@@ -1,2 +1,2 @@
-# Todoy
+# TodoCalendar
 iOS Todo calendar app
