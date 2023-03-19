@@ -12,6 +12,13 @@
 		F63C9BDD29C6B00500CC663A /* Domain.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9BD129C6B00500CC663A /* Domain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63C9CAB29C6DE7B00CC663A /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */; };
 		F63C9CAF29C6DE8300CC663A /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CAE29C6DE8300CC663A /* Extensions.framework */; };
+		F63C9CEC29C6E3A400CC663A /* TodoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CEB29C6E3A400CC663A /* TodoItem.swift */; };
+		F63C9CEE29C6E5BF00CC663A /* AnniversaryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CED29C6E5BF00CC663A /* AnniversaryItem.swift */; };
+		F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CF029C6E66700CC663A /* EventTag.swift */; };
+		F63C9CF329C6ED8300CC663A /* EventPlanTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CF229C6ED8300CC663A /* EventPlanTime.swift */; };
+		F63C9CF929C6F51F00CC663A /* Times.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CF829C6F51F00CC663A /* Times.swift */; };
+		F63C9CFB29C6F53800CC663A /* TodoItemPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CFA29C6F53800CC663A /* TodoItemPlan.swift */; };
+		F63C9CFD29C6F54400CC663A /* AnniversaryItemPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CFC29C6F54400CC663A /* AnniversaryItemPlan.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +38,13 @@
 		F63C9BDB29C6B00500CC663A /* DomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainTests.swift; sourceTree = "<group>"; };
 		F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9CAE29C6DE8300CC663A /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F63C9CEB29C6E3A400CC663A /* TodoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItem.swift; sourceTree = "<group>"; };
+		F63C9CED29C6E5BF00CC663A /* AnniversaryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnniversaryItem.swift; sourceTree = "<group>"; };
+		F63C9CF029C6E66700CC663A /* EventTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTag.swift; sourceTree = "<group>"; };
+		F63C9CF229C6ED8300CC663A /* EventPlanTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPlanTime.swift; sourceTree = "<group>"; };
+		F63C9CF829C6F51F00CC663A /* Times.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Times.swift; sourceTree = "<group>"; };
+		F63C9CFA29C6F53800CC663A /* TodoItemPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemPlan.swift; sourceTree = "<group>"; };
+		F63C9CFC29C6F54400CC663A /* AnniversaryItemPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnniversaryItemPlan.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +90,7 @@
 		F63C9BD029C6B00500CC663A /* Domain */ = {
 			isa = PBXGroup;
 			children = (
+				F63C9CEA29C6E14400CC663A /* Models */,
 				F63C9BD129C6B00500CC663A /* Domain.h */,
 			);
 			path = Domain;
@@ -96,6 +111,44 @@
 				F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F63C9CEA29C6E14400CC663A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F63C9CF729C6F51300CC663A /* Times */,
+				F63C9CEF29C6E60800CC663A /* EventItem */,
+				F63C9CF629C6F35000CC663A /* EventPlan */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		F63C9CEF29C6E60800CC663A /* EventItem */ = {
+			isa = PBXGroup;
+			children = (
+				F63C9CF029C6E66700CC663A /* EventTag.swift */,
+				F63C9CEB29C6E3A400CC663A /* TodoItem.swift */,
+				F63C9CED29C6E5BF00CC663A /* AnniversaryItem.swift */,
+			);
+			path = EventItem;
+			sourceTree = "<group>";
+		};
+		F63C9CF629C6F35000CC663A /* EventPlan */ = {
+			isa = PBXGroup;
+			children = (
+				F63C9CF229C6ED8300CC663A /* EventPlanTime.swift */,
+				F63C9CFA29C6F53800CC663A /* TodoItemPlan.swift */,
+				F63C9CFC29C6F54400CC663A /* AnniversaryItemPlan.swift */,
+			);
+			path = EventPlan;
+			sourceTree = "<group>";
+		};
+		F63C9CF729C6F51300CC663A /* Times */ = {
+			isa = PBXGroup;
+			children = (
+				F63C9CF829C6F51F00CC663A /* Times.swift */,
+			);
+			path = Times;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -160,6 +213,7 @@
 				TargetAttributes = {
 					F63C9BCD29C6B00500CC663A = {
 						CreatedOnToolsVersion = 14.2;
+						LastSwiftMigration = 1420;
 					};
 					F63C9BD529C6B00500CC663A = {
 						CreatedOnToolsVersion = 14.2;
@@ -207,6 +261,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F63C9CEC29C6E3A400CC663A /* TodoItem.swift in Sources */,
+				F63C9CEE29C6E5BF00CC663A /* AnniversaryItem.swift in Sources */,
+				F63C9CFD29C6F54400CC663A /* AnniversaryItemPlan.swift in Sources */,
+				F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */,
+				F63C9CFB29C6F53800CC663A /* TodoItemPlan.swift in Sources */,
+				F63C9CF329C6ED8300CC663A /* EventPlanTime.swift in Sources */,
+				F63C9CF929C6F51F00CC663A /* Times.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -352,6 +413,7 @@
 		F63C9BE129C6B00500CC663A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -372,6 +434,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -380,6 +443,7 @@
 		F63C9BE229C6B00500CC663A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -408,6 +472,7 @@
 		F63C9BE429C6B00500CC663A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
@@ -424,6 +489,7 @@
 		F63C9BE529C6B00500CC663A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
