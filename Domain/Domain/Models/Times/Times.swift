@@ -17,3 +17,18 @@ public enum DayOfWeeks {
     case friday
     case saturday
 }
+
+public struct FixedDate: Comparable {
+    
+    private let selectedDate: Date
+    private let utcOffset: TimeInterval
+    
+    public var date: Date {
+        let offset = utcOffset * 3600
+        return self.selectedDate.addingTimeInterval(offset)
+    }
+    
+    public static func < (lhs: FixedDate, rhs: FixedDate) -> Bool {
+        return lhs.date < rhs.date
+    }
+}

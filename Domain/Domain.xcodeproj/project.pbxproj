@@ -12,13 +12,13 @@
 		F63C9BDD29C6B00500CC663A /* Domain.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9BD129C6B00500CC663A /* Domain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63C9CAB29C6DE7B00CC663A /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */; };
 		F63C9CAF29C6DE8300CC663A /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CAE29C6DE8300CC663A /* Extensions.framework */; };
-		F63C9CEC29C6E3A400CC663A /* TodoItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CEB29C6E3A400CC663A /* TodoItem.swift */; };
-		F63C9CEE29C6E5BF00CC663A /* AnniversaryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CED29C6E5BF00CC663A /* AnniversaryItem.swift */; };
+		F63C9CEC29C6E3A400CC663A /* TodoEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CEB29C6E3A400CC663A /* TodoEvent.swift */; };
+		F63C9CEE29C6E5BF00CC663A /* ScheduleEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CED29C6E5BF00CC663A /* ScheduleEvent.swift */; };
 		F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CF029C6E66700CC663A /* EventTag.swift */; };
-		F63C9CF329C6ED8300CC663A /* EventPlanTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CF229C6ED8300CC663A /* EventPlanTime.swift */; };
 		F63C9CF929C6F51F00CC663A /* Times.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CF829C6F51F00CC663A /* Times.swift */; };
-		F63C9CFB29C6F53800CC663A /* TodoItemPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CFA29C6F53800CC663A /* TodoItemPlan.swift */; };
-		F63C9CFD29C6F54400CC663A /* AnniversaryItemPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CFC29C6F54400CC663A /* AnniversaryItemPlan.swift */; };
+		F63C9CFD29C6F54400CC663A /* ScheduleEventPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CFC29C6F54400CC663A /* ScheduleEventPlan.swift */; };
+		F63C9D0029C8A60F00CC663A /* TodoEventUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CFF29C8A60F00CC663A /* TodoEventUsecase.swift */; };
+		F63C9D0529C8A8C900CC663A /* TodoItemPlanRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9D0429C8A8C900CC663A /* TodoItemPlanRepository.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,13 +38,13 @@
 		F63C9BDB29C6B00500CC663A /* DomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainTests.swift; sourceTree = "<group>"; };
 		F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9CAE29C6DE8300CC663A /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F63C9CEB29C6E3A400CC663A /* TodoItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItem.swift; sourceTree = "<group>"; };
-		F63C9CED29C6E5BF00CC663A /* AnniversaryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnniversaryItem.swift; sourceTree = "<group>"; };
+		F63C9CEB29C6E3A400CC663A /* TodoEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEvent.swift; sourceTree = "<group>"; };
+		F63C9CED29C6E5BF00CC663A /* ScheduleEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEvent.swift; sourceTree = "<group>"; };
 		F63C9CF029C6E66700CC663A /* EventTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTag.swift; sourceTree = "<group>"; };
-		F63C9CF229C6ED8300CC663A /* EventPlanTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventPlanTime.swift; sourceTree = "<group>"; };
 		F63C9CF829C6F51F00CC663A /* Times.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Times.swift; sourceTree = "<group>"; };
-		F63C9CFA29C6F53800CC663A /* TodoItemPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemPlan.swift; sourceTree = "<group>"; };
-		F63C9CFC29C6F54400CC663A /* AnniversaryItemPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnniversaryItemPlan.swift; sourceTree = "<group>"; };
+		F63C9CFC29C6F54400CC663A /* ScheduleEventPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventPlan.swift; sourceTree = "<group>"; };
+		F63C9CFF29C8A60F00CC663A /* TodoEventUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEventUsecase.swift; sourceTree = "<group>"; };
+		F63C9D0429C8A8C900CC663A /* TodoItemPlanRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemPlanRepository.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +91,8 @@
 			isa = PBXGroup;
 			children = (
 				F63C9CEA29C6E14400CC663A /* Models */,
+				F63C9CFE29C8A5C800CC663A /* Usecases */,
+				F63C9D0329C8A88200CC663A /* Repositories */,
 				F63C9BD129C6B00500CC663A /* Domain.h */,
 			);
 			path = Domain;
@@ -117,30 +119,26 @@
 			isa = PBXGroup;
 			children = (
 				F63C9CF729C6F51300CC663A /* Times */,
-				F63C9CEF29C6E60800CC663A /* EventItem */,
-				F63C9CF629C6F35000CC663A /* EventPlan */,
+				F63C9D0629C9F63C00CC663A /* Events */,
 			);
 			path = Models;
 			sourceTree = "<group>";
 		};
-		F63C9CEF29C6E60800CC663A /* EventItem */ = {
+		F63C9CEF29C6E60800CC663A /* Todo */ = {
 			isa = PBXGroup;
 			children = (
-				F63C9CF029C6E66700CC663A /* EventTag.swift */,
-				F63C9CEB29C6E3A400CC663A /* TodoItem.swift */,
-				F63C9CED29C6E5BF00CC663A /* AnniversaryItem.swift */,
+				F63C9CEB29C6E3A400CC663A /* TodoEvent.swift */,
 			);
-			path = EventItem;
+			path = Todo;
 			sourceTree = "<group>";
 		};
-		F63C9CF629C6F35000CC663A /* EventPlan */ = {
+		F63C9CF629C6F35000CC663A /* Schedule */ = {
 			isa = PBXGroup;
 			children = (
-				F63C9CF229C6ED8300CC663A /* EventPlanTime.swift */,
-				F63C9CFA29C6F53800CC663A /* TodoItemPlan.swift */,
-				F63C9CFC29C6F54400CC663A /* AnniversaryItemPlan.swift */,
+				F63C9CED29C6E5BF00CC663A /* ScheduleEvent.swift */,
+				F63C9CFC29C6F54400CC663A /* ScheduleEventPlan.swift */,
 			);
-			path = EventPlan;
+			path = Schedule;
 			sourceTree = "<group>";
 		};
 		F63C9CF729C6F51300CC663A /* Times */ = {
@@ -149,6 +147,32 @@
 				F63C9CF829C6F51F00CC663A /* Times.swift */,
 			);
 			path = Times;
+			sourceTree = "<group>";
+		};
+		F63C9CFE29C8A5C800CC663A /* Usecases */ = {
+			isa = PBXGroup;
+			children = (
+				F63C9CFF29C8A60F00CC663A /* TodoEventUsecase.swift */,
+			);
+			path = Usecases;
+			sourceTree = "<group>";
+		};
+		F63C9D0329C8A88200CC663A /* Repositories */ = {
+			isa = PBXGroup;
+			children = (
+				F63C9D0429C8A8C900CC663A /* TodoItemPlanRepository.swift */,
+			);
+			path = Repositories;
+			sourceTree = "<group>";
+		};
+		F63C9D0629C9F63C00CC663A /* Events */ = {
+			isa = PBXGroup;
+			children = (
+				F63C9CF029C6E66700CC663A /* EventTag.swift */,
+				F63C9CEF29C6E60800CC663A /* Todo */,
+				F63C9CF629C6F35000CC663A /* Schedule */,
+			);
+			path = Events;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -261,12 +285,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F63C9CEC29C6E3A400CC663A /* TodoItem.swift in Sources */,
-				F63C9CEE29C6E5BF00CC663A /* AnniversaryItem.swift in Sources */,
-				F63C9CFD29C6F54400CC663A /* AnniversaryItemPlan.swift in Sources */,
+				F63C9CEC29C6E3A400CC663A /* TodoEvent.swift in Sources */,
+				F63C9CEE29C6E5BF00CC663A /* ScheduleEvent.swift in Sources */,
+				F63C9CFD29C6F54400CC663A /* ScheduleEventPlan.swift in Sources */,
 				F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */,
-				F63C9CFB29C6F53800CC663A /* TodoItemPlan.swift in Sources */,
-				F63C9CF329C6ED8300CC663A /* EventPlanTime.swift in Sources */,
+				F63C9D0029C8A60F00CC663A /* TodoEventUsecase.swift in Sources */,
+				F63C9D0529C8A8C900CC663A /* TodoItemPlanRepository.swift in Sources */,
 				F63C9CF929C6F51F00CC663A /* Times.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
