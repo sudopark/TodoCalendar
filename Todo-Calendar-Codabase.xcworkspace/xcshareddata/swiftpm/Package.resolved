@@ -10,21 +10,12 @@
       }
     },
     {
-      "identity" : "rxswift",
+      "identity" : "publisher-async-bind",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/ReactiveX/RxSwift.git",
+      "location" : "https://github.com/sudopark/publisher-async-bind.git",
       "state" : {
-        "revision" : "b4307ba0b6425c0ba4178e138799946c3da594f8",
-        "version" : "6.5.0"
-      }
-    },
-    {
-      "identity" : "sqliteservice",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/sudopark/SQLiteService.git",
-      "state" : {
-        "revision" : "be79b222f720be445f3cc7260480697c468e1b10",
-        "version" : "0.2.0"
+        "revision" : "c2e39e1b8d26e1a832078d6cf54114874527618f",
+        "version" : "0.0.2"
       }
     },
     {

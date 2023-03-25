@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F60CBB6229CEADB200F03310 /* AsyncFlatMap in Frameworks */ = {isa = PBXBuildFile; productRef = F60CBB6129CEADB200F03310 /* AsyncFlatMap */; };
 		F63C9C4129C6B0E100CC663A /* Common3rdParty.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9C4029C6B0E100CC663A /* Common3rdParty.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63C9C8D29C6B2DC00CC663A /* Either in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C8C29C6B2DC00CC663A /* Either */; };
 		F63C9C8F29C6B2DC00CC663A /* Optics in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C8E29C6B2DC00CC663A /* Optics */; };
@@ -18,7 +19,6 @@
 		F63C9C9B29C6B2DC00CC663A /* ValidationSemigroup in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9A29C6B2DC00CC663A /* ValidationSemigroup */; };
 		F63C9C9D29C6B2DC00CC663A /* Writer in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9C29C6B2DC00CC663A /* Writer */; };
 		F63C9CA029C6B31600CC663A /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9F29C6B31600CC663A /* AsyncAlgorithms */; };
-		F63C9CA329C6B3DC00CC663A /* SQLiteService in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9CA229C6B3DC00CC663A /* SQLiteService */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,13 +33,13 @@
 			files = (
 				F63C9C9129C6B2DC00CC663A /* Prelude in Frameworks */,
 				F63C9C9B29C6B2DC00CC663A /* ValidationSemigroup in Frameworks */,
+				F60CBB6229CEADB200F03310 /* AsyncFlatMap in Frameworks */,
 				F63C9C9529C6B2DC00CC663A /* State in Frameworks */,
 				F63C9C9329C6B2DC00CC663A /* Reader in Frameworks */,
 				F63C9C9729C6B2DC00CC663A /* Tuple in Frameworks */,
 				F63C9C8F29C6B2DC00CC663A /* Optics in Frameworks */,
 				F63C9C9D29C6B2DC00CC663A /* Writer in Frameworks */,
 				F63C9C8D29C6B2DC00CC663A /* Either in Frameworks */,
-				F63C9CA329C6B3DC00CC663A /* SQLiteService in Frameworks */,
 				F63C9C9929C6B2DC00CC663A /* ValidationNearSemiring in Frameworks */,
 				F63C9CA029C6B31600CC663A /* AsyncAlgorithms in Frameworks */,
 			);
@@ -111,7 +111,7 @@
 				F63C9C9A29C6B2DC00CC663A /* ValidationSemigroup */,
 				F63C9C9C29C6B2DC00CC663A /* Writer */,
 				F63C9C9F29C6B31600CC663A /* AsyncAlgorithms */,
-				F63C9CA229C6B3DC00CC663A /* SQLiteService */,
+				F60CBB6129CEADB200F03310 /* AsyncFlatMap */,
 			);
 			productName = Common3rdParty;
 			productReference = F63C9C3D29C6B0E100CC663A /* Common3rdParty.framework */;
@@ -143,7 +143,7 @@
 			packageReferences = (
 				F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */,
 				F63C9C9E29C6B31600CC663A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
-				F63C9CA129C6B3DC00CC663A /* XCRemoteSwiftPackageReference "SQLiteService" */,
+				F60CBB6029CEADB200F03310 /* XCRemoteSwiftPackageReference "publisher-async-bind" */,
 			);
 			productRefGroup = F63C9C3E29C6B0E100CC663A /* Products */;
 			projectDirPath = "";
@@ -375,6 +375,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		F60CBB6029CEADB200F03310 /* XCRemoteSwiftPackageReference "publisher-async-bind" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sudopark/publisher-async-bind.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.2;
+			};
+		};
 		F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-prelude.git";
@@ -391,17 +399,14 @@
 				minimumVersion = 0.1.0;
 			};
 		};
-		F63C9CA129C6B3DC00CC663A /* XCRemoteSwiftPackageReference "SQLiteService" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sudopark/SQLiteService.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		F60CBB6129CEADB200F03310 /* AsyncFlatMap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F60CBB6029CEADB200F03310 /* XCRemoteSwiftPackageReference "publisher-async-bind" */;
+			productName = AsyncFlatMap;
+		};
 		F63C9C8C29C6B2DC00CC663A /* Either */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
@@ -451,11 +456,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F63C9C9E29C6B31600CC663A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
 			productName = AsyncAlgorithms;
-		};
-		F63C9CA229C6B3DC00CC663A /* SQLiteService */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9CA129C6B3DC00CC663A /* XCRemoteSwiftPackageReference "SQLiteService" */;
-			productName = SQLiteService;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
