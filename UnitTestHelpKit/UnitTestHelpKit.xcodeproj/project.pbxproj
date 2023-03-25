@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F60CBB5229CEA04D00F03310 /* BaseTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60CBB5129CEA04D00F03310 /* BaseTestCase.swift */; };
+		F60CBB5429CEA09700F03310 /* PublisherWaitable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60CBB5329CEA09700F03310 /* PublisherWaitable.swift */; };
+		F60CBB5629CEA62200F03310 /* PublisherWaitableTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60CBB5529CEA62200F03310 /* PublisherWaitableTests.swift */; };
+		F60CBB5C29CEA8D000F03310 /* TestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60CBB5B29CEA8D000F03310 /* TestError.swift */; };
 		F63C9CD229C6DEDF00CC663A /* UnitTestHelpKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CC929C6DEDF00CC663A /* UnitTestHelpKit.framework */; };
 		F63C9CD729C6DEDF00CC663A /* UnitTestHelpKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CD629C6DEDF00CC663A /* UnitTestHelpKitTests.swift */; };
 		F63C9CD829C6DEDF00CC663A /* UnitTestHelpKit.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9CCC29C6DEDF00CC663A /* UnitTestHelpKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -25,6 +29,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F60CBB5129CEA04D00F03310 /* BaseTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTestCase.swift; sourceTree = "<group>"; };
+		F60CBB5329CEA09700F03310 /* PublisherWaitable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublisherWaitable.swift; sourceTree = "<group>"; };
+		F60CBB5529CEA62200F03310 /* PublisherWaitableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublisherWaitableTests.swift; sourceTree = "<group>"; };
+		F60CBB5929CEA88A00F03310 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F60CBB5B29CEA8D000F03310 /* TestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestError.swift; sourceTree = "<group>"; };
 		F63C9CC929C6DEDF00CC663A /* UnitTestHelpKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = UnitTestHelpKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9CCC29C6DEDF00CC663A /* UnitTestHelpKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UnitTestHelpKit.h; sourceTree = "<group>"; };
 		F63C9CD129C6DEDF00CC663A /* UnitTestHelpKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTestHelpKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -77,6 +86,9 @@
 			isa = PBXGroup;
 			children = (
 				F63C9CCC29C6DEDF00CC663A /* UnitTestHelpKit.h */,
+				F60CBB5129CEA04D00F03310 /* BaseTestCase.swift */,
+				F60CBB5329CEA09700F03310 /* PublisherWaitable.swift */,
+				F60CBB5B29CEA8D000F03310 /* TestError.swift */,
 			);
 			path = UnitTestHelpKit;
 			sourceTree = "<group>";
@@ -85,6 +97,7 @@
 			isa = PBXGroup;
 			children = (
 				F63C9CD629C6DEDF00CC663A /* UnitTestHelpKitTests.swift */,
+				F60CBB5529CEA62200F03310 /* PublisherWaitableTests.swift */,
 			);
 			path = UnitTestHelpKitTests;
 			sourceTree = "<group>";
@@ -92,6 +105,7 @@
 		F63C9CE129C6DEFA00CC663A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F60CBB5929CEA88A00F03310 /* Common3rdParty.framework */,
 				F63C9CE629C6DF0300CC663A /* XCTest.framework */,
 				F63C9CE229C6DEFA00CC663A /* Common3rdParty.framework */,
 			);
@@ -160,6 +174,7 @@
 				TargetAttributes = {
 					F63C9CC829C6DEDF00CC663A = {
 						CreatedOnToolsVersion = 14.2;
+						LastSwiftMigration = 1420;
 					};
 					F63C9CD029C6DEDF00CC663A = {
 						CreatedOnToolsVersion = 14.2;
@@ -207,6 +222,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F60CBB5C29CEA8D000F03310 /* TestError.swift in Sources */,
+				F60CBB5229CEA04D00F03310 /* BaseTestCase.swift in Sources */,
+				F60CBB5429CEA09700F03310 /* PublisherWaitable.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -215,6 +233,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F63C9CD729C6DEDF00CC663A /* UnitTestHelpKitTests.swift in Sources */,
+				F60CBB5629CEA62200F03310 /* PublisherWaitableTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -352,6 +371,7 @@
 		F63C9CDC29C6DEDF00CC663A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -372,6 +392,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -380,6 +401,7 @@
 		F63C9CDD29C6DEDF00CC663A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -408,6 +430,7 @@
 		F63C9CDF29C6DEDF00CC663A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
@@ -424,6 +447,7 @@
 		F63C9CE029C6DEDF00CC663A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
