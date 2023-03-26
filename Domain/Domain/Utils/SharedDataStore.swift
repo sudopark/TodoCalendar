@@ -30,7 +30,9 @@ public final class SharedDataStore: @unchecked Sendable {
     
     public func clearAll() {
         self.lock.lock(); defer { self.lock.unlock() }
-        self.memorizedDataSubjects.removeAll()
+        self.memorizedDataSubjects.values.forEach {
+            $0.send(nil)
+        }
     }
 }
 
