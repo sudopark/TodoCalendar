@@ -14,8 +14,6 @@ public struct TodoEvent {
     
     public let uuid: String
     public var name: String
-    public var isDone: Bool = false
-    public var shouldBeExplicitlyDone: Bool = false
     
     public var eventTagId: String?
     
@@ -35,13 +33,16 @@ public struct TodoEvent {
 public struct TodoMakeParams {
     
     public var name: String?
-    public var shouldBeExplicitlyDone: Bool = false
     public var eventTagId: String?
     public var time: EventTime?
     public var repeating: EventRepeating?
     public var exceptFromRepeatedScheduleId: String?
     
     public init() { }
+    
+    var isValidForMaking: Bool {
+        return self.name?.isEmpty == false
+    }
 }
 
 public typealias TodoEditParams = TodoMakeParams

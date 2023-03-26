@@ -10,6 +10,10 @@ import Combine
 import Prelude
 import Optics
 
+public enum ShareDataKeys: String {
+    case todos
+}
+
 
 public final class SharedDataStore: @unchecked Sendable {
     

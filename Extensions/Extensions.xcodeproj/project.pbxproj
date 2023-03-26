@@ -12,6 +12,8 @@
 		F63C9BFE29C6B03100CC663A /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9BFD29C6B03100CC663A /* ExtensionsTests.swift */; };
 		F63C9BFF29C6B03100CC663A /* Extensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9BF329C6B03000CC663A /* Extensions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63C9CA629C6DE7100CC663A /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CA529C6DE7100CC663A /* Common3rdParty.framework */; };
+		F65B08F729D01609000EE650 /* Result+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08F629D01609000EE650 /* Result+extensions.swift */; };
+		F65B08FB29D01CC6000EE650 /* Publisher+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08FA29D01CC6000EE650 /* Publisher+extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,6 +33,8 @@
 		F63C9BF829C6B03100CC663A /* ExtensionsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExtensionsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9BFD29C6B03100CC663A /* ExtensionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExtensionsTests.swift; sourceTree = "<group>"; };
 		F63C9CA529C6DE7100CC663A /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F65B08F629D01609000EE650 /* Result+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Result+extensions.swift"; sourceTree = "<group>"; };
+		F65B08FA29D01CC6000EE650 /* Publisher+extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +79,7 @@
 		F63C9BF229C6B03000CC663A /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				F65B08F529D015FB000EE650 /* Type+Extensions */,
 				F63C9BF329C6B03000CC663A /* Extensions.h */,
 				F60CBB5729CEA85000F03310 /* RuntimeError.swift */,
 			);
@@ -95,6 +100,15 @@
 				F63C9CA529C6DE7100CC663A /* Common3rdParty.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F65B08F529D015FB000EE650 /* Type+Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				F65B08F629D01609000EE650 /* Result+extensions.swift */,
+				F65B08FA29D01CC6000EE650 /* Publisher+extension.swift */,
+			);
+			path = "Type+Extensions";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -207,6 +221,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F65B08F729D01609000EE650 /* Result+extensions.swift in Sources */,
+				F65B08FB29D01CC6000EE650 /* Publisher+extension.swift in Sources */,
 				F60CBB5829CEA85000F03310 /* RuntimeError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
