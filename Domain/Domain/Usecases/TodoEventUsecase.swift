@@ -11,8 +11,8 @@ import Combine
 
 public protocol TodoEventUsecase {
     
-    func makeTodoEvent(_ params: TodoEventMakeParams) async throws -> TodoEvent
-    func updateTodoEvent(_ eventId: String, _ params: TodoEventMakeParams) async throws -> TodoEvent
+    func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent
+    func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent
     
     func todoEvents(in range: Range<Date>) -> AnyPublisher<[TodoEvent], Never>
 }

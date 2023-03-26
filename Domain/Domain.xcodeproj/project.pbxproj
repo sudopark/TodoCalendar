@@ -16,9 +16,14 @@
 		F63C9CEE29C6E5BF00CC663A /* ScheduleEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CED29C6E5BF00CC663A /* ScheduleEvent.swift */; };
 		F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CF029C6E66700CC663A /* EventTag.swift */; };
 		F63C9CF929C6F51F00CC663A /* Times.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CF829C6F51F00CC663A /* Times.swift */; };
-		F63C9CFD29C6F54400CC663A /* ScheduleEventPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CFC29C6F54400CC663A /* ScheduleEventPlan.swift */; };
 		F63C9D0029C8A60F00CC663A /* TodoEventUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9CFF29C8A60F00CC663A /* TodoEventUsecase.swift */; };
 		F63C9D0529C8A8C900CC663A /* TodoItemPlanRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9D0429C8A8C900CC663A /* TodoItemPlanRepository.swift */; };
+		F63C9D0B29CC993900CC663A /* SharedDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9D0A29CC993900CC663A /* SharedDataStore.swift */; };
+		F63C9D1129CCB2EB00CC663A /* SharedDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9D1029CCB2EB00CC663A /* SharedDataStoreTests.swift */; };
+		F63C9D1329CCB44400CC663A /* UnitTestHelpKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9D1229CCB44400CC663A /* UnitTestHelpKit.framework */; };
+		F63C9D1529CCB45400CC663A /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9D1429CCB45400CC663A /* Common3rdParty.framework */; };
+		F65B08E029CFF9FF000EE650 /* EventRepeating.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08DF29CFF9FF000EE650 /* EventRepeating.swift */; };
+		F65B08E229CFFAEB000EE650 /* EventTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08E129CFFAEB000EE650 /* EventTime.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -42,9 +47,14 @@
 		F63C9CED29C6E5BF00CC663A /* ScheduleEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEvent.swift; sourceTree = "<group>"; };
 		F63C9CF029C6E66700CC663A /* EventTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTag.swift; sourceTree = "<group>"; };
 		F63C9CF829C6F51F00CC663A /* Times.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Times.swift; sourceTree = "<group>"; };
-		F63C9CFC29C6F54400CC663A /* ScheduleEventPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventPlan.swift; sourceTree = "<group>"; };
 		F63C9CFF29C8A60F00CC663A /* TodoEventUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEventUsecase.swift; sourceTree = "<group>"; };
 		F63C9D0429C8A8C900CC663A /* TodoItemPlanRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoItemPlanRepository.swift; sourceTree = "<group>"; };
+		F63C9D0A29CC993900CC663A /* SharedDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataStore.swift; sourceTree = "<group>"; };
+		F63C9D1029CCB2EB00CC663A /* SharedDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataStoreTests.swift; sourceTree = "<group>"; };
+		F63C9D1229CCB44400CC663A /* UnitTestHelpKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = UnitTestHelpKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F63C9D1429CCB45400CC663A /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F65B08DF29CFF9FF000EE650 /* EventRepeating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeating.swift; sourceTree = "<group>"; };
+		F65B08E129CFFAEB000EE650 /* EventTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTime.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,6 +71,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F63C9D1529CCB45400CC663A /* Common3rdParty.framework in Frameworks */,
+				F63C9D1329CCB44400CC663A /* UnitTestHelpKit.framework in Frameworks */,
 				F63C9BD729C6B00500CC663A /* Domain.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -93,6 +105,7 @@
 				F63C9CEA29C6E14400CC663A /* Models */,
 				F63C9CFE29C8A5C800CC663A /* Usecases */,
 				F63C9D0329C8A88200CC663A /* Repositories */,
+				F63C9D0929CA087A00CC663A /* Utils */,
 				F63C9BD129C6B00500CC663A /* Domain.h */,
 			);
 			path = Domain;
@@ -101,6 +114,7 @@
 		F63C9BDA29C6B00500CC663A /* DomainTests */ = {
 			isa = PBXGroup;
 			children = (
+				F63C9D0C29CCA44D00CC663A /* Utils */,
 				F63C9BDB29C6B00500CC663A /* DomainTests.swift */,
 			);
 			path = DomainTests;
@@ -109,6 +123,8 @@
 		F63C9CA929C6DE7B00CC663A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F63C9D1429CCB45400CC663A /* Common3rdParty.framework */,
+				F63C9D1229CCB44400CC663A /* UnitTestHelpKit.framework */,
 				F63C9CAE29C6DE8300CC663A /* Extensions.framework */,
 				F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */,
 			);
@@ -136,7 +152,6 @@
 			isa = PBXGroup;
 			children = (
 				F63C9CED29C6E5BF00CC663A /* ScheduleEvent.swift */,
-				F63C9CFC29C6F54400CC663A /* ScheduleEventPlan.swift */,
 			);
 			path = Schedule;
 			sourceTree = "<group>";
@@ -169,10 +184,28 @@
 			isa = PBXGroup;
 			children = (
 				F63C9CF029C6E66700CC663A /* EventTag.swift */,
+				F65B08E129CFFAEB000EE650 /* EventTime.swift */,
+				F65B08DF29CFF9FF000EE650 /* EventRepeating.swift */,
 				F63C9CEF29C6E60800CC663A /* Todo */,
 				F63C9CF629C6F35000CC663A /* Schedule */,
 			);
 			path = Events;
+			sourceTree = "<group>";
+		};
+		F63C9D0929CA087A00CC663A /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				F63C9D0A29CC993900CC663A /* SharedDataStore.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		F63C9D0C29CCA44D00CC663A /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				F63C9D1029CCB2EB00CC663A /* SharedDataStoreTests.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -285,12 +318,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F65B08E029CFF9FF000EE650 /* EventRepeating.swift in Sources */,
+				F65B08E229CFFAEB000EE650 /* EventTime.swift in Sources */,
 				F63C9CEC29C6E3A400CC663A /* TodoEvent.swift in Sources */,
 				F63C9CEE29C6E5BF00CC663A /* ScheduleEvent.swift in Sources */,
-				F63C9CFD29C6F54400CC663A /* ScheduleEventPlan.swift in Sources */,
 				F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */,
 				F63C9D0029C8A60F00CC663A /* TodoEventUsecase.swift in Sources */,
 				F63C9D0529C8A8C900CC663A /* TodoItemPlanRepository.swift in Sources */,
+				F63C9D0B29CC993900CC663A /* SharedDataStore.swift in Sources */,
 				F63C9CF929C6F51F00CC663A /* Times.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -299,6 +334,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F63C9D1129CCB2EB00CC663A /* SharedDataStoreTests.swift in Sources */,
 				F63C9BDC29C6B00500CC663A /* DomainTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

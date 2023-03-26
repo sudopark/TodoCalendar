@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F60CBB5829CEA85000F03310 /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60CBB5729CEA85000F03310 /* RuntimeError.swift */; };
 		F63C9BF929C6B03100CC663A /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9BF029C6B03000CC663A /* Extensions.framework */; };
 		F63C9BFE29C6B03100CC663A /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9BFD29C6B03100CC663A /* ExtensionsTests.swift */; };
 		F63C9BFF29C6B03100CC663A /* Extensions.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9BF329C6B03000CC663A /* Extensions.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -24,6 +25,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F60CBB5729CEA85000F03310 /* RuntimeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeError.swift; sourceTree = "<group>"; };
 		F63C9BF029C6B03000CC663A /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9BF329C6B03000CC663A /* Extensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Extensions.h; sourceTree = "<group>"; };
 		F63C9BF829C6B03100CC663A /* ExtensionsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExtensionsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -74,6 +76,7 @@
 			isa = PBXGroup;
 			children = (
 				F63C9BF329C6B03000CC663A /* Extensions.h */,
+				F60CBB5729CEA85000F03310 /* RuntimeError.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -156,6 +159,7 @@
 				TargetAttributes = {
 					F63C9BEF29C6B03000CC663A = {
 						CreatedOnToolsVersion = 14.2;
+						LastSwiftMigration = 1420;
 					};
 					F63C9BF729C6B03100CC663A = {
 						CreatedOnToolsVersion = 14.2;
@@ -203,6 +207,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F60CBB5829CEA85000F03310 /* RuntimeError.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -348,6 +353,7 @@
 		F63C9C0329C6B03100CC663A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -368,6 +374,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -376,6 +383,7 @@
 		F63C9C0429C6B03100CC663A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -404,6 +412,7 @@
 		F63C9C0629C6B03100CC663A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
@@ -420,6 +429,7 @@
 		F63C9C0729C6B03100CC663A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
