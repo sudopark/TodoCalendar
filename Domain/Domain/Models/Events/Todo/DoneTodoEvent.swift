@@ -20,6 +20,7 @@ public struct DoneTodoEvent {
     
     public let uuid: String
     public let originEventId: String
+    public var originEventIsRepeating: Bool = false
     public let name: String
     
     public var eventTagId: String?

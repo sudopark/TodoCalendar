@@ -37,9 +37,12 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
     }
     
     var shouldFailComplete: Bool = false
+    var doneEventIsRepeating: Bool = false
     func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {
         try self.checkShouldFail(self.shouldFailComplete)
-        return DoneTodoEvent(uuid: "done", name: "some", originEventId: eventId, doneTime: .now)
+        let event = DoneTodoEvent(uuid: "done", name: "some", originEventId: eventId, doneTime: .now)
+            |> \.originEventIsRepeating .~ self.doneEventIsRepeating
+        return event
     }
     
     var shouldFailLoadCurrentTodoEvents: Bool = false
