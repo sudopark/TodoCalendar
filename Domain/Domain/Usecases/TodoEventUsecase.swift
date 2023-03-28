@@ -52,11 +52,10 @@ extension TodoEventUsecaseImple {
             throw RuntimeError("invalid parameter for make Todo Event")
         }
         let newEvent = try await self.todoRepository.makeTodoEvent(params)
-        defer {
-            let shareKey = ShareDataKeys.todos.rawValue
-            self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
-                ($0 ?? [:]) |> key(newEvent.uuid) .~ newEvent
-            }
+        
+        let shareKey = ShareDataKeys.todos.rawValue
+        self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
+            ($0 ?? [:]) |> key(newEvent.uuid) .~ newEvent
         }
         return newEvent
     }
@@ -67,17 +66,27 @@ extension TodoEventUsecaseImple {
             throw RuntimeError("invalid parameter for update Todo event")
         }
         let updatedEvent = try await self.todoRepository.updateTodoEvent(eventId, params)
-        defer {
-            let shareKey = ShareDataKeys.todos.rawValue
-            self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
-                ($0 ?? [:]) |> key(eventId) .~ updatedEvent
-            }
+        
+        let shareKey = ShareDataKeys.todos.rawValue
+        self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
+            ($0 ?? [:]) |> key(eventId) .~ updatedEvent
         }
         return updatedEvent
     }
     
     public func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {
-        throw RuntimeError("not implemented")
+        let doneEvent = try await self.todoRepository.completeTodo(eventId)
+        
+        let (todoKey, doneKey) = (ShareDataKeys.todos.rawValue, ShareDataKeys.doneTodos.rawValue)
+        self.sharedDataStore.update([String: DoneTodoEvent].self, key: doneKey) {
+            ($0 ?? [:]) |> key(doneEvent.originEventId) .~ doneEvent
+        }
+        if doneEvent.originEventIsRepeating == false {
+            self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
+                ($0 ?? [:]) |> key(doneEvent.originEventId) .~ nil
+            }
+        }
+        return doneEvent
     }
 }
 

@@ -150,3 +150,100 @@ extension TodoEventUsecaseImpleTests {
         XCTAssertEqual(todoNames, ["old", "new"])
     }
 }
+
+
+// MARK: - TodoEventUsecase
+
+extension TodoEventUsecaseImpleTests {
+    
+    @discardableResult
+    private func stubTodoEvent(isRepeating: Bool = false) -> TodoEvent {
+        let event = TodoEvent.dummy()
+        let shareKey = ShareDataKeys.todos.rawValue
+        self.spyStore.put([String: TodoEvent].self, key: shareKey, [event.uuid: event])
+        
+        self.stubTodoRepository.doneEventIsRepeating = isRepeating
+        return event
+    }
+    
+    // todo 이벤트 완료 처리
+    func testUsecase_completeTodoEvent() async {
+        // given
+        let usecase = self.makeUsecase()
+        let oldEvent = self.stubTodoEvent()
+        
+        // when
+        let doneEvent = try? await usecase.completeTodo(oldEvent.uuid)
+        
+        // then
+        XCTAssertNotNil(doneEvent)
+    }
+    
+    // todo 이벤트 완료 처리하고 스토어에 저장된 완료된 이벤트 업데이트
+    func testUsecase_whenAfterCompleteTodoEvent_updateSharedDoneEvents() {
+        // given
+        let expect = expectation(description: "todo 이벤트 완료처리하면 저장된 완료된 이벤트 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        let oldEvent = self.stubTodoEvent()
+        
+        // when
+        let shareKey = ShareDataKeys.doneTodos.rawValue
+        let doneSource = self.spyStore.observe([String: DoneTodoEvent].self, key: shareKey)
+        let doneEvents = self.waitOutputs(expect, for: doneSource) {
+            Task {
+                _ = try? await usecase.completeTodo(oldEvent.uuid)
+            }
+        }
+        
+        // then
+        let doneOriginEventIds = doneEvents.map { $0?.values.map { $0.originEventId } }
+        XCTAssertEqual(doneOriginEventIds, [
+            nil,
+            [oldEvent.uuid]
+        ])
+    }
+    
+    // 반복 안하는 일정은 완료 처리 이후에 스토어에 저장된 todo 삭제
+    func testUsecase_whenNotRepeatingEvent_deleteSharedTodoAfterComplete() {
+        // given
+        let expect = expectation(description: "반복안하는 todo는 완료처리 이후에 저장된 공유 할일에서 제거")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        let oldEvent = self.stubTodoEvent(isRepeating: false)
+        
+        // when
+        let shareKey = ShareDataKeys.todos.rawValue
+        let todoSource = self.spyStore.observe([String: TodoEvent].self, key: shareKey)
+        let todos = self.waitOutputs(expect, for: todoSource) {
+            Task {
+                _ = try await usecase.completeTodo(oldEvent.uuid)
+            }
+        }
+        
+        // then
+        let oldEventExists = todos.map { $0?.keys.contains(oldEvent.uuid) }
+        XCTAssertEqual(oldEventExists, [true, false])
+    }
+    
+    // 반복하는 일정은 완료 처리 이후에도 스토어에 저장된 todo 삭제 안함
+    func testUsecase_whenRepeatingEvent_notDeleteAfterCOmplete() {
+        // given
+        let expect = expectation(description: "반복되는 todo는 완료처리 이후에 저장된 공유 할일에서 삭제 안함")
+        let usecase = self.makeUsecase()
+        let oldEvent = self.stubTodoEvent(isRepeating: true)
+        
+        // when
+        let shareKey = ShareDataKeys.todos.rawValue
+        let todoSource = self.spyStore.observe([String: TodoEvent].self, key: shareKey)
+        let todos = self.waitOutputs(expect, for: todoSource) {
+            Task {
+                _ = try? await usecase.completeTodo(oldEvent.uuid)
+            }
+        }
+        
+        // then
+        let oldTodoExists = todos.map { $0?.keys.contains(oldEvent.uuid) }
+        XCTAssertEqual(oldTodoExists, [true])
+    }
+}

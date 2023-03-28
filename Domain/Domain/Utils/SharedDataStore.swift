@@ -12,6 +12,7 @@ import Optics
 
 public enum ShareDataKeys: String {
     case todos
+    case doneTodos
 }
 
 
