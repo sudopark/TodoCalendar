@@ -62,7 +62,18 @@ extension TodoEventUsecaseImple {
     }
     
     public func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
-        throw RuntimeError("not implemented")
+        guard params.isValidForUpdate
+        else {
+            throw RuntimeError("invalid parameter for update Todo event")
+        }
+        let updatedEvent = try await self.todoRepository.updateTodoEvent(eventId, params)
+        defer {
+            let shareKey = ShareDataKeys.todos.rawValue
+            self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
+                ($0 ?? [:]) |> key(eventId) .~ updatedEvent
+            }
+        }
+        return updatedEvent
     }
     
     public func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {

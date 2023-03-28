@@ -43,6 +43,14 @@ public struct TodoMakeParams {
     var isValidForMaking: Bool {
         return self.name?.isEmpty == false
     }
+    
+    var isValidForUpdate: Bool {
+        return self.name?.isEmpty == false
+            || self.eventTagId?.isEmpty == false
+            || self.time != nil
+            || self.repeating != nil
+            || self.exceptFromRepeatedScheduleId?.isEmpty == false
+    }
 }
 
 public typealias TodoEditParams = TodoMakeParams
