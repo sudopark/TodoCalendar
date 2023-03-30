@@ -50,7 +50,7 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
         guard self.shouldFailLoadCurrentTodoEvents == false else {
             return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
         }
-        let events = (0..<10).map { TodoEvent.dummy($0) }
+        let events = (10..<30).map { TodoEvent.dummy($0) }
         return Just(events).mapNever().eraseToAnyPublisher()
     }
     

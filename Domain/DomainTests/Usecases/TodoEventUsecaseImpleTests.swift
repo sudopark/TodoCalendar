@@ -247,3 +247,129 @@ extension TodoEventUsecaseImpleTests {
         XCTAssertEqual(oldTodoExists, [true])
     }
 }
+
+// MARK: - Load cases
+
+extension TodoEventUsecaseImpleTests {
+    
+    private func stubTodoItemsWithTimeAndWithoutTime() {
+        let todosWithTime = (0..<10).map { TodoEvent.dummy($0) |> \.time .~ .at(Date()) }
+        let todosWithoutTime = (10..<20).map { TodoEvent.dummy($0) |> \.time .~ nil }
+        let todoMap = (todosWithTime + todosWithoutTime).reduce(into: [String: TodoEvent]()) {
+            $0[$1.uuid] = $1
+        }
+        self.spyStore.put([String: TodoEvent].self, key: ShareDataKeys.todos.rawValue, todoMap)
+    }
+    
+    private func stubLoadCurrentTodosFail() {
+        self.stubTodoRepository.shouldFailLoadCurrentTodoEvents = true
+    }
+
+    func testUsecase_whenCachedCurrentTodoIsNotEmpty_refreshCurrentTodos() {
+        // given
+        let expect = expectation(description: "캐시된거 있을때 currenct todo 스트림 반환")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        self.stubTodoItemsWithTimeAndWithoutTime()
+        
+        // when()
+        let currentTodos = self.waitOutputs(expect, for: usecase.currentTodoEvents) {
+            usecase.refreshCurentTodoEvents()
+        }
+        
+        // then
+        let idsSets = currentTodos.map { todos in
+            Set(todos.map { $0.uuid })
+        }
+        XCTAssertEqual(idsSets, [
+            (10..<20).map { "id:\($0)" } |> Set.init,
+            (10..<30).map { "id:\($0)" } |> Set.init
+        ])
+    }
+    
+    func testUsecase_whenCachedCurrentTodoIsEmpty_refreshCurrentTodos() {
+        // given
+        let expect = expectation(description: "캐시된거 없을때 currenct todo 스트림 반환")
+        let usecase = self.makeUsecase()
+        
+        // when
+        let currentTodos = self.waitOutputs(expect, for: usecase.currentTodoEvents) {
+            usecase.refreshCurentTodoEvents()
+        }
+        
+        // then
+        let idsSets = currentTodos.map { todos in
+            todos.map { $0.uuid } |> Set.init
+        }
+        XCTAssertEqual(idsSets, [
+            (10..<30).map { "id:\($0)" } |> Set.init
+        ])
+    }
+    
+    func testUsecase_whenRefreshCurrentTodoFails_justReturnCached() {
+        // given
+        let expect = expectation(description: "refresh 실패하면 캐시된거만 반환")
+        let usecase = self.makeUsecase()
+        self.stubTodoItemsWithTimeAndWithoutTime()
+        self.stubLoadCurrentTodosFail()
+        
+        // when
+        let currentTodos = self.waitOutputs(expect, for: usecase.currentTodoEvents) {
+            usecase.refreshCurentTodoEvents()
+        }
+        
+        // then
+        let idsSets = currentTodos.map { todos in
+            todos.map { $0.uuid } |> Set.init
+        }
+        XCTAssertEqual(idsSets, [
+            (10..<20).map { "id:\($0)" } |> Set.init
+        ])
+    }
+    
+    func testUsecase_whenMakeNewTodoEventWithoutTime_updateCurrentTodo() {
+        // given
+        let expect = expectation(description: "새로만들어진 currenct todo 이벤트도 반환")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        self.stubTodoItemsWithTimeAndWithoutTime()
+        
+        // when
+        let currentTodos = self.waitOutputs(expect, for: usecase.currentTodoEvents) {
+            let params = TodoMakeParams() |> \.name .~ "new"
+            Task {
+                _ = try? await usecase.makeTodoEvent(params)
+            }
+        }
+        
+        // then
+        let idsSets = currentTodos.map { todos in
+            todos.map { $0.uuid } |> Set.init
+        }
+        XCTAssertEqual(idsSets, [
+            (10..<20).map { "id:\($0)" } |> Set.init,
+            ((10..<20).map { "id:\($0)" } + ["new"]) |> Set.init
+        ])
+    }
+    
+    func testUsecase_whenCompleteTodoEvent_removeFromCurrentTodo() {
+        // given
+        let expect = expectation(description: "완료된 currenct todo 이벤트는 제외하고 반환")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        self.stubTodoItemsWithTimeAndWithoutTime()
+        
+        // when
+        let currentTodos = self.waitOutputs(expect, for: usecase.currentTodoEvents) {
+            Task {
+                _ = try? await usecase.completeTodo("id:12")
+            }
+        }
+        
+        // then
+        let hasTodo12 = currentTodos.map { todos in
+            todos.first(where: { $0.uuid == "id:12" }) != nil
+        }
+        XCTAssertEqual(hasTodo12, [true, false])
+    }
+}
