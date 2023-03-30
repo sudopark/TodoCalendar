@@ -20,7 +20,8 @@ public protocol TodoEventUsecase {
     func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent
     func completeTodo(_ eventId: String) async throws -> DoneTodoEvent
     
-    func currentTodoEvents() -> AnyPublisher<[TodoEvent], Never>
+    func refreshCurentTodoEvents()
+    var currentTodoEvents: AnyPublisher<[TodoEvent], Never> { get }
     func todoEvents(in range: Range<Date>) -> AnyPublisher<TodoEventsDuringThePeriod, Never>
 }
 
@@ -39,6 +40,8 @@ public final class TodoEventUsecaseImple: TodoEventUsecase {
         self.todoRepository = todoRepository
         self.sharedDataStore = sharedDataStore
     }
+    
+    private var cancellables: Set<AnyCancellable> = []
 }
 
 
@@ -94,9 +97,29 @@ extension TodoEventUsecaseImple {
 // MARK: - load case
 
 extension TodoEventUsecaseImple {
+
+    public func refreshCurentTodoEvents() {
+        
+        let shareKey = ShareDataKeys.todos.rawValue
+        let updateCached: ([TodoEvent]) -> Void = { [weak self] todos in
+            self?.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
+                return todos.reduce(into: $0 ?? [:]) { $0[$1.uuid] = $1 }
+            }
+        }
+        
+        self.todoRepository.loadCurrentTodoEvents()
+            .sink(receiveCompletion: { _ in }, receiveValue: updateCached)
+            .store(in: &self.cancellables)
+    }
     
-    public func currentTodoEvents() -> AnyPublisher<[TodoEvent], Never> {
-        return Empty().eraseToAnyPublisher()
+    public var currentTodoEvents: AnyPublisher<[TodoEvent], Never> {
+        
+        let shareKey = ShareDataKeys.todos.rawValue
+        return self.sharedDataStore
+            .observe([String: TodoEvent].self, key: shareKey)
+            .compactMap { $0 }
+            .map { $0.values.filter { $0.time == nil }}
+            .eraseToAnyPublisher()
     }
     
     public func todoEvents(in range: Range<Date>) -> AnyPublisher<TodoEventsDuringThePeriod, Never> {
