@@ -10,28 +10,47 @@ import Foundation
 
 // MARK: - event repeating
 
-public struct EventRepeating {
+public protocol EventRepeatingOption { }
+
+public enum EventRepeatingOptions {
     
-    public enum RepeatOptions {
-        case everyDay
-        case everyWeek
-        case every2weeks
-        case every3weeks
-        case every4weeks
-        case everyMonth
-        case everyYear
-        case everyLastDayOfMonth
-        case every1stDayOf(DayOfWeeks)
-        case every2ndDayOf(DayOfWeeks)
-        case every3rdDayOf(DayOfWeeks)
-        case every4thDayOf(DayOfWeeks)
+    public struct EveryDay: EventRepeatingOption {
+        public var interval: Int = 1   // 1 ~ 999
+        public init() { }
     }
     
-    public var repeatOption: RepeatOptions
+    public struct EveryWeek: EventRepeatingOption {
+        public var interval: Int = 1   // 1 ~ 5
+        public var dayOfWeeks: [DayOfWeeks] = []
+        public init() { }
+    }
+    
+    public struct EveryMonth: EventRepeatingOption {
+        
+        public var interval: Int = 1   // 1 ~ 11
+        public var weekSeqs: [WeekSeq] = []
+        public var weekOfDays: [DayOfWeeks] = []
+        public init() { }
+    }
+    
+    public struct EveryYear: EventRepeatingOption {
+        public var interval: Int = 1    // 1 ~ 99
+        public var months: [Months] = []
+        public var weekSeqs: [WeekSeq] = []
+        public var dayOfWeek: [DayOfWeeks] = []
+        public init() {}
+    }
+}
+
+public struct EventRepeating {
+
+    public let repeatingStartTime: Date
+    public var repeatOption: EventRepeatingOption
     public var repeatingEndTime: Date?
 
     public init(repeatingStartTime: Date,
-                repeatOption: RepeatOptions) {
+                repeatOption: EventRepeatingOption) {
+        self.repeatingStartTime = repeatingStartTime
         self.repeatOption = repeatOption
     }
 }
