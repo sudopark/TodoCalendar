@@ -23,7 +23,6 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
             |> \.eventTagId .~ params.eventTagId
             |> \.time .~ params.time
             |> \.repeating .~ params.repeating
-            |> \.exceptFromRepeatedEventId .~ params.exceptFromRepeatedScheduleId
     }
     
     var shouldFailUpdate: Bool = false
@@ -33,16 +32,19 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
             |> \.eventTagId .~ params.eventTagId
             |> \.time .~ params.time
             |> \.repeating .~ params.repeating
-            |> \.exceptFromRepeatedEventId .~ params.exceptFromRepeatedScheduleId
     }
     
     var shouldFailComplete: Bool = false
     var doneEventIsRepeating: Bool = false
-    func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {
+    func completeTodo(_ eventId: String) async throws -> CompleteTodoResult {
         try self.checkShouldFail(self.shouldFailComplete)
-        let event = DoneTodoEvent(uuid: "done", name: "some", originEventId: eventId, doneTime: .now)
+        let doneEvent = DoneTodoEvent(uuid: "done", name: "some", originEventId: eventId, doneTime: .now)
             |> \.originEventIsRepeating .~ self.doneEventIsRepeating
-        return event
+        var nextTodo: TodoEvent?
+        if self.doneEventIsRepeating {
+            nextTodo = TodoEvent(uuid: "next", name: "next todo")
+        }
+        return .init(doneEvent: doneEvent, nextRepeatingTodoEvent: nextTodo)
     }
     
     var shouldFailLoadCurrentTodoEvents: Bool = false
@@ -54,21 +56,15 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
         return Just(events).mapNever().eraseToAnyPublisher()
     }
     
-    var shouldFailLoadTodoEvents: Bool = false
-    func loadTodoEvnets(in range: Range<Date>) -> AnyPublisher<[TodoEvent], Error> {
-        guard self.shouldFailLoadTodoEvents == false else {
+    var shouldFailLoadTodosInRange: Bool = false
+    func loadTodoEvents(in range: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Error> {
+        guard self.shouldFailLoadTodosInRange == false
+        else {
             return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
         }
-        let events = (0..<10).map { TodoEvent.dummy($0) }
-        return Just(events).mapNever().eraseToAnyPublisher()
-    }
-    
-    var shouldFailLoadDoneEvents: Bool = false
-    func loadDoneEvents(in range: Range<Date>) -> AnyPublisher<[DoneTodoEvent], Error> {
-        guard self.shouldFailLoadDoneEvents == false else {
-            return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
+        let events = (-10..<0).map {
+            TodoEvent.dummy($0) |> \.time .~ .at(.dummy($0))
         }
-        let events = (0..<10).map { DoneTodoEvent.dummy($0) }
         return Just(events).mapNever().eraseToAnyPublisher()
     }
 }

@@ -22,7 +22,8 @@ public protocol TodoEventUsecase {
     
     func refreshCurentTodoEvents()
     var currentTodoEvents: AnyPublisher<[TodoEvent], Never> { get }
-    func todoEvents(in range: Range<Date>) -> AnyPublisher<TodoEventsDuringThePeriod, Never>
+    func refreshTodoEvents(in period: Range<TimeStamp>)
+    func todoEvents(in period: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Never>
 }
 
 
@@ -78,15 +79,19 @@ extension TodoEventUsecaseImple {
     }
     
     public func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {
-        let doneEvent = try await self.todoRepository.completeTodo(eventId)
+        let doneResult = try await self.todoRepository.completeTodo(eventId)
+        let (doneEvent, nextTodo) = (doneResult.doneEvent, doneResult.nextRepeatingTodoEvent)
         
         let (todoKey, doneKey) = (ShareDataKeys.todos.rawValue, ShareDataKeys.doneTodos.rawValue)
         self.sharedDataStore.update([String: DoneTodoEvent].self, key: doneKey) {
             ($0 ?? [:]) |> key(doneEvent.originEventId) .~ doneEvent
         }
-        if doneEvent.originEventIsRepeating == false {
+        self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
+            ($0 ?? [:]) |> key(doneEvent.originEventId) .~ nil
+        }
+        if let next = nextTodo {
             self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
-                ($0 ?? [:]) |> key(doneEvent.originEventId) .~ nil
+                ($0 ?? [:]) |> key(next.uuid) .~ next
             }
         }
         return doneEvent
@@ -117,12 +122,37 @@ extension TodoEventUsecaseImple {
         let shareKey = ShareDataKeys.todos.rawValue
         return self.sharedDataStore
             .observe([String: TodoEvent].self, key: shareKey)
-            .compactMap { $0 }
-            .map { $0.values.filter { $0.time == nil }}
+            .map { $0?.values.map { $0 } ?? [] }
+            .map { $0.filter { $0.time == nil } }
             .eraseToAnyPublisher()
     }
     
-    public func todoEvents(in range: Range<Date>) -> AnyPublisher<TodoEventsDuringThePeriod, Never> {
-        return Empty().eraseToAnyPublisher()
+    public func refreshTodoEvents(in period: Range<TimeStamp>) {
+        let shareKey = ShareDataKeys.todos.rawValue
+        let updateCache: ([TodoEvent]) -> Void = { [weak self] todos in
+            self?.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
+                return todos.reduce(into: $0 ?? [:]) { $0[$1.uuid] = $1 }
+            }
+        }
+        self.todoRepository.loadTodoEvents(in: period)
+            .sink(receiveCompletion: { _ in }, receiveValue: updateCache)
+            .store(in: &self.cancellables)
+    }
+    
+    public func todoEvents(in period: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Never> {
+        let shareKey = ShareDataKeys.todos.rawValue
+        
+        let filterInRange: ([TodoEvent]) -> [TodoEvent] = { todos in
+            return todos.filter { event in
+                guard let time = event.time else { return false }
+                return time.isClamped(with: period)
+            }
+        }
+        
+        return self.sharedDataStore
+            .observe([String: TodoEvent].self, key: shareKey)
+            .map { $0?.values.map { $0 } ?? [] }
+            .map(filterInRange)
+            .eraseToAnyPublisher()
     }
 }
