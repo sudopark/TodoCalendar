@@ -25,7 +25,6 @@
 		F65B08E029CFF9FF000EE650 /* EventRepeating.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08DF29CFF9FF000EE650 /* EventRepeating.swift */; };
 		F65B08E229CFFAEB000EE650 /* EventTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08E129CFFAEB000EE650 /* EventTime.swift */; };
 		F65B08E629D005E4000EE650 /* DoneTodoEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08E529D005E4000EE650 /* DoneTodoEvent.swift */; };
-		F65B08EA29D00713000EE650 /* TodoEventsDuringThePeriod.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08E929D00713000EE650 /* TodoEventsDuringThePeriod.swift */; };
 		F65B08ED29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08EC29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift */; };
 		F65B08F029D01448000EE650 /* StubTodoEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08EF29D01448000EE650 /* StubTodoEventRepository.swift */; };
 		F65B08F229D014E9000EE650 /* Dummies.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08F129D014E9000EE650 /* Dummies.swift */; };
@@ -62,7 +61,6 @@
 		F65B08DF29CFF9FF000EE650 /* EventRepeating.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeating.swift; sourceTree = "<group>"; };
 		F65B08E129CFFAEB000EE650 /* EventTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTime.swift; sourceTree = "<group>"; };
 		F65B08E529D005E4000EE650 /* DoneTodoEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoneTodoEvent.swift; sourceTree = "<group>"; };
-		F65B08E929D00713000EE650 /* TodoEventsDuringThePeriod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEventsDuringThePeriod.swift; sourceTree = "<group>"; };
 		F65B08EC29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEventUsecaseImpleTests.swift; sourceTree = "<group>"; };
 		F65B08EF29D01448000EE650 /* StubTodoEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubTodoEventRepository.swift; sourceTree = "<group>"; };
 		F65B08F129D014E9000EE650 /* Dummies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dummies.swift; sourceTree = "<group>"; };
@@ -161,7 +159,6 @@
 			children = (
 				F63C9CEB29C6E3A400CC663A /* TodoEvent.swift */,
 				F65B08E529D005E4000EE650 /* DoneTodoEvent.swift */,
-				F65B08E929D00713000EE650 /* TodoEventsDuringThePeriod.swift */,
 			);
 			path = Todo;
 			sourceTree = "<group>";
@@ -363,7 +360,6 @@
 				F63C9D0529C8A8C900CC663A /* TodoEventRepository.swift in Sources */,
 				F63C9D0B29CC993900CC663A /* SharedDataStore.swift in Sources */,
 				F63C9CF929C6F51F00CC663A /* Times.swift in Sources */,
-				F65B08EA29D00713000EE650 /* TodoEventsDuringThePeriod.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -35,3 +35,15 @@ public struct DoneTodoEvent {
         self.doneTime = doneTime
     }
 }
+
+
+public struct CompleteTodoResult {
+    
+    public let doneEvent: DoneTodoEvent
+    public var nextRepeatingTodoEvent: TodoEvent?
+    
+    public init(doneEvent: DoneTodoEvent, nextRepeatingTodoEvent: TodoEvent? = nil) {
+        self.doneEvent = doneEvent
+        self.nextRepeatingTodoEvent = nextRepeatingTodoEvent
+    }
+}

@@ -226,10 +226,11 @@ extension TodoEventUsecaseImpleTests {
         XCTAssertEqual(oldEventExists, [true, false])
     }
     
-    // 반복하는 일정은 완료 처리 이후에도 스토어에 저장된 todo 삭제 안함
+    // 반복하는 일정은 완료 처리 이후에도 스토어에 저장된 이전 todo 삭제하고 새로운 todo로 업데이트
     func testUsecase_whenRepeatingEvent_notDeleteAfterCOmplete() {
         // given
         let expect = expectation(description: "반복되는 todo는 완료처리 이후에 저장된 공유 할일에서 삭제 안함")
+        expect.expectedFulfillmentCount = 3
         let usecase = self.makeUsecase()
         let oldEvent = self.stubTodoEvent(isRepeating: true)
         
@@ -244,16 +245,18 @@ extension TodoEventUsecaseImpleTests {
         
         // then
         let oldTodoExists = todos.map { $0?.keys.contains(oldEvent.uuid) }
-        XCTAssertEqual(oldTodoExists, [true])
+        let newTodoExists = todos.map { $0?.keys.contains("next")}
+        XCTAssertEqual(oldTodoExists, [true, false, false])
+        XCTAssertEqual(newTodoExists, [false, false, true])
     }
 }
 
-// MARK: - Load cases
+// MARK: - Load cases + current todo
 
 extension TodoEventUsecaseImpleTests {
     
     private func stubTodoItemsWithTimeAndWithoutTime() {
-        let todosWithTime = (0..<10).map { TodoEvent.dummy($0) |> \.time .~ .at(Date()) }
+        let todosWithTime = (0..<10).map { TodoEvent.dummy($0) |> \.time .~ .at(.dummy($0)) }
         let todosWithoutTime = (10..<20).map { TodoEvent.dummy($0) |> \.time .~ nil }
         let todoMap = (todosWithTime + todosWithoutTime).reduce(into: [String: TodoEvent]()) {
             $0[$1.uuid] = $1
@@ -290,6 +293,7 @@ extension TodoEventUsecaseImpleTests {
     func testUsecase_whenCachedCurrentTodoIsEmpty_refreshCurrentTodos() {
         // given
         let expect = expectation(description: "캐시된거 없을때 currenct todo 스트림 반환")
+        expect.expectedFulfillmentCount = 2
         let usecase = self.makeUsecase()
         
         // when
@@ -302,6 +306,7 @@ extension TodoEventUsecaseImpleTests {
             todos.map { $0.uuid } |> Set.init
         }
         XCTAssertEqual(idsSets, [
+            [],
             (10..<30).map { "id:\($0)" } |> Set.init
         ])
     }
@@ -371,5 +376,83 @@ extension TodoEventUsecaseImpleTests {
             todos.first(where: { $0.uuid == "id:12" }) != nil
         }
         XCTAssertEqual(hasTodo12, [true, false])
+    }
+}
+
+
+// MARK: - load case + in range
+
+extension TodoEventUsecaseImpleTests {
+    
+    private var todosInRange: Range<TimeStamp> {
+        return TimeStamp.dummy(-10)..<TimeStamp.dummy(30)
+    }
+    
+    private func stubLoadTodosInPeriodFail() {
+        self.stubTodoRepository.shouldFailLoadTodosInRange = true
+    }
+    
+    func testUsecase_loadTodoEventsInPeriodWithCachedAndRefresh() {
+        // given
+        let expect = expectation(description: "특정 기간동안의 todo 로드 + 메모리에 캐싱된거 있는 경우")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        self.stubTodoItemsWithTimeAndWithoutTime()
+        
+        // when
+        let todos = self.waitOutputs(expect, for: usecase.todoEvents(in: self.todosInRange)) {
+            usecase.refreshTodoEvents(in: self.todosInRange)
+        }
+        
+        // then
+        let idsSets = todos.map { todos in
+            todos.map { $0.uuid } |> Set.init
+        }
+        XCTAssertEqual(idsSets, [
+            (0..<10).map { "id:\($0)" } |> Set.init,
+            (-10..<10).map { "id:\($0)" } |> Set.init,
+        ])
+    }
+    
+    func testUsecase_loadTodoEventsInPeriodWithoutCachedAndRefresh() {
+        // given
+        let expect = expectation(description: "특정 기간동안의 todo 로드 + 메모리에 케싱된거 없는 경우")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        
+        // when
+        let todos = self.waitOutputs(expect, for: usecase.todoEvents(in: self.todosInRange)) {
+            usecase.refreshTodoEvents(in: self.todosInRange)
+        }
+        
+        // then
+        let idsSets = todos.map { todos in
+            todos.map { $0.uuid } |> Set.init
+        }
+        XCTAssertEqual(idsSets, [
+            [],
+            (-10..<0).map { "id:\($0)" } |> Set.init,
+        ])
+    }
+    
+    func testUsecase_whenLoadFailTodoEventsInPeriod_justReturnCached() {
+        // given
+        let expect = self.expectation(description: "특정 기간동안의 todo 로드 + 새로 로드 실패 -> 메모리에 캐싱된것만 반환")
+        let usecase = self.makeUsecase()
+        self.stubTodoItemsWithTimeAndWithoutTime()
+        self.stubLoadTodosInPeriodFail()
+        
+        // when
+        let todos = self.waitOutputs(expect, for: usecase.todoEvents(in: self.todosInRange)) {
+            usecase.refreshTodoEvents(in: self.todosInRange)
+        }
+        
+        // then
+        let idsSets = todos.map { todos in
+            todos.map { $0.uuid } |> Set.init
+        }
+        XCTAssertEqual(idsSets, [
+            (0..<10).map { "id:\($0)" } |> Set.init,
+        ])
     }
 }
