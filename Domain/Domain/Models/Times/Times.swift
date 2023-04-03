@@ -18,17 +18,39 @@ public enum DayOfWeeks {
     case saturday
 }
 
-public struct FixedDate: Comparable {
+public enum Months {
+    case january
+    case february
+    case march
+    case april
+    case may
+    case june
+    case july
+    case august
+    case september
+    case october
+    case november
+    case december
+}
+
+public enum WeekSeq {
+    case seq(Int)
+    case lastWeek
+}
+
+public struct TimeStamp: Comparable {
     
-    private let selectedDate: Date
-    private let utcOffset: TimeInterval
+    public let timeInterval: TimeInterval
+    public let secondsFromGMT: TimeInterval
     
-    public var date: Date {
-        let offset = utcOffset * 3600
-        return self.selectedDate.addingTimeInterval(offset)
+    public init(timeInterval: TimeInterval, secondsFromGMT: TimeInterval) {
+        self.timeInterval = timeInterval
+        self.secondsFromGMT = secondsFromGMT
     }
     
-    public static func < (lhs: FixedDate, rhs: FixedDate) -> Bool {
-        return lhs.date < rhs.date
+    public var timeIntervalWithUTCOffset: TimeInterval { self.timeInterval + self.secondsFromGMT }
+    
+    public static func < (_ lhs: Self, _ rhs: Self) -> Bool {
+        return lhs.timeInterval < rhs.timeInterval
     }
 }
