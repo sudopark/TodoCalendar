@@ -20,7 +20,15 @@ public enum EventTime: Comparable {
         switch self {
         case .at(let time): return time.timeInterval
         case .period(let range): return range.lowerBound.timeInterval
-        case .allDays(let range): return range.lowerBound.timeIntervalWithUTCOffset
+        case .allDays(let range): return range.lowerBound.timeInterval
+        }
+    }
+    
+    var upperBound: TimeInterval {
+        switch self {
+        case .at(let time): return time.timeInterval
+        case .period(let range): return range.upperBound.timeInterval
+        case .allDays(let range): return range.upperBound.timeInterval
         }
     }
     
@@ -31,9 +39,20 @@ public enum EventTime: Comparable {
         case .period(let range):
             return range.clamped(to: period).isEmpty == false
         case .allDays(let range):
-            return (range.lowerBound.timeIntervalWithUTCOffset..<range.upperBound.timeIntervalWithUTCOffset)
-                .clamped(to: period.lowerBound.timeIntervalWithUTCOffset..<period.upperBound.timeIntervalWithUTCOffset)
+            return (range.lowerBound.timeInterval..<range.upperBound.timeInterval)
+                .clamped(to: period.lowerBound.timeInterval..<period.upperBound.timeInterval)
                 .isEmpty == false
+        }
+    }
+    
+    func shift(_ interval: TimeInterval) -> EventTime {
+        switch self {
+        case .at(let time):
+            return .at(time.add(interval))
+        case .period(let range):
+            return .period(range.lowerBound.add(interval)..<range.upperBound.add(interval))
+        case .allDays(let range):
+            return .allDays(range.lowerBound.add(interval)..<range.upperBound.add(interval))
         }
     }
     

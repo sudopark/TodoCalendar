@@ -11,7 +11,7 @@ import Domain
 extension TimeStamp {
     
     static func dummy(_ int: Int = 0, offset: Int = 0) -> TimeStamp {
-        return .init(timeInterval: TimeInterval(int), secondsFromGMT: TimeInterval(offset))
+        return .init(utcTimeInterval: TimeInterval(int), withFixed: TimeInterval(offset))
     }
 }
 
