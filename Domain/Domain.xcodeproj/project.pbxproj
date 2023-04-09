@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F602B30929E2EE9100F790B5 /* EventRepeatingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602B30829E2EE9100F790B5 /* EventRepeatingTests.swift */; };
 		F63C9BD729C6B00500CC663A /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9BCE29C6B00500CC663A /* Domain.framework */; };
-		F63C9BDC29C6B00500CC663A /* DomainTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9BDB29C6B00500CC663A /* DomainTests.swift */; };
 		F63C9BDD29C6B00500CC663A /* Domain.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9BD129C6B00500CC663A /* Domain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63C9CAB29C6DE7B00CC663A /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */; };
 		F63C9CAF29C6DE8300CC663A /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CAE29C6DE8300CC663A /* Extensions.framework */; };
@@ -42,10 +42,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F602B30829E2EE9100F790B5 /* EventRepeatingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatingTests.swift; sourceTree = "<group>"; };
 		F63C9BCE29C6B00500CC663A /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9BD129C6B00500CC663A /* Domain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Domain.h; sourceTree = "<group>"; };
 		F63C9BD629C6B00500CC663A /* DomainTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DomainTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F63C9BDB29C6B00500CC663A /* DomainTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainTests.swift; sourceTree = "<group>"; };
 		F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9CAE29C6DE8300CC663A /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9CEB29C6E3A400CC663A /* TodoEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEvent.swift; sourceTree = "<group>"; };
@@ -91,6 +91,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F602B30729E2EE7E00F790B5 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F602B30829E2EE9100F790B5 /* EventRepeatingTests.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
 		F63C9BC429C6B00500CC663A = {
 			isa = PBXGroup;
 			children = (
@@ -126,9 +134,9 @@
 			isa = PBXGroup;
 			children = (
 				F65B08EE29D0143D000EE650 /* Doubles */,
+				F602B30729E2EE7E00F790B5 /* Models */,
 				F65B08EB29D013E1000EE650 /* Usecases */,
 				F63C9D0C29CCA44D00CC663A /* Utils */,
-				F63C9BDB29C6B00500CC663A /* DomainTests.swift */,
 			);
 			path = DomainTests;
 			sourceTree = "<group>";
@@ -368,8 +376,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F63C9D1129CCB2EB00CC663A /* SharedDataStoreTests.swift in Sources */,
+				F602B30929E2EE9100F790B5 /* EventRepeatingTests.swift in Sources */,
 				F65B08ED29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift in Sources */,
-				F63C9BDC29C6B00500CC663A /* DomainTests.swift in Sources */,
 				F65B08F029D01448000EE650 /* StubTodoEventRepository.swift in Sources */,
 				F65B08F229D014E9000EE650 /* Dummies.swift in Sources */,
 			);
