@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F602B30B29E5AB0700F790B5 /* Date+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602B30A29E5AB0700F790B5 /* Date+extensions.swift */; };
 		F60CBB5829CEA85000F03310 /* RuntimeError.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60CBB5729CEA85000F03310 /* RuntimeError.swift */; };
 		F63C9BF929C6B03100CC663A /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9BF029C6B03000CC663A /* Extensions.framework */; };
 		F63C9BFE29C6B03100CC663A /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63C9BFD29C6B03100CC663A /* ExtensionsTests.swift */; };
@@ -28,6 +29,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F602B30A29E5AB0700F790B5 /* Date+extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+extensions.swift"; sourceTree = "<group>"; };
 		F60CBB5729CEA85000F03310 /* RuntimeError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RuntimeError.swift; sourceTree = "<group>"; };
 		F63C9BF029C6B03000CC663A /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9BF329C6B03000CC663A /* Extensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Extensions.h; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				F65B08F629D01609000EE650 /* Result+extensions.swift */,
 				F65B08FA29D01CC6000EE650 /* Publisher+extension.swift */,
 				F65B08FF29D5FA57000EE650 /* Sequence+Extension.swift */,
+				F602B30A29E5AB0700F790B5 /* Date+extensions.swift */,
 			);
 			path = "Type+Extensions";
 			sourceTree = "<group>";
@@ -224,6 +227,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F602B30B29E5AB0700F790B5 /* Date+extensions.swift in Sources */,
 				F65B08F729D01609000EE650 /* Result+extensions.swift in Sources */,
 				F65B08FB29D01CC6000EE650 /* Publisher+extension.swift in Sources */,
 				F60CBB5829CEA85000F03310 /* RuntimeError.swift in Sources */,
