@@ -8,8 +8,8 @@
 import Foundation
 
 
-public enum DayOfWeeks {
-    case sunday
+public enum DayOfWeeks: Int {
+    case sunday = 1
     case monday
     case tuesday
     case wednesday
@@ -44,6 +44,10 @@ public struct TimeStamp: Comparable {
     public let fixedGMTTImeZoneOffset: TimeInterval
     
     public var timeInterval: TimeInterval {
+        return utcTimeInterval
+    }
+    
+    public var timeIntervalWithTimeZoneOffset: TimeInterval {
         return utcTimeInterval + fixedGMTTImeZoneOffset
     }
     
@@ -68,6 +72,10 @@ public struct TimeStamp: Comparable {
 extension TimeInterval {
     
     static func days(_ number: Int) -> TimeInterval {
-        return TimeInterval(number) * 24 * 3600
+        return TimeInterval(number) * .hours(24)
+    }
+    
+    static func hours(_ number: Int) -> TimeInterval {
+        return TimeInterval(number) * 3600
     }
 }
