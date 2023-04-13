@@ -41,30 +41,17 @@ public enum WeekSeq {
 public struct TimeStamp: Comparable {
     
     public let utcTimeInterval: TimeInterval
-    public let fixedGMTTImeZoneOffset: TimeInterval
     
-    public var timeInterval: TimeInterval {
-        return utcTimeInterval
-    }
-    
-    public var timeIntervalWithTimeZoneOffset: TimeInterval {
-        return utcTimeInterval + fixedGMTTImeZoneOffset
-    }
-    
-    public init(utcTimeInterval: TimeInterval, withFixed timeZoneOffset: TimeInterval = 0) {
+    public init(_ utcTimeInterval: TimeInterval) {
         self.utcTimeInterval = utcTimeInterval
-        self.fixedGMTTImeZoneOffset = timeZoneOffset
     }
     
         public static func < (_ lhs: Self, _ rhs: Self) -> Bool {
-        return lhs.timeInterval < rhs.timeInterval
+        return lhs.utcTimeInterval < rhs.utcTimeInterval
     }
     
     public func add(_ time: TimeInterval) -> TimeStamp {
-        return .init(
-            utcTimeInterval: self.utcTimeInterval + time,
-            withFixed: self.fixedGMTTImeZoneOffset
-        )
+        return .init(self.utcTimeInterval + time)
     }
 }
 

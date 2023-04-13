@@ -20,16 +20,16 @@ class BaseEventRepeatingTests: BaseTestCase {
         endTime: TimeStamp? = nil
     ) -> EventRepeating {
         return EventRepeating(
-            repeatingStartTime: .init(utcTimeInterval: 0),
+            repeatingStartTime: .init(0),
             repeatOption: option
         )
         |> \.repeatingEndTime .~ endTime
     }
     
-    func dummyDate(_ dateString: String, timeZone: String = "UTC") -> Date {
+    func dummyDate(_ dateString: String) -> Date {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm"
-        formatter.timeZone = TimeZone(abbreviation: timeZone)
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
         return formatter.date(from: dateString)!
     }
 }
@@ -37,18 +37,12 @@ class BaseEventRepeatingTests: BaseTestCase {
 class EventRepeatingTests_everyDay: BaseEventRepeatingTests {
     
     private var dummyTimeAt: EventTime {
-        return .at(.init(utcTimeInterval: 10))
+        return .at(.init(10))
     }
     
     private var dummyTimeRange: EventTime {
         return .period(
-            TimeStamp(utcTimeInterval: 10)..<TimeStamp(utcTimeInterval: 110)
-        )
-    }
-    
-    private var dummyTimeAllDays: EventTime {
-        return .allDays(
-            TimeStamp(utcTimeInterval: 100, withFixed: 1000)..<TimeStamp(utcTimeInterval: 72*3600+100, withFixed: 1000)
+            TimeStamp(10)..<TimeStamp(110)
         )
     }
 }
@@ -66,17 +60,17 @@ extension EventRepeatingTests_everyDay {
         // when + then
         // 1일 간격으로 반복시
         var next = repeating.nextEventTime(from: self.dummyTimeAt)
-        XCTAssertEqual(next, .at(TimeStamp(utcTimeInterval: 10 + .days(1))))
+        XCTAssertEqual(next, .at(TimeStamp(10 + .days(1))))
         
         // 3일 간격으로 반복시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         repeating = self.makeRepeating(option)
         next = repeating.nextEventTime(from: self.dummyTimeAt)
-        XCTAssertEqual(next, .at(TimeStamp(utcTimeInterval: 10 + .days(3))))
+        XCTAssertEqual(next, .at(TimeStamp(10 + .days(3))))
         
         // 반복종료시간 초과시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
-        repeating = self.makeRepeating(option, endTime: .init(utcTimeInterval: .days(2)))
+        repeating = self.makeRepeating(option, endTime: .init(.days(2)))
         next = repeating.nextEventTime(from: self.dummyTimeAt)
         XCTAssertNil(next)
     }
@@ -99,25 +93,8 @@ extension EventRepeatingTests_everyDay {
         XCTAssertEqual(next, self.dummyTimeRange.shift(.days(3)))
         
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
-        repeating = self.makeRepeating(option, endTime: .init(utcTimeInterval: .days(2)))
+        repeating = self.makeRepeating(option, endTime: .init(.days(2)))
         next = repeating.nextEventTime(from: self.dummyTimeRange)
-        XCTAssertNil(next)
-    }
-    
-    func testRepeating_whenRepeatAllDays_getNextTimeUntilEnd() {
-        // given
-        var option = EventRepeatingOptions.EveryDay() |> \.interval .~ 7
-        var repeating = self.makeRepeating(option)
-        
-        // when + then
-        // 지정 3일 이벤트 -> 7일 간격으로 반복
-        var next = repeating.nextEventTime(from: self.dummyTimeAllDays)
-        XCTAssertEqual(next, self.dummyTimeAllDays.shift(.days(7)))
-        
-        // 지정 3일 이벤트 -> 7일 간격으로 반복시에 반복 종료시간 끝남
-        option = EventRepeatingOptions.EveryDay() |> \.interval .~ 7
-        repeating = self.makeRepeating(option, endTime: .init(utcTimeInterval: .days(10)))
-        next = repeating.nextEventTime(from: self.dummyTimeAllDays)
         XCTAssertNil(next)
     }
 }
@@ -129,26 +106,16 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
     
     private var dummyTimeAt: EventTime {
         let date = self.dummyDate("2023-04-11 07:00")
-        return .at(.init(utcTimeInterval: date.timeIntervalSince1970))
+        return .at(.init(date.timeIntervalSince1970))
     }
     
     private var dummyTimeRange: EventTime {
         let start = self.dummyDate("2023-04-11 07:00")
         let end = self.dummyDate("2023-04-11 08:00")
         return .period(
-            TimeStamp(utcTimeInterval: start.timeIntervalSince1970)
+            TimeStamp(start.timeIntervalSince1970)
             ..<
-            TimeStamp(utcTimeInterval: end.timeIntervalSince1970)
-        )
-    }
-    
-    private var dummyAllDays: EventTime {
-        let start = self.dummyDate("2023-04-11 00:00")
-        let end = self.dummyDate("2023-04-12 00:00")
-        return .allDays(
-            TimeStamp(utcTimeInterval: start.timeIntervalSince1970, withFixed: .hours(9))
-            ..<
-            TimeStamp(utcTimeInterval: end.timeIntervalSince1970, withFixed: .hours(9))
+            TimeStamp(end.timeIntervalSince1970)
         )
     }
     
@@ -162,7 +129,7 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
                 |> \.dayOfWeeks .~ [.tuesday]
             let repeating = self.makeRepeating(
                 option,
-                endTime: endTime.map { .init(utcTimeInterval: self.dummyDate($0).timeIntervalSince1970) }
+                endTime: endTime.map { .init(self.dummyDate($0).timeIntervalSince1970) }
             )
             
             // when
@@ -171,7 +138,7 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
             // then
             if let expected = expected {
                 let nextWeekEvent = self.dummyDate(expected)
-                XCTAssertEqual(next, .at(.init(utcTimeInterval: nextWeekEvent.timeIntervalSince1970)))
+                XCTAssertEqual(next, .at(.init(nextWeekEvent.timeIntervalSince1970)))
             } else {
                 XCTAssertNil(next)
             }
@@ -194,7 +161,7 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
                 |> \.dayOfWeeks .~ [.tuesday]
             let repeating = self.makeRepeating(
                 option,
-                endTime: endTime.map { .init(utcTimeInterval: self.dummyDate($0).timeIntervalSince1970) }
+                endTime: endTime.map { .init(self.dummyDate($0).timeIntervalSince1970) }
             )
             
             // when
@@ -203,9 +170,9 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
             // then
             if let expected {
                 let nextWeekEvents = EventTime.period(
-                    TimeStamp(utcTimeInterval: self.dummyDate(expected.0).timeIntervalSince1970)
+                    TimeStamp(self.dummyDate(expected.0).timeIntervalSince1970)
                         ..<
-                    TimeStamp(utcTimeInterval: self.dummyDate(expected.1).timeIntervalSince1970)
+                    TimeStamp(self.dummyDate(expected.1).timeIntervalSince1970)
                 )
                 XCTAssertEqual(next, nextWeekEvents)
             } else {
@@ -219,44 +186,6 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
         parameterizeTest(3, expected: nil, endTime: "2023-05-01 07:00")
     }
     
-    // 일주일뒤 다음일정 -> 하루종일 화요일부터 - 수요일
-    func testRepeating_nextWeekAtAllDays() {
-        // given
-        func parameterizeTests(_ interval: Int, expected: (String, String)?, endTime: String? = nil) {
-            // given
-            let option = EventRepeatingOptions.EveryWeek(.init(abbreviation: "KST")!)
-                |> \.interval .~ interval
-                |> \.dayOfWeeks .~ [.tuesday]
-            let repeating = self.makeRepeating(
-                option,
-                endTime: endTime.map {
-                    .init(utcTimeInterval: self.dummyDate($0, timeZone: "KST").timeIntervalSince1970)
-                }
-            )
-            
-            // when
-            let next = repeating.nextEventTime(from: self.dummyAllDays)
-            
-            // then
-            if let expected {
-                let nextWeekEvents = EventTime.allDays(
-                    TimeStamp(utcTimeInterval: self.dummyDate(expected.0).timeIntervalSince1970, withFixed: .hours(9))
-                        ..<
-                    TimeStamp(utcTimeInterval: self.dummyDate(expected.1).timeIntervalSince1970, withFixed: .hours(9))
-                )
-                XCTAssertEqual(next, nextWeekEvents)
-            } else {
-                XCTAssertNil(next)
-            }
-        }
-        
-        // when + then
-        parameterizeTests(1, expected: ("2023-04-18 00:00", "2023-04-19 00:00"))
-        parameterizeTests(2, expected: ("2023-04-25 00:00", "2023-04-26 00:00"))
-        parameterizeTests(3, expected: ("2023-05-02 00:00", "2023-05-03 00:00"))
-        parameterizeTests(3, expected: nil, endTime: "2023-05-02 00:00")
-    }
-    
     // 화, 금 반복할때 특정시간 + 현재는 화요일 -> 같은주 목요일
     func testRepeating_whenRepeatAtTimeWithSomeWeekDays_nextDayIsSameWeek() {
         // given
@@ -267,7 +196,7 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
                 |> \.dayOfWeeks .~ [.tuesday, .friday]
             let repeating = self.makeRepeating(
                 option,
-                endTime: endTime.map { .init(utcTimeInterval: self.dummyDate($0).timeIntervalSince1970) }
+                endTime: endTime.map { .init(self.dummyDate($0).timeIntervalSince1970) }
             )
             
             // when
@@ -276,7 +205,7 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
             // then
             if let expected {
                 let sameWeekEvent = self.dummyDate(expected)
-                XCTAssertEqual(next, .at(.init(utcTimeInterval: sameWeekEvent.timeIntervalSince1970)))
+                XCTAssertEqual(next, .at(.init(sameWeekEvent.timeIntervalSince1970)))
             } else {
                 XCTAssertNil(next)
             }
@@ -298,7 +227,7 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
                 |> \.dayOfWeeks .~ [.tuesday, .friday]
             let repeating = self.makeRepeating(
                 option,
-                endTime: endTime.map { .init(utcTimeInterval: self.dummyDate($0).timeIntervalSince1970) }
+                endTime: endTime.map { .init(self.dummyDate($0).timeIntervalSince1970) }
             )
             
             // when
@@ -307,9 +236,9 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
             // then
             if let expected {
                 let sameWeekPeriod = EventTime.period(
-                    TimeStamp(utcTimeInterval: self.dummyDate(expected.0).timeIntervalSince1970)
+                    TimeStamp(self.dummyDate(expected.0).timeIntervalSince1970)
                     ..<
-                    TimeStamp(utcTimeInterval: self.dummyDate(expected.1).timeIntervalSince1970)
+                    TimeStamp(self.dummyDate(expected.1).timeIntervalSince1970)
                 )
                 XCTAssertEqual(next, sameWeekPeriod)
             } else {
@@ -322,41 +251,5 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
             parameterizeTest($0, expected: ("2023-04-14 07:00", "2023-04-14 08:00"))
         }
         parameterizeTest(1, expected: nil, endTime: "2023-04-14 07:59")
-    }
-    
-    // 화, 금 반복할때 화요일-수요일 + 현재는 화요일 -> 같은주 금요일-토요일
-    func testRepeating_whenRepeatAllDaysWithSomeWeekDays_nextDayIsSameWeek() {
-        // given
-        func parameterizeTest(_ interval: Int, expected: (String, String)?, endTime: String? = nil) {
-            // given
-            let option = EventRepeatingOptions.EveryWeek(.init(abbreviation: "KST")!)
-                |> \.interval .~ interval
-                |> \.dayOfWeeks .~ [.tuesday, .friday]
-            let repeating = self.makeRepeating(
-                option,
-                endTime: endTime.map { .init(utcTimeInterval: self.dummyDate($0).timeIntervalSince1970) }
-            )
-            
-            // when
-            let next = repeating.nextEventTime(from: self.dummyAllDays)
-            
-            // then
-            if let expected {
-                let sameWeekPeriod = EventTime.allDays(
-                    TimeStamp(utcTimeInterval: self.dummyDate(expected.0).timeIntervalSince1970, withFixed: .hours(9))
-                    ..<
-                    TimeStamp(utcTimeInterval: self.dummyDate(expected.1).timeIntervalSince1970, withFixed: .hours(9))
-                )
-                XCTAssertEqual(next, sameWeekPeriod)
-            } else {
-                XCTAssertNil(next)
-            }
-        }
-        
-        // when + then
-        (1..<10).forEach {
-            parameterizeTest($0, expected: ("2023-04-14 00:00", "2023-04-15 00:00"))
-        }
-        parameterizeTest(1, expected: nil, endTime: "2023-04-15 07:59")
     }
 }
