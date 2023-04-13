@@ -113,7 +113,11 @@ extension EventRepeating {
         else { return nil }
         
         // https://github.com/sudopark/TodoCalendar/issues/9
-        if let endTime = self.repeatingEndTime, nextTime.upperBound > endTime.timeInterval {
+        // 종료 시간과의 범위 비교시에는 fixedTimeZoneOffset 정보가 들어가야함
+        // .atTime, .period는 utc 시간으로만 계산해도됨
+        // .allDay는 종료시간의 timeStamp에도 fixedTimeZoneOffset이 포함되어야함
+        if let endTime = self.repeatingEndTime,
+            nextTime.upperBoundWithFixedTimeZoneOffset > endTime.timeIntervalWithTimeZoneOffset {
             return nil
         }
         return nextTime
