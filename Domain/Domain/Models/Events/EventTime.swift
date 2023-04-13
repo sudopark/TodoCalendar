@@ -13,38 +13,19 @@ import Foundation
 public enum EventTime: Comparable {
     
     case at(TimeStamp)
-    case period(Range<TimeStamp>)
-    case allDays(Range<TimeStamp>)
+    case period(Range<TimeStamp>, allDayTimeZone: String? = nil)
     
     var lowerBound: TimeInterval {
         switch self {
-        case .at(let time): return time.timeInterval
-        case .period(let range): return range.lowerBound.timeInterval
-        case .allDays(let range): return range.lowerBound.timeInterval
-        }
-    }
-    
-    var lowerBoundWithFixedTimeZoneOffset: TimeInterval {
-        switch self {
-        case .at(let time): return time.timeInterval
-        case .period(let range): return range.lowerBound.timeInterval
-        case .allDays(let range): return range.lowerBound.timeIntervalWithTimeZoneOffset
+        case .at(let time): return time.utcTimeInterval
+        case .period(let range, _): return range.lowerBound.utcTimeInterval
         }
     }
     
     var upperBound: TimeInterval {
         switch self {
-        case .at(let time): return time.timeInterval
-        case .period(let range): return range.upperBound.timeInterval
-        case .allDays(let range): return range.upperBound.timeInterval
-        }
-    }
-    
-    var upperBoundWithFixedTimeZoneOffset: TimeInterval {
-        switch self {
-        case .at(let time): return time.timeInterval
-        case .period(let range): return range.upperBound.timeInterval
-        case .allDays(let range): return range.upperBound.timeIntervalWithTimeZoneOffset
+        case .at(let time): return time.utcTimeInterval
+        case .period(let range, _): return range.upperBound.utcTimeInterval
         }
     }
     
@@ -52,12 +33,8 @@ public enum EventTime: Comparable {
         switch self {
         case .at(let time):
             return period ~= time
-        case .period(let range):
+        case .period(let range, _):
             return range.clamped(to: period).isEmpty == false
-        case .allDays(let range):
-            return (range.lowerBound.timeInterval..<range.upperBound.timeInterval)
-                .clamped(to: period.lowerBound.timeInterval..<period.upperBound.timeInterval)
-                .isEmpty == false
         }
     }
     
@@ -65,10 +42,8 @@ public enum EventTime: Comparable {
         switch self {
         case .at(let time):
             return .at(time.add(interval))
-        case .period(let range):
+        case .period(let range, _):
             return .period(range.lowerBound.add(interval)..<range.upperBound.add(interval))
-        case .allDays(let range):
-            return .allDays(range.lowerBound.add(interval)..<range.upperBound.add(interval))
         }
     }
     

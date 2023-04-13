@@ -10,8 +10,8 @@ import Domain
 
 extension TimeStamp {
     
-    static func dummy(_ int: Int = 0, offset: Int = 0) -> TimeStamp {
-        return .init(utcTimeInterval: TimeInterval(int), withFixed: TimeInterval(offset))
+    static func dummy(_ int: Int = 0) -> TimeStamp {
+        return .init(TimeInterval(int))
     }
 }
 
