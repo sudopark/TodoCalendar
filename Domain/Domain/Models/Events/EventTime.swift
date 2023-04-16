@@ -15,6 +15,13 @@ public enum EventTime: Comparable {
     case at(TimeStamp)
     case period(Range<TimeStamp>)
     
+    var timeZoneAbbreviation: String {
+        switch self {
+        case .at(let time): return time.timeZoneAbbreviation
+        case .period(let range): return range.lowerBound.timeZoneAbbreviation
+        }
+    }
+    
     var lowerBound: TimeInterval {
         switch self {
         case .at(let time): return time.utcTimeInterval
