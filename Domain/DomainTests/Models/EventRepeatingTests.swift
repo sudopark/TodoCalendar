@@ -253,3 +253,93 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
         parameterizeTest(1, expected: nil, endTime: "2023-04-14 07:59")
     }
 }
+
+
+// MARK: - test every month
+
+class EventRepeatingTests_everyMonth: BaseEventRepeatingTests {
+    
+    private var dummyTimeAt: EventTime {
+        return .at(.init(self.dummyDate("2023-04-11 01:00").timeIntervalSince1970,
+                         timeZone: "KST"))
+    }
+    
+    private var dummyPeriod: EventTime {
+        return .period(
+            TimeStamp(self.dummyDate("2023-04-11 01:00")
+                .timeIntervalSince1970, timeZone: "KST")
+            ..<
+            TimeStamp(self.dummyDate("2023-04-12 01:00").timeIntervalSince1970, timeZone: "KST")
+        )
+    }
+}
+
+extension EventRepeatingTests_everyMonth {
+    
+    private func parameterizeTestTimeAt(
+        _ interval: Int,
+        from: String,
+        isOnlyWithSeekLast: Bool = false,
+        expected: String?,
+        endTime: String? = nil
+    ) {
+        // given
+        let option = EventRepeatingOptions.EveryMonth(timeZone: TimeZone(abbreviation: "KST")!)
+            |> \.interval .~ interval
+            |> \.weekSeqs .~ (isOnlyWithSeekLast ? [.last] : [.seq(2), .seq(4), .last])
+            |> \.weekOfDays .~ [.tuesday, .thursday]
+        let repeating = self.makeRepeating(
+            option,
+            endTime: endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST")}
+        )
+        
+        // when
+        let next = repeating.nextEventTime(from: .at(
+            TimeStamp(self.dummyDate(from).timeIntervalSince1970, timeZone: "KST")
+        ))
+        
+        // then
+        if let expected {
+            let nextTime = TimeStamp(self.dummyDate(expected).timeIntervalSince1970, timeZone: "KST")
+            XCTAssertEqual(next, .at(nextTime))
+        } else {
+            XCTAssertNil(next)
+        }
+    }
+    
+    // 같은 주차일때 다음 요일 검사
+    func testRepeating_timeAtNextEventTimeIsSameWeek() {
+        // given
+        
+        // when + then
+        (1..<10).forEach {
+            parameterizeTestTimeAt($0, from: "2023-04-11 01:00", expected: "2023-04-13 01:00")
+        }
+        parameterizeTestTimeAt(1, from: "2023-04-11 01:00", expected: nil, endTime: "2023-04-13 00:00")
+    }
+    
+    // 같은 주차 아니면 다음주차의 첫번째 요일 검사
+    func testRepeating_timeAtNextEventIsNotSameWeek() {
+        // given
+        
+        // when + then
+        (1..<10).forEach {
+            parameterizeTestTimeAt($0, from: "2023-04-13 01:00", expected: "2023-04-25 01:00")
+        }
+        parameterizeTestTimeAt(1, from: "2023-04-13 01:00", expected: nil, endTime: "2023-04-25 00:00")
+        parameterizeTestTimeAt(1, from: "2023-05-25 01:00", expected: "2023-05-30 01:00")
+        parameterizeTestTimeAt(1, from: "2023-05-25 01:00", expected: nil, endTime: "2023-05-30 00:00")
+    }
+    
+    // 다음주차가 다른달이면 다음달 첫번째 요일 검사
+    func testRepeating_timeAtNextEventIsNotSameMonth() {
+        // given
+        
+        // when + then
+        parameterizeTestTimeAt(1, from: "2023-04-27 01:00", expected: "2023-05-09 01:00")
+        parameterizeTestTimeAt(2, from: "2023-04-27 01:00", expected: "2023-06-13 01:00")
+        parameterizeTestTimeAt(1, from: "2023-05-30 01:00", expected: "2023-06-13 01:00")
+        parameterizeTestTimeAt(1, from: "2023-04-27 01:00", isOnlyWithSeekLast: true, expected: "2023-05-30 01:00")
+        parameterizeTestTimeAt(1, from: "2023-05-30 01:00", expected: nil, endTime: "2023-06-13 00:00")
+    }
+}

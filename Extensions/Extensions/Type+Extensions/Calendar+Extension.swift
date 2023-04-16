@@ -1,0 +1,58 @@
+//
+//  Calendar+extension.swift
+//  Extensions
+//
+//  Created by sudo.park on 2023/04/16.
+//
+
+import Foundation
+import Prelude
+import Optics
+
+
+extension Calendar {
+    
+    public func addDays(_ interval: Int, from: Date) -> Date? {
+        return self.date(byAdding: .day, value: interval, to: from)
+    }
+    
+    public func addMonth(_ interval: Int, from: Date) -> Date? {
+        return self.date(byAdding: .month, value: interval, to: from)
+    }
+    
+    public func firstDayOfMonth(from date: Date) -> Date? {
+        return self.date(from: self.dateComponents([.year, .month], from: self.startOfDay(for: date)))
+    }
+    
+    public func lastDayOfMonth(from date: Date) -> Date? {
+        return self.firstDayOfMonth(from: date)
+            .flatMap { self.date(byAdding: DateComponents(month: 1, day: -1), to: $0) }
+    }
+    
+    public func lastOfSameWeekDay(_ from: Date) -> Date? {
+        guard let weekDay = self.dateComponents([.weekday], from: from).weekday,
+              let lastDayOfMonth = self.lastDayOfMonth(from: from),
+              let lastDayOfMonthWeekDay = self.dateComponents([.weekday], from: lastDayOfMonth).weekday
+        else { return nil }
+       
+        let lastDayOfMonthComponents = self.dateComponents([.year, .month, .day], from: lastDayOfMonth)
+        guard let lastDayOfMonthDay = lastDayOfMonthComponents.day else { return nil }
+        
+        let daysToMinus = (lastDayOfMonthWeekDay - weekDay + 7) % 7
+        let newComponents = self.dateComponents([.year, .month, .day, .hour, .minute, .second], from: from)
+            |> \.day .~ (lastDayOfMonthDay - daysToMinus)
+        
+        return self.date(from: newComponents)
+    }
+    
+    public func first(day: Int, from date: Date) -> Date? {
+        guard let firstDayOfMonth = self.firstDayOfMonth(from: date),
+              let firstDayWeekDay = self.dateComponents([.weekday], from: firstDayOfMonth).weekday
+        else { return nil }
+        let daysToAdd = (day + 7 - firstDayWeekDay) % 7
+        let newComponents = self.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
+            |> \.day .~ (1 + daysToAdd)
+        return self.date(from: newComponents)
+    }
+}
+

@@ -35,7 +35,7 @@ public enum Months {
 
 public enum WeekSeq {
     case seq(Int)
-    case lastWeek
+    case last
 }
 
 public struct TimeStamp: Comparable {
