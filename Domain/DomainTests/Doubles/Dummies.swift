@@ -11,7 +11,7 @@ import Domain
 extension TimeStamp {
     
     static func dummy(_ int: Int = 0) -> TimeStamp {
-        return .init(TimeInterval(int))
+        return .init(TimeInterval(int), timeZone: "UTC")
     }
 }
 
