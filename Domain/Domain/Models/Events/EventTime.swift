@@ -13,19 +13,19 @@ import Foundation
 public enum EventTime: Comparable {
     
     case at(TimeStamp)
-    case period(Range<TimeStamp>, allDayTimeZone: String? = nil)
+    case period(Range<TimeStamp>)
     
     var lowerBound: TimeInterval {
         switch self {
         case .at(let time): return time.utcTimeInterval
-        case .period(let range, _): return range.lowerBound.utcTimeInterval
+        case .period(let range): return range.lowerBound.utcTimeInterval
         }
     }
     
     var upperBound: TimeInterval {
         switch self {
         case .at(let time): return time.utcTimeInterval
-        case .period(let range, _): return range.upperBound.utcTimeInterval
+        case .period(let range): return range.upperBound.utcTimeInterval
         }
     }
     
@@ -33,7 +33,7 @@ public enum EventTime: Comparable {
         switch self {
         case .at(let time):
             return period ~= time
-        case .period(let range, _):
+        case .period(let range):
             return range.clamped(to: period).isEmpty == false
         }
     }
@@ -42,7 +42,7 @@ public enum EventTime: Comparable {
         switch self {
         case .at(let time):
             return .at(time.add(interval))
-        case .period(let range, _):
+        case .period(let range):
             return .period(range.lowerBound.add(interval)..<range.upperBound.add(interval))
         }
     }

@@ -41,9 +41,12 @@ public enum WeekSeq {
 public struct TimeStamp: Comparable {
     
     public let utcTimeInterval: TimeInterval
+    public let timeZoneAbbreviation: String
     
-    public init(_ utcTimeInterval: TimeInterval) {
+    public init(_ utcTimeInterval: TimeInterval,
+                timeZone abbreviation: String) {
         self.utcTimeInterval = utcTimeInterval
+        self.timeZoneAbbreviation = abbreviation
     }
     
         public static func < (_ lhs: Self, _ rhs: Self) -> Bool {
@@ -51,7 +54,8 @@ public struct TimeStamp: Comparable {
     }
     
     public func add(_ time: TimeInterval) -> TimeStamp {
-        return .init(self.utcTimeInterval + time)
+        return .init(self.utcTimeInterval + time,
+                     timeZone: self.timeZoneAbbreviation)
     }
 }
 
