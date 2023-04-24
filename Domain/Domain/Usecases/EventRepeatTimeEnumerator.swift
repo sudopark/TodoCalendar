@@ -6,7 +6,8 @@
 //
 
 import Foundation
-
+import Prelude
+import Optics
 
 final class EventRepeatTimeEnumerator {
     
@@ -49,14 +50,21 @@ final class EventRepeatTimeEnumerator {
         let ordinal: Int
         let weekDay: Int
         let date: Date
+        let hour: Int
+        let minute: Int
+        let second: Int
         
         init?(_ calendar: Calendar, date: Date) {
-            let components = calendar.dateComponents([.year, .month, .day, .weekdayOrdinal, .weekday], from: date)
+            var components = calendar.dateComponents([.year, .month, .day, .weekdayOrdinal, .weekday, .hour, .minute, .second], from: date)
+            components.timeZone = calendar.timeZone
             guard let year = components.year,
                   let month = components.month,
                   let day = components.day,
                   let ordinal = components.weekdayOrdinal,
-                  let weekDay = components.weekday
+                  let weekDay = components.weekday,
+                  let hour = components.hour,
+                  let minute = components.minute,
+                  let second = components.second
             else { return nil }
             self.year = year
             self.month = month
@@ -64,6 +72,9 @@ final class EventRepeatTimeEnumerator {
             self.ordinal = ordinal
             self.weekDay = weekDay
             self.date = date
+            self.hour = hour
+            self.minute = minute
+            self.second = second
         }
     }
     
@@ -141,10 +152,8 @@ extension EventRepeatTimeEnumerator {
             ?? self.findNextEventDateAfterWeek(ordinals, weekDays, current: current)
             ?? self.findNextEventDateAfterNextMonth(everyMonth.interval, repeatingOrdinals: ordinals, repeatingWeekDays: weekDays, current: current)
         case .days(let days):
-            // TODO:
-            // 같은 달 내에서 현재보다 큰 달 있으면 -> 리턴
-            // 없으면 다음달의 첫번째 지정 날짜
-            return nil
+            return self.findNextEventDateInSameMonth(days, current)
+            ?? self.findNextEventDateInNextMonth(everyMonth.interval, days, current)
         }
     }
     
@@ -185,6 +194,48 @@ extension EventRepeatTimeEnumerator {
         let isSameMonth = calendar.month(of: nextDate) == calendar.month(of: nextMonth)
         return isSameMonth ? nextDate : nil
     }
+    
+    private func findNextEventDateInSameMonth(
+        _ days: [Int],
+        _ current: Current
+    ) -> Date? {
+        
+        guard let nextDayOnSameMonth = days.nextDay(current.day) else { return nil }
+        let components = DateComponents(
+            timeZone: self.calendar.timeZone,
+            year: current.year,
+            month: current.month,
+            day: nextDayOnSameMonth,
+            hour: current.hour,
+            minute: current.minute,
+            second: current.second
+        )
+        guard let next = calendar.date(from: components),
+              self.calendar.day(of: next) == nextDayOnSameMonth
+        else { return nil }
+        return next
+    }
+    
+    private func findNextEventDateInNextMonth(
+        _ interval: Int,
+        _ days: [Int],
+        _ current: Current
+    ) -> Date? {
+        
+        guard let firstRepeatDay = days.first else { return nil }
+        return self.calendar.firstDayOfMonth(from: current.date)
+            .flatMap { self.calendar.addMonth(interval, from: $0)}
+            .flatMap { self.calendar.addDays(firstRepeatDay-1, from: $0) }
+            .flatMap { self.calendar.syncTimes($0, with: current.date) }
+    }
 }
 
 // MARK: - every year
+
+
+private extension Array where Element == Int {
+    
+    func nextDay(_ current: Int) -> Int? {
+        return self.first(where: { $0 > current })
+    }
+}

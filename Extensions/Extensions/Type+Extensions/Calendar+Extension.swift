@@ -16,6 +16,10 @@ extension Calendar {
         return self.dateComponents([.month], from: date).month
     }
     
+    public func day(of date: Date) -> Int? {
+        return self.dateComponents([.day], from: date).day
+    }
+    
     public func addDays(_ interval: Int, from: Date) -> Date? {
         return self.date(byAdding: .day, value: interval, to: from)
     }
@@ -57,6 +61,15 @@ extension Calendar {
         let newComponents = self.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date)
             |> \.day .~ (1 + daysToAdd)
         return self.date(from: newComponents)
+    }
+    
+    public func syncTimes(_ originDate: Date, with date: Date) -> Date? {
+        let components = self.dateComponents([.hour, .minute, .second], from: date)
+        guard let hour = components.hour,
+              let minute = components.minute,
+              let second = components.second
+        else { return nil }
+        return self.date(bySettingHour: hour, minute: minute, second: second, of: originDate)
     }
 }
 
