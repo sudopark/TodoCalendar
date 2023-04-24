@@ -350,10 +350,19 @@ class EventRepeatEnumeratorTests_everyMonthWithSelectDays: BaseEventRepeatTimeEn
     func testEnumerator_timeAtNextEventIsSameMonth_andNextDay() {
         // given
         // when + then
-//        parameterizeTestTimeAt(1, from: <#T##String#>, expected: <#T##String?#>)
+        parameterizeTestTimeAt(1, from: "2023-01-01 01:00", expected: "2023-01-15 01:00")
+        parameterizeTestTimeAt(1, from: "2023-01-15 01:00", expected: "2023-01-30 01:00")
+        parameterizeTestTimeAt(1, from: "2023-01-30 01:00", expected: "2023-01-31 01:00")
+        parameterizeTestTimeAt(1, from: "2023-01-31 01:00", expected: nil, endTime: "2023-01-31 00:59")
     }
     
     func testEnumerator_timeAtNextEventIsNotSameMonth_andNextDay() {
-        
+        // given
+        // when + then
+        parameterizeTestTimeAt(1, from: "2023-01-31 01:00", expected: "2023-02-01 01:00")
+        parameterizeTestTimeAt(1, from: "2023-02-01 01:00", expected: "2023-02-15 01:00")
+        parameterizeTestTimeAt(1, from: "2023-02-15 01:00", expected: "2023-03-01 01:00")
+        parameterizeTestTimeAt(1, from: "2023-02-15 01:00", expected: nil, endTime: "2023-02-28 00:59")
+        parameterizeTestTimeAt(2, from: "2023-01-31 01:00", expected: "2023-03-01 01:00")
     }
 }
