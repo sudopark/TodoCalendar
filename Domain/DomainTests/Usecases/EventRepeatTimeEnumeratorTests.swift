@@ -1,8 +1,8 @@
 //
-//  EventRepeatingTests.swift
+//  EventRepeatTimeEnumeratorTests.swift
 //  DomainTests
 //
-//  Created by sudo.park on 2023/04/09.
+//  Created by sudo.park on 2023/04/25.
 //
 
 import XCTest
@@ -13,17 +13,10 @@ import UnitTestHelpKit
 @testable import Domain
 
 
-class BaseEventRepeatingTests: BaseTestCase {
- 
-    func makeRepeating(
-        _ option: EventRepeatingOption,
-        endTime: TimeStamp? = nil
-    ) -> EventRepeating {
-        return EventRepeating(
-            repeatingStartTime: .init(0, timeZone: "UTC"),
-            repeatOption: option
-        )
-        |> \.repeatingEndTime .~ endTime
+class BaseEventRepeatTimeEnumeratorTests: BaseTestCase {
+    
+    func makeEnumerator(_ option: EventRepeatingOption) -> EventRepeatTimeEnumerator {
+        return EventRepeatTimeEnumerator(option)!
     }
     
     func dummyDate(_ dateString: String) -> Date {
@@ -34,7 +27,10 @@ class BaseEventRepeatingTests: BaseTestCase {
     }
 }
 
-class EventRepeatingTests_everyDay: BaseEventRepeatingTests {
+
+// MARK: - test every day
+
+class EventRepeatTimeEnumeratorTests_everyDay: BaseEventRepeatTimeEnumeratorTests {
     
     private var dummyTimeAt: EventTime {
         return .at(.init(10, timeZone: "UTC"))
@@ -47,54 +43,52 @@ class EventRepeatingTests_everyDay: BaseEventRepeatingTests {
     }
 }
 
-// MARK: - test every day
-
-extension EventRepeatingTests_everyDay {
+extension EventRepeatTimeEnumeratorTests_everyDay {
     
     // 특정 시간 1일간격으로 반복 + 3일 간격으로 반복
-    func testRepeating_whenRepeatEventAtTimeEveryDay_getNextTimeUntilEnd() {
+    func testEnumerator_whenRepeatEventAtTimeEveryDay_getNextTimeUntilEnd() {
         // given
         var option = EventRepeatingOptions.EveryDay()
-        var repeating = self.makeRepeating(option)
+        var enumerator = self.makeEnumerator(option)
         
         // when + then
         // 1일 간격으로 반복시
-        var next = repeating.nextEventTime(from: self.dummyTimeAt)
+        var next = enumerator.nextEventTime(from: self.dummyTimeAt, until: nil)
         XCTAssertEqual(next, .at(TimeStamp(10 + .days(1), timeZone: "UTC")))
         
         // 3일 간격으로 반복시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
-        repeating = self.makeRepeating(option)
-        next = repeating.nextEventTime(from: self.dummyTimeAt)
+        enumerator = self.makeEnumerator(option)
+        next = enumerator.nextEventTime(from: self.dummyTimeAt, until: nil)
         XCTAssertEqual(next, .at(TimeStamp(10 + .days(3), timeZone: "UTC")))
         
         // 반복종료시간 초과시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
-        repeating = self.makeRepeating(option, endTime: .init(.days(2), timeZone: "UTC"))
-        next = repeating.nextEventTime(from: self.dummyTimeAt)
+        enumerator = self.makeEnumerator(option)
+        next = enumerator.nextEventTime(from: self.dummyTimeAt, until: .init(.days(2), timeZone: "UTC"))
         XCTAssertNil(next)
     }
     
     
-    func testRepeating_whenRepeatPeriodEveryDay_getNextTimeUntilEnd() {
+    func testEnumerator_whenRepeatPeriodEveryDay_getNextTimeUntilEnd() {
         // given
         var option = EventRepeatingOptions.EveryDay()
-        var repeating = self.makeRepeating(option)
+        var enumerator = self.makeEnumerator(option)
         
         // when + then
         // 특정 기간 1일 간격으로 반복
-        var next = repeating.nextEventTime(from: self.dummyTimeRange)
+        var next = enumerator.nextEventTime(from: self.dummyTimeRange, until: nil)
         XCTAssertEqual(next, self.dummyTimeRange.shift(.days(1)))
         
         // 특정기간 3일 간격으로 반복
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
-        repeating = self.makeRepeating(option)
-        next = repeating.nextEventTime(from: self.dummyTimeRange)
+        enumerator = self.makeEnumerator(option)
+        next = enumerator.nextEventTime(from: self.dummyTimeRange, until: nil)
         XCTAssertEqual(next, self.dummyTimeRange.shift(.days(3)))
         
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
-        repeating = self.makeRepeating(option, endTime: .init(.days(2), timeZone: "UTC"))
-        next = repeating.nextEventTime(from: self.dummyTimeRange)
+        enumerator = self.makeEnumerator(option)
+        next = enumerator.nextEventTime(from: self.dummyTimeRange, until: .init(.days(2), timeZone: "UTC"))
         XCTAssertNil(next)
     }
 }
@@ -102,7 +96,7 @@ extension EventRepeatingTests_everyDay {
 
 // MARK: - test every week
 
-class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
+class EventRepeatTimeEnumeratorTests_everyWeek: BaseEventRepeatTimeEnumeratorTests {
     
     private var dummyTimeAt: EventTime {
         let date = self.dummyDate("2023-04-11 07:00")
@@ -118,22 +112,23 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
             TimeStamp(end.timeIntervalSince1970, timeZone: "KST")
         )
     }
+}
+
+extension EventRepeatTimeEnumeratorTests_everyWeek {
     
     // 일주일뒤 다음일절 -> 화요일 특정 시간
-    func testRepeating_nextWeekAtTime() {
+    func testEnumerator_nextWeekAtTime() {
         // given
         func parameterizeTest(_ intervalWeek: Int, expected: String?, endTime: String? = nil) {
             // given
             let option = EventRepeatingOptions.EveryWeek(.init(abbreviation: "KST")!)
                 |> \.interval .~ intervalWeek
                 |> \.dayOfWeeks .~ [.tuesday]
-            let repeating = self.makeRepeating(
-                option,
-                endTime: endTime.map { .init(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
-            )
+            let enumerator = self.makeEnumerator(option)
+            let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
             
             // when
-            let next = repeating.nextEventTime(from: self.dummyTimeAt)
+            let next = enumerator.nextEventTime(from: self.dummyTimeAt, until: endTime)
             
             // then
             if let expected = expected {
@@ -152,20 +147,18 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
     }
     
     // 일주일뒤 다음일정 -> 화요일 12:00~13:00
-    func testRepeating_nextWeekAtPeriod() {
+    func testEnumerator_nextWeekAtPeriod() {
         // given
         func parameterizeTest(_ interval: Int, expected: (String, String)?, endTime: String? = nil) {
             // given
             let option = EventRepeatingOptions.EveryWeek(.init(abbreviation: "KST")!)
                 |> \.interval .~ interval
                 |> \.dayOfWeeks .~ [.tuesday]
-            let repeating = self.makeRepeating(
-                option,
-                endTime: endTime.map { .init(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
-            )
+            let enumerator = self.makeEnumerator(option)
+            let endTIme = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
             
             // when
-            let next = repeating.nextEventTime(from: self.dummyTimeRange)
+            let next = enumerator.nextEventTime(from: self.dummyTimeRange, until: endTIme)
             
             // then
             if let expected {
@@ -187,20 +180,18 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
     }
     
     // 화, 금 반복할때 특정시간 + 현재는 화요일 -> 같은주 목요일
-    func testRepeating_whenRepeatAtTimeWithSomeWeekDays_nextDayIsSameWeek() {
+    func testEnumerator_whenRepeatAtTimeWithSomeWeekDays_nextDayIsSameWeek() {
         // given
         func parameterizeTest(_ interval: Int, expected: String?, endTime: String? = nil) {
             // given
             let option = EventRepeatingOptions.EveryWeek(.init(abbreviation: "KST")!)
                 |> \.interval .~ interval
                 |> \.dayOfWeeks .~ [.tuesday, .friday]
-            let repeating = self.makeRepeating(
-                option,
-                endTime: endTime.map { .init(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
-            )
+            let enumerator = self.makeEnumerator(option)
+            let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
             
             // when
-            let next = repeating.nextEventTime(from: self.dummyTimeAt)
+            let next = enumerator.nextEventTime(from: self.dummyTimeAt, until: endTime)
             
             // then
             if let expected {
@@ -218,20 +209,18 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
     }
 
     // 화, 금 반복할때 12:00~13:00 + 현재는 화요일 -> 같은주 금요일
-    func testRepeating_whenRepeatPeriodWithSomeWeekDays_nextDayIsSameWeek() {
+    func testEnumerator_whenRepeatPeriodWithSomeWeekDays_nextDayIsSameWeek() {
         // given
         func parameterizeTest(_ interval: Int, expected: (String, String)?, endTime: String? = nil) {
             // given
             let option = EventRepeatingOptions.EveryWeek(.init(abbreviation: "KST")!)
                 |> \.interval .~ interval
                 |> \.dayOfWeeks .~ [.tuesday, .friday]
-            let repeating = self.makeRepeating(
-                option,
-                endTime: endTime.map { .init(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
-            )
+            let enumerator = self.makeEnumerator(option)
+            let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
             
             // when
-            let next = repeating.nextEventTime(from: self.dummyTimeRange)
+            let next = enumerator.nextEventTime(from: self.dummyTimeRange, until: endTime)
             
             // then
             if let expected {
@@ -255,26 +244,9 @@ class EventRepeatingTests_everyWeek: BaseEventRepeatingTests {
 }
 
 
-// MARK: - test every month
+// MARK: - test every month + with select weeks
 
-class EventRepeatingTests_everyMonth: BaseEventRepeatingTests {
-    
-    private var dummyTimeAt: EventTime {
-        return .at(.init(self.dummyDate("2023-04-11 01:00").timeIntervalSince1970,
-                         timeZone: "KST"))
-    }
-    
-    private var dummyPeriod: EventTime {
-        return .period(
-            TimeStamp(self.dummyDate("2023-04-11 01:00")
-                .timeIntervalSince1970, timeZone: "KST")
-            ..<
-            TimeStamp(self.dummyDate("2023-04-12 01:00").timeIntervalSince1970, timeZone: "KST")
-        )
-    }
-}
-
-extension EventRepeatingTests_everyMonth {
+class EventRepeatEnumeratorTests_everyMonthWithSelectWeeks: BaseEventRepeatTimeEnumeratorTests {
     
     private func parameterizeTestTimeAt(
         _ interval: Int,
@@ -289,15 +261,13 @@ extension EventRepeatingTests_everyMonth {
             |> \.selection .~ .week(
                 isOnlyWithSeekLast ? [.last] : [.seq(2), .seq(4), .last], [.tuesday, .thursday]
             )
-        let repeating = self.makeRepeating(
-            option,
-            endTime: endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST")}
-        )
+        let enumerator = self.makeEnumerator(option)
+        let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
         
         // when
-        let next = repeating.nextEventTime(from: .at(
+        let next = enumerator.nextEventTime(from: .at(
             TimeStamp(self.dummyDate(from).timeIntervalSince1970, timeZone: "KST")
-        ))
+        ), until: endTime)
         
         // then
         if let expected {
@@ -309,7 +279,7 @@ extension EventRepeatingTests_everyMonth {
     }
     
     // 같은 주차일때 다음 요일 검사
-    func testRepeating_timeAtNextEventTimeIsSameWeek() {
+    func testEnumerator_timeAtNextEventTimeIsSameWeek() {
         // given
         
         // when + then
@@ -320,7 +290,7 @@ extension EventRepeatingTests_everyMonth {
     }
     
     // 같은 주차 아니면 다음주차의 첫번째 요일 검사
-    func testRepeating_timeAtNextEventIsNotSameWeek() {
+    func testEnumerator_timeAtNextEventIsNotSameWeek() {
         // given
         
         // when + then
@@ -333,7 +303,7 @@ extension EventRepeatingTests_everyMonth {
     }
     
     // 다음주차가 다른달이면 다음달 첫번째 요일 검사
-    func testRepeating_timeAtNextEventIsNotSameMonth() {
+    func testEnumerator_timeAtNextEventIsNotSameMonth() {
         // given
         
         // when + then
@@ -342,5 +312,48 @@ extension EventRepeatingTests_everyMonth {
         parameterizeTestTimeAt(1, from: "2023-05-30 01:00", expected: "2023-06-13 01:00")
         parameterizeTestTimeAt(1, from: "2023-04-27 01:00", isOnlyWithSeekLast: true, expected: "2023-05-30 01:00")
         parameterizeTestTimeAt(1, from: "2023-05-30 01:00", expected: nil, endTime: "2023-06-13 00:00")
+    }
+}
+
+
+// MARK: - test every month + with select days
+
+class EventRepeatEnumeratorTests_everyMonthWithSelectDays: BaseEventRepeatTimeEnumeratorTests {
+    
+    private func parameterizeTestTimeAt(
+        _ interval: Int,
+        from: String,
+        expected: String?,
+        endTime: String? = nil
+    ) {
+        // given
+        let option = EventRepeatingOptions.EveryMonth(timeZone: TimeZone(abbreviation: "KST")!)
+            |> \.interval .~ interval
+            |> \.selection .~ .days([1, 15, 30, 31])
+        let enumerator = self.makeEnumerator(option)
+        let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
+        
+        // when
+        let next = enumerator.nextEventTime(from: .at(
+            TimeStamp(self.dummyDate(from).timeIntervalSince1970, timeZone: "KST")
+        ), until: endTime)
+        
+        // then
+        if let expected {
+            let nextTime = TimeStamp(self.dummyDate(expected).timeIntervalSince1970, timeZone: "KST")
+            XCTAssertEqual(next, .at(nextTime))
+        } else {
+            XCTAssertNil(next)
+        }
+    }
+    
+    func testEnumerator_timeAtNextEventIsSameMonth_andNextDay() {
+        // given
+        // when + then
+//        parameterizeTestTimeAt(1, from: <#T##String#>, expected: <#T##String?#>)
+    }
+    
+    func testEnumerator_timeAtNextEventIsNotSameMonth_andNextDay() {
+        
     }
 }

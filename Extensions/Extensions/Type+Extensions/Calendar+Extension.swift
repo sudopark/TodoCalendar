@@ -12,6 +12,10 @@ import Optics
 
 extension Calendar {
     
+    public func month(of date: Date) -> Int? {
+        return self.dateComponents([.month], from: date).month
+    }
+    
     public func addDays(_ interval: Int, from: Date) -> Date? {
         return self.date(byAdding: .day, value: interval, to: from)
     }
