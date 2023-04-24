@@ -33,7 +33,7 @@ public enum Months {
     case december
 }
 
-public enum WeekSeq {
+public enum WeekOrdinal {
     case seq(Int)
     case last
 }

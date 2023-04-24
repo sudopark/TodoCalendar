@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		F602B30929E2EE9100F790B5 /* EventRepeatingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602B30829E2EE9100F790B5 /* EventRepeatingTests.swift */; };
+		F626206E29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F626206D29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift */; };
+		F62C7D6429EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62C7D6329EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift */; };
 		F63C9BD729C6B00500CC663A /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9BCE29C6B00500CC663A /* Domain.framework */; };
 		F63C9BDD29C6B00500CC663A /* Domain.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9BD129C6B00500CC663A /* Domain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63C9CAB29C6DE7B00CC663A /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */; };
@@ -43,6 +45,8 @@
 
 /* Begin PBXFileReference section */
 		F602B30829E2EE9100F790B5 /* EventRepeatingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatingTests.swift; sourceTree = "<group>"; };
+		F626206D29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatTimeEnumeratorTests.swift; sourceTree = "<group>"; };
+		F62C7D6329EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatTimeEnumerator.swift; sourceTree = "<group>"; };
 		F63C9BCE29C6B00500CC663A /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9BD129C6B00500CC663A /* Domain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Domain.h; sourceTree = "<group>"; };
 		F63C9BD629C6B00500CC663A /* DomainTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DomainTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -191,6 +195,7 @@
 			isa = PBXGroup;
 			children = (
 				F63C9CFF29C8A60F00CC663A /* TodoEventUsecase.swift */,
+				F62C7D6329EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -235,6 +240,7 @@
 			isa = PBXGroup;
 			children = (
 				F65B08EC29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift */,
+				F626206D29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -365,6 +371,7 @@
 				F63C9CEE29C6E5BF00CC663A /* ScheduleEvent.swift in Sources */,
 				F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */,
 				F63C9D0029C8A60F00CC663A /* TodoEventUsecase.swift in Sources */,
+				F62C7D6429EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift in Sources */,
 				F63C9D0529C8A8C900CC663A /* TodoEventRepository.swift in Sources */,
 				F63C9D0B29CC993900CC663A /* SharedDataStore.swift in Sources */,
 				F63C9CF929C6F51F00CC663A /* Times.swift in Sources */,
@@ -375,6 +382,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F626206E29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift in Sources */,
 				F63C9D1129CCB2EB00CC663A /* SharedDataStoreTests.swift in Sources */,
 				F602B30929E2EE9100F790B5 /* EventRepeatingTests.swift in Sources */,
 				F65B08ED29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift in Sources */,
