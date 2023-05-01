@@ -226,19 +226,6 @@ private extension EventRepeatTimeEnumerator {
         
         guard let nextMonth = calendar.addMonth(interval, from: current.date)
         else { return nil }
-//              let firstRepeatingWeekDay = repeatingWeekDays.first?.rawValue,
-//              let nextMonthFirstRepeatingWeekDay = calendar.first(day: firstRepeatingWeekDay, from: nextMonth),
-//              let nextMonthFirstRepeatingWeekDayOrdinal = calendar.dateComponents([.weekdayOrdinal], from: nextMonthFirstRepeatingWeekDay).weekdayOrdinal,
-//              let nextMonthFirstRepeatingOrdinal = repeatingOrdinals.first?.weekOrdinal(calendar, in: nextMonthFirstRepeatingWeekDay)
-//        else { return nil }
-//
-//        let ordinalInterval = nextMonthFirstRepeatingOrdinal - nextMonthFirstRepeatingWeekDayOrdinal
-//
-//        return self.calendar.addDays(ordinalInterval * 7, from: nextMonthFirstRepeatingWeekDay)
-//            .flatMap {
-//                calendar.month(of: $0) == calendar.month(of: nextMonth) ? $0 : nil
-//            }
-//            .flatMap { validator($0) ? $0 : nil }
         
         return calendar.addMonth(interval, from: current.date)
             .flatMap {
