@@ -44,16 +44,39 @@ public final class ScheduleEventUsecaseImple: ScheduleEventUsecase {
 extension ScheduleEventUsecaseImple {
     
     public func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent {
-        return try await self.scheduleRepository.makeScheduleEvent(params)
+        guard params.isValidForMaking
+        else {
+            throw RuntimeError("invalid parameter for make Schedule Event")
+        }
+        let newEvent = try await self.scheduleRepository.makeScheduleEvent(params)
+        let shareKey = ShareDataKeys.schedules.rawValue
+        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+            ( $0 ?? .init() ).append(newEvent)
+        }
+        return newEvent
     }
     
     public func refreshScheduleEvents(in period: Range<TimeStamp>) {
-        // range에 매칭되는 이벤트들 조회해와야함
-        // 그리고 조회 범위들 내에서 이벤트들의 반복타임 갱신해줘야함 => 퍼포먼스 적으로 이슈 있을 수 있음
-            // 멤캐시된것들 -> 미리 계산된결과 활용필수적으로 해야함
+
+        let updateCache: ([ScheduleEvent]) -> Void = { [weak self] events in
+            guard let self = self else { return }
+            let key = ShareDataKeys.schedules
+            self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: key.rawValue) {
+                return ($0 ?? .init()).refresh(events, in: period)
+            }
+        }
+
+        self.scheduleRepository.loadScheduleEvents(in: period)
+            .receive(on: DispatchQueue.global(qos: .background))
+            .sink(receiveCompletion: { _ in }, receiveValue: updateCache)
+            .store(in: &self.cancellables)
     }
     
     public func scheduleEvents(in period: Range<TimeStamp>)  -> AnyPublisher<[ScheduleEvent], Never> {
-        return Empty().eraseToAnyPublisher()
+        let key = ShareDataKeys.schedules
+        return self.sharedDataStore
+            .observe(MemorizedScheduleEventsContainer.self, key: key.rawValue)
+            .map { $0?.scheduleEvents(in: period) ?? [] }
+            .eraseToAnyPublisher()
     }
 }

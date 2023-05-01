@@ -78,6 +78,16 @@ public struct EventRepeating {
         self.repeatingStartTime = repeatingStartTime
         self.repeatOption = repeatOption
     }
+    
+    func isClamped(with period: Range<TimeStamp>) -> Bool {
+        let closedPeriod = (period.lowerBound...period.upperBound.add(1))
+        if let repeatingEndTime {
+            return (self.repeatingStartTime...repeatingEndTime)
+                .clamped(to: closedPeriod).isEmpty == false
+        } else {
+            return self.repeatingStartTime < period.upperBound
+        }
+    }
 }
 
 
