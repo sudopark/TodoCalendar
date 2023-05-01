@@ -366,3 +366,71 @@ class EventRepeatEnumeratorTests_everyMonthWithSelectDays: BaseEventRepeatTimeEn
         parameterizeTestTimeAt(2, from: "2023-01-31 01:00", expected: "2023-03-01 01:00")
     }
 }
+
+
+// MARK: - test every year
+
+class EventRepeatEnumeratorTests_everyYear: BaseEventRepeatTimeEnumeratorTests {
+    
+    private func parameterizeTests(
+        _ interval: Int = 1,
+        weekDays: [DayOfWeeks] = [.tuesday, .thursday],
+        from: String,
+        expected: String?,
+        endTime: String? = nil
+    ) {
+        // given
+        let option = EventRepeatingOptions.EveryYear(timeZone: TimeZone(abbreviation: "KST")!)
+            |> \.interval .~ interval
+            |> \.months .~ [.april, .august, .december]
+            |> \.weekOrdinals .~ [ .seq(2), .seq(4), .last]
+            |> \.dayOfWeek .~ weekDays
+        let enumerator = self.makeEnumerator(option)
+        let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
+        
+        // when
+        let next = enumerator.nextEventTime(from: .at(
+            TimeStamp(self.dummyDate(from).timeIntervalSince1970, timeZone: "KST")
+        ), until: endTime)
+        
+        // then
+        if let expected {
+            let nextTime = TimeStamp(self.dummyDate(expected).timeIntervalSince1970, timeZone: "KST")
+            XCTAssertEqual(next, .at(nextTime))
+        } else{
+            XCTAssertNil(next)
+        }
+    }
+    
+    // 같은주에 다음일정 있으면 그거 리턴 + 같은 년도여야함
+    func testEnumerator_nextEventTimeIsSameWeek() {
+        // given
+        // when + then
+        self.parameterizeTests(from: "2023-04-11 01:00", expected: "2023-04-13 01:00")
+        self.parameterizeTests(from: "2023-04-11 01:00", expected: nil, endTime: "2023-04-13 00:00")
+    }
+    
+    // 다음주 첫 반복요일 + 같은 년도 + 같은 달
+    func testEnumerator_nextEventTimeIsNextWeekFirstRepeatingDay() {
+        // given
+        // when + then
+        self.parameterizeTests(from: "2023-04-13 01:00", expected: "2023-04-25 01:00")
+        self.parameterizeTests(from: "2023-04-13 01:00", expected: nil, endTime: "2023-04-25 00:00")
+    }
+    
+    // 다음달 첫 반복 주, 요일 + 같은 년도여야함
+    func testEnumerator_nextEventTimeIsNextMonthFirstRepeatingWeekAndDay() {
+        // given
+        // when + then
+        self.parameterizeTests(from: "2023-04-27 01:00", expected: "2023-08-08 01:00")
+        self.parameterizeTests(from: "2023-04-27 01:00", expected: nil, endTime: "2023-08-08 00:00")
+    }
+    
+    // 다음년도 첫 반복달,반복주, 요일 이여야함
+    func testEnumerator_nextEventTimeIsNextYearFirstRepeatingMonthOrdinalAndWeekDay() {
+        // given
+        // when + then
+        self.parameterizeTests(from: "2023-12-28 01:00", expected: "2024-04-09 01:00")
+        self.parameterizeTests(from: "2023-12-28 01:00", expected: nil, endTime: "2023-04-09 00:00")
+    }
+}

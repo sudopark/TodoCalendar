@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F602B30929E2EE9100F790B5 /* EventRepeatingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F602B30829E2EE9100F790B5 /* EventRepeatingTests.swift */; };
 		F626206E29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F626206D29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift */; };
 		F62C7D6429EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62C7D6329EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift */; };
 		F63C9BD729C6B00500CC663A /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9BCE29C6B00500CC663A /* Domain.framework */; };
@@ -44,7 +43,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		F602B30829E2EE9100F790B5 /* EventRepeatingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatingTests.swift; sourceTree = "<group>"; };
 		F626206D29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatTimeEnumeratorTests.swift; sourceTree = "<group>"; };
 		F62C7D6329EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatTimeEnumerator.swift; sourceTree = "<group>"; };
 		F63C9BCE29C6B00500CC663A /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -98,7 +96,6 @@
 		F602B30729E2EE7E00F790B5 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				F602B30829E2EE9100F790B5 /* EventRepeatingTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -384,7 +381,6 @@
 			files = (
 				F626206E29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift in Sources */,
 				F63C9D1129CCB2EB00CC663A /* SharedDataStoreTests.swift in Sources */,
-				F602B30929E2EE9100F790B5 /* EventRepeatingTests.swift in Sources */,
 				F65B08ED29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift in Sources */,
 				F65B08F029D01448000EE650 /* StubTodoEventRepository.swift in Sources */,
 				F65B08F229D014E9000EE650 /* Dummies.swift in Sources */,

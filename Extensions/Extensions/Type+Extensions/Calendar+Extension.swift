@@ -12,6 +12,10 @@ import Optics
 
 extension Calendar {
     
+    public func year(of date: Date) -> Int? {
+        return self.dateComponents([.year], from: date).year
+    }
+    
     public func month(of date: Date) -> Int? {
         return self.dateComponents([.month], from: date).month
     }
@@ -26,6 +30,10 @@ extension Calendar {
     
     public func addMonth(_ interval: Int, from: Date) -> Date? {
         return self.date(byAdding: .month, value: interval, to: from)
+    }
+    
+    public func addYear(_ interval: Int, from: Date) -> Date? {
+        return self.date(byAdding: .year, value: interval, to: from)
     }
     
     public func firstDayOfMonth(from date: Date) -> Date? {
@@ -70,6 +78,12 @@ extension Calendar {
               let second = components.second
         else { return nil }
         return self.date(bySettingHour: hour, minute: minute, second: second, of: originDate)
+    }
+    
+    public func dateBySetting(from date: Date, mutating: (inout DateComponents) -> Void) -> Date? {
+        var components = self.dateComponents(in: self.timeZone, from: date)
+        mutating(&components)
+        return self.date(from: components)
     }
 }
 
