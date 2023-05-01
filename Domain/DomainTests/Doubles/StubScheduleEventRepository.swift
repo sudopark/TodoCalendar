@@ -20,13 +20,18 @@ class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
         try self.checkShouldFail(self.shouldFailMake)
         return ScheduleEvent(uuid: "new", name: params.name ?? "", time: params.time ?? .at(.dummy()))
             |> \.eventTagId .~ params.eventTagId
-            |> \.repeatingOption .~ params.repeatingOption
+            |> \.repeating .~ params.repeating
     }
     
     var shouldFailLoad: Bool = false
-    var eventsMocking: (Range<TimeStamp>) -> [ScheduleEvent] = { _ in
-        return (-10..<10).map {
-            ScheduleEvent(uuid: "id:\($0)", name: "name:\($0)", time: .at(.dummy($0)))
+    var eventsMocking: (Range<TimeStamp>) -> [ScheduleEvent] = { range in
+        
+        var sender: [ScheduleEvent] = []
+        let oneDay: TimeInterval = 3600 * 24
+        let days = ((range.upperBound.utcTimeInterval - range.lowerBound.utcTimeInterval) / oneDay) |> Int.init
+        return (0..<days).map {
+            let time = range.lowerBound.add(oneDay)
+            return ScheduleEvent(uuid: "id:\($0)", name: "name:\($0)", time: .at(time))
         }
     }
     func loadScheduleEvents(in range: Range<TimeStamp>) -> AnyPublisher<[ScheduleEvent], Error> {

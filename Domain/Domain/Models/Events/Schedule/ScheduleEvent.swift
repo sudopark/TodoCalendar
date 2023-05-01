@@ -17,7 +17,7 @@ public struct ScheduleEvent {
     
     public var eventTagId: String?
     
-    public var repeatingOption: EventRepeating?
+    public var repeating: EventRepeating?
     
     public struct RepeatingTimes {
         public let time: EventTime
@@ -30,6 +30,14 @@ public struct ScheduleEvent {
         self.name = name
         self.time = time
     }
+    
+    func isClamped(in period: Range<TimeStamp>) -> Bool {
+        if let repeating {
+            return repeating.isClamped(with: period)
+        } else {
+            return time.isClamped(with: period)
+        }
+    }
 }
 
 
@@ -40,10 +48,15 @@ public struct ScheduleMakeParams {
     public var name: String?
     public var time: EventTime?
     public var eventTagId: String?
-    public var repeatingOption: EventRepeating?
+    public var repeating: EventRepeating?
     public var showTurn: Bool = false
     
     public init() { }
+    
+    public var isValidForMaking: Bool {
+        return self.name?.isEmpty == false
+            && self.time != nil
+    }
 }
 
 

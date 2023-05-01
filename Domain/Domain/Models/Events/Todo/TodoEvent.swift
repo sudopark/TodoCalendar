@@ -38,11 +38,11 @@ public struct TodoMakeParams {
     
     public init() { }
     
-    var isValidForMaking: Bool {
+    public var isValidForMaking: Bool {
         return self.name?.isEmpty == false
     }
     
-    var isValidForUpdate: Bool {
+    public var isValidForUpdate: Bool {
         return self.name?.isEmpty == false
             || self.eventTagId?.isEmpty == false
             || self.time != nil
