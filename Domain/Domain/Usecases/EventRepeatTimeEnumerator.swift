@@ -91,7 +91,7 @@ final class EventRepeatTimeEnumerator {
         case let everyMonth as EventRepeatingOptions.EveryMonth:
             nextDate = self.nextEventDate(everyMonth: everyMonth, current: current, from: currentEventStartDate)
         case let everyYear as EventRepeatingOptions.EveryYear:
-            nextDate = nil
+            nextDate = self.nextEventDate(everyYear, current)
         default: nextDate = nil
         }
         
@@ -106,7 +106,7 @@ final class EventRepeatTimeEnumerator {
     }
 }
 
-// MARK: - every week
+// MARK: - next date by repeating options
 
 extension EventRepeatTimeEnumerator {
     
@@ -115,14 +115,55 @@ extension EventRepeatTimeEnumerator {
         current: Current
     ) -> Date? {
         
-        if let nextDateOnSameWeek = self.findNextEventDateOnSameWeek(everyWeek.dayOfWeeks, current: current) {
-            return nextDateOnSameWeek
-        } else {
-            return current.date.add(days: everyWeek.interval * 7)
+        func findEventTimeOnNextWeekFirstRepeatingDay() -> Date? {
+            return everyWeek.dayOfWeeks.first
+                .flatMap { self.calendar.addDays($0.rawValue - current.weekDay, from: current.date) }
+                .flatMap { $0.add(days: everyWeek.interval * 7) }
+        }
+        return self.findEventDateOnSameWeek(everyWeek.dayOfWeeks, current: current)
+            ?? findEventTimeOnNextWeekFirstRepeatingDay()
+    }
+    
+    private func nextEventDate(
+        everyMonth: EventRepeatingOptions.EveryMonth,
+        current: Current,
+        from date: Date
+    ) -> Date? {
+        
+        let shouldSameMonth: (Date?) -> Bool = { nextDate in
+            return nextDate.map { self.calendar.month(of: $0) } == current.month
+        }
+        
+        switch everyMonth.selection {
+        case .week(let ordinals, let weekDays):
+            return self.findEventDateOnSameWeek(weekDays, current: current, shouldSameMonth)
+            ?? self.findEventDateOnNextWeekFirstRepeatingDay(ordinals, weekDays, current: current, shouldSameMonth)
+            ?? self.findEventDateOnNextMonthRepeatingFirstWeekAndDay(everyMonth.interval, repeatingOrdinals: ordinals, repeatingWeekDays: weekDays, current: current)
+        case .days(let days):
+            return self.findEventDateOnSameMonth(days, current)
+            ?? self.findEventDateOnNextMonthFirstReaptingDay(everyMonth.interval, days, current)
         }
     }
     
-    private func findNextEventDateOnSameWeek(
+    private func nextEventDate(
+        _ everyYear: EventRepeatingOptions.EveryYear,
+        _ current: Current
+    ) -> Date? {
+        // 같은 주에 있으면 그거 리턴
+        
+        // 다른주 + 같은 달 안에 있으면 그거 리턴
+        // 다음달 첫 주 첫 요일
+        // 다음년도 첫 달 첫 주 첫 요일
+        return nil
+    }
+}
+
+
+// MARK: - finding methods
+
+private extension EventRepeatTimeEnumerator {
+    
+    private func findEventDateOnSameWeek(
         _ repeatingWeekDays: [DayOfWeeks],
         current: Current,
         _ validator: (Date?) -> Bool = { $0 != nil }
@@ -131,33 +172,8 @@ extension EventRepeatTimeEnumerator {
             .flatMap { calendar.addDays($0.rawValue - current.weekDay, from: current.date) }
         return validator(nextDate) ? nextDate : nil
     }
-}
-
-
-// MARK: - every month
-
-extension EventRepeatTimeEnumerator {
     
-    private func nextEventDate(
-        everyMonth: EventRepeatingOptions.EveryMonth,
-        current: Current,
-        from date: Date
-    ) -> Date? {
-        
-        switch everyMonth.selection {
-        case .week(let ordinals, let weekDays):
-            return self.findNextEventDateOnSameWeek(weekDays, current: current) {
-                $0.map { self.calendar.month(of: $0) } == current.month
-            }
-            ?? self.findNextEventDateAfterWeek(ordinals, weekDays, current: current)
-            ?? self.findNextEventDateAfterNextMonth(everyMonth.interval, repeatingOrdinals: ordinals, repeatingWeekDays: weekDays, current: current)
-        case .days(let days):
-            return self.findNextEventDateInSameMonth(days, current)
-            ?? self.findNextEventDateInNextMonth(everyMonth.interval, days, current)
-        }
-    }
-    
-    private func findNextEventDateAfterWeek(
+    private func findEventDateOnNextWeekFirstRepeatingDay(
         _ repeatingOrdinals: [WeekOrdinal],
         _ repeatingWeekDays: [DayOfWeeks],
         current: Current,
@@ -171,7 +187,7 @@ extension EventRepeatTimeEnumerator {
         return validator(nextDate) ? nextDate : nil
     }
     
-    private func findNextEventDateAfterNextMonth(
+    private func findEventDateOnNextMonthRepeatingFirstWeekAndDay(
         _ interval: Int,
         repeatingOrdinals: [WeekOrdinal],
         repeatingWeekDays: [DayOfWeeks],
@@ -195,28 +211,22 @@ extension EventRepeatTimeEnumerator {
         return isSameMonth ? nextDate : nil
     }
     
-    private func findNextEventDateInSameMonth(
+    private func findEventDateOnSameMonth(
         _ days: [Int],
         _ current: Current
     ) -> Date? {
         
         guard let nextDayOnSameMonth = days.nextDay(current.day) else { return nil }
-        let components = DateComponents(
-            timeZone: self.calendar.timeZone,
-            year: current.year,
-            month: current.month,
-            day: nextDayOnSameMonth,
-            hour: current.hour,
-            minute: current.minute,
-            second: current.second
-        )
-        guard let next = calendar.date(from: components),
-              self.calendar.day(of: next) == nextDayOnSameMonth
-        else { return nil }
-        return next
+        var components = self.calendar.dateComponents(in: self.calendar.timeZone, from: current.date)
+        components.day = nextDayOnSameMonth
+        let compareIsNotFloored: (Date) -> Date? = {
+            return self.calendar.day(of: $0) == nextDayOnSameMonth ? $0 : nil
+        }
+        return self.calendar.date(from: components)
+            .flatMap(compareIsNotFloored)
     }
     
-    private func findNextEventDateInNextMonth(
+    private func findEventDateOnNextMonthFirstReaptingDay(
         _ interval: Int,
         _ days: [Int],
         _ current: Current
@@ -228,10 +238,13 @@ extension EventRepeatTimeEnumerator {
             .flatMap { self.calendar.addDays(firstRepeatDay-1, from: $0) }
             .flatMap { self.calendar.syncTimes($0, with: current.date) }
     }
+    
+    private func findEvetDateOnNextYearFirstRepeatingMonthWeekAndDay(
+    ) -> Date? {
+        // TODO:
+        return nil
+    }
 }
-
-// MARK: - every year
-
 
 private extension Array where Element == Int {
     
