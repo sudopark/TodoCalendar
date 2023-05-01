@@ -13,7 +13,7 @@ import Extensions
 
 public protocol EventRepeatingOption {
     
-    func nextEventTime(from currentEventTime: EventTime) -> EventTime?
+    
 }
 
 public enum EventRepeatingOptions {
@@ -21,14 +21,6 @@ public enum EventRepeatingOptions {
     public struct EveryDay: EventRepeatingOption {
         public var interval: Int = 1   // 1 ~ 999
         public init() { }
-        
-        public func nextEventTime(from currentEventTime: EventTime) -> EventTime? {
-            let currentLowerBoundDate = Date(timeIntervalSince1970: currentEventTime.lowerBound)
-            guard let futureDate = currentLowerBoundDate.add(days: self.interval)
-            else { return nil }
-            let interval = futureDate.timeIntervalSince(currentLowerBoundDate)
-            return currentEventTime.shift(interval)
-        }
     }
     
     public struct EveryWeek: EventRepeatingOption {
@@ -38,33 +30,6 @@ public enum EventRepeatingOptions {
         
         public init(_ timeZone: TimeZone) {
             self.timeZone = timeZone
-        }
-        
-        // 유저가 kst에서 2001-1월 1일 하루종일을 만듬 -> utc offset: 0
-        // utc offset은 다 동일하다
-        // utc로 타임존을 설정하고 0을 date로 변환하면 -> 날짜는 1월 1일이 나옴
-        // pdt로 타임존을 설정하면 0을 date로 변환하면 -> 날짜는 2000년 12월 31일이 나옴
-        public func nextEventTime(from currentEventTime: EventTime) -> EventTime? {
-            let currentLowerBoundDate = Date(timeIntervalSince1970: currentEventTime.lowerBound)
-            guard let futureDate = self.nextEventLowerBoundDate(currentLowerBoundDate)
-            else { return nil }
-            let interval = futureDate.timeIntervalSince(currentLowerBoundDate)
-            return currentEventTime.shift(interval)
-        }
-        
-        private func nextEventLowerBoundDate(_ currentLowerBoundDate: Date) -> Date? {
-            var calendar = Calendar(identifier: .gregorian)
-            calendar.timeZone = self.timeZone
-            guard let currentEventWeekDay = calendar.dateComponents([.weekday], from: currentLowerBoundDate).weekday
-            else { return nil }
-            
-            if let nextDayOfWeekWithSameWeek = self.dayOfWeeks.next(currentEventWeekDay) {
-                let intervalDays = nextDayOfWeekWithSameWeek.rawValue - currentEventWeekDay
-                return currentLowerBoundDate.add(days: intervalDays)
-            } else {
-                return currentLowerBoundDate.add(days: self.interval * 7)
-                
-            }
         }
     }
     
@@ -82,114 +47,22 @@ public enum EventRepeatingOptions {
         public init(timeZone: TimeZone) {
             self.timeZone = timeZone
         }
-        
-        public func nextEventTime(from currentEventTime: EventTime) -> EventTime? {
-            let currentLowerBoundDate = Date(timeIntervalSince1970: currentEventTime.lowerBound)
-            var calendar = Calendar(identifier: .gregorian)
-            calendar.timeZone = self.timeZone
-            let components = calendar.dateComponents([.month, .weekday], from: currentLowerBoundDate)
-            guard let month = components.month, let weekDay = components.weekday
-            else { return nil }
-            
-            switch self.selection {
-            case .days(let days): return nil
-            case .week(let ordinals, let weekDays):
-                guard let next = self.findNextDate(calendar, ordinals: ordinals, weekDays: weekDays, month: month, current: weekDay, currentLowerBoundDate)
-                else { return nil }
-                return currentEventTime.shift(next.timeIntervalSince(currentLowerBoundDate))
-            }
-        }
-        
-        private func findNextDate(
-            _ calendar: Calendar,
-            ordinals: [WeekOrdinal],
-            weekDays: [DayOfWeeks],
-            month: Int,
-            current weekDay: Int,
-            _ date: Date
-        ) -> Date? {
-            guard let nextEventLowerBound = self.sameWeekNextEventLowerBound(
-                calendar, weekDays: weekDays, current: weekDay, month: month, date
-            )
-            ?? (self.nextWeekOrMonthEventLowerbound(
-                calendar, current: weekDay, weekDays: weekDays, ordinals: ordinals, month, date))
-            else {
-                return nil
-            }
-            return nextEventLowerBound
-        }
-        
-        private func sameWeekNextEventLowerBound(
-            _ calendar: Calendar,
-            weekDays: [DayOfWeeks],
-            current weekDay: Int,
-            month: Int,
-            _ date: Date
-        ) -> Date? {
-            guard let sameWeekNextDay = weekDays.next(weekDay)
-            else { return nil }
-            guard let nextDate = date.add(days: sameWeekNextDay.rawValue - weekDay) else { return nil }
-            let isSameMonth = calendar.dateComponents([.month], from: nextDate).month == month
-            return isSameMonth ? nextDate : nil
-        }
-        
-        private func nextWeekOrMonthEventLowerbound(_ calendar: Calendar,
-                                                    current weekDay: Int,
-                                                    weekDays: [DayOfWeeks],
-                                                    ordinals: [WeekOrdinal],
-                                                    _ month: Int,
-                                                    _ date: Date) -> Date? {
-            
-            guard let currentWeekFirstRepeatingWeekDay = weekDays.first
-                .flatMap ({ date.add(days: $0.rawValue - weekDay) })
-            else { return nil }
-            
-            
-            func nextWeekEventLowerBound() -> Date? {
-                return ordinals.next(calendar, from: currentWeekFirstRepeatingWeekDay)
-            }
-            
-            func nextMonthEventLowerBound() -> Date? {
-                // 다음차수 달의 첫번째 반복 요일 -> 1주차에 해당하는 날짜를 구하고
-                guard let addMonthDate = calendar.addMonth(self.interval, from: date),
-                      let firstWeekDay = weekDays.first?.rawValue,
-                      let nextMonthFirstWeekDay = calendar.first(day: firstWeekDay, from: addMonthDate),
-                      let nextMonthFirstOrdinal = ordinals.first?.weekOrdinal(calendar, in: nextMonthFirstWeekDay),
-                      let ordinalInterval = calendar.dateComponents([.weekdayOrdinal], from: nextMonthFirstWeekDay).weekdayOrdinal.map ({ nextMonthFirstOrdinal - $0 })
-                else { return nil }
-                
-                // 첫번째 반복 주차와의 차이를 구해 x 7일 해서 더하고
-                // 같은 달인지만 검사
-                guard let nextDate = calendar.addDays(ordinalInterval * 7, from: nextMonthFirstWeekDay)
-                else { return nil }
-                let isSameMonth = calendar.dateComponents([.month], from: nextDate).month
-                == calendar.dateComponents([.month], from: nextMonthFirstWeekDay).month
-                return isSameMonth ? nextDate : nil
-            }
-            
-            let next = nextWeekEventLowerBound()
-            if next.flatMap({ calendar.dateComponents([.month], from: $0).month }) == month {
-                return next
-            } else {
-                return nextMonthEventLowerBound()
-            }
-        }
     }
     
     public struct EveryYear: EventRepeatingOption {
         public var interval: Int = 1    // 1 ~ 99
         public var months: [Months] = []
-        public var weekSeqs: [WeekOrdinal] = []
+        public var weekOrdinals: [WeekOrdinal] = []
         public var dayOfWeek: [DayOfWeeks] = []
-        public init() {}
+        public let timeZone: TimeZone
         
-        public func nextEventTime(from currentEventTime: EventTime) -> EventTime? {
-            // TODO:
-            // 같은 주면 같은 주
-            // 다른 주면 다음 주
-            // 다른 주 -> 달 넘어가면 다음달 첫 이벤트
-            // 년도 넘어가면 -> 다음년도 첫 이벤트
-            return currentEventTime
+        public init(timeZone: TimeZone) {
+            self.timeZone = timeZone
+        }
+        
+        func nextMonthInterval(from currentMonth: Int) -> Int? {
+            return self.months.first(where: { $0.rawValue > currentMonth })
+                .map { $0.rawValue - currentMonth }
         }
     }
 }
@@ -207,18 +80,6 @@ public struct EventRepeating {
     }
 }
 
-extension EventRepeating {
-    
-    public func nextEventTime(from currentEventTime: EventTime) -> EventTime? {
-        guard let nextTime = self.repeatOption.nextEventTime(from: currentEventTime)
-        else { return nil }
-        
-        if let endTime = self.repeatingEndTime, nextTime.upperBound > endTime.utcTimeInterval {
-            return nil
-        }
-        return nextTime
-    }
-}
 
 
 extension Array where Element == DayOfWeeks {

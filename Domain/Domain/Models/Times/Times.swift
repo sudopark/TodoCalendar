@@ -18,8 +18,8 @@ public enum DayOfWeeks: Int {
     case saturday
 }
 
-public enum Months {
-    case january
+public enum Months: Int {
+    case january = 1
     case february
     case march
     case april
