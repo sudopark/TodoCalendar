@@ -69,6 +69,7 @@ extension TodoEventUsecaseImple {
         else {
             throw RuntimeError("invalid parameter for update Todo event")
         }
+        // TODO: 반복일정일 경우 유저 선택에 따른 구현 필요
         let updatedEvent = try await self.todoRepository.updateTodoEvent(eventId, params)
         
         let shareKey = ShareDataKeys.todos.rawValue

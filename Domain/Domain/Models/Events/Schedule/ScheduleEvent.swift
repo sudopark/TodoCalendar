@@ -14,13 +14,16 @@ public struct ScheduleEvent {
     public let uuid: String
     public var name: String
     public var time: EventTime
-    public var turn: Int?
     
     public var eventTagId: String?
     
-    public var repeating: EventRepeating?
-    // 해당 아이디가 존재하면 시작날짜와 같은 날에 있는 반복일정은 예외
-    public var exceptFromRepeatedEventId: String?
+    public var repeatingOption: EventRepeating?
+    
+    public struct RepeatingTimes {
+        public let time: EventTime
+        public let turn: Int
+    }
+    public var repeatingTimes: [RepeatingTimes] = []
     
     public init(uuid: String, name: String, time: EventTime) {
         self.uuid = uuid
@@ -37,8 +40,8 @@ public struct ScheduleMakeParams {
     public var name: String?
     public var time: EventTime?
     public var eventTagId: String?
-    public var repeating: EventRepeating?
-    public var exceptFromRepeatedScheduleId: String?
+    public var repeatingOption: EventRepeating?
+    public var showTurn: Bool = false
     
     public init() { }
 }
