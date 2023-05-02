@@ -35,7 +35,7 @@ extension MemorizedScheduleEventsContainer {
     func scheduleEvents(in period: Range<TimeStamp>) -> [ScheduleEvent] {
         return self.items.values
             .map { $0 }
-            .filter { $0.event.isClamped(in: period) }
+            .filter { $0.event.isOverlap(with: period) }
             .map { item in
                 guard item.isNotCalculated(for: period) else { return item }
                 return self.calculateRepeatingTimes(item.event, with: item, in: period)
@@ -52,7 +52,7 @@ extension MemorizedScheduleEventsContainer {
     func refresh(_ events: [ScheduleEvent], in period: Range<TimeStamp>) -> MemorizedScheduleEventsContainer {
         
         let cachedInPeriodMap = self.items.values
-            .filter { $0.event.isClamped(in: period) }
+            .filter { $0.event.isOverlap(with: period) }
             .asDictionary { $0.event.uuid }
         let newEventsMap = events.asDictionary { $0.uuid }
         

@@ -146,7 +146,7 @@ extension TodoEventUsecaseImple {
         let filterInRange: ([TodoEvent]) -> [TodoEvent] = { todos in
             return todos.filter { event in
                 guard let time = event.time else { return false }
-                return time.isClamped(with: period)
+                return time.isOverlap(with: period)
             }
         }
         

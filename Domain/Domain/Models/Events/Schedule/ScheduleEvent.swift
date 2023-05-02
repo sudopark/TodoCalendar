@@ -31,11 +31,11 @@ public struct ScheduleEvent {
         self.time = time
     }
     
-    func isClamped(in period: Range<TimeStamp>) -> Bool {
+    func isOverlap(with period: Range<TimeStamp>) -> Bool {
         if let repeating {
-            return repeating.isClamped(with: period)
+            return repeating.isOverlap(with: period)
         } else {
-            return time.isClamped(with: period)
+            return time.isOverlap(with: period)
         }
     }
 }

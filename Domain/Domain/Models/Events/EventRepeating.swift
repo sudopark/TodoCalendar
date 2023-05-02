@@ -79,11 +79,10 @@ public struct EventRepeating {
         self.repeatOption = repeatOption
     }
     
-    func isClamped(with period: Range<TimeStamp>) -> Bool {
+    func isOverlap(with period: Range<TimeStamp>) -> Bool {
         let closedPeriod = (period.lowerBound...period.upperBound.add(1))
         if let repeatingEndTime {
-            return (self.repeatingStartTime...repeatingEndTime)
-                .clamped(to: closedPeriod).isEmpty == false
+            return (self.repeatingStartTime...repeatingEndTime).overlaps(closedPeriod)
         } else {
             return self.repeatingStartTime < period.upperBound
         }
