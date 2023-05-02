@@ -104,6 +104,25 @@ final class EventRepeatTimeEnumerator {
         }
         return nextTime
     }
+    
+    func nextEventTimes(
+        from start: EventTime,
+        until endTime: TimeStamp
+    ) -> [EventTime] {
+        
+        var sender: [EventTime] = []
+        var next: EventTime?
+        var cursor = start
+        repeat {
+            next = self.nextEventTime(from: cursor, until: endTime)
+            if let n = next {
+                sender.append(n)
+                cursor = n
+            }
+        } while next != nil
+        
+        return sender
+    }
 }
 
 // MARK: - next date by repeating options
