@@ -434,3 +434,32 @@ class EventRepeatEnumeratorTests_everyYear: BaseEventRepeatTimeEnumeratorTests {
         self.parameterizeTests(from: "2023-12-28 01:00", expected: nil, endTime: "2023-04-09 00:00")
     }
 }
+
+// MARK: - enumerate until end
+
+class EventRepeatEnumeratorTests_EnumeratesUntilEnd: BaseEventRepeatTimeEnumeratorTests {
+    
+    func testEnumerator_enumerateUntilEnd() {
+        // given
+        let option = EventRepeatingOptions.EveryDay()
+            |> \.interval .~ 3
+        let enumerator = self.makeEnumerator(option)
+        let startTimeStamp = TimeStamp(
+            self.dummyDate("2023-05-20 01:00").timeIntervalSince1970 , timeZone: "KST"
+        )
+        let endTimeStamp = TimeStamp(
+            self.dummyDate("2023-06-01 01:00").timeIntervalSince1970, timeZone: "KST"
+        )
+        
+        // when
+        let eventTimes = enumerator.nextEventTimes(from: .at(startTimeStamp), until: endTimeStamp)
+        
+        // then
+        XCTAssertEqual(eventTimes, [
+            .at(.init(self.dummyDate("2023-05-23 01:00").timeIntervalSince1970, timeZone: "KST")),
+            .at(.init(self.dummyDate("2023-05-26 01:00").timeIntervalSince1970, timeZone: "KST")),
+            .at(.init(self.dummyDate("2023-05-29 01:00").timeIntervalSince1970, timeZone: "KST")),
+            .at(.init(self.dummyDate("2023-06-01 01:00").timeIntervalSince1970, timeZone: "KST")),
+        ])
+    }
+}
