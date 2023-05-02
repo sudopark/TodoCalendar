@@ -1,5 +1,5 @@
 //
-//  MemorizedScheduleEvent.swift
+//  MemorizedScheduleEventsContainer.swift
 //  Domain
 //
 //  Created by sudo.park on 2023/05/01.

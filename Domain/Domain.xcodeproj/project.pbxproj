@@ -13,7 +13,7 @@
 		F632E21E29FF89C20052C61B /* ScheduleEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E21D29FF89C20052C61B /* ScheduleEventRepository.swift */; };
 		F632E22029FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E21F29FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift */; };
 		F632E22229FF8BAF0052C61B /* StubScheduleEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E22129FF8BAF0052C61B /* StubScheduleEventRepository.swift */; };
-		F632E22429FF8F670052C61B /* MemorizedScheduleEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E22329FF8F670052C61B /* MemorizedScheduleEvent.swift */; };
+		F632E22429FF8F670052C61B /* MemorizedScheduleEventsContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E22329FF8F670052C61B /* MemorizedScheduleEventsContainer.swift */; };
 		F63C9BD729C6B00500CC663A /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9BCE29C6B00500CC663A /* Domain.framework */; };
 		F63C9BDD29C6B00500CC663A /* Domain.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9BD129C6B00500CC663A /* Domain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63C9CAB29C6DE7B00CC663A /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CAA29C6DE7B00CC663A /* Common3rdParty.framework */; };
@@ -35,6 +35,7 @@
 		F65B08F029D01448000EE650 /* StubTodoEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08EF29D01448000EE650 /* StubTodoEventRepository.swift */; };
 		F65B08F229D014E9000EE650 /* Dummies.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08F129D014E9000EE650 /* Dummies.swift */; };
 		F65B08F429D015F0000EE650 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F65B08F329D015F0000EE650 /* Extensions.framework */; };
+		F6EFD8DC29FFE8660088FCB4 /* MemorizedScheduleEventsContainerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6EFD8DB29FFE8660088FCB4 /* MemorizedScheduleEventsContainerTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,7 +55,7 @@
 		F632E21D29FF89C20052C61B /* ScheduleEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventRepository.swift; sourceTree = "<group>"; };
 		F632E21F29FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventUsecaseImpleTests.swift; sourceTree = "<group>"; };
 		F632E22129FF8BAF0052C61B /* StubScheduleEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubScheduleEventRepository.swift; sourceTree = "<group>"; };
-		F632E22329FF8F670052C61B /* MemorizedScheduleEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorizedScheduleEvent.swift; sourceTree = "<group>"; };
+		F632E22329FF8F670052C61B /* MemorizedScheduleEventsContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorizedScheduleEventsContainer.swift; sourceTree = "<group>"; };
 		F63C9BCE29C6B00500CC663A /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9BD129C6B00500CC663A /* Domain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Domain.h; sourceTree = "<group>"; };
 		F63C9BD629C6B00500CC663A /* DomainTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DomainTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -77,6 +78,7 @@
 		F65B08EF29D01448000EE650 /* StubTodoEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubTodoEventRepository.swift; sourceTree = "<group>"; };
 		F65B08F129D014E9000EE650 /* Dummies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dummies.swift; sourceTree = "<group>"; };
 		F65B08F329D015F0000EE650 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6EFD8DB29FFE8660088FCB4 /* MemorizedScheduleEventsContainerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorizedScheduleEventsContainerTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -186,7 +188,6 @@
 			isa = PBXGroup;
 			children = (
 				F63C9CED29C6E5BF00CC663A /* ScheduleEvent.swift */,
-				F632E22329FF8F670052C61B /* MemorizedScheduleEvent.swift */,
 			);
 			path = Schedule;
 			sourceTree = "<group>";
@@ -202,9 +203,7 @@
 		F63C9CFE29C8A5C800CC663A /* Usecases */ = {
 			isa = PBXGroup;
 			children = (
-				F62C7D6329EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift */,
-				F63C9CFF29C8A60F00CC663A /* TodoEventUsecase.swift */,
-				F632E21B29FF84A50052C61B /* ScheduleEventUsecase.swift */,
+				F6EFD8DA29FFE84C0088FCB4 /* Events */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -252,6 +251,7 @@
 				F626206D29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift */,
 				F65B08EC29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift */,
 				F632E21F29FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift */,
+				F6EFD8DB29FFE8660088FCB4 /* MemorizedScheduleEventsContainerTests.swift */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -264,6 +264,17 @@
 				F632E22129FF8BAF0052C61B /* StubScheduleEventRepository.swift */,
 			);
 			path = Doubles;
+			sourceTree = "<group>";
+		};
+		F6EFD8DA29FFE84C0088FCB4 /* Events */ = {
+			isa = PBXGroup;
+			children = (
+				F632E22329FF8F670052C61B /* MemorizedScheduleEventsContainer.swift */,
+				F62C7D6329EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift */,
+				F63C9CFF29C8A60F00CC663A /* TodoEventUsecase.swift */,
+				F632E21B29FF84A50052C61B /* ScheduleEventUsecase.swift */,
+			);
+			path = Events;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -382,7 +393,7 @@
 				F65B08E629D005E4000EE650 /* DoneTodoEvent.swift in Sources */,
 				F63C9CEC29C6E3A400CC663A /* TodoEvent.swift in Sources */,
 				F63C9CEE29C6E5BF00CC663A /* ScheduleEvent.swift in Sources */,
-				F632E22429FF8F670052C61B /* MemorizedScheduleEvent.swift in Sources */,
+				F632E22429FF8F670052C61B /* MemorizedScheduleEventsContainer.swift in Sources */,
 				F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */,
 				F63C9D0029C8A60F00CC663A /* TodoEventUsecase.swift in Sources */,
 				F62C7D6429EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift in Sources */,
@@ -399,6 +410,7 @@
 			files = (
 				F626206E29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift in Sources */,
 				F63C9D1129CCB2EB00CC663A /* SharedDataStoreTests.swift in Sources */,
+				F6EFD8DC29FFE8660088FCB4 /* MemorizedScheduleEventsContainerTests.swift in Sources */,
 				F65B08ED29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift in Sources */,
 				F632E22229FF8BAF0052C61B /* StubScheduleEventRepository.swift in Sources */,
 				F632E22029FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift in Sources */,
