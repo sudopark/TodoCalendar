@@ -36,12 +36,12 @@ public enum EventTime: Comparable {
         }
     }
     
-    func isClamped(with period: Range<TimeStamp>) -> Bool {
+    func isOverlap(with period: Range<TimeStamp>) -> Bool {
         switch self {
         case .at(let time):
             return period ~= time
         case .period(let range):
-            return range.clamped(to: period).isEmpty == false
+            return range.overlaps(period)
         }
     }
     
