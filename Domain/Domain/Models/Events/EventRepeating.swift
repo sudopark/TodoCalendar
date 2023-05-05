@@ -13,17 +13,24 @@ import Extensions
 
 public protocol EventRepeatingOption {
     
+    var compareHash: Int { get }
+}
+
+extension EventRepeatingOption where Self: Hashable {
     
+    public var compareHash: Int {
+        return self.hashValue
+    }
 }
 
 public enum EventRepeatingOptions {
     
-    public struct EveryDay: EventRepeatingOption {
+    public struct EveryDay: EventRepeatingOption, Hashable {
         public var interval: Int = 1   // 1 ~ 999
         public init() { }
     }
     
-    public struct EveryWeek: EventRepeatingOption {
+    public struct EveryWeek: EventRepeatingOption, Hashable {
         public var interval: Int = 1   // 1 ~ 5
         public var dayOfWeeks: [DayOfWeeks] = []
         public var timeZone: TimeZone
@@ -33,9 +40,9 @@ public enum EventRepeatingOptions {
         }
     }
     
-    public struct EveryMonth: EventRepeatingOption {
+    public struct EveryMonth: EventRepeatingOption, Hashable {
         
-        public enum DateSelector {
+        public enum DateSelector: Hashable, Equatable {
             case days([Int])    // days -> 1~31
             case week(_ ordinals: [WeekOrdinal], _ weekDays: [DayOfWeeks])
         }
@@ -49,7 +56,7 @@ public enum EventRepeatingOptions {
         }
     }
     
-    public struct EveryYear: EventRepeatingOption {
+    public struct EveryYear: EventRepeatingOption, Hashable {
         public var interval: Int = 1    // 1 ~ 99
         public var months: [Months] = []
         public var weekOrdinals: [WeekOrdinal] = []
@@ -67,8 +74,8 @@ public enum EventRepeatingOptions {
     }
 }
 
-public struct EventRepeating {
-
+public struct EventRepeating: Equatable {
+    
     public let repeatingStartTime: TimeStamp
     public var repeatOption: EventRepeatingOption
     public var repeatingEndTime: TimeStamp?
@@ -86,6 +93,12 @@ public struct EventRepeating {
         } else {
             return self.repeatingStartTime < period.upperBound
         }
+    }
+    
+    public static func == (lhs: EventRepeating, rhs: EventRepeating) -> Bool {
+        return lhs.repeatingStartTime == rhs.repeatingStartTime
+            && lhs.repeatOption.compareHash == rhs.repeatOption.compareHash
+            && lhs.repeatingEndTime == rhs.repeatingEndTime
     }
 }
 
