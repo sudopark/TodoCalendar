@@ -43,6 +43,11 @@ struct MemorizedScheduleEventsContainer {
             self.calculatedRangeAndTimes.append(new)
             self.event.repeatingTimes = self.calculatedRangeAndTimes.flatMap { $0.1 }
         }
+        
+        func replaced(_ newEvent: ScheduleEvent) -> CacheItem {
+            return self
+                |> \.event .~ (newEvent |> \.repeatingTimes .~ self.event.repeatingTimes)
+        }
     }
     
     private var caches: [String: CacheItem] = [:]
@@ -63,8 +68,15 @@ extension MemorizedScheduleEventsContainer {
     }
     
     func append(_ newEvent: ScheduleEvent) -> MemorizedScheduleEventsContainer {
+        let newItem: CacheItem
+        if let cached = self.caches[newEvent.uuid],
+           newEvent.isEqualEventTimeOrRepeatOption(cached.event) {
+            newItem = cached.replaced(newEvent)
+        } else {
+            newItem = .init(event: newEvent)
+        }
         return MemorizedScheduleEventsContainer(
-            caches: self.caches |> key(newEvent.uuid) .~ .init(event: newEvent)
+            caches: self.caches |> key(newEvent.uuid) .~ newItem
         )
     }
     
@@ -76,10 +88,14 @@ extension MemorizedScheduleEventsContainer {
         let newEventsMap = events.asDictionary { $0.uuid }
         
         let removed = cachedInPeriodMap.filter { newEventsMap[$0.key] == nil }
-        var newItems = self.caches.filter { removed[$0.value.event.uuid] != nil }
+        var newItems = self.caches.filter { removed[$0.value.event.uuid] == nil }
         
-        let newEventsWithCalculate = events.map {
-            self.calculateRepeatingTimes($0, with: cachedInPeriodMap[$0.uuid], in: period)
+        let newEventsWithCalculate = events.map { new in
+            let cached: CacheItem? = cachedInPeriodMap[new.uuid]
+            let shouldIgnoreCache = cached.map { !new.isEqualEventTimeOrRepeatOption($0.event) } ?? false
+            return self.calculateRepeatingTimes(
+                new, with: shouldIgnoreCache ? nil : cached, in: period
+            )
         }
         newEventsWithCalculate.forEach {
             newItems[$0.event.uuid] = $0
@@ -222,6 +238,14 @@ extension MemorizedScheduleEventsContainer {
             .map { pair -> ScheduleEvent.RepeatingTimes in
                 return .init(time: pair.element, turn: nextFirstTurn + pair.offset)
             }
+    }
+}
+
+private extension ScheduleEvent {
+    
+    func isEqualEventTimeOrRepeatOption(_ old: ScheduleEvent) -> Bool {
+        return self.time == old.time
+            && self.repeating == old.repeating
     }
 }
 
