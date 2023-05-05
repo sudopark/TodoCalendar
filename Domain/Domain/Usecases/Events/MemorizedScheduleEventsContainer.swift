@@ -41,12 +41,12 @@ struct MemorizedScheduleEventsContainer {
         
         mutating func append(new : (Range<TimeStamp>, [ScheduleEvent.RepeatingTimes])) {
             self.calculatedRangeAndTimes.append(new)
-            self.event.repeatingTimes = self.calculatedRangeAndTimes.flatMap { $0.1 }
+            self.event.nextRepeatingTimes = self.calculatedRangeAndTimes.flatMap { $0.1 }
         }
         
         func replaced(_ newEvent: ScheduleEvent) -> CacheItem {
             return self
-                |> \.event .~ (newEvent |> \.repeatingTimes .~ self.event.repeatingTimes)
+                |> \.event .~ (newEvent |> \.nextRepeatingTimes .~ self.event.nextRepeatingTimes)
         }
     }
     
@@ -118,7 +118,7 @@ extension MemorizedScheduleEventsContainer {
         else { return cached }
         
         let (startTime, end) = (
-            event.time.shift(to: repeating.repeatingStartTime),
+            event.time,
             repeating.repeatingEndTime.map { min($0, period.upperBound) } ?? period.upperBound
         )
         
@@ -232,7 +232,7 @@ extension MemorizedScheduleEventsContainer {
         from start: ScheduleEvent.RepeatingTimes,
         until end: TimeStamp
     ) -> [ScheduleEvent.RepeatingTimes] {
-        let nextFirstTurn = start.turn
+        let nextFirstTurn = start.turn + 1
         return enumerator.nextEventTimes(from: start.time, until: end)
             .enumerated()
             .map { pair -> ScheduleEvent.RepeatingTimes in
