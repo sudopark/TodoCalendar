@@ -62,6 +62,12 @@ extension EventRepeatTimeEnumeratorTests_everyDay {
         next = enumerator.nextEventTime(from: self.dummyTimeAt, until: nil)
         XCTAssertEqual(next, .at(TimeStamp(10 + .days(3), timeZone: "UTC")))
         
+        // 반복 종료 시간과 동일한 경우
+        option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
+        enumerator = self.makeEnumerator(option)
+        next = enumerator.nextEventTime(from: self.dummyTimeAt, until: .init(.days(3) + 10, timeZone: "UTC"))
+        XCTAssertEqual(next, .at(TimeStamp(10 + .days(3), timeZone: "UTC")))
+        
         // 반복종료시간 초과시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)

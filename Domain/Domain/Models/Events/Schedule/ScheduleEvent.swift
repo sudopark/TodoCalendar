@@ -23,7 +23,10 @@ public struct ScheduleEvent {
         public let time: EventTime
         public let turn: Int
     }
-    public var repeatingTimes: [RepeatingTimes] = []
+    var nextRepeatingTimes: [RepeatingTimes] = []
+    public var repeatingTimes: [RepeatingTimes] {
+        return [.init(time: self.time, turn: 1)] + self.nextRepeatingTimes
+    }
     
     public init(uuid: String, name: String, time: EventTime) {
         self.uuid = uuid
