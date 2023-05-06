@@ -47,6 +47,17 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
         return .init(doneEvent: doneEvent, nextRepeatingTodoEvent: nextTodo)
     }
     
+    var shouldFailSkipRepeatingTodo: Bool = false
+    var isAvailToSkipNextTodo: Bool = true
+    func skipRepeatingTodo(current eventId: String) async throws -> TodoEvent? {
+        try self.checkShouldFail(self.shouldFailSkipRepeatingTodo)
+        if self.isAvailToSkipNextTodo {
+            return TodoEvent(uuid: eventId, name: "skip-next")
+                |> \.time .~ .at(.dummy(100))
+        }
+        return nil
+    }
+    
     var shouldFailLoadCurrentTodoEvents: Bool = false
     func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], Error> {
         guard self.shouldFailLoadCurrentTodoEvents == false else {
