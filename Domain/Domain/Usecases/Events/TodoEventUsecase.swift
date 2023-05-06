@@ -69,14 +69,40 @@ extension TodoEventUsecaseImple {
         else {
             throw RuntimeError("invalid parameter for update Todo event")
         }
-        // TODO: 반복일정일 경우 유저 선택에 따른 구현 필요
-        let updatedEvent = try await self.todoRepository.updateTodoEvent(eventId, params)
         
+        if case .onlyThisTime = params.repeatingUpdateScope {
+            return try await self.updateTodoEventWithRepeatingChanges(eventId, params)
+        } else {
+            return try await self.updateTodoEventWithoutRepeatingChanges(eventId, params)
+        }
+    }
+    
+    private func updateTodoEventWithoutRepeatingChanges(
+        _ eventId: String,
+        _ params: TodoEditParams
+    ) async throws -> TodoEvent {
+        let updatedEvent = try await self.todoRepository.updateTodoEvent(eventId, params)
         let shareKey = ShareDataKeys.todos.rawValue
         self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
             ($0 ?? [:]) |> key(eventId) .~ updatedEvent
         }
         return updatedEvent
+    }
+    
+    private func updateTodoEventWithRepeatingChanges(
+        _ eventId: String,
+        _ params: TodoEditParams
+    ) async throws -> TodoEvent {
+        
+        let nextTodo = try await self.todoRepository.skipRepeatingTodo(current: eventId)
+        let newTodo = try await self.todoRepository.makeTodoEvent(params.asMakeParams())
+        let shareKey = ShareDataKeys.todos.rawValue
+        self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
+            ($0 ?? [:])
+            |> key(eventId) .~ nextTodo
+            |> key(newTodo.uuid) .~ newTodo
+        }
+        return newTodo
     }
     
     public func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {

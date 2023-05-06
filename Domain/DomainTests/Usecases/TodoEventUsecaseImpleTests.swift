@@ -149,6 +149,81 @@ extension TodoEventUsecaseImpleTests {
         let todoNames = todos.map { $0?["id"]?.name }
         XCTAssertEqual(todoNames, ["old", "new"])
     }
+
+    private func stubOldRepeatingTodoEvent() -> TodoEvent {
+        let oldEvent = TodoEvent(uuid: "old", name: "some")
+            |> \.time .~ .at(.dummy(0))
+            |> \.repeating .~ .init(repeatingStartTime: .dummy(0), repeatOption: EventRepeatingOptions.EveryDay())
+        let shareKey = ShareDataKeys.todos.rawValue
+        self.spyStore.put([String: TodoEvent].self, key: shareKey, [oldEvent.uuid: oldEvent])
+        return oldEvent
+    }
+    
+    func testUsecase_whenUpdateRepeatingAllTodos_updateAll() {
+        // given
+        let expect = self.expectation(description: "반복일정 전체를 업데이트하면 다 바뀜")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        let oldEvent = self.stubOldRepeatingTodoEvent()
+        
+        // when
+        let todoSource = usecase.todoEvents(
+            in: TimeStamp.dummy(0)..<TimeStamp.dummy(24*3600*10)
+        )
+        let todos = self.waitOutputs(expect, for: todoSource) {
+            Task {
+                let params = TodoEditParams()
+                    |> \.time .~ .at(.dummy(4))
+                    |> \.repeatingUpdateScope .~ .all
+                _ = try? await usecase.updateTodoEvent(oldEvent.uuid, params)
+            }
+        }
+        
+        // then
+        let todoEventTims = todos.map { $0.map { $0.time } }
+        XCTAssertEqual(todoEventTims, [
+            [.at(.dummy(0))], [.at(.dummy(4))]
+        ])
+    }
+    
+    func testUsecase_whenUpdateRepeatingTodoOnlyThisTime_makeNewOneWithUpdatedAndSkipToNextOldEvent() {
+        // given
+        let expect = expectation(description: "반복되는 todo 이번만 바꾼경우, 업데이트 옵션으로 새로운 todo 만들고 기존 todo는 다음으로 넘어감")
+        expect.expectedFulfillmentCount = 2
+        expect.assertForOverFulfill = false
+        let usecase = self.makeUsecase()
+        let oldEvent = self.stubOldRepeatingTodoEvent()
+        
+        // when
+        let todoSource = usecase.todoEvents(
+            in: TimeStamp.dummy(0)..<TimeStamp.dummy(24*3600*10)
+        )
+        let todos = self.waitOutputs(expect, for: todoSource) {
+            Task {
+                let params = TodoEditParams()
+                    |> \.name .~ oldEvent.name
+                    |> \.time .~ .at(.dummy(4))
+                    |> \.repeatingUpdateScope .~ .onlyThisTime
+                _ = try? await usecase.updateTodoEvent(oldEvent.uuid, params)
+            }
+        }
+        
+        // then
+        struct Pair: Equatable { let uuid: String; let time: EventTime? }
+        let todoIdAndTimePair = todos.map {
+            $0.map { Pair(uuid: $0.uuid, time: $0.time) }
+                .sorted(by: { $0.uuid > $1.uuid })
+        }
+        XCTAssertEqual(todoIdAndTimePair, [
+            [
+                Pair(uuid: oldEvent.uuid, time: .at(.dummy(0)))
+            ],
+            [
+                Pair(uuid: oldEvent.uuid, time: .at(.dummy(100))),
+                Pair(uuid: "new", time: .at(.dummy(4)))
+            ]
+        ])
+    }
 }
 
 
