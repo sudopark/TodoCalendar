@@ -71,13 +71,13 @@ extension TodoEventUsecaseImple {
         }
         
         if case .onlyThisTime = params.repeatingUpdateScope {
-            return try await self.updateTodoEventWithRepeatingChanges(eventId, params)
+            return try await self.replaceCurrentTodoAndMakeNewEvent(eventId, params)
         } else {
-            return try await self.updateTodoEventWithoutRepeatingChanges(eventId, params)
+            return try await self.updateSelectedTodoEvent(eventId, params)
         }
     }
     
-    private func updateTodoEventWithoutRepeatingChanges(
+    private func updateSelectedTodoEvent(
         _ eventId: String,
         _ params: TodoEditParams
     ) async throws -> TodoEvent {
@@ -89,20 +89,21 @@ extension TodoEventUsecaseImple {
         return updatedEvent
     }
     
-    private func updateTodoEventWithRepeatingChanges(
+    private func replaceCurrentTodoAndMakeNewEvent(
         _ eventId: String,
         _ params: TodoEditParams
     ) async throws -> TodoEvent {
         
-        let nextTodo = try await self.todoRepository.skipRepeatingTodo(current: eventId)
-        let newTodo = try await self.todoRepository.makeTodoEvent(params.asMakeParams())
+        let replaceResult = try await self.todoRepository.replaceRepeatingTodo(
+            current: eventId, to: params.asMakeParams()
+        )
         let shareKey = ShareDataKeys.todos.rawValue
         self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
             ($0 ?? [:])
-            |> key(eventId) .~ nextTodo
-            |> key(newTodo.uuid) .~ newTodo
+            |> key(eventId) .~ replaceResult.nextRepeatingTodoEvent
+            |> key(replaceResult.newTodoEvent.uuid) .~ replaceResult.newTodoEvent
         }
-        return newTodo
+        return replaceResult.newTodoEvent
     }
     
     public func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {

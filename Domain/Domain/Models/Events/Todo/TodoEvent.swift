@@ -78,3 +78,16 @@ public struct TodoEditParams {
             |> \.repeating .~ self.repeating
     }
 }
+
+
+// MARK: - replace
+
+public struct ReplaceRepeatingTodoEventResult {
+    
+    public let newTodoEvent: TodoEvent
+    public var nextRepeatingTodoEvent: TodoEvent?
+    
+    public init(newTodoEvent: TodoEvent) {
+        self.newTodoEvent = newTodoEvent
+    }
+}
