@@ -60,7 +60,7 @@ public struct TodoEditParams {
     public var isValidForUpdate: Bool {
         switch self.repeatingUpdateScope {
         case .onlyThisTime:
-            return self.name?.isEmpty == false
+            return self.asMakeParams().isValidForMaking
             
         default:
             return self.name?.isEmpty == false
