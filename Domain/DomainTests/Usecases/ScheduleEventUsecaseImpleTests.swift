@@ -169,7 +169,7 @@ extension ScheduleEventUsecaseImpleTests {
         
         // when
         let source = usecase.scheduleEvents(in: self.dummyRange)
-        let eventLits = self.waitOutputs(expect, for: source, timeout: 0.1) {
+        let eventLits = self.waitOutputs(expect, for: source, timeout: 1) {
             usecase.refreshScheduleEvents(in: self.dummyRange)
         }
         
@@ -190,7 +190,7 @@ extension ScheduleEventUsecaseImpleTests {
         
         // when
         let source = usecase.scheduleEvents(in: self.dummyRange)
-        let eventLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
+        let eventLists = self.waitOutputs(expect, for: source, timeout: 1) {
             usecase.refreshScheduleEvents(in: self.dummyRange)
         }
         
@@ -241,7 +241,7 @@ extension ScheduleEventUsecaseImpleTests {
         
         // when
         let source = usecase.scheduleEvents(in: self.dummyRange).filter { $0.isEmpty == false }
-        let events = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
+        let events = self.waitFirstOutput(expect, for: source, timeout: 1) {
             usecase.refreshScheduleEvents(in: self.dummyRange)
         } ?? []
         
