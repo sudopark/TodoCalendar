@@ -9,9 +9,11 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 import Extensions
 import UnitTestHelpKit
+
+@testable import Domain
+
 
 class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
     
@@ -21,6 +23,39 @@ class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
         return ScheduleEvent(uuid: "new", name: params.name ?? "", time: params.time ?? .at(.dummy()))
             |> \.eventTagId .~ params.eventTagId
             |> \.repeating .~ params.repeating
+    }
+    
+    var updateOriginEventMocking: ScheduleEvent?
+    
+    var shouldFailUpdate: Bool = false
+    func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent {
+        try self.checkShouldFail(self.shouldFailUpdate)
+        return ScheduleEvent(uuid: eventId, name: params.name ?? "", time: params.time ?? .at(.dummy()))
+            |> \.eventTagId .~ (params.eventTagId ?? self.updateOriginEventMocking?.eventTagId)
+            |> \.repeating .~ (params.repeating ?? self.updateOriginEventMocking?.repeating)
+            |> \.showTurn .~ (params.showTurn ?? self.updateOriginEventMocking?.showTurn ?? false)
+    }
+    
+    var shouldFailExclude: Bool = false
+    func excludeRepeatingEvent(
+        _ originEventId: String,
+        at currentTime: EventTime,
+        asNew params: ScheduleMakeParams
+    ) async throws -> ExcludeRepeatingEventResult {
+        
+        try self.checkShouldFail(self.shouldFailExclude)
+        
+        let newEvent = ScheduleEvent(uuid: "new", name: params.name ?? "", time: params.time ?? .at(.dummy()))
+            |> \.eventTagId .~ params.eventTagId
+            |> \.repeating .~ params.repeating
+            |> \.showTurn .~ (params.showTurn ?? false)
+        
+        let originEvent = (
+            updateOriginEventMocking ?? ScheduleEvent(uuid: originEventId, name: "origin", time: .at(.dummy(0)))
+        )
+        |> \.repeatingTimeToExcludes .~ [currentTime.customKey]
+        
+        return .init(newEvent: newEvent, originEvent: originEvent)
     }
     
     var shouldFailLoad: Bool = false

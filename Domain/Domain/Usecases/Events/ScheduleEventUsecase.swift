@@ -78,7 +78,12 @@ extension ScheduleEventUsecaseImple {
         _ eventId: String,
         _ params: ScheduleEditParams
     ) async throws -> ScheduleEvent {
-        throw RuntimeError("not implemented")
+        let updated = try await self.scheduleRepository.updateScheduleEvent(eventId, params)
+        let shareKey = ShareDataKeys.schedules.rawValue
+        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+            ($0 ?? .init()).append(updated)
+        }
+        return updated
     }
     
     private func makeNewScheduleEventAndExcludeFromOriginEvent(
@@ -87,7 +92,19 @@ extension ScheduleEventUsecaseImple {
         _ params: ScheduleEditParams
     ) async throws -> ScheduleEvent {
         // exclude
-        throw RuntimeError("not implemented")
+        let excludeResult = try await self.scheduleRepository.excludeRepeatingEvent(
+            originEventId,
+            at: currentTime,
+            asNew: params.asMakeParams()
+        )
+        let shareKey = ShareDataKeys.schedules.rawValue
+        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+            ($0 ?? .init())
+                .invalidate(originEventId)
+                .append(excludeResult.newEvent)
+                .append(excludeResult.originEvent)
+        }
+        return excludeResult.newEvent
     }
 }
 
