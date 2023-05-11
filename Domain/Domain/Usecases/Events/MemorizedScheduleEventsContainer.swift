@@ -70,7 +70,7 @@ extension MemorizedScheduleEventsContainer {
     func append(_ newEvent: ScheduleEvent) -> MemorizedScheduleEventsContainer {
         let newItem: CacheItem
         if let cached = self.caches[newEvent.uuid],
-           newEvent.isEqualEventTimeOrRepeatOption(cached.event) {
+           newEvent.isEqualEventTimeAndRepeatOption(cached.event) {
             newItem = cached.replaced(newEvent)
         } else {
             newItem = .init(event: newEvent)
@@ -92,7 +92,7 @@ extension MemorizedScheduleEventsContainer {
         
         let newEventsWithCalculate = events.map { new in
             let cached: CacheItem? = cachedInPeriodMap[new.uuid]
-            let shouldIgnoreCache = cached.map { !new.isEqualEventTimeOrRepeatOption($0.event) } ?? false
+            let shouldIgnoreCache = cached.map { !new.isEqualEventTimeAndRepeatOption($0.event) } ?? false
             return self.calculateRepeatingTimes(
                 new, with: shouldIgnoreCache ? nil : cached, in: period
             )
@@ -243,7 +243,7 @@ extension MemorizedScheduleEventsContainer {
 
 private extension ScheduleEvent {
     
-    func isEqualEventTimeOrRepeatOption(_ old: ScheduleEvent) -> Bool {
+    func isEqualEventTimeAndRepeatOption(_ old: ScheduleEvent) -> Bool {
         return self.time == old.time
             && self.repeating == old.repeating
     }

@@ -47,15 +47,25 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
         return .init(doneEvent: doneEvent, nextRepeatingTodoEvent: nextTodo)
     }
     
-    var shouldFailSkipRepeatingTodo: Bool = false
+    var shouldFailReplaceRepeatingTodo: Bool = false
     var isAvailToSkipNextTodo: Bool = true
-    func skipRepeatingTodo(current eventId: String) async throws -> TodoEvent? {
-        try self.checkShouldFail(self.shouldFailSkipRepeatingTodo)
+    func replaceRepeatingTodo(
+        current eventId: String,
+        to newParams: TodoMakeParams
+    ) async throws -> ReplaceRepeatingTodoEventResult {
+        try self.checkShouldFail(self.shouldFailReplaceRepeatingTodo)
+        let newTodo = TodoEvent(uuid: "new", name: newParams.name ?? "")
+            |> \.eventTagId .~ newParams.eventTagId
+            |> \.repeating .~ newParams.repeating
+            |> \.time .~ newParams.time
         if self.isAvailToSkipNextTodo {
-            return TodoEvent(uuid: eventId, name: "skip-next")
-                |> \.time .~ .at(.dummy(100))
+            return .init(newTodoEvent: newTodo)
+                |> \.nextRepeatingTodoEvent .~ (
+                    TodoEvent(uuid: eventId, name: "skip-next")
+                        |> \.time .~ .at(.dummy(100))
+                )
         }
-        return nil
+        return .init(newTodoEvent: newTodo)
     }
     
     var shouldFailLoadCurrentTodoEvents: Bool = false
