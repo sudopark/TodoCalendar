@@ -80,7 +80,7 @@ public struct ScheduleEditParams {
     
     public enum RepeatingUpdateScope: Equatable {
         case all
-        case onlyThisTime
+        case onlyThisTime(EventTime)
     }
     
     public var name: String?

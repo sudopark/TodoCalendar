@@ -17,6 +17,7 @@ import Extensions
 public protocol ScheduleEventUsecase {
     
     func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent
+    func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent
     func refreshScheduleEvents(in period: Range<TimeStamp>)
     func scheduleEvents(in period: Range<TimeStamp>) -> AnyPublisher<[ScheduleEvent], Never>
 }
@@ -55,6 +56,43 @@ extension ScheduleEventUsecaseImple {
         }
         return newEvent
     }
+    
+    public func updateScheduleEvent(
+        _ eventId: String,
+        _ params: ScheduleEditParams
+    ) async throws -> ScheduleEvent {
+        
+        guard params.isValidForUpdate
+        else {
+            throw RuntimeError("invalid parameter for update Schedule event")
+        }
+        
+        if case let .onlyThisTime(current) = params.repeatingUpdateScope {
+            return try await self.makeNewScheduleEventAndExcludeFromOriginEvent(eventId, current, params)
+        } else {
+            return try await self.updateCurrentScheduleEvent(eventId, params)
+        }
+    }
+    
+    private func updateCurrentScheduleEvent(
+        _ eventId: String,
+        _ params: ScheduleEditParams
+    ) async throws -> ScheduleEvent {
+        throw RuntimeError("not implemented")
+    }
+    
+    private func makeNewScheduleEventAndExcludeFromOriginEvent(
+        _ originEventId: String,
+        _ currentTime: EventTime,
+        _ params: ScheduleEditParams
+    ) async throws -> ScheduleEvent {
+        // exclude
+        throw RuntimeError("not implemented")
+    }
+}
+
+
+extension ScheduleEventUsecaseImple {
     
     public func refreshScheduleEvents(in period: Range<TimeStamp>) {
 
