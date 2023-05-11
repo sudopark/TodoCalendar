@@ -371,11 +371,17 @@ extension ScheduleEventUsecaseImpleTests {
         ])
     }
     
+    private func stubUpdateRepeatingEvent() -> ScheduleEvent {
+        let event = self.repeatingEvent(at: 0)
+        self.stubRepository.updateOriginEventMocking = event
+        return event
+    }
+    
     // 반복하는 일정 + 전체 반복일정 수정시에 - 파라민터가 불충분하면 실패
     func testUsecase_whenUpdateRepeatingEventWithInvalidParams_updateFail() async {
         // given
         let usecase = self.makeUsecase()
-        let event = self.repeatingEvent(at: 0)
+        let event = self.stubUpdateRepeatingEvent()
         
         // when
         let params = ScheduleEditParams()
@@ -389,7 +395,7 @@ extension ScheduleEventUsecaseImpleTests {
     func testUsecase_updateRepeatingEventWithAll() async {
         // given
         let usecase = self.makeUsecase()
-        let event = self.repeatingEvent(at: 0)
+        let event = self.stubUpdateRepeatingEvent()
         
         // when
         let params = ScheduleEditParams()
@@ -405,8 +411,9 @@ extension ScheduleEventUsecaseImpleTests {
     func testUsecase_whenAllRepeatingEventUpdated_updateSubscribingEventRangeWithRefreshingRepeatTimes() {
         // given
         let expect = expectation(description: "반복하는 일정 + 전체 반복일정 수정 이후에 업데이트됨 + 반복시간 다시 계산해서 구독중인 이벤트 발생")
+        expect.expectedFulfillmentCount = 2
         let usecase = self.makeUsecase()
-        let old = self.repeatingEvent(at: 0)
+        let old = self.stubUpdateRepeatingEvent()
         self.replaceMemorized([old])
         
         // when
@@ -446,7 +453,7 @@ extension ScheduleEventUsecaseImpleTests {
     func testUsecase_whenUpdateRepeatingEventOnlyThisTimeWithInvalidParams_updateFail() async {
         // given
         let usecase = self.makeUsecase()
-        let event = self.repeatingEvent(at: 0)
+        let event = self.stubUpdateRepeatingEvent()
         
         // when
         let params = ScheduleEditParams()
@@ -462,7 +469,7 @@ extension ScheduleEventUsecaseImpleTests {
     func testUsecase_updateRepeatingEventOnlyThisTime() async {
         // given
         let usecase = self.makeUsecase()
-        let event = self.repeatingEvent(at: 0)
+        let event = self.stubUpdateRepeatingEvent()
         
         // when
         let params = ScheduleEditParams()
@@ -481,7 +488,7 @@ extension ScheduleEventUsecaseImpleTests {
         let expect = expectation(description: "반복하는 일정 + 이번만 수정시에 새 일정이 구독중인 이벤트로 반환되고, 기존 일정은 반복시간이 제외해서 다시 계산해서 반환")
         expect.expectedFulfillmentCount = 2
         let usecase = self.makeUsecase()
-        let old = self.repeatingEvent(at: 0)
+        let old = self.stubUpdateRepeatingEvent()
         self.replaceMemorized([old])
         
         // when

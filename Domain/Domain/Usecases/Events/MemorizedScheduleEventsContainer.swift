@@ -67,6 +67,12 @@ extension MemorizedScheduleEventsContainer {
             .map { $0.event }
     }
     
+    func invalidate(_ eventId: String) -> MemorizedScheduleEventsContainer {
+        return MemorizedScheduleEventsContainer(
+            caches: self.caches |> key(eventId) .~ nil
+        )
+    }
+    
     func append(_ newEvent: ScheduleEvent) -> MemorizedScheduleEventsContainer {
         let newItem: CacheItem
         if let cached = self.caches[newEvent.uuid],
@@ -114,7 +120,9 @@ extension MemorizedScheduleEventsContainer {
             return .init(event: event)
         }
         let cached = cached ?? CacheItem(event: event)
-        guard let enumerator = EventRepeatTimeEnumerator(repeating.repeatOption)
+        guard let enumerator = EventRepeatTimeEnumerator(
+            repeating.repeatOption, without: event.repeatingTimeToExcludes
+        )
         else { return cached }
         
         let (startTime, end) = (

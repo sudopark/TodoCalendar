@@ -13,5 +13,13 @@ public protocol ScheduleEventRepository {
     
     func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent
     
+    func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent
+    
+    func excludeRepeatingEvent(
+        _ originEventId: String,
+        at currentTime: EventTime,
+        asNew params: ScheduleMakeParams
+    ) async throws -> ExcludeRepeatingEventResult
+    
     func loadScheduleEvents(in range: Range<TimeStamp>) -> AnyPublisher<[ScheduleEvent], Error>
 }

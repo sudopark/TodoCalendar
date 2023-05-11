@@ -26,14 +26,6 @@ public struct ScheduleEvent {
     public struct RepeatingTimes {
         public let time: EventTime
         public let turn: Int
-        
-        var customKey: String {
-            switch self.time {
-            case .at(let time): return "\(time.utcTimeInterval)"
-            case .period(let range):
-                return "\(range.lowerBound.utcTimeInterval)..<\(range.upperBound.utcTimeInterval)"
-            }
-        }
     }
     var nextRepeatingTimes: [RepeatingTimes] = []
     public var repeatingTimes: [RepeatingTimes] {
@@ -113,5 +105,20 @@ public struct ScheduleEditParams {
             |> \.time .~ self.time
             |> \.repeating .~ self.repeating
             |> \.showTurn .~ self.showTurn
+    }
+}
+
+
+public struct ExcludeRepeatingEventResult {
+    
+    public let newEvent: ScheduleEvent
+    public let originEvent: ScheduleEvent
+    
+    public init(
+        newEvent: ScheduleEvent,
+        originEvent: ScheduleEvent
+    ) {
+        self.newEvent = newEvent
+        self.originEvent = originEvent
     }
 }

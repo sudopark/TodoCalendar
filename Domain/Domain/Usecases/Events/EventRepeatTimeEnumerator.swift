@@ -13,30 +13,30 @@ final class EventRepeatTimeEnumerator {
     
     private let calendar: Calendar
     private let option: EventRepeatingOption
+    private let igonreTimeKeys: Set<String>
     
-    init?(_ option: EventRepeatingOption) {
+    init?(_ option: EventRepeatingOption, without timesKey: Set<String> = []) {
+        self.option = option
+        self.igonreTimeKeys = timesKey
+        
         switch option {
         case is EventRepeatingOptions.EveryDay:
             self.calendar = Calendar(identifier: .gregorian)
-            self.option = option
             
         case let everyWeek as EventRepeatingOptions.EveryWeek:
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = everyWeek.timeZone
             self.calendar = calendar
-            self.option = option
             
         case let everyMonth as EventRepeatingOptions.EveryMonth:
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = everyMonth.timeZone
             self.calendar = calendar
-            self.option = option
             
         case let everyYear as EventRepeatingOptions.EveryYear:
             var calendar = Calendar(identifier: .gregorian)
             calendar.timeZone = everyYear.timeZone
             self.calendar = calendar
-            self.option = option
             
         default: return nil
         }
@@ -101,6 +101,10 @@ final class EventRepeatTimeEnumerator {
         let nextTime = time.shift(interval)
         if let endTime, nextTime.upperBound > endTime.utcTimeInterval {
             return nil
+        }
+        
+        if self.igonreTimeKeys.contains(nextTime.customKey) {
+            return nextEventTime(from: nextTime, until: endTime)
         }
         return nextTime
     }

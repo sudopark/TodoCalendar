@@ -75,4 +75,12 @@ public enum EventTime: Comparable {
     public static func < (_ lhs: Self, _ rhs: Self) -> Bool {
         return lhs.lowerBound < rhs.lowerBound
     }
+    
+    var customKey: String {
+        switch self {
+        case .at(let time): return "\(time.utcTimeInterval)"
+        case .period(let range):
+            return "\(range.lowerBound.utcTimeInterval)..<\(range.upperBound.utcTimeInterval)"
+        }
+    }
 }
