@@ -22,10 +22,17 @@ public enum EventTime: Comparable {
         }
     }
     
-    var lowerBoundTimeStamp: TimeStamp {
+    public var lowerBoundTimeStamp: TimeStamp {
         switch self {
         case .at(let time): return time
         case .period(let range): return range.lowerBound
+        }
+    }
+    
+    public var upperBoundTimeStamp: TimeStamp {
+        switch self {
+        case .at(let time): return time
+        case .period(let range): return range.upperBound
         }
     }
     

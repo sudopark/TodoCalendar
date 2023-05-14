@@ -70,3 +70,12 @@ extension TimeInterval {
         return TimeInterval(number) * 3600
     }
 }
+
+
+extension TimeZone {
+    
+    public var addreviationKey: String? {
+        return TimeZone.abbreviationDictionary
+            .first(where: { $0.value == self.identifier })?.key
+    }
+}

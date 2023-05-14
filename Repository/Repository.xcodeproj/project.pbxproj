@@ -10,6 +10,16 @@
 		F6C58CCA2A111A89002BA9B7 /* Repository.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C58CC12A111A89002BA9B7 /* Repository.framework */; };
 		F6C58CCF2A111A89002BA9B7 /* RepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58CCE2A111A89002BA9B7 /* RepositoryTests.swift */; };
 		F6C58CD02A111A89002BA9B7 /* Repository.h in Headers */ = {isa = PBXBuildFile; fileRef = F6C58CC42A111A89002BA9B7 /* Repository.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F6C58CDC2A111AF6002BA9B7 /* TodoLocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58CDB2A111AF6002BA9B7 /* TodoLocalStorage.swift */; };
+		F6C58CE42A111C7E002BA9B7 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C58CE12A111C7E002BA9B7 /* Common3rdParty.framework */; };
+		F6C58CE62A111C7E002BA9B7 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C58CE22A111C7E002BA9B7 /* Domain.framework */; };
+		F6C58CE82A111C7E002BA9B7 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C58CE32A111C7E002BA9B7 /* Extensions.framework */; };
+		F6C58CEC2A111C9F002BA9B7 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C58CEB2A111C9F002BA9B7 /* Common3rdParty.framework */; };
+		F6C58CEE2A111C9F002BA9B7 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C58CED2A111C9F002BA9B7 /* Extensions.framework */; };
+		F6C58CF02A111C9F002BA9B7 /* UnitTestHelpKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C58CEF2A111C9F002BA9B7 /* UnitTestHelpKit.framework */; };
+		F6C58CF32A111CCE002BA9B7 /* TodoEventTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58CF22A111CCE002BA9B7 /* TodoEventTable.swift */; };
+		F6C58CF82A111D6E002BA9B7 /* EventTimeTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58CF72A111D6E002BA9B7 /* EventTimeTable.swift */; };
+		F6C58CFC2A112432002BA9B7 /* EventRepeatingOption+CodableMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58CFB2A112432002BA9B7 /* EventRepeatingOption+CodableMapper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,6 +37,16 @@
 		F6C58CC42A111A89002BA9B7 /* Repository.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Repository.h; sourceTree = "<group>"; };
 		F6C58CC92A111A89002BA9B7 /* RepositoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepositoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6C58CCE2A111A89002BA9B7 /* RepositoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RepositoryTests.swift; sourceTree = "<group>"; };
+		F6C58CDB2A111AF6002BA9B7 /* TodoLocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoLocalStorage.swift; sourceTree = "<group>"; };
+		F6C58CE12A111C7E002BA9B7 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6C58CE22A111C7E002BA9B7 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6C58CE32A111C7E002BA9B7 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6C58CEB2A111C9F002BA9B7 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6C58CED2A111C9F002BA9B7 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6C58CEF2A111C9F002BA9B7 /* UnitTestHelpKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = UnitTestHelpKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6C58CF22A111CCE002BA9B7 /* TodoEventTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEventTable.swift; sourceTree = "<group>"; };
+		F6C58CF72A111D6E002BA9B7 /* EventTimeTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTimeTable.swift; sourceTree = "<group>"; };
+		F6C58CFB2A112432002BA9B7 /* EventRepeatingOption+CodableMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventRepeatingOption+CodableMapper.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -34,6 +54,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6C58CE62A111C7E002BA9B7 /* Domain.framework in Frameworks */,
+				F6C58CE42A111C7E002BA9B7 /* Common3rdParty.framework in Frameworks */,
+				F6C58CE82A111C7E002BA9B7 /* Extensions.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,6 +64,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6C58CEC2A111C9F002BA9B7 /* Common3rdParty.framework in Frameworks */,
+				F6C58CEE2A111C9F002BA9B7 /* Extensions.framework in Frameworks */,
+				F6C58CF02A111C9F002BA9B7 /* UnitTestHelpKit.framework in Frameworks */,
 				F6C58CCA2A111A89002BA9B7 /* Repository.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -54,6 +80,7 @@
 				F6C58CC32A111A89002BA9B7 /* Repository */,
 				F6C58CCD2A111A89002BA9B7 /* RepositoryTests */,
 				F6C58CC22A111A89002BA9B7 /* Products */,
+				F6C58CE02A111C7E002BA9B7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -69,6 +96,7 @@
 		F6C58CC32A111A89002BA9B7 /* Repository */ = {
 			isa = PBXGroup;
 			children = (
+				F6C58CF42A111D45002BA9B7 /* Event */,
 				F6C58CC42A111A89002BA9B7 /* Repository.h */,
 			);
 			path = Repository;
@@ -80,6 +108,54 @@
 				F6C58CCE2A111A89002BA9B7 /* RepositoryTests.swift */,
 			);
 			path = RepositoryTests;
+			sourceTree = "<group>";
+		};
+		F6C58CE02A111C7E002BA9B7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F6C58CEB2A111C9F002BA9B7 /* Common3rdParty.framework */,
+				F6C58CED2A111C9F002BA9B7 /* Extensions.framework */,
+				F6C58CEF2A111C9F002BA9B7 /* UnitTestHelpKit.framework */,
+				F6C58CE12A111C7E002BA9B7 /* Common3rdParty.framework */,
+				F6C58CE22A111C7E002BA9B7 /* Domain.framework */,
+				F6C58CE32A111C7E002BA9B7 /* Extensions.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F6C58CF12A111CC3002BA9B7 /* Local */ = {
+			isa = PBXGroup;
+			children = (
+				F6C58CF22A111CCE002BA9B7 /* TodoEventTable.swift */,
+				F6C58CDB2A111AF6002BA9B7 /* TodoLocalStorage.swift */,
+			);
+			path = Local;
+			sourceTree = "<group>";
+		};
+		F6C58CF42A111D45002BA9B7 /* Event */ = {
+			isa = PBXGroup;
+			children = (
+				F6C58CF62A111D57002BA9B7 /* Common */,
+				F6C58CF52A111D4F002BA9B7 /* Todo */,
+			);
+			path = Event;
+			sourceTree = "<group>";
+		};
+		F6C58CF52A111D4F002BA9B7 /* Todo */ = {
+			isa = PBXGroup;
+			children = (
+				F6C58CF12A111CC3002BA9B7 /* Local */,
+			);
+			path = Todo;
+			sourceTree = "<group>";
+		};
+		F6C58CF62A111D57002BA9B7 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				F6C58CF72A111D6E002BA9B7 /* EventTimeTable.swift */,
+				F6C58CFB2A112432002BA9B7 /* EventRepeatingOption+CodableMapper.swift */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -144,6 +220,7 @@
 				TargetAttributes = {
 					F6C58CC02A111A89002BA9B7 = {
 						CreatedOnToolsVersion = 14.3;
+						LastSwiftMigration = 1430;
 					};
 					F6C58CC82A111A89002BA9B7 = {
 						CreatedOnToolsVersion = 14.3;
@@ -191,6 +268,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6C58CF82A111D6E002BA9B7 /* EventTimeTable.swift in Sources */,
+				F6C58CF32A111CCE002BA9B7 /* TodoEventTable.swift in Sources */,
+				F6C58CDC2A111AF6002BA9B7 /* TodoLocalStorage.swift in Sources */,
+				F6C58CFC2A112432002BA9B7 /* EventRepeatingOption+CodableMapper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -336,6 +417,7 @@
 		F6C58CD42A111A89002BA9B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -359,6 +441,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -367,6 +450,7 @@
 		F6C58CD52A111A89002BA9B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -398,6 +482,7 @@
 		F6C58CD72A111A89002BA9B7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
@@ -414,6 +499,7 @@
 		F6C58CD82A111A89002BA9B7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
