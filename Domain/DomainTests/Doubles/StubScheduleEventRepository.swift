@@ -30,10 +30,14 @@ class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
     var shouldFailUpdate: Bool = false
     func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent {
         try self.checkShouldFail(self.shouldFailUpdate)
-        return ScheduleEvent(uuid: eventId, name: params.name ?? "", time: params.time ?? .at(.dummy()))
-            |> \.eventTagId .~ (params.eventTagId ?? self.updateOriginEventMocking?.eventTagId)
-            |> \.repeating .~ (params.repeating ?? self.updateOriginEventMocking?.repeating)
-            |> \.showTurn .~ (params.showTurn ?? self.updateOriginEventMocking?.showTurn ?? false)
+        let time: EventTime = params.time ?? .at(.dummy())
+        let eventTagId: String? = params.eventTagId ?? self.updateOriginEventMocking?.eventTagId
+        let repeating: EventRepeating? = params.repeating ?? self.updateOriginEventMocking?.repeating
+        let showTurn: Bool = params.showTurn ?? self.updateOriginEventMocking?.showTurn ?? false
+        return ScheduleEvent(uuid: eventId, name: params.name ?? "", time: time)
+            |> \.eventTagId .~ eventTagId
+            |> \.repeating .~ repeating
+            |> \.showTurn .~ showTurn
     }
     
     var shouldFailExclude: Bool = false

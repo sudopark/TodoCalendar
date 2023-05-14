@@ -36,7 +36,7 @@ final class ScheduleEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         let key = ShareDataKeys.schedules
         let events = self.dummyEvents(0..<10)
         self.spyStore.update(MemorizedScheduleEventsContainer.self, key: key.rawValue) {
-            return ($0 ?? .init()).refresh(events, in: self.dummyRange)
+            return ($0 ?? .init()).refresh(events, in: self.dummyRange())
         }
         return ScheduleEventUsecaseImple(
             scheduleRepository: self.stubRepository,
@@ -125,9 +125,11 @@ extension ScheduleEventUsecaseImpleTests {
 
 extension ScheduleEventUsecaseImpleTests {
     
-    private var dummyRange: Range<TimeStamp> {
+    private func dummyRange(_ range: Range<Int> = 0..<20) -> Range<TimeStamp> {
         let oneDay: TimeInterval = 3600 * 24
-        return TimeStamp.dummy(0)..<TimeStamp.dummy(0).add(20 * oneDay)
+        return TimeStamp(TimeInterval(range.lowerBound) * oneDay, timeZone: "KST")
+            ..<
+            TimeStamp(TimeInterval(range.upperBound) * oneDay, timeZone: "KST")
     }
     
     private func dummyEvents(_ range: Range<Int>) -> [ScheduleEvent] {
@@ -168,9 +170,9 @@ extension ScheduleEventUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let source = usecase.scheduleEvents(in: self.dummyRange)
+        let source = usecase.scheduleEvents(in: self.dummyRange())
         let eventLits = self.waitOutputs(expect, for: source, timeout: 1) {
-            usecase.refreshScheduleEvents(in: self.dummyRange)
+            usecase.refreshScheduleEvents(in: self.dummyRange())
         }
         
         // then
@@ -189,9 +191,9 @@ extension ScheduleEventUsecaseImpleTests {
         self.stubNoMemorized()
         
         // when
-        let source = usecase.scheduleEvents(in: self.dummyRange)
+        let source = usecase.scheduleEvents(in: self.dummyRange())
         let eventLists = self.waitOutputs(expect, for: source, timeout: 1) {
-            usecase.refreshScheduleEvents(in: self.dummyRange)
+            usecase.refreshScheduleEvents(in: self.dummyRange())
         }
         
         // then
@@ -209,7 +211,7 @@ extension ScheduleEventUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let source = usecase.scheduleEvents(in: self.dummyRange).filter { $0.isEmpty == false }
+        let source = usecase.scheduleEvents(in: self.dummyRange()).filter { $0.isEmpty == false }
         let eventLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
             
             Task {
@@ -240,9 +242,9 @@ extension ScheduleEventUsecaseImpleTests {
         ])
         
         // when
-        let source = usecase.scheduleEvents(in: self.dummyRange).filter { $0.isEmpty == false }
+        let source = usecase.scheduleEvents(in: self.dummyRange()).filter { $0.isEmpty == false }
         let events = self.waitFirstOutput(expect, for: source, timeout: 1) {
-            usecase.refreshScheduleEvents(in: self.dummyRange)
+            usecase.refreshScheduleEvents(in: self.dummyRange())
         } ?? []
         
         // then
@@ -260,7 +262,7 @@ extension ScheduleEventUsecaseImpleTests {
         self.stubNoMemorized()
         
         // when
-        let source = usecas.scheduleEvents(in: self.dummyRange).filter { $0.isEmpty == false }
+        let source = usecas.scheduleEvents(in: self.dummyRange()).filter { $0.isEmpty == false }
         let events = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
             
             Task.init {
@@ -288,7 +290,7 @@ extension ScheduleEventUsecaseImpleTests {
         self.stubNoMemorized()
         
         // when
-        let source = usecas.scheduleEvents(in: self.dummyRange).filter { $0.isEmpty == false }
+        let source = usecas.scheduleEvents(in: self.dummyRange()).filter { $0.isEmpty == false }
         let events = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
             
             Task.init {
@@ -296,7 +298,7 @@ extension ScheduleEventUsecaseImpleTests {
                     |> \.name .~ "over"
                     |> \.time .~ .at(.dummy(0).add(24 * 3600 * 100))
                     |> \.repeating .~ .init(
-                        repeatingStartTime: .dummy(0).add(24 * 3600 * 100),
+                        repeatingStartTime: TimeStamp.dummy(0).add(24 * 3600 * 100),
                         repeatOption: EventRepeatingOptions.EveryDay()
                     )
                 _ = try? await usecas.makeScheduleEvent(paramsRangeOver)
@@ -357,7 +359,7 @@ extension ScheduleEventUsecaseImpleTests {
         let eventLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
             Task {
                 let params = ScheduleEditParams()
-                    |> \.time .~ .at(.dummy(4))
+                    |> \.time .~ EventTime.at(.dummy(4))
                 _ = try await usecase.updateScheduleEvent(old.uuid, params)
             }
         }
@@ -366,8 +368,8 @@ extension ScheduleEventUsecaseImpleTests {
         let idAndTimeParis = eventLists
             .map { evs in evs.map { Pair(uuid: $0.uuid, time: $0.time) } }
         XCTAssertEqual(idAndTimeParis, [
-            [.init(uuid: old.uuid, time: .at(.dummy(0)))],
-            [.init(uuid: old.uuid, time: .at(.dummy(4)))]
+            [.init(uuid: old.uuid, time: EventTime.at(.dummy(0)))],
+            [.init(uuid: old.uuid, time: EventTime.at(.dummy(4)))]
         ])
     }
     
@@ -399,12 +401,12 @@ extension ScheduleEventUsecaseImpleTests {
         
         // when
         let params = ScheduleEditParams()
-            |> \.time .~ .at(.dummy(4))
+            |> \.time .~ EventTime.at(.dummy(4))
             |> \.repeatingUpdateScope .~ .all
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
         
         // then
-        XCTAssertEqual(updated?.time, .at(.dummy(4)))
+        XCTAssertEqual(updated?.time, EventTime.at(.dummy(4)))
     }
     
     // 반복하는 일정 + 전체 반복일정 수정 이후에 업데이트됨 + 반복시간 다시 계산해서 구독중인 이벤트 발생
@@ -418,12 +420,12 @@ extension ScheduleEventUsecaseImpleTests {
         
         // when
         let source = usecase.scheduleEvents(
-            in: TimeStamp.dummy(0)..<TimeStamp.dummy(3*24*3600)
+            in: self.dummyRange(0..<3)
         )
         let eventLists = self.waitOutputs(expect, for: source) {
             Task {
                 let params = ScheduleEditParams()
-                    |> \.time .~ .at(.dummy(4))
+                    |> \.time .~ EventTime.at(.dummy(4))
                     |> \.repeatingUpdateScope .~ .all
                 _ = try await usecase.updateScheduleEvent(old.uuid, params)
             }
@@ -435,16 +437,16 @@ extension ScheduleEventUsecaseImpleTests {
         let events = eventLists.compactMap { $0.first(where: { $0.uuid == old.uuid } )}
         let eventTimes = events.map { $0.time }
         XCTAssertEqual(eventTimes, [
-            .at(.dummy(0)), .at(.dummy(4))
+            EventTime.at(.dummy(0)), EventTime.at(.dummy(4))
         ])
         let eventRepeatingTimes = events.map { $0.repeatingTimes.map { $0.time } }
         XCTAssertEqual(eventRepeatingTimes, [
             [
-                .at(.dummy(0)), .at(.dummy(24*3600)),
-                .at(.dummy(2*24*3600)), .at(.dummy(3*24*3600))
+                EventTime.at(.dummy(0)), EventTime.at(.dummy(24*3600)),
+                EventTime.at(.dummy(2*24*3600)), EventTime.at(.dummy(3*24*3600))
             ],
             [
-                .at(.dummy(4)), .at(.dummy(4+24*3600)), .at(.dummy(4+2*24*3600))
+                EventTime.at(.dummy(4)), EventTime.at(.dummy(4+24*3600)), EventTime.at(.dummy(4+2*24*3600))
             ]
         ])
     }
@@ -458,7 +460,7 @@ extension ScheduleEventUsecaseImpleTests {
         // when
         let params = ScheduleEditParams()
             |> \.time .~ .at(.dummy(4))
-            |> \.repeatingUpdateScope .~ .onlyThisTime(.at(.dummy(0)))
+            |> \.repeatingUpdateScope .~ .onlyThisTime(EventTime.at(.dummy(0)))
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
         
         // then
@@ -475,11 +477,11 @@ extension ScheduleEventUsecaseImpleTests {
         let params = ScheduleEditParams()
             |> \.name .~ event.name
             |> \.time .~ .at(.dummy(4))
-            |> \.repeatingUpdateScope .~ .onlyThisTime(.at(.dummy(0)))
+            |> \.repeatingUpdateScope .~ .onlyThisTime(EventTime.at(.dummy(0)))
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
         
         // then
-        XCTAssertEqual(updated?.time, .at(.dummy(4)))
+        XCTAssertEqual(updated?.time, EventTime.at(.dummy(4)))
     }
     
     // 반복하는 일정 + 이번만 수정시에 새 일정이 구독중인 이벤트로 반환되고, 기존 일정은 반복시간이 제외해서 다시 계산해서 반환
@@ -492,14 +494,14 @@ extension ScheduleEventUsecaseImpleTests {
         self.replaceMemorized([old])
         
         // when
-        let range = TimeStamp.dummy(0)..<TimeStamp.dummy(3*24*3600)
+        let range = self.dummyRange(0..<3)
         let source = usecase.scheduleEvents(in: range)
         let eventLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
             Task {
                 let params = ScheduleEditParams()
                     |> \.name .~ old.name
                     |> \.time .~ .at(.dummy(4))
-                    |> \.repeatingUpdateScope .~ .onlyThisTime(.at(.dummy(2*24*3600)))
+                    |> \.repeatingUpdateScope .~ .onlyThisTime(EventTime.at(.dummy(2*24*3600)))
                 _ = try await usecase.updateScheduleEvent(old.uuid, params)
             }
         }
@@ -514,19 +516,19 @@ extension ScheduleEventUsecaseImpleTests {
         ])
         let memorizedOriginEvent = eventLists.first?.first(where: { $0.uuid == old.uuid })
         XCTAssertEqual(memorizedOriginEvent?.repeatingTimes.map { $0.time }, [
-            .at(.dummy(0)), .at(.dummy(1*24*3600)), .at(.dummy(2*24*3600)), .at(.dummy(3*24*3600))
+            EventTime.at(.dummy(0)), EventTime.at(.dummy(1*24*3600)), EventTime.at(.dummy(2*24*3600)), EventTime.at(.dummy(3*24*3600))
         ])
         XCTAssertEqual(memorizedOriginEvent?.repeatingTimes.map { $0.turn }, [
             1, 2, 3, 4
         ])
         let updatedOriginEvent = eventLists.last?.first(where: { $0.uuid == old.uuid })
         XCTAssertEqual(updatedOriginEvent?.repeatingTimes.map { $0.time }, [
-            .at(.dummy(0)), .at(.dummy(1*24*3600)), .at(.dummy(3*24*3600))
+            EventTime.at(.dummy(0)), EventTime.at(.dummy(1*24*3600)), EventTime.at(.dummy(3*24*3600))
         ])
         XCTAssertEqual(updatedOriginEvent?.repeatingTimes.map { $0.turn }, [
             1, 2, 3
         ])
         let newEvent = eventLists.last?.first(where: { $0.uuid == "new" })
-        XCTAssertEqual(newEvent?.time, .at(.dummy(4)))
+        XCTAssertEqual(newEvent?.time, EventTime.at(.dummy(4)))
     }
 }
