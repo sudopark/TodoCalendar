@@ -9,13 +9,13 @@ import Foundation
 import Prelude
 import Optics
 
-final class EventRepeatTimeEnumerator {
+public final class EventRepeatTimeEnumerator: Sendable {
     
     private let calendar: Calendar
     private let option: EventRepeatingOption
     private let igonreTimeKeys: Set<String>
     
-    init?(_ option: EventRepeatingOption, without timesKey: Set<String> = []) {
+    public init?(_ option: EventRepeatingOption, without timesKey: Set<String> = []) {
         self.option = option
         self.igonreTimeKeys = timesKey
         
@@ -78,7 +78,7 @@ final class EventRepeatTimeEnumerator {
         }
     }
     
-    func nextEventTime(from time: EventTime, until endTime: TimeStamp?) -> EventTime? {
+    public func nextEventTime(from time: EventTime, until endTime: TimeStamp?) -> EventTime? {
         let currentEventStartDate = Date(timeIntervalSince1970: time.lowerBound)
         guard let current = Current(self.calendar, date: currentEventStartDate) else { return nil }
         let nextDate: Date?

@@ -26,6 +26,24 @@ public struct TodoEvent {
         self.uuid = uuid
         self.name = name
     }
+    
+    public init?(_ params: TodoMakeParams) {
+        guard let name = params.name
+        else { return nil }
+        self.uuid = UUID().uuidString
+        self.name = name
+        self.eventTagId = params.eventTagId
+        self.time = params.time
+        self.repeating = params.repeating
+    }
+    
+    public func apply(_ params: TodoEditParams) -> TodoEvent {
+        return self
+            |> \.name .~ (params.name ?? self.name)
+            |> \.eventTagId .~ (params.eventTagId ?? self.eventTagId)
+            |> \.time .~ (params.time ?? self.time)
+            |> \.repeating .~ (params.repeating ?? self.repeating)
+    }
 }
 
 

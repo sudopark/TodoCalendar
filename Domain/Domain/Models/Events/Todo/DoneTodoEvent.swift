@@ -20,11 +20,9 @@ public struct DoneTodoEvent {
     
     public let uuid: String
     public let originEventId: String
-    public var originEventIsRepeating: Bool = false
     public let name: String
     
     public var eventTagId: String?
-    
     public var eventTime: EventTime?
     public let doneTime: Date
     
@@ -34,8 +32,16 @@ public struct DoneTodoEvent {
         self.originEventId = originEventId
         self.doneTime = doneTime
     }
+    
+    public init(_ origin: TodoEvent) {
+        self.uuid = UUID().uuidString
+        self.originEventId = origin.uuid
+        self.name = origin.name
+        self.eventTagId = origin.eventTagId
+        self.eventTime = origin.time
+        self.doneTime = Date()
+    }
 }
-
 
 public struct CompleteTodoResult {
     
