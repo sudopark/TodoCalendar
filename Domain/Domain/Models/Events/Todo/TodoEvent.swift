@@ -40,9 +40,9 @@ public struct TodoEvent {
     public func apply(_ params: TodoEditParams) -> TodoEvent {
         return self
             |> \.name .~ (params.name ?? self.name)
-            |> \.eventTagId .~ (params.eventTagId ?? self.eventTagId)
-            |> \.time .~ (params.time ?? self.time)
-            |> \.repeating .~ (params.repeating ?? self.repeating)
+            |> \.eventTagId .~ params.eventTagId
+            |> \.time .~ params.time
+            |> \.repeating .~ params.repeating
     }
 }
 
@@ -74,6 +74,8 @@ public struct TodoEditParams {
     public var time: EventTime?
     public var repeating: EventRepeating?
     public var repeatingUpdateScope: RepeatingUpdateScope?
+    
+    public init() { }
     
     public var isValidForUpdate: Bool {
         switch self.repeatingUpdateScope {

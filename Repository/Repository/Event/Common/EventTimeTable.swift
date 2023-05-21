@@ -22,30 +22,39 @@ struct EventTimeTable: Table {
         var dataType: ColumnDataType {
             switch self {
             case .eventId: return .text([.unique, .notNull])
-            case .timeType: return .text([.notNull])
-            case .timezone: return .text([.notNull])
-            case .lowerInterval: return .real([.notNull])
-            case .upperInterval: return .real([.notNull])
+            case .timeType: return .text([])
+            case .timezone: return .text([])
+            case .lowerInterval: return .real([])
+            case .upperInterval: return .real([])
             }
         }
     }
     
     struct Entity: RowValueType {
-        let eventTime: EventTime
+        let eventTime: EventTime?
         let eventId: String
         
         init(_ cursor: CursorIterator) throws {
             self.eventId = try cursor.next().unwrap()
-            let timeType: String = try cursor.next().unwrap()
-            let timeZone: String = try cursor.next().unwrap()
-            let lowerInterval: Double = try cursor.next().unwrap()
-            let upperInterval: Double = try cursor.next().unwrap()
+            guard let timeType: String = try? cursor.next().unwrap(),
+                  let timeZone: String = try? cursor.next().unwrap(),
+                  let lowerInterval: Double = try? cursor.next().unwrap(),
+                  let upperInterval: Double = try? cursor.next().unwrap()
+            else{
+                self.eventTime = nil
+                return
+            }
+            
             if timeType == "at" {
-                let interval: Double = try cursor.next().unwrap()
-                self.eventTime = .at(TimeStamp(interval, timeZone: timeZone))
+                self.eventTime = .at(TimeStamp(lowerInterval, timeZone: timeZone))
             } else {
                 self.eventTime = .period(TimeStamp(lowerInterval, timeZone: timeZone)..<TimeStamp(upperInterval, timeZone: timeZone))
             }
+        }
+        
+        init(_ eventId: String, _ time: EventTime?) {
+            self.eventId = eventId
+            self.eventTime = time
         }
     }
     
@@ -56,10 +65,10 @@ struct EventTimeTable: Table {
     static func scalar(_ entity: Entity, for column: Columns) -> ScalarType? {
         switch column {
         case .eventId: return entity.eventId
-        case .timeType: return entity.eventTime.typeText
-        case .timezone: return entity.eventTime.lowerBoundTimeStamp.timeZoneAbbreviation
-        case .lowerInterval: return entity.eventTime.lowerBoundTimeStamp.utcTimeInterval
-        case .upperInterval: return entity.eventTime.upperBoundWitShifttingIfNeed
+        case .timeType: return entity.eventTime?.typeText
+        case .timezone: return entity.eventTime?.lowerBoundTimeStamp.timeZoneAbbreviation
+        case .lowerInterval: return entity.eventTime?.lowerBoundTimeStamp.utcTimeInterval
+        case .upperInterval: return entity.eventTime?.upperBoundTimeStamp.utcTimeInterval
         }
     }
 }
@@ -69,13 +78,6 @@ private extension EventTime {
         switch self {
         case .at: return "at"
         case .period: return "period"
-        }
-    }
-    
-    var upperBoundWitShifttingIfNeed: TimeInterval {
-        switch self {
-        case .at(let time): return time.utcTimeInterval + 1
-        case .period(let range): return range.upperBound.utcTimeInterval
         }
     }
 }
