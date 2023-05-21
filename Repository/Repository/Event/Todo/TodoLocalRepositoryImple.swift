@@ -17,13 +17,10 @@ import Extensions
 public final class TodoLocalRepositoryImple: TodoEventRepository, Sendable {
     
     private let localStorage: TodoLocalStorage
-    private let eventEnumerator: EventRepeatTimeEnumerator
     public init(
-        localStorage: TodoLocalStorage,
-        eventEnumerator: EventRepeatTimeEnumerator
+        localStorage: TodoLocalStorage
     ) {
         self.localStorage = localStorage
-        self.eventEnumerator = eventEnumerator
     }
 }
 
@@ -78,13 +75,12 @@ extension TodoLocalRepositoryImple {
     private func replaceTodoNextEventTimeIfIsRepeating(_ origin: TodoEvent) async throws -> TodoEvent? {
         guard let repeating = origin.repeating,
               let time = origin.time,
-              let nextEventtime = self.eventEnumerator.nextEventTime(from: time, until: repeating.repeatingEndTime)
-        else {
-            return nil
-        }
-        let nextTodo = origin |> \.time .~ nextEventtime
+              let nextEventTime = EventRepeatTimeEnumerator(repeating.repeatOption)?.nextEventTime(from: time, until: repeating.repeatingEndTime)
+        else { return nil }
+        
+        let nextTodo = origin |> \.time .~ nextEventTime
         try await self.localStorage.updateTodoEvent(nextTodo)
-        return origin |> \.time .~ nextEventtime
+        return origin |> \.time .~ nextEventTime
     }
 }
 
