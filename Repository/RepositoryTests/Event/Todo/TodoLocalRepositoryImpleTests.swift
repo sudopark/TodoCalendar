@@ -156,9 +156,84 @@ extension TodoLocalRepositoryImpleTests {
 
 extension TodoLocalRepositoryImpleTests {
     
+    private func makeDummyTodo(
+        id: String,
+        time: TimeInterval? = nil,
+        from: TimeInterval? = nil,
+        end: TimeInterval? = nil
+    ) -> TodoEvent {
+        let repeating = from
+            .map {
+                EventRepeating(
+                    repeatingStartTime: .init($0, timeZone: "KST"),
+                    repeatOption: EventRepeatingOptions.EveryDay()
+                )
+                |> \.repeatingEndTime .~ end.map { .init($0, timeZone: "KST") }
+            }
+        return TodoEvent(uuid: id, name: "name:\(id)")
+            |> \.time .~ time.map { .at(.init($0, timeZone: "KST")) }
+            |> \.repeating .~ repeating
+    }
+    
+    private var dummyCurrentTodoAndHasTimes: [TodoEvent] {
+        
+        return [
+            self.makeDummyTodo(id: "left_out_at", time: 20),
+            self.makeDummyTodo(id: "left_out_range", time: 20, from: 20, end: 30),
+            self.makeDummyTodo(id: "left_join", time: 30, from: 30, end: 60),
+            self.makeDummyTodo(id: "contain_at", time: 70),
+            self.makeDummyTodo(id: "contain_range", time: 60, from: 50, end: 100),
+            self.makeDummyTodo(id: "right_join", time: 120, from: 120, end: 150),
+            self.makeDummyTodo(id: "right_out_range", time: 151, from: 151, end: 200),
+            self.makeDummyTodo(id: "right_out_at", time: 200),
+            self.makeDummyTodo(id: "bigger_closed", time: 0, from: 0, end: 400),
+            self.makeDummyTodo(id: "bigger_not_closed", time: 0, from: 0),
+            self.makeDummyTodo(id: "bigger_right_join", time: 100, from: 100),
+            self.makeDummyTodo(id: "not_join_bigger", time: 400, from: 400),
+            self.makeDummyTodo(id: "current1"),
+            self.makeDummyTodo(id: "current2")
+        ]
+    }
+    
     // save todo(current or not) + load current todo
+    func testRepository_loadCurrentTodos() {
+        // given
+        self.stubSaveTodo(self.dummyCurrentTodoAndHasTimes)
+        let expect = expectation(description: "현재 할일 로드")
+        let repositoty = self.makeRepository()
+        
+        // when
+        let load = repositoty.loadCurrentTodoEvents()
+        let currents = self.waitFirstOutput(expect, for: load, timeout: 1) ?? []
+        
+        // then
+        let ids = currents.map { $0.uuid } |> Set.init
+        XCTAssertEqual(ids, ["current1", "current2"])
+    }
     
     // save todo(currnt or not) + load todos in range
+    func testReposiotry_loadTodosInRange() {
+        // given
+        self.stubSaveTodo(self.dummyCurrentTodoAndHasTimes)
+        let expect = expectation(description: "조회 범위에 해당하는 todo 로드")
+        let repository = self.makeRepository()
+        
+        // when
+        let range = TimeStamp(50, timeZone: "KST")..<TimeStamp(150, timeZone: "KST")
+        let load = repository.loadTodoEvents(in: range)
+        let todos = self.waitFirstOutput(expect, for: load, timeout: 1) ?? []
+        
+        // then
+        let ids = todos.map { $0.uuid } |> Set.init
+        XCTAssertEqual(ids, [
+            "left_join",
+            "contain_at", "contain_range",
+            "right_join",
+            "bigger_closed",
+            "bigger_not_closed",
+            "bigger_right_join"
+        ])
+    }
 }
 
 extension TodoLocalRepositoryImpleTests {
