@@ -16,6 +16,8 @@ struct EventTimeTable: Table {
         case eventId = "event_id"
         case timeType = "time_type"
         case timezone
+        case timeLowerInterval = "tl_interval"
+        case timeUpperInterval = "tu_interval"
         case lowerInterval = "l_interval"
         case upperInterval = "u_interval"
         
@@ -24,6 +26,8 @@ struct EventTimeTable: Table {
             case .eventId: return .text([.unique, .notNull])
             case .timeType: return .text([])
             case .timezone: return .text([])
+            case .timeLowerInterval: return .real([])
+            case .timeUpperInterval: return .real([])
             case .lowerInterval: return .real([])
             case .upperInterval: return .real([])
             }
@@ -33,28 +37,32 @@ struct EventTimeTable: Table {
     struct Entity: RowValueType {
         let eventTime: EventTime?
         let eventId: String
+        fileprivate var repeating: EventRepeating?
         
         init(_ cursor: CursorIterator) throws {
             self.eventId = try cursor.next().unwrap()
             guard let timeType: String = try? cursor.next().unwrap(),
                   let timeZone: String = try? cursor.next().unwrap(),
-                  let lowerInterval: Double = try? cursor.next().unwrap(),
-                  let upperInterval: Double = try? cursor.next().unwrap()
+                  let timeLowerInterval: Double = try? cursor.next().unwrap(),
+                  let timeUpperInterval: Double = try? cursor.next().unwrap()
             else{
                 self.eventTime = nil
                 return
             }
+            let _: Double? = cursor.next()
+            let _: Double? = cursor.next()
             
             if timeType == "at" {
-                self.eventTime = .at(TimeStamp(lowerInterval, timeZone: timeZone))
+                self.eventTime = .at(TimeStamp(timeLowerInterval, timeZone: timeZone))
             } else {
-                self.eventTime = .period(TimeStamp(lowerInterval, timeZone: timeZone)..<TimeStamp(upperInterval, timeZone: timeZone))
+                self.eventTime = .period(TimeStamp(timeLowerInterval, timeZone: timeZone)..<TimeStamp(timeUpperInterval, timeZone: timeZone))
             }
         }
         
-        init(_ eventId: String, _ time: EventTime?) {
+        init(_ eventId: String, _ time: EventTime?, _ repeating: EventRepeating?) {
             self.eventId = eventId
             self.eventTime = time
+            self.repeating = repeating
         }
     }
     
@@ -67,8 +75,19 @@ struct EventTimeTable: Table {
         case .eventId: return entity.eventId
         case .timeType: return entity.eventTime?.typeText
         case .timezone: return entity.eventTime?.lowerBoundTimeStamp.timeZoneAbbreviation
-        case .lowerInterval: return entity.eventTime?.lowerBoundTimeStamp.utcTimeInterval
-        case .upperInterval: return entity.eventTime?.upperBoundTimeStamp.utcTimeInterval
+        case .timeLowerInterval:
+            return entity.eventTime?.lowerBoundTimeStamp.utcTimeInterval
+        case .timeUpperInterval:
+            return entity.eventTime?.upperBoundTimeStamp.utcTimeInterval
+        case .lowerInterval:
+            return entity.repeating?.repeatingStartTime.utcTimeInterval
+                ?? entity.eventTime?.lowerBoundTimeStamp.utcTimeInterval
+        case .upperInterval:
+            if let repeating = entity.repeating {
+                return repeating.repeatingEndTime?.utcTimeInterval
+            } else {
+                return entity.eventTime?.upperBoundTimeStamp.utcTimeInterval
+            }
         }
     }
 }
