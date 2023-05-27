@@ -26,3 +26,16 @@ public struct EventTag {
         self.colorHex = colorHex
     }
 }
+
+
+public struct EventTagMakeParams {
+    public var name: String
+    public var colorHext: String
+    
+    public init(name: String, colorHex: String) {
+        self.name = name
+        self.colorHext = colorHex
+    }
+}
+
+public typealias EventTagEditParams = EventTagMakeParams

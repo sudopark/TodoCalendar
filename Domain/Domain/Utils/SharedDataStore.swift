@@ -14,6 +14,7 @@ public enum ShareDataKeys: String {
     case todos
     case doneTodos
     case schedules
+    case tags
 }
 
 
