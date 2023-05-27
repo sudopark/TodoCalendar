@@ -334,8 +334,42 @@ extension TodoLocalRepositoryImpleTests {
 extension TodoLocalRepositoryImpleTests {
     
     // replace repeating todo -> with next todo
+    func testRepository_replaceRepeatingTodoOlyThisTime_andNextTodoExists() async {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100, from: 100)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let params = self.dummyMakeParams
+        let result = try? await repository.replaceRepeatingTodo(current: origin.uuid, to: params)
+        let todos = try? await repository.loadTodoEvents(in: self.dummyRange(0..<24*3600+200)).values.first(where: { _ in true })
+        
+        // then
+        XCTAssertNotEqual(result?.newTodoEvent.uuid, "origin")
+        XCTAssertEqual(result?.newTodoEvent.name, params.name)
+        XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(.init(100+24*3600, timeZone: "KST")))
+        let updated = todos?.first(where: { $0.uuid == origin.uuid })
+        XCTAssertEqual(updated?.time, .at(.init(100+24*3600, timeZone: "KST")))
+    }
     
     // replace repeating todo -> without next todo
-    
-    // replace repeating todo -> origin todo will updated
+    func testRepository_replaceRepeatingTodoOnlyThisTime_andNextTodoNotExists() async {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100, from: 100, end: 200)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let params = self.dummyMakeParams
+        let result = try? await repository.replaceRepeatingTodo(current: origin.uuid, to: params)
+        let todos = try? await repository.loadTodoEvents(in: self.dummyRange(0..<24*3600+200)).values.first(where: { _ in true })
+        
+        // then
+        XCTAssertNotEqual(result?.newTodoEvent.uuid, "origin")
+        XCTAssertEqual(result?.newTodoEvent.name, params.name)
+        XCTAssertNil(result?.nextRepeatingTodoEvent)
+        let updated = todos?.first(where: { $0.uuid == origin.uuid })
+        XCTAssertNil(updated)
+    }
 }
