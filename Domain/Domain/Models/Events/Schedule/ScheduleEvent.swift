@@ -65,7 +65,7 @@ public struct ScheduleEvent {
             |> \.time .~ (params.time ?? self.time)
             |> \.eventTagId .~ params.eventTagId
             |> \.repeating .~ params.repeating
-            |> \.showTurn .~ (params.showTurn ?? self.showTurn)
+            |> \.showTurn .~ (params.showTurn ?? false)
     }
 }
 
