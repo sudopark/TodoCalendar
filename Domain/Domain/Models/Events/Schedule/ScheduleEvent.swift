@@ -39,12 +39,33 @@ public struct ScheduleEvent {
         self.time = time
     }
     
+    public init?(_ params: ScheduleMakeParams) {
+        guard let name = params.name,
+              let time = params.time
+        else { return nil }
+        self.uuid = UUID().uuidString
+        self.name = name
+        self.time = time
+        self.eventTagId = params.eventTagId
+        self.repeating = params.repeating
+        self.showTurn = params.showTurn ?? false
+    }
+    
     func isOverlap(with period: Range<TimeStamp>) -> Bool {
         if let repeating {
             return repeating.isOverlap(with: period)
         } else {
             return time.isOverlap(with: period)
         }
+    }
+    
+    public func apply(_ params: ScheduleEditParams) -> ScheduleEvent {
+        return self
+            |> \.name .~ (params.name ?? self.name)
+            |> \.time .~ (params.time ?? self.time)
+            |> \.eventTagId .~ params.eventTagId
+            |> \.repeating .~ params.repeating
+            |> \.showTurn .~ (params.showTurn ?? self.showTurn)
     }
 }
 
