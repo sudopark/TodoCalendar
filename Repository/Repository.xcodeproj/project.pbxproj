@@ -10,6 +10,7 @@
 		F6078D742A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D732A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift */; };
 		F6078D782A21FC8B006B4879 /* ScheduleEventTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D772A21FC8B006B4879 /* ScheduleEventTable.swift */; };
 		F6078D7A2A21FC97006B4879 /* ScheduleEventLocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D792A21FC97006B4879 /* ScheduleEventLocalStorage.swift */; };
+		F6078D7D2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D7C2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift */; };
 		F6C58CCA2A111A89002BA9B7 /* Repository.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C58CC12A111A89002BA9B7 /* Repository.framework */; };
 		F6C58CCF2A111A89002BA9B7 /* RepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58CCE2A111A89002BA9B7 /* RepositoryTests.swift */; };
 		F6C58CD02A111A89002BA9B7 /* Repository.h in Headers */ = {isa = PBXBuildFile; fileRef = F6C58CC42A111A89002BA9B7 /* Repository.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -43,6 +44,7 @@
 		F6078D732A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventLocalRepositoryImple.swift; sourceTree = "<group>"; };
 		F6078D772A21FC8B006B4879 /* ScheduleEventTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventTable.swift; sourceTree = "<group>"; };
 		F6078D792A21FC97006B4879 /* ScheduleEventLocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventLocalStorage.swift; sourceTree = "<group>"; };
+		F6078D7C2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventLocalRepositoryImpleTests.swift; sourceTree = "<group>"; };
 		F6C58CC12A111A89002BA9B7 /* Repository.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Repository.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6C58CC42A111A89002BA9B7 /* Repository.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Repository.h; sourceTree = "<group>"; };
 		F6C58CC92A111A89002BA9B7 /* RepositoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepositoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -104,6 +106,14 @@
 				F6078D792A21FC97006B4879 /* ScheduleEventLocalStorage.swift */,
 			);
 			path = Local;
+			sourceTree = "<group>";
+		};
+		F6078D7B2A2213F2006B4879 /* Schedule */ = {
+			isa = PBXGroup;
+			children = (
+				F6078D7C2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift */,
+			);
+			path = Schedule;
 			sourceTree = "<group>";
 		};
 		F6C58CB72A111A89002BA9B7 = {
@@ -199,6 +209,7 @@
 			isa = PBXGroup;
 			children = (
 				F6C58CFE2A189690002BA9B7 /* Todo */,
+				F6078D7B2A2213F2006B4879 /* Schedule */,
 			);
 			path = Event;
 			sourceTree = "<group>";
@@ -348,6 +359,7 @@
 				F6C58D072A19E8A6002BA9B7 /* BaseLocalTests.swift in Sources */,
 				F6C58CCF2A111A89002BA9B7 /* RepositoryTests.swift in Sources */,
 				F6C58D042A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift in Sources */,
+				F6078D7D2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
