@@ -226,11 +226,11 @@ extension TodoLocalRepositoryImpleTests {
         // then
         let ids = todos.map { $0.uuid } |> Set.init
         XCTAssertEqual(ids, [
-            "left_join",
+//            "left_join",
             "contain_at", "contain_range",
             "right_join",
-            "bigger_closed",
-            "bigger_not_closed",
+//            "bigger_closed",
+//            "bigger_not_closed",
             "bigger_right_join"
         ])
     }

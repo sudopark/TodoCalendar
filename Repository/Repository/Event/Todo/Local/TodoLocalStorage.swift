@@ -46,29 +46,9 @@ extension TodoLocalStorage {
     }
     
     func loadTodoEvents(in range: Range<TimeStamp>) async throws -> [TodoEvent] {
-        // 항상 l <= u, L <= U 이고
-        // todo의 기간이 l..<u 이며 조회 기간이 L..<U 이라 할때
-        // 조회에서 제외되는 조건은 ( l < L && u < L) || ( U <= l && U <= u)
-        // 이를 뒤집으면 => (l >= L || u >= L) && ( U > l ||  U > u)
-        
-        // 1. endtime이 없는경우 null로 저장되기떄문에 l,u >= L 인지 판단하는 로직을 대신해여함
-        // 2. l, u < U의 경우는 u가 무한이라면 성립하지 않기 때문에 검사 불필요
-        // 1번의 경우 currentTime인 경우도 같이 조회될수있기때문에 filtering 해줘야함 -> upper bound가 null 인 경우는 current Todo 이거나 반복일정이 없는경우만 해당되기 때문에
-        // current는 조회에서 제외될것이고 -> lowerInterval 없어서 필터잉
-        // 반복일정이 없는 경우는 lower=upper 이기때문에 조건식을 만족못하면 걸러짐
         let timeQuery = Times.selectAll()
-            .where {
-                $0.lowerInterval >= range.lowerBound.utcTimeInterval
-                ||
-                $0.upperInterval >= range.lowerBound.utcTimeInterval
-                ||
-                $0.upperInterval.isNull()
-            }
-            .where {
-                $0.lowerInterval < range.upperBound.utcTimeInterval
-                ||
-                $0.upperInterval < range.upperBound.utcTimeInterval
-            }
+            .where { $0.timeLowerInterval >= range.lowerBound.utcTimeInterval }
+            .where { $0.timeUpperInterval < range.upperBound.utcTimeInterval }
         let eventQuery = Todo.selectAll()
         return try await self.loadTodoEvents(timeQuery, eventQuery)
     }
