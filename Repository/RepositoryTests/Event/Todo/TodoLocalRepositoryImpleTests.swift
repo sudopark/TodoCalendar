@@ -239,14 +239,95 @@ extension TodoLocalRepositoryImpleTests {
 extension TodoLocalRepositoryImpleTests {
     
     // complete current todo -> no next event
+    func testRepository_completeCurrentTodo() async {
+        // given
+        let origin = self.makeDummyTodo(id: "origin")
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.completeTodo(origin.uuid)
+        
+        // then
+        XCTAssertEqual(result?.doneEvent.originEventId, "origin")
+        XCTAssertNil(result?.nextRepeatingTodoEvent)
+    }
     
     // complete not repeating todo -> no next event
+    func testRepository_completeNotRepeatingTodo() async {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.completeTodo(origin.uuid)
+        
+        // then
+        XCTAssertEqual(result?.doneEvent.originEventId, "origin")
+        XCTAssertNil(result?.nextRepeatingTodoEvent)
+    }
     
     // complete repeating todo -> has next evnet
+    func testRepository_completeRepeatingEvent() async {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100, from: 100)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.completeTodo(origin.uuid)
+        
+        // then
+        XCTAssertEqual(result?.doneEvent.originEventId, "origin")
+        XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(.init(100 + 3600*24, timeZone: "KST")))
+    }
     
     // complete reapting todo + next event time is over end time -> no next event
+    func testRepository_completeRepeatingEventButNextTimeIsNotExists() async {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100, from: 100, end: 200)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.completeTodo(origin.uuid)
+        
+        // then
+        XCTAssertEqual(result?.doneEvent.originEventId, "origin")
+        XCTAssertNil(result?.nextRepeatingTodoEvent)
+    }
     
     // complete todo -> todo will updated
+    func testRepository_whenAfterCompleteRepeatingTodo_originEventWillUpdated() async {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100, from: 100)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let _ = try? await repository.completeTodo(origin.uuid)
+        let todos = try? await repository.loadTodoEvents(in: self.dummyRange(0..<24*3600+200)).values.first(where: { _ in true })
+        
+        // then
+        let updated = todos?.first(where: { $0.uuid == origin.uuid })
+        XCTAssertEqual(updated?.time, .at(.init(100+24*3600, timeZone: "KST")))
+    }
+    
+    func testRepository_whenAfterNotRepeatingTodo_originEventWillRemoved() async {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let _ = try? await repository.completeTodo(origin.uuid)
+        let todos = try? await repository.loadTodoEvents(in: self.dummyRange(0..<24*3600+200)).values.first(where: { _ in true })
+        
+        // then
+        let updated = todos?.first(where: { $0.uuid == origin.uuid })
+        XCTAssertNil(updated)
+    }
 }
 
 
