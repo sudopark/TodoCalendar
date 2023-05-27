@@ -83,7 +83,7 @@ public enum EventTime: Comparable {
         return lhs.lowerBound < rhs.lowerBound
     }
     
-    var customKey: String {
+    public var customKey: String {
         switch self {
         case .at(let time): return "\(time.utcTimeInterval)"
         case .period(let range):
