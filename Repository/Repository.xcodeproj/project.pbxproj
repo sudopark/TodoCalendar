@@ -11,6 +11,10 @@
 		F6078D782A21FC8B006B4879 /* ScheduleEventTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D772A21FC8B006B4879 /* ScheduleEventTable.swift */; };
 		F6078D7A2A21FC97006B4879 /* ScheduleEventLocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D792A21FC97006B4879 /* ScheduleEventLocalStorage.swift */; };
 		F6078D7D2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D7C2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift */; };
+		F6957FC52A2313F40064E8BD /* EventTagTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FC42A2313F40064E8BD /* EventTagTable.swift */; };
+		F6957FC72A2315090064E8BD /* EventTagLocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FC62A2315090064E8BD /* EventTagLocalStorage.swift */; };
+		F6957FC92A2317440064E8BD /* EventTagLocalRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FC82A2317440064E8BD /* EventTagLocalRepositoryImple.swift */; };
+		F6957FCC2A231A390064E8BD /* EventTagLocalRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FCB2A231A390064E8BD /* EventTagLocalRepositoryImpleTests.swift */; };
 		F6C58CCA2A111A89002BA9B7 /* Repository.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6C58CC12A111A89002BA9B7 /* Repository.framework */; };
 		F6C58CCF2A111A89002BA9B7 /* RepositoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58CCE2A111A89002BA9B7 /* RepositoryTests.swift */; };
 		F6C58CD02A111A89002BA9B7 /* Repository.h in Headers */ = {isa = PBXBuildFile; fileRef = F6C58CC42A111A89002BA9B7 /* Repository.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -45,6 +49,10 @@
 		F6078D772A21FC8B006B4879 /* ScheduleEventTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventTable.swift; sourceTree = "<group>"; };
 		F6078D792A21FC97006B4879 /* ScheduleEventLocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventLocalStorage.swift; sourceTree = "<group>"; };
 		F6078D7C2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventLocalRepositoryImpleTests.swift; sourceTree = "<group>"; };
+		F6957FC42A2313F40064E8BD /* EventTagTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagTable.swift; sourceTree = "<group>"; };
+		F6957FC62A2315090064E8BD /* EventTagLocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagLocalStorage.swift; sourceTree = "<group>"; };
+		F6957FC82A2317440064E8BD /* EventTagLocalRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagLocalRepositoryImple.swift; sourceTree = "<group>"; };
+		F6957FCB2A231A390064E8BD /* EventTagLocalRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagLocalRepositoryImpleTests.swift; sourceTree = "<group>"; };
 		F6C58CC12A111A89002BA9B7 /* Repository.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Repository.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6C58CC42A111A89002BA9B7 /* Repository.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Repository.h; sourceTree = "<group>"; };
 		F6C58CC92A111A89002BA9B7 /* RepositoryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RepositoryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -94,7 +102,6 @@
 			isa = PBXGroup;
 			children = (
 				F6078D762A21FC70006B4879 /* Local */,
-				F6078D732A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift */,
 			);
 			path = Schedule;
 			sourceTree = "<group>";
@@ -104,6 +111,7 @@
 			children = (
 				F6078D772A21FC8B006B4879 /* ScheduleEventTable.swift */,
 				F6078D792A21FC97006B4879 /* ScheduleEventLocalStorage.swift */,
+				F6078D732A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift */,
 			);
 			path = Local;
 			sourceTree = "<group>";
@@ -114,6 +122,32 @@
 				F6078D7C2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift */,
 			);
 			path = Schedule;
+			sourceTree = "<group>";
+		};
+		F6957FC22A2313DD0064E8BD /* EventTag */ = {
+			isa = PBXGroup;
+			children = (
+				F6957FC32A2313EB0064E8BD /* Local */,
+			);
+			path = EventTag;
+			sourceTree = "<group>";
+		};
+		F6957FC32A2313EB0064E8BD /* Local */ = {
+			isa = PBXGroup;
+			children = (
+				F6957FC42A2313F40064E8BD /* EventTagTable.swift */,
+				F6957FC62A2315090064E8BD /* EventTagLocalStorage.swift */,
+				F6957FC82A2317440064E8BD /* EventTagLocalRepositoryImple.swift */,
+			);
+			path = Local;
+			sourceTree = "<group>";
+		};
+		F6957FCA2A231A280064E8BD /* EventTag */ = {
+			isa = PBXGroup;
+			children = (
+				F6957FCB2A231A390064E8BD /* EventTagLocalRepositoryImpleTests.swift */,
+			);
+			path = EventTag;
 			sourceTree = "<group>";
 		};
 		F6C58CB72A111A89002BA9B7 = {
@@ -173,6 +207,7 @@
 				F6C58CF22A111CCE002BA9B7 /* TodoEventTable.swift */,
 				F6C58D012A19E640002BA9B7 /* DoneTodoEventTable.swift */,
 				F6C58CDB2A111AF6002BA9B7 /* TodoLocalStorage.swift */,
+				F6C58CFF2A189BFF002BA9B7 /* TodoLocalRepositoryImple.swift */,
 			);
 			path = Local;
 			sourceTree = "<group>";
@@ -183,6 +218,7 @@
 				F6C58CF62A111D57002BA9B7 /* Common */,
 				F6C58CF52A111D4F002BA9B7 /* Todo */,
 				F6078D722A21FBDB006B4879 /* Schedule */,
+				F6957FC22A2313DD0064E8BD /* EventTag */,
 			);
 			path = Event;
 			sourceTree = "<group>";
@@ -191,7 +227,6 @@
 			isa = PBXGroup;
 			children = (
 				F6C58CF12A111CC3002BA9B7 /* Local */,
-				F6C58CFF2A189BFF002BA9B7 /* TodoLocalRepositoryImple.swift */,
 			);
 			path = Todo;
 			sourceTree = "<group>";
@@ -210,6 +245,7 @@
 			children = (
 				F6C58CFE2A189690002BA9B7 /* Todo */,
 				F6078D7B2A2213F2006B4879 /* Schedule */,
+				F6957FCA2A231A280064E8BD /* EventTag */,
 			);
 			path = Event;
 			sourceTree = "<group>";
@@ -344,9 +380,12 @@
 				F6C58CF32A111CCE002BA9B7 /* TodoEventTable.swift in Sources */,
 				F6078D7A2A21FC97006B4879 /* ScheduleEventLocalStorage.swift in Sources */,
 				F6078D782A21FC8B006B4879 /* ScheduleEventTable.swift in Sources */,
+				F6957FC52A2313F40064E8BD /* EventTagTable.swift in Sources */,
+				F6957FC92A2317440064E8BD /* EventTagLocalRepositoryImple.swift in Sources */,
 				F6C58D002A189BFF002BA9B7 /* TodoLocalRepositoryImple.swift in Sources */,
 				F6C58D022A19E640002BA9B7 /* DoneTodoEventTable.swift in Sources */,
 				F6078D742A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift in Sources */,
+				F6957FC72A2315090064E8BD /* EventTagLocalStorage.swift in Sources */,
 				F6C58CDC2A111AF6002BA9B7 /* TodoLocalStorage.swift in Sources */,
 				F6C58CFC2A112432002BA9B7 /* EventRepeatingOption+CodableMapper.swift in Sources */,
 			);
@@ -359,6 +398,7 @@
 				F6C58D072A19E8A6002BA9B7 /* BaseLocalTests.swift in Sources */,
 				F6C58CCF2A111A89002BA9B7 /* RepositoryTests.swift in Sources */,
 				F6C58D042A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift in Sources */,
+				F6957FCC2A231A390064E8BD /* EventTagLocalRepositoryImpleTests.swift in Sources */,
 				F6078D7D2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
