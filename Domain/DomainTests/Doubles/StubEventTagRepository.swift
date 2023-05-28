@@ -22,7 +22,7 @@ class StubEventTagRepository: EventTagRepository, BaseStub, @unchecked Sendable 
         if let error = self.makeFailError {
             throw error
         }
-        return EventTag(name: params.name, colorHex: params.colorHext)
+        return EventTag(name: params.name, colorHex: params.colorHex)
     }
     
     var updateFailError: Error?
@@ -30,7 +30,7 @@ class StubEventTagRepository: EventTagRepository, BaseStub, @unchecked Sendable 
         if let error = updateFailError {
             throw error
         }
-        return EventTag(uuid: tagId, name: params.name, colorHex: params.colorHext)
+        return EventTag(uuid: tagId, name: params.name, colorHex: params.colorHex)
     }
     
     var shouldFailLoadTagsInRange: Bool = false
