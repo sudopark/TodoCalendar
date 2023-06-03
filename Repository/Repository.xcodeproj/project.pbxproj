@@ -32,6 +32,10 @@
 		F6C58D022A19E640002BA9B7 /* DoneTodoEventTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58D012A19E640002BA9B7 /* DoneTodoEventTable.swift */; };
 		F6C58D042A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58D032A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift */; };
 		F6C58D072A19E8A6002BA9B7 /* BaseLocalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58D062A19E8A6002BA9B7 /* BaseLocalTests.swift */; };
+		F6E35D5B2A2B8E5600BDA545 /* EnvironmentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D5A2A2B8E5600BDA545 /* EnvironmentStorage.swift */; };
+		F6E35D5F2A2B914900BDA545 /* TimeZoneRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D5E2A2B914900BDA545 /* TimeZoneRepositoryImple.swift */; };
+		F6E35D632A2B927000BDA545 /* FakeEnvironmentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D622A2B927000BDA545 /* FakeEnvironmentStorage.swift */; };
+		F6E35D652A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D642A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +75,10 @@
 		F6C58D012A19E640002BA9B7 /* DoneTodoEventTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoneTodoEventTable.swift; sourceTree = "<group>"; };
 		F6C58D032A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoLocalRepositoryImpleTests.swift; sourceTree = "<group>"; };
 		F6C58D062A19E8A6002BA9B7 /* BaseLocalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseLocalTests.swift; sourceTree = "<group>"; };
+		F6E35D5A2A2B8E5600BDA545 /* EnvironmentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentStorage.swift; sourceTree = "<group>"; };
+		F6E35D5E2A2B914900BDA545 /* TimeZoneRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeZoneRepositoryImple.swift; sourceTree = "<group>"; };
+		F6E35D622A2B927000BDA545 /* FakeEnvironmentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeEnvironmentStorage.swift; sourceTree = "<group>"; };
+		F6E35D642A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeZoneRepositoryImpleTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,6 +180,8 @@
 		F6C58CC32A111A89002BA9B7 /* Repository */ = {
 			isa = PBXGroup;
 			children = (
+				F6E35D5C2A2B8E5B00BDA545 /* Storages */,
+				F6E35D5D2A2B913100BDA545 /* Time */,
 				F6C58CF42A111D45002BA9B7 /* Event */,
 				F6C58CC42A111A89002BA9B7 /* Repository.h */,
 			);
@@ -181,6 +191,8 @@
 		F6C58CCD2A111A89002BA9B7 /* RepositoryTests */ = {
 			isa = PBXGroup;
 			children = (
+				F6E35D612A2B925C00BDA545 /* Doubles */,
+				F6E35D602A2B925400BDA545 /* Time */,
 				F6C58D052A19E891002BA9B7 /* Common */,
 				F6C58CFD2A189688002BA9B7 /* Event */,
 				F6C58CCE2A111A89002BA9B7 /* RepositoryTests.swift */,
@@ -264,6 +276,38 @@
 				F6C58D062A19E8A6002BA9B7 /* BaseLocalTests.swift */,
 			);
 			path = Common;
+			sourceTree = "<group>";
+		};
+		F6E35D5C2A2B8E5B00BDA545 /* Storages */ = {
+			isa = PBXGroup;
+			children = (
+				F6E35D5A2A2B8E5600BDA545 /* EnvironmentStorage.swift */,
+			);
+			path = Storages;
+			sourceTree = "<group>";
+		};
+		F6E35D5D2A2B913100BDA545 /* Time */ = {
+			isa = PBXGroup;
+			children = (
+				F6E35D5E2A2B914900BDA545 /* TimeZoneRepositoryImple.swift */,
+			);
+			path = Time;
+			sourceTree = "<group>";
+		};
+		F6E35D602A2B925400BDA545 /* Time */ = {
+			isa = PBXGroup;
+			children = (
+				F6E35D642A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift */,
+			);
+			path = Time;
+			sourceTree = "<group>";
+		};
+		F6E35D612A2B925C00BDA545 /* Doubles */ = {
+			isa = PBXGroup;
+			children = (
+				F6E35D622A2B927000BDA545 /* FakeEnvironmentStorage.swift */,
+			);
+			path = Doubles;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -384,8 +428,10 @@
 				F6957FC92A2317440064E8BD /* EventTagLocalRepositoryImple.swift in Sources */,
 				F6C58D002A189BFF002BA9B7 /* TodoLocalRepositoryImple.swift in Sources */,
 				F6C58D022A19E640002BA9B7 /* DoneTodoEventTable.swift in Sources */,
+				F6E35D5F2A2B914900BDA545 /* TimeZoneRepositoryImple.swift in Sources */,
 				F6078D742A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift in Sources */,
 				F6957FC72A2315090064E8BD /* EventTagLocalStorage.swift in Sources */,
+				F6E35D5B2A2B8E5600BDA545 /* EnvironmentStorage.swift in Sources */,
 				F6C58CDC2A111AF6002BA9B7 /* TodoLocalStorage.swift in Sources */,
 				F6C58CFC2A112432002BA9B7 /* EventRepeatingOption+CodableMapper.swift in Sources */,
 			);
@@ -396,9 +442,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6C58D072A19E8A6002BA9B7 /* BaseLocalTests.swift in Sources */,
+				F6E35D652A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift in Sources */,
 				F6C58CCF2A111A89002BA9B7 /* RepositoryTests.swift in Sources */,
 				F6C58D042A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift in Sources */,
 				F6957FCC2A231A390064E8BD /* EventTagLocalRepositoryImpleTests.swift in Sources */,
+				F6E35D632A2B927000BDA545 /* FakeEnvironmentStorage.swift in Sources */,
 				F6078D7D2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
