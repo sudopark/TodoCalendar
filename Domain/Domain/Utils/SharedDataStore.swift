@@ -16,6 +16,8 @@ public enum ShareDataKeys: String {
     case schedules
     case tags
     case timeZone
+    case currentCountry
+    case availableCountries
 }
 
 
