@@ -29,6 +29,8 @@ class StubHolidayRepository: HolidayRepository {
     }
     
     func loadHolidays(_ year: Int, _ countryCode: String, shouldIgnoreCache: Bool) async throws -> [Holiday] {
-        return []
+        return [
+            .init(dateString: "\(year)", localName: "\(countryCode)", name: "dummy")
+        ]
     }
 }

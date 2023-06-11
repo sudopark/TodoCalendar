@@ -21,7 +21,7 @@ public struct HolidaySupportCountry {
     }
 }
 
-public struct Holiday {
+public struct Holiday: Equatable {
     
     public let dateString: String
     public let localName: String
