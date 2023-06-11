@@ -89,7 +89,7 @@ extension HolidayUsecaseImple {
         else {
             return nil
         }
-        try await self.holidayRepository.saveSelectedCountry(country.code)
+        try await self.holidayRepository.saveSelectedCountry(country)
         return country
     }
     
@@ -108,7 +108,7 @@ extension HolidayUsecaseImple {
     }
     
     public func selectCountry(_ country: HolidaySupportCountry) async throws {
-        try await self.holidayRepository.saveSelectedCountry(country.code)
+        try await self.holidayRepository.saveSelectedCountry(country)
         self.dataStore.put(
             HolidaySupportCountry.self,
             key: ShareDataKeys.currentCountry.rawValue,

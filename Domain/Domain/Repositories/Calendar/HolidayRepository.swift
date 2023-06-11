@@ -12,7 +12,7 @@ public protocol HolidayRepository {
     
     func loadAvailableCountrise() async throws -> [HolidaySupportCountry]
     func loadLatestSelectedCountry() async throws -> HolidaySupportCountry?
-    func saveSelectedCountry(_ code: String) async throws
+    func saveSelectedCountry(_ country: HolidaySupportCountry) async throws
     
     func loadHolidays(_ year: Int, _ countryCode: String, shouldIgnoreCache: Bool) async throws -> [Holiday]
 }

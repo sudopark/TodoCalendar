@@ -24,8 +24,8 @@ class StubHolidayRepository: HolidayRepository {
         return self.currentCountry
     }
     
-    func saveSelectedCountry(_ code: String) async throws {
-        self.currentCountry = .init(code: code, name: "name:\(code)")
+    func saveSelectedCountry(_ country: HolidaySupportCountry) async throws {
+        self.currentCountry = country
     }
     
     func loadHolidays(_ year: Int, _ countryCode: String, shouldIgnoreCache: Bool) async throws -> [Holiday] {
