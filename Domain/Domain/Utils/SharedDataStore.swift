@@ -18,6 +18,7 @@ public enum ShareDataKeys: String {
     case timeZone
     case currentCountry
     case availableCountries
+    case holidays
 }
 
 

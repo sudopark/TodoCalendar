@@ -23,8 +23,8 @@ public protocol HolidayUsecase {
     var currentSelectedCountry: AnyPublisher<HolidaySupportCountry, Never> { get }
     var availableCountries: AnyPublisher<[HolidaySupportCountry], Never> { get }
     
-    func refreshHolidays() async throws
-    func holidays(year: Int, countryCode: String) -> AnyPublisher<[Holiday], Never>
+    func refreshHolidays(_ year: Int) async throws
+    func holidays() -> AnyPublisher<[Int: [Holiday]], Never>
 }
 
 
@@ -59,6 +59,8 @@ public final class HolidayUsecaseImple: HolidayUsecase {
         self.dataStore = dataStore
         self.localeProvider = localeProvider
     }
+    
+    private typealias Holidays = [String: [Int: [Holiday]]]
 }
 
 
@@ -134,11 +136,34 @@ extension HolidayUsecaseImple {
 
 extension HolidayUsecaseImple {
     
-    public func refreshHolidays() async throws {
+    public func refreshHolidays(_ year: Int) async throws {
+        guard let currentCountry = self.dataStore.value(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue)
+        else { return }
         
+        let holidays = try await self.holidayRepository.loadHolidays(year, currentCountry.code, shouldIgnoreCache: false)
+        let shareKey = ShareDataKeys.holidays.rawValue
+        self.dataStore.update(Holidays.self, key: shareKey) { old in
+            return (old ?? [:]) |> key(currentCountry.code) %~ {
+                return ($0 ?? [:]) |> key(year) .~ holidays
+            }
+        }
     }
     
-    public func holidays(year: Int, countryCode: String) -> AnyPublisher<[Holiday], Never> {
-        return Empty().eraseToAnyPublisher()
+    public func holidays() -> AnyPublisher<[Int: [Holiday]], Never> {
+        
+        let asCountryHoliday: (HolidaySupportCountry) -> AnyPublisher<[Int: [Holiday]], Never>?
+        asCountryHoliday = { [weak self] country in
+            guard let self = self else { return nil }
+            return self.dataStore
+                .observe(Holidays.self, key: ShareDataKeys.holidays.rawValue)
+                .compactMap { $0 }
+                .map { $0[country.code] ?? [:] }
+                .eraseToAnyPublisher()
+        }
+        
+        return self.currentSelectedCountry
+            .compactMap(asCountryHoliday)
+            .switchToLatest()
+            .eraseToAnyPublisher()
     }
 }

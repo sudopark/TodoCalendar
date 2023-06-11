@@ -140,6 +140,85 @@ extension HolidayUsecaseImpleTests {
     }
 }
 
+// MARK: - test holiday
+
+extension HolidayUsecaseImpleTests {
+    
+    func testUsecase_provideCurrentSelectedCountryHolidays() {
+        // given
+        let expect = expectation(description: "마지막에 저장했던 국가 기준으로 현재 년도 국경일 제공")
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "KR")
+        
+        // when
+        let holidays = self.waitFirstOutput(expect, for: usecase.holidays()) {
+            Task {
+                try await usecase.prepare()
+                try await usecase.refreshHolidays(2023)
+            }
+        }
+        
+        // then
+        XCTAssertEqual(holidays, [
+            2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]
+        ])
+    }
+    
+    func testUsecase_whenYearChanged_provideHolidays() {
+        // given
+        let expect = expectation(description: "조회 년도 변경시에 국경일 정보 추가해서 제공")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "KR")
+        
+        // when
+        let holidayMaps = self.waitOutputs(expect, for: usecase.holidays()) {
+            Task {
+                try await usecase.prepare()
+                try await usecase.refreshHolidays(2023)
+                try await usecase.refreshHolidays(2022)
+            }
+        }
+        
+        // then
+        XCTAssertEqual(holidayMaps, [
+            [
+                2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]
+            ],
+            [
+                2022: [.init(dateString: "2022", localName: "KR", name: "dummy")],
+                2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]
+            ]
+        ])
+    }
+    
+    func testUsecase_whenCountryChanged_provideChangedCountryHoliday() {
+        // given
+        let expect = expectation(description: "국가 변경시에 변경된 국가의 현재 년도 국경일 제공")
+        expect.expectedFulfillmentCount = 4
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "KR")
+        
+        // when
+        let holidayMaps = self.waitOutputs(expect, for: usecase.holidays()) {
+            Task {
+                try await usecase.prepare()
+                try await usecase.refreshHolidays(2023)
+                
+                try await usecase.selectCountry(.init(code: "US", name: "USA"))
+                try await usecase.refreshHolidays(2023)
+                
+                try await usecase.selectCountry(.init(code: "KR", name: "Korea"))
+            }
+        }
+        
+        // then
+        XCTAssertEqual(holidayMaps, [
+            [2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]],
+            [:],
+            [2023: [.init(dateString: "2023", localName: "US", name: "dummy")]],
+            [2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]],
+        ])
+    }
+}
+
 extension HolidayUsecaseImpleTests {
     
     private class StubLocalProvider: LocaleProvider {
