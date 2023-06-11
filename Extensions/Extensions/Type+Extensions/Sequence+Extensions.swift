@@ -12,4 +12,11 @@ extension Sequence {
     public func asDictionary<Key: Hashable>(_ keySelector: (Element) -> Key) -> [Key: Element] {
         return self.reduce(into: [Key: Element]()) { $0[keySelector($1)] = $1 }
     }
+    
+    public func asyncForEach(_ asyncTask: (Element) async throws -> Void) async rethrows {
+        
+        for element in self {
+            try await asyncTask(element)
+        }
+    }
 }
