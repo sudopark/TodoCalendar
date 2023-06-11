@@ -20,6 +20,7 @@
 		F63C9C9D29C6B2DC00CC663A /* Writer in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9C29C6B2DC00CC663A /* Writer */; };
 		F63C9CA029C6B31600CC663A /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9F29C6B31600CC663A /* AsyncAlgorithms */; };
 		F6C58CDF2A111C6A002BA9B7 /* SQLiteService in Frameworks */ = {isa = PBXBuildFile; productRef = F6C58CDE2A111C6A002BA9B7 /* SQLiteService */; };
+		F6CD67332A35A556007E4306 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = F6CD67322A35A556007E4306 /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 				F63C9C8D29C6B2DC00CC663A /* Either in Frameworks */,
 				F63C9C9929C6B2DC00CC663A /* ValidationNearSemiring in Frameworks */,
 				F63C9CA029C6B31600CC663A /* AsyncAlgorithms in Frameworks */,
+				F6CD67332A35A556007E4306 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -115,6 +117,7 @@
 				F63C9C9F29C6B31600CC663A /* AsyncAlgorithms */,
 				F60CBB6129CEADB200F03310 /* AsyncFlatMap */,
 				F6C58CDE2A111C6A002BA9B7 /* SQLiteService */,
+				F6CD67322A35A556007E4306 /* Alamofire */,
 			);
 			productName = Common3rdParty;
 			productReference = F63C9C3D29C6B0E100CC663A /* Common3rdParty.framework */;
@@ -148,6 +151,7 @@
 				F63C9C9E29C6B31600CC663A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
 				F60CBB6029CEADB200F03310 /* XCRemoteSwiftPackageReference "publisher-async-bind" */,
 				F6C58CDD2A111C6A002BA9B7 /* XCRemoteSwiftPackageReference "SQLiteService" */,
+				F6CD67312A35A556007E4306 /* XCRemoteSwiftPackageReference "Alamofire" */,
 			);
 			productRefGroup = F63C9C3E29C6B0E100CC663A /* Products */;
 			projectDirPath = "";
@@ -411,6 +415,14 @@
 				minimumVersion = 0.2.0;
 			};
 		};
+		F6CD67312A35A556007E4306 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -473,6 +485,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F6C58CDD2A111C6A002BA9B7 /* XCRemoteSwiftPackageReference "SQLiteService" */;
 			productName = SQLiteService;
+		};
+		F6CD67322A35A556007E4306 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F6CD67312A35A556007E4306 /* XCRemoteSwiftPackageReference "Alamofire" */;
+			productName = Alamofire;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
