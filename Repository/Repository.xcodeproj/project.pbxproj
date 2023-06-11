@@ -32,6 +32,8 @@
 		F6C58D022A19E640002BA9B7 /* DoneTodoEventTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58D012A19E640002BA9B7 /* DoneTodoEventTable.swift */; };
 		F6C58D042A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58D032A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift */; };
 		F6C58D072A19E8A6002BA9B7 /* BaseLocalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C58D062A19E8A6002BA9B7 /* BaseLocalTests.swift */; };
+		F6CD672C2A35A2EF007E4306 /* HolidayRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD672B2A35A2EF007E4306 /* HolidayRepositoryImple.swift */; };
+		F6CD672E2A35A331007E4306 /* RemoteAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD672D2A35A331007E4306 /* RemoteAPI.swift */; };
 		F6E35D5B2A2B8E5600BDA545 /* EnvironmentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D5A2A2B8E5600BDA545 /* EnvironmentStorage.swift */; };
 		F6E35D5F2A2B914900BDA545 /* TimeZoneRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D5E2A2B914900BDA545 /* TimeZoneRepositoryImple.swift */; };
 		F6E35D632A2B927000BDA545 /* FakeEnvironmentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D622A2B927000BDA545 /* FakeEnvironmentStorage.swift */; };
@@ -75,6 +77,8 @@
 		F6C58D012A19E640002BA9B7 /* DoneTodoEventTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoneTodoEventTable.swift; sourceTree = "<group>"; };
 		F6C58D032A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoLocalRepositoryImpleTests.swift; sourceTree = "<group>"; };
 		F6C58D062A19E8A6002BA9B7 /* BaseLocalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseLocalTests.swift; sourceTree = "<group>"; };
+		F6CD672B2A35A2EF007E4306 /* HolidayRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayRepositoryImple.swift; sourceTree = "<group>"; };
+		F6CD672D2A35A331007E4306 /* RemoteAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteAPI.swift; sourceTree = "<group>"; };
 		F6E35D5A2A2B8E5600BDA545 /* EnvironmentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentStorage.swift; sourceTree = "<group>"; };
 		F6E35D5E2A2B914900BDA545 /* TimeZoneRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeZoneRepositoryImple.swift; sourceTree = "<group>"; };
 		F6E35D622A2B927000BDA545 /* FakeEnvironmentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeEnvironmentStorage.swift; sourceTree = "<group>"; };
@@ -180,9 +184,9 @@
 		F6C58CC32A111A89002BA9B7 /* Repository */ = {
 			isa = PBXGroup;
 			children = (
-				F6E35D5C2A2B8E5B00BDA545 /* Storages */,
-				F6E35D5D2A2B913100BDA545 /* Time */,
-				F6C58CF42A111D45002BA9B7 /* Event */,
+				F6CD672F2A35A456007E4306 /* Remote */,
+				F6E35D5C2A2B8E5B00BDA545 /* Local */,
+				F6CD67302A35A48A007E4306 /* Repository+Imple */,
 				F6C58CC42A111A89002BA9B7 /* Repository.h */,
 			);
 			path = Repository;
@@ -278,20 +282,38 @@
 			path = Common;
 			sourceTree = "<group>";
 		};
-		F6E35D5C2A2B8E5B00BDA545 /* Storages */ = {
+		F6CD672F2A35A456007E4306 /* Remote */ = {
+			isa = PBXGroup;
+			children = (
+				F6CD672D2A35A331007E4306 /* RemoteAPI.swift */,
+			);
+			path = Remote;
+			sourceTree = "<group>";
+		};
+		F6CD67302A35A48A007E4306 /* Repository+Imple */ = {
+			isa = PBXGroup;
+			children = (
+				F6E35D5D2A2B913100BDA545 /* Calendar */,
+				F6C58CF42A111D45002BA9B7 /* Event */,
+			);
+			path = "Repository+Imple";
+			sourceTree = "<group>";
+		};
+		F6E35D5C2A2B8E5B00BDA545 /* Local */ = {
 			isa = PBXGroup;
 			children = (
 				F6E35D5A2A2B8E5600BDA545 /* EnvironmentStorage.swift */,
 			);
-			path = Storages;
+			path = Local;
 			sourceTree = "<group>";
 		};
-		F6E35D5D2A2B913100BDA545 /* Time */ = {
+		F6E35D5D2A2B913100BDA545 /* Calendar */ = {
 			isa = PBXGroup;
 			children = (
 				F6E35D5E2A2B914900BDA545 /* TimeZoneRepositoryImple.swift */,
+				F6CD672B2A35A2EF007E4306 /* HolidayRepositoryImple.swift */,
 			);
-			path = Time;
+			path = Calendar;
 			sourceTree = "<group>";
 		};
 		F6E35D602A2B925400BDA545 /* Time */ = {
@@ -434,6 +456,8 @@
 				F6E35D5B2A2B8E5600BDA545 /* EnvironmentStorage.swift in Sources */,
 				F6C58CDC2A111AF6002BA9B7 /* TodoLocalStorage.swift in Sources */,
 				F6C58CFC2A112432002BA9B7 /* EventRepeatingOption+CodableMapper.swift in Sources */,
+				F6CD672C2A35A2EF007E4306 /* HolidayRepositoryImple.swift in Sources */,
+				F6CD672E2A35A331007E4306 /* RemoteAPI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
