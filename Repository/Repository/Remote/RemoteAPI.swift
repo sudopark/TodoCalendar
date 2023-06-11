@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import Combine
 import Alamofire
 
 
@@ -31,19 +30,20 @@ public protocol RemoteAPI: AnyObject, Sendable {
 
 extension RemoteAPI {
     
-    public func request(
+    public func request<T: Decodable>(
         _ method: RemoteAPIMethod,
         path: String,
-        parameters: [String: Any]
-    ) async throws -> Data {
-        return try await self.request(method, path: path, with: nil, parameters: parameters)
-    }
-    
-    public func request(
-        _ method: RemoteAPIMethod,
-        path: String
-    ) async throws -> Data {
-        return try await self.request(method, path: path, with: nil, parameters: [:])
+        with header: [String: String]? = nil,
+        parameters: [String: Any] = [:]
+    ) async throws -> T {
+        let data = try await self.request(method, path: path, with: header, parameters: parameters)
+        do {
+            let decodeResult = try JSONDecoder().decode(T.self, from: data)
+            return decodeResult
+        } catch {
+            // TOOD: log error..
+            throw error
+        }
     }
 }
 
