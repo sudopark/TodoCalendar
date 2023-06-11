@@ -140,7 +140,7 @@ extension HolidayUsecaseImple {
         guard let currentCountry = self.dataStore.value(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue)
         else { return }
         
-        let holidays = try await self.holidayRepository.loadHolidays(year, currentCountry.code, shouldIgnoreCache: false)
+        let holidays = try await self.holidayRepository.loadHolidays(year, currentCountry.code)
         let shareKey = ShareDataKeys.holidays.rawValue
         self.dataStore.update(Holidays.self, key: shareKey) { old in
             return (old ?? [:]) |> key(currentCountry.code) %~ {

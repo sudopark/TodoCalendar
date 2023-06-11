@@ -10,7 +10,7 @@ import Extensions
 @testable import Repository
 
 
-final class StubRemoteAPI: RemoteAPI {
+final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
     
     struct Resopnse {
         let method: RemoteAPIMethod
@@ -42,12 +42,17 @@ final class StubRemoteAPI: RemoteAPI {
         self.responses = responses
     }
     
+    var didRequestedPath: String?
+    
     func request(
         _ method: RemoteAPIMethod,
         path: String,
         with header: [String : String]?,
         parameters: [String : Any]
     ) async throws -> Data {
+        
+        self.didRequestedPath = path
+        
         guard let response = self.findResponse(method: method, path: path, header: header, parameters: parameters)
         else {
             throw RuntimeError("no stub response exists")
