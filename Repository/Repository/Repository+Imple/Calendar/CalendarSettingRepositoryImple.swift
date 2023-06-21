@@ -1,5 +1,5 @@
 //
-//  TimeZoneRepositoryImple.swift
+//  CalendarSettingRepositoryImple.swift
 //  Repository
 //
 //  Created by sudo.park on 2023/06/04.
@@ -9,7 +9,7 @@ import Foundation
 import Domain
 
 
-public final class TimeZoneRepositoryImple: TimeZoneRepository, Sendable {
+public final class CalendarSettingRepositoryImple: CalendarSettingRepository, Sendable {
     
     private let environmentStorage: EnvironmentStorage
     
@@ -18,9 +18,20 @@ public final class TimeZoneRepositoryImple: TimeZoneRepository, Sendable {
     }
     
     private var timeZoneKey: String { "user_timeZone" }
+    private var firstWeekDayKey: String { "first_week_day" }
 }
 
-extension TimeZoneRepositoryImple {
+extension CalendarSettingRepositoryImple {
+    
+    public func firstWeekDay() -> DayOfWeeks? {
+        guard let rawValue: Int = self.environmentStorage.load(firstWeekDayKey)
+        else { return nil }
+        return .init(rawValue: rawValue)
+    }
+    
+    public func saveFirstWeekDay(_ newValue: DayOfWeeks) {
+        self.environmentStorage.update(self.firstWeekDayKey, newValue.rawValue)
+    }
     
     public func loadUserSelectedTImeZone() -> TimeZone? {
         guard let abbreviation: String = self.environmentStorage.load(self.timeZoneKey)
