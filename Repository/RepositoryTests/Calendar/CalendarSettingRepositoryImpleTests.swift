@@ -1,5 +1,5 @@
 //
-//  TimeZoneRepositoryImpleTests.swift
+//  CalendarSettingRepositoryImpleTests.swift
 //  RepositoryTests
 //
 //  Created by sudo.park on 2023/06/04.
@@ -11,20 +11,20 @@ import UnitTestHelpKit
 @testable import Repository
 
 
-class TimeZoneRepositoryImpleTests: BaseTestCase {
+class CalendarSettingRepositoryImpleTests: BaseTestCase {
     
     override func setUpWithError() throws { }
     
     override func tearDownWithError() throws { }
     
-    private func makeRepository() -> TimeZoneRepositoryImple {
+    private func makeRepository() -> CalendarSettingRepositoryImple {
         
         let storage = FakeEnvironmentStorage()
         return .init(environmentStorage: storage)
     }
 }
 
-extension TimeZoneRepositoryImpleTests {
+extension CalendarSettingRepositoryImpleTests {
     
     func testRepository_saveAndLoadTimeZone() {
         // given
@@ -36,5 +36,17 @@ extension TimeZoneRepositoryImpleTests {
         
         // then
         XCTAssertEqual(timeZone, TimeZone(abbreviation: "KST"))
+    }
+    
+    func testRepository_saveAndLoadFirstWeekDay() {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        repository.saveFirstWeekDay(.wednesday)
+        let weekDay = repository.firstWeekDay()
+        
+        // then
+        XCTAssertEqual(weekDay, .wednesday)
     }
 }

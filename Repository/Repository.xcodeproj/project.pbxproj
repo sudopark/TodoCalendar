@@ -37,9 +37,9 @@
 		F6CD67352A35B13A007E4306 /* HolidayRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD67342A35B13A007E4306 /* HolidayRepositoryImpleTests.swift */; };
 		F6CD67372A35B175007E4306 /* StubRemoteAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD67362A35B175007E4306 /* StubRemoteAPI.swift */; };
 		F6E35D5B2A2B8E5600BDA545 /* EnvironmentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D5A2A2B8E5600BDA545 /* EnvironmentStorage.swift */; };
-		F6E35D5F2A2B914900BDA545 /* TimeZoneRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D5E2A2B914900BDA545 /* TimeZoneRepositoryImple.swift */; };
+		F6E35D5F2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D5E2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift */; };
 		F6E35D632A2B927000BDA545 /* FakeEnvironmentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D622A2B927000BDA545 /* FakeEnvironmentStorage.swift */; };
-		F6E35D652A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D642A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift */; };
+		F6E35D652A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D642A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -84,9 +84,9 @@
 		F6CD67342A35B13A007E4306 /* HolidayRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayRepositoryImpleTests.swift; sourceTree = "<group>"; };
 		F6CD67362A35B175007E4306 /* StubRemoteAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubRemoteAPI.swift; sourceTree = "<group>"; };
 		F6E35D5A2A2B8E5600BDA545 /* EnvironmentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentStorage.swift; sourceTree = "<group>"; };
-		F6E35D5E2A2B914900BDA545 /* TimeZoneRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeZoneRepositoryImple.swift; sourceTree = "<group>"; };
+		F6E35D5E2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingRepositoryImple.swift; sourceTree = "<group>"; };
 		F6E35D622A2B927000BDA545 /* FakeEnvironmentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeEnvironmentStorage.swift; sourceTree = "<group>"; };
-		F6E35D642A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeZoneRepositoryImpleTests.swift; sourceTree = "<group>"; };
+		F6E35D642A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingRepositoryImpleTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -314,7 +314,7 @@
 		F6E35D5D2A2B913100BDA545 /* Calendar */ = {
 			isa = PBXGroup;
 			children = (
-				F6E35D5E2A2B914900BDA545 /* TimeZoneRepositoryImple.swift */,
+				F6E35D5E2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift */,
 				F6CD672B2A35A2EF007E4306 /* HolidayRepositoryImple.swift */,
 			);
 			path = Calendar;
@@ -323,7 +323,7 @@
 		F6E35D602A2B925400BDA545 /* Calendar */ = {
 			isa = PBXGroup;
 			children = (
-				F6E35D642A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift */,
+				F6E35D642A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift */,
 				F6CD67342A35B13A007E4306 /* HolidayRepositoryImpleTests.swift */,
 			);
 			path = Calendar;
@@ -456,7 +456,7 @@
 				F6957FC92A2317440064E8BD /* EventTagLocalRepositoryImple.swift in Sources */,
 				F6C58D002A189BFF002BA9B7 /* TodoLocalRepositoryImple.swift in Sources */,
 				F6C58D022A19E640002BA9B7 /* DoneTodoEventTable.swift in Sources */,
-				F6E35D5F2A2B914900BDA545 /* TimeZoneRepositoryImple.swift in Sources */,
+				F6E35D5F2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift in Sources */,
 				F6078D742A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift in Sources */,
 				F6957FC72A2315090064E8BD /* EventTagLocalStorage.swift in Sources */,
 				F6E35D5B2A2B8E5600BDA545 /* EnvironmentStorage.swift in Sources */,
@@ -473,7 +473,7 @@
 			files = (
 				F6CD67352A35B13A007E4306 /* HolidayRepositoryImpleTests.swift in Sources */,
 				F6C58D072A19E8A6002BA9B7 /* BaseLocalTests.swift in Sources */,
-				F6E35D652A2B92F700BDA545 /* TimeZoneRepositoryImpleTests.swift in Sources */,
+				F6E35D652A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift in Sources */,
 				F6CD67372A35B175007E4306 /* StubRemoteAPI.swift in Sources */,
 				F6C58CCF2A111A89002BA9B7 /* RepositoryTests.swift in Sources */,
 				F6C58D042A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift in Sources */,

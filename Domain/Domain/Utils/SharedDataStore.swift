@@ -19,6 +19,7 @@ public enum ShareDataKeys: String {
     case currentCountry
     case availableCountries
     case holidays
+    case firstWeekDay
 }
 
 
