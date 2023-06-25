@@ -42,6 +42,8 @@
 		F6957FBD2A22293E0064E8BD /* EventTagRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FBC2A22293E0064E8BD /* EventTagRepository.swift */; };
 		F6957FBF2A222B0A0064E8BD /* StubEventTagRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FBE2A222B0A0064E8BD /* StubEventTagRepository.swift */; };
 		F6957FC12A222B520064E8BD /* EventTagUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FC02A222B520064E8BD /* EventTagUsecaseImpleTests.swift */; };
+		F6C2B0CE2A433FD400BA89CA /* CalendarUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C2B0CD2A433FD400BA89CA /* CalendarUsecase.swift */; };
+		F6C2B0D02A43413600BA89CA /* CalendarComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6C2B0CF2A43413600BA89CA /* CalendarComponent.swift */; };
 		F6CD67222A343345007E4306 /* HolidayUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD67212A343345007E4306 /* HolidayUsecase.swift */; };
 		F6CD67262A343511007E4306 /* HolidayRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD67252A343511007E4306 /* HolidayRepository.swift */; };
 		F6CD67282A3445D4007E4306 /* HolidayUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD67272A3445D4007E4306 /* HolidayUsecaseImpleTests.swift */; };
@@ -100,6 +102,8 @@
 		F6957FBC2A22293E0064E8BD /* EventTagRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagRepository.swift; sourceTree = "<group>"; };
 		F6957FBE2A222B0A0064E8BD /* StubEventTagRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubEventTagRepository.swift; sourceTree = "<group>"; };
 		F6957FC02A222B520064E8BD /* EventTagUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagUsecaseImpleTests.swift; sourceTree = "<group>"; };
+		F6C2B0CD2A433FD400BA89CA /* CalendarUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarUsecase.swift; sourceTree = "<group>"; };
+		F6C2B0CF2A43413600BA89CA /* CalendarComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarComponent.swift; sourceTree = "<group>"; };
 		F6CD67212A343345007E4306 /* HolidayUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayUsecase.swift; sourceTree = "<group>"; };
 		F6CD67252A343511007E4306 /* HolidayRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayRepository.swift; sourceTree = "<group>"; };
 		F6CD67272A3445D4007E4306 /* HolidayUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayUsecaseImpleTests.swift; sourceTree = "<group>"; };
@@ -155,6 +159,7 @@
 			children = (
 				F63283DD2A3432A6003DD587 /* Holiday.swift */,
 				F63283DE2A3432A6003DD587 /* Times.swift */,
+				F6C2B0CF2A43413600BA89CA /* CalendarComponent.swift */,
 			);
 			path = Calendar;
 			sourceTree = "<group>";
@@ -338,6 +343,7 @@
 			children = (
 				F6E35D522A2B892600BDA545 /* CalendarSettingUsecase.swift */,
 				F6CD67212A343345007E4306 /* HolidayUsecase.swift */,
+				F6C2B0CD2A433FD400BA89CA /* CalendarUsecase.swift */,
 			);
 			path = Calendar;
 			sourceTree = "<group>";
@@ -473,11 +479,13 @@
 				F65B08E629D005E4000EE650 /* DoneTodoEvent.swift in Sources */,
 				F63C9CEC29C6E3A400CC663A /* TodoEvent.swift in Sources */,
 				F6CD67262A343511007E4306 /* HolidayRepository.swift in Sources */,
+				F6C2B0CE2A433FD400BA89CA /* CalendarUsecase.swift in Sources */,
 				F63C9CEE29C6E5BF00CC663A /* ScheduleEvent.swift in Sources */,
 				F632E22429FF8F670052C61B /* MemorizedScheduleEventsContainer.swift in Sources */,
 				F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */,
 				F609B3872A279EDB0056CC13 /* PagingUsecase.swift in Sources */,
 				F6CD67222A343345007E4306 /* HolidayUsecase.swift in Sources */,
+				F6C2B0D02A43413600BA89CA /* CalendarComponent.swift in Sources */,
 				F63C9D0029C8A60F00CC663A /* TodoEventUsecase.swift in Sources */,
 				F6E35D552A2B899B00BDA545 /* CalendarSettingRepository.swift in Sources */,
 				F6957FBB2A22281E0064E8BD /* EventTagUsecase.swift in Sources */,

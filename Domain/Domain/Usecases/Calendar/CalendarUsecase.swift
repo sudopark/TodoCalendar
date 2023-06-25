@@ -1,0 +1,115 @@
+//
+//  CalendarUsecase.swift
+//  Domain
+//
+//  Created by sudo.park on 2023/06/21.
+//
+
+import Foundation
+import Combine
+import Prelude
+import Optics
+import Extensions
+
+
+public protocol CalendarUsecase {
+    
+    func components(
+        for month: Int, of year: Int, at timeZone: TimeZone
+    ) -> AnyPublisher<CalendarComponent, Never>
+}
+
+
+final class CalendarUsecaseImple: CalendarUsecase {
+    
+    private let calendarSettingUsecase: CalendarSettingUsecase
+    private let holidayUsecase: HolidayUsecase
+    
+    public init(
+        calendarSettingUsecase: CalendarSettingUsecase,
+        holidayUsecase: HolidayUsecase
+    ) {
+        self.calendarSettingUsecase = calendarSettingUsecase
+        self.holidayUsecase = holidayUsecase
+    }
+}
+
+extension CalendarUsecaseImple {
+    
+    public func components(
+        for month: Int, of year: Int, at timeZone: TimeZone
+    ) -> AnyPublisher<CalendarComponent, Never> {
+        
+        let baseComponents = self.baseCalendarComponents(year, month, timeZone)
+        let holidaysGivenYear = self.holidayUsecase.holidays().map { $0[year] ?? [] }
+        return Publishers.CombineLatest(baseComponents, holidaysGivenYear)
+            .map { $0.update(holidays: $1)}
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    private func baseCalendarComponents(
+        _ year: Int, _ month: Int, _ timeZone: TimeZone
+    ) -> AnyPublisher<CalendarComponent, Never> {
+        return self.calendarSettingUsecase.firstWeekDay
+            .compactMap { [weak self] firstDay -> CalendarComponent? in
+                return try? self?.components(year, month, firstDay, timeZone)
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    private func components(
+        _ year: Int,
+        _ month: Int,
+        _ startDayOfWeek: DayOfWeeks,
+        _ timeZone: TimeZone
+    ) throws -> CalendarComponent {
+        
+        let calendar = Calendar(identifier: .gregorian)
+            |> \.timeZone .~ timeZone
+            |> \.firstWeekday .~ startDayOfWeek.rawValue
+        
+        let startDateOfMonth = try calendar.startDateOfMonth(year, month).unwrap()
+        let lastDateOfMonth = try calendar.lastDayOfMonth(from: startDateOfMonth).unwrap()
+        
+        let calendarFirstDate = try calendar.firstDateOfWeek(startDayOfWeek, startDateOfMonth).unwrap()
+        let calendarLastDate = try calendar.lastOfSameWeekDay(lastDateOfMonth).unwrap()
+        
+        let daysInterval = calendarLastDate.timeIntervalSince(calendarFirstDate)
+            |> { $0 / (3600 * 24) }
+            |> Int.init
+        let weeksInterval = daysInterval % 7 == 0 ? daysInterval / 7 : (daysInterval / 7) + 1
+        
+        let weeks: [CalendarComponent.Week] = try (0..<weeksInterval).map { weekOffset in
+            let weekStart = try calendar.addDays(7 * weekOffset, from: calendarFirstDate).unwrap()
+            let days: [CalendarComponent.Day] = try (0..<7).map { offset in
+                let date = try calendar.addDays(offset, from: weekStart).unwrap()
+                return .init(date, calendar: calendar)
+            }
+            return .init(days: days)
+        }
+        
+        return .init(year: year, month: month, weeks: weeks)
+    }
+}
+
+
+private extension Calendar {
+    
+    func startDateOfMonth(_ year: Int, _ month: Int) -> Date? {
+        let components = DateComponents()
+            |> \.timeZone .~ self.timeZone
+            |> \.year .~ pure(year)
+            |> \.month .~ pure(month)
+            |> \.day .~ 1
+        return self.date(from: components)
+            .map { self.startOfDay(for: $0) }
+    }
+    
+    func firstDateOfWeek(_ startDayOfWeek: DayOfWeeks, _ from: Date) -> Date? {
+        guard let weekDay = self.dateComponents([.weekday], from: from).weekday
+        else { return nil }
+        let daysToMinus = (weekDay - startDayOfWeek.rawValue + 7) % 7
+        return self.addDays(-daysToMinus, from: from)
+    }
+}
