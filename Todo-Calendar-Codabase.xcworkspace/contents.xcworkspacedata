@@ -29,5 +29,8 @@
       <FileRef
          location = "group:Common3rdParty/Common3rdParty.xcodeproj">
       </FileRef>
+      <FileRef
+         location = "group:TestDoubles/TestDoubles.xcodeproj">
+      </FileRef>
    </Group>
 </Workspace>
