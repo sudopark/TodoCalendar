@@ -14,7 +14,16 @@ import Optics
 
 open class StubHolidayUsecase: HolidayUsecase {
     
-    public init() { }
+    public init(
+        country: HolidaySupportCountry = .init(code: "KST", name: "Korea"),
+        holidays: [Int: [Holiday]]? = nil
+    ) {
+        self.currentSelectedCountrySubject.send(country)
+        guard let holidays else { return }
+        self.holidaysSubject.send([
+            country.code: holidays
+        ])
+    }
     
     open func prepare() async throws {
         let country = HolidaySupportCountry(code: "KST", name: "Korea")
@@ -53,7 +62,7 @@ open class StubHolidayUsecase: HolidayUsecase {
         guard let country = self.currentSelectedCountrySubject.value
         else { return }
         let holidays = (0..<5).map { int -> Holiday in
-            return Holiday(dateString: "202\(int)-01-0\(int)", localName: "h:\(int)", name: "holiday-\(int)")
+            return Holiday(dateString: "\(year)-0\(int)-0\(int)", localName: "h:\(int)", name: "holiday-\(int)")
         }
         let oldMap = self.holidaysSubject.value ?? [:]
         let newHolidays = (oldMap[country.code] ?? [:]) |> key(year) .~ holidays

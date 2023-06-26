@@ -8,6 +8,7 @@
 import Foundation
 import Prelude
 import Optics
+import Extensions
 
 
 public struct CalendarComponent: Equatable {
@@ -52,7 +53,7 @@ public struct CalendarComponent: Equatable {
         let holidayMap = holidays.reduce(into: [String: Holiday]()) { $0[$1.dateString] = $1 }
         let newWeeks = self.weeks.map { week -> Week in
             let newDays = week.days.map { day -> Day in
-                let dateString = "\(day.year)-\(day.month)-\(day.day)"
+                let dateString = "\(day.year)-\(day.month.withLeadingZero())-\(day.day.withLeadingZero())"
                 return day |> \.holiday .~ holidayMap[dateString]
             }
             return .init(days: newDays)

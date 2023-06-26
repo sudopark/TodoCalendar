@@ -73,7 +73,7 @@ extension CalendarUsecaseImple {
         let lastDateOfMonth = try calendar.lastDayOfMonth(from: startDateOfMonth).unwrap()
         
         let calendarFirstDate = try calendar.firstDateOfWeek(startDayOfWeek, startDateOfMonth).unwrap()
-        let calendarLastDate = try calendar.lastOfSameWeekDay(lastDateOfMonth).unwrap()
+        let calendarLastDate = try calendar.lastDateOfWeek(startDayOfWeek, lastDateOfMonth).unwrap()
         
         let daysInterval = calendarLastDate.timeIntervalSince(calendarFirstDate)
             |> { $0 / (3600 * 24) }
@@ -107,9 +107,12 @@ private extension Calendar {
     }
     
     func firstDateOfWeek(_ startDayOfWeek: DayOfWeeks, _ from: Date) -> Date? {
-        guard let weekDay = self.dateComponents([.weekday], from: from).weekday
-        else { return nil }
+        let weekDay = self.component(.weekday, from: from)
         let daysToMinus = (weekDay - startDayOfWeek.rawValue + 7) % 7
         return self.addDays(-daysToMinus, from: from)
+    }
+    
+    func lastDateOfWeek(_ startDayOfWeek: DayOfWeeks, _ from: Date) -> Date? {
+        return self.firstDateOfWeek(startDayOfWeek, from)?.add(days: 6)
     }
 }
