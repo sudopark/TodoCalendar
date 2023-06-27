@@ -14,6 +14,8 @@ import Extensions
 
 public protocol CalendarUsecase {
     
+    var currentDay: AnyPublisher<CalendarComponent.Day, Never> { get }
+    
     func components(
         for month: Int, of year: Int, at timeZone: TimeZone
     ) -> AnyPublisher<CalendarComponent, Never>
@@ -31,6 +33,26 @@ final class CalendarUsecaseImple: CalendarUsecase {
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.holidayUsecase = holidayUsecase
+    }
+}
+
+extension CalendarUsecaseImple {
+    
+    public var currentDay: AnyPublisher<CalendarComponent.Day, Never> {
+        
+        let currentTime = Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
+            .map { _ in Date() }
+            .prepend(Date())
+        let currentTimeZone = self.calendarSettingUsecase.currentTimeZone
+        let transform: (Date, TimeZone) -> CalendarComponent.Day = { current, timeZone in
+            let calendar = Calendar(identifier: .gregorian)
+                |> \.timeZone .~ timeZone
+            return .init(current, calendar: calendar)
+        }
+        
+        return Publishers.CombineLatest(currentTime, currentTimeZone)
+            .map(transform)
+            .eraseToAnyPublisher()
     }
 }
 
