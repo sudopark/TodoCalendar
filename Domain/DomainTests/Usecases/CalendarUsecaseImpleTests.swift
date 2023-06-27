@@ -35,6 +35,7 @@ class CalendarUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         firstWeekDay: DayOfWeeks = .sunday
     ) -> CalendarUsecaseImple {
         self.stubSettingUsecase.updateFirstWeekDay(firstWeekDay)
+        self.stubSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
         
         let holidayUsecase = StubHolidayUsecase(
             holidays: [2023: [
@@ -250,5 +251,39 @@ extension CalendarUsecaseImpleTests {
             .init(year: 2023, month: 09, day: 30, weekDay: 7) |> \.holiday .~ .init(dateString: "2023-09-30", localName: "추석", name: "추석"),
             .init(year: 2023, month: 10, day: 03, weekDay: 3) |> \.holiday .~ .init(dateString: "2023-10-03", localName: "개천절", name: "개천절"),
         ])
+    }
+}
+
+
+extension CalendarUsecaseImpleTests {
+    
+    func testUsecase_provide_currentDayInfo() {
+        // given
+        let expect = expectation(description: "현재 날짜 정보 제공")
+        let usecase = self.makeUsecaseWithStub()
+        
+        // when
+        let current = self.waitFirstOutput(expect, for: usecase.currentDay)
+        
+        // then
+        let now = Date(); let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ .init(abbreviation: "KST")!
+        XCTAssertEqual(current?.year, calendar.component(.year, from: now))
+        XCTAssertEqual(current?.month, calendar.component(.month, from: now))
+        XCTAssertEqual(current?.day, calendar.component(.day, from: now))
+    }
+    
+    func testUsecase_whenTimeZoneChanged_updateCurrentDay() {
+        // given
+        let expect = expectation(description: "timeZone 변경시에 현재 날짜도 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStub()
+        
+        // when
+        let currents = self.waitOutputs(expect, for: usecase.currentDay) {
+            self.stubSettingUsecase.selectTimeZone(TimeZone(abbreviation: "PDT")!)
+        }
+        
+        // then
+        XCTAssertEqual(currents.count, 2)
     }
 }
