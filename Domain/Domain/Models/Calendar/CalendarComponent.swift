@@ -15,6 +15,10 @@ public struct CalendarComponent: Equatable {
     
     public struct Week: Equatable {
         public let days: [Day]
+        
+        public init(days: [Day]) {
+            self.days = days
+        }
     }
     
     public struct Day: Equatable {
@@ -24,7 +28,7 @@ public struct CalendarComponent: Equatable {
         public let weekDay: Int
         public var holiday: Holiday?
         
-        init(year: Int, month: Int, day: Int, weekDay: Int) {
+        public init(year: Int, month: Int, day: Int, weekDay: Int) {
             self.year = year
             self.month = month
             self.day = day
@@ -43,13 +47,13 @@ public struct CalendarComponent: Equatable {
     public let month: Int
     public var weeks: [Week]
     
-    init(year: Int, month: Int, weeks: [Week]) {
+    public init(year: Int, month: Int, weeks: [Week]) {
         self.year = year
         self.month = month
         self.weeks = weeks
     }
     
-    func update(holidays: [Holiday]) -> CalendarComponent {
+    public func update(holidays: [Holiday]) -> CalendarComponent {
         let holidayMap = holidays.reduce(into: [String: Holiday]()) { $0[$1.dateString] = $1 }
         let newWeeks = self.weeks.map { week -> Week in
             let newDays = week.days.map { day -> Day in
