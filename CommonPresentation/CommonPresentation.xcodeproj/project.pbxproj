@@ -52,6 +52,8 @@
 		F63F64B32A2C05B700E24186 /* CommonPresentation */ = {
 			isa = PBXGroup;
 			children = (
+				F67907D82A4B42CE000CF11B /* UIComponents */,
+				F67907D72A4B42B5000CF11B /* Bases */,
 				F63F64B42A2C05B700E24186 /* CommonPresentation.h */,
 			);
 			path = CommonPresentation;
@@ -64,6 +66,20 @@
 				F63F64BC2A2C066C00E24186 /* Common3rdParty.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F67907D72A4B42B5000CF11B /* Bases */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Bases;
+			sourceTree = "<group>";
+		};
+		F67907D82A4B42CE000CF11B /* UIComponents */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = UIComponents;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

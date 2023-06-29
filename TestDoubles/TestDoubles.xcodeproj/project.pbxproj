@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F67907E02A4DD3D7000CF11B /* StubCalendarUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */; };
 		F69904C72A49D25500F44834 /* TestDoubles.h in Headers */ = {isa = PBXBuildFile; fileRef = F69904C62A49D25500F44834 /* TestDoubles.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F69904CF2A49D29300F44834 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F69904CE2A49D29300F44834 /* Common3rdParty.framework */; };
 		F69904D32A49D29A00F44834 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F69904D22A49D29A00F44834 /* Domain.framework */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubCalendarUsecase.swift; sourceTree = "<group>"; };
 		F69904C32A49D25400F44834 /* TestDoubles.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TestDoubles.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F69904C62A49D25500F44834 /* TestDoubles.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestDoubles.h; sourceTree = "<group>"; };
 		F69904CE2A49D29300F44834 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -85,6 +87,7 @@
 			children = (
 				F69904E02A49D2F600F44834 /* StubCalendarSettingUsecase.swift */,
 				F69904E22A49D30700F44834 /* StubHolidayUsecase.swift */,
+				F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -178,6 +181,7 @@
 			files = (
 				F69904E32A49D30700F44834 /* StubHolidayUsecase.swift in Sources */,
 				F69904E12A49D2F600F44834 /* StubCalendarSettingUsecase.swift in Sources */,
+				F67907E02A4DD3D7000CF11B /* StubCalendarUsecase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

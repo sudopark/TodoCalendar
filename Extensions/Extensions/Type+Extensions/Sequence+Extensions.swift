@@ -20,3 +20,14 @@ extension Sequence {
         }
     }
 }
+
+
+extension Array {
+    
+    public subscript(safe index: Int) -> Element? {
+        get {
+            guard (0..<self.count) ~= index else { return nil }
+            return self[index]
+        }
+    }
+}

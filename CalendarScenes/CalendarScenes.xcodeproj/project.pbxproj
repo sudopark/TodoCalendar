@@ -17,6 +17,11 @@
 		F63F64F82A2C070900E24186 /* UnitTestHelpKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64F72A2C070900E24186 /* UnitTestHelpKit.framework */; };
 		F63F64FA2A2C071C00E24186 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64F92A2C071C00E24186 /* Common3rdParty.framework */; };
 		F63F64FC2A2C072100E24186 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64FB2A2C072100E24186 /* Extensions.framework */; };
+		F67907D62A4B3AB9000CF11B /* CalendarPagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907D52A4B3AB9000CF11B /* CalendarPagerViewModel.swift */; };
+		F67907DB2A4B4362000CF11B /* CalendarMonthInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907DA2A4B4362000CF11B /* CalendarMonthInteractor.swift */; };
+		F67907DE2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907DD2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift */; };
+		F67907E22A4DD6E3000CF11B /* TestDoubles.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F67907E12A4DD6E3000CF11B /* TestDoubles.framework */; };
+		F67907E42A4DD780000CF11B /* CalendarPagerViewRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907E32A4DD780000CF11B /* CalendarPagerViewRouter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -41,6 +46,11 @@
 		F63F64F72A2C070900E24186 /* UnitTestHelpKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = UnitTestHelpKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63F64F92A2C071C00E24186 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63F64FB2A2C072100E24186 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F67907D52A4B3AB9000CF11B /* CalendarPagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPagerViewModel.swift; sourceTree = "<group>"; };
+		F67907DA2A4B4362000CF11B /* CalendarMonthInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMonthInteractor.swift; sourceTree = "<group>"; };
+		F67907DD2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPagerViewModelImpleTests.swift; sourceTree = "<group>"; };
+		F67907E12A4DD6E3000CF11B /* TestDoubles.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TestDoubles.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F67907E32A4DD780000CF11B /* CalendarPagerViewRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPagerViewRouter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +69,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F67907E22A4DD6E3000CF11B /* TestDoubles.framework in Frameworks */,
 				F63F64FC2A2C072100E24186 /* Extensions.framework in Frameworks */,
 				F63F64FA2A2C071C00E24186 /* Common3rdParty.framework in Frameworks */,
 				F63F64F82A2C070900E24186 /* UnitTestHelpKit.framework in Frameworks */,
@@ -91,6 +102,8 @@
 		F63F64D02A2C06CA00E24186 /* CalendarScenes */ = {
 			isa = PBXGroup;
 			children = (
+				F67907D92A4B4351000CF11B /* CalendarMonth */,
+				F67907D42A4B3A8E000CF11B /* CalendarPager */,
 				F63F64D12A2C06CA00E24186 /* CalendarScenes.h */,
 			);
 			path = CalendarScenes;
@@ -99,6 +112,7 @@
 		F63F64DA2A2C06CA00E24186 /* CalendarScenesTests */ = {
 			isa = PBXGroup;
 			children = (
+				F67907DC2A4B4736000CF11B /* CalendarPager */,
 				F63F64DB2A2C06CA00E24186 /* CalendarScenesTests.swift */,
 			);
 			path = CalendarScenesTests;
@@ -107,6 +121,7 @@
 		F63F64E62A2C06DE00E24186 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F67907E12A4DD6E3000CF11B /* TestDoubles.framework */,
 				F63F64FB2A2C072100E24186 /* Extensions.framework */,
 				F63F64F92A2C071C00E24186 /* Common3rdParty.framework */,
 				F63F64F72A2C070900E24186 /* UnitTestHelpKit.framework */,
@@ -116,6 +131,31 @@
 				F63F64E72A2C06DE00E24186 /* Common3rdParty.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F67907D42A4B3A8E000CF11B /* CalendarPager */ = {
+			isa = PBXGroup;
+			children = (
+				F67907D52A4B3AB9000CF11B /* CalendarPagerViewModel.swift */,
+				F67907E32A4DD780000CF11B /* CalendarPagerViewRouter.swift */,
+			);
+			path = CalendarPager;
+			sourceTree = "<group>";
+		};
+		F67907D92A4B4351000CF11B /* CalendarMonth */ = {
+			isa = PBXGroup;
+			children = (
+				F67907DA2A4B4362000CF11B /* CalendarMonthInteractor.swift */,
+			);
+			path = CalendarMonth;
+			sourceTree = "<group>";
+		};
+		F67907DC2A4B4736000CF11B /* CalendarPager */ = {
+			isa = PBXGroup;
+			children = (
+				F67907DD2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift */,
+			);
+			path = CalendarPager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -180,6 +220,7 @@
 				TargetAttributes = {
 					F63F64CD2A2C06CA00E24186 = {
 						CreatedOnToolsVersion = 14.3;
+						LastSwiftMigration = 1430;
 					};
 					F63F64D52A2C06CA00E24186 = {
 						CreatedOnToolsVersion = 14.3;
@@ -227,6 +268,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F67907D62A4B3AB9000CF11B /* CalendarPagerViewModel.swift in Sources */,
+				F67907DB2A4B4362000CF11B /* CalendarMonthInteractor.swift in Sources */,
+				F67907E42A4DD780000CF11B /* CalendarPagerViewRouter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,6 +278,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F67907DE2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift in Sources */,
 				F63F64DC2A2C06CA00E24186 /* CalendarScenesTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -372,6 +417,7 @@
 		F63F64E12A2C06CA00E24186 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -396,6 +442,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -404,6 +451,7 @@
 		F63F64E22A2C06CA00E24186 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -436,6 +484,7 @@
 		F63F64E42A2C06CA00E24186 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
@@ -452,6 +501,7 @@
 		F63F64E52A2C06CA00E24186 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
