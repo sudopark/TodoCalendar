@@ -18,14 +18,17 @@ class CalendarPagerViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
+    private var spyHolidayUsecase: StubHolidayUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
+        self.spyHolidayUsecase = .init()
         self.spyRouter = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
+        self.spyHolidayUsecase = nil
         self.spyRouter = nil
     }
     
@@ -34,11 +37,10 @@ class CalendarPagerViewModelImpleTests: BaseTestCase, PublisherWaitable {
     ) -> CalendarPagerViewModelImple {
         
         let calendarUsecase = StubCalendarUsecase(today: today)
-        let holidayUsecase = StubHolidayUsecase()
         
         let viewModel = CalendarPagerViewModelImple(
             calendarUsecase: calendarUsecase,
-            holidayUsecase: holidayUsecase
+            holidayUsecase: self.spyHolidayUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -125,7 +127,36 @@ extension CalendarPagerViewModelImpleTests {
 
 extension CalendarPagerViewModelImpleTests {
     
-    // calendar가 조회한 년도 중 새로운 년도 추가시에 새로운 년도의 공휴일 refresh
+    func testViewModel_whenFocusChangedToNewYear_refreshTheYearsHolidays() {
+        // given
+        let expect = expectation(description: "calendar가 조회한 년도 중 새로운 년도 추가시에 새로운 년도의 공휴일 refresh -> 2023, 2022, 2021년 조회할것임")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 02, day: 02, weekDay: 5)
+        )
+        
+        // when
+        let holidaysPerYears = self.waitOutputs(expect, for: self.spyHolidayUsecase.holidays()) {
+            // 2021년까지 준비되도록 스크롤
+            (0..<13).forEach { _ in
+                viewModel.focusMoveToPreviousMonth()
+            }
+        }
+        
+        // then
+        let currentViewingMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+        XCTAssertEqual(currentViewingMonths, [
+            .init(year: 2021, month: 12),
+            .init(year: 2022, month: 1),
+            .init(year: 2022, month: 2)
+        ])
+        let holidayLoadedYears = holidaysPerYears.map { $0.keys }.map { $0.sorted() }
+        XCTAssertEqual(holidayLoadedYears, [
+            [2023],
+            [2022, 2023],
+            [2021, 2022, 2023]
+        ])
+    }
     
     // calendar가 조회중인 전체 조회 기간이 길어지면 스케줄 이벤트 다시 조회
     

@@ -7,6 +7,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 
 
@@ -71,9 +73,27 @@ final class CalendarPagerViewModelImple: @unchecked Sendable {
             })
             .store(in: &self.cancellables)
         
-        // TODO: bind months -> check year changed -> check should refresh holidays
+        let totalViewingYears = self.subject.monthsInCurrentRange
+            .compactMap { $0?.years() }
+            .scan(TotalYears()) { acc, years in acc.append(years) }
+        totalViewingYears
+            .map { $0.newOne }
+            .removeDuplicates()
+            .sink(receiveValue: { [weak self] newYears in
+                self?.refreshHolidays(for: newYears)
+            })
+            .store(in: &self.cancellables)
         
         // TODO: bind months -> check new range appended -> refresh events
+    }
+    
+    private func refreshHolidays(for newYears: [Int]) {
+        Task { [weak self] in
+            await newYears.asyncForEach { year in
+                try? await self?.holidayUsecase.refreshHolidays(year)
+            }
+        }
+        .store(in: &self.cancellables)
     }
 }
 
@@ -111,5 +131,31 @@ extension CalendarPagerViewModelImple {
         guard let months = self.subject.monthsInCurrentRange.value else { return }
         let newMonths = months.map { $0.nextMonth() }
         self.subject.monthsInCurrentRange.send(newMonths)
+    }
+}
+
+private extension Array where Element == CalendarMonth {
+    
+    func years() -> Set<Int> {
+        return self.map { $0.year } |> Set.init
+    }
+}
+
+private struct TotalYears {
+    
+    private let checked: Set<Int>
+    let newOne: [Int]
+    
+    init(checked: Set<Int> = [], newOne: [Int] = []) {
+        self.checked = checked
+        self.newOne = newOne
+    }
+    
+    func append(_ years: Set<Int>) -> TotalYears {
+        let notChecked = years.subtracting(self.checked)
+        return .init(
+            checked: self.checked.union(years),
+            newOne: Array(notChecked).sorted()
+        )
     }
 }
