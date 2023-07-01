@@ -6,8 +6,10 @@
 //
 
 import XCTest
-import Domain
 import Combine
+import Prelude
+import Optics
+import Domain
 import TestDoubles
 import UnitTestHelpKit
 
@@ -19,17 +21,26 @@ class CalendarPagerViewModelImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
     private var spyHolidayUsecase: StubHolidayUsecase!
+    private var spyTodoUsecase: PrivateSpyTodoEventUsecase!
+    private var spyScheduleUsecase: PrivateSpyScheduleEventUsecase!
+    private var stubSettingUsecase: StubCalendarSettingUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyHolidayUsecase = .init()
         self.spyRouter = .init()
+        self.spyTodoUsecase = .init()
+        self.spyScheduleUsecase = .init()
+        self.stubSettingUsecase = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.spyHolidayUsecase = nil
         self.spyRouter = nil
+        self.spyTodoUsecase = nil
+        self.spyScheduleUsecase = nil
+        self.stubSettingUsecase = nil
     }
     
     private func makeViewModel(
@@ -37,10 +48,14 @@ class CalendarPagerViewModelImpleTests: BaseTestCase, PublisherWaitable {
     ) -> CalendarPagerViewModelImple {
         
         let calendarUsecase = StubCalendarUsecase(today: today)
+        self.stubSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
         
         let viewModel = CalendarPagerViewModelImple(
             calendarUsecase: calendarUsecase,
-            holidayUsecase: self.spyHolidayUsecase
+            calendarSettingUsecase: self.stubSettingUsecase,
+            holidayUsecase: self.spyHolidayUsecase,
+            todoEventUsecase: self.spyTodoUsecase,
+            scheduleEventUsecase: self.spyScheduleUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -158,9 +173,120 @@ extension CalendarPagerViewModelImpleTests {
         ])
     }
     
-    // calendar가 조회중인 전체 조회 기간이 길어지면 스케줄 이벤트 다시 조회
+    private func range(_ start: (Int, Int, Int),
+                       _ end: (Int, Int, Int)) -> Range<TimeStamp> {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ TimeZone(abbreviation: "KST")!
+        let startCompos = DateComponents(year: start.0, month: start.1, day: start.2, hour: 0, minute: 0, second: 0)
+        let endCompos = DateComponents(year: end.0, month: end.1, day: end.2, hour: 23, minute: 59, second: 59)
+        
+        let start = calendar.date(from: startCompos)!
+        let end = calendar.date(from: endCompos)!
+        return TimeStamp(start.timeIntervalSince1970, timeZone: "KST")
+                ..<
+                TimeStamp(end.timeIntervalSince1970, timeZone: "KST")
+    }
     
-    // calendar가 조회중인 전체 조회 기간이 길어지면 시간정보 있는 할일 이벤트 다시 조회
+    func testViewModel_whenRangeChangeAndNewMonthAppened_reloadTodoEventsInTotalPeriod() {
+        // given
+        let expect = expectation(description: "calendar가 조회중인 전체 조회 기간이 길어지면 스케줄 이벤트 다시 조회")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 10, day: 04, weekDay: 3)
+        )
+        
+        // when
+        let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
+        let source = self.spyTodoUsecase.todoEvents(in: totalRange)
+        let todoLists = self.waitOutputs(expect, for: source) {
+            // 전체 범위 => 9~11월
+            
+            // 전체 범위 => 8~11월, 신규 8~9
+            viewModel.focusMoveToPreviousMonth()
+            
+            // 전체범위 변동 없음 => 8~11
+            viewModel.focusMoveToNextMonth()
+            
+            // 전체 범위 => 8~12월, 신규 11~12
+            viewModel.focusMoveToNextMonth()
+            
+            // 전체 범위 => 8~다음년도1월, 신규 12~1
+            viewModel.focusMoveToNextMonth()
+        }
+        
+        // then
+        let todoIdLists = todoLists.map { ts in ts.map { $0.uuid } }
+        XCTAssertEqual(todoIdLists, [
+            ["kst-month: 9~11"],
+            ["kst-month: 9~11", "kst-month: 8~9"],
+            ["kst-month: 9~11", "kst-month: 8~9", "kst-month: 11~12"],
+            ["kst-month: 9~11", "kst-month: 8~9", "kst-month: 11~12", "kst-month: 12~1"]
+        ])
+    }
+    
+    func testViewModel_whenRangeChangeAndNewMonthAppened_reloadScheduleEventsInTotalPeriod() {
+        // given
+        let expect = expectation(description: "calendar가 조회중인 전체 조회 기간이 길어지면 시간정보 있는 할일 이벤트 다시 조회")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 10, day: 04, weekDay: 3)
+        )
+        
+        // when
+        let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
+        let source = self.spyScheduleUsecase.scheduleEvents(in: totalRange)
+        let scheduleLists = self.waitOutputs(expect, for: source) {
+            // 전체 범위 => 9~11월
+            
+            // 전체 범위 => 8~11월, 신규 8~9
+            viewModel.focusMoveToPreviousMonth()
+            
+            // 전체범위 변동 없음 => 8~11
+            viewModel.focusMoveToNextMonth()
+            
+            // 전체 범위 => 8~12월, 신규 11~12
+            viewModel.focusMoveToNextMonth()
+            
+            // 전체 범위 => 8~다음년도1월, 신규 12~1
+            viewModel.focusMoveToNextMonth()
+        }
+        
+        // then
+        let scheduleIdLists = scheduleLists.map { ss in ss.map { $0.uuid } }
+        XCTAssertEqual(scheduleIdLists, [
+            ["kst-month: 9~11"],
+            ["kst-month: 9~11", "kst-month: 8~9"],
+            ["kst-month: 9~11", "kst-month: 8~9", "kst-month: 11~12"],
+            ["kst-month: 9~11", "kst-month: 8~9", "kst-month: 11~12", "kst-month: 12~1"]
+        ])
+    }
+    
+    // timeZone 변경시도 테스트 추가해야함
+    func testViewModel_whenTimeZoneChanged_refreshNotCheckedRange() {
+        // given
+        let expect = expectation(description: "timeZone 변경시에 새로운 구간에 대한 todo 이벤트 조회")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 10, day: 4, weekDay: 2)
+        )
+        
+        // when
+        let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
+        let source = self.spyTodoUsecase.todoEvents(in: totalRange)
+        let todoLists = self.waitOutputs(expect, for: source) {
+            // 최초 9~11월 나몸
+            
+            // timeZone pdt로 변경 => 현재보다 16시간 만큼 미래시간으로 지정됨
+            // 달력의 마지막날인 2023-11-30일 23:59:59에서 pdt로 빼낸 interval을 kst로 변경하면 12월 1일임
+            self.stubSettingUsecase.selectTimeZone(TimeZone(abbreviation: "PDT")!)
+        }
+        
+        // then
+        let todoIdLists = todoLists.map { ts in ts.map { $0.uuid } }
+        XCTAssertEqual(todoIdLists, [
+            ["kst-month: 9~11"],
+            ["kst-month: 9~11", "kst-month: 11~12"]
+        ])
+    }
 }
 
 private extension CalendarPagerViewModelImpleTests {
@@ -191,6 +317,53 @@ private extension CalendarPagerViewModelImpleTests {
         var didHolidayChanged: Bool?
         func holidayChanged(_ holidays: [Int : [Holiday]]) {
             self.didHolidayChanged = true
+        }
+    }
+    
+    class PrivateSpyTodoEventUsecase: StubTodoEventUsecase {
+        
+        private let todoEventsInRange = CurrentValueSubject<[TodoEvent]?, Never>(nil)
+        override func refreshTodoEvents(in period: Range<TimeStamp>) {
+            let calendar = Calendar(identifier: .gregorian)
+                |> \.timeZone .~ TimeZone(abbreviation: "KST")!
+            let startMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.lowerBound.utcTimeInterval))
+            let endMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.upperBound.utcTimeInterval))
+            
+            let newTodo = TodoEvent(uuid: "kst-month: \(startMonth)~\(endMonth)", name: "dummy")
+                |> \.time .~ EventTime.at(period.lowerBound)
+            let newTodos = (self.todoEventsInRange.value ?? []) <> [newTodo]
+            self.todoEventsInRange.send(newTodos)
+        }
+        
+        override func todoEvents(in period: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Never> {
+            return self.todoEventsInRange
+                .compactMap { $0 }
+                .eraseToAnyPublisher()
+        }
+    }
+    
+    class PrivateSpyScheduleEventUsecase: StubScheduleEventUsecase {
+        
+        private let scheduleEventsInRange = CurrentValueSubject<[ScheduleEvent]?, Never>(nil)
+        override func refreshScheduleEvents(in period: Range<TimeStamp>) {
+            let calendar = Calendar(identifier: .gregorian)
+                |> \.timeZone .~ TimeZone(abbreviation: "KST")!
+            let startMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.lowerBound.utcTimeInterval))
+            let endMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.upperBound.utcTimeInterval))
+            
+            let newOne = ScheduleEvent(
+                uuid: "kst-month: \(startMonth)~\(endMonth)",
+                name: "dummy",
+                time: .at(period.lowerBound)
+            )
+            let newSchedules = (self.scheduleEventsInRange.value ?? []) <> [newOne]
+            self.scheduleEventsInRange.send(newSchedules)
+        }
+        
+        override func scheduleEvents(in period: Range<TimeStamp>) -> AnyPublisher<[ScheduleEvent], Never> {
+            return self.scheduleEventsInRange
+                .compactMap { $0 }
+                .eraseToAnyPublisher()
         }
     }
 }
