@@ -42,16 +42,25 @@ struct CalendarMonth: Hashable, Comparable {
 final class CalendarPagerViewModelImple: @unchecked Sendable {
     
     private let calendarUsecase: CalendarUsecase
+    private let calendarSettingUsecase: CalendarSettingUsecase
     private let holidayUsecase: HolidayUsecase
+    private let todoEventUsecase: TodoEventUsecase
+    private let scheduleEventUsecase: ScheduleEventUsecase
     weak var router: CalendarPagerViewRouting?
     private var monthInteractors: [CalendarMonthInteractor]?
     
     init(
         calendarUsecase: CalendarUsecase,
-        holidayUsecase: HolidayUsecase
+        calendarSettingUsecase: CalendarSettingUsecase,
+        holidayUsecase: HolidayUsecase,
+        todoEventUsecase: TodoEventUsecase,
+        scheduleEventUsecase: ScheduleEventUsecase
     ) {
         self.calendarUsecase = calendarUsecase
+        self.calendarSettingUsecase = calendarSettingUsecase
         self.holidayUsecase = holidayUsecase
+        self.todoEventUsecase = todoEventUsecase
+        self.scheduleEventUsecase = scheduleEventUsecase
         
         self.internalBind()
     }
@@ -84,7 +93,20 @@ final class CalendarPagerViewModelImple: @unchecked Sendable {
             })
             .store(in: &self.cancellables)
         
-        // TODO: bind months -> check new range appended -> refresh events
+        // Timezone 변경시에 조회중인 달력은 안바뀜 하지만 조회 가능한 범위는 달라짐
+        // ex) 동일날짜의 시간이라도 kst는 utc보다 9시간 빠름
+        let totalViewingMonths = Publishers.CombineLatest(
+                self.subject.monthsInCurrentRange.compactMap { $0 },
+                self.calendarSettingUsecase.currentTimeZone
+            )
+            .scan(TotalMonthRanges()) { acc, pair in acc.append(pair.0, in: pair.1) }
+        totalViewingMonths
+            .map { $0.newRanges }
+            .removeDuplicates()
+            .sink(receiveValue: { [weak self] ranges in
+                self?.refreshEvents(ranges)
+            })
+            .store(in: &self.cancellables)
     }
     
     private func refreshHolidays(for newYears: [Int]) {
@@ -94,6 +116,13 @@ final class CalendarPagerViewModelImple: @unchecked Sendable {
             }
         }
         .store(in: &self.cancellables)
+    }
+    
+    private func refreshEvents(_ ranges: [Range<TimeStamp>]) {
+        ranges.forEach {
+            self.scheduleEventUsecase.refreshScheduleEvents(in: $0)
+            self.todoEventUsecase.refreshTodoEvents(in: $0)
+        }
     }
 }
 
@@ -122,8 +151,8 @@ extension CalendarPagerViewModelImple {
     }
     
     func focusMoveToPreviousMonth() {
-        guard let monts = self.subject.monthsInCurrentRange.value else { return }
-        let newMonths = monts.map { $0.previousMonth() }
+        guard let months = self.subject.monthsInCurrentRange.value else { return }
+        let newMonths = months.map { $0.previousMonth() }
         self.subject.monthsInCurrentRange.send(newMonths)
     }
     
@@ -159,3 +188,83 @@ private struct TotalYears {
         )
     }
 }
+
+private struct TotalMonthRanges {
+
+    private let checkedRange: Range<TimeInterval>?
+    let newRanges: [Range<TimeStamp>]
+    
+    init(
+        checkedRange: Range<TimeInterval>? = nil,
+        newRanges: [Range<TimeStamp>] = []
+    ) {
+        self.checkedRange = checkedRange
+        self.newRanges = newRanges
+    }
+    
+    func append(_ months: [CalendarMonth], in timeZone: TimeZone) -> TotalMonthRanges {
+        
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        guard months.isEmpty == false,
+              let firstDate = months.first.flatMap(calendar.firstDateOfMonth(_:)),
+              let endDate = months.last.flatMap(calendar.lastDateOfMonth(_:)),
+              let timeZoneAbbre = timeZone.addreviationKey
+        else { return self }
+
+        let monthsRange = (firstDate.timeIntervalSince1970..<endDate.timeIntervalSince1970)
+        
+        let notCheckedRanges = (self.checkedRange.map { monthsRange.notOverlapRanges(with: $0) } ?? [monthsRange])
+            .map {
+                return TimeStamp($0.lowerBound, timeZone: timeZoneAbbre)..<TimeStamp($0.upperBound, timeZone: timeZoneAbbre)
+            }
+        let newCheckedRange = self.checkedRange.map { $0.merge(with: monthsRange) } ?? monthsRange
+        return .init(
+            checkedRange: newCheckedRange,
+            newRanges: notCheckedRanges
+        )
+    }
+}
+
+
+private extension Calendar {
+    
+    private func endOfDay(for date: Date) -> Date? {
+        return self.date(
+            byAdding: .init(day: 1, second: -1),
+            to: date
+        )
+    }
+    
+    func firstDateOfMonth(_ month: CalendarMonth) -> Date? {
+        let formatter = DateFormatter()
+        formatter.timeZone = self.timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        let firstDateString = "\(month.year)-\(month.month.withLeadingZero())-01"
+        return formatter.date(from: firstDateString)
+            .flatMap { self.startOfDay(for: $0) }
+    }
+    
+    func lastDateOfMonth(_ month: CalendarMonth) -> Date? {
+        return self.firstDateOfMonth(month)
+            .flatMap { self.lastDayOfMonth(from: $0) }
+            .flatMap { self.endOfDay(for: $0) }
+    }
+}
+
+private extension Range where Bound == TimeInterval {
+    
+    func merge(with other: Range) -> Range {
+        
+        let lowerBound = Swift.min(other.lowerBound, self.lowerBound)
+        let upperBound = Swift.max(other.upperBound, self.upperBound)
+        
+        return (lowerBound..<upperBound)
+    }
+    
+    func notOverlapRanges(with other: Range) -> [Range] {
+        let leftOut = self.lowerBound < other.lowerBound ? (self.lowerBound..<other.lowerBound) : nil
+        let rightOut = self.upperBound > other.upperBound ? (other.upperBound..<self.upperBound) : nil
+        return [leftOut, rightOut].compactMap { $0 }
+    }
+}
+

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		F67907E02A4DD3D7000CF11B /* StubCalendarUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */; };
+		F67907ED2A5004CA000CF11B /* StubTodoEventUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907EC2A5004CA000CF11B /* StubTodoEventUsecase.swift */; };
+		F67907EF2A5004D4000CF11B /* StubScheduleEventUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907EE2A5004D4000CF11B /* StubScheduleEventUsecase.swift */; };
 		F69904C72A49D25500F44834 /* TestDoubles.h in Headers */ = {isa = PBXBuildFile; fileRef = F69904C62A49D25500F44834 /* TestDoubles.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F69904CF2A49D29300F44834 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F69904CE2A49D29300F44834 /* Common3rdParty.framework */; };
 		F69904D32A49D29A00F44834 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F69904D22A49D29A00F44834 /* Domain.framework */; };
@@ -19,6 +21,8 @@
 
 /* Begin PBXFileReference section */
 		F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubCalendarUsecase.swift; sourceTree = "<group>"; };
+		F67907EC2A5004CA000CF11B /* StubTodoEventUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubTodoEventUsecase.swift; sourceTree = "<group>"; };
+		F67907EE2A5004D4000CF11B /* StubScheduleEventUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubScheduleEventUsecase.swift; sourceTree = "<group>"; };
 		F69904C32A49D25400F44834 /* TestDoubles.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TestDoubles.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F69904C62A49D25500F44834 /* TestDoubles.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TestDoubles.h; sourceTree = "<group>"; };
 		F69904CE2A49D29300F44834 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -88,6 +92,8 @@
 				F69904E02A49D2F600F44834 /* StubCalendarSettingUsecase.swift */,
 				F69904E22A49D30700F44834 /* StubHolidayUsecase.swift */,
 				F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */,
+				F67907EC2A5004CA000CF11B /* StubTodoEventUsecase.swift */,
+				F67907EE2A5004D4000CF11B /* StubScheduleEventUsecase.swift */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -179,7 +185,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F67907ED2A5004CA000CF11B /* StubTodoEventUsecase.swift in Sources */,
 				F69904E32A49D30700F44834 /* StubHolidayUsecase.swift in Sources */,
+				F67907EF2A5004D4000CF11B /* StubScheduleEventUsecase.swift in Sources */,
 				F69904E12A49D2F600F44834 /* StubCalendarSettingUsecase.swift in Sources */,
 				F67907E02A4DD3D7000CF11B /* StubCalendarUsecase.swift in Sources */,
 			);
