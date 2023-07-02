@@ -1,8 +1,8 @@
 //
 //  Dummies.swift
-//  DomainTests
+//  TestDoubles
 //
-//  Created by sudo.park on 2023/03/26.
+//  Created by sudo.park on 2023/07/02.
 //
 
 import Foundation
@@ -10,21 +10,22 @@ import Domain
 
 extension TimeStamp {
     
-    static func dummy(_ int: Int = 0) -> TimeStamp {
+    public static func dummy(_ int: Int = 0) -> TimeStamp {
         return .init(TimeInterval(int), timeZone: "UTC")
     }
 }
 
 extension TodoEvent {
     
-    static func dummy(_ int: Int = 0) -> TodoEvent {
+    public static func dummy(_ int: Int = 0) -> TodoEvent {
         return .init(uuid: "id:\(int)", name: "name:\(int)")
     }
 }
 
 extension DoneTodoEvent {
     
-    static func dummy(_ int: Int = 0) -> DoneTodoEvent {
+    public static func dummy(_ int: Int = 0) -> DoneTodoEvent {
         return .init(uuid: "did:\(int)", name: "name:\(int)", originEventId: "id:\(int)", doneTime: .now)
     }
 }
+

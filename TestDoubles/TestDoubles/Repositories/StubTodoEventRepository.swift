@@ -1,8 +1,8 @@
 //
 //  StubTodoEventRepository.swift
-//  DomainTests
+//  TestDoubles
 //
-//  Created by sudo.park on 2023/03/26.
+//  Created by sudo.park on 2023/07/02.
 //
 
 import Foundation
@@ -14,10 +14,12 @@ import Extensions
 import UnitTestHelpKit
 
 
-class StubTodoEventRepository: TodoEventRepository, BaseStub {
+open class StubTodoEventRepository: TodoEventRepository, BaseStub {
     
-    var shouldFailMake: Bool = false
-    func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent {
+    public init() {}
+    
+    public var shouldFailMake: Bool = false
+    open func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent {
         try self.checkShouldFail(self.shouldFailMake)
         return TodoEvent(uuid: "new", name: params.name ?? "")
             |> \.eventTagId .~ params.eventTagId
@@ -25,8 +27,8 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
             |> \.repeating .~ params.repeating
     }
     
-    var shouldFailUpdate: Bool = false
-    func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
+    public var shouldFailUpdate: Bool = false
+    open func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
         try self.checkShouldFail(self.shouldFailUpdate)
         return TodoEvent(uuid: eventId, name: params.name ?? "")
             |> \.eventTagId .~ params.eventTagId
@@ -34,9 +36,9 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
             |> \.repeating .~ params.repeating
     }
     
-    var shouldFailComplete: Bool = false
-    var doneEventIsRepeating: Bool = false
-    func completeTodo(_ eventId: String) async throws -> CompleteTodoResult {
+    public var shouldFailComplete: Bool = false
+    public var doneEventIsRepeating: Bool = false
+    open func completeTodo(_ eventId: String) async throws -> CompleteTodoResult {
         try self.checkShouldFail(self.shouldFailComplete)
         let doneEvent = DoneTodoEvent(uuid: "done", name: "some", originEventId: eventId, doneTime: .now)
         var nextTodo: TodoEvent?
@@ -46,9 +48,9 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
         return .init(doneEvent: doneEvent, nextRepeatingTodoEvent: nextTodo)
     }
     
-    var shouldFailReplaceRepeatingTodo: Bool = false
-    var isAvailToSkipNextTodo: Bool = true
-    func replaceRepeatingTodo(
+    public var shouldFailReplaceRepeatingTodo: Bool = false
+    public var isAvailToSkipNextTodo: Bool = true
+    open func replaceRepeatingTodo(
         current eventId: String,
         to newParams: TodoMakeParams
     ) async throws -> ReplaceRepeatingTodoEventResult {
@@ -67,8 +69,8 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
         return .init(newTodoEvent: newTodo)
     }
     
-    var shouldFailLoadCurrentTodoEvents: Bool = false
-    func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], Error> {
+    public var shouldFailLoadCurrentTodoEvents: Bool = false
+    open func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], Error> {
         guard self.shouldFailLoadCurrentTodoEvents == false else {
             return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
         }
@@ -76,8 +78,8 @@ class StubTodoEventRepository: TodoEventRepository, BaseStub {
         return Just(events).mapNever().eraseToAnyPublisher()
     }
     
-    var shouldFailLoadTodosInRange: Bool = false
-    func loadTodoEvents(in range: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Error> {
+    public var shouldFailLoadTodosInRange: Bool = false
+    open func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Error> {
         guard self.shouldFailLoadTodosInRange == false
         else {
             return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()

@@ -41,11 +41,11 @@ class TodoLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable {
 
 extension TodoLocalRepositoryImpleTests {
     
-    private func dummyRange(_ range: Range<Int>) -> Range<TimeStamp> {
+    private func dummyRange(_ range: Range<Int>) -> Range<TimeInterval> {
         let oneDay: TimeInterval = 24 * 3600
-        return TimeStamp(TimeInterval(range.lowerBound) * oneDay, timeZone: "KST")
-            ..<
-            TimeStamp(TimeInterval(range.upperBound) * oneDay, timeZone: "KST")
+        return TimeInterval(range.lowerBound)*oneDay
+        ..<
+        TimeInterval(range.upperBound)*oneDay
     }
     
     private var dummyMakeParams: TodoMakeParams {
@@ -219,8 +219,7 @@ extension TodoLocalRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let range = TimeStamp(50, timeZone: "KST")..<TimeStamp(150, timeZone: "KST")
-        let load = repository.loadTodoEvents(in: range)
+        let load = repository.loadTodoEvents(in: 50..<150)
         let todos = self.waitFirstOutput(expect, for: load, timeout: 1) ?? []
         
         // then

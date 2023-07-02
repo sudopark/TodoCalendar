@@ -79,3 +79,12 @@ extension TimeZone {
             .first(where: { $0.value == self.identifier })?.key
     }
 }
+
+
+extension Range where Bound == TimeStamp {
+    
+    // TODO: 삭제 예정
+    public func intervalRanges() -> Range<TimeInterval> {
+        return self.lowerBound.utcTimeInterval..<self.upperBound.utcTimeInterval
+    }
+}

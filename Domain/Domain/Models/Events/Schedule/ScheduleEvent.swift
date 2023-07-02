@@ -55,7 +55,7 @@ public struct ScheduleEvent {
         if let repeating {
             return repeating.isOverlap(with: period)
         } else {
-            return time.isOverlap(with: period)
+            return time.isOverlap(with: period.intervalRanges())
         }
     }
     

@@ -35,11 +35,11 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         return Empty().eraseToAnyPublisher()
     }
 
-    open func refreshTodoEvents(in period: Range<TimeStamp>) {
+    open func refreshTodoEvents(in period: Range<TimeInterval>) {
         
     }
     
-    open func todoEvents(in period: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Never> {
+    open func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never> {
         return Empty().eraseToAnyPublisher()
     }
 }

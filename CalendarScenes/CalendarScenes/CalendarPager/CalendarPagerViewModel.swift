@@ -121,7 +121,7 @@ final class CalendarPagerViewModelImple: @unchecked Sendable {
     private func refreshEvents(_ ranges: [Range<TimeStamp>]) {
         ranges.forEach {
             self.scheduleEventUsecase.refreshScheduleEvents(in: $0)
-            self.todoEventUsecase.refreshTodoEvents(in: $0)
+            self.todoEventUsecase.refreshTodoEvents(in: $0.intervalRanges())
         }
     }
 }

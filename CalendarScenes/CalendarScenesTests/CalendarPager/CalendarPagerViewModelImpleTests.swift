@@ -196,7 +196,7 @@ extension CalendarPagerViewModelImpleTests {
         
         // when
         let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
-        let source = self.spyTodoUsecase.todoEvents(in: totalRange)
+        let source = self.spyTodoUsecase.todoEvents(in: totalRange.intervalRanges())
         let todoLists = self.waitOutputs(expect, for: source) {
             // 전체 범위 => 9~11월
             
@@ -271,7 +271,7 @@ extension CalendarPagerViewModelImpleTests {
         
         // when
         let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
-        let source = self.spyTodoUsecase.todoEvents(in: totalRange)
+        let source = self.spyTodoUsecase.todoEvents(in: totalRange.intervalRanges())
         let todoLists = self.waitOutputs(expect, for: source) {
             // 최초 9~11월 나몸
             
@@ -323,19 +323,19 @@ private extension CalendarPagerViewModelImpleTests {
     class PrivateSpyTodoEventUsecase: StubTodoEventUsecase {
         
         private let todoEventsInRange = CurrentValueSubject<[TodoEvent]?, Never>(nil)
-        override func refreshTodoEvents(in period: Range<TimeStamp>) {
+        override func refreshTodoEvents(in period: Range<TimeInterval>) {
             let calendar = Calendar(identifier: .gregorian)
                 |> \.timeZone .~ TimeZone(abbreviation: "KST")!
-            let startMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.lowerBound.utcTimeInterval))
-            let endMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.upperBound.utcTimeInterval))
+            let startMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.lowerBound))
+            let endMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.upperBound))
             
             let newTodo = TodoEvent(uuid: "kst-month: \(startMonth)~\(endMonth)", name: "dummy")
-                |> \.time .~ EventTime.at(period.lowerBound)
+                |> \.time .~ EventTime.at(.init(period.lowerBound, timeZone: "KST"))
             let newTodos = (self.todoEventsInRange.value ?? []) <> [newTodo]
             self.todoEventsInRange.send(newTodos)
         }
         
-        override func todoEvents(in period: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Never> {
+        override func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never> {
             return self.todoEventsInRange
                 .compactMap { $0 }
                 .eraseToAnyPublisher()

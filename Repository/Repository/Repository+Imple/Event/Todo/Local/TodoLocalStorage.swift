@@ -45,10 +45,10 @@ extension TodoLocalStorage {
         return try await self.loadTodoEvents(timeQuery, eventQuery)
     }
     
-    func loadTodoEvents(in range: Range<TimeStamp>) async throws -> [TodoEvent] {
+    func loadTodoEvents(in range: Range<TimeInterval>) async throws -> [TodoEvent] {
         let timeQuery = Times.selectAll()
-            .where { $0.timeLowerInterval >= range.lowerBound.utcTimeInterval }
-            .where { $0.timeUpperInterval < range.upperBound.utcTimeInterval }
+            .where { $0.timeLowerInterval >= range.lowerBound }
+            .where { $0.timeUpperInterval < range.upperBound }
         let eventQuery = Todo.selectAll()
         return try await self.loadTodoEvents(timeQuery, eventQuery)
     }
