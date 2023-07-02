@@ -22,8 +22,8 @@ public protocol TodoEventUsecase {
     
     func refreshCurentTodoEvents()
     var currentTodoEvents: AnyPublisher<[TodoEvent], Never> { get }
-    func refreshTodoEvents(in period: Range<TimeStamp>)
-    func todoEvents(in period: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Never>
+    func refreshTodoEvents(in period: Range<TimeInterval>)
+    func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never>
 }
 
 
@@ -155,7 +155,7 @@ extension TodoEventUsecaseImple {
             .eraseToAnyPublisher()
     }
     
-    public func refreshTodoEvents(in period: Range<TimeStamp>) {
+    public func refreshTodoEvents(in period: Range<TimeInterval>) {
         let shareKey = ShareDataKeys.todos.rawValue
         let updateCache: ([TodoEvent]) -> Void = { [weak self] todos in
             self?.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
@@ -167,7 +167,7 @@ extension TodoEventUsecaseImple {
             .store(in: &self.cancellables)
     }
     
-    public func todoEvents(in period: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Never> {
+    public func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never> {
         let shareKey = ShareDataKeys.todos.rawValue
         
         let filterInRange: ([TodoEvent]) -> [TodoEvent] = { todos in

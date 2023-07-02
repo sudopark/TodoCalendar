@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import UnitTestHelpKit
+import TestDoubles
 
 @testable import Domain
 
@@ -168,7 +169,7 @@ extension TodoEventUsecaseImpleTests {
         
         // when
         let todoSource = usecase.todoEvents(
-            in: TimeStamp.dummy(0)..<TimeStamp.dummy(24*3600*10)
+            in: 0..<24*3600*10
         )
         let todos = self.waitOutputs(expect, for: todoSource) {
             Task {
@@ -196,7 +197,7 @@ extension TodoEventUsecaseImpleTests {
         
         // when
         let todoSource = usecase.todoEvents(
-            in: TimeStamp.dummy(0)..<TimeStamp.dummy(24*3600*10)
+            in: 0..<24*3600*10
         )
         let todos = self.waitOutputs(expect, for: todoSource) {
             Task {
@@ -459,8 +460,8 @@ extension TodoEventUsecaseImpleTests {
 
 extension TodoEventUsecaseImpleTests {
     
-    private var todosInRange: Range<TimeStamp> {
-        return TimeStamp.dummy(-10)..<TimeStamp.dummy(30)
+    private var todosInRange: Range<TimeInterval> {
+        return -10..<30
     }
     
     private func stubLoadTodosInPeriodFail() {

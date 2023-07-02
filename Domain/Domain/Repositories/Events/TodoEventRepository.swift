@@ -17,5 +17,5 @@ public protocol TodoEventRepository {
     func replaceRepeatingTodo(current eventId: String, to newParams: TodoMakeParams) async throws -> ReplaceRepeatingTodoEventResult
     
     func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], Error>
-    func loadTodoEvents(in range: Range<TimeStamp>) -> AnyPublisher<[TodoEvent], Error>
+    func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Error>
 }

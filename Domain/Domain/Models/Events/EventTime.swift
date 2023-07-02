@@ -50,12 +50,12 @@ public enum EventTime: Comparable {
         }
     }
     
-    func isOverlap(with period: Range<TimeStamp>) -> Bool {
+    func isOverlap(with period: Range<TimeInterval>) -> Bool {
         switch self {
         case .at(let time):
-            return period ~= time
+            return period ~= time.utcTimeInterval
         case .period(let range):
-            return range.overlaps(period)
+            return range.intervalRanges().overlaps(period)
         }
     }
     
