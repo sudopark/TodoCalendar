@@ -18,8 +18,8 @@ public protocol ScheduleEventUsecase {
     
     func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent
     func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent
-    func refreshScheduleEvents(in period: Range<TimeStamp>)
-    func scheduleEvents(in period: Range<TimeStamp>) -> AnyPublisher<[ScheduleEvent], Never>
+    func refreshScheduleEvents(in period: Range<TimeInterval>)
+    func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never>
 }
 
 
@@ -111,7 +111,7 @@ extension ScheduleEventUsecaseImple {
 
 extension ScheduleEventUsecaseImple {
     
-    public func refreshScheduleEvents(in period: Range<TimeStamp>) {
+    public func refreshScheduleEvents(in period: Range<TimeInterval>) {
 
         let updateCache: ([ScheduleEvent]) -> Void = { [weak self] events in
             guard let self = self else { return }
@@ -127,7 +127,7 @@ extension ScheduleEventUsecaseImple {
             .store(in: &self.cancellables)
     }
     
-    public func scheduleEvents(in period: Range<TimeStamp>)  -> AnyPublisher<[ScheduleEvent], Never> {
+    public func scheduleEvents(in period: Range<TimeInterval>)  -> AnyPublisher<[ScheduleEvent], Never> {
         let key = ShareDataKeys.schedules
         return self.sharedDataStore
             .observe(MemorizedScheduleEventsContainer.self, key: key.rawValue)

@@ -174,16 +174,14 @@ extension CalendarPagerViewModelImpleTests {
     }
     
     private func range(_ start: (Int, Int, Int),
-                       _ end: (Int, Int, Int)) -> Range<TimeStamp> {
+                       _ end: (Int, Int, Int)) -> Range<TimeInterval> {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ TimeZone(abbreviation: "KST")!
         let startCompos = DateComponents(year: start.0, month: start.1, day: start.2, hour: 0, minute: 0, second: 0)
         let endCompos = DateComponents(year: end.0, month: end.1, day: end.2, hour: 23, minute: 59, second: 59)
         
         let start = calendar.date(from: startCompos)!
         let end = calendar.date(from: endCompos)!
-        return TimeStamp(start.timeIntervalSince1970, timeZone: "KST")
-                ..<
-                TimeStamp(end.timeIntervalSince1970, timeZone: "KST")
+        return start.timeIntervalSince1970..<end.timeIntervalSince1970
     }
     
     func testViewModel_whenRangeChangeAndNewMonthAppened_reloadTodoEventsInTotalPeriod() {
@@ -196,7 +194,7 @@ extension CalendarPagerViewModelImpleTests {
         
         // when
         let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
-        let source = self.spyTodoUsecase.todoEvents(in: totalRange.intervalRanges())
+        let source = self.spyTodoUsecase.todoEvents(in: totalRange)
         let todoLists = self.waitOutputs(expect, for: source) {
             // 전체 범위 => 9~11월
             
@@ -271,7 +269,7 @@ extension CalendarPagerViewModelImpleTests {
         
         // when
         let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
-        let source = self.spyTodoUsecase.todoEvents(in: totalRange.intervalRanges())
+        let source = self.spyTodoUsecase.todoEvents(in: totalRange)
         let todoLists = self.waitOutputs(expect, for: source) {
             // 최초 9~11월 나몸
             
@@ -345,22 +343,22 @@ private extension CalendarPagerViewModelImpleTests {
     class PrivateSpyScheduleEventUsecase: StubScheduleEventUsecase {
         
         private let scheduleEventsInRange = CurrentValueSubject<[ScheduleEvent]?, Never>(nil)
-        override func refreshScheduleEvents(in period: Range<TimeStamp>) {
+        override func refreshScheduleEvents(in period: Range<TimeInterval>) {
             let calendar = Calendar(identifier: .gregorian)
                 |> \.timeZone .~ TimeZone(abbreviation: "KST")!
-            let startMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.lowerBound.utcTimeInterval))
-            let endMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.upperBound.utcTimeInterval))
+            let startMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.lowerBound))
+            let endMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.upperBound))
             
             let newOne = ScheduleEvent(
                 uuid: "kst-month: \(startMonth)~\(endMonth)",
                 name: "dummy",
-                time: .at(period.lowerBound)
+                time: .at(.init(period.lowerBound, timeZone: "KST"))
             )
             let newSchedules = (self.scheduleEventsInRange.value ?? []) <> [newOne]
             self.scheduleEventsInRange.send(newSchedules)
         }
         
-        override func scheduleEvents(in period: Range<TimeStamp>) -> AnyPublisher<[ScheduleEvent], Never> {
+        override func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never> {
             return self.scheduleEventsInRange
                 .compactMap { $0 }
                 .eraseToAnyPublisher()

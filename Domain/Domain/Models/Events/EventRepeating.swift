@@ -11,7 +11,7 @@ import Extensions
 
 // MARK: - event repeating
 
-public protocol EventRepeatingOption {
+public protocol EventRepeatingOption: Sendable {
     
     var compareHash: Int { get }
 }
@@ -42,7 +42,7 @@ public enum EventRepeatingOptions {
     
     public struct EveryMonth: EventRepeatingOption, Hashable {
         
-        public enum DateSelector: Hashable, Equatable {
+        public enum DateSelector: Hashable, Equatable, Sendable {
             case days([Int])    // days -> 1~31
             case week(_ ordinals: [WeekOrdinal], _ weekDays: [DayOfWeeks])
         }
@@ -86,12 +86,12 @@ public struct EventRepeating: Equatable {
         self.repeatOption = repeatOption
     }
     
-    func isOverlap(with period: Range<TimeStamp>) -> Bool {
-        let closedPeriod = (period.lowerBound...period.upperBound.add(1))
+    func isOverlap(with period: Range<TimeInterval>) -> Bool {
+        let closedPeriod = (period.lowerBound...period.upperBound+1)
         if let repeatingEndTime {
-            return (self.repeatingStartTime...repeatingEndTime).overlaps(closedPeriod)
+            return (self.repeatingStartTime.utcTimeInterval...repeatingEndTime.utcTimeInterval).overlaps(closedPeriod)
         } else {
-            return self.repeatingStartTime < period.upperBound
+            return self.repeatingStartTime.utcTimeInterval < period.upperBound
         }
     }
     

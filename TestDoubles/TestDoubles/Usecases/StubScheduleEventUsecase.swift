@@ -23,11 +23,11 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase {
         throw RuntimeError("not implemented")
     }
     
-    open func refreshScheduleEvents(in period: Range<TimeStamp>) {
+    open func refreshScheduleEvents(in period: Range<TimeInterval>) {
     
     }
     
-    open func scheduleEvents(in period: Range<TimeStamp>) -> AnyPublisher<[ScheduleEvent], Never> {
+    open func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never> {
         return Empty().eraseToAnyPublisher()
     }
 }

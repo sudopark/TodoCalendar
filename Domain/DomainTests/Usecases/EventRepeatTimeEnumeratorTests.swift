@@ -65,13 +65,13 @@ extension EventRepeatTimeEnumeratorTests_everyDay {
         // 반복 종료 시간과 동일한 경우
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)
-        next = enumerator.nextEventTime(from: self.dummyTimeAt, until: .init(.days(3) + 10, timeZone: "UTC"))
+        next = enumerator.nextEventTime(from: self.dummyTimeAt, until: .days(3) + 10)
         XCTAssertEqual(next, .at(TimeStamp(10 + .days(3), timeZone: "UTC")))
         
         // 반복종료시간 초과시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)
-        next = enumerator.nextEventTime(from: self.dummyTimeAt, until: .init(.days(2), timeZone: "UTC"))
+        next = enumerator.nextEventTime(from: self.dummyTimeAt, until: .days(2))
         XCTAssertNil(next)
     }
     
@@ -94,7 +94,7 @@ extension EventRepeatTimeEnumeratorTests_everyDay {
         
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)
-        next = enumerator.nextEventTime(from: self.dummyTimeRange, until: .init(.days(2), timeZone: "UTC"))
+        next = enumerator.nextEventTime(from: self.dummyTimeRange, until: .days(2))
         XCTAssertNil(next)
     }
 }
@@ -131,7 +131,7 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
                 |> \.interval .~ intervalWeek
                 |> \.dayOfWeeks .~ [.tuesday]
             let enumerator = self.makeEnumerator(option)
-            let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
+            let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
             
             // when
             let next = enumerator.nextEventTime(from: self.dummyTimeAt, until: endTime)
@@ -161,7 +161,7 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
                 |> \.interval .~ interval
                 |> \.dayOfWeeks .~ [.tuesday]
             let enumerator = self.makeEnumerator(option)
-            let endTIme = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
+            let endTIme = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
             
             // when
             let next = enumerator.nextEventTime(from: self.dummyTimeRange, until: endTIme)
@@ -194,7 +194,7 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
                 |> \.interval .~ interval
                 |> \.dayOfWeeks .~ [.tuesday, .friday]
             let enumerator = self.makeEnumerator(option)
-            let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
+            let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
             
             // when
             let next = enumerator.nextEventTime(from: self.dummyTimeAt, until: endTime)
@@ -223,7 +223,7 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
                 |> \.interval .~ interval
                 |> \.dayOfWeeks .~ [.tuesday, .friday]
             let enumerator = self.makeEnumerator(option)
-            let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
+            let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
             
             // when
             let next = enumerator.nextEventTime(from: self.dummyTimeRange, until: endTime)
@@ -268,7 +268,7 @@ class EventRepeatEnumeratorTests_everyMonthWithSelectWeeks: BaseEventRepeatTimeE
                 isOnlyWithSeekLast ? [.last] : [.seq(2), .seq(4), .last], [.tuesday, .thursday]
             )
         let enumerator = self.makeEnumerator(option)
-        let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
+        let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
         
         // when
         let next = enumerator.nextEventTime(from: .at(
@@ -337,7 +337,7 @@ class EventRepeatEnumeratorTests_everyMonthWithSelectDays: BaseEventRepeatTimeEn
             |> \.interval .~ interval
             |> \.selection .~ .days([1, 15, 30, 31])
         let enumerator = self.makeEnumerator(option)
-        let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
+        let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
         
         // when
         let next = enumerator.nextEventTime(from: .at(
@@ -392,7 +392,7 @@ class EventRepeatEnumeratorTests_everyYear: BaseEventRepeatTimeEnumeratorTests {
             |> \.weekOrdinals .~ [ .seq(2), .seq(4), .last]
             |> \.dayOfWeek .~ weekDays
         let enumerator = self.makeEnumerator(option)
-        let endTime = endTime.map { TimeStamp(self.dummyDate($0).timeIntervalSince1970, timeZone: "KST") }
+        let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
         
         // when
         let next = enumerator.nextEventTime(from: .at(
@@ -453,12 +453,10 @@ class EventRepeatEnumeratorTests_EnumeratesUntilEnd: BaseEventRepeatTimeEnumerat
         let startTimeStamp = TimeStamp(
             self.dummyDate("2023-05-20 01:00").timeIntervalSince1970 , timeZone: "KST"
         )
-        let endTimeStamp = TimeStamp(
-            self.dummyDate("2023-06-01 01:00").timeIntervalSince1970, timeZone: "KST"
-        )
+        let endTime = self.dummyDate("2023-06-01 01:00").timeIntervalSince1970
         
         // when
-        let eventTimes = enumerator.nextEventTimes(from: .at(startTimeStamp), until: endTimeStamp)
+        let eventTimes = enumerator.nextEventTimes(from: .at(startTimeStamp), until: endTime)
         
         // then
         XCTAssertEqual(eventTimes, [

@@ -40,11 +40,11 @@ class ScheduleEventLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable 
 
 extension ScheduleEventLocalRepositoryImpleTests {
     
-    private func dummyRange(_ range: Range<Int>) -> Range<TimeStamp> {
+    private func dummyRange(_ range: Range<Int>) -> Range<TimeInterval> {
         let oneDay: TimeInterval = 24 * 3600
-        return TimeStamp(TimeInterval(range.lowerBound) * oneDay, timeZone: "KST")
-            ..<
-            TimeStamp(TimeInterval(range.upperBound) * oneDay, timeZone: "KST")
+        return TimeInterval(range.lowerBound)*oneDay
+                ..<
+                TimeInterval(range.upperBound)*oneDay
     }
     
     private var dummyMakeParams: ScheduleMakeParams {
@@ -162,7 +162,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let range = TimeStamp(50, timeZone: "KST")..<TimeStamp(150, timeZone: "KST")
+        let range = 50.0..<150.0
         let load = repository.loadScheduleEvents(in: range)
         let events = self.waitFirstOutput(expect, for: load, timeout: 1) ?? []
         

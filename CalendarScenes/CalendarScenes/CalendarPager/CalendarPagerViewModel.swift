@@ -118,10 +118,10 @@ final class CalendarPagerViewModelImple: @unchecked Sendable {
         .store(in: &self.cancellables)
     }
     
-    private func refreshEvents(_ ranges: [Range<TimeStamp>]) {
+    private func refreshEvents(_ ranges: [Range<TimeInterval>]) {
         ranges.forEach {
             self.scheduleEventUsecase.refreshScheduleEvents(in: $0)
-            self.todoEventUsecase.refreshTodoEvents(in: $0.intervalRanges())
+            self.todoEventUsecase.refreshTodoEvents(in: $0)
         }
     }
 }
@@ -192,11 +192,11 @@ private struct TotalYears {
 private struct TotalMonthRanges {
 
     private let checkedRange: Range<TimeInterval>?
-    let newRanges: [Range<TimeStamp>]
+    let newRanges: [Range<TimeInterval>]
     
     init(
         checkedRange: Range<TimeInterval>? = nil,
-        newRanges: [Range<TimeStamp>] = []
+        newRanges: [Range<TimeInterval>] = []
     ) {
         self.checkedRange = checkedRange
         self.newRanges = newRanges
@@ -207,16 +207,13 @@ private struct TotalMonthRanges {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         guard months.isEmpty == false,
               let firstDate = months.first.flatMap(calendar.firstDateOfMonth(_:)),
-              let endDate = months.last.flatMap(calendar.lastDateOfMonth(_:)),
-              let timeZoneAbbre = timeZone.addreviationKey
+              let endDate = months.last.flatMap(calendar.lastDateOfMonth(_:))
         else { return self }
 
         let monthsRange = (firstDate.timeIntervalSince1970..<endDate.timeIntervalSince1970)
         
         let notCheckedRanges = (self.checkedRange.map { monthsRange.notOverlapRanges(with: $0) } ?? [monthsRange])
-            .map {
-                return TimeStamp($0.lowerBound, timeZone: timeZoneAbbre)..<TimeStamp($0.upperBound, timeZone: timeZoneAbbre)
-            }
+            
         let newCheckedRange = self.checkedRange.map { $0.merge(with: monthsRange) } ?? monthsRange
         return .init(
             checkedRange: newCheckedRange,

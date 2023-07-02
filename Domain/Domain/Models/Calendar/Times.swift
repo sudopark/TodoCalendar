@@ -8,7 +8,7 @@
 import Foundation
 
 
-public enum DayOfWeeks: Int {
+public enum DayOfWeeks: Int, Sendable {
     case sunday = 1
     case monday
     case tuesday
@@ -18,7 +18,7 @@ public enum DayOfWeeks: Int {
     case saturday
 }
 
-public enum Months: Int {
+public enum Months: Int, Sendable {
     case january = 1
     case february
     case march
@@ -33,7 +33,7 @@ public enum Months: Int {
     case december
 }
 
-public enum WeekOrdinal: Equatable, Hashable {
+public enum WeekOrdinal: Equatable, Hashable, Sendable {
     case seq(Int)
     case last
 }
@@ -83,8 +83,7 @@ extension TimeZone {
 
 extension Range where Bound == TimeStamp {
     
-    // TODO: 삭제 예정
-    public func intervalRanges() -> Range<TimeInterval> {
+    func intervalRanges() -> Range<TimeInterval> {
         return self.lowerBound.utcTimeInterval..<self.upperBound.utcTimeInterval
     }
 }
