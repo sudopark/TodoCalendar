@@ -78,7 +78,7 @@ public final class EventRepeatTimeEnumerator: Sendable {
         }
     }
     
-    public func nextEventTime(from time: EventTime, until endTime: TimeStamp?) -> EventTime? {
+    public func nextEventTime(from time: EventTime, until endTime: TimeInterval?) -> EventTime? {
         let currentEventStartDate = Date(timeIntervalSince1970: time.lowerBound)
         guard let current = Current(self.calendar, date: currentEventStartDate) else { return nil }
         let nextDate: Date?
@@ -99,7 +99,7 @@ public final class EventRepeatTimeEnumerator: Sendable {
         else { return nil }
         
         let nextTime = time.shift(interval)
-        if let endTime, nextTime.upperBound > endTime.utcTimeInterval {
+        if let endTime, nextTime.upperBound > endTime {
             return nil
         }
         
@@ -111,7 +111,7 @@ public final class EventRepeatTimeEnumerator: Sendable {
     
     func nextEventTimes(
         from start: EventTime,
-        until endTime: TimeStamp
+        until endTime: TimeInterval
     ) -> [EventTime] {
         
         var sender: [EventTime] = []

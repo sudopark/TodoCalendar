@@ -51,11 +51,11 @@ public struct ScheduleEvent {
         self.showTurn = params.showTurn ?? false
     }
     
-    func isOverlap(with period: Range<TimeStamp>) -> Bool {
+    func isOverlap(with period: Range<TimeInterval>) -> Bool {
         if let repeating {
             return repeating.isOverlap(with: period)
         } else {
-            return time.isOverlap(with: period.intervalRanges())
+            return time.isOverlap(with: period)
         }
     }
     

@@ -15,31 +15,31 @@ struct MemorizedScheduleEventsContainer {
     private struct CacheItem {
         
         var event: ScheduleEvent
-        var calculatedRangeAndTimes: [(Range<TimeStamp>, [ScheduleEvent.RepeatingTimes])] = []
+        var calculatedRangeAndTimes: [(Range<TimeInterval>, [ScheduleEvent.RepeatingTimes])] = []
         
         init(event: ScheduleEvent) {
             self.event = event
         }
         
-        func isNotCalculated(for period: Range<TimeStamp>) -> Bool {
+        func isNotCalculated(for period: Range<TimeInterval>) -> Bool {
             return self.event.repeating != nil
                 && self.calculatedRangeAndTimes
                 .first(where: { period.isSubRange(of: $0.0) }) == nil
         }
         
-        func firstCacheIndex(contains time: TimeStamp) -> Int? {
+        func firstCacheIndex(contains time: TimeInterval) -> Int? {
             return self.calculatedRangeAndTimes.firstIndex(where: {
                 $0.0.contains(time)
             })
         }
         
-        func nextCacheIndex(from time: TimeStamp, until end: TimeStamp) -> Int? {
+        func nextCacheIndex(from time: TimeInterval, until end: TimeInterval) -> Int? {
             return self.calculatedRangeAndTimes.firstIndex(where: {
                 return time < $0.0.lowerBound && $0.0.lowerBound < end
             })
         }
         
-        mutating func append(new : (Range<TimeStamp>, [ScheduleEvent.RepeatingTimes])) {
+        mutating func append(new : (Range<TimeInterval>, [ScheduleEvent.RepeatingTimes])) {
             self.calculatedRangeAndTimes.append(new)
             self.event.nextRepeatingTimes = self.calculatedRangeAndTimes.flatMap { $0.1 }
         }
@@ -56,7 +56,7 @@ struct MemorizedScheduleEventsContainer {
 
 extension MemorizedScheduleEventsContainer {
     
-    func scheduleEvents(in period: Range<TimeStamp>) -> [ScheduleEvent] {
+    func scheduleEvents(in period: Range<TimeInterval>) -> [ScheduleEvent] {
         return self.caches.values
             .map { $0 }
             .filter { $0.event.isOverlap(with: period) }
@@ -86,7 +86,7 @@ extension MemorizedScheduleEventsContainer {
         )
     }
     
-    func refresh(_ events: [ScheduleEvent], in period: Range<TimeStamp>) -> MemorizedScheduleEventsContainer {
+    func refresh(_ events: [ScheduleEvent], in period: Range<TimeInterval>) -> MemorizedScheduleEventsContainer {
         
         let cachedInPeriodMap = self.caches.values
             .filter { $0.event.isOverlap(with: period) }
@@ -113,7 +113,7 @@ extension MemorizedScheduleEventsContainer {
     private func calculateRepeatingTimes(
         _ event: ScheduleEvent,
         with cached: CacheItem?,
-        in period: Range<TimeStamp>
+        in period: Range<TimeInterval>
     ) -> CacheItem {
         guard let repeating = event.repeating
         else {
@@ -127,7 +127,7 @@ extension MemorizedScheduleEventsContainer {
         
         let (startTime, end) = (
             event.time,
-            repeating.repeatingEndTime.map { min($0, period.upperBound) } ?? period.upperBound
+            repeating.repeatingEndTime.map { min($0.utcTimeInterval, period.upperBound) } ?? period.upperBound
         )
         
         let calculatedResult = self.calculateRepeatingTimesBlock(
@@ -147,11 +147,11 @@ extension MemorizedScheduleEventsContainer {
     }
     
     private struct BlockCalculateResult {
-        let newRange: Range<TimeStamp>?
+        let newRange: Range<TimeInterval>?
         let newCalculated: [ScheduleEvent.RepeatingTimes]
         var cacheItem: CacheItem
         init(
-            _ newRange: Range<TimeStamp>?,
+            _ newRange: Range<TimeInterval>?,
             _ newCalculated: [ScheduleEvent.RepeatingTimes],
             _ cacheItem: CacheItem
         ) {
@@ -172,16 +172,16 @@ extension MemorizedScheduleEventsContainer {
     private func calculateRepeatingTimesBlock(
         _ enumerator: EventRepeatTimeEnumerator,
         from start: ScheduleEvent.RepeatingTimes,
-        unitl end: TimeStamp,
+        unitl end: TimeInterval,
         acc result: BlockCalculateResult
     ) -> BlockCalculateResult {
-        let startTimeStamp = start.time.lowerBoundTimeStamp
+        let startTime = start.time.lowerBoundTimeStamp.utcTimeInterval
         // return 1
-        guard startTimeStamp < end else { return result }
+        guard startTime < end else { return result }
         
         var result = result
         
-        if let blockIndex = result.cacheItem.firstCacheIndex(contains: startTimeStamp) {
+        if let blockIndex = result.cacheItem.firstCacheIndex(contains: startTime) {
             // 현재 시작점을 포함하는 범위의 캐시가 존재한다면
             // cache.start..<start..<(cache.end or end)
             let (blockRange, block) = result.cacheItem.calculatedRangeAndTimes.remove(at: blockIndex)
@@ -204,7 +204,7 @@ extension MemorizedScheduleEventsContainer {
                 block_to_end.cacheItem
             )
             
-        } else if let blockIndex = result.cacheItem.nextCacheIndex(from: startTimeStamp, until: end) {
+        } else if let blockIndex = result.cacheItem.nextCacheIndex(from: startTime, until: end) {
             // start..<cache.start..<end 내에 캐시가 존재한다면
             let (blockRange, block) = result.cacheItem.calculatedRangeAndTimes.remove(at: blockIndex)
             
@@ -221,14 +221,14 @@ extension MemorizedScheduleEventsContainer {
             )
             // return 4
             return .init(
-                startTimeStamp..<newEnd,
+                startTime..<newEnd,
                 start_to_block + block + block_to_end.newCalculated,
                 block_to_end.cacheItem
             )
         } else {
             // return 5 캐싱된것이 없다면 주어진 범위까지 계산
             return .init(
-                startTimeStamp..<end,
+                startTime..<end,
                 self.enumerateEventTimes(enumerator, from: start, until: end),
                 result.cacheItem
             )
@@ -238,7 +238,7 @@ extension MemorizedScheduleEventsContainer {
     private func enumerateEventTimes(
         _ enumerator: EventRepeatTimeEnumerator,
         from start: ScheduleEvent.RepeatingTimes,
-        until end: TimeStamp
+        until end: TimeInterval
     ) -> [ScheduleEvent.RepeatingTimes] {
         let nextFirstTurn = start.turn + 1
         return enumerator.nextEventTimes(from: start.time, until: end)
@@ -257,7 +257,7 @@ private extension ScheduleEvent {
     }
 }
 
-private extension Range where Bound == TimeStamp {
+private extension Range where Bound == TimeInterval {
     
     func isSubRange(of parentRange: Range) -> Bool {
         return parentRange.lowerBound <= self.lowerBound

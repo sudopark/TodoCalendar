@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import UnitTestHelpKit
+import TestDoubles
 
 @testable import Domain
 
@@ -125,11 +126,9 @@ extension ScheduleEventUsecaseImpleTests {
 
 extension ScheduleEventUsecaseImpleTests {
     
-    private func dummyRange(_ range: Range<Int> = 0..<20) -> Range<TimeStamp> {
+    private func dummyRange(_ range: Range<Int> = 0..<20) -> Range<TimeInterval> {
         let oneDay: TimeInterval = 3600 * 24
-        return TimeStamp(TimeInterval(range.lowerBound) * oneDay, timeZone: "KST")
-            ..<
-            TimeStamp(TimeInterval(range.upperBound) * oneDay, timeZone: "KST")
+        return TimeInterval(range.lowerBound)*oneDay..<TimeInterval(range.upperBound)*oneDay
     }
     
     private func dummyEvents(_ range: Range<Int>) -> [ScheduleEvent] {
@@ -355,7 +354,7 @@ extension ScheduleEventUsecaseImpleTests {
         self.replaceMemorized([old])
         
         // when
-        let source = usecase.scheduleEvents(in: TimeStamp.dummy(0)..<TimeStamp.dummy(100))
+        let source = usecase.scheduleEvents(in: 0..<100)
         let eventLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
             Task {
                 let params = ScheduleEditParams()

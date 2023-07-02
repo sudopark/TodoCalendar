@@ -19,10 +19,8 @@ class MemorizedScheduleEventsContainerTests: BaseTestCase {
         return .init()
     }
     
-    private func period(_ range: Range<Int>) -> Range<TimeStamp> {
-        return TimeStamp(range.lowerBound.days, timeZone: "KST")
-            ..<
-        TimeStamp(range.upperBound.days, timeZone: "KST")
+    private func period(_ range: Range<Int>) -> Range<TimeInterval> {
+        return range.lowerBound.days..<range.upperBound.days
     }
     
     private func notRepeatingEvent(_ int: Int) -> ScheduleEvent {

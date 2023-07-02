@@ -16,7 +16,6 @@
 		F632E21C29FF84A50052C61B /* ScheduleEventUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E21B29FF84A50052C61B /* ScheduleEventUsecase.swift */; };
 		F632E21E29FF89C20052C61B /* ScheduleEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E21D29FF89C20052C61B /* ScheduleEventRepository.swift */; };
 		F632E22029FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E21F29FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift */; };
-		F632E22229FF8BAF0052C61B /* StubScheduleEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E22129FF8BAF0052C61B /* StubScheduleEventRepository.swift */; };
 		F632E22429FF8F670052C61B /* MemorizedScheduleEventsContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F632E22329FF8F670052C61B /* MemorizedScheduleEventsContainer.swift */; };
 		F63C9BD729C6B00500CC663A /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9BCE29C6B00500CC663A /* Domain.framework */; };
 		F63C9BDD29C6B00500CC663A /* Domain.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9BD129C6B00500CC663A /* Domain.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -75,7 +74,6 @@
 		F632E21B29FF84A50052C61B /* ScheduleEventUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventUsecase.swift; sourceTree = "<group>"; };
 		F632E21D29FF89C20052C61B /* ScheduleEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventRepository.swift; sourceTree = "<group>"; };
 		F632E21F29FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventUsecaseImpleTests.swift; sourceTree = "<group>"; };
-		F632E22129FF8BAF0052C61B /* StubScheduleEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubScheduleEventRepository.swift; sourceTree = "<group>"; };
 		F632E22329FF8F670052C61B /* MemorizedScheduleEventsContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorizedScheduleEventsContainer.swift; sourceTree = "<group>"; };
 		F63C9BCE29C6B00500CC663A /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63C9BD129C6B00500CC663A /* Domain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Domain.h; sourceTree = "<group>"; };
@@ -312,7 +310,6 @@
 		F65B08EE29D0143D000EE650 /* Doubles */ = {
 			isa = PBXGroup;
 			children = (
-				F632E22129FF8BAF0052C61B /* StubScheduleEventRepository.swift */,
 				F6957FBE2A222B0A0064E8BD /* StubEventTagRepository.swift */,
 				F6E35D582A2B8B6700BDA545 /* StubCalendarSetingRepository.swift */,
 				F6CD67292A3445E0007E4306 /* StubHolidayRepository.swift */,
@@ -511,7 +508,6 @@
 				F609B3892A27AC870056CC13 /* PagingUsecaseTests.swift in Sources */,
 				F69904E72A49D9DF00F44834 /* CalendarUsecaseImpleTests.swift in Sources */,
 				F65B08ED29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift in Sources */,
-				F632E22229FF8BAF0052C61B /* StubScheduleEventRepository.swift in Sources */,
 				F632E22029FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift in Sources */,
 				F6957FC12A222B520064E8BD /* EventTagUsecaseImpleTests.swift in Sources */,
 				F6CD67282A3445D4007E4306 /* HolidayUsecaseImpleTests.swift in Sources */,

@@ -10,6 +10,7 @@
 		F60163502A51571200CAD076 /* StubTodoEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F601634F2A51571200CAD076 /* StubTodoEventRepository.swift */; };
 		F60163532A51579C00CAD076 /* Dummies.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60163522A51579C00CAD076 /* Dummies.swift */; };
 		F60163552A5158B700CAD076 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F60163542A5158B700CAD076 /* XCTest.framework */; platformFilter = ios; };
+		F60163592A515FEE00CAD076 /* StubScheduleEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60163582A515FEE00CAD076 /* StubScheduleEventRepository.swift */; };
 		F67907E02A4DD3D7000CF11B /* StubCalendarUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */; };
 		F67907ED2A5004CA000CF11B /* StubTodoEventUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907EC2A5004CA000CF11B /* StubTodoEventUsecase.swift */; };
 		F67907EF2A5004D4000CF11B /* StubScheduleEventUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907EE2A5004D4000CF11B /* StubScheduleEventUsecase.swift */; };
@@ -26,6 +27,7 @@
 		F601634F2A51571200CAD076 /* StubTodoEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubTodoEventRepository.swift; sourceTree = "<group>"; };
 		F60163522A51579C00CAD076 /* Dummies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dummies.swift; sourceTree = "<group>"; };
 		F60163542A5158B700CAD076 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		F60163582A515FEE00CAD076 /* StubScheduleEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubScheduleEventRepository.swift; sourceTree = "<group>"; };
 		F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubCalendarUsecase.swift; sourceTree = "<group>"; };
 		F67907EC2A5004CA000CF11B /* StubTodoEventUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubTodoEventUsecase.swift; sourceTree = "<group>"; };
 		F67907EE2A5004D4000CF11B /* StubScheduleEventUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubScheduleEventUsecase.swift; sourceTree = "<group>"; };
@@ -119,6 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				F601634F2A51571200CAD076 /* StubTodoEventRepository.swift */,
+				F60163582A515FEE00CAD076 /* StubScheduleEventRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -206,6 +209,7 @@
 				F60163502A51571200CAD076 /* StubTodoEventRepository.swift in Sources */,
 				F67907ED2A5004CA000CF11B /* StubTodoEventUsecase.swift in Sources */,
 				F69904E32A49D30700F44834 /* StubHolidayUsecase.swift in Sources */,
+				F60163592A515FEE00CAD076 /* StubScheduleEventRepository.swift in Sources */,
 				F67907EF2A5004D4000CF11B /* StubScheduleEventUsecase.swift in Sources */,
 				F69904E12A49D2F600F44834 /* StubCalendarSettingUsecase.swift in Sources */,
 				F60163532A51579C00CAD076 /* Dummies.swift in Sources */,

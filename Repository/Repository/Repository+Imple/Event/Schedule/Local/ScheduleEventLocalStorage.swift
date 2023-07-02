@@ -38,7 +38,7 @@ extension ScheduleEventLocalStorage {
         return schedule
     }
     
-    func loadScheduleEvents(in range: Range<TimeStamp>) async throws -> [ScheduleEvent] {
+    func loadScheduleEvents(in range: Range<TimeInterval>) async throws -> [ScheduleEvent] {
         // 항상 l <= u, L <= U 이고
         // todo의 기간이 l..<u 이며 조회 기간이 L..<U 이라 할때
         // 조회에서 제외되는 조건은 ( l < L && u < L) || ( U <= l && U <= u)
@@ -51,16 +51,16 @@ extension ScheduleEventLocalStorage {
         // 반복일정이 없는 경우는 lower=upper 이기때문에 조건식을 만족못하면 걸러짐
         let timeQuery = Times.selectAll()
             .where {
-                $0.lowerInterval >= range.lowerBound.utcTimeInterval
+                $0.lowerInterval >= range.lowerBound
                 ||
-                $0.upperInterval >= range.lowerBound.utcTimeInterval
+                $0.upperInterval >= range.lowerBound
                 ||
                 $0.upperInterval.isNull()
             }
             .where {
-                $0.lowerInterval < range.upperBound.utcTimeInterval
+                $0.lowerInterval < range.upperBound
                 ||
-                $0.upperInterval < range.upperBound.utcTimeInterval
+                $0.upperInterval < range.upperBound
             }
         let eventQuery = Schedules.selectAll()
         return try await self.loadScheduleEvents(timeQuery, eventQuery)
