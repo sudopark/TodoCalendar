@@ -29,8 +29,7 @@ open class StubCalendarUsecase: CalendarUsecase {
     
     open func components(
         for month: Int,
-        of year: Int,
-        at timeZone: TimeZone
+        of year: Int
     ) -> AnyPublisher<CalendarComponent, Never> {
      
         let weekAndDays: [[(Int, Int)]] = [

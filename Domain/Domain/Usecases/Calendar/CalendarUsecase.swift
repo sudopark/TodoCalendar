@@ -17,7 +17,7 @@ public protocol CalendarUsecase {
     var currentDay: AnyPublisher<CalendarComponent.Day, Never> { get }
     
     func components(
-        for month: Int, of year: Int, at timeZone: TimeZone
+        for month: Int, of year: Int
     ) -> AnyPublisher<CalendarComponent, Never>
 }
 
@@ -59,10 +59,10 @@ extension CalendarUsecaseImple {
 extension CalendarUsecaseImple {
     
     public func components(
-        for month: Int, of year: Int, at timeZone: TimeZone
+        for month: Int, of year: Int
     ) -> AnyPublisher<CalendarComponent, Never> {
         
-        let baseComponents = self.baseCalendarComponents(year, month, timeZone)
+        let baseComponents = self.baseCalendarComponents(year, month)
         let holidaysGivenYear = self.holidayUsecase.holidays().map { $0[year] ?? [] }
         return Publishers.CombineLatest(baseComponents, holidaysGivenYear)
             .map { $0.update(holidays: $1)}
@@ -71,11 +71,11 @@ extension CalendarUsecaseImple {
     }
     
     private func baseCalendarComponents(
-        _ year: Int, _ month: Int, _ timeZone: TimeZone
+        _ year: Int, _ month: Int
     ) -> AnyPublisher<CalendarComponent, Never> {
         return self.calendarSettingUsecase.firstWeekDay
             .compactMap { [weak self] firstDay -> CalendarComponent? in
-                return try? self?.components(year, month, firstDay, timeZone)
+                return try? self?.components(year, month, firstDay)
             }
             .eraseToAnyPublisher()
     }
@@ -83,12 +83,12 @@ extension CalendarUsecaseImple {
     private func components(
         _ year: Int,
         _ month: Int,
-        _ startDayOfWeek: DayOfWeeks,
-        _ timeZone: TimeZone
+        _ startDayOfWeek: DayOfWeeks
     ) throws -> CalendarComponent {
         
+        let utcTimeZone = try TimeZone(abbreviation: "UTC").unwrap()
         let calendar = Calendar(identifier: .gregorian)
-            |> \.timeZone .~ timeZone
+            |> \.timeZone .~ utcTimeZone
             |> \.firstWeekday .~ startDayOfWeek.rawValue
         
         let startDateOfMonth = try calendar.startDateOfMonth(year, month).unwrap()
