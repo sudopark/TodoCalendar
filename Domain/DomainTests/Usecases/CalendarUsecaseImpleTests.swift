@@ -34,8 +34,7 @@ class CalendarUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     private func makeUsecaseWithStub(
         firstWeekDay: DayOfWeeks = .sunday
     ) -> CalendarUsecaseImple {
-        self.stubSettingUsecase.updateFirstWeekDay(firstWeekDay)
-        self.stubSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
+        self.stubSettingUsecase.prepare()
         
         let holidayUsecase = StubHolidayUsecase(
             holidays: [2023: [
