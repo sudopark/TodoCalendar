@@ -10,5 +10,5 @@ import Domain
 
 protocol CalendarPagerViewRouting: Sendable, AnyObject {
     
-    func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarMonthInteractor]
+    func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarInteractor]
 }

@@ -293,7 +293,7 @@ private extension CalendarPagerViewModelImpleTests {
         
         var spyInteractors: [SpyMonthInteractor] = []
         var didInitialMonthsAttached: (() -> Void)?
-        func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarMonthInteractor] {
+        func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarInteractor] {
             let interactors = months.map { SpyMonthInteractor(currentMonth: $0) }
             self.spyInteractors = interactors
             self.didInitialMonthsAttached?()
@@ -301,7 +301,7 @@ private extension CalendarPagerViewModelImpleTests {
         }
     }
     
-    class SpyMonthInteractor: CalendarMonthInteractor, @unchecked Sendable {
+    class SpyMonthInteractor: CalendarInteractor, @unchecked Sendable {
         
         var currentMonth: CalendarMonth
         init(currentMonth: CalendarMonth) {
