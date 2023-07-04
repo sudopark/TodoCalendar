@@ -47,7 +47,7 @@ final class CalendarPagerViewModelImple: @unchecked Sendable {
     private let todoEventUsecase: TodoEventUsecase
     private let scheduleEventUsecase: ScheduleEventUsecase
     weak var router: CalendarPagerViewRouting?
-    private var monthInteractors: [CalendarMonthInteractor]?
+    private var monthInteractors: [CalendarInteractor]?
     
     init(
         calendarUsecase: CalendarUsecase,
