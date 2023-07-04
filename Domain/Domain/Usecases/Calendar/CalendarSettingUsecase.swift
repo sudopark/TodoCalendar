@@ -13,6 +13,8 @@ import Combine
 
 public protocol CalendarSettingUsecase {
     
+    func prepare()
+    
     // manage first day of week
     func updateFirstWeekDay(_ newValue: DayOfWeeks)
     var firstWeekDay: AnyPublisher<DayOfWeeks, Never> { get }
@@ -40,6 +42,20 @@ public final class CalendarSettingUsecaseImple: CalendarSettingUsecase {
     }
 }
 
+// MARK: - prepare
+
+extension CalendarSettingUsecaseImple {
+    
+    public func prepare() {
+        
+        let firstWeekDay = self.settingRepository.firstWeekDay() ?? .sunday
+        self.shareDataStore.put(DayOfWeeks.self, key: ShareDataKeys.firstWeekDay.rawValue, firstWeekDay)
+        
+        let currentTimeZone = self.settingRepository.loadUserSelectedTImeZone() ?? TimeZone.current
+        self.shareDataStore.put(TimeZone.self, key: ShareDataKeys.timeZone.rawValue, currentTimeZone)
+    }
+}
+
 // MARK: - manage first week day
 
 extension CalendarSettingUsecaseImple {
@@ -56,15 +72,9 @@ extension CalendarSettingUsecaseImple {
     public var firstWeekDay: AnyPublisher<DayOfWeeks, Never> {
         
         let shareKey = ShareDataKeys.firstWeekDay.rawValue
-        let setupSavedFirstWeekDay: (Subscription) -> Void = { [weak self] _ in
-            guard let self = self else { return }
-            let value = self.settingRepository.firstWeekDay() ?? .sunday
-            self.shareDataStore.put(DayOfWeeks.self, key: shareKey, value)
-        }
         
         return self.shareDataStore
             .observe(DayOfWeeks.self, key: shareKey)
-            .handleEvents(receiveSubscription: setupSavedFirstWeekDay)
             .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()
@@ -90,16 +100,9 @@ extension CalendarSettingUsecaseImple {
     public var currentTimeZone: AnyPublisher<TimeZone, Never> {
         let shareKey = ShareDataKeys.timeZone.rawValue
         
-        let setupSavedTimeZone: (Subscription) -> Void = { [weak self] _ in
-            guard let savedTimezone = self?.settingRepository.loadUserSelectedTImeZone()
-            else { return }
-            self?.shareDataStore.update(TimeZone.self, key: shareKey) { _ in savedTimezone }
-        }
-        
         return self.shareDataStore
             .observe(TimeZone.self, key: shareKey)
-            .map { $0 ?? TimeZone.current }
-            .handleEvents(receiveSubscription: setupSavedTimeZone)
+            .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

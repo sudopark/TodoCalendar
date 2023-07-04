@@ -50,13 +50,15 @@ class CalendarSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
 
 extension CalendarSettingUsecaseImpleTests {
         
-    func testUsecase_whenSubscribeCurrentTimeZone_startWithSavedTimeZone() {
+    func testUsecase_whenPrepare_startWithSavedTimeZone() {
         // given
         let expect = expectation(description: "timezone 정보 구독시에 저장되어있는 정보 같이 구독")
         let usecase = self.makeUsecase(savedTimeZone: TimeZone(abbreviation: "KST"))
         
         // when
-        let timeZones = self.waitOutputs(expect, for: usecase.currentTimeZone)
+        let timeZones = self.waitOutputs(expect, for: usecase.currentTimeZone) {
+            usecase.prepare()
+        }
         
         // then
         XCTAssertEqual(timeZones, [
@@ -72,6 +74,7 @@ extension CalendarSettingUsecaseImpleTests {
         
         // when
         let timeZones = self.waitOutputs(expect, for: usecase.currentTimeZone) {
+            usecase.prepare()
             usecase.selectTimeZone(TimeZone(abbreviation: "UTC")!)
         }
             
@@ -85,19 +88,21 @@ extension CalendarSettingUsecaseImpleTests {
 
 extension CalendarSettingUsecaseImpleTests {
     
-    func testUsecase_whenSubscribeCurrentFirstWeekDayWithoutSavedValue_startWithSundayDefaultValue() {
+    func testUsecase_whenPrepareAndSaveCurrentTimeZoneNotExists_startWithSundayDefaultValue() {
         // given
         let expect = expectation(description: "저장된 주 시작요일 없는데 구독된 경우 월요일로 방출")
         let usecase = self.makeUsecase(savedFirstWeekDay: nil)
         
         // when
-        let day = self.waitFirstOutput(expect, for: usecase.firstWeekDay)
+        let day = self.waitFirstOutput(expect, for: usecase.firstWeekDay) {
+            usecase.prepare()
+        }
         
         // then
         XCTAssertEqual(day, .sunday)
     }
     
-    func testUsecase_whenSubscribeCurrentFirstWeekDayAndUpdate_updateCurrentValue() {
+    func testUsecase_whenPrepareAndSaveCurrentTimeZoneExists_updateCurrentValue() {
         // given
         let expect = expectation(description: "주 요일 시작일 구독 이후에 변경")
         expect.expectedFulfillmentCount = 2
@@ -105,6 +110,7 @@ extension CalendarSettingUsecaseImpleTests {
         
         // when
         let days = self.waitOutputs(expect, for: usecase.firstWeekDay) {
+            usecase.prepare()
             usecase.updateFirstWeekDay(.saturday)
         }
         

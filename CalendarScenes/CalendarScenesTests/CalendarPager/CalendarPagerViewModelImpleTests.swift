@@ -48,7 +48,7 @@ class CalendarPagerViewModelImpleTests: BaseTestCase, PublisherWaitable {
     ) -> CalendarPagerViewModelImple {
         
         let calendarUsecase = StubCalendarUsecase(today: today)
-        self.stubSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
+        self.stubSettingUsecase.prepare()
         
         let viewModel = CalendarPagerViewModelImple(
             calendarUsecase: calendarUsecase,

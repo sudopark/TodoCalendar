@@ -14,6 +14,11 @@ open class StubCalendarSettingUsecase: CalendarSettingUsecase {
     
     public init() { }
     
+    open func prepare() {
+        self.firstWeekDaySubject.send(.sunday)
+        self.currentTimeZoneSubject.send(TimeZone(abbreviation: "KST")!)
+    }
+    
     private let firstWeekDaySubject = CurrentValueSubject<DayOfWeeks?, Never>(nil)
     open func updateFirstWeekDay(_ newValue: DayOfWeeks) {
         self.firstWeekDaySubject.send(newValue)
