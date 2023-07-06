@@ -11,6 +11,7 @@ import Domain
 
 
 struct Day: Equatable {
+struct DayCellViewModel: Equatable {
     
     // TOOD: add event
     let year: Int
@@ -23,11 +24,11 @@ struct Day: Equatable {
     }
 }
 
-struct Week: Equatable {
-    let days: [Day]
+struct WeekRowModel: Equatable {
+    let days: [DayCellViewModel]
     
     init(_ week: CalendarComponent.Week, month: Int) {
-        self.days = week.days.map { day -> Day in
+        self.days = week.days.map { day -> DayCellViewModel in
             return .init(
                 year: day.year,
                 month: day.month,
@@ -89,17 +90,17 @@ extension CalendarViewModelImple: CalendarInteractor {
         
     }
     
-    func select(_ day: Day) {
+    func select(_ day: DayCellViewModel) {
         self.subject.userSelectedDay.send(day)
     }
 }
 
 extension CalendarViewModelImple {
     
-    var weeks: AnyPublisher<[Week], Never> {
-        let transform: (CalendarComponent) -> [Week]
+    var weekModels: AnyPublisher<[WeekRowModel], Never> {
+        let transform: (CalendarComponent) -> [WeekRowModel]
         transform = { component in
-            return component.weeks.map { week -> Week in
+            return component.weeks.map { week -> WeekRowModel in
                 return .init(week, month: component.month)
             }
         }
@@ -111,7 +112,7 @@ extension CalendarViewModelImple {
     }
     
     var currentSelectDayIdentifier: AnyPublisher<String, Never> {
-        let transform: (Day?, CalendarComponent.Day, CalendarComponent) -> String
+        let transform: (DayCellViewModel?, CalendarComponent.Day, CalendarComponent) -> String
         transform = { selected, today, thisMonth in
             switch (selected, today, thisMonth) {
             case (.some(let day), _, let m) where day.month == m.month && day.year == m.year:

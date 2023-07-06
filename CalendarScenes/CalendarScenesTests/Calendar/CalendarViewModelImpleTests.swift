@@ -58,7 +58,7 @@ extension CalendarViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let weeks = self.waitFirstOutput(expect, for: viewModel.weeks) {
+        let weeks = self.waitFirstOutput(expect, for: viewModel.weekModels) {
             viewModel.updateMonthIfNeed(.init(year: 2023, month: 9))
         } ?? []
         
@@ -83,7 +83,7 @@ extension CalendarViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let weekLists = self.waitOutputs(expect, for: viewModel.weeks) {
+        let weekLists = self.waitOutputs(expect, for: viewModel.weekModels) {
             viewModel.updateMonthIfNeed(.init(year: 2023, month: 9))
             viewModel.updateMonthIfNeed(.init(year: 2023, month: 9))    // ignore
             viewModel.updateMonthIfNeed(.init(year: 2023, month: 8))
