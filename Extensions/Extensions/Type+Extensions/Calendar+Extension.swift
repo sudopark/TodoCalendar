@@ -40,6 +40,12 @@ extension Calendar {
         return self.date(from: self.dateComponents([.year, .month], from: self.startOfDay(for: date)))
     }
     
+    public func lastTimeOfDay(from date: Date) -> Date? {
+        return self.startOfDay(for: date)
+            .add(days: 1)
+            .map { $0.addingTimeInterval(-1) }
+    }
+    
     public func lastDayOfMonth(from date: Date) -> Date? {
         return self.firstDayOfMonth(from: date)
             .flatMap { self.date(byAdding: DateComponents(month: 1, day: -1), to: $0) }

@@ -12,5 +12,4 @@ import Domain
 protocol CalendarInteractor: Sendable {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
-    func holidayChanged(_ holidays: [Int: [Holiday]])
 }
