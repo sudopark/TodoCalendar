@@ -10,14 +10,28 @@ import Combine
 import Domain
 
 
-struct Day: Equatable {
+enum EventId: Equatable {
+    case todo(String)
+    case schedule(String)
+    case holiday(String)
+}
+
 struct DayCellViewModel: Equatable {
     
-    // TOOD: add event
     let year: Int
     let month: Int
     let day: Int
     let isNotCurrentMonth: Bool
+    
+    struct EventModel: Equatable {
+        enum Bound {
+            case start
+            case end
+        }
+        let eventId: EventId
+        let bound: Bound?
+    }
+    var events: [EventModel] = []
     
     var identifier: String {
         "\(year)-\(month)-\(day)"
@@ -61,8 +75,8 @@ final class CalendarViewModelImple: @unchecked Sendable {
     private struct Subject: @unchecked Sendable {
         let currentTimeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let currentMonthComponent = CurrentValueSubject<CalendarComponent?, Never>(nil)
-        let holidays = CurrentValueSubject<[Int: [Holiday]]?, Never>(nil)
-        let userSelectedDay = CurrentValueSubject<Day?, Never>(nil)
+        // TODO: 추후에 identifier만 들고있는 걸로 수정 필요
+        let userSelectedDay = CurrentValueSubject<DayCellViewModel?, Never>(nil)
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -84,10 +98,6 @@ extension CalendarViewModelImple: CalendarInteractor {
             .sink(receiveValue: { [weak self] component in
                 self?.subject.currentMonthComponent.send(component)
             })
-    }
-    
-    func holidayChanged(_ holidays: [Int : [Holiday]]) {
-        
     }
     
     func select(_ day: DayCellViewModel) {
