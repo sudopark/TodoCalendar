@@ -59,6 +59,18 @@ public enum EventTime: Comparable {
         }
     }
     
+    public func clamped(to period: Range<TimeInterval>) -> Range<TimeInterval>? {
+        switch self {
+        case .at(let time):
+            return period ~= time.utcTimeInterval
+                ? time.utcTimeInterval..<time.utcTimeInterval
+                : nil
+        case .period(let range):
+            let clamped = range.intervalRanges().clamped(to: period)
+            return clamped.isEmpty ? nil : clamped
+        }
+    }
+    
     func shift(_ interval: TimeInterval) -> EventTime {
         switch self {
         case .at(let time):

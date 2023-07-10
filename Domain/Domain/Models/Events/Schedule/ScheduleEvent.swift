@@ -26,8 +26,13 @@ public struct ScheduleEvent {
     public struct RepeatingTimes {
         public let time: EventTime
         public let turn: Int
+        
+        public init(time: EventTime, turn: Int) {
+            self.time = time
+            self.turn = turn
+        }
     }
-    var nextRepeatingTimes: [RepeatingTimes] = []
+    public var nextRepeatingTimes: [RepeatingTimes] = []
     public var repeatingTimes: [RepeatingTimes] {
         return [.init(time: self.time, turn: 1)] + self.nextRepeatingTimes
     }

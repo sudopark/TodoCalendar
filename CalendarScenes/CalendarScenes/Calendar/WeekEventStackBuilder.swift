@@ -15,6 +15,24 @@ struct CalendarEvent: Equatable {
 
     let eventId: EventId
     let time: EventTime
+    
+    init(_ eventId: EventId, _ time: EventTime) {
+        self.eventId = eventId
+        self.time = time
+    }
+    
+    init?(_ todo: TodoEvent) {
+        guard let time = todo.time else { return nil }
+        self.eventId = .todo(todo.uuid)
+        self.time = time
+    }
+    
+    static func events(
+        from scheduleEvnet: ScheduleEvent
+    ) -> [CalendarEvent] {
+        return scheduleEvnet.repeatingTimes
+            .map { CalendarEvent(.schedule(scheduleEvnet.uuid, turn: $0.turn), $0.time) }
+    }
 }
 
 struct EventOnWeek {
@@ -25,14 +43,22 @@ struct EventOnWeek {
     fileprivate var length: Int { self.weekDaysRange.count }
     
     init?(_ event: CalendarEvent, on weekRange: Range<TimeInterval>, with calendar: Calendar) {
-        let eventRange: Range<TimeInterval> = event.time.lowerBoundTimeStamp.utcTimeInterval..<event.time.upperBoundTimeStamp.utcTimeInterval
-        let overlapRange = eventRange.clamped(to: weekRange)
-        guard !overlapRange.isEmpty else { return nil }
+        guard let overlapRange = event.time.clamped(to: weekRange) else { return nil }
         self.eventId = event.eventId
         self.eventRangesOnWeek = overlapRange
         guard let range = calendar.eventWeekDaysRange(overlapRange, weekRange)
         else { return nil }
         self.weekDaysRange = range
+    }
+    
+    init(
+        eventRangesOnWeek: Range<TimeInterval>,
+        weekDaysRange: ClosedRange<Int>,
+        eventId: EventId
+    ) {
+        self.eventRangesOnWeek = eventRangesOnWeek
+        self.weekDaysRange = weekDaysRange
+        self.eventId = eventId
     }
 }
 
@@ -62,8 +88,15 @@ extension WeekEventStackBuilder {
             .sorted(by: { $0.length > $1.length })
         
         let sorting: ([EventOnWeek], [EventOnWeek]) -> Bool = { lhs, rhs in
-            let (lhsLength, rhsLength) = (lhs.eventExistsLength(), rhs.eventExistsLength())
-            return lhsLength == rhsLength ? lhs.count < rhs.count : lhsLength > rhsLength
+            let (lhsLength, rhsLength) = (lhs.eventExistsLength, rhs.eventExistsLength)
+            guard lhsLength == rhsLength else {
+                return lhsLength > rhsLength
+            }
+            let (firstLhs, firstRhs) = (lhs.firstEventWeekDay, rhs.firstEventWeekDay)
+            guard firstLhs == firstRhs else {
+                return firstLhs < firstRhs
+            }
+            return lhs.count < rhs.count
         }
         
         let stacks = self.stack(remains: eventsOnThisWeek, stacks: [])
@@ -147,19 +180,11 @@ extension WeekEventStackBuilder {
 
 private extension Calendar {
     
-    private func date(from day: CalendarComponent.Day) -> Date? {
-        let components = DateComponents(
-            year: day.year, month: day.month, day: day.day,
-            hour: 0, minute: 0, second: 0
-        )
-        return self.date(from: components)
-    }
-    
     // this_week_monday.start..<next_week_monday.start
     func weekRange(_ week: CalendarComponent.Week) -> Range<TimeInterval>? {
         guard let firstDay = week.days.first, let lastDay = week.days.last,
               let lowerBoundDate = self.date(from: firstDay).flatMap(self.startOfDay(for:)),
-              let upperBoundDate = self.date(from: lastDay).flatMap(self.lastTimeOfDay(from:))
+              let upperBoundDate = self.date(from: lastDay).flatMap(self.endOfDay(for:))
         else { return nil }
         return lowerBoundDate.timeIntervalSince1970..<upperBoundDate.timeIntervalSince1970
     }
@@ -202,10 +227,14 @@ private extension Array where Element == EventOnWeek {
         return (left, right, notCandidate)
     }
     
-    func eventExistsLength() -> Int {
+    var eventExistsLength: Int {
         return self.reduce(into: Set<Int>()) { acc, event in
             event.weekDaysRange.forEach { acc.insert($0) }
         }
         .count
+    }
+    
+    var firstEventWeekDay: Int {
+        return self.first?.weekDaysRange.lowerBound ?? 8
     }
 }

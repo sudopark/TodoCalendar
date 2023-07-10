@@ -65,3 +65,15 @@ public struct CalendarComponent: Equatable {
         return .init(year: self.year, month: self.month, weeks: newWeeks)
     }
 }
+
+
+extension Calendar {
+    
+    public func date(from day: CalendarComponent.Day) -> Date? {
+        let components = DateComponents(
+            year: day.year, month: day.month, day: day.day,
+            hour: 0, minute: 0, second: 0
+        )
+        return self.date(from: components)
+    }
+}
