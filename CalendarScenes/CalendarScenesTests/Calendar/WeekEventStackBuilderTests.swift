@@ -32,13 +32,13 @@ class WeekEventStackBuilderTests: BaseTestCase {
         let start = self.calendar.date(from: .init(year: 2023, month: 7, day: daysRange.lowerBound))!
             |> self.calendar.startOfDay(for:)
         let end = self.calendar.date(from: .init(year: 2023, month: 7, day: daysRange.upperBound))!
-            |> { self.calendar.lastTimeOfDay(from: $0)! }
+            |> { self.calendar.endOfDay(for: $0)! }
         
         let dates = start..<end
         let timeStamps = TimeStamp(dates.lowerBound.timeIntervalSince1970, timeZone: "KST")
             ..<
             TimeStamp(dates.upperBound.timeIntervalSince1970, timeZone: "KST")
-        return .init(eventId: .schedule("\(daysRange)"), time: .period(timeStamps))
+        return .init(.todo("\(daysRange)"), .period(timeStamps))
     }
     
     private func makeBuilder() -> WeekEventStackBuilder {
@@ -154,7 +154,7 @@ private extension EventId {
     var idString: String {
         switch self {
         case .todo(let id): return "t:\(id)"
-        case .schedule(let id): return "s:\(id)"
+        case .schedule(let id, _): return "s:\(id)"
         case .holiday(let id): return "h:\(id)"
         }
     }

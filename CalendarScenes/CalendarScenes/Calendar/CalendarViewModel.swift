@@ -7,12 +7,16 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 
 
+// MARK: - cell, event and row model
+
 enum EventId: Equatable {
     case todo(String)
-    case schedule(String)
+    case schedule(String, turn: Int)
     case holiday(String)
 }
 
@@ -23,35 +27,69 @@ struct DayCellViewModel: Equatable {
     let day: Int
     let isNotCurrentMonth: Bool
     
-    struct EventModel: Equatable {
+    init(year: Int, month: Int, day: Int, isNotCurrentMonth: Bool) {
+        self.year = year
+        self.month = month
+        self.day = day
+        self.isNotCurrentMonth = isNotCurrentMonth
+    }
+    
+    enum EventSummary: Equatable {
         enum Bound {
             case start
             case end
+            
+            init?(_ weekDay: Int, _ weekDaysRangs: ClosedRange<Int>) {
+                if weekDaysRangs == weekDay...weekDay {
+                    return nil
+                } else if weekDaysRangs.lowerBound == weekDay {
+                    self = .start
+                } else if weekDaysRangs.upperBound == weekDay {
+                    self = .end
+                } else {
+                    return nil
+                }
+            }
         }
-        let eventId: EventId
-        let bound: Bound?
+        case blank
+        case event(EventId, Bound?)
     }
-    var events: [EventModel] = []
+    var events: [EventSummary] = []
     
     var identifier: String {
         "\(year)-\(month)-\(day)"
+    }
+    
+    init(_ day: CalendarComponent.Day, month: Int, stack: [[EventOnWeek]]) {
+        self.year = day.year
+        self.month = day.month
+        self.day = day.day
+        self.isNotCurrentMonth = day.month != month
+        self.events = stack.map { eventsRow in
+            let eventOnThisDay = eventsRow.first(where: { $0.weekDaysRange ~= day.weekDay })
+            return eventOnThisDay.map { .event($0.eventId, .init(day.weekDay, $0.weekDaysRange)) } ?? .blank
+        }
     }
 }
 
 struct WeekRowModel: Equatable {
     let days: [DayCellViewModel]
     
-    init(_ week: CalendarComponent.Week, month: Int) {
+    init(_ week: CalendarComponent.Week, month: Int, stack: [[EventOnWeek]]) {
         self.days = week.days.map { day -> DayCellViewModel in
-            return .init(
-                year: day.year,
-                month: day.month,
-                day: day.day,
-                isNotCurrentMonth: day.month != month
-            )
+            return .init(day, month: month, stack: stack)
         }
     }
 }
+
+struct EventDetailModel: Equatable {
+    
+    let eventId: EventId
+    let name: String
+    let colorHex: String
+}
+
+// MARK: - CalendarViewModelImple
 
 final class CalendarViewModelImple: @unchecked Sendable {
     
@@ -70,17 +108,76 @@ final class CalendarViewModelImple: @unchecked Sendable {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.todoUsecase = todoUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
+        
+        self.internalBind()
+    }
+    
+    private struct CurrentMonthInfo: Equatable {
+        let timeZone: TimeZone
+        let component: CalendarComponent
+        let range: Range<TimeInterval>
+    }
+    private struct ScheduleEventAndTime {
+        let event: ScheduleEvent
+        let time: EventTime
     }
     
     private struct Subject: @unchecked Sendable {
-        let currentTimeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let currentMonthComponent = CurrentValueSubject<CalendarComponent?, Never>(nil)
+        let currentMonthInfo = CurrentValueSubject<CurrentMonthInfo?, Never>(nil)
         // TODO: 추후에 identifier만 들고있는 걸로 수정 필요
+        let todoEventsMap = CurrentValueSubject<[String: TodoEvent], Never>([:])
+        let scheduleEventsMap = CurrentValueSubject<[String: ScheduleEvent], Never>([:])
+        
         let userSelectedDay = CurrentValueSubject<DayCellViewModel?, Never>(nil)
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
     private var currentMonthComponentsBinding: AnyCancellable?
+    
+    private func internalBind() {
+        
+        Publishers.CombineLatest(
+            self.calendarSettingUsecase.currentTimeZone,
+            self.subject.currentMonthComponent.compactMap { $0 }
+        )
+        .sink(receiveValue: { [weak self] timeZone, component in
+            guard let range = component.intervalRange(at: timeZone) else { return }
+            let totalComponent = CurrentMonthInfo(timeZone: timeZone, component: component, range: range)
+            self?.subject.currentMonthInfo.send(totalComponent)
+        })
+        .store(in: &self.cancellables)
+        
+        
+        let loadPeriodExistTodos: (Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never>
+        loadPeriodExistTodos = { [weak self] range in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            return self.todoUsecase.todoEvents(in: range)
+        }
+        self.subject.currentMonthInfo.compactMap { $0?.range }
+            .map(loadPeriodExistTodos)
+            .switchToLatest()
+            .sink(receiveValue: { [weak self] events in
+                self?.subject.todoEventsMap.send(events.asDictionary { $0.uuid })
+            })
+            .store(in: &self.cancellables)
+        
+        let loadScheduleEvents: (Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never>
+        loadScheduleEvents = { [weak self] range in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            // TODO: filter event repeating time
+            return self.scheduleEventUsecase.scheduleEvents(in: range)
+        }
+        self.subject.currentMonthInfo.compactMap { $0?.range }
+            .map(loadScheduleEvents)
+            .switchToLatest()
+            .sink(receiveValue: { [weak self] events in
+                self?.subject.scheduleEventsMap.send(events.asDictionary { $0.uuid })
+            })
+            .store(in: &self.cancellables)
+        
+        // currentMonth component에서 holiday 추출
+    }
 }
 
 
@@ -107,18 +204,46 @@ extension CalendarViewModelImple: CalendarInteractor {
 
 extension CalendarViewModelImple {
     
+    private func calendarEvents() -> AnyPublisher<[CalendarEvent], Never> {
+        
+        let transform: ([String: TodoEvent], [String: ScheduleEvent]) -> [CalendarEvent]
+        transform = { todosMap, schedulesMap in
+            let todos = todosMap.values
+                .compactMap { CalendarEvent($0) }
+            let schedules = schedulesMap.values
+                .flatMap { CalendarEvent.events(from: $0) }
+            return todos + schedules
+        }
+        
+        return Publishers.CombineLatest(
+            self.subject.todoEventsMap,
+            self.subject.scheduleEventsMap
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+    
+    // TODO: vc or view에서 구독시에 subscribeOn 쓰는것으로
+    // TODO: throttle 걸건지도
     var weekModels: AnyPublisher<[WeekRowModel], Never> {
-        let transform: (CalendarComponent) -> [WeekRowModel]
-        transform = { component in
-            return component.weeks.map { week -> WeekRowModel in
-                return .init(week, month: component.month)
+        
+        let transform: (CurrentMonthInfo, [CalendarEvent]) -> [WeekRowModel]
+        transform = { current, events in
+            let stackBuilder = WeekEventStackBuilder(current.timeZone)
+            return current.component.weeks.map { week -> WeekRowModel in
+                let stack = stackBuilder.build(week, events: events).eventStacks
+                return .init(week, month: current.component.month, stack: stack)
             }
         }
-        return self.subject.currentMonthComponent
-            .compactMap { $0 }
-            .map(transform)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
+        
+        return Publishers.CombineLatest(
+            self.subject.currentMonthInfo.compactMap { $0 },
+            self.calendarEvents()
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
     
     var currentSelectDayIdentifier: AnyPublisher<String, Never> {
@@ -141,5 +266,22 @@ extension CalendarViewModelImple {
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - private extensions
+
+private extension CalendarComponent {
+    
+    func intervalRange(at timeZone: TimeZone) -> Range<TimeInterval>? {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        guard let startDay = self.weeks.first?.days.first,
+              let endDay = self.weeks.last?.days.last,
+              let startDate = calendar.date(from: startDay).flatMap(calendar.startOfDay(for:)),
+              let endDate = calendar.date(from: endDay).flatMap(calendar.endOfDay(for:))
+        else { return nil }
+        
+        return startDate.timeIntervalSince1970..<endDate.timeIntervalSince1970
     }
 }

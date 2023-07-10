@@ -225,13 +225,6 @@ private struct TotalMonthRanges {
 
 private extension Calendar {
     
-    private func endOfDay(for date: Date) -> Date? {
-        return self.date(
-            byAdding: .init(day: 1, second: -1),
-            to: date
-        )
-    }
-    
     func firstDateOfMonth(_ month: CalendarMonth) -> Date? {
         let formatter = DateFormatter()
         formatter.timeZone = self.timeZone
