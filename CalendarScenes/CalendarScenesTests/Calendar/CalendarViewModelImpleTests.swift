@@ -19,17 +19,20 @@ import TestDoubles
 class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
+    private var stubSettingUsecase: StubCalendarSettingUsecase!
     private var stubTodoUsecase: PrivateStubTodoUsecase!
     private var stubScheduleUsecase: PrivateStubScheduleUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
+        self.stubSettingUsecase = .init()
         self.stubTodoUsecase = .init()
         self.stubScheduleUsecase = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
+        self.stubSettingUsecase = nil
         self.stubTodoUsecase = nil
         self.stubScheduleUsecase = nil
     }
@@ -38,12 +41,11 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let calendarUsecase = PrivateStubCalendarUsecase(
             today: .init(year: 2023, month: 09, day: 10, weekDay: 1)
         )
-        let settingUsecase = StubCalendarSettingUsecase()
-        settingUsecase.prepare()
+        self.stubSettingUsecase.prepare()
         
         let viewModel = CalendarViewModelImple(
             calendarUsecase: calendarUsecase,
-            calendarSettingUsecase: settingUsecase,
+            calendarSettingUsecase: self.stubSettingUsecase,
             todoUsecase: self.stubTodoUsecase,
             scheduleEventUsecase: self.stubScheduleUsecase
         )
@@ -256,31 +258,28 @@ extension CalendarViewModelImpleTests {
             .init(time: EventTime.dummyPeriod(from: (09, 14), to: (09, 16)), turn: 4),
             .init(time: EventTime.dummyPeriod(from: (09, 19), to: (09, 26)), turn: 5),
             .init(time: EventTime.dummyPeriod(from: (09, 26), to: (09, 28)), turn: 6),
-            .init(time: EventTime.dummyAt(10, 5), turn: 7)
+            .init(time: EventTime.dummyAt(10, 1), turn: 7)
         ]
         self.stubScheduleUsecase.eventsFor9 = [schedule_w2_tue_fri, schedule_event_repeating]
         
         let singleEventOn8 = TodoEvent(uuid: "todo8", name: "some")
             |> \.time .~ .dummyAt(08, 13)
-        self.stubTodoUsecase.eventsFor8 = [singleEventOn8]
-        
+        self.stubTodoUsecase.eventsFor8 = [singleEventOn8, todo_w1_mon]
+        self.stubScheduleUsecase.eventsFor8 = [
+            schedule_event_repeating
+        ]
         return self.makeViewModel()
     }
     
-    // 이벤트 정보와 함께 달력 정보 제공 + 이때 해당되는 일정의 todo만, 해당 월에서 반복시간이 없는 스케쥴이나, 반복시간이 해당 월에 매칭되는 경우만 반환
-    func testViewModel_provideWeekModelsWithEvent() {
-        // given
-        let expect = expectation(description: "이벤트 정보와 함께 달력 정보 제공 + 이때 해당되는 일정의 todo만, 해당 월에서 반복시간이 없는 스케쥴이나, 반복시간이 해당 월에 매칭되는 경우만 반환")
-        expect.assertForOverFulfill = false
-        let viewModel = self.makeViewModelWithStubEvents()
-        
-        // when
-        let source = viewModel.weekModels.throttle(for: .milliseconds(10), scheduler: RunLoop.main, latest: true)
-        let weeks = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
-            viewModel.updateMonthIfNeed(.init(year: 2023, month: 9))
-        } ?? []
-        
-        // then
+    private func removeTodo0828() {
+        self.stubTodoUsecase.eventsFor9 = self.stubTodoUsecase.eventsFor9.filter { $0.uuid != "todo_w1_mon" }
+    }
+    
+    private func changeToPDTTimeZone() {
+        self.stubSettingUsecase.selectTimeZone(TimeZone(abbreviation: "PDT")!)
+    }
+    
+    private func assertWeeksFor9(_ weeks: [WeekRowModel]) {
         let eventIdLists = weeks.map { $0.eventIds }
         XCTAssertEqual(eventIdLists.count, 5)
         
@@ -327,42 +326,134 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(eventIdLists[safe: 4], expectWeek5)
     }
     
-    private func makeViewModelWithFirstWeekModelsPrepared() -> CalendarViewModelImple {
+    private func assertWeeksFor8(_ weeks: [WeekRowModel]) {
+        let eventIdLists = weeks.map { $0.eventIds }
+        XCTAssertEqual(eventIdLists.count, 5)
+        
+        XCTAssertEqual(eventIdLists[safe: 0], [
+            [.schedule("schedule_event_repeating", turn: 1)],
+            [.schedule("schedule_event_repeating", turn: 2)],
+            [.schedule("schedule_event_repeating", turn: 2)],
+            [.schedule("schedule_event_repeating", turn: 2)],
+            [.schedule("schedule_event_repeating", turn: 2)],
+            [.schedule("schedule_event_repeating", turn: 2)],
+            [.schedule("schedule_event_repeating", turn: 2)]
+        ])
+        XCTAssertEqual(eventIdLists[safe: 1], Array(repeating: [
+            .schedule("schedule_event_repeating", turn: 2)
+        ], count: 7))
+        XCTAssertEqual(eventIdLists[safe: 2], [
+            [.schedule("schedule_event_repeating", turn: 2), .todo("todo8")],
+            [.schedule("schedule_event_repeating", turn: 2), nil],
+            [.schedule("schedule_event_repeating", turn: 2), nil],
+            [.schedule("schedule_event_repeating", turn: 2), nil],
+            [nil, nil], [nil, nil], [nil, nil]
+        ])
+        XCTAssertEqual(eventIdLists[safe: 3], [
+            [nil], [nil], [nil], [nil], [nil],
+            [.schedule("schedule_event_repeating", turn: 3)],
+            [.schedule("schedule_event_repeating", turn: 3)]
+        ])
+        XCTAssertEqual(eventIdLists[safe: 4], [
+            [.schedule("schedule_event_repeating", turn: 3), nil],
+            [.schedule("schedule_event_repeating", turn: 3), .todo("todo_w1_mon")],
+            [.schedule("schedule_event_repeating", turn: 3), nil],
+            [nil, nil], [nil, nil], [nil, nil], [nil, nil]
+        ])
+    }
+    
+    // 이벤트 정보와 함께 달력 정보 제공 + 이때 해당되는 일정의 todo만, 해당 월에서 반복시간이 없는 스케쥴이나, 반복시간이 해당 월에 매칭되는 경우만 반환
+    func testViewModel_provideWeekModelsWithEvent() {
         // given
-        let expect = expectation(description: "9월에 해당하는 weekmodel이 완전히 준비될때까지 대기")
+        let expect = expectation(description: "이벤트 정보와 함께 달력 정보 제공 + 이때 해당되는 일정의 todo만, 해당 월에서 반복시간이 없는 스케쥴이나, 반복시간이 해당 월에 매칭되는 경우만 반환")
+        expect.assertForOverFulfill = false
         let viewModel = self.makeViewModelWithStubEvents()
         
         // when
-        let source = viewModel.weekModels.throttle(for: .milliseconds(10), scheduler: RunLoop.main, latest: true)
-        let _ = self.waitFirstOutput(expect, for: source) {
-            viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
-        }
+        let source = viewModel.weekModels
+//            .throttle(for: .milliseconds(10), scheduler: RunLoop.main, latest: true)
+        let weeks = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
+            viewModel.updateMonthIfNeed(.init(year: 2023, month: 9))
+        } ?? []
         
         // then
-        return viewModel
+        self.assertWeeksFor9(weeks)
     }
+    
     // 달 변경시에 변경된 이벤트 방출
     func testViewModel_whenAfterChangeMonth_updateWeekModelWithEvents() {
         // given
         let expect = expectation(description: "달 변경 이후에 변경된 달의 이벤트 정보도 같이 방출")
-        expect.expectedFulfillmentCount = 4
-        expect.assertForOverFulfill = false
-        let viewModel = self.makeViewModelWithFirstWeekModelsPrepared()
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithStubEvents()
         
         // when
         let weekModelLists = self.waitOutputs(expect, for: viewModel.weekModels) {
+            viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
             viewModel.updateMonthIfNeed(.init(year: 2023, month: 08))
         }
         
         // then
-        // index 0 -> 9월 데이터, index 1 -> 8월 날짜에 이전 9월 이벤트 합성, index 2 -> 8월 날짜에 8월 이벤트 합성(todo 만 변경될꺼임)
-        XCTAssertEqual(weekModelLists.count, 4)
-        
+        XCTAssertEqual(weekModelLists.count, 2)
+        assertWeeksFor9(weekModelLists.first ?? [])
+        assertWeeksFor8(weekModelLists.last ?? [])
     }
     
-    // 이벤트 변경되면 이벤트 구성 바뀌어서 방출
+    func testViewModel_whenEventStackChangesOnMonth_updateWeekModels() {
+        // given
+        let expect = expectation(description: "이벤트 변경되면 이벤트 구성 바뀌어서 방출")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithStubEvents()
+        
+        // when
+        let weekModelLists = self.waitOutputs(expect, for: viewModel.weekModels) {
+            viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
+            self.removeTodo0828()
+        }
+        
+        // then
+        XCTAssertEqual(weekModelLists.count, 2)
+        self.assertWeeksFor9(weekModelLists.first ?? [])
+        
+        let newWeeksFirstWeek = weekModelLists.last?.first
+        let expectWeek1: [[EventId?]] = [
+            [.schedule("schedule_event_repeating", turn: 3)],
+            [.schedule("schedule_event_repeating", turn: 3)],
+            [.schedule("schedule_event_repeating", turn: 3)],
+            [nil], [nil], [nil], [nil]
+        ]
+        XCTAssertEqual(newWeeksFirstWeek?.eventIds, expectWeek1)
+    }
     
-    // 타임존 바뀌면 전체 표현 범위 변하고 포함되는 이벤트 다시 계산해서 방출
+    func testViewModel_whenTimeZoneChanges_updateWeekModelWithNewEventRange() {
+        // given
+        let expect = expectation(description: "타임존 바뀌면 전체 표현 범위 변하고 포함되는 이벤트 다시 계산해서 방출")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithStubEvents()
+        
+        // when
+        let weekModelLists = self.waitOutputs(expect, for: viewModel.weekModels) {
+            viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
+            self.changeToPDTTimeZone()
+        }
+        
+        // then
+        XCTAssertEqual(weekModelLists.count, 2)
+        self.assertWeeksFor9(weekModelLists.first ?? [])
+        
+        // 이벤트가 16시간씩 앞으로 밀림 -> 1일씩 밀림
+        let newWeeksLastWeek = weekModelLists.last?.last
+        let expectWeek5: [[EventId?]] = [
+            [nil, .schedule("schedule_event_repeating", turn: 5)],  // 9.24
+            [.schedule("schedule_event_repeating", turn: 6), .schedule("schedule_event_repeating", turn: 5)],  // 9.25
+            [.schedule("schedule_event_repeating", turn: 6), nil],  // 9.26
+            [.schedule("schedule_event_repeating", turn: 6), nil], // 9.27
+            [nil, nil], // 9.28
+            [nil, nil],
+            [.schedule("schedule_event_repeating", turn: 7), nil] // 9.29, 9.30
+        ]
+        XCTAssertEqual(newWeeksLastWeek?.eventIds, expectWeek5)
+    }
 }
 
 // MARK: - doubles
@@ -386,15 +477,27 @@ extension CalendarViewModelImpleTests {
     
     private class PrivateStubTodoUsecase: StubTodoEventUsecase {
         
-        var eventsFor8: [TodoEvent] = []
-        var eventsFor9: [TodoEvent] = []
+        var eventsFor8: [TodoEvent] = [] {
+            didSet {
+                self.subjectFor8.send(eventsFor8)
+            }
+        }
+        var eventsFor9: [TodoEvent] = [] {
+            didSet {
+                self.subjectFor9.send(eventsFor9)
+            }
+        }
+        
+        private let subjectFor9 = CurrentValueSubject<[TodoEvent], Never>([])
+        private let subjectFor8 = CurrentValueSubject<[TodoEvent], Never>([])
         
         override func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never> {
             switch period.centerDateMonth() {
             case 9:
-                return Just(eventsFor9).eraseToAnyPublisher()
+//                return Just(eventsFor9).eraseToAnyPublisher()
+                return self.subjectFor9.eraseToAnyPublisher()
             case 8:
-                return Just(eventsFor8).eraseToAnyPublisher()
+                return self.subjectFor8.eraseToAnyPublisher()
             default: return Empty().eraseToAnyPublisher()
             }
         }
@@ -402,15 +505,28 @@ extension CalendarViewModelImpleTests {
     
     private class PrivateStubScheduleUsecase: StubScheduleEventUsecase {
         
-        var eventsFor8: [ScheduleEvent] = []
-        var eventsFor9: [ScheduleEvent] = []
+        var eventsFor8: [ScheduleEvent] = [] {
+            didSet {
+                self.subjectFor8.send(eventsFor8)
+            }
+        }
+        var eventsFor9: [ScheduleEvent] = [] {
+            didSet {
+                self.subjectFor9.send(eventsFor9)
+            }
+        }
+        
+        private let subjectFor9 = CurrentValueSubject<[ScheduleEvent], Never>([])
+        private let subjectFor8 = CurrentValueSubject<[ScheduleEvent], Never>([])
         
         override func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never> {
             switch period.centerDateMonth() {
             case 9:
-                return Just(eventsFor9).eraseToAnyPublisher()
+//                return Just(eventsFor9).eraseToAnyPublisher()
+                return self.subjectFor9.eraseToAnyPublisher()
             case 8:
-                return Just(eventsFor8).eraseToAnyPublisher()
+                return self.subjectFor8.eraseToAnyPublisher()
+//                return Just(eventsFor8).eraseToAnyPublisher()
             default: return Empty().eraseToAnyPublisher()
             }
         }

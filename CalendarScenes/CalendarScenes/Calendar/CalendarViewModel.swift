@@ -148,34 +148,6 @@ final class CalendarViewModelImple: @unchecked Sendable {
         })
         .store(in: &self.cancellables)
         
-        
-        let loadPeriodExistTodos: (Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never>
-        loadPeriodExistTodos = { [weak self] range in
-            guard let self = self else { return Empty().eraseToAnyPublisher() }
-            return self.todoUsecase.todoEvents(in: range)
-        }
-        self.subject.currentMonthInfo.compactMap { $0?.range }
-            .map(loadPeriodExistTodos)
-            .switchToLatest()
-            .sink(receiveValue: { [weak self] events in
-                self?.subject.todoEventsMap.send(events.asDictionary { $0.uuid })
-            })
-            .store(in: &self.cancellables)
-        
-        let loadScheduleEvents: (Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never>
-        loadScheduleEvents = { [weak self] range in
-            guard let self = self else { return Empty().eraseToAnyPublisher() }
-            // TODO: filter event repeating time
-            return self.scheduleEventUsecase.scheduleEvents(in: range)
-        }
-        self.subject.currentMonthInfo.compactMap { $0?.range }
-            .map(loadScheduleEvents)
-            .switchToLatest()
-            .sink(receiveValue: { [weak self] events in
-                self?.subject.scheduleEventsMap.send(events.asDictionary { $0.uuid })
-            })
-            .store(in: &self.cancellables)
-        
         // currentMonth component에서 holiday 추출
     }
 }
@@ -204,29 +176,51 @@ extension CalendarViewModelImple: CalendarInteractor {
 
 extension CalendarViewModelImple {
     
-    private func calendarEvents() -> AnyPublisher<[CalendarEvent], Never> {
+    private func updateTodoMap() -> ([TodoEvent]) -> Void {
+        return { [weak self] todos in
+            self?.subject.todoEventsMap.send(todos.asDictionary { $0.uuid })
+        }
+    }
+    
+    private func updateScheduleMap() -> ([ScheduleEvent]) -> Void {
+        return { [weak self] schedules in
+            self?.subject.scheduleEventsMap.send(schedules.asDictionary { $0.uuid })
+        }
+    }
+    
+    private func calendarEvents(in period: Range<TimeInterval>) -> AnyPublisher<[CalendarEvent], Never> {
         
-        let transform: ([String: TodoEvent], [String: ScheduleEvent]) -> [CalendarEvent]
-        transform = { todosMap, schedulesMap in
-            let todos = todosMap.values
-                .compactMap { CalendarEvent($0) }
-            let schedules = schedulesMap.values
-                .flatMap { CalendarEvent.events(from: $0) }
-            return todos + schedules
+        let todos = self.todoUsecase.todoEvents(in: period)
+            .handleEvents(receiveOutput: self.updateTodoMap())
+        let schedules = self.scheduleEventUsecase.scheduleEvents(in: period)
+            .handleEvents(receiveOutput: self.updateScheduleMap())
+        
+        let transform: ([TodoEvent], [ScheduleEvent]) -> [CalendarEvent]
+        transform = { todos, schedules in
+            let todoEvents = todos.compactMap { CalendarEvent($0) }
+            let scheduleEvents = schedules.flatMap { CalendarEvent.events(from: $0) }
+            return todoEvents + scheduleEvents
         }
         
-        return Publishers.CombineLatest(
-            self.subject.todoEventsMap,
-            self.subject.scheduleEventsMap
-        )
-        .map(transform)
-        .removeDuplicates()
-        .eraseToAnyPublisher()
+        return Publishers.CombineLatest(todos,schedules)
+            .map(transform)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     // TODO: vc or view에서 구독시에 subscribeOn 쓰는것으로
     // TODO: throttle 걸건지도
     var weekModels: AnyPublisher<[WeekRowModel], Never> {
+        
+        typealias CurrentMonthAndEvents = (CurrentMonthInfo, [CalendarEvent])
+        
+        let withCalendarEventsInThisMonth: (CurrentMonthInfo) -> AnyPublisher<CurrentMonthAndEvents, Never>
+        withCalendarEventsInThisMonth = { [weak self] info in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            return self.calendarEvents(in: info.range)
+                .map { (info, $0) }
+                .eraseToAnyPublisher()
+        }
         
         let transform: (CurrentMonthInfo, [CalendarEvent]) -> [WeekRowModel]
         transform = { current, events in
@@ -237,13 +231,12 @@ extension CalendarViewModelImple {
             }
         }
         
-        return Publishers.CombineLatest(
-            self.subject.currentMonthInfo.compactMap { $0 },
-            self.calendarEvents()
-        )
-        .map(transform)
-        .removeDuplicates()
-        .eraseToAnyPublisher()
+        return self.subject.currentMonthInfo.compactMap { $0 }
+            .map(withCalendarEventsInThisMonth)
+            .switchToLatest()
+            .map(transform)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     var currentSelectDayIdentifier: AnyPublisher<String, Never> {
