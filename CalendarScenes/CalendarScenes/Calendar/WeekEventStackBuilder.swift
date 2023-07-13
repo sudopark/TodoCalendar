@@ -27,6 +27,26 @@ struct CalendarEvent: Equatable {
         self.time = time
     }
     
+    init?(_ holiday: Holiday, timeZone: TimeZone) {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        guard let timeZoneAbbre = timeZone.addreviationKey,
+              let components = holiday.dateComponents()
+        else { return nil }
+        
+        let dateComponents = DateComponents(year: components.0, month: components.1, day: components.2)
+        let startComponents = dateComponents |> \.hour .~ 0 |> \.minute .~ 0 |> \.second .~ 0
+        let endComponents = dateComponents |> \.hour .~ 23 |> \.minute .~ 59 |> \.second .~ 59
+        guard let start = calendar.date(from: startComponents),
+              let end = calendar.date(from: endComponents)
+        else { return nil }
+        self.eventId = .holiday(holiday.dateString, name: holiday.name)
+        self.time = .period(
+            TimeStamp(start.timeIntervalSince1970, timeZone: timeZoneAbbre)
+                ..<
+            TimeStamp(end.timeIntervalSince1970, timeZone: timeZoneAbbre)
+        )
+    }
+    
     static func events(
         from scheduleEvnet: ScheduleEvent
     ) -> [CalendarEvent] {
@@ -145,11 +165,17 @@ extension WeekEventStackBuilder {
     ) -> (dropouts: [EventOnWeek], neighbors: [EventOnWeek]) {
      
         let sorting: (EventOnWeek, EventOnWeek) -> Bool = { lhs, rhs in
-            return lhs.length == rhs.length
-                ? lhs.weekDaysRange.lowerBound < rhs.weekDaysRange.lowerBound
-                : lhs.length > rhs.length
+            guard lhs.length == rhs.length
+            else {
+                return lhs.length > rhs.length
+            }
+            guard lhs.weekDaysRange.lowerBound == rhs.weekDaysRange.lowerBound
+            else {
+                return lhs.weekDaysRange.lowerBound < rhs.weekDaysRange.lowerBound
+            }
+            return lhs.eventId.isHoliday
         }
-        var sortCandidate = candidates.sorted(by: sorting)
+        let sortCandidate = candidates.sorted(by: sorting)
         
         guard let target = sortCandidate.first
         else {

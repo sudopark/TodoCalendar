@@ -32,4 +32,10 @@ public struct Holiday: Equatable {
         self.localName = localName
         self.name = name
     }
+    
+    public func dateComponents() -> (Int, Int, Int)? {
+        let components = dateString.components(separatedBy: "-").compactMap { Int($0) }
+        guard components.count == 3 else { return nil }
+        return (components[0], components[1], components[2])
+    }
 }
