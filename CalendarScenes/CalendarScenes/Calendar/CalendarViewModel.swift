@@ -17,7 +17,12 @@ import Domain
 enum EventId: Equatable {
     case todo(String)
     case schedule(String, turn: Int)
-    case holiday(String)
+    case holiday(_ dateString: String, name: String)
+    
+    var isHoliday: Bool {
+        guard case .holiday = self else { return false }
+        return true
+    }
 }
 
 struct DayCellViewModel: Equatable {
@@ -117,10 +122,6 @@ final class CalendarViewModelImple: @unchecked Sendable {
         let component: CalendarComponent
         let range: Range<TimeInterval>
     }
-    private struct ScheduleEventAndTime {
-        let event: ScheduleEvent
-        let time: EventTime
-    }
     
     private struct Subject: @unchecked Sendable {
         let currentMonthComponent = CurrentValueSubject<CalendarComponent?, Never>(nil)
@@ -147,8 +148,6 @@ final class CalendarViewModelImple: @unchecked Sendable {
             self?.subject.currentMonthInfo.send(totalComponent)
         })
         .store(in: &self.cancellables)
-        
-        // currentMonth component에서 holiday 추출
     }
 }
 
@@ -188,18 +187,18 @@ extension CalendarViewModelImple {
         }
     }
     
-    private func calendarEvents(in period: Range<TimeInterval>) -> AnyPublisher<[CalendarEvent], Never> {
+    private func calendarEvents(from info: CurrentMonthInfo) -> AnyPublisher<[CalendarEvent], Never> {
         
-        let todos = self.todoUsecase.todoEvents(in: period)
+        let todos = self.todoUsecase.todoEvents(in: info.range)
             .handleEvents(receiveOutput: self.updateTodoMap())
-        let schedules = self.scheduleEventUsecase.scheduleEvents(in: period)
+        let schedules = self.scheduleEventUsecase.scheduleEvents(in: info.range)
             .handleEvents(receiveOutput: self.updateScheduleMap())
-        
+        let holidayCalenarEvents = info.component.holidayCalendarEvents(with: info.timeZone)
         let transform: ([TodoEvent], [ScheduleEvent]) -> [CalendarEvent]
         transform = { todos, schedules in
             let todoEvents = todos.compactMap { CalendarEvent($0) }
             let scheduleEvents = schedules.flatMap { CalendarEvent.events(from: $0) }
-            return todoEvents + scheduleEvents
+            return todoEvents + scheduleEvents + holidayCalenarEvents
         }
         
         return Publishers.CombineLatest(todos,schedules)
@@ -217,7 +216,7 @@ extension CalendarViewModelImple {
         let withCalendarEventsInThisMonth: (CurrentMonthInfo) -> AnyPublisher<CurrentMonthAndEvents, Never>
         withCalendarEventsInThisMonth = { [weak self] info in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
-            return self.calendarEvents(in: info.range)
+            return self.calendarEvents(from: info)
                 .map { (info, $0) }
                 .eraseToAnyPublisher()
         }
@@ -276,5 +275,12 @@ private extension CalendarComponent {
         else { return nil }
         
         return startDate.timeIntervalSince1970..<endDate.timeIntervalSince1970
+    }
+    
+    func holidayCalendarEvents(with timeZone: TimeZone) -> [CalendarEvent] {
+        return self.weeks
+            .flatMap { $0.days }
+            .compactMap { $0.holiday }
+            .compactMap { CalendarEvent($0, timeZone: timeZone) }
     }
 }

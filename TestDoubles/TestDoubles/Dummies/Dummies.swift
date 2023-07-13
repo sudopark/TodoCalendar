@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 import Domain
 
 extension TimeStamp {
@@ -40,7 +42,13 @@ extension CalendarComponent {
             [(9, 17), (9, 18), (9, 19), (9, 20), (9, 21), (9, 22), (9, 23)],
             [(9, 24), (9, 25), (9, 26), (9, 27), (9, 28), (9, 29), (9, 30)]
         ]
+        let holidays: [Holiday] = [
+            .init(dateString: "2023-09-28", localName: "추석", name: "추석"),
+            .init(dateString: "2023-09-29", localName: "추석", name: "추석"),
+            .init(dateString: "2023-09-30", localName: "추석", name: "추석")
+        ]
         return dummy(2023, 9, weekAndDays)
+            .applyHolidays(holidays)
     }
     
     public static func dummy2023_8() -> CalendarComponent {
@@ -51,7 +59,11 @@ extension CalendarComponent {
             [(8, 20), (8, 21), (8, 22), (8, 23), (8, 24), (8, 25), (8, 26)],
             [(8, 27), (8, 28), (8, 29), (8, 30), (8, 31), (9, 1), (9, 2)],
         ]
+        let holidays: [Holiday] = [
+            .init(dateString: "2023-08-15", localName: "광복절", name: "광복절")
+        ]
         return dummy(2023, 8, weekAndDays)
+            .applyHolidays(holidays)
     }
     
     private static func dummy(_ year: Int, _ month: Int, _ weekAndDays: [[(Int, Int)]]) -> CalendarComponent {
@@ -63,5 +75,20 @@ extension CalendarComponent {
         }
         let components = CalendarComponent(year: year, month: month, weeks: weeks)
         return components
+    }
+}
+
+private extension CalendarComponent {
+    
+    func applyHolidays(_ holidays: [Holiday]) -> CalendarComponent {
+        let holidaysMap = holidays.asDictionary { $0.dateString }
+        let newWeeks = self.weeks.map { week -> CalendarComponent.Week in
+            let newDays = week.days.map { day -> CalendarComponent.Day in
+                let dateString = "\(day.year)-\(day.month.withLeadingZero())-\(day.day.withLeadingZero())"
+                return day |> \.holiday .~ holidaysMap[dateString]
+            }
+            return .init(days: newDays)
+        }
+        return .init(year: self.year, month: self.month, weeks: newWeeks)
     }
 }

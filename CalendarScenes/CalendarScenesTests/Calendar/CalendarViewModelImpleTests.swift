@@ -320,8 +320,9 @@ extension CalendarViewModelImpleTests {
             [.schedule("schedule_event_repeating", turn: 5), nil],  // 9.25
             [.schedule("schedule_event_repeating", turn: 5), .schedule("schedule_event_repeating", turn: 6)],  // 9.26
             [nil, .schedule("schedule_event_repeating", turn: 6)], // 9.27
-            [nil, .schedule("schedule_event_repeating", turn: 6)], // 9.28
-            [nil, nil], [nil, nil] // 9.29, 9.30
+            [.holiday("2023-09-28", name: "추석"), .schedule("schedule_event_repeating", turn: 6)], // 9.28
+            [.holiday("2023-09-29", name: "추석"), nil], // 9.29
+            [.holiday("2023-09-30", name: "추석"), nil] // 9.30
         ]
         XCTAssertEqual(eventIdLists[safe: 4], expectWeek5)
     }
@@ -345,7 +346,7 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(eventIdLists[safe: 2], [
             [.schedule("schedule_event_repeating", turn: 2), .todo("todo8")],
             [.schedule("schedule_event_repeating", turn: 2), nil],
-            [.schedule("schedule_event_repeating", turn: 2), nil],
+            [.schedule("schedule_event_repeating", turn: 2), .holiday("2023-08-15", name: "광복절")],
             [.schedule("schedule_event_repeating", turn: 2), nil],
             [nil, nil], [nil, nil], [nil, nil]
         ])
@@ -448,9 +449,9 @@ extension CalendarViewModelImpleTests {
             [.schedule("schedule_event_repeating", turn: 6), .schedule("schedule_event_repeating", turn: 5)],  // 9.25
             [.schedule("schedule_event_repeating", turn: 6), nil],  // 9.26
             [.schedule("schedule_event_repeating", turn: 6), nil], // 9.27
-            [nil, nil], // 9.28
-            [nil, nil],
-            [.schedule("schedule_event_repeating", turn: 7), nil] // 9.29, 9.30
+            [.holiday("2023-09-28", name: "추석"), nil], // 9.28
+            [.holiday("2023-09-29", name: "추석"), nil],
+            [.holiday("2023-09-30", name: "추석"), .schedule("schedule_event_repeating", turn: 7)] // 9.29, 9.30
         ]
         XCTAssertEqual(newWeeksLastWeek?.eventIds, expectWeek5)
     }
@@ -494,7 +495,6 @@ extension CalendarViewModelImpleTests {
         override func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never> {
             switch period.centerDateMonth() {
             case 9:
-//                return Just(eventsFor9).eraseToAnyPublisher()
                 return self.subjectFor9.eraseToAnyPublisher()
             case 8:
                 return self.subjectFor8.eraseToAnyPublisher()
@@ -522,11 +522,9 @@ extension CalendarViewModelImpleTests {
         override func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never> {
             switch period.centerDateMonth() {
             case 9:
-//                return Just(eventsFor9).eraseToAnyPublisher()
                 return self.subjectFor9.eraseToAnyPublisher()
             case 8:
                 return self.subjectFor8.eraseToAnyPublisher()
-//                return Just(eventsFor8).eraseToAnyPublisher()
             default: return Empty().eraseToAnyPublisher()
             }
         }
