@@ -79,7 +79,7 @@ public final class EventRepeatTimeEnumerator: Sendable {
     }
     
     public func nextEventTime(from time: EventTime, until endTime: TimeInterval?) -> EventTime? {
-        let currentEventStartDate = Date(timeIntervalSince1970: time.lowerBound)
+        let currentEventStartDate = Date(timeIntervalSince1970: time.lowerBoundWithFixed)
         guard let current = Current(self.calendar, date: currentEventStartDate) else { return nil }
         let nextDate: Date?
         switch self.option {
@@ -99,7 +99,7 @@ public final class EventRepeatTimeEnumerator: Sendable {
         else { return nil }
         
         let nextTime = time.shift(interval)
-        if let endTime, nextTime.upperBound > endTime {
+        if let endTime, nextTime.upperBoundWithFixed > endTime {
             return nil
         }
         

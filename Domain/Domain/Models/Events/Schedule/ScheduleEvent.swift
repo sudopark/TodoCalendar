@@ -23,7 +23,7 @@ public struct ScheduleEvent {
     public var repeating: EventRepeating?
     public var showTurn: Bool = false
     
-    public struct RepeatingTimes {
+    public struct RepeatingTimes: Equatable {
         public let time: EventTime
         public let turn: Int
         
@@ -58,6 +58,7 @@ public struct ScheduleEvent {
     
     func isOverlap(with period: Range<TimeInterval>) -> Bool {
         if let repeating {
+            // TODO: 이때는 timeZone 고려해서 같이 계산해야함
             return repeating.isOverlap(with: period)
         } else {
             return time.isOverlap(with: period)

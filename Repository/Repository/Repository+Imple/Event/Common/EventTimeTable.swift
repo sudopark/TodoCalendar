@@ -8,6 +8,7 @@
 import Foundation
 import Domain
 import SQLiteService
+import Extensions
 
 
 struct EventTimeTable: Table {
@@ -19,6 +20,7 @@ struct EventTimeTable: Table {
         case timeUpperInterval = "tu_interval"
         case lowerInterval = "l_interval"
         case upperInterval = "u_interval"
+        case secondsFromGMT = "seconds_from_gmt"
         
         var dataType: ColumnDataType {
             switch self {
@@ -28,6 +30,7 @@ struct EventTimeTable: Table {
             case .timeUpperInterval: return .real([])
             case .lowerInterval: return .real([])
             case .upperInterval: return .real([])
+            case .secondsFromGMT: return .real([.default(0.0)])
             }
         }
     }
@@ -49,10 +52,13 @@ struct EventTimeTable: Table {
             let _: Double? = cursor.next()
             let _: Double? = cursor.next()
             
-            if timeType == "at" {
-                self.eventTime = .at(timeLowerInterval)
-            } else {
-                self.eventTime = .period(timeLowerInterval..<timeUpperInterval)
+            let secondsFromGMT: Double = try cursor.next().unwrap()
+            
+            switch timeType {
+            case "at": self.eventTime = .at(timeLowerInterval)
+            case "period": self.eventTime = .period(timeLowerInterval..<timeUpperInterval)
+            case "allday": self.eventTime = .allDay(timeLowerInterval..<timeUpperInterval, secondsFromGMT: secondsFromGMT)
+            default: throw RuntimeError("not defined event time type: \(timeType)")
             }
         }
         
@@ -72,18 +78,22 @@ struct EventTimeTable: Table {
         case .eventId: return entity.eventId
         case .timeType: return entity.eventTime?.typeText
         case .timeLowerInterval:
-            return entity.eventTime?.lowerBound
+            return entity.eventTime?.lowerBoundWithFixed
         case .timeUpperInterval:
-            return entity.eventTime?.upperBound
+            return entity.eventTime?.upperBoundWithFixed
         case .lowerInterval:
+            // TODO: 저장시 seconds from gmt 고려도 해줘야함
             return entity.repeating?.repeatingStartTime
-                ?? entity.eventTime?.lowerBound
+                ?? entity.eventTime?.lowerBoundWithFixed
         case .upperInterval:
+            // TODO: 저장시 seconds from gmt 고려도 해줘야함
             if let repeating = entity.repeating {
                 return repeating.repeatingEndTime
             } else {
-                return entity.eventTime?.upperBound
+                return entity.eventTime?.upperBoundWithFixed
             }
+        case .secondsFromGMT:
+            return entity.eventTime?.secondsFromGMT ?? 0
         }
     }
 }
@@ -93,6 +103,12 @@ private extension EventTime {
         switch self {
         case .at: return "at"
         case .period: return "period"
+        case .allDay: return "allday"
         }
+    }
+    
+    var secondsFromGMT: TimeInterval? {
+        guard case let .allDay(_, secondsFromGMT) = self else { return nil }
+        return secondsFromGMT
     }
 }

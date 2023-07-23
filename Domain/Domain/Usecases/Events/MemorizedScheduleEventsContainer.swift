@@ -175,7 +175,7 @@ extension MemorizedScheduleEventsContainer {
         unitl end: TimeInterval,
         acc result: BlockCalculateResult
     ) -> BlockCalculateResult {
-        let startTime = start.time.lowerBound
+        let startTime = start.time.lowerBoundWithFixed
         // return 1
         guard startTime < end else { return result }
         

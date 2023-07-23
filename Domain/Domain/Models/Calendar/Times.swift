@@ -47,6 +47,14 @@ extension TimeInterval {
     static func hours(_ number: Int) -> TimeInterval {
         return TimeInterval(number) * 3600
     }
+    
+    public func earlistTimeZoneInterval(_ secondsFromGMT: TimeInterval) -> TimeInterval {
+        return self + secondsFromGMT - .hours(14)
+    }
+    
+    public func latestTimeZoneInterval(_ secondsFromGMT: TimeInterval) -> TimeInterval {
+        return self + secondsFromGMT + .hours(12)
+    }
 }
 
 
@@ -59,9 +67,11 @@ extension TimeZone {
 }
 
 
-extension Range where Bound == TimeStamp {
+extension Range where Bound == TimeInterval {
     
-    func intervalRanges() -> Range<TimeInterval> {
-        return self.lowerBound.utcTimeInterval..<self.upperBound.utcTimeInterval
+    func intervalRanges(secondsFromGMT: TimeInterval) -> Range<TimeInterval> {
+        return self.lowerBound.earlistTimeZoneInterval(secondsFromGMT)
+            ..<
+        self.upperBound.latestTimeZoneInterval(secondsFromGMT)
     }
 }
