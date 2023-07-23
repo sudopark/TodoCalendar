@@ -153,8 +153,8 @@ extension TodoEventUsecaseImpleTests {
 
     private func stubOldRepeatingTodoEvent() -> TodoEvent {
         let oldEvent = TodoEvent(uuid: "old", name: "some")
-            |> \.time .~ .at(.dummy(0))
-            |> \.repeating .~ .init(repeatingStartTime: .dummy(0), repeatOption: EventRepeatingOptions.EveryDay())
+            |> \.time .~ .at(0)
+            |> \.repeating .~ .init(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
         let shareKey = ShareDataKeys.todos.rawValue
         self.spyStore.put([String: TodoEvent].self, key: shareKey, [oldEvent.uuid: oldEvent])
         return oldEvent
@@ -174,7 +174,7 @@ extension TodoEventUsecaseImpleTests {
         let todos = self.waitOutputs(expect, for: todoSource) {
             Task {
                 let params = TodoEditParams()
-                    |> \.time .~ .at(.dummy(4))
+                    |> \.time .~ .at(4)
                     |> \.repeatingUpdateScope .~ .all
                 _ = try? await usecase.updateTodoEvent(oldEvent.uuid, params)
             }
@@ -183,7 +183,7 @@ extension TodoEventUsecaseImpleTests {
         // then
         let todoEventTims = todos.map { $0.map { $0.time } }
         XCTAssertEqual(todoEventTims, [
-            [.at(.dummy(0))], [.at(.dummy(4))]
+            [.at(0)], [.at(4)]
         ])
     }
     
@@ -203,7 +203,7 @@ extension TodoEventUsecaseImpleTests {
             Task {
                 let params = TodoEditParams()
                     |> \.name .~ oldEvent.name
-                    |> \.time .~ .at(.dummy(4))
+                    |> \.time .~ .at(4)
                     |> \.repeatingUpdateScope .~ .onlyThisTime
                 _ = try? await usecase.updateTodoEvent(oldEvent.uuid, params)
             }
@@ -217,11 +217,11 @@ extension TodoEventUsecaseImpleTests {
         }
         XCTAssertEqual(todoIdAndTimePair, [
             [
-                Pair(uuid: oldEvent.uuid, time: .at(.dummy(0)))
+                Pair(uuid: oldEvent.uuid, time: .at(0))
             ],
             [
-                Pair(uuid: oldEvent.uuid, time: .at(.dummy(100))),
-                Pair(uuid: "new", time: .at(.dummy(4)))
+                Pair(uuid: oldEvent.uuid, time: .at(100)),
+                Pair(uuid: "new", time: .at(4))
             ]
         ])
     }
@@ -332,7 +332,7 @@ extension TodoEventUsecaseImpleTests {
 extension TodoEventUsecaseImpleTests {
     
     private func stubTodoItemsWithTimeAndWithoutTime() {
-        let todosWithTime = (0..<10).map { TodoEvent.dummy($0) |> \.time .~ .at(.dummy($0)) }
+        let todosWithTime = (0..<10).map { TodoEvent.dummy($0) |> \.time .~ .at(TimeInterval($0)) }
         let todosWithoutTime = (10..<20).map { TodoEvent.dummy($0) |> \.time .~ nil }
         let todoMap = (todosWithTime + todosWithoutTime).reduce(into: [String: TodoEvent]()) {
             $0[$1.uuid] = $1

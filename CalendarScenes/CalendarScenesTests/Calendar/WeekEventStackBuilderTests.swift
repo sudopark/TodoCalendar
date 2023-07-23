@@ -35,9 +35,9 @@ class WeekEventStackBuilderTests: BaseTestCase {
             |> { self.calendar.endOfDay(for: $0)! }
         
         let dates = start..<end
-        let timeStamps = TimeStamp(dates.lowerBound.timeIntervalSince1970, timeZone: "KST")
+        let timeStamps = dates.lowerBound.timeIntervalSince1970
             ..<
-            TimeStamp(dates.upperBound.timeIntervalSince1970, timeZone: "KST")
+            dates.upperBound.timeIntervalSince1970
         return .init(.todo("\(daysRange)"), .period(timeStamps))
     }
     
@@ -155,7 +155,7 @@ private extension EventId {
         switch self {
         case .todo(let id): return "t:\(id)"
         case .schedule(let id, _): return "s:\(id)"
-        case .holiday(let id): return "h:\(id)"
+        case .holiday(let date, _): return "h:\(date)"
         }
     }
 }

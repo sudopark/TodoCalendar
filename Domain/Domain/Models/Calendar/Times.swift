@@ -38,28 +38,6 @@ public enum WeekOrdinal: Equatable, Hashable, Sendable {
     case last
 }
 
-public struct TimeStamp: Comparable {
-    
-    public let utcTimeInterval: TimeInterval
-    public let timeZoneAbbreviation: String
-    
-    public init(_ utcTimeInterval: TimeInterval,
-                timeZone abbreviation: String) {
-        self.utcTimeInterval = utcTimeInterval
-        self.timeZoneAbbreviation = abbreviation
-    }
-    
-        public static func < (_ lhs: Self, _ rhs: Self) -> Bool {
-        return lhs.utcTimeInterval < rhs.utcTimeInterval
-    }
-    
-    public func add(_ time: TimeInterval) -> TimeStamp {
-        return .init(self.utcTimeInterval + time,
-                     timeZone: self.timeZoneAbbreviation)
-    }
-}
-
-
 extension TimeInterval {
     
     static func days(_ number: Int) -> TimeInterval {

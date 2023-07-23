@@ -49,12 +49,12 @@ extension ScheduleEventLocalRepositoryImpleTests {
     
     private var dummyMakeParams: ScheduleMakeParams {
         let option = EventRepeatingOptions.EveryDay()
-        let repeating = EventRepeating(repeatingStartTime: TimeStamp(100, timeZone: "KST"), repeatOption: option)
-            |> \.repeatingEndTime .~ TimeStamp(200, timeZone: "KST")
+        let repeating = EventRepeating(repeatingStartTime: 100.0, repeatOption: option)
+            |> \.repeatingEndTime .~ 200.0
         return ScheduleMakeParams()
             |> \.name .~ "new"
             |> \.eventTagId .~ "some"
-            |> \.time .~ .at(.init(100, timeZone: "KST"))
+            |> \.time .~ .at(100)
             |> \.showTurn .~ true
             |> \.repeating .~ repeating
     }
@@ -89,7 +89,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
         
         // when
         let params = ScheduleEditParams()
-            |> \.time .~ .at(.init(0, timeZone: "KST"))
+            |> \.time .~ .at(0)
         let updated = try? await repository.updateScheduleEvent(origin?.uuid ?? "", params)
         let loadedEvents = try? await repository.loadScheduleEvents(in: self.dummyRange(0..<10))
             .values.first(where: { _ in true })
@@ -97,7 +97,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
         // then
         XCTAssertNotNil(updated)
         XCTAssertEqual(updated?.name, origin?.name)
-        XCTAssertEqual(updated?.time, .at(.init(0, timeZone: "KST")))
+        XCTAssertEqual(updated?.time, .at(0))
         XCTAssertEqual(updated?.repeating, nil)
         
         let event = loadedEvents?.first(where: { $0.uuid == origin?.uuid })
@@ -117,12 +117,12 @@ extension ScheduleEventLocalRepositoryImpleTests {
         let repeating = from
             .map {
                 EventRepeating(
-                    repeatingStartTime: .init($0, timeZone: "KST"),
+                    repeatingStartTime: $0,
                     repeatOption: EventRepeatingOptions.EveryDay()
                 )
-                |> \.repeatingEndTime .~ end.map { .init($0, timeZone: "KST") }
+                |> \.repeatingEndTime .~ end
             }
-        return ScheduleEvent(uuid: id, name: "name:\(id)", time: .at(.init(time, timeZone: "KST")))
+        return ScheduleEvent(uuid: id, name: "name:\(id)", time: .at(time))
             |> \.repeating .~ repeating
             |> \.showTurn .~ true
     }
@@ -189,9 +189,9 @@ extension ScheduleEventLocalRepositoryImpleTests {
         let origin = try? await repository.makeScheduleEvent(self.dummyMakeParams)
         
         // when
-        let time = EventTime.at(.init(100, timeZone: "KST"))
+        let time = EventTime.at(100)
         let newParams = self.dummyMakeParams
-            |> \.time .~ .at(.init(100, timeZone: "KST"))
+            |> \.time .~ .at(100)
             |> \.name .~ "new name"
         let result = try? await repository.excludeRepeatingEvent(
             origin?.uuid ?? "",
@@ -204,11 +204,11 @@ extension ScheduleEventLocalRepositoryImpleTests {
         XCTAssertNotNil(result)
         XCTAssertNotEqual(result?.newEvent.uuid, result?.originEvent.uuid)
         XCTAssertEqual(result?.newEvent.name, "new name")
-        XCTAssertEqual(result?.newEvent.time, .at(.init(100, timeZone: "KST")))
+        XCTAssertEqual(result?.newEvent.time, .at(100))
         XCTAssertEqual(result?.newEvent.repeatingTimeToExcludes, [])
         XCTAssertEqual(result?.originEvent.name, origin?.name)
         XCTAssertEqual(result?.originEvent.repeatingTimeToExcludes, [
-            EventTime.at(.init(100, timeZone: "KST")).customKey
+            EventTime.at(100).customKey
         ])
         
         let loadedOrigin = loadedEvents?.first(where: { $0.uuid == origin?.uuid })

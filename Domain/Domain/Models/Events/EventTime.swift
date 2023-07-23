@@ -12,61 +12,40 @@ import Foundation
 
 public enum EventTime: Comparable {
     
-    case at(TimeStamp)
-    case period(Range<TimeStamp>)
+    case at(TimeInterval)
+    case period(Range<TimeInterval>)
 
-    var timeZoneAbbreviation: String {
-        switch self {
-        case .at(let time): return time.timeZoneAbbreviation
-        case .period(let range): return range.lowerBound.timeZoneAbbreviation
-        }
-    }
-    
-    public var lowerBoundTimeStamp: TimeStamp {
+    public var lowerBound: TimeInterval {
         switch self {
         case .at(let time): return time
         case .period(let range): return range.lowerBound
         }
     }
     
-    public var upperBoundTimeStamp: TimeStamp {
+    public var upperBound: TimeInterval {
         switch self {
         case .at(let time): return time
         case .period(let range): return range.upperBound
         }
     }
     
-    var lowerBound: TimeInterval {
-        switch self {
-        case .at(let time): return time.utcTimeInterval
-        case .period(let range): return range.lowerBound.utcTimeInterval
-        }
-    }
-    
-    var upperBound: TimeInterval {
-        switch self {
-        case .at(let time): return time.utcTimeInterval
-        case .period(let range): return range.upperBound.utcTimeInterval
-        }
-    }
-    
     public func isOverlap(with period: Range<TimeInterval>) -> Bool {
         switch self {
         case .at(let time):
-            return period ~= time.utcTimeInterval
+            return period ~= time
         case .period(let range):
-            return range.intervalRanges().overlaps(period)
+            return range.overlaps(period)
         }
     }
     
     public func clamped(to period: Range<TimeInterval>) -> Range<TimeInterval>? {
         switch self {
         case .at(let time):
-            return period ~= time.utcTimeInterval
-                ? time.utcTimeInterval..<time.utcTimeInterval
+            return period ~= time
+                ? time..<time
                 : nil
         case .period(let range):
-            let clamped = range.intervalRanges().clamped(to: period)
+            let clamped = range.clamped(to: period)
             return clamped.isEmpty ? nil : clamped
         }
     }
@@ -74,20 +53,20 @@ public enum EventTime: Comparable {
     func shift(_ interval: TimeInterval) -> EventTime {
         switch self {
         case .at(let time):
-            return .at(time.add(interval))
+            return .at(time + interval)
         case .period(let range):
-            return .period(range.lowerBound.add(interval)..<range.upperBound.add(interval))
+            return .period(range.lowerBound+interval..<range.upperBound+interval)
         }
     }
     
-    func shift(to timeStamp: TimeStamp) -> EventTime {
+    func shift(to timeStamp: TimeInterval) -> EventTime {
         switch self {
         case .at(let time):
-            let interval = timeStamp.utcTimeInterval - time.utcTimeInterval
-            return .at(time.add(interval))
+            let interval = timeStamp - time
+            return .at(time + interval)
         case .period(let ranege):
-            let interval = timeStamp.utcTimeInterval - ranege.lowerBound.utcTimeInterval
-            return .period(ranege.lowerBound.add(interval)..<ranege.upperBound.add(interval))
+            let interval = timeStamp - ranege.lowerBound
+            return .period(ranege.lowerBound+interval..<ranege.upperBound+interval)
         }
     }
     
@@ -97,9 +76,9 @@ public enum EventTime: Comparable {
     
     public var customKey: String {
         switch self {
-        case .at(let time): return "\(time.utcTimeInterval)"
+        case .at(let time): return "\(time)"
         case .period(let range):
-            return "\(range.lowerBound.utcTimeInterval)..<\(range.upperBound.utcTimeInterval)"
+            return "\(range.lowerBound)..<\(range.upperBound)"
         }
     }
 }

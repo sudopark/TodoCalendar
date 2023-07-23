@@ -76,11 +76,11 @@ public enum EventRepeatingOptions {
 
 public struct EventRepeating: Equatable {
     
-    public let repeatingStartTime: TimeStamp
+    public let repeatingStartTime: TimeInterval
     public var repeatOption: EventRepeatingOption
-    public var repeatingEndTime: TimeStamp?
+    public var repeatingEndTime: TimeInterval?
 
-    public init(repeatingStartTime: TimeStamp,
+    public init(repeatingStartTime: TimeInterval,
                 repeatOption: EventRepeatingOption) {
         self.repeatingStartTime = repeatingStartTime
         self.repeatOption = repeatOption
@@ -89,9 +89,9 @@ public struct EventRepeating: Equatable {
     func isOverlap(with period: Range<TimeInterval>) -> Bool {
         let closedPeriod = (period.lowerBound...period.upperBound+1)
         if let repeatingEndTime {
-            return (self.repeatingStartTime.utcTimeInterval...repeatingEndTime.utcTimeInterval).overlaps(closedPeriod)
+            return (self.repeatingStartTime...repeatingEndTime).overlaps(closedPeriod)
         } else {
-            return self.repeatingStartTime.utcTimeInterval < period.upperBound
+            return self.repeatingStartTime < period.upperBound
         }
     }
     

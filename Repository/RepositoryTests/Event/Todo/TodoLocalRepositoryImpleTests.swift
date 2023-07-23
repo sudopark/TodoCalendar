@@ -51,13 +51,13 @@ extension TodoLocalRepositoryImpleTests {
     private var dummyMakeParams: TodoMakeParams {
         let option = EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!)
             |> \.interval .~ 2
-        let repeating = EventRepeating(repeatingStartTime: TimeStamp(100, timeZone: "KST"), repeatOption: option)
-            |> \.repeatingEndTime .~ TimeStamp(200, timeZone: "KST")
+        let repeating = EventRepeating(repeatingStartTime: 100, repeatOption: option)
+            |> \.repeatingEndTime .~ 200
         return TodoMakeParams()
             |> \.name .~ "new"
             |> \.eventTagId .~ "some"
             |> \.time .~ .period(
-                TimeStamp(0, timeZone: "KST")..<TimeStamp(100, timeZone: "KST")
+                0.0..<100.0
             )
             |> \.repeating .~ repeating
     }
@@ -104,11 +104,11 @@ extension TodoLocalRepositoryImpleTests {
         let event = events?.first
         XCTAssertEqual(event?.name, "new")
         XCTAssertEqual(event?.eventTagId, "some")
-        XCTAssertEqual(event?.time, .period(TimeStamp(0, timeZone: "KST")..<TimeStamp(100, timeZone: "KST")))
+        XCTAssertEqual(event?.time, .period(0.0..<100.0))
         let repeatOption = event?.repeating?.repeatOption as? EventRepeatingOptions.EveryWeek
         XCTAssertEqual(repeatOption?.interval, 2)
-        XCTAssertEqual(event?.repeating?.repeatingStartTime, .init(100, timeZone: "KST"))
-        XCTAssertEqual(event?.repeating?.repeatingEndTime, .init(200, timeZone: "KST"))
+        XCTAssertEqual(event?.repeating?.repeatingStartTime, 100)
+        XCTAssertEqual(event?.repeating?.repeatingEndTime, 200)
     }
     
     // update
@@ -138,7 +138,7 @@ extension TodoLocalRepositoryImpleTests {
         let params = TodoEditParams()
             |> \.name .~ "new name"
             |> \.eventTagId .~ "new tag"
-            |> \.time .~ .at(.init(22, timeZone: "KST"))
+            |> \.time .~ .at(22)
         let _ = try await repository.updateTodoEvent(old.uuid, params)
         
         // when
@@ -149,7 +149,7 @@ extension TodoLocalRepositoryImpleTests {
         let event = events?.first
         XCTAssertEqual(event?.name, "new name")
         XCTAssertEqual(event?.eventTagId, "new tag")
-        XCTAssertEqual(event?.time, .at(.init(22, timeZone: "KST")))
+        XCTAssertEqual(event?.time, .at(22))
     }
 }
 
@@ -165,13 +165,13 @@ extension TodoLocalRepositoryImpleTests {
         let repeating = from
             .map {
                 EventRepeating(
-                    repeatingStartTime: .init($0, timeZone: "KST"),
+                    repeatingStartTime: $0,
                     repeatOption: EventRepeatingOptions.EveryDay()
                 )
-                |> \.repeatingEndTime .~ end.map { .init($0, timeZone: "KST") }
+                |> \.repeatingEndTime .~ end
             }
         return TodoEvent(uuid: id, name: "name:\(id)")
-            |> \.time .~ time.map { .at(.init($0, timeZone: "KST")) }
+            |> \.time .~ time.map { .at($0) }
             |> \.repeating .~ repeating
     }
     
@@ -279,7 +279,7 @@ extension TodoLocalRepositoryImpleTests {
         
         // then
         XCTAssertEqual(result?.doneEvent.originEventId, "origin")
-        XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(.init(100 + 3600*24, timeZone: "KST")))
+        XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(100.0 + 3600*24))
     }
     
     // complete reapting todo + next event time is over end time -> no next event
@@ -310,7 +310,7 @@ extension TodoLocalRepositoryImpleTests {
         
         // then
         let updated = todos?.first(where: { $0.uuid == origin.uuid })
-        XCTAssertEqual(updated?.time, .at(.init(100+24*3600, timeZone: "KST")))
+        XCTAssertEqual(updated?.time, .at(100.0+24*3600))
     }
     
     func testRepository_whenAfterNotRepeatingTodo_originEventWillRemoved() async {
@@ -347,9 +347,9 @@ extension TodoLocalRepositoryImpleTests {
         // then
         XCTAssertNotEqual(result?.newTodoEvent.uuid, "origin")
         XCTAssertEqual(result?.newTodoEvent.name, params.name)
-        XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(.init(100+24*3600, timeZone: "KST")))
+        XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(100.0+24*3600))
         let updated = todos?.first(where: { $0.uuid == origin.uuid })
-        XCTAssertEqual(updated?.time, .at(.init(100+24*3600, timeZone: "KST")))
+        XCTAssertEqual(updated?.time, .at(100.0+24*3600))
     }
     
     // replace repeating todo -> without next todo

@@ -21,7 +21,7 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
     public var shouldFailMake: Bool = false
     open func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent {
         try self.checkShouldFail(self.shouldFailMake)
-        return ScheduleEvent(uuid: "new", name: params.name ?? "", time: params.time ?? .at(.dummy()))
+        return ScheduleEvent(uuid: "new", name: params.name ?? "", time: params.time ?? .at(0))
             |> \.eventTagId .~ params.eventTagId
             |> \.repeating .~ params.repeating
     }
@@ -31,7 +31,7 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
     public var shouldFailUpdate: Bool = false
     open func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent {
         try self.checkShouldFail(self.shouldFailUpdate)
-        let time: EventTime = params.time ?? .at(.dummy())
+        let time: EventTime = params.time ?? .at(0)
         let eventTagId: String? = params.eventTagId ?? self.updateOriginEventMocking?.eventTagId
         let repeating: EventRepeating? = params.repeating ?? self.updateOriginEventMocking?.repeating
         let showTurn: Bool = params.showTurn ?? self.updateOriginEventMocking?.showTurn ?? false
@@ -50,13 +50,13 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
         
         try self.checkShouldFail(self.shouldFailExclude)
         
-        let newEvent = ScheduleEvent(uuid: "new", name: params.name ?? "", time: params.time ?? .at(.dummy()))
+        let newEvent = ScheduleEvent(uuid: "new", name: params.name ?? "", time: params.time ?? .at(0))
             |> \.eventTagId .~ params.eventTagId
             |> \.repeating .~ params.repeating
             |> \.showTurn .~ (params.showTurn ?? false)
         
         let originEvent = (
-            updateOriginEventMocking ?? ScheduleEvent(uuid: originEventId, name: "origin", time: .at(.dummy(0)))
+            updateOriginEventMocking ?? ScheduleEvent(uuid: originEventId, name: "origin", time: .at(0))
         )
         |> \.repeatingTimeToExcludes .~ [currentTime.customKey]
         
@@ -70,7 +70,7 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
         let oneDay: TimeInterval = 3600 * 24
         let days = ((range.upperBound - range.lowerBound) / oneDay) |> Int.init
         return (0..<days).map {
-            let time = TimeStamp(range.lowerBound+oneDay, timeZone: "KST")
+            let time = range.lowerBound + oneDay
             return ScheduleEvent(uuid: "id:\($0)", name: "name:\($0)", time: .at(time))
         }
     }
