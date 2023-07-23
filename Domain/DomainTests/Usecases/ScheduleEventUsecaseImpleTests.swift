@@ -57,7 +57,7 @@ final class ScheduleEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     private func repeatingEvent(at day: Int) -> ScheduleEvent {
         let time = EventTime.at(TimeInterval(day) * 24 * 3600)
         let repeating = EventRepeating(
-            repeatingStartTime: time.lowerBound,
+            repeatingStartTime: time.lowerBoundWithFixed,
             repeatOption: EventRepeatingOptions.EveryDay()
         )
         return .init(uuid: "id:\(day)", name: "name", time: time)
@@ -529,5 +529,97 @@ extension ScheduleEventUsecaseImpleTests {
         ])
         let newEvent = eventLists.last?.first(where: { $0.uuid == "new" })
         XCTAssertEqual(newEvent?.time, EventTime.at(4))
+    }
+}
+
+
+// MARK: - repeat all day event case
+
+extension ScheduleEventUsecaseImpleTests {
+    
+    // kst에서 allday로 2023년 7월 24일 ~ 26일까지 지정했음 (GMT + 9) 매 주 반복됨
+    // pdt 7월 30~ 8월 5 조회시에 걸려야함
+    // t+14 7월 30~ 8월 5 조회시에 걸려야함
+    // t-12 7월 30~ 8월 5 조회시에 걸려야함
+    
+    private func makeUsecaseWithRepeatingPerWeekAndAllDayScheduleEvent() -> ScheduleEventUsecaseImple {
+        let usecase = self.makeUsecase()
+        
+        let kstTimeZone = TimeZone(abbreviation: "KST")!
+        let range = try! TimeInterval.range(
+            from: "2023-07-24 00:00:00",
+            to: "2023-07-26 23:59:59",
+            in: kstTimeZone
+        )
+        let option = EventRepeatingOptions.EveryWeek(kstTimeZone)
+            |> \.interval .~ 1
+            |> \.dayOfWeeks .~ [.monday]
+        let repeating = EventRepeating(repeatingStartTime: range.lowerBound, repeatOption: option)
+        let event = ScheduleEvent(
+            uuid: "all-day", name: "allday-event",
+            time: .allDay(range, secondsFromGMT: kstTimeZone.secondsFromGMT() |> TimeInterval.init)
+        )
+        |> \.repeating .~ repeating
+        
+        self.stubEvents([event])
+        self.stubNoMemorized()
+        return usecase
+    }
+    
+    func testUsecase_provideRepeatingEventWithAllday_otherTimeZones() {
+        // given
+        let kstTimeZone = TimeZone(abbreviation: "KST")!
+        let kstFirstRange = try! TimeInterval.range(
+            from: "2023-07-24 00:00:00",
+            to: "2023-07-26 23:59:59",
+            in: kstTimeZone
+        )
+        let kstSecondRange = try! TimeInterval.range(
+            from: "2023-07-31 00:00:00",
+            to: "2023-08-02 23:59:59",
+            in: kstTimeZone
+        )
+        
+        func parameterizeTests(_ timeZone: TimeZone) {
+            // given
+            print("start => \(timeZone)")
+            let expect = expectation(description: "kst timezone에서 저장된 allday 2023.07.24~07.26 이벤트를 다른 timezone의 다음주 기간 에서도 조회할 수 있어야함")
+            expect.assertForOverFulfill = false
+            try! self.setUpWithError()
+            let usecase = self.makeUsecaseWithRepeatingPerWeekAndAllDayScheduleEvent()
+            
+            // when
+            let range = try! TimeInterval.range(
+                from: "2023-07-30 00:00:00",
+                to: "2023-08-05 23:59:59",
+                in: timeZone
+            )
+            let events = self.waitFirstOutput(expect, for: usecase.scheduleEvents(in: range).drop(while: { $0.isEmpty }), timeout: 0.1) {
+                usecase.refreshScheduleEvents(in: range)
+            }
+            
+            // then
+            XCTAssertEqual(events?.count, 1)
+            let allDayEvent = events?.first(where: { $0.uuid == "all-day" })
+            let kstTimeZone = TimeZone(abbreviation: "KST")!
+            let secondsFromGMT = kstTimeZone.secondsFromGMT() |> TimeInterval.init
+            XCTAssertEqual(allDayEvent?.time, .allDay(kstFirstRange, secondsFromGMT: secondsFromGMT))
+            XCTAssertEqual(allDayEvent?.repeatingTimes, [
+                .init(time: .allDay(kstFirstRange, secondsFromGMT: secondsFromGMT), turn: 1),
+                .init(time: .allDay(kstSecondRange, secondsFromGMT: secondsFromGMT), turn: 2),
+            ])
+            try! self.tearDownWithError()
+        }
+        
+        // when
+        let timeZones: [TimeZone] = [
+            .init(abbreviation: "UTC")!, .init(abbreviation: "KST")!, .init(abbreviation: "PDT")!,
+            .init(secondsFromGMT: 14 * 3600)!, .init(secondsFromGMT: -12 * 3600)!
+        ]
+        
+        // then
+        timeZones.forEach {
+            parameterizeTests($0)
+        }
     }
 }

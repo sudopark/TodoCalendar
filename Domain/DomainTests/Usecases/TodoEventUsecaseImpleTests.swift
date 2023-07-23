@@ -532,3 +532,68 @@ extension TodoEventUsecaseImpleTests {
         ])
     }
 }
+
+
+// MARK: - load todo in period + include allday
+
+extension TodoEventUsecaseImpleTests {
+    
+    // kst에서 allday로 2023년 7월 23일 ~ 25일까지 지정했음 (GMT + 9)
+    // pdt 7월 23~25 조회시에 걸려야함
+    // t+14 23~25 조회시에도 걸려야함
+    // t-12 23~25 조회시에도 걸려야함
+    
+    private func dummyAllDayLoadRange(timeZone: TimeZone) -> Range<TimeInterval> {
+        return try! TimeInterval.range(
+            from: "2023-07-23 00:00:00",
+            to: "2023-07-25 23:59:59",
+            in: timeZone
+        )
+    }
+    
+    private func makeUsecaseWithAllDayTodoStubbing() -> TodoEventUsecaseImple {
+        
+        let usecase = self.makeUsecase()
+        let kstTimeZone = TimeZone(abbreviation: "KST")!
+        let range = self.dummyAllDayLoadRange(timeZone: kstTimeZone)
+        let todo = TodoEvent(uuid: "allday", name: "allday-todo-event")
+            |> \.time .~ .allDay(range, secondsFromGMT: TimeInterval(kstTimeZone.secondsFromGMT()))
+        self.spyStore.put([String: TodoEvent].self, key: ShareDataKeys.todos.rawValue, [todo.uuid: todo])
+        return usecase
+    }
+    
+    func testUsecase_provoideTodoEventWithAlldayEventTime_otherTimeZones() {
+        // given
+        func parameterizeTests(_ timeZone: TimeZone) {
+            // given
+            let expect = expectation(description: "kst timezone에서 저장된 allday 2023.07.23~07.25 이벤트를 다른 timezone 에서도 조회할 수 있어야함")
+            expect.assertForOverFulfill = false
+            let usecase = self.makeUsecaseWithAllDayTodoStubbing()
+            
+            // when
+            let range = self.dummyAllDayLoadRange(timeZone: timeZone)
+            let events = self.waitFirstOutput(expect, for: usecase.todoEvents(in: range))
+            
+            // then
+            XCTAssertEqual(events?.count, 1)
+            let allDayEvent = events?.first(where: { $0.uuid == "allday" })
+            let kstTimeZone = TimeZone(abbreviation: "KST")!
+            let kstRange = self.dummyAllDayLoadRange(timeZone: kstTimeZone)
+            XCTAssertEqual(
+                allDayEvent?.time,
+                .allDay(kstRange, secondsFromGMT: TimeInterval(kstTimeZone.secondsFromGMT()))
+            )
+        }
+        
+        // when
+        let timeZones: [TimeZone] = [
+            .init(abbreviation: "UTC")!, .init(abbreviation: "KST")!, .init(abbreviation: "PDT")!,
+            .init(secondsFromGMT: 14 * 3600)!, .init(secondsFromGMT: -12 * 3600)!
+        ]
+        
+        // then
+        timeZones.forEach {
+            parameterizeTests($0)
+        }
+    }
+}

@@ -14,18 +14,23 @@ public enum EventTime: Comparable {
     
     case at(TimeInterval)
     case period(Range<TimeInterval>)
+    case allDay(Range<TimeInterval>, secondsFromGMT: TimeInterval)
 
-    public var lowerBound: TimeInterval {
+    public var lowerBoundWithFixed: TimeInterval {
         switch self {
         case .at(let time): return time
         case .period(let range): return range.lowerBound
+        case .allDay(let range, _):
+            return range.lowerBound
         }
     }
     
-    public var upperBound: TimeInterval {
+    public var upperBoundWithFixed: TimeInterval {
         switch self {
         case .at(let time): return time
         case .period(let range): return range.upperBound
+        case .allDay(let range, _):
+            return range.upperBound
         }
     }
     
@@ -35,6 +40,8 @@ public enum EventTime: Comparable {
             return period ~= time
         case .period(let range):
             return range.overlaps(period)
+        case .allDay(let range, let secondsFromGMT):
+            return range.intervalRanges(secondsFromGMT: secondsFromGMT).overlaps(period)
         }
     }
     
@@ -47,6 +54,10 @@ public enum EventTime: Comparable {
         case .period(let range):
             let clamped = range.clamped(to: period)
             return clamped.isEmpty ? nil : clamped
+            
+        case .allDay(let range, let secondsFromGMT):
+            let clamped = range.intervalRanges(secondsFromGMT: secondsFromGMT).clamped(to: period)
+            return clamped.isEmpty ? nil : clamped
         }
     }
     
@@ -56,22 +67,16 @@ public enum EventTime: Comparable {
             return .at(time + interval)
         case .period(let range):
             return .period(range.lowerBound+interval..<range.upperBound+interval)
-        }
-    }
-    
-    func shift(to timeStamp: TimeInterval) -> EventTime {
-        switch self {
-        case .at(let time):
-            let interval = timeStamp - time
-            return .at(time + interval)
-        case .period(let ranege):
-            let interval = timeStamp - ranege.lowerBound
-            return .period(ranege.lowerBound+interval..<ranege.upperBound+interval)
+        case .allDay(let range, let secondsFromGMT):
+            return .allDay(
+                range.lowerBound+interval..<range.upperBound+interval,
+                secondsFromGMT: secondsFromGMT
+            )
         }
     }
     
     public static func < (_ lhs: Self, _ rhs: Self) -> Bool {
-        return lhs.lowerBound < rhs.lowerBound
+        return lhs.lowerBoundWithFixed < rhs.lowerBoundWithFixed
     }
     
     public var customKey: String {
@@ -79,6 +84,8 @@ public enum EventTime: Comparable {
         case .at(let time): return "\(time)"
         case .period(let range):
             return "\(range.lowerBound)..<\(range.upperBound)"
+        case .allDay(let range, let secondsFromGMT):
+            return "\(range.lowerBound)..<\(range.upperBound)+\(secondsFromGMT)"
         }
     }
 }

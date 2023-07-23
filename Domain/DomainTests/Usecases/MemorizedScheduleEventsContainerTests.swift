@@ -295,6 +295,6 @@ private extension Int {
 private extension ScheduleEvent.RepeatingTimes {
     
     var day: Int {
-        return (self.time.lowerBound / 24 / 3600) |> Int.init
+        return (self.time.lowerBoundWithFixed / 24 / 3600) |> Int.init
     }
 }
