@@ -241,7 +241,13 @@ extension CalendarViewModelImpleTests {
             |> \.time .~ .dummyPeriod(from: (09, 10), to: (09, 13))
         let todo_w1_mon = TodoEvent(uuid: "todo_w1_mon", name: "some")
             |> \.time .~ .dummyAt(08, 28)
-        self.stubTodoUsecase.eventsFor9 = [todo_w2_sun_wed, todo_w1_mon]
+        let pdtTimeZone = TimeZone(abbreviation: "PDT")!
+        let range = try! TimeInterval.range(
+            from: "2023-08-29 00:00:00", to: "2023-08-29 23:59:59", in: pdtTimeZone
+        )
+        let todo8_29_allday = TodoEvent(uuid: "todo8_29_allday", name: "allday")
+            |> \.time .~ .allDay(range, secondsFromGMT: pdtTimeZone.secondsFromGMT() |> TimeInterval.init)
+        self.stubTodoUsecase.eventsFor9 = [todo_w2_sun_wed, todo_w1_mon, todo8_29_allday]
         
         let schedule_w2_tue_fri = ScheduleEvent(
             uuid: "schedule_w2_tue_fri", name: "some",
@@ -264,7 +270,7 @@ extension CalendarViewModelImpleTests {
         
         let singleEventOn8 = TodoEvent(uuid: "todo8", name: "some")
             |> \.time .~ .dummyAt(08, 13)
-        self.stubTodoUsecase.eventsFor8 = [singleEventOn8, todo_w1_mon]
+        self.stubTodoUsecase.eventsFor8 = [singleEventOn8, todo_w1_mon, todo8_29_allday]
         self.stubScheduleUsecase.eventsFor8 = [
             schedule_event_repeating
         ]
@@ -286,7 +292,7 @@ extension CalendarViewModelImpleTests {
         let expectWeek1: [[EventId?]] = [
             [.schedule("schedule_event_repeating", turn: 3), nil],
             [.schedule("schedule_event_repeating", turn: 3), .todo("todo_w1_mon")],
-            [.schedule("schedule_event_repeating", turn: 3), nil],
+            [.schedule("schedule_event_repeating", turn: 3), .todo("todo8_29_allday")],
             [nil, nil], [nil, nil], [nil, nil], [nil, nil]
         ]
         XCTAssertEqual(eventIdLists[safe: 0], expectWeek1)
@@ -358,7 +364,7 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(eventIdLists[safe: 4], [
             [.schedule("schedule_event_repeating", turn: 3), nil],
             [.schedule("schedule_event_repeating", turn: 3), .todo("todo_w1_mon")],
-            [.schedule("schedule_event_repeating", turn: 3), nil],
+            [.schedule("schedule_event_repeating", turn: 3), .todo("todo8_29_allday")],
             [nil, nil], [nil, nil], [nil, nil], [nil, nil]
         ])
     }
@@ -372,7 +378,6 @@ extension CalendarViewModelImpleTests {
         
         // when
         let source = viewModel.weekModels
-//            .throttle(for: .milliseconds(10), scheduler: RunLoop.main, latest: true)
         let weeks = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
             viewModel.updateMonthIfNeed(.init(year: 2023, month: 9))
         } ?? []
@@ -418,10 +423,10 @@ extension CalendarViewModelImpleTests {
         
         let newWeeksFirstWeek = weekModelLists.last?.first
         let expectWeek1: [[EventId?]] = [
-            [.schedule("schedule_event_repeating", turn: 3)],
-            [.schedule("schedule_event_repeating", turn: 3)],
-            [.schedule("schedule_event_repeating", turn: 3)],
-            [nil], [nil], [nil], [nil]
+            [.schedule("schedule_event_repeating", turn: 3), nil],
+            [.schedule("schedule_event_repeating", turn: 3), nil],
+            [.schedule("schedule_event_repeating", turn: 3), .todo("todo8_29_allday")],
+            [nil, nil], [nil, nil], [nil, nil], [nil, nil]
         ]
         XCTAssertEqual(newWeeksFirstWeek?.eventIds, expectWeek1)
     }

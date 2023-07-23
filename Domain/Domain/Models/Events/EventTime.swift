@@ -66,12 +66,9 @@ public enum EventTime: Comparable {
         case .at(let time):
             return .at(time + interval)
         case .period(let range):
-            return .period(range.lowerBound+interval..<range.upperBound+interval)
+            return .period(range.shift(interval))
         case .allDay(let range, let secondsFromGMT):
-            return .allDay(
-                range.lowerBound+interval..<range.upperBound+interval,
-                secondsFromGMT: secondsFromGMT
-            )
+            return .allDay(range.shift(interval), secondsFromGMT: secondsFromGMT)
         }
     }
     

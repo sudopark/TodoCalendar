@@ -11,20 +11,54 @@ import Prelude
 import Optics
 
 
+// MARK: - CalenarEvent
+
 struct CalendarEvent: Equatable {
+    
+    enum EventTimeOnCalendar: Equatable {
+        case at(TimeInterval)
+        case period(Range<TimeInterval>)
+        
+        init(_ time: EventTime, timeZone: TimeZone) {
+            switch time {
+            case .at(let interval):
+                self = .at(interval)
+            case .period(let range):
+                self = .period(range)
+            case .allDay(let range, let secondsFromGMT):
+                self = .period(range.shiftting(secondsFromGMT, to: timeZone))
+            }
+        }
+        
+        func clamped(to period: Range<TimeInterval>) -> Range<TimeInterval>? {
+            switch self {
+            case .at(let time):
+                return period ~= time
+                    ? time..<time
+                    : nil
+            case .period(let range):
+                let clamped = range.clamped(to: period)
+                return clamped.isEmpty ? nil : clamped
+            }
+        }
+    }
 
     let eventId: EventId
-    let time: EventTime
+    let time: EventTimeOnCalendar
     
-    init(_ eventId: EventId, _ time: EventTime) {
+    init(_ eventId: EventId, _ time: EventTimeOnCalendar) {
         self.eventId = eventId
         self.time = time
     }
     
-    init?(_ todo: TodoEvent) {
+    init(_ eventId: EventId, _ time: EventTime, in timeZone: TimeZone) {
+        self.eventId = eventId
+        self.time = EventTimeOnCalendar(time, timeZone: timeZone)
+    }
+    
+    init?(_ todo: TodoEvent, in timeZone: TimeZone) {
         guard let time = todo.time else { return nil }
-        self.eventId = .todo(todo.uuid)
-        self.time = time
+        self.init(.todo(todo.uuid), time, in: timeZone)
     }
     
     init?(_ holiday: Holiday, timeZone: TimeZone) {
@@ -43,12 +77,18 @@ struct CalendarEvent: Equatable {
     }
     
     static func events(
-        from scheduleEvnet: ScheduleEvent
+        from scheduleEvnet: ScheduleEvent,
+        in timeZone: TimeZone
     ) -> [CalendarEvent] {
         return scheduleEvnet.repeatingTimes
-            .map { CalendarEvent(.schedule(scheduleEvnet.uuid, turn: $0.turn), $0.time) }
+            .map {
+                CalendarEvent(.schedule(scheduleEvnet.uuid, turn: $0.turn), $0.time, in: timeZone)
+            }
     }
 }
+
+
+// MARK: - EventOnWeek + WeekEventStack
 
 struct EventOnWeek {
     let eventRangesOnWeek: Range<TimeInterval>
@@ -82,6 +122,8 @@ struct WeekEventStack {
     let eventStacks: [[EventOnWeek]]
 }
 
+
+// MARK: - WeekEventStackBuilder
 
 struct WeekEventStackBuilder {
     
@@ -257,5 +299,14 @@ private extension Array where Element == EventOnWeek {
     
     var firstEventWeekDay: Int {
         return self.first?.weekDaysRange.lowerBound ?? 8
+    }
+}
+
+private extension Range where Bound == TimeInterval {
+    
+    func shiftting(_ secondsFromGMT: TimeInterval, to timeZone: TimeZone) -> Range {
+        let utcRange = self.lowerBound+secondsFromGMT..<self.upperBound+secondsFromGMT
+        let givenTimeZoneSecondsFromGMT = timeZone.secondsFromGMT() |> TimeInterval.init
+        return utcRange.lowerBound-givenTimeZoneSecondsFromGMT..<utcRange.upperBound-givenTimeZoneSecondsFromGMT
     }
 }
