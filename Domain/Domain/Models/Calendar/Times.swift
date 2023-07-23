@@ -74,4 +74,8 @@ extension Range where Bound == TimeInterval {
             ..<
         self.upperBound.latestTimeZoneInterval(secondsFromGMT)
     }
+    
+    public func shift(_ interval: TimeInterval) -> Range {
+        return self.lowerBound+interval..<self.upperBound+interval
+    }
 }

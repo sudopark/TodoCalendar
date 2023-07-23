@@ -46,6 +46,46 @@ class WeekEventStackBuilderTests: BaseTestCase {
     }
 }
 
+// MARK: - test calendar event
+
+extension WeekEventStackBuilderTests {
+    
+    func dummyRange(in timeZone: TimeZone) -> Range<TimeInterval> {
+        return try! TimeInterval.range(
+            from: "2023-07-23 00:00:00",
+            to: "2023-07-23 23:59:59",
+            in: timeZone
+        )
+    }
+    
+    // make event from time + allday
+    func testCalerdarEvent_makeFromEventTime_allDay() {
+        // given
+        let kstTimeZone = TimeZone(abbreviation: "KST")!
+        let range = self.dummyRange(in: kstTimeZone)
+        let time = EventTime.allDay(range, secondsFromGMT: kstTimeZone.secondsFromGMT() |> TimeInterval.init)
+        
+        func parameterizeTest(_ timeZone: TimeZone) {
+            // given
+            // when
+            let event = CalendarEvent(.todo("dummy"), time, in: timeZone)
+            
+            // then
+            let expectedRange = self.dummyRange(in: timeZone)
+            XCTAssertEqual(event.time, .period(expectedRange))
+        }
+        
+        // when
+        let timeZones: [TimeZone] = [
+            .init(abbreviation: "KST")!, .init(abbreviation: "UTC")!, .init(abbreviation: "PDT")!,
+            .init(secondsFromGMT: 14*3600)!, .init(secondsFromGMT: -12*3600)!
+        ]
+        
+        // then
+        timeZones.forEach(parameterizeTest(_:))
+    }
+}
+
 extension WeekEventStackBuilderTests {
     
     func testBuilder_stackEvents_onlyOnThisWeek() {

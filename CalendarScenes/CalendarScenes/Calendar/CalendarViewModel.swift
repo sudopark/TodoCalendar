@@ -196,8 +196,8 @@ extension CalendarViewModelImple {
         let holidayCalenarEvents = info.component.holidayCalendarEvents(with: info.timeZone)
         let transform: ([TodoEvent], [ScheduleEvent]) -> [CalendarEvent]
         transform = { todos, schedules in
-            let todoEvents = todos.compactMap { CalendarEvent($0) }
-            let scheduleEvents = schedules.flatMap { CalendarEvent.events(from: $0) }
+            let todoEvents = todos.compactMap { CalendarEvent($0, in: info.timeZone) }
+            let scheduleEvents = schedules.flatMap { CalendarEvent.events(from: $0, in: info.timeZone) }
             return todoEvents + scheduleEvents + holidayCalenarEvents
         }
         
