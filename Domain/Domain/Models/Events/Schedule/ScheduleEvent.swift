@@ -58,8 +58,7 @@ public struct ScheduleEvent {
     
     func isOverlap(with period: Range<TimeInterval>) -> Bool {
         if let repeating {
-            // TODO: 이때는 timeZone 고려해서 같이 계산해야함
-            return repeating.isOverlap(with: period)
+            return repeating.isOverlap(with: period, for: self.time)
         } else {
             return time.isOverlap(with: period)
         }

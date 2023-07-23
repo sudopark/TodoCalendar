@@ -46,9 +46,7 @@ extension TodoLocalStorage {
     }
     
     func loadTodoEvents(in range: Range<TimeInterval>) async throws -> [TodoEvent] {
-        let timeQuery = Times.selectAll()
-            .where { $0.timeLowerInterval >= range.lowerBound }
-            .where { $0.timeUpperInterval < range.upperBound }
+        let timeQuery = Times.overlapQuery(with: range)
         let eventQuery = Todo.selectAll()
         return try await self.loadTodoEvents(timeQuery, eventQuery)
     }
