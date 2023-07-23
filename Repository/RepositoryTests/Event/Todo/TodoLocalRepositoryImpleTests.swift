@@ -225,11 +225,11 @@ extension TodoLocalRepositoryImpleTests {
         // then
         let ids = todos.map { $0.uuid } |> Set.init
         XCTAssertEqual(ids, [
-//            "left_join",
+            "left_join",
             "contain_at", "contain_range",
             "right_join",
-//            "bigger_closed",
-//            "bigger_not_closed",
+            "bigger_closed",
+            "bigger_not_closed",
             "bigger_right_join"
         ])
     }
@@ -370,5 +370,72 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertNil(result?.nextRepeatingTodoEvent)
         let updated = todos?.first(where: { $0.uuid == origin.uuid })
         XCTAssertNil(updated)
+    }
+}
+
+
+// MARK: load todo in period + all day
+
+extension TodoLocalRepositoryImpleTests {
+    
+    // allday + 2023.07.24~07.26 + kst 이벤트가 있고 이를
+    // udt로 조회, pdt로 조회, t14로 조회, t-12로 조회
+    
+    private func dummyAllDayLoadRange(timeZone: TimeZone) -> Range<TimeInterval> {
+        return try! TimeInterval.range(
+            from: "2023-07-23 00:00:00",
+            to: "2023-07-25 23:59:59",
+            in: timeZone
+        )
+    }
+    
+    private var dummyParams: TodoMakeParams {
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let secondsFromGMT = timeZone.secondsFromGMT() |> TimeInterval.init
+        let range = self.dummyAllDayLoadRange(timeZone: timeZone)
+        return TodoMakeParams()
+            |> \.name .~ "all-day"
+            |> \.time .~ .allDay(range, secondsFromGMT: secondsFromGMT)
+    }
+    
+    private func makeRepositoryWithSaveAllDayTodo() async throws -> TodoLocalRepositoryImple {
+        let repository = self.makeRepository()
+        _ = try await repository.makeTodoEvent(self.dummyParams)
+        return repository
+    }
+    
+    func testRepository_loadAllDayEvent_withOtherTimeZones() async throws {
+        // given
+        let repository = try await self.makeRepositoryWithSaveAllDayTodo()
+        let timeZones: [TimeZone] = [
+            .init(abbreviation: "UTC")!, .init(abbreviation: "KST")!, .init(abbreviation: "PDT")!,
+            .init(secondsFromGMT: 14*3600)!, .init(secondsFromGMT: -12*3600)!
+        ]
+        
+        // when
+        let ranges = timeZones.map { self.dummyAllDayLoadRange(timeZone: $0) }
+        var todos: [TodoEvent?] = []
+        try await ranges.asyncForEach { range in
+            let todo = try await repository.loadTodoEvents(in: range).values.first(where: { _ in true })
+            todos.append(todo?.first)
+        }
+        
+        // then
+        let todoNames = todos.map { $0?.name }
+        XCTAssertEqual(todoNames, Array(repeating: "all-day", count: timeZones.count))
+    }
+}
+
+
+extension TimeInterval {
+    
+    static func range(from: String, to: String, in timeZone: TimeZone) throws -> Range<TimeInterval> {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        formatter.timeZone = timeZone
+        
+        let start = try formatter.date(from: from).unwrap()
+        let end = try formatter.date(from: to).unwrap()
+        return (start.timeIntervalSince1970..<end.timeIntervalSince1970)
     }
 }

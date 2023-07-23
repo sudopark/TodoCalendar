@@ -86,12 +86,27 @@ public struct EventRepeating: Equatable {
         self.repeatOption = repeatOption
     }
     
-    func isOverlap(with period: Range<TimeInterval>) -> Bool {
+    public func startTime(for eventTime: EventTime) -> TimeInterval {
+        switch eventTime {
+        case .allDay(_, let secondsFromGMT): return repeatingStartTime.earlistTimeZoneInterval(secondsFromGMT)
+        default: return self.repeatingStartTime
+        }
+    }
+    
+    public func endTime(for eventTime: EventTime) -> TimeInterval? {
+        switch eventTime {
+        case .allDay(_, let secondsFromGMT):
+            return self.repeatingEndTime.map { $0.latestTimeZoneInterval(secondsFromGMT) }
+        default: return self.repeatingEndTime
+        }
+    }
+    
+    func isOverlap(with period: Range<TimeInterval>, for eventTime: EventTime) -> Bool {
         let closedPeriod = (period.lowerBound...period.upperBound+1)
-        if let repeatingEndTime {
-            return (self.repeatingStartTime...repeatingEndTime).overlaps(closedPeriod)
+        if let repeatingEndTime = self.endTime(for: eventTime) {
+            return (self.startTime(for: eventTime)...repeatingEndTime).overlaps(closedPeriod)
         } else {
-            return self.repeatingStartTime < period.upperBound
+            return self.startTime(for: eventTime) < period.upperBound
         }
     }
     
