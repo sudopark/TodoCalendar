@@ -29,8 +29,7 @@ struct CalendarEvent: Equatable {
     
     init?(_ holiday: Holiday, timeZone: TimeZone) {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        guard let timeZoneAbbre = timeZone.addreviationKey,
-              let components = holiday.dateComponents()
+        guard let components = holiday.dateComponents()
         else { return nil }
         
         let dateComponents = DateComponents(year: components.0, month: components.1, day: components.2)
@@ -40,11 +39,7 @@ struct CalendarEvent: Equatable {
               let end = calendar.date(from: endComponents)
         else { return nil }
         self.eventId = .holiday(holiday.dateString, name: holiday.name)
-        self.time = .period(
-            TimeStamp(start.timeIntervalSince1970, timeZone: timeZoneAbbre)
-                ..<
-            TimeStamp(end.timeIntervalSince1970, timeZone: timeZoneAbbre)
-        )
+        self.time = .period(start.timeIntervalSince1970..<end.timeIntervalSince1970)
     }
     
     static func events(

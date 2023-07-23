@@ -75,7 +75,7 @@ extension TodoLocalRepositoryImple {
     private func replaceTodoNextEventTimeIfIsRepeating(_ origin: TodoEvent) async throws -> TodoEvent? {
         guard let repeating = origin.repeating,
               let time = origin.time,
-              let nextEventTime = EventRepeatTimeEnumerator(repeating.repeatOption)?.nextEventTime(from: time, until: repeating.repeatingEndTime?.utcTimeInterval)
+              let nextEventTime = EventRepeatTimeEnumerator(repeating.repeatOption)?.nextEventTime(from: time, until: repeating.repeatingEndTime)
         else { return nil }
         
         let nextTodo = origin |> \.time .~ nextEventTime

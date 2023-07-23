@@ -328,7 +328,7 @@ private extension CalendarPagerViewModelImpleTests {
             let endMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.upperBound))
             
             let newTodo = TodoEvent(uuid: "kst-month: \(startMonth)~\(endMonth)", name: "dummy")
-                |> \.time .~ EventTime.at(.init(period.lowerBound, timeZone: "KST"))
+                |> \.time .~ EventTime.at(period.lowerBound)
             let newTodos = (self.todoEventsInRange.value ?? []) <> [newTodo]
             self.todoEventsInRange.send(newTodos)
         }
@@ -352,7 +352,7 @@ private extension CalendarPagerViewModelImpleTests {
             let newOne = ScheduleEvent(
                 uuid: "kst-month: \(startMonth)~\(endMonth)",
                 name: "dummy",
-                time: .at(.init(period.lowerBound, timeZone: "KST"))
+                time: .at(period.lowerBound)
             )
             let newSchedules = (self.scheduleEventsInRange.value ?? []) <> [newOne]
             self.scheduleEventsInRange.send(newSchedules)

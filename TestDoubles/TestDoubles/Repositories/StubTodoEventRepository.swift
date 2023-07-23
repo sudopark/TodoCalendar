@@ -63,7 +63,7 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub {
             return .init(newTodoEvent: newTodo)
                 |> \.nextRepeatingTodoEvent .~ (
                     TodoEvent(uuid: eventId, name: "skip-next")
-                        |> \.time .~ .at(.dummy(100))
+                        |> \.time .~ .at(100)
                 )
         }
         return .init(newTodoEvent: newTodo)
@@ -85,7 +85,7 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub {
             return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
         }
         let events = (-10..<0).map {
-            TodoEvent.dummy($0) |> \.time .~ .at(.dummy($0))
+            TodoEvent.dummy($0) |> \.time .~ .at(TimeInterval($0))
         }
         return Just(events).mapNever().eraseToAnyPublisher()
     }

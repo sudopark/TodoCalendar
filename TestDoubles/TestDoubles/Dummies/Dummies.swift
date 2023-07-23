@@ -10,12 +10,6 @@ import Prelude
 import Optics
 import Domain
 
-extension TimeStamp {
-    
-    public static func dummy(_ int: Int = 0) -> TimeStamp {
-        return .init(TimeInterval(int), timeZone: "UTC")
-    }
-}
 
 extension TodoEvent {
     

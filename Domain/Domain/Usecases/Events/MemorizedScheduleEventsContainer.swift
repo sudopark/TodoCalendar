@@ -127,7 +127,7 @@ extension MemorizedScheduleEventsContainer {
         
         let (startTime, end) = (
             event.time,
-            repeating.repeatingEndTime.map { min($0.utcTimeInterval, period.upperBound) } ?? period.upperBound
+            repeating.repeatingEndTime.map { min($0, period.upperBound) } ?? period.upperBound
         )
         
         let calculatedResult = self.calculateRepeatingTimesBlock(
@@ -175,7 +175,7 @@ extension MemorizedScheduleEventsContainer {
         unitl end: TimeInterval,
         acc result: BlockCalculateResult
     ) -> BlockCalculateResult {
-        let startTime = start.time.lowerBoundTimeStamp.utcTimeInterval
+        let startTime = start.time.lowerBound
         // return 1
         guard startTime < end else { return result }
         
@@ -263,12 +263,4 @@ private extension Range where Bound == TimeInterval {
         return parentRange.lowerBound <= self.lowerBound
             && self.upperBound <= parentRange.upperBound
     }
-}
-
-private func min(_ lhs: TimeStamp, _ rhs: TimeStamp) -> TimeStamp {
-    return lhs.utcTimeInterval <= rhs.utcTimeInterval ? lhs : rhs
-}
-
-private func max(_ lhs: TimeStamp, _ rhs: TimeStamp) -> TimeStamp {
-    return lhs.utcTimeInterval >= rhs.utcTimeInterval ? lhs : rhs
 }

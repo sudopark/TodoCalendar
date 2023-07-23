@@ -251,7 +251,7 @@ extension CalendarViewModelImpleTests {
             uuid: "schedule_event_repeating", name: "some",
             time: EventTime.dummyPeriod(from: (07, 20), to: (07, 30))
         )
-        |> \.repeating .~ EventRepeating(repeatingStartTime: .dummy(), repeatOption: EventRepeatingOptions.EveryDay())
+        |> \.repeating .~ EventRepeating(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
         |> \.nextRepeatingTimes .~ [
             .init(time: EventTime.dummyPeriod(from: (07, 31), to: (08, 16)), turn: 2),
             .init(time: EventTime.dummyPeriod(from: (08, 25), to: (08, 29)), turn: 3),
@@ -551,18 +551,16 @@ private extension EventTime {
     
     static func dummyAt(_ month: Int, _ day: Int) -> EventTime {
         let date = self.date(month, day)
-        return .at(
-            .init(date.timeIntervalSince1970, timeZone: "KST")
-        )
+        return .at(date.timeIntervalSince1970)
     }
     
     static func dummyPeriod(from : (Int, Int), to: (Int, Int)) -> EventTime {
         let start = self.date(from.0, from.1)
         let end = self.date(to.0, to.1)
         return .period(
-            TimeStamp(start.timeIntervalSince1970, timeZone: "KST")
+            start.timeIntervalSince1970
                 ..<
-            TimeStamp(end.timeIntervalSince1970, timeZone: "KST")
+            end.timeIntervalSince1970
         )
     }
 }

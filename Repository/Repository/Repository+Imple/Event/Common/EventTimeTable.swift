@@ -15,7 +15,6 @@ struct EventTimeTable: Table {
     enum Columns: String, TableColumn {
         case eventId = "event_id"
         case timeType = "time_type"
-        case timezone
         case timeLowerInterval = "tl_interval"
         case timeUpperInterval = "tu_interval"
         case lowerInterval = "l_interval"
@@ -25,7 +24,6 @@ struct EventTimeTable: Table {
             switch self {
             case .eventId: return .text([.unique, .notNull])
             case .timeType: return .text([])
-            case .timezone: return .text([])
             case .timeLowerInterval: return .real([])
             case .timeUpperInterval: return .real([])
             case .lowerInterval: return .real([])
@@ -42,7 +40,6 @@ struct EventTimeTable: Table {
         init(_ cursor: CursorIterator) throws {
             self.eventId = try cursor.next().unwrap()
             guard let timeType: String = try? cursor.next().unwrap(),
-                  let timeZone: String = try? cursor.next().unwrap(),
                   let timeLowerInterval: Double = try? cursor.next().unwrap(),
                   let timeUpperInterval: Double = try? cursor.next().unwrap()
             else{
@@ -53,9 +50,9 @@ struct EventTimeTable: Table {
             let _: Double? = cursor.next()
             
             if timeType == "at" {
-                self.eventTime = .at(TimeStamp(timeLowerInterval, timeZone: timeZone))
+                self.eventTime = .at(timeLowerInterval)
             } else {
-                self.eventTime = .period(TimeStamp(timeLowerInterval, timeZone: timeZone)..<TimeStamp(timeUpperInterval, timeZone: timeZone))
+                self.eventTime = .period(timeLowerInterval..<timeUpperInterval)
             }
         }
         
@@ -74,19 +71,18 @@ struct EventTimeTable: Table {
         switch column {
         case .eventId: return entity.eventId
         case .timeType: return entity.eventTime?.typeText
-        case .timezone: return entity.eventTime?.lowerBoundTimeStamp.timeZoneAbbreviation
         case .timeLowerInterval:
-            return entity.eventTime?.lowerBoundTimeStamp.utcTimeInterval
+            return entity.eventTime?.lowerBound
         case .timeUpperInterval:
-            return entity.eventTime?.upperBoundTimeStamp.utcTimeInterval
+            return entity.eventTime?.upperBound
         case .lowerInterval:
-            return entity.repeating?.repeatingStartTime.utcTimeInterval
-                ?? entity.eventTime?.lowerBoundTimeStamp.utcTimeInterval
+            return entity.repeating?.repeatingStartTime
+                ?? entity.eventTime?.lowerBound
         case .upperInterval:
             if let repeating = entity.repeating {
-                return repeating.repeatingEndTime?.utcTimeInterval
+                return repeating.repeatingEndTime
             } else {
-                return entity.eventTime?.upperBoundTimeStamp.utcTimeInterval
+                return entity.eventTime?.upperBound
             }
         }
     }

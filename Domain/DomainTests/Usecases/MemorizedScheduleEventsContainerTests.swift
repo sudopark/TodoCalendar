@@ -27,14 +27,14 @@ class MemorizedScheduleEventsContainerTests: BaseTestCase {
         return ScheduleEvent(
             uuid: "id:\(int)",
             name: "some",
-            time: .at(TimeStamp(int.days, timeZone: "KST"))
+            time: .at(int.days)
         )
     }
     
     private func repeatingEvent(_ int: Int, customId: String? = nil, end: Int? = nil) -> ScheduleEvent {
-        let time = TimeStamp(int.days, timeZone: "KST")
+        let time = int.days
         let repeating = EventRepeating(repeatingStartTime: time, repeatOption: EventRepeatingOptions.EveryDay())
-            |> \.repeatingEndTime .~ end.map { TimeStamp($0.days, timeZone: "KST") }
+            |> \.repeatingEndTime .~ end.map { $0.days }
         return ScheduleEvent(uuid: customId ?? "id:\(int)", name: "some", time: .at(time))
             |> \.repeating .~ repeating
         

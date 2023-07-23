@@ -33,13 +33,11 @@ class BaseEventRepeatTimeEnumeratorTests: BaseTestCase {
 class EventRepeatTimeEnumeratorTests_everyDay: BaseEventRepeatTimeEnumeratorTests {
     
     private var dummyTimeAt: EventTime {
-        return .at(.init(10, timeZone: "UTC"))
+        return .at(10)
     }
     
     private var dummyTimeRange: EventTime {
-        return .period(
-            TimeStamp(10, timeZone: "UTC")..<TimeStamp(110, timeZone: "UTC")
-        )
+        return .period(10..<110)
     }
 }
 
@@ -54,19 +52,19 @@ extension EventRepeatTimeEnumeratorTests_everyDay {
         // when + then
         // 1일 간격으로 반복시
         var next = enumerator.nextEventTime(from: self.dummyTimeAt, until: nil)
-        XCTAssertEqual(next, .at(TimeStamp(10 + .days(1), timeZone: "UTC")))
+        XCTAssertEqual(next, .at(10 + .days(1)))
         
         // 3일 간격으로 반복시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)
         next = enumerator.nextEventTime(from: self.dummyTimeAt, until: nil)
-        XCTAssertEqual(next, .at(TimeStamp(10 + .days(3), timeZone: "UTC")))
+        XCTAssertEqual(next, .at(10 + .days(3)))
         
         // 반복 종료 시간과 동일한 경우
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)
         next = enumerator.nextEventTime(from: self.dummyTimeAt, until: .days(3) + 10)
-        XCTAssertEqual(next, .at(TimeStamp(10 + .days(3), timeZone: "UTC")))
+        XCTAssertEqual(next, .at(10 + .days(3)))
         
         // 반복종료시간 초과시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
@@ -106,16 +104,14 @@ class EventRepeatTimeEnumeratorTests_everyWeek: BaseEventRepeatTimeEnumeratorTes
     
     private var dummyTimeAt: EventTime {
         let date = self.dummyDate("2023-04-11 07:00")
-        return .at(.init(date.timeIntervalSince1970, timeZone: "KST"))
+        return .at(date.timeIntervalSince1970)
     }
     
     private var dummyTimeRange: EventTime {
         let start = self.dummyDate("2023-04-11 07:00")
         let end = self.dummyDate("2023-04-11 08:00")
         return .period(
-            TimeStamp(start.timeIntervalSince1970, timeZone: "KST")
-            ..<
-            TimeStamp(end.timeIntervalSince1970, timeZone: "KST")
+            start.timeIntervalSince1970..<end.timeIntervalSince1970
         )
     }
 }
@@ -139,7 +135,7 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
             // then
             if let expected = expected {
                 let nextWeekEvent = self.dummyDate(expected)
-                XCTAssertEqual(next, .at(.init(nextWeekEvent.timeIntervalSince1970, timeZone: "KST")))
+                XCTAssertEqual(next, .at(nextWeekEvent.timeIntervalSince1970))
             } else {
                 XCTAssertNil(next)
             }
@@ -169,9 +165,9 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
             // then
             if let expected {
                 let nextWeekEvents = EventTime.period(
-                    TimeStamp(self.dummyDate(expected.0).timeIntervalSince1970, timeZone: "KST")
+                    self.dummyDate(expected.0).timeIntervalSince1970
                         ..<
-                    TimeStamp(self.dummyDate(expected.1).timeIntervalSince1970, timeZone: "KST" )
+                    self.dummyDate(expected.1).timeIntervalSince1970
                 )
                 XCTAssertEqual(next, nextWeekEvents)
             } else {
@@ -202,7 +198,7 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
             // then
             if let expected {
                 let sameWeekEvent = self.dummyDate(expected)
-                XCTAssertEqual(next, .at(.init(sameWeekEvent.timeIntervalSince1970, timeZone: "KST")))
+                XCTAssertEqual(next, .at(sameWeekEvent.timeIntervalSince1970))
             } else {
                 XCTAssertNil(next)
             }
@@ -231,9 +227,9 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
             // then
             if let expected {
                 let sameWeekPeriod = EventTime.period(
-                    TimeStamp(self.dummyDate(expected.0).timeIntervalSince1970, timeZone: "KST")
+                    self.dummyDate(expected.0).timeIntervalSince1970
                     ..<
-                    TimeStamp(self.dummyDate(expected.1).timeIntervalSince1970, timeZone: "KST")
+                    self.dummyDate(expected.1).timeIntervalSince1970
                 )
                 XCTAssertEqual(next, sameWeekPeriod)
             } else {
@@ -272,12 +268,12 @@ class EventRepeatEnumeratorTests_everyMonthWithSelectWeeks: BaseEventRepeatTimeE
         
         // when
         let next = enumerator.nextEventTime(from: .at(
-            TimeStamp(self.dummyDate(from).timeIntervalSince1970, timeZone: "KST")
+            self.dummyDate(from).timeIntervalSince1970
         ), until: endTime)
         
         // then
         if let expected {
-            let nextTime = TimeStamp(self.dummyDate(expected).timeIntervalSince1970, timeZone: "KST")
+            let nextTime = self.dummyDate(expected).timeIntervalSince1970
             XCTAssertEqual(next, .at(nextTime))
         } else {
             XCTAssertNil(next)
@@ -341,12 +337,12 @@ class EventRepeatEnumeratorTests_everyMonthWithSelectDays: BaseEventRepeatTimeEn
         
         // when
         let next = enumerator.nextEventTime(from: .at(
-            TimeStamp(self.dummyDate(from).timeIntervalSince1970, timeZone: "KST")
+            self.dummyDate(from).timeIntervalSince1970
         ), until: endTime)
         
         // then
         if let expected {
-            let nextTime = TimeStamp(self.dummyDate(expected).timeIntervalSince1970, timeZone: "KST")
+            let nextTime = self.dummyDate(expected).timeIntervalSince1970
             XCTAssertEqual(next, .at(nextTime))
         } else {
             XCTAssertNil(next)
@@ -396,12 +392,12 @@ class EventRepeatEnumeratorTests_everyYear: BaseEventRepeatTimeEnumeratorTests {
         
         // when
         let next = enumerator.nextEventTime(from: .at(
-            TimeStamp(self.dummyDate(from).timeIntervalSince1970, timeZone: "KST")
+            self.dummyDate(from).timeIntervalSince1970
         ), until: endTime)
         
         // then
         if let expected {
-            let nextTime = TimeStamp(self.dummyDate(expected).timeIntervalSince1970, timeZone: "KST")
+            let nextTime = self.dummyDate(expected).timeIntervalSince1970
             XCTAssertEqual(next, .at(nextTime))
         } else{
             XCTAssertNil(next)
@@ -450,9 +446,7 @@ class EventRepeatEnumeratorTests_EnumeratesUntilEnd: BaseEventRepeatTimeEnumerat
         let option = EventRepeatingOptions.EveryDay()
             |> \.interval .~ 3
         let enumerator = self.makeEnumerator(option)
-        let startTimeStamp = TimeStamp(
-            self.dummyDate("2023-05-20 01:00").timeIntervalSince1970 , timeZone: "KST"
-        )
+        let startTimeStamp = self.dummyDate("2023-05-20 01:00").timeIntervalSince1970
         let endTime = self.dummyDate("2023-06-01 01:00").timeIntervalSince1970
         
         // when
@@ -460,10 +454,10 @@ class EventRepeatEnumeratorTests_EnumeratesUntilEnd: BaseEventRepeatTimeEnumerat
         
         // then
         XCTAssertEqual(eventTimes, [
-            .at(.init(self.dummyDate("2023-05-23 01:00").timeIntervalSince1970, timeZone: "KST")),
-            .at(.init(self.dummyDate("2023-05-26 01:00").timeIntervalSince1970, timeZone: "KST")),
-            .at(.init(self.dummyDate("2023-05-29 01:00").timeIntervalSince1970, timeZone: "KST")),
-            .at(.init(self.dummyDate("2023-06-01 01:00").timeIntervalSince1970, timeZone: "KST")),
+            .at(self.dummyDate("2023-05-23 01:00").timeIntervalSince1970),
+            .at(self.dummyDate("2023-05-26 01:00").timeIntervalSince1970),
+            .at(self.dummyDate("2023-05-29 01:00").timeIntervalSince1970),
+            .at(self.dummyDate("2023-06-01 01:00").timeIntervalSince1970),
         ])
     }
 }
