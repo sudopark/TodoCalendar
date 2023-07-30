@@ -31,11 +31,11 @@ public final class SingleMonthSceneBuilderImple {
 }
 
 
-extension SingleMonthSceneBuilderImple: CalendarSingleMonthSceneBuilder {
+extension SingleMonthSceneBuilderImple: SingleMonthSceneBuilder {
     
-    public func makeSingleMonthScene(_ month: CalendarMonth) -> any CalendarSingleMonthScene {
+    public func makeSingleMonthScene(_ month: CalendarMonth) -> any SingleMonthScene {
         
-        let viewModel = CalendarSingleMonthViewModelImple(
+        let viewModel = SingleMonthViewModelImple(
             calendarUsecase: self.calendarUsecase,
             calendarSettingUsecase: self.calendarSettingUsecase,
             todoUsecase: self.todoUsecase,

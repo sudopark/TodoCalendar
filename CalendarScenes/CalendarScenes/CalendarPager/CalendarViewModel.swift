@@ -1,5 +1,5 @@
 //
-//  CalendarPagerViewModelImple.swift
+//  CalendarViewModelImple.swift
 //  CalendarScenes
 //
 //  Created by sudo.park on 2023/06/28.
@@ -12,9 +12,9 @@ import Optics
 import Domain
 import Scenes
 
-// MARK: - CalendarPagerViewModel
+// MARK: - CalendarViewModel
 
-protocol CalendarPagerViewModel: AnyObject, Sendable {
+protocol CalendarViewModel: AnyObject, Sendable {
     
     func prepare()
     func focusMoveToPreviousMonth()
@@ -22,17 +22,17 @@ protocol CalendarPagerViewModel: AnyObject, Sendable {
 }
 
 
-// MARK: - CalendarPagerViewModelImple
+// MARK: - CalendarViewModelImple
 
-final class CalendarPagerViewModelImple: CalendarPagerViewModel, @unchecked Sendable {
+final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     
     private let calendarUsecase: CalendarUsecase
     private let calendarSettingUsecase: CalendarSettingUsecase
     private let holidayUsecase: HolidayUsecase
     private let todoEventUsecase: TodoEventUsecase
     private let scheduleEventUsecase: ScheduleEventUsecase
-    var router: CalendarPagerViewRouting?
-    private var monthInteractors: [CalendarSingleMonthInteractor]?
+    var router: CalendarViewRouting?
+    private var monthInteractors: [SingleMonthSceneInteractor]?
     
     init(
         calendarUsecase: CalendarUsecase,
@@ -112,7 +112,7 @@ final class CalendarPagerViewModelImple: CalendarPagerViewModel, @unchecked Send
 }
 
 
-extension CalendarPagerViewModelImple {
+extension CalendarViewModelImple {
     
     func prepare() {
     

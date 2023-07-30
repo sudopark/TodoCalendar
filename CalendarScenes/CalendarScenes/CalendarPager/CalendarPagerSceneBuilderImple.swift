@@ -1,5 +1,5 @@
 //
-//  CalendarPagerSceneBuilderImple.swift
+//  CalendarSceneBuilderImple.swift
 //  CalendarScenes
 //
 //  Created by sudo.park on 2023/07/30.
@@ -9,7 +9,7 @@ import Foundation
 import Domain
 import Scenes
 
-public struct CalendarPagerSceneBuilderImple {
+public struct CalendarSceneBuilderImple {
         
     private let calendarUsecase: CalendarUsecase
     private let calendarSettingUsecase: CalendarSettingUsecase
@@ -32,21 +32,21 @@ public struct CalendarPagerSceneBuilderImple {
     }
 }
 
-extension CalendarPagerSceneBuilderImple: CalendarPagerSceneBuilder {
+extension CalendarSceneBuilderImple: CalendarSceneBuilder {
     
-    public func makeCalendarPagerScene() -> any CalendarPagerScene {
+    public func makeCalendarScene() -> any CalendarScene {
         
-        let viewModel = CalendarPagerViewModelImple(
+        let viewModel = CalendarViewModelImple(
             calendarUsecase: self.calendarUsecase,
             calendarSettingUsecase: self.calendarSettingUsecase,
             holidayUsecase: self.holidayUsecase,
             todoEventUsecase: self.todoEventUsecase,
             scheduleEventUsecase: self.scheduleEventUsecase
         )
-        let viewController = CalendarPagerViewController(viewModel: viewModel)
+        let viewController = CalendarViewController(viewModel: viewModel)
         
         let nextSceneBuilder = SingleMonthSceneBuilderImple(calendarUsecase: self.calendarUsecase, calendarSettingUsecase: self.calendarSettingUsecase, todoUsecase: self.todoEventUsecase, scheduleEventUsecase: self.scheduleEventUsecase)
-        let router = CalendarPagerViewRouterImple(nextSceneBuilder)
+        let router = CalendarViewRouterImple(nextSceneBuilder)
         router.scene = viewController
         viewModel.router = router
         
