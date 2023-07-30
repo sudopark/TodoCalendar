@@ -1,0 +1,169 @@
+//
+//  CalendarPagerViewController.swift
+//  CalendarScenes
+//
+//  Created by sudo.park on 2023/07/28.
+//
+
+import UIKit
+
+
+final class CalendarPagerViewController: UIPageViewController {
+    
+    private let viewModel: CalendarPagerViewModel
+    init(viewModel: CalendarPagerViewModel) {
+        self.viewModel = viewModel
+        super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private var monthViewControllers: [UIViewController]?
+    
+    override func loadView() {
+        super.loadView()
+        self.setupLayouts()
+        self.setupStyling()
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        self.setupPager()
+        self.viewModel.prepare()
+    }
+    
+    private func setupPager() {
+        self.dataSource = self
+        self.delegate = self
+    }
+    
+    // TODO: Impement attaching
+    func attachInitialMonthScenes(_ months: [CalendarMonth]) -> [CalendarInteractor] {
+//        let viewControllers = (0..<3).enumerated().map { offset, _ in
+//            let sender = DummyViewController()
+//            sender.setInt(offset)
+//            return sender
+//        }
+//        self.monthViewControllers = viewControllers
+//        self.setViewControllers([viewControllers[1]], direction: .forward, animated: false)
+        return []
+    }
+}
+
+
+extension CalendarPagerViewController: UIPageViewControllerDataSource {
+    
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerBefore viewController: UIViewController
+    ) -> UIViewController? {
+        guard let viewControllers = self.monthViewControllers,
+              var index = viewControllers.firstIndex(of: viewController)
+        else { return nil }
+        
+        if index == 0 {
+            index = viewControllers.count
+        }
+        index -= 1
+        
+        return viewControllers[index]
+    }
+    
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        viewControllerAfter viewController: UIViewController
+    ) -> UIViewController? {
+        guard let viewControllers = self.monthViewControllers,
+              var index = viewControllers.firstIndex(of: viewController)
+        else { return nil }
+        
+        index += 1
+        if index == viewControllers.count {
+            index = 0
+        }
+        return viewControllers[index]
+    }
+}
+
+extension CalendarPagerViewController: UIPageViewControllerDelegate {
+    
+    func pageViewController(
+        _ pageViewController: UIPageViewController,
+        didFinishAnimating finished: Bool,
+        previousViewControllers: [UIViewController],
+        transitionCompleted completed: Bool
+    ) {
+        guard completed,
+              let previousFirstViewController = previousViewControllers.first,
+              let currentLastViewController = pageViewController.viewControllers?.last
+        else { return }
+
+        let isMoveToRight = previousFirstViewController == currentLastViewController
+        if isMoveToRight {
+            // TODO: update is move to right
+            print("is move to right")
+            self.viewModel.focusMoveToNextMonth()
+        } else {
+            // TODO: update is move to left
+            print("is move to left")
+            self.viewModel.focusMoveToPreviousMonth()
+        }
+    }
+}
+
+
+extension CalendarPagerViewController {
+    
+    private func setupLayouts() {
+        
+    }
+    
+    private func setupStyling() {
+        
+    }
+}
+//
+//private class DummyViewController: UIViewController {
+//
+//    private let label = UILabel()
+//    private var int: Int?
+//    func setInt(_ int: Int) {
+//        self.int = int
+//        self.label.text = "\(int)"
+//    }
+//
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//            self.view.addSubview(label)
+//            label.translatesAutoresizingMaskIntoConstraints = false
+//            NSLayoutConstraint.activate([
+//                label.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
+//                label.centerYAnchor.constraint(equalTo: self.view.centerYAnchor)
+//            ])
+//            label.textAlignment = .center
+//
+//    }
+//}
+//
+//
+//import SwiftUI
+//
+//private struct CalendarPagerControllerView: UIViewControllerRepresentable {
+//
+//    func makeUIViewController(context: Context) -> some UIViewController {
+//        let viewController = CalendarPagerViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
+//        return viewController
+//    }
+//
+//    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {}
+//}
+//
+//struct PagerPreview: PreviewProvider {
+//
+//    static var previews: some View {
+//        return CalendarPagerControllerView()
+//    }
+//}
