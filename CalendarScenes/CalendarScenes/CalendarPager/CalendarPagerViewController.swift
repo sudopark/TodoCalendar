@@ -6,9 +6,11 @@
 //
 
 import UIKit
+import Domain
+import Scenes
 
 
-final class CalendarPagerViewController: UIPageViewController {
+final class CalendarPagerViewController: UIPageViewController, CalendarPagerScene {
     
     private let viewModel: CalendarPagerViewModel
     init(viewModel: CalendarPagerViewModel) {
@@ -40,16 +42,12 @@ final class CalendarPagerViewController: UIPageViewController {
         self.delegate = self
     }
     
-    // TODO: Impement attaching
-    func attachInitialMonthScenes(_ months: [CalendarMonth]) -> [CalendarInteractor] {
-//        let viewControllers = (0..<3).enumerated().map { offset, _ in
-//            let sender = DummyViewController()
-//            sender.setInt(offset)
-//            return sender
-//        }
-//        self.monthViewControllers = viewControllers
-//        self.setViewControllers([viewControllers[1]], direction: .forward, animated: false)
-        return []
+    func addChildMonths(_ singleMonthScenes: [any CalendarSingleMonthScene]) {
+        guard !singleMonthScenes.isEmpty else { return }
+        
+        self.monthViewControllers = singleMonthScenes
+        let center = (singleMonthScenes.count-1) / 2
+        self.setViewControllers([singleMonthScenes[center]], direction: .forward, animated: false)
     }
 }
 

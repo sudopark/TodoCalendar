@@ -8,6 +8,9 @@
          location = "group:CommonPresentation/CommonPresentation.xcodeproj">
       </FileRef>
       <FileRef
+         location = "group:Scenes/Scenes.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:CalendarScenes/CalendarScenes.xcodeproj">
       </FileRef>
    </Group>

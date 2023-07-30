@@ -1,5 +1,5 @@
 //
-//  CalendarViewModel.swift
+//  CalendarSingleMonthViewModel.swift
 //  CalendarScenes
 //
 //  Created by sudo.park on 2023/07/05.
@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 
 
 // MARK: - cell, event and row model
@@ -94,9 +95,20 @@ struct EventDetailModel: Equatable {
     let colorHex: String
 }
 
-// MARK: - CalendarViewModelImple
 
-final class CalendarViewModelImple: @unchecked Sendable {
+// MARK: - CalendarSingleMonthViewModel
+
+protocol CalendarSingleMonthViewModel: AnyObject, Sendable, CalendarSingleMonthInteractor {
+    
+    func select(_ day: DayCellViewModel)
+    
+    var weekModels: AnyPublisher<[WeekRowModel], Never> { get }
+    var currentSelectDayIdentifier: AnyPublisher<String, Never> { get }
+}
+
+// MARK: - CalendarSingleMonthViewModelImple
+
+final class CalendarSingleMonthViewModelImple: CalendarSingleMonthViewModel, @unchecked Sendable {
     
     private let calendarUsecase: CalendarUsecase
     private let calendarSettingUsecase: CalendarSettingUsecase
@@ -152,7 +164,7 @@ final class CalendarViewModelImple: @unchecked Sendable {
 }
 
 
-extension CalendarViewModelImple: CalendarInteractor {
+extension CalendarSingleMonthViewModelImple {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth) {
         
@@ -173,7 +185,7 @@ extension CalendarViewModelImple: CalendarInteractor {
     }
 }
 
-extension CalendarViewModelImple {
+extension CalendarSingleMonthViewModelImple {
     
     private func updateTodoMap() -> ([TodoEvent]) -> Void {
         return { [weak self] todos in
