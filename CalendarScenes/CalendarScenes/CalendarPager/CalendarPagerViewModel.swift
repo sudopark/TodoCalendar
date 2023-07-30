@@ -10,36 +10,9 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 
-
-// MARK: - CCalendarMonth + alendarPagerViewModel
-
-struct CalendarMonth: Hashable, Comparable {
-    
-    let year: Int
-    let month: Int
-    
-    init(year: Int, month: Int) {
-        self.year = year
-        self.month = month
-    }
-    
-    static func < (lhs: CalendarMonth, rhs: CalendarMonth) -> Bool {
-        return lhs.year < rhs.year && lhs.month < rhs.month
-    }
-    
-    func nextMonth() -> CalendarMonth {
-        return self.month == 12
-        ? .init(year: self.year + 1, month: 1)
-        : .init(year: self.year, month: self.month + 1)
-    }
-    
-    func previousMonth() -> CalendarMonth {
-        return self.month == 1
-        ? .init(year: self.year - 1, month: 12)
-        : .init(year: self.year, month: self.month - 1)
-    }
-}
+// MARK: - CalendarPagerViewModel
 
 protocol CalendarPagerViewModel: AnyObject, Sendable {
     
@@ -58,8 +31,8 @@ final class CalendarPagerViewModelImple: CalendarPagerViewModel, @unchecked Send
     private let holidayUsecase: HolidayUsecase
     private let todoEventUsecase: TodoEventUsecase
     private let scheduleEventUsecase: ScheduleEventUsecase
-    weak var router: CalendarPagerViewRouting?
-    private var monthInteractors: [CalendarInteractor]?
+    var router: CalendarPagerViewRouting?
+    private var monthInteractors: [CalendarSingleMonthInteractor]?
     
     init(
         calendarUsecase: CalendarUsecase,

@@ -37,13 +37,13 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubScheduleUsecase = nil
     }
     
-    private func makeViewModel() -> CalendarViewModelImple {
+    private func makeViewModel() -> CalendarSingleMonthViewModelImple {
         let calendarUsecase = PrivateStubCalendarUsecase(
             today: .init(year: 2023, month: 09, day: 10, weekDay: 1)
         )
         self.stubSettingUsecase.prepare()
         
-        let viewModel = CalendarViewModelImple(
+        let viewModel = CalendarSingleMonthViewModelImple(
             calendarUsecase: calendarUsecase,
             calendarSettingUsecase: self.stubSettingUsecase,
             todoUsecase: self.stubTodoUsecase,
@@ -236,7 +236,7 @@ extension CalendarViewModelImpleTests {
         XCTAssertEqual(eventBoundForWednesDay, [nil, .end, nil, .start, nil])
     }
     
-    private func makeViewModelWithStubEvents() -> CalendarViewModelImple {
+    private func makeViewModelWithStubEvents() -> CalendarSingleMonthViewModelImple {
         let todo_w2_sun_wed = TodoEvent(uuid: "todo_w2_sun_wed", name: "some")
             |> \.time .~ .dummyPeriod(from: (09, 10), to: (09, 13))
         let todo_w1_mon = TodoEvent(uuid: "todo_w1_mon", name: "some")

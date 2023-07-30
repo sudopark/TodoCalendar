@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import TestDoubles
 import UnitTestHelpKit
 
@@ -293,7 +294,7 @@ private extension CalendarPagerViewModelImpleTests {
         
         var spyInteractors: [SpyMonthInteractor] = []
         var didInitialMonthsAttached: (() -> Void)?
-        func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarInteractor] {
+        func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarSingleMonthInteractor] {
             let interactors = months.map { SpyMonthInteractor(currentMonth: $0) }
             self.spyInteractors = interactors
             self.didInitialMonthsAttached?()
@@ -301,7 +302,7 @@ private extension CalendarPagerViewModelImpleTests {
         }
     }
     
-    class SpyMonthInteractor: CalendarInteractor, @unchecked Sendable {
+    class SpyMonthInteractor: CalendarSingleMonthInteractor, @unchecked Sendable {
         
         var currentMonth: CalendarMonth
         init(currentMonth: CalendarMonth) {
