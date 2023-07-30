@@ -12,6 +12,8 @@ import Optics
 import Domain
 
 
+// MARK: - CCalendarMonth + alendarPagerViewModel
+
 struct CalendarMonth: Hashable, Comparable {
     
     let year: Int
@@ -39,7 +41,17 @@ struct CalendarMonth: Hashable, Comparable {
     }
 }
 
-final class CalendarPagerViewModelImple: @unchecked Sendable {
+protocol CalendarPagerViewModel: AnyObject, Sendable {
+    
+    func prepare()
+    func focusMoveToPreviousMonth()
+    func focusMoveToNextMonth()
+}
+
+
+// MARK: - CalendarPagerViewModelImple
+
+final class CalendarPagerViewModelImple: CalendarPagerViewModel, @unchecked Sendable {
     
     private let calendarUsecase: CalendarUsecase
     private let calendarSettingUsecase: CalendarSettingUsecase
@@ -152,12 +164,14 @@ extension CalendarPagerViewModelImple {
     
     func focusMoveToPreviousMonth() {
         guard let months = self.subject.monthsInCurrentRange.value else { return }
+        // TODO: reorder months
         let newMonths = months.map { $0.previousMonth() }
         self.subject.monthsInCurrentRange.send(newMonths)
     }
     
     func focusMoveToNextMonth() {
         guard let months = self.subject.monthsInCurrentRange.value else { return }
+        // TODO: reorder months
         let newMonths = months.map { $0.nextMonth() }
         self.subject.monthsInCurrentRange.send(newMonths)
     }
