@@ -12,13 +12,13 @@ import Scenes
 import CommonPresentation
 
 
-final class SingleMonthViewController: UIHostingController<DummyView>, CalendarSingleMonthScene {
+final class SingleMonthViewController: UIHostingController<DummyView>, SingleMonthScene {
     
-    private let viewModel: CalendarSingleMonthViewModel
-    var interactor: CalendarSingleMonthInteractor? {
+    private let viewModel: SingleMonthViewModel
+    var interactor: SingleMonthSceneInteractor? {
         return self.viewModel
     }
-    init(viewModel: CalendarSingleMonthViewModel) {
+    init(viewModel: SingleMonthViewModel) {
         self.viewModel = viewModel
         
         super.init(rootView: DummyView())

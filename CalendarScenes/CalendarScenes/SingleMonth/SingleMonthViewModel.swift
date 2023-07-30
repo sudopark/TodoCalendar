@@ -1,5 +1,5 @@
 //
-//  CalendarSingleMonthViewModel.swift
+//  SingleMonthViewModel.swift
 //  CalendarScenes
 //
 //  Created by sudo.park on 2023/07/05.
@@ -96,9 +96,9 @@ struct EventDetailModel: Equatable {
 }
 
 
-// MARK: - CalendarSingleMonthViewModel
+// MARK: - SingleMonthViewModel
 
-protocol CalendarSingleMonthViewModel: AnyObject, Sendable, CalendarSingleMonthInteractor {
+protocol SingleMonthViewModel: AnyObject, Sendable, SingleMonthSceneInteractor {
     
     func select(_ day: DayCellViewModel)
     
@@ -106,9 +106,9 @@ protocol CalendarSingleMonthViewModel: AnyObject, Sendable, CalendarSingleMonthI
     var currentSelectDayIdentifier: AnyPublisher<String, Never> { get }
 }
 
-// MARK: - CalendarSingleMonthViewModelImple
+// MARK: - SingleMonthViewModelImple
 
-final class CalendarSingleMonthViewModelImple: CalendarSingleMonthViewModel, @unchecked Sendable {
+final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable {
     
     private let calendarUsecase: CalendarUsecase
     private let calendarSettingUsecase: CalendarSettingUsecase
@@ -164,7 +164,7 @@ final class CalendarSingleMonthViewModelImple: CalendarSingleMonthViewModel, @un
 }
 
 
-extension CalendarSingleMonthViewModelImple {
+extension SingleMonthViewModelImple {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth) {
         
@@ -185,7 +185,7 @@ extension CalendarSingleMonthViewModelImple {
     }
 }
 
-extension CalendarSingleMonthViewModelImple {
+extension SingleMonthViewModelImple {
     
     private func updateTodoMap() -> ([TodoEvent]) -> Void {
         return { [weak self] todos in

@@ -1,5 +1,5 @@
 //
-//  CalendarPagerViewController.swift
+//  CalendarViewController.swift
 //  CalendarScenes
 //
 //  Created by sudo.park on 2023/07/28.
@@ -10,10 +10,10 @@ import Domain
 import Scenes
 
 
-final class CalendarPagerViewController: UIPageViewController, CalendarPagerScene {
+final class CalendarViewController: UIPageViewController, CalendarScene {
     
-    private let viewModel: CalendarPagerViewModel
-    init(viewModel: CalendarPagerViewModel) {
+    private let viewModel: CalendarViewModel
+    init(viewModel: CalendarViewModel) {
         self.viewModel = viewModel
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
     }
@@ -42,7 +42,7 @@ final class CalendarPagerViewController: UIPageViewController, CalendarPagerScen
         self.delegate = self
     }
     
-    func addChildMonths(_ singleMonthScenes: [any CalendarSingleMonthScene]) {
+    func addChildMonths(_ singleMonthScenes: [any SingleMonthScene]) {
         guard !singleMonthScenes.isEmpty else { return }
         
         self.monthViewControllers = singleMonthScenes
@@ -52,7 +52,7 @@ final class CalendarPagerViewController: UIPageViewController, CalendarPagerScen
 }
 
 
-extension CalendarPagerViewController: UIPageViewControllerDataSource {
+extension CalendarViewController: UIPageViewControllerDataSource {
     
     func pageViewController(
         _ pageViewController: UIPageViewController,
@@ -86,7 +86,7 @@ extension CalendarPagerViewController: UIPageViewControllerDataSource {
     }
 }
 
-extension CalendarPagerViewController: UIPageViewControllerDelegate {
+extension CalendarViewController: UIPageViewControllerDelegate {
     
     func pageViewController(
         _ pageViewController: UIPageViewController,
@@ -113,7 +113,7 @@ extension CalendarPagerViewController: UIPageViewControllerDelegate {
 }
 
 
-extension CalendarPagerViewController {
+extension CalendarViewController {
     
     private func setupLayouts() {
         
@@ -152,7 +152,7 @@ extension CalendarPagerViewController {
 //private struct CalendarPagerControllerView: UIViewControllerRepresentable {
 //
 //    func makeUIViewController(context: Context) -> some UIViewController {
-//        let viewController = CalendarPagerViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
+//        let viewController = CalendarViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
 //        return viewController
 //    }
 //

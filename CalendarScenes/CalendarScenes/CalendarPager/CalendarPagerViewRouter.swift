@@ -9,19 +9,19 @@ import Foundation
 import Domain
 import Scenes
 
-protocol CalendarPagerViewRouting: Routing, Sendable {
+protocol CalendarViewRouting: Routing, Sendable {
     
-    func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarSingleMonthInteractor]
+    func attachInitialMonths(_ months: [CalendarMonth]) -> [SingleMonthSceneInteractor]
 }
 
 
-typealias NextSceneBuilders = CalendarSingleMonthSceneBuilder
+typealias NextSceneBuilders = SingleMonthSceneBuilder
 
-final class CalendarPagerViewRouterImple: BaseRouterImple<NextSceneBuilders>, CalendarPagerViewRouting, @unchecked Sendable {
+final class CalendarViewRouterImple: BaseRouterImple<NextSceneBuilders>, CalendarViewRouting, @unchecked Sendable {
     
-    private var currentScene: (any CalendarPagerScene)? { self.scene as? (any CalendarPagerScene) }
+    private var currentScene: (any CalendarScene)? { self.scene as? (any CalendarScene) }
     
-    func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarSingleMonthInteractor] {
+    func attachInitialMonths(_ months: [CalendarMonth]) -> [SingleMonthSceneInteractor] {
         guard let current = self.currentScene else { return [] }
         let childScenes = months.map { self.nextScenesBuilder.makeSingleMonthScene($0) }
         current.addChildMonths(childScenes)

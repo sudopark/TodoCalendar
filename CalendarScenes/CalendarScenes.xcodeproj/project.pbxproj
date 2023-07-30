@@ -18,12 +18,12 @@
 		F63F64FA2A2C071C00E24186 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64F92A2C071C00E24186 /* Common3rdParty.framework */; };
 		F63F64FC2A2C072100E24186 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64FB2A2C072100E24186 /* Extensions.framework */; };
 		F6495D192A55317A00A459E3 /* WeekEventStackBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6495D182A55317A00A459E3 /* WeekEventStackBuilder.swift */; };
-		F67907D62A4B3AB9000CF11B /* CalendarPagerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907D52A4B3AB9000CF11B /* CalendarPagerViewModel.swift */; };
-		F67907DE2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907DD2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift */; };
+		F67907D62A4B3AB9000CF11B /* CalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907D52A4B3AB9000CF11B /* CalendarViewModel.swift */; };
+		F67907DE2A4B4748000CF11B /* CalendarViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907DD2A4B4748000CF11B /* CalendarViewModelImpleTests.swift */; };
 		F67907E22A4DD6E3000CF11B /* TestDoubles.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F67907E12A4DD6E3000CF11B /* TestDoubles.framework */; };
 		F67907E42A4DD780000CF11B /* CalendarPagerViewRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907E32A4DD780000CF11B /* CalendarPagerViewRouter.swift */; };
-		F69C9A3E2A5477330099D4B5 /* CalendarSingleMonthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69C9A3D2A5477330099D4B5 /* CalendarSingleMonthViewModel.swift */; };
-		F69C9A412A547A500099D4B5 /* CalendarViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69C9A402A547A500099D4B5 /* CalendarViewModelImpleTests.swift */; };
+		F69C9A3E2A5477330099D4B5 /* SingleMonthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69C9A3D2A5477330099D4B5 /* SingleMonthViewModel.swift */; };
+		F69C9A412A547A500099D4B5 /* SingleMonthViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69C9A402A547A500099D4B5 /* SingleMonthViewModelImpleTests.swift */; };
 		F6B70CEE2A763D4400FFF457 /* CalendarPagerSceneBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70CED2A763D4400FFF457 /* CalendarPagerSceneBuilderImple.swift */; };
 		F6B70D112A7645FA00FFF457 /* Scenes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70D102A7645FA00FFF457 /* Scenes.framework */; };
 		F6B70D1B2A764ABE00FFF457 /* SingleMonthSceneBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D1A2A764ABE00FFF457 /* SingleMonthSceneBuilderImple.swift */; };
@@ -55,12 +55,12 @@
 		F63F64F92A2C071C00E24186 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63F64FB2A2C072100E24186 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6495D182A55317A00A459E3 /* WeekEventStackBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekEventStackBuilder.swift; sourceTree = "<group>"; };
-		F67907D52A4B3AB9000CF11B /* CalendarPagerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPagerViewModel.swift; sourceTree = "<group>"; };
-		F67907DD2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPagerViewModelImpleTests.swift; sourceTree = "<group>"; };
+		F67907D52A4B3AB9000CF11B /* CalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarViewModel.swift; sourceTree = "<group>"; };
+		F67907DD2A4B4748000CF11B /* CalendarViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarViewModelImpleTests.swift; sourceTree = "<group>"; };
 		F67907E12A4DD6E3000CF11B /* TestDoubles.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TestDoubles.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F67907E32A4DD780000CF11B /* CalendarPagerViewRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPagerViewRouter.swift; sourceTree = "<group>"; };
-		F69C9A3D2A5477330099D4B5 /* CalendarSingleMonthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSingleMonthViewModel.swift; sourceTree = "<group>"; };
-		F69C9A402A547A500099D4B5 /* CalendarViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarViewModelImpleTests.swift; sourceTree = "<group>"; };
+		F69C9A3D2A5477330099D4B5 /* SingleMonthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleMonthViewModel.swift; sourceTree = "<group>"; };
+		F69C9A402A547A500099D4B5 /* SingleMonthViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleMonthViewModelImpleTests.swift; sourceTree = "<group>"; };
 		F6B70CED2A763D4400FFF457 /* CalendarPagerSceneBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPagerSceneBuilderImple.swift; sourceTree = "<group>"; };
 		F6B70D102A7645FA00FFF457 /* Scenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Scenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6B70D1A2A764ABE00FFF457 /* SingleMonthSceneBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleMonthSceneBuilderImple.swift; sourceTree = "<group>"; };
@@ -119,7 +119,7 @@
 		F63F64D02A2C06CA00E24186 /* CalendarScenes */ = {
 			isa = PBXGroup;
 			children = (
-				F67907D92A4B4351000CF11B /* CalendarSingleMonth */,
+				F67907D92A4B4351000CF11B /* SingleMonth */,
 				F67907D42A4B3A8E000CF11B /* CalendarPager */,
 				F63F64D12A2C06CA00E24186 /* CalendarScenes.h */,
 			);
@@ -129,8 +129,8 @@
 		F63F64DA2A2C06CA00E24186 /* CalendarScenesTests */ = {
 			isa = PBXGroup;
 			children = (
-				F69C9A3F2A547A3F0099D4B5 /* Calendar */,
-				F67907DC2A4B4736000CF11B /* CalendarPager */,
+				F69C9A3F2A547A3F0099D4B5 /* SingleMonth */,
+				F67907DC2A4B4736000CF11B /* Calendar */,
 				F63F64DB2A2C06CA00E24186 /* CalendarScenesTests.swift */,
 			);
 			path = CalendarScenesTests;
@@ -155,7 +155,7 @@
 		F67907D42A4B3A8E000CF11B /* CalendarPager */ = {
 			isa = PBXGroup;
 			children = (
-				F67907D52A4B3AB9000CF11B /* CalendarPagerViewModel.swift */,
+				F67907D52A4B3AB9000CF11B /* CalendarViewModel.swift */,
 				F67907E32A4DD780000CF11B /* CalendarPagerViewRouter.swift */,
 				F6B89CB52A72BE82004DE88B /* CalendarPagerViewController.swift */,
 				F6B70CED2A763D4400FFF457 /* CalendarPagerSceneBuilderImple.swift */,
@@ -163,32 +163,32 @@
 			path = CalendarPager;
 			sourceTree = "<group>";
 		};
-		F67907D92A4B4351000CF11B /* CalendarSingleMonth */ = {
+		F67907D92A4B4351000CF11B /* SingleMonth */ = {
 			isa = PBXGroup;
 			children = (
-				F69C9A3D2A5477330099D4B5 /* CalendarSingleMonthViewModel.swift */,
+				F69C9A3D2A5477330099D4B5 /* SingleMonthViewModel.swift */,
 				F6495D182A55317A00A459E3 /* WeekEventStackBuilder.swift */,
 				F6B70D1A2A764ABE00FFF457 /* SingleMonthSceneBuilderImple.swift */,
 				F6B70D1C2A764B9600FFF457 /* SinlgeMonthViewController.swift */,
 			);
-			path = CalendarSingleMonth;
+			path = SingleMonth;
 			sourceTree = "<group>";
 		};
-		F67907DC2A4B4736000CF11B /* CalendarPager */ = {
+		F67907DC2A4B4736000CF11B /* Calendar */ = {
 			isa = PBXGroup;
 			children = (
-				F67907DD2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift */,
-			);
-			path = CalendarPager;
-			sourceTree = "<group>";
-		};
-		F69C9A3F2A547A3F0099D4B5 /* Calendar */ = {
-			isa = PBXGroup;
-			children = (
-				F69C9A402A547A500099D4B5 /* CalendarViewModelImpleTests.swift */,
-				F6D413352A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift */,
+				F67907DD2A4B4748000CF11B /* CalendarViewModelImpleTests.swift */,
 			);
 			path = Calendar;
+			sourceTree = "<group>";
+		};
+		F69C9A3F2A547A3F0099D4B5 /* SingleMonth */ = {
+			isa = PBXGroup;
+			children = (
+				F69C9A402A547A500099D4B5 /* SingleMonthViewModelImpleTests.swift */,
+				F6D413352A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift */,
+			);
+			path = SingleMonth;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -301,9 +301,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F69C9A3E2A5477330099D4B5 /* CalendarSingleMonthViewModel.swift in Sources */,
+				F69C9A3E2A5477330099D4B5 /* SingleMonthViewModel.swift in Sources */,
 				F6B70D1D2A764B9600FFF457 /* SinlgeMonthViewController.swift in Sources */,
-				F67907D62A4B3AB9000CF11B /* CalendarPagerViewModel.swift in Sources */,
+				F67907D62A4B3AB9000CF11B /* CalendarViewModel.swift in Sources */,
 				F6B70CEE2A763D4400FFF457 /* CalendarPagerSceneBuilderImple.swift in Sources */,
 				F6B89CB62A72BE82004DE88B /* CalendarPagerViewController.swift in Sources */,
 				F67907E42A4DD780000CF11B /* CalendarPagerViewRouter.swift in Sources */,
@@ -316,10 +316,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F67907DE2A4B4748000CF11B /* CalendarPagerViewModelImpleTests.swift in Sources */,
+				F67907DE2A4B4748000CF11B /* CalendarViewModelImpleTests.swift in Sources */,
 				F63F64DC2A2C06CA00E24186 /* CalendarScenesTests.swift in Sources */,
 				F6D413362A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift in Sources */,
-				F69C9A412A547A500099D4B5 /* CalendarViewModelImpleTests.swift in Sources */,
+				F69C9A412A547A500099D4B5 /* SingleMonthViewModelImpleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,30 +9,30 @@ import Foundation
 import Domain
 
 
-// MARK: - CalendarSingleMonthScene
+// MARK: - SingleMonthScene
 
-public protocol CalendarSingleMonthInteractor: AnyObject {
+public protocol SingleMonthSceneInteractor: AnyObject {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
 }
 
-public protocol CalendarSingleMonthScene: Scene where Interactor == CalendarSingleMonthInteractor {
+public protocol SingleMonthScene: Scene where Interactor == SingleMonthSceneInteractor {
 }
 
-public protocol CalendarSingleMonthSceneBuilder: AnyObject {
+public protocol SingleMonthSceneBuilder: AnyObject {
     
-    func makeSingleMonthScene(_ month: CalendarMonth) -> any CalendarSingleMonthScene
+    func makeSingleMonthScene(_ month: CalendarMonth) -> any SingleMonthScene
 }
 
 
-// MARK: - CalendarPagerScene
+// MARK: - CalendarScene
 
-public protocol CalendarPagerScene: Scene where Interactor == EmptyInteractor {
+public protocol CalendarScene: Scene where Interactor == EmptyInteractor {
     
-    func addChildMonths(_ singleMonthScenes: [any CalendarSingleMonthScene])
+    func addChildMonths(_ singleMonthScenes: [any SingleMonthScene])
 }
 
-public protocol CalendarPagerSceneBuilder {
+public protocol CalendarSceneBuilder {
     
-    func makeCalendarPagerScene() -> any CalendarPagerScene
+    func makeCalendarScene() -> any CalendarScene
 }
