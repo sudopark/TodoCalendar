@@ -1,0 +1,687 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F6B70D9D2A765C8100FFF457 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D9C2A765C8100FFF457 /* AppDelegate.swift */; };
+		F6B70D9F2A765C8100FFF457 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D9E2A765C8100FFF457 /* SceneDelegate.swift */; };
+		F6B70DA62A765C8200FFF457 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F6B70DA52A765C8200FFF457 /* Assets.xcassets */; };
+		F6B70DA92A765C8200FFF457 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F6B70DA72A765C8200FFF457 /* LaunchScreen.storyboard */; };
+		F6B70DB42A765C8200FFF457 /* TodoCalendarAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DB32A765C8200FFF457 /* TodoCalendarAppTests.swift */; };
+		F6B70DBE2A765C8200FFF457 /* TodoCalendarAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DBD2A765C8200FFF457 /* TodoCalendarAppUITests.swift */; };
+		F6B70DC02A765C8200FFF457 /* TodoCalendarAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DBF2A765C8200FFF457 /* TodoCalendarAppUITestsLaunchTests.swift */; };
+		F6B70DD12A765DAE00FFF457 /* ApplicationRootRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DD02A765DAE00FFF457 /* ApplicationRootRouter.swift */; };
+		F6B70DD32A76601300FFF457 /* ApplicationRootViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DD22A76601300FFF457 /* ApplicationRootViewModel.swift */; };
+		F6B70DD52A7662F300FFF457 /* Factories+Usecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DD42A7662F300FFF457 /* Factories+Usecase.swift */; };
+		F6B70DD72A76630D00FFF457 /* Storages+Remote.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DD62A76630D00FFF457 /* Storages+Remote.swift */; };
+		F6B70DDC2A76668F00FFF457 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DDB2A76668F00FFF457 /* Domain.framework */; };
+		F6B70DDD2A76668F00FFF457 /* Domain.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DDB2A76668F00FFF457 /* Domain.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F6B70DE02A76669500FFF457 /* Repository.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DDF2A76669500FFF457 /* Repository.framework */; };
+		F6B70DE12A76669500FFF457 /* Repository.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DDF2A76669500FFF457 /* Repository.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F6B70DE32A7666AA00FFF457 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DE22A7666AA00FFF457 /* Extensions.framework */; };
+		F6B70DE42A7666AA00FFF457 /* Extensions.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DE22A7666AA00FFF457 /* Extensions.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F6B70DE62A7666AF00FFF457 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DE52A7666AF00FFF457 /* Common3rdParty.framework */; };
+		F6B70DE72A7666AF00FFF457 /* Common3rdParty.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DE52A7666AF00FFF457 /* Common3rdParty.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F6B70DE92A7666B700FFF457 /* CommonPresentation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DE82A7666B700FFF457 /* CommonPresentation.framework */; };
+		F6B70DEA2A7666B700FFF457 /* CommonPresentation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DE82A7666B700FFF457 /* CommonPresentation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F6B70DEC2A7666BC00FFF457 /* CalendarScenes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DEB2A7666BC00FFF457 /* CalendarScenes.framework */; };
+		F6B70DED2A7666BC00FFF457 /* CalendarScenes.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DEB2A7666BC00FFF457 /* CalendarScenes.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F6B70DEF2A7666C100FFF457 /* Scenes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DEE2A7666C100FFF457 /* Scenes.framework */; };
+		F6B70DF02A7666C100FFF457 /* Scenes.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DEE2A7666C100FFF457 /* Scenes.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		F6B70DB02A765C8200FFF457 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F6B70D912A765C8100FFF457 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F6B70D982A765C8100FFF457;
+			remoteInfo = TodoCalendarApp;
+		};
+		F6B70DBA2A765C8200FFF457 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F6B70D912A765C8100FFF457 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F6B70D982A765C8100FFF457;
+			remoteInfo = TodoCalendarApp;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F6B70DDE2A76668F00FFF457 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F6B70DEA2A7666B700FFF457 /* CommonPresentation.framework in Embed Frameworks */,
+				F6B70DED2A7666BC00FFF457 /* CalendarScenes.framework in Embed Frameworks */,
+				F6B70DE12A76669500FFF457 /* Repository.framework in Embed Frameworks */,
+				F6B70DDD2A76668F00FFF457 /* Domain.framework in Embed Frameworks */,
+				F6B70DE72A7666AF00FFF457 /* Common3rdParty.framework in Embed Frameworks */,
+				F6B70DF02A7666C100FFF457 /* Scenes.framework in Embed Frameworks */,
+				F6B70DE42A7666AA00FFF457 /* Extensions.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		F6B70D992A765C8100FFF457 /* TodoCalendarApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoCalendarApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70D9C2A765C8100FFF457 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		F6B70D9E2A765C8100FFF457 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		F6B70DA52A765C8200FFF457 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F6B70DA82A765C8200FFF457 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		F6B70DAA2A765C8200FFF457 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F6B70DAF2A765C8200FFF457 /* TodoCalendarAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoCalendarAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DB32A765C8200FFF457 /* TodoCalendarAppTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoCalendarAppTests.swift; sourceTree = "<group>"; };
+		F6B70DB92A765C8200FFF457 /* TodoCalendarAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoCalendarAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DBD2A765C8200FFF457 /* TodoCalendarAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoCalendarAppUITests.swift; sourceTree = "<group>"; };
+		F6B70DBF2A765C8200FFF457 /* TodoCalendarAppUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoCalendarAppUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		F6B70DD02A765DAE00FFF457 /* ApplicationRootRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationRootRouter.swift; sourceTree = "<group>"; };
+		F6B70DD22A76601300FFF457 /* ApplicationRootViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationRootViewModel.swift; sourceTree = "<group>"; };
+		F6B70DD42A7662F300FFF457 /* Factories+Usecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Factories+Usecase.swift"; sourceTree = "<group>"; };
+		F6B70DD62A76630D00FFF457 /* Storages+Remote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Storages+Remote.swift"; sourceTree = "<group>"; };
+		F6B70DDB2A76668F00FFF457 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DDF2A76669500FFF457 /* Repository.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Repository.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DE22A7666AA00FFF457 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DE52A7666AF00FFF457 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DE82A7666B700FFF457 /* CommonPresentation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CommonPresentation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DEB2A7666BC00FFF457 /* CalendarScenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CalendarScenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DEE2A7666C100FFF457 /* Scenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Scenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F6B70D962A765C8100FFF457 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F6B70DE92A7666B700FFF457 /* CommonPresentation.framework in Frameworks */,
+				F6B70DEC2A7666BC00FFF457 /* CalendarScenes.framework in Frameworks */,
+				F6B70DE02A76669500FFF457 /* Repository.framework in Frameworks */,
+				F6B70DDC2A76668F00FFF457 /* Domain.framework in Frameworks */,
+				F6B70DE62A7666AF00FFF457 /* Common3rdParty.framework in Frameworks */,
+				F6B70DEF2A7666C100FFF457 /* Scenes.framework in Frameworks */,
+				F6B70DE32A7666AA00FFF457 /* Extensions.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F6B70DAC2A765C8200FFF457 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F6B70DB62A765C8200FFF457 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F6B70D902A765C8100FFF457 = {
+			isa = PBXGroup;
+			children = (
+				F6B70D9B2A765C8100FFF457 /* TodoCalendarApp */,
+				F6B70DB22A765C8200FFF457 /* TodoCalendarAppTests */,
+				F6B70DBC2A765C8200FFF457 /* TodoCalendarAppUITests */,
+				F6B70D9A2A765C8100FFF457 /* Products */,
+				F6B70DDA2A76668F00FFF457 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		F6B70D9A2A765C8100FFF457 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F6B70D992A765C8100FFF457 /* TodoCalendarApp.app */,
+				F6B70DAF2A765C8200FFF457 /* TodoCalendarAppTests.xctest */,
+				F6B70DB92A765C8200FFF457 /* TodoCalendarAppUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F6B70D9B2A765C8100FFF457 /* TodoCalendarApp */ = {
+			isa = PBXGroup;
+			children = (
+				F6B70DCF2A765DA100FFF457 /* Factories */,
+				F6B70DCE2A765D9D00FFF457 /* Root */,
+				F6B70D9C2A765C8100FFF457 /* AppDelegate.swift */,
+				F6B70D9E2A765C8100FFF457 /* SceneDelegate.swift */,
+				F6B70DA52A765C8200FFF457 /* Assets.xcassets */,
+				F6B70DA72A765C8200FFF457 /* LaunchScreen.storyboard */,
+				F6B70DAA2A765C8200FFF457 /* Info.plist */,
+			);
+			path = TodoCalendarApp;
+			sourceTree = "<group>";
+		};
+		F6B70DB22A765C8200FFF457 /* TodoCalendarAppTests */ = {
+			isa = PBXGroup;
+			children = (
+				F6B70DB32A765C8200FFF457 /* TodoCalendarAppTests.swift */,
+			);
+			path = TodoCalendarAppTests;
+			sourceTree = "<group>";
+		};
+		F6B70DBC2A765C8200FFF457 /* TodoCalendarAppUITests */ = {
+			isa = PBXGroup;
+			children = (
+				F6B70DBD2A765C8200FFF457 /* TodoCalendarAppUITests.swift */,
+				F6B70DBF2A765C8200FFF457 /* TodoCalendarAppUITestsLaunchTests.swift */,
+			);
+			path = TodoCalendarAppUITests;
+			sourceTree = "<group>";
+		};
+		F6B70DCE2A765D9D00FFF457 /* Root */ = {
+			isa = PBXGroup;
+			children = (
+				F6B70DD02A765DAE00FFF457 /* ApplicationRootRouter.swift */,
+				F6B70DD22A76601300FFF457 /* ApplicationRootViewModel.swift */,
+			);
+			path = Root;
+			sourceTree = "<group>";
+		};
+		F6B70DCF2A765DA100FFF457 /* Factories */ = {
+			isa = PBXGroup;
+			children = (
+				F6B70DD62A76630D00FFF457 /* Storages+Remote.swift */,
+				F6B70DD42A7662F300FFF457 /* Factories+Usecase.swift */,
+			);
+			path = Factories;
+			sourceTree = "<group>";
+		};
+		F6B70DDA2A76668F00FFF457 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F6B70DEE2A7666C100FFF457 /* Scenes.framework */,
+				F6B70DEB2A7666BC00FFF457 /* CalendarScenes.framework */,
+				F6B70DE82A7666B700FFF457 /* CommonPresentation.framework */,
+				F6B70DE52A7666AF00FFF457 /* Common3rdParty.framework */,
+				F6B70DE22A7666AA00FFF457 /* Extensions.framework */,
+				F6B70DDF2A76669500FFF457 /* Repository.framework */,
+				F6B70DDB2A76668F00FFF457 /* Domain.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F6B70D982A765C8100FFF457 /* TodoCalendarApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F6B70DC32A765C8200FFF457 /* Build configuration list for PBXNativeTarget "TodoCalendarApp" */;
+			buildPhases = (
+				F6B70D952A765C8100FFF457 /* Sources */,
+				F6B70D962A765C8100FFF457 /* Frameworks */,
+				F6B70D972A765C8100FFF457 /* Resources */,
+				F6B70DDE2A76668F00FFF457 /* Embed Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TodoCalendarApp;
+			productName = TodoCalendarApp;
+			productReference = F6B70D992A765C8100FFF457 /* TodoCalendarApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F6B70DAE2A765C8200FFF457 /* TodoCalendarAppTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F6B70DC62A765C8200FFF457 /* Build configuration list for PBXNativeTarget "TodoCalendarAppTests" */;
+			buildPhases = (
+				F6B70DAB2A765C8200FFF457 /* Sources */,
+				F6B70DAC2A765C8200FFF457 /* Frameworks */,
+				F6B70DAD2A765C8200FFF457 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F6B70DB12A765C8200FFF457 /* PBXTargetDependency */,
+			);
+			name = TodoCalendarAppTests;
+			productName = TodoCalendarAppTests;
+			productReference = F6B70DAF2A765C8200FFF457 /* TodoCalendarAppTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F6B70DB82A765C8200FFF457 /* TodoCalendarAppUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F6B70DC92A765C8200FFF457 /* Build configuration list for PBXNativeTarget "TodoCalendarAppUITests" */;
+			buildPhases = (
+				F6B70DB52A765C8200FFF457 /* Sources */,
+				F6B70DB62A765C8200FFF457 /* Frameworks */,
+				F6B70DB72A765C8200FFF457 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F6B70DBB2A765C8200FFF457 /* PBXTargetDependency */,
+			);
+			name = TodoCalendarAppUITests;
+			productName = TodoCalendarAppUITests;
+			productReference = F6B70DB92A765C8200FFF457 /* TodoCalendarAppUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F6B70D912A765C8100FFF457 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1430;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					F6B70D982A765C8100FFF457 = {
+						CreatedOnToolsVersion = 14.3.1;
+					};
+					F6B70DAE2A765C8200FFF457 = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = F6B70D982A765C8100FFF457;
+					};
+					F6B70DB82A765C8200FFF457 = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = F6B70D982A765C8100FFF457;
+					};
+				};
+			};
+			buildConfigurationList = F6B70D942A765C8100FFF457 /* Build configuration list for PBXProject "TodoCalendarApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F6B70D902A765C8100FFF457;
+			productRefGroup = F6B70D9A2A765C8100FFF457 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F6B70D982A765C8100FFF457 /* TodoCalendarApp */,
+				F6B70DAE2A765C8200FFF457 /* TodoCalendarAppTests */,
+				F6B70DB82A765C8200FFF457 /* TodoCalendarAppUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F6B70D972A765C8100FFF457 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F6B70DA92A765C8200FFF457 /* LaunchScreen.storyboard in Resources */,
+				F6B70DA62A765C8200FFF457 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F6B70DAD2A765C8200FFF457 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F6B70DB72A765C8200FFF457 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F6B70D952A765C8100FFF457 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F6B70DD72A76630D00FFF457 /* Storages+Remote.swift in Sources */,
+				F6B70DD52A7662F300FFF457 /* Factories+Usecase.swift in Sources */,
+				F6B70DD12A765DAE00FFF457 /* ApplicationRootRouter.swift in Sources */,
+				F6B70DD32A76601300FFF457 /* ApplicationRootViewModel.swift in Sources */,
+				F6B70D9D2A765C8100FFF457 /* AppDelegate.swift in Sources */,
+				F6B70D9F2A765C8100FFF457 /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F6B70DAB2A765C8200FFF457 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F6B70DB42A765C8200FFF457 /* TodoCalendarAppTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F6B70DB52A765C8200FFF457 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F6B70DC02A765C8200FFF457 /* TodoCalendarAppUITestsLaunchTests.swift in Sources */,
+				F6B70DBE2A765C8200FFF457 /* TodoCalendarAppUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F6B70DB12A765C8200FFF457 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F6B70D982A765C8100FFF457 /* TodoCalendarApp */;
+			targetProxy = F6B70DB02A765C8200FFF457 /* PBXContainerItemProxy */;
+		};
+		F6B70DBB2A765C8200FFF457 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F6B70D982A765C8100FFF457 /* TodoCalendarApp */;
+			targetProxy = F6B70DBA2A765C8200FFF457 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		F6B70DA72A765C8200FFF457 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F6B70DA82A765C8200FFF457 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		F6B70DC12A765C8200FFF457 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F6B70DC22A765C8200FFF457 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F6B70DC42A765C8200FFF457 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2ABNASUGL6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TodoCalendarApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F6B70DC52A765C8200FFF457 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2ABNASUGL6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TodoCalendarApp/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F6B70DC72A765C8200FFF457 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2ABNASUGL6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TodoCalendarApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TodoCalendarApp";
+			};
+			name = Debug;
+		};
+		F6B70DC82A765C8200FFF457 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2ABNASUGL6;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarAppTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/TodoCalendarApp.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/TodoCalendarApp";
+			};
+			name = Release;
+		};
+		F6B70DCA2A765C8200FFF457 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2ABNASUGL6;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarAppUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = TodoCalendarApp;
+			};
+			name = Debug;
+		};
+		F6B70DCB2A765C8200FFF457 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 2ABNASUGL6;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarAppUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = TodoCalendarApp;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F6B70D942A765C8100FFF457 /* Build configuration list for PBXProject "TodoCalendarApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F6B70DC12A765C8200FFF457 /* Debug */,
+				F6B70DC22A765C8200FFF457 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F6B70DC32A765C8200FFF457 /* Build configuration list for PBXNativeTarget "TodoCalendarApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F6B70DC42A765C8200FFF457 /* Debug */,
+				F6B70DC52A765C8200FFF457 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F6B70DC62A765C8200FFF457 /* Build configuration list for PBXNativeTarget "TodoCalendarAppTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F6B70DC72A765C8200FFF457 /* Debug */,
+				F6B70DC82A765C8200FFF457 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F6B70DC92A765C8200FFF457 /* Build configuration list for PBXNativeTarget "TodoCalendarAppUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F6B70DCA2A765C8200FFF457 /* Debug */,
+				F6B70DCB2A765C8200FFF457 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F6B70D912A765C8100FFF457 /* Project object */;
+}
