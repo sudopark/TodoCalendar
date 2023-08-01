@@ -122,6 +122,11 @@ extension CalendarViewModelImple {
                 self?.prepareInitialMonths(around: today)
             })
             .store(in: &self.cancellables)
+        
+        self.calendarSettingUsecase.prepare()
+        Task { [weak self] in
+            try? await self?.holidayUsecase.prepare()
+        }
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {

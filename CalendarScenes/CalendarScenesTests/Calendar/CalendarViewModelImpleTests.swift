@@ -49,7 +49,6 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     ) -> CalendarViewModelImple {
         
         let calendarUsecase = StubCalendarUsecase(today: today)
-        self.stubSettingUsecase.prepare()
         
         let viewModel = CalendarViewModelImple(
             calendarUsecase: calendarUsecase,
@@ -84,6 +83,20 @@ extension CalendarViewModelImpleTests {
             .init(year: 2023, month: 2),
             .init(year: 2023, month: 3)
         ])
+    }
+    
+    func testViewModel_whenPrepare_prepareHoliday() {
+        // given
+        let expect = expectation(description: "prepare시에 holiday도 준비 -> 현재 국가정보 반환됨")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let currentCountry = self.waitFirstOutput(expect, for: self.spyHolidayUsecase.currentSelectedCountry.removeDuplicates(by: { $0.code == $1.code })) {
+            viewModel.prepare()
+        }
+        
+        // then
+        XCTAssertEqual(currentCountry?.code, "KST")
     }
     
     private func makeViewModelWithInitialSetup(_ today: CalendarComponent.Day) -> CalendarViewModelImple {
