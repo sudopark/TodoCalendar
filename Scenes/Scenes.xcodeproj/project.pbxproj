@@ -13,6 +13,7 @@
 		F6B70D0D2A7643CB00FFF457 /* BaseComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D0C2A7643CB00FFF457 /* BaseComponents.swift */; };
 		F6B70D0F2A7645B400FFF457 /* Scenes+Calendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D0E2A7645B400FFF457 /* Scenes+Calendar.swift */; };
 		F6B70D172A7648CE00FFF457 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70D162A7648CE00FFF457 /* Domain.framework */; };
+		F6B70DF32A79449E00FFF457 /* Factories.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DF22A79449E00FFF457 /* Factories.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		F6B70D0C2A7643CB00FFF457 /* BaseComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseComponents.swift; sourceTree = "<group>"; };
 		F6B70D0E2A7645B400FFF457 /* Scenes+Calendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Scenes+Calendar.swift"; sourceTree = "<group>"; };
 		F6B70D162A7648CE00FFF457 /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DF22A79449E00FFF457 /* Factories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Factories.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +62,7 @@
 			isa = PBXGroup;
 			children = (
 				F6B70CFC2A76438600FFF457 /* Scenes.h */,
+				F6B70DF22A79449E00FFF457 /* Factories.swift */,
 				F6B70D0C2A7643CB00FFF457 /* BaseComponents.swift */,
 				F6B70D0E2A7645B400FFF457 /* Scenes+Calendar.swift */,
 			);
@@ -156,6 +159,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6B70DF32A79449E00FFF457 /* Factories.swift in Sources */,
 				F6B70D0F2A7645B400FFF457 /* Scenes+Calendar.swift in Sources */,
 				F6B70D0D2A7643CB00FFF457 /* BaseComponents.swift in Sources */,
 			);

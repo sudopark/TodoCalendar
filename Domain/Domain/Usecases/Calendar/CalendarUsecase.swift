@@ -22,7 +22,7 @@ public protocol CalendarUsecase {
 }
 
 
-final class CalendarUsecaseImple: CalendarUsecase {
+public final class CalendarUsecaseImple: CalendarUsecase {
     
     private let calendarSettingUsecase: CalendarSettingUsecase
     private let holidayUsecase: HolidayUsecase

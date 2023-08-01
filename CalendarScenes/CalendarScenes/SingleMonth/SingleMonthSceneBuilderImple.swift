@@ -12,21 +12,12 @@ import Scenes
 
 public final class SingleMonthSceneBuilderImple {
     
-    private let calendarUsecase: CalendarUsecase
-    private let calendarSettingUsecase: CalendarSettingUsecase
-    private let todoUsecase: TodoEventUsecase
-    private let scheduleEventUsecase: ScheduleEventUsecase
+    private let usecaseFactory: UsecaseFactory
     
     public init(
-        calendarUsecase: CalendarUsecase,
-        calendarSettingUsecase: CalendarSettingUsecase,
-        todoUsecase: TodoEventUsecase,
-        scheduleEventUsecase: ScheduleEventUsecase
+        usecaseFactory: UsecaseFactory
     ) {
-        self.calendarUsecase = calendarUsecase
-        self.calendarSettingUsecase = calendarSettingUsecase
-        self.todoUsecase = todoUsecase
-        self.scheduleEventUsecase = scheduleEventUsecase
+        self.usecaseFactory = usecaseFactory
     }
 }
 
@@ -36,10 +27,10 @@ extension SingleMonthSceneBuilderImple: SingleMonthSceneBuilder {
     public func makeSingleMonthScene(_ month: CalendarMonth) -> any SingleMonthScene {
         
         let viewModel = SingleMonthViewModelImple(
-            calendarUsecase: self.calendarUsecase,
-            calendarSettingUsecase: self.calendarSettingUsecase,
-            todoUsecase: self.todoUsecase,
-            scheduleEventUsecase: self.scheduleEventUsecase
+            calendarUsecase: self.usecaseFactory.makeCalendarUsecase(),
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
+            todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
+            scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase()
         )
         // TODO: setup router
         let viewController = SingleMonthViewController(viewModel: viewModel)
