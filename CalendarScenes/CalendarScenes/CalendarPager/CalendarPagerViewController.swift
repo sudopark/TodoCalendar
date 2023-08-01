@@ -95,20 +95,15 @@ extension CalendarViewController: UIPageViewControllerDelegate {
         transitionCompleted completed: Bool
     ) {
         guard completed,
+              let totalViewControllers = self.monthViewControllers,
+              !totalViewControllers.isEmpty,
               let previousFirstViewController = previousViewControllers.first,
-              let currentLastViewController = pageViewController.viewControllers?.last
+              let currentViewController = pageViewController.viewControllers?.first,
+              let previousIndex = totalViewControllers.firstIndex(of: previousFirstViewController),
+              let currentIndex = totalViewControllers.firstIndex(of: currentViewController)
         else { return }
-
-        let isMoveToRight = previousFirstViewController == currentLastViewController
-        if isMoveToRight {
-            // TODO: update is move to right
-            print("is move to right")
-            self.viewModel.focusMoveToNextMonth()
-        } else {
-            // TODO: update is move to left
-            print("is move to left")
-            self.viewModel.focusMoveToPreviousMonth()
-        }
+        
+        self.viewModel.focusChanged(from: previousIndex, to: currentIndex)
     }
 }
 
@@ -123,45 +118,3 @@ extension CalendarViewController {
         
     }
 }
-//
-//private class DummyViewController: UIViewController {
-//
-//    private let label = UILabel()
-//    private var int: Int?
-//    func setInt(_ int: Int) {
-//        self.int = int
-//        self.label.text = "\(int)"
-//    }
-//
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//            self.view.addSubview(label)
-//            label.translatesAutoresizingMaskIntoConstraints = false
-//            NSLayoutConstraint.activate([
-//                label.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
-//                label.centerYAnchor.constraint(equalTo: self.view.centerYAnchor)
-//            ])
-//            label.textAlignment = .center
-//
-//    }
-//}
-//
-//
-//import SwiftUI
-//
-//private struct CalendarPagerControllerView: UIViewControllerRepresentable {
-//
-//    func makeUIViewController(context: Context) -> some UIViewController {
-//        let viewController = CalendarViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
-//        return viewController
-//    }
-//
-//    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {}
-//}
-//
-//struct PagerPreview: PreviewProvider {
-//
-//    static var previews: some View {
-//        return CalendarPagerControllerView()
-//    }
-//}

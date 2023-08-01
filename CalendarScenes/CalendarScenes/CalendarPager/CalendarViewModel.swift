@@ -17,8 +17,7 @@ import Scenes
 protocol CalendarViewModel: AnyObject, Sendable {
     
     func prepare()
-    func focusMoveToPreviousMonth()
-    func focusMoveToNextMonth()
+    func focusChanged(from previousIndex: Int, to nextIndex: Int)
 }
 
 
@@ -67,8 +66,13 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             })
             .store(in: &self.cancellables)
         
-        let totalViewingYears = self.subject.monthsInCurrentRange
-            .compactMap { $0?.years() }
+        let monthsWithSort = self.subject.monthsInCurrentRange
+            .compactMap { $0 }
+            .map { $0.sorted() }
+            .share()
+        
+        let totalViewingYears = monthsWithSort
+            .map { $0.years() }
             .scan(TotalYears()) { acc, years in acc.append(years) }
         totalViewingYears
             .map { $0.newOne }
@@ -81,7 +85,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         // Timezone 변경시에 조회중인 달력은 안바뀜 하지만 조회 가능한 범위는 달라짐
         // ex) 동일날짜의 시간이라도 kst는 utc보다 9시간 빠름
         let totalViewingMonths = Publishers.CombineLatest(
-                self.subject.monthsInCurrentRange.compactMap { $0 },
+                monthsWithSort,
                 self.calendarSettingUsecase.currentTimeZone
             )
             .scan(TotalMonthRanges()) { acc, pair in acc.append(pair.0, in: pair.1) }
@@ -140,18 +144,29 @@ extension CalendarViewModelImple {
         self.subject.monthsInCurrentRange.send(months)
     }
     
-    func focusMoveToPreviousMonth() {
-        guard let months = self.subject.monthsInCurrentRange.value else { return }
-        // TODO: reorder months
-        let newMonths = months.map { $0.previousMonth() }
+    func focusChanged(from previousIndex: Int, to currentIndex: Int) {
+        guard let months = self.subject.monthsInCurrentRange.value, !months.isEmpty
+        else { return }
+        let lastIndex = months.count - 1
+        
+        let isMoveToNext = previousIndex + 1 == currentIndex
+            || (currentIndex == 0 && previousIndex == lastIndex)
+        
+        func updateAfterFocusMoveToNext() -> [CalendarMonth] {
+            let hasNext = currentIndex + 1 <= lastIndex
+            let targetIndex = hasNext ? currentIndex + 1 : 0
+            return months |> ix(targetIndex) .~ months[currentIndex].nextMonth()
+        }
+        
+        func updateAfterFocusMoveToPrevious() -> [CalendarMonth] {
+            let hasPrevious = currentIndex - 1 >= 0
+            let targetIndex = hasPrevious ? currentIndex - 1 : lastIndex
+            return months |> ix(targetIndex) .~ months[currentIndex].previousMonth()
+        }
+        
+        let newMonths = isMoveToNext ? updateAfterFocusMoveToNext() : updateAfterFocusMoveToPrevious()
         self.subject.monthsInCurrentRange.send(newMonths)
-    }
-    
-    func focusMoveToNextMonth() {
-        guard let months = self.subject.monthsInCurrentRange.value else { return }
-        // TODO: reorder months
-        let newMonths = months.map { $0.nextMonth() }
-        self.subject.monthsInCurrentRange.send(newMonths)
+        
     }
 }
 

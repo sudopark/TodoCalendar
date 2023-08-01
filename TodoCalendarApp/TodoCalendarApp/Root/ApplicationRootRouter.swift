@@ -34,6 +34,7 @@ extension ApplicationRootRouter {
     
     func setupInitialScene() {
         
+        guard !AppEnvironment.isTestBuild else { return }
         Task { @MainActor in
             let builder = CalendarSceneBuilderImple(usecaseFactory: self.nonLoginUsecaseFactory)
             let calendarScene = builder.makeCalendarScene()
