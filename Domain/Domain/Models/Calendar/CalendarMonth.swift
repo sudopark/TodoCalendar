@@ -19,7 +19,7 @@ public struct CalendarMonth: Hashable, Comparable {
     }
     
     public static func < (lhs: CalendarMonth, rhs: CalendarMonth) -> Bool {
-        return lhs.year < rhs.year && lhs.month < rhs.month
+        return lhs.year * 100 + lhs.month < rhs.year * 100 + rhs.month
     }
     
     public func nextMonth() -> CalendarMonth {

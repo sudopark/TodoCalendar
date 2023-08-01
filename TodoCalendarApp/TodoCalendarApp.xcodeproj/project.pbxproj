@@ -32,6 +32,7 @@
 		F6B70DED2A7666BC00FFF457 /* CalendarScenes.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DEB2A7666BC00FFF457 /* CalendarScenes.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F6B70DEF2A7666C100FFF457 /* Scenes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DEE2A7666C100FFF457 /* Scenes.framework */; };
 		F6B70DF02A7666C100FFF457 /* Scenes.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DEE2A7666C100FFF457 /* Scenes.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F6B70DF52A79611500FFF457 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DF42A79611500FFF457 /* AppEnvironment.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +95,7 @@
 		F6B70DE82A7666B700FFF457 /* CommonPresentation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CommonPresentation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6B70DEB2A7666BC00FFF457 /* CalendarScenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CalendarScenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6B70DEE2A7666C100FFF457 /* Scenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Scenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6B70DF42A79611500FFF457 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +154,7 @@
 		F6B70D9B2A765C8100FFF457 /* TodoCalendarApp */ = {
 			isa = PBXGroup;
 			children = (
+				F6B70DF42A79611500FFF457 /* AppEnvironment.swift */,
 				F6B70DCF2A765DA100FFF457 /* Factories */,
 				F6B70DCE2A765D9D00FFF457 /* Root */,
 				F6B70D9C2A765C8100FFF457 /* AppDelegate.swift */,
@@ -343,6 +346,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6B70DF52A79611500FFF457 /* AppEnvironment.swift in Sources */,
 				F6B70DD72A76630D00FFF457 /* Storages+Remote.swift in Sources */,
 				F6B70DD52A7662F300FFF457 /* Factories+Usecase.swift in Sources */,
 				F6B70DD12A765DAE00FFF457 /* ApplicationRootRouter.swift in Sources */,

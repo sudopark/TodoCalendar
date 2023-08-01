@@ -113,42 +113,60 @@ extension CalendarViewModelImpleTests {
         return viewModel
     }
     
-    // focus 과거날짜로 이동시 -> month 구성 -1하고 전파
-    func testViewModel_whenFocusChangedToPast_updateMonths() {
-        // given
-        let viewModel = self.makeViewModelWithInitialSetup(
-            .init(year: 2023, month: 02, day: 02, weekDay: 5)
-        )
-        
-        // when
-        viewModel.focusMoveToPreviousMonth()
-        
-        // then
-        let months = self.spyRouter.spyInteractors.map { $0.currentMonth }
-        XCTAssertEqual(months, [
-            .init(year: 2022, month: 12),
-            .init(year: 2023, month: 01),
-            .init(year: 2023, month: 02)
-        ])
-    }
     
-    // focus 미래 날짜로 이동시 -> month 구성 +1하고 전파
-    func testViewModel_whenFocusChangedToFuture_updateMonths() {
+    func testViewModel_whenUpdateFocus_updateMonths() {
         // given
         let viewModel = self.makeViewModelWithInitialSetup(
-            .init(year: 2023, month: 11, day: 23, weekDay: 5)
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
         )
+        func parameterizeTest(expect months: [CalendarMonth], _ action: () -> Void) {
+            action()
+            
+            let currentMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+            XCTAssertEqual(currentMonths, months)
+        }
         
-        // when
-        viewModel.focusMoveToNextMonth()
+        // move next
+        parameterizeTest(expect: [
+            .init(year: 2023, month: 10), .init(year: 2023, month: 08), .init(year: 2023, month: 09)
+        ]) { viewModel.focusChanged(from: 1, to: 2) }
         
-        // then
-        let months = self.spyRouter.spyInteractors.map { $0.currentMonth }
-        XCTAssertEqual(months, [
-            .init(year: 2023, month: 11),
-            .init(year: 2023, month: 12),
-            .init(year: 2024, month: 01)
-        ])
+        parameterizeTest(expect: [
+            .init(year: 2023, month: 10), .init(year: 2023, month: 11), .init(year: 2023, month: 09)
+        ]) { viewModel.focusChanged(from: 2, to: 0) }
+        
+        parameterizeTest(expect: [
+            .init(year: 2023, month: 10), .init(year: 2023, month: 11), .init(year: 2023, month: 12)
+        ]) { viewModel.focusChanged(from: 0, to: 1) }
+        
+        parameterizeTest(expect: [
+            .init(year: 2024, month: 01), .init(year: 2023, month: 11), .init(year: 2023, month: 12)
+        ]) { viewModel.focusChanged(from: 1, to: 2) }
+        
+        parameterizeTest(expect: [
+            .init(year: 2024, month: 01), .init(year: 2024, month: 02), .init(year: 2023, month: 12)
+        ]) { viewModel.focusChanged(from: 2, to: 0) }
+        
+        // move previous
+        parameterizeTest(expect: [
+            .init(year: 2024, month: 01), .init(year: 2023, month: 11), .init(year: 2023, month: 12)
+        ]) { viewModel.focusChanged(from: 0, to: 2) }
+        
+        parameterizeTest(expect: [
+            .init(year: 2023, month: 10), .init(year: 2023, month: 11), .init(year: 2023, month: 12)
+        ]) { viewModel.focusChanged(from: 2, to: 1) }
+        
+        parameterizeTest(expect: [
+            .init(year: 2023, month: 10), .init(year: 2023, month: 11), .init(year: 2023, month: 09)
+        ]) { viewModel.focusChanged(from: 1, to: 0) }
+        
+        parameterizeTest(expect: [
+            .init(year: 2023, month: 10), .init(year: 2023, month: 08), .init(year: 2023, month: 09)
+        ]) { viewModel.focusChanged(from: 0, to: 2) }
+        
+        parameterizeTest(expect: [
+            .init(year: 2023, month: 07), .init(year: 2023, month: 08), .init(year: 2023, month: 09)
+        ]) { viewModel.focusChanged(from: 2, to: 1) }
     }
 }
 
@@ -167,13 +185,17 @@ extension CalendarViewModelImpleTests {
         // when
         let holidaysPerYears = self.waitOutputs(expect, for: self.spyHolidayUsecase.holidays()) {
             // 2021년까지 준비되도록 스크롤
+            var startIndex = 1
             (0..<13).forEach { _ in
-                viewModel.focusMoveToPreviousMonth()
+                let nextIndex = startIndex-1 < 0 ? 2 : startIndex - 1
+                viewModel.focusChanged(from: startIndex, to: nextIndex)
+                startIndex = nextIndex
             }
         }
         
         // then
         let currentViewingMonths = self.spyRouter.spyInteractors.map { $0.currentMonth }
+            .sorted()
         XCTAssertEqual(currentViewingMonths, [
             .init(year: 2021, month: 12),
             .init(year: 2022, month: 1),
@@ -213,16 +235,16 @@ extension CalendarViewModelImpleTests {
             // 전체 범위 => 9~11월
             
             // 전체 범위 => 8~11월, 신규 8~9
-            viewModel.focusMoveToPreviousMonth()
+            viewModel.focusChanged(from: 1, to: 0)
             
             // 전체범위 변동 없음 => 8~11
-            viewModel.focusMoveToNextMonth()
+            viewModel.focusChanged(from: 0, to: 1)
             
             // 전체 범위 => 8~12월, 신규 11~12
-            viewModel.focusMoveToNextMonth()
+            viewModel.focusChanged(from: 1, to: 2)
             
             // 전체 범위 => 8~다음년도1월, 신규 12~1
-            viewModel.focusMoveToNextMonth()
+            viewModel.focusChanged(from: 2, to: 0)
         }
         
         // then
@@ -250,16 +272,16 @@ extension CalendarViewModelImpleTests {
             // 전체 범위 => 9~11월
             
             // 전체 범위 => 8~11월, 신규 8~9
-            viewModel.focusMoveToPreviousMonth()
+            viewModel.focusChanged(from: 1, to: 0)
             
             // 전체범위 변동 없음 => 8~11
-            viewModel.focusMoveToNextMonth()
+            viewModel.focusChanged(from: 0, to: 1)
             
             // 전체 범위 => 8~12월, 신규 11~12
-            viewModel.focusMoveToNextMonth()
+            viewModel.focusChanged(from: 1, to: 2)
             
             // 전체 범위 => 8~다음년도1월, 신규 12~1
-            viewModel.focusMoveToNextMonth()
+            viewModel.focusChanged(from: 2, to: 0)
         }
         
         // then
