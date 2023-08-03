@@ -104,7 +104,8 @@ protocol SingleMonthViewModel: AnyObject, Sendable, SingleMonthSceneInteractor {
     
     var weekDaysSymbols: AnyPublisher<[String], Never> { get }
     var weekModels: AnyPublisher<[WeekRowModel], Never> { get }
-    var currentSelectDayIdentifier: AnyPublisher<String, Never> { get }
+    var currentSelectDayIdentifier: AnyPublisher<String?, Never> { get }
+    var todayIdentifier: AnyPublisher<String, Never> { get }
 }
 
 // MARK: - SingleMonthViewModelImple
@@ -262,26 +263,33 @@ extension SingleMonthViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var currentSelectDayIdentifier: AnyPublisher<String, Never> {
-        let transform: (DayCellViewModel?, CalendarComponent.Day, CalendarComponent) -> String
+    var currentSelectDayIdentifier: AnyPublisher<String?, Never> {
+        let transform: (DayCellViewModel?, CalendarComponent.Day, CalendarComponent) -> String?
         transform = { selected, today, thisMonth in
             switch (selected, today, thisMonth) {
             case (.some(let day), _, let m) where day.month == m.month && day.year == m.year:
                 return day.identifier
             case (_, let t, let m) where t.month != m.month:
                 return "\(m.year)-\(m.month)-1"
-            case (_, let t, _):
-                return "\(t.year)-\(t.month)-\(t.day)"
+            default:
+                return nil
             }
         }
         return Publishers.CombineLatest3(
             self.subject.userSelectedDay,
-            self.calendarUsecase.currentDay,
+            self.calendarUsecase.currentDay.removeDuplicates(),
             self.subject.currentMonthComponent.compactMap { $0 }
         )
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+    
+    var todayIdentifier: AnyPublisher<String, Never> {
+        return self.calendarUsecase.currentDay
+            .map { "\($0.year)-\($0.month)-\($0.day)" }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
 
