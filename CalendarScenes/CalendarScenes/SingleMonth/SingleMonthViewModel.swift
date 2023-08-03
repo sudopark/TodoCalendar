@@ -102,6 +102,7 @@ protocol SingleMonthViewModel: AnyObject, Sendable, SingleMonthSceneInteractor {
     
     func select(_ day: DayCellViewModel)
     
+    var weekDaysSymbols: AnyPublisher<[String], Never> { get }
     var weekModels: AnyPublisher<[WeekRowModel], Never> { get }
     var currentSelectDayIdentifier: AnyPublisher<String, Never> { get }
 }
@@ -138,10 +139,8 @@ final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable
     private struct Subject: @unchecked Sendable {
         let currentMonthComponent = CurrentValueSubject<CalendarComponent?, Never>(nil)
         let currentMonthInfo = CurrentValueSubject<CurrentMonthInfo?, Never>(nil)
-        // TODO: 추후에 identifier만 들고있는 걸로 수정 필요
         let todoEventsMap = CurrentValueSubject<[String: TodoEvent], Never>([:])
         let scheduleEventsMap = CurrentValueSubject<[String: ScheduleEvent], Never>([:])
-        
         let userSelectedDay = CurrentValueSubject<DayCellViewModel?, Never>(nil)
     }
     private let subject = Subject()
@@ -216,6 +215,19 @@ extension SingleMonthViewModelImple {
         return Publishers.CombineLatest(todos,schedules)
             .map(transform)
             .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var weekDaysSymbols: AnyPublisher<[String], Never> {
+        let symbols = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+        let transform: (DayOfWeeks) -> [String] = { dayOfWeek in
+            let startIndex = dayOfWeek.rawValue-1
+            return (startIndex..<startIndex+7).map { index in
+                return symbols[index % 7]
+            }
+        }
+        return self.calendarSettingUsecase.firstWeekDay
+            .map(transform)
             .eraseToAnyPublisher()
     }
     
