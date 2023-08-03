@@ -12,7 +12,7 @@ import Scenes
 import CommonPresentation
 
 
-final class SingleMonthViewController: UIHostingController<DummyView>, SingleMonthScene {
+final class SingleMonthViewController: UIHostingController<SingleMonthView>, SingleMonthScene {
     
     private let viewModel: SingleMonthViewModel
     var interactor: SingleMonthSceneInteractor? {
@@ -21,18 +21,11 @@ final class SingleMonthViewController: UIHostingController<DummyView>, SingleMon
     init(viewModel: SingleMonthViewModel) {
         self.viewModel = viewModel
         
-        super.init(rootView: DummyView())
+        let monthView = SingleMonthView(viewModel)
+        super.init(rootView: monthView)
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-}
-
-
-struct DummyView: View {
-        
-    var body: some View {
-        Text("hello world")
     }
 }
