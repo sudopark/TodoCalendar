@@ -55,6 +55,13 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
     
+    private var monthsWithSort: AnyPublisher<[CalendarMonth], Never> {
+        return self.subject.monthsInCurrentRange
+            .compactMap { $0 }
+            .map { $0.sorted() }
+            .eraseToAnyPublisher()
+    }
+    
     private func internalBind() {
         
         self.subject.monthsInCurrentRange
@@ -66,26 +73,10 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             })
             .store(in: &self.cancellables)
         
-        let monthsWithSort = self.subject.monthsInCurrentRange
-            .compactMap { $0 }
-            .map { $0.sorted() }
-            .share()
-        
-        let totalViewingYears = monthsWithSort
-            .map { $0.years() }
-            .scan(TotalYears()) { acc, years in acc.append(years) }
-        totalViewingYears
-            .map { $0.newOne }
-            .removeDuplicates()
-            .sink(receiveValue: { [weak self] newYears in
-                self?.refreshHolidays(for: newYears)
-            })
-            .store(in: &self.cancellables)
-        
         // Timezone 변경시에 조회중인 달력은 안바뀜 하지만 조회 가능한 범위는 달라짐
         // ex) 동일날짜의 시간이라도 kst는 utc보다 9시간 빠름
         let totalViewingMonths = Publishers.CombineLatest(
-                monthsWithSort,
+                self.monthsWithSort,
                 self.calendarSettingUsecase.currentTimeZone
             )
             .scan(TotalMonthRanges()) { acc, pair in acc.append(pair.0, in: pair.1) }
@@ -94,6 +85,19 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .removeDuplicates()
             .sink(receiveValue: { [weak self] ranges in
                 self?.refreshEvents(ranges)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindRefreshHoliday() {
+        let totalViewingYears = self.monthsWithSort
+            .map { $0.years() }
+            .scan(TotalYears()) { acc, years in acc.append(years) }
+        totalViewingYears
+            .map { $0.newOne }
+            .removeDuplicates()
+            .sink(receiveValue: { [weak self] newYears in
+                self?.refreshHolidays(for: newYears)
             })
             .store(in: &self.cancellables)
     }
@@ -130,6 +134,7 @@ extension CalendarViewModelImple {
         self.calendarSettingUsecase.prepare()
         Task { [weak self] in
             try? await self?.holidayUsecase.prepare()
+            self?.bindRefreshHoliday()
         }
     }
     
