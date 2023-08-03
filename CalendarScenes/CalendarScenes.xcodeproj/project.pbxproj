@@ -30,6 +30,7 @@
 		F6B70D1D2A764B9600FFF457 /* SinlgeMonthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D1C2A764B9600FFF457 /* SinlgeMonthViewController.swift */; };
 		F6B89CB62A72BE82004DE88B /* CalendarPagerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B89CB52A72BE82004DE88B /* CalendarPagerViewController.swift */; };
 		F6D413362A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D413352A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift */; };
+		F6E1D65E2A7BF4770072CE20 /* SingleMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E1D65D2A7BF4770072CE20 /* SingleMonthView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,6 +68,7 @@
 		F6B70D1C2A764B9600FFF457 /* SinlgeMonthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SinlgeMonthViewController.swift; sourceTree = "<group>"; };
 		F6B89CB52A72BE82004DE88B /* CalendarPagerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPagerViewController.swift; sourceTree = "<group>"; };
 		F6D413352A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekEventStackBuilderTests.swift; sourceTree = "<group>"; };
+		F6E1D65D2A7BF4770072CE20 /* SingleMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleMonthView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +172,7 @@
 				F6495D182A55317A00A459E3 /* WeekEventStackBuilder.swift */,
 				F6B70D1A2A764ABE00FFF457 /* SingleMonthSceneBuilderImple.swift */,
 				F6B70D1C2A764B9600FFF457 /* SinlgeMonthViewController.swift */,
+				F6E1D65D2A7BF4770072CE20 /* SingleMonthView.swift */,
 			);
 			path = SingleMonth;
 			sourceTree = "<group>";
@@ -307,6 +310,7 @@
 				F6B70CEE2A763D4400FFF457 /* CalendarPagerSceneBuilderImple.swift in Sources */,
 				F6B89CB62A72BE82004DE88B /* CalendarPagerViewController.swift in Sources */,
 				F67907E42A4DD780000CF11B /* CalendarPagerViewRouter.swift in Sources */,
+				F6E1D65E2A7BF4770072CE20 /* SingleMonthView.swift in Sources */,
 				F6495D192A55317A00A459E3 /* WeekEventStackBuilder.swift in Sources */,
 				F6B70D1B2A764ABE00FFF457 /* SingleMonthSceneBuilderImple.swift in Sources */,
 			);
