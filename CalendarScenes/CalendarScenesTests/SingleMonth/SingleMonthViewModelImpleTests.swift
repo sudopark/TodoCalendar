@@ -369,6 +369,33 @@ extension SingleMonthViewModelImpleTests {
         ])
     }
     
+    func testViewModel_whenFirstWeekDayChanges_updateWeekDaysSymbol() {
+        // given
+        let expect = expectation(description: "주 시작일 변경시에 요일 심볼리스트도 변경")
+        expect.expectedFulfillmentCount = 8
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let weekDayLists = self.waitOutputs(expect, for: viewModel.weekDaysSymbols) {
+            let days: [DayOfWeeks] = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
+            days.forEach {
+                self.stubSettingUsecase.updateFirstWeekDay($0)
+            }
+        }
+        
+        // then
+        XCTAssertEqual(weekDayLists, [
+            ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
+            ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
+            ["TUE", "WED", "THU", "FRI", "SAT", "SUN", "MON"],
+            ["WED", "THU", "FRI", "SAT", "SUN", "MON", "TUE"],
+            ["THU", "FRI", "SAT", "SUN", "MON", "TUE", "WED"],
+            ["FRI", "SAT", "SUN", "MON", "TUE", "WED", "THU"],
+            ["SAT", "SUN", "MON", "TUE", "WED", "THU", "FRI"],
+            ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+        ])
+    }
+    
     // 이벤트 정보와 함께 달력 정보 제공 + 이때 해당되는 일정의 todo만, 해당 월에서 반복시간이 없는 스케쥴이나, 반복시간이 해당 월에 매칭되는 경우만 반환
     func testViewModel_provideWeekModelsWithEvent() {
         // given
