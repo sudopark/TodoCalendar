@@ -8,13 +8,18 @@
 import UIKit
 import Domain
 import Scenes
-
+import CommonPresentation
 
 final class CalendarViewController: UIPageViewController, CalendarScene {
     
     private let viewModel: CalendarViewModel
-    init(viewModel: CalendarViewModel) {
+    private let viewAppearance: ViewAppearance
+    init(
+        viewModel: CalendarViewModel,
+        viewAppearance: ViewAppearance
+    ) {
         self.viewModel = viewModel
+        self.viewAppearance = viewAppearance
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal)
     }
     

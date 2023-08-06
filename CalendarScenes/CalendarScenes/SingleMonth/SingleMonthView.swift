@@ -17,6 +17,21 @@ extension DayCellViewModel: Identifiable {
     var id: String { self.identifier }
 }
 
+struct SingleMonthContainerView: View {
+    
+    private let viewModel: SingleMonthViewModel
+    private let viewAppearance: ViewAppearance
+    
+    init(viewModel: SingleMonthViewModel, viewAppearance: ViewAppearance) {
+        self.viewModel = viewModel
+        self.viewAppearance = viewAppearance
+    }
+    
+    var body: some View {
+        return SingleMonthView(viewModel)
+            .environmentObject(viewAppearance)
+    }
+}
 
 struct SingleMonthView: View {
     
@@ -24,6 +39,8 @@ struct SingleMonthView: View {
     @State private var days: [DayCellViewModel] = []
     @State private var selectedDay: String?
     @State private var today: String?
+    
+    @EnvironmentObject private var appearance: ViewAppearance
     
     private let viewModel: SingleMonthViewModel
     init(_ viewModel: SingleMonthViewModel) {
@@ -47,7 +64,10 @@ struct SingleMonthView: View {
     private var headerView: some View {
         return HStack {
             ForEach(self.weekdaySymbols, id: \.self) { weekDay in
+                // TODO: 주말이면 텍스트 색 변경
                 Text(weekDay)
+                    .font(self.appearance.fontSet.weekday.asFont)
+                    .foregroundColor(self.appearance.colorSet.weekDayText.asColor)
                     .frame(maxWidth: .infinity)
             }
         }
@@ -65,12 +85,25 @@ struct SingleMonthView: View {
     }
     
     private func dayView(_ day: DayCellViewModel) -> some View {
-        let textColor: Color = day.identifier == self.selectedDay ? .white : .black
-        let backgroundColor: Color = day.identifier == self.selectedDay ? .black
-            : day.identifier == self.today ? .gray
-            : .clear
+        // TODO: 주말이면 텍스트 컬러 변경
+        // TODO: 이번달 아니면 텍스트 색 변경
+        let textColor: Color = {
+            return day.identifier == selectedDay
+            ? self.appearance.colorSet.selectedDayText.asColor
+            : self.appearance.colorSet.weekDayText.asColor
+        }()
+        let backgroundColor: Color = {
+            if day.identifier == self.selectedDay {
+                return self.appearance.colorSet.selectedDayBackground.asColor
+            } else if day.identifier == self.today {
+                return self.appearance.colorSet.todayBackground.asColor
+            } else {
+                return self.appearance.colorSet.dayBackground.asColor
+            }
+        }()
         return VStack {
             Text("\(day.day)")
+                .font(self.appearance.fontSet.day.asFont)
                 .foregroundColor(textColor)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 4)

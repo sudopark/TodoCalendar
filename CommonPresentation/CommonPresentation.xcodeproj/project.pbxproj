@@ -11,6 +11,7 @@
 		F605FA0A2A7E0E1300813AF5 /* UIColor+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F605FA092A7E0E1200813AF5 /* UIColor+Extensions.swift */; };
 		F605FA0C2A7E0EED00813AF5 /* FontSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F605FA0B2A7E0EED00813AF5 /* FontSet.swift */; };
 		F605FA0E2A7E0FA300813AF5 /* ViewAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F605FA0D2A7E0FA300813AF5 /* ViewAppearance.swift */; };
+		F605FA142A7F643500813AF5 /* UIFont+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F605FA132A7F643500813AF5 /* UIFont+Extensions.swift */; };
 		F63F64B52A2C05B700E24186 /* CommonPresentation.h in Headers */ = {isa = PBXBuildFile; fileRef = F63F64B42A2C05B700E24186 /* CommonPresentation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63F64BD2A2C066C00E24186 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64BC2A2C066C00E24186 /* Common3rdParty.framework */; };
 		F63F64C12A2C067300E24186 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64C02A2C067300E24186 /* Extensions.framework */; };
@@ -21,6 +22,7 @@
 		F605FA092A7E0E1200813AF5 /* UIColor+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Extensions.swift"; sourceTree = "<group>"; };
 		F605FA0B2A7E0EED00813AF5 /* FontSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FontSet.swift; sourceTree = "<group>"; };
 		F605FA0D2A7E0FA300813AF5 /* ViewAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewAppearance.swift; sourceTree = "<group>"; };
+		F605FA132A7F643500813AF5 /* UIFont+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIFont+Extensions.swift"; sourceTree = "<group>"; };
 		F63F64B12A2C05B700E24186 /* CommonPresentation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommonPresentation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63F64B42A2C05B700E24186 /* CommonPresentation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommonPresentation.h; sourceTree = "<group>"; };
 		F63F64BC2A2C066C00E24186 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -54,6 +56,7 @@
 			isa = PBXGroup;
 			children = (
 				F605FA092A7E0E1200813AF5 /* UIColor+Extensions.swift */,
+				F605FA132A7F643500813AF5 /* UIFont+Extensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -193,6 +196,7 @@
 				F605FA072A7E0B2900813AF5 /* ColorSet.swift in Sources */,
 				F605FA0C2A7E0EED00813AF5 /* FontSet.swift in Sources */,
 				F605FA0E2A7E0FA300813AF5 /* ViewAppearance.swift in Sources */,
+				F605FA142A7F643500813AF5 /* UIFont+Extensions.swift in Sources */,
 				F605FA0A2A7E0E1300813AF5 /* UIColor+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

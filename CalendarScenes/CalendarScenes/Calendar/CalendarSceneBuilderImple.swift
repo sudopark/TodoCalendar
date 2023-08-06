@@ -8,15 +8,19 @@
 import Foundation
 import Domain
 import Scenes
+import CommonPresentation
 
 public struct CalendarSceneBuilderImple {
         
     private let usecaseFactory: UsecaseFactory
+    private let viewAppearance: ViewAppearance
     
     public init(
-        usecaseFactory: UsecaseFactory
+        usecaseFactory: UsecaseFactory,
+        viewAppearance: ViewAppearance
     ) {
         self.usecaseFactory = usecaseFactory
+        self.viewAppearance = viewAppearance
     }
 }
 
@@ -31,10 +35,14 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             todoEventUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase()
         )
-        let viewController = CalendarViewController(viewModel: viewModel)
+        let viewController = CalendarViewController(
+            viewModel: viewModel,
+            viewAppearance: self.viewAppearance
+        )
         
         let nextSceneBuilder = SingleMonthSceneBuilderImple(
-            usecaseFactory: self.usecaseFactory
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
         )
         let router = CalendarViewRouterImple(nextSceneBuilder)
         router.scene = viewController

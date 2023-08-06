@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import Domain
+import CommonPresentation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -20,6 +22,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         viewModel.router = router
         self.applicationViewModel = viewModel
         self.applicationRouter = router
+        self.applicationRouter?.viewAppearance = ViewAppearance(
+            color: .defaultLight, font: .systemDefault
+        )
     }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
