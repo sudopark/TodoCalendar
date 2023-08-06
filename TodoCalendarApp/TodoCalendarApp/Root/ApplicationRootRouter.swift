@@ -8,6 +8,7 @@
 import UIKit
 import Domain
 import Scenes
+import CommonPresentation
 import CalendarScenes
 
 
@@ -22,6 +23,7 @@ protocol ApplicationRouting: Routing {
 final class ApplicationRootRouter: ApplicationRouting {
     
     @MainActor var window: UIWindow!
+    var viewAppearance: ViewAppearance!
     
     private let nonLoginUsecaseFactory: NonLoginUsecaseFactoryImple
     init(nonLoginUsecaseFactory: NonLoginUsecaseFactoryImple) {
@@ -36,7 +38,10 @@ extension ApplicationRootRouter {
         
         guard !AppEnvironment.isTestBuild else { return }
         Task { @MainActor in
-            let builder = CalendarSceneBuilderImple(usecaseFactory: self.nonLoginUsecaseFactory)
+            let builder = CalendarSceneBuilderImple(
+                usecaseFactory: self.nonLoginUsecaseFactory,
+                viewAppearance: self.viewAppearance
+            )
             let calendarScene = builder.makeCalendarScene()
             let navigationController = UINavigationController(rootViewController: calendarScene)
             self.window.rootViewController = navigationController

@@ -25,3 +25,13 @@ extension UIColor {
        )
    }
 }
+
+
+import SwiftUI
+
+extension UIColor {
+    
+    public var asColor: Color {
+        return Color(self)
+    }
+}

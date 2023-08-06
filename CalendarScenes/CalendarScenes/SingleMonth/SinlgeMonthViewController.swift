@@ -12,16 +12,23 @@ import Scenes
 import CommonPresentation
 
 
-final class SingleMonthViewController: UIHostingController<SingleMonthView>, SingleMonthScene {
+final class SingleMonthViewController: UIHostingController<SingleMonthContainerView>, SingleMonthScene {
     
     private let viewModel: SingleMonthViewModel
+    private let viewAppearance: ViewAppearance
     var interactor: SingleMonthSceneInteractor? {
         return self.viewModel
     }
-    init(viewModel: SingleMonthViewModel) {
+    init(
+        viewModel: SingleMonthViewModel,
+        viewAppearance: ViewAppearance
+    ) {
         self.viewModel = viewModel
+        self.viewAppearance = viewAppearance
         
-        let monthView = SingleMonthView(viewModel)
+        let monthView = SingleMonthContainerView(
+            viewModel: viewModel, viewAppearance: viewAppearance
+        )
         super.init(rootView: monthView)
     }
     

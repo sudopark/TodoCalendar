@@ -8,16 +8,20 @@
 import Foundation
 import Domain
 import Scenes
+import CommonPresentation
 
 
 public final class SingleMonthSceneBuilderImple {
     
     private let usecaseFactory: UsecaseFactory
+    private let viewAppearance: ViewAppearance
     
     public init(
-        usecaseFactory: UsecaseFactory
+        usecaseFactory: UsecaseFactory,
+        viewAppearance: ViewAppearance
     ) {
         self.usecaseFactory = usecaseFactory
+        self.viewAppearance = viewAppearance
     }
 }
 
@@ -33,7 +37,10 @@ extension SingleMonthSceneBuilderImple: SingleMonthSceneBuilder {
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase()
         )
         // TODO: setup router
-        let viewController = SingleMonthViewController(viewModel: viewModel)
+        let viewController = SingleMonthViewController(
+            viewModel: viewModel,
+            viewAppearance: self.viewAppearance
+        )
         return viewController
     }
 }
