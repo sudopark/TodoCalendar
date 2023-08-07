@@ -414,7 +414,7 @@ extension SingleMonthViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let weekDayLists = self.waitOutputs(expect, for: viewModel.weekDaysSymbols) {
+        let modelLists = self.waitOutputs(expect, for: viewModel.weekDays) {
             let days: [DayOfWeeks] = [.monday, .tuesday, .wednesday, .thursday, .friday, .saturday, .sunday]
             days.forEach {
                 self.stubSettingUsecase.updateFirstWeekDay($0)
@@ -422,6 +422,7 @@ extension SingleMonthViewModelImpleTests {
         }
         
         // then
+        let weekDayLists = modelLists.map { ms in ms.map { $0.symbol } }
         XCTAssertEqual(weekDayLists, [
             ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
             ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
@@ -431,6 +432,17 @@ extension SingleMonthViewModelImpleTests {
             ["FRI", "SAT", "SUN", "MON", "TUE", "WED", "THU"],
             ["SAT", "SUN", "MON", "TUE", "WED", "THU", "FRI"],
             ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+        ])
+        let isWeekEnds = modelLists.map { ms in ms.map { $0.isWeekEnd } }
+        XCTAssertEqual(isWeekEnds, [
+            [true, false, false, false, false, false, true],
+            [false, false, false, false, false, true, true],
+            [false, false, false, false, true, true, false],
+            [false, false, false, true, true, false, false],
+            [false, false, true, true, false, false, false],
+            [false, true, true, false, false, false, false],
+            [true, true, false, false, false, false, false],
+            [true, false, false, false, false, false, true],
         ])
     }
     

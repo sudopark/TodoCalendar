@@ -26,6 +26,23 @@ enum EventId: Equatable {
     }
 }
 
+struct WeekDayModel: Equatable {
+    let symbol: String
+    let isWeekEnd: Bool
+    
+    static func allModels() -> [WeekDayModel] {
+        return [
+            .init(symbol: "SUN", isWeekEnd: true),
+            .init(symbol: "MON", isWeekEnd: false),
+            .init(symbol: "TUE", isWeekEnd: false),
+            .init(symbol: "WED", isWeekEnd: false),
+            .init(symbol: "THU", isWeekEnd: false),
+            .init(symbol: "FRI", isWeekEnd: false),
+            .init(symbol: "SAT", isWeekEnd: true)
+        ]
+    }
+}
+
 struct DayCellViewModel: Equatable {
     
     let year: Int
@@ -115,7 +132,7 @@ protocol SingleMonthViewModel: AnyObject, Sendable, SingleMonthSceneInteractor {
     
     func select(_ day: DayCellViewModel)
     
-    var weekDaysSymbols: AnyPublisher<[String], Never> { get }
+    var weekDays: AnyPublisher<[WeekDayModel], Never> { get }
     var weekModels: AnyPublisher<[WeekRowModel], Never> { get }
     var currentSelectDayIdentifier: AnyPublisher<String?, Never> { get }
     var todayIdentifier: AnyPublisher<String, Never> { get }
@@ -232,12 +249,12 @@ extension SingleMonthViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var weekDaysSymbols: AnyPublisher<[String], Never> {
-        let symbols = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
-        let transform: (DayOfWeeks) -> [String] = { dayOfWeek in
+    var weekDays: AnyPublisher<[WeekDayModel], Never> {
+        let models = WeekDayModel.allModels()
+        let transform: (DayOfWeeks) -> [WeekDayModel] = { dayOfWeek in
             let startIndex = dayOfWeek.rawValue-1
             return (startIndex..<startIndex+7).map { index in
-                return symbols[index % 7]
+                return models[index % 7]
             }
         }
         return self.calendarSettingUsecase.firstWeekDay
