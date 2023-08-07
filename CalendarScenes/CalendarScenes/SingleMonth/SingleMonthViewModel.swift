@@ -32,12 +32,23 @@ struct DayCellViewModel: Equatable {
     let month: Int
     let day: Int
     let isNotCurrentMonth: Bool
+    let isWeekEnd: Bool
+    let isHoliday: Bool
     
-    init(year: Int, month: Int, day: Int, isNotCurrentMonth: Bool) {
+    init(
+        year: Int,
+        month: Int,
+        day: Int,
+        isNotCurrentMonth: Bool,
+        isWeekEnd: Bool,
+        isHoliday: Bool
+    ) {
         self.year = year
         self.month = month
         self.day = day
         self.isNotCurrentMonth = isNotCurrentMonth
+        self.isWeekEnd = isWeekEnd
+        self.isHoliday = isHoliday
     }
     
     enum EventSummary: Equatable {
@@ -75,6 +86,8 @@ struct DayCellViewModel: Equatable {
             let eventOnThisDay = eventsRow.first(where: { $0.weekDaysRange ~= day.weekDay })
             return eventOnThisDay.map { .event($0.eventId, .init(day.weekDay, $0.weekDaysRange)) } ?? .blank
         }
+        self.isWeekEnd = DayOfWeeks(rawValue: day.weekDay)?.isWeekEnd == true
+        self.isHoliday = day.holiday != nil
     }
 }
 
@@ -267,7 +280,7 @@ extension SingleMonthViewModelImple {
         let transform: (DayCellViewModel?, CalendarComponent.Day, CalendarComponent) -> String?
         transform = { selected, today, thisMonth in
             switch (selected, today, thisMonth) {
-            case (.some(let day), _, let m) where day.month == m.month && day.year == m.year:
+            case (.some(let day), _, _):
                 return day.identifier
             case (_, let t, let m) where t.month != m.month:
                 return "\(m.year)-\(m.month)-1"

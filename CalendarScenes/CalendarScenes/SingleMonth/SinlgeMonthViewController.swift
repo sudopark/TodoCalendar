@@ -30,6 +30,8 @@ final class SingleMonthViewController: UIHostingController<SingleMonthContainerV
             viewModel: viewModel, viewAppearance: viewAppearance
         )
         super.init(rootView: monthView)
+        
+        self.view.backgroundColor = self.viewAppearance.colorSet.dayBackground
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
