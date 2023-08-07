@@ -35,7 +35,7 @@ struct SingleMonthContainerView: View {
 
 struct SingleMonthView: View {
     
-    @State private var weekdaySymbols: [String] = []
+    @State private var weekdays: [WeekDayModel] = []
     @State private var days: [DayCellViewModel] = []
     @State private var selectedDay: String?
     @State private var today: String?
@@ -54,7 +54,7 @@ struct SingleMonthView: View {
         }
         .padding([.leading, .trailing], 8)
         .background(self.appearance.colorSet.dayBackground.asColor)
-        .onReceive(self.viewModel.weekDaysSymbols.receive(on: RunLoop.main)) { self.weekdaySymbols = $0 }
+        .onReceive(self.viewModel.weekDays.receive(on: RunLoop.main)) { self.weekdays = $0 }
         .onReceive(self.viewModel.allDays.receive(on: RunLoop.main)) {
             self.days = $0
         }
@@ -63,12 +63,16 @@ struct SingleMonthView: View {
     }
     
     private var headerView: some View {
+        let textColor: (WeekDayModel) -> Color = {
+            return $0.isWeekEnd
+            ? self.appearance.colorSet.weekEndText.asColor
+            : self.appearance.colorSet.weekDayText.asColor
+        }
         return HStack {
-            ForEach(self.weekdaySymbols, id: \.self) { weekDay in
-                // TODO: 주말이면 텍스트 색 변경
-                Text(weekDay)
+            ForEach(self.weekdays, id: \.symbol) { weekDay in
+                Text(weekDay.symbol)
                     .font(self.appearance.fontSet.weekday.asFont)
-                    .foregroundColor(self.appearance.colorSet.weekDayText.asColor)
+                    .foregroundColor(textColor(weekDay))
                     .frame(maxWidth: .infinity)
             }
         }
