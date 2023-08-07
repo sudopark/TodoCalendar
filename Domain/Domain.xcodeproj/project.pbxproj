@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		F609B3872A279EDB0056CC13 /* PagingUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F609B3862A279EDB0056CC13 /* PagingUsecase.swift */; };
 		F609B3892A27AC870056CC13 /* PagingUsecaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F609B3882A27AC870056CC13 /* PagingUsecaseTests.swift */; };
+		F61C60252A8131AD007BA02C /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61C60242A8131AD007BA02C /* AppearanceSettings.swift */; };
+		F61C602D2A8134AB007BA02C /* AppSettingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61C602C2A8134AB007BA02C /* AppSettingRepository.swift */; };
+		F61C60302A8134F7007BA02C /* AuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61C602F2A8134F7007BA02C /* AuthRepository.swift */; };
 		F626206E29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F626206D29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift */; };
 		F62C7D6429EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62C7D6329EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift */; };
 		F63283DF2A3432A6003DD587 /* Holiday.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63283DD2A3432A6003DD587 /* Holiday.swift */; };
@@ -68,6 +71,9 @@
 /* Begin PBXFileReference section */
 		F609B3862A279EDB0056CC13 /* PagingUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingUsecase.swift; sourceTree = "<group>"; };
 		F609B3882A27AC870056CC13 /* PagingUsecaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingUsecaseTests.swift; sourceTree = "<group>"; };
+		F61C60242A8131AD007BA02C /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
+		F61C602C2A8134AB007BA02C /* AppSettingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingRepository.swift; sourceTree = "<group>"; };
+		F61C602F2A8134F7007BA02C /* AuthRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRepository.swift; sourceTree = "<group>"; };
 		F626206D29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatTimeEnumeratorTests.swift; sourceTree = "<group>"; };
 		F62C7D6329EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatTimeEnumerator.swift; sourceTree = "<group>"; };
 		F63283DD2A3432A6003DD587 /* Holiday.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Holiday.swift; sourceTree = "<group>"; };
@@ -155,6 +161,30 @@
 			path = Common;
 			sourceTree = "<group>";
 		};
+		F61C60232A813196007BA02C /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				F61C60242A8131AD007BA02C /* AppearanceSettings.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		F61C602B2A813496007BA02C /* Setting */ = {
+			isa = PBXGroup;
+			children = (
+				F61C602C2A8134AB007BA02C /* AppSettingRepository.swift */,
+			);
+			path = Setting;
+			sourceTree = "<group>";
+		};
+		F61C602E2A8134EB007BA02C /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				F61C602F2A8134F7007BA02C /* AuthRepository.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
 		F63283DC2A34329A003DD587 /* Calendar */ = {
 			isa = PBXGroup;
 			children = (
@@ -226,6 +256,7 @@
 			children = (
 				F63283DC2A34329A003DD587 /* Calendar */,
 				F63C9D0629C9F63C00CC663A /* Events */,
+				F61C60232A813196007BA02C /* Settings */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -260,8 +291,10 @@
 		F63C9D0329C8A88200CC663A /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
+				F61C602E2A8134EB007BA02C /* Auth */,
 				F6CD67232A3434DD007E4306 /* Calendar */,
 				F6CD67242A3434E6007E4306 /* Events */,
+				F61C602B2A813496007BA02C /* Setting */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -471,6 +504,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F61C602D2A8134AB007BA02C /* AppSettingRepository.swift in Sources */,
 				F65B08E029CFF9FF000EE650 /* EventRepeating.swift in Sources */,
 				F6957FBD2A22293E0064E8BD /* EventTagRepository.swift in Sources */,
 				F63283DF2A3432A6003DD587 /* Holiday.swift in Sources */,
@@ -483,6 +517,7 @@
 				F6C2B0CE2A433FD400BA89CA /* CalendarUsecase.swift in Sources */,
 				F6B70D152A76485700FFF457 /* CalendarMonth.swift in Sources */,
 				F63C9CEE29C6E5BF00CC663A /* ScheduleEvent.swift in Sources */,
+				F61C60252A8131AD007BA02C /* AppearanceSettings.swift in Sources */,
 				F632E22429FF8F670052C61B /* MemorizedScheduleEventsContainer.swift in Sources */,
 				F63C9CF129C6E66700CC663A /* EventTag.swift in Sources */,
 				F609B3872A279EDB0056CC13 /* PagingUsecase.swift in Sources */,
@@ -494,6 +529,7 @@
 				F62C7D6429EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift in Sources */,
 				F63C9D0529C8A8C900CC663A /* TodoEventRepository.swift in Sources */,
 				F6E35D532A2B892600BDA545 /* CalendarSettingUsecase.swift in Sources */,
+				F61C60302A8134F7007BA02C /* AuthRepository.swift in Sources */,
 				F632E21C29FF84A50052C61B /* ScheduleEventUsecase.swift in Sources */,
 				F63C9D0B29CC993900CC663A /* SharedDataStore.swift in Sources */,
 			);
