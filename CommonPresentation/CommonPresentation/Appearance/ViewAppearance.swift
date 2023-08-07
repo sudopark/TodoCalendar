@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Domain
 
 
 public class ViewAppearance: ObservableObject {

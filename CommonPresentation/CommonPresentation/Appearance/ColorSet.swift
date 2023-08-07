@@ -23,10 +23,6 @@ public protocol ColorSet: Sendable {
 }
 
 
-public enum ColorSetKeys: String {
-    case defaultLight
-}
-
 // MARK: - default light
 
 public struct DefaultLightColorSet: ColorSet {

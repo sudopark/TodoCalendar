@@ -11,6 +11,8 @@
 		F6078D782A21FC8B006B4879 /* ScheduleEventTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D772A21FC8B006B4879 /* ScheduleEventTable.swift */; };
 		F6078D7A2A21FC97006B4879 /* ScheduleEventLocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D792A21FC97006B4879 /* ScheduleEventLocalStorage.swift */; };
 		F6078D7D2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6078D7C2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift */; };
+		F61C60332A81356C007BA02C /* AppSettingRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61C60322A81356C007BA02C /* AppSettingRepositoryImple.swift */; };
+		F61C60362A81362D007BA02C /* AppSettingRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61C60352A81362D007BA02C /* AppSettingRepositoryImpleTests.swift */; };
 		F6957FC52A2313F40064E8BD /* EventTagTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FC42A2313F40064E8BD /* EventTagTable.swift */; };
 		F6957FC72A2315090064E8BD /* EventTagLocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FC62A2315090064E8BD /* EventTagLocalStorage.swift */; };
 		F6957FC92A2317440064E8BD /* EventTagLocalRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FC82A2317440064E8BD /* EventTagLocalRepositoryImple.swift */; };
@@ -57,6 +59,8 @@
 		F6078D772A21FC8B006B4879 /* ScheduleEventTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventTable.swift; sourceTree = "<group>"; };
 		F6078D792A21FC97006B4879 /* ScheduleEventLocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventLocalStorage.swift; sourceTree = "<group>"; };
 		F6078D7C2A2213FF006B4879 /* ScheduleEventLocalRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventLocalRepositoryImpleTests.swift; sourceTree = "<group>"; };
+		F61C60322A81356C007BA02C /* AppSettingRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingRepositoryImple.swift; sourceTree = "<group>"; };
+		F61C60352A81362D007BA02C /* AppSettingRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingRepositoryImpleTests.swift; sourceTree = "<group>"; };
 		F6957FC42A2313F40064E8BD /* EventTagTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagTable.swift; sourceTree = "<group>"; };
 		F6957FC62A2315090064E8BD /* EventTagLocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagLocalStorage.swift; sourceTree = "<group>"; };
 		F6957FC82A2317440064E8BD /* EventTagLocalRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagLocalRepositoryImple.swift; sourceTree = "<group>"; };
@@ -140,6 +144,22 @@
 			path = Schedule;
 			sourceTree = "<group>";
 		};
+		F61C60312A81353E007BA02C /* Setting */ = {
+			isa = PBXGroup;
+			children = (
+				F61C60322A81356C007BA02C /* AppSettingRepositoryImple.swift */,
+			);
+			path = Setting;
+			sourceTree = "<group>";
+		};
+		F61C60342A81361D007BA02C /* Setting */ = {
+			isa = PBXGroup;
+			children = (
+				F61C60352A81362D007BA02C /* AppSettingRepositoryImpleTests.swift */,
+			);
+			path = Setting;
+			sourceTree = "<group>";
+		};
 		F6957FC22A2313DD0064E8BD /* EventTag */ = {
 			isa = PBXGroup;
 			children = (
@@ -203,6 +223,7 @@
 				F6E35D602A2B925400BDA545 /* Calendar */,
 				F6C58D052A19E891002BA9B7 /* Common */,
 				F6C58CFD2A189688002BA9B7 /* Event */,
+				F61C60342A81361D007BA02C /* Setting */,
 				F6C58CCE2A111A89002BA9B7 /* RepositoryTests.swift */,
 			);
 			path = RepositoryTests;
@@ -299,6 +320,7 @@
 			children = (
 				F6E35D5D2A2B913100BDA545 /* Calendar */,
 				F6C58CF42A111D45002BA9B7 /* Event */,
+				F61C60312A81353E007BA02C /* Setting */,
 			);
 			path = "Repository+Imple";
 			sourceTree = "<group>";
@@ -459,6 +481,7 @@
 				F6E35D5F2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift in Sources */,
 				F6078D742A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift in Sources */,
 				F6957FC72A2315090064E8BD /* EventTagLocalStorage.swift in Sources */,
+				F61C60332A81356C007BA02C /* AppSettingRepositoryImple.swift in Sources */,
 				F6E35D5B2A2B8E5600BDA545 /* EnvironmentStorage.swift in Sources */,
 				F6C58CDC2A111AF6002BA9B7 /* TodoLocalStorage.swift in Sources */,
 				F6C58CFC2A112432002BA9B7 /* EventRepeatingOption+CodableMapper.swift in Sources */,
@@ -473,6 +496,7 @@
 			files = (
 				F6CD67352A35B13A007E4306 /* HolidayRepositoryImpleTests.swift in Sources */,
 				F6C58D072A19E8A6002BA9B7 /* BaseLocalTests.swift in Sources */,
+				F61C60362A81362D007BA02C /* AppSettingRepositoryImpleTests.swift in Sources */,
 				F6E35D652A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift in Sources */,
 				F6CD67372A35B175007E4306 /* StubRemoteAPI.swift in Sources */,
 				F6C58CCF2A111A89002BA9B7 /* RepositoryTests.swift in Sources */,

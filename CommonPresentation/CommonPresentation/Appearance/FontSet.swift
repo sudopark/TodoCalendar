@@ -19,10 +19,6 @@ public protocol FontSet: Sendable {
 }
 
 
-public enum FontSetKeys: String {
-    case systemDefault
-}
-
 // MARK: - default font set
 
 public struct SystemDefaultFontSet: FontSet {
