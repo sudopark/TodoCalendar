@@ -10,15 +10,22 @@ import Domain
 
 final class ApplicationRootViewModelImple {
  
+    private let applicationUsecase: ApplicationRootUsecase
     var router: ApplicationRootRouter?
+    
+    init(applicationUsecase: ApplicationRootUsecase) {
+        self.applicationUsecase = applicationUsecase
+    }
 }
 
 
 extension ApplicationRootViewModelImple {
     
     func prepareInitialScene() {
-        // TODO: 계정 유무에 따라 다른 팩토리 사용해서 초기 화면 구성해야함
-        self.router?.setupInitialScene()
+        Task {
+            let result = try await self.applicationUsecase.prepareLaunch()
+            self.router?.setupInitialScene(result)
+        }
     }
 }
 

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F61C60222A812F2F007BA02C /* ApplicationRootUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61C60212A812F2F007BA02C /* ApplicationRootUsecase.swift */; };
+		F61C60382A813831007BA02C /* ApplicationRootBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61C60372A813831007BA02C /* ApplicationRootBuilder.swift */; };
 		F6B70D9D2A765C8100FFF457 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D9C2A765C8100FFF457 /* AppDelegate.swift */; };
 		F6B70D9F2A765C8100FFF457 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D9E2A765C8100FFF457 /* SceneDelegate.swift */; };
 		F6B70DA62A765C8200FFF457 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F6B70DA52A765C8200FFF457 /* Assets.xcassets */; };
@@ -73,7 +75,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		F61C60212A812F2F007BA02C /* ApplicationRootUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationRootUsecase.swift; sourceTree = "<group>"; };
 		F61C602A2A813339007BA02C /* TodoCalendarApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TodoCalendarApp.entitlements; sourceTree = "<group>"; };
+		F61C60372A813831007BA02C /* ApplicationRootBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationRootBuilder.swift; sourceTree = "<group>"; };
 		F6B70D992A765C8100FFF457 /* TodoCalendarApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoCalendarApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6B70D9C2A765C8100FFF457 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F6B70D9E2A765C8100FFF457 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -190,6 +194,8 @@
 			children = (
 				F6B70DD02A765DAE00FFF457 /* ApplicationRootRouter.swift */,
 				F6B70DD22A76601300FFF457 /* ApplicationRootViewModel.swift */,
+				F61C60212A812F2F007BA02C /* ApplicationRootUsecase.swift */,
+				F61C60372A813831007BA02C /* ApplicationRootBuilder.swift */,
 			);
 			path = Root;
 			sourceTree = "<group>";
@@ -348,7 +354,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F61C60222A812F2F007BA02C /* ApplicationRootUsecase.swift in Sources */,
 				F6B70DF52A79611500FFF457 /* AppEnvironment.swift in Sources */,
+				F61C60382A813831007BA02C /* ApplicationRootBuilder.swift in Sources */,
 				F6B70DD72A76630D00FFF457 /* Storages+Remote.swift in Sources */,
 				F6B70DD52A7662F300FFF457 /* Factories+Usecase.swift in Sources */,
 				F6B70DD12A765DAE00FFF457 /* ApplicationRootRouter.swift in Sources */,

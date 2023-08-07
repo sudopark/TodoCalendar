@@ -17,7 +17,7 @@ import CalendarScenes
 
 protocol ApplicationRouting: Routing {
     
-    func setupInitialScene()
+    func setupInitialScene(_ prepareResult: ApplicationPrepareResult)
 }
 
 final class ApplicationRootRouter: ApplicationRouting {
@@ -34,9 +34,15 @@ final class ApplicationRootRouter: ApplicationRouting {
 
 extension ApplicationRootRouter {
     
-    func setupInitialScene() {
+    func setupInitialScene(_ prepareResult: ApplicationPrepareResult) {
         
         guard !AppEnvironment.isTestBuild else { return }
+        self.viewAppearance = ViewAppearance(
+            color: prepareResult.appearnceSetings.colorSetKey,
+            font: prepareResult.appearnceSetings.fontSetKey
+        )
+        self.prepareDatabase(for: prepareResult.latestLoginAccountId)
+        
         Task { @MainActor in
             let builder = CalendarSceneBuilderImple(
                 usecaseFactory: self.nonLoginUsecaseFactory,
@@ -47,5 +53,14 @@ extension ApplicationRootRouter {
             self.window.rootViewController = navigationController
             self.window.makeKeyAndVisible()
         }
+    }
+    
+    private func prepareDatabase(for accountId: String?) {
+        let database = Singleton.shared.commonSqliteService
+        let dbPath = AppEnvironment.dbFilePath(for: accountId)
+        let openResult = database.open(path: dbPath)
+        print("db open result: \(openResult) -> path: \(dbPath)")
+        
+        // TODO: create table if need
     }
 }

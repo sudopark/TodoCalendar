@@ -17,14 +17,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     override init() {
         super.init()
         
-        let router = ApplicationRootRouter(nonLoginUsecaseFactory: NonLoginUsecaseFactoryImple())
-        let viewModel = ApplicationRootViewModelImple()
-        viewModel.router = router
-        self.applicationViewModel = viewModel
-        self.applicationRouter = router
-        self.applicationRouter?.viewAppearance = ViewAppearance(
-            color: .defaultLight, font: .systemDefault
-        )
+        let builder = ApplicationRootBuilder()
+        self.applicationViewModel = builder.makeRootViewModel()
+        self.applicationRouter = self.applicationViewModel.router
     }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
