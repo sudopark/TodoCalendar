@@ -53,6 +53,7 @@ struct SingleMonthView: View {
             gridWeeksView
         }
         .padding([.leading, .trailing], 8)
+        .background(self.appearance.colorSet.dayBackground.asColor)
         .onReceive(self.viewModel.weekDaysSymbols.receive(on: RunLoop.main)) { self.weekdaySymbols = $0 }
         .onReceive(self.viewModel.allDays.receive(on: RunLoop.main)) {
             self.days = $0
@@ -85,12 +86,16 @@ struct SingleMonthView: View {
     }
     
     private func dayView(_ day: DayCellViewModel) -> some View {
-        // TODO: 주말이면 텍스트 컬러 변경
-        // TODO: 이번달 아니면 텍스트 색 변경
         let textColor: Color = {
-            return day.identifier == selectedDay
-            ? self.appearance.colorSet.selectedDayText.asColor
-            : self.appearance.colorSet.weekDayText.asColor
+            if day.identifier == selectedDay {
+                return self.appearance.colorSet.selectedDayText.asColor
+            } else if day.isHoliday {
+                return self.appearance.colorSet.holidayText.asColor
+            } else if day.isWeekEnd {
+                return self.appearance.colorSet.weekEndText.asColor
+            } else {
+                return self.appearance.colorSet.weekDayText.asColor
+            }
         }()
         let backgroundColor: Color = {
             if day.identifier == self.selectedDay {
@@ -100,6 +105,10 @@ struct SingleMonthView: View {
             } else {
                 return self.appearance.colorSet.dayBackground.asColor
             }
+        }()
+        let opacity: Double = {
+            return day.identifier == self.selectedDay || day.isNotCurrentMonth == false
+            ? 1.0 : 0.5
         }()
         return VStack {
             Text("\(day.day)")
@@ -114,6 +123,7 @@ struct SingleMonthView: View {
             RoundedRectangle(cornerRadius: 10)
                 .fill(backgroundColor)
         )
+        .opacity(opacity)
         .onTapGesture {
             self.viewModel.select(day)
         }

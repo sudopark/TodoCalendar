@@ -120,6 +120,6 @@ extension CalendarViewController {
     }
     
     private func setupStyling() {
-        
+        self.view.backgroundColor = self.viewAppearance.colorSet.dayBackground
     }
 }

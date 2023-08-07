@@ -16,6 +16,10 @@ public enum DayOfWeeks: Int, Sendable {
     case thursday
     case friday
     case saturday
+    
+    public var isWeekEnd: Bool {
+        return self == .sunday || self == .saturday
+    }
 }
 
 public enum Months: Int, Sendable {
