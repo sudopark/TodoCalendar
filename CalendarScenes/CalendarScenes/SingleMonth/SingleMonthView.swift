@@ -143,3 +143,49 @@ private extension SingleMonthViewModel {
             .eraseToAnyPublisher()
     }
 }
+
+
+// MARK: - preview
+
+final class DummySingleMonthViewModel: SingleMonthViewModel {
+    
+    func select(_ day: DayCellViewModel) { }
+    
+    var weekDays: AnyPublisher<[WeekDayModel], Never> {
+        return Just([
+            .init(symbol: "SUN", isWeekEnd: true),
+            .init(symbol: "MON", isWeekEnd: false),
+            .init(symbol: "TUE", isWeekEnd: false),
+            .init(symbol: "WED", isWeekEnd: false),
+            .init(symbol: "THU", isWeekEnd: false),
+            .init(symbol: "FRI", isWeekEnd: false),
+            .init(symbol: "SAT", isWeekEnd: true)
+        ])
+        .eraseToAnyPublisher()
+    }
+    
+    var weekModels: AnyPublisher<[WeekRowModel], Never> {
+        let days: [DayCellViewModel] = (0..<31).map { int -> DayCellViewModel in
+            return  DayCellViewModel(year: 2023, month: 09, day: int+1, isNotCurrentMonth: false, isWeekEnd: false, isHoliday: false)
+        }
+        let model = WeekRowModel(days: days)
+        return Just([model]).eraseToAnyPublisher()
+    }
+    
+    var currentSelectDayIdentifier: AnyPublisher<String?, Never> { Empty().eraseToAnyPublisher() }
+    
+    var todayIdentifier: AnyPublisher<String, Never> { Empty().eraseToAnyPublisher() }
+    
+    func updateMonthIfNeed(_ newMonth: Domain.CalendarMonth) { }
+}
+
+
+struct SingleMonthViewPreviewProvider: PreviewProvider {
+    
+    static var previews: some View {
+        let viewModel = DummySingleMonthViewModel()
+        let viewAppearance = ViewAppearance(color: .defaultLight, font: .systemDefault)
+        return SingleMonthView(viewModel)
+            .environmentObject(viewAppearance)
+    }
+}

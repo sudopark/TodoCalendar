@@ -111,6 +111,10 @@ struct DayCellViewModel: Equatable {
 struct WeekRowModel: Equatable {
     let days: [DayCellViewModel]
     
+    init(days: [DayCellViewModel]) {
+        self.days = days
+    }
+    
     init(_ week: CalendarComponent.Week, month: Int, stack: [[EventOnWeek]]) {
         self.days = week.days.map { day -> DayCellViewModel in
             return .init(day, month: month, stack: stack)
