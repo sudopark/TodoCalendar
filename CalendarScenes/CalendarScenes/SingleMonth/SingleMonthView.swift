@@ -33,10 +33,17 @@ struct SingleMonthContainerView: View {
     }
 }
 
+
+private enum Metric {
+    static let dayMinHeight: CGFloat = 80
+    static let dayMaxHeight: CGFloat = 100
+    static let eventRowHeight: CGFloat = 15
+}
+
 struct SingleMonthView: View {
     
     @State private var weekdays: [WeekDayModel] = []
-    @State private var days: [DayCellViewModel] = []
+    @State private var weeks: [WeekRowModel] = []
     @State private var selectedDay: String?
     @State private var today: String?
     
@@ -50,13 +57,15 @@ struct SingleMonthView: View {
     var body: some View {
         VStack(spacing: 0) {
             headerView
-            gridWeeksView
+            GeometryReader { proxy in
+                self.gridWeeksView(proxy)
+            }
         }
         .padding([.leading, .trailing], 8)
         .background(self.appearance.colorSet.dayBackground.asColor)
         .onReceive(self.viewModel.weekDays.receive(on: RunLoop.main)) { self.weekdays = $0 }
-        .onReceive(self.viewModel.allDays.receive(on: RunLoop.main)) {
-            self.days = $0
+        .onReceive(self.viewModel.weekModels.receive(on: RunLoop.main)) {
+            self.weeks = $0
         }
         .onReceive(self.viewModel.currentSelectDayIdentifier.receive(on: RunLoop.main)) { self.selectedDay = $0 }
         .onReceive(self.viewModel.todayIdentifier.receive(on: RunLoop.main)) { self.today = $0 }
@@ -78,18 +87,29 @@ struct SingleMonthView: View {
         }
     }
     
-    private var gridWeeksView: some View {
-        
+    private func gridWeeksView(_ proxy: GeometryProxy) -> some View {
+        let height: CGFloat = {
+            let rowCount = self.weeks.count
+            guard rowCount > 0 else { return 0 }
+            let expectHeight = proxy.size.height / CGFloat(rowCount)
+            return max(
+                Metric.dayMinHeight,
+                min(Metric.dayMaxHeight, expectHeight)
+            )
+        }()
         return VStack {
             LazyVGrid(columns: Array(repeating: GridItem(spacing: 0), count: 7), spacing: 0) {
-                ForEach(self.days, id: \.identifier) {
-                    self.dayView($0)
+                ForEach(self.weeks.flatMap { $0.days }, id: \.identifier) {
+                    self.dayView($0, height)
                 }
             }
         }
     }
     
-    private func dayView(_ day: DayCellViewModel) -> some View {
+    private func dayView(
+        _ day: DayCellViewModel,
+        _ expectHeight: CGFloat
+    ) -> some View {
         let textColor: Color = {
             if day.identifier == selectedDay {
                 return self.appearance.colorSet.selectedDayText.asColor
@@ -122,7 +142,7 @@ struct SingleMonthView: View {
                 .padding(.top, 4)
             Spacer()
         }
-        .frame(minHeight: 80)
+        .frame(height: expectHeight)
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(backgroundColor)
@@ -134,58 +154,56 @@ struct SingleMonthView: View {
     }
 }
 
-private extension SingleMonthViewModel {
-    
-    var allDays: AnyPublisher<[DayCellViewModel], Never> {
-        return self.weekModels
-            .map { weeks in weeks.flatMap { $0.days } }
-            .subscribe(on: DispatchQueue.global(qos: .userInitiated))
-            .eraseToAnyPublisher()
-    }
-}
-
-
 // MARK: - preview
 
-final class DummySingleMonthViewModel: SingleMonthViewModel {
-    
-    func select(_ day: DayCellViewModel) { }
-    
-    var weekDays: AnyPublisher<[WeekDayModel], Never> {
-        return Just([
-            .init(symbol: "SUN", isWeekEnd: true),
-            .init(symbol: "MON", isWeekEnd: false),
-            .init(symbol: "TUE", isWeekEnd: false),
-            .init(symbol: "WED", isWeekEnd: false),
-            .init(symbol: "THU", isWeekEnd: false),
-            .init(symbol: "FRI", isWeekEnd: false),
-            .init(symbol: "SAT", isWeekEnd: true)
-        ])
-        .eraseToAnyPublisher()
-    }
-    
-    var weekModels: AnyPublisher<[WeekRowModel], Never> {
-        let days: [DayCellViewModel] = (0..<31).map { int -> DayCellViewModel in
-            return  DayCellViewModel(year: 2023, month: 09, day: int+1, isNotCurrentMonth: false, isWeekEnd: false, isHoliday: false)
-        }
-        let model = WeekRowModel(days: days)
-        return Just([model]).eraseToAnyPublisher()
-    }
-    
-    var currentSelectDayIdentifier: AnyPublisher<String?, Never> { Empty().eraseToAnyPublisher() }
-    
-    var todayIdentifier: AnyPublisher<String, Never> { Empty().eraseToAnyPublisher() }
-    
-    func updateMonthIfNeed(_ newMonth: Domain.CalendarMonth) { }
-}
-
-
-struct SingleMonthViewPreviewProvider: PreviewProvider {
-    
-    static var previews: some View {
-        let viewModel = DummySingleMonthViewModel()
-        let viewAppearance = ViewAppearance(color: .defaultLight, font: .systemDefault)
-        return SingleMonthView(viewModel)
-            .environmentObject(viewAppearance)
-    }
-}
+//final class DummySingleMonthViewModel: SingleMonthViewModel {
+//
+//    func select(_ day: DayCellViewModel) { }
+//
+//    var weekDays: AnyPublisher<[WeekDayModel], Never> {
+//        return Just([
+//            .init(symbol: "SUN", isWeekEnd: true),
+//            .init(symbol: "MON", isWeekEnd: false),
+//            .init(symbol: "TUE", isWeekEnd: false),
+//            .init(symbol: "WED", isWeekEnd: false),
+//            .init(symbol: "THU", isWeekEnd: false),
+//            .init(symbol: "FRI", isWeekEnd: false),
+//            .init(symbol: "SAT", isWeekEnd: true)
+//        ])
+//        .eraseToAnyPublisher()
+//    }
+//
+//    var weekModels: AnyPublisher<[WeekRowModel], Never> {
+//        let days: [DayCellViewModel] = (0..<31).map { int -> DayCellViewModel in
+//            return  DayCellViewModel(year: 2023, month: 09, day: int+1, isNotCurrentMonth: false, isWeekEnd: false, isHoliday: false)
+//        }
+//        let models = days.enumerated().reduce(into: [WeekRowModel]()) { acc, pair in
+//            let isSunday = pair.offset % 7 == 0
+//            if isSunday {
+//                let newWeek = WeekRowModel(days: [pair.element])
+//                acc.append(newWeek)
+//            } else {
+//                let newWeek = WeekRowModel(days: acc.last!.days + [pair.element])
+//                acc[acc.count-1] = newWeek
+//            }
+//        }
+//        return Just(models).eraseToAnyPublisher()
+//    }
+//
+//    var currentSelectDayIdentifier: AnyPublisher<String?, Never> { Empty().eraseToAnyPublisher() }
+//
+//    var todayIdentifier: AnyPublisher<String, Never> { Empty().eraseToAnyPublisher() }
+//
+//    func updateMonthIfNeed(_ newMonth: Domain.CalendarMonth) { }
+//}
+//
+//
+//struct SingleMonthViewPreviewProvider: PreviewProvider {
+//
+//    static var previews: some View {
+//        let viewModel = DummySingleMonthViewModel()
+//        let viewAppearance = ViewAppearance(color: .defaultLight, font: .systemDefault)
+//        return SingleMonthView(viewModel)
+//            .environmentObject(viewAppearance)
+//    }
+//}

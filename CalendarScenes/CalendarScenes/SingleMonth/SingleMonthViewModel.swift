@@ -13,18 +13,7 @@ import Domain
 import Scenes
 
 
-// MARK: - cell, event and row model
-
-enum EventId: Equatable {
-    case todo(String)
-    case schedule(String, turn: Int)
-    case holiday(_ dateString: String, name: String)
-    
-    var isHoliday: Bool {
-        guard case .holiday = self else { return false }
-        return true
-    }
-}
+// MARK: - week components
 
 struct WeekDayModel: Equatable {
     let symbol: String
@@ -68,67 +57,68 @@ struct DayCellViewModel: Equatable {
         self.isHoliday = isHoliday
     }
     
-    enum EventSummary: Equatable {
-        enum Bound {
-            case start
-            case end
-            
-            init?(_ weekDay: Int, _ weekDaysRangs: ClosedRange<Int>) {
-                if weekDaysRangs == weekDay...weekDay {
-                    return nil
-                } else if weekDaysRangs.lowerBound == weekDay {
-                    self = .start
-                } else if weekDaysRangs.upperBound == weekDay {
-                    self = .end
-                } else {
-                    return nil
-                }
-            }
-        }
-        case blank
-        case event(EventId, Bound?)
-    }
-    var events: [EventSummary] = []
-    
     var identifier: String {
         "\(year)-\(month)-\(day)"
     }
     
-    init(_ day: CalendarComponent.Day, month: Int, stack: [[EventOnWeek]]) {
+    init(_ day: CalendarComponent.Day, month: Int) {
         self.year = day.year
         self.month = day.month
         self.day = day.day
         self.isNotCurrentMonth = day.month != month
-        self.events = stack.map { eventsRow in
-            let eventOnThisDay = eventsRow.first(where: { $0.weekDaysRange ~= day.weekDay })
-            return eventOnThisDay.map { .event($0.eventId, .init(day.weekDay, $0.weekDaysRange)) } ?? .blank
-        }
         self.isWeekEnd = DayOfWeeks(rawValue: day.weekDay)?.isWeekEnd == true
         self.isHoliday = day.holiday != nil
     }
 }
 
 struct WeekRowModel: Equatable {
+    let id: String
     let days: [DayCellViewModel]
     
-    init(days: [DayCellViewModel]) {
+    init(_ id: String, _ days: [DayCellViewModel]) {
+        self.id = id
         self.days = days
     }
     
-    init(_ week: CalendarComponent.Week, month: Int, stack: [[EventOnWeek]]) {
+    init(_ week: CalendarComponent.Week, month: Int) {
+        self.id = week.id
         self.days = week.days.map { day -> DayCellViewModel in
-            return .init(day, month: month, stack: stack)
+            return .init(day, month: month)
         }
     }
 }
 
-struct EventDetailModel: Equatable {
+
+// MARK: Event components
+
+enum EventId: Equatable {
+    case todo(String)
+    case schedule(String, turn: Int)
+    case holiday(_ dateString: String)
     
-    let eventId: EventId
-    let name: String
-    let colorHex: String
+    var isHoliday: Bool {
+        guard case .holiday = self else { return false }
+        return true
+    }
 }
 
+struct WeekEventLineModel: Equatable {
+    
+    var eventId: EventId { self.eventOnWeek.eventId }
+    let eventOnWeek: EventOnWeek
+    let colorHex: String
+    var isStartOnWeek: Bool = false
+    var isEndOnWeek: Bool = false
+    
+    init(_ eventOnWeek: EventOnWeek, _ tag: EventTag?) {
+        self.eventOnWeek = eventOnWeek
+        self.colorHex = tag?.colorHex ?? "0xFF0000"
+        self.isStartOnWeek = eventOnWeek.daysSequence.lowerBound == 1
+        self.isEndOnWeek = eventOnWeek.daysSequence.upperBound == 7
+    }
+}
+
+typealias WeekEventStackViewModel = [[WeekEventLineModel]]
 
 // MARK: - SingleMonthViewModel
 
@@ -140,6 +130,7 @@ protocol SingleMonthViewModel: AnyObject, Sendable, SingleMonthSceneInteractor {
     var weekModels: AnyPublisher<[WeekRowModel], Never> { get }
     var currentSelectDayIdentifier: AnyPublisher<String?, Never> { get }
     var todayIdentifier: AnyPublisher<String, Never> { get }
+    func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never>
 }
 
 // MARK: - SingleMonthViewModelImple
@@ -150,17 +141,20 @@ final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable
     private let calendarSettingUsecase: CalendarSettingUsecase
     private let todoUsecase: TodoEventUsecase
     private let scheduleEventUsecase: ScheduleEventUsecase
+    private let eventTagUsecase: EventTagUsecase
     
     init(
         calendarUsecase: CalendarUsecase,
         calendarSettingUsecase: CalendarSettingUsecase,
         todoUsecase: TodoEventUsecase,
-        scheduleEventUsecase: ScheduleEventUsecase
+        scheduleEventUsecase: ScheduleEventUsecase,
+        eventTagUsecase: EventTagUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.todoUsecase = todoUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
+        self.eventTagUsecase = eventTagUsecase
         
         self.internalBind()
     }
@@ -177,6 +171,8 @@ final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable
         let todoEventsMap = CurrentValueSubject<[String: TodoEvent], Never>([:])
         let scheduleEventsMap = CurrentValueSubject<[String: ScheduleEvent], Never>([:])
         let userSelectedDay = CurrentValueSubject<DayCellViewModel?, Never>(nil)
+        let eventStackMap = CurrentValueSubject<[String: WeekEventStack], Never>([:])
+        let eventTagMap = CurrentValueSubject<[String: EventTag], Never>([:])
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -194,6 +190,64 @@ final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable
             self?.subject.currentMonthInfo.send(totalComponent)
         })
         .store(in: &self.cancellables)
+        
+        typealias CurrentMonthAndEvent = (CurrentMonthInfo, [CalendarEvent])
+        let withEventsInThisMonth: (CurrentMonthInfo) -> AnyPublisher<CurrentMonthAndEvent, Never>
+        withEventsInThisMonth = { [weak self] month in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            return self.calendarEvents(from: month)
+                .map { (month, $0) }
+                .eraseToAnyPublisher()
+        }
+        
+        let arrangeEventStacks: (CurrentMonthAndEvent) -> [String: WeekEventStack]
+        arrangeEventStacks = { pair in
+            let (current, events) = pair
+            let weeks = current.component.weeks
+            let stackBuilder = WeekEventStackBuilder(current.timeZone)
+            return weeks.reduce(into: [String: WeekEventStack]()) { acc, week in
+                let stack = stackBuilder.build(week, events: events)
+                acc[week.id] = stack
+            }
+        }
+        self.subject.currentMonthInfo.compactMap { $0 }
+            .map(withEventsInThisMonth)
+            .switchToLatest()
+            .map(arrangeEventStacks)
+            .subscribe(on: DispatchQueue.global(qos: .userInitiated))
+            .sink(receiveValue: { [weak self] stackMap in
+                self?.subject.eventStackMap.send(stackMap)
+            })
+            .store(in: &self.cancellables)
+        
+        let loadTags: (Set<String>) -> AnyPublisher<[String: EventTag], Never> = { [weak self] ids in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            return self.eventTagUsecase.eventTags(Array(ids))
+                .eraseToAnyPublisher()
+        }
+        
+        requireEventTagIds
+            .removeDuplicates()
+            .map(loadTags)
+            .switchToLatest()
+            .subscribe(on: DispatchQueue.global(qos: .userInitiated))
+            .sink(receiveValue: { [weak self] tagMap in
+                self?.subject.eventTagMap.send(tagMap)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private var requireEventTagIds: AnyPublisher<Set<String>, Never> {
+        let transform: ([TodoEvent], [ScheduleEvent]) -> Set<String> = { todos, schedules in
+            return (todos.compactMap { $0.eventTagId } + schedules.compactMap { $0.eventTagId })
+                |> Set.init
+        }
+        return Publishers.CombineLatest(
+            self.subject.todoEventsMap.map { Array($0.values) },
+            self.subject.scheduleEventsMap.map { Array($0.values) }
+        )
+        .map(transform)
+        .eraseToAnyPublisher()
     }
 }
 
@@ -266,32 +320,16 @@ extension SingleMonthViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    // TODO: vc or view에서 구독시에 subscribeOn 쓰는것으로
-    // TODO: throttle 걸건지도
     var weekModels: AnyPublisher<[WeekRowModel], Never> {
-        
-        typealias CurrentMonthAndEvents = (CurrentMonthInfo, [CalendarEvent])
-        
-        let withCalendarEventsInThisMonth: (CurrentMonthInfo) -> AnyPublisher<CurrentMonthAndEvents, Never>
-        withCalendarEventsInThisMonth = { [weak self] info in
-            guard let self = self else { return Empty().eraseToAnyPublisher() }
-            return self.calendarEvents(from: info)
-                .map { (info, $0) }
-                .eraseToAnyPublisher()
-        }
-        
-        let transform: (CurrentMonthInfo, [CalendarEvent]) -> [WeekRowModel]
-        transform = { current, events in
-            let stackBuilder = WeekEventStackBuilder(current.timeZone)
+
+        let transform: (CurrentMonthInfo) -> [WeekRowModel]
+        transform = { current in
             return current.component.weeks.map { week -> WeekRowModel in
-                let stack = stackBuilder.build(week, events: events).eventStacks
-                return .init(week, month: current.component.month, stack: stack)
+                return .init(week, month: current.component.month)
             }
         }
         
         return self.subject.currentMonthInfo.compactMap { $0 }
-            .map(withCalendarEventsInThisMonth)
-            .switchToLatest()
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
@@ -324,6 +362,26 @@ extension SingleMonthViewModelImple {
             .map { "\($0.year)-\($0.month)-\($0.day)" }
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never> {
+        let transform: ([String: WeekEventStack], [String: EventTag]) -> WeekEventStackViewModel?
+        transform = { stacks, tags -> WeekEventStackViewModel? in
+            guard let stack = stacks[weekId] else { return nil }
+            return stack.eventStacks.map { events -> [WeekEventLineModel] in
+                return events.map { event -> WeekEventLineModel in
+                    let tag = event.eventTagId.flatMap { tags[$0] }
+                    return WeekEventLineModel(event, tag)
+                }
+            }
+        }
+        return Publishers.CombineLatest(
+            self.subject.eventStackMap,
+            self.subject.eventTagMap
+        )
+        .compactMap(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
 }
 

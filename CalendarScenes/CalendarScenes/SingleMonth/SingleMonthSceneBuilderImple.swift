@@ -34,7 +34,8 @@ extension SingleMonthSceneBuilderImple: SingleMonthSceneBuilder {
             calendarUsecase: self.usecaseFactory.makeCalendarUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
-            scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase()
+            scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase()
         )
         // TODO: setup router
         let viewController = SingleMonthViewController(

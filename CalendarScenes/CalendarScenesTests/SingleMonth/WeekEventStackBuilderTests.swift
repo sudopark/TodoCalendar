@@ -38,7 +38,7 @@ class WeekEventStackBuilderTests: BaseTestCase {
         let timeStamps = dates.lowerBound.timeIntervalSince1970
             ..<
             dates.upperBound.timeIntervalSince1970
-        return .init(.todo("\(daysRange)"), .period(timeStamps))
+        return .init(.todo("\(daysRange)"), "some", .period(timeStamps))
     }
     
     private func makeBuilder() -> WeekEventStackBuilder {
@@ -68,7 +68,7 @@ extension WeekEventStackBuilderTests {
         func parameterizeTest(_ timeZone: TimeZone) {
             // given
             // when
-            let event = CalendarEvent(.todo("dummy"), time, in: timeZone)
+            let event = CalendarEvent(.todo("dummy"), "some", time, in: timeZone)
             
             // then
             let expectedRange = self.dummyRange(in: timeZone)
@@ -177,7 +177,7 @@ extension WeekEventStackBuilderTests {
         ])
         
         // then
-        let rangeLists = stack.eventStacks.map { row in row.map { $0.weekDaysRange } }
+        let rangeLists = stack.eventStacks.map { row in row.map { $0.daysSequence } }
         XCTAssertEqual(rangeLists, [
             [ (1...7) ],
             [ (1...3), (4...4), (5...7) ],
@@ -195,7 +195,7 @@ private extension EventId {
         switch self {
         case .todo(let id): return "t:\(id)"
         case .schedule(let id, _): return "s:\(id)"
-        case .holiday(let date, _): return "h:\(date)"
+        case .holiday(let date): return "h:\(date)"
         }
     }
 }

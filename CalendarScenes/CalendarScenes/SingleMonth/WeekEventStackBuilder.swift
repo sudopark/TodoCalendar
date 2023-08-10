@@ -44,21 +44,27 @@ struct CalendarEvent: Equatable {
     }
 
     let eventId: EventId
+    let name: String
     let time: EventTimeOnCalendar
+    let eventTagId: String?
     
-    init(_ eventId: EventId, _ time: EventTimeOnCalendar) {
+    init(_ eventId: EventId, _ name: String, _ time: EventTimeOnCalendar, _ eventTagId: String? = nil) {
         self.eventId = eventId
+        self.name = name
         self.time = time
+        self.eventTagId = eventTagId
     }
     
-    init(_ eventId: EventId, _ time: EventTime, in timeZone: TimeZone) {
+    init(_ eventId: EventId, _ name: String, _ time: EventTime, _ eventTagId: String? = nil, in timeZone: TimeZone) {
         self.eventId = eventId
+        self.name = name
         self.time = EventTimeOnCalendar(time, timeZone: timeZone)
+        self.eventTagId = eventTagId
     }
     
     init?(_ todo: TodoEvent, in timeZone: TimeZone) {
         guard let time = todo.time else { return nil }
-        self.init(.todo(todo.uuid), time, in: timeZone)
+        self.init(.todo(todo.uuid), todo.name, time, todo.eventTagId, in: timeZone)
     }
     
     init?(_ holiday: Holiday, timeZone: TimeZone) {
@@ -72,8 +78,11 @@ struct CalendarEvent: Equatable {
         guard let start = calendar.date(from: startComponents),
               let end = calendar.date(from: endComponents)
         else { return nil }
-        self.eventId = .holiday(holiday.dateString, name: holiday.name)
+        self.eventId = .holiday(holiday.dateString)
+        self.name = holiday.name
         self.time = .period(start.timeIntervalSince1970..<end.timeIntervalSince1970)
+        // TODO: holiday용 tag 하나 만들 필요 있음
+        self.eventTagId = nil
     }
     
     static func events(
@@ -82,7 +91,13 @@ struct CalendarEvent: Equatable {
     ) -> [CalendarEvent] {
         return scheduleEvnet.repeatingTimes
             .map {
-                CalendarEvent(.schedule(scheduleEvnet.uuid, turn: $0.turn), $0.time, in: timeZone)
+                CalendarEvent(
+                    .schedule(scheduleEvnet.uuid, turn: $0.turn),
+                    scheduleEvnet.name,
+                    $0.time,
+                    scheduleEvnet.eventTagId,
+                    in: timeZone
+                )
             }
     }
 }
@@ -90,30 +105,47 @@ struct CalendarEvent: Equatable {
 
 // MARK: - EventOnWeek + WeekEventStack
 
-struct EventOnWeek {
+struct EventOnWeek: Equatable {
+    let name: String
     let eventRangesOnWeek: Range<TimeInterval>
-    let weekDaysRange: ClosedRange<Int>
+    let overlapDays: Set<Int>
+    let daysSequence: ClosedRange<Int>
     let eventId: EventId
+    let eventTagId: String?
     
-    fileprivate var length: Int { self.weekDaysRange.count }
+    fileprivate var length: Int { self.overlapDays.count }
     
     init?(_ event: CalendarEvent, on weekRange: Range<TimeInterval>, with calendar: Calendar) {
         guard let overlapRange = event.time.clamped(to: weekRange) else { return nil }
+        self.name = event.name
         self.eventId = event.eventId
         self.eventRangesOnWeek = overlapRange
-        guard let range = calendar.eventWeekDaysRange(overlapRange, weekRange)
-        else { return nil }
-        self.weekDaysRange = range
+        
+        let allWeekDays = calendar.betweenDays(
+            Date(timeIntervalSince1970: weekRange.lowerBound),
+            to: Date(timeIntervalSince1970: weekRange.upperBound)
+        )
+        let overlapDays = calendar.overlapEventDays(overlapRange, weekRange)
+        guard let sequence = allWeekDays.weekDaysSubSequences(overlapDays) else { return nil }
+        self.overlapDays = overlapDays |> Set.init
+        self.daysSequence = sequence
+        self.eventTagId = event.eventTagId
     }
     
     init(
-        eventRangesOnWeek: Range<TimeInterval>,
-        weekDaysRange: ClosedRange<Int>,
-        eventId: EventId
+        _ eventRangesOnWeek: Range<TimeInterval>,
+        _ overlapDays: [Int],
+        _ daysSequence: ClosedRange<Int>,
+        _ eventId: EventId,
+        _ name: String,
+        _ eventTagId: String? = nil
     ) {
         self.eventRangesOnWeek = eventRangesOnWeek
-        self.weekDaysRange = weekDaysRange
+        self.overlapDays = overlapDays |> Set.init
+        self.daysSequence = daysSequence
         self.eventId = eventId
+        self.name = name
+        self.eventTagId = eventTagId
     }
 }
 
@@ -141,7 +173,7 @@ extension WeekEventStackBuilder {
         
         let eventsOnThisWeek = events
             .compactMap { EventOnWeek($0, on: weekRange, with: self.calendar) }
-            .filter { !$0.weekDaysRange.isEmpty }
+            .filter { !$0.daysSequence.isEmpty }
             .sorted(by: { $0.length > $1.length })
         
         let sorting: ([EventOnWeek], [EventOnWeek]) -> Bool = { lhs, rhs in
@@ -149,7 +181,7 @@ extension WeekEventStackBuilder {
             guard lhsLength == rhsLength else {
                 return lhsLength > rhsLength
             }
-            let (firstLhs, firstRhs) = (lhs.firstEventWeekDay, rhs.firstEventWeekDay)
+            let (firstLhs, firstRhs) = (lhs.firstEventDaySequence, rhs.firstEventDaySequence)
             guard firstLhs == firstRhs else {
                 return firstLhs < firstRhs
             }
@@ -172,19 +204,19 @@ extension WeekEventStackBuilder {
         else { return stacks }
         
         let target = remains.removeFirst()
-        if target.weekDaysRange == (1...7) {
+        if target.daysSequence == (1...7) {
             return self.stack(remains: remains, stacks: [[target]] + stacks)
         }
         
         let (leftCandidate, rightCandidate, dropouts) = remains.neighborCandidates(from: target)
         
         let (leftDropouts, leftNeighbors) = self.findNeighors(
-            0...target.weekDaysRange.lowerBound-1,
+            0...target.daysSequence.lowerBound-1,
             leftCandidate
         )
         
         let (rightDropouts, rightNeigbors) = self.findNeighors(
-            target.weekDaysRange.upperBound+1...8,
+            target.daysSequence.upperBound+1...8,
             rightCandidate
         )
         
@@ -206,9 +238,9 @@ extension WeekEventStackBuilder {
             else {
                 return lhs.length > rhs.length
             }
-            guard lhs.weekDaysRange.lowerBound == rhs.weekDaysRange.lowerBound
+            guard lhs.daysSequence.lowerBound == rhs.daysSequence.lowerBound
             else {
-                return lhs.weekDaysRange.lowerBound < rhs.weekDaysRange.lowerBound
+                return lhs.daysSequence.lowerBound < rhs.daysSequence.lowerBound
             }
             return lhs.eventId.isHoliday
         }
@@ -224,12 +256,12 @@ extension WeekEventStackBuilder {
         let (leftCandidate, rightCandidate, dropouts) = remains.neighborCandidates(from: target)
         
         let (leftDropouts, leftNeighbors) = self.findNeighors(
-            0...target.weekDaysRange.lowerBound-1,
+            0...target.daysSequence.lowerBound-1,
             leftCandidate
         )
         
         let (rightDropouts, rightNeighbors) = self.findNeighors(
-            target.weekDaysRange.upperBound+1...8,
+            target.daysSequence.upperBound+1...8,
             rightCandidate
         )
         
@@ -252,17 +284,25 @@ private extension Calendar {
         return lowerBoundDate.timeIntervalSince1970..<upperBoundDate.timeIntervalSince1970
     }
     
-    func eventWeekDaysRange(
+    func overlapEventDays(
         _ eventOnWeekRange: Range<TimeInterval>,
         _ weekRange: Range<TimeInterval>
-    ) -> ClosedRange<Int>? {
+    ) -> [Int] {
         
         let firstDate = Date(timeIntervalSince1970: eventOnWeekRange.lowerBound)
         let lastDate = Date(timeIntervalSince1970: eventOnWeekRange.upperBound)
-        let firstDateWeekDay = self.component(.weekday, from: firstDate)
-        let lastDateWeekDay = self.component(.weekday, from: lastDate)
-        guard firstDateWeekDay <= lastDateWeekDay else { return nil }
-        return (firstDateWeekDay...lastDateWeekDay)
+        
+        return self.betweenDays(firstDate, to: lastDate)
+    }
+    
+    func betweenDays(_ from: Date, to: Date) -> [Int] {
+        var cursor = self.startOfDay(for: from); let end = self.startOfDay(for: to)
+        var sender: [Int] = []; let interval: TimeInterval = 24 * 3600
+        while cursor.compare(end) != .orderedDescending {
+            sender.append(self.component(.day, from: cursor))
+            cursor = cursor.addingTimeInterval(interval)
+        }
+        return sender
     }
 }
 
@@ -273,14 +313,14 @@ private extension Array where Element == EventOnWeek {
         right: [EventOnWeek],
         dropouts: [EventOnWeek]
     ) {
-        let leftBound = center.weekDaysRange.lowerBound
-        let rightBound = center.weekDaysRange.upperBound
+        let leftBound = center.daysSequence.lowerBound
+        let rightBound = center.daysSequence.upperBound
         
         var (left, right, notCandidate) = ([EventOnWeek](), [EventOnWeek](), [EventOnWeek]())
         self.forEach {
-            if $0.weekDaysRange.upperBound < leftBound {
+            if $0.daysSequence.upperBound < leftBound {
                 left.append($0)
-            } else if rightBound < $0.weekDaysRange.lowerBound {
+            } else if rightBound < $0.daysSequence.lowerBound {
                 right.append($0)
             } else {
                 notCandidate.append($0)
@@ -292,13 +332,13 @@ private extension Array where Element == EventOnWeek {
     
     var eventExistsLength: Int {
         return self.reduce(into: Set<Int>()) { acc, event in
-            event.weekDaysRange.forEach { acc.insert($0) }
+            event.daysSequence.forEach { acc.insert($0) }
         }
         .count
     }
     
-    var firstEventWeekDay: Int {
-        return self.first?.weekDaysRange.lowerBound ?? 8
+    var firstEventDaySequence: Int {
+        return self.first?.daysSequence.lowerBound ?? 8
     }
 }
 
@@ -308,5 +348,17 @@ private extension Range where Bound == TimeInterval {
         let utcRange = self.lowerBound+secondsFromGMT..<self.upperBound+secondsFromGMT
         let givenTimeZoneSecondsFromGMT = timeZone.secondsFromGMT() |> TimeInterval.init
         return utcRange.lowerBound-givenTimeZoneSecondsFromGMT..<utcRange.upperBound-givenTimeZoneSecondsFromGMT
+    }
+}
+
+private extension Array where Element == Int {
+    
+    func weekDaysSubSequences(_ slice: [Int]) -> ClosedRange<Int>? {
+        guard let sliceFirst = slice.first, let sliceLast = slice.last,
+              let firstIndex = self.firstIndex(of: sliceFirst),
+              let lastIndex = self.lastIndex(of: sliceLast),
+              firstIndex <= lastIndex
+        else { return nil }
+        return (firstIndex+1...lastIndex+1)
     }
 }

@@ -14,10 +14,12 @@ import Extensions
 public struct CalendarComponent: Equatable {
     
     public struct Week: Equatable {
+        public let id: String
         public let days: [Day]
         
         public init(days: [Day]) {
             self.days = days
+            self.id = "\(days.first?.identifier ?? "?")-\(days.last?.identifier ?? "?")"
         }
     }
     
@@ -27,6 +29,10 @@ public struct CalendarComponent: Equatable {
         public let day: Int
         public let weekDay: Int
         public var holiday: Holiday?
+        
+        var identifier: String {
+            return "\(year)-\(month)-\(day)"
+        }
         
         public init(year: Int, month: Int, day: Int, weekDay: Int) {
             self.year = year
