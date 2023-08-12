@@ -112,7 +112,8 @@ struct WeekEventLineModel: Equatable {
     
     init(_ eventOnWeek: EventOnWeek, _ tag: EventTag?) {
         self.eventOnWeek = eventOnWeek
-        self.colorHex = tag?.colorHex ?? "0xFF0000"
+        // TODO: 임시로 디폴트 색 지정
+        self.colorHex = tag?.colorHex ?? "#0000FF"
         self.isStartOnWeek = eventOnWeek.daysSequence.lowerBound == 1
         self.isEndOnWeek = eventOnWeek.daysSequence.upperBound == 7
     }
