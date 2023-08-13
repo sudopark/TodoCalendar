@@ -107,19 +107,46 @@ struct WeekEventLineModel: Equatable {
     var eventId: EventId { self.eventOnWeek.eventId }
     let eventOnWeek: EventOnWeek
     let colorHex: String
-    var isStartOnWeek: Bool = false
-    var isEndOnWeek: Bool = false
     
     init(_ eventOnWeek: EventOnWeek, _ tag: EventTag?) {
         self.eventOnWeek = eventOnWeek
         // TODO: 임시로 디폴트 색 지정
         self.colorHex = tag?.colorHex ?? "#0000FF"
-        self.isStartOnWeek = eventOnWeek.daysSequence.lowerBound == 1
-        self.isEndOnWeek = eventOnWeek.daysSequence.upperBound == 7
     }
 }
 
+struct EventMoreModel: Equatable {
+    let daySequence: Int
+    let dayIdentifier: String
+    let moreCount: Int
+}
+
 typealias WeekEventStackViewModel = [[WeekEventLineModel]]
+
+extension WeekEventStackViewModel {
+    
+    func eventMores(with maxSize: Int) -> [EventMoreModel] {
+        guard maxSize > 0, maxSize < self.count else { return [] }
+        let willHiddenRows = self[maxSize...]
+        let willHiddenEventsPerDaySeq = willHiddenRows.reduce(into: [Int: [WeekEventLineModel]]()) { acc, lines in
+            lines.forEach { line in
+                line.eventOnWeek.daysSequence.forEach {
+                    acc[$0] = (acc[$0] ?? []) + [line]
+                }
+            }
+        }
+        return willHiddenEventsPerDaySeq.compactMap {
+            guard let event = $0.value.first?.eventOnWeek,
+                  let dayIdentifier = event.daysIdentifiers[safe: $0.key-1]
+            else { return nil }
+            return EventMoreModel(
+                daySequence: $0.key,
+                dayIdentifier: dayIdentifier,
+                moreCount: $0.value.count
+            )
+        }
+    }
+}
 
 // MARK: - SingleMonthViewModel
 

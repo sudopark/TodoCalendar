@@ -41,6 +41,11 @@ struct CalendarEvent: Equatable {
                 return clamped.isEmpty ? nil : clamped
             }
         }
+        
+        var isPeriod: Bool {
+            guard case .period = self else { return false }
+            return true
+        }
     }
 
     let eventId: EventId
@@ -112,6 +117,7 @@ struct EventOnWeek: Equatable {
     let daysSequence: ClosedRange<Int>
     let eventId: EventId
     let eventTagId: String?
+    var hasPeriod: Bool = false
     
     fileprivate var length: Int { self.overlapDays.count }
     
@@ -130,6 +136,7 @@ struct EventOnWeek: Equatable {
         self.overlapDays = overlapDays |> Set.init
         self.daysSequence = sequence
         self.eventTagId = event.eventTagId
+        self.hasPeriod = event.time.isPeriod
     }
     
     init(

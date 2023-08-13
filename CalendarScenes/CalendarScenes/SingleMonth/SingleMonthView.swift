@@ -37,8 +37,9 @@ struct SingleMonthContainerView: View {
 private enum Metric {
     static let dayMinHeight: CGFloat = 80
     static let dayMaxHeight: CGFloat = 100
-    static let eventRowHeight: CGFloat = 15
+    static let eventRowHeight: CGFloat = 18
     static let eventTopMargin: CGFloat = 10
+    static let eventInterspacing: CGFloat = 2
 }
 
 struct SingleMonthView: View {
@@ -113,6 +114,7 @@ private struct WeekRowView: View {
     private let week: WeekRowModel
     private let viewModel: SingleMonthViewModel
     private let expectSize: CGSize
+    private var dayWidth: CGFloat { expectSize.width / 7 }
     @EnvironmentObject private var appearance: ViewAppearance
     
     @State private var eventStackModel: WeekEventStackViewModel = []
@@ -200,41 +202,69 @@ private struct WeekRowView: View {
         
         let size = min(maxDrawableEventRowCount, self.eventStackModel.count)
         // TODO: 각 일자별 more 필요한 지점 구해야함 + 지점별 개별 more count 구해야함
-        let dayWidth = expectSize.width / 7
         return VStack(alignment: .leading, spacing: 2) {
             ForEach(0..<size, id: \.self) {
                 return eventRowView(self.eventStackModel[$0], dayWith: dayWidth)
+                return eventRowView(self.eventStackModel[$0])
             }
         }
         .padding(.top, Metric.eventTopMargin)
         .asAnyView()
     }
     
-    private func eventRowView(_ lines: [WeekEventLineModel], dayWith: CGFloat) -> some View {
-        return ZStack() {
+    private func eventRowView(_ lines: [WeekEventLineModel]) -> some View {
+        return ZStack(alignment: .leading) {
             ForEach(0..<lines.count, id: \.self) {
-                return eventLineView(lines[$0], dayWidth: dayWith)
+                return eventLineView(lines[$0])
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func eventLineView(_ line: WeekEventLineModel, dayWidth: CGFloat) -> some View {
-        let offsetX = CGFloat(line.eventOnWeek.daysSequence.lowerBound-1) * dayWidth
-        let width = CGFloat(line.eventOnWeek.daysSequence.count) * dayWidth
-        return Text(line.eventOnWeek.name)
-            .font(self.appearance.fontSet.eventOnDay.asFont)
-            .frame(width: width, alignment: .leading)
-            .background(Color.from(line.colorHex))
-            .offset(x: offsetX)
+    private func eventLineView(_ line: WeekEventLineModel) -> some View {
+        let offsetX = CGFloat(line.eventOnWeek.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
+        let width = CGFloat(line.eventOnWeek.daysSequence.count) * dayWidth - Metric.eventInterspacing
+        let background: some View = {
+            if line.eventOnWeek.hasPeriod {
+                return RoundedRectangle(cornerRadius: 2).fill(
+                    Color.from(line.colorHex)?.opacity(0.5) ?? .clear
+                )
+                .asAnyView()
+            } else {
+                return EmptyView().asAnyView()
+            }
+        }()
+        let textColor: Color = {
+            return self.selectedDay == line.eventOnWeek.eventStartDayIdentifierOnWeek
+            ? self.appearance.colorSet.eventSelected.asColor
+            : self.appearance.colorSet.event.asColor
+        }()
+        return HStack(spacing: 2) {
+             RoundedRectangle(cornerRadius: 12)
+                 .fill(Color.from(line.colorHex) ?? .clear)
+                 .frame(width: 3, height: 12)
+                 .padding(.leading, 1)
+             
+             Text(line.eventOnWeek.name)
+                 .font(self.appearance.fontSet.eventOnDay.asFont)
+                 .foregroundColor(textColor)
+                 .lineLimit(1)
+        }
+         .frame(width: width, alignment: .leading)
+         .background(background)
+         .offset(x: offsetX)
+    }
     }
 }
 
 // MARK: - preview
 
-final class DummySingleMonthViewModel: SingleMonthViewModel {
+final class DummySingleMonthViewModel: SingleMonthViewModel, @unchecked Sendable {
     
-    func select(_ day: DayCellViewModel) { }
+    private let selectedDay = CurrentValueSubject<String?, Never>(nil)
+    func select(_ day: DayCellViewModel) {
+        self.selectedDay.send(day.identifier)
+    }
 
     var weekDays: AnyPublisher<[WeekDayModel], Never> {
         return Just([
@@ -294,7 +324,9 @@ final class DummySingleMonthViewModel: SingleMonthViewModel {
         }
     }
 
-    var currentSelectDayIdentifier: AnyPublisher<String?, Never> { Empty().eraseToAnyPublisher() }
+    var currentSelectDayIdentifier: AnyPublisher<String?, Never> {
+        return self.selectedDay.eraseToAnyPublisher()
+    }
 
     var todayIdentifier: AnyPublisher<String, Never> { Empty().eraseToAnyPublisher() }
 
