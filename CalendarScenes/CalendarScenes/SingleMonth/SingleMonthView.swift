@@ -12,28 +12,74 @@ import Optics
 import Domain
 import CommonPresentation
 
-
-extension DayCellViewModel: Identifiable {
+final class SingleMonthViewState: ObservableObject {
     
-    typealias ID = String
-    var id: String { self.identifier }
+    @Published fileprivate var weekDays: [WeekDayModel] = []
+    @Published fileprivate var weeks: [WeekRowModel] = []
+    @Published fileprivate var selectedDay: String?
+    @Published fileprivate var today: String?
+    var eventStacks: (String) -> AnyPublisher<WeekEventStackViewModel, Never> = { _ in
+        Empty().eraseToAnyPublisher()
+    }
+    
+    private var didBind = false
+    private var cancellables: Set<AnyCancellable> = []
+    
+    func bind(_ viewModel: SingleMonthViewModel) {
+        guard self.didBind == false else { return }
+        self.didBind = true
+        
+        self.eventStacks = viewModel.eventStack(at:)
+        
+        viewModel.weekDays
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] days in
+                self?.weekDays = days
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.weekModels
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] models in
+                self?.weeks = models
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.currentSelectDayIdentifier
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] identifier in
+                self?.selectedDay = identifier
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.todayIdentifier
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] identifier in
+                self?.today = identifier
+            })
+            .store(in: &self.cancellables)
+    }
 }
 
 struct SingleMonthContainerView: View {
     
-    private let viewModel: SingleMonthViewModel
+    @StateObject private var state: SingleMonthViewState = .init()
     private let viewAppearance: ViewAppearance
     
+    var stateBinding: (SingleMonthViewState) -> Void = { _ in }
     var daySelected: (DayCellViewModel) -> Void = { _ in }
     
-    init(viewModel: SingleMonthViewModel, viewAppearance: ViewAppearance) {
-        self.viewModel = viewModel
+    init(viewAppearance: ViewAppearance) {
         self.viewAppearance = viewAppearance
     }
     
     var body: some View {
-        return SingleMonthView(viewModel)
+        return SingleMonthView()
             .eventHandler(\.daySelected, self.daySelected)
+            .onAppear {
+                self.stateBinding(self.state)
+            }
+            .environmentObject(state)
             .environmentObject(viewAppearance)
     }
 }
@@ -49,19 +95,10 @@ private enum Metric {
 
 struct SingleMonthView: View {
     
-    @State private var weekdays: [WeekDayModel] = []
-    @State private var weeks: [WeekRowModel] = []
-    @State private var selectedDay: String?
-    @State private var today: String?
-    
+    @EnvironmentObject private var state: SingleMonthViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
     fileprivate var daySelected: (DayCellViewModel) -> Void = { _ in }
-    
-    private let viewModel: SingleMonthViewModel
-    init(_ viewModel: SingleMonthViewModel) {
-        self.viewModel = viewModel
-    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -72,12 +109,6 @@ struct SingleMonthView: View {
         }
         .padding([.leading, .trailing], 8)
         .background(self.appearance.colorSet.dayBackground.asColor)
-        .onReceive(self.viewModel.weekDays.receive(on: RunLoop.main)) { self.weekdays = $0 }
-        .onReceive(self.viewModel.weekModels.receive(on: RunLoop.main)) {
-            self.weeks = $0
-        }
-        .onReceive(self.viewModel.currentSelectDayIdentifier.receive(on: RunLoop.main)) { self.selectedDay = $0 }
-        .onReceive(self.viewModel.todayIdentifier.receive(on: RunLoop.main)) { self.today = $0 }
     }
     
     private var headerView: some View {
@@ -87,7 +118,7 @@ struct SingleMonthView: View {
             : self.appearance.colorSet.weekDayText.asColor
         }
         return HStack {
-            ForEach(self.weekdays, id: \.symbol) { weekDay in
+            ForEach(self.state.weekDays, id: \.symbol) { weekDay in
                 Text(weekDay.symbol)
                     .font(self.appearance.fontSet.weekday.asFont)
                     .foregroundColor(textColor(weekDay))
@@ -98,7 +129,7 @@ struct SingleMonthView: View {
     
     private func gridWeeksView(_ proxy: GeometryProxy) -> some View {
         let height: CGFloat = {
-            let rowCount = self.weeks.count
+            let rowCount = self.state.weeks.count
             guard rowCount > 0 else { return 0 }
             let expectHeight = proxy.size.height / CGFloat(rowCount)
             return max(
@@ -108,9 +139,10 @@ struct SingleMonthView: View {
         }()
         let expectSize = CGSize(width: proxy.size.width, height: height)
         return VStack {
-            ForEach(self.weeks, id: \.id) {
-                WeekRowView(week: $0, viewModel, expectSize, $selectedDay, $today)
+            ForEach(self.state.weeks, id: \.id) {
+                WeekRowView(week: $0, expectSize)
                     .eventHandler(\.daySelected, self.daySelected)
+                    .environmentObject(state)
                     .environmentObject(appearance)
             }
         }
@@ -120,29 +152,22 @@ struct SingleMonthView: View {
 private struct WeekRowView: View {
     
     private let week: WeekRowModel
-    private let viewModel: SingleMonthViewModel
     private let expectSize: CGSize
     private var dayWidth: CGFloat { expectSize.width / 7 }
+    
+    @EnvironmentObject private var state: SingleMonthViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
     @State private var eventStackModel: WeekEventStackViewModel = []
-    @Binding private var selectedDay: String?
-    @Binding private var today: String?
     
     fileprivate var daySelected: (DayCellViewModel) -> Void = { _ in }
     
     init(
         week: WeekRowModel,
-        _ viewModel: SingleMonthViewModel,
-        _ expectSize: CGSize,
-        _ selectedDay: Binding<String?>,
-        _ today: Binding<String?>
+        _ expectSize: CGSize
     ) {
         self.week = week
-        self.viewModel = viewModel
         self.expectSize = expectSize
-        self._selectedDay = selectedDay
-        self._today = today
     }
     
     var body: some View {
@@ -152,7 +177,7 @@ private struct WeekRowView: View {
             }
             eventStackView()
         }
-        .onReceive(viewModel.eventStack(at: week.id).receive(on: RunLoop.main)) {
+        .onReceive(state.eventStacks(week.id).receive(on: RunLoop.main)) {
             self.eventStackModel = $0
         }
     }
@@ -161,7 +186,7 @@ private struct WeekRowView: View {
         _ day: DayCellViewModel
     ) -> some View {
         let textColor: Color = {
-            if day.identifier == selectedDay {
+            if day.identifier == self.state.selectedDay {
                 return self.appearance.colorSet.selectedDayText.asColor
             } else if day.isHoliday {
                 return self.appearance.colorSet.holidayText.asColor
@@ -172,16 +197,16 @@ private struct WeekRowView: View {
             }
         }()
         let backgroundColor: Color = {
-            if day.identifier == self.selectedDay {
+            if day.identifier == self.state.selectedDay {
                 return self.appearance.colorSet.selectedDayBackground.asColor
-            } else if day.identifier == self.today {
+            } else if day.identifier == self.state.today {
                 return self.appearance.colorSet.todayBackground.asColor
             } else {
                 return self.appearance.colorSet.dayBackground.asColor
             }
         }()
         let opacity: Double = {
-            return day.identifier == self.selectedDay || day.isNotCurrentMonth == false
+            return day.identifier == self.state.selectedDay || day.isNotCurrentMonth == false
             ? 1.0 : 0.5
         }()
         return VStack {
@@ -243,7 +268,7 @@ private struct WeekRowView: View {
             }
         }()
         let textColor: Color = {
-            return self.selectedDay == line.eventOnWeek.eventStartDayIdentifierOnWeek
+            return self.state.selectedDay == line.eventOnWeek.eventStartDayIdentifierOnWeek
             ? self.appearance.colorSet.eventSelected.asColor
             : self.appearance.colorSet.event.asColor
         }()
@@ -265,7 +290,7 @@ private struct WeekRowView: View {
     
     private func eventMoreViews(_ moreModels: [EventMoreModel]) -> some View {
         let textColor: (EventMoreModel) -> Color = { model in
-            return self.selectedDay == model.dayIdentifier
+            return self.state.selectedDay == model.dayIdentifier
             ? self.appearance.colorSet.eventSelected.asColor
             : self.appearance.colorSet.event.asColor
         }
@@ -367,7 +392,9 @@ struct SingleMonthViewPreviewProvider: PreviewProvider {
     static var previews: some View {
         let viewModel = DummySingleMonthViewModel()
         let viewAppearance = ViewAppearance(color: .defaultLight, font: .systemDefault)
-        return SingleMonthView(viewModel)
-            .environmentObject(viewAppearance)
+        let containerView = SingleMonthContainerView(viewAppearance: viewAppearance)
+            .eventHandler(\.stateBinding, { $0.bind(viewModel) })
+            .eventHandler(\.daySelected, viewModel.select(_:))
+        return containerView
     }
 }
