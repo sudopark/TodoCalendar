@@ -27,8 +27,9 @@ final class SingleMonthViewController: UIHostingController<SingleMonthContainerV
         self.viewAppearance = viewAppearance
         
         let monthView = SingleMonthContainerView(
-            viewModel: viewModel, viewAppearance: viewAppearance
+            viewAppearance: viewAppearance
         )
+        .eventHandler(\.stateBinding, { $0.bind(viewModel) })
         .eventHandler(\.daySelected, viewModel.select(_:))
         super.init(rootView: monthView)
         
