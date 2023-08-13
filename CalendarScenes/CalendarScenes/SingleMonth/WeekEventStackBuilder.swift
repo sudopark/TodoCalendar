@@ -115,9 +115,12 @@ struct EventOnWeek: Equatable {
     let eventRangesOnWeek: Range<TimeInterval>
     let overlapDays: Set<Int>
     let daysSequence: ClosedRange<Int>
+    let daysIdentifiers: [String]
     let eventId: EventId
     let eventTagId: String?
     var hasPeriod: Bool = false
+    
+    var eventStartDayIdentifierOnWeek: String? { self.daysIdentifiers.first }
     
     fileprivate var length: Int { self.overlapDays.count }
     
@@ -135,6 +138,7 @@ struct EventOnWeek: Equatable {
         guard let sequence = allWeekDays.weekDaysSubSequences(overlapDays) else { return nil }
         self.overlapDays = overlapDays |> Set.init
         self.daysSequence = sequence
+        self.daysIdentifiers = calendar.daysIdentifiers(overlapRange)
         self.eventTagId = event.eventTagId
         self.hasPeriod = event.time.isPeriod
     }
@@ -143,6 +147,7 @@ struct EventOnWeek: Equatable {
         _ eventRangesOnWeek: Range<TimeInterval>,
         _ overlapDays: [Int],
         _ daysSequence: ClosedRange<Int>,
+        _ daysIdentifiers: [String],
         _ eventId: EventId,
         _ name: String,
         _ eventTagId: String? = nil
@@ -150,6 +155,7 @@ struct EventOnWeek: Equatable {
         self.eventRangesOnWeek = eventRangesOnWeek
         self.overlapDays = overlapDays |> Set.init
         self.daysSequence = daysSequence
+        self.daysIdentifiers = daysIdentifiers
         self.eventId = eventId
         self.name = name
         self.eventTagId = eventTagId
@@ -367,5 +373,30 @@ private extension Array where Element == Int {
               firstIndex <= lastIndex
         else { return nil }
         return (firstIndex+1...lastIndex+1)
+    }
+}
+
+private extension Calendar {
+
+    private func dayIdentifier(_ date: Date) -> String {
+        let (year, month, day) = (
+            self.component(.year, from: date),
+            self.component(.month, from: date),
+            self.component(.day, from: date)
+        )
+        return "\(year)-\(month)-\(day)"
+    }
+    
+    func daysIdentifiers(_ range: Range<TimeInterval>) -> [String] {
+        guard let lastDateOfEnd = self.endOfDay(for: .init(timeIntervalSince1970: range.upperBound))
+        else { return [] }
+        var cursor = Date(timeIntervalSince1970: range.lowerBound)
+        var sender: [String] = []
+        while self.compare(cursor, to: lastDateOfEnd, toGranularity: .day) != .orderedDescending {
+            sender.append(self.dayIdentifier(cursor))
+            
+            cursor = cursor.addingTimeInterval(24 * 3600)
+        }
+        return sender
     }
 }

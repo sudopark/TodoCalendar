@@ -230,12 +230,11 @@ extension SingleMonthViewModelImpleTests {
 // MARK: - test events
 
 extension SingleMonthViewModelImpleTests {
-
-    private func dummyEvent(_ range: ClosedRange<Int>) -> EventOnWeek {
-        let dummyRange: Range<TimeInterval> = 0..<1
-        return .init(
-            dummyRange, Array(range), range, .todo("todo:\(range)"), "some"
-        )
+    
+    private func dummyEventLine(_ days: ClosedRange<Int>) -> WeekEventLineModel {
+        let dayIdentifiers = days.map { "2023-9-\($0)" }
+        let event = EventOnWeek(0..<1, [], days, dayIdentifiers, .todo("\(days)"), "todo:\(days)")
+        return .init(event, nil)
     }
 
 

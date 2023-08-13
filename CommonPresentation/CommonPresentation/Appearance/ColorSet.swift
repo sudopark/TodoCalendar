@@ -20,6 +20,8 @@ public protocol ColorSet: Sendable {
     var selectedDayText: UIColor { get }
     var holidayText: UIColor { get }
     var todayBackground: UIColor { get }
+    var event: UIColor { get }
+    var eventSelected: UIColor { get }
 }
 
 
@@ -35,4 +37,6 @@ public struct DefaultLightColorSet: ColorSet {
     public let selectedDayText: UIColor = UIColor.white
     public let holidayText: UIColor = UIColor(rgb: 0x233238)
     public let todayBackground: UIColor = UIColor(rgb: 0xf4f4f4)
+    public let event: UIColor = UIColor(rgb: 0x45454a)
+    public let eventSelected: UIColor = UIColor.white
 }
