@@ -203,12 +203,12 @@ private struct WeekRowView: View {
         guard maxDrawableEventRowCount > 0 else { return EmptyView().asAnyView() }
         
         let size = min(maxDrawableEventRowCount, self.eventStackModel.count)
-        // TODO: 각 일자별 more 필요한 지점 구해야함 + 지점별 개별 more count 구해야함
+        let moreEvents = eventStackModel.eventMores(with: size)
         return VStack(alignment: .leading, spacing: 2) {
             ForEach(0..<size, id: \.self) {
-                return eventRowView(self.eventStackModel[$0], dayWith: dayWidth)
                 return eventRowView(self.eventStackModel[$0])
             }
+            eventMoreViews(moreEvents)
         }
         .padding(.top, Metric.eventTopMargin)
         .asAnyView()
@@ -256,6 +256,26 @@ private struct WeekRowView: View {
          .background(background)
          .offset(x: offsetX)
     }
+    
+    private func eventMoreViews(_ moreModels: [EventMoreModel]) -> some View {
+        let textColor: (EventMoreModel) -> Color = { model in
+            return self.selectedDay == model.dayIdentifier
+            ? self.appearance.colorSet.eventSelected.asColor
+            : self.appearance.colorSet.event.asColor
+        }
+        let offsetX: (EventMoreModel) -> CGFloat = { model in
+            return CGFloat(model.daySequence-1) * dayWidth
+        }
+        return ZStack(alignment: .center) {
+            ForEach(moreModels, id: \.daySequence) {
+                Text("+\($0.moreCount)")
+                    .font(self.appearance.fontSet.eventMore.asFont)
+                    .foregroundColor(textColor($0))
+                    .frame(width: dayWidth)
+                    .offset(x: offsetX($0))
+            }
+            .padding(.top, 2)
+        }
     }
 }
 

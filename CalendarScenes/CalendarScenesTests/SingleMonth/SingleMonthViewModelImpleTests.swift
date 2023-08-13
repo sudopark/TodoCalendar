@@ -226,7 +226,6 @@ extension SingleMonthViewModelImpleTests {
     }
 }
 
-
 // MARK: - test events
 
 extension SingleMonthViewModelImpleTests {
@@ -237,9 +236,29 @@ extension SingleMonthViewModelImpleTests {
         return .init(event, nil)
     }
 
-
-    // TODO: line 정보 잘 만드는지 확인
-    // TODO: color hex, isStart or end
+    func testEventStackModel_provideEventMoreCounts() {
+        // given
+        let stack: [[WeekEventLineModel]] = [
+            [self.dummyEventLine(1...5)],
+            [self.dummyEventLine(2...4)],
+            [self.dummyEventLine(1...3), self.dummyEventLine(4...7)],
+            [self.dummyEventLine(1...4)],
+            [self.dummyEventLine(1...6)]
+        ]
+        
+        // when
+        let moreModels = stack.eventMores(with: 3).sorted(by: { $0.daySequence < $1.daySequence })
+        
+        // then
+        XCTAssertEqual(moreModels, [
+            .init(daySequence: 1, dayIdentifier: "2023-9-1", moreCount: 2),
+            .init(daySequence: 2, dayIdentifier: "2023-9-2", moreCount: 2),
+            .init(daySequence: 3, dayIdentifier: "2023-9-3", moreCount: 2),
+            .init(daySequence: 4, dayIdentifier: "2023-9-4", moreCount: 2),
+            .init(daySequence: 5, dayIdentifier: "2023-9-5", moreCount: 1),
+            .init(daySequence: 6, dayIdentifier: "2023-9-6", moreCount: 1)
+        ])
+    }
 
     private func makeViewModelWithStubEvents() -> SingleMonthViewModelImple {
         let todo_w2_sun_wed = TodoEvent(uuid: "todo_w2_sun_wed", name: "some")
