@@ -24,6 +24,8 @@ struct SingleMonthContainerView: View {
     private let viewModel: SingleMonthViewModel
     private let viewAppearance: ViewAppearance
     
+    var daySelected: (DayCellViewModel) -> Void = { _ in }
+    
     init(viewModel: SingleMonthViewModel, viewAppearance: ViewAppearance) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
@@ -31,6 +33,7 @@ struct SingleMonthContainerView: View {
     
     var body: some View {
         return SingleMonthView(viewModel)
+            .eventHandler(\.daySelected, self.daySelected)
             .environmentObject(viewAppearance)
     }
 }
@@ -52,6 +55,8 @@ struct SingleMonthView: View {
     @State private var today: String?
     
     @EnvironmentObject private var appearance: ViewAppearance
+    
+    fileprivate var daySelected: (DayCellViewModel) -> Void = { _ in }
     
     private let viewModel: SingleMonthViewModel
     init(_ viewModel: SingleMonthViewModel) {
@@ -105,6 +110,7 @@ struct SingleMonthView: View {
         return VStack {
             ForEach(self.weeks, id: \.id) {
                 WeekRowView(week: $0, viewModel, expectSize, $selectedDay, $today)
+                    .eventHandler(\.daySelected, self.daySelected)
                     .environmentObject(appearance)
             }
         }
@@ -122,6 +128,8 @@ private struct WeekRowView: View {
     @State private var eventStackModel: WeekEventStackViewModel = []
     @Binding private var selectedDay: String?
     @Binding private var today: String?
+    
+    fileprivate var daySelected: (DayCellViewModel) -> Void = { _ in }
     
     init(
         week: WeekRowModel,
@@ -190,9 +198,7 @@ private struct WeekRowView: View {
                 .fill(backgroundColor)
         )
         .opacity(opacity)
-        .onTapGesture {
-            self.viewModel.select(day)
-        }
+        .onTapGesture { self.daySelected(day) }
     }
     
     private func eventStackView() -> some View {

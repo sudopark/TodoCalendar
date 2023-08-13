@@ -29,6 +29,7 @@ final class SingleMonthViewController: UIHostingController<SingleMonthContainerV
         let monthView = SingleMonthContainerView(
             viewModel: viewModel, viewAppearance: viewAppearance
         )
+        .eventHandler(\.daySelected, viewModel.select(_:))
         super.init(rootView: monthView)
         
         self.view.backgroundColor = self.viewAppearance.colorSet.dayBackground
