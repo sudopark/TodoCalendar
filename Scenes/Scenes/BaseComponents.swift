@@ -26,6 +26,13 @@ extension Scene {
 }
 
 
+// MARK: - empty builder
+
+public struct EmptyBuilder {
+    public init() { }
+}
+
+
 // MARK: - Router + BaseRouterimple
 
 public protocol Routing: AnyObject {

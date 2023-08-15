@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 import Domain
 
 
@@ -24,5 +25,16 @@ public class ViewAppearance: ObservableObject {
         case .systemDefault:
             self.fontSet = SystemDefaultFontSet()
         }
+    }
+}
+
+extension ViewAppearance {
+    
+    public var didUpdated: AnyPublisher<(FontSet, ColorSet), Never> {
+        return Publishers.CombineLatest(
+            self.$fontSet,
+            self.$colorSet
+        )
+        .eraseToAnyPublisher()
     }
 }
