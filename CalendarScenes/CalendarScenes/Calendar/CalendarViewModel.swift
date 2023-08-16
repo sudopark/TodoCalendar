@@ -30,6 +30,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let holidayUsecase: HolidayUsecase
     private let todoEventUsecase: TodoEventUsecase
     private let scheduleEventUsecase: ScheduleEventUsecase
+    private let eventTagUsecase: EventTagUsecase
     var router: CalendarViewRouting?
     private var monthInteractors: [SingleMonthSceneInteractor]?
     
@@ -38,13 +39,15 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         calendarSettingUsecase: CalendarSettingUsecase,
         holidayUsecase: HolidayUsecase,
         todoEventUsecase: TodoEventUsecase,
-        scheduleEventUsecase: ScheduleEventUsecase
+        scheduleEventUsecase: ScheduleEventUsecase,
+        eventTagUsecase: EventTagUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.holidayUsecase = holidayUsecase
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
+        self.eventTagUsecase = eventTagUsecase
         
         self.internalBind()
     }
@@ -136,6 +139,8 @@ extension CalendarViewModelImple {
             try? await self?.holidayUsecase.prepare()
             self?.bindRefreshHoliday()
         }
+        
+        self.eventTagUsecase.bindRefreshRequireTagInfos()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
