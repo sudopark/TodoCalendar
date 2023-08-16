@@ -173,7 +173,6 @@ extension TodoEventUsecaseImple {
         let filterInRange: ([TodoEvent]) -> [TodoEvent] = { todos in
             return todos.filter { event in
                 guard let time = event.time else { return false }
-                // TODO: 이때는 timeZone 고려해서 같이 계산해야함
                 return time.isOverlap(with: period)
             }
         }

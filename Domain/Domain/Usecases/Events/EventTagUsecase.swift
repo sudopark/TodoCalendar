@@ -7,6 +7,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Extensions
 
 
@@ -17,7 +19,9 @@ public protocol EventTagUsecase {
     func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag
     func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag
     
+    func bindRefreshRequireTagInfos()
     func refreshTags(_ ids: [String])
+    func eventTag(id: String) -> AnyPublisher<EventTag, Never>
     func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never>
 }
 
@@ -26,16 +30,21 @@ public final class EventTagUsecaseImple: EventTagUsecase {
     
     private let tagRepository: EventTagRepository
     private let sharedDataStore: SharedDataStore
+    private let refreshBindingQueue: DispatchQueue
     
     public init(
         tagRepository: EventTagRepository,
-        sharedDataStore: SharedDataStore
+        sharedDataStore: SharedDataStore,
+        refreshBindingQueue: DispatchQueue? = nil
     ) {
         self.tagRepository = tagRepository
         self.sharedDataStore = sharedDataStore
+        self.refreshBindingQueue = refreshBindingQueue ?? DispatchQueue(label: "event-tag-binding")
     }
     
     private var cancellables: Set<AnyCancellable> = []
+    
+    private var shareKey: String { ShareDataKeys.tags.rawValue }
 }
 
 
@@ -56,9 +65,8 @@ extension EventTagUsecaseImple {
     }
     
     private func updateSharedTags(_ tags: [EventTag]) {
-        let shareKey = ShareDataKeys.tags.rawValue
         let newMap = tags.asDictionary { $0.uuid }
-        self.sharedDataStore.update([String: EventTag].self, key: shareKey) {
+        self.sharedDataStore.update([String: EventTag].self, key: self.shareKey) {
             ($0 ?? [:]).merging(newMap) { $1 }
         }
     }
@@ -66,10 +74,38 @@ extension EventTagUsecaseImple {
 
 extension EventTagUsecaseImple {
     
+    public func bindRefreshRequireTagInfos() {
+
+        let (todoKey, scheduleKey) = (ShareDataKeys.todos.rawValue, ShareDataKeys.schedules.rawValue)
+        let allTagIdsFromTodos = self.sharedDataStore.observe([String: TodoEvent].self, key: todoKey)
+            .map { $0.flatMap { Array($0.values)} ?? [] }
+            .map { ts in ts.compactMap { $0.eventTagId } }
+            .map { Set($0) }
+        let allTagIdsSchedules = self.sharedDataStore.observe(MemorizedScheduleEventsContainer.self, key: scheduleKey)
+            .map { $0?.allCachedEvents() ?? []}
+            .map { ss in ss.compactMap { $0.eventTagId } }
+            .map { Set($0) }
+        
+        let refreshNeedTagIds = Publishers.CombineLatest(allTagIdsFromTodos, allTagIdsSchedules)
+            .map { $0.0.union($0.1 ) }
+            .scan(AllTagIds.empty) { $0.updated($1) }
+            .map { $0.newIds }
+            .removeDuplicates()
+            .filter { !$0.isEmpty }
+            .map { Array($0) }
+        
+        refreshNeedTagIds
+            .subscribe(on: self.refreshBindingQueue)
+            .sink(receiveValue: { [weak self] ids in
+                self?.refreshTags(ids)
+            })
+            .store(in: &self.cancellables)
+    }
+    
     public func refreshTags(_ ids: [String]) {
         
+        let shareKey = self.shareKey
         let updateCached: ([EventTag]) -> Void = { [weak self] tags in
-            let shareKey = ShareDataKeys.tags.rawValue
             let newMap = tags.asDictionary { $0.uuid }
             self?.sharedDataStore.update([String: EventTag].self, key: shareKey) {
                 ($0 ?? [:]).merging(newMap) { $1 }
@@ -81,13 +117,33 @@ extension EventTagUsecaseImple {
             .store(in: &self.cancellables)
     }
     
+    public func eventTag(id: String) -> AnyPublisher<EventTag, Never> {
+        return self.sharedDataStore.observe([String: EventTag].self, key: self.shareKey)
+            .compactMap { $0?[id] }
+            .eraseToAnyPublisher()
+    }
+    
     public func eventTags(_ ids: [String]) -> AnyPublisher<[String : EventTag], Never> {
-        let shareKey = ShareDataKeys.tags.rawValue
         let idsSet = Set(ids)
-        return self.sharedDataStore.observe([String: EventTag].self, key: shareKey)
+        return self.sharedDataStore.observe([String: EventTag].self, key: self.shareKey)
             .map { tagMap in
                 return (tagMap ?? [:]).filter { idsSet.contains($0.key) }
             }
             .eraseToAnyPublisher()
+    }
+}
+
+private struct AllTagIds {
+    
+    private let totalIdSet: Set<String>
+    let newIds: Set<String>
+    
+    static var empty: AllTagIds {
+        return .init(totalIdSet: [], newIds: [])
+    }
+    
+    func updated(_ newSet: Set<String>) -> AllTagIds {
+        let newIds = newSet.subtracting(self.totalIdSet)
+        return .init(totalIdSet: self.totalIdSet.union(newSet), newIds: newIds)
     }
 }
