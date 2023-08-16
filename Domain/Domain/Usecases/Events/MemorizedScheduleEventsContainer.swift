@@ -51,6 +51,10 @@ struct MemorizedScheduleEventsContainer {
     }
     
     private var caches: [String: CacheItem] = [:]
+    
+    func allCachedEvents() -> [ScheduleEvent] {
+        return self.caches.values.map { $0.event }
+    }
 }
 
 
