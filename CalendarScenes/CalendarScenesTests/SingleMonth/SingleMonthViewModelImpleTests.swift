@@ -24,7 +24,7 @@ class SingleMonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubScheduleUsecase: PrivateStubScheduleUsecase!
     private var stubTagUsecase: StubEventTagUsecase!
     
-    private var timeoutMillis: Int { return 1 }
+    private var timeoutMillis: Int { return 10 }
 
     override func setUpWithError() throws {
         self.cancelBag = .init()

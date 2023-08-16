@@ -196,11 +196,8 @@ final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable
     private struct Subject: @unchecked Sendable {
         let currentMonthComponent = CurrentValueSubject<CalendarComponent?, Never>(nil)
         let currentMonthInfo = CurrentValueSubject<CurrentMonthInfo?, Never>(nil)
-        let todoEventsMap = CurrentValueSubject<[String: TodoEvent], Never>([:])
-        let scheduleEventsMap = CurrentValueSubject<[String: ScheduleEvent], Never>([:])
         let userSelectedDay = CurrentValueSubject<DayCellViewModel?, Never>(nil)
         let eventStackMap = CurrentValueSubject<[String: WeekEventStack], Never>([:])
-        let eventTagMap = CurrentValueSubject<[String: EventTag], Never>([:])
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -247,35 +244,6 @@ final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable
                 self?.subject.eventStackMap.send(stackMap)
             })
             .store(in: &self.cancellables)
-        
-        let loadTags: (Set<String>) -> AnyPublisher<[String: EventTag], Never> = { [weak self] ids in
-            guard let self = self else { return Empty().eraseToAnyPublisher() }
-            return self.eventTagUsecase.eventTags(Array(ids))
-                .eraseToAnyPublisher()
-        }
-        
-        requireEventTagIds
-            .removeDuplicates()
-            .map(loadTags)
-            .switchToLatest()
-            .subscribe(on: DispatchQueue.global(qos: .userInitiated))
-            .sink(receiveValue: { [weak self] tagMap in
-                self?.subject.eventTagMap.send(tagMap)
-            })
-            .store(in: &self.cancellables)
-    }
-    
-    private var requireEventTagIds: AnyPublisher<Set<String>, Never> {
-        let transform: ([TodoEvent], [ScheduleEvent]) -> Set<String> = { todos, schedules in
-            return (todos.compactMap { $0.eventTagId } + schedules.compactMap { $0.eventTagId })
-                |> Set.init
-        }
-        return Publishers.CombineLatest(
-            self.subject.todoEventsMap.map { Array($0.values) },
-            self.subject.scheduleEventsMap.map { Array($0.values) }
-        )
-        .map(transform)
-        .eraseToAnyPublisher()
     }
 }
 
@@ -303,24 +271,10 @@ extension SingleMonthViewModelImple {
 
 extension SingleMonthViewModelImple {
     
-    private func updateTodoMap() -> ([TodoEvent]) -> Void {
-        return { [weak self] todos in
-            self?.subject.todoEventsMap.send(todos.asDictionary { $0.uuid })
-        }
-    }
-    
-    private func updateScheduleMap() -> ([ScheduleEvent]) -> Void {
-        return { [weak self] schedules in
-            self?.subject.scheduleEventsMap.send(schedules.asDictionary { $0.uuid })
-        }
-    }
-    
     private func calendarEvents(from info: CurrentMonthInfo) -> AnyPublisher<[CalendarEvent], Never> {
         
         let todos = self.todoUsecase.todoEvents(in: info.range)
-            .handleEvents(receiveOutput: self.updateTodoMap())
         let schedules = self.scheduleEventUsecase.scheduleEvents(in: info.range)
-            .handleEvents(receiveOutput: self.updateScheduleMap())
         let holidayCalenarEvents = info.component.holidayCalendarEvents(with: info.timeZone)
         let transform: ([TodoEvent], [ScheduleEvent]) -> [CalendarEvent]
         transform = { todos, schedules in
@@ -393,23 +347,35 @@ extension SingleMonthViewModelImple {
     }
     
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never> {
-        let transform: ([String: WeekEventStack], [String: EventTag]) -> WeekEventStackViewModel?
-        transform = { stacks, tags -> WeekEventStackViewModel? in
-            guard let stack = stacks[weekId] else { return nil }
-            return stack.eventStacks.map { events -> [WeekEventLineModel] in
+        typealias StackAndTagMap = (WeekEventStack, [String: EventTag])
+        let asStackAndTagMap: (WeekEventStack) -> AnyPublisher<StackAndTagMap, Never>
+        asStackAndTagMap = { [weak self] stack in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            let tagIds = stack.eventStacks.flatMap { $0.compactMap { $0.eventTagId } }
+            guard !tagIds.isEmpty
+            else {
+                return Just((stack, [:])).eraseToAnyPublisher()
+            }
+
+            return self.eventTagUsecase.eventTags(tagIds)
+                .map { (stack, $0) }
+                .eraseToAnyPublisher()
+        }
+        let asStakModel: (StackAndTagMap) -> WeekEventStackViewModel = { pair in
+            return pair.0.eventStacks.map { events -> [WeekEventLineModel] in
                 return events.map { event -> WeekEventLineModel in
-                    let tag = event.eventTagId.flatMap { tags[$0] }
+                    let tag = event.eventTagId.flatMap { pair.1[$0] }
                     return WeekEventLineModel(event, tag)
                 }
             }
         }
-        return Publishers.CombineLatest(
-            self.subject.eventStackMap,
-            self.subject.eventTagMap
-        )
-        .compactMap(transform)
-        .removeDuplicates()
-        .eraseToAnyPublisher()
+        return self.subject.eventStackMap
+            .compactMap { $0[weekId] }
+            .map(asStackAndTagMap)
+            .switchToLatest()
+            .map(asStakModel)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
 
