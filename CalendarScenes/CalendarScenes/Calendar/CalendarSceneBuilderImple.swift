@@ -33,7 +33,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             holidayUsecase: self.usecaseFactory.makeHolidayUsecase(),
             todoEventUsecase: self.usecaseFactory.makeTodoEventUsecase(),
-            scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase()
+            scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase()
         )
         let viewController = CalendarViewController(
             viewModel: viewModel,

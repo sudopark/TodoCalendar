@@ -25,6 +25,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyTodoUsecase: PrivateSpyTodoEventUsecase!
     private var spyScheduleUsecase: PrivateSpyScheduleEventUsecase!
     private var stubSettingUsecase: StubCalendarSettingUsecase!
+    private var spyEventTagUsecase: PrivateSpyEventTagUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -33,6 +34,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyTodoUsecase = .init()
         self.spyScheduleUsecase = .init()
         self.stubSettingUsecase = .init()
+        self.spyEventTagUsecase = .init()
     }
     
     override func tearDownWithError() throws {
@@ -42,6 +44,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyTodoUsecase = nil
         self.spyScheduleUsecase = nil
         self.stubSettingUsecase = nil
+        self.spyEventTagUsecase = nil
     }
     
     private func makeViewModel(
@@ -55,7 +58,8 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             calendarSettingUsecase: self.stubSettingUsecase,
             holidayUsecase: self.spyHolidayUsecase,
             todoEventUsecase: self.spyTodoUsecase,
-            scheduleEventUsecase: self.spyScheduleUsecase
+            scheduleEventUsecase: self.spyScheduleUsecase,
+            eventTagUsecase: self.spyEventTagUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -97,6 +101,21 @@ extension CalendarViewModelImpleTests {
         
         // then
         XCTAssertEqual(currentCountry?.code, "KST")
+    }
+    
+    func testViewModel_whenPrepre_bindRequireEventTagRefreshing() {
+        // given
+        let expect = expectation(description: "prepare 시에 필요 이벤트 tag 정보 refresh 바인딩")
+        let viewModel = self.makeViewModel()
+        self.spyEventTagUsecase.didBindRefresh = {
+            expect.fulfill()
+        }
+        
+        // when
+        viewModel.prepare()
+        
+        // then
+        self.wait(for: [expect], timeout: 0.001)
     }
     
     private func makeViewModelWithInitialSetup(_ today: CalendarComponent.Day) -> CalendarViewModelImple {
@@ -373,6 +392,15 @@ private extension CalendarViewModelImpleTests {
             return self.todoEventsInRange
                 .compactMap { $0 }
                 .eraseToAnyPublisher()
+        }
+    }
+    
+    private class PrivateSpyEventTagUsecase: StubEventTagUsecase {
+        
+        var didBindRefresh: (() -> Void)?
+        override func bindRefreshRequireTagInfos() {
+            self.didBindRefresh?()
+            super.bindRefreshRequireTagInfos()
         }
     }
     
