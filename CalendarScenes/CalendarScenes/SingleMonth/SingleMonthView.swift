@@ -88,8 +88,8 @@ struct SingleMonthContainerView: View {
 private enum Metric {
     static let dayMinHeight: CGFloat = 80
     static let dayMaxHeight: CGFloat = 100
-    static let eventRowHeight: CGFloat = 18
-    static let eventTopMargin: CGFloat = 10
+    static let eventRowHeightWithSpacing: CGFloat = 12
+    static let eventTopMargin: CGFloat = 22
     static let eventInterspacing: CGFloat = 2
 }
 
@@ -138,7 +138,7 @@ struct SingleMonthView: View {
             )
         }()
         let expectSize = CGSize(width: proxy.size.width, height: height)
-        return VStack {
+        return VStack(spacing: 0) {
             ForEach(self.state.weeks, id: \.id) {
                 WeekRowView(week: $0, expectSize)
                     .eventHandler(\.daySelected, self.daySelected)
@@ -171,7 +171,7 @@ private struct WeekRowView: View {
     }
     
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             HStack(spacing: 0) {
                 ForEach(week.days, id: \.identifier) { dayView($0) }
             }
@@ -229,7 +229,7 @@ private struct WeekRowView: View {
     private func eventStackView() -> some View {
         
         let totalHeight = self.expectSize.height - Metric.eventTopMargin
-        let drawableRowCount = Int(totalHeight / Metric.eventRowHeight)
+        let drawableRowCount = Int(totalHeight / Metric.eventRowHeightWithSpacing)
         let maxDrawableEventRowCount = drawableRowCount - 1
         guard maxDrawableEventRowCount > 0 else { return EmptyView().asAnyView() }
         
@@ -372,6 +372,14 @@ final class DummySingleMonthViewModel: SingleMonthViewModel, @unchecked Sendable
             ])
             .eraseToAnyPublisher()
             
+        } else if weekId == "id:1" {
+            let eventw2 = EventOnWeek(0..<1, [2, 3, 4, 5], (2...5), [
+                "2023-9-9", "2023-9-10", "2023-9-11", "2023-9-12"
+            ], .todo("ev-w2"), "ev-w2")
+            return Just([
+                [.init(eventw2, nil)]
+            ])
+                .eraseToAnyPublisher()
         } else {
             return Just([]).eraseToAnyPublisher()
         }
