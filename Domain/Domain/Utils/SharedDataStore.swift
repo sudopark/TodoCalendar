@@ -27,8 +27,13 @@ public final class SharedDataStore: @unchecked Sendable {
     
     private let lock = NSRecursiveLock()
     private var memorizedDataSubjects: [String: CurrentValueSubject<Any?, Never>] = [:]
+    private let serialEventQeueu: DispatchQueue?
     
-    public init() { }
+    public init(
+        serialEventQeueu: DispatchQueue? = DispatchQueue(label: "serial-sharedDataStore-event")
+    ) {
+        self.serialEventQeueu = serialEventQeueu
+    }
     
     private func subject(for key: String) -> CurrentValueSubject<Any?, Never> {
         if let subject = self.memorizedDataSubjects[key] {
@@ -77,6 +82,6 @@ extension SharedDataStore {
         self.lock.lock(); defer { self.lock.unlock() }
         return self.subject(for: key)
             .map { $0 as? V }
-            .eraseToAnyPublisher()
+            .receiveOnIfPossible(self.serialEventQeueu)
     }
 }

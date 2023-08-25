@@ -32,7 +32,7 @@ class HolidayUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         withCurrentLocale: String = "KR",
         latestSelectedCountryCode: String? = nil
     ) -> HolidayUsecaseImple {
-        let store = SharedDataStore()
+        let store = SharedDataStore(serialEventQeueu: nil)
         let provider = StubLocalProvider(code: withCurrentLocale)
         return HolidayUsecaseImple(
             holidayRepository: self.stubRepository,
