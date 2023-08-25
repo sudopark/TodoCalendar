@@ -31,7 +31,6 @@ public final class SharedDataStore: @unchecked Sendable {
     public init() { }
     
     private func subject(for key: String) -> CurrentValueSubject<Any?, Never> {
-        self.lock.lock(); defer { self.lock.unlock() }
         if let subject = self.memorizedDataSubjects[key] {
             return subject
         }
@@ -52,26 +51,30 @@ public final class SharedDataStore: @unchecked Sendable {
 extension SharedDataStore {
     
     public func put<V>(_ type: V.Type, key: String, _ value: V) {
+        self.lock.lock(); defer { self.lock.unlock() }
         self.subject(for: key)
             .send(value)
     }
     
     public func update<V>(_ type: V.Type, key: String, _ mutating: (V?) -> V) {
+        self.lock.lock(); defer { self.lock.unlock() }
         let subject = self.subject(for: key)
-        // TODO: subject를 빼오는것까지는 lock이 걸리지만 그 이후로는 안걸림 -> 문제될 수 있음
         let newValue = subject.value as? V |> mutating
         subject.send(newValue)
     }
     
     public func delete(_ key: String) {
+        self.lock.lock(); defer { self.lock.unlock() }
         self.subject(for: key).send(nil)
     }
     
     public func value<V>(_ type: V.Type, key: String) -> V? {
+        self.lock.lock(); defer { self.lock.unlock() }
         return self.subject(for:key).value as? V
     }
     
     public func observe<V>(_ type: V.Type, key: String) -> AnyPublisher<V?, Never> {
+        self.lock.lock(); defer { self.lock.unlock() }
         return self.subject(for: key)
             .map { $0 as? V }
             .eraseToAnyPublisher()
