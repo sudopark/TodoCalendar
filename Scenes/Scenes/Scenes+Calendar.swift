@@ -29,6 +29,7 @@ public protocol SingleMonthSceneBuilder: AnyObject {
 
 public protocol CalendarScene: Scene where Interactor == EmptyInteractor {
     
+    @MainActor
     func addChildMonths(_ singleMonthScenes: [any SingleMonthScene])
 }
 

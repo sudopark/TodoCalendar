@@ -150,8 +150,10 @@ extension CalendarViewModelImple {
             currentMonth,
             currentMonth.nextMonth()
         ]
-        self.monthInteractors = self.router?.attachInitialMonths(months)
-        self.subject.monthsInCurrentRange.send(months)
+        Task { @MainActor in
+            self.monthInteractors = self.router?.attachInitialMonths(months)
+            self.subject.monthsInCurrentRange.send(months)
+        }
     }
     
     func focusChanged(from previousIndex: Int, to currentIndex: Int) {

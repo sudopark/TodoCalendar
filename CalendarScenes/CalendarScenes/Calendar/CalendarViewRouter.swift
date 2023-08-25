@@ -11,6 +11,7 @@ import Scenes
 
 protocol CalendarViewRouting: Routing, Sendable {
     
+    @MainActor
     func attachInitialMonths(_ months: [CalendarMonth]) -> [SingleMonthSceneInteractor]
 }
 
@@ -21,6 +22,7 @@ final class CalendarViewRouterImple: BaseRouterImple<NextSceneBuilders>, Calenda
     
     private var currentScene: (any CalendarScene)? { self.scene as? (any CalendarScene) }
     
+    @MainActor
     func attachInitialMonths(_ months: [CalendarMonth]) -> [SingleMonthSceneInteractor] {
         guard let current = self.currentScene else { return [] }
         let childScenes = months.map { self.nextScenesBuilder.makeSingleMonthScene($0) }
