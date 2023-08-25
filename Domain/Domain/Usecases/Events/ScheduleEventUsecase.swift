@@ -38,6 +38,7 @@ public final class ScheduleEventUsecaseImple: ScheduleEventUsecase {
         self.sharedDataStore = sharedDataStore
     }
     
+    private let eventMemorizationQueue = DispatchQueue(label: "schedule-event-memorize")
     private var cancellables: Set<AnyCancellable> = []
 }
 
@@ -122,7 +123,7 @@ extension ScheduleEventUsecaseImple {
         }
 
         self.scheduleRepository.loadScheduleEvents(in: period)
-            .receive(on: DispatchQueue.global(qos: .background))
+            .receive(on: self.eventMemorizationQueue)
             .sink(receiveCompletion: { _ in }, receiveValue: updateCache)
             .store(in: &self.cancellables)
     }

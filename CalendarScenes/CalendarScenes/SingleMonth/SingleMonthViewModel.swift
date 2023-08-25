@@ -202,6 +202,7 @@ final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
     private var currentMonthComponentsBinding: AnyCancellable?
+    private let eventStackBuildingQueue = DispatchQueue(label: "event-stack-builder")
     
     private func internalBind() {
         
@@ -239,7 +240,7 @@ final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable
             .map(withEventsInThisMonth)
             .switchToLatest()
             .map(arrangeEventStacks)
-            .subscribe(on: DispatchQueue.global(qos: .userInitiated))
+            .subscribe(on: self.eventStackBuildingQueue)
             .sink(receiveValue: { [weak self] stackMap in
                 self?.subject.eventStackMap.send(stackMap)
             })

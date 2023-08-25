@@ -58,6 +58,7 @@ extension SharedDataStore {
     
     public func update<V>(_ type: V.Type, key: String, _ mutating: (V?) -> V) {
         let subject = self.subject(for: key)
+        // TODO: subject를 빼오는것까지는 lock이 걸리지만 그 이후로는 안걸림 -> 문제될 수 있음
         let newValue = subject.value as? V |> mutating
         subject.send(newValue)
     }
