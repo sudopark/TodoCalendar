@@ -26,7 +26,9 @@ public struct CalendarSceneBuilderImple {
 
 extension CalendarSceneBuilderImple: CalendarSceneBuilder {
     
-    public func makeCalendarScene() -> any CalendarScene {
+    public func makeCalendarScene(
+        listener: CalendarSceneListener
+    ) -> any CalendarScene {
         
         let viewModel = CalendarViewModelImple(
             calendarUsecase: self.usecaseFactory.makeCalendarUsecase(),
@@ -36,6 +38,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase()
         )
+        viewModel.listener = listener
         let viewController = CalendarViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance

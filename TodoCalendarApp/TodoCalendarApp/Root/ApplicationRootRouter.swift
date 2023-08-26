@@ -48,7 +48,7 @@ extension ApplicationRootRouter {
                 usecaseFactory: self.nonLoginUsecaseFactory,
                 viewAppearance: self.viewAppearance
             )
-            let calendarScene = builder.makeCalendarScene()
+            let calendarScene = builder.makeCalendarScene(listener: DummyListener())
             let navigationController = UINavigationController(rootViewController: calendarScene)
             self.window.rootViewController = navigationController
             self.window.makeKeyAndVisible()
@@ -63,4 +63,10 @@ extension ApplicationRootRouter {
         
         // TODO: create table if need
     }
+}
+
+// TODO: replace real listener after implement
+final class DummyListener: CalendarSceneListener {
+    
+    func calendarScene(focusChangedTo month: CalendarMonth, isCurrentMonth: Bool) { }
 }

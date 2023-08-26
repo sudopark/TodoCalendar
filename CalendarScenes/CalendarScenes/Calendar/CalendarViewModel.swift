@@ -33,6 +33,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let eventTagUsecase: EventTagUsecase
     var router: CalendarViewRouting?
     private var monthInteractors: [SingleMonthSceneInteractor]?
+    // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
+    weak var listener: CalendarSceneListener?
     
     init(
         calendarUsecase: CalendarUsecase,
@@ -52,15 +54,22 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.internalBind()
     }
     
+    private struct TotalMonthsInRange {
+        let totalMonths: [CalendarMonth]
+        let focusedIndex: Int
+        var focusedMonth: CalendarMonth? {
+            return self.totalMonths[safe: focusedIndex]
+        }
+    }
     private struct Subject {
-        let monthsInCurrentRange = CurrentValueSubject<[CalendarMonth]?, Never>(nil)
+        let monthsInCurrentRange = CurrentValueSubject<TotalMonthsInRange?, Never>(nil)
     }
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
     
     private var monthsWithSort: AnyPublisher<[CalendarMonth], Never> {
         return self.subject.monthsInCurrentRange
-            .compactMap { $0 }
+            .compactMap { $0?.totalMonths }
             .map { $0.sorted() }
             .eraseToAnyPublisher()
     }
@@ -68,7 +77,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private func internalBind() {
         
         self.subject.monthsInCurrentRange
-            .compactMap { $0 }
+            .compactMap { $0?.totalMonths }
             .sink(receiveValue: { [weak self] months in
                 months.enumerated().forEach { offset, month in
                     self?.monthInteractors?[safe: offset]?.updateMonthIfNeed(month)
@@ -90,6 +99,31 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 self?.refreshEvents(ranges)
             })
             .store(in: &self.cancellables)
+        
+        self.bindFocusedMonthChanged()
+    }
+    
+    private func bindFocusedMonthChanged() {
+        let transformWithFocusedMonthIsCurrent: (CalendarMonth, CalendarComponent.Day) -> (CalendarMonth, Bool)
+        transformWithFocusedMonthIsCurrent = { focusedMonth, currentDay in
+            let isCurrentMonth = currentDay.year == focusedMonth.year
+                && currentDay.month == focusedMonth.month
+            return (focusedMonth, isCurrentMonth)
+        }
+        let compare: ((CalendarMonth, Bool), (CalendarMonth, Bool)) -> Bool = { lhs, rhs in
+            return lhs.0 == rhs.0 && lhs.1 == rhs.1
+        }
+        
+        Publishers.CombineLatest(
+            self.subject.monthsInCurrentRange.compactMap { $0?.focusedMonth },
+            self.calendarUsecase.currentDay
+        )
+        .map(transformWithFocusedMonthIsCurrent)
+        .removeDuplicates(by: compare)
+        .sink(receiveValue: { [weak self] (focused, isCurrent) in
+            self?.listener?.calendarScene(focusChangedTo: focused, isCurrentMonth: isCurrent)
+        })
+        .store(in: &self.cancellables)
     }
     
     private func bindRefreshHoliday() {
@@ -150,14 +184,15 @@ extension CalendarViewModelImple {
             currentMonth,
             currentMonth.nextMonth()
         ]
+        let totalMonths = TotalMonthsInRange(totalMonths: months, focusedIndex: 1)
         Task { @MainActor in
             self.monthInteractors = self.router?.attachInitialMonths(months)
-            self.subject.monthsInCurrentRange.send(months)
+            self.subject.monthsInCurrentRange.send(totalMonths)
         }
     }
     
     func focusChanged(from previousIndex: Int, to currentIndex: Int) {
-        guard let months = self.subject.monthsInCurrentRange.value, !months.isEmpty
+        guard let months = self.subject.monthsInCurrentRange.value?.totalMonths, !months.isEmpty
         else { return }
         let lastIndex = months.count - 1
         
@@ -177,7 +212,8 @@ extension CalendarViewModelImple {
         }
         
         let newMonths = isMoveToNext ? updateAfterFocusMoveToNext() : updateAfterFocusMoveToPrevious()
-        self.subject.monthsInCurrentRange.send(newMonths)
+        let newTotalMonths = TotalMonthsInRange(totalMonths: newMonths, focusedIndex: currentIndex)
+        self.subject.monthsInCurrentRange.send(newTotalMonths)
         
     }
 }

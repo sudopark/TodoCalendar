@@ -26,6 +26,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyScheduleUsecase: PrivateSpyScheduleEventUsecase!
     private var stubSettingUsecase: StubCalendarSettingUsecase!
     private var spyEventTagUsecase: PrivateSpyEventTagUsecase!
+    private var spyListener: SpyListener!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -35,6 +36,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyScheduleUsecase = .init()
         self.stubSettingUsecase = .init()
         self.spyEventTagUsecase = .init()
+        self.spyListener = .init()
     }
     
     override func tearDownWithError() throws {
@@ -45,6 +47,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyScheduleUsecase = nil
         self.stubSettingUsecase = nil
         self.spyEventTagUsecase = nil
+        self.spyListener = nil
     }
     
     private func makeViewModel(
@@ -62,6 +65,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventTagUsecase: self.spyEventTagUsecase
         )
         viewModel.router = self.spyRouter
+        viewModel.listener = self.spyListener
         return viewModel
     }
 }
@@ -186,6 +190,56 @@ extension CalendarViewModelImpleTests {
         parameterizeTest(expect: [
             .init(year: 2023, month: 07), .init(year: 2023, month: 08), .init(year: 2023, month: 09)
         ]) { viewModel.focusChanged(from: 2, to: 1) }
+    }
+    
+    func testViewModel_whenFocusedMonthChanged_notify() {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        func parameterizeTest(
+            _ month: CalendarMonth,
+            _ isCurrent: Bool,
+            _ action: () -> Void
+        ) {
+            let expect = expectation(description: "현재 포커스된 달 조회 변경")
+            var pair: (CalendarMonth, Bool)?
+            self.spyListener.didMonthChanged = { focuse, flag in
+                pair = (focuse, flag)
+                expect.fulfill()
+            }
+            action()
+            self.wait(for: [expect], timeout: self.timeout)
+            
+            XCTAssertEqual(pair?.0, month)
+            XCTAssertEqual(pair?.1, isCurrent)
+        }
+        
+        // when + then
+        parameterizeTest(.init(year: 2023, month: 09), false) {
+            viewModel.focusChanged(from: 1, to: 2)
+        }
+        parameterizeTest(.init(year: 2023, month: 10), false) {
+            viewModel.focusChanged(from: 2, to: 0)
+        }
+        parameterizeTest(.init(year: 2023, month: 11), false) {
+            viewModel.focusChanged(from: 0, to: 1)
+        }
+        parameterizeTest(.init(year: 2023, month: 10), false) {
+            viewModel.focusChanged(from: 1, to: 0)
+        }
+        parameterizeTest(.init(year: 2023, month: 09), false) {
+            viewModel.focusChanged(from: 0, to: 2)
+        }
+        parameterizeTest(.init(year: 2023, month: 08), true) {
+            viewModel.focusChanged(from: 2, to: 1)
+        }
+        parameterizeTest(.init(year: 2023, month: 07), false) {
+            viewModel.focusChanged(from: 1, to: 0)
+        }
+        parameterizeTest(.init(year: 2023, month: 06), false) {
+            viewModel.focusChanged(from: 0, to: 2)
+        }
     }
 }
 
@@ -370,6 +424,18 @@ private extension CalendarViewModelImpleTests {
         var didHolidayChanged: Bool?
         func holidayChanged(_ holidays: [Int : [Holiday]]) {
             self.didHolidayChanged = true
+        }
+    }
+    
+    class SpyListener: CalendarSceneListener {
+        
+        var didMonthChanged: ((CalendarMonth, Bool) -> Void)?
+        
+        func calendarScene(
+            focusChangedTo month: CalendarMonth,
+            isCurrentMonth: Bool
+        ) {
+            self.didMonthChanged?(month, isCurrentMonth)
         }
     }
     

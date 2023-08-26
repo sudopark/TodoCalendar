@@ -33,7 +33,17 @@ public protocol CalendarScene: Scene where Interactor == EmptyInteractor {
     func addChildMonths(_ singleMonthScenes: [any SingleMonthScene])
 }
 
+public protocol CalendarSceneListener: AnyObject {
+    
+    func calendarScene(
+        focusChangedTo month: CalendarMonth,
+        isCurrentMonth: Bool
+    )
+}
+
 public protocol CalendarSceneBuilder {
     
-    func makeCalendarScene() -> any CalendarScene
+    func makeCalendarScene(
+        listener: CalendarSceneListener
+    ) -> any CalendarScene
 }
