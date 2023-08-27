@@ -44,11 +44,11 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             viewAppearance: self.viewAppearance
         )
         
-        let nextSceneBuilder = SingleMonthSceneBuilderImple(
+        let singleMonthSceneBuilder = SingleMonthSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
         )
-        let router = CalendarViewRouterImple(nextSceneBuilder)
+        let router = CalendarViewRouterImple(singleMonthSceneBuilder)
         router.scene = viewController
         viewModel.router = router
         

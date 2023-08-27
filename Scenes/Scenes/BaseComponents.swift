@@ -39,12 +39,9 @@ public protocol Routing: AnyObject {
     // common routing interface
 }
 
-open class BaseRouterImple<NextScenesBuilder>: Routing {
+open class BaseRouterImple: Routing {
     
-    public final let nextScenesBuilder: NextScenesBuilder
     public weak var scene: (any Scene)?
     
-    public init(_ nextScenesBuilder: NextScenesBuilder) {
-        self.nextScenesBuilder = nextScenesBuilder
-    }
+    public init() { }
 }

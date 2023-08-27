@@ -48,12 +48,20 @@ extension ApplicationRootRouter {
         Task { @MainActor in
             let builder = MainSceneBuilerImple(
                 usecaseFactory: self.nonLoginUsecaseFactory,
-                viewAppearance: self.viewAppearance
+                viewAppearance: self.viewAppearance,
+                calendarSceneBulder: self.calendarSceneBulder()
             )
             let mainScene = builder.makeMainScene()
             self.window.rootViewController = mainScene
             self.window.makeKeyAndVisible()
         }
+    }
+    
+    private func calendarSceneBulder() -> CalendarSceneBuilder {
+        return CalendarSceneBuilderImple(
+            usecaseFactory: self.nonLoginUsecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
     }
     
     private func prepareDatabase(for accountId: String?) {
@@ -64,10 +72,4 @@ extension ApplicationRootRouter {
         
         // TODO: create table if need
     }
-}
-
-// TODO: replace real listener after implement
-final class DummyListener: CalendarSceneListener {
-    
-    func calendarScene(focusChangedTo month: CalendarMonth, isCurrentMonth: Bool) { }
 }

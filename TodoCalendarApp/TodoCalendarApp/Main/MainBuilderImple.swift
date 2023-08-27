@@ -10,7 +10,6 @@
 import UIKit
 import Scenes
 import CommonPresentation
-import CalendarScenes
 
 
 // MARK: - MainSceneBuilerImple
@@ -19,13 +18,16 @@ public final class MainSceneBuilerImple {
     
     private let usecaseFactory: UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let calendarSceneBulder: CalendarSceneBuilder
     
     public init(
         usecaseFactory: UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        calendarSceneBulder: CalendarSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.calendarSceneBulder = calendarSceneBulder
     }
 }
 
@@ -43,14 +45,7 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             viewAppearance: self.viewAppearance
         )
         
-        let nextSceneBuilder = CalendarSceneBuilderImple(
-            usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
-        )
-        
-        let router = MainRouter(
-            nextSceneBuilder
-        )
+        let router = MainRouter(self.calendarSceneBulder)
         router.scene = viewController
         viewModel.router = router
         

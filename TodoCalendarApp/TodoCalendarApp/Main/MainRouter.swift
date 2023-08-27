@@ -22,10 +22,13 @@ protocol MainRouting: Routing, Sendable {
 
 // MARK: - Router
 
-// TODO: compose next Scene Builders protocol
-typealias MainNextSceneBuilders = CalendarSceneBuilder
-
-final class MainRouter: BaseRouterImple<MainNextSceneBuilders>, MainRouting, @unchecked Sendable { }
+final class MainRouter: BaseRouterImple, MainRouting, @unchecked Sendable {
+    
+    private let calendarSceneBulder: CalendarSceneBuilder
+    init(_ calendarSceneBulder: CalendarSceneBuilder) {
+        self.calendarSceneBulder = calendarSceneBulder
+    }
+}
 
 
 extension MainRouter {
@@ -39,7 +42,7 @@ extension MainRouter {
     @MainActor
     func attachCalendar() -> CalendarSceneInteractor? {
         guard let current = self.currentScene else { return nil }
-        let calendarScene = self.nextScenesBuilder.makeCalendarScene(
+        let calendarScene = self.calendarSceneBulder.makeCalendarScene(
             listener: current.interactor
         )
         current.addCalendar(calendarScene)

@@ -11,12 +11,12 @@ import Scenes
 import CommonPresentation
 
 
-public final class SingleMonthSceneBuilderImple {
+final class SingleMonthSceneBuilderImple {
     
     private let usecaseFactory: UsecaseFactory
     private let viewAppearance: ViewAppearance
     
-    public init(
+    init(
         usecaseFactory: UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
@@ -28,7 +28,7 @@ public final class SingleMonthSceneBuilderImple {
 
 extension SingleMonthSceneBuilderImple: SingleMonthSceneBuilder {
     
-    public func makeSingleMonthScene(_ month: CalendarMonth) -> any SingleMonthScene {
+    func makeSingleMonthScene(_ month: CalendarMonth) -> any SingleMonthScene {
         
         let viewModel = SingleMonthViewModelImple(
             calendarUsecase: self.usecaseFactory.makeCalendarUsecase(),
