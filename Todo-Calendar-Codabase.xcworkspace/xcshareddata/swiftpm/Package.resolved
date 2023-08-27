@@ -19,6 +19,15 @@
       }
     },
     {
+      "identity" : "combinecocoa",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/CombineCommunity/CombineCocoa.git",
+      "state" : {
+        "revision" : "7300c75ff9e072aa7fd0fccefcc88f74aae9bf56",
+        "version" : "0.4.1"
+      }
+    },
+    {
       "identity" : "publisher-async-bind",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sudopark/publisher-async-bind.git",
