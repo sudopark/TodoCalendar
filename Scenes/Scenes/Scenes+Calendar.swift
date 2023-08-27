@@ -27,13 +27,12 @@ public protocol SingleMonthSceneBuilder: AnyObject {
 
 // MARK: - CalendarScene
 
-public protocol CalendarScene: Scene where Interactor == EmptyInteractor {
+public protocol CalendarSceneInteractor: Sendable, AnyObject {
     
-    @MainActor
-    func addChildMonths(_ singleMonthScenes: [any SingleMonthScene])
+    func moveFocusToToday()
 }
 
-public protocol CalendarSceneListener: AnyObject {
+public protocol CalendarSceneListener: Sendable, AnyObject {
     
     func calendarScene(
         focusChangedTo month: CalendarMonth,
@@ -41,9 +40,15 @@ public protocol CalendarSceneListener: AnyObject {
     )
 }
 
+public protocol CalendarScene: Scene where Interactor == CalendarSceneInteractor {
+    
+    @MainActor
+    func addChildMonths(_ singleMonthScenes: [any SingleMonthScene])
+}
+
 public protocol CalendarSceneBuilder {
     
     func makeCalendarScene(
-        listener: CalendarSceneListener
+        listener: CalendarSceneListener?
     ) -> any CalendarScene
 }
