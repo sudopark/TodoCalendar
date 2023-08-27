@@ -20,7 +20,7 @@ public protocol Scene: UIViewController {
     var interactor: Interactor? { get }
 }
 
-extension Scene {
+extension Scene where Interactor == EmptyInteractor {
     
     public var interactor: Interactor? { nil }
 }

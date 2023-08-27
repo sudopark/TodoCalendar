@@ -43,14 +43,15 @@ extension ApplicationRootRouter {
         )
         self.prepareDatabase(for: prepareResult.latestLoginAccountId)
         
+        // TODO: 추후에 prepare result에 따라 usecase factory 결정해야함
+        
         Task { @MainActor in
-            let builder = CalendarSceneBuilderImple(
+            let builder = MainSceneBuilerImple(
                 usecaseFactory: self.nonLoginUsecaseFactory,
                 viewAppearance: self.viewAppearance
             )
-            let calendarScene = builder.makeCalendarScene(listener: DummyListener())
-            let navigationController = UINavigationController(rootViewController: calendarScene)
-            self.window.rootViewController = navigationController
+            let mainScene = builder.makeMainScene()
+            self.window.rootViewController = mainScene
             self.window.makeKeyAndVisible()
         }
     }

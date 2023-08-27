@@ -14,7 +14,7 @@ import Scenes
 
 // MARK: - CalendarViewModel
 
-protocol CalendarViewModel: AnyObject, Sendable {
+protocol CalendarViewModel: AnyObject, Sendable, CalendarSceneInteractor {
     
     func prepare()
     func focusChanged(from previousIndex: Int, to nextIndex: Int)
@@ -214,7 +214,10 @@ extension CalendarViewModelImple {
         let newMonths = isMoveToNext ? updateAfterFocusMoveToNext() : updateAfterFocusMoveToPrevious()
         let newTotalMonths = TotalMonthsInRange(totalMonths: newMonths, focusedIndex: currentIndex)
         self.subject.monthsInCurrentRange.send(newTotalMonths)
-        
+    }
+    
+    func moveFocusToToday() {
+        // TODO: 
     }
 }
 
