@@ -35,6 +35,11 @@
 		F6BB1D6C2A9CE041009D2428 /* DayEventListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D662A9CE041009D2428 /* DayEventListViewController.swift */; };
 		F6BB1D6D2A9CE041009D2428 /* DayEventListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D672A9CE041009D2428 /* DayEventListView.swift */; };
 		F6BB1D6E2A9CE041009D2428 /* DayEventListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D682A9CE041009D2428 /* DayEventListViewModel.swift */; };
+		F6BB1D752A9CE3B4009D2428 /* CalendarPaperBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D702A9CE3B4009D2428 /* CalendarPaperBuilderImple.swift */; };
+		F6BB1D762A9CE3B4009D2428 /* CalendarPaperRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D712A9CE3B4009D2428 /* CalendarPaperRouter.swift */; };
+		F6BB1D772A9CE3B4009D2428 /* CalendarPaperScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D722A9CE3B4009D2428 /* CalendarPaperScene+Builder.swift */; };
+		F6BB1D782A9CE3B4009D2428 /* CalendarPaperViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D732A9CE3B4009D2428 /* CalendarPaperViewController.swift */; };
+		F6BB1D792A9CE3B4009D2428 /* CalendarPaperViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D742A9CE3B4009D2428 /* CalendarPaperViewModel.swift */; };
 		F6D413362A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D413352A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift */; };
 		F6E1D65E2A7BF4770072CE20 /* MonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E1D65D2A7BF4770072CE20 /* MonthView.swift */; };
 /* End PBXBuildFile section */
@@ -79,6 +84,11 @@
 		F6BB1D662A9CE041009D2428 /* DayEventListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayEventListViewController.swift; sourceTree = "<group>"; };
 		F6BB1D672A9CE041009D2428 /* DayEventListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayEventListView.swift; sourceTree = "<group>"; };
 		F6BB1D682A9CE041009D2428 /* DayEventListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayEventListViewModel.swift; sourceTree = "<group>"; };
+		F6BB1D702A9CE3B4009D2428 /* CalendarPaperBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPaperBuilderImple.swift; sourceTree = "<group>"; };
+		F6BB1D712A9CE3B4009D2428 /* CalendarPaperRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPaperRouter.swift; sourceTree = "<group>"; };
+		F6BB1D722A9CE3B4009D2428 /* CalendarPaperScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarPaperScene+Builder.swift"; sourceTree = "<group>"; };
+		F6BB1D732A9CE3B4009D2428 /* CalendarPaperViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPaperViewController.swift; sourceTree = "<group>"; };
+		F6BB1D742A9CE3B4009D2428 /* CalendarPaperViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPaperViewModel.swift; sourceTree = "<group>"; };
 		F6D413352A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekEventStackBuilderTests.swift; sourceTree = "<group>"; };
 		F6E1D65D2A7BF4770072CE20 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -135,6 +145,7 @@
 			children = (
 				F6BB1D622A9CE025009D2428 /* DayEventList */,
 				F67907D92A4B4351000CF11B /* Month */,
+				F6BB1D6F2A9CE2D6009D2428 /* CalendarPaper */,
 				F67907D42A4B3A8E000CF11B /* Calendar */,
 				F63F64D12A2C06CA00E24186 /* CalendarScenes.h */,
 			);
@@ -218,6 +229,18 @@
 				F6BB1D682A9CE041009D2428 /* DayEventListViewModel.swift */,
 			);
 			path = DayEventList;
+			sourceTree = "<group>";
+		};
+		F6BB1D6F2A9CE2D6009D2428 /* CalendarPaper */ = {
+			isa = PBXGroup;
+			children = (
+				F6BB1D702A9CE3B4009D2428 /* CalendarPaperBuilderImple.swift */,
+				F6BB1D712A9CE3B4009D2428 /* CalendarPaperRouter.swift */,
+				F6BB1D722A9CE3B4009D2428 /* CalendarPaperScene+Builder.swift */,
+				F6BB1D732A9CE3B4009D2428 /* CalendarPaperViewController.swift */,
+				F6BB1D742A9CE3B4009D2428 /* CalendarPaperViewModel.swift */,
+			);
+			path = CalendarPaper;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -332,6 +355,7 @@
 			files = (
 				F6BB1D6C2A9CE041009D2428 /* DayEventListViewController.swift in Sources */,
 				F69C9A3E2A5477330099D4B5 /* MonthViewModel.swift in Sources */,
+				F6BB1D772A9CE3B4009D2428 /* CalendarPaperScene+Builder.swift in Sources */,
 				F6BB1D6E2A9CE041009D2428 /* DayEventListViewModel.swift in Sources */,
 				F6B70D1D2A764B9600FFF457 /* MonthViewController.swift in Sources */,
 				F67907D62A4B3AB9000CF11B /* CalendarViewModel.swift in Sources */,
@@ -339,10 +363,14 @@
 				F6B70CEE2A763D4400FFF457 /* CalendarSceneBuilderImple.swift in Sources */,
 				F6B89CB62A72BE82004DE88B /* CalendarViewController.swift in Sources */,
 				F67907E42A4DD780000CF11B /* CalendarViewRouter.swift in Sources */,
+				F6BB1D762A9CE3B4009D2428 /* CalendarPaperRouter.swift in Sources */,
 				F6E1D65E2A7BF4770072CE20 /* MonthView.swift in Sources */,
+				F6BB1D752A9CE3B4009D2428 /* CalendarPaperBuilderImple.swift in Sources */,
 				F6495D192A55317A00A459E3 /* WeekEventStackBuilder.swift in Sources */,
 				F6BB1D6A2A9CE041009D2428 /* DayEventListRouter.swift in Sources */,
 				F6BB1D6B2A9CE041009D2428 /* DayEventListScene+Builder.swift in Sources */,
+				F6BB1D782A9CE3B4009D2428 /* CalendarPaperViewController.swift in Sources */,
+				F6BB1D792A9CE3B4009D2428 /* CalendarPaperViewModel.swift in Sources */,
 				F6BB1D6D2A9CE041009D2428 /* DayEventListView.swift in Sources */,
 				F6B70D1B2A764ABE00FFF457 /* MonthSceneBuilderImple.swift in Sources */,
 			);
