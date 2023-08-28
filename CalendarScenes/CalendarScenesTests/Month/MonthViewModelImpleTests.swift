@@ -1,5 +1,5 @@
 //
-//  SingleMonthViewModelImpleTests.swift
+//  MonthViewModelImpleTests.swift
 //  CalendarScenesTests
 //
 //  Created by sudo.park on 2023/07/05.
@@ -16,7 +16,7 @@ import TestDoubles
 @testable import CalendarScenes
 
 
-class SingleMonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
+class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>!
     private var stubSettingUsecase: StubCalendarSettingUsecase!
@@ -42,13 +42,13 @@ class SingleMonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTagUsecase = nil
     }
 
-    private func makeViewModel() -> SingleMonthViewModelImple {
+    private func makeViewModel() -> MonthViewModelImple {
         let calendarUsecase = PrivateStubCalendarUsecase(
             today: .init(year: 2023, month: 09, day: 10, weekDay: 1)
         )
         self.stubSettingUsecase.prepare()
 
-        let viewModel = SingleMonthViewModelImple(
+        let viewModel = MonthViewModelImple(
             calendarUsecase: calendarUsecase,
             calendarSettingUsecase: self.stubSettingUsecase,
             todoUsecase: self.stubTodoUsecase,
@@ -62,7 +62,7 @@ class SingleMonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
 
 // MARK: - provide components
 
-extension SingleMonthViewModelImpleTests {
+extension MonthViewModelImpleTests {
 
     func testViewModel_whenUpdateMonth_provideCalendarWeeks() {
         // given
@@ -133,7 +133,7 @@ extension SingleMonthViewModelImpleTests {
 
 // MARK: - selected day
 
-extension SingleMonthViewModelImpleTests {
+extension MonthViewModelImpleTests {
 
     func testViewModel_whenCurrentMonthIsEqualTodayMonth_defaultSelectionDayIsToday() {
         // given
@@ -228,7 +228,7 @@ extension SingleMonthViewModelImpleTests {
 
 // MARK: - test events
 
-extension SingleMonthViewModelImpleTests {
+extension MonthViewModelImpleTests {
     
     private func dummyEventLine(_ days: ClosedRange<Int>) -> WeekEventLineModel {
         let dayIdentifiers = days.map { "2023-9-\($0)" }
@@ -260,7 +260,7 @@ extension SingleMonthViewModelImpleTests {
         ])
     }
 
-    private func makeViewModelWithStubEvents() -> SingleMonthViewModelImple {
+    private func makeViewModelWithStubEvents() -> MonthViewModelImple {
         let todo_w2_sun_wed = TodoEvent(uuid: "todo_w2_sun_wed", name: "some")
             |> \.time .~ .dummyPeriod(from: (09, 10), to: (09, 13))
         let todo_w1_mon = TodoEvent(uuid: "todo_w1_mon", name: "some")
@@ -310,7 +310,7 @@ extension SingleMonthViewModelImpleTests {
     }
 
     private func waitAndAssertWeeksFor9Eventes(
-        _ viewModel: SingleMonthViewModelImple
+        _ viewModel: MonthViewModelImple
     ) async throws {
         
         async let weekSource = viewModel.weekModels.firstValue(with: self.timeoutMillis)
@@ -388,7 +388,7 @@ extension SingleMonthViewModelImpleTests {
     }
 
     private func waitAndAssertWeeksFor8(
-        _ viewModel: SingleMonthViewModelImple,
+        _ viewModel: MonthViewModelImple,
         shouldDropFirst: Bool = true
     ) async throws {
         
@@ -569,7 +569,7 @@ extension SingleMonthViewModelImpleTests {
 
 // MARK: - doubles
 
-extension SingleMonthViewModelImpleTests {
+extension MonthViewModelImpleTests {
 
     private class PrivateStubCalendarUsecase: StubCalendarUsecase {
 

@@ -1,5 +1,5 @@
 //
-//  SingleMonthViewModel.swift
+//  MonthViewModel.swift
 //  CalendarScenes
 //
 //  Created by sudo.park on 2023/07/05.
@@ -148,9 +148,9 @@ extension WeekEventStackViewModel {
     }
 }
 
-// MARK: - SingleMonthViewModel
+// MARK: - MonthViewModel
 
-protocol SingleMonthViewModel: AnyObject, Sendable, SingleMonthSceneInteractor {
+protocol MonthViewModel: AnyObject, Sendable, MonthSceneInteractor {
     
     func select(_ day: DayCellViewModel)
     
@@ -161,9 +161,9 @@ protocol SingleMonthViewModel: AnyObject, Sendable, SingleMonthSceneInteractor {
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never>
 }
 
-// MARK: - SingleMonthViewModelImple
+// MARK: - MonthViewModelImple
 
-final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable {
+final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     
     private let calendarUsecase: CalendarUsecase
     private let calendarSettingUsecase: CalendarSettingUsecase
@@ -249,7 +249,7 @@ final class SingleMonthViewModelImple: SingleMonthViewModel, @unchecked Sendable
 }
 
 
-extension SingleMonthViewModelImple {
+extension MonthViewModelImple {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth) {
         
@@ -270,7 +270,7 @@ extension SingleMonthViewModelImple {
     }
 }
 
-extension SingleMonthViewModelImple {
+extension MonthViewModelImple {
     
     private func calendarEvents(from info: CurrentMonthInfo) -> AnyPublisher<[CalendarEvent], Never> {
         

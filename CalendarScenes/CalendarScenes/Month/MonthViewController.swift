@@ -1,5 +1,5 @@
 //
-//  SinlgeMonthViewController.swift
+//  MonthViewController.swift
 //  CalendarScenes
 //
 //  Created by sudo.park on 2023/07/30.
@@ -12,21 +12,21 @@ import Scenes
 import CommonPresentation
 
 
-final class SingleMonthViewController: UIHostingController<SingleMonthContainerView>, SingleMonthScene {
+final class MonthViewController: UIHostingController<MonthContainerView>, MonthScene {
     
-    private let viewModel: SingleMonthViewModel
+    private let viewModel: MonthViewModel
     private let viewAppearance: ViewAppearance
-    var interactor: SingleMonthSceneInteractor? {
+    var interactor: MonthSceneInteractor? {
         return self.viewModel
     }
     init(
-        viewModel: SingleMonthViewModel,
+        viewModel: MonthViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         
-        let monthView = SingleMonthContainerView(
+        let monthView = MonthContainerView(
             viewAppearance: viewAppearance
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
