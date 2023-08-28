@@ -40,6 +40,7 @@
 		F6BB1D772A9CE3B4009D2428 /* CalendarPaperScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D722A9CE3B4009D2428 /* CalendarPaperScene+Builder.swift */; };
 		F6BB1D782A9CE3B4009D2428 /* CalendarPaperViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D732A9CE3B4009D2428 /* CalendarPaperViewController.swift */; };
 		F6BB1D792A9CE3B4009D2428 /* CalendarPaperViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D742A9CE3B4009D2428 /* CalendarPaperViewModel.swift */; };
+		F6BB1D7B2A9CE55F009D2428 /* MonthScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6BB1D7A2A9CE55F009D2428 /* MonthScene+Builder.swift */; };
 		F6D413362A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D413352A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift */; };
 		F6E1D65E2A7BF4770072CE20 /* MonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E1D65D2A7BF4770072CE20 /* MonthView.swift */; };
 /* End PBXBuildFile section */
@@ -89,6 +90,7 @@
 		F6BB1D722A9CE3B4009D2428 /* CalendarPaperScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CalendarPaperScene+Builder.swift"; sourceTree = "<group>"; };
 		F6BB1D732A9CE3B4009D2428 /* CalendarPaperViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPaperViewController.swift; sourceTree = "<group>"; };
 		F6BB1D742A9CE3B4009D2428 /* CalendarPaperViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPaperViewModel.swift; sourceTree = "<group>"; };
+		F6BB1D7A2A9CE55F009D2428 /* MonthScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MonthScene+Builder.swift"; sourceTree = "<group>"; };
 		F6D413352A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekEventStackBuilderTests.swift; sourceTree = "<group>"; };
 		F6E1D65D2A7BF4770072CE20 /* MonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -192,6 +194,7 @@
 		F67907D92A4B4351000CF11B /* Month */ = {
 			isa = PBXGroup;
 			children = (
+				F6BB1D7A2A9CE55F009D2428 /* MonthScene+Builder.swift */,
 				F69C9A3D2A5477330099D4B5 /* MonthViewModel.swift */,
 				F6495D182A55317A00A459E3 /* WeekEventStackBuilder.swift */,
 				F6B70D1A2A764ABE00FFF457 /* MonthSceneBuilderImple.swift */,
@@ -370,6 +373,7 @@
 				F6BB1D6A2A9CE041009D2428 /* DayEventListRouter.swift in Sources */,
 				F6BB1D6B2A9CE041009D2428 /* DayEventListScene+Builder.swift in Sources */,
 				F6BB1D782A9CE3B4009D2428 /* CalendarPaperViewController.swift in Sources */,
+				F6BB1D7B2A9CE55F009D2428 /* MonthScene+Builder.swift in Sources */,
 				F6BB1D792A9CE3B4009D2428 /* CalendarPaperViewModel.swift in Sources */,
 				F6BB1D6D2A9CE041009D2428 /* DayEventListView.swift in Sources */,
 				F6B70D1B2A764ABE00FFF457 /* MonthSceneBuilderImple.swift in Sources */,

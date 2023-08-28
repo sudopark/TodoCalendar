@@ -14,11 +14,11 @@ import CommonPresentation
 
 // MARK: - CalendarPaperSceneBuilerImple
 
-public final class CalendarPaperSceneBuilerImple {
+final class CalendarPaperSceneBuilerImple {
     
     private let viewAppearance: ViewAppearance
     
-    public init(
+    init(
         viewAppearance: ViewAppearance
     ) {
         self.viewAppearance = viewAppearance
@@ -28,7 +28,7 @@ public final class CalendarPaperSceneBuilerImple {
 
 extension CalendarPaperSceneBuilerImple: CalendarPaperSceneBuiler {
     
-    public func makeCalendarPaperScene() -> any CalendarPaperScene {
+    func makeCalendarPaperScene() -> any CalendarPaperScene {
         
         let viewModel = CalendarPaperViewModelImple(
             

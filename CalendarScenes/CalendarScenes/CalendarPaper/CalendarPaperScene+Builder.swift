@@ -14,7 +14,7 @@ import Domain
 
 // MARK: - CalendarPaperScene Interactable & Listenable
 
-public protocol CalendarPaperSceneInteractor: AnyObject {
+protocol CalendarPaperSceneInteractor: AnyObject {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
 }
@@ -23,13 +23,13 @@ public protocol CalendarPaperSceneInteractor: AnyObject {
 
 // MARK: - CalendarPaperScene
 
-public protocol CalendarPaperScene: Scene where Interactor == CalendarPaperSceneInteractor
+protocol CalendarPaperScene: Scene where Interactor == CalendarPaperSceneInteractor
 { }
 
 
 // MARK: - Builder + DependencyInjector Extension
 
-public protocol CalendarPaperSceneBuiler: AnyObject {
+protocol CalendarPaperSceneBuiler: AnyObject {
     
     func makeCalendarPaperScene() -> any CalendarPaperScene
 }
