@@ -400,17 +400,17 @@ private extension CalendarViewModelImpleTests {
     
     class SpyRouter: CalendarViewRouting, @unchecked Sendable {
         
-        var spyInteractors: [SpyMonthInteractor] = []
+        var spyInteractors: [SpyPaperInteractor] = []
         var didInitialMonthsAttached: (() -> Void)?
-        func attachInitialMonths(_ months: [CalendarMonth]) -> [MonthSceneInteractor] {
-            let interactors = months.map { SpyMonthInteractor(currentMonth: $0) }
+        func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarPaperSceneInteractor] {
+            let interactors = months.map { SpyPaperInteractor(currentMonth: $0) }
             self.spyInteractors = interactors
             self.didInitialMonthsAttached?()
             return interactors
         }
     }
     
-    class SpyMonthInteractor: MonthSceneInteractor, @unchecked Sendable {
+    class SpyPaperInteractor: CalendarPaperSceneInteractor, @unchecked Sendable {
         
         var currentMonth: CalendarMonth
         init(currentMonth: CalendarMonth) {
@@ -420,14 +420,9 @@ private extension CalendarViewModelImpleTests {
         func updateMonthIfNeed(_ newMonth: CalendarMonth) {
             self.currentMonth = newMonth
         }
-        
-        var didHolidayChanged: Bool?
-        func holidayChanged(_ holidays: [Int : [Holiday]]) {
-            self.didHolidayChanged = true
-        }
     }
     
-    class SpyListener: CalendarSceneListener {
+    final class SpyListener: CalendarSceneListener, @unchecked Sendable {
         
         var didMonthChanged: ((CalendarMonth, Bool) -> Void)?
         

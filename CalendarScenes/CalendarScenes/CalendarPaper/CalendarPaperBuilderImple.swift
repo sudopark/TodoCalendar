@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -16,30 +17,40 @@ import CommonPresentation
 
 final class CalendarPaperSceneBuilerImple {
     
+    private let usecaseFactory: UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let monthSceneBuilder: MonthSceneBuilder
+    private let eventListSceneBuilder: DayEventListSceneBuiler
     
     init(
-        viewAppearance: ViewAppearance
+        usecaseFactory: UsecaseFactory,
+        viewAppearance: ViewAppearance,
+        monthSceneBuilder: MonthSceneBuilder,
+        eventListSceneBuilder: DayEventListSceneBuiler
     ) {
+        self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.monthSceneBuilder = monthSceneBuilder
+        self.eventListSceneBuilder = eventListSceneBuilder
     }
 }
 
 
 extension CalendarPaperSceneBuilerImple: CalendarPaperSceneBuiler {
     
-    func makeCalendarPaperScene() -> any CalendarPaperScene {
+    func makeCalendarPaperScene(_ month: CalendarMonth) -> any CalendarPaperScene {
         
-        let viewModel = CalendarPaperViewModelImple(
-            
-        )
+        let viewModel = CalendarPaperViewModelImple(month: month)
         
         let viewController = CalendarPaperViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )
         
-        let router = CalendarPaperRouter()
+        let router = CalendarPaperRouter(
+            monthSceneBuilder: self.monthSceneBuilder,
+            eventListSceneBuilder: self.eventListSceneBuilder
+        )
         router.scene = viewController
         viewModel.router = router
         

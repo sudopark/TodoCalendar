@@ -61,7 +61,9 @@ struct DayEventListView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     
     var body: some View {
-        Text("DayEventListView")
+        ForEach(0..<30) {
+            Text("DayEventListView => \($0)")
+        }
     }
 }
 

@@ -37,6 +37,12 @@ final class DayEventListViewController: UIHostingController<DayEventListContaine
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
         super.init(rootView: containerView)
+        self.sizingOptions = [.intrinsicContentSize]
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.view.invalidateIntrinsicContentSize()
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
