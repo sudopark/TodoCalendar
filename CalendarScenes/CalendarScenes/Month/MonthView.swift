@@ -1,5 +1,5 @@
 //
-//  SingleMonthView.swift
+//  MonthView.swift
 //  CalendarScenes
 //
 //  Created by sudo.park on 2023/08/03.
@@ -12,7 +12,7 @@ import Optics
 import Domain
 import CommonPresentation
 
-final class SingleMonthViewState: ObservableObject {
+final class MonthViewState: ObservableObject {
     
     @Published fileprivate var weekDays: [WeekDayModel] = []
     @Published fileprivate var weeks: [WeekRowModel] = []
@@ -25,7 +25,7 @@ final class SingleMonthViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
-    func bind(_ viewModel: SingleMonthViewModel) {
+    func bind(_ viewModel: MonthViewModel) {
         guard self.didBind == false else { return }
         self.didBind = true
         
@@ -61,12 +61,12 @@ final class SingleMonthViewState: ObservableObject {
     }
 }
 
-struct SingleMonthContainerView: View {
+struct MonthContainerView: View {
     
-    @StateObject private var state: SingleMonthViewState = .init()
+    @StateObject private var state: MonthViewState = .init()
     private let viewAppearance: ViewAppearance
     
-    var stateBinding: (SingleMonthViewState) -> Void = { _ in }
+    var stateBinding: (MonthViewState) -> Void = { _ in }
     var daySelected: (DayCellViewModel) -> Void = { _ in }
     
     init(viewAppearance: ViewAppearance) {
@@ -74,7 +74,7 @@ struct SingleMonthContainerView: View {
     }
     
     var body: some View {
-        return SingleMonthView()
+        return MonthView()
             .eventHandler(\.daySelected, self.daySelected)
             .onAppear {
                 self.stateBinding(self.state)
@@ -93,9 +93,9 @@ private enum Metric {
     static let eventInterspacing: CGFloat = 2
 }
 
-struct SingleMonthView: View {
+struct MonthView: View {
     
-    @EnvironmentObject private var state: SingleMonthViewState
+    @EnvironmentObject private var state: MonthViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
     fileprivate var daySelected: (DayCellViewModel) -> Void = { _ in }
@@ -155,7 +155,7 @@ private struct WeekRowView: View {
     private let expectSize: CGSize
     private var dayWidth: CGFloat { expectSize.width / 7 }
     
-    @EnvironmentObject private var state: SingleMonthViewState
+    @EnvironmentObject private var state: MonthViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
     @State private var eventStackModel: WeekEventStackViewModel = []
@@ -312,7 +312,7 @@ private struct WeekRowView: View {
 
 // MARK: - preview
 
-final class DummySingleMonthViewModel: SingleMonthViewModel, @unchecked Sendable {
+final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
     
     private let selectedDay = CurrentValueSubject<String?, Never>(nil)
     func select(_ day: DayCellViewModel) {
@@ -395,12 +395,12 @@ final class DummySingleMonthViewModel: SingleMonthViewModel, @unchecked Sendable
 }
 
 
-struct SingleMonthViewPreviewProvider: PreviewProvider {
+struct MonthViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
-        let viewModel = DummySingleMonthViewModel()
+        let viewModel = DummyMonthViewModel()
         let viewAppearance = ViewAppearance(color: .defaultLight, font: .systemDefault)
-        let containerView = SingleMonthContainerView(viewAppearance: viewAppearance)
+        let containerView = MonthContainerView(viewAppearance: viewAppearance)
             .eventHandler(\.stateBinding, { $0.bind(viewModel) })
             .eventHandler(\.daySelected, viewModel.select(_:))
         return containerView

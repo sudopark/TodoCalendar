@@ -32,7 +32,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let scheduleEventUsecase: ScheduleEventUsecase
     private let eventTagUsecase: EventTagUsecase
     var router: CalendarViewRouting?
-    private var monthInteractors: [SingleMonthSceneInteractor]?
+    private var monthInteractors: [MonthSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
     weak var listener: CalendarSceneListener?
     

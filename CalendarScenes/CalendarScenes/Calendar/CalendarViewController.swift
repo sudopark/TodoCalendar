@@ -50,12 +50,12 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
         self.delegate = self
     }
     
-    func addChildMonths(_ singleMonthScenes: [any SingleMonthScene]) {
-        guard !singleMonthScenes.isEmpty else { return }
+    func addChildMonths(_ monthScenes: [any MonthScene]) {
+        guard !monthScenes.isEmpty else { return }
         
-        self.monthViewControllers = singleMonthScenes
-        let center = (singleMonthScenes.count-1) / 2
-        self.setViewControllers([singleMonthScenes[center]], direction: .forward, animated: false)
+        self.monthViewControllers = monthScenes
+        let center = (monthScenes.count-1) / 2
+        self.setViewControllers([monthScenes[center]], direction: .forward, animated: false)
     }
 }
 

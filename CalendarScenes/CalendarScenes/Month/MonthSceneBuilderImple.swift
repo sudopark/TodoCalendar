@@ -1,5 +1,5 @@
 //
-//  SingleMonthSceneBuilderImple.swift
+//  MonthSceneBuilderImple.swift
 //  CalendarScenes
 //
 //  Created by sudo.park on 2023/07/30.
@@ -11,7 +11,7 @@ import Scenes
 import CommonPresentation
 
 
-final class SingleMonthSceneBuilderImple {
+final class MonthSceneBuilderImple {
     
     private let usecaseFactory: UsecaseFactory
     private let viewAppearance: ViewAppearance
@@ -26,11 +26,11 @@ final class SingleMonthSceneBuilderImple {
 }
 
 
-extension SingleMonthSceneBuilderImple: SingleMonthSceneBuilder {
+extension MonthSceneBuilderImple: MonthSceneBuilder {
     
-    func makeSingleMonthScene(_ month: CalendarMonth) -> any SingleMonthScene {
+    func makeMonthScene(_ month: CalendarMonth) -> any MonthScene {
         
-        let viewModel = SingleMonthViewModelImple(
+        let viewModel = MonthViewModelImple(
             calendarUsecase: self.usecaseFactory.makeCalendarUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
@@ -38,7 +38,7 @@ extension SingleMonthSceneBuilderImple: SingleMonthSceneBuilder {
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase()
         )
         // TODO: setup router
-        let viewController = SingleMonthViewController(
+        let viewController = MonthViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )
