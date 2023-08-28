@@ -18,6 +18,7 @@ import Scenes
 protocol CalendarPaperViewModel: AnyObject, Sendable, CalendarPaperSceneInteractor {
 
     // interactor
+    func prepare()
     
     // presenter
 }
@@ -27,10 +28,15 @@ protocol CalendarPaperViewModel: AnyObject, Sendable, CalendarPaperSceneInteract
 
 final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Sendable {
     
-    var router: CalendarPaperRouting?
+    // TODO: 삭제 예정
+    private let month: CalendarMonth
     
-    init() {
-        
+    var router: CalendarPaperRouting?
+    private var monthInteractor: MonthSceneInteractor?
+    private var eventListInteractor: DayEventListSceneInteractor?
+    
+    init(month: CalendarMonth) {
+        self.month = month
     }
     
     
@@ -47,8 +53,17 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
 
 extension CalendarPaperViewModelImple {
     
+    func prepare() {
+        Task { @MainActor in
+            // TODO: attach childs
+            let interactors = self.router?.attachMonthAndEventList(self.month) ?? nil
+            self.monthInteractor = interactors?.0
+            self.eventListInteractor = interactors?.1
+        }
+    }
+    
     func updateMonthIfNeed(_ newMonth: CalendarMonth) {
-        // TODO: send update message to month scene
+        self.monthInteractor?.updateMonthIfNeed(newMonth)
     }
 }
 

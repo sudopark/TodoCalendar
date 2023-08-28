@@ -32,7 +32,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let scheduleEventUsecase: ScheduleEventUsecase
     private let eventTagUsecase: EventTagUsecase
     var router: CalendarViewRouting?
-    private var monthInteractors: [MonthSceneInteractor]?
+    private var calendarPaperInteractors: [CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
     weak var listener: CalendarSceneListener?
     
@@ -80,7 +80,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .compactMap { $0?.totalMonths }
             .sink(receiveValue: { [weak self] months in
                 months.enumerated().forEach { offset, month in
-                    self?.monthInteractors?[safe: offset]?.updateMonthIfNeed(month)
+                    self?.calendarPaperInteractors?[safe: offset]?.updateMonthIfNeed(month)
                 }
             })
             .store(in: &self.cancellables)
@@ -186,7 +186,7 @@ extension CalendarViewModelImple {
         ]
         let totalMonths = TotalMonthsInRange(totalMonths: months, focusedIndex: 1)
         Task { @MainActor in
-            self.monthInteractors = self.router?.attachInitialMonths(months)
+            self.calendarPaperInteractors = self.router?.attachInitialMonths(months)
             self.subject.monthsInCurrentRange.send(totalMonths)
         }
     }

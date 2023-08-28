@@ -103,9 +103,7 @@ struct MonthView: View {
     var body: some View {
         VStack(spacing: 0) {
             headerView
-            GeometryReader { proxy in
-                self.gridWeeksView(proxy)
-            }
+            self.gridWeeksView()
         }
         .padding([.leading, .trailing], 8)
         .background(self.appearance.colorSet.dayBackground.asColor)
@@ -127,17 +125,11 @@ struct MonthView: View {
         }
     }
     
-    private func gridWeeksView(_ proxy: GeometryProxy) -> some View {
-        let height: CGFloat = {
-            let rowCount = self.state.weeks.count
-            guard rowCount > 0 else { return 0 }
-            let expectHeight = proxy.size.height / CGFloat(rowCount)
-            return max(
-                Metric.dayMinHeight,
-                min(Metric.dayMaxHeight, expectHeight)
-            )
-        }()
-        let expectSize = CGSize(width: proxy.size.width, height: height)
+    private func gridWeeksView() -> some View {
+        let expectSize = CGSize(
+            width: UIScreen.main.bounds.width - 16,
+            height: 100
+        )
         return VStack(spacing: 0) {
             ForEach(self.state.weeks, id: \.id) {
                 WeekRowView(week: $0, expectSize)
@@ -283,7 +275,7 @@ private struct WeekRowView: View {
                  .foregroundColor(textColor)
                  .lineLimit(1)
         }
-         .frame(width: width, alignment: .leading)
+         .frame(width: max(width, 50), alignment: .leading)
          .background(background)
          .offset(x: offsetX)
     }
