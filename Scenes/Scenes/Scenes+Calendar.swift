@@ -9,22 +9,6 @@ import Foundation
 import Domain
 
 
-// MARK: - MonthScene
-
-public protocol MonthSceneInteractor: AnyObject {
-    
-    func updateMonthIfNeed(_ newMonth: CalendarMonth)
-}
-
-public protocol MonthScene: Scene where Interactor == MonthSceneInteractor {
-}
-
-public protocol MonthSceneBuilder: AnyObject {
-    
-    func makeMonthScene(_ month: CalendarMonth) -> any MonthScene
-}
-
-
 // MARK: - CalendarScene
 
 public protocol CalendarSceneInteractor: Sendable, AnyObject {
@@ -43,7 +27,7 @@ public protocol CalendarSceneListener: Sendable, AnyObject {
 public protocol CalendarScene: Scene where Interactor == CalendarSceneInteractor {
     
     @MainActor
-    func addChildMonths(_ monthScenes: [any MonthScene])
+    func addChildMonths(_ monthScenes: [any Scene])
 }
 
 public protocol CalendarSceneBuilder {
