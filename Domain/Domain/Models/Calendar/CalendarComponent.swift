@@ -30,7 +30,7 @@ public struct CalendarComponent: Equatable {
         public let weekDay: Int
         public var holiday: Holiday?
         
-        var identifier: String {
+        public var identifier: String {
             return "\(year)-\(month)-\(day)"
         }
         
