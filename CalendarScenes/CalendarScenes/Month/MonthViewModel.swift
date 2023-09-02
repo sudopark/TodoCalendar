@@ -167,6 +167,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     weak var listener: MonthSceneListener?
     
     init(
+        initialMonth: CalendarMonth,
         calendarUsecase: CalendarUsecase,
         calendarSettingUsecase: CalendarSettingUsecase,
         todoUsecase: TodoEventUsecase,
@@ -180,6 +181,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         self.eventTagUsecase = eventTagUsecase
         
         self.internalBind()
+        self.updateMonthIfNeed(initialMonth)
     }
     
     private struct CurrentMonthInfo: Equatable {
