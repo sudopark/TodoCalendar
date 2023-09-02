@@ -137,7 +137,7 @@ extension MonthViewModelImpleTests {
 
     func testViewModel_whenCurrentMonthIsEqualTodayMonth_defaultSelectionDayIsToday() {
         // given
-        let expect = expectation(description: "지정된 달이 오늘과 같은 달이면 선택값 없음")
+        let expect = expectation(description: "지정된 달이 오늘과 같은 달이면 최초 선택값은 오늘")
         let viewModel = self.makeViewModel()
 
         // when
@@ -146,7 +146,7 @@ extension MonthViewModelImpleTests {
         } ?? nil
 
         // then
-        XCTAssertEqual(selected, nil)
+        XCTAssertEqual(selected, "2023-9-10")
     }
 
     func testViewModel_whenCurrentMonthIsNotEqualTodayMonth_defaultSelectionDayIsMonthFirstDay() {
@@ -163,7 +163,7 @@ extension MonthViewModelImpleTests {
 
         // then
         XCTAssertEqual(selecteds, [
-            nil, "2023-8-1"
+            "2023-9-10", "2023-8-1"
         ])
     }
 
@@ -186,7 +186,7 @@ extension MonthViewModelImpleTests {
 
         // then
         XCTAssertEqual(selecteds, [
-            nil, "2023-9-23"
+            "2023-9-10", "2023-9-23"
         ])
     }
 
@@ -209,7 +209,7 @@ extension MonthViewModelImpleTests {
 
         // then
         XCTAssertEqual(selecteds, [
-            nil, "2023-8-31"
+            "2023-9-10", "2023-8-31"
         ])
     }
 
