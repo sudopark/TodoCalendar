@@ -324,10 +324,10 @@ extension MonthViewModelImple {
             switch (selected, today, thisMonth) {
             case (.some(let day), _, _):
                 return day.identifier
-            case (_, let t, let m) where t.month != m.month:
+            case (_, let t, let m) where t.year == m.year && t.month == m.month:
+                return "\(t.year)-\(t.month)-\(t.day)"
+            case (_, _, let m):
                 return "\(m.year)-\(m.month)-1"
-            default:
-                return nil
             }
         }
         return Publishers.CombineLatest3(
