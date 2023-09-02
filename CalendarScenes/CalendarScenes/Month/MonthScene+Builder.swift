@@ -18,7 +18,7 @@ enum EventId: Equatable {
     case holiday(_ dateString: String)
 }
 
-struct CurrentSelectDayModel {
+struct CurrentSelectDayModel: Equatable {
     let identifier: String
     let eventIds: [EventId]
     
@@ -45,5 +45,5 @@ protocol MonthScene: Scene where Interactor == MonthSceneInteractor {
 
 protocol MonthSceneBuilder: AnyObject {
     
-    func makeMonthScene(_ month: CalendarMonth) -> any MonthScene
+    func makeMonthScene(_ month: CalendarMonth, listener: MonthSceneListener?) -> any MonthScene
 }

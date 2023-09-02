@@ -28,7 +28,6 @@ protocol CalendarPaperViewModel: AnyObject, Sendable, CalendarPaperSceneInteract
 
 final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Sendable {
     
-    // TODO: 삭제 예정
     private let month: CalendarMonth
     
     var router: CalendarPaperRouting?
@@ -41,11 +40,7 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
     
     
     private struct Subject {
-        
     }
-    
-    private var cancellables: Set<AnyCancellable> = []
-    private let subject = Subject()
 }
 
 
@@ -55,15 +50,20 @@ extension CalendarPaperViewModelImple {
     
     func prepare() {
         Task { @MainActor in
-            // TODO: attach childs
             let interactors = self.router?.attachMonthAndEventList(self.month) ?? nil
             self.monthInteractor = interactors?.0
             self.eventListInteractor = interactors?.1
+            // TODO: 현재 선택일
         }
     }
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth) {
         self.monthInteractor?.updateMonthIfNeed(newMonth)
+    }
+    
+    func monthScene(didChange currentSelectedDay: CurrentSelectDayModel) {
+        // TODO: 초기 선택일 정보 전달될때 리스너 아직 준비 안되어있을수도있음
+        self.eventListInteractor?.selectedDayChanaged(currentSelectedDay)
     }
 }
 

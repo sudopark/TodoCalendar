@@ -14,7 +14,7 @@ import Domain
 
 // MARK: - CalendarPaperScene Interactable & Listenable
 
-protocol CalendarPaperSceneInteractor: AnyObject {
+protocol CalendarPaperSceneInteractor: AnyObject, MonthSceneListener {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
 }
