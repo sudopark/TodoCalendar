@@ -23,6 +23,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubTodoUsecase: PrivateStubTodoUsecase!
     private var stubScheduleUsecase: PrivateStubScheduleUsecase!
     private var stubTagUsecase: StubEventTagUsecase!
+    private var spyListener: SpyListener?
     
     private var timeoutMillis: Int { return 10 }
 
@@ -32,6 +33,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTodoUsecase = .init()
         self.stubScheduleUsecase = .init()
         self.stubTagUsecase = .init()
+        self.spyListener = .init()
     }
 
     override func tearDownWithError() throws {
@@ -40,6 +42,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTodoUsecase = nil
         self.stubScheduleUsecase = nil
         self.stubTagUsecase = nil
+        self.spyListener = nil
     }
 
     private func makeViewModel() -> MonthViewModelImple {
@@ -55,6 +58,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
             scheduleEventUsecase: self.stubScheduleUsecase,
             eventTagUsecase: self.stubTagUsecase
         )
+        viewModel.listener = self.spyListener
         return viewModel
     }
 }
@@ -567,6 +571,59 @@ extension MonthViewModelImpleTests {
     }
 }
 
+// MARK: - notify selected day
+
+extension MonthViewModelImpleTests {
+    
+    // 9.10 ~ 9.16 주 이벤트 배치
+    // 10~13 -> todo_w2_sun_wed / 12~15 -> schedule_w2_tue_fri
+    // 1st 11일 선택 -> 이벤트 [todo_w2_sun_wed]
+    // 2nd 13일 선택 -> 이벤트 [todo_w2_sun_wed, schedule_w2_tue_fri]
+    // 3rd 15일 선택 -> 이벤트 [schedule_w2_tue_fri, schedule_event_repeating]
+    // 4th 16일 선택 -> 이벤트 [schedule_event_repeating]
+    func testViewModel_whenSelectedDayChanged_notify() {
+        // given
+        let viewModel = self.makeViewModelWithStubEvents()
+        viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
+        
+        func parameterizeTest(
+            _ expectDay: String,
+            _ expectEventIds: [EventId],
+            _ action: () -> Void
+        ) {
+            // given
+            let expect = expectation(description: "wait selected day notified")
+            var model: CurrentSelectDayModel?
+            self.spyListener?.didCurrentDayChanged = {
+                model = $0
+                expect.fulfill()
+            }
+            
+            // when
+            action()
+            self.wait(for: [expect], timeout: self.timeout)
+            
+            // then
+            XCTAssertEqual(model?.identifier, expectDay)
+            XCTAssertEqual(model?.eventIds, expectEventIds)
+        }
+        
+        // when + then
+        parameterizeTest("2023-9-11", [.todo("todo_w2_sun_wed")]) {
+            viewModel.select(.init(2023, 9, 11))
+        }
+        parameterizeTest("2023-9-13", [.todo("todo_w2_sun_wed"), .schedule("schedule_w2_tue_fri", turn: 1)]) {
+            viewModel.select(.init(2023, 9, 13))
+        }
+        parameterizeTest("2023-9-15", [.schedule("schedule_event_repeating", turn: 4), .schedule("schedule_w2_tue_fri", turn: 1)]) {
+            viewModel.select(.init(2023, 9, 15))
+        }
+        parameterizeTest("2023-9-16", [.schedule("schedule_event_repeating", turn: 4)]) {
+            viewModel.select(.init(2023, 9, 16))
+        }
+    }
+}
+
 // MARK: - doubles
 
 extension MonthViewModelImpleTests {
@@ -639,6 +696,14 @@ extension MonthViewModelImpleTests {
             }
         }
     }
+    
+    private class SpyListener: MonthSceneListener {
+        
+        var didCurrentDayChanged: ((CurrentSelectDayModel) -> Void)?
+        func monthScene(didChange currentSelectedDay: CurrentSelectDayModel) {
+            self.didCurrentDayChanged?(currentSelectedDay)
+        }
+    }
 }
 
 private extension Range where Bound == TimeInterval {
@@ -684,5 +749,12 @@ private extension WeekEventStackViewModel {
     
     var daysSequences: [[ClosedRange<Int>]] {
         return self.map { lines in lines.map { $0.eventOnWeek.daysSequence } }
+    }
+}
+
+private extension DayCellViewModel {
+    
+    init(_ year: Int, _ month: Int, _ day: Int) {
+        self.init(year: year, month: month, day: day, isNotCurrentMonth: false, isWeekEnd: false, isHoliday: false)
     }
 }

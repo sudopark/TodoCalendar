@@ -377,8 +377,8 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
         }
     }
 
-    var currentSelectDayIdentifier: AnyPublisher<String?, Never> {
-        return self.selectedDay.eraseToAnyPublisher()
+    var currentSelectDayIdentifier: AnyPublisher<String, Never> {
+        return self.selectedDay.compactMap{ $0 }.eraseToAnyPublisher()
     }
 
     var todayIdentifier: AnyPublisher<String, Never> { Empty().eraseToAnyPublisher() }

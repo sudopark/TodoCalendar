@@ -88,13 +88,7 @@ struct WeekRowModel: Equatable {
     }
 }
 
-
-// MARK: Event components
-
-enum EventId: Equatable {
-    case todo(String)
-    case schedule(String, turn: Int)
-    case holiday(_ dateString: String)
+extension EventId {
     
     var isHoliday: Bool {
         guard case .holiday = self else { return false }
@@ -156,7 +150,7 @@ protocol MonthViewModel: AnyObject, Sendable, MonthSceneInteractor {
     
     var weekDays: AnyPublisher<[WeekDayModel], Never> { get }
     var weekModels: AnyPublisher<[WeekRowModel], Never> { get }
-    var currentSelectDayIdentifier: AnyPublisher<String?, Never> { get }
+    var currentSelectDayIdentifier: AnyPublisher<String, Never> { get }
     var todayIdentifier: AnyPublisher<String, Never> { get }
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never>
 }
@@ -170,6 +164,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     private let todoUsecase: TodoEventUsecase
     private let scheduleEventUsecase: ScheduleEventUsecase
     private let eventTagUsecase: EventTagUsecase
+    weak var listener: MonthSceneListener?
     
     init(
         calendarUsecase: CalendarUsecase,
@@ -206,6 +201,12 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     
     private func internalBind() {
         
+        self.bindCurrentMonthInfo()
+        self.bindEventsInCurrentMonth()
+        self.bindCurerntSelectedDayNotifying()
+    }
+    
+    private func bindCurrentMonthInfo() {
         Publishers.CombineLatest(
             self.calendarSettingUsecase.currentTimeZone,
             self.subject.currentMonthComponent.compactMap { $0 }
@@ -216,6 +217,9 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
             self?.subject.currentMonthInfo.send(totalComponent)
         })
         .store(in: &self.cancellables)
+    }
+    
+    private func bindEventsInCurrentMonth() {
         
         typealias CurrentMonthAndEvent = (CurrentMonthInfo, [CalendarEvent])
         let withEventsInThisMonth: (CurrentMonthInfo) -> AnyPublisher<CurrentMonthAndEvent, Never>
@@ -245,6 +249,40 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
                 self?.subject.eventStackMap.send(stackMap)
             })
             .store(in: &self.cancellables)
+    }
+    
+    private func bindCurerntSelectedDayNotifying() {
+     
+        typealias SelectedWeekAndDay = (CalendarComponent.Week, CalendarComponent.Day)
+        let asWeekAndDayIndex: (String, CurrentMonthInfo) -> SelectedWeekAndDay?
+        asWeekAndDayIndex = { identifier, monthInfo in
+            return monthInfo.component.weeks.compactMap { week in
+                guard let day = week.days.first(where: { $0.identifier == identifier })
+                else { return nil }
+                return (week, day)
+            }.first
+        }
+        
+        let asSelectedDayModel: (SelectedWeekAndDay) -> AnyPublisher<CurrentSelectDayModel, Never>
+        asSelectedDayModel = { [weak self] pair in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            let (week, day) = pair
+            return self.eventStack(at: week.id)
+                .map { CurrentSelectDayModel(day.identifier, $0.eventId(in: day.day) ) }
+                .eraseToAnyPublisher()
+        }
+        
+        Publishers.CombineLatest(
+            self.currentSelectDayIdentifier,
+            self.subject.currentMonthInfo.compactMap { $0 }
+        )
+        .compactMap(asWeekAndDayIndex)
+        .map(asSelectedDayModel)
+        .switchToLatest()
+        .sink(receiveValue: { [weak self] model in
+            self?.listener?.monthScene(didChange: model)
+        })
+        .store(in: &self.cancellables)
     }
 }
 
@@ -318,8 +356,8 @@ extension MonthViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var currentSelectDayIdentifier: AnyPublisher<String?, Never> {
-        let transform: (DayCellViewModel?, CalendarComponent.Day, CalendarComponent) -> String?
+    var currentSelectDayIdentifier: AnyPublisher<String, Never> {
+        let transform: (DayCellViewModel?, CalendarComponent.Day, CalendarComponent) -> String
         transform = { selected, today, thisMonth in
             switch (selected, today, thisMonth) {
             case (.some(let day), _, _):
@@ -401,5 +439,16 @@ private extension CalendarComponent {
             .flatMap { $0.days }
             .compactMap { $0.holiday }
             .compactMap { CalendarEvent($0, timeZone: timeZone) }
+    }
+}
+
+private extension WeekEventStackViewModel {
+    
+    func eventId(in day: Int) -> [EventId] {
+        return self.reduce(into: [EventId]()) { acc, lines in
+            guard let eventLineOnDay = lines.first (where: { $0.eventOnWeek.overlapDays.contains(day) })
+            else { return }
+            acc += [eventLineOnDay.eventId]
+        }
     }
 }
