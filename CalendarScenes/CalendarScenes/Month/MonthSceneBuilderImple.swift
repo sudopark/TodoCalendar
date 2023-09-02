@@ -34,6 +34,7 @@ extension MonthSceneBuilderImple: MonthSceneBuilder {
     ) -> any MonthScene {
         
         let viewModel = MonthViewModelImple(
+            initialMonth: month,
             calendarUsecase: self.usecaseFactory.makeCalendarUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),

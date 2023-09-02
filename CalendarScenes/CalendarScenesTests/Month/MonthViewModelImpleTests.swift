@@ -52,6 +52,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubSettingUsecase.prepare()
 
         let viewModel = MonthViewModelImple(
+            initialMonth: .init(year: 2023, month: 9),
             calendarUsecase: calendarUsecase,
             calendarSettingUsecase: self.stubSettingUsecase,
             todoUsecase: self.stubTodoUsecase,
