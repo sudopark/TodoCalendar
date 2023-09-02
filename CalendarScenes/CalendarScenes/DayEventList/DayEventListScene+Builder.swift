@@ -13,13 +13,16 @@ import Scenes
 
 // MARK: - DayEventListScene Interactable & Listenable
 
-public protocol DayEventListSceneInteractor: AnyObject { }
+protocol DayEventListSceneInteractor: AnyObject {
+    
+    func selectedDayChanaged(_ newDay: CurrentSelectDayModel)
+}
 //
 //public protocol DayEventListSceneListener: AnyObject { }
 
 // MARK: - DayEventListScene
 
-public protocol DayEventListScene: Scene where Interactor == DayEventListSceneInteractor
+protocol DayEventListScene: Scene where Interactor == DayEventListSceneInteractor
 {
     
 }
@@ -27,7 +30,7 @@ public protocol DayEventListScene: Scene where Interactor == DayEventListSceneIn
 
 // MARK: - Builder + DependencyInjector Extension
 
-public protocol DayEventListSceneBuiler: AnyObject {
+protocol DayEventListSceneBuiler: AnyObject {
     
     func makeDayEventListScene() -> any DayEventListScene
 }

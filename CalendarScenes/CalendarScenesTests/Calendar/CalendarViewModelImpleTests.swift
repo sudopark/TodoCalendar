@@ -420,6 +420,8 @@ private extension CalendarViewModelImpleTests {
         func updateMonthIfNeed(_ newMonth: CalendarMonth) {
             self.currentMonth = newMonth
         }
+        
+        func monthScene(didChange currentSelectedDay: CurrentSelectDayModel) {}
     }
     
     final class SpyListener: CalendarSceneListener, @unchecked Sendable {

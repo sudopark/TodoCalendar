@@ -53,7 +53,10 @@ extension CalendarPaperRouter {
     )? {
         guard let current = self.currentScene else { return nil }
         
-        let monthScene = self.monthSceneBuilder.makeMonthScene(month)
+        let monthScene = self.monthSceneBuilder.makeMonthScene(
+            month,
+            listener: current.interactor
+        )
         let eventListScene = self.eventListSceneBuilder.makeDayEventListScene()
         
         current.addMonth(monthScene)

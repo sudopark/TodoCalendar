@@ -14,11 +14,11 @@ import CommonPresentation
 
 // MARK: - DayEventListSceneBuilerImple
 
-public final class DayEventListSceneBuilerImple {
+final class DayEventListSceneBuilerImple {
     
     private let viewAppearance: ViewAppearance
     
-    public init(
+    init(
         viewAppearance: ViewAppearance
     ) {
         self.viewAppearance = viewAppearance
@@ -28,7 +28,7 @@ public final class DayEventListSceneBuilerImple {
 
 extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
     
-    public func makeDayEventListScene() -> any DayEventListScene {
+    func makeDayEventListScene() -> any DayEventListScene {
         
         let viewModel = DayEventListViewModelImple(
             
