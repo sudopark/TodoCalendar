@@ -38,9 +38,7 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
         self.month = month
     }
     
-    
-    private struct Subject {
-    }
+    private var currentSelectedDay: CurrentSelectDayModel?
 }
 
 
@@ -53,7 +51,9 @@ extension CalendarPaperViewModelImple {
             let interactors = self.router?.attachMonthAndEventList(self.month) ?? nil
             self.monthInteractor = interactors?.0
             self.eventListInteractor = interactors?.1
-            // TODO: 현재 선택일
+            if let currentSelectedDay {
+                self.eventListInteractor?.selectedDayChanaged(currentSelectedDay)
+            }
         }
     }
     
@@ -63,6 +63,7 @@ extension CalendarPaperViewModelImple {
     
     func monthScene(didChange currentSelectedDay: CurrentSelectDayModel) {
         // TODO: 초기 선택일 정보 전달될때 리스너 아직 준비 안되어있을수도있음
+        self.currentSelectedDay = currentSelectedDay
         self.eventListInteractor?.selectedDayChanaged(currentSelectedDay)
     }
 }
