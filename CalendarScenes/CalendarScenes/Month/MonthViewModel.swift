@@ -255,36 +255,23 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     
     private func bindCurerntSelectedDayNotifying() {
      
-        typealias SelectedWeekAndDay = (CalendarComponent.Week, CalendarComponent.Day)
-        let asWeekAndDayIndex: (String, CurrentMonthInfo) -> SelectedWeekAndDay?
-        asWeekAndDayIndex = { identifier, monthInfo in
-            return monthInfo.component.weeks.compactMap { week in
-                guard let day = week.days.first(where: { $0.identifier == identifier })
-                else { return nil }
-                return (week, day)
-            }.first
-        }
-        
-        let asSelectedDayModel: (SelectedWeekAndDay) -> AnyPublisher<CurrentSelectDayModel, Never>
-        asSelectedDayModel = { [weak self] pair in
+        typealias DayAndEventIds = (CurrentSelectDayModel, [EventId])
+        let withEvents: (CurrentSelectDayModel) -> AnyPublisher<DayAndEventIds, Never>
+        withEvents = { [weak self] model in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
-            let (week, day) = pair
-            return self.eventStack(at: week.id)
-                .map { CurrentSelectDayModel(day.identifier, $0.eventId(in: day.day) ) }
+            let eventIds = self.eventStack(at: model.weekId)
+                .map { $0.eventId(in: model.day) }
+            return eventIds.map { (model, $0) }
                 .eraseToAnyPublisher()
         }
         
-        Publishers.CombineLatest(
-            self.currentSelectDayIdentifier,
-            self.subject.currentMonthInfo.compactMap { $0 }
-        )
-        .compactMap(asWeekAndDayIndex)
-        .map(asSelectedDayModel)
-        .switchToLatest()
-        .sink(receiveValue: { [weak self] model in
-            self?.listener?.monthScene(didChange: model)
-        })
-        .store(in: &self.cancellables)
+        self.currentSelectedDay
+            .map(withEvents)
+            .switchToLatest()
+            .sink(receiveValue: { [weak self] pair in
+                self?.listener?.monthScene(didChange: pair.0, and: pair.1)
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -358,26 +345,33 @@ extension MonthViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var currentSelectDayIdentifier: AnyPublisher<String, Never> {
-        let transform: (DayCellViewModel?, CalendarComponent.Day, CalendarComponent) -> String
-        transform = { selected, today, thisMonth in
+    private var currentSelectedDay: AnyPublisher<CurrentSelectDayModel, Never> {
+        let transform: (DayCellViewModel?, CalendarComponent.Day, CurrentMonthInfo) -> CurrentSelectDayModel?
+        transform = { selected, today, thisMonth -> CurrentSelectDayModel? in
             switch (selected, today, thisMonth) {
-            case (.some(let day), _, _):
-                return day.identifier
-            case (_, let t, let m) where t.year == m.year && t.month == m.month:
-                return "\(t.year)-\(t.month)-\(t.day)"
+            case (.some(let day), _, let month):
+                return .init(dayCellViewModel: day, month.component, month.timeZone)
+            case (_, let t, let m)
+                where t.year == m.component.year && t.month == m.component.month:
+                return .init(today: t, m.component, m.timeZone)
             case (_, _, let m):
-                return "\(m.year)-\(m.month)-1"
+                return .init(firstDayOf: m.component, m.timeZone)
             }
         }
         return Publishers.CombineLatest3(
             self.subject.userSelectedDay,
             self.calendarUsecase.currentDay.removeDuplicates(),
-            self.subject.currentMonthComponent.compactMap { $0 }
+            self.subject.currentMonthInfo.compactMap { $0 }
         )
-        .map(transform)
+        .compactMap(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+    
+    var currentSelectDayIdentifier: AnyPublisher<String, Never> {
+        return self.currentSelectedDay
+            .map { $0.identifier }
+            .eraseToAnyPublisher()
     }
     
     var todayIdentifier: AnyPublisher<String, Never> {
@@ -452,5 +446,56 @@ private extension WeekEventStackViewModel {
             else { return }
             acc += [eventLineOnDay.eventId]
         }
+    }
+}
+
+private extension CurrentSelectDayModel {
+    
+    init?(
+        dayCellViewModel: DayCellViewModel,
+        _ component: CalendarComponent,
+        _ timeZone: TimeZone
+    ) {
+        self.init(
+            dayCellViewModel.year, dayCellViewModel.month, dayCellViewModel.day, component, timeZone
+        )
+    }
+    
+    init?(
+        today: CalendarComponent.Day,
+        _ component: CalendarComponent,
+        _ timeZone: TimeZone
+    ) {
+        self.init(today.year, today.month, today.day, component, timeZone)
+    }
+    
+    init?(
+        firstDayOf month: CalendarComponent,
+        _ timeZone: TimeZone
+    ) {
+        guard let firstDay = month.weeks.flatMap({ $0.days }).first(where: { $0.month == month.month && $0.day == 1 })
+        else { return nil }
+        self.init(firstDay.year, firstDay.month, firstDay.day, month, timeZone)
+    }
+    
+    private init?(
+        _ year: Int, _ month: Int, _ day: Int,
+        _ component: CalendarComponent, _ timeZone: TimeZone
+    ) {
+        let identifier = "\(year)-\(month)-\(day)"
+        let findWeekContainsDay: (CalendarComponent.Week) -> Bool = { week in
+            return week.days.first(where: { $0.identifier == identifier }) != nil
+        }
+        guard let week = component.weeks.first(where: findWeekContainsDay)
+        else { return nil }
+        
+        let component = DateComponents(year: year, month: month, day: day)
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        guard let date = calendar.date(from: component),
+              let dayEnd = calendar.endOfDay(for: date)
+        else { return nil }
+        let dayStart = calendar.startOfDay(for: date)
+        let range = dayStart.timeIntervalSince1970..<dayEnd.timeIntervalSince1970
+        self.init(year, month, day, weekId: week.id, range: range)
     }
 }

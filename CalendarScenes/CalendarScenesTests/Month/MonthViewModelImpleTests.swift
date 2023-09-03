@@ -594,9 +594,9 @@ extension MonthViewModelImpleTests {
         ) {
             // given
             let expect = expectation(description: "wait selected day notified")
-            var model: CurrentSelectDayModel?
+            var model: CurrentSelectDayModel?; var eventIds: [EventId]?
             self.spyListener?.didCurrentDayChanged = {
-                model = $0
+                model = $0; eventIds = $1
                 expect.fulfill()
             }
             
@@ -606,7 +606,7 @@ extension MonthViewModelImpleTests {
             
             // then
             XCTAssertEqual(model?.identifier, expectDay)
-            XCTAssertEqual(model?.eventIds, expectEventIds)
+            XCTAssertEqual(eventIds, expectEventIds)
         }
         
         // when + then
@@ -700,9 +700,9 @@ extension MonthViewModelImpleTests {
     
     private class SpyListener: MonthSceneListener {
         
-        var didCurrentDayChanged: ((CurrentSelectDayModel) -> Void)?
-        func monthScene(didChange currentSelectedDay: CurrentSelectDayModel) {
-            self.didCurrentDayChanged?(currentSelectedDay)
+        var didCurrentDayChanged: ((CurrentSelectDayModel, [EventId]) -> Void)?
+        func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [EventId]) {
+            self.didCurrentDayChanged?(currentSelectedDay, eventsThatDay)
         }
     }
 }

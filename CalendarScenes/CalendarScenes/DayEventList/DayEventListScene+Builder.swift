@@ -15,7 +15,10 @@ import Scenes
 
 protocol DayEventListSceneInteractor: AnyObject {
     
-    func selectedDayChanaged(_ newDay: CurrentSelectDayModel)
+    func selectedDayChanaged(
+        _ newDay: CurrentSelectDayModel,
+        and eventThatDay: [EventId]
+    )
 }
 //
 //public protocol DayEventListSceneListener: AnyObject { }
