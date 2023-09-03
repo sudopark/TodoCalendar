@@ -19,12 +19,24 @@ enum EventId: Equatable {
 }
 
 struct CurrentSelectDayModel: Equatable {
-    let identifier: String
-    let eventIds: [EventId]
     
-    init(_ identifier: String, _ eventIds: [EventId]) {
-        self.identifier = identifier
-        self.eventIds = eventIds
+    let year: Int
+    let month: Int
+    let day: Int
+    let weekId: String
+    let range: Range<TimeInterval>
+    
+    var identifier: String { "\(year)-\(month)-\(day)" }
+    
+    init(
+        _ year: Int, _ month: Int, _ day: Int,
+        weekId: String, range: Range<TimeInterval>
+    ) {
+        self.year = year
+        self.month = month
+        self.day = day
+        self.weekId = weekId
+        self.range = range
     }
 }
 
@@ -37,7 +49,10 @@ protocol MonthSceneInteractor: AnyObject {
 
 protocol MonthSceneListener: AnyObject {
     
-    func monthScene(didChange currentSelectedDay: CurrentSelectDayModel)
+    func monthScene(
+        didChange currentSelectedDay: CurrentSelectDayModel,
+        and eventsThatDay: [EventId]
+    )
 }
 
 protocol MonthScene: Scene where Interactor == MonthSceneInteractor {

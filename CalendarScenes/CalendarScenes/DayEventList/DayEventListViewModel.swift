@@ -47,7 +47,10 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
 
 extension DayEventListViewModelImple {
     
-    func selectedDayChanaged(_ newDay: CurrentSelectDayModel) {
+    func selectedDayChanaged(
+        _ newDay: CurrentSelectDayModel,
+        and eventThatDay: [EventId]
+    ) {
         // TODO: update list
     }
 }

@@ -63,13 +63,13 @@ extension CalendarPaperViewModelImpleTests {
         // given
         let viewModel = self.makeViewModel()
         let days: [CurrentSelectDayModel] = [
-            .init("day1", []),
-            .init("day2", [])
+            .init(2023, 9, 10, weekId: "week1", range: 0..<10),
+            .init(2023, 9, 11, weekId: "week2", range: 10..<20)
         ]
         
         // when
         days.forEach {
-            viewModel.monthScene(didChange: $0)
+            viewModel.monthScene(didChange: $0, and: [])
         }
         
         // then
@@ -105,8 +105,10 @@ extension CalendarPaperViewModelImpleTests {
     private class SpyEventInteractor: DayEventListSceneInteractor {
         
         var selectedDays: [CurrentSelectDayModel] = []
-        func selectedDayChanaged(_ newDay: CurrentSelectDayModel) {
+        var selectedDayEvents: [[EventId]] = []
+        func selectedDayChanaged(_ newDay: CurrentSelectDayModel, and eventThatDay: [EventId]) {
             self.selectedDays.append(newDay)
+            self.selectedDayEvents.append(eventThatDay)
         }
     }
 }
