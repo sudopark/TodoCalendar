@@ -15,12 +15,15 @@ import CommonPresentation
 // MARK: - DayEventListSceneBuilerImple
 
 final class DayEventListSceneBuilerImple {
-    
+
+    private let usecaseFactory: UsecaseFactory
     private let viewAppearance: ViewAppearance
     
     init(
+        usecaseFactory: UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
+        self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
     }
 }
@@ -31,7 +34,10 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
     func makeDayEventListScene() -> any DayEventListScene {
         
         let viewModel = DayEventListViewModelImple(
-            
+            calendarSettingUsecase: usecaseFactory.makeCalendarSettingUsecase(),
+            todoEventUsecase: usecaseFactory.makeTodoEventUsecase(),
+            scheduleEventUsecase: usecaseFactory.makeScheduleEventUsecase(),
+            eventTagUsecase: usecaseFactory.makeEventTagUsecase()
         )
         
         let viewController = DayEventListViewController(

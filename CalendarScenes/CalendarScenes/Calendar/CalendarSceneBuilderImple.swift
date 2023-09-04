@@ -49,6 +49,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             viewAppearance: self.viewAppearance
         )
         let eventListSceneBuilder = DayEventListSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
         )
         let paperSceneBuilder = CalendarPaperSceneBuilerImple(

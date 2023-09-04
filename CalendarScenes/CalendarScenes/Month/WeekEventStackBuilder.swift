@@ -83,7 +83,7 @@ struct CalendarEvent: Equatable {
         guard let start = calendar.date(from: startComponents),
               let end = calendar.date(from: endComponents)
         else { return nil }
-        self.eventId = .holiday(holiday.dateString)
+        self.eventId = .holiday(holiday)
         self.name = holiday.name
         self.time = .period(start.timeIntervalSince1970..<end.timeIntervalSince1970)
         // TODO: holiday용 tag 하나 만들 필요 있음
@@ -352,15 +352,6 @@ private extension Array where Element == EventOnWeek {
     
     var firstEventDaySequence: Int {
         return self.first?.daysSequence.lowerBound ?? 8
-    }
-}
-
-private extension Range where Bound == TimeInterval {
-    
-    func shiftting(_ secondsFromGMT: TimeInterval, to timeZone: TimeZone) -> Range {
-        let utcRange = self.lowerBound+secondsFromGMT..<self.upperBound+secondsFromGMT
-        let givenTimeZoneSecondsFromGMT = timeZone.secondsFromGMT() |> TimeInterval.init
-        return utcRange.lowerBound-givenTimeZoneSecondsFromGMT..<utcRange.upperBound-givenTimeZoneSecondsFromGMT
     }
 }
 
