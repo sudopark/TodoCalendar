@@ -31,8 +31,9 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         
     }
     
+    public var stubCurrentTodoEvents: [TodoEvent] = []
     open var currentTodoEvents: AnyPublisher<[TodoEvent], Never> {
-        return Empty().eraseToAnyPublisher()
+        return Just(self.stubCurrentTodoEvents).eraseToAnyPublisher()
     }
 
     open func refreshTodoEvents(in period: Range<TimeInterval>) {

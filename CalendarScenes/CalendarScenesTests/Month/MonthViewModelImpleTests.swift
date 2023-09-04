@@ -383,7 +383,7 @@ extension MonthViewModelImpleTests {
         let week5EventIds = week5Events.eventIds
         let week5EventDaysSequences = week5Events.daysSequences
         XCTAssertEqual(week5EventIds, [
-            [.schedule("schedule_event_repeating", turn: 5), .holiday("2023-09-28"), .holiday("2023-09-29"), .holiday("2023-09-30")],
+            [.schedule("schedule_event_repeating", turn: 5), .holiday("2023-09-28".asHoliday("추석")), .holiday("2023-09-29".asHoliday("추석")), .holiday("2023-09-30".asHoliday("추석"))],
             [.schedule("schedule_event_repeating", turn: 6)]
         ])
         XCTAssertEqual(week5EventDaysSequences, [
@@ -432,7 +432,7 @@ extension MonthViewModelImpleTests {
             .firstValue(with: self.timeoutMillis)
         XCTAssertEqual(week3Events?.eventIds, [
             [.schedule("schedule_event_repeating", turn: 2)],
-            [.todo("todo8"), .holiday("2023-08-15")]
+            [.todo("todo8"), .holiday("2023-08-15".asHoliday("광복절"))]
         ])
         XCTAssertEqual(week3Events?.daysSequences, [
             [(1...4)],
@@ -562,7 +562,7 @@ extension MonthViewModelImpleTests {
         let lastWeekEvents = try await viewModel.eventStack(at: lastWeek?.id ?? "")
             .firstValue(with: self.timeoutMillis)
         XCTAssertEqual(lastWeekEvents?.eventIds, [
-            [.schedule("schedule_event_repeating", turn: 6), .holiday("2023-09-28"), .holiday("2023-09-29"), .holiday("2023-09-30")],
+            [.schedule("schedule_event_repeating", turn: 6), .holiday("2023-09-28".asHoliday("추석")), .holiday("2023-09-29".asHoliday("추석")), .holiday("2023-09-30".asHoliday("추석"))],
             [.schedule("schedule_event_repeating", turn: 5), .schedule("schedule_event_repeating", turn: 7)]
         ])
         XCTAssertEqual(lastWeekEvents?.daysSequences, [
@@ -757,5 +757,12 @@ private extension DayCellViewModel {
     
     init(_ year: Int, _ month: Int, _ day: Int) {
         self.init(year: year, month: month, day: day, isNotCurrentMonth: false, isWeekEnd: false, isHoliday: false)
+    }
+}
+
+private extension String {
+    
+    func asHoliday(_ name: String) -> Holiday {
+        return .init(dateString: self, localName: name, name: name)
     }
 }

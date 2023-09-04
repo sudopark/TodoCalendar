@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F60E65642AA31BD000A9A516 /* CalendarPaperViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60E65632AA31BD000A9A516 /* CalendarPaperViewModelImpleTests.swift */; };
+		F62C66B52AA4CCEC008B064A /* DayEventListViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62C66B42AA4CCEC008B064A /* DayEventListViewModelImpleTests.swift */; };
 		F63F64D72A2C06CA00E24186 /* CalendarScenes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64CE2A2C06CA00E24186 /* CalendarScenes.framework */; };
 		F63F64DC2A2C06CA00E24186 /* CalendarScenesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F63F64DB2A2C06CA00E24186 /* CalendarScenesTests.swift */; };
 		F63F64DD2A2C06CA00E24186 /* CalendarScenes.h in Headers */ = {isa = PBXBuildFile; fileRef = F63F64D12A2C06CA00E24186 /* CalendarScenes.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -58,6 +59,7 @@
 
 /* Begin PBXFileReference section */
 		F60E65632AA31BD000A9A516 /* CalendarPaperViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPaperViewModelImpleTests.swift; sourceTree = "<group>"; };
+		F62C66B42AA4CCEC008B064A /* DayEventListViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DayEventListViewModelImpleTests.swift; sourceTree = "<group>"; };
 		F63F64CE2A2C06CA00E24186 /* CalendarScenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CalendarScenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63F64D12A2C06CA00E24186 /* CalendarScenes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CalendarScenes.h; sourceTree = "<group>"; };
 		F63F64D62A2C06CA00E24186 /* CalendarScenesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CalendarScenesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -133,6 +135,14 @@
 			path = CalendarPaper;
 			sourceTree = "<group>";
 		};
+		F62C66B32AA4CCDF008B064A /* DayEventList */ = {
+			isa = PBXGroup;
+			children = (
+				F62C66B42AA4CCEC008B064A /* DayEventListViewModelImpleTests.swift */,
+			);
+			path = DayEventList;
+			sourceTree = "<group>";
+		};
 		F63F64C42A2C06CA00E24186 = {
 			isa = PBXGroup;
 			children = (
@@ -167,6 +177,7 @@
 		F63F64DA2A2C06CA00E24186 /* CalendarScenesTests */ = {
 			isa = PBXGroup;
 			children = (
+				F62C66B32AA4CCDF008B064A /* DayEventList */,
 				F60E65622AA31BBD00A9A516 /* CalendarPaper */,
 				F69C9A3F2A547A3F0099D4B5 /* Month */,
 				F67907DC2A4B4736000CF11B /* Calendar */,
@@ -399,6 +410,7 @@
 				F67907DE2A4B4748000CF11B /* CalendarViewModelImpleTests.swift in Sources */,
 				F63F64DC2A2C06CA00E24186 /* CalendarScenesTests.swift in Sources */,
 				F6D413362A5737CA00E2FEA8 /* WeekEventStackBuilderTests.swift in Sources */,
+				F62C66B52AA4CCEC008B064A /* DayEventListViewModelImpleTests.swift in Sources */,
 				F69C9A412A547A500099D4B5 /* MonthViewModelImpleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

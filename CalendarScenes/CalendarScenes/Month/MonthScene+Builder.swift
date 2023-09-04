@@ -15,7 +15,7 @@ import Scenes
 enum EventId: Equatable {
     case todo(String)
     case schedule(String, turn: Int)
-    case holiday(_ dateString: String)
+    case holiday(_ holiday: Holiday)
 }
 
 struct CurrentSelectDayModel: Equatable {
