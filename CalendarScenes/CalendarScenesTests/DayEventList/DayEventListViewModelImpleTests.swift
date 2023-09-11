@@ -19,40 +19,51 @@ import TestDoubles
 class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
+    private var stubTodoUsecase: StubTodoEventUsecase!
+    private var spyRouter: SpyRouter!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
+        self.stubTodoUsecase = .init()
+        self.spyRouter = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
+        self.stubTodoUsecase = nil
+        self.spyRouter = nil
     }
     
     // 9-10일: current-todo-1, current-todo-2, todo-with-time, not-repeating-schedule, repeating-schedule(turn 4)
     // 9-11일: current-todo-1, current-todo-2
-    private func makeViewModel() -> DayEventListViewModelImple {
+    private func makeViewModel(
+        shouldFailDoneTodo: Bool = false
+    ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
             .init(uuid: "current-todo-1", name: "some"),
             .init(uuid: "current-todo-2", name: "some")
         ]
         let todoWithTime = TodoEvent(uuid: "todo-with-time", name: "some")
-        let notRepeatingSchedule = ScheduleEvent(uuid: "not-repeating-schedule", name: "some", time: .at(100))
-        let repeatingSchedule = ScheduleEvent(uuid: "repeating-schedule", name: "some", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(100), turn: 4)]
+        let notRepeatingSchedule = ScheduleEvent(uuid: "not-repeating-schedule", name: "some", time: .at(self.todayRange.lowerBound))
+        let repeatingSchedule = ScheduleEvent(uuid: "repeating-schedule", name: "some", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound), turn: 4)]
         
-        let todoUsecase = StubTodoEventUsecase()
-        todoUsecase.stubCurrentTodoEvents = currentTodos
+        self.stubTodoUsecase.stubCurrentTodoEvents = currentTodos
+        self.stubTodoUsecase.stubTodoEventsInRange = [todoWithTime]
+        self.stubTodoUsecase.shouldFailCompleteTodo = shouldFailDoneTodo
         
         let scheduleUsecase = StubScheduleEventUsecase()
+        scheduleUsecase.stubScheduleEventsInRange = [notRepeatingSchedule, repeatingSchedule]
         
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
         
         let viewModel = DayEventListViewModelImple(
             calendarSettingUsecase: calendarSettingUsecase,
-            todoEventUsecase: todoUsecase,
+            todoEventUsecase: self.stubTodoUsecase,
             scheduleEventUsecase: scheduleUsecase,
             eventTagUsecase: StubEventTagUsecase()
         )
+        viewModel.router = self.spyRouter
         return viewModel
     }
     
@@ -255,6 +266,90 @@ extension DayEventListViewModelImpleTests {
     }
 }
 
-// 선택된 날짜에 해당하는 이벤트 리스트 제공 + 이경우에 current todo 정보도 같이 제공
+extension DayEventListViewModelImpleTests {
+    
+    private var dummyCurrentDay: CurrentSelectDayModel {
+        return .init(2023, 09, 10, weekId: "week_1", range: self.todayRange)
+    }
+    
+    private var dummyEventIds: [EventId] {
+        return [
+            .holiday(.init(dateString: "some", localName: "holiday", name: "some")),
+            .schedule("repeating-schedule", turn: 4),
+            .todo("todo-with-time"),
+            .schedule("not-repeating-schedule", turn: 1)
+        ]
+    }
+    
+    // 선택된 날짜에 해당하는 이벤트 리스트 제공 + 이경우에 current todo 정보도 같이 제공
+    func testViewModel_provideEventListThatDayWithCurrentTodo() {
+        // given
+        let expect = expectation(description: "해당 하는 날짜의 이벤트 목록을 current todo와 함께 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEventIds.count + 2 })
+        let cvms = self.waitFirstOutput(expect, for: source) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds)
+        }
+        
+        // then
+        let eventIdLists = cvms?.map { $0.eventId }
+        XCTAssertEqual(eventIdLists, [
+            .todo("current-todo-1"),
+            .todo("current-todo-2")
+        ] + self.dummyEventIds)
+    }
+    
+    // 선택된 날짜에 해당하는 todo event 완료 처리시 목록에서 제거
+    func testViewModel_whenDoneTodo_exclude() {
+        // given
+        let expect = expectation(description: "todo 완료시 리스트에서 제거")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEventIds.count + 2 })
+        let cvmLists = self.waitOutputs(expect, for: source) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds)
+            
+            viewModel.doneTodo("todo-with-time")
+            // 완료처리되면 외부에서도 아이디 업데이트되어서 입력될꺼임
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds.filter { $0 != .todo("todo-with-time") })
+        }
+        
+        // then
+        let idLists = cvmLists.map { cvms in cvms.map { $0.eventId } }
+        let expectIdListsBeforeDone = [.todo("current-todo-1"), .todo("current-todo-2")] + self.dummyEventIds
+        let expectIdListsAfterDone = [.todo("current-todo-1"), .todo("current-todo-2")] + self.dummyEventIds.filter { $0 != .todo("todo-with-time") }
+        XCTAssertEqual(idLists, [
+            expectIdListsBeforeDone,
+            expectIdListsAfterDone
+        ])
+    }
+    
+    func testViewModel_whenFailToDoneTodo_showErrorWithoutUpdateList() {
+        // given
+        let expect = expectation(description: "todo 완료처리 실패시 에러 알림")
+        let viewModel = self.makeViewModel(shouldFailDoneTodo: true)
+        
+        // when
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEventIds.count + 2})
+        let _ = self.waitFirstOutput(expect, for: source) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds)
+            
+            viewModel.doneTodo("todo-with-time")
+        }
+        
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowError)
+    }
+}
 
-// 선택된 날짜에 해당하는 todo event 완료 처리시 목록에서 제거
+extension DayEventListViewModelImpleTests {
+    
+    private class SpyRouter: BaseSpyRouter, DayEventListRouting, @unchecked Sendable {
+        
+        
+    }
+}

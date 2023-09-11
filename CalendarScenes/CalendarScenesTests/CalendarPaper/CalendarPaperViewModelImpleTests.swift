@@ -8,6 +8,7 @@
 import XCTest
 import Domain
 import UnitTestHelpKit
+import TestDoubles
 
 @testable import CalendarScenes
 
@@ -80,7 +81,7 @@ extension CalendarPaperViewModelImpleTests {
 
 extension CalendarPaperViewModelImpleTests {
     
-    private class SpyRouter: CalendarPaperRouting, @unchecked Sendable {
+    private class SpyRouter: BaseSpyRouter, CalendarPaperRouting, @unchecked Sendable {
         
         var didListenerAttached: (() -> Void)?
         let spyMonthInteractor: SpyMonthSceneInteractor = .init()
