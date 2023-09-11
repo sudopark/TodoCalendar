@@ -27,7 +27,8 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase {
     
     }
     
+    public var stubScheduleEventsInRange: [ScheduleEvent] = []
     open func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never> {
-        return Empty().eraseToAnyPublisher()
+        return Just(self.stubScheduleEventsInRange).eraseToAnyPublisher()
     }
 }

@@ -37,6 +37,8 @@ public struct EmptyBuilder {
 
 public protocol Routing: AnyObject {
     // common routing interface
+    func showError(_ error: Error)
+    func showToast(_ message: String)
 }
 
 open class BaseRouterImple: Routing {
@@ -44,4 +46,12 @@ open class BaseRouterImple: Routing {
     public weak var scene: (any Scene)?
     
     public init() { }
+    
+    open func showError(_ error: Error) {
+        // TODO: show error
+    }
+    
+    public func showToast(_ message: String) {
+        // TODO: show toast
+    }
 }

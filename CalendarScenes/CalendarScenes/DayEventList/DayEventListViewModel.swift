@@ -224,7 +224,14 @@ extension DayEventListViewModelImple {
     }
     
     func doneTodo(_ eventId: String) {
-        
+        Task { [weak self] in
+            do {
+                _ = try await self?.todoEventUsecase.completeTodo(eventId)
+            } catch {
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
     }
     
     func addEvent() {

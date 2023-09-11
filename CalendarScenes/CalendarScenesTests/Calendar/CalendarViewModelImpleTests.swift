@@ -398,7 +398,7 @@ extension CalendarViewModelImpleTests {
 
 private extension CalendarViewModelImpleTests {
     
-    class SpyRouter: CalendarViewRouting, @unchecked Sendable {
+    class SpyRouter: BaseSpyRouter, CalendarViewRouting, @unchecked Sendable {
         
         var spyInteractors: [SpyPaperInteractor] = []
         var didInitialMonthsAttached: (() -> Void)?
