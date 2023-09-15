@@ -27,6 +27,7 @@ struct EventCellViewModel: Equatable {
     enum PeriodText: Equatable {
         case anyTime
         case allDay
+        case atTime(_ timeText: String)
         case inToday(_ startTime: String, _ endTime: String)
         case fromTodayToFuture(_ startTime: String, _ endDay: String)
         case fromPastToToday(_ startDay: String, _ endTime: String)
@@ -40,20 +41,22 @@ struct EventCellViewModel: Equatable {
             let startTimeInToday = todayRange ~= eventTimeRange.lowerBound
             let endTimeInToday = todayRange ~= eventTimeRange.upperBound
             let isAllDay = eventTimeRange.lowerBound <= todayRange.lowerBound && todayRange.upperBound <= eventTimeRange.upperBound
-            switch (startTimeInToday, endTimeInToday, isAllDay) {
-            case (_, _, true):
+            switch (eventTime, startTimeInToday, endTimeInToday, isAllDay) {
+            case (_, _, _, true):
                 self = .allDay
-            case (true, true, _):
+            case (.at(let time), true, true, _):
+                self = .atTime(time.timeText(timeZone))
+            case (_, true, true, _):
                 self = .inToday(
                     eventTime.lowerBoundWithFixed.timeText(timeZone),
                     eventTime.upperBoundWithFixed.timeText(timeZone)
                 )
-            case (true, false, _):
+            case (_, true, false, _):
                 self = .fromTodayToFuture(
                     eventTime.lowerBoundWithFixed.timeText(timeZone),
                     eventTime.upperBoundWithFixed.dayText(timeZone)
                 )
-            case (false, true, _):
+            case (_, false, true, _):
                 self = .fromPastToToday(
                     eventTime.lowerBoundWithFixed.dayText(timeZone),
                     eventTime.upperBoundWithFixed.timeText(timeZone)
