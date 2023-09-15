@@ -145,6 +145,13 @@ extension DayEventListViewModelImpleTests {
         return start.timeIntervalSince1970..<end.timeIntervalSince1970
     }
     
+    private func september10th10_30AtTime(in timeZone: TimeZone) -> EventTime {
+        let component = DateComponents(year: 2023, month: 9, day: 10, hour: 10, minute: 30)
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let date = calendar.date(from: component)!
+        return .at(date.timeIntervalSince1970)
+    }
+    
     private var todayRange: Range<TimeInterval> {
         return september10th(in: TimeZone(abbreviation: "KST")!)
     }
@@ -185,6 +192,19 @@ extension DayEventListViewModelImpleTests {
         parameterizeTest(self.rangeFromTodayToFuture, .fromTodayToFuture("0:01", "11 (Mon)"))
         parameterizeTest(self.rangeFromPastToFuture, .allDay)
         parameterizeTest(self.rangeFromTodayToToday, .inToday("0:01", "23:58"))
+    }
+    
+    func testCellViewModel_whenEventTimeIsAt_showTimeText() {
+        // given
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let time = self.september10th10_30AtTime(in: timeZone)
+        let event = ScheduleEvent(uuid: "event", name: "name", time: time)
+        
+        // when
+        let cellViewModel = EventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: timeZone)
+        
+        // then
+        XCTAssertEqual(cellViewModel?.periodText, .atTime("10:30"))
     }
     
     private var pdt9_10: Range<TimeInterval> {
