@@ -10,6 +10,8 @@
 
 import SwiftUI
 import Combine
+import Prelude
+import Optics
 import CommonPresentation
 
 
@@ -20,12 +22,27 @@ final class DayEventListViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
+    @Published fileprivate var dateText: String = ""
+    @Published fileprivate var cellViewModels: [EventCellViewModel] = []
+    
     func bind(_ viewModel: DayEventListViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
         
-        // TODO: bind state
+        viewModel.selectedDay
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.dateText = text
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.cellViewModels
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] cellViewModels in
+                self?.cellViewModels = cellViewModels
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -61,9 +78,147 @@ struct DayEventListView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     
     var body: some View {
-        ForEach(0..<30) {
-            Text("DayEventListView => \($0)")
+        VStack(alignment: .leading, spacing: 6) {
+            Text(self.state.dateText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .font(self.appearance.fontSet.size(22, weight: .semibold).asFont)
+                .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                .padding(.bottom, 3)
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(self.state.cellViewModels, id: \.presentingCompareKey) { cellViewModel in
+                    cellView(cellViewModel)
+                }
+            }
+            .fixedSize(horizontal: false, vertical: true)
+            addNewButton()
         }
+        .padding()
+    }
+    
+    private func cellView(_ cellViewModel: EventCellViewModel) -> some View {
+        let tagLineColor = cellViewModel.colorHex.flatMap { Color.from($0) } ?? .clear
+        return HStack(spacing: 8) {
+            // left
+            self.eventLeftView(cellViewModel)
+                .frame(width: 50)
+                
+            // tag line
+            RoundedRectangle(cornerRadius: 3)
+                .fill(tagLineColor)
+                .frame(width: 6)
+            
+            // right
+            self.eventRightView(cellViewModel)
+        }
+        .padding(.vertical, 4).padding(.horizontal, 8)
+        .frame(idealHeight: 50)
+        .background(self.appearance.colorSet.eventList.asColor)
+    }
+    
+    private func eventLeftView(_ cellViewModel: EventCellViewModel) -> some View {
+        func singleText(_ text: String) -> some View {
+            return VStack(alignment: .center) {
+                Text(text)
+                    .minimumScaleFactor(0.7)
+                    .font(self.appearance.fontSet.size(15, weight: .regular).asFont)
+                    .foregroundColor(self.appearance.colorSet.normalText.asColor)
+            }
+        }
+        func doubleText(_ top: String, _ bottom: String) -> some View {
+            return VStack(alignment: .center, spacing: 2) {
+                Text(top)
+                    .minimumScaleFactor(0.7)
+                    .font(self.appearance.fontSet.size(15, weight: .regular).asFont)
+                    .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                Text(bottom)
+                    .minimumScaleFactor(0.7)
+                    .font(self.appearance.fontSet.size(14).asFont)
+                    .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
+            }
+        }
+        switch cellViewModel.periodText {
+        case .anyTime:
+            return singleText("Always".localized()).asAnyView()
+        case .allDay:
+            return singleText("Allday".localized()).asAnyView()
+        case .atTime(let time):
+            return singleText(time).asAnyView()
+        case .inToday(let start, let end):
+            return doubleText(start, end).asAnyView()
+        case .fromTodayToFuture(let start, let end):
+            return doubleText(start, end).asAnyView()
+        case .fromPastToToday(let start, let end):
+            return doubleText(start, end).asAnyView()
+        default:
+            return EmptyView().asAnyView()
+        }
+    }
+    
+    private func eventRightView(_ cellViewModel: EventCellViewModel) -> some View {
+        return HStack(alignment: .center, spacing: 8) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(cellViewModel.name)
+                    .minimumScaleFactor(0.7)
+                    .font(self.appearance.fontSet.normal.asFont)
+                    .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                
+                if let periodDescription = cellViewModel.periodDescription {
+                    Text(periodDescription)
+                        .minimumScaleFactor(0.7)
+                        .font(self.appearance.fontSet.size(13).asFont)
+                        .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
+                }
+            }
+            Spacer()
+            if cellViewModel.isTodo {
+                Button {
+                    // TODO: done action
+                } label: {
+                    Image(systemName: "circle")
+                }
+            }
+        }
+    }
+    
+    private func addNewButton() -> some View {
+        return Text("Button")
+    }
+}
+
+private extension EventId {
+    
+    var presentingCompareKey: String {
+        switch self {
+        case .todo(let id): return "todo:\(id)"
+        case .schedule(let id, let turn): return "scheudle:\(id)-\(turn)"
+        case .holiday(let holiday): return "\(holiday.dateString)-\(holiday.name)"
+        }
+    }
+}
+
+private extension EventCellViewModel.PeriodText {
+    
+    var presentingCompareKey: String {
+        switch self {
+        case .anyTime: return "anyTime"
+        case .allDay: return "allDay"
+        case .atTime(let time): return "atTime-\(time)"
+        case .inToday(let start, let end): return "inToday-\(start)~\(end)"
+        case .fromTodayToFuture(let start, let end): return "fromTodayToFuture\(start)~\(end)"
+        case .fromPastToToday(let start, let end): return "fromPastToToday-\(start)~\(end)"
+        }
+    }
+}
+
+private extension EventCellViewModel {
+    
+    var presentingCompareKey: String {
+        let components: [String?] = [
+            self.eventId.presentingCompareKey,
+            self.name, self.periodText?.presentingCompareKey,
+            self.periodDescription, self.colorHex
+        ]
+        return components.map { $0 ?? "nil" }.joined(separator: "-")
     }
 }
 
@@ -74,8 +229,82 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let viewAppearance = ViewAppearance(color: .defaultLight, font: .systemDefault)
-        let containerView = DayEventListContainerView(viewAppearance: viewAppearance)
+        let state = DayEventListViewState()
+        state.dateText = "2020년 9월 15일(금)"
+        state.cellViewModels = EventCellViewModel.dummies()
+        let containerView = DayEventListView()
+            .environmentObject(viewAppearance)
+            .environmentObject(state)
         return containerView
     }
 }
 
+private extension EventCellViewModel {
+    
+    // period랑 allday만 설명 있음
+    
+    static func dummies() -> [EventCellViewModel] {
+        let currentTodoCells: [EventCellViewModel] = [
+            .init(eventId: .todo("current-todo1"), name: "current todo 1")
+                |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .anyTime,
+            .init(eventId: .todo("current-todo2"), name: "current todo 2")
+                |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .anyTime
+        ]
+        let todoCells: [EventCellViewModel] = [
+//            .init(eventId: .todo("todo1"), name: "todo with anyTime")
+//                |> \.colorHex .~ "#0000ff"
+//                |> \.periodText .~ .anyTime,
+//            .init(eventId: .todo("todo2"), name: "todo with all day")
+//                |> \.colorHex .~ "#0000ff"
+//                |> \.periodText .~ .allDay,
+//            .init(eventId: .todo("todo3"), name: "todo with at time")
+//                |> \.colorHex .~ "#0000ff"
+//                |> \.periodText .~ .atTime("10:30"),
+//            .init(eventId: .todo("todo4"), name: "todo with in today")
+//                |> \.colorHex .~ "#0000ff"
+//                |> \.periodText .~ .inToday("9:30", "20:30")
+//                |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
+            .init(eventId: .todo("todo5"), name: "todo with today to future")
+                |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .fromTodayToFuture("09:30", "9 (Sat)")
+                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
+            .init(eventId: .todo("todo6"), name: "todo with past to today")
+                |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .fromPastToToday("9 (Sat)", "20:00")
+                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
+        ]
+        let scheduleCells: [EventCellViewModel] = [
+            .init(eventId: .schedule("sc1", turn: 1), name: "schdule with anyTime")
+                |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .anyTime,
+            .init(eventId: .schedule("sc2", turn: 1), name: "schdule with all day")
+            |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .allDay,
+            .init(eventId: .schedule("sc3", turn: 1), name: "schdule with at time")
+            |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .atTime("10:30"),
+            .init(eventId: .schedule("sc4", turn: 1), name: "schdule with in today")
+            |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .inToday("9:30", "20:30")
+                |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
+            .init(eventId: .schedule("sc5", turn: 1), name: "schdule with today to future")
+            |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .fromTodayToFuture("09:30", "9 (Sat)")
+                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
+            .init(eventId: .schedule("sc6", turn: 1), name: "schdule with past to today")
+            |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .fromPastToToday("9 (Sat)", "20:00")
+                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
+        ]
+        
+        let holidayCell = EventCellViewModel(.init(dateString: "2023-09-30", localName: "추석", name: "추석"))
+            |> \.colorHex .~ "#ff0000"
+        
+        return currentTodoCells + (
+            scheduleCells + todoCells + [holidayCell]
+        )
+//        .shuffled()
+    }
+}

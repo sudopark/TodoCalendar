@@ -22,6 +22,15 @@ public protocol FontSet: Sendable {
     var normal: UIFont { get }
     var subNormal: UIFont { get}
     var subNormalWithBold: UIFont { get }
+    
+    func size(_ size: CGFloat, weight: UIFont.Weight) -> UIFont
+}
+
+extension FontSet {
+    
+    public func size(_ size: CGFloat) -> UIFont {
+        return self.size(size, weight: .regular)
+    }
 }
 
 
@@ -39,4 +48,8 @@ public struct SystemDefaultFontSet: FontSet {
     public let normal: UIFont = UIFont.systemFont(ofSize: 16)
     public let subNormal: UIFont = UIFont.systemFont(ofSize: 12)
     public let subNormalWithBold: UIFont = UIFont.systemFont(ofSize: 12, weight: .bold)
+    
+    public func size(_ size: CGFloat, weight: UIFont.Weight) -> UIFont {
+        return UIFont.systemFont(ofSize: size, weight: weight)
+    }
 }

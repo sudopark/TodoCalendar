@@ -66,7 +66,7 @@ struct EventCellViewModel: Equatable {
             }
         }
     }
-    var tagId: String?
+    fileprivate var tagId: String?
     let name: String
     var periodText: PeriodText?
     var periodDescription: String?

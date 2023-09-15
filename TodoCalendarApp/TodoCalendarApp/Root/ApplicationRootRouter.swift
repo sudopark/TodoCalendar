@@ -29,6 +29,14 @@ final class ApplicationRootRouter: ApplicationRouting {
     init(nonLoginUsecaseFactory: NonLoginUsecaseFactoryImple) {
         self.nonLoginUsecaseFactory = nonLoginUsecaseFactory
     }
+    
+    func showError(_ error: Error) {
+        // TODO:
+    }
+    
+    func showToast(_ message: String) {
+        // TODO: 
+    }
 }
 
 
