@@ -36,6 +36,7 @@ final class DayEventListViewController: UIHostingController<DayEventListContaine
             viewAppearance: viewAppearance
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
+        .eventHandler(\.requestDoneTodo, viewModel.doneTodo(_:))
         super.init(rootView: containerView)
         self.sizingOptions = [.intrinsicContentSize]
     }

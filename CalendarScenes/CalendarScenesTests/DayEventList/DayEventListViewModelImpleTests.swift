@@ -364,6 +364,37 @@ extension DayEventListViewModelImpleTests {
         // then
         XCTAssertNotNil(self.spyRouter.didShowError)
     }
+    
+    private func makeViewModelWithInitialListLoaded(
+        shouldFailDoneTodo: Bool = false
+    ) -> DayEventListViewModelImple {
+        // given
+        let expect = expectation(description: "wait first cells loaded")
+        let viewModel = self.makeViewModel(shouldFailDoneTodo: shouldFailDoneTodo)
+        
+        // when
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEventIds.count + 2 })
+        let _ = self.waitFirstOutput(expect, for: source) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds)
+        }
+        
+        // then
+        return viewModel
+    }
+    
+    func testViewModel_whenAfterFailToDoneTodo_notifyFailedId() {
+        // given
+        let expect = expectation(description: "todo 완료처리 실패시에 실패한 아이디 todo 알림")
+        let viewModel = self.makeViewModelWithInitialListLoaded(shouldFailDoneTodo: true)
+        
+        // when
+        let failedId = self.waitFirstOutput(expect, for: viewModel.doneTodoFailed) {
+            viewModel.doneTodo("todo-with-time")
+        }
+        
+        // then
+        XCTAssertEqual(failedId, "todo-with-time")
+    }
 }
 
 extension DayEventListViewModelImpleTests {

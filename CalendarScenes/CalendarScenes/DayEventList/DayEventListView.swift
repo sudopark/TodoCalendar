@@ -24,6 +24,7 @@ final class DayEventListViewState: ObservableObject {
     
     @Published fileprivate var dateText: String = ""
     @Published fileprivate var cellViewModels: [EventCellViewModel] = []
+    @Published fileprivate var tempDoneTodoIds: Set<String> = []
     
     func bind(_ viewModel: DayEventListViewModel) {
         
@@ -41,8 +42,28 @@ final class DayEventListViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] cellViewModels in
                 self?.cellViewModels = cellViewModels
+                self?.removeDoneTodoIdsFromTempDoneIds(from: cellViewModels)
             })
             .store(in: &self.cancellables)
+        
+        viewModel.doneTodoFailed
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] todoId in
+                guard let self = self else { return }
+                self.tempDoneTodoIds = self.tempDoneTodoIds |> elem(todoId) .~ false
+                // elem 함수 자체가
+                // 세터로 넣어줄 함수(contain) == true 이면 insert
+                // 세터로 넣어줄 함수(contain) == false 이면 remove
+                // set false 함수가 들어가 버리면 -> contain 여부와 관련없이 결과는 false여서 remove / true이면 반대여서 insert -> set은 읽지는 않으니(내부에 입력한 결과로만 반환하게 const)
+                // over가 들어가서 { !$0 } 이라면 -> contain의 invert가 되기 때문에
+                // 없다면 insert / 있으면 delete
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func removeDoneTodoIdsFromTempDoneIds(from cellViewModels: [EventCellViewModel]) {
+        let existingTodoIds = cellViewModels.compactMap { $0.todoEventId } |> Set.init
+        self.tempDoneTodoIds = tempDoneTodoIds.intersection(existingTodoIds)
     }
 }
 
@@ -55,6 +76,7 @@ struct DayEventListContainerView: View {
     private let viewAppearance: ViewAppearance
     
     var stateBinding: (DayEventListViewState) -> Void = { _ in }
+    var requestDoneTodo: (String) -> Void = { _ in }
     
     init(viewAppearance: ViewAppearance) {
         self.viewAppearance = viewAppearance
@@ -62,6 +84,7 @@ struct DayEventListContainerView: View {
     
     var body: some View {
         return DayEventListView()
+            .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
             .onAppear {
                 self.stateBinding(self.state)
             }
@@ -77,6 +100,8 @@ struct DayEventListView: View {
     @EnvironmentObject private var state: DayEventListViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
+    fileprivate var requestDoneTodo: (String) -> Void = { _ in }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(self.state.dateText)
@@ -86,7 +111,9 @@ struct DayEventListView: View {
                 .padding(.bottom, 3)
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(self.state.cellViewModels, id: \.presentingCompareKey) { cellViewModel in
-                    cellView(cellViewModel)
+                    
+                    EventListCellView(cellViewModel: cellViewModel)
+                        .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -95,7 +122,27 @@ struct DayEventListView: View {
         .padding()
     }
     
-    private func cellView(_ cellViewModel: EventCellViewModel) -> some View {
+    private func addNewButton() -> some View {
+        return Text("Button")
+    }
+}
+
+
+// MARK: - event list cellView
+
+private struct EventListCellView: View {
+    
+    @EnvironmentObject private var state: DayEventListViewState
+    @EnvironmentObject private var appearance: ViewAppearance
+    
+    fileprivate var requestDoneTodo: (String) -> Void = { _ in }
+    
+    private let cellViewModel: EventCellViewModel
+    init(cellViewModel: EventCellViewModel) {
+        self.cellViewModel = cellViewModel
+    }
+    
+    var body: some View {
         let tagLineColor = cellViewModel.colorHex.flatMap { Color.from($0) } ?? .clear
         return HStack(spacing: 8) {
             // left
@@ -170,18 +217,22 @@ struct DayEventListView: View {
                 }
             }
             Spacer()
-            if cellViewModel.isTodo {
+            if let todoId = cellViewModel.todoEventId {
                 Button {
-                    // TODO: done action
+                    withAnimation {
+                        _ = self.state.tempDoneTodoIds.insert(todoId)
+                    }
+                    self.requestDoneTodo(todoId)
+                    
                 } label: {
-                    Image(systemName: "circle")
+                    if self.state.tempDoneTodoIds.contains(todoId) {
+                        Image(systemName: "circle.fill")
+                    } else {
+                        Image(systemName: "circle")
+                    }
                 }
             }
         }
-    }
-    
-    private func addNewButton() -> some View {
-        return Text("Button")
     }
 }
 
@@ -233,6 +284,16 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         state.dateText = "2020년 9월 15일(금)"
         state.cellViewModels = EventCellViewModel.dummies()
         let containerView = DayEventListView()
+            .eventHandler(\.requestDoneTodo) { id in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    // 완료처리 실패하게 하던지
+//                    state.requestDoneTodoIds = []
+                    
+                    // 혹은 완료처리 성공 이후 셀 목록 업데이트 시뮬레이션
+                    let newCells = state.cellViewModels.filter { $0.todoEventId != id }
+                    state.cellViewModels = newCells
+                }
+            }
             .environmentObject(viewAppearance)
             .environmentObject(state)
         return containerView
