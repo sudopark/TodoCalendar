@@ -19,9 +19,9 @@ import Extensions
 struct EventCellViewModel: Equatable {
     
     let eventId: EventId
-    var isTodo: Bool {
-        guard case .todo = self.eventId else { return false }
-        return true
+    var todoEventId: String? {
+        guard case let .todo(id) = self.eventId else { return nil }
+        return id
     }
     
     enum PeriodText: Equatable {
@@ -94,6 +94,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     // presenter
     var selectedDay: AnyPublisher<String, Never> { get }
     var cellViewModels: AnyPublisher<[EventCellViewModel], Never> { get }
+    var doneTodoFailed: AnyPublisher<String, Never> { get }
 }
 
 
@@ -142,6 +143,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let todosMap = CurrentValueSubject<[String: TodoEvent], Never>([:])
         let scheduleMap = CurrentValueSubject<[String: ScheduleEvent], Never>([:])
         let tagMaps = CurrentValueSubject<[String: EventTag], Never>([:])
+        let doneFailedTodo = PassthroughSubject<String, Never>()
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -231,6 +233,7 @@ extension DayEventListViewModelImple {
             do {
                 _ = try await self?.todoEventUsecase.completeTodo(eventId)
             } catch {
+                self?.subject.doneFailedTodo.send(eventId)
                 self?.router?.showError(error)
             }
         }
@@ -322,6 +325,11 @@ extension DayEventListViewModelImple {
         )
         .map(asCellViewModel)
         .eraseToAnyPublisher()
+    }
+    
+    var doneTodoFailed: AnyPublisher<String, Never> {
+        return self.subject.doneFailedTodo
+            .eraseToAnyPublisher()
     }
 }
 
