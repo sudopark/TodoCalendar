@@ -115,7 +115,7 @@ extension DayEventListViewModelImpleTests {
         let current = TodoEvent(uuid: "curent", name: "current todo")
         
         // when
-        let cellViewModel = EventCellViewModel(current, in: 0..<100, TimeZone(abbreviation: "KST")!)
+        let cellViewModel = TodoEventCellViewModelImple(current, in: 0..<100, TimeZone(abbreviation: "KST")!)
         
         // then
         XCTAssertEqual(cellViewModel?.name, "current todo")
@@ -128,7 +128,7 @@ extension DayEventListViewModelImpleTests {
         let holiday = Holiday(dateString: "2020-03-01", localName: "삼일절", name: "삼일절")
         
         // when
-        let cellViewModel = EventCellViewModel(holiday)
+        let cellViewModel = HolidayEventCellViewModelImple(holiday)
         
         // then
         XCTAssertEqual(cellViewModel.name, "삼일절")
@@ -178,12 +178,12 @@ extension DayEventListViewModelImpleTests {
         // given
         func parameterizeTest(
             _ range: Range<TimeInterval>,
-            _ expectPeriodText: EventCellViewModel.PeriodText
+            _ expectPeriodText: EventPeriodText
         ) {
             let time = EventTime.period(range)
             let event = ScheduleEvent(uuid: "event", name: "some", time: time)
             
-            let cellViewModel = EventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
+            let cellViewModel = ScheduleEventCellViewModelImple(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
             
             XCTAssertEqual(cellViewModel?.periodText, expectPeriodText)
         }
@@ -201,7 +201,7 @@ extension DayEventListViewModelImpleTests {
         let event = ScheduleEvent(uuid: "event", name: "name", time: time)
         
         // when
-        let cellViewModel = EventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: timeZone)
+        let cellViewModel = ScheduleEventCellViewModelImple(event, turn: 1, in: self.todayRange, timeZone: timeZone)
         
         // then
         XCTAssertEqual(cellViewModel?.periodText, .atTime("10:30"))
@@ -227,13 +227,13 @@ extension DayEventListViewModelImpleTests {
         // given
         func parameterizeTest(
             _ range: Range<TimeInterval>,
-            _ expectedPeriodText: EventCellViewModel.PeriodText
+            _ expectedPeriodText: EventPeriodText
         ) {
             let pdtSecondsFromGMT = TimeZone(abbreviation: "PDT")!.secondsFromGMT() |> TimeInterval.init
             let time = EventTime.allDay(range, secondsFromGMT: pdtSecondsFromGMT)
             let event = ScheduleEvent(uuid: "event", name: "some", time: time)
             
-            let cellViewModel = EventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
+            let cellViewModel = ScheduleEventCellViewModelImple(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
             
             XCTAssertEqual(cellViewModel?.periodText, expectedPeriodText)
         }
@@ -252,7 +252,7 @@ extension DayEventListViewModelImpleTests {
         ) {
             let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
             
-            let cellViewModel = EventCellViewModel(schedule, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
+            let cellViewModel = ScheduleEventCellViewModelImple(schedule, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
             
             XCTAssertEqual(cellViewModel?.periodDescription, expectedDescription)
         }
@@ -294,10 +294,19 @@ extension DayEventListViewModelImpleTests {
     
     private var dummyEventIds: [EventId] {
         return [
-            .holiday(.init(dateString: "some", localName: "holiday", name: "some")),
+            .holiday(.init(dateString: "dummy-date", localName: "holiday", name: "name")),
             .schedule("repeating-schedule", turn: 4),
             .todo("todo-with-time"),
             .schedule("not-repeating-schedule", turn: 1)
+        ]
+    }
+    
+    private var dummyEventIdStrings: [String] {
+        return [
+            "dummy-date_name",
+            "repeating-schedule",
+            "todo-with-time",
+            "not-repeating-schedule"
         ]
     }
     
@@ -314,11 +323,10 @@ extension DayEventListViewModelImpleTests {
         }
         
         // then
-        let eventIdLists = cvms?.map { $0.eventId }
+        let eventIdLists = cvms?.map { $0.eventIdentifier }
         XCTAssertEqual(eventIdLists, [
-            .todo("current-todo-1"),
-            .todo("current-todo-2")
-        ] + self.dummyEventIds)
+            "current-todo-1", "current-todo-2"
+        ] + self.dummyEventIdStrings)
     }
     
     // 선택된 날짜에 해당하는 todo event 완료 처리시 목록에서 제거
@@ -339,9 +347,9 @@ extension DayEventListViewModelImpleTests {
         }
         
         // then
-        let idLists = cvmLists.map { cvms in cvms.map { $0.eventId } }
-        let expectIdListsBeforeDone = [.todo("current-todo-1"), .todo("current-todo-2")] + self.dummyEventIds
-        let expectIdListsAfterDone = [.todo("current-todo-1"), .todo("current-todo-2")] + self.dummyEventIds.filter { $0 != .todo("todo-with-time") }
+        let idLists = cvmLists.map { cvms in cvms.map { $0.eventIdentifier } }
+        let expectIdListsBeforeDone = ["current-todo-1", "current-todo-2"] + self.dummyEventIdStrings
+        let expectIdListsAfterDone = ["current-todo-1", "current-todo-2"] + self.dummyEventIdStrings.filter { $0 != "todo-with-time" }
         XCTAssertEqual(idLists, [
             expectIdListsBeforeDone,
             expectIdListsAfterDone
