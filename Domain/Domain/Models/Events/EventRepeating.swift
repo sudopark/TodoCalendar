@@ -74,7 +74,7 @@ public enum EventRepeatingOptions {
     }
 }
 
-public struct EventRepeating: Equatable {
+public struct EventRepeating: Equatable, Sendable {
     
     public let repeatingStartTime: TimeInterval
     public var repeatOption: any EventRepeatingOption

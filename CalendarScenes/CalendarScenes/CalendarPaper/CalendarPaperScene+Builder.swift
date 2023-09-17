@@ -39,5 +39,6 @@ protocol CalendarPaperScene: Scene where Interactor == any CalendarPaperSceneInt
 protocol CalendarPaperSceneBuiler: AnyObject {
     
     // TODO: month 삭제 예정
+    @MainActor
     func makeCalendarPaperScene(_ month: CalendarMonth) -> any CalendarPaperScene
 }

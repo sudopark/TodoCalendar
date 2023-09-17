@@ -32,6 +32,7 @@ public protocol CalendarScene: Scene where Interactor == any CalendarSceneIntera
 
 public protocol CalendarSceneBuilder {
     
+    @MainActor
     func makeCalendarScene(
         listener: (any CalendarSceneListener)?
     ) -> any CalendarScene

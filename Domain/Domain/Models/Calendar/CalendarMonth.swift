@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct CalendarMonth: Hashable, Comparable {
+public struct CalendarMonth: Hashable, Comparable, Sendable {
     
     public let year: Int
     public let month: Int

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SQLiteService
+@preconcurrency import SQLiteService
 import Prelude
 import Optics
 import Domain

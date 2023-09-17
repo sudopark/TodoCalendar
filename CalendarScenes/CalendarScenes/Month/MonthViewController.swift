@@ -16,7 +16,7 @@ final class MonthViewController: UIHostingController<MonthContainerView>, MonthS
     
     private let viewModel: any MonthViewModel
     private let viewAppearance: ViewAppearance
-    var interactor: (any MonthSceneInteractor)? {
+    nonisolated var interactor: (any MonthSceneInteractor)? {
         return self.viewModel
     }
     init(

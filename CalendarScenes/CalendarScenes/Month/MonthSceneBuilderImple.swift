@@ -28,6 +28,7 @@ final class MonthSceneBuilderImple {
 
 extension MonthSceneBuilderImple: MonthSceneBuilder {
     
+    @MainActor
     func makeMonthScene(
         _ month: CalendarMonth,
         listener: (any MonthSceneListener)?

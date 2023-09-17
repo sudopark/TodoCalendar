@@ -20,7 +20,7 @@ protocol ApplicationRouting: Routing {
     func setupInitialScene(_ prepareResult: ApplicationPrepareResult)
 }
 
-final class ApplicationRootRouter: ApplicationRouting {
+final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     
     @MainActor var window: UIWindow!
     var viewAppearance: ViewAppearance!

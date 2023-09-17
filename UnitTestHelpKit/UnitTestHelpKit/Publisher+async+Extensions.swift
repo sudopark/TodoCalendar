@@ -13,7 +13,6 @@ extension Publisher {
     
     public func values(with timeoutMillis: Int) async throws -> AsyncThrowingPublisher<AnyPublisher<Output, Failure>> {
         
-        let sender = self.values
         return self.timeout(.milliseconds(timeoutMillis), scheduler: RunLoop.main)
             .eraseToAnyPublisher()
             .values

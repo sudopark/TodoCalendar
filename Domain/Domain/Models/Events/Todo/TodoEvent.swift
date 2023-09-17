@@ -49,7 +49,7 @@ public struct TodoEvent {
 
 // MARK: - Todo make parameters
 
-public struct TodoMakeParams {
+public struct TodoMakeParams: Sendable {
     
     public var name: String?
     public var eventTagId: String?
@@ -63,9 +63,9 @@ public struct TodoMakeParams {
     }
 }
 
-public struct TodoEditParams {
+public struct TodoEditParams: Sendable {
     
-    public enum RepeatingUpdateScope: Equatable {
+    public enum RepeatingUpdateScope: Equatable, Sendable {
         case all
         case onlyThisTime
     }

@@ -31,6 +31,7 @@ final class DayEventListSceneBuilerImple {
 
 extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
     
+    @MainActor
     func makeDayEventListScene() -> any DayEventListScene {
         
         let viewModel = DayEventListViewModelImple(
