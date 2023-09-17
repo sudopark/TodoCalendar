@@ -77,6 +77,9 @@ struct DayEventListContainerView: View {
     
     var stateBinding: (DayEventListViewState) -> Void = { _ in }
     var requestDoneTodo: (String) -> Void = { _ in }
+    var requestAddNewEventWhetherUsingTemplate: (Bool) -> Void = { _ in }
+    var addNewTodoQuickly: (String) -> Void = { _ in }
+    var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
     
     init(viewAppearance: ViewAppearance) {
         self.viewAppearance = viewAppearance
@@ -101,6 +104,9 @@ struct DayEventListView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     
     fileprivate var requestDoneTodo: (String) -> Void = { _ in }
+    fileprivate var requestAddNewEventWhetherUsingTemplate: (Bool) -> Void = { _ in }
+    fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
+    fileprivate var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -117,13 +123,42 @@ struct DayEventListView: View {
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
+            
+            QuickAddNewTodoView()
+            
             addNewButton()
         }
         .padding()
     }
     
     private func addNewButton() -> some View {
-        return Text("Button")
+        return HStack {
+            Button {
+                self.requestAddNewEventWhetherUsingTemplate(false)
+            } label: {
+                HStack {
+                    Image(systemName: "plus")
+                        .tint(self.appearance.colorSet.normalText.asColor)
+                    Text("Add New Event")
+                        .font(self.appearance.fontSet.size(15).asFont)
+                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                    Spacer()
+                }
+                .padding(.leading, 16)
+                .frame(height: 50)
+                .frame(maxWidth: .infinity)
+                .backgroundAsRoundedRectForEventList(self.appearance)
+            }
+            
+            Button {
+                self.requestAddNewEventWhetherUsingTemplate(true)
+            } label: {
+                Image(systemName: "list.bullet.clipboard")
+                    .tint(self.appearance.colorSet.normalText.asColor)
+                    .frame(width: 50, height: 50)
+                    .backgroundAsRoundedRectForEventList(self.appearance)
+            }
+        }
     }
 }
 
@@ -159,7 +194,7 @@ private struct EventListCellView: View {
         }
         .padding(.vertical, 4).padding(.horizontal, 8)
         .frame(idealHeight: 50)
-        .background(self.appearance.colorSet.eventList.asColor)
+        .backgroundAsRoundedRectForEventList(self.appearance)
     }
     
     private func eventLeftView(_ cellViewModel: EventCellViewModel) -> some View {
@@ -236,6 +271,65 @@ private struct EventListCellView: View {
     }
 }
 
+private struct QuickAddNewTodoView: View {
+    
+    @EnvironmentObject private var state: DayEventListViewState
+    @EnvironmentObject private var appearance: ViewAppearance
+    
+    @State private var newTodoName: String = ""
+    @FocusState private var isFocusInput: Bool
+    
+    private func resetStates() {
+        self.newTodoName = ""
+        self.isFocusInput = false
+    }
+    
+    fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
+    fileprivate var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
+    
+    var body: some View {
+        HStack(spacing: 8) {
+            
+            Text("Todo".localized())
+                .minimumScaleFactor(0.7)
+                .font(self.appearance.fontSet.size(15, weight: .regular).asFont)
+                .foregroundColor(self.appearance.colorSet.normalText.asColor)
+            .frame(width: 50)
+            
+            RoundedRectangle(cornerRadius: 3)
+                .fill(self.appearance.colorSet.subNormalText.asColor)
+                .frame(width: 6)
+            
+            HStack(spacing: 8) {
+                TextField("Add a new todo quickly".localized(), text: $newTodoName)
+                    .focused($isFocusInput)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                    .onSubmit {
+                        guard !self.newTodoName.isEmpty else { return }
+                        self.addNewTodoQuickly(self.newTodoName)
+                        self.resetStates()
+                    }
+                
+                if !self.newTodoName.isEmpty {
+                    Button {
+                        self.makeNewTodoWithGivenNameAndDetails(self.newTodoName)
+                        self.resetStates()
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                }
+            }
+                
+        }
+        .opacity(self.isFocusInput ? 1.0 : 0.5)
+        .animation(.default, value: self.isFocusInput)
+        .padding(.vertical, 4).padding(.horizontal, 8)
+        .frame(height: 50)
+        .backgroundAsRoundedRectForEventList(self.appearance)
+    }
+}
+
 private extension EventId {
     
     var presentingCompareKey: String {
@@ -272,6 +366,19 @@ private extension EventCellViewModel {
         return components.map { $0 ?? "nil" }.joined(separator: "-")
     }
 }
+
+private extension View {
+    
+    func backgroundAsRoundedRectForEventList(_ appearance: ViewAppearance) -> some View {
+        
+        return self
+            .background(
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(appearance.colorSet.eventList.asColor)
+            )
+    }
+}
+
 
 
 // MARK: - preview
@@ -337,23 +444,23 @@ private extension EventCellViewModel {
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
         let scheduleCells: [EventCellViewModel] = [
-            .init(eventId: .schedule("sc1", turn: 1), name: "schdule with anyTime")
+            .init(eventId: .schedule("sc1", turn: 1), name: "schdule with at time")
                 |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .anyTime,
+                |> \.periodText .~ .atTime("8:30"),
             .init(eventId: .schedule("sc2", turn: 1), name: "schdule with all day")
             |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .allDay,
-            .init(eventId: .schedule("sc3", turn: 1), name: "schdule with at time")
-            |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .atTime("10:30"),
+//            .init(eventId: .schedule("sc3", turn: 1), name: "schdule with at time")
+//            |> \.colorHex .~ "#0000ff"
+//                |> \.periodText .~ .atTime("10:30"),
             .init(eventId: .schedule("sc4", turn: 1), name: "schdule with in today")
             |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .inToday("9:30", "20:30")
                 |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
-            .init(eventId: .schedule("sc5", turn: 1), name: "schdule with today to future")
-            |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .fromTodayToFuture("09:30", "9 (Sat)")
-                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
+//            .init(eventId: .schedule("sc5", turn: 1), name: "schdule with today to future")
+//            |> \.colorHex .~ "#0000ff"
+//                |> \.periodText .~ .fromTodayToFuture("09:30", "9 (Sat)")
+//                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
             .init(eventId: .schedule("sc6", turn: 1), name: "schdule with past to today")
             |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .fromPastToToday("9 (Sat)", "20:00")
