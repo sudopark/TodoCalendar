@@ -174,6 +174,8 @@ extension CalendarViewModelImple {
             self?.bindRefreshHoliday()
         }
         
+        self.todoEventUsecase.refreshCurentTodoEvents()
+        
         self.eventTagUsecase.bindRefreshRequireTagInfos()
     }
     

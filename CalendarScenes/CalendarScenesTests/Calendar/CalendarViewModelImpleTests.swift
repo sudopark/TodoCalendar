@@ -122,6 +122,25 @@ extension CalendarViewModelImpleTests {
         self.wait(for: [expect], timeout: 0.001)
     }
     
+    func testViewModel_whenPrepare_refreshCurrentTodos() {
+        // given
+        let expect = expectation(description: "prepare시에 concurrent todo refresh")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        self.spyTodoUsecase.stubCurrentTodos = [TodoEvent(uuid: "current", name: "some")]
+        
+        // when
+        let currentTodos = self.waitOutputs(expect, for: self.spyTodoUsecase.currentTodoEvents) {
+            viewModel.prepare()
+        }
+        
+        // then
+        let todoIds = currentTodos.map { ts in ts.map { $0.uuid }}
+        XCTAssertEqual(todoIds, [
+            [], ["current"]
+        ])
+    }
+    
     private func makeViewModelWithInitialSetup(_ today: CalendarComponent.Day) -> CalendarViewModelImple {
         // given
         let expect = expectation(description: "초기 월 세팅 대기")
@@ -437,6 +456,16 @@ private extension CalendarViewModelImpleTests {
     }
     
     class PrivateSpyTodoEventUsecase: StubTodoEventUsecase {
+        
+        var stubCurrentTodos: [TodoEvent] = []
+        private let fakeCurrentTodoSubject = CurrentValueSubject<[TodoEvent], Never>([])
+        override func refreshCurentTodoEvents() {
+            self.fakeCurrentTodoSubject.send(stubCurrentTodos)
+        }
+        
+        override var currentTodoEvents: AnyPublisher<[TodoEvent], Never> {
+            return self.fakeCurrentTodoSubject.eraseToAnyPublisher()
+        }
         
         private let todoEventsInRange = CurrentValueSubject<[TodoEvent]?, Never>(nil)
         override func refreshTodoEvents(in period: Range<TimeInterval>) {
