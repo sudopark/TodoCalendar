@@ -9,11 +9,11 @@ import CommonPresentation
 
 // MARK: - ___VARIABLE_sceneName___SceneBuilerImple
 
-public final class ___VARIABLE_sceneName___SceneBuilerImple {
+final class ___VARIABLE_sceneName___SceneBuilerImple {
     
     private let viewAppearance: ViewAppearance
     
-    public init(
+    init(
         viewAppearance: ViewAppearance
     ) {
         self.viewAppearance = viewAppearance
@@ -23,7 +23,8 @@ public final class ___VARIABLE_sceneName___SceneBuilerImple {
 
 extension ___VARIABLE_sceneName___SceneBuilerImple: ___VARIABLE_sceneName___SceneBuiler {
     
-    public func make___VARIABLE_sceneName___Scene() -> any ___VARIABLE_sceneName___Scene {
+    @MainActor
+    func make___VARIABLE_sceneName___Scene() -> any ___VARIABLE_sceneName___Scene {
         
         let viewModel = ___VARIABLE_sceneName___ViewModelImple(
             
@@ -34,10 +35,7 @@ extension ___VARIABLE_sceneName___SceneBuilerImple: ___VARIABLE_sceneName___Scen
             viewAppearance: self.viewAppearance
         )
         
-        let nextSceneBuilder = EmptyBuilder()
-        
         let router = ___VARIABLE_sceneName___Router(
-            nextSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

@@ -8,29 +8,11 @@
 import UIKit
 
 
-// MARK: - SceneInteractors
-
-
-public final class EmptyInteractor { }
-
 // MARK: - Scene
 
 public protocol Scene: UIViewController {
     associatedtype Interactor
     @MainActor var interactor: Interactor? { get }
-}
-
-extension Scene where Interactor == EmptyInteractor {
-    
-    @MainActor
-    public var interactor: Interactor? { nil }
-}
-
-
-// MARK: - empty builder
-
-public struct EmptyBuilder {
-    public init() { }
 }
 
 

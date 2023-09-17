@@ -12,13 +12,16 @@ import CommonPresentation
 
 final class ___VARIABLE_sceneName___ViewController: UIViewController, ___VARIABLE_sceneName___Scene {
     
-    private let viewModel: ___VARIABLE_sceneName___ViewModel
+    private let viewModel: any ___VARIABLE_sceneName___ViewModel
     private let viewAppearance: ViewAppearance
+    
+    @MainActor
+    var interactor: (any ___VARIABLE_sceneName___SceneInteractor)? { self.viewModel }
     
     private var cancellables: Set<AnyCancellable> = []
     
     init(
-        viewModel: ___VARIABLE_sceneName___ViewModel,
+        viewModel: any ___VARIABLE_sceneName___ViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
@@ -66,7 +69,7 @@ extension ___VARIABLE_sceneName___ViewController {
     }
     
     private func setupStyling(
-        _ fontSet: FontSet, _ colorSet: ColorSet
+        _ fontSet: any FontSet, _ colorSet: any ColorSet
     ) {
         self.view.backgroundColor = colorSet.dayBackground
     }

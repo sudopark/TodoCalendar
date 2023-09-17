@@ -15,7 +15,7 @@ final class ___VARIABLE_sceneName___ViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
-    func bind(_ viewModel: ___VARIABLE_sceneName___ViewModel) {
+    func bind(_ viewModel: any ___VARIABLE_sceneName___ViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
