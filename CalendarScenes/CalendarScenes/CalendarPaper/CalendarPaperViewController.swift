@@ -27,7 +27,8 @@ final class CalendarPaperViewController: UIViewController, CalendarPaperScene {
     
     private var cancellables: Set<AnyCancellable> = []
     
-    nonisolated var interactor: (any CalendarPaperSceneInteractor)? { self.viewModel }
+    @MainActor
+    var interactor: (any CalendarPaperSceneInteractor)? { self.viewModel }
     
     init(
         viewModel: any CalendarPaperViewModel,

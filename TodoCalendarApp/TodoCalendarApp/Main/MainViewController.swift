@@ -24,7 +24,8 @@ final class MainViewController: UIViewController, MainScene {
     private let viewModel: any MainViewModel
     private let viewAppearance: ViewAppearance
     
-    nonisolated var interactor: (any MainSceneInteractor)? { self.viewModel }
+    @MainActor
+    var interactor: (any MainSceneInteractor)? { self.viewModel }
     
     private var cancellables: Set<AnyCancellable> = []
     

@@ -17,11 +17,12 @@ public final class EmptyInteractor { }
 
 public protocol Scene: UIViewController {
     associatedtype Interactor
-    var interactor: Interactor? { get }
+    @MainActor var interactor: Interactor? { get }
 }
 
 extension Scene where Interactor == EmptyInteractor {
     
+    @MainActor
     public var interactor: Interactor? { nil }
 }
 
