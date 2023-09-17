@@ -81,6 +81,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let scheduleMap = CurrentValueSubject<[String: ScheduleEvent], Never>([:])
         let tagMaps = CurrentValueSubject<[String: EventTag], Never>([:])
         let doneFailedTodo = PassthroughSubject<String, Never>()
+        let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -178,18 +179,31 @@ extension DayEventListViewModelImple {
     }
     
     func addNewTodoQuickly(withName: String) {
-        // TODO: add todo with pending animation
+        let newPendingTodo = PendingTodoEventCellViewModel(
+            name: withName, defaultTagId: nil
+        )
+        self.updatePendingTodos { $0 + [newPendingTodo] }
+        
         let params = TodoMakeParams() |> \.name .~ withName
-        // TODO: append pending cell
         Task { [weak self] in
             do {
                 _ = try await self?.todoEventUsecase.makeTodoEvent(params)
             } catch let error {
                 self?.router?.showError(error)
             }
-            // TODO: remove pending cell
+            self?.updatePendingTodos {
+                $0.filter { $0.eventIdentifier != newPendingTodo.eventIdentifier }
+            }
         }
         .store(in: &self.cancellables)
+    }
+    
+    private func updatePendingTodos(
+        _ mutating: ([PendingTodoEventCellViewModel]) -> [PendingTodoEventCellViewModel]
+    ) {
+        let old = self.subject.pendingTodoEvents.value
+        let new = mutating(old)
+        self.subject.pendingTodoEvents.send(new)
     }
     
     func makeTodoEvent(with givenName: String) {
@@ -251,28 +265,31 @@ extension DayEventListViewModelImple {
     private var cellViewModelsFromEvent: AnyPublisher<[any EventCellViewModel], Never> {
         
         let asCellViewModel: (
-            CurrentDayAndIdLists, TimeZone, AllTodos, [String: ScheduleEvent]
+            (CurrentDayAndIdLists, TimeZone, AllTodos, [String: ScheduleEvent]), [PendingTodoEventCellViewModel]
         ) -> [EventCellViewModel]
-        asCellViewModel = { dayAndIds, timeZone, allTodos, scheduleMap in
+        asCellViewModel = { tuple, pendings in
+            
+            let (dayAndIds, timeZone, allTodos, scheduleMap) = (tuple.0, tuple.1, tuple.2, tuple.3)
             
             let range = dayAndIds.currentDay.range
             let currentTodoCells = allTodos.currentTodoIds
                 .compactMap { allTodos.allTodoMap[$0] }
-                .compactMap { TodoEventCellViewModelImple($0, in: range, timeZone) }
+                .compactMap { TodoEventCellViewModel($0, in: range, timeZone) }
+            
             let eventCellsWithTime = dayAndIds.eventIds.compactMap { eventId -> EventCellViewModel? in
                 switch eventId {
                 case .todo(let id):
                     return allTodos.allTodoMap[id]
-                        .flatMap { TodoEventCellViewModelImple($0, in: range, timeZone) }
+                        .flatMap { TodoEventCellViewModel($0, in: range, timeZone) }
                 case .schedule(let id, let turn):
                     return scheduleMap[id]
-                        .flatMap { ScheduleEventCellViewModelImple($0, turn: turn, in: range, timeZone: timeZone) }
+                        .flatMap { ScheduleEventCellViewModel($0, turn: turn, in: range, timeZone: timeZone) }
                 case .holiday(let holiday):
-                    return HolidayEventCellViewModelImple(holiday)
+                    return HolidayEventCellViewModel(holiday)
                 }
             }
             
-            return currentTodoCells + eventCellsWithTime
+            return currentTodoCells + pendings + eventCellsWithTime
         }
         
         return Publishers.CombineLatest4(
@@ -281,6 +298,7 @@ extension DayEventListViewModelImple {
             self.subject.allTodos.compactMap { $0 },
             self.subject.scheduleMap
         )
+        .combineLatest(self.subject.pendingTodoEvents)
         .map(asCellViewModel)
         .eraseToAnyPublisher()
     }

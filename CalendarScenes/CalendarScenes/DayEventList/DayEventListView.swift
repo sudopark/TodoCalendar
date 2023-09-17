@@ -41,16 +41,20 @@ final class DayEventListViewState: ObservableObject {
         viewModel.cellViewModels
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] cellViewModels in
-                self?.cellViewModels = cellViewModels
-                self?.removeDoneTodoIdsFromTempDoneIds(from: cellViewModels)
+                withAnimation {
+                    self?.cellViewModels = cellViewModels
+                    self?.removeDoneTodoIdsFromTempDoneIds(from: cellViewModels)
+                }
             })
             .store(in: &self.cancellables)
         
         viewModel.doneTodoFailed
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] todoId in
-                guard let self = self else { return }
-                self.tempDoneTodoIds = self.tempDoneTodoIds |> elem(todoId) .~ false
+                withAnimation {
+                    guard let self = self else { return }
+                    self.tempDoneTodoIds = self.tempDoneTodoIds |> elem(todoId) .~ false
+                }
             })
             .store(in: &self.cancellables)
     }
@@ -82,6 +86,9 @@ struct DayEventListContainerView: View {
     var body: some View {
         return DayEventListView()
             .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
+            .eventHandler(\.requestAddNewEventWhetherUsingTemplate, self.requestAddNewEventWhetherUsingTemplate)
+            .eventHandler(\.addNewTodoQuickly, self.addNewTodoQuickly)
+            .eventHandler(\.makeNewTodoWithGivenNameAndDetails, self.makeNewTodoWithGivenNameAndDetails)
             .onAppear {
                 self.stateBinding(self.state)
             }
@@ -119,6 +126,8 @@ struct DayEventListView: View {
             .fixedSize(horizontal: false, vertical: true)
             
             QuickAddNewTodoView()
+                .eventHandler(\.addNewTodoQuickly, self.addNewTodoQuickly)
+                .eventHandler(\.makeNewTodoWithGivenNameAndDetails, self.makeNewTodoWithGivenNameAndDetails)
             
             addNewButton()
         }
@@ -339,7 +348,7 @@ private extension View {
 private extension EventCellViewModel {
     
     var todoEventId: String? {
-        return (self as? TodoEventCellViewModelImple)?.eventIdentifier
+        return (self as? TodoEventCellViewModel)?.eventIdentifier
     }
 }
 
@@ -356,11 +365,37 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             .eventHandler(\.requestDoneTodo) { id in
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     // 완료처리 실패하게 하던지
-//                    state.requestDoneTodoIds = []
+                    withAnimation {
+    //                    state.requestDoneTodoIds = []
+                        
+                        // 혹은 완료처리 성공 이후 셀 목록 업데이트 시뮬레이션
+                        let newCells = state.cellViewModels.filter { $0.todoEventId != id }
+                        state.cellViewModels = newCells
+                    }
+                }
+            }
+            .eventHandler(\.addNewTodoQuickly) { name in
+                let pending = PendingTodoEventCellViewModel(name: name, defaultTagId: nil)
+                    |> \.colorHex .~ "#ffff00"
+                let index = state.cellViewModels.firstIndex(where: { !$0.name.starts(with: "current todo") })!
+                
+                withAnimation {
+                    state.cellViewModels.insert(pending, at: index)
                     
-                    // 혹은 완료처리 성공 이후 셀 목록 업데이트 시뮬레이션
-                    let newCells = state.cellViewModels.filter { $0.todoEventId != id }
-                    state.cellViewModels = newCells
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        if let index = state.cellViewModels.firstIndex(where: { $0.eventIdentifier == pending.eventIdentifier }) {
+                            withAnimation {
+                                // 삭제하여 실패했을때 가정
+//                                state.cellViewModels.remove(at: index)
+                                
+                                // 추가하여 성공했을때 가정
+                                let newCell = TodoEventCellViewModel("new-current-todo", name: name)
+                                    |> \.periodText .~ .anyTime
+                                    |> \.colorHex .~ pending.colorHex
+                                state.cellViewModels[index] = newCell
+                            }
+                        }
+                    }
                 }
             }
             .environmentObject(viewAppearance)
@@ -369,7 +404,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
     }
     
     private static func makeDummyCells() -> [EventCellViewModel] {
-        let currentTodoCells: [TodoEventCellViewModelImple] = [
+        let currentTodoCells: [TodoEventCellViewModel] = [
             .init("current-todo1", name: "current todo 1")
                 |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .anyTime,
@@ -377,7 +412,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .anyTime
         ]
-        let todoCells: [TodoEventCellViewModelImple] = [
+        let todoCells: [TodoEventCellViewModel] = [
 //            .init(eventId: .todo("todo1"), name: "todo with anyTime")
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .anyTime,
@@ -400,7 +435,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 |> \.periodText .~ .fromPastToToday("9 (Sat)", "20:00")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
-        let scheduleCells: [ScheduleEventCellViewModelImple] = [
+        let scheduleCells: [ScheduleEventCellViewModel] = [
             .init("sc1", name: "schdule with at time")
                 |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .atTime("8:30"),
@@ -424,7 +459,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
         
-        let holidayCell = HolidayEventCellViewModelImple(
+        let holidayCell = HolidayEventCellViewModel(
             .init(dateString: "2023-09-30", localName: "추석", name: "추석")
         )
         |> \.colorHex .~ "#ff0000"
