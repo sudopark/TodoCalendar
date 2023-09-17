@@ -51,12 +51,6 @@ final class DayEventListViewState: ObservableObject {
             .sink(receiveValue: { [weak self] todoId in
                 guard let self = self else { return }
                 self.tempDoneTodoIds = self.tempDoneTodoIds |> elem(todoId) .~ false
-                // elem 함수 자체가
-                // 세터로 넣어줄 함수(contain) == true 이면 insert
-                // 세터로 넣어줄 함수(contain) == false 이면 remove
-                // set false 함수가 들어가 버리면 -> contain 여부와 관련없이 결과는 false여서 remove / true이면 반대여서 insert -> set은 읽지는 않으니(내부에 입력한 결과로만 반환하게 const)
-                // over가 들어가서 { !$0 } 이라면 -> contain의 invert가 되기 때문에
-                // 없다면 insert / 있으면 delete
             })
             .store(in: &self.cancellables)
     }
@@ -116,7 +110,7 @@ struct DayEventListView: View {
                 .foregroundColor(self.appearance.colorSet.normalText.asColor)
                 .padding(.bottom, 3)
             VStack(alignment: .leading, spacing: 6) {
-                ForEach(self.state.cellViewModels, id: \.presentingCompareKey) { cellViewModel in
+                ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
                     
                     EventListCellView(cellViewModel: cellViewModel)
                         .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
@@ -330,43 +324,6 @@ private struct QuickAddNewTodoView: View {
     }
 }
 
-private extension EventId {
-    
-    var presentingCompareKey: String {
-        switch self {
-        case .todo(let id): return "todo:\(id)"
-        case .schedule(let id, let turn): return "scheudle:\(id)-\(turn)"
-        case .holiday(let holiday): return "\(holiday.dateString)-\(holiday.name)"
-        }
-    }
-}
-
-private extension EventCellViewModel.PeriodText {
-    
-    var presentingCompareKey: String {
-        switch self {
-        case .anyTime: return "anyTime"
-        case .allDay: return "allDay"
-        case .atTime(let time): return "atTime-\(time)"
-        case .inToday(let start, let end): return "inToday-\(start)~\(end)"
-        case .fromTodayToFuture(let start, let end): return "fromTodayToFuture\(start)~\(end)"
-        case .fromPastToToday(let start, let end): return "fromPastToToday-\(start)~\(end)"
-        }
-    }
-}
-
-private extension EventCellViewModel {
-    
-    var presentingCompareKey: String {
-        let components: [String?] = [
-            self.eventId.presentingCompareKey,
-            self.name, self.periodText?.presentingCompareKey,
-            self.periodDescription, self.colorHex
-        ]
-        return components.map { $0 ?? "nil" }.joined(separator: "-")
-    }
-}
-
 private extension View {
     
     func backgroundAsRoundedRectForEventList(_ appearance: ViewAppearance) -> some View {
@@ -379,7 +336,12 @@ private extension View {
     }
 }
 
-
+private extension EventCellViewModel {
+    
+    var todoEventId: String? {
+        return (self as? TodoEventCellViewModelImple)?.eventIdentifier
+    }
+}
 
 // MARK: - preview
 
@@ -389,7 +351,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(color: .defaultLight, font: .systemDefault)
         let state = DayEventListViewState()
         state.dateText = "2020년 9월 15일(금)"
-        state.cellViewModels = EventCellViewModel.dummies()
+        state.cellViewModels = self.makeDummyCells()
         let containerView = DayEventListView()
             .eventHandler(\.requestDoneTodo) { id in
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -405,22 +367,17 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             .environmentObject(state)
         return containerView
     }
-}
-
-private extension EventCellViewModel {
     
-    // period랑 allday만 설명 있음
-    
-    static func dummies() -> [EventCellViewModel] {
-        let currentTodoCells: [EventCellViewModel] = [
-            .init(eventId: .todo("current-todo1"), name: "current todo 1")
+    private static func makeDummyCells() -> [EventCellViewModel] {
+        let currentTodoCells: [TodoEventCellViewModelImple] = [
+            .init("current-todo1", name: "current todo 1")
                 |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .anyTime,
-            .init(eventId: .todo("current-todo2"), name: "current todo 2")
+            .init("current-todo2", name: "current todo 2")
                 |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .anyTime
         ]
-        let todoCells: [EventCellViewModel] = [
+        let todoCells: [TodoEventCellViewModelImple] = [
 //            .init(eventId: .todo("todo1"), name: "todo with anyTime")
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .anyTime,
@@ -434,41 +391,43 @@ private extension EventCellViewModel {
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .inToday("9:30", "20:30")
 //                |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
-            .init(eventId: .todo("todo5"), name: "todo with today to future")
+            .init("todo5", name: "todo with today to future")
                 |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .fromTodayToFuture("09:30", "9 (Sat)")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
-            .init(eventId: .todo("todo6"), name: "todo with past to today")
+            .init("todo6", name: "todo with past to today")
                 |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .fromPastToToday("9 (Sat)", "20:00")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
-        let scheduleCells: [EventCellViewModel] = [
-            .init(eventId: .schedule("sc1", turn: 1), name: "schdule with at time")
+        let scheduleCells: [ScheduleEventCellViewModelImple] = [
+            .init("sc1", name: "schdule with at time")
                 |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .atTime("8:30"),
-            .init(eventId: .schedule("sc2", turn: 1), name: "schdule with all day")
+            .init("sc2", name: "schdule with all day")
             |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .allDay,
 //            .init(eventId: .schedule("sc3", turn: 1), name: "schdule with at time")
 //            |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .atTime("10:30"),
-            .init(eventId: .schedule("sc4", turn: 1), name: "schdule with in today")
-            |> \.colorHex .~ "#0000ff"
+            .init("sc4", name: "schdule with in today")
+                |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .inToday("9:30", "20:30")
                 |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
 //            .init(eventId: .schedule("sc5", turn: 1), name: "schdule with today to future")
 //            |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .fromTodayToFuture("09:30", "9 (Sat)")
 //                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
-            .init(eventId: .schedule("sc6", turn: 1), name: "schdule with past to today")
-            |> \.colorHex .~ "#0000ff"
+            .init("sc6", name: "schdule with past to today")
+                |> \.colorHex .~ "#0000ff"
                 |> \.periodText .~ .fromPastToToday("9 (Sat)", "20:00")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
         
-        let holidayCell = EventCellViewModel(.init(dateString: "2023-09-30", localName: "추석", name: "추석"))
-            |> \.colorHex .~ "#ff0000"
+        let holidayCell = HolidayEventCellViewModelImple(
+            .init(dateString: "2023-09-30", localName: "추석", name: "추석")
+        )
+        |> \.colorHex .~ "#ff0000"
         
         return currentTodoCells + (
             scheduleCells + todoCells + [holidayCell]
