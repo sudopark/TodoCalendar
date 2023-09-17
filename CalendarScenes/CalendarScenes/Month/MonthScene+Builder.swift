@@ -55,10 +55,10 @@ protocol MonthSceneListener: AnyObject {
     )
 }
 
-protocol MonthScene: Scene where Interactor == MonthSceneInteractor {
+protocol MonthScene: Scene where Interactor == any MonthSceneInteractor {
 }
 
 protocol MonthSceneBuilder: AnyObject {
     
-    func makeMonthScene(_ month: CalendarMonth, listener: MonthSceneListener?) -> any MonthScene
+    func makeMonthScene(_ month: CalendarMonth, listener: (any MonthSceneListener)?) -> any MonthScene
 }

@@ -23,7 +23,7 @@ protocol CalendarPaperSceneInteractor: AnyObject, MonthSceneListener {
 
 // MARK: - CalendarPaperScene
 
-protocol CalendarPaperScene: Scene where Interactor == CalendarPaperSceneInteractor
+protocol CalendarPaperScene: Scene where Interactor == any CalendarPaperSceneInteractor
 {
     
     @MainActor

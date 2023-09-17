@@ -25,24 +25,24 @@ protocol CalendarViewModel: AnyObject, Sendable, CalendarSceneInteractor {
 
 final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     
-    private let calendarUsecase: CalendarUsecase
-    private let calendarSettingUsecase: CalendarSettingUsecase
-    private let holidayUsecase: HolidayUsecase
-    private let todoEventUsecase: TodoEventUsecase
-    private let scheduleEventUsecase: ScheduleEventUsecase
-    private let eventTagUsecase: EventTagUsecase
-    var router: CalendarViewRouting?
-    private var calendarPaperInteractors: [CalendarPaperSceneInteractor]?
+    private let calendarUsecase: any CalendarUsecase
+    private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let holidayUsecase: any HolidayUsecase
+    private let todoEventUsecase: any TodoEventUsecase
+    private let scheduleEventUsecase: any ScheduleEventUsecase
+    private let eventTagUsecase: any EventTagUsecase
+    var router: (any CalendarViewRouting)?
+    private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
-    weak var listener: CalendarSceneListener?
+    weak var listener: (any CalendarSceneListener)?
     
     init(
-        calendarUsecase: CalendarUsecase,
-        calendarSettingUsecase: CalendarSettingUsecase,
-        holidayUsecase: HolidayUsecase,
-        todoEventUsecase: TodoEventUsecase,
-        scheduleEventUsecase: ScheduleEventUsecase,
-        eventTagUsecase: EventTagUsecase
+        calendarUsecase: any CalendarUsecase,
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        holidayUsecase: any HolidayUsecase,
+        todoEventUsecase: any TodoEventUsecase,
+        scheduleEventUsecase: any ScheduleEventUsecase,
+        eventTagUsecase: any EventTagUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase

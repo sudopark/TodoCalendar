@@ -24,12 +24,12 @@ public protocol CalendarUsecase {
 
 public final class CalendarUsecaseImple: CalendarUsecase {
     
-    private let calendarSettingUsecase: CalendarSettingUsecase
-    private let holidayUsecase: HolidayUsecase
+    private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let holidayUsecase: any HolidayUsecase
     
     public init(
-        calendarSettingUsecase: CalendarSettingUsecase,
-        holidayUsecase: HolidayUsecase
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        holidayUsecase: any HolidayUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.holidayUsecase = holidayUsecase

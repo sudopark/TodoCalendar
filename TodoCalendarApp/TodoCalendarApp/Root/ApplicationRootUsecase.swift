@@ -27,10 +27,10 @@ protocol ApplicationRootUsecase {
 
 final class ApplicationRootUsecaseImple: ApplicationRootUsecase {
     
-    private let authRepository: AuthRepository
-    private let appSettingRepository: AppSettingRepository
+    private let authRepository: any AuthRepository
+    private let appSettingRepository: any AppSettingRepository
     
-    init(authRepository: AuthRepository, appSettingRepository: AppSettingRepository) {
+    init(authRepository: any AuthRepository, appSettingRepository: any AppSettingRepository) {
         self.authRepository = authRepository
         self.appSettingRepository = appSettingRepository
     }

@@ -12,11 +12,11 @@ import CommonPresentation
 
 public struct CalendarSceneBuilderImple {
         
-    private let usecaseFactory: UsecaseFactory
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     
     public init(
-        usecaseFactory: UsecaseFactory,
+        usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
         self.usecaseFactory = usecaseFactory
@@ -27,7 +27,7 @@ public struct CalendarSceneBuilderImple {
 extension CalendarSceneBuilderImple: CalendarSceneBuilder {
     
     public func makeCalendarScene(
-        listener: CalendarSceneListener?
+        listener: (any CalendarSceneListener)?
     ) -> any CalendarScene {
         
         let viewModel = CalendarViewModelImple(

@@ -28,12 +28,12 @@ public protocol EventTagUsecase {
 
 public final class EventTagUsecaseImple: EventTagUsecase {
     
-    private let tagRepository: EventTagRepository
+    private let tagRepository: any EventTagRepository
     private let sharedDataStore: SharedDataStore
     private let refreshBindingQueue: DispatchQueue
     
     public init(
-        tagRepository: EventTagRepository,
+        tagRepository: any EventTagRepository,
         sharedDataStore: SharedDataStore,
         refreshBindingQueue: DispatchQueue? = nil
     ) {

@@ -24,7 +24,7 @@ public protocol CalendarSceneListener: Sendable, AnyObject {
     )
 }
 
-public protocol CalendarScene: Scene where Interactor == CalendarSceneInteractor {
+public protocol CalendarScene: Scene where Interactor == any CalendarSceneInteractor {
     
     @MainActor
     func addChildMonths(_ monthScenes: [any Scene])
@@ -33,6 +33,6 @@ public protocol CalendarScene: Scene where Interactor == CalendarSceneInteractor
 public protocol CalendarSceneBuilder {
     
     func makeCalendarScene(
-        listener: CalendarSceneListener?
+        listener: (any CalendarSceneListener)?
     ) -> any CalendarScene
 }

@@ -33,7 +33,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
 final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     
-    var router: MainRouting?
+    var router: (any MainRouting)?
     
     init() {
         
@@ -46,7 +46,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
-    private var calendarSceneInteractor: CalendarSceneInteractor?
+    private var calendarSceneInteractor: (any CalendarSceneInteractor)?
 }
 
 

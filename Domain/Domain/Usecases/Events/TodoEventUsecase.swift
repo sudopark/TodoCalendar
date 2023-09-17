@@ -31,11 +31,11 @@ public protocol TodoEventUsecase {
 
 public final class TodoEventUsecaseImple: TodoEventUsecase {
     
-    private let todoRepository: TodoEventRepository
+    private let todoRepository: any TodoEventRepository
     private let sharedDataStore: SharedDataStore
     
     public init(
-        todoRepository: TodoEventRepository,
+        todoRepository: any TodoEventRepository,
         sharedDataStore: SharedDataStore
     ) {
         self.todoRepository = todoRepository

@@ -22,15 +22,15 @@ final class CalendarPaperViewController: UIViewController, CalendarPaperScene {
     private let monthContainerView = UIView()
     private let eventListContainerView = UIView()
     
-    private let viewModel: CalendarPaperViewModel
+    private let viewModel: any CalendarPaperViewModel
     private let viewAppearance: ViewAppearance
     
     private var cancellables: Set<AnyCancellable> = []
     
-    var interactor: CalendarPaperSceneInteractor? { self.viewModel }
+    var interactor: (any CalendarPaperSceneInteractor)? { self.viewModel }
     
     init(
-        viewModel: CalendarPaperViewModel,
+        viewModel: any CalendarPaperViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
@@ -139,7 +139,7 @@ extension CalendarPaperViewController {
     }
     
     private func setupStyling(
-        _ fontSet: FontSet, _ colorSet: ColorSet
+        _ fontSet: any FontSet, _ colorSet: any ColorSet
     ) {
         self.view.backgroundColor = colorSet.dayBackground
     }

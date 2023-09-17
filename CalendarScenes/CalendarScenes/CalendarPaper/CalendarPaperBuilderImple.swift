@@ -17,16 +17,16 @@ import CommonPresentation
 
 final class CalendarPaperSceneBuilerImple {
     
-    private let usecaseFactory: UsecaseFactory
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
-    private let monthSceneBuilder: MonthSceneBuilder
-    private let eventListSceneBuilder: DayEventListSceneBuiler
+    private let monthSceneBuilder: any MonthSceneBuilder
+    private let eventListSceneBuilder: any DayEventListSceneBuiler
     
     init(
-        usecaseFactory: UsecaseFactory,
+        usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
-        monthSceneBuilder: MonthSceneBuilder,
-        eventListSceneBuilder: DayEventListSceneBuiler
+        monthSceneBuilder: any MonthSceneBuilder,
+        eventListSceneBuilder: any DayEventListSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance

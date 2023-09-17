@@ -27,11 +27,11 @@ public protocol ScheduleEventUsecase {
 
 public final class ScheduleEventUsecaseImple: ScheduleEventUsecase {
     
-    private let scheduleRepository: ScheduleEventRepository
+    private let scheduleRepository: any ScheduleEventRepository
     private let sharedDataStore: SharedDataStore
     
     public init(
-        scheduleRepository: ScheduleEventRepository,
+        scheduleRepository: any ScheduleEventRepository,
         sharedDataStore: SharedDataStore
     ) {
         self.scheduleRepository = scheduleRepository

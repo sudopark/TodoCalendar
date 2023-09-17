@@ -46,14 +46,14 @@ extension Locale: LocaleProvider {
 
 public final class HolidayUsecaseImple: HolidayUsecase {
     
-    private let holidayRepository: HolidayRepository
+    private let holidayRepository: any HolidayRepository
     private let dataStore: SharedDataStore
-    private let localeProvider: LocaleProvider
+    private let localeProvider: any LocaleProvider
     
     public init(
-        holidayRepository: HolidayRepository,
+        holidayRepository: any HolidayRepository,
         dataStore: SharedDataStore,
-        localeProvider: LocaleProvider
+        localeProvider: any LocaleProvider
     ) {
         self.holidayRepository = holidayRepository
         self.dataStore = dataStore

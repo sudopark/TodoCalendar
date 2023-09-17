@@ -19,7 +19,7 @@ public protocol MainSceneInteractor: Sendable, CalendarSceneListener { }
 
 // MARK: - MainScene
 
-public protocol MainScene: Scene where Interactor == MainSceneInteractor
+public protocol MainScene: Scene where Interactor == any MainSceneInteractor
 {
     @MainActor
     func addCalendar(_ calendarScene: any CalendarScene)

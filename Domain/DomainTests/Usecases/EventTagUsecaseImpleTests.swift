@@ -158,7 +158,7 @@ extension EventTagUsecaseImpleTests {
         XCTAssertEqual(tag?.uuid, "some")
     }
     
-    private func stubMakeTag(_ usecase: EventTagUsecase) -> EventTag {
+    private func stubMakeTag(_ usecase: any EventTagUsecase) -> EventTag {
         let expect = expectation(description: "tag 생성 조회")
         
         let making: AsyncFlatMapPublisher<Void, Error, EventTag> = Publishers.create {

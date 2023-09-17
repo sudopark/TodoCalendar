@@ -18,15 +18,15 @@ import CommonPresentation
 
 final class DayEventListViewController: UIHostingController<DayEventListContainerView>, DayEventListScene {
     
-    private let viewModel: DayEventListViewModel
+    private let viewModel: any DayEventListViewModel
     private let viewAppearance: ViewAppearance
     
-    var interactor: DayEventListSceneInteractor? { self.viewModel }
+    var interactor: (any DayEventListSceneInteractor)? { self.viewModel }
     
     private var cancellables: Set<AnyCancellable> = []
     
     init(
-        viewModel: DayEventListViewModel,
+        viewModel: any DayEventListViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel

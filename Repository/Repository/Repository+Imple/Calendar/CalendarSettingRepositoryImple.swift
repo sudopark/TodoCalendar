@@ -11,9 +11,9 @@ import Domain
 
 public final class CalendarSettingRepositoryImple: CalendarSettingRepository, Sendable {
     
-    private let environmentStorage: EnvironmentStorage
+    private let environmentStorage: any EnvironmentStorage
     
-    public init(environmentStorage: EnvironmentStorage) {
+    public init(environmentStorage: any EnvironmentStorage) {
         self.environmentStorage = environmentStorage
     }
     

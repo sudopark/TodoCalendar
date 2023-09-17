@@ -30,11 +30,11 @@ public protocol CalendarSettingUsecase {
 
 public final class CalendarSettingUsecaseImple: CalendarSettingUsecase {
     
-    private let settingRepository: CalendarSettingRepository
+    private let settingRepository: any CalendarSettingRepository
     private let shareDataStore: SharedDataStore
     
     public init(
-        settingRepository: CalendarSettingRepository,
+        settingRepository: any CalendarSettingRepository,
         shareDataStore: SharedDataStore
     ) {
         self.settingRepository = settingRepository
