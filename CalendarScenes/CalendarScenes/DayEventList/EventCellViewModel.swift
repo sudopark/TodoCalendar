@@ -92,7 +92,7 @@ extension EventCellViewModel {
 
 // MARK: - Todo
 
-struct TodoEventCellViewModelImple: EventCellViewModel {
+struct TodoEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
     var tagId: String?
@@ -123,18 +123,22 @@ struct TodoEventCellViewModelImple: EventCellViewModel {
     }
 }
 
-struct PendingTodoEventCellViewModelImple: EventCellViewModel {
-    
-    let pendingId: String = UUID().uuidString
+struct PendingTodoEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
     var tagId: String?
     let name: String
-    var periodText: EventPeriodText?
+    var periodText: EventPeriodText? = .anyTime
     var periodDescription: String?
     var colorHex: String?
     var customCompareKey: String {
-        self.makeCustomCompareKey(["pending-todo", self.pendingId])
+        self.makeCustomCompareKey(["pending-todo"])
+    }
+    
+    init(name: String, defaultTagId: String?) {
+        self.eventIdentifier = "pending:\(UUID().uuidString)"
+        self.name = name
+        self.tagId = defaultTagId
     }
     
     // TOOD: make custom compare key
@@ -142,7 +146,7 @@ struct PendingTodoEventCellViewModelImple: EventCellViewModel {
 
 // MARK: - Schedule
 
-struct ScheduleEventCellViewModelImple: EventCellViewModel {
+struct ScheduleEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
     let turn: Int?
@@ -176,7 +180,7 @@ struct ScheduleEventCellViewModelImple: EventCellViewModel {
 
 
 // MARK: - Holiday
-struct HolidayEventCellViewModelImple: EventCellViewModel {
+struct HolidayEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
     var tagId: String?

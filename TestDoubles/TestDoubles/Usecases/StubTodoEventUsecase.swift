@@ -26,8 +26,18 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         .eraseToAnyPublisher()
     }
     
+    public var shouldFailMakeTodo: Bool = false
     open func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent {
-        throw RuntimeError("not implemented")
+        guard shouldFailMakeTodo == false
+        else {
+            throw RuntimeError("failed")
+        }
+
+        guard let newEvent = TodoEvent(params)
+        else {
+            throw RuntimeError("invalid parameters")
+        }
+        return newEvent
     }
     
     open func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {

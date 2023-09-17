@@ -38,14 +38,12 @@ final class DayEventListViewController: UIHostingController<DayEventListContaine
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
         .eventHandler(\.requestDoneTodo, viewModel.doneTodo(_:))
         .eventHandler(\.requestAddNewEventWhetherUsingTemplate) { isUsingTemplate in
-            isUsingTemplate ? viewModel.addEventByTemplate() : viewModel.addEvent()
+            isUsingTemplate
+            ? viewModel.makeEventByTemplate()
+            : viewModel.makeEvent()
         }
-        .eventHandler(\.addNewTodoQuickly) { name in
-            // TODO: add new todo with only name
-        }
-        .eventHandler(\.makeNewTodoWithGivenNameAndDetails) { name in
-            // TODO: start make todo with name
-        }
+        .eventHandler(\.addNewTodoQuickly, viewModel.addNewTodoQuickly(withName:))
+        .eventHandler(\.makeNewTodoWithGivenNameAndDetails, viewModel.makeTodoEvent(with:))
         super.init(rootView: containerView)
         self.sizingOptions = [.intrinsicContentSize]
     }

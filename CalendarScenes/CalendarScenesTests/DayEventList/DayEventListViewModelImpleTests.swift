@@ -37,19 +37,21 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     // 9-10일: current-todo-1, current-todo-2, todo-with-time, not-repeating-schedule, repeating-schedule(turn 4)
     // 9-11일: current-todo-1, current-todo-2
     private func makeViewModel(
-        shouldFailDoneTodo: Bool = false
+        shouldFailDoneTodo: Bool = false,
+        shouldFailMakeTodo: Bool = false
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
-            .init(uuid: "current-todo-1", name: "some"),
-            .init(uuid: "current-todo-2", name: "some")
+            .init(uuid: "current-todo-1", name: "current-todo-1"),
+            .init(uuid: "current-todo-2", name: "current-todo-2")
         ]
-        let todoWithTime = TodoEvent(uuid: "todo-with-time", name: "some")
-        let notRepeatingSchedule = ScheduleEvent(uuid: "not-repeating-schedule", name: "some", time: .at(self.todayRange.lowerBound))
-        let repeatingSchedule = ScheduleEvent(uuid: "repeating-schedule", name: "some", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound), turn: 4)]
+        let todoWithTime = TodoEvent(uuid: "todo-with-time", name: "todo-with-time")
+        let notRepeatingSchedule = ScheduleEvent(uuid: "not-repeating-schedule", name: "not-repeating-schedule", time: .at(self.todayRange.lowerBound))
+        let repeatingSchedule = ScheduleEvent(uuid: "repeating-schedule", name: "repeating-schedule", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound), turn: 4)]
         
         self.stubTodoUsecase.stubCurrentTodoEvents = currentTodos
         self.stubTodoUsecase.stubTodoEventsInRange = [todoWithTime]
         self.stubTodoUsecase.shouldFailCompleteTodo = shouldFailDoneTodo
+        self.stubTodoUsecase.shouldFailMakeTodo = shouldFailMakeTodo
         
         let scheduleUsecase = StubScheduleEventUsecase()
         scheduleUsecase.stubScheduleEventsInRange = [notRepeatingSchedule, repeatingSchedule]
@@ -115,7 +117,7 @@ extension DayEventListViewModelImpleTests {
         let current = TodoEvent(uuid: "curent", name: "current todo")
         
         // when
-        let cellViewModel = TodoEventCellViewModelImple(current, in: 0..<100, TimeZone(abbreviation: "KST")!)
+        let cellViewModel = TodoEventCellViewModel(current, in: 0..<100, TimeZone(abbreviation: "KST")!)
         
         // then
         XCTAssertEqual(cellViewModel?.name, "current todo")
@@ -128,7 +130,7 @@ extension DayEventListViewModelImpleTests {
         let holiday = Holiday(dateString: "2020-03-01", localName: "삼일절", name: "삼일절")
         
         // when
-        let cellViewModel = HolidayEventCellViewModelImple(holiday)
+        let cellViewModel = HolidayEventCellViewModel(holiday)
         
         // then
         XCTAssertEqual(cellViewModel.name, "삼일절")
@@ -183,7 +185,7 @@ extension DayEventListViewModelImpleTests {
             let time = EventTime.period(range)
             let event = ScheduleEvent(uuid: "event", name: "some", time: time)
             
-            let cellViewModel = ScheduleEventCellViewModelImple(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
+            let cellViewModel = ScheduleEventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
             
             XCTAssertEqual(cellViewModel?.periodText, expectPeriodText)
         }
@@ -201,7 +203,7 @@ extension DayEventListViewModelImpleTests {
         let event = ScheduleEvent(uuid: "event", name: "name", time: time)
         
         // when
-        let cellViewModel = ScheduleEventCellViewModelImple(event, turn: 1, in: self.todayRange, timeZone: timeZone)
+        let cellViewModel = ScheduleEventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: timeZone)
         
         // then
         XCTAssertEqual(cellViewModel?.periodText, .atTime("10:30"))
@@ -233,7 +235,7 @@ extension DayEventListViewModelImpleTests {
             let time = EventTime.allDay(range, secondsFromGMT: pdtSecondsFromGMT)
             let event = ScheduleEvent(uuid: "event", name: "some", time: time)
             
-            let cellViewModel = ScheduleEventCellViewModelImple(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
+            let cellViewModel = ScheduleEventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
             
             XCTAssertEqual(cellViewModel?.periodText, expectedPeriodText)
         }
@@ -252,7 +254,7 @@ extension DayEventListViewModelImpleTests {
         ) {
             let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
             
-            let cellViewModel = ScheduleEventCellViewModelImple(schedule, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
+            let cellViewModel = ScheduleEventCellViewModel(schedule, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
             
             XCTAssertEqual(cellViewModel?.periodDescription, expectedDescription)
         }
@@ -294,7 +296,7 @@ extension DayEventListViewModelImpleTests {
     
     private var dummyEventIds: [EventId] {
         return [
-            .holiday(.init(dateString: "dummy-date", localName: "holiday", name: "name")),
+            .holiday(.init(dateString: "dummy-date", localName: "holiday", name: "holiday-name")),
             .schedule("repeating-schedule", turn: 4),
             .todo("todo-with-time"),
             .schedule("not-repeating-schedule", turn: 1)
@@ -303,7 +305,7 @@ extension DayEventListViewModelImpleTests {
     
     private var dummyEventIdStrings: [String] {
         return [
-            "dummy-date_name",
+            "dummy-date_holiday-name",
             "repeating-schedule",
             "todo-with-time",
             "not-repeating-schedule"
@@ -374,11 +376,16 @@ extension DayEventListViewModelImpleTests {
     }
     
     private func makeViewModelWithInitialListLoaded(
-        shouldFailDoneTodo: Bool = false
+        shouldFailDoneTodo: Bool = false,
+        shouldFailMakeTodo: Bool = false
     ) -> DayEventListViewModelImple {
         // given
         let expect = expectation(description: "wait first cells loaded")
-        let viewModel = self.makeViewModel(shouldFailDoneTodo: shouldFailDoneTodo)
+        expect.assertForOverFulfill = false
+        let viewModel = self.makeViewModel(
+            shouldFailDoneTodo: shouldFailDoneTodo,
+            shouldFailMakeTodo: shouldFailMakeTodo
+        )
         
         // when
         let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEventIds.count + 2 })
@@ -405,10 +412,128 @@ extension DayEventListViewModelImpleTests {
     }
 }
 
+// MARK: - test make new todo quickly
+
+extension DayEventListViewModelImpleTests {
+    
+    private var totalEventNameListWithoutPending: [String] {
+        return [
+            "current-todo-1", "current-todo-2",
+            "holiday",
+            "repeating-schedule",
+            "todo-with-time",
+            "not-repeating-schedule"
+        ]
+    }
+    
+    private var totalEventNameListsWithPending: [String] {
+        return [
+            "current-todo-1", "current-todo-2",
+            "pending-quick-todo",
+            "holiday",
+            "repeating-schedule",
+            "todo-with-time",
+            "not-repeating-schedule"
+        ]
+    }
+    
+    func testViewModel_whenMakeNewTodoQuickly_appendPendingCellAndInvalidate() {
+        // given
+        let expect = expectation(description: "빠르게 todo 생성시에 pendingcell 방출하고 이후 제거")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        
+        // when
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+            viewModel.addNewTodoQuickly(withName: "pending-quick-todo")
+        }
+        
+        // then
+        let nameLists = cvmLists.map { $0.map { $0.name } }
+        XCTAssertEqual(nameLists, [
+            self.totalEventNameListWithoutPending,
+            self.totalEventNameListsWithPending,
+            self.totalEventNameListWithoutPending
+        ])
+    }
+    
+    func testViewModel_whenMakeNewTodoQuicklyFails_removePendingTodo() {
+        // given
+        let expect = expectation(description: "빠르게 todo 생성 실패시에도 pendingcell 방출하고 이후 제거")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithInitialListLoaded(shouldFailMakeTodo: true)
+        
+        // when
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+            viewModel.addNewTodoQuickly(withName: "pending-quick-todo")
+        }
+        
+        // then
+        let nameLists = cvmLists.map { $0.map { $0.name } }
+        XCTAssertEqual(nameLists, [
+            self.totalEventNameListWithoutPending,
+            self.totalEventNameListsWithPending,
+            self.totalEventNameListWithoutPending
+        ])
+    }
+    
+    func testViewModel_whenMakeNewTodoQuicklyFails_showError() {
+        // given
+        let expect = expectation(description: "빠르게 todo 생성 실패시에 에러 알림")
+        let viewModel = self.makeViewModel(shouldFailMakeTodo: true)
+        self.spyRouter.didShowErrorCallback = { _ in
+            expect.fulfill()
+        }
+        // when
+        viewModel.addNewTodoQuickly(withName: "pending-quick-todo")
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
+}
+
+// MARK: - test make events
+
+extension DayEventListViewModelImpleTests {
+    
+    func testViewModel_makeTodoWithGivenName() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.makeTodoEvent(with: "some")
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToMakeNewTodoEventWithParams?.name, "some")
+    }
+    
+    // TODO: evnet 생성 기능 추가한 이후에 구현
+//    func testViewModel_makeNewEvent() {
+//
+//    }
+//
+//    func testViewModel_makeNewEventUsingTemplate() {
+//        // given
+//        // when
+//        // then
+//    }
+}
+
 extension DayEventListViewModelImpleTests {
     
     private class SpyRouter: BaseSpyRouter, DayEventListRouting, @unchecked Sendable {
         
+        var didRouteToMakeNewTodoEventWithParams: TodoMakeParams?
+        func routeToMakeTodoEvent(_ withParams: TodoMakeParams) {
+            self.didRouteToMakeNewTodoEventWithParams = withParams
+        }
         
+        func routeToMakeNewEvent() {
+            
+        }
+        
+        func routeToSelectTemplateForMakeEvent() {
+            
+        }
     }
 }
