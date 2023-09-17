@@ -28,6 +28,6 @@ final class Singleton {
     
     
     // TODO: test build 이면 empty remote 객체 제공
-    let remoteAPI: RemoteAPI = RemoteAPIImple()
+    let remoteAPI: any RemoteAPI = RemoteAPIImple()
 }
 

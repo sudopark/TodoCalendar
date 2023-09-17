@@ -87,8 +87,8 @@ extension CalendarPaperViewModelImpleTests {
         let spyMonthInteractor: SpyMonthSceneInteractor = .init()
         let spyEventListInteractor: SpyEventInteractor = .init()
         func attachMonthAndEventList(_ month: CalendarMonth) -> (
-            MonthSceneInteractor?,
-            DayEventListSceneInteractor?
+            (any MonthSceneInteractor)?,
+            (any DayEventListSceneInteractor)?
         )? {
             self.didListenerAttached?()
             return (spyMonthInteractor, spyEventListInteractor)

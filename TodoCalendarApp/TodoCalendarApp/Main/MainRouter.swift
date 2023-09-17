@@ -17,15 +17,15 @@ import CommonPresentation
 protocol MainRouting: Routing, Sendable {
     
     @MainActor
-    func attachCalendar() -> CalendarSceneInteractor?
+    func attachCalendar() -> (any CalendarSceneInteractor)?
 }
 
 // MARK: - Router
 
 final class MainRouter: BaseRouterImple, MainRouting, @unchecked Sendable {
     
-    private let calendarSceneBulder: CalendarSceneBuilder
-    init(_ calendarSceneBulder: CalendarSceneBuilder) {
+    private let calendarSceneBulder: any CalendarSceneBuilder
+    init(_ calendarSceneBulder: any CalendarSceneBuilder) {
         self.calendarSceneBulder = calendarSceneBulder
     }
 }
@@ -40,7 +40,7 @@ extension MainRouter {
     // TODO: router implememnts
     
     @MainActor
-    func attachCalendar() -> CalendarSceneInteractor? {
+    func attachCalendar() -> (any CalendarSceneInteractor)? {
         guard let current = self.currentScene else { return nil }
         let calendarScene = self.calendarSceneBulder.makeCalendarScene(
             listener: current.interactor

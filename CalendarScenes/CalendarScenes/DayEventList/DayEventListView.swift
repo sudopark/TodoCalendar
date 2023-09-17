@@ -23,10 +23,10 @@ final class DayEventListViewState: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     
     @Published fileprivate var dateText: String = ""
-    @Published fileprivate var cellViewModels: [EventCellViewModel] = []
+    @Published fileprivate var cellViewModels: [any EventCellViewModel] = []
     @Published fileprivate var tempDoneTodoIds: Set<String> = []
     
-    func bind(_ viewModel: DayEventListViewModel) {
+    func bind(_ viewModel: any DayEventListViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
@@ -59,7 +59,7 @@ final class DayEventListViewState: ObservableObject {
             .store(in: &self.cancellables)
     }
     
-    private func removeDoneTodoIdsFromTempDoneIds(from cellViewModels: [EventCellViewModel]) {
+    private func removeDoneTodoIdsFromTempDoneIds(from cellViewModels: [any EventCellViewModel]) {
         let existingTodoIds = cellViewModels.compactMap { $0.todoEventId } |> Set.init
         self.tempDoneTodoIds = tempDoneTodoIds.intersection(existingTodoIds)
     }
@@ -175,8 +175,8 @@ private struct EventListCellView: View {
     
     fileprivate var requestDoneTodo: (String) -> Void = { _ in }
     
-    private let cellViewModel: EventCellViewModel
-    init(cellViewModel: EventCellViewModel) {
+    private let cellViewModel: any EventCellViewModel
+    init(cellViewModel: any EventCellViewModel) {
         self.cellViewModel = cellViewModel
     }
     
@@ -200,7 +200,7 @@ private struct EventListCellView: View {
         .backgroundAsRoundedRectForEventList(self.appearance)
     }
     
-    private func eventLeftView(_ cellViewModel: EventCellViewModel) -> some View {
+    private func eventLeftView(_ cellViewModel: any EventCellViewModel) -> some View {
         func singleText(_ text: String) -> some View {
             return VStack(alignment: .center) {
                 Text(text)
@@ -239,7 +239,7 @@ private struct EventListCellView: View {
         }
     }
     
-    private func eventRightView(_ cellViewModel: EventCellViewModel) -> some View {
+    private func eventRightView(_ cellViewModel: any EventCellViewModel) -> some View {
         return HStack(alignment: .center, spacing: 8) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(cellViewModel.name)
@@ -403,7 +403,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         return containerView
     }
     
-    private static func makeDummyCells() -> [EventCellViewModel] {
+    private static func makeDummyCells() -> [any EventCellViewModel] {
         let currentTodoCells: [TodoEventCellViewModel] = [
             .init("current-todo1", name: "current todo 1")
                 |> \.colorHex .~ "#0000ff"

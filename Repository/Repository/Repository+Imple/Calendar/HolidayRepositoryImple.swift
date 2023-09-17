@@ -13,14 +13,14 @@ import SQLiteService
 
 public final class HolidayRepositoryImple: HolidayRepository {
     
-    private let localEnvironmentStorage: EnvironmentStorage
+    private let localEnvironmentStorage: any EnvironmentStorage
     private let sqliteService: SQLiteService
-    private let remoteAPI: RemoteAPI
+    private let remoteAPI: any RemoteAPI
     
     public init(
-        localEnvironmentStorage: EnvironmentStorage,
+        localEnvironmentStorage: any EnvironmentStorage,
         sqliteService: SQLiteService,
-        remoteAPI: RemoteAPI
+        remoteAPI: any RemoteAPI
     ) {
         self.localEnvironmentStorage = localEnvironmentStorage
         self.sqliteService = sqliteService

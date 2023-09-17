@@ -12,8 +12,8 @@ import Domain
 
 public class ViewAppearance: ObservableObject {
     
-    @Published public var colorSet: ColorSet
-    @Published public var fontSet: FontSet
+    @Published public var colorSet: any ColorSet
+    @Published public var fontSet: any FontSet
     
     public init(color: ColorSetKeys, font: FontSetKeys) {
         switch color {
@@ -30,7 +30,7 @@ public class ViewAppearance: ObservableObject {
 
 extension ViewAppearance {
     
-    public var didUpdated: AnyPublisher<(FontSet, ColorSet), Never> {
+    public var didUpdated: AnyPublisher<(any FontSet, any ColorSet), Never> {
         return Publishers.CombineLatest(
             self.$fontSet,
             self.$colorSet

@@ -10,10 +10,10 @@ import Domain
 
 final class ApplicationRootViewModelImple {
  
-    private let applicationUsecase: ApplicationRootUsecase
+    private let applicationUsecase: any ApplicationRootUsecase
     var router: ApplicationRootRouter?
     
-    init(applicationUsecase: ApplicationRootUsecase) {
+    init(applicationUsecase: any ApplicationRootUsecase) {
         self.applicationUsecase = applicationUsecase
     }
 }

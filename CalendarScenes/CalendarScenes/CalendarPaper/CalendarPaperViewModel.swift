@@ -30,9 +30,9 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
     
     private let month: CalendarMonth
     
-    var router: CalendarPaperRouting?
-    private var monthInteractor: MonthSceneInteractor?
-    private var eventListInteractor: DayEventListSceneInteractor?
+    var router: (any CalendarPaperRouting)?
+    private var monthInteractor: (any MonthSceneInteractor)?
+    private var eventListInteractor: (any DayEventListSceneInteractor)?
     
     init(month: CalendarMonth) {
         self.month = month

@@ -21,15 +21,15 @@ final class MainViewController: UIViewController, MainScene {
     private let headerView = HeaderView()
     private let calendarContainerView = UIView()
     
-    private let viewModel: MainViewModel
+    private let viewModel: any MainViewModel
     private let viewAppearance: ViewAppearance
     
-    var interactor: MainSceneInteractor? { self.viewModel }
+    var interactor: (any MainSceneInteractor)? { self.viewModel }
     
     private var cancellables: Set<AnyCancellable> = []
     
     init(
-        viewModel: MainViewModel,
+        viewModel: any MainViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
@@ -138,7 +138,7 @@ extension MainViewController {
     }
     
     private func setupStyling(
-        _ fontSet: FontSet, _ colorSet: ColorSet
+        _ fontSet: any FontSet, _ colorSet: any ColorSet
     ) {
         self.view.backgroundColor = colorSet.dayBackground
         self.headerView.setupStyling(fontSet, colorSet)
@@ -211,7 +211,7 @@ private final class HeaderView: UIView {
     }
     
     func setupStyling(
-        _ fontSet: FontSet, _ colorSet: ColorSet
+        _ fontSet: any FontSet, _ colorSet: any ColorSet
     ) {
         self.monthLabel.font = fontSet.bigMonth
         self.monthLabel.textColor = colorSet.normalText

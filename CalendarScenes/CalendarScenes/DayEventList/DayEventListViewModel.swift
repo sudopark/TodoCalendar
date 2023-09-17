@@ -21,7 +21,7 @@ import Extensions
 protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor {
 
     // interactor
-    func selectEvent(_ model: EventCellViewModel)
+    func selectEvent(_ model: any EventCellViewModel)
     func doneTodo(_ eventId: String)
     func addNewTodoQuickly(withName: String)
     func makeTodoEvent(with givenName: String)
@@ -30,7 +30,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     
     // presenter
     var selectedDay: AnyPublisher<String, Never> { get }
-    var cellViewModels: AnyPublisher<[EventCellViewModel], Never> { get }
+    var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> { get }
     var doneTodoFailed: AnyPublisher<String, Never> { get }
 }
 
@@ -39,17 +39,17 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
 
 final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendable {
     
-    private let calendarSettingUsecase: CalendarSettingUsecase
-    private let todoEventUsecase: TodoEventUsecase
-    private let scheduleEventUsecase: ScheduleEventUsecase
-    private let eventTagUsecase: EventTagUsecase
-    var router: DayEventListRouting?
+    private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let todoEventUsecase: any TodoEventUsecase
+    private let scheduleEventUsecase: any ScheduleEventUsecase
+    private let eventTagUsecase: any EventTagUsecase
+    var router: (any DayEventListRouting)?
     
     init(
-        calendarSettingUsecase: CalendarSettingUsecase,
-        todoEventUsecase: TodoEventUsecase,
-        scheduleEventUsecase: ScheduleEventUsecase,
-        eventTagUsecase: EventTagUsecase
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        todoEventUsecase: any TodoEventUsecase,
+        scheduleEventUsecase: any ScheduleEventUsecase,
+        eventTagUsecase: any EventTagUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.todoEventUsecase = todoEventUsecase
@@ -266,7 +266,7 @@ extension DayEventListViewModelImple {
         
         let asCellViewModel: (
             (CurrentDayAndIdLists, TimeZone, AllTodos, [String: ScheduleEvent]), [PendingTodoEventCellViewModel]
-        ) -> [EventCellViewModel]
+        ) -> [any EventCellViewModel]
         asCellViewModel = { tuple, pendings in
             
             let (dayAndIds, timeZone, allTodos, scheduleMap) = (tuple.0, tuple.1, tuple.2, tuple.3)
@@ -276,7 +276,7 @@ extension DayEventListViewModelImple {
                 .compactMap { allTodos.allTodoMap[$0] }
                 .compactMap { TodoEventCellViewModel($0, in: range, timeZone) }
             
-            let eventCellsWithTime = dayAndIds.eventIds.compactMap { eventId -> EventCellViewModel? in
+            let eventCellsWithTime = dayAndIds.eventIds.compactMap { eventId -> (any EventCellViewModel)? in
                 switch eventId {
                 case .todo(let id):
                     return allTodos.allTodoMap[id]

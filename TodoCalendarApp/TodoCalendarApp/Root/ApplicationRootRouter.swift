@@ -65,7 +65,7 @@ extension ApplicationRootRouter {
         }
     }
     
-    private func calendarSceneBulder() -> CalendarSceneBuilder {
+    private func calendarSceneBulder() -> any CalendarSceneBuilder {
         return CalendarSceneBuilderImple(
             usecaseFactory: self.nonLoginUsecaseFactory,
             viewAppearance: self.viewAppearance

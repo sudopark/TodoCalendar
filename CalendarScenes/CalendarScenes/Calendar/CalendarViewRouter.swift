@@ -12,19 +12,19 @@ import Scenes
 protocol CalendarViewRouting: Routing, Sendable {
     
     @MainActor
-    func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarPaperSceneInteractor]
+    func attachInitialMonths(_ months: [CalendarMonth]) -> [any CalendarPaperSceneInteractor]
 }
 
 final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unchecked Sendable {
     
-    private let paperSceneBuilder: CalendarPaperSceneBuiler
-    init(_ paperSceneBuilder: CalendarPaperSceneBuiler) {
+    private let paperSceneBuilder: any CalendarPaperSceneBuiler
+    init(_ paperSceneBuilder: any CalendarPaperSceneBuiler) {
         self.paperSceneBuilder = paperSceneBuilder
     }
     private var currentScene: (any CalendarScene)? { self.scene as? (any CalendarScene) }
     
     @MainActor
-    func attachInitialMonths(_ months: [CalendarMonth]) -> [CalendarPaperSceneInteractor] {
+    func attachInitialMonths(_ months: [CalendarMonth]) -> [any CalendarPaperSceneInteractor] {
         guard let current = self.currentScene else { return [] }
         
         let childScenes = months.map { self.paperSceneBuilder.makeCalendarPaperScene($0) }

@@ -16,14 +16,14 @@ import CommonPresentation
 
 public final class MainSceneBuilerImple {
     
-    private let usecaseFactory: UsecaseFactory
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
-    private let calendarSceneBulder: CalendarSceneBuilder
+    private let calendarSceneBulder: any CalendarSceneBuilder
     
     public init(
-        usecaseFactory: UsecaseFactory,
+        usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
-        calendarSceneBulder: CalendarSceneBuilder
+        calendarSceneBulder: any CalendarSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance

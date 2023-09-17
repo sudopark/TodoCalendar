@@ -25,7 +25,7 @@ protocol DayEventListSceneInteractor: AnyObject {
 
 // MARK: - DayEventListScene
 
-protocol DayEventListScene: Scene where Interactor == DayEventListSceneInteractor
+protocol DayEventListScene: Scene where Interactor == any DayEventListSceneInteractor
 {
     
 }

@@ -15,7 +15,7 @@ import UnitTestHelpKit
 
 class BaseEventRepeatTimeEnumeratorTests: BaseTestCase {
     
-    func makeEnumerator(_ option: EventRepeatingOption) -> EventRepeatTimeEnumerator {
+    func makeEnumerator(_ option: any EventRepeatingOption) -> EventRepeatTimeEnumerator {
         return EventRepeatTimeEnumerator(option)!
     }
     

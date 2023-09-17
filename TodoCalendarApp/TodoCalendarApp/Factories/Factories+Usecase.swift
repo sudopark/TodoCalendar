@@ -17,7 +17,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory { }
 
 extension NonLoginUsecaseFactoryImple {
     
-    func makeCalendarSettingUsecase() -> CalendarSettingUsecase {
+    func makeCalendarSettingUsecase() -> any CalendarSettingUsecase {
         let settingRepository = CalendarSettingRepositoryImple(
             environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
         )
@@ -27,7 +27,7 @@ extension NonLoginUsecaseFactoryImple {
         )
     }
     
-    func makeHolidayUsecase() -> HolidayUsecase {
+    func makeHolidayUsecase() -> any HolidayUsecase {
         let holidayRepository = HolidayRepositoryImple(
             localEnvironmentStorage: Singleton.shared.userDefaultEnvironmentStorage,
             sqliteService: Singleton.shared.commonSqliteService,
@@ -40,7 +40,7 @@ extension NonLoginUsecaseFactoryImple {
         )
     }
     
-    func makeCalendarUsecase() -> CalendarUsecase {
+    func makeCalendarUsecase() -> any CalendarUsecase {
         return CalendarUsecaseImple(
             calendarSettingUsecase: self.makeCalendarSettingUsecase(),
             holidayUsecase: self.makeHolidayUsecase()
@@ -51,7 +51,7 @@ extension NonLoginUsecaseFactoryImple {
 
 extension NonLoginUsecaseFactoryImple {
     
-    func makeTodoEventUsecase() -> TodoEventUsecase {
+    func makeTodoEventUsecase() -> any TodoEventUsecase {
             
         let storage = TodoLocalStorage(
             sqliteService: Singleton.shared.commonSqliteService
@@ -65,7 +65,7 @@ extension NonLoginUsecaseFactoryImple {
         )
     }
     
-    func makeScheduleEventUsecase() -> ScheduleEventUsecase {
+    func makeScheduleEventUsecase() -> any ScheduleEventUsecase {
         let storage = ScheduleEventLocalStorage(
             sqliteService: Singleton.shared.commonSqliteService
         )
@@ -78,7 +78,7 @@ extension NonLoginUsecaseFactoryImple {
         )
     }
     
-    func makeEventTagUsecase() -> EventTagUsecase {
+    func makeEventTagUsecase() -> any EventTagUsecase {
         let storage = EventTagLocalStorage(
             sqliteService: Singleton.shared.commonSqliteService
         )

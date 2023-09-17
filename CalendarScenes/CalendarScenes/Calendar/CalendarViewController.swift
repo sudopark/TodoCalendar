@@ -12,13 +12,13 @@ import CommonPresentation
 
 final class CalendarViewController: UIPageViewController, CalendarScene {
     
-    private let viewModel: CalendarViewModel
+    private let viewModel: any CalendarViewModel
     private let viewAppearance: ViewAppearance
     
-    var interactor: CalendarSceneInteractor? { self.viewModel }
+    var interactor: (any CalendarSceneInteractor)? { self.viewModel }
     
     init(
-        viewModel: CalendarViewModel,
+        viewModel: any CalendarViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel

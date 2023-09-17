@@ -10,6 +10,7 @@ import Combine
 import Domain
 import Scenes
 import UnitTestHelpKit
+import TestDoubles
 
 @testable import TodoCalendarApp
 
@@ -101,11 +102,11 @@ extension MainViewModelImpleTests {
 
 extension MainViewModelImpleTests {
     
-    private class SpyRouter: MainRouting, @unchecked Sendable {
+    private class SpyRouter: BaseSpyRouter, MainRouting, @unchecked Sendable {
         
         var interactor = SpyCalendarInteractor()
         var didCalendarAttached: (() -> Void)?
-        func attachCalendar() -> CalendarSceneInteractor? {
+        func attachCalendar() -> (any CalendarSceneInteractor)? {
             self.didCalendarAttached?()
             return self.interactor
         }

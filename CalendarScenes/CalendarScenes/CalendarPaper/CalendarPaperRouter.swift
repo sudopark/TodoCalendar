@@ -19,7 +19,7 @@ protocol CalendarPaperRouting: Routing, Sendable {
     
     @MainActor
     func attachMonthAndEventList(_ month: CalendarMonth) -> (
-        MonthSceneInteractor?, DayEventListSceneInteractor?
+        (any MonthSceneInteractor)?, (any DayEventListSceneInteractor)?
     )?
 }
 
@@ -27,12 +27,12 @@ protocol CalendarPaperRouting: Routing, Sendable {
 
 final class CalendarPaperRouter: BaseRouterImple, CalendarPaperRouting, @unchecked Sendable {
     
-    private let monthSceneBuilder: MonthSceneBuilder
-    private let eventListSceneBuilder: DayEventListSceneBuiler
+    private let monthSceneBuilder: any MonthSceneBuilder
+    private let eventListSceneBuilder: any DayEventListSceneBuiler
     
     init(
-        monthSceneBuilder: MonthSceneBuilder,
-        eventListSceneBuilder: DayEventListSceneBuiler
+        monthSceneBuilder: any MonthSceneBuilder,
+        eventListSceneBuilder: any DayEventListSceneBuiler
     ) {
         self.monthSceneBuilder = monthSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
@@ -49,7 +49,7 @@ extension CalendarPaperRouter {
     // TODO: router implememnts
     @MainActor
     func attachMonthAndEventList(_ month: CalendarMonth) -> (
-        MonthSceneInteractor?, DayEventListSceneInteractor?
+        (any MonthSceneInteractor)?, (any DayEventListSceneInteractor)?
     )? {
         guard let current = self.currentScene else { return nil }
         

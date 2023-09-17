@@ -25,7 +25,7 @@ final class MonthViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
-    func bind(_ viewModel: MonthViewModel) {
+    func bind(_ viewModel: any MonthViewModel) {
         guard self.didBind == false else { return }
         self.didBind = true
         

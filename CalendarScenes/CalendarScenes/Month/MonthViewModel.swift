@@ -159,20 +159,20 @@ protocol MonthViewModel: AnyObject, Sendable, MonthSceneInteractor {
 
 final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     
-    private let calendarUsecase: CalendarUsecase
-    private let calendarSettingUsecase: CalendarSettingUsecase
-    private let todoUsecase: TodoEventUsecase
-    private let scheduleEventUsecase: ScheduleEventUsecase
-    private let eventTagUsecase: EventTagUsecase
-    weak var listener: MonthSceneListener?
+    private let calendarUsecase: any CalendarUsecase
+    private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let todoUsecase: any TodoEventUsecase
+    private let scheduleEventUsecase: any ScheduleEventUsecase
+    private let eventTagUsecase: any EventTagUsecase
+    weak var listener: (any MonthSceneListener)?
     
     init(
         initialMonth: CalendarMonth,
-        calendarUsecase: CalendarUsecase,
-        calendarSettingUsecase: CalendarSettingUsecase,
-        todoUsecase: TodoEventUsecase,
-        scheduleEventUsecase: ScheduleEventUsecase,
-        eventTagUsecase: EventTagUsecase
+        calendarUsecase: any CalendarUsecase,
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        todoUsecase: any TodoEventUsecase,
+        scheduleEventUsecase: any ScheduleEventUsecase,
+        eventTagUsecase: any EventTagUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase

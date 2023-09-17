@@ -14,13 +14,13 @@ import CommonPresentation
 
 final class MonthViewController: UIHostingController<MonthContainerView>, MonthScene {
     
-    private let viewModel: MonthViewModel
+    private let viewModel: any MonthViewModel
     private let viewAppearance: ViewAppearance
-    var interactor: MonthSceneInteractor? {
+    var interactor: (any MonthSceneInteractor)? {
         return self.viewModel
     }
     init(
-        viewModel: MonthViewModel,
+        viewModel: any MonthViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel

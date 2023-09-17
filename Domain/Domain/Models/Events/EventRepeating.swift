@@ -77,11 +77,11 @@ public enum EventRepeatingOptions {
 public struct EventRepeating: Equatable {
     
     public let repeatingStartTime: TimeInterval
-    public var repeatOption: EventRepeatingOption
+    public var repeatOption: any EventRepeatingOption
     public var repeatingEndTime: TimeInterval?
 
     public init(repeatingStartTime: TimeInterval,
-                repeatOption: EventRepeatingOption) {
+                repeatOption: any EventRepeatingOption) {
         self.repeatingStartTime = repeatingStartTime
         self.repeatOption = repeatOption
     }

@@ -12,16 +12,16 @@ import Domain
 
 public protocol CalendarUsecaseFactory {
     
-    func makeCalendarUsecase() -> CalendarUsecase
-    func makeCalendarSettingUsecase() -> CalendarSettingUsecase
-    func makeHolidayUsecase() -> HolidayUsecase
+    func makeCalendarUsecase() -> any CalendarUsecase
+    func makeCalendarSettingUsecase() -> any CalendarSettingUsecase
+    func makeHolidayUsecase() -> any HolidayUsecase
 }
 
 public protocol EventUsecaseFactory {
  
-    func makeTodoEventUsecase() -> TodoEventUsecase
-    func makeScheduleEventUsecase() -> ScheduleEventUsecase
-    func makeEventTagUsecase() -> EventTagUsecase
+    func makeTodoEventUsecase() -> any TodoEventUsecase
+    func makeScheduleEventUsecase() -> any ScheduleEventUsecase
+    func makeEventTagUsecase() -> any EventTagUsecase
 }
 
 public protocol UsecaseFactory: CalendarUsecaseFactory, EventUsecaseFactory { }

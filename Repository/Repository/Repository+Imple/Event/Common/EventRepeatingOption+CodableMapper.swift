@@ -21,8 +21,8 @@ struct EventRepeatingOptionCodableMapper: Codable {
         case weekOrdinals
     }
     
-    let option: EventRepeatingOption
-    init(option: EventRepeatingOption) {
+    let option: any EventRepeatingOption
+    init(option: any EventRepeatingOption) {
         self.option = option
     }
     

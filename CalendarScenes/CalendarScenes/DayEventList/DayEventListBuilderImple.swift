@@ -16,11 +16,11 @@ import CommonPresentation
 
 final class DayEventListSceneBuilerImple {
 
-    private let usecaseFactory: UsecaseFactory
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     
     init(
-        usecaseFactory: UsecaseFactory,
+        usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
         self.usecaseFactory = usecaseFactory

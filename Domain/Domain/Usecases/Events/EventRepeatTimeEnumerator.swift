@@ -12,10 +12,10 @@ import Optics
 public final class EventRepeatTimeEnumerator: Sendable {
     
     private let calendar: Calendar
-    private let option: EventRepeatingOption
+    private let option: any EventRepeatingOption
     private let igonreTimeKeys: Set<String>
     
-    public init?(_ option: EventRepeatingOption, without timesKey: Set<String> = []) {
+    public init?(_ option: any EventRepeatingOption, without timesKey: Set<String> = []) {
         self.option = option
         self.igonreTimeKeys = timesKey
         
