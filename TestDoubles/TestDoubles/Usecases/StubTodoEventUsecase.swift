@@ -55,6 +55,7 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         return DoneTodoEvent(TodoEvent(uuid: eventId, name: "some"))
     }
     
+    
     open func refreshCurentTodoEvents() {
         
     }
