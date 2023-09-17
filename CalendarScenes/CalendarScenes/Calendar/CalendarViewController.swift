@@ -15,7 +15,8 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
     private let viewModel: any CalendarViewModel
     private let viewAppearance: ViewAppearance
     
-    nonisolated var interactor: (any CalendarSceneInteractor)? { self.viewModel }
+    @MainActor
+    var interactor: (any CalendarSceneInteractor)? { self.viewModel }
     
     init(
         viewModel: any CalendarViewModel,

@@ -21,7 +21,8 @@ final class DayEventListViewController: UIHostingController<DayEventListContaine
     private let viewModel: any DayEventListViewModel
     private let viewAppearance: ViewAppearance
     
-    nonisolated var interactor: (any DayEventListSceneInteractor)? { self.viewModel }
+    @MainActor
+    var interactor: (any DayEventListSceneInteractor)? { self.viewModel }
     
     private var cancellables: Set<AnyCancellable> = []
     
