@@ -311,7 +311,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu11 gnu++20";
-				OTHER_SWIFT_FLAGS = "-enable-upcoming-feature ExistentialAny -enable-upcoming-feature ImplicitOpenExistentials";
+				OTHER_SWIFT_FLAGS = "-enable-upcoming-feature ExistentialAny -enable-upcoming-feature ImplicitOpenExistentials -enable-upcoming-feature ForwardTrailingClosures";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.Scenes;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -345,7 +345,7 @@
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGES = "objective-c objective-c++";
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu11 gnu++20";
-				OTHER_SWIFT_FLAGS = "-enable-upcoming-feature ExistentialAny -enable-upcoming-feature ImplicitOpenExistentials";
+				OTHER_SWIFT_FLAGS = "-enable-upcoming-feature ExistentialAny -enable-upcoming-feature ImplicitOpenExistentials -enable-upcoming-feature ForwardTrailingClosures";
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.Scenes;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
