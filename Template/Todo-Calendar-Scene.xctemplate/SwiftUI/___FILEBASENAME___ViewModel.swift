@@ -10,7 +10,7 @@ import Scenes
 
 // MARK: - ___VARIABLE_sceneName:identifier___ViewModel
 
-protocol ___VARIABLE_sceneName___ViewModel: AnyObject, Sendable {
+protocol ___VARIABLE_sceneName___ViewModel: AnyObject, Sendable, ___VARIABLE_sceneName___SceneInteractor {
 
     // interactor
     
@@ -22,7 +22,7 @@ protocol ___VARIABLE_sceneName___ViewModel: AnyObject, Sendable {
 
 final class ___VARIABLE_sceneName___ViewModelImple: ___VARIABLE_sceneName___ViewModel, @unchecked Sendable {
     
-    var router: ___VARIABLE_sceneName___Routing?
+    var router: (any ___VARIABLE_sceneName___Routing)?
     
     init() {
         
