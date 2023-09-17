@@ -38,6 +38,7 @@ final class CalendarPaperSceneBuilerImple {
 
 extension CalendarPaperSceneBuilerImple: CalendarPaperSceneBuiler {
     
+    @MainActor
     func makeCalendarPaperScene(_ month: CalendarMonth) -> any CalendarPaperScene {
         
         let viewModel = CalendarPaperViewModelImple(month: month)

@@ -26,6 +26,7 @@ public struct CalendarSceneBuilderImple {
 
 extension CalendarSceneBuilderImple: CalendarSceneBuilder {
     
+    @MainActor
     public func makeCalendarScene(
         listener: (any CalendarSceneListener)?
     ) -> any CalendarScene {

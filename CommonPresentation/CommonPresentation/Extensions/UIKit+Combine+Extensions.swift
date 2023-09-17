@@ -11,6 +11,7 @@ import Combine
 
 extension UIView {
     
+    @MainActor
     public func addTapGestureRecognizerPublisher(
         _ count: Int = 1,
         _ throttleMilliseconds: Int = 200,

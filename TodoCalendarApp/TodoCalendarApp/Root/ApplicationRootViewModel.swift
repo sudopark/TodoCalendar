@@ -8,7 +8,7 @@
 import Foundation
 import Domain
 
-final class ApplicationRootViewModelImple {
+final class ApplicationRootViewModelImple: @unchecked Sendable {
  
     private let applicationUsecase: any ApplicationRootUsecase
     var router: ApplicationRootRouter?

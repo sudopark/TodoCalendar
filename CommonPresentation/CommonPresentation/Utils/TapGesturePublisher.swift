@@ -27,7 +27,7 @@ struct TapGesturePublisher: Publisher {
     }
 }
 
-final class TapGestureSubscription<S: Subscriber>: Subscription where S.Input == Void, S.Failure == Never {
+final class TapGestureSubscription<S: Subscriber>: Subscription, @unchecked Sendable where S.Input == Void, S.Failure == Never {
     
     private var subscriber: S?
     private let view: UIView
@@ -35,9 +35,12 @@ final class TapGestureSubscription<S: Subscriber>: Subscription where S.Input ==
     init(_ subscriber: S, _ view: UIView) {
         self.subscriber = subscriber
         self.view = view
-        self.addGestureRecognizer()
+        Task { @MainActor [weak self] in
+            self?.addGestureRecognizer()
+        }
     }
     
+    @MainActor
     private func addGestureRecognizer() {
         let gesture = UITapGestureRecognizer()
         gesture.addTarget(self, action: #selector(self.handler))

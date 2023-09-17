@@ -30,5 +30,6 @@ public protocol MainScene: Scene where Interactor == any MainSceneInteractor
 
 public protocol MainSceneBuiler: AnyObject {
     
+    @MainActor
     func makeMainScene() -> any MainScene
 }

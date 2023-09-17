@@ -33,7 +33,7 @@ public struct PagingOption {
     public init() {}
 }
 
-public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingResultType> where ResultType.Query == QueryType {
+public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingResultType>: @unchecked Sendable where ResultType.Query == QueryType {
     
     public typealias Loading = @Sendable (QueryType) async throws -> ResultType
     private let option: PagingOption

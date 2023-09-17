@@ -34,6 +34,7 @@ public final class MainSceneBuilerImple {
 
 extension MainSceneBuilerImple: MainSceneBuiler {
     
+    @MainActor
     public func makeMainScene() -> any MainScene {
         
         let viewModel = MainViewModelImple(

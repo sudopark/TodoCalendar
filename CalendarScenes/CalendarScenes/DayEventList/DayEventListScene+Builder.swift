@@ -35,5 +35,6 @@ protocol DayEventListScene: Scene where Interactor == any DayEventListSceneInter
 
 protocol DayEventListSceneBuiler: AnyObject {
     
+    @MainActor
     func makeDayEventListScene() -> any DayEventListScene
 }

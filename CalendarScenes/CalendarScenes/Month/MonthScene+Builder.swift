@@ -60,5 +60,6 @@ protocol MonthScene: Scene where Interactor == any MonthSceneInteractor {
 
 protocol MonthSceneBuilder: AnyObject {
     
+    @MainActor
     func makeMonthScene(_ month: CalendarMonth, listener: (any MonthSceneListener)?) -> any MonthScene
 }

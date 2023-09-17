@@ -12,7 +12,7 @@ import Optics
 
 // MARK: - Event time
 
-public enum EventTime: Comparable {
+public enum EventTime: Comparable, Sendable {
     
     case at(TimeInterval)
     case period(Range<TimeInterval>)
