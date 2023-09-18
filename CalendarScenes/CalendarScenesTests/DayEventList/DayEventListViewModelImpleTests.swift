@@ -121,7 +121,7 @@ extension DayEventListViewModelImpleTests {
         
         // then
         XCTAssertEqual(cellViewModel?.name, "current todo")
-        XCTAssertEqual(cellViewModel?.periodText, .anyTime)
+        XCTAssertEqual(cellViewModel?.periodText, .singleText("Todo".localized()))
         XCTAssertEqual(cellViewModel?.periodDescription, nil)
     }
     
@@ -134,7 +134,7 @@ extension DayEventListViewModelImpleTests {
         
         // then
         XCTAssertEqual(cellViewModel.name, "삼일절")
-        XCTAssertEqual(cellViewModel.periodText, .allDay)
+        XCTAssertEqual(cellViewModel.periodText, .singleText("Allday".localized()))
         XCTAssertEqual(cellViewModel.periodDescription, nil)
     }
     
@@ -176,7 +176,28 @@ extension DayEventListViewModelImpleTests {
         return range.lowerBound+100..<range.upperBound-100
     }
     
-    func testCellViewModel_makeFromEventWithTime() {
+    func testCellViewModel_makeFromTodoEventWithTime() {
+        // given
+        func parameterizeTest(
+            _ range: Range<TimeInterval>?,
+            _ expectPeriodText: EventPeriodText
+        ) {
+            let time = range.map { EventTime.period($0) }
+            let event = TodoEvent(uuid: "todo", name: "dummy") |> \.time .~ time
+            
+            let cellViewModel = TodoEventCellViewModel(event, in: self.todayRange, TimeZone(abbreviation: "KST")!)
+            
+            XCTAssertEqual(cellViewModel?.periodText, expectPeriodText)
+        }
+        // when + then
+        parameterizeTest(nil, .singleText("Todo".localized()))
+        parameterizeTest(self.rangeFromPastToToday, .doubleText("Todo".localized(), "23:58"))
+        parameterizeTest(self.rangeFromTodayToFuture, .doubleText("Todo".localized(), "11 (Mon)"))
+        parameterizeTest(self.rangeFromPastToFuture, .doubleText("Todo".localized(), "Allday".localized()))
+        parameterizeTest(self.rangeFromTodayToToday, .doubleText("Todo".localized(), "23:58"))
+    }
+    
+    func testCellViewModel_makeFromScheduleEventWithTime() {
         // given
         func parameterizeTest(
             _ range: Range<TimeInterval>,
@@ -190,10 +211,10 @@ extension DayEventListViewModelImpleTests {
             XCTAssertEqual(cellViewModel?.periodText, expectPeriodText)
         }
         // when + then
-        parameterizeTest(self.rangeFromPastToToday, .fromPastToToday("9 (Sat)", "23:58"))
-        parameterizeTest(self.rangeFromTodayToFuture, .fromTodayToFuture("0:01", "11 (Mon)"))
-        parameterizeTest(self.rangeFromPastToFuture, .allDay)
-        parameterizeTest(self.rangeFromTodayToToday, .inToday("0:01", "23:58"))
+        parameterizeTest(self.rangeFromPastToToday, .doubleText("9 (Sat)", "23:58"))
+        parameterizeTest(self.rangeFromTodayToFuture, .doubleText("0:01", "11 (Mon)"))
+        parameterizeTest(self.rangeFromPastToFuture, .singleText("Allday".localized()))
+        parameterizeTest(self.rangeFromTodayToToday, .doubleText("0:01", "23:58"))
     }
     
     func testCellViewModel_whenEventTimeIsAt_showTimeText() {
@@ -206,7 +227,7 @@ extension DayEventListViewModelImpleTests {
         let cellViewModel = ScheduleEventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: timeZone)
         
         // then
-        XCTAssertEqual(cellViewModel?.periodText, .atTime("10:30"))
+        XCTAssertEqual(cellViewModel?.periodText, .singleText("10:30"))
     }
     
     private var pdt9_10: Range<TimeInterval> {
@@ -240,10 +261,10 @@ extension DayEventListViewModelImpleTests {
             XCTAssertEqual(cellViewModel?.periodText, expectedPeriodText)
         }
         // when + then
-        parameterizeTest(self.pdt9_9to9_10, .allDay)
-        parameterizeTest(self.pdt9_9to9_11, .allDay)
-        parameterizeTest(self.pdt9_10, .allDay)
-        parameterizeTest(self.pdt9_10to9_11, .allDay)
+        parameterizeTest(self.pdt9_9to9_10, .singleText("Allday".localized()))
+        parameterizeTest(self.pdt9_9to9_11, .singleText("Allday".localized()))
+        parameterizeTest(self.pdt9_10, .singleText("Allday".localized()))
+        parameterizeTest(self.pdt9_10to9_11, .singleText("Allday".localized()))
     }
     
     func testCellViewModel_makeEventWithTimeHasPeriod_setPeriodDesription() {

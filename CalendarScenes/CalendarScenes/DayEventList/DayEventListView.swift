@@ -222,18 +222,10 @@ private struct EventListCellView: View {
             }
         }
         switch cellViewModel.periodText {
-        case .anyTime:
-            return singleText("Always".localized()).asAnyView()
-        case .allDay:
-            return singleText("Allday".localized()).asAnyView()
-        case .atTime(let time):
-            return singleText(time).asAnyView()
-        case .inToday(let start, let end):
-            return doubleText(start, end).asAnyView()
-        case .fromTodayToFuture(let start, let end):
-            return doubleText(start, end).asAnyView()
-        case .fromPastToToday(let start, let end):
-            return doubleText(start, end).asAnyView()
+        case .singleText(let text):
+            return singleText(text).asAnyView()
+        case .doubleText(let topText, let bottomText):
+            return doubleText(topText, bottomText).asAnyView()
         default:
             return EmptyView().asAnyView()
         }
@@ -390,7 +382,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                                 
                                 // 추가하여 성공했을때 가정
                                 let newCell = TodoEventCellViewModel("new-current-todo", name: name)
-                                    |> \.periodText .~ .anyTime
+                                    |> \.periodText .~ .singleText("Todo".localized())
                                     |> \.colorHex .~ pending.colorHex
                                 state.cellViewModels[index] = newCell
                             }
@@ -407,47 +399,47 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         let currentTodoCells: [TodoEventCellViewModel] = [
             .init("current-todo1", name: "current todo 1")
                 |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .anyTime,
+                |> \.periodText .~ .singleText("Todo".localized()),
             .init("current-todo2", name: "current todo 2")
                 |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .anyTime
+                |> \.periodText .~ .singleText("Todo".localized())
         ]
         let todoCells: [TodoEventCellViewModel] = [
 //            .init(eventId: .todo("todo1"), name: "todo with anyTime")
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .anyTime,
-//            .init(eventId: .todo("todo2"), name: "todo with all day")
-//                |> \.colorHex .~ "#0000ff"
-//                |> \.periodText .~ .allDay,
-//            .init(eventId: .todo("todo3"), name: "todo with at time")
-//                |> \.colorHex .~ "#0000ff"
-//                |> \.periodText .~ .atTime("10:30"),
+            .init("todo2", name: "todo with all day")
+                |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .doubleText("Todo".localized(), "Allday"),
+            .init("todo3", name: "todo with at time")
+                |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .doubleText("Todo".localized(), "10:30"),
 //            .init(eventId: .todo("todo4"), name: "todo with in today")
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .inToday("9:30", "20:30")
 //                |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
             .init("todo5", name: "todo with today to future")
                 |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .fromTodayToFuture("09:30", "9 (Sat)")
+                |> \.periodText .~ .doubleText("Todo".localized(), "9 (Sat)")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
             .init("todo6", name: "todo with past to today")
                 |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .fromPastToToday("9 (Sat)", "20:00")
+                |> \.periodText .~ .doubleText("Todo".localized(), "20:00")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
         let scheduleCells: [ScheduleEventCellViewModel] = [
             .init("sc1", name: "schdule with at time")
                 |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .atTime("8:30"),
+                |> \.periodText .~ .singleText("8:30"),
             .init("sc2", name: "schdule with all day")
-            |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .allDay,
+                |> \.colorHex .~ "#0000ff"
+                |> \.periodText .~ .singleText("Allday".localized()),
 //            .init(eventId: .schedule("sc3", turn: 1), name: "schdule with at time")
 //            |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .atTime("10:30"),
             .init("sc4", name: "schdule with in today")
                 |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .inToday("9:30", "20:30")
+                |> \.periodText .~ .doubleText("9:30", "20:30")
                 |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
 //            .init(eventId: .schedule("sc5", turn: 1), name: "schdule with today to future")
 //            |> \.colorHex .~ "#0000ff"
@@ -455,7 +447,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
 //                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
             .init("sc6", name: "schdule with past to today")
                 |> \.colorHex .~ "#0000ff"
-                |> \.periodText .~ .fromPastToToday("9 (Sat)", "20:00")
+                |> \.periodText .~ .doubleText("9 (Sat)", "20:00")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
         

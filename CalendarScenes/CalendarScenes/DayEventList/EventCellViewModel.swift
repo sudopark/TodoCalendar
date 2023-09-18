@@ -13,42 +13,71 @@ import Optics
 // MARK: - EventPeriodText
 
 enum EventPeriodText: Equatable {
-    case anyTime
-    case allDay
-    case atTime(_ timeText: String)
-    case inToday(_ startTime: String, _ endTime: String)
-    case fromTodayToFuture(_ startTime: String, _ endDay: String)
-    case fromPastToToday(_ startDay: String, _ endTime: String)
+    
+    case singleText(_ text: String)
+    case doubleText(_ topText: String, _ bottomText: String)
+    
+    init?(_ todo: TodoEvent, in todayRange: Range<TimeInterval>, timeZone: TimeZone) {
+        guard let time = todo.time
+        else {
+            self = .singleText("Todo".localized())
+            return
+        }
+        
+        let (isAllTodayTimeContains, _, endTimeInToday) = todayRange.checkTodayRangeBound(time, timeZone: timeZone)
+        
+        switch (time, endTimeInToday, isAllTodayTimeContains) {
+        case (_, _, true):
+            self = .doubleText("Todo".localized(), "Allday".localized())
+            
+        case (.at(let t), true, _):
+            self = .doubleText("Todo".localized(), t.timeText(timeZone))
+            
+        case (_, true, _):
+            self = .doubleText(
+                "Todo".localized(),
+                time.upperBoundWithFixed.timeText(timeZone)
+            )
+            
+        case (_, false, _):
+            self = .doubleText(
+                "Todo".localized(),
+                time.upperBoundWithFixed.dayText(timeZone)
+            )
+        }
+    }
     
     init?(
-        _ eventTime: EventTime,
+        schedule eventTime: EventTime,
         in todayRange: Range<TimeInterval>,
         timeZone: TimeZone
     ) {
-        let eventTimeRange = eventTime.rangeWithShifttingifNeed(on: timeZone)
-        let startTimeInToday = todayRange ~= eventTimeRange.lowerBound
-        let endTimeInToday = todayRange ~= eventTimeRange.upperBound
-        let isAllDay = eventTimeRange.lowerBound <= todayRange.lowerBound && todayRange.upperBound <= eventTimeRange.upperBound
+        let (isAllDay, startTimeInToday, endTimeInToday) = todayRange.checkTodayRangeBound(eventTime, timeZone: timeZone)
         switch (eventTime, startTimeInToday, endTimeInToday, isAllDay) {
         case (_, _, _, true):
-            self = .allDay
+            self = .singleText("Allday".localized())
+            
         case (.at(let time), true, true, _):
-            self = .atTime(time.timeText(timeZone))
+            self = .singleText(time.timeText(timeZone))
+            
         case (_, true, true, _):
-            self = .inToday(
+            self = .doubleText(
                 eventTime.lowerBoundWithFixed.timeText(timeZone),
                 eventTime.upperBoundWithFixed.timeText(timeZone)
             )
+            
         case (_, true, false, _):
-            self = .fromTodayToFuture(
+            self = .doubleText(
                 eventTime.lowerBoundWithFixed.timeText(timeZone),
                 eventTime.upperBoundWithFixed.dayText(timeZone)
             )
+            
         case (_, false, true, _):
-            self = .fromPastToToday(
+            self = .doubleText(
                 eventTime.lowerBoundWithFixed.dayText(timeZone),
                 eventTime.upperBoundWithFixed.timeText(timeZone)
             )
+            
         default:
             return nil
         }
@@ -56,12 +85,8 @@ enum EventPeriodText: Equatable {
     
     fileprivate var customCompareKey: String {
         switch self {
-        case .anyTime: return "anyTime"
-        case .allDay: return "allDay"
-        case .atTime(let time): return "atTime-\(time)"
-        case .inToday(let start, let end): return "inToday-\(start)~\(end)"
-        case .fromTodayToFuture(let start, let end): return "fromTodayToFuture\(start)~\(end)"
-        case .fromPastToToday(let start, let end): return "fromPastToToday-\(start)~\(end)"
+        case .singleText(let text): return "single-\(text)"
+        case .doubleText(let top, let bottom): return "double-\(top)+\(bottom)"
         }
     }
 }
@@ -111,15 +136,8 @@ struct TodoEventCellViewModel: EventCellViewModel {
         self.eventIdentifier = todo.uuid
         self.tagId = todo.eventTagId
         self.name = todo.name
-        
-        guard let time = todo.time else {
-            self.periodText = .anyTime
-            return
-        }
-        guard let periodText = EventPeriodText(time, in: todayRange, timeZone: timeZone)
-        else { return nil }
-        self.periodText = periodText
-        self.periodDescription = time.durationText(timeZone)
+        self.periodText = EventPeriodText(todo, in: todayRange, timeZone: timeZone)
+        self.periodDescription = todo.time?.durationText(timeZone)
     }
 }
 
@@ -128,7 +146,7 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     let eventIdentifier: String
     var tagId: String?
     let name: String
-    var periodText: EventPeriodText? = .anyTime
+    var periodText: EventPeriodText? = .singleText("Todo".localized())
     var periodDescription: String?
     var colorHex: String?
     var customCompareKey: String {
@@ -167,7 +185,7 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
     
     init?(_ schedule: ScheduleEvent, turn: Int?, in todayRange: Range<TimeInterval>, timeZone: TimeZone) {
         guard let time = schedule.repeatingTimes.first(where: { $0.turn == turn }),
-              let periodText = EventPeriodText(time.time, in: todayRange, timeZone: timeZone)
+              let periodText = EventPeriodText(schedule: time.time, in: todayRange, timeZone: timeZone)
         else { return nil }
         self.eventIdentifier = schedule.uuid
         self.turn = turn
@@ -194,7 +212,7 @@ struct HolidayEventCellViewModel: EventCellViewModel {
         self.eventIdentifier = [holiday.dateString, holiday.name].joined(separator: "_")
         // TODO: set holiday tag
         self.name = holiday.localName
-        self.periodText = .allDay
+        self.periodText = .singleText("Allday".localized())
     }
 }
 
@@ -267,3 +285,20 @@ private extension Range where Bound == TimeInterval {
     }
 }
 
+
+private extension Range where Bound == TimeInterval {
+    
+    func checkTodayRangeBound(_ time: EventTime, timeZone: TimeZone) -> (
+        isAllTodayTimeContains: Bool,
+        starttimeInToday: Bool,
+        endTimeInToday: Bool
+    ) {
+        let eventTimeRange = time.rangeWithShifttingifNeed(on: timeZone)
+        let startTimeInToday = self ~= eventTimeRange.lowerBound
+        let endTimeInToday = self ~= eventTimeRange.upperBound
+        let isAllDay = eventTimeRange.lowerBound <= self.lowerBound
+            && self.upperBound <= eventTimeRange.upperBound
+        
+        return (isAllDay, startTimeInToday, endTimeInToday)
+    }
+}
