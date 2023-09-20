@@ -21,5 +21,5 @@ public protocol ScheduleEventRepository {
         asNew params: ScheduleMakeParams
     ) async throws -> ExcludeRepeatingEventResult
     
-    func loadScheduleEvents(in range: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Error>
+    func loadScheduleEvents(in range: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], any Error>
 }

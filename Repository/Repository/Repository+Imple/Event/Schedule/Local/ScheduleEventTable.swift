@@ -86,7 +86,7 @@ struct ScheduleEventTable: Table {
     typealias EntityType = Entity
     static var tableName: String { "Schedules" }
     
-    static func scalar(_ entity: EntityType, for column: Columns) -> ScalarType? {
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
         switch column {
         case .uuid: return entity.uuid
         case .name: return entity.name

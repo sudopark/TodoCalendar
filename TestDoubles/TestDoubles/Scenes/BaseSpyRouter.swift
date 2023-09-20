@@ -13,9 +13,9 @@ open class BaseSpyRouter: Routing {
     
     public init() { }
     
-    public var didShowError: Error?
-    public var didShowErrorCallback: ((Error) -> Void)?
-    open func showError(_ error: Error) {
+    public var didShowError: (any Error)?
+    public var didShowErrorCallback: ((any Error) -> Void)?
+    open func showError(_ error: any Error) {
         self.didShowError = error
         self.didShowErrorCallback?(error)
     }

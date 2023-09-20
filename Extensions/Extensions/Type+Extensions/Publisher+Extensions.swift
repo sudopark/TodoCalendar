@@ -12,7 +12,7 @@ import Combine
 extension Publisher where Failure == Never {
     
     public func mapNever() -> Publishers.MapError<Self, Error> {
-        return self.mapError { _ -> Error in }
+        return self.mapError { _ -> (any Error) in }
     }
     
     public func receiveOnIfPossible<S: Scheduler>(

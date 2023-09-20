@@ -26,7 +26,7 @@ struct EventRepeatingOptionCodableMapper: Codable {
         self.option = option
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let optionType: String = try container.decode(String.self, forKey: .optionType)
         let timeZoneAbbre = try? container.decode(String.self, forKey: .timeZone)
@@ -75,7 +75,7 @@ struct EventRepeatingOptionCodableMapper: Codable {
         }
     }
     
-    func encode(to encoder: Encoder) throws {
+    func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self.option {
         case let everyDay as EventRepeatingOptions.EveryDay:
@@ -119,7 +119,7 @@ private struct WeekOrdinalMapper: Codable {
         self.ordinal = ordinal
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let isLast: Bool = try container.decode(Bool.self, forKey: .isLast)
         if isLast {
@@ -129,7 +129,7 @@ private struct WeekOrdinalMapper: Codable {
         }
     }
     
-    func encode(to encoder: Encoder) throws {
+    func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self.ordinal {
         case .last:
@@ -154,7 +154,7 @@ private struct EveryMonthDateSelectorMapper: Codable {
         self.selector = selector
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         if let days = try? container.decode([Int].self, forKey: .days) {
             self = .init(selector: .days(days))
@@ -169,7 +169,7 @@ private struct EveryMonthDateSelectorMapper: Codable {
         }
     }
     
-    func encode(to encoder: Encoder) throws {
+    func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self.selector {
         case .days(let days):

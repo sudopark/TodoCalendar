@@ -100,7 +100,7 @@ struct EventTimeTable: Table {
     typealias ColumnType = Columns
     typealias EntityType = Entity
     
-    static func scalar(_ entity: Entity, for column: Columns) -> ScalarType? {
+    static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
         switch column {
         case .eventId: return entity.eventId
         case .timeType: return entity.eventTime?.typeText

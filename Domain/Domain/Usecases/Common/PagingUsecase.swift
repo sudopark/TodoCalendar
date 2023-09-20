@@ -52,7 +52,7 @@ public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingR
         let query = CurrentValueSubject<QueryType?, Never>(nil)
         let pagingResult = CurrentValueSubject<ResultType?, Never>(nil)
         let loadingStatus = CurrentValueSubject<LoadingStatus?, Never>(nil)
-        let occurredError = PassthroughSubject<Error, Never>()
+        let occurredError = PassthroughSubject<any Error, Never>()
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -135,7 +135,7 @@ extension PagingUsecase {
             .eraseToAnyPublisher()
     }
     
-    var occurredError: AnyPublisher<Error, Never> {
+    var occurredError: AnyPublisher<any Error, Never> {
         return self.subject.occurredError
             .eraseToAnyPublisher()
     }

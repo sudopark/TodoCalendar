@@ -20,7 +20,7 @@ public protocol Scene: UIViewController {
 
 public protocol Routing: AnyObject {
     // common routing interface
-    func showError(_ error: Error)
+    func showError(_ error: any Error)
     func showToast(_ message: String)
 }
 
@@ -30,7 +30,7 @@ open class BaseRouterImple: Routing {
     
     public init() { }
     
-    open func showError(_ error: Error) {
+    open func showError(_ error: any Error) {
         // TODO: show error
     }
     

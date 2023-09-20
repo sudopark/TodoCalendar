@@ -51,7 +51,7 @@ extension EventTagLocalRepositoryImple {
 
 extension EventTagLocalRepositoryImple {
     
-    public func loadTags(_ ids: [String]) -> AnyPublisher<[EventTag], Error> {
+    public func loadTags(_ ids: [String]) -> AnyPublisher<[EventTag], any Error> {
         return Publishers.create { [weak self] in
             return try await self?.localStorage.loadTags(in: ids)
         }

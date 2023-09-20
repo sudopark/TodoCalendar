@@ -65,7 +65,7 @@ extension HolidayRepositoryImple {
             self.country = country
         }
         
-        init(from decoder: Decoder) throws {
+        init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.country = .init(
                 code: try container.decode(String.self, forKey: .code),
@@ -73,7 +73,7 @@ extension HolidayRepositoryImple {
             )
         }
         
-        func encode(to encoder: Encoder) throws {
+        func encode(to encoder: any Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(self.country.code, forKey: .code)
             try container.encode(self.country.name, forKey: .name)
@@ -178,7 +178,7 @@ extension HolidayRepositoryImple {
         typealias EntityType = Entity
         static var tableName: String { "Holidays" }
         
-        static func scalar(_ entity: Entity, for column: Columns) -> ScalarType? {
+        static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
             switch column {
             case .countryCode: return entity.countryCode
             case .year: return entity.year
@@ -202,7 +202,7 @@ extension HolidayRepositoryImple {
             self.holiday = holiday
         }
         
-        init(from decoder: Decoder) throws {
+        init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.init(holiday: .init(
                 dateString: try container.decode(String.self, forKey: .date),

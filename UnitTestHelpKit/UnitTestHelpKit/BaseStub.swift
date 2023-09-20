@@ -12,7 +12,7 @@ public protocol BaseStub { }
 
 extension BaseStub {
     
-    public func checkShouldFail(_ flag: Bool, customError: Error? = nil) throws {
+    public func checkShouldFail(_ flag: Bool, customError: (any Error)? = nil) throws {
         guard flag else { return }
         throw customError ?? TestError()
     }

@@ -87,14 +87,14 @@ extension TodoLocalRepositoryImple {
 
 extension TodoLocalRepositoryImple {
     
-    public func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], Error> {
+    public func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error> {
         return Publishers.create { [weak self] in
             return try await self?.localStorage.loadCurrentTodoEvents()
         }
         .eraseToAnyPublisher()
     }
     
-    public func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Error> {
+    public func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], any Error> {
         return Publishers.create { [weak self] in
             return try await self?.localStorage.loadTodoEvents(in: range)
         }

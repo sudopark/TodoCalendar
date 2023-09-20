@@ -74,7 +74,7 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
             return ScheduleEvent(uuid: "id:\($0)", name: "name:\($0)", time: .at(time))
         }
     }
-    open func loadScheduleEvents(in range: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Error> {
+    open func loadScheduleEvents(in range: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], any Error> {
         guard self.shouldFailLoad == false
         else {
             return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()

@@ -35,7 +35,7 @@ struct DoneTodoEventTable: Table {
     typealias EntityType = DoneTodoEvent
     static var tableName: String { "DoneTodos" }
     
-    static func scalar(_ entity: EntityType, for column: Colums) -> ScalarType? {
+    static func scalar(_ entity: EntityType, for column: Colums) -> (any ScalarType)? {
         switch column {
         case .uuid: return entity.uuid
         case .originEventId: return entity.originEventId

@@ -30,7 +30,7 @@ struct EventTagTable: Table {
     typealias EntityType = EventTag
     static var tableName: String { "EventTags" }
     
-    static func scalar(_ entity: EntityType, for column: Columns) -> ScalarType? {
+    static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
         switch column {
         case .uuid: return entity.uuid
         case .name: return entity.name

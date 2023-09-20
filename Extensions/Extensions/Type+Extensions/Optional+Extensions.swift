@@ -10,7 +10,7 @@ import Foundation
 
 extension Optional {
     
-    public func unwrap(_ customError: (() -> Error)? = nil) throws -> Wrapped {
+    public func unwrap(_ customError: (() -> any Error)? = nil) throws -> Wrapped {
         switch self {
         case .none: throw customError?() ?? RuntimeError("unwrap optional value error: \(String(describing: self))")
         case .some(let value): return value

@@ -64,7 +64,7 @@ extension ScheduleEventLocalRepositoryImple {
     
     public func loadScheduleEvents(
         in range: Range<TimeInterval>
-    ) -> AnyPublisher<[ScheduleEvent], Error> {
+    ) -> AnyPublisher<[ScheduleEvent], any Error> {
         return Publishers.create { [weak self] in
             return try await self?.localStorage.loadScheduleEvents(in: range)
         }

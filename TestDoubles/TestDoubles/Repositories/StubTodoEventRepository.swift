@@ -70,7 +70,7 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub {
     }
     
     public var shouldFailLoadCurrentTodoEvents: Bool = false
-    open func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], Error> {
+    open func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error> {
         guard self.shouldFailLoadCurrentTodoEvents == false else {
             return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
         }
@@ -79,7 +79,7 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub {
     }
     
     public var shouldFailLoadTodosInRange: Bool = false
-    open func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Error> {
+    open func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], any Error> {
         guard self.shouldFailLoadTodosInRange == false
         else {
             return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()

@@ -12,7 +12,6 @@ import CommonPresentation
 import CalendarScenes
 
 
-
 // MARK: - ApplicationRootRouter
 
 protocol ApplicationRouting: Routing {
@@ -30,7 +29,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         self.nonLoginUsecaseFactory = nonLoginUsecaseFactory
     }
     
-    func showError(_ error: Error) {
+    func showError(_ error: any Error) {
         // TODO:
     }
     
