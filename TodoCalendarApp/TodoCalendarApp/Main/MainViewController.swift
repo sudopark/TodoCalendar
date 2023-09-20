@@ -12,6 +12,7 @@ import Combine
 import CombineCocoa
 import Scenes
 import CommonPresentation
+import Extensions
 
 
 // MARK: - MainViewController
@@ -110,6 +111,14 @@ extension MainViewController {
                 self?.viewModel.moveToSetting()
             }
             .store(in: &self.cancellables)
+        
+        self.headerView.logButton.addTapGestureRecognizerPublisher()
+            .sink(receiveValue: { [weak self] in
+                let consoleBuilder = LoggerConsoleBuilder()
+                let consoleVC = consoleBuilder.makeConsoleView()
+                self?.present(consoleVC, animated: true)
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -155,6 +164,7 @@ private final class HeaderView: UIView {
     private let buttonsStackView = UIStackView()
     let searchButton = UIButton()
     let settingButton = UIButton()
+    let logButton = UIButton()
     
     func setupLayout() {
         
@@ -199,6 +209,14 @@ private final class HeaderView: UIView {
             $0.leadingAnchor.constraint(greaterThanOrEqualTo: returnTodayView.trailingAnchor, constant: 4)
         }
         buttonsStackView.spacing = 12
+        
+        #if DEBUG
+        buttonsStackView.addArrangedSubview(logButton)
+        logButton.setTitle("Log", for: .normal)
+        logButton.setTitleColor(.red, for: .normal)
+        logButton.titleLabel?.font = .systemFont(ofSize: 12, weight: .bold)
+        #endif
+        
         buttonsStackView.addArrangedSubview(searchButton)
         searchButton.autoLayout.active {
             $0.widthAnchor.constraint(equalToConstant: 25)

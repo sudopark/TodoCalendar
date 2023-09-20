@@ -20,7 +20,9 @@
 		F66FDEF12A9B4D2A005A8227 /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FDEF02A9B4D2A005A8227 /* String+Extensions.swift */; };
 		F67907EB2A4DF43A000CF11B /* Task+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907EA2A4DF43A000CF11B /* Task+Extensions.swift */; };
 		F69904B82A482C6500F44834 /* Optional+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69904B72A482C6500F44834 /* Optional+Extensions.swift */; };
+		F6B35B332AB8AB310074BD2A /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B35B322AB8AB310074BD2A /* Logger.swift */; };
 		F6D1ADC92A49F1420091556D /* Int+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D1ADC82A49F1420091556D /* Int+Extensions.swift */; };
+		F6D8E8002ABB503300A16311 /* LoggerConsoleBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D8E7FF2ABB503300A16311 /* LoggerConsoleBuilder.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,7 +50,9 @@
 		F66FDEF02A9B4D2A005A8227 /* String+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
 		F67907EA2A4DF43A000CF11B /* Task+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+Extensions.swift"; sourceTree = "<group>"; };
 		F69904B72A482C6500F44834 /* Optional+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+Extensions.swift"; sourceTree = "<group>"; };
+		F6B35B322AB8AB310074BD2A /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		F6D1ADC82A49F1420091556D /* Int+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Int+Extensions.swift"; sourceTree = "<group>"; };
+		F6D8E7FF2ABB503300A16311 /* LoggerConsoleBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoggerConsoleBuilder.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,6 +97,7 @@
 		F63C9BF229C6B03000CC663A /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				F6B35B312AB8AB230074BD2A /* Logging */,
 				F65B08F529D015FB000EE650 /* Type+Extensions */,
 				F63C9BF329C6B03000CC663A /* Extensions.h */,
 				F60CBB5729CEA85000F03310 /* RuntimeError.swift */,
@@ -130,6 +135,15 @@
 				F66FDEF02A9B4D2A005A8227 /* String+Extensions.swift */,
 			);
 			path = "Type+Extensions";
+			sourceTree = "<group>";
+		};
+		F6B35B312AB8AB230074BD2A /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				F6B35B322AB8AB310074BD2A /* Logger.swift */,
+				F6D8E7FF2ABB503300A16311 /* LoggerConsoleBuilder.swift */,
+			);
+			path = Logging;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -242,12 +256,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6B35B332AB8AB310074BD2A /* Logger.swift in Sources */,
 				F66FDEF12A9B4D2A005A8227 /* String+Extensions.swift in Sources */,
 				F69904B82A482C6500F44834 /* Optional+Extensions.swift in Sources */,
 				F67907EB2A4DF43A000CF11B /* Task+Extensions.swift in Sources */,
 				F602B30B29E5AB0700F790B5 /* Date+Extensions.swift in Sources */,
 				F62C7D6229EBDEC200AF1BD8 /* Calendar+Extension.swift in Sources */,
 				F65B08F729D01609000EE650 /* Result+Extensions.swift in Sources */,
+				F6D8E8002ABB503300A16311 /* LoggerConsoleBuilder.swift in Sources */,
 				F65B08FB29D01CC6000EE650 /* Publisher+Extensions.swift in Sources */,
 				F6D1ADC92A49F1420091556D /* Int+Extensions.swift in Sources */,
 				F60CBB5829CEA85000F03310 /* RuntimeError.swift in Sources */,

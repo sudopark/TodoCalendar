@@ -20,6 +20,8 @@
 		F63C9C9D29C6B2DC00CC663A /* Writer in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9C29C6B2DC00CC663A /* Writer */; };
 		F63C9CA029C6B31600CC663A /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9F29C6B31600CC663A /* AsyncAlgorithms */; };
 		F66FDEF72A9B5A94005A8227 /* CombineCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = F66FDEF62A9B5A94005A8227 /* CombineCocoa */; };
+		F6B35B2E2AB8A8470074BD2A /* Pulse in Frameworks */ = {isa = PBXBuildFile; productRef = F6B35B2D2AB8A8470074BD2A /* Pulse */; };
+		F6B35B302AB8A8470074BD2A /* PulseUI in Frameworks */ = {isa = PBXBuildFile; productRef = F6B35B2F2AB8A8470074BD2A /* PulseUI */; };
 		F6C58CDF2A111C6A002BA9B7 /* SQLiteService in Frameworks */ = {isa = PBXBuildFile; productRef = F6C58CDE2A111C6A002BA9B7 /* SQLiteService */; };
 		F6CD67332A35A556007E4306 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = F6CD67322A35A556007E4306 /* Alamofire */; };
 /* End PBXBuildFile section */
@@ -46,7 +48,9 @@
 				F63C9C8D29C6B2DC00CC663A /* Either in Frameworks */,
 				F63C9C9929C6B2DC00CC663A /* ValidationNearSemiring in Frameworks */,
 				F63C9CA029C6B31600CC663A /* AsyncAlgorithms in Frameworks */,
+				F6B35B2E2AB8A8470074BD2A /* Pulse in Frameworks */,
 				F66FDEF72A9B5A94005A8227 /* CombineCocoa in Frameworks */,
+				F6B35B302AB8A8470074BD2A /* PulseUI in Frameworks */,
 				F6CD67332A35A556007E4306 /* Alamofire in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -121,6 +125,8 @@
 				F6C58CDE2A111C6A002BA9B7 /* SQLiteService */,
 				F6CD67322A35A556007E4306 /* Alamofire */,
 				F66FDEF62A9B5A94005A8227 /* CombineCocoa */,
+				F6B35B2D2AB8A8470074BD2A /* Pulse */,
+				F6B35B2F2AB8A8470074BD2A /* PulseUI */,
 			);
 			productName = Common3rdParty;
 			productReference = F63C9C3D29C6B0E100CC663A /* Common3rdParty.framework */;
@@ -156,6 +162,7 @@
 				F6C58CDD2A111C6A002BA9B7 /* XCRemoteSwiftPackageReference "SQLiteService" */,
 				F6CD67312A35A556007E4306 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				F66FDEF52A9B5A94005A8227 /* XCRemoteSwiftPackageReference "CombineCocoa" */,
+				F6B35B2C2AB8A8470074BD2A /* XCRemoteSwiftPackageReference "Pulse" */,
 			);
 			productRefGroup = F63C9C3E29C6B0E100CC663A /* Products */;
 			projectDirPath = "";
@@ -419,6 +426,14 @@
 				minimumVersion = 0.4.1;
 			};
 		};
+		F6B35B2C2AB8A8470074BD2A /* XCRemoteSwiftPackageReference "Pulse" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kean/Pulse";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
+			};
+		};
 		F6C58CDD2A111C6A002BA9B7 /* XCRemoteSwiftPackageReference "SQLiteService" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sudopark/SQLiteService.git";
@@ -497,6 +512,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F66FDEF52A9B5A94005A8227 /* XCRemoteSwiftPackageReference "CombineCocoa" */;
 			productName = CombineCocoa;
+		};
+		F6B35B2D2AB8A8470074BD2A /* Pulse */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F6B35B2C2AB8A8470074BD2A /* XCRemoteSwiftPackageReference "Pulse" */;
+			productName = Pulse;
+		};
+		F6B35B2F2AB8A8470074BD2A /* PulseUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F6B35B2C2AB8A8470074BD2A /* XCRemoteSwiftPackageReference "Pulse" */;
+			productName = PulseUI;
 		};
 		F6C58CDE2A111C6A002BA9B7 /* SQLiteService */ = {
 			isa = XCSwiftPackageProductDependency;
