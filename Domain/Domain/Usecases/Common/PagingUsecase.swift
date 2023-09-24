@@ -14,7 +14,7 @@ public protocol PagingQueryType: Sendable {
     
     var isFirst: Bool { get }
     
-    func isSameQuery(with other: Self) -> Bool
+    func shouldResetResult(compareWith other: Self) -> Bool
 }
 
 public protocol PagingResultType: Sendable {
@@ -99,11 +99,11 @@ public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingR
 
 extension PagingUsecase {
     
-    func refresh(_ query: QueryType) {
+    public func refresh(_ query: QueryType) {
         self.subject.query.send(query)
     }
     
-    func loadMore() {
+    public func loadMore() {
         guard let currentPage = self.subject.pagingResult.value,
               let nextQuery = currentPage.nextQuery()
         else { return }
@@ -113,7 +113,7 @@ extension PagingUsecase {
 
 extension PagingUsecase {
     
-    var isRefreshing: AnyPublisher<Bool, Never> {
+    public var isRefreshing: AnyPublisher<Bool, Never> {
         let transform: (LoadingStatus?) -> Bool = { status in
             guard status == .refreshing else { return false }
             return true
@@ -124,7 +124,7 @@ extension PagingUsecase {
             .eraseToAnyPublisher()
     }
     
-    var isLoadingMore: AnyPublisher<Bool, Never> {
+    public var isLoadingMore: AnyPublisher<Bool, Never> {
         let transform: (LoadingStatus?) -> Bool = { status in
             guard status == .loadingMore else { return false }
             return true
@@ -135,23 +135,21 @@ extension PagingUsecase {
             .eraseToAnyPublisher()
     }
     
-    var occurredError: AnyPublisher<any Error, Never> {
+    public var occurredError: AnyPublisher<any Error, Never> {
         return self.subject.occurredError
             .eraseToAnyPublisher()
     }
     
-    var totalResult: AnyPublisher<ResultType?, Never> {
+    public var totalResult: AnyPublisher<ResultType?, Never> {
         
         let accumulatePagingIfNeed: (ResultType?, ResultType?) -> ResultType? = { accumulated, newPage in
             
             switch (accumulated, newPage) {
             case (.none, .none), (_, .none): return .none
             case let (.none, .some(new)): return new
+            case let (.some(previous), .some(new)) where previous.query.shouldResetResult(compareWith: new.query):
+                return new
             case let (.some(previous), .some(new)):
-                guard previous.query.isSameQuery(with: new.query)
-                else {
-                    return new
-                }
                 return previous.append(new)
             }
         }

@@ -14,4 +14,5 @@ public protocol EventTagRepository: Sendable {
     func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag
     
     func loadTags(_ ids: [String]) -> AnyPublisher<[EventTag], any Error>
+    func loadTags(olderThan time: TimeInterval?, size: Int) async throws -> [EventTag]
 }

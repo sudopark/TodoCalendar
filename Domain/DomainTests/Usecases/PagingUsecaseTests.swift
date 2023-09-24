@@ -260,8 +260,8 @@ private extension PagingUsecaseTests {
             return pageNumber == 0
         }
         
-        func isSameQuery(with other: PagingUsecaseTests.DummyQuery) -> Bool {
-            return self.query == other.query
+        func shouldResetResult(compareWith other: PagingUsecaseTests.DummyQuery) -> Bool {
+            return self.query != other.query
         }
     }
     

@@ -22,6 +22,7 @@ class TodoLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable {
     var localStorage: TodoLocalStorage!
     
     override func setUpWithError() throws {
+        self.fileName = "todos"
         try super.setUpWithError()
         self.cancelBag = .init()
         self.localStorage = .init(sqliteService: self.sqliteService)

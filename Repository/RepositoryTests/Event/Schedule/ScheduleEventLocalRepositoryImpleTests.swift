@@ -22,6 +22,7 @@ class ScheduleEventLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable 
     var localStorage: ScheduleEventLocalStorage!
     
     override func setUpWithError() throws {
+        self.fileName = "schedules"
         try super.setUpWithError()
         self.cancelBag = .init()
         self.localStorage = .init(sqliteService: self.sqliteService)
