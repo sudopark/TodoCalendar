@@ -14,10 +14,12 @@ import UnitTestHelpKit
 
 class BaseLocalTests: BaseTestCase {
     
-    func testDBPath(_ name: String = "test") -> String {
+    var fileName: String = "test"
+    
+    func testDBPath() -> String {
         return try! FileManager.default
             .url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-            .appendingPathComponent("\(name).db")
+            .appendingPathComponent("\(self.fileName).db")
             .path
     }
     

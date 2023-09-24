@@ -17,6 +17,7 @@ class HolidayRepositoryImpleTests: BaseLocalTests {
     private var spyRemote: StubRemoteAPI!
     
     override func setUpWithError() throws {
+        self.fileName = "holidays"
         try super.setUpWithError()
         self.spyRemote = .init(responses: self.responses)
     }

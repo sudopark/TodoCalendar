@@ -16,12 +16,14 @@ struct EventTagTable: Table {
         case uuid
         case name
         case colorHex
+        case createAt = "create_at"
         
         var dataType: ColumnDataType {
             switch self {
             case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
             case .name: return .text([.unique, .notNull])
             case .colorHex: return .text([.notNull])
+            case .createAt: return .real([.notNull])
             }
         }
     }
@@ -35,6 +37,7 @@ struct EventTagTable: Table {
         case .uuid: return entity.uuid
         case .name: return entity.name
         case .colorHex: return entity.colorHex
+        case .createAt: return entity.createAt
         }
     }
 }
@@ -45,7 +48,8 @@ extension EventTag: RowValueType {
         self.init(
             uuid: try cursor.next().unwrap(),
             name: try cursor.next().unwrap(),
-            colorHex: try cursor.next().unwrap()
+            colorHex: try cursor.next().unwrap(),
+            createAt: try cursor.next().unwrap()
         )
     }
 }

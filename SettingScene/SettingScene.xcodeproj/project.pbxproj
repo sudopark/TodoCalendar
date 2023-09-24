@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		F676A75B2AC01F7F00D168DF /* SettingScene.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A7522AC01F7F00D168DF /* SettingScene.framework */; };
-		F676A7602AC01F7F00D168DF /* SettingSceneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A75F2AC01F7F00D168DF /* SettingSceneTests.swift */; };
 		F676A7612AC01F7F00D168DF /* SettingScene.h in Headers */ = {isa = PBXBuildFile; fileRef = F676A7552AC01F7F00D168DF /* SettingScene.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F676A76C2AC0207900D168DF /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A76B2AC0207900D168DF /* Common3rdParty.framework */; };
 		F676A7702AC0207E00D168DF /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A76F2AC0207E00D168DF /* Domain.framework */; };
@@ -24,6 +23,8 @@
 		F676A7BA2AC0269500D168DF /* EventTagListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B42AC0269500D168DF /* EventTagListViewController.swift */; };
 		F676A7BB2AC0269500D168DF /* EventTagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B52AC0269500D168DF /* EventTagListView.swift */; };
 		F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */; };
+		F676A7C12AC027F100D168DF /* EventTagListUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7C02AC027F100D168DF /* EventTagListUsecase.swift */; };
+		F676A7C42AC0334B00D168DF /* EventTagListUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7C32AC0334B00D168DF /* EventTagListUsecaseImpleTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,7 +41,6 @@
 		F676A7522AC01F7F00D168DF /* SettingScene.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SettingScene.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F676A7552AC01F7F00D168DF /* SettingScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingScene.h; sourceTree = "<group>"; };
 		F676A75A2AC01F7F00D168DF /* SettingSceneTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SettingSceneTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F676A75F2AC01F7F00D168DF /* SettingSceneTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingSceneTests.swift; sourceTree = "<group>"; };
 		F676A76B2AC0207900D168DF /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F676A76F2AC0207E00D168DF /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F676A7732AC0208600D168DF /* Scenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Scenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,6 +56,8 @@
 		F676A7B42AC0269500D168DF /* EventTagListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewController.swift; sourceTree = "<group>"; };
 		F676A7B52AC0269500D168DF /* EventTagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListView.swift; sourceTree = "<group>"; };
 		F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewModel.swift; sourceTree = "<group>"; };
+		F676A7C02AC027F100D168DF /* EventTagListUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListUsecase.swift; sourceTree = "<group>"; };
+		F676A7C32AC0334B00D168DF /* EventTagListUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListUsecaseImpleTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,7 +119,7 @@
 		F676A75E2AC01F7F00D168DF /* SettingSceneTests */ = {
 			isa = PBXGroup;
 			children = (
-				F676A75F2AC01F7F00D168DF /* SettingSceneTests.swift */,
+				F676A7C22AC0332D00D168DF /* EventTag */,
 			);
 			path = SettingSceneTests;
 			sourceTree = "<group>";
@@ -147,6 +149,15 @@
 				F676A7B42AC0269500D168DF /* EventTagListViewController.swift */,
 				F676A7B52AC0269500D168DF /* EventTagListView.swift */,
 				F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */,
+				F676A7C02AC027F100D168DF /* EventTagListUsecase.swift */,
+			);
+			path = EventTag;
+			sourceTree = "<group>";
+		};
+		F676A7C22AC0332D00D168DF /* EventTag */ = {
+			isa = PBXGroup;
+			children = (
+				F676A7C32AC0334B00D168DF /* EventTagListUsecaseImpleTests.swift */,
 			);
 			path = EventTag;
 			sourceTree = "<group>";
@@ -216,6 +227,7 @@
 					};
 					F676A7592AC01F7F00D168DF = {
 						CreatedOnToolsVersion = 15.0;
+						LastSwiftMigration = 1500;
 					};
 				};
 			};
@@ -263,6 +275,7 @@
 				F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */,
 				F676A7BA2AC0269500D168DF /* EventTagListViewController.swift in Sources */,
 				F676A7BB2AC0269500D168DF /* EventTagListView.swift in Sources */,
+				F676A7C12AC027F100D168DF /* EventTagListUsecase.swift in Sources */,
 				F676A7B82AC0269500D168DF /* EventTagListRouter.swift in Sources */,
 				F676A7B72AC0269500D168DF /* EventTagListBuilderImple.swift in Sources */,
 			);
@@ -272,7 +285,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F676A7602AC01F7F00D168DF /* SettingSceneTests.swift in Sources */,
+				F676A7C42AC0334B00D168DF /* EventTagListUsecaseImpleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,6 +491,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
@@ -486,6 +500,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.SettingSceneTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -495,6 +510,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;

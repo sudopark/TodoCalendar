@@ -8,22 +8,25 @@
 import Foundation
 
 
-public struct EventTag {
+public struct EventTag: Sendable {
     
     public let uuid: String
     public var name: String
     public var colorHex: String
+    public let createAt: TimeInterval
     
-    public init(uuid: String, name: String, colorHex: String) {
+    public init(uuid: String, name: String, colorHex: String, createAt: TimeInterval) {
         self.uuid = uuid
         self.name = name
         self.colorHex = colorHex
+        self.createAt = createAt
     }
     
     public init(name: String, colorHex: String) {
         self.uuid = UUID().uuidString
         self.name = name
         self.colorHex = colorHex
+        self.createAt = Date().timeIntervalSince1970
     }
 }
 
