@@ -34,7 +34,10 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
     }
     
     private func makeRepository() -> EventTagLocalRepositoryImple {
-        return .init(localStorage: self.localStorage)
+        return .init(
+            localStorage: self.localStorage,
+            environmentStorage: FakeEnvironmentStorage()
+        )
     }
 }
 
@@ -166,5 +169,23 @@ extension EventTagLocalRepositoryImpleTests {
         
         // then
         XCTAssertEqual(tags?.map { $0.uuid }, totalTags.map { $0.uuid })
+    }
+}
+
+extension EventTagLocalRepositoryImpleTests {
+    
+    func testRepository_toggleAndLoadOffIds() {
+        // given
+        let repository = self.makeRepository()
+        
+        // when + then
+        var ids = repository.loadOffTags()
+        XCTAssertEqual(ids, [])
+        ids = repository.toggleTagIsOn("t1")
+        XCTAssertEqual(ids, ["t1"])
+        ids = repository.toggleTagIsOn("t2")
+        XCTAssertEqual(ids, ["t1", "t2"])
+        ids = repository.toggleTagIsOn("t1")
+        XCTAssertEqual(ids, ["t2"])
     }
 }

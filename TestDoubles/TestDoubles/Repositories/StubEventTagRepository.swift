@@ -7,6 +7,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 import Extensions
 
@@ -50,5 +52,16 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         return Just(allTagsStubbing)
             .mapNever()
             .eraseToAnyPublisher()
+    }
+    
+    private var offTagIdSet: Set<String> = []
+    public func loadOffTags() -> Set<String> {
+        return offTagIdSet
+    }
+    
+    public func toggleTagIsOn(_ tagId: String) -> Set<String> {
+        let newSet = self.offTagIdSet |> elem(tagId) .~ !offTagIdSet.contains(tagId)
+        self.offTagIdSet = newSet
+        return newSet
     }
 }

@@ -7,6 +7,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 import Extensions
 
@@ -39,5 +41,15 @@ open class StubEventTagUsecase: EventTagUsecase {
     public var allTagsLoadResult: Result<[EventTag], any Error> = .success([])
     public func loadAllEventTags() -> AnyPublisher<[EventTag], any Error> {
         return allTagsLoadResult.eraseToAnyPublisher()
+    }
+    
+    private let offIds = CurrentValueSubject<Set<String>, Never>([])
+    public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<String>, Never> {
+        return offIds.eraseToAnyPublisher()
+    }
+    
+    public func toggleEventTagIsOnCalendar(_ tagId: String) {
+        let newSet = offIds.value |> elem(tagId) .~ !offIds.value.contains(tagId)
+        self.offIds.send(newSet)
     }
 }

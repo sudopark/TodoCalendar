@@ -24,4 +24,8 @@ open class BaseSpyRouter: Routing {
     open func showToast(_ message: String) {
         self.didShowToastWithMessage = message
     }
+    
+    public func closeScene() {
+        
+    }
 }

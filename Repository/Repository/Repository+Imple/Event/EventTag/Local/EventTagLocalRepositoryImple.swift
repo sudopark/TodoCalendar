@@ -7,6 +7,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import AsyncFlatMap
 import Domain
 import Extensions
@@ -15,8 +17,13 @@ import Extensions
 public final class EventTagLocalRepositoryImple: EventTagRepository {
     
     private let localStorage: EventTagLocalStorage
-    public init(localStorage: EventTagLocalStorage) {
+    private let environmentStorage: any EnvironmentStorage
+    public init(
+        localStorage: EventTagLocalStorage,
+        environmentStorage: any EnvironmentStorage
+    ) {
         self.localStorage = localStorage
+        self.environmentStorage = environmentStorage
     }
 }
 
@@ -62,5 +69,19 @@ extension EventTagLocalRepositoryImple {
             return try await self?.localStorage.loadAllTags()
         }
         .eraseToAnyPublisher()
+    }
+    
+    private var offIds: String { "off_eventtagIds_on_calendar" }
+    
+    public func loadOffTags() -> Set<String> {
+        let ids: [String]? = self.environmentStorage.load(self.offIds)
+        return (ids ?? []) |> Set.init
+    }
+    
+    public func toggleTagIsOn(_ tagId: String) -> Set<String> {
+        let oldOffIds = self.loadOffTags()
+        let newIds = oldOffIds |> elem(tagId) .~ !oldOffIds.contains(tagId)
+        self.environmentStorage.update(self.offIds, newIds)
+        return newIds
     }
 }
