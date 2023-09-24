@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F676A7BF2AC026E400D168DF /* Scenes+Setting.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7BE2AC026E400D168DF /* Scenes+Setting.swift */; };
 		F6B70CFD2A76438600FFF457 /* Scenes.h in Headers */ = {isa = PBXBuildFile; fileRef = F6B70CFC2A76438600FFF457 /* Scenes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F6B70D062A7643B900FFF457 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70D052A7643B900FFF457 /* Common3rdParty.framework */; };
 		F6B70D0A2A7643BE00FFF457 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70D092A7643BE00FFF457 /* Extensions.framework */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F676A7BE2AC026E400D168DF /* Scenes+Setting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Scenes+Setting.swift"; sourceTree = "<group>"; };
 		F6B70CF92A76438600FFF457 /* Scenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Scenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6B70CFC2A76438600FFF457 /* Scenes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Scenes.h; sourceTree = "<group>"; };
 		F6B70D052A7643B900FFF457 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -65,6 +67,7 @@
 				F6B70DF22A79449E00FFF457 /* Factories.swift */,
 				F6B70D0C2A7643CB00FFF457 /* BaseComponents.swift */,
 				F6B70D0E2A7645B400FFF457 /* Scenes+Calendar.swift */,
+				F676A7BE2AC026E400D168DF /* Scenes+Setting.swift */,
 			);
 			path = Scenes;
 			sourceTree = "<group>";
@@ -160,6 +163,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6B70DF32A79449E00FFF457 /* Factories.swift in Sources */,
+				F676A7BF2AC026E400D168DF /* Scenes+Setting.swift in Sources */,
 				F6B70D0F2A7645B400FFF457 /* Scenes+Calendar.swift in Sources */,
 				F6B70D0D2A7643CB00FFF457 /* BaseComponents.swift in Sources */,
 			);
