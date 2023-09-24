@@ -9,11 +9,10 @@ import XCTest
 import Combine
 import Prelude
 import Optics
-import Domain
 import UnitTestHelpKit
 import TestDoubles
 
-@testable import SettingScene
+@testable import Domain
 
 
 class EventTagListUsecaseImpleTests: BaseTestCase, PublisherWaitable {

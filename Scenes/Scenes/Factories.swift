@@ -22,6 +22,7 @@ public protocol EventUsecaseFactory {
     func makeTodoEventUsecase() -> any TodoEventUsecase
     func makeScheduleEventUsecase() -> any ScheduleEventUsecase
     func makeEventTagUsecase() -> any EventTagUsecase
+    func makeEventTagListUsecase() -> any EventTagListUsecase
 }
 
 public protocol UsecaseFactory: CalendarUsecaseFactory, EventUsecaseFactory { }

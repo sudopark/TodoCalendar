@@ -16,11 +16,14 @@ import CommonPresentation
 
 final class EventTagListSceneBuilerImple {
     
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     
     init(
+        usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
+        self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
     }
 }
@@ -32,7 +35,7 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
     func makeEventTagListScene() -> any EventTagListScene {
         
         let viewModel = EventTagListViewModelImple(
-            
+            tagListUsecase: self.usecaseFactory.makeEventTagListUsecase()
         )
         
         let viewController = EventTagListViewController(
