@@ -9,6 +9,26 @@ import Foundation
 import Combine
 
 
+extension Publisher {
+    
+    public func mapAsAnyError() -> Publishers.MapError<Self, any Error> {
+        return self.mapError { error -> any Error in
+            return error
+        }
+    }
+    
+    public func sink(
+        receiveValue: @escaping (Output) -> Void,
+        receiveError: ((Failure) -> Void)? = nil
+    ) -> AnyCancellable {
+        
+        return self.sink(receiveCompletion: { completion in
+            guard case let .failure(error) = completion else { return }
+            receiveError?(error)
+        }, receiveValue: receiveValue)
+    }
+}
+
 extension Publisher where Failure == Never {
     
     public func mapNever() -> Publishers.MapError<Self, Error> {

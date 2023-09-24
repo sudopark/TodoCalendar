@@ -23,6 +23,7 @@ public protocol EventTagUsecase {
     func refreshTags(_ ids: [String])
     func eventTag(id: String) -> AnyPublisher<EventTag, Never>
     func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never>
+    func loadAllEventTags() -> AnyPublisher<[EventTag], any Error>
 }
 
 
@@ -129,6 +130,20 @@ extension EventTagUsecaseImple {
             .map { tagMap in
                 return (tagMap ?? [:]).filter { idsSet.contains($0.key) }
             }
+            .eraseToAnyPublisher()
+    }
+    
+    public func loadAllEventTags() -> AnyPublisher<[EventTag], any Error> {
+        let updateCached: ([EventTag]) -> Void = { [weak self] tags in
+            let newMap = tags.asDictionary { $0.uuid }
+            self?.sharedDataStore.put(
+                [String: EventTag].self,
+                key: ShareDataKeys.tags.rawValue,
+                newMap
+            )
+        }
+        return self.tagRepository.loadAllTags()
+            .handleEvents(receiveOutput: updateCached)
             .eraseToAnyPublisher()
     }
 }

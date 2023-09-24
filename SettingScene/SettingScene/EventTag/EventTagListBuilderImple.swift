@@ -35,7 +35,7 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
     func makeEventTagListScene() -> any EventTagListScene {
         
         let viewModel = EventTagListViewModelImple(
-            tagListUsecase: self.usecaseFactory.makeEventTagListUsecase()
+            tagUsecase: self.usecaseFactory.makeEventTagUsecase()
         )
         
         let viewController = EventTagListViewController(

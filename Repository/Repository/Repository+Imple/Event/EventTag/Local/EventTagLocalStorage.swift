@@ -57,18 +57,8 @@ extension EventTagLocalStorage {
         }
     }
     
-    func loadTags(
-        olderThan time: TimeInterval?,
-        size: Int
-    ) async throws -> [EventTag] {
-        var query = Tags.selectAll()
-            .orderBy(Tags.Columns.createAt.rawValue, isAscending: false)
-            .limit(size)
-        
-        if let time = time {
-            query = query.where { $0.createAt < time }
-        }
-        
+    func loadAllTags() async throws -> [EventTag] {
+        let query = Tags.selectAll()
         return try await self.sqliteService.async.run { db in
             return try db.load(Tags.self, query: query)
         }
