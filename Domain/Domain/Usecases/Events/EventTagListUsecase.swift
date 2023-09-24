@@ -1,6 +1,6 @@
 //
 //  EventTagListUsecase.swift
-//  SettingScene
+//  Domain
 //
 //  Created by sudo.park on 2023/09/24.
 //
@@ -9,10 +9,9 @@ import Foundation
 import Combine
 import Prelude
 import Optics
-import Domain
 
 
-protocol EventTagListUsecase: Sendable, AnyObject {
+public protocol EventTagListUsecase: Sendable, AnyObject {
     
     func reload()
     func loadMore()
@@ -21,7 +20,7 @@ protocol EventTagListUsecase: Sendable, AnyObject {
 }
 
 
-final class EventTagListUsecaseImple: EventTagListUsecase, Sendable {
+public final class EventTagListUsecaseImple: EventTagListUsecase, Sendable {
     
     struct EventTagQuery: PagingQueryType {
         let lastItemCreateTime: TimeInterval?
@@ -63,9 +62,9 @@ final class EventTagListUsecaseImple: EventTagListUsecase, Sendable {
     
     private let pagingUsecase: PagingUsecase<EventTagQuery, EventTagPagingResult>
     
-    init(
+    public init(
         option: PagingOption = .init(),
-        _ repository: EventTagRepository
+        _ repository: any EventTagRepository
     ) {
         
         self.pagingUsecase = .init(option: option) { query in
@@ -83,18 +82,19 @@ final class EventTagListUsecaseImple: EventTagListUsecase, Sendable {
 
 extension EventTagListUsecaseImple {
         
-    func reload() {
+    public func reload() {
         let query = EventTagQuery(lastItemCreateTime: nil) |> \.isFirst .~ true
         self.pagingUsecase.refresh(query)
     }
     
-    func loadMore() {
+    public func loadMore() {
         self.pagingUsecase.loadMore()
     }
     
-    var eventTags: AnyPublisher<[EventTag], Never> {
+    public var eventTags: AnyPublisher<[EventTag], Never> {
         return self.pagingUsecase.totalResult
             .map { $0?.tags ?? [] }
             .eraseToAnyPublisher()
     }
 }
+
