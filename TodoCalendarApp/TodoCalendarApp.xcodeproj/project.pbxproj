@@ -17,6 +17,8 @@
 		F66FDEFD2A9B68E2005A8227 /* MainViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FDEFC2A9B68E2005A8227 /* MainViewModelImpleTests.swift */; };
 		F66FDEFF2A9B699E005A8227 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F66FDEFE2A9B699E005A8227 /* Common3rdParty.framework */; };
 		F66FDF012A9B69A4005A8227 /* UnitTestHelpKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F66FDF002A9B69A4005A8227 /* UnitTestHelpKit.framework */; };
+		F676A7AD2AC0263B00D168DF /* SettingScene.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A7AC2AC0263B00D168DF /* SettingScene.framework */; };
+		F676A7AE2AC0263B00D168DF /* SettingScene.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F676A7AC2AC0263B00D168DF /* SettingScene.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F683C3682AB74952009821A5 /* TestDoubles.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F683C3672AB74952009821A5 /* TestDoubles.framework */; };
 		F6B70D9D2A765C8100FFF457 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D9C2A765C8100FFF457 /* AppDelegate.swift */; };
 		F6B70D9F2A765C8100FFF457 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70D9E2A765C8100FFF457 /* SceneDelegate.swift */; };
@@ -67,6 +69,7 @@
 				F6B70DDD2A76668F00FFF457 /* Domain.framework in Embed Frameworks */,
 				F6B70DE72A7666AF00FFF457 /* Common3rdParty.framework in Embed Frameworks */,
 				F6B70DF02A7666C100FFF457 /* Scenes.framework in Embed Frameworks */,
+				F676A7AE2AC0263B00D168DF /* SettingScene.framework in Embed Frameworks */,
 				F6B70DE42A7666AA00FFF457 /* Extensions.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -86,6 +89,7 @@
 		F66FDEFC2A9B68E2005A8227 /* MainViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModelImpleTests.swift; sourceTree = "<group>"; };
 		F66FDEFE2A9B699E005A8227 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F66FDF002A9B69A4005A8227 /* UnitTestHelpKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = UnitTestHelpKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F676A7AC2AC0263B00D168DF /* SettingScene.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = SettingScene.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F683C3672AB74952009821A5 /* TestDoubles.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TestDoubles.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6B70D992A765C8100FFF457 /* TodoCalendarApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoCalendarApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6B70D9C2A765C8100FFF457 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -120,6 +124,7 @@
 				F6B70DDC2A76668F00FFF457 /* Domain.framework in Frameworks */,
 				F6B70DE62A7666AF00FFF457 /* Common3rdParty.framework in Frameworks */,
 				F6B70DEF2A7666C100FFF457 /* Scenes.framework in Frameworks */,
+				F676A7AD2AC0263B00D168DF /* SettingScene.framework in Frameworks */,
 				F6B70DE32A7666AA00FFF457 /* Extensions.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -217,6 +222,7 @@
 		F6B70DDA2A76668F00FFF457 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F676A7AC2AC0263B00D168DF /* SettingScene.framework */,
 				F683C3672AB74952009821A5 /* TestDoubles.framework */,
 				F66FDF002A9B69A4005A8227 /* UnitTestHelpKit.framework */,
 				F66FDEFE2A9B699E005A8227 /* Common3rdParty.framework */,
