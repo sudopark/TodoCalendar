@@ -20,6 +20,8 @@ final class EventTagListViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
+    @Published var cellviewModels: [EventTagCellViewModel] = []
+    
     func bind(_ viewModel: any EventTagListViewModel) {
         
         guard self.didBind == false else { return }

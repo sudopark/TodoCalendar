@@ -142,7 +142,7 @@ extension EventTagLocalRepositoryImpleTests {
     func testRepository_loadTagsByIds() async throws {
         // given
         let totalIds = (0..<10).map { "\($0)" }
-        let stubTags = totalIds.map { EventTag(uuid: $0, name: "name:\($0)", colorHex: "hex:\($0)", createAt: Date().timeIntervalSince1970)}
+        let stubTags = totalIds.map { EventTag(uuid: $0, name: "name:\($0)", colorHex: "hex:\($0)")}
         let repository = try await self.makeRepositoryWithStubSaveTags(stubTags)
         
         // when
@@ -154,23 +154,17 @@ extension EventTagLocalRepositoryImpleTests {
         XCTAssertEqual(ids, someIds)
     }
     
-    func testRepository_loadTagsByOrder() async throws {
+    func testRepository_loadAllTags() async throws {
         // given
         let totalTags = (0..<100).map { int -> EventTag in
-            return .init(uuid: "id:\(int)", name: "some:\(int)", colorHex: "some", createAt: TimeInterval(int))
+            return .init(uuid: "id:\(int)", name: "some:\(int)", colorHex: "some")
         }
         let repository = try await self.makeRepositoryWithStubSaveTags(totalTags)
         
         // when
-        let t0 = try await repository.loadTags(olderThan: nil, size: 40)
-        let t1 = try await repository.loadTags(olderThan: 60, size: 40)
-        let t2 = try await repository.loadTags(olderThan: 20, size: 40)
-        let t3 = try await repository.loadTags(olderThan: 0, size: 40)
+        let tags = try await repository.loadAllTags().values(with: 10).first(where: { _ in true })
         
         // then
-        XCTAssertEqual(t0.map { $0.uuid }, (60..<100).reversed().map { "id:\($0)" })
-        XCTAssertEqual(t1.map { $0.uuid }, (20..<60).reversed().map { "id:\($0)" })
-        XCTAssertEqual(t2.map { $0.uuid }, (0..<20).reversed().map { "id:\($0)" })
-        XCTAssertEqual(t3.isEmpty, true)
+        XCTAssertEqual(tags?.map { $0.uuid }, totalTags.map { $0.uuid })
     }
 }

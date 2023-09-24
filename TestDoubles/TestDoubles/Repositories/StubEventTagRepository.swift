@@ -28,13 +28,13 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         if let error = updateFailError {
             throw error
         }
-        return .init(uuid: tagId, name: params.name, colorHex: params.colorHex, createAt: 0)
+        return .init(uuid: tagId, name: params.name, colorHex: params.colorHex)
     }
     
     public var shouldFailLoadTagsInRange: Bool = false
     public var tagsMocking: ([String]) -> [EventTag] = { ids in
         return ids.map {
-            return .init(uuid: $0, name: "name:\($0)", colorHex: "color", createAt: 0)
+            return .init(uuid: $0, name: "name:\($0)", colorHex: "color")
         }
     }
     open func loadTags(_ ids: [String]) -> AnyPublisher<[EventTag], any Error> {
@@ -45,8 +45,10 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         return Just(self.tagsMocking(ids)).mapNever().eraseToAnyPublisher()
     }
     
-    
-    open func loadTags(olderThan time: TimeInterval?, size: Int) async throws -> [EventTag] {
-        return []
+    public var allTagsStubbing: [EventTag] = []
+    public func loadAllTags() -> AnyPublisher<[EventTag], any Error> {
+        return Just(allTagsStubbing)
+            .mapNever()
+            .eraseToAnyPublisher()
     }
 }

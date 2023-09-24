@@ -26,13 +26,18 @@ open class StubEventTagUsecase: EventTagUsecase {
     open func refreshTags(_ ids: [String]) { }
     open func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never> {
         let tags = ids
-            .map { EventTag(uuid: $0, name: "some", colorHex: "0x000000", createAt: 0) }
+            .map { EventTag(uuid: $0, name: "some", colorHex: "0x000000") }
             .asDictionary { $0.uuid }
         return Just(tags).eraseToAnyPublisher()
     }
     
     public func eventTag(id: String) -> AnyPublisher<EventTag, Never> {
-        let tag = EventTag(uuid: id, name: "some", colorHex: "0x000000", createAt: 0)
+        let tag = EventTag(uuid: id, name: "some", colorHex: "0x000000")
         return Just(tag).eraseToAnyPublisher()
+    }
+    
+    public var allTagsLoadResult: Result<[EventTag], any Error> = .success([])
+    public func loadAllEventTags() -> AnyPublisher<[EventTag], any Error> {
+        return allTagsLoadResult.eraseToAnyPublisher()
     }
 }

@@ -38,8 +38,6 @@
 		F65B08E629D005E4000EE650 /* DoneTodoEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08E529D005E4000EE650 /* DoneTodoEvent.swift */; };
 		F65B08ED29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08EC29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift */; };
 		F65B08F429D015F0000EE650 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F65B08F329D015F0000EE650 /* Extensions.framework */; };
-		F66A808F2AC0584300F2C4A0 /* EventTagListUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66A808E2AC0584300F2C4A0 /* EventTagListUsecase.swift */; };
-		F66A80912AC0588800F2C4A0 /* EventTagListUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66A80902AC0588800F2C4A0 /* EventTagListUsecaseImpleTests.swift */; };
 		F6957FBB2A22281E0064E8BD /* EventTagUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FBA2A22281E0064E8BD /* EventTagUsecase.swift */; };
 		F6957FBD2A22293E0064E8BD /* EventTagRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FBC2A22293E0064E8BD /* EventTagRepository.swift */; };
 		F6957FC12A222B520064E8BD /* EventTagUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6957FC02A222B520064E8BD /* EventTagUsecaseImpleTests.swift */; };
@@ -102,8 +100,6 @@
 		F65B08E529D005E4000EE650 /* DoneTodoEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoneTodoEvent.swift; sourceTree = "<group>"; };
 		F65B08EC29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEventUsecaseImpleTests.swift; sourceTree = "<group>"; };
 		F65B08F329D015F0000EE650 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F66A808E2AC0584300F2C4A0 /* EventTagListUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListUsecase.swift; sourceTree = "<group>"; };
-		F66A80902AC0588800F2C4A0 /* EventTagListUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListUsecaseImpleTests.swift; sourceTree = "<group>"; };
 		F6957FBA2A22281E0064E8BD /* EventTagUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagUsecase.swift; sourceTree = "<group>"; };
 		F6957FBC2A22293E0064E8BD /* EventTagRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagRepository.swift; sourceTree = "<group>"; };
 		F6957FC02A222B520064E8BD /* EventTagUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagUsecaseImpleTests.swift; sourceTree = "<group>"; };
@@ -341,7 +337,6 @@
 				F6E35D562A2B8B1C00BDA545 /* CalendarSettingUsecaseImpleTests.swift */,
 				F6CD67272A3445D4007E4306 /* HolidayUsecaseImpleTests.swift */,
 				F69904E62A49D9DF00F44834 /* CalendarUsecaseImpleTests.swift */,
-				F66A80902AC0588800F2C4A0 /* EventTagListUsecaseImpleTests.swift */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -392,7 +387,6 @@
 				F63C9CFF29C8A60F00CC663A /* TodoEventUsecase.swift */,
 				F632E21B29FF84A50052C61B /* ScheduleEventUsecase.swift */,
 				F6957FBA2A22281E0064E8BD /* EventTagUsecase.swift */,
-				F66A808E2AC0584300F2C4A0 /* EventTagListUsecase.swift */,
 			);
 			path = Events;
 			sourceTree = "<group>";
@@ -530,7 +524,6 @@
 				F6E35D552A2B899B00BDA545 /* CalendarSettingRepository.swift in Sources */,
 				F6957FBB2A22281E0064E8BD /* EventTagUsecase.swift in Sources */,
 				F62C7D6429EC31F500AF1BD8 /* EventRepeatTimeEnumerator.swift in Sources */,
-				F66A808F2AC0584300F2C4A0 /* EventTagListUsecase.swift in Sources */,
 				F63C9D0529C8A8C900CC663A /* TodoEventRepository.swift in Sources */,
 				F6E35D532A2B892600BDA545 /* CalendarSettingUsecase.swift in Sources */,
 				F61C60302A8134F7007BA02C /* AuthRepository.swift in Sources */,
@@ -547,7 +540,6 @@
 				F6CD672A2A3445E0007E4306 /* StubHolidayRepository.swift in Sources */,
 				F626206E29F6D377004D0090 /* EventRepeatTimeEnumeratorTests.swift in Sources */,
 				F63C9D1129CCB2EB00CC663A /* SharedDataStoreTests.swift in Sources */,
-				F66A80912AC0588800F2C4A0 /* EventTagListUsecaseImpleTests.swift in Sources */,
 				F6E35D592A2B8B6700BDA545 /* StubCalendarSetingRepository.swift in Sources */,
 				F6EFD8DC29FFE8660088FCB4 /* MemorizedScheduleEventsContainerTests.swift in Sources */,
 				F609B3892A27AC870056CC13 /* PagingUsecaseTests.swift in Sources */,

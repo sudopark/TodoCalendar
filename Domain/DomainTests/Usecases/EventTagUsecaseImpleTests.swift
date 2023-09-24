@@ -229,7 +229,11 @@ extension EventTagUsecaseImpleTests {
         ]
         let scheduleContainer = schedules.reduce(MemorizedScheduleEventsContainer()) { $0.append($1) }
         self.sharedDataStore.put(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue, scheduleContainer)
-        
+        self.stubRepository.allTagsStubbing = [
+            .init(uuid: "tag-t1", name: "t1", colorHex: "some"),
+            .init(uuid: "tag-t3", name: "t2", colorHex: "some"),
+            .init(uuid: "tag-s2", name: "s2", colorHex: "some")
+        ]
         return makeUsecase()
     }
     
@@ -289,6 +293,21 @@ extension EventTagUsecaseImpleTests {
             ["tag-t1", "tag-t3", "tag-s2", "tag-t2"],
             ["tag-t1", "tag-t3", "tag-s2", "tag-t2", "tag-s3"],
             ["tag-t1", "tag-t3", "tag-s2", "tag-t2", "tag-s3", "tag-t1-new"]
+        ])
+    }
+    
+    func testUsecase_loadAllTags() {
+        // given
+        let expect = expectation(description: "load all tags")
+        let usecase = self.makeUsecaseWithStubEvents()
+        
+        // when
+        let tags = self.waitFirstOutput(expect, for: usecase.loadAllEventTags())
+        
+        // then
+        let ids = tags?.map { $0.uuid }
+        XCTAssertEqual(ids, [
+            "tag-t1", "tag-t3", "tag-s2"
         ])
     }
 }

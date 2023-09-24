@@ -29,7 +29,7 @@ extension EventTagLocalRepositoryImple {
         else {
             throw RuntimeError(key: "EvnetTag_Name_Duplicated", "event tag name:\(params.name) is already exists")
         }
-        let tag = EventTag(uuid: UUID().uuidString, name: params.name, colorHex: params.colorHex, createAt: Date().timeIntervalSince1970)
+        let tag = EventTag(uuid: UUID().uuidString, name: params.name, colorHex: params.colorHex)
         try await self.localStorage.saveTag(tag)
         return tag
     }
@@ -57,11 +57,10 @@ extension EventTagLocalRepositoryImple {
         .eraseToAnyPublisher()
     }
     
-    public func loadTags(
-        olderThan time: TimeInterval?,
-        size: Int
-    ) async throws -> [EventTag] {
-        
-        return try await self.localStorage.loadTags(olderThan: time, size: size)
+    public func loadAllTags() -> AnyPublisher<[EventTag], any Error> {
+        return Publishers.create { [weak self] in
+            return try await self?.localStorage.loadAllTags()
+        }
+        .eraseToAnyPublisher()
     }
 }

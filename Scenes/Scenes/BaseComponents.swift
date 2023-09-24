@@ -32,9 +32,15 @@ open class BaseRouterImple: Routing {
     
     open func showError(_ error: any Error) {
         // TODO: show error
+        Task { @MainActor in
+            
+        }
     }
     
     public func showToast(_ message: String) {
         // TODO: show toast
+        Task { @MainActor in
+            
+        }
     }
 }

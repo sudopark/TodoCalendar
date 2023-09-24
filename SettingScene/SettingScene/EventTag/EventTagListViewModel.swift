@@ -26,7 +26,6 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
 
     // interactor
     func reload()
-    func loadMore()
     
     // presenter
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> { get }
@@ -37,13 +36,13 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
 
 final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendable {
     
-    private let tagListUsecase: EventTagListUsecase
+    private let tagUsecase: EventTagUsecase
     var router: (any EventTagListRouting)?
     
     init(
-        tagListUsecase: EventTagListUsecase
+        tagUsecase: EventTagUsecase
     ) {
-        self.tagListUsecase = tagListUsecase
+        self.tagUsecase = tagUsecase
         
         self.internalBind()
     }
@@ -59,11 +58,7 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
     
     private func internalBind() {
      
-        self.tagListUsecase.eventTags
-            .sink(receiveValue: { [weak self] tags in
-                self?.subject.tags.send(tags)
-            })
-            .store(in: &self.cancellables)
+        
     }
 }
 
@@ -73,11 +68,17 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
 extension EventTagListViewModelImple {
     
     func reload() {
-        self.tagListUsecase.reload()
-    }
-    
-    func loadMore() {
-        self.tagListUsecase.loadMore()
+        
+        let showError: (any Error) -> Void = { [weak self] error in
+            self?.router?.showError(error)
+        }
+        let loaded: ([EventTag]) -> Void = { [weak self] tags in
+            self?.subject.tags.send(tags)
+        }
+        
+        self.tagUsecase.loadAllEventTags()
+            .sink(receiveValue: loaded, receiveError: showError)
+            .store(in: &self.cancellables)
     }
 }
 
