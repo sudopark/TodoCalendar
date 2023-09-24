@@ -19,6 +19,11 @@
 		F676A7A72AC025E200D168DF /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A7A62AC025E200D168DF /* Common3rdParty.framework */; };
 		F676A7A92AC025E900D168DF /* TestDoubles.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A7A82AC025E900D168DF /* TestDoubles.framework */; };
 		F676A7AB2AC025F000D168DF /* UnitTestHelpKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A7AA2AC025F000D168DF /* UnitTestHelpKit.framework */; };
+		F676A7B72AC0269500D168DF /* EventTagListBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B12AC0269500D168DF /* EventTagListBuilderImple.swift */; };
+		F676A7B82AC0269500D168DF /* EventTagListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B22AC0269500D168DF /* EventTagListRouter.swift */; };
+		F676A7BA2AC0269500D168DF /* EventTagListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B42AC0269500D168DF /* EventTagListViewController.swift */; };
+		F676A7BB2AC0269500D168DF /* EventTagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B52AC0269500D168DF /* EventTagListView.swift */; };
+		F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +51,11 @@
 		F676A7A62AC025E200D168DF /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F676A7A82AC025E900D168DF /* TestDoubles.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TestDoubles.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F676A7AA2AC025F000D168DF /* UnitTestHelpKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = UnitTestHelpKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F676A7B12AC0269500D168DF /* EventTagListBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListBuilderImple.swift; sourceTree = "<group>"; };
+		F676A7B22AC0269500D168DF /* EventTagListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListRouter.swift; sourceTree = "<group>"; };
+		F676A7B42AC0269500D168DF /* EventTagListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewController.swift; sourceTree = "<group>"; };
+		F676A7B52AC0269500D168DF /* EventTagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListView.swift; sourceTree = "<group>"; };
+		F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +108,7 @@
 		F676A7542AC01F7F00D168DF /* SettingScene */ = {
 			isa = PBXGroup;
 			children = (
+				F676A7AF2AC0264700D168DF /* EventTag */,
 				F676A7552AC01F7F00D168DF /* SettingScene.h */,
 			);
 			path = SettingScene;
@@ -126,6 +137,18 @@
 				F676A76B2AC0207900D168DF /* Common3rdParty.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F676A7AF2AC0264700D168DF /* EventTag */ = {
+			isa = PBXGroup;
+			children = (
+				F676A7B12AC0269500D168DF /* EventTagListBuilderImple.swift */,
+				F676A7B22AC0269500D168DF /* EventTagListRouter.swift */,
+				F676A7B42AC0269500D168DF /* EventTagListViewController.swift */,
+				F676A7B52AC0269500D168DF /* EventTagListView.swift */,
+				F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */,
+			);
+			path = EventTag;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -237,6 +260,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */,
+				F676A7BA2AC0269500D168DF /* EventTagListViewController.swift in Sources */,
+				F676A7BB2AC0269500D168DF /* EventTagListView.swift in Sources */,
+				F676A7B82AC0269500D168DF /* EventTagListRouter.swift in Sources */,
+				F676A7B72AC0269500D168DF /* EventTagListBuilderImple.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -449,6 +477,7 @@
 		F676A7682AC01F7F00D168DF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
@@ -465,6 +494,7 @@
 		F676A7692AC01F7F00D168DF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
