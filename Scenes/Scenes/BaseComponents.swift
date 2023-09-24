@@ -22,9 +22,10 @@ public protocol Routing: AnyObject {
     // common routing interface
     func showError(_ error: any Error)
     func showToast(_ message: String)
+    func closeScene()
 }
 
-open class BaseRouterImple: Routing {
+open class BaseRouterImple: Routing, @unchecked Sendable {
     
     public weak var scene: (any Scene)?
     
@@ -41,6 +42,12 @@ open class BaseRouterImple: Routing {
         // TODO: show toast
         Task { @MainActor in
             
+        }
+    }
+    
+    public func closeScene() {
+        Task { @MainActor in
+            self.scene?.dismiss(animated: true)
         }
     }
 }

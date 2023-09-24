@@ -83,7 +83,8 @@ extension NonLoginUsecaseFactoryImple {
             sqliteService: Singleton.shared.commonSqliteService
         )
         let repository = EventTagLocalRepositoryImple(
-            localStorage: storage
+            localStorage: storage,
+            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
         )
         return repository
     }
@@ -92,12 +93,6 @@ extension NonLoginUsecaseFactoryImple {
         return EventTagUsecaseImple(
             tagRepository: self.makeEventTagRepository(),
             sharedDataStore: Singleton.shared.sharedDataStore
-        )
-    }
-    
-    func makeEventTagListUsecase() -> any EventTagListUsecase {
-        return EventTagListUsecaseImple(
-            self.makeEventTagRepository()
         )
     }
 }

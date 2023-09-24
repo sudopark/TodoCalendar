@@ -9,12 +9,15 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 import Scenes
 
 
 struct EventTagCellViewModel: Equatable {
     
+    var isOn: Bool = true
     let id: String
     let name: String
     let colorHext: String
@@ -26,6 +29,10 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
 
     // interactor
     func reload()
+    func toggleIsOn(_ tagId: String)
+    func close()
+    func addNewTag()
+    func showTagDetail(_ tagId: String)
     
     // presenter
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> { get }
@@ -43,23 +50,15 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
         tagUsecase: EventTagUsecase
     ) {
         self.tagUsecase = tagUsecase
-        
-        self.internalBind()
     }
     
     
     private struct Subject {
-        
         let tags = CurrentValueSubject<[EventTag]?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
-    
-    private func internalBind() {
-     
-        
-    }
 }
 
 
@@ -80,6 +79,22 @@ extension EventTagListViewModelImple {
             .sink(receiveValue: loaded, receiveError: showError)
             .store(in: &self.cancellables)
     }
+    
+    func close() {
+        self.router?.closeScene()
+    }
+    
+    func addNewTag() {
+        // TODO: route to add new tag
+    }
+    
+    func toggleIsOn(_ tagId: String) {
+        self.tagUsecase.toggleEventTagIsOnCalendar(tagId)
+    }
+    
+    func showTagDetail(_ tagId: String) {
+        // TODO: show detail
+    }
 }
 
 
@@ -88,13 +103,20 @@ extension EventTagListViewModelImple {
 extension EventTagListViewModelImple {
     
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> {
-        let transform: (EventTag) -> EventTagCellViewModel = {
-            return .init(id: $0.uuid, name: $0.name, colorHext: $0.colorHex)
+        let transform: ([EventTag], Set<String>) -> [EventTagCellViewModel] = { tags, offTagIdSet in
+            return tags
+                .map {
+                    EventTagCellViewModel(id: $0.uuid, name: $0.name, colorHext: $0.colorHex)
+                    |> \.isOn .~ !offTagIdSet.contains($0.uuid)
+                }
+            
         }
-        return self.subject.tags
-            .compactMap { $0 }
-            .map { $0.map(transform) }
-            .removeDuplicates()
-            .eraseToAnyPublisher()
+        return Publishers.CombineLatest(
+            self.subject.tags.compactMap { $0 },
+            self.tagUsecase.offEventTagIdsOnCalendar()
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
 }

@@ -36,6 +36,10 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     func showToast(_ message: String) {
         // TODO: 
     }
+    
+    func closeScene() {
+        // ignore
+    }
 }
 
 

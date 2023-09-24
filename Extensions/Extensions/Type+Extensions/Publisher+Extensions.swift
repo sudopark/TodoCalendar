@@ -27,11 +27,20 @@ extension Publisher {
             receiveError?(error)
         }, receiveValue: receiveValue)
     }
+    
+    public func ignoreError() -> AnyPublisher<Output, Never> {
+        return self.map { output -> Output? in
+            return Optional<Output>.some(output)
+        }
+        .catch { _ in Just(nil) }
+        .compactMap { $0 }
+        .eraseToAnyPublisher()
+    }
 }
 
 extension Publisher where Failure == Never {
     
-    public func mapNever() -> Publishers.MapError<Self, Error> {
+    public func mapNever() -> Publishers.MapError<Self, any Error> {
         return self.mapError { _ -> (any Error) in }
     }
     
