@@ -6,7 +6,20 @@
 //
 
 import UIKit
+import Domain
 
+
+extension EventTagColor {
+    
+    public func color(with appearance: ViewAppearance) -> UIColor {
+        switch self {
+        case .holiday: return appearance.colorSet.holidayTag
+        case .default: return appearance.colorSet.defaultTag
+        case .custom(let hex): return UIColor.from(hex: hex)
+            ?? appearance.colorSet.defaultTag
+        }
+    }
+}
 
 extension UIColor {
    public convenience init(red: Int, green: Int, blue: Int) {

@@ -27,6 +27,9 @@ public protocol ColorSet: Sendable {
     var subNormalText: UIColor { get }
     
     var eventList: UIColor { get }
+    
+    var holidayTag: UIColor { get }
+    var defaultTag: UIColor { get }
 }
 
 
@@ -49,4 +52,7 @@ public struct DefaultLightColorSet: ColorSet {
     public let subNormalText: UIColor = UIColor(rgb: 0x646464)
     
     public let eventList: UIColor = UIColor(rgb: 0xf4f4f4)
+    
+    public let holidayTag: UIColor = UIColor(rgb: 0xD6236A)
+    public let defaultTag: UIColor = UIColor(rgb: 0x088CDA)
 }

@@ -99,8 +99,10 @@ protocol EventCellViewModel: Sendable {
     var name: String { get }
     var periodText: EventPeriodText? { get set }
     var periodDescription: String? { get set }
-    var colorHex: String? { get set }
+    var tagColor: EventTagColor? { get set }
     var customCompareKey: String { get }
+    
+    mutating func applyTagColor(_ tag: EventTag?)
 }
 
 extension EventCellViewModel {
@@ -109,9 +111,13 @@ extension EventCellViewModel {
         let baseComponents: [String?] = [
             self.eventIdentifier, self.tagId, self.name,
             self.periodText?.customCompareKey, self.periodDescription,
-            self.colorHex
+            self.tagColor?.compareKey
         ]
         return baseComponents.map { $0 ?? "nil" }.joined(separator: ",")
+    }
+    
+    mutating func applyTagColor(_ tag: EventTag?) {
+        self.tagColor = tag.map { EventTagColor.custom(hex: $0.colorHex) } ?? .default
     }
 }
 
@@ -124,7 +130,7 @@ struct TodoEventCellViewModel: EventCellViewModel {
     let name: String
     var periodText: EventPeriodText?
     var periodDescription: String?
-    var colorHex: String?
+    var tagColor: EventTagColor?
     var customCompareKey: String { self.makeCustomCompareKey(["todo"]) }
     
     init(_ id: String, name: String) {
@@ -148,7 +154,7 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     let name: String
     var periodText: EventPeriodText? = .singleText("Todo".localized())
     var periodDescription: String?
-    var colorHex: String?
+    var tagColor: EventTagColor?
     var customCompareKey: String {
         self.makeCustomCompareKey(["pending-todo"])
     }
@@ -172,7 +178,7 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
     let name: String
     var periodText: EventPeriodText?
     var periodDescription: String?
-    var colorHex: String?
+    var tagColor: EventTagColor?
     var customCompareKey: String {
         self.makeCustomCompareKey(["schedule", self.turn.map { "\($0)" }])
     }
@@ -205,14 +211,17 @@ struct HolidayEventCellViewModel: EventCellViewModel {
     let name: String
     var periodText: EventPeriodText?
     var periodDescription: String?
-    var colorHex: String?
+    var tagColor: EventTagColor?
     var customCompareKey: String { self.makeCustomCompareKey(["holidays"]) }
     
     init(_ holiday: Holiday) {
         self.eventIdentifier = [holiday.dateString, holiday.name].joined(separator: "_")
-        // TODO: set holiday tag
         self.name = holiday.localName
         self.periodText = .singleText("Allday".localized())
+    }
+    
+    mutating func applyTagColor(_ tag: EventTag?) {
+        self.tagColor = .holiday
     }
 }
 
@@ -300,5 +309,16 @@ private extension Range where Bound == TimeInterval {
             && self.upperBound <= eventTimeRange.upperBound
         
         return (isAllDay, startTimeInToday, endTimeInToday)
+    }
+}
+
+private extension EventTagColor {
+    
+    var compareKey: String {
+        switch self {
+        case .default: return "default"
+        case .holiday: return "holiday"
+        case .custom(let hex): return "custom:\(hex)"
+        }
     }
 }

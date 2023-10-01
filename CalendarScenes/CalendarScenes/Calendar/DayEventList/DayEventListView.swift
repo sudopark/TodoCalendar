@@ -181,7 +181,7 @@ private struct EventListCellView: View {
     }
     
     var body: some View {
-        let tagLineColor = cellViewModel.colorHex.flatMap { Color.from($0) } ?? .clear
+        let tagLineColor = cellViewModel.tagColor?.color(with: self.appearance).asColor ?? .clear
         return HStack(spacing: 8) {
             // left
             self.eventLeftView(cellViewModel)
@@ -273,6 +273,7 @@ private struct QuickAddNewTodoView: View {
     
     @State private var newTodoName: String = ""
     @FocusState private var isFocusInput: Bool
+    private var isEntering: Bool { !self.newTodoName.isEmpty }
     
     private func resetStates() {
         self.newTodoName = ""
@@ -292,7 +293,7 @@ private struct QuickAddNewTodoView: View {
             .frame(width: 50)
             
             RoundedRectangle(cornerRadius: 3)
-                .fill(self.appearance.colorSet.subNormalText.asColor)
+                .fill(self.appearance.colorSet.defaultTag.asColor)
                 .frame(width: 6)
             
             HStack(spacing: 8) {
@@ -317,8 +318,7 @@ private struct QuickAddNewTodoView: View {
             }
                 
         }
-        .opacity(self.isFocusInput ? 1.0 : 0.5)
-        .animation(.default, value: self.isFocusInput)
+        .opacity(self.isEntering ? 1.0 : 0.5)
         .padding(.vertical, 4).padding(.horizontal, 8)
         .frame(height: 50)
         .backgroundAsRoundedRectForEventList(self.appearance)
@@ -368,7 +368,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             }
             .eventHandler(\.addNewTodoQuickly) { name in
                 let pending = PendingTodoEventCellViewModel(name: name, defaultTagId: nil)
-                    |> \.colorHex .~ "#ffff00"
+                    |> \.tagColor .~ .default
                 let index = state.cellViewModels.firstIndex(where: { !$0.name.starts(with: "current todo") })!
                 
                 withAnimation {
@@ -383,7 +383,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                                 // 추가하여 성공했을때 가정
                                 let newCell = TodoEventCellViewModel("new-current-todo", name: name)
                                     |> \.periodText .~ .singleText("Todo".localized())
-                                    |> \.colorHex .~ pending.colorHex
+                                    |> \.tagColor .~ pending.tagColor
                                 state.cellViewModels[index] = newCell
                             }
                         }
@@ -398,10 +398,10 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
     private static func makeDummyCells() -> [any EventCellViewModel] {
         let currentTodoCells: [TodoEventCellViewModel] = [
             .init("current-todo1", name: "current todo 1")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .singleText("Todo".localized()),
             .init("current-todo2", name: "current todo 2")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .singleText("Todo".localized())
         ]
         let todoCells: [TodoEventCellViewModel] = [
@@ -409,36 +409,36 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .anyTime,
             .init("todo2", name: "todo with all day")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .doubleText("Todo".localized(), "Allday"),
             .init("todo3", name: "todo with at time")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .doubleText("Todo".localized(), "10:30"),
 //            .init(eventId: .todo("todo4"), name: "todo with in today")
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .inToday("9:30", "20:30")
 //                |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
             .init("todo5", name: "todo with today to future")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .doubleText("Todo".localized(), "9 (Sat)")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
             .init("todo6", name: "todo with past to today")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .doubleText("Todo".localized(), "20:00")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
         let scheduleCells: [ScheduleEventCellViewModel] = [
             .init("sc1", name: "schdule with at time")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .singleText("8:30"),
             .init("sc2", name: "schdule with all day")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .singleText("Allday".localized()),
 //            .init(eventId: .schedule("sc3", turn: 1), name: "schdule with at time")
 //            |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .atTime("10:30"),
             .init("sc4", name: "schdule with in today")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .doubleText("9:30", "20:30")
                 |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
 //            .init(eventId: .schedule("sc5", turn: 1), name: "schdule with today to future")
@@ -446,7 +446,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
 //                |> \.periodText .~ .fromTodayToFuture("09:30", "9 (Sat)")
 //                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
             .init("sc6", name: "schdule with past to today")
-                |> \.colorHex .~ "#0000ff"
+                |> \.tagColor .~ .default
                 |> \.periodText .~ .doubleText("9 (Sat)", "20:00")
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
@@ -454,7 +454,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         let holidayCell = HolidayEventCellViewModel(
             .init(dateString: "2023-09-30", localName: "추석", name: "추석")
         )
-        |> \.colorHex .~ "#ff0000"
+            |> \.tagColor .~ .holiday
         
         return currentTodoCells + (
             scheduleCells + todoCells + [holidayCell]
