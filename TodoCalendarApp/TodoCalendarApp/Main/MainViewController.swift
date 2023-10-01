@@ -106,6 +106,13 @@ extension MainViewController {
             })
             .store(in: &self.cancellables)
         
+        self.headerView.eventTypeFilterButton
+            .addTapGestureRecognizerPublisher()
+            .sink(receiveValue: { [weak self] in
+                self?.viewModel.moveToEventTypeFilterSetting()
+            })
+            .store(in: &self.cancellables)
+        
         self.headerView.settingButton.addTapGestureRecognizerPublisher()
             .sink { [weak self] in
                 self?.viewModel.moveToSetting()
@@ -163,6 +170,7 @@ private final class HeaderView: UIView {
     private let returnTodayLabel = UILabel()
     private let buttonsStackView = UIStackView()
     let searchButton = UIButton()
+    let eventTypeFilterButton = UIButton()
     let settingButton = UIButton()
     let logButton = UIButton()
     
@@ -222,6 +230,11 @@ private final class HeaderView: UIView {
             $0.widthAnchor.constraint(equalToConstant: 25)
             $0.heightAnchor.constraint(equalToConstant: 25)
         }
+        buttonsStackView.addArrangedSubview(eventTypeFilterButton)
+        eventTypeFilterButton.autoLayout.active {
+            $0.widthAnchor.constraint(equalToConstant: 25)
+            $0.heightAnchor.constraint(equalToConstant: 25)
+        }
         buttonsStackView.addArrangedSubview(settingButton)
         settingButton.autoLayout.active {
             $0.widthAnchor.constraint(equalToConstant: 25)
@@ -245,6 +258,8 @@ private final class HeaderView: UIView {
         
         self.searchButton.tintColor = colorSet.normalText
         self.searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        self.eventTypeFilterButton.tintColor = colorSet.normalText
+        self.eventTypeFilterButton.setImage(UIImage(systemName: "line.3.horizontal.decrease.circle"), for: .normal)
         self.settingButton.tintColor = colorSet.normalText
         self.settingButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
     }

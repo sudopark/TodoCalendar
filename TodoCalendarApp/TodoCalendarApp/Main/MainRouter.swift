@@ -18,6 +18,8 @@ protocol MainRouting: Routing, Sendable {
     
     @MainActor
     func attachCalendar() -> (any CalendarSceneInteractor)?
+    
+    func routeToEventTypeFilterSetting()
 }
 
 // MARK: - Router
@@ -25,8 +27,13 @@ protocol MainRouting: Routing, Sendable {
 final class MainRouter: BaseRouterImple, MainRouting, @unchecked Sendable {
     
     private let calendarSceneBulder: any CalendarSceneBuilder
-    init(_ calendarSceneBulder: any CalendarSceneBuilder) {
+    private let eventTagListSceneBuilder: any EventTagListSceneBuiler
+    init(
+        calendarSceneBulder: any CalendarSceneBuilder,
+        eventTagListSceneBuilder: any EventTagListSceneBuiler
+    ) {
         self.calendarSceneBulder = calendarSceneBulder
+        self.eventTagListSceneBuilder = eventTagListSceneBuilder
     }
 }
 
@@ -48,5 +55,13 @@ extension MainRouter {
         current.addCalendar(calendarScene)
         
         return calendarScene.interactor
+    }
+    
+    func routeToEventTypeFilterSetting() {
+        Task { @MainActor in
+            
+            let eventSettingScene = self.eventTagListSceneBuilder.makeEventTagListScene()
+            self.currentScene?.present(eventSettingScene, animated: true)
+        }
     }
 }
