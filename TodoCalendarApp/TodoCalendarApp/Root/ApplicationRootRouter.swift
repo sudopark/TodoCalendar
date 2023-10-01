@@ -10,6 +10,7 @@ import Domain
 import Scenes
 import CommonPresentation
 import CalendarScenes
+import SettingScene
 
 
 // MARK: - ApplicationRootRouter
@@ -60,7 +61,8 @@ extension ApplicationRootRouter {
             let builder = MainSceneBuilerImple(
                 usecaseFactory: self.nonLoginUsecaseFactory,
                 viewAppearance: self.viewAppearance,
-                calendarSceneBulder: self.calendarSceneBulder()
+                calendarSceneBulder: self.calendarSceneBulder(),
+                eventTagListSceneBuilder: self.eventTagListSceneBulder()
             )
             let mainScene = builder.makeMainScene()
             self.window.rootViewController = mainScene
@@ -70,6 +72,13 @@ extension ApplicationRootRouter {
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
         return CalendarSceneBuilderImple(
+            usecaseFactory: self.nonLoginUsecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+    }
+    
+    private func eventTagListSceneBulder() -> any EventTagListSceneBuiler {
+        return EventTagListSceneBuilerImple(
             usecaseFactory: self.nonLoginUsecaseFactory,
             viewAppearance: self.viewAppearance
         )

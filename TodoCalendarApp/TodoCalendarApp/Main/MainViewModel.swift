@@ -21,6 +21,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     func prepare()
     func returnToToday()
     func startSearch()
+    func moveToEventTypeFilterSetting()
     func moveToSetting()
     
     // presenter
@@ -66,6 +67,10 @@ extension MainViewModelImple {
     
     func startSearch() {
         // TODO:
+    }
+    
+    func moveToEventTypeFilterSetting() {
+        self.router?.routeToEventTypeFilterSetting()
     }
     
     func moveToSetting() {

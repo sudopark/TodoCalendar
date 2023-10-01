@@ -96,7 +96,21 @@ extension MainViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyRouter.interactor.didFocusMovedToToday, true)
     }
+     
+    func testViewModel_rouetToEventTypeSettingScene() {
+        // given
+        let expect = expectation(description: "이벤트 타입 세팅 화면으로 이동")
+        let viewModel = self.makeViewModel()
+        self.spyRouter.didRouteToEventTypeFilterSetting = {
+            expect.fulfill()
+        }
         
+        // when
+        viewModel.moveToEventTypeFilterSetting()
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
 }
 
 
@@ -109,6 +123,11 @@ extension MainViewModelImpleTests {
         func attachCalendar() -> (any CalendarSceneInteractor)? {
             self.didCalendarAttached?()
             return self.interactor
+        }
+        
+        var didRouteToEventTypeFilterSetting: (() -> Void)?
+        func routeToEventTypeFilterSetting() {
+            self.didRouteToEventTypeFilterSetting?()
         }
     }
     

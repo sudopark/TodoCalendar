@@ -50,6 +50,7 @@ struct EventTagListContainerView: View {
     private let viewAppearance: ViewAppearance
     
     var stateBinding: (EventTagListViewState) -> Void = { _ in }
+    var onAppear: () -> Void = { }
     var addTag: () -> Void = { }
     var closeScene: () -> Void = { }
     var toggleEventTagViewingIsOn: (String) -> Void = { _ in }
@@ -67,6 +68,7 @@ struct EventTagListContainerView: View {
             .eventHandler(\.showTagDetail, self.showTagDetail)
             .onAppear {
                 self.stateBinding(self.state)
+                self.onAppear()
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
