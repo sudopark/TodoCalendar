@@ -249,8 +249,10 @@ extension DayEventListViewModelImple {
         let applyTag: ([any EventCellViewModel], [String: EventTag]) -> [any EventCellViewModel]
         applyTag = { cellViewModels, tagMap in
             return cellViewModels.map { cellViewModel in
-                guard let tagId = cellViewModel.tagId else { return cellViewModel }
-                return cellViewModel |> \.colorHex .~ tagMap[tagId]?.colorHex
+                let tag = cellViewModel.tagId.flatMap { tagMap[$0] }
+                var cellViewModel = cellViewModel
+                cellViewModel.applyTagColor(tag)
+                return cellViewModel
             }
         }
         return Publishers.CombineLatest(

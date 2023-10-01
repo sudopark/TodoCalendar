@@ -100,12 +100,17 @@ struct WeekEventLineModel: Equatable {
     
     var eventId: EventId { self.eventOnWeek.eventId }
     let eventOnWeek: EventOnWeek
-    let colorHex: String
+    let lineColor: EventTagColor
     
     init(_ eventOnWeek: EventOnWeek, _ tag: EventTag?) {
         self.eventOnWeek = eventOnWeek
-        // TODO: 임시로 디폴트 색 지정
-        self.colorHex = tag?.colorHex ?? "#0000FF"
+        
+        switch eventOnWeek.eventId {
+        case .holiday:
+            self.lineColor = .holiday
+        default:
+            self.lineColor = tag.map { .custom(hex: $0.colorHex) } ?? .default
+        }
     }
 }
 

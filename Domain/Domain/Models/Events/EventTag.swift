@@ -39,3 +39,10 @@ public struct EventTagMakeParams {
 }
 
 public typealias EventTagEditParams = EventTagMakeParams
+
+
+public enum EventTagColor: Equatable, Sendable {
+    case `default`
+    case holiday
+    case custom(hex: String)
+}
