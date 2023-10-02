@@ -115,11 +115,17 @@ extension EventTagListViewModelImple {
                 }
             
         }
+        let appendBaseTags: ([EventTagCellViewModel]) -> [EventTagCellViewModel] = { tags in
+            let holidayTag = EventTagCellViewModel(id: .holiday, name: "holiday".localized(), color: .holiday)
+            let defaultTag = EventTagCellViewModel(id: .default, name: "default".localized(), color: .default)
+            return [holidayTag, defaultTag] + tags
+        }
         return Publishers.CombineLatest(
             self.subject.tags.compactMap { $0 },
             self.tagUsecase.offEventTagIdsOnCalendar()
         )
         .map(transform)
+        .map(appendBaseTags)
         .removeDuplicates()
         .eraseToAnyPublisher()
     }

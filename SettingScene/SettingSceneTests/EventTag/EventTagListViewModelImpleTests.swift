@@ -59,7 +59,9 @@ extension EventTagListViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(cells?.count, 20)
+        XCTAssertEqual(cells?.count, 22)
+        XCTAssertEqual(cells?[safe: 0]?.id, .holiday)
+        XCTAssertEqual(cells?[safe: 1]?.id, .default)
     }
     
     func testViewModel_whenLoadAllTagsFail_showError() {
