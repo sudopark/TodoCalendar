@@ -73,15 +73,37 @@ extension EventTagLocalRepositoryImple {
     
     private var offIds: String { "off_eventtagIds_on_calendar" }
     
-    public func loadOffTags() -> Set<String> {
-        let ids: [String]? = self.environmentStorage.load(self.offIds)
+    public func loadOffTags() -> Set<AllEventTagId> {
+        let idStringValues: [String]? = self.environmentStorage.load(self.offIds)
+        let ids = idStringValues?.map { AllEventTagId($0) }
         return (ids ?? []) |> Set.init
     }
     
-    public func toggleTagIsOn(_ tagId: String) -> Set<String> {
+    public func toggleTagIsOn(_ tagId: AllEventTagId) -> Set<AllEventTagId> {
         let oldOffIds = self.loadOffTags()
         let newIds = oldOffIds |> elem(tagId) .~ !oldOffIds.contains(tagId)
-        self.environmentStorage.update(self.offIds, newIds)
+        let newIdStringValues = newIds.map { $0.stringValue }
+        self.environmentStorage.update(self.offIds, newIdStringValues)
         return newIds
+    }
+}
+
+
+private extension AllEventTagId {
+    
+    var stringValue: String {
+        switch self {
+        case .holiday: return "holiday"
+        case .default: return "default"
+        case .custom(let id): return id
+        }
+    }
+    
+    init(_ stringValue: String) {
+        switch stringValue {
+        case "holiday": self = .holiday
+        case "default": self = .default
+        default: self = .custom(stringValue)
+        }
     }
 }

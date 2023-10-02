@@ -18,9 +18,9 @@ import Scenes
 struct EventTagCellViewModel: Equatable {
     
     var isOn: Bool = true
-    let id: String
+    let id: AllEventTagId
     let name: String
-    let colorHext: String
+    let color: EventTagColor
 }
 
 // MARK: - EventTagListViewModel
@@ -29,10 +29,10 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
 
     // interactor
     func reload()
-    func toggleIsOn(_ tagId: String)
+    func toggleIsOn(_ tagId: AllEventTagId)
     func close()
     func addNewTag()
-    func showTagDetail(_ tagId: String)
+    func showTagDetail(_ tagId: AllEventTagId)
     
     // presenter
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> { get }
@@ -88,11 +88,11 @@ extension EventTagListViewModelImple {
         // TODO: route to add new tag
     }
     
-    func toggleIsOn(_ tagId: String) {
+    func toggleIsOn(_ tagId: AllEventTagId) {
         self.tagUsecase.toggleEventTagIsOnCalendar(tagId)
     }
     
-    func showTagDetail(_ tagId: String) {
+    func showTagDetail(_ tagId: AllEventTagId) {
         // TODO: show detail
     }
 }
@@ -103,11 +103,15 @@ extension EventTagListViewModelImple {
 extension EventTagListViewModelImple {
     
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> {
-        let transform: ([EventTag], Set<String>) -> [EventTagCellViewModel] = { tags, offTagIdSet in
+        let transform: ([EventTag], Set<AllEventTagId>) -> [EventTagCellViewModel] = { tags, offTagIdSet in
             return tags
                 .map {
-                    EventTagCellViewModel(id: $0.uuid, name: $0.name, colorHext: $0.colorHex)
-                    |> \.isOn .~ !offTagIdSet.contains($0.uuid)
+                    EventTagCellViewModel(
+                        id: .custom($0.uuid),
+                        name: $0.name,
+                        color: .custom(hex: $0.colorHex)
+                    )
+                    |> \.isOn .~ !offTagIdSet.contains(.custom($0.uuid))
                 }
             
         }

@@ -181,11 +181,13 @@ extension EventTagLocalRepositoryImpleTests {
         // when + then
         var ids = repository.loadOffTags()
         XCTAssertEqual(ids, [])
-        ids = repository.toggleTagIsOn("t1")
-        XCTAssertEqual(ids, ["t1"])
-        ids = repository.toggleTagIsOn("t2")
-        XCTAssertEqual(ids, ["t1", "t2"])
-        ids = repository.toggleTagIsOn("t1")
-        XCTAssertEqual(ids, ["t2"])
+        ids = repository.toggleTagIsOn(.custom("t1"))
+        XCTAssertEqual(ids, [.custom("t1")])
+        ids = repository.toggleTagIsOn(.custom("t2"))
+        XCTAssertEqual(ids, [.custom("t1"), .custom("t2")])
+        ids = repository.toggleTagIsOn(.custom("t1"))
+        XCTAssertEqual(ids, [.custom("t2")])
+        ids = repository.toggleTagIsOn(.holiday)
+        XCTAssertEqual(ids, [.custom("t2"), .holiday])
     }
 }

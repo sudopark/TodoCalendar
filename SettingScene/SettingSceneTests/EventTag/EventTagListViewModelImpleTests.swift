@@ -100,18 +100,18 @@ extension EventTagListViewModelImpleTests {
         
         // when
         let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
-            viewModel.toggleIsOn("id:3")
-            viewModel.toggleIsOn("id:4")
-            viewModel.toggleIsOn("id:3")
+            viewModel.toggleIsOn(.custom("id:3"))
+            viewModel.toggleIsOn(.custom("id:4"))
+            viewModel.toggleIsOn(.custom("id:3"))
         }
         
         // then
         let offTagIds = cvmLists.map { cs in cs.filter { !$0.isOn }.map { $0.id} }
         XCTAssertEqual(offTagIds, [
             [],
-            ["id:3"],
-            ["id:3", "id:4"],
-            ["id:4"]
+            [.custom("id:3")],
+            [.custom("id:3"), .custom("id:4")],
+            [.custom("id:4")]
         ])
     }
 }

@@ -43,12 +43,12 @@ open class StubEventTagUsecase: EventTagUsecase {
         return allTagsLoadResult.eraseToAnyPublisher()
     }
     
-    private let offIds = CurrentValueSubject<Set<String>, Never>([])
-    public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<String>, Never> {
+    private let offIds = CurrentValueSubject<Set<AllEventTagId>, Never>([])
+    public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<AllEventTagId>, Never> {
         return offIds.eraseToAnyPublisher()
     }
     
-    public func toggleEventTagIsOnCalendar(_ tagId: String) {
+    public func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId) {
         let newSet = offIds.value |> elem(tagId) .~ !offIds.value.contains(tagId)
         self.offIds.send(newSet)
     }
