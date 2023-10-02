@@ -25,8 +25,8 @@ public protocol EventTagUsecase {
     func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never>
     func loadAllEventTags() -> AnyPublisher<[EventTag], any Error>
     
-    func toggleEventTagIsOnCalendar(_ tagId: String)
-    func offEventTagIdsOnCalendar() -> AnyPublisher<Set<String>, Never>
+    func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId)
+    func offEventTagIdsOnCalendar() -> AnyPublisher<Set<AllEventTagId>, Never>
 }
 
 
@@ -106,7 +106,7 @@ extension EventTagUsecaseImple {
             .store(in: &self.cancellables)
         
         let offIds = self.tagRepository.loadOffTags()
-        self.sharedDataStore.put(Set<String>.self, key: ShareDataKeys.offEventTagSet.rawValue, offIds)
+        self.sharedDataStore.put(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, offIds)
     }
     
     public func refreshTags(_ ids: [String]) {
@@ -156,15 +156,14 @@ extension EventTagUsecaseImple {
 
 extension EventTagUsecaseImple {
     
-    public func toggleEventTagIsOnCalendar(_ tagId: String) {
-        let shareKey = ShareDataKeys.offEventTagSet.rawValue
+    public func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId) {
         let newSet = self.tagRepository.toggleTagIsOn(tagId)
-        self.sharedDataStore.put(Set<String>.self, key: ShareDataKeys.offEventTagSet.rawValue, newSet)
+        self.sharedDataStore.put(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, newSet)
     }
     
-    public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<String>, Never> {
+    public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<AllEventTagId>, Never> {
         return self.sharedDataStore
-            .observe(Set<String>.self, key: ShareDataKeys.offEventTagSet.rawValue)
+            .observe(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue)
             .map { $0 ?? [] }
             .eraseToAnyPublisher()
     }

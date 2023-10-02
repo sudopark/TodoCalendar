@@ -16,6 +16,6 @@ public protocol EventTagRepository: Sendable {
     func loadAllTags() -> AnyPublisher<[EventTag], any Error>
     func loadTags(_ ids: [String]) -> AnyPublisher<[EventTag], any Error>
     
-    func loadOffTags() -> Set<String>
-    func toggleTagIsOn(_ tagId: String) -> Set<String>
+    func loadOffTags() -> Set<AllEventTagId>
+    func toggleTagIsOn(_ tagId: AllEventTagId) -> Set<AllEventTagId>
 }

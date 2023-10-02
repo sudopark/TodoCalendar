@@ -8,6 +8,12 @@
 import Foundation
 
 
+public enum AllEventTagId: Sendable, Hashable {
+    case holiday
+    case `default`
+    case custom(String)
+}
+
 public struct EventTag: Sendable {
     
     public let uuid: String

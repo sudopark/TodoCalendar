@@ -318,22 +318,24 @@ extension EventTagUsecaseImpleTests {
     func testUsecase_toggleIsOffTagIds() {
         // given
         let expect = expectation(description: "필터링된 이벤트 아이디 set 제공")
-        expect.expectedFulfillmentCount = 4
+        expect.expectedFulfillmentCount = 5
         let usecase = self.makeUsecase()
         
         // when
         let offIds = self.waitOutputs(expect, for: usecase.offEventTagIdsOnCalendar()) {
-            usecase.toggleEventTagIsOnCalendar("id1")
-            usecase.toggleEventTagIsOnCalendar("id2")
-            usecase.toggleEventTagIsOnCalendar("id1")
+            usecase.toggleEventTagIsOnCalendar(.custom("id1"))
+            usecase.toggleEventTagIsOnCalendar(.custom("id2"))
+            usecase.toggleEventTagIsOnCalendar(.custom("id1"))
+            usecase.toggleEventTagIsOnCalendar(.holiday)
         }
         
         // then
         XCTAssertEqual(offIds, [
             [],
-            ["id1"],
-            ["id1", "id2"],
-            ["id2"]
+            [.custom("id1")],
+            [.custom("id1"), .custom("id2")],
+            [.custom("id2")],
+            [.custom("id2"), .holiday]
         ])
     }
 }

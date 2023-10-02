@@ -54,12 +54,12 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
             .eraseToAnyPublisher()
     }
     
-    private var offTagIdSet: Set<String> = []
-    public func loadOffTags() -> Set<String> {
+    private var offTagIdSet: Set<AllEventTagId> = []
+    public func loadOffTags() -> Set<AllEventTagId> {
         return offTagIdSet
     }
     
-    public func toggleTagIsOn(_ tagId: String) -> Set<String> {
+    public func toggleTagIsOn(_ tagId: AllEventTagId) -> Set<AllEventTagId> {
         let newSet = self.offTagIdSet |> elem(tagId) .~ !offTagIdSet.contains(tagId)
         self.offTagIdSet = newSet
         return newSet
