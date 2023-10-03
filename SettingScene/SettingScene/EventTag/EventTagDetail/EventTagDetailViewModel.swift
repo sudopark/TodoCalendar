@@ -34,6 +34,7 @@ protocol EventTagDetailViewModel: AnyObject, Sendable, EventTagDetailSceneIntera
     // presenter
     var originalName: String? { get }
     var originalColor: EventTagColor { get }
+    var suggestColorHexes: [String] { get }
     var selectedColor: AnyPublisher<EventTagColor, Never> { get }
     
     var isNameChangable: Bool { get }
@@ -59,7 +60,9 @@ final class EventTagDetailViewModelImple: EventTagDetailViewModel, @unchecked Se
         self.eventTagUsecase = eventTagUsecase
         
         self.subject.name.send(originalInfo?.name)
-        self.subject.color.send(originalInfo?.color)
+        self.subject.color.send(
+            originalInfo?.color ?? self.suggestColorHexes.randomElement().map { .custom(hex: $0) }
+        )
     }
     
     
@@ -186,6 +189,14 @@ extension EventTagDetailViewModelImple {
     }
     var originalColor: EventTagColor {
         return self.originalInfo?.color ?? .default
+    }
+    
+    var suggestColorHexes: [String] {
+        return [
+            "#F42D2D", "#F9316D", "#FD838F", "#4034AB", "#4561DB",
+            "#088CDA", "#41E6EC", "#06A192", "#036A73", "#72E985", "#F6DC41", "#FFA02E",
+            "#FF5722", "#B75F17", "#CCD0DC", "#828DA9", "#8DACF6",
+        ]
     }
     
     var selectedColor: AnyPublisher<EventTagColor, Never> {

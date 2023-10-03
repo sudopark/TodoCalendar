@@ -118,10 +118,103 @@ extension EventTagListViewModelImpleTests {
     }
 }
 
+
+// MARK: - make, edit, delete tag
+
+extension EventTagListViewModelImpleTests {
+    
+    func testViewModel_makeNewTag() {
+        // given
+        let expect = expectation(description: "tag 생성 이후 리스트 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        
+        // when
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+            viewModel.addNewTag()
+        }
+        
+        // then
+        let tagCounts = cvmLists.map { $0.count }
+        let hasNewTags = cvmLists.map { $0.contains(where: { $0.name == "new" }) }
+        XCTAssertEqual(self.spyRouter.didRouteToAddNewTag, true)
+        XCTAssertEqual(tagCounts, [22, 23])
+        XCTAssertEqual(hasNewTags, [false, true])
+    }
+    
+    func testViewModel_editTag() {
+        // given
+        let expect = expectation(description: "tag 수정 이후 리스트 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        
+        // when
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+            viewModel.showTagDetail(.custom("id:4"))
+        }
+        
+        // then
+        let tagCounts = cvmLists.map { $0.count }
+        let tag4s = cvmLists.map { cs in cs.first(where: { $0.id == .custom("id:4") }) }
+        XCTAssertEqual(self.spyRouter.didRouteToEditTag, true)
+        XCTAssertEqual(tagCounts, [22, 22])
+        XCTAssertEqual(tag4s.map { $0?.name }, ["n:4", "edited name"])
+        XCTAssertEqual(tag4s.map { $0?.color }, [
+            .custom(hex: "some"), .custom(hex: "edited color hex")
+        ])
+    }
+    
+    func testViewModel_deleteTag() {
+        // given
+        let expect = expectation(description: "tag 삭제")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        
+        // when
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+            self.spyRouter.shouldDeleteTagWhenEdit = true
+            viewModel.showTagDetail(.custom("id:4"))
+        }
+        
+        // then
+        let tagCounts = cvmLists.map { $0.count }
+        let hasTag4s = cvmLists.map { cs in cs.contains(where: { $0.id == .custom("id:4") }) }
+        XCTAssertEqual(self.spyRouter.didRouteToEditTag, true)
+        XCTAssertEqual(tagCounts, [22, 21])
+        XCTAssertEqual(hasTag4s, [true, false])
+    }
+}
+
 extension EventTagListViewModelImpleTests {
 
     
-    private class SpyRouter: BaseSpyRouter, EventTagListRouting, @unchecked Sendable {
+    private class SpyRouter: BaseSpyRouter, EventTagListRouting, @unchecked Sendable
+    {
         
+        var didRouteToAddNewTag: Bool?
+        func routeToAddNewTag(listener: EventTagDetailSceneListener) {
+            self.didRouteToAddNewTag = true
+            let newTag = EventTag(name: "new", colorHex: "some")
+            listener.eventTag(created: newTag)
+        }
+        
+        var shouldDeleteTagWhenEdit: Bool = false
+        var didRouteToEditTag: Bool?
+        func routeToEditTag(
+            _ tagInfo: OriginalTagInfo,
+            listener: EventTagDetailSceneListener
+        ) {
+            self.didRouteToEditTag = true
+            if shouldDeleteTagWhenEdit {
+                listener.evetTag(deleted: tagInfo.id.customTagId ?? "")
+            } else {
+                let newTag = EventTag(
+                    uuid: tagInfo.id.customTagId ?? "",
+                    name: "edited name",
+                    colorHex: "edited color hex"
+                )
+                listener.eventTag(updated: newTag)
+            }
+        }
     }
 }

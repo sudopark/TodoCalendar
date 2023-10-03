@@ -14,11 +14,27 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol EventTagListRouting: Routing, Sendable { }
+protocol EventTagListRouting: Routing, Sendable { 
+    
+    func routeToAddNewTag(listener: EventTagDetailSceneListener)
+    
+    func routeToEditTag(
+        _ tagInfo: OriginalTagInfo,
+        listener: EventTagDetailSceneListener
+    )
+}
 
 // MARK: - Router
 
-final class EventTagListRouter: BaseRouterImple, EventTagListRouting, @unchecked Sendable { }
+final class EventTagListRouter: BaseRouterImple, EventTagListRouting, @unchecked Sendable { 
+    
+    private let tagDetailSceneBuilder: any EventTagDetailSceneBuiler
+    init(
+        tagDetailSceneBuilder: any EventTagDetailSceneBuiler
+    ) {
+        self.tagDetailSceneBuilder = tagDetailSceneBuilder
+    }
+}
 
 
 extension EventTagListRouter {
@@ -28,4 +44,26 @@ extension EventTagListRouter {
     }
     
     // TODO: router implememnts
+    func routeToAddNewTag(listener: EventTagDetailSceneListener) {
+        Task { @MainActor in
+            let nextScene = self.tagDetailSceneBuilder.makeEventTagDetailScene(
+                originalInfo: nil,
+                listener: listener
+            )
+            self.currentScene?.present(nextScene, animated: true)
+        }
+    }
+    
+    func routeToEditTag(
+        _ tagInfo: OriginalTagInfo,
+        listener: EventTagDetailSceneListener
+    ) {
+        Task { @MainActor in
+            let nextScene = self.tagDetailSceneBuilder.makeEventTagDetailScene(
+                originalInfo: tagInfo,
+                listener: listener
+            )
+            self.currentScene?.present(nextScene, animated: true)
+        }
+    }
 }
