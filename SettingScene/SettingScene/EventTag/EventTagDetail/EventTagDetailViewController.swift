@@ -37,6 +37,16 @@ final class EventTagDetailViewController: UIHostingController<EventTagDetailCont
             viewAppearance: viewAppearance
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
+        .eventHandler(\.nameEntered, viewModel.enterName(_:))
+        .eventHandler(\.colorSelected) {
+            guard let hex = $0.customHex else { return }
+            viewModel.selectColor(hex)
+        }
+        .eventHandler(\.requestSelectOtherColor) {
+            // TODO: select new color
+        }
+        .eventHandler(\.saveChanges, viewModel.save)
+        .eventHandler(\.deleteTag, viewModel.delete)
         super.init(rootView: containerView)
     }
     
