@@ -51,4 +51,9 @@ public enum EventTagColor: Equatable, Sendable {
     case `default`
     case holiday
     case custom(hex: String)
+    
+    public var customHex: String? {
+        guard case let .custom(hex) = self else { return nil }
+        return hex
+    }
 }

@@ -25,7 +25,17 @@ open class BaseSpyRouter: Routing {
         self.didShowToastWithMessage = message
     }
     
-    public func closeScene() {
-        
+    public var didClosed: Bool?
+    public func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        self.didClosed = true
+        dismissed?()
+    }
+    
+    public var didShowConfirmWith: ConfirmDialogInfo?
+    public var didShowConfirmWithCallback: ((ConfirmDialogInfo) -> Void)?
+    public func showConfirm(dialog info: ConfirmDialogInfo) {
+        self.didShowConfirmWith = info
+        self.didShowConfirmWithCallback?(info)
+        info.confirmed?()
     }
 }

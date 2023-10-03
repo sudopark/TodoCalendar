@@ -38,7 +38,11 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         // TODO: 
     }
     
-    func closeScene() {
+    func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        // TODO: 
+    }
+    
+    func showConfirm(dialog info: ConfirmDialogInfo) {
         // ignore
     }
 }
