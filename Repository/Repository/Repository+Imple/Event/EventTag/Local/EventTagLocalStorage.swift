@@ -45,6 +45,13 @@ extension EventTagLocalStorage {
         }
     }
     
+    func deleteTag(_ tagId: String) async throws {
+        try await self.sqliteService.async.run { db in
+            let deleteQuery = Tags.delete().where { $0.uuid == tagId }
+            try db.delete(Tags.self, query: deleteQuery)
+        }
+    }
+    
     func loadTag(match name: String) async throws -> [EventTag] {
         let query = Tags.selectAll { $0.name == name }
         return try await self.sqliteService.async.run { try $0.load(query) }

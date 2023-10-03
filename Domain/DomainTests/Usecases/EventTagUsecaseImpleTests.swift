@@ -118,6 +118,57 @@ extension EventTagUsecaseImpleTests {
         // then
         XCTAssertNil(new)
     }
+    
+    private func makeUsecaseWithTagAndOffed() -> EventTagUsecaseImple {
+        let tags: [EventTag] = (0..<10).map {
+            EventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "some")
+        }
+        self.sharedDataStore.put([String: EventTag].self, key: ShareDataKeys.tags.rawValue, tags.asDictionary { $0.uuid })
+        self.sharedDataStore.put(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, [
+            .custom("id:3"), .custom("id:4")
+        ])
+        return self.makeUsecase()
+    }
+    
+    // delete
+    func testUsecase_deleteTag() async {
+        // given
+        let usecase = self.makeUsecaseWithTagAndOffed()
+        
+        // when
+        let void: Void? = try? await usecase.deleteTag("id:4")
+        
+        // then
+        XCTAssertNotNil(void)
+    }
+    
+    // delete -> remove from shared and off ids
+    func testUsecase_whenDeleteTag_updateSharedTags() {
+        // given
+        let expect = expectation(description: "tag 삭제 이후 공유중인 이벤트 목록과 off id 에서 제외")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithTagAndOffed()
+        
+        // when
+        let ids = (0..<10).map { "id:\($0)" }
+        let tagSource = usecase.eventTags(ids)
+        let offIdSource = usecase.offEventTagIdsOnCalendar()
+        let source = Publishers.Zip(tagSource, offIdSource)
+        let pairs = self.waitOutputs(expect, for: source) {
+            Task {
+                try await usecase.deleteTag("id:4")
+            }
+        }
+        
+        // then
+        XCTAssertEqual(pairs.map { $0.0.keys }.map { $0.sorted() }, [
+            Array(0..<10).map { "id:\($0)" },
+            Array(0..<10).filter { $0 != 4 }.map { "id:\($0)" }
+        ])
+        XCTAssertEqual(pairs.map { $0.1 }, [
+            [.custom("id:3"), .custom("id:4")], [.custom("id:3")]
+        ])
+    }
 }
 
 extension EventTagUsecaseImpleTests {

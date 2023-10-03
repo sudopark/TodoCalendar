@@ -131,6 +131,23 @@ extension EventTagLocalRepositoryImpleTests {
         XCTAssertEqual(result?.name, "origin")
         XCTAssertEqual(result?.colorHex, "new hex")
     }
+    
+    func testRepository_whenDeleteTag_removeFromTagAndOffIds() async throws {
+        // given
+        let repository = self.makeRepository()
+        let params = EventTagMakeParams(name: "some", colorHex: "hex")
+        let origin = try await repository.makeNewTag(params)
+        let _ = repository.toggleTagIsOn(.custom(origin.uuid))
+        
+        // when
+        try await repository.deleteTag(origin.uuid)
+        let tagAfterDelete = try await repository.loadTags([origin.uuid]).values(with: 100).first(where: { _ in true })
+        let offIdsAfterDelete = repository.loadOffTags()
+        
+        // then
+        XCTAssertEqual(tagAfterDelete?.count, 0)
+        XCTAssertEqual(offIdsAfterDelete, [])
+    }
 }
 
 extension EventTagLocalRepositoryImpleTests {

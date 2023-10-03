@@ -24,6 +24,10 @@ open class StubEventTagUsecase: EventTagUsecase {
         throw RuntimeError("failed")
     }
     
+    open func deleteTag(_ tagId: String) async throws {
+        throw RuntimeError("failed")
+    }
+    
     open func bindRefreshRequireTagInfos() { }
     open func refreshTags(_ ids: [String]) { }
     open func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never> {

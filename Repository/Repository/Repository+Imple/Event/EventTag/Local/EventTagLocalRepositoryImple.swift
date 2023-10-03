@@ -53,6 +53,11 @@ extension EventTagLocalRepositoryImple {
         try await self.localStorage.editTag(tagId, with: params)
         return try await self.localStorage.loadTags(in: [tagId]).first.unwrap()
     }
+    
+    public func deleteTag(_ tagId: String) async throws {
+        try await self.localStorage.deleteTag(tagId)
+        self.deleteOfftagId(tagId)
+    }
 }
 
 extension EventTagLocalRepositoryImple {
@@ -85,6 +90,13 @@ extension EventTagLocalRepositoryImple {
         let newIdStringValues = newIds.map { $0.stringValue }
         self.environmentStorage.update(self.offIds, newIdStringValues)
         return newIds
+    }
+    
+    private func deleteOfftagId(_ tagId: String) {
+        let oldOffIds = self.loadOffTags()
+        let newIds = oldOffIds |> elem(.custom(tagId)) .~ false
+        let newIdStringValues = newIds.map { $0.stringValue }
+        self.environmentStorage.update(self.offIds, newIdStringValues)
     }
 }
 

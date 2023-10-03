@@ -18,6 +18,7 @@ public protocol EventTagUsecase {
     
     func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag
     func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag
+    func deleteTag(_ tagId: String) async throws
     
     func bindRefreshRequireTagInfos()
     func refreshTags(_ ids: [String])
@@ -66,6 +67,16 @@ extension EventTagUsecaseImple {
         let updated = try await self.tagRepository.editTag(tagId, params)
         self.updateSharedTags([updated])
         return updated
+    }
+    
+    public func deleteTag(_ tagId: String) async throws {
+        try await self.tagRepository.deleteTag(tagId)
+        self.sharedDataStore.update([String: EventTag].self, key: self.shareKey) {
+            ($0 ?? [:]) |> key(tagId) .~ nil
+        }
+        self.sharedDataStore.update(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue) {
+            ($0 ?? []) |> elem(.custom(tagId)) .~ false
+        }
     }
     
     private func updateSharedTags(_ tags: [EventTag]) {

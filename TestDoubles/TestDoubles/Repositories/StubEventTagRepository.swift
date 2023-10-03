@@ -33,6 +33,10 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         return .init(uuid: tagId, name: params.name, colorHex: params.colorHex)
     }
     
+    public func deleteTag(_ tagId: String) async throws {
+        
+    }
+    
     public var shouldFailLoadTagsInRange: Bool = false
     public var tagsMocking: ([String]) -> [EventTag] = { ids in
         return ids.map {
