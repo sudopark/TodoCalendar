@@ -30,6 +30,13 @@ public protocol ColorSet: Sendable {
     
     var holidayTag: UIColor { get }
     var defaultTag: UIColor { get }
+    
+    var primaryBtnBackground: UIColor { get }
+    var primaryBtnText: UIColor { get }
+    var secondaryBtnBackground: UIColor { get }
+    var secondaryBtnText: UIColor { get }
+    var negativeBtnBackground: UIColor { get }
+    var negativeBtnText: UIColor { get }
 }
 
 
@@ -55,4 +62,11 @@ public struct DefaultLightColorSet: ColorSet {
     
     public let holidayTag: UIColor = UIColor(rgb: 0xD6236A)
     public let defaultTag: UIColor = UIColor(rgb: 0x088CDA)
+    
+    public let primaryBtnBackground: UIColor = .systemBlue
+    public let primaryBtnText: UIColor = .white
+    public var secondaryBtnBackground: UIColor { .systemGray5 }
+    public var secondaryBtnText: UIColor { self.normalText }
+    public let negativeBtnBackground: UIColor = .systemRed
+    public let negativeBtnText: UIColor = .white
 }
