@@ -43,7 +43,12 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
             viewAppearance: self.viewAppearance
         )
     
+        let tagDetailBuilder = EventTagDetailSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
         let router = EventTagListRouter(
+            tagDetailSceneBuilder: tagDetailBuilder
         )
         router.scene = viewController
         viewModel.router = router

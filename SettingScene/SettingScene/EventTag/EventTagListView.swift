@@ -131,14 +131,13 @@ struct EventTagListView: View {
     private func cellView(_ cellViewModel: EventTagCellViewModel) -> some View {
         
         HStack {
-            Button {
-                self.toggleEventTagViewingIsOn(cellViewModel.id)
-            } label: {
-                Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
-                    .foregroundStyle(cellViewModel.color.color(with: self.appearance).asColor)
-                    .font(.title3)
-                    .animation(.easeIn, value: cellViewModel.isOn)
-            }
+            Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
+                .foregroundStyle(cellViewModel.color.color(with: self.appearance).asColor)
+                .font(.title3)
+                .animation(.easeIn, value: cellViewModel.isOn)
+                .onTapGesture {
+                    self.toggleEventTagViewingIsOn(cellViewModel.id)
+                }
             Text(cellViewModel.name)
                 .lineLimit(1)
                 .font(self.appearance.fontSet.normal.asFont)

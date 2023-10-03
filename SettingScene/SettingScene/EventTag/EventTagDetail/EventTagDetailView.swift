@@ -21,6 +21,7 @@ final class EventTagDetailViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
+    @Published fileprivate var suggestColorHexes: [String] = []
     @Published fileprivate var newTagName: String = ""
     @Published fileprivate var originalColor: EventTagColor?
     @Published fileprivate var selectedColor: EventTagColor?
@@ -34,6 +35,7 @@ final class EventTagDetailViewState: ObservableObject {
         self.didBind = true
         
         self.originalColor = viewModel.originalColor
+        self.suggestColorHexes = viewModel.suggestColorHexes
         self.newTagName = viewModel.originalName ?? ""
         self.isDeletable = viewModel.isDeletable
         self.isNameChangable = viewModel.isNameChangable
@@ -103,13 +105,6 @@ struct EventTagDetailView: View {
     fileprivate var deleteTag: () -> Void = { }
     
     private let suggestColorColums = [GridItem(.adaptive(minimum: 40))]
-    private var suggestColorHexTexts: [String] {
-        return [
-            "#F42D2D", "#F9316D", "#FD838F", "#4034AB", "#4561DB",
-            "#088CDA", "#41E6EC", "#06A192", "#036A73", "#72E985", "#F6DC41", "#FFA02E",
-            "#FF5722", "#B75F17", "#CCD0DC", "#828DA9", "#8DACF6",
-        ]
-    }
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -160,7 +155,7 @@ struct EventTagDetailView: View {
         VStack {
             LazyVGrid(columns: self.suggestColorColums, spacing: 20) {
                 Section {
-                    ForEach(self.suggestColorHexTexts, id: \.self) { hex in
+                    ForEach(self.state.suggestColorHexes, id: \.self) { hex in
                         self.circleView(.custom(hex: hex))
                     }
                 }

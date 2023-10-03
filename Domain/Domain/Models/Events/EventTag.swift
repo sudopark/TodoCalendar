@@ -12,6 +12,11 @@ public enum AllEventTagId: Sendable, Hashable {
     case holiday
     case `default`
     case custom(String)
+    
+    public var customTagId: String? {
+        guard case let .custom(id) = self else { return nil }
+        return id
+    }
 }
 
 public struct EventTag: Sendable {
