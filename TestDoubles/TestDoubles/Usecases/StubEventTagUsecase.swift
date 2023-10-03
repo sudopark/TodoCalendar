@@ -17,15 +17,29 @@ open class StubEventTagUsecase: EventTagUsecase {
     
     public init() { }
     
+    public var shouldMakeFail: Bool = false
     open func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag {
-        throw RuntimeError("failed")
+        guard self.shouldMakeFail == false
+        else {
+            throw RuntimeError("failed")
+        }
+        return .init(name: params.name, colorHex: params.colorHex)
     }
+    public var shouldEditFail: Bool = false
     open func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag {
-        throw RuntimeError("failed")
+        guard self.shouldEditFail == false
+        else {
+            throw RuntimeError("failed")
+        }
+        return .init(uuid: tagId, name: params.name, colorHex: params.colorHex)
     }
     
+    public var shouldDeleteFail: Bool = false
     open func deleteTag(_ tagId: String) async throws {
-        throw RuntimeError("failed")
+        guard self.shouldDeleteFail == false 
+        else {
+            throw RuntimeError("failed")
+        }
     }
     
     open func bindRefreshRequireTagInfos() { }
