@@ -24,4 +24,9 @@ public protocol EventUsecaseFactory {
     func makeEventTagUsecase() -> any EventTagUsecase
 }
 
-public protocol UsecaseFactory: CalendarUsecaseFactory, EventUsecaseFactory { }
+public protocol SettingUsecaseFactory {
+    
+    func makeUISettingUsecase() -> any UISettingUsecase
+}
+
+public protocol UsecaseFactory: CalendarUsecaseFactory, EventUsecaseFactory, SettingUsecaseFactory { }

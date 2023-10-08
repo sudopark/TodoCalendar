@@ -50,6 +50,9 @@
 		F6CD67262A343511007E4306 /* HolidayRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD67252A343511007E4306 /* HolidayRepository.swift */; };
 		F6CD67282A3445D4007E4306 /* HolidayUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD67272A3445D4007E4306 /* HolidayUsecaseImpleTests.swift */; };
 		F6CD672A2A3445E0007E4306 /* StubHolidayRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CD67292A3445E0007E4306 /* StubHolidayRepository.swift */; };
+		F6CFAC3A2AD2DEC100C7EA5E /* UISettingUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CFAC392AD2DEC100C7EA5E /* UISettingUsecase.swift */; };
+		F6CFAC3C2AD2E74E00C7EA5E /* StubAppSettingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CFAC3B2AD2E74E00C7EA5E /* StubAppSettingRepository.swift */; };
+		F6CFAC3E2AD2E7CC00C7EA5E /* UISettingUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CFAC3D2AD2E7CC00C7EA5E /* UISettingUsecaseImpleTests.swift */; };
 		F6E35D532A2B892600BDA545 /* CalendarSettingUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D522A2B892600BDA545 /* CalendarSettingUsecase.swift */; };
 		F6E35D552A2B899B00BDA545 /* CalendarSettingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D542A2B899B00BDA545 /* CalendarSettingRepository.swift */; };
 		F6E35D572A2B8B1C00BDA545 /* CalendarSettingUsecaseImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D562A2B8B1C00BDA545 /* CalendarSettingUsecaseImpleTests.swift */; };
@@ -112,6 +115,9 @@
 		F6CD67252A343511007E4306 /* HolidayRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayRepository.swift; sourceTree = "<group>"; };
 		F6CD67272A3445D4007E4306 /* HolidayUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayUsecaseImpleTests.swift; sourceTree = "<group>"; };
 		F6CD67292A3445E0007E4306 /* StubHolidayRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubHolidayRepository.swift; sourceTree = "<group>"; };
+		F6CFAC392AD2DEC100C7EA5E /* UISettingUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UISettingUsecase.swift; sourceTree = "<group>"; };
+		F6CFAC3B2AD2E74E00C7EA5E /* StubAppSettingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubAppSettingRepository.swift; sourceTree = "<group>"; };
+		F6CFAC3D2AD2E7CC00C7EA5E /* UISettingUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UISettingUsecaseImpleTests.swift; sourceTree = "<group>"; };
 		F6E35D522A2B892600BDA545 /* CalendarSettingUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingUsecase.swift; sourceTree = "<group>"; };
 		F6E35D542A2B899B00BDA545 /* CalendarSettingRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingRepository.swift; sourceTree = "<group>"; };
 		F6E35D562A2B8B1C00BDA545 /* CalendarSettingUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingUsecaseImpleTests.swift; sourceTree = "<group>"; };
@@ -282,6 +288,7 @@
 				F609B3852A279EBD0056CC13 /* Common */,
 				F6E35D512A2B891900BDA545 /* Calendar */,
 				F6EFD8DA29FFE84C0088FCB4 /* Events */,
+				F6CFAC382AD2DEB200C7EA5E /* Setting */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -337,6 +344,7 @@
 				F6E35D562A2B8B1C00BDA545 /* CalendarSettingUsecaseImpleTests.swift */,
 				F6CD67272A3445D4007E4306 /* HolidayUsecaseImpleTests.swift */,
 				F69904E62A49D9DF00F44834 /* CalendarUsecaseImpleTests.swift */,
+				F6CFAC3D2AD2E7CC00C7EA5E /* UISettingUsecaseImpleTests.swift */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -346,6 +354,7 @@
 			children = (
 				F6E35D582A2B8B6700BDA545 /* StubCalendarSetingRepository.swift */,
 				F6CD67292A3445E0007E4306 /* StubHolidayRepository.swift */,
+				F6CFAC3B2AD2E74E00C7EA5E /* StubAppSettingRepository.swift */,
 			);
 			path = Doubles;
 			sourceTree = "<group>";
@@ -367,6 +376,14 @@
 				F6957FBC2A22293E0064E8BD /* EventTagRepository.swift */,
 			);
 			path = Events;
+			sourceTree = "<group>";
+		};
+		F6CFAC382AD2DEB200C7EA5E /* Setting */ = {
+			isa = PBXGroup;
+			children = (
+				F6CFAC392AD2DEC100C7EA5E /* UISettingUsecase.swift */,
+			);
+			path = Setting;
 			sourceTree = "<group>";
 		};
 		F6E35D512A2B891900BDA545 /* Calendar */ = {
@@ -512,6 +529,7 @@
 				F63C9CEC29C6E3A400CC663A /* TodoEvent.swift in Sources */,
 				F6CD67262A343511007E4306 /* HolidayRepository.swift in Sources */,
 				F6C2B0CE2A433FD400BA89CA /* CalendarUsecase.swift in Sources */,
+				F6CFAC3A2AD2DEC100C7EA5E /* UISettingUsecase.swift in Sources */,
 				F6B70D152A76485700FFF457 /* CalendarMonth.swift in Sources */,
 				F63C9CEE29C6E5BF00CC663A /* ScheduleEvent.swift in Sources */,
 				F61C60252A8131AD007BA02C /* AppearanceSettings.swift in Sources */,
@@ -544,7 +562,9 @@
 				F6EFD8DC29FFE8660088FCB4 /* MemorizedScheduleEventsContainerTests.swift in Sources */,
 				F609B3892A27AC870056CC13 /* PagingUsecaseTests.swift in Sources */,
 				F69904E72A49D9DF00F44834 /* CalendarUsecaseImpleTests.swift in Sources */,
+				F6CFAC3E2AD2E7CC00C7EA5E /* UISettingUsecaseImpleTests.swift in Sources */,
 				F65B08ED29D0140C000EE650 /* TodoEventUsecaseImpleTests.swift in Sources */,
+				F6CFAC3C2AD2E74E00C7EA5E /* StubAppSettingRepository.swift in Sources */,
 				F632E22029FF8B6D0052C61B /* ScheduleEventUsecaseImpleTests.swift in Sources */,
 				F6957FC12A222B520064E8BD /* EventTagUsecaseImpleTests.swift in Sources */,
 				F6CD67282A3445D4007E4306 /* HolidayUsecaseImpleTests.swift in Sources */,
