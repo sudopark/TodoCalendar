@@ -34,8 +34,9 @@ public class ViewAppearance: ObservableObject {
 
 extension ViewAppearance {
     
-    public var didUpdated: AnyPublisher<(any FontSet, any ColorSet), Never> {
-        return Publishers.CombineLatest(
+    public var didUpdated: AnyPublisher<(EventTagColorSet, any FontSet, any ColorSet), Never> {
+        return Publishers.CombineLatest3(
+            self.$tagColors,
             self.$fontSet,
             self.$colorSet
         )

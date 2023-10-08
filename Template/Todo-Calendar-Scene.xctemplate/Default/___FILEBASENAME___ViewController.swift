@@ -52,8 +52,8 @@ extension ___VARIABLE_sceneName___ViewController {
      
         self.viewAppearance.didUpdated
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] pair in
-                self?.setupStyling(pair.0, pair.1)
+            .sink(receiveValue: { [weak self] tuple in
+                self?.setupStyling(tuple.1, tuple.2)
             })
             .store(in: &self.cancellables)
     }
