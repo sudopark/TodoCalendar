@@ -96,3 +96,14 @@ extension NonLoginUsecaseFactoryImple {
         )
     }
 }
+
+
+extension NonLoginUsecaseFactoryImple {
+    
+    func makeUISettingUsecase() -> any UISettingUsecase {
+        let repository = AppSettingRepositoryImple(
+            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
+        )
+        return UISettingUsecaseImple(appSettingRepository: repository)
+    }
+}

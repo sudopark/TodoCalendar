@@ -14,16 +14,15 @@ final class ApplicationRootBuilder {
     
     func makeRootViewModel() -> ApplicationRootViewModelImple {
         
+        let usecaseFactory = NonLoginUsecaseFactoryImple()
         let rootUsecase = ApplicationRootUsecaseImple(
             authRepository: FakeAuthRepository(),
-            appSettingRepository: AppSettingRepositoryImple(
-                environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
-            )
+            uiSettingUsecase: usecaseFactory.makeUISettingUsecase()
         )
         let rootViewModel = ApplicationRootViewModelImple(
             applicationUsecase: rootUsecase
         )
-        let rootRouter = ApplicationRootRouter(nonLoginUsecaseFactory: NonLoginUsecaseFactoryImple())
+        let rootRouter = ApplicationRootRouter(nonLoginUsecaseFactory: usecaseFactory)
         rootViewModel.router = rootRouter
         
         return rootViewModel

@@ -17,6 +17,8 @@ public final class AppSettingRepositoryImple: AppSettingRepository {
         self.environmentStorage = environmentStorage
     }
     
+    private var holidayTagColorKey: String { "holiday_tag_color" }
+    private var defaultTagColorKey: String { "default_tag_color" }
     private var colorSetKey: String { "color_set" }
     private var fontSetKey: String { "font_set" }
 }
@@ -25,12 +27,21 @@ public final class AppSettingRepositoryImple: AppSettingRepository {
 extension AppSettingRepositoryImple {
     
     public func loadSavedViewAppearance() -> AppearanceSettings {
+        let holidayTagColor: String? = self.environmentStorage.load(holidayTagColorKey)
+        let defaultTagColor: String? = self.environmentStorage.load(defaultTagColorKey)
         let colorSetRaw: String? = self.environmentStorage.load(colorSetKey)
         let fontSetRaw: String? = self.environmentStorage.load(fontSetKey)
         let colorSet = colorSetRaw.flatMap { ColorSetKeys(rawValue: $0) } ?? .defaultLight
         let fontSet = fontSetRaw.flatMap { FontSetKeys(rawValue: $0) } ?? .systemDefault
         
-        return AppearanceSettings(colorSetKey: colorSet, fontSetKey: fontSet)
+        return AppearanceSettings(
+            tagColorSetting: .init(
+                holiday: holidayTagColor ?? "#D6236A",
+                default: defaultTagColor ?? "#088CDA"
+            ),
+            colorSetKey: colorSet,
+            fontSetKey: fontSet
+        )
     }
     
     public func saveViewAppearanceSetting(_ newValue: AppearanceSettings) {

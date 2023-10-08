@@ -13,10 +13,10 @@ extension EventTagColor {
     
     public func color(with appearance: ViewAppearance) -> UIColor {
         switch self {
-        case .holiday: return appearance.colorSet.holidayTag
-        case .default: return appearance.colorSet.defaultTag
+        case .holiday: return appearance.tagColors.holiday
+        case .default: return appearance.tagColors.defaultColor
         case .custom(let hex): return UIColor.from(hex: hex)
-            ?? appearance.colorSet.defaultTag
+            ?? appearance.tagColors.defaultColor
         }
     }
 }

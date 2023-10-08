@@ -200,7 +200,10 @@ private extension EventTagCellViewModel {
 struct EventTagListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
-        let viewAppearance = ViewAppearance(color: .defaultLight, font: .systemDefault)
+        let viewAppearance = ViewAppearance(
+            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+            color: .defaultLight, font: .systemDefault
+        )
         let state = EventTagListViewState()
         state.cellviewModels = (0..<20).map {
             EventTagCellViewModel(id: .custom("id:\($0)"), name: "name:\($0)", color: .custom(hex: "#ff0000"))

@@ -293,7 +293,7 @@ private struct QuickAddNewTodoView: View {
             .frame(width: 50)
             
             RoundedRectangle(cornerRadius: 3)
-                .fill(self.appearance.colorSet.defaultTag.asColor)
+                .fill(self.appearance.tagColors.defaultColor.asColor)
                 .frame(width: 6)
             
             HStack(spacing: 8) {
@@ -349,7 +349,10 @@ private extension EventCellViewModel {
 struct DayEventListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
-        let viewAppearance = ViewAppearance(color: .defaultLight, font: .systemDefault)
+        let viewAppearance = ViewAppearance(
+            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+            color: .defaultLight, font: .systemDefault
+        )
         let state = DayEventListViewState()
         state.dateText = "2020년 9월 15일(금)"
         state.cellViewModels = self.makeDummyCells()

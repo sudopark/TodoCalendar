@@ -7,6 +7,18 @@
 
 import UIKit
 
+// MARK: - event tag color set
+
+public struct EventTagColorSet {
+    
+    public let holiday: UIColor
+    public let defaultColor: UIColor
+    
+    public init(holiday: UIColor, defaultColor: UIColor) {
+        self.holiday = holiday
+        self.defaultColor = defaultColor
+    }
+}
 
 // MARK: - ColorSet
 
@@ -27,9 +39,6 @@ public protocol ColorSet: Sendable {
     var subNormalText: UIColor { get }
     
     var eventList: UIColor { get }
-    
-    var holidayTag: UIColor { get }
-    var defaultTag: UIColor { get }
     
     var primaryBtnBackground: UIColor { get }
     var primaryBtnText: UIColor { get }
@@ -59,9 +68,6 @@ public struct DefaultLightColorSet: ColorSet {
     public let subNormalText: UIColor = UIColor(rgb: 0x646464)
     
     public let eventList: UIColor = UIColor(rgb: 0xf4f4f4)
-    
-    public let holidayTag: UIColor = UIColor(rgb: 0xD6236A)
-    public let defaultTag: UIColor = UIColor(rgb: 0x088CDA)
     
     public let primaryBtnBackground: UIColor = .systemBlue
     public let primaryBtnText: UIColor = .white

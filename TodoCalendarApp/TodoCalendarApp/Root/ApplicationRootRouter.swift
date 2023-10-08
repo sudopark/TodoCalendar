@@ -54,6 +54,10 @@ extension ApplicationRootRouter {
         
         guard !AppEnvironment.isTestBuild else { return }
         self.viewAppearance = ViewAppearance(
+            tagColorSetting: .init(
+                holiday: prepareResult.appearnceSetings.tagColorSetting.holiday,
+                default: prepareResult.appearnceSetings.tagColorSetting.default
+            ),
             color: prepareResult.appearnceSetings.colorSetKey,
             font: prepareResult.appearnceSetings.fontSetKey
         )

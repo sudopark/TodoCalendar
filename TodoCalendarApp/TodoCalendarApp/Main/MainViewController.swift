@@ -272,7 +272,13 @@ import SwiftUI
 struct ViewControllerPreviewConverter: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> some UIViewController {
-        return MainViewController(viewModel: MainViewModelImple(), viewAppearance: ViewAppearance(color: .defaultLight, font: .systemDefault))
+        return MainViewController(
+            viewModel: MainViewModelImple(),
+            viewAppearance: ViewAppearance(
+                tagColorSetting: .init(holiday: "#ff0000", default: "#00ff00"),
+                color: .defaultLight, font: .systemDefault
+            )
+        )
     }
     
     func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {}
