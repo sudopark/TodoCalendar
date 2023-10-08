@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 import Domain
 
 
@@ -46,10 +48,33 @@ extension AppSettingRepositoryImple {
     
     public func saveViewAppearanceSetting(_ newValue: AppearanceSettings) {
         self.environmentStorage.update(
+            self.holidayTagColorKey, newValue.tagColorSetting.holiday
+        )
+        self.environmentStorage.update(
+            self.defaultTagColorKey, newValue.tagColorSetting.default
+        )
+        self.environmentStorage.update(
             self.colorSetKey, newValue.colorSetKey.rawValue
         )
         self.environmentStorage.update(
             self.fontSetKey, newValue.fontSetKey.rawValue
         )
+    }
+    
+    public func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings {
+        let setting = self.loadSavedViewAppearance()
+        let newTagColorSetting = EventTagColorSetting(
+            holiday: params.newTagColorSetting?.newHolidayTagColor ?? setting.tagColorSetting.holiday,
+            default: params.newTagColorSetting?.newDefaultTagColor ?? setting.tagColorSetting.default
+        )
+        let newSetting = AppearanceSettings(
+            tagColorSetting: newTagColorSetting,
+            colorSetKey: params.newColorSetKey ?? setting.colorSetKey,
+            fontSetKey: params.newFontSetKcy ?? setting.fontSetKey
+        )
+        
+        self.saveViewAppearanceSetting(newSetting)
+        
+        return newSetting
     }
 }

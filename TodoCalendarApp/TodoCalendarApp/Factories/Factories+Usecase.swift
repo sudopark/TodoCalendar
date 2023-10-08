@@ -13,7 +13,13 @@ import Scenes
 
 // MARK: - NonLoginUsecaseFactoryImple
 
-struct NonLoginUsecaseFactoryImple: UsecaseFactory { }
+struct NonLoginUsecaseFactoryImple: UsecaseFactory {
+    
+    let viewAppearanceStore: any ViewAppearanceStore
+    init(viewAppearanceStore: any ViewAppearanceStore) {
+        self.viewAppearanceStore = viewAppearanceStore
+    }
+}
 
 extension NonLoginUsecaseFactoryImple {
     
@@ -104,6 +110,9 @@ extension NonLoginUsecaseFactoryImple {
         let repository = AppSettingRepositoryImple(
             environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
         )
-        return UISettingUsecaseImple(appSettingRepository: repository)
+        return UISettingUsecaseImple(
+            appSettingRepository: repository,
+            viewAppearanceStore: self.viewAppearanceStore
+        )
     }
 }

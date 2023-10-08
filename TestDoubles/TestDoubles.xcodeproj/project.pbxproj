@@ -25,6 +25,7 @@
 		F69904DB2A49D2A900F44834 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F69904DA2A49D2A900F44834 /* Extensions.framework */; };
 		F69904E12A49D2F600F44834 /* StubCalendarSettingUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69904E02A49D2F600F44834 /* StubCalendarSettingUsecase.swift */; };
 		F69904E32A49D30700F44834 /* StubHolidayUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69904E22A49D30700F44834 /* StubHolidayUsecase.swift */; };
+		F6CFAC402AD3117000C7EA5E /* StubUISettingUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6CFAC3F2AD3117000C7EA5E /* StubUISettingUsecase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 		F69904DA2A49D2A900F44834 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F69904E02A49D2F600F44834 /* StubCalendarSettingUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubCalendarSettingUsecase.swift; sourceTree = "<group>"; };
 		F69904E22A49D30700F44834 /* StubHolidayUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubHolidayUsecase.swift; sourceTree = "<group>"; };
+		F6CFAC3F2AD3117000C7EA5E /* StubUISettingUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubUISettingUsecase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -133,6 +135,7 @@
 				F67907EC2A5004CA000CF11B /* StubTodoEventUsecase.swift */,
 				F67907EE2A5004D4000CF11B /* StubScheduleEventUsecase.swift */,
 				F698371B2A840281001F7603 /* StubEventTagUsecase.swift */,
+				F6CFAC3F2AD3117000C7EA5E /* StubUISettingUsecase.swift */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -231,6 +234,7 @@
 				F67907ED2A5004CA000CF11B /* StubTodoEventUsecase.swift in Sources */,
 				F69904E32A49D30700F44834 /* StubHolidayUsecase.swift in Sources */,
 				F698371C2A840281001F7603 /* StubEventTagUsecase.swift in Sources */,
+				F6CFAC402AD3117000C7EA5E /* StubUISettingUsecase.swift in Sources */,
 				F60163592A515FEE00CAD076 /* StubScheduleEventRepository.swift in Sources */,
 				F67907EF2A5004D4000CF11B /* StubScheduleEventUsecase.swift in Sources */,
 				F69904E12A49D2F600F44834 /* StubCalendarSettingUsecase.swift in Sources */,

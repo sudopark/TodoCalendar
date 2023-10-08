@@ -28,14 +28,14 @@ protocol ApplicationRootUsecase {
 final class ApplicationRootUsecaseImple: ApplicationRootUsecase {
     
     private let authRepository: any AuthRepository
-    private let uiSettingUsecase: any UISettingUsecase
+    private let appSettingRepository: any AppSettingRepository
     
     init(
         authRepository: any AuthRepository,
-        uiSettingUsecase: any UISettingUsecase
+        appSettingRepository: any AppSettingRepository
     ) {
         self.authRepository = authRepository
-        self.uiSettingUsecase = uiSettingUsecase
+        self.appSettingRepository = appSettingRepository
     }
 }
 
@@ -44,7 +44,7 @@ extension ApplicationRootUsecaseImple {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult {
         let latestLoginId = try await self.authRepository.loadLatestLoginUserId()
-        let appearance = self.uiSettingUsecase.loadAppearanceSetting()
+        let appearance = self.appSettingRepository.loadSavedViewAppearance()
         return .init(
             latestLoginAccountId: latestLoginId,
             appearnceSetings: appearance

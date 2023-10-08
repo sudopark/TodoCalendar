@@ -7,11 +7,40 @@
 
 import UIKit
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 import CalendarScenes
 import SettingScene
 
+
+// MARK: - ApplicationViewAppearanceStore
+
+final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked Sendable {
+    
+    let appearance: ViewAppearance
+    init(_ setting: AppearanceSettings) {
+        
+        self.appearance = .init(
+            tagColorSetting: setting.tagColorSetting,
+            color: setting.colorSetKey,
+            font: setting.fontSetKey
+        )
+    }
+    
+    func notifySettingChanged(_ newSetting: AppearanceSettings) {
+        let newTagColorSet = EventTagColorSet(newSetting.tagColorSetting)
+        if self.appearance.tagColors != newTagColorSet {
+            self.appearance.tagColors = newTagColorSet
+        }
+        if self.appearance.colorSet.key != newSetting.colorSetKey {
+            self.appearance.colorSet = newSetting.colorSetKey.convert()
+        }
+        if self.appearance.fontSet.key != newSetting.fontSetKey {
+            self.appearance.fontSet = newSetting.fontSetKey.convert()
+        }
+    }
+}
 
 // MARK: - ApplicationRootRouter
 
@@ -23,12 +52,10 @@ protocol ApplicationRouting: Routing {
 final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     
     @MainActor var window: UIWindow!
-    var viewAppearance: ViewAppearance!
+    var viewAppearanceStore: ApplicationViewAppearanceStoreImple!
+    private var usecaseFactory: (any UsecaseFactory)!
     
-    private let nonLoginUsecaseFactory: NonLoginUsecaseFactoryImple
-    init(nonLoginUsecaseFactory: NonLoginUsecaseFactoryImple) {
-        self.nonLoginUsecaseFactory = nonLoginUsecaseFactory
-    }
+    init() { }
     
     func showError(_ error: any Error) {
         // TODO:
@@ -53,22 +80,16 @@ extension ApplicationRootRouter {
     func setupInitialScene(_ prepareResult: ApplicationPrepareResult) {
         
         guard !AppEnvironment.isTestBuild else { return }
-        self.viewAppearance = ViewAppearance(
-            tagColorSetting: .init(
-                holiday: prepareResult.appearnceSetings.tagColorSetting.holiday,
-                default: prepareResult.appearnceSetings.tagColorSetting.default
-            ),
-            color: prepareResult.appearnceSetings.colorSetKey,
-            font: prepareResult.appearnceSetings.fontSetKey
-        )
+        self.viewAppearanceStore = .init(prepareResult.appearnceSetings)
         self.prepareDatabase(for: prepareResult.latestLoginAccountId)
         
         // TODO: 추후에 prepare result에 따라 usecase factory 결정해야함
+        self.usecaseFactory = NonLoginUsecaseFactoryImple(viewAppearanceStore: self.viewAppearanceStore)
         
         Task { @MainActor in
             let builder = MainSceneBuilerImple(
-                usecaseFactory: self.nonLoginUsecaseFactory,
-                viewAppearance: self.viewAppearance,
+                usecaseFactory: self.usecaseFactory,
+                viewAppearance: self.viewAppearanceStore.appearance,
                 calendarSceneBulder: self.calendarSceneBulder(),
                 eventTagListSceneBuilder: self.eventTagListSceneBulder()
             )
@@ -80,15 +101,15 @@ extension ApplicationRootRouter {
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
         return CalendarSceneBuilderImple(
-            usecaseFactory: self.nonLoginUsecaseFactory,
-            viewAppearance: self.viewAppearance
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance
         )
     }
     
     private func eventTagListSceneBulder() -> any EventTagListSceneBuiler {
         return EventTagListSceneBuilerImple(
-            usecaseFactory: self.nonLoginUsecaseFactory,
-            viewAppearance: self.viewAppearance
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance
         )
     }
     
@@ -96,7 +117,7 @@ extension ApplicationRootRouter {
         let database = Singleton.shared.commonSqliteService
         let dbPath = AppEnvironment.dbFilePath(for: accountId)
         let openResult = database.open(path: dbPath)
-        print("db open result: \(openResult) -> path: \(dbPath)")
+        logger.log(level: .info, "db open result: \(openResult) -> path: \(dbPath)")
         
         // TODO: create table if need
     }
