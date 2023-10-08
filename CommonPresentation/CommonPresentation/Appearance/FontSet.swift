@@ -6,11 +6,14 @@
 //
 
 import UIKit
+import Domain
 
 
 // MARK: - FontSet
 
 public protocol FontSet: Sendable {
+    
+    var key: FontSetKeys { get }
     
     // calendar component
     var weekday: UIFont { get }
@@ -39,6 +42,8 @@ extension FontSet {
 // MARK: - default font set
 
 public struct SystemDefaultFontSet: FontSet {
+    
+    public let key: FontSetKeys = .systemDefault
 
     // calendar component
     public let weekday: UIFont = UIFont.systemFont(ofSize: 12)

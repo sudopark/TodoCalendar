@@ -6,10 +6,11 @@
 //
 
 import UIKit
+import Domain
 
 // MARK: - event tag color set
 
-public struct EventTagColorSet {
+public struct EventTagColorSet: Equatable {
     
     public let holiday: UIColor
     public let defaultColor: UIColor
@@ -18,11 +19,18 @@ public struct EventTagColorSet {
         self.holiday = holiday
         self.defaultColor = defaultColor
     }
+    
+    public init(_ setting: EventTagColorSetting) {
+        self.holiday = UIColor.from(hex: setting.holiday) ?? .clear
+        self.defaultColor = UIColor.from(hex: setting.default) ?? .clear
+    }
 }
 
 // MARK: - ColorSet
 
 public protocol ColorSet: Sendable {
+    
+    var key: ColorSetKeys { get }
     
     // calendar component
     var weekDayText: UIColor { get }
@@ -52,6 +60,8 @@ public protocol ColorSet: Sendable {
 // MARK: - default light
 
 public struct DefaultLightColorSet: ColorSet {
+    
+    public let key: ColorSetKeys = .defaultLight
 
     // calendar component
     public let weekDayText: UIColor = UIColor(rgb: 0x323232)

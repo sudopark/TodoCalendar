@@ -23,12 +23,14 @@ class EventTagDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyRouter: SpyRouter!
     private var spyListener: SpyListener!
     private var stubEventTagUsecase: StubEventTagUsecase!
+    private var stubUISettingUsecase: StubUISettingUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyRouter = .init()
         self.spyListener = .init()
         self.stubEventTagUsecase = .init()
+        self.stubUISettingUsecase = .init()
     }
     
     override func tearDownWithError() throws {
@@ -36,12 +38,14 @@ class EventTagDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyRouter = nil
         self.spyListener = nil
         self.stubEventTagUsecase = nil
+        self.stubUISettingUsecase = nil
     }
     
     private func makeViewModel(info: OriginalTagInfo?) -> EventTagDetailViewModelImple {
         let viewModel = EventTagDetailViewModelImple(
             originalInfo: info,
-            eventTagUsecase: self.stubEventTagUsecase
+            eventTagUsecase: self.stubEventTagUsecase,
+            uiSettingUsecase: self.stubUISettingUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -124,7 +128,52 @@ extension EventTagDetailViewModelImpleTests {
 extension EventTagDetailViewModelImpleTests {
     
     // 색상정보 제공
+    func testViewModel_whenHolidayTag_provideHolidayColor() {
+        // given
+        let viewModel = self.makeViewModel(info: self.holidayTagInfo)
+        
+        // when
+        XCTAssertEqual(viewModel.originalName, "holiday")
+        XCTAssertEqual(viewModel.originalColor, .holiday)
+        XCTAssertEqual(viewModel.isDeletable, false)
+        XCTAssertEqual(viewModel.isNameChangable, false)
+    }
+    
+    func testViewModel_whenHoliday_changeColor() {
+        // given
+        let viewModel = self.makeViewModel(info: self.defaultTagInfo)
+        
+        // when
+        XCTAssertEqual(viewModel.originalName, "default")
+        XCTAssertEqual(viewModel.originalColor, .default)
+        XCTAssertEqual(viewModel.isDeletable, false)
+        XCTAssertEqual(viewModel.isNameChangable, false)
+    }
+    
     // 색장 변경
+    func testViewModel_whenDefaultTag_provideDefaultTagColor() {
+        // given
+        let viewModel = self.makeViewModel(info: self.holidayTagInfo)
+        
+        // when
+        viewModel.selectColor("new_color")
+        viewModel.save()
+        
+        // then
+        XCTAssertEqual(self.stubUISettingUsecase.didChangeAppearanceSetting?.tagColorSetting.holiday, "new_color")
+    }
+    
+    func testViewModel_whenDefaultTag_changeTagColor() {
+        // given
+        let viewModel = self.makeViewModel(info: self.defaultTagInfo)
+        
+        // when
+        viewModel.selectColor("new_color")
+        viewModel.save()
+        
+        // then
+        XCTAssertEqual(self.stubUISettingUsecase.didChangeAppearanceSetting?.tagColorSetting.default, "new_color")
+    }
 }
 
 extension EventTagDetailViewModelImpleTests {

@@ -48,16 +48,19 @@ protocol EventTagDetailViewModel: AnyObject, Sendable, EventTagDetailSceneIntera
 final class EventTagDetailViewModelImple: EventTagDetailViewModel, @unchecked Sendable {
     
     private let originalInfo: OriginalTagInfo?
-    private let eventTagUsecase: EventTagUsecase
+    private let eventTagUsecase: any EventTagUsecase
+    private let uiSettingUsecase: any UISettingUsecase
     var router: (any EventTagDetailRouting)?
     var listener: (any EventTagDetailSceneListener)?
     
     init(
         originalInfo: OriginalTagInfo?,
-        eventTagUsecase: EventTagUsecase
+        eventTagUsecase: any EventTagUsecase,
+        uiSettingUsecase: any UISettingUsecase
     ) {
         self.originalInfo = originalInfo
         self.eventTagUsecase = eventTagUsecase
+        self.uiSettingUsecase = uiSettingUsecase
         
         self.subject.name.send(originalInfo?.name)
         self.subject.color.send(
@@ -116,16 +119,33 @@ extension EventTagDetailViewModelImple {
     func save() {
         switch self.originalInfo?.id {
         case .holiday:
-             // TODO: change holiday color
-            break
+            self.changeBaseTagColor(isHoliday: true)
+            
         case .default:
-            // TODO: change default color
-            break
+            self.changeBaseTagColor(isHoliday: false)
+            
         case .custom(let id):
             self.editTag(id)
             
         case nil:
             self.saveNewTag()
+        }
+    }
+    
+    private func changeBaseTagColor(isHoliday: Bool) {
+        guard let newColor = self.subject.color.value?.customHex else { return }
+        let newTagColorSetting  = if isHoliday {
+            EditAppearanceSettingParams.EditEventTagColorParams() |> \.newHolidayTagColor .~ newColor
+        } else {
+            EditAppearanceSettingParams.EditEventTagColorParams() |> \.newDefaultTagColor .~ newColor
+        }
+        let params = EditAppearanceSettingParams() |> \.newTagColorSetting .~ newTagColorSetting
+        do {
+            let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
+            self.router?.showToast("[TODO] color changed message")
+            self.router?.closeScene()
+        } catch {
+            self.router?.showError(error)
         }
     }
     

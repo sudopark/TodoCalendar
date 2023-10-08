@@ -21,6 +21,7 @@ public enum ShareDataKeys: String {
     case holidays
     case firstWeekDay
     case offEventTagSet
+    case uiSetting
 }
 
 

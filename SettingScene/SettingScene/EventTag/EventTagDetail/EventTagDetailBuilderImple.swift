@@ -39,7 +39,8 @@ extension EventTagDetailSceneBuilerImple: EventTagDetailSceneBuiler {
         
         let viewModel = EventTagDetailViewModelImple(
             originalInfo: originalInfo,
-            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase()
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )
         
         let viewController = EventTagDetailViewController(

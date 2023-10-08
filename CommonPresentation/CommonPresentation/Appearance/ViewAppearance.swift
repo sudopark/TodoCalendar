@@ -27,15 +27,8 @@ public class ViewAppearance: ObservableObject {
             defaultColor: UIColor.from(hex: tagColorSetting.default) ?? .clear
         )
         
-        switch color {
-        case .defaultLight:
-            self.colorSet = DefaultLightColorSet()
-        }
-        
-        switch font {
-        case .systemDefault:
-            self.fontSet = SystemDefaultFontSet()
-        }
+        self.colorSet = color.convert()
+        self.fontSet = font.convert()
     }
 }
 
@@ -47,5 +40,23 @@ extension ViewAppearance {
             self.$colorSet
         )
         .eraseToAnyPublisher()
+    }
+}
+
+extension ColorSetKeys {
+    
+    public func convert() -> any ColorSet {
+        switch self {
+        case .defaultLight: return DefaultLightColorSet()
+        }
+    }
+}
+
+extension FontSetKeys {
+    
+    public func convert() -> any FontSet {
+        switch self {
+        case .systemDefault: return SystemDefaultFontSet()
+        }
     }
 }

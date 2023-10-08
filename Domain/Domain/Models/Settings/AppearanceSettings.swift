@@ -8,11 +8,11 @@
 import Foundation
 
 
-public enum ColorSetKeys: String {
+public enum ColorSetKeys: String, Sendable {
     case defaultLight
 }
 
-public enum FontSetKeys: String {
+public enum FontSetKeys: String, Sendable {
     case systemDefault
 }
 
@@ -40,5 +40,29 @@ public struct AppearanceSettings {
         self.tagColorSetting = tagColorSetting
         self.colorSetKey = colorSetKey
         self.fontSetKey = fontSetKey
+    }
+}
+
+// MARK: - edit params
+
+public struct EditAppearanceSettingParams {
+    
+    public struct EditEventTagColorParams {
+        public var newHolidayTagColor: String?
+        public var newDefaultTagColor: String?
+        public init() { }
+    }
+    
+    public var newTagColorSetting: EditEventTagColorParams?
+    public var newColorSetKey: ColorSetKeys?
+    public var newFontSetKcy: FontSetKeys?
+    
+    public init() { }
+    
+    public var isValid: Bool {
+        return self.newTagColorSetting?.newHolidayTagColor != nil
+            || self.newTagColorSetting?.newDefaultTagColor != nil
+            || self.newColorSetKey != nil
+            || self.newFontSetKcy != nil
     }
 }

@@ -12,4 +12,5 @@ public protocol AppSettingRepository: Sendable {
     
     func loadSavedViewAppearance() -> AppearanceSettings
     func saveViewAppearanceSetting(_ newValue: AppearanceSettings)
+    func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings
 }

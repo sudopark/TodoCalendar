@@ -1,19 +1,20 @@
 //
-//  StubAppSettingRepository.swift
-//  DomainTests
+//  StubUISettingUsecase.swift
+//  TestDoubles
 //
-//  Created by sudo.park on 2023/10/08.
+//  Created by sudo.park on 2023/10/09.
 //
 
 import Foundation
+import Domain
 
-@testable import Domain
 
-
-class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
+open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     
-    var stubAppearanceSetting: AppearanceSettings?
-    func loadSavedViewAppearance() -> AppearanceSettings {
+    public init() { }
+    
+    public var stubAppearanceSetting: AppearanceSettings?
+    open func loadAppearanceSetting() -> AppearanceSettings {
         if let setting = self.stubAppearanceSetting {
             return setting
         }
@@ -24,12 +25,9 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
         )
     }
     
-    func saveViewAppearanceSetting(_ newValue: AppearanceSettings) {
-        self.stubAppearanceSetting = newValue
-    }
-    
-    func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings {
-        let old = self.loadSavedViewAppearance()
+    public var didChangeAppearanceSetting: AppearanceSettings?
+    open func changeAppearanceSetting(_ params: EditAppearanceSettingParams) throws -> AppearanceSettings {
+        let old = self.loadAppearanceSetting()
         let newSetting = AppearanceSettings(
             tagColorSetting: .init(
                 holiday: params.newTagColorSetting?.newHolidayTagColor ?? old.tagColorSetting.holiday,
@@ -37,6 +35,7 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
             colorSetKey: params.newColorSetKey ?? old.colorSetKey,
             fontSetKey: params.newFontSetKcy ?? old.fontSetKey
         )
+        self.didChangeAppearanceSetting = newSetting
         return newSetting
     }
 }
