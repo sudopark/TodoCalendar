@@ -79,7 +79,6 @@ struct EventTagDetailContainerView: View {
         return EventTagDetailView()
             .eventHandler(\.nameEntered, self.nameEntered)
             .eventHandler(\.colorSelected, self.colorSelected)
-            .eventHandler(\.requestSelectOtherColor, self.requestSelectOtherColor)
             .eventHandler(\.saveChanges, self.saveChanges)
             .eventHandler(\.deleteTag, self.deleteTag)
             .onAppear {
@@ -94,13 +93,14 @@ struct EventTagDetailContainerView: View {
 
 struct EventTagDetailView: View {
     
+    @Environment(\.self) var environment
     @EnvironmentObject private var state: EventTagDetailViewState
     @EnvironmentObject private var appearance: ViewAppearance
     @FocusState private var isFocusInput: Bool
+    @State private var selectedOtherColor: Color = .clear
     
     fileprivate var nameEntered: (String) -> Void = { _ in }
     fileprivate var colorSelected: (EventTagColor) -> Void = { _ in }
-    fileprivate var requestSelectOtherColor: () -> Void = { }
     fileprivate var saveChanges: () -> Void = { }
     fileprivate var deleteTag: () -> Void = { }
     
@@ -204,25 +204,30 @@ struct EventTagDetailView: View {
         let gradientColors: [Color] = [
             .red, .orange, .yellow, .green, .blue, .purple
         ]
-        return Button {
-            self.requestSelectOtherColor()
-        } label: {
-            ZStack {
-                Circle()
-                    .stroke(
-                        .angularGradient(colors: gradientColors, center: .center, startAngle: .zero, endAngle: .radians(Double.pi * 2)),
-                        lineWidth: 2
-                    )
-                    .foregroundStyle(.clear)
-                    .frame(width: 28, height: 28)
-                    
-                Circle()
-                    .frame(width: 20, height: 20)
-                    .foregroundStyle(
-                        self.state.selectedColor?.color(with: self.appearance).asColor ?? .clear
-                    )
-                    
-            }
+        return ZStack {
+            Circle()
+                .stroke(
+                    .angularGradient(colors: gradientColors, center: .center, startAngle: .zero, endAngle: .radians(Double.pi * 2)),
+                    lineWidth: 2
+                )
+                .foregroundStyle(.clear)
+                .frame(width: 28, height: 28)
+                
+            Circle()
+                .frame(width: 20, height: 20)
+                .foregroundStyle(
+                    self.state.selectedColor?.color(with: self.appearance).asColor ?? .clear
+                )
+                
+        }
+        .overlay {
+            ColorPicker("", selection: $selectedOtherColor)
+                .labelsHidden()
+                .opacity(0.15)
+        }
+        .onChange(of: self.selectedOtherColor) { newColor in
+            guard let hex = newColor.hex(environment) else { return }
+            self.colorSelected(.custom(hex: hex))
         }
     }
     

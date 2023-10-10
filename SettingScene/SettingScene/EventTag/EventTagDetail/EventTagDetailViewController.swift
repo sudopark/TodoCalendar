@@ -42,9 +42,6 @@ final class EventTagDetailViewController: UIHostingController<EventTagDetailCont
             guard let hex = $0.customHex else { return }
             viewModel.selectColor(hex)
         }
-        .eventHandler(\.requestSelectOtherColor) {
-            // TODO: select new color
-        }
         .eventHandler(\.saveChanges, viewModel.save)
         .eventHandler(\.deleteTag, viewModel.delete)
         super.init(rootView: containerView)
