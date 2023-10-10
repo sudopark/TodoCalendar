@@ -240,6 +240,7 @@ struct EventTagDetailView: View {
                 } label: {
                     Text("Delete".localized())
                         .font(self.appearance.fontSet.bottomButton.asFont)
+                        .frame(maxWidth: .infinity)
                         .foregroundStyle(self.appearance.colorSet.negativeBtnBackground.asColor)
                 }
                 .padding()
@@ -255,11 +256,11 @@ struct EventTagDetailView: View {
             } label: {
                 Text("Save".localized())
                     .font(self.appearance.fontSet.bottomButton.asFont)
+                    .frame(maxWidth: .infinity)
                     .foregroundStyle(self.appearance.colorSet.primaryBtnText.asColor)
             }
             .disabled(!self.state.isSavable)
             .padding()
-            .frame(maxWidth: .infinity)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(
