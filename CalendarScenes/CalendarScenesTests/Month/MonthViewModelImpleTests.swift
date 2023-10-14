@@ -299,6 +299,7 @@ extension MonthViewModelImpleTests {
 
         let singleEventOn8 = TodoEvent(uuid: "todo8", name: "some")
             |> \.time .~ .dummyAt(08, 13)
+            |> \.eventTagId .~ "some"
         self.stubTodoUsecase.eventsFor8 = [singleEventOn8, todo_w1_mon, todo8_29_allday]
         self.stubScheduleUsecase.eventsFor8 = [
             schedule_event_repeating
@@ -622,6 +623,59 @@ extension MonthViewModelImpleTests {
         parameterizeTest("2023-9-16", [.schedule("schedule_event_repeating", turn: 4)]) {
             viewModel.select(.init(2023, 9, 16))
         }
+    }
+}
+
+extension MonthViewModelImpleTests {
+    
+    private func makeViewModelWith8Loaded() -> MonthViewModelImple {
+        // given
+        let expect = expectation(description: "wait")
+        expect.assertForOverFulfill = false
+        let viewModel = self.makeViewModelWithStubEvents()
+        // when
+        let _ = self.waitFirstOutput(expect, for: viewModel.weekModels.dropFirst()) {
+            viewModel.updateMonthIfNeed(.init(year: 2023, month: 08))
+        }
+        // then
+        return viewModel
+    }
+    
+    func testViewModel_provideEventsWithFiltering() {
+        // given
+        let expect = expectation(description: "필터링된 이벤트 목록만 반환")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModelWith8Loaded()
+        
+        // when
+        let eventsIn8ThirdWeek = viewModel.eventStack(at: "2023-8-13-2023-8-19")
+        let eventStacks = self.waitOutputs(expect, for: eventsIn8ThirdWeek) {
+            self.stubTagUsecase.toggleEventTagIsOnCalendar(.holiday)
+            self.stubTagUsecase.toggleEventTagIsOnCalendar(.custom("some"))
+            self.stubTagUsecase.toggleEventTagIsOnCalendar(.default)
+        }
+        
+        // then
+        let eventIds = eventStacks.map { $0.eventIds }
+        
+        let eventIds0 = eventIds[safe: 0]
+        XCTAssertEqual(eventIds0, [
+            [.schedule("schedule_event_repeating", turn: 2)],
+            [.todo("todo8"), .holiday("2023-08-15".asHoliday("광복절"))]
+        ])
+        let eventIds1 = eventIds[safe: 1]
+        XCTAssertEqual(eventIds1, [
+            [.schedule("schedule_event_repeating", turn: 2)],
+            [.todo("todo8")]
+        ])
+        
+        let eventIds2 = eventIds[safe: 2]
+        XCTAssertEqual(eventIds2, [
+            [.schedule("schedule_event_repeating", turn: 2)]
+        ])
+        
+        let eventIds3 = eventIds[safe: 3]
+        XCTAssertEqual(eventIds3, [])
     }
 }
 

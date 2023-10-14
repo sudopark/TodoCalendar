@@ -131,7 +131,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
             .compactMap { todos in todos?.allTodoMap.values.compactMap { $0.eventTagId } }
         let tagIdsFromSchedule = self.subject.scheduleMap
             .map { schedules in schedules.compactMap { $0.value.eventTagId } }
-        // TODO: 추후에 holiday용 태그도 로드해야함
+
         Publishers.CombineLatest(
             tagIdsFromTodo, tagIdsFromSchedule
         )

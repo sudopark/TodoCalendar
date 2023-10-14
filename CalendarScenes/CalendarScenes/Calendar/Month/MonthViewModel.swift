@@ -316,10 +316,21 @@ extension MonthViewModelImple {
             return todoEvents + scheduleEvents + holidayCalenarEvents
         }
         
-        return Publishers.CombineLatest(todos,schedules)
+        let filterActivatedEvent: ([CalendarEvent], Set<AllEventTagId>) -> [CalendarEvent]
+        filterActivatedEvent = { events, offTagIds in
+            return events.filter { !offTagIds.contains($0.eventTagAsAllTagId) }
+        }
+        
+        let events = Publishers.CombineLatest(todos, schedules)
             .map(transform)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
+        
+        return Publishers.CombineLatest(
+            events,
+            self.eventTagUsecase.offEventTagIdsOnCalendar()
+        )
+        .map(filterActivatedEvent)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
     
     var weekDays: AnyPublisher<[WeekDayModel], Never> {
@@ -502,5 +513,19 @@ private extension CurrentSelectDayModel {
         let dayStart = calendar.startOfDay(for: date)
         let range = dayStart.timeIntervalSince1970..<dayEnd.timeIntervalSince1970
         self.init(year, month, day, weekId: week.id, range: range)
+    }
+}
+
+private extension CalendarEvent {
+    
+    var eventTagAsAllTagId: AllEventTagId {
+        switch self.eventTagId {
+        case _ where self.eventId.isHoliday:
+            return .holiday
+        case .none:
+            return .default
+        case .some(let id):
+            return .custom(id)
+        }
     }
 }
