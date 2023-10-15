@@ -41,44 +41,29 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let todoEventUsecase: any TodoEventUsecase
-    private let scheduleEventUsecase: any ScheduleEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     var router: (any DayEventListRouting)?
     
     init(
         calendarSettingUsecase: any CalendarSettingUsecase,
         todoEventUsecase: any TodoEventUsecase,
-        scheduleEventUsecase: any ScheduleEventUsecase,
         eventTagUsecase: any EventTagUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.todoEventUsecase = todoEventUsecase
-        self.scheduleEventUsecase = scheduleEventUsecase
         self.eventTagUsecase = eventTagUsecase
         
         self.internalBind()
     }
     
     
-    private struct CurrentDayAndIdLists {
+    private struct CurrentDayAndEventLists {
         let currentDay: CurrentSelectDayModel
-        let eventIds: [EventId]
-    }
-    
-    private struct AllTodos {
-        let currentTodoIds: [String]
-        let allTodoMap: [String: TodoEvent]
-        init(_ currents: [TodoEvent], _ todoWithTime: [TodoEvent]) {
-            self.currentTodoIds = currents.map { $0.uuid }
-            self.allTodoMap = (currents + todoWithTime).asDictionary { $0.uuid }
-        }
+        let events: [any CalendarEvent]
     }
     
     private struct Subject {
-        let currentDayAndIdLists = CurrentValueSubject<CurrentDayAndIdLists?, Never>(nil)
-        let allTodos = CurrentValueSubject<AllTodos?, Never>(nil)
-        let todosMap = CurrentValueSubject<[String: TodoEvent], Never>([:])
-        let scheduleMap = CurrentValueSubject<[String: ScheduleEvent], Never>([:])
+        let currentDayAndEventLists = CurrentValueSubject<CurrentDayAndEventLists?, Never>(nil)
         let tagMaps = CurrentValueSubject<[String: EventTag], Never>([:])
         let doneFailedTodo = PassthroughSubject<String, Never>()
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
@@ -89,51 +74,19 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     
     private func internalBind() {
         
-        self.bindEvents()
         self.bindTags()
     }
     
-    private func bindEvents() {
-        
-        let todoWithTimes = self.subject.currentDayAndIdLists
-            .compactMap { $0?.currentDay.range }
-            .map { [weak self] range -> AnyPublisher<[TodoEvent], Never> in
-                guard let self = self else { return Empty().eraseToAnyPublisher() }
-                return self.todoEventUsecase.todoEvents(in: range)
-            }
-            .switchToLatest()
-        
-        Publishers.CombineLatest(
-            self.todoEventUsecase.currentTodoEvents,
-            todoWithTimes
-        )
-        .map { AllTodos($0, $1) }
-        .sink(receiveValue: { [weak self] allTodos in
-            self?.subject.allTodos.send(allTodos)
-        })
-        .store(in: &self.cancellables)
-        
-        self.subject.currentDayAndIdLists
-            .compactMap { $0?.currentDay.range }
-            .map { [weak self] range -> AnyPublisher<[ScheduleEvent], Never> in
-                guard let self = self else { return Empty().eraseToAnyPublisher() }
-                return self.scheduleEventUsecase.scheduleEvents(in: range)
-            }
-            .switchToLatest()
-            .sink(receiveValue: { [weak self] schedules in
-                self?.subject.scheduleMap.send(schedules.asDictionary { $0.uuid })
-            })
-            .store(in: &self.cancellables)
-    }
-    
     private func bindTags() {
-        let tagIdsFromTodo = self.subject.allTodos
-            .compactMap { todos in todos?.allTodoMap.values.compactMap { $0.eventTagId } }
-        let tagIdsFromSchedule = self.subject.scheduleMap
-            .map { schedules in schedules.compactMap { $0.value.eventTagId } }
-
+        
+        let customTagIdsFromCalenadrEvent = self.subject.currentDayAndEventLists
+            .compactMap { $0?.events }
+            .map { $0.compactMap { $0.eventTagId.customTagId } }
+        let tagIdsFromCurrentTodo = self.todoEventUsecase.currentTodoEvents
+            .map { $0.compactMap { $0.eventTagId } }
+        
         Publishers.CombineLatest(
-            tagIdsFromTodo, tagIdsFromSchedule
+            customTagIdsFromCalenadrEvent, tagIdsFromCurrentTodo
         )
         .map { $0 + $1 }
         .map { [weak self] ids -> AnyPublisher<[String: EventTag], Never> in
@@ -155,10 +108,10 @@ extension DayEventListViewModelImple {
     
     func selectedDayChanaged(
         _ newDay: CurrentSelectDayModel,
-        and eventThatDay: [EventId]
+        and eventThatDay: [any CalendarEvent]
     ) {
-        self.subject.currentDayAndIdLists.send(
-            .init(currentDay: newDay, eventIds: eventThatDay)
+        self.subject.currentDayAndEventLists.send(
+            .init(currentDay: newDay, events: eventThatDay)
         )
     }
     
@@ -237,7 +190,7 @@ extension DayEventListViewModelImple {
         }
         return Publishers.CombineLatest(
             self.calendarSettingUsecase.currentTimeZone,
-            self.subject.currentDayAndIdLists.compactMap { $0?.currentDay }
+            self.subject.currentDayAndEventLists.compactMap { $0?.currentDay }
         )
         .compactMap(transform)
         .removeDuplicates()
@@ -249,7 +202,7 @@ extension DayEventListViewModelImple {
         let applyTag: ([any EventCellViewModel], [String: EventTag]) -> [any EventCellViewModel]
         applyTag = { cellViewModels, tagMap in
             return cellViewModels.map { cellViewModel in
-                let tag = cellViewModel.tagId.flatMap { tagMap[$0] }
+                let tag = cellViewModel.tagId.customTagId.flatMap { tagMap[$0] }
                 var cellViewModel = cellViewModel
                 cellViewModel.applyTagColor(tag)
                 return cellViewModel
@@ -267,27 +220,26 @@ extension DayEventListViewModelImple {
     private var cellViewModelsFromEvent: AnyPublisher<[any EventCellViewModel], Never> {
         
         let asCellViewModel: (
-            (CurrentDayAndIdLists, TimeZone, AllTodos, [String: ScheduleEvent]), [PendingTodoEventCellViewModel]
+            CurrentDayAndEventLists, TimeZone, [TodoEvent], [PendingTodoEventCellViewModel]
         ) -> [any EventCellViewModel]
-        asCellViewModel = { tuple, pendings in
+        asCellViewModel = { dayAndEvents, timeZone, currentTodos, pendings in
             
-            let (dayAndIds, timeZone, allTodos, scheduleMap) = (tuple.0, tuple.1, tuple.2, tuple.3)
-            
-            let range = dayAndIds.currentDay.range
-            let currentTodoCells = allTodos.currentTodoIds
-                .compactMap { allTodos.allTodoMap[$0] }
+            let range = dayAndEvents.currentDay.range
+            let currentTodoCells = currentTodos
+                .compactMap { TodoCalendarEvent($0, in: timeZone) }
                 .compactMap { TodoEventCellViewModel($0, in: range, timeZone) }
             
-            let eventCellsWithTime = dayAndIds.eventIds.compactMap { eventId -> (any EventCellViewModel)? in
-                switch eventId {
-                case .todo(let id):
-                    return allTodos.allTodoMap[id]
-                        .flatMap { TodoEventCellViewModel($0, in: range, timeZone) }
-                case .schedule(let id, let turn):
-                    return scheduleMap[id]
-                        .flatMap { ScheduleEventCellViewModel($0, turn: turn, in: range, timeZone: timeZone) }
-                case .holiday(let holiday):
+            let eventCellsWithTime = dayAndEvents.events.compactMap { event -> (any EventCellViewModel)? in
+                switch event {
+                case let todo as TodoCalendarEvent:
+                    return TodoEventCellViewModel(todo, in: range, timeZone)
+                    
+                case let schedule as ScheduleCalendarEvent:
+                    return ScheduleEventCellViewModel(schedule, in: range, timeZone: timeZone)
+                case let holiday as HolidayCalendarEvent:
                     return HolidayEventCellViewModel(holiday)
+                
+                default: return nil
                 }
             }
             
@@ -295,12 +247,11 @@ extension DayEventListViewModelImple {
         }
         
         return Publishers.CombineLatest4(
-            self.subject.currentDayAndIdLists.compactMap { $0 },
+            self.subject.currentDayAndEventLists.compactMap { $0 },
             self.calendarSettingUsecase.currentTimeZone,
-            self.subject.allTodos.compactMap { $0 },
-            self.subject.scheduleMap
+            self.todoEventUsecase.currentTodoEvents,
+            self.subject.pendingTodoEvents
         )
-        .combineLatest(self.subject.pendingTodoEvents)
         .map(asCellViewModel)
         .eraseToAnyPublisher()
     }

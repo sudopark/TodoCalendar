@@ -455,7 +455,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         ]
         
         let holidayCell = HolidayEventCellViewModel(
-            .init(dateString: "2023-09-30", localName: "추석", name: "추석")
+            HolidayCalendarEvent(.init(dateString: "2023-09-30", localName: "추석", name: "추석"), in: TimeZone.current)!
         )
             |> \.tagColor .~ .holiday
         

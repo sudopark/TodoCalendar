@@ -88,24 +88,16 @@ struct WeekRowModel: Equatable {
     }
 }
 
-extension EventId {
-    
-    var isHoliday: Bool {
-        guard case .holiday = self else { return false }
-        return true
-    }
-}
-
 struct WeekEventLineModel: Equatable {
     
-    var eventId: EventId { self.eventOnWeek.eventId }
+    var eventId: String { self.eventOnWeek.eventId }
     let eventOnWeek: EventOnWeek
     let lineColor: EventTagColor
     
     init(_ eventOnWeek: EventOnWeek, _ tag: EventTag?) {
         self.eventOnWeek = eventOnWeek
         
-        switch eventOnWeek.eventId {
+        switch eventOnWeek.eventTagId {
         case .holiday:
             self.lineColor = .holiday
         default:
@@ -228,7 +220,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     
     private func bindEventsInCurrentMonth() {
         
-        typealias CurrentMonthAndEvent = (CurrentMonthInfo, [CalendarEvent])
+        typealias CurrentMonthAndEvent = (CurrentMonthInfo, [any CalendarEvent])
         let withEventsInThisMonth: (CurrentMonthInfo) -> AnyPublisher<CurrentMonthAndEvent, Never>
         withEventsInThisMonth = { [weak self] month in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
@@ -260,12 +252,12 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     
     private func bindCurerntSelectedDayNotifying() {
      
-        typealias DayAndEventIds = (CurrentSelectDayModel, [EventId])
+        typealias DayAndEventIds = (CurrentSelectDayModel, [any CalendarEvent])
         let withEvents: (CurrentSelectDayModel) -> AnyPublisher<DayAndEventIds, Never>
         withEvents = { [weak self] model in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
             let eventIds = self.eventStack(at: model.weekId)
-                .map { $0.eventId(in: model.day) }
+                .map { $0.events(in: model.day) }
             return eventIds.map { (model, $0) }
                 .eraseToAnyPublisher()
         }
@@ -304,21 +296,21 @@ extension MonthViewModelImple {
 
 extension MonthViewModelImple {
     
-    private func calendarEvents(from info: CurrentMonthInfo) -> AnyPublisher<[CalendarEvent], Never> {
+    private func calendarEvents(from info: CurrentMonthInfo) -> AnyPublisher<[any CalendarEvent], Never> {
         
         let todos = self.todoUsecase.todoEvents(in: info.range)
         let schedules = self.scheduleEventUsecase.scheduleEvents(in: info.range)
         let holidayCalenarEvents = info.component.holidayCalendarEvents(with: info.timeZone)
-        let transform: ([TodoEvent], [ScheduleEvent]) -> [CalendarEvent]
+        let transform: ([TodoEvent], [ScheduleEvent]) -> [any CalendarEvent]
         transform = { todos, schedules in
-            let todoEvents = todos.compactMap { CalendarEvent($0, in: info.timeZone) }
-            let scheduleEvents = schedules.flatMap { CalendarEvent.events(from: $0, in: info.timeZone) }
+            let todoEvents = todos.compactMap { TodoCalendarEvent($0, in: info.timeZone) }
+            let scheduleEvents = schedules.flatMap { ScheduleCalendarEvent.events(from: $0, in: info.timeZone) }
             return todoEvents + scheduleEvents + holidayCalenarEvents
         }
         
-        let filterActivatedEvent: ([CalendarEvent], Set<AllEventTagId>) -> [CalendarEvent]
+        let filterActivatedEvent: ([any CalendarEvent], Set<AllEventTagId>) -> [any CalendarEvent]
         filterActivatedEvent = { events, offTagIds in
-            return events.filter { !offTagIds.contains($0.eventTagAsAllTagId) }
+            return events.filter { !offTagIds.contains($0.eventTagId) }
         }
         
         let events = Publishers.CombineLatest(todos, schedules)
@@ -329,7 +321,7 @@ extension MonthViewModelImple {
             self.eventTagUsecase.offEventTagIdsOnCalendar()
         )
         .map(filterActivatedEvent)
-        .removeDuplicates()
+        .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey } })
         .eraseToAnyPublisher()
     }
     
@@ -402,7 +394,7 @@ extension MonthViewModelImple {
         let asStackAndTagMap: (WeekEventStack) -> AnyPublisher<StackAndTagMap, Never>
         asStackAndTagMap = { [weak self] stack in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
-            let tagIds = stack.eventStacks.flatMap { $0.compactMap { $0.eventTagId } }
+            let tagIds = stack.eventStacks.flatMap { $0.compactMap { $0.eventTagId.customTagId } }
             guard !tagIds.isEmpty
             else {
                 return Just((stack, [:])).eraseToAnyPublisher()
@@ -415,7 +407,7 @@ extension MonthViewModelImple {
         let asStakModel: (StackAndTagMap) -> WeekEventStackViewModel = { pair in
             return pair.0.eventStacks.map { events -> [WeekEventLineModel] in
                 return events.map { event -> WeekEventLineModel in
-                    let tag = event.eventTagId.flatMap { pair.1[$0] }
+                    let tag = event.eventTagId.customTagId.flatMap { pair.1[$0] }
                     return WeekEventLineModel(event, tag)
                 }
             }
@@ -446,21 +438,21 @@ private extension CalendarComponent {
         return startDate.timeIntervalSince1970..<endDate.timeIntervalSince1970
     }
     
-    func holidayCalendarEvents(with timeZone: TimeZone) -> [CalendarEvent] {
+    func holidayCalendarEvents(with timeZone: TimeZone) -> [any CalendarEvent] {
         return self.weeks
             .flatMap { $0.days }
             .compactMap { $0.holiday }
-            .compactMap { CalendarEvent($0, timeZone: timeZone) }
+            .compactMap { HolidayCalendarEvent($0, in: timeZone) }
     }
 }
 
 private extension WeekEventStackViewModel {
     
-    func eventId(in day: Int) -> [EventId] {
-        return self.reduce(into: [EventId]()) { acc, lines in
+    func events(in day: Int) -> [any CalendarEvent] {
+        return self.reduce(into: [any CalendarEvent]()) { acc, lines in
             guard let eventLineOnDay = lines.first (where: { $0.eventOnWeek.overlapDays.contains(day) })
             else { return }
-            acc += [eventLineOnDay.eventId]
+            acc += [eventLineOnDay.eventOnWeek.event]
         }
     }
 }
@@ -513,19 +505,5 @@ private extension CurrentSelectDayModel {
         let dayStart = calendar.startOfDay(for: date)
         let range = dayStart.timeIntervalSince1970..<dayEnd.timeIntervalSince1970
         self.init(year, month, day, weekId: week.id, range: range)
-    }
-}
-
-private extension CalendarEvent {
-    
-    var eventTagAsAllTagId: AllEventTagId {
-        switch self.eventTagId {
-        case _ where self.eventId.isHoliday:
-            return .holiday
-        case .none:
-            return .default
-        case .some(let id):
-            return .custom(id)
-        }
     }
 }

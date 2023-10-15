@@ -11,123 +11,27 @@ import Prelude
 import Optics
 
 
-// MARK: - CalenarEvent
-
-struct CalendarEvent: Equatable {
-    
-    enum EventTimeOnCalendar: Equatable {
-        case at(TimeInterval)
-        case period(Range<TimeInterval>)
-        
-        init(_ time: EventTime, timeZone: TimeZone) {
-            switch time {
-            case .at(let interval):
-                self = .at(interval)
-            case .period(let range):
-                self = .period(range)
-            case .allDay(let range, let secondsFromGMT):
-                self = .period(range.shiftting(secondsFromGMT, to: timeZone))
-            }
-        }
-        
-        func clamped(to period: Range<TimeInterval>) -> Range<TimeInterval>? {
-            switch self {
-            case .at(let time):
-                return period ~= time
-                    ? time..<time
-                    : nil
-            case .period(let range):
-                let clamped = range.clamped(to: period)
-                return clamped.isEmpty ? nil : clamped
-            }
-        }
-        
-        var isPeriod: Bool {
-            guard case .period = self else { return false }
-            return true
-        }
-    }
-
-    let eventId: EventId
-    let name: String
-    let time: EventTimeOnCalendar
-    let eventTagId: String?
-    
-    init(_ eventId: EventId, _ name: String, _ time: EventTimeOnCalendar, _ eventTagId: String? = nil) {
-        self.eventId = eventId
-        self.name = name
-        self.time = time
-        self.eventTagId = eventTagId
-    }
-    
-    init(_ eventId: EventId, _ name: String, _ time: EventTime, _ eventTagId: String? = nil, in timeZone: TimeZone) {
-        self.eventId = eventId
-        self.name = name
-        self.time = EventTimeOnCalendar(time, timeZone: timeZone)
-        self.eventTagId = eventTagId
-    }
-    
-    init?(_ todo: TodoEvent, in timeZone: TimeZone) {
-        guard let time = todo.time else { return nil }
-        self.init(.todo(todo.uuid), todo.name, time, todo.eventTagId, in: timeZone)
-    }
-    
-    init?(_ holiday: Holiday, timeZone: TimeZone) {
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        guard let components = holiday.dateComponents()
-        else { return nil }
-        
-        let dateComponents = DateComponents(year: components.0, month: components.1, day: components.2)
-        let startComponents = dateComponents |> \.hour .~ 0 |> \.minute .~ 0 |> \.second .~ 0
-        let endComponents = dateComponents |> \.hour .~ 23 |> \.minute .~ 59 |> \.second .~ 59
-        guard let start = calendar.date(from: startComponents),
-              let end = calendar.date(from: endComponents)
-        else { return nil }
-        self.eventId = .holiday(holiday)
-        self.name = holiday.name
-        self.time = .period(start.timeIntervalSince1970..<end.timeIntervalSince1970)
-        // TODO: holiday용 tag 하나 만들 필요 있음
-        self.eventTagId = nil
-    }
-    
-    static func events(
-        from scheduleEvnet: ScheduleEvent,
-        in timeZone: TimeZone
-    ) -> [CalendarEvent] {
-        return scheduleEvnet.repeatingTimes
-            .map {
-                CalendarEvent(
-                    .schedule(scheduleEvnet.uuid, turn: $0.turn),
-                    scheduleEvnet.name,
-                    $0.time,
-                    scheduleEvnet.eventTagId,
-                    in: timeZone
-                )
-            }
-    }
-}
-
-
 // MARK: - EventOnWeek + WeekEventStack
 
 struct EventOnWeek: Equatable {
-    let name: String
+    let event: any CalendarEvent
+    var name: String { self.event.name }
     let eventRangesOnWeek: Range<TimeInterval>
     let overlapDays: Set<Int>
     let daysSequence: ClosedRange<Int>
     let daysIdentifiers: [String]
-    let eventId: EventId
-    let eventTagId: String?
-    var hasPeriod: Bool = false
+    var eventId: String { self.event.eventId }
+    var eventTagId: AllEventTagId { self.event.eventTagId }
+    var hasPeriod: Bool { self.event.eventTimeOnCalendar?.isPeriod == true }
+    var isHoliday: Bool { self.event is HolidayCalendarEvent }
     
     var eventStartDayIdentifierOnWeek: String? { self.daysIdentifiers.first }
     
     fileprivate var length: Int { self.overlapDays.count }
     
-    init?(_ event: CalendarEvent, on weekRange: Range<TimeInterval>, with calendar: Calendar) {
-        guard let overlapRange = event.time.clamped(to: weekRange) else { return nil }
-        self.name = event.name
-        self.eventId = event.eventId
+    init?(_ event: any CalendarEvent, on weekRange: Range<TimeInterval>, with calendar: Calendar) {
+        guard let overlapRange = event.eventTimeOnCalendar?.clamped(to: weekRange) else { return nil }
+        self.event = event
         self.eventRangesOnWeek = overlapRange
         
         let allWeekDays = calendar.betweenDays(
@@ -139,8 +43,6 @@ struct EventOnWeek: Equatable {
         self.overlapDays = overlapDays |> Set.init
         self.daysSequence = sequence
         self.daysIdentifiers = calendar.daysIdentifiers(overlapRange)
-        self.eventTagId = event.eventTagId
-        self.hasPeriod = event.time.isPeriod
     }
     
     init(
@@ -148,17 +50,19 @@ struct EventOnWeek: Equatable {
         _ overlapDays: [Int],
         _ daysSequence: ClosedRange<Int>,
         _ daysIdentifiers: [String],
-        _ eventId: EventId,
-        _ name: String,
+        _ event: any CalendarEvent,
         _ eventTagId: String? = nil
     ) {
         self.eventRangesOnWeek = eventRangesOnWeek
         self.overlapDays = overlapDays |> Set.init
         self.daysSequence = daysSequence
         self.daysIdentifiers = daysIdentifiers
-        self.eventId = eventId
-        self.name = name
-        self.eventTagId = eventTagId
+        self.event = event
+    }
+    
+    static func == (_ lhs: Self, _ rhs: Self) -> Bool {
+        return lhs.event.compareKey == rhs.event.compareKey
+            && lhs.eventRangesOnWeek == rhs.eventRangesOnWeek
     }
 }
 
@@ -180,7 +84,7 @@ struct WeekEventStackBuilder {
 
 extension WeekEventStackBuilder {
     
-    func build(_ week: CalendarComponent.Week, events: [CalendarEvent]) -> WeekEventStack {
+    func build(_ week: CalendarComponent.Week, events: [any CalendarEvent]) -> WeekEventStack {
         guard let weekRange = self.calendar.weekRange(week)
         else { return .init(eventStacks: []) }
         
@@ -255,7 +159,7 @@ extension WeekEventStackBuilder {
             else {
                 return lhs.daysSequence.lowerBound < rhs.daysSequence.lowerBound
             }
-            return lhs.eventId.isHoliday
+            return lhs.isHoliday
         }
         let sortCandidate = candidates.sorted(by: sorting)
         

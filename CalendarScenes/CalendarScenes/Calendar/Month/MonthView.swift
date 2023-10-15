@@ -345,15 +345,15 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
     
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never> {
         if weekId == "id:0" {
-            let event1_5 = EventOnWeek(0..<1, [1, 2, 3, 4, 5], (1...5), ["2023-9-1", "2023-9-2", "2023-9-3", "2023-9-4", "2023-9-5"], .todo("t1_5"), "ev:1_5") |> \.hasPeriod .~ true
-            let event2_6 = EventOnWeek(0..<1, [2, 3, 4, 5, 6], (2...6), [], .todo("t2_6"), "ev:2_6") |> \.hasPeriod .~ true
+            let event1_5 = EventOnWeek(0..<1, [1, 2, 3, 4, 5], (1...5), ["2023-9-1", "2023-9-2", "2023-9-3", "2023-9-4", "2023-9-5"], DummyCalendarEvent("t1_5", "ev:1_5"))
+            let event2_6 = EventOnWeek(0..<1, [2, 3, 4, 5, 6], (2...6), [], DummyCalendarEvent("t2_6", "ev:2_6"))
             
-            let event2_3 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], .todo("t2_3"), "ev:2_3") |> \.hasPeriod .~ true
-            let event4_6 = EventOnWeek(0..<1, [4, 5, 6], (4...6), ["2023-9-4", "2023-9-5", "2023-9-6"],  .todo("t4-6"), "ev:4_6") |> \.hasPeriod .~ true
+            let event2_3 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], DummyCalendarEvent("t2_3", "ev:2_3"))
+            let event4_6 = EventOnWeek(0..<1, [4, 5, 6], (4...6), ["2023-9-4", "2023-9-5", "2023-9-6"], DummyCalendarEvent("t4-6", "ev:4_6"))
             
-            let event2_3_1 = EventOnWeek(0..<1, [2], (2...2), ["2023-9-2"], .todo("t2_3_1"), "ev:2_3_1")
-            let event2_3_2 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], .todo("t2_3_2"), "ev:2_3_2")
-            let event2_3_3 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], .todo("t2_3_3"), "ev:2_3_3")
+            let event2_3_1 = EventOnWeek(0..<1, [2], (2...2), ["2023-9-2"], DummyCalendarEvent("t2_3_1", "ev:2_3_1", hasPeriod: false))
+            let event2_3_2 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], DummyCalendarEvent("t2_3_2", "ev:2_3_2", hasPeriod: false))
+            let event2_3_3 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], DummyCalendarEvent("t2_3_3", "ev:2_3_3", hasPeriod: false))
             
             return Just([
                 [.init(event1_5, nil)],
@@ -368,7 +368,7 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
         } else if weekId == "id:1" {
             let eventw2 = EventOnWeek(0..<1, [2, 3, 4, 5], (2...5), [
                 "2023-9-9", "2023-9-10", "2023-9-11", "2023-9-12"
-            ], .todo("ev-w2"), "ev-w2")
+            ], DummyCalendarEvent("ev-w2", "ev-w2", hasPeriod: false))
             return Just([
                 [.init(eventw2, nil)]
             ])
@@ -401,5 +401,22 @@ struct MonthViewPreviewProvider: PreviewProvider {
             .eventHandler(\.stateBinding, { $0.bind(viewModel) })
             .eventHandler(\.daySelected, viewModel.select(_:))
         return containerView
+    }
+}
+
+private struct DummyCalendarEvent: CalendarEvent {
+    var eventId: String
+    var name: String
+    var eventTime: EventTime?
+    var eventTimeOnCalendar: EventTimeOnCalendar?
+    var eventTagId: AllEventTagId
+
+    init(_ id: String, _ name: String, hasPeriod: Bool = true) {
+        self.eventId = id
+        self.name = name
+        self.eventTagId = .default
+        if hasPeriod {
+            self.eventTimeOnCalendar = .init(.period(0..<1), timeZone: TimeZone.autoupdatingCurrent)
+        }
     }
 }

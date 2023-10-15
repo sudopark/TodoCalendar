@@ -17,8 +17,8 @@ enum EventPeriodText: Equatable {
     case singleText(_ text: String)
     case doubleText(_ topText: String, _ bottomText: String)
     
-    init?(_ todo: TodoEvent, in todayRange: Range<TimeInterval>, timeZone: TimeZone) {
-        guard let time = todo.time
+    init?(_ todo: TodoCalendarEvent, in todayRange: Range<TimeInterval>, timeZone: TimeZone) {
+        guard let time = todo.eventTime
         else {
             self = .singleText("Todo".localized())
             return
@@ -95,7 +95,7 @@ enum EventPeriodText: Equatable {
 protocol EventCellViewModel: Sendable {
     
     var eventIdentifier: String { get }
-    var tagId: String? { get }
+    var tagId: AllEventTagId { get }
     var name: String { get }
     var periodText: EventPeriodText? { get set }
     var periodDescription: String? { get set }
@@ -109,7 +109,7 @@ extension EventCellViewModel {
     
     fileprivate func makeCustomCompareKey(_ additionalComponents: [String?]) -> String {
         let baseComponents: [String?] = [
-            self.eventIdentifier, self.tagId, self.name,
+            self.eventIdentifier, "\(self.tagId.hashValue)", self.name,
             self.periodText?.customCompareKey, self.periodDescription,
             self.tagColor?.compareKey
         ]
@@ -126,7 +126,7 @@ extension EventCellViewModel {
 struct TodoEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
-    var tagId: String?
+    var tagId: AllEventTagId
     let name: String
     var periodText: EventPeriodText?
     var periodDescription: String?
@@ -136,21 +136,22 @@ struct TodoEventCellViewModel: EventCellViewModel {
     init(_ id: String, name: String) {
         self.eventIdentifier = id
         self.name = name
+        self.tagId = .default
     }
     
-    init?(_ todo: TodoEvent, in todayRange: Range<TimeInterval>, _ timeZone: TimeZone) {
-        self.eventIdentifier = todo.uuid
+    init?(_ todo: TodoCalendarEvent, in todayRange: Range<TimeInterval>, _ timeZone: TimeZone) {
+        self.eventIdentifier = todo.eventId
         self.tagId = todo.eventTagId
         self.name = todo.name
         self.periodText = EventPeriodText(todo, in: todayRange, timeZone: timeZone)
-        self.periodDescription = todo.time?.durationText(timeZone)
+        self.periodDescription = todo.eventTime?.durationText(timeZone)
     }
 }
 
 struct PendingTodoEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
-    var tagId: String?
+    var tagId: AllEventTagId
     let name: String
     var periodText: EventPeriodText? = .singleText("Todo".localized())
     var periodDescription: String?
@@ -162,7 +163,7 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     init(name: String, defaultTagId: String?) {
         self.eventIdentifier = "pending:\(UUID().uuidString)"
         self.name = name
-        self.tagId = defaultTagId
+        self.tagId = defaultTagId.map { .custom($0) } ?? .default
     }
     
     // TOOD: make custom compare key
@@ -174,7 +175,7 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
     let turn: Int?
-    var tagId: String?
+    var tagId: AllEventTagId
     let name: String
     var periodText: EventPeriodText?
     var periodDescription: String?
@@ -187,18 +188,19 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
         self.eventIdentifier = id
         self.turn = turn
         self.name = name
+        self.tagId = .default
     }
     
-    init?(_ schedule: ScheduleEvent, turn: Int?, in todayRange: Range<TimeInterval>, timeZone: TimeZone) {
-        guard let time = schedule.repeatingTimes.first(where: { $0.turn == turn }),
-              let periodText = EventPeriodText(schedule: time.time, in: todayRange, timeZone: timeZone)
+    init?(_ schedule: ScheduleCalendarEvent, in todayRange: Range<TimeInterval>, timeZone: TimeZone) {
+        guard let time = schedule.eventTime,
+            let periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone)
         else { return nil }
-        self.eventIdentifier = schedule.uuid
-        self.turn = turn
+        self.eventIdentifier = schedule.eventId
+        self.turn = schedule.turn
         self.tagId = schedule.eventTagId
         self.name = schedule.name
         self.periodText = periodText
-        self.periodDescription = time.time.durationText(timeZone)
+        self.periodDescription = schedule.eventTime?.durationText(timeZone)
     }
 }
 
@@ -207,17 +209,19 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
 struct HolidayEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
-    var tagId: String?
+    var tagId: AllEventTagId
     let name: String
     var periodText: EventPeriodText?
     var periodDescription: String?
     var tagColor: EventTagColor?
     var customCompareKey: String { self.makeCustomCompareKey(["holidays"]) }
     
-    init(_ holiday: Holiday) {
-        self.eventIdentifier = [holiday.dateString, holiday.name].joined(separator: "_")
-        self.name = holiday.localName
+    init(_ holiday: HolidayCalendarEvent) {
+        self.eventIdentifier = holiday.eventId
+        self.name = holiday.name
         self.periodText = .singleText("Allday".localized())
+        self.tagId = .holiday
+        self.tagColor = .holiday
     }
     
     mutating func applyTagColor(_ tag: EventTag?) {

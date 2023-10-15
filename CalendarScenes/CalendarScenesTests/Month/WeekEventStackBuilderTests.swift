@@ -27,7 +27,7 @@ class WeekEventStackBuilderTests: BaseTestCase {
         return .init(days: days)
     }
     
-    private func dummyEvent(on days: ClosedRange<Int>) -> CalendarEvent {
+    private func dummyEvent(on days: ClosedRange<Int>) -> any CalendarEvent {
         let daysRange = days.lowerBound...days.upperBound
         let start = self.calendar.date(from: .init(year: 2023, month: 7, day: daysRange.lowerBound))!
             |> self.calendar.startOfDay(for:)
@@ -38,7 +38,8 @@ class WeekEventStackBuilderTests: BaseTestCase {
         let timeStamps = dates.lowerBound.timeIntervalSince1970
             ..<
             dates.upperBound.timeIntervalSince1970
-        return .init(.todo("\(daysRange)"), "some", .period(timeStamps))
+        let todo = TodoEvent(uuid: "\(daysRange)", name: "some") |> \.time .~ .period(timeStamps)
+        return TodoCalendarEvent(todo, in: TimeZone(abbreviation: "KST")!)
     }
     
     private func makeBuilder() -> WeekEventStackBuilder {
@@ -68,11 +69,14 @@ extension WeekEventStackBuilderTests {
         func parameterizeTest(_ timeZone: TimeZone) {
             // given
             // when
-            let event = CalendarEvent(.todo("dummy"), "some", time, in: timeZone)
+            let event = TodoCalendarEvent(
+                .init(uuid: "dummy", name: "some") |> \.time .~ time,
+                in: timeZone
+            )
             
             // then
             let expectedRange = self.dummyRange(in: timeZone)
-            XCTAssertEqual(event.time, .period(expectedRange))
+            XCTAssertEqual(event.eventTimeOnCalendar, .period(expectedRange))
         }
         
         // when
@@ -107,12 +111,12 @@ extension WeekEventStackBuilderTests {
         ])
         
         // then
-        let eventIds = stack.eventStacks.flatMap { $0 }.map { $0.eventId.idString } |> Set.init
+        let eventIds = stack.eventStacks.flatMap { $0 }.map { $0.eventId } |> Set.init
         XCTAssertEqual(eventIds, [
-            eventLeftJoinThisWeek.eventId.idString,
-            eventRightJoinThisWeek.eventId.idString,
-            eventInThisWeek.eventId.idString,
-            eventContainThisWeek.eventId.idString
+            eventLeftJoinThisWeek.eventId,
+            eventRightJoinThisWeek.eventId,
+            eventInThisWeek.eventId,
+            eventContainThisWeek.eventId
         ])
     }
     
@@ -185,17 +189,5 @@ extension WeekEventStackBuilderTests {
             [ (1...2), (5...7) ],
             [ (2...3), (4...5) ]
         ])
-    }
-}
-
-
-private extension EventId {
-    
-    var idString: String {
-        switch self {
-        case .todo(let id): return "t:\(id)"
-        case .schedule(let id, _): return "s:\(id)"
-        case .holiday(let date): return "h:\(date)"
-        }
     }
 }

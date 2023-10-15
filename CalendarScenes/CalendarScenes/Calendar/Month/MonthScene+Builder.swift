@@ -12,12 +12,6 @@ import Scenes
 
 // MARK: CurrentSelectedDay and Event components
 
-enum EventId: Equatable {
-    case todo(String)
-    case schedule(String, turn: Int)
-    case holiday(_ holiday: Holiday)
-}
-
 struct CurrentSelectDayModel: Equatable {
     
     let year: Int
@@ -51,7 +45,7 @@ protocol MonthSceneListener: AnyObject {
     
     func monthScene(
         didChange currentSelectedDay: CurrentSelectDayModel,
-        and eventsThatDay: [EventId]
+        and eventsThatDay: [any CalendarEvent]
     )
 }
 

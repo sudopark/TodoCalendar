@@ -106,8 +106,8 @@ extension CalendarPaperViewModelImpleTests {
     private class SpyEventInteractor: DayEventListSceneInteractor {
         
         var selectedDays: [CurrentSelectDayModel] = []
-        var selectedDayEvents: [[EventId]] = []
-        func selectedDayChanaged(_ newDay: CurrentSelectDayModel, and eventThatDay: [EventId]) {
+        var selectedDayEvents: [[any CalendarEvent]] = []
+        func selectedDayChanaged(_ newDay: CurrentSelectDayModel, and eventThatDay: [any CalendarEvent]) {
             self.selectedDays.append(newDay)
             self.selectedDayEvents.append(eventThatDay)
         }
