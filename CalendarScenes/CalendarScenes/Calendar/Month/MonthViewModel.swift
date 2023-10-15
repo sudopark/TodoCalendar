@@ -307,22 +307,12 @@ extension MonthViewModelImple {
             let scheduleEvents = schedules.flatMap { ScheduleCalendarEvent.events(from: $0, in: info.timeZone) }
             return todoEvents + scheduleEvents + holidayCalenarEvents
         }
-        
-        let filterActivatedEvent: ([any CalendarEvent], Set<AllEventTagId>) -> [any CalendarEvent]
-        filterActivatedEvent = { events, offTagIds in
-            return events.filter { !offTagIds.contains($0.eventTagId) }
-        }
-        
-        let events = Publishers.CombineLatest(todos, schedules)
+        return Publishers.CombineLatest(todos, schedules)
             .map(transform)
-        
-        return Publishers.CombineLatest(
-            events,
-            self.eventTagUsecase.offEventTagIdsOnCalendar()
-        )
-        .map(filterActivatedEvent)
-        .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey } })
-        .eraseToAnyPublisher()
+            .eraseToAnyPublisher()
+            .filterTagActivated(self.eventTagUsecase) { $0.eventTagId }
+            .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey } })
+            .eraseToAnyPublisher()
     }
     
     var weekDays: AnyPublisher<[WeekDayModel], Never> {

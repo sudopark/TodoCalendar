@@ -20,17 +20,20 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var stubTodoUsecase: StubTodoEventUsecase!
+    private var stubTagUsecase: StubEventTagUsecase!
     private var spyRouter: SpyRouter!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.stubTodoUsecase = .init()
+        self.stubTagUsecase = .init()
         self.spyRouter = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.stubTodoUsecase = nil
+        self.stubTagUsecase = nil
         self.spyRouter = nil
     }
     
@@ -55,7 +58,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let viewModel = DayEventListViewModelImple(
             calendarSettingUsecase: calendarSettingUsecase,
             todoEventUsecase: self.stubTodoUsecase,
-            eventTagUsecase: StubEventTagUsecase()
+            eventTagUsecase: self.stubTagUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -321,9 +324,10 @@ extension DayEventListViewModelImpleTests {
         let timeZone = TimeZone(abbreviation: "KST")!
         let holiday = HolidayCalendarEvent(.init(dateString: "2023-09-30", localName: "holiday", name: "holiday"), in: timeZone)!
         let schedule4 = ScheduleEvent(uuid: "repeating-schedule", name: "repeating-schedule", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound), turn: 4)]
+            |> \.eventTagId .~ "some"
         let scheduleWithRepeating = ScheduleCalendarEvent.events(from: schedule4, in: timeZone).last!
-        let todo = TodoCalendarEvent(.init(uuid: ("todo-with-time"), name: "todo-with-time"), in: timeZone)
-        let scheduleWithoutRepeating = ScheduleCalendarEvent(eventId: "not-repeating-schedule", name: "not-repeating-schedule", eventTime: .at(self.todayRange.lowerBound), eventTimeOnCalendar: nil, eventTagId: .default) |> \.turn .~ 1
+        let todo = TodoCalendarEvent(.init(uuid: ("todo-with-time"), name: "todo-with-time") |> \.eventTagId .~ "some", in: timeZone)
+        let scheduleWithoutRepeating = ScheduleCalendarEvent(eventId: "not-repeating-schedule", name: "not-repeating-schedule", eventTime: .at(self.todayRange.lowerBound), eventTimeOnCalendar: nil, eventTagId: .custom("some")) |> \.turn .~ 1
         return [
             holiday, scheduleWithRepeating, todo, scheduleWithoutRepeating
         ]
@@ -435,6 +439,24 @@ extension DayEventListViewModelImpleTests {
         
         // then
         XCTAssertEqual(failedId, "todo-with-time")
+    }
+    
+    func testViewModel_provideEventListWithoutOffTagEvent() {
+        // given
+        let expect = expectation(description: "이벤트 목록 제공시에 비활성화된 태그에 해당하는 이벤트는 제외")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        
+        // when
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+            self.stubTagUsecase.toggleEventTagIsOnCalendar(.default)
+        }
+        
+        // then
+        let hasCurrentTodo = cvmLists
+            .map { $0.filter { $0.name.starts(with: "current-todo") }}
+            .map { !$0.isEmpty }
+        XCTAssertEqual(hasCurrentTodo, [true, false])
     }
 }
 
