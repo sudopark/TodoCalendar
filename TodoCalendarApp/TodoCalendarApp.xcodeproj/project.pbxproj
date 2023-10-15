@@ -44,6 +44,8 @@
 		F6B70DEF2A7666C100FFF457 /* Scenes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DEE2A7666C100FFF457 /* Scenes.framework */; };
 		F6B70DF02A7666C100FFF457 /* Scenes.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6B70DEE2A7666C100FFF457 /* Scenes.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F6B70DF52A79611500FFF457 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B70DF42A79611500FFF457 /* AppEnvironment.swift */; };
+		F6F7808E2ADC1FDC00B50C19 /* EventDetailScene.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6F7808D2ADC1FDC00B50C19 /* EventDetailScene.framework */; };
+		F6F7808F2ADC1FDC00B50C19 /* EventDetailScene.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F6F7808D2ADC1FDC00B50C19 /* EventDetailScene.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +72,7 @@
 				F6B70DE72A7666AF00FFF457 /* Common3rdParty.framework in Embed Frameworks */,
 				F6B70DF02A7666C100FFF457 /* Scenes.framework in Embed Frameworks */,
 				F676A7AE2AC0263B00D168DF /* SettingScene.framework in Embed Frameworks */,
+				F6F7808F2ADC1FDC00B50C19 /* EventDetailScene.framework in Embed Frameworks */,
 				F6B70DE42A7666AA00FFF457 /* Extensions.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -111,6 +114,7 @@
 		F6B70DEB2A7666BC00FFF457 /* CalendarScenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = CalendarScenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6B70DEE2A7666C100FFF457 /* Scenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Scenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6B70DF42A79611500FFF457 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
+		F6F7808D2ADC1FDC00B50C19 /* EventDetailScene.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = EventDetailScene.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -125,6 +129,7 @@
 				F6B70DE62A7666AF00FFF457 /* Common3rdParty.framework in Frameworks */,
 				F6B70DEF2A7666C100FFF457 /* Scenes.framework in Frameworks */,
 				F676A7AD2AC0263B00D168DF /* SettingScene.framework in Frameworks */,
+				F6F7808E2ADC1FDC00B50C19 /* EventDetailScene.framework in Frameworks */,
 				F6B70DE32A7666AA00FFF457 /* Extensions.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -222,6 +227,7 @@
 		F6B70DDA2A76668F00FFF457 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				F6F7808D2ADC1FDC00B50C19 /* EventDetailScene.framework */,
 				F676A7AC2AC0263B00D168DF /* SettingScene.framework */,
 				F683C3672AB74952009821A5 /* TestDoubles.framework */,
 				F66FDF002A9B69A4005A8227 /* UnitTestHelpKit.framework */,
