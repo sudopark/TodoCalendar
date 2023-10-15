@@ -68,4 +68,9 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         self.offTagIdSet = newSet
         return newSet
     }
+    
+    public var stubLatestUsecaseTag: EventTag?
+    open func loadLatestUsedTag() async throws -> EventTag? {
+        return self.stubLatestUsecaseTag
+    }
 }

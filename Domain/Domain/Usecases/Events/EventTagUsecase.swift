@@ -14,24 +14,25 @@ import Extensions
 
 // MARK: - EventTagUsecase
 
-public protocol EventTagUsecase {
+public protocol EventTagUsecase: Sendable {
     
     func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag
     func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag
     func deleteTag(_ tagId: String) async throws
     
-    func bindRefreshRequireTagInfos()
+    func prepare()
     func refreshTags(_ ids: [String])
     func eventTag(id: String) -> AnyPublisher<EventTag, Never>
     func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never>
     func loadAllEventTags() -> AnyPublisher<[EventTag], any Error>
+    var latestUsedEventTag: AnyPublisher<EventTag?, Never> { get }
     
     func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId)
     func offEventTagIdsOnCalendar() -> AnyPublisher<Set<AllEventTagId>, Never>
 }
 
 
-public final class EventTagUsecaseImple: EventTagUsecase {
+public final class EventTagUsecaseImple: EventTagUsecase, @unchecked Sendable {
     
     private let tagRepository: any EventTagRepository
     private let sharedDataStore: SharedDataStore
@@ -89,7 +90,24 @@ extension EventTagUsecaseImple {
 
 extension EventTagUsecaseImple {
     
-    public func bindRefreshRequireTagInfos() {
+    public func prepare() {
+        self.loadAndUpdateLatestUsedTag()
+        self.bindRefreshRequireTagInfos()
+    }
+    
+    private func loadAndUpdateLatestUsedTag() {
+        Task { [weak self] in
+            let key = ShareDataKeys.latestUsedEventTag.rawValue
+            if let tag = try await self?.tagRepository.loadLatestUsedTag() {
+                self?.sharedDataStore.put(EventTag.self, key: key, tag)
+            } else {
+                self?.sharedDataStore.delete(key)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+    
+    private func bindRefreshRequireTagInfos() {
 
         let (todoKey, scheduleKey) = (ShareDataKeys.todos.rawValue, ShareDataKeys.schedules.rawValue)
         let allTagIdsFromTodos = self.sharedDataStore.observe([String: TodoEvent].self, key: todoKey)
@@ -162,6 +180,12 @@ extension EventTagUsecaseImple {
         return self.tagRepository.loadAllTags()
             .handleEvents(receiveOutput: updateCached)
             .eraseToAnyPublisher()
+    }
+    
+    public var latestUsedEventTag: AnyPublisher<EventTag?, Never> {
+        
+        return self.sharedDataStore
+            .observe(EventTag.self, key: ShareDataKeys.latestUsedEventTag.rawValue)
     }
 }
 

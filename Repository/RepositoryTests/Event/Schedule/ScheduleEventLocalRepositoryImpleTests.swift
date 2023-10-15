@@ -20,22 +20,28 @@ class ScheduleEventLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable 
     
     var cancelBag: Set<AnyCancellable>!
     var localStorage: ScheduleEventLocalStorage!
+    var spyEnvStorage: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {
         self.fileName = "schedules"
         try super.setUpWithError()
         self.cancelBag = .init()
         self.localStorage = .init(sqliteService: self.sqliteService)
+        self.spyEnvStorage = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.localStorage = nil
+        self.spyEnvStorage = nil
         try super.tearDownWithError()
     }
     
     private func makeRepository() -> ScheduleEventLocalRepositoryImple {
-        return ScheduleEventLocalRepositoryImple(localStorage: self.localStorage)
+        return ScheduleEventLocalRepositoryImple(
+            localStorage: self.localStorage,
+            environmentStorage: self.spyEnvStorage
+        )
     }
 }
 
@@ -103,6 +109,29 @@ extension ScheduleEventLocalRepositoryImpleTests {
         
         let event = loadedEvents?.first(where: { $0.uuid == origin?.uuid })
         XCTAssertNotNil(event)
+    }
+    
+    func testRepository_whenMakeOrUpdateTodo_udpateLatestEventTagId() async {
+        // given
+        let repository = self.makeRepository()
+        let key = "latest_used_event_tag_id"
+        
+        // when
+        let origin: String? = self.spyEnvStorage.load(key)
+        let makeParams = self.dummyMakeParams |> \.eventTagId .~ "tag1"
+        let newSchedule = try? await repository.makeScheduleEvent(makeParams)
+        let updatedeAfterMake: String? = self.spyEnvStorage.load(key)
+        
+        let updateParams = ScheduleEditParams()
+            |> \.name .~ "new name"
+            |> \.eventTagId .~ nil
+        _ = try? await repository.updateScheduleEvent(newSchedule?.uuid ?? "", updateParams)
+        let updatedAfterUpdate: String? = self.spyEnvStorage.load(key)
+        
+        // then
+        XCTAssertEqual(origin, nil)
+        XCTAssertEqual(updatedeAfterMake, "tag1")
+        XCTAssertEqual(updatedAfterUpdate, nil)
     }
 }
 

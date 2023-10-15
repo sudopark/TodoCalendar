@@ -17,10 +17,13 @@ import Extensions
 public final class TodoLocalRepositoryImple: TodoEventRepository, Sendable {
     
     private let localStorage: TodoLocalStorage
+    private let environmentStorage: any EnvironmentStorage
     public init(
-        localStorage: TodoLocalStorage
+        localStorage: TodoLocalStorage,
+        environmentStorage: any EnvironmentStorage
     ) {
         self.localStorage = localStorage
+        self.environmentStorage = environmentStorage
     }
 }
 
@@ -33,6 +36,7 @@ extension TodoLocalRepositoryImple {
             throw RuntimeError("invalid parameter")
         }
         try await self.localStorage.saveTodoEvent(newTodo)
+        self.updateLatestUsedEventTag(params.eventTagId)
         return newTodo
     }
     
@@ -40,7 +44,17 @@ extension TodoLocalRepositoryImple {
         let origin = try await self.localStorage.loadTodoEvent(eventId)
         let updated = origin.apply(params)
         try await self.localStorage.updateTodoEvent(updated)
+        self.updateLatestUsedEventTag(params.eventTagId)
         return updated
+    }
+    
+    private func updateLatestUsedEventTag(_ tagId: String?) {
+        let key = "latest_used_event_tag_id"
+        if let id = tagId {
+            self.environmentStorage.update(key, id)
+        } else {
+            self.environmentStorage.remove(key)
+        }
     }
 }
 

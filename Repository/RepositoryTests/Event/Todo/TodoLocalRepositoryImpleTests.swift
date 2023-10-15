@@ -20,22 +20,28 @@ class TodoLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     var localStorage: TodoLocalStorage!
+    var spyEnvStorage: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {
         self.fileName = "todos"
         try super.setUpWithError()
         self.cancelBag = .init()
         self.localStorage = .init(sqliteService: self.sqliteService)
+        self.spyEnvStorage = .init()
     }
     
     override func tearDownWithError() throws {
         try super.tearDownWithError()
         self.cancelBag = nil
         self.localStorage = nil
+        self.spyEnvStorage = nil
     }
     
     private func makeRepository() -> TodoLocalRepositoryImple {
-        return TodoLocalRepositoryImple(localStorage: self.localStorage)
+        return TodoLocalRepositoryImple(
+            localStorage: self.localStorage,
+            environmentStorage: self.spyEnvStorage
+        )
     }
 }
 
@@ -129,6 +135,29 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(updated?.eventTagId, old.eventTagId)
         XCTAssertNil(updated?.time)
         XCTAssertNil(updated?.repeating)
+    }
+    
+    func testRepository_whenMakeOrUpdateTodo_udpateLatestEventTagId() async {
+        // given
+        let repository = self.makeRepository()
+        let key = "latest_used_event_tag_id"
+        
+        // when
+        let origin: String? = self.spyEnvStorage.load(key)
+        let makeParams = self.dummyMakeParams |> \.eventTagId .~ "tag1"
+        let newTodo = try? await repository.makeTodoEvent(makeParams)
+        let updatedeAfterMake: String? = self.spyEnvStorage.load(key)
+        
+        let updateParams = TodoEditParams()
+            |> \.name .~ "new name"
+            |> \.eventTagId .~ nil
+        _ = try? await repository.updateTodoEvent(newTodo?.uuid ?? "", updateParams)
+        let updatedAfterUpdate: String? = self.spyEnvStorage.load(key)
+        
+        // then
+        XCTAssertEqual(origin, nil)
+        XCTAssertEqual(updatedeAfterMake, "tag1")
+        XCTAssertEqual(updatedAfterUpdate, nil)
     }
     
     // update and load

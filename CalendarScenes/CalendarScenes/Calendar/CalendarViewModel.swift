@@ -176,7 +176,7 @@ extension CalendarViewModelImple {
         
         self.todoEventUsecase.refreshCurentTodoEvents()
         
-        self.eventTagUsecase.bindRefreshRequireTagInfos()
+        self.eventTagUsecase.prepare()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
