@@ -213,6 +213,7 @@ extension DayEventListViewModelImple {
             self.subject.tagMaps
         )
         .map(applyTag)
+        .filterTagActivated(self.eventTagUsecase) { $0.tagId }
         .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
         .eraseToAnyPublisher()
     }

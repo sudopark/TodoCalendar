@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 import Prelude
 import Optics
 import Domain
@@ -138,5 +139,27 @@ struct HolidayCalendarEvent: CalendarEvent {
         self.eventTime = .period(timeRange)
         self.eventTimeOnCalendar = .period(timeRange)
         self.eventTagId = .holiday
+    }
+}
+
+
+extension Publisher where Output: Sequence, Failure == Never {
+    
+    func filterTagActivated(
+        _ tagUseacse: any EventTagUsecase,
+        tagSelector: @escaping (Output.Element) -> AllEventTagId
+    ) -> AnyPublisher<[Output.Element], Never> {
+        
+        let filtering: (Output, Set<AllEventTagId>) -> [Output.Element]
+        filtering = { outputs, offIds in
+            return outputs.filter { !offIds.contains(tagSelector($0)) }
+        }
+        
+        return Publishers.CombineLatest(
+            self,
+            tagUseacse.offEventTagIdsOnCalendar()
+        )
+        .map(filtering)
+        .eraseToAnyPublisher()
     }
 }
