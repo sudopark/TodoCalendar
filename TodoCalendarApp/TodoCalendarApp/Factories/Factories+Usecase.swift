@@ -63,7 +63,8 @@ extension NonLoginUsecaseFactoryImple {
             sqliteService: Singleton.shared.commonSqliteService
         )
         let repository = TodoLocalRepositoryImple(
-            localStorage: storage
+            localStorage: storage,
+            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
         )
         return TodoEventUsecaseImple(
             todoRepository: repository,
@@ -76,7 +77,8 @@ extension NonLoginUsecaseFactoryImple {
             sqliteService: Singleton.shared.commonSqliteService
         )
         let repository = ScheduleEventLocalRepositoryImple(
-            localStorage: storage
+            localStorage: storage,
+            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
         )
         return ScheduleEventUsecaseImple(
             scheduleRepository: repository,

@@ -39,6 +39,7 @@ class EventTagUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeUsecase() -> EventTagUsecaseImple {
+        self.stubRepository.stubLatestUsecaseTag = .init(uuid: "latest", name: "latest", colorHex: "some")
         return EventTagUsecaseImple(
             tagRepository: self.stubRepository,
             sharedDataStore: self.sharedDataStore,
@@ -319,12 +320,12 @@ extension EventTagUsecaseImpleTests {
         }
     }
     
-    func testUsecase_bindRefreshRequireTagInfos() {
+    func testUsecase_whenPrepare_bindRefreshRequireTagInfos() {
         // given
         let expect = expectation(description: "필요한 tag 정보 refresh binding")
         expect.expectedFulfillmentCount = 4
         let usecase = self.makeUsecaseWithStubEvents()
-        usecase.bindRefreshRequireTagInfos()
+        usecase.prepare()
         
         // when
         let tagSource = usecase.eventTags(self.allTagIds).drop(while: { $0.isEmpty })
@@ -345,6 +346,22 @@ extension EventTagUsecaseImpleTests {
             ["tag-t1", "tag-t3", "tag-s2", "tag-t2", "tag-s3"],
             ["tag-t1", "tag-t3", "tag-s2", "tag-t2", "tag-s3", "tag-t1-new"]
         ])
+    }
+    
+    func testUsecase_whenPrepare_setupLatestUsedEventTag() {
+        // given
+        let expect = expectation(description: "prepare시에 마지막으로 사용한 이벤트 태그 불러와서 세팅")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        
+        // when
+        let tags = self.waitOutputs(expect, for: usecase.latestUsedEventTag) {
+            usecase.prepare()
+        }
+        
+        // then
+        let tagIds = tags.map { $0?.uuid }
+        XCTAssertEqual(tagIds, [nil, "latest"])
     }
     
     func testUsecase_loadAllTags() {

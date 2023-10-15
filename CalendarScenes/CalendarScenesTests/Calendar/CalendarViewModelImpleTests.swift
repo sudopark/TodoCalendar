@@ -111,7 +111,7 @@ extension CalendarViewModelImpleTests {
         // given
         let expect = expectation(description: "prepare 시에 필요 이벤트 tag 정보 refresh 바인딩")
         let viewModel = self.makeViewModel()
-        self.spyEventTagUsecase.didBindRefresh = {
+        self.spyEventTagUsecase.didPrepared = {
             expect.fulfill()
         }
         
@@ -489,10 +489,9 @@ private extension CalendarViewModelImpleTests {
     
     private class PrivateSpyEventTagUsecase: StubEventTagUsecase {
         
-        var didBindRefresh: (() -> Void)?
-        override func bindRefreshRequireTagInfos() {
-            self.didBindRefresh?()
-            super.bindRefreshRequireTagInfos()
+        var didPrepared: (() -> Void)?
+        override func prepare() {
+            self.didPrepared?()
         }
     }
     

@@ -42,7 +42,11 @@ open class StubEventTagUsecase: EventTagUsecase {
         }
     }
     
-    open func bindRefreshRequireTagInfos() { }
+    public var stubLatestUsecaseEventTag: EventTag?
+    open func prepare() {
+        self.latestUsedEventTagSubject.send(self.stubLatestUsecaseEventTag)
+    }
+    
     open func refreshTags(_ ids: [String]) { }
     open func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never> {
         let tags = ids
@@ -69,5 +73,11 @@ open class StubEventTagUsecase: EventTagUsecase {
     public func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId) {
         let newSet = offIds.value |> elem(tagId) .~ !offIds.value.contains(tagId)
         self.offIds.send(newSet)
+    }
+    
+    private let latestUsedEventTagSubject = CurrentValueSubject<EventTag?, Never>(nil)
+    public var latestUsedEventTag: AnyPublisher<EventTag?, Never> {
+        return self.latestUsedEventTagSubject
+            .eraseToAnyPublisher()
     }
 }
