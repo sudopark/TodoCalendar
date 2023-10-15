@@ -17,6 +17,9 @@
          location = "group:CalendarScenes/CalendarScenes.xcodeproj">
       </FileRef>
       <FileRef
+         location = "group:EventDetailScene/EventDetailScene.xcodeproj">
+      </FileRef>
+      <FileRef
          location = "group:SettingScene/SettingScene.xcodeproj">
       </FileRef>
    </Group>
