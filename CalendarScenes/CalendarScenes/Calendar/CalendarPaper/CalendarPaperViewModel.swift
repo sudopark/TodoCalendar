@@ -38,7 +38,7 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
         self.month = month
     }
     
-    private var currentSelectedDayAndEvents: (CurrentSelectDayModel, [EventId])?
+    private var currentSelectedDayAndEvents: (CurrentSelectDayModel, [any CalendarEvent])?
 }
 
 
@@ -63,7 +63,7 @@ extension CalendarPaperViewModelImple {
     
     func monthScene(
         didChange currentSelectedDay: CurrentSelectDayModel,
-        and eventsThatDay: [EventId]
+        and eventsThatDay: [any CalendarEvent]
     ) {
         self.currentSelectedDayAndEvents = (currentSelectedDay, eventsThatDay)
         self.eventListInteractor?.selectedDayChanaged(currentSelectedDay, and: eventsThatDay)

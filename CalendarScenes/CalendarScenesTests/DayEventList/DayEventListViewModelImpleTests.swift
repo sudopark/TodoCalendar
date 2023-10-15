@@ -44,17 +44,10 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             .init(uuid: "current-todo-1", name: "current-todo-1"),
             .init(uuid: "current-todo-2", name: "current-todo-2")
         ]
-        let todoWithTime = TodoEvent(uuid: "todo-with-time", name: "todo-with-time")
-        let notRepeatingSchedule = ScheduleEvent(uuid: "not-repeating-schedule", name: "not-repeating-schedule", time: .at(self.todayRange.lowerBound))
-        let repeatingSchedule = ScheduleEvent(uuid: "repeating-schedule", name: "repeating-schedule", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound), turn: 4)]
-        
+
         self.stubTodoUsecase.stubCurrentTodoEvents = currentTodos
-        self.stubTodoUsecase.stubTodoEventsInRange = [todoWithTime]
         self.stubTodoUsecase.shouldFailCompleteTodo = shouldFailDoneTodo
         self.stubTodoUsecase.shouldFailMakeTodo = shouldFailMakeTodo
-        
-        let scheduleUsecase = StubScheduleEventUsecase()
-        scheduleUsecase.stubScheduleEventsInRange = [notRepeatingSchedule, repeatingSchedule]
         
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
@@ -62,7 +55,6 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let viewModel = DayEventListViewModelImple(
             calendarSettingUsecase: calendarSettingUsecase,
             todoEventUsecase: self.stubTodoUsecase,
-            scheduleEventUsecase: scheduleUsecase,
             eventTagUsecase: StubEventTagUsecase()
         )
         viewModel.router = self.spyRouter
@@ -95,9 +87,7 @@ extension DayEventListViewModelImpleTests {
         
         // when
         let selectedDays = self.waitOutputs(expect, for: viewModel.selectedDay) {
-            viewModel.selectedDayChanaged(self.september10th(), and: [
-                .todo("todo-with-time"), .schedule("not-repeating-schedule", turn: 1),  .schedule("repeating-schedule", turn: 4)
-            ])
+            viewModel.selectedDayChanaged(self.september10th(), and: [])
             viewModel.selectedDayChanaged(self.september11th(), and: [])
         }
         
@@ -114,10 +104,12 @@ extension DayEventListViewModelImpleTests {
     
     func testCellViewModel_makeFromCurrentTodo() {
         // given
+        let timeZone = TimeZone(abbreviation: "KST")!
         let current = TodoEvent(uuid: "curent", name: "current todo")
+        let event = TodoCalendarEvent(current, in: timeZone)
         
         // when
-        let cellViewModel = TodoEventCellViewModel(current, in: 0..<100, TimeZone(abbreviation: "KST")!)
+        let cellViewModel = TodoEventCellViewModel(event, in: 0..<100, timeZone)
         
         // then
         XCTAssertEqual(cellViewModel?.name, "current todo")
@@ -128,9 +120,10 @@ extension DayEventListViewModelImpleTests {
     func testCellViewModel_makeFromHoliday() {
         // given
         let holiday = Holiday(dateString: "2020-03-01", localName: "삼일절", name: "삼일절")
+        let event = HolidayCalendarEvent(holiday, in: TimeZone(abbreviation: "KST")!)!
         
         // when
-        let cellViewModel = HolidayEventCellViewModel(holiday)
+        let cellViewModel = HolidayEventCellViewModel(event)
         
         // then
         XCTAssertEqual(cellViewModel.name, "삼일절")
@@ -178,14 +171,16 @@ extension DayEventListViewModelImpleTests {
     
     func testCellViewModel_makeFromTodoEventWithTime() {
         // given
+        let timeZone = TimeZone(abbreviation: "KST")!
         func parameterizeTest(
             _ range: Range<TimeInterval>?,
             _ expectPeriodText: EventPeriodText
         ) {
             let time = range.map { EventTime.period($0) }
-            let event = TodoEvent(uuid: "todo", name: "dummy") |> \.time .~ time
+            let todo = TodoEvent(uuid: "todo", name: "dummy") |> \.time .~ time
+            let event = TodoCalendarEvent(todo, in: timeZone)
             
-            let cellViewModel = TodoEventCellViewModel(event, in: self.todayRange, TimeZone(abbreviation: "KST")!)
+            let cellViewModel = TodoEventCellViewModel(event, in: self.todayRange, timeZone)
             
             XCTAssertEqual(cellViewModel?.periodText, expectPeriodText)
         }
@@ -199,14 +194,16 @@ extension DayEventListViewModelImpleTests {
     
     func testCellViewModel_makeFromScheduleEventWithTime() {
         // given
+        let timeZone = TimeZone(abbreviation: "KST")!
         func parameterizeTest(
             _ range: Range<TimeInterval>,
             _ expectPeriodText: EventPeriodText
         ) {
             let time = EventTime.period(range)
-            let event = ScheduleEvent(uuid: "event", name: "some", time: time)
+            let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
+            let event = ScheduleCalendarEvent.events(from: schedule, in: timeZone).first!
             
-            let cellViewModel = ScheduleEventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
+            let cellViewModel = ScheduleEventCellViewModel(event, in: self.todayRange, timeZone: timeZone)
             
             XCTAssertEqual(cellViewModel?.periodText, expectPeriodText)
         }
@@ -221,10 +218,11 @@ extension DayEventListViewModelImpleTests {
         // given
         let timeZone = TimeZone(abbreviation: "KST")!
         let time = self.september10th10_30AtTime(in: timeZone)
-        let event = ScheduleEvent(uuid: "event", name: "name", time: time)
+        let schedule = ScheduleEvent(uuid: "event", name: "name", time: time)
+        let event = ScheduleCalendarEvent.events(from: schedule, in: timeZone).first!
         
         // when
-        let cellViewModel = ScheduleEventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: timeZone)
+        let cellViewModel = ScheduleEventCellViewModel(event, in: self.todayRange, timeZone: timeZone)
         
         // then
         XCTAssertEqual(cellViewModel?.periodText, .singleText("10:30"))
@@ -248,15 +246,17 @@ extension DayEventListViewModelImpleTests {
     
     func testCellViewModel_whenEventTimeIsAllDay_makeWithCurrentTimeZoneTimeShiftting() {
         // given
+        let kstTimeZone = TimeZone(abbreviation: "KST")!
         func parameterizeTest(
             _ range: Range<TimeInterval>,
             _ expectedPeriodText: EventPeriodText
         ) {
             let pdtSecondsFromGMT = TimeZone(abbreviation: "PDT")!.secondsFromGMT() |> TimeInterval.init
             let time = EventTime.allDay(range, secondsFromGMT: pdtSecondsFromGMT)
-            let event = ScheduleEvent(uuid: "event", name: "some", time: time)
+            let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
+            let event = ScheduleCalendarEvent.events(from: schedule, in: kstTimeZone).first!
             
-            let cellViewModel = ScheduleEventCellViewModel(event, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
+            let cellViewModel = ScheduleEventCellViewModel(event, in: self.todayRange, timeZone: kstTimeZone)
             
             XCTAssertEqual(cellViewModel?.periodText, expectedPeriodText)
         }
@@ -269,13 +269,15 @@ extension DayEventListViewModelImpleTests {
     
     func testCellViewModel_makeEventWithTimeHasPeriod_setPeriodDesription() {
         // given
+        let timeZone = TimeZone(abbreviation: "KST")!
         func parameterizeTest(
             _ time: EventTime,
             _ expectedDescription: String?
         ) {
             let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
+            let event = ScheduleCalendarEvent.events(from: schedule, in: timeZone).first!
             
-            let cellViewModel = ScheduleEventCellViewModel(schedule, turn: 1, in: self.todayRange, timeZone: TimeZone(abbreviation: "KST")!)
+            let cellViewModel = ScheduleEventCellViewModel(event,in: self.todayRange, timeZone: timeZone)
             
             XCTAssertEqual(cellViewModel?.periodDescription, expectedDescription)
         }
@@ -315,19 +317,22 @@ extension DayEventListViewModelImpleTests {
         return .init(2023, 09, 10, weekId: "week_1", range: self.todayRange)
     }
     
-    private var dummyEventIds: [EventId] {
+    private var dummyEvents: [any CalendarEvent] {
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let holiday = HolidayCalendarEvent(.init(dateString: "2023-09-30", localName: "holiday", name: "holiday"), in: timeZone)!
+        let schedule4 = ScheduleEvent(uuid: "repeating-schedule", name: "repeating-schedule", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound), turn: 4)]
+        let scheduleWithRepeating = ScheduleCalendarEvent.events(from: schedule4, in: timeZone).last!
+        let todo = TodoCalendarEvent(.init(uuid: ("todo-with-time"), name: "todo-with-time"), in: timeZone)
+        let scheduleWithoutRepeating = ScheduleCalendarEvent(eventId: "not-repeating-schedule", name: "not-repeating-schedule", eventTime: .at(self.todayRange.lowerBound), eventTimeOnCalendar: nil, eventTagId: .default) |> \.turn .~ 1
         return [
-            .holiday(.init(dateString: "dummy-date", localName: "holiday", name: "holiday-name")),
-            .schedule("repeating-schedule", turn: 4),
-            .todo("todo-with-time"),
-            .schedule("not-repeating-schedule", turn: 1)
+            holiday, scheduleWithRepeating, todo, scheduleWithoutRepeating
         ]
     }
     
     private var dummyEventIdStrings: [String] {
         return [
-            "dummy-date_holiday-name",
-            "repeating-schedule",
+            "2023-09-30-holiday",
+            "repeating-schedule-4",
             "todo-with-time",
             "not-repeating-schedule"
         ]
@@ -340,9 +345,9 @@ extension DayEventListViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEventIds.count + 2 })
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
         let cvms = self.waitFirstOutput(expect, for: source) {
-            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds)
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
         }
         
         // then
@@ -360,13 +365,13 @@ extension DayEventListViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEventIds.count + 2 })
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
         let cvmLists = self.waitOutputs(expect, for: source) {
-            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds)
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
             
             viewModel.doneTodo("todo-with-time")
             // 완료처리되면 외부에서도 아이디 업데이트되어서 입력될꺼임
-            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds.filter { $0 != .todo("todo-with-time") })
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents.filter { $0.eventId != "todo-with-time" })
         }
         
         // then
@@ -385,9 +390,9 @@ extension DayEventListViewModelImpleTests {
         let viewModel = self.makeViewModel(shouldFailDoneTodo: true)
         
         // when
-        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEventIds.count + 2})
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2})
         let _ = self.waitFirstOutput(expect, for: source) {
-            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds)
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
             
             viewModel.doneTodo("todo-with-time")
         }
@@ -409,9 +414,9 @@ extension DayEventListViewModelImpleTests {
         )
         
         // when
-        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEventIds.count + 2 })
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
         let _ = self.waitFirstOutput(expect, for: source) {
-            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEventIds)
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
         }
         
         // then

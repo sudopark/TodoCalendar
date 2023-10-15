@@ -17,7 +17,7 @@ protocol DayEventListSceneInteractor: AnyObject {
     
     func selectedDayChanaged(
         _ newDay: CurrentSelectDayModel,
-        and eventThatDay: [EventId]
+        and eventThatDay: [any CalendarEvent]
     )
 }
 //

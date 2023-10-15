@@ -237,7 +237,8 @@ extension MonthViewModelImpleTests {
     
     private func dummyEventLine(_ days: ClosedRange<Int>) -> WeekEventLineModel {
         let dayIdentifiers = days.map { "2023-9-\($0)" }
-        let event = EventOnWeek(0..<1, [], days, dayIdentifiers, .todo("\(days)"), "todo:\(days)")
+        let todo = TodoCalendarEvent(.init(uuid: "\(days)", name: "todo:\(days)"), in: TimeZone.current)
+        let event = EventOnWeek(0..<1, [], days, dayIdentifiers, todo)
         return .init(event, nil)
     }
 
@@ -333,8 +334,8 @@ extension MonthViewModelImpleTests {
         let week1EventDaysSequences = week1Events.daysSequences
             
         XCTAssertEqual(week1EventIds, [
-            [.schedule("schedule_event_repeating", turn: 3)],
-            [.todo("todo_w1_mon"), .todo("todo8_29_allday")]
+            ["schedule_event_repeating-3"],
+            ["todo_w1_mon", "todo8_29_allday"]
         ])
         XCTAssertEqual(week1EventDaysSequences, [
             [(1...3)],
@@ -356,8 +357,8 @@ extension MonthViewModelImpleTests {
         let week3EventIds = week3Events.eventIds
         let week3EventDaysSequences = week3Events.daysSequences
         XCTAssertEqual(week3EventIds, [
-            [.todo("todo_w2_sun_wed"), .schedule("schedule_event_repeating", turn: 4)],
-            [.schedule("schedule_w2_tue_fri", turn: 1)]
+            ["todo_w2_sun_wed", "schedule_event_repeating-4"],
+            ["schedule_w2_tue_fri-1"]
         ])
         XCTAssertEqual(week3EventDaysSequences, [
             [(1...4), (5...7)],
@@ -371,7 +372,7 @@ extension MonthViewModelImpleTests {
         let week4EventIds = week4Events.eventIds
         let week4EventDaysSequences = week4Events.daysSequences
         XCTAssertEqual(week4EventIds, [
-            [.schedule("schedule_event_repeating", turn: 5)]
+            ["schedule_event_repeating-5"]
         ])
         XCTAssertEqual(week4EventDaysSequences, [
             [(3...7)]
@@ -384,8 +385,8 @@ extension MonthViewModelImpleTests {
         let week5EventIds = week5Events.eventIds
         let week5EventDaysSequences = week5Events.daysSequences
         XCTAssertEqual(week5EventIds, [
-            [.schedule("schedule_event_repeating", turn: 5), .holiday("2023-09-28".asHoliday("추석")), .holiday("2023-09-29".asHoliday("추석")), .holiday("2023-09-30".asHoliday("추석"))],
-            [.schedule("schedule_event_repeating", turn: 6)]
+            ["schedule_event_repeating-5", "2023-09-28-추석", "2023-09-29-추석", "2023-09-30-추석"],
+            ["schedule_event_repeating-6"]
         ])
         XCTAssertEqual(week5EventDaysSequences, [
             [(1...3), (5...5), (6...6), (7...7)],
@@ -410,7 +411,7 @@ extension MonthViewModelImpleTests {
         let week1Events = try await viewModel.eventStack(at: week1?.id ?? "")
             .firstValue(with: self.timeoutMillis)
         XCTAssertEqual(week1Events?.eventIds, [
-            [.schedule("schedule_event_repeating", turn: 1), .schedule("schedule_event_repeating", turn: 2)]
+            ["schedule_event_repeating-1", "schedule_event_repeating-2"]
         ])
         XCTAssertEqual(week1Events?.daysSequences, [
             [(1...1), (2...7)]
@@ -421,7 +422,7 @@ extension MonthViewModelImpleTests {
         let week2Events = try await viewModel.eventStack(at: week2?.id ?? "")
             .firstValue(with: self.timeoutMillis)
         XCTAssertEqual(week2Events?.eventIds, [
-            [.schedule("schedule_event_repeating", turn: 2)]
+            ["schedule_event_repeating-2"]
         ])
         XCTAssertEqual(week2Events?.daysSequences, [
             [(1...7)]
@@ -432,8 +433,8 @@ extension MonthViewModelImpleTests {
         let week3Events = try await viewModel.eventStack(at: week3?.id ?? "")
             .firstValue(with: self.timeoutMillis)
         XCTAssertEqual(week3Events?.eventIds, [
-            [.schedule("schedule_event_repeating", turn: 2)],
-            [.todo("todo8"), .holiday("2023-08-15".asHoliday("광복절"))]
+            ["schedule_event_repeating-2"],
+            ["todo8", "2023-08-15-광복절"]
         ])
         XCTAssertEqual(week3Events?.daysSequences, [
             [(1...4)],
@@ -445,7 +446,7 @@ extension MonthViewModelImpleTests {
         let week4Events = try await viewModel.eventStack(at: week4?.id ?? "")
             .firstValue(with: self.timeoutMillis)
         XCTAssertEqual(week4Events?.eventIds, [
-            [.schedule("schedule_event_repeating", turn: 3)]
+            ["schedule_event_repeating-3"]
         ])
         XCTAssertEqual(week4Events?.daysSequences, [
             [(6...7)]
@@ -456,8 +457,8 @@ extension MonthViewModelImpleTests {
         let week5Events = try await viewModel.eventStack(at: week5?.id ?? "")
             .firstValue(with: self.timeoutMillis)
         XCTAssertEqual(week5Events?.eventIds, [
-            [.schedule("schedule_event_repeating", turn: 3)],
-            [.todo("todo_w1_mon"), .todo("todo8_29_allday")]
+            ["schedule_event_repeating-3"],
+            ["todo_w1_mon", "todo8_29_allday"]
         ])
         XCTAssertEqual(week5Events?.daysSequences, [
             [(1...3)],
@@ -538,8 +539,8 @@ extension MonthViewModelImpleTests {
 
         // then
         XCTAssertEqual(updatedFirstWeekEvents?.eventIds, [
-            [.schedule("schedule_event_repeating", turn: 3)],
-            [.todo("todo8_29_allday")]
+            ["schedule_event_repeating-3"],
+            ["todo8_29_allday"]
         ])
         XCTAssertEqual(updatedFirstWeekEvents?.daysSequences, [
             [(1...3)],
@@ -563,8 +564,8 @@ extension MonthViewModelImpleTests {
         let lastWeekEvents = try await viewModel.eventStack(at: lastWeek?.id ?? "")
             .firstValue(with: self.timeoutMillis)
         XCTAssertEqual(lastWeekEvents?.eventIds, [
-            [.schedule("schedule_event_repeating", turn: 6), .holiday("2023-09-28".asHoliday("추석")), .holiday("2023-09-29".asHoliday("추석")), .holiday("2023-09-30".asHoliday("추석"))],
-            [.schedule("schedule_event_repeating", turn: 5), .schedule("schedule_event_repeating", turn: 7)]
+            ["schedule_event_repeating-6", "2023-09-28-추석", "2023-09-29-추석", "2023-09-30-추석"],
+            ["schedule_event_repeating-5", "schedule_event_repeating-7"]
         ])
         XCTAssertEqual(lastWeekEvents?.daysSequences, [
             [(2...4), (5...5), (6...6), (7...7)],
@@ -590,14 +591,14 @@ extension MonthViewModelImpleTests {
         
         func parameterizeTest(
             _ expectDay: String,
-            _ expectEventIds: [EventId],
+            _ expectEventIds: [String],
             _ action: () -> Void
         ) {
             // given
             let expect = expectation(description: "wait selected day notified")
-            var model: CurrentSelectDayModel?; var eventIds: [EventId]?
+            var model: CurrentSelectDayModel?; var eventIds: [String]?
             self.spyListener?.didCurrentDayChanged = {
-                model = $0; eventIds = $1
+                model = $0; eventIds = $1.map { $0.eventId }
                 expect.fulfill()
             }
             
@@ -611,16 +612,16 @@ extension MonthViewModelImpleTests {
         }
         
         // when + then
-        parameterizeTest("2023-9-11", [.todo("todo_w2_sun_wed")]) {
+        parameterizeTest("2023-9-11", ["todo_w2_sun_wed"]) {
             viewModel.select(.init(2023, 9, 11))
         }
-        parameterizeTest("2023-9-13", [.todo("todo_w2_sun_wed"), .schedule("schedule_w2_tue_fri", turn: 1)]) {
+        parameterizeTest("2023-9-13", ["todo_w2_sun_wed", "schedule_w2_tue_fri-1"]) {
             viewModel.select(.init(2023, 9, 13))
         }
-        parameterizeTest("2023-9-15", [.schedule("schedule_event_repeating", turn: 4), .schedule("schedule_w2_tue_fri", turn: 1)]) {
+        parameterizeTest("2023-9-15", ["schedule_event_repeating-4", "schedule_w2_tue_fri-1"]) {
             viewModel.select(.init(2023, 9, 15))
         }
-        parameterizeTest("2023-9-16", [.schedule("schedule_event_repeating", turn: 4)]) {
+        parameterizeTest("2023-9-16", ["schedule_event_repeating-4"]) {
             viewModel.select(.init(2023, 9, 16))
         }
     }
@@ -660,18 +661,18 @@ extension MonthViewModelImpleTests {
         
         let eventIds0 = eventIds[safe: 0]
         XCTAssertEqual(eventIds0, [
-            [.schedule("schedule_event_repeating", turn: 2)],
-            [.todo("todo8"), .holiday("2023-08-15".asHoliday("광복절"))]
+            ["schedule_event_repeating-2"],
+            ["todo8", "2023-08-15-광복절"]
         ])
         let eventIds1 = eventIds[safe: 1]
         XCTAssertEqual(eventIds1, [
-            [.schedule("schedule_event_repeating", turn: 2)],
-            [.todo("todo8")]
+            ["schedule_event_repeating-2"],
+            ["todo8"]
         ])
         
         let eventIds2 = eventIds[safe: 2]
         XCTAssertEqual(eventIds2, [
-            [.schedule("schedule_event_repeating", turn: 2)]
+            ["schedule_event_repeating-2"]
         ])
         
         let eventIds3 = eventIds[safe: 3]
@@ -754,8 +755,8 @@ extension MonthViewModelImpleTests {
     
     private class SpyListener: MonthSceneListener {
         
-        var didCurrentDayChanged: ((CurrentSelectDayModel, [EventId]) -> Void)?
-        func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [EventId]) {
+        var didCurrentDayChanged: ((CurrentSelectDayModel, [any CalendarEvent]) -> Void)?
+        func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) {
             self.didCurrentDayChanged?(currentSelectedDay, eventsThatDay)
         }
     }
@@ -798,7 +799,7 @@ private extension EventTime {
 
 private extension WeekEventStackViewModel {
     
-    var eventIds: [[EventId]] {
+    var eventIds: [[String]] {
         return self.map { lines in lines.map { $0.eventId } }
     }
     
