@@ -18,6 +18,7 @@ import UnitTestHelpKit
 class EventTagLocalRepositoryImpleTests: BaseLocalTests {
     
     private var localStorage: EventTagLocalStorage!
+    private var fakeEnvStore: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {
         self.fileName = "tags"
@@ -26,17 +27,19 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
         self.sqliteService.run { db in
             try db.createTableOrNot(EventTagTable.self)
         }
+        self.fakeEnvStore = .init()
     }
     
     override func tearDownWithError() throws {
         self.localStorage = nil
+        self.fakeEnvStore = nil
         try super.tearDownWithError()
     }
     
     private func makeRepository() -> EventTagLocalRepositoryImple {
         return .init(
             localStorage: self.localStorage,
-            environmentStorage: FakeEnvironmentStorage()
+            environmentStorage: self.fakeEnvStore
         )
     }
 }
@@ -147,6 +150,38 @@ extension EventTagLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(tagAfterDelete?.count, 0)
         XCTAssertEqual(offIdsAfterDelete, [])
+    }
+}
+
+extension EventTagLocalRepositoryImpleTests {
+    
+    private func makeRepositoryWithStubLatestUsedTag() -> EventTagLocalRepositoryImple {
+        self.fakeEnvStore.update("latest_used_event_tag_id", "latest")
+        return self.makeRepository()
+    }
+    
+    func testRepository_loadLatestUsedEventTag() async {
+        // given
+        let repository = self.makeRepositoryWithStubLatestUsedTag()
+        let tag = EventTag(uuid: "latest", name: "latest", colorHex: "some")
+        try? await self.localStorage.saveTag(tag)
+        
+        // when
+        let latestTag = try? await repository.loadLatestUsedTag()
+        
+        // then
+        XCTAssertEqual(latestTag?.uuid, "latest")
+    }
+    
+    func testRepository_whenLatestEventTagIdExistButTagNotExists_resultIsNil() async {
+        // given
+        let repository = self.makeRepositoryWithStubLatestUsedTag()
+        
+        // when
+        let latest = try? await repository.loadLatestUsedTag()
+        
+        // then
+        XCTAssertEqual(latest?.uuid, nil)
     }
 }
 

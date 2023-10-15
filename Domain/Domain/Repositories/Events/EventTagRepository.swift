@@ -19,4 +19,6 @@ public protocol EventTagRepository: Sendable {
     
     func loadOffTags() -> Set<AllEventTagId>
     func toggleTagIsOn(_ tagId: AllEventTagId) -> Set<AllEventTagId>
+    
+    func loadLatestUsedTag() async throws -> EventTag?
 }
