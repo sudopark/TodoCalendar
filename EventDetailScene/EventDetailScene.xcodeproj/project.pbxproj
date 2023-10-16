@@ -19,6 +19,13 @@
 		F6F780882ADC1EFB00B50C19 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6F780872ADC1EFB00B50C19 /* Extensions.framework */; };
 		F6F7808A2ADC1F0300B50C19 /* UnitTestHelpKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6F780892ADC1F0300B50C19 /* UnitTestHelpKit.framework */; };
 		F6F7808C2ADC1F0800B50C19 /* TestDoubles.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6F7808B2ADC1F0800B50C19 /* TestDoubles.framework */; };
+		F6F780A42ADC20F900B50C19 /* AddEventBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F7809E2ADC20F900B50C19 /* AddEventBuilderImple.swift */; };
+		F6F780A52ADC20F900B50C19 /* AddEventRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F7809F2ADC20F900B50C19 /* AddEventRouter.swift */; };
+		F6F780A62ADC20F900B50C19 /* AddEventScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A02ADC20F900B50C19 /* AddEventScene+Builder.swift */; };
+		F6F780A72ADC20F900B50C19 /* AddEventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A12ADC20F900B50C19 /* AddEventViewController.swift */; };
+		F6F780A82ADC20F900B50C19 /* AddEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A22ADC20F900B50C19 /* AddEventView.swift */; };
+		F6F780A92ADC20F900B50C19 /* AddEventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A32ADC20F900B50C19 /* AddEventViewModel.swift */; };
+		F6F780AB2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780AA2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +53,13 @@
 		F6F780872ADC1EFB00B50C19 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6F780892ADC1F0300B50C19 /* UnitTestHelpKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = UnitTestHelpKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6F7808B2ADC1F0800B50C19 /* TestDoubles.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TestDoubles.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F6F7809E2ADC20F900B50C19 /* AddEventBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventBuilderImple.swift; sourceTree = "<group>"; };
+		F6F7809F2ADC20F900B50C19 /* AddEventRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventRouter.swift; sourceTree = "<group>"; };
+		F6F780A02ADC20F900B50C19 /* AddEventScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddEventScene+Builder.swift"; sourceTree = "<group>"; };
+		F6F780A12ADC20F900B50C19 /* AddEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventViewController.swift; sourceTree = "<group>"; };
+		F6F780A22ADC20F900B50C19 /* AddEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventView.swift; sourceTree = "<group>"; };
+		F6F780A32ADC20F900B50C19 /* AddEventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventViewModel.swift; sourceTree = "<group>"; };
+		F6F780AA2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventViewModelImpleTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +112,7 @@
 		F6F780562ADC1EAA00B50C19 /* EventDetailScene */ = {
 			isa = PBXGroup;
 			children = (
+				F6F7809D2ADC20EC00B50C19 /* AddEvent */,
 				F6F780572ADC1EAA00B50C19 /* EventDetailScene.h */,
 			);
 			path = EventDetailScene;
@@ -107,6 +122,7 @@
 			isa = PBXGroup;
 			children = (
 				F6F780612ADC1EAB00B50C19 /* EventDetailSceneTests.swift */,
+				F6F780AA2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift */,
 			);
 			path = EventDetailSceneTests;
 			sourceTree = "<group>";
@@ -126,6 +142,19 @@
 				F6F7806D2ADC1EC000B50C19 /* Common3rdParty.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		F6F7809D2ADC20EC00B50C19 /* AddEvent */ = {
+			isa = PBXGroup;
+			children = (
+				F6F7809E2ADC20F900B50C19 /* AddEventBuilderImple.swift */,
+				F6F7809F2ADC20F900B50C19 /* AddEventRouter.swift */,
+				F6F780A02ADC20F900B50C19 /* AddEventScene+Builder.swift */,
+				F6F780A12ADC20F900B50C19 /* AddEventViewController.swift */,
+				F6F780A22ADC20F900B50C19 /* AddEventView.swift */,
+				F6F780A32ADC20F900B50C19 /* AddEventViewModel.swift */,
+			);
+			path = AddEvent;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -237,6 +266,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6F780A82ADC20F900B50C19 /* AddEventView.swift in Sources */,
+				F6F780A42ADC20F900B50C19 /* AddEventBuilderImple.swift in Sources */,
+				F6F780A72ADC20F900B50C19 /* AddEventViewController.swift in Sources */,
+				F6F780A62ADC20F900B50C19 /* AddEventScene+Builder.swift in Sources */,
+				F6F780A52ADC20F900B50C19 /* AddEventRouter.swift in Sources */,
+				F6F780A92ADC20F900B50C19 /* AddEventViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,6 +280,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6F780622ADC1EAB00B50C19 /* EventDetailSceneTests.swift in Sources */,
+				F6F780AB2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -449,6 +485,7 @@
 		F6F7806A2ADC1EAB00B50C19 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
@@ -466,6 +503,7 @@
 		F6F7806B2ADC1EAB00B50C19 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ABNASUGL6;
