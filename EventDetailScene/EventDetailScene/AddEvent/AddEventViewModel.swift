@@ -86,7 +86,7 @@ protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     func enter(name: String)
     func toggleIsTodo()
     func selectTime()
-    func toggleIsAllDay()
+//    func toggleIsAllDay()
     func selectRepeatOption()
     func selectEventTag()
     func selectPlace()
@@ -97,7 +97,7 @@ protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     
     // presenter
     var isTodo: AnyPublisher<Bool, Never> { get }
-    var selectedTime: AnyPublisher<SelectedTime, Never> { get }
+    var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOption: AnyPublisher<String, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
     var selectedPlace: AnyPublisher<SelectPlace?, Never> { get }
@@ -126,6 +126,8 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
         self.scheduleUsecase = scheduleUsecase
         self.eventTagUsease = eventTagUsease
         self.calendarSettingUsecase = calendarSettingUsecase
+        
+        self.setupInitialValue()
     }
     
     
@@ -140,7 +142,25 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
     }
     
     private var cancellables: Set<AnyCancellable> = []
+    private var setupDefaultSelectTag: AnyCancellable?
     private let subject = Subject()
+    
+    private func setupInitialValue() {
+        
+        let now = Date(); let nextHour = now.addingTimeInterval(3600)
+        self.subject.selectedTime.send(
+            .period(now.timeIntervalSince1970..<nextHour.timeIntervalSince1970)
+        )
+        
+        self.setupDefaultSelectTag = self.eventTagUsease.latestUsedEventTag
+            .map { tag -> SelectedTag in
+                return tag.map { SelectedTag($0) }
+                ?? .init(.default, "default".localized(), .default)
+            }
+            .sink(receiveValue: { [weak self] tag in
+                self?.subject.selectedTag.send(tag)
+            })
+    }
 }
 
 
@@ -157,18 +177,35 @@ extension AddEventViewModelImple {
     }
     
     func selectTime() {
-        // TODO: show select time picker
+        let time = self.subject.selectedTime.value
+        self.router?.routeToEventTimeSelect(
+            time, 
+            isNotSelectable: self.subject.isTodo.value
+        )
     }
     
-    func toggleIsAllDay() {
-        // TODO: toggle is all day
+    func eventTimeSelect(didSelect time: EventTime?) {
+        self.subject.selectedTime.send(time)
     }
+    
+//    func toggleIsAllDay() {
+//        // TODO: toggle is all day
+//    }
+//    
+//    private func toggleOnIsAllDay(_ time: EventTime) {
+//        
+//    }
+//    
+//    private func toggleOffIsAllDay(_ time: EventTime) {
+//
+//    }
     
     func selectRepeatOption() {
         // TODO: select repeat option
     }
     
     func selectEventTag() {
+        self.setupDefaultSelectTag?.cancel()
         // TODO: select tag
     }
     
@@ -204,16 +241,9 @@ extension AddEventViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var selectedTime: AnyPublisher<SelectedTime, Never> {
-        let transform: (TimeZone, EventTime?) -> SelectedTime = { timeZone, selected in
-            let defaultTime: () -> SelectedTime = {
-                let now = Date(); let nextHour = now.addingTimeInterval(3600)
-                return .period(
-                    now.dateText(at: timeZone), now.timeText(at: timeZone),
-                    nextHour.dateText(at: timeZone), nextHour.timeText(at: timeZone)
-                )
-            }
-            return selected.map { SelectedTime($0, timeZone) } ?? defaultTime()
+    var selectedTime: AnyPublisher<SelectedTime?, Never> {
+        let transform: (TimeZone, EventTime?) -> SelectedTime? = { timeZone, selected in
+            return selected.map { SelectedTime($0, timeZone) }
         }
         return Publishers.CombineLatest(
             self.calendarSettingUsecase.currentTimeZone,
@@ -229,16 +259,10 @@ extension AddEventViewModelImple {
     }
     
     var selectedTag: AnyPublisher<SelectedTag, Never> {
-        let transform: (EventTag?, SelectedTag?) -> SelectedTag = { latest, selected in
-            return selected ?? latest.map { .init($0) } ?? .defaultTag
-        }
-        return Publishers.CombineLatest(
-            self.eventTagUsease.latestUsedEventTag,
-            self.subject.selectedTag
-        )
-        .map(transform)
-        .removeDuplicates()
-        .eraseToAnyPublisher()
+        return self.subject.selectedTag
+            .compactMap { $0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     var selectedPlace: AnyPublisher<SelectPlace?, Never> {
