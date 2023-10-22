@@ -71,6 +71,15 @@ struct EventRepeatingOptionCodableMapper: Codable {
             option.dayOfWeek = dayofWeeks.compactMap { DayOfWeeks(rawValue: $0) }
             self = .init(option: option)
             
+        case "every_year_some_day":
+            guard let timeZone = timeZoneAbbre.flatMap ({ TimeZone(abbreviation: $0) })
+            else {
+                throw RuntimeError("invalid time zone value: \(timeZoneAbbre ?? "")")
+            }
+            var option = EventRepeatingOptions.EveryYearSomeDay(timeZone: timeZone)
+            option.interval = try container.decode(Int.self, forKey: .interval)
+            self = .init(option: option)
+            
         default: throw RuntimeError("not support option type")
         }
     }
@@ -100,6 +109,11 @@ struct EventRepeatingOptionCodableMapper: Codable {
             try container.encode(everyYear.months.map { $0.rawValue }, forKey: .months)
             try container.encode(everyYear.weekOrdinals.map { WeekOrdinalMapper(ordinal: $0) }, forKey: .weekOrdinals)
             try container.encode(everyYear.dayOfWeek.map { $0.rawValue }, forKey: .dayOfWeek)
+            try container.encodeIfPresent(everyYear.timeZone.addreviationKey, forKey: .timeZone)
+            
+        case let everyYear as EventRepeatingOptions.EveryYearSomeDay:
+            try container.encode("every_year_some_day", forKey: .optionType)
+            try container.encode(everyYear.interval, forKey: .interval)
             try container.encodeIfPresent(everyYear.timeZone.addreviationKey, forKey: .timeZone)
             
         default: throw RuntimeError("not support option type")

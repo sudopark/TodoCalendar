@@ -24,19 +24,16 @@ public final class EventRepeatTimeEnumerator: Sendable {
             self.calendar = Calendar(identifier: .gregorian)
             
         case let everyWeek as EventRepeatingOptions.EveryWeek:
-            var calendar = Calendar(identifier: .gregorian)
-            calendar.timeZone = everyWeek.timeZone
-            self.calendar = calendar
+            self.calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ everyWeek.timeZone
             
         case let everyMonth as EventRepeatingOptions.EveryMonth:
-            var calendar = Calendar(identifier: .gregorian)
-            calendar.timeZone = everyMonth.timeZone
-            self.calendar = calendar
+            self.calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ everyMonth.timeZone
             
         case let everyYear as EventRepeatingOptions.EveryYear:
-            var calendar = Calendar(identifier: .gregorian)
-            calendar.timeZone = everyYear.timeZone
-            self.calendar = calendar
+            self.calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ everyYear.timeZone
+            
+        case let everyYear as EventRepeatingOptions.EveryYearSomeDay:
+            self.calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ everyYear.timeZone
             
         default: return nil
         }
@@ -91,6 +88,8 @@ public final class EventRepeatTimeEnumerator: Sendable {
         case let everyMonth as EventRepeatingOptions.EveryMonth:
             nextDate = self.nextEventDate(everyMonth: everyMonth, current: current, from: currentEventStartDate)
         case let everyYear as EventRepeatingOptions.EveryYear:
+            nextDate = self.nextEventDate(everyYear, current)
+        case let everyYear as EventRepeatingOptions.EveryYearSomeDay:
             nextDate = self.nextEventDate(everyYear, current)
         default: nextDate = nil
         }
@@ -207,6 +206,14 @@ extension EventRepeatTimeEnumerator {
                 weekDays: everyYear.dayOfWeek,
                 current: current
             )
+    }
+    
+    private func nextEventDate(
+        _ everyYear: EventRepeatingOptions.EveryYearSomeDay,
+        _ current: Current
+    ) -> Date? {
+        return self.calendar
+            .date(byAdding: .year, value: everyYear.interval, to: current.date)
     }
 }
 
