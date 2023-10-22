@@ -72,6 +72,15 @@ public enum EventRepeatingOptions {
                 .map { $0.rawValue - currentMonth }
         }
     }
+    
+    public struct EveryYearSomeDay: EventRepeatingOption, Hashable {
+        public var interval: Int = 1
+        public let timeZone: TimeZone
+        
+        public init(timeZone: TimeZone) {
+            self.timeZone = timeZone
+        }
+    }
 }
 
 public struct EventRepeating: Equatable, Sendable {

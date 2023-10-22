@@ -437,6 +437,50 @@ class EventRepeatEnumeratorTests_everyYear: BaseEventRepeatTimeEnumeratorTests {
     }
 }
 
+// MARK: - repeat every year some day
+
+class EventRepeatEnumeratorTests_everyYear_someDay: BaseEventRepeatTimeEnumeratorTests {
+ 
+    private func parameterizeTest(
+        interval: Int = 1,
+        from: String,
+        expected: String?,
+        endTime: String? = nil
+    ) {
+        // given
+        let option = EventRepeatingOptions.EveryYearSomeDay(timeZone: TimeZone(abbreviation: "KST")!)
+            |> \.interval .~ interval
+        let enumerator = self.makeEnumerator(option)
+        let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
+        
+        // when
+        let next = enumerator.nextEventTime(
+            from: .at(self.dummyDate(from).timeIntervalSince1970),
+            until: endTime
+        )
+        
+        // then
+        if let expected {
+            let expectedNextTime = self.dummyDate(expected).timeIntervalSince1970
+            XCTAssertEqual(next, .at(expectedNextTime))
+        } else {
+            XCTAssertNil(next)
+        }
+    }
+    
+    // interval에 따라 다음년도 같은시간 반환
+    func testEnumerator_nextTimePerInterval() {
+        // given
+        // when + then
+        self.parameterizeTest(interval: 1, from: "2023-03-01 01:00", expected: "2024-03-01 01:00")
+        self.parameterizeTest(interval: 2, from: "2023-03-01 01:00", expected: "2025-03-01 01:00")
+        self.parameterizeTest(interval: 1, from: "2020-02-29 01:00", expected: "2021-02-28 01:00")
+        self.parameterizeTest(interval: 2, from: "2020-02-29 01:00", expected: "2022-02-28 01:00")
+        self.parameterizeTest(interval: 3, from: "2020-02-29 01:00", expected: "2023-02-28 01:00")
+        self.parameterizeTest(interval: 4, from: "2020-02-29 01:00", expected: "2024-02-29 01:00")
+    }
+}
+
 // MARK: - enumerate until end
 
 class EventRepeatEnumeratorTests_EnumeratesUntilEnd: BaseEventRepeatTimeEnumeratorTests {
