@@ -17,34 +17,45 @@ import Scenes
 
 // MARK: - AddEventViewModel
 
+struct SelectTimeText: Equatable {
+    var year: String?
+    let day: String
+    var time: String?
+    
+    init(_ timeStamp: TimeInterval, _ timeZone: TimeZone, withoutTime: Bool = false) {
+        let date = Date(timeIntervalSince1970: timeStamp)
+        let isSameYear = Date().components(timeZone).0 == date.components(timeZone).0
+        self.year = isSameYear ? nil : date.yearText(at: timeZone)
+        self.day = date.dateText(at: timeZone)
+        self.time = withoutTime ? nil : date.timeText(at: timeZone)
+    }
+}
+
 enum SelectedTime: Equatable {
-    case at(dateText: String, timeText: String)
-    case period(_ startDate: String, _ startTime: String, _ endDate: String, _ endTime: String)
-    case alldayPeriod(_ start: String, _ end: String?)
+    case at(SelectTimeText)
+    case period(SelectTimeText, SelectTimeText)
+    case singleAllDay(SelectTimeText)
+    case alldayPeriod(SelectTimeText, SelectTimeText)
     
     init(_ time: EventTime, _ timeZone: TimeZone) {
         switch time {
         case .at(let timeStamp):
-            let time = Date(timeIntervalSince1970: timeStamp)
             self = .at(
-                dateText: time.dateText(at: timeZone), timeText: time.timeText(at: timeZone)
+                .init(timeStamp, timeZone)
             )
             
         case .period(let range):
-            let start = Date(timeIntervalSince1970: range.lowerBound)
-            let end = Date(timeIntervalSince1970: range.upperBound)
             self = .period(
-                start.dateText(at: timeZone), start.timeText(at: timeZone),
-                end.dateText(at: timeZone), end.timeText(at: timeZone)
+                .init(range.lowerBound, timeZone), .init(range.upperBound, timeZone)
             )
-        case .allDay(let range, _):
-            let start = Date(timeIntervalSince1970: range.lowerBound)
-            let end = Date(timeIntervalSince1970: range.upperBound)
-            let isSameDay = start.isSameDay(end, at: timeZone)
-            self = .alldayPeriod(
-                start.dateText(at: timeZone),
-                isSameDay ? nil : end.dateText(at: timeZone)
-            )
+            
+        case .allDay:
+            let range = time.rangeWithShifttingifNeed(on: timeZone)
+            let isSameDay = Date(timeIntervalSince1970: range.lowerBound)
+                .isSameDay(Date(timeIntervalSince1970: range.upperBound), at: timeZone)
+            self = isSameDay
+            ? .singleAllDay(.init(range.lowerBound, timeZone))
+            : .alldayPeriod(.init(range.lowerBound, timeZone), .init(range.upperBound, timeZone))
         }
     }
 }
@@ -85,8 +96,8 @@ protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     // interactor
     func enter(name: String)
     func toggleIsTodo()
-    func selectTime()
-//    func toggleIsAllDay()
+    func eventTimeSelect(didSelect time: EventTime?)
+    func toggleIsAllDay()
     func selectRepeatOption()
     func selectEventTag()
     func selectPlace()
@@ -133,6 +144,7 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
     
     private struct Subject {
         let name = CurrentValueSubject<String?, Never>(nil)
+        let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let isTodo = CurrentValueSubject<Bool, Never>(false)
         let selectedTime = CurrentValueSubject<EventTime?, Never>(nil)
         let selectedTag = CurrentValueSubject<SelectedTag?, Never>(nil)
@@ -146,6 +158,12 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
     private let subject = Subject()
     
     private func setupInitialValue() {
+        
+        self.calendarSettingUsecase.currentTimeZone
+            .sink(receiveValue: { [weak self] timeZone in
+                self?.subject.timeZone.send(timeZone)
+            })
+            .store(in: &self.cancellables)
         
         let now = Date(); let nextHour = now.addingTimeInterval(3600)
         self.subject.selectedTime.send(
@@ -176,30 +194,17 @@ extension AddEventViewModelImple {
         self.subject.isTodo.send(!self.subject.isTodo.value)
     }
     
-    func selectTime() {
-        let time = self.subject.selectedTime.value
-        self.router?.routeToEventTimeSelect(
-            time, 
-            isNotSelectable: self.subject.isTodo.value
-        )
-    }
-    
     func eventTimeSelect(didSelect time: EventTime?) {
         self.subject.selectedTime.send(time)
     }
     
-//    func toggleIsAllDay() {
-//        // TODO: toggle is all day
-//    }
-//    
-//    private func toggleOnIsAllDay(_ time: EventTime) {
-//        
-//    }
-//    
-//    private func toggleOffIsAllDay(_ time: EventTime) {
-//
-//    }
-    
+    func toggleIsAllDay() {
+        guard let timeZone = self.subject.timeZone.value,
+              let time = self.subject.selectedTime.value?.toggleIsAllDay(timeZone)
+        else { return }
+        self.subject.selectedTime.send(time)
+    }
+
     func selectRepeatOption() {
         // TODO: select repeat option
     }
@@ -246,7 +251,7 @@ extension AddEventViewModelImple {
             return selected.map { SelectedTime($0, timeZone) }
         }
         return Publishers.CombineLatest(
-            self.calendarSettingUsecase.currentTimeZone,
+            self.subject.timeZone.compactMap { $0 },
             self.subject.selectedTime
         )
         .map(transform)
@@ -278,7 +283,14 @@ extension AddEventViewModelImple {
     }
 }
 
-private extension Date {
+extension Date {
+    
+    func yearText(at timeZone: TimeZone) -> String {
+        let dateForm = DateFormatter()
+        dateForm.timeZone = timeZone
+        dateForm.dateFormat = "yyyy".localized()
+        return dateForm.string(from: self)
+    }
     
     func dateText(at timeZone: TimeZone) -> String {
         let dateForm = DateFormatter()
@@ -295,11 +307,49 @@ private extension Date {
     }
     
     func isSameDay(_ other: Date, at timeZone: TimeZone) -> Bool {
+        let lhsCompos = self.components(timeZone)
+        let rhsCompos = other.components(timeZone)
+        return lhsCompos.0 == rhsCompos.0
+            && lhsCompos.1 == rhsCompos.1
+            && lhsCompos.2 == rhsCompos.2
+    }
+    
+    func components(_ timeZone: TimeZone) -> (Int?, Int?, Int?) {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        let lhsCompos = calendar.dateComponents([.year, .month, .day], from: self)
-        let rhsCompos = calendar.dateComponents([.year, .month, .day], from: other)
-        return lhsCompos.year == rhsCompos.year
-            && lhsCompos.month == rhsCompos.month
-            && lhsCompos.day == rhsCompos.day
+        let compos = calendar.dateComponents([.year, .month, .day], from: self)
+        return (compos.year, compos.month, compos.day)
+    }
+}
+
+private extension EventTime {
+    
+    func toggleIsAllDay(_ timeZone: TimeZone) -> EventTime? {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let secondsFromGMT = TimeInterval(timeZone.secondsFromGMT())
+        switch self {
+        case .at(let time):
+            let date = Date(timeIntervalSince1970: time)
+            guard let end = calendar.endOfDay(for: date) else { return nil }
+            let start = calendar.startOfDay(for: date)
+            return .allDay(
+                start.timeIntervalSince1970..<end.timeIntervalSince1970,
+                secondsFromGMT: secondsFromGMT
+            )
+            
+        case .period(let range):
+            let (startDate, endDate) = (
+                Date(timeIntervalSince1970: range.lowerBound),
+                Date(timeIntervalSince1970: range.upperBound)
+            )
+            guard let endDayOfEnd = calendar.endOfDay(for: endDate) else { return nil }
+            let startOfStart = calendar.startOfDay(for: startDate)
+            return .allDay(
+                startOfStart.timeIntervalSince1970..<endDayOfEnd.timeIntervalSince1970,
+                secondsFromGMT: secondsFromGMT
+            )
+            
+        case .allDay(let range, secondsFromGMT: _):
+            return .period(range)
+        }
     }
 }

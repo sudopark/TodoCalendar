@@ -17,10 +17,6 @@ import CommonPresentation
 
 protocol AddEventRouting: Routing, Sendable { 
     
-    func routeToEventTimeSelect(
-        _ previousSelected: EventTime?,
-        isNotSelectable: Bool
-    )
 }
 
 // MARK: - Router
@@ -35,12 +31,4 @@ extension AddEventRouter {
     }
     
     // TODO: router implememnts
-    func routeToEventTimeSelect(
-        _ previousSelected: EventTime?,
-        isNotSelectable: Bool
-    ) {
-        Task { @MainActor in
-            let listener = self.currentScene?.interactor
-        }
-    }
 }
