@@ -9,6 +9,7 @@
 
 import UIKit
 import Scenes
+import Domain
 import CommonPresentation
 
 
@@ -16,11 +17,14 @@ import CommonPresentation
 
 final class SelectEventRepeatOptionSceneBuilerImple {
     
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     
     init(
+        usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
+        self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
     }
 }
@@ -29,10 +33,16 @@ final class SelectEventRepeatOptionSceneBuilerImple {
 extension SelectEventRepeatOptionSceneBuilerImple: SelectEventRepeatOptionSceneBuiler {
     
     @MainActor
-    func makeSelectEventRepeatOptionScene() -> any SelectEventRepeatOptionScene {
+    func makeSelectEventRepeatOptionScene(
+        startTime: Date,
+        previousSelected repeating: EventRepeating,
+        listener: (any SelectEventRepeatOptionSceneListener)?
+    ) -> any SelectEventRepeatOptionScene {
         
         let viewModel = SelectEventRepeatOptionViewModelImple(
-            
+            startTime: startTime,
+            previousSelected: repeating,
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase()
         )
         
         let viewController = SelectEventRepeatOptionViewController(
@@ -44,7 +54,7 @@ extension SelectEventRepeatOptionSceneBuilerImple: SelectEventRepeatOptionSceneB
         )
         router.scene = viewController
         viewModel.router = router
-        
+        viewModel.listener = listener
         return viewController
     }
 }
