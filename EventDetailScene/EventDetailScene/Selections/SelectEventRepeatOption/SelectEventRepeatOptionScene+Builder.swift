@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 
 
@@ -15,7 +16,11 @@ import Scenes
 
 protocol SelectEventRepeatOptionSceneInteractor: AnyObject { }
 //
-//public protocol SelectEventRepeatOptionSceneListener: AnyObject { }
+protocol SelectEventRepeatOptionSceneListener: AnyObject {
+    
+    func selectEventRepeatOption(didSelect repeating: EventRepeating)
+    func selectEventRepeatOptionNotRepeat()
+}
 
 // MARK: - SelectEventRepeatOptionScene
 
@@ -28,5 +33,9 @@ protocol SelectEventRepeatOptionScene: Scene where Interactor == any SelectEvent
 protocol SelectEventRepeatOptionSceneBuiler: AnyObject {
     
     @MainActor
-    func makeSelectEventRepeatOptionScene() -> any SelectEventRepeatOptionScene
+    func makeSelectEventRepeatOptionScene(
+        startTime: Date,
+        previousSelected repeating: EventRepeating,
+        listener: (any SelectEventRepeatOptionSceneListener)?
+    ) -> any SelectEventRepeatOptionScene
 }
