@@ -300,7 +300,7 @@ extension MonthViewModelImpleTests {
 
         let singleEventOn8 = TodoEvent(uuid: "todo8", name: "some")
             |> \.time .~ .dummyAt(08, 13)
-            |> \.eventTagId .~ "some"
+            |> \.eventTagId .~ .custom("some")
         self.stubTodoUsecase.eventsFor8 = [singleEventOn8, todo_w1_mon, todo8_29_allday]
         self.stubScheduleUsecase.eventsFor8 = [
             schedule_event_repeating

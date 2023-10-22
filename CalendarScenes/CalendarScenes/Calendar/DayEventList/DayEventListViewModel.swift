@@ -83,7 +83,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
             .compactMap { $0?.events }
             .map { $0.compactMap { $0.eventTagId.customTagId } }
         let tagIdsFromCurrentTodo = self.todoEventUsecase.currentTodoEvents
-            .map { $0.compactMap { $0.eventTagId } }
+            .map { $0.compactMap { $0.eventTagId?.customTagId } }
         
         Publishers.CombineLatest(
             customTagIdsFromCalenadrEvent, tagIdsFromCurrentTodo

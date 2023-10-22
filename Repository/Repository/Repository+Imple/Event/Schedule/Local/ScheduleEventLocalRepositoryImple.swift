@@ -35,7 +35,7 @@ extension ScheduleEventLocalRepositoryImple {
             throw RuntimeError("invalid parameter")
         }
         try await localStorage.saveScheduleEvent(newEvent)
-        self.updateLatestUsedEventTag(params.eventTagId)
+        self.updateLatestUsedEventTag(params.eventTagId?.customTagId)
         return newEvent
     }
     
@@ -46,7 +46,7 @@ extension ScheduleEventLocalRepositoryImple {
         let origin = try await self.localStorage.loadScheduleEvent(eventId)
         let updated = origin.apply(params)
         try await self.localStorage.updateScheduleEvent(updated)
-        self.updateLatestUsedEventTag(params.eventTagId)
+        self.updateLatestUsedEventTag(params.eventTagId?.customTagId)
         return updated
     }
     
@@ -60,7 +60,7 @@ extension ScheduleEventLocalRepositoryImple {
         let updated = origin
             |> \.repeatingTimeToExcludes <>~ [currentTime.customKey]
         try await self.localStorage.updateScheduleEvent(updated)
-        self.updateLatestUsedEventTag(params.eventTagId)
+        self.updateLatestUsedEventTag(params.eventTagId?.customTagId)
         return .init(newEvent: newEvent, originEvent: updated)
     }
     

@@ -324,9 +324,9 @@ extension DayEventListViewModelImpleTests {
         let timeZone = TimeZone(abbreviation: "KST")!
         let holiday = HolidayCalendarEvent(.init(dateString: "2023-09-30", localName: "holiday", name: "holiday"), in: timeZone)!
         let schedule4 = ScheduleEvent(uuid: "repeating-schedule", name: "repeating-schedule", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound), turn: 4)]
-            |> \.eventTagId .~ "some"
+            |> \.eventTagId .~ .custom("some")
         let scheduleWithRepeating = ScheduleCalendarEvent.events(from: schedule4, in: timeZone).last!
-        let todo = TodoCalendarEvent(.init(uuid: ("todo-with-time"), name: "todo-with-time") |> \.eventTagId .~ "some", in: timeZone)
+        let todo = TodoCalendarEvent(.init(uuid: ("todo-with-time"), name: "todo-with-time") |> \.eventTagId .~ .custom("some"), in: timeZone)
         let scheduleWithoutRepeating = ScheduleCalendarEvent(eventId: "not-repeating-schedule", name: "not-repeating-schedule", eventTime: .at(self.todayRange.lowerBound), eventTimeOnCalendar: nil, eventTagId: .custom("some")) |> \.turn .~ 1
         return [
             holiday, scheduleWithRepeating, todo, scheduleWithoutRepeating

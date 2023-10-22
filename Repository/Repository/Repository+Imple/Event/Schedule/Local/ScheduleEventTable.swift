@@ -48,7 +48,7 @@ struct ScheduleEventTable: Table {
         init(_ event: ScheduleEvent) {
             self.uuid = event.uuid
             self.name = event.name
-            self.eventTagId = event.eventTagId
+            self.eventTagId = event.eventTagId?.stringValue
             self.repeating = event.repeating
             self.showTurn = event.showTurn
             self.excludeTimes = Array(event.repeatingTimeToExcludes)

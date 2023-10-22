@@ -41,7 +41,7 @@ struct DoneTodoEventTable: Table {
         case .originEventId: return entity.originEventId
         case .name: return entity.name
         case .doneTime: return entity.doneTime.timeIntervalSince1970
-        case .eventTagId: return entity.eventTagId
+        case .eventTagId: return entity.eventTagId?.stringValue
         }
     }
 }
@@ -55,6 +55,6 @@ extension DoneTodoEvent: RowValueType {
             originEventId: try cursor.next().unwrap(),
             doneTime: Date(timeIntervalSince1970: try cursor.next().unwrap())
         )
-        self.eventTagId = cursor.next()
+        self.eventTagId = cursor.next().map { AllEventTagId($0) }
     }
 }

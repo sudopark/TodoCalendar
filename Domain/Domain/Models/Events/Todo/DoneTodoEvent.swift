@@ -22,7 +22,7 @@ public struct DoneTodoEvent {
     public let originEventId: String
     public let name: String
     
-    public var eventTagId: String?
+    public var eventTagId: AllEventTagId?
     public var eventTime: EventTime?
     public let doneTime: Date
     

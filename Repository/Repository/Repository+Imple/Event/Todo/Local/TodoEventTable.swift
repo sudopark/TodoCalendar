@@ -41,7 +41,7 @@ struct TodoEventTable: Table {
         switch column {
         case .uuid: return  entity.uuid
         case .name: return entity.name
-        case .eventTagId: return entity.eventTagId
+        case .eventTagId: return entity.eventTagId?.customTagId
         case .repeatingStart: return entity.repeating?.repeatingStartTime
         case .repeatingOption: return entity.repeating
                 .map { EventRepeatingOptionCodableMapper(option: $0.repeatOption) }
@@ -61,7 +61,7 @@ extension TodoEvent: RowValueType {
             uuid: try cursor.next().unwrap(),
             name: try cursor.next().unwrap()
         )
-        self.eventTagId = cursor.next()
+        self.eventTagId = cursor.next().map { AllEventTagId($0) }
         let start: Double? = cursor.next()
         let optionText: String? = cursor.next()
         let end: Double? = cursor.next()

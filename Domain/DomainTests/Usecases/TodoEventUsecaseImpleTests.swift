@@ -65,7 +65,7 @@ extension TodoEventUsecaseImpleTests {
         
         // when
         let params = TodoMakeParams()
-        |> \.eventTagId .~ "some"
+        |> \.eventTagId .~ .custom("some")
         let newTodo = try? await usecase.makeTodoEvent(params)
         
         // then
@@ -105,7 +105,7 @@ extension TodoEventUsecaseImpleTests {
         
         // when
         let params = TodoEditParams()
-            |> \.eventTagId .~ "some"
+            |> \.eventTagId .~ .custom("some")
         let updated = try? await usecase.updateTodoEvent("id", params)
         
         // then
