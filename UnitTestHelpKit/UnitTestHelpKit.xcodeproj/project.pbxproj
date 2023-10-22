@@ -18,6 +18,7 @@
 		F63C9CE729C6DF0300CC663A /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63C9CE629C6DF0300CC663A /* XCTest.framework */; platformFilter = ios; };
 		F65B08F929D019FB000EE650 /* BaseStub.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65B08F829D019FB000EE650 /* BaseStub.swift */; };
 		F698371E2A853641001F7603 /* Publisher+async+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F698371D2A853641001F7603 /* Publisher+async+Extensions.swift */; };
+		F6D05D9B2AE541BC0028ED68 /* Time+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D05D9A2AE541BC0028ED68 /* Time+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +45,7 @@
 		F63C9CE629C6DF0300CC663A /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/iPhoneOS.platform/Developer/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		F65B08F829D019FB000EE650 /* BaseStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseStub.swift; sourceTree = "<group>"; };
 		F698371D2A853641001F7603 /* Publisher+async+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Publisher+async+Extensions.swift"; sourceTree = "<group>"; };
+		F6D05D9A2AE541BC0028ED68 /* Time+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Time+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,6 +97,7 @@
 				F60CBB5B29CEA8D000F03310 /* TestError.swift */,
 				F65B08F829D019FB000EE650 /* BaseStub.swift */,
 				F698371D2A853641001F7603 /* Publisher+async+Extensions.swift */,
+				F6D05D9A2AE541BC0028ED68 /* Time+Extension.swift */,
 			);
 			path = UnitTestHelpKit;
 			sourceTree = "<group>";
@@ -228,6 +231,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6D05D9B2AE541BC0028ED68 /* Time+Extension.swift in Sources */,
 				F60CBB5C29CEA8D000F03310 /* TestError.swift in Sources */,
 				F60CBB5229CEA04D00F03310 /* BaseTestCase.swift in Sources */,
 				F698371E2A853641001F7603 /* Publisher+async+Extensions.swift in Sources */,
