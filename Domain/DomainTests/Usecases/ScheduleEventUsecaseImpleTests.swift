@@ -82,12 +82,12 @@ extension ScheduleEventUsecaseImpleTests {
         let params = ScheduleMakeParams()
             |> \.name .~ "new"
             |> \.time .~ .at(0)
-            |> \.eventTagId .~ "some"
+            |> \.eventTagId .~ .custom("some")
         let event = try? await usecase.makeScheduleEvent(params)
         
         // then
         XCTAssertEqual(event?.name, "new")
-        XCTAssertEqual(event?.eventTagId, "some")
+        XCTAssertEqual(event?.eventTagId, .custom("some"))
     }
     
     // 생성 실패
@@ -99,7 +99,7 @@ extension ScheduleEventUsecaseImpleTests {
         // when
         let params = ScheduleMakeParams()
             |> \.name .~ "new"
-            |> \.eventTagId .~ "some"
+            |> \.eventTagId .~ .custom("some")
         let event = try? await usecase.makeScheduleEvent(params)
         
         // then

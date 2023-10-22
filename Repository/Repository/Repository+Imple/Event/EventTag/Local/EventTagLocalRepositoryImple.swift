@@ -109,7 +109,7 @@ extension EventTagLocalRepositoryImple {
 }
 
 
-private extension AllEventTagId {
+extension AllEventTagId {
     
     var stringValue: String {
         switch self {

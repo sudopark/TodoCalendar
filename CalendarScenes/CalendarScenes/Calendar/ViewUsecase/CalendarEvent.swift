@@ -80,7 +80,7 @@ struct TodoCalendarEvent: CalendarEvent {
         self.name = todo.name
         self.eventTime = todo.time
         self.eventTimeOnCalendar = todo.time.map { EventTimeOnCalendar($0, timeZone: timeZone) }
-        self.eventTagId = todo.eventTagId.map { .custom($0) } ?? .default
+        self.eventTagId = todo.eventTagId ?? .default
     }
 }
 
@@ -105,7 +105,7 @@ struct ScheduleCalendarEvent: CalendarEvent {
                     name: schedule.name,
                     eventTime: $0.time,
                     eventTimeOnCalendar: .init($0.time, timeZone: timeZone),
-                    eventTagId: schedule.eventTagId.map { .custom($0) } ?? .default
+                    eventTagId: schedule.eventTagId ?? .default
                 )
                 |> \.turn .~ $0.turn
             }

@@ -269,15 +269,15 @@ extension EventTagUsecaseImpleTests {
     
     private func makeUsecaseWithStubEvents() -> EventTagUsecaseImple {
         let todos: [String: TodoEvent] = [
-            "todo1": TodoEvent(uuid: "todo1", name: "todo1") |> \.eventTagId .~ "tag-t1",
+            "todo1": TodoEvent(uuid: "todo1", name: "todo1") |> \.eventTagId .~ .custom("tag-t1"),
             "todo2": TodoEvent(uuid: "todo2", name: "todo2"),
-            "todo3": TodoEvent(uuid: "todo3", name: "todo3") |> \.eventTagId .~ "tag-t3"
+            "todo3": TodoEvent(uuid: "todo3", name: "todo3") |> \.eventTagId .~ .custom("tag-t3")
         ]
         self.sharedDataStore.put([String: TodoEvent].self, key: ShareDataKeys.todos.rawValue, todos)
         
         let schedules: [ScheduleEvent] = [
             ScheduleEvent(uuid: "sc1", name: "sc1", time: .at(0)),
-            ScheduleEvent(uuid: "sc2", name: "sc2", time: .at(0)) |> \.eventTagId .~ "tag-s2"
+            ScheduleEvent(uuid: "sc2", name: "sc2", time: .at(0)) |> \.eventTagId .~ .custom("tag-s2")
         ]
         let scheduleContainer = schedules.reduce(MemorizedScheduleEventsContainer()) { $0.append($1) }
         self.sharedDataStore.put(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue, scheduleContainer)
@@ -294,14 +294,14 @@ extension EventTagUsecaseImpleTests {
     }
     
     private func addTagT2ToTodo2() {
-        let newTodo2 = TodoEvent(uuid: "todo2", name: "todo2") |> \.eventTagId .~ "tag-t2"
+        let newTodo2 = TodoEvent(uuid: "todo2", name: "todo2") |> \.eventTagId .~ .custom("tag-t2")
         self.sharedDataStore.update([String: TodoEvent].self, key: ShareDataKeys.todos.rawValue) {
             ($0 ?? [:]) |> key(newTodo2.uuid) .~ newTodo2
         }
     }
     
     private func addSchedule3WithTagS3() {
-        let schedule3 = ScheduleEvent(uuid: "sc3", name: "sc3", time: .at(0)) |> \.eventTagId .~ "tag-s3"
+        let schedule3 = ScheduleEvent(uuid: "sc3", name: "sc3", time: .at(0)) |> \.eventTagId .~ .custom("tag-s3")
         self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue) {
             ($0 ?? .init()).append(schedule3)
         }
@@ -314,7 +314,7 @@ extension EventTagUsecaseImpleTests {
     }
     
     private func updateTagT1() {
-        let newTodo1 = TodoEvent(uuid: "todo1", name: "todo1") |> \.eventTagId .~ "tag-t1-new"
+        let newTodo1 = TodoEvent(uuid: "todo1", name: "todo1") |> \.eventTagId .~ .custom("tag-t1-new")
         self.sharedDataStore.update([String: TodoEvent].self, key: ShareDataKeys.todos.rawValue) {
             ($0 ?? [:]) |> key(newTodo1.uuid) .~ newTodo1
         }

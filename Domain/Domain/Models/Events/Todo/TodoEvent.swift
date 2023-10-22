@@ -17,7 +17,7 @@ public struct TodoEvent {
     public let uuid: String
     public var name: String
     
-    public var eventTagId: String?
+    public var eventTagId: AllEventTagId?
     
     public var time: EventTime?
     public var repeating: EventRepeating?
@@ -52,7 +52,7 @@ public struct TodoEvent {
 public struct TodoMakeParams: Sendable {
     
     public var name: String?
-    public var eventTagId: String?
+    public var eventTagId: AllEventTagId?
     public var time: EventTime?
     public var repeating: EventRepeating?
     
@@ -70,7 +70,7 @@ public struct TodoEditParams: Sendable {
         case onlyThisTime
     }
     public var name: String?
-    public var eventTagId: String?
+    public var eventTagId: AllEventTagId?
     public var time: EventTime?
     public var repeating: EventRepeating?
     public var repeatingUpdateScope: RepeatingUpdateScope?
@@ -84,7 +84,7 @@ public struct TodoEditParams: Sendable {
             
         default:
             return self.name?.isEmpty == false
-                || self.eventTagId?.isEmpty == false
+                || self.eventTagId != nil
                 || self.time != nil
                 || self.repeating != nil
         }
