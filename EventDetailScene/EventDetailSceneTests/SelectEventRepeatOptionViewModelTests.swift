@@ -53,7 +53,7 @@ class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {
 extension SelectEventRepeatOptionViewModelTests {
     
     @discardableResult
-    private func waitFirstNotEmptyOptionList(_ viewModel: SelectEventRepeatOptionViewModelImple) -> [SelectOptionModel]? {
+    private func waitFirstNotEmptyOptionList(_ viewModel: SelectEventRepeatOptionViewModelImple) -> [SelectRepeatingOptionModel]? {
         // given
         let expect = expectation(description: "wait not empty option model list")
         expect.assertForOverFulfill = false
@@ -335,8 +335,8 @@ extension SelectEventRepeatOptionViewModelTests {
 private class SpyListener: SelectEventRepeatOptionSceneListener {
     
     var didEventRepeatingSelectOrNot: [EventRepeating?] = []
-    func selectEventRepeatOption(didSelect repeating: EventRepeating) {
-        self.didEventRepeatingSelectOrNot.append(repeating)
+    func selectEventRepeatOption(didSelect repeating: EventRepeatingTimeSelectResult) {
+        self.didEventRepeatingSelectOrNot.append(repeating.repeating)
     }
     
     func selectEventRepeatOptionNotRepeat() {

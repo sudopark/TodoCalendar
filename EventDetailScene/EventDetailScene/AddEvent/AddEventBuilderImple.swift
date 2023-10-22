@@ -18,13 +18,16 @@ final class AddEventSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.selectRepeatOptionSceneBuilder = selectRepeatOptionSceneBuilder
     }
 }
 
@@ -47,6 +50,7 @@ extension AddEventSceneBuilerImple: AddEventSceneBuiler {
         )
     
         let router = AddEventRouter(
+            selectRepeatOptionSceneBuilder: selectRepeatOptionSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

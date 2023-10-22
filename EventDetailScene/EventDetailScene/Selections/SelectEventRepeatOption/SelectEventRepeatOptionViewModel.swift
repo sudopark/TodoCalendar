@@ -98,11 +98,11 @@ private enum SupportingOptions: Equatable {
     }
 }
 
-struct SelectOptionModel: Equatable {
+struct SelectRepeatingOptionModel: Equatable {
     
     let id: String
     let text: String
-    fileprivate let option: EventRepeatingOption?
+    let option: EventRepeatingOption?
     
     init(_ text: String, _ option: EventRepeatingOption?) {
         self.id = UUID().uuidString
@@ -154,7 +154,7 @@ struct SelectOptionModel: Equatable {
         }
     }
     
-    static func == (lhs: SelectOptionModel, rhs: SelectOptionModel) -> Bool {
+    static func == (lhs: SelectRepeatingOptionModel, rhs: SelectRepeatingOptionModel) -> Bool {
         return lhs.id == rhs.id
     }
 }
@@ -197,7 +197,7 @@ protocol SelectEventRepeatOptionViewModel: AnyObject, Sendable, SelectEventRepea
     func selectRepeatEndDate(_ date: Date)
     
     // presenter
-    var options: AnyPublisher<[SelectOptionModel], Never> { get }
+    var options: AnyPublisher<[SelectRepeatingOptionModel], Never> { get }
     var selectedOptionId: AnyPublisher<String, Never> { get }
     var hasRepeatEnd: AnyPublisher<Bool, Never> { get }
     var repeatEndTimeText: AnyPublisher<String, Never> { get }
@@ -227,12 +227,12 @@ final class SelectEventRepeatOptionViewModelImple: SelectEventRepeatOptionViewMo
     
     
     private struct OptionSeqMap {
-        var storage: [String: (Int, SelectOptionModel)] = [:]
+        var storage: [String: (Int, SelectRepeatingOptionModel)] = [:]
         
         init() {
             self.storage = [:]
         }
-        init(_ options: [SelectOptionModel]) {
+        init(_ options: [SelectRepeatingOptionModel]) {
             self.storage = options.enumerated()
                 .map { ($0.offset, $0.element) }
                 .asDictionary { $0.1.id }
@@ -274,12 +274,12 @@ extension SelectEventRepeatOptionViewModelImple {
         _ previousSelectOption: EventRepeating?
     ) {
         
-        let notRepeatOptionModel = SelectOptionModel("not repeat".localized(), nil)
+        let notRepeatOptionModel = SelectRepeatingOptionModel("not repeat".localized(), nil)
         let previousOptionModel = previousSelectOption.flatMap {
-            SelectOptionModel($0.repeatOption, self.startTime, timeZone)
+            SelectRepeatingOptionModel($0.repeatOption, self.startTime, timeZone)
         }
         let supportOptionModels = SupportingOptions.supports(from: self.startTime, timeZone: timeZone)
-            .compactMap { SelectOptionModel($0, self.startTime, timeZone) }
+            .compactMap { SelectRepeatingOptionModel($0, self.startTime, timeZone) }
         
         let sameOptionWithPrevious = supportOptionModels.first(where: { $0.option?.compareHash == previousSelectOption?.repeatOption.compareHash })
         switch (previousOptionModel, sameOptionWithPrevious) {
@@ -349,7 +349,8 @@ extension SelectEventRepeatOptionViewModelImple {
                 repeatOption: option
             )
             |> \.repeatingEndTime .~ self.subject.repeatEndTime.value?.endTimeIfOn?.timeIntervalSince1970
-            self.listener?.selectEventRepeatOption(didSelect: repeating)
+            let result = EventRepeatingTimeSelectResult(text: model.text, repeating: repeating)
+            self.listener?.selectEventRepeatOption(didSelect: result)
         } else {
             self.listener?.selectEventRepeatOptionNotRepeat()
         }
@@ -361,8 +362,8 @@ extension SelectEventRepeatOptionViewModelImple {
 
 extension SelectEventRepeatOptionViewModelImple {
     
-    var options: AnyPublisher<[SelectOptionModel], Never> {
-        let transform: (OptionSeqMap) -> [SelectOptionModel] = { seqMap in
+    var options: AnyPublisher<[SelectRepeatingOptionModel], Never> {
+        let transform: (OptionSeqMap) -> [SelectRepeatingOptionModel] = { seqMap in
             return seqMap.storage.values
                 .sorted(by: { $0.0 < $1.0 })
                 .map { $0.1 }

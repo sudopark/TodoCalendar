@@ -108,6 +108,7 @@ protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     
     // presenter
     var isTodo: AnyPublisher<Bool, Never> { get }
+    // TODO: 시간 선택 여부에 따라 업데이트되어야함
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOption: AnyPublisher<String, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
@@ -147,6 +148,7 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let isTodo = CurrentValueSubject<Bool, Never>(false)
         let selectedTime = CurrentValueSubject<EventTime?, Never>(nil)
+        let repeatOptionSelectResult = CurrentValueSubject<EventRepeatingTimeSelectResult?, Never>(nil)
         let selectedTag = CurrentValueSubject<SelectedTag?, Never>(nil)
         let selectedPlace = CurrentValueSubject<SelectPlace?, Never>(nil)
         let url = CurrentValueSubject<String?, Never>(nil)
@@ -196,6 +198,21 @@ extension AddEventViewModelImple {
     
     func eventTimeSelect(didSelect time: EventTime?) {
         self.subject.selectedTime.send(time)
+        guard let time = time 
+        else {
+            self.subject.repeatOptionSelectResult.send(nil)
+            return
+        }
+        guard let result = self.subject.repeatOptionSelectResult.value else { return }
+        
+        let newOption = EventRepeating(
+            repeatingStartTime: time.lowerBoundWithFixed,
+            repeatOption: result.repeating.repeatOption
+        )
+        |> \.repeatingEndTime .~ result.repeating.repeatingEndTime
+        self.subject.repeatOptionSelectResult.send(
+            .init(text: result.text, repeating: newOption)
+        )
     }
     
     func toggleIsAllDay() {
@@ -206,7 +223,21 @@ extension AddEventViewModelImple {
     }
 
     func selectRepeatOption() {
-        // TODO: select repeat option
+
+        guard let time = self.subject.selectedTime.value else { return }
+        
+        self.router?.routeToEventRepeatOptionSelect(
+            startTime: Date(timeIntervalSince1970: time.lowerBoundWithFixed),
+            with: self.subject.repeatOptionSelectResult.value?.repeating
+        )
+    }
+    
+    func selectEventRepeatOption(didSelect repeating: EventRepeatingTimeSelectResult) {
+        self.subject.repeatOptionSelectResult.send(repeating)
+    }
+    
+    func selectEventRepeatOptionNotRepeat() {
+        self.subject.repeatOptionSelectResult.send(nil)
     }
     
     func selectEventTag() {
@@ -260,7 +291,10 @@ extension AddEventViewModelImple {
     }
     
     var repeatOption: AnyPublisher<String, Never> {
-        Empty().eraseToAnyPublisher()
+        return self.subject.repeatOptionSelectResult
+            .map { $0?.text ?? "not repeat".localized() }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     var selectedTag: AnyPublisher<SelectedTag, Never> {
