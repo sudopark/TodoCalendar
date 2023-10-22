@@ -22,11 +22,16 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
     private var refDate: Date!
+    private var timeZone: TimeZone {
+        return TimeZone(abbreviation: "KST")!
+    }
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyRouter = .init()
-        self.refDate = .init()
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.timeZone
+        let compos = DateComponents(year: 2023, month: 9, day: 18, hour: 4, minute: 44)
+        self.refDate = calendar.date(from: compos)
     }
     
     override func tearDownWithError() throws {
@@ -59,56 +64,42 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private var defaultCurrentAndNextHourSelectTime: SelectedTime {
-        let now = self.refDate!; let next = now.addingTimeInterval(3600)
-        let timeZone = TimeZone(abbreviation: "KST")!
-        let dateForm = DateFormatter(); dateForm.timeZone = timeZone; dateForm.dateFormat = "MMM dd (E)".localized()
-        let timeForm = DateFormatter(); timeForm.timeZone = timeZone; timeForm.dateFormat = "HH:00".localized()
-        let nowDate = dateForm.string(from: now); let nowTime = timeForm.string(from: now)
-        let nextDate = dateForm.string(from: next); let nextTime = timeForm.string(from: next)
-        return .period(nowDate, nowTime, nextDate, nextTime)
-    }
-    
-    private var dummyTimeAt: SelectedTime {
-        let at = EventTime.at(self.refDate!.timeIntervalSince1970)
-        let timeZone = TimeZone(abbreviation: "KST")!
-        return .init(at, timeZone)
-    }
-    
-    private var dummyPeriod: SelectedTime {
-        let now = self.refDate!; let future = now.addingTimeInterval(3600 * 24 * 3)
-        let timeZone = TimeZone(abbreviation: "KST")!
-        let period = EventTime.period(now.timeIntervalSince1970..<future.timeIntervalSince1970)
-        return .init(period, timeZone)
-    }
-    
-    private var dummyPeriodDuringOneDay: SelectedTime {
-        let now = self.refDate!; let future = now.addingTimeInterval(0.1)
-        let timeZone = TimeZone(abbreviation: "KST")!
-        let period = EventTime.period(now.timeIntervalSince1970..<future.timeIntervalSince1970)
-        return .init(period, timeZone)
-    }
-    
-    private var dummySingleAllDay: SelectedTime {
-        let timeZone = TimeZone(abbreviation: "KST")!
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        let start = calendar.startOfDay(for: self.refDate!); let end = calendar.endOfDay(for: start)!
-        let period = EventTime.allDay(
-            start.timeIntervalSince1970..<end.timeIntervalSince1970,
-            secondsFromGMT: TimeInterval(timeZone.secondsFromGMT())
+        let now = Date(); let next = now.addingTimeInterval(3600)
+        return .period(
+            .init(now.timeIntervalSince1970, self.timeZone),
+            .init(next.timeIntervalSince1970, self.timeZone)
         )
-        return .init(period, timeZone)
     }
     
-    private var dummyAlldayPeriod: SelectedTime {
-        let timeZone = TimeZone(abbreviation: "KST")!
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        let now = self.refDate!; let future = now.addingTimeInterval(3600 * 24 * 3)
-        let start = calendar.startOfDay(for: now); let end = calendar.endOfDay(for: future)!
-        let period = EventTime.allDay(
+    private var dummySingleDayPeriod: EventTime {
+        let start = self.refDate!; let next = start.addingTimeInterval(3600)
+        return .period(start.timeIntervalSince1970..<next.timeIntervalSince1970)
+    }
+    
+    private var dummy3DaysPeriod: EventTime {
+        let start = self.refDate!; let next = start.add(days: 3)!
+        return .period(start.timeIntervalSince1970..<next.timeIntervalSince1970)
+    }
+    
+    private var dummySingleAllDayPeriod: EventTime {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.timeZone
+        let start = calendar.startOfDay(for: self.refDate!)
+        let end = calendar.endOfDay(for: start)!
+        return .allDay(
             start.timeIntervalSince1970..<end.timeIntervalSince1970,
-            secondsFromGMT: TimeInterval(timeZone.secondsFromGMT())
+            secondsFromGMT: self.timeZone.secondsFromGMT() |> TimeInterval.init
         )
-        return .init(period, timeZone)
+    }
+    
+    private var dummyAll3DaysPeriod: EventTime {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let start = calendar.startOfDay(for: self.refDate!)
+        let nextDate = self.refDate!.add(days: 3)!
+        let end = calendar.endOfDay(for: nextDate)!
+        return .allDay(
+            start.timeIntervalSince1970..<end.timeIntervalSince1970,
+            secondsFromGMT: self.timeZone.secondsFromGMT() |> TimeInterval.init
+        )
     }
 }
 
@@ -177,6 +168,76 @@ extension AddEventViewModelImpleTests {
 
 extension AddEventViewModelImpleTests {
     
+    func testSelectTimetext() {
+        // given
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.timeZone
+        let thisYear = self.refDate!
+        let nextYear = calendar.addYear(1, from: thisYear)!
+        
+        // when
+        let thisYearText = SelectTimeText(thisYear.timeIntervalSince1970, self.timeZone)
+        let nextYearText = SelectTimeText(nextYear.timeIntervalSince1970, self.timeZone)
+        let thisYearWithoutTime = SelectTimeText(thisYear.timeIntervalSince1970, self.timeZone, withoutTime: true)
+        
+        // then
+        XCTAssertEqual(thisYearText.year, nil)
+        XCTAssertEqual(thisYearText.day, thisYear.dateText(at: self.timeZone))
+        XCTAssertEqual(thisYearText.time, thisYear.timeText(at: self.timeZone))
+        
+        XCTAssertEqual(nextYearText.year, nextYear.yearText(at: self.timeZone))
+        XCTAssertEqual(nextYearText.day, nextYear.dateText(at: self.timeZone))
+        XCTAssertEqual(nextYearText.time, nextYear.timeText(at: self.timeZone))
+        
+        XCTAssertEqual(thisYearWithoutTime.year, nil)
+        XCTAssertEqual(thisYearWithoutTime.day, thisYear.dateText(at: self.timeZone))
+        XCTAssertEqual(thisYearWithoutTime.time, nil)
+    }
+    
+    // at -> SelectedTime
+    func testSelectedTime_fromEventTime() {
+        // given
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.timeZone
+        let next = self.refDate!.add(days: 3)!
+        let refStart = calendar.startOfDay(for: self.refDate!)
+        let nextEnd = calendar.endOfDay(for: next)!
+        
+        // when
+        let timeAt = SelectedTime(
+            .at(self.refDate!.timeIntervalSince1970), self.timeZone
+        )
+        let period = SelectedTime(
+            self.dummy3DaysPeriod, self.timeZone
+        )
+        let singleAllDay = SelectedTime(
+            self.dummySingleAllDayPeriod, self.timeZone
+        )
+        let allDays = SelectedTime(
+            self.dummyAll3DaysPeriod, self.timeZone
+        )
+        
+        // then
+        XCTAssertEqual(
+            timeAt, .at(.init(self.refDate.timeIntervalSince1970, self.timeZone))
+        )
+        XCTAssertEqual(
+            period,
+            .period(
+                .init(self.refDate.timeIntervalSince1970, self.timeZone),
+                    .init(next.timeIntervalSince1970, self.timeZone))
+        )
+        XCTAssertEqual(
+            singleAllDay,
+            .singleAllDay(.init(refStart.timeIntervalSince1970, self.timeZone))
+        )
+        XCTAssertEqual(
+            allDays,
+            .alldayPeriod(
+                .init(refStart.timeIntervalSince1970, self.timeZone),
+                .init(nextEnd.timeIntervalSince1970, self.timeZone)
+            )
+        )
+    }
+    
     // 시간 선택 -> 선택 이후 선택된 시간 업데이트
     func testViewModel_whenAfterSelectTime_updateSelectedTime() {
         // given
@@ -187,47 +248,81 @@ extension AddEventViewModelImpleTests {
         
         // when
         let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
-            viewModel.selectTime()
             viewModel.eventTimeSelect(didSelect: nil)
         }
         
         // then
         XCTAssertEqual(times, [
-            self.defaultCurrentAndNextHourSelectTime, nil
+            self.defaultCurrentAndNextHourSelectTime, 
+            nil
         ])
-        XCTAssertEqual(self.spyRouter.didRouteToEventTimeSeelct, true)
-        XCTAssertEqual(self.spyRouter.didRouteToEventTimeSelectWith.map { SelectedTime($0, TimeZone(abbreviation: "KST")!) }, self.defaultCurrentAndNextHourSelectTime)
-        XCTAssertEqual(self.spyRouter.didRouteToEventTimeSelectWithNotSelectable, true)
     }
     
-//    // time + at => all day on -> 선택날짜 allday => all day off -> 이전 선택한 날짜
-//    func testViewModel_whenEventTimeIsTimeAtAndToggleIsAllDay_udpateSelectedTime() {
-//        // given
-//        let expect = expectation(description: "time + at => all day on -> 선택날짜 allday => all day off -> 이전 선택한 날짜")
-//        expect.expectedFulfillmentCount = 4
-//        let viewModel = self.makeViewModel()
-//        
-//        // when
-//        let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
-//            viewModel.selectTime()
-//            viewModel.eventTimeSelect(didSelect: .at(Date().timeIntervalSince1970))
-//            
-//            viewModel.toggleIsAllDay()
-//            viewModel.toggleIsAllDay()
-//        }
-//        
-//        // then
-//        XCTAssertEqual(times, [
-//            self.defaultCurrentAndNextHourSelectTime,
-//            self.dummyTimeAt,
-//            self.dummySingleAllDay,
-//            self.dummyTimeAt
-//        ])
-//    }
-//    
-//    // time + period(복수일) => all day on -> 선택 복수날짜 allday => all day off -> 이전 선택한 날짜
-//    
-//    // time + period(단수일) => all day on -> 선택 단수일 allday => all day off -> 이전 선택한 날짜
+    // time + at => all day on -> 선택날짜 allday => all day off -> 이전 선택한 날짜
+    func testViewModel_whenEventTimeIsTimeAtAndToggleIsAllDay_udpateSelectedTime() {
+        // given
+        let expect = expectation(description: "time + at => all day on -> 선택날짜 allday => all day off -> 이전 선택한 날짜")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
+            viewModel.eventTimeSelect(didSelect: .at(self.refDate!.timeIntervalSince1970))
+            
+            viewModel.toggleIsAllDay()
+            viewModel.toggleIsAllDay()
+        }
+        
+        // then
+        XCTAssertEqual(times[safe: 0]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 1]??.isAt, true)
+        XCTAssertEqual(times[safe: 2]??.isSingleAllDay, true)
+        XCTAssertEqual(times[safe: 3]??.isPeriod, true)
+    }
+    
+    // time + period(복수일) => all day on -> 선택 복수날짜 allday => all day off -> 이전 선택한 날짜
+    func testViewModel_whenEventTimeIs3DaysPeriod_toggleAllDay() {
+        // given
+        let expect = expectation(description: "time + period(복수일) => all day on -> 선택 복수날짜 allday => all day off -> 이전 선택한 날짜")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
+            viewModel.eventTimeSelect(didSelect: self.dummy3DaysPeriod)
+            
+            viewModel.toggleIsAllDay()
+            viewModel.toggleIsAllDay()
+        }
+        
+        // then
+        XCTAssertEqual(times[safe: 0]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 1]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 2]??.isAllDayPeriod, true)
+        XCTAssertEqual(times[safe: 3]??.isPeriod, true)
+    }
+    
+    // time + period(단수일) => all day on -> 선택 단수일 allday => all day off -> 이전 선택한 날짜
+    func testViewModel_whenEventTimeIsSingleDayPeriod_toggleAllDay() {
+        // given
+        let expect = expectation(description: "time + period(단수일) => all day on -> 선택 단수일 allday => all day off -> period")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
+            viewModel.eventTimeSelect(didSelect: self.dummySingleDayPeriod)
+            
+            viewModel.toggleIsAllDay()
+            viewModel.toggleIsAllDay()
+        }
+        
+        // then
+        XCTAssertEqual(times[safe: 0]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 1]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 2]??.isSingleAllDay, true)
+        XCTAssertEqual(times[safe: 3]??.isPeriod, true)
+    }
     
     // 태그 선택
     
@@ -253,15 +348,29 @@ extension AddEventViewModelImpleTests {
 
 private class SpyRouter: BaseSpyRouter, AddEventRouting, @unchecked Sendable {
     
-    var didRouteToEventTimeSeelct: Bool?
-    var didRouteToEventTimeSelectWith: EventTime?
-    var didRouteToEventTimeSelectWithNotSelectable: Bool?
-    func routeToEventTimeSelect(
-        _ previousSelected: EventTime?,
-        isNotSelectable: Bool
-    ) {
-        self.didRouteToEventTimeSeelct = true
-        self.didRouteToEventTimeSelectWith = previousSelected
-        self.didRouteToEventTimeSelectWithNotSelectable = isNotSelectable
+    
+}
+
+
+private extension SelectedTime {
+    
+    var isAt: Bool {
+        guard case .at = self else { return false }
+        return true
+    }
+    
+    var isPeriod: Bool {
+        guard case .period = self else { return false }
+        return true
+    }
+    
+    var isSingleAllDay: Bool {
+        guard case .singleAllDay = self else { return false }
+        return true
+    }
+    
+    var isAllDayPeriod: Bool {
+        guard case .alldayPeriod = self else { return false }
+        return true
     }
 }

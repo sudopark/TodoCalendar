@@ -7,12 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F62A12342ADD8E8900CECAC6 /* EventTimeSelectionBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62A122E2ADD8E8900CECAC6 /* EventTimeSelectionBuilderImple.swift */; };
-		F62A12352ADD8E8900CECAC6 /* EventTimeSelectionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62A122F2ADD8E8900CECAC6 /* EventTimeSelectionRouter.swift */; };
-		F62A12362ADD8E8900CECAC6 /* EventTimeSelectionScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62A12302ADD8E8900CECAC6 /* EventTimeSelectionScene+Builder.swift */; };
-		F62A12372ADD8E8900CECAC6 /* EventTimeSelectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62A12312ADD8E8900CECAC6 /* EventTimeSelectionViewController.swift */; };
-		F62A12382ADD8E8900CECAC6 /* EventTimeSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62A12322ADD8E8900CECAC6 /* EventTimeSelectionView.swift */; };
-		F62A12392ADD8E8900CECAC6 /* EventTimeSelectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62A12332ADD8E8900CECAC6 /* EventTimeSelectionViewModel.swift */; };
 		F6F7805D2ADC1EAB00B50C19 /* EventDetailScene.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6F780542ADC1EAA00B50C19 /* EventDetailScene.framework */; };
 		F6F780622ADC1EAB00B50C19 /* EventDetailSceneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780612ADC1EAB00B50C19 /* EventDetailSceneTests.swift */; };
 		F6F780632ADC1EAB00B50C19 /* EventDetailScene.h in Headers */ = {isa = PBXBuildFile; fileRef = F6F780572ADC1EAA00B50C19 /* EventDetailScene.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -45,12 +39,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		F62A122E2ADD8E8900CECAC6 /* EventTimeSelectionBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTimeSelectionBuilderImple.swift; sourceTree = "<group>"; };
-		F62A122F2ADD8E8900CECAC6 /* EventTimeSelectionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTimeSelectionRouter.swift; sourceTree = "<group>"; };
-		F62A12302ADD8E8900CECAC6 /* EventTimeSelectionScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventTimeSelectionScene+Builder.swift"; sourceTree = "<group>"; };
-		F62A12312ADD8E8900CECAC6 /* EventTimeSelectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTimeSelectionViewController.swift; sourceTree = "<group>"; };
-		F62A12322ADD8E8900CECAC6 /* EventTimeSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTimeSelectionView.swift; sourceTree = "<group>"; };
-		F62A12332ADD8E8900CECAC6 /* EventTimeSelectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTimeSelectionViewModel.swift; sourceTree = "<group>"; };
 		F6F780542ADC1EAA00B50C19 /* EventDetailScene.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EventDetailScene.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6F780572ADC1EAA00B50C19 /* EventDetailScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EventDetailScene.h; sourceTree = "<group>"; };
 		F6F7805C2ADC1EAB00B50C19 /* EventDetailSceneTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventDetailSceneTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -102,23 +90,9 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F62A122C2ADD8E6900CECAC6 /* EventTime */ = {
-			isa = PBXGroup;
-			children = (
-				F62A122E2ADD8E8900CECAC6 /* EventTimeSelectionBuilderImple.swift */,
-				F62A122F2ADD8E8900CECAC6 /* EventTimeSelectionRouter.swift */,
-				F62A12302ADD8E8900CECAC6 /* EventTimeSelectionScene+Builder.swift */,
-				F62A12312ADD8E8900CECAC6 /* EventTimeSelectionViewController.swift */,
-				F62A12322ADD8E8900CECAC6 /* EventTimeSelectionView.swift */,
-				F62A12332ADD8E8900CECAC6 /* EventTimeSelectionViewModel.swift */,
-			);
-			path = EventTime;
-			sourceTree = "<group>";
-		};
 		F62A122D2ADD8E7500CECAC6 /* Selections */ = {
 			isa = PBXGroup;
 			children = (
-				F62A122C2ADD8E6900CECAC6 /* EventTime */,
 			);
 			path = Selections;
 			sourceTree = "<group>";
@@ -301,16 +275,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6F780A82ADC20F900B50C19 /* AddEventView.swift in Sources */,
-				F62A12382ADD8E8900CECAC6 /* EventTimeSelectionView.swift in Sources */,
-				F62A12352ADD8E8900CECAC6 /* EventTimeSelectionRouter.swift in Sources */,
 				F6F780A42ADC20F900B50C19 /* AddEventBuilderImple.swift in Sources */,
-				F62A12372ADD8E8900CECAC6 /* EventTimeSelectionViewController.swift in Sources */,
-				F62A12392ADD8E8900CECAC6 /* EventTimeSelectionViewModel.swift in Sources */,
 				F6F780A72ADC20F900B50C19 /* AddEventViewController.swift in Sources */,
-				F62A12362ADD8E8900CECAC6 /* EventTimeSelectionScene+Builder.swift in Sources */,
 				F6F780A62ADC20F900B50C19 /* AddEventScene+Builder.swift in Sources */,
 				F6F780A52ADC20F900B50C19 /* AddEventRouter.swift in Sources */,
-				F62A12342ADD8E8900CECAC6 /* EventTimeSelectionBuilderImple.swift in Sources */,
 				F6F780A92ADC20F900B50C19 /* AddEventViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
