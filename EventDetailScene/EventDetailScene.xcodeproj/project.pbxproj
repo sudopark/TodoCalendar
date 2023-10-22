@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F69B723C2AE55C0800C7A5CB /* SelectEventTagBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72362AE55C0700C7A5CB /* SelectEventTagBuilderImple.swift */; };
+		F69B723D2AE55C0800C7A5CB /* SelectEventTagRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72372AE55C0700C7A5CB /* SelectEventTagRouter.swift */; };
+		F69B723E2AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72382AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift */; };
+		F69B723F2AE55C0800C7A5CB /* SelectEventTagViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72392AE55C0800C7A5CB /* SelectEventTagViewController.swift */; };
+		F69B72402AE55C0800C7A5CB /* SelectEventTagView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B723A2AE55C0800C7A5CB /* SelectEventTagView.swift */; };
+		F69B72412AE55C0800C7A5CB /* SelectEventTagViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B723B2AE55C0800C7A5CB /* SelectEventTagViewModel.swift */; };
 		F6D05D922AE51D080028ED68 /* SelectEventRepeatOptionBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D05D8C2AE51D080028ED68 /* SelectEventRepeatOptionBuilderImple.swift */; };
 		F6D05D932AE51D080028ED68 /* SelectEventRepeatOptionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D05D8D2AE51D080028ED68 /* SelectEventRepeatOptionRouter.swift */; };
 		F6D05D942AE51D080028ED68 /* SelectEventRepeatOptionScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D05D8E2AE51D080028ED68 /* SelectEventRepeatOptionScene+Builder.swift */; };
@@ -46,6 +52,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F69B72362AE55C0700C7A5CB /* SelectEventTagBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagBuilderImple.swift; sourceTree = "<group>"; };
+		F69B72372AE55C0700C7A5CB /* SelectEventTagRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagRouter.swift; sourceTree = "<group>"; };
+		F69B72382AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelectEventTagScene+Builder.swift"; sourceTree = "<group>"; };
+		F69B72392AE55C0800C7A5CB /* SelectEventTagViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagViewController.swift; sourceTree = "<group>"; };
+		F69B723A2AE55C0800C7A5CB /* SelectEventTagView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagView.swift; sourceTree = "<group>"; };
+		F69B723B2AE55C0800C7A5CB /* SelectEventTagViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagViewModel.swift; sourceTree = "<group>"; };
 		F6D05D8C2AE51D080028ED68 /* SelectEventRepeatOptionBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventRepeatOptionBuilderImple.swift; sourceTree = "<group>"; };
 		F6D05D8D2AE51D080028ED68 /* SelectEventRepeatOptionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventRepeatOptionRouter.swift; sourceTree = "<group>"; };
 		F6D05D8E2AE51D080028ED68 /* SelectEventRepeatOptionScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelectEventRepeatOptionScene+Builder.swift"; sourceTree = "<group>"; };
@@ -108,6 +120,7 @@
 			isa = PBXGroup;
 			children = (
 				F65ED73E2AE51C5F00BCD4C1 /* SelectEventRepeatOption */,
+				F69B72352AE55BEB00C7A5CB /* SelectEventTag */,
 			);
 			path = Selections;
 			sourceTree = "<group>";
@@ -123,6 +136,19 @@
 				F6D05D912AE51D080028ED68 /* SelectEventRepeatOptionViewModel.swift */,
 			);
 			path = SelectEventRepeatOption;
+			sourceTree = "<group>";
+		};
+		F69B72352AE55BEB00C7A5CB /* SelectEventTag */ = {
+			isa = PBXGroup;
+			children = (
+				F69B72362AE55C0700C7A5CB /* SelectEventTagBuilderImple.swift */,
+				F69B72372AE55C0700C7A5CB /* SelectEventTagRouter.swift */,
+				F69B72382AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift */,
+				F69B72392AE55C0800C7A5CB /* SelectEventTagViewController.swift */,
+				F69B723A2AE55C0800C7A5CB /* SelectEventTagView.swift */,
+				F69B723B2AE55C0800C7A5CB /* SelectEventTagViewModel.swift */,
+			);
+			path = SelectEventTag;
 			sourceTree = "<group>";
 		};
 		F6F7804A2ADC1EAA00B50C19 = {
@@ -303,16 +329,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F69B723D2AE55C0800C7A5CB /* SelectEventTagRouter.swift in Sources */,
 				F6D05D922AE51D080028ED68 /* SelectEventRepeatOptionBuilderImple.swift in Sources */,
+				F69B723F2AE55C0800C7A5CB /* SelectEventTagViewController.swift in Sources */,
 				F6F780A82ADC20F900B50C19 /* AddEventView.swift in Sources */,
 				F6D05D942AE51D080028ED68 /* SelectEventRepeatOptionScene+Builder.swift in Sources */,
 				F6F780A42ADC20F900B50C19 /* AddEventBuilderImple.swift in Sources */,
 				F6D05D932AE51D080028ED68 /* SelectEventRepeatOptionRouter.swift in Sources */,
+				F69B723C2AE55C0800C7A5CB /* SelectEventTagBuilderImple.swift in Sources */,
+				F69B72412AE55C0800C7A5CB /* SelectEventTagViewModel.swift in Sources */,
+				F69B723E2AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift in Sources */,
 				F6D05D972AE51D080028ED68 /* SelectEventRepeatOptionViewModel.swift in Sources */,
 				F6F780A72ADC20F900B50C19 /* AddEventViewController.swift in Sources */,
 				F6F780A62ADC20F900B50C19 /* AddEventScene+Builder.swift in Sources */,
 				F6F780A52ADC20F900B50C19 /* AddEventRouter.swift in Sources */,
 				F6D05D962AE51D080028ED68 /* SelectEventRepeatOptionView.swift in Sources */,
+				F69B72402AE55C0800C7A5CB /* SelectEventTagView.swift in Sources */,
 				F6F780A92ADC20F900B50C19 /* AddEventViewModel.swift in Sources */,
 				F6D05D952AE51D080028ED68 /* SelectEventRepeatOptionViewController.swift in Sources */,
 			);
