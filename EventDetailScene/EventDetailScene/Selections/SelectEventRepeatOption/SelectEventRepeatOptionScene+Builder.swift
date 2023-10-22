@@ -14,11 +14,16 @@ import Scenes
 
 // MARK: - SelectEventRepeatOptionScene Interactable & Listenable
 
+struct EventRepeatingTimeSelectResult {
+    let text: String
+    let repeating: EventRepeating
+}
+
 protocol SelectEventRepeatOptionSceneInteractor: AnyObject { }
 //
 protocol SelectEventRepeatOptionSceneListener: AnyObject {
     
-    func selectEventRepeatOption(didSelect repeating: EventRepeating)
+    func selectEventRepeatOption(didSelect repeating: EventRepeatingTimeSelectResult)
     func selectEventRepeatOptionNotRepeat()
 }
 
@@ -35,7 +40,7 @@ protocol SelectEventRepeatOptionSceneBuiler: AnyObject {
     @MainActor
     func makeSelectEventRepeatOptionScene(
         startTime: Date,
-        previousSelected repeating: EventRepeating,
+        previousSelected repeating: EventRepeating?,
         listener: (any SelectEventRepeatOptionSceneListener)?
     ) -> any SelectEventRepeatOptionScene
 }

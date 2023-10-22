@@ -327,6 +327,44 @@ extension AddEventViewModelImpleTests {
     // 태그 선택
     
     // 반복옵션 선택
+    func testViewModel_whenRepeatTimeSelected_update() {
+        // given
+        let expect = expectation(description: "이벤트 반복 옵션 선택 이후에 반복시간 업데이트")
+        expect.expectedFulfillmentCount = 5
+        let viewModel = self.makeViewModel()
+        let dummy = EventRepeatingTimeSelectResult(
+            text: "Everyday".localized(),
+            repeating: EventRepeating(
+                repeatingStartTime: self.dummySingleDayPeriod.lowerBoundWithFixed,
+                repeatOption: EventRepeatingOptions.EveryDay()
+            )
+        )
+        
+        // when
+        let repeats = self.waitOutputs(expect, for: viewModel.repeatOption) {
+            viewModel.eventTimeSelect(didSelect: self.dummySingleDayPeriod)
+            
+            viewModel.selectRepeatOption()
+            viewModel.selectEventRepeatOption(didSelect: dummy) // on
+            
+            viewModel.selectRepeatOption()
+            viewModel.selectEventRepeatOptionNotRepeat() // off
+            
+            viewModel.selectRepeatOption()
+            viewModel.selectEventRepeatOption(didSelect: dummy) // on
+            
+            viewModel.eventTimeSelect(didSelect: nil) // off
+        }
+        
+        // then
+        XCTAssertEqual(repeats, [
+            "not repeat".localized(),
+            "Everyday".localized(),
+            "not repeat".localized(),
+            "Everyday".localized(),
+            "not repeat".localized(),
+        ])
+    }
     
     // 장소 선택
 }
@@ -348,7 +386,12 @@ extension AddEventViewModelImpleTests {
 
 private class SpyRouter: BaseSpyRouter, AddEventRouting, @unchecked Sendable {
     
-    
+    var didRouteToEventRepeatOptionSelect: Bool?
+    func routeToEventRepeatOptionSelect(
+        startTime: Date, with initalOption: EventRepeating?
+    ) {
+        self.didRouteToEventRepeatOptionSelect = true
+    }
 }
 
 
