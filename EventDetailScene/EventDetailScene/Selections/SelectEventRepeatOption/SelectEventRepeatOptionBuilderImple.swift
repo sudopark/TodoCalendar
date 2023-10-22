@@ -35,7 +35,7 @@ extension SelectEventRepeatOptionSceneBuilerImple: SelectEventRepeatOptionSceneB
     @MainActor
     func makeSelectEventRepeatOptionScene(
         startTime: Date,
-        previousSelected repeating: EventRepeating,
+        previousSelected repeating: EventRepeating?,
         listener: (any SelectEventRepeatOptionSceneListener)?
     ) -> any SelectEventRepeatOptionScene {
         
