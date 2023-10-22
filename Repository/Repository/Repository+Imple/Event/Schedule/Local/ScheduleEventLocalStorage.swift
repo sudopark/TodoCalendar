@@ -104,7 +104,7 @@ private extension ScheduleEvent {
     
     init(_ entity: ScheduleEventTable.Entity, _ time: EventTime) {
         self.init(uuid: entity.uuid, name: entity.name, time: time)
-        self.eventTagId = entity.eventTagId
+        self.eventTagId = entity.eventTagId.map { AllEventTagId($0) }
         self.repeating = entity.repeating
         self.showTurn = entity.showTurn
         self.repeatingTimeToExcludes = entity.excludeTimes |> Set.init

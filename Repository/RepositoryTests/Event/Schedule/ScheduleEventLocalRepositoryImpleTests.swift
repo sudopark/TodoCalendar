@@ -60,7 +60,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
             |> \.repeatingEndTime .~ 200.0
         return ScheduleMakeParams()
             |> \.name .~ "new"
-            |> \.eventTagId .~ "some"
+            |> \.eventTagId .~ .custom("some")
             |> \.time .~ .at(100)
             |> \.showTurn .~ true
             |> \.repeating .~ repeating
@@ -118,7 +118,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
         
         // when
         let origin: String? = self.spyEnvStorage.load(key)
-        let makeParams = self.dummyMakeParams |> \.eventTagId .~ "tag1"
+        let makeParams = self.dummyMakeParams |> \.eventTagId .~ .custom("tag1")
         let newSchedule = try? await repository.makeScheduleEvent(makeParams)
         let updatedeAfterMake: String? = self.spyEnvStorage.load(key)
         

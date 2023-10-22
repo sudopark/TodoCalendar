@@ -62,7 +62,7 @@ extension TodoLocalRepositoryImpleTests {
             |> \.repeatingEndTime .~ 200
         return TodoMakeParams()
             |> \.name .~ "new"
-            |> \.eventTagId .~ "some"
+            |> \.eventTagId .~ .custom("some")
             |> \.time .~ .period(
                 0.0..<100.0
             )
@@ -110,7 +110,7 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(events?.count, 1)
         let event = events?.first
         XCTAssertEqual(event?.name, "new")
-        XCTAssertEqual(event?.eventTagId, "some")
+        XCTAssertEqual(event?.eventTagId, .custom("some"))
         XCTAssertEqual(event?.time, .period(0.0..<100.0))
         let repeatOption = event?.repeating?.repeatOption as? EventRepeatingOptions.EveryWeek
         XCTAssertEqual(repeatOption?.interval, 2)
@@ -144,7 +144,7 @@ extension TodoLocalRepositoryImpleTests {
         
         // when
         let origin: String? = self.spyEnvStorage.load(key)
-        let makeParams = self.dummyMakeParams |> \.eventTagId .~ "tag1"
+        let makeParams = self.dummyMakeParams |> \.eventTagId .~ .custom("tag1")
         let newTodo = try? await repository.makeTodoEvent(makeParams)
         let updatedeAfterMake: String? = self.spyEnvStorage.load(key)
         
@@ -167,7 +167,7 @@ extension TodoLocalRepositoryImpleTests {
         let old = try await repository.makeTodoEvent(self.dummyMakeParams)
         let params = TodoEditParams()
             |> \.name .~ "new name"
-            |> \.eventTagId .~ "new tag"
+            |> \.eventTagId .~ .custom("new tag")
             |> \.time .~ .at(22)
         let _ = try await repository.updateTodoEvent(old.uuid, params)
         
@@ -178,7 +178,7 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(events?.count, 1)
         let event = events?.first
         XCTAssertEqual(event?.name, "new name")
-        XCTAssertEqual(event?.eventTagId, "new tag")
+        XCTAssertEqual(event?.eventTagId, .custom("new tag"))
         XCTAssertEqual(event?.time, .at(22))
     }
 }

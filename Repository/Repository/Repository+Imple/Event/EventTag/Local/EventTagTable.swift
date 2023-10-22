@@ -8,7 +8,7 @@
 import Foundation
 import SQLiteService
 import Domain
-
+import Extensions
 
 struct EventTagTable: Table {
     

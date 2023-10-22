@@ -112,11 +112,11 @@ extension EventTagUsecaseImple {
         let (todoKey, scheduleKey) = (ShareDataKeys.todos.rawValue, ShareDataKeys.schedules.rawValue)
         let allTagIdsFromTodos = self.sharedDataStore.observe([String: TodoEvent].self, key: todoKey)
             .map { $0.flatMap { Array($0.values)} ?? [] }
-            .map { ts in ts.compactMap { $0.eventTagId } }
+            .map { ts in ts.compactMap { $0.eventTagId?.customTagId } }
             .map { Set($0) }
         let allTagIdsSchedules = self.sharedDataStore.observe(MemorizedScheduleEventsContainer.self, key: scheduleKey)
             .map { $0?.allCachedEvents() ?? []}
-            .map { ss in ss.compactMap { $0.eventTagId } }
+            .map { ss in ss.compactMap { $0.eventTagId?.customTagId } }
             .map { Set($0) }
         
         let refreshNeedTagIds = Publishers.CombineLatest(allTagIdsFromTodos, allTagIdsSchedules)

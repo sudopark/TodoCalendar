@@ -117,7 +117,14 @@ extension EventCellViewModel {
     }
     
     mutating func applyTagColor(_ tag: EventTag?) {
-        self.tagColor = tag.map { EventTagColor.custom(hex: $0.colorHex) } ?? .default
+        switch self.tagId {
+        case .default:
+            self.tagColor = .default
+        case .custom:
+            self.tagColor = tag.map { EventTagColor.custom(hex: $0.colorHex) } ?? .default
+        case .holiday:
+            self.tagColor = .holiday
+        }
     }
 }
 
