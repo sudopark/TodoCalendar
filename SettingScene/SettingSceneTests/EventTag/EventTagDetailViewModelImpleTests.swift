@@ -330,7 +330,7 @@ private class SpyListener: EventTagDetailSceneListener {
     }
     
     var didDeleted: ((String) -> Void)?
-    func evetTag(deleted tagId: String) {
+    func eventTag(deleted tagId: String) {
         self.didDeleted?(tagId)
     }
     

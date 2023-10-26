@@ -45,6 +45,7 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
     
     private let tagUsecase: EventTagUsecase
     var router: (any EventTagListRouting)?
+    var listener: (any EventTagListSceneListener)?
     
     init(
         tagUsecase: EventTagUsecase
@@ -125,6 +126,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
     func eventTag(created newTag: EventTag) {
         let newTags = [newTag] + (self.subject.tags.value ?? [])
         self.subject.tags.send(newTags)
+        self.listener?.eventTag(created: newTag)
     }
     
     func eventTag(updated newTag: EventTag) {
@@ -133,11 +135,13 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         else { return }
         let newTags = tags |> ix(index) .~ newTag
         self.subject.tags.send(newTags)
+        self.listener?.eventTag(updated: newTag)
     }
     
-    func evetTag(deleted tagId: String) {
+    func eventTag(deleted tagId: String) {
         let newTags = self.subject.tags.value?.filter { $0.uuid != tagId }
         self.subject.tags.send(newTags)
+        self.listener?.eventTag(deleted: tagId)
     }
 }
 
