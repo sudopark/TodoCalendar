@@ -114,7 +114,9 @@ extension AddEventViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let time = self.waitFirstOutput(expect, for: viewModel.selectedTime)
+        let time = self.waitFirstOutput(expect, for: viewModel.selectedTime.dropFirst()) {
+            viewModel.prepare()
+        }
         
         // then
         XCTAssertEqual(time, self.defaultCurrentAndNextHourSelectTime)
@@ -129,6 +131,7 @@ extension AddEventViewModelImpleTests {
         
         // when
         let isTodos = self.waitOutputs(expect, for: viewModel.isTodo) {
+            viewModel.prepare()
             viewModel.toggleIsTodo()
             viewModel.toggleIsTodo()
         }
@@ -144,7 +147,9 @@ extension AddEventViewModelImpleTests {
         let viewModel = self.makeViewModel(latestTagExists: true)
         
         // when
-        let tag = self.waitFirstOutput(expect, for: viewModel.selectedTag)
+        let tag = self.waitFirstOutput(expect, for: viewModel.selectedTag) {
+            viewModel.prepare()
+        }
         
         // then
         XCTAssertEqual(tag?.tagId, .custom("latest"))
@@ -156,7 +161,9 @@ extension AddEventViewModelImpleTests {
         let viewModel = self.makeViewModel(latestTagExists: false)
         
         // when
-        let tag = self.waitFirstOutput(expect, for: viewModel.selectedTag)
+        let tag = self.waitFirstOutput(expect, for: viewModel.selectedTag) {
+            viewModel.prepare()
+        }
         
         // then
         XCTAssertEqual(tag?.tagId, .default)
@@ -242,18 +249,20 @@ extension AddEventViewModelImpleTests {
     func testViewModel_whenAfterSelectTime_updateSelectedTime() {
         // given
         let expect = expectation(description: "기간 선택 이후에 선택된 날짜 업데이트")
-        expect.expectedFulfillmentCount = 2
+        expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel()
         viewModel.toggleIsTodo()
         
         // when
         let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
+            viewModel.prepare()
             viewModel.eventTimeSelect(didSelect: nil)
         }
         
         // then
         XCTAssertEqual(times, [
-            self.defaultCurrentAndNextHourSelectTime, 
+            nil,
+            self.defaultCurrentAndNextHourSelectTime,
             nil
         ])
     }
@@ -262,11 +271,12 @@ extension AddEventViewModelImpleTests {
     func testViewModel_whenEventTimeIsTimeAtAndToggleIsAllDay_udpateSelectedTime() {
         // given
         let expect = expectation(description: "time + at => all day on -> 선택날짜 allday => all day off -> 이전 선택한 날짜")
-        expect.expectedFulfillmentCount = 4
+        expect.expectedFulfillmentCount = 5
         let viewModel = self.makeViewModel()
         
         // when
         let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
+            viewModel.prepare()
             viewModel.eventTimeSelect(didSelect: .at(self.refDate!.timeIntervalSince1970))
             
             viewModel.toggleIsAllDay()
@@ -274,21 +284,23 @@ extension AddEventViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(times[safe: 0]??.isPeriod, true)
-        XCTAssertEqual(times[safe: 1]??.isAt, true)
-        XCTAssertEqual(times[safe: 2]??.isSingleAllDay, true)
-        XCTAssertEqual(times[safe: 3]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 0] ?? nil, nil)
+        XCTAssertEqual(times[safe: 1]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 2]??.isAt, true)
+        XCTAssertEqual(times[safe: 3]??.isSingleAllDay, true)
+        XCTAssertEqual(times[safe: 4]??.isPeriod, true)
     }
     
     // time + period(복수일) => all day on -> 선택 복수날짜 allday => all day off -> 이전 선택한 날짜
     func testViewModel_whenEventTimeIs3DaysPeriod_toggleAllDay() {
         // given
         let expect = expectation(description: "time + period(복수일) => all day on -> 선택 복수날짜 allday => all day off -> 이전 선택한 날짜")
-        expect.expectedFulfillmentCount = 4
+        expect.expectedFulfillmentCount = 5
         let viewModel = self.makeViewModel()
         
         // when
         let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
+            viewModel.prepare()
             viewModel.eventTimeSelect(didSelect: self.dummy3DaysPeriod)
             
             viewModel.toggleIsAllDay()
@@ -296,21 +308,23 @@ extension AddEventViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(times[safe: 0]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 0] ?? nil, nil)
         XCTAssertEqual(times[safe: 1]??.isPeriod, true)
-        XCTAssertEqual(times[safe: 2]??.isAllDayPeriod, true)
-        XCTAssertEqual(times[safe: 3]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 2]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 3]??.isAllDayPeriod, true)
+        XCTAssertEqual(times[safe: 4]??.isPeriod, true)
     }
     
     // time + period(단수일) => all day on -> 선택 단수일 allday => all day off -> 이전 선택한 날짜
     func testViewModel_whenEventTimeIsSingleDayPeriod_toggleAllDay() {
         // given
         let expect = expectation(description: "time + period(단수일) => all day on -> 선택 단수일 allday => all day off -> period")
-        expect.expectedFulfillmentCount = 4
+        expect.expectedFulfillmentCount = 5
         let viewModel = self.makeViewModel()
         
         // when
         let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
+            viewModel.prepare()
             viewModel.eventTimeSelect(didSelect: self.dummySingleDayPeriod)
             
             viewModel.toggleIsAllDay()
@@ -318,13 +332,31 @@ extension AddEventViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(times[safe: 0]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 0] ?? nil, nil)
         XCTAssertEqual(times[safe: 1]??.isPeriod, true)
-        XCTAssertEqual(times[safe: 2]??.isSingleAllDay, true)
-        XCTAssertEqual(times[safe: 3]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 2]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 3]??.isSingleAllDay, true)
+        XCTAssertEqual(times[safe: 4]??.isPeriod, true)
     }
     
     // 태그 선택
+    func testViewModel_selectEventTag() {
+        // given
+        let expect = expectation(description: "이벤트 태그 선택")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel(latestTagExists: true)
+        
+        // when
+        let tags = self.waitOutputs(expect, for: viewModel.selectedTag) {
+            viewModel.prepare()
+            viewModel.selectEventTag()
+            viewModel.selectEventTag(didSelected: .init(.holiday, "some", .holiday))
+        }
+        
+        // then
+        let selectedTagIds = tags.map { $0.tagId }
+        XCTAssertEqual(selectedTagIds, [.custom("latest"), .holiday])
+    }
     
     // 반복옵션 선택
     func testViewModel_whenRepeatTimeSelected_update() {
@@ -391,6 +423,11 @@ private class SpyRouter: BaseSpyRouter, AddEventRouting, @unchecked Sendable {
         startTime: Date, with initalOption: EventRepeating?
     ) {
         self.didRouteToEventRepeatOptionSelect = true
+    }
+    
+    var didRouteToSelectEventTag: Bool?
+    func routeToEventTagSelect(currentSelectedTagId: AllEventTagId) {
+        self.didRouteToSelectEventTag = true
     }
 }
 
