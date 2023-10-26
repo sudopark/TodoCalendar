@@ -68,6 +68,7 @@ struct SelectPlace: Equatable {
 protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     
     // interactor
+    func prepare()
     func enter(name: String)
     func toggleIsTodo()
     func eventTimeSelect(didSelect time: EventTime?)
@@ -113,7 +114,7 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
         self.eventTagUsease = eventTagUsease
         self.calendarSettingUsecase = calendarSettingUsecase
         
-        self.setupInitialValue()
+        self.internalBinding()
     }
     
     
@@ -133,13 +134,22 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
     private var setupDefaultSelectTag: AnyCancellable?
     private let subject = Subject()
     
-    private func setupInitialValue() {
+    private func internalBinding() {
         
         self.calendarSettingUsecase.currentTimeZone
             .sink(receiveValue: { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
             })
             .store(in: &self.cancellables)
+    }
+}
+
+
+// MARK: - AddEventViewModelImple Interactor
+
+extension AddEventViewModelImple {
+    
+    func prepare() {
         
         let now = Date(); let nextHour = now.addingTimeInterval(3600)
         self.subject.selectedTime.send(
@@ -155,12 +165,6 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
                 self?.subject.selectedTag.send(tag)
             })
     }
-}
-
-
-// MARK: - AddEventViewModelImple Interactor
-
-extension AddEventViewModelImple {
     
     func enter(name: String) {
         self.subject.name.send(name)
@@ -216,7 +220,13 @@ extension AddEventViewModelImple {
     
     func selectEventTag() {
         self.setupDefaultSelectTag?.cancel()
-        // TODO: select tag
+        self.router?.routeToEventTagSelect(
+            currentSelectedTagId: self.subject.selectedTag.value?.tagId ?? .default
+        )
+    }
+    
+    func selectEventTag(didSelected tag: SelectedTag) {
+        self.subject.selectedTag.send(tag)
     }
     
     func selectPlace() {
