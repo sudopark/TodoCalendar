@@ -34,7 +34,7 @@ extension EventTagDetailSceneBuilerImple: EventTagDetailSceneBuiler {
     @MainActor
     func makeEventTagDetailScene(
         originalInfo: OriginalTagInfo?,
-        listener: EventTagDetailSceneListener?
+        listener: (any EventTagDetailSceneListener)?
     ) -> any EventTagDetailScene {
         
         let viewModel = EventTagDetailViewModelImple(

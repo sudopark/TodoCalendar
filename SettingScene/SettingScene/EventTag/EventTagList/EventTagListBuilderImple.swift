@@ -32,7 +32,9 @@ public final class EventTagListSceneBuilerImple {
 extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
     
     @MainActor
-    public func makeEventTagListScene() -> any EventTagListScene {
+    public func makeEventTagListScene(
+        listener: (any EventTagListSceneListener)?
+    ) -> any EventTagListScene {
         
         let viewModel = EventTagListViewModelImple(
             tagUsecase: self.usecaseFactory.makeEventTagUsecase()
@@ -52,6 +54,7 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
         )
         router.scene = viewController
         viewModel.router = router
+        viewModel.listener = listener
         
         return viewController
     }

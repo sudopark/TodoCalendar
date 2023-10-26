@@ -8,6 +8,7 @@
 import XCTest
 import Combine
 import Domain
+import Scenes
 import Extensions
 import TestDoubles
 import UnitTestHelpKit
@@ -206,7 +207,7 @@ extension EventTagListViewModelImpleTests {
         ) {
             self.didRouteToEditTag = true
             if shouldDeleteTagWhenEdit {
-                listener.evetTag(deleted: tagInfo.id.customTagId ?? "")
+                listener.eventTag(deleted: tagInfo.id.customTagId ?? "")
             } else {
                 let newTag = EventTag(
                     uuid: tagInfo.id.customTagId ?? "",

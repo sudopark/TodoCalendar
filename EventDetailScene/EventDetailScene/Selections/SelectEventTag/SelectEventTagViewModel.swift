@@ -9,6 +9,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 import Scenes
 
@@ -92,6 +94,7 @@ final class SelectEventTagViewModelImple: SelectEventTagViewModel, @unchecked Se
 
 extension SelectEventTagViewModelImple {
     
+    // TODO: view에서 호출시에 최초 1회만 하도록, listener로 태그 리스트 변경 받은 경우에 명시적으로 refresh 예정
     func refresh() {
         
         let loaded: ([EventTag]) -> Void = { [weak self] tags in
@@ -111,11 +114,35 @@ extension SelectEventTagViewModelImple {
     }
     
     func addTag() {
-        // TODO:
+        self.router?.routeToAddNewTagScene()
     }
     
     func moveToTagSetting() {
-        // TODO:
+        self.router?.routeToTagListScene()
+    }
+    
+    func eventTag(created newTag: EventTag) {
+        defer {
+            self.subject.selectedTagId.send(.custom(newTag.uuid))
+        }
+        let tags = self.subject.tags.value ?? []
+        guard !tags.contains(where: { $0.uuid == newTag.uuid })
+        else { return }
+        let newTags = [newTag] + tags
+        self.subject.tags.send(newTags)
+    }
+    
+    func eventTag(updated newTag: EventTag) {
+        guard let tags = self.subject.tags.value,
+              let index = tags.firstIndex(where: { $0.uuid == newTag.uuid })
+        else { return }
+        let newTags = tags |> ix(index) .~ newTag
+        self.subject.tags.send(newTags)
+    }
+    
+    func eventTag(deleted tagId: String) {
+        let newTags = self.subject.tags.value?.filter { $0.uuid != tagId }
+        self.subject.tags.send(newTags)
     }
 }
 
@@ -165,13 +192,5 @@ extension SelectEventTagViewModelImple {
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
-    }
-}
-
-private extension AllEventTagId {
-    
-    var isCustom: Bool {
-        guard case .custom = self else { return false }
-        return true
     }
 }
