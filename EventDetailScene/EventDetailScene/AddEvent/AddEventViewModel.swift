@@ -65,32 +65,6 @@ struct SelectPlace: Equatable {
     let coordinate: String
 }
 
-struct SelectedTag: Equatable {
-    let tagId: AllEventTagId
-    let name: String
-    let color: EventTagColor
-    
-    init(
-        _ tagId: AllEventTagId,
-        _ name: String,
-        _ color: EventTagColor
-    ) {
-        self.tagId = tagId
-        self.name = name
-        self.color = color
-    }
-    
-    init(_ tag: EventTag) {
-        self.tagId = .custom(tag.uuid)
-        self.name = tag.name
-        self.color = .custom(hex: tag.colorHex)
-    }
-    
-    static var defaultTag: SelectedTag {
-        return .init(.default, "default".localized(), .default)
-    }
-}
-
 protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     
     // interactor
@@ -174,9 +148,9 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
         
         self.setupDefaultSelectTag = self.eventTagUsease.latestUsedEventTag
             .map { tag -> SelectedTag in
-                return tag.map { SelectedTag($0) }
-                ?? .init(.default, "default".localized(), .default)
+                return tag.map { SelectedTag($0) } ?? .defaultTag
             }
+            .first()
             .sink(receiveValue: { [weak self] tag in
                 self?.subject.selectedTag.send(tag)
             })
