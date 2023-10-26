@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -16,11 +17,14 @@ import CommonPresentation
 
 final class SelectEventTagSceneBuilerImple {
     
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     
     init(
+        usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
+        self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
     }
 }
@@ -29,10 +33,13 @@ final class SelectEventTagSceneBuilerImple {
 extension SelectEventTagSceneBuilerImple: SelectEventTagSceneBuiler {
     
     @MainActor
-    func makeSelectEventTagScene() -> any SelectEventTagScene {
+    func makeSelectEventTagScene(
+        startWith initail: AllEventTagId
+    ) -> any SelectEventTagScene {
         
         let viewModel = SelectEventTagViewModelImple(
-            
+            startWith: initail,
+            tagUsecase: usecaseFactory.makeEventTagUsecase()
         )
         
         let viewController = SelectEventTagViewController(
