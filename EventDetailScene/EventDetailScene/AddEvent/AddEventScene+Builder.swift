@@ -13,7 +13,8 @@ import Scenes
 
 // MARK: - AddEventScene Interactable & Listenable
 
-protocol AddEventSceneInteractor: AnyObject, SelectEventRepeatOptionSceneListener { }
+protocol AddEventSceneInteractor:
+    AnyObject, SelectEventRepeatOptionSceneListener, SelectEventTagSceneListener { }
 //
 //public protocol AddEventSceneListener: AnyObject { }
 

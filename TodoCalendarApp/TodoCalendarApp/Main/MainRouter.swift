@@ -60,7 +60,9 @@ extension MainRouter {
     func routeToEventTypeFilterSetting() {
         Task { @MainActor in
             
-            let eventSettingScene = self.eventTagListSceneBuilder.makeEventTagListScene()
+            let eventSettingScene = self.eventTagListSceneBuilder.makeEventTagListScene(
+                listener: nil
+            )
             self.currentScene?.present(eventSettingScene, animated: true)
         }
     }

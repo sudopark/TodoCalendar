@@ -40,7 +40,8 @@ extension SelectEventTagSceneBuilerImple: SelectEventTagSceneBuiler {
     
     @MainActor
     func makeSelectEventTagScene(
-        startWith initail: AllEventTagId
+        startWith initail: AllEventTagId,
+        listener: SelectEventTagSceneListener?
     ) -> any SelectEventTagScene {
         
         let viewModel = SelectEventTagViewModelImple(
@@ -59,6 +60,7 @@ extension SelectEventTagSceneBuilerImple: SelectEventTagSceneBuiler {
         )
         router.scene = viewController
         viewModel.router = router
+        viewModel.listener = listener
         
         return viewController
     }
