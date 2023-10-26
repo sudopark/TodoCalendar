@@ -133,9 +133,106 @@ extension SelectEventTagViewModelImpleTests {
         ])
     }
     
-    // TODO: 태그 추가 화면으로 이동 + 태그 추가된경우 해당 태그 선택
+    func testViewModel_whenRouteToAddNewTagAndNewtagCreated_provideNewTagAtList() {
+        // given
+        let expect = expectation(description: "태그 추가 화면으로 이동 + 태그 추가된경우 해당 태그 리스트에 추가")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitalListLoaded()
+        
+        // when
+        let tagLists = self.waitOutputs(expect, for: viewModel.tags) {
+            viewModel.addTag()
+            viewModel.eventTag(created: .init(uuid: "new_tag", name: "new tag", colorHex: "some"))
+        }
+        
+        // then
+        let tagIdLists = tagLists.map { ts in ts.map { $0.id } }
+        XCTAssertEqual(tagIdLists, [
+            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday],
+            [.default, .custom("new_tag"), .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday]
+        ])
+        XCTAssertEqual(self.spyRouter.didRouteToAddNewtag, true)
+    }
     
-    // TODO: 태그 설정화면으로 이동 -> 선택중이던 태그가 삭제된경우 디폴트 태그로 자동 선택
+    func testViewModel_whenRouteToAddNewTagAndNewtagCreated_selectIt() {
+        // given
+        let expect = expectation(description: "태그 추가 화면으로 이동 + 태그 추가된경우 해당 태그 자동으로 선택")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitalListLoaded()
+        
+        // when
+        let selectedIds = self.waitOutputs(expect, for: viewModel.selectedTagId) {
+            viewModel.addTag()
+            viewModel.eventTag(created: .init(uuid: "new_tag", name: "new tag", colorHex: "some"))
+        }
+        
+        // then
+        XCTAssertEqual(selectedIds, [
+            .default, .custom("new_tag")
+        ])
+    }
+    
+    func testViewModel_whenTagUpdated_updateItFromList() {
+        // given
+        let expect = expectation(description: "태그가 수정된경우 해당 태그 리스트에서 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitalListLoaded()
+        
+        // when
+        let tagLists = self.waitOutputs(expect, for: viewModel.tags) {
+            viewModel.moveToTagSetting()
+            viewModel.eventTag(updated: .init(uuid: "id:1", name: "new_name", colorHex: "some"))
+        }
+        
+        // then
+        let tagIdLists = tagLists.map { ts in ts.map { $0.id } }
+        let tag1Names = tagLists.compactMap { ts in ts.first(where:{ $0.id == .custom("id:1") })?.name }
+        XCTAssertEqual(tagIdLists, [
+            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday],
+            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday]
+        ])
+        XCTAssertEqual(tag1Names, ["n:1", "new_name"])
+        XCTAssertEqual(self.spyRouter.didrouteToTagList, true)
+    }
+    
+    func testViewModel_whenTagIsRemoved_removeItFromList() {
+        // given
+        let expect = expectation(description: "태그가삭제된경우 해당 태그 리스트에서 제거")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitalListLoaded()
+        
+        // when
+        let tagLists = self.waitOutputs(expect, for: viewModel.tags) {
+            viewModel.moveToTagSetting()
+            viewModel.eventTag(deleted: "id:1")
+        }
+        
+        // then
+        let tagIdLists = tagLists.map { ts in ts.map { $0.id } }
+        XCTAssertEqual(tagIdLists, [
+            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday],
+            [.default, .custom("id:0"), .custom("id:2"), .holiday]
+        ])
+    }
+    
+    func testViewModel_whenSelectedTagListRemoved_selectDefaultTag() {
+        // given
+        let expect = expectation(description: "선택된 태그가 삭제된 경우 기본태그로 선택 변경")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithInitalListLoaded()
+        
+        // when
+        let selectedIds = self.waitOutputs(expect, for: viewModel.selectedTagId) {
+            viewModel.selectTag(.custom("id:1"))
+            viewModel.moveToTagSetting()
+            viewModel.eventTag(deleted: "id:1")
+        }
+        
+        // then
+        XCTAssertEqual(selectedIds, [
+            .default, .custom("id:1"), .default
+        ])
+    }
     
     func testViewModel_whenAfterSelectTag_notify() {
         // given
@@ -160,7 +257,15 @@ extension SelectEventTagViewModelImpleTests {
 
 private class SpyRouter: BaseSpyRouter, SelectEventTagRouting, @unchecked Sendable {
     
+    var didrouteToTagList: Bool?
+    func routeToTagListScene() {
+        self.didrouteToTagList = true
+    }
     
+    var didRouteToAddNewtag: Bool?
+    func routeToAddNewTagScene() {
+        self.didRouteToAddNewtag = true
+    }
 }
 
 private class SpyListener: SelectEventTagSceneListener {

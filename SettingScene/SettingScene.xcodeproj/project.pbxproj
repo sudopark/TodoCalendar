@@ -26,7 +26,6 @@
 		F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */; };
 		F6B7AC692ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC632ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift */; };
 		F6B7AC6A2ACC05E2003F6BA8 /* EventTagDetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC642ACC05E2003F6BA8 /* EventTagDetailRouter.swift */; };
-		F6B7AC6B2ACC05E2003F6BA8 /* EventTagDetailScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC652ACC05E2003F6BA8 /* EventTagDetailScene+Builder.swift */; };
 		F6B7AC6C2ACC05E2003F6BA8 /* EventTagDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC662ACC05E2003F6BA8 /* EventTagDetailViewController.swift */; };
 		F6B7AC6D2ACC05E2003F6BA8 /* EventTagDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC672ACC05E2003F6BA8 /* EventTagDetailView.swift */; };
 		F6B7AC6E2ACC05E2003F6BA8 /* EventTagDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC682ACC05E2003F6BA8 /* EventTagDetailViewModel.swift */; };
@@ -65,7 +64,6 @@
 		F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewModel.swift; sourceTree = "<group>"; };
 		F6B7AC632ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailBuilderImple.swift; sourceTree = "<group>"; };
 		F6B7AC642ACC05E2003F6BA8 /* EventTagDetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailRouter.swift; sourceTree = "<group>"; };
-		F6B7AC652ACC05E2003F6BA8 /* EventTagDetailScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EventTagDetailScene+Builder.swift"; sourceTree = "<group>"; };
 		F6B7AC662ACC05E2003F6BA8 /* EventTagDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailViewController.swift; sourceTree = "<group>"; };
 		F6B7AC672ACC05E2003F6BA8 /* EventTagDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailView.swift; sourceTree = "<group>"; };
 		F6B7AC682ACC05E2003F6BA8 /* EventTagDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailViewModel.swift; sourceTree = "<group>"; };
@@ -100,6 +98,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F60D1B6F2AEABA6C00B088D6 /* EventTagList */ = {
+			isa = PBXGroup;
+			children = (
+				F676A7B12AC0269500D168DF /* EventTagListBuilderImple.swift */,
+				F676A7B22AC0269500D168DF /* EventTagListRouter.swift */,
+				F676A7B42AC0269500D168DF /* EventTagListViewController.swift */,
+				F676A7B52AC0269500D168DF /* EventTagListView.swift */,
+				F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */,
+			);
+			path = EventTagList;
+			sourceTree = "<group>";
+		};
 		F676A7482AC01F7F00D168DF = {
 			isa = PBXGroup;
 			children = (
@@ -156,12 +166,8 @@
 		F676A7AF2AC0264700D168DF /* EventTag */ = {
 			isa = PBXGroup;
 			children = (
+				F60D1B6F2AEABA6C00B088D6 /* EventTagList */,
 				F6B7AC622ACC055F003F6BA8 /* EventTagDetail */,
-				F676A7B12AC0269500D168DF /* EventTagListBuilderImple.swift */,
-				F676A7B22AC0269500D168DF /* EventTagListRouter.swift */,
-				F676A7B42AC0269500D168DF /* EventTagListViewController.swift */,
-				F676A7B52AC0269500D168DF /* EventTagListView.swift */,
-				F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */,
 			);
 			path = EventTag;
 			sourceTree = "<group>";
@@ -180,7 +186,6 @@
 			children = (
 				F6B7AC632ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift */,
 				F6B7AC642ACC05E2003F6BA8 /* EventTagDetailRouter.swift */,
-				F6B7AC652ACC05E2003F6BA8 /* EventTagDetailScene+Builder.swift */,
 				F6B7AC662ACC05E2003F6BA8 /* EventTagDetailViewController.swift */,
 				F6B7AC672ACC05E2003F6BA8 /* EventTagDetailView.swift */,
 				F6B7AC682ACC05E2003F6BA8 /* EventTagDetailViewModel.swift */,
@@ -308,7 +313,6 @@
 				F6B7AC6E2ACC05E2003F6BA8 /* EventTagDetailViewModel.swift in Sources */,
 				F676A7B72AC0269500D168DF /* EventTagListBuilderImple.swift in Sources */,
 				F6B7AC6C2ACC05E2003F6BA8 /* EventTagDetailViewController.swift in Sources */,
-				F6B7AC6B2ACC05E2003F6BA8 /* EventTagDetailScene+Builder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

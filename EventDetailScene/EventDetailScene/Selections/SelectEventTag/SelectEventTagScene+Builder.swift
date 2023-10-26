@@ -47,7 +47,7 @@ struct SelectedTag: Equatable {
 
 // MARK: - SelectEventTagScene Interactable & Listenable
 
-protocol SelectEventTagSceneInteractor: AnyObject { }
+protocol SelectEventTagSceneInteractor: AnyObject, EventTagDetailSceneListener, EventTagListSceneListener { }
 //
 protocol SelectEventTagSceneListener: AnyObject {
     

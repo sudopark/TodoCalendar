@@ -15,11 +15,7 @@ import Domain
 import Scenes
 
 
-struct OriginalTagInfo {
-    let id: AllEventTagId
-    let name: String
-    let color: EventTagColor
-}
+
 
 // MARK: - EventTagDetailViewModel
 
@@ -107,7 +103,7 @@ extension EventTagDetailViewModelImple {
             do {
                 try await self?.eventTagUsecase.deleteTag(tagId)
                 self?.show(message: "[TODO] delete message") { [weak self] in
-                    self?.listener?.evetTag(deleted: tagId)
+                    self?.listener?.eventTag(deleted: tagId)
                 }
             } catch {
                 self?.router?.showError(error)
