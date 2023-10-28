@@ -42,6 +42,10 @@
 		F6E35D5F2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D5E2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift */; };
 		F6E35D632A2B927000BDA545 /* FakeEnvironmentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D622A2B927000BDA545 /* FakeEnvironmentStorage.swift */; };
 		F6E35D652A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E35D642A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift */; };
+		F6E38E242AECEF6D0034FA22 /* EventDetailDataLocalRepostioryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E38E232AECEF6D0034FA22 /* EventDetailDataLocalRepostioryImpleTests.swift */; };
+		F6E38E272AECEF9B0034FA22 /* EventDetailDataLocalRepostioryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E38E262AECEF9B0034FA22 /* EventDetailDataLocalRepostioryImple.swift */; };
+		F6E38E2A2AECF03A0034FA22 /* EventDetailDataLocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E38E292AECF03A0034FA22 /* EventDetailDataLocalStorage.swift */; };
+		F6E38E2C2AECF0ED0034FA22 /* EventDetailDataTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6E38E2B2AECF0ED0034FA22 /* EventDetailDataTable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,6 +95,10 @@
 		F6E35D5E2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingRepositoryImple.swift; sourceTree = "<group>"; };
 		F6E35D622A2B927000BDA545 /* FakeEnvironmentStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FakeEnvironmentStorage.swift; sourceTree = "<group>"; };
 		F6E35D642A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSettingRepositoryImpleTests.swift; sourceTree = "<group>"; };
+		F6E38E232AECEF6D0034FA22 /* EventDetailDataLocalRepostioryImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailDataLocalRepostioryImpleTests.swift; sourceTree = "<group>"; };
+		F6E38E262AECEF9B0034FA22 /* EventDetailDataLocalRepostioryImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailDataLocalRepostioryImple.swift; sourceTree = "<group>"; };
+		F6E38E292AECF03A0034FA22 /* EventDetailDataLocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailDataLocalStorage.swift; sourceTree = "<group>"; };
+		F6E38E2B2AECF0ED0034FA22 /* EventDetailDataTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailDataTable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -260,6 +268,7 @@
 				F6C58CF52A111D4F002BA9B7 /* Todo */,
 				F6078D722A21FBDB006B4879 /* Schedule */,
 				F6957FC22A2313DD0064E8BD /* EventTag */,
+				F6E38E252AECEF8D0034FA22 /* EventDetailData */,
 			);
 			path = Event;
 			sourceTree = "<group>";
@@ -287,6 +296,7 @@
 				F6C58CFE2A189690002BA9B7 /* Todo */,
 				F6078D7B2A2213F2006B4879 /* Schedule */,
 				F6957FCA2A231A280064E8BD /* EventTag */,
+				F6E38E2D2AECF4490034FA22 /* EventDetailData */,
 			);
 			path = Event;
 			sourceTree = "<group>";
@@ -358,6 +368,32 @@
 				F6CD67362A35B175007E4306 /* StubRemoteAPI.swift */,
 			);
 			path = Doubles;
+			sourceTree = "<group>";
+		};
+		F6E38E252AECEF8D0034FA22 /* EventDetailData */ = {
+			isa = PBXGroup;
+			children = (
+				F6E38E282AECEFCD0034FA22 /* Local */,
+			);
+			path = EventDetailData;
+			sourceTree = "<group>";
+		};
+		F6E38E282AECEFCD0034FA22 /* Local */ = {
+			isa = PBXGroup;
+			children = (
+				F6E38E2B2AECF0ED0034FA22 /* EventDetailDataTable.swift */,
+				F6E38E292AECF03A0034FA22 /* EventDetailDataLocalStorage.swift */,
+				F6E38E262AECEF9B0034FA22 /* EventDetailDataLocalRepostioryImple.swift */,
+			);
+			path = Local;
+			sourceTree = "<group>";
+		};
+		F6E38E2D2AECF4490034FA22 /* EventDetailData */ = {
+			isa = PBXGroup;
+			children = (
+				F6E38E232AECEF6D0034FA22 /* EventDetailDataLocalRepostioryImpleTests.swift */,
+			);
+			path = EventDetailData;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -474,9 +510,12 @@
 				F6C58CF32A111CCE002BA9B7 /* TodoEventTable.swift in Sources */,
 				F6078D7A2A21FC97006B4879 /* ScheduleEventLocalStorage.swift in Sources */,
 				F6078D782A21FC8B006B4879 /* ScheduleEventTable.swift in Sources */,
+				F6E38E2C2AECF0ED0034FA22 /* EventDetailDataTable.swift in Sources */,
 				F6957FC52A2313F40064E8BD /* EventTagTable.swift in Sources */,
 				F6957FC92A2317440064E8BD /* EventTagLocalRepositoryImple.swift in Sources */,
+				F6E38E2A2AECF03A0034FA22 /* EventDetailDataLocalStorage.swift in Sources */,
 				F6C58D002A189BFF002BA9B7 /* TodoLocalRepositoryImple.swift in Sources */,
+				F6E38E272AECEF9B0034FA22 /* EventDetailDataLocalRepostioryImple.swift in Sources */,
 				F6C58D022A19E640002BA9B7 /* DoneTodoEventTable.swift in Sources */,
 				F6E35D5F2A2B914900BDA545 /* CalendarSettingRepositoryImple.swift in Sources */,
 				F6078D742A21FBFC006B4879 /* ScheduleEventLocalRepositoryImple.swift in Sources */,
@@ -499,6 +538,7 @@
 				F61C60362A81362D007BA02C /* AppSettingRepositoryImpleTests.swift in Sources */,
 				F6E35D652A2B92F700BDA545 /* CalendarSettingRepositoryImpleTests.swift in Sources */,
 				F6CD67372A35B175007E4306 /* StubRemoteAPI.swift in Sources */,
+				F6E38E242AECEF6D0034FA22 /* EventDetailDataLocalRepostioryImpleTests.swift in Sources */,
 				F6C58CCF2A111A89002BA9B7 /* RepositoryTests.swift in Sources */,
 				F6C58D042A19E88C002BA9B7 /* TodoLocalRepositoryImpleTests.swift in Sources */,
 				F6957FCC2A231A390064E8BD /* EventTagLocalRepositoryImpleTests.swift in Sources */,
