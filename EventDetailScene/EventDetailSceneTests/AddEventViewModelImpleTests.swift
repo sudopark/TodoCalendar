@@ -243,13 +243,13 @@ extension AddEventViewModelImpleTests {
         )
         XCTAssertEqual(
             singleAllDay,
-            .singleAllDay(.init(refStart.timeIntervalSince1970, self.timeZone))
+            .singleAllDay(.init(refStart.timeIntervalSince1970, self.timeZone, withoutTime: true))
         )
         XCTAssertEqual(
             allDays,
             .alldayPeriod(
-                .init(refStart.timeIntervalSince1970, self.timeZone),
-                .init(nextEnd.timeIntervalSince1970, self.timeZone)
+                .init(refStart.timeIntervalSince1970, self.timeZone, withoutTime: true),
+                .init(nextEnd.timeIntervalSince1970, self.timeZone, withoutTime: true)
             )
         )
     }
@@ -265,7 +265,7 @@ extension AddEventViewModelImpleTests {
         // when
         let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
             viewModel.prepare()
-            viewModel.eventTimeSelect(didSelect: nil)
+            viewModel.removeTime()
         }
         
         // then
@@ -286,7 +286,7 @@ extension AddEventViewModelImpleTests {
         // when
         let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
             viewModel.prepare()
-            viewModel.eventTimeSelect(didSelect: .at(self.refDate!.timeIntervalSince1970))
+            viewModel.removeEventEndTime()
             
             viewModel.toggleIsAllDay()
             viewModel.toggleIsAllDay()
@@ -310,7 +310,7 @@ extension AddEventViewModelImpleTests {
         // when
         let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
             viewModel.prepare()
-            viewModel.eventTimeSelect(didSelect: self.dummy3DaysPeriod)
+            viewModel.selectEndtime(Date().add(days: 3)!)
             
             viewModel.toggleIsAllDay()
             viewModel.toggleIsAllDay()
@@ -328,13 +328,12 @@ extension AddEventViewModelImpleTests {
     func testViewModel_whenEventTimeIsSingleDayPeriod_toggleAllDay() {
         // given
         let expect = expectation(description: "time + period(단수일) => all day on -> 선택 단수일 allday => all day off -> period")
-        expect.expectedFulfillmentCount = 5
+        expect.expectedFulfillmentCount = 4
         let viewModel = self.makeViewModel()
         
         // when
         let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
             viewModel.prepare()
-            viewModel.eventTimeSelect(didSelect: self.dummySingleDayPeriod)
             
             viewModel.toggleIsAllDay()
             viewModel.toggleIsAllDay()
@@ -343,9 +342,46 @@ extension AddEventViewModelImpleTests {
         // then
         XCTAssertEqual(times[safe: 0] ?? nil, nil)
         XCTAssertEqual(times[safe: 1]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 2]??.isSingleAllDay, true)
+        XCTAssertEqual(times[safe: 3]??.isPeriod, true)
+    }
+    
+
+    func testViewModel_updateStartTime() {
+        // given
+        let expect = expectation(description: "시작시간 업데이트")
+        expect.expectedFulfillmentCount = 10
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
+            viewModel.prepare() // 1. 최초 period
+            viewModel.selectStartTime(Date().add(days: 1)!) // 2. period 시작시간 변경 및 유효하지 않음
+            viewModel.removeEventEndTime()  // 3. at으로 변경
+            viewModel.selectStartTime(Date(timeIntervalSince1970: 0)) // 4. update
+            
+            viewModel.removeTime()  // 5. remove all
+            viewModel.selectStartTime(Date(timeIntervalSince1970: 0)) // 6. at
+            viewModel.toggleIsAllDay()    // 7. isSingle all day
+            
+            viewModel.selectEndtime(Date(timeIntervalSince1970: 0).add(days: 4)!) // 8. update all day period
+            viewModel.selectStartTime(Date(timeIntervalSince1970: 0).add(days: 1)!) // 9. update startTime
+        }
+        
+        // then
+        XCTAssertEqual(times[safe: 0] ?? nil, nil)
+        XCTAssertEqual(times[safe: 1]??.isPeriod, true)
         XCTAssertEqual(times[safe: 2]??.isPeriod, true)
-        XCTAssertEqual(times[safe: 3]??.isSingleAllDay, true)
-        XCTAssertEqual(times[safe: 4]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 2]??.isValid, false)
+        XCTAssertEqual(times[safe: 3]??.isAt, true)
+        XCTAssertEqual(times[safe: 4]??.isAt, true)
+        XCTAssertEqual(times[safe: 4]??.startTime.timeIntervalSince1970, 0)
+        XCTAssertEqual(times[safe: 5] ?? nil, nil)
+        XCTAssertEqual(times[safe: 6]??.isAt, true)
+        XCTAssertEqual(times[safe: 7]??.isSingleAllDay, true)
+        XCTAssertEqual(times[safe: 8]??.isAllDayPeriod, true)
+        XCTAssertEqual(times[safe: 9]??.isAllDayPeriod, true)
+        XCTAssertEqual(times[safe: 9]??.startTime.timeIntervalSince1970, Date(timeIntervalSince1970: 0).add(days: 1)!.timeIntervalSince1970)
     }
     
     // 태그 선택
@@ -383,7 +419,7 @@ extension AddEventViewModelImpleTests {
         
         // when
         let repeats = self.waitOutputs(expect, for: viewModel.repeatOption) {
-            viewModel.eventTimeSelect(didSelect: self.dummySingleDayPeriod)
+            viewModel.selectStartTime(self.refDate)
             
             viewModel.selectRepeatOption()
             viewModel.selectEventRepeatOption(didSelect: dummy) // on
@@ -394,7 +430,7 @@ extension AddEventViewModelImpleTests {
             viewModel.selectRepeatOption()
             viewModel.selectEventRepeatOption(didSelect: dummy) // on
             
-            viewModel.eventTimeSelect(didSelect: nil) // off
+            viewModel.removeTime()
         }
         
         // then
@@ -441,7 +477,7 @@ extension AddEventViewModelImpleTests {
         // when
         let isSavables = self.waitOutputs(expect, for: viewModel.isSavable) {
             viewModel.enter(name: "schedule name")
-            viewModel.eventTimeSelect(didSelect: .at(100))
+            viewModel.selectStartTime(self.refDate)
         }
         
         // then
@@ -449,7 +485,8 @@ extension AddEventViewModelImpleTests {
     }
     
     private func enterInfo(_ viewModel: AddEventViewModelImple) {
-        viewModel.eventTimeSelect(didSelect: .at(100))
+        viewModel.removeEventEndTime()
+        viewModel.selectStartTime(Date(timeIntervalSince1970: 100))
         viewModel.selectEventRepeatOption(
             didSelect: .init(
                 text: "some",
@@ -610,5 +647,22 @@ private extension SelectedTime {
     var isAllDayPeriod: Bool {
         guard case .alldayPeriod = self else { return false }
         return true
+    }
+    
+    var startTime: Date {
+        switch self {
+        case .at(let time): return time.date
+        case .period(let start, _): return start.date
+        case .singleAllDay(let time): return time.date
+        case .alldayPeriod(let start, _): return start.date
+        }
+    }
+    
+    var endTime: Date? {
+        switch self {
+        case .period(_, let end): return end.date
+        case .alldayPeriod(_, let end): return end.date
+        default: return nil
+        }
     }
 }
