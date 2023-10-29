@@ -15,8 +15,14 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase {
     
     public init() { }
     
+    public var didMakeScheduleParams: ScheduleMakeParams?
     open func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent {
-        throw RuntimeError("not implemented")
+        self.didMakeScheduleParams = params
+        guard let newEvent = ScheduleEvent(params)
+        else {
+            throw RuntimeError("invalid parameters")
+        }
+        return newEvent
     }
     
     open func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent {

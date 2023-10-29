@@ -26,9 +26,11 @@ open class BaseSpyRouter: Routing {
     }
     
     public var didClosed: Bool?
+    public var didCloseCallback: (() -> Void)?
     public func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
         self.didClosed = true
         dismissed?()
+        self.didCloseCallback?()
     }
     
     public var didShowConfirmWith: ConfirmDialogInfo?
