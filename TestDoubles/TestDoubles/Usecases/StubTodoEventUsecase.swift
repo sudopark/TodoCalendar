@@ -27,7 +27,9 @@ open class StubTodoEventUsecase: TodoEventUsecase {
     }
     
     public var shouldFailMakeTodo: Bool = false
+    public var didMakeTodoWithParams: TodoMakeParams?
     open func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent {
+        self.didMakeTodoWithParams = params
         guard shouldFailMakeTodo == false
         else {
             throw RuntimeError("failed")

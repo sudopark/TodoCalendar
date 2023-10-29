@@ -103,6 +103,15 @@ extension NonLoginUsecaseFactoryImple {
             sharedDataStore: Singleton.shared.sharedDataStore
         )
     }
+    
+    func makeEventDetailDataUsecase() -> any EventDetailDataUsecase {
+        let storage = EventDetailDataLocalStorage(
+            sqliteService: Singleton.shared.commonSqliteService
+        )
+        return EventDetailDataLocalRepostioryImple(
+            localStorage: storage
+        )
+    }
 }
 
 

@@ -13,6 +13,7 @@
 		F60163592A515FEE00CAD076 /* StubScheduleEventRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F60163582A515FEE00CAD076 /* StubScheduleEventRepository.swift */; };
 		F62C66B72AAF54C9008B064A /* Scenes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F62C66B62AAF54C9008B064A /* Scenes.framework */; };
 		F62C66BC2AAF54E6008B064A /* BaseSpyRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F62C66BB2AAF54E6008B064A /* BaseSpyRouter.swift */; };
+		F6709A6C2AEE117C0032768A /* StubEventDetailDataUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6709A6B2AEE117C0032768A /* StubEventDetailDataUsecase.swift */; };
 		F676A7C62AC033C700D168DF /* StubEventTagRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7C52AC033C700D168DF /* StubEventTagRepository.swift */; };
 		F67907E02A4DD3D7000CF11B /* StubCalendarUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */; };
 		F67907ED2A5004CA000CF11B /* StubTodoEventUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67907EC2A5004CA000CF11B /* StubTodoEventUsecase.swift */; };
@@ -35,6 +36,7 @@
 		F60163582A515FEE00CAD076 /* StubScheduleEventRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubScheduleEventRepository.swift; sourceTree = "<group>"; };
 		F62C66B62AAF54C9008B064A /* Scenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Scenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F62C66BB2AAF54E6008B064A /* BaseSpyRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseSpyRouter.swift; sourceTree = "<group>"; };
+		F6709A6B2AEE117C0032768A /* StubEventDetailDataUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubEventDetailDataUsecase.swift; sourceTree = "<group>"; };
 		F676A7C52AC033C700D168DF /* StubEventTagRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubEventTagRepository.swift; sourceTree = "<group>"; };
 		F67907DF2A4DD3D7000CF11B /* StubCalendarUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubCalendarUsecase.swift; sourceTree = "<group>"; };
 		F67907EC2A5004CA000CF11B /* StubTodoEventUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubTodoEventUsecase.swift; sourceTree = "<group>"; };
@@ -136,6 +138,7 @@
 				F67907EE2A5004D4000CF11B /* StubScheduleEventUsecase.swift */,
 				F698371B2A840281001F7603 /* StubEventTagUsecase.swift */,
 				F6CFAC3F2AD3117000C7EA5E /* StubUISettingUsecase.swift */,
+				F6709A6B2AEE117C0032768A /* StubEventDetailDataUsecase.swift */,
 			);
 			path = Usecases;
 			sourceTree = "<group>";
@@ -240,6 +243,7 @@
 				F69904E12A49D2F600F44834 /* StubCalendarSettingUsecase.swift in Sources */,
 				F60163532A51579C00CAD076 /* Dummies.swift in Sources */,
 				F62C66BC2AAF54E6008B064A /* BaseSpyRouter.swift in Sources */,
+				F6709A6C2AEE117C0032768A /* StubEventDetailDataUsecase.swift in Sources */,
 				F676A7C62AC033C700D168DF /* StubEventTagRepository.swift in Sources */,
 				F67907E02A4DD3D7000CF11B /* StubCalendarUsecase.swift in Sources */,
 			);

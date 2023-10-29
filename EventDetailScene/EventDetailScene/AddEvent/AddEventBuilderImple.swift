@@ -44,7 +44,8 @@ extension AddEventSceneBuilerImple: AddEventSceneBuiler {
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             eventTagUsease: self.usecaseFactory.makeEventTagUsecase(),
-            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase()
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
+            eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase()
         )
         
         let viewController = AddEventViewController(

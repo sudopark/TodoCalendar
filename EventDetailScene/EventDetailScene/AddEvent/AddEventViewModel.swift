@@ -60,11 +60,6 @@ enum SelectedTime: Equatable {
     }
 }
 
-struct SelectPlace: Equatable {
-    let name: String
-    let coordinate: String
-}
-
 protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     
     // interactor
@@ -78,7 +73,6 @@ protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     func selectPlace()
     func enter(url: String)
     func enter(memo: String)
-    func showMoreAction()
     func save()
     
     // presenter
@@ -87,7 +81,7 @@ protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOption: AnyPublisher<String, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
-    var selectedPlace: AnyPublisher<SelectPlace?, Never> { get }
+    var selectedPlace: AnyPublisher<Place?, Never> { get }
     var isSavable: AnyPublisher<Bool, Never> { get }
     var isSaving: AnyPublisher<Bool, Never> { get }
 }
@@ -101,18 +95,21 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
     private let scheduleUsecase: any ScheduleEventUsecase
     private let eventTagUsease: any EventTagUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let eventDetailDataUsecase: any EventDetailDataUsecase
     var router: (any AddEventRouting)?
     
     init(
         todoUsecase: any TodoEventUsecase,
         scheduleUsecase: any ScheduleEventUsecase,
         eventTagUsease: any EventTagUsecase,
-        calendarSettingUsecase: any CalendarSettingUsecase
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        eventDetailDataUsecase: any EventDetailDataUsecase
     ) {
         self.todoUsecase = todoUsecase
         self.scheduleUsecase = scheduleUsecase
         self.eventTagUsease = eventTagUsease
         self.calendarSettingUsecase = calendarSettingUsecase
+        self.eventDetailDataUsecase = eventDetailDataUsecase
         
         self.internalBinding()
     }
@@ -125,9 +122,10 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
         let selectedTime = CurrentValueSubject<EventTime?, Never>(nil)
         let repeatOptionSelectResult = CurrentValueSubject<EventRepeatingTimeSelectResult?, Never>(nil)
         let selectedTag = CurrentValueSubject<SelectedTag?, Never>(nil)
-        let selectedPlace = CurrentValueSubject<SelectPlace?, Never>(nil)
-        let url = CurrentValueSubject<String?, Never>(nil)
-        let memo = CurrentValueSubject<String?, Never>(nil)
+        let enteredMemo = CurrentValueSubject<String?, Never>(nil)
+        let enteredLink = CurrentValueSubject<String?, Never>(nil)
+        let selectedPlace = CurrentValueSubject<Place?, Never>(nil)
+        let isSaving = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -234,19 +232,78 @@ extension AddEventViewModelImple {
     }
     
     func enter(url: String) {
-        self.subject.url.send(url)
+        self.subject.enteredLink.send(url)
     }
     
     func enter(memo: String) {
-        self.subject.memo.send(memo)
-    }
-    
-    func showMoreAction() {
-        // TODO: show action picker
+        self.subject.enteredMemo.send(memo)
     }
     
     func save() {
-        // TODO: save
+        let isTodo = self.subject.isTodo.value
+        isTodo ? self.saveNewTodoEvent() : self.saveNewScheduleEvent()
+    }
+    
+    private func saveNewTodoEvent() {
+        guard let name = self.subject.name.value else { return }
+        
+        let params = TodoMakeParams()
+            |> \.name .~ name
+            |> \.eventTagId .~ self.subject.selectedTag.value?.tagId
+            |> \.time .~ self.subject.selectedTime.value
+            |> \.repeating .~ self.subject.repeatOptionSelectResult.value?.repeating
+        
+        self.subject.isSaving.send(true)
+        
+        Task { [weak self] in
+            do {
+                let newTodo = try await self?.todoUsecase.makeTodoEvent(params)
+                await self?.saveEventDetailWithoutError(newTodo?.uuid)
+                
+                self?.router?.showToast("[TODO] todo saved".localized())
+                self?.router?.closeScene(animate: true, nil)
+            } catch {
+                self?.router?.showError(error)
+            }
+            self?.subject.isSaving.send(false)
+        }
+        .store(in: &self.cancellables)
+    }
+    
+    private func saveNewScheduleEvent() {
+        guard let name = self.subject.name.value,
+              let time = self.subject.selectedTime.value
+        else { return }
+        
+        let params = ScheduleMakeParams()
+            |> \.name .~ name
+            |> \.time .~ pure(time)
+            |> \.eventTagId .~ self.subject.selectedTag.value?.tagId
+            |> \.repeating .~ self.subject.repeatOptionSelectResult.value?.repeating
+        
+        self.subject.isSaving.send(true)
+        
+        Task { [weak self] in
+            do {
+                let newSchedule = try await self?.scheduleUsecase.makeScheduleEvent(params)
+                await self?.saveEventDetailWithoutError(newSchedule?.uuid)
+                
+                self?.router?.showToast("[TODO] schedule saved".localized())
+                self?.router?.closeScene(animate: true, nil)
+            } catch {
+                self?.router?.showError(error)
+            }
+            self?.subject.isSaving.send(false)
+        }
+        .store(in: &self.cancellables)
+    }
+    
+    private func saveEventDetailWithoutError(_ eventId: String?) async {
+        guard let eventId else { return }
+        let detail = EventDetailData(eventId)
+            |> \.memo .~ self.subject.enteredMemo.value
+            |> \.url .~ self.subject.enteredLink.value
+        let _ = try? await self.eventDetailDataUsecase.saveDetail(detail)
     }
 }
 
@@ -288,16 +345,34 @@ extension AddEventViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var selectedPlace: AnyPublisher<SelectPlace?, Never> {
-        Empty().eraseToAnyPublisher()
+    var selectedPlace: AnyPublisher<Place?, Never> {
+        return self.subject.selectedPlace
+            .eraseToAnyPublisher()
     }
     
     var isSavable: AnyPublisher<Bool, Never> {
-        Empty().eraseToAnyPublisher()
+        let transform: (Bool, String?, EventTime?) -> Bool = { isTodo, name, time in
+            let nameIsNotEmpty = name?.isEmpty == false
+            guard isTodo == false
+            else {
+                return nameIsNotEmpty
+            }
+            return nameIsNotEmpty && time != nil
+        }
+        return Publishers.CombineLatest3(
+            self.subject.isTodo,
+            self.subject.name,
+            self.subject.selectedTime
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
     
     var isSaving: AnyPublisher<Bool, Never> {
-        Empty().eraseToAnyPublisher()
+        return self.subject.isSaving
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
 

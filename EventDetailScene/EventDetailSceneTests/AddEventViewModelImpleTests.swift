@@ -20,6 +20,9 @@ import TestDoubles
 class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
+    private var spyTodoUsecase: StubTodoEventUsecase!
+    private var spyScheduleUsecase: StubScheduleEventUsecase!
+    private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
     private var spyRouter: SpyRouter!
     private var refDate: Date!
     private var timeZone: TimeZone {
@@ -28,6 +31,9 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
+        self.spyTodoUsecase = .init()
+        self.spyScheduleUsecase = .init()
+        self.spyEventDetailDataUsecase = .init()
         self.spyRouter = .init()
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.timeZone
         let compos = DateComponents(year: 2023, month: 9, day: 18, hour: 4, minute: 44)
@@ -36,16 +42,18 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
+        self.spyTodoUsecase = nil
+        self.spyScheduleUsecase = nil
+        self.spyEventDetailDataUsecase = nil
         self.spyRouter = nil
         self.refDate = nil
     }
     
     private func makeViewModel(
-        latestTagExists: Bool = true
+        latestTagExists: Bool = true,
+        shouldFailSaveDetailData: Bool = false
     ) -> AddEventViewModelImple {
         
-        let todoUsecase = StubTodoEventUsecase()
-        let scheduleUsecase = StubScheduleEventUsecase()
         let tagUsecase = StubEventTagUsecase()
         tagUsecase.stubLatestUsecaseEventTag = latestTagExists ? .init(uuid: "latest", name: "some", colorHex: "some") : nil
         tagUsecase.prepare()
@@ -54,10 +62,11 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         settingUsecase.prepare()
         
         let viewModel = AddEventViewModelImple(
-            todoUsecase: todoUsecase,
-            scheduleUsecase: scheduleUsecase,
+            todoUsecase: self.spyTodoUsecase,
+            scheduleUsecase: self.spyScheduleUsecase,
             eventTagUsease: tagUsecase,
-            calendarSettingUsecase: settingUsecase
+            calendarSettingUsecase: settingUsecase,
+            eventDetailDataUsecase: self.spyEventDetailDataUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -406,14 +415,163 @@ extension AddEventViewModelImpleTests {
 extension AddEventViewModelImpleTests {
     
     // todo의 경우 이름만 입력하면 저장 가능해짐
+    func testViewModel_whenMakeTodo_isSavableWhenEnterName() {
+        // given
+        let expect = expectation(description: "todo의 경우 이름만 입력하면 저장 가능해짐")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isSavables = self.waitOutputs(expect, for: viewModel.isSavable) {
+            viewModel.toggleIsTodo()
+            viewModel.enter(name: "todo name")
+        }
+        
+        // then
+        XCTAssertEqual(isSavables, [false, true])
+    }
     
     // schedule event의 경우 이름 및 시간이 입력되어야함
+    func testViewModel_whenMakeScheduleEvent_isSavableWhenEnterNameAndSelectTime() {
+        // given
+        let expect = expectation(description: "schedule event의 경우 이름 및 시간이 입력되어야함")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isSavables = self.waitOutputs(expect, for: viewModel.isSavable) {
+            viewModel.enter(name: "schedule name")
+            viewModel.eventTimeSelect(didSelect: .at(100))
+        }
+        
+        // then
+        XCTAssertEqual(isSavables, [false, true])
+    }
     
-    // todo 저장
+    private func enterInfo(_ viewModel: AddEventViewModelImple) {
+        viewModel.eventTimeSelect(didSelect: .at(100))
+        viewModel.selectEventRepeatOption(
+            didSelect: .init(
+                text: "some",
+                repeating: .init(repeatingStartTime: 100, repeatOption: EventRepeatingOptions.EveryDay()))
+        )
+        viewModel.selectEventTag(didSelected: .init(.custom("some"), "tag", .custom(hex: "hex")))
+        viewModel.enter(url: "url")
+        viewModel.enter(memo: "memo")
+    }
+    
+    // todo 저장 완료 이후에 토스트 노출 + 화면 닫음
+    func testViewModel_saveTodo() {
+        // given
+        let expect = expectation(description: "todo 저장 완료 이후에 토스트 노출 + 화면 닫음")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+            viewModel.enter(name: "todo")
+            viewModel.toggleIsTodo()
+            self.enterInfo(viewModel)
+            
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] todo saved".localized())
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        
+        let madeParams = self.spyTodoUsecase.didMakeTodoWithParams
+        XCTAssertEqual(madeParams?.name, "todo")
+        XCTAssertEqual(madeParams?.eventTagId, .custom("some"))
+        XCTAssertEqual(madeParams?.time, .at(100))
+        XCTAssertEqual(madeParams?.repeating, .init(repeatingStartTime: 100, repeatOption: EventRepeatingOptions.EveryDay()) )
+    }
     
     // scheudle 저장
+    func testViewModel_saveScheduleEvent() {
+        // given
+        let expect = expectation(description: "schedule 저장 완료 이후에 토스트 노출 + 화면 닫음")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+            viewModel.enter(name: "schedule")
+            self.enterInfo(viewModel)
+            
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] schedule saved".localized())
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        
+        let madeParams = self.spyScheduleUsecase.didMakeScheduleParams
+        XCTAssertEqual(madeParams?.name, "schedule")
+        XCTAssertEqual(madeParams?.eventTagId, .custom("some"))
+        XCTAssertEqual(madeParams?.time, .at(100))
+        XCTAssertEqual(madeParams?.repeating, .init(repeatingStartTime: 100, repeatOption: EventRepeatingOptions.EveryDay()) )
+    }
     
-    // 저장시에 저장중임을 알림
+    // 이벤트 저장 이후에 메타데이터도 저장함
+    func testViewModel_whenAfterSaveTodo_saveDetailData() {
+        // given
+        let expect = expectation(description: "todo 저장 완료 이후에 event detail data 저장")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+            viewModel.enter(name: "todo")
+            viewModel.toggleIsTodo()
+            self.enterInfo(viewModel)
+            
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+        XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.memo, "memo")
+        XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.url, "url")
+    }
+    
+    func testViewModel_whenAfterSaveSchedule_saveDetailData() {
+        // given
+        let expect = expectation(description: "schedule 저장 완료 이후에 event detail data 저장")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+            viewModel.enter(name: "schedule")
+            self.enterInfo(viewModel)
+            
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+        XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.memo, "memo")
+        XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.url, "url")
+    }
+    
+    func testViewModel_whenSaveEventDetailDataFail_ignore() {
+        // given
+        let expect = expectation(description: "todo 저장 완료 이후에 event detail data 저장 실패해도 무시")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(shouldFailSaveDetailData: true)
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+            viewModel.enter(name: "todo")
+            viewModel.toggleIsTodo()
+            self.enterInfo(viewModel)
+            
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] todo saved".localized())
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+    }
 }
 
 private class SpyRouter: BaseSpyRouter, AddEventRouting, @unchecked Sendable {
