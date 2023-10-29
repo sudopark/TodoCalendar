@@ -37,6 +37,20 @@ final class AddEventViewController: UIHostingController<AddEventContainerView>, 
             viewAppearance: viewAppearance
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
+        .eventHandler(\.onAppear, viewModel.prepare)
+        .eventHandler(\.nameEntered, viewModel.enter(name:))
+        .eventHandler(\.toggleIsTodo, viewModel.toggleIsTodo)
+        .eventHandler(\.selectStartTime, viewModel.selectStartTime(_:))
+        .eventHandler(\.selectEndTime, viewModel.selectEndtime(_:))
+        .eventHandler(\.removeTime,  viewModel.removeTime)
+        .eventHandler(\.removeEventEndTime, viewModel.removeEventEndTime)
+        .eventHandler(\.toggleIsAllDay, viewModel.toggleIsAllDay)
+        .eventHandler(\.selectRepeatOption, viewModel.selectRepeatOption)
+        .eventHandler(\.selectTag, viewModel.selectEventTag)
+//        .eventHandler(\.selectPlace, TODO)
+        .eventHandler(\.enterUrl, viewModel.enter(url:))
+        .eventHandler(\.enterMemo, viewModel.enter(memo:))
+        .eventHandler(\.save, viewModel.save)
         super.init(rootView: containerView)
     }
     
