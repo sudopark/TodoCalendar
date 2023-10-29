@@ -21,6 +21,7 @@ struct SelectTimeText: Equatable {
     var year: String?
     let day: String
     var time: String?
+    let date: Date
     
     init(_ timeStamp: TimeInterval, _ timeZone: TimeZone, withoutTime: Bool = false) {
         let date = Date(timeIntervalSince1970: timeStamp)
@@ -28,6 +29,11 @@ struct SelectTimeText: Equatable {
         self.year = isSameYear ? nil : date.yearText(at: timeZone)
         self.day = date.dateText(at: timeZone)
         self.time = withoutTime ? nil : date.timeText(at: timeZone)
+        self.date = date
+    }
+    
+    static func == (_ lhs: Self, _ rhs: Self) -> Bool {
+        return lhs.year == rhs.year && lhs.day == rhs.day && lhs.time == rhs.time
     }
 }
 
@@ -54,8 +60,69 @@ enum SelectedTime: Equatable {
             let isSameDay = Date(timeIntervalSince1970: range.lowerBound)
                 .isSameDay(Date(timeIntervalSince1970: range.upperBound), at: timeZone)
             self = isSameDay
-            ? .singleAllDay(.init(range.lowerBound, timeZone))
-            : .alldayPeriod(.init(range.lowerBound, timeZone), .init(range.upperBound, timeZone))
+            ? .singleAllDay(.init(range.lowerBound, timeZone, withoutTime: true))
+            : .alldayPeriod(.init(range.lowerBound, timeZone, withoutTime: true), .init(range.upperBound, timeZone, withoutTime: true))
+        }
+    }
+    
+    var isValid: Bool {
+        switch self {
+        case .period(let start, let end): return start.date < end.date
+        case .alldayPeriod(let start, let end): return start.date < end.date
+        default: return true
+        }
+    }
+    
+    fileprivate func eventTime(_ timeZone: TimeZone) -> EventTime? {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let secondsFromGMT = timeZone.secondsFromGMT() |> TimeInterval.init
+        switch self {
+        case .at(let time):
+            return .at(time.date.timeIntervalSince1970)
+            
+        case .period(let start, let end):
+            guard start.date < end.date else { return nil }
+            return .period(start.date.timeIntervalSince1970..<end.date.timeIntervalSince1970)
+            
+        case .singleAllDay(let time):
+            guard let end = calendar.endOfDay(for: time.date) else { return nil }
+            let start = calendar.startOfDay(for: time.date)
+            return .allDay(
+                start.timeIntervalSince1970..<end.timeIntervalSince1970,
+                secondsFromGMT: secondsFromGMT
+            )
+        case .alldayPeriod(let start, let end):
+            guard start.date < end.date, let endofEndDate = calendar.endOfDay(for: end.date)
+            else { return nil }
+            let startOfStarDate = calendar.startOfDay(for: start.date)
+            return .allDay(
+                startOfStarDate.timeIntervalSince1970..<endofEndDate.timeIntervalSince1970,
+                secondsFromGMT: secondsFromGMT
+            )
+        }
+    }
+    
+    fileprivate func toggleIsAllDay(_ timeZone: TimeZone) -> SelectedTime? {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        switch self {
+        case .at(let time):
+            return .singleAllDay(.init(time.date.timeIntervalSince1970, timeZone, withoutTime: true))
+        case .period(let start, let end) where start.date.isSameDay(end.date, at: timeZone):
+            return .singleAllDay(.init(start.date.timeIntervalSince1970, timeZone, withoutTime: true))
+        case .period(let start, let end):
+            return .alldayPeriod(start |> \.time .~ nil, end |> \.time .~ nil)
+        case .singleAllDay(let time):
+            guard let end = calendar.endOfDay(for: time.date) else { return nil }
+            let start = calendar.startOfDay(for: time.date)
+            return .period(
+                .init(start.timeIntervalSince1970, timeZone),
+                .init(end.timeIntervalSince1970, timeZone)
+            )
+        case .alldayPeriod(let start, let end):
+            return .period(
+                .init(start.date.timeIntervalSince1970, timeZone),
+                .init(end.date.timeIntervalSince1970, timeZone)
+            )
         }
     }
 }
@@ -66,7 +133,10 @@ protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     func prepare()
     func enter(name: String)
     func toggleIsTodo()
-    func eventTimeSelect(didSelect time: EventTime?)
+    func selectStartTime(_ date: Date)
+    func selectEndtime(_ date: Date)
+    func removeTime()
+    func removeEventEndTime()
     func toggleIsAllDay()
     func selectRepeatOption()
     func selectEventTag()
@@ -77,7 +147,6 @@ protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     
     // presenter
     var isTodo: AnyPublisher<Bool, Never> { get }
-    // TODO: 시간 선택 여부에 따라 업데이트되어야함
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOption: AnyPublisher<String, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
@@ -119,7 +188,7 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
         let name = CurrentValueSubject<String?, Never>(nil)
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let isTodo = CurrentValueSubject<Bool, Never>(false)
-        let selectedTime = CurrentValueSubject<EventTime?, Never>(nil)
+        let selectedTime = CurrentValueSubject<SelectedTime?, Never>(nil)
         let repeatOptionSelectResult = CurrentValueSubject<EventRepeatingTimeSelectResult?, Never>(nil)
         let selectedTag = CurrentValueSubject<SelectedTag?, Never>(nil)
         let enteredMemo = CurrentValueSubject<String?, Never>(nil)
@@ -149,10 +218,19 @@ extension AddEventViewModelImple {
     
     func prepare() {
         
-        let now = Date(); let nextHour = now.addingTimeInterval(3600)
-        self.subject.selectedTime.send(
-            .period(now.timeIntervalSince1970..<nextHour.timeIntervalSince1970)
-        )
+        self.subject.timeZone
+            .compactMap { $0 }
+            .first()
+            .sink(receiveValue: { [weak self] timeZone in
+                let now = Date(); let nextHour = now.addingTimeInterval(3600)
+                self?.subject.selectedTime.send(
+                    .period(
+                        .init(now.timeIntervalSince1970, timeZone),
+                        .init(nextHour.timeIntervalSince1970, timeZone)
+                    )
+                )
+            })
+            .store(in: &self.cancellables)
         
         self.setupDefaultSelectTag = self.eventTagUsease.latestUsedEventTag
             .map { tag -> SelectedTag in
@@ -172,17 +250,69 @@ extension AddEventViewModelImple {
         self.subject.isTodo.send(!self.subject.isTodo.value)
     }
     
-    func eventTimeSelect(didSelect time: EventTime?) {
-        self.subject.selectedTime.send(time)
-        guard let time = time 
-        else {
-            self.subject.repeatOptionSelectResult.send(nil)
-            return
+    func selectStartTime(_ date: Date) {
+        guard let timeZone = self.subject.timeZone.value else { return }
+        let timeText = SelectTimeText(date.timeIntervalSince1970, timeZone)
+        
+        let newTime: SelectedTime = switch self.subject.selectedTime.value {
+            case .none, .at: .at(timeText)
+            case .period(_, let end): .period(timeText, end)
+            case .singleAllDay(let start) where start.date.isSameDay(date, at: timeZone):
+                .singleAllDay(timeText |> \.time .~ nil)
+            case .singleAllDay(let start):
+                .alldayPeriod(start, timeText |> \.time .~ nil)
+            case .alldayPeriod(_, let end): .alldayPeriod(timeText |> \.time .~ nil, end)
         }
-        guard let result = self.subject.repeatOptionSelectResult.value else { return }
+        
+        self.subject.selectedTime.send(newTime)
+        self.syncEventRepeatingOptionStartTime(newTime, timeZone)
+    }
+    
+    func selectEndtime(_ date: Date) {
+        guard let timeZone = self.subject.timeZone.value else { return }
+        let timeText = SelectTimeText(date.timeIntervalSince1970, timeZone)
+        
+        let newTime: SelectedTime? = switch self.subject.selectedTime.value {
+            case .none: nil
+            case .at(let start): .period(start, timeText)
+            case .period(let start, _): .period(start, timeText)
+            case .singleAllDay(let start) where start.date.isSameDay(date, at: timeZone): nil
+            case .singleAllDay(let start): .alldayPeriod(start, timeText |> \.time .~ nil)
+            case .alldayPeriod(let start, _): .alldayPeriod(start, timeText |> \.time .~ nil)
+        }
+        
+        guard let newTime else { return }
+        self.subject.selectedTime.send(newTime)
+        self.syncEventRepeatingOptionStartTime(newTime, timeZone)
+    }
+    
+    func removeTime() {
+        self.subject.selectedTime.send(nil)
+        self.subject.repeatOptionSelectResult.send(nil)
+    }
+    
+    func removeEventEndTime() {
+        guard let timeZone = self.subject.timeZone.value else { return }
+        let newTime: SelectedTime? = switch self.subject.selectedTime.value {
+        case .period(let start, _): .at(start)
+        case .alldayPeriod(let start, _): .singleAllDay(start)
+        default: nil
+        }
+        
+        guard let newTime else { return }
+        self.subject.selectedTime.send(newTime)
+        self.syncEventRepeatingOptionStartTime(newTime, timeZone)
+    }
+    
+    private func syncEventRepeatingOptionStartTime(
+        _ selectedTime: SelectedTime, _ timeZone: TimeZone
+    ) {
+        guard let result = self.subject.repeatOptionSelectResult.value,
+              let eventTime = selectedTime.eventTime(timeZone)
+        else { return }
         
         let newOption = EventRepeating(
-            repeatingStartTime: time.lowerBoundWithFixed,
+            repeatingStartTime: eventTime.lowerBoundWithFixed,
             repeatOption: result.repeating.repeatOption
         )
         |> \.repeatingEndTime .~ result.repeating.repeatingEndTime
@@ -200,10 +330,18 @@ extension AddEventViewModelImple {
 
     func selectRepeatOption() {
 
-        guard let time = self.subject.selectedTime.value else { return }
+        guard let time = self.subject.selectedTime.value,
+              let timeZone = self.subject.timeZone.value
+        else { return }
+        
+        guard let eventTime = time.eventTime(timeZone)
+        else {
+            self.router?.showToast("[TODO] enter valid event time".localized())
+            return
+        }
         
         self.router?.routeToEventRepeatOptionSelect(
-            startTime: Date(timeIntervalSince1970: time.lowerBoundWithFixed),
+            startTime: Date(timeIntervalSince1970: eventTime.lowerBoundWithFixed),
             with: self.subject.repeatOptionSelectResult.value?.repeating
         )
     }
@@ -244,13 +382,22 @@ extension AddEventViewModelImple {
         isTodo ? self.saveNewTodoEvent() : self.saveNewScheduleEvent()
     }
     
+    private func validEventTime() -> EventTime? {
+        guard let timeZone = self.subject.timeZone.value,
+              let time = self.subject.selectedTime.value
+        else { return nil }
+        return time.eventTime(timeZone)
+    }
+    
     private func saveNewTodoEvent() {
         guard let name = self.subject.name.value else { return }
+        
+        let eventTime = self.validEventTime()
         
         let params = TodoMakeParams()
             |> \.name .~ name
             |> \.eventTagId .~ self.subject.selectedTag.value?.tagId
-            |> \.time .~ self.subject.selectedTime.value
+            |> \.time .~ eventTime
             |> \.repeating .~ self.subject.repeatOptionSelectResult.value?.repeating
         
         self.subject.isSaving.send(true)
@@ -272,7 +419,7 @@ extension AddEventViewModelImple {
     
     private func saveNewScheduleEvent() {
         guard let name = self.subject.name.value,
-              let time = self.subject.selectedTime.value
+              let time = self.validEventTime()
         else { return }
         
         let params = ScheduleMakeParams()
@@ -319,16 +466,9 @@ extension AddEventViewModelImple {
     }
     
     var selectedTime: AnyPublisher<SelectedTime?, Never> {
-        let transform: (TimeZone, EventTime?) -> SelectedTime? = { timeZone, selected in
-            return selected.map { SelectedTime($0, timeZone) }
-        }
-        return Publishers.CombineLatest(
-            self.subject.timeZone.compactMap { $0 },
-            self.subject.selectedTime
-        )
-        .map(transform)
-        .removeDuplicates()
-        .eraseToAnyPublisher()
+        return self.subject.selectedTime
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     var repeatOption: AnyPublisher<String, Never> {
@@ -351,13 +491,15 @@ extension AddEventViewModelImple {
     }
     
     var isSavable: AnyPublisher<Bool, Never> {
-        let transform: (Bool, String?, EventTime?) -> Bool = { isTodo, name, time in
+        let transform: (Bool, String?, SelectedTime?) -> Bool = { isTodo, name, time in
             let nameIsNotEmpty = name?.isEmpty == false
             guard isTodo == false
             else {
-                return nameIsNotEmpty
+                let timeSelectedButInvalid = time?.isValid != false
+                return nameIsNotEmpty && timeSelectedButInvalid
             }
-            return nameIsNotEmpty && time != nil
+            let validtimeSelected = time?.isValid == true
+            return nameIsNotEmpty && validtimeSelected
         }
         return Publishers.CombineLatest3(
             self.subject.isTodo,
@@ -411,38 +553,5 @@ extension Date {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let compos = calendar.dateComponents([.year, .month, .day], from: self)
         return (compos.year, compos.month, compos.day)
-    }
-}
-
-private extension EventTime {
-    
-    func toggleIsAllDay(_ timeZone: TimeZone) -> EventTime? {
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        let secondsFromGMT = TimeInterval(timeZone.secondsFromGMT())
-        switch self {
-        case .at(let time):
-            let date = Date(timeIntervalSince1970: time)
-            guard let end = calendar.endOfDay(for: date) else { return nil }
-            let start = calendar.startOfDay(for: date)
-            return .allDay(
-                start.timeIntervalSince1970..<end.timeIntervalSince1970,
-                secondsFromGMT: secondsFromGMT
-            )
-            
-        case .period(let range):
-            let (startDate, endDate) = (
-                Date(timeIntervalSince1970: range.lowerBound),
-                Date(timeIntervalSince1970: range.upperBound)
-            )
-            guard let endDayOfEnd = calendar.endOfDay(for: endDate) else { return nil }
-            let startOfStart = calendar.startOfDay(for: startDate)
-            return .allDay(
-                startOfStart.timeIntervalSince1970..<endDayOfEnd.timeIntervalSince1970,
-                secondsFromGMT: secondsFromGMT
-            )
-            
-        case .allDay(let range, secondsFromGMT: _):
-            return .period(range)
-        }
     }
 }
