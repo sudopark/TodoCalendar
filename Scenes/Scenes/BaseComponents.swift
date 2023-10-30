@@ -21,6 +21,7 @@ public struct ConfirmDialogInfo: @unchecked Sendable {
     public init() { }
 }
 
+public struct EmptyInteractor: Sendable { }
 
 // MARK: - Scene
 

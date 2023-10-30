@@ -14,13 +14,16 @@ public struct CalendarSceneBuilderImple {
         
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let eventDetailSceneBuilder: any EventDetailSceneBuilder
     
     public init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        eventDetailSceneBuilder: any EventDetailSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.eventDetailSceneBuilder = eventDetailSceneBuilder
     }
 }
 
@@ -51,7 +54,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
         )
         let eventListSceneBuilder = DayEventListSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            eventDetailSceneBuilder: self.eventDetailSceneBuilder
         )
         let paperSceneBuilder = CalendarPaperSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,

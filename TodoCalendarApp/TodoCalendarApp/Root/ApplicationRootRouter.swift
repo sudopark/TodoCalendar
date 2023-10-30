@@ -11,6 +11,7 @@ import Extensions
 import Scenes
 import CommonPresentation
 import CalendarScenes
+import EventDetailScene
 import SettingScene
 
 
@@ -102,12 +103,29 @@ extension ApplicationRootRouter {
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
         return CalendarSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearanceStore.appearance
+            viewAppearance: self.viewAppearanceStore.appearance,
+            eventDetailSceneBuilder: self.eventDetailSceneBuilder()
+        )
+    }
+    
+    private func eventDetailSceneBuilder() -> any EventDetailSceneBuilder {
+        return EventDetailSceneBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance,
+            eventTagDetailSceneBuilder: self.eventTagDetailSceneBuilder(),
+            eventTagListSceneBuilder: self.eventTagListSceneBulder()
         )
     }
     
     private func eventTagListSceneBulder() -> any EventTagListSceneBuiler {
         return EventTagListSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance
+        )
+    }
+    
+    private func eventTagDetailSceneBuilder() -> any EventTagDetailSceneBuiler {
+        return EventTagDetailSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance
         )

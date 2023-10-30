@@ -62,6 +62,7 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         settingUsecase.prepare()
         
         let viewModel = AddEventViewModelImple(
+            isTodo: false,
             todoUsecase: self.spyTodoUsecase,
             scheduleUsecase: self.spyScheduleUsecase,
             eventTagUsease: tagUsecase,

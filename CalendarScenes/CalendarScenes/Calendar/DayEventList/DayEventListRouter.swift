@@ -25,7 +25,14 @@ protocol DayEventListRouting: Routing, Sendable {
 
 // MARK: - Router
 
-final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked Sendable { }
+final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked Sendable {
+    
+    private let eventDetailSceneBuilder: any EventDetailSceneBuilder
+    
+    init(eventDetailSceneBuilder: any EventDetailSceneBuilder) {
+        self.eventDetailSceneBuilder = eventDetailSceneBuilder
+    }
+}
 
 
 extension DayEventListRouter {
@@ -37,11 +44,19 @@ extension DayEventListRouter {
     // TODO: router implememnts
     
     func routeToMakeTodoEvent(_ withParams: TodoMakeParams) {
-        // TODO: route to make todo scene
+        Task { @MainActor in
+            
+            let next = self.eventDetailSceneBuilder.makeNewEventScene(isTodo: true)
+            self.currentScene?.present(next, animated: true)
+        }
     }
     
     func routeToMakeNewEvent() {
-        // TODO: route to make new event scene
+        Task { @MainActor in
+            
+            let next = self.eventDetailSceneBuilder.makeNewEventScene(isTodo: false)
+            self.currentScene?.present(next, animated: true)
+        }
     }
     
     func routeToSelectTemplateForMakeEvent() {

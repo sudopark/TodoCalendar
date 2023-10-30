@@ -38,9 +38,10 @@ final class AddEventSceneBuilerImple {
 extension AddEventSceneBuilerImple: AddEventSceneBuiler {
     
     @MainActor
-    func makeAddEventScene() -> any AddEventScene {
+    func makeAddEventScene(isTodo: Bool) -> any AddEventScene {
         
         let viewModel = AddEventViewModelImple(
+            isTodo: isTodo,
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             eventTagUsease: self.usecaseFactory.makeEventTagUsecase(),
