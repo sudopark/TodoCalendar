@@ -14,6 +14,7 @@
 		F69B72402AE55C0800C7A5CB /* SelectEventTagView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B723A2AE55C0800C7A5CB /* SelectEventTagView.swift */; };
 		F69B72412AE55C0800C7A5CB /* SelectEventTagViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B723B2AE55C0800C7A5CB /* SelectEventTagViewModel.swift */; };
 		F69B72432AE55E8600C7A5CB /* SelectEventTagViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72422AE55E8600C7A5CB /* SelectEventTagViewModelImpleTests.swift */; };
+		F6B0984A2AEE641200E84149 /* EventDetailSceneBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B098492AEE641200E84149 /* EventDetailSceneBuilderImple.swift */; };
 		F6D05D922AE51D080028ED68 /* SelectEventRepeatOptionBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D05D8C2AE51D080028ED68 /* SelectEventRepeatOptionBuilderImple.swift */; };
 		F6D05D932AE51D080028ED68 /* SelectEventRepeatOptionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D05D8D2AE51D080028ED68 /* SelectEventRepeatOptionRouter.swift */; };
 		F6D05D942AE51D080028ED68 /* SelectEventRepeatOptionScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D05D8E2AE51D080028ED68 /* SelectEventRepeatOptionScene+Builder.swift */; };
@@ -60,6 +61,7 @@
 		F69B723A2AE55C0800C7A5CB /* SelectEventTagView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagView.swift; sourceTree = "<group>"; };
 		F69B723B2AE55C0800C7A5CB /* SelectEventTagViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagViewModel.swift; sourceTree = "<group>"; };
 		F69B72422AE55E8600C7A5CB /* SelectEventTagViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagViewModelImpleTests.swift; sourceTree = "<group>"; };
+		F6B098492AEE641200E84149 /* EventDetailSceneBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailSceneBuilderImple.swift; sourceTree = "<group>"; };
 		F6D05D8C2AE51D080028ED68 /* SelectEventRepeatOptionBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventRepeatOptionBuilderImple.swift; sourceTree = "<group>"; };
 		F6D05D8D2AE51D080028ED68 /* SelectEventRepeatOptionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventRepeatOptionRouter.swift; sourceTree = "<group>"; };
 		F6D05D8E2AE51D080028ED68 /* SelectEventRepeatOptionScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelectEventRepeatOptionScene+Builder.swift"; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 		F6F780562ADC1EAA00B50C19 /* EventDetailScene */ = {
 			isa = PBXGroup;
 			children = (
+				F6B098492AEE641200E84149 /* EventDetailSceneBuilderImple.swift */,
 				F65ED73D2AE51C5500BCD4C1 /* Selections */,
 				F6F7809D2ADC20EC00B50C19 /* AddEvent */,
 				F6F780572ADC1EAA00B50C19 /* EventDetailScene.h */,
@@ -344,6 +347,7 @@
 				F69B723E2AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift in Sources */,
 				F6D05D972AE51D080028ED68 /* SelectEventRepeatOptionViewModel.swift in Sources */,
 				F6F780A72ADC20F900B50C19 /* AddEventViewController.swift in Sources */,
+				F6B0984A2AEE641200E84149 /* EventDetailSceneBuilderImple.swift in Sources */,
 				F6F780A62ADC20F900B50C19 /* AddEventScene+Builder.swift in Sources */,
 				F6F780A52ADC20F900B50C19 /* AddEventRouter.swift in Sources */,
 				F6D05D962AE51D080028ED68 /* SelectEventRepeatOptionView.swift in Sources */,
@@ -428,7 +432,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -488,7 +492,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

@@ -187,6 +187,7 @@ struct AddEventView: View {
                     self.enterLinkView
                     self.enterMemokView
                 }
+                .padding(.top, 20)
                 .padding(.horizontal, 12)
                 .padding(.bottom, 120)
             }
@@ -250,6 +251,7 @@ struct AddEventView: View {
                 }
                 
                 Text(timeText.day)
+                    .lineLimit(1)
                     .strikethrough(isInvalid)
                     .font(self.appearance.fontSet.size(14).asFont)
                     .foregroundStyle(self.appearance.colorSet.normalText.asColor)
@@ -319,33 +321,31 @@ struct AddEventView: View {
     }
     
     private var toggleAllDayView: some View {
-        Button {
+        
+        func backGroundView() -> some View {
+            if self.state.isAllDay {
+                return RoundedRectangle(cornerRadius: 16)
+                    .fill(self.appearance.colorSet.normalText.asColor)
+                    .asAnyView()
+            } else {
+                return RoundedRectangle(cornerRadius: 16)
+                    .stroke(self.appearance.colorSet.subSubNormalText.asColor, lineWidth: 1)
+                    .asAnyView()
+            }
+        }
+        let textColor: Color = self.state.isAllDay ? .white : self.appearance.colorSet.subSubNormalText.asColor
+        return Button {
             self.state.isAllDay.toggle()
             self.toggleIsAllDay()
             
         } label: {
             Text("Allday".localized())
-                .foregroundStyle(
-                    self.state.isAllDay 
-                    ? .white
-                    : self.appearance.colorSet.subSubNormalText.asColor
-                )
+                .foregroundStyle(textColor)
                 .padding(.vertical, 8)
                 .padding(.horizontal, 16)
         }
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(
-                    self.state.isAllDay
-                    ? self.appearance.colorSet.normalText.asColor
-                    : .clear
-                )
-                .stroke(
-                    self.state.isAllDay
-                    ? .clear
-                    : self.appearance.colorSet.subSubNormalText.asColor,
-                    lineWidth: 1
-                )
+            backGroundView()
         )
     }
     
@@ -494,7 +494,7 @@ struct AddEventView: View {
             Image(systemName: "doc.text")
                 .font(.system(size: 16, weight: .light))
             
-            TextField("Memo".localized(), text: self.$state.url)
+            TextField("Memo".localized(), text: self.$state.memo)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
                 .foregroundStyle(self.appearance.colorSet.normalText.asColor)

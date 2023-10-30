@@ -14,12 +14,12 @@ import CommonPresentation
 
 // MARK: - EventTagDetailSceneBuilerImple
 
-final class EventTagDetailSceneBuilerImple {
+public final class EventTagDetailSceneBuilerImple {
     
     private let usecaseFactory: UsecaseFactory
     private let viewAppearance: ViewAppearance
     
-    init(
+    public init(
         usecaseFactory: UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
@@ -32,7 +32,7 @@ final class EventTagDetailSceneBuilerImple {
 extension EventTagDetailSceneBuilerImple: EventTagDetailSceneBuiler {
     
     @MainActor
-    func makeEventTagDetailScene(
+    public func makeEventTagDetailScene(
         originalInfo: OriginalTagInfo?,
         listener: (any EventTagDetailSceneListener)?
     ) -> any EventTagDetailScene {

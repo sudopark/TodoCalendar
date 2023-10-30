@@ -168,12 +168,14 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
     var router: (any AddEventRouting)?
     
     init(
+        isTodo: Bool,
         todoUsecase: any TodoEventUsecase,
         scheduleUsecase: any ScheduleEventUsecase,
         eventTagUsease: any EventTagUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         eventDetailDataUsecase: any EventDetailDataUsecase
     ) {
+        
         self.todoUsecase = todoUsecase
         self.scheduleUsecase = scheduleUsecase
         self.eventTagUsease = eventTagUsease
@@ -181,6 +183,7 @@ final class AddEventViewModelImple: AddEventViewModel, @unchecked Sendable {
         self.eventDetailDataUsecase = eventDetailDataUsecase
         
         self.internalBinding()
+        self.subject.isTodo.send(isTodo)
     }
     
     
@@ -259,8 +262,8 @@ extension AddEventViewModelImple {
             case .period(_, let end): .period(timeText, end)
             case .singleAllDay(let start) where start.date.isSameDay(date, at: timeZone):
                 .singleAllDay(timeText |> \.time .~ nil)
-            case .singleAllDay(let start):
-                .alldayPeriod(start, timeText |> \.time .~ nil)
+            case .singleAllDay:
+                .singleAllDay(timeText)
             case .alldayPeriod(_, let end): .alldayPeriod(timeText |> \.time .~ nil, end)
         }
         

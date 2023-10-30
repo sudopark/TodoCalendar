@@ -20,7 +20,7 @@ protocol AddEventSceneInteractor:
 
 // MARK: - AddEventScene
 
-protocol AddEventScene: Scene where Interactor == any AddEventSceneInteractor
+protocol AddEventScene: EventDetailScene where Interactor == any AddEventSceneInteractor
 { }
 
 
@@ -29,5 +29,5 @@ protocol AddEventScene: Scene where Interactor == any AddEventSceneInteractor
 protocol AddEventSceneBuiler: AnyObject {
     
     @MainActor
-    func makeAddEventScene() -> any AddEventScene
+    func makeAddEventScene(isTodo: Bool) -> any AddEventScene
 }
