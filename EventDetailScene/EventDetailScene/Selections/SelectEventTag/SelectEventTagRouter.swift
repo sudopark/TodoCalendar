@@ -62,6 +62,7 @@ extension SelectEventTagRouter {
             let next = self.eventTagListSceneBuilder.makeEventTagListScene(
                 listener: self.currentScene?.interactor
             )
+            self.currentScene?.navigationController?.navigationBar.isHidden = false
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }

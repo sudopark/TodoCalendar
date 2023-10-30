@@ -38,6 +38,7 @@ struct TagCellViewModel: Equatable {
 protocol SelectEventTagViewModel: AnyObject, Sendable, SelectEventTagSceneInteractor {
 
     // interactor
+    func close()
     func refresh()
     func selectTag(_ id: AllEventTagId)
     func addTag()
@@ -93,6 +94,10 @@ final class SelectEventTagViewModelImple: SelectEventTagViewModel, @unchecked Se
 // MARK: - SelectEventTagViewModelImple Interactor
 
 extension SelectEventTagViewModelImple {
+    
+    func close() {
+        self.router?.closeScene(animate: true, nil)
+    }
     
     // TODO: view에서 호출시에 최초 1회만 하도록, listener로 태그 리스트 변경 받은 경우에 명시적으로 refresh 예정
     func refresh() {

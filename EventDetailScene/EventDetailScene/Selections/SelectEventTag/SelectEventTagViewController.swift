@@ -33,11 +33,21 @@ final class SelectEventTagViewController: UIHostingController<SelectEventTagCont
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         
+        let eventHandlers = SelectEventTagViewEventHandler()
+        eventHandlers.bind(viewModel)
+        
         let containerView = SelectEventTagContainerView(
-            viewAppearance: viewAppearance
+            viewAppearance: viewAppearance,
+            eventHandler: eventHandlers
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
         super.init(rootView: containerView)
+        self.navigationController?.isNavigationBarHidden = true
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = true
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
