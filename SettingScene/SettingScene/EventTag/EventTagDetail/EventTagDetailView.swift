@@ -235,39 +235,19 @@ struct EventTagDetailView: View {
         
         return HStack {
             if self.state.isDeletable {
-                Button {
-                    self.deleteTag()
-                } label: {
-                    Text("Delete".localized())
-                        .font(self.appearance.fontSet.bottomButton.asFont)
-                        .frame(maxWidth: .infinity)
-                        .foregroundStyle(self.appearance.colorSet.negativeBtnBackground.asColor)
-                }
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
+                ConfirmButton(
+                    title: "Delete".localized(),
+                    textColor: self.appearance.colorSet.negativeBtnBackground.asColor,
+                    backgroundColor: self.appearance.colorSet.secondaryBtnBackground.asColor
                 )
+                .eventHandler(\.onTap, self.deleteTag)
             }
             
-            Button {
-                self.saveChanges()
-            } label: {
-                Text("Save".localized())
-                    .font(self.appearance.fontSet.bottomButton.asFont)
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(self.appearance.colorSet.primaryBtnText.asColor)
-            }
-            .disabled(!self.state.isSavable)
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(
-                        self.appearance.colorSet.primaryBtnBackground.asColor
-                            .opacity(self.state.isSavable ? 1.0 : 0.7)
-                    )
+            ConfirmButton(
+                title: "Save".localized(),
+                isEnable: self.$state.isSavable
             )
+            .eventHandler(\.onTap, self.saveChanges)
         }
     }
 }

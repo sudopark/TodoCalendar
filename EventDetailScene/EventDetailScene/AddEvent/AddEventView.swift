@@ -194,7 +194,11 @@ struct AddEventView: View {
             
             VStack {
                 Spacer()
-                self.saveButton
+                
+                BottomConfirmButton(
+                    title: "Save".localized(), isEnable: self.$state.isSavable
+                )
+                .eventHandler(\.onTap, self.save)
             }
         }
     }
@@ -505,37 +509,6 @@ struct AddEventView: View {
                 }
                 .onReceive(self.state.$memo, perform: self.enterMemo)
         }
-    }
-    
-    private var saveButton: some View {
-        
-        ZStack {
-         
-            Button {
-                self.save()
-            } label: {
-                Text("Save".localized())
-                    .font(self.appearance.fontSet.bottomButton.asFont)
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(self.appearance.colorSet.primaryBtnText.asColor)
-            }
-            .disabled(!self.state.isSavable)
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(
-                        self.appearance.colorSet.primaryBtnBackground.asColor
-                            .opacity(self.state.isSavable ? 1.0 : 0.7)
-                    )
-            )
-        }
-        .padding()
-        .background(
-            Rectangle()
-                .fill(self.appearance.colorSet.dayBackground.asColor)
-                .ignoresSafeArea(edges: .bottom)
-        )
     }
 }
 
