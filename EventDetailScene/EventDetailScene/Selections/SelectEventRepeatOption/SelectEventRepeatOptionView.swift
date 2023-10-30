@@ -121,28 +121,14 @@ struct SelectEventRepeatOptionView: View {
             .listStyle(.inset)
             .navigationTitle("Repeating".localized())
             .toolbar {
-                self.closeButton
+                CloseButton()
+                    .eventHandler(\.onTap, self.eventHandlers.close)
             }
             .toolbar {
                 ToolbarItem(placement: .bottomBar) {
                     self.repeatEndBarView
                 }
             }
-        }
-    }
-    
-    private var closeButton: some View {
-        Button {
-            self.eventHandlers.close()
-        } label: {
-            Image(systemName: "xmark.circle.fill")
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(
-                    self.appearance.colorSet.event.asColor,
-                    self.appearance.colorSet.eventList.asColor
-                )
-                .font(.system(size: 20))
-                
         }
     }
     

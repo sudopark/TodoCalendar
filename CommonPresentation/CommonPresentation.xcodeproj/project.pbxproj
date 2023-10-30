@@ -19,6 +19,7 @@
 		F66FDEEF2A9B4455005A8227 /* AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FDEEE2A9B4455005A8227 /* AutoLayout.swift */; };
 		F66FDEF92A9B5BD5005A8227 /* UIKit+Combine+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FDEF82A9B5BD5005A8227 /* UIKit+Combine+Extensions.swift */; };
 		F66FDEFB2A9B5D8F005A8227 /* TapGesturePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FDEFA2A9B5D8F005A8227 /* TapGesturePublisher.swift */; };
+		F677A1EF2AEFA178002938A9 /* CloseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F677A1EE2AEFA178002938A9 /* CloseButton.swift */; };
 		F69837202A8545DD001F7603 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F698371F2A8545DD001F7603 /* View+Extension.swift */; };
 /* End PBXBuildFile section */
 
@@ -36,6 +37,7 @@
 		F66FDEEE2A9B4455005A8227 /* AutoLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoLayout.swift; sourceTree = "<group>"; };
 		F66FDEF82A9B5BD5005A8227 /* UIKit+Combine+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIKit+Combine+Extensions.swift"; sourceTree = "<group>"; };
 		F66FDEFA2A9B5D8F005A8227 /* TapGesturePublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapGesturePublisher.swift; sourceTree = "<group>"; };
+		F677A1EE2AEFA178002938A9 /* CloseButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseButton.swift; sourceTree = "<group>"; };
 		F698371F2A8545DD001F7603 /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -133,6 +135,7 @@
 		F67907D82A4B42CE000CF11B /* UIComponents */ = {
 			isa = PBXGroup;
 			children = (
+				F677A1EE2AEFA178002938A9 /* CloseButton.swift */,
 			);
 			path = UIComponents;
 			sourceTree = "<group>";
@@ -217,6 +220,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F677A1EF2AEFA178002938A9 /* CloseButton.swift in Sources */,
 				F605FA072A7E0B2900813AF5 /* ColorSet.swift in Sources */,
 				F66FDEEF2A9B4455005A8227 /* AutoLayout.swift in Sources */,
 				F66FDEF92A9B5BD5005A8227 /* UIKit+Combine+Extensions.swift in Sources */,

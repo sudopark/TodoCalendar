@@ -121,7 +121,8 @@ struct SelectEventTagView: View {
             .listStyle(.inset)
             .navigationTitle("Event Type".localized())
             .toolbar {
-                self.closeButton
+                CloseButton()
+                    .eventHandler(\.onTap, eventHandlers.close)
             }
         }
     }
@@ -176,21 +177,6 @@ struct SelectEventTagView: View {
         }
         .onTapGesture {
             self.eventHandlers.addTag()
-        }
-    }
-    
-    private var closeButton: some View {
-        Button {
-            self.eventHandlers.close()
-        } label: {
-            Image(systemName: "xmark.circle.fill")
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(
-                    self.appearance.colorSet.event.asColor,
-                    self.appearance.colorSet.eventList.asColor
-                )
-                .font(.system(size: 20))
-                
         }
     }
     
