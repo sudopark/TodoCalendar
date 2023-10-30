@@ -148,7 +148,7 @@ protocol AddEventViewModel: AnyObject, Sendable, AddEventSceneInteractor {
     // presenter
     var isTodo: AnyPublisher<Bool, Never> { get }
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
-    var repeatOption: AnyPublisher<String, Never> { get }
+    var repeatOption: AnyPublisher<String?, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
     var selectedPlace: AnyPublisher<Place?, Never> { get }
     var isSavable: AnyPublisher<Bool, Never> { get }
@@ -474,9 +474,9 @@ extension AddEventViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var repeatOption: AnyPublisher<String, Never> {
+    var repeatOption: AnyPublisher<String?, Never> {
         return self.subject.repeatOptionSelectResult
-            .map { $0?.text ?? "not repeat".localized() }
+            .map { $0?.text  }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

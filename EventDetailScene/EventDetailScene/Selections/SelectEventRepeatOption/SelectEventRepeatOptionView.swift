@@ -20,13 +20,53 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
+    @Published var optionList: [[SelectRepeatingOptionModel]] = []
+    @Published var selectedOptionId: String?
+    @Published var selectedEndDate: Date = Date()
+    @Published var hasEndTime: Bool = false
+    
     func bind(_ viewModel: any SelectEventRepeatOptionViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
         
         // TODO: bind state
+        viewModel.options
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] list in
+                self?.optionList = list
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.selectedOptionId
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] id in
+                self?.selectedOptionId = id
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.repeatEndTime
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] date in
+                self?.selectedEndDate = date
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.hasRepeatEnd
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isOn in
+                self?.hasEndTime = isOn
+            })
+            .store(in: &self.cancellables)
     }
+}
+
+final class SelectEventRepeatOptionViewEventHandlers {
+    var onAppear: () -> Void = { }
+    var close: () -> Void = { }
+    var itemSelect: (String) -> Void = { _ in }
+    var endTimeSelect: (Date) -> Void = { _ in }
+    var toggleHasEndTime: (Bool) -> Void = { _ in }
 }
 
 
@@ -38,6 +78,7 @@ struct SelectEventRepeatOptionContainerView: View {
     private let viewAppearance: ViewAppearance
     
     var stateBinding: (SelectEventRepeatOptionViewState) -> Void = { _ in }
+    var eventHandlers: SelectEventRepeatOptionViewEventHandlers = .init()
     
     init(viewAppearance: ViewAppearance) {
         self.viewAppearance = viewAppearance
@@ -45,8 +86,10 @@ struct SelectEventRepeatOptionContainerView: View {
     
     var body: some View {
         return SelectEventRepeatOptionView()
+            .eventHandler(\.eventHandlers, self.eventHandlers)
             .onAppear {
                 self.stateBinding(self.state)
+                self.eventHandlers.onAppear()
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
@@ -60,11 +103,116 @@ struct SelectEventRepeatOptionView: View {
     @EnvironmentObject private var state: SelectEventRepeatOptionViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
+    fileprivate var eventHandlers: SelectEventRepeatOptionViewEventHandlers = .init()
+    
     var body: some View {
-        Text("SelectEventRepeatOptionView")
+        NavigationStack {
+            
+            List {
+                ForEach(self.state.optionList, id: \.compareKey) {
+                    self.sectionView($0)
+                }
+                .listRowSeparator(.hidden)
+            }
+            .listStyle(.inset)
+            .navigationTitle("Repeating".localized())
+            .toolbar {
+                self.closeButton
+            }
+            .toolbar {
+                ToolbarItem(placement: .bottomBar) {
+                    self.repeatEndBarView
+                }
+            }
+        }
+    }
+    
+    private var closeButton: some View {
+        Button {
+            self.eventHandlers.close()
+        } label: {
+            Image(systemName: "xmark.circle.fill")
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(
+                    self.appearance.colorSet.event.asColor,
+                    self.appearance.colorSet.eventList.asColor
+                )
+                .font(.system(size: 20))
+                
+        }
+    }
+    
+    private func sectionView(_ section: [SelectRepeatingOptionModel]) -> some View {
+        Section {
+            ForEach(section, id: \.compareKey) { option in
+                HStack {
+                    Text(option.text)
+                        .font(self.appearance.fontSet.normal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                        .lineLimit(1)
+                    
+                    Spacer()
+                    if self.state.selectedOptionId == option.id {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12))
+                    }
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 12)
+                .background {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(self.appearance.colorSet.eventList.asColor)
+                }
+                .onTapGesture {
+                    self.eventHandlers.itemSelect(option.id)
+                }
+            }
+        } header: {
+            Text("")
+        }
+    }
+    
+    private var repeatEndBarView: some View {
+        HStack {
+            Text("Repeat end date".localized())
+            
+            Spacer()
+            
+            DatePicker(
+                "",
+                selection: self.$state.selectedEndDate,
+                displayedComponents: [.date]
+            )
+            .labelsHidden()
+            .onChange(of: self.state.selectedEndDate) { date in
+                self.eventHandlers.endTimeSelect(date)
+            }
+            
+            Toggle(isOn: self.$state.hasEndTime) {
+                Text("")
+            }
+            .onChange(of: self.state.hasEndTime) { new in
+                self.eventHandlers.toggleHasEndTime(new)
+            }
+            .labelsHidden()
+            .toggleStyle(.switch)
+        }
     }
 }
 
+private extension SelectRepeatingOptionModel {
+    
+    var compareKey: String {
+        return "\(id)_\(text)_\(option?.compareHash ?? 0)"
+    }
+}
+
+private extension Array where Element == SelectRepeatingOptionModel {
+    
+    var compareKey: String {
+        return self.map { $0.compareKey }.joined(separator: "+")
+    }
+}
 
 // MARK: - preview
 
@@ -76,8 +224,18 @@ struct SelectEventRepeatOptionViewPreviewProvider: PreviewProvider {
             color: .defaultLight,
             font: .systemDefault
         )
-        let containerView = SelectEventRepeatOptionContainerView(viewAppearance: viewAppearance)
-        return containerView
+        let view = SelectEventRepeatOptionView()
+        let state = SelectEventRepeatOptionViewState()
+        state.optionList = [
+            [.init("some", nil)],
+            [.init("option1", nil), .init("option2", nil), .init("option3", nil)],
+            [
+                .init("option4", nil), .init("option5", nil), .init("option6", nil),
+                .init("option7", nil), .init("option8", nil), .init("option9", nil)
+            ]
+        ]
+        return view
+            .environmentObject(viewAppearance)
+            .environmentObject(state)
     }
 }
-

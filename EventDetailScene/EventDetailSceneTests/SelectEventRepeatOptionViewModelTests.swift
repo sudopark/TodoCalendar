@@ -8,6 +8,7 @@
 import XCTest
 import Combine
 import Domain
+import Extensions
 import Prelude
 import Optics
 import UnitTestHelpKit
@@ -53,7 +54,7 @@ class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {
 extension SelectEventRepeatOptionViewModelTests {
     
     @discardableResult
-    private func waitFirstNotEmptyOptionList(_ viewModel: SelectEventRepeatOptionViewModelImple) -> [SelectRepeatingOptionModel]? {
+    private func waitFirstNotEmptyOptionList(_ viewModel: SelectEventRepeatOptionViewModelImple) -> [[SelectRepeatingOptionModel]]? {
         // given
         let expect = expectation(description: "wait not empty option model list")
         expect.assertForOverFulfill = false
@@ -67,22 +68,28 @@ extension SelectEventRepeatOptionViewModelTests {
         return models
     }
     
-    private var defaultOptionListTexts: [String] {
+    private var defaultOptionListTexts: [[String]] {
         [
-            "not repeat".localized(),
-            "Everyday".localized(),
-            "Every Week".localized(),
-            "every 2 week".localized(),
-            "every 3 week".localized(),
-            "every 4 week".localized(),
-            "Every Month".localized(),
-            "Every Year".localized(),
-            "Every month last week all days".localized(),
-            "\("Every month".localized()) 1\("week_suffix".localized()) \("weekday_1".localized())",
-            "\("Every month".localized()) 2\("week_suffix".localized()) \("weekday_1".localized())",
-            "\("Every month".localized()) 3\("week_suffix".localized()) \("weekday_1".localized())",
-            "\("Every month".localized()) 4\("week_suffix".localized()) \("weekday_1".localized())",
-            "\("Every month last".localized()) \("weekday_1".localized())"
+            [
+                "not repeat".localized(),
+            ],
+            [
+                "Everyday".localized(),
+                "Every Week".localized(),
+                "every 2 week".localized(),
+                "every 3 week".localized(),
+                "every 4 week".localized(),
+                "Every Month".localized(),
+                "Every Year".localized(),
+            ],
+            [
+                "Every month last week all days".localized(),
+                "\("Every month".localized()) 1\("week_suffix".localized()) \("weekday_1".localized())",
+                "\("Every month".localized()) 2\("week_suffix".localized()) \("weekday_1".localized())",
+                "\("Every month".localized()) 3\("week_suffix".localized()) \("weekday_1".localized())",
+                "\("Every month".localized()) 4\("week_suffix".localized()) \("weekday_1".localized())",
+                "\("Every month last".localized()) \("weekday_1".localized())"
+            ]
         ]
     }
     
@@ -95,7 +102,7 @@ extension SelectEventRepeatOptionViewModelTests {
         let options = self.waitFirstNotEmptyOptionList(viewModel)
         
         // then
-        XCTAssertEqual(options?.map { $0.text }, self.defaultOptionListTexts)
+        XCTAssertEqual(options?.map { os in os.map { $0.text } }, self.defaultOptionListTexts)
     }
     
     // 이전 선택값 없을때 - 디폴트로 반복없음 선택 상태
@@ -110,7 +117,7 @@ extension SelectEventRepeatOptionViewModelTests {
         
         // then
         XCTAssertNotNil(id)
-        XCTAssertEqual(id, options?.first(where: { $0.isNotRepeat })?.id)
+        XCTAssertEqual(id, options?.flatMap { $0 }.first(where: { $0.isNotRepeat })?.id)
     }
     
     // 이전 선텍값 있고 + 해당 옵션이 디폴트 선택 리스트에 있는 경우에 해당 옵션 선택한 상태로 제공
@@ -129,7 +136,7 @@ extension SelectEventRepeatOptionViewModelTests {
         
         // then
         XCTAssertNotNil(id)
-        let weekPer2Id = options?.first(where: { $0.text == "every 2 week".localized() })?.id
+        let weekPer2Id = options?.flatMap { $0 }.first(where: { $0.text == "every 2 week".localized() })?.id
         XCTAssertEqual(id, weekPer2Id)
         XCTAssertEqual(options?.count, self.defaultOptionListTexts.count)
     }
@@ -152,9 +159,10 @@ extension SelectEventRepeatOptionViewModelTests {
         // then
         XCTAssertNotNil(id)
         let findingText = "\("Every month".localized()) 3\("week_suffix".localized()) \("weekday_4".localized())"
-        let week3thWedId = options?.first(where: { $0.text == findingText })?.id
+        let week3thWedId = options?.flatMap { $0 }.first(where: { $0.text == findingText })?.id
         XCTAssertEqual(id, week3thWedId)
-        XCTAssertEqual(options?.count, self.defaultOptionListTexts.count + 1)
+        let allItemCount = options?.flatMap { $0 }.count
+        XCTAssertEqual(allItemCount, self.defaultOptionListTexts.flatMap { $0 }.count + 1)
     }
     
     // 반복 옵션 선택시에 선택된 이벤트 아이디 변경
@@ -163,7 +171,7 @@ extension SelectEventRepeatOptionViewModelTests {
         let expect = expectation(description: "반복 옵션 선택시에 선택된 이벤트 아이디 변경")
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel()
-        let options = self.waitFirstNotEmptyOptionList(viewModel)
+        let options = self.waitFirstNotEmptyOptionList(viewModel)?.flatMap { $0 }
         
         // when
         let second = options?[safe: 1]; let last = options?.last
@@ -190,13 +198,13 @@ extension SelectEventRepeatOptionViewModelTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let endTimeOfIsOn = Publishers.CombineLatest(viewModel.repeatEndTimeText, viewModel.hasRepeatEnd)
+        let endTimeOfIsOn = Publishers.CombineLatest(viewModel.repeatEndTime, viewModel.hasRepeatEnd)
         let endTime = self.waitFirstOutput(expect, for: endTimeOfIsOn) {
             viewModel.prepare()
         }
         
         // then
-        XCTAssertEqual(endTime?.0, "2023.10.31")
+        XCTAssertEqual(endTime?.0.text("yyyy.MM.dd", timeZone: TimeZone(abbreviation: "KST")!), "2023.10.31")
         XCTAssertEqual(endTime?.1, false)
     }
     
@@ -212,13 +220,13 @@ extension SelectEventRepeatOptionViewModelTests {
         let viewModel = self.makeViewModel(previous: previous)
         
         // when
-        let endTimeOfIsOn = Publishers.CombineLatest(viewModel.repeatEndTimeText, viewModel.hasRepeatEnd)
+        let endTimeOfIsOn = Publishers.CombineLatest(viewModel.repeatEndTime, viewModel.hasRepeatEnd)
         let endTime = self.waitFirstOutput(expect, for: endTimeOfIsOn) {
             viewModel.prepare()
         }
         
         // then
-        XCTAssertEqual(endTime?.0, "2023.11.30")
+        XCTAssertEqual(endTime?.0.text("yyyy.MM.dd", timeZone: TimeZone(abbreviation: "KST")!), "2023.11.30")
         XCTAssertEqual(endTime?.1, true)
     }
     
@@ -249,12 +257,13 @@ extension SelectEventRepeatOptionViewModelTests {
         self.waitFirstNotEmptyOptionList(viewModel)
         
         // when
-        let texts = self.waitOutputs(expect, for: viewModel.repeatEndTimeText) {
+        let times = self.waitOutputs(expect, for: viewModel.repeatEndTime) {
             viewModel.selectRepeatEndDate("2023.10.28 12:33:33".date())
             viewModel.selectRepeatEndDate("2024.01.01 00:00:00".date())
         }
         
         // then
+        let texts = times.map { $0.text("yyyy.MM.dd", timeZone: TimeZone(abbreviation: "KST")!) }
         XCTAssertEqual(texts, [
             "2023.10.31", "2023.10.28", "2024.01.01"
         ])
@@ -286,7 +295,7 @@ extension SelectEventRepeatOptionViewModelTests {
     func testViewModel_whenAfterSelectOption_notify() {
         // given
         let viewModel = self.makeViewModel()
-        let options = self.waitFirstNotEmptyOptionList(viewModel)
+        let options = self.waitFirstNotEmptyOptionList(viewModel)?.flatMap { $0 }
         
         // when
         let everyDay = options!.first(where: { $0.text == "Everyday".localized() })!
@@ -305,7 +314,7 @@ extension SelectEventRepeatOptionViewModelTests {
     func testViewModel_whenUpdateEndTime_notify() {
         // given
         let viewModel = self.makeViewModel()
-        let options = self.waitFirstNotEmptyOptionList(viewModel)
+        let options = self.waitFirstNotEmptyOptionList(viewModel)?.flatMap { $0 }
         
         // when
         let everyDay = options?.first(where: { $0.text == "Everyday".localized() })
