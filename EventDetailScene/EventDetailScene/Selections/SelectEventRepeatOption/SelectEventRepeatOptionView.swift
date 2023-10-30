@@ -61,7 +61,7 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
     }
 }
 
-final class SelectEventRepeatOptionViewEventHandlers {
+final class SelectEventRepeatOptionViewEventHandlers: ObservableObject {
     var onAppear: () -> Void = { }
     var close: () -> Void = { }
     var itemSelect: (String) -> Void = { _ in }
@@ -86,13 +86,13 @@ struct SelectEventRepeatOptionContainerView: View {
     
     var body: some View {
         return SelectEventRepeatOptionView()
-            .eventHandler(\.eventHandlers, self.eventHandlers)
             .onAppear {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
+            .environmentObject(eventHandlers)
     }
 }
 
@@ -103,7 +103,7 @@ struct SelectEventRepeatOptionView: View {
     @EnvironmentObject private var state: SelectEventRepeatOptionViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
-    fileprivate var eventHandlers: SelectEventRepeatOptionViewEventHandlers = .init()
+    @EnvironmentObject private var eventHandlers: SelectEventRepeatOptionViewEventHandlers
     
     var body: some View {
         NavigationStack {
