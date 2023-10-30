@@ -68,32 +68,36 @@ private enum SupportingOptions: Equatable {
         }
     }
     
-    static func supports(from startTime: Date, timeZone: TimeZone) -> [any EventRepeatingOption] {
+    static func supports(from startTime: Date, timeZone: TimeZone) -> [[any EventRepeatingOption]] {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let startDay = calendar.component(.day, from: startTime)
         guard let weekday = DayOfWeeks(rawValue: calendar.component(.weekday, from: startTime))
         else { return [] }
         return [
-            EventRepeatingOptions.EveryDay(),
-            EventRepeatingOptions.EveryWeek(timeZone),
-            EventRepeatingOptions.EveryWeek(timeZone) |> \.interval .~ 2,
-            EventRepeatingOptions.EveryWeek(timeZone) |> \.interval .~ 3,
-            EventRepeatingOptions.EveryWeek(timeZone) |> \.interval .~ 4,
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .days([startDay]),
-            EventRepeatingOptions.EveryYearSomeDay(timeZone: timeZone),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.last], [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.seq(1)], [weekday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.seq(2)], [weekday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.seq(3)], [weekday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.seq(4)], [weekday]),
-            EventRepeatingOptions.EveryMonth(timeZone: timeZone)
-            |> \.selection .~ .week([.last], [weekday])
+            [
+                EventRepeatingOptions.EveryDay(),
+                EventRepeatingOptions.EveryWeek(timeZone),
+                EventRepeatingOptions.EveryWeek(timeZone) |> \.interval .~ 2,
+                EventRepeatingOptions.EveryWeek(timeZone) |> \.interval .~ 3,
+                EventRepeatingOptions.EveryWeek(timeZone) |> \.interval .~ 4,
+                EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+                |> \.selection .~ .days([startDay]),
+                EventRepeatingOptions.EveryYearSomeDay(timeZone: timeZone),
+            ],
+            [
+                EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+                |> \.selection .~ .week([.last], [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]),
+                EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+                |> \.selection .~ .week([.seq(1)], [weekday]),
+                EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+                |> \.selection .~ .week([.seq(2)], [weekday]),
+                EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+                |> \.selection .~ .week([.seq(3)], [weekday]),
+                EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+                |> \.selection .~ .week([.seq(4)], [weekday]),
+                EventRepeatingOptions.EveryMonth(timeZone: timeZone)
+                |> \.selection .~ .week([.last], [weekday])
+            ]
         ]
     }
 }
@@ -195,12 +199,13 @@ protocol SelectEventRepeatOptionViewModel: AnyObject, Sendable, SelectEventRepea
     func selectOption(_ id: String)
     func toggleHasRepeatEnd(isOn: Bool)
     func selectRepeatEndDate(_ date: Date)
+    func close()
     
     // presenter
-    var options: AnyPublisher<[SelectRepeatingOptionModel], Never> { get }
+    var options: AnyPublisher<[[SelectRepeatingOptionModel]], Never> { get }
     var selectedOptionId: AnyPublisher<String, Never> { get }
     var hasRepeatEnd: AnyPublisher<Bool, Never> { get }
-    var repeatEndTimeText: AnyPublisher<String, Never> { get }
+    var repeatEndTime: AnyPublisher<Date, Never> { get }
 }
 
 
@@ -227,15 +232,24 @@ final class SelectEventRepeatOptionViewModelImple: SelectEventRepeatOptionViewMo
     
     
     private struct OptionSeqMap {
-        var storage: [String: (Int, SelectRepeatingOptionModel)] = [:]
+        private var idOptionMap: [String: SelectRepeatingOptionModel] = [:]
+        private var optionIdList: [[String]] = []
         
-        init() {
-            self.storage = [:]
+        init() { }
+        
+        init(_ options: [[SelectRepeatingOptionModel]]) {
+            self.idOptionMap = options.flatMap { $0 }.asDictionary { $0.id }
+            self.optionIdList = options.map { list in list.map { $0.id } }
         }
-        init(_ options: [SelectRepeatingOptionModel]) {
-            self.storage = options.enumerated()
-                .map { ($0.offset, $0.element) }
-                .asDictionary { $0.1.id }
+        
+        func option(_ id: String) -> SelectRepeatingOptionModel? {
+            return self.idOptionMap[id]
+        }
+        
+        var optionList: [[SelectRepeatingOptionModel]] {
+            return self.optionIdList.map { ids in
+                return ids.compactMap { idOptionMap[$0] }
+            }
         }
     }
     
@@ -279,25 +293,27 @@ extension SelectEventRepeatOptionViewModelImple {
             SelectRepeatingOptionModel($0.repeatOption, self.startTime, timeZone)
         }
         let supportOptionModels = SupportingOptions.supports(from: self.startTime, timeZone: timeZone)
-            .compactMap { SelectRepeatingOptionModel($0, self.startTime, timeZone) }
+            .map { options in
+                options.compactMap { SelectRepeatingOptionModel($0, self.startTime, timeZone) }
+            }
         
-        let sameOptionWithPrevious = supportOptionModels.first(where: { $0.option?.compareHash == previousSelectOption?.repeatOption.compareHash })
+        let sameOptionWithPrevious = supportOptionModels.flatMap { $0 }.first(where: { $0.option?.compareHash == previousSelectOption?.repeatOption.compareHash })
         switch (previousOptionModel, sameOptionWithPrevious) {
         case (_, .some(let same)):
             self.subject.options.send(
-                .init([notRepeatOptionModel] + supportOptionModels)
+                .init([[notRepeatOptionModel]] + supportOptionModels)
             )
             self.subject.selectedOptionId.send(same.id)
             
         case (let .some(prev), _):
             self.subject.options.send(
-                .init([notRepeatOptionModel, prev] + supportOptionModels)
+                .init([[notRepeatOptionModel, prev]] + supportOptionModels)
             )
             self.subject.selectedOptionId.send(prev.id)
             
         default:
             self.subject.options.send(
-                .init([notRepeatOptionModel] + supportOptionModels)
+                .init([[notRepeatOptionModel]] + supportOptionModels)
             )
             self.subject.selectedOptionId.send(notRepeatOptionModel.id)
         }
@@ -331,7 +347,9 @@ extension SelectEventRepeatOptionViewModelImple {
     }
     
     func selectRepeatEndDate(_ date: Date) {
-        guard let timeZone = self.subject.timeZone.value else { return }
+        guard let timeZone = self.subject.timeZone.value,
+              self.subject.repeatEndTime.value?.date != date
+        else { return }
         let time = RepeatEndTime(date, from: self.startTime, timeZone: timeZone)
             |> \.isOn .~ true
         self.subject.repeatEndTime.send(time)
@@ -340,7 +358,7 @@ extension SelectEventRepeatOptionViewModelImple {
     
     private func notifyOptionSelected() {
         guard let optionId = self.subject.selectedOptionId.value,
-              let model = self.subject.options.value.storage[optionId]?.1
+              let model = self.subject.options.value.option(optionId)
         else { return }
         
         if let option = model.option {
@@ -355,6 +373,10 @@ extension SelectEventRepeatOptionViewModelImple {
             self.listener?.selectEventRepeatOptionNotRepeat()
         }
     }
+    
+    func close() {
+        self.router?.closeScene(animate: true, nil)
+    }
 }
 
 
@@ -362,11 +384,9 @@ extension SelectEventRepeatOptionViewModelImple {
 
 extension SelectEventRepeatOptionViewModelImple {
     
-    var options: AnyPublisher<[SelectRepeatingOptionModel], Never> {
-        let transform: (OptionSeqMap) -> [SelectRepeatingOptionModel] = { seqMap in
-            return seqMap.storage.values
-                .sorted(by: { $0.0 < $1.0 })
-                .map { $0.1 }
+    var options: AnyPublisher<[[SelectRepeatingOptionModel]], Never> {
+        let transform: (OptionSeqMap) -> [[SelectRepeatingOptionModel]] = { seqMap in
+            return seqMap.optionList
         }
         return self.subject.options
             .map(transform)
@@ -381,9 +401,9 @@ extension SelectEventRepeatOptionViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var repeatEndTimeText: AnyPublisher<String, Never> {
+    var repeatEndTime: AnyPublisher<Date, Never> {
         return self.subject.repeatEndTime
-            .compactMap { $0?.text }
+            .compactMap { $0?.date }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

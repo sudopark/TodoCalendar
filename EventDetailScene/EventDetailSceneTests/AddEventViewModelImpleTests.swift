@@ -436,11 +436,11 @@ extension AddEventViewModelImpleTests {
         
         // then
         XCTAssertEqual(repeats, [
-            "not repeat".localized(),
+            nil,
             "Everyday".localized(),
-            "not repeat".localized(),
+            nil,
             "Everyday".localized(),
-            "not repeat".localized(),
+            nil,
         ])
     }
     
