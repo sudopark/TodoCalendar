@@ -28,10 +28,14 @@ final class ___VARIABLE_sceneName___ViewController: UIHostingController<___VARIA
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         
+        let eventHandlers = ___VARIABLE_sceneName___ViewEventHandler()
+        
         let containerView = ___VARIABLE_sceneName___ContainerView(
-            viewAppearance: viewAppearance
+            viewAppearance: viewAppearance,
+            eventHandlers: eventHandlers
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
+        
         super.init(rootView: containerView)
     }
     

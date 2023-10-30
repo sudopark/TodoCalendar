@@ -20,7 +20,7 @@ protocol ___VARIABLE_sceneName___Scene: Scene where Interactor == any ___VARIABL
 
 // MARK: - Builder + DependencyInjector Extension
 
-public protocol ___VARIABLE_sceneName___SceneBuiler: AnyObject {
+protocol ___VARIABLE_sceneName___SceneBuiler: AnyObject {
     
     @MainActor
     func make___VARIABLE_sceneName___Scene() -> any ___VARIABLE_sceneName___Scene

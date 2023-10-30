@@ -76,12 +76,16 @@ struct SelectEventRepeatOptionContainerView: View {
     
     @StateObject private var state: SelectEventRepeatOptionViewState = .init()
     private let viewAppearance: ViewAppearance
+    private let eventHandlers: SelectEventRepeatOptionViewEventHandlers
     
     var stateBinding: (SelectEventRepeatOptionViewState) -> Void = { _ in }
-    var eventHandlers: SelectEventRepeatOptionViewEventHandlers = .init()
     
-    init(viewAppearance: ViewAppearance) {
+    init(
+        viewAppearance: ViewAppearance,
+        eventHandlers: SelectEventRepeatOptionViewEventHandlers
+    ) {
         self.viewAppearance = viewAppearance
+        self.eventHandlers = eventHandlers
     }
     
     var body: some View {
