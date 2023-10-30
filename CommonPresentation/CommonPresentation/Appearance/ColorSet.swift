@@ -55,6 +55,8 @@ public protocol ColorSet: Sendable {
     var secondaryBtnText: UIColor { get }
     var negativeBtnBackground: UIColor { get }
     var negativeBtnText: UIColor { get }
+    
+    var accent: UIColor { get }
 }
 
 
@@ -87,4 +89,6 @@ public struct DefaultLightColorSet: ColorSet {
     public var secondaryBtnText: UIColor { self.normalText }
     public let negativeBtnBackground: UIColor = .systemRed
     public let negativeBtnText: UIColor = .white
+    
+    public let accent: UIColor = .systemBlue
 }
