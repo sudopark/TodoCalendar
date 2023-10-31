@@ -27,13 +27,13 @@ protocol MainRouting: Routing, Sendable {
 final class MainRouter: BaseRouterImple, MainRouting, @unchecked Sendable {
     
     private let calendarSceneBulder: any CalendarSceneBuilder
-    private let eventTagListSceneBuilder: any EventTagListSceneBuiler
+    private let settingSceneBuilder: any SettingSceneBuiler
     init(
         calendarSceneBulder: any CalendarSceneBuilder,
-        eventTagListSceneBuilder: any EventTagListSceneBuiler
+        settingSceneBuilder: any SettingSceneBuiler
     ) {
         self.calendarSceneBulder = calendarSceneBulder
-        self.eventTagListSceneBuilder = eventTagListSceneBuilder
+        self.settingSceneBuilder = settingSceneBuilder
     }
 }
 
@@ -60,7 +60,7 @@ extension MainRouter {
     func routeToEventTypeFilterSetting() {
         Task { @MainActor in
             
-            let eventSettingScene = self.eventTagListSceneBuilder.makeEventTagListScene(
+            let eventSettingScene = self.settingSceneBuilder.makeEventTagListScene(
                 listener: nil
             )
             self.currentScene?.present(eventSettingScene, animated: true)

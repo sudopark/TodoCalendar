@@ -15,19 +15,16 @@ public final class EventDetailSceneBuilderImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
-    private let eventTagDetailSceneBuilder: any EventTagDetailSceneBuiler
-    private let eventTagListSceneBuilder: any EventTagListSceneBuiler
+    private let settingSceneBuilder: any SettingSceneBuiler
     
     public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
-        eventTagDetailSceneBuilder: any EventTagDetailSceneBuiler,
-        eventTagListSceneBuilder: any EventTagListSceneBuiler
+        settingSceneBuilder: any SettingSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
-        self.eventTagDetailSceneBuilder = eventTagDetailSceneBuilder
-        self.eventTagListSceneBuilder = eventTagListSceneBuilder
+        self.settingSceneBuilder = settingSceneBuilder
     }
 }
 
@@ -44,8 +41,7 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
         let selectTagSceneBuilder = SelectEventTagSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
-            eventTagDetailSceneBuilder: self.eventTagDetailSceneBuilder,
-            eventTagListSceneBuilder: self.eventTagListSceneBuilder
+            settingSceneBuilder: self.settingSceneBuilder
         )
         
         let addSceneBuilder = AddEventSceneBuilerImple(

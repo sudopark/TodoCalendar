@@ -24,15 +24,12 @@ protocol SelectEventTagRouting: Routing, Sendable {
 
 final class SelectEventTagRouter: BaseRouterImple, SelectEventTagRouting, @unchecked Sendable { 
     
-    private let eventTagDetailSceneBuilder: any EventTagDetailSceneBuiler
-    private let eventTagListSceneBuilder: any EventTagListSceneBuiler
+    private let settingSceneBuilder: any SettingSceneBuiler
     
     init(
-        eventTagDetailSceneBuilder: any EventTagDetailSceneBuiler,
-        eventTagListSceneBuilder: any EventTagListSceneBuiler
+        settingSceneBuilder: any SettingSceneBuiler
     ) {
-        self.eventTagDetailSceneBuilder = eventTagDetailSceneBuilder
-        self.eventTagListSceneBuilder = eventTagListSceneBuilder
+        self.settingSceneBuilder = settingSceneBuilder
     }
 }
 
@@ -47,7 +44,7 @@ extension SelectEventTagRouter {
     func routeToAddNewTagScene() {
         Task { @MainActor in
             
-            let next = self.eventTagDetailSceneBuilder.makeEventTagDetailScene(
+            let next = self.settingSceneBuilder.makeEventTagDetailScene(
                 originalInfo: nil,
                 listener: self.currentScene?.interactor
             )
@@ -59,7 +56,7 @@ extension SelectEventTagRouter {
         
         Task { @MainActor in
             
-            let next = self.eventTagListSceneBuilder.makeEventTagListScene(
+            let next = self.settingSceneBuilder.makeEventTagListScene(
                 listener: self.currentScene?.interactor
             )
             self.currentScene?.navigationController?.navigationBar.isHidden = false

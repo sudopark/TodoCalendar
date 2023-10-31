@@ -70,3 +70,8 @@ public protocol EventTagListSceneBuiler: AnyObject {
         listener: (any EventTagListSceneListener)?
     ) -> any EventTagListScene
 }
+
+
+// MARK: - setting scene builder
+
+public protocol SettingSceneBuiler: EventTagDetailSceneBuiler, EventTagListSceneBuiler { }

@@ -92,7 +92,7 @@ extension ApplicationRootRouter {
                 usecaseFactory: self.usecaseFactory,
                 viewAppearance: self.viewAppearanceStore.appearance,
                 calendarSceneBulder: self.calendarSceneBulder(),
-                eventTagListSceneBuilder: self.eventTagListSceneBulder()
+                settingSceneBuilder: self.settingSceneBuilder()
             )
             let mainScene = builder.makeMainScene()
             self.window.rootViewController = mainScene
@@ -112,20 +112,12 @@ extension ApplicationRootRouter {
         return EventDetailSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
-            eventTagDetailSceneBuilder: self.eventTagDetailSceneBuilder(),
-            eventTagListSceneBuilder: self.eventTagListSceneBulder()
+            settingSceneBuilder: settingSceneBuilder()
         )
     }
     
-    private func eventTagListSceneBulder() -> any EventTagListSceneBuiler {
-        return EventTagListSceneBuilerImple(
-            usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearanceStore.appearance
-        )
-    }
-    
-    private func eventTagDetailSceneBuilder() -> any EventTagDetailSceneBuiler {
-        return EventTagDetailSceneBuilerImple(
+    private func settingSceneBuilder() -> any SettingSceneBuiler {
+        return SettingSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance
         )

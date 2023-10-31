@@ -19,18 +19,18 @@ public final class MainSceneBuilerImple {
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let calendarSceneBulder: any CalendarSceneBuilder
-    private let eventTagListSceneBuilder: any EventTagListSceneBuiler
+    private let settingSceneBuilder: any SettingSceneBuiler
     
     public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         calendarSceneBulder: any CalendarSceneBuilder,
-        eventTagListSceneBuilder: any EventTagListSceneBuiler
+        settingSceneBuilder: any SettingSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.calendarSceneBulder = calendarSceneBulder
-        self.eventTagListSceneBuilder = eventTagListSceneBuilder
+        self.settingSceneBuilder = settingSceneBuilder
     }
 }
 
@@ -51,7 +51,7 @@ extension MainSceneBuilerImple: MainSceneBuiler {
         
         let router = MainRouter(
             calendarSceneBulder: self.calendarSceneBulder,
-            eventTagListSceneBuilder: self.eventTagListSceneBuilder
+            settingSceneBuilder: self.settingSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

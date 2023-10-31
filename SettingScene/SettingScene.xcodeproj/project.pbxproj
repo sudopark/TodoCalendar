@@ -24,6 +24,7 @@
 		F676A7BA2AC0269500D168DF /* EventTagListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B42AC0269500D168DF /* EventTagListViewController.swift */; };
 		F676A7BB2AC0269500D168DF /* EventTagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B52AC0269500D168DF /* EventTagListView.swift */; };
 		F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */; };
+		F68E7DF72AF0AA7000110A73 /* SettingSceneBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */; };
 		F6B7AC692ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC632ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift */; };
 		F6B7AC6A2ACC05E2003F6BA8 /* EventTagDetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC642ACC05E2003F6BA8 /* EventTagDetailRouter.swift */; };
 		F6B7AC6C2ACC05E2003F6BA8 /* EventTagDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC662ACC05E2003F6BA8 /* EventTagDetailViewController.swift */; };
@@ -62,6 +63,7 @@
 		F676A7B42AC0269500D168DF /* EventTagListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewController.swift; sourceTree = "<group>"; };
 		F676A7B52AC0269500D168DF /* EventTagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListView.swift; sourceTree = "<group>"; };
 		F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewModel.swift; sourceTree = "<group>"; };
+		F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingSceneBuilderImple.swift; sourceTree = "<group>"; };
 		F6B7AC632ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailBuilderImple.swift; sourceTree = "<group>"; };
 		F6B7AC642ACC05E2003F6BA8 /* EventTagDetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailRouter.swift; sourceTree = "<group>"; };
 		F6B7AC662ACC05E2003F6BA8 /* EventTagDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailViewController.swift; sourceTree = "<group>"; };
@@ -132,6 +134,7 @@
 		F676A7542AC01F7F00D168DF /* SettingScene */ = {
 			isa = PBXGroup;
 			children = (
+				F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */,
 				F676A7AF2AC0264700D168DF /* EventTag */,
 				F676A7552AC01F7F00D168DF /* SettingScene.h */,
 			);
@@ -309,6 +312,7 @@
 				F6B7AC6D2ACC05E2003F6BA8 /* EventTagDetailView.swift in Sources */,
 				F676A7BB2AC0269500D168DF /* EventTagListView.swift in Sources */,
 				F676A7B82AC0269500D168DF /* EventTagListRouter.swift in Sources */,
+				F68E7DF72AF0AA7000110A73 /* SettingSceneBuilderImple.swift in Sources */,
 				F6B7AC6A2ACC05E2003F6BA8 /* EventTagDetailRouter.swift in Sources */,
 				F6B7AC6E2ACC05E2003F6BA8 /* EventTagDetailViewModel.swift in Sources */,
 				F676A7B72AC0269500D168DF /* EventTagListBuilderImple.swift in Sources */,

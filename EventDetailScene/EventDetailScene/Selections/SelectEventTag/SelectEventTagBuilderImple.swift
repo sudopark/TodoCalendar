@@ -19,19 +19,16 @@ final class SelectEventTagSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
-    private let eventTagDetailSceneBuilder: any EventTagDetailSceneBuiler
-    private let eventTagListSceneBuilder: any EventTagListSceneBuiler
+    private let settingSceneBuilder: any SettingSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
-        eventTagDetailSceneBuilder: any EventTagDetailSceneBuiler,
-        eventTagListSceneBuilder: any EventTagListSceneBuiler
+        settingSceneBuilder: any SettingSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
-        self.eventTagDetailSceneBuilder = eventTagDetailSceneBuilder
-        self.eventTagListSceneBuilder = eventTagListSceneBuilder
+        self.settingSceneBuilder = settingSceneBuilder
     }
 }
 
@@ -55,8 +52,7 @@ extension SelectEventTagSceneBuilerImple: SelectEventTagSceneBuiler {
         )
     
         let router = SelectEventTagRouter(
-            eventTagDetailSceneBuilder: self.eventTagDetailSceneBuilder,
-            eventTagListSceneBuilder: self.eventTagListSceneBuilder
+            settingSceneBuilder: self.settingSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router
