@@ -8,6 +8,8 @@
 //
 
 import UIKit
+import Prelude
+import Optics
 import Domain
 import Scenes
 import CommonPresentation
@@ -15,26 +17,39 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol EventDetailRouting: Routing, Sendable { 
+protocol EventDetailRouting: Routing, Sendable, AnyObject {
     
-    func routeToEventRepeatOptionSelect(
-        startTime: Date,
-        with initalOption: EventRepeating?,
-        listener: (any SelectEventRepeatOptionSceneListener)?
-    )
+    func attachInput(
+        // TODO: listener 삭제해도됨
+        _ listener: (any EventDetailInputListener)?
+    ) -> (any EventDetailInputInteractor)?
+}
+
+
+extension EventDetailRouting {
     
-    func routeToEventTagSelect(
-        currentSelectedTagId: AllEventTagId,
-        listener: (any SelectEventTagSceneListener)?
-    )
+    func showConfirmClose() {
+        let confirmed: () -> Void = { [weak self] in
+            self?.closeScene(animate: true, nil)
+        }
+        let info = ConfirmDialogInfo()
+            |> \.title .~ pure("edit_close_ocnfirm_title".localized())
+            |> \.message .~ pure("edit_close_confirm_message".localized())
+            |> \.confirmText .~ "close".localized()
+            |> \.confirmed .~ pure(confirmed)
+            |> \.withCancel .~ true
+            |> \.cancelText .~ "continue".localized()
+        self.showConfirm(dialog: info)
+    }
 }
 
 // MARK: - Router
 
-final class EventDetailRouter: BaseRouterImple, EventDetailRouting, @unchecked Sendable { 
+final class EventDetailRouter: BaseRouterImple, EventDetailRouting, EventDetailInputRouting, @unchecked Sendable {
     
     private let selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler
     private let selectEventTagSceneBuilder: any SelectEventTagSceneBuiler
+    weak var inputViewModel: (any EventDetailInputViewModel)?
     
     init(
         selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler,
@@ -50,6 +65,13 @@ extension EventDetailRouter {
     
     private var currentScene: (any EventDetailScene)? {
         self.scene as? (any EventDetailScene)
+    }
+    
+    func attachInput(
+        _ listener: (any EventDetailInputListener)?
+    ) -> (any EventDetailInputInteractor)? {
+        inputViewModel?.listener = listener
+        return inputViewModel
     }
     
     // TODO: router implememnts

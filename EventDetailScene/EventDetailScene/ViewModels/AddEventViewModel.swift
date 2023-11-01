@@ -47,24 +47,18 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
     
     
     private struct Subject {
-        let name = CurrentValueSubject<String?, Never>(nil)
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let isTodo = CurrentValueSubject<Bool, Never>(false)
-        let selectedTime = CurrentValueSubject<SelectedTime?, Never>(nil)
-        let repeatOptionSelectResult = CurrentValueSubject<EventRepeatingTimeSelectResult?, Never>(nil)
-        let selectedTag = CurrentValueSubject<SelectedTag?, Never>(nil)
-        let enteredMemo = CurrentValueSubject<String?, Never>(nil)
-        let enteredLink = CurrentValueSubject<String?, Never>(nil)
-        let selectedPlace = CurrentValueSubject<Place?, Never>(nil)
+        let basic = CurrentValueSubject<EventDetailBasicData?, Never>(nil)
+        let additional = CurrentValueSubject<EventDetailData?, Never>(nil)
         let isSaving = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
-    private var setupDefaultSelectTag: AnyCancellable?
+    private var inputInteractor: (any EventDetailInputInteractor)?
     private let subject = Subject()
     
     private func internalBinding() {
-        
         self.calendarSettingUsecase.currentTimeZone
             .sink(receiveValue: { [weak self] timeZone in
                 self?.subject.timeZone.send(timeZone)
@@ -76,32 +70,45 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
 
 // MARK: - AddEventViewModelImple Interactor
 
-extension AddEventViewModelImple: SelectEventRepeatOptionSceneListener, SelectEventTagSceneListener {
+extension AddEventViewModelImple: EventDetailInputListener {
+    
+    func attachInput() {
+        self.inputInteractor = self.router?.attachInput(self)
+    }
+    
+    func eventDetail(didInput basic: EventDetailBasicData, additional: EventDetailData) {
+        self.subject.basic.send(basic)
+        self.subject.additional.send(additional)
+    }
     
     func prepare() {
         
-        self.subject.timeZone
-            .compactMap { $0 }
+        let defaultSelectTime = self.subject.timeZone.compactMap { $0 }
             .first()
-            .sink(receiveValue: { [weak self] timeZone in
+            .map { timeZone in
                 let now = Date(); let nextHour = now.addingTimeInterval(3600)
-                self?.subject.selectedTime.send(
-                    .period(
-                        .init(now.timeIntervalSince1970, timeZone),
-                        .init(nextHour.timeIntervalSince1970, timeZone)
-                    )
+                return SelectedTime.period(
+                    .init(now.timeIntervalSince1970, timeZone),
+                    .init(nextHour.timeIntervalSince1970, timeZone)
+                )
+            }
+        let defaultTag = self.eventTagUsease.latestUsedEventTag
+            .first()
+            .map { $0?.uuid }
+        
+        Publishers.CombineLatest(defaultSelectTime, defaultTag)
+            .sink(receiveValue: { [weak self] (time, id) in
+                // TOOD: send to input viewModel
+                let initailData = EventDetailBasicData(
+                    name: nil,
+                    eventTagId: id.map {.custom($0) } ?? .default
+                )
+                    |> \.selectedTime .~ time
+                self?.inputInteractor?.prepared(
+                    basic: initailData, additional: .init("pending")
                 )
             })
             .store(in: &self.cancellables)
-        
-        self.setupDefaultSelectTag = self.eventTagUsease.latestUsedEventTag
-            .map { tag -> SelectedTag in
-                return tag.map { SelectedTag($0) } ?? .defaultTag
-            }
-            .first()
-            .sink(receiveValue: { [weak self] tag in
-                self?.subject.selectedTag.send(tag)
-            })
     }
     
     func chooseMoreAction() {
@@ -109,168 +116,37 @@ extension AddEventViewModelImple: SelectEventRepeatOptionSceneListener, SelectEv
     }
     
     func close() {
-        // TODO: show confirm close
-    }
-    
-    func enter(name: String) {
-        self.subject.name.send(name)
+        self.router?.showConfirmClose()
     }
     
     func toggleIsTodo() {
         self.subject.isTodo.send(!self.subject.isTodo.value)
     }
     
-    func selectStartTime(_ date: Date) {
-        guard let timeZone = self.subject.timeZone.value else { return }
-        let timeText = SelectTimeText(date.timeIntervalSince1970, timeZone)
-        
-        let newTime: SelectedTime = switch self.subject.selectedTime.value {
-            case .none, .at: .at(timeText)
-            case .period(_, let end): .period(timeText, end)
-            case .singleAllDay(let start) where start.date.isSameDay(date, at: timeZone):
-                .singleAllDay(timeText |> \.time .~ nil)
-            case .singleAllDay:
-                .singleAllDay(timeText)
-            case .alldayPeriod(_, let end): .alldayPeriod(timeText |> \.time .~ nil, end)
-        }
-        
-        self.subject.selectedTime.send(newTime)
-        self.syncEventRepeatingOptionStartTime(newTime, timeZone)
-    }
-    
-    func selectEndtime(_ date: Date) {
-        guard let timeZone = self.subject.timeZone.value else { return }
-        let timeText = SelectTimeText(date.timeIntervalSince1970, timeZone)
-        
-        let newTime: SelectedTime? = switch self.subject.selectedTime.value {
-            case .none: nil
-            case .at(let start): .period(start, timeText)
-            case .period(let start, _): .period(start, timeText)
-            case .singleAllDay(let start) where start.date.isSameDay(date, at: timeZone): nil
-            case .singleAllDay(let start): .alldayPeriod(start, timeText |> \.time .~ nil)
-            case .alldayPeriod(let start, _): .alldayPeriod(start, timeText |> \.time .~ nil)
-        }
-        
-        guard let newTime else { return }
-        self.subject.selectedTime.send(newTime)
-        self.syncEventRepeatingOptionStartTime(newTime, timeZone)
-    }
-    
-    func removeTime() {
-        self.subject.selectedTime.send(nil)
-        self.subject.repeatOptionSelectResult.send(nil)
-    }
-    
-    func removeEventEndTime() {
-        guard let timeZone = self.subject.timeZone.value else { return }
-        let newTime: SelectedTime? = switch self.subject.selectedTime.value {
-        case .period(let start, _): .at(start)
-        case .alldayPeriod(let start, _): .singleAllDay(start)
-        default: nil
-        }
-        
-        guard let newTime else { return }
-        self.subject.selectedTime.send(newTime)
-        self.syncEventRepeatingOptionStartTime(newTime, timeZone)
-    }
-    
-    private func syncEventRepeatingOptionStartTime(
-        _ selectedTime: SelectedTime, _ timeZone: TimeZone
-    ) {
-        guard let result = self.subject.repeatOptionSelectResult.value,
-              let eventTime = selectedTime.eventTime(timeZone)
-        else { return }
-        
-        let newOption = EventRepeating(
-            repeatingStartTime: eventTime.lowerBoundWithFixed,
-            repeatOption: result.repeating.repeatOption
-        )
-        |> \.repeatingEndTime .~ result.repeating.repeatingEndTime
-        self.subject.repeatOptionSelectResult.send(
-            .init(text: result.text, repeating: newOption)
-        )
-    }
-    
-    func toggleIsAllDay() {
-        guard let timeZone = self.subject.timeZone.value,
-              let time = self.subject.selectedTime.value?.toggleIsAllDay(timeZone)
-        else { return }
-        self.subject.selectedTime.send(time)
-    }
-
-    func selectRepeatOption() {
-
-        guard let time = self.subject.selectedTime.value,
-              let timeZone = self.subject.timeZone.value
-        else { return }
-        
-        guard let eventTime = time.eventTime(timeZone)
-        else {
-            self.router?.showToast("[TODO] enter valid event time".localized())
-            return
-        }
-        
-        self.router?.routeToEventRepeatOptionSelect(
-            startTime: Date(timeIntervalSince1970: eventTime.lowerBoundWithFixed),
-            with: self.subject.repeatOptionSelectResult.value?.repeating,
-            listener: self
-        )
-    }
-    
-    func selectEventRepeatOption(didSelect repeating: EventRepeatingTimeSelectResult) {
-        self.subject.repeatOptionSelectResult.send(repeating)
-    }
-    
-    func selectEventRepeatOptionNotRepeat() {
-        self.subject.repeatOptionSelectResult.send(nil)
-    }
-    
-    func selectEventTag() {
-        self.setupDefaultSelectTag?.cancel()
-        self.router?.routeToEventTagSelect(
-            currentSelectedTagId: self.subject.selectedTag.value?.tagId ?? .default,
-            listener: self
-        )
-    }
-    
-    func selectEventTag(didSelected tag: SelectedTag) {
-        self.subject.selectedTag.send(tag)
-    }
-    
-    func selectPlace() {
-        // TODO: select place
-    }
-    
-    func enter(url: String) {
-        self.subject.enteredLink.send(url)
-    }
-    
-    func enter(memo: String) {
-        self.subject.enteredMemo.send(memo)
-    }
     
     func save() {
         let isTodo = self.subject.isTodo.value
         isTodo ? self.saveNewTodoEvent() : self.saveNewScheduleEvent()
     }
     
-    private func validEventTime() -> EventTime? {
+    private func validEventTime(_ basic: EventDetailBasicData) -> EventTime? {
         guard let timeZone = self.subject.timeZone.value,
-              let time = self.subject.selectedTime.value
+              let time = basic.selectedTime
         else { return nil }
         return time.eventTime(timeZone)
     }
     
     private func saveNewTodoEvent() {
-        guard let name = self.subject.name.value else { return }
+        guard let basic = self.subject.basic.value, let name = basic.name
+        else { return }
         
-        let eventTime = self.validEventTime()
+        let eventTime = self.validEventTime(basic)
         
         let params = TodoMakeParams()
             |> \.name .~ name
-            |> \.eventTagId .~ self.subject.selectedTag.value?.tagId
+            |> \.eventTagId .~ pure(basic.eventTagId)
             |> \.time .~ eventTime
-            |> \.repeating .~ self.subject.repeatOptionSelectResult.value?.repeating
+            |> \.repeating .~ basic.eventRepeating?.repeating
         
         self.subject.isSaving.send(true)
         
@@ -290,15 +166,15 @@ extension AddEventViewModelImple: SelectEventRepeatOptionSceneListener, SelectEv
     }
     
     private func saveNewScheduleEvent() {
-        guard let name = self.subject.name.value,
-              let time = self.validEventTime()
+        guard let basic = self.subject.basic.value,
+              let name = basic.name, let time = self.validEventTime(basic)
         else { return }
         
         let params = ScheduleMakeParams()
             |> \.name .~ name
             |> \.time .~ pure(time)
-            |> \.eventTagId .~ self.subject.selectedTag.value?.tagId
-            |> \.repeating .~ self.subject.repeatOptionSelectResult.value?.repeating
+            |> \.eventTagId .~ pure(basic.eventTagId)
+            |> \.repeating .~ basic.eventRepeating?.repeating
         
         self.subject.isSaving.send(true)
         
@@ -318,10 +194,11 @@ extension AddEventViewModelImple: SelectEventRepeatOptionSceneListener, SelectEv
     }
     
     private func saveEventDetailWithoutError(_ eventId: String?) async {
-        guard let eventId else { return }
+        guard let eventId, let addition = self.subject.additional.value
+        else { return }
         let detail = EventDetailData(eventId)
-            |> \.memo .~ self.subject.enteredMemo.value
-            |> \.url .~ self.subject.enteredLink.value
+            |> \.memo .~ addition.memo
+            |> \.url .~ addition.url
         let _ = try? await self.eventDetailDataUsecase.saveDetail(detail)
     }
 }
@@ -331,11 +208,18 @@ extension AddEventViewModelImple: SelectEventRepeatOptionSceneListener, SelectEv
 
 extension AddEventViewModelImple {
     
-    var initialName: String? {
-        // TOOD: todo quick 으로 진입한경우 해당값 전달
-        nil
+    var isLoading: AnyPublisher<Bool, Never> {
+        let transform: (EventDetailBasicData?, EventDetailData?) -> Bool = { basic, addition in
+            return basic == nil || addition == nil
+        }
+        return Publishers.CombineLatest(
+            self.subject.basic, self.subject.additional
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
- 
+    
     var isTodo: AnyPublisher<Bool, Never> {
         return self.subject.isTodo
             .removeDuplicates()
@@ -344,46 +228,20 @@ extension AddEventViewModelImple {
     
     var isTodoOrScheduleTogglable: Bool { true }
     
-    var selectedTime: AnyPublisher<SelectedTime?, Never> {
-        return self.subject.selectedTime
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-    
-    var repeatOption: AnyPublisher<String?, Never> {
-        return self.subject.repeatOptionSelectResult
-            .map { $0?.text  }
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-    
-    var selectedTag: AnyPublisher<SelectedTag, Never> {
-        return self.subject.selectedTag
-            .compactMap { $0 }
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-    
-    var selectedPlace: AnyPublisher<Place?, Never> {
-        return self.subject.selectedPlace
-            .eraseToAnyPublisher()
-    }
-    
     var isSavable: AnyPublisher<Bool, Never> {
-        let transform: (Bool, String?, SelectedTime?) -> Bool = { isTodo, name, time in
-            let nameIsNotEmpty = name?.isEmpty == false
+        let transform: (Bool, EventDetailBasicData?) -> Bool = { isTodo, basic in
+            let nameIsNotEmpty = basic?.name?.isEmpty == false
             guard isTodo == false
             else {
-                let timeSelectedButInvalid = time?.isValid != false
+                let timeSelectedButInvalid = basic?.selectedTime?.isValid != false
                 return nameIsNotEmpty && timeSelectedButInvalid
             }
-            let validtimeSelected = time?.isValid == true
+            let validtimeSelected = basic?.selectedTime?.isValid == true
             return nameIsNotEmpty && validtimeSelected
         }
-        return Publishers.CombineLatest3(
+        return Publishers.CombineLatest(
             self.subject.isTodo,
-            self.subject.name,
-            self.subject.selectedTime
+            self.subject.basic
         )
         .map(transform)
         .removeDuplicates()

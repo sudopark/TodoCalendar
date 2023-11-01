@@ -19,4 +19,5 @@ public protocol TodoEventRepository {
     
     func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error>
     func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], any Error>
+    func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error>
 }

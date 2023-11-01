@@ -9,6 +9,12 @@
 /* Begin PBXBuildFile section */
 		F68E7E062AF294DD00110A73 /* EventDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E052AF294DD00110A73 /* EventDetailViewModel.swift */; };
 		F68E7E092AF297E500110A73 /* SelectedTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E082AF297E500110A73 /* SelectedTime.swift */; };
+		F68E7E0B2AF29DD700110A73 /* EditTodoEventDetailViewModelImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E0A2AF29DD700110A73 /* EditTodoEventDetailViewModelImple.swift */; };
+		F68E7E0F2AF2B56C00110A73 /* EventDetailInputViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E0E2AF2B56C00110A73 /* EventDetailInputViewModel.swift */; };
+		F68E7E122AF7C7DB00110A73 /* EventDetailInputViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E112AF7C7DB00110A73 /* EventDetailInputViewModelTests.swift */; };
+		F68E7E142AF7E82A00110A73 /* SpyEventDetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E132AF7E82A00110A73 /* SpyEventDetailRouter.swift */; };
+		F68E7E172AF7F13F00110A73 /* OriginalAndCurrent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E162AF7F13F00110A73 /* OriginalAndCurrent.swift */; };
+		F68E7E192AF7F15700110A73 /* EventDetailBasicData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E182AF7F15700110A73 /* EventDetailBasicData.swift */; };
 		F69B723C2AE55C0800C7A5CB /* SelectEventTagBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72362AE55C0700C7A5CB /* SelectEventTagBuilderImple.swift */; };
 		F69B723D2AE55C0800C7A5CB /* SelectEventTagRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72372AE55C0700C7A5CB /* SelectEventTagRouter.swift */; };
 		F69B723E2AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72382AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift */; };
@@ -56,6 +62,12 @@
 /* Begin PBXFileReference section */
 		F68E7E052AF294DD00110A73 /* EventDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailViewModel.swift; sourceTree = "<group>"; };
 		F68E7E082AF297E500110A73 /* SelectedTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedTime.swift; sourceTree = "<group>"; };
+		F68E7E0A2AF29DD700110A73 /* EditTodoEventDetailViewModelImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTodoEventDetailViewModelImple.swift; sourceTree = "<group>"; };
+		F68E7E0E2AF2B56C00110A73 /* EventDetailInputViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailInputViewModel.swift; sourceTree = "<group>"; };
+		F68E7E112AF7C7DB00110A73 /* EventDetailInputViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailInputViewModelTests.swift; sourceTree = "<group>"; };
+		F68E7E132AF7E82A00110A73 /* SpyEventDetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyEventDetailRouter.swift; sourceTree = "<group>"; };
+		F68E7E162AF7F13F00110A73 /* OriginalAndCurrent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OriginalAndCurrent.swift; sourceTree = "<group>"; };
+		F68E7E182AF7F15700110A73 /* EventDetailBasicData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailBasicData.swift; sourceTree = "<group>"; };
 		F69B72362AE55C0700C7A5CB /* SelectEventTagBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagBuilderImple.swift; sourceTree = "<group>"; };
 		F69B72372AE55C0700C7A5CB /* SelectEventTagRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagRouter.swift; sourceTree = "<group>"; };
 		F69B72382AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelectEventTagScene+Builder.swift"; sourceTree = "<group>"; };
@@ -145,11 +157,28 @@
 		F68E7E072AF2963500110A73 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				F68E7E082AF297E500110A73 /* SelectedTime.swift */,
-				F68E7E052AF294DD00110A73 /* EventDetailViewModel.swift */,
 				F6F780A32ADC20F900B50C19 /* AddEventViewModel.swift */,
+				F68E7E0A2AF29DD700110A73 /* EditTodoEventDetailViewModelImple.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		F68E7E102AF2B61500110A73 /* EventDetailInput */ = {
+			isa = PBXGroup;
+			children = (
+				F68E7E0E2AF2B56C00110A73 /* EventDetailInputViewModel.swift */,
+			);
+			path = EventDetailInput;
+			sourceTree = "<group>";
+		};
+		F68E7E152AF7F11F00110A73 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				F68E7E082AF297E500110A73 /* SelectedTime.swift */,
+				F68E7E162AF7F13F00110A73 /* OriginalAndCurrent.swift */,
+				F68E7E182AF7F15700110A73 /* EventDetailBasicData.swift */,
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 		F69B72352AE55BEB00C7A5CB /* SelectEventTag */ = {
@@ -187,10 +216,13 @@
 		F6F780562ADC1EAA00B50C19 /* EventDetailScene */ = {
 			isa = PBXGroup;
 			children = (
+				F68E7E152AF7F11F00110A73 /* Models */,
+				F68E7E102AF2B61500110A73 /* EventDetailInput */,
 				F6B098492AEE641200E84149 /* EventDetailSceneBuilderImple.swift */,
 				F6F7809F2ADC20F900B50C19 /* EventDetailRouter.swift */,
 				F6F780A12ADC20F900B50C19 /* EventDetailViewController.swift */,
 				F6F780A22ADC20F900B50C19 /* EventDetailView.swift */,
+				F68E7E052AF294DD00110A73 /* EventDetailViewModel.swift */,
 				F68E7E072AF2963500110A73 /* ViewModels */,
 				F65ED73D2AE51C5500BCD4C1 /* Selections */,
 				F6F780572ADC1EAA00B50C19 /* EventDetailScene.h */,
@@ -205,6 +237,8 @@
 				F6F780AA2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift */,
 				F6D05D982AE53EDB0028ED68 /* SelectEventRepeatOptionViewModelTests.swift */,
 				F69B72422AE55E8600C7A5CB /* SelectEventTagViewModelImpleTests.swift */,
+				F68E7E112AF7C7DB00110A73 /* EventDetailInputViewModelTests.swift */,
+				F68E7E132AF7E82A00110A73 /* SpyEventDetailRouter.swift */,
 			);
 			path = EventDetailSceneTests;
 			sourceTree = "<group>";
@@ -337,7 +371,9 @@
 			files = (
 				F69B723D2AE55C0800C7A5CB /* SelectEventTagRouter.swift in Sources */,
 				F68E7E062AF294DD00110A73 /* EventDetailViewModel.swift in Sources */,
+				F68E7E192AF7F15700110A73 /* EventDetailBasicData.swift in Sources */,
 				F6D05D922AE51D080028ED68 /* SelectEventRepeatOptionBuilderImple.swift in Sources */,
+				F68E7E0F2AF2B56C00110A73 /* EventDetailInputViewModel.swift in Sources */,
 				F69B723F2AE55C0800C7A5CB /* SelectEventTagViewController.swift in Sources */,
 				F6F780A82ADC20F900B50C19 /* EventDetailView.swift in Sources */,
 				F6D05D942AE51D080028ED68 /* SelectEventRepeatOptionScene+Builder.swift in Sources */,
@@ -345,10 +381,12 @@
 				F6D05D932AE51D080028ED68 /* SelectEventRepeatOptionRouter.swift in Sources */,
 				F69B723C2AE55C0800C7A5CB /* SelectEventTagBuilderImple.swift in Sources */,
 				F69B72412AE55C0800C7A5CB /* SelectEventTagViewModel.swift in Sources */,
+				F68E7E0B2AF29DD700110A73 /* EditTodoEventDetailViewModelImple.swift in Sources */,
 				F69B723E2AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift in Sources */,
 				F6D05D972AE51D080028ED68 /* SelectEventRepeatOptionViewModel.swift in Sources */,
 				F6F780A72ADC20F900B50C19 /* EventDetailViewController.swift in Sources */,
 				F6B0984A2AEE641200E84149 /* EventDetailSceneBuilderImple.swift in Sources */,
+				F68E7E172AF7F13F00110A73 /* OriginalAndCurrent.swift in Sources */,
 				F6F780A52ADC20F900B50C19 /* EventDetailRouter.swift in Sources */,
 				F6D05D962AE51D080028ED68 /* SelectEventRepeatOptionView.swift in Sources */,
 				F69B72402AE55C0800C7A5CB /* SelectEventTagView.swift in Sources */,
@@ -362,6 +400,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F6F780622ADC1EAB00B50C19 /* EventDetailSceneTests.swift in Sources */,
+				F68E7E142AF7E82A00110A73 /* SpyEventDetailRouter.swift in Sources */,
+				F68E7E122AF7C7DB00110A73 /* EventDetailInputViewModelTests.swift in Sources */,
 				F6D05D992AE53EDB0028ED68 /* SelectEventRepeatOptionViewModelTests.swift in Sources */,
 				F69B72432AE55E8600C7A5CB /* SelectEventTagViewModelImpleTests.swift in Sources */,
 				F6F780AB2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift in Sources */,
