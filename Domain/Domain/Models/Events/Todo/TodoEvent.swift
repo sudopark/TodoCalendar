@@ -12,7 +12,7 @@ import Optics
 
 // MARK: - Todo Evnet
 
-public struct TodoEvent {
+public struct TodoEvent: Sendable {
     
     public let uuid: String
     public var name: String

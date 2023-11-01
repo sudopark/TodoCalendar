@@ -1,6 +1,6 @@
 //
 //  
-//  AddEventRouter.swift
+//  EventDetailRouter.swift
 //  EventDetailScene
 //
 //  Created by sudo.park on 10/15/23.
@@ -15,21 +15,23 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol AddEventRouting: Routing, Sendable { 
+protocol EventDetailRouting: Routing, Sendable { 
     
     func routeToEventRepeatOptionSelect(
         startTime: Date,
-        with initalOption: EventRepeating?
+        with initalOption: EventRepeating?,
+        listener: (any SelectEventRepeatOptionSceneListener)?
     )
     
     func routeToEventTagSelect(
-        currentSelectedTagId: AllEventTagId
+        currentSelectedTagId: AllEventTagId,
+        listener: (any SelectEventTagSceneListener)?
     )
 }
 
 // MARK: - Router
 
-final class AddEventRouter: BaseRouterImple, AddEventRouting, @unchecked Sendable { 
+final class EventDetailRouter: BaseRouterImple, EventDetailRouting, @unchecked Sendable { 
     
     private let selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler
     private let selectEventTagSceneBuilder: any SelectEventTagSceneBuiler
@@ -44,36 +46,38 @@ final class AddEventRouter: BaseRouterImple, AddEventRouting, @unchecked Sendabl
 }
 
 
-extension AddEventRouter {
+extension EventDetailRouter {
     
-    private var currentScene: (any AddEventScene)? {
-        self.scene as? (any AddEventScene)
+    private var currentScene: (any EventDetailScene)? {
+        self.scene as? (any EventDetailScene)
     }
     
     // TODO: router implememnts
     func routeToEventRepeatOptionSelect(
         startTime: Date,
-        with initalOption: EventRepeating?
+        with initalOption: EventRepeating?,
+        listener: (any SelectEventRepeatOptionSceneListener)?
     ) {
         Task { @MainActor in
             
             let next = self.selectRepeatOptionSceneBuilder.makeSelectEventRepeatOptionScene(
                 startTime: startTime,
                 previousSelected: initalOption,
-                listener: self.currentScene?.interactor
+                listener: listener
             )
             self.currentScene?.present(next, animated: true)
         }
     }
     
     func routeToEventTagSelect(
-        currentSelectedTagId: AllEventTagId
+        currentSelectedTagId: AllEventTagId,
+        listener: (any SelectEventTagSceneListener)?
     ) {
         Task { @MainActor in
             
             let next = self.selectEventTagSceneBuilder.makeSelectEventTagScene(
                 startWith: currentSelectedTagId,
-                listener: self.currentScene?.interactor
+                listener: listener
             )
             
             let navigationController = UINavigationController(rootViewController: next)

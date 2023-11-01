@@ -14,9 +14,9 @@ import Domain
 import CommonPresentation
 
 
-// MARK: - AddEventViewController
+// MARK: - EventDetailViewState
 
-final class AddEventViewState: ObservableObject {
+final class EventDetailViewState: ObservableObject {
     
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
@@ -34,7 +34,7 @@ final class AddEventViewState: ObservableObject {
     @Published var url: String = ""
     @Published var memo: String = ""
     
-    func bind(_ viewModel: any AddEventViewModel) {
+    func bind(_ viewModel: any EventDetailViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
@@ -85,15 +85,15 @@ final class AddEventViewState: ObservableObject {
 }
 
 
-// MARK: - AddEventContainerView
+// MARK: - EventDetailContainerView
 
-struct AddEventContainerView: View {
+struct EventDetailContainerView: View {
     
-    @StateObject private var state: AddEventViewState = .init()
+    @StateObject private var state: EventDetailViewState = .init()
     private let viewAppearance: ViewAppearance
     
     var onAppear: () -> Void = { }
-    var stateBinding: (AddEventViewState) -> Void = { _ in }
+    var stateBinding: (EventDetailViewState) -> Void = { _ in }
     var nameEntered: (String) -> Void = { _ in }
     var toggleIsTodo: () -> Void = { }
     var selectStartTime: ( Date) -> Void = { _ in }
@@ -113,7 +113,7 @@ struct AddEventContainerView: View {
     }
     
     var body: some View {
-        return AddEventView()
+        return EventDetailView()
             .eventHandler(\.nameEntered, nameEntered)
             .eventHandler(\.toggleIsTodo, toggleIsTodo)
             .eventHandler(\.selectStartTime, selectStartTime)
@@ -138,9 +138,9 @@ struct AddEventContainerView: View {
 
 // MARK: - AddEventView
 
-struct AddEventView: View {
+struct EventDetailView: View {
     
-    @EnvironmentObject private var state: AddEventViewState
+    @EnvironmentObject private var state: EventDetailViewState
     @EnvironmentObject private var appearance: ViewAppearance
     private enum InputFields {
         case name
@@ -534,7 +534,7 @@ private extension SelectedTime {
 
 // MARK: - preview
 
-struct AddEventViewPreviewProvider: PreviewProvider {
+struct EventDetailViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let viewAppearance = ViewAppearance(
@@ -542,14 +542,14 @@ struct AddEventViewPreviewProvider: PreviewProvider {
             color: .defaultLight,
             font: .systemDefault
         )
-        let state = AddEventViewState()
+        let state = EventDetailViewState()
         state.selectedTag = .defaultTag
         state.selectedTime = .period(
             .init(Date().timeIntervalSince1970, .current),
             .init(Date().addingTimeInterval(+10).timeIntervalSince1970, .current)
         )
         state.selectedRepeat = "some"
-        let eventView = AddEventView()
+        let eventView = EventDetailView()
             .environmentObject(viewAppearance)
             .environmentObject(state)
         return eventView

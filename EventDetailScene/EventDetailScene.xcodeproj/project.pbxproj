@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F68E7E062AF294DD00110A73 /* EventDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E052AF294DD00110A73 /* EventDetailViewModel.swift */; };
+		F68E7E092AF297E500110A73 /* SelectedTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E082AF297E500110A73 /* SelectedTime.swift */; };
 		F69B723C2AE55C0800C7A5CB /* SelectEventTagBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72362AE55C0700C7A5CB /* SelectEventTagBuilderImple.swift */; };
 		F69B723D2AE55C0800C7A5CB /* SelectEventTagRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72372AE55C0700C7A5CB /* SelectEventTagRouter.swift */; };
 		F69B723E2AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72382AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift */; };
@@ -34,11 +36,9 @@
 		F6F780882ADC1EFB00B50C19 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6F780872ADC1EFB00B50C19 /* Extensions.framework */; };
 		F6F7808A2ADC1F0300B50C19 /* UnitTestHelpKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6F780892ADC1F0300B50C19 /* UnitTestHelpKit.framework */; };
 		F6F7808C2ADC1F0800B50C19 /* TestDoubles.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F6F7808B2ADC1F0800B50C19 /* TestDoubles.framework */; };
-		F6F780A42ADC20F900B50C19 /* AddEventBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F7809E2ADC20F900B50C19 /* AddEventBuilderImple.swift */; };
-		F6F780A52ADC20F900B50C19 /* AddEventRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F7809F2ADC20F900B50C19 /* AddEventRouter.swift */; };
-		F6F780A62ADC20F900B50C19 /* AddEventScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A02ADC20F900B50C19 /* AddEventScene+Builder.swift */; };
-		F6F780A72ADC20F900B50C19 /* AddEventViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A12ADC20F900B50C19 /* AddEventViewController.swift */; };
-		F6F780A82ADC20F900B50C19 /* AddEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A22ADC20F900B50C19 /* AddEventView.swift */; };
+		F6F780A52ADC20F900B50C19 /* EventDetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F7809F2ADC20F900B50C19 /* EventDetailRouter.swift */; };
+		F6F780A72ADC20F900B50C19 /* EventDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A12ADC20F900B50C19 /* EventDetailViewController.swift */; };
+		F6F780A82ADC20F900B50C19 /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A22ADC20F900B50C19 /* EventDetailView.swift */; };
 		F6F780A92ADC20F900B50C19 /* AddEventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780A32ADC20F900B50C19 /* AddEventViewModel.swift */; };
 		F6F780AB2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F780AA2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift */; };
 /* End PBXBuildFile section */
@@ -54,6 +54,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		F68E7E052AF294DD00110A73 /* EventDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailViewModel.swift; sourceTree = "<group>"; };
+		F68E7E082AF297E500110A73 /* SelectedTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedTime.swift; sourceTree = "<group>"; };
 		F69B72362AE55C0700C7A5CB /* SelectEventTagBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagBuilderImple.swift; sourceTree = "<group>"; };
 		F69B72372AE55C0700C7A5CB /* SelectEventTagRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagRouter.swift; sourceTree = "<group>"; };
 		F69B72382AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelectEventTagScene+Builder.swift"; sourceTree = "<group>"; };
@@ -83,11 +85,9 @@
 		F6F780872ADC1EFB00B50C19 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6F780892ADC1F0300B50C19 /* UnitTestHelpKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = UnitTestHelpKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F6F7808B2ADC1F0800B50C19 /* TestDoubles.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TestDoubles.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F6F7809E2ADC20F900B50C19 /* AddEventBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventBuilderImple.swift; sourceTree = "<group>"; };
-		F6F7809F2ADC20F900B50C19 /* AddEventRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventRouter.swift; sourceTree = "<group>"; };
-		F6F780A02ADC20F900B50C19 /* AddEventScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddEventScene+Builder.swift"; sourceTree = "<group>"; };
-		F6F780A12ADC20F900B50C19 /* AddEventViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventViewController.swift; sourceTree = "<group>"; };
-		F6F780A22ADC20F900B50C19 /* AddEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventView.swift; sourceTree = "<group>"; };
+		F6F7809F2ADC20F900B50C19 /* EventDetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailRouter.swift; sourceTree = "<group>"; };
+		F6F780A12ADC20F900B50C19 /* EventDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailViewController.swift; sourceTree = "<group>"; };
+		F6F780A22ADC20F900B50C19 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		F6F780A32ADC20F900B50C19 /* AddEventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventViewModel.swift; sourceTree = "<group>"; };
 		F6F780AA2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventViewModelImpleTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -142,6 +142,16 @@
 			path = SelectEventRepeatOption;
 			sourceTree = "<group>";
 		};
+		F68E7E072AF2963500110A73 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				F68E7E082AF297E500110A73 /* SelectedTime.swift */,
+				F68E7E052AF294DD00110A73 /* EventDetailViewModel.swift */,
+				F6F780A32ADC20F900B50C19 /* AddEventViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
 		F69B72352AE55BEB00C7A5CB /* SelectEventTag */ = {
 			isa = PBXGroup;
 			children = (
@@ -178,8 +188,11 @@
 			isa = PBXGroup;
 			children = (
 				F6B098492AEE641200E84149 /* EventDetailSceneBuilderImple.swift */,
+				F6F7809F2ADC20F900B50C19 /* EventDetailRouter.swift */,
+				F6F780A12ADC20F900B50C19 /* EventDetailViewController.swift */,
+				F6F780A22ADC20F900B50C19 /* EventDetailView.swift */,
+				F68E7E072AF2963500110A73 /* ViewModels */,
 				F65ED73D2AE51C5500BCD4C1 /* Selections */,
-				F6F7809D2ADC20EC00B50C19 /* AddEvent */,
 				F6F780572ADC1EAA00B50C19 /* EventDetailScene.h */,
 			);
 			path = EventDetailScene;
@@ -211,19 +224,6 @@
 				F6F7806D2ADC1EC000B50C19 /* Common3rdParty.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		F6F7809D2ADC20EC00B50C19 /* AddEvent */ = {
-			isa = PBXGroup;
-			children = (
-				F6F7809E2ADC20F900B50C19 /* AddEventBuilderImple.swift */,
-				F6F7809F2ADC20F900B50C19 /* AddEventRouter.swift */,
-				F6F780A02ADC20F900B50C19 /* AddEventScene+Builder.swift */,
-				F6F780A12ADC20F900B50C19 /* AddEventViewController.swift */,
-				F6F780A22ADC20F900B50C19 /* AddEventView.swift */,
-				F6F780A32ADC20F900B50C19 /* AddEventViewModel.swift */,
-			);
-			path = AddEvent;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -336,20 +336,20 @@
 			buildActionMask = 2147483647;
 			files = (
 				F69B723D2AE55C0800C7A5CB /* SelectEventTagRouter.swift in Sources */,
+				F68E7E062AF294DD00110A73 /* EventDetailViewModel.swift in Sources */,
 				F6D05D922AE51D080028ED68 /* SelectEventRepeatOptionBuilderImple.swift in Sources */,
 				F69B723F2AE55C0800C7A5CB /* SelectEventTagViewController.swift in Sources */,
-				F6F780A82ADC20F900B50C19 /* AddEventView.swift in Sources */,
+				F6F780A82ADC20F900B50C19 /* EventDetailView.swift in Sources */,
 				F6D05D942AE51D080028ED68 /* SelectEventRepeatOptionScene+Builder.swift in Sources */,
-				F6F780A42ADC20F900B50C19 /* AddEventBuilderImple.swift in Sources */,
+				F68E7E092AF297E500110A73 /* SelectedTime.swift in Sources */,
 				F6D05D932AE51D080028ED68 /* SelectEventRepeatOptionRouter.swift in Sources */,
 				F69B723C2AE55C0800C7A5CB /* SelectEventTagBuilderImple.swift in Sources */,
 				F69B72412AE55C0800C7A5CB /* SelectEventTagViewModel.swift in Sources */,
 				F69B723E2AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift in Sources */,
 				F6D05D972AE51D080028ED68 /* SelectEventRepeatOptionViewModel.swift in Sources */,
-				F6F780A72ADC20F900B50C19 /* AddEventViewController.swift in Sources */,
+				F6F780A72ADC20F900B50C19 /* EventDetailViewController.swift in Sources */,
 				F6B0984A2AEE641200E84149 /* EventDetailSceneBuilderImple.swift in Sources */,
-				F6F780A62ADC20F900B50C19 /* AddEventScene+Builder.swift in Sources */,
-				F6F780A52ADC20F900B50C19 /* AddEventRouter.swift in Sources */,
+				F6F780A52ADC20F900B50C19 /* EventDetailRouter.swift in Sources */,
 				F6D05D962AE51D080028ED68 /* SelectEventRepeatOptionView.swift in Sources */,
 				F69B72402AE55C0800C7A5CB /* SelectEventTagView.swift in Sources */,
 				F6F780A92ADC20F900B50C19 /* AddEventViewModel.swift in Sources */,
