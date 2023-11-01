@@ -19,6 +19,7 @@ import CommonPresentation
 final class EventDetailViewController: UIHostingController<EventDetailContainerView>, EventDetailScene {
     
     private let viewModel: any EventDetailViewModel
+    private let inputViewModel: any EventDetailInputViewModel
     private let viewAppearance: ViewAppearance
     
     @MainActor
@@ -28,28 +29,33 @@ final class EventDetailViewController: UIHostingController<EventDetailContainerV
     
     init(
         viewModel: any EventDetailViewModel,
+        inputViewModel: any EventDetailInputViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
+        self.inputViewModel = inputViewModel
         self.viewAppearance = viewAppearance
         
         let containerView = EventDetailContainerView(
             viewAppearance: viewAppearance
         )
-        .eventHandler(\.stateBinding, { $0.bind(viewModel) })
-        .eventHandler(\.onAppear, viewModel.prepare)
-        .eventHandler(\.nameEntered, viewModel.enter(name:))
+        .eventHandler(\.stateBinding, { $0.bind(viewModel, inputViewModel) })
+        .eventHandler(\.onAppear) {
+            inputViewModel.setup()
+            viewModel.prepare()
+        }
+        .eventHandler(\.nameEntered, inputViewModel.enter(name:))
         .eventHandler(\.toggleIsTodo, viewModel.toggleIsTodo)
-        .eventHandler(\.selectStartTime, viewModel.selectStartTime(_:))
-        .eventHandler(\.selectEndTime, viewModel.selectEndtime(_:))
-        .eventHandler(\.removeTime,  viewModel.removeTime)
-        .eventHandler(\.removeEventEndTime, viewModel.removeEventEndTime)
-        .eventHandler(\.toggleIsAllDay, viewModel.toggleIsAllDay)
-        .eventHandler(\.selectRepeatOption, viewModel.selectRepeatOption)
-        .eventHandler(\.selectTag, viewModel.selectEventTag)
+        .eventHandler(\.selectStartTime, inputViewModel.selectStartTime(_:))
+        .eventHandler(\.selectEndTime, inputViewModel.selectEndtime(_:))
+        .eventHandler(\.removeTime,  inputViewModel.removeTime)
+        .eventHandler(\.removeEventEndTime, inputViewModel.removeEventEndTime)
+        .eventHandler(\.toggleIsAllDay, inputViewModel.toggleIsAllDay)
+        .eventHandler(\.selectRepeatOption, inputViewModel.selectRepeatOption)
+        .eventHandler(\.selectTag, inputViewModel.selectEventTag)
 //        .eventHandler(\.selectPlace, TODO)
-        .eventHandler(\.enterUrl, viewModel.enter(url:))
-        .eventHandler(\.enterMemo, viewModel.enter(memo:))
+        .eventHandler(\.enterUrl, inputViewModel.enter(url:))
+        .eventHandler(\.enterMemo, inputViewModel.enter(memo:))
         .eventHandler(\.save, viewModel.save)
         super.init(rootView: containerView)
     }

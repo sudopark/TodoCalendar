@@ -42,8 +42,14 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase()
         )
         
+        let inputViewModel = EventDetailInputViewModelImple(
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase()
+        )
+        
         let viewController = EventDetailViewController(
             viewModel: viewModel,
+            inputViewModel: inputViewModel,
             viewAppearance: self.viewAppearance
         )
         
@@ -62,8 +68,11 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             selectRepeatOptionSceneBuilder: selectOptionBuilder,
             selectEventTagSceneBuilder: selectTagSceneBuilder
         )
+        router.inputViewModel = inputViewModel
         router.scene = viewController
         viewModel.router = router
+        inputViewModel.routing = router
+        viewModel.attachInput()
         
         return viewController
     }

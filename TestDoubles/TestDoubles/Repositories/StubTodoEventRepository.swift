@@ -98,4 +98,8 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub {
             return RemoveTodoResult()
         }
     }
+        
+    open func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
 }

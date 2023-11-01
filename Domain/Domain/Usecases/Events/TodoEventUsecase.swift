@@ -25,6 +25,7 @@ public protocol TodoEventUsecase {
     var currentTodoEvents: AnyPublisher<[TodoEvent], Never> { get }
     func refreshTodoEvents(in period: Range<TimeInterval>)
     func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never>
+    func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error>
 }
 
 
@@ -195,6 +196,18 @@ extension TodoEventUsecaseImple {
             .observe([String: TodoEvent].self, key: shareKey)
             .map { $0?.values.map { $0 } ?? [] }
             .map(filterInRange)
+            .eraseToAnyPublisher()
+    }
+    
+    public func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
+        let updateStore: (TodoEvent) -> Void = { [weak self] event in
+            let shareKey = ShareDataKeys.todos.rawValue
+            self?.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
+                ($0 ?? [:]) |> key(event.uuid) .~ event
+            }
+        }
+        return self.todoRepository.todoEvent(id)
+            .handleEvents(receiveOutput: updateStore)
             .eraseToAnyPublisher()
     }
 }

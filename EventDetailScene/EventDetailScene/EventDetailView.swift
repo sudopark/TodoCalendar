@@ -34,7 +34,10 @@ final class EventDetailViewState: ObservableObject {
     @Published var url: String = ""
     @Published var memo: String = ""
     
-    func bind(_ viewModel: any EventDetailViewModel) {
+    func bind(
+        _ viewModel: any EventDetailViewModel,
+        _ inputViewModel: any EventDetailInputViewModel
+    ) {
         
         guard self.didBind == false else { return }
         self.didBind = true
@@ -47,21 +50,21 @@ final class EventDetailViewState: ObservableObject {
             })
             .store(in: &self.cancellables)
         
-        viewModel.selectedTime
+        inputViewModel.selectedTime
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] time in
                 self?.selectedTime = time
             })
             .store(in: &self.cancellables)
         
-        viewModel.repeatOption
+        inputViewModel.repeatOption
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] option in
                 self?.selectedRepeat = option
             })
             .store(in: &self.cancellables)
         
-        viewModel.selectedTag
+        inputViewModel.selectedTag
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] tag in
                 self?.selectedTag = tag

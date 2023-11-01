@@ -1,0 +1,30 @@
+//
+//  EventDetailViewModel.swift
+//  EventDetailScene
+//
+//  Created by sudo.park on 11/1/23.
+//
+
+import Foundation
+import Combine
+import Prelude
+import Optics
+import Domain
+
+
+protocol EventDetailViewModel: Sendable, AnyObject {
+    
+    func attachInput()
+    func prepare()
+    func chooseMoreAction()
+    func close()
+    func toggleIsTodo()
+    func save()
+    
+    // presenter
+    var isLoading: AnyPublisher<Bool, Never> { get }
+    var isTodo: AnyPublisher<Bool, Never> { get }
+    var isTodoOrScheduleTogglable: Bool { get }
+    var isSavable: AnyPublisher<Bool, Never> { get }
+    var isSaving: AnyPublisher<Bool, Never> { get }
+}

@@ -123,6 +123,44 @@ enum SelectedTime: Equatable {
     }
 }
 
+extension Optional where Wrapped == SelectedTime {
+    
+    func periodStartChanged(_ date: Date, _ timeZone: TimeZone) -> SelectedTime {
+    
+        let timeText = SelectTimeText(date.timeIntervalSince1970, timeZone)
+        
+        return switch self {
+            case .none, .at: .at(timeText)
+            case .period(_, let end): .period(timeText, end)
+            case .singleAllDay(let start) where start.date.isSameDay(date, at: timeZone):
+                .singleAllDay(timeText |> \.time .~ nil)
+            case .singleAllDay:
+                .singleAllDay(timeText)
+            case .alldayPeriod(_, let end): .alldayPeriod(timeText |> \.time .~ nil, end)
+        }
+    }
+    
+    func periodEndTimeChanged(_ date: Date, _ timeZone: TimeZone) -> SelectedTime? {
+        let timeText = SelectTimeText(date.timeIntervalSince1970, timeZone)
+        return switch self {
+            case .none: nil
+            case .at(let start): .period(start, timeText)
+            case .period(let start, _): .period(start, timeText)
+            case .singleAllDay(let start) where start.date.isSameDay(date, at: timeZone): nil
+            case .singleAllDay(let start): .alldayPeriod(start, timeText |> \.time .~ nil)
+            case .alldayPeriod(let start, _): .alldayPeriod(start, timeText |> \.time .~ nil)
+        }
+    }
+    
+    func removePeriodEndTime(_ timeZone: TimeZone) -> SelectedTime? {
+        return switch self {
+        case .period(let start, _): .at(start)
+        case .alldayPeriod(let start, _): .singleAllDay(start)
+        default: nil
+        }
+    }
+}
+
 
 extension Date {
     

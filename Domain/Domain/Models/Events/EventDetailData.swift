@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - EventDetail
 
-public struct Place: Sendable {
+public struct Place: Sendable, Equatable {
 
     public struct Coordinate: Sendable, Equatable {
         public let latttude: Double
@@ -32,7 +32,7 @@ public struct Place: Sendable {
     }
 }
 
-public struct EventDetailData: Sendable {
+public struct EventDetailData: Sendable, Equatable {
     
     public let eventId: String
     public var place: Place?

@@ -76,7 +76,11 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         return self.todosWithoutDone(self.stubTodoEventsInRange)
     }
     
+
     open func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
+    }
         
+    open func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
+        return Empty().eraseToAnyPublisher()
     }
 }

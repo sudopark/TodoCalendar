@@ -136,4 +136,9 @@ extension TodoLocalRepositoryImple {
         }
         .eraseToAnyPublisher()
     }
+    
+    public func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
+        // TODO: 
+        return Empty().mapNever().eraseToAnyPublisher()
+    }
 }
