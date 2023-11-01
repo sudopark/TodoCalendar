@@ -343,6 +343,7 @@ extension AddEventViewModelImpleTests {
         // then
         XCTAssertEqual(times[safe: 0] ?? nil, nil)
         XCTAssertEqual(times[safe: 1]??.isPeriod, true)
+        // 매일밤 11시에 돌리면 tc 꺄잘수있음
         XCTAssertEqual(times[safe: 2]??.isSingleAllDay, true)
         XCTAssertEqual(times[safe: 3]??.isPeriod, true)
     }
@@ -612,17 +613,21 @@ extension AddEventViewModelImpleTests {
     }
 }
 
-private class SpyRouter: BaseSpyRouter, AddEventRouting, @unchecked Sendable {
+private class SpyRouter: BaseSpyRouter, EventDetailRouting, @unchecked Sendable {
     
     var didRouteToEventRepeatOptionSelect: Bool?
     func routeToEventRepeatOptionSelect(
-        startTime: Date, with initalOption: EventRepeating?
+        startTime: Date, with initalOption: EventRepeating?,
+        listener: (any SelectEventRepeatOptionSceneListener)?
     ) {
         self.didRouteToEventRepeatOptionSelect = true
     }
     
     var didRouteToSelectEventTag: Bool?
-    func routeToEventTagSelect(currentSelectedTagId: AllEventTagId) {
+    func routeToEventTagSelect(
+        currentSelectedTagId: AllEventTagId,
+        listener: (any SelectEventTagSceneListener)?
+    ) {
         self.didRouteToSelectEventTag = true
     }
 }

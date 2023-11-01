@@ -1,6 +1,6 @@
 //
 //  
-//  AddEventViewController.swift
+//  EventDetailViewController.swift
 //  EventDetailScene
 //
 //  Created by sudo.park on 10/15/23.
@@ -14,26 +14,26 @@ import Scenes
 import CommonPresentation
 
 
-// MARK: - AddEventViewController
+// MARK: - EventDetailViewController
 
-final class AddEventViewController: UIHostingController<AddEventContainerView>, AddEventScene {
+final class EventDetailViewController: UIHostingController<EventDetailContainerView>, EventDetailScene {
     
-    private let viewModel: any AddEventViewModel
+    private let viewModel: any EventDetailViewModel
     private let viewAppearance: ViewAppearance
     
     @MainActor
-    var interactor: (any AddEventSceneInteractor)? { self.viewModel }
+    var interactor: EmptyInteractor?
     
     private var cancellables: Set<AnyCancellable> = []
     
     init(
-        viewModel: any AddEventViewModel,
+        viewModel: any EventDetailViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         
-        let containerView = AddEventContainerView(
+        let containerView = EventDetailContainerView(
             viewAppearance: viewAppearance
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })

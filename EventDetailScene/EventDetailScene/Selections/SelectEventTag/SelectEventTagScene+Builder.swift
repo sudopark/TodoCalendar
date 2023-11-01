@@ -67,6 +67,6 @@ protocol SelectEventTagSceneBuiler: AnyObject {
     @MainActor
     func makeSelectEventTagScene(
         startWith initail: AllEventTagId,
-        listener: SelectEventTagSceneListener?
+        listener: (any SelectEventTagSceneListener)?
     ) -> any SelectEventTagScene
 }

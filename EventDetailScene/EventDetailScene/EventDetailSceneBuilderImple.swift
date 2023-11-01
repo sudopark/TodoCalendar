@@ -33,6 +33,20 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
     @MainActor
     public func makeNewEventScene(isTodo: Bool) -> any EventDetailScene {
         
+        let viewModel = AddEventViewModelImple(
+            isTodo: isTodo,
+            todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
+            scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
+            eventTagUsease: self.usecaseFactory.makeEventTagUsecase(),
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
+            eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase()
+        )
+        
+        let viewController = EventDetailViewController(
+            viewModel: viewModel,
+            viewAppearance: self.viewAppearance
+        )
+        
         let selectOptionBuilder = SelectEventRepeatOptionSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
@@ -44,12 +58,13 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             settingSceneBuilder: self.settingSceneBuilder
         )
         
-        let addSceneBuilder = AddEventSceneBuilerImple(
-            usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance,
+        let router = EventDetailRouter(
             selectRepeatOptionSceneBuilder: selectOptionBuilder,
             selectEventTagSceneBuilder: selectTagSceneBuilder
         )
-        return addSceneBuilder.makeAddEventScene(isTodo: isTodo)
+        router.scene = viewController
+        viewModel.router = router
+        
+        return viewController
     }
 }
