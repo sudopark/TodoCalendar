@@ -19,6 +19,23 @@ import Scenes
 struct EventRepeatingTimeSelectResult: Equatable {
     let text: String
     let repeating: EventRepeating
+        
+    init(text: String, repeating: EventRepeating) {
+        self.text = text
+        self.repeating = repeating
+    }
+    
+    init?(_ repeating: EventRepeating, timeZone: TimeZone) {
+        guard let model = SelectRepeatingOptionModel(
+            repeating.repeatOption, 
+            Date(timeIntervalSince1970: repeating.repeatingStartTime),
+            timeZone
+        ) else {
+            return nil
+        }
+        self.text = model.text
+        self.repeating = repeating
+    }
     
     func updateRepeatStartTime(
         _ startTime: TimeInterval, _ timeZone: TimeZone

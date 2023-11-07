@@ -233,8 +233,8 @@ extension AddEventViewModelImple {
             let nameIsNotEmpty = basic?.name?.isEmpty == false
             guard isTodo == false
             else {
-                let timeSelectedButInvalid = basic?.selectedTime?.isValid != false
-                return nameIsNotEmpty && timeSelectedButInvalid
+                let notInvalidTimeSelected = basic?.selectedTime?.isValid != false
+                return nameIsNotEmpty && notInvalidTimeSelected
             }
             let validtimeSelected = basic?.selectedTime?.isValid == true
             return nameIsNotEmpty && validtimeSelected

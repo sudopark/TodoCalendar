@@ -42,8 +42,23 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         return newEvent
     }
     
+    public var shouldUpdateEventFail: Bool = false
+    public var didUpdateEditParams: TodoEditParams?
     open func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
-        throw RuntimeError("not implemented")
+        self.didUpdateEditParams = params
+        guard self.shouldUpdateEventFail == false
+        else {
+            throw RuntimeError("not implemented")
+        }
+        guard let name = params.name
+        else {
+            throw RuntimeError("invalid argument")
+        }
+        let todo = TodoEvent(uuid: eventId, name: name)
+            |> \.time .~ params.time
+            |> \.repeating .~ params.repeating
+            |> \.eventTagId .~ params.eventTagId
+        return todo
     }
     
     public var shouldFailCompleteTodo: Bool = false
@@ -76,11 +91,17 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         return self.todosWithoutDone(self.stubTodoEventsInRange)
     }
     
-
     open func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
     }
         
+    public var stubTodo: TodoEvent?
     open func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
-        return Empty().eraseToAnyPublisher()
+        guard let todo = self.stubTodo
+        else {
+            return Empty().eraseToAnyPublisher()
+        }
+        return Just(todo)
+            .mapNever()
+            .eraseToAnyPublisher()
     }
 }

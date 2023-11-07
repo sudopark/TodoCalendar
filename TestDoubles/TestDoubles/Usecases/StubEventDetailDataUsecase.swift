@@ -14,8 +14,13 @@ open class StubEventDetailDataUsecase: EventDetailDataUsecase, @unchecked Sendab
     
     public init() { } 
     
-    open func loadDetail(_ id: String) -> AnyPublisher<EventDetailData, Never> {
-        return Empty().eraseToAnyPublisher()
+    public var stubDetail: EventDetailData?
+    open func loadDetail(_ id: String) -> AnyPublisher<EventDetailData, any Error> {
+        guard let detail = self.stubDetail 
+        else {
+            return Empty().eraseToAnyPublisher()
+        }
+        return Just(detail).mapNever().eraseToAnyPublisher()
     }
     
     public var savedDetail: EventDetailData?

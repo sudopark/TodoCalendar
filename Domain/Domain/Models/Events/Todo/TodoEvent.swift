@@ -12,7 +12,7 @@ import Optics
 
 // MARK: - Todo Evnet
 
-public struct TodoEvent: Sendable {
+public struct TodoEvent: Sendable, Equatable {
     
     public let uuid: String
     public var name: String
@@ -63,7 +63,7 @@ public struct TodoMakeParams: Sendable {
     }
 }
 
-public struct TodoEditParams: Sendable {
+public struct TodoEditParams: Sendable, Equatable {
     
     public enum RepeatingUpdateScope: Equatable, Sendable {
         case all

@@ -33,11 +33,16 @@ open class BaseSpyRouter: Routing {
         self.didCloseCallback?()
     }
     
+    public var shouldConfirmNotCancel: Bool = true
     public var didShowConfirmWith: ConfirmDialogInfo?
     public var didShowConfirmWithCallback: ((ConfirmDialogInfo) -> Void)?
     public func showConfirm(dialog info: ConfirmDialogInfo) {
         self.didShowConfirmWith = info
         self.didShowConfirmWithCallback?(info)
-        info.confirmed?()
+        if shouldConfirmNotCancel {
+            info.confirmed?()
+        } else {
+            info.canceled?()
+        }
     }
 }

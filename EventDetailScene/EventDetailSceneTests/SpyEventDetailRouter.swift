@@ -7,6 +7,7 @@
 
 import Foundation
 import Domain
+import Scenes
 import UnitTestHelpKit
 import TestDoubles
 
