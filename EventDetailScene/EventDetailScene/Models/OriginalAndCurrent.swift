@@ -18,3 +18,10 @@ struct OriginalAndCurrent<T> {
         self.current = current ?? origin
     }
 }
+
+extension OriginalAndCurrent where T: Equatable {
+    
+    var isChanged: Bool {
+        return origin != current
+    }
+}

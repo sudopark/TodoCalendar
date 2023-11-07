@@ -21,7 +21,7 @@ public final class EventDetailDataLocalRepostioryImple: EventDetailDataRepositor
 
 extension EventDetailDataLocalRepostioryImple {
     
-    public func loadDetail(_ id: String) -> AnyPublisher<EventDetailData, Never> {
+    public func loadDetail(_ id: String) -> AnyPublisher<EventDetailData, any Error> {
         return Publishers.create { [weak self] in
             return try await self?.localStorage.loadDetail(id) ?? .init(id)
         }

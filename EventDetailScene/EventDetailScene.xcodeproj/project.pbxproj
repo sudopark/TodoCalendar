@@ -15,6 +15,7 @@
 		F68E7E142AF7E82A00110A73 /* SpyEventDetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E132AF7E82A00110A73 /* SpyEventDetailRouter.swift */; };
 		F68E7E172AF7F13F00110A73 /* OriginalAndCurrent.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E162AF7F13F00110A73 /* OriginalAndCurrent.swift */; };
 		F68E7E192AF7F15700110A73 /* EventDetailBasicData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7E182AF7F15700110A73 /* EventDetailBasicData.swift */; };
+		F691E0122AFA8416003B55A0 /* EditTodoEventDetailViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F691E0112AFA8416003B55A0 /* EditTodoEventDetailViewModelImpleTests.swift */; };
 		F69B723C2AE55C0800C7A5CB /* SelectEventTagBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72362AE55C0700C7A5CB /* SelectEventTagBuilderImple.swift */; };
 		F69B723D2AE55C0800C7A5CB /* SelectEventTagRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72372AE55C0700C7A5CB /* SelectEventTagRouter.swift */; };
 		F69B723E2AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69B72382AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift */; };
@@ -68,6 +69,7 @@
 		F68E7E132AF7E82A00110A73 /* SpyEventDetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpyEventDetailRouter.swift; sourceTree = "<group>"; };
 		F68E7E162AF7F13F00110A73 /* OriginalAndCurrent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OriginalAndCurrent.swift; sourceTree = "<group>"; };
 		F68E7E182AF7F15700110A73 /* EventDetailBasicData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailBasicData.swift; sourceTree = "<group>"; };
+		F691E0112AFA8416003B55A0 /* EditTodoEventDetailViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTodoEventDetailViewModelImpleTests.swift; sourceTree = "<group>"; };
 		F69B72362AE55C0700C7A5CB /* SelectEventTagBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagBuilderImple.swift; sourceTree = "<group>"; };
 		F69B72372AE55C0700C7A5CB /* SelectEventTagRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventTagRouter.swift; sourceTree = "<group>"; };
 		F69B72382AE55C0800C7A5CB /* SelectEventTagScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SelectEventTagScene+Builder.swift"; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 				F69B72422AE55E8600C7A5CB /* SelectEventTagViewModelImpleTests.swift */,
 				F68E7E112AF7C7DB00110A73 /* EventDetailInputViewModelTests.swift */,
 				F68E7E132AF7E82A00110A73 /* SpyEventDetailRouter.swift */,
+				F691E0112AFA8416003B55A0 /* EditTodoEventDetailViewModelImpleTests.swift */,
 			);
 			path = EventDetailSceneTests;
 			sourceTree = "<group>";
@@ -402,6 +405,7 @@
 				F6F780622ADC1EAB00B50C19 /* EventDetailSceneTests.swift in Sources */,
 				F68E7E142AF7E82A00110A73 /* SpyEventDetailRouter.swift in Sources */,
 				F68E7E122AF7C7DB00110A73 /* EventDetailInputViewModelTests.swift in Sources */,
+				F691E0122AFA8416003B55A0 /* EditTodoEventDetailViewModelImpleTests.swift in Sources */,
 				F6D05D992AE53EDB0028ED68 /* SelectEventRepeatOptionViewModelTests.swift in Sources */,
 				F69B72432AE55E8600C7A5CB /* SelectEventTagViewModelImpleTests.swift in Sources */,
 				F6F780AB2ADC25F100B50C19 /* AddEventViewModelImpleTests.swift in Sources */,

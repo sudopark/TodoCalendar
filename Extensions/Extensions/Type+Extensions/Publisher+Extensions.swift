@@ -36,6 +36,11 @@ extension Publisher {
         .compactMap { $0 }
         .eraseToAnyPublisher()
     }
+    
+    public func mapAsOptional() -> AnyPublisher<Output?, Failure> {
+        return self.map { o -> Output? in o }
+            .eraseToAnyPublisher()
+    }
 }
 
 extension Publisher where Failure == Never {

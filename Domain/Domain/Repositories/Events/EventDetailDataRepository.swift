@@ -11,7 +11,7 @@ import Combine
 
 public protocol EventDetailDataRepository: Sendable {
     
-    func loadDetail(_ id: String) -> AnyPublisher<EventDetailData, Never>
+    func loadDetail(_ id: String) -> AnyPublisher<EventDetailData, any Error>
     func saveDetail(_ detail: EventDetailData) async throws -> EventDetailData
     func removeDetail(_ id: String) async throws
 }
