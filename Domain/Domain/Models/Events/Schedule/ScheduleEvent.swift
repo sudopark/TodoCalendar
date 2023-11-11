@@ -134,7 +134,6 @@ public struct ScheduleEditParams {
     }
 }
 
-
 public struct ExcludeRepeatingEventResult {
     
     public let newEvent: ScheduleEvent
@@ -147,4 +146,10 @@ public struct ExcludeRepeatingEventResult {
         self.newEvent = newEvent
         self.originEvent = originEvent
     }
+}
+
+
+public struct RemoveSheduleEventResult {
+    public var nextRepeatingEvnet: ScheduleEvent?
+    public init() { }
 }
