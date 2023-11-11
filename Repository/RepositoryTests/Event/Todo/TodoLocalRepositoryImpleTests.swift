@@ -184,6 +184,55 @@ extension TodoLocalRepositoryImpleTests {
 }
 
 
+// MARK: - test remove
+
+extension TodoLocalRepositoryImpleTests {
+    
+    private func makeRepositoryWithStubTodo(
+        _ todo: TodoEvent
+    ) async throws -> TodoLocalRepositoryImple {
+        let repository = self.makeRepository()
+        try await self.localStorage.saveTodoEvent(todo)
+        return repository
+    }
+ 
+    func testReposiotry_removeTodo_withoutNextRepeating() async throws {
+        // given
+        let todo = self.makeDummyTodo(id: "some")
+        let repository = try await self.makeRepositoryWithStubTodo(todo)
+        
+        // when
+        let result = try await repository.removeTodo(todo.uuid, onlyThisTime: false)
+        
+        // then
+        XCTAssertNil(result.nextRepeatingTodo)
+    }
+    
+    func testRepository_removeTodo_withNextRepeating() async throws {
+        // given
+        let todo = self.makeDummyTodo(id: "some", time: 0, from: 0)
+        let repository = try await self.makeRepositoryWithStubTodo(todo)
+        
+        // when
+        let result = try await repository.removeTodo(todo.uuid, onlyThisTime: true)
+        
+        // then
+        XCTAssertNotNil(result.nextRepeatingTodo)
+    }
+    
+    func testRepository_removeRepeatingTodo() async throws {
+        // given
+        let todo = self.makeDummyTodo(id: "some", time: 0, from: 0)
+        let repository = try await self.makeRepositoryWithStubTodo(todo)
+        
+        // when
+        let result = try await repository.removeTodo(todo.uuid, onlyThisTime: false)
+        
+        // then
+        XCTAssertNil(result.nextRepeatingTodo)
+    }
+}
+
 extension TodoLocalRepositoryImpleTests {
     
     private func makeDummyTodo(

@@ -75,4 +75,8 @@ open class StubTodoEventUsecase: TodoEventUsecase {
     open func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never> {
         return self.todosWithoutDone(self.stubTodoEventsInRange)
     }
+    
+    open func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
+        
+    }
 }

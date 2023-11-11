@@ -89,4 +89,13 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub {
         }
         return Just(events).mapNever().eraseToAnyPublisher()
     }
+    
+    public var stubRemoveTodoNextRepeatingExists: Bool = false
+    open func removeTodo(_ eventId: String, onlyThisTime: Bool) async throws -> RemoveTodoResult {
+        if stubRemoveTodoNextRepeatingExists {
+            return RemoveTodoResult() |> \.nextRepeatingTodo .~ .init(uuid: eventId, name: "next")
+        } else {
+            return RemoveTodoResult()
+        }
+    }
 }

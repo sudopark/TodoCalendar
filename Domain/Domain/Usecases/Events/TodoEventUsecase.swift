@@ -19,6 +19,7 @@ public protocol TodoEventUsecase {
     func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent
     func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent
     func completeTodo(_ eventId: String) async throws -> DoneTodoEvent
+    func removeTodo(_ id: String, onlyThisTime: Bool) async throws
     
     func refreshCurentTodoEvents()
     var currentTodoEvents: AnyPublisher<[TodoEvent], Never> { get }
@@ -123,6 +124,19 @@ extension TodoEventUsecaseImple {
             }
         }
         return doneEvent
+    }
+    
+    public func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
+        let removeResult = try await self.todoRepository.removeTodo(
+            id, onlyThisTime: onlyThisTime
+        )
+        // onlyThisTime
+            // remove current and
+        let shareKey = ShareDataKeys.todos.rawValue
+        self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
+            ($0 ?? [:])
+            |> key(id) .~ removeResult.nextRepeatingTodo
+        }
     }
 }
 

@@ -28,6 +28,8 @@ public final class TodoLocalRepositoryImple: TodoEventRepository, Sendable {
 }
 
 
+// MARK: - make
+
 extension TodoLocalRepositoryImple {
     
     public func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent {
@@ -58,6 +60,8 @@ extension TodoLocalRepositoryImple {
     }
 }
 
+
+// MARK: - complete
 
 extension TodoLocalRepositoryImple {
     
@@ -95,6 +99,24 @@ extension TodoLocalRepositoryImple {
         let nextTodo = origin |> \.time .~ nextEventTime
         try await self.localStorage.updateTodoEvent(nextTodo)
         return origin |> \.time .~ nextEventTime
+    }
+}
+
+
+// MARK: - remove
+
+extension TodoLocalRepositoryImple {
+    
+    public func removeTodo(_ eventId: String, onlyThisTime: Bool) async throws -> RemoveTodoResult {
+        let origin = try await self.localStorage.loadTodoEvent(eventId)
+        
+        try await self.localStorage.removeTodo(eventId)
+        
+        let next: TodoEvent? = onlyThisTime
+            ? try await self.replaceTodoNextEventTimeIfIsRepeating(origin)
+            : nil
+        
+        return RemoveTodoResult() |> \.nextRepeatingTodo .~ next
     }
 }
 
