@@ -122,13 +122,14 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             .catch { _ in Just(.init(id)) }
             .eraseToAnyPublisher()
     }
-    
-    func chooseMoreAction() {
-        // 이 이벤트만 삭제
-        // 이후 모든 이벤트 삭제
-        // 복사하기
-        // 템플릿에 추가
-        // 공유?
+
+    func handleMoreAction(_ action: EventDetailMoreAction) {
+        switch action {
+        case .remove(let onlyThisEvent): break
+        case .copy: break
+        case .addToTemplate: break
+        case .share: break
+        }
     }
     
     func close() {
@@ -256,6 +257,21 @@ extension EditTodoEventDetailViewModelImple {
     var isSaving: AnyPublisher<Bool, Never> {
         return self.subject.isSaving
             .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var moreActions: AnyPublisher<[EventDetailMoreAction], Never> {
+        let transform: (EventDetailBasicData) -> [EventDetailMoreAction] = { basic in
+            let isRepeating = basic.selectedTime != nil && basic.eventRepeating != nil
+            let removeActions: [EventDetailMoreAction] = isRepeating
+                ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
+                : [.remove(onlyThisEvent: false)]
+            return removeActions + [.copy, .addToTemplate, .share]
+        }
+        return self.subject.basicData
+            .compactMap { $0?.origin }
+            .map(transform)
+            .first()
             .eraseToAnyPublisher()
     }
 }

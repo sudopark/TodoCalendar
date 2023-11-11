@@ -12,11 +12,19 @@ import Optics
 import Domain
 
 
+enum EventDetailMoreAction: Equatable {
+    case remove(onlyThisEvent: Bool)
+    case copy
+    case addToTemplate
+    case share
+}
+
+
 protocol EventDetailViewModel: Sendable, AnyObject {
     
     func attachInput()
     func prepare()
-    func chooseMoreAction()
+    func handleMoreAction(_ action: EventDetailMoreAction)
     func close()
     func toggleIsTodo()
     func save()
@@ -27,4 +35,5 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     var isTodoOrScheduleTogglable: Bool { get }
     var isSavable: AnyPublisher<Bool, Never> { get }
     var isSaving: AnyPublisher<Bool, Never> { get }
+    var moreActions: AnyPublisher<[EventDetailMoreAction], Never> { get }
 }

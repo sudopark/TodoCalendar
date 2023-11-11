@@ -111,8 +111,16 @@ extension AddEventViewModelImple: EventDetailInputListener {
             .store(in: &self.cancellables)
     }
     
-    func chooseMoreAction() {
-        // do nothing
+    func handleMoreAction(_ action: EventDetailMoreAction) {
+        switch action {
+        case .copy:
+            // TODO:
+            break
+        case .addToTemplate:
+            // TODO: break
+            break
+        default: break
+        }
     }
     
     func close() {
@@ -252,5 +260,13 @@ extension AddEventViewModelImple {
         return self.subject.isSaving
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    var moreActions: AnyPublisher<[EventDetailMoreAction], Never> {
+        return Just([
+            .copy,
+            .addToTemplate
+        ])
+        .eraseToAnyPublisher()
     }
 }

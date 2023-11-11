@@ -148,6 +148,33 @@ extension EditTodoEventDetailViewModelImpleTests {
         XCTAssertEqual(isTodo, true)
         XCTAssertEqual(viewModel.isTodoOrScheduleTogglable, false)
     }
+    
+    func testViewModel_provideEventDetailMoreActions() {
+        // given
+        func parameterizeTest(
+            _ viewModel: EditTodoEventDetailViewModelImple,
+            expect expectingActions: [EventDetailMoreAction]
+        ) {
+            // given
+            let expect = expectation(description: "wait more action")
+            // when
+            let actions = self.waitFirstOutput(expect, for: viewModel.moreActions) {
+                viewModel.prepare()
+            }
+            
+            // then
+            XCTAssertEqual(actions, expectingActions)
+        }
+        // when + then
+        let todo = self.dummyRepeatingTodo
+        parameterizeTest(self.makeViewModel(customTodo: todo), expect: [
+            .remove(onlyThisEvent: true), .remove(onlyThisEvent: false), .copy, .addToTemplate, .share
+        ])
+        let todoNotRepeating = todo |> \.repeating .~ nil
+        parameterizeTest(self.makeViewModel(customTodo: todoNotRepeating), expect: [
+            .remove(onlyThisEvent: false), .copy, .addToTemplate, .share
+        ])
+    }
 }
 
 
