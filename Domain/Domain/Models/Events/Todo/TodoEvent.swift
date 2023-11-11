@@ -111,3 +111,10 @@ public struct ReplaceRepeatingTodoEventResult {
         self.newTodoEvent = newTodoEvent
     }
 }
+
+
+public struct RemoveTodoResult {
+    
+    public var nextRepeatingTodo: TodoEvent?
+    public init() { }
+}

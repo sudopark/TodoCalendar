@@ -225,6 +225,91 @@ extension TodoEventUsecaseImpleTests {
             ]
         ])
     }
+    
+    // remove todo
+    func testUsecase_removeTodo() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when + then
+        try await usecase.removeTodo("some", onlyThisTime: false)
+    }
+    
+    private func makeUsecaseWithStubWillRemovingTodo(
+        nextEventExists: Bool
+    ) -> TodoEventUsecaseImple {
+        self.stubTodoRepository.stubRemoveTodoNextRepeatingExists = nextEventExists
+        let todo = TodoEvent(uuid: "will_removing_todo", name: "old")
+        self.spyStore.put(
+            [String: TodoEvent].self, key: ShareDataKeys.todos.rawValue, [todo.uuid: todo]
+        )
+        let usecase = self.makeUsecase()
+        return usecase
+    }
+    
+    private var willRemovingTodoAtStore: AnyPublisher<TodoEvent?, Never> {
+        return self.spyStore
+            .observe([String: TodoEvent].self, key: ShareDataKeys.todos.rawValue)
+            .map { $0?["will_removing_todo"] }
+            .eraseToAnyPublisher()
+    }
+    
+    // remove todo -> update shared data as nil
+    func testUsecase_whenRemoveTodo_removeFromShared() {
+        // given
+        let expect = expectation(description: "todo 삭제 이후 공유 스토어에서 삭제")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubWillRemovingTodo(nextEventExists: false)
+        
+        // when
+        let todos = self.waitOutputs(expect, for: self.willRemovingTodoAtStore) {
+            Task {
+                try? await usecase.removeTodo("will_removing_todo", onlyThisTime: false)
+            }
+        }
+        
+        // then
+        let todoIsNils = todos.map { $0 == nil }
+        XCTAssertEqual(todoIsNils, [false, true])
+    }
+    
+    // remove repeating todo only this time + next repeating event exists -> update shared data as next event
+    func testUsecase_whenRemoveTodoAndNextRepeatingTodoExists_provideSharedTodoAsNextEvent() {
+        // given
+        let expect = expectation(description: "반복이벤트 중 이번만 삭제하는 경우 다음이벤트로 대체")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubWillRemovingTodo(nextEventExists: true)
+        
+        // when
+        let todos = self.waitOutputs(expect, for: self.willRemovingTodoAtStore) {
+            Task {
+                try? await usecase.removeTodo("will_removing_todo", onlyThisTime: true)
+            }
+        }
+        
+        // then
+        let todoNames = todos.map { $0?.name }
+        XCTAssertEqual(todoNames, ["old", "next"])
+    }
+    
+    // remove repeating todo only this time + next repeating event not exists -> update shared data as nil
+    func testUsecase_whenRemoveTodoAndNextRepeatingTodoNotExists_provideSharedTodoAsNextEvent() {
+        // given
+        let expect = expectation(description: "반복이벤트 중 이번만 삭제하는 경우 다음이벤트로 대체해야하지만 없으면 nil")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubWillRemovingTodo(nextEventExists: false)
+        
+        // when
+        let todos = self.waitOutputs(expect, for: self.willRemovingTodoAtStore) {
+            Task {
+                try? await usecase.removeTodo("will_removing_todo", onlyThisTime: true)
+            }
+        }
+        
+        // then
+        let todoIsNils = todos.map { $0 == nil }
+        XCTAssertEqual(todoIsNils, [false, true])
+    }
 }
 
 
