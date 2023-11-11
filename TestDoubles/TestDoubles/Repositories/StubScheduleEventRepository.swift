@@ -81,4 +81,13 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
         }
         return Just(self.eventsMocking(range)).mapNever().eraseToAnyPublisher()
     }
+    
+    public var stubRemoveScheduleNextRepeatingExists: Bool = false
+    open func removeEvent(_ eventId: String, onlyThisTime: EventTime?) async throws -> RemoveSheduleEventResult {
+        if stubRemoveScheduleNextRepeatingExists {
+            return RemoveSheduleEventResult() |> \.nextRepeatingEvnet .~ .init(uuid: eventId, name: "next", time: .at(2))
+        } else {
+            return RemoveSheduleEventResult()
+        }
+    }
 }

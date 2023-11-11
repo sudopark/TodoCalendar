@@ -533,6 +533,94 @@ extension ScheduleEventUsecaseImpleTests {
 }
 
 
+// MARK: - remove case
+
+extension ScheduleEventUsecaseImpleTests {
+    
+    func testUsecase_removeSchedule() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when + then
+        try await usecase.removeScheduleEvent("will_removing_todo", onlyThisTime: nil)
+    }
+    
+    private func makeUsecaseWithStubWillRemovingSchedule(
+        nextEventExists: Bool
+    ) -> ScheduleEventUsecaseImple {
+        let usecase = self.makeUsecase()
+        self.stubRepository.stubRemoveScheduleNextRepeatingExists = nextEventExists
+        let schedule = ScheduleEvent(uuid: "will_removing_todo", name: "old", time: .at(0))
+        self.spyStore.update(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue) {
+            ($0 ?? .init()).append(schedule)
+        }
+        return usecase
+    }
+    
+    private var willRemovingScheduleAtStore: AnyPublisher<ScheduleEvent?, Never> {
+        return self.spyStore
+            .observe(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue)
+            .map { $0?.scheduleEvents(in: 0..<10) }
+            .map { $0?.first(where: { $0.uuid == "will_removing_todo" })}
+            .eraseToAnyPublisher()
+    }
+    
+    func testUsecase_whenRemoveSchedule_removeFromShared() {
+        // given
+        let expect = expectation(description: "schedule 삭제 이후 공유 스토어에서 삭제")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubWillRemovingSchedule(nextEventExists: false)
+        
+        // when
+        let schedules = self.waitOutputs(expect, for: self.willRemovingScheduleAtStore) {
+            Task {
+                try? await usecase.removeScheduleEvent("will_removing_todo", onlyThisTime: nil)
+            }
+        }
+        
+        // then
+        let isNils = schedules.map { $0 == nil }
+        XCTAssertEqual(isNils, [false, true])
+    }
+    
+    func testUsecase_whenRemoveScheduleAndNextRepeatingExists_provideSharedAsNextEvent() {
+        // given
+        let expect = expectation(description: "반복이벤트 중 이번만 삭제하는 경우 다음이벤트로 대체")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubWillRemovingSchedule(nextEventExists: true)
+        
+        // when
+        let schedules = self.waitOutputs(expect, for: self.willRemovingScheduleAtStore) {
+            Task {
+                try? await usecase.removeScheduleEvent("will_removing_todo", onlyThisTime: .at(0))
+            }
+        }
+        
+        // then
+        let names = schedules.map { $0?.name }
+        XCTAssertEqual(names, ["old", "next"])
+    }
+    
+    func testUsecase_whenRemoveScheduleAndNextRepeatingNotExists_provideSharedAsNextEvent() {
+        // given
+        let expect = expectation(description: "반복이벤트 중 이번만 삭제하는 경우 다음이벤트로 대체해야하지만 없으면 nil")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubWillRemovingSchedule(nextEventExists: false)
+        
+        // when
+        let schedules = self.waitOutputs(expect, for: self.willRemovingScheduleAtStore) {
+            Task {
+                try? await usecase.removeScheduleEvent("will_removing_todo", onlyThisTime: .at(0))
+            }
+        }
+        
+        // then
+        let isNils = schedules.map { $0 == nil }
+        XCTAssertEqual(isNils, [false, true])
+    }
+}
+
+
 // MARK: - repeat all day event case
 
 extension ScheduleEventUsecaseImpleTests {

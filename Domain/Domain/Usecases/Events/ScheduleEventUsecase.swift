@@ -18,6 +18,10 @@ public protocol ScheduleEventUsecase {
     
     func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent
     func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent
+    func removeScheduleEvent(
+        _ eventId: String, onlyThisTime: EventTime?
+    ) async throws
+    
     func refreshScheduleEvents(in period: Range<TimeInterval>)
     func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never>
 }
@@ -107,6 +111,21 @@ extension ScheduleEventUsecaseImple {
         }
         return excludeResult.newEvent
     }
+    
+    public func removeScheduleEvent(
+        _ eventId: String, onlyThisTime: EventTime?
+    ) async throws {
+        
+        let result = try await self.scheduleRepository.removeEvent(
+            eventId, onlyThisTime: onlyThisTime
+        )
+        
+        let shareKey = ShareDataKeys.schedules.rawValue
+        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+            ($0 ?? .init())
+                .replace(eventId, ifExists: result.nextRepeatingEvnet)
+        }
+    }
 }
 
 
@@ -134,5 +153,21 @@ extension ScheduleEventUsecaseImple {
             .observe(MemorizedScheduleEventsContainer.self, key: key.rawValue)
             .map { $0?.scheduleEvents(in: period) ?? [] }
             .eraseToAnyPublisher()
+    }
+}
+
+
+private extension MemorizedScheduleEventsContainer {
+    
+    func replace(
+        _ eventId: String, ifExists next: ScheduleEvent?
+    ) -> MemorizedScheduleEventsContainer {
+        
+        guard let next else {
+            return self.invalidate(eventId)
+        }
+        
+        return self.invalidate(eventId)
+            .append(next)
     }
 }

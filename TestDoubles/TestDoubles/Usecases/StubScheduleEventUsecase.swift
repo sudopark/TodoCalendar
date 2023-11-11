@@ -37,4 +37,8 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase {
     open func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never> {
         return Just(self.stubScheduleEventsInRange).eraseToAnyPublisher()
     }
+    
+    open func removeScheduleEvent(_ eventId: String, onlyThisTime: EventTime?) async throws {
+        
+    }
 }

@@ -72,6 +72,22 @@ extension ScheduleEventLocalRepositoryImple {
             self.environmentStorage.remove(key)
         }
     }
+    
+    public func removeEvent(
+        _ eventId: String, onlyThisTime: EventTime?
+    ) async throws -> RemoveSheduleEventResult {
+        
+        let origin = try await self.localStorage.loadScheduleEvent(eventId)
+        try await self.localStorage.removeScheduleEvent(eventId)
+        
+        guard let onlyThisTime else {
+            return RemoveSheduleEventResult()
+        }
+        
+        let updated = origin |> \.repeatingTimeToExcludes <>~ [onlyThisTime.customKey]
+        try await self.localStorage.updateScheduleEvent(updated)
+        return RemoveSheduleEventResult() |> \.nextRepeatingEvnet .~ updated
+    }
 }
 
 extension ScheduleEventLocalRepositoryImple {

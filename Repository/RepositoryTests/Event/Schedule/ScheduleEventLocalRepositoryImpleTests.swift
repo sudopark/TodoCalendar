@@ -138,6 +138,53 @@ extension ScheduleEventLocalRepositoryImpleTests {
 
 extension ScheduleEventLocalRepositoryImpleTests {
     
+    private func makeRepositoryWithStubSchedule(
+        _ schedule: ScheduleEvent
+    ) async throws -> ScheduleEventLocalRepositoryImple {
+        let repository = self.makeRepository()
+        try await self.localStorage.saveScheduleEvent(schedule)
+        return repository
+    }
+ 
+    func testReposiotry_removeSchedule_withoutNextRepeating() async throws {
+        // given
+        let schedule = self.makeDummySchedule(id: "some", time: 0)
+        let repository = try await self.makeRepositoryWithStubSchedule(schedule)
+        
+        // when
+        let result = try await repository.removeEvent(schedule.uuid, onlyThisTime: nil)
+        
+        // then
+        XCTAssertNil(result.nextRepeatingEvnet)
+    }
+    
+    func testRepository_removeSchedule_withNextRepeating() async throws {
+        // given
+        let schedule = self.makeDummySchedule(id: "some", time: 0, from: 0)
+        let repository = try await self.makeRepositoryWithStubSchedule(schedule)
+        
+        // when
+        let result = try await repository.removeEvent(schedule.uuid, onlyThisTime: .at(0))
+        
+        // then
+        XCTAssertNotNil(result.nextRepeatingEvnet)
+    }
+    
+    func testRepository_removeRepeatingTodo() async throws {
+        // given
+        let schedule = self.makeDummySchedule(id: "some", time: 0, from: 0)
+        let repository = try await self.makeRepositoryWithStubSchedule(schedule)
+        
+        // when
+        let result = try await repository.removeEvent(schedule.uuid, onlyThisTime: nil)
+        
+        // then
+        XCTAssertNil(result.nextRepeatingEvnet)
+    }
+}
+
+extension ScheduleEventLocalRepositoryImpleTests {
+    
     private func makeDummySchedule(
         id: String,
         time: TimeInterval,
