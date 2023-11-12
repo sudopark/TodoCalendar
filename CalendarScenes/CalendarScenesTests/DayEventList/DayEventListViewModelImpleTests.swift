@@ -254,7 +254,9 @@ extension DayEventListViewModelImpleTests {
             _ range: Range<TimeInterval>,
             _ expectedPeriodText: EventPeriodText
         ) {
-            let pdtSecondsFromGMT = TimeZone(abbreviation: "PDT")!.secondsFromGMT() |> TimeInterval.init
+            let pdtSecondsFromGMT = TimeZone(abbreviation: "PDT")!
+                .secondsFromGMT(for: Date(timeIntervalSince1970: range.lowerBound))
+                |> TimeInterval.init
             let time = EventTime.allDay(range, secondsFromGMT: pdtSecondsFromGMT)
             let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
             let event = ScheduleCalendarEvent.events(from: schedule, in: kstTimeZone).first!
@@ -305,7 +307,9 @@ extension DayEventListViewModelImpleTests {
         parameterizeTest(periodOnyHasMinutes, "Sep 10 00:00 ~ Sep 10 00:10(10minutes)")
         
         let pdtTimeZone = TimeZone(abbreviation: "PDT")!
-        let offset = pdtTimeZone.secondsFromGMT() |> TimeInterval.init
+        let offset = pdtTimeZone.secondsFromGMT(
+            for: Date(timeIntervalSince1970: self.pdt9_10.lowerBound)
+        ) |> TimeInterval.init
         let allDayToday: EventTime = .allDay(self.pdt9_10, secondsFromGMT: offset)
         parameterizeTest(allDayToday, nil)
         
