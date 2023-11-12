@@ -275,8 +275,9 @@ extension MonthViewModelImpleTests {
         let range = try! TimeInterval.range(
             from: "2023-08-29 00:00:00", to: "2023-08-29 23:59:59", in: pdtTimeZone
         )
+        let offset = TimeInterval(pdtTimeZone.secondsFromGMT(for: Date(timeIntervalSince1970: range.lowerBound)))
         let todo8_29_allday = TodoEvent(uuid: "todo8_29_allday", name: "allday")
-            |> \.time .~ .allDay(range, secondsFromGMT: pdtTimeZone.secondsFromGMT() |> TimeInterval.init)
+            |> \.time .~ .allDay(range, secondsFromGMT: offset)
         self.stubTodoUsecase.eventsFor9 = [todo_w2_sun_wed, todo_w1_mon, todo8_29_allday]
 
         let schedule_w2_tue_fri = ScheduleEvent(

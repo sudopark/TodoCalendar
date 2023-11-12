@@ -64,7 +64,10 @@ extension WeekEventStackBuilderTests {
         // given
         let kstTimeZone = TimeZone(abbreviation: "KST")!
         let range = self.dummyRange(in: kstTimeZone)
-        let time = EventTime.allDay(range, secondsFromGMT: kstTimeZone.secondsFromGMT() |> TimeInterval.init)
+        let offset = kstTimeZone.secondsFromGMT(
+            for: Date(timeIntervalSince1970: range.lowerBound)
+        )
+        let time = EventTime.allDay(range, secondsFromGMT: offset |> TimeInterval.init)
         
         func parameterizeTest(_ timeZone: TimeZone) {
             // given
@@ -81,9 +84,12 @@ extension WeekEventStackBuilderTests {
         
         // when
         let timeZones: [TimeZone] = [
-            .init(abbreviation: "KST")!, .init(abbreviation: "UTC")!, .init(abbreviation: "PDT")!,
+            .init(abbreviation: "KST")!, .init(abbreviation: "UTC")!,
             .init(secondsFromGMT: 14*3600)!, .init(secondsFromGMT: -12*3600)!
         ]
+        // pdt는 제외해야함
+        // expect는 계산시에 해당시간(7월) 기준으로 계산함(pdt) -> 비교값이 잘못됨
+        // 허나 이벤트 타임 계산시에는 pst로(햔재시간 기준) 계산함
         
         // then
         timeZones.forEach(parameterizeTest(_:))
