@@ -18,4 +18,7 @@ public protocol EventDetailSceneBuilder {
     
     @MainActor
     func makeTodoEventDetailScene(_ todoId: String) -> any EventDetailScene
+    
+    @MainActor
+    func makeScheduleEventDetailScene(_ scheduleId: String) -> any EventDetailScene
 }

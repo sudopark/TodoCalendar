@@ -20,6 +20,7 @@ protocol DayEventListRouting: Routing, Sendable {
     func routeToMakeTodoEvent(_ withParams: TodoMakeParams)
     func routeToMakeNewEvent()
     func routeToTodoEventDetail(_ eventId: String)
+    func routeToScheduleEventDetail(_ eventId: String)
     // TODO: tempplate 관련해서 초기 파라미터 필요할 수 있음
     func routeToSelectTemplateForMakeEvent()
 }
@@ -63,6 +64,13 @@ extension DayEventListRouter {
     func routeToTodoEventDetail(_ eventId: String) {
         Task { @MainActor in
             let next = self.eventDetailSceneBuilder.makeTodoEventDetailScene(eventId)
+            self.currentScene?.present(next, animated: true)
+        }
+    }
+    
+    func routeToScheduleEventDetail(_ eventId: String) {
+        Task { @MainActor in
+            let next = self.eventDetailSceneBuilder.makeScheduleEventDetailScene(eventId)
             self.currentScene?.present(next, animated: true)
         }
     }

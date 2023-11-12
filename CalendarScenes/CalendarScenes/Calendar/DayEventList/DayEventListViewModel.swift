@@ -121,8 +121,7 @@ extension DayEventListViewModelImple {
         case let todo as TodoEventCellViewModel:
             self.router?.routeToTodoEventDetail(todo.eventIdentifier)
         case let schedule as ScheduleEventCellViewModel:
-            // TODO:
-            break
+            self.router?.routeToScheduleEventDetail(schedule.eventIdentifier)
         case let holiday as HolidayEventCellViewModel:
             // TODO:
             break
