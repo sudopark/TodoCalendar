@@ -100,4 +100,11 @@ extension ScheduleEventLocalRepositoryImple {
         }
         .eraseToAnyPublisher()
     }
+    
+    public func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error> {
+        return Publishers.create { [weak self] in
+            return try await self?.localStorage.loadScheduleEvent(eventId)
+        }
+        .eraseToAnyPublisher()
+    }
 }

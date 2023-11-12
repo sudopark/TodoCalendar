@@ -90,4 +90,13 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
             return RemoveSheduleEventResult()
         }
     }
+    
+    public var stubEvent: ScheduleEvent?
+    public func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error> {
+        guard let event = self.stubEvent
+        else {
+            return Empty().eraseToAnyPublisher()
+        }
+        return Just(event).mapNever().eraseToAnyPublisher()
+    }
 }

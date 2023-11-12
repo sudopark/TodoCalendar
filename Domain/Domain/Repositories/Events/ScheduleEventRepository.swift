@@ -26,4 +26,6 @@ public protocol ScheduleEventRepository {
     ) async throws -> RemoveSheduleEventResult
     
     func loadScheduleEvents(in range: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], any Error>
+    
+    func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error>
 }
