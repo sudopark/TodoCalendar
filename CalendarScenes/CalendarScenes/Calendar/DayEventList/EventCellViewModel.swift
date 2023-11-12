@@ -180,6 +180,7 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
 
 struct ScheduleEventCellViewModel: EventCellViewModel {
     
+    let eventIdWithoutTurn: String
     let eventIdentifier: String
     let turn: Int?
     var tagId: AllEventTagId
@@ -192,7 +193,8 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
     }
     
     init(_ id: String, turn: Int? = nil, name: String) {
-        self.eventIdentifier = id
+        self.eventIdWithoutTurn = id
+        self.eventIdentifier = "\(id)_\(turn ?? 0)"
         self.turn = turn
         self.name = name
         self.tagId = .default
@@ -203,6 +205,7 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
             let periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone)
         else { return nil }
         self.eventIdentifier = schedule.eventId
+        self.eventIdWithoutTurn = schedule.eventIdWithoutTurn
         self.turn = schedule.turn
         self.tagId = schedule.eventTagId
         self.name = schedule.name

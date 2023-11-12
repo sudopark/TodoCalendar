@@ -60,6 +60,18 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
     }
     
     @MainActor
+    public func makeScheduleEventDetailScene(_ scheduleId: String) -> any EventDetailScene {
+        let viewModel = EditScheduleEventDetailViewModelImple(
+            scheduleId: scheduleId,
+            scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase()
+        )
+        return self.makeEventDetailScene(viewModel)
+    }
+    
+    @MainActor
     private func makeEventDetailScene(
         _ viewModel: any EventDetailViewModel
     ) -> any EventDetailScene {

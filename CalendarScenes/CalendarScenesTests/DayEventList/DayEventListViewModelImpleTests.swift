@@ -572,6 +572,20 @@ extension DayEventListViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didRouteToTodoDetail, true)
     }
     
+    func testViewModel_whenSelectScheduleEvent_routeToScheduleDetail() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let schedule = ScheduleCalendarEvent(eventId: "dummy", name: "some", eventTime: .at(0), eventTimeOnCalendar: .at(0), eventTagId: .default)
+        
+        // when
+        let model = ScheduleEventCellViewModel(schedule, in: 0..<10, timeZone: timeZone)!
+        viewModel.selectEvent(model)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToScheduleDetail, true)
+    }
+    
     // TODO: evnet 생성 기능 추가한 이후에 구현
 //    func testViewModel_makeNewEvent() {
 //
@@ -604,6 +618,11 @@ extension DayEventListViewModelImpleTests {
         var didRouteToTodoDetail: Bool?
         func routeToTodoEventDetail(_ eventId: String) {
             self.didRouteToTodoDetail = true
+        }
+        
+        var didRouteToScheduleDetail: Bool?
+        func routeToScheduleEventDetail(_ eventId: String) {
+            self.didRouteToScheduleDetail = true
         }
     }
 }

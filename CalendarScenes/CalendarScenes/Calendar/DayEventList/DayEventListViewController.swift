@@ -45,6 +45,7 @@ final class DayEventListViewController: UIHostingController<DayEventListContaine
         }
         .eventHandler(\.addNewTodoQuickly, viewModel.addNewTodoQuickly(withName:))
         .eventHandler(\.makeNewTodoWithGivenNameAndDetails, viewModel.makeTodoEvent(with:))
+        .eventHandler(\.requestShowDetail, viewModel.selectEvent(_:))
         super.init(rootView: containerView)
         self.sizingOptions = [.intrinsicContentSize]
     }

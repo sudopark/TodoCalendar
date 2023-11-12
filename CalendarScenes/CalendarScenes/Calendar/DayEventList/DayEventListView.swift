@@ -78,6 +78,7 @@ struct DayEventListContainerView: View {
     var requestAddNewEventWhetherUsingTemplate: (Bool) -> Void = { _ in }
     var addNewTodoQuickly: (String) -> Void = { _ in }
     var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
+    var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     
     init(viewAppearance: ViewAppearance) {
         self.viewAppearance = viewAppearance
@@ -89,6 +90,7 @@ struct DayEventListContainerView: View {
             .eventHandler(\.requestAddNewEventWhetherUsingTemplate, self.requestAddNewEventWhetherUsingTemplate)
             .eventHandler(\.addNewTodoQuickly, self.addNewTodoQuickly)
             .eventHandler(\.makeNewTodoWithGivenNameAndDetails, self.makeNewTodoWithGivenNameAndDetails)
+            .eventHandler(\.requestShowDetail, self.requestShowDetail)
             .onAppear {
                 self.stateBinding(self.state)
             }
@@ -104,6 +106,7 @@ struct DayEventListView: View {
     @EnvironmentObject private var state: DayEventListViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
+    fileprivate var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     fileprivate var requestDoneTodo: (String) -> Void = { _ in }
     fileprivate var requestAddNewEventWhetherUsingTemplate: (Bool) -> Void = { _ in }
     fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
@@ -121,6 +124,7 @@ struct DayEventListView: View {
                     
                     EventListCellView(cellViewModel: cellViewModel)
                         .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
+                        .eventHandler(\.requestShowDetail, self.requestShowDetail)
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -174,6 +178,7 @@ private struct EventListCellView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     
     fileprivate var requestDoneTodo: (String) -> Void = { _ in }
+    fileprivate var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     
     private let cellViewModel: any EventCellViewModel
     init(cellViewModel: any EventCellViewModel) {
@@ -198,6 +203,9 @@ private struct EventListCellView: View {
         .padding(.vertical, 4).padding(.horizontal, 8)
         .frame(idealHeight: 50)
         .backgroundAsRoundedRectForEventList(self.appearance)
+        .onTapGesture {
+            self.requestShowDetail(self.cellViewModel)
+        }
     }
     
     private func eventLeftView(_ cellViewModel: any EventCellViewModel) -> some View {

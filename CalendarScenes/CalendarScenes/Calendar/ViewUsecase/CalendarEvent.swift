@@ -86,6 +86,7 @@ struct TodoCalendarEvent: CalendarEvent {
 
 struct ScheduleCalendarEvent: CalendarEvent {
     
+    let eventIdWithoutTurn: String
     let eventId: String
     let name: String
     let eventTime: EventTime?
@@ -101,6 +102,7 @@ struct ScheduleCalendarEvent: CalendarEvent {
         return schedule.repeatingTimes
             .map {
                 .init(
+                    eventIdWithoutTurn: schedule.uuid,
                     eventId: "\(schedule.uuid)-\($0.turn)",
                     name: schedule.name,
                     eventTime: $0.time,
