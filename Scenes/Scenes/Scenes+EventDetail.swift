@@ -15,4 +15,7 @@ public protocol EventDetailSceneBuilder {
     
     @MainActor
     func makeNewEventScene(isTodo: Bool) -> any EventDetailScene
+    
+    @MainActor
+    func makeTodoEventDetailScene(_ todoId: String) -> any EventDetailScene
 }

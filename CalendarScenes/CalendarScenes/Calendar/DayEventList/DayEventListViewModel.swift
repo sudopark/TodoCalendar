@@ -117,6 +117,17 @@ extension DayEventListViewModelImple {
     
     func selectEvent(_ model: any EventCellViewModel) {
         // TODO: show detail
+        switch model {
+        case let todo as TodoEventCellViewModel:
+            self.router?.routeToTodoEventDetail(todo.eventIdentifier)
+        case let schedule as ScheduleEventCellViewModel:
+            // TODO:
+            break
+        case let holiday as HolidayEventCellViewModel:
+            // TODO:
+            break
+        default: break
+        }
     }
     
     func doneTodo(_ eventId: String) {
