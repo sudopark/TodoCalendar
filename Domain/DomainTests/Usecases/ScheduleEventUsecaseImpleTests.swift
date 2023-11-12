@@ -530,6 +530,43 @@ extension ScheduleEventUsecaseImpleTests {
         let newEvent = eventLists.last?.first(where: { $0.uuid == "new" })
         XCTAssertEqual(newEvent?.time, EventTime.at(4))
     }
+    
+    private func stubScheduleEvent() {
+        self.stubRepository.stubEvent = .init(uuid: "some", name: "name", time: .at(1))
+    }
+    
+    func testUsecase_loadScheduleById() {
+        // given
+        let expect = expectation(description: "id로 이벤트 조회")
+        let usecase = self.makeUsecase()
+        self.stubScheduleEvent()
+        
+        // when
+        let event = self.waitFirstOutput(expect, for: usecase.scheduleEvent("some"))
+        
+        // then
+        XCTAssertNotNil(event)
+    }
+    
+    func testUsecase_whenLoadSchedule_updateStore() {
+        // given
+        let expect = expectation(description: "id로 이벤트 조회 이후에 공유데이터 업데이트")
+        let usecase = self.makeUsecase()
+        self.stubScheduleEvent()
+        
+        // when
+        let source = self.spyStore.observe(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue)
+            .compactMap { $0?.scheduleEvents(in: 0..<10) }
+            .compactMap { $0.first(where: { $0.uuid == "some"} )}
+        let event = self.waitFirstOutput(expect, for: source) {
+            usecase.scheduleEvent("some")
+                .sink(receiveValue: { _ in })
+                .store(in: &self.cancelBag)
+        }
+        
+        // then
+        XCTAssertNotNil(event)
+    }
 }
 
 

@@ -157,7 +157,15 @@ extension ScheduleEventUsecaseImple {
     }
     
     public func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error> {
-        return Empty().eraseToAnyPublisher()
+        let updateStore: (ScheduleEvent) -> Void = { [weak self] schedule in
+            let key = ShareDataKeys.schedules.rawValue
+            self?.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: key) {
+                ($0 ?? .init()).append(schedule)
+            }
+        }
+        return self.scheduleRepository.scheduleEvent(eventId)
+            .handleEvents(receiveOutput: updateStore)
+            .eraseToAnyPublisher()
     }
 }
 
