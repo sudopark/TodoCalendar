@@ -24,6 +24,7 @@ public protocol ScheduleEventUsecase {
     
     func refreshScheduleEvents(in period: Range<TimeInterval>)
     func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never>
+    func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error>
 }
 
 
@@ -153,6 +154,10 @@ extension ScheduleEventUsecaseImple {
             .observe(MemorizedScheduleEventsContainer.self, key: key.rawValue)
             .map { $0?.scheduleEvents(in: period) ?? [] }
             .eraseToAnyPublisher()
+    }
+    
+    public func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error> {
+        return Empty().eraseToAnyPublisher()
     }
 }
 

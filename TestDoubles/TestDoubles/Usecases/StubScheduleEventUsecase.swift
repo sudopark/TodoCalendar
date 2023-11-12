@@ -25,8 +25,15 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase {
         return newEvent
     }
     
+    public var shouldUpdateEventFail: Bool = false
+    public var didUpdateEditParams: ScheduleEditParams?
     open func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent {
-        throw RuntimeError("not implemented")
+        self.didUpdateEditParams = params
+        guard self.shouldUpdateEventFail == false
+        else {
+            throw RuntimeError("failed")
+        }
+        return .init(uuid: "some", name: "name", time: .at(0))
     }
     
     open func refreshScheduleEvents(in period: Range<TimeInterval>) {
@@ -40,5 +47,14 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase {
     
     open func removeScheduleEvent(_ eventId: String, onlyThisTime: EventTime?) async throws {
         
+    }
+    
+    public var stubEvent: ScheduleEvent?
+    open func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error> {
+        guard let event = self.stubEvent
+        else {
+            return Empty().eraseToAnyPublisher()
+        }
+        return Just(event).mapNever().eraseToAnyPublisher()
     }
 }

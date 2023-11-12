@@ -1,8 +1,8 @@
 //
-//  EditTodoEventDetailViewModelImple.swift
+//  EditScheduleEventDetailViewModelImple.swift
 //  EventDetailScene
 //
-//  Created by sudo.park on 11/1/23.
+//  Created by sudo.park on 11/12/23.
 //
 
 import Foundation
@@ -13,24 +13,24 @@ import Domain
 import Scenes
 
 
-final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {
+final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {
     
-    private let todoId: String
-    private let todoUsecase: any TodoEventUsecase
+    private let scheduleId: String
+    private let scheduleUsecase: any ScheduleEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let eventDetailDataUsecase: any EventDetailDataUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     var router: (any EventDetailRouting)?
     
     init(
-        todoId: String,
-        todoUsecase: any TodoEventUsecase,
+        scheduleId: String,
+        scheduleUsecase: any ScheduleEventUsecase,
         eventTagUsecase: any EventTagUsecase,
         eventDetailDataUsecase: any EventDetailDataUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase
     ) {
-        self.todoId = todoId
-        self.todoUsecase = todoUsecase
+        self.scheduleId = scheduleId
+        self.scheduleUsecase = scheduleUsecase
         self.eventTagUsecase = eventTagUsecase
         self.eventDetailDataUsecase = eventDetailDataUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -62,8 +62,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
     }
 }
 
-
-extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
+extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     
     private func handleError() -> (Error) -> Void {
         return { [weak self] error in
@@ -88,8 +87,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             )
             self?.inputInteractor?.prepared(basic: basic, additional: addition)
         }
-        
-        let handleComplete: (Subscribers.Completion<Error>) -> Void = { [weak self] completed in
+        let handleCompleted: (Subscribers.Completion<Error>) -> Void = { [weak self] completed in
             self?.subject.isLoading.send(false)
             if case .failure(let error) = completed {
                 self?.handleError()(error)
@@ -100,16 +98,16 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             self.prepareBasicData(),
             self.additionDataWithoutError().mapNever()
         )
-        .sink(receiveCompletion: handleComplete, receiveValue: handlePrepared)
+        .sink(receiveCompletion: handleCompleted, receiveValue: handlePrepared)
         .store(in: &self.cancellables)
     }
     
     private func prepareBasicData() -> AnyPublisher<EventDetailBasicData, any Error> {
-        let transform: (TodoEvent, TimeZone) -> EventDetailBasicData = { todo, timeZone in
-            return EventDetailBasicData(todo: todo, timeZone)
+        let transform: (ScheduleEvent, TimeZone) -> EventDetailBasicData = { schedule, timeZone in
+            return EventDetailBasicData(schedule, timeZone)
         }
         return Publishers.CombineLatest(
-            self.todoUsecase.todoEvent(self.todoId).removeDuplicates(),
+            self.scheduleUsecase.scheduleEvent(self.scheduleId).removeDuplicates(),
             self.subject.timeZone.compactMap { $0 }.mapNever().first()
         )
         .map(transform)
@@ -117,12 +115,12 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
     }
     
     private func additionDataWithoutError() -> AnyPublisher<EventDetailData, Never> {
-        let id = self.todoId
+        let id = self.scheduleId
         return self.eventDetailDataUsecase.loadDetail(id)
             .catch { _ in Just(.init(id)) }
             .eraseToAnyPublisher()
     }
-
+    
     func handleMoreAction(_ action: EventDetailMoreAction) {
         switch action {
         case .remove(let onlyThisEvent):
@@ -141,23 +139,29 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
     }
     
     private func removeEventAfterConfirm(onlyThisTime: Bool) {
+        guard let timeZone = self.subject.timeZone.value,
+              let time = self.subject.basicData.value?.origin.selectedTime?.eventTime(timeZone)
+        else { return }
+        let onlyThisTime = onlyThisTime ? time : nil
         let info = ConfirmDialogInfo()
             |> \.message .~ pure("do you want to remove this event".localized())
             |> \.confirmText .~ "remove".localized()
-            |> \.confirmed .~ pure(self.removeTodo(onlyThistime: onlyThisTime))
+            |> \.confirmed .~ pure(self.removeSchedule(onlyThisTime))
             |> \.withCancel .~ true
             |> \.cancelText .~ "cancel".localized()
         self.router?.showConfirm(dialog: info)
     }
     
-    private func removeTodo(onlyThistime: Bool) -> () -> Void {
-        let todoId = self.todoId
+    private func removeSchedule(_ onlyThistime: EventTime?) -> () -> Void {
+        let scheduleId = self.scheduleId
         return { [weak self] in
             guard let self = self else { return }
             Task { [weak self] in
                 do {
-                    try await self?.todoUsecase.removeTodo(todoId, onlyThisTime: onlyThistime)
-                    self?.router?.showToast("todo removed".localized())
+                    try await self?.scheduleUsecase.removeScheduleEvent(
+                        scheduleId, onlyThisTime: onlyThistime
+                    )
+                    self?.router?.showToast("schedule removed".localized())
                     self?.router?.closeScene()
                 } catch {
                     self?.router?.showError(error)
@@ -175,9 +179,11 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
     func toggleIsTodo() { }
     
     func eventDetail(didInput basic: EventDetailBasicData, additional: EventDetailData) {
+        
         guard let oldBasic = self.subject.basicData.value,
               let oldAddition = self.subject.additionalData.value
         else { return }
+        
         self.subject.basicData.send(
             oldBasic |> \.current .~ basic
         )
@@ -187,39 +193,43 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
     }
     
     func save() {
-
         guard let basic = self.subject.basicData.value,
               let addition = self.subject.additionalData.value,
-              let timeZone = self.subject.timeZone.value
+              let timeZone = self.subject.timeZone.value,
+              let originEventTime = basic.origin.selectedTime?.eventTime(timeZone)
         else { return }
         
         guard basic.isChanged || addition.isChanged
         else {
-            self.router?.closeScene(animate: true, nil)
+            self.router?.closeScene()
             return
         }
         
-        let orinalTodoIsRepeating = basic.origin.eventRepeating != nil
-        let params = self.todoEditParams(from: basic.current, timeZone)
+        let originalScheduleIsRepeating = basic.origin.eventRepeating != nil
+        let params = self.scheduleEditParams(from: basic.current, timeZone)
         
-        orinalTodoIsRepeating
-            ? self.saveAfterShowConfirm(params, addition.current)
-            : self.editTodo(params, addition.current)
+        originalScheduleIsRepeating
+            ? saveAfterShowConfirm(originEventTime, params, addition.current)
+            : editSchedule(params, addition.current)
     }
     
     private func saveAfterShowConfirm(
-        _ params: TodoEditParams,
+        _ originEventTime: EventTime,
+        _ params: ScheduleEditParams,
         _ addition: EventDetailData
     ) {
         
         let onlyThisTimeConfirmed: () -> Void = { [weak self] in
-            self?.editTodo(params |> \.repeatingUpdateScope .~ .onlyThisTime, addition)
+            self?.editSchedule(
+                params |> \.repeatingUpdateScope .~ .onlyThisTime(originEventTime),
+                addition
+            )
         }
         let allConfirmed: () -> Void = { [weak self] in
-            self?.editTodo(params |> \.repeatingUpdateScope .~ .all, addition)
+            self?.editSchedule(params |> \.repeatingUpdateScope .~ .all, addition)
         }
         let info = ConfirmDialogInfo()
-            |> \.title .~ pure("[TODO] edit todo scope".localized())
+            |> \.title .~ pure("[TODO] edit schedule scope".localized())
             |> \.message .~ pure("[TODO] select scope".localized())
             |> \.confirmText .~ "only this time".localized()
             |> \.confirmed .~ pure(onlyThisTimeConfirmed)
@@ -229,20 +239,20 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
         self.router?.showConfirm(dialog: info)
     }
     
-    private func editTodo(
-        _ params: TodoEditParams,
+    private func editSchedule(
+        _ params: ScheduleEditParams,
         _ addition: EventDetailData
     ) {
         
-        let todoId = self.todoId
+        let scheduleId = self.scheduleId
         self.subject.isSaving.send(true)
         Task { [weak self] in
             
             do {
-                let _ = try await self?.todoUsecase.updateTodoEvent(todoId, params)
+                let _ = try await self?.scheduleUsecase.updateScheduleEvent(scheduleId, params)
                 let _ = try? await self?.eventDetailDataUsecase.saveDetail(addition)
                 
-                self?.router?.showToast("[TODO] todo saved".localized())
+                self?.router?.showToast("[TODO] schedule saved".localized())
                 self?.router?.closeScene(animate: true, nil)
             } catch {
                 self?.router?.showError(error)
@@ -252,17 +262,18 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
         .store(in: &self.cancellables)
     }
     
-    private func todoEditParams(from basic: EventDetailBasicData, _ timeZone: TimeZone) -> TodoEditParams {
-        return TodoEditParams()
+    private func scheduleEditParams(from basic: EventDetailBasicData, _ timeZone: TimeZone) -> ScheduleEditParams {
+        
+        return ScheduleEditParams()
             |> \.name .~ basic.name
             |> \.eventTagId .~ pure(basic.eventTagId)
             |> \.time .~ basic.selectedTime?.eventTime(timeZone)
             |> \.repeating .~ basic.eventRepeating?.repeating
+        
     }
 }
 
-
-extension EditTodoEventDetailViewModelImple {
+extension EditScheduleEventDetailViewModelImple {
     
     var isLoading: AnyPublisher<Bool, Never> {
         return self.subject.isLoading
@@ -270,16 +281,15 @@ extension EditTodoEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var isTodo: AnyPublisher<Bool, Never> { Just(true).eraseToAnyPublisher() }
+    var isTodo: AnyPublisher<Bool, Never> { Just(false).eraseToAnyPublisher() }
     
     var isTodoOrScheduleTogglable: Bool { false }
     
     var isSavable: AnyPublisher<Bool, Never> {
-        
         let transform: (EventDetailBasicData?) -> Bool = { basic in
             let nameIsNotEmpty = basic?.name?.isEmpty == false
-            let notInvalidTimeSelected = basic?.selectedTime?.isValid != false
-            return nameIsNotEmpty && notInvalidTimeSelected
+            let validTimeSelected = basic?.selectedTime?.isValid == true
+            return nameIsNotEmpty && validTimeSelected
         }
         
         return self.subject.basicData
@@ -311,25 +321,12 @@ extension EditTodoEventDetailViewModelImple {
     }
 }
 
-
-extension EventDetailBasicData {
+private extension EventDetailBasicData {
     
-    init(todo: TodoEvent, _ timeZone: TimeZone) {
-        self.name = todo.name
-        self.selectedTime = todo.time.map { SelectedTime($0, timeZone) }
-        self.eventRepeating = EventRepeatingTimeSelectResult.make(todo.time, todo.repeating, timeZone)
-        self.eventTagId = todo.eventTagId ?? .default
-    }
-}
-
-extension EventRepeatingTimeSelectResult {
-    
-     static func make(_ eventTime: EventTime?, _ repeating: EventRepeating?, _ timeZone: TimeZone) -> Self? {
-        guard let repeating,
-              let start = eventTime.map ({ Date(timeIntervalSince1970: $0.lowerBoundWithFixed) }),
-              let model = SelectRepeatingOptionModel(repeating.repeatOption, start, timeZone)
-        else { return nil }
-         return .init(text: model.text, repeating: repeating)
-        
+    init(_ schedule: ScheduleEvent, _ timeZone: TimeZone) {
+        self.name = schedule.name
+        self.selectedTime = SelectedTime(schedule.time, timeZone)
+        self.eventRepeating = EventRepeatingTimeSelectResult.make(schedule.time, schedule.repeating, timeZone)
+        self.eventTagId = schedule.eventTagId ?? .default
     }
 }
