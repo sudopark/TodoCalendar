@@ -32,4 +32,8 @@ extension EventDetailDataLocalRepostioryImple {
         try await self.localStorage.saveDetail(detail)
         return detail
     }
+    
+    public func removeDetail(_ id: String) async throws {
+        try await self.localStorage.removeDetail(id)
+    }
 }

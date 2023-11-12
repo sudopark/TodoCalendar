@@ -63,4 +63,14 @@ extension EventDetailDataLocalRepostioryImpleTests {
         XCTAssertEqual(loadedDetail?.place?.addressText, detail.place?.addressText)
         XCTAssertEqual(loadedDetail?.place?.coordinate, detail.place?.coordinate)
     }
+    
+    func testRepository_removeDetail() async throws {
+        // given
+        let repository = self.makeRepository()
+        let detail = EventDetailData("dummy")
+        try await self.localStorage.saveDetail(detail)
+        
+        // when + then
+        try await repository.removeDetail(detail.eventId)
+    }
 }
