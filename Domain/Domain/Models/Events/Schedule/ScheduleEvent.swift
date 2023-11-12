@@ -12,7 +12,7 @@ import Optics
 
 // MARK: - schedule event
 
-public struct ScheduleEvent {
+public struct ScheduleEvent: Equatable {
     
     public let uuid: String
     public var name: String
@@ -94,7 +94,7 @@ public struct ScheduleMakeParams {
 }
 
 
-public struct ScheduleEditParams {
+public struct ScheduleEditParams: Equatable {
     
     public enum RepeatingUpdateScope: Equatable {
         case all
