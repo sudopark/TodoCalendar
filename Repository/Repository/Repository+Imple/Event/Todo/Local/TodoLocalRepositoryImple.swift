@@ -138,7 +138,9 @@ extension TodoLocalRepositoryImple {
     }
     
     public func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
-        // TODO: 
-        return Empty().mapNever().eraseToAnyPublisher()
+        return Publishers.create { [weak self] in
+            return try await self?.localStorage.loadTodoEvent(id)
+        }
+        .eraseToAnyPublisher()
     }
 }

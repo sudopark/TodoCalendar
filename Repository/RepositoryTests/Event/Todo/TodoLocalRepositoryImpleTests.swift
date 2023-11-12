@@ -503,6 +503,18 @@ extension TodoLocalRepositoryImpleTests {
         let todoNames = todos.map { $0?.name }
         XCTAssertEqual(todoNames, Array(repeating: "all-day", count: timeZones.count))
     }
+    
+    func testRepository_loadTodoById() async throws {
+        // given
+        let todo = TodoEvent(uuid: "dummy", name: "some")
+        let repository = try await self.makeRepositoryWithStubTodo(todo)
+        
+        // when
+        let loadedTodo = try await repository.todoEvent(todo.uuid).firstValue(with: 100)
+        
+        // then
+        XCTAssertNotNil(loadedTodo)
+    }
 }
 
 
