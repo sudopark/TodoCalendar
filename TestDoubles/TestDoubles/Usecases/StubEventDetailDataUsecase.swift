@@ -28,4 +28,8 @@ open class StubEventDetailDataUsecase: EventDetailDataUsecase, @unchecked Sendab
         }
         return detail
     }
+    
+    open func removeDetail(_ id: String) async throws {
+        
+    }
 }
