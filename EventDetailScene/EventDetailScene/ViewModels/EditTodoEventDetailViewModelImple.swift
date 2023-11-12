@@ -125,10 +125,45 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
 
     func handleMoreAction(_ action: EventDetailMoreAction) {
         switch action {
-        case .remove(let onlyThisEvent): break
-        case .copy: break
-        case .addToTemplate: break
-        case .share: break
+        case .remove(let onlyThisEvent):
+            self.removeEventAfterConfirm(onlyThisTime: onlyThisEvent)
+            
+        case .copy:
+            // TODO:
+            break
+        case .addToTemplate:
+            // TODO:
+            break
+        case .share:
+            // TODO:
+            break
+        }
+    }
+    
+    private func removeEventAfterConfirm(onlyThisTime: Bool) {
+        let info = ConfirmDialogInfo()
+            |> \.message .~ pure("do you want to remove this event".localized())
+            |> \.confirmText .~ "remove".localized()
+            |> \.confirmed .~ pure(self.removeTodo(onlyThistime: onlyThisTime))
+            |> \.withCancel .~ true
+            |> \.cancelText .~ "cancel".localized()
+        self.router?.showConfirm(dialog: info)
+    }
+    
+    private func removeTodo(onlyThistime: Bool) -> () -> Void {
+        let todoId = self.todoId
+        return { [weak self] in
+            guard let self = self else { return }
+            Task { [weak self] in
+                do {
+                    try await self?.todoUsecase.removeTodo(todoId, onlyThisTime: onlyThistime)
+                    self?.router?.showToast("todo removed".localized())
+                    self?.router?.closeScene()
+                } catch {
+                    self?.router?.showError(error)
+                }
+            }
+            .store(in: &self.cancellables)
         }
     }
     
@@ -260,13 +295,13 @@ extension EditTodoEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var moreActions: AnyPublisher<[EventDetailMoreAction], Never> {
-        let transform: (EventDetailBasicData) -> [EventDetailMoreAction] = { basic in
+    var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
+        let transform: (EventDetailBasicData) -> [[EventDetailMoreAction]] = { basic in
             let isRepeating = basic.selectedTime != nil && basic.eventRepeating != nil
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
-            return removeActions + [.copy, .addToTemplate, .share]
+            return [removeActions, [.copy, .addToTemplate, .share]]
         }
         return self.subject.basicData
             .compactMap { $0?.origin }

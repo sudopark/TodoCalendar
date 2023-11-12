@@ -153,7 +153,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         // given
         func parameterizeTest(
             _ viewModel: EditTodoEventDetailViewModelImple,
-            expect expectingActions: [EventDetailMoreAction]
+            expect expectingActions: [[EventDetailMoreAction]]
         ) {
             // given
             let expect = expectation(description: "wait more action")
@@ -168,12 +168,26 @@ extension EditTodoEventDetailViewModelImpleTests {
         // when + then
         let todo = self.dummyRepeatingTodo
         parameterizeTest(self.makeViewModel(customTodo: todo), expect: [
-            .remove(onlyThisEvent: true), .remove(onlyThisEvent: false), .copy, .addToTemplate, .share
+            [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)], [.copy, .addToTemplate, .share]
         ])
         let todoNotRepeating = todo |> \.repeating .~ nil
         parameterizeTest(self.makeViewModel(customTodo: todoNotRepeating), expect: [
-            .remove(onlyThisEvent: false), .copy, .addToTemplate, .share
+            [.remove(onlyThisEvent: false)], [.copy, .addToTemplate, .share]
         ])
+    }
+    
+    func testViewModel_whenAfterRemoveTodo_closeScene() {
+        // given
+        let expect = expectation(description: "todo 삭제 이후에 화면 닫음")
+        self.spyRouter.didCloseCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModelWithPrepare()
+        
+        // when
+        viewModel.handleMoreAction(.remove(onlyThisEvent: true))
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "todo removed".localized())
     }
 }
 

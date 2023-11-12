@@ -35,5 +35,5 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     var isTodoOrScheduleTogglable: Bool { get }
     var isSavable: AnyPublisher<Bool, Never> { get }
     var isSaving: AnyPublisher<Bool, Never> { get }
-    var moreActions: AnyPublisher<[EventDetailMoreAction], Never> { get }
+    var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> { get }
 }

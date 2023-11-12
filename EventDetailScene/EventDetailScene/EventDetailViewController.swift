@@ -57,6 +57,7 @@ final class EventDetailViewController: UIHostingController<EventDetailContainerV
         .eventHandler(\.enterUrl, inputViewModel.enter(url:))
         .eventHandler(\.enterMemo, inputViewModel.enter(memo:))
         .eventHandler(\.save, viewModel.save)
+        .eventHandler(\.doMoreAction, viewModel.handleMoreAction(_:))
         super.init(rootView: containerView)
     }
     

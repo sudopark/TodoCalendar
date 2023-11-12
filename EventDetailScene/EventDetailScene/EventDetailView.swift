@@ -28,6 +28,7 @@ final class EventDetailViewState: ObservableObject {
     @Published var selectedTime: SelectedTime?
     @Published var selectedRepeat: String?
     @Published var isAllDay: Bool = false
+    @Published var availableMoreActions: [[EventDetailMoreAction]] = []
     
     @Published var selectedStartDate: Date = Date()
     @Published var selectedEndDate: Date = Date().addingTimeInterval(60)
@@ -84,6 +85,13 @@ final class EventDetailViewState: ObservableObject {
                 self?.isSavable = isSavable
             })
             .store(in: &self.cancellables)
+        
+        viewModel.moreActions
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] actions in
+                self?.availableMoreActions = actions
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -110,6 +118,7 @@ struct EventDetailContainerView: View {
     var enterUrl: (String) -> Void = { _ in }
     var enterMemo: (String) -> Void = { _ in }
     var save: () -> Void = { }
+    var doMoreAction: (EventDetailMoreAction) -> Void = { _ in }
     
     init(viewAppearance: ViewAppearance) {
         self.viewAppearance = viewAppearance
@@ -171,6 +180,7 @@ struct EventDetailView: View {
     fileprivate var enterUrl: (String) -> Void = { _ in }
     fileprivate var enterMemo: (String) -> Void = { _ in }
     fileprivate var save: () -> Void = { }
+    var doMoreAction: (EventDetailMoreAction) -> Void = { _ in }
 
     private var selectedTagColor: Color? {
         return self.state.selectedTag?.color.color(with: self.appearance).asColor
@@ -180,6 +190,7 @@ struct EventDetailView: View {
         ZStack {
             ScrollView {
                 VStack(spacing: 25) {
+                    self.moreActionView
                     self.nameInputView
                     self.isTodoToggleView
                     self.timeSelectView
@@ -202,6 +213,32 @@ struct EventDetailView: View {
                     title: "Save".localized(), isEnable: self.$state.isSavable
                 )
                 .eventHandler(\.onTap, self.save)
+            }
+        }
+    }
+    
+    private var moreActionView: some View {
+        HStack {
+            Spacer()
+            
+            Menu {
+                ForEach(0..<self.state.availableMoreActions.count, id: \.self) { sectionIndex in
+                    Section {
+                        ForEach(self.state.availableMoreActions[sectionIndex]) { action in
+                            Button(role: action.isRemove ? .destructive : nil) {
+                                self.doMoreAction(action)
+                            } label: {
+                                HStack {
+                                    Text(action.text)
+                                    Image(systemName: action.imageName)
+                                }
+                            }
+                        }
+                    }
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
             }
         }
     }
@@ -535,6 +572,55 @@ private extension SelectedTime {
     }
 }
 
+extension EventDetailMoreAction: Identifiable {
+    var id: String {
+        switch self {
+        case .remove(let onlyThisEvent): return "remove:\(onlyThisEvent)"
+        case .copy: return "copy"
+        case .addToTemplate: return "addToTemplate"
+        case .share: return "share"
+        }
+    }
+    
+    
+    var text: String {
+        switch self {
+        case .remove(let onlyThisEvent): 
+            return onlyThisEvent
+                ? "remove event only this time".localized()
+                : "remove event".localized()
+        case .copy: return "copy".localized()
+        case .addToTemplate: return "add to template".localized()
+        case .share: return "share".localized()
+        }
+    }
+    
+    var imageName: String {
+        switch self {
+        case .remove: return "trash"
+        case .copy: return "doc.on.doc"
+        case .addToTemplate: return "doc.plaintext"
+        case .share: return "square.and.arrow.up"
+        }
+    }
+    
+    var isRemove: Bool {
+        switch self {
+        case .remove: return true
+        default: return false
+        }
+    }
+}
+
+private extension Array where Element == [EventDetailMoreAction] {
+    var compareKey: String {
+        return self
+            .map { actions in actions.map { $0.id } }
+            .map { $0.joined(separator: ",") }
+            .joined(separator: "_")
+    }
+}
+
 // MARK: - preview
 
 struct EventDetailViewPreviewProvider: PreviewProvider {
@@ -552,6 +638,10 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
             .init(Date().addingTimeInterval(+10).timeIntervalSince1970, .current)
         )
         state.selectedRepeat = "some"
+        state.availableMoreActions = [
+            [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
+            [.copy, .addToTemplate, .share]
+        ]
         let eventView = EventDetailView()
             .environmentObject(viewAppearance)
             .environmentObject(state)
