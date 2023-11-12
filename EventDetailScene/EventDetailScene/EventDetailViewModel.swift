@@ -22,6 +22,8 @@ enum EventDetailMoreAction: Equatable {
 
 protocol EventDetailViewModel: Sendable, AnyObject {
     
+    var router: (any EventDetailRouting)? { get set }
+    
     func attachInput()
     func prepare()
     func handleMoreAction(_ action: EventDetailMoreAction)

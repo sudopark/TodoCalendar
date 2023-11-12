@@ -42,6 +42,28 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase()
         )
         
+        return self.makeEventDetailScene(viewModel)
+    }
+    
+    @MainActor
+    public func makeTodoEventDetailScene(
+        _ todoId: String
+    ) -> any EventDetailScene {
+        let viewModel = EditTodoEventDetailViewModelImple(
+            todoId: todoId,
+            todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase()
+        )
+        return self.makeEventDetailScene(viewModel)
+    }
+    
+    @MainActor
+    private func makeEventDetailScene(
+        _ viewModel: any EventDetailViewModel
+    ) -> any EventDetailScene {
+        
         let inputViewModel = EventDetailInputViewModelImple(
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase()

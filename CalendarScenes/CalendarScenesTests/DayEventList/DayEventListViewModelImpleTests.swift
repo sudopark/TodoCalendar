@@ -555,6 +555,19 @@ extension DayEventListViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didRouteToMakeNewTodoEventWithParams?.name, "some")
     }
     
+    func testViewModel_whenSelectTodoEvent_routeToTodoDetail() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let todo = TodoCalendarEvent(.init(uuid: "dummy", name: "some"), in: timeZone)
+        // when
+        let todoModel = TodoEventCellViewModel(todo, in: 0..<100, timeZone)!
+        viewModel.selectEvent(todoModel)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToTodoDetail, true)
+    }
+    
     // TODO: evnet 생성 기능 추가한 이후에 구현
 //    func testViewModel_makeNewEvent() {
 //
@@ -582,6 +595,11 @@ extension DayEventListViewModelImpleTests {
         
         func routeToSelectTemplateForMakeEvent() {
             
+        }
+        
+        var didRouteToTodoDetail: Bool?
+        func routeToTodoEventDetail(_ eventId: String) {
+            self.didRouteToTodoDetail = true
         }
     }
 }
