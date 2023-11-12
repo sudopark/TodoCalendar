@@ -262,10 +262,9 @@ extension AddEventViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var moreActions: AnyPublisher<[EventDetailMoreAction], Never> {
+    var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
         return Just([
-            .copy,
-            .addToTemplate
+            [.copy, .addToTemplate]
         ])
         .eraseToAnyPublisher()
     }
