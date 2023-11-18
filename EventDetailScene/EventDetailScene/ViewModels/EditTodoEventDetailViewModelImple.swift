@@ -270,9 +270,10 @@ extension EditTodoEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var isTodo: AnyPublisher<Bool, Never> { Just(true).eraseToAnyPublisher() }
-    
-    var isTodoOrScheduleTogglable: Bool { false }
+    var eventDetailTypeModel: AnyPublisher<EventDetailTypeModel, Never> {
+        return Just(EventDetailTypeModel.todoCase())
+            .eraseToAnyPublisher()
+    }
     
     var isSavable: AnyPublisher<Bool, Never> {
         

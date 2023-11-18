@@ -225,14 +225,13 @@ extension AddEventViewModelImple {
         .removeDuplicates()
         .eraseToAnyPublisher()
     }
-    
-    var isTodo: AnyPublisher<Bool, Never> {
+
+    var eventDetailTypeModel: AnyPublisher<EventDetailTypeModel, Never> {
         return self.subject.isTodo
+            .map { EventDetailTypeModel.makeCase($0) }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
-    
-    var isTodoOrScheduleTogglable: Bool { true }
     
     var isSavable: AnyPublisher<Bool, Never> {
         let transform: (Bool, EventDetailBasicData?) -> Bool = { isTodo, basic in

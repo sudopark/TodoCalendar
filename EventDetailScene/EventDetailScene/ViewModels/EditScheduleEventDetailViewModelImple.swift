@@ -281,9 +281,10 @@ extension EditScheduleEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var isTodo: AnyPublisher<Bool, Never> { Just(false).eraseToAnyPublisher() }
-    
-    var isTodoOrScheduleTogglable: Bool { false }
+    var eventDetailTypeModel: AnyPublisher<EventDetailTypeModel, Never> {
+        return Just(EventDetailTypeModel.scheduleCase())
+            .eraseToAnyPublisher()
+    }
     
     var isSavable: AnyPublisher<Bool, Never> {
         let transform: (EventDetailBasicData?) -> Bool = { basic in
