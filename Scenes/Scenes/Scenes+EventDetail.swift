@@ -11,10 +11,24 @@ import Domain
 
 public protocol EventDetailScene: Scene { }
 
+public struct MakeEventParams: Sendable {
+    public struct InitialTodoInfo: Sendable {
+        public var name: String?
+        public init(name: String? = nil) {
+            self.name = name
+        }
+    }
+    public let selectedDate: Date
+    public var initialTodoInfo: InitialTodoInfo?
+    public init(selectedDate: Date) {
+        self.selectedDate = selectedDate
+    }
+}
+
 public protocol EventDetailSceneBuilder {
     
     @MainActor
-    func makeNewEventScene(isTodo: Bool) -> any EventDetailScene
+    func makeNewEventScene(_ params: MakeEventParams) -> any EventDetailScene
     
     @MainActor
     func makeTodoEventDetailScene(_ todoId: String) -> any EventDetailScene

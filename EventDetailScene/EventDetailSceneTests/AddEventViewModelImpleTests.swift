@@ -62,7 +62,7 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         settingUsecase.prepare()
         
         let viewModel = AddEventViewModelImple(
-            isTodo: false,
+            params: .init(selectedDate: self.refDate),
             todoUsecase: self.spyTodoUsecase,
             scheduleUsecase: self.spyScheduleUsecase,
             eventTagUsease: tagUsecase,
@@ -75,7 +75,13 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private var defaultCurrentAndNextHourSelectTime: SelectedTime {
-        let now = Date(); let next = now.addingTimeInterval(3600)
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let now = calendar.dateBySetting(from: Date()) {
+            $0.year = 2023
+            $0.month = 9
+            $0.day = 18
+        }!
+        let next = now.addingTimeInterval(3600)
         return .period(
             .init(now.timeIntervalSince1970, self.timeZone),
             .init(next.timeIntervalSince1970, self.timeZone)
@@ -381,4 +387,3 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didClosed, true)
     }
 }
-

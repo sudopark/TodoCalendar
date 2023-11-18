@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import UnitTestHelpKit
 import TestDoubles
 
@@ -331,7 +332,9 @@ extension DayEventListViewModelImpleTests {
             |> \.eventTagId .~ .custom("some")
         let scheduleWithRepeating = ScheduleCalendarEvent.events(from: schedule4, in: timeZone).last!
         let todo = TodoCalendarEvent(.init(uuid: ("todo-with-time"), name: "todo-with-time") |> \.eventTagId .~ .custom("some"), in: timeZone)
-        let scheduleWithoutRepeating = ScheduleCalendarEvent(eventId: "not-repeating-schedule", name: "not-repeating-schedule", eventTime: .at(self.todayRange.lowerBound), eventTimeOnCalendar: nil, eventTagId: .custom("some")) |> \.turn .~ 1
+        let scheduleWithoutRepeating = ScheduleCalendarEvent(
+            eventIdWithoutTurn: "ev",
+            eventId: "not-repeating-schedule", name: "not-repeating-schedule", eventTime: .at(self.todayRange.lowerBound), eventTimeOnCalendar: nil, eventTagId: .custom("some")) |> \.turn .~ 1
         return [
             holiday, scheduleWithRepeating, todo, scheduleWithoutRepeating
         ]
@@ -551,12 +554,13 @@ extension DayEventListViewModelImpleTests {
     func testViewModel_makeTodoWithGivenName() {
         // given
         let viewModel = self.makeViewModel()
+        viewModel.selectedDayChanaged(self.september10th(), and: [])
         
         // when
         viewModel.makeTodoEvent(with: "some")
         
         // then
-        XCTAssertEqual(self.spyRouter.didRouteToMakeNewTodoEventWithParams?.name, "some")
+        XCTAssertEqual(self.spyRouter.didRouteToMakeNewEventWithParams?.initialTodoInfo?.name, "some")
     }
     
     func testViewModel_whenSelectTodoEvent_routeToTodoDetail() {
@@ -576,7 +580,7 @@ extension DayEventListViewModelImpleTests {
         // given
         let viewModel = self.makeViewModelWithInitialListLoaded()
         let timeZone = TimeZone(abbreviation: "KST")!
-        let schedule = ScheduleCalendarEvent(eventId: "dummy", name: "some", eventTime: .at(0), eventTimeOnCalendar: .at(0), eventTagId: .default)
+        let schedule = ScheduleCalendarEvent(eventIdWithoutTurn: "ev", eventId: "dummy", name: "some", eventTime: .at(0), eventTimeOnCalendar: .at(0), eventTagId: .default)
         
         // when
         let model = ScheduleEventCellViewModel(schedule, in: 0..<10, timeZone: timeZone)!
@@ -602,9 +606,9 @@ extension DayEventListViewModelImpleTests {
     
     private class SpyRouter: BaseSpyRouter, DayEventListRouting, @unchecked Sendable {
         
-        var didRouteToMakeNewTodoEventWithParams: TodoMakeParams?
-        func routeToMakeTodoEvent(_ withParams: TodoMakeParams) {
-            self.didRouteToMakeNewTodoEventWithParams = withParams
+        var didRouteToMakeNewEventWithParams: MakeEventParams?
+        func routeToMakeNewEvent(_ withParams: MakeEventParams) {
+            self.didRouteToMakeNewEventWithParams = withParams
         }
         
         func routeToMakeNewEvent() {

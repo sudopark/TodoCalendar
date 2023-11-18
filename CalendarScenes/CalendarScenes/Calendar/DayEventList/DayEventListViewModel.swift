@@ -170,17 +170,26 @@ extension DayEventListViewModelImple {
     }
     
     func makeTodoEvent(with givenName: String) {
-        let params = TodoMakeParams()
-            |> \.name .~ givenName
-        self.router?.routeToMakeTodoEvent(params)
+        guard let selectDate = self.currentDate else { return }
+        let params = MakeEventParams(selectedDate: selectDate)
+            |> \.initialTodoInfo .~ .init(name: givenName)
+        self.router?.routeToMakeNewEvent(params)
     }
     
     func makeEvent() {
-        self.router?.routeToMakeNewEvent()
+        guard let selectDate = self.currentDate else { return }
+        let params = MakeEventParams(selectedDate: selectDate)
+        self.router?.routeToMakeNewEvent(params)
     }
     
     func makeEventByTemplate() {
         self.router?.routeToSelectTemplateForMakeEvent()
+    }
+    
+    private var currentDate: Date? {
+        guard let current = self.subject.currentDayAndEventLists.value?.currentDay
+        else { return nil }
+        return Date(timeIntervalSince1970: current.range.lowerBound)
     }
 }
 
