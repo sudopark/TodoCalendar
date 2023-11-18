@@ -24,6 +24,7 @@ final class EventDetailViewState: ObservableObject {
     @Published var selectedTag: SelectedTag?
     @Published var enterName: String = ""
     @Published var eventDetailTypeModel: EventDetailTypeModel?
+    @Published var isSaving: Bool = false
     @Published var isSavable: Bool = false
     @Published var selectedTime: SelectedTime?
     @Published var selectedRepeat: String?
@@ -82,7 +83,7 @@ final class EventDetailViewState: ObservableObject {
         viewModel.isSaving
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isSaving in
-                // TODO: update is saving
+                self?.isSaving = isSaving
             })
             .store(in: &self.cancellables)
         
@@ -218,7 +219,9 @@ struct EventDetailView: View {
                 Spacer()
                 
                 BottomConfirmButton(
-                    title: "Save".localized(), isEnable: self.$state.isSavable
+                    title: "Save".localized(), 
+                    isEnable: self.$state.isSavable,
+                    isProcessing: self.$state.isSaving
                 )
                 .eventHandler(\.onTap, self.save)
             }
@@ -694,6 +697,10 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
 //        state.eventDetailTypeModel = .todoCase()
 //        state.eventDetailTypeModel = .scheduleCase()
 //        state.eventDetailTypeModel = .holidayCase("Korea")
+        state.isSaving = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            state.isSaving = true
+        }
         let eventView = EventDetailView()
             .environmentObject(viewAppearance)
             .environmentObject(state)

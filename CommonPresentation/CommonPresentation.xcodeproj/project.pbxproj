@@ -16,6 +16,7 @@
 		F63F64B52A2C05B700E24186 /* CommonPresentation.h in Headers */ = {isa = PBXBuildFile; fileRef = F63F64B42A2C05B700E24186 /* CommonPresentation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63F64BD2A2C066C00E24186 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64BC2A2C066C00E24186 /* Common3rdParty.framework */; };
 		F63F64C12A2C067300E24186 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64C02A2C067300E24186 /* Extensions.framework */; };
+		F657790F2B087DB40049B5C1 /* LoadingCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F657790E2B087DB40049B5C1 /* LoadingCircleView.swift */; };
 		F66FDEEF2A9B4455005A8227 /* AutoLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FDEEE2A9B4455005A8227 /* AutoLayout.swift */; };
 		F66FDEF92A9B5BD5005A8227 /* UIKit+Combine+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FDEF82A9B5BD5005A8227 /* UIKit+Combine+Extensions.swift */; };
 		F66FDEFB2A9B5D8F005A8227 /* TapGesturePublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66FDEFA2A9B5D8F005A8227 /* TapGesturePublisher.swift */; };
@@ -36,6 +37,7 @@
 		F63F64B42A2C05B700E24186 /* CommonPresentation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommonPresentation.h; sourceTree = "<group>"; };
 		F63F64BC2A2C066C00E24186 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63F64C02A2C067300E24186 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F657790E2B087DB40049B5C1 /* LoadingCircleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingCircleView.swift; sourceTree = "<group>"; };
 		F66FDEEE2A9B4455005A8227 /* AutoLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoLayout.swift; sourceTree = "<group>"; };
 		F66FDEF82A9B5BD5005A8227 /* UIKit+Combine+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIKit+Combine+Extensions.swift"; sourceTree = "<group>"; };
 		F66FDEFA2A9B5D8F005A8227 /* TapGesturePublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapGesturePublisher.swift; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 				F677A1EE2AEFA178002938A9 /* CloseButton.swift */,
 				F677A1F02AF00360002938A9 /* ConfirmButton.swift */,
 				F677A1F22AF00715002938A9 /* BottomConfirmButton.swift */,
+				F657790E2B087DB40049B5C1 /* LoadingCircleView.swift */,
 			);
 			path = UIComponents;
 			sourceTree = "<group>";
@@ -238,6 +241,7 @@
 				F69837202A8545DD001F7603 /* View+Extension.swift in Sources */,
 				F605FA0A2A7E0E1300813AF5 /* UIColor+Extensions.swift in Sources */,
 				F677A1F32AF00715002938A9 /* BottomConfirmButton.swift in Sources */,
+				F657790F2B087DB40049B5C1 /* LoadingCircleView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

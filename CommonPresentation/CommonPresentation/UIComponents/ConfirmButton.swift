@@ -14,6 +14,7 @@ public struct ConfirmButton: View {
     private let textColor: Color?
     private let backgroundColor: Color?
     @Binding private var isEnable: Bool
+    @Binding private var isProcessing: Bool
     
     @EnvironmentObject private var appearance: ViewAppearance
     public var onTap: () -> Void = { }
@@ -21,11 +22,13 @@ public struct ConfirmButton: View {
     public init(
         title: String, 
         isEnable: Binding<Bool> = .constant(true),
+        isProcessing: Binding<Bool> = .constant(false),
         textColor: Color? = nil,
         backgroundColor: Color? = nil
     ) {
         self.title = title
         self._isEnable = isEnable
+        self._isProcessing = isProcessing
         self.textColor = textColor
         self.backgroundColor = backgroundColor
     }
@@ -38,17 +41,28 @@ public struct ConfirmButton: View {
         return self.backgroundColor ?? self.appearance.colorSet.primaryBtnBackground.asColor
     }
     
+    private var isDisable: Bool {
+        return !self.isEnable || self.isProcessing
+    }
+    
     public var body: some View {
         Button {
             self.onTap()
         } label: {
-            Text(title)
-                .font(self.appearance.fontSet.bottomButton.asFont)
-                .foregroundStyle(self.colorForText)
+            if self.isProcessing {
+                LoadingCircleView(.white)
+                    .frame(width: 32, height: 32)
+                    .frame(maxWidth: .infinity)
+            } else {
+                Text(title)
+                    .font(self.appearance.fontSet.bottomButton.asFont)
+                    .foregroundStyle(self.colorForText)
+                    .frame(maxWidth: .infinity)
+            }
         }
-        .disabled(!self.isEnable)
+        .disabled(self.isDisable)
         .padding()
-        .frame(maxWidth: .infinity)
+        .frame(height: 50)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(
