@@ -31,10 +31,10 @@ public final class EventDetailSceneBuilderImple {
 extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
     
     @MainActor
-    public func makeNewEventScene(isTodo: Bool) -> any EventDetailScene {
+    public func makeNewEventScene(_ params: MakeEventParams) -> any EventDetailScene {
         
         let viewModel = AddEventViewModelImple(
-            isTodo: isTodo,
+            params: params,
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             eventTagUsease: self.usecaseFactory.makeEventTagUsecase(),

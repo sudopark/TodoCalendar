@@ -19,6 +19,7 @@ import Scenes
 
 final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
     
+    private let initailMakeParams: MakeEventParams
     private let todoUsecase: any TodoEventUsecase
     private let scheduleUsecase: any ScheduleEventUsecase
     private let eventTagUsease: any EventTagUsecase
@@ -27,7 +28,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
     var router: (any EventDetailRouting)?
     
     init(
-        isTodo: Bool,
+        params: MakeEventParams,
         todoUsecase: any TodoEventUsecase,
         scheduleUsecase: any ScheduleEventUsecase,
         eventTagUsease: any EventTagUsecase,
@@ -35,6 +36,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         eventDetailDataUsecase: any EventDetailDataUsecase
     ) {
         
+        self.initailMakeParams = params
         self.todoUsecase = todoUsecase
         self.scheduleUsecase = scheduleUsecase
         self.eventTagUsease = eventTagUsease
@@ -42,7 +44,6 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         self.eventDetailDataUsecase = eventDetailDataUsecase
         
         self.internalBinding()
-        self.subject.isTodo.send(isTodo)
     }
     
     
@@ -83,14 +84,11 @@ extension AddEventViewModelImple: EventDetailInputListener {
     
     func prepare() {
         
+        let params = self.initailMakeParams
         let defaultSelectTime = self.subject.timeZone.compactMap { $0 }
             .first()
-            .map { timeZone in
-                let now = Date(); let nextHour = now.addingTimeInterval(3600)
-                return SelectedTime.period(
-                    .init(now.timeIntervalSince1970, timeZone),
-                    .init(nextHour.timeIntervalSince1970, timeZone)
-                )
+            .compactMap { timeZone in
+                return params.selectedDate.selectDateDefaultTime(timeZone)
             }
         let defaultTag = self.eventTagUsease.latestUsedEventTag
             .first()
@@ -98,15 +96,15 @@ extension AddEventViewModelImple: EventDetailInputListener {
         
         Publishers.CombineLatest(defaultSelectTime, defaultTag)
             .sink(receiveValue: { [weak self] (time, id) in
-                // TOOD: send to input viewModel
                 let initailData = EventDetailBasicData(
-                    name: nil,
+                    name: params.initialTodoInfo?.name,
                     eventTagId: id.map {.custom($0) } ?? .default
                 )
                     |> \.selectedTime .~ time
                 self?.inputInteractor?.prepared(
                     basic: initailData, additional: .init("pending")
                 )
+                self?.subject.isTodo.send(params.initialTodoInfo != nil)
             })
             .store(in: &self.cancellables)
     }
@@ -267,5 +265,26 @@ extension AddEventViewModelImple {
             [.copy, .addToTemplate]
         ])
         .eraseToAnyPublisher()
+    }
+}
+
+private extension Date {
+    
+    func selectDateDefaultTime(_ timeZone: TimeZone) -> SelectedTime? {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let selectDateCompos = calendar.dateComponents([.year, .month, .day], from: self)
+        let now = Date()
+        guard let start = calendar.dateBySetting(from: now, mutating: {
+            $0.year = calendar.component(.year, from: self)
+            $0.month = calendar.component(.month, from: self)
+            $0.day = calendar.component(.day, from: self)
+        })
+        else { return nil }
+        
+        let nextHour = start.addingTimeInterval(3600)
+        return .period(
+            .init(start.timeIntervalSince1970, timeZone),
+            .init(nextHour.timeIntervalSince1970, timeZone)
+        )
     }
 }
