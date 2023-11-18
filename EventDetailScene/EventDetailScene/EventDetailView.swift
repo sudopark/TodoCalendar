@@ -23,7 +23,7 @@ final class EventDetailViewState: ObservableObject {
     
     @Published var selectedTag: SelectedTag?
     @Published var enterName: String = ""
-    @Published var isTodo: Bool = false
+    @Published var eventDetailTypeModel: EventDetailTypeModel?
     @Published var isSavable: Bool = false
     @Published var selectedTime: SelectedTime?
     @Published var selectedRepeat: String?
@@ -44,10 +44,10 @@ final class EventDetailViewState: ObservableObject {
         self.didBind = true
         
         // TODO: bind state
-        viewModel.isTodo
+        viewModel.eventDetailTypeModel
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] isTodo in
-                self?.isTodo = isTodo
+            .sink(receiveValue: { [weak self] model in
+                self?.eventDetailTypeModel = model
             })
             .store(in: &self.cancellables)
         
@@ -173,6 +173,7 @@ struct EventDetailView: View {
         case end
     }
     @State private var isTimeSelecting: TimeSelecting?
+    @State private var showEventDetailTypePopover: Bool = false
     
     fileprivate var nameEntered: (String) -> Void = { _ in }
     fileprivate var toggleIsTodo: () -> Void = { }
@@ -199,7 +200,7 @@ struct EventDetailView: View {
                 VStack(spacing: 25) {
                     self.moreActionView
                     self.nameInputView
-                    self.isTodoToggleView
+                    self.eventDetailTypeView
                     self.timeSelectView
                     self.selectRepeatView
                     Spacer(minLength: 12)
@@ -273,19 +274,59 @@ struct EventDetailView: View {
         }
     }
     
-    private var isTodoToggleView: some View {
-        Button {
-            self.toggleIsTodo()
-        } label: {
-            HStack {
-                Image(systemName: self.state.isTodo ? "circle.fill" : "circle")
-                    .font(.system(size: 16, weight: .light))
-                    .foregroundColor(self.appearance.colorSet.normalText.asColor)
-                Text("Todo event".localized())
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
-                    .font(self.appearance.fontSet.normal.asFont)
-                Spacer()
+    private var eventDetailTypeView: some View {
+        
+        guard let model = self.state.eventDetailTypeModel
+        else {
+            return EmptyView().asAnyView()
+        }
+        
+        if let togglable = model.isTodoOrSchedule {
+            return self.togglableEventTypeView(togglable == .todo, model: model).asAnyView()
+        } else {
+            return self.normalEventTypeView(model).asAnyView()
+        }
+    }
+    
+    private func togglableEventTypeView(_ isTodo: Bool, model: EventDetailTypeModel) -> some View {
+        HStack {
+            Button {
+                self.toggleIsTodo()
+            } label: {
+                HStack {
+                    Image(systemName: isTodo ? "circle.fill" : "circle")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                    Text(model.text)
+                        .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                        .font(self.appearance.fontSet.normal.asFont)
+                }
             }
+            
+            Spacer()
+        }
+    }
+    
+    private func normalEventTypeView(_ model: EventDetailTypeModel) -> some View {
+        HStack(spacing: 6) {
+            Text(model.text)
+                .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                .font(self.appearance.fontSet.subNormal.asFont)
+
+            if model.showHelpButton {
+                Button {
+                    self.showEventDetailTypePopover = true
+                } label: {
+                    Image(systemName: "questionmark.circle")
+                        .font(self.appearance.fontSet.subNormal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                }
+                .popover(isPresented: self.$showEventDetailTypePopover) {
+                    Text("[Todo] event type description")
+                }
+            }
+            
+            Spacer()
         }
     }
     
@@ -649,6 +690,10 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
             [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
             [.copy, .addToTemplate, .share]
         ]
+        state.eventDetailTypeModel = .makeCase(true)
+//        state.eventDetailTypeModel = .todoCase()
+//        state.eventDetailTypeModel = .scheduleCase()
+//        state.eventDetailTypeModel = .holidayCase("Korea")
         let eventView = EventDetailView()
             .environmentObject(viewAppearance)
             .environmentObject(state)
