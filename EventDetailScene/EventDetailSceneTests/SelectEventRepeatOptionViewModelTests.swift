@@ -105,6 +105,22 @@ extension SelectEventRepeatOptionViewModelTests {
         XCTAssertEqual(options?.map { os in os.map { $0.text } }, self.defaultOptionListTexts)
     }
     
+    func testViewModel_whenProvideEveryWeekRepeatOption_provideWeekDay() {
+        // given
+        let viewModel = self.makeViewModel(previous: nil)
+        
+        // when
+        let options = self.waitFirstNotEmptyOptionList(viewModel)
+        
+        // then
+        let everyWeeks = options?.flatMap { $0 }
+            .compactMap { $0.option as? EventRepeatingOptions.EveryWeek }
+        let intervals = everyWeeks?.map { $0.interval }
+        let weekDays = everyWeeks?.map { $0.dayOfWeeks }
+        XCTAssertEqual(intervals, [1, 2, 3, 4])
+        XCTAssertEqual(weekDays, [[.sunday], [.sunday], [.sunday], [.sunday]])
+    }
+    
     // 이전 선택값 없을때 - 디폴트로 반복없음 선택 상태
     func testViewModel_whenPreviousSelectNotExists_selectNotRepeatOption() {
         // given

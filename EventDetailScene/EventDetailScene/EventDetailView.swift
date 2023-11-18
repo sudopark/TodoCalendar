@@ -51,6 +51,13 @@ final class EventDetailViewState: ObservableObject {
             })
             .store(in: &self.cancellables)
         
+        inputViewModel.initialName
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] name in
+                self?.enterName = name ?? ""
+            })
+            .store(in: &self.cancellables)
+        
         inputViewModel.selectedTime
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] time in

@@ -76,10 +76,17 @@ private enum SupportingOptions: Equatable {
         return [
             [
                 EventRepeatingOptions.EveryDay(),
-                EventRepeatingOptions.EveryWeek(timeZone),
-                EventRepeatingOptions.EveryWeek(timeZone) |> \.interval .~ 2,
-                EventRepeatingOptions.EveryWeek(timeZone) |> \.interval .~ 3,
-                EventRepeatingOptions.EveryWeek(timeZone) |> \.interval .~ 4,
+                EventRepeatingOptions.EveryWeek(timeZone)
+                    |> \.dayOfWeeks .~ [weekday],
+                EventRepeatingOptions.EveryWeek(timeZone) 
+                    |> \.interval .~ 2
+                    |> \.dayOfWeeks .~ [weekday],
+                EventRepeatingOptions.EveryWeek(timeZone) 
+                    |> \.interval .~ 3
+                    |> \.dayOfWeeks .~ [weekday],
+                EventRepeatingOptions.EveryWeek(timeZone) 
+                    |> \.interval .~ 4
+                    |> \.dayOfWeeks .~ [weekday],
                 EventRepeatingOptions.EveryMonth(timeZone: timeZone)
                 |> \.selection .~ .days([startDay]),
                 EventRepeatingOptions.EveryYearSomeDay(timeZone: timeZone),
