@@ -158,14 +158,18 @@ extension AddEventViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let isTodos = self.waitOutputs(expect, for: viewModel.isTodo) {
+        let typeModels = self.waitOutputs(expect, for: viewModel.eventDetailTypeModel) {
             viewModel.prepare()
             viewModel.toggleIsTodo()
             viewModel.toggleIsTodo()
         }
         
         // then
-        XCTAssertEqual(isTodos, [false, true, false])
+        XCTAssertEqual(typeModels, [
+            EventDetailTypeModel.makeCase(false),
+            EventDetailTypeModel.makeCase(true),
+            EventDetailTypeModel.makeCase(false)
+        ])
     }
     
     func testViewModel_whenLatestUsedTagNotExists_provideInitialSelectedTagIsDefault() {
