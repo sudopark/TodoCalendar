@@ -142,11 +142,10 @@ extension EditTodoEventDetailViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let isTodo = self.waitFirstOutput(expect, for: viewModel.isTodo)
+        let typeModel = self.waitFirstOutput(expect, for: viewModel.eventDetailTypeModel)
         
         // then
-        XCTAssertEqual(isTodo, true)
-        XCTAssertEqual(viewModel.isTodoOrScheduleTogglable, false)
+        XCTAssertEqual(typeModel, EventDetailTypeModel.todoCase())
     }
     
     func testViewModel_provideEventDetailMoreActions() {
