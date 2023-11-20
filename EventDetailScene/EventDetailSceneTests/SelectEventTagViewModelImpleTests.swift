@@ -73,7 +73,6 @@ extension SelectEventTagViewModelImpleTests {
             .custom("id:0"),
             .custom("id:1"),
             .custom("id:2"),
-            .holiday
         ])
     }
     
@@ -148,8 +147,8 @@ extension SelectEventTagViewModelImpleTests {
         // then
         let tagIdLists = tagLists.map { ts in ts.map { $0.id } }
         XCTAssertEqual(tagIdLists, [
-            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday],
-            [.default, .custom("new_tag"), .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday]
+            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2")],
+            [.default, .custom("new_tag"), .custom("id:0"), .custom("id:1"), .custom("id:2")]
         ])
         XCTAssertEqual(self.spyRouter.didRouteToAddNewtag, true)
     }
@@ -188,8 +187,8 @@ extension SelectEventTagViewModelImpleTests {
         let tagIdLists = tagLists.map { ts in ts.map { $0.id } }
         let tag1Names = tagLists.compactMap { ts in ts.first(where:{ $0.id == .custom("id:1") })?.name }
         XCTAssertEqual(tagIdLists, [
-            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday],
-            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday]
+            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2")],
+            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2")]
         ])
         XCTAssertEqual(tag1Names, ["n:1", "new_name"])
         XCTAssertEqual(self.spyRouter.didrouteToTagList, true)
@@ -210,8 +209,8 @@ extension SelectEventTagViewModelImpleTests {
         // then
         let tagIdLists = tagLists.map { ts in ts.map { $0.id } }
         XCTAssertEqual(tagIdLists, [
-            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2"), .holiday],
-            [.default, .custom("id:0"), .custom("id:2"), .holiday]
+            [.default, .custom("id:0"), .custom("id:1"), .custom("id:2")],
+            [.default, .custom("id:0"), .custom("id:2")]
         ])
     }
     
