@@ -188,9 +188,8 @@ extension SelectEventTagViewModelImple {
     var tags: AnyPublisher<[TagCellViewModel], Never> {
         let transform: ([EventTag]) -> [TagCellViewModel] = { tags in
             let defaultCVM = TagCellViewModel(.defaultTag)
-            let holidayCVM = TagCellViewModel(.holiday)
             let cvms = tags.map { TagCellViewModel($0) }
-            return [defaultCVM] + cvms + [holidayCVM]
+            return [defaultCVM] + cvms
         }
         return self.subject.tags
             .compactMap { $0 }
