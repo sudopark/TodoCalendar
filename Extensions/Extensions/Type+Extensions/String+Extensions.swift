@@ -8,6 +8,8 @@
 import Foundation
 
 
+// MARK: - localizing
+
 extension String {
     
     public func localized() -> String {
@@ -18,5 +20,22 @@ extension String {
     public func localized(with args: any CVarArg...) -> String {
         let format = self.localized()
         return String(format: format, arguments: args)
+    }
+}
+
+
+// MARK: - encoding
+
+extension String {
+    
+    public func isEscaped() -> Bool {
+        return self.removingPercentEncoding != self
+    }
+    
+    public func asURL(withEncoding allowCharSet: CharacterSet = .urlQueryAllowed) -> URL? {
+        let path = self.isEscaped()
+            ? self
+            : self.addingPercentEncoding(withAllowedCharacters: allowCharSet) ?? self
+        return URL(string: path)
     }
 }

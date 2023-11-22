@@ -25,6 +25,13 @@
 		F676A7BB2AC0269500D168DF /* EventTagListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B52AC0269500D168DF /* EventTagListView.swift */; };
 		F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */; };
 		F68E7DF72AF0AA7000110A73 /* SettingSceneBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */; };
+		F69BA6A22B0BB3A100BCA65B /* SettingItemListBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */; };
+		F69BA6A32B0BB3A100BCA65B /* SettingItemListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */; };
+		F69BA6A42B0BB3A100BCA65B /* SettingItemListScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69E2B0BB3A100BCA65B /* SettingItemListScene+Builder.swift */; };
+		F69BA6A52B0BB3A100BCA65B /* SettingItemListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */; };
+		F69BA6A62B0BB3A100BCA65B /* SettingItemListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA6A02B0BB3A100BCA65B /* SettingItemListView.swift */; };
+		F69BA6A72B0BB3A100BCA65B /* SettingItemListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA6A12B0BB3A100BCA65B /* SettingItemListViewModel.swift */; };
+		F69BA6AA2B0E3FAB00BCA65B /* SettingItemListViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA6A92B0E3FAB00BCA65B /* SettingItemListViewModelImpleTests.swift */; };
 		F6B7AC692ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC632ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift */; };
 		F6B7AC6A2ACC05E2003F6BA8 /* EventTagDetailRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC642ACC05E2003F6BA8 /* EventTagDetailRouter.swift */; };
 		F6B7AC6C2ACC05E2003F6BA8 /* EventTagDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6B7AC662ACC05E2003F6BA8 /* EventTagDetailViewController.swift */; };
@@ -64,6 +71,13 @@
 		F676A7B52AC0269500D168DF /* EventTagListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListView.swift; sourceTree = "<group>"; };
 		F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewModel.swift; sourceTree = "<group>"; };
 		F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingSceneBuilderImple.swift; sourceTree = "<group>"; };
+		F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListBuilderImple.swift; sourceTree = "<group>"; };
+		F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListRouter.swift; sourceTree = "<group>"; };
+		F69BA69E2B0BB3A100BCA65B /* SettingItemListScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingItemListScene+Builder.swift"; sourceTree = "<group>"; };
+		F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListViewController.swift; sourceTree = "<group>"; };
+		F69BA6A02B0BB3A100BCA65B /* SettingItemListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListView.swift; sourceTree = "<group>"; };
+		F69BA6A12B0BB3A100BCA65B /* SettingItemListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListViewModel.swift; sourceTree = "<group>"; };
+		F69BA6A92B0E3FAB00BCA65B /* SettingItemListViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListViewModelImpleTests.swift; sourceTree = "<group>"; };
 		F6B7AC632ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailBuilderImple.swift; sourceTree = "<group>"; };
 		F6B7AC642ACC05E2003F6BA8 /* EventTagDetailRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailRouter.swift; sourceTree = "<group>"; };
 		F6B7AC662ACC05E2003F6BA8 /* EventTagDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagDetailViewController.swift; sourceTree = "<group>"; };
@@ -136,6 +150,7 @@
 			children = (
 				F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */,
 				F676A7AF2AC0264700D168DF /* EventTag */,
+				F69BA69B2B0BB38900BCA65B /* Setting */,
 				F676A7552AC01F7F00D168DF /* SettingScene.h */,
 			);
 			path = SettingScene;
@@ -144,6 +159,7 @@
 		F676A75E2AC01F7F00D168DF /* SettingSceneTests */ = {
 			isa = PBXGroup;
 			children = (
+				F69BA6A82B0E3F8800BCA65B /* Setting */,
 				F676A7C22AC0332D00D168DF /* EventTag */,
 			);
 			path = SettingSceneTests;
@@ -182,6 +198,27 @@
 				F6B7AC712ACC1770003F6BA8 /* EventTagDetailViewModelImpleTests.swift */,
 			);
 			path = EventTag;
+			sourceTree = "<group>";
+		};
+		F69BA69B2B0BB38900BCA65B /* Setting */ = {
+			isa = PBXGroup;
+			children = (
+				F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */,
+				F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */,
+				F69BA69E2B0BB3A100BCA65B /* SettingItemListScene+Builder.swift */,
+				F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */,
+				F69BA6A02B0BB3A100BCA65B /* SettingItemListView.swift */,
+				F69BA6A12B0BB3A100BCA65B /* SettingItemListViewModel.swift */,
+			);
+			path = Setting;
+			sourceTree = "<group>";
+		};
+		F69BA6A82B0E3F8800BCA65B /* Setting */ = {
+			isa = PBXGroup;
+			children = (
+				F69BA6A92B0E3FAB00BCA65B /* SettingItemListViewModelImpleTests.swift */,
+			);
+			path = Setting;
 			sourceTree = "<group>";
 		};
 		F6B7AC622ACC055F003F6BA8 /* EventTagDetail */ = {
@@ -306,17 +343,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F69BA6A42B0BB3A100BCA65B /* SettingItemListScene+Builder.swift in Sources */,
 				F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */,
 				F676A7BA2AC0269500D168DF /* EventTagListViewController.swift in Sources */,
 				F6B7AC692ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift in Sources */,
 				F6B7AC6D2ACC05E2003F6BA8 /* EventTagDetailView.swift in Sources */,
 				F676A7BB2AC0269500D168DF /* EventTagListView.swift in Sources */,
+				F69BA6A52B0BB3A100BCA65B /* SettingItemListViewController.swift in Sources */,
+				F69BA6A22B0BB3A100BCA65B /* SettingItemListBuilderImple.swift in Sources */,
+				F69BA6A72B0BB3A100BCA65B /* SettingItemListViewModel.swift in Sources */,
+				F69BA6A62B0BB3A100BCA65B /* SettingItemListView.swift in Sources */,
 				F676A7B82AC0269500D168DF /* EventTagListRouter.swift in Sources */,
 				F68E7DF72AF0AA7000110A73 /* SettingSceneBuilderImple.swift in Sources */,
 				F6B7AC6A2ACC05E2003F6BA8 /* EventTagDetailRouter.swift in Sources */,
 				F6B7AC6E2ACC05E2003F6BA8 /* EventTagDetailViewModel.swift in Sources */,
 				F676A7B72AC0269500D168DF /* EventTagListBuilderImple.swift in Sources */,
 				F6B7AC6C2ACC05E2003F6BA8 /* EventTagDetailViewController.swift in Sources */,
+				F69BA6A32B0BB3A100BCA65B /* SettingItemListRouter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,6 +369,7 @@
 			files = (
 				F66A808D2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift in Sources */,
 				F6B7AC722ACC1770003F6BA8 /* EventTagDetailViewModelImpleTests.swift in Sources */,
+				F69BA6AA2B0E3FAB00BCA65B /* SettingItemListViewModelImpleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -39,6 +39,7 @@ public protocol Routing: AnyObject {
     func showToast(_ message: String)
     func closeScene(animate: Bool, _ dismissed: (@Sendable () -> Void)?)
     func showConfirm(dialog info: ConfirmDialogInfo)
+    func openSafari(_ path: String)
 }
 
 extension Routing {
@@ -101,6 +102,19 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
             }
             
             self.scene?.present(controller, animated: true)
+        }
+    }
+    
+    public func openSafari(_ path: String) {
+        Task { @MainActor in
+            
+            guard let url = path.asURL() 
+            else {
+                // TODO: log open failed
+                return
+            }
+            
+            UIApplication.shared.open(url)
         }
     }
 }

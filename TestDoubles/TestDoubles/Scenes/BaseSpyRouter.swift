@@ -45,4 +45,9 @@ open class BaseSpyRouter: Routing {
             info.canceled?()
         }
     }
+    
+    public var didOpenSafariPath: String?
+    public func openSafari(_ path: String) {
+        self.didOpenSafariPath = path
+    }
 }
