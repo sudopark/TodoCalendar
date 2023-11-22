@@ -24,6 +24,8 @@
 		F677A1F12AF00360002938A9 /* ConfirmButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F677A1F02AF00360002938A9 /* ConfirmButton.swift */; };
 		F677A1F32AF00715002938A9 /* BottomConfirmButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F677A1F22AF00715002938A9 /* BottomConfirmButton.swift */; };
 		F69837202A8545DD001F7603 /* View+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F698371F2A8545DD001F7603 /* View+Extension.swift */; };
+		F6F629A82B0E5ACC00EF2F11 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = F6F629A72B0E5ACC00EF2F11 /* Kingfisher */; };
+		F6F629AA2B0E5AF000EF2F11 /* RemoteImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F629A92B0E5AF000EF2F11 /* RemoteImageView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +47,7 @@
 		F677A1F02AF00360002938A9 /* ConfirmButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmButton.swift; sourceTree = "<group>"; };
 		F677A1F22AF00715002938A9 /* BottomConfirmButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomConfirmButton.swift; sourceTree = "<group>"; };
 		F698371F2A8545DD001F7603 /* View+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Extension.swift"; sourceTree = "<group>"; };
+		F6F629A92B0E5AF000EF2F11 /* RemoteImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F6F629A82B0E5ACC00EF2F11 /* Kingfisher in Frameworks */,
 				F61C60272A8131EF007BA02C /* Domain.framework in Frameworks */,
 				F63F64C12A2C067300E24186 /* Extensions.framework in Frameworks */,
 				F63F64BD2A2C066C00E24186 /* Common3rdParty.framework in Frameworks */,
@@ -145,6 +149,7 @@
 				F677A1F02AF00360002938A9 /* ConfirmButton.swift */,
 				F677A1F22AF00715002938A9 /* BottomConfirmButton.swift */,
 				F657790E2B087DB40049B5C1 /* LoadingCircleView.swift */,
+				F6F629A92B0E5AF000EF2F11 /* RemoteImageView.swift */,
 			);
 			path = UIComponents;
 			sourceTree = "<group>";
@@ -177,6 +182,9 @@
 			dependencies = (
 			);
 			name = CommonPresentation;
+			packageProductDependencies = (
+				F6F629A72B0E5ACC00EF2F11 /* Kingfisher */,
+			);
 			productName = CommonPresentation;
 			productReference = F63F64B12A2C05B700E24186 /* CommonPresentation.framework */;
 			productType = "com.apple.product-type.framework";
@@ -205,6 +213,9 @@
 				Base,
 			);
 			mainGroup = F63F64A72A2C05B700E24186;
+			packageReferences = (
+				F6F629A62B0E5ACC00EF2F11 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			productRefGroup = F63F64B22A2C05B700E24186 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -235,6 +246,7 @@
 				F66FDEEF2A9B4455005A8227 /* AutoLayout.swift in Sources */,
 				F66FDEF92A9B5BD5005A8227 /* UIKit+Combine+Extensions.swift in Sources */,
 				F605FA0C2A7E0EED00813AF5 /* FontSet.swift in Sources */,
+				F6F629AA2B0E5AF000EF2F11 /* RemoteImageView.swift in Sources */,
 				F605FA0E2A7E0FA300813AF5 /* ViewAppearance.swift in Sources */,
 				F66FDEFB2A9B5D8F005A8227 /* TapGesturePublisher.swift in Sources */,
 				F605FA142A7F643500813AF5 /* UIFont+Extensions.swift in Sources */,
@@ -461,6 +473,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		F6F629A62B0E5ACC00EF2F11 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		F6F629A72B0E5ACC00EF2F11 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F6F629A62B0E5ACC00EF2F11 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F63F64A82A2C05B700E24186 /* Project object */;
 }
