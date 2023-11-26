@@ -73,6 +73,10 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     func showConfirm(dialog info: ConfirmDialogInfo) {
         // ignore
     }
+    
+    func openSafari(_ path: String) {
+        // ignore
+    }
 }
 
 

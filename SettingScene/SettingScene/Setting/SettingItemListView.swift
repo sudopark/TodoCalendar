@@ -40,7 +40,7 @@ final class SettingItemListViewState: ObservableObject {
 
 final class SettingItemListViewEventHandler: ObservableObject {
     
-    // TODO: add handlers
+    var onAppear: () -> Void = { }
     var selectItem: (any SettingItemModelType) -> Void = { _ in }
     var close: () -> Void = { }
 }
@@ -68,6 +68,7 @@ struct SettingItemListContainerView: View {
         return SettingItemListView()
             .onAppear {
                 self.stateBinding(self.state)
+                self.eventHandlers.onAppear()
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)

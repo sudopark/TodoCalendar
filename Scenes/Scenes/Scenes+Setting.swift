@@ -71,7 +71,27 @@ public protocol EventTagListSceneBuiler: AnyObject {
     ) -> any EventTagListScene
 }
 
+// MARK: - SettingItemListScene Interactable & Listenable
+
+public protocol SettingItemListSceneInteractor: AnyObject { }
+//
+//public protocol SettingItemListSceneListener: AnyObject { }
+
+// MARK: - SettingItemListScene
+
+public protocol SettingItemListScene: Scene where Interactor == any SettingItemListSceneInteractor
+{ }
+
+
+// MARK: - Builder + DependencyInjector Extension
+
+public protocol SettingItemListSceneBuiler: AnyObject {
+    
+    @MainActor
+    func makeSettingItemListScene() -> any SettingItemListScene
+}
+
 
 // MARK: - setting scene builder
 
-public protocol SettingSceneBuiler: EventTagDetailSceneBuiler, EventTagListSceneBuiler { }
+public protocol SettingSceneBuiler: EventTagDetailSceneBuiler, EventTagListSceneBuiler, SettingItemListSceneBuiler { }

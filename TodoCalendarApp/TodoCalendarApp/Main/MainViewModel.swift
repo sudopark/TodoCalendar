@@ -74,7 +74,7 @@ extension MainViewModelImple {
     }
     
     func moveToSetting() {
-        // TODO:
+        self.router?.routeToSettingScene()
     }
     
     func calendarScene(focusChangedTo month: CalendarMonth, isCurrentMonth: Bool) {

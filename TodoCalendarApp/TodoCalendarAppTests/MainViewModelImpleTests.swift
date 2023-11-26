@@ -111,6 +111,17 @@ extension MainViewModelImpleTests {
         // then
         self.wait(for: [expect], timeout: self.timeout)
     }
+    
+    func testViewModel_routeToSettingScene() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.moveToSetting()
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSetting, true)
+    }
 }
 
 
@@ -128,6 +139,11 @@ extension MainViewModelImpleTests {
         var didRouteToEventTypeFilterSetting: (() -> Void)?
         func routeToEventTypeFilterSetting() {
             self.didRouteToEventTypeFilterSetting?()
+        }
+        
+        var didRouteToSetting: Bool?
+        func routeToSettingScene() {
+            self.didRouteToSetting = true
         }
     }
     
