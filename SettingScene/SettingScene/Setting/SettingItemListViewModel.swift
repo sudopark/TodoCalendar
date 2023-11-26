@@ -77,7 +77,7 @@ struct SuggestAppItemModel: SettingItemModelType {
     
     static func readmind() -> SuggestAppItemModel {
         return SuggestAppItemModel(
-            imagePath: "https://readmind.notion.site/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Fcc695e01-7826-43c9-a35b-a1dda0e6f9a2%2Fappicon-readmind.png?table=block&id=8825f38d-4ede-4979-932e-9dfea1592ea1&spaceId=90479db1-ad1d-40e8-93c6-347893be40d3&width=250&userId=&cache=v2",
+            imagePath: "https://is1-ssl.mzstatic.com/image/thumb/Purple116/v4/c8/77/ec/c877ec10-f7bb-2762-f512-0fa769ff6d6f/AppIcon-1x_U007emarketing-0-10-0-85-220.png/230x0w.webp",
             name: "Readmind",
             description: "Reading list management".localized(),
             sourcePath: "http://itunes.apple.com/app/id/id1565634642"
@@ -116,6 +116,7 @@ protocol SettingItemListViewModel: AnyObject, Sendable, SettingItemListSceneInte
     // interactor
     func prepare()
     func selectItem(_ model: any SettingItemModelType)
+    func close()
     
     // presenter
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> { get }
@@ -183,6 +184,10 @@ extension SettingItemListViewModelImple {
             self.router?.openSafari(suggest.sourcePath)
         default: break
         }
+    }
+    
+    func close() {
+        self.router?.closeScene()
     }
     
     private func handleSettingItemSelected(_ model: SettingItemModel) {
