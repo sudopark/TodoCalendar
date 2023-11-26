@@ -29,12 +29,14 @@ class StubHolidayRepository: HolidayRepository {
     }
     
     func loadHolidays(_ year: Int, _ countryCode: String) async throws -> [Holiday] {
+        let name = self.holidayCachCleared ? "dummy-v2" : "dummy"
         return [
-            .init(dateString: "\(year)", localName: "\(countryCode)", name: "dummy")
+            .init(dateString: "\(year)", localName: "\(countryCode)", name: name)
         ]
     }
     
+    var holidayCachCleared: Bool = false
     func clearHolidayCache() async throws {
-        
+        self.holidayCachCleared = true
     }
 }

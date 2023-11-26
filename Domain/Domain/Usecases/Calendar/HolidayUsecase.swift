@@ -23,7 +23,8 @@ public protocol HolidayUsecase {
     var currentSelectedCountry: AnyPublisher<HolidaySupportCountry, Never> { get }
     var availableCountries: AnyPublisher<[HolidaySupportCountry], Never> { get }
     
-    func refreshHolidays(_ year: Int) async throws
+    func refreshHolidays() async throws
+    func loadHolidays(_ year: Int) async throws
     func holidays() -> AnyPublisher<[Int: [Holiday]], Never>
 }
 
@@ -111,6 +112,10 @@ extension HolidayUsecaseImple {
     
     public func selectCountry(_ country: HolidaySupportCountry) async throws {
         try await self.holidayRepository.saveSelectedCountry(country)
+        
+        let years = self.currentPreparedHolidayYears()
+        await self.refreshHolidays(for: country, years: years)
+        
         self.dataStore.put(
             HolidaySupportCountry.self,
             key: ShareDataKeys.currentCountry.rawValue,
@@ -136,14 +141,50 @@ extension HolidayUsecaseImple {
 
 extension HolidayUsecaseImple {
     
-    public func refreshHolidays(_ year: Int) async throws {
+    public func refreshHolidays() async throws {
         guard let currentCountry = self.dataStore.value(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue)
         else { return }
         
-        let holidays = try await self.holidayRepository.loadHolidays(year, currentCountry.code)
+        let currentPreparedYears = self.currentPreparedHolidayYears()
+        
+        try await self.holidayRepository.clearHolidayCache()
+        self.dataStore.delete(ShareDataKeys.holidays.rawValue)
+        
+        await self.refreshHolidays(for: currentCountry, years: currentPreparedYears)
+    }
+    
+    private func refreshHolidays(
+        for country: HolidaySupportCountry,
+        years: [Int]
+    ) async {
+        
+        await years.asyncForEach { [weak self] year in
+            try? await self?.loadHolidays(country, year: year)
+        }
+    }
+    
+    private func currentPreparedHolidayYears() -> [Int] {
+        guard let currentCountry = self.dataStore.value(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue),
+              let holidays = self.dataStore.value(Holidays.self, key: ShareDataKeys.holidays.rawValue),
+              let holidayYearMap = holidays[currentCountry.code]
+        else {
+            return []
+        }
+        return holidayYearMap.keys.sorted()
+    }
+    
+    public func loadHolidays(_ year: Int) async throws {
+        guard let currentCountry = self.dataStore.value(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue)
+        else { return }
+        
+        try await self.loadHolidays(currentCountry, year: year)
+    }
+    
+    private func loadHolidays(_ country: HolidaySupportCountry, year: Int) async throws {
+        let holidays = try await self.holidayRepository.loadHolidays(year, country.code)
         let shareKey = ShareDataKeys.holidays.rawValue
         self.dataStore.update(Holidays.self, key: shareKey) { old in
-            return (old ?? [:]) |> key(currentCountry.code) %~ {
+            return (old ?? [:]) |> key(country.code) %~ {
                 return ($0 ?? [:]) |> key(year) .~ holidays
             }
         }
@@ -164,6 +205,7 @@ extension HolidayUsecaseImple {
         return self.currentSelectedCountry
             .compactMap(asCountryHoliday)
             .switchToLatest()
+            .removeDuplicates()
             .eraseToAnyPublisher()
     }
 }
