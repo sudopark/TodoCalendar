@@ -153,7 +153,7 @@ extension HolidayUsecaseImpleTests {
         let holidays = self.waitFirstOutput(expect, for: usecase.holidays()) {
             Task {
                 try await usecase.prepare()
-                try await usecase.refreshHolidays(2023)
+                try await usecase.loadHolidays(2023)
             }
         }
         
@@ -173,8 +173,8 @@ extension HolidayUsecaseImpleTests {
         let holidayMaps = self.waitOutputs(expect, for: usecase.holidays()) {
             Task {
                 try await usecase.prepare()
-                try await usecase.refreshHolidays(2023)
-                try await usecase.refreshHolidays(2022)
+                try await usecase.loadHolidays(2023)
+                try await usecase.loadHolidays(2022)
             }
         }
         
@@ -193,18 +193,20 @@ extension HolidayUsecaseImpleTests {
     func testUsecase_whenCountryChanged_provideChangedCountryHoliday() {
         // given
         let expect = expectation(description: "국가 변경시에 변경된 국가의 현재 년도 국경일 제공")
-        expect.expectedFulfillmentCount = 4
+        expect.expectedFulfillmentCount = 3
         let usecase = self.makeUsecase(latestSelectedCountryCode: "KR")
         
         // when
         let holidayMaps = self.waitOutputs(expect, for: usecase.holidays()) {
             Task {
                 try await usecase.prepare()
-                try await usecase.refreshHolidays(2023)
+                // 최초 kr 공휴일 로드됨
+                try await usecase.loadHolidays(2023)
                 
+                // 이후 us 이벤트 나옴
                 try await usecase.selectCountry(.init(code: "US", name: "USA"))
-                try await usecase.refreshHolidays(2023)
-                
+//
+                // kr 이벤트 나옴
                 try await usecase.selectCountry(.init(code: "KR", name: "Korea"))
             }
         }
@@ -212,9 +214,68 @@ extension HolidayUsecaseImpleTests {
         // then
         XCTAssertEqual(holidayMaps, [
             [2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]],
-            [:],
+            
             [2023: [.init(dateString: "2023", localName: "US", name: "dummy")]],
+            
             [2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]],
+        ])
+    }
+    
+    func testUsecase_whenSelectOtherCountry_loadAllHolidaysForCurrentPreparedYears() {
+        // given
+        let expect = expectation(description: "국가변경시에 현재 로드되었던 년도에 해당하는 공휴일 모두 로드")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "KR")
+        
+        // when
+        let holidayMap = self.waitOutputs(expect, for: usecase.holidays()) {
+            Task {
+                try await usecase.prepare()
+                try await usecase.loadHolidays(2023)    // 2023 공휴일 준비
+                try await usecase.loadHolidays(2022)    // 2022, 2023 공휴일 준비
+                
+                try await usecase.selectCountry(.init(code: "US", name: "USA")) // 이후 us 이벤트 방출
+            }
+        }
+        
+        // then
+        XCTAssertEqual(holidayMap, [
+            [
+                2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]
+            ],
+            
+            [
+                2023: [.init(dateString: "2023", localName: "KR", name: "dummy")],
+                2022: [.init(dateString: "2022", localName: "KR", name: "dummy")]
+            ],
+            
+            [
+                2023: [.init(dateString: "2023", localName: "US", name: "dummy")],
+                2022: [.init(dateString: "2022", localName: "US", name: "dummy")]
+            ],
+        ])
+    }
+    
+    func testUsecase_refreshHolidays() {
+        // given
+        let expect = expectation(description: "현재 공휴일 refresh")
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "KR")
+        expect.expectedFulfillmentCount = 2
+        
+        // when
+        let holidayMap = self.waitOutputs(expect, for: usecase.holidays()) {
+            Task {
+                try await usecase.prepare()
+                try await usecase.loadHolidays(2023)
+                
+                try await usecase.refreshHolidays()
+            }
+        }
+        
+        // then
+        XCTAssertEqual(holidayMap, [
+            [2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]],
+            [2023: [.init(dateString: "2023", localName: "KR", name: "dummy-v2")]]
         ])
     }
 }
