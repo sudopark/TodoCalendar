@@ -54,4 +54,13 @@ extension SettingSceneBuilderImple {
         )
         return listBuilder.makeEventTagListScene(listener: listener)
     }
+    
+    @MainActor
+    public func makeSettingItemListScene() -> any SettingItemListScene {
+        
+        let builder = SettingItemListSceneBuilerImple(
+            viewAppearance: self.viewAppearance
+        )
+        return builder.makeSettingItemListScene()
+    }
 }

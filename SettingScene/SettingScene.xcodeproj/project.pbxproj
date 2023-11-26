@@ -27,7 +27,6 @@
 		F68E7DF72AF0AA7000110A73 /* SettingSceneBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */; };
 		F69BA6A22B0BB3A100BCA65B /* SettingItemListBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */; };
 		F69BA6A32B0BB3A100BCA65B /* SettingItemListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */; };
-		F69BA6A42B0BB3A100BCA65B /* SettingItemListScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69E2B0BB3A100BCA65B /* SettingItemListScene+Builder.swift */; };
 		F69BA6A52B0BB3A100BCA65B /* SettingItemListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */; };
 		F69BA6A62B0BB3A100BCA65B /* SettingItemListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA6A02B0BB3A100BCA65B /* SettingItemListView.swift */; };
 		F69BA6A72B0BB3A100BCA65B /* SettingItemListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA6A12B0BB3A100BCA65B /* SettingItemListViewModel.swift */; };
@@ -73,7 +72,6 @@
 		F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingSceneBuilderImple.swift; sourceTree = "<group>"; };
 		F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListBuilderImple.swift; sourceTree = "<group>"; };
 		F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListRouter.swift; sourceTree = "<group>"; };
-		F69BA69E2B0BB3A100BCA65B /* SettingItemListScene+Builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingItemListScene+Builder.swift"; sourceTree = "<group>"; };
 		F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListViewController.swift; sourceTree = "<group>"; };
 		F69BA6A02B0BB3A100BCA65B /* SettingItemListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListView.swift; sourceTree = "<group>"; };
 		F69BA6A12B0BB3A100BCA65B /* SettingItemListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListViewModel.swift; sourceTree = "<group>"; };
@@ -205,7 +203,6 @@
 			children = (
 				F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */,
 				F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */,
-				F69BA69E2B0BB3A100BCA65B /* SettingItemListScene+Builder.swift */,
 				F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */,
 				F69BA6A02B0BB3A100BCA65B /* SettingItemListView.swift */,
 				F69BA6A12B0BB3A100BCA65B /* SettingItemListViewModel.swift */,
@@ -343,7 +340,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F69BA6A42B0BB3A100BCA65B /* SettingItemListScene+Builder.swift in Sources */,
 				F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */,
 				F676A7BA2AC0269500D168DF /* EventTagListViewController.swift in Sources */,
 				F6B7AC692ACC05E2003F6BA8 /* EventTagDetailBuilderImple.swift in Sources */,

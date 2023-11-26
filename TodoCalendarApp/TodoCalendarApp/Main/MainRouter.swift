@@ -20,6 +20,7 @@ protocol MainRouting: Routing, Sendable {
     func attachCalendar() -> (any CalendarSceneInteractor)?
     
     func routeToEventTypeFilterSetting()
+    func routeToSettingScene()
 }
 
 // MARK: - Router
@@ -64,6 +65,14 @@ extension MainRouter {
                 listener: nil
             )
             self.currentScene?.present(eventSettingScene, animated: true)
+        }
+    }
+    
+    func routeToSettingScene() {
+        Task { @MainActor in
+            
+            let scene = self.settingSceneBuilder.makeSettingItemListScene()
+            self.currentScene?.present(scene, animated: true)
         }
     }
 }
