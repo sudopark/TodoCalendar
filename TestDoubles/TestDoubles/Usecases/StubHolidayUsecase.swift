@@ -75,8 +75,8 @@ open class StubHolidayUsecase: HolidayUsecase {
     open func loadHolidays(_ year: Int) async throws {
         guard let country = self.currentSelectedCountrySubject.value
         else { return }
-        let holidays = (0..<5).map { int -> Holiday in
-            return Holiday(dateString: "\(year)-0\(int)-0\(int)", localName: "h:\(int)", name: "holiday-\(int)")
+        let holidays = (1...5).map { int -> Holiday in
+            return Holiday(dateString: "\(year)-0\(int)-0\(int)", localName: "h:\(int)", name: "holiday-\(int)-\(country.code)")
         }
         let oldMap = self.holidaysSubject.value ?? [:]
         let newHolidays = (oldMap[country.code] ?? [:]) |> key(year) .~ holidays
