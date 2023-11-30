@@ -114,6 +114,29 @@ extension SettingItemListViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyRouter.didOpenSafariPath, suggestItem.sourcePath)
     }
+    
+    func testViewModel_routeToHolidaySetting() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        
+        // when
+        guard let holiday = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .holidaySetting })
+        else {
+            XCTAssert(false)
+            return
+        }
+        viewModel.selectItem(holiday)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToHoliday, true)
+    }
 }
 
-private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Sendable { }
+private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Sendable {
+    
+    var didRouteToHoliday: Bool?
+    func routeToHolidaySetting() {
+        self.didRouteToHoliday = true
+    }
+}

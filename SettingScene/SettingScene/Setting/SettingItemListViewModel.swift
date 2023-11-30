@@ -194,7 +194,8 @@ extension SettingItemListViewModelImple {
         switch model.itemId {
         case .appearance: break
         case .editEvent: break
-        case .holidaySetting: break
+        case .holidaySetting:
+            self.router?.routeToHolidaySetting()
         case .feedback: break
         case .faq: break
         case .shareApp: break

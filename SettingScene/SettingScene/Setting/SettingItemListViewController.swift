@@ -47,6 +47,11 @@ final class SettingItemListViewController: UIHostingController<SettingItemListCo
         super.init(rootView: containerView)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = true
+    }
+    
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
