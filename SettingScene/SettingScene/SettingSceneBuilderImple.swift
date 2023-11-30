@@ -58,8 +58,14 @@ extension SettingSceneBuilderImple {
     @MainActor
     public func makeSettingItemListScene() -> any SettingItemListScene {
         
-        let builder = SettingItemListSceneBuilerImple(
+        let holidayListSceneBuilder = HolidayListSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
+        )
+        
+        let builder = SettingItemListSceneBuilerImple(
+            viewAppearance: self.viewAppearance,
+            holidayListSceneBuilder: holidayListSceneBuilder
         )
         return builder.makeSettingItemListScene()
     }

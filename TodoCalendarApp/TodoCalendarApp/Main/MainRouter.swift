@@ -72,7 +72,8 @@ extension MainRouter {
         Task { @MainActor in
             
             let scene = self.settingSceneBuilder.makeSettingItemListScene()
-            self.currentScene?.present(scene, animated: true)
+            let navigation = UINavigationController(rootViewController: scene)
+            self.currentScene?.present(navigation, animated: true)
         }
     }
 }

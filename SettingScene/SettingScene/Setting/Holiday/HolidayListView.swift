@@ -160,7 +160,7 @@ struct HolidayListView: View {
                         .frame(width: 4)
                         .padding(.vertical, 5)
                     
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(item.name)
                             .minimumScaleFactor(0.7)
                             .font(self.appearance.fontSet.size(16).asFont)
