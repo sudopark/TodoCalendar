@@ -17,16 +17,18 @@ import Scenes
 
 struct HolidayItemModel {
     let name: String
+    let engName: String
     let dateText: String
     
     init?(_ holiday: Holiday) {
-        self.name = holiday.name
+        self.name = holiday.localName
+        self.engName = holiday.name
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         guard let date = formatter.date(from: holiday.dateString) else { return nil }
         
         let presentFormatter = DateFormatter()
-        presentFormatter.dateFormat = "yyyy MMM ddd"
+        presentFormatter.dateFormat = "yyyy MMM dd"
         self.dateText = presentFormatter.string(from: date)
     }
 }
@@ -38,6 +40,7 @@ protocol HolidayListViewModel: AnyObject, Sendable, HolidayListSceneInteractor {
     // interactor
     func prepare()
     func selectCountry()
+    func close()
     
     // presenter
     var currentCountryName: AnyPublisher<String, Never> { get }
@@ -98,6 +101,10 @@ extension HolidayListViewModelImple {
     
     func selectCountry() {
         // TODO: select holiday
+    }
+    
+    func close() {
+        self.router?.closeScene()
     }
 }
 

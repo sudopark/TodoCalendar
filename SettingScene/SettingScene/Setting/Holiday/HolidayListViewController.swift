@@ -34,6 +34,8 @@ final class HolidayListViewController: UIHostingController<HolidayListContainerV
         self.viewAppearance = viewAppearance
         
         let eventHandlers = HolidayListViewEventHandler()
+        eventHandlers.onAppear = viewModel.prepare
+        eventHandlers.selectCountry = viewModel.selectCountry
         
         let containerView = HolidayListContainerView(
             viewAppearance: viewAppearance,
