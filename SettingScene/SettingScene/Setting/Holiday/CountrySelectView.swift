@@ -10,6 +10,7 @@
 
 import SwiftUI
 import Combine
+import Domain
 import CommonPresentation
 
 
@@ -19,6 +20,10 @@ final class CountrySelectViewState: ObservableObject {
     
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
+    @Published var countries: [HolidaySupportCountry] = []
+    @Published var selectedCountryCode: String? = nil
+    @Published var isSavable: Bool = false
+    @Published var isSaving: Bool = false
     
     func bind(_ viewModel: any CountrySelectViewModel) {
         
@@ -26,6 +31,33 @@ final class CountrySelectViewState: ObservableObject {
         self.didBind = true
         
         // TODO: bind state
+        viewModel.supportCountries
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] countries in
+                self?.countries = countries
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.selectedCountryCode
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] code in
+                self?.selectedCountryCode = code
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.isSaving
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] flag in
+                self?.isSaving = flag
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.isConfirmable
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] flag in
+                self?.isSavable = flag
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -34,6 +66,9 @@ final class CountrySelectViewState: ObservableObject {
 final class CountrySelectViewEventHandler: ObservableObject {
     
     // TODO: add handlers
+    var onAppear: () -> Void = { }
+    var select: (String) -> Void = { _ in }
+    var confirm: () -> Void = { }
 }
 
 
@@ -59,6 +94,7 @@ struct CountrySelectContainerView: View {
         return CountrySelectView()
             .onAppear {
                 self.stateBinding(self.state)
+                self.eventHandlers.onAppear()
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
@@ -75,7 +111,68 @@ struct CountrySelectView: View {
     @EnvironmentObject private var eventHandlers: CountrySelectViewEventHandler
     
     var body: some View {
-        Text("CountrySelectView")
+        NavigationStack {
+            
+            List {
+                ForEach(self.state.countries, id: \.code) { country in
+                    countryView(country)
+                }
+                .listRowSeparator(.hidden)
+                
+            }
+            .navigationTitle("Country".localized())
+            .listStyle(.plain)
+            .listRowSpacing(0)
+            .toolbar {
+                confirmButton
+            }
+        }
+    }
+    
+    func countryView(_ country: HolidaySupportCountry) -> some View {
+        
+        HStack {
+            Text(country.name)
+                .font(self.appearance.fontSet.normal.asFont)
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+            
+            Spacer()
+            
+            if self.state.selectedCountryCode == country.code {
+                Image(systemName: "checkmark")
+                    .font(self.appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.accent.asColor)
+            }
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(self.appearance.colorSet.eventList.asColor)
+        )
+        .onTapGesture {
+            self.eventHandlers.select(country.code)
+        }
+    }
+    
+    private var confirmButton: some View {
+        if self.state.isSaving {
+            return LoadingCircleView(
+                self.appearance.colorSet.accent.asColor,
+                lineWidth: 2
+            )
+            .frame(width: 20, height: 20)
+            .asAnyView()
+            
+        } else {
+            return Button {
+                self.eventHandlers.confirm()
+            } label: {
+                Text("Confirm".localized())
+            }
+            .disabled(!self.state.isSavable)
+            .asAnyView()
+        }
     }
 }
 
@@ -92,6 +189,13 @@ struct CountrySelectViewPreviewProvider: PreviewProvider {
         )
         let state = CountrySelectViewState()
         let eventHandlers = CountrySelectViewEventHandler()
+        
+        state.countries = (0..<20).map {
+            return HolidaySupportCountry(code: "code:\($0)", name: "name:\($0)")
+        }
+        state.selectedCountryCode = "code:3"
+        state.isSavable = true
+        state.isSaving = true
         
         let view = CountrySelectView()
             .environmentObject(state)
