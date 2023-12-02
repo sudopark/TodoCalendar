@@ -12,9 +12,14 @@ public struct LoadingCircleView: View {
     
     @State private var percent: CGFloat = 0
     private let layerColor: Color
+    private let lineWidth: CGFloat
     
-    public init(_ layerColor: Color) {
+    public init(
+        _ layerColor: Color,
+        lineWidth: CGFloat = 3.5
+    ) {
         self.layerColor = layerColor
+        self.lineWidth = lineWidth
     }
     
     public var body: some View {
@@ -23,7 +28,7 @@ public struct LoadingCircleView: View {
             .trim(from: 0, to: self.percent)
             .stroke(
                 self.layerColor,
-                style: .init(lineWidth: 3.5, lineCap: .round)
+                style: .init(lineWidth: self.lineWidth, lineCap: .round)
             )
             .animation(.easeInOut(duration: 1.25).repeatForever(autoreverses: true), value: self.percent)
             .aspectRatio(1, contentMode: .fit)

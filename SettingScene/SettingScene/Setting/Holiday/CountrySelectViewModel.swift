@@ -112,7 +112,7 @@ extension CountrySelectViewModelImple {
                 try await self?.holidayUsecase.selectCountry(country)
                 self?.subject.isSaving.send(true)
                 self?.router?.showToast("holiday_country_selected".localized())
-                self?.router?.closeScene()
+                self?.router?.pop(animate: true)
             } catch {
                 self?.subject.isSaving.send(false)
                 self?.router?.showError(error)
