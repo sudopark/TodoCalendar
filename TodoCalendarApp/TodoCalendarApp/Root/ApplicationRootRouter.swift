@@ -77,6 +77,10 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     func openSafari(_ path: String) {
         // ignore
     }
+    
+    func pop(animate: Bool) {
+        // ignore
+    }
 }
 
 
