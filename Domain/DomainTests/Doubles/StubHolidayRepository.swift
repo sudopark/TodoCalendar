@@ -11,7 +11,7 @@ import Domain
 
 class StubHolidayRepository: HolidayRepository {
     
-    private var currentCountry: HolidaySupportCountry?
+    var stubCurrentCountry: HolidaySupportCountry?
     
     func loadAvailableCountrise() async throws -> [HolidaySupportCountry] {
         return [
@@ -21,11 +21,11 @@ class StubHolidayRepository: HolidayRepository {
     }
     
     func loadLatestSelectedCountry() async throws -> HolidaySupportCountry? {
-        return self.currentCountry
+        return self.stubCurrentCountry
     }
     
     func saveSelectedCountry(_ country: HolidaySupportCountry) async throws {
-        self.currentCountry = country
+        self.stubCurrentCountry = country
     }
     
     func loadHolidays(_ year: Int, _ countryCode: String) async throws -> [Holiday] {

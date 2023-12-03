@@ -84,6 +84,9 @@ extension HolidayUsecaseImple {
     }
     
     private func loadLatestSelectedCountryOrDefaultValueByCurrentLocale() async throws -> HolidaySupportCountry? {
+        if let savedCountry = try? await self.holidayRepository.loadLatestSelectedCountry() {
+            return savedCountry
+        }
         guard let regionCode = self.localeProvider.currentRegionCode()?.uppercased()
         else { return nil }
         
