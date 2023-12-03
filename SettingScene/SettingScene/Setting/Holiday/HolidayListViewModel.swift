@@ -100,7 +100,7 @@ extension HolidayListViewModelImple {
     }
     
     func selectCountry() {
-        // TODO: select holiday
+        self.router?.routeToSelectCountry()
     }
     
     func close() {

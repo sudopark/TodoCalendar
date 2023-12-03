@@ -18,13 +18,16 @@ final class HolidayListSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let countrySelectSceneBuilder: any CountrySelectSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        countrySelectSceneBuilder: any CountrySelectSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.countrySelectSceneBuilder = countrySelectSceneBuilder
     }
 }
 
@@ -45,6 +48,7 @@ extension HolidayListSceneBuilerImple: HolidayListSceneBuiler {
         )
     
         let router = HolidayListRouter(
+            countrySelectSceneBuilder: self.countrySelectSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

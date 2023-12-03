@@ -103,8 +103,23 @@ extension HolidayListViewModelImpleTests {
         XCTAssertEqual(holidayLists.first?.first?.name, "holiday-1-KST")
         XCTAssertEqual(holidayLists.last?.first?.name, "holiday-1-US")
     }
+    
+    func testViewModel_routeToCountrySelect() {
+        // given
+        let viewModel = self.makeUsecaseWithStubHoliday()
+        
+        // when
+        viewModel.selectCountry()
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToCountrySelect, true)
+    }
 }
 
 private class SpyRouter: BaseSpyRouter, HolidayListRouting, @unchecked Sendable {
     
+    var didRouteToCountrySelect: Bool?
+    func routeToSelectCountry() {
+        self.didRouteToCountrySelect = true
+    }
 }
