@@ -89,7 +89,7 @@ extension CountrySelectViewModelImpleTests {
         let expect = expectation(description: "선택국가 저장하고 토스트 노출하고 close")
         let viewModel = self.makeViewModelWithLoadCountries()
         
-        self.spyRouter.didPopCallback = { expect.fulfill() }
+        self.spyRouter.didCloseCallback = { expect.fulfill() }
         
         // when
         viewModel.selectCountry("US")

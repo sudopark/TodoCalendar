@@ -108,8 +108,11 @@ struct HolidayListView: View {
             .listStyle(.plain)
             .navigationTitle("Holiday".localized())
             .toolbar {
-                CloseButton()
-                    .eventHandler(\.onTap, self.eventHandlers.close)
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationBackButton {
+                        eventHandlers.close()
+                    }
+                }
             }
         }
     }

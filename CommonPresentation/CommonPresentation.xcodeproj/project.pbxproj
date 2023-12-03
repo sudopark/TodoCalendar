@@ -13,6 +13,7 @@
 		F605FA0E2A7E0FA300813AF5 /* ViewAppearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = F605FA0D2A7E0FA300813AF5 /* ViewAppearance.swift */; };
 		F605FA142A7F643500813AF5 /* UIFont+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = F605FA132A7F643500813AF5 /* UIFont+Extensions.swift */; };
 		F61C60272A8131EF007BA02C /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F61C60262A8131EF007BA02C /* Domain.framework */; };
+		F61EAD532B1C9061007FD342 /* NavigationBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61EAD522B1C9061007FD342 /* NavigationBackButton.swift */; };
 		F63F64B52A2C05B700E24186 /* CommonPresentation.h in Headers */ = {isa = PBXBuildFile; fileRef = F63F64B42A2C05B700E24186 /* CommonPresentation.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F63F64BD2A2C066C00E24186 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64BC2A2C066C00E24186 /* Common3rdParty.framework */; };
 		F63F64C12A2C067300E24186 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F63F64C02A2C067300E24186 /* Extensions.framework */; };
@@ -35,6 +36,7 @@
 		F605FA0D2A7E0FA300813AF5 /* ViewAppearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewAppearance.swift; sourceTree = "<group>"; };
 		F605FA132A7F643500813AF5 /* UIFont+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIFont+Extensions.swift"; sourceTree = "<group>"; };
 		F61C60262A8131EF007BA02C /* Domain.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Domain.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F61EAD522B1C9061007FD342 /* NavigationBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBackButton.swift; sourceTree = "<group>"; };
 		F63F64B12A2C05B700E24186 /* CommonPresentation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommonPresentation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F63F64B42A2C05B700E24186 /* CommonPresentation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommonPresentation.h; sourceTree = "<group>"; };
 		F63F64BC2A2C066C00E24186 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -150,6 +152,7 @@
 				F677A1F22AF00715002938A9 /* BottomConfirmButton.swift */,
 				F657790E2B087DB40049B5C1 /* LoadingCircleView.swift */,
 				F6F629A92B0E5AF000EF2F11 /* RemoteImageView.swift */,
+				F61EAD522B1C9061007FD342 /* NavigationBackButton.swift */,
 			);
 			path = UIComponents;
 			sourceTree = "<group>";
@@ -253,6 +256,7 @@
 				F69837202A8545DD001F7603 /* View+Extension.swift in Sources */,
 				F605FA0A2A7E0E1300813AF5 /* UIColor+Extensions.swift in Sources */,
 				F677A1F32AF00715002938A9 /* BottomConfirmButton.swift in Sources */,
+				F61EAD532B1C9061007FD342 /* NavigationBackButton.swift in Sources */,
 				F657790F2B087DB40049B5C1 /* LoadingCircleView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

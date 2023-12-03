@@ -27,6 +27,7 @@ final class EventTagListViewController: UIHostingController<EventTagListContaine
     private var cancellables: Set<AnyCancellable> = []
     
     init(
+        hasNavigation: Bool,
         viewModel: any EventTagListViewModel,
         viewAppearance: ViewAppearance
     ) {
@@ -34,6 +35,7 @@ final class EventTagListViewController: UIHostingController<EventTagListContaine
         self.viewAppearance = viewAppearance
         
         let containerView = EventTagListContainerView(
+            hasNavigation: hasNavigation,
             viewAppearance: viewAppearance
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })

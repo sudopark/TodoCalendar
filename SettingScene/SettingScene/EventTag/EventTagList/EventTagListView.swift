@@ -49,6 +49,7 @@ struct EventTagListContainerView: View {
     
     @StateObject fileprivate var state: EventTagListViewState = .init()
     private let viewAppearance: ViewAppearance
+    private let hasNavigation: Bool
     
     var stateBinding: (EventTagListViewState) -> Void = { _ in }
     var onAppear: () -> Void = { }
@@ -57,12 +58,16 @@ struct EventTagListContainerView: View {
     var toggleEventTagViewingIsOn: (AllEventTagId) -> Void = { _ in }
     var showTagDetail: (AllEventTagId) -> Void = { _ in }
     
-    init(viewAppearance: ViewAppearance) {
+    init(
+        hasNavigation: Bool,
+        viewAppearance: ViewAppearance
+    ) {
+        self.hasNavigation = hasNavigation
         self.viewAppearance = viewAppearance
     }
     
     var body: some View {
-        return EventTagListView()
+        return EventTagListView(hasNavigation: hasNavigation)
             .eventHandler(\.addTag, self.addTag)
             .eventHandler(\.closeScene, self.closeScene)
             .eventHandler(\.toggleEventTagViewingIsOn, self.toggleEventTagViewingIsOn)
@@ -83,10 +88,15 @@ struct EventTagListView: View {
     @EnvironmentObject private var state: EventTagListViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
+    private let hasNavigation: Bool
     fileprivate var addTag: () -> Void = { }
     fileprivate var closeScene: () -> Void = { }
     fileprivate var toggleEventTagViewingIsOn: (AllEventTagId) -> Void = { _ in }
     fileprivate var showTagDetail: (AllEventTagId) -> Void = { _ in }
+    
+    init(hasNavigation: Bool) {
+        self.hasNavigation = hasNavigation
+    }
     
     var body: some View {
         NavigationStack {
@@ -98,24 +108,42 @@ struct EventTagListView: View {
             }
             .listStyle(.plain)
             .toolbar {
-                HStack(spacing: 8) {
-                    Button {
-                        self.addTag()
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .symbolRenderingMode(.palette)
-                            .foregroundStyle(
-                                self.appearance.colorSet.event.asColor,
-                                self.appearance.colorSet.eventList.asColor
-                            )
-                            .font(.system(size: 20))
+                if self.hasNavigation {
+                 
+                    ToolbarItem(placement: .topBarLeading) {
+                        NavigationBackButton {
+                            self.closeScene()
+                        }
                     }
                     
-                    CloseButton()
-                        .eventHandler(\.onTap, self.closeScene)
+                    ToolbarItem(placement: .topBarTrailing) {
+                        self.addButton
+                    }
+                } else {
+                    ToolbarItemGroup(placement: .topBarTrailing) {
+                        HStack(spacing: 8) {
+                            self.addButton
+                            CloseButton()
+                                .eventHandler(\.onTap, self.closeScene)
+                        }
+                    }
                 }
             }
             .navigationTitle("Event Types".localized())
+        }
+    }
+    
+    private var addButton: some View {
+        Button {
+            self.addTag()
+        } label: {
+            Image(systemName: "plus.circle.fill")
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(
+                    self.appearance.colorSet.event.asColor,
+                    self.appearance.colorSet.eventList.asColor
+                )
+                .font(.system(size: 20))
         }
     }
     
@@ -199,7 +227,7 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
         state.cellviewModels = (0..<20).map {
             EventTagCellViewModel(id: .custom("id:\($0)"), name: "name:\($0)", color: .custom(hex: "#ff0000"))
         }
-        return EventTagListView()
+        return EventTagListView(hasNavigation: true)
             .eventHandler(\.toggleEventTagViewingIsOn) { id in
                 guard let index = state.cellviewModels.firstIndex(where: { $0.id == id })
                 else { return }

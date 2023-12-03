@@ -33,6 +33,7 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
     
     @MainActor
     func makeEventTagListScene(
+        hasNavigation: Bool,
         listener: (any EventTagListSceneListener)?
     ) -> any EventTagListScene {
         
@@ -41,6 +42,7 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
         )
         
         let viewController = EventTagListViewController(
+            hasNavigation: hasNavigation,
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )

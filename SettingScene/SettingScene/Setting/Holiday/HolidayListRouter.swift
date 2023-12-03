@@ -29,6 +29,10 @@ final class HolidayListRouter: BaseRouterImple, HolidayListRouting, @unchecked S
     ) {
         self.countrySelectSceneBuilder = countrySelectSceneBuilder
     }
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        self.currentScene?.navigationController?.popViewController(animated: animate)
+    }
 }
 
 

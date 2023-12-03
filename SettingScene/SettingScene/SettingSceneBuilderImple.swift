@@ -45,6 +45,7 @@ extension SettingSceneBuilderImple {
     
     @MainActor
     public func makeEventTagListScene(
+        hasNavigation: Bool,
         listener: (any EventTagListSceneListener)?
     ) -> any EventTagListScene {
         
@@ -52,7 +53,9 @@ extension SettingSceneBuilderImple {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
         )
-        return listBuilder.makeEventTagListScene(listener: listener)
+        return listBuilder.makeEventTagListScene(
+            hasNavigation: hasNavigation, listener: listener
+        )
     }
     
     @MainActor

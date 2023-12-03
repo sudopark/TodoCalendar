@@ -37,6 +37,7 @@ final class CountrySelectViewController: UIHostingController<CountrySelectContai
         eventHandlers.onAppear = viewModel.prepare
         eventHandlers.select = viewModel.selectCountry(_:)
         eventHandlers.confirm = viewModel.confirm
+        eventHandlers.close = viewModel.close
         
         let containerView = CountrySelectContainerView(
             viewAppearance: viewAppearance,

@@ -50,11 +50,4 @@ open class BaseSpyRouter: Routing {
     public func openSafari(_ path: String) {
         self.didOpenSafariPath = path
     }
-    
-    public var didPopCallback: (() -> Void)?
-    public var didPop: Bool = false
-    public func pop(animate: Bool) {
-        self.didPop = true
-        self.didPopCallback?()
-    }
 }

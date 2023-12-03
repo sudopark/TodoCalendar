@@ -18,7 +18,12 @@ protocol CountrySelectRouting: Routing, Sendable { }
 
 // MARK: - Router
 
-final class CountrySelectRouter: BaseRouterImple, CountrySelectRouting, @unchecked Sendable { }
+final class CountrySelectRouter: BaseRouterImple, CountrySelectRouting, @unchecked Sendable { 
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        self.currentScene?.navigationController?.popViewController(animated: animate)
+    }
+}
 
 
 extension CountrySelectRouter {

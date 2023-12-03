@@ -62,6 +62,7 @@ extension MainRouter {
         Task { @MainActor in
             
             let eventSettingScene = self.settingSceneBuilder.makeEventTagListScene(
+                hasNavigation: false,
                 listener: nil
             )
             self.currentScene?.present(eventSettingScene, animated: true)

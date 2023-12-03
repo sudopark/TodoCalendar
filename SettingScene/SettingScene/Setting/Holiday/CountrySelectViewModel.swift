@@ -23,6 +23,7 @@ protocol CountrySelectViewModel: AnyObject, Sendable, CountrySelectSceneInteract
     func prepare()
     func selectCountry(_ code: String)
     func confirm()
+    func close()
     
     // presenter
     var supportCountries: AnyPublisher<[HolidaySupportCountry], Never> { get }
@@ -112,13 +113,17 @@ extension CountrySelectViewModelImple {
                 try await self?.holidayUsecase.selectCountry(country)
                 self?.subject.isSaving.send(true)
                 self?.router?.showToast("holiday_country_selected".localized())
-                self?.router?.pop(animate: true)
+                self?.router?.closeScene()
             } catch {
                 self?.subject.isSaving.send(false)
                 self?.router?.showError(error)
             }
         }
         .store(in: &self.cancellables)
+    }
+    
+    func close() {
+        self.router?.closeScene()
     }
 }
 

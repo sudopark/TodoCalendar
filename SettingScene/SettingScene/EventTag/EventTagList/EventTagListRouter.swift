@@ -34,6 +34,15 @@ final class EventTagListRouter: BaseRouterImple, EventTagListRouting, @unchecked
     ) {
         self.tagDetailSceneBuilder = tagDetailSceneBuilder
     }
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        if let navigation = self.currentScene?.navigationController {
+            navigation.popViewController(animated: animate)
+            dismissed?()
+        } else {
+            self.currentScene?.dismiss(animated: animate, completion: dismissed)
+        }
+    }
 }
 
 

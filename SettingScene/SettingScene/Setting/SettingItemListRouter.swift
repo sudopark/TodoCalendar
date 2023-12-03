@@ -43,7 +43,6 @@ extension SettingItemListRouter {
         Task { @MainActor in
             
             let next = self.holidayListSceneBuilder.makeHolidayListScene()
-            self.currentScene?.navigationController?.navigationBar.isHidden = false
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }

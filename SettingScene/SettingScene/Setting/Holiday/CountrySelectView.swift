@@ -69,6 +69,7 @@ final class CountrySelectViewEventHandler: ObservableObject {
     var onAppear: () -> Void = { }
     var select: (String) -> Void = { _ in }
     var confirm: () -> Void = { }
+    var close: () -> Void = { }
 }
 
 
@@ -124,7 +125,14 @@ struct CountrySelectView: View {
             .listStyle(.plain)
             .listRowSpacing(0)
             .toolbar {
-                confirmButton
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationBackButton {
+                        self.eventHandlers.close()
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    confirmButton
+                }
             }
         }
     }

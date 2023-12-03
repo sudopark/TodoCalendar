@@ -40,7 +40,6 @@ public protocol Routing: AnyObject {
     func closeScene(animate: Bool, _ dismissed: (@Sendable () -> Void)?)
     func showConfirm(dialog info: ConfirmDialogInfo)
     func openSafari(_ path: String)
-    func pop(animate: Bool)
 }
 
 extension Routing {
@@ -70,15 +69,9 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         }
     }
     
-    public func closeScene(animate: Bool, _ dismissed: (@Sendable () -> Void)?) {
+    open func closeScene(animate: Bool, _ dismissed: (@Sendable () -> Void)?) {
         Task { @MainActor in
             self.scene?.dismiss(animated: animate, completion: dismissed)
-        }
-    }
-    
-    public func pop(animate: Bool) {
-        Task { @MainActor in
-            self.scene?.navigationController?.popViewController(animated: animate) 
         }
     }
     
