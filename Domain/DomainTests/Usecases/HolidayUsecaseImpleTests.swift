@@ -34,6 +34,11 @@ class HolidayUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     ) -> HolidayUsecaseImple {
         let store = SharedDataStore(serialEventQeueu: nil)
         let provider = StubLocalProvider(code: withCurrentLocale)
+        let country = latestSelectedCountryCode.map {
+            HolidaySupportCountry(code: $0, name: $0)
+        }
+        self.stubRepository.stubCurrentCountry = country
+        
         return HolidayUsecaseImple(
             holidayRepository: self.stubRepository,
             dataStore: store,
@@ -49,7 +54,7 @@ extension HolidayUsecaseImpleTests {
     func testUsecase_whenWitLatestSelectedCountry_updateCurrentCountry() {
         // given
         let expect = expectation(description: "prepare 시에 저장된 국가 있으면 현재국가 업데이트됨")
-        let usecase = self.makeUsecase(latestSelectedCountryCode: "KR")
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "US")
         
         // when
         let current = self.waitFirstOutput(expect, for: usecase.currentSelectedCountry) {
@@ -59,7 +64,7 @@ extension HolidayUsecaseImpleTests {
         }
         
         // then
-        XCTAssertEqual(current?.code, "KR")
+        XCTAssertEqual(current?.code, "US")
     }
     
     func testUsecase_whenWithoutLatestSelectedCountry_updateCurrentCountryFromCurrentLocale() async {
@@ -107,7 +112,7 @@ extension HolidayUsecaseImpleTests {
         // given
         let expect = expectation(description: "선택가능 국가 목록 조회 및 refresh")
         expect.expectedFulfillmentCount = 2
-        let usecase = self.makeUsecase(latestSelectedCountryCode: "KR")
+        let usecase = self.makeUsecase(latestSelectedCountryCode: nil)
         
         // when
         let countryLists = self.waitOutputs(expect, for: usecase.availableCountries) {
