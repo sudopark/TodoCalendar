@@ -136,7 +136,7 @@ struct HolidayCalendarEvent: CalendarEvent {
         else { return nil }
         
         self.eventId = "\(holiday.dateString)-\(holiday.name)"
-        self.name = holiday.name
+        self.name = holiday.localName
         let timeRange = start.timeIntervalSince1970..<end.timeIntervalSince1970
         self.eventTime = .period(timeRange)
         self.eventTimeOnCalendar = .period(timeRange)
