@@ -33,5 +33,9 @@ extension AppSettingRepositoryImpleTests {
         // then
         XCTAssertEqual(appearance.colorSetKey, .defaultLight)
         XCTAssertEqual(appearance.fontSetKey, .systemDefault)
+        XCTAssertEqual(appearance.showUnderLineOnEventDay, true)
+        XCTAssertEqual(appearance.accnetDayPolicy, [
+            .holiday: false, .sunday: false, .saturday: false
+        ])
     }
 }
