@@ -20,7 +20,9 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
         return .init(
             tagColorSetting: .init(holiday: "holiday", default: "default"),
             colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault
+            fontSetKey: .systemDefault,
+            accnetDayPolicy: [:],
+            showUnderLineOnEventDay: false
         )
     }
     
@@ -35,7 +37,9 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
                 holiday: params.newTagColorSetting?.newHolidayTagColor ?? old.tagColorSetting.holiday,
                 default: params.newTagColorSetting?.newDefaultTagColor ?? old.tagColorSetting.default),
             colorSetKey: params.newColorSetKey ?? old.colorSetKey,
-            fontSetKey: params.newFontSetKcy ?? old.fontSetKey
+            fontSetKey: params.newFontSetKcy ?? old.fontSetKey,
+            accnetDayPolicy: params.newAccentDays ?? old.accnetDayPolicy,
+            showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? old.showUnderLineOnEventDay
         )
         return newSetting
     }

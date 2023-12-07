@@ -23,6 +23,10 @@ public final class AppSettingRepositoryImple: AppSettingRepository {
     private var defaultTagColorKey: String { "default_tag_color" }
     private var colorSetKey: String { "color_set" }
     private var fontSetKey: String { "font_set" }
+    private var accentDay_holidayKey: String { "accent_holiday" }
+    private var accentDay_saturdayKey: String { "accent_saturday" }
+    private var accentDay_sunday: String { "accent_sunday" }
+    private var showUnderLineOnEventDayKey: String { "show_underline_eventday" }
 }
 
 
@@ -36,13 +40,24 @@ extension AppSettingRepositoryImple {
         let colorSet = colorSetRaw.flatMap { ColorSetKeys(rawValue: $0) } ?? .defaultLight
         let fontSet = fontSetRaw.flatMap { FontSetKeys(rawValue: $0) } ?? .systemDefault
         
+        let accentHoliday: Bool? = self.environmentStorage.load(accentDay_sunday)
+        let accentSaturday: Bool? = self.environmentStorage.load(accentDay_saturdayKey)
+        let accentSunday: Bool? = self.environmentStorage.load(accentDay_sunday)
+        let isShowUnderline: Bool? = self.environmentStorage.load(showUnderLineOnEventDayKey)
+        
         return AppearanceSettings(
             tagColorSetting: .init(
                 holiday: holidayTagColor ?? "#D6236A",
                 default: defaultTagColor ?? "#088CDA"
             ),
             colorSetKey: colorSet,
-            fontSetKey: fontSet
+            fontSetKey: fontSet,
+            accnetDayPolicy: [
+                .holiday: accentHoliday ?? false,
+                .saturday: accentSaturday ?? false,
+                .sunday: accentSunday ?? false
+            ],
+            showUnderLineOnEventDay: isShowUnderline ?? true
         )
     }
     
@@ -70,7 +85,9 @@ extension AppSettingRepositoryImple {
         let newSetting = AppearanceSettings(
             tagColorSetting: newTagColorSetting,
             colorSetKey: params.newColorSetKey ?? setting.colorSetKey,
-            fontSetKey: params.newFontSetKcy ?? setting.fontSetKey
+            fontSetKey: params.newFontSetKcy ?? setting.fontSetKey,
+            accnetDayPolicy: params.newAccentDays ?? setting.accnetDayPolicy,
+            showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? setting.showUnderLineOnEventDay
         )
         
         self.saveViewAppearanceSetting(newSetting)
