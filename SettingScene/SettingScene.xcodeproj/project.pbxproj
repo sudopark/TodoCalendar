@@ -15,6 +15,7 @@
 		F61EAD622B1CA13E007FD342 /* AppearanceSettingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61EAD5C2B1CA13E007FD342 /* AppearanceSettingViewModel.swift */; };
 		F651190A2B1CCB830034A45B /* CalendarSectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65119092B1CCB830034A45B /* CalendarSectionViewModel.swift */; };
 		F651190D2B220D5B0034A45B /* CalendarSectionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F651190C2B220D5B0034A45B /* CalendarSectionViewModelTests.swift */; };
+		F65119122B222A460034A45B /* CalendarAppearancePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65119112B222A460034A45B /* CalendarAppearancePreviewView.swift */; };
 		F66A808D2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66A808C2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift */; };
 		F676A75B2AC01F7F00D168DF /* SettingScene.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A7522AC01F7F00D168DF /* SettingScene.framework */; };
 		F676A7612AC01F7F00D168DF /* SettingScene.h in Headers */ = {isa = PBXBuildFile; fileRef = F676A7552AC01F7F00D168DF /* SettingScene.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -40,6 +41,7 @@
 		F68F7A3C2B18E751009EC869 /* CountrySelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68F7A362B18E751009EC869 /* CountrySelectView.swift */; };
 		F68F7A3D2B18E751009EC869 /* CountrySelectViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68F7A372B18E751009EC869 /* CountrySelectViewModel.swift */; };
 		F68F7A3F2B18EC9C009EC869 /* CountrySelectViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68F7A3E2B18EC9C009EC869 /* CountrySelectViewModelImpleTests.swift */; };
+		F690C44E2B28B50D0069FD35 /* AppearanceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F690C44D2B28B50D0069FD35 /* AppearanceRow.swift */; };
 		F69BA6A22B0BB3A100BCA65B /* SettingItemListBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */; };
 		F69BA6A32B0BB3A100BCA65B /* SettingItemListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */; };
 		F69BA6A52B0BB3A100BCA65B /* SettingItemListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */; };
@@ -80,6 +82,7 @@
 		F61EAD5C2B1CA13E007FD342 /* AppearanceSettingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingViewModel.swift; sourceTree = "<group>"; };
 		F65119092B1CCB830034A45B /* CalendarSectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSectionViewModel.swift; sourceTree = "<group>"; };
 		F651190C2B220D5B0034A45B /* CalendarSectionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSectionViewModelTests.swift; sourceTree = "<group>"; };
+		F65119112B222A460034A45B /* CalendarAppearancePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAppearancePreviewView.swift; sourceTree = "<group>"; };
 		F66A808C2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewModelImpleTests.swift; sourceTree = "<group>"; };
 		F676A7522AC01F7F00D168DF /* SettingScene.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SettingScene.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F676A7552AC01F7F00D168DF /* SettingScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingScene.h; sourceTree = "<group>"; };
@@ -107,6 +110,7 @@
 		F68F7A362B18E751009EC869 /* CountrySelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountrySelectView.swift; sourceTree = "<group>"; };
 		F68F7A372B18E751009EC869 /* CountrySelectViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountrySelectViewModel.swift; sourceTree = "<group>"; };
 		F68F7A3E2B18EC9C009EC869 /* CountrySelectViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountrySelectViewModelImpleTests.swift; sourceTree = "<group>"; };
+		F690C44D2B28B50D0069FD35 /* AppearanceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceRow.swift; sourceTree = "<group>"; };
 		F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListBuilderImple.swift; sourceTree = "<group>"; };
 		F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListRouter.swift; sourceTree = "<group>"; };
 		F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListViewController.swift; sourceTree = "<group>"; };
@@ -171,23 +175,16 @@
 		F61EAD562B1CA11F007FD342 /* Appearance */ = {
 			isa = PBXGroup;
 			children = (
-				F65119082B1CCB6D0034A45B /* ViewModels */,
+				F65119102B222A2F0034A45B /* CalendarSection */,
 				F61EAD572B1CA13E007FD342 /* AppearanceSettingBuilderImple.swift */,
 				F61EAD582B1CA13E007FD342 /* AppearanceSettingRouter.swift */,
 				F61EAD592B1CA13E007FD342 /* AppearanceSettingScene+Builder.swift */,
 				F61EAD5A2B1CA13E007FD342 /* AppearanceSettingViewController.swift */,
 				F61EAD5B2B1CA13E007FD342 /* AppearanceSettingView.swift */,
 				F61EAD5C2B1CA13E007FD342 /* AppearanceSettingViewModel.swift */,
+				F690C44D2B28B50D0069FD35 /* AppearanceRow.swift */,
 			);
 			path = Appearance;
-			sourceTree = "<group>";
-		};
-		F65119082B1CCB6D0034A45B /* ViewModels */ = {
-			isa = PBXGroup;
-			children = (
-				F65119092B1CCB830034A45B /* CalendarSectionViewModel.swift */,
-			);
-			path = ViewModels;
 			sourceTree = "<group>";
 		};
 		F651190B2B220D400034A45B /* Appearance */ = {
@@ -196,6 +193,15 @@
 				F651190C2B220D5B0034A45B /* CalendarSectionViewModelTests.swift */,
 			);
 			path = Appearance;
+			sourceTree = "<group>";
+		};
+		F65119102B222A2F0034A45B /* CalendarSection */ = {
+			isa = PBXGroup;
+			children = (
+				F65119092B1CCB830034A45B /* CalendarSectionViewModel.swift */,
+				F65119112B222A460034A45B /* CalendarAppearancePreviewView.swift */,
+			);
+			path = CalendarSection;
 			sourceTree = "<group>";
 		};
 		F676A7482AC01F7F00D168DF = {
@@ -463,11 +469,13 @@
 				F69BA6A62B0BB3A100BCA65B /* SettingItemListView.swift in Sources */,
 				F61EAD622B1CA13E007FD342 /* AppearanceSettingViewModel.swift in Sources */,
 				F61EAD602B1CA13E007FD342 /* AppearanceSettingViewController.swift in Sources */,
+				F690C44E2B28B50D0069FD35 /* AppearanceRow.swift in Sources */,
 				F676A7B82AC0269500D168DF /* EventTagListRouter.swift in Sources */,
 				F68F7A3C2B18E751009EC869 /* CountrySelectView.swift in Sources */,
 				F6D32F882B131E98008BA797 /* HolidayListBuilderImple.swift in Sources */,
 				F68F7A3B2B18E751009EC869 /* CountrySelectViewController.swift in Sources */,
 				F68E7DF72AF0AA7000110A73 /* SettingSceneBuilderImple.swift in Sources */,
+				F65119122B222A460034A45B /* CalendarAppearancePreviewView.swift in Sources */,
 				F6B7AC6A2ACC05E2003F6BA8 /* EventTagDetailRouter.swift in Sources */,
 				F6B7AC6E2ACC05E2003F6BA8 /* EventTagDetailViewModel.swift in Sources */,
 				F676A7B72AC0269500D168DF /* EventTagListBuilderImple.swift in Sources */,
