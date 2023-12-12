@@ -37,6 +37,11 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         self.viewAppearance = viewAppearance
         
         let eventHandlers = AppearanceSettingViewEventHandler()
+        eventHandlers.onAppear = calendarSectionViewModel.prepare
+        eventHandlers.weekStartDaySelected = calendarSectionViewModel.changeStartOfWeekDay(_:)
+        eventHandlers.changeColorTheme = calendarSectionViewModel.changeColorTheme
+        eventHandlers.toggleAccentDay = calendarSectionViewModel.toggleAccentDay(_:)
+        eventHandlers.toggleShowUnderline = calendarSectionViewModel.toggleIsShowUnderLineOnEventDay(_:)
         
         let containerView = AppearanceSettingContainerView(
             viewAppearance: viewAppearance,

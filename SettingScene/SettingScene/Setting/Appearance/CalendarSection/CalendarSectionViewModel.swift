@@ -19,20 +19,31 @@ struct CalendarAppearanceModel: Equatable {
         let number: Int
         let isWeekEnd: Bool
         let hasEvent: Bool
+        let isHoliday: Bool
         
         init(
             _ number: Int,
             isWeekEnd: Bool = false,
-            hasEvent: Bool = false
+            hasEvent: Bool = false,
+            isHoliday: Bool = false
         ) {
             self.number = number
             self.isWeekEnd = isWeekEnd
             self.hasEvent = hasEvent
+            self.isHoliday = isHoliday
         }
     }
     
     let weekDays: [DayOfWeeks]
     let weeks: [[DayModel?]]
+    
+    init(
+        _ weekDays: [DayOfWeeks],
+        _ weeks: [[DayModel?]]
+    ) {
+        self.weekDays = weekDays
+        self.weeks = weeks
+    }
     
     init(_ startOfWeek: DayOfWeeks) {
         let total: [DayOfWeeks] = [
@@ -63,7 +74,8 @@ struct CalendarAppearanceModel: Equatable {
                 return DayModel(
                     dayNumber,
                     isWeekEnd: dayNumber % 7 == 0 || dayNumber % 7 == 6,
-                    hasEvent: hasEventDays.contains(dayNumber)
+                    hasEvent: hasEventDays.contains(dayNumber),
+                    isHoliday: dayNumber == 13 || dayNumber == 24
                 )
             }
         }
@@ -80,6 +92,7 @@ protocol CalendarSectionViewModel: AnyObject, Sendable {
     func toggleIsShowUnderLineOnEventDay(_ newValue: Bool)
     
  
+    var currentWeekStartDay: AnyPublisher<DayOfWeeks, Never> { get }
     var calendarAppearanceModel: AnyPublisher<CalendarAppearanceModel, Never> { get }
     var accentDaysActivatedMap: AnyPublisher<[AccentDays: Bool], Never> { get }
     var isShowUnderLineOnEventDay: AnyPublisher<Bool, Never> { get }
@@ -102,13 +115,25 @@ final class CalendarSectionViewModelImple: CalendarSectionViewModel, @unchecked 
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        
+        self.internalBind()
     }
     
     private struct Subject {
+        let startWeekDay = CurrentValueSubject<DayOfWeeks?, Never>(nil)
         let appearanceSetting = CurrentValueSubject<AppearanceSettings?, Never>(nil)
     }
     private let subject = Subject()
     private var cancelables: Set<AnyCancellable> = []
+    
+    private func internalBind() {
+        
+        self.calendarSettingUsecase.firstWeekDay
+            .sink(receiveValue: { [weak self] day in
+                self?.subject.startWeekDay.send(day)
+            })
+            .store(in: &self.cancelables)
+    }
 }
 
 
@@ -121,6 +146,8 @@ extension CalendarSectionViewModelImple {
     }
     
     func changeStartOfWeekDay(_ day: DayOfWeeks) {
+        // TOOD: remove duplicated
+        guard self.subject.startWeekDay.value != day else { return }
         self.calendarSettingUsecase.updateFirstWeekDay(day)
     }
     
@@ -145,7 +172,8 @@ extension CalendarSectionViewModelImple {
     }
     
     func toggleIsShowUnderLineOnEventDay(_ newValue: Bool) {
-        guard let origin = self.subject.appearanceSetting.value
+        guard let origin = self.subject.appearanceSetting.value,
+              origin.showUnderLineOnEventDay != newValue
         else { return }
         
         let params = EditAppearanceSettingParams()
@@ -164,8 +192,16 @@ extension CalendarSectionViewModelImple {
 
 extension CalendarSectionViewModelImple {
     
+    var currentWeekStartDay: AnyPublisher<DayOfWeeks, Never> {
+        return self.subject.startWeekDay
+            .compactMap { $0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
     var calendarAppearanceModel: AnyPublisher<CalendarAppearanceModel, Never> {
-        return self.calendarSettingUsecase.firstWeekDay
+        return self.subject.startWeekDay
+            .compactMap { $0 }
             .compactMap { CalendarAppearanceModel($0) }
             .removeDuplicates()
             .eraseToAnyPublisher()

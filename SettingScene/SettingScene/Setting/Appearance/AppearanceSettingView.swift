@@ -20,9 +20,11 @@ final class AppearanceSettingViewState: ObservableObject {
     
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
-    @Published var calendarModel: CalendarAppearanceModel?
+    @Published var calendarModel: CalendarAppearanceModel = .init([], [])
     @Published var accentDays: [AccentDays: Bool] = [:]
     @Published var showUnderLine: Bool = false
+    @Published var selectedWeekDay: DayOfWeeks = .sunday
+    let weekDayPickerSource: [DayOfWeeks] = [.sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday]
     
     func bind(
         _ viewModel: any AppearanceSettingViewModel,
@@ -33,10 +35,19 @@ final class AppearanceSettingViewState: ObservableObject {
         self.didBind = true
         
         // TODO: bind state
+        calendarSectionViewModel.currentWeekStartDay
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] day in
+                self?.selectedWeekDay = day
+            })
+            .store(in: &self.cancellables)
+        
         calendarSectionViewModel.calendarAppearanceModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
-                self?.calendarModel = model
+                withAnimation {
+                    self?.calendarModel = model
+                }
             })
             .store(in: &self.cancellables)
         
@@ -61,6 +72,11 @@ final class AppearanceSettingViewState: ObservableObject {
 final class AppearanceSettingViewEventHandler: ObservableObject {
     
     // TODO: add handlers
+    var onAppear: () -> Void = { }
+    var weekStartDaySelected: (DayOfWeeks) -> Void = { _ in }
+    var changeColorTheme: () -> Void = { }
+    var toggleAccentDay: (AccentDays) -> Void = { _ in }
+    var toggleShowUnderline: (Bool) -> Void = { _ in }
 }
 
 
@@ -86,6 +102,7 @@ struct AppearanceSettingContainerView: View {
         return AppearanceSettingView()
             .onAppear {
                 self.stateBinding(self.state)
+                self.eventHandlers.onAppear()
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
@@ -104,16 +121,26 @@ struct AppearanceSettingView: View {
     var body: some View {
         NavigationStack {
             Form {
+                CalendarSectionView()
+                    .listRowBackground(self.appearance.colorSet.dayBackground.asColor)
+                
                 Text("AppearanceSettingView")
             }
+            .formStyle(PlainFormStyle())
+            .scrollContentBackground(.hidden)
+            .background(self.appearance.colorSet.dayBackground.asColor)
             .navigationTitle("Appearance".localized())
         }
     }
+}
+
+struct PlainFormStyle: FormStyle {
     
-    private var calendarView: some View {
-        VStack(spacing: 0) {
-            
-        }
+    @EnvironmentObject private var appearance: ViewAppearance
+    
+    func makeBody(configuration: Configuration) -> some View {
+        return configuration.content
+            .listRowSeparator(.hidden)
     }
 }
 
@@ -129,9 +156,15 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
         )
         let state = AppearanceSettingViewState()
         let eventHandlers = AppearanceSettingViewEventHandler()
+        eventHandlers.weekStartDaySelected = { day in
+            withAnimation {
+                state.calendarModel = .init(day)
+            }
+        }
         
         state.calendarModel = CalendarAppearanceModel(.sunday)
         state.accentDays = [.holiday: true, .sunday: true]
+        state.selectedWeekDay = .sunday
         
         let view = AppearanceSettingView()
             .environmentObject(state)
@@ -140,4 +173,3 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
         return view
     }
 }
-

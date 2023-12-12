@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+import Extensions
 
 public enum DayOfWeeks: Int, Sendable {
     case sunday = 1
@@ -19,6 +19,42 @@ public enum DayOfWeeks: Int, Sendable {
     
     public var isWeekEnd: Bool {
         return self == .sunday || self == .saturday
+    }
+    
+    public var text: String {
+        switch self {
+        case .sunday: return "Sunday".localized()
+        case .monday: return "Monday".localized()
+        case .tuesday: return "Tueday".localized()
+        case .wednesday: return "Wednesday".localized()
+        case .thursday: return "Thursday".localized()
+        case .friday: return "Friday".localized()
+        case .saturday: return "Saturday".localized()
+        }
+    }
+    
+    public var shortText: String {
+        switch self {
+        case .sunday: return "SUN".localized()
+        case .monday: return "MON".localized()
+        case .tuesday: return "TUE".localized()
+        case .wednesday: return "WED".localized()
+        case .thursday: return "THU".localized()
+        case .friday: return "FRI".localized()
+        case .saturday: return "SAT".localized()
+        }
+    }
+    
+    public var veryShortText: String {
+        switch self {
+        case .sunday: return "S".localized()
+        case .monday: return "M".localized()
+        case .tuesday: return "T".localized()
+        case .wednesday: return "W".localized()
+        case .thursday: return "T".localized()
+        case .friday: return "F".localized()
+        case .saturday: return "S".localized()
+        }
     }
 }
 
