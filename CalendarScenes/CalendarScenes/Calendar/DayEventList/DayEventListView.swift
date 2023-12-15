@@ -12,6 +12,7 @@ import SwiftUI
 import Combine
 import Prelude
 import Optics
+import Domain
 import CommonPresentation
 
 
@@ -357,9 +358,16 @@ private extension EventCellViewModel {
 struct DayEventListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
-        let viewAppearance = ViewAppearance(
+        let setting = AppearanceSettings(
             tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
-            color: .defaultLight, font: .systemDefault
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault,
+            accnetDayPolicy: [:],
+            showUnderLineOnEventDay: false,
+            eventOnCalendar: .init()
+        )
+        let viewAppearance = ViewAppearance(
+            setting: setting
         )
         let state = DayEventListViewState()
         state.dateText = "2020년 9월 15일(금)"

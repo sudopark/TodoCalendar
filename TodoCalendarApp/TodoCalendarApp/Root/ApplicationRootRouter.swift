@@ -22,11 +22,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     let appearance: ViewAppearance
     init(_ setting: AppearanceSettings) {
         
-        self.appearance = .init(
-            tagColorSetting: setting.tagColorSetting,
-            color: setting.colorSetKey,
-            font: setting.fontSetKey
-        )
+        self.appearance = .init(setting: setting)
     }
     
     func notifySettingChanged(_ newSetting: AppearanceSettings) {
@@ -39,6 +35,9 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         }
         if self.appearance.fontSet.key != newSetting.fontSetKey {
             self.appearance.fontSet = newSetting.fontSetKey.convert()
+        }
+        if self.appearance.eventOnCalendarSetting != newSetting.eventOnCalendar {
+            self.appearance.eventOnCalendarSetting = newSetting.eventOnCalendar
         }
     }
 }

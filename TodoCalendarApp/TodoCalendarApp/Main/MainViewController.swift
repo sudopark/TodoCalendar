@@ -9,6 +9,7 @@
 
 import UIKit
 import Combine
+import Domain
 import CombineCocoa
 import Scenes
 import CommonPresentation
@@ -272,11 +273,18 @@ import SwiftUI
 struct ViewControllerPreviewConverter: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> some UIViewController {
+        let setting = AppearanceSettings(
+            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault,
+            accnetDayPolicy: [:],
+            showUnderLineOnEventDay: false,
+            eventOnCalendar: .init()
+        )
         return MainViewController(
             viewModel: MainViewModelImple(),
             viewAppearance: ViewAppearance(
-                tagColorSetting: .init(holiday: "#ff0000", default: "#00ff00"),
-                color: .defaultLight, font: .systemDefault
+                setting: setting
             )
         )
     }

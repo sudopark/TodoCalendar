@@ -27,6 +27,10 @@ public final class AppSettingRepositoryImple: AppSettingRepository {
     private var accentDay_saturdayKey: String { "accent_saturday" }
     private var accentDay_sunday: String { "accent_sunday" }
     private var showUnderLineOnEventDayKey: String { "show_underline_eventday" }
+    
+    private var eventOnCalendarAdditionalFontSize: String { "event_on_calendar_additional_font_size" }
+    private var boldTextEventOnCalendar: String { "bold_text_event_on_calendar" }
+    private var showEventTagColorOnCalendar: String { "show_event_tag_color_on_calendar" }
 }
 
 
@@ -45,6 +49,7 @@ extension AppSettingRepositoryImple {
         let accentSunday: Bool? = self.environmentStorage.load(accentDay_sunday)
         let isShowUnderline: Bool? = self.environmentStorage.load(showUnderLineOnEventDayKey)
         
+        let eventOnCalendarSetting = self.loadEventOnCalendarSetting()
         return AppearanceSettings(
             tagColorSetting: .init(
                 holiday: holidayTagColor ?? "#D6236A",
@@ -57,8 +62,20 @@ extension AppSettingRepositoryImple {
                 .saturday: accentSaturday ?? false,
                 .sunday: accentSunday ?? false
             ],
-            showUnderLineOnEventDay: isShowUnderline ?? true
+            showUnderLineOnEventDay: isShowUnderline ?? true,
+            eventOnCalendar: eventOnCalendarSetting
         )
+    }
+    
+    private func loadEventOnCalendarSetting() -> EventOnCalendarSetting {
+        let additionalFont: Int =
+        self.environmentStorage.load(eventOnCalendarAdditionalFontSize) ?? 0
+        let bold: Bool = self.environmentStorage.load(boldTextEventOnCalendar) ?? false
+        let showColor: Bool = self.environmentStorage.load(showEventTagColorOnCalendar) ?? true
+        return EventOnCalendarSetting()
+            |> \.textAdditionalSize .~ CGFloat(additionalFont)
+            |> \.bold .~ bold
+            |> \.showEventTagColor .~ showColor
     }
     
     public func saveViewAppearanceSetting(_ newValue: AppearanceSettings) {
@@ -87,7 +104,8 @@ extension AppSettingRepositoryImple {
             colorSetKey: params.newColorSetKey ?? setting.colorSetKey,
             fontSetKey: params.newFontSetKcy ?? setting.fontSetKey,
             accnetDayPolicy: params.newAccentDays ?? setting.accnetDayPolicy,
-            showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? setting.showUnderLineOnEventDay
+            showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? setting.showUnderLineOnEventDay,
+            eventOnCalendar: params.eventOnCalendar ?? setting.eventOnCalendar
         )
         
         self.saveViewAppearanceSetting(newSetting)

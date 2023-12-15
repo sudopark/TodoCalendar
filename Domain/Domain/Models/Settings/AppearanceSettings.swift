@@ -7,7 +7,6 @@
 
 import Foundation
 
-
 public enum ColorSetKeys: String, Sendable {
     case defaultLight
 }
@@ -32,6 +31,15 @@ public enum AccentDays: Sendable {
     case sunday
 }
 
+public struct EventOnCalendarSetting: Sendable, Equatable {
+    
+    public var textAdditionalSize: CGFloat = 0
+    public var bold: Bool = false
+    public var showEventTagColor: Bool = true
+    
+    public init() { }
+}
+
 public struct AppearanceSettings {
     
     public let tagColorSetting: EventTagColorSetting
@@ -40,18 +48,22 @@ public struct AppearanceSettings {
     public let accnetDayPolicy: [AccentDays: Bool]
     public let showUnderLineOnEventDay: Bool
     
+    public let eventOnCalendar: EventOnCalendarSetting
+    
     public init(
         tagColorSetting: EventTagColorSetting,
         colorSetKey: ColorSetKeys,
         fontSetKey: FontSetKeys,
         accnetDayPolicy: [AccentDays: Bool],
-        showUnderLineOnEventDay: Bool
+        showUnderLineOnEventDay: Bool,
+        eventOnCalendar: EventOnCalendarSetting
     ) {
         self.tagColorSetting = tagColorSetting
         self.colorSetKey = colorSetKey
         self.fontSetKey = fontSetKey
         self.accnetDayPolicy = accnetDayPolicy
         self.showUnderLineOnEventDay = showUnderLineOnEventDay
+        self.eventOnCalendar = eventOnCalendar
     }
 }
 
@@ -70,6 +82,7 @@ public struct EditAppearanceSettingParams {
     public var newFontSetKcy: FontSetKeys?
     public var newAccentDays: [AccentDays: Bool]?
     public var newShowUnderLineOnEventDay: Bool?
+    public var eventOnCalendar: EventOnCalendarSetting?
     
     public init() { }
     
@@ -80,5 +93,6 @@ public struct EditAppearanceSettingParams {
             || self.newFontSetKcy != nil
             || self.newAccentDays != nil
             || self.newShowUnderLineOnEventDay != nil
+            || self.eventOnCalendar != nil
     }
 }
