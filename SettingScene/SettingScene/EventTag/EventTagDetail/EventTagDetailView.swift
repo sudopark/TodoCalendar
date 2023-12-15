@@ -258,9 +258,16 @@ struct EventTagDetailView: View {
 struct EventTagDetailViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
-        let viewAppearance = ViewAppearance(
+        let setting = AppearanceSettings(
             tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
-            color: .defaultLight, font: .systemDefault
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault,
+            accnetDayPolicy: [:],
+            showUnderLineOnEventDay: false,
+            eventOnCalendar: .init()
+        )
+        let viewAppearance = ViewAppearance(
+            setting: setting
         )
         let detailView = EventTagDetailView()
         let state = EventTagDetailViewState()

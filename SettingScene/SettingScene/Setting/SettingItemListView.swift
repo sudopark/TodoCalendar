@@ -10,6 +10,7 @@
 
 import SwiftUI
 import Combine
+import Domain
 import CommonPresentation
 
 
@@ -198,10 +199,16 @@ struct SettingItemListView: View {
 struct SettingItemListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
+        let setting = AppearanceSettings(
+            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault,
+            accnetDayPolicy: [:],
+            showUnderLineOnEventDay: false,
+            eventOnCalendar: .init()
+        )
         let viewAppearance = ViewAppearance(
-            tagColorSetting: .init(holiday: "#ff0000", default: "#ff0000"),
-            color: .defaultLight,
-            font: .systemDefault
+            setting: setting
         )
         let state = SettingItemListViewState()
         let eventHandlers = SettingItemListViewEventHandler()

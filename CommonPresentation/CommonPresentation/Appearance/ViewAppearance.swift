@@ -15,20 +15,17 @@ public class ViewAppearance: ObservableObject {
     @Published public var tagColors: EventTagColorSet
     @Published public var colorSet: any ColorSet
     @Published public var fontSet: any FontSet
+    @Published public var eventOnCalendarSetting: EventOnCalendarSetting
     
-    public init(
-        tagColorSetting: EventTagColorSetting,
-        color: ColorSetKeys,
-        font: FontSetKeys
-    ) {
+    public init(setting: AppearanceSettings) {
         
         self.tagColors = .init(
-            holiday: UIColor.from(hex: tagColorSetting.holiday) ?? .clear,
-            defaultColor: UIColor.from(hex: tagColorSetting.default) ?? .clear
+            holiday: UIColor.from(hex: setting.tagColorSetting.holiday) ?? .clear,
+            defaultColor: UIColor.from(hex: setting.tagColorSetting.default) ?? .clear
         )
-        
-        self.colorSet = color.convert()
-        self.fontSet = font.convert()
+        self.colorSet = setting.colorSetKey.convert()
+        self.fontSet = setting.fontSetKey.convert()
+        self.eventOnCalendarSetting = setting.eventOnCalendar
     }
 }
 

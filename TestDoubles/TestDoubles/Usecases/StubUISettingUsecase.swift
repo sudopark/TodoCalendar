@@ -23,7 +23,8 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
             colorSetKey: .defaultLight,
             fontSetKey: .systemDefault,
             accnetDayPolicy: [.sunday: true, .saturday: false, .holiday: false],
-            showUnderLineOnEventDay: true
+            showUnderLineOnEventDay: true,
+            eventOnCalendar: .init()
         )
     }
     
@@ -37,9 +38,11 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
             colorSetKey: params.newColorSetKey ?? old.colorSetKey,
             fontSetKey: params.newFontSetKcy ?? old.fontSetKey,
             accnetDayPolicy: params.newAccentDays ?? old.accnetDayPolicy,
-            showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? old.showUnderLineOnEventDay
+            showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? old.showUnderLineOnEventDay,
+            eventOnCalendar: params.eventOnCalendar ?? old.eventOnCalendar
         )
         self.didChangeAppearanceSetting = newSetting
+        self.stubAppearanceSetting = newSetting
         return newSetting
     }
 }

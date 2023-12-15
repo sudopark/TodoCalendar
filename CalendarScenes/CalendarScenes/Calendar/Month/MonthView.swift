@@ -392,10 +392,16 @@ struct MonthViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let viewModel = DummyMonthViewModel()
-        let viewAppearance = ViewAppearance(
+        let setting = AppearanceSettings(
             tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
-            color: .defaultLight,
-            font: .systemDefault
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault,
+            accnetDayPolicy: [:],
+            showUnderLineOnEventDay: false,
+            eventOnCalendar: .init()
+        )
+        let viewAppearance = ViewAppearance(
+            setting: setting
         )
         let containerView = MonthContainerView(viewAppearance: viewAppearance)
             .eventHandler(\.stateBinding, { $0.bind(viewModel) })

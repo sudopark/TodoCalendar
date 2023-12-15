@@ -200,10 +200,16 @@ private extension HolidayItemModel {
 struct HolidayListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
+        let setting = AppearanceSettings(
+            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault,
+            accnetDayPolicy: [:],
+            showUnderLineOnEventDay: false,
+            eventOnCalendar: .init()
+        )
         let viewAppearance = ViewAppearance(
-            tagColorSetting: .init(holiday: "#ff0000", default: "#ff0000"),
-            color: .defaultLight,
-            font: .systemDefault
+            setting: setting
         )
         let state = HolidayListViewState()
         let eventHandlers = HolidayListViewEventHandler()
