@@ -35,6 +35,7 @@
 		F676A7BC2AC0269500D168DF /* EventTagListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */; };
 		F68C5CE82B2CA21B0060D173 /* EventOnCalendarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68C5CE72B2CA21B0060D173 /* EventOnCalendarViewModel.swift */; };
 		F68C5CEA2B2CAB9C0060D173 /* EventOnCalendarViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68C5CE92B2CAB9C0060D173 /* EventOnCalendarViewModelImpleTests.swift */; };
+		F68C5CEC2B2D640C0060D173 /* EventOnCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68C5CEB2B2D640C0060D173 /* EventOnCalendarView.swift */; };
 		F68E7DF72AF0AA7000110A73 /* SettingSceneBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */; };
 		F68F7A382B18E751009EC869 /* CountrySelectBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68F7A322B18E751009EC869 /* CountrySelectBuilderImple.swift */; };
 		F68F7A392B18E751009EC869 /* CountrySelectRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68F7A332B18E751009EC869 /* CountrySelectRouter.swift */; };
@@ -43,7 +44,6 @@
 		F68F7A3C2B18E751009EC869 /* CountrySelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68F7A362B18E751009EC869 /* CountrySelectView.swift */; };
 		F68F7A3D2B18E751009EC869 /* CountrySelectViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68F7A372B18E751009EC869 /* CountrySelectViewModel.swift */; };
 		F68F7A3F2B18EC9C009EC869 /* CountrySelectViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F68F7A3E2B18EC9C009EC869 /* CountrySelectViewModelImpleTests.swift */; };
-		F690C44E2B28B50D0069FD35 /* AppearanceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = F690C44D2B28B50D0069FD35 /* AppearanceRow.swift */; };
 		F69BA6A22B0BB3A100BCA65B /* SettingItemListBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */; };
 		F69BA6A32B0BB3A100BCA65B /* SettingItemListRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */; };
 		F69BA6A52B0BB3A100BCA65B /* SettingItemListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */; };
@@ -106,6 +106,7 @@
 		F676A7B62AC0269500D168DF /* EventTagListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewModel.swift; sourceTree = "<group>"; };
 		F68C5CE72B2CA21B0060D173 /* EventOnCalendarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventOnCalendarViewModel.swift; sourceTree = "<group>"; };
 		F68C5CE92B2CAB9C0060D173 /* EventOnCalendarViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventOnCalendarViewModelImpleTests.swift; sourceTree = "<group>"; };
+		F68C5CEB2B2D640C0060D173 /* EventOnCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventOnCalendarView.swift; sourceTree = "<group>"; };
 		F68E7DF62AF0AA7000110A73 /* SettingSceneBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingSceneBuilderImple.swift; sourceTree = "<group>"; };
 		F68F7A322B18E751009EC869 /* CountrySelectBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountrySelectBuilderImple.swift; sourceTree = "<group>"; };
 		F68F7A332B18E751009EC869 /* CountrySelectRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountrySelectRouter.swift; sourceTree = "<group>"; };
@@ -114,7 +115,6 @@
 		F68F7A362B18E751009EC869 /* CountrySelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountrySelectView.swift; sourceTree = "<group>"; };
 		F68F7A372B18E751009EC869 /* CountrySelectViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountrySelectViewModel.swift; sourceTree = "<group>"; };
 		F68F7A3E2B18EC9C009EC869 /* CountrySelectViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountrySelectViewModelImpleTests.swift; sourceTree = "<group>"; };
-		F690C44D2B28B50D0069FD35 /* AppearanceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceRow.swift; sourceTree = "<group>"; };
 		F69BA69C2B0BB3A100BCA65B /* SettingItemListBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListBuilderImple.swift; sourceTree = "<group>"; };
 		F69BA69D2B0BB3A100BCA65B /* SettingItemListRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListRouter.swift; sourceTree = "<group>"; };
 		F69BA69F2B0BB3A100BCA65B /* SettingItemListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingItemListViewController.swift; sourceTree = "<group>"; };
@@ -187,7 +187,6 @@
 				F61EAD5A2B1CA13E007FD342 /* AppearanceSettingViewController.swift */,
 				F61EAD5B2B1CA13E007FD342 /* AppearanceSettingView.swift */,
 				F61EAD5C2B1CA13E007FD342 /* AppearanceSettingViewModel.swift */,
-				F690C44D2B28B50D0069FD35 /* AppearanceRow.swift */,
 			);
 			path = Appearance;
 			sourceTree = "<group>";
@@ -288,6 +287,7 @@
 			isa = PBXGroup;
 			children = (
 				F68C5CE72B2CA21B0060D173 /* EventOnCalendarViewModel.swift */,
+				F68C5CEB2B2D640C0060D173 /* EventOnCalendarView.swift */,
 			);
 			path = EventOnCalendar;
 			sourceTree = "<group>";
@@ -484,7 +484,7 @@
 				F69BA6A62B0BB3A100BCA65B /* SettingItemListView.swift in Sources */,
 				F61EAD622B1CA13E007FD342 /* AppearanceSettingViewModel.swift in Sources */,
 				F61EAD602B1CA13E007FD342 /* AppearanceSettingViewController.swift in Sources */,
-				F690C44E2B28B50D0069FD35 /* AppearanceRow.swift in Sources */,
+				F68C5CEC2B2D640C0060D173 /* EventOnCalendarView.swift in Sources */,
 				F676A7B82AC0269500D168DF /* EventTagListRouter.swift in Sources */,
 				F68F7A3C2B18E751009EC869 /* CountrySelectView.swift in Sources */,
 				F6D32F882B131E98008BA797 /* HolidayListBuilderImple.swift in Sources */,
