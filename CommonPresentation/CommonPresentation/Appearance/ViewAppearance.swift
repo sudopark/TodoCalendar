@@ -16,6 +16,7 @@ public class ViewAppearance: ObservableObject {
     @Published public var colorSet: any ColorSet
     @Published public var fontSet: any FontSet
     @Published public var eventOnCalendarSetting: EventOnCalendarSetting
+    @Published public var eventlist: EventListSetting
     
     public init(setting: AppearanceSettings) {
         
@@ -26,6 +27,7 @@ public class ViewAppearance: ObservableObject {
         self.colorSet = setting.colorSetKey.convert()
         self.fontSet = setting.fontSetKey.convert()
         self.eventOnCalendarSetting = setting.eventOnCalendar
+        self.eventlist = setting.eventList
     }
 }
 

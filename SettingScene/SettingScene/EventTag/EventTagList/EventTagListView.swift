@@ -225,7 +225,8 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
             fontSetKey: .systemDefault,
             accnetDayPolicy: [:],
             showUnderLineOnEventDay: false,
-            eventOnCalendar: .init()
+            eventOnCalendar: .init(),
+            eventList: .init()
         )
         let viewAppearance = ViewAppearance(
             setting: setting

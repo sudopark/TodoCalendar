@@ -15,7 +15,7 @@ final class EventOnCalendarViewState: ObservableObject {
     
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
-    @Published var additionalFontSizeModel: EventOnCalendarTextAdditionalSizeModel = .init(sizeText: "")
+    @Published var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(sizeText: "")
     @Published var isBold: Bool = false
     @Published var isShowEventTagColor: Bool = false
     
@@ -205,7 +205,8 @@ struct EventOnCalendarViewPreviewProvider: PreviewProvider {
             fontSetKey: .systemDefault,
             accnetDayPolicy: [:],
             showUnderLineOnEventDay: false,
-            eventOnCalendar: .init()
+            eventOnCalendar: .init(),
+            eventList: .init()
         )
         let viewAppearance = ViewAppearance(
             setting: setting
