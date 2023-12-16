@@ -1,5 +1,5 @@
 //
-//  CalendarSectionViewModel.swift
+//  CalendarSectionAppearnaceSettingViewModel.swift
 //  SettingScene
 //
 //  Created by sudo.park on 12/3/23.
@@ -83,7 +83,7 @@ struct CalendarAppearanceModel: Equatable {
 }
 
 
-protocol CalendarSectionViewModel: AnyObject, Sendable {
+protocol CalendarSectionAppearnaceSettingViewModel: AnyObject, Sendable {
     
     func prepare()
     func changeStartOfWeekDay(_ day: DayOfWeeks)
@@ -103,7 +103,7 @@ protocol CalendarSectionRouting: Routing {
     func routeToSelectColorTheme()
 }
 
-final class CalendarSectionViewModelImple: CalendarSectionViewModel, @unchecked Sendable {
+final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewModel, @unchecked Sendable {
     
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase

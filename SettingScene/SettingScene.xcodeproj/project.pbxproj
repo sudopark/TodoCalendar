@@ -13,7 +13,7 @@
 		F61EAD602B1CA13E007FD342 /* AppearanceSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61EAD5A2B1CA13E007FD342 /* AppearanceSettingViewController.swift */; };
 		F61EAD612B1CA13E007FD342 /* AppearanceSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61EAD5B2B1CA13E007FD342 /* AppearanceSettingView.swift */; };
 		F61EAD622B1CA13E007FD342 /* AppearanceSettingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F61EAD5C2B1CA13E007FD342 /* AppearanceSettingViewModel.swift */; };
-		F651190A2B1CCB830034A45B /* CalendarSectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65119092B1CCB830034A45B /* CalendarSectionViewModel.swift */; };
+		F651190A2B1CCB830034A45B /* CalendarSectionAppearnaceSettingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65119092B1CCB830034A45B /* CalendarSectionAppearnaceSettingViewModel.swift */; };
 		F651190D2B220D5B0034A45B /* CalendarSectionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F651190C2B220D5B0034A45B /* CalendarSectionViewModelTests.swift */; };
 		F65119122B222A460034A45B /* CalendarAppearancePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65119112B222A460034A45B /* CalendarAppearancePreviewView.swift */; };
 		F66A808D2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66A808C2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift */; };
@@ -82,7 +82,7 @@
 		F61EAD5A2B1CA13E007FD342 /* AppearanceSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingViewController.swift; sourceTree = "<group>"; };
 		F61EAD5B2B1CA13E007FD342 /* AppearanceSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingView.swift; sourceTree = "<group>"; };
 		F61EAD5C2B1CA13E007FD342 /* AppearanceSettingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingViewModel.swift; sourceTree = "<group>"; };
-		F65119092B1CCB830034A45B /* CalendarSectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSectionViewModel.swift; sourceTree = "<group>"; };
+		F65119092B1CCB830034A45B /* CalendarSectionAppearnaceSettingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSectionAppearnaceSettingViewModel.swift; sourceTree = "<group>"; };
 		F651190C2B220D5B0034A45B /* CalendarSectionViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarSectionViewModelTests.swift; sourceTree = "<group>"; };
 		F65119112B222A460034A45B /* CalendarAppearancePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAppearancePreviewView.swift; sourceTree = "<group>"; };
 		F66A808C2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewModelImpleTests.swift; sourceTree = "<group>"; };
@@ -203,7 +203,7 @@
 		F65119102B222A2F0034A45B /* CalendarSection */ = {
 			isa = PBXGroup;
 			children = (
-				F65119092B1CCB830034A45B /* CalendarSectionViewModel.swift */,
+				F65119092B1CCB830034A45B /* CalendarSectionAppearnaceSettingViewModel.swift */,
 				F65119112B222A460034A45B /* CalendarAppearancePreviewView.swift */,
 			);
 			path = CalendarSection;
@@ -478,7 +478,7 @@
 				F69BA6A52B0BB3A100BCA65B /* SettingItemListViewController.swift in Sources */,
 				F68F7A3D2B18E751009EC869 /* CountrySelectViewModel.swift in Sources */,
 				F69BA6A22B0BB3A100BCA65B /* SettingItemListBuilderImple.swift in Sources */,
-				F651190A2B1CCB830034A45B /* CalendarSectionViewModel.swift in Sources */,
+				F651190A2B1CCB830034A45B /* CalendarSectionAppearnaceSettingViewModel.swift in Sources */,
 				F69BA6A72B0BB3A100BCA65B /* SettingItemListViewModel.swift in Sources */,
 				F68F7A382B18E751009EC869 /* CountrySelectBuilderImple.swift in Sources */,
 				F69BA6A62B0BB3A100BCA65B /* SettingItemListView.swift in Sources */,

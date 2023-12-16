@@ -11,6 +11,62 @@ import Combine
 import CommonPresentation
 
 
+final class CalendarSectionAppearanceSettingViewState: ObservableObject {
+    
+    private var didBind = false
+    private var cancellables: Set<AnyCancellable> = []
+    @Published var calendarModel: CalendarAppearanceModel = .init([], [])
+    @Published var accentDays: [AccentDays: Bool] = [:]
+    @Published var showUnderLine: Bool = false
+    @Published var selectedWeekDay: DayOfWeeks = .sunday
+    
+    func bind(_ viewModel: any CalendarSectionAppearnaceSettingViewModel) {
+        
+        guard self.didBind == false else { return }
+        self.didBind = true
+        
+        viewModel.currentWeekStartDay
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] day in
+                self?.selectedWeekDay = day
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.calendarAppearanceModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                withAnimation {
+                    self?.calendarModel = model
+                }
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.accentDaysActivatedMap
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] map in
+                self?.accentDays = map
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.isShowUnderLineOnEventDay
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] flag in
+                self?.showUnderLine = flag
+            })
+            .store(in: &self.cancellables)
+    }
+}
+
+
+final class CalendarSectionAppearanceSettingViewEventHandler: ObservableObject {
+    
+    var onAppear: () -> Void = { }
+    var weekStartDaySelected: (DayOfWeeks) -> Void = { _ in }
+    var changeColorTheme: () -> Void = { }
+    var toggleAccentDay: (AccentDays) -> Void = { _ in }
+    var toggleShowUnderline: (Bool) -> Void = { _ in }
+}
+
 // MARK: - CalendarAppearancePreviewView
 
 struct CalendarAppearancePreviewView: View {
@@ -115,11 +171,13 @@ struct CalendarAppearancePreviewView: View {
 
 // MARK: - CalendarSectionView
 
-struct CalendarSectionView: View {
+struct CalendarSectionAppearanceSettingView: View {
     
+    @StateObject private var state: CalendarSectionAppearanceSettingViewState = .init()
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var state: AppearanceSettingViewState
-    @EnvironmentObject private var eventHandlers: AppearanceSettingViewEventHandler
+    @EnvironmentObject private var eventHandlers: CalendarSectionAppearanceSettingViewEventHandler
+    
+    var stateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
     
     private let selectWeekDaySource: [DayOfWeeks] = [
         .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday
@@ -128,31 +186,39 @@ struct CalendarSectionView: View {
     init() { }
     
     var body: some View {
-        Section(header: CalendarAppearancePreviewView(model: $state.calendarModel)) {
+        
+        VStack {
+            CalendarAppearancePreviewView(model: $state.calendarModel)
             
-            AppearanceRow("Start day of week".localized(), pickerView)
-                .onReceive(state.$selectedWeekDay, perform: eventHandlers.weekStartDaySelected)
-            
-            AppearanceRow("Accent days".localized(), HStack {
-                accentDayView(.holiday)
-                accentDayView(.saturday)
-                accentDayView(.sunday)
-            })
-            
-            AppearanceRow("Color theme".localized(), colorThemePreview)
-                .onTapGesture(perform: eventHandlers.changeColorTheme)
-            
-            AppearanceRow("Underline scheduled days".localized(), subTitle: "Widget".localized(), showUnderlineView)
-                .onReceive(state.$showUnderLine, perform: eventHandlers.toggleShowUnderline)
+            VStack(spacing: 8) {
+                AppearanceRow("Start day of week".localized(), pickerView)
+                    .onReceive(state.$selectedWeekDay, perform: eventHandlers.weekStartDaySelected)
+                
+                AppearanceRow("Accent days".localized(), HStack {
+                    accentDayView(.holiday)
+                    accentDayView(.saturday)
+                    accentDayView(.sunday)
+                })
+                
+                AppearanceRow("Color theme".localized(), colorThemePreview)
+                    .onTapGesture(perform: eventHandlers.changeColorTheme)
+                
+                AppearanceRow("Underline scheduled days".localized(), subTitle: "Widget".localized(), showUnderlineView)
+                    .onReceive(state.$showUnderLine, perform: eventHandlers.toggleShowUnderline)
+            }
         }
-        .padding(.horizontal, 16)
+        .padding(.top, 20)
+        .onAppear {
+            self.stateBinding(self.state)
+            self.eventHandlers.onAppear()
+        }
     }
 }
 
 
 // MARK: - CalendarSectionView startWeekday
 
-extension CalendarSectionView {
+extension CalendarSectionAppearanceSettingView {
     
     private var pickerView: some View {
         Menu {
@@ -227,6 +293,7 @@ extension CalendarSectionView {
     
     private var showUnderlineView: some View {
         Toggle("", isOn: $state.showUnderLine)
+            .controlSize(.small)
             .labelsHidden()
     }
 }
