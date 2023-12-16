@@ -23,7 +23,8 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
             fontSetKey: .systemDefault,
             accnetDayPolicy: [:],
             showUnderLineOnEventDay: false,
-            eventOnCalendar: .init()
+            eventOnCalendar: .init(),
+            eventList: .init()
         )
     }
     
@@ -41,7 +42,8 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
             fontSetKey: params.newFontSetKcy ?? old.fontSetKey,
             accnetDayPolicy: params.newAccentDays ?? old.accnetDayPolicy,
             showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? old.showUnderLineOnEventDay,
-            eventOnCalendar: params.eventOnCalendar ?? old.eventOnCalendar
+            eventOnCalendar: params.eventOnCalendar ?? old.eventOnCalendar,
+            eventList: params.eventList ?? old.eventList
         )
         return newSetting
     }

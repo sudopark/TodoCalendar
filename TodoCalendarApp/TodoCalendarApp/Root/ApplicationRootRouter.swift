@@ -39,6 +39,9 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         if self.appearance.eventOnCalendarSetting != newSetting.eventOnCalendar {
             self.appearance.eventOnCalendarSetting = newSetting.eventOnCalendar
         }
+        if self.appearance.eventlist != newSetting.eventList {
+            self.appearance.eventlist = newSetting.eventList
+        }
     }
 }
 

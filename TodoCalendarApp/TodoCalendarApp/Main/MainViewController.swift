@@ -279,7 +279,8 @@ struct ViewControllerPreviewConverter: UIViewControllerRepresentable {
             fontSetKey: .systemDefault,
             accnetDayPolicy: [:],
             showUnderLineOnEventDay: false,
-            eventOnCalendar: .init()
+            eventOnCalendar: .init(),
+            eventList: .init()
         )
         return MainViewController(
             viewModel: MainViewModelImple(),

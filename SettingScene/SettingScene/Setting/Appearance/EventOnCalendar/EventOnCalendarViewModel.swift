@@ -12,7 +12,7 @@ import Optics
 import Domain
 import Scenes
 
-struct EventOnCalendarTextAdditionalSizeModel: Equatable {
+struct EventTextAdditionalSizeModel: Equatable {
     let sizeText: String
     var isIncreasable: Bool = true
     var isDescreasable: Bool = true
@@ -26,7 +26,7 @@ protocol EventOnCalendarViewModel: AnyObject, Sendable {
     func toggleBoldText(_ isOn: Bool)
     func toggleShowEventTagColor(_ isOn: Bool)
     
-    var textIncreasedSizeText: AnyPublisher<EventOnCalendarTextAdditionalSizeModel, Never> { get }
+    var textIncreasedSizeText: AnyPublisher<EventTextAdditionalSizeModel, Never> { get }
     var isBoldTextOnCalendar: AnyPublisher<Bool, Never> { get }
     var showEvnetTagColor: AnyPublisher<Bool, Never> { get }
 }
@@ -104,8 +104,8 @@ extension EventOnCalendarViewModelImple {
 
 extension EventOnCalendarViewModelImple {
     
-    var textIncreasedSizeText: AnyPublisher<EventOnCalendarTextAdditionalSizeModel, Never> {
-        let transform: (CGFloat) -> EventOnCalendarTextAdditionalSizeModel = { size in
+    var textIncreasedSizeText: AnyPublisher<EventTextAdditionalSizeModel, Never> {
+        let transform: (CGFloat) -> EventTextAdditionalSizeModel = { size in
             let prefix = size == 0 ? "±" : size < 0 ? "" : "+"
             let text = "\(prefix)\(Int(size))"
             return .init(

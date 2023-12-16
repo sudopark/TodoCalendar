@@ -40,6 +40,17 @@ public struct EventOnCalendarSetting: Sendable, Equatable {
     public init() { }
 }
 
+public struct EventListSetting: Sendable, Equatable {
+    
+    public var textAdditionalSize: CGFloat = 0
+    public var showHoliday: Bool = false
+    public var showLunarCalendarDate: Bool = false
+    public var is24hourForm: Bool = false
+    public var dimOnPastEvent: Bool = false
+    
+    public init() { }
+}
+
 public struct AppearanceSettings {
     
     public let tagColorSetting: EventTagColorSetting
@@ -49,6 +60,7 @@ public struct AppearanceSettings {
     public let showUnderLineOnEventDay: Bool
     
     public let eventOnCalendar: EventOnCalendarSetting
+    public let eventList: EventListSetting
     
     public init(
         tagColorSetting: EventTagColorSetting,
@@ -56,7 +68,8 @@ public struct AppearanceSettings {
         fontSetKey: FontSetKeys,
         accnetDayPolicy: [AccentDays: Bool],
         showUnderLineOnEventDay: Bool,
-        eventOnCalendar: EventOnCalendarSetting
+        eventOnCalendar: EventOnCalendarSetting,
+        eventList: EventListSetting
     ) {
         self.tagColorSetting = tagColorSetting
         self.colorSetKey = colorSetKey
@@ -64,6 +77,7 @@ public struct AppearanceSettings {
         self.accnetDayPolicy = accnetDayPolicy
         self.showUnderLineOnEventDay = showUnderLineOnEventDay
         self.eventOnCalendar = eventOnCalendar
+        self.eventList = eventList
     }
 }
 
@@ -83,6 +97,7 @@ public struct EditAppearanceSettingParams {
     public var newAccentDays: [AccentDays: Bool]?
     public var newShowUnderLineOnEventDay: Bool?
     public var eventOnCalendar: EventOnCalendarSetting?
+    public var eventList: EventListSetting?
     
     public init() { }
     
@@ -94,5 +109,6 @@ public struct EditAppearanceSettingParams {
             || self.newAccentDays != nil
             || self.newShowUnderLineOnEventDay != nil
             || self.eventOnCalendar != nil
+            || self.eventList != nil
     }
 }
