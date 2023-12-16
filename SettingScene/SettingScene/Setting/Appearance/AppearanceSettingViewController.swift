@@ -19,7 +19,8 @@ import CommonPresentation
 final class AppearanceSettingViewController: UIHostingController<AppearanceSettingContainerView>, AppearanceSettingScene {
     
     private let viewModel: any AppearanceSettingViewModel
-    private let calendarSectionViewModel: any CalendarSectionViewModel
+    private let calendarSectionViewModel: any CalendarSectionAppearnaceSettingViewModel
+    private let eventOnCalednarSectionViewModel: any EventOnCalendarViewModel
     private let viewAppearance: ViewAppearance
     
     @MainActor
@@ -29,25 +30,36 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
     
     init(
         viewModel: any AppearanceSettingViewModel,
-        calendarSectionViewModel: any CalendarSectionViewModel,
+        calendarSectionViewModel: any CalendarSectionAppearnaceSettingViewModel,
+        eventOnCalednarSectionViewModel: any EventOnCalendarViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
         self.calendarSectionViewModel = calendarSectionViewModel
+        self.eventOnCalednarSectionViewModel = eventOnCalednarSectionViewModel
         self.viewAppearance = viewAppearance
         
-        let eventHandlers = AppearanceSettingViewEventHandler()
-        eventHandlers.onAppear = calendarSectionViewModel.prepare
-        eventHandlers.weekStartDaySelected = calendarSectionViewModel.changeStartOfWeekDay(_:)
-        eventHandlers.changeColorTheme = calendarSectionViewModel.changeColorTheme
-        eventHandlers.toggleAccentDay = calendarSectionViewModel.toggleAccentDay(_:)
-        eventHandlers.toggleShowUnderline = calendarSectionViewModel.toggleIsShowUnderLineOnEventDay(_:)
+        let calendarSectionEventHandler = CalendarSectionAppearanceSettingViewEventHandler()
+        calendarSectionEventHandler.onAppear = calendarSectionViewModel.prepare
+        calendarSectionEventHandler.weekStartDaySelected = calendarSectionViewModel.changeStartOfWeekDay(_:)
+        calendarSectionEventHandler.changeColorTheme = calendarSectionViewModel.changeColorTheme
+        calendarSectionEventHandler.toggleAccentDay = calendarSectionViewModel.toggleAccentDay(_:)
+        calendarSectionEventHandler.toggleShowUnderline = calendarSectionViewModel.toggleIsShowUnderLineOnEventDay(_:)
+        
+        let eventOnCalendarEventHandler = EventOnCalendarViewEventHandler()
+        eventOnCalendarEventHandler.onAppear = eventOnCalednarSectionViewModel.prepare
+        eventOnCalendarEventHandler.increaseFontSize = eventOnCalednarSectionViewModel.increaseTextSize
+        eventOnCalendarEventHandler.decreaseFontSize = eventOnCalednarSectionViewModel.decreaseTextSize
+        eventOnCalendarEventHandler.toggleIsBold = eventOnCalednarSectionViewModel.toggleBoldText(_:)
+        eventOnCalendarEventHandler.toggleShowEventTagColor = eventOnCalednarSectionViewModel.toggleShowEventTagColor(_:)
         
         let containerView = AppearanceSettingContainerView(
             viewAppearance: viewAppearance,
-            eventHandlers: eventHandlers
+            calendarSectionEventHandler: calendarSectionEventHandler,
+            eventOnCalendarSectionEventHandler: eventOnCalendarEventHandler
         )
-        .eventHandler(\.stateBinding, { $0.bind(viewModel, calendarSectionViewModel) })
+        .eventHandler(\.calendarSectionStateBinding) { $0.bind(calendarSectionViewModel) }
+        .eventHandler(\.eventOnCalendarSectionStateBinding) { $0.bind(eventOnCalednarSectionViewModel) }
         
         super.init(rootView: containerView)
     }

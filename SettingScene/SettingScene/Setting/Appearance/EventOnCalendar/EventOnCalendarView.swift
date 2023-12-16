@@ -113,26 +113,27 @@ struct EventOnCalendarViewPreviewView: View {
 
 struct EventOnCalendarView: View {
     
-    @StateObject fileprivate var state: EventOnCalendarViewState = .init()
+    @StateObject private var state: EventOnCalendarViewState = .init()
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandler: EventOnCalendarViewEventHandler
     
     var stateBinding: (EventOnCalendarViewState) -> Void = { _ in }
     
     var body: some View {
-        Section {
-            
-            AppearanceRow("Event font size".localized(), fontSizeSettingView)
-            
-            AppearanceRow("Bold text".localized(), boldTextView)
-                .onReceive(state.$isBold, perform: eventHandler.toggleIsBold)
-            
-            AppearanceRow("Event color".localized(), showEventTagColorView)
-                .onReceive(state.$isShowEventTagColor, perform: eventHandler.toggleShowEventTagColor)
-            
-        } header: {
+        VStack {
             EventOnCalendarViewPreviewView()
+            
+            VStack(spacing: 8) {
+                AppearanceRow("Event font size".localized(), fontSizeSettingView)
+                
+                AppearanceRow("Bold text".localized(), boldTextView)
+                    .onReceive(state.$isBold, perform: eventHandler.toggleIsBold)
+                
+                AppearanceRow("Event color".localized(), showEventTagColorView)
+                    .onReceive(state.$isShowEventTagColor, perform: eventHandler.toggleShowEventTagColor)
+            }
         }
+        .padding(.top, 20)
         .onAppear {
             self.stateBinding(self.state)
             self.eventHandler.onAppear()
@@ -140,21 +141,27 @@ struct EventOnCalendarView: View {
     }
     
     private var fontSizeSettingView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 8) {
             
             Text(state.additionalFontSizeModel.sizeText)
                 .font(appearance.fontSet.size(12).asFont)
                 .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
             
-            ControlGroup {
+            HStack(spacing: 2) {
+                
                 Button {
                     eventHandler.decreaseFontSize()
                 } label: {
                     Text("-")
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.normalText.asColor)
+                        .padding(.vertical, 2)
+                        .padding(.leading, 8).padding(.trailing, 2)
                 }
                 .disabled(!state.additionalFontSizeModel.isDescreasable)
+                
+                Divider()
+                    .frame(height: 12)
                 
                 Button {
                     eventHandler.increaseFontSize()
@@ -162,10 +169,15 @@ struct EventOnCalendarView: View {
                     Text("+")
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.normalText.asColor)
+                        .padding(.vertical, 2)
+                        .padding(.leading, 2).padding(.trailing, 8)
                 }
                 .disabled(!state.additionalFontSizeModel.isIncreasable)
             }
-            .frame(width: 50, height: 20)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(appearance.colorSet.dayBackground.asColor)
+            )
         }
     }
     
