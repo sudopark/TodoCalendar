@@ -15,14 +15,12 @@
 		264172B1B81B7DE3872DC913 /* Repository.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = A95CB8EFDF0AAD06033531CC /* Repository.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		2EDF7FB890959DCEAC5F8C5E /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043C47E199E2E0567B61351B /* MainViewModel.swift */; };
 		30964EC99FFFE7CD481907E1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9332B629D69905FC244B3D60 /* AppDelegate.swift */; };
-		416B94D0B0D56B99F36D1439 /* Alamofire.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 028F4FEB5541CF82A87F3EF7 /* Alamofire.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4736D066657323FD2E5B129B /* CalendarScenes.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 67D38033A5F7F0CC29F48974 /* CalendarScenes.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4DA3D8B321FDA829124075B8 /* UnitTestHelpKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F3D5A1096FA2E28CA8BD26BD /* UnitTestHelpKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		51AC78212D1ACD072102EFCC /* MainScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99865651F324DE5F152E78C3 /* MainScene+Builder.swift */; };
 		5718426657A75BBE6139B916 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 59F76E048B6B579257C53859 /* Domain.framework */; };
 		573407E6A4F2E968ED23171A /* TodoCalendarAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BA1FB40491A19F2D219B6DD /* TodoCalendarAppTests.swift */; };
 		5A2CB0C65E6980DC3B5EFE74 /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79B0A75A78B4936210237C05 /* MainViewController.swift */; };
-		5C51041D0503B7B892620EF4 /* Pulse.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = C982C1B5E77EB58FA3A7C78F /* Pulse.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5D2F2C590C6257019C11F6E4 /* ApplicationRootViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A168BC0E64776DBB0A40F9C /* ApplicationRootViewModel.swift */; };
 		62285653490A99BAB54316E1 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A37C59413D14D853B0D9A6F /* SceneDelegate.swift */; };
 		6732B1B6216CBA4EDDB14CDE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C9FE66ACC23E2698C6B584E5 /* Assets.xcassets */; };
@@ -38,22 +36,18 @@
 		AE1B3E46DEC44F899962C9A2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = ED10A5594D0BA287D278F685 /* LaunchScreen.storyboard */; };
 		B5F7BE5EBFACC1C0DC982387 /* TestDoubles.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 319B7A2368F5A25EA104C138 /* TestDoubles.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		B78636EF5D21144E296395C0 /* EventDetailScene.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CA802E757DEA6561B2422B8 /* EventDetailScene.framework */; };
-		B992C189FE0D5E4DDBB9815C /* CombineCocoa.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D906A041CC27B5F5C4852CB1 /* CombineCocoa.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C0AD3F8879D14071CF8479FF /* Scenes.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 21D7B59B64F1EE8DE7EF32CA /* Scenes.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		C174285957A1C09F202E4E10 /* TuistBundle+TodoCalendarApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FA2B3F929CD9291F00E4DBC /* TuistBundle+TodoCalendarApp.swift */; };
 		C7FB487791DB1B0C03013246 /* ApplicationRootUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = E35C30A133002F3A003BCB6B /* ApplicationRootUsecase.swift */; };
 		C97B6895B24E4CA0929079CF /* SettingScene.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 464ACB48DA2B202AF2751CE8 /* SettingScene.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D548A689C6E2BAB51E137CA7 /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D898781E886F2BABC61F96DD /* Extensions.framework */; };
-		E2F296A97BDA415CF94615C1 /* SQLiteService.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1F6A9795F0119BFC07744263 /* SQLiteService.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E34F4FD4B2F671DF7520DE4C /* CommonPresentation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69D02E720EEE4CFF6BCB6B63 /* CommonPresentation.framework */; };
-		E8B85121E99C2C0FAF13E070 /* Kingfisher.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 12CA9061A15D06E32700C769 /* Kingfisher.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		EAAF8A80AD6F327F7A2DE228 /* MainRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4313A80835F8DB52BCC8C130 /* MainRouter.swift */; };
 		F7FF7726E457EAF113D7894A /* ApplicationRootBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7529918CE8ADB1B0BE64C7B /* ApplicationRootBuilder.swift */; };
 		F82D416D80FF6C70248AE344 /* MainBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85868DB58F7CB27903D608B3 /* MainBuilderImple.swift */; };
 		F9F21579ED53C3CEE40469E5 /* EventDetailScene.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4CA802E757DEA6561B2422B8 /* EventDetailScene.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FA71A30B901CF0DD65FCFE47 /* Domain.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 59F76E048B6B579257C53859 /* Domain.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FC45D5435577A268780BBD6A /* Common3rdParty.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F950F1308C2BA8DE47F2B8B8 /* Common3rdParty.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		FDA1681CA4D2870FB511B537 /* AsyncAlgorithms.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4C55305C9839EE8CE5C6A3F1 /* AsyncAlgorithms.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FFFF9A5CFF354D14FCC507D4 /* Factories+Usecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 699DE187D142578919385D61 /* Factories+Usecase.swift */; };
 /* End PBXBuildFile section */
 
@@ -86,19 +80,13 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				416B94D0B0D56B99F36D1439 /* Alamofire.framework in Embed Frameworks */,
-				FDA1681CA4D2870FB511B537 /* AsyncAlgorithms.framework in Embed Frameworks */,
 				4736D066657323FD2E5B129B /* CalendarScenes.framework in Embed Frameworks */,
-				B992C189FE0D5E4DDBB9815C /* CombineCocoa.framework in Embed Frameworks */,
 				FC45D5435577A268780BBD6A /* Common3rdParty.framework in Embed Frameworks */,
 				9CE8F4312D620E307F457352 /* CommonPresentation.framework in Embed Frameworks */,
 				FA71A30B901CF0DD65FCFE47 /* Domain.framework in Embed Frameworks */,
 				F9F21579ED53C3CEE40469E5 /* EventDetailScene.framework in Embed Frameworks */,
 				ACE6B7B3093655C45DAFA540 /* Extensions.framework in Embed Frameworks */,
-				E8B85121E99C2C0FAF13E070 /* Kingfisher.framework in Embed Frameworks */,
-				5C51041D0503B7B892620EF4 /* Pulse.framework in Embed Frameworks */,
 				264172B1B81B7DE3872DC913 /* Repository.framework in Embed Frameworks */,
-				E2F296A97BDA415CF94615C1 /* SQLiteService.framework in Embed Frameworks */,
 				C0AD3F8879D14071CF8479FF /* Scenes.framework in Embed Frameworks */,
 				C97B6895B24E4CA0929079CF /* SettingScene.framework in Embed Frameworks */,
 			);
@@ -108,11 +96,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		028F4FEB5541CF82A87F3EF7 /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		043C47E199E2E0567B61351B /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
-		12CA9061A15D06E32700C769 /* Kingfisher.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Kingfisher.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		149BF0E715094FE3B775B36F /* TodoCalendarAppTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TodoCalendarAppTests-Info.plist"; sourceTree = "<group>"; };
-		1F6A9795F0119BFC07744263 /* SQLiteService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SQLiteService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		21D7B59B64F1EE8DE7EF32CA /* Scenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Scenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		23B2CAB87502D9C27F7AF2A2 /* TodoCalendarApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "TodoCalendarApp-Info.plist"; sourceTree = "<group>"; };
 		2DD044FE6D1691BAB889E5F9 /* MainViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModelImpleTests.swift; sourceTree = "<group>"; };
@@ -123,7 +108,6 @@
 		464ACB48DA2B202AF2751CE8 /* SettingScene.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SettingScene.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		474A65F446E4187F3A6513B7 /* ApplicationRootRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationRootRouter.swift; sourceTree = "<group>"; };
 		4A93B9D3582B381222012461 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		4C55305C9839EE8CE5C6A3F1 /* AsyncAlgorithms.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncAlgorithms.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4CA802E757DEA6561B2422B8 /* EventDetailScene.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EventDetailScene.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5302E3DAE5AE3E6EE414F70E /* TodoCalendarApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TodoCalendarApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		58DF76A0BE2ACF175205F37E /* TodoCalendarApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = TodoCalendarApp.entitlements; sourceTree = "<group>"; };
@@ -143,10 +127,8 @@
 		A7529918CE8ADB1B0BE64C7B /* ApplicationRootBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationRootBuilder.swift; sourceTree = "<group>"; };
 		A95CB8EFDF0AAD06033531CC /* Repository.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Repository.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEAE875AB57815AF0C42E874 /* TodoCalendarAppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TodoCalendarAppTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		C982C1B5E77EB58FA3A7C78F /* Pulse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pulse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C9FE66ACC23E2698C6B584E5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D898781E886F2BABC61F96DD /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D906A041CC27B5F5C4852CB1 /* CombineCocoa.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineCocoa.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E35C30A133002F3A003BCB6B /* ApplicationRootUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationRootUsecase.swift; sourceTree = "<group>"; };
 		F3D5A1096FA2E28CA8BD26BD /* UnitTestHelpKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = UnitTestHelpKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F950F1308C2BA8DE47F2B8B8 /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -184,21 +166,15 @@
 		0275319982406469AC6E5D2B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				028F4FEB5541CF82A87F3EF7 /* Alamofire.framework */,
-				4C55305C9839EE8CE5C6A3F1 /* AsyncAlgorithms.framework */,
 				67D38033A5F7F0CC29F48974 /* CalendarScenes.framework */,
-				D906A041CC27B5F5C4852CB1 /* CombineCocoa.framework */,
 				F950F1308C2BA8DE47F2B8B8 /* Common3rdParty.framework */,
 				69D02E720EEE4CFF6BCB6B63 /* CommonPresentation.framework */,
 				59F76E048B6B579257C53859 /* Domain.framework */,
 				4CA802E757DEA6561B2422B8 /* EventDetailScene.framework */,
 				D898781E886F2BABC61F96DD /* Extensions.framework */,
-				12CA9061A15D06E32700C769 /* Kingfisher.framework */,
-				C982C1B5E77EB58FA3A7C78F /* Pulse.framework */,
 				A95CB8EFDF0AAD06033531CC /* Repository.framework */,
 				21D7B59B64F1EE8DE7EF32CA /* Scenes.framework */,
 				464ACB48DA2B202AF2751CE8 /* SettingScene.framework */,
-				1F6A9795F0119BFC07744263 /* SQLiteService.framework */,
 				319B7A2368F5A25EA104C138 /* TestDoubles.framework */,
 				5302E3DAE5AE3E6EE414F70E /* TodoCalendarApp.app */,
 				BEAE875AB57815AF0C42E874 /* TodoCalendarAppTests.xctest */,
@@ -485,15 +461,6 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
-				OTHER_SWIFT_FLAGS = (
-					"$(inherited)",
-					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarApp;
 				PRODUCT_NAME = TodoCalendarAppTests;
 				SDKROOT = iphoneos;
@@ -520,15 +487,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
-				);
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
-				OTHER_SWIFT_FLAGS = (
-					"$(inherited)",
-					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarApp;
 				PRODUCT_NAME = TodoCalendarAppTests;
@@ -671,15 +629,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
-				OTHER_SWIFT_FLAGS = (
-					"$(inherited)",
-					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarApp;
 				PRODUCT_NAME = TodoCalendarApp;
 				SDKROOT = iphoneos;
@@ -705,15 +654,6 @@
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
-				);
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
-				OTHER_SWIFT_FLAGS = (
-					"$(inherited)",
-					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.TodoCalendarApp;
 				PRODUCT_NAME = TodoCalendarApp;

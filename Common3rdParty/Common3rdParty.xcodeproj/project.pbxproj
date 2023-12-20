@@ -7,22 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0D70ACDB29BDC5DB265E708E /* CombineCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B48A07C29ECA493D8F51CE7 /* CombineCocoa.framework */; };
-		10BDEDE6B4C4EE7724FE7C7A /* AsyncAlgorithms.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 363432AC9110C8BA9CFD77B9 /* AsyncAlgorithms.framework */; };
-		13FFDA4F94CB583C29C880A3 /* XCTestDynamicOverlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C77F7C2EA55EEC21D767081 /* XCTestDynamicOverlay.framework */; };
-		63D03BC2E642EEBD57F492A1 /* ConcurrencyExtras.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB45BDE9009EBCE8E8CF20A7 /* ConcurrencyExtras.framework */; };
-		81543D4AEB3AEB1C0950C025 /* SQLiteService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D62C64BD0501E3D1E692B2D0 /* SQLiteService.framework */; };
-		89EE1F7BF8C9B019D35A5F66 /* Dependencies.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 432933490AF2EE737004AB87 /* Dependencies.framework */; };
-		8A9366FBA8A4C87A002EA812 /* Pulse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D8D19C8E3916FB0AA591B15 /* Pulse.framework */; };
+		271E42D0E1BDDABA55FA8ED1 /* Prelude in Frameworks */ = {isa = PBXBuildFile; productRef = E7EF48562558515294FD0CF4 /* Prelude */; };
+		2CB408F376C7C16B40CB0DFF /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = AA5E764A06E36165CA08032E /* AsyncAlgorithms */; };
+		4C2BB1D608DFD745FA8398E2 /* PulseUI in Frameworks */ = {isa = PBXBuildFile; productRef = C63281BE68A80C7AAE852656 /* PulseUI */; };
+		4FF60FBB7FEFFD2E36A519BC /* Optics in Frameworks */ = {isa = PBXBuildFile; productRef = A089C95D796814D84DFC8E7C /* Optics */; };
+		61C4179D8ECFCF104E8FE0A8 /* Pulse in Frameworks */ = {isa = PBXBuildFile; productRef = CF91B3C4A0621BA9AFC031BF /* Pulse */; };
+		75D0BDE196DD8DBF63F8ABAF /* AsyncFlatMap in Frameworks */ = {isa = PBXBuildFile; productRef = E8779E7C6A414C1CBC95BE92 /* AsyncFlatMap */; };
+		8D07376381E67446EA5A6A94 /* SQLiteService in Frameworks */ = {isa = PBXBuildFile; productRef = 1E9321F976579E39607086E9 /* SQLiteService */; };
 		C32B83B9FE9E2492829C7F40 /* Common3rdParty.h in Headers */ = {isa = PBXBuildFile; fileRef = 65C4246BA17B6A2182E1776E /* Common3rdParty.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		C7309224426059101A9223FE /* Optics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF63F14B521547337EA24724 /* Optics.framework */; };
-		CBF16548D71375FBFD62B59B /* Clocks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D335A7E3B2279BD6B15F63C /* Clocks.framework */; };
-		CC1CA8C0BF43E65C0A7FFD2A /* CombineSchedulers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30D3CFB39E94D1EB88E87660 /* CombineSchedulers.framework */; };
-		CC7E8EA4183CF52495211266 /* Either.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CC926B80134C1F228F675EEF /* Either.framework */; };
-		CDA6D51DA3F90578456C6971 /* Prelude.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A99FF50837ECF4B3B3A9E5 /* Prelude.framework */; };
-		DB5B3FF7AB190EECD7B4AF2A /* AsyncFlatMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F40E9813D40564177D00B5AA /* AsyncFlatMap.framework */; };
-		DDE3BA7A8797B7C0CC7A8FE8 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99AC4589E83EF04553CAEAA0 /* Alamofire.framework */; };
-		E4098F9F9F9184BD102EE261 /* PulseUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D59448C74425C11E8F9B024 /* PulseUI.framework */; };
+		C5BD02ADFE964D879DAC28AE /* CombineCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = DC3FA25843B7A0B2E2F5300B /* CombineCocoa */; };
+		F8D71729893B9A4198468CB2 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = C51C8A4FEE1AC32E2E9BE9C1 /* Alamofire */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,24 +33,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1D335A7E3B2279BD6B15F63C /* Clocks.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Clocks.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2417E4E7D744C5937A3AC85B /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		30D3CFB39E94D1EB88E87660 /* CombineSchedulers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineSchedulers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3427E543F2B21FDB7BD8C2CB /* Common3rdParty-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Common3rdParty-Info.plist"; sourceTree = "<group>"; };
-		363432AC9110C8BA9CFD77B9 /* AsyncAlgorithms.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncAlgorithms.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3C77F7C2EA55EEC21D767081 /* XCTestDynamicOverlay.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XCTestDynamicOverlay.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		3D8D19C8E3916FB0AA591B15 /* Pulse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pulse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		432933490AF2EE737004AB87 /* Dependencies.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Dependencies.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		5B48A07C29ECA493D8F51CE7 /* CombineCocoa.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineCocoa.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		65C4246BA17B6A2182E1776E /* Common3rdParty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common3rdParty.h; sourceTree = "<group>"; };
-		8D59448C74425C11E8F9B024 /* PulseUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PulseUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		97A99FF50837ECF4B3B3A9E5 /* Prelude.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Prelude.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		99AC4589E83EF04553CAEAA0 /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		AF63F14B521547337EA24724 /* Optics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Optics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CB45BDE9009EBCE8E8CF20A7 /* ConcurrencyExtras.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ConcurrencyExtras.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		CC926B80134C1F228F675EEF /* Either.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Either.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		D62C64BD0501E3D1E692B2D0 /* SQLiteService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SQLiteService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F40E9813D40564177D00B5AA /* AsyncFlatMap.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncFlatMap.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,21 +43,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DDE3BA7A8797B7C0CC7A8FE8 /* Alamofire.framework in Frameworks */,
-				10BDEDE6B4C4EE7724FE7C7A /* AsyncAlgorithms.framework in Frameworks */,
-				DB5B3FF7AB190EECD7B4AF2A /* AsyncFlatMap.framework in Frameworks */,
-				CBF16548D71375FBFD62B59B /* Clocks.framework in Frameworks */,
-				0D70ACDB29BDC5DB265E708E /* CombineCocoa.framework in Frameworks */,
-				CC1CA8C0BF43E65C0A7FFD2A /* CombineSchedulers.framework in Frameworks */,
-				63D03BC2E642EEBD57F492A1 /* ConcurrencyExtras.framework in Frameworks */,
-				89EE1F7BF8C9B019D35A5F66 /* Dependencies.framework in Frameworks */,
-				CC7E8EA4183CF52495211266 /* Either.framework in Frameworks */,
-				C7309224426059101A9223FE /* Optics.framework in Frameworks */,
-				CDA6D51DA3F90578456C6971 /* Prelude.framework in Frameworks */,
-				8A9366FBA8A4C87A002EA812 /* Pulse.framework in Frameworks */,
-				E4098F9F9F9184BD102EE261 /* PulseUI.framework in Frameworks */,
-				81543D4AEB3AEB1C0950C025 /* SQLiteService.framework in Frameworks */,
-				13FFDA4F94CB583C29C880A3 /* XCTestDynamicOverlay.framework in Frameworks */,
+				F8D71729893B9A4198468CB2 /* Alamofire in Frameworks */,
+				271E42D0E1BDDABA55FA8ED1 /* Prelude in Frameworks */,
+				2CB408F376C7C16B40CB0DFF /* AsyncAlgorithms in Frameworks */,
+				75D0BDE196DD8DBF63F8ABAF /* AsyncFlatMap in Frameworks */,
+				8D07376381E67446EA5A6A94 /* SQLiteService in Frameworks */,
+				C5BD02ADFE964D879DAC28AE /* CombineCocoa in Frameworks */,
+				61C4179D8ECFCF104E8FE0A8 /* Pulse in Frameworks */,
+				4C2BB1D608DFD745FA8398E2 /* PulseUI in Frameworks */,
+				4FF60FBB7FEFFD2E36A519BC /* Optics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -121,22 +94,7 @@
 		95E0AAE5E1519B86FAA0BC59 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				99AC4589E83EF04553CAEAA0 /* Alamofire.framework */,
-				363432AC9110C8BA9CFD77B9 /* AsyncAlgorithms.framework */,
-				F40E9813D40564177D00B5AA /* AsyncFlatMap.framework */,
-				1D335A7E3B2279BD6B15F63C /* Clocks.framework */,
-				5B48A07C29ECA493D8F51CE7 /* CombineCocoa.framework */,
-				30D3CFB39E94D1EB88E87660 /* CombineSchedulers.framework */,
 				2417E4E7D744C5937A3AC85B /* Common3rdParty.framework */,
-				CB45BDE9009EBCE8E8CF20A7 /* ConcurrencyExtras.framework */,
-				432933490AF2EE737004AB87 /* Dependencies.framework */,
-				CC926B80134C1F228F675EEF /* Either.framework */,
-				AF63F14B521547337EA24724 /* Optics.framework */,
-				97A99FF50837ECF4B3B3A9E5 /* Prelude.framework */,
-				3D8D19C8E3916FB0AA591B15 /* Pulse.framework */,
-				8D59448C74425C11E8F9B024 /* PulseUI.framework */,
-				D62C64BD0501E3D1E692B2D0 /* SQLiteService.framework */,
-				3C77F7C2EA55EEC21D767081 /* XCTestDynamicOverlay.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -178,6 +136,17 @@
 			dependencies = (
 			);
 			name = Common3rdParty;
+			packageProductDependencies = (
+				C51C8A4FEE1AC32E2E9BE9C1 /* Alamofire */,
+				E7EF48562558515294FD0CF4 /* Prelude */,
+				AA5E764A06E36165CA08032E /* AsyncAlgorithms */,
+				E8779E7C6A414C1CBC95BE92 /* AsyncFlatMap */,
+				1E9321F976579E39607086E9 /* SQLiteService */,
+				DC3FA25843B7A0B2E2F5300B /* CombineCocoa */,
+				CF91B3C4A0621BA9AFC031BF /* Pulse */,
+				C63281BE68A80C7AAE852656 /* PulseUI */,
+				A089C95D796814D84DFC8E7C /* Optics */,
+			);
 			productName = Common3rdParty;
 			productReference = 2417E4E7D744C5937A3AC85B /* Common3rdParty.framework */;
 			productType = "com.apple.product-type.framework";
@@ -202,6 +171,15 @@
 				en,
 			);
 			mainGroup = 8613EC38C4FCED2D4E348525;
+			packageReferences = (
+				6B49C9DB4C11A941A8609D69 /* XCRemoteSwiftPackageReference "Alamofire" */,
+				A651A3FBDA738D9042715A21 /* XCRemoteSwiftPackageReference "CombineCocoa" */,
+				748B8025D63B99505B3F4B35 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
+				0573F77BC9886FA16220B18C /* XCRemoteSwiftPackageReference "Pulse" */,
+				1A38147B773B5417A8D55E1E /* XCRemoteSwiftPackageReference "swift-prelude" */,
+				58B0E280DE6C312919454437 /* XCRemoteSwiftPackageReference "SQLiteService" */,
+				BDDE8FB43541A0DD4786431F /* XCRemoteSwiftPackageReference "publisher-async-bind" */,
+			);
 			productRefGroup = 95E0AAE5E1519B86FAA0BC59 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -361,15 +339,6 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
-				OTHER_SWIFT_FLAGS = (
-					"$(inherited)",
-					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.Common3rdParty;
 				PRODUCT_NAME = Common3rdParty;
 				SDKROOT = iphoneos;
@@ -403,15 +372,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
-				);
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
-				OTHER_SWIFT_FLAGS = (
-					"$(inherited)",
-					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.Common3rdParty;
 				PRODUCT_NAME = Common3rdParty;
@@ -451,6 +411,104 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0573F77BC9886FA16220B18C /* XCRemoteSwiftPackageReference "Pulse" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kean/Pulse";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.3;
+			};
+		};
+		1A38147B773B5417A8D55E1E /* XCRemoteSwiftPackageReference "swift-prelude" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-prelude.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		58B0E280DE6C312919454437 /* XCRemoteSwiftPackageReference "SQLiteService" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sudopark/SQLiteService.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
+			};
+		};
+		6B49C9DB4C11A941A8609D69 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
+		748B8025D63B99505B3F4B35 /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
+		A651A3FBDA738D9042715A21 /* XCRemoteSwiftPackageReference "CombineCocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CombineCommunity/CombineCocoa.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.1;
+			};
+		};
+		BDDE8FB43541A0DD4786431F /* XCRemoteSwiftPackageReference "publisher-async-bind" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sudopark/publisher-async-bind.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1E9321F976579E39607086E9 /* SQLiteService */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SQLiteService;
+		};
+		A089C95D796814D84DFC8E7C /* Optics */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Optics;
+		};
+		AA5E764A06E36165CA08032E /* AsyncAlgorithms */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AsyncAlgorithms;
+		};
+		C51C8A4FEE1AC32E2E9BE9C1 /* Alamofire */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Alamofire;
+		};
+		C63281BE68A80C7AAE852656 /* PulseUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PulseUI;
+		};
+		CF91B3C4A0621BA9AFC031BF /* Pulse */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Pulse;
+		};
+		DC3FA25843B7A0B2E2F5300B /* CombineCocoa */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = CombineCocoa;
+		};
+		E7EF48562558515294FD0CF4 /* Prelude */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Prelude;
+		};
+		E8779E7C6A414C1CBC95BE92 /* AsyncFlatMap */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AsyncFlatMap;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4ADA227C868C20F69C765084 /* Project object */;
 }

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		034E6A039D970AD128C798EE /* CloseButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA17984EBD7E4E7BD68D9005 /* CloseButton.swift */; };
-		158EAC0C349250F35C3FF26E /* Kingfisher.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2EE5450D23836F395CB4E25 /* Kingfisher.framework */; };
 		1D658C4D2186F1FFFD87F13B /* BottomConfirmButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 080BB137D2E711653FF740C8 /* BottomConfirmButton.swift */; };
 		20648506E1EE907FAE935C31 /* NavigationBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D83096CABCF79E75A69DB5F /* NavigationBackButton.swift */; };
 		309FDBF2557236CED2726D2D /* CommonPresentation.h in Headers */ = {isa = PBXBuildFile; fileRef = C8A8537161DB3962809004B2 /* CommonPresentation.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -27,6 +26,7 @@
 		E796FBBDA49BA7C2098301B7 /* ColorSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4366430DF97D339CE2CC70C2 /* ColorSet.swift */; };
 		F13908E12EE53BFA04C092FF /* UIKit+Combine+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 182D217145E0204EC3D0F611 /* UIKit+Combine+Extensions.swift */; };
 		F850202E620F6EAA71E84CAA /* LoadingCircleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62FF3CFEA530F64D1761C237 /* LoadingCircleView.swift */; };
+		FD6A78D517213A6A63E795C7 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = FF9A1D774F04B96368B9F11D /* Kingfisher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -60,7 +60,6 @@
 		727B534AC68A36FC9320C993 /* UIFont+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIFont+Extensions.swift"; sourceTree = "<group>"; };
 		91E9836F979364134B54FE70 /* CommonPresentation-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "CommonPresentation-Info.plist"; sourceTree = "<group>"; };
 		9D83096CABCF79E75A69DB5F /* NavigationBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationBackButton.swift; sourceTree = "<group>"; };
-		A2EE5450D23836F395CB4E25 /* Kingfisher.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Kingfisher.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C8A8537161DB3962809004B2 /* CommonPresentation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommonPresentation.h; sourceTree = "<group>"; };
 		CE29F982D2372456BB508B60 /* RemoteImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImageView.swift; sourceTree = "<group>"; };
 		D363CF254070B400C3532CCB /* CommonPresentation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CommonPresentation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -75,7 +74,7 @@
 				C961C66002A1616CC442FA70 /* Common3rdParty.framework in Frameworks */,
 				CFD179C2E87FB22A0CCFD480 /* Domain.framework in Frameworks */,
 				D2E3EDAA30BB52E0C7A5F093 /* Extensions.framework in Frameworks */,
-				158EAC0C349250F35C3FF26E /* Kingfisher.framework in Frameworks */,
+				FD6A78D517213A6A63E795C7 /* Kingfisher in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -140,7 +139,6 @@
 				D363CF254070B400C3532CCB /* CommonPresentation.framework */,
 				70BBCAF3165F85A1F6596657 /* Domain.framework */,
 				6E5AB433794AC1C11CCD0A19 /* Extensions.framework */,
-				A2EE5450D23836F395CB4E25 /* Kingfisher.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -219,6 +217,9 @@
 			dependencies = (
 			);
 			name = CommonPresentation;
+			packageProductDependencies = (
+				FF9A1D774F04B96368B9F11D /* Kingfisher */,
+			);
 			productName = CommonPresentation;
 			productReference = D363CF254070B400C3532CCB /* CommonPresentation.framework */;
 			productType = "com.apple.product-type.framework";
@@ -243,6 +244,9 @@
 				en,
 			);
 			mainGroup = BC973BF048FEB1F19E3AF979;
+			packageReferences = (
+				3EDD6B6DEA050330B9204BB6 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			productRefGroup = 99DC28F654957ABBC97AB8C9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -304,15 +308,6 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
-				);
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
-				OTHER_SWIFT_FLAGS = (
-					"$(inherited)",
-					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.CommonPresentation;
 				PRODUCT_NAME = CommonPresentation;
@@ -460,15 +455,6 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
-				OTHER_SWIFT_FLAGS = (
-					"$(inherited)",
-					"-Xcc",
-					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
-				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.CommonPresentation;
 				PRODUCT_NAME = CommonPresentation;
 				SDKROOT = iphoneos;
@@ -507,6 +493,24 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3EDD6B6DEA050330B9204BB6 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		FF9A1D774F04B96368B9F11D /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1B4AED8718BFB1BD14444509 /* Project object */;
 }
