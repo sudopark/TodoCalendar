@@ -13,18 +13,17 @@ extension Project {
                            platform: Platform,
                            iOSTargetVersion: String,
                            dependencies: [TargetDependency] = []) -> Project {
-        var targets = makeAppTargets(name: name,
+        let targets = makeAppTargets(name: name,
                                      platform: platform,
                                      iOSTargetVersion: iOSTargetVersion ,
                                      dependencies: dependencies)
-//        targets += additionalTargets.flatMap({ makeFrameworkTargets(name: $0, platform: platform,
-//                                                                    iOSTargetVersion: iOSTargetVersion) })
         return Project(name: name,
                        organizationName: organizationName,
                        targets: targets)
     }
     
     public static func frameworkWithTest(name: String,
+                                         packages: [Package] = [],
                                          platform: Platform,
                                          iOSTargetVersion: String,
                                          dependencies: [TargetDependency] = []) -> Project {
@@ -34,10 +33,12 @@ extension Project {
                                                    dependencies: dependencies)
         return Project(name: name,
                        organizationName: organizationName,
+                       packages: packages,
                        targets: targets)
     }
     
     public static func framework(name: String,
+                                 packages: [Package] = [],
                                  platform: Platform,
                                  iOSTargetVersion: String,
                                  dependencies: [TargetDependency] = []) -> Project {
@@ -46,7 +47,8 @@ extension Project {
                                            iOSTargetVersion: iOSTargetVersion,
                                            dependencies: dependencies)
         return Project(name: name,
-                       organizationName: organizationName,
+                       organizationName: organizationName, 
+                       packages: packages,
                        targets: targets)
     }
     

@@ -2,93 +2,39 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:TodoCalendarApp/TodoCalendarApp.xcodeproj">
+      location = "group:CalendarScenes/CalendarScenes.xcodeproj">
    </FileRef>
-   <Group
-      location = "container:"
-      name = "Presentation">
-      <FileRef
-         location = "group:CommonPresentation/CommonPresentation.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Scenes/Scenes.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:CalendarScenes/CalendarScenes.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:EventDetailScene/EventDetailScene.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:SettingScene/SettingScene.xcodeproj">
-      </FileRef>
-   </Group>
+   <FileRef
+      location = "group:Common3rdParty/Common3rdParty.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:CommonPresentation/CommonPresentation.xcodeproj">
+   </FileRef>
    <FileRef
       location = "group:Domain/Domain.xcodeproj">
    </FileRef>
    <FileRef
+      location = "group:EventDetailScene/EventDetailScene.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:Extensions/Extensions.xcodeproj">
+   </FileRef>
+   <FileRef
       location = "group:Repository/Repository.xcodeproj">
    </FileRef>
-   <Group
-      location = "container:"
-      name = "Supports">
-      <FileRef
-         location = "group:Extensions/Extensions.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Common3rdParty/Common3rdParty.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:TestDoubles/TestDoubles.xcodeproj">
-      </FileRef>
-   </Group>
-   <Group
-      location = "container:"
-      name = "Dependencies">
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Alamofire/Alamofire.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/CombineCocoa.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Kingfisher.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Pulse.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/SQLiteService/SQLiteService.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/combine-schedulers/combine-schedulers.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/publisher-async-bind/publisher-async-bind.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/swift-async-algorithms/AsyncAlgorithms.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/swift-clocks/swift-clocks.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/swift-collections/swift-collections.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/swift-concurrency-extras/swift-concurrency-extras.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/swift-dependencies/swift-dependencies.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/swift-prelude/swift-prelude.xcodeproj">
-      </FileRef>
-      <FileRef
-         location = "group:Tuist/Dependencies/SwiftPackageManager/.build/checkouts/xctest-dynamic-overlay/xctest-dynamic-overlay.xcodeproj">
-      </FileRef>
-   </Group>
+   <FileRef
+      location = "group:Scenes/Scenes.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:SettingScene/SettingScene.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TestDoubles/TestDoubles.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:TodoCalendarApp/TodoCalendarApp.xcodeproj">
+   </FileRef>
+   <FileRef
+      location = "group:UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
+   </FileRef>
 </Workspace>
