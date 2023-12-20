@@ -17,7 +17,7 @@
                BlueprintIdentifier = "C411270D9867900A1E3F83CB"
                BuildableName = "CalendarScenes.framework"
                BlueprintName = "CalendarScenes"
-               ReferencedContainer = "container:CalendarScenes/CalendarScenes.xcodeproj">
+               ReferencedContainer = "container:Presentations/CalendarScenes/CalendarScenes.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,7 +31,7 @@
                BlueprintIdentifier = "047FA6E5931A2A4371EEB620"
                BuildableName = "CalendarScenesTests.xctest"
                BlueprintName = "CalendarScenesTests"
-               ReferencedContainer = "container:CalendarScenes/CalendarScenes.xcodeproj">
+               ReferencedContainer = "container:Presentations/CalendarScenes/CalendarScenes.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -45,7 +45,7 @@
                BlueprintIdentifier = "AE3303C809479D8DBFCA257A"
                BuildableName = "Common3rdParty.framework"
                BlueprintName = "Common3rdParty"
-               ReferencedContainer = "container:Common3rdParty/Common3rdParty.xcodeproj">
+               ReferencedContainer = "container:Supports/Common3rdParty/Common3rdParty.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -59,7 +59,7 @@
                BlueprintIdentifier = "1137643073D82F7CC8155F8E"
                BuildableName = "CommonPresentation.framework"
                BlueprintName = "CommonPresentation"
-               ReferencedContainer = "container:CommonPresentation/CommonPresentation.xcodeproj">
+               ReferencedContainer = "container:Presentations/CommonPresentation/CommonPresentation.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -101,7 +101,7 @@
                BlueprintIdentifier = "105CD31AC2158620A2F4AE31"
                BuildableName = "EventDetailScene.framework"
                BlueprintName = "EventDetailScene"
-               ReferencedContainer = "container:EventDetailScene/EventDetailScene.xcodeproj">
+               ReferencedContainer = "container:Presentations/EventDetailScene/EventDetailScene.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -115,7 +115,7 @@
                BlueprintIdentifier = "9A20AAE1CC1F7291567F811E"
                BuildableName = "EventDetailSceneTests.xctest"
                BlueprintName = "EventDetailSceneTests"
-               ReferencedContainer = "container:EventDetailScene/EventDetailScene.xcodeproj">
+               ReferencedContainer = "container:Presentations/EventDetailScene/EventDetailScene.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -129,7 +129,7 @@
                BlueprintIdentifier = "29E11AD25B6ED45614120EEC"
                BuildableName = "Extensions.framework"
                BlueprintName = "Extensions"
-               ReferencedContainer = "container:Extensions/Extensions.xcodeproj">
+               ReferencedContainer = "container:Supports/Extensions/Extensions.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -143,7 +143,7 @@
                BlueprintIdentifier = "3954E044B47416C4414C36CD"
                BuildableName = "ExtensionsTests.xctest"
                BlueprintName = "ExtensionsTests"
-               ReferencedContainer = "container:Extensions/Extensions.xcodeproj">
+               ReferencedContainer = "container:Supports/Extensions/Extensions.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -185,7 +185,7 @@
                BlueprintIdentifier = "EF2A980275EA5A3F4C57B51A"
                BuildableName = "Scenes.framework"
                BlueprintName = "Scenes"
-               ReferencedContainer = "container:Scenes/Scenes.xcodeproj">
+               ReferencedContainer = "container:Presentations/Scenes/Scenes.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -199,7 +199,7 @@
                BlueprintIdentifier = "3C18C0ACE0B79316B021AE4A"
                BuildableName = "SettingScene.framework"
                BlueprintName = "SettingScene"
-               ReferencedContainer = "container:SettingScene/SettingScene.xcodeproj">
+               ReferencedContainer = "container:Presentations/SettingScene/SettingScene.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -213,7 +213,7 @@
                BlueprintIdentifier = "8970AA2456FAA8C473F8D0FE"
                BuildableName = "SettingSceneTests.xctest"
                BlueprintName = "SettingSceneTests"
-               ReferencedContainer = "container:SettingScene/SettingScene.xcodeproj">
+               ReferencedContainer = "container:Presentations/SettingScene/SettingScene.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -227,7 +227,7 @@
                BlueprintIdentifier = "6DE57CFDB207375552CAFA3F"
                BuildableName = "TestDoubles.framework"
                BlueprintName = "TestDoubles"
-               ReferencedContainer = "container:TestDoubles/TestDoubles.xcodeproj">
+               ReferencedContainer = "container:Supports/TestDoubles/TestDoubles.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -269,7 +269,7 @@
                BlueprintIdentifier = "06D38148D597BEDB1E7606C6"
                BuildableName = "UnitTestHelpKit.framework"
                BlueprintName = "UnitTestHelpKit"
-               ReferencedContainer = "container:UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
+               ReferencedContainer = "container:Supports/UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -283,7 +283,7 @@
                BlueprintIdentifier = "04A33EC78FB05E2BF7543A20"
                BuildableName = "UnitTestHelpKitTests.xctest"
                BlueprintName = "UnitTestHelpKitTests"
-               ReferencedContainer = "container:UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
+               ReferencedContainer = "container:Supports/UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -301,7 +301,7 @@
                BlueprintIdentifier = "047FA6E5931A2A4371EEB620"
                BuildableName = "CalendarScenesTests.xctest"
                BlueprintName = "CalendarScenesTests"
-               ReferencedContainer = "container:CalendarScenes/CalendarScenes.xcodeproj">
+               ReferencedContainer = "container:Presentations/CalendarScenes/CalendarScenes.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -321,7 +321,7 @@
                BlueprintIdentifier = "9A20AAE1CC1F7291567F811E"
                BuildableName = "EventDetailSceneTests.xctest"
                BlueprintName = "EventDetailSceneTests"
-               ReferencedContainer = "container:EventDetailScene/EventDetailScene.xcodeproj">
+               ReferencedContainer = "container:Presentations/EventDetailScene/EventDetailScene.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -331,7 +331,7 @@
                BlueprintIdentifier = "3954E044B47416C4414C36CD"
                BuildableName = "ExtensionsTests.xctest"
                BlueprintName = "ExtensionsTests"
-               ReferencedContainer = "container:Extensions/Extensions.xcodeproj">
+               ReferencedContainer = "container:Supports/Extensions/Extensions.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -351,7 +351,7 @@
                BlueprintIdentifier = "8970AA2456FAA8C473F8D0FE"
                BuildableName = "SettingSceneTests.xctest"
                BlueprintName = "SettingSceneTests"
-               ReferencedContainer = "container:SettingScene/SettingScene.xcodeproj">
+               ReferencedContainer = "container:Presentations/SettingScene/SettingScene.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -371,7 +371,7 @@
                BlueprintIdentifier = "04A33EC78FB05E2BF7543A20"
                BuildableName = "UnitTestHelpKitTests.xctest"
                BlueprintName = "UnitTestHelpKitTests"
-               ReferencedContainer = "container:UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
+               ReferencedContainer = "container:Supports/UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>

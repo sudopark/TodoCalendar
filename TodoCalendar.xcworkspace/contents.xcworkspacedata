@@ -2,39 +2,47 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:CalendarScenes/CalendarScenes.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:Common3rdParty/Common3rdParty.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:CommonPresentation/CommonPresentation.xcodeproj">
-   </FileRef>
-   <FileRef
       location = "group:Domain/Domain.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:EventDetailScene/EventDetailScene.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:Extensions/Extensions.xcodeproj">
-   </FileRef>
+   <Group
+      location = "group:Presentations"
+      name = "Presentations">
+      <FileRef
+         location = "group:CalendarScenes/CalendarScenes.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:CommonPresentation/CommonPresentation.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:EventDetailScene/EventDetailScene.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:Scenes/Scenes.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:SettingScene/SettingScene.xcodeproj">
+      </FileRef>
+   </Group>
    <FileRef
       location = "group:Repository/Repository.xcodeproj">
    </FileRef>
-   <FileRef
-      location = "group:Scenes/Scenes.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:SettingScene/SettingScene.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:TestDoubles/TestDoubles.xcodeproj">
-   </FileRef>
+   <Group
+      location = "group:Supports"
+      name = "Supports">
+      <FileRef
+         location = "group:Common3rdParty/Common3rdParty.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:Extensions/Extensions.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:TestDoubles/TestDoubles.xcodeproj">
+      </FileRef>
+      <FileRef
+         location = "group:UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
+      </FileRef>
+   </Group>
    <FileRef
       location = "group:TodoCalendarApp/TodoCalendarApp.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:UnitTestHelpKit/UnitTestHelpKit.xcodeproj">
    </FileRef>
 </Workspace>

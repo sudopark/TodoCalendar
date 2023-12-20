@@ -20,6 +20,7 @@
 		41BD590162EB5261161D659C /* Extensions.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F16DDA0CA40C80A8782EBC31 /* Extensions.framework */; };
 		461765080C34160E4A35E5CE /* MemorizedScheduleEventsContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DAAFC98FC7F89A686AF167E /* MemorizedScheduleEventsContainer.swift */; };
 		468B08AF4B1CB401DA6FAE78 /* EventRepeatTimeEnumerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A556B1BB39958D4A4368970F /* EventRepeatTimeEnumerator.swift */; };
+		4938FD533DEA04D820EE36A8 /* Domain.h in Headers */ = {isa = PBXBuildFile; fileRef = A2E8F3B7AD80256408939E4E /* Domain.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		49AE3F0E5AB16425B63B9D47 /* CalendarSettingUsecase.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCF925EAE88C028A919FFE06 /* CalendarSettingUsecase.swift */; };
 		4F2BACD2A4454BD1FDF032B2 /* PagingUsecaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9CBEE93A3E0FBF4712ACC45 /* PagingUsecaseTests.swift */; };
 		5393DF89EDDBDAEC647F6E4C /* StubAppSettingRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B96AA06C9EA6BEAD8A228CE1 /* StubAppSettingRepository.swift */; };
@@ -125,6 +126,7 @@
 		9EEB1FEB268E32B0B21EDE3E /* CalendarUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarUsecase.swift; sourceTree = "<group>"; };
 		A145F43F0A55775C35C98502 /* EventTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTime.swift; sourceTree = "<group>"; };
 		A2AAA276C7D6B2F0E0C8371A /* PagingUsecase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingUsecase.swift; sourceTree = "<group>"; };
+		A2E8F3B7AD80256408939E4E /* Domain.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Domain.h; sourceTree = "<group>"; };
 		A556B1BB39958D4A4368970F /* EventRepeatTimeEnumerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRepeatTimeEnumerator.swift; sourceTree = "<group>"; };
 		A6BD7AD5DF567EB0106B69EA /* EventDetailDataRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailDataRepository.swift; sourceTree = "<group>"; };
 		A7354A37D334F99F792CB1F8 /* EventTagUsecaseImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagUsecaseImpleTests.swift; sourceTree = "<group>"; };
@@ -337,6 +339,7 @@
 				0341B6BC3BB2B1CDE266CAF5 /* Derived */,
 				3D1C864952D1F1B227707649 /* DomainTests */,
 				28B694539E22431DAF52B883 /* Sources */,
+				A2E8F3B7AD80256408939E4E /* Domain.h */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -451,6 +454,17 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		0D9EFFBB16B4C7E30F426D18 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4938FD533DEA04D820EE36A8 /* Domain.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		7FBD2F22544C231784C1A4D5 /* DomainTests */ = {
 			isa = PBXNativeTarget;
@@ -475,6 +489,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = DCD0ADB89B8BC26D5C8A4F4D /* Build configuration list for PBXNativeTarget "Domain" */;
 			buildPhases = (
+				0D9EFFBB16B4C7E30F426D18 /* Headers */,
 				1D850859E8B32250D61F93CE /* Sources */,
 				2A71FE6FD8EF88EBB2284866 /* Resources */,
 				DBA686A82FFC1AB19CC1C76B /* Embed Frameworks */,

@@ -15,6 +15,7 @@
 		069971898E03BD7B5F91CF10 /* EventDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4954E1E3FB5F2C881621EF72 /* EventDetailViewController.swift */; };
 		06B54959B87111F6ACC8D58A /* SelectEventRepeatOptionViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E06CA02160F86F74B036F60 /* SelectEventRepeatOptionViewModelTests.swift */; };
 		0B52997F6F01158539ACB901 /* EventDetailSceneTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128061C83439EF4426102F0A /* EventDetailSceneTests.swift */; };
+		0DF2914A69958A6E9F6DB186 /* EventDetailScene.h in Headers */ = {isa = PBXBuildFile; fileRef = 2F340723CB9689BD4D1A22BC /* EventDetailScene.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		1F5FA59414BB4A1CA009038D /* SelectEventTagViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82A0FB06EA40FED1B948EF59 /* SelectEventTagViewModel.swift */; };
 		20A54D3D1FB9FF2C8C8240CD /* EventDetailInputViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E338BB8D6C2CC20089C22842 /* EventDetailInputViewModel.swift */; };
 		28B373A494DD4FF244BC6D14 /* SelectEventTagScene+Builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28F90D62A68D084B1DE0B50 /* SelectEventTagScene+Builder.swift */; };
@@ -90,6 +91,7 @@
 		1C819B5431E231A797CC77D8 /* EditScheduleEventDetailViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditScheduleEventDetailViewModelImpleTests.swift; sourceTree = "<group>"; };
 		293A849B68D765DEEBE242B9 /* EventDetailSceneTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventDetailSceneTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		29C7BAC6597961C30FF2D9D4 /* EventDetailScene-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "EventDetailScene-Info.plist"; sourceTree = "<group>"; };
+		2F340723CB9689BD4D1A22BC /* EventDetailScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EventDetailScene.h; sourceTree = "<group>"; };
 		2F72E8A2D2DB6E8D56797763 /* EditTodoEventDetailViewModelImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditTodoEventDetailViewModelImple.swift; sourceTree = "<group>"; };
 		359B328C0B21CB3A2159ABD4 /* SelectEventRepeatOptionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectEventRepeatOptionRouter.swift; sourceTree = "<group>"; };
 		361D8592942892D2FF79BC78 /* EventDetailSceneBuilderImple.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailSceneBuilderImple.swift; sourceTree = "<group>"; };
@@ -192,6 +194,7 @@
 				D237F00930224325AA300AAD /* Derived */,
 				1EC4C5FD62D3B4FA0A4EC61D /* EventDetailSceneTests */,
 				4DB6CF63ADBFF9845E410010 /* Sources */,
+				2F340723CB9689BD4D1A22BC /* EventDetailScene.h */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -309,11 +312,23 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		914A5974FE4F76DBFC1645DB /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0DF2914A69958A6E9F6DB186 /* EventDetailScene.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		105CD31AC2158620A2F4AE31 /* EventDetailScene */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FCB84CC0807FA492807FFCE5 /* Build configuration list for PBXNativeTarget "EventDetailScene" */;
 			buildPhases = (
+				914A5974FE4F76DBFC1645DB /* Headers */,
 				9C00D2F8F7EEE26632C519A0 /* Sources */,
 				825FB5ABAE4D809463FEA316 /* Resources */,
 				FB6CFE793DF2E7CE2FED47B0 /* Embed Frameworks */,
