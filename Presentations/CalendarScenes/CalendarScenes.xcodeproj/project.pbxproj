@@ -25,6 +25,7 @@
 		616E4B91EA518F32A1364C41 /* Domain.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA3979CDB8C2194712EA94DC /* Domain.framework */; };
 		627709E90E0F6F0808DCFE68 /* CalendarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB28593AF9AD4C9F544DF3BD /* CalendarViewController.swift */; };
 		633C0B2C8C78614ECB17584A /* DayEventListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E27A725EE5BC9B90F45C237 /* DayEventListViewModel.swift */; };
+		66E8A0183802075C320BDE21 /* CalendarScenes.h in Headers */ = {isa = PBXBuildFile; fileRef = C7B1CAB6CF15E1DC13EDBEDE /* CalendarScenes.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		6768E1854FB59DC1DB2966D8 /* CalendarScenes.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD402DE3C55146BF918BD6E2 /* CalendarScenes.framework */; };
 		6A184AB381DDF88E0C54F070 /* EventCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17315F26029487CB1ECE1D13 /* EventCellViewModel.swift */; };
 		6FFB8B4D8B31422B2AC69134 /* MonthSceneBuilderImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0186B60D11676C6D609A2B4F /* MonthSceneBuilderImple.swift */; };
@@ -112,6 +113,7 @@
 		C0304E5236529F509D3869E8 /* CalendarViewRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarViewRouter.swift; sourceTree = "<group>"; };
 		C05CBA46E7E4DE86CD8D30F6 /* CalendarPaperRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPaperRouter.swift; sourceTree = "<group>"; };
 		C7365EE9FF3D9D45F4FB5731 /* Extensions.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Extensions.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		C7B1CAB6CF15E1DC13EDBEDE /* CalendarScenes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CalendarScenes.h; sourceTree = "<group>"; };
 		DA1B2BADD1D43BFB5155896B /* Scenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Scenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD0E527A71F67179AFBF79CE /* CalendarScenesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CalendarScenesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD402DE3C55146BF918BD6E2 /* CalendarScenes.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CalendarScenes.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -286,6 +288,7 @@
 				AAA75C6A770B4B723D2D7A52 /* CalendarScenesTests */,
 				513B6286590922DF754579DD /* Derived */,
 				3988B0A496A7CFF8C9D88F91 /* Sources */,
+				C7B1CAB6CF15E1DC13EDBEDE /* CalendarScenes.h */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -316,6 +319,17 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		4D0C7521BC1ECAF8FC66C05A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				66E8A0183802075C320BDE21 /* CalendarScenes.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		047FA6E5931A2A4371EEB620 /* CalendarScenesTests */ = {
 			isa = PBXNativeTarget;
@@ -340,6 +354,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = E06901482694DBEEF15C9C31 /* Build configuration list for PBXNativeTarget "CalendarScenes" */;
 			buildPhases = (
+				4D0C7521BC1ECAF8FC66C05A /* Headers */,
 				67D61D36621CB09E45F632F4 /* Sources */,
 				0E2E3FB969CB5F9AD7F10317 /* Resources */,
 				F3E473131FDD328212802AB4 /* Embed Frameworks */,

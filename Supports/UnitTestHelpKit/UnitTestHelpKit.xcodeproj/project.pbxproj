@@ -18,6 +18,7 @@
 		D00B81F491630EFBEA45324E /* BaseTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72195B7579C0B8C0F14F94D3 /* BaseTestCase.swift */; };
 		E5667DE21E6CF1BAB0896824 /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7DAFAC2A121DC082D8E10B4 /* Common3rdParty.framework */; };
 		ED7FAC28618CA87874EA1736 /* UnitTestHelpKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BF6464306AE0F37D664B9BA /* UnitTestHelpKit.framework */; };
+		EE9AA9501105BDCDFA0AC905 /* UnitTestHelpKit.h in Headers */ = {isa = PBXBuildFile; fileRef = EDD7E9160D9FA8029233E276 /* UnitTestHelpKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		FE32B894159AEBB439C16E1C /* TestError.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9AB2516CA238EBFA2E886A2 /* TestError.swift */; };
 /* End PBXBuildFile section */
 
@@ -69,6 +70,7 @@
 		D0278E53025AFB399159E3A8 /* BaseStub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseStub.swift; sourceTree = "<group>"; };
 		E8620E24F6F091FB28EB4963 /* Time+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Time+Extension.swift"; sourceTree = "<group>"; };
 		E9AB2516CA238EBFA2E886A2 /* TestError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestError.swift; sourceTree = "<group>"; };
+		EDD7E9160D9FA8029233E276 /* UnitTestHelpKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = UnitTestHelpKit.h; sourceTree = "<group>"; };
 		FA5527DBD171568FDC6F749D /* PublisherWaitableTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublisherWaitableTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -167,11 +169,23 @@
 				D134E7B0FFA3ECE413A5C286 /* Derived */,
 				B2F254E3AAA138209C86A196 /* Sources */,
 				0D0B69F5904F0FC73854BD7B /* UnitTestHelpKitTests */,
+				EDD7E9160D9FA8029233E276 /* UnitTestHelpKit.h */,
 			);
 			name = Project;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		C2174C84C7EEDF047DF03CEB /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EE9AA9501105BDCDFA0AC905 /* UnitTestHelpKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		04A33EC78FB05E2BF7543A20 /* UnitTestHelpKitTests */ = {
@@ -197,6 +211,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 77CA904A1BE6B48CBB2BC80C /* Build configuration list for PBXNativeTarget "UnitTestHelpKit" */;
 			buildPhases = (
+				C2174C84C7EEDF047DF03CEB /* Headers */,
 				C9C6D9758B6F451A92C1612C /* Sources */,
 				AC4372B820060979D6FF87FB /* Resources */,
 				48A71B5526E526E6F451BF9B /* Embed Frameworks */,

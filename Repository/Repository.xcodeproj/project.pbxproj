@@ -26,6 +26,7 @@
 		62F25B627EA3AACA4D144285 /* ScheduleEventLocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A17BBA4EC83F0CD9763B276 /* ScheduleEventLocalStorage.swift */; };
 		731881922015BFA95747FE03 /* FakeEnvironmentStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0832856ADA28185A53E7CC9A /* FakeEnvironmentStorage.swift */; };
 		7698819E14FFB597AEE70D1C /* CalendarSettingRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BF6A964CFA56B8807D4A554 /* CalendarSettingRepositoryImple.swift */; };
+		7D8481BFBED1E9499F7F715D /* Repository.h in Headers */ = {isa = PBXBuildFile; fileRef = EC42E629DD4E779FD4579FAF /* Repository.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7F4437E5C49D98CA26117869 /* HolidayRepositoryImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CE95E55A414A4B77B90B12F /* HolidayRepositoryImpleTests.swift */; };
 		8755E14E6CBFD9376BA1C178 /* DoneTodoEventTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D038576A1BF16F74BE7D9A6 /* DoneTodoEventTable.swift */; };
 		8B2A20EE447F2F4D00728032 /* TodoLocalRepositoryImple.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2D466537386E6D93647196F /* TodoLocalRepositoryImple.swift */; };
@@ -119,6 +120,7 @@
 		E16B48454364195FCD45BEA0 /* TodoEventTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoEventTable.swift; sourceTree = "<group>"; };
 		E48D18EBD8E7EA5AB163BD67 /* ScheduleEventTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleEventTable.swift; sourceTree = "<group>"; };
 		E7EF88D930EE8CA032F458C3 /* BaseLocalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseLocalTests.swift; sourceTree = "<group>"; };
+		EC42E629DD4E779FD4579FAF /* Repository.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Repository.h; sourceTree = "<group>"; };
 		FEBDD808EB73BF5312CFA8F7 /* EventDetailDataLocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailDataLocalStorage.swift; sourceTree = "<group>"; };
 		FF761F7DAC6F054CF196982A /* StubRemoteAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StubRemoteAPI.swift; sourceTree = "<group>"; };
 		FFBDB7DDFAA9EE9DA2D2B79C /* TestDoubles.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = TestDoubles.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -221,6 +223,7 @@
 				40D2E54445243144004079D1 /* Derived */,
 				E3A8829A46AD7054E2A63358 /* RepositoryTests */,
 				2D734AC98FF0BE5BAB8E93F5 /* Sources */,
+				EC42E629DD4E779FD4579FAF /* Repository.h */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -445,11 +448,23 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		79E49293956A093ED152835A /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7D8481BFBED1E9499F7F715D /* Repository.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		1D2AB1734E89DD04E08514BF /* Repository */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D3D537516A62B1120ED0BF47 /* Build configuration list for PBXNativeTarget "Repository" */;
 			buildPhases = (
+				79E49293956A093ED152835A /* Headers */,
 				9E07F934F5242885DDEE70C1 /* Sources */,
 				AE11C0459D6E006BEEFBCC7B /* Resources */,
 				40F1B57B9AB1628D70BD01D4 /* Embed Frameworks */,

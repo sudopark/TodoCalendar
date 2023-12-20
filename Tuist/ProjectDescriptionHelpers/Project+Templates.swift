@@ -69,6 +69,7 @@ extension Project {
                              infoPlist: .default,
                              sources: ["Sources/**"],
                              resources: [],
+                             headers: Headers.headers(public: "\(name).h"),
                              dependencies: dependencies)
         let tests = Target(name: "\(name)Tests",
                            platform: platform,
@@ -80,8 +81,8 @@ extension Project {
                            resources: [],
                            dependencies: [
                             .target(name: name),
-                            .project(target: "UnitTestHelpKit", path: .relativeToCurrentFile("../../UnitTestHelpKit")),
-                            .project(target: "TestDoubles", path: .relativeToCurrentFile("../../TestDoubles"))
+                            .project(target: "UnitTestHelpKit", path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
+                            .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles"))
                            ])
         return [sources, tests]
     }
@@ -153,8 +154,8 @@ extension Project {
             dependencies: [
                 .target(name: "\(name)"),
                 .project(target: "UnitTestHelpKit", path:
-                        .relativeToCurrentFile("../../UnitTestHelpKit")),
-                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../TestDoubles"))
+                        .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
+                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles"))
             ])
         return [mainTarget, testTarget]
     }

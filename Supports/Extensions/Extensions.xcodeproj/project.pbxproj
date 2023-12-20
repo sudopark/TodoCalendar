@@ -11,6 +11,7 @@
 		08E64EFCAB73D84E9D08309A /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E8DB1A70B0917EF86EBECCD /* String+Extensions.swift */; };
 		10E1B53580BF8B51DC8CEB4D /* TestDoubles.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FDF597B5FBAE7072B58B98BB /* TestDoubles.framework */; };
 		200085046E2DEB48744FA5EC /* Sequence+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8FFFFFD9691C9C7EC0896F /* Sequence+Extensions.swift */; };
+		38F233FE2E30C7B93475D7EA /* Extensions.h in Headers */ = {isa = PBXBuildFile; fileRef = 73BD4B2FD287DDDC8D148FD3 /* Extensions.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		44F4A857A456088F570EAD8E /* Date+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C90E2584B483D50F25AA1C /* Date+Extensions.swift */; };
 		5B771D25858CB491F9BEB6FB /* Calendar+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79785C482FC439CDEAF86F03 /* Calendar+Extension.swift */; };
 		65E4A53465FF2D09C3BF1861 /* ExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D13E8179F11038BBA8D4A3BA /* ExtensionsTests.swift */; };
@@ -70,6 +71,7 @@
 		551E113BB3B8A3DB5A752528 /* ExtensionsTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "ExtensionsTests-Info.plist"; sourceTree = "<group>"; };
 		5FC0C8D42AE452C80205BFF2 /* Optional+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Optional+Extensions.swift"; sourceTree = "<group>"; };
 		70456A8753DDB01B4E885E5E /* ExtensionsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ExtensionsTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		73BD4B2FD287DDDC8D148FD3 /* Extensions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Extensions.h; sourceTree = "<group>"; };
 		77D7972E5D0CFA744F86D4E2 /* Extensions-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Extensions-Info.plist"; sourceTree = "<group>"; };
 		79785C482FC439CDEAF86F03 /* Calendar+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Extension.swift"; sourceTree = "<group>"; };
 		80C5F610D6CBB41E217C1E5A /* Task+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Task+Extensions.swift"; sourceTree = "<group>"; };
@@ -138,6 +140,7 @@
 				9328F6B26679166258494F5B /* Derived */,
 				8C99B323CD884FF3DDFB82AD /* ExtensionsTests */,
 				324D1214F5DB51587800F056 /* Sources */,
+				73BD4B2FD287DDDC8D148FD3 /* Extensions.h */,
 			);
 			name = Project;
 			sourceTree = "<group>";
@@ -204,11 +207,23 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		C6177EBBAAA2183BDBAA8F54 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				38F233FE2E30C7B93475D7EA /* Extensions.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		29E11AD25B6ED45614120EEC /* Extensions */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6D1DB21E5249B5C2E1EF2E95 /* Build configuration list for PBXNativeTarget "Extensions" */;
 			buildPhases = (
+				C6177EBBAAA2183BDBAA8F54 /* Headers */,
 				D67AA69311BA81F196732CAB /* Sources */,
 				9AC9AAA360C2CB3806A94F75 /* Resources */,
 				5C151ABB61620A52B0DADF14 /* Embed Frameworks */,

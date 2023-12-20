@@ -7,4 +7,18 @@
 
 import ProjectDescription
 
-let workspace = Workspace(name: "TodoCalendar", projects: ["./*"])
+let workspace = Workspace(name: "TodoCalendar", 
+                          projects: [
+                            "TodoCalendarApp",
+                            "Domain",
+                            "Repository",
+                            "Presentations/CommonPresentation",
+                            "Presentations/Scenes",
+                            "Presentations/CalendarScenes",
+                            "Presentations/EventDetailScene",
+                            "Presentations/SettingScene",
+                            "Supports/Extensions",
+                            "Supports/UnitTestHelpKit",
+                            "Supports/Common3rdParty",
+                            "Supports/TestDoubles"
+                          ])
