@@ -3,178 +3,216 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F60CBB6229CEADB200F03310 /* AsyncFlatMap in Frameworks */ = {isa = PBXBuildFile; productRef = F60CBB6129CEADB200F03310 /* AsyncFlatMap */; };
-		F63C9C4129C6B0E100CC663A /* Common3rdParty.h in Headers */ = {isa = PBXBuildFile; fileRef = F63C9C4029C6B0E100CC663A /* Common3rdParty.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		F63C9C8D29C6B2DC00CC663A /* Either in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C8C29C6B2DC00CC663A /* Either */; };
-		F63C9C8F29C6B2DC00CC663A /* Optics in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C8E29C6B2DC00CC663A /* Optics */; };
-		F63C9C9129C6B2DC00CC663A /* Prelude in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9029C6B2DC00CC663A /* Prelude */; };
-		F63C9C9329C6B2DC00CC663A /* Reader in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9229C6B2DC00CC663A /* Reader */; };
-		F63C9C9529C6B2DC00CC663A /* State in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9429C6B2DC00CC663A /* State */; };
-		F63C9C9729C6B2DC00CC663A /* Tuple in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9629C6B2DC00CC663A /* Tuple */; };
-		F63C9C9929C6B2DC00CC663A /* ValidationNearSemiring in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9829C6B2DC00CC663A /* ValidationNearSemiring */; };
-		F63C9C9B29C6B2DC00CC663A /* ValidationSemigroup in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9A29C6B2DC00CC663A /* ValidationSemigroup */; };
-		F63C9C9D29C6B2DC00CC663A /* Writer in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9C29C6B2DC00CC663A /* Writer */; };
-		F63C9CA029C6B31600CC663A /* AsyncAlgorithms in Frameworks */ = {isa = PBXBuildFile; productRef = F63C9C9F29C6B31600CC663A /* AsyncAlgorithms */; };
-		F66FDEF72A9B5A94005A8227 /* CombineCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = F66FDEF62A9B5A94005A8227 /* CombineCocoa */; };
-		F6B35B2E2AB8A8470074BD2A /* Pulse in Frameworks */ = {isa = PBXBuildFile; productRef = F6B35B2D2AB8A8470074BD2A /* Pulse */; };
-		F6B35B302AB8A8470074BD2A /* PulseUI in Frameworks */ = {isa = PBXBuildFile; productRef = F6B35B2F2AB8A8470074BD2A /* PulseUI */; };
-		F6C58CDF2A111C6A002BA9B7 /* SQLiteService in Frameworks */ = {isa = PBXBuildFile; productRef = F6C58CDE2A111C6A002BA9B7 /* SQLiteService */; };
-		F6CD67332A35A556007E4306 /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = F6CD67322A35A556007E4306 /* Alamofire */; };
+		0D70ACDB29BDC5DB265E708E /* CombineCocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B48A07C29ECA493D8F51CE7 /* CombineCocoa.framework */; };
+		10BDEDE6B4C4EE7724FE7C7A /* AsyncAlgorithms.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 363432AC9110C8BA9CFD77B9 /* AsyncAlgorithms.framework */; };
+		13FFDA4F94CB583C29C880A3 /* XCTestDynamicOverlay.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C77F7C2EA55EEC21D767081 /* XCTestDynamicOverlay.framework */; };
+		63D03BC2E642EEBD57F492A1 /* ConcurrencyExtras.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CB45BDE9009EBCE8E8CF20A7 /* ConcurrencyExtras.framework */; };
+		81543D4AEB3AEB1C0950C025 /* SQLiteService.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D62C64BD0501E3D1E692B2D0 /* SQLiteService.framework */; };
+		89EE1F7BF8C9B019D35A5F66 /* Dependencies.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 432933490AF2EE737004AB87 /* Dependencies.framework */; };
+		8A9366FBA8A4C87A002EA812 /* Pulse.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D8D19C8E3916FB0AA591B15 /* Pulse.framework */; };
+		C32B83B9FE9E2492829C7F40 /* Common3rdParty.h in Headers */ = {isa = PBXBuildFile; fileRef = 65C4246BA17B6A2182E1776E /* Common3rdParty.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C7309224426059101A9223FE /* Optics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF63F14B521547337EA24724 /* Optics.framework */; };
+		CBF16548D71375FBFD62B59B /* Clocks.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D335A7E3B2279BD6B15F63C /* Clocks.framework */; };
+		CC1CA8C0BF43E65C0A7FFD2A /* CombineSchedulers.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 30D3CFB39E94D1EB88E87660 /* CombineSchedulers.framework */; };
+		CC7E8EA4183CF52495211266 /* Either.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CC926B80134C1F228F675EEF /* Either.framework */; };
+		CDA6D51DA3F90578456C6971 /* Prelude.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 97A99FF50837ECF4B3B3A9E5 /* Prelude.framework */; };
+		DB5B3FF7AB190EECD7B4AF2A /* AsyncFlatMap.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F40E9813D40564177D00B5AA /* AsyncFlatMap.framework */; };
+		DDE3BA7A8797B7C0CC7A8FE8 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99AC4589E83EF04553CAEAA0 /* Alamofire.framework */; };
+		E4098F9F9F9184BD102EE261 /* PulseUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8D59448C74425C11E8F9B024 /* PulseUI.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		EDCF8BDBACEBC7336A58CEA8 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		F63C9C3D29C6B0E100CC663A /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F63C9C4029C6B0E100CC663A /* Common3rdParty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common3rdParty.h; sourceTree = "<group>"; };
+		1D335A7E3B2279BD6B15F63C /* Clocks.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Clocks.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2417E4E7D744C5937A3AC85B /* Common3rdParty.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Common3rdParty.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		30D3CFB39E94D1EB88E87660 /* CombineSchedulers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineSchedulers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3427E543F2B21FDB7BD8C2CB /* Common3rdParty-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "Common3rdParty-Info.plist"; sourceTree = "<group>"; };
+		363432AC9110C8BA9CFD77B9 /* AsyncAlgorithms.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncAlgorithms.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3C77F7C2EA55EEC21D767081 /* XCTestDynamicOverlay.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XCTestDynamicOverlay.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		3D8D19C8E3916FB0AA591B15 /* Pulse.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pulse.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		432933490AF2EE737004AB87 /* Dependencies.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Dependencies.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5B48A07C29ECA493D8F51CE7 /* CombineCocoa.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineCocoa.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		65C4246BA17B6A2182E1776E /* Common3rdParty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common3rdParty.h; sourceTree = "<group>"; };
+		8D59448C74425C11E8F9B024 /* PulseUI.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PulseUI.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		97A99FF50837ECF4B3B3A9E5 /* Prelude.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Prelude.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		99AC4589E83EF04553CAEAA0 /* Alamofire.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Alamofire.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		AF63F14B521547337EA24724 /* Optics.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Optics.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB45BDE9009EBCE8E8CF20A7 /* ConcurrencyExtras.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ConcurrencyExtras.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CC926B80134C1F228F675EEF /* Either.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Either.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D62C64BD0501E3D1E692B2D0 /* SQLiteService.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SQLiteService.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F40E9813D40564177D00B5AA /* AsyncFlatMap.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncFlatMap.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		F63C9C3A29C6B0E100CC663A /* Frameworks */ = {
+		D4A0B3169CCD37B6EFEFDDBA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F63C9C9129C6B2DC00CC663A /* Prelude in Frameworks */,
-				F63C9C9B29C6B2DC00CC663A /* ValidationSemigroup in Frameworks */,
-				F60CBB6229CEADB200F03310 /* AsyncFlatMap in Frameworks */,
-				F63C9C9529C6B2DC00CC663A /* State in Frameworks */,
-				F63C9C9329C6B2DC00CC663A /* Reader in Frameworks */,
-				F63C9C9729C6B2DC00CC663A /* Tuple in Frameworks */,
-				F63C9C8F29C6B2DC00CC663A /* Optics in Frameworks */,
-				F63C9C9D29C6B2DC00CC663A /* Writer in Frameworks */,
-				F6C58CDF2A111C6A002BA9B7 /* SQLiteService in Frameworks */,
-				F63C9C8D29C6B2DC00CC663A /* Either in Frameworks */,
-				F63C9C9929C6B2DC00CC663A /* ValidationNearSemiring in Frameworks */,
-				F63C9CA029C6B31600CC663A /* AsyncAlgorithms in Frameworks */,
-				F6B35B2E2AB8A8470074BD2A /* Pulse in Frameworks */,
-				F66FDEF72A9B5A94005A8227 /* CombineCocoa in Frameworks */,
-				F6B35B302AB8A8470074BD2A /* PulseUI in Frameworks */,
-				F6CD67332A35A556007E4306 /* Alamofire in Frameworks */,
+				DDE3BA7A8797B7C0CC7A8FE8 /* Alamofire.framework in Frameworks */,
+				10BDEDE6B4C4EE7724FE7C7A /* AsyncAlgorithms.framework in Frameworks */,
+				DB5B3FF7AB190EECD7B4AF2A /* AsyncFlatMap.framework in Frameworks */,
+				CBF16548D71375FBFD62B59B /* Clocks.framework in Frameworks */,
+				0D70ACDB29BDC5DB265E708E /* CombineCocoa.framework in Frameworks */,
+				CC1CA8C0BF43E65C0A7FFD2A /* CombineSchedulers.framework in Frameworks */,
+				63D03BC2E642EEBD57F492A1 /* ConcurrencyExtras.framework in Frameworks */,
+				89EE1F7BF8C9B019D35A5F66 /* Dependencies.framework in Frameworks */,
+				CC7E8EA4183CF52495211266 /* Either.framework in Frameworks */,
+				C7309224426059101A9223FE /* Optics.framework in Frameworks */,
+				CDA6D51DA3F90578456C6971 /* Prelude.framework in Frameworks */,
+				8A9366FBA8A4C87A002EA812 /* Pulse.framework in Frameworks */,
+				E4098F9F9F9184BD102EE261 /* PulseUI.framework in Frameworks */,
+				81543D4AEB3AEB1C0950C025 /* SQLiteService.framework in Frameworks */,
+				13FFDA4F94CB583C29C880A3 /* XCTestDynamicOverlay.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		F63C9C3329C6B0E100CC663A = {
+		100402DE40D9CF176AD61BEC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				F63C9C3F29C6B0E100CC663A /* Common3rdParty */,
-				F63C9C3E29C6B0E100CC663A /* Products */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		5C6E611B662641BE715A3BEA /* Derived */ = {
+			isa = PBXGroup;
+			children = (
+				A3B1D4C06F1B597302A7411F /* InfoPlists */,
+			);
+			path = Derived;
+			sourceTree = "<group>";
+		};
+		6631293911BE8435655CACE2 /* Project */ = {
+			isa = PBXGroup;
+			children = (
+				5C6E611B662641BE715A3BEA /* Derived */,
+				65C4246BA17B6A2182E1776E /* Common3rdParty.h */,
+			);
+			name = Project;
+			sourceTree = "<group>";
+		};
+		8613EC38C4FCED2D4E348525 = {
+			isa = PBXGroup;
+			children = (
+				6631293911BE8435655CACE2 /* Project */,
+				100402DE40D9CF176AD61BEC /* Frameworks */,
+				95E0AAE5E1519B86FAA0BC59 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		F63C9C3E29C6B0E100CC663A /* Products */ = {
+		95E0AAE5E1519B86FAA0BC59 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F63C9C3D29C6B0E100CC663A /* Common3rdParty.framework */,
+				99AC4589E83EF04553CAEAA0 /* Alamofire.framework */,
+				363432AC9110C8BA9CFD77B9 /* AsyncAlgorithms.framework */,
+				F40E9813D40564177D00B5AA /* AsyncFlatMap.framework */,
+				1D335A7E3B2279BD6B15F63C /* Clocks.framework */,
+				5B48A07C29ECA493D8F51CE7 /* CombineCocoa.framework */,
+				30D3CFB39E94D1EB88E87660 /* CombineSchedulers.framework */,
+				2417E4E7D744C5937A3AC85B /* Common3rdParty.framework */,
+				CB45BDE9009EBCE8E8CF20A7 /* ConcurrencyExtras.framework */,
+				432933490AF2EE737004AB87 /* Dependencies.framework */,
+				CC926B80134C1F228F675EEF /* Either.framework */,
+				AF63F14B521547337EA24724 /* Optics.framework */,
+				97A99FF50837ECF4B3B3A9E5 /* Prelude.framework */,
+				3D8D19C8E3916FB0AA591B15 /* Pulse.framework */,
+				8D59448C74425C11E8F9B024 /* PulseUI.framework */,
+				D62C64BD0501E3D1E692B2D0 /* SQLiteService.framework */,
+				3C77F7C2EA55EEC21D767081 /* XCTestDynamicOverlay.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		F63C9C3F29C6B0E100CC663A /* Common3rdParty */ = {
+		A3B1D4C06F1B597302A7411F /* InfoPlists */ = {
 			isa = PBXGroup;
 			children = (
-				F63C9C4029C6B0E100CC663A /* Common3rdParty.h */,
+				3427E543F2B21FDB7BD8C2CB /* Common3rdParty-Info.plist */,
 			);
-			path = Common3rdParty;
+			path = InfoPlists;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		F63C9C3829C6B0E100CC663A /* Headers */ = {
+		87EF2EA534D4A2711D35A52C /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F63C9C4129C6B0E100CC663A /* Common3rdParty.h in Headers */,
+				C32B83B9FE9E2492829C7F40 /* Common3rdParty.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		F63C9C3C29C6B0E100CC663A /* Common3rdParty */ = {
+		AE3303C809479D8DBFCA257A /* Common3rdParty */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F63C9C4429C6B0E100CC663A /* Build configuration list for PBXNativeTarget "Common3rdParty" */;
+			buildConfigurationList = 88CF3D4DA87C749707FCB897 /* Build configuration list for PBXNativeTarget "Common3rdParty" */;
 			buildPhases = (
-				F63C9C3829C6B0E100CC663A /* Headers */,
-				F63C9C3929C6B0E100CC663A /* Sources */,
-				F63C9C3A29C6B0E100CC663A /* Frameworks */,
-				F63C9C3B29C6B0E100CC663A /* Resources */,
+				87EF2EA534D4A2711D35A52C /* Headers */,
+				CED71C3FEFDD2332D9FC7EE8 /* Sources */,
+				19A9F88B4A368ADC27F88684 /* Resources */,
+				EDCF8BDBACEBC7336A58CEA8 /* Embed Frameworks */,
+				D4A0B3169CCD37B6EFEFDDBA /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = Common3rdParty;
-			packageProductDependencies = (
-				F63C9C8C29C6B2DC00CC663A /* Either */,
-				F63C9C8E29C6B2DC00CC663A /* Optics */,
-				F63C9C9029C6B2DC00CC663A /* Prelude */,
-				F63C9C9229C6B2DC00CC663A /* Reader */,
-				F63C9C9429C6B2DC00CC663A /* State */,
-				F63C9C9629C6B2DC00CC663A /* Tuple */,
-				F63C9C9829C6B2DC00CC663A /* ValidationNearSemiring */,
-				F63C9C9A29C6B2DC00CC663A /* ValidationSemigroup */,
-				F63C9C9C29C6B2DC00CC663A /* Writer */,
-				F63C9C9F29C6B31600CC663A /* AsyncAlgorithms */,
-				F60CBB6129CEADB200F03310 /* AsyncFlatMap */,
-				F6C58CDE2A111C6A002BA9B7 /* SQLiteService */,
-				F6CD67322A35A556007E4306 /* Alamofire */,
-				F66FDEF62A9B5A94005A8227 /* CombineCocoa */,
-				F6B35B2D2AB8A8470074BD2A /* Pulse */,
-				F6B35B2F2AB8A8470074BD2A /* PulseUI */,
-			);
 			productName = Common3rdParty;
-			productReference = F63C9C3D29C6B0E100CC663A /* Common3rdParty.framework */;
+			productReference = 2417E4E7D744C5937A3AC85B /* Common3rdParty.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		F63C9C3429C6B0E100CC663A /* Project object */ = {
+		4ADA227C868C20F69C765084 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				BuildIndependentTargetsInParallel = 1;
-				LastUpgradeCheck = 1420;
+				BuildIndependentTargetsInParallel = YES;
+				ORGANIZATIONNAME = com.sudo.park;
 				TargetAttributes = {
-					F63C9C3C29C6B0E100CC663A = {
-						CreatedOnToolsVersion = 14.2;
-					};
 				};
 			};
-			buildConfigurationList = F63C9C3729C6B0E100CC663A /* Build configuration list for PBXProject "Common3rdParty" */;
+			buildConfigurationList = 6A1FB366A62F4C1D269E65CC /* Build configuration list for PBXProject "Common3rdParty" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
 				Base,
+				en,
 			);
-			mainGroup = F63C9C3329C6B0E100CC663A;
-			packageReferences = (
-				F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */,
-				F63C9C9E29C6B31600CC663A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */,
-				F60CBB6029CEADB200F03310 /* XCRemoteSwiftPackageReference "publisher-async-bind" */,
-				F6C58CDD2A111C6A002BA9B7 /* XCRemoteSwiftPackageReference "SQLiteService" */,
-				F6CD67312A35A556007E4306 /* XCRemoteSwiftPackageReference "Alamofire" */,
-				F66FDEF52A9B5A94005A8227 /* XCRemoteSwiftPackageReference "CombineCocoa" */,
-				F6B35B2C2AB8A8470074BD2A /* XCRemoteSwiftPackageReference "Pulse" */,
-			);
-			productRefGroup = F63C9C3E29C6B0E100CC663A /* Products */;
+			mainGroup = 8613EC38C4FCED2D4E348525;
+			productRefGroup = 95E0AAE5E1519B86FAA0BC59 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F63C9C3C29C6B0E100CC663A /* Common3rdParty */,
+				AE3303C809479D8DBFCA257A /* Common3rdParty */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		F63C9C3B29C6B0E100CC663A /* Resources */ = {
+		19A9F88B4A368ADC27F88684 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -184,7 +222,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		F63C9C3929C6B0E100CC663A /* Sources */ = {
+		CED71C3FEFDD2332D9FC7EE8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -194,13 +232,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		F63C9C4229C6B0E100CC663A /* Debug */ = {
+		00F548D52A5AEC969FE6CCB2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -227,7 +267,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -245,25 +285,21 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
-				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
-				MTL_FAST_MATH = YES;
+				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
 		};
-		F63C9C4329C6B0E100CC663A /* Release */ = {
+		5D98FD15BFB9680617AF081A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
@@ -290,7 +326,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -302,238 +338,119 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				MTL_FAST_MATH = YES;
-				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				VALIDATE_PRODUCT = YES;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
-		F63C9C4529C6B0E100CC663A /* Debug */ = {
+		71DF58E9DEB3440A38140753 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 2ABNASUGL6;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_FILE = "Derived/InfoPlists/Common3rdParty-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.Common3rdParty;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = Common3rdParty;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_COMPILATION_MODE = singlefile;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
 		};
-		F63C9C4629C6B0E100CC663A /* Release */ = {
+		AF5FE6EDAA4B72DB84B0FE37 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = 2ABNASUGL6;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_FILE = "Derived/InfoPlists/Common3rdParty-Info.plist";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
+				);
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/Dependencies/SwiftPackageManager/.build/checkouts/CombineCocoa/Sources/Runtime/include/module.modulemap",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.sudo.park.Common3rdParty;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				PRODUCT_NAME = Common3rdParty;
+				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F63C9C3729C6B0E100CC663A /* Build configuration list for PBXProject "Common3rdParty" */ = {
+		6A1FB366A62F4C1D269E65CC /* Build configuration list for PBXProject "Common3rdParty" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F63C9C4229C6B0E100CC663A /* Debug */,
-				F63C9C4329C6B0E100CC663A /* Release */,
+				00F548D52A5AEC969FE6CCB2 /* Debug */,
+				5D98FD15BFB9680617AF081A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F63C9C4429C6B0E100CC663A /* Build configuration list for PBXNativeTarget "Common3rdParty" */ = {
+		88CF3D4DA87C749707FCB897 /* Build configuration list for PBXNativeTarget "Common3rdParty" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				F63C9C4529C6B0E100CC663A /* Debug */,
-				F63C9C4629C6B0E100CC663A /* Release */,
+				71DF58E9DEB3440A38140753 /* Debug */,
+				AF5FE6EDAA4B72DB84B0FE37 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		F60CBB6029CEADB200F03310 /* XCRemoteSwiftPackageReference "publisher-async-bind" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sudopark/publisher-async-bind.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.0.2;
-			};
-		};
-		F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/pointfreeco/swift-prelude.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
-		F63C9C9E29C6B31600CC663A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-async-algorithms.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
-			};
-		};
-		F66FDEF52A9B5A94005A8227 /* XCRemoteSwiftPackageReference "CombineCocoa" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/CombineCommunity/CombineCocoa.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.4.1;
-			};
-		};
-		F6B35B2C2AB8A8470074BD2A /* XCRemoteSwiftPackageReference "Pulse" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kean/Pulse";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.0.0;
-			};
-		};
-		F6C58CDD2A111C6A002BA9B7 /* XCRemoteSwiftPackageReference "SQLiteService" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sudopark/SQLiteService.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.0;
-			};
-		};
-		F6CD67312A35A556007E4306 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.0.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		F60CBB6129CEADB200F03310 /* AsyncFlatMap */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F60CBB6029CEADB200F03310 /* XCRemoteSwiftPackageReference "publisher-async-bind" */;
-			productName = AsyncFlatMap;
-		};
-		F63C9C8C29C6B2DC00CC663A /* Either */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
-			productName = Either;
-		};
-		F63C9C8E29C6B2DC00CC663A /* Optics */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
-			productName = Optics;
-		};
-		F63C9C9029C6B2DC00CC663A /* Prelude */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
-			productName = Prelude;
-		};
-		F63C9C9229C6B2DC00CC663A /* Reader */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
-			productName = Reader;
-		};
-		F63C9C9429C6B2DC00CC663A /* State */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
-			productName = State;
-		};
-		F63C9C9629C6B2DC00CC663A /* Tuple */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
-			productName = Tuple;
-		};
-		F63C9C9829C6B2DC00CC663A /* ValidationNearSemiring */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
-			productName = ValidationNearSemiring;
-		};
-		F63C9C9A29C6B2DC00CC663A /* ValidationSemigroup */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
-			productName = ValidationSemigroup;
-		};
-		F63C9C9C29C6B2DC00CC663A /* Writer */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C8B29C6B2DC00CC663A /* XCRemoteSwiftPackageReference "swift-prelude" */;
-			productName = Writer;
-		};
-		F63C9C9F29C6B31600CC663A /* AsyncAlgorithms */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F63C9C9E29C6B31600CC663A /* XCRemoteSwiftPackageReference "swift-async-algorithms" */;
-			productName = AsyncAlgorithms;
-		};
-		F66FDEF62A9B5A94005A8227 /* CombineCocoa */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F66FDEF52A9B5A94005A8227 /* XCRemoteSwiftPackageReference "CombineCocoa" */;
-			productName = CombineCocoa;
-		};
-		F6B35B2D2AB8A8470074BD2A /* Pulse */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F6B35B2C2AB8A8470074BD2A /* XCRemoteSwiftPackageReference "Pulse" */;
-			productName = Pulse;
-		};
-		F6B35B2F2AB8A8470074BD2A /* PulseUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F6B35B2C2AB8A8470074BD2A /* XCRemoteSwiftPackageReference "Pulse" */;
-			productName = PulseUI;
-		};
-		F6C58CDE2A111C6A002BA9B7 /* SQLiteService */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F6C58CDD2A111C6A002BA9B7 /* XCRemoteSwiftPackageReference "SQLiteService" */;
-			productName = SQLiteService;
-		};
-		F6CD67322A35A556007E4306 /* Alamofire */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F6CD67312A35A556007E4306 /* XCRemoteSwiftPackageReference "Alamofire" */;
-			productName = Alamofire;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = F63C9C3429C6B0E100CC663A /* Project object */;
+	rootObject = 4ADA227C868C20F69C765084 /* Project object */;
 }
