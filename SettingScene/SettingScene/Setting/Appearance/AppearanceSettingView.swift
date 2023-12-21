@@ -166,7 +166,7 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
             $0.showUnderLine = true
         }
         .eventHandler(\.eventOnCalendarSectionStateBinding) {
-            $0.additionalFontSizeModel = .init(sizeText: "+3")
+            $0.additionalFontSizeModel = .init(3)
             $0.isShowEventTagColor = true
         }
     }

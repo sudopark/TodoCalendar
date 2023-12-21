@@ -41,7 +41,8 @@ class EventOnCalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventOnCalendar: EventOnCalendarSetting()
                 |> \.textAdditionalSize .~ 3
                 |> \.bold .~ false
-                |> \.showEventTagColor .~ true
+                |> \.showEventTagColor .~ true,
+            eventList: .init()
         )
         return EventOnCalendarViewModelImple(uiSettingUsecase: self.spyUISettingUsecase)
     }
@@ -62,7 +63,9 @@ extension EventOnCalendarViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(sizeModel, .init(sizeText: "+3", isIncreasable: true, isDescreasable: true))
+        XCTAssertEqual(sizeModel?.sizeText, "+3")
+        XCTAssertEqual(sizeModel?.isIncreasable, true)
+        XCTAssertEqual(sizeModel?.isDescreasable, true)
     }
     
     // prepare시에 마지막에 저장된 설정 로드 - bold: false
