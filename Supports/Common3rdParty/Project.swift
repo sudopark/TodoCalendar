@@ -20,6 +20,7 @@ let project = Project.framework(name: "Common3rdParty",
                                 ],
                                 platform: .iOS,
                                 iOSTargetVersion: "15.0",
+                                withSourceFile: false,
                                 dependencies: [
                                     .package(product: "Alamofire"),
                                     .package(product: "Prelude"),

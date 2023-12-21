@@ -41,13 +41,15 @@ extension Project {
                                  packages: [Package] = [],
                                  platform: Platform,
                                  iOSTargetVersion: String,
+                                 withSourceFile: Bool = true,
                                  dependencies: [TargetDependency] = []) -> Project {
         let targets = makeFrameworkTargets(name: name,
-                                           platform: platform, 
+                                           platform: platform,
                                            iOSTargetVersion: iOSTargetVersion,
+                                           withSourceFile: withSourceFile,
                                            dependencies: dependencies)
         return Project(name: name,
-                       organizationName: organizationName, 
+                       organizationName: organizationName,
                        packages: packages,
                        targets: targets)
     }
@@ -90,6 +92,7 @@ extension Project {
     private static func makeFrameworkTargets(name: String,
                                              platform: Platform,
                                              iOSTargetVersion: String,
+                                             withSourceFile: Bool,
                                              dependencies: [TargetDependency] = [])
     -> [Target]
     {
@@ -99,7 +102,7 @@ extension Project {
                              bundleId: "\(organizationName).\(name)",
                              deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
                              infoPlist: .default,
-                             sources: ["Sources/**"],
+                             sources: withSourceFile ? ["Sources/**"] : [],
                              resources: [],
                              headers: Headers.headers(public: "\(name).h"),
                              dependencies: dependencies)
@@ -107,7 +110,7 @@ extension Project {
     }
     
     /// Helper function to create the application target and the unit test target.
-    private static func makeAppTargets(name: String, 
+    private static func makeAppTargets(name: String,
                                        platform: Platform,
                                        iOSTargetVersion: String,
                                        dependencies: [TargetDependency])
