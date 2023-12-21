@@ -15,7 +15,7 @@ final class EventOnCalendarViewState: ObservableObject {
     
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
-    @Published var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(sizeText: "")
+    @Published var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(0)
     @Published var isBold: Bool = false
     @Published var isShowEventTagColor: Bool = false
     
@@ -215,7 +215,7 @@ struct EventOnCalendarViewPreviewProvider: PreviewProvider {
         let eventHandler = EventOnCalendarViewEventHandler()
         return EventOnCalendarView()
             .eventHandler(\.stateBinding) { state in
-                state.additionalFontSizeModel = .init(sizeText: "+1")
+                state.additionalFontSizeModel = .init(0)
                 state.isBold = false
                 state.isShowEventTagColor = true
             }

@@ -16,6 +16,11 @@ struct EventTextAdditionalSizeModel: Equatable {
     let sizeText: String
     var isIncreasable: Bool = true
     var isDescreasable: Bool = true
+      
+    init(_ size: CGFloat) {
+        let prefix = size == 0 ? "±" : size < 0 ? "" : "+"
+        self.sizeText = "\(prefix)\(Int(size))"
+    }
 }
 
 protocol EventOnCalendarViewModel: AnyObject, Sendable {
@@ -106,13 +111,9 @@ extension EventOnCalendarViewModelImple {
     
     var textIncreasedSizeText: AnyPublisher<EventTextAdditionalSizeModel, Never> {
         let transform: (CGFloat) -> EventTextAdditionalSizeModel = { size in
-            let prefix = size == 0 ? "±" : size < 0 ? "" : "+"
-            let text = "\(prefix)\(Int(size))"
-            return .init(
-                sizeText: text,
-                isIncreasable: size < Constant.maxFontSize,
-                isDescreasable: size > Constant.minFontSize
-            )
+            return EventTextAdditionalSizeModel(size)
+                |> \.isIncreasable .~ (size < Constant.maxFontSize)
+                |> \.isDescreasable .~ (size > Constant.minFontSize)
         }
         return self.subject.setting
             .compactMap { $0?.textAdditionalSize }
