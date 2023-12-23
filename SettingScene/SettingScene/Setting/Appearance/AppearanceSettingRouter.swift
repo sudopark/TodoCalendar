@@ -14,7 +14,10 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol AppearanceSettingRouting: Routing, Sendable { }
+protocol AppearanceSettingRouting: Routing, Sendable {
+    
+    func routeToSelectTimeZone()
+}
 
 // MARK: - Router
 
@@ -28,4 +31,7 @@ extension AppearanceSettingRouter {
     }
     
     // TODO: router implememnts
+    func routeToSelectTimeZone() {
+        // TODO: 
+    }
 }

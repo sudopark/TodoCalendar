@@ -7,7 +7,8 @@
 
 import Foundation
 import Domain
-
+import Prelude
+import Optics
 
 open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     
@@ -18,7 +19,7 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
         if let setting = self.stubAppearanceSetting {
             return setting
         }
-        return .init(
+        return AppearanceSettings(
             tagColorSetting: .init(holiday: "holiday", default: "default"),
             colorSetKey: .defaultLight,
             fontSetKey: .systemDefault,
@@ -27,6 +28,8 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
             eventOnCalendar: .init(),
             eventList: .init()
         )
+        |> \.hapticEffectOff .~ false
+        |> \.animationEffectOff .~ false
     }
     
     public var didChangeAppearanceSetting: AppearanceSettings?
@@ -43,6 +46,8 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
             eventOnCalendar: params.eventOnCalendar ?? old.eventOnCalendar,
             eventList: params.eventList ?? old.eventList
         )
+        |> \.hapticEffectOff .~ (params.hapticEffectOff ?? old.hapticEffectOff)
+        |> \.animationEffectOff .~ (params.animationEffectOff ?? old.animationEffectOff)
         self.didChangeAppearanceSetting = newSetting
         self.stubAppearanceSetting = newSetting
         return newSetting
