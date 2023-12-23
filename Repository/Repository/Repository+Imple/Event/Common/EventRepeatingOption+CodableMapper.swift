@@ -29,7 +29,7 @@ struct EventRepeatingOptionCodableMapper: Codable {
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let optionType: String = try container.decode(String.self, forKey: .optionType)
-        let timeZoneAbbre = try? container.decode(String.self, forKey: .timeZone)
+        let timeZoneIdentifier = try? container.decode(String.self, forKey: .timeZone)
         switch optionType {
         case "every_day":
             var option = EventRepeatingOptions.EveryDay()
@@ -37,9 +37,9 @@ struct EventRepeatingOptionCodableMapper: Codable {
             self = .init(option: option)
             
         case "every_week":
-            guard let timeZone = timeZoneAbbre.flatMap ({ TimeZone(abbreviation: $0) })
+            guard let timeZone = timeZoneIdentifier.flatMap ({ TimeZone(identifier: $0) })
             else {
-                throw RuntimeError("invalid time zone value: \(timeZoneAbbre ?? "")")
+                throw RuntimeError("invalid time zone value: \(timeZoneIdentifier ?? "")")
             }
             var option = EventRepeatingOptions.EveryWeek(timeZone)
             option.interval = try container.decode(Int.self, forKey: .interval)
@@ -48,9 +48,9 @@ struct EventRepeatingOptionCodableMapper: Codable {
             self = .init(option: option)
             
         case "every_month":
-            guard let timeZone = timeZoneAbbre.flatMap ({ TimeZone(abbreviation: $0) })
+            guard let timeZone = timeZoneIdentifier.flatMap ({ TimeZone(identifier: $0) })
             else {
-                throw RuntimeError("invalid time zone value: \(timeZoneAbbre ?? "")")
+                throw RuntimeError("invalid time zone value: \(timeZoneIdentifier ?? "")")
             }
             var option = EventRepeatingOptions.EveryMonth(timeZone: timeZone)
             option.interval = try container.decode(Int.self, forKey: .interval)
@@ -59,9 +59,9 @@ struct EventRepeatingOptionCodableMapper: Codable {
             self = .init(option: option)
             
         case "every_year":
-            guard let timeZone = timeZoneAbbre.flatMap ({ TimeZone(abbreviation: $0) })
+            guard let timeZone = timeZoneIdentifier.flatMap ({ TimeZone(identifier: $0) })
             else {
-                throw RuntimeError("invalid time zone value: \(timeZoneAbbre ?? "")")
+                throw RuntimeError("invalid time zone value: \(timeZoneIdentifier ?? "")")
             }
             var option = EventRepeatingOptions.EveryYear(timeZone: timeZone)
             option.interval = try container.decode(Int.self, forKey: .interval)
@@ -72,9 +72,9 @@ struct EventRepeatingOptionCodableMapper: Codable {
             self = .init(option: option)
             
         case "every_year_some_day":
-            guard let timeZone = timeZoneAbbre.flatMap ({ TimeZone(abbreviation: $0) })
+            guard let timeZone = timeZoneIdentifier.flatMap ({ TimeZone(identifier: $0) })
             else {
-                throw RuntimeError("invalid time zone value: \(timeZoneAbbre ?? "")")
+                throw RuntimeError("invalid time zone value: \(timeZoneIdentifier ?? "")")
             }
             var option = EventRepeatingOptions.EveryYearSomeDay(timeZone: timeZone)
             option.interval = try container.decode(Int.self, forKey: .interval)
@@ -95,13 +95,13 @@ struct EventRepeatingOptionCodableMapper: Codable {
             try container.encode("every_week", forKey: .optionType)
             try container.encode(everyWeek.interval, forKey: .interval)
             try container.encode(everyWeek.dayOfWeeks.map { $0.rawValue }, forKey: .dayOfWeek)
-            try container.encodeIfPresent(everyWeek.timeZone.addreviationKey, forKey: .timeZone)
+            try container.encodeIfPresent(everyWeek.timeZone.identifier, forKey: .timeZone)
             
         case let everyMonth as EventRepeatingOptions.EveryMonth:
             try container.encode("every_month", forKey: .optionType)
             try container.encode(everyMonth.interval, forKey: .interval)
             try container.encode(EveryMonthDateSelectorMapper(selector: everyMonth.selection), forKey: .monthDaySelection)
-            try container.encodeIfPresent(everyMonth.timeZone.addreviationKey, forKey: .timeZone)
+            try container.encodeIfPresent(everyMonth.timeZone.identifier, forKey: .timeZone)
             
         case let everyYear as EventRepeatingOptions.EveryYear:
             try container.encode("every_year", forKey: .optionType)
@@ -109,12 +109,12 @@ struct EventRepeatingOptionCodableMapper: Codable {
             try container.encode(everyYear.months.map { $0.rawValue }, forKey: .months)
             try container.encode(everyYear.weekOrdinals.map { WeekOrdinalMapper(ordinal: $0) }, forKey: .weekOrdinals)
             try container.encode(everyYear.dayOfWeek.map { $0.rawValue }, forKey: .dayOfWeek)
-            try container.encodeIfPresent(everyYear.timeZone.addreviationKey, forKey: .timeZone)
+            try container.encodeIfPresent(everyYear.timeZone.identifier, forKey: .timeZone)
             
         case let everyYear as EventRepeatingOptions.EveryYearSomeDay:
             try container.encode("every_year_some_day", forKey: .optionType)
             try container.encode(everyYear.interval, forKey: .interval)
-            try container.encodeIfPresent(everyYear.timeZone.addreviationKey, forKey: .timeZone)
+            try container.encodeIfPresent(everyYear.timeZone.identifier, forKey: .timeZone)
             
         default: throw RuntimeError("not support option type")
         }

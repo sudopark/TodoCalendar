@@ -98,15 +98,6 @@ extension TimeInterval {
 }
 
 
-extension TimeZone {
-    
-    public var addreviationKey: String? {
-        return TimeZone.abbreviationDictionary
-            .first(where: { $0.value == self.identifier })?.key
-    }
-}
-
-
 extension Range where Bound == TimeInterval {
     
     func intervalRanges(secondsFromGMT: TimeInterval) -> Range<TimeInterval> {

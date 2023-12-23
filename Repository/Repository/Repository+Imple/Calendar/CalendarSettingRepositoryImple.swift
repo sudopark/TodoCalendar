@@ -34,13 +34,13 @@ extension CalendarSettingRepositoryImple {
     }
     
     public func loadUserSelectedTImeZone() -> TimeZone? {
-        guard let abbreviation: String = self.environmentStorage.load(self.timeZoneKey)
+        guard let identifier: String = self.environmentStorage.load(self.timeZoneKey)
         else { return nil }
-        return TimeZone(abbreviation: abbreviation)
+        return TimeZone(identifier: identifier)
     }
     
     public func saveTimeZone(_ timeZone: TimeZone) {
-        let abbreviation = timeZone.addreviationKey
-        self.environmentStorage.update(self.timeZoneKey, abbreviation)
+        let identifier = timeZone.identifier
+        self.environmentStorage.update(self.timeZoneKey, identifier)
     }
 }
