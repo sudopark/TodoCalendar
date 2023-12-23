@@ -62,6 +62,9 @@ public struct AppearanceSettings {
     public let eventOnCalendar: EventOnCalendarSetting
     public let eventList: EventListSetting
     
+    public var hapticEffectOff: Bool = false
+    public var animationEffectOff: Bool = false
+    
     public init(
         tagColorSetting: EventTagColorSetting,
         colorSetKey: ColorSetKeys,
@@ -98,6 +101,8 @@ public struct EditAppearanceSettingParams {
     public var newShowUnderLineOnEventDay: Bool?
     public var eventOnCalendar: EventOnCalendarSetting?
     public var eventList: EventListSetting?
+    public var hapticEffectOff: Bool?
+    public var animationEffectOff: Bool?
     
     public init() { }
     
@@ -110,5 +115,7 @@ public struct EditAppearanceSettingParams {
             || self.newShowUnderLineOnEventDay != nil
             || self.eventOnCalendar != nil
             || self.eventList != nil
+            || self.hapticEffectOff != nil
+            || self.animationEffectOff != nil
     }
 }

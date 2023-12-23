@@ -42,6 +42,12 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         if self.appearance.eventlist != newSetting.eventList {
             self.appearance.eventlist = newSetting.eventList
         }
+        if self.appearance.hapticEffectOff != newSetting.hapticEffectOff {
+            self.appearance.hapticEffectOff = newSetting.hapticEffectOff
+        }
+        if self.appearance.animationEffectOff != newSetting.animationEffectOff {
+            self.appearance.animationEffectOff = newSetting.animationEffectOff
+        }
     }
 }
 

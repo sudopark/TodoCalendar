@@ -66,6 +66,7 @@
 		F6D32F8D2B131E98008BA797 /* HolidayListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D32F872B131E98008BA797 /* HolidayListViewModel.swift */; };
 		F6D32F902B163742008BA797 /* HolidayListViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6D32F8F2B163742008BA797 /* HolidayListViewModelImpleTests.swift */; };
 		F6F142672B2D8181001ACB8C /* EventListAppearnaceSettingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F142662B2D8181001ACB8C /* EventListAppearnaceSettingViewModel.swift */; };
+		F6F5D1E92B36ADAA005193F5 /* AppearanceSettingViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F6F5D1E82B36ADAA005193F5 /* AppearanceSettingViewModelImpleTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -140,6 +141,7 @@
 		F6D32F872B131E98008BA797 /* HolidayListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayListViewModel.swift; sourceTree = "<group>"; };
 		F6D32F8F2B163742008BA797 /* HolidayListViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayListViewModelImpleTests.swift; sourceTree = "<group>"; };
 		F6F142662B2D8181001ACB8C /* EventListAppearnaceSettingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventListAppearnaceSettingViewModel.swift; sourceTree = "<group>"; };
+		F6F5D1E82B36ADAA005193F5 /* AppearanceSettingViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingViewModelImpleTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -204,6 +206,7 @@
 				F651190C2B220D5B0034A45B /* CalendarSectionViewModelTests.swift */,
 				F68C5CE92B2CAB9C0060D173 /* EventOnCalendarViewModelImpleTests.swift */,
 				F67366302B348DF200582DF3 /* EventListAppearnaceSettingViewModelTests.swift */,
+				F6F5D1E82B36ADAA005193F5 /* AppearanceSettingViewModelImpleTests.swift */,
 			);
 			path = Appearance;
 			sourceTree = "<group>";
@@ -537,6 +540,7 @@
 				F67366312B348DF200582DF3 /* EventListAppearnaceSettingViewModelTests.swift in Sources */,
 				F69BA6AA2B0E3FAB00BCA65B /* SettingItemListViewModelImpleTests.swift in Sources */,
 				F6D32F902B163742008BA797 /* HolidayListViewModelImpleTests.swift in Sources */,
+				F6F5D1E92B36ADAA005193F5 /* AppearanceSettingViewModelImpleTests.swift in Sources */,
 				F68F7A3F2B18EC9C009EC869 /* CountrySelectViewModelImpleTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

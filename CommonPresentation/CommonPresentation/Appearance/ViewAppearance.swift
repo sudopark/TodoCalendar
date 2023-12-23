@@ -18,6 +18,9 @@ public class ViewAppearance: ObservableObject {
     @Published public var eventOnCalendarSetting: EventOnCalendarSetting
     @Published public var eventlist: EventListSetting
     
+    public var hapticEffectOff: Bool = false
+    public var animationEffectOff: Bool = false
+    
     public init(setting: AppearanceSettings) {
         
         self.tagColors = .init(
@@ -28,6 +31,8 @@ public class ViewAppearance: ObservableObject {
         self.fontSet = setting.fontSetKey.convert()
         self.eventOnCalendarSetting = setting.eventOnCalendar
         self.eventlist = setting.eventList
+        self.hapticEffectOff = setting.hapticEffectOff
+        self.animationEffectOff = setting.animationEffectOff
     }
 }
 

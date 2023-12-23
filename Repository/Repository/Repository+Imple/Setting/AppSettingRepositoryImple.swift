@@ -41,6 +41,10 @@ public final class AppSettingRepositoryImple: AppSettingRepository {
     private var showLunarCalendarDate: String { "show_lunar_calendar_date" }
     private var is24HourForm: String { "is_24_hourForm" }
     private var dimOnPastEvent: String { "dim_on_past_event" }
+    
+    // general
+    private var hapticEffectIsOff: String { "haptic_effect_off" }
+    private var animationEffectIsOff: String { "animation_effect_off" }
 }
 
 
@@ -61,6 +65,10 @@ extension AppSettingRepositoryImple {
         
         let eventOnCalendarSetting = self.loadEventOnCalendarSetting()
         let eventList = self.loadEventListSetting()
+        
+        let hapticIsOff: Bool = self.environmentStorage.load(hapticEffectIsOff) ?? false
+        let animationIsOff: Bool = self.environmentStorage.load(animationEffectIsOff) ?? false
+        
         return AppearanceSettings(
             tagColorSetting: .init(
                 holiday: holidayTagColor ?? "#D6236A",
@@ -77,6 +85,8 @@ extension AppSettingRepositoryImple {
             eventOnCalendar: eventOnCalendarSetting,
             eventList: eventList
         )
+        |> \.hapticEffectOff .~ hapticIsOff
+        |> \.animationEffectOff .~ animationIsOff
     }
     
     private func loadEventOnCalendarSetting() -> EventOnCalendarSetting {

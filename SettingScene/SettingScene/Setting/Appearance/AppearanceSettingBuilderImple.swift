@@ -34,11 +34,13 @@ extension AppearanceSettingSceneBuilerImple: AppearanceSettingSceneBuiler {
     @MainActor
     func makeAppearanceSettingScene() -> any AppearanceSettingScene {
         
+        let uiSettingUsecase = self.usecaseFactory.makeUISettingUsecase()
+        
         let viewModel = AppearanceSettingViewModelImple(
-            
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
+            uiSettingUsecase: uiSettingUsecase
         )
         
-        let uiSettingUsecase = self.usecaseFactory.makeUISettingUsecase()
         let calendarSectionViewModel = CalendarSectionViewModelImple(
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             uiSettingUsecase: uiSettingUsecase
