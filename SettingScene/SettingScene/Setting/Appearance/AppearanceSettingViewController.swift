@@ -65,15 +65,23 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         eventListSettingHandler.toggleIs24HourFom = eventListAppearanceSettingViewModel.toggleIsShowTimeWith24HourForm(_:)
         eventListSettingHandler.toggleDimOnPastEvent = eventListAppearanceSettingViewModel.toggleDimOnPastEvent(_:)
         
+        let appearanceEventHandler = AppearanceSettingViewEventHandler()
+        appearanceEventHandler.onAppear = viewModel.prepare
+        appearanceEventHandler.changeTimeZone = viewModel.routeToSelectTimezone
+        appearanceEventHandler.toggleHapticFeedback = viewModel.toggleIsOnHapticFeedback(_:)
+        appearanceEventHandler.toggleAnimationEffect = viewModel.toggleMinimizeAnimationEffect(_:)
+        
         let containerView = AppearanceSettingContainerView(
             viewAppearance: viewAppearance,
             calendarSectionEventHandler: calendarSectionEventHandler,
             eventOnCalendarSectionEventHandler: eventOnCalendarEventHandler,
-            eventListSettingEventHandler: eventListSettingHandler
+            eventListSettingEventHandler: eventListSettingHandler,
+            appearanceSettingEventHandler: appearanceEventHandler
         )
         .eventHandler(\.calendarSectionStateBinding) { $0.bind(calendarSectionViewModel) }
         .eventHandler(\.eventOnCalendarSectionStateBinding) { $0.bind(eventOnCalednarSectionViewModel) }
         .eventHandler(\.eventListSettingStateBinding) { $0.bind(eventListAppearanceSettingViewModel) }
+        .eventHandler(\.appearanceSettingStateBinding) { $0.bind(viewModel) }
         
         super.init(rootView: containerView)
     }
