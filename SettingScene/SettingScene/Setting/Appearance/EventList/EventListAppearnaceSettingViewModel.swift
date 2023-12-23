@@ -12,6 +12,36 @@ import Optics
 import Domain
 
 
+struct EventListAppearanceSampleModel: Equatable {
+    
+    let dateText: String
+    var is24HourForm: Bool = true
+    var holidayName: String?
+    var lunarDateText: String?
+    var shouldDim: Bool = false
+    
+    init?(_ setting: EventListSetting) {
+        let calendar = Calendar(identifier: .gregorian)
+        guard let christmas = calendar.dateBySetting(from: Date(), mutating: { $0.month = 12; $0.day = 25 })
+        else { return nil }
+        
+        let form = DateFormatter() |> \.dateFormat .~ "yyyy MM dd (E)".localized()
+        self.dateText = form.string(from: christmas)
+        self.is24HourForm = setting.is24hourForm
+        if setting.showHoliday {
+            self.holidayName = "Chrismas".localized()
+        }
+        
+        if setting.showLunarCalendarDate {
+            let lunarForm = DateFormatter() 
+                |> \.dateFormat .~ "MM dd".localized()
+                |> \.calendar .~ Calendar(identifier: .chinese)
+            self.lunarDateText = lunarForm.string(from: christmas)
+        }
+        self.shouldDim = setting.dimOnPastEvent
+    }
+}
+
 protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable {
     
     func prepare()
@@ -22,6 +52,7 @@ protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable {
     func toggleIsShowTimeWith24HourForm(_ isOn: Bool)
     func toggleDimOnPastEvent(_ isOn: Bool)
     
+    var eventListSamepleModel: AnyPublisher<EventListAppearanceSampleModel, Never> { get }
     var eventFontIncreasedSizeModel: AnyPublisher<EventTextAdditionalSizeModel, Never> { get }
     var isShowHolidayName: AnyPublisher<Bool, Never> { get }
     var isShowLunarCalendarDate: AnyPublisher<Bool, Never> { get }
@@ -124,6 +155,14 @@ extension EventListAppearnaceSettingViewModelImple {
 }
 
 extension EventListAppearnaceSettingViewModelImple {
+    
+    var eventListSamepleModel: AnyPublisher<EventListAppearanceSampleModel, Never> {
+        return self.subject.setting
+            .compactMap { $0 }
+            .compactMap { EventListAppearanceSampleModel($0) }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     var eventFontIncreasedSizeModel: AnyPublisher<EventTextAdditionalSizeModel, Never> {
         let transform: (CGFloat) -> EventTextAdditionalSizeModel = { size in

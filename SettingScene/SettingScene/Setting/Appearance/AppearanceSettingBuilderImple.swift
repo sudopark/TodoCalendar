@@ -38,19 +38,25 @@ extension AppearanceSettingSceneBuilerImple: AppearanceSettingSceneBuiler {
             
         )
         
+        let uiSettingUsecase = self.usecaseFactory.makeUISettingUsecase()
         let calendarSectionViewModel = CalendarSectionViewModelImple(
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
-            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
+            uiSettingUsecase: uiSettingUsecase
         )
         
         let eventOnCalendarViewModel = EventOnCalendarViewModelImple(
-            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
+            uiSettingUsecase: uiSettingUsecase
+        )
+        
+        let eventListSettingViewModel = EventListAppearnaceSettingViewModelImple(
+            uiSettingUsecase: uiSettingUsecase
         )
         
         let viewController = AppearanceSettingViewController(
             viewModel: viewModel,
             calendarSectionViewModel: calendarSectionViewModel,
             eventOnCalednarSectionViewModel: eventOnCalendarViewModel,
+            eventListAppearanceSettingViewModel: eventListSettingViewModel,
             viewAppearance: self.viewAppearance
         )
     

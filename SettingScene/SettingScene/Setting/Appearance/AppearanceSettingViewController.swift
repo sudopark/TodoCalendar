@@ -21,6 +21,7 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
     private let viewModel: any AppearanceSettingViewModel
     private let calendarSectionViewModel: any CalendarSectionAppearnaceSettingViewModel
     private let eventOnCalednarSectionViewModel: any EventOnCalendarViewModel
+    private let eventListAppearanceSettingViewModel: any EventListAppearnaceSettingViewModel
     private let viewAppearance: ViewAppearance
     
     @MainActor
@@ -32,11 +33,13 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         viewModel: any AppearanceSettingViewModel,
         calendarSectionViewModel: any CalendarSectionAppearnaceSettingViewModel,
         eventOnCalednarSectionViewModel: any EventOnCalendarViewModel,
+        eventListAppearanceSettingViewModel: any EventListAppearnaceSettingViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
         self.calendarSectionViewModel = calendarSectionViewModel
         self.eventOnCalednarSectionViewModel = eventOnCalednarSectionViewModel
+        self.eventListAppearanceSettingViewModel = eventListAppearanceSettingViewModel
         self.viewAppearance = viewAppearance
         
         let calendarSectionEventHandler = CalendarSectionAppearanceSettingViewEventHandler()
@@ -53,13 +56,24 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         eventOnCalendarEventHandler.toggleIsBold = eventOnCalednarSectionViewModel.toggleBoldText(_:)
         eventOnCalendarEventHandler.toggleShowEventTagColor = eventOnCalednarSectionViewModel.toggleShowEventTagColor(_:)
         
+        let eventListSettingHandler = EventListAppearanceSettingViewEventHandler()
+        eventListSettingHandler.onAppear = eventListAppearanceSettingViewModel.prepare
+        eventListSettingHandler.increaseFontSize = eventListAppearanceSettingViewModel.increaseFontSize
+        eventListSettingHandler.decreaseFontSize = eventListAppearanceSettingViewModel.decreaseFontSize
+        eventListSettingHandler.toggleIsShowHolidayName = eventListAppearanceSettingViewModel.toggleShowHolidayName(_:)
+        eventListSettingHandler.toggleShowLunarCalendarDate = eventListAppearanceSettingViewModel.toggleShowLunarCalendarDate(_:)
+        eventListSettingHandler.toggleIs24HourFom = eventListAppearanceSettingViewModel.toggleIsShowTimeWith24HourForm(_:)
+        eventListSettingHandler.toggleDimOnPastEvent = eventListAppearanceSettingViewModel.toggleDimOnPastEvent(_:)
+        
         let containerView = AppearanceSettingContainerView(
             viewAppearance: viewAppearance,
             calendarSectionEventHandler: calendarSectionEventHandler,
-            eventOnCalendarSectionEventHandler: eventOnCalendarEventHandler
+            eventOnCalendarSectionEventHandler: eventOnCalendarEventHandler,
+            eventListSettingEventHandler: eventListSettingHandler
         )
         .eventHandler(\.calendarSectionStateBinding) { $0.bind(calendarSectionViewModel) }
         .eventHandler(\.eventOnCalendarSectionStateBinding) { $0.bind(eventOnCalednarSectionViewModel) }
+        .eventHandler(\.eventListSettingStateBinding) { $0.bind(eventListAppearanceSettingViewModel) }
         
         super.init(rootView: containerView)
     }

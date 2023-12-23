@@ -18,6 +18,7 @@
 		F65119122B222A460034A45B /* CalendarAppearancePreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F65119112B222A460034A45B /* CalendarAppearancePreviewView.swift */; };
 		F66A808D2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66A808C2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift */; };
 		F67366312B348DF200582DF3 /* EventListAppearnaceSettingViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67366302B348DF200582DF3 /* EventListAppearnaceSettingViewModelTests.swift */; };
+		F67366332B368E1000582DF3 /* EventListAppearanceSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F67366322B368E1000582DF3 /* EventListAppearanceSettingView.swift */; };
 		F676A75B2AC01F7F00D168DF /* SettingScene.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A7522AC01F7F00D168DF /* SettingScene.framework */; };
 		F676A7612AC01F7F00D168DF /* SettingScene.h in Headers */ = {isa = PBXBuildFile; fileRef = F676A7552AC01F7F00D168DF /* SettingScene.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		F676A76C2AC0207900D168DF /* Common3rdParty.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F676A76B2AC0207900D168DF /* Common3rdParty.framework */; };
@@ -89,6 +90,7 @@
 		F65119112B222A460034A45B /* CalendarAppearancePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarAppearancePreviewView.swift; sourceTree = "<group>"; };
 		F66A808C2AC055EC00F2C4A0 /* EventTagListViewModelImpleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTagListViewModelImpleTests.swift; sourceTree = "<group>"; };
 		F67366302B348DF200582DF3 /* EventListAppearnaceSettingViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventListAppearnaceSettingViewModelTests.swift; sourceTree = "<group>"; };
+		F67366322B368E1000582DF3 /* EventListAppearanceSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventListAppearanceSettingView.swift; sourceTree = "<group>"; };
 		F676A7522AC01F7F00D168DF /* SettingScene.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SettingScene.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F676A7552AC01F7F00D168DF /* SettingScene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SettingScene.h; sourceTree = "<group>"; };
 		F676A75A2AC01F7F00D168DF /* SettingSceneTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SettingSceneTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -366,6 +368,7 @@
 			isa = PBXGroup;
 			children = (
 				F6F142662B2D8181001ACB8C /* EventListAppearnaceSettingViewModel.swift */,
+				F67366322B368E1000582DF3 /* EventListAppearanceSettingView.swift */,
 			);
 			path = EventList;
 			sourceTree = "<group>";
@@ -502,6 +505,7 @@
 				F676A7B82AC0269500D168DF /* EventTagListRouter.swift in Sources */,
 				F68F7A3C2B18E751009EC869 /* CountrySelectView.swift in Sources */,
 				F6D32F882B131E98008BA797 /* HolidayListBuilderImple.swift in Sources */,
+				F67366332B368E1000582DF3 /* EventListAppearanceSettingView.swift in Sources */,
 				F68F7A3B2B18E751009EC869 /* CountrySelectViewController.swift in Sources */,
 				F68E7DF72AF0AA7000110A73 /* SettingSceneBuilderImple.swift in Sources */,
 				F65119122B222A460034A45B /* CalendarAppearancePreviewView.swift in Sources */,
