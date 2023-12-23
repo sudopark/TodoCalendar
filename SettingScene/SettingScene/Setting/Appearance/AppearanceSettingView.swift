@@ -63,27 +63,33 @@ struct AppearanceSettingContainerView: View {
     
     private let calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler
     private let eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler
+    private let eventListSettingEventHandler: EventListAppearanceSettingViewEventHandler
     
     var calendarSectionStateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
     var eventOnCalendarSectionStateBinding: (EventOnCalendarViewState) -> Void = { _ in }
+    var eventListSettingStateBinding: (EventListAppearanceSettingViewState) -> Void = { _ in }
     
     init(
         viewAppearance: ViewAppearance,
         calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler,
-        eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler
+        eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler,
+        eventListSettingEventHandler: EventListAppearanceSettingViewEventHandler
     ) {
         self.viewAppearance = viewAppearance
         self.calendarSectionEventHandler = calendarSectionEventHandler
         self.eventOnCalendarSectionEventHandler = eventOnCalendarSectionEventHandler
+        self.eventListSettingEventHandler = eventListSettingEventHandler
     }
     
     var body: some View {
         return AppearanceSettingView()
             .eventHandler(\.calendarSectionStateBinding, calendarSectionStateBinding)
             .eventHandler(\.eventOnCalendarSectionStateBinding, eventOnCalendarSectionStateBinding)
+            .eventHandler(\.eventListSettingStateBinding, eventListSettingStateBinding)
             .environmentObject(viewAppearance)
             .environmentObject(calendarSectionEventHandler)
             .environmentObject(eventOnCalendarSectionEventHandler)
+            .environmentObject(eventListSettingEventHandler)
     }
 }
 
@@ -94,9 +100,11 @@ struct AppearanceSettingView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler
     @EnvironmentObject private var eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler
+    @EnvironmentObject private var eventListSettingEventHandler: EventListAppearanceSettingViewEventHandler
     
     fileprivate var calendarSectionStateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
     fileprivate var eventOnCalendarSectionStateBinding: (EventOnCalendarViewState) -> Void = { _ in }
+    fileprivate var eventListSettingStateBinding: (EventListAppearanceSettingViewState) -> Void = { _ in }
     
     var body: some View {
         NavigationStack {
@@ -111,6 +119,11 @@ struct AppearanceSettingView: View {
                     .eventHandler(\.stateBinding, eventOnCalendarSectionStateBinding)
                     .listRowSeparator(.hidden)
                     .listRowBackground(self.appearance.colorSet.dayBackground.asColor)
+                
+                EventListAppearanceSettingView()
+                    .eventHandler(\.stateBinding, eventListSettingStateBinding)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.dayBackground.asColor)
                 
                 Text("AppearanceSettingView")
                 
@@ -153,11 +166,13 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
         )
         let calendar = CalendarSectionAppearanceSettingViewEventHandler()
         let eventOnCalendar = EventOnCalendarViewEventHandler()
-
+        let eventListHandler = EventListAppearanceSettingViewEventHandler()
+        
         return AppearanceSettingContainerView(
             viewAppearance: viewAppearance,
             calendarSectionEventHandler: calendar,
-            eventOnCalendarSectionEventHandler: eventOnCalendar
+            eventOnCalendarSectionEventHandler: eventOnCalendar,
+            eventListSettingEventHandler: eventListHandler
         )
         .eventHandler(\.calendarSectionStateBinding) {
             $0.calendarModel = .init(.monday)
