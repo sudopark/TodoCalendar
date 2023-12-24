@@ -15,7 +15,8 @@ import CommonPresentation
 // MARK: - Routing
 
 protocol SettingItemListRouting: Routing, Sendable { 
-    
+ 
+    func routeToAppearanceSetting()
     func routeToHolidaySetting()
 }
 
@@ -23,9 +24,14 @@ protocol SettingItemListRouting: Routing, Sendable {
 
 final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unchecked Sendable { 
     
+    private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     
-    init(holidayListSceneBuilder: any HolidayListSceneBuiler) {
+    init(
+        appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
+        holidayListSceneBuilder: any HolidayListSceneBuiler
+    ) {
+        self.appearanceSceneBuilder = appearanceSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
     }
 }
@@ -35,6 +41,14 @@ extension SettingItemListRouter {
     
     private var currentScene: (any SettingItemListScene)? {
         self.scene as? (any SettingItemListScene)
+    }
+    
+    func routeToAppearanceSetting() {
+        Task { @MainActor in
+            
+            let next = self.appearanceSceneBuilder.makeAppearanceSettingScene()
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
     }
     
     // TODO: router implememnts

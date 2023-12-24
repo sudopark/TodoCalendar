@@ -17,13 +17,16 @@ import CommonPresentation
 final class SettingItemListSceneBuilerImple {
     
     private let viewAppearance: ViewAppearance
+    private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     
     init(
         viewAppearance: ViewAppearance,
+        appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler
     ) {
         self.viewAppearance = viewAppearance
+        self.appearanceSceneBuilder = appearanceSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
     }
 }
@@ -44,6 +47,7 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
         )
     
         let router = SettingItemListRouter(
+            appearanceSceneBuilder: self.appearanceSceneBuilder,
             holidayListSceneBuilder: self.holidayListSceneBuilder
         )
         router.scene = viewController

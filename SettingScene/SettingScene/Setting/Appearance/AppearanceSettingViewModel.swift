@@ -24,6 +24,7 @@ protocol AppearanceSettingViewModel: AnyObject, Sendable, AppearanceSettingScene
     func routeToSelectTimezone()
     func toggleIsOnHapticFeedback(_ newValue: Bool)
     func toggleMinimizeAnimationEffect(_ newValue: Bool)
+    func close()
     
     // presenter
     var currentTimeZoneName: AnyPublisher<String, Never> { get }
@@ -99,6 +100,10 @@ extension AppearanceSettingViewModelImple {
         } catch {
             self.router?.showError(error)
         }
+    }
+    
+    func close() {
+        self.router?.closeScene()
     }
 }
 

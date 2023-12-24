@@ -98,6 +98,7 @@ final class AppearanceSettingViewEventHandler: ObservableObject {
     var changeTimeZone: () -> Void = { }
     var toggleHapticFeedback: (Bool) -> Void = { _ in }
     var toggleAnimationEffect: (Bool) -> Void = { _ in }
+    var close: () -> Void = { }
 }
 
 // MARK: - AppearanceSettingContainerView
@@ -187,6 +188,13 @@ struct AppearanceSettingView: View {
             .scrollContentBackground(.hidden)
             .background(self.appearance.colorSet.dayBackground.asColor)
             .navigationTitle("Appearance".localized())
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationBackButton {
+                        appearanceSettingEventHandler.close()
+                    }
+                }
+            }
         }
     }
     

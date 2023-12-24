@@ -132,7 +132,7 @@ struct EventListAppearanceSettingView: View {
                 }
              
                 HStack {
-                    Text("2023년 12월 25일 (월)")
+                    Text(state.sampleModel?.dateText ?? "")
                         .font(self.appearance.fontSet.size(22, weight: .semibold).asFont)
                         .foregroundColor(self.appearance.colorSet.normalText.asColor)
                         .padding(.bottom, 3)
