@@ -115,6 +115,23 @@ extension SettingItemListViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didOpenSafariPath, suggestItem.sourcePath)
     }
     
+    func testViewModel_routeToAppearanceSetting() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        
+        // when
+        guard let appear = items.compactMap ({ $0 as? SettingItemModel }).first(where: { $0.itemId == .appearance })
+        else {
+            XCTAssert(false)
+            return
+        }
+        viewModel.selectItem(appear)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAppearanceSetting, true)
+    }
+    
     func testViewModel_routeToHolidaySetting() {
         // given
         let viewModel = self.makeViewModel()
@@ -138,5 +155,10 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     var didRouteToHoliday: Bool?
     func routeToHolidaySetting() {
         self.didRouteToHoliday = true
+    }
+    
+    var didRouteToAppearanceSetting: Bool?
+    func routeToAppearanceSetting() {
+        self.didRouteToAppearanceSetting = true
     }
 }

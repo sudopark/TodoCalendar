@@ -21,7 +21,12 @@ protocol AppearanceSettingRouting: Routing, Sendable {
 
 // MARK: - Router
 
-final class AppearanceSettingRouter: BaseRouterImple, AppearanceSettingRouting, @unchecked Sendable { }
+final class AppearanceSettingRouter: BaseRouterImple, AppearanceSettingRouting, @unchecked Sendable {
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        self.currentScene?.navigationController?.popViewController(animated: animate)
+    }
+}
 
 
 extension AppearanceSettingRouter {

@@ -127,6 +127,61 @@ extension AppSettingRepositoryImple {
         self.environmentStorage.update(
             self.fontSetKey, newValue.fontSetKey.rawValue
         )
+        
+        self.saveCalendarAppearanceSetting(newValue)
+        self.saveEventOnCalendarApperanaceSetting(newValue)
+        self.saveEventListApperanceSetting(newValue)
+        self.saveGeneralAppearanceSetting(newValue)
+    }
+    
+    private func saveCalendarAppearanceSetting(_ newValue: AppearanceSettings) {
+        self.environmentStorage.update(
+            self.accentDay_sunday, newValue.accnetDayPolicy[.sunday] ?? false
+        )
+        self.environmentStorage.update(
+            self.accentDay_saturdayKey, newValue.accnetDayPolicy[.saturday] ?? false
+        )
+        self.environmentStorage.update(
+            self.accentDay_holidayKey, newValue.accnetDayPolicy[.holiday] ?? false
+        )
+        self.environmentStorage.update(
+            showUnderLineOnEventDayKey, newValue.showUnderLineOnEventDay
+        )
+    }
+    
+    private func saveEventOnCalendarApperanaceSetting(_ newValue: AppearanceSettings) {
+        self.environmentStorage.update(
+            eventOnCalendarAdditionalFontSize, Int(newValue.eventOnCalendar.textAdditionalSize)
+        )
+        self.environmentStorage.update(
+            boldTextEventOnCalendar, newValue.eventOnCalendar.bold
+        )
+        self.environmentStorage.update(
+            showEventTagColorOnCalendar, newValue.eventOnCalendar.showEventTagColor
+        )
+    }
+    
+    private func saveEventListApperanceSetting(_ newValue: AppearanceSettings) {
+        self.environmentStorage.update(
+            eventAdditionaFontSize, Int(newValue.eventList.textAdditionalSize)
+        )
+        self.environmentStorage.update(
+            showHolidayNameOnEventList, newValue.eventList.showHoliday
+        )
+        self.environmentStorage.update(
+            showLunarCalendarDate, newValue.eventList.showLunarCalendarDate
+        )
+        self.environmentStorage.update(
+            is24HourForm, newValue.eventList.is24hourForm
+        )
+        self.environmentStorage.update(
+            dimOnPastEvent, newValue.eventList.dimOnPastEvent
+        )
+    }
+    
+    private func saveGeneralAppearanceSetting(_ newValue: AppearanceSettings) {
+        self.environmentStorage.update(hapticEffectIsOff, newValue.hapticEffectOff)
+        self.environmentStorage.update(animationEffectIsOff, newValue.animationEffectOff)
     }
     
     public func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings {

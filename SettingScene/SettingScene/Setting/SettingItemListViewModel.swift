@@ -192,10 +192,14 @@ extension SettingItemListViewModelImple {
     
     private func handleSettingItemSelected(_ model: SettingItemModel) {
         switch model.itemId {
-        case .appearance: break
+        case .appearance:
+            self.router?.routeToAppearanceSetting()
+            
         case .editEvent: break
+            
         case .holidaySetting:
             self.router?.routeToHolidaySetting()
+            
         case .feedback: break
         case .faq: break
         case .shareApp: break

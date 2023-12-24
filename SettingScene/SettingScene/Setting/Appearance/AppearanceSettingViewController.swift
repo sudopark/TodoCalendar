@@ -70,6 +70,7 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         appearanceEventHandler.changeTimeZone = viewModel.routeToSelectTimezone
         appearanceEventHandler.toggleHapticFeedback = viewModel.toggleIsOnHapticFeedback(_:)
         appearanceEventHandler.toggleAnimationEffect = viewModel.toggleMinimizeAnimationEffect(_:)
+        appearanceEventHandler.close = viewModel.close
         
         let containerView = AppearanceSettingContainerView(
             viewAppearance: viewAppearance,
