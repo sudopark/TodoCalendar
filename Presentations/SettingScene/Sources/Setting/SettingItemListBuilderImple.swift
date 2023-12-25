@@ -16,15 +16,18 @@ import CommonPresentation
 
 final class SettingItemListSceneBuilerImple {
     
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     
     init(
+        usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler
     ) {
+        self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.appearanceSceneBuilder = appearanceSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
@@ -38,7 +41,7 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
     func makeSettingItemListScene() -> any SettingItemListScene {
         
         let viewModel = SettingItemListViewModelImple(
-            
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )
         
         let viewController = SettingItemListViewController(

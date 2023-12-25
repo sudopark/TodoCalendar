@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -35,29 +36,36 @@ final class AppearanceSettingSceneBuilerImple {
 extension AppearanceSettingSceneBuilerImple: AppearanceSettingSceneBuiler {
     
     @MainActor
-    func makeAppearanceSettingScene() -> any AppearanceSettingScene {
+    func makeAppearanceSettingScene(
+        inital setting: AppearanceSettings
+    ) -> any AppearanceSettingScene {
         
         let uiSettingUsecase = self.usecaseFactory.makeUISettingUsecase()
         
         let viewModel = AppearanceSettingViewModelImple(
+            setting: setting,
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             uiSettingUsecase: uiSettingUsecase
         )
         
         let calendarSectionViewModel = CalendarSectionViewModelImple(
+            setting: .init(setting),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             uiSettingUsecase: uiSettingUsecase
         )
         
         let eventOnCalendarViewModel = EventOnCalendarViewModelImple(
+            setting: .init(setting),
             uiSettingUsecase: uiSettingUsecase
         )
         
         let eventListSettingViewModel = EventListAppearnaceSettingViewModelImple(
+            setting: .init(setting),
             uiSettingUsecase: uiSettingUsecase
         )
         
         let viewController = AppearanceSettingViewController(
+            initial: setting,
             viewModel: viewModel,
             calendarSectionViewModel: calendarSectionViewModel,
             eventOnCalednarSectionViewModel: eventOnCalendarViewModel,
@@ -68,10 +76,6 @@ extension AppearanceSettingSceneBuilerImple: AppearanceSettingSceneBuiler {
         let router = AppearanceSettingRouter(
             timeZoneSelectBuilder: self.timeZoneSelectSceneBuilder
         )
-        router.calendarInteractor = calendarSectionViewModel
-        router.eventOnCalendarInteractor = eventOnCalendarViewModel
-        router.eventListInteractor = eventListSettingViewModel
-        
         router.scene = viewController
         viewModel.router = router
         // TOOD: set calendarSectionVM Router

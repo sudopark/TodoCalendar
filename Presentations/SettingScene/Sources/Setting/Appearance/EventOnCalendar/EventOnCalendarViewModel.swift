@@ -35,11 +35,6 @@ struct EventOnCalendarAppearanceSetting {
     }
 }
 
-protocol EventOnCalendarAppearanceSettingInteractor: AnyObject, Sendable {
-    
-    func prepared(_ setting: EventOnCalendarAppearanceSetting)
-}
-
 struct EventTextAdditionalSizeModel: Equatable {
     let sizeText: String
     var isIncreasable: Bool = true
@@ -51,7 +46,7 @@ struct EventTextAdditionalSizeModel: Equatable {
     }
 }
 
-protocol EventOnCalendarViewModel: AnyObject, Sendable, EventOnCalendarAppearanceSettingInteractor {
+protocol EventOnCalendarViewModel: AnyObject, Sendable {
     
     func increaseTextSize()
     func decreaseTextSize()
@@ -67,9 +62,11 @@ final class EventOnCalendarViewModelImple: EventOnCalendarViewModel, @unchecked 
     
     private let uiSettingUsecase: any UISettingUsecase
     init(
+        setting: EventOnCalendarAppearanceSetting,
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
+        self.subject.setting.send(setting)
     }
     
     private enum Constant {
@@ -86,10 +83,6 @@ final class EventOnCalendarViewModelImple: EventOnCalendarViewModel, @unchecked 
 
 extension EventOnCalendarViewModelImple {
     
-    func prepared(_ setting: EventOnCalendarAppearanceSetting) {
-        self.subject.setting.send(setting)
-    }
-
     func increaseTextSize() {
         guard let setting = self.subject.setting.value,
               setting.eventOnCalenarTextAdditionalSize < Constant.maxFontSize

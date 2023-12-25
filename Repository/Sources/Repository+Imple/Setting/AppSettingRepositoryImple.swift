@@ -43,8 +43,8 @@ public final class AppSettingRepositoryImple: AppSettingRepository {
     private var dimOnPastEvent: String { "dim_on_past_event" }
     
     // general
-    private var hapticEffectIsOff: String { "haptic_effect_off" }
-    private var animationEffectIsOff: String { "animation_effect_off" }
+    private var hapticEffectIsOn: String { "haptic_effect_on" }
+    private var animationEffectIsOn: String { "animation_effect_on" }
 }
 
 
@@ -105,12 +105,12 @@ extension AppSettingRepositoryImple {
             |> \.dimOnPastEvent .~ isDim
         
         // general
-        let hapticIsOff: Bool = self.environmentStorage.load(hapticEffectIsOff) ?? false
-        let animationIsOff: Bool = self.environmentStorage.load(animationEffectIsOff) ?? false
+        let hapticIsOn: Bool = self.environmentStorage.load(hapticEffectIsOn) ?? true
+        let animationIsOn: Bool = self.environmentStorage.load(animationEffectIsOn) ?? false
         
         return setting
-            |> \.hapticEffectOff .~ hapticIsOff
-            |> \.animationEffectOff .~ animationIsOff
+            |> \.hapticEffectIsOn .~ hapticIsOn
+            |> \.animationEffectIsOn .~ animationIsOn
     }
     
     public func saveViewAppearanceSetting(_ newValue: AppearanceSettings) {
@@ -170,8 +170,8 @@ extension AppSettingRepositoryImple {
         )
         
         // general
-        self.environmentStorage.update(hapticEffectIsOff, newValue.hapticEffectOff)
-        self.environmentStorage.update(animationEffectIsOff, newValue.animationEffectOff)
+        self.environmentStorage.update(hapticEffectIsOn, newValue.hapticEffectIsOn)
+        self.environmentStorage.update(animationEffectIsOn, newValue.animationEffectIsOn)
     }
     
     public func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings {

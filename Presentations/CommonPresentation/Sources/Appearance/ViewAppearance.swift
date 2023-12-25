@@ -58,8 +58,8 @@ public class ViewAppearance: ObservableObject {
         self.is24hourForm = setting.is24hourForm
         self.dimOnPastEvent = setting.dimOnPastEvent
         
-        self.hapticEffectOff = setting.hapticEffectOff
-        self.animationEffectOff = setting.animationEffectOff
+        self.hapticEffectOff = setting.hapticEffectIsOn
+        self.animationEffectOff = setting.animationEffectIsOn
     }
 }
 

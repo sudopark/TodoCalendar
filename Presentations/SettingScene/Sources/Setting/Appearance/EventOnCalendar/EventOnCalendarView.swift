@@ -19,6 +19,11 @@ final class EventOnCalendarViewState: ObservableObject {
     @Published var isBold: Bool = false
     @Published var isShowEventTagColor: Bool = false
     
+    init(_ setting: EventOnCalendarAppearanceSetting) {
+        self.additionalFontSizeModel = .init(setting.eventOnCalenarTextAdditionalSize)
+        self.isBold = setting.eventOnCalendarIsBold
+        self.isShowEventTagColor = setting.eventOnCalendarShowEventTagColor
+    }
     
     func bind(_ viewModel: any EventOnCalendarViewModel) {
         guard self.didBind == false else { return }
@@ -113,11 +118,15 @@ struct EventOnCalendarViewPreviewView: View {
 
 struct EventOnCalendarView: View {
     
-    @StateObject private var state: EventOnCalendarViewState = .init()
+    @StateObject private var state: EventOnCalendarViewState
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandler: EventOnCalendarViewEventHandler
     
     var stateBinding: (EventOnCalendarViewState) -> Void = { _ in }
+    
+    init(_ setting: EventOnCalendarAppearanceSetting) {
+        self._state = .init(wrappedValue: .init(setting))
+    }
     
     var body: some View {
         VStack {
@@ -209,7 +218,7 @@ struct EventOnCalendarViewPreviewProvider: PreviewProvider {
         )
         
         let eventHandler = EventOnCalendarViewEventHandler()
-        return EventOnCalendarView()
+        return EventOnCalendarView(.init(setting))
             .eventHandler(\.stateBinding) { state in
                 state.additionalFontSizeModel = .init(0)
                 state.isBold = false

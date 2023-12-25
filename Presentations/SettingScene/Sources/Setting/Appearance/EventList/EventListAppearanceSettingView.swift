@@ -22,6 +22,14 @@ final class EventListAppearanceSettingViewState: ObservableObject {
     @Published var is24hourTimeForm: Bool = false
     @Published var isDimOnPastEvent: Bool = false
     
+    init(_ setting: EventListAppearanceSetting) {
+        self.additionalFontSizeModel = .init(setting.eventTextAdditionalSize)
+        self.showHolidayName = setting.showHoliday
+        self.showLunarCalendarDate = setting.showLunarCalendarDate
+        self.is24hourTimeForm = setting.is24hourForm
+        self.isDimOnPastEvent = setting.dimOnPastEvent
+    }
+    
     func bind(_ viewModel: any EventListAppearnaceSettingViewModel) {
         
         guard self.didBind == false else { return }
@@ -86,11 +94,15 @@ final class EventListAppearanceSettingViewEventHandler: ObservableObject {
 
 struct EventListAppearanceSettingView: View {
     
-    @StateObject private var state: EventListAppearanceSettingViewState = .init()
+    @StateObject private var state: EventListAppearanceSettingViewState
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandler: EventListAppearanceSettingViewEventHandler
     
     var stateBinding: (EventListAppearanceSettingViewState) -> Void = { _ in }
+    
+    init(_ setting: EventListAppearanceSetting) {
+        self._state = .init(wrappedValue: .init(setting))
+    }
     
     var body: some View {
         VStack {
@@ -291,7 +303,7 @@ struct EventListAppearanceSettingPreviewProvider: PreviewProvider {
             setting: setting
         )
         let handler = EventListAppearanceSettingViewEventHandler()
-        return EventListAppearanceSettingView()
+        return EventListAppearanceSettingView(.init(setting))
             .environmentObject(viewAppearance)
             .environmentObject(handler)
     }

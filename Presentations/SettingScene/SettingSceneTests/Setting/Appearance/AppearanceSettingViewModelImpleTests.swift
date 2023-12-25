@@ -42,7 +42,15 @@ class AppearanceSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let timeZone = isSystemTimeZone ? TimeZone.current : TimeZone(abbreviation: "CST")!
         self.stubCalendarSettingUsecase.selectTimeZone(timeZone)
         
+        let setting = AppearanceSettings(
+            tagColorSetting: .init(holiday: "", default: ""),
+            colorSetKey: .defaultLight, fontSetKey: .systemDefault
+        )
+            |> \.hapticEffectIsOn .~ true
+            |> \.animationEffectIsOn .~ false
+        
         let viewModel = AppearanceSettingViewModelImple(
+            setting: setting,
             calendarSettingUsecase: self.stubCalendarSettingUsecase,
             uiSettingUsecase: self.stubUISettingUsecase
         )
@@ -53,19 +61,6 @@ class AppearanceSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
 
 extension AppearanceSettingViewModelImpleTests {
     
-    func testViewModel_whenPrepare_attachAndSendSettingData() {
-        // given
-        let viewModel = self.makeViewModel()
-        
-        // when
-        viewModel.prepare()
-        
-        // then
-        XCTAssertEqual(self.spyRouter.spyCalendarInteractor.didPrepared, true)
-        XCTAssertEqual(self.spyRouter.spyEventOnCalendarInteracotr.didPrepared, true)
-        XCTAssertEqual(self.spyRouter.spyEventListInteractor.didPrepared, true)
-    }
-    
     // 현재 타임존 정보 반환
     func testViewModel_provideCurrentTimeZone() {
         // given
@@ -75,13 +70,11 @@ extension AppearanceSettingViewModelImpleTests {
         
         // when
         let names = self.waitOutputs(expect, for: viewModel.currentTimeZoneName) {
-            viewModel.prepare()
-            
             self.stubCalendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "CST")!)
         }
         
         // then
-        let isSystemTimeZoneName = names.map { $0 == "System time".localized() }
+        let isSystemTimeZoneName = names.map { $0 == "System Time".localized() }
         XCTAssertEqual(isSystemTimeZoneName, [true, false])
     }
     
@@ -105,8 +98,7 @@ extension AppearanceSettingViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let isOns = self.waitOutputs(expect, for: viewModel.isOnHapticFeedback) {
-            viewModel.prepare()
+        let isOns = self.waitOutputs(expect, for: viewModel.hapticIsOn) {
             
             viewModel.toggleIsOnHapticFeedback(false)
             
@@ -125,8 +117,7 @@ extension AppearanceSettingViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let isOns = self.waitOutputs(expect, for: viewModel.minimizeAnimationEffect) {
-            viewModel.prepare()
+        let isOns = self.waitOutputs(expect, for: viewModel.animationIsOn) {
             
             viewModel.toggleMinimizeAnimationEffect(true)
             
@@ -138,38 +129,8 @@ extension AppearanceSettingViewModelImpleTests {
     }
 }
 
-private class SpyCalendarInteractor: CalendarAppearanceSettingInteractor, @unchecked Sendable {
-    var didPrepared: Bool?
-    func prepared(_ setting: CalendarAppearanceSetting) {
-        self.didPrepared = true
-    }
-}
-
-private class SpyEventOnCalendarInteractor: EventOnCalendarAppearanceSettingInteractor, @unchecked Sendable {
-    
-    var didPrepared: Bool?
-    func prepared(_ setting: EventOnCalendarAppearanceSetting) {
-        didPrepared = true
-    }
-}
-
-private class SpyEventInteractor: EventListAppearanceSettingInteractor, @unchecked Sendable {
-    
-    var didPrepared: Bool?
-    func prepared(_ setting: EventListAppearanceSetting) {
-        didPrepared = true
-    }
-}
 
 private class SpyRouter: BaseSpyRouter, AppearanceSettingRouting, @unchecked Sendable {
-    
-    var spyCalendarInteractor: SpyCalendarInteractor = .init()
-    var spyEventOnCalendarInteracotr: SpyEventOnCalendarInteractor = .init()
-    var spyEventListInteractor: SpyEventInteractor = .init()
-    
-    func attachSubScenes() -> (calenadar: CalendarAppearanceSettingInteractor?, eventOnCalendar: EventOnCalendarAppearanceSettingInteractor?, eventList: EventListAppearanceSettingInteractor?) {
-        return (spyCalendarInteractor, spyEventOnCalendarInteracotr, spyEventListInteractor)
-    }
     
     var didRouteToSelectTimeZone: Bool?
     func routeToSelectTimeZone() {

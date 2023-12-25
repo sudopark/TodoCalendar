@@ -39,6 +39,7 @@ class CalendarSectionViewModelTests: BaseTestCase, PublisherWaitable {
         calendarSettingUsecase.prepare()
         
         let viewModel = CalendarSectionViewModelImple(
+            setting: self.dummySetting,
             calendarSettingUsecase: calendarSettingUsecase,
             uiSettingUsecase: uiSettingUsecase
         )
@@ -164,7 +165,6 @@ extension CalendarSectionViewModelTests {
         
         // when
         let models = self.waitOutputs(expect, for: viewModel.calendarAppearanceModel) {
-            viewModel.prepared(self.dummySetting)
             
             viewModel.changeStartOfWeekDay(.friday)
         }
@@ -189,7 +189,6 @@ extension CalendarSectionViewModelTests {
         
         // when
         let accentDaysMaps = self.waitOutputs(expect, for: viewModel.accentDaysActivatedMap) {
-            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleAccentDay(.sunday)
             
@@ -216,7 +215,6 @@ extension CalendarSectionViewModelTests {
         // when
         let isOns = self.waitOutputs(expect, for: viewModel.isShowUnderLineOnEventDay) {
             
-            viewModel.prepared(self.dummySetting)
             viewModel.toggleIsShowUnderLineOnEventDay(false)
             viewModel.toggleIsShowUnderLineOnEventDay(true)
         }

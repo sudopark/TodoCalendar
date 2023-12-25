@@ -84,6 +84,7 @@ extension SettingSceneBuilderImple {
         )
         
         let builder = SettingItemListSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             appearanceSceneBuilder: apperanceSceneBuilder,
             holidayListSceneBuilder: holidayListSceneBuilder

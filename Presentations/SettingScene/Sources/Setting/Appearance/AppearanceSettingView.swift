@@ -64,6 +64,11 @@ final class AppearanceSettingViewState: ObservableObject {
     @Published var hapticOn: Bool = false
     @Published var animationOn: Bool = false
     
+    init(_ setting: AppearanceSettings) {
+        self.hapticOn = setting.hapticEffectIsOn
+        self.animationOn = setting.animationEffectIsOn
+    }
+    
     func bind(_ viewModel: any AppearanceSettingViewModel) {
         
         guard self.didBind == false else { return }
@@ -76,14 +81,14 @@ final class AppearanceSettingViewState: ObservableObject {
             })
             .store(in: &self.cancellables)
         
-        viewModel.isOnHapticFeedback
+        viewModel.hapticIsOn
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.hapticOn = flag
             })
             .store(in: &self.cancellables)
         
-        viewModel.minimizeAnimationEffect
+        viewModel.animationIsOn
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.animationOn = flag
@@ -107,6 +112,7 @@ struct AppearanceSettingContainerView: View {
     
     private let viewAppearance: ViewAppearance
     
+    private let initailSetting: AppearanceSettings
     private let calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler
     private let eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler
     private let eventListSettingEventHandler: EventListAppearanceSettingViewEventHandler
@@ -118,12 +124,14 @@ struct AppearanceSettingContainerView: View {
     var appearanceSettingStateBinding: (AppearanceSettingViewState) -> Void = { _ in }
     
     init(
+        _ setting: AppearanceSettings,
         viewAppearance: ViewAppearance,
         calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler,
         eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler,
         eventListSettingEventHandler: EventListAppearanceSettingViewEventHandler,
         appearanceSettingEventHandler: AppearanceSettingViewEventHandler
     ) {
+        self.initailSetting = setting
         self.viewAppearance = viewAppearance
         self.calendarSectionEventHandler = calendarSectionEventHandler
         self.eventOnCalendarSectionEventHandler = eventOnCalendarSectionEventHandler
@@ -132,7 +140,7 @@ struct AppearanceSettingContainerView: View {
     }
     
     var body: some View {
-        return AppearanceSettingView()
+        return AppearanceSettingView(initailSetting)
             .eventHandler(\.calendarSectionStateBinding, calendarSectionStateBinding)
             .eventHandler(\.eventOnCalendarSectionStateBinding, eventOnCalendarSectionStateBinding)
             .eventHandler(\.eventListSettingStateBinding, eventListSettingStateBinding)
@@ -149,7 +157,8 @@ struct AppearanceSettingContainerView: View {
 
 struct AppearanceSettingView: View {
     
-    @StateObject private var appearanceState = AppearanceSettingViewState()
+    private let initialSetting: AppearanceSettings
+    @StateObject private var appearanceState: AppearanceSettingViewState
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler
     @EnvironmentObject private var eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler
@@ -161,21 +170,26 @@ struct AppearanceSettingView: View {
     fileprivate var eventListSettingStateBinding: (EventListAppearanceSettingViewState) -> Void = { _ in }
     fileprivate var appearanceSettingStateBinding: (AppearanceSettingViewState) -> Void = { _ in }
     
+    init(_ setting: AppearanceSettings) {
+        self.initialSetting = setting
+        self._appearanceState = .init(wrappedValue: .init(setting))
+    }
+    
     var body: some View {
         NavigationStack {
             List {
                 
-                CalendarSectionAppearanceSettingView()
+                CalendarSectionAppearanceSettingView(.init(self.initialSetting))
                     .eventHandler(\.stateBinding, calendarSectionStateBinding)
                     .listRowSeparator(.hidden)
                     .listRowBackground(self.appearance.colorSet.dayBackground.asColor)
                 
-                EventOnCalendarView()
+                EventOnCalendarView(.init(self.initialSetting))
                     .eventHandler(\.stateBinding, eventOnCalendarSectionStateBinding)
                     .listRowSeparator(.hidden)
                     .listRowBackground(self.appearance.colorSet.dayBackground.asColor)
                 
-                EventListAppearanceSettingView()
+                EventListAppearanceSettingView(.init(self.initialSetting))
                     .eventHandler(\.stateBinding, eventListSettingStateBinding)
                     .listRowSeparator(.hidden)
                     .listRowBackground(appearance.colorSet.dayBackground.asColor)
@@ -273,6 +287,7 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
         let appearanaceEventHandler = AppearanceSettingViewEventHandler()
         
         return AppearanceSettingContainerView(
+            setting,
             viewAppearance: viewAppearance,
             calendarSectionEventHandler: calendar,
             eventOnCalendarSectionEventHandler: eventOnCalendar,

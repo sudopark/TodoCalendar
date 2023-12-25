@@ -38,6 +38,7 @@ class EventListAppearnaceSettingViewModelTests: BaseTestCase, PublisherWaitable 
     private func makeViewModel() -> EventListAppearnaceSettingViewModelImple {
     
         let viewModel = EventListAppearnaceSettingViewModelImple(
+            setting: self.dummySetting,
             uiSettingUsecase: self.spyUsecase
         )
         return viewModel
@@ -56,7 +57,7 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let models = self.waitOutputs(expect, for: viewModel.eventFontIncreasedSizeModel) {
-            viewModel.prepared(self.dummySetting) // 3
+            
             viewModel.increaseFontSize()    // 4
             viewModel.increaseFontSize()    // ignore
             
@@ -96,7 +97,7 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.eventFontIncreasedSizeModel) {
-            viewModel.prepared(self.dummySetting)
+            
             viewModel.increaseFontSize()
         }
         
@@ -113,7 +114,6 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let isShows = self.waitOutputs(expect, for: viewModel.isShowHolidayName) {
-            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleShowHolidayName(false)
             viewModel.toggleShowHolidayName(true)
@@ -131,7 +131,7 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isShowHolidayName) {
-            viewModel.prepared(self.dummySetting)
+            
             viewModel.toggleShowHolidayName(false)
         }
         
@@ -148,7 +148,6 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let isShows = self.waitOutputs(expect, for: viewModel.isShowLunarCalendarDate) {
-            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleShowLunarCalendarDate(false)
             viewModel.toggleShowLunarCalendarDate(true)
@@ -166,7 +165,6 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isShowLunarCalendarDate) {
-            viewModel.prepared(self.dummySetting)
             viewModel.toggleShowLunarCalendarDate(false)
         }
         
@@ -183,7 +181,6 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let isShows = self.waitOutputs(expect, for: viewModel.isShowTimeWith24HourForm) {
-            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleIsShowTimeWith24HourForm(false)
             viewModel.toggleIsShowTimeWith24HourForm(true)
@@ -201,7 +198,6 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isShowTimeWith24HourForm) {
-            viewModel.prepared(self.dummySetting)
             viewModel.toggleIsShowTimeWith24HourForm(false)
         }
         
@@ -218,7 +214,6 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let isShows = self.waitOutputs(expect, for: viewModel.isDimOnPastEvent) {
-            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleDimOnPastEvent(false)
             viewModel.toggleDimOnPastEvent(true)
@@ -236,7 +231,6 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isDimOnPastEvent) {
-            viewModel.prepared(self.dummySetting)
             viewModel.toggleDimOnPastEvent(false)
         }
         

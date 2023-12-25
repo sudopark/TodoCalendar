@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 
 
@@ -28,5 +29,7 @@ protocol AppearanceSettingScene: Scene where Interactor == any AppearanceSetting
 protocol AppearanceSettingSceneBuiler: AnyObject {
     
     @MainActor
-    func makeAppearanceSettingScene() -> any AppearanceSettingScene
+    func makeAppearanceSettingScene(
+        inital setting: AppearanceSettings
+    ) -> any AppearanceSettingScene
 }

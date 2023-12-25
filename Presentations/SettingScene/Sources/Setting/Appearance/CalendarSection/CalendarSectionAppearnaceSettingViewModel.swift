@@ -31,11 +31,6 @@ struct CalendarAppearanceSetting {
     }
 }
 
-protocol CalendarAppearanceSettingInteractor: AnyObject, Sendable {
-    
-    func prepared(_ setting: CalendarAppearanceSetting)
-}
-
 struct CalendarAppearanceModel: Equatable {
     
     struct DayModel: Equatable {
@@ -106,7 +101,7 @@ struct CalendarAppearanceModel: Equatable {
 }
 
 
-protocol CalendarSectionAppearnaceSettingViewModel: AnyObject, Sendable, CalendarAppearanceSettingInteractor {
+protocol CalendarSectionAppearnaceSettingViewModel: AnyObject, Sendable {
     
     func changeStartOfWeekDay(_ day: DayOfWeeks)
     func toggleAccentDay(_ type: AccentDays)
@@ -132,11 +127,13 @@ final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewM
     weak var router: CalendarSectionRouting?
     
     init(
+        setting: CalendarAppearanceSetting,
         calendarSettingUsecase: any CalendarSettingUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        self.subject.setting.send(setting)
         
         self.internalBind()
     }
@@ -160,10 +157,6 @@ final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewM
 
 
 extension CalendarSectionViewModelImple {
-    
-    func prepared(_ setting: CalendarAppearanceSetting) {
-        self.subject.setting.send(setting)
-    }
     
     func changeStartOfWeekDay(_ day: DayOfWeeks) {
         // TOOD: remove duplicated

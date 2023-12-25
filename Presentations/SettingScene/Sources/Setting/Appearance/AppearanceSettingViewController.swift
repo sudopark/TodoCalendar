@@ -10,6 +10,7 @@
 import UIKit
 import SwiftUI
 import Combine
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -30,6 +31,7 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
     private var cancellables: Set<AnyCancellable> = []
     
     init(
+        initial setting: AppearanceSettings,
         viewModel: any AppearanceSettingViewModel,
         calendarSectionViewModel: any CalendarSectionAppearnaceSettingViewModel,
         eventOnCalednarSectionViewModel: any EventOnCalendarViewModel,
@@ -63,13 +65,13 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         eventListSettingHandler.toggleDimOnPastEvent = eventListAppearanceSettingViewModel.toggleDimOnPastEvent(_:)
         
         let appearanceEventHandler = AppearanceSettingViewEventHandler()
-        appearanceEventHandler.onAppear = viewModel.prepare
         appearanceEventHandler.changeTimeZone = viewModel.routeToSelectTimezone
         appearanceEventHandler.toggleHapticFeedback = viewModel.toggleIsOnHapticFeedback(_:)
         appearanceEventHandler.toggleAnimationEffect = viewModel.toggleMinimizeAnimationEffect(_:)
         appearanceEventHandler.close = viewModel.close
         
         let containerView = AppearanceSettingContainerView(
+            setting,
             viewAppearance: viewAppearance,
             calendarSectionEventHandler: calendarSectionEventHandler,
             eventOnCalendarSectionEventHandler: eventOnCalendarEventHandler,

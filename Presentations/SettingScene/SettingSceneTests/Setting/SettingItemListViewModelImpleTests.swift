@@ -30,7 +30,9 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeViewModel() -> SettingItemListViewModelImple {
-        let viewModel = SettingItemListViewModelImple()
+        let viewModel = SettingItemListViewModelImple(
+            uiSettingUsecase: StubUISettingUsecase()
+        )
         viewModel.router = self.spyRouter
         return viewModel
     }
@@ -158,7 +160,9 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     }
     
     var didRouteToAppearanceSetting: Bool?
-    func routeToAppearanceSetting() {
+    func routeToAppearanceSetting(
+        inital setting: AppearanceSettings
+    ) {
         self.didRouteToAppearanceSetting = true
     }
 }

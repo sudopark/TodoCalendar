@@ -73,11 +73,11 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         }
         
         // general
-        if self.appearance.hapticEffectOff != newSetting.hapticEffectOff {
-            self.appearance.hapticEffectOff = newSetting.hapticEffectOff
+        if self.appearance.hapticEffectOff != newSetting.hapticEffectIsOn {
+            self.appearance.hapticEffectOff = newSetting.hapticEffectIsOn
         }
-        if self.appearance.animationEffectOff != newSetting.animationEffectOff {
-            self.appearance.animationEffectOff = newSetting.animationEffectOff
+        if self.appearance.animationEffectOff != newSetting.animationEffectIsOn {
+            self.appearance.animationEffectOff = newSetting.animationEffectIsOn
         }
     }
 }
