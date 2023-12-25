@@ -19,7 +19,12 @@ protocol TimeZoneSelectRouting: Routing, Sendable { }
 
 // MARK: - Router
 
-final class TimeZoneSelectRouter: BaseRouterImple, TimeZoneSelectRouting, @unchecked Sendable { }
+final class TimeZoneSelectRouter: BaseRouterImple, TimeZoneSelectRouting, @unchecked Sendable { 
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        self.currentScene?.navigationController?.popViewController(animated: animate)
+    }
+}
 
 
 extension TimeZoneSelectRouter {

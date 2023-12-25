@@ -18,13 +18,16 @@ final class AppearanceSettingSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let timeZoneSelectSceneBuilder: any TimeZoneSelectSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        timeZoneSelectSceneBuilder: any TimeZoneSelectSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.timeZoneSelectSceneBuilder = timeZoneSelectSceneBuilder
     }
 }
 
@@ -63,6 +66,7 @@ extension AppearanceSettingSceneBuilerImple: AppearanceSettingSceneBuiler {
         )
     
         let router = AppearanceSettingRouter(
+            timeZoneSelectBuilder: self.timeZoneSelectSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

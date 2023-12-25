@@ -61,9 +61,15 @@ extension SettingSceneBuilderImple {
     @MainActor
     public func makeSettingItemListScene() -> any SettingItemListScene {
         
-        let apperanceSceneBuilder = AppearanceSettingSceneBuilerImple(
+        let timeZoneSelectSceneBuilder = TimeZoneSelectSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
+        )
+        
+        let apperanceSceneBuilder = AppearanceSettingSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            timeZoneSelectSceneBuilder: timeZoneSelectSceneBuilder
         )
         
         let countrySelectSceneBuilder = CountrySelectSceneBuilerImple(
