@@ -84,7 +84,8 @@ extension Project {
                            dependencies: [
                             .target(name: name),
                             .project(target: "UnitTestHelpKit", path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
-                            .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles"))
+                            .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
+                            .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
                            ])
         return [sources, tests]
     }
@@ -158,7 +159,8 @@ extension Project {
                 .target(name: "\(name)"),
                 .project(target: "UnitTestHelpKit", path:
                         .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
-                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles"))
+                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
+                .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
             ])
         return [mainTarget, testTarget]
     }
