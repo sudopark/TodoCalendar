@@ -276,23 +276,22 @@ extension CalendarSectionAppearanceSettingView {
             ? self.appearance.colorSet.normalText
             : .clear
         
-        return Button {
-            self.eventHandlers.toggleAccentDay(day)
-        } label: {
-            Text(day.text)
-                .padding(.vertical, 4)
-                .padding(.horizontal, 8)
-                .font(self.appearance.fontSet.size(10).asFont)
-                .foregroundStyle(textColor.asColor)
-                .background(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .fill(backgroundColor.asColor)
-                )
-                .overlay {
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(lineColor.asColor, lineWidth: 1)
-                }
-        }
+        return Text(day.text)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .font(self.appearance.fontSet.size(10).asFont)
+            .foregroundStyle(textColor.asColor)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(backgroundColor.asColor)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(lineColor.asColor, lineWidth: 1)
+            }
+            .onTapGesture {
+                eventHandlers.toggleAccentDay(day)
+            }
     }
     
     private var colorThemePreview: some View {
