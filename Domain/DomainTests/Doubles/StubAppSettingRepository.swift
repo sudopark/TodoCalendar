@@ -20,11 +20,7 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
         return .init(
             tagColorSetting: .init(holiday: "holiday", default: "default"),
             colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault,
-            accnetDayPolicy: [:],
-            showUnderLineOnEventDay: false,
-            eventOnCalendar: .init(),
-            eventList: .init()
+            fontSetKey: .systemDefault
         )
     }
     
@@ -34,17 +30,7 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
     
     func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings {
         let old = self.loadSavedViewAppearance()
-        let newSetting = AppearanceSettings(
-            tagColorSetting: .init(
-                holiday: params.newTagColorSetting?.newHolidayTagColor ?? old.tagColorSetting.holiday,
-                default: params.newTagColorSetting?.newDefaultTagColor ?? old.tagColorSetting.default),
-            colorSetKey: params.newColorSetKey ?? old.colorSetKey,
-            fontSetKey: params.newFontSetKcy ?? old.fontSetKey,
-            accnetDayPolicy: params.newAccentDays ?? old.accnetDayPolicy,
-            showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? old.showUnderLineOnEventDay,
-            eventOnCalendar: params.eventOnCalendar ?? old.eventOnCalendar,
-            eventList: params.eventList ?? old.eventList
-        )
+        let newSetting = old.update(params)
         return newSetting
     }
 }

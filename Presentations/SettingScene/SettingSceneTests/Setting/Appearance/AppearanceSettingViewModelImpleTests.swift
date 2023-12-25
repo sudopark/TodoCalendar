@@ -53,6 +53,19 @@ class AppearanceSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
 
 extension AppearanceSettingViewModelImpleTests {
     
+    func testViewModel_whenPrepare_attachAndSendSettingData() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.prepare()
+        
+        // then
+        XCTAssertEqual(self.spyRouter.spyCalendarInteractor.didPrepared, true)
+        XCTAssertEqual(self.spyRouter.spyEventOnCalendarInteracotr.didPrepared, true)
+        XCTAssertEqual(self.spyRouter.spyEventListInteractor.didPrepared, true)
+    }
+    
     // 현재 타임존 정보 반환
     func testViewModel_provideCurrentTimeZone() {
         // given
@@ -125,7 +138,38 @@ extension AppearanceSettingViewModelImpleTests {
     }
 }
 
+private class SpyCalendarInteractor: CalendarAppearanceSettingInteractor, @unchecked Sendable {
+    var didPrepared: Bool?
+    func prepared(_ setting: CalendarAppearanceSetting) {
+        self.didPrepared = true
+    }
+}
+
+private class SpyEventOnCalendarInteractor: EventOnCalendarAppearanceSettingInteractor, @unchecked Sendable {
+    
+    var didPrepared: Bool?
+    func prepared(_ setting: EventOnCalendarAppearanceSetting) {
+        didPrepared = true
+    }
+}
+
+private class SpyEventInteractor: EventListAppearanceSettingInteractor, @unchecked Sendable {
+    
+    var didPrepared: Bool?
+    func prepared(_ setting: EventListAppearanceSetting) {
+        didPrepared = true
+    }
+}
+
 private class SpyRouter: BaseSpyRouter, AppearanceSettingRouting, @unchecked Sendable {
+    
+    var spyCalendarInteractor: SpyCalendarInteractor = .init()
+    var spyEventOnCalendarInteracotr: SpyEventOnCalendarInteractor = .init()
+    var spyEventListInteractor: SpyEventInteractor = .init()
+    
+    func attachSubScenes() -> (calenadar: CalendarAppearanceSettingInteractor?, eventOnCalendar: EventOnCalendarAppearanceSettingInteractor?, eventList: EventListAppearanceSettingInteractor?) {
+        return (spyCalendarInteractor, spyEventOnCalendarInteracotr, spyEventListInteractor)
+    }
     
     var didRouteToSelectTimeZone: Bool?
     func routeToSelectTimeZone() {

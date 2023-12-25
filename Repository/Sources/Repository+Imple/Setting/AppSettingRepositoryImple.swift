@@ -58,60 +58,59 @@ extension AppSettingRepositoryImple {
         let colorSet = colorSetRaw.flatMap { ColorSetKeys(rawValue: $0) } ?? .defaultLight
         let fontSet = fontSetRaw.flatMap { FontSetKeys(rawValue: $0) } ?? .systemDefault
         
-        let accentHoliday: Bool? = self.environmentStorage.load(accentDay_sunday)
-        let accentSaturday: Bool? = self.environmentStorage.load(accentDay_saturdayKey)
-        let accentSunday: Bool? = self.environmentStorage.load(accentDay_sunday)
-        let isShowUnderline: Bool? = self.environmentStorage.load(showUnderLineOnEventDayKey)
-        
-        let eventOnCalendarSetting = self.loadEventOnCalendarSetting()
-        let eventList = self.loadEventListSetting()
-        
-        let hapticIsOff: Bool = self.environmentStorage.load(hapticEffectIsOff) ?? false
-        let animationIsOff: Bool = self.environmentStorage.load(animationEffectIsOff) ?? false
-        
-        return AppearanceSettings(
+        var setting = AppearanceSettings(
             tagColorSetting: .init(
                 holiday: holidayTagColor ?? "#D6236A",
                 default: defaultTagColor ?? "#088CDA"
             ),
             colorSetKey: colorSet,
-            fontSetKey: fontSet,
-            accnetDayPolicy: [
-                .holiday: accentHoliday ?? false,
-                .saturday: accentSaturday ?? false,
-                .sunday: accentSunday ?? false
-            ],
-            showUnderLineOnEventDay: isShowUnderline ?? true,
-            eventOnCalendar: eventOnCalendarSetting,
-            eventList: eventList
+            fontSetKey: fontSet
         )
-        |> \.hapticEffectOff .~ hapticIsOff
-        |> \.animationEffectOff .~ animationIsOff
-    }
-    
-    private func loadEventOnCalendarSetting() -> EventOnCalendarSetting {
-        let additionalFont: Int =
+        
+        // calendar
+        let accentHoliday: Bool? = self.environmentStorage.load(accentDay_sunday)
+        let accentSaturday: Bool? = self.environmentStorage.load(accentDay_saturdayKey)
+        let accentSunday: Bool? = self.environmentStorage.load(accentDay_sunday)
+        let isShowUnderline: Bool? = self.environmentStorage.load(showUnderLineOnEventDayKey)
+        setting = setting
+            |> \.accnetDayPolicy .~ [
+                .sunday: accentSunday ?? false,
+                .saturday: accentSaturday ?? false,
+                .holiday: accentHoliday ?? false
+            ]
+            |> \.showUnderLineOnEventDay .~ (isShowUnderline ?? true)
+        
+        
+        // event on calednar
+        let eventOnCalendarAdditionalFont: Int =
         self.environmentStorage.load(eventOnCalendarAdditionalFontSize) ?? 0
-        let bold: Bool = self.environmentStorage.load(boldTextEventOnCalendar) ?? false
-        let showColor: Bool = self.environmentStorage.load(showEventTagColorOnCalendar) ?? true
-        return EventOnCalendarSetting()
-            |> \.textAdditionalSize .~ CGFloat(additionalFont)
-            |> \.bold .~ bold
-            |> \.showEventTagColor .~ showColor
-    }
-    
-    private func loadEventListSetting() -> EventListSetting {
-        let font: Int = self.environmentStorage.load(eventAdditionaFontSize) ?? 0
+        let eventOnCalendarBold: Bool = self.environmentStorage.load(boldTextEventOnCalendar) ?? false
+        let eventOnCalendarShowColor: Bool = self.environmentStorage.load(showEventTagColorOnCalendar) ?? true
+        setting = setting
+            |> \.eventOnCalenarTextAdditionalSize .~ CGFloat(eventOnCalendarAdditionalFont)
+            |> \.eventOnCalendarIsBold .~ eventOnCalendarBold
+            |> \.eventOnCalendarShowEventTagColor .~ eventOnCalendarShowColor
+        
+        // event list
+        let eventFont: Int = self.environmentStorage.load(eventAdditionaFontSize) ?? 0
         let holiday: Bool = self.environmentStorage.load(showHolidayNameOnEventList) ?? false
         let lunar: Bool = self.environmentStorage.load(showLunarCalendarDate) ?? false
         let is24From: Bool = self.environmentStorage.load(is24HourForm) ?? true
         let isDim: Bool = self.environmentStorage.load(dimOnPastEvent) ?? false
-        return EventListSetting()
-            |> \.textAdditionalSize .~ CGFloat(font)
+        setting = setting
+            |> \.eventTextAdditionalSize .~ CGFloat(eventFont)
             |> \.showHoliday .~ holiday
             |> \.showLunarCalendarDate .~ lunar
             |> \.is24hourForm .~ is24From
             |> \.dimOnPastEvent .~ isDim
+        
+        // general
+        let hapticIsOff: Bool = self.environmentStorage.load(hapticEffectIsOff) ?? false
+        let animationIsOff: Bool = self.environmentStorage.load(animationEffectIsOff) ?? false
+        
+        return setting
+            |> \.hapticEffectOff .~ hapticIsOff
+            |> \.animationEffectOff .~ animationIsOff
     }
     
     public func saveViewAppearanceSetting(_ newValue: AppearanceSettings) {
@@ -128,13 +127,7 @@ extension AppSettingRepositoryImple {
             self.fontSetKey, newValue.fontSetKey.rawValue
         )
         
-        self.saveCalendarAppearanceSetting(newValue)
-        self.saveEventOnCalendarApperanaceSetting(newValue)
-        self.saveEventListApperanceSetting(newValue)
-        self.saveGeneralAppearanceSetting(newValue)
-    }
-    
-    private func saveCalendarAppearanceSetting(_ newValue: AppearanceSettings) {
+        // calendar
         self.environmentStorage.update(
             self.accentDay_sunday, newValue.accnetDayPolicy[.sunday] ?? false
         )
@@ -147,58 +140,44 @@ extension AppSettingRepositoryImple {
         self.environmentStorage.update(
             showUnderLineOnEventDayKey, newValue.showUnderLineOnEventDay
         )
-    }
-    
-    private func saveEventOnCalendarApperanaceSetting(_ newValue: AppearanceSettings) {
+        
+        // event on calendar
         self.environmentStorage.update(
-            eventOnCalendarAdditionalFontSize, Int(newValue.eventOnCalendar.textAdditionalSize)
+            eventOnCalendarAdditionalFontSize, Int(newValue.eventOnCalenarTextAdditionalSize)
         )
         self.environmentStorage.update(
-            boldTextEventOnCalendar, newValue.eventOnCalendar.bold
+            boldTextEventOnCalendar, newValue.eventOnCalendarIsBold
         )
         self.environmentStorage.update(
-            showEventTagColorOnCalendar, newValue.eventOnCalendar.showEventTagColor
+            showEventTagColorOnCalendar, newValue.eventOnCalendarShowEventTagColor
         )
-    }
-    
-    private func saveEventListApperanceSetting(_ newValue: AppearanceSettings) {
+        
+        // event list
         self.environmentStorage.update(
-            eventAdditionaFontSize, Int(newValue.eventList.textAdditionalSize)
-        )
-        self.environmentStorage.update(
-            showHolidayNameOnEventList, newValue.eventList.showHoliday
+            eventAdditionaFontSize, Int(newValue.eventTextAdditionalSize)
         )
         self.environmentStorage.update(
-            showLunarCalendarDate, newValue.eventList.showLunarCalendarDate
+            showHolidayNameOnEventList, newValue.showHoliday
         )
         self.environmentStorage.update(
-            is24HourForm, newValue.eventList.is24hourForm
+            showLunarCalendarDate, newValue.showLunarCalendarDate
         )
         self.environmentStorage.update(
-            dimOnPastEvent, newValue.eventList.dimOnPastEvent
+            is24HourForm, newValue.is24hourForm
         )
-    }
-    
-    private func saveGeneralAppearanceSetting(_ newValue: AppearanceSettings) {
+        self.environmentStorage.update(
+            dimOnPastEvent, newValue.dimOnPastEvent
+        )
+        
+        // general
         self.environmentStorage.update(hapticEffectIsOff, newValue.hapticEffectOff)
         self.environmentStorage.update(animationEffectIsOff, newValue.animationEffectOff)
     }
     
     public func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings {
         let setting = self.loadSavedViewAppearance()
-        let newTagColorSetting = EventTagColorSetting(
-            holiday: params.newTagColorSetting?.newHolidayTagColor ?? setting.tagColorSetting.holiday,
-            default: params.newTagColorSetting?.newDefaultTagColor ?? setting.tagColorSetting.default
-        )
-        let newSetting = AppearanceSettings(
-            tagColorSetting: newTagColorSetting,
-            colorSetKey: params.newColorSetKey ?? setting.colorSetKey,
-            fontSetKey: params.newFontSetKcy ?? setting.fontSetKey,
-            accnetDayPolicy: params.newAccentDays ?? setting.accnetDayPolicy,
-            showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? setting.showUnderLineOnEventDay,
-            eventOnCalendar: params.eventOnCalendar ?? setting.eventOnCalendar,
-            eventList: params.eventList ?? setting.eventList
-        )
+        
+        let newSetting = setting.update(params)
         
         self.saveViewAppearanceSetting(newSetting)
         

@@ -31,23 +31,12 @@ class EventListAppearnaceSettingViewModelTests: BaseTestCase, PublisherWaitable 
         self.spyUsecase = nil
     }
     
+    private var dummySetting: EventListAppearanceSetting {
+        return .init(eventTextAdditionalSize: 3, showHoliday: true, showLunarCalendarDate: true, is24hourForm: true, dimOnPastEvent: true)
+    }
+    
     private func makeViewModel() -> EventListAppearnaceSettingViewModelImple {
-        
-        let setting = EventListSetting()
-            |> \.textAdditionalSize .~ 3
-            |> \.showHoliday .~ true
-            |> \.showLunarCalendarDate .~ true
-            |> \.is24hourForm .~ true
-            |> \.dimOnPastEvent .~ true
-        self.spyUsecase.stubAppearanceSetting = .init(
-            tagColorSetting: .init(holiday: "", default: ""),
-            colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault,
-            accnetDayPolicy: [:],
-            showUnderLineOnEventDay: false,
-            eventOnCalendar: .init(),
-            eventList: setting
-        )
+    
         let viewModel = EventListAppearnaceSettingViewModelImple(
             uiSettingUsecase: self.spyUsecase
         )
@@ -67,7 +56,7 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let models = self.waitOutputs(expect, for: viewModel.eventFontIncreasedSizeModel) {
-            viewModel.prepare() // 3
+            viewModel.prepared(self.dummySetting) // 3
             viewModel.increaseFontSize()    // 4
             viewModel.increaseFontSize()    // ignore
             
@@ -107,12 +96,12 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.eventFontIncreasedSizeModel) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             viewModel.increaseFontSize()
         }
         
         // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.eventList.textAdditionalSize, 4)
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.eventTextAdditionalSize, 4)
     }
     
     // holiday 이름 표시 여부 토글
@@ -124,7 +113,7 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let isShows = self.waitOutputs(expect, for: viewModel.isShowHolidayName) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleShowHolidayName(false)
             viewModel.toggleShowHolidayName(true)
@@ -142,12 +131,12 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isShowHolidayName) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             viewModel.toggleShowHolidayName(false)
         }
         
         // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.eventList.showHoliday, false)
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.showHoliday, false)
     }
     
     // 음력 표시여부 토글
@@ -159,7 +148,7 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let isShows = self.waitOutputs(expect, for: viewModel.isShowLunarCalendarDate) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleShowLunarCalendarDate(false)
             viewModel.toggleShowLunarCalendarDate(true)
@@ -177,12 +166,12 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isShowLunarCalendarDate) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             viewModel.toggleShowLunarCalendarDate(false)
         }
         
         // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.eventList.showLunarCalendarDate, false)
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.showLunarCalendarDate, false)
     }
     
     // 24시 포맷으로 출력 여부 토글
@@ -194,7 +183,7 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let isShows = self.waitOutputs(expect, for: viewModel.isShowTimeWith24HourForm) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleIsShowTimeWith24HourForm(false)
             viewModel.toggleIsShowTimeWith24HourForm(true)
@@ -212,12 +201,12 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isShowTimeWith24HourForm) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             viewModel.toggleIsShowTimeWith24HourForm(false)
         }
         
         // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.eventList.is24hourForm, false)
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.is24hourForm, false)
     }
     
     // 지나간 이벤트 딤드처리 여부 토글
@@ -229,7 +218,7 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let isShows = self.waitOutputs(expect, for: viewModel.isDimOnPastEvent) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleDimOnPastEvent(false)
             viewModel.toggleDimOnPastEvent(true)
@@ -247,11 +236,11 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isDimOnPastEvent) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             viewModel.toggleDimOnPastEvent(false)
         }
         
         // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.eventList.dimOnPastEvent, false)
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.dimOnPastEvent, false)
     }
 }

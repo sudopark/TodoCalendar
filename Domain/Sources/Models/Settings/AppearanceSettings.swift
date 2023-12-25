@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 
 public enum ColorSetKeys: String, Sendable {
     case defaultLight
@@ -31,56 +33,65 @@ public enum AccentDays: Sendable {
     case sunday
 }
 
-public struct EventOnCalendarSetting: Sendable, Equatable {
-    
-    public var textAdditionalSize: CGFloat = 0
-    public var bold: Bool = false
-    public var showEventTagColor: Bool = true
-    
-    public init() { }
-}
-
-public struct EventListSetting: Sendable, Equatable {
-    
-    public var textAdditionalSize: CGFloat = 0
-    public var showHoliday: Bool = false
-    public var showLunarCalendarDate: Bool = false
-    public var is24hourForm: Bool = false
-    public var dimOnPastEvent: Bool = false
-    
-    public init() { }
-}
-
 public struct AppearanceSettings {
     
     public let tagColorSetting: EventTagColorSetting
     public let colorSetKey: ColorSetKeys
     public let fontSetKey: FontSetKeys
-    public let accnetDayPolicy: [AccentDays: Bool]
-    public let showUnderLineOnEventDay: Bool
     
-    public let eventOnCalendar: EventOnCalendarSetting
-    public let eventList: EventListSetting
+    // calendar
+    public var accnetDayPolicy: [AccentDays: Bool] = [:]
+    public var showUnderLineOnEventDay: Bool = false
     
+    // event on calendar
+    public var eventOnCalenarTextAdditionalSize: CGFloat = 0
+    public var eventOnCalendarIsBold: Bool = false
+    public var eventOnCalendarShowEventTagColor: Bool = true
+    
+    // event list
+    public var eventTextAdditionalSize: CGFloat = 0
+    public var showHoliday: Bool = false
+    public var showLunarCalendarDate: Bool = false
+    public var is24hourForm: Bool = false
+    public var dimOnPastEvent: Bool = false
+    
+    // general
     public var hapticEffectOff: Bool = false
     public var animationEffectOff: Bool = false
     
     public init(
         tagColorSetting: EventTagColorSetting,
         colorSetKey: ColorSetKeys,
-        fontSetKey: FontSetKeys,
-        accnetDayPolicy: [AccentDays: Bool],
-        showUnderLineOnEventDay: Bool,
-        eventOnCalendar: EventOnCalendarSetting,
-        eventList: EventListSetting
+        fontSetKey: FontSetKeys
     ) {
         self.tagColorSetting = tagColorSetting
         self.colorSetKey = colorSetKey
         self.fontSetKey = fontSetKey
-        self.accnetDayPolicy = accnetDayPolicy
-        self.showUnderLineOnEventDay = showUnderLineOnEventDay
-        self.eventOnCalendar = eventOnCalendar
-        self.eventList = eventList
+    }
+    
+    public func update(_ params: EditAppearanceSettingParams) -> AppearanceSettings {
+        let newTagColorSetting = EventTagColorSetting(
+            holiday: params.newTagColorSetting?.newHolidayTagColor ?? self.tagColorSetting.holiday,
+            default: params.newTagColorSetting?.newDefaultTagColor ?? self.tagColorSetting.default
+        )
+        let newSetting = AppearanceSettings(
+            tagColorSetting: newTagColorSetting,
+            colorSetKey: params.newColorSetKey ?? self.colorSetKey,
+            fontSetKey: params.newFontSetKcy ?? self.fontSetKey
+        )
+        return newSetting
+            |> \.accnetDayPolicy .~ (params.accnetDayPolicy ?? self.accnetDayPolicy)
+            |> \.showUnderLineOnEventDay .~ (params.showUnderLineOnEventDay ?? self.showUnderLineOnEventDay)
+            |> \.eventOnCalenarTextAdditionalSize .~ (params.eventOnCalenarTextAdditionalSize ?? self.eventOnCalenarTextAdditionalSize)
+            |> \.eventOnCalendarIsBold .~ (params.eventOnCalendarIsBold ?? self.eventOnCalendarIsBold)
+            |> \.eventOnCalendarShowEventTagColor .~ (params.eventOnCalendarShowEventTagColor ?? self.eventOnCalendarShowEventTagColor)
+            |> \.eventTextAdditionalSize .~ (params.eventTextAdditionalSize ?? self.eventTextAdditionalSize)
+            |> \.showHoliday .~ (params.showHoliday ?? self.showHoliday)
+            |> \.showLunarCalendarDate .~ (params.showLunarCalendarDate ?? self.showLunarCalendarDate)
+            |> \.is24hourForm .~ (params.is24hourForm ?? self.is24hourForm)
+            |> \.dimOnPastEvent .~ (params.dimOnPastEvent ?? self.dimOnPastEvent)
+            |> \.hapticEffectOff .~ (params.hapticEffectOff ?? self.hapticEffectOff)
+            |> \.animationEffectOff .~ (params.animationEffectOff ?? self.animationEffectOff)
     }
 }
 
@@ -97,25 +108,65 @@ public struct EditAppearanceSettingParams {
     public var newTagColorSetting: EditEventTagColorParams?
     public var newColorSetKey: ColorSetKeys?
     public var newFontSetKcy: FontSetKeys?
-    public var newAccentDays: [AccentDays: Bool]?
-    public var newShowUnderLineOnEventDay: Bool?
-    public var eventOnCalendar: EventOnCalendarSetting?
-    public var eventList: EventListSetting?
+    
+    public var accnetDayPolicy: [AccentDays: Bool]?
+    public var showUnderLineOnEventDay: Bool?
+    
+    // event on calendar
+    public var eventOnCalenarTextAdditionalSize: CGFloat?
+    public var eventOnCalendarIsBold: Bool?
+    public var eventOnCalendarShowEventTagColor: Bool?
+    
+    // event list
+    public var eventTextAdditionalSize: CGFloat?
+    public var showHoliday: Bool?
+    public var showLunarCalendarDate: Bool?
+    public var is24hourForm: Bool?
+    public var dimOnPastEvent: Bool?
+    
+    // general
     public var hapticEffectOff: Bool?
     public var animationEffectOff: Bool?
     
     public init() { }
     
     public var isValid: Bool {
+        
+        return isValidBaseValues 
+            || isValidCalendarValues
+            || isValidEventOnCalendarValues
+            || isValidEventListValues
+            || isValidGeneralValues
+    }
+    
+    private var isValidBaseValues: Bool {
         return self.newTagColorSetting?.newHolidayTagColor != nil
             || self.newTagColorSetting?.newDefaultTagColor != nil
             || self.newColorSetKey != nil
             || self.newFontSetKcy != nil
-            || self.newAccentDays != nil
-            || self.newShowUnderLineOnEventDay != nil
-            || self.eventOnCalendar != nil
-            || self.eventList != nil
-            || self.hapticEffectOff != nil
+    }
+    
+    private var isValidCalendarValues: Bool {
+        return self.accnetDayPolicy != nil
+            || self.showUnderLineOnEventDay != nil
+    }
+    
+    private var isValidEventOnCalendarValues: Bool {
+        return self.eventOnCalenarTextAdditionalSize != nil
+            || self.eventOnCalendarIsBold != nil
+            || self.eventOnCalendarShowEventTagColor != nil
+    }
+    
+    private var isValidEventListValues: Bool {
+        return self.eventTextAdditionalSize != nil
+            || self.showHoliday != nil
+            || self.showLunarCalendarDate != nil
+            || self.is24hourForm != nil
+            || self.dimOnPastEvent != nil
+    }
+    
+    private var isValidGeneralValues: Bool {
+        return self.hapticEffectOff != nil
             || self.animationEffectOff != nil
     }
 }

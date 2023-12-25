@@ -12,6 +12,41 @@ import Optics
 import Domain
 
 
+struct EventListAppearanceSetting {
+    let eventTextAdditionalSize: CGFloat
+    let showHoliday: Bool
+    let showLunarCalendarDate: Bool
+    let is24hourForm: Bool
+    let dimOnPastEvent: Bool
+    
+    init(
+        eventTextAdditionalSize: CGFloat,
+        showHoliday: Bool,
+        showLunarCalendarDate: Bool,
+        is24hourForm: Bool, 
+        dimOnPastEvent: Bool
+    ) {
+        self.eventTextAdditionalSize = eventTextAdditionalSize
+        self.showHoliday = showHoliday
+        self.showLunarCalendarDate = showLunarCalendarDate
+        self.is24hourForm = is24hourForm
+        self.dimOnPastEvent = dimOnPastEvent
+    }
+    
+    init(_ setting: AppearanceSettings) {
+        self.eventTextAdditionalSize = setting.eventTextAdditionalSize
+        self.showHoliday = setting.showHoliday
+        self.showLunarCalendarDate = setting.showLunarCalendarDate
+        self.is24hourForm = setting.is24hourForm
+        self.dimOnPastEvent = setting.dimOnPastEvent
+    }
+}
+
+protocol EventListAppearanceSettingInteractor: AnyObject, Sendable {
+    
+    func prepared(_ setting: EventListAppearanceSetting)
+}
+
 struct EventListAppearanceSampleModel: Equatable {
     
     let dateText: String
@@ -20,7 +55,7 @@ struct EventListAppearanceSampleModel: Equatable {
     var lunarDateText: String?
     var shouldDim: Bool = false
     
-    init?(_ setting: EventListSetting) {
+    init?(_ setting: EventListAppearanceSetting) {
         let calendar = Calendar(identifier: .gregorian)
         guard let christmas = calendar.dateBySetting(from: Date(), mutating: { $0.month = 12; $0.day = 25 })
         else { return nil }
@@ -42,9 +77,8 @@ struct EventListAppearanceSampleModel: Equatable {
     }
 }
 
-protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable {
+protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable, EventListAppearanceSettingInteractor {
     
-    func prepare()
     func increaseFontSize()
     func decreaseFontSize()
     func toggleShowHolidayName(_ show: Bool)
@@ -68,12 +102,14 @@ final class EventListAppearnaceSettingViewModelImple: EventListAppearnaceSetting
     }
     
     private let uiSettingUsecase: any UISettingUsecase
-    init(uiSettingUsecase: any UISettingUsecase) {
+    init(
+        uiSettingUsecase: any UISettingUsecase
+    ) {
         self.uiSettingUsecase = uiSettingUsecase
     }
     
     private struct Subject {
-        let setting = CurrentValueSubject<EventListSetting?, Never>(nil)
+        let setting = CurrentValueSubject<EventListAppearanceSetting?, Never>(nil)
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -82,27 +118,26 @@ final class EventListAppearnaceSettingViewModelImple: EventListAppearnaceSetting
 
 extension EventListAppearnaceSettingViewModelImple {
     
-    func prepare() {
-        let setting = self.uiSettingUsecase.loadAppearanceSetting()
-        self.subject.setting.send(setting.eventList)
+    func prepared(_ setting: EventListAppearanceSetting) {
+        self.subject.setting.send(setting)
     }
     
     func increaseFontSize() {
         guard let setting = self.subject.setting.value,
-              setting.textAdditionalSize < Constants.maxFontSize
+              setting.eventTextAdditionalSize < Constants.maxFontSize
         else { return }
         
-        let newSetting = setting |> \.textAdditionalSize +~ 1
-        self.updateSetting(newSetting)
+        let params = EditAppearanceSettingParams() |> \.eventTextAdditionalSize .~ (setting.eventTextAdditionalSize + 1)
+        self.updateSetting(params)
     }
     
     func decreaseFontSize() {
         guard let setting = self.subject.setting.value,
-              setting.textAdditionalSize > Constants.minFontSize
+              setting.eventTextAdditionalSize > Constants.minFontSize
         else { return }
         
-        let newSetting = setting |> \.textAdditionalSize -~ 1
-        self.updateSetting(newSetting)
+        let params = EditAppearanceSettingParams() |> \.eventTextAdditionalSize .~ (setting.eventTextAdditionalSize - 1)
+        self.updateSetting(params)
     }
     
     func toggleShowHolidayName(_ show: Bool) {
@@ -110,8 +145,8 @@ extension EventListAppearnaceSettingViewModelImple {
               setting.showHoliday != show
         else { return }
         
-        let newSetting = setting |> \.showHoliday .~ show
-        self.updateSetting(newSetting)
+        let params = EditAppearanceSettingParams() |> \.showHoliday .~ show
+        self.updateSetting(params)
     }
     
     func toggleShowLunarCalendarDate(_ show: Bool) {
@@ -119,8 +154,8 @@ extension EventListAppearnaceSettingViewModelImple {
               setting.showLunarCalendarDate != show
         else { return }
         
-        let newSetting = setting |> \.showLunarCalendarDate .~ show
-        self.updateSetting(newSetting)
+        let params = EditAppearanceSettingParams() |> \.showLunarCalendarDate .~ show
+        self.updateSetting(params)
     }
     
     func toggleIsShowTimeWith24HourForm(_ isOn: Bool) {
@@ -128,8 +163,8 @@ extension EventListAppearnaceSettingViewModelImple {
               setting.is24hourForm != isOn
         else { return }
         
-        let newSetting = setting |> \.is24hourForm .~ isOn
-        self.updateSetting(newSetting)
+        let params = EditAppearanceSettingParams() |> \.is24hourForm .~ isOn
+        self.updateSetting(params)
     }
     
     func toggleDimOnPastEvent(_ isOn: Bool) {
@@ -137,17 +172,15 @@ extension EventListAppearnaceSettingViewModelImple {
               setting.dimOnPastEvent != isOn
         else { return }
         
-        let newSetting = setting |> \.dimOnPastEvent .~ isOn
-        self.updateSetting(newSetting)
+        let params = EditAppearanceSettingParams() |> \.dimOnPastEvent .~ isOn
+        self.updateSetting(params)
     }
     
-    private func updateSetting(_ newEventListSetting: EventListSetting) {
-        let params = EditAppearanceSettingParams()
-            |> \.eventList .~ newEventListSetting
+    private func updateSetting(_ params: EditAppearanceSettingParams) {
         
         do {
             let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
-            self.subject.setting.send(newSetting.eventList)
+            self.subject.setting.send(.init(newSetting))
         } catch {
             // TODO: show error
         }
@@ -171,7 +204,7 @@ extension EventListAppearnaceSettingViewModelImple {
                 |> \.isDescreasable .~ (size > Constants.minFontSize)
         }
         return self.subject.setting
-            .compactMap { $0?.textAdditionalSize }
+            .compactMap { $0?.eventTextAdditionalSize }
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()

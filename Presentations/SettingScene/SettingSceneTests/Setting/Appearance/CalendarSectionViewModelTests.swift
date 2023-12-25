@@ -26,6 +26,12 @@ class CalendarSectionViewModelTests: BaseTestCase, PublisherWaitable {
         self.cancelBag = nil
     }
     
+    private var dummySetting: CalendarAppearanceSetting {
+        return .init(accnetDayPolicy: [
+            .sunday : true, .saturday: false, .holiday: false
+        ], showUnderLineOnEventDay: true)
+    }
+    
     private func makeViewModel() -> CalendarSectionViewModelImple {
         
         let uiSettingUsecase = StubUISettingUsecase()
@@ -158,7 +164,7 @@ extension CalendarSectionViewModelTests {
         
         // when
         let models = self.waitOutputs(expect, for: viewModel.calendarAppearanceModel) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             
             viewModel.changeStartOfWeekDay(.friday)
         }
@@ -183,7 +189,7 @@ extension CalendarSectionViewModelTests {
         
         // when
         let accentDaysMaps = self.waitOutputs(expect, for: viewModel.accentDaysActivatedMap) {
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             
             viewModel.toggleAccentDay(.sunday)
             
@@ -210,7 +216,7 @@ extension CalendarSectionViewModelTests {
         // when
         let isOns = self.waitOutputs(expect, for: viewModel.isShowUnderLineOnEventDay) {
             
-            viewModel.prepare()
+            viewModel.prepared(self.dummySetting)
             viewModel.toggleIsShowUnderLineOnEventDay(false)
             viewModel.toggleIsShowUnderLineOnEventDay(true)
         }

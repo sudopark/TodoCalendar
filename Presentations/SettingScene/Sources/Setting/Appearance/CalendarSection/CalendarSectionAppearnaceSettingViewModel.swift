@@ -12,6 +12,29 @@ import Optics
 import Domain
 import Scenes
 
+struct CalendarAppearanceSetting {
+    
+    let accnetDayPolicy: [AccentDays: Bool]
+    let showUnderLineOnEventDay: Bool
+    
+    init(
+        accnetDayPolicy: [AccentDays : Bool],
+        showUnderLineOnEventDay: Bool
+    ) {
+        self.accnetDayPolicy = accnetDayPolicy
+        self.showUnderLineOnEventDay = showUnderLineOnEventDay
+    }
+    
+    init(_ setting: AppearanceSettings) {
+        self.accnetDayPolicy = setting.accnetDayPolicy
+        self.showUnderLineOnEventDay = setting.showUnderLineOnEventDay
+    }
+}
+
+protocol CalendarAppearanceSettingInteractor: AnyObject, Sendable {
+    
+    func prepared(_ setting: CalendarAppearanceSetting)
+}
 
 struct CalendarAppearanceModel: Equatable {
     
@@ -83,9 +106,8 @@ struct CalendarAppearanceModel: Equatable {
 }
 
 
-protocol CalendarSectionAppearnaceSettingViewModel: AnyObject, Sendable {
+protocol CalendarSectionAppearnaceSettingViewModel: AnyObject, Sendable, CalendarAppearanceSettingInteractor {
     
-    func prepare()
     func changeStartOfWeekDay(_ day: DayOfWeeks)
     func toggleAccentDay(_ type: AccentDays)
     func changeColorTheme()
@@ -121,7 +143,7 @@ final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewM
     
     private struct Subject {
         let startWeekDay = CurrentValueSubject<DayOfWeeks?, Never>(nil)
-        let appearanceSetting = CurrentValueSubject<AppearanceSettings?, Never>(nil)
+        let setting = CurrentValueSubject<CalendarAppearanceSetting?, Never>(nil)
     }
     private let subject = Subject()
     private var cancelables: Set<AnyCancellable> = []
@@ -139,10 +161,8 @@ final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewM
 
 extension CalendarSectionViewModelImple {
     
-    func prepare() {
-        self.subject.appearanceSetting.send(
-            self.uiSettingUsecase.loadAppearanceSetting()
-        )
+    func prepared(_ setting: CalendarAppearanceSetting) {
+        self.subject.setting.send(setting)
     }
     
     func changeStartOfWeekDay(_ day: DayOfWeeks) {
@@ -156,35 +176,34 @@ extension CalendarSectionViewModelImple {
     }
     
     func toggleAccentDay(_ type: AccentDays) {
-        guard let origin = self.subject.appearanceSetting.value
+        guard let origin = self.subject.setting.value
         else { return }
         let newMap = origin.accnetDayPolicy
             |> key(type) %~ { !($0 ?? false) }
         
         let params = EditAppearanceSettingParams()
-            |> \.newAccentDays .~ newMap
+            |> \.accnetDayPolicy .~ newMap
         do {
             let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
-            self.subject.appearanceSetting.send(newSetting)
+            self.subject.setting.send(.init(newSetting))
         } catch {
             self.router?.showError(error)
         }
     }
     
     func toggleIsShowUnderLineOnEventDay(_ newValue: Bool) {
-        guard let origin = self.subject.appearanceSetting.value,
+        guard let origin = self.subject.setting.value,
               origin.showUnderLineOnEventDay != newValue
         else { return }
         
         let params = EditAppearanceSettingParams()
-            |> \.newShowUnderLineOnEventDay .~ newValue
+            |> \.showUnderLineOnEventDay .~ newValue
         
         do {
             let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
-            self.subject.appearanceSetting.send(newSetting)
+            self.subject.setting.send(.init(newSetting))
         } catch {
             self.router?.showError(error)
-            self.subject.appearanceSetting.send(origin)
         }
     }
 }
@@ -208,13 +227,13 @@ extension CalendarSectionViewModelImple {
     }
     
     var accentDaysActivatedMap: AnyPublisher<[AccentDays: Bool], Never> {
-        return self.subject.appearanceSetting
+        return self.subject.setting
             .compactMap { $0?.accnetDayPolicy }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
     var isShowUnderLineOnEventDay: AnyPublisher<Bool, Never> {
-        return self.subject.appearanceSetting
+        return self.subject.setting
             .compactMap { $0?.showUnderLineOnEventDay }
             .eraseToAnyPublisher()
     }

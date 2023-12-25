@@ -15,11 +15,26 @@ public class ViewAppearance: ObservableObject {
     @Published public var tagColors: EventTagColorSet
     @Published public var colorSet: any ColorSet
     @Published public var fontSet: any FontSet
-    @Published public var eventOnCalendarSetting: EventOnCalendarSetting
-    @Published public var eventlist: EventListSetting
     
-    public var hapticEffectOff: Bool = false
-    public var animationEffectOff: Bool = false
+    // calendar
+    @Published public var accnetDayPolicy: [AccentDays: Bool]
+    @Published public var showUnderLineOnEventDay: Bool
+    
+    // event on calendar
+    @Published public var eventOnCalenarTextAdditionalSize: CGFloat
+    @Published public var eventOnCalendarIsBold: Bool
+    @Published public var eventOnCalendarShowEventTagColor: Bool
+    
+    // event list
+    @Published public var eventTextAdditionalSize: CGFloat
+    @Published public var showHoliday: Bool
+    @Published public var showLunarCalendarDate: Bool
+    @Published public var is24hourForm: Bool
+    @Published public var dimOnPastEvent: Bool
+    
+    // general
+    @Published public var hapticEffectOff: Bool
+    @Published public var animationEffectOff: Bool
     
     public init(setting: AppearanceSettings) {
         
@@ -29,8 +44,20 @@ public class ViewAppearance: ObservableObject {
         )
         self.colorSet = setting.colorSetKey.convert()
         self.fontSet = setting.fontSetKey.convert()
-        self.eventOnCalendarSetting = setting.eventOnCalendar
-        self.eventlist = setting.eventList
+        
+        self.accnetDayPolicy = setting.accnetDayPolicy
+        self.showUnderLineOnEventDay = setting.showUnderLineOnEventDay
+        
+        self.eventOnCalenarTextAdditionalSize = setting.eventOnCalenarTextAdditionalSize
+        self.eventOnCalendarIsBold = setting.eventOnCalendarIsBold
+        self.eventOnCalendarShowEventTagColor = setting.eventOnCalendarShowEventTagColor
+        
+        self.eventTextAdditionalSize = setting.eventTextAdditionalSize
+        self.showHoliday = setting.showHoliday
+        self.showLunarCalendarDate = setting.showLunarCalendarDate
+        self.is24hourForm = setting.is24hourForm
+        self.dimOnPastEvent = setting.dimOnPastEvent
+        
         self.hapticEffectOff = setting.hapticEffectOff
         self.animationEffectOff = setting.animationEffectOff
     }

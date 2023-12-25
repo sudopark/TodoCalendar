@@ -276,11 +276,7 @@ struct ViewControllerPreviewConverter: UIViewControllerRepresentable {
         let setting = AppearanceSettings(
             tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
             colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault,
-            accnetDayPolicy: [:],
-            showUnderLineOnEventDay: false,
-            eventOnCalendar: .init(),
-            eventList: .init()
+            fontSetKey: .systemDefault
         )
         return MainViewController(
             viewModel: MainViewModelImple(),
