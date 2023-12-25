@@ -210,10 +210,6 @@ struct SettingItemListViewPreviewProvider: PreviewProvider {
         let state = SettingItemListViewState()
         let eventHandlers = SettingItemListViewEventHandler()
         
-        let viewModel = SettingItemListViewModelImple()
-        state.bind(viewModel)
-        viewModel.prepare()
-        
         let view = SettingItemListView()
             .environmentObject(state)
             .environmentObject(viewAppearance)

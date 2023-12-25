@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -16,7 +17,9 @@ import CommonPresentation
 
 protocol SettingItemListRouting: Routing, Sendable { 
  
-    func routeToAppearanceSetting()
+    func routeToAppearanceSetting(
+        inital setting: AppearanceSettings
+    )
     func routeToHolidaySetting()
 }
 
@@ -43,10 +46,14 @@ extension SettingItemListRouter {
         self.scene as? (any SettingItemListScene)
     }
     
-    func routeToAppearanceSetting() {
+    func routeToAppearanceSetting(
+        inital setting: AppearanceSettings
+    ) {
         Task { @MainActor in
             
-            let next = self.appearanceSceneBuilder.makeAppearanceSettingScene()
+            let next = self.appearanceSceneBuilder.makeAppearanceSettingScene(
+                inital: setting
+            )
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }

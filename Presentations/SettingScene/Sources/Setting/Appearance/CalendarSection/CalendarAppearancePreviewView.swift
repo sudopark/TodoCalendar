@@ -19,6 +19,12 @@ final class CalendarSectionAppearanceSettingViewState: ObservableObject {
     @Published var accentDays: [AccentDays: Bool] = [:]
     @Published var showUnderLine: Bool = false
     @Published var selectedWeekDay: DayOfWeeks = .sunday
+    private var didFirstCalendarModelUpdated = false
+    
+    init(_ setting: CalendarAppearanceSetting) {
+        self.accentDays = setting.accnetDayPolicy
+        self.showUnderLine = setting.showUnderLineOnEventDay
+    }
     
     func bind(_ viewModel: any CalendarSectionAppearnaceSettingViewModel) {
         
@@ -35,8 +41,13 @@ final class CalendarSectionAppearanceSettingViewState: ObservableObject {
         viewModel.calendarAppearanceModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
-                withAnimation {
+                if self?.didFirstCalendarModelUpdated == true {
+                    withAnimation {
+                        self?.calendarModel = model
+                    }
+                } else {
                     self?.calendarModel = model
+                    self?.didFirstCalendarModelUpdated = true
                 }
             })
             .store(in: &self.cancellables)
@@ -173,7 +184,7 @@ struct CalendarAppearancePreviewView: View {
 
 struct CalendarSectionAppearanceSettingView: View {
     
-    @StateObject private var state: CalendarSectionAppearanceSettingViewState = .init()
+    @StateObject private var state: CalendarSectionAppearanceSettingViewState
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandlers: CalendarSectionAppearanceSettingViewEventHandler
     
@@ -183,7 +194,9 @@ struct CalendarSectionAppearanceSettingView: View {
         .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday
     ]
     
-    init() { }
+    init(_ setting: CalendarAppearanceSetting) {
+        _state = .init(wrappedValue: .init(setting))
+    }
     
     var body: some View {
         

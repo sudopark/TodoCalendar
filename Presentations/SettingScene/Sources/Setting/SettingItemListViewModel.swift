@@ -127,9 +127,14 @@ protocol SettingItemListViewModel: AnyObject, Sendable, SettingItemListSceneInte
 
 final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked Sendable {
     
+    private let uiSettingUsecase: any UISettingUsecase
     var router: (any SettingItemListRouting)?
     
-    init() { }
+    init(
+        uiSettingUsecase: any UISettingUsecase
+    ) {
+        self.uiSettingUsecase = uiSettingUsecase
+    }
     
     
     private struct Subject {
@@ -193,7 +198,7 @@ extension SettingItemListViewModelImple {
     private func handleSettingItemSelected(_ model: SettingItemModel) {
         switch model.itemId {
         case .appearance:
-            self.router?.routeToAppearanceSetting()
+            self.routeApearanceSetting()
             
         case .editEvent: break
             
@@ -206,6 +211,11 @@ extension SettingItemListViewModelImple {
         case .addReview: break
         case .sourceCode: break
         }
+    }
+    
+    private func routeApearanceSetting() {
+        let setting = self.uiSettingUsecase.loadAppearanceSetting()
+        self.router?.routeToAppearanceSetting(inital: setting)
     }
 }
 

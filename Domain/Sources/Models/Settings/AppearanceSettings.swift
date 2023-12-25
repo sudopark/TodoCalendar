@@ -56,8 +56,8 @@ public struct AppearanceSettings {
     public var dimOnPastEvent: Bool = false
     
     // general
-    public var hapticEffectOff: Bool = false
-    public var animationEffectOff: Bool = false
+    public var hapticEffectIsOn: Bool = false
+    public var animationEffectIsOn: Bool = false
     
     public init(
         tagColorSetting: EventTagColorSetting,
@@ -90,8 +90,8 @@ public struct AppearanceSettings {
             |> \.showLunarCalendarDate .~ (params.showLunarCalendarDate ?? self.showLunarCalendarDate)
             |> \.is24hourForm .~ (params.is24hourForm ?? self.is24hourForm)
             |> \.dimOnPastEvent .~ (params.dimOnPastEvent ?? self.dimOnPastEvent)
-            |> \.hapticEffectOff .~ (params.hapticEffectOff ?? self.hapticEffectOff)
-            |> \.animationEffectOff .~ (params.animationEffectOff ?? self.animationEffectOff)
+            |> \.hapticEffectIsOn .~ (params.hapticEffectIsOn ?? self.hapticEffectIsOn)
+            |> \.animationEffectIsOn .~ (params.animationEffectIsOn ?? self.animationEffectIsOn)
     }
 }
 
@@ -125,8 +125,8 @@ public struct EditAppearanceSettingParams {
     public var dimOnPastEvent: Bool?
     
     // general
-    public var hapticEffectOff: Bool?
-    public var animationEffectOff: Bool?
+    public var hapticEffectIsOn: Bool?
+    public var animationEffectIsOn: Bool?
     
     public init() { }
     
@@ -166,7 +166,7 @@ public struct EditAppearanceSettingParams {
     }
     
     private var isValidGeneralValues: Bool {
-        return self.hapticEffectOff != nil
-            || self.animationEffectOff != nil
+        return self.hapticEffectIsOn != nil
+            || self.animationEffectIsOn != nil
     }
 }

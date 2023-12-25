@@ -40,7 +40,10 @@ class EventOnCalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeViewModel() -> EventOnCalendarViewModelImple {
-        return EventOnCalendarViewModelImple(uiSettingUsecase: self.spyUISettingUsecase)
+        return EventOnCalendarViewModelImple(
+            setting: self.dummySetting,
+            uiSettingUsecase: self.spyUISettingUsecase
+        )
     }
 }
 
@@ -55,7 +58,6 @@ extension EventOnCalendarViewModelImpleTests {
         
         // when
         let sizeModel = self.waitFirstOutput(expect, for: viewModel.textIncreasedSizeText) {
-            viewModel.prepared(self.dummySetting)
         }
         
         // then
@@ -72,7 +74,6 @@ extension EventOnCalendarViewModelImpleTests {
         
         // when
         let isBold = self.waitFirstOutput(expect, for: viewModel.isBoldTextOnCalendar) {
-            viewModel.prepared(self.dummySetting)
         }
         
         // then
@@ -87,7 +88,6 @@ extension EventOnCalendarViewModelImpleTests {
         
         // when
         let isShow = self.waitFirstOutput(expect, for: viewModel.showEvnetTagColor) {
-            viewModel.prepared(self.dummySetting)
         }
         
         // then
@@ -103,7 +103,6 @@ extension EventOnCalendarViewModelImpleTests {
         
         // when
         let models = self.waitOutputs(expect, for: viewModel.textIncreasedSizeText) {
-            viewModel.prepared(self.dummySetting) // 3
             viewModel.increaseTextSize() // 4
             viewModel.increaseTextSize() // 5
             viewModel.increaseTextSize() // 6
@@ -129,7 +128,6 @@ extension EventOnCalendarViewModelImpleTests {
         
         // when
         let models = self.waitOutputs(expect, for: viewModel.textIncreasedSizeText) {
-            viewModel.prepared(self.dummySetting) // 3
             viewModel.decreaseTextSize() // 2
             viewModel.decreaseTextSize() // 1
             viewModel.decreaseTextSize() // 0
@@ -156,7 +154,6 @@ extension EventOnCalendarViewModelImpleTests {
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.textIncreasedSizeText) {
-            viewModel.prepared(self.dummySetting)
             viewModel.increaseTextSize()
         }
         let setting = self.spyUISettingUsecase.loadAppearanceSetting()
@@ -174,7 +171,6 @@ extension EventOnCalendarViewModelImpleTests {
         
         // when
         let isBolds = self.waitOutputs(expect, for: viewModel.isBoldTextOnCalendar) {
-            viewModel.prepared(self.dummySetting)
             viewModel.toggleBoldText(true)
         }
         
@@ -193,7 +189,6 @@ extension EventOnCalendarViewModelImpleTests {
         
         // when
         let isShows = self.waitOutputs(expect, for: viewModel.showEvnetTagColor) {
-            viewModel.prepared(self.dummySetting)
             viewModel.toggleShowEventTagColor(false)
         }
         

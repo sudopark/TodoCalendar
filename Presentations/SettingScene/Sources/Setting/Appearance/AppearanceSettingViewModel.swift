@@ -20,7 +20,6 @@ import Scenes
 protocol AppearanceSettingViewModel: AnyObject, Sendable, AppearanceSettingSceneInteractor {
 
     // interactor
-    func prepare()
     func routeToSelectTimezone()
     func toggleIsOnHapticFeedback(_ newValue: Bool)
     func toggleMinimizeAnimationEffect(_ newValue: Bool)
@@ -28,8 +27,8 @@ protocol AppearanceSettingViewModel: AnyObject, Sendable, AppearanceSettingScene
     
     // presenter
     var currentTimeZoneName: AnyPublisher<String, Never> { get }
-    var isOnHapticFeedback: AnyPublisher<Bool, Never> { get }
-    var minimizeAnimationEffect: AnyPublisher<Bool, Never> { get }
+    var hapticIsOn: AnyPublisher<Bool, Never> { get }
+    var animationIsOn: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -42,11 +41,13 @@ final class AppearanceSettingViewModelImple: AppearanceSettingViewModel, @unchec
     var router: (any AppearanceSettingRouting)?
     
     init(
+        setting: AppearanceSettings,
         calendarSettingUsecase: any CalendarSettingUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        self.subject.uiSetting.send(setting)
     }
     
     
@@ -63,40 +64,26 @@ final class AppearanceSettingViewModelImple: AppearanceSettingViewModel, @unchec
 
 extension AppearanceSettingViewModelImple {
     
-    func prepare() {
-        
-        let interactors = self.router?.attachSubScenes()
-        
-        let setting = self.uiSettingUsecase.loadAppearanceSetting()
-        
-        interactors?.calenadar?.prepared(.init(setting))
-        interactors?.eventOnCalendar?.prepared(.init(setting))
-        interactors?.eventList?.prepared(.init(setting))
-        
-        self.subject.uiSetting.send(setting)
-    }
-    
     func routeToSelectTimezone() {
         
         self.router?.routeToSelectTimeZone()
     }
     
     func toggleIsOnHapticFeedback(_ newValue: Bool) {
-        let isOff = !newValue
         guard let setting = self.subject.uiSetting.value,
-              setting.hapticEffectOff != isOff
+              setting.hapticEffectIsOn != newValue
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.hapticEffectOff .~ isOff
+        let params = EditAppearanceSettingParams() |> \.hapticEffectIsOn .~ newValue
         self.updateSetting(params)
     }
     
     func toggleMinimizeAnimationEffect(_ newValue: Bool) {
         guard let setting = self.subject.uiSetting.value,
-              setting.animationEffectOff != newValue
+              setting.animationEffectIsOn != newValue
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.animationEffectOff .~ newValue
+        let params = EditAppearanceSettingParams() |> \.animationEffectIsOn .~ newValue
         self.updateSetting(params)
     }
     
@@ -124,7 +111,7 @@ extension AppearanceSettingViewModelImple {
             let systemTimeZone = TimeZone.current
             
             return systemTimeZone == timeZone
-                ? "System time".localized()
+                ? "System Time".localized()
                 : timeZone.localizedName(for: .generic, locale: .current)
         }
         
@@ -134,17 +121,16 @@ extension AppearanceSettingViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var isOnHapticFeedback: AnyPublisher<Bool, Never> {
+    var hapticIsOn: AnyPublisher<Bool, Never> {
         return self.subject.uiSetting
-            .compactMap { $0?.hapticEffectOff }
-            .map { !$0 }
+            .compactMap { $0?.hapticEffectIsOn }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
     
-    var minimizeAnimationEffect: AnyPublisher<Bool, Never> {
+    var animationIsOn: AnyPublisher<Bool, Never> {
         return self.subject.uiSetting
-            .compactMap { $0?.animationEffectOff }
+            .compactMap { $0?.animationEffectIsOn }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

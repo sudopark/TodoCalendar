@@ -13,6 +13,7 @@ import Domain
 
 
 struct EventListAppearanceSetting {
+    
     let eventTextAdditionalSize: CGFloat
     let showHoliday: Bool
     let showLunarCalendarDate: Bool
@@ -42,10 +43,6 @@ struct EventListAppearanceSetting {
     }
 }
 
-protocol EventListAppearanceSettingInteractor: AnyObject, Sendable {
-    
-    func prepared(_ setting: EventListAppearanceSetting)
-}
 
 struct EventListAppearanceSampleModel: Equatable {
     
@@ -77,7 +74,7 @@ struct EventListAppearanceSampleModel: Equatable {
     }
 }
 
-protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable, EventListAppearanceSettingInteractor {
+protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable {
     
     func increaseFontSize()
     func decreaseFontSize()
@@ -103,9 +100,11 @@ final class EventListAppearnaceSettingViewModelImple: EventListAppearnaceSetting
     
     private let uiSettingUsecase: any UISettingUsecase
     init(
+        setting: EventListAppearanceSetting,
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
+        self.subject.setting.send(setting)
     }
     
     private struct Subject {
@@ -117,10 +116,6 @@ final class EventListAppearnaceSettingViewModelImple: EventListAppearnaceSetting
 
 
 extension EventListAppearnaceSettingViewModelImple {
-    
-    func prepared(_ setting: EventListAppearanceSetting) {
-        self.subject.setting.send(setting)
-    }
     
     func increaseFontSize() {
         guard let setting = self.subject.setting.value,
