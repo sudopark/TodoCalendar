@@ -68,6 +68,10 @@ extension AppearanceSettingSceneBuilerImple: AppearanceSettingSceneBuiler {
         let router = AppearanceSettingRouter(
             timeZoneSelectBuilder: self.timeZoneSelectSceneBuilder
         )
+        router.calendarInteractor = calendarSectionViewModel
+        router.eventOnCalendarInteractor = eventOnCalendarViewModel
+        router.eventListInteractor = eventListSettingViewModel
+        
         router.scene = viewController
         viewModel.router = router
         // TOOD: set calendarSectionVM Router

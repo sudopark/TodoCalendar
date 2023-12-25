@@ -43,21 +43,18 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         self.viewAppearance = viewAppearance
         
         let calendarSectionEventHandler = CalendarSectionAppearanceSettingViewEventHandler()
-        calendarSectionEventHandler.onAppear = calendarSectionViewModel.prepare
         calendarSectionEventHandler.weekStartDaySelected = calendarSectionViewModel.changeStartOfWeekDay(_:)
         calendarSectionEventHandler.changeColorTheme = calendarSectionViewModel.changeColorTheme
         calendarSectionEventHandler.toggleAccentDay = calendarSectionViewModel.toggleAccentDay(_:)
         calendarSectionEventHandler.toggleShowUnderline = calendarSectionViewModel.toggleIsShowUnderLineOnEventDay(_:)
         
         let eventOnCalendarEventHandler = EventOnCalendarViewEventHandler()
-        eventOnCalendarEventHandler.onAppear = eventOnCalednarSectionViewModel.prepare
         eventOnCalendarEventHandler.increaseFontSize = eventOnCalednarSectionViewModel.increaseTextSize
         eventOnCalendarEventHandler.decreaseFontSize = eventOnCalednarSectionViewModel.decreaseTextSize
         eventOnCalendarEventHandler.toggleIsBold = eventOnCalednarSectionViewModel.toggleBoldText(_:)
         eventOnCalendarEventHandler.toggleShowEventTagColor = eventOnCalednarSectionViewModel.toggleShowEventTagColor(_:)
         
         let eventListSettingHandler = EventListAppearanceSettingViewEventHandler()
-        eventListSettingHandler.onAppear = eventListAppearanceSettingViewModel.prepare
         eventListSettingHandler.increaseFontSize = eventListAppearanceSettingViewModel.increaseFontSize
         eventListSettingHandler.decreaseFontSize = eventListAppearanceSettingViewModel.decreaseFontSize
         eventListSettingHandler.toggleIsShowHolidayName = eventListAppearanceSettingViewModel.toggleShowHolidayName(_:)

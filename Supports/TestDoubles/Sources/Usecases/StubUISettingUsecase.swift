@@ -22,32 +22,14 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
         return AppearanceSettings(
             tagColorSetting: .init(holiday: "holiday", default: "default"),
             colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault,
-            accnetDayPolicy: [.sunday: true, .saturday: false, .holiday: false],
-            showUnderLineOnEventDay: true,
-            eventOnCalendar: .init(),
-            eventList: .init()
+            fontSetKey: .systemDefault
         )
-        |> \.hapticEffectOff .~ false
-        |> \.animationEffectOff .~ false
     }
     
     public var didChangeAppearanceSetting: AppearanceSettings?
     open func changeAppearanceSetting(_ params: EditAppearanceSettingParams) throws -> AppearanceSettings {
         let old = self.loadAppearanceSetting()
-        let newSetting = AppearanceSettings(
-            tagColorSetting: .init(
-                holiday: params.newTagColorSetting?.newHolidayTagColor ?? old.tagColorSetting.holiday,
-                default: params.newTagColorSetting?.newDefaultTagColor ?? old.tagColorSetting.default),
-            colorSetKey: params.newColorSetKey ?? old.colorSetKey,
-            fontSetKey: params.newFontSetKcy ?? old.fontSetKey,
-            accnetDayPolicy: params.newAccentDays ?? old.accnetDayPolicy,
-            showUnderLineOnEventDay: params.newShowUnderLineOnEventDay ?? old.showUnderLineOnEventDay,
-            eventOnCalendar: params.eventOnCalendar ?? old.eventOnCalendar,
-            eventList: params.eventList ?? old.eventList
-        )
-        |> \.hapticEffectOff .~ (params.hapticEffectOff ?? old.hapticEffectOff)
-        |> \.animationEffectOff .~ (params.animationEffectOff ?? old.animationEffectOff)
+        let newSetting = old.update(params)
         self.didChangeAppearanceSetting = newSetting
         self.stubAppearanceSetting = newSetting
         return newSetting

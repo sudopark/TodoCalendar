@@ -36,12 +36,43 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         if self.appearance.fontSet.key != newSetting.fontSetKey {
             self.appearance.fontSet = newSetting.fontSetKey.convert()
         }
-        if self.appearance.eventOnCalendarSetting != newSetting.eventOnCalendar {
-            self.appearance.eventOnCalendarSetting = newSetting.eventOnCalendar
+        // calendar
+        if self.appearance.accnetDayPolicy != newSetting.accnetDayPolicy {
+            self.appearance.accnetDayPolicy = newSetting.accnetDayPolicy
         }
-        if self.appearance.eventlist != newSetting.eventList {
-            self.appearance.eventlist = newSetting.eventList
+        if self.appearance.showUnderLineOnEventDay != newSetting.showUnderLineOnEventDay {
+            self.appearance.showUnderLineOnEventDay = newSetting.showUnderLineOnEventDay
         }
+        
+        // evnet on calendar
+        if self.appearance.eventOnCalenarTextAdditionalSize != newSetting.eventOnCalenarTextAdditionalSize {
+            self.appearance.eventOnCalenarTextAdditionalSize = newSetting.eventOnCalenarTextAdditionalSize
+        }
+        if self.appearance.eventOnCalendarIsBold != newSetting.eventOnCalendarIsBold {
+            self.appearance.eventOnCalendarIsBold = newSetting.eventOnCalendarIsBold
+        }
+        if self.appearance.eventOnCalendarShowEventTagColor != newSetting.eventOnCalendarShowEventTagColor {
+            self.appearance.eventOnCalendarShowEventTagColor = newSetting.eventOnCalendarShowEventTagColor
+        }
+        
+        // event list
+        if self.appearance.eventTextAdditionalSize != newSetting.eventTextAdditionalSize {
+            self.appearance.eventTextAdditionalSize = newSetting.eventTextAdditionalSize
+        }
+        if self.appearance.showHoliday != newSetting.showHoliday {
+            self.appearance.showHoliday = newSetting.showHoliday
+        }
+        if self.appearance.showLunarCalendarDate != newSetting.showLunarCalendarDate {
+            self.appearance.showLunarCalendarDate = newSetting.showLunarCalendarDate
+        }
+        if self.appearance.is24hourForm != newSetting.is24hourForm {
+            self.appearance.is24hourForm = newSetting.is24hourForm
+        }
+        if self.appearance.dimOnPastEvent != newSetting.dimOnPastEvent {
+            self.appearance.dimOnPastEvent = newSetting.dimOnPastEvent
+        }
+        
+        // general
         if self.appearance.hapticEffectOff != newSetting.hapticEffectOff {
             self.appearance.hapticEffectOff = newSetting.hapticEffectOff
         }

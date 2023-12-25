@@ -65,7 +65,14 @@ extension AppearanceSettingViewModelImple {
     
     func prepare() {
         
+        let interactors = self.router?.attachSubScenes()
+        
         let setting = self.uiSettingUsecase.loadAppearanceSetting()
+        
+        interactors?.calenadar?.prepared(.init(setting))
+        interactors?.eventOnCalendar?.prepared(.init(setting))
+        interactors?.eventList?.prepared(.init(setting))
+        
         self.subject.uiSetting.send(setting)
     }
     

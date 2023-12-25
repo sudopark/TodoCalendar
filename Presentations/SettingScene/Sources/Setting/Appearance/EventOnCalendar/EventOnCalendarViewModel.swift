@@ -12,6 +12,34 @@ import Optics
 import Domain
 import Scenes
 
+struct EventOnCalendarAppearanceSetting {
+    
+    let eventOnCalenarTextAdditionalSize: CGFloat
+    let eventOnCalendarIsBold: Bool
+    let eventOnCalendarShowEventTagColor: Bool
+    
+    init(
+        eventOnCalenarTextAdditionalSize: CGFloat,
+        eventOnCalendarIsBold: Bool, 
+        eventOnCalendarShowEventTagColor: Bool
+    ) {
+        self.eventOnCalenarTextAdditionalSize = eventOnCalenarTextAdditionalSize
+        self.eventOnCalendarIsBold = eventOnCalendarIsBold
+        self.eventOnCalendarShowEventTagColor = eventOnCalendarShowEventTagColor
+    }
+    
+    init(_ setting: AppearanceSettings) {
+        self.eventOnCalenarTextAdditionalSize = setting.eventOnCalenarTextAdditionalSize
+        self.eventOnCalendarIsBold = setting.eventOnCalendarIsBold
+        self.eventOnCalendarShowEventTagColor = setting.eventOnCalendarShowEventTagColor
+    }
+}
+
+protocol EventOnCalendarAppearanceSettingInteractor: AnyObject, Sendable {
+    
+    func prepared(_ setting: EventOnCalendarAppearanceSetting)
+}
+
 struct EventTextAdditionalSizeModel: Equatable {
     let sizeText: String
     var isIncreasable: Bool = true
@@ -23,9 +51,8 @@ struct EventTextAdditionalSizeModel: Equatable {
     }
 }
 
-protocol EventOnCalendarViewModel: AnyObject, Sendable {
+protocol EventOnCalendarViewModel: AnyObject, Sendable, EventOnCalendarAppearanceSettingInteractor {
     
-    func prepare()
     func increaseTextSize()
     func decreaseTextSize()
     func toggleBoldText(_ isOn: Bool)
@@ -39,7 +66,9 @@ protocol EventOnCalendarViewModel: AnyObject, Sendable {
 final class EventOnCalendarViewModelImple: EventOnCalendarViewModel, @unchecked Sendable {
     
     private let uiSettingUsecase: any UISettingUsecase
-    init(uiSettingUsecase: any UISettingUsecase) {
+    init(
+        uiSettingUsecase: any UISettingUsecase
+    ) {
         self.uiSettingUsecase = uiSettingUsecase
     }
     
@@ -49,7 +78,7 @@ final class EventOnCalendarViewModelImple: EventOnCalendarViewModel, @unchecked 
     }
     
     private struct Subject {
-        let setting = CurrentValueSubject<EventOnCalendarSetting?, Never>(nil)
+        let setting = CurrentValueSubject<EventOnCalendarAppearanceSetting?, Never>(nil)
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -57,50 +86,48 @@ final class EventOnCalendarViewModelImple: EventOnCalendarViewModel, @unchecked 
 
 extension EventOnCalendarViewModelImple {
     
-    func prepare() {
-        let setting = self.uiSettingUsecase.loadAppearanceSetting()
-        self.subject.setting.send(setting.eventOnCalendar)
+    func prepared(_ setting: EventOnCalendarAppearanceSetting) {
+        self.subject.setting.send(setting)
     }
-    
+
     func increaseTextSize() {
         guard let setting = self.subject.setting.value,
-              setting.textAdditionalSize < Constant.maxFontSize
+              setting.eventOnCalenarTextAdditionalSize < Constant.maxFontSize
         else { return }
         
-        let newSetting = setting |> \.textAdditionalSize +~ 1
-        self.updateSetting(newSetting)
+        let params = EditAppearanceSettingParams() |> \.eventOnCalenarTextAdditionalSize .~ (setting.eventOnCalenarTextAdditionalSize + 1)
+        self.updateSetting(params)
     }
     
     func decreaseTextSize() {
         guard let setting = self.subject.setting.value,
-              setting.textAdditionalSize > Constant.minFontSize
+              setting.eventOnCalenarTextAdditionalSize > Constant.minFontSize
         else { return }
-        let newSetting = setting |> \.textAdditionalSize -~ 1
-        self.updateSetting(newSetting)
+
+        let params = EditAppearanceSettingParams() |> \.eventOnCalenarTextAdditionalSize .~ (setting.eventOnCalenarTextAdditionalSize - 1)
+        self.updateSetting(params)
     }
     
     func toggleBoldText(_ isOn: Bool) {
         guard let setting = self.subject.setting.value,
-              setting.bold != isOn
+              setting.eventOnCalendarIsBold != isOn
         else { return }
-        let newSetting = setting |> \.bold .~ isOn
-        self.updateSetting(newSetting)
+        let params = EditAppearanceSettingParams() |> \.eventOnCalendarIsBold .~ isOn
+        self.updateSetting(params)
     }
     
     func toggleShowEventTagColor(_ isOn: Bool) {
         guard let setting = self.subject.setting.value,
-              setting.showEventTagColor != isOn
+              setting.eventOnCalendarShowEventTagColor != isOn
         else { return }
-        let newSetting = setting |> \.showEventTagColor .~ isOn
-        self.updateSetting(newSetting)
+        let params = EditAppearanceSettingParams() |> \.eventOnCalendarShowEventTagColor .~ isOn
+        self.updateSetting(params)
     }
     
-    private func updateSetting(_ newEventOnCalendarSetting: EventOnCalendarSetting) {
-        let params = EditAppearanceSettingParams()
-            |> \.eventOnCalendar .~ newEventOnCalendarSetting
+    private func updateSetting(_ params: EditAppearanceSettingParams) {
         do {
             let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
-            self.subject.setting.send(newSetting.eventOnCalendar)
+            self.subject.setting.send(.init(newSetting))
         } catch {
             // TODO: show error
         }
@@ -116,7 +143,7 @@ extension EventOnCalendarViewModelImple {
                 |> \.isDescreasable .~ (size > Constant.minFontSize)
         }
         return self.subject.setting
-            .compactMap { $0?.textAdditionalSize }
+            .compactMap { $0?.eventOnCalenarTextAdditionalSize }
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
@@ -124,14 +151,14 @@ extension EventOnCalendarViewModelImple {
     
     var isBoldTextOnCalendar: AnyPublisher<Bool, Never> {
         return self.subject.setting
-            .compactMap { $0?.bold }
+            .compactMap { $0?.eventOnCalendarIsBold }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
     
     var showEvnetTagColor: AnyPublisher<Bool, Never> {
         return self.subject.setting
-            .compactMap { $0?.showEventTagColor }
+            .compactMap { $0?.eventOnCalendarShowEventTagColor }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
