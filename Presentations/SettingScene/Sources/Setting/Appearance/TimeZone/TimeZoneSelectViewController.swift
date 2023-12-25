@@ -35,6 +35,10 @@ final class TimeZoneSelectViewController: UIHostingController<TimeZoneSelectCont
         self.viewAppearance = viewAppearance
         
         let eventHandlers = TimeZoneSelectViewEventHandler()
+        eventHandlers.onAppear = viewModel.loadList
+        eventHandlers.search = viewModel.search(keyword:)
+        eventHandlers.timeZoneSelected = viewModel.selectTimeZone(_:)
+        eventHandlers.close = viewModel.close
         
         let containerView = TimeZoneSelectContainerView(
             viewAppearance: viewAppearance,

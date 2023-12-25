@@ -23,6 +23,12 @@ protocol AppearanceSettingRouting: Routing, Sendable {
 
 final class AppearanceSettingRouter: BaseRouterImple, AppearanceSettingRouting, @unchecked Sendable {
     
+    private let timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler
+    
+    init(timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler) {
+        self.timeZoneSelectBuilder = timeZoneSelectBuilder
+    }
+    
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
         self.currentScene?.navigationController?.popViewController(animated: animate)
     }
@@ -36,7 +42,11 @@ extension AppearanceSettingRouter {
     }
     
     // TODO: router implememnts
+    
     func routeToSelectTimeZone() {
-        // TODO: 
+        Task { @MainActor in
+            let next = self.timeZoneSelectBuilder.makeTimeZoneSelectScene()
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
     }
 }

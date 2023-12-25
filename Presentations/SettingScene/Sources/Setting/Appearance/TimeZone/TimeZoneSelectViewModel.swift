@@ -19,11 +19,16 @@ struct TimeZoneModel: Equatable {
     let title: String
     var description: String?
     
-    init?(timeZone: TimeZone) {
+    init(_ identifier: String, title: String) {
+        self.identifier = identifier
+        self.title = title
+    }
+    
+    init?(timeZone: TimeZone, isSystem: Bool = false) {
         self.identifier = timeZone.identifier
         guard let title = timeZone.localizedName(for: .generic, locale: .current)
         else { return nil }
-        self.title = title
+        self.title = isSystem ? "System timeZone".localized() : title
         
         let standardName = timeZone.localizedName(for: .standard, locale: .current)
         self.description = standardName.map {
@@ -44,7 +49,7 @@ struct TimeZoneListModel: Equatable {
     
     init?(_ timeZones: [TimeZone]) {
         let system = TimeZone.current
-        guard let systemTimeZone = TimeZoneModel(timeZone: system)
+        guard let systemTimeZone = TimeZoneModel(timeZone: system, isSystem: true)
         else { return nil }
         
         self.systemTimeZone = systemTimeZone
