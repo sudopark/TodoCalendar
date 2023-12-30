@@ -53,6 +53,13 @@ public struct CalendarComponent: Equatable {
     public let month: Int
     public var weeks: [Week]
     
+    public func holiday(_ month: Int, _ day: Int) -> Holiday? {
+        return self.weeks
+            .flatMap { $0.days }
+            .first(where: { $0.month == month && $0.day == day })?
+            .holiday
+    }
+    
     public init(year: Int, month: Int, weeks: [Week]) {
         self.year = year
         self.month = month
