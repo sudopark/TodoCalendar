@@ -35,20 +35,17 @@ struct CalendarAppearanceModel: Equatable {
     
     struct DayModel: Equatable {
         let number: Int
-        let isWeekEnd: Bool
         let hasEvent: Bool
-        let isHoliday: Bool
+        let accent: AccentDays?
         
         init(
             _ number: Int,
-            isWeekEnd: Bool = false,
             hasEvent: Bool = false,
-            isHoliday: Bool = false
+            accent: AccentDays? = nil
         ) {
             self.number = number
-            self.isWeekEnd = isWeekEnd
             self.hasEvent = hasEvent
-            self.isHoliday = isHoliday
+            self.accent = accent
         }
     }
     
@@ -89,11 +86,13 @@ struct CalendarAppearanceModel: Equatable {
                 let dayNumber = index + 1
                 guard (1...31) ~= dayNumber else { return nil }
 
+                let isSunday = dayNumber % 7 == 0; let isSaturday = dayNumber % 7 == 6
+                let isHoliday = dayNumber == 13 || dayNumber == 24
+                let accent: AccentDays? = isSunday ? .sunday : isSaturday ? .saturday : isHoliday ? .holiday : nil
                 return DayModel(
                     dayNumber,
-                    isWeekEnd: dayNumber % 7 == 0 || dayNumber % 7 == 6,
                     hasEvent: hasEventDays.contains(dayNumber),
-                    isHoliday: dayNumber == 13 || dayNumber == 24
+                    accent: accent
                 )
             }
         }

@@ -184,7 +184,7 @@ extension MonthViewModelImpleTests {
             viewModel.select(
                 .init(
                     year: 2023, month: 9, day: 23, isNotCurrentMonth: false,
-                    isWeekEnd: false, isHoliday: false
+                    accentDay: nil
                 )
             )
         }
@@ -207,7 +207,7 @@ extension MonthViewModelImpleTests {
             viewModel.select(
                 .init(
                     year: 2023, month: 08, day: 31, isNotCurrentMonth: true,
-                    isWeekEnd: false, isHoliday: false
+                    accentDay: nil
                 )
             )
         }
@@ -493,7 +493,7 @@ extension MonthViewModelImpleTests {
             ["SAT", "SUN", "MON", "TUE", "WED", "THU", "FRI"],
             ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
         ])
-        let isWeekEnds = modelLists.map { ms in ms.map { $0.isWeekEnd } }
+        let isWeekEnds = modelLists.map { ms in ms.map { $0.isSaturday || $0.isSunday } }
         XCTAssertEqual(isWeekEnds, [
             [true, false, false, false, false, false, true],
             [false, false, false, false, false, true, true],
@@ -812,7 +812,7 @@ private extension WeekEventStackViewModel {
 private extension DayCellViewModel {
     
     init(_ year: Int, _ month: Int, _ day: Int) {
-        self.init(year: year, month: month, day: day, isNotCurrentMonth: false, isWeekEnd: false, isHoliday: false)
+        self.init(year: year, month: month, day: day, isNotCurrentMonth: false, accentDay: nil)
     }
 }
 

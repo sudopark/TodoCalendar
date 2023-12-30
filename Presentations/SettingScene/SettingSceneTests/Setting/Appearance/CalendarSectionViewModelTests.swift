@@ -68,8 +68,10 @@ extension CalendarSectionViewModelTests {
             let dayNumbers = model.weeks.map { w in w.map { $0?.number } }
             XCTAssertEqual(dayNumbers, expectDayNumbers)
             
-            let weekEnds = model.weeks.flatMap { $0 }.filter { $0?.isWeekEnd == true }.map { $0?.number }
-            XCTAssertEqual(weekEnds, [6, 7, 13, 14, 20, 21, 27, 28])
+            let sundays = model.weeks.flatMap { $0 }.filter { $0?.accent == .sunday }.map { $0?.number }
+            let saturdays = model.weeks.flatMap { $0 }.filter { $0?.accent == .saturday }.map { $0?.number }
+            XCTAssertEqual(sundays, [7, 14, 21, 28])
+            XCTAssertEqual(saturdays, [6, 13, 20, 27])
             
             let hasEvents = model.weeks.flatMap { $0 }.filter { $0?.hasEvent == true }.map { $0?.number }
             XCTAssertEqual(hasEvents, [2, 4, 5, 14, 17, 22, 23, 30])
