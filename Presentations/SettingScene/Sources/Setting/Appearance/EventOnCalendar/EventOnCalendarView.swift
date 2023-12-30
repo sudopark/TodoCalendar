@@ -80,7 +80,7 @@ struct EventOnCalendarViewPreviewView: View {
                         .padding(.leading, 1)
                     
                     Text("All day".localized())
-                        .font(appearance.fontSet.eventOnDay.asFont)
+                        .font(appearance.eventTextFontOnCalendar().asFont)
                         .foregroundStyle(appearance.colorSet.event.asColor)
                         .lineLimit(1)
                 }
@@ -97,7 +97,7 @@ struct EventOnCalendarViewPreviewView: View {
                         .padding(.leading, 1)
                     
                     Text("Some time".localized())
-                        .font(appearance.fontSet.eventOnDay.asFont)
+                        .font(appearance.eventTextFontOnCalendar().asFont)
                         .foregroundStyle(appearance.colorSet.event.asColor)
                         .lineLimit(1)
                 }
@@ -216,6 +216,7 @@ struct EventOnCalendarViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(
             setting: setting
         )
+        viewAppearance.eventOnCalenarTextAdditionalSize = -2
         
         let eventHandler = EventOnCalendarViewEventHandler()
         return EventOnCalendarView(.init(setting))

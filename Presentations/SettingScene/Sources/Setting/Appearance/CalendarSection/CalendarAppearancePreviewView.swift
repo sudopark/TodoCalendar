@@ -1,5 +1,5 @@
 //
-//  CalendarAppearanceSampleView.swift
+//  CalendarSectionAppearanceSettingView.swift
 //  SettingScene
 //
 //  Created by sudo.park on 12/8/23.
@@ -156,7 +156,7 @@ struct CalendarAppearanceSampleView: View {
                 .font(self.appearance.fontSet.size(10).asFont)
                 .foregroundStyle(textColor.asColor)
             
-            if hasEvent {
+            if hasEvent && self.appearance.showUnderLineOnEventDay {
                 VStack {
                     Spacer()
                     
