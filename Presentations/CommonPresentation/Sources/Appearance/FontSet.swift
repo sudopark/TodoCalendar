@@ -18,7 +18,6 @@ public protocol FontSet: Sendable {
     // calendar component
     var weekday: UIFont { get }
     var day: UIFont { get }
-    var eventOnDay: UIFont { get }
     var eventMore: UIFont { get }
     
     var bigMonth: UIFont { get }
@@ -48,7 +47,6 @@ public struct SystemDefaultFontSet: FontSet {
     // calendar component
     public let weekday: UIFont = UIFont.systemFont(ofSize: 12)
     public let day: UIFont = UIFont.systemFont(ofSize: 14)
-    public let eventOnDay: UIFont = UIFont.systemFont(ofSize: 10)
     public let eventMore: UIFont = UIFont.systemFont(ofSize: 9)
     
     public let bigMonth: UIFont = UIFont.systemFont(ofSize: 32, weight: .semibold)

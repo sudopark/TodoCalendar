@@ -284,6 +284,7 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
         viewAppearance.accnetDayPolicy = [
             .sunday : true, .saturday: true, .holiday: true
         ]
+        viewAppearance.showUnderLineOnEventDay = true
         let calendar = CalendarSectionAppearanceSettingViewEventHandler()
         let eventOnCalendar = EventOnCalendarViewEventHandler()
         let eventListHandler = EventListAppearanceSettingViewEventHandler()

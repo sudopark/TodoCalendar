@@ -79,6 +79,14 @@ extension ViewAppearance {
             return self.colorSet.weekDayText
         }
     }
+    
+    public func eventTextFontOnCalendar() -> UIFont {
+        let defaultSize: CGFloat = 10
+        return UIFont.systemFont(
+            ofSize: defaultSize + self.eventOnCalenarTextAdditionalSize,
+            weight: self.eventOnCalendarIsBold ? .semibold : .regular
+        )
+    }
 }
 
 extension ViewAppearance {

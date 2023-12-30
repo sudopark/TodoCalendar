@@ -267,10 +267,11 @@ private struct WeekRowView: View {
                  .padding(.leading, 1)
              
              Text(line.eventOnWeek.name)
-                 .font(self.appearance.fontSet.eventOnDay.asFont)
+                .font(self.appearance.eventTextFontOnCalendar().asFont)
                  .foregroundColor(textColor)
                  .lineLimit(1)
         }
+        .clipped()
          .frame(width: max(width, 50), alignment: .leading)
          .background(background)
          .offset(x: offsetX)
@@ -288,7 +289,7 @@ private struct WeekRowView: View {
         return ZStack(alignment: .center) {
             ForEach(moreModels, id: \.daySequence) {
                 Text("+\($0.moreCount)")
-                    .font(self.appearance.fontSet.eventMore.asFont)
+                    .font(self.appearance.eventTextFontOnCalendar().asFont)
                     .foregroundColor(textColor($0))
                     .frame(width: dayWidth)
                     .offset(x: offsetX($0))
@@ -363,7 +364,7 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
         } else if weekId == "id:1" {
             let eventw2 = EventOnWeek(0..<1, [2, 3, 4, 5], (2...5), [
                 "2023-9-9", "2023-9-10", "2023-9-11", "2023-9-12"
-            ], DummyCalendarEvent("ev-w2", "ev-w2", hasPeriod: false))
+            ], DummyCalendarEvent("ev-w2", "ev-w2- hohohohohohohohohohohohoh", hasPeriod: false))
             return Just([
                 [.init(eventw2, nil)]
             ])
@@ -395,6 +396,8 @@ struct MonthViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(
             setting: setting
         )
+        viewAppearance.eventOnCalenarTextAdditionalSize = 7
+        viewAppearance.eventOnCalendarIsBold = true
         let containerView = MonthContainerView(viewAppearance: viewAppearance)
             .eventHandler(\.stateBinding, { $0.bind(viewModel) })
             .eventHandler(\.daySelected, viewModel.select(_:))
