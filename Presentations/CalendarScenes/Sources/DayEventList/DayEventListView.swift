@@ -117,7 +117,7 @@ struct DayEventListView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(self.state.dateText)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .font(self.appearance.fontSet.size(22, weight: .semibold).asFont)
+                .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
                 .foregroundColor(self.appearance.colorSet.normalText.asColor)
                 .padding(.bottom, 3)
             VStack(alignment: .leading, spacing: 6) {
@@ -148,7 +148,9 @@ struct DayEventListView: View {
                     Image(systemName: "plus")
                         .tint(self.appearance.colorSet.normalText.asColor)
                     Text("Add New Event")
-                        .font(self.appearance.fontSet.size(15).asFont)
+                        .font(
+                            self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize).asFont
+                        )
                         .foregroundColor(self.appearance.colorSet.normalText.asColor)
                     Spacer()
                 }
@@ -191,7 +193,7 @@ private struct EventListCellView: View {
         return HStack(spacing: 8) {
             // left
             self.eventLeftView(cellViewModel)
-                .frame(width: 50)
+                .frame(minWidth: 50)
                 
             // tag line
             RoundedRectangle(cornerRadius: 3)
@@ -214,7 +216,9 @@ private struct EventListCellView: View {
             return VStack(alignment: .center) {
                 Text(text)
                     .minimumScaleFactor(0.7)
-                    .font(self.appearance.fontSet.size(15, weight: .regular).asFont)
+                    .font(
+                        self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
+                    )
                     .foregroundColor(self.appearance.colorSet.normalText.asColor)
             }
         }
@@ -222,11 +226,11 @@ private struct EventListCellView: View {
             return VStack(alignment: .center, spacing: 2) {
                 Text(top)
                     .minimumScaleFactor(0.7)
-                    .font(self.appearance.fontSet.size(15, weight: .regular).asFont)
+                    .font(self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont)
                     .foregroundColor(self.appearance.colorSet.normalText.asColor)
                 Text(bottom)
                     .minimumScaleFactor(0.7)
-                    .font(self.appearance.fontSet.size(14).asFont)
+                    .font(self.appearance.fontSet.size(14+appearance.eventTextAdditionalSize).asFont)
                     .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
             }
         }
@@ -245,13 +249,15 @@ private struct EventListCellView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(cellViewModel.name)
                     .minimumScaleFactor(0.7)
-                    .font(self.appearance.fontSet.normal.asFont)
+                    .font(self.appearance.eventTextFontOnList().asFont)
                     .foregroundColor(self.appearance.colorSet.normalText.asColor)
                 
                 if let periodDescription = cellViewModel.periodDescription {
                     Text(periodDescription)
                         .minimumScaleFactor(0.7)
-                        .font(self.appearance.fontSet.size(13).asFont)
+                        .font(
+                            self.appearance.fontSet.size(13+appearance.eventTextAdditionalSize).asFont
+                        )
                         .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
                 }
             }
@@ -297,9 +303,11 @@ private struct QuickAddNewTodoView: View {
             
             Text("Todo".localized())
                 .minimumScaleFactor(0.7)
-                .font(self.appearance.fontSet.size(15, weight: .regular).asFont)
+                .font(
+                    self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
+                )
                 .foregroundColor(self.appearance.colorSet.normalText.asColor)
-            .frame(width: 50)
+            .frame(minWidth: 50)
             
             RoundedRectangle(cornerRadius: 3)
                 .fill(self.appearance.tagColors.defaultColor.asColor)

@@ -145,13 +145,17 @@ struct EventListAppearanceSettingView: View {
              
                 HStack {
                     Text(state.sampleModel?.dateText ?? "")
-                        .font(self.appearance.fontSet.size(22, weight: .semibold).asFont)
+                        .font(
+                            self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont
+                        )
                         .foregroundColor(self.appearance.colorSet.normalText.asColor)
                         .padding(.bottom, 3)
                     
                     if let lunarDate = state.sampleModel?.lunarDateText {
                         Text(lunarDate)
-                            .font(self.appearance.fontSet.size(20, weight: .semibold).asFont)
+                            .font(
+                                self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
+                            )
                             .foregroundColor(self.appearance.colorSet.subSubNormalText.asColor)
                             .padding(.bottom, 3)
                     }
@@ -173,12 +177,12 @@ struct EventListAppearanceSettingView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("🥗 Event name")
                             .minimumScaleFactor(0.7)
-                            .font(self.appearance.fontSet.normal.asFont)
+                            .font(self.appearance.eventTextFontOnList().asFont)
                             .foregroundColor(self.appearance.colorSet.normalText.asColor)
                         
                         Text("description")
                             .minimumScaleFactor(0.7)
-                            .font(self.appearance.fontSet.size(13).asFont)
+                            .font(self.appearance.fontSet.size(13+appearance.eventTextAdditionalSize).asFont)
                             .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
                     }
                     Spacer()
@@ -197,13 +201,15 @@ struct EventListAppearanceSettingView: View {
         func timeView(_ text: String) -> some View {
             Text(text)
                 .minimumScaleFactor(0.7)
-                .font(self.appearance.fontSet.size(15, weight: .regular).asFont)
+                .font(
+                    self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
+                )
                 .foregroundColor(self.appearance.colorSet.normalText.asColor)
         }
         
         let pmView: some View = {
             Text("PM")
-                .font(appearance.fontSet.size(9).asFont)
+                .font(appearance.fontSet.size(9+appearance.eventTextAdditionalSize).asFont)
                 .foregroundStyle(appearance.colorSet.normalText.asColor)
         }()
         
