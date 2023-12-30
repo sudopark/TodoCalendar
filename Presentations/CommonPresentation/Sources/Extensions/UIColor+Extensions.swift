@@ -13,6 +13,10 @@ import Domain
 extension EventTagColor {
     
     public func color(with appearance: ViewAppearance) -> UIColor {
+        guard appearance.eventOnCalendarShowEventTagColor
+        else {
+            return UIColor.clear
+        }
         switch self {
         case .holiday: return appearance.tagColors.holiday
         case .default: return appearance.tagColors.defaultColor
