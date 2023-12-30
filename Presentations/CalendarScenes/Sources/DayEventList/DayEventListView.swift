@@ -219,7 +219,7 @@ private struct EventListCellView: View {
         return HStack(spacing: 8) {
             // left
             self.eventLeftView(cellViewModel)
-                .frame(minWidth: 50)
+                .frame(width: 52)
                 
             // tag line
             RoundedRectangle(cornerRadius: 3)
@@ -238,26 +238,53 @@ private struct EventListCellView: View {
     }
     
     private func eventLeftView(_ cellViewModel: any EventCellViewModel) -> some View {
-        func singleText(_ text: String) -> some View {
+        
+        func pmOrAmView(_ amOrPm: String) -> some View {
+            Text(amOrPm)
+                .minimumScaleFactor(0.7)
+                .font(appearance.fontSet.size(8+appearance.eventTextAdditionalSize).asFont)
+                .foregroundStyle(appearance.colorSet.normalText.asColor)
+        }
+        
+        func singleText(_ text: EventTimeText) -> some View {
             return VStack(alignment: .center) {
-                Text(text)
-                    .minimumScaleFactor(0.7)
-                    .font(
-                        self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
-                    )
-                    .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text(text.text)
+                        .minimumScaleFactor(0.7)
+                        .font(
+                            self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
+                        )
+                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                    
+                    if let amPm = text.pmOram {
+                        pmOrAmView(amPm)
+                    }
+                }
             }
         }
-        func doubleText(_ top: String, _ bottom: String) -> some View {
+        func doubleText(_ top: EventTimeText, _ bottom: EventTimeText) -> some View {
             return VStack(alignment: .center, spacing: 2) {
-                Text(top)
-                    .minimumScaleFactor(0.7)
-                    .font(self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont)
-                    .foregroundColor(self.appearance.colorSet.normalText.asColor)
-                Text(bottom)
-                    .minimumScaleFactor(0.7)
-                    .font(self.appearance.fontSet.size(14+appearance.eventTextAdditionalSize).asFont)
-                    .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text(top.text)
+                        .minimumScaleFactor(0.7)
+                        .font(self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont)
+                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                    
+                    if let amPm = top.pmOram {
+                        pmOrAmView(amPm)
+                    }
+                }
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                 
+                    Text(bottom.text)
+                        .minimumScaleFactor(0.7)
+                        .font(self.appearance.fontSet.size(14+appearance.eventTextAdditionalSize).asFont)
+                        .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
+                    
+                    if let amPm = bottom.pmOram {
+                        pmOrAmView(amPm)
+                    }
+                }
             }
         }
         switch cellViewModel.periodText {
@@ -333,7 +360,7 @@ private struct QuickAddNewTodoView: View {
                     self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
                 )
                 .foregroundColor(self.appearance.colorSet.normalText.asColor)
-            .frame(minWidth: 50)
+                .frame(width: 52)
             
             RoundedRectangle(cornerRadius: 3)
                 .fill(self.appearance.tagColors.defaultColor.asColor)
@@ -400,6 +427,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(
             setting: setting
         )
+//        viewAppearance.eventTextAdditionalSize = 4
         viewAppearance.showHoliday = true
         viewAppearance.showLunarCalendarDate = true
         let state = DayEventListViewState()
@@ -435,7 +463,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                                 
                                 // 추가하여 성공했을때 가정
                                 let newCell = TodoEventCellViewModel("new-current-todo", name: name)
-                                    |> \.periodText .~ .singleText("Todo".localized())
+                                    |> \.periodText .~ .singleText(.init(text: "Todo".localized()))
                                     |> \.tagColor .~ pending.tagColor
                                 state.cellViewModels[index] = newCell
                             }
@@ -452,10 +480,10 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         let currentTodoCells: [TodoEventCellViewModel] = [
             .init("current-todo1", name: "current todo 1")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .singleText("Todo".localized()),
+                |> \.periodText .~ .singleText(.init(text: "Todo".localized())),
             .init("current-todo2", name: "current todo 2")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .singleText("Todo".localized())
+                |> \.periodText .~ .singleText(.init(text: "Todo".localized()))
         ]
         let todoCells: [TodoEventCellViewModel] = [
 //            .init(eventId: .todo("todo1"), name: "todo with anyTime")
@@ -463,36 +491,55 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
 //                |> \.periodText .~ .anyTime,
             .init("todo2", name: "todo with all day")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .doubleText("Todo".localized(), "Allday"),
+                |> \.periodText .~ .doubleText(
+                    .init(text: "Todo".localized()),
+                    .init(text: "Allday")
+                ),
             .init("todo3", name: "todo with at time")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .doubleText("Todo".localized(), "10:30"),
+                |> \.periodText .~ .doubleText(
+                    .init(text: "Todo".localized()),
+                    .init(text: "10:30", pmOram: "AM")
+                ),
 //            .init(eventId: .todo("todo4"), name: "todo with in today")
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .inToday("9:30", "20:30")
 //                |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
             .init("todo5", name: "todo with today to future")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .doubleText("Todo".localized(), "9 (Sat)")
+                |> \.periodText .~ .doubleText(
+                    .init(text: "Todo".localized()),
+                    .init(text: "9 (Sat)")
+                )
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
             .init("todo6", name: "todo with past to today")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .doubleText("Todo".localized(), "20:00")
+                |> \.periodText .~ .doubleText(
+                    .init(text: "Todo".localized()),
+                    .init(text: "20:00")
+                )
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
         let scheduleCells: [ScheduleEventCellViewModel] = [
             .init("sc1", name: "schdule with at time")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .singleText("8:30"),
+                |> \.periodText .~ .singleText(
+                    .init(text: "8:30", pmOram: "AM")
+                ),
             .init("sc2", name: "schdule with all day")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .singleText("Allday".localized()),
+                |> \.periodText .~ .singleText(
+                    .init(text: "Allday".localized())
+                ),
 //            .init(eventId: .schedule("sc3", turn: 1), name: "schdule with at time")
 //            |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .atTime("10:30"),
             .init("sc4", name: "schdule with in today")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .doubleText("9:30", "20:30")
+                |> \.periodText .~ .doubleText(
+                    .init(text: "9:30", pmOram: "AM"),
+                    .init(text: "8:30", pmOram: "PM")
+                )
                 |> \.periodDescription .~ "Sep 10 09:30 ~ Sep 10 20:30(11hours)",
 //            .init(eventId: .schedule("sc5", turn: 1), name: "schdule with today to future")
 //            |> \.colorHex .~ "#0000ff"
@@ -500,7 +547,10 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
 //                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
             .init("sc6", name: "schdule with past to today")
                 |> \.tagColor .~ .default
-                |> \.periodText .~ .doubleText("9 (Sat)", "20:00")
+                |> \.periodText .~ .doubleText(
+                    .init(text: "9 (Sat)"),
+                    .init(text: "20:00")
+                )
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
         

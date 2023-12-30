@@ -70,16 +70,19 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let todoEventUsecase: any TodoEventUsecase
     private let eventTagUsecase: any EventTagUsecase
+    private let uiSettingUsecase: any UISettingUsecase
     var router: (any DayEventListRouting)?
     
     init(
         calendarSettingUsecase: any CalendarSettingUsecase,
         todoEventUsecase: any TodoEventUsecase,
-        eventTagUsecase: any EventTagUsecase
+        eventTagUsecase: any EventTagUsecase,
+        uiSettingUsecase: any UISettingUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.todoEventUsecase = todoEventUsecase
         self.eventTagUsecase = eventTagUsecase
+        self.uiSettingUsecase = uiSettingUsecase
         
         self.internalBind()
     }
@@ -261,25 +264,26 @@ extension DayEventListViewModelImple {
         .eraseToAnyPublisher()
     }
     
-    private var cellViewModelsFromEvent: AnyPublisher<[any EventCellViewModel], Never> {
-        
+    private typealias CurrentAndEvents = ([any EventCellViewModel], [any EventCellViewModel])
+    
+    private var currentAndEventCellViewModels: AnyPublisher<CurrentAndEvents, Never> {
         let asCellViewModel: (
-            CurrentDayAndEventLists, TimeZone, [TodoEvent], [PendingTodoEventCellViewModel]
-        ) -> [any EventCellViewModel]
-        asCellViewModel = { dayAndEvents, timeZone, currentTodos, pendings in
+            CurrentDayAndEventLists, TimeZone, [TodoEvent], Bool
+        ) -> CurrentAndEvents
+        asCellViewModel = { dayAndEvents, timeZone, currentTodos, is24HourForm in
             
             let range = dayAndEvents.currentDay.range
             let currentTodoCells = currentTodos
                 .compactMap { TodoCalendarEvent($0, in: timeZone) }
-                .compactMap { TodoEventCellViewModel($0, in: range, timeZone) }
+                .compactMap { TodoEventCellViewModel($0, in: range, timeZone, is24HourForm) }
             
             let eventCellsWithTime = dayAndEvents.events.compactMap { event -> (any EventCellViewModel)? in
                 switch event {
                 case let todo as TodoCalendarEvent:
-                    return TodoEventCellViewModel(todo, in: range, timeZone)
+                    return TodoEventCellViewModel(todo, in: range, timeZone, is24HourForm)
                     
                 case let schedule as ScheduleCalendarEvent:
-                    return ScheduleEventCellViewModel(schedule, in: range, timeZone: timeZone)
+                    return ScheduleEventCellViewModel(schedule, in: range, timeZone: timeZone, is24HourForm)
                 case let holiday as HolidayCalendarEvent:
                     return HolidayEventCellViewModel(holiday)
                 
@@ -287,39 +291,37 @@ extension DayEventListViewModelImple {
                 }
             }
             
-            return currentTodoCells + pendings + eventCellsWithTime
+            return (currentTodoCells, eventCellsWithTime)
         }
         
         return Publishers.CombineLatest4(
             self.subject.currentDayAndEventLists.compactMap { $0 },
             self.calendarSettingUsecase.currentTimeZone,
             self.todoEventUsecase.currentTodoEvents,
-            self.subject.pendingTodoEvents
+            self.uiSettingUsecase.currentUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .map(asCellViewModel)
+        .eraseToAnyPublisher()
+    }
+    
+    private var cellViewModelsFromEvent: AnyPublisher<[any EventCellViewModel], Never> {
+        
+        let combineEvents: (CurrentAndEvents, [PendingTodoEventCellViewModel]) -> [any EventCellViewModel]
+        combineEvents = { pair, pending in
+            return pair.0 + pending + pair.1
+        }
+        
+        return Publishers.CombineLatest(
+            self.currentAndEventCellViewModels,
+            self.subject.pendingTodoEvents
+        )
+        .map(combineEvents)
         .eraseToAnyPublisher()
     }
     
     var doneTodoFailed: AnyPublisher<String, Never> {
         return self.subject.doneFailedTodo
             .eraseToAnyPublisher()
-    }
-}
-
-private extension TimeInterval {
-    
-    func timeText(_ timeZone: TimeZone) -> String {
-        let formatter = DateFormatter()
-        formatter.timeZone = timeZone
-        formatter.dateFormat = "H:mm".localized()
-        return formatter.string(from: Date(timeIntervalSince1970: self))
-    }
-    
-    func dayText(_ timeZone: TimeZone) -> String {
-        let formatter = DateFormatter()
-        formatter.timeZone = timeZone
-        formatter.dateFormat = "d (E)".localized()
-        return formatter.string(from: Date(timeIntervalSince1970: self))
     }
 }
 

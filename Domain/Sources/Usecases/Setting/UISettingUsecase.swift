@@ -27,6 +27,8 @@ public protocol UISettingUsecase: Sendable {
     func changeAppearanceSetting(
         _ params: EditAppearanceSettingParams
     ) throws -> AppearanceSettings
+    
+    var currentUISeting: AnyPublisher<AppearanceSettings, Never> { get }
 }
 
 
@@ -34,20 +36,27 @@ public final class UISettingUsecaseImple: UISettingUsecase {
     
     private let appSettingRepository: any AppSettingRepository
     private let viewAppearanceStore: any ViewAppearanceStore
+    private let sharedDataStore: SharedDataStore
     
     public init(
         appSettingRepository: any AppSettingRepository,
-        viewAppearanceStore: any ViewAppearanceStore
+        viewAppearanceStore: any ViewAppearanceStore,
+        sharedDataStore: SharedDataStore
     ) {
         self.appSettingRepository = appSettingRepository
         self.viewAppearanceStore = viewAppearanceStore
+        self.sharedDataStore = sharedDataStore
     }
 }
 
 extension UISettingUsecaseImple {
     
+    private var key: String { ShareDataKeys.uiSetting.rawValue }
+    
     public func loadAppearanceSetting() -> AppearanceSettings {
-        return self.appSettingRepository.loadSavedViewAppearance()
+        let setting = self.appSettingRepository.loadSavedViewAppearance()
+        sharedDataStore.put(AppearanceSettings.self, key: self.key, setting)
+        return setting
     }
     
     public func changeAppearanceSetting(
@@ -59,6 +68,15 @@ extension UISettingUsecaseImple {
         }
         let newSetting = self.appSettingRepository.changeAppearanceSetting(params)
         self.viewAppearanceStore.notifySettingChanged(newSetting)
+        self.sharedDataStore.put(AppearanceSettings.self, key: self.key, newSetting)
         return newSetting
+    }
+    
+    public var currentUISeting: AnyPublisher<AppearanceSettings, Never> {
+        return self.sharedDataStore
+            .observe(AppearanceSettings.self, key: self.key)
+            .compactMap { $0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }

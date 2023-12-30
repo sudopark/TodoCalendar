@@ -40,7 +40,8 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
         let viewModel = DayEventListViewModelImple(
             calendarSettingUsecase: usecaseFactory.makeCalendarSettingUsecase(),
             todoEventUsecase: usecaseFactory.makeTodoEventUsecase(),
-            eventTagUsecase: usecaseFactory.makeEventTagUsecase()
+            eventTagUsecase: usecaseFactory.makeEventTagUsecase(),
+            uiSettingUsecase: usecaseFactory.makeUISettingUsecase()
         )
         
         let viewController = DayEventListViewController(

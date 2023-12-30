@@ -12,15 +12,41 @@ import Optics
 
 // MARK: - EventPeriodText
 
+struct EventTimeText: Equatable {
+    let text: String
+    var pmOram: String?
+    
+    init(text: String, pmOram: String? = nil) {
+        self.text = text
+        self.pmOram = pmOram
+    }
+    
+    init(day: TimeInterval, _ timeZone: TimeZone) {
+        self.text = day.dayText(timeZone)
+    }
+    
+    init(time: TimeInterval, _ timeZone: TimeZone, _ isShort: Bool) {
+        self.text = time.timeText(timeZone, isShort: isShort)
+        self.pmOram = isShort ? time.isAmOrPmText(timeZone) : nil
+    }
+}
+
 enum EventPeriodText: Equatable {
     
-    case singleText(_ text: String)
-    case doubleText(_ topText: String, _ bottomText: String)
+    case singleText(_ text: EventTimeText)
+    case doubleText(_ topText: EventTimeText, _ bottomText: EventTimeText)
     
-    init?(_ todo: TodoCalendarEvent, in todayRange: Range<TimeInterval>, timeZone: TimeZone) {
+    init?(
+        _ todo: TodoCalendarEvent,
+        in todayRange: Range<TimeInterval>,
+        timeZone: TimeZone,
+        is24hourForm: Bool
+    ) {
         guard let time = todo.eventTime
         else {
-            self = .singleText("Todo".localized())
+            self = .singleText(
+                .init(text: "Todo".localized())
+            )
             return
         }
         
@@ -28,21 +54,27 @@ enum EventPeriodText: Equatable {
         
         switch (time, endTimeInToday, isAllTodayTimeContains) {
         case (_, _, true):
-            self = .doubleText("Todo".localized(), "Allday".localized())
+            self = .doubleText(
+                .init(text: "Todo".localized()),
+                .init(text: "Allday".localized())
+            )
             
         case (.at(let t), true, _):
-            self = .doubleText("Todo".localized(), t.timeText(timeZone))
+            self = .doubleText(
+                .init(text: "Todo".localized()),
+                .init(time: t, timeZone, !is24hourForm)
+            )
             
         case (_, true, _):
             self = .doubleText(
-                "Todo".localized(),
-                time.upperBoundWithFixed.timeText(timeZone)
+                .init(text: "Todo".localized()),
+                .init(time: time.upperBoundWithFixed, timeZone, !is24hourForm)
             )
             
         case (_, false, _):
             self = .doubleText(
-                "Todo".localized(),
-                time.upperBoundWithFixed.dayText(timeZone)
+                .init(text: "Todo".localized()),
+                .init(day: time.upperBoundWithFixed, timeZone)
             )
         }
     }
@@ -50,32 +82,37 @@ enum EventPeriodText: Equatable {
     init?(
         schedule eventTime: EventTime,
         in todayRange: Range<TimeInterval>,
-        timeZone: TimeZone
+        timeZone: TimeZone,
+        is24hourForm: Bool
     ) {
         let (isAllDay, startTimeInToday, endTimeInToday) = todayRange.checkTodayRangeBound(eventTime, timeZone: timeZone)
         switch (eventTime, startTimeInToday, endTimeInToday, isAllDay) {
         case (_, _, _, true):
-            self = .singleText("Allday".localized())
+            self = .singleText(
+                .init(text: "Allday".localized())
+            )
             
         case (.at(let time), true, true, _):
-            self = .singleText(time.timeText(timeZone))
+            self = .singleText(
+                .init(time: time, timeZone, !is24hourForm)
+            )
             
         case (_, true, true, _):
             self = .doubleText(
-                eventTime.lowerBoundWithFixed.timeText(timeZone),
-                eventTime.upperBoundWithFixed.timeText(timeZone)
+                .init(time: eventTime.lowerBoundWithFixed, timeZone, !is24hourForm),
+                .init(time: eventTime.upperBoundWithFixed, timeZone, !is24hourForm)
             )
             
         case (_, true, false, _):
             self = .doubleText(
-                eventTime.lowerBoundWithFixed.timeText(timeZone),
-                eventTime.upperBoundWithFixed.dayText(timeZone)
+                .init(time: eventTime.lowerBoundWithFixed, timeZone, !is24hourForm),
+                .init(day: eventTime.upperBoundWithFixed, timeZone)
             )
             
         case (_, false, true, _):
             self = .doubleText(
-                eventTime.lowerBoundWithFixed.dayText(timeZone),
-                eventTime.upperBoundWithFixed.timeText(timeZone)
+                .init(day: eventTime.lowerBoundWithFixed, timeZone),
+                .init(time: eventTime.upperBoundWithFixed, timeZone, !is24hourForm)
             )
             
         default:
@@ -146,11 +183,16 @@ struct TodoEventCellViewModel: EventCellViewModel {
         self.tagId = .default
     }
     
-    init?(_ todo: TodoCalendarEvent, in todayRange: Range<TimeInterval>, _ timeZone: TimeZone) {
+    init?(
+        _ todo: TodoCalendarEvent,
+        in todayRange: Range<TimeInterval>,
+        _ timeZone: TimeZone,
+        _ is24hourForm: Bool
+    ) {
         self.eventIdentifier = todo.eventId
         self.tagId = todo.eventTagId
         self.name = todo.name
-        self.periodText = EventPeriodText(todo, in: todayRange, timeZone: timeZone)
+        self.periodText = EventPeriodText(todo, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.periodDescription = todo.eventTime?.durationText(timeZone)
     }
 }
@@ -160,7 +202,9 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     let eventIdentifier: String
     var tagId: AllEventTagId
     let name: String
-    var periodText: EventPeriodText? = .singleText("Todo".localized())
+    var periodText: EventPeriodText? = .singleText(
+        .init(text: "Todo".localized())
+    )
     var periodDescription: String?
     var tagColor: EventTagColor?
     var customCompareKey: String {
@@ -200,9 +244,14 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
         self.tagId = .default
     }
     
-    init?(_ schedule: ScheduleCalendarEvent, in todayRange: Range<TimeInterval>, timeZone: TimeZone) {
+    init?(
+        _ schedule: ScheduleCalendarEvent,
+        in todayRange: Range<TimeInterval>,
+        timeZone: TimeZone,
+        _ is24hourForm: Bool
+    ) {
         guard let time = schedule.eventTime,
-            let periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone)
+            let periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         else { return nil }
         self.eventIdentifier = schedule.eventId
         self.eventIdWithoutTurn = schedule.eventIdWithoutTurn
@@ -229,7 +278,9 @@ struct HolidayEventCellViewModel: EventCellViewModel {
     init(_ holiday: HolidayCalendarEvent) {
         self.eventIdentifier = holiday.eventId
         self.name = holiday.name
-        self.periodText = .singleText("Allday".localized())
+        self.periodText = .singleText(
+            .init(text: "Allday".localized())
+        )
         self.tagId = .holiday
         self.tagColor = .holiday
     }
@@ -244,10 +295,17 @@ struct HolidayEventCellViewModel: EventCellViewModel {
 
 private extension TimeInterval {
     
-    func timeText(_ timeZone: TimeZone) -> String {
+    func isAmOrPmText(_ timeZone: TimeZone) -> String {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let date = Date(timeIntervalSince1970: self)
+        let isAm = calendar.component(.hour, from: date) < 12
+        return isAm ? "AM" : "PM"
+    }
+
+    func timeText(_ timeZone: TimeZone, isShort: Bool) -> String {
         let formatter = DateFormatter()
         formatter.timeZone = timeZone
-        formatter.dateFormat = "H:mm".localized()
+        formatter.dateFormat = isShort ? "h:mm".localized() : "H:mm".localized()
         return formatter.string(from: Date(timeIntervalSince1970: self))
     }
     
