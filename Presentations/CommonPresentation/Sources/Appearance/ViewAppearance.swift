@@ -87,6 +87,14 @@ extension ViewAppearance {
             weight: self.eventOnCalendarIsBold ? .semibold : .regular
         )
     }
+    
+    public func eventTextFontOnList() -> UIFont {
+        let defaultSize: CGFloat = 14
+        return UIFont.systemFont(
+            ofSize: defaultSize + self.eventTextAdditionalSize,
+            weight: .regular
+        )
+    }
 }
 
 extension ViewAppearance {
