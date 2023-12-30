@@ -6,29 +6,34 @@
 //
 
 import XCTest
+import Combine
 import Prelude
 import Optics
 import UnitTestHelpKit
 @testable import Domain
 
 
-class UISettingUsecaseImpleTests: BaseTestCase {
+class UISettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     
+    var cancelBag: Set<AnyCancellable>!
     private var spyViewAppearanceStore: SpyViewAppearanceStore!
     
     override func setUpWithError() throws {
+        self.cancelBag = .init()
         self.spyViewAppearanceStore = .init()
     }
     
     override func tearDownWithError() throws {
         self.spyViewAppearanceStore = nil
+        self.cancelBag = nil
     }
         
     private func makeUsecase() -> UISettingUsecaseImple {
         let repository = StubAppSettingRepository()
         let usecase = UISettingUsecaseImple(
             appSettingRepository: repository,
-            viewAppearanceStore: self.spyViewAppearanceStore
+            viewAppearanceStore: self.spyViewAppearanceStore,
+            sharedDataStore: SharedDataStore()
         )
         return usecase
     }
@@ -49,6 +54,20 @@ extension UISettingUsecaseImpleTests {
         XCTAssertEqual(setting.tagColorSetting.default, "default")
         XCTAssertEqual(setting.colorSetKey, .defaultLight)
         XCTAssertEqual(setting.fontSetKey, .systemDefault)
+    }
+    
+    func testUsecase_whenAfterLoadSetting_notifyByCurrentSetting() {
+        // given
+        let expect = expectation(description: "setting 조회 이후에 현재 세팅 전파")
+        let usecase = self.makeUsecase()
+        
+        // when
+        let setting = self.waitFirstOutput(expect, for: usecase.currentUISeting) {
+            let _ = usecase.loadAppearanceSetting()
+        }
+        
+        // then
+        XCTAssertNotNil(setting)
     }
     
     func testUsecase_whenChangeSettingWithInsufficientParams_error() {
@@ -93,10 +112,29 @@ extension UISettingUsecaseImpleTests {
                 EditAppearanceSettingParams.EditEventTagColorParams()
                 |> \.newHolidayTagColor .~ "new"
             )
-        let newValeu = try? usecase.changeAppearanceSetting(params)
+        let _ = try? usecase.changeAppearanceSetting(params)
         
         // then
         XCTAssertEqual(self.spyViewAppearanceStore.didSettignCahngedTo?.tagColorSetting.holiday, "new")
+    }
+    
+    func testUsecase_whenAfterChangeSetting_notifyByCurrentSetting() {
+        // given
+        let expect = expectation(description: "setting 조회 이후에 현재 세팅 전파")
+        let usecase = self.makeUsecase()
+        
+        // when
+        let setting = self.waitFirstOutput(expect, for: usecase.currentUISeting) {
+            let params = EditAppearanceSettingParams()
+                |> \.newTagColorSetting .~ (
+                    EditAppearanceSettingParams.EditEventTagColorParams()
+                    |> \.newHolidayTagColor .~ "new"
+                )
+            let _ = try? usecase.changeAppearanceSetting(params)
+        }
+        
+        // then
+        XCTAssertNotNil(setting)
     }
 }
 

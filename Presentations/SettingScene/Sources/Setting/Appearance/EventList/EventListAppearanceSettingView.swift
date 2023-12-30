@@ -166,7 +166,7 @@ struct EventListAppearanceSettingView: View {
             
             HStack(spacing: 8) {
                 eventSampleTimeView
-                .frame(minWidth: 50)
+                .frame(width: 52)
                 
                 RoundedRectangle(cornerRadius: 3)
                     .fill(appearance.tagColors.defaultColor.asColor)
@@ -209,6 +209,7 @@ struct EventListAppearanceSettingView: View {
         
         let pmView: some View = {
             Text("PM")
+                .minimumScaleFactor(0.7)
                 .font(appearance.fontSet.size(9+appearance.eventTextAdditionalSize).asFont)
                 .foregroundStyle(appearance.colorSet.normalText.asColor)
         }()

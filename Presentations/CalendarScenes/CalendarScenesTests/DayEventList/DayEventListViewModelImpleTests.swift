@@ -56,10 +56,21 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
         
+        let uiSettingUsecase = StubUISettingUsecase()
+        let setting = AppearanceSettings(
+            tagColorSetting: .init(holiday: "", default: ""), 
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault
+        )
+        |> \.is24hourForm .~ true
+        uiSettingUsecase.stubAppearanceSetting = setting
+        _ = uiSettingUsecase.loadAppearanceSetting()
+        
         let viewModel = DayEventListViewModelImple(
             calendarSettingUsecase: calendarSettingUsecase,
             todoEventUsecase: self.stubTodoUsecase,
-            eventTagUsecase: self.stubTagUsecase
+            eventTagUsecase: self.stubTagUsecase,
+            uiSettingUsecase: uiSettingUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -117,11 +128,13 @@ extension DayEventListViewModelImpleTests {
         let event = TodoCalendarEvent(current, in: timeZone)
         
         // when
-        let cellViewModel = TodoEventCellViewModel(event, in: 0..<100, timeZone)
+        let cellViewModel = TodoEventCellViewModel(event, in: 0..<100, timeZone, true)
         
         // then
         XCTAssertEqual(cellViewModel?.name, "current todo")
-        XCTAssertEqual(cellViewModel?.periodText, .singleText("Todo".localized()))
+        XCTAssertEqual(cellViewModel?.periodText, .singleText(
+            .init(text: "Todo".localized())
+        ))
         XCTAssertEqual(cellViewModel?.periodDescription, nil)
     }
     
@@ -135,7 +148,9 @@ extension DayEventListViewModelImpleTests {
         
         // then
         XCTAssertEqual(cellViewModel.name, "삼일절")
-        XCTAssertEqual(cellViewModel.periodText, .singleText("Allday".localized()))
+        XCTAssertEqual(cellViewModel.periodText, .singleText(
+            .init(text: "Allday".localized())
+        ))
         XCTAssertEqual(cellViewModel.periodDescription, nil)
     }
     
@@ -188,16 +203,26 @@ extension DayEventListViewModelImpleTests {
             let todo = TodoEvent(uuid: "todo", name: "dummy") |> \.time .~ time
             let event = TodoCalendarEvent(todo, in: timeZone)
             
-            let cellViewModel = TodoEventCellViewModel(event, in: self.todayRange, timeZone)
+            let cellViewModel = TodoEventCellViewModel(event, in: self.todayRange, timeZone, true)
             
             XCTAssertEqual(cellViewModel?.periodText, expectPeriodText)
         }
         // when + then
-        parameterizeTest(nil, .singleText("Todo".localized()))
-        parameterizeTest(self.rangeFromPastToToday, .doubleText("Todo".localized(), "23:58"))
-        parameterizeTest(self.rangeFromTodayToFuture, .doubleText("Todo".localized(), "11 (Mon)"))
-        parameterizeTest(self.rangeFromPastToFuture, .doubleText("Todo".localized(), "Allday".localized()))
-        parameterizeTest(self.rangeFromTodayToToday, .doubleText("Todo".localized(), "23:58"))
+        parameterizeTest(nil, .singleText(
+            .init(text: "Todo".localized())
+        ))
+        parameterizeTest(self.rangeFromPastToToday, .doubleText(
+            .init(text: "Todo".localized()), .init(text: "23:58")
+        ))
+        parameterizeTest(self.rangeFromTodayToFuture, .doubleText(
+            .init(text: "Todo".localized()), .init(text: "11 (Mon)")
+        ))
+        parameterizeTest(self.rangeFromPastToFuture, .doubleText(
+            .init(text: "Todo".localized()), .init(text: "Allday".localized())
+        ))
+        parameterizeTest(self.rangeFromTodayToToday, .doubleText(
+            .init(text: "Todo".localized()), .init(text: "23:58")
+        ))
     }
     
     func testCellViewModel_makeFromScheduleEventWithTime() {
@@ -211,15 +236,23 @@ extension DayEventListViewModelImpleTests {
             let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
             let event = ScheduleCalendarEvent.events(from: schedule, in: timeZone).first!
             
-            let cellViewModel = ScheduleEventCellViewModel(event, in: self.todayRange, timeZone: timeZone)
+            let cellViewModel = ScheduleEventCellViewModel(event, in: self.todayRange, timeZone: timeZone, true)
             
             XCTAssertEqual(cellViewModel?.periodText, expectPeriodText)
         }
         // when + then
-        parameterizeTest(self.rangeFromPastToToday, .doubleText("9 (Sat)", "23:58"))
-        parameterizeTest(self.rangeFromTodayToFuture, .doubleText("0:01", "11 (Mon)"))
-        parameterizeTest(self.rangeFromPastToFuture, .singleText("Allday".localized()))
-        parameterizeTest(self.rangeFromTodayToToday, .doubleText("0:01", "23:58"))
+        parameterizeTest(self.rangeFromPastToToday, .doubleText(
+            .init(text: "9 (Sat)"), .init(text: "23:58")
+        ))
+        parameterizeTest(self.rangeFromTodayToFuture, .doubleText(
+            .init(text: "0:01"), .init(text: "11 (Mon)")
+        ))
+        parameterizeTest(self.rangeFromPastToFuture, .singleText(
+            .init(text: "Allday".localized())
+        ))
+        parameterizeTest(self.rangeFromTodayToToday, .doubleText(
+            .init(text: "0:01"), .init(text: "23:58")
+        ))
     }
     
     func testCellViewModel_whenEventTimeIsAt_showTimeText() {
@@ -230,10 +263,12 @@ extension DayEventListViewModelImpleTests {
         let event = ScheduleCalendarEvent.events(from: schedule, in: timeZone).first!
         
         // when
-        let cellViewModel = ScheduleEventCellViewModel(event, in: self.todayRange, timeZone: timeZone)
+        let cellViewModel = ScheduleEventCellViewModel(event, in: self.todayRange, timeZone: timeZone, true)
         
         // then
-        XCTAssertEqual(cellViewModel?.periodText, .singleText("10:30"))
+        XCTAssertEqual(cellViewModel?.periodText, .singleText(
+            .init(text: "10:30")
+        ))
     }
     
     private var pdt9_10: Range<TimeInterval> {
@@ -266,15 +301,23 @@ extension DayEventListViewModelImpleTests {
             let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
             let event = ScheduleCalendarEvent.events(from: schedule, in: kstTimeZone).first!
             
-            let cellViewModel = ScheduleEventCellViewModel(event, in: self.todayRange, timeZone: kstTimeZone)
+            let cellViewModel = ScheduleEventCellViewModel(event, in: self.todayRange, timeZone: kstTimeZone, true)
             
             XCTAssertEqual(cellViewModel?.periodText, expectedPeriodText)
         }
         // when + then
-        parameterizeTest(self.pdt9_9to9_10, .singleText("Allday".localized()))
-        parameterizeTest(self.pdt9_9to9_11, .singleText("Allday".localized()))
-        parameterizeTest(self.pdt9_10, .singleText("Allday".localized()))
-        parameterizeTest(self.pdt9_10to9_11, .singleText("Allday".localized()))
+        parameterizeTest(self.pdt9_9to9_10, .singleText(
+            .init(text: "Allday".localized())
+        ))
+        parameterizeTest(self.pdt9_9to9_11, .singleText(
+            .init(text: "Allday".localized())
+        ))
+        parameterizeTest(self.pdt9_10, .singleText(
+            .init(text: "Allday".localized())
+        ))
+        parameterizeTest(self.pdt9_10to9_11, .singleText(
+            .init(text: "Allday".localized())
+        ))
     }
     
     func testCellViewModel_makeEventWithTimeHasPeriod_setPeriodDesription() {
@@ -287,7 +330,7 @@ extension DayEventListViewModelImpleTests {
             let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
             let event = ScheduleCalendarEvent.events(from: schedule, in: timeZone).first!
             
-            let cellViewModel = ScheduleEventCellViewModel(event,in: self.todayRange, timeZone: timeZone)
+            let cellViewModel = ScheduleEventCellViewModel(event,in: self.todayRange, timeZone: timeZone, true)
             
             XCTAssertEqual(cellViewModel?.periodDescription, expectedDescription)
         }
@@ -573,7 +616,7 @@ extension DayEventListViewModelImpleTests {
         let timeZone = TimeZone(abbreviation: "KST")!
         let todo = TodoCalendarEvent(.init(uuid: "dummy", name: "some"), in: timeZone)
         // when
-        let todoModel = TodoEventCellViewModel(todo, in: 0..<100, timeZone)!
+        let todoModel = TodoEventCellViewModel(todo, in: 0..<100, timeZone, true)!
         viewModel.selectEvent(todoModel)
         
         // then
@@ -587,7 +630,7 @@ extension DayEventListViewModelImpleTests {
         let schedule = ScheduleCalendarEvent(eventIdWithoutTurn: "ev", eventId: "dummy", name: "some", eventTime: .at(0), eventTimeOnCalendar: .at(0), eventTagId: .default)
         
         // when
-        let model = ScheduleEventCellViewModel(schedule, in: 0..<10, timeZone: timeZone)!
+        let model = ScheduleEventCellViewModel(schedule, in: 0..<10, timeZone: timeZone, true)!
         viewModel.selectEvent(model)
         
         // then
