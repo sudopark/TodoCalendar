@@ -16,6 +16,34 @@ import Scenes
 import Extensions
 
 
+struct SelectedDayModel: Equatable {
+    let dateText: String
+    var holidayName: String?
+    let lunarDateText: String
+    
+    init(dateText: String, lunarDateText: String) {
+        self.dateText = dateText
+        self.lunarDateText = lunarDateText
+    }
+    
+    init(_ timeZone: TimeZone, currentModel: CurrentSelectDayModel) {
+        let date = Date(timeIntervalSince1970: currentModel.range.lowerBound)
+        
+        let formatter = DateFormatter() |> \.timeZone .~ timeZone
+        formatter.dateFormat = "yyyy MM dd (E)".localized()
+        self.dateText = formatter.string(from: date)
+        
+        let lunarFormatter = DateFormatter() 
+            |> \.timeZone .~ timeZone
+            |> \.calendar .~ Calendar(identifier: .chinese)
+        
+        lunarFormatter.dateFormat = "MM dd".localized()
+        self.lunarDateText = lunarFormatter.string(from: date)
+        
+        self.holidayName = currentModel.holiday?.localName
+    }
+}
+
 // MARK: - DayEventListViewModel
 
 protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor {
@@ -29,7 +57,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func makeEventByTemplate()
     
     // presenter
-    var selectedDay: AnyPublisher<String, Never> { get }
+    var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> { get }
     var doneTodoFailed: AnyPublisher<String, Never> { get }
 }
@@ -198,14 +226,10 @@ extension DayEventListViewModelImple {
 
 extension DayEventListViewModelImple {
     
-    var selectedDay: AnyPublisher<String, Never> {
-        let transform: (TimeZone, CurrentSelectDayModel) -> String?
+    var selectedDay: AnyPublisher<SelectedDayModel, Never> {
+        let transform: (TimeZone, CurrentSelectDayModel) -> SelectedDayModel?
         transform = { timeZone, currentDay in
-            let date = Date(timeIntervalSince1970: currentDay.range.lowerBound)
-            let formatter = DateFormatter()
-            formatter.timeZone = timeZone
-            formatter.dateFormat = "EEEE, MMM d, yyyy".localized()
-            return formatter.string(from: date)
+            return SelectedDayModel(timeZone, currentModel: currentDay)
         }
         return Publishers.CombineLatest(
             self.calendarSettingUsecase.currentTimeZone,

@@ -585,6 +585,7 @@ extension MonthViewModelImpleTests {
     // 2nd 13일 선택 -> 이벤트 [todo_w2_sun_wed, schedule_w2_tue_fri]
     // 3rd 15일 선택 -> 이벤트 [schedule_w2_tue_fri, schedule_event_repeating]
     // 4th 16일 선택 -> 이벤트 [schedule_event_repeating]
+    // 5th 29일 선택 -> 이벤트 [
     func testViewModel_whenSelectedDayChanged_notify() {
         // given
         let viewModel = self.makeViewModelWithStubEvents()
@@ -593,6 +594,7 @@ extension MonthViewModelImpleTests {
         func parameterizeTest(
             _ expectDay: String,
             _ expectEventIds: [String],
+            _ expectHasHoliday: Bool,
             _ action: () -> Void
         ) {
             // given
@@ -610,20 +612,24 @@ extension MonthViewModelImpleTests {
             // then
             XCTAssertEqual(model?.identifier, expectDay)
             XCTAssertEqual(eventIds, expectEventIds)
+            XCTAssertEqual(model?.holiday != nil, expectHasHoliday)
         }
         
         // when + then
-        parameterizeTest("2023-9-11", ["todo_w2_sun_wed"]) {
+        parameterizeTest("2023-9-11", ["todo_w2_sun_wed"], false) {
             viewModel.select(.init(2023, 9, 11))
         }
-        parameterizeTest("2023-9-13", ["todo_w2_sun_wed", "schedule_w2_tue_fri-1"]) {
+        parameterizeTest("2023-9-13", ["todo_w2_sun_wed", "schedule_w2_tue_fri-1"], false) {
             viewModel.select(.init(2023, 9, 13))
         }
-        parameterizeTest("2023-9-15", ["schedule_event_repeating-4", "schedule_w2_tue_fri-1"]) {
+        parameterizeTest("2023-9-15", ["schedule_event_repeating-4", "schedule_w2_tue_fri-1"], false) {
             viewModel.select(.init(2023, 9, 15))
         }
-        parameterizeTest("2023-9-16", ["schedule_event_repeating-4"]) {
+        parameterizeTest("2023-9-16", ["schedule_event_repeating-4"], false) {
             viewModel.select(.init(2023, 9, 16))
+        }
+        parameterizeTest("2023-9-29", ["2023-09-29-추석"], true) {
+            viewModel.select(.init(2023, 09, 29))
         }
     }
 }

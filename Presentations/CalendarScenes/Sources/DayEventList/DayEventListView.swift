@@ -23,7 +23,7 @@ final class DayEventListViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
-    @Published fileprivate var dateText: String = ""
+    @Published fileprivate var dayModel: SelectedDayModel?
     @Published fileprivate var cellViewModels: [any EventCellViewModel] = []
     @Published fileprivate var tempDoneTodoIds: Set<String> = []
     
@@ -34,8 +34,8 @@ final class DayEventListViewState: ObservableObject {
         
         viewModel.selectedDay
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] text in
-                self?.dateText = text
+            .sink(receiveValue: { [weak self] model in
+                self?.dayModel = model
             })
             .store(in: &self.cancellables)
         
@@ -115,11 +115,36 @@ struct DayEventListView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(self.state.dateText)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
-                .foregroundColor(self.appearance.colorSet.normalText.asColor)
+            
+            // 상단 날짜 표시 헤더
+            VStack(alignment: .leading) {
+                
+                if let holidayName = self.state.dayModel?.holidayName, self.appearance.showHoliday {
+                    Text(holidayName)
+                        .font(appearance.eventSubNormalTextFontOnList().asFont)
+                        .foregroundStyle(appearance.colorSet.calendarAccentColor.asColor)
+                }
+                
+                // 상단 날짜표시 헤더 - 날짜 및 음력 표시
+                HStack {
+                    
+                    Text(self.state.dayModel?.dateText ?? "")
+                        .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
+                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                        
+                    
+                    if self.appearance.showLunarCalendarDate {
+                        Text(self.state.dayModel?.lunarDateText ?? "")
+                            .font(
+                                self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
+                            )
+                            .foregroundColor(self.appearance.colorSet.subSubNormalText.asColor)
+                    }
+                }
                 .padding(.bottom, 3)
+            }
+            
+            // 이벤트 리스트
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
                     
@@ -130,6 +155,7 @@ struct DayEventListView: View {
             }
             .fixedSize(horizontal: false, vertical: true)
             
+            // todo 추가
             QuickAddNewTodoView()
                 .eventHandler(\.addNewTodoQuickly, self.addNewTodoQuickly)
                 .eventHandler(\.makeNewTodoWithGivenNameAndDetails, self.makeNewTodoWithGivenNameAndDetails)
@@ -374,8 +400,11 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(
             setting: setting
         )
+        viewAppearance.showHoliday = true
+        viewAppearance.showLunarCalendarDate = true
         let state = DayEventListViewState()
-        state.dateText = "2020년 9월 15일(금)"
+        state.dayModel = .init(dateText: "2020년 9월 15일(금)", lunarDateText: "6월 4일")
+        state.dayModel?.holidayName = "크리스마스"
         state.cellViewModels = self.makeDummyCells()
         let containerView = DayEventListView()
             .eventHandler(\.requestDoneTodo) { id in

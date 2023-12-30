@@ -470,6 +470,7 @@ private extension CurrentSelectDayModel {
         self.init(
             dayCellViewModel.year, dayCellViewModel.month, dayCellViewModel.day, component, timeZone
         )
+        self.holiday = component.holiday(dayCellViewModel.month, dayCellViewModel.day)
     }
     
     init?(
@@ -478,6 +479,7 @@ private extension CurrentSelectDayModel {
         _ timeZone: TimeZone
     ) {
         self.init(today.year, today.month, today.day, component, timeZone)
+        self.holiday = component.holiday(today.month, today.day)
     }
     
     init?(
@@ -487,6 +489,7 @@ private extension CurrentSelectDayModel {
         guard let firstDay = month.weeks.flatMap({ $0.days }).first(where: { $0.month == month.month && $0.day == 1 })
         else { return nil }
         self.init(firstDay.year, firstDay.month, firstDay.day, month, timeZone)
+        self.holiday = month.holiday(firstDay.month, firstDay.day)
     }
     
     private init?(

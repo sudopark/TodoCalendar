@@ -95,6 +95,14 @@ extension ViewAppearance {
             weight: .regular
         )
     }
+    
+    public func eventSubNormalTextFontOnList() -> UIFont {
+        let defaultSize: CGFloat = 12
+        return UIFont.systemFont(
+            ofSize: defaultSize + self.eventTextAdditionalSize,
+            weight: .regular
+        )
+    }
 }
 
 extension ViewAppearance {

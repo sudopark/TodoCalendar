@@ -139,7 +139,7 @@ struct EventListAppearanceSettingView: View {
                 
                 if let holidayName = state.sampleModel?.holidayName {
                     Text(holidayName)
-                        .font(appearance.fontSet.subNormal.asFont)
+                        .font(appearance.eventSubNormalTextFontOnList().asFont)
                         .foregroundStyle(Color.red)
                 }
              

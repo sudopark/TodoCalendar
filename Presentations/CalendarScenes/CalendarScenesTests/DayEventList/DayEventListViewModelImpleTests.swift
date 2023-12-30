@@ -96,9 +96,13 @@ extension DayEventListViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(selectedDays, [
-            "Sunday, Sep 10, 2023",
-            "Monday, Sep 11, 2023"
+        XCTAssertEqual(selectedDays.map { $0.dateText }, [
+            "2023 09 10 (Sun)",
+            "2023 09 11 (Mon)"
+        ])
+        XCTAssertEqual(selectedDays.map { $0.lunarDateText }, [
+            "07 26",
+            "07 27"
         ])
     }
 }
