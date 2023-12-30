@@ -17,17 +17,24 @@ import Scenes
 
 struct WeekDayModel: Equatable {
     let symbol: String
-    let isWeekEnd: Bool
+    let isSunday: Bool
+    let isSaturday: Bool
+    
+    init(symbol: String, isSunday: Bool = false, isSaturday: Bool = false) {
+        self.symbol = symbol
+        self.isSunday = isSunday
+        self.isSaturday = isSaturday
+    }
     
     static func allModels() -> [WeekDayModel] {
         return [
-            .init(symbol: "SUN", isWeekEnd: true),
-            .init(symbol: "MON", isWeekEnd: false),
-            .init(symbol: "TUE", isWeekEnd: false),
-            .init(symbol: "WED", isWeekEnd: false),
-            .init(symbol: "THU", isWeekEnd: false),
-            .init(symbol: "FRI", isWeekEnd: false),
-            .init(symbol: "SAT", isWeekEnd: true)
+            .init(symbol: "SUN", isSunday: true),
+            .init(symbol: "MON"),
+            .init(symbol: "TUE"),
+            .init(symbol: "WED"),
+            .init(symbol: "THU"),
+            .init(symbol: "FRI"),
+            .init(symbol: "SAT", isSaturday: true)
         ]
     }
 }
@@ -38,23 +45,20 @@ struct DayCellViewModel: Equatable {
     let month: Int
     let day: Int
     let isNotCurrentMonth: Bool
-    let isWeekEnd: Bool
-    let isHoliday: Bool
+    let accentDay: AccentDays?
     
     init(
         year: Int,
         month: Int,
         day: Int,
         isNotCurrentMonth: Bool,
-        isWeekEnd: Bool,
-        isHoliday: Bool
+        accentDay: AccentDays?
     ) {
         self.year = year
         self.month = month
         self.day = day
         self.isNotCurrentMonth = isNotCurrentMonth
-        self.isWeekEnd = isWeekEnd
-        self.isHoliday = isHoliday
+        self.accentDay = accentDay
     }
     
     var identifier: String {
@@ -66,8 +70,17 @@ struct DayCellViewModel: Equatable {
         self.month = day.month
         self.day = day.day
         self.isNotCurrentMonth = day.month != month
-        self.isWeekEnd = DayOfWeeks(rawValue: day.weekDay)?.isWeekEnd == true
-        self.isHoliday = day.holiday != nil
+        let dayOfWeek = DayOfWeeks(rawValue: day.weekDay)
+        switch (dayOfWeek, day.holiday != nil) {
+        case (_, true):
+            self.accentDay = .holiday
+        case (.sunday, _):
+            self.accentDay = .sunday
+        case (.saturday, _):
+            self.accentDay = .saturday
+        default:
+            self.accentDay = nil
+        }
     }
 }
 

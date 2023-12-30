@@ -63,6 +63,24 @@ public class ViewAppearance: ObservableObject {
     }
 }
 
+// MARK: - combined property
+
+extension ViewAppearance {
+    
+    public func accentCalendarDayColor(_ accent: AccentDays?) -> UIColor {
+        switch accent {
+        case .holiday:
+            return self.accnetDayPolicy[.holiday] == true ? self.colorSet.calendarAccentColor : self.colorSet.holidayText
+        case .sunday:
+            return self.accnetDayPolicy[.sunday] == true ? self.colorSet.calendarAccentColor : self.colorSet.holidayText
+        case .saturday:
+            return self.accnetDayPolicy[.saturday] == true ? self.colorSet.calendarAccentColor : self.colorSet.holidayText
+        default:
+            return self.colorSet.weekDayText
+        }
+    }
+}
+
 extension ViewAppearance {
     
     public var didUpdated: AnyPublisher<(EventTagColorSet, any FontSet, any ColorSet), Never> {

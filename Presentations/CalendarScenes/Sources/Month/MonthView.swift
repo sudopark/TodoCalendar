@@ -111,9 +111,8 @@ struct MonthView: View {
     
     private var headerView: some View {
         let textColor: (WeekDayModel) -> Color = {
-            return $0.isWeekEnd
-            ? self.appearance.colorSet.weekEndText.asColor
-            : self.appearance.colorSet.weekDayText.asColor
+            let accent: AccentDays? = $0.isSunday ? .sunday : $0.isSaturday ? .saturday : nil
+            return appearance.accentCalendarDayColor(accent).asColor
         }
         return HStack {
             ForEach(self.state.weekDays, id: \.symbol) { weekDay in
@@ -180,12 +179,8 @@ private struct WeekRowView: View {
         let textColor: Color = {
             if day.identifier == self.state.selectedDay {
                 return self.appearance.colorSet.selectedDayText.asColor
-            } else if day.isHoliday {
-                return self.appearance.colorSet.holidayText.asColor
-            } else if day.isWeekEnd {
-                return self.appearance.colorSet.weekEndText.asColor
             } else {
-                return self.appearance.colorSet.weekDayText.asColor
+                return self.appearance.accentCalendarDayColor(day.accentDay).asColor
             }
         }()
         let backgroundColor: Color = {
@@ -314,20 +309,20 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
 
     var weekDays: AnyPublisher<[WeekDayModel], Never> {
         return Just([
-            .init(symbol: "SUN", isWeekEnd: true),
-            .init(symbol: "MON", isWeekEnd: false),
-            .init(symbol: "TUE", isWeekEnd: false),
-            .init(symbol: "WED", isWeekEnd: false),
-            .init(symbol: "THU", isWeekEnd: false),
-            .init(symbol: "FRI", isWeekEnd: false),
-            .init(symbol: "SAT", isWeekEnd: true)
+            .init(symbol: "SUN", isSunday: true),
+            .init(symbol: "MON"),
+            .init(symbol: "TUE"),
+            .init(symbol: "WED"),
+            .init(symbol: "THU"),
+            .init(symbol: "FRI"),
+            .init(symbol: "SAT", isSaturday: true)
         ])
         .eraseToAnyPublisher()
     }
 
     var weekModels: AnyPublisher<[WeekRowModel], Never> {
         let days: [DayCellViewModel] = (0..<31).map { int -> DayCellViewModel in
-            return  DayCellViewModel(year: 2023, month: 09, day: int+1, isNotCurrentMonth: false, isWeekEnd: false, isHoliday: false)
+            return  DayCellViewModel(year: 2023, month: 09, day: int+1, isNotCurrentMonth: false, accentDay: nil)
         }
         let models = days.enumerated().reduce(into: [WeekRowModel]()) { acc, pair in
             let isSunday = pair.offset % 7 == 0

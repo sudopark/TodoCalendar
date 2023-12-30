@@ -1,5 +1,5 @@
 //
-//  CalendarAppearancePreviewView.swift
+//  CalendarAppearanceSampleView.swift
 //  SettingScene
 //
 //  Created by sudo.park on 12/8/23.
@@ -78,9 +78,9 @@ final class CalendarSectionAppearanceSettingViewEventHandler: ObservableObject {
     var toggleShowUnderline: (Bool) -> Void = { _ in }
 }
 
-// MARK: - CalendarAppearancePreviewView
+// MARK: - CalendarAppearanceSampleView
 
-struct CalendarAppearancePreviewView: View {
+struct CalendarAppearanceSampleView: View {
     
     @Binding private var model: CalendarAppearanceModel
     @EnvironmentObject private var appearance: ViewAppearance
@@ -99,7 +99,10 @@ struct CalendarAppearancePreviewView: View {
                 Grid(alignment: .center, horizontalSpacing: 4, verticalSpacing: 5) {
                     GridRow {
                         ForEach(model.weekDays, id: \.rawValue) { day in
-                            textView(day.veryShortText, isWeekEnd: day == .sunday || day == .saturday)
+                            textView(
+                                day.veryShortText,
+                                accent: day == .sunday ? .sunday : day == .saturday ? .saturday : nil
+                            )
                         }
                     }
                     
@@ -128,8 +131,7 @@ struct CalendarAppearancePreviewView: View {
         let text = day.map { "\($0.number)" } ?? ""
         return textView(
             text,
-            isWeekEnd: day?.isWeekEnd == true,
-            isHoliday: day?.isHoliday == true,
+            accent: day?.accent,
             hasEvent: day?.hasEvent == true,
             isSelected: day?.number == 1
         )
@@ -137,20 +139,15 @@ struct CalendarAppearancePreviewView: View {
     
     private func textView(
         _ text: String,
-        isWeekEnd: Bool,
-        isHoliday: Bool = false,
+        accent: AccentDays?,
         hasEvent: Bool = false,
         isSelected: Bool = false
     ) -> some View {
         let textColor: UIColor = {
             if isSelected {
                 return self.appearance.colorSet.selectedDayText
-            } else if isHoliday {
-                return self.appearance.colorSet.holidayText
-            } else if isWeekEnd {
-                return self.appearance.colorSet.weekEndText
-            } else  {
-                return self.appearance.colorSet.normalText
+            } else {
+                return self.appearance.accentCalendarDayColor(accent)
             }
         }()
         
@@ -201,7 +198,7 @@ struct CalendarSectionAppearanceSettingView: View {
     var body: some View {
         
         VStack {
-            CalendarAppearancePreviewView(model: $state.calendarModel)
+            CalendarAppearanceSampleView(model: $state.calendarModel)
             
             VStack(spacing: 8) {
                 AppearanceRow("Start day of week".localized(), pickerView)
