@@ -68,9 +68,6 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         if self.appearance.is24hourForm != newSetting.is24hourForm {
             self.appearance.is24hourForm = newSetting.is24hourForm
         }
-        if self.appearance.dimOnPastEvent != newSetting.dimOnPastEvent {
-            self.appearance.dimOnPastEvent = newSetting.dimOnPastEvent
-        }
         
         // general
         if self.appearance.hapticEffectOff != newSetting.hapticEffectIsOn {

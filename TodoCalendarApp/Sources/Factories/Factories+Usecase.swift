@@ -121,9 +121,10 @@ extension NonLoginUsecaseFactoryImple {
         let repository = AppSettingRepositoryImple(
             environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
         )
-        return UISettingUsecaseImple(
+        return AppSettingUsecaseImple(
             appSettingRepository: repository,
-            viewAppearanceStore: self.viewAppearanceStore
+            viewAppearanceStore: self.viewAppearanceStore,
+            sharedDataStore: Singleton.shared.sharedDataStore
         )
     }
 }
