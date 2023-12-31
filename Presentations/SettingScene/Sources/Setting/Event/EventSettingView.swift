@@ -22,12 +22,28 @@ final class EventSettingViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
+    @Published var tagModel: EventTagCellViewModel?
+    @Published var periodModel: SelectedPeriodModel = .init(.hour1)
+    
     func bind(_ viewModel: any EventSettingViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
         
         // TODO: bind state
+        viewModel.selectedTagModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.tagModel = model
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.selectedPeriod
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.periodModel = model
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -36,6 +52,10 @@ final class EventSettingViewState: ObservableObject {
 final class EventSettingViewEventHandler: ObservableObject {
     
     // TODO: add handlers
+    var onAppear: () -> Void = { }
+    var selectTag: () -> Void = { }
+    var selectPeriod: (EventSettings.DefaultNewEventPeriod) -> Void = { _ in }
+    var close: () -> Void = { }
 }
 
 
@@ -61,6 +81,7 @@ struct EventSettingContainerView: View {
         return EventSettingView()
             .onAppear {
                 self.stateBinding(self.state)
+                self.eventHandlers.onAppear()
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
@@ -76,8 +97,104 @@ struct EventSettingView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandlers: EventSettingViewEventHandler
     
+    let allPeriods: [SelectedPeriodModel] = [
+        .init(.minute0), .init(.minute5), .init(.minute10), .init(.minute15),
+        .init(.minute30), .init(.minute45), .init(.hour1), .init(.hour2), .init(.allDay)
+    ]
+    
     var body: some View {
-        Text("EventSettingView")
+        NavigationStack {
+            
+            ScrollView {
+                
+                VStack {
+                    rowView(eventTypeView)
+                    rowView(periodView)
+                }
+                .padding(.top, 20)
+                .padding(.horizontal, 16)
+            }
+            .listStyle(.plain)
+            .navigationTitle("Event Settings".localized())
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationBackButton(tapHandler: eventHandlers.close)
+                }
+            }
+        }
+    }
+    
+    private func rowView(_ content: some View) -> some View {
+        content
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(UIColor.systemGroupedBackground.asColor)
+            )
+            .listRowSeparator(.hidden)
+    }
+    
+    private var eventTypeView: some View {
+        HStack {
+            Text("Event Type".localized())
+                .font(self.appearance.fontSet.normal.asFont)
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+            Spacer()
+            Circle()
+                .fill(
+                    self.state.tagModel?.color.color(with: appearance).asColor ?? .clear
+                )
+                .frame(width: 6, height: 6)
+            Text(state.tagModel?.name ?? "")
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+            
+            Image(systemName: "chevron.right")
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+        }
+    }
+    
+    private var periodView: some View {
+        HStack {
+            Text("Event Period".localized())
+                .font(self.appearance.fontSet.normal.asFont)
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+            
+            Spacer()
+            
+            Menu {
+                
+                Picker(selection: $state.periodModel) {
+                    
+                    ForEach(allPeriods, id: \.self) { model in
+                        HStack {
+                            if model.period == state.periodModel.period {
+                                Image(systemName: "checkmark")
+                                    .font(appearance.fontSet.normal.asFont)
+                                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                            }
+                            Text(model.text)
+                                .font(appearance.fontSet.normal.asFont)
+                                .foregroundStyle(appearance.colorSet.normalText.asColor)
+                        }
+                    }
+                } label: { EmptyView() }
+                
+            } label: {
+                HStack(spacing: 4) {
+                    Text(state.periodModel.text)
+                        .font(appearance.fontSet.subNormal.asFont)
+                        .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                    
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(self.appearance.fontSet.subNormal.asFont)
+                        .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                }
+            }
+        }
+        .onReceive(state.$periodModel.map { $0.period}, perform: eventHandlers.selectPeriod)
     }
 }
 
@@ -96,8 +213,9 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
             setting: setting
         )
         let state = EventSettingViewState()
+        state.tagModel = .init(id: .default, name: "default", color: .default)
+        state.periodModel = .init(EventSettings.DefaultNewEventPeriod.minute15)
         let eventHandlers = EventSettingViewEventHandler()
-        
         let view = EventSettingView()
             .environmentObject(state)
             .environmentObject(viewAppearance)

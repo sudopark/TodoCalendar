@@ -16,7 +16,7 @@ import Domain
 import Scenes
 
 
-struct SelectedPeriodModel: Equatable {
+struct SelectedPeriodModel: Hashable {
     let period: EventSettings.DefaultNewEventPeriod
     let text: String
     
@@ -33,6 +33,10 @@ struct SelectedPeriodModel: Equatable {
         case .hour2: "%d hours".localized(with: 2)
         case .allDay: "Allday".localized()
         }
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(period.rawValue)
     }
 }
 
@@ -66,15 +70,26 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
     ) {
         self.eventSettingUsecase = eventSettingUsecase
         self.eventTagUsecase = eventTagUsecase
-        
+     
+        self.internalBinding()
     }
     
     
     private struct Subject {
+        let setting = CurrentValueSubject<EventSettings?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
+    
+    private func internalBinding() {
+        
+        self.eventSettingUsecase.currentEventSetting
+            .sink(receiveValue: { [weak self] setting in
+                self?.subject.setting.send(setting)
+            })
+            .store(in: &self.cancellables)
+    }
 }
 
 
@@ -83,7 +98,8 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
 extension EventSettingViewModelImple {
     
     func prepare() {
-        _ = self.eventSettingUsecase.loadEventSetting()
+        let setting = self.eventSettingUsecase.loadEventSetting()
+        self.subject.setting.send(setting)
     }
  
     func selectTag() {
@@ -91,6 +107,10 @@ extension EventSettingViewModelImple {
     }
     
     func selectPeriod(_ newValue: EventSettings.DefaultNewEventPeriod) {
+        guard let setting = self.subject.setting.value,
+              setting.defaultNewEventPeriod != newValue
+        else { return }
+        
         let params = EditEventSettingsParams()
             |> \.defaultNewEventPeriod .~ newValue
         do {

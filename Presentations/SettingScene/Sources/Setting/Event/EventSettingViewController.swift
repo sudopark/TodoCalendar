@@ -35,6 +35,10 @@ final class EventSettingViewController: UIHostingController<EventSettingContaine
         self.viewAppearance = viewAppearance
         
         let eventHandlers = EventSettingViewEventHandler()
+        eventHandlers.onAppear = viewModel.prepare
+        eventHandlers.close = viewModel.close
+        eventHandlers.selectTag = viewModel.selectTag
+        eventHandlers.selectPeriod = viewModel.selectPeriod(_:)
         
         let containerView = EventSettingContainerView(
             viewAppearance: viewAppearance,

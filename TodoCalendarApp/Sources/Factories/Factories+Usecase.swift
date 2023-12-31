@@ -117,7 +117,7 @@ extension NonLoginUsecaseFactoryImple {
 
 extension NonLoginUsecaseFactoryImple {
     
-    func makeUISettingUsecase() -> any UISettingUsecase {
+    private func makeAppSettingUsecase() -> AppSettingUsecaseImple {
         let repository = AppSettingRepositoryImple(
             environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
         )
@@ -126,5 +126,13 @@ extension NonLoginUsecaseFactoryImple {
             viewAppearanceStore: self.viewAppearanceStore,
             sharedDataStore: Singleton.shared.sharedDataStore
         )
+    }
+    
+    func makeUISettingUsecase() -> any UISettingUsecase {
+        return self.makeAppSettingUsecase()
+    }
+    
+    func makeEventSettingUsecase() -> EventSettingUsecase {
+        return self.makeAppSettingUsecase()
     }
 }
