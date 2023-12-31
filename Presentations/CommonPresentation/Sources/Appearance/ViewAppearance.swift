@@ -30,7 +30,6 @@ public class ViewAppearance: ObservableObject {
     @Published public var showHoliday: Bool
     @Published public var showLunarCalendarDate: Bool
     @Published public var is24hourForm: Bool
-    @Published public var dimOnPastEvent: Bool
     
     // general
     @Published public var hapticEffectOff: Bool
@@ -56,7 +55,6 @@ public class ViewAppearance: ObservableObject {
         self.showHoliday = setting.showHoliday
         self.showLunarCalendarDate = setting.showLunarCalendarDate
         self.is24hourForm = setting.is24hourForm
-        self.dimOnPastEvent = setting.dimOnPastEvent
         
         self.hapticEffectOff = setting.hapticEffectIsOn
         self.animationEffectOff = setting.animationEffectIsOn

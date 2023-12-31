@@ -40,7 +40,6 @@ public final class AppSettingRepositoryImple: AppSettingRepository {
     private var showHolidayNameOnEventList: String { "show_holiday_name_on_eventList" }
     private var showLunarCalendarDate: String { "show_lunar_calendar_date" }
     private var is24HourForm: String { "is_24_hourForm" }
-    private var dimOnPastEvent: String { "dim_on_past_event" }
     
     // general
     private var hapticEffectIsOn: String { "haptic_effect_on" }
@@ -96,13 +95,11 @@ extension AppSettingRepositoryImple {
         let holiday: Bool = self.environmentStorage.load(showHolidayNameOnEventList) ?? false
         let lunar: Bool = self.environmentStorage.load(showLunarCalendarDate) ?? false
         let is24From: Bool = self.environmentStorage.load(is24HourForm) ?? true
-        let isDim: Bool = self.environmentStorage.load(dimOnPastEvent) ?? false
         setting = setting
             |> \.eventTextAdditionalSize .~ CGFloat(eventFont)
             |> \.showHoliday .~ holiday
             |> \.showLunarCalendarDate .~ lunar
             |> \.is24hourForm .~ is24From
-            |> \.dimOnPastEvent .~ isDim
         
         // general
         let hapticIsOn: Bool = self.environmentStorage.load(hapticEffectIsOn) ?? true
@@ -164,9 +161,6 @@ extension AppSettingRepositoryImple {
         )
         self.environmentStorage.update(
             is24HourForm, newValue.is24hourForm
-        )
-        self.environmentStorage.update(
-            dimOnPastEvent, newValue.dimOnPastEvent
         )
         
         // general

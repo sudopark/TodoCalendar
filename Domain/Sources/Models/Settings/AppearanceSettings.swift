@@ -53,7 +53,6 @@ public struct AppearanceSettings: Equatable {
     public var showHoliday: Bool = false
     public var showLunarCalendarDate: Bool = false
     public var is24hourForm: Bool = false
-    public var dimOnPastEvent: Bool = false
     
     // general
     public var hapticEffectIsOn: Bool = false
@@ -89,7 +88,6 @@ public struct AppearanceSettings: Equatable {
             |> \.showHoliday .~ (params.showHoliday ?? self.showHoliday)
             |> \.showLunarCalendarDate .~ (params.showLunarCalendarDate ?? self.showLunarCalendarDate)
             |> \.is24hourForm .~ (params.is24hourForm ?? self.is24hourForm)
-            |> \.dimOnPastEvent .~ (params.dimOnPastEvent ?? self.dimOnPastEvent)
             |> \.hapticEffectIsOn .~ (params.hapticEffectIsOn ?? self.hapticEffectIsOn)
             |> \.animationEffectIsOn .~ (params.animationEffectIsOn ?? self.animationEffectIsOn)
     }
@@ -122,7 +120,6 @@ public struct EditAppearanceSettingParams {
     public var showHoliday: Bool?
     public var showLunarCalendarDate: Bool?
     public var is24hourForm: Bool?
-    public var dimOnPastEvent: Bool?
     
     // general
     public var hapticEffectIsOn: Bool?
@@ -162,7 +159,6 @@ public struct EditAppearanceSettingParams {
             || self.showHoliday != nil
             || self.showLunarCalendarDate != nil
             || self.is24hourForm != nil
-            || self.dimOnPastEvent != nil
     }
     
     private var isValidGeneralValues: Bool {

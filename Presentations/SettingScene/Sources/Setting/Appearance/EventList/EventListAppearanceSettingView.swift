@@ -20,14 +20,12 @@ final class EventListAppearanceSettingViewState: ObservableObject {
     @Published var showHolidayName: Bool = false
     @Published var showLunarCalendarDate: Bool = false
     @Published var is24hourTimeForm: Bool = false
-    @Published var isDimOnPastEvent: Bool = false
     
     init(_ setting: EventListAppearanceSetting) {
         self.additionalFontSizeModel = .init(setting.eventTextAdditionalSize)
         self.showHolidayName = setting.showHoliday
         self.showLunarCalendarDate = setting.showLunarCalendarDate
         self.is24hourTimeForm = setting.is24hourForm
-        self.isDimOnPastEvent = setting.dimOnPastEvent
     }
     
     func bind(_ viewModel: any EventListAppearnaceSettingViewModel) {
@@ -69,13 +67,6 @@ final class EventListAppearanceSettingViewState: ObservableObject {
                 self?.is24hourTimeForm = flag
             })
             .store(in: &self.cancellables)
-        
-        viewModel.isDimOnPastEvent
-            .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] flag in
-                self?.isDimOnPastEvent = flag
-            })
-            .store(in: &self.cancellables)
     }
 }
 
@@ -88,7 +79,6 @@ final class EventListAppearanceSettingViewEventHandler: ObservableObject {
     var toggleIsShowHolidayName: (Bool) -> Void = { _ in }
     var toggleShowLunarCalendarDate: (Bool) -> Void = { _ in }
     var toggleIs24HourFom: (Bool) -> Void = { _ in }
-    var toggleDimOnPastEvent: (Bool) -> Void = { _ in }
 }
 
 
@@ -120,9 +110,6 @@ struct EventListAppearanceSettingView: View {
             
             AppearanceRow("24 hour form".localized(), is24HourFormView)
                 .onReceive(state.$is24hourTimeForm, perform: eventHandler.toggleIs24HourFom)
-            
-            AppearanceRow("Dim on past event".localized(), dimOnPastEventView)
-                .onReceive(state.$isDimOnPastEvent, perform: eventHandler.toggleDimOnPastEvent)
             
         }
         .padding(.top, 20)
@@ -285,11 +272,6 @@ struct EventListAppearanceSettingView: View {
     
     private var is24HourFormView: some View {
         Toggle("", isOn: $state.is24hourTimeForm)
-            .labelsHidden()
-    }
-    
-    private var dimOnPastEventView: some View {
-        Toggle("", isOn: $state.isDimOnPastEvent)
             .labelsHidden()
     }
 }
