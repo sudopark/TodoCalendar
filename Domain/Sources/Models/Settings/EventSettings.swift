@@ -13,7 +13,7 @@ import Foundation
 
 public struct EventSettings: Sendable, Equatable {
     
-    public enum DefaultNewEventPeriod: Sendable, Equatable {
+    public enum DefaultNewEventPeriod: String, Sendable {
         case minute0
         case minute5
         case minute10

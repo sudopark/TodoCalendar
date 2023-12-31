@@ -11,10 +11,7 @@ import Combine
 import Extensions
 
 
-public protocol AppSettingUsecase: AnyObject, UISettingUsecase { }
-
-
-public final class AppSettingUsecaseImple: AppSettingUsecase {
+public final class AppSettingUsecaseImple: Sendable {
     
     private let appSettingRepository: any AppSettingRepository
     private let viewAppearanceStore: any ViewAppearanceStore
@@ -33,7 +30,7 @@ public final class AppSettingUsecaseImple: AppSettingUsecase {
 
 // MARK: - appearance
 
-extension AppSettingUsecaseImple {
+extension AppSettingUsecaseImple: UISettingUsecase {
     
     private var appearanceKey: String { ShareDataKeys.uiSetting.rawValue }
     
@@ -59,6 +56,39 @@ extension AppSettingUsecaseImple {
     public var currentUISeting: AnyPublisher<AppearanceSettings, Never> {
         return self.sharedDataStore
             .observe(AppearanceSettings.self, key: self.appearanceKey)
+            .compactMap { $0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - EventSetting
+
+
+extension AppSettingUsecaseImple: EventSettingUsecase {
+    
+    private var eventSettingKey: String { ShareDataKeys.eventSetting.rawValue }
+    
+    public func loadEventSetting() -> EventSettings {
+        let setting = self.appSettingRepository.loadEventSetting()
+        self.sharedDataStore.put(EventSettings.self, key: eventSettingKey, setting)
+        return setting
+    }
+    
+    public func changeEventSetting(_ params: EditEventSettingsParams) throws -> EventSettings {
+        guard params.isValid
+        else {
+            throw RuntimeError("invalid edit parameters")
+        }
+        let newSetting = self.appSettingRepository.changeEventSetting(params)
+        self.sharedDataStore.put(EventSettings.self, key: eventSettingKey, newSetting)
+        return newSetting
+    }
+    
+    public var currentEventSetting: AnyPublisher<EventSettings, Never> {
+        return self.sharedDataStore
+            .observe(EventSettings.self, key: self.eventSettingKey)
             .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()

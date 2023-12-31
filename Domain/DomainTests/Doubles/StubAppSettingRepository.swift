@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 
 @testable import Domain
 
@@ -31,6 +33,22 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
     func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings {
         let old = self.loadSavedViewAppearance()
         let newSetting = old.update(params)
+        return newSetting
+    }
+    
+    var stubEvnetSetting: EventSettings?
+    func loadEventSetting() -> EventSettings {
+        if let setting = self.stubEvnetSetting {
+            return setting
+        }
+        return EventSettings()
+    }
+    
+    func changeEventSetting(_ params: EditEventSettingsParams) -> EventSettings {
+        let old = self.loadEventSetting()
+        let newSetting = old
+        |> \.defaultNewEventTagId .~ (params.defaultNewEventTagId ?? old.defaultNewEventTagId)
+        |> \.defaultNewEventPeriod .~ (params.defaultNewEventPeriod ?? old.defaultNewEventPeriod)
         return newSetting
     }
 }
