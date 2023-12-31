@@ -1,5 +1,5 @@
 //
-//  UISettingUsecaseImpleTests.swift
+//  AppSettingUsecaseImpleTests.swift
 //  DomainTests
 //
 //  Created by sudo.park on 2023/10/08.
@@ -13,7 +13,7 @@ import UnitTestHelpKit
 @testable import Domain
 
 
-class UISettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
+class AppSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyViewAppearanceStore: SpyViewAppearanceStore!
@@ -28,9 +28,9 @@ class UISettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         self.cancelBag = nil
     }
         
-    private func makeUsecase() -> UISettingUsecaseImple {
+    private func makeUsecase() -> AppSettingUsecaseImple {
         let repository = StubAppSettingRepository()
-        let usecase = UISettingUsecaseImple(
+        let usecase = AppSettingUsecaseImple(
             appSettingRepository: repository,
             viewAppearanceStore: self.spyViewAppearanceStore,
             sharedDataStore: SharedDataStore()
@@ -40,7 +40,9 @@ class UISettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
 }
 
 
-extension UISettingUsecaseImpleTests {
+// MARK: - test ui setting
+
+extension AppSettingUsecaseImpleTests {
     
     func testUsecase_loadAppAppearanceSetting() {
         // given
