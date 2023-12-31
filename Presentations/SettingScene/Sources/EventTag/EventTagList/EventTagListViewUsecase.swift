@@ -19,6 +19,14 @@ struct EventTagCellViewModel: Equatable {
     let id: AllEventTagId
     let name: String
     let color: EventTagColor
+    
+    static var `default`: EventTagCellViewModel {
+        return .init(id: .default, name: "default".localized(), color: .default)
+    }
+    
+    static var holiday: EventTagCellViewModel {
+        return .init(id: .holiday, name: "holiday".localized(), color: .holiday)
+    }
 }
 
 
@@ -61,8 +69,8 @@ extension EventTagListViewUsecase {
     
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> {
         let asCellViewModels: ([EventTag]) -> [EventTagCellViewModel] = { tags in
-            let holidayTag = EventTagCellViewModel(id: .holiday, name: "holiday".localized(), color: .holiday)
-            let defaultTag = EventTagCellViewModel(id: .default, name: "default".localized(), color: .default)
+            let holidayTag = EventTagCellViewModel.holiday
+            let defaultTag = EventTagCellViewModel.default
             let customCells = tags.map {
                 EventTagCellViewModel(
                     id: .custom($0.uuid),
