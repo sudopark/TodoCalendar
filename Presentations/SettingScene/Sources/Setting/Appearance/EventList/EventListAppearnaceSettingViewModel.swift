@@ -18,7 +18,6 @@ struct EventListAppearanceSetting {
     let showHoliday: Bool
     let showLunarCalendarDate: Bool
     let is24hourForm: Bool
-    let dimOnPastEvent: Bool
     
     init(
         eventTextAdditionalSize: CGFloat,
@@ -31,7 +30,6 @@ struct EventListAppearanceSetting {
         self.showHoliday = showHoliday
         self.showLunarCalendarDate = showLunarCalendarDate
         self.is24hourForm = is24hourForm
-        self.dimOnPastEvent = dimOnPastEvent
     }
     
     init(_ setting: AppearanceSettings) {
@@ -39,7 +37,6 @@ struct EventListAppearanceSetting {
         self.showHoliday = setting.showHoliday
         self.showLunarCalendarDate = setting.showLunarCalendarDate
         self.is24hourForm = setting.is24hourForm
-        self.dimOnPastEvent = setting.dimOnPastEvent
     }
 }
 
@@ -50,7 +47,6 @@ struct EventListAppearanceSampleModel: Equatable {
     var is24HourForm: Bool = true
     var holidayName: String?
     var lunarDateText: String?
-    var shouldDim: Bool = false
     
     init?(_ setting: EventListAppearanceSetting) {
         let calendar = Calendar(identifier: .gregorian)
@@ -70,7 +66,6 @@ struct EventListAppearanceSampleModel: Equatable {
                 |> \.calendar .~ Calendar(identifier: .chinese)
             self.lunarDateText = lunarForm.string(from: christmas)
         }
-        self.shouldDim = setting.dimOnPastEvent
     }
 }
 
@@ -81,14 +76,12 @@ protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable {
     func toggleShowHolidayName(_ show: Bool)
     func toggleShowLunarCalendarDate(_ show: Bool)
     func toggleIsShowTimeWith24HourForm(_ isOn: Bool)
-    func toggleDimOnPastEvent(_ isOn: Bool)
     
     var eventListSamepleModel: AnyPublisher<EventListAppearanceSampleModel, Never> { get }
     var eventFontIncreasedSizeModel: AnyPublisher<EventTextAdditionalSizeModel, Never> { get }
     var isShowHolidayName: AnyPublisher<Bool, Never> { get }
     var isShowLunarCalendarDate: AnyPublisher<Bool, Never> { get }
     var isShowTimeWith24HourForm: AnyPublisher<Bool, Never> { get }
-    var isDimOnPastEvent: AnyPublisher<Bool, Never> { get }
 }
 
 final class EventListAppearnaceSettingViewModelImple: EventListAppearnaceSettingViewModel, @unchecked Sendable {
@@ -162,15 +155,6 @@ extension EventListAppearnaceSettingViewModelImple {
         self.updateSetting(params)
     }
     
-    func toggleDimOnPastEvent(_ isOn: Bool) {
-        guard let setting = self.subject.setting.value,
-              setting.dimOnPastEvent != isOn
-        else { return }
-        
-        let params = EditAppearanceSettingParams() |> \.dimOnPastEvent .~ isOn
-        self.updateSetting(params)
-    }
-    
     private func updateSetting(_ params: EditAppearanceSettingParams) {
         
         do {
@@ -222,13 +206,6 @@ extension EventListAppearnaceSettingViewModelImple {
     var isShowTimeWith24HourForm: AnyPublisher<Bool, Never> {
         return self.subject.setting
             .compactMap { $0?.is24hourForm }
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-    
-    var isDimOnPastEvent: AnyPublisher<Bool, Never> {
-        return self.subject.setting
-            .compactMap { $0?.dimOnPastEvent }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

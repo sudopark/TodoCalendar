@@ -204,37 +204,4 @@ extension EventListAppearnaceSettingViewModelTests {
         // then
         XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.is24hourForm, false)
     }
-    
-    // 지나간 이벤트 딤드처리 여부 토글
-    func testViewModel_toggleDimedOnPastEvent() {
-        // given
-        let expect = expectation(description: "지나간 이벤트 딤드처리 여부 토글")
-        expect.expectedFulfillmentCount = 3
-        let viewModel = self.makeViewModel()
-        
-        // when
-        let isShows = self.waitOutputs(expect, for: viewModel.isDimOnPastEvent) {
-            
-            viewModel.toggleDimOnPastEvent(false)
-            viewModel.toggleDimOnPastEvent(true)
-        }
-        
-        // then
-        XCTAssertEqual(isShows, [true, false, true])
-    }
-    
-    func testViewModel_whenAfterToggleDimedOnPastEvent_saveUpdates() {
-        // given
-        let expect = expectation(description: "지나간 이벤트 딤드처리 여부 토글 이후에 변경사항 저장")
-        expect.expectedFulfillmentCount = 2
-        let viewModel = self.makeViewModel()
-        
-        // when
-        let _ = self.waitOutputs(expect, for: viewModel.isDimOnPastEvent) {
-            viewModel.toggleDimOnPastEvent(false)
-        }
-        
-        // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.dimOnPastEvent, false)
-    }
 }
