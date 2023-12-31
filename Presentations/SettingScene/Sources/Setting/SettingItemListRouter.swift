@@ -20,6 +20,7 @@ protocol SettingItemListRouting: Routing, Sendable {
     func routeToAppearanceSetting(
         inital setting: AppearanceSettings
     )
+    func routeToEventSetting()
     func routeToHolidaySetting()
 }
 
@@ -28,13 +29,16 @@ protocol SettingItemListRouting: Routing, Sendable {
 final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unchecked Sendable { 
     
     private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
+    private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     
     init(
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
+        eventSettingSceneBuilder: any EventSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler
     ) {
         self.appearanceSceneBuilder = appearanceSceneBuilder
+        self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
     }
 }
@@ -54,6 +58,13 @@ extension SettingItemListRouter {
             let next = self.appearanceSceneBuilder.makeAppearanceSettingScene(
                 inital: setting
             )
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+    
+    func routeToEventSetting() {
+        Task { @MainActor in
+            let next = self.eventSettingSceneBuilder.makeEventSettingScene()
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }

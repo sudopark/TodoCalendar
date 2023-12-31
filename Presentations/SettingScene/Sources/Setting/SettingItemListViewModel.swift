@@ -200,7 +200,8 @@ extension SettingItemListViewModelImple {
         case .appearance:
             self.routeApearanceSetting()
             
-        case .editEvent: break
+        case .editEvent:
+            self.router?.routeToEventSetting()
             
         case .holidaySetting:
             self.router?.routeToHolidaySetting()

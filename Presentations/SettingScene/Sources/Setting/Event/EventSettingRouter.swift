@@ -22,7 +22,12 @@ protocol EventSettingRouting: Routing, Sendable {
 
 // MARK: - Router
 
-final class EventSettingRouter: BaseRouterImple, EventSettingRouting, @unchecked Sendable { }
+final class EventSettingRouter: BaseRouterImple, EventSettingRouting, @unchecked Sendable { 
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        self.currentScene?.navigationController?.popViewController(animated: animate)
+    }
+}
 
 
 extension EventSettingRouter {

@@ -72,6 +72,11 @@ extension SettingSceneBuilderImple {
             timeZoneSelectSceneBuilder: timeZoneSelectSceneBuilder
         )
         
+        let eventSettingSceneBuilder = EventSettingSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
         let countrySelectSceneBuilder = CountrySelectSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
@@ -87,6 +92,7 @@ extension SettingSceneBuilderImple {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             appearanceSceneBuilder: apperanceSceneBuilder,
+            eventSettingSceneBuilder: eventSettingSceneBuilder,
             holidayListSceneBuilder: holidayListSceneBuilder
         )
         return builder.makeSettingItemListScene()

@@ -19,17 +19,20 @@ final class SettingItemListSceneBuilerImple {
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
+    private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
+        eventSettingSceneBuilder: any EventSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.appearanceSceneBuilder = appearanceSceneBuilder
+        self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
     }
 }
@@ -51,6 +54,7 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
     
         let router = SettingItemListRouter(
             appearanceSceneBuilder: self.appearanceSceneBuilder,
+            eventSettingSceneBuilder: self.eventSettingSceneBuilder,
             holidayListSceneBuilder: self.holidayListSceneBuilder
         )
         router.scene = viewController
