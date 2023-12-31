@@ -18,6 +18,12 @@ public final class AppSettingRepositoryImple: AppSettingRepository {
     public init(environmentStorage: any EnvironmentStorage) {
         self.environmentStorage = environmentStorage
     }
+}
+
+
+// MARK: - appearance setting
+
+extension AppSettingRepositoryImple {
     
     private var holidayTagColorKey: String { "holiday_tag_color" }
     private var defaultTagColorKey: String { "default_tag_color" }
@@ -44,10 +50,6 @@ public final class AppSettingRepositoryImple: AppSettingRepository {
     // general
     private var hapticEffectIsOn: String { "haptic_effect_on" }
     private var animationEffectIsOn: String { "animation_effect_on" }
-}
-
-
-extension AppSettingRepositoryImple {
     
     public func loadSavedViewAppearance() -> AppearanceSettings {
         let holidayTagColor: String? = self.environmentStorage.load(holidayTagColorKey)
@@ -176,5 +178,57 @@ extension AppSettingRepositoryImple {
         self.saveViewAppearanceSetting(newSetting)
         
         return newSetting
+    }
+}
+
+
+// MARK: - event setting
+
+extension AppSettingRepositoryImple {
+    
+    // event setting
+    private var defaultNewEventTagId: String { "default_new_event_tagId" }
+    private var defaultNewEventPeriod: String { "default_new_event_period" }
+    
+    public func loadEventSetting() -> EventSettings {
+        let tagIdRaw: String? = self.environmentStorage.load(defaultNewEventTagId)
+        let tagId: AllEventTagId = tagIdRaw.map { value in
+            switch value {
+            case "holiday": return AllEventTagId.holiday
+            case "default": return AllEventTagId.default
+            default: return AllEventTagId.custom(value)
+            }
+        } ?? .default
+        
+        let periodRaw: String? = self.environmentStorage.load(defaultNewEventPeriod)
+        let period: EventSettings.DefaultNewEventPeriod = periodRaw.flatMap {
+            EventSettings.DefaultNewEventPeriod(rawValue: $0)
+        } ?? .hour1
+        
+        return EventSettings()
+            |> \.defaultNewEventTagId .~ tagId
+            |> \.defaultNewEventPeriod .~ period
+    }
+    
+    public func changeEventSetting(_ params: EditEventSettingsParams) -> EventSettings {
+        let old = self.loadEventSetting()
+        let newSetting = old
+            |> \.defaultNewEventTagId .~ (params.defaultNewEventTagId ?? old.defaultNewEventTagId)
+            |> \.defaultNewEventPeriod .~ (params.defaultNewEventPeriod ??  old.defaultNewEventPeriod)
+        
+        self.environmentStorage.update(defaultNewEventTagId, newSetting.defaultNewEventTagId.rawValue)
+        self.environmentStorage.update(defaultNewEventPeriod, newSetting.defaultNewEventPeriod.rawValue)
+        return newSetting
+    }
+}
+
+private extension AllEventTagId {
+    
+    var rawValue: String {
+        switch self {
+        case .holiday: return "holiday"
+        case .default: return "default"
+        case .custom(let value): return value
+        }
     }
 }

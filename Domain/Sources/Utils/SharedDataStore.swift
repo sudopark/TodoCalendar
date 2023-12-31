@@ -22,6 +22,7 @@ public enum ShareDataKeys: String {
     case firstWeekDay
     case offEventTagSet
     case uiSetting
+    case eventSetting
     case latestUsedEventTag
 }
 
