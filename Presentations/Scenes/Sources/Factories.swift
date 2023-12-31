@@ -28,6 +28,7 @@ public protocol EventUsecaseFactory {
 public protocol SettingUsecaseFactory {
     
     func makeUISettingUsecase() -> any UISettingUsecase
+    func makeEventSettingUsecase() -> any EventSettingUsecase
 }
 
 public protocol UsecaseFactory: CalendarUsecaseFactory, EventUsecaseFactory, SettingUsecaseFactory { }
