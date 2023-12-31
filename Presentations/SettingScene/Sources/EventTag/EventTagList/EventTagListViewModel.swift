@@ -15,13 +15,7 @@ import Domain
 import Scenes
 
 
-struct EventTagCellViewModel: Equatable {
-    
-    var isOn: Bool = true
-    let id: AllEventTagId
-    let name: String
-    let color: EventTagColor
-}
+
 
 // MARK: - EventTagListViewModel
 
@@ -43,6 +37,7 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
 
 final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendable {
     
+    private let eventTagListUsecase: EventTagListViewUsecase
     private let tagUsecase: EventTagUsecase
     var router: (any EventTagListRouting)?
     var listener: (any EventTagListSceneListener)?
@@ -50,16 +45,33 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
     init(
         tagUsecase: EventTagUsecase
     ) {
+        self.eventTagListUsecase = .init(tagUsecase: tagUsecase)
         self.tagUsecase = tagUsecase
+        
+        self.internalBinding()
     }
     
-    
     private struct Subject {
-        let tags = CurrentValueSubject<[EventTag]?, Never>(nil)
+        let cvms = CurrentValueSubject<[EventTagCellViewModel]?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
+    
+    private func internalBinding() {
+        
+        self.eventTagListUsecase.cellViewModels
+            .sink(receiveValue: { [weak self] cvms in
+                self?.subject.cvms.send(cvms)
+            })
+            .store(in: &self.cancellables)
+        
+        self.eventTagListUsecase.reloadFailed
+            .sink(receiveValue: { [weak self] error in
+                self?.router?.showError(error)
+            })
+            .store(in: &self.cancellables)
+    }
 }
 
 
@@ -69,16 +81,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
     
     func reload() {
         
-        let showError: (any Error) -> Void = { [weak self] error in
-            self?.router?.showError(error)
-        }
-        let loaded: ([EventTag]) -> Void = { [weak self] tags in
-            self?.subject.tags.send(tags)
-        }
-        
-        self.tagUsecase.loadAllEventTags()
-            .sink(receiveValue: loaded, receiveError: showError)
-            .store(in: &self.cancellables)
+        self.eventTagListUsecase.reload()
     }
     
     func close() {
@@ -114,33 +117,44 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
     }
     
     private func routeToCustomTagEdit(_ tagId: String) {
-        guard let tag = self.subject.tags.value?.first(where: { $0.uuid == tagId })
+        guard let model = self.subject.cvms.value?.first(where: { $0.id.customTagId == tagId }),
+              let customColor = model.color.customHex
         else { return }
         
         let info = OriginalTagInfo(
-            id: .custom(tagId), name: tag.name, color: .custom(hex: tag.colorHex)
+            id: .custom(tagId), name: model.name, color: .custom(hex: customColor)
         )
         self.router?.routeToEditTag(info, listener: self)
     }
     
     func eventTag(created newTag: EventTag) {
-        let newTags = [newTag] + (self.subject.tags.value ?? [])
-        self.subject.tags.send(newTags)
+        let newModel = EventTagCellViewModel(
+            id: .custom(newTag.uuid),
+            name: newTag.name,
+            color: .custom(hex: newTag.colorHex)
+        )
+        let newTags = [newModel] + (self.subject.cvms.value ?? [])
+        self.subject.cvms.send(newTags)
         self.listener?.eventTag(created: newTag)
     }
     
     func eventTag(updated newTag: EventTag) {
-        let tags = self.subject.tags.value ?? []
-        guard let index = tags.firstIndex(where: { $0.uuid == newTag.uuid })
+        let cvms = self.subject.cvms.value ?? []
+        guard let index = cvms.firstIndex(where: { $0.id.customTagId == newTag.uuid })
         else { return }
-        let newTags = tags |> ix(index) .~ newTag
-        self.subject.tags.send(newTags)
+        let newModel = EventTagCellViewModel(
+            id: .custom(newTag.uuid),
+            name: newTag.name,
+            color: .custom(hex: newTag.colorHex)
+        )
+        let newTags = cvms |> ix(index) .~ newModel
+        self.subject.cvms.send(newTags)
         self.listener?.eventTag(updated: newTag)
     }
     
     func eventTag(deleted tagId: String) {
-        let newTags = self.subject.tags.value?.filter { $0.uuid != tagId }
-        self.subject.tags.send(newTags)
+        let newTags = self.subject.cvms.value?.filter { $0.id.customTagId != tagId }
+        self.subject.cvms.send(newTags)
         self.listener?.eventTag(deleted: tagId)
     }
 }
@@ -151,32 +165,9 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
 extension EventTagListViewModelImple {
     
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> {
-        
-        let asCellViewModels: ([EventTag]) -> [EventTagCellViewModel] = { tags in
-            let holidayTag = EventTagCellViewModel(id: .holiday, name: "holiday".localized(), color: .holiday)
-            let defaultTag = EventTagCellViewModel(id: .default, name: "default".localized(), color: .default)
-            let customCells = tags.map {
-                EventTagCellViewModel(
-                    id: .custom($0.uuid),
-                    name: $0.name,
-                    color: .custom(hex: $0.colorHex)
-                )
-            }
-            return [holidayTag, defaultTag] + customCells
-        }
-        let applyOnOff: ([EventTagCellViewModel], Set<AllEventTagId>) -> [EventTagCellViewModel] = { cvms, offTagIdSet in
-            
-            return cvms
-                .map { $0 |> \.isOn .~ !offTagIdSet.contains($0.id) }
-            
-        }
-        
-        return Publishers.CombineLatest(
-            self.subject.tags.compactMap { $0 }.map(asCellViewModels),
-            self.tagUsecase.offEventTagIdsOnCalendar()
-        )
-        .map(applyOnOff)
-        .removeDuplicates()
-        .eraseToAnyPublisher()
+        return self.subject.cvms
+            .compactMap { $0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
