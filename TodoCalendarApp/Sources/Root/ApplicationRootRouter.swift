@@ -13,6 +13,7 @@ import CommonPresentation
 import CalendarScenes
 import EventDetailScene
 import SettingScene
+import SQLiteService
 
 
 // MARK: - ApplicationViewAppearanceStore
@@ -172,7 +173,5 @@ extension ApplicationRootRouter {
         let dbPath = AppEnvironment.dbFilePath(for: accountId)
         let openResult = database.open(path: dbPath)
         logger.log(level: .info, "db open result: \(openResult) -> path: \(dbPath)")
-        
-        // TODO: create table if need
     }
 }
