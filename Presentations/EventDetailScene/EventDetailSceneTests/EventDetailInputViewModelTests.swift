@@ -27,6 +27,12 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
         return TimeZone(abbreviation: "KST")!
     }
     
+    private var thisYearRefDate: Date {
+        let calenar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.timeZone
+        let year = calenar.component(.year, from: Date())
+        return calenar.date(bySetting: .year, value: year, of: self.refDate)!
+    }
+    
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyRouter = .init()
@@ -152,7 +158,7 @@ extension EventDetailInputViewModelTests {
     func testSelectTimetext() {
         // given
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.timeZone
-        let thisYear = self.refDate!
+        let thisYear = self.thisYearRefDate
         let nextYear = calendar.addYear(1, from: thisYear)!
         
         // when
