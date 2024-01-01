@@ -109,6 +109,7 @@ struct EventSettingView: View {
                 
                 VStack {
                     rowView(eventTypeView)
+                        .onTapGesture(perform: eventHandlers.selectTag)
                     rowView(periodView)
                 }
                 .padding(.top, 20)

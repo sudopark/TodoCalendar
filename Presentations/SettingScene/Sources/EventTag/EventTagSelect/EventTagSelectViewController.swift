@@ -35,6 +35,9 @@ final class EventTagSelectViewController: UIHostingController<EventTagSelectCont
         self.viewAppearance = viewAppearance
         
         let eventHandlers = EventTagSelectViewEventHandler()
+        eventHandlers.onAppear = viewModel.loadList
+        eventHandlers.selectTag = viewModel.select(_:)
+        eventHandlers.onClose = viewModel.close
         
         let containerView = EventTagSelectContainerView(
             viewAppearance: viewAppearance,

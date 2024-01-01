@@ -19,13 +19,16 @@ final class EventSettingSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.eventTagSelectSceneBuilder = eventTagSelectSceneBuilder
     }
 }
 
@@ -46,6 +49,7 @@ extension EventSettingSceneBuilerImple: EventSettingSceneBuiler {
         )
     
         let router = EventSettingRouter(
+            eventTagSelectSceneBuilder: self.eventTagSelectSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

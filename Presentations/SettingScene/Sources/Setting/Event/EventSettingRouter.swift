@@ -22,7 +22,14 @@ protocol EventSettingRouting: Routing, Sendable {
 
 // MARK: - Router
 
-final class EventSettingRouter: BaseRouterImple, EventSettingRouting, @unchecked Sendable { 
+final class EventSettingRouter: BaseRouterImple, EventSettingRouting, @unchecked Sendable {
+    
+    private let eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
+    init(
+        eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
+    ) {
+        self.eventTagSelectSceneBuilder = eventTagSelectSceneBuilder
+    }
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
         self.currentScene?.navigationController?.popViewController(animated: animate)
@@ -38,7 +45,9 @@ extension EventSettingRouter {
     
     // TODO: router implememnts
     func routeToSelectTag() {
-        
+        Task { @MainActor in
+            let next = self.eventTagSelectSceneBuilder.makeEventTagSelectScene()
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
     }
-    
 }

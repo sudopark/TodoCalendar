@@ -202,7 +202,7 @@ private extension EventTagColor {
     }
 }
 
-private extension EventTagCellViewModel {
+extension EventTagCellViewModel {
     
     var compareKey: String {
         let components = [
