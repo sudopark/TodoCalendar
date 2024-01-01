@@ -51,15 +51,21 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     private func makeViewModel(
         latestTagExists: Bool = true,
+        defaultPeriod: EventSettings.DefaultNewEventPeriod = .hour1,
         shouldFailSaveDetailData: Bool = false
     ) -> AddEventViewModelImple {
         
         let tagUsecase = StubEventTagUsecase()
-        tagUsecase.stubLatestUsecaseEventTag = latestTagExists ? .init(uuid: "latest", name: "some", colorHex: "some") : nil
         tagUsecase.prepare()
         
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
+        
+        let eventSettingUsecase = StubEventSettingUsecase()
+        eventSettingUsecase.stubSetting = .init()
+        eventSettingUsecase.stubSetting?.defaultNewEventTagId = latestTagExists
+            ? .custom("latest") : .default
+        eventSettingUsecase.stubSetting?.defaultNewEventPeriod = defaultPeriod
         
         let viewModel = AddEventViewModelImple(
             params: .init(selectedDate: self.refDate),
@@ -67,7 +73,8 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
             scheduleUsecase: self.spyScheduleUsecase,
             eventTagUsease: tagUsecase,
             calendarSettingUsecase: settingUsecase,
-            eventDetailDataUsecase: self.spyEventDetailDataUsecase
+            eventDetailDataUsecase: self.spyEventDetailDataUsecase,
+            eventSettingUsecase: eventSettingUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachInput()
@@ -85,6 +92,28 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         return .period(
             .init(now.timeIntervalSince1970, self.timeZone),
             .init(next.timeIntervalSince1970, self.timeZone)
+        )
+    }
+    
+    private var defaultCurrentAtSelectTime: SelectedTime {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let now = calendar.dateBySetting(from: Date()) {
+            $0.year = 2023
+            $0.month = 9
+            $0.day = 18
+        }!
+        return .at(.init(now.timeIntervalSince1970, self.timeZone))
+    }
+    
+    private var defaultSingleAllDaySelectTime: SelectedTime {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ self.timeZone
+        let now = calendar.dateBySetting(from: Date()) {
+            $0.year = 2023
+            $0.month = 9
+            $0.day = 18
+        }!
+        return .singleAllDay(
+            .init(now.timeIntervalSince1970, timeZone, withoutTime: true)
         )
     }
     
@@ -148,6 +177,42 @@ extension AddEventViewModelImpleTests {
         let preparedAddition = self.spyRouter.spyInteractor.didPreparedWith?.1
         XCTAssertEqual(preparedAddition?.url, nil)
         XCTAssertEqual(preparedAddition?.memo, nil)
+    }
+    
+    func testViewModel_attachInputSceneWithInitialDefaultPeriod() {
+        // given
+        func parameterizeTest(
+            _ defPeriod: EventSettings.DefaultNewEventPeriod,
+            expectTime: SelectedTime
+        ) {
+            // given
+            let expect = expectation(description: "wait")
+            let viewModel = self.makeViewModel(defaultPeriod: defPeriod)
+            self.spyRouter.spyInteractor.didPreparedCallback = {
+                expect.fulfill()
+            }
+            
+            // when
+            viewModel.prepare()
+            self.wait(for: [expect], timeout: self.timeout)
+            
+            // then
+            let prepredBasic = self.spyRouter.spyInteractor.didPreparedWith?.0
+            XCTAssertEqual(prepredBasic?.selectedTime, expectTime)
+        }
+        // when + then
+        parameterizeTest(
+            .minute0,
+            expectTime: defaultCurrentAtSelectTime
+        )
+        parameterizeTest(
+            .hour1,
+            expectTime: defaultCurrentAndNextHourSelectTime
+        )
+        parameterizeTest(
+            .allDay,
+            expectTime: defaultSingleAllDaySelectTime
+        )
     }
     
     // todo여부 토글

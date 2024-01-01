@@ -25,6 +25,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
     private let eventTagUsease: any EventTagUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let eventDetailDataUsecase: any EventDetailDataUsecase
+    private let eventSettingUsecase: any EventSettingUsecase
     var router: (any EventDetailRouting)?
     
     init(
@@ -33,7 +34,8 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         scheduleUsecase: any ScheduleEventUsecase,
         eventTagUsease: any EventTagUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        eventDetailDataUsecase: any EventDetailDataUsecase
+        eventDetailDataUsecase: any EventDetailDataUsecase,
+        eventSettingUsecase: any EventSettingUsecase
     ) {
         
         self.initailMakeParams = params
@@ -42,6 +44,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         self.eventTagUsease = eventTagUsease
         self.calendarSettingUsecase = calendarSettingUsecase
         self.eventDetailDataUsecase = eventDetailDataUsecase
+        self.eventSettingUsecase = eventSettingUsecase
         
         self.internalBinding()
     }
@@ -85,20 +88,24 @@ extension AddEventViewModelImple: EventDetailInputListener {
     func prepare() {
         
         let params = self.initailMakeParams
+        let defaultSetting = self.eventSettingUsecase.loadEventSetting()
+        
         let defaultSelectTime = self.subject.timeZone.compactMap { $0 }
             .first()
             .compactMap { timeZone in
-                return params.selectedDate.selectDateDefaultTime(timeZone)
+                return params.selectedDate.selectDateDefaultTime(
+                    timeZone,
+                    defaultPeriod: defaultSetting.defaultNewEventPeriod
+                )
             }
-        let defaultTag = self.eventTagUsease.latestUsedEventTag
-            .first()
-            .map { $0?.uuid }
+
+        let defaultTag = self.eventSettingUsecase.loadEventSetting().defaultNewEventTagId
         
-        Publishers.CombineLatest(defaultSelectTime, defaultTag)
-            .sink(receiveValue: { [weak self] (time, id) in
+        defaultSelectTime
+            .sink(receiveValue: { [weak self] time in
                 let initailData = EventDetailBasicData(
                     name: params.initialTodoInfo?.name,
-                    eventTagId: id.map {.custom($0) } ?? .default
+                    eventTagId: defaultTag
                 )
                     |> \.selectedTime .~ time
                 self?.inputInteractor?.prepared(
@@ -269,7 +276,10 @@ extension AddEventViewModelImple {
 
 private extension Date {
     
-    func selectDateDefaultTime(_ timeZone: TimeZone) -> SelectedTime? {
+    func selectDateDefaultTime(
+        _ timeZone: TimeZone,
+        defaultPeriod: EventSettings.DefaultNewEventPeriod
+    ) -> SelectedTime? {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let selectDateCompos = calendar.dateComponents([.year, .month, .day], from: self)
         let now = Date()
@@ -280,10 +290,24 @@ private extension Date {
         })
         else { return nil }
         
-        let nextHour = start.addingTimeInterval(3600)
-        return .period(
-            .init(start.timeIntervalSince1970, timeZone),
-            .init(nextHour.timeIntervalSince1970, timeZone)
-        )
+        func period(_ interval: TimeInterval) -> SelectedTime {
+            let next = start.addingTimeInterval(interval)
+            return .period(
+                .init(start.timeIntervalSince1970, timeZone),
+                .init(next.timeIntervalSince1970, timeZone)
+            )
+        }
+        
+        switch defaultPeriod {
+        case .minute0: return .at(.init(start.timeIntervalSince1970, timeZone))
+        case .minute5: return period(5 * 60)
+        case .minute10: return period(10 * 60)
+        case .minute15: return period(15 * 60)
+        case .minute30: return period(30 * 60)
+        case .minute45: return period(45 * 60)
+        case .hour1: return period(60 * 60)
+        case .hour2: return period(120 * 60)
+        case .allDay: return .singleAllDay(.init(start.timeIntervalSince1970, timeZone, withoutTime: true))
+        }
     }
 }

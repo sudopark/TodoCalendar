@@ -181,7 +181,7 @@ extension Date {
     func timeText(at timeZone: TimeZone) -> String {
         let timeForm = DateFormatter()
         timeForm.timeZone = timeZone
-        timeForm.dateFormat = "HH:00".localized()
+        timeForm.dateFormat = "HH:mm".localized()
         return timeForm.string(from: self)
     }
     

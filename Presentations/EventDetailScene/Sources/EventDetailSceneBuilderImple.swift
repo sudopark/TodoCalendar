@@ -39,7 +39,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             eventTagUsease: self.usecaseFactory.makeEventTagUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
-            eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase()
+            eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
+            eventSettingUsecase: self.usecaseFactory.makeEventSettingUsecase()
         )
         
         return self.makeEventDetailScene(viewModel)
