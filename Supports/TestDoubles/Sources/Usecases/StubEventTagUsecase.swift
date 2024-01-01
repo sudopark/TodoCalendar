@@ -13,7 +13,7 @@ import Domain
 import Extensions
 
 
-open class StubEventTagUsecase: EventTagUsecase {
+open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
     
     public init() { }
     
