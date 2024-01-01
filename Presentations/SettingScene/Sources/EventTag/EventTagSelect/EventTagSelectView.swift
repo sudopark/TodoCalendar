@@ -11,6 +11,8 @@
 
 import SwiftUI
 import Combine
+import Prelude
+import Optics
 import Domain
 import CommonPresentation
 
@@ -21,6 +23,8 @@ final class EventTagSelectViewState: ObservableObject {
     
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
+    @Published var cellViewModels: [EventTagCellViewModel] = []
+    @Published var selectedId: AllEventTagId?
     
     func bind(_ viewModel: any EventTagSelectViewModel) {
         
@@ -28,6 +32,19 @@ final class EventTagSelectViewState: ObservableObject {
         self.didBind = true
         
         // TODO: bind state
+        viewModel.cellViewModels
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] cvms in
+                self?.cellViewModels = cvms
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.selectedId
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] id in
+                self?.selectedId = id
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -36,6 +53,9 @@ final class EventTagSelectViewState: ObservableObject {
 final class EventTagSelectViewEventHandler: ObservableObject {
     
     // TODO: add handlers
+    var onAppear: () -> Void = { }
+    var selectTag: (AllEventTagId) -> Void = { _ in }
+    var onClose: () -> Void = { }
 }
 
 
@@ -61,6 +81,7 @@ struct EventTagSelectContainerView: View {
         return EventTagSelectView()
             .onAppear {
                 self.stateBinding(self.state)
+                eventHandlers.onAppear()
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
@@ -77,7 +98,64 @@ struct EventTagSelectView: View {
     @EnvironmentObject private var eventHandlers: EventTagSelectViewEventHandler
     
     var body: some View {
-        Text("EventTagSelectView")
+        NavigationStack {
+            
+            
+            List {
+                
+                Text("This is the event type selected by default when creating a new event.".localized())
+                    .font(appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                    .listRowSeparator(.hidden)
+                    .padding(.bottom, 16)
+                
+                ForEach(state.cellViewModels, id: \.compareKey) { cvm in
+                    cellView(cvm)
+                        .listRowSeparator(.hidden)
+                }
+            }
+            .listStyle(.plain)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationBackButton(tapHandler: eventHandlers.onClose)
+                }
+            }
+            .navigationTitle("Default Event Type".localized())
+        }
+    }
+    
+    private func cellView(_ cellViewModel: EventTagCellViewModel) -> some View {
+        HStack(spacing: 12) {
+            
+            Circle()
+                .fill(cellViewModel.color.color(with: appearance).asColor)
+                .frame(width: 8, height: 8)
+            
+            Text(cellViewModel.name)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(
+                    cellViewModel.isOn
+                    ? appearance.colorSet.normalText.asColor
+                    : appearance.colorSet.subSubNormalText.asColor
+                )
+                .lineLimit(1)
+            
+            Spacer()
+            
+            if cellViewModel.id == state.selectedId {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 12))
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(self.appearance.colorSet.eventList.asColor)
+        )
+        .onTapGesture {
+            eventHandlers.selectTag(cellViewModel.id)
+        }
     }
 }
 
@@ -96,6 +174,12 @@ struct EventTagSelectViewPreviewProvider: PreviewProvider {
             setting: setting
         )
         let state = EventTagSelectViewState()
+        state.cellViewModels = (0..<20).map {
+            EventTagCellViewModel(id: .custom("id:\($0)"), name: "name:\($0)", color: .custom(hex: "#ff0000"))
+            |> \.isOn .~ ($0 % 2 == 0)
+        }
+        state.selectedId = .custom("id:3")
+        
         let eventHandlers = EventTagSelectViewEventHandler()
         
         let view = EventTagSelectView()

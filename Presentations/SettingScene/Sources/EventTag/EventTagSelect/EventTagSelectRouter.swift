@@ -19,7 +19,12 @@ protocol EventTagSelectRouting: Routing, Sendable { }
 
 // MARK: - Router
 
-final class EventTagSelectRouter: BaseRouterImple, EventTagSelectRouting, @unchecked Sendable { }
+final class EventTagSelectRouter: BaseRouterImple, EventTagSelectRouting, @unchecked Sendable {
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        self.currentScene?.navigationController?.popViewController(animated: animate)
+    }
+}
 
 
 extension EventTagSelectRouter {

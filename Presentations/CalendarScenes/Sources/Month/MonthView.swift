@@ -244,7 +244,7 @@ private struct WeekRowView: View {
     private func eventLineView(_ line: WeekEventLineModel) -> some View {
         let offsetX = CGFloat(line.eventOnWeek.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
         let width = CGFloat(line.eventOnWeek.daysSequence.count) * dayWidth - Metric.eventInterspacing
-        let lineColor = line.lineColor.color(with: self.appearance).asColor
+        let lineColor = line.lineColor.colorForEventOnCalendar(appearance).asColor
         let background: some View = {
             if line.eventOnWeek.hasPeriod {
                 return RoundedRectangle(cornerRadius: 2).fill(

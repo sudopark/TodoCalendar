@@ -75,7 +75,7 @@ struct EventOnCalendarViewPreviewView: View {
                     .foregroundStyle(appearance.colorSet.weekDayText.asColor)
                 HStack(spacing: 2) {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(appearance.eventTagColorOnCalendar(\.holiday).asColor)
+                        .fill(EventTagColor.holiday.colorForEventOnCalendar(appearance).asColor)
                         .frame(width: 3, height: 12)
                         .padding(.leading, 1)
                     
@@ -87,12 +87,12 @@ struct EventOnCalendarViewPreviewView: View {
                 .frame(width: 52, alignment: .leading)
                 .background(
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(appearance.eventTagColorOnCalendar(\.holiday).asColor)
+                        .fill(EventTagColor.holiday.colorForEventOnCalendar(appearance).asColor)
                 )
                 
                 HStack(spacing: 2) {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(appearance.eventTagColorOnCalendar(\.defaultColor).asColor)
+                        .fill(EventTagColor.default.colorForEventOnCalendar(appearance).asColor)
                         .frame(width: 3, height: 12)
                         .padding(.leading, 1)
                     
@@ -198,19 +198,6 @@ struct EventOnCalendarView: View {
     private var showEventTagColorView: some View {
         Toggle("", isOn: $state.isShowEventTagColor)
             .labelsHidden()
-    }
-}
-
-private extension ViewAppearance {
-    
-    func eventTagColorOnCalendar(
-        _ colorSelector: KeyPath<EventTagColorSet, UIColor>
-    ) -> UIColor {
-        guard self.eventOnCalendarShowEventTagColor
-        else {
-            return UIColor.clear
-        }
-        return self.tagColors[keyPath: colorSelector]
     }
 }
 

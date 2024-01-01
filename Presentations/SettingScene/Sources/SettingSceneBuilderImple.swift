@@ -72,9 +72,15 @@ extension SettingSceneBuilderImple {
             timeZoneSelectSceneBuilder: timeZoneSelectSceneBuilder
         )
         
-        let eventSettingSceneBuilder = EventSettingSceneBuilerImple(
+        let eventTagSelectSceneBuilder = EventTagSelectSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
+        )
+        
+        let eventSettingSceneBuilder = EventSettingSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            eventTagSelectSceneBuilder: eventTagSelectSceneBuilder
         )
         
         let countrySelectSceneBuilder = CountrySelectSceneBuilerImple(
