@@ -66,7 +66,8 @@ extension TodoLocalRepositoryImpleTests {
             |> \.time .~ .period(
                 0.0..<100.0
             )
-            |> \.repeating .~ repeating
+            |> \.repeating .~ pure(repeating)
+            |> \.notificationOption .~ .before(seconds: 100)
     }
     
     // make
@@ -116,6 +117,7 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(repeatOption?.interval, 2)
         XCTAssertEqual(event?.repeating?.repeatingStartTime, 100)
         XCTAssertEqual(event?.repeating?.repeatingEndTime, 200)
+        XCTAssertEqual(event?.notificationOption, .before(seconds: 100))
     }
     
     // update
@@ -252,6 +254,7 @@ extension TodoLocalRepositoryImpleTests {
         return TodoEvent(uuid: id, name: "name:\(id)")
             |> \.time .~ time.map { .at($0) }
             |> \.repeating .~ repeating
+            |> \.notificationOption .~ .allDay9AMBefore(seconds: 100)
     }
     
     private var dummyCurrentTodoAndHasTimes: [TodoEvent] {
@@ -329,6 +332,7 @@ extension TodoLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(result?.doneEvent.originEventId, "origin")
         XCTAssertNil(result?.nextRepeatingTodoEvent)
+        XCTAssertEqual(result?.doneEvent.notificationOption, .allDay9AMBefore(seconds: 100))
     }
     
     // complete not repeating todo -> no next event

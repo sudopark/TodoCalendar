@@ -20,6 +20,7 @@ struct TodoEventTable: Table {
         case repeatingStart = "repeating_start"
         case repeatingOption = "repeating_option"
         case repeatingEnd = "repeating_end"
+        case notificationOption = "notification_option"
         
         var dataType: ColumnDataType {
             switch self {
@@ -29,6 +30,7 @@ struct TodoEventTable: Table {
             case .repeatingStart: return .real([])
             case .repeatingOption: return .text([])
             case .repeatingEnd: return .real([])
+            case .notificationOption: return .text([])
             }
         }
     }
@@ -49,6 +51,7 @@ struct TodoEventTable: Table {
                 .flatMap { String(data: $0, encoding: .utf8) }
             
         case .repeatingEnd: return entity.repeating?.repeatingEndTime
+        case .notificationOption: return entity.notificationOption?.asString
         }
     }
     
@@ -65,6 +68,7 @@ extension TodoEvent: RowValueType {
         let start: Double? = cursor.next()
         let optionText: String? = cursor.next()
         let end: Double? = cursor.next()
+        self.notificationOption = cursor.next().flatMap { EventNotificationTimeOption(from: $0) }
         
         let optionMapper = optionText?.data(using: .utf8)
             .flatMap { try? JSONDecoder().decode(EventRepeatingOptionCodableMapper.self, from: $0) }

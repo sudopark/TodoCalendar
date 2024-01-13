@@ -9,7 +9,7 @@
 import Foundation
 
 
-public enum EventNotificationTimeOption {
+public enum EventNotificationTimeOption: Sendable, Equatable {
     
     case atTime
     case before(seconds: TimeInterval)
