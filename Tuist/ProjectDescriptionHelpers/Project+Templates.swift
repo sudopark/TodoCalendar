@@ -79,7 +79,7 @@ extension Project {
                            bundleId: "\(organizationName).\(name)Tests",
                            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
                            infoPlist: .default,
-                           sources: ["\(name)Tests/**"],
+                           sources: ["Tests/**"],
                            resources: [],
                            dependencies: [
                             .target(name: name),
