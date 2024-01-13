@@ -25,6 +25,7 @@ public struct DoneTodoEvent {
     public var eventTagId: AllEventTagId?
     public var eventTime: EventTime?
     public let doneTime: Date
+    public var notificationOption: EventNotificationTimeOption?
     
     public init(uuid: String, name: String, originEventId: String, doneTime: Date) {
         self.uuid = uuid
@@ -40,6 +41,7 @@ public struct DoneTodoEvent {
         self.eventTagId = origin.eventTagId
         self.eventTime = origin.time
         self.doneTime = Date()
+        self.notificationOption = origin.notificationOption
     }
 }
 

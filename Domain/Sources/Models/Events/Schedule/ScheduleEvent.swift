@@ -23,6 +23,8 @@ public struct ScheduleEvent: Equatable {
     public var repeating: EventRepeating?
     public var showTurn: Bool = false
     
+    public var notificationOption: EventNotificationTimeOption?
+    
     public struct RepeatingTimes: Equatable {
         public let time: EventTime
         public let turn: Int
@@ -54,6 +56,7 @@ public struct ScheduleEvent: Equatable {
         self.eventTagId = params.eventTagId
         self.repeating = params.repeating
         self.showTurn = params.showTurn ?? false
+        self.notificationOption = params.notificationOption
     }
     
     func isOverlap(with period: Range<TimeInterval>) -> Bool {
@@ -71,6 +74,7 @@ public struct ScheduleEvent: Equatable {
             |> \.eventTagId .~ params.eventTagId
             |> \.repeating .~ params.repeating
             |> \.showTurn .~ (params.showTurn ?? false)
+            |> \.notificationOption .~ (params.notificationOption ?? self.notificationOption)
     }
 }
 
@@ -84,6 +88,7 @@ public struct ScheduleMakeParams {
     public var eventTagId: AllEventTagId?
     public var repeating: EventRepeating?
     public var showTurn: Bool?
+    public var notificationOption: EventNotificationTimeOption?
     
     public init() { }
     
@@ -107,6 +112,7 @@ public struct ScheduleEditParams: Equatable {
     public var repeating: EventRepeating?
     public var repeatingUpdateScope: RepeatingUpdateScope?
     public var showTurn: Bool?
+    public var notificationOption: EventNotificationTimeOption?
     
     public init() { }
     
@@ -121,6 +127,7 @@ public struct ScheduleEditParams: Equatable {
                 || self.time != nil
                 || self.repeating != nil
                 || self.showTurn != nil
+                || self.notificationOption != nil
         }
     }
     
@@ -131,6 +138,7 @@ public struct ScheduleEditParams: Equatable {
             |> \.time .~ self.time
             |> \.repeating .~ self.repeating
             |> \.showTurn .~ self.showTurn
+            |> \.notificationOption .~ self.notificationOption
     }
 }
 

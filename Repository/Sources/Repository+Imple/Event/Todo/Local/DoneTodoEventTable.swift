@@ -19,6 +19,7 @@ struct DoneTodoEventTable: Table {
         case name
         case doneTime = "done_time"
         case eventTagId = "tag_id"
+        case notificationOption = "notification_option"
         
         var dataType: ColumnDataType {
             switch self {
@@ -27,6 +28,7 @@ struct DoneTodoEventTable: Table {
             case .name: return .text([.notNull])
             case .doneTime: return .real([.notNull])
             case .eventTagId: return .text([])
+            case .notificationOption: return .text([])
             }
         }
     }
@@ -42,6 +44,7 @@ struct DoneTodoEventTable: Table {
         case .name: return entity.name
         case .doneTime: return entity.doneTime.timeIntervalSince1970
         case .eventTagId: return entity.eventTagId?.stringValue
+        case .notificationOption: return entity.notificationOption?.asString
         }
     }
 }
@@ -56,5 +59,6 @@ extension DoneTodoEvent: RowValueType {
             doneTime: Date(timeIntervalSince1970: try cursor.next().unwrap())
         )
         self.eventTagId = cursor.next().map { AllEventTagId($0) }
+        self.notificationOption = cursor.next().flatMap { EventNotificationTimeOption(from: $0) }
     }
 }
