@@ -29,13 +29,15 @@ final class ApplicationRootUsecaseImple: ApplicationRootUsecase {
     
     private let authRepository: any AuthRepository
     private let appSettingRepository: any AppSettingRepository
-    
+    private let sharedDataStore: SharedDataStore
     init(
         authRepository: any AuthRepository,
-        appSettingRepository: any AppSettingRepository
+        appSettingRepository: any AppSettingRepository,
+        sharedDataStore: SharedDataStore
     ) {
         self.authRepository = authRepository
         self.appSettingRepository = appSettingRepository
+        self.sharedDataStore = sharedDataStore
     }
 }
 
@@ -45,6 +47,11 @@ extension ApplicationRootUsecaseImple {
     func prepareLaunch() async throws -> ApplicationPrepareResult {
         let latestLoginId = try await self.authRepository.loadLatestLoginUserId()
         let appearance = self.appSettingRepository.loadSavedViewAppearance()
+        self.sharedDataStore.put(
+            AppearanceSettings.self,
+            key: ShareDataKeys.uiSetting.rawValue,
+            appearance
+        )
         return .init(
             latestLoginAccountId: latestLoginId,
             appearnceSetings: appearance

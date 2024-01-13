@@ -18,7 +18,8 @@ final class ApplicationRootBuilder {
             authRepository: FakeAuthRepository(),
             appSettingRepository: AppSettingRepositoryImple(
                 environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
-            )
+            ),
+            sharedDataStore: Singleton.shared.sharedDataStore
         )
         let rootViewModel = ApplicationRootViewModelImple(
             applicationUsecase: rootUsecase
