@@ -18,59 +18,45 @@ public enum NotificationAuthorizationStatus: Sendable {
 
 public protocol NotificationPermissionUsecase: AnyObject, Sendable {
     
-    func checkAuthorizationStatus(
-        _ resultHandler: @escaping (Result<NotificationAuthorizationStatus, Error>) -> Void
-    )
+    func checkAuthorizationStatus() async throws -> NotificationAuthorizationStatus
     
-    func requestPermission(
-        _ resultHandler: @escaping (Result<Bool, Error>) -> Void
-    )
+    func requestPermission() async throws -> Bool
 }
 
 
 public final class NotificationPermissionUsecaseImple: NotificationPermissionUsecase, @unchecked Sendable {
     
-    private let notificationCenter: UNUserNotificationCenter
-    public init() {
-        self.notificationCenter = .current()
+    private let notificationService: any LocalNotificationService
+    public init(
+        notificationService: any LocalNotificationService = UNUserNotificationCenter.current()
+    ) {
+        self.notificationService = notificationService
     }
 }
 
 
 extension NotificationPermissionUsecaseImple {
     
-    public func checkAuthorizationStatus(
-        _ resultHandler: @escaping (Result<NotificationAuthorizationStatus, Error>) -> Void
-    ) {
-        self.notificationCenter.getNotificationSettings { settings in
-            switch settings.authorizationStatus {
-            case .notDetermined:
-                resultHandler(.success(.notDetermined))
-            case .denied:
-                resultHandler(.success(.denied))
-            case .authorized:
-                resultHandler(.success(.authorized))
-            case .provisional, .ephemeral:
-                resultHandler(.failure(
-                    RuntimeError("invalid status")
-                ))
-            @unknown default:
-                fatalError()
-            }
+    public func checkAuthorizationStatus() async throws -> NotificationAuthorizationStatus {
+        let status = await self.notificationService.notificationAuthorizationStatus()
+        switch status {
+        case .notDetermined:
+            return .notDetermined
+        case .denied:
+            return .denied
+        case .authorized:
+            return .authorized
+        case .provisional, .ephemeral:
+            throw RuntimeError("invalid status - \(status)")
+        @unknown default:
+            fatalError()
         }
     }
     
-    public func requestPermission(
-        _ resultHandler: @escaping (Result<Bool, Error>
-        ) -> Void) {
+    public func requestPermission() async throws -> Bool {
         
-        self.notificationCenter.requestAuthorization(options: [.alert, .badge, .sound]) { isGrant, error in
-            
-            if let error {
-                resultHandler(.failure(error))
-            } else {
-                resultHandler(.success(isGrant))
-            }
-        }
+        return try await self.notificationService.requestAuthorization(
+            options: [.alert, .badge, .sound]
+        )
     }
 }
