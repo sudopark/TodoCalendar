@@ -15,13 +15,17 @@ import UserNotifications
 final class StubLocalNotificationService: LocalNotificationService {
     
     var didAddNotificationRequest: UNNotificationRequest?
+    var didNotificationAddCalled: ((UNNotificationRequest) -> Void)?
     func add(_ request: UNNotificationRequest) async throws {
         self.didAddNotificationRequest = request
+        self.didNotificationAddCalled?(request)
     }
     
     var didRemovePendingNotificationRequestIdentifiers: [String]?
+    var didRemovePendingNotificationWithIdentifiers: (([String]) -> Void)?
     func removePendingNotificationRequests(withIdentifiers: [String]) {
         self.didRemovePendingNotificationRequestIdentifiers = withIdentifiers
+        self.didRemovePendingNotificationWithIdentifiers?(withIdentifiers)
     }
     
     var stubAuthorizeStatus: UNAuthorizationStatus?
