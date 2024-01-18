@@ -39,7 +39,7 @@ public struct SingleEventNotification: EventNotification {
     public var title: String { self.eventName }
     public var message: String { self.eventTImeText }
     
-    init(
+    public init(
         notificationId: String,
         eventType: SingleNotificationEventSourceType,
         eventId: String,
