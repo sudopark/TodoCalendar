@@ -44,7 +44,7 @@ class EventNotificationUsecaseImpleTests: BaseTestCase {
     private func makeUsecase() -> EventNotificationUsecaseImple {
         
         self.stubCalednarSettingUsecase.prepare()
-        // TODO: stub inital values
+        
         self.stubTodoUsecase.makeTodoChangeInPeriodEvent([
             pastTodo, todoWithoutTime, futureTodoEvent1, futureTodoEvent2
         ])
@@ -202,13 +202,120 @@ extension EventNotificationUsecaseImpleTests {
 
 extension EventNotificationUsecaseImpleTests {
     
+    private func makeUsecaseWithOnlyStubSchedules() -> EventNotificationUsecaseImple {
+        let usecase = self.makeUsecase()
+        self.stubTodoUsecase.makeTodoChangeInPeriodEvent([])
+        self.stubScheduleUsecase.makeScheduleChangeInPeriodEvent([
+            pastSchedule, schedule1, scheduleWithRepeat
+        ])
+        return usecase
+    }
+    
     // 현재 시간부터 1년 단위로 미래 일정 + 반복일정의 미래 시간 알림 등록
+    func testUsecase_whenSyncScheduleEventNotifications_scheduleNotificationsFromNowToNextYear() {
+        // given
+        let expect = expectation(description: "현재 시간부터 1년 단위로 미래 일정 + 반복일정의 미래 시간 알림 등록")
+        expect.expectedFulfillmentCount = 13
+        let usecase = self.makeUsecaseWithOnlyStubSchedules()
+        
+        self.spyNotificationService.didNotificationAddCalled = { req in
+            expect.fulfill()
+        }
+        
+        // when
+        usecase.runSyncEventNotification()
+        self.wait(for: [expect], timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets[schedule1.uuid]?.count, 1)
+        XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets[scheduleWithRepeat.uuid]?.count, 12)
+    }
+    
+    private func makeUsecaseWithInitialSyncSchedules() -> EventNotificationUsecaseImple {
+        // given
+        let expect = expectation(description: "wait add 13 times")
+        expect.expectedFulfillmentCount = 13
+        expect.assertForOverFulfill = false
+        let usecase = self.makeUsecaseWithOnlyStubSchedules()
+        
+        self.spyNotificationService.didNotificationAddCalled = { _ in
+            expect.fulfill()
+        }
+        
+        // when
+        usecase.runSyncEventNotification()
+        self.wait(for: [expect], timeout: 0.1)
+        
+        // then
+        return usecase
+    }
     
     // 이미 등록된 일정이 수정된경우 알림 변경
+    func testUsecase_whenScheduleEventUpdated_updatePendingNotification() {
+        // given
+        let usecase = self.makeUsecaseWithInitialSyncSchedules()
+        let expect = expectation(description: "이미 등록된 일정이 수정된경우 알림 변경")
+        
+        var updatedReq: [UNNotificationRequest] = []
+        self.spyNotificationService.didNotificationAddCalled = {
+            updatedReq.append($0)
+            expect.fulfill()
+        }
+        
+        // when
+        let newEvent = schedule1 |> \.name .~ "updated"
+        self.stubScheduleUsecase.makeScheduleChangeInPeriodEvent([
+            pastSchedule, newEvent, scheduleWithRepeat
+        ])
+        self.wait(for: [expect], timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(updatedReq.count, 1)
+        XCTAssertEqual(updatedReq.first?.content.title, "updated")
+        XCTAssertEqual(
+            self.spyNotificationRepository.eventAndNotificationSets[schedule1.uuid]?.count, 1
+        )
+        XCTAssertEqual(
+            self.spyNotificationRepository.eventAndNotificationSets[scheduleWithRepeat.uuid]?.count,
+            12
+        )
+        XCTAssertNotNil(usecase)    // 메모리 해제 안되게하기위해 필요함
+    }
     
     // 이미 등록된 일정이 삭제된 경우 알림 삭제
-    
-    // timeZone 변경시에도 연산 다시돔
+    func testUsecase_whenScheduleEventRemoved_cancelPendingTodo() {
+        // given
+        let usecase = self.makeUsecaseWithInitialSyncSchedules()
+        let expectForRemove = expectation(description: "이미 등록된 일정이 삭제된 경우 알림 삭제")
+        let expectForAdd = expectation(description: "변경사항 없어서 신규추가 없음")
+        expectForAdd.isInverted = true
+        
+        var removedIds: [String]?
+        self.spyNotificationService.didRemovePendingNotificationWithIdentifiers = {
+            removedIds = $0
+            expectForRemove.fulfill()
+        }
+        self.spyNotificationService.didNotificationAddCalled = { _ in
+            expectForAdd.fulfill()
+        }
+        
+        // when
+        self.stubScheduleUsecase.makeScheduleChangeInPeriodEvent([
+            pastSchedule, scheduleWithRepeat
+        ])
+        self.wait(for: [expectForRemove, expectForAdd], timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(removedIds?.count, 1)
+        XCTAssertEqual(
+            self.spyNotificationRepository.eventAndNotificationSets[schedule1.uuid], nil
+        )
+        XCTAssertEqual(
+            self.spyNotificationRepository.eventAndNotificationSets[scheduleWithRepeat.uuid]?.count,
+            12
+        )
+        XCTAssertNotNil(usecase)    // 메모리 해제 안되게하기위해 필요함
+    }
 }
 
 
@@ -234,6 +341,38 @@ private var futureTodoEvent2: TodoEvent = {
         |> \.notificationOption .~ .atTime
 }()
 
+private var pastSchedule: ScheduleEvent = {
+    return ScheduleEvent(
+        uuid: "past",
+        name: "past sc",
+        time: .at(Date().addingTimeInterval(-100).timeIntervalSince1970)
+    )
+    |> \.notificationOption .~ .atTime
+}()
+
+private var schedule1: ScheduleEvent = {
+    return ScheduleEvent(
+        uuid: "sc1",
+        name: "sc1",
+        time: .at(Date().addingTimeInterval(100).timeIntervalSince1970)
+    )
+    |> \.notificationOption .~ .atTime
+}()
+
+private var scheduleWithRepeat: ScheduleEvent = {
+    let time = Date().timeIntervalSince1970
+    return ScheduleEvent(
+        uuid: "sc-repeat",
+        name: "sc-repeat",
+        time: .at(time)
+    )
+    |> \.repeating .~ EventRepeating(
+        repeatingStartTime: time,
+        repeatOption: EventRepeatingOptions.EveryMonth(timeZone: TimeZone(abbreviation: "KST")!)
+    )
+    |> \.notificationOption .~ .atTime
+}()
+
 private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
     
     private let fakeSubject = CurrentValueSubject<[TodoEvent]?, Never>(nil)
@@ -253,16 +392,22 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
 
 private final class PrivateStubScheduleEventUsecase: StubScheduleEventUsecase {
     
-    private let fakeSubject = CurrentValueSubject<[ScheduleEvent]?, Never>(nil)
+    private let fakeSubject = CurrentValueSubject<MemorizedScheduleEventsContainer, Never>(.init())
     
     func makeScheduleChangeInPeriodEvent(_ schedules: [ScheduleEvent]) {
-        self.fakeSubject.send(schedules)
+        var container = MemorizedScheduleEventsContainer()
+        schedules.forEach {
+            container = container.invalidate($0.uuid)
+            container = container.append($0)
+        }
+        self.fakeSubject.send(container)
     }
     
     override func scheduleEvents(
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[ScheduleEvent], Never> {
-        return self.fakeSubject.compactMap { $0 }
+        return self.fakeSubject
+            .map { $0.scheduleEvents(in: period) }
             .eraseToAnyPublisher()
     }
 }
