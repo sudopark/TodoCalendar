@@ -29,5 +29,7 @@ protocol EventNotificationDefaultTimeOptionScene: Scene where Interactor == any 
 protocol EventNotificationDefaultTimeOptionSceneBuiler: AnyObject {
     
     @MainActor
-    func makeEventNotificationDefaultTimeOptionScene() -> any EventNotificationDefaultTimeOptionScene
+    func makeEventNotificationDefaultTimeOptionScene(
+        forAllDay: Bool
+    ) -> any EventNotificationDefaultTimeOptionScene
 }

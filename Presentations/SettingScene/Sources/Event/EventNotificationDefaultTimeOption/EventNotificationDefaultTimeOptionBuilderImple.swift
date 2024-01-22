@@ -17,11 +17,14 @@ import CommonPresentation
 
 final class EventNotificationDefaultTimeOptionSceneBuilerImple {
     
+    private let usecaesFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     
     init(
+        usecaesFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
+        self.usecaesFactory = usecaesFactory
         self.viewAppearance = viewAppearance
     }
 }
@@ -30,10 +33,14 @@ final class EventNotificationDefaultTimeOptionSceneBuilerImple {
 extension EventNotificationDefaultTimeOptionSceneBuilerImple: EventNotificationDefaultTimeOptionSceneBuiler {
     
     @MainActor
-    func makeEventNotificationDefaultTimeOptionScene() -> any EventNotificationDefaultTimeOptionScene {
+    func makeEventNotificationDefaultTimeOptionScene(
+        forAllDay: Bool
+    ) -> any EventNotificationDefaultTimeOptionScene {
         
         let viewModel = EventNotificationDefaultTimeOptionViewModelImple(
-            
+            forAllDay: forAllDay,
+            notificationPermissionUsecase: usecaesFactory.makeNotificationPermissionUsecase(),
+            eventNotificationSettingUsecase: usecaesFactory.makeEventNotificationSettingUsecase()
         )
         
         let viewController = EventNotificationDefaultTimeOptionViewController(

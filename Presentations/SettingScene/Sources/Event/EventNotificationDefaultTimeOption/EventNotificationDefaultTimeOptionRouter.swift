@@ -15,11 +15,19 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol EventNotificationDefaultTimeOptionRouting: Routing, Sendable { }
+protocol EventNotificationDefaultTimeOptionRouting: Routing, Sendable { 
+    
+    func openSystemNotificationSetting()
+}
 
 // MARK: - Router
 
-final class EventNotificationDefaultTimeOptionRouter: BaseRouterImple, EventNotificationDefaultTimeOptionRouting, @unchecked Sendable { }
+final class EventNotificationDefaultTimeOptionRouter: BaseRouterImple, EventNotificationDefaultTimeOptionRouting, @unchecked Sendable { 
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        self.currentScene?.navigationController?.popViewController(animated: animate)
+    }
+}
 
 
 extension EventNotificationDefaultTimeOptionRouter {
@@ -29,4 +37,7 @@ extension EventNotificationDefaultTimeOptionRouter {
     }
     
     // TODO: router implememnts
+    func openSystemNotificationSetting() {
+        // TODO: 
+    }
 }
