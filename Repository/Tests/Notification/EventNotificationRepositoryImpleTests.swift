@@ -32,6 +32,36 @@ class EventNotificationRepositoryImpleTests: BaseLocalTests {
 }
 
 
+// MARK: - default notification time option 저장
+
+extension EventNotificationRepositoryImpleTests {
+    
+    func testRepository_saveAndLoadDefaultNotificationTimeOption() {
+        // given
+        let repository = self.makeRepository()
+        func parameterizeTest(
+            forAllDay: Bool,
+            expectValue: EventNotificationTimeOption?
+        ) {
+            // given
+            // when
+            repository.saveDefaultNotificationTimeOption(forAllday: forAllDay, option: expectValue)
+            let saved = repository.loadDefaultNotificationTimeOption(forAllDay: forAllDay)
+            
+            // then
+            XCTAssertEqual(saved, expectValue)
+        }
+        // when + then
+        XCTAssertNil(repository.loadDefaultNotificationTimeOption(forAllDay: false))
+        XCTAssertNil(repository.loadDefaultNotificationTimeOption(forAllDay: true))
+        parameterizeTest(forAllDay: false, expectValue: .atTime)
+        parameterizeTest(forAllDay: false, expectValue: .before(seconds: 100))
+        parameterizeTest(forAllDay: true, expectValue: .allDay9AM)
+        parameterizeTest(forAllDay: true, expectValue: .allDay12AM)
+        parameterizeTest(forAllDay: true, expectValue: .allDay9AMBefore(seconds: 100))
+    }
+}
+
 // MARK: - save pending notification ids
 
 extension EventNotificationRepositoryImpleTests {

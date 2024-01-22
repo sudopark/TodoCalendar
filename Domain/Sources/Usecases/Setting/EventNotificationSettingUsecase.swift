@@ -12,12 +12,20 @@ import Foundation
 public protocol EventNotificationSettingUsecase: Sendable {
     
     func availableTimes(forAllDay: Bool) -> [EventNotificationTimeOption]
+    func loadDefailtNotificationTimeOption(forAllDay: Bool) -> EventNotificationTimeOption?
+    func saveDefaultNotificationTimeOption(forAllDay: Bool, option: EventNotificationTimeOption?)
 }
 
 
 public final class EventNotificationSettingUsecaseImple: EventNotificationSettingUsecase {
     
-    public init() { }
+    private let notificationRepository: any EventNotificationRepository
+    
+    public init(
+        notificationRepository: any EventNotificationRepository
+    ) {
+        self.notificationRepository = notificationRepository
+    }
 }
 
 extension EventNotificationSettingUsecaseImple {
@@ -54,5 +62,21 @@ extension EventNotificationSettingUsecaseImple {
             .before(seconds: self.days*2),
             .before(seconds: self.days*7)
         ]
+    }
+    
+    public func loadDefailtNotificationTimeOption(
+        forAllDay: Bool
+    ) -> EventNotificationTimeOption? {
+        
+        return self.notificationRepository.loadDefaultNotificationTimeOption(forAllDay: forAllDay)
+    }
+    
+    public func saveDefaultNotificationTimeOption(
+        forAllDay: Bool, 
+        option: EventNotificationTimeOption?
+    ) {
+        self.notificationRepository.saveDefaultNotificationTimeOption(
+            forAllday: forAllDay, option: option
+        )
     }
 }
