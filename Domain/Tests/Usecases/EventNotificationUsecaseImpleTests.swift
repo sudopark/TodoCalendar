@@ -412,12 +412,12 @@ private final class PrivateStubScheduleEventUsecase: StubScheduleEventUsecase {
     }
 }
 
-private final class SpyEventNotificationRepository: EventNotificationRepository, @unchecked Sendable {
+private final class SpyEventNotificationRepository: StubEventNotificationRepository {
     
     
     var eventAndNotificationSets: [String: Set<String>] = [:]
     
-    func removeAllSavedNotificationId(of eventIds: [String]) async throws -> [String] {
+    override func removeAllSavedNotificationId(of eventIds: [String]) async throws -> [String] {
         var sender: [String] = []
         eventIds.forEach {
             let set = self.eventAndNotificationSets[$0] ?? []
@@ -427,8 +427,10 @@ private final class SpyEventNotificationRepository: EventNotificationRepository,
         return sender
     }
     
-    func saveNotificationId(of eventId: String, _ notificationId: String) async throws {
-        self.eventAndNotificationSets = eventAndNotificationSets
-            |> key(eventId) %~ { $0 <> [notificationId] }
+    override func batchSaveNotificationId(_ eventIdNotificationIdMap: [String : [String]]) async throws {
+        let idSetMap = eventIdNotificationIdMap.mapValues { Set($0) }
+        idSetMap.forEach {
+            self.eventAndNotificationSets[$0.key] = (self.eventAndNotificationSets[$0.key] ?? []).union($0.value)
+        }
     }
 }
