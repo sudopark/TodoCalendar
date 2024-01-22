@@ -14,6 +14,20 @@ open class StubEventNotificationRepository: EventNotificationRepository, @unchec
     
     public init() { }
     
+    var option: EventNotificationTimeOption?
+    var optionForAllday: EventNotificationTimeOption?
+    
+    open func loadDefaultNotificationTimeOption(forAllDay: Bool) -> EventNotificationTimeOption? {
+        return forAllDay ? self.optionForAllday : self.option
+    }
+    
+    open func saveDefaultNotificationTimeOption(forAllday: Bool, option: EventNotificationTimeOption?) {
+        if forAllday {
+            self.optionForAllday = option
+        } else {
+            self.option = option
+        }
+    }
     
     open func removeAllSavedNotificationId(of eventIds: [String]) async throws -> [String] {
         return []

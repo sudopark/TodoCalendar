@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import TestDoubles
 
 @testable import Domain
 
@@ -14,7 +15,9 @@ import XCTest
 class EventNotificationSettingUsecaseImpleTests: XCTestCase {
     
     private func makeUsecase() -> EventNotificationSettingUsecaseImple {
-        return .init()
+        return .init(
+            notificationRepository: StubEventNotificationRepository()
+        )
     }
 }
 
@@ -59,5 +62,24 @@ extension EventNotificationSettingUsecaseImpleTests {
             .before(seconds: 3600.0*24*2),
             .before(seconds: 3600.0*24*7)
         ])
+    }
+    
+    func testUsecase_saveAndLoadDefaultEventNotificationTimeOption() {
+        // given
+        let usecase = self.makeUsecase()
+        let optionBeforeSave = usecase.loadDefailtNotificationTimeOption(forAllDay: false)
+        let optionBeforeSaveFroAllDay = usecase.loadDefailtNotificationTimeOption(forAllDay: true)
+        
+        // when
+        usecase.saveDefaultNotificationTimeOption(forAllDay: false, option: .atTime)
+        usecase.saveDefaultNotificationTimeOption(forAllDay: true, option: .allDay9AMBefore(seconds: 100))
+        
+        // then
+        let optionAfterSave = usecase.loadDefailtNotificationTimeOption(forAllDay: false)
+        let optionAfterSaveForAllday = usecase.loadDefailtNotificationTimeOption(forAllDay: true)
+        XCTAssertEqual(optionBeforeSave, nil)
+        XCTAssertEqual(optionBeforeSaveFroAllDay, nil)
+        XCTAssertEqual(optionAfterSave, .atTime)
+        XCTAssertEqual(optionAfterSaveForAllday, .allDay9AMBefore(seconds: 100))
     }
 }
