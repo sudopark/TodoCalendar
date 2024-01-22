@@ -11,5 +11,5 @@ import Foundation
 public protocol EventNotificationRepository: AnyObject, Sendable {
     
     func removeAllSavedNotificationId(of eventIds: [String]) async throws -> [String]
-    func saveNotificationId(of eventId: String, _ notificationId: String) async throws
+    func batchSaveNotificationId(_ eventIdNotificationIdMap: [String: [String]]) async throws
 }

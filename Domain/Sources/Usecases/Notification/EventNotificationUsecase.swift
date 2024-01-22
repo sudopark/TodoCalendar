@@ -11,6 +11,7 @@ import Combine
 import UserNotifications
 import Prelude
 import Optics
+import AsyncAlgorithms
 import Extensions
 
 
@@ -98,14 +99,17 @@ extension EventNotificationUsecaseImple {
                 return .init(todo: todo, in: timeZone, timeOption: option)
             }
             
-            await params.asyncForEach { param in
+            let eventAndNotificationIds = await params.async.reduce(into: [String: [String]]()) { acc, param in
                 if let notificationId = try? await self.scheduleNotification(param) {
-                    do {
-                        try await self.notificationRepository.saveNotificationId(of: param.eventId, notificationId)
-                    } catch {
-                        self.cancelNotifications([notificationId])
-                    }
+                    let newIds = (acc[param.eventId] ?? []) + [notificationId]
+                    acc[param.eventId] = newIds
                 }
+            }
+            do {
+                try await self.notificationRepository.batchSaveNotificationId(eventAndNotificationIds)
+            } catch {
+                let notificationIds = eventAndNotificationIds.flatMap { $0.value }
+                self.cancelNotifications(notificationIds)
             }
         }
         .store(in: &self.cancellables)
@@ -143,14 +147,17 @@ extension EventNotificationUsecaseImple {
                 return .init(schedule: pair.0, repeatingAt: pair.1.time, in: timeZone, with: oprion)
             }
             
-            await params.asyncForEach { param in
+            let eventAndNotificationIds = await params.async.reduce(into: [String: [String]]()) { acc, param in
                 if let notificationId = try? await self.scheduleNotification(param) {
-                    do {
-                        try await self.notificationRepository.saveNotificationId(of: param.eventId, notificationId)
-                    } catch {
-                        self.cancelNotifications([notificationId])
-                    }
+                    let newIds = (acc[param.eventId] ?? []) + [notificationId]
+                    acc[param.eventId] = newIds
                 }
+            }
+            do {
+                try await self.notificationRepository.batchSaveNotificationId(eventAndNotificationIds)
+            } catch {
+                let notificationIds = eventAndNotificationIds.flatMap { $0.value }
+                self.cancelNotifications(notificationIds)
             }
         }
         .store(in: &self.cancellables)

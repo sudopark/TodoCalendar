@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UserNotifications
 import Domain
 import Repository
 import Scenes
@@ -134,5 +135,21 @@ extension NonLoginUsecaseFactoryImple {
     
     func makeEventSettingUsecase() -> EventSettingUsecase {
         return self.makeAppSettingUsecase()
+    }
+    
+    func makeNotificationPermissionUsecase() -> NotificationPermissionUsecase {
+        return NotificationPermissionUsecaseImple(
+            notificationService: UNUserNotificationCenter.current()
+        )
+    }
+    
+    func makeEventNotificationSettingUsecase() -> EventNotificationSettingUsecase {
+        let repository = EventNotificationRepositoryImple(
+            sqliteService: Singleton.shared.commonSqliteService,
+            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
+        )
+        return EventNotificationSettingUsecaseImple(
+            notificationRepository: repository
+        )
     }
 }
