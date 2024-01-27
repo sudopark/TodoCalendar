@@ -35,8 +35,13 @@ final class EventNotificationDefaultTimeOptionViewController: UIHostingControlle
         self.viewAppearance = viewAppearance
         
         let eventHandlers = EventNotificationDefaultTimeOptionViewEventHandler()
+        eventHandlers.viewOnAppear = viewModel.reload
+        eventHandlers.requestPermission = viewModel.requestPermission
+        eventHandlers.selectOption = viewModel.selectOption(_:)
+        eventHandlers.close = viewModel.close
         
         let containerView = EventNotificationDefaultTimeOptionContainerView(
+            isForAllDay: viewModel.forAllDay,
             viewAppearance: viewAppearance,
             eventHandlers: eventHandlers
         )

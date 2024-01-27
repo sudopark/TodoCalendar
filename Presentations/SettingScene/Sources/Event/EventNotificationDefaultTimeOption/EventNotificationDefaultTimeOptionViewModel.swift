@@ -37,6 +37,7 @@ protocol EventNotificationDefaultTimeOptionViewModel: AnyObject, Sendable, Event
     func close()
     
     // presenter
+    var forAllDay:Bool { get }
     var isNeedNotificationPermission: AnyPublisher<Bool, Never> { get }
     var options: AnyPublisher<[DefaultTimeOptionModel], Never> { get }
     var selectedOption: AnyPublisher<EventNotificationTimeOption?, Never> { get }
@@ -47,7 +48,7 @@ protocol EventNotificationDefaultTimeOptionViewModel: AnyObject, Sendable, Event
 
 final class EventNotificationDefaultTimeOptionViewModelImple: EventNotificationDefaultTimeOptionViewModel, @unchecked Sendable {
     
-    private let forAllDay: Bool
+    let forAllDay: Bool
     private let notificationPermissionUsecase: any NotificationPermissionUsecase
     private let eventNotificationSettingUsecase: any EventNotificationSettingUsecase
     var router: (any EventNotificationDefaultTimeOptionRouting)?
