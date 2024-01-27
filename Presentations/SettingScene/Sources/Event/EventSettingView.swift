@@ -23,6 +23,8 @@ final class EventSettingViewState: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     
     @Published var tagModel: EventTagCellViewModel?
+    @Published var selectedEventNotificationTimeText: String?
+    @Published var selectedAllDayEventNotificationTimeText: String?
     @Published var periodModel: SelectedPeriodModel = .init(.hour1)
     
     func bind(_ viewModel: any EventSettingViewModel) {
@@ -35,6 +37,13 @@ final class EventSettingViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.tagModel = model
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.selectedEventNotificationTimeText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.selectedEventNotificationTimeText = text
             })
             .store(in: &self.cancellables)
         
@@ -54,6 +63,8 @@ final class EventSettingViewEventHandler: ObservableObject {
     // TODO: add handlers
     var onAppear: () -> Void = { }
     var selectTag: () -> Void = { }
+    var selectEventNotificationTime: () -> Void = { }
+    var selectAllDayEventNotificationTime: () -> Void = { }
     var selectPeriod: (EventSettings.DefaultNewEventPeriod) -> Void = { _ in }
     var close: () -> Void = { }
 }
@@ -110,6 +121,13 @@ struct EventSettingView: View {
                 VStack {
                     rowView(eventTypeView)
                         .onTapGesture(perform: eventHandlers.selectTag)
+                    
+                    rowView(eventNotificationTimeView)
+                        .onTapGesture(perform: eventHandlers.selectEventNotificationTime)
+                    
+                    rowView(allDayEventNotificationTimeView)
+                        .onTapGesture(perform: eventHandlers.selectAllDayEventNotificationTime)
+                    
                     rowView(periodView)
                 }
                 .padding(.top, 20)
@@ -154,6 +172,55 @@ struct EventSettingView: View {
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+        }
+    }
+    
+    private var eventNotificationTimeView: some View {
+        HStack {
+            Text("NotificationTime".localized())
+                .font(self.appearance.fontSet.normal.asFont)
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .layoutPriority(1)
+            
+            Spacer()
+            
+            Text(state.selectedEventNotificationTimeText ?? "")
+                .lineLimit(1)
+                .font(appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+            
+            Image(systemName: "chevron.right")
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+        }
+    }
+    
+    private var allDayEventNotificationTimeView: some View {
+        HStack {
+            HStack {
+                
+                VStack(alignment: .leading) {
+                    Text("NotificationTime".localized())
+                        .font(self.appearance.fontSet.normal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    
+                    Text("Allday".localized())
+                        .font(appearance.fontSet.subSubNormal.asFont)
+                        .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                }
+                .layoutPriority(1)
+                
+                Spacer()
+                
+                Text(state.selectedAllDayEventNotificationTimeText ?? "")
+                    .lineLimit(1)
+                    .font(appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                
+                Image(systemName: "chevron.right")
+                    .font(self.appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+            }
         }
     }
     
@@ -216,6 +283,8 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
         let state = EventSettingViewState()
         state.tagModel = .init(id: .default, name: "default", color: .default)
         state.periodModel = .init(EventSettings.DefaultNewEventPeriod.minute15)
+        state.selectedEventNotificationTimeText = "so long text hahahahhahahha hahah"
+        state.selectedAllDayEventNotificationTimeText = "so long text hahahahhahahha hahah"
         let eventHandlers = EventSettingViewEventHandler()
         let view = EventSettingView()
             .environmentObject(state)
