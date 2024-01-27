@@ -52,6 +52,8 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
     
     // presenter
     var selectedTagModel: AnyPublisher<EventTagCellViewModel, Never> { get }
+    var selectedEventNotificationTimeText: AnyPublisher<String, Never> { get }
+    var selectedAllDayEventNotificationTimeText: AnyPublisher<String, Never> { get }
     var selectedPeriod: AnyPublisher<SelectedPeriodModel, Never> { get }
 }
 
@@ -155,6 +157,14 @@ extension EventSettingViewModelImple {
             .switchToLatest()
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    var selectedEventNotificationTimeText: AnyPublisher<String, Never> {
+        Empty().eraseToAnyPublisher()
+    }
+    
+    var selectedAllDayEventNotificationTimeText: AnyPublisher<String, Never> {
+        Empty().eraseToAnyPublisher()
     }
     
     var selectedPeriod: AnyPublisher<SelectedPeriodModel, Never> {
