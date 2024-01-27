@@ -60,6 +60,7 @@ public protocol ColorSet: Sendable {
     var accent: UIColor { get }
     
     var white: UIColor { get }
+    var line: UIColor { get }
 }
 
 
@@ -97,4 +98,5 @@ public struct DefaultLightColorSet: ColorSet {
     public let accent: UIColor = .systemBlue
     
     public let white: UIColor = .white
+    public let line: UIColor = UIColor.black.withAlphaComponent(0.2)
 }
