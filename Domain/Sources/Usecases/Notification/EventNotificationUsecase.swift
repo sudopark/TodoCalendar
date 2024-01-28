@@ -94,9 +94,10 @@ extension EventNotificationUsecaseImple {
                 .removeAllSavedNotificationId(of: shouldUpdateIds + removedIds)
             self.cancelNotifications(pendingNotificationIds)
             
-            let params = changes.changed.values.compactMap { todo -> SingleEventNotificationMakeParams? in
-                guard let option = todo.notificationOption else { return nil }
-                return .init(todo: todo, in: timeZone, timeOption: option)
+            let params = changes.changed.values.flatMap { todo -> [SingleEventNotificationMakeParams] in
+                return todo.notificationOptions.compactMap {
+                    return SingleEventNotificationMakeParams(todo: todo, in: timeZone, timeOption: $0)
+                }
             }
             
             let eventAndNotificationIds = await params.async.reduce(into: [String: [String]]()) { acc, param in
@@ -142,9 +143,12 @@ extension EventNotificationUsecaseImple {
             let eventAndRepeatTimes = changes.changed.values.flatMap { event in
                 return event.repeatingTimes.map { (event, $0) }
             }
-            let params = eventAndRepeatTimes.compactMap { pair -> SingleEventNotificationMakeParams? in
-                guard let oprion = pair.0.notificationOption else { return nil }
-                return .init(schedule: pair.0, repeatingAt: pair.1.time, in: timeZone, with: oprion)
+            let params = eventAndRepeatTimes.flatMap { pair -> [SingleEventNotificationMakeParams] in
+                return pair.0.notificationOptions.compactMap {
+                    return SingleEventNotificationMakeParams(
+                        schedule: pair.0, repeatingAt: pair.1.time, in: timeZone, with: $0
+                    )
+                }
             }
             
             let eventAndNotificationIds = await params.async.reduce(into: [String: [String]]()) { acc, param in

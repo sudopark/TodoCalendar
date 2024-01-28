@@ -108,5 +108,6 @@ private extension ScheduleEvent {
         self.repeating = entity.repeating
         self.showTurn = entity.showTurn
         self.repeatingTimeToExcludes = entity.excludeTimes |> Set.init
+        self.notificationOptions = entity.notificationOptions
     }
 }

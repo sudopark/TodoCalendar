@@ -22,7 +22,7 @@ public struct TodoEvent: Sendable, Equatable {
     public var time: EventTime?
     public var repeating: EventRepeating?
     
-    public var notificationOption: EventNotificationTimeOption?
+    public var notificationOptions: [EventNotificationTimeOption] = []
     
     public init(uuid: String, name: String) {
         self.uuid = uuid
@@ -37,7 +37,7 @@ public struct TodoEvent: Sendable, Equatable {
         self.eventTagId = params.eventTagId
         self.time = params.time
         self.repeating = params.repeating
-        self.notificationOption = params.notificationOption
+        self.notificationOptions = params.notificationOptions ?? []
     }
     
     public func apply(_ params: TodoEditParams) -> TodoEvent {
@@ -46,7 +46,7 @@ public struct TodoEvent: Sendable, Equatable {
             |> \.eventTagId .~ params.eventTagId
             |> \.time .~ params.time
             |> \.repeating .~ params.repeating
-            |> \.notificationOption .~ (params.notificationOption ?? self.notificationOption)
+            |> \.notificationOptions .~ (params.notificationOptions ?? self.notificationOptions)
     }
 }
 
@@ -59,7 +59,7 @@ public struct TodoMakeParams: Sendable {
     public var eventTagId: AllEventTagId?
     public var time: EventTime?
     public var repeating: EventRepeating?
-    public var notificationOption: EventNotificationTimeOption?
+    public var notificationOptions: [EventNotificationTimeOption]?
     
     public init() { }
     
@@ -79,7 +79,7 @@ public struct TodoEditParams: Sendable, Equatable {
     public var time: EventTime?
     public var repeating: EventRepeating?
     public var repeatingUpdateScope: RepeatingUpdateScope?
-    public var notificationOption: EventNotificationTimeOption?
+    public var notificationOptions: [EventNotificationTimeOption]?
     
     public init() { }
     
@@ -93,7 +93,7 @@ public struct TodoEditParams: Sendable, Equatable {
                 || self.eventTagId != nil
                 || self.time != nil
                 || self.repeating != nil
-                || self.notificationOption != nil
+                || self.notificationOptions != nil
         }
     }
     
@@ -103,7 +103,7 @@ public struct TodoEditParams: Sendable, Equatable {
             |> \.eventTagId .~ self.eventTagId
             |> \.time .~ self.time
             |> \.repeating .~ self.repeating
-            |> \.notificationOption .~ self.notificationOption
+            |> \.notificationOptions .~ self.notificationOptions
     }
 }
 
