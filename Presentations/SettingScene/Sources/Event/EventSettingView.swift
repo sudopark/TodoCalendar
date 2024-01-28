@@ -47,6 +47,13 @@ final class EventSettingViewState: ObservableObject {
             })
             .store(in: &self.cancellables)
         
+        viewModel.selectedAllDayEventNotificationTimeText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.selectedAllDayEventNotificationTimeText = text
+            })
+            .store(in: &self.cancellables)
+        
         viewModel.selectedPeriod
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
@@ -62,6 +69,7 @@ final class EventSettingViewEventHandler: ObservableObject {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
+    var onWillAppear: () -> Void = { }
     var selectTag: () -> Void = { }
     var selectEventNotificationTime: () -> Void = { }
     var selectAllDayEventNotificationTime: () -> Void = { }
@@ -94,6 +102,7 @@ struct EventSettingContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
+            .onWillAppear(eventHandlers.onWillAppear)
             .environmentObject(state)
             .environmentObject(viewAppearance)
             .environmentObject(eventHandlers)

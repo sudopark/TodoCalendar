@@ -36,8 +36,11 @@ final class EventSettingViewController: UIHostingController<EventSettingContaine
         
         let eventHandlers = EventSettingViewEventHandler()
         eventHandlers.onAppear = viewModel.prepare
+        eventHandlers.onWillAppear = viewModel.reloadEventNotificationSetting
         eventHandlers.close = viewModel.close
         eventHandlers.selectTag = viewModel.selectTag
+        eventHandlers.selectEventNotificationTime = { viewModel.selectEventNotificationTimeOption(forAllDay: false) }
+        eventHandlers.selectAllDayEventNotificationTime = { viewModel.selectEventNotificationTimeOption(forAllDay: true) }
         eventHandlers.selectPeriod = viewModel.selectPeriod(_:)
         
         let containerView = EventSettingContainerView(

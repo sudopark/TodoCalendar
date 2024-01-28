@@ -39,3 +39,23 @@ extension String {
         return URL(string: path)
     }
 }
+
+
+// MARK: - else
+
+extension Array where Element == String {
+    
+    public func andJoin(
+        seperator: String = ", ",
+        lastSeperator: String = "and".localized()
+    ) -> String {
+        guard self.count > 1
+        else {
+            return self.first ?? ""
+        }
+        
+        var elements = self; let last = elements.removeLast()
+        let leading = elements.joined(separator: seperator)
+        return "\(leading) \(lastSeperator) \(last)"
+    }
+}

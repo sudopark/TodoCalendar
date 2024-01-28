@@ -77,10 +77,16 @@ extension SettingSceneBuilderImple {
             viewAppearance: self.viewAppearance
         )
         
+        let eventNotificationDefaultTimeOptionSceneBuilder = EventNotificationDefaultTimeOptionSceneBuilerImple(
+            usecaesFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
         let eventSettingSceneBuilder = EventSettingSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
-            eventTagSelectSceneBuilder: eventTagSelectSceneBuilder
+            eventTagSelectSceneBuilder: eventTagSelectSceneBuilder,
+            eventDefaultNotificationTimeSceneBuilder: eventNotificationDefaultTimeOptionSceneBuilder
         )
         
         let countrySelectSceneBuilder = CountrySelectSceneBuilerImple(

@@ -46,7 +46,9 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
 
     // interactor
     func prepare()
+    func reloadEventNotificationSetting()
     func selectTag()
+    func selectEventNotificationTimeOption(forAllDay: Bool)
     func selectPeriod(_ newValue: EventSettings.DefaultNewEventPeriod)
     func close()
     
@@ -63,14 +65,17 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
 final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendable {
     
     private let eventSettingUsecase: any EventSettingUsecase
+    private let eventNotificationSettingUsecase: any EventNotificationSettingUsecase
     private let eventTagUsecase: any EventTagUsecase
     var router: (any EventSettingRouting)?
     
     init(
         eventSettingUsecase: any EventSettingUsecase,
+        eventNotificationSettingUsecase: any EventNotificationSettingUsecase,
         eventTagUsecase: any EventTagUsecase
     ) {
         self.eventSettingUsecase = eventSettingUsecase
+        self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
         self.eventTagUsecase = eventTagUsecase
      
         self.internalBinding()
@@ -79,6 +84,8 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
     
     private struct Subject {
         let setting = CurrentValueSubject<EventSettings?, Never>(nil)
+        let eventNotificationTimeOption = CurrentValueSubject<EventNotificationTimeOption??, Never>(nil)
+        let allDayEventNotificationTimeOption = CurrentValueSubject<EventNotificationTimeOption??, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -103,9 +110,21 @@ extension EventSettingViewModelImple {
         let setting = self.eventSettingUsecase.loadEventSetting()
         self.subject.setting.send(setting)
     }
+    
+    func reloadEventNotificationSetting() {
+        let option = self.eventNotificationSettingUsecase.loadDefailtNotificationTimeOption(forAllDay: false)
+        self.subject.eventNotificationTimeOption.send(option)
+        
+        let optionForAllDay = self.eventNotificationSettingUsecase.loadDefailtNotificationTimeOption(forAllDay: true)
+        self.subject.allDayEventNotificationTimeOption.send(optionForAllDay)
+    }
  
     func selectTag() {
         self.router?.routeToSelectTag()
+    }
+    
+    func selectEventNotificationTimeOption(forAllDay: Bool) {
+        self.router?.routeToEventNotificationTime(forAllDay: forAllDay)
     }
     
     func selectPeriod(_ newValue: EventSettings.DefaultNewEventPeriod) {
@@ -159,12 +178,26 @@ extension EventSettingViewModelImple {
             .eraseToAnyPublisher()
     }
     
+    private func optionsText() -> (EventNotificationTimeOption?) -> String {
+        return { option in
+            return DefaultTimeOptionModel(option: option).text
+        }
+    }
+    
     var selectedEventNotificationTimeText: AnyPublisher<String, Never> {
-        Empty().eraseToAnyPublisher()
+        return self.subject.eventNotificationTimeOption
+            .compactMap { $0 }
+            .map(self.optionsText())
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     var selectedAllDayEventNotificationTimeText: AnyPublisher<String, Never> {
-        Empty().eraseToAnyPublisher()
+        return self.subject.allDayEventNotificationTimeOption
+            .compactMap { $0 }
+            .map(self.optionsText())
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     var selectedPeriod: AnyPublisher<SelectedPeriodModel, Never> {

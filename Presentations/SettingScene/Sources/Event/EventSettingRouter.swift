@@ -18,6 +18,7 @@ import CommonPresentation
 protocol EventSettingRouting: Routing, Sendable { 
     
     func routeToSelectTag()
+    func routeToEventNotificationTime(forAllDay: Bool)
 }
 
 // MARK: - Router
@@ -25,10 +26,13 @@ protocol EventSettingRouting: Routing, Sendable {
 final class EventSettingRouter: BaseRouterImple, EventSettingRouting, @unchecked Sendable {
     
     private let eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
+    private let eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
     init(
-        eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
+        eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler,
+        eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
     ) {
         self.eventTagSelectSceneBuilder = eventTagSelectSceneBuilder
+        self.eventDefaultNotificationTimeSceneBuilder = eventDefaultNotificationTimeSceneBuilder
     }
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
@@ -47,6 +51,13 @@ extension EventSettingRouter {
     func routeToSelectTag() {
         Task { @MainActor in
             let next = self.eventTagSelectSceneBuilder.makeEventTagSelectScene()
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+    
+    func routeToEventNotificationTime(forAllDay: Bool) {
+        Task { @MainActor in
+            let next = self.eventDefaultNotificationTimeSceneBuilder.makeEventNotificationDefaultTimeOptionScene(forAllDay: forAllDay)
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }
