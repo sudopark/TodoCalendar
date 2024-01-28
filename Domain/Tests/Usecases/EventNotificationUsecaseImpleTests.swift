@@ -322,7 +322,7 @@ extension EventNotificationUsecaseImpleTests {
 private var pastTodo: TodoEvent = {
     return TodoEvent(uuid: "past", name: "past todo")
         |> \.time .~ .at(Date().addingTimeInterval(-100).timeIntervalSince1970)
-        |> \.notificationOption .~ .atTime
+        |> \.notificationOptions .~ [.atTime]
 }()
 
 private var todoWithoutTime: TodoEvent = {
@@ -332,13 +332,13 @@ private var todoWithoutTime: TodoEvent = {
 private var futureTodoEvent1: TodoEvent = {
     return TodoEvent(uuid: "future-todo-1", name: "future todo 1")
         |> \.time .~ .at(Date().addingTimeInterval(100).timeIntervalSince1970)
-        |> \.notificationOption .~ .atTime
+        |> \.notificationOptions .~ [.atTime]
 }()
 
 private var futureTodoEvent2: TodoEvent = {
     return TodoEvent(uuid: "future-todo-2", name: "future todo 2")
         |> \.time .~ .at(Date().addingTimeInterval(200).timeIntervalSince1970)
-        |> \.notificationOption .~ .atTime
+        |> \.notificationOptions .~ [.atTime]
 }()
 
 private var pastSchedule: ScheduleEvent = {
@@ -347,7 +347,7 @@ private var pastSchedule: ScheduleEvent = {
         name: "past sc",
         time: .at(Date().addingTimeInterval(-100).timeIntervalSince1970)
     )
-    |> \.notificationOption .~ .atTime
+    |> \.notificationOptions .~ [.atTime]
 }()
 
 private var schedule1: ScheduleEvent = {
@@ -356,7 +356,7 @@ private var schedule1: ScheduleEvent = {
         name: "sc1",
         time: .at(Date().addingTimeInterval(100).timeIntervalSince1970)
     )
-    |> \.notificationOption .~ .atTime
+    |> \.notificationOptions .~ [.atTime]
 }()
 
 private var scheduleWithRepeat: ScheduleEvent = {
@@ -370,7 +370,7 @@ private var scheduleWithRepeat: ScheduleEvent = {
         repeatingStartTime: time,
         repeatOption: EventRepeatingOptions.EveryMonth(timeZone: TimeZone(abbreviation: "KST")!)
     )
-    |> \.notificationOption .~ .atTime
+    |> \.notificationOptions .~ [.atTime]
 }()
 
 private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {

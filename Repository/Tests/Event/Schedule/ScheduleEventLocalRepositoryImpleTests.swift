@@ -64,7 +64,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
             |> \.time .~ .at(100)
             |> \.showTurn .~ true
             |> \.repeating .~ pure(repeating)
-            |> \.notificationOption .~ .before(seconds: 100)
+            |> \.notificationOptions .~ [.before(seconds: 100), .atTime]
     }
     
     // make and load
@@ -87,7 +87,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
         XCTAssertEqual(new?.showTurn, params.showTurn)
         let event = loadEvents?.first(where: { $0.name == params.name })
         XCTAssertNotNil(event)
-        XCTAssertEqual(new?.notificationOption, .before(seconds: 100))
+        XCTAssertEqual(new?.notificationOptions, [.before(seconds: 100), .atTime])
     }
     
     // update and load

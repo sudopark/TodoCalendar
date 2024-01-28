@@ -19,7 +19,7 @@ struct DoneTodoEventTable: Table {
         case name
         case doneTime = "done_time"
         case eventTagId = "tag_id"
-        case notificationOption = "notification_option"
+        case notificationOptions = "notification_options"
         
         var dataType: ColumnDataType {
             switch self {
@@ -28,7 +28,7 @@ struct DoneTodoEventTable: Table {
             case .name: return .text([.notNull])
             case .doneTime: return .real([.notNull])
             case .eventTagId: return .text([])
-            case .notificationOption: return .text([])
+            case .notificationOptions: return .text([])
             }
         }
     }
@@ -44,7 +44,12 @@ struct DoneTodoEventTable: Table {
         case .name: return entity.name
         case .doneTime: return entity.doneTime.timeIntervalSince1970
         case .eventTagId: return entity.eventTagId?.stringValue
-        case .notificationOption: return entity.notificationOption?.asString
+        case .notificationOptions:
+            let mappers = entity.notificationOptions.map {
+                EventNotificationTimeOptionMapper(option: $0)
+            }
+            let data = try? JSONEncoder().encode(mappers)
+            return data.flatMap { String(data: $0, encoding: .utf8) }
         }
     }
 }
@@ -59,6 +64,11 @@ extension DoneTodoEvent: RowValueType {
             doneTime: Date(timeIntervalSince1970: try cursor.next().unwrap())
         )
         self.eventTagId = cursor.next().map { AllEventTagId($0) }
-        self.notificationOption = cursor.next().flatMap { EventNotificationTimeOption(from: $0) }
+        let notificationOptionText: String? = cursor.next()
+        let mappers = notificationOptionText?.data(using: .utf8)
+            .flatMap {
+                try? JSONDecoder().decode([EventNotificationTimeOptionMapper].self, from: $0)
+            }
+        self.notificationOptions = mappers?.map { $0.option } ?? []
     }
 }

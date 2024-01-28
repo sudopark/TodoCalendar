@@ -22,6 +22,7 @@ struct ScheduleEventTable: Table {
         case repeatingEnd = "repeating_end"
         case showTurn = "show_turn"
         case excludeTimes = "exclude_times"
+        case notificationOptions = "notification_options"
         
         var dataType: ColumnDataType {
             switch self {
@@ -33,6 +34,7 @@ struct ScheduleEventTable: Table {
             case .repeatingEnd: return .real([])
             case .showTurn: return .integer([.notNull, .default(0)])
             case .excludeTimes: return .text([])
+            case .notificationOptions: return .text([])
             }
         }
     }
@@ -44,6 +46,7 @@ struct ScheduleEventTable: Table {
         var repeating: EventRepeating?
         let showTurn: Bool
         var excludeTimes: [String] = []
+        var notificationOptions: [EventNotificationTimeOption] = []
         
         init(_ event: ScheduleEvent) {
             self.uuid = event.uuid
@@ -52,6 +55,7 @@ struct ScheduleEventTable: Table {
             self.repeating = event.repeating
             self.showTurn = event.showTurn
             self.excludeTimes = Array(event.repeatingTimeToExcludes)
+            self.notificationOptions = event.notificationOptions
         }
         
         init(_ cursor: CursorIterator) throws {
@@ -67,6 +71,12 @@ struct ScheduleEventTable: Table {
             self.excludeTimes = excludeTimesStr?.data(using: .utf8)
                 .flatMap { try? JSONDecoder().decode([String].self, from: $0) }
                 ?? []
+            let notificationOptionsText: String? = cursor.next()
+            let notificationOptionsMappers = notificationOptionsText?.data(using: .utf8)
+                .flatMap {
+                    try? JSONDecoder().decode([EventNotificationTimeOptionMapper].self, from: $0)
+                }
+            self.notificationOptions = notificationOptionsMappers?.map { $0.option } ?? []
             
             let optionMapper = optionText?.data(using: .utf8)
                 .flatMap { try? JSONDecoder().decode(EventRepeatingOptionCodableMapper.self, from: $0) }
@@ -77,7 +87,8 @@ struct ScheduleEventTable: Table {
             }
             self.repeating = .init(
                 repeatingStartTime: startInterval,
-                repeatOption: option)
+                repeatOption: option
+            )
             self.repeating?.repeatingEndTime = end
         }
     }
@@ -100,6 +111,12 @@ struct ScheduleEventTable: Table {
         case .showTurn: return entity.showTurn
         case .excludeTimes: return (try? JSONEncoder().encode(entity.excludeTimes))
                 .flatMap { String(data: $0, encoding: .utf8) }
+        case .notificationOptions:
+            let mappers = entity.notificationOptions.map {
+                EventNotificationTimeOptionMapper(option: $0)
+            }
+            let data = try? JSONEncoder().encode(mappers)
+            return data.flatMap { String(data: $0, encoding: .utf8) }
         }
     }
 }

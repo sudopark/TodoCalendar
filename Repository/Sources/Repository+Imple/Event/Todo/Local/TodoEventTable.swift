@@ -20,7 +20,7 @@ struct TodoEventTable: Table {
         case repeatingStart = "repeating_start"
         case repeatingOption = "repeating_option"
         case repeatingEnd = "repeating_end"
-        case notificationOption = "notification_option"
+        case notificationOptions = "notification_options"
         
         var dataType: ColumnDataType {
             switch self {
@@ -30,7 +30,7 @@ struct TodoEventTable: Table {
             case .repeatingStart: return .real([])
             case .repeatingOption: return .text([])
             case .repeatingEnd: return .real([])
-            case .notificationOption: return .text([])
+            case .notificationOptions: return .text([])
             }
         }
     }
@@ -51,7 +51,10 @@ struct TodoEventTable: Table {
                 .flatMap { String(data: $0, encoding: .utf8) }
             
         case .repeatingEnd: return entity.repeating?.repeatingEndTime
-        case .notificationOption: return entity.notificationOption?.asString
+        case .notificationOptions:
+            let mappers = entity.notificationOptions.map { EventNotificationTimeOptionMapper(option: $0) }
+            let data = try? JSONEncoder().encode(mappers)
+            return data.flatMap { String(data: $0, encoding: .utf8) }
         }
     }
     
@@ -68,7 +71,13 @@ extension TodoEvent: RowValueType {
         let start: Double? = cursor.next()
         let optionText: String? = cursor.next()
         let end: Double? = cursor.next()
-        self.notificationOption = cursor.next().flatMap { EventNotificationTimeOption(from: $0) }
+        let notificationOptionText: String? = cursor.next()
+        
+        let notificationOpionMappers = notificationOptionText?.data(using: .utf8)
+            .flatMap {
+                try? JSONDecoder().decode([EventNotificationTimeOptionMapper].self, from: $0)
+            }
+        self.notificationOptions = notificationOpionMappers?.map { $0.option } ?? []
         
         let optionMapper = optionText?.data(using: .utf8)
             .flatMap { try? JSONDecoder().decode(EventRepeatingOptionCodableMapper.self, from: $0) }
