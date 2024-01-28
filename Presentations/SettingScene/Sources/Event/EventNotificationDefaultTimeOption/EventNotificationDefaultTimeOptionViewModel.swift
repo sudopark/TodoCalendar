@@ -183,15 +183,15 @@ private extension Optional where Wrapped == EventNotificationTimeOption {
     var text: String {
         switch self {
         case .none: 
-            return "event_notification_setting::option_title::no_notification"
-        case .atTime: 
-            return "event_notification_setting::option_title::at_time"
+            return "event_notification_setting::option_title::no_notification".localized()
+        case .atTime:
+            return "event_notification_setting::option_title::at_time".localized()
         case .before(let seconds):
             return seconds.beforeText
         case .allDay9AM:
-            return "event_notification_setting::option_title::allday_9am"
+            return "event_notification_setting::option_title::allday_9am".localized()
         case .allDay12AM:
-            return "event_notification_setting::option_title::allday_12am"
+            return "event_notification_setting::option_title::allday_12am".localized()
         case .allDay9AMBefore(let seconds):
             return seconds.alldayBeforeText
         }
