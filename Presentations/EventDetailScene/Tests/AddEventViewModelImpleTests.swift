@@ -67,6 +67,9 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
             ? .custom("latest") : .default
         eventSettingUsecase.stubSetting?.defaultNewEventPeriod = defaultPeriod
         
+        let eventNotificationSettingUsecase = StubEventNotificationSettingUsecase()
+        eventNotificationSettingUsecase.saveDefaultNotificationTimeOption(forAllDay: false, option: .atTime)
+        
         let viewModel = AddEventViewModelImple(
             params: .init(selectedDate: self.refDate),
             todoUsecase: self.spyTodoUsecase,
@@ -74,7 +77,8 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventTagUsease: tagUsecase,
             calendarSettingUsecase: settingUsecase,
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
-            eventSettingUsecase: eventSettingUsecase
+            eventSettingUsecase: eventSettingUsecase,
+            eventNotificationSettingUsecase: eventNotificationSettingUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachInput()
@@ -168,11 +172,12 @@ extension AddEventViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyRouter.didAttachInput, true)
         
-        let prepredBasic = self.spyRouter.spyInteractor.didPreparedWith?.0
-        XCTAssertEqual(prepredBasic?.name, nil)
-        XCTAssertEqual(prepredBasic?.selectedTime, self.defaultCurrentAndNextHourSelectTime)
-        XCTAssertEqual(prepredBasic?.eventRepeating, nil)
-        XCTAssertEqual(prepredBasic?.eventTagId, .custom("latest"))
+        let preparedBasic = self.spyRouter.spyInteractor.didPreparedWith?.0
+        XCTAssertEqual(preparedBasic?.name, nil)
+        XCTAssertEqual(preparedBasic?.selectedTime, self.defaultCurrentAndNextHourSelectTime)
+        XCTAssertEqual(preparedBasic?.eventRepeating, nil)
+        XCTAssertEqual(preparedBasic?.eventTagId, .custom("latest"))
+        XCTAssertEqual(preparedBasic?.eventNotifications, [.atTime])
         
         let preparedAddition = self.spyRouter.spyInteractor.didPreparedWith?.1
         XCTAssertEqual(preparedAddition?.url, nil)
