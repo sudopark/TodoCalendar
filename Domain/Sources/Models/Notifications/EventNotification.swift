@@ -207,8 +207,12 @@ private extension TimeInterval {
     
     func applyNotAllDayNotificationTime(option: EventNotificationTimeOption) -> TimeInterval? {
         switch option {
-        case .atTime: return self
+        case .atTime:  return self
         case .before(let seconds): return self - seconds
+        case .custom(let timeZone, let compos):
+            let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+            return calendar.notificationTimeInterval(compos)
+            
         default: return nil
         }
     }
@@ -226,6 +230,10 @@ private extension TimeInterval {
             return calendar.date(bySetting: .hour, value: 9, of: startDate)
                 .map { $0.timeIntervalSince1970 - seconds }
             
+        case .custom(let timeZone, let compos):
+            let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+            return calendar.notificationTimeInterval(compos)
+            
         default: return nil
         }
     }
@@ -240,5 +248,9 @@ private extension Calendar {
         )
         |> \.calendar .~ Calendar(identifier: .gregorian)
         |> \.timeZone .~ pure(self.timeZone)
+    }
+    
+    func notificationTimeInterval(_ components: DateComponents) -> TimeInterval? {
+        return self.date(from: components)?.timeIntervalSince1970
     }
 }
