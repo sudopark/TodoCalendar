@@ -53,6 +53,7 @@ final class EventDetailViewController: UIHostingController<EventDetailContainerV
         .eventHandler(\.toggleIsAllDay, inputViewModel.toggleIsAllDay)
         .eventHandler(\.selectRepeatOption, inputViewModel.selectRepeatOption)
         .eventHandler(\.selectTag, inputViewModel.selectEventTag)
+        .eventHandler(\.selectNotificationOption, inputViewModel.selectNotificationTime)
 //        .eventHandler(\.selectPlace, TODO)
         .eventHandler(\.enterUrl, inputViewModel.enter(url:))
         .eventHandler(\.enterMemo, inputViewModel.enter(memo:))

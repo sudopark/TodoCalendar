@@ -11,6 +11,7 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import CommonPresentation
 
 
 // MARK: - event detail input interactor + listener
@@ -40,6 +41,11 @@ protocol EventDetailInputRouting: Routing, Sendable, AnyObject {
         currentSelectedTagId: AllEventTagId,
         listener: (any SelectEventTagSceneListener)?
     )
+    
+//    func routeToEventNotificationTimeSelect(
+//        current selecteds: [EventNotificationTimeOption]
+//        // TODO: add listener
+//    )
 }
 
 
@@ -58,6 +64,7 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     func toggleIsAllDay()
     func selectRepeatOption()
     func selectEventTag()
+    func selectNotificationTime()
     func selectPlace()
     func enter(url: String)
     func enter(memo: String)
@@ -67,6 +74,7 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     var repeatOption: AnyPublisher<String?, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
     var selectedPlace: AnyPublisher<Place?, Never> { get }
+    var selectedNotificationTimeText: AnyPublisher<String?, Never> { get }
 }
 
 
@@ -117,6 +125,8 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
     private let subject = Subject()
 }
 
+
+// MARK: - prepare and select time
 
 extension EventDetailInputViewModelImple {
     
@@ -191,6 +201,8 @@ extension EventDetailInputViewModelImple {
 }
 
 
+// MARK: - repeat option
+
 extension EventDetailInputViewModelImple: SelectEventRepeatOptionSceneListener {
     
     func selectRepeatOption() {
@@ -226,6 +238,9 @@ extension EventDetailInputViewModelImple: SelectEventRepeatOptionSceneListener {
     }
 }
 
+
+// MARK: - event tag
+
 extension EventDetailInputViewModelImple: SelectEventTagSceneListener {
     
     func selectEventTag() {
@@ -241,6 +256,32 @@ extension EventDetailInputViewModelImple: SelectEventTagSceneListener {
         self.subject.mutateBasicIfPossible {
             return $0 |> \.basic.eventTagId .~ tag.tagId
         }
+    }
+}
+
+
+// MARK: - select notification time
+
+extension EventDetailInputViewModelImple {
+    
+    func selectNotificationTime() {
+        // TODO: route to select
+    }
+    
+    var selectedNotificationTimeText: AnyPublisher<String?, Never> {
+        let transform: (BasicAndTimeZoneData) -> String? = { data in
+            guard !data.basic.eventNotifications.isEmpty
+            else {
+                return nil
+            }
+            let texts = data.basic.eventNotifications.map { $0.text }
+            return texts.andJoin()
+        }
+        return self.subject.basic
+            .compactMap { $0 }
+            .map(transform)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
 

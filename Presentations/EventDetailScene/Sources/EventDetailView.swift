@@ -28,6 +28,7 @@ final class EventDetailViewState: ObservableObject {
     @Published var isSavable: Bool = false
     @Published var selectedTime: SelectedTime?
     @Published var selectedRepeat: String?
+    @Published var selectedNotificationTimeText: String?
     @Published var isAllDay: Bool = false
     @Published var availableMoreActions: [[EventDetailMoreAction]] = []
     
@@ -80,6 +81,13 @@ final class EventDetailViewState: ObservableObject {
             })
             .store(in: &self.cancellables)
         
+        inputViewModel.selectedNotificationTimeText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.selectedNotificationTimeText = text
+            })
+            .store(in: &self.cancellables)
+        
         viewModel.isSaving
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isSaving in
@@ -122,6 +130,7 @@ struct EventDetailContainerView: View {
     var toggleIsAllDay: () -> Void = { }
     var selectRepeatOption: () -> Void = { }
     var selectTag: () -> Void = { }
+    var selectNotificationOption: () -> Void = { }
     var selectPlace: () -> Void = { }
     var enterUrl: (String) -> Void = { _ in }
     var enterMemo: (String) -> Void = { _ in }
@@ -142,6 +151,7 @@ struct EventDetailContainerView: View {
             .eventHandler(\.removeEventEndTime, removeEventEndTime)
             .eventHandler(\.toggleIsAllDay, toggleIsAllDay)
             .eventHandler(\.selectRepeatOption, selectRepeatOption)
+            .eventHandler(\.selectNotificationOption, selectNotificationOption)
             .eventHandler(\.selectTag, selectTag)
             .eventHandler(\.selectPlace, selectPlace)
             .eventHandler(\.enterUrl, enterUrl)
@@ -185,6 +195,7 @@ struct EventDetailView: View {
     fileprivate var toggleIsAllDay: () -> Void = { }
     fileprivate var selectRepeatOption: () -> Void = { }
     fileprivate var selectTag: () -> Void = { }
+    fileprivate var selectNotificationOption: () -> Void = { }
     fileprivate var selectPlace: () -> Void = { }
     fileprivate var enterUrl: (String) -> Void = { _ in }
     fileprivate var enterMemo: (String) -> Void = { _ in }
@@ -206,6 +217,7 @@ struct EventDetailView: View {
                     self.selectRepeatView
                     Spacer(minLength: 12)
                     self.selectTagView
+                    self.selectNotificationView
                     Spacer(minLength: 12)
                     self.enterLinkView
                     self.enterMemokView
@@ -566,6 +578,37 @@ struct EventDetailView: View {
         }
     }
     
+    private var selectNotificationView: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "bell.fill")
+                .font(.system(size: 16, weight: .light))
+            
+            Text(
+                self.state.selectedNotificationTimeText 
+                ?? "event_notification_setting::option_title::no_notification".localized()
+            )
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(
+                    self.state.selectedNotificationTimeText == nil
+                    ? self.appearance.colorSet.subSubNormalText.asColor
+                    : self.appearance.colorSet.normalText.asColor
+                )
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(
+                            self.state.selectedNotificationTimeText == nil
+                            ? .clear
+                            : self.appearance.colorSet.eventList.asColor
+                        )
+                )
+                .onTapGesture {
+                    self.selectNotificationOption()
+                }
+            Spacer()
+        }
+    }
+    
     private var enterLinkView: some View {
         HStack(spacing: 16) {
             Image(systemName: "link")
@@ -696,14 +739,15 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
             [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
             [.copy, .addToTemplate, .share]
         ]
+//        state.selectedNotificationTimeText = "some time"
         state.eventDetailTypeModel = .makeCase(true)
 //        state.eventDetailTypeModel = .todoCase()
 //        state.eventDetailTypeModel = .scheduleCase()
 //        state.eventDetailTypeModel = .holidayCase("Korea")
         state.isSaving = false
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-            state.isSaving = true
-        }
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+//            state.isSaving = true
+//        }
         let eventView = EventDetailView()
             .environmentObject(viewAppearance)
             .environmentObject(state)
