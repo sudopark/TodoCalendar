@@ -458,6 +458,48 @@ extension EventDetailInputViewModelTests {
 }
 
 
+// MARK: - notification time
+
+extension EventDetailInputViewModelTests {
+    
+    func testViewModel_provideEventNotificationTimeText_whenPrepare() {
+        // given
+        func parameterizeTest(
+            with basic: EventDetailBasicData,
+            expectText: String?
+        ) {
+            // given
+            let expect = expectation(description: "초기 이벤트 알림시간 정보 제공")
+            let viewModel = self.makeViewModel()
+            
+            // when
+            let text = self.waitFirstOutput(expect, for: viewModel.selectedNotificationTimeText) {
+                viewModel.prepared(basic: basic, additional: self.dummyPreviousAddition)
+            }
+            
+            // then
+            XCTAssertEqual(text, expectText)
+        }
+        // when + then
+        parameterizeTest(
+            with: self.dummyPreviousBasic |> \.eventNotifications .~ [],
+            expectText: nil
+        )
+        parameterizeTest(
+            with: self.dummyPreviousBasic |> \.eventNotifications .~ [.atTime],
+            expectText: "event_notification_setting::option_title::at_time".localized()
+        )
+        parameterizeTest(
+            with: self.dummyPreviousBasic |> \.eventNotifications .~ [.atTime, .before(seconds: 60)],
+            expectText: "\("event_notification_setting::option_title::at_time".localized()) and \("event_notification_setting::option_title::before_minutes".localized(with: 1))"
+        )
+        parameterizeTest(
+            with: self.dummyPreviousBasic |> \.eventNotifications .~ [.atTime, .before(seconds: 60), .before(seconds: 120)],
+            expectText: "\("event_notification_setting::option_title::at_time".localized()), \("event_notification_setting::option_title::before_minutes".localized(with: 1)) and \("event_notification_setting::option_title::before_minutes".localized(with: 2))"
+        )
+    }
+}
+
 private class SpyRouter: BaseSpyRouter, EventDetailInputRouting, @unchecked Sendable {
     
     var didRouteToEventRepeatOptionSelect: Bool?
