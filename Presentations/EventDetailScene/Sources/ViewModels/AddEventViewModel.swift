@@ -26,6 +26,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let eventDetailDataUsecase: any EventDetailDataUsecase
     private let eventSettingUsecase: any EventSettingUsecase
+    private let eventNotificationSettingUsecase: any EventNotificationSettingUsecase
     var router: (any EventDetailRouting)?
     
     init(
@@ -35,7 +36,8 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         eventTagUsease: any EventTagUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         eventDetailDataUsecase: any EventDetailDataUsecase,
-        eventSettingUsecase: any EventSettingUsecase
+        eventSettingUsecase: any EventSettingUsecase,
+        eventNotificationSettingUsecase: any EventNotificationSettingUsecase
     ) {
         
         self.initailMakeParams = params
@@ -45,6 +47,7 @@ final class AddEventViewModelImple: EventDetailViewModel, @unchecked Sendable {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.eventDetailDataUsecase = eventDetailDataUsecase
         self.eventSettingUsecase = eventSettingUsecase
+        self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
         
         self.internalBinding()
     }
@@ -101,13 +104,17 @@ extension AddEventViewModelImple: EventDetailInputListener {
 
         let defaultTag = self.eventSettingUsecase.loadEventSetting().defaultNewEventTagId
         
+        let defaultNotification = self.eventNotificationSettingUsecase
+            .loadDefailtNotificationTimeOption(forAllDay: false)
+        
         defaultSelectTime
             .sink(receiveValue: { [weak self] time in
                 let initailData = EventDetailBasicData(
                     name: params.initialTodoInfo?.name,
                     eventTagId: defaultTag
                 )
-                    |> \.selectedTime .~ time
+                |> \.selectedTime .~ time
+                |> \.eventNotifications .~ (defaultNotification.map { [$0] } ?? [])
                 self?.inputInteractor?.prepared(
                     basic: initailData, additional: .init("pending")
                 )
@@ -281,7 +288,6 @@ private extension Date {
         defaultPeriod: EventSettings.DefaultNewEventPeriod
     ) -> SelectedTime? {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        let selectDateCompos = calendar.dateComponents([.year, .month, .day], from: self)
         let now = Date()
         guard let start = calendar.dateBySetting(from: now, mutating: {
             $0.year = calendar.component(.year, from: self)

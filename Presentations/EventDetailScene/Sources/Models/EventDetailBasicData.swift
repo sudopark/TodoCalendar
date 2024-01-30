@@ -13,16 +13,19 @@ struct EventDetailBasicData: Equatable {
     var selectedTime: SelectedTime?
     var eventRepeating: EventRepeatingTimeSelectResult?
     var eventTagId: AllEventTagId
+    var eventNotifications: [EventNotificationTimeOption]
     
     init(
         name: String?,
         selectedTime: SelectedTime? = nil,
         eventRepeating: EventRepeatingTimeSelectResult? = nil,
-        eventTagId: AllEventTagId
+        eventTagId: AllEventTagId,
+        eventNotifications: [EventNotificationTimeOption] = []
     ) {
         self.name = name
         self.selectedTime = selectedTime
         self.eventRepeating = eventRepeating
         self.eventTagId = eventTagId
+        self.eventNotifications = eventNotifications
     }
 }

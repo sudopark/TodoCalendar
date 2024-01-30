@@ -320,6 +320,7 @@ extension EventDetailBasicData {
         self.selectedTime = todo.time.map { SelectedTime($0, timeZone) }
         self.eventRepeating = EventRepeatingTimeSelectResult.make(todo.time, todo.repeating, timeZone)
         self.eventTagId = todo.eventTagId ?? .default
+        self.eventNotifications = todo.notificationOptions
     }
 }
 

@@ -80,6 +80,7 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         |> \.time .~ .at(0)
         |> \.repeating .~ pure(self.dummyRepeating)
         |> \.eventTagId .~ .custom("tag")
+        |> \.notificationOptions .~ [.atTime, .before(seconds: 100)]
     }
     
     private var dummyDetail: EventDetailData {
@@ -132,6 +133,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         XCTAssertEqual(preparedWith?.0.selectedTime, .init(self.dummyRepeatingTodo.time!, self.timeZone))
         XCTAssertEqual(preparedWith?.0.eventRepeating, .init(self.dummyRepeating, timeZone: self.timeZone))
         XCTAssertEqual(preparedWith?.0.eventTagId, .custom("tag"))
+        XCTAssertEqual(preparedWith?.0.eventNotifications, [.atTime, .before(seconds: 100)])
         XCTAssertEqual(preparedWith?.1, self.dummyDetail)
     }
     

@@ -79,6 +79,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         return ScheduleEvent(uuid: "dummy_todo", name: "dummy", time: .at(0))
         |> \.repeating .~ pure(self.dummyRepeating)
         |> \.eventTagId .~ .custom("tag")
+        |> \.notificationOptions .~ [.atTime]
     }
     
     private var dummyDetail: EventDetailData {
@@ -131,6 +132,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(preparedWith?.0.selectedTime, .init(self.dummyRepeatingSchedule.time, self.timeZone))
         XCTAssertEqual(preparedWith?.0.eventRepeating, .init(self.dummyRepeating, timeZone: self.timeZone))
         XCTAssertEqual(preparedWith?.0.eventTagId, .custom("tag"))
+        XCTAssertEqual(preparedWith?.0.eventNotifications, [.atTime])
         XCTAssertEqual(preparedWith?.1, self.dummyDetail)
     }
     

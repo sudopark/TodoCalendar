@@ -329,5 +329,6 @@ private extension EventDetailBasicData {
         self.selectedTime = SelectedTime(schedule.time, timeZone)
         self.eventRepeating = EventRepeatingTimeSelectResult.make(schedule.time, schedule.repeating, timeZone)
         self.eventTagId = schedule.eventTagId ?? .default
+        self.eventNotifications = schedule.notificationOptions
     }
 }
