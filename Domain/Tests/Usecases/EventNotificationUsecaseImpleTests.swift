@@ -46,7 +46,7 @@ class EventNotificationUsecaseImpleTests: BaseTestCase {
         self.stubCalednarSettingUsecase.prepare()
         
         self.stubTodoUsecase.makeTodoChangeInPeriodEvent([
-            pastTodo, todoWithoutTime, futureTodoEvent1, futureTodoEvent2
+            pastTodo, todoWithoutTime, futureTodoEvent1, futureTodoEvent2, futureTodoWithCustomTime
         ])
         
         return .init(
@@ -66,7 +66,7 @@ extension EventNotificationUsecaseImpleTests {
     func testUsecase_whenRunSyncNotifications_scheduleTodoEventNotificationsFromNowToNextYear() {
         // given
         let expect = expectation(description: "현재 시간부터 1년 단위로 날짜 있는 미래 todo 알림 등록")
-        expect.expectedFulfillmentCount = 2
+        expect.expectedFulfillmentCount = 3
         let usecase = self.makeUsecase()
         var scheduledNotificationReqs: [UNNotificationRequest] = []
         self.spyNotificationService.didNotificationAddCalled = {
@@ -80,11 +80,12 @@ extension EventNotificationUsecaseImpleTests {
         
         // then
         scheduledNotificationReqs = scheduledNotificationReqs.sorted(by: { $0.content.title < $1.content.title })
-        XCTAssertEqual(scheduledNotificationReqs.count, 2)
+        XCTAssertEqual(scheduledNotificationReqs.count, 3)
         let eventNames = scheduledNotificationReqs.map { $0.content.title }
         XCTAssertEqual(eventNames, [
             "(\("Todo".localized()))\(futureTodoEvent1.name)",
             "(\("Todo".localized()))\(futureTodoEvent2.name)",
+            "(\("Todo".localized()))\(futureTodoWithCustomTime.name)"
         ])
         XCTAssertEqual(
             self.spyNotificationRepository.eventAndNotificationSets[futureTodoEvent1.uuid],
@@ -93,6 +94,10 @@ extension EventNotificationUsecaseImpleTests {
         XCTAssertEqual(
             self.spyNotificationRepository.eventAndNotificationSets[futureTodoEvent2.uuid],
             scheduledNotificationReqs[safe: 1].map { Set([$0.identifier]) }
+        )
+        XCTAssertEqual(
+            self.spyNotificationRepository.eventAndNotificationSets[futureTodoWithCustomTime.uuid],
+            scheduledNotificationReqs[safe: 2].map { Set([$0.identifier]) }
         )
     }
     
@@ -131,7 +136,7 @@ extension EventNotificationUsecaseImpleTests {
         let updatedTodo = futureTodoEvent2
             |> \.name .~ "future todo 2 - updated"
         self.stubTodoUsecase.makeTodoChangeInPeriodEvent([
-            pastTodo, todoWithoutTime, futureTodoEvent1, updatedTodo
+            pastTodo, todoWithoutTime, futureTodoEvent1, updatedTodo, futureTodoWithCustomTime
         ])
         self.wait(for: [expect], timeout: 0.1)
         
@@ -146,7 +151,7 @@ extension EventNotificationUsecaseImpleTests {
             self.spyNotificationRepository.eventAndNotificationSets[futureTodoEvent2.uuid],
             updatedNotificationReqs[safe: 0].map { Set([$0.identifier]) }
         )
-        XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets.count, 2)
+        XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets.count, 3)
         XCTAssertNotNil(usecase)    // 메모리 해제 안되게하기위해 필요함
     }
     
@@ -169,13 +174,13 @@ extension EventNotificationUsecaseImpleTests {
         
         // when
         self.stubTodoUsecase.makeTodoChangeInPeriodEvent([
-            pastTodo, todoWithoutTime, futureTodoEvent1
+            pastTodo, todoWithoutTime, futureTodoEvent1, futureTodoWithCustomTime
         ])
         self.wait(for: [expectForRemove, expectForAdd], timeout: 0.1)
         
         // then
         XCTAssertEqual(removedPendingNotificationIds?.count, 1)
-        XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets.count, 1)
+        XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets.count, 2)
         XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets[futureTodoEvent2.uuid], nil)
         XCTAssertNotNil(usecase)    // 메모리 해제 안되게하기위해 필요함
     }
@@ -184,7 +189,7 @@ extension EventNotificationUsecaseImpleTests {
     func testUsecase_whenTimeZoneChanges_reScheduleNotifications() {
         // given
         let expect = expectation(description: "timeZone 변경된 경우에도 notificaiton 다시 등록함")
-        expect.expectedFulfillmentCount = 2
+        expect.expectedFulfillmentCount = 3
         let usecase = self.makeUsecaseWithInitialSync()
         
         self.spyNotificationService.didNotificationAddCalled = { _ in
@@ -206,7 +211,7 @@ extension EventNotificationUsecaseImpleTests {
         let usecase = self.makeUsecase()
         self.stubTodoUsecase.makeTodoChangeInPeriodEvent([])
         self.stubScheduleUsecase.makeScheduleChangeInPeriodEvent([
-            pastSchedule, schedule1, scheduleWithRepeat
+            pastSchedule, schedule1, scheduleWithRepeat, schedule2WithCustomTime
         ])
         return usecase
     }
@@ -215,7 +220,7 @@ extension EventNotificationUsecaseImpleTests {
     func testUsecase_whenSyncScheduleEventNotifications_scheduleNotificationsFromNowToNextYear() {
         // given
         let expect = expectation(description: "현재 시간부터 1년 단위로 미래 일정 + 반복일정의 미래 시간 알림 등록")
-        expect.expectedFulfillmentCount = 13
+        expect.expectedFulfillmentCount = 14
         let usecase = self.makeUsecaseWithOnlyStubSchedules()
         
         self.spyNotificationService.didNotificationAddCalled = { req in
@@ -265,7 +270,7 @@ extension EventNotificationUsecaseImpleTests {
         // when
         let newEvent = schedule1 |> \.name .~ "updated"
         self.stubScheduleUsecase.makeScheduleChangeInPeriodEvent([
-            pastSchedule, newEvent, scheduleWithRepeat
+            pastSchedule, newEvent, scheduleWithRepeat, schedule2WithCustomTime
         ])
         self.wait(for: [expect], timeout: 0.1)
         
@@ -301,7 +306,7 @@ extension EventNotificationUsecaseImpleTests {
         
         // when
         self.stubScheduleUsecase.makeScheduleChangeInPeriodEvent([
-            pastSchedule, scheduleWithRepeat
+            pastSchedule, scheduleWithRepeat, schedule2WithCustomTime
         ])
         self.wait(for: [expectForRemove, expectForAdd], timeout: 0.1)
         
@@ -341,6 +346,12 @@ private var futureTodoEvent2: TodoEvent = {
         |> \.notificationOptions .~ [.atTime]
 }()
 
+private var futureTodoWithCustomTime: TodoEvent = {
+    return TodoEvent(uuid: "future-todo-custom-time", name: "future todo custom time")
+    |> \.time .~ .at(Date().addingTimeInterval(300).timeIntervalSince1970)
+    |> \.notificationOptions .~ [.custom(TimeZone(abbreviation: "KST")!, .after300SecondsBefore1Min())]
+}()
+
 private var pastSchedule: ScheduleEvent = {
     return ScheduleEvent(
         uuid: "past",
@@ -357,6 +368,16 @@ private var schedule1: ScheduleEvent = {
         time: .at(Date().addingTimeInterval(100).timeIntervalSince1970)
     )
     |> \.notificationOptions .~ [.atTime]
+}()
+
+
+private var schedule2WithCustomTime: ScheduleEvent = {
+    return ScheduleEvent(
+        uuid: "sc2-custom-time", 
+        name: "sc2 custom time",
+        time: .at(Date().addingTimeInterval(300).timeIntervalSince1970)
+    )
+    |> \.notificationOptions .~ [.custom(TimeZone(abbreviation: "KST")!, .after300SecondsBefore1Min())]
 }()
 
 private var scheduleWithRepeat: ScheduleEvent = {
@@ -432,5 +453,18 @@ private final class SpyEventNotificationRepository: StubEventNotificationReposit
         idSetMap.forEach {
             self.eventAndNotificationSets[$0.key] = (self.eventAndNotificationSets[$0.key] ?? []).union($0.value)
         }
+    }
+}
+
+private extension DateComponents {
+    
+    static func after300SecondsBefore1Min() -> DateComponents {
+        let future = Date().addingTimeInterval(300-60)
+        let calendar = Calendar(identifier: .gregorian)
+            |> \.timeZone .~ TimeZone(abbreviation: "KST")!
+        return calendar.dateComponents(
+            [.year, .month, .day, .hour, .minute, .second], 
+            from: future
+        )
     }
 }

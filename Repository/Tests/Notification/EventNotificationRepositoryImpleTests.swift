@@ -8,6 +8,8 @@
 
 import XCTest
 import Domain
+import Prelude
+import Optics
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
@@ -28,6 +30,15 @@ class EventNotificationRepositoryImpleTests: BaseLocalTests {
             sqliteService: self.sqliteService,
             environmentStorage: envStorage
         )
+    }
+    
+    private var kstTimeZone: TimeZone {
+        return TimeZone(abbreviation: "KST")!
+    }
+    
+    private var dummyComponents: DateComponents {
+        return DateComponents(year: 2023, month: 12, day: 12, hour: 23, minute: 34, second: 39)
+        |> \.calendar .~ Calendar(identifier: .gregorian)
     }
 }
 
@@ -59,6 +70,12 @@ extension EventNotificationRepositoryImpleTests {
         parameterizeTest(forAllDay: true, expectValue: .allDay9AM)
         parameterizeTest(forAllDay: true, expectValue: .allDay12AM)
         parameterizeTest(forAllDay: true, expectValue: .allDay9AMBefore(seconds: 100))
+        parameterizeTest(
+            forAllDay: false, expectValue: .custom(self.kstTimeZone, self.dummyComponents)
+        )
+        parameterizeTest(
+            forAllDay: true, expectValue: .custom(self.kstTimeZone, self.dummyComponents)
+        )
     }
 }
 
