@@ -16,5 +16,5 @@ public enum EventNotificationTimeOption: Sendable, Equatable {
     case allDay9AM
     case allDay12AM
     case allDay9AMBefore(seconds: TimeInterval)
-    case custom(_ timeZone: TimeZone, _ components: DateComponents)
+    case custom(_ components: DateComponents)
 }

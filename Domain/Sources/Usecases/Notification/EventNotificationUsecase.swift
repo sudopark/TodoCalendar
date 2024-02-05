@@ -23,7 +23,6 @@ public protocol EventNotificationUsecase: AnyObject, Sendable {
 
 public final class EventNotificationUsecaseImple: EventNotificationUsecase, @unchecked Sendable {
     
-    private let calendarSettingUsecase: any CalendarSettingUsecase
     private let todoEventUsecase: any TodoEventUsecase
     private let scheduleEventUescase: any ScheduleEventUsecase
     private let notificationRepository: any EventNotificationRepository
@@ -36,13 +35,11 @@ public final class EventNotificationUsecaseImple: EventNotificationUsecase, @unc
     private let serialWorkQueue = DispatchQueue(label: "event-notification-sync")
     
     public init(
-        calendarSettingUsecase: any CalendarSettingUsecase,
         todoEventUsecase: any TodoEventUsecase,
         scheduleEventUescase: any ScheduleEventUsecase,
         notificationRepository: any EventNotificationRepository,
         notificationService: any LocalNotificationService = UNUserNotificationCenter.current()
     ) {
-        self.calendarSettingUsecase = calendarSettingUsecase
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUescase = scheduleEventUescase
         self.notificationRepository = notificationRepository
@@ -55,15 +52,8 @@ extension EventNotificationUsecaseImple {
     
     public func runSyncEventNotification() {
         
-        let runSyncNotifications: (TimeZone) -> Void = { [weak self] timeZone in
-            self?.runSyncTodoEvents(timeZone)
-            self?.runSyncScheduleEvents(timeZone)
-        }
-        
-        self.calendarSettingUsecase.currentTimeZone
-            .subscribe(on: self.serialWorkQueue)
-            .sink(receiveValue: runSyncNotifications)
-            .store(in: &self.cancellables)
+        self.runSyncTodoEvents()
+        self.runSyncScheduleEvents()
     }
     
     private func fromNowToNextYearPeriod() -> Range<TimeInterval> {
@@ -71,19 +61,18 @@ extension EventNotificationUsecaseImple {
         return now.timeIntervalSince1970..<nextYear.timeIntervalSince1970
     }
     
-    private func runSyncTodoEvents(_ timeZone: TimeZone) {
+    private func runSyncTodoEvents() {
         
         self.todoSyncBinding?.cancel()
         
         self.todoSyncBinding = self.todoEventUsecase.todoEvents(in: self.fromNowToNextYearPeriod())
             .scan(EventChanges<TodoEvent>()) { $0.update($1) { $0.uuid } }
             .sink(receiveValue: { [weak self] changes in
-                self?.syncTodoEventNotifications(timeZone, changes)
+                self?.syncTodoEventNotifications(changes)
             })
     }
     
     private func syncTodoEventNotifications(
-        _ timeZone: TimeZone,
         _ changes: EventChanges<TodoEvent>
     ) {
         Task { [weak self] in
@@ -96,12 +85,12 @@ extension EventNotificationUsecaseImple {
             
             let params = changes.changed.values.flatMap { todo -> [SingleEventNotificationMakeParams] in
                 return todo.notificationOptions.compactMap {
-                    return SingleEventNotificationMakeParams(todo: todo, in: timeZone, timeOption: $0)
+                    return SingleEventNotificationMakeParams(todo: todo, timeOption: $0)
                 }
             }
             
             let eventAndNotificationIds = await params.async.reduce(into: [String: [String]]()) { acc, param in
-                if let notificationId = try? await self.scheduleNotification(param) {
+                if let notificationId = try? await self.scheduleNotificationIfFuture(param) {
                     let newIds = (acc[param.eventId] ?? []) + [notificationId]
                     acc[param.eventId] = newIds
                 }
@@ -116,20 +105,19 @@ extension EventNotificationUsecaseImple {
         .store(in: &self.cancellables)
     }
     
-    private func runSyncScheduleEvents(_ timeZone: TimeZone) {
+    private func runSyncScheduleEvents() {
         
         self.scheduleSyncBinding?.cancel()
         
         self.scheduleSyncBinding = self.scheduleEventUescase.scheduleEvents(in: self.fromNowToNextYearPeriod())
             .scan(EventChanges<ScheduleEvent>()) { $0.update($1) { $0.uuid } }
             .sink(receiveValue: { [weak self] changes in
-                self?.syncScheduleEventNotifications(timeZone, changes)
+                self?.syncScheduleEventNotifications(changes)
             })
     }
     
     
     private func syncScheduleEventNotifications(
-        _ timeZone: TimeZone,
         _ changes: EventChanges<ScheduleEvent>
     ) {
         Task { [weak self] in
@@ -146,13 +134,13 @@ extension EventNotificationUsecaseImple {
             let params = eventAndRepeatTimes.flatMap { pair -> [SingleEventNotificationMakeParams] in
                 return pair.0.notificationOptions.compactMap {
                     return SingleEventNotificationMakeParams(
-                        schedule: pair.0, repeatingAt: pair.1.time, in: timeZone, with: $0
+                        schedule: pair.0, repeatingAt: pair.1.time, with: $0
                     )
                 }
             }
             
             let eventAndNotificationIds = await params.async.reduce(into: [String: [String]]()) { acc, param in
-                if let notificationId = try? await self.scheduleNotification(param) {
+                if let notificationId = try? await self.scheduleNotificationIfFuture(param) {
                     let newIds = (acc[param.eventId] ?? []) + [notificationId]
                     acc[param.eventId] = newIds
                 }
@@ -167,14 +155,13 @@ extension EventNotificationUsecaseImple {
         .store(in: &self.cancellables)
     }
     
-    private func scheduleNotification(_ params: SingleEventNotificationMakeParams) async throws -> String {
+    private func scheduleNotificationIfFuture(_ params: SingleEventNotificationMakeParams) async throws -> String? {
         let content = UNMutableNotificationContent()
             |> \.title .~ params.eventName
             |> \.body .~ params.eventTimeText
         
-        let trigger = UNCalendarNotificationTrigger(
-            dateMatching: params.scheduleDateComponents, repeats: false
-        )
+        guard let trigger = params.scheduleTime.trigger(from: Date())
+        else { return nil }
         
         let uuid = UUID().uuidString
         let request = UNNotificationRequest(identifier: uuid, content: content, trigger: trigger)
@@ -208,5 +195,21 @@ private struct EventChanges<T: Equatable> {
             |> \.changed .~ added.merging(updated) { $1 }
             |> \.origin .~ newOriginMap
             |> \.removed .~ removed
+    }
+}
+
+
+private extension SingleEventNotificationMakeParams.ScheduleTime {
+    
+    func trigger(from now: Date) -> UNNotificationTrigger? {
+        switch self {
+        case .at(let time):
+            let interval = time - now.timeIntervalSince1970
+            guard interval > 0 else { return nil }
+            return UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+            
+        case .components(let components):
+            return UNCalendarNotificationTrigger(dateMatching: components, repeats: false)
+        }
     }
 }
