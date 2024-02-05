@@ -19,14 +19,12 @@ import TestDoubles
 
 class EventNotificationUsecaseImpleTests: BaseTestCase {
     
-    private var stubCalednarSettingUsecase: StubCalendarSettingUsecase!
     private var stubTodoUsecase: PrivateStubTodoEventUsecase!
     private var stubScheduleUsecase: PrivateStubScheduleEventUsecase!
     private var spyNotificationRepository: SpyEventNotificationRepository!
     private var spyNotificationService: StubLocalNotificationService!
     
     override func setUpWithError() throws {
-        self.stubCalednarSettingUsecase = .init()
         self.stubTodoUsecase = .init()
         self.stubScheduleUsecase = .init()
         self.spyNotificationRepository = .init()
@@ -34,7 +32,6 @@ class EventNotificationUsecaseImpleTests: BaseTestCase {
     }
     
     override func tearDownWithError() throws {
-        self.stubCalednarSettingUsecase = nil
         self.stubTodoUsecase = nil
         self.stubScheduleUsecase = nil
         self.spyNotificationRepository = nil
@@ -43,14 +40,11 @@ class EventNotificationUsecaseImpleTests: BaseTestCase {
     
     private func makeUsecase() -> EventNotificationUsecaseImple {
         
-        self.stubCalednarSettingUsecase.prepare()
-        
         self.stubTodoUsecase.makeTodoChangeInPeriodEvent([
             pastTodo, todoWithoutTime, futureTodoEvent1, futureTodoEvent2, futureTodoWithCustomTime
         ])
         
         return .init(
-            calendarSettingUsecase: self.stubCalednarSettingUsecase,
             todoEventUsecase: self.stubTodoUsecase,
             scheduleEventUescase: self.stubScheduleUsecase,
             notificationRepository: self.spyNotificationRepository,
@@ -182,25 +176,6 @@ extension EventNotificationUsecaseImpleTests {
         XCTAssertEqual(removedPendingNotificationIds?.count, 1)
         XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets.count, 2)
         XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets[futureTodoEvent2.uuid], nil)
-        XCTAssertNotNil(usecase)    // 메모리 해제 안되게하기위해 필요함
-    }
-    
-    // timeZone 변경시에도 연산 다시돔
-    func testUsecase_whenTimeZoneChanges_reScheduleNotifications() {
-        // given
-        let expect = expectation(description: "timeZone 변경된 경우에도 notificaiton 다시 등록함")
-        expect.expectedFulfillmentCount = 3
-        let usecase = self.makeUsecaseWithInitialSync()
-        
-        self.spyNotificationService.didNotificationAddCalled = { _ in
-            expect.fulfill()
-        }
-        
-        // when
-        self.stubCalednarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "PDT")!)
-        self.wait(for: [expect], timeout: 0.1)
-        
-        // then
         XCTAssertNotNil(usecase)    // 메모리 해제 안되게하기위해 필요함
     }
 }
@@ -349,7 +324,7 @@ private var futureTodoEvent2: TodoEvent = {
 private var futureTodoWithCustomTime: TodoEvent = {
     return TodoEvent(uuid: "future-todo-custom-time", name: "future todo custom time")
     |> \.time .~ .at(Date().addingTimeInterval(300).timeIntervalSince1970)
-    |> \.notificationOptions .~ [.custom(TimeZone(abbreviation: "KST")!, .after300SecondsBefore1Min())]
+    |> \.notificationOptions .~ [.custom(.after300SecondsBefore1Min())]
 }()
 
 private var pastSchedule: ScheduleEvent = {
@@ -377,7 +352,7 @@ private var schedule2WithCustomTime: ScheduleEvent = {
         name: "sc2 custom time",
         time: .at(Date().addingTimeInterval(300).timeIntervalSince1970)
     )
-    |> \.notificationOptions .~ [.custom(TimeZone(abbreviation: "KST")!, .after300SecondsBefore1Min())]
+    |> \.notificationOptions .~ [.custom(.after300SecondsBefore1Min())]
 }()
 
 private var scheduleWithRepeat: ScheduleEvent = {

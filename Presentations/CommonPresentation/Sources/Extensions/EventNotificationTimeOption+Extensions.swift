@@ -37,8 +37,8 @@ extension EventNotificationTimeOption {
             return "event_notification_setting::option_title::allday_12am".localized()
         case .allDay9AMBefore(let seconds):
             return seconds.alldayBeforeText
-        case .custom(let timeZone, let componets):
-            let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        case .custom(let componets):
+            let calendar = Calendar(identifier: .gregorian)
             return calendar.customTimeText(componets).map {
                 "event_notification_setting::option_title::customTime".localized(with: $0)
             }

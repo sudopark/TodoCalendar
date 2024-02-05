@@ -84,15 +84,19 @@ public struct TodayEventsNotification: EventNotification {
 
 public struct SingleEventNotificationMakeParams: Sendable, Equatable {
     
+    public enum ScheduleTime: Equatable, Sendable {
+        case at(TimeInterval)
+        case components(DateComponents)
+    }
+    
     public let eventType: SingleNotificationEventSourceType
     public let eventId: String
     public let eventName: String
     public let eventTimeText: String
-    public let scheduleDateComponents: DateComponents
+    public let scheduleTime: ScheduleTime
     
     public init?(
         todo: TodoEvent,
-        in timeZone: TimeZone,
         timeOption: EventNotificationTimeOption
     ) {
         
@@ -101,17 +105,16 @@ public struct SingleEventNotificationMakeParams: Sendable, Equatable {
         self.eventName = "(\("Todo".localized()))\(todo.name)"
         
         guard let time = todo.time,
-              let (timeText, component) = time.futureNotificationTime(in: timeZone, timeOption: timeOption)
+              let (timeText, scheduleTime) = time.notificationTimeInfo(timeOption: timeOption)
         else { return nil }
         
         self.eventTimeText = timeText
-        self.scheduleDateComponents = component
+        self.scheduleTime = scheduleTime
     }
     
     public init?(
         schedule: ScheduleEvent,
         repeatingAt: EventTime?,
-        in timeZone: TimeZone,
         with option: EventNotificationTimeOption
     ) {
         self.eventType = .schedule
@@ -119,73 +122,70 @@ public struct SingleEventNotificationMakeParams: Sendable, Equatable {
         self.eventName = schedule.name
         
         let eventTime = repeatingAt ?? schedule.time
-        guard let (timeText, components) = eventTime.futureNotificationTime(in: timeZone, timeOption: option)
+        guard let (timeText, scheduleTime) = eventTime.notificationTimeInfo(timeOption: option)
         else { return nil }
         
         self.eventTimeText = timeText
-        self.scheduleDateComponents = components
+        self.scheduleTime = scheduleTime
     }
 }
 
 private extension EventTime {
     
-    func futureNotificationTime(
-        in timeZone: TimeZone,
+    func notificationTimeInfo(
         timeOption: EventNotificationTimeOption
-    ) -> (String, DateComponents)? {
-        
-        let now = Date()
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+    ) -> (String, SingleEventNotificationMakeParams.ScheduleTime)? {
         
         func notAllDayNotificationTime(_ startTime: TimeInterval) -> (
-            String, DateComponents
+            String, SingleEventNotificationMakeParams.ScheduleTime
         )? {
-            guard let notificationTime = startTime.applyNotAllDayNotificationTime(option: timeOption),
-                  notificationTime > now.timeIntervalSince1970
+            guard let notificationTime = startTime.notAllDayNotificationTime(option: timeOption)
             else { return nil }
-            let components = calendar.notificationTimeDateComponent(notificationTime)
             
             let startDate = Date(timeIntervalSince1970: startTime)
             let dateFormatter = DateFormatter()
             
+            let calendar = Calendar(identifier: .gregorian)
             if calendar.isDateInToday(startDate) {
                 dateFormatter.dateFormat = "HH:mm".localized()
                 let timeText = "\("Today".localized()) \(dateFormatter.string(from: startDate))"
-                return (timeText, components)
+                return (timeText, notificationTime)
             } else if calendar.isDateInTomorrow(startDate) {
                 dateFormatter.dateFormat = "HH:mm".localized()
                 let timeText =  "\("Tomorrow".localized()) \(dateFormatter.string(from: startDate))"
-                return (timeText, components)
+                return (timeText, notificationTime)
                 
             } else {
                 dateFormatter.dateFormat = "MM d, HH:mm".localized()
                 let timeText = dateFormatter.string(from: startDate)
-                return (timeText, components)
+                return (timeText, notificationTime)
             }
         }
         
-        func allDayNotificationTime(_ startTime: TimeInterval) -> (
-            String, DateComponents
+        func allDayNotificationTime(
+            _ startTime: TimeInterval, _ secondsFromGMT: TimeInterval
+        ) -> (
+            String, SingleEventNotificationMakeParams.ScheduleTime
         )? {
-            guard let notificationTime = startTime.applyAllDayNotificationTime(option: timeOption, calendar: calendar),
-                  notificationTime > now.timeIntervalSince1970
+            guard let timeZone = TimeZone(secondsFromGMT: Int(secondsFromGMT)) else { return nil }
+            let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+            guard let notificationTime = startTime.allDayNotificationTime(option: timeOption, calendar: calendar)
             else { return nil }
-            
-            let components = calendar.notificationTimeDateComponent(notificationTime)
-            
+ 
             let startDate = Date(timeIntervalSince1970: startTime)
             
-            if calendar.isDateInToday(startDate) {
+            let systemCalendar = Calendar(identifier: .gregorian)
+            if systemCalendar.isDateInToday(startDate) {
                 let timeText = "All day today".localized()
-                return (timeText, components)
-            } else if calendar.isDateInTomorrow(startDate) {
+                return (timeText, notificationTime)
+            } else if systemCalendar.isDateInTomorrow(startDate) {
                 let timeText = "All day tomorrow".localized()
-                return (timeText, components)
+                return (timeText, notificationTime)
             } else {
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "MM d".localized()
                 let timetext = "\(dateFormatter.string(from: startDate)) all day".localized()
-                return (timetext, components)
+                return (timetext, notificationTime)
             }
         }
 
@@ -197,60 +197,70 @@ private extension EventTime {
             return notAllDayNotificationTime(range.lowerBound)
             
         case .allDay(let range, let secondsFromGMT):
-            let shiftRange = range.shiftting(secondsFromGMT, to: timeZone)
-            return allDayNotificationTime(shiftRange.lowerBound)
+            return allDayNotificationTime(range.lowerBound, secondsFromGMT)
         }
     }
 }
 
 private extension TimeInterval {
     
-    func applyNotAllDayNotificationTime(option: EventNotificationTimeOption) -> TimeInterval? {
+    func notAllDayNotificationTime(
+        option: EventNotificationTimeOption
+    ) -> SingleEventNotificationMakeParams.ScheduleTime? {
+        
         switch option {
-        case .atTime:  return self
-        case .before(let seconds): return self - seconds
-        case .custom(let timeZone, let compos):
-            let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-            return calendar.notificationTimeInterval(compos)
+        case .atTime:  
+            return .at(self)
+        case .before(let seconds):
+            return .at(self - seconds)
+        case .custom(let compos):
+            return .components(compos)
             
         default: return nil
         }
     }
     
-    func applyAllDayNotificationTime(option: EventNotificationTimeOption, calendar: Calendar) -> TimeInterval? {
+    func allDayNotificationTime(
+        option: EventNotificationTimeOption, 
+        calendar: Calendar
+    ) -> SingleEventNotificationMakeParams.ScheduleTime? {
         let startDate = Date(timeIntervalSince1970: self)
+        let startDateComponents = calendar.dateComponents([
+            .year, .month, .day, .hour, .minute, .second
+        ], from: startDate)
         switch option {
         case .allDay9AM:
-            return calendar.date(bySetting: .hour, value: 9, of: startDate)?.timeIntervalSince1970
+            return .components(
+                startDateComponents 
+                    |> \.hour .~ 9
+                    |> \.minute .~ 0
+                    |> \.second .~ 0
+            )
             
         case .allDay12AM:
-            return calendar.date(bySetting: .hour, value: 0, of: startDate)?.timeIntervalSince1970
+            return .components(
+                startDateComponents
+                    |> \.hour .~ 12
+                    |> \.minute .~ 0
+                    |> \.second .~ 0
+            )
             
         case .allDay9AMBefore(let seconds):
-            return calendar.date(bySetting: .hour, value: 9, of: startDate)
-                .map { $0.timeIntervalSince1970 - seconds }
+            let beforeDate = startDate.addingTimeInterval(-seconds)
+            let beforeDateComponents = calendar.dateComponents([
+                .year, .month, .day, .hour, .minute, .second
+            ], from: beforeDate)
+            return .components(
+                beforeDateComponents
+                    |> \.hour .~ 9
+                    |> \.minute .~ 0
+                    |> \.second .~ 0
+            )
             
-        case .custom(let timeZone, let compos):
-            let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-            return calendar.notificationTimeInterval(compos)
+        case .custom(let compos):
+            return .components(compos)
             
         default: return nil
         }
-    }
-}
-
-private extension Calendar {
-    
-    func notificationTimeDateComponent(_ time: TimeInterval) -> DateComponents {
-        return self.dateComponents(
-            [.year, .month, .day, .hour, .minute, .second],
-            from: Date(timeIntervalSince1970: time)
-        )
-        |> \.calendar .~ Calendar(identifier: .gregorian)
-        |> \.timeZone .~ pure(self.timeZone)
-    }
-    
-    func notificationTimeInterval(_ components: DateComponents) -> TimeInterval? {
-        return self.date(from: components)?.timeIntervalSince1970
     }
 }

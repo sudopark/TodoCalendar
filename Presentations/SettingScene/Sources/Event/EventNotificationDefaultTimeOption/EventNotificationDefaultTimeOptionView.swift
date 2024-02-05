@@ -206,6 +206,8 @@ private extension Optional where Wrapped == EventNotificationTimeOption {
         case .allDay9AM: return "allDay9AM"
         case .allDay12AM: return "allDay12AM"
         case .allDay9AMBefore(let seconds): return "allDay9AMBefore:\(seconds)"
+        case .custom(let components):
+            return "custom:\(components)"
         }
     }
 }

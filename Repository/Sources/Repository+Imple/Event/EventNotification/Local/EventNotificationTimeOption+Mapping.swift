@@ -15,7 +15,6 @@ struct EventNotificationTimeOptionMapper: Codable {
     private enum CodingKeys: String, CodingKey {
         case typeText = "type_text"
         case beforeSeconds = "before_seconds"
-        case customTimeZone = "custom_timezone"
         case customTimeComponents = "custom_components"
     }
     
@@ -46,9 +45,8 @@ struct EventNotificationTimeOptionMapper: Codable {
             self = .init(option: .allDay9AMBefore(seconds: seconds))
             
         case "custom":
-            let timeZone = try container.decode(TimeZone.self, forKey: .customTimeZone)
             let components = try container.decode(DateComponents.self, forKey: .customTimeComponents)
-            self = .init(option: .custom(timeZone, components))
+            self = .init(option: .custom(components))
             
         default:
             throw RuntimeError("invalid value")
@@ -59,7 +57,6 @@ struct EventNotificationTimeOptionMapper: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.typeText, forKey: .typeText)
         try? container.encode(self.beforeSeconds, forKey: .beforeSeconds)
-        try? container.encode(self.customTimeTimeZone, forKey: .customTimeZone)
         try? container.encode(self.customTimeComponents, forKey: .customTimeComponents)
     }
     
@@ -80,17 +77,10 @@ struct EventNotificationTimeOptionMapper: Codable {
         default: return nil
         }
     }
-    
-    private var customTimeTimeZone: TimeZone? {
-        switch self.option {
-        case .custom(let timeZone, _): return timeZone
-        default: return nil
-        }
-    }
-    
+
     private var customTimeComponents: DateComponents? {
         switch self.option {
-        case .custom(_, let compos): return compos
+        case .custom(let compos): return compos
         default: return nil
         }
     }

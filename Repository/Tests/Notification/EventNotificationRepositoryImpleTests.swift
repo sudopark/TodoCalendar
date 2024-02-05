@@ -71,10 +71,10 @@ extension EventNotificationRepositoryImpleTests {
         parameterizeTest(forAllDay: true, expectValue: .allDay12AM)
         parameterizeTest(forAllDay: true, expectValue: .allDay9AMBefore(seconds: 100))
         parameterizeTest(
-            forAllDay: false, expectValue: .custom(self.kstTimeZone, self.dummyComponents)
+            forAllDay: false, expectValue: .custom(self.dummyComponents)
         )
         parameterizeTest(
-            forAllDay: true, expectValue: .custom(self.kstTimeZone, self.dummyComponents)
+            forAllDay: true, expectValue: .custom(self.dummyComponents)
         )
     }
 }
