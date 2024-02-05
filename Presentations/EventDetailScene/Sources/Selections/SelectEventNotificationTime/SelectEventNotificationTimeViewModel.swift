@@ -1,0 +1,240 @@
+//
+//  
+//  SelectEventNotificationTimeViewModel.swift
+//  EventDetailScene
+//
+//  Created by sudo.park on 1/31/24.
+//  Copyright © 2024 com.sudo.park. All rights reserved.
+//
+//
+
+import Foundation
+import Combine
+import Prelude
+import Optics
+import Domain
+import Scenes
+
+
+struct NotificationTimeOptionModel: Equatable {
+    let option: EventNotificationTimeOption?
+    let text: String
+    
+    init(option: EventNotificationTimeOption?) {
+        self.option = option
+        self.text = option.text
+    }
+}
+
+struct CustomTimeOptionModel: Equatable {
+    let option: EventNotificationTimeOption
+    let components: DateComponents
+    let dateText: String
+    let diffTimeText: String
+    
+    // TODO: init with custom
+    init?(option: EventNotificationTimeOption) {
+        guard case let .custom(compos) = option else { return nil }
+        self.option = option
+        self.components = compos
+        let calendar = Calendar(identifier: .gregorian)
+        self.dateText = calendar.customOptionTimeText(compos) ?? ""
+        // TOOD: diffTimeText
+        self.diffTimeText = "TODO"
+    }
+}
+
+// MARK: - SelectEventNotificationTimeViewModel
+
+protocol SelectEventNotificationTimeViewModel: AnyObject, Sendable, SelectEventNotificationTimeSceneInteractor {
+
+    // interactor
+    func prepare()
+    func toggleSelectDefaultOption(_ option: EventNotificationTimeOption?)
+    func addCustomTimeOption(_ components: DateComponents)
+    func removeCustomTimeOption(_ components: DateComponents)
+    func moveEventSetting()
+    func close()
+    
+    // presenter
+    var defaultTimeOptions: AnyPublisher<[NotificationTimeOptionModel], Never> { get }
+    var customTimeOptions: AnyPublisher<[CustomTimeOptionModel], Never> { get }
+    var selectedDefaultTimeOptions: AnyPublisher<[EventNotificationTimeOption], Never> { get }
+    // TODO: provide default custom options time
+}
+
+
+// MARK: - SelectEventNotificationTimeViewModelImple
+
+final class SelectEventNotificationTimeViewModelImple: SelectEventNotificationTimeViewModel, @unchecked Sendable {
+    
+    private let isForAllDay: Bool
+    private let eventNotificationSettingUsecase: any EventNotificationSettingUsecase
+    var router: (any SelectEventNotificationTimeRouting)?
+    var listener: (any SelectEventNotificationTimeSceneListener)?
+    
+    init(
+        isForAllDay: Bool,
+        startWith select: [EventNotificationTimeOption],
+        eventNotificationSettingUsecase: any EventNotificationSettingUsecase
+    ) {
+        self.isForAllDay = isForAllDay
+        self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
+        self.subject.selectedOptions.send(select)
+        
+        self.bindChangedOptionChanged()
+    }
+    
+    
+    private struct Subject {
+        let defaultOptions = CurrentValueSubject<[EventNotificationTimeOption]?, Never>(nil)
+        let customOptions = CurrentValueSubject<[EventNotificationTimeOption]?, Never>(nil)
+        let selectedOptions = CurrentValueSubject<[EventNotificationTimeOption]?, Never>(nil)
+    }
+    
+    private var cancellables: Set<AnyCancellable> = []
+    private let subject = Subject()
+    
+    private func bindChangedOptionChanged() {
+        
+        self.subject.selectedOptions
+            .compactMap { $0 }
+            .dropFirst()
+            .sink(receiveValue: { [weak self] options in
+                self?.listener?.selectEventNotificationTime(didUpdate: options)
+            })
+            .store(in: &self.cancellables)
+    }
+}
+
+
+// MARK: - SelectEventNotificationTimeViewModelImple Interactor
+
+extension SelectEventNotificationTimeViewModelImple {
+    
+    func prepare() {
+        
+        let defaultOptions = self.eventNotificationSettingUsecase
+            .availableTimes(forAllDay: self.isForAllDay)
+        self.subject.defaultOptions.send(defaultOptions)
+    }
+    
+    func toggleSelectDefaultOption(_ option: EventNotificationTimeOption?) {
+        guard let options = self.subject.selectedOptions.value
+        else { return }
+        
+        let newOptionAndIndex = option.map {
+            ($0, options.firstIndex(of: $0))
+        }
+        
+        switch newOptionAndIndex {
+        case .none:
+            self.subject.selectedOptions.send(
+                options.onlyCustomOptions()
+            )
+        case .some((let option, .none)):
+            self.subject.selectedOptions.send(
+                options + [option]
+            )
+            
+        case (.some((_, .some(let ix)))):
+            var newOptions = options; newOptions.remove(at: ix)
+            self.subject.selectedOptions.send(newOptions)
+        }
+    }
+    
+    func addCustomTimeOption(_ components: DateComponents) {
+        guard let options = self.subject.selectedOptions.value
+        else { return }
+        
+        let newOptions = options.filter { $0.customOptionDateComponents != components }
+        let newOption = EventNotificationTimeOption.custom(components)
+        self.subject.selectedOptions.send(newOptions + [newOption])
+    }
+    
+    func removeCustomTimeOption(_ components: DateComponents) {
+        guard let options = self.subject.selectedOptions.value
+        else { return }
+        
+        let newOptions = options.filter { $0.customOptionDateComponents != components }
+        self.subject.selectedOptions.send(newOptions)
+    }
+    
+    func moveEventSetting() {
+        self.router?.routeToEventSetting()
+    }
+    
+    func close() {
+        self.router?.closeScene(animate: true, nil)
+    }
+}
+
+
+// MARK: - SelectEventNotificationTimeViewModelImple Presenter
+
+extension SelectEventNotificationTimeViewModelImple {
+    
+    var defaultTimeOptions: AnyPublisher<[NotificationTimeOptionModel], Never> {
+        let transform: ([EventNotificationTimeOption]) -> [NotificationTimeOptionModel] = { options in
+            return options.map { .init(option: $0) }
+        }
+        return self.subject.defaultOptions
+            .compactMap { $0 }
+            .map(transform)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var selectedDefaultTimeOptions: AnyPublisher<[EventNotificationTimeOption], Never> {
+        let filterDefaultOptions: ([EventNotificationTimeOption]) -> [EventNotificationTimeOption] = { options in
+            return options.filter { option in
+                if case .custom = option {
+                    return false
+                } else{
+                    return true
+                }
+            }
+        }
+        return self.subject.selectedOptions
+            .compactMap { $0 }
+            .map(filterDefaultOptions)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var customTimeOptions: AnyPublisher<[CustomTimeOptionModel], Never> {
+        return self.subject.selectedOptions
+            .compactMap { $0 }
+            .map { $0.onlyCustomOptions() }
+            .map { os in os.compactMap { .init(option: $0) } }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+}
+
+private extension Array where Element == EventNotificationTimeOption {
+    
+    func onlyCustomOptions() -> Array {
+        return self.filter { option in
+            guard case .custom = option else { return false }
+            return true
+        }
+    }
+}
+
+private extension Calendar {
+    
+    func customOptionTimeText(_ components: DateComponents) -> String? {
+        guard let date = self.date(from: components) else { return nil }
+        let formatter = DateFormatter() |> \.dateFormat .~ "yyyy".localized()
+        return formatter.string(from: date)
+    }
+}
+
+extension EventNotificationTimeOption {
+    
+    var customOptionDateComponents: DateComponents? {
+        guard case let .custom(compos) = self else { return nil }
+        return compos
+    }
+}
