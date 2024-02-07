@@ -332,6 +332,7 @@ extension AddEventViewModelImpleTests {
         |> \.selectedTime .~ self.dummyNewSelectTime
         |> \.eventRepeating .~ pure(repeating)
         |> \.eventTagId .~ .custom("some")
+        |> \.eventNotifications .~ [.atTime]
         
         let addition = EventDetailData("pending")
         |> \.url .~ "url"
@@ -376,6 +377,7 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(madeParams?.eventTagId, .custom("some"))
         XCTAssertEqual(madeParams?.time, .at(0))
         XCTAssertEqual(madeParams?.repeating, .init(repeatingStartTime: 100, repeatOption: EventRepeatingOptions.EveryDay()) )
+        XCTAssertEqual(madeParams?.notificationOptions, [.atTime])
     }
     
     // scheudle 저장
@@ -401,6 +403,7 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(madeParams?.eventTagId, .custom("some"))
         XCTAssertEqual(madeParams?.time, .at(0))
         XCTAssertEqual(madeParams?.repeating, .init(repeatingStartTime: 100, repeatOption: EventRepeatingOptions.EveryDay()) )
+        XCTAssertEqual(madeParams?.notificationOptions, [.atTime])
     }
     
     // 이벤트 저장 이후에 메타데이터도 저장함
