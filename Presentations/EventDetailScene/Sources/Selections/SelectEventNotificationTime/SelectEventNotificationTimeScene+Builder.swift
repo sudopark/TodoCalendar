@@ -36,6 +36,7 @@ protocol SelectEventNotificationTimeSceneBuiler: AnyObject {
     func makeSelectEventNotificationTimeScene(
         isForAllDay: Bool,
         startWith select: [EventNotificationTimeOption],
+        eventTimeComponents: DateComponents,
         listener: (any SelectEventNotificationTimeSceneListener)?
     ) -> any SelectEventNotificationTimeScene
 }

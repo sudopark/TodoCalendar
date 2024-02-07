@@ -35,6 +35,12 @@ final class SelectEventNotificationTimeViewController: UIHostingController<Selec
         self.viewAppearance = viewAppearance
         
         let eventHandlers = SelectEventNotificationTimeViewEventHandler()
+        eventHandlers.onAppear = viewModel.prepare
+        eventHandlers.toggleSelectDefaultOption = viewModel.toggleSelectDefaultOption(_:)
+        eventHandlers.addCustomTimeOption = viewModel.addCustomTimeOption(_:)
+        eventHandlers.removeCustomTimeOption = viewModel.removeCustomTimeOption(_:)
+        eventHandlers.moveEventSetting = viewModel.moveEventSetting
+        eventHandlers.close = viewModel.close
         
         let containerView = SelectEventNotificationTimeContainerView(
             viewAppearance: viewAppearance,

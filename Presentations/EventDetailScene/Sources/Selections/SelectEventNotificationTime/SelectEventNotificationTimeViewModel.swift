@@ -60,7 +60,7 @@ protocol SelectEventNotificationTimeViewModel: AnyObject, Sendable, SelectEventN
     var defaultTimeOptions: AnyPublisher<[NotificationTimeOptionModel], Never> { get }
     var customTimeOptions: AnyPublisher<[CustomTimeOptionModel], Never> { get }
     var selectedDefaultTimeOptions: AnyPublisher<[EventNotificationTimeOption], Never> { get }
-    // TODO: provide default custom options time
+    var suggestCustomTimeComponents: DateComponents { get }
 }
 
 
@@ -69,6 +69,7 @@ protocol SelectEventNotificationTimeViewModel: AnyObject, Sendable, SelectEventN
 final class SelectEventNotificationTimeViewModelImple: SelectEventNotificationTimeViewModel, @unchecked Sendable {
     
     private let isForAllDay: Bool
+    private let eventTimeComponents: DateComponents
     private let eventNotificationSettingUsecase: any EventNotificationSettingUsecase
     var router: (any SelectEventNotificationTimeRouting)?
     var listener: (any SelectEventNotificationTimeSceneListener)?
@@ -76,9 +77,11 @@ final class SelectEventNotificationTimeViewModelImple: SelectEventNotificationTi
     init(
         isForAllDay: Bool,
         startWith select: [EventNotificationTimeOption],
+        eventTimeComponents: DateComponents,
         eventNotificationSettingUsecase: any EventNotificationSettingUsecase
     ) {
         self.isForAllDay = isForAllDay
+        self.eventTimeComponents = eventTimeComponents
         self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
         self.subject.selectedOptions.send(select)
         
@@ -209,6 +212,10 @@ extension SelectEventNotificationTimeViewModelImple {
             .map { os in os.compactMap { .init(option: $0) } }
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    var suggestCustomTimeComponents: DateComponents {
+        return self.eventTimeComponents
     }
 }
 
