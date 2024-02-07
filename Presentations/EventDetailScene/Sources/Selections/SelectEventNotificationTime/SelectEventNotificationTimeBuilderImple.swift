@@ -45,7 +45,8 @@ extension SelectEventNotificationTimeSceneBuilerImple: SelectEventNotificationTi
             isForAllDay: isForAllDay,
             startWith: select,
             eventTimeComponents: eventTimeComponents,
-            eventNotificationSettingUsecase: usecaseFactory.makeEventNotificationSettingUsecase()
+            eventNotificationSettingUsecase: usecaseFactory.makeEventNotificationSettingUsecase(),
+            notificationPermissionUsecase: usecaseFactory.makeNotificationPermissionUsecase()
         )
         
         let viewController = SelectEventNotificationTimeViewController(

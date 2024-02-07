@@ -24,9 +24,11 @@ open class StubNotificationPermissionUsecase: NotificationPermissionUsecase, @un
     }
     
     public var stubRequestPermissionResult: Result<Bool, any Error> = .success(true)
+    public var didPermissionChanged: ((NotificationAuthorizationStatus) -> Void)?
     open func requestPermission() async throws -> Bool {
         switch self.stubRequestPermissionResult {
         case .success(let success):
+            self.didPermissionChanged?(success ? .authorized : .denied)
             return success
         case .failure(let failure):
             throw failure

@@ -18,6 +18,7 @@ import CommonPresentation
 protocol SelectEventNotificationTimeRouting: Routing, Sendable { 
     
     func routeToEventSetting()
+    func openSystemNotificationSetting()
 }
 
 // MARK: - Router
@@ -33,6 +34,10 @@ extension SelectEventNotificationTimeRouter {
     
     // TODO: router implememnts
     func routeToEventSetting() {
+        // TODO: 
+    }
+    
+    func openSystemNotificationSetting() {
         // TODO: 
     }
 }
