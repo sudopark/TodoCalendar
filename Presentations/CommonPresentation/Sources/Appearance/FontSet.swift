@@ -21,6 +21,8 @@ public protocol FontSet: Sendable {
     var eventMore: UIFont { get }
     
     var bigMonth: UIFont { get }
+    var big: UIFont { get }
+    var bigBold: UIFont { get }
     var normal: UIFont { get }
     var subNormal: UIFont { get}
     var subNormalWithBold: UIFont { get }
@@ -51,6 +53,8 @@ public struct SystemDefaultFontSet: FontSet {
     public let eventMore: UIFont = UIFont.systemFont(ofSize: 9)
     
     public let bigMonth: UIFont = UIFont.systemFont(ofSize: 32, weight: .semibold)
+    public let big: UIFont = UIFont.systemFont(ofSize: 18)
+    public let bigBold: UIFont = UIFont.systemFont(ofSize: 18, weight: .bold)
     public let normal: UIFont = UIFont.systemFont(ofSize: 14)
     public let subNormal: UIFont = UIFont.systemFont(ofSize: 12)
     public let subNormalWithBold: UIFont = UIFont.systemFont(ofSize: 12, weight: .bold)

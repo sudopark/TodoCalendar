@@ -37,12 +37,14 @@ extension SelectEventNotificationTimeSceneBuilerImple: SelectEventNotificationTi
     func makeSelectEventNotificationTimeScene(
         isForAllDay: Bool,
         startWith select: [EventNotificationTimeOption],
+        eventTimeComponents: DateComponents,
         listener: (any SelectEventNotificationTimeSceneListener)?
     ) -> any SelectEventNotificationTimeScene {
         
         let viewModel = SelectEventNotificationTimeViewModelImple(
             isForAllDay: isForAllDay,
             startWith: select,
+            eventTimeComponents: eventTimeComponents,
             eventNotificationSettingUsecase: usecaseFactory.makeEventNotificationSettingUsecase()
         )
         

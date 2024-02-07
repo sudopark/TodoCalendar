@@ -57,6 +57,7 @@ class SelectEventNotificationTimeViewModelTests: BaseTestCase, PublisherWaitable
         let viewModel = SelectEventNotificationTimeViewModelImple(
             isForAllDay: false,
             startWith: startWith,
+            eventTimeComponents: .init(),
             eventNotificationSettingUsecase: self.stubUsecase
         )
         viewModel.router = self.spyRouter
