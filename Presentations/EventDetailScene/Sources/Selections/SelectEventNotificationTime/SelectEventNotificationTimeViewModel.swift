@@ -54,6 +54,7 @@ protocol SelectEventNotificationTimeViewModel: AnyObject, Sendable, SelectEventN
     func addCustomTimeOption(_ components: DateComponents)
     func removeCustomTimeOption(_ components: DateComponents)
     func moveEventSetting()
+    func moveSystemNotificationSetting()
     func close()
     
     // presenter
@@ -61,6 +62,7 @@ protocol SelectEventNotificationTimeViewModel: AnyObject, Sendable, SelectEventN
     var customTimeOptions: AnyPublisher<[CustomTimeOptionModel], Never> { get }
     var selectedDefaultTimeOptions: AnyPublisher<[EventNotificationTimeOption], Never> { get }
     var suggestCustomTimeComponents: DateComponents { get }
+    var isNeedNotificaitonPermission: AnyPublisher<Void, Never> { get }
 }
 
 
@@ -71,6 +73,7 @@ final class SelectEventNotificationTimeViewModelImple: SelectEventNotificationTi
     private let isForAllDay: Bool
     private let eventTimeComponents: DateComponents
     private let eventNotificationSettingUsecase: any EventNotificationSettingUsecase
+    private let notificationPermissionUsecase: any NotificationPermissionUsecase
     var router: (any SelectEventNotificationTimeRouting)?
     var listener: (any SelectEventNotificationTimeSceneListener)?
     
@@ -78,11 +81,13 @@ final class SelectEventNotificationTimeViewModelImple: SelectEventNotificationTi
         isForAllDay: Bool,
         startWith select: [EventNotificationTimeOption],
         eventTimeComponents: DateComponents,
-        eventNotificationSettingUsecase: any EventNotificationSettingUsecase
+        eventNotificationSettingUsecase: any EventNotificationSettingUsecase,
+        notificationPermissionUsecase: any NotificationPermissionUsecase
     ) {
         self.isForAllDay = isForAllDay
         self.eventTimeComponents = eventTimeComponents
         self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
+        self.notificationPermissionUsecase = notificationPermissionUsecase
         self.subject.selectedOptions.send(select)
         
         self.bindChangedOptionChanged()
@@ -93,6 +98,7 @@ final class SelectEventNotificationTimeViewModelImple: SelectEventNotificationTi
         let defaultOptions = CurrentValueSubject<[EventNotificationTimeOption]?, Never>(nil)
         let customOptions = CurrentValueSubject<[EventNotificationTimeOption]?, Never>(nil)
         let selectedOptions = CurrentValueSubject<[EventNotificationTimeOption]?, Never>(nil)
+        let notificationPermissionDenied = PassthroughSubject<Void, Never>()
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -120,6 +126,27 @@ extension SelectEventNotificationTimeViewModelImple {
         let defaultOptions = self.eventNotificationSettingUsecase
             .availableTimes(forAllDay: self.isForAllDay)
         self.subject.defaultOptions.send(defaultOptions)
+        
+        self.requestNotificationPermissionIfNeed()
+    }
+    
+    private func requestNotificationPermissionIfNeed() {
+        
+        Task { [weak self] in
+            let status = try await self?.notificationPermissionUsecase.checkAuthorizationStatus()
+            switch status {
+            case .notDetermined:
+                let isGrant = try await self?.notificationPermissionUsecase.requestPermission()
+                if isGrant == false {
+                    self?.subject.notificationPermissionDenied.send(())
+                }
+                
+            case .denied:
+                self?.subject.notificationPermissionDenied.send(())
+            default: break
+            }
+        }
+        .store(in: &self.cancellables)
     }
     
     func toggleSelectDefaultOption(_ option: EventNotificationTimeOption?) {
@@ -165,6 +192,10 @@ extension SelectEventNotificationTimeViewModelImple {
     
     func moveEventSetting() {
         self.router?.routeToEventSetting()
+    }
+    
+    func moveSystemNotificationSetting() {
+        self.router?.openSystemNotificationSetting()
     }
     
     func close() {
@@ -216,6 +247,11 @@ extension SelectEventNotificationTimeViewModelImple {
     
     var suggestCustomTimeComponents: DateComponents {
         return self.eventTimeComponents
+    }
+    
+    var isNeedNotificaitonPermission: AnyPublisher<Void, Never> {
+        return self.subject.notificationPermissionDenied
+            .eraseToAnyPublisher()
     }
 }
 

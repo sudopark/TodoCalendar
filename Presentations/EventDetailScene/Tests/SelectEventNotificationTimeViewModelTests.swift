@@ -23,12 +23,14 @@ class SelectEventNotificationTimeViewModelTests: BaseTestCase, PublisherWaitable
     private var spyRouter: SpyRouter!
     private var spyListener: SpyListener!
     private var stubUsecase: StubEventNotificationSettingUsecase!
+    private var spyNotificationPermissionUsecase: StubNotificationPermissionUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyRouter = .init()
         self.spyListener = .init()
         self.stubUsecase = .init()
+        self.spyNotificationPermissionUsecase = .init()
     }
     
     override func tearDownWithError() throws {
@@ -36,6 +38,7 @@ class SelectEventNotificationTimeViewModelTests: BaseTestCase, PublisherWaitable
         self.spyRouter = nil
         self.spyListener = nil
         self.stubUsecase = nil
+        self.spyNotificationPermissionUsecase = nil
     }
     
     private var dummyCustomOption1: EventNotificationTimeOption {
@@ -58,7 +61,8 @@ class SelectEventNotificationTimeViewModelTests: BaseTestCase, PublisherWaitable
             isForAllDay: false,
             startWith: startWith,
             eventTimeComponents: .init(),
-            eventNotificationSettingUsecase: self.stubUsecase
+            eventNotificationSettingUsecase: self.stubUsecase,
+            notificationPermissionUsecase: self.spyNotificationPermissionUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -214,12 +218,105 @@ extension SelectEventNotificationTimeViewModelTests {
     }
 }
 
+// MARK: - test notification permission
+
+extension SelectEventNotificationTimeViewModelTests {
+    
+    private func makeViewModelWithNotificationPermission(
+        status: NotificationAuthorizationStatus,
+        willAccept: Bool = true
+    ) -> SelectEventNotificationTimeViewModelImple {
+        self.spyNotificationPermissionUsecase.stubAuthorizationStatusCheckResult = .success(status)
+        self.spyNotificationPermissionUsecase.stubRequestPermissionResult = .success(willAccept)
+        return self.makeViewModel(startWith: [])
+    }
+    
+    // 화면 진입 이후에 알림권한 아직 요청 안했으면 요청
+    func testViewModel_whenNotificationPermissionNotDeterminded_requestPermission() {
+        // given
+        let expect = expectation(description: "화면 진입 이후에 알림권한 아직 요청 안했으면 요청")
+        let viewModel = self.makeViewModelWithNotificationPermission(
+            status: .notDetermined,
+            willAccept: true
+        )
+        var newStatus: NotificationAuthorizationStatus?
+        self.spyNotificationPermissionUsecase.didPermissionChanged = {
+            newStatus = $0
+            expect.fulfill()
+        }
+        
+        // when
+        viewModel.prepare()
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        XCTAssertEqual(newStatus, .authorized)
+    }
+    
+    // 화면 진입 이후에 알림권한 거절되었으면 설정화면으로 연결
+    func testViewModel_whenNotificationPermissionDeniedAfterRequest_showIsNeedPermission() {
+        // given
+        let expect = expectation(description: "화면 진입 이후에 알림권한 요청하고 거절되었으면 설정화면으로 연결 유도")
+        let viewModel = self.makeViewModelWithNotificationPermission(
+            status: .notDetermined, 
+            willAccept: false
+        )
+        
+        // when
+        let isNeed: Void? = self.waitFirstOutput(expect, for: viewModel.isNeedNotificaitonPermission) {
+            viewModel.prepare()
+        }
+        
+        // then
+        XCTAssertNotNil(isNeed)
+    }
+    
+    func testViewModel_whenNotificationPermissionDenied_showIsNeedPermission() {
+        // given
+        let expect = expectation(description: "화면 진입 이후에 이미 알림권한 거절되었으면 설정화면으로 연결 유도")
+        let viewModel = self.makeViewModelWithNotificationPermission(
+            status: .denied
+        )
+        
+        // when
+        let isNeed: Void? = self.waitFirstOutput(expect, for: viewModel.isNeedNotificaitonPermission) {
+            viewModel.prepare()
+        }
+        
+        // then
+        XCTAssertNotNil(isNeed)
+    }
+    
+    // 설정화면으로 이동
+    func testViewModel_whenNotificationPermissionDenied_routeToSystemSetting() {
+        // given
+        let expect = expectation(description: "화면 진입 이후에 이미 알림권한 거절되었으면 설정화면으로 연결 유도 + 설정화면으로 이동")
+        let viewModel = self.makeViewModelWithNotificationPermission(
+            status: .denied
+        )
+        
+        // when
+        let _ = self.waitFirstOutput(expect, for: viewModel.isNeedNotificaitonPermission) {
+            viewModel.prepare()
+        }
+        viewModel.moveSystemNotificationSetting()
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenSystemNotificationSetting, true)
+    }
+}
+
 
 private class SpyRouter: BaseSpyRouter, SelectEventNotificationTimeRouting, @unchecked Sendable {
     
     var didRouteToEventSetting: Bool?
     func routeToEventSetting() {
         self.didRouteToEventSetting = true
+    }
+    
+    var didOpenSystemNotificationSetting: Bool?
+    func openSystemNotificationSetting() {
+        self.didOpenSystemNotificationSetting = true
     }
 }
 

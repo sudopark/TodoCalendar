@@ -25,6 +25,7 @@ final class SelectEventNotificationTimeViewState: ObservableObject {
     @Published var customTimeOptions: [CustomTimeOptionModel] = []
     @Published var selectedDefaultTimeOptions: [EventNotificationTimeOption] = []
     @Published var suggestCustomOptionTime: Date = Date()
+    @Published var notificaitonPermissionDenied: Bool = false
     
     func isSelectedDefaultModel(_ option: EventNotificationTimeOption?) -> Bool {
         guard let option = option
@@ -62,6 +63,13 @@ final class SelectEventNotificationTimeViewState: ObservableObject {
                 self?.selectedDefaultTimeOptions = options
             })
             .store(in: &self.cancellables)
+        
+        viewModel.isNeedNotificaitonPermission
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in
+                self?.notificaitonPermissionDenied = true
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -74,6 +82,7 @@ final class SelectEventNotificationTimeViewEventHandler: ObservableObject {
     var addCustomTimeOption: (DateComponents) -> Void = { _ in }
     var removeCustomTimeOption: (DateComponents) -> Void = { _ in }
     var moveEventSetting: () -> Void = { }
+    var moveSystemNotificationSetting: () -> Void = { }
     var close: () -> Void = { }
 }
 
@@ -171,6 +180,9 @@ struct SelectEventNotificationTimeView: View {
                 .environment(\.defaultMinListRowHeight, 10)
                 .safeAreaInset(edge: .bottom) {
                     // TODO: permission 필요 뷰
+                    if state.notificaitonPermissionDenied {
+                        self.permissionNeedView
+                    }
                 }
             }
             .navigationTitle("event_notification_select::title".localized())
@@ -280,6 +292,33 @@ struct SelectEventNotificationTimeView: View {
             }
         }
     }
+    
+    private var permissionNeedView: some View {
+        VStack(spacing: 0) {
+            
+//            Spacer()
+            
+            Rectangle()
+                .fill(appearance.colorSet.line.asColor)
+                .frame(height: 0.5)
+            
+            VStack(spacing: 16) {
+                Text("event_notification_setting::need_permission_message".localized())
+                    .multilineTextAlignment(.center)
+                    .font(appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                
+                ConfirmButton(title: "event_notification_setting::need_permission::go_setting".localized())
+                    .eventHandler(\.onTap, eventHandlers.moveSystemNotificationSetting)
+            }
+            .padding()
+            .background(
+                Rectangle()
+                    .fill(appearance.colorSet.eventList.asColor)
+                    .ignoresSafeArea(edges: .bottom)
+            )
+        }
+    }
 }
 
 
@@ -311,6 +350,7 @@ struct SelectEventNotificationTimeViewPreviewProvider: PreviewProvider {
                 .init(year: 2024, month: 2, day: 8, hour: 13, minute: 30, second: 1))
             )!
         ]
+        state.notificaitonPermissionDenied = true
         let eventHandlers = SelectEventNotificationTimeViewEventHandler()
         eventHandlers.addCustomTimeOption = { component in
             state.customTimeOptions.append(
