@@ -302,6 +302,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
                 |> \.selectedTime .~ pure(SelectedTime(.at(100), self.timeZone))
                 |> \.eventRepeating .~ .init(self.dummyRepeating, timeZone: self.timeZone)
                 |> \.eventTagId .~ .default
+                |> \.eventNotifications .~ [.atTime]
                 
             } detaiil: {
                 $0 |> \.memo .~ "new_memo"
@@ -321,6 +322,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.time, .at(100))
         XCTAssertEqual(updateParams?.repeating, self.dummyRepeating)
         XCTAssertEqual(updateParams?.repeatingUpdateScope, nil)
+        XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
         XCTAssertEqual(savedDetail?.memo, "new_memo")
@@ -343,6 +345,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
                 |> \.selectedTime .~ pure(SelectedTime(.at(100), self.timeZone))
                 |> \.eventRepeating .~ .init(self.dummyRepeating, timeZone: self.timeZone)
                 |> \.eventTagId .~ .default
+                |> \.eventNotifications .~ [.atTime]
                 
             } detaiil: {
                 $0 |> \.memo .~ "new_memo"
@@ -362,6 +365,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.time, .at(100))
         XCTAssertEqual(updateParams?.repeating, self.dummyRepeating)
         XCTAssertEqual(updateParams?.repeatingUpdateScope, .onlyThisTime(.at(0)))
+        XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
         XCTAssertEqual(savedDetail?.memo, "new_memo")
@@ -384,6 +388,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
                 |> \.selectedTime .~ pure(SelectedTime(.at(100), self.timeZone))
                 |> \.eventRepeating .~ .init(self.dummyRepeating, timeZone: self.timeZone)
                 |> \.eventTagId .~ .default
+                |> \.eventNotifications .~ [.atTime]
                 
             } detaiil: {
                 $0 |> \.memo .~ "new_memo"
@@ -403,6 +408,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.time, .at(100))
         XCTAssertEqual(updateParams?.repeating, self.dummyRepeating)
         XCTAssertEqual(updateParams?.repeatingUpdateScope, .all)
+        XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
         XCTAssertEqual(savedDetail?.memo, "new_memo")

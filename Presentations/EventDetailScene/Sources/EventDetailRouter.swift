@@ -49,14 +49,17 @@ final class EventDetailRouter: BaseRouterImple, EventDetailRouting, EventDetailI
     
     private let selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler
     private let selectEventTagSceneBuilder: any SelectEventTagSceneBuiler
+    private let selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler
     weak var inputViewModel: (any EventDetailInputViewModel)?
     
     init(
         selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler,
-        selectEventTagSceneBuilder: any SelectEventTagSceneBuiler
+        selectEventTagSceneBuilder: any SelectEventTagSceneBuiler,
+        selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler
     ) {
         self.selectRepeatOptionSceneBuilder = selectRepeatOptionSceneBuilder
         self.selectEventTagSceneBuilder = selectEventTagSceneBuilder
+        self.selectNotificationTimeSceneBuilder = selectNotificationTimeSceneBuilder
     }
 }
 
@@ -99,6 +102,27 @@ extension EventDetailRouter {
             
             let next = self.selectEventTagSceneBuilder.makeSelectEventTagScene(
                 startWith: currentSelectedTagId,
+                listener: listener
+            )
+            
+            let navigationController = UINavigationController(rootViewController: next)
+            self.currentScene?.present(navigationController, animated: true)
+        }
+    }
+    
+    func routeToEventNotificationTimeSelect(
+        isForAllDay: Bool,
+        current selecteds: [EventNotificationTimeOption],
+        eventTimeComponents: DateComponents,
+        listener: (any SelectEventNotificationTimeSceneListener)?
+    ) {
+        
+        Task { @MainActor in
+            
+            let next = self.selectNotificationTimeSceneBuilder.makeSelectEventNotificationTimeScene(
+                isForAllDay: isForAllDay,
+                startWith: selecteds,
+                eventTimeComponents: eventTimeComponents,
                 listener: listener
             )
             

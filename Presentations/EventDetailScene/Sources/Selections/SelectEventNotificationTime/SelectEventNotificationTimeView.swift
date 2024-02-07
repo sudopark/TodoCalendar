@@ -141,7 +141,7 @@ struct SelectEventNotificationTimeView: View {
                     
                     // default options
                     Section {
-                        ForEach(state.defaultTimeOptions, id: \.text) {
+                        ForEach(state.defaultTimeOptions, id: \.compareKey) {
                             self.defaultOptionView($0)
                         }
                     }
@@ -187,8 +187,9 @@ struct SelectEventNotificationTimeView: View {
             }
             .navigationTitle("event_notification_select::title".localized())
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    NavigationBackButton(tapHandler: eventHandlers.close)
+                ToolbarItem(placement: .topBarTrailing) {
+                    CloseButton()
+                        .eventHandler(\.onTap, eventHandlers.close)
                 }
             }
         }
@@ -321,6 +322,13 @@ struct SelectEventNotificationTimeView: View {
     }
 }
 
+
+private extension NotificationTimeOptionModel {
+    
+    var compareKey: String {
+        return self.option.map { "\($0)" } ?? "nil"
+    }
+}
 
 // MARK: - preview
 

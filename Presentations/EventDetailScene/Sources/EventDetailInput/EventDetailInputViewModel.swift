@@ -42,10 +42,12 @@ protocol EventDetailInputRouting: Routing, Sendable, AnyObject {
         listener: (any SelectEventTagSceneListener)?
     )
     
-//    func routeToEventNotificationTimeSelect(
-//        current selecteds: [EventNotificationTimeOption]
-//        // TODO: add listener
-//    )
+    func routeToEventNotificationTimeSelect(
+        isForAllDay: Bool,
+        current selecteds: [EventNotificationTimeOption],
+        eventTimeComponents: DateComponents,
+        listener: (any SelectEventNotificationTimeSceneListener)?
+    )
 }
 
 
@@ -182,6 +184,7 @@ extension EventDetailInputViewModelImple {
             return $0
                 |> \.basic.selectedTime .~  nil
                 |> \.basic.eventRepeating .~ nil
+                |> \.basic.eventNotifications .~ []
         }
     }
     
@@ -195,7 +198,9 @@ extension EventDetailInputViewModelImple {
     
     func toggleIsAllDay() {
         self.subject.mutateBasicIfPossible { data in
-            return data |> \.basic.selectedTime %~ { $0?.toggleIsAllDay(data.timeZone) }
+            data 
+                |> \.basic.selectedTime %~ { $0?.toggleIsAllDay(data.timeZone) }
+                |> \.basic.eventNotifications .~ []
         }
     }
 }
@@ -262,10 +267,32 @@ extension EventDetailInputViewModelImple: SelectEventTagSceneListener {
 
 // MARK: - select notification time
 
-extension EventDetailInputViewModelImple {
+extension EventDetailInputViewModelImple: SelectEventNotificationTimeSceneListener {
     
     func selectNotificationTime() {
-        // TODO: route to select
+        guard let basicAndTimeZone = self.subject.basic.value,
+              let (eventTime, isAllDay) = basicAndTimeZone.basic.selectedTime?.evnetTimeAndIsAllDay
+        else { return }
+        
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ basicAndTimeZone.timeZone
+        let eventTimeComponents = calendar.dateComponents([
+            .year, .month, .day, .hour, .minute, .second
+        ], from: eventTime)
+        self.routing?.routeToEventNotificationTimeSelect(
+            isForAllDay: isAllDay,
+            current: basicAndTimeZone.basic.eventNotifications,
+            eventTimeComponents: eventTimeComponents,
+            listener: self
+        )
+    }
+    
+    func selectEventNotificationTime(
+        didUpdate selectedTimeOptions: [EventNotificationTimeOption]
+    ) {
+        
+        self.subject.mutateBasicIfPossible {
+            $0 |> \.basic.eventNotifications .~ selectedTimeOptions
+        }
     }
     
     var selectedNotificationTimeText: AnyPublisher<String?, Never> {
@@ -356,5 +383,21 @@ extension EventDetailInputViewModelImple {
     
     var selectedPlace: AnyPublisher<Place?, Never> {
         return Just(nil).eraseToAnyPublisher()
+    }
+}
+
+private extension SelectedTime {
+    
+    var evnetTimeAndIsAllDay: (Date, Bool) {
+        switch self {
+        case .at(let time):
+            return (time.date, false)
+        case .period(let start, _):
+            return (start.date, false)
+        case .singleAllDay(let time):
+            return (time.date, true)
+        case .alldayPeriod(let start, _):
+            return (start.date, true)
+        }
     }
 }

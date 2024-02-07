@@ -163,10 +163,11 @@ extension AddEventViewModelImple: EventDetailInputListener {
         let eventTime = self.validEventTime(basic)
         
         let params = TodoMakeParams()
-            |> \.name .~ name
+            |> \.name .~ pure(name)
             |> \.eventTagId .~ pure(basic.eventTagId)
             |> \.time .~ eventTime
             |> \.repeating .~ basic.eventRepeating?.repeating
+            |> \.notificationOptions .~ pure(basic.eventNotifications)
         
         self.subject.isSaving.send(true)
         
@@ -191,10 +192,11 @@ extension AddEventViewModelImple: EventDetailInputListener {
         else { return }
         
         let params = ScheduleMakeParams()
-            |> \.name .~ name
+            |> \.name .~ pure(name)
             |> \.time .~ pure(time)
             |> \.eventTagId .~ pure(basic.eventTagId)
             |> \.repeating .~ basic.eventRepeating?.repeating
+            |> \.notificationOptions .~ pure(basic.eventNotifications)
         
         self.subject.isSaving.send(true)
         

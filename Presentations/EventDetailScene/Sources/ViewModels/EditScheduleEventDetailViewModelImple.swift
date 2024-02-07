@@ -269,6 +269,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             |> \.eventTagId .~ pure(basic.eventTagId)
             |> \.time .~ basic.selectedTime?.eventTime(timeZone)
             |> \.repeating .~ basic.eventRepeating?.repeating
+            |> \.notificationOptions .~ pure(basic.eventNotifications)
         
     }
 }

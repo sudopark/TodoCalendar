@@ -431,11 +431,39 @@ extension EventDetailInputViewModelTests {
             SelectedTime(.period(self.refDate.add(days: 1)!.timeIntervalSince1970..<self.refDate.add(days: 3)!.timeIntervalSince1970), self.timeZone)
         )
         
+        // select event time
+        XCTAssertEqual(
+            self.spyListener.didUpdateBasics.last?.eventNotifications,
+            []
+        )
+        viewModel.selectEventNotificationTime(didUpdate: [.atTime])
+        XCTAssertEqual(
+            self.spyListener.didUpdateBasics.last?.eventNotifications,
+            [.atTime]
+        )
+        
+        // toggle all day
+        viewModel.toggleIsAllDay()
+        XCTAssertEqual(
+            self.spyListener.didUpdateBasics.last?.eventNotifications,
+            []
+        )
+        
+        viewModel.selectEventNotificationTime(didUpdate: [.allDay9AM])
+        XCTAssertEqual(
+            self.spyListener.didUpdateBasics.last?.eventNotifications,
+            [.allDay9AM]
+        )
+        
         // remove time
         viewModel.removeTime()
         XCTAssertEqual(
             self.spyListener.didUpdateBasics.last?.selectedTime,
             nil
+        )
+        XCTAssertEqual(
+            self.spyListener.didUpdateBasics.last?.eventNotifications,
+            []
         )
         
         // select tag
@@ -498,6 +526,46 @@ extension EventDetailInputViewModelTests {
             expectText: "\("event_notification_setting::option_title::at_time".localized()), \("event_notification_setting::option_title::before_minutes".localized(with: 1)) and \("event_notification_setting::option_title::before_minutes".localized(with: 2))"
         )
     }
+    
+    // 이벤트 알림시간 설정 및 업데이트 - 초기값 전달
+    func testViewModel_routeToSelectEventNotificationTime_withInitialData() {
+        // given
+        func parameterizeTest(
+            with basic: EventDetailBasicData,
+            expectIsForAllDay: Bool,
+            options: [EventNotificationTimeOption]
+        ) {
+            // given
+            let expect = expectation(description: "wait notificaiton time text")
+            let viewModel = self.makeViewModel()
+            
+            // when
+            let _ = self.waitFirstOutput(expect, for: viewModel.selectedNotificationTimeText) {
+                viewModel.prepared(basic: basic, additional: self.dummyPreviousAddition)
+            }
+            viewModel.selectNotificationTime()
+            
+            // then
+            let params = self.spyRouter.didRouteToEventNotificationWithParams
+            XCTAssertEqual(params?.0, expectIsForAllDay)
+            XCTAssertEqual(params?.1, options)
+        }
+        
+        // when + then
+        parameterizeTest(
+            with: self.dummyPreviousBasic
+                |> \.eventNotifications .~ [.atTime],
+            expectIsForAllDay: false,
+            options: [.atTime]
+        )
+        parameterizeTest(
+            with: self.dummyPreviousBasic
+                |> \.selectedTime .~ SelectedTime(.allDay(0..<10, secondsFromGMT: 0), self.timeZone)
+                |> \.eventNotifications .~ [.allDay9AM],
+            expectIsForAllDay: true,
+            options: [.allDay9AM]
+        )
+    }
 }
 
 private class SpyRouter: BaseSpyRouter, EventDetailInputRouting, @unchecked Sendable {
@@ -516,6 +584,11 @@ private class SpyRouter: BaseSpyRouter, EventDetailInputRouting, @unchecked Send
         listener: (any SelectEventTagSceneListener)?
     ) {
         self.didRouteToSelectEventTag = true
+    }
+    
+    var didRouteToEventNotificationWithParams: (Bool, [EventNotificationTimeOption], DateComponents)?
+    func routeToEventNotificationTimeSelect(isForAllDay: Bool, current selecteds: [EventNotificationTimeOption], eventTimeComponents: DateComponents, listener: (SelectEventNotificationTimeSceneListener)?) {
+        self.didRouteToEventNotificationWithParams = (isForAllDay, selecteds, eventTimeComponents)
     }
 }
 

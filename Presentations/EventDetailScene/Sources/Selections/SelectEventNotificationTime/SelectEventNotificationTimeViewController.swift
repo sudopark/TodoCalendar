@@ -49,6 +49,12 @@ final class SelectEventNotificationTimeViewController: UIHostingController<Selec
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
         
         super.init(rootView: containerView)
+        self.navigationController?.isNavigationBarHidden = true
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = true
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
