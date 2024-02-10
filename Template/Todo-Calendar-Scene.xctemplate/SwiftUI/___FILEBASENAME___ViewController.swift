@@ -29,6 +29,7 @@ final class ___VARIABLE_sceneName___ViewController: UIHostingController<___VARIA
         self.viewAppearance = viewAppearance
         
         let eventHandlers = ___VARIABLE_sceneName___ViewEventHandler()
+        eventHandlers.bind(viewModel)
         
         let containerView = ___VARIABLE_sceneName___ContainerView(
             viewAppearance: viewAppearance,

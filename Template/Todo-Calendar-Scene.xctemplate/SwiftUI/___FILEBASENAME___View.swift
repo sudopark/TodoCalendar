@@ -5,6 +5,7 @@
 
 import SwiftUI
 import Combine
+import Domain
 import CommonPresentation
 
 
@@ -29,6 +30,12 @@ final class ___VARIABLE_sceneName___ViewState: ObservableObject {
 final class ___VARIABLE_sceneName___ViewEventHandler: ObservableObject {
     
     // TODO: add handlers
+    var onAppear: () -> Void = { }
+    var close: () -> Void = { }
+
+    func bind(_ viewModel: any ___VARIABLE_sceneName___ViewModel) {
+        // TODO: bind handlers
+    }
 }
 
 
@@ -54,6 +61,7 @@ struct ___VARIABLE_sceneName___ContainerView: View {
         return ___VARIABLE_sceneName___View()
             .onAppear {
                 self.stateBinding(self.state)
+                self.eventHandlers.onAppear()
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
@@ -83,10 +91,7 @@ struct ___VARIABLE_sceneName___ViewPreviewProvider: PreviewProvider {
         let setting = AppearanceSettings(
             tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
             colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault,
-            accnetDayPolicy: [:],
-            showUnderLineOnEventDay: false,
-            eventOnCalendar: .init()
+            fontSetKey: .systemDefault
         )
         let viewAppearance = ViewAppearance(
             setting: setting
