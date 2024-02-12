@@ -22,6 +22,8 @@ let project = Project.app(name: "TodoCalendarApp",
                             .project(target: "Scenes",
                                      path: .relativeToCurrentFile("../Presentations/Scenes")),
                             .project(target: "SettingScene",
-                                     path: .relativeToCurrentFile("../Presentations/SettingScene"))
+                                     path: .relativeToCurrentFile("../Presentations/SettingScene")),
+                            .project(target: "MemberScenes",
+                                     path: .relativeToCurrentFile("../Presentations/MemberScenes"))
                           ])
 
