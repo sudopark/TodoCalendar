@@ -16,7 +16,8 @@ let project = Project.framework(name: "Common3rdParty",
                                     .remote(url: "https://github.com/CombineCommunity/CombineCocoa.git",
                                             requirement: .upToNextMajor(from: "0.4.1")),
                                     .remote(url: "https://github.com/kean/Pulse",
-                                            requirement: .upToNextMajor(from: "4.0.3"))
+                                            requirement: .upToNextMajor(from: "4.0.3")),
+                                    .remote(url: "https://github.com/google/GoogleSignIn-iOS", requirement: .upToNextMajor(from: "7.0.0"))
                                 ],
                                 platform: .iOS,
                                 iOSTargetVersion: "15.0",
@@ -30,5 +31,6 @@ let project = Project.framework(name: "Common3rdParty",
                                     .package(product: "CombineCocoa"),
                                     .package(product: "Pulse"),
                                     .package(product: "PulseUI"),
-                                    .package(product: "Optics")
+                                    .package(product: "Optics"),
+                                    .package(product: "GoogleSignIn")
                                 ])
