@@ -26,8 +26,7 @@ let dependencies = Dependencies(
                 .remote(url: "https://github.com/CombineCommunity/CombineCocoa.git", 
                         requirement: .upToNextMajor(from: "0.4.1")),
                 .remote(url: "https://github.com/kean/Pulse",
-                        requirement: .upToNextMajor(from: "4.0.3")),
-                .remote(url: "https://github.com/google/GoogleSignIn-iOS", requirement: .upToNextMajor(from: "7.0.0"))
+                        requirement: .upToNextMajor(from: "4.0.3"))
             ],
             productTypes: [ // 다이나믹 프레임워크로
                 "Alamofire": .framework,
@@ -37,8 +36,7 @@ let dependencies = Dependencies(
                 "CombineCocoa": .framework,
                 "AsyncAlgorithms": .framework,
                 "publisher-async-bind": .framework,
-                "SQLiteService": .framework,
-                "GoogleSignIn": .framework
+                "SQLiteService": .framework
             ]
         ),
     platforms: [.iOS]
