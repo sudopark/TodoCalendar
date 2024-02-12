@@ -10,10 +10,15 @@ import Domain
 
 final class ApplicationRootViewModelImple: @unchecked Sendable {
  
+    private let authUsecase: any AuthUsecase
     private let applicationUsecase: any ApplicationRootUsecase
     var router: ApplicationRootRouter?
     
-    init(applicationUsecase: any ApplicationRootUsecase) {
+    init(
+        authUsecase: any AuthUsecase,
+        applicationUsecase: any ApplicationRootUsecase
+    ) {
+        self.authUsecase = authUsecase
         self.applicationUsecase = applicationUsecase
     }
 }
@@ -26,6 +31,13 @@ extension ApplicationRootViewModelImple {
             let result = try await self.applicationUsecase.prepareLaunch()
             self.router?.setupInitialScene(result)
         }
+    }
+    
+    func handle(open url: URL) -> Bool {
+        if self.authUsecase.handleAuthenticationResultOrNot(open: url) {
+            return true
+        }
+        return false
     }
 }
 
