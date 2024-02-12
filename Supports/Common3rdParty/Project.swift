@@ -17,7 +17,8 @@ let project = Project.framework(name: "Common3rdParty",
                                             requirement: .upToNextMajor(from: "0.4.1")),
                                     .remote(url: "https://github.com/kean/Pulse",
                                             requirement: .upToNextMajor(from: "4.0.3")),
-                                    .remote(url: "https://github.com/google/GoogleSignIn-iOS", requirement: .upToNextMajor(from: "7.0.0"))
+                                    .remote(url: "https://github.com/google/GoogleSignIn-iOS", requirement: .upToNextMajor(from: "7.0.0")),
+                                    .remote(url: "https://github.com/firebase/firebase-ios-sdk", requirement: .upToNextMajor(from: "10.21.0"))
                                 ],
                                 platform: .iOS,
                                 iOSTargetVersion: "15.0",
@@ -32,5 +33,7 @@ let project = Project.framework(name: "Common3rdParty",
                                     .package(product: "Pulse"),
                                     .package(product: "PulseUI"),
                                     .package(product: "Optics"),
+                                    .package(product: "FirebaseAuth"),
+                                    .package(product: "FirebaseCrashlytics"),
                                     .package(product: "GoogleSignIn")
                                 ])

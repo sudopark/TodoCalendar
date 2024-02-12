@@ -7,6 +7,7 @@
 
 import UIKit
 import Extensions
+import FirebaseCore
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -17,6 +18,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         #if DEBUG
         logger.prepare()
         #endif
+        
+        FirebaseApp.configure()
+        
         return true
     }
 
