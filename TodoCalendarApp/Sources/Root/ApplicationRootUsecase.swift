@@ -12,7 +12,7 @@ import CommonPresentation
 
 struct ApplicationPrepareResult {
     
-    var latestLoginAccountId: String?
+    var latestLoginAuth: Auth?
     let appearnceSetings: AppearanceSettings
 }
 
@@ -45,7 +45,7 @@ final class ApplicationRootUsecaseImple: ApplicationRootUsecase {
 extension ApplicationRootUsecaseImple {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult {
-        let latestLoginId = try await self.authRepository.loadLatestLoginUserId()
+        let latestLoginAuth = try await self.authRepository.loadLatestSignInAuth()
         let appearance = self.appSettingRepository.loadSavedViewAppearance()
         self.sharedDataStore.put(
             AppearanceSettings.self,
@@ -53,7 +53,7 @@ extension ApplicationRootUsecaseImple {
             appearance
         )
         return .init(
-            latestLoginAccountId: latestLoginId,
+            latestLoginAuth: latestLoginAuth,
             appearnceSetings: appearance
         )
     }

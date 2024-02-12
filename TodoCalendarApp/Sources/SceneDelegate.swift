@@ -11,16 +11,6 @@ import CommonPresentation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
-    private var applicationViewModel: ApplicationRootViewModelImple!
-    private weak var applicationRouter: ApplicationRootRouter?
-
-    override init() {
-        super.init()
-        
-        let builder = ApplicationRootBuilder()
-        self.applicationViewModel = builder.makeRootViewModel()
-        self.applicationRouter = self.applicationViewModel.router
-    }
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -28,10 +18,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         
-        let window = UIWindow(windowScene: windowScene)
-        self.applicationRouter?.window = window
+        let app = UIApplication.shared.delegate as? AppDelegate
         
-        self.applicationViewModel.prepareInitialScene()
+        let window = UIWindow(windowScene: windowScene)
+        app?.applicationRouter?.window = window
+        
+        app?.applicationViewModel.prepareInitialScene()
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -61,7 +53,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to save data, release shared resources, and store enough scene-specific state information
         // to restore the scene back to its current state.
     }
-
-
+    
 }
 
