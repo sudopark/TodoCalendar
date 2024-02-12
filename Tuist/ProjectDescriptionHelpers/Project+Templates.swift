@@ -139,6 +139,12 @@ extension Project {
                             ]
                         ]
                     ]
+                ],
+                "GIDClientID": "\(googleClientId)",
+                "CFBundleURLTypes": [
+                    "CFBundleURLSchemes": [
+                        "\(googleReverseAppId)"
+                    ]
                 ]
             ]),
             sources: ["Sources/**"],
