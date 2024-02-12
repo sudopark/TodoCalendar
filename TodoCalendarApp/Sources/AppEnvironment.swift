@@ -35,4 +35,6 @@ struct AppEnvironment {
         let dbUrl = directory?.appending(path: "\(fileName).db")
         return dbUrl?.path() ?? ""
     }
+    
+    static var keyChainStoreName: String { "TodoCalendar" }
 }
