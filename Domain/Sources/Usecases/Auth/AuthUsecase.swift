@@ -13,6 +13,8 @@ public protocol AuthUsecase: Sendable {
     
     func signIn(_ provider: any OAuth2ServiceProvider) async throws -> Auth
     func handleAuthenticationResultOrNot(open url: URL) ->Bool
+    
+    var supportOAuth2Service: [any OAuth2ServiceProvider] { get }
 }
 
 public final class AuthUsecaseImple: AuthUsecase, @unchecked Sendable {
@@ -42,6 +44,10 @@ extension AuthUsecaseImple {
         let credential = try await usecase.requestAuthentication()
         
         return try await self.authRepository.signIn(credential)
+    }
+    
+    public var supportOAuth2Service: [OAuth2ServiceProvider] {
+        return self.oauth2ServiceProvider.supportOAuth2Service
     }
 }
 

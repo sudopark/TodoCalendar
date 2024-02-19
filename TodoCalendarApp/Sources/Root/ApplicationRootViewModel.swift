@@ -29,7 +29,7 @@ extension ApplicationRootViewModelImple {
     func prepareInitialScene() {
         Task {
             let result = try await self.applicationUsecase.prepareLaunch()
-            self.router?.setupInitialScene(result)
+            self.router?.setupInitialScene(result, with: self.authUsecase)
         }
     }
     

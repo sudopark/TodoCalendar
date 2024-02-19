@@ -84,7 +84,10 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
 
 protocol ApplicationRouting: Routing {
     
-    func setupInitialScene(_ prepareResult: ApplicationPrepareResult)
+    func setupInitialScene(
+        _ prepareResult: ApplicationPrepareResult,
+        with authUsecase: any AuthUsecase
+    )
 }
 
 final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
@@ -123,14 +126,20 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
 
 extension ApplicationRootRouter {
     
-    func setupInitialScene(_ prepareResult: ApplicationPrepareResult) {
+    func setupInitialScene(
+        _ prepareResult: ApplicationPrepareResult,
+        with authUsecase: any AuthUsecase
+    ) {
         
         guard !AppEnvironment.isTestBuild else { return }
         self.viewAppearanceStore = .init(prepareResult.appearnceSetings)
         self.prepareDatabase(for: prepareResult.latestLoginAuth?.uid)
         
         // TODO: 추후에 prepare result에 따라 usecase factory 결정해야함
-        self.usecaseFactory = NonLoginUsecaseFactoryImple(viewAppearanceStore: self.viewAppearanceStore)
+        self.usecaseFactory = NonLoginUsecaseFactoryImple(
+            authUsecase: authUsecase,
+            viewAppearanceStore: self.viewAppearanceStore
+        )
         
         Task { @MainActor in
             let builder = MainSceneBuilerImple(
