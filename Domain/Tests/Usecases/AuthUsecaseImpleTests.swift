@@ -130,6 +130,12 @@ private class FakeOAuthUsecaseProvider: OAuth2ServiceUsecaseProvider, @unchecked
         default: return nil
         }
     }
+    
+    var supportOAuth2Service: [OAuth2ServiceProvider] {
+        [
+            GoogleOAuth2ServiceProvider()
+        ]
+    }
 }
 
 private class StubGoogleOAuth2Usecase: OAuth2ServiceUsecase, @unchecked Sendable {

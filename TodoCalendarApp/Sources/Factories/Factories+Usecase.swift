@@ -16,8 +16,14 @@ import Scenes
 
 struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     
+    let authUsecase: any AuthUsecase
     let viewAppearanceStore: any ViewAppearanceStore
-    init(viewAppearanceStore: any ViewAppearanceStore) {
+    
+    init(
+        authUsecase: any AuthUsecase,
+        viewAppearanceStore: any ViewAppearanceStore
+    ) {
+        self.authUsecase = authUsecase
         self.viewAppearanceStore = viewAppearanceStore
     }
 }

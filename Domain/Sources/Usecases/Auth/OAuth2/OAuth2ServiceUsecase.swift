@@ -22,6 +22,7 @@ public protocol OAuth2ServiceUsecase: Sendable {
 public protocol OAuth2ServiceUsecaseProvider: Sendable {
     
     func usecase(for provider: any OAuth2ServiceProvider) -> (any OAuth2ServiceUsecase)?
+    var supportOAuth2Service: [any OAuth2ServiceProvider] { get }
 }
 
 
@@ -45,5 +46,11 @@ public final class OAuth2ServiceUsecaseProviderImple: OAuth2ServiceUsecaseProvid
         default:
             return nil
         }
+    }
+    
+    public var supportOAuth2Service: [any OAuth2ServiceProvider] {
+        return [
+            GoogleOAuth2ServiceProvider()
+        ]
     }
 }
