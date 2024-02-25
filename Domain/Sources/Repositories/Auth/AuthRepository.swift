@@ -10,6 +10,6 @@ import Foundation
 
 public protocol AuthRepository: Sendable {
     
-    func loadLatestSignInAuth() async throws -> Auth?
-    func signIn(_ credential: any OAuth2Credential) async throws -> Auth
+    func loadLatestSignInAuth() async throws -> Account?
+    func signIn(_ credential: any OAuth2Credential) async throws -> Account
 }

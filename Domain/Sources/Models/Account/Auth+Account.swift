@@ -25,3 +25,30 @@ public struct Auth: Sendable {
         self.refreshToken = refreshToken
     }
 }
+
+
+public struct AccountInfo: Sendable {
+    
+    public let userId: String
+    public var email: String?
+    public var signInMethod: String?
+    
+    public var firstSignIn: Date?
+    public var lastSignIn: Date?
+    
+    public init(_ userId: String) {
+        self.userId = userId
+    }
+}
+
+
+public struct Account: Sendable {
+    
+    public let auth: Auth
+    public let info: AccountInfo
+    
+    public init(auth: Auth, info: AccountInfo) {
+        self.auth = auth
+        self.info = info
+    }
+}

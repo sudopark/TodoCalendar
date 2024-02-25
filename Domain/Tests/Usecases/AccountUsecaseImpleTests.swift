@@ -1,5 +1,5 @@
 //
-//  AuthUsecaseImpleTests.swift
+//  AccountUsecaseImpleTests.swift
 //  DomainTests
 //
 //  Created by sudo.park on 2/12/24.
@@ -7,6 +7,7 @@
 //
 
 import XCTest
+import Combine
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
@@ -14,28 +15,89 @@ import TestDoubles
 @testable import Domain
 
 
-class AuthUsecaseImpleTests: BaseTestCase {
+class AccountUsecaseImpleTests: BaseTestCase, PublisherWaitable {
+    
+    var cancelBag: Set<AnyCancellable>!
+    
+    override func setUpWithError() throws {
+        self.cancelBag = .init()
+    }
+    
+    override func tearDownWithError() throws {
+        self.cancelBag = nil
+    }
     
     private var dummyAuth: Auth {
         return .init(uid: "dummy", accessToken: "token", refreshToken: "refresh")
     }
     
     private func makeUsecase(
+        latestAccount: Account? = nil,
         shouldFailOAuth: Bool = false,
         shouldFailSignIn: Bool = false
-    ) -> AuthUsecaseImple {
+    ) -> AccountUsecaseImple {
         
         let provider = FakeOAuthUsecaseProvider()
         provider.shouldFailOAuth = shouldFailOAuth
-        let repository = StubAuthRepository(latest: nil)
+        let repository = StubAuthRepository(latest: latestAccount)
         repository.shouldFailSignIn = shouldFailSignIn
         
-        return .init(oauth2ServiceProvider: provider, authRepository: repository)
+        return .init(
+            oauth2ServiceProvider: provider,
+            authRepository: repository,
+            sharedStore: SharedDataStore()
+        )
     }
 }
 
+extension AccountUsecaseImpleTests {
+    
+    // 마지막 로그인 정보 준비
+    func testUsecase_prepareLatestSignInInfo() async {
+        // given
+        func parameterizeTest(expectHasAccount: Bool) async {
+            // given
+            let usecase = self.makeUsecase(
+                latestAccount: expectHasAccount
+                ? .init(auth: .init(uid: "id", accessToken: "token"), info: .init("id"))
+                : nil
+            )
+            
+            // when
+            let account = try? await usecase.prepareLastSignInAccount()
+            
+            // then
+            XCTAssertEqual(account != nil, expectHasAccount)
+        }
+        
+        // when + then
+        await parameterizeTest(expectHasAccount: true)
+        await parameterizeTest(expectHasAccount: false)
+    }
+    
+    // 마지막 로그인 정보 준비 이후에 현재 계정정보 세팅
+    func testUsecase_whenAfterPrepareLatestSignInInfo_updateCurrentAccount() {
+        // given
+        let expect = expectation(description: "마지막 로그인 정보 준비 이후에 현재 계정정보 세팅")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase(
+            latestAccount: .init(auth: .init(uid: "id", accessToken: "token"), info: .init("id"))
+        )
+        
+        // when
+        let accountInfos = self.waitOutputs(expect, for: usecase.currentAccountInfo) {
+            Task {
+                try await usecase.prepareLastSignInAccount()
+            }
+        }
+        
+        // then
+        let hasAccount = accountInfos.map { $0 != nil }
+        XCTAssertEqual(hasAccount, [false, true])
+    }
+}
 
-extension AuthUsecaseImpleTests {
+extension AccountUsecaseImpleTests {
     
     // signin - oauth 이후 인가까지 완료
     func testUsecase_signIn() async {
@@ -111,6 +173,44 @@ extension AuthUsecaseImpleTests {
         
         // then
         XCTAssertNotNil(failed)
+    }
+    
+    func testUsecase_whenAfterSignIn_updateCurrentAccountInfo() {
+        // given
+        let expect = expectation(description: "로그인 이후에 현재 계정정보 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        
+        // when
+        let infos = self.waitOutputs(expect, for: usecase.currentAccountInfo) {
+            Task {
+                try await usecase.signIn(GoogleOAuth2ServiceProvider())
+            }
+        }
+        
+        // then
+        let hasAccount = infos.map { $0 != nil }
+        XCTAssertEqual(hasAccount, [false, true])
+    }
+    
+    func testUsecase_whenAfterSignIn_notify() {
+        // given
+        let expect = expectation(description: "로그인 이후에 로그인 되었음을 알림")
+        let usecase = self.makeUsecase()
+        
+        // when
+        let event = self.waitFirstOutput(expect, for: usecase.accountStatusChanged) {
+            Task {
+                try await usecase.signIn(GoogleOAuth2ServiceProvider())
+            }
+        }
+        
+        // then
+        if case .signedIn = event {
+            XCTAssert(true)
+        } else {
+           XCTFail("로그인 이벤트 안나옴")
+        }
     }
 }
 
