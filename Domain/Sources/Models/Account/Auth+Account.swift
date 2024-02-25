@@ -33,8 +33,8 @@ public struct AccountInfo: Sendable {
     public var email: String?
     public var signInMethod: String?
     
-    public var firstSignIn: Date?
-    public var lastSignIn: Date?
+    public var firstSignIn: TimeInterval?
+    public var lastSignIn: TimeInterval?
     
     public init(_ userId: String) {
         self.userId = userId

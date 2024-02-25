@@ -19,13 +19,16 @@ import TestDoubles
 class AuthRepositoryImpleTests: BaseTestCase {
     
     private var spyKeyChainStore: SpyKeyChainStorage!
+    private var stubRemote: StubRemoteAPI!
     
     override func setUpWithError() throws {
         self.spyKeyChainStore = .init()
+        self.stubRemote = .init(responses: self.responses)
     }
     
     override func tearDownWithError() throws {
         self.spyKeyChainStore = nil
+        self.stubRemote = nil
     }
     
     private func makeRepository(shouldFail: Bool = false) -> AuthRepositoryImple {
@@ -33,6 +36,7 @@ class AuthRepositoryImpleTests: BaseTestCase {
         authService.shouldFail = shouldFail
         
         return AuthRepositoryImple(
+            remoteAPI: self.stubRemote,
             keyChainStorage: self.spyKeyChainStore,
             firebaseAuthService: authService
         )
@@ -129,5 +133,27 @@ class SpyKeyChainStorage: KeyChainStorage, @unchecked Sendable {
     
     func remove(_ key: String) {
         self.storage[key] = nil
+    }
+}
+
+extension AuthRepositoryImpleTests {
+    
+    private var responses: [StubRemoteAPI.Resopnse] {
+        return [
+            .init(
+                endpoint: AccountAPIEndpoints.account,
+                header: ["Authorization": "Bearer access"],
+                resultJsonString: .success(
+                """
+                {
+                    "uid": "some",
+                    "method": "some@email.com",
+                    "method": "method",
+                    "first_signed_in": 0,
+                    "last_signed_in": 0
+                }
+                """
+                ))
+        ]
     }
 }

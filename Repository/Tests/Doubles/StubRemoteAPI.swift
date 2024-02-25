@@ -14,7 +14,7 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
     
     struct Resopnse {
         let method: RemoteAPIMethod
-        let path: String
+        let endpoint: any Endpoint
         let header: [String: String]?
         let parameters: [String: Any]
         let parameterCompare: (([String: Any], [String: Any]) -> Bool)?
@@ -22,14 +22,14 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         
         init(
             method: RemoteAPIMethod = .get,
-            path: String,
+            endpoint: any Endpoint,
             header: [String : String]? = nil,
             parameters: [String : Any] = [:],
             parameterCompare: (([String: Any], [String: Any]) -> Bool)? = nil,
             resultJsonString: Result<String, Error>
         ) {
             self.method = method
-            self.path = path
+            self.endpoint = endpoint
             self.header = header
             self.parameters = parameters
             self.parameterCompare = parameterCompare
@@ -42,15 +42,22 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         self.responses = responses
     }
     
+    let environment: RemoteEnvironment = .init(
+        calendarAPIHost: "dummy_calendar_api_host"
+    )
     var didRequestedPath: String?
     
     func request(
         _ method: RemoteAPIMethod,
-        path: String,
+        _ endpoint: any Endpoint,
         with header: [String : String]?,
         parameters: [String : Any]
     ) async throws -> Data {
         
+        guard let path = environment.path(endpoint)
+        else {
+            throw RuntimeError("invalid params")
+        }
         self.didRequestedPath = path
         
         guard let response = self.findResponse(method: method, path: path, header: header, parameters: parameters)
@@ -80,7 +87,7 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         
         return self.responses.first(where: { response in
             return response.method == method
-            && response.path == path
+            && self.environment.path(response.endpoint) == path
             && response.header == header
             && response.parameterCompare.map { $0(response.parameters, parameters) } ?? true
         })
