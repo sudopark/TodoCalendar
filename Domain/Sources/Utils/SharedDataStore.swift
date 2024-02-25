@@ -11,6 +11,7 @@ import Prelude
 import Optics
 
 public enum ShareDataKeys: String {
+    case accountInfo
     case todos
     case doneTodos
     case schedules

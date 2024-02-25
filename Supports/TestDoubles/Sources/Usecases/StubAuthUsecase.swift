@@ -16,14 +16,15 @@ open class StubAuthUsecase: AuthUsecase, @unchecked Sendable {
     public init() { }
     
     public var shouldFailSignIn: Bool = false
-    open func signIn(_ provider: any OAuth2ServiceProvider) async throws -> Auth {
+    open func signIn(_ provider: any OAuth2ServiceProvider) async throws -> Account {
         guard self.shouldFailSignIn == false
         else {
             throw RuntimeError("signin failed")
         }
         
         let newAuth = Auth(uid: "id", accessToken: "access")
-        return newAuth
+        let info = AccountInfo("id")
+        return .init(auth: newAuth, info: info)
     }
     
     open func handleAuthenticationResultOrNot(open url: URL) -> Bool {
