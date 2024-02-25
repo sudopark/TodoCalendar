@@ -29,7 +29,8 @@ final class SignInViewController: UIHostingController<SignInContainerView>, Sign
     
     init(
         viewModel: any SignInViewModel,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        signInButtonProvider: any SignInButtonProvider
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
@@ -39,7 +40,8 @@ final class SignInViewController: UIHostingController<SignInContainerView>, Sign
         
         let containerView = SignInContainerView(
             viewAppearance: viewAppearance,
-            eventHandlers: eventHandlers
+            eventHandlers: eventHandlers,
+            signInButtonProvider: signInButtonProvider
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
         

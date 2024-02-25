@@ -52,7 +52,7 @@ extension AuthUsecaseImpleTests {
     // signin - no provider
     func testUsecase_whenSignInWithNotSupportProvider_fail() async {
         // given
-        struct NotSupportProvider: OAuth2ServiceProvider { }
+        struct NotSupportProvider: OAuth2ServiceProvider { var identifier: String = "some" }
         let usecase = self.makeUsecase()
         
         // when
