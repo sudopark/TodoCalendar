@@ -23,12 +23,15 @@ final class Singleton {
     
     let keyChainStorage = KeyChainStorageImple(identifier: AppEnvironment.keyChainStoreName)
     
-    let commonSqliteService: SQLiteService = {
+    lazy var commonSqliteService: SQLiteService = {
         let service = SQLiteService()
         return service
     }()
     
     
     // TODO: test build 이면 empty remote 객체 제공
-    let remoteAPI: any RemoteAPI = RemoteAPIImple()
+    lazy var remoteAPI: any RemoteAPI = {
+        let environment = RemoteEnvironment(calendarAPIHost: "some")
+        return RemoteAPIImple(environment: environment)
+    }()
 }

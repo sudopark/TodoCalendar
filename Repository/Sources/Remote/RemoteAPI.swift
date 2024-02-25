@@ -7,6 +7,7 @@
 
 import Foundation
 import Alamofire
+import Extensions
 
 
 // MARK: - RemoteAPI
@@ -22,7 +23,7 @@ public protocol RemoteAPI: AnyObject, Sendable {
     
     func request(
         _ method: RemoteAPIMethod,
-        path: String,
+        _ endpoint: any Endpoint,
         with header: [String: String]?,
         parameters: [String: Any]
     ) async throws -> Data
@@ -32,11 +33,13 @@ extension RemoteAPI {
     
     public func request<T: Decodable>(
         _ method: RemoteAPIMethod,
-        path: String,
+        _ endpoint: any Endpoint,
         with header: [String: String]? = nil,
         parameters: [String: Any] = [:]
     ) async throws -> T {
-        let data = try await self.request(method, path: path, with: header, parameters: parameters)
+        let data = try await self.request(
+            method, endpoint, with: header, parameters: parameters
+        )
         do {
             let decodeResult = try JSONDecoder().decode(T.self, from: data)
             return decodeResult
@@ -56,21 +59,30 @@ private let underlyingSession = Session(
 
 public final class RemoteAPIImple: RemoteAPI, Sendable {
     
+    private let environment: RemoteEnvironment
+    public init(environment: RemoteEnvironment) {
+        self.environment = environment
+    }
+    
     private var session: Session {
         return underlyingSession
     }
-    
-    public init() {}
 }
 
 extension RemoteAPIImple {
     
     public func request(
         _ method: RemoteAPIMethod,
-        path: String,
+        _ endpoint: any Endpoint,
         with header: [String : String]?,
         parameters: [String : Any]
     ) async throws -> Data {
+        
+        guard let path = self.environment.path(endpoint)
+        else {
+            throw RuntimeError("not support endpoint: \(endpoint)")
+        }
+        
         let dataTask = self.session.request(
             path,
             method: method.asHttpMethod(),

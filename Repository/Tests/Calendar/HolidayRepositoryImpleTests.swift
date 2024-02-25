@@ -180,7 +180,7 @@ extension HolidayRepositoryImpleTests {
     private var responses: [StubRemoteAPI.Resopnse] {
         return [
             .init(
-                path: "https://date.nager.at/api/v3/AvailableCountries",
+                endpoint: HolidayAPIEndpoints.supportCountry,
                 resultJsonString: .success(
                 """
                 [
@@ -200,7 +200,7 @@ extension HolidayRepositoryImpleTests {
                 """
             )),
             .init(
-                path: "https://date.nager.at/api/v3/PublicHolidays/2023/KR",
+                endpoint: HolidayAPIEndpoints.holidays(year: 2023, countryCode: "KR"),
                 resultJsonString: .success(
                 """
                 [
@@ -221,7 +221,7 @@ extension HolidayRepositoryImpleTests {
                 """
             )),
             .init(
-                path: "https://date.nager.at/api/v3/PublicHolidays/2022/KR",
+                endpoint: HolidayAPIEndpoints.holidays(year: 2022, countryCode: "KR"),
                 resultJsonString: .success(
                 """
                 [
@@ -242,7 +242,7 @@ extension HolidayRepositoryImpleTests {
                 """
             )),
             .init(
-                path: "https://date.nager.at/api/v3/PublicHolidays/2023/US",
+                endpoint: HolidayAPIEndpoints.holidays(year: 2023, countryCode: "US"),
                 resultJsonString: .success(
                 """
                 [

@@ -35,10 +35,11 @@ public final class HolidayRepositoryImple: HolidayRepository {
 
 extension HolidayRepositoryImple {
     
+    private var host: String { "https://date.nager.at/api/v3" }
+    
     public func loadAvailableCountrise() async throws -> [HolidaySupportCountry] {
         let dtos: [HolidaySupportCountryDTO] = try await self.remoteAPI.request(
-            .get,
-            path: "https://date.nager.at/api/v3/AvailableCountries"
+            .get, HolidayAPIEndpoints.supportCountry
         )
         return dtos.map { $0.country }
     }
@@ -123,7 +124,7 @@ extension HolidayRepositoryImple {
     private func loadHolidaysFromRemote(_ year: Int, _ countryCode: String) async throws -> [Holiday] {
         let dtos: [HolidayDTO] = try await self.remoteAPI.request(
             .get,
-            path: "https://date.nager.at/api/v3/PublicHolidays/\(year)/\(countryCode)"
+            HolidayAPIEndpoints.holidays(year: year, countryCode: countryCode)
         )
         return dtos.map { $0.holiday }
     }
