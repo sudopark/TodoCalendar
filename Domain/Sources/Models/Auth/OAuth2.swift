@@ -12,14 +12,16 @@ import Foundation
 // MARK: - OAuth2ServiceProvider
 
 public protocol OAuth2ServiceProvider: Sendable {
-    
+    var identifier: String { get }
 }
 
-public struct AppleOAuth2ServiceProvider: OAuth2ServiceProvider { 
+public struct AppleOAuth2ServiceProvider: OAuth2ServiceProvider {
+    public let identifier: String = "apple"
     public init() { }
 }
 
 public struct GoogleOAuth2ServiceProvider: OAuth2ServiceProvider {
+    public let identifier: String = "google"
     public init() { }
 }
 

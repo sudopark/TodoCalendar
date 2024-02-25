@@ -61,6 +61,8 @@ public protocol ColorSet: Sendable {
     
     var white: UIColor { get }
     var line: UIColor { get }
+    
+    var background: UIColor { get }
 }
 
 
@@ -99,4 +101,6 @@ public struct DefaultLightColorSet: ColorSet {
     
     public let white: UIColor = .white
     public let line: UIColor = UIColor.black.withAlphaComponent(0.2)
+    
+    public let background: UIColor = .white
 }

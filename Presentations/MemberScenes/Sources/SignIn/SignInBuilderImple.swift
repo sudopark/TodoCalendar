@@ -41,7 +41,8 @@ extension SignInSceneBuilerImple: SignInSceneBuiler {
         
         let viewController = SignInViewController(
             viewModel: viewModel,
-            viewAppearance: self.viewAppearance
+            viewAppearance: self.viewAppearance,
+            signInButtonProvider: SignInButtonProviderImple()
         )
     
         let router = SignInRouter(

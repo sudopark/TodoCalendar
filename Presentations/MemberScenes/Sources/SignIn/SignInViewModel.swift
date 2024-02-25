@@ -56,6 +56,7 @@ final class SignInViewModelImple: SignInViewModel, @unchecked Sendable {
 extension SignInViewModelImple {
  
     func signIn(_ provider: OAuth2ServiceProvider) {
+        guard self.subject.isSigningIn.value == false else { return }
         Task { [weak self] in
             self?.subject.isSigningIn.send(true)
             do {
