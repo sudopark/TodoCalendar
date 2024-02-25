@@ -16,6 +16,7 @@ final class ApplicationRootBuilder {
     func makeRootViewModel() -> ApplicationRootViewModelImple {
         
         let authRepository = AuthRepositoryImple(
+            remoteAPI: Singleton.shared.remoteAPI,
             keyChainStorage: Singleton.shared.keyChainStorage,
             firebaseAuthService: AppEnvironment.isTestBuild ? DummyFirebaseAuthService() : nil
         )
@@ -24,19 +25,21 @@ final class ApplicationRootBuilder {
 //            return (UIApplication.shared.delegate as? AppDelegate)?.applicationRouter?.window.rootViewController
             UIApplication.shared.windows.first?.rootViewController?.topPresentedViewController()
         }
-        let authUsecase = AuthUsecaseImple(
+        let accountUsecase: any AuthUsecase & AccountUsecase = AccountUsecaseImple(
             oauth2ServiceProvider: oauth2ServiceUsecaseProvider,
-            authRepository: authRepository
+            authRepository: authRepository,
+            sharedStore: Singleton.shared.sharedDataStore
         )
         let rootUsecase = ApplicationRootUsecaseImple(
-            authRepository: authRepository,
+            accountUsecase: accountUsecase,
             appSettingRepository: AppSettingRepositoryImple(
                 environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
             ),
             sharedDataStore: Singleton.shared.sharedDataStore
         )
         let rootViewModel = ApplicationRootViewModelImple(
-            authUsecase: authUsecase,
+            authUsecase: accountUsecase,
+            accountUsecase: accountUsecase,
             applicationUsecase: rootUsecase
         )
         let rootRouter = ApplicationRootRouter()

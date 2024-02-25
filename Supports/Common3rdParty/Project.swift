@@ -37,5 +37,6 @@ let project = Project.framework(name: "Common3rdParty",
                                     .package(product: "FirebaseAuth"),
                                     .package(product: "FirebaseCrashlytics"),
                                     .package(product: "GoogleSignIn"),
+                                    .package(product: "GoogleSignInSwift"),
                                     .package(product: "KeychainSwift")
                                 ])

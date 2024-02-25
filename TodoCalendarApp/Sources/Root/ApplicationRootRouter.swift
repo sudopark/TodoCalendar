@@ -86,7 +86,8 @@ protocol ApplicationRouting: Routing {
     
     func setupInitialScene(
         _ prepareResult: ApplicationPrepareResult,
-        with authUsecase: any AuthUsecase
+        with authUsecase: any AuthUsecase,
+        _ accountUsecase: any AccountUsecase
     )
 }
 
@@ -128,16 +129,18 @@ extension ApplicationRootRouter {
     
     func setupInitialScene(
         _ prepareResult: ApplicationPrepareResult,
-        with authUsecase: any AuthUsecase
+        with authUsecase: any AuthUsecase,
+        _ accountUsecase: any AccountUsecase
     ) {
         
         guard !AppEnvironment.isTestBuild else { return }
         self.viewAppearanceStore = .init(prepareResult.appearnceSetings)
-        self.prepareDatabase(for: prepareResult.latestLoginAuth?.uid)
+        self.prepareDatabase(for: prepareResult.latestLoginAcount?.auth.uid)
         
         // TODO: 추후에 prepare result에 따라 usecase factory 결정해야함
         self.usecaseFactory = NonLoginUsecaseFactoryImple(
             authUsecase: authUsecase,
+            accountUescase: accountUsecase,
             viewAppearanceStore: self.viewAppearanceStore
         )
         
