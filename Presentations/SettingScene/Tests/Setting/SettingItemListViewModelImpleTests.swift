@@ -29,8 +29,10 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyRouter = nil
     }
     
-    private func makeViewModel() -> SettingItemListViewModelImple {
+    private func makeViewModel(_ account: AccountInfo? = nil) -> SettingItemListViewModelImple {
+        let accountUsecase = StubAccountUsecase(account)
         let viewModel = SettingItemListViewModelImple(
+            accountUsecase: accountUsecase,
             uiSettingUsecase: StubUISettingUsecase()
         )
         viewModel.router = self.spyRouter
@@ -47,9 +49,7 @@ extension SettingItemListViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let sections = self.waitFirstOutput(expect, for: viewModel.sectionModels) {
-            viewModel.prepare()
-        }
+        let sections = self.waitFirstOutput(expect, for: viewModel.sectionModels)
         
         // then
         let sectionTitles = sections?.map { $0.headerText }
@@ -62,6 +62,47 @@ extension SettingItemListViewModelImpleTests {
         XCTAssertEqual(baseItemIds, [
             .appearance, .editEvent, .holidaySetting
         ])
+        let accountItem = baseSection?.items.last as? AccountSettingItemModel
+        XCTAssertEqual(accountItem?.isSignIn, false)
+        
+        let supportSection = sections?[safe: 1]
+        let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
+        XCTAssertEqual(supportItemIds, [
+            .feedback, .faq
+        ])
+        
+        let appInfoSection = sections?[safe: 2]
+        let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
+        XCTAssertEqual(infoItemIds, [
+            .shareApp, .addReview, .sourceCode
+        ])
+        
+        let suggestSection = sections?[safe: 3]
+        let isSuggestItems = suggestSection?.items.map { $0 as? SuggestAppItemModel }.map { $0 != nil }
+        XCTAssertEqual(isSuggestItems, [true])
+    }
+    
+    func testViewModel_whenSignIn_provideItemSections() {
+        // given
+        let expect = expectation(description: "세팅 항목 section 제공")
+        let viewModel = self.makeViewModel(AccountInfo("some"))
+        
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.sectionModels)
+        
+        // then
+        let sectionTitles = sections?.map { $0.headerText }
+        XCTAssertEqual(sectionTitles, [
+            nil, "Support".localized(), "App".localized(), "Suggest".localized()
+        ])
+        
+        let baseSection = sections?[safe: 0]
+        let baseItemIds = baseSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
+        XCTAssertEqual(baseItemIds, [
+            .appearance, .editEvent, .holidaySetting
+        ])
+        let accountItem = baseSection?.items.last as? AccountSettingItemModel
+        XCTAssertEqual(accountItem?.isSignIn, true)
         
         let supportSection = sections?[safe: 1]
         let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
@@ -92,9 +133,7 @@ extension SettingItemListViewModelImpleTests {
         
         // when
         let source = viewModel.sectionModels.map { $0.flatMap { $0.items } }
-        let items = self.waitFirstOutput(expect, for: source) {
-            viewModel.prepare()
-        }
+        let items = self.waitFirstOutput(expect, for: source)
         
         // then
         return items ?? []
@@ -186,5 +225,15 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     var didRouteToEventSetting: Bool?
     func routeToEventSetting() {
         self.didRouteToEventSetting = true
+    }
+    
+    var didRouteToSignIn: Bool?
+    func routeToSignIn() {
+        self.didRouteToSignIn = true
+    }
+    
+    var didRouteToAccountManage: Bool?
+    func routeToAccountManage() {
+        self.didRouteToAccountManage = true
     }
 }

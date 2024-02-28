@@ -115,6 +115,8 @@ struct SettingItemListView: View {
                 switch item {
                 case let normalItem as SettingItemModel:
                     normalItemView(normalItem).asAnyView()
+                case let accountItem as AccountSettingItemModel:
+                    accountItemView(accountItem).asAnyView()
                 case let suggestItem as SuggestAppItemModel:
                     suggestAppItemView(suggestItem).asAnyView()
                 default:
@@ -140,6 +142,40 @@ struct SettingItemListView: View {
                 .foregroundStyle(self.appearance.colorSet.normalText.asColor)
             
             Spacer()
+            
+            Image(systemName: "chevron.right")
+                .font(self.appearance.fontSet.size(8).asFont)
+                .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(self.appearance.colorSet.eventList.asColor)
+        )
+        .onTapGesture {
+            self.eventHandlers.selectItem(item)
+        }
+    }
+    
+    private func accountItemView(_ item: AccountSettingItemModel) -> some View{
+        HStack {
+            Image(systemName: item.iconName)
+                .font(self.itemFont)
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .frame(minWidth: 25)
+            
+            Text(item.title)
+                .font(self.itemFont)
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+            
+            Spacer()
+            
+            if let method = item.signInMethod {
+                Text(method)
+                    .font(self.appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+            }
             
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.size(8).asFont)

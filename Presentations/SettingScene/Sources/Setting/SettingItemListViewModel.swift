@@ -13,7 +13,7 @@ import Domain
 import Scenes
 
 
-protocol SettingItemModelType: Equatable {
+protocol SettingItemModelType {
     var compareKey: String { get }
 }
 
@@ -66,6 +66,25 @@ struct SettingItemModel: SettingItemModelType {
     var compareKey: String { self.itemId.rawValue }
 }
 
+struct AccountSettingItemModel: SettingItemModelType {
+    var compareKey: String {
+        return "\(self.isSignIn)-\(self.signInMethod ?? "")"
+    }
+    let signInMethod: String?
+    let isSignIn: Bool
+    var iconName: String {
+        return self.isSignIn ? "person.crop.circle" : "person.crop.circle.badge.plus"
+    }
+    var title: String {
+        return self.isSignIn ? "setting:account:signedIn".localized() : "setting:account:need_signIn".localized()
+    }
+    
+    init(_ accountInfo: AccountInfo?) {
+        self.isSignIn = accountInfo != nil
+        self.signInMethod = accountInfo?.signInMethod
+    }
+}
+
 struct SuggestAppItemModel: SettingItemModelType {
     
     let imagePath: String
@@ -87,17 +106,16 @@ struct SuggestAppItemModel: SettingItemModelType {
 
 
 protocol SettingSectionModelType {
-    associatedtype ItemType: SettingItemModelType
     var headerText: String? { get }
     var compareKey: String { get }
-    var items: [ItemType] { get }
+    var items: [any SettingItemModelType] { get }
 }
-struct SettingSectionModel<ItemType: SettingItemModelType>: SettingSectionModelType {
+struct SettingSectionModel: SettingSectionModelType {
     
     let headerText: String?
-    let items: [ItemType]
+    let items: [any SettingItemModelType]
     
-    init(headerText: String?, items: [ItemType]) {
+    init(headerText: String?, items: [any SettingItemModelType]) {
         self.headerText = headerText
         self.items = items
     }
@@ -114,7 +132,6 @@ struct SettingSectionModel<ItemType: SettingItemModelType>: SettingSectionModelT
 protocol SettingItemListViewModel: AnyObject, Sendable, SettingItemListSceneInteractor {
 
     // interactor
-    func prepare()
     func selectItem(_ model: any SettingItemModelType)
     func close()
     
@@ -127,12 +144,15 @@ protocol SettingItemListViewModel: AnyObject, Sendable, SettingItemListSceneInte
 
 final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked Sendable {
     
+    private let accountUsecase: any AccountUsecase
     private let uiSettingUsecase: any UISettingUsecase
     var router: (any SettingItemListRouting)?
     
     init(
+        accountUsecase: any AccountUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
+        self.accountUsecase = accountUsecase
         self.uiSettingUsecase = uiSettingUsecase
     }
     
@@ -150,41 +170,12 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
 
 extension SettingItemListViewModelImple {
     
-    func prepare() {
-        let baseSectionItems: [SettingItemModel] = [
-            .init(.appearance),
-            .init(.editEvent),
-            .init(.holidaySetting)
-        ]
-        let baseSection = SettingSectionModel(headerText: nil, items: baseSectionItems)
-        
-        let supportSectionItems: [SettingItemModel] = [
-            .init(.feedback),
-            .init(.faq)
-        ]
-        let supportSection = SettingSectionModel(headerText: "Support".localized(), items: supportSectionItems)
-        
-        let appInfoSectionItems: [SettingItemModel] = [
-            .init(.shareApp),
-            .init(.addReview),
-            .init(.sourceCode)
-        ]
-        let appInfoSection = SettingSectionModel(headerText: "App".localized(), items: appInfoSectionItems)
-        
-        let suggestItem = SuggestAppItemModel.readmind()
-        let suggestSection = SettingSectionModel(headerText: "Suggest".localized(), items: [suggestItem])
-        
-        let sections: [any SettingSectionModelType] = [
-            baseSection, supportSection, appInfoSection, suggestSection
-        ]
-        
-        self.subject.sections.send(sections)
-    }
-    
     func selectItem(_ model: any SettingItemModelType) {
         switch model {
         case let settingItem as SettingItemModel:
             self.handleSettingItemSelected(settingItem)
+        case let account as AccountSettingItemModel:
+            self.handleSignIn(account)
         case let suggest as SuggestAppItemModel:
             self.router?.openSafari(suggest.sourcePath)
         default: break
@@ -214,6 +205,14 @@ extension SettingItemListViewModelImple {
         }
     }
     
+    private func handleSignIn(_ item: AccountSettingItemModel) {
+        if item.isSignIn {
+            self.router?.routeToAccountManage()
+        } else {
+            self.router?.routeToSignIn()
+        }
+    }
+    
     private func routeApearanceSetting() {
         let setting = self.uiSettingUsecase.loadAppearanceSetting()
         self.router?.routeToAppearanceSetting(inital: setting)
@@ -226,10 +225,44 @@ extension SettingItemListViewModelImple {
 extension SettingItemListViewModelImple {
     
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
-        return self.subject.sections
-            .compactMap { $0 }
+        
+        let transform: (AccountInfo?) -> [any SettingSectionModelType] = { account in
+            let baseSectionItems: [SettingItemModel] = [
+                .init(.appearance),
+                .init(.editEvent),
+                .init(.holidaySetting)
+            ]
+            let accountItem = AccountSettingItemModel(account)
+            let baseSection = SettingSectionModel(
+                headerText: nil, 
+                items: baseSectionItems + [accountItem]
+            )
+            
+            let supportSectionItems: [SettingItemModel] = [
+                .init(.feedback),
+                .init(.faq)
+            ]
+            let supportSection = SettingSectionModel(headerText: "Support".localized(), items: supportSectionItems)
+            
+            let appInfoSectionItems: [SettingItemModel] = [
+                .init(.shareApp),
+                .init(.addReview),
+                .init(.sourceCode)
+            ]
+            let appInfoSection = SettingSectionModel(headerText: "App".localized(), items: appInfoSectionItems)
+            
+            let suggestItem = SuggestAppItemModel.readmind()
+            let suggestSection = SettingSectionModel(headerText: "Suggest".localized(), items: [suggestItem])
+            
+            let sections: [any SettingSectionModelType] = [
+                baseSection, supportSection, appInfoSection, suggestSection
+            ]
+            return sections
+        }
+        
+        return self.accountUsecase.currentAccountInfo
+            .map(transform)
             .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey } })
             .eraseToAnyPublisher()
-            
     }
 }
