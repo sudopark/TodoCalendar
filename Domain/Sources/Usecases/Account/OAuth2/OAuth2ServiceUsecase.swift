@@ -13,6 +13,7 @@ public protocol OAuth2ServiceUsecase: Sendable {
     
     var provider: any OAuth2ServiceProvider { get }
     
+    @MainActor
     func requestAuthentication() async throws -> any OAuth2Credential
     
     func handle(open url: URL) -> Bool
