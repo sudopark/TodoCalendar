@@ -12,18 +12,6 @@ import UIKit
 import Scenes
 
 
-// MARK: - SignInScene Interactable & Listenable
-
-protocol SignInSceneInteractor: AnyObject { }
-//
-//public protocol SignInSceneListener: AnyObject { }
-
-// MARK: - SignInScene
-
-protocol SignInScene: Scene where Interactor == any SignInSceneInteractor
-{ }
-
-
 // MARK: - Builder + DependencyInjector Extension
 
 protocol SignInSceneBuiler: AnyObject {

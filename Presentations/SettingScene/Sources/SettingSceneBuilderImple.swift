@@ -13,15 +13,18 @@ import CommonPresentation
 
 public final class SettingSceneBuilderImple: SettingSceneBuiler {
     
-    private let usecaseFactory: UsecaseFactory
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let memberSceneBuilder: any MemberSceneBuilder
     
     public init(
-        usecaseFactory: UsecaseFactory,
-        viewAppearance: ViewAppearance
+        usecaseFactory: any UsecaseFactory,
+        viewAppearance: ViewAppearance,
+        memberSceneBuilder: any MemberSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.memberSceneBuilder = memberSceneBuilder
     }
 }
 
@@ -105,7 +108,8 @@ extension SettingSceneBuilderImple {
             viewAppearance: self.viewAppearance,
             appearanceSceneBuilder: apperanceSceneBuilder,
             eventSettingSceneBuilder: eventSettingSceneBuilder,
-            holidayListSceneBuilder: holidayListSceneBuilder
+            holidayListSceneBuilder: holidayListSceneBuilder,
+            memberSceneBuilder: self.memberSceneBuilder
         )
         return builder.makeSettingItemListScene()
     }

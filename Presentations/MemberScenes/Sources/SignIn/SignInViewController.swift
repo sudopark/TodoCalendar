@@ -46,6 +46,7 @@ final class SignInViewController: UIHostingController<SignInContainerView>, Sign
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
         
         super.init(rootView: containerView)
+        self.view.backgroundColor = .clear
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
