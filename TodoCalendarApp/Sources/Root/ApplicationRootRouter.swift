@@ -13,6 +13,7 @@ import CommonPresentation
 import CalendarScenes
 import EventDetailScene
 import SettingScene
+import MemberScenes
 import SQLiteService
 
 
@@ -175,6 +176,14 @@ extension ApplicationRootRouter {
     
     private func settingSceneBuilder() -> any SettingSceneBuiler {
         return SettingSceneBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance,
+            memberSceneBuilder: self.memberSceneBuilder()
+        )
+    }
+    
+    private func memberSceneBuilder() -> any MemberSceneBuilder {
+        return MemberSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance
         )

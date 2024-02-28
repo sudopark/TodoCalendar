@@ -33,15 +33,18 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
     private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
     private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
+    private let memberSceneBuilder: any MemberSceneBuilder
     
     init(
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
         eventSettingSceneBuilder: any EventSettingSceneBuiler,
-        holidayListSceneBuilder: any HolidayListSceneBuiler
+        holidayListSceneBuilder: any HolidayListSceneBuiler,
+        memberSceneBuilder: any MemberSceneBuilder
     ) {
         self.appearanceSceneBuilder = appearanceSceneBuilder
         self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
+        self.memberSceneBuilder = memberSceneBuilder
     }
 }
 
@@ -86,6 +89,9 @@ extension SettingItemListRouter {
     }
     
     func routeToSignIn() {
-        // TODO:
+        Task { @MainActor in
+            let next = self.memberSceneBuilder.makeSignInScene()
+            self.currentScene?.present(next, animated: true)
+        }
     }
 }
