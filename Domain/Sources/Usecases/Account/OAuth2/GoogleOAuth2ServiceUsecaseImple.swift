@@ -27,6 +27,7 @@ public final class GoogleOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unche
 
 extension GoogleOAuth2ServiceUsecaseImple {
     
+    @MainActor
     public func requestAuthentication() async throws -> OAuth2Credential {
         guard let topViewController = self.topViewControllerFinding()
         else {
