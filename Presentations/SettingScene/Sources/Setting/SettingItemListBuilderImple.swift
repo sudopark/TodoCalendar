@@ -44,6 +44,7 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
     func makeSettingItemListScene() -> any SettingItemListScene {
         
         let viewModel = SettingItemListViewModelImple(
+            accountUsecase: self.usecaseFactory.accountUescase,
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )
         

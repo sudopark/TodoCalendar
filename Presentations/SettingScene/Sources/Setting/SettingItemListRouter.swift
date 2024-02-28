@@ -22,6 +22,8 @@ protocol SettingItemListRouting: Routing, Sendable {
     )
     func routeToEventSetting()
     func routeToHolidaySetting()
+    func routeToAccountManage()
+    func routeToSignIn()
 }
 
 // MARK: - Router
@@ -77,5 +79,13 @@ extension SettingItemListRouter {
             let next = self.holidayListSceneBuilder.makeHolidayListScene()
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
+    }
+    
+    func routeToAccountManage() {
+        // TODO: 
+    }
+    
+    func routeToSignIn() {
+        // TODO:
     }
 }

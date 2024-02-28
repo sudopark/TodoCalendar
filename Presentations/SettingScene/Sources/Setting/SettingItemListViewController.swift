@@ -34,7 +34,6 @@ final class SettingItemListViewController: UIHostingController<SettingItemListCo
         self.viewAppearance = viewAppearance
         
         let eventHandlers = SettingItemListViewEventHandler()
-        eventHandlers.onAppear = viewModel.prepare
         eventHandlers.selectItem = viewModel.selectItem(_:)
         eventHandlers.close = viewModel.close
         
