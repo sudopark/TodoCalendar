@@ -41,11 +41,22 @@ public enum AccountAPIEndpoints: Endpoint {
     }
 }
 
+public enum TodoAPIEndpoints: Endpoint {
+    case currentTodo
+    
+    public var subPath: String {
+        switch self {
+        case .currentTodo:
+            return "current"
+        }
+    }
+}
+
 // MARK: - RemoteEnvironment
 
 public struct RemoteEnvironment: Sendable {
     
-    private let calendarAPIHost: String
+    let calendarAPIHost: String
     public init(
         calendarAPIHost: String
     ) {
@@ -58,7 +69,9 @@ public struct RemoteEnvironment: Sendable {
         case let holiday as HolidayAPIEndpoints:
             return "https://date.nager.at/api/v3/\(holiday.subPath)"
         case let account as AccountAPIEndpoints:
-            return "\(calendarAPIHost)/\(account.subPath)"
+            return "\(calendarAPIHost)/accounts/\(account.subPath)"
+        case let todo as TodoAPIEndpoints:
+            return "\(calendarAPIHost)/toods/\(todo.subPath)"
         default: return nil
         }
     }

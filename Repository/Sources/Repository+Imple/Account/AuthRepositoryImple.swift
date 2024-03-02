@@ -35,9 +35,25 @@ extension AuthDataResult: FirebaseAuthDataResult {
     }
 }
 
+public struct AuthRefreshResult {
+    let uid: String
+    let idToken: String
+    let refreshToken: String?
+    
+    init(uid: String, idToken: String, refreshToken: String?) {
+        self.uid = uid
+        self.idToken = idToken
+        self.refreshToken = refreshToken
+    }
+}
+
 public protocol FirebaseAuthService {
     
     func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult
+    
+    func refreshToken(
+        _ resultHandler: @escaping (Result<AuthRefreshResult, any Error>) -> Void
+    )
 }
 
 extension FirebaseAuth.Auth: FirebaseAuthService { 
@@ -53,6 +69,29 @@ extension FirebaseAuth.Auth: FirebaseAuthService {
             
         default:
             throw RuntimeError("not support signin credential")
+        }
+    }
+    
+    public func refreshToken(
+        _ resultHandler: @escaping (Result<AuthRefreshResult, any Error>) -> Void
+    ) {
+        guard let currentUser = self.currentUser
+        else {
+            resultHandler(.failure(RuntimeError("not current user")))
+            return
+        }
+        
+        currentUser.getIDTokenResult(forcingRefresh: true) { [weak self] result, error in
+            guard let result = result, error == nil
+            else {
+                return
+            }
+            let refreshResult = AuthRefreshResult(
+                uid: currentUser.uid,
+                idToken: result.token,
+                refreshToken: self?.currentUser?.refreshToken
+            )
+            resultHandler(.success(refreshResult))
         }
     }
 }
@@ -129,7 +168,7 @@ extension AuthRepositoryImple {
     
     private func loadAccountInfo(_ auth: Domain.Auth) async throws -> AccountInfo {
         let infoDTO: AccountInfoMapper = try await self.remoteAPI.request(
-            .get, AccountAPIEndpoints.account,
+            .put, AccountAPIEndpoints.account,
             with: ["Authorization": "Bearer \(auth.accessToken)"]
         )
         return infoDTO.info
