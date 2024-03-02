@@ -17,6 +17,7 @@ public enum RemoteAPIMethod: String {
     case post
     case path
     case delete
+    case put
 }
 
 public protocol RemoteAPI: AnyObject, Sendable {
@@ -111,6 +112,7 @@ extension RemoteAPIMethod {
         case .post: return .post
         case .path: return .patch
         case .delete: return .delete
+        case .put: return .put
         }
     }
     

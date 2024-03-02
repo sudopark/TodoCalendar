@@ -66,4 +66,8 @@ class DummyFirebaseAuthService: FirebaseAuthService {
     func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
         throw RuntimeError("failed")
     }
+    
+    func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
+        
+    }
 }
