@@ -7,6 +7,7 @@
 
 import Foundation
 import Alamofire
+import Domain
 import Extensions
 
 
@@ -28,6 +29,12 @@ public protocol RemoteAPI: AnyObject, Sendable {
         with header: [String: String]?,
         parameters: [String: Any]
     ) async throws -> Data
+    
+    func attach(listener: any OAuthAutenticatorTokenRefreshListener)
+    
+    func setup(
+        credential auth: Auth?
+    )
 }
 
 extension RemoteAPI {
@@ -54,23 +61,35 @@ extension RemoteAPI {
 
 // MARK: - RemoteAPIImple
 
-private let underlyingSession = Session(
-    serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility)
-)
 
-public final class RemoteAPIImple: RemoteAPI, Sendable {
-    
+public final class RemoteAPIImple: RemoteAPI, @unchecked Sendable {
+ 
     private let environment: RemoteEnvironment
-    public init(environment: RemoteEnvironment) {
-        self.environment = environment
-    }
+    private let session: Session
+    private let authenticator: OAuthAutenticator
     
-    private var session: Session {
-        return underlyingSession
+    public init(
+        environment: RemoteEnvironment,
+        authenticator: OAuthAutenticator
+    ) {
+        self.environment = environment
+        self.authenticator = authenticator
+        self.session = Session(
+            serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility),
+            interceptor: AuthenticationInterceptor(authenticator: authenticator)
+        )
     }
 }
 
 extension RemoteAPIImple {
+    
+    public func attach(listener: OAuthAutenticatorTokenRefreshListener) {
+        self.authenticator.listener = listener
+    }
+    
+    public func setup(credential auth: Auth?) {
+        (self.session.interceptor as? AuthenticationInterceptor<OAuthAutenticator>)?.credential = auth
+    }
     
     public func request(
         _ method: RemoteAPIMethod,

@@ -85,20 +85,26 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
 
 protocol ApplicationRouting: Routing {
     
-    func setupInitialScene(
-        _ prepareResult: ApplicationPrepareResult,
-        with authUsecase: any AuthUsecase,
-        _ accountUsecase: any AccountUsecase
-    )
+    func setupInitialScene(_ prepareResult: ApplicationPrepareResult)
+    func changeRootSceneAfter(signIn auth: Auth?)
 }
 
 final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     
+    
     @MainActor var window: UIWindow!
     var viewAppearanceStore: ApplicationViewAppearanceStoreImple!
+    private let authUsecase: any AuthUsecase
+    private let accountUsecase: any AccountUsecase
     private var usecaseFactory: (any UsecaseFactory)!
     
-    init() { }
+    init(
+        authUsecase: any AuthUsecase,
+        accountUsecase: any AccountUsecase
+    ) {
+        self.authUsecase = authUsecase
+        self.accountUsecase = accountUsecase
+    }
     
     func showError(_ error: any Error) {
         // TODO:
@@ -129,33 +135,50 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
 extension ApplicationRootRouter {
     
     func setupInitialScene(
-        _ prepareResult: ApplicationPrepareResult,
-        with authUsecase: any AuthUsecase,
-        _ accountUsecase: any AccountUsecase
+        _ prepareResult: ApplicationPrepareResult
     ) {
         
         guard !AppEnvironment.isTestBuild else { return }
         self.viewAppearanceStore = .init(prepareResult.appearnceSetings)
-        self.prepareDatabase(for: prepareResult.latestLoginAcount?.auth.uid)
-        
-        // TODO: 추후에 prepare result에 따라 usecase factory 결정해야함
-        self.usecaseFactory = NonLoginUsecaseFactoryImple(
-            authUsecase: authUsecase,
-            accountUescase: accountUsecase,
-            viewAppearanceStore: self.viewAppearanceStore
-        )
         
         Task { @MainActor in
-            let builder = MainSceneBuilerImple(
-                usecaseFactory: self.usecaseFactory,
-                viewAppearance: self.viewAppearanceStore.appearance,
-                calendarSceneBulder: self.calendarSceneBulder(),
-                settingSceneBuilder: self.settingSceneBuilder()
+            self.changeUsecaseFactroy(
+                by: prepareResult.latestLoginAcount?.auth
             )
-            let mainScene = builder.makeMainScene()
-            self.window.rootViewController = mainScene
-            self.window.makeKeyAndVisible()
+            self.refreshRoot()
         }
+    }
+
+    func changeRootSceneAfter(signIn auth: Auth?) {
+        Task { @MainActor in
+            self.changeUsecaseFactroy(by: auth)
+            self.refreshRoot()
+        }
+    }
+    
+    private func changeUsecaseFactroy(
+        by auth: Auth?
+    ) {
+        // TODO: 추후에 prepare result에 따라 usecase factory 결정해야함
+        self.usecaseFactory = NonLoginUsecaseFactoryImple(
+            authUsecase: self.authUsecase,
+            accountUescase: self.accountUsecase,
+            viewAppearanceStore: self.viewAppearanceStore
+        )
+    }
+    
+    @MainActor
+    private func refreshRoot() {
+        
+        let builder = MainSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance,
+            calendarSceneBulder: self.calendarSceneBulder(),
+            settingSceneBuilder: self.settingSceneBuilder()
+        )
+        let mainScene = builder.makeMainScene()
+        self.window.rootViewController = mainScene
+        self.window.makeKeyAndVisible()
     }
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
@@ -187,12 +210,5 @@ extension ApplicationRootRouter {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance
         )
-    }
-    
-    private func prepareDatabase(for accountId: String?) {
-        let database = Singleton.shared.commonSqliteService
-        let dbPath = AppEnvironment.dbFilePath(for: accountId)
-        let openResult = database.open(path: dbPath)
-        logger.log(level: .info, "db open result: \(openResult) -> path: \(dbPath)")
     }
 }

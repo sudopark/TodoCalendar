@@ -17,22 +17,22 @@ extension Auth: AuthenticationCredential {
 }
 
 
-protocol OAuthAutenticatorTokenRefreshListener: AnyObject {
+public protocol OAuthAutenticatorTokenRefreshListener: AnyObject {
     
     func oauthAutenticator(didRefresh auth: Auth)
     func oauthAutenticator(didRefreshFailed error: any Error)
 }
 
-final class OAuthAutenticator: Authenticator {
+public final class OAuthAutenticator: Authenticator {
     
-    typealias Credential = Auth
+    public typealias Credential = Auth
     
     private let remoteEnvironment: RemoteEnvironment
     private let firebaseAuthService: any FirebaseAuthService
     
-    weak var listener: OAuthAutenticatorTokenRefreshListener?
+    public weak var listener: OAuthAutenticatorTokenRefreshListener?
     
-    init(
+    public init(
         remoteEnvironment: RemoteEnvironment,
         firebaseAuthService: any FirebaseAuthService
     ) {
@@ -46,7 +46,7 @@ final class OAuthAutenticator: Authenticator {
 
 extension OAuthAutenticator {
     
-    func apply(_ credential: Credential, to urlRequest: inout URLRequest) {
+    public func apply(_ credential: Credential, to urlRequest: inout URLRequest) {
         guard let path = urlRequest.url?.absoluteString,
               self.isNeedToken(path) else { return }
         urlRequest.headers.add(.authorization(bearerToken: credential.accessToken))
@@ -68,7 +68,7 @@ extension OAuthAutenticator {
 
 extension OAuthAutenticator {
     
-    func didRequest(
+    public func didRequest(
         _ urlRequest: URLRequest,
         with response: HTTPURLResponse,
         failDueToAuthenticationError error: Error
@@ -81,7 +81,7 @@ extension OAuthAutenticator {
         return response.statusCode == 401
     }
     
-    func refresh(
+    public func refresh(
         _ credential: Credential,
         for session: Session,
         completion: @escaping (Result<Credential, Error>) -> Void
@@ -105,7 +105,7 @@ extension OAuthAutenticator {
         }
     }
     
-    func isRequest(_ urlRequest: URLRequest, authenticatedWith credential: Credential) -> Bool {
+    public func isRequest(_ urlRequest: URLRequest, authenticatedWith credential: Credential) -> Bool {
         let bearerToken = HTTPHeader.authorization(bearerToken: credential.accessToken).value
         return urlRequest.headers["Authorization"] == bearerToken
     }

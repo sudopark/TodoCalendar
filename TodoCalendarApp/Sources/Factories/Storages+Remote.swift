@@ -8,6 +8,9 @@
 import Foundation
 import Domain
 import Repository
+import Extensions
+import FirebaseAuth
+import Alamofire
 import SQLiteService
 
 
@@ -28,10 +31,53 @@ final class Singleton {
         return service
     }()
     
-    
     // TODO: test build 이면 empty remote 객체 제공
-    lazy var remoteAPI: any RemoteAPI = {
+    private var remoteEnvironment: RemoteEnvironment = {
+        // TODO: host 값 읽어와야함
         let environment = RemoteEnvironment(calendarAPIHost: "some")
-        return RemoteAPIImple(environment: environment)
+        return environment
     }()
+    
+    let firebaseAuthService: any FirebaseAuthService = {
+        if AppEnvironment.isTestBuild {
+            return DummyFirebaseAuthService()
+        } else {
+            return Auth.auth()
+        }
+    }()
+    
+    lazy var oauthAuthenticator: OAuthAutenticator = {
+        let authenticator = OAuthAutenticator(
+            remoteEnvironment: self.remoteEnvironment,
+            firebaseAuthService: firebaseAuthService
+        )
+        return authenticator
+    }()
+
+    
+    lazy var remoteAPI: RemoteAPIImple = {
+        let environment = self.remoteEnvironment
+        let authenticator = OAuthAutenticator(
+            remoteEnvironment: environment,
+            firebaseAuthService: self.firebaseAuthService
+        )
+        return RemoteAPIImple(
+            environment: environment,
+            authenticator: authenticator
+        )
+    }()
+}
+
+
+// MARK: - dummy
+
+class DummyFirebaseAuthService: FirebaseAuthService {
+    
+    func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
+        throw RuntimeError("failed")
+    }
+    
+    func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
+        
+    }
 }
