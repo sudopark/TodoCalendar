@@ -102,15 +102,18 @@ extension FirebaseAuth.Auth: FirebaseAuthService {
 public final class AuthRepositoryImple: AuthRepository, @unchecked Sendable {
     
     private let remoteAPI: any RemoteAPI
+    private let authStore: any AuthStore
     private let keyChainStorage: any KeyChainStorage
     private let firebaseAuthService: any FirebaseAuthService
     
     public init(
         remoteAPI: any RemoteAPI,
+        authStore: any AuthStore,
         keyChainStorage: any KeyChainStorage,
         firebaseAuthService: (any FirebaseAuthService)? = nil
     ) {
         self.remoteAPI = remoteAPI
+        self.authStore = authStore
         self.keyChainStorage = keyChainStorage
         self.firebaseAuthService = firebaseAuthService ?? Auth.auth()
     }
@@ -119,16 +122,15 @@ public final class AuthRepositoryImple: AuthRepository, @unchecked Sendable {
 
 extension AuthRepositoryImple {
     
-    private var authKey: String { "current_auth" }
     private var accountInfoKey: String { "current_account_info" }
     
     public func loadLatestSignInAuth() async throws -> Account? {
-        guard let authMapper: AuthMapper = self.keyChainStorage.load(authKey),
+        guard let auth = self.authStore.loadCurrentAuth(),
               let infoMapper: AccountInfoMapper = self.keyChainStorage.load(accountInfoKey)
         else {
             return nil
         }
-        return .init(auth: authMapper.auth, info: infoMapper.info)
+        return .init(auth: auth, info: infoMapper.info)
     }
     
     public func signIn(_ credential: OAuth2Credential) async throws -> Account {
@@ -161,7 +163,7 @@ extension AuthRepositoryImple {
     
     private func postSignInAction(_ auth: Domain.Auth) async throws -> Account {
         let info = try await self.loadAccountInfo(auth)
-        self.keyChainStorage.update(authKey, AuthMapper(auth: auth))
+        self.authStore.updateAuth(auth)
         self.keyChainStorage.update(accountInfoKey, AccountInfoMapper(info: info))
         return .init(auth: auth, info: info)
     }
