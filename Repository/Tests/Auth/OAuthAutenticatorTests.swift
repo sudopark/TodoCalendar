@@ -21,27 +21,28 @@ class OAuthAutenticatorTests: BaseTestCase {
     
     private var remoteEnvironment: RemoteEnvironment!
     private var stubFirebaseService: StubFirebaseAuthService!
-    private var spyKeychainStore: SpyKeyChainStorage!
+    private var spyListener: SpyListener?
     
     override func setUpWithError() throws {
         self.remoteEnvironment = .init(calendarAPIHost: "https://calendar.come")
         self.stubFirebaseService = .init()
-        self.spyKeychainStore = .init()
+        self.spyListener = .init()
     }
     
     override func tearDownWithError() throws {
         self.remoteEnvironment = nil
         self.stubFirebaseService = nil
-        self.spyKeychainStore = nil
+        self.spyListener = nil
     }
     
     private func makeAuthenticator() -> OAuthAutenticator {
         
-        return .init(
+        let authenticator = OAuthAutenticator(
             remoteEnvironment: self.remoteEnvironment,
-            firebaseAuthService: self.stubFirebaseService,
-            keyChainStore: self.spyKeychainStore
+            firebaseAuthService: self.stubFirebaseService
         )
+        authenticator.listener = self.spyListener
+        return authenticator
     }
     
     private var dummyAuth: Auth {
@@ -164,12 +165,11 @@ extension OAuthAutenticatorTests {
     
 
     // referesh and save auth
-    func testAuthenticator_whenRefreshToken_saveAuth() {
+    func testAuthenticator_refreshToken() {
         // given
         let authenticator = self.makeAuthenticator()
         func parameterizeTest(_ shouldFail: Bool) {
             // given
-            self.spyKeychainStore.remove("current_auth")
             self.stubFirebaseService.shouldFailRefresh = shouldFail
             let expect = expectation(description: "wait-refresh")
             var result: Result<Auth, any Error>?
@@ -185,11 +185,11 @@ extension OAuthAutenticatorTests {
             switch result {
             case .success:
                 XCTAssertEqual(shouldFail, false)
-                let newAuth: AuthMapper? = self.spyKeychainStore.load("current_auth")
-                XCTAssertNotNil(newAuth?.auth)
+                XCTAssertEqual(self.spyListener?.didTokenRefreshed, true)
                 
             case .failure:
                 XCTAssertEqual(shouldFail, true)
+                XCTAssertEqual(self.spyListener?.didTokenRefreshFailed, true)
             default:
                 XCTFail("refresh failed without response")
             }
@@ -229,5 +229,18 @@ extension OAuthAutenticatorTests {
         parameterizeTest("wrong auth", isEqual: false)
         parameterizeTest("Bearer old", isEqual: false)
         parameterizeTest("Bearer access-new", isEqual: true)
+    }
+}
+
+private final class SpyListener: OAuthAutenticatorTokenRefreshListener {
+    
+    var didTokenRefreshed: Bool?
+    func oauthAutenticator(didRefresh auth: Auth) {
+        self.didTokenRefreshed = true
+    }
+    
+    var didTokenRefreshFailed: Bool?
+    func oauthAutenticator(didRefreshFailed error: any Error) {
+        self.didTokenRefreshFailed = true
     }
 }

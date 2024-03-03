@@ -17,22 +17,27 @@ extension Auth: AuthenticationCredential {
 }
 
 
+protocol OAuthAutenticatorTokenRefreshListener: AnyObject {
+    
+    func oauthAutenticator(didRefresh auth: Auth)
+    func oauthAutenticator(didRefreshFailed error: any Error)
+}
+
 final class OAuthAutenticator: Authenticator {
     
     typealias Credential = Auth
     
     private let remoteEnvironment: RemoteEnvironment
     private let firebaseAuthService: any FirebaseAuthService
-    private let keyChainStore: any KeyChainStorage
+    
+    weak var listener: OAuthAutenticatorTokenRefreshListener?
     
     init(
         remoteEnvironment: RemoteEnvironment,
-        firebaseAuthService: any FirebaseAuthService,
-        keyChainStore: any KeyChainStorage
+        firebaseAuthService: any FirebaseAuthService
     ) {
         self.remoteEnvironment = remoteEnvironment
         self.firebaseAuthService = firebaseAuthService
-        self.keyChainStore = keyChainStore
     }
 }
 
@@ -86,14 +91,15 @@ extension OAuthAutenticator {
             switch result {
             case .success(let refreshResult):
                 let auth = Auth(
-                    uid: refreshResult.uid, 
+                    uid: refreshResult.uid,
                     accessToken: refreshResult.idToken,
                     refreshToken: refreshResult.refreshToken
                 )
-                self.saveAuth(auth)
+                self.listener?.oauthAutenticator(didRefresh: auth)
                 completion(.success(auth))
                 
             case .failure(let error):
+                self.listener?.oauthAutenticator(didRefreshFailed: error)
                 completion(.failure(error))
             }
         }
@@ -102,9 +108,5 @@ extension OAuthAutenticator {
     func isRequest(_ urlRequest: URLRequest, authenticatedWith credential: Credential) -> Bool {
         let bearerToken = HTTPHeader.authorization(bearerToken: credential.accessToken).value
         return urlRequest.headers["Authorization"] == bearerToken
-    }
-    
-    private func saveAuth(_ auth: Auth) {
-        self.keyChainStore.update("current_auth", AuthMapper(auth: auth))
     }
 }
