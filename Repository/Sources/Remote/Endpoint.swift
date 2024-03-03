@@ -23,9 +23,9 @@ public enum HolidayAPIEndpoints: Endpoint {
     public var subPath: String {
         switch self {
         case .supportCountry: 
-            return "AvailableCountries"
-        case .holidays(let year, let countryCode): 
-            return "PublicHolidays/\(year)/\(countryCode)"
+            return "api/v3/AvailableCountries"
+        case .holidays(let year, let countryCode):
+            return "api/v3/PublicHolidays/\(year)/\(countryCode)"
         }
     }
 }
@@ -67,7 +67,7 @@ public struct RemoteEnvironment: Sendable {
         
         switch endpoint {
         case let holiday as HolidayAPIEndpoints:
-            return "https://date.nager.at/api/v3/\(holiday.subPath)"
+            return "https://date.nager.at/\(holiday.subPath)"
         case let account as AccountAPIEndpoints:
             return "\(calendarAPIHost)/accounts/\(account.subPath)"
         case let todo as TodoAPIEndpoints:

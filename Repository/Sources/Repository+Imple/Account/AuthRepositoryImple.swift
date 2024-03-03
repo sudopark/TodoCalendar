@@ -110,12 +110,12 @@ public final class AuthRepositoryImple: AuthRepository, @unchecked Sendable {
         remoteAPI: any RemoteAPI,
         authStore: any AuthStore,
         keyChainStorage: any KeyChainStorage,
-        firebaseAuthService: (any FirebaseAuthService)? = nil
+        firebaseAuthService: any FirebaseAuthService
     ) {
         self.remoteAPI = remoteAPI
         self.authStore = authStore
         self.keyChainStorage = keyChainStorage
-        self.firebaseAuthService = firebaseAuthService ?? Auth.auth()
+        self.firebaseAuthService = firebaseAuthService
     }
 }
 

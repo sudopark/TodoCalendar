@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Domain
 import Extensions
 @testable import Repository
 
@@ -46,6 +47,14 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         calendarAPIHost: "dummy_calendar_api_host"
     )
     var didRequestedPath: String?
+    
+    func attach(listener: OAuthAutenticatorTokenRefreshListener) {
+        
+    }
+    
+    func setup(credential auth: Auth?) {
+        
+    }
     
     func request(
         _ method: RemoteAPIMethod,

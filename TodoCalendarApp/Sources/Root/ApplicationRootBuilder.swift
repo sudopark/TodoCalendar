@@ -15,11 +15,12 @@ final class ApplicationRootBuilder {
     
     func makeRootViewModel() -> ApplicationRootViewModelImple {
         
+        let remote = Singleton.shared.remoteAPI
         let authRepository = AuthRepositoryImple(
-            remoteAPI: Singleton.shared.remoteAPI,
+            remoteAPI: remote,
             authStore: Singleton.shared.keyChainStorage,
             keyChainStorage: Singleton.shared.keyChainStorage,
-            firebaseAuthService: AppEnvironment.isTestBuild ? DummyFirebaseAuthService() : nil
+            firebaseAuthService: Singleton.shared.firebaseAuthService
         )
         let oauth2ServiceUsecaseProvider = OAuth2ServiceUsecaseProviderImple {
             // TODO: 이부분 객체로 바꿔줄필요있음
@@ -31,19 +32,25 @@ final class ApplicationRootBuilder {
             authRepository: authRepository,
             sharedStore: Singleton.shared.sharedDataStore
         )
-        let rootUsecase = ApplicationRootUsecaseImple(
+        let prepareUsecase = ApplicationPrepareLaunchUsecaseImple(
             accountUsecase: accountUsecase,
-            appSettingRepository: AppSettingRepositoryImple(
+            latestAppSettingRepository: AppSettingRepositoryImple(
                 environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
             ),
-            sharedDataStore: Singleton.shared.sharedDataStore
+            sharedDataStore: Singleton.shared.sharedDataStore,
+            remoteAPI: remote,
+            database: Singleton.shared.commonSqliteService
         )
         let rootViewModel = ApplicationRootViewModelImple(
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
-            applicationUsecase: rootUsecase
+            prepareLaunchUsecase: prepareUsecase
         )
-        let rootRouter = ApplicationRootRouter()
+        remote.attach(listener: rootViewModel)
+        let rootRouter = ApplicationRootRouter(
+            authUsecase: accountUsecase,
+            accountUsecase: accountUsecase
+        )
         rootViewModel.router = rootRouter
         
         return rootViewModel
@@ -58,17 +65,5 @@ private extension UIViewController {
             return self
         }
         return presented.topPresentedViewController()
-    }
-}
-
-
-class DummyFirebaseAuthService: FirebaseAuthService {
-    
-    func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
-        throw RuntimeError("failed")
-    }
-    
-    func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
-        
     }
 }
