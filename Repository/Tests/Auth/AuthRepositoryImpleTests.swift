@@ -37,6 +37,7 @@ class AuthRepositoryImpleTests: BaseTestCase {
         
         return AuthRepositoryImple(
             remoteAPI: self.stubRemote,
+            authStore: self.spyKeyChainStore,
             keyChainStorage: self.spyKeyChainStore,
             firebaseAuthService: authService
         )
@@ -127,7 +128,7 @@ class StubFirebaseAuthService: FirebaseAuthService {
 }
 
 
-class SpyKeyChainStorage: KeyChainStorage, @unchecked Sendable {
+class SpyKeyChainStorage: KeyChainStorage, AuthStore, @unchecked Sendable {
     
     private var storage: [String: any Codable] = [:]
     
@@ -135,6 +136,16 @@ class SpyKeyChainStorage: KeyChainStorage, @unchecked Sendable {
     
     func load<T>(_ key: String) -> T? where T : Decodable {
         return self.storage[key] as? T
+    }
+    
+    func loadCurrentAuth() -> Domain.Auth? {
+        let mapper: AuthMapper? = self.load("current_auth")
+        return mapper?.auth
+    }
+    
+    func updateAuth(_ auth: Domain.Auth) {
+        let mapper = AuthMapper(auth: auth)
+        self.update("current_auth", mapper)
     }
     
     func update<T>(_ key: String, _ value: T) where T : Encodable {

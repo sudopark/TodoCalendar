@@ -17,6 +17,7 @@ final class ApplicationRootBuilder {
         
         let authRepository = AuthRepositoryImple(
             remoteAPI: Singleton.shared.remoteAPI,
+            authStore: Singleton.shared.keyChainStorage,
             keyChainStorage: Singleton.shared.keyChainStorage,
             firebaseAuthService: AppEnvironment.isTestBuild ? DummyFirebaseAuthService() : nil
         )
