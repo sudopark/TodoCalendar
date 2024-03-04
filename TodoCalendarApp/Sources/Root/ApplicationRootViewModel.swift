@@ -15,7 +15,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
  
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
-    private let prepareLaunchUsecase: any ApplicationPrepareLaunchUsecase
+    private let prepareUsecase: any ApplicationPrepareUsecase
     var router: ApplicationRootRouter?
     
     private var cancellables: Set<AnyCancellable> = []
@@ -23,11 +23,11 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     init(
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
-        prepareLaunchUsecase: any ApplicationPrepareLaunchUsecase
+        prepareUsecase: any ApplicationPrepareUsecase
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
-        self.prepareLaunchUsecase = prepareLaunchUsecase
+        self.prepareUsecase = prepareUsecase
         
         self.bindAccountStatusChanged()
     }
@@ -40,7 +40,7 @@ extension ApplicationRootViewModelImple: OAuthAutenticatorTokenRefreshListener {
     
     func prepareInitialScene() {
         Task {
-            let result = try await self.prepareLaunchUsecase.prepareLaunch()
+            let result = try await self.prepareUsecase.prepareLaunch()
             self.router?.setupInitialScene(result)
         }
     }
@@ -61,22 +61,21 @@ extension ApplicationRootViewModelImple: OAuthAutenticatorTokenRefreshListener {
     }
     
     private func handleUserSignedIn(_ account: Account) {
-        // TODO: replace database
+        self.prepareUsecase.prepareSignedIn(account.auth)
         self.router?.changeRootSceneAfter(signIn: account.auth)
     }
     
     private func handleUserSignedOut() {
-        // TODO: replace database
+        self.prepareUsecase.prepareSignedOut()
         self.router?.changeRootSceneAfter(signIn: nil)
     }
     
     func oauthAutenticator(didRefresh auth: Auth) {
-        // TODO: replace database
-        self.router?.changeRootSceneAfter(signIn: auth)
+        // do nothing
     }
     
     func oauthAutenticator(didRefreshFailed error: Error) {
-        // TODO: replace database
+        self.prepareUsecase.prepareSignedOut()
         self.router?.changeRootSceneAfter(signIn: nil)
     }
 }

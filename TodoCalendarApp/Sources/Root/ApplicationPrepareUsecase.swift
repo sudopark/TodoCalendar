@@ -1,5 +1,5 @@
 //
-//  ApplicationPrepareLaunchUsecase.swift
+//  ApplicationPrepareUsecase.swift
 //  TodoCalendarApp
 //
 //  Created by sudo.park on 2023/08/07.
@@ -21,13 +21,15 @@ struct ApplicationPrepareResult {
 
 // MARK: - ApplicationRootUsecase
 
-protocol ApplicationPrepareLaunchUsecase {
+protocol ApplicationPrepareUsecase {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult
+    func prepareSignedIn(_ auth: Auth)
+    func prepareSignedOut()
 }
 
 
-final class ApplicationPrepareLaunchUsecaseImple: ApplicationPrepareLaunchUsecase {
+final class ApplicationUsecaseImple: ApplicationPrepareUsecase {
     
     private let accountUsecase: any AccountUsecase
     private let latestAppSettingRepository: any AppSettingRepository
@@ -53,7 +55,7 @@ final class ApplicationPrepareLaunchUsecaseImple: ApplicationPrepareLaunchUsecas
 }
 
 
-extension ApplicationPrepareLaunchUsecaseImple {
+extension ApplicationUsecaseImple {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult {
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()
@@ -66,6 +68,14 @@ extension ApplicationPrepareLaunchUsecaseImple {
             latestLoginAcount: latestLoginAccount,
             appearnceSetings: appearance
         )
+    }
+    
+    func prepareSignedIn(_ auth: Auth) {
+        // TODO: close and open database
+    }
+    
+    func prepareSignedOut() {
+        // TODO: close and open database
     }
     
     private func prepareLatestAppearanceSeting() async throws -> AppearanceSettings  {

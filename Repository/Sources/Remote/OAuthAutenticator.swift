@@ -34,15 +34,18 @@ public final class OAuthAutenticator: Authenticator {
     
     public typealias Credential = OptionalAuthCredential
     
+    private let authStore: any AuthStore
     private let remoteEnvironment: RemoteEnvironment
     private let firebaseAuthService: any FirebaseAuthService
     
     public weak var listener: OAuthAutenticatorTokenRefreshListener?
     
     public init(
+        authStore: any AuthStore,
         remoteEnvironment: RemoteEnvironment,
         firebaseAuthService: any FirebaseAuthService
     ) {
+        self.authStore = authStore
         self.remoteEnvironment = remoteEnvironment
         self.firebaseAuthService = firebaseAuthService
     }
@@ -109,6 +112,7 @@ extension OAuthAutenticator {
                     accessToken: refreshResult.idToken,
                     refreshToken: refreshResult.refreshToken
                 )
+                self.authStore.updateAuth(auth)
                 self.listener?.oauthAutenticator(didRefresh: auth)
                 completion(.success(.need(auth)))
                 
