@@ -7,15 +7,22 @@
 //
 
 import Foundation
-import Domain
 import Alamofire
+import Domain
+import Extensions
 
 
-extension Auth: AuthenticationCredential {
+public enum OptionalAuthCredential: AuthenticationCredential {
+    case notNeed
+    case need(Auth)
     
     public var requiresRefresh: Bool { false }
-}
 
+    var auth: Auth? {
+        guard case let .need(auth) = self else { return nil }
+        return auth
+    }
+}
 
 public protocol OAuthAutenticatorTokenRefreshListener: AnyObject {
     
@@ -25,7 +32,7 @@ public protocol OAuthAutenticatorTokenRefreshListener: AnyObject {
 
 public final class OAuthAutenticator: Authenticator {
     
-    public typealias Credential = Auth
+    public typealias Credential = OptionalAuthCredential
     
     private let remoteEnvironment: RemoteEnvironment
     private let firebaseAuthService: any FirebaseAuthService
@@ -47,9 +54,10 @@ public final class OAuthAutenticator: Authenticator {
 extension OAuthAutenticator {
     
     public func apply(_ credential: Credential, to urlRequest: inout URLRequest) {
-        guard let path = urlRequest.url?.absoluteString,
+        guard let auth = credential.auth,
+              let path = urlRequest.url?.absoluteString,
               self.isNeedToken(path) else { return }
-        urlRequest.headers.add(.authorization(bearerToken: credential.accessToken))
+        urlRequest.headers.add(.authorization(bearerToken: auth.accessToken))
     }
     
     private func isNeedToken(_ urlPath: String) -> Bool {
@@ -87,6 +95,12 @@ extension OAuthAutenticator {
         completion: @escaping (Result<Credential, Error>) -> Void
     ) {
         
+        guard case .need = credential
+        else {
+            completion(.failure(RuntimeError("auth not exists")))
+            return
+        }
+        
         self.firebaseAuthService.refreshToken { result in
             switch result {
             case .success(let refreshResult):
@@ -96,7 +110,7 @@ extension OAuthAutenticator {
                     refreshToken: refreshResult.refreshToken
                 )
                 self.listener?.oauthAutenticator(didRefresh: auth)
-                completion(.success(auth))
+                completion(.success(.need(auth)))
                 
             case .failure(let error):
                 self.listener?.oauthAutenticator(didRefreshFailed: error)
@@ -106,7 +120,13 @@ extension OAuthAutenticator {
     }
     
     public func isRequest(_ urlRequest: URLRequest, authenticatedWith credential: Credential) -> Bool {
-        let bearerToken = HTTPHeader.authorization(bearerToken: credential.accessToken).value
-        return urlRequest.headers["Authorization"] == bearerToken
+        switch credential {
+        case .notNeed:
+            return true
+            
+        case .need(let auth):
+            let bearerToken = HTTPHeader.authorization(bearerToken: auth.accessToken).value
+            return urlRequest.headers["Authorization"] == bearerToken
+        }
     }
 }

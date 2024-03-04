@@ -88,7 +88,8 @@ extension RemoteAPIImple {
     }
     
     public func setup(credential auth: Auth?) {
-        (self.session.interceptor as? AuthenticationInterceptor<OAuthAutenticator>)?.credential = auth
+        let credential: OptionalAuthCredential = auth.map { .need($0) } ?? .notNeed
+        (self.session.interceptor as? AuthenticationInterceptor<OAuthAutenticator>)?.credential = credential
     }
     
     public func request(

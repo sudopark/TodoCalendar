@@ -78,7 +78,8 @@ extension OAuthAutenticatorTests {
             }
             
             // when
-            authenticator.apply(self.dummyAuth, to: &request)
+            let credential = OptionalAuthCredential.need(self.dummyAuth)
+            authenticator.apply(credential, to: &request)
             
             // then
             let authHeader = request.headers["Authorization"]
@@ -98,6 +99,41 @@ extension OAuthAutenticatorTests {
         )
         parameterizeTest(
             TodoAPIEndpoints.currentTodo, method: .get, expecthasToken: true
+        )
+    }
+    
+    func testAuthenticator_whenCredentialNotNeed_notApplyToken() {
+        // given
+        let authenticator = self.makeAuthenticator()
+        func parameterizeTest(
+            _ endpoint: any Endpoint,
+            method: HTTPMethod
+        ) {
+            // given
+            guard var request = self.makeRequest(endpoint, method: method)
+            else {
+                XCTFail("invalid endpoint")
+                return
+            }
+            
+            // when
+            let credential = OptionalAuthCredential.notNeed
+            authenticator.apply(credential, to: &request)
+            
+            // then
+            let authHeader = request.headers["Authorization"]
+            let token = authHeader?.components(separatedBy: "Bearer ")[safe: 1]
+            XCTAssertNil(token)
+        }
+        // when + then
+        parameterizeTest(
+            HolidayAPIEndpoints.supportCountry, method: .get
+        )
+        parameterizeTest(
+            AccountAPIEndpoints.account, method: .put
+        )
+        parameterizeTest(
+            TodoAPIEndpoints.currentTodo, method: .get
         )
     }
 }
@@ -164,7 +200,7 @@ extension OAuthAutenticatorTests {
     }
     
 
-    // referesh and save auth
+    // referesh
     func testAuthenticator_refreshToken() {
         // given
         let authenticator = self.makeAuthenticator()
@@ -172,10 +208,11 @@ extension OAuthAutenticatorTests {
             // given
             self.stubFirebaseService.shouldFailRefresh = shouldFail
             let expect = expectation(description: "wait-refresh")
-            var result: Result<Auth, any Error>?
+            var result: Result<OptionalAuthCredential, any Error>?
             
             // when
-            authenticator.refresh(self.dummyAuth, for: Session()) {
+            let credential = OptionalAuthCredential.need(self.dummyAuth)
+            authenticator.refresh(credential, for: Session()) {
                 result = $0
                 expect.fulfill()
             }
@@ -200,6 +237,40 @@ extension OAuthAutenticatorTests {
         parameterizeTest(false)
     }
     
+    func testAuthenticator_whenCredentialNotNeed_alwayNotRefreshToken() {
+        // given
+        let authenticator = self.makeAuthenticator()
+        func parameterizeTest() {
+            // given
+            let expect = expectation(description: "wait-refresh")
+            var result: Result<OptionalAuthCredential, any Error>?
+            
+            // when
+            let credential = OptionalAuthCredential.notNeed
+            authenticator.refresh(credential, for: Session()) {
+                result = $0
+                expect.fulfill()
+            }
+            self.wait(for: [expect], timeout: self.timeout)
+            
+            // then
+            switch result {
+            case .success:
+                XCTFail("성공해서는 안됨")
+                
+            case .failure:
+                XCTAssert(true)
+                XCTAssertNotEqual(self.spyListener?.didTokenRefreshFailed, true, "해당케이스에서는 리스너 호출안함")
+            default:
+                XCTFail("refresh failed without response")
+            }
+        }
+        
+        // when + then
+        parameterizeTest()
+        parameterizeTest()
+    }
+    
     // check token has changed
     func testAuthenticator_checkTokenChanged() {
         // given
@@ -218,7 +289,8 @@ extension OAuthAutenticatorTests {
             request.setValue(stubToken, forHTTPHeaderField: "Authorization")
             
             // when
-            let result = authenticator.isRequest(request, authenticatedWith: newAuth)
+            let credential = OptionalAuthCredential.need(newAuth)
+            let result = authenticator.isRequest(request, authenticatedWith: credential)
             
             // then
             XCTAssertEqual(result, isEqual)
@@ -229,6 +301,35 @@ extension OAuthAutenticatorTests {
         parameterizeTest("wrong auth", isEqual: false)
         parameterizeTest("Bearer old", isEqual: false)
         parameterizeTest("Bearer access-new", isEqual: true)
+    }
+    
+    func testAuthenticator_whenCredentialNotNeed_checkTokenChangedAlwaysTrue() {
+        // given
+        let authenticator = self.makeAuthenticator()
+        func parameterizeTest(
+            _ stubToken: String?
+        ) {
+            // given
+            guard var request = self.makeRequest(TodoAPIEndpoints.currentTodo, method: .get)
+            else {
+                XCTFail("invalid endpoint")
+                return
+            }
+            request.setValue(stubToken, forHTTPHeaderField: "Authorization")
+            
+            // when
+            let credential = OptionalAuthCredential.notNeed
+            let result = authenticator.isRequest(request, authenticatedWith: credential)
+            
+            // then
+            XCTAssertEqual(result, true)
+        }
+        
+        // when + then
+        parameterizeTest(nil)
+        parameterizeTest("wrong auth")
+        parameterizeTest("Bearer old")
+        parameterizeTest("Bearer access-new")
     }
 }
 
