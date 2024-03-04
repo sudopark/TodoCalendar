@@ -20,17 +20,20 @@ import UnitTestHelpKit
 class OAuthAutenticatorTests: BaseTestCase {
     
     private var remoteEnvironment: RemoteEnvironment!
+    private var spyAuthStore: SpyKeyChainStorage!
     private var stubFirebaseService: StubFirebaseAuthService!
     private var spyListener: SpyListener?
     
     override func setUpWithError() throws {
         self.remoteEnvironment = .init(calendarAPIHost: "https://calendar.come")
+        self.spyAuthStore = .init()
         self.stubFirebaseService = .init()
         self.spyListener = .init()
     }
     
     override func tearDownWithError() throws {
         self.remoteEnvironment = nil
+        self.spyAuthStore = nil
         self.stubFirebaseService = nil
         self.spyListener = nil
     }
@@ -38,6 +41,7 @@ class OAuthAutenticatorTests: BaseTestCase {
     private func makeAuthenticator() -> OAuthAutenticator {
         
         let authenticator = OAuthAutenticator(
+            authStore: self.spyAuthStore,
             remoteEnvironment: self.remoteEnvironment,
             firebaseAuthService: self.stubFirebaseService
         )
@@ -223,6 +227,7 @@ extension OAuthAutenticatorTests {
             case .success:
                 XCTAssertEqual(shouldFail, false)
                 XCTAssertEqual(self.spyListener?.didTokenRefreshed, true)
+                XCTAssertEqual(self.spyAuthStore.loadCurrentAuth()?.accessToken, "access-new")
                 
             case .failure:
                 XCTAssertEqual(shouldFail, true)

@@ -46,18 +46,10 @@ final class Singleton {
         }
     }()
     
-    lazy var oauthAuthenticator: OAuthAutenticator = {
-        let authenticator = OAuthAutenticator(
-            remoteEnvironment: self.remoteEnvironment,
-            firebaseAuthService: firebaseAuthService
-        )
-        return authenticator
-    }()
-
-    
     lazy var remoteAPI: RemoteAPIImple = {
         let environment = self.remoteEnvironment
         let authenticator = OAuthAutenticator(
+            authStore: self.keyChainStorage,
             remoteEnvironment: environment,
             firebaseAuthService: self.firebaseAuthService
         )

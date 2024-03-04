@@ -32,7 +32,7 @@ final class ApplicationRootBuilder {
             authRepository: authRepository,
             sharedStore: Singleton.shared.sharedDataStore
         )
-        let prepareUsecase = ApplicationPrepareLaunchUsecaseImple(
+        let prepareUsecase = ApplicationUsecaseImple(
             accountUsecase: accountUsecase,
             latestAppSettingRepository: AppSettingRepositoryImple(
                 environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
@@ -44,7 +44,7 @@ final class ApplicationRootBuilder {
         let rootViewModel = ApplicationRootViewModelImple(
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
-            prepareLaunchUsecase: prepareUsecase
+            prepareUsecase: prepareUsecase
         )
         remote.attach(listener: rootViewModel)
         let rootRouter = ApplicationRootRouter(
