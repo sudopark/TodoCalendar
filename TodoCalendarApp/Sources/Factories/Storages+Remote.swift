@@ -31,10 +31,22 @@ final class Singleton {
         return service
     }()
     
-    // TODO: test build 이면 empty remote 객체 제공
     private var remoteEnvironment: RemoteEnvironment = {
         // TODO: host 값 읽어와야함
-        let environment = RemoteEnvironment(calendarAPIHost: "some")
+        func readSecret() -> [String: Any] {
+            guard let path = Bundle.main.path(forResource: "secrets", ofType: "json"),
+                    let jsonData = try? Data(contentsOf: URL(fileURLWithPath: path))
+            else { return [:] }
+            
+            return (try? JSONSerialization.jsonObject(with: jsonData, options: .allowFragments) as? [String: Any]) ?? [:]
+        }
+        let secrets = readSecret()
+        let host = AppEnvironment.useEmulator 
+            ? secrets["emulator_caleandar_api_host"] as? String
+            : secrets["caleandar_api_host"] as? String
+        let environment = RemoteEnvironment(
+            calendarAPIHost: host ?? "https://dummy.com"
+        )
         return environment
     }()
     
@@ -42,7 +54,11 @@ final class Singleton {
         if AppEnvironment.isTestBuild {
             return DummyFirebaseAuthService()
         } else {
-            return Auth.auth()
+            let authService = Auth.auth()
+            if AppEnvironment.useEmulator {
+                authService.useEmulator(withHost:"127.0.0.1", port:9099)
+            }
+            return authService
         }
     }()
     
@@ -64,6 +80,9 @@ final class Singleton {
 // MARK: - dummy
 
 class DummyFirebaseAuthService: FirebaseAuthService {
+    func signOut() throws {
+        
+    }
     
     func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
         throw RuntimeError("failed")

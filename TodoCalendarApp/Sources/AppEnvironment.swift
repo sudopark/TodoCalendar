@@ -10,6 +10,8 @@ import Foundation
 
 struct AppEnvironment {
     
+    static var useEmulator: Bool { false }
+    
     static var isTestBuild: Bool {
         #if DEBUG
         return ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
