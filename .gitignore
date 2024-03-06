@@ -70,4 +70,5 @@ Derived/
 Tuist/Dependencies
 Tuist/TodoCalendarApp/Derived/
 TodoCalendarApp/Resources/GoogleService-Info.plist
+TodoCalendarApp/Resources/secrets.json
 Tuist/ProjectDescriptionHelpers/InfoPlist_Secrets.swift
