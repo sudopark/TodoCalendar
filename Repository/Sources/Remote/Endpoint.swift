@@ -31,12 +31,12 @@ public enum HolidayAPIEndpoints: Endpoint {
 }
 
 public enum AccountAPIEndpoints: Endpoint {
-    case account
+    case info
     
     public var subPath: String {
         switch self {
-        case .account:
-            return "account"
+        case .info:
+            return "info"
         }
     }
 }

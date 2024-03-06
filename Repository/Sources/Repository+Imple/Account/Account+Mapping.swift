@@ -16,12 +16,13 @@ private enum CodingKeys: String, CodingKey {
     case auth
     case info
     case uid
+    case id
     case access_token
     case refresh_token
     case email
     case method
     case firstSignedIn = "first_signed_in"
-    case lastSignedIn = "last_signed_in"
+    case lastSignedIn = "last_sign_in"
 }
 
 struct AuthMapper: Codable {
@@ -61,7 +62,7 @@ struct AccountInfoMapper: Codable {
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let info = AccountInfo(try container.decode(String.self, forKey: .uid))
+        let info = AccountInfo(try container.decode(String.self, forKey: .id))
         |> \.email .~ (try? container.decode(String.self, forKey: .email))
         |> \.signInMethod .~ (try? container.decode(String.self, forKey: .method))
         |> \.firstSignIn .~ (try? container.decode(Double.self, forKey: .firstSignedIn))

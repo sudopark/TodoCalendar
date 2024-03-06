@@ -110,7 +110,9 @@ extension RemoteAPIImple {
             parameters: parameters,
             encoding: method.encoding(),
             headers: header.map { HTTPHeaders($0) }
-        ).serializingData()
+        )
+        .validate()
+        .serializingData()
         
         let response = await dataTask.response
         let code = response.response?.statusCode ?? -1

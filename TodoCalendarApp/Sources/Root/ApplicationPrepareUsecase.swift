@@ -34,21 +34,18 @@ final class ApplicationUsecaseImple: ApplicationPrepareUsecase {
     private let accountUsecase: any AccountUsecase
     private let latestAppSettingRepository: any AppSettingRepository
     private let sharedDataStore: SharedDataStore
-    private let remoteAPI: any RemoteAPI
     private let database: SQLiteService
     private let databasePathFinding: (String?) -> String
     init(
         accountUsecase: any AccountUsecase,
         latestAppSettingRepository: any AppSettingRepository,
         sharedDataStore: SharedDataStore,
-        remoteAPI: any RemoteAPI,
         database: SQLiteService,
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
     ) {
         self.accountUsecase = accountUsecase
         self.latestAppSettingRepository = latestAppSettingRepository
         self.sharedDataStore = sharedDataStore
-        self.remoteAPI = remoteAPI
         self.database = database
         self.databasePathFinding = databasePathFinding
     }
@@ -61,7 +58,6 @@ extension ApplicationUsecaseImple {
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()
         let appearance = try await self.prepareLatestAppearanceSeting()
         
-        self.prepareRemoteAuthenticateCredentialIfNeed(latestLoginAccount?.auth)
         self.prepareDatabase(for: latestLoginAccount?.auth.uid)
         
         return .init(
@@ -86,10 +82,6 @@ extension ApplicationUsecaseImple {
             appearance
         )
         return appearance
-    }
-    
-    private func prepareRemoteAuthenticateCredentialIfNeed(_ auth: Auth?) {
-        self.remoteAPI.setup(credential: auth)
     }
     
     // TODO: 추후 db switching은 별도 객체 만들것임

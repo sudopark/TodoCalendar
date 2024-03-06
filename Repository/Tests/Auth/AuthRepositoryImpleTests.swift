@@ -81,15 +81,18 @@ extension AuthRepositoryImpleTests {
         
         // when
         let authBeforeSignIn = try? await repository.loadLatestSignInAuth()
+        let credentialBeforeSignIn = self.stubRemote.credential
         
         let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token")
         let _ = try? await repository.signIn(credential)
         
         let authAfterSignIn = try? await repository.loadLatestSignInAuth()
-        
+        let credentialAfterSignIn = self.stubRemote.credential
         // then
         XCTAssertNil(authBeforeSignIn)
+        XCTAssertNil(credentialBeforeSignIn)
         XCTAssertNotNil(authAfterSignIn)
+        XCTAssertNotNil(credentialAfterSignIn)
     }
 }
 
@@ -125,6 +128,11 @@ class StubFirebaseAuthService: FirebaseAuthService {
             resultHandler(.success(result))
         }
     }
+    
+    var didSignout: Bool?
+    func signOut() throws {
+        self.didSignout = true
+    }
 }
 
 
@@ -155,6 +163,10 @@ class SpyKeyChainStorage: KeyChainStorage, AuthStore, @unchecked Sendable {
     func remove(_ key: String) {
         self.storage[key] = nil
     }
+    
+    func removeAuth() {
+        self.storage.removeValue(forKey: "current_auth")
+    }
 }
 
 extension AuthRepositoryImpleTests {
@@ -163,12 +175,12 @@ extension AuthRepositoryImpleTests {
         return [
             .init(
                 method: .put,
-                endpoint: AccountAPIEndpoints.account,
+                endpoint: AccountAPIEndpoints.info,
                 header: ["Authorization": "Bearer access"],
                 resultJsonString: .success(
                 """
                 {
-                    "uid": "some",
+                    "id": "some",
                     "method": "some@email.com",
                     "method": "method",
                     "first_signed_in": 0,

@@ -99,7 +99,7 @@ extension OAuthAutenticatorTests {
             HolidayAPIEndpoints.supportCountry, method: .get, expecthasToken: false
         )
         parameterizeTest(
-            AccountAPIEndpoints.account, method: .put, expecthasToken: false
+            AccountAPIEndpoints.info, method: .put, expecthasToken: false
         )
         parameterizeTest(
             TodoAPIEndpoints.currentTodo, method: .get, expecthasToken: true
@@ -134,7 +134,7 @@ extension OAuthAutenticatorTests {
             HolidayAPIEndpoints.supportCountry, method: .get
         )
         parameterizeTest(
-            AccountAPIEndpoints.account, method: .put
+            AccountAPIEndpoints.info, method: .put
         )
         parameterizeTest(
             TodoAPIEndpoints.currentTodo, method: .get
@@ -190,10 +190,10 @@ extension OAuthAutenticatorTests {
             HolidayAPIEndpoints.supportCountry, .get, 401, isNeed: false
         )
         parameterizeTest(
-            AccountAPIEndpoints.account, .put, 401, isNeed: false
+            AccountAPIEndpoints.info, .put, 401, isNeed: false
         )
         parameterizeTest(
-            AccountAPIEndpoints.account, .put, 403, isNeed: false
+            AccountAPIEndpoints.info, .put, 403, isNeed: false
         )
         parameterizeTest(
             TodoAPIEndpoints.currentTodo, .get, 403, isNeed: false
@@ -232,6 +232,8 @@ extension OAuthAutenticatorTests {
             case .failure:
                 XCTAssertEqual(shouldFail, true)
                 XCTAssertEqual(self.spyListener?.didTokenRefreshFailed, true)
+                XCTAssertEqual(self.spyAuthStore.loadCurrentAuth()?.accessToken, nil)
+                XCTAssertEqual(self.stubFirebaseService.didSignout, true)
             default:
                 XCTFail("refresh failed without response")
             }

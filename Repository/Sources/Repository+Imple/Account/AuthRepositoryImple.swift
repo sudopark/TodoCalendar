@@ -54,6 +54,8 @@ public protocol FirebaseAuthService {
     func refreshToken(
         _ resultHandler: @escaping (Result<AuthRefreshResult, any Error>) -> Void
     )
+    
+    func signOut() throws
 }
 
 extension FirebaseAuth.Auth: FirebaseAuthService { 
@@ -130,6 +132,7 @@ extension AuthRepositoryImple {
         else {
             return nil
         }
+        self.remoteAPI.setup(credential: auth)
         return .init(auth: auth, info: infoMapper.info)
     }
     
@@ -165,12 +168,13 @@ extension AuthRepositoryImple {
         let info = try await self.loadAccountInfo(auth)
         self.authStore.updateAuth(auth)
         self.keyChainStorage.update(accountInfoKey, AccountInfoMapper(info: info))
+        self.remoteAPI.setup(credential: auth)
         return .init(auth: auth, info: info)
     }
     
     private func loadAccountInfo(_ auth: Domain.Auth) async throws -> AccountInfo {
         let infoDTO: AccountInfoMapper = try await self.remoteAPI.request(
-            .put, AccountAPIEndpoints.account,
+            .put, AccountAPIEndpoints.info,
             with: ["Authorization": "Bearer \(auth.accessToken)"]
         )
         return infoDTO.info

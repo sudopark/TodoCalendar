@@ -13,6 +13,7 @@ public protocol AuthStore: Sendable {
     
     func loadCurrentAuth() -> Auth?
     func updateAuth(_ auth: Auth)
+    func removeAuth()
 }
 
 
@@ -27,5 +28,9 @@ extension KeyChainStorageImple: AuthStore {
     public func updateAuth(_ auth: Auth) {
         let mapper = AuthMapper(auth: auth)
         self.update(self.key, mapper)
+    }
+    
+    public func removeAuth() {
+        self.remove(self.key)
     }
 }

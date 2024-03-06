@@ -9,15 +9,16 @@
 import Foundation
 
 
-public struct ServerErrorModel: @unchecked Sendable {
+public struct ServerErrorModel: @unchecked Sendable, Decodable {
     
-    public enum ErrorCode: String, Sendable {
+    public enum ErrorCode: String, Sendable, Decodable {
         case unauthorized = "Unauthorized"
     }
     
     var code: ErrorCode?
     var message: String?
-    var origin: Any?
+    var origin: String?
     
     public init() { }
+    
 }

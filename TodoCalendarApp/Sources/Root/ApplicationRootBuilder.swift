@@ -38,7 +38,6 @@ final class ApplicationRootBuilder {
                 environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
             ),
             sharedDataStore: Singleton.shared.sharedDataStore,
-            remoteAPI: remote,
             database: Singleton.shared.commonSqliteService
         )
         let rootViewModel = ApplicationRootViewModelImple(

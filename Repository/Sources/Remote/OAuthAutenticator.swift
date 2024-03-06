@@ -64,7 +64,7 @@ extension OAuthAutenticator {
     }
     
     private func isNeedToken(_ urlPath: String) -> Bool {
-        let accountPath = self.remoteEnvironment.path(AccountAPIEndpoints.account)
+        let accountPath = self.remoteEnvironment.path(AccountAPIEndpoints.info)
         if accountPath.map ({ urlPath.starts(with: $0) }) == true {
             return false
         } else if urlPath.starts(with: self.remoteEnvironment.calendarAPIHost) {
@@ -117,6 +117,8 @@ extension OAuthAutenticator {
                 completion(.success(.need(auth)))
                 
             case .failure(let error):
+                try? self.firebaseAuthService.signOut()
+                self.authStore.removeAuth()
                 self.listener?.oauthAutenticator(didRefreshFailed: error)
                 completion(.failure(error))
             }

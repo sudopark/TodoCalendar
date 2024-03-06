@@ -52,8 +52,9 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         
     }
     
+    var credential: Auth?
     func setup(credential auth: Auth?) {
-        
+        self.credential = auth
     }
     
     func request(
