@@ -42,10 +42,18 @@ public enum AccountAPIEndpoints: Endpoint {
 }
 
 public enum TodoAPIEndpoints: Endpoint {
+    case make
+    case todo(String)
     case currentTodo
     
     public var subPath: String {
         switch self {
+        case .make:
+            return "todo"
+            
+        case .todo(let id):
+            return "todo/\(id)"
+            
         case .currentTodo:
             return "current"
         }

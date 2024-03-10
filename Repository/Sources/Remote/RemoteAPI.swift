@@ -16,7 +16,7 @@ import Extensions
 public enum RemoteAPIMethod: String {
     case get
     case post
-    case path
+    case patch
     case delete
     case put
 }
@@ -132,7 +132,7 @@ extension RemoteAPIMethod {
         switch self {
         case .get: return .get
         case .post: return .post
-        case .path: return .patch
+        case .patch: return .patch
         case .delete: return .delete
         case .put: return .put
         }
@@ -140,7 +140,7 @@ extension RemoteAPIMethod {
     
     func encoding() -> any ParameterEncoding {
         switch self {
-        case .post, .path: return JSONEncoding.default
+        case .post, .patch: return JSONEncoding.default
         default: return URLEncoding(arrayEncoding: .noBrackets)
         }
     }

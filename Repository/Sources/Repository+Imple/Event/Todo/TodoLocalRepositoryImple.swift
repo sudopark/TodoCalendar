@@ -16,10 +16,10 @@ import Extensions
 
 public final class TodoLocalRepositoryImple: TodoEventRepository, Sendable {
     
-    private let localStorage: TodoLocalStorage
+    private let localStorage: any TodoLocalStorage
     private let environmentStorage: any EnvironmentStorage
     public init(
-        localStorage: TodoLocalStorage,
+        localStorage: any TodoLocalStorage,
         environmentStorage: any EnvironmentStorage
     ) {
         self.localStorage = localStorage
