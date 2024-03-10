@@ -19,7 +19,7 @@ import UnitTestHelpKit
 class TodoLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
-    var localStorage: TodoLocalStorage!
+    var localStorage: TodoLocalStorageImple!
     var spyEnvStorage: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {

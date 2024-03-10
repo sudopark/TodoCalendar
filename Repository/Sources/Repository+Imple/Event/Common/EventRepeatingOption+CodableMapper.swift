@@ -196,3 +196,36 @@ private struct EveryMonthDateSelectorMapper: Codable {
         }
     }
 }
+
+
+struct EventRepeatingMapper: Decodable {
+    
+    private enum CodingKeys: String, CodingKey {
+        case start
+        case end
+        case option
+    }
+    
+    let repeating: EventRepeating
+    init(repeating: EventRepeating) {
+        self.repeating = repeating
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        var repeating = EventRepeating(
+            repeatingStartTime: try container.decode(TimeInterval.self, forKey: .start),
+            repeatOption: try container.decode(EventRepeatingOptionCodableMapper.self, forKey: .option).option
+        )
+        repeating.repeatingEndTime = try? container.decode(TimeInterval.self, forKey: .end)
+        self.repeating = repeating
+    }
+    
+    func asJson() -> [String: Any] {
+        var sender: [String: Any] = [:]
+        sender["start"] = self.repeating.repeatingStartTime
+        sender["end"] = self.repeating.repeatingEndTime
+        sender["option"] = try? EventRepeatingOptionCodableMapper(option: self.repeating.repeatOption).asJson()
+        return sender
+    }
+}

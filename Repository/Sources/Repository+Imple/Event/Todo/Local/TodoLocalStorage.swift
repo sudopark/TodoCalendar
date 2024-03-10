@@ -13,7 +13,19 @@ import Domain
 import Extensions
 
 
-public final class TodoLocalStorage: Sendable {
+public protocol TodoLocalStorage: Sendable { 
+    
+    func loadTodoEvent(_ eventId: String) async throws -> TodoEvent
+    func loadCurrentTodoEvents() async throws -> [TodoEvent]
+    func loadTodoEvents(in range: Range<TimeInterval>) async throws -> [TodoEvent]
+    func saveTodoEvent(_ todo: TodoEvent) async throws
+    func updateTodoEvent(_ todo: TodoEvent) async throws
+    func updateTodoEvents(_ todos: [TodoEvent]) async throws
+    func saveDoneTodoEvent(_ doneEvent: DoneTodoEvent) async throws
+    func removeTodo(_ eventId: String) async throws
+}
+
+public final class TodoLocalStorageImple: TodoLocalStorage, Sendable {
     
     private let sqliteService: SQLiteService
     public init(sqliteService: SQLiteService) {
@@ -26,9 +38,9 @@ public final class TodoLocalStorage: Sendable {
 }
 
 
-extension TodoLocalStorage {
+extension TodoLocalStorageImple {
     
-    func loadTodoEvent(_ eventId: String) async throws -> TodoEvent {
+    public func loadTodoEvent(_ eventId: String) async throws -> TodoEvent {
         let timeQuery = Times.selectAll()
         let eventQuery = Todo.selectAll { $0.uuid == eventId }
         let todos = try await self.loadTodoEvents(timeQuery, eventQuery)
@@ -39,13 +51,13 @@ extension TodoLocalStorage {
         return todo
     }
     
-    func loadCurrentTodoEvents() async throws -> [TodoEvent] {
+    public func loadCurrentTodoEvents() async throws -> [TodoEvent] {
         let timeQuery = Times.selectAll { $0.timeType.isNull() }
         let eventQuery = Todo.selectAll()
         return try await self.loadTodoEvents(timeQuery, eventQuery)
     }
     
-    func loadTodoEvents(in range: Range<TimeInterval>) async throws -> [TodoEvent] {
+    public func loadTodoEvents(in range: Range<TimeInterval>) async throws -> [TodoEvent] {
         let timeQuery = Times.overlapQuery(with: range)
         let eventQuery = Todo.selectAll()
         return try await self.loadTodoEvents(timeQuery, eventQuery)
@@ -67,17 +79,17 @@ extension TodoLocalStorage {
     }
 }
 
-extension TodoLocalStorage {
+extension TodoLocalStorageImple {
     
-    func saveTodoEvent(_ todo: TodoEvent) async throws {
+    public func saveTodoEvent(_ todo: TodoEvent) async throws {
         try await self.updateTodoEvents([todo])
     }
     
-    func updateTodoEvent(_ todo: TodoEvent) async throws {
+    public func updateTodoEvent(_ todo: TodoEvent) async throws {
         try await self.updateTodoEvents([todo])
     }
     
-    func updateTodoEvents(_ todos: [TodoEvent]) async throws {
+    public func updateTodoEvents(_ todos: [TodoEvent]) async throws {
         try await self.sqliteService.async.run { db in
             let times = todos.map { Times.Entity($0.uuid, $0.time, $0.repeating) }
             try db.insert(Times.self, entities: times, shouldReplace: true)
@@ -87,7 +99,7 @@ extension TodoLocalStorage {
         }
     }
     
-    func saveDoneTodoEvent(_ doneEvent: DoneTodoEvent) async throws {
+    public func saveDoneTodoEvent(_ doneEvent: DoneTodoEvent) async throws {
         try await self.sqliteService.async.run { db in
             let time = Times.Entity(doneEvent.uuid, doneEvent.eventTime, nil)
             try db.insert(Times.self, entities: [time])
@@ -97,7 +109,7 @@ extension TodoLocalStorage {
         }
     }
     
-    func removeTodo(_ eventId: String) async throws {
+    public func removeTodo(_ eventId: String) async throws {
         try await self.sqliteService.async.run { db in
             let query = Times.delete().where { $0.eventId == eventId }
             try db.delete(Times.self, query: query)
