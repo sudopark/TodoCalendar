@@ -39,6 +39,8 @@ class TodoRemoteRepositoryImpleTests: BaseTestCase {
     }
 }
 
+// MARK: - make and update
+
 extension TodoRemoteRepositoryImpleTests {
     
     private var dummyRepeating: EventRepeating {
@@ -97,6 +99,82 @@ extension TodoRemoteRepositoryImpleTests {
     }
 }
 
+
+// MARK: - complete and replace
+
+extension TodoRemoteRepositoryImpleTests {
+    
+    // complete
+    func testRepository_completeTodo() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.completeTodo("origin")
+        
+        // then
+        XCTAssertEqual(result?.doneEvent.uuid, "done_id")
+        XCTAssertEqual(result?.doneEvent.name, "todo_name")
+        XCTAssertEqual(result?.doneEvent.originEventId, "origin")
+        XCTAssertEqual(result?.doneEvent.doneTime.timeIntervalSince1970, 100)
+        XCTAssertEqual(result?.doneEvent.eventTagId, .custom("custom_id"))
+        XCTAssertEqual(result?.doneEvent.eventTime, .allDay(0..<100, secondsFromGMT: 300))
+        XCTAssertEqual(result?.doneEvent.notificationOptions, [.allDay9AMBefore(seconds: 300)])
+        guard let next = result?.nextRepeatingTodoEvent 
+        else {
+            XCTFail("next not exists")
+            return
+        }
+        self.assertTodo(next)
+    }
+    
+    // complete 이후에 기존 todo 제거 + 신규 이벤트 저장 + 다음 이벤트 저장
+    func testRepository_whenAfterCompleteTodo_updateCache() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let _ = try? await repository.completeTodo("origin")
+        
+        // then
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "origin")
+        XCTAssertEqual(self.spyTodoCache.didSaveDoneTodoEvent?.uuid, "done_id")
+        XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent != nil, true)
+    }
+    
+    // replace
+    func testRepository_replaceRepeatingTodo() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.replaceRepeatingTodo(current: "origin", to: .init())
+        
+        // then
+        guard let new = result?.newTodoEvent, let next = result?.newTodoEvent
+        else {
+            XCTFail("new or next not exists")
+            return
+        }
+        self.assertTodo(new)
+        self.assertTodo(next)
+    }
+    
+    // replace 이후에 기존 todo 제거, 신규 todo 저장, 다음 이벤트 저장
+    func testRepository_whenAfterReplaceRepeatingTodo_updateCache() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let _ = try? await repository.replaceRepeatingTodo(current: "origin", to: .init())
+        
+        // then
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "origin")
+        XCTAssertEqual(self.spyTodoCache.didSavedTodoEvent != nil, true)
+        XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent != nil, true)
+    }
+}
+
 private extension TodoRemoteRepositoryImpleTests {
     
     private var dummySingleTodoResponse: String {
@@ -132,6 +210,30 @@ private extension TodoRemoteRepositoryImpleTests {
         """
     }
     
+    private var dummyDoneTodoResponse: String {
+        return """
+        {
+            "uuid": "done_id",
+            "name": "todo_name",
+            "event_tag_id": "custom_id",
+            "origin_event_id": "origin",
+            "done_at": 100,
+            "event_time": {
+                "time_type": "allday",
+                "period_start": 0,
+                "period_end": 100,
+                "seconds_from_gmt": 300
+            },
+            "notification_options": [
+                {
+                    "type_text": "allDay9AMBefore",
+                    "before_seconds": 300
+                }
+            ]
+        }
+        """
+    }
+    
     private var reponses: [StubRemoteAPI.Resopnse] {
         return [
             .init(
@@ -143,6 +245,30 @@ private extension TodoRemoteRepositoryImpleTests {
                 method: .patch,
                 endpoint: TodoAPIEndpoints.todo("new_uuid"),
                 resultJsonString: .success(self.dummySingleTodoResponse)
+            ),
+            .init(
+                method: .post,
+                endpoint: TodoAPIEndpoints.done("origin"),
+                resultJsonString: .success(
+                """
+                {
+                    "done": \(self.dummyDoneTodoResponse),
+                    "next_repeating": \(self.dummySingleTodoResponse)
+                }
+                """
+                )
+            ),
+            .init(
+                method: .post,
+                endpoint: TodoAPIEndpoints.replaceRepeating("origin"),
+                resultJsonString: .success(
+                """
+                {
+                    "new_todo": \(self.dummySingleTodoResponse),
+                    "next_repeating": \(self.dummySingleTodoResponse)
+                }
+                """
+                )
             )
         ]
     }
@@ -177,11 +303,13 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
         throw RuntimeError("not implemented")
     }
     
+    var didSaveDoneTodoEvent: DoneTodoEvent?
     func saveDoneTodoEvent(_ doneEvent: DoneTodoEvent) async throws {
-        throw RuntimeError("not implemented")
+        self.didSaveDoneTodoEvent = doneEvent
     }
     
+    var didRemoveTodoId: String?
     func removeTodo(_ eventId: String) async throws {
-        throw RuntimeError("not implemented")
+        self.didRemoveTodoId = eventId
     }
 }

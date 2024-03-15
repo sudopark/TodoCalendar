@@ -36,7 +36,9 @@ extension TodoRemoteRepositoryImple {
         let endpoint = TodoAPIEndpoints.make
         let payload = params.asJson()
         let mapper: TodoEventMapper = try await self.remote.request(
-            .post, endpoint, parameters: payload
+            .post, 
+            endpoint, 
+            parameters: payload
         )
         let newTodo = mapper.todo
         try? await self.cacheStorage.saveTodoEvent(newTodo)
@@ -47,7 +49,9 @@ extension TodoRemoteRepositoryImple {
         let endpoint = TodoAPIEndpoints.todo(eventId)
         let payload = params.asJson()
         let mapper: TodoEventMapper = try await self.remote.request(
-            .patch, endpoint, parameters: payload
+            .patch, 
+            endpoint, 
+            parameters: payload
         )
         let updated = mapper.todo
         try? await self.cacheStorage.updateTodoEvent(updated)
@@ -60,14 +64,43 @@ extension TodoRemoteRepositoryImple {
 extension TodoRemoteRepositoryImple {
     
     public func completeTodo(_ eventId: String) async throws -> CompleteTodoResult {
-        throw RuntimeError("not implemented")
+        
+        let endpoint = TodoAPIEndpoints.done(eventId)
+        let mapper: CompleteTodoResultMapper = try await remote.request(
+            .post,
+            endpoint
+        )
+        let result = mapper.result
+        
+        // update cache
+        try? await cacheStorage.removeTodo(eventId)
+        try? await cacheStorage.saveDoneTodoEvent(result.doneEvent)
+        if let next = result.nextRepeatingTodoEvent {
+            try? await cacheStorage.updateTodoEvent(next)
+        }
+        return result
     }
     
     public func replaceRepeatingTodo(
         current eventId: String,
         to newParams: TodoMakeParams
     ) async throws -> ReplaceRepeatingTodoEventResult {
-        throw RuntimeError("not implemented")
+        
+        let endpoint = TodoAPIEndpoints.replaceRepeating(eventId)
+        let mapper: ReplaceRepeatingTodoEventResultMapper = try await remote.request(
+            .post,
+            endpoint,
+            parameters: newParams.asJson()
+        )
+        let result = mapper.result
+        
+        // update cache
+        try? await cacheStorage.removeTodo(eventId)
+        try? await cacheStorage.saveTodoEvent(result.newTodoEvent)
+        if let next = result.nextRepeatingTodoEvent {
+            try await cacheStorage.updateTodoEvent(next)
+        }
+        return result
     }
 }
 
