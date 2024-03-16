@@ -16,6 +16,7 @@ import UnitTestHelpKit
 
 @testable import Repository
 
+private let refTime = Date().timeIntervalSince1970
 
 class TodoRemoteRepositoryImpleTests: BaseTestCase {
     
@@ -46,7 +47,7 @@ extension TodoRemoteRepositoryImpleTests {
     private var dummyRepeating: EventRepeating {
         return EventRepeating(
             repeatingStartTime: 300,
-            repeatOption: EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!)
+            repeatOption: EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!) |> \.dayOfWeeks .~ [.sunday]
         )
         |> \.repeatingEndTime .~ 400
         
@@ -91,10 +92,10 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertEqual(todo.uuid, "new_uuid")
         XCTAssertEqual(todo.name, "todo_name")
         XCTAssertEqual(todo.eventTagId, .custom("custom_id"))
-        XCTAssertEqual(todo.time, .allDay(0..<100, secondsFromGMT: 300))
+        XCTAssertEqual(todo.time, .allDay(refTime+100..<refTime+200, secondsFromGMT: 300))
         XCTAssertEqual(todo.repeating?.repeatingStartTime, 300)
         XCTAssertEqual(todo.repeating?.repeatOption.compareHash, self.dummyRepeating.repeatOption.compareHash)
-        XCTAssertEqual(todo.repeating?.repeatingEndTime, 400)
+        XCTAssertEqual(todo.repeating?.repeatingEndTime, refTime+3600*24*100)
         XCTAssertEqual(todo.notificationOptions, [.allDay9AMBefore(seconds: 300)])
     }
 }
@@ -126,6 +127,11 @@ extension TodoRemoteRepositoryImpleTests {
             return
         }
         self.assertTodo(next)
+        let params = self.stubRemote.didRequestedParams ?? [:]
+        let nextTime = params["next_event_time"] as? [String: Any]
+        let origin = params["origin"] as? [String: Any]
+        XCTAssertNotNil(nextTime)
+        XCTAssertNotNil(origin)
     }
     
     // complete 이후에 기존 todo 제거 + 신규 이벤트 저장 + 다음 이벤트 저장
@@ -158,6 +164,11 @@ extension TodoRemoteRepositoryImpleTests {
         }
         self.assertTodo(new)
         self.assertTodo(next)
+        let params = self.stubRemote.didRequestedParams ?? [:]
+        let nextTime = params["origin_next_event_time"] as? [String: Any]
+        let newPayload = params["new"] as? [String: Any]
+        XCTAssertNotNil(nextTime)
+        XCTAssertNotNil(newPayload)
     }
     
     // replace 이후에 기존 todo 제거, 신규 todo 저장, 다음 이벤트 저장
@@ -185,18 +196,18 @@ private extension TodoRemoteRepositoryImpleTests {
             "event_tag_id": "custom_id",
             "event_time": {
                 "time_type": "allday",
-                "period_start": 0,
-                "period_end": 100,
+                "period_start": \(refTime+100),
+                "period_end": \(refTime+200),
                 "seconds_from_gmt": 300
             },
             "repeating": {
                 "start": 300,
-                "end": 400,
+                "end": \(refTime+3600*24*100),
                 "option": {
 
                     "optionType": "every_week",
                     "interval": 1,
-                    "dayOfWeek": [],
+                    "dayOfWeek": [1],
                     "timeZone": "Asia/Seoul"
                 }
             },
@@ -236,6 +247,11 @@ private extension TodoRemoteRepositoryImpleTests {
     
     private var reponses: [StubRemoteAPI.Resopnse] {
         return [
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.todo("origin"),
+                resultJsonString: .success(self.dummySingleTodoResponse)
+            ),
             .init(
                 method:.post,
                 endpoint: TodoAPIEndpoints.make,

@@ -65,10 +65,15 @@ extension TodoRemoteRepositoryImple {
     
     public func completeTodo(_ eventId: String) async throws -> CompleteTodoResult {
         
+        let origin = try await self.loadTodoEvent(eventId)
+        let nextTime = self.findNextRepeatingEvent(origin)
+        
+        let payload = DoneTodoEventParams(origin, nextTime)
         let endpoint = TodoAPIEndpoints.done(eventId)
         let mapper: CompleteTodoResultMapper = try await remote.request(
             .post,
-            endpoint
+            endpoint,
+            parameters: payload.asJson()
         )
         let result = mapper.result
         
@@ -86,11 +91,15 @@ extension TodoRemoteRepositoryImple {
         to newParams: TodoMakeParams
     ) async throws -> ReplaceRepeatingTodoEventResult {
         
+        let origin = try await self.loadTodoEvent(eventId)
+        let nextTime = self.findNextRepeatingEvent(origin)
+        
+        let payload = ReplaceRepeatingTodoEventParams(newParams, nextTime)
         let endpoint = TodoAPIEndpoints.replaceRepeating(eventId)
         let mapper: ReplaceRepeatingTodoEventResultMapper = try await remote.request(
             .post,
             endpoint,
-            parameters: newParams.asJson()
+            parameters: payload.asJson()
         )
         let result = mapper.result
         
@@ -101,6 +110,14 @@ extension TodoRemoteRepositoryImple {
             try await cacheStorage.updateTodoEvent(next)
         }
         return result
+    }
+    
+    private func findNextRepeatingEvent(_ origin: TodoEvent) -> EventTime? {
+        guard let repeating = origin.repeating,
+              let time = origin.time
+        else { return nil }
+        
+        return EventRepeatTimeEnumerator(repeating.repeatOption)?.nextEventTime(from: time, until: repeating.repeatingEndTime)
     }
 }
 
@@ -129,5 +146,14 @@ extension TodoRemoteRepositoryImple {
     
     public func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, Error> {
         return Empty().eraseToAnyPublisher()
+    }
+    
+    private func loadTodoEvent(_ id: String) async throws -> TodoEvent {
+        let endpoint = TodoAPIEndpoints.todo(id)
+        let mapper: TodoEventMapper = try await self.remote.request(
+            .get,
+            endpoint
+        )
+        return mapper.todo
     }
 }
