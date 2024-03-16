@@ -47,6 +47,7 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         calendarAPIHost: "dummy_calendar_api_host"
     )
     var didRequestedPath: String?
+    var didRequestedParams: [String: Any]?
     
     func attach(listener: OAuthAutenticatorTokenRefreshListener) {
         
@@ -69,6 +70,7 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
             throw RuntimeError("invalid params")
         }
         self.didRequestedPath = path
+        self.didRequestedParams = parameters
         
         guard let response = self.findResponse(method: method, path: path, header: header, parameters: parameters)
         else {

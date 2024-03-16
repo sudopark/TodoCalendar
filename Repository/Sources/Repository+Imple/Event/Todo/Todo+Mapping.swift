@@ -49,6 +49,43 @@ extension TodoEditParams {
     }
 }
 
+struct DoneTodoEventParams {
+    private let origin: TodoEvent
+    private let nextTime: EventTime?
+    
+    init(_ origin: TodoEvent, _ nextTime: EventTime?) {
+        self.origin = origin
+        self.nextTime = nextTime
+    }
+    
+    func asJson() -> [String: Any] {
+        let params = TodoMakeParams()
+            |> \.name .~ self.origin.name
+            |> \.eventTagId .~ self.origin.eventTagId
+            |> \.time .~ self.origin.time
+            |> \.notificationOptions .~ pure(self.origin.notificationOptions)
+        
+        return ["origin": params.asJson() ]
+            |> key("next_event_time") .~ self.nextTime.map { EventTimeMapper(time: $0).asJson() }
+    }
+}
+
+struct ReplaceRepeatingTodoEventParams {
+    private let newParams: TodoMakeParams
+    private let nextTime: EventTime?
+    
+    init(_ newParams: TodoMakeParams, _ nextTime: EventTime?) {
+        self.newParams = newParams
+        self.nextTime = nextTime
+    }
+    
+    func asJson() -> [String: Any] {
+        let payload: [String: Any] = ["new": self.newParams.asJson()]
+        return payload
+        |> key("origin_next_event_time") .~ self.nextTime.map { EventTimeMapper(time: $0).asJson() }
+    }
+}
+
 private enum TodoCodingKeys: String, CodingKey {
     case uuid
     case name
