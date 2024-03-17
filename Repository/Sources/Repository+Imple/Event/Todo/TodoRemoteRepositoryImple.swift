@@ -126,7 +126,41 @@ extension TodoRemoteRepositoryImple {
 extension TodoRemoteRepositoryImple {
     
     public func removeTodo(_ eventId: String, onlyThisTime: Bool) async throws -> RemoveTodoResult {
-        throw RuntimeError("not implemented")
+        if onlyThisTime {
+            return try await self.replaceCurrentTodoToNext(eventId)
+        } else {
+            return try await self.removeTodo(eventId: eventId)
+        }
+    }
+    
+    private func replaceCurrentTodoToNext(_ eventid: String) async throws -> RemoveTodoResult {
+        let origin = try await self.loadTodoEvent(eventid)
+        guard let nextEventTime = self.findNextRepeatingEvent(origin)
+        else{
+            return try await self.removeTodo(eventId: eventid)
+        }
+        let params = TodoEditParams() |> \.time .~ nextEventTime
+        let endpoint = TodoAPIEndpoints.todo(eventid)
+        let mapper: TodoEventMapper = try await self.remote.request(
+            .patch,
+            endpoint,
+            parameters: params.asJson()
+        )
+        
+        let updated = mapper.todo
+        try? await self.cacheStorage.updateTodoEvent(updated)
+        return .init()
+            |> \.nextRepeatingTodo .~ updated
+    }
+    
+    private func removeTodo(eventId: String) async throws -> RemoveTodoResult {
+        let endpoint = TodoAPIEndpoints.todo(eventId)
+        let _ : RemoveTodoResultMapper = try await self.remote.request(
+            .delete,
+            endpoint
+        )
+        try? await self.cacheStorage.removeTodo(eventId)
+        return .init()
     }
 }
 

@@ -174,3 +174,18 @@ struct ReplaceRepeatingTodoEventResultMapper: Decodable {
         |> \.nextRepeatingTodoEvent .~ (try? container.decode(TodoEventMapper.self, forKey: .nextRepeating).todo)
     }
 }
+
+
+struct RemoveTodoResultMapper: Decodable {
+    
+    let status: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case status
+    }
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.status = try container.decode(String.self, forKey: .status)
+    }
+}

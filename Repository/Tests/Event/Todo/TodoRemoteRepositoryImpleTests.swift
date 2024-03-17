@@ -186,6 +186,68 @@ extension TodoRemoteRepositoryImpleTests {
     }
 }
 
+// TOOD: remove
+
+extension TodoRemoteRepositoryImpleTests {
+    
+    // 이벤트 삭제
+    func testRepository_removeTodo() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.removeTodo("repeating-todo", onlyThisTime: false)
+        
+        // then
+        XCTAssertNotNil(result)
+        XCTAssertNil(result?.nextRepeatingTodo)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "repeating-todo")
+    }
+    
+    // 반복 이벤트 이번만 삭제시 다음 이벤트 있으면 이벤트 시간 다음으로 업데이트
+    func testRepository_whenRemoveRepeatingTodoOnlyThisTime_updateNextEventTime() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.removeTodo("repeating-todo", onlyThisTime: true)
+        
+        // then
+        XCTAssertNotNil(result)
+        XCTAssertNotNil(result?.nextRepeatingTodo)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, nil)
+        XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, result?.nextRepeatingTodo?.uuid)
+    }
+    
+    // 반복 이벤트 이번만 삭제시 다음 이벤트 없으면 그냥 삭제만
+    func testRepository_whenRemoveRepeatingTodoAndHasNoNextOnlyThistime_justRemove() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.removeTodo("no-next-repeating-todo", onlyThisTime: true)
+        
+        // then
+        XCTAssertNotNil(result)
+        XCTAssertNil(result?.nextRepeatingTodo)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "no-next-repeating-todo")
+    }
+    
+    // 반복 안하는 이벤트 이번만 삭제 요청시 다음 이벤트 시간 없으니 그냥 삭제
+    func testRepository_whenRemoveNotRepeatingTodoOnlyThistime_justRemove() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try? await repository.removeTodo("not-repeating-todo", onlyThisTime: true)
+        
+        // then
+        XCTAssertNotNil(result)
+        XCTAssertNil(result?.nextRepeatingTodo)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "not-repeating-todo")
+    }
+}
+
 private extension TodoRemoteRepositoryImpleTests {
     
     private var dummySingleTodoResponse: String {
@@ -245,12 +307,64 @@ private extension TodoRemoteRepositoryImpleTests {
         """
     }
     
+    private var dummyNoRepeatingTodoResponse: String {
+        return """
+        {
+            "uuid": "new_uuid",
+            "name": "todo_name",
+            "event_tag_id": "custom_id"
+        }
+        """
+    }
+    
+    private var dummyNoNextRepeatingTimeTodoResponse: String {
+        return """
+        {
+            "uuid": "new_uuid",
+            "name": "todo_name",
+            "event_tag_id": "custom_id",
+            "event_time": {
+                "time_type": "allday",
+                "period_start": \(refTime+100),
+                "period_end": \(refTime+200),
+                "seconds_from_gmt": 300
+            },
+            "repeating": {
+                "start": 300,
+                "end": \(refTime+201),
+                "option": {
+
+                    "optionType": "every_week",
+                    "interval": 1,
+                    "dayOfWeek": [1],
+                    "timeZone": "Asia/Seoul"
+                }
+            }
+        }
+        """
+    }
+    
     private var reponses: [StubRemoteAPI.Resopnse] {
         return [
             .init(
                 method: .get,
                 endpoint: TodoAPIEndpoints.todo("origin"),
                 resultJsonString: .success(self.dummySingleTodoResponse)
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.todo("repeating-todo"),
+                resultJsonString: .success(self.dummySingleTodoResponse)
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.todo("not-repeating-todo"),
+                resultJsonString: .success(self.dummyNoRepeatingTodoResponse)
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.todo("no-next-repeating-todo"),
+                resultJsonString: .success(self.dummyNoNextRepeatingTimeTodoResponse)
             ),
             .init(
                 method:.post,
@@ -260,6 +374,11 @@ private extension TodoRemoteRepositoryImpleTests {
             .init(
                 method: .patch,
                 endpoint: TodoAPIEndpoints.todo("new_uuid"),
+                resultJsonString: .success(self.dummySingleTodoResponse)
+            ),
+            .init(
+                method: .patch,
+                endpoint: TodoAPIEndpoints.todo("repeating-todo"),
                 resultJsonString: .success(self.dummySingleTodoResponse)
             ),
             .init(
@@ -285,6 +404,21 @@ private extension TodoRemoteRepositoryImpleTests {
                 }
                 """
                 )
+            ),
+            .init(
+                method: .delete,
+                endpoint: TodoAPIEndpoints.todo("repeating-todo"),
+                resultJsonString: .success("{ \"status\": \"ok\" }")
+            ),
+            .init(
+                method: .delete,
+                endpoint: TodoAPIEndpoints.todo("not-repeating-todo"),
+                resultJsonString: .success("{ \"status\": \"ok\" }")
+            ),
+            .init(
+                method: .delete,
+                endpoint: TodoAPIEndpoints.todo("no-next-repeating-todo"),
+                resultJsonString: .success("{ \"status\": \"ok\" }")
             )
         ]
     }
