@@ -8,16 +8,18 @@
 
 import Foundation
 import Combine
+import CombineExt
 import Prelude
 import Optics
 import Domain
 import Extensions
 
 
-public final class TodoRemoteRepositoryImple: TodoEventRepository, Sendable {
+public final class TodoRemoteRepositoryImple: TodoEventRepository, @unchecked Sendable {
     
     private let remote: any RemoteAPI
     private let cacheStorage: any TodoLocalStorage
+    private var cancellables: Set<AnyCancellable> = []
     
     public init(
         remote: any RemoteAPI,
@@ -168,18 +170,49 @@ extension TodoRemoteRepositoryImple {
 
 extension TodoRemoteRepositoryImple {
     
+    private typealias CacheAndRefreshed = ([TodoEvent]?, [TodoEvent]?)
+    
     public func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], Error> {
-        return Empty().eraseToAnyPublisher()
+        
+        return self.loadTodosWithReplaceCached { [weak self] in
+            return try await self?.cacheStorage.loadCurrentTodoEvents()
+        } thenFromRemote: { [weak self] in
+            let mappers: [TodoEventMapper]? = try await self?.remote.request(
+                .get, 
+                TodoAPIEndpoints.currentTodo
+            )
+            return mappers?.map { $0.todo }
+        }
     }
     
     public func loadTodoEvents(
         in range: Range<TimeInterval>
     ) -> AnyPublisher<[TodoEvent], Error> {
-        return Empty().eraseToAnyPublisher()
+        
+        return self.loadTodosWithReplaceCached { [weak self] in
+            return try await self?.cacheStorage.loadTodoEvents(in: range)
+        } thenFromRemote: { [weak self] in
+            let payload: [String: Any] = ["lower": range.lowerBound, "upper": range.upperBound]
+            let mappers: [TodoEventMapper]? = try await self?.remote.request(
+                .get, 
+                TodoAPIEndpoints.todos,
+                parameters: payload
+            )
+            return mappers?.map { $0.todo }
+        }
     }
     
+    
     public func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, Error> {
-        return Empty().eraseToAnyPublisher()
+        return self.loadTodosWithReplaceCached { [weak self] in
+            let cache = try await self?.cacheStorage.loadTodoEvent(id)
+            return cache.map { [$0] }
+        } thenFromRemote: { [weak self] in
+            let refreshed = try await self?.loadTodoEvent(id)
+            return refreshed.map { [$0] }
+        }
+        .compactMap { $0.first }
+        .eraseToAnyPublisher()
     }
     
     private func loadTodoEvent(_ id: String) async throws -> TodoEvent {
@@ -189,5 +222,43 @@ extension TodoRemoteRepositoryImple {
             endpoint
         )
         return mapper.todo
+    }
+    
+    private func loadTodosWithReplaceCached(
+        startWithCached cacheOperation: @Sendable @escaping () async throws -> [TodoEvent]?,
+        thenFromRemote remoteOperation: @Sendable @escaping () async throws -> [TodoEvent]?
+    ) -> AnyPublisher<[TodoEvent], any Error> {
+        
+        return AnyPublisher<[TodoEvent]?, any Error>.create { subscriber in
+            let task = Task { [weak self] in
+                let cached = try? await cacheOperation()
+                if let cached {
+                    subscriber.send(cached)
+                }
+                do {
+                    let refreshed = try await remoteOperation()
+                    await self?.replaceCached(cached, refreshed)
+                    subscriber.send(refreshed)
+                    subscriber.send(completion: .finished)
+                } catch {
+                    subscriber.send(completion: .failure(error))
+                }
+            }
+            return AnyCancellable { task.cancel() }
+        }
+        .compactMap { $0 }
+        .eraseToAnyPublisher()
+    }
+    
+    private func replaceCached(
+        _ cached: [TodoEvent]?,
+        _ refreshed: [TodoEvent]?
+    ) async {
+        if let cached {
+            try? await self.cacheStorage.removeTodos(cached.map { $0.uuid })
+        }
+        if let refreshed {
+            try? await self.cacheStorage.updateTodoEvents(refreshed)
+        }
     }
 }

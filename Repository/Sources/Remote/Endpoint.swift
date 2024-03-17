@@ -44,6 +44,7 @@ public enum AccountAPIEndpoints: Endpoint {
 public enum TodoAPIEndpoints: Endpoint {
     case make
     case todo(String)
+    case todos
     case currentTodo
     case done(String)
     case replaceRepeating(String)
@@ -56,8 +57,11 @@ public enum TodoAPIEndpoints: Endpoint {
         case .todo(let id):
             return "todo/\(id)"
             
+        case .todos:
+            return ""
+            
         case .currentTodo:
-            return "current"
+            return ""
             
         case .done(let id):
             return "todo/\(id)/complete"
@@ -87,7 +91,9 @@ public struct RemoteEnvironment: Sendable {
         case let account as AccountAPIEndpoints:
             return "\(calendarAPIHost)/accounts/\(account.subPath)"
         case let todo as TodoAPIEndpoints:
-            return "\(calendarAPIHost)/toods/\(todo.subPath)"
+            let prefix = "\(calendarAPIHost)/todos"
+            let subpath = todo.subPath
+            return subpath.isEmpty ? prefix : "\(prefix)/\(subpath)"
         default: return nil
         }
     }

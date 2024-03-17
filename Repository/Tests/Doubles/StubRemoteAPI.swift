@@ -58,12 +58,19 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         self.credential = auth
     }
     
+    var shouldFailRequest: Bool = false
+    
     func request(
         _ method: RemoteAPIMethod,
         _ endpoint: any Endpoint,
         with header: [String : String]?,
         parameters: [String : Any]
     ) async throws -> Data {
+        
+        guard self.shouldFailRequest == false
+        else {
+            throw RuntimeError("failed")
+        }
         
         guard let path = environment.path(endpoint)
         else {

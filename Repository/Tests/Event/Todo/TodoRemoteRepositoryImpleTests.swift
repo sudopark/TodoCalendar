@@ -18,22 +18,28 @@ import UnitTestHelpKit
 
 private let refTime = Date().timeIntervalSince1970
 
-class TodoRemoteRepositoryImpleTests: BaseTestCase {
+class TodoRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
     
     private var stubRemote: StubRemoteAPI!
     private var spyTodoCache: SpyTodoLocalStorage!
+    var cancelBag: Set<AnyCancellable>!
     
     override func setUpWithError() throws {
         self.stubRemote = .init(responses: self.reponses)
         self.spyTodoCache = .init()
+        self.cancelBag = .init()
     }
     
     override func tearDownWithError() throws {
         self.stubRemote = nil
         self.spyTodoCache = nil
+        self.cancelBag = nil
     }
     
-    private func makeRepository() -> TodoRemoteRepositoryImple {
+    private func makeRepository(
+        stubbing: ((SpyTodoLocalStorage, StubRemoteAPI) -> Void)? = nil
+    ) -> TodoRemoteRepositoryImple {
+        stubbing?(self.spyTodoCache, self.stubRemote)
         return TodoRemoteRepositoryImple(
             remote: self.stubRemote, cacheStorage: self.spyTodoCache
         )
@@ -90,7 +96,7 @@ extension TodoRemoteRepositoryImpleTests {
     
     private func assertTodo(_ todo: TodoEvent) {
         XCTAssertEqual(todo.uuid, "new_uuid")
-        XCTAssertEqual(todo.name, "todo_name")
+        XCTAssertEqual(todo.name, "todo_refreshed")
         XCTAssertEqual(todo.eventTagId, .custom("custom_id"))
         XCTAssertEqual(todo.time, .allDay(refTime+100..<refTime+200, secondsFromGMT: 300))
         XCTAssertEqual(todo.repeating?.repeatingStartTime, 300)
@@ -248,13 +254,254 @@ extension TodoRemoteRepositoryImpleTests {
     }
 }
 
+// MARK: - load
+
+extension TodoRemoteRepositoryImpleTests {
+    
+    // load current todos
+    func testRepository_whenLoadCurrentTodo_loadCacheAndRemote() {
+        // given
+        let expect = expectation(description: "load current todos")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository()
+        
+        // when
+        let loading = repository.loadCurrentTodoEvents()
+        let todoLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        let idLists = todoLists.map { ts in ts.map { $0.uuid } }
+        XCTAssertEqual(idLists, [
+            ["new_uuid", "should_removed"],
+            ["new_uuid"]
+        ])
+    }
+    
+    // after load current todos updated cached + remove not exists at refreshed
+    func testRepository_whenAfterLoadCurrentTodo_replaceCache() {
+        // given
+        let expect = expectation(description: "remove and update cache")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository()
+        self.spyTodoCache.didUpdateTodosCallback = { expect.fulfill() }
+        self.spyTodoCache.didTodosRemovedCallback = { expect.fulfill() }
+        
+        // when
+        repository.loadCurrentTodoEvents()
+            .sink(receiveValue: { _ in })
+            .store(in: &self.cancelBag)
+        self.wait(for: [expect], timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(
+            self.spyTodoCache.didUpdatedTodos?.map { $0.name },
+            ["todo_refreshed"]
+        )
+        XCTAssertEqual(
+            self.spyTodoCache.didRemovedTodoIds,
+            ["new_uuid", "should_removed"]
+        )
+    }
+    
+    // load current todos when load cached failed + ignore cache
+    func testRepository_whenLoadCurrentTodoAndLoadCacheFail_ignore() {
+        // given
+        let expect = expectation(description: "load current todos when load cached failed + ignore cache")
+        let repository = self.makeRepository { 
+            cache, _ in cache.shouldLoadCurrentTodoFail = true
+        }
+        
+        // when
+        let loading = repository.loadCurrentTodoEvents()
+        let todoLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        let nameLists = todoLists.map { ts in ts.map { $0.name } }
+        XCTAssertEqual(nameLists, [
+            ["todo_refreshed"]
+        ])
+    }
+    
+    // load current todos when load remote failed + faild
+    func testRepository_whenLoadCurrentTodoAndLoadFromRemoteFail_shouldFail() {
+        // given
+        let expect = expectation(description: "load current todos when load remote failed + faild")
+        let repository = self.makeRepository { _, remote in
+            remote.shouldFailRequest = true
+        }
+        
+        // when
+        let loading = repository.loadCurrentTodoEvents()
+        let error = self.waitError(expect, for: loading)
+        
+        // then
+        XCTAssertNotNil(error)
+    }
+    
+    // load todos
+    func testRepository_whenLoadTodosInRange_loadCacheAndRemote() {
+        // given
+        let expect = expectation(description: "load todos")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository()
+        
+        // when
+        let loading = repository.loadTodoEvents(in: 0..<100)
+        let todoLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        let idLists = todoLists.map { ts in ts.map { $0.uuid } }
+        XCTAssertEqual(idLists, [
+            ["new_uuid", "should_removed"],
+            ["new_uuid"]
+        ])
+    }
+    
+    // after load todos updated cached + remove not exists at refreshed
+    func testRepository_whenAfterLoadTodosInRange_replaceCache() {
+        // given
+        let expect = expectation(description: "remove and update cache")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository()
+        self.spyTodoCache.didUpdateTodosCallback = { expect.fulfill() }
+        self.spyTodoCache.didTodosRemovedCallback = { expect.fulfill() }
+        
+        // when
+        repository.loadTodoEvents(in: 0..<100)
+            .sink(receiveValue: { _ in })
+            .store(in: &self.cancelBag)
+        self.wait(for: [expect], timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(
+            self.spyTodoCache.didUpdatedTodos?.map { $0.name },
+            ["todo_refreshed"]
+        )
+        XCTAssertEqual(
+            self.spyTodoCache.didRemovedTodoIds,
+            ["new_uuid", "should_removed"]
+        )
+    }
+    
+    // load todos when load cached failed + ignore cache
+    func testRepository_whenLoadTodosInRangeAndLoadCacheFail_ignore() {
+        // given
+        let expect = expectation(description: "load todos when load cached failed + ignore cache")
+        let repository = self.makeRepository {
+            cache, _ in cache.shouldFailLoadTodosInRange = true
+        }
+        
+        // when
+        let loading = repository.loadTodoEvents(in: 0..<100)
+        let todoLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        let nameLists = todoLists.map { ts in ts.map { $0.name } }
+        XCTAssertEqual(nameLists, [
+            ["todo_refreshed"]
+        ])
+    }
+    
+    // load todos when load remote failed + faild
+    func testRepository_whenLoadTodosInRangeAndLoadFromRemoteFail_shouldFail() {
+        // given
+        let expect = expectation(description: "load todos when load remote failed + faild")
+        let repository = self.makeRepository { _, remote in
+            remote.shouldFailRequest = true
+        }
+        
+        // when
+        let loading = repository.loadTodoEvents(in: 0..<100)
+        let error = self.waitError(expect, for: loading)
+        
+        // then
+        XCTAssertNotNil(error)
+    }
+    
+    // load todo
+    func testRepository_whenLoadTodos_loadCacheAndRemote() {
+        // given
+        let expect = expectation(description: "load todo")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository()
+        
+        // when
+        let loading = repository.todoEvent("origin")
+        let todos = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        let names = todos.map { $0.name }
+        XCTAssertEqual(names, [ "cached", "todo_refreshed"])
+    }
+    
+    // after load todo updated cached + remove not exists at refreshed
+    func testRepository_whenAfterLoadTodo_replaceCache() {
+        // given
+        let expect = expectation(description: "remove and update cache")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository()
+        self.spyTodoCache.didUpdateTodosCallback = { expect.fulfill() }
+        self.spyTodoCache.didTodosRemovedCallback = { expect.fulfill() }
+        
+        // when
+        repository.todoEvent("origin")
+            .sink(receiveValue: { _ in })
+            .store(in: &self.cancelBag)
+        self.wait(for: [expect], timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(
+            self.spyTodoCache.didUpdatedTodos?.map { $0.name },
+            ["todo_refreshed"]
+        )
+        XCTAssertEqual(
+            self.spyTodoCache.didRemovedTodoIds,
+            ["origin"]
+        )
+    }
+    
+    // load todo when load cached failed + ignore cache
+    func testRepository_whenLoadTodoAndLoadCacheFail_ignore() {
+        // given
+        let expect = expectation(description: "load todo when load cached failed + ignore cache")
+        let repository = self.makeRepository {
+            cache, _ in cache.shouldFailLoadTodo = true
+        }
+        
+        // when
+        let loading = repository.todoEvent("origin")
+        let todos = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        let nameLists = todos.map { $0.name }
+        XCTAssertEqual(nameLists, ["todo_refreshed"])
+    }
+    
+    // load todo when load remote failed + faild
+    func testRepository_whenLoadTodosAndLoadFromRemoteFail_shouldFail() {
+        // given
+        let expect = expectation(description: "load todo when load remote failed + faild")
+        let repository = self.makeRepository { _, remote in
+            remote.shouldFailRequest = true
+        }
+        
+        // when
+        let loading = repository.todoEvent("origin")
+        let error = self.waitError(expect, for: loading)
+        
+        // then
+        XCTAssertNotNil(error)
+    }
+}
+ 
+
 private extension TodoRemoteRepositoryImpleTests {
     
     private var dummySingleTodoResponse: String {
         return """
         {
             "uuid": "new_uuid",
-            "name": "todo_name",
+            "name": "todo_refreshed",
             "event_tag_id": "custom_id",
             "event_time": {
                 "time_type": "allday",
@@ -419,6 +666,24 @@ private extension TodoRemoteRepositoryImpleTests {
                 method: .delete,
                 endpoint: TodoAPIEndpoints.todo("no-next-repeating-todo"),
                 resultJsonString: .success("{ \"status\": \"ok\" }")
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.currentTodo,
+                resultJsonString: .success(
+                    """
+                    [ \(self.dummySingleTodoResponse) ]
+                    """
+                )
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.todos,
+                resultJsonString: .success(
+                    """
+                    [ \(self.dummySingleTodoResponse) ]
+                    """
+                )
             )
         ]
     }
@@ -427,16 +692,36 @@ private extension TodoRemoteRepositoryImpleTests {
 
 private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     
+    var shouldFailLoadTodo: Bool = false
     func loadTodoEvent(_ eventId: String) async throws -> TodoEvent {
-        throw RuntimeError("not implemented")
+        guard self.shouldFailLoadTodo == false
+        else {
+            throw RuntimeError("failed")
+        }
+        let todo = TodoEvent(uuid: eventId, name: "cached")
+        return todo
     }
     
+    var shouldLoadCurrentTodoFail: Bool = false
     func loadCurrentTodoEvents() async throws -> [TodoEvent] {
-        throw RuntimeError("not implemented")
+        guard self.shouldLoadCurrentTodoFail == false
+        else {
+            throw RuntimeError("failed")
+        }
+        let todo = TodoEvent(uuid: "new_uuid", name: "cached")
+        let shouldRemoveTodo = TodoEvent(uuid: "should_removed", name: "some")
+        return [todo, shouldRemoveTodo]
     }
     
+    var shouldFailLoadTodosInRange: Bool = false
     func loadTodoEvents(in range: Range<TimeInterval>) async throws -> [TodoEvent] {
-        throw RuntimeError("not implemented")
+        guard self.shouldFailLoadTodosInRange == false
+        else {
+            throw RuntimeError("shouldFailLoadTodosInRange")
+        }
+        let todo = TodoEvent(uuid: "new_uuid", name: "cached")
+        let shouldRemoveTodo = TodoEvent(uuid: "should_removed", name: "some")
+        return [todo, shouldRemoveTodo]
     }
     
     var didSavedTodoEvent: TodoEvent?
@@ -449,8 +734,11 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
         self.didUpdatedTodoEvent = todo
     }
     
+    var didUpdatedTodos: [TodoEvent]?
+    var didUpdateTodosCallback: (() -> Void)?
     func updateTodoEvents(_ todos: [TodoEvent]) async throws {
-        throw RuntimeError("not implemented")
+        self.didUpdatedTodos = todos
+        self.didUpdateTodosCallback?()
     }
     
     var didSaveDoneTodoEvent: DoneTodoEvent?
@@ -461,5 +749,12 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     var didRemoveTodoId: String?
     func removeTodo(_ eventId: String) async throws {
         self.didRemoveTodoId = eventId
+    }
+    
+    var didRemovedTodoIds: [String]?
+    var didTodosRemovedCallback: (() -> Void)?
+    func removeTodos(_ eventids: [String]) async throws {
+        self.didRemovedTodoIds = eventids
+        self.didTodosRemovedCallback?()
     }
 }
