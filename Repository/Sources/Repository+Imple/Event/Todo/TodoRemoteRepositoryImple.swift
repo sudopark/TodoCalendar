@@ -47,12 +47,13 @@ extension TodoRemoteRepositoryImple {
         return newTodo
     }
     
+    // TODO: 이때는 put이 되어야함
     public func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
         let endpoint = TodoAPIEndpoints.todo(eventId)
         let payload = params.asJson()
         let mapper: TodoEventMapper = try await self.remote.request(
-            .patch, 
-            endpoint, 
+            .put,
+            endpoint,
             parameters: payload
         )
         let updated = mapper.todo

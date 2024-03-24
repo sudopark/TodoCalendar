@@ -83,20 +83,6 @@ public struct TodoEditParams: Sendable, Equatable {
     
     public init() { }
     
-    public var isValidForUpdate: Bool {
-        switch self.repeatingUpdateScope {
-        case .onlyThisTime:
-            return self.asMakeParams().isValidForMaking
-            
-        default:
-            return self.name?.isEmpty == false
-                || self.eventTagId != nil
-                || self.time != nil
-                || self.repeating != nil
-                || self.notificationOptions != nil
-        }
-    }
-    
     public func asMakeParams() -> TodoMakeParams {
         return TodoMakeParams()
             |> \.name .~ (self.name)
