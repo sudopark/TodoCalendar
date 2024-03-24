@@ -105,6 +105,7 @@ extension TodoEventUsecaseImpleTests {
         
         // when
         let params = TodoEditParams()
+            |> \.name .~ "name"
             |> \.eventTagId .~ .custom("some")
         let updated = try? await usecase.updateTodoEvent("id", params)
         
@@ -174,6 +175,7 @@ extension TodoEventUsecaseImpleTests {
         let todos = self.waitOutputs(expect, for: todoSource) {
             Task {
                 let params = TodoEditParams()
+                    |> \.name .~ "name"
                     |> \.time .~ .at(4)
                     |> \.repeatingUpdateScope .~ .all
                 _ = try? await usecase.updateTodoEvent(oldEvent.uuid, params)

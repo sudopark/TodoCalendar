@@ -67,7 +67,7 @@ extension TodoEventUsecaseImple {
     }
     
     public func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
-        guard params.isValidForUpdate
+        guard params.name?.isEmpty == false
         else {
             throw RuntimeError("invalid parameter for update Todo event")
         }
