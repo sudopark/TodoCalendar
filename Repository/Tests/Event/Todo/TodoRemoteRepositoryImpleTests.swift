@@ -619,7 +619,7 @@ private extension TodoRemoteRepositoryImpleTests {
                 resultJsonString: .success(self.dummySingleTodoResponse)
             ),
             .init(
-                method: .patch,
+                method: .put,
                 endpoint: TodoAPIEndpoints.todo("new_uuid"),
                 resultJsonString: .success(self.dummySingleTodoResponse)
             ),
