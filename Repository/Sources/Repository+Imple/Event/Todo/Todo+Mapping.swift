@@ -11,17 +11,32 @@ import Prelude
 import Optics
 import Domain
 
+private enum TodoCodingKeys: String, CodingKey {
+    case uuid
+    case name
+    case eventTagId = "event_tag_id"
+    case time = "event_time"
+    case repeating
+    case notificationOptions = "notification_options"
+    
+    // done
+    case originEventId = "origin_event_id"
+    case doneAt = "done_at"
+}
+
+private typealias Key = TodoCodingKeys
+
 extension TodoMakeParams {
     
     func asJson() -> [String: Any] {
         var sender: [String: Any] = [:]
-        sender["name"] = self.name
-        sender["event_tag_id"] = self.eventTagId?.customTagId
-        sender["event_time"] = self.time.map { EventTimeMapper(time: $0) }
+        sender[Key.name.rawValue] = self.name
+        sender[Key.eventTagId.rawValue] = self.eventTagId?.customTagId
+        sender[Key.time.rawValue] = self.time.map { EventTimeMapper(time: $0) }
             .map { $0.asJson() }
-        sender["repeating"] = self.repeating.map { EventRepeatingMapper(repeating: $0) }
+        sender[Key.repeating.rawValue] = self.repeating.map { EventRepeatingMapper(repeating: $0) }
             .map { $0.asJson() }
-        sender["notification_options"] = self.notificationOptions.map { os in
+        sender[Key.notificationOptions.rawValue] = self.notificationOptions.map { os in
             return os
                 .map { EventNotificationTimeOptionMapper(option: $0) }
                 .map { try? $0.asJson() }
@@ -34,13 +49,13 @@ extension TodoEditParams {
     
     func asJson() -> [String: Any] {
         var sender = [String: Any]()
-        sender["name"] = self.name
-        sender["event_tag_id"] = self.eventTagId?.customTagId
-        sender["event_time"] = self.time.map { EventTimeMapper(time: $0) }
+        sender[Key.name.rawValue] = self.name
+        sender[Key.eventTagId.rawValue] = self.eventTagId?.customTagId
+        sender[Key.time.rawValue] = self.time.map { EventTimeMapper(time: $0) }
             .map { $0.asJson() }
-        sender["repeating"] = self.repeating.map { EventRepeatingMapper(repeating: $0) }
+        sender[Key.repeating.rawValue] = self.repeating.map { EventRepeatingMapper(repeating: $0) }
             .map { $0.asJson() }
-        sender["notification_options"] = self.notificationOptions.map { os in
+        sender[Key.notificationOptions.rawValue] = self.notificationOptions.map { os in
             return os
                 .map { EventNotificationTimeOptionMapper(option: $0) }
                 .map { try? $0.asJson() }
@@ -84,19 +99,6 @@ struct ReplaceRepeatingTodoEventParams {
         return payload
         |> key("origin_next_event_time") .~ self.nextTime.map { EventTimeMapper(time: $0).asJson() }
     }
-}
-
-private enum TodoCodingKeys: String, CodingKey {
-    case uuid
-    case name
-    case eventTagId = "event_tag_id"
-    case time = "event_time"
-    case repeating
-    case notificationOptions = "notification_options"
-    
-    // done
-    case originEventId = "origin_event_id"
-    case doneAt = "done_at"
 }
 
 struct TodoEventMapper: Decodable {

@@ -75,6 +75,7 @@ public struct ScheduleEvent: Equatable {
             |> \.repeating .~ params.repeating
             |> \.showTurn .~ (params.showTurn ?? false)
             |> \.notificationOptions .~ (params.notificationOptions ?? self.notificationOptions)
+            |> \.repeatingTimeToExcludes .~ self.repeatingTimeToExcludes
     }
 }
 

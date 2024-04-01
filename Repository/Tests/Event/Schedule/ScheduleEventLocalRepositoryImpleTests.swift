@@ -19,7 +19,7 @@ import UnitTestHelpKit
 class ScheduleEventLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
-    var localStorage: ScheduleEventLocalStorage!
+    var localStorage: ScheduleEventLocalStorageImple!
     var spyEnvStorage: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {
