@@ -69,7 +69,7 @@ extension NonLoginUsecaseFactoryImple {
     
     func makeTodoEventUsecase() -> any TodoEventUsecase {
             
-        let storage = TodoLocalStorage(
+        let storage = TodoLocalStorageImple(
             sqliteService: Singleton.shared.commonSqliteService
         )
         let repository = TodoLocalRepositoryImple(
@@ -83,7 +83,7 @@ extension NonLoginUsecaseFactoryImple {
     }
     
     func makeScheduleEventUsecase() -> any ScheduleEventUsecase {
-        let storage = ScheduleEventLocalStorage(
+        let storage = ScheduleEventLocalStorageImple(
             sqliteService: Singleton.shared.commonSqliteService
         )
         let repository = ScheduleEventLocalRepositoryImple(

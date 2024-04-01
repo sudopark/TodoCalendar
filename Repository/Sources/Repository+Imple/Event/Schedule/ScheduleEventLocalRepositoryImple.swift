@@ -16,10 +16,10 @@ import Extensions
 
 public final class ScheduleEventLocalRepositoryImple: ScheduleEventRepository, Sendable {
     
-    private let localStorage: ScheduleEventLocalStorage
+    private let localStorage: any ScheduleEventLocalStorage
     private let environmentStorage: any EnvironmentStorage
     public init(
-        localStorage: ScheduleEventLocalStorage,
+        localStorage: any ScheduleEventLocalStorage,
         environmentStorage: any EnvironmentStorage
     ) {
         self.localStorage = localStorage

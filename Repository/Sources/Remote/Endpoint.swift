@@ -16,6 +16,9 @@ public protocol Endpoint: Sendable {
     var subPath: String { get }
 }
 
+
+// MARK: - HolidayAPIEndpoints
+
 public enum HolidayAPIEndpoints: Endpoint {
     case supportCountry
     case holidays(year: Int, countryCode: String)
@@ -30,6 +33,9 @@ public enum HolidayAPIEndpoints: Endpoint {
     }
 }
 
+
+// MARK: - AccountAPIEndpoints
+
 public enum AccountAPIEndpoints: Endpoint {
     case info
     
@@ -40,6 +46,9 @@ public enum AccountAPIEndpoints: Endpoint {
         }
     }
 }
+
+
+// MARK: - TodoAPIEndpoints
 
 public enum TodoAPIEndpoints: Endpoint {
     case make
@@ -72,6 +81,26 @@ public enum TodoAPIEndpoints: Endpoint {
     }
 }
 
+
+// MARK: - ScheduleEventEndpoints
+
+enum ScheduleEventEndpoints: Endpoint {
+    case make
+    case schedule(id: String)
+    case exclude(id: String)
+    case schedules
+    
+    var subPath: String {
+        switch self {
+        case .make: return "schedule"
+        case .schedule(let id): return "schedule/\(id)"
+        case .exclude(let id): return "schedule/\(id)/exclude"
+        case .schedules: return ""
+        }
+    }
+}
+
+
 // MARK: - RemoteEnvironment
 
 public struct RemoteEnvironment: Sendable {
@@ -93,6 +122,10 @@ public struct RemoteEnvironment: Sendable {
         case let todo as TodoAPIEndpoints:
             let prefix = "\(calendarAPIHost)/todos"
             let subpath = todo.subPath
+            return subpath.isEmpty ? prefix : "\(prefix)/\(subpath)"
+        case let schedule as ScheduleEventEndpoints:
+            let prefix = "\(calendarAPIHost)/schedules"
+            let subpath = schedule.subPath
             return subpath.isEmpty ? prefix : "\(prefix)/\(subpath)"
         default: return nil
         }

@@ -13,7 +13,25 @@ import Domain
 import Extensions
 
 
-public final class ScheduleEventLocalStorage: Sendable {
+public protocol ScheduleEventLocalStorage: Sendable {
+    func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent
+    func loadScheduleEvents(in range: Range<TimeInterval>) async throws -> [ScheduleEvent]
+    func saveScheduleEvent(_ event: ScheduleEvent) async throws
+    func updateScheduleEvents(_ events: [ScheduleEvent]) async throws
+    func removeScheduleEvents(_ eventIds: [String]) async throws
+}
+
+extension ScheduleEventLocalStorage {
+    
+    func updateScheduleEvent(_ event: ScheduleEvent) async throws {
+        try await self.updateScheduleEvents([event])
+    }
+    func removeScheduleEvent(_ eventId: String) async throws {
+        try await self.removeScheduleEvents([eventId])
+    }
+}
+
+public final class ScheduleEventLocalStorageImple: ScheduleEventLocalStorage, Sendable {
     
     private let sqliteService: SQLiteService
     public init(sqliteService: SQLiteService) {
@@ -25,9 +43,9 @@ public final class ScheduleEventLocalStorage: Sendable {
 }
 
 
-extension ScheduleEventLocalStorage {
+extension ScheduleEventLocalStorageImple {
     
-    func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent {
+    public func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent {
         let timeQuery = Times.selectAll()
         let eventQuery = Schedules.selectAll { $0.uuid == eventId }
         let schedules = try await self.loadScheduleEvents(timeQuery, eventQuery)
@@ -38,7 +56,7 @@ extension ScheduleEventLocalStorage {
         return schedule
     }
     
-    func loadScheduleEvents(in range: Range<TimeInterval>) async throws -> [ScheduleEvent] {
+    public func loadScheduleEvents(in range: Range<TimeInterval>) async throws -> [ScheduleEvent] {
         
         let timeQuery = Times.overlapQuery(with: range)
         let eventQuery = Schedules.selectAll()
@@ -66,17 +84,13 @@ extension ScheduleEventLocalStorage {
 }
 
 
-extension ScheduleEventLocalStorage {
+extension ScheduleEventLocalStorageImple {
     
-    func saveScheduleEvent(_ event: ScheduleEvent) async throws {
+    public func saveScheduleEvent(_ event: ScheduleEvent) async throws {
         try await self.updateScheduleEvents([event])
     }
     
-    func updateScheduleEvent(_ event: ScheduleEvent) async throws {
-        try await self.updateScheduleEvents([event])
-    }
-    
-    func updateScheduleEvents(_ events: [ScheduleEvent]) async throws {
+    public func updateScheduleEvents(_ events: [ScheduleEvent]) async throws {
         try await self.sqliteService.async.run { db in
             let times = events.map { Times.Entity($0.uuid, $0.time, $0.repeating) }
             try db.insert(Times.self, entities: times)
@@ -87,13 +101,13 @@ extension ScheduleEventLocalStorage {
         }
     }
     
-    func removeScheduleEvent(_ eventId: String) async throws {
+    public func removeScheduleEvents(_ eventIds: [String]) async throws {
         try await self.sqliteService.async.run { db in
-            let query = Times.delete().where { $0.eventId == eventId }
+            let query = Times.delete().where { $0.eventId.in(eventIds) }
             try db.delete(Times.self, query: query)
         }
         try await self.sqliteService.async.run { db in
-            let query = Schedules.delete().where { $0.uuid == eventId }
+            let query = Schedules.delete().where { $0.uuid.in(eventIds) }
             try db.delete(Schedules.self, query: query)
         }
     }
