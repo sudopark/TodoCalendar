@@ -123,11 +123,7 @@ public struct ScheduleEditParams: Equatable {
             
         default:
             return self.name?.isEmpty == false
-                || self.eventTagId != nil
-                || self.time != nil
-                || self.repeating != nil
-                || self.showTurn != nil
-                || self.notificationOptions != nil
+                && self.time != nil
         }
     }
     

@@ -337,6 +337,7 @@ extension ScheduleEventUsecaseImpleTests {
         // when
         let params = ScheduleEditParams()
             |> \.name .~ "new"
+            |> \.time .~ .at(100)
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
         
         // then
@@ -358,7 +359,8 @@ extension ScheduleEventUsecaseImpleTests {
         let eventLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
             Task {
                 let params = ScheduleEditParams()
-                    |> \.time .~ EventTime.at(4)
+                    |> \.name .~ old.name
+                    |> \.time .~ pure(EventTime.at(4))
                 _ = try await usecase.updateScheduleEvent(old.uuid, params)
             }
         }
@@ -400,7 +402,8 @@ extension ScheduleEventUsecaseImpleTests {
         
         // when
         let params = ScheduleEditParams()
-            |> \.time .~ EventTime.at(4)
+            |> \.name .~ event.name
+            |> \.time .~ pure(EventTime.at(4))
             |> \.repeatingUpdateScope .~ .all
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
         
@@ -424,7 +427,8 @@ extension ScheduleEventUsecaseImpleTests {
         let eventLists = self.waitOutputs(expect, for: source) {
             Task {
                 let params = ScheduleEditParams()
-                    |> \.time .~ EventTime.at(4.0)
+                    |> \.name .~ old.name
+                    |> \.time .~ pure(EventTime.at(4.0))
                     |> \.repeatingUpdateScope .~ .all
                 _ = try await usecase.updateScheduleEvent(old.uuid, params)
             }
