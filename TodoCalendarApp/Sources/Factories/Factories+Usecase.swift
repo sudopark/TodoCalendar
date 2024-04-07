@@ -115,7 +115,7 @@ extension NonLoginUsecaseFactoryImple {
     }
     
     func makeEventDetailDataUsecase() -> any EventDetailDataUsecase {
-        let storage = EventDetailDataLocalStorage(
+        let storage = EventDetailDataLocalStorageImple(
             sqliteService: Singleton.shared.commonSqliteService
         )
         return EventDetailDataLocalRepostioryImple(

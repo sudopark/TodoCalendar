@@ -120,6 +120,19 @@ enum EventTagEndpoints: Endpoint {
 }
 
 
+// MARK: - event detail
+
+enum EventDetailEndpoints: Endpoint {
+    case detail(eventId: String)
+    
+    var subPath: String {
+        switch self {
+        case .detail(let eventId): return "\(eventId)"
+        }
+    }
+}
+
+
 // MARK: - RemoteEnvironment
 
 public struct RemoteEnvironment: Sendable {
@@ -155,6 +168,10 @@ public struct RemoteEnvironment: Sendable {
         case let eventTag as EventTagEndpoints:
             let prefix = "\(calendarAPIHost)/tags"
             return appendSubpathIfNotEmpty(prefix, eventTag.subPath)
+            
+        case let detail as EventDetailEndpoints:
+            let prefix = "\(calendarAPIHost)/event_details"
+            return appendSubpathIfNotEmpty(prefix, detail.subPath)
             
         default: return nil
         }
