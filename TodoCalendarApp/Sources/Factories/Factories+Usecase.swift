@@ -97,7 +97,7 @@ extension NonLoginUsecaseFactoryImple {
     }
     
     private func makeEventTagRepository() -> any EventTagRepository {
-        let storage = EventTagLocalStorage(
+        let storage = EventTagLocalStorageImple(
             sqliteService: Singleton.shared.commonSqliteService
         )
         let repository = EventTagLocalRepositoryImple(

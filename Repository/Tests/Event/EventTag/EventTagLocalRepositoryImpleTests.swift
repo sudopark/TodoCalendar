@@ -17,7 +17,7 @@ import UnitTestHelpKit
 
 class EventTagLocalRepositoryImpleTests: BaseLocalTests {
     
-    private var localStorage: EventTagLocalStorage!
+    private var localStorage: EventTagLocalStorageImple!
     private var fakeEnvStore: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {

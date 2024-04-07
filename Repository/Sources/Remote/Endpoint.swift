@@ -101,6 +101,25 @@ enum ScheduleEventEndpoints: Endpoint {
 }
 
 
+// MARK: - EventTag
+
+enum EventTagEndpoints: Endpoint {
+    case make
+    case tag(id: String)
+    case tags
+    case allTags
+    
+    var subPath: String {
+        switch self {
+        case .make: return "tag"
+        case .tag(let id): return "tag/\(id)"
+        case .tags: return ""
+        case .allTags: return "all"
+        }
+    }
+}
+
+
 // MARK: - RemoteEnvironment
 
 public struct RemoteEnvironment: Sendable {
@@ -114,19 +133,29 @@ public struct RemoteEnvironment: Sendable {
     
     func path(_ endpoint: any Endpoint) -> String? {
         
+        func appendSubpathIfNotEmpty(_ prefix: String, _ subPath: String) -> String {
+            return subPath.isEmpty ? prefix : "\(prefix)/\(subPath)"
+        }
+        
         switch endpoint {
         case let holiday as HolidayAPIEndpoints:
             return "https://date.nager.at/\(holiday.subPath)"
+            
         case let account as AccountAPIEndpoints:
             return "\(calendarAPIHost)/accounts/\(account.subPath)"
+            
         case let todo as TodoAPIEndpoints:
             let prefix = "\(calendarAPIHost)/todos"
-            let subpath = todo.subPath
-            return subpath.isEmpty ? prefix : "\(prefix)/\(subpath)"
+            return appendSubpathIfNotEmpty(prefix, todo.subPath)
+            
         case let schedule as ScheduleEventEndpoints:
             let prefix = "\(calendarAPIHost)/schedules"
-            let subpath = schedule.subPath
-            return subpath.isEmpty ? prefix : "\(prefix)/\(subpath)"
+            return appendSubpathIfNotEmpty(prefix, schedule.subPath)
+            
+        case let eventTag as EventTagEndpoints:
+            let prefix = "\(calendarAPIHost)/tags"
+            return appendSubpathIfNotEmpty(prefix, eventTag.subPath)
+            
         default: return nil
         }
     }
