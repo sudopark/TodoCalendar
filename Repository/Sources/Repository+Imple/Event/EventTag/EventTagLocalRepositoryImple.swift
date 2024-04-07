@@ -16,10 +16,10 @@ import Extensions
 
 public final class EventTagLocalRepositoryImple: EventTagRepository {
     
-    private let localStorage: EventTagLocalStorage
+    private let localStorage: any EventTagLocalStorage
     private let environmentStorage: any EnvironmentStorage
     public init(
-        localStorage: EventTagLocalStorage,
+        localStorage: any EventTagLocalStorage,
         environmentStorage: any EnvironmentStorage
     ) {
         self.localStorage = localStorage
