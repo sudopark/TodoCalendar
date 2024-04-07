@@ -10,7 +10,13 @@ import Foundation
 import Domain
 
 
-public final class EventDetailDataLocalStorage: Sendable {
+public protocol EventDetailDataLocalStorage: Sendable {
+    func loadDetail(_ id: String) async throws -> EventDetailData?
+    func saveDetail(_ detail: EventDetailData) async throws
+    func removeDetail(_ id: String) async throws
+}
+
+public final class EventDetailDataLocalStorageImple: EventDetailDataLocalStorage {
     
     private let sqliteService: SQLiteService
     public init(sqliteService: SQLiteService) {
@@ -21,22 +27,22 @@ public final class EventDetailDataLocalStorage: Sendable {
 }
 
 
-extension EventDetailDataLocalStorage {
+extension EventDetailDataLocalStorageImple {
     
-    func loadDetail(_ id: String) async throws -> EventDetailData? {
+    public func loadDetail(_ id: String) async throws -> EventDetailData? {
         let query = Detail.selectAll { $0.uuid == id }
         return try await self.sqliteService.async.run {
             return try $0.loadOne(query)
         }
     }
     
-    func saveDetail(_ detail: EventDetailData) async throws {
+    public func saveDetail(_ detail: EventDetailData) async throws {
         try await self.sqliteService.async.run { db in
             try db.insertOne(Detail.self, entity: detail, shouldReplace: true)
         }
     }
     
-    func removeDetail(_ id: String) async throws {
+    public func removeDetail(_ id: String) async throws {
         try await self.sqliteService.async.run { db in
             let query = Detail.delete().where { $0.uuid == id }
             try db.delete(Detail.self, query: query)

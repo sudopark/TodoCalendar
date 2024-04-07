@@ -13,8 +13,8 @@ import AsyncFlatMap
 
 public final class EventDetailDataLocalRepostioryImple: EventDetailDataRepository, Sendable {
     
-    private let localStorage: EventDetailDataLocalStorage
-    public init(localStorage: EventDetailDataLocalStorage) {
+    private let localStorage: any EventDetailDataLocalStorage
+    public init(localStorage: any EventDetailDataLocalStorage) {
         self.localStorage = localStorage
     }
 }

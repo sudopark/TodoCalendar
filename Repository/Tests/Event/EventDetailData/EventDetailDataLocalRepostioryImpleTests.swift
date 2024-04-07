@@ -18,7 +18,7 @@ import UnitTestHelpKit
 
 class EventDetailDataLocalRepostioryImpleTests: BaseLocalTests {
     
-    private var localStorage: EventDetailDataLocalStorage!
+    private var localStorage: EventDetailDataLocalStorageImple!
     
     override func setUpWithError() throws {
         self.fileName = "details"
