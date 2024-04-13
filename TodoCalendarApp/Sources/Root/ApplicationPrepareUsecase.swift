@@ -67,6 +67,7 @@ extension ApplicationUsecaseImple {
     }
     
     func prepareSignedIn(_ auth: Auth) {
+        self.sharedDataStore.clearAll()
         let closeResult = self.database.close()
         switch closeResult {
         case .success:
@@ -77,6 +78,7 @@ extension ApplicationUsecaseImple {
     }
     
     func prepareSignedOut() {
+        self.sharedDataStore.clearAll()
         let closeResult = self.database.close()
         switch closeResult {
         case .success:
