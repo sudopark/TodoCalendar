@@ -12,7 +12,7 @@ import Optics
 import Domain
 
 
-private enum CodingKeys: String, CodingKey {
+enum ScheduleEventCodingKeys: String, CodingKey {
     case uuid
     case name
     case eventTagId = "event_tag_id"
@@ -23,7 +23,7 @@ private enum CodingKeys: String, CodingKey {
     case excludeTimes = "exclude_repeatings"
 }
 
-private typealias Key = CodingKeys
+private typealias Key = ScheduleEventCodingKeys
 
 extension ScheduleMakeParams {
     
@@ -72,7 +72,7 @@ struct ScheduleEventMapper: Decodable {
     let event: ScheduleEvent
     
     init(from decoder: any Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let container = try decoder.container(keyedBy: Key.self)
         var event = ScheduleEvent(
             uuid: try container.decode(String.self, forKey: .uuid),
             name: try container.decode(String.self, forKey: .name),

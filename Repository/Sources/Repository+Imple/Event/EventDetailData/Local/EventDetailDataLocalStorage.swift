@@ -11,9 +11,11 @@ import Domain
 
 
 public protocol EventDetailDataLocalStorage: Sendable {
+    func loadAll() async throws -> [EventDetailData]
     func loadDetail(_ id: String) async throws -> EventDetailData?
     func saveDetail(_ detail: EventDetailData) async throws
     func removeDetail(_ id: String) async throws
+    func removeAll() async throws
 }
 
 public final class EventDetailDataLocalStorageImple: EventDetailDataLocalStorage {
@@ -28,6 +30,11 @@ public final class EventDetailDataLocalStorageImple: EventDetailDataLocalStorage
 
 
 extension EventDetailDataLocalStorageImple {
+    
+    public func loadAll() async throws -> [EventDetailData] {
+        let query = Detail.selectAll()
+        return try await self.sqliteService.async.run { try $0.load(query) }
+    }
     
     public func loadDetail(_ id: String) async throws -> EventDetailData? {
         let query = Detail.selectAll { $0.uuid == id }
@@ -47,5 +54,9 @@ extension EventDetailDataLocalStorageImple {
             let query = Detail.delete().where { $0.uuid == id }
             try db.delete(Detail.self, query: query)
         }
+    }
+    
+    public func removeAll() async throws {
+        try await self.sqliteService.async.run { try $0.dropTable(Detail.self) }
     }
 }

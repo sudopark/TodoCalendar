@@ -15,6 +15,7 @@ import Extensions
 
 public protocol TodoLocalStorage: Sendable { 
     
+    func loadAllEvents() async throws -> [TodoEvent]
     func loadTodoEvent(_ eventId: String) async throws -> TodoEvent
     func loadCurrentTodoEvents() async throws -> [TodoEvent]
     func loadTodoEvents(in range: Range<TimeInterval>) async throws -> [TodoEvent]
@@ -24,6 +25,7 @@ public protocol TodoLocalStorage: Sendable {
     func saveDoneTodoEvent(_ doneEvent: DoneTodoEvent) async throws
     func removeTodo(_ eventId: String) async throws
     func removeTodos(_ eventids: [String]) async throws
+    func removeAll() async throws
 }
 
 public final class TodoLocalStorageImple: TodoLocalStorage, Sendable {
@@ -40,6 +42,13 @@ public final class TodoLocalStorageImple: TodoLocalStorage, Sendable {
 
 
 extension TodoLocalStorageImple {
+    
+    public func loadAllEvents() async throws -> [TodoEvent] {
+        let timeQuery = Times.selectAll()
+        let eventQuery = Todo.selectAll()
+        let todos = try await self.loadTodoEvents(timeQuery, eventQuery)
+        return todos
+    }
     
     public func loadTodoEvent(_ eventId: String) async throws -> TodoEvent {
         let timeQuery = Times.selectAll()
@@ -130,5 +139,9 @@ extension TodoLocalStorageImple {
             let query = Todo.delete().where { $0.uuid.in(eventids) }
             try db.delete(Todo.self, query: query)
         }
+    }
+    
+    public func removeAll() async throws {
+        try await self.sqliteService.async.run { try $0.dropTable(Todo.self) }
     }
 }

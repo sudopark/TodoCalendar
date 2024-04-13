@@ -428,6 +428,10 @@ extension ScheduleEventRemoteRepositoryImpleTests {
 
 private class SpyScheduleEventLocalStorage: ScheduleEventLocalStorage, @unchecked Sendable {
     
+    func loadAllEvents() async throws -> [ScheduleEvent] {
+        return []
+    }
+    
     var shouldFailLoadEvent: Bool = false
     func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent {
         guard self.shouldFailLoadEvent == false
@@ -467,4 +471,6 @@ private class SpyScheduleEventLocalStorage: ScheduleEventLocalStorage, @unchecke
         self.didRemoveIds = eventIds
         self.didRemoveCallback?()
     }
+    
+    func removeAll() async throws { }
 }
