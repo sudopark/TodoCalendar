@@ -155,22 +155,22 @@ public struct RemoteEnvironment: Sendable {
             return "https://date.nager.at/\(holiday.subPath)"
             
         case let account as AccountAPIEndpoints:
-            return "\(calendarAPIHost)/accounts/\(account.subPath)"
+            return "\(calendarAPIHost)/v1/accounts/\(account.subPath)"
             
         case let todo as TodoAPIEndpoints:
-            let prefix = "\(calendarAPIHost)/todos"
+            let prefix = "\(calendarAPIHost)/v1/todos"
             return appendSubpathIfNotEmpty(prefix, todo.subPath)
             
         case let schedule as ScheduleEventEndpoints:
-            let prefix = "\(calendarAPIHost)/schedules"
+            let prefix = "\(calendarAPIHost)/v1/schedules"
             return appendSubpathIfNotEmpty(prefix, schedule.subPath)
             
         case let eventTag as EventTagEndpoints:
-            let prefix = "\(calendarAPIHost)/tags"
+            let prefix = "\(calendarAPIHost)/v1/tags"
             return appendSubpathIfNotEmpty(prefix, eventTag.subPath)
             
         case let detail as EventDetailEndpoints:
-            let prefix = "\(calendarAPIHost)/event_details"
+            let prefix = "\(calendarAPIHost)/v1/event_details"
             return appendSubpathIfNotEmpty(prefix, detail.subPath)
             
         default: return nil

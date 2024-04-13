@@ -63,6 +63,10 @@ extension Logger {
                 return .string("\(anyValue)")
             }
         }
+        #if DEBUG
+        let formattedFractional = Date().formatted(.dateTime.hour().minute().second().secondFraction(.fractional(3)))
+        print("[\(label)] - \(formattedFractional):(\(level)): \(message) with: \(metadata ?? [:])")
+        #endif
         LoggerStore.shared.storeMessage(
             label: label.rawValue,
             level: level.asPulseLoggerLevel,

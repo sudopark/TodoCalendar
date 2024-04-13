@@ -21,7 +21,9 @@ protocol CountrySelectRouting: Routing, Sendable { }
 final class CountrySelectRouter: BaseRouterImple, CountrySelectRouting, @unchecked Sendable { 
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
-        self.currentScene?.navigationController?.popViewController(animated: animate)
+        Task { @MainActor in
+            self.currentScene?.navigationController?.popViewController(animated: animate)
+        }
     }
 }
 

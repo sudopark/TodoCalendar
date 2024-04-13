@@ -74,7 +74,11 @@ public final class RemoteAPIImple: RemoteAPI, @unchecked Sendable {
     ) {
         self.environment = environment
         self.authenticator = authenticator
+        
+        let configure = URLSessionConfiguration.af.default
+        configure.timeoutIntervalForRequest = 30
         self.session = Session(
+            configuration: configure,
             serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility),
             interceptor: AuthenticationInterceptor(authenticator: authenticator)
         )
@@ -113,15 +117,21 @@ extension RemoteAPIImple {
         )
         .validate()
         .serializingData()
-        
+
         let response = await dataTask.response
-        let code = response.response?.statusCode ?? -1
         let result = response.result
         switch result {
         case .success(let data):
             return data
         case .failure(let error):
-            throw error
+            if var serverError = response.data
+                .flatMap ({try? JSONDecoder().decode(ServerErrorModel.self, from: $0)}) {
+                serverError.rawError = error
+                serverError.statusCode = response.response?.statusCode ?? -1
+                throw serverError
+            } else {
+                throw error
+            }
         }
     }
 }

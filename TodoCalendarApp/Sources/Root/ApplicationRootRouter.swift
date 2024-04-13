@@ -159,7 +159,7 @@ extension ApplicationRootRouter {
     private func changeUsecaseFactroy(
         by auth: Auth?
     ) {
-        if let auth = auth {
+        if auth != nil {
             self.usecaseFactory = LoginUsecaseFactoryImple(
                 authUsecase: self.authUsecase,
                 accountUescase: self.accountUsecase,

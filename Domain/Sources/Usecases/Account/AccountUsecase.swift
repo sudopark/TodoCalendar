@@ -14,6 +14,11 @@ import Extensions
 public enum AccountChangedEvent: Sendable {
     case signedIn(Account)
     case signOut
+    
+    public var isSignIn: Bool {
+        guard case .signedIn = self else { return false }
+        return true
+    }
 }
 
 public protocol AccountUsecase: Sendable {

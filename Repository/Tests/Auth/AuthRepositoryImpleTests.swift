@@ -180,7 +180,7 @@ extension AuthRepositoryImpleTests {
                 resultJsonString: .success(
                 """
                 {
-                    "id": "some",
+                    "uid": "some",
                     "method": "some@email.com",
                     "method": "method",
                     "first_signed_in": 0,

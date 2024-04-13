@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import Domain
 import Repository
+import Extensions
 
 
 final class ApplicationRootViewModelImple: @unchecked Sendable {
@@ -50,6 +51,7 @@ extension ApplicationRootViewModelImple: OAuthAutenticatorTokenRefreshListener {
         self.accountUsecase.accountStatusChanged
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] status in
+                logger.log(level: .info, "user signIn status changed, isSignIn?: \(status.isSignIn)")
                 switch status {
                 case .signedIn(let account):
                     self?.handleUserSignedIn(account)

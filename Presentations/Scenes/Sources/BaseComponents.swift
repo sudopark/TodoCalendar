@@ -58,7 +58,7 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     open func showError(_ error: any Error) {
         // TODO: show error
         Task { @MainActor in
-            
+            logger.log(level: .error, "\(error)")
         }
     }
     
