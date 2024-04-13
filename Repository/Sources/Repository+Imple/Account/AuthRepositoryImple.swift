@@ -86,6 +86,8 @@ extension FirebaseAuth.Auth: FirebaseAuthService {
         currentUser.getIDTokenResult(forcingRefresh: true) { [weak self] result, error in
             guard let result = result, error == nil
             else {
+                let error = error ?? RuntimeError("refresh failed")
+                resultHandler(.failure(error))
                 return
             }
             let refreshResult = AuthRefreshResult(
