@@ -132,6 +132,7 @@ extension AuthRepositoryImple {
         guard let auth = self.authStore.loadCurrentAuth(),
               let infoMapper: AccountInfoMapper = self.keyChainStorage.load(accountInfoKey)
         else {
+            self.remoteAPI.setup(credential: nil)
             return nil
         }
         self.remoteAPI.setup(credential: auth)
