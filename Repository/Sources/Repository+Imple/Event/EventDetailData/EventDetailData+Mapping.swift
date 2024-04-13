@@ -12,7 +12,7 @@ import Optics
 import Domain
 
 
-private enum CodingKeys: String, CodingKey {
+enum EventDetailDataCodingKeys: String, CodingKey {
     case eventId = "event_id"
     case place
     case placeLat = "lat"
@@ -23,6 +23,8 @@ private enum CodingKeys: String, CodingKey {
     case url
     case memo
 }
+
+private typealias CodingKeys = EventDetailDataCodingKeys
 
 private struct PlaceMapper: Decodable {
     let place: Place

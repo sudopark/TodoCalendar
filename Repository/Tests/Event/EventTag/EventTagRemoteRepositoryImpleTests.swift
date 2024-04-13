@@ -302,4 +302,9 @@ private final class SpyLocalStorage: EventTagLocalStorage, @unchecked Sendable {
             .init(uuid: "t3", name: "cached1", colorHex: "hex")
         ]
     }
+    
+    var didRemoveAll: Bool?
+    func removeAllTags() async throws {
+        self.didRemoveAll = true
+    }
 }

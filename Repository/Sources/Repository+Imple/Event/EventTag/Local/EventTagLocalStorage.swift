@@ -18,6 +18,7 @@ public protocol EventTagLocalStorage: Sendable {
     func loadTag(match name: String) async throws -> [EventTag]
     func loadTags(in ids: [String]) async throws -> [EventTag]
     func loadAllTags() async throws -> [EventTag]
+    func removeAllTags() async throws
 }
 extension EventTagLocalStorage {
     
@@ -86,5 +87,9 @@ extension EventTagLocalStorageImple {
         return try await self.sqliteService.async.run { db in
             return try db.load(Tags.self, query: query)
         }
+    }
+    
+    public func removeAllTags() async throws {
+        try await self.sqliteService.async.run { try $0.dropTable(Tags.self) } 
     }
 }

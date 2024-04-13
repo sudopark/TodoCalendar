@@ -172,6 +172,10 @@ extension EventDetailDataRemoteRepostioryImpleTests {
 
 private class SpyCache: EventDetailDataLocalStorage, @unchecked Sendable {
     
+    func loadAll() async throws -> [EventDetailData] {
+        return []
+    }
+    
     var shouldFailLoadDetail: Bool = false
     func loadDetail(_ id: String) async throws -> EventDetailData? {
         guard self.shouldFailLoadDetail == false
@@ -193,5 +197,8 @@ private class SpyCache: EventDetailDataLocalStorage, @unchecked Sendable {
         self.didRemoveDetailId = id
     }
     
-    
+    var didRemoveAll: Bool?
+    func removeAll() async throws {
+        self.didRemoveAll = true
+    }
 }

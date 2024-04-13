@@ -14,11 +14,13 @@ import Extensions
 
 
 public protocol ScheduleEventLocalStorage: Sendable {
+    func loadAllEvents() async throws -> [ScheduleEvent]
     func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent
     func loadScheduleEvents(in range: Range<TimeInterval>) async throws -> [ScheduleEvent]
     func saveScheduleEvent(_ event: ScheduleEvent) async throws
     func updateScheduleEvents(_ events: [ScheduleEvent]) async throws
     func removeScheduleEvents(_ eventIds: [String]) async throws
+    func removeAll() async throws
 }
 
 extension ScheduleEventLocalStorage {
@@ -44,6 +46,12 @@ public final class ScheduleEventLocalStorageImple: ScheduleEventLocalStorage, Se
 
 
 extension ScheduleEventLocalStorageImple {
+    
+    public func loadAllEvents() async throws -> [ScheduleEvent] {
+        let timeQuery = Times.selectAll()
+        let eventQuery = Schedules.selectAll()
+        return try await self.loadScheduleEvents(timeQuery, eventQuery)
+    }
     
     public func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent {
         let timeQuery = Times.selectAll()
@@ -110,6 +118,10 @@ extension ScheduleEventLocalStorageImple {
             let query = Schedules.delete().where { $0.uuid.in(eventIds) }
             try db.delete(Schedules.self, query: query)
         }
+    }
+    
+    public func removeAll() async throws {
+        try await self.sqliteService.async.run { try $0.dropTable(Schedules.self) }
     }
 }
 

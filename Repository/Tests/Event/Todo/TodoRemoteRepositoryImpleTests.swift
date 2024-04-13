@@ -692,6 +692,10 @@ private extension TodoRemoteRepositoryImpleTests {
 
 private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     
+    func loadAllEvents() async throws -> [TodoEvent] {
+        return []
+    }
+    
     var shouldFailLoadTodo: Bool = false
     func loadTodoEvent(_ eventId: String) async throws -> TodoEvent {
         guard self.shouldFailLoadTodo == false
@@ -756,5 +760,10 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     func removeTodos(_ eventids: [String]) async throws {
         self.didRemovedTodoIds = eventids
         self.didTodosRemovedCallback?()
+    }
+    
+    var didRemoveAll: Bool?
+    func removeAll() async throws {
+        self.didRemoveAll = true
     }
 }

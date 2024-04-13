@@ -132,6 +132,23 @@ enum EventDetailEndpoints: Endpoint {
     }
 }
 
+// MARK: - migration
+
+enum MigrationEndpoints: Endpoint {
+    case eventTags
+    case todos
+    case schedules
+    case eventDetails
+    
+    var subPath: String {
+        switch self {
+        case .eventTags: return "event_tags"
+        case .todos: return "todos"
+        case .schedules: return "schedules"
+        case .eventDetails: return "event_details"
+        }
+    }
+}
 
 // MARK: - RemoteEnvironment
 
@@ -172,6 +189,10 @@ public struct RemoteEnvironment: Sendable {
         case let detail as EventDetailEndpoints:
             let prefix = "\(calendarAPIHost)/v1/event_details"
             return appendSubpathIfNotEmpty(prefix, detail.subPath)
+            
+        case let migration as MigrationEndpoints:
+            let prefix = "\(calendarAPIHost)/v1/migration"
+            return appendSubpathIfNotEmpty(prefix, migration.subPath)
             
         default: return nil
         }
