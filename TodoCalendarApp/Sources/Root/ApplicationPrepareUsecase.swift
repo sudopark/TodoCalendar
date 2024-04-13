@@ -67,11 +67,23 @@ extension ApplicationUsecaseImple {
     }
     
     func prepareSignedIn(_ auth: Auth) {
-        // TODO: close and open database
+        let closeResult = self.database.close()
+        switch closeResult {
+        case .success:
+            self.prepareDatabase(for: auth.uid)
+        case .failure(let error):
+            logger.log(level: .critical, "signIn -> close db failed..: \(error)")
+        }
     }
     
     func prepareSignedOut() {
-        // TODO: close and open database
+        let closeResult = self.database.close()
+        switch closeResult {
+        case .success:
+            self.prepareDatabase(for: nil)
+        case .failure(let error):
+            logger.log(level: .critical, "signOut -> close db failed..: \(error)")
+        }
     }
     
     private func prepareLatestAppearanceSeting() async throws -> AppearanceSettings  {
@@ -84,7 +96,6 @@ extension ApplicationUsecaseImple {
         return appearance
     }
     
-    // TODO: 추후 db switching은 별도 객체 만들것임
     private func prepareDatabase(for accountId: String?) {
         let database = self.database
         let dbPath = self.databasePathFinding(accountId)

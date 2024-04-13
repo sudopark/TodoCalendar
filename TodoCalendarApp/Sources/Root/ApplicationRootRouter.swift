@@ -159,12 +159,19 @@ extension ApplicationRootRouter {
     private func changeUsecaseFactroy(
         by auth: Auth?
     ) {
-        // TODO: 추후에 prepare result에 따라 usecase factory 결정해야함
-        self.usecaseFactory = NonLoginUsecaseFactoryImple(
-            authUsecase: self.authUsecase,
-            accountUescase: self.accountUsecase,
-            viewAppearanceStore: self.viewAppearanceStore
-        )
+        if let auth = auth {
+            self.usecaseFactory = LoginUsecaseFactoryImple(
+                authUsecase: self.authUsecase,
+                accountUescase: self.accountUsecase,
+                viewAppearanceStore: self.viewAppearanceStore
+            )
+        } else {
+            self.usecaseFactory = NonLoginUsecaseFactoryImple(
+                authUsecase: self.authUsecase,
+                accountUescase: self.accountUsecase,
+                viewAppearanceStore: self.viewAppearanceStore
+            )
+        }
     }
     
     @MainActor

@@ -162,3 +162,151 @@ extension NonLoginUsecaseFactoryImple {
         )
     }
 }
+
+
+// MARK: - LoginUsecaseFactoryImple
+
+
+struct LoginUsecaseFactoryImple: UsecaseFactory {
+    
+    let authUsecase: any AuthUsecase
+    let accountUescase: any AccountUsecase
+    let viewAppearanceStore: any ViewAppearanceStore
+    
+    init(
+        authUsecase: any AuthUsecase,
+        accountUescase: any AccountUsecase,
+        viewAppearanceStore: any ViewAppearanceStore
+    ) {
+        self.authUsecase = authUsecase
+        self.accountUescase = accountUescase
+        self.viewAppearanceStore = viewAppearanceStore
+    }
+}
+
+extension LoginUsecaseFactoryImple {
+    
+    func makeCalendarSettingUsecase() -> any CalendarSettingUsecase {
+        let settingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
+        )
+        return CalendarSettingUsecaseImple(
+            settingRepository: settingRepository,
+            shareDataStore: Singleton.shared.sharedDataStore
+        )
+    }
+    
+    func makeHolidayUsecase() -> any HolidayUsecase {
+        let holidayRepository = HolidayRepositoryImple(
+            localEnvironmentStorage: Singleton.shared.userDefaultEnvironmentStorage,
+            sqliteService: Singleton.shared.commonSqliteService,
+            remoteAPI: Singleton.shared.remoteAPI
+        )
+        return HolidayUsecaseImple(
+            holidayRepository: holidayRepository,
+            dataStore: Singleton.shared.sharedDataStore,
+            localeProvider: Locale.current
+        )
+    }
+    
+    func makeCalendarUsecase() -> any CalendarUsecase {
+        return CalendarUsecaseImple(
+            calendarSettingUsecase: self.makeCalendarSettingUsecase(),
+            holidayUsecase: self.makeHolidayUsecase()
+        )
+    }
+}
+
+extension LoginUsecaseFactoryImple {
+    
+    func makeTodoEventUsecase() -> any TodoEventUsecase {
+        let cache = TodoLocalStorageImple(
+            sqliteService: Singleton.shared.commonSqliteService
+        )
+        let repository = TodoRemoteRepositoryImple(
+            remote: Singleton.shared.remoteAPI,
+            cacheStorage: cache
+        )
+        return TodoEventUsecaseImple(
+            todoRepository: repository,
+            sharedDataStore: Singleton.shared.sharedDataStore
+        )
+    }
+    
+    func makeScheduleEventUsecase() -> any ScheduleEventUsecase {
+        let cache = ScheduleEventLocalStorageImple(
+            sqliteService: Singleton.shared.commonSqliteService
+        )
+        let repository = ScheduleEventRemoteRepositoryImple(
+            remote: Singleton.shared.remoteAPI,
+            cacheStore: cache
+        )
+        return ScheduleEventUsecaseImple(
+            scheduleRepository: repository,
+            sharedDataStore: Singleton.shared.sharedDataStore
+        )
+    }
+    
+    func makeEventTagUsecase() -> any EventTagUsecase {
+        let cache = EventTagLocalStorageImple(
+            sqliteService: Singleton.shared.commonSqliteService
+        )
+        let repository = EventTagRemoteRepositoryImple(
+            remote: Singleton.shared.remoteAPI,
+            cacheStorage: cache,
+            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
+        )
+        return EventTagUsecaseImple(
+            tagRepository: repository,
+            sharedDataStore: Singleton.shared.sharedDataStore
+        )
+    }
+    
+    func makeEventDetailDataUsecase() -> any EventDetailDataUsecase {
+        let cache = EventDetailDataLocalStorageImple(
+            sqliteService: Singleton.shared.commonSqliteService
+        )
+        return EventDetailDataRemoteRepostioryImple(
+            remoteAPI: Singleton.shared.remoteAPI,
+            cacheStorage: cache
+        )
+    }
+}
+
+extension LoginUsecaseFactoryImple {
+    
+    private func makeAppSettingUsecase() -> AppSettingUsecaseImple {
+        let repository = AppSettingRepositoryImple(
+            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
+        )
+        return AppSettingUsecaseImple(
+            appSettingRepository: repository,
+            viewAppearanceStore: self.viewAppearanceStore,
+            sharedDataStore: Singleton.shared.sharedDataStore
+        )
+    }
+    
+    func makeUISettingUsecase() -> any UISettingUsecase {
+        return self.makeAppSettingUsecase()
+    }
+    
+    func makeEventSettingUsecase() -> any EventSettingUsecase {
+        return self.makeAppSettingUsecase()
+    }
+    
+    func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase {
+        return NotificationPermissionUsecaseImple(
+            notificationService: UNUserNotificationCenter.current()
+        )
+    }
+    
+    func makeEventNotificationSettingUsecase() -> any EventNotificationSettingUsecase {
+        let repository = EventNotificationRepositoryImple(
+            sqliteService: Singleton.shared.commonSqliteService,
+            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
+        )
+        return EventNotificationSettingUsecaseImple(
+            notificationRepository: repository
+        )
+    }
+}

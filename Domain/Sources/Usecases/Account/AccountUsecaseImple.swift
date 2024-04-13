@@ -95,6 +95,5 @@ extension AccountUsecaseImple: AccountUsecase {
         } else {
             self.sharedStore.delete(self.accountShareKey)
         }
-        // TODO: setup idToken at accessTokenProvider
     }
 }
