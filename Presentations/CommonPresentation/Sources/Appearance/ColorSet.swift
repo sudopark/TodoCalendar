@@ -58,6 +58,7 @@ public protocol ColorSet: Sendable {
     var negativeBtnText: UIColor { get }
     
     var accent: UIColor { get }
+    var accentOrange: UIColor { get }
     
     var white: UIColor { get }
     var line: UIColor { get }
@@ -98,6 +99,7 @@ public struct DefaultLightColorSet: ColorSet {
     public let negativeBtnText: UIColor = .white
     
     public let accent: UIColor = .systemBlue
+    public let accentOrange: UIColor = UIColor(rgb: 0xff7417)
     
     public let white: UIColor = .white
     public let line: UIColor = UIColor.black.withAlphaComponent(0.2)

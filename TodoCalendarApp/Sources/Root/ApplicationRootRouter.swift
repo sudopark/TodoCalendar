@@ -163,7 +163,8 @@ extension ApplicationRootRouter {
             self.usecaseFactory = LoginUsecaseFactoryImple(
                 authUsecase: self.authUsecase,
                 accountUescase: self.accountUsecase,
-                viewAppearanceStore: self.viewAppearanceStore
+                viewAppearanceStore: self.viewAppearanceStore,
+                temporaryUserDataFilePath: AppEnvironment.dbFilePath(for: nil)
             )
         } else {
             self.usecaseFactory = NonLoginUsecaseFactoryImple(

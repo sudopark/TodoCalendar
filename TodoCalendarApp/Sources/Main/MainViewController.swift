@@ -95,15 +95,22 @@ extension MainViewController {
             })
             .store(in: &self.cancellables)
         
+        self.viewModel.temporaryUserDataMigrationStatus
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] status in
+                self?.headerView.updateMigrationStatus(status)
+            })
+            .store(in: &self.cancellables)
+        
         self.headerView.returnTodayView.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewModel.returnToToday()
             })
             .store(in: &self.cancellables)
         
-        self.headerView.searchButton.addTapGestureRecognizerPublisher()
+        self.headerView.migrationButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
-                self?.viewModel.startSearch()
+                self?.viewModel.handleMigration()
             })
             .store(in: &self.cancellables)
         
@@ -165,15 +172,54 @@ extension MainViewController {
 
 private final class HeaderView: UIView {
     
+    private var migrationStatus: TemporaryUserDataMigrationStatus?
+    private var currentColorSet: (any ColorSet)?
+    
     let monthLabel = UILabel()
     let returnTodayView = UIView()
     private let returnTodayImage = UIImageView()
     private let returnTodayLabel = UILabel()
     private let buttonsStackView = UIStackView()
-    let searchButton = UIButton()
+    let migrationButton = UIButton()
     let eventTypeFilterButton = UIButton()
     let settingButton = UIButton()
     let logButton = UIButton()
+    
+    func updateMigrationStatus(_ status: TemporaryUserDataMigrationStatus?) {
+         self.migrationStatus = status
+        switch status {
+        case .migrating:
+            self.migrationButton.isHidden = false
+            self.migrationButton.tintColor = self.currentColorSet?.normalText
+            self.migrationButton.setImage(UIImage(systemName: "arrow.triangle.2.circlepath"), for: .normal)
+            self.runMigrationAnimation()
+            
+        case .need:
+            self.migrationButton.isHidden = false
+            self.migrationButton.tintColor = self.currentColorSet?.accentOrange
+            self.migrationButton.setImage(UIImage(systemName: "exclamationmark.triangle"), for: .normal)
+            self.stopMigrationAnimation()
+            
+        case .none:
+            self.migrationButton.isHidden = true
+            self.stopMigrationAnimation()
+        }
+    }
+    
+    private func runMigrationAnimation() {
+        self.stopMigrationAnimation()
+        
+        let rotation : CABasicAnimation = CABasicAnimation(keyPath: "transform.rotation.z")
+        rotation.toValue = NSNumber(value: Double.pi * 2)
+        rotation.duration = 1.5
+        rotation.isCumulative = true
+        rotation.repeatCount = Float.greatestFiniteMagnitude
+        self.migrationButton.layer.add(rotation, forKey: "rotationAnimation")
+    }
+    
+    private func stopMigrationAnimation() {
+        self.migrationButton.layer.removeAllAnimations()
+    }
     
     func setupLayout() {
         
@@ -226,11 +272,12 @@ private final class HeaderView: UIView {
         logButton.titleLabel?.font = .systemFont(ofSize: 12, weight: .bold)
         #endif
         
-        buttonsStackView.addArrangedSubview(searchButton)
-        searchButton.autoLayout.active {
+        buttonsStackView.addArrangedSubview(migrationButton)
+        migrationButton.autoLayout.active {
             $0.widthAnchor.constraint(equalToConstant: 25)
             $0.heightAnchor.constraint(equalToConstant: 25)
         }
+        migrationButton.isHidden = true
         buttonsStackView.addArrangedSubview(eventTypeFilterButton)
         eventTypeFilterButton.autoLayout.active {
             $0.widthAnchor.constraint(equalToConstant: 25)
@@ -246,6 +293,8 @@ private final class HeaderView: UIView {
     func setupStyling(
         _ fontSet: any FontSet, _ colorSet: any ColorSet
     ) {
+        self.currentColorSet = colorSet
+        
         self.monthLabel.font = fontSet.bigMonth
         self.monthLabel.textColor = colorSet.normalText
         
@@ -257,8 +306,13 @@ private final class HeaderView: UIView {
         
         self.returnTodayView.layer.borderColor = colorSet.normalText.cgColor
         
-        self.searchButton.tintColor = colorSet.normalText
-        self.searchButton.setImage(UIImage(systemName: "magnifyingglass"), for: .normal)
+        switch self.migrationStatus {
+        case .migrating:
+            self.migrationButton.tintColor = colorSet.normalText
+        case .need:
+            self.migrationButton.tintColor = colorSet.accentOrange
+        default: break
+        }
         self.eventTypeFilterButton.tintColor = colorSet.normalText
         self.eventTypeFilterButton.setImage(UIImage(systemName: "line.3.horizontal.decrease.circle"), for: .normal)
         self.settingButton.tintColor = colorSet.normalText
@@ -279,7 +333,9 @@ struct ViewControllerPreviewConverter: UIViewControllerRepresentable {
             fontSetKey: .systemDefault
         )
         return MainViewController(
-            viewModel: MainViewModelImple(),
+            viewModel: MainViewModelImple(
+                temporaryUserDataMigrationUsecase: NotNeedTemporaryUserDataMigrationUescaseImple()
+            ),
             viewAppearance: ViewAppearance(
                 setting: setting
             )

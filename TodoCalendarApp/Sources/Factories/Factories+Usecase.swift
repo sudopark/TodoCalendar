@@ -161,6 +161,10 @@ extension NonLoginUsecaseFactoryImple {
             notificationRepository: repository
         )
     }
+    
+    func makeTemporaryUserDataMigrationUsecase() -> any TemporaryUserDataMigrationUescase {
+        return NotNeedTemporaryUserDataMigrationUescaseImple()
+    }
 }
 
 
@@ -172,15 +176,23 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let authUsecase: any AuthUsecase
     let accountUescase: any AccountUsecase
     let viewAppearanceStore: any ViewAppearanceStore
+    private let temporaryUserDataMigrationUsecase: TemporaryUserDataMigrationUescaseImple
     
     init(
         authUsecase: any AuthUsecase,
         accountUescase: any AccountUsecase,
-        viewAppearanceStore: any ViewAppearanceStore
+        viewAppearanceStore: any ViewAppearanceStore,
+        temporaryUserDataFilePath: String
     ) {
         self.authUsecase = authUsecase
         self.accountUescase = accountUescase
         self.viewAppearanceStore = viewAppearanceStore
+        
+        let migrationRepository = TemporaryUserDataMigrationRepositoryImple(
+            tempUserDBPath: temporaryUserDataFilePath, 
+            remoteAPI: Singleton.shared.remoteAPI
+        )
+        self.temporaryUserDataMigrationUsecase = .init(migrationRepository: migrationRepository)
     }
 }
 
@@ -308,5 +320,9 @@ extension LoginUsecaseFactoryImple {
         return EventNotificationSettingUsecaseImple(
             notificationRepository: repository
         )
+    }
+    
+    func makeTemporaryUserDataMigrationUsecase() -> any TemporaryUserDataMigrationUescase {
+        return self.temporaryUserDataMigrationUsecase
     }
 }
