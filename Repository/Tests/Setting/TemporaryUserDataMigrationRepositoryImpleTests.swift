@@ -69,6 +69,15 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
         let todoStorage = TodoLocalStorageImple(sqliteService: self.sqliteService)
         try await todoStorage.updateTodoEvents([todo1, todo2])
         
+        let done1 = DoneTodoEvent(uuid: "d1", name: "d1", originEventId: "todo1", doneTime: Date())
+        |> \.eventTime .~ self.dummyTime
+        
+        let done2 = DoneTodoEvent(uuid: "d2", name: "d2", originEventId: "todo2", doneTime: Date())
+        |> \.eventTime .~ self.dummyTime
+        |> \.notificationOptions .~ self.dummyNotificationOptions
+        try await todoStorage.saveDoneTodoEvent(done1)
+        try await todoStorage.saveDoneTodoEvent(done2)
+        
         let sc1 = ScheduleEvent(uuid: "sc1", name: "sc1", time: self.dummyTime)
             |> \.repeating .~ self.dummyRepeating
             |> \.showTurn .~ true
@@ -155,6 +164,18 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         XCTAssertEqual(detailEventIds, ["todo1"])
     }
     
+    func testRespository_migrateDoneTodoEvents() async throws {
+        // given
+        let repository = try await self.makeRepository()
+        
+        // when
+        try await repository.migrateDoneEvents()
+        
+        // then
+        let doneIds = self.stubRemote.didRequestedParams?.keys.sorted().map { $0 }
+        XCTAssertEqual(doneIds, ["d1", "d2"])
+    }
+    
     func testReposiotry_clearTempUserData() async throws {
         // given
         let repository = try await self.makeRepository()
@@ -216,6 +237,11 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
                 endpoint: MigrationEndpoints.eventDetails,
                 resultJsonString: .success(self.okReponse)
             ),
+            .init(
+                method: .post,
+                endpoint: MigrationEndpoints.doneTodos,
+                resultJsonString: .success(self.okReponse)
+            )
         ]
     }
 }

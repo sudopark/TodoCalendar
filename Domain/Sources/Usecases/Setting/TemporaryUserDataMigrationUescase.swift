@@ -69,6 +69,7 @@ extension TemporaryUserDataMigrationUescaseImple {
                 try await self?.migrationRepository.migrateTodoEvents()
                 try await self?.migrationRepository.migrateScheduleEvents()
                 try? await self?.migrationRepository.migrateEventDetails()
+                try? await self?.migrationRepository.migrateDoneEvents()
                 try? await self?.migrationRepository.clearTemporaryUserData()
                 self?.subject.isMigrating.send(false)
                 self?.subject.migrationResult.send(.success(()))

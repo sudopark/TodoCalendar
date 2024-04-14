@@ -695,6 +695,9 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     func loadAllEvents() async throws -> [TodoEvent] {
         return []
     }
+    func loadAllDoneEvents() async throws -> [DoneTodoEvent] {
+        return []
+    }
     
     var shouldFailLoadTodo: Bool = false
     func loadTodoEvent(_ eventId: String) async throws -> TodoEvent {
@@ -766,4 +769,6 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     func removeAll() async throws {
         self.didRemoveAll = true
     }
+    
+    func removeAllDoneEvents() async throws { }
 }

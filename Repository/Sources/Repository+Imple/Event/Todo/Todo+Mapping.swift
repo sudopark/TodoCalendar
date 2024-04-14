@@ -11,7 +11,7 @@ import Prelude
 import Optics
 import Domain
 
-private enum TodoCodingKeys: String, CodingKey {
+enum TodoCodingKeys: String, CodingKey {
     case uuid
     case name
     case eventTagId = "event_tag_id"

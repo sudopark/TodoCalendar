@@ -155,6 +155,7 @@ extension TemporaryUserDataMigrationUescaseImpleTests {
         parameterizeTest("이벤트 태그 마이그레이션 실패시 실패") { $0.stubMigrateEventTagResult = .failure(RuntimeError("failed")) }
         parameterizeTest("todo event 마이그레이션 실패시 실패") { $0.stubMigrateTodoResult = .failure(RuntimeError("failed")) }
         parameterizeTest("schedule event 마이그레이션 실패시 실패") { $0.stubMigrateScheduleResult = .failure(RuntimeError("failed")) }
+        parameterizeTest("done todo event 마이그레이션 실패는 성공으로 간주", expectIsFail: false) { $0.shouldFailMigratedDoneTodo = true }
         parameterizeTest("event detail 마이그레이션 실패는 성공으로 간주", expectIsFail: false) { $0.stubMigrateEventDetailResult = .failure(RuntimeError("failed")) }
         parameterizeTest("임시유저 데이터 삭제 실패는 성공으로 간주", expectIsFail: false) { $0.stubClearDataResult = .failure(RuntimeError("failed")) }
     }
@@ -238,6 +239,13 @@ private final class StubRepository: TemporaryUserDataMigrationRepository {
             
         case .failure(let error):
             throw error
+        }
+    }
+    
+    var shouldFailMigratedDoneTodo: Bool = false
+    func migrateDoneEvents() async throws {
+        if shouldFailMigratedDoneTodo {
+            throw RuntimeError("failed")
         }
     }
     
