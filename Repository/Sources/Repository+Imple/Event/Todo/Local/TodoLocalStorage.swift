@@ -22,10 +22,12 @@ public protocol TodoLocalStorage: Sendable {
     func saveTodoEvent(_ todo: TodoEvent) async throws
     func updateTodoEvent(_ todo: TodoEvent) async throws
     func updateTodoEvents(_ todos: [TodoEvent]) async throws
+    func loadAllDoneEvents() async throws -> [DoneTodoEvent]
     func saveDoneTodoEvent(_ doneEvent: DoneTodoEvent) async throws
     func removeTodo(_ eventId: String) async throws
     func removeTodos(_ eventids: [String]) async throws
     func removeAll() async throws
+    func removeAllDoneEvents() async throws
 }
 
 public final class TodoLocalStorageImple: TodoLocalStorage, Sendable {
@@ -88,6 +90,20 @@ extension TodoLocalStorageImple {
             return try db.load(query, mapping: mapping)
         }
     }
+    
+    public func loadAllDoneEvents() async throws -> [DoneTodoEvent] {
+        let timeQuery = Times.selectAll()
+        let doneQuery = Dones.selectAll()
+        let query = doneQuery.innerJoin(with: timeQuery, on: { ($0.uuid, $1.eventId) })
+        let mapping: (CursorIterator) throws -> DoneTodoEvent = { cursor in
+            return try DoneTodoEvent(cursor)
+            |> \.eventTime .~ (try? Times.Entity(cursor).eventTime)
+        }
+        return try await self.sqliteService.async.run([DoneTodoEvent].self) { db in
+            try db.createTableOrNot(Times.self)
+            return try db.load(query, mapping: mapping)
+        }
+    }
 }
 
 extension TodoLocalStorageImple {
@@ -144,5 +160,9 @@ extension TodoLocalStorageImple {
     
     public func removeAll() async throws {
         try await self.sqliteService.async.run { try $0.dropTable(Todo.self) }
+    }
+    
+    public func removeAllDoneEvents() async throws {
+        try await self.sqliteService.async.run { try $0.dropTable(Dones.self) }
     }
 }

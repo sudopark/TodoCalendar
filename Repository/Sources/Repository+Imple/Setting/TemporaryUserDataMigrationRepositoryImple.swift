@@ -123,6 +123,24 @@ extension TemporaryUserDataMigrationRepositoryImple {
         try? await storage.removeAll()
     }
     
+    public func migrateDoneEvents() async throws {
+        let service = try await self.prepareTempDBsqliteService()
+        defer { service.close() }
+        
+        let storage = TodoLocalStorageImple(sqliteService: service)
+        let doneEvents = try await storage.loadAllDoneEvents()
+        
+        let endpoint = MigrationEndpoints.doneTodos
+        let payload = BatchDoneTodoEventPayload(dones: doneEvents)
+        let _: BatchWriteResult = try await self.remoteAPI.request(
+            .post,
+            endpoint,
+            parameters: payload.asJson()
+        )
+        
+        try? await storage.removeAllDoneEvents()
+    }
+    
     public func clearTemporaryUserData() async throws {
         try FileManager.default.removeItem(atPath: self.tempUserDBPath)
     }

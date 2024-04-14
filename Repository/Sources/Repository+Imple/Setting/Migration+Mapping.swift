@@ -91,3 +91,30 @@ struct BatchEventDetailPayload {
         }
     }
 }
+
+struct BatchDoneTodoEventPayload {
+    private let dones: [DoneTodoEvent]
+    init(dones: [DoneTodoEvent]) {
+        self.dones = dones
+    }
+    func asJson() -> [String: Any] {
+        typealias Key = TodoCodingKeys
+        func payload(_ done: DoneTodoEvent) -> [String: Any] {
+            var sender = [String: Any]()
+            sender[Key.name.rawValue] = done.name
+            sender[Key.originEventId.rawValue] = done.originEventId
+            sender[Key.doneAt.rawValue] = done.doneTime.timeIntervalSince1970
+            sender[Key.eventTagId.rawValue] = done.eventTagId?.customTagId
+            sender[Key.time.rawValue] = done.eventTime.map {
+                EventTimeMapper(time: $0).asJson()
+            }
+            sender[Key.notificationOptions.rawValue] = done.notificationOptions.compactMap {
+                try? EventNotificationTimeOptionMapper(option: $0).asJson()
+            }
+            return sender
+        }
+        return self.dones.reduce(into: [String: Any]()) { acc, done in
+            acc[done.uuid] = payload(done)
+        }
+    }
+}
