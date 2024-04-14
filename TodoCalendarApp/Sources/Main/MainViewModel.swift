@@ -9,24 +9,32 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 import Scenes
 
 
 // MARK: - MainViewModel
 
+enum TemporaryUserDataMigrationStatus: Equatable {
+    case need(_ count: Int)
+    case migrating
+}
+
 protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // interactor
     func prepare()
     func returnToToday()
-    func startSearch()
+    func handleMigration()
     func moveToEventTypeFilterSetting()
     func moveToSetting()
     
     // presenter
     var currentMonth: AnyPublisher<String, Never> { get }
     var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
+    var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
 }
 
 
@@ -34,20 +42,56 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
 final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     
+    private let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     var router: (any MainRouting)?
     
-    init() {
+    init(
+        temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
+    ) {
+        self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
         
+        self.internalBinding()
     }
     
     
     private struct Subject {
         let focusedMonthInfo = CurrentValueSubject<(CalendarMonth, Bool)?, Never>(nil)
+        let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
     private var calendarSceneInteractor: (any CalendarSceneInteractor)?
+    
+    private func internalBinding() {
+        
+        self.temporaryUserDataMigrationUsecase.isMigrating
+            .filter { $0 }
+            .sink(receiveValue: { [weak self] _ in
+                self?.subject.temporaryUserDataMigrationStatus.send(.migrating)
+            })
+            .store(in: &self.cancellables)
+        
+        self.temporaryUserDataMigrationUsecase.migrationNeedEventCount
+            .filter { $0 > 0 }
+            .sink(receiveValue: { [weak self] count in
+                self?.subject.temporaryUserDataMigrationStatus.send(.need(count))
+            })
+            .store(in: &self.cancellables)
+        
+        self.temporaryUserDataMigrationUsecase.migrationResult
+            .sink(receiveValue: { [weak self] result in
+                self?.subject.temporaryUserDataMigrationStatus.send(nil)
+                switch result {
+                case .success:
+                    self?.router?.showToast("temporary_user_data::migration_success::message".localized())
+                case .failure(let error):
+                    self?.router?.showError(error)
+                }
+            })
+            .store(in: &self.cancellables)
+    }
+    
 }
 
 
@@ -59,14 +103,28 @@ extension MainViewModelImple {
         Task { @MainActor in
             self.calendarSceneInteractor = self.router?.attachCalendar()
         }
+        
+        self.temporaryUserDataMigrationUsecase.checkIsNeedMigration()
     }
     
     func returnToToday() {
         self.calendarSceneInteractor?.moveFocusToToday()
     }
     
-    func startSearch() {
-        // TODO:
+    func handleMigration() {
+        guard let status = self.subject.temporaryUserDataMigrationStatus.value,
+              case .need(let count) = status
+        else { return }
+        
+        let runMigration: () -> Void = { [weak self] in
+            self?.temporaryUserDataMigrationUsecase.startMigration()
+        }
+        let info = ConfirmDialogInfo()
+            |> \.title .~ pure("temporary_user_data::migration::confirm::title".localized())
+            |> \.message .~ pure("temporary_user_data::migration::confirm::message".localized(with: count))
+            |> \.withCancel .~ true
+            |> \.confirmed .~ pure(runMigration)
+        self.router?.showConfirm(dialog: info)
     }
     
     func moveToEventTypeFilterSetting() {
@@ -99,6 +157,12 @@ extension MainViewModelImple {
         return self.subject.focusedMonthInfo
             .compactMap { $0 }
             .map { !$0.1 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> {
+        return self.subject.temporaryUserDataMigrationStatus
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

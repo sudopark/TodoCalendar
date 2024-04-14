@@ -18,21 +18,30 @@ import TestDoubles
 class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     private var spyRouter: SpyRouter!
+    private var stubMigrationUsecase: StubTemporaryUserDataMigrationUescase!
     var cancelBag: Set<AnyCancellable>!
     
     override func setUpWithError() throws {
         self.spyRouter = .init()
+        self.stubMigrationUsecase = .init()
         self.cancelBag = .init()
+        self.timeout = 0.01
     }
     
     override func tearDownWithError() throws {
         self.spyRouter = nil
+        self.stubMigrationUsecase = nil
         self.cancelBag = nil
     }
     
-    private func makeViewModel() -> MainViewModelImple {
+    private func makeViewModel(
+        shouldFailMigration: Bool = false
+    ) -> MainViewModelImple {
+        self.stubMigrationUsecase.shouldFail = shouldFailMigration
         let expect = expectation(description: "wait until attached")
-        let viewModel = MainViewModelImple()
+        let viewModel = MainViewModelImple(
+            temporaryUserDataMigrationUsecase: self.stubMigrationUsecase
+        )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
             expect.fulfill()
@@ -121,6 +130,56 @@ extension MainViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyRouter.didRouteToSetting, true)
+    }
+}
+
+extension MainViewModelImpleTests {
+    
+    // show migration is need
+    func testViewModel_checkIsNeedMigration() {
+        // given
+        let expect = expectation(description: "show migration is need")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let status = self.waitFirstOutput(expect, for: viewModel.temporaryUserDataMigrationStatus)
+        
+        // then
+        XCTAssertEqual(status, .need(100))
+    }
+    
+    // success
+    func testViewModel_migrationSuccess() {
+        // given
+        let expect = expectation(description: "migration success")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let statuses = self.waitOutputs(expect, for: viewModel.temporaryUserDataMigrationStatus) {
+            viewModel.handleMigration()
+        }
+        
+        // then
+        XCTAssertEqual(statuses, [.need(100), .migrating, nil])
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage != nil, true)
+    }
+    
+    // fail
+    func testViewModel_migrationFailed() {
+        // given
+        let expect = expectation(description: "migration failed")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel(shouldFailMigration: true)
+        
+        // when
+        let statuses = self.waitOutputs(expect, for: viewModel.temporaryUserDataMigrationStatus) {
+            viewModel.handleMigration()
+        }
+        
+        // then
+        XCTAssertEqual(statuses, [.need(100), .migrating, nil, .need(10)])
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith != nil, true)
     }
 }
 

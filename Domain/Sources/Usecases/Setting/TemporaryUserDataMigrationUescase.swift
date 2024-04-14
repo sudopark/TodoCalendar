@@ -11,6 +11,8 @@ import Combine
 import Extensions
 
 
+// MARK: - TemporaryUserDataMigrationUescase
+
 public protocol TemporaryUserDataMigrationUescase: Sendable, AnyObject {
     
     func checkIsNeedMigration()
@@ -22,11 +24,14 @@ public protocol TemporaryUserDataMigrationUescase: Sendable, AnyObject {
     var migrationResult: AnyPublisher<Result<Void, any Error>, Never> { get }
 }
 
+
+// MARK: - TemporaryUserDataMigrationUescaseImple
+
 public final class TemporaryUserDataMigrationUescaseImple: TemporaryUserDataMigrationUescase, @unchecked Sendable {
     
     private let migrationRepository: TemporaryUserDataMigrationRepository
     
-    init(
+    public init(
         migrationRepository: TemporaryUserDataMigrationRepository
     ) {
         self.migrationRepository = migrationRepository
@@ -47,7 +52,11 @@ extension TemporaryUserDataMigrationUescaseImple {
     public func checkIsNeedMigration() {
         
         Task { [weak self] in
-            try await self?.updateMigrationNeedCount()
+            do {
+                try await self?.updateMigrationNeedCount()
+            } catch {
+                logger.log(level: .error, "migration check fail: \(error)")
+            }
         }
         .store(in: &self.cancellables)
     }
@@ -105,4 +114,21 @@ extension TemporaryUserDataMigrationUescaseImple {
         return self.subject.migrationResult
             .eraseToAnyPublisher()
     }
+}
+
+
+// MARK: - NotNeedTemporaryUserDataMigrationUescaseImple
+
+public final class NotNeedTemporaryUserDataMigrationUescaseImple: TemporaryUserDataMigrationUescase {
+    
+    public init() { }
+    
+    public func checkIsNeedMigration() { }
+    
+    public func startMigration() { }
+    
+    public var isNeedMigration: AnyPublisher<Bool, Never> { Just(false).eraseToAnyPublisher() }
+    public var migrationNeedEventCount: AnyPublisher<Int, Never> { Just(0).eraseToAnyPublisher() }
+    public var isMigrating: AnyPublisher<Bool, Never> { Just(false).eraseToAnyPublisher() }
+    public var migrationResult: AnyPublisher<Result<Void, any Error>, Never> { Empty().eraseToAnyPublisher() }
 }

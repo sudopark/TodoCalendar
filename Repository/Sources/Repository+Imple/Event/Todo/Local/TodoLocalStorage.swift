@@ -84,6 +84,7 @@ extension TodoLocalStorageImple {
                 |> \.time .~ (try? Times.Entity(cursor).eventTime)
         }
         return try await self.sqliteService.async.run([TodoEvent].self) { db in
+            try db.createTableOrNot(Times.self)
             return try db.load(query, mapping: mapping)
         }
     }

@@ -86,6 +86,7 @@ extension ScheduleEventLocalStorageImple {
             return ScheduleEvent(entity, time)
         }
         return try await sqliteService.async.run([ScheduleEvent].self) { db in
+            try db.createTableOrNot(Times.self)
             return try db.load(query, mapping: mapping)
         }
     }
