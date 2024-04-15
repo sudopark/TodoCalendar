@@ -34,4 +34,8 @@ open class StubAuthUsecase: AuthUsecase, @unchecked Sendable {
     public var supportOAuth2Service: [any OAuth2ServiceProvider] {
         return [GoogleOAuth2ServiceProvider()]
     }
+    
+    open func signOut() async throws {
+        
+    }
 }

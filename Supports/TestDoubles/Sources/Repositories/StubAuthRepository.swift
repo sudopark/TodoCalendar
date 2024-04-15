@@ -34,4 +34,8 @@ open class StubAuthRepository: AuthRepository, @unchecked Sendable {
         self.latestAccount = account
         return account
     }
+    
+    public func signOut() async throws {
+        self.latestAccount = nil
+    }
 }

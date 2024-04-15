@@ -20,10 +20,12 @@ class AuthRepositoryImpleTests: BaseTestCase {
     
     private var spyKeyChainStore: SpyKeyChainStorage!
     private var stubRemote: StubRemoteAPI!
+    private var spyFirebaseAuthService: StubFirebaseAuthService!
     
     override func setUpWithError() throws {
         self.spyKeyChainStore = .init()
         self.stubRemote = .init(responses: self.responses)
+        self.spyFirebaseAuthService = .init()
     }
     
     override func tearDownWithError() throws {
@@ -32,14 +34,13 @@ class AuthRepositoryImpleTests: BaseTestCase {
     }
     
     private func makeRepository(shouldFail: Bool = false) -> AuthRepositoryImple {
-        let authService = StubFirebaseAuthService()
-        authService.shouldFail = shouldFail
+        self.spyFirebaseAuthService.shouldFail = shouldFail
         
         return AuthRepositoryImple(
             remoteAPI: self.stubRemote,
             authStore: self.spyKeyChainStore,
             keyChainStorage: self.spyKeyChainStore,
-            firebaseAuthService: authService
+            firebaseAuthService: spyFirebaseAuthService
         )
     }
 }
@@ -93,6 +94,20 @@ extension AuthRepositoryImpleTests {
         XCTAssertNil(credentialBeforeSignIn)
         XCTAssertNotNil(authAfterSignIn)
         XCTAssertNotNil(credentialAfterSignIn)
+    }
+    
+    func testRepository_signOut() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        try await repository.signOut()
+        
+        // then
+        let authAfterSignIn = try? await repository.loadLatestSignInAuth()
+        XCTAssertEqual(self.spyFirebaseAuthService.didSignout, true)
+        XCTAssertNil(authAfterSignIn)
+        XCTAssertNil(self.stubRemote.credential)
     }
 }
 
