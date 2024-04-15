@@ -141,8 +141,6 @@ extension AuthRepositoryImple {
     
     public func signIn(_ credential: OAuth2Credential) async throws -> Account {
         
-        // TODO: signIn 이전에 로그인된 계정 있으면 로그아웃 처리 필요
-        
         switch credential {
         case let googleCredential as GoogleOAuth2Credential:
             let auth = try await googleSignIn(googleCredential)
@@ -181,5 +179,12 @@ extension AuthRepositoryImple {
             with: ["Authorization": "Bearer \(auth.accessToken)"]
         )
         return infoDTO.info
+    }
+    
+    public func signOut() async throws {
+        try self.firebaseAuthService.signOut()
+        self.authStore.removeAuth()
+        self.keyChainStorage.remove(accountInfoKey)
+        self.remoteAPI.setup(credential: nil)
     }
 }
