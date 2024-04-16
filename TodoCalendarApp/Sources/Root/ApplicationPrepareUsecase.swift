@@ -67,7 +67,9 @@ extension ApplicationUsecaseImple {
     }
     
     func prepareSignedIn(_ auth: Auth) {
-        self.sharedDataStore.clearAll()
+        self.sharedDataStore.clearAll {
+            $0 != ShareDataKeys.accountInfo.rawValue
+        }
         let closeResult = self.database.close()
         switch closeResult {
         case .success:

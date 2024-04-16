@@ -49,10 +49,12 @@ public final class SharedDataStore: @unchecked Sendable {
         return newSubject
     }
     
-    public func clearAll() {
+    public func clearAll(filter: (String) -> Bool = { _ in true }) {
         self.lock.lock(); defer { self.lock.unlock() }
-        self.memorizedDataSubjects.values.forEach {
-            $0.send(nil)
+        self.memorizedDataSubjects.forEach { key, subject in
+            if filter(key) {
+                subject.send(nil)
+            }
         }
     }
 }

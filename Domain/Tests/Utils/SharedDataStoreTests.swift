@@ -104,4 +104,19 @@ extension SharedDataStoreTests {
         // then
         XCTAssertEqual(values, [nil, 100, nil, 101, nil])
     }
+    
+    func testStore_clearWithFilter() {
+        // given
+        self.store.put(Int.self, key: "will_remove", 100)
+        self.store.put(Int.self, key: "will_not_remove", 10)
+        
+        // when
+        self.store.clearAll(filter: { $0 != "will_not_remove" })
+        
+        // then
+        let intWillRemove = self.store.value(Int.self, key: "will_remove")
+        let intWillNotRemove = self.store.value(Int.self, key: "will_not_remove")
+        XCTAssertEqual(intWillRemove, nil)
+        XCTAssertEqual(intWillNotRemove, 10)
+    }
 }
