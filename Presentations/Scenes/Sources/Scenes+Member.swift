@@ -20,9 +20,18 @@ public protocol SignInSceneInteractor: AnyObject { }
 public protocol SignInScene: Scene where Interactor == any SignInSceneInteractor
 { }
 
+// MARK: - ManageAccountScene
+
+public protocol ManageAccountSceneInteractor: AnyObject { }
+
+public protocol ManageAccountScene: Scene where Interactor == any ManageAccountSceneInteractor
+{ }
 
 public protocol MemberSceneBuilder {
     
     @MainActor
     func makeSignInScene() -> any SignInScene
+    
+    @MainActor
+    func makeMangeAccountScene() -> any ManageAccountScene
 }

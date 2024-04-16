@@ -19,7 +19,14 @@ protocol ManageAccountRouting: Routing, Sendable { }
 
 // MARK: - Router
 
-final class ManageAccountRouter: BaseRouterImple, ManageAccountRouting, @unchecked Sendable { }
+final class ManageAccountRouter: BaseRouterImple, ManageAccountRouting, @unchecked Sendable { 
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        Task { @MainActor in
+            self.currentScene?.navigationController?.popViewController(animated: true)
+        }
+    }
+}
 
 
 extension ManageAccountRouter {

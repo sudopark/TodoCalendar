@@ -85,7 +85,12 @@ extension SettingItemListRouter {
     }
     
     func routeToAccountManage() {
-        // TODO: 
+        
+        Task { @MainActor in
+            
+            let next = self.memberSceneBuilder.makeMangeAccountScene()
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
     }
     
     func routeToSignIn() {
