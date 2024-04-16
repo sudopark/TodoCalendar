@@ -30,7 +30,6 @@ protocol ManageAccountViewModel: AnyObject, Sendable, ManageAccountSceneInteract
     func close()
     func prepare()
     func handleMigration()
-    func showPrivatePolicy()
     func signOut()
     
     // presenter
@@ -129,10 +128,6 @@ extension ManageAccountViewModelImple {
         else { return }
         
         self.migrationUsecase.startMigration()
-    }
-    
-    func showPrivatePolicy() {
-        self.router?.openSafari(Constant.privatePolicyURLPath)
     }
     
     func signOut() {

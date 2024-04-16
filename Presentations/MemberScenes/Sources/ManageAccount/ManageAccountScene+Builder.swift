@@ -12,18 +12,6 @@ import UIKit
 import Scenes
 
 
-// MARK: - ManageAccountScene Interactable & Listenable
-
-protocol ManageAccountSceneInteractor: AnyObject { }
-//
-//public protocol ManageAccountSceneListener: AnyObject { }
-
-// MARK: - ManageAccountScene
-
-protocol ManageAccountScene: Scene where Interactor == any ManageAccountSceneInteractor
-{ }
-
-
 // MARK: - Builder + DependencyInjector Extension
 
 protocol ManageAccountSceneBuiler: AnyObject {

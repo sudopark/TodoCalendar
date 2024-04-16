@@ -35,4 +35,13 @@ extension MemberSceneBuilderImple {
         )
         return builder.makeSignInScene()
     }
+    
+    @MainActor
+    public func makeMangeAccountScene() -> any ManageAccountScene {
+        let builder = ManageAccountSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        return builder.makeManageAccountScene()
+    }
 }
