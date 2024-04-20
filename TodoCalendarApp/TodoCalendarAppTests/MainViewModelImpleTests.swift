@@ -18,11 +18,13 @@ import TestDoubles
 class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     private var spyRouter: SpyRouter!
+    private var spyUISettingUsecase: StubUISettingUsecase!
     private var stubMigrationUsecase: StubTemporaryUserDataMigrationUescase!
     var cancelBag: Set<AnyCancellable>!
     
     override func setUpWithError() throws {
         self.spyRouter = .init()
+        self.spyUISettingUsecase = .init()
         self.stubMigrationUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
@@ -30,6 +32,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     override func tearDownWithError() throws {
         self.spyRouter = nil
+        self.spyUISettingUsecase = nil
         self.stubMigrationUsecase = nil
         self.cancelBag = nil
     }
@@ -40,6 +43,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubMigrationUsecase.shouldFail = shouldFailMigration
         let expect = expectation(description: "wait until attached")
         let viewModel = MainViewModelImple(
+            uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase
         )
         viewModel.router = self.spyRouter
@@ -53,6 +57,29 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
 }
 
 extension MainViewModelImpleTests {
+    
+    private func makeViewModelWithoutPrepare() -> MainViewModelImple {
+        let viewModel = MainViewModelImple(
+            uiSettingUsecase: self.spyUISettingUsecase,
+            temporaryUserDataMigrationUsecase: self.stubMigrationUsecase
+        )
+        viewModel.router = self.spyRouter
+        return viewModel
+    }
+    
+    func testViewModel_whenPrepare_refreshViewAppearance() {
+        // given
+        let expect = expectation(description: "prepare시에 viewApeparance refresh")
+        let viewModel = self.makeViewModelWithoutPrepare()
+        
+        // when
+        let setting = self.waitFirstOutput(expect, for: self.spyUISettingUsecase.currentCalendarUISeting) {
+            viewModel.prepare()
+        }
+        
+        // then
+        XCTAssertNotNil(setting)
+    }
     
     func testViewModel_whenFocusChanged_updateCurrentMonth() {
         // given

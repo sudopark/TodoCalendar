@@ -205,7 +205,7 @@ public struct RemoteEnvironment: Sendable {
             return appendSubpathIfNotEmpty(prefix, detail.subPath)
             
         case let setting as AppSettingEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/event_details"
+            let prefix = "\(calendarAPIHost)/v1/setting"
             return appendSubpathIfNotEmpty(prefix, setting.subPath)
             
         case let migration as MigrationEndpoints:
