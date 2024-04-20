@@ -42,12 +42,15 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
 final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     
+    private let uiSettingUsecase: any UISettingUsecase
     private let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     var router: (any MainRouting)?
     
     init(
+        uiSettingUsecase: any UISettingUsecase,
         temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     ) {
+        self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
         
         self.internalBinding()
@@ -102,11 +105,16 @@ extension MainViewModelImple {
     func prepare() {
         Task { @MainActor in
             self.calendarSceneInteractor = self.router?.attachCalendar()
-            
-            // TODO: reload appearance setting
         }
-        
+        self.refreshViewAppearanceSettings()
         self.temporaryUserDataMigrationUsecase.checkIsNeedMigration()
+    }
+    
+    private func refreshViewAppearanceSettings() {
+        Task { [weak self] in
+            _ = try await self?.uiSettingUsecase.refreshAppearanceSetting()
+        }
+        .store(in: &self.cancellables)
     }
     
     func returnToToday() {

@@ -319,37 +319,3 @@ private final class HeaderView: UIView {
         self.settingButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
     }
 }
-
-// MARK: - preview
-
-import SwiftUI
-
-struct ViewControllerPreviewConverter: UIViewControllerRepresentable {
-
-    func makeUIViewController(context: Context) -> some UIViewController {
-        let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault
-        )
-        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
-        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        return MainViewController(
-            viewModel: MainViewModelImple(
-                temporaryUserDataMigrationUsecase: NotNeedTemporaryUserDataMigrationUescaseImple()
-            ),
-            viewAppearance: ViewAppearance(
-                setting: setting
-            )
-        )
-    }
-    
-    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {}
-}
-
-
-struct ViewControllerPreviewProvider: PreviewProvider {
-    
-    static var previews: some View {
-        return ViewControllerPreviewConverter()
-    }
-}

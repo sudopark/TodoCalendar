@@ -41,6 +41,7 @@ extension MainSceneBuilerImple: MainSceneBuiler {
     public func makeMainScene() -> any MainScene {
         
         let viewModel = MainViewModelImple(
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             temporaryUserDataMigrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase
         )
         
