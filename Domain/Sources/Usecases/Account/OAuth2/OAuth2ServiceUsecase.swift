@@ -11,8 +11,6 @@ import UIKit
 
 public protocol OAuth2ServiceUsecase: Sendable {
     
-    var provider: any OAuth2ServiceProvider { get }
-    
     @MainActor
     func requestAuthentication() async throws -> any OAuth2Credential
     
@@ -44,6 +42,11 @@ public final class OAuth2ServiceUsecaseProviderImple: OAuth2ServiceUsecaseProvid
                 topViewControllerFinding: self.topViewControllerFinding
             )
             
+        case let apple as AppleOAuth2ServiceProvider:
+            return AppleOAuth2ServiceUsecaseImple(
+                preHandleResult: apple.appleSignInResult
+            )
+            
         default:
             return nil
         }
@@ -51,7 +54,8 @@ public final class OAuth2ServiceUsecaseProviderImple: OAuth2ServiceUsecaseProvid
     
     public var supportOAuth2Service: [any OAuth2ServiceProvider] {
         return [
-            GoogleOAuth2ServiceProvider()
+            GoogleOAuth2ServiceProvider(),
+            AppleOAuth2ServiceProvider()
         ]
     }
 }

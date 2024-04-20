@@ -69,6 +69,14 @@ extension FirebaseAuth.Auth: FirebaseAuthService {
             )
             return try await self.signIn(with: credential)
             
+        case let appleCredential as AppleOAuth2Credential:
+            let credential = OAuthProvider.credential(
+                withProviderID: appleCredential.provider,
+                idToken: appleCredential.idToken,
+                rawNonce: appleCredential.nonce
+            )
+            return try await self.signIn(with: credential)
+            
         default:
             throw RuntimeError("not support signin credential")
         }
@@ -141,21 +149,15 @@ extension AuthRepositoryImple {
     
     public func signIn(_ credential: OAuth2Credential) async throws -> Account {
         
-        switch credential {
-        case let googleCredential as GoogleOAuth2Credential:
-            let auth = try await googleSignIn(googleCredential)
-            let account = try await self.postSignInAction(auth)
-            return account
-            
-        default:
-            throw RuntimeError("not support signin credential")
-        }
+        let auth = try await authorize(credential)
+        let account = try await self.postSignInAction(auth)
+        return account
     }
     
     
-    private func googleSignIn(_ googleCredential: GoogleOAuth2Credential) async throws -> Domain.Auth {
+    private func authorize(_ credential: OAuth2Credential) async throws -> Domain.Auth {
         
-        let result = try await self.firebaseAuthService.authorize(with: googleCredential)
+        let result = try await self.firebaseAuthService.authorize(with: credential)
         let accessToken = try await result.idTokenWithoutRefreshing()
         
         return .init(

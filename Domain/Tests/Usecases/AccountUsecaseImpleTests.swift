@@ -262,6 +262,44 @@ extension AccountUsecaseImpleTests {
             XCTFail("기대한 이벤트가 아님")
         }
     }
+    
+    func testUsecase_appleSignIn() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when
+        let provider = AppleOAuth2ServiceProvider()
+        provider.appleSignInResult = .success(.init(appleIDToken: "token", nonce: "nonce"))
+        let account = try await usecase.signIn(provider)
+        
+        // then
+        XCTAssertEqual(account.auth.uid, "id")
+    }
+    
+    func testUsecase_appleSignIn_failed() async {
+        // given
+        func parameterizeTest(hasPrehandleErrorResult: Bool) async {
+            // given
+            let usecase = self.makeUsecase()
+            
+            // when
+            let provider = AppleOAuth2ServiceProvider()
+            if hasPrehandleErrorResult {
+                provider.appleSignInResult = .failure(RuntimeError("failed"))
+            }
+            
+            // then
+            do {
+                let _ = try await usecase.signIn(provider)
+                XCTFail("로그인에 실패해야함")
+            } catch {
+                XCTAssert(true)
+            }
+        }
+        // when + then
+        await parameterizeTest(hasPrehandleErrorResult: true)
+        await parameterizeTest(hasPrehandleErrorResult: false)
+    }
 }
 
 
@@ -277,13 +315,17 @@ private class FakeOAuthUsecaseProvider: OAuth2ServiceUsecaseProvider, @unchecked
         case is GoogleOAuth2ServiceProvider:
             return StubGoogleOAuth2Usecase(shouldFailOAuth: shouldFailOAuth)
             
+        case let apple as AppleOAuth2ServiceProvider:
+            return AppleOAuth2ServiceUsecaseImple(preHandleResult: apple.appleSignInResult)
+            
         default: return nil
         }
     }
     
     var supportOAuth2Service: [OAuth2ServiceProvider] {
         [
-            GoogleOAuth2ServiceProvider()
+            GoogleOAuth2ServiceProvider(),
+            AppleOAuth2ServiceProvider()
         ]
     }
 }

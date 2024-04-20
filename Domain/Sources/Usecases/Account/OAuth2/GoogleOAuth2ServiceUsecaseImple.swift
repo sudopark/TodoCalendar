@@ -19,10 +19,6 @@ public final class GoogleOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unche
     public init(topViewControllerFinding: @escaping () -> UIViewController?) {
         self.topViewControllerFinding = topViewControllerFinding
     }
-    
-    public var provider: OAuth2ServiceProvider {
-        GoogleOAuth2ServiceProvider()
-    }
 }
 
 extension GoogleOAuth2ServiceUsecaseImple {

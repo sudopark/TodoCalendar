@@ -59,6 +59,18 @@ extension AuthRepositoryImpleTests {
         XCTAssertNotNil(result)
     }
     
+    func testRepository_signInApple() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let credential = AppleOAuth2Credential(provider: "apple", idToken: "token", nonce: "nonce")
+        let result = try? await repository.signIn(credential)
+        
+        // then
+        XCTAssertNotNil(result)
+    }
+    
     func testRepository_failSignIn() async {
         // given
         let repository = self.makeRepository(shouldFail: true)
