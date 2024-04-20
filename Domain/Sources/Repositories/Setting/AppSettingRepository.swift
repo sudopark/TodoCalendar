@@ -11,8 +11,16 @@ import Foundation
 public protocol AppSettingRepository: Sendable {
     
     func loadSavedViewAppearance() -> AppearanceSettings
-    func saveViewAppearanceSetting(_ newValue: AppearanceSettings)
-    func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings
+    func refreshAppearanceSetting() async throws -> AppearanceSettings
+    
+    func changeCalendarAppearanceSetting(
+        _ params: EditCalendarAppearanceSettingParams
+    ) throws -> CalendarAppearanceSettings
+    
+    func changeDefaultEventTagColor(
+        _ params: EditDefaultEventTagColorParams
+    ) async throws -> DefaultEventTagColorSetting
+    
     
     func loadEventSetting() -> EventSettings
     func changeEventSetting(_ params: EditEventSettingsParams) -> EventSettings

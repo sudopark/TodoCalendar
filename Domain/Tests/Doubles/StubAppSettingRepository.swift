@@ -20,20 +20,31 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
             return setting
         }
         return .init(
-            tagColorSetting: .init(holiday: "holiday", default: "default"),
-            colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault
+            calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
+            defaultTagColor: .init(holiday: "holiday", default: "default")
         )
     }
     
-    func saveViewAppearanceSetting(_ newValue: AppearanceSettings) {
-        self.stubAppearanceSetting = newValue
+    func refreshAppearanceSetting() async throws -> AppearanceSettings {
+        return self.loadSavedViewAppearance()
     }
     
-    func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings {
+    func changeCalendarAppearanceSetting(
+        _ params: EditCalendarAppearanceSettingParams
+    ) throws -> CalendarAppearanceSettings {
         let old = self.loadSavedViewAppearance()
-        let newSetting = old.update(params)
-        return newSetting
+        let new = old |> \.calendar .~ old.calendar.update(params)
+        self.stubAppearanceSetting = new
+        return new.calendar
+    }
+    
+    func changeDefaultEventTagColor(
+        _ params: EditDefaultEventTagColorParams
+    ) async throws -> DefaultEventTagColorSetting {
+        let old = self.loadSavedViewAppearance()
+        let new = old |> \.defaultTagColor .~ old.defaultTagColor.update(params)
+        self.stubAppearanceSetting = new
+        return new.defaultTagColor
     }
     
     var stubEvnetSetting: EventSettings?

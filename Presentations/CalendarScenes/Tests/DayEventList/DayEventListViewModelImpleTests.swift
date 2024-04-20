@@ -57,14 +57,13 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         calendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
         
         let uiSettingUsecase = StubUISettingUsecase()
-        let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "", default: ""), 
-            colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault
+        var setting = AppearanceSettings(
+            calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
+            defaultTagColor: .init(holiday: "", default: "")
         )
-        |> \.is24hourForm .~ true
+        setting.calendar.is24hourForm = true
         uiSettingUsecase.stubAppearanceSetting = setting
-        _ = uiSettingUsecase.loadAppearanceSetting()
+        _ = uiSettingUsecase.loadSavedAppearanceSetting()
         
         let viewModel = DayEventListViewModelImple(
             calendarSettingUsecase: calendarSettingUsecase,

@@ -93,9 +93,14 @@ extension ApplicationUsecaseImple {
     private func prepareLatestAppearanceSeting() async throws -> AppearanceSettings  {
         let appearance = self.latestAppSettingRepository.loadSavedViewAppearance()
         self.sharedDataStore.put(
-            AppearanceSettings.self,
-            key: ShareDataKeys.uiSetting.rawValue,
-            appearance
+            CalendarAppearanceSettings.self,
+            key: ShareDataKeys.calendarAppearance.rawValue,
+            appearance.calendar
+        )
+        self.sharedDataStore.put(
+            DefaultEventTagColorSetting.self,
+            key: ShareDataKeys.defaultEventTagColor.rawValue,
+            appearance.defaultTagColor
         )
         return appearance
     }

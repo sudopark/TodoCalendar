@@ -20,7 +20,7 @@ public struct EventTagColorSet: Equatable {
         self.defaultColor = defaultColor
     }
     
-    public init(_ setting: EventTagColorSetting) {
+    public init(_ setting: DefaultEventTagColorSetting) {
         self.holiday = UIColor.from(hex: setting.holiday) ?? .clear
         self.defaultColor = UIColor.from(hex: setting.default) ?? .clear
     }

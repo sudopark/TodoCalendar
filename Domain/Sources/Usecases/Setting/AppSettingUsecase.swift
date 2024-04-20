@@ -11,7 +11,7 @@ import Combine
 import Extensions
 
 
-public final class AppSettingUsecaseImple: Sendable {
+public final class AppSettingUsecaseImple: @unchecked Sendable {
     
     private let appSettingRepository: any AppSettingRepository
     private let viewAppearanceStore: any ViewAppearanceStore
@@ -32,30 +32,66 @@ public final class AppSettingUsecaseImple: Sendable {
 
 extension AppSettingUsecaseImple: UISettingUsecase {
     
-    private var appearanceKey: String { ShareDataKeys.uiSetting.rawValue }
+    private var calednarSettingKey: String { ShareDataKeys.calendarAppearance.rawValue }
+    private var defaultEventTagColorKey: String { ShareDataKeys.defaultEventTagColor.rawValue }
     
-    public func loadAppearanceSetting() -> AppearanceSettings {
+    public func loadSavedAppearanceSetting() -> AppearanceSettings {
         let setting = self.appSettingRepository.loadSavedViewAppearance()
-        sharedDataStore.put(AppearanceSettings.self, key: self.appearanceKey, setting)
+        self.sharedDataStore.put(
+            CalendarAppearanceSettings.self, key: self.calednarSettingKey, setting.calendar
+        )
+        self.sharedDataStore.put(
+            DefaultEventTagColorSetting.self, key: self.defaultEventTagColorKey, setting.defaultTagColor
+        )
+        self.viewAppearanceStore.notifySettingChanged(setting)
         return setting
     }
     
-    public func changeAppearanceSetting(
-        _ params: EditAppearanceSettingParams
-    ) throws -> AppearanceSettings {
+    public func refreshAppearanceSetting() async throws -> AppearanceSettings {
+        let setting = try await self.appSettingRepository.refreshAppearanceSetting()
+        self.sharedDataStore.put(
+            CalendarAppearanceSettings.self, key: self.calednarSettingKey, setting.calendar
+        )
+        self.sharedDataStore.put(
+            DefaultEventTagColorSetting.self, key: self.defaultEventTagColorKey, setting.defaultTagColor
+        )
+        self.viewAppearanceStore.notifySettingChanged(setting)
+        return setting
+    }
+    
+    public func changeCalendarAppearanceSetting(
+        _ params: EditCalendarAppearanceSettingParams
+    ) throws -> CalendarAppearanceSettings {
         guard params.isValid
         else {
             throw RuntimeError("invalid edit appearance params")
         }
-        let newSetting = self.appSettingRepository.changeAppearanceSetting(params)
-        self.viewAppearanceStore.notifySettingChanged(newSetting)
-        self.sharedDataStore.put(AppearanceSettings.self, key: self.appearanceKey, newSetting)
+        let newSetting = try self.appSettingRepository.changeCalendarAppearanceSetting(params)
+        self.viewAppearanceStore.notifyCalendarSettingChanged(newSetting)
+        self.sharedDataStore.put(
+            CalendarAppearanceSettings.self, key: self.calednarSettingKey, newSetting
+        )
         return newSetting
     }
     
-    public var currentUISeting: AnyPublisher<AppearanceSettings, Never> {
+    public func changeDefaultEventTagColor(
+        _ params: EditDefaultEventTagColorParams
+    ) async throws -> DefaultEventTagColorSetting {
+        guard params.isValid
+        else {
+            throw RuntimeError("invalid edit appearance params")
+        }
+        let newSetting = try await self.appSettingRepository.changeDefaultEventTagColor(params)
+        self.viewAppearanceStore.notifyDefaultEventTagColorChanged(newSetting)
+        self.sharedDataStore.put(
+            DefaultEventTagColorSetting.self, key: self.defaultEventTagColorKey, newSetting
+        )
+        return newSetting
+    }
+    
+    public var currentCalendarUISeting: AnyPublisher<CalendarAppearanceSettings, Never> {
         return self.sharedDataStore
-            .observe(AppearanceSettings.self, key: self.appearanceKey)
+            .observe(CalendarAppearanceSettings.self, key: self.calednarSettingKey)
             .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()

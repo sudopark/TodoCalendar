@@ -235,14 +235,13 @@ struct SettingItemListView: View {
 struct SettingItemListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
-        let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+        let calendar = CalendarAppearanceSettings(
             colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
-        let viewAppearance = ViewAppearance(
-            setting: setting
-        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting)
         let state = SettingItemListViewState()
         let eventHandlers = SettingItemListViewEventHandler()
         

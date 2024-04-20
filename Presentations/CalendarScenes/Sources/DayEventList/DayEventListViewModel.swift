@@ -298,7 +298,7 @@ extension DayEventListViewModelImple {
             self.subject.currentDayAndEventLists.compactMap { $0 },
             self.calendarSettingUsecase.currentTimeZone,
             self.todoEventUsecase.currentTodoEvents,
-            self.uiSettingUsecase.currentUISeting.map { $0.is24hourForm }.removeDuplicates()
+            self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .map(asCellViewModel)
         .eraseToAnyPublisher()

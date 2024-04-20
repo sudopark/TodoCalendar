@@ -102,6 +102,8 @@ extension MainViewModelImple {
     func prepare() {
         Task { @MainActor in
             self.calendarSceneInteractor = self.router?.attachCalendar()
+            
+            // TODO: reload appearance setting
         }
         
         self.temporaryUserDataMigrationUsecase.checkIsNeedMigration()

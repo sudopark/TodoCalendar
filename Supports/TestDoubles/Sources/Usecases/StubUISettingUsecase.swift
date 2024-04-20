@@ -16,34 +16,57 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     public init() { }
     
     public var stubAppearanceSetting: AppearanceSettings?
-    private let settingSubject = CurrentValueSubject<AppearanceSettings?, Never>(nil)
-    open func loadAppearanceSetting() -> AppearanceSettings {
-        if let setting = self.stubAppearanceSetting {
-            self.settingSubject.send(setting)
-            return setting
-        }
-        let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "holiday", default: "default"),
-            colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault
-        )
+    
+    public func loadSavedAppearanceSetting() -> AppearanceSettings {
+        let setting = self.readSetting()
         self.settingSubject.send(setting)
         return setting
     }
     
+    private let settingSubject = CurrentValueSubject<AppearanceSettings?, Never>(nil)
+    open func refreshAppearanceSetting() async throws -> AppearanceSettings {
+        let setting = self.readSetting()
+        self.settingSubject.send(setting)
+        return setting
+    }
+    
+    private func readSetting() -> AppearanceSettings {
+        if let setting = self.stubAppearanceSetting {
+            return setting
+        }
+        let tag = DefaultEventTagColorSetting(holiday: "holiday", default: "default")
+        let setting = AppearanceSettings(
+            calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
+            defaultTagColor: tag
+        )
+        return setting
+    }
+    
     public var didChangeAppearanceSetting: AppearanceSettings?
-    open func changeAppearanceSetting(_ params: EditAppearanceSettingParams) throws -> AppearanceSettings {
-        let old = self.loadAppearanceSetting()
-        let newSetting = old.update(params)
+    
+    open func changeCalendarAppearanceSetting(_ params: EditCalendarAppearanceSettingParams) throws -> CalendarAppearanceSettings {
+        let old = self.readSetting()
+        let newSetting = old |> \.calendar .~ old.calendar.update(params)
         self.didChangeAppearanceSetting = newSetting
         self.stubAppearanceSetting = newSetting
         self.settingSubject.send(newSetting)
-        return newSetting
+        return newSetting.calendar
     }
     
-    public var currentUISeting: AnyPublisher<AppearanceSettings, Never> {
+    public var didDetaulEventTagColorChangedCallback: (() -> Void)?
+    public func changeDefaultEventTagColor(_ params: EditDefaultEventTagColorParams) async throws -> DefaultEventTagColorSetting {
+        let old = self.readSetting()
+        let newSetting = old |> \.defaultTagColor .~ old.defaultTagColor.update(params)
+        self.didChangeAppearanceSetting = newSetting
+        self.stubAppearanceSetting = newSetting
+        self.settingSubject.send(newSetting)
+        self.didDetaulEventTagColorChangedCallback?()
+        return newSetting.defaultTagColor
+    }
+    
+    public var currentCalendarUISeting: AnyPublisher<CalendarAppearanceSettings, Never> {
         return self.settingSubject
-            .compactMap { $0 }
+            .compactMap { $0?.calendar }
             .eraseToAnyPublisher()
     }
 }

@@ -29,6 +29,10 @@ open class StubEventSettingUsecase: EventSettingUsecase, @unchecked Sendable {
         return setting
     }
     
+    public func refreshEventSetting() async throws -> EventSettings {
+        return self.loadEventSetting()
+    }
+    
     open func changeEventSetting(_ params: EditEventSettingsParams) throws -> EventSettings {
         let old = self.loadEventSetting()
         let new = old

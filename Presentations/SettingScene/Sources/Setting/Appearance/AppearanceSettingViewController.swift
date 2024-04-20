@@ -31,7 +31,7 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
     private var cancellables: Set<AnyCancellable> = []
     
     init(
-        initial setting: AppearanceSettings,
+        initial setting: CalendarAppearanceSettings,
         viewModel: any AppearanceSettingViewModel,
         calendarSectionViewModel: any CalendarSectionAppearnaceSettingViewModel,
         eventOnCalednarSectionViewModel: any EventOnCalendarViewModel,

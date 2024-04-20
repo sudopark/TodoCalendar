@@ -44,18 +44,18 @@ class AppSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
 
 extension AppSettingUsecaseImpleTests {
     
-    func testUsecase_loadAppAppearanceSetting() {
+    func testUsecase_loadAppAppearanceSetting() async throws {
         // given
         let usecase = self.makeUsecase()
         
         // when
-        let setting = usecase.loadAppearanceSetting()
+        let setting = try await usecase.refreshAppearanceSetting()
         
         // then
-        XCTAssertEqual(setting.tagColorSetting.holiday, "holiday")
-        XCTAssertEqual(setting.tagColorSetting.default, "default")
-        XCTAssertEqual(setting.colorSetKey, .defaultLight)
-        XCTAssertEqual(setting.fontSetKey, .systemDefault)
+        XCTAssertEqual(setting.defaultTagColor.holiday, "holiday")
+        XCTAssertEqual(setting.defaultTagColor.default, "default")
+        XCTAssertEqual(setting.calendar.colorSetKey, .defaultLight)
+        XCTAssertEqual(setting.calendar.fontSetKey, .systemDefault)
     }
     
     func testUsecase_whenAfterLoadSetting_notifyByCurrentSetting() {
@@ -64,22 +64,24 @@ extension AppSettingUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let setting = self.waitFirstOutput(expect, for: usecase.currentUISeting) {
-            let _ = usecase.loadAppearanceSetting()
+        let setting = self.waitFirstOutput(expect, for: usecase.currentCalendarUISeting) {
+            Task {
+                let _ = try await usecase.refreshAppearanceSetting()
+            }
         }
         
         // then
         XCTAssertNotNil(setting)
     }
     
-    func testUsecase_whenChangeSettingWithInsufficientParams_error() {
+    func testUsecase_whenchangeCalendarSettingWithInsufficientParams_error() {
         // given
         let usecase = self.makeUsecase()
         var failed: Error?
         // when
-        let params = EditAppearanceSettingParams()
+        let params = EditCalendarAppearanceSettingParams()
         do {
-            _ = try usecase.changeAppearanceSetting(params)
+            _ = try usecase.changeCalendarAppearanceSetting(params)
         } catch {
             failed = error
         }
@@ -88,51 +90,84 @@ extension AppSettingUsecaseImpleTests {
         XCTAssertNotNil(failed)
     }
     
-    func testUsecase_changeAppearnaceSetting() {
+    func testUsecase_changeCalendarAppearnaceSetting() {
         // given
         let usecase = self.makeUsecase()
         
         // when
-        let params = EditAppearanceSettingParams()
-            |> \.newTagColorSetting .~ (
-                EditAppearanceSettingParams.EditEventTagColorParams()
-                |> \.newHolidayTagColor .~ "new"
-            )
-        let newValue = try? usecase.changeAppearanceSetting(params)
+        let params = EditCalendarAppearanceSettingParams()
+            |> \.animationEffectIsOn .~ true
+        let newValue = try? usecase.changeCalendarAppearanceSetting(params)
         
         // then
-        XCTAssertEqual(newValue?.tagColorSetting.holiday, "new")
+        XCTAssertEqual(newValue?.animationEffectIsOn, true)
     }
     
-    func testUsecase_whenAfterChangeSetting_notifyToViewAppearanceStore() {
+    func testUsecase_whenAfterchangeCalendarSetting_notifyToViewAppearanceStore() {
         // given
         let usecase = self.makeUsecase()
         
         // when
-        let params = EditAppearanceSettingParams()
-            |> \.newTagColorSetting .~ (
-                EditAppearanceSettingParams.EditEventTagColorParams()
-                |> \.newHolidayTagColor .~ "new"
-            )
-        let _ = try? usecase.changeAppearanceSetting(params)
+        let params = EditCalendarAppearanceSettingParams()
+            |> \.animationEffectIsOn .~ true
+        let _ = try? usecase.changeCalendarAppearanceSetting(params)
         
         // then
-        XCTAssertEqual(self.spyViewAppearanceStore.didSettignCahngedTo?.tagColorSetting.holiday, "new")
+        XCTAssertEqual(self.spyViewAppearanceStore.didChangedCalendarSetting?.animationEffectIsOn, true)
+    }
+    
+    func testUsecase_whenChangetagSettingWithInsufficientParams_error() async {
+        // given
+        let usecase = self.makeUsecase()
+        var failed: Error?
+        // when
+        let params = EditDefaultEventTagColorParams()
+        do {
+            _ = try await usecase.changeDefaultEventTagColor(params)
+        } catch {
+            failed = error
+        }
+        
+        // then
+        XCTAssertNotNil(failed)
+    }
+    
+    func testUsecase_changeDefaultTagColorAppearnaceSetting() async {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when
+        let params = EditDefaultEventTagColorParams()
+            |> \.newDefaultTagColor .~ "new"
+        let newValue = try? await usecase.changeDefaultEventTagColor(params)
+        
+        // then
+        XCTAssertEqual(newValue?.default, "new")
+    }
+    
+    func testUsecase_whenAfterChangeTagColorSetting_notifyToViewAppearanceStore() async {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when
+        let params = EditDefaultEventTagColorParams()
+            |> \.newDefaultTagColor .~ "new"
+        let _ = try? await usecase.changeDefaultEventTagColor(params)
+        
+        // then
+        XCTAssertEqual(self.spyViewAppearanceStore.didChangedDefaultTagColor?.default, "new")
     }
     
     func testUsecase_whenAfterChangeSetting_notifyByCurrentSetting() {
         // given
-        let expect = expectation(description: "setting 조회 이후에 현재 세팅 전파")
+        let expect = expectation(description: "setting 변경 이후에 현재 세팅 전파")
         let usecase = self.makeUsecase()
         
         // when
-        let setting = self.waitFirstOutput(expect, for: usecase.currentUISeting) {
-            let params = EditAppearanceSettingParams()
-                |> \.newTagColorSetting .~ (
-                    EditAppearanceSettingParams.EditEventTagColorParams()
-                    |> \.newHolidayTagColor .~ "new"
-                )
-            let _ = try? usecase.changeAppearanceSetting(params)
+        let setting = self.waitFirstOutput(expect, for: usecase.currentCalendarUISeting) {
+            let params = EditCalendarAppearanceSettingParams()
+                |> \.animationEffectIsOn .~ true
+            let _ = try? usecase.changeCalendarAppearanceSetting(params)
         }
         
         // then
@@ -224,5 +259,15 @@ private class SpyViewAppearanceStore: ViewAppearanceStore, @unchecked Sendable {
     var didSettignCahngedTo: AppearanceSettings?
     func notifySettingChanged(_ newSetting: AppearanceSettings) {
         self.didSettignCahngedTo = newSetting
+    }
+    
+    var didChangedCalendarSetting: CalendarAppearanceSettings?
+    func notifyCalendarSettingChanged(_ newSetting: CalendarAppearanceSettings) {
+        self.didChangedCalendarSetting = newSetting
+    }
+    
+    var didChangedDefaultTagColor: DefaultEventTagColorSetting?
+    func notifyDefaultEventTagColorChanged(_ newSetting: DefaultEventTagColorSetting) {
+        self.didChangedDefaultTagColor = newSetting
     }
 }

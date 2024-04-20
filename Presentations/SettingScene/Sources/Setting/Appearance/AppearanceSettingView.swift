@@ -64,7 +64,7 @@ final class AppearanceSettingViewState: ObservableObject {
     @Published var hapticOn: Bool = false
     @Published var animationOn: Bool = false
     
-    init(_ setting: AppearanceSettings) {
+    init(_ setting: CalendarAppearanceSettings) {
         self.hapticOn = setting.hapticEffectIsOn
         self.animationOn = setting.animationEffectIsOn
     }
@@ -112,7 +112,7 @@ struct AppearanceSettingContainerView: View {
     
     private let viewAppearance: ViewAppearance
     
-    private let initailSetting: AppearanceSettings
+    private let initailSetting: CalendarAppearanceSettings
     private let calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler
     private let eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler
     private let eventListSettingEventHandler: EventListAppearanceSettingViewEventHandler
@@ -124,7 +124,7 @@ struct AppearanceSettingContainerView: View {
     var appearanceSettingStateBinding: (AppearanceSettingViewState) -> Void = { _ in }
     
     init(
-        _ setting: AppearanceSettings,
+        _ setting: CalendarAppearanceSettings,
         viewAppearance: ViewAppearance,
         calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler,
         eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler,
@@ -157,7 +157,7 @@ struct AppearanceSettingContainerView: View {
 
 struct AppearanceSettingView: View {
     
-    private let initialSetting: AppearanceSettings
+    private let initialSetting: CalendarAppearanceSettings
     @StateObject private var appearanceState: AppearanceSettingViewState
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler
@@ -170,7 +170,7 @@ struct AppearanceSettingView: View {
     fileprivate var eventListSettingStateBinding: (EventListAppearanceSettingViewState) -> Void = { _ in }
     fileprivate var appearanceSettingStateBinding: (AppearanceSettingViewState) -> Void = { _ in }
     
-    init(_ setting: AppearanceSettings) {
+    init(_ setting: CalendarAppearanceSettings) {
         self.initialSetting = setting
         self._appearanceState = .init(wrappedValue: .init(setting))
     }
@@ -273,27 +273,26 @@ struct PlainFormStyle: FormStyle {
 struct AppearanceSettingViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
-        let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+        let calendar = CalendarAppearanceSettings(
             colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
-        let viewAppearance = ViewAppearance(
-            setting: setting
-        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting)
         viewAppearance.accnetDayPolicy = [
             .sunday : true, .saturday: true, .holiday: true
         ]
         viewAppearance.showUnderLineOnEventDay = true
-        let calendar = CalendarSectionAppearanceSettingViewEventHandler()
+        let calendarHandler = CalendarSectionAppearanceSettingViewEventHandler()
         let eventOnCalendar = EventOnCalendarViewEventHandler()
         let eventListHandler = EventListAppearanceSettingViewEventHandler()
         let appearanaceEventHandler = AppearanceSettingViewEventHandler()
         
         return AppearanceSettingContainerView(
-            setting,
+            calendar,
             viewAppearance: viewAppearance,
-            calendarSectionEventHandler: calendar,
+            calendarSectionEventHandler: calendarHandler,
             eventOnCalendarSectionEventHandler: eventOnCalendar,
             eventListSettingEventHandler: eventListHandler,
             appearanceSettingEventHandler: appearanaceEventHandler

@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 
 
 // MARK: - EventSettings
@@ -29,6 +31,13 @@ public struct EventSettings: Sendable, Equatable {
     public var defaultNewEventPeriod: DefaultNewEventPeriod = .hour1
     
     public init() { }
+    
+    public func update(_ params: EditEventSettingsParams) -> EventSettings {
+        let newSetting = self
+            |> \.defaultNewEventTagId .~ (params.defaultNewEventTagId ?? self.defaultNewEventTagId)
+            |> \.defaultNewEventPeriod .~ (params.defaultNewEventPeriod ??  self.defaultNewEventPeriod)
+        return newSetting
+    }
 }
 
 

@@ -12,7 +12,7 @@ import Optics
 import Domain
 import Scenes
 
-struct CalendarAppearanceSetting {
+struct CalendarSectionAppearanceSetting {
     
     let accnetDayPolicy: [AccentDays: Bool]
     let showUnderLineOnEventDay: Bool
@@ -25,7 +25,7 @@ struct CalendarAppearanceSetting {
         self.showUnderLineOnEventDay = showUnderLineOnEventDay
     }
     
-    init(_ setting: AppearanceSettings) {
+    init(_ setting: CalendarAppearanceSettings) {
         self.accnetDayPolicy = setting.accnetDayPolicy
         self.showUnderLineOnEventDay = setting.showUnderLineOnEventDay
     }
@@ -126,7 +126,7 @@ final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewM
     weak var router: CalendarSectionRouting?
     
     init(
-        setting: CalendarAppearanceSetting,
+        setting: CalendarSectionAppearanceSetting,
         calendarSettingUsecase: any CalendarSettingUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
@@ -139,7 +139,7 @@ final class CalendarSectionViewModelImple: CalendarSectionAppearnaceSettingViewM
     
     private struct Subject {
         let startWeekDay = CurrentValueSubject<DayOfWeeks?, Never>(nil)
-        let setting = CurrentValueSubject<CalendarAppearanceSetting?, Never>(nil)
+        let setting = CurrentValueSubject<CalendarSectionAppearanceSetting?, Never>(nil)
     }
     private let subject = Subject()
     private var cancelables: Set<AnyCancellable> = []
@@ -173,10 +173,10 @@ extension CalendarSectionViewModelImple {
         let newMap = origin.accnetDayPolicy
             |> key(type) %~ { !($0 ?? false) }
         
-        let params = EditAppearanceSettingParams()
+        let params = EditCalendarAppearanceSettingParams()
             |> \.accnetDayPolicy .~ newMap
         do {
-            let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
+            let newSetting = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
             self.subject.setting.send(.init(newSetting))
         } catch {
             self.router?.showError(error)
@@ -188,11 +188,11 @@ extension CalendarSectionViewModelImple {
               origin.showUnderLineOnEventDay != newValue
         else { return }
         
-        let params = EditAppearanceSettingParams()
+        let params = EditCalendarAppearanceSettingParams()
             |> \.showUnderLineOnEventDay .~ newValue
         
         do {
-            let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
+            let newSetting = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
             self.subject.setting.send(.init(newSetting))
         } catch {
             self.router?.showError(error)

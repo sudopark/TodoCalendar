@@ -28,7 +28,7 @@ struct EventOnCalendarAppearanceSetting {
         self.eventOnCalendarShowEventTagColor = eventOnCalendarShowEventTagColor
     }
     
-    init(_ setting: AppearanceSettings) {
+    init(_ setting: CalendarAppearanceSettings) {
         self.eventOnCalenarTextAdditionalSize = setting.eventOnCalenarTextAdditionalSize
         self.eventOnCalendarIsBold = setting.eventOnCalendarIsBold
         self.eventOnCalendarShowEventTagColor = setting.eventOnCalendarShowEventTagColor
@@ -88,7 +88,7 @@ extension EventOnCalendarViewModelImple {
               setting.eventOnCalenarTextAdditionalSize < Constant.maxFontSize
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.eventOnCalenarTextAdditionalSize .~ (setting.eventOnCalenarTextAdditionalSize + 1)
+        let params = EditCalendarAppearanceSettingParams() |> \.eventOnCalenarTextAdditionalSize .~ (setting.eventOnCalenarTextAdditionalSize + 1)
         self.updateSetting(params)
     }
     
@@ -97,7 +97,7 @@ extension EventOnCalendarViewModelImple {
               setting.eventOnCalenarTextAdditionalSize > Constant.minFontSize
         else { return }
 
-        let params = EditAppearanceSettingParams() |> \.eventOnCalenarTextAdditionalSize .~ (setting.eventOnCalenarTextAdditionalSize - 1)
+        let params = EditCalendarAppearanceSettingParams() |> \.eventOnCalenarTextAdditionalSize .~ (setting.eventOnCalenarTextAdditionalSize - 1)
         self.updateSetting(params)
     }
     
@@ -105,7 +105,7 @@ extension EventOnCalendarViewModelImple {
         guard let setting = self.subject.setting.value,
               setting.eventOnCalendarIsBold != isOn
         else { return }
-        let params = EditAppearanceSettingParams() |> \.eventOnCalendarIsBold .~ isOn
+        let params = EditCalendarAppearanceSettingParams() |> \.eventOnCalendarIsBold .~ isOn
         self.updateSetting(params)
     }
     
@@ -113,13 +113,13 @@ extension EventOnCalendarViewModelImple {
         guard let setting = self.subject.setting.value,
               setting.eventOnCalendarShowEventTagColor != isOn
         else { return }
-        let params = EditAppearanceSettingParams() |> \.eventOnCalendarShowEventTagColor .~ isOn
+        let params = EditCalendarAppearanceSettingParams() |> \.eventOnCalendarShowEventTagColor .~ isOn
         self.updateSetting(params)
     }
     
-    private func updateSetting(_ params: EditAppearanceSettingParams) {
+    private func updateSetting(_ params: EditCalendarAppearanceSettingParams) {
         do {
-            let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
+            let newSetting = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
             self.subject.setting.send(.init(newSetting))
         } catch {
             // TODO: show error
