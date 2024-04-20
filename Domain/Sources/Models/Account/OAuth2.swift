@@ -15,8 +15,22 @@ public protocol OAuth2ServiceProvider: Sendable {
     var identifier: String { get }
 }
 
-public struct AppleOAuth2ServiceProvider: OAuth2ServiceProvider {
+public final class AppleOAuth2ServiceProvider: OAuth2ServiceProvider, @unchecked Sendable {
+    
+    public struct AppleLoginIDTokenWithMetaData {
+        public let appleIDToken: String
+        public let nonce: String
+        public init(
+            appleIDToken: String,
+            nonce: String
+        ) {
+            self.appleIDToken = appleIDToken
+            self.nonce = nonce
+        }
+    }
+    
     public let identifier: String = "apple"
+    public var appleSignInResult: Result<AppleLoginIDTokenWithMetaData, any Error>?
     public init() { }
 }
 
@@ -35,7 +49,6 @@ public struct AppleOAuth2Credential: OAuth2Credential {
     public let provider: String
     public let idToken: String
     public let nonce: String
-    public var accessToken: String?
     
     public init(
         provider: String,
