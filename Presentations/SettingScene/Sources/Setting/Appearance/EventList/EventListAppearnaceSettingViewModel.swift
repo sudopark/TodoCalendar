@@ -32,7 +32,7 @@ struct EventListAppearanceSetting {
         self.is24hourForm = is24hourForm
     }
     
-    init(_ setting: AppearanceSettings) {
+    init(_ setting: CalendarAppearanceSettings) {
         self.eventTextAdditionalSize = setting.eventTextAdditionalSize
         self.showHoliday = setting.showHoliday
         self.showLunarCalendarDate = setting.showLunarCalendarDate
@@ -115,7 +115,7 @@ extension EventListAppearnaceSettingViewModelImple {
               setting.eventTextAdditionalSize < Constants.maxFontSize
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.eventTextAdditionalSize .~ (setting.eventTextAdditionalSize + 1)
+        let params = EditCalendarAppearanceSettingParams() |> \.eventTextAdditionalSize .~ (setting.eventTextAdditionalSize + 1)
         self.updateSetting(params)
     }
     
@@ -124,7 +124,7 @@ extension EventListAppearnaceSettingViewModelImple {
               setting.eventTextAdditionalSize > Constants.minFontSize
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.eventTextAdditionalSize .~ (setting.eventTextAdditionalSize - 1)
+        let params = EditCalendarAppearanceSettingParams() |> \.eventTextAdditionalSize .~ (setting.eventTextAdditionalSize - 1)
         self.updateSetting(params)
     }
     
@@ -133,7 +133,7 @@ extension EventListAppearnaceSettingViewModelImple {
               setting.showHoliday != show
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.showHoliday .~ show
+        let params = EditCalendarAppearanceSettingParams() |> \.showHoliday .~ show
         self.updateSetting(params)
     }
     
@@ -142,7 +142,7 @@ extension EventListAppearnaceSettingViewModelImple {
               setting.showLunarCalendarDate != show
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.showLunarCalendarDate .~ show
+        let params = EditCalendarAppearanceSettingParams() |> \.showLunarCalendarDate .~ show
         self.updateSetting(params)
     }
     
@@ -151,14 +151,14 @@ extension EventListAppearnaceSettingViewModelImple {
               setting.is24hourForm != isOn
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.is24hourForm .~ isOn
+        let params = EditCalendarAppearanceSettingParams() |> \.is24hourForm .~ isOn
         self.updateSetting(params)
     }
     
-    private func updateSetting(_ params: EditAppearanceSettingParams) {
+    private func updateSetting(_ params: EditCalendarAppearanceSettingParams) {
         
         do {
-            let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
+            let newSetting = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
             self.subject.setting.send(.init(newSetting))
         } catch {
             // TODO: show error

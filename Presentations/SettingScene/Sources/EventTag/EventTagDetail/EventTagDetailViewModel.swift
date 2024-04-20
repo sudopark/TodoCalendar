@@ -130,19 +130,21 @@ extension EventTagDetailViewModelImple {
     
     private func changeBaseTagColor(isHoliday: Bool) {
         guard let newColor = self.subject.color.value?.customHex else { return }
-        let newTagColorSetting  = if isHoliday {
-            EditAppearanceSettingParams.EditEventTagColorParams() |> \.newHolidayTagColor .~ newColor
+        let params  = if isHoliday {
+            EditDefaultEventTagColorParams() |> \.newHolidayTagColor .~ newColor
         } else {
-            EditAppearanceSettingParams.EditEventTagColorParams() |> \.newDefaultTagColor .~ newColor
+            EditDefaultEventTagColorParams() |> \.newDefaultTagColor .~ newColor
         }
-        let params = EditAppearanceSettingParams() |> \.newTagColorSetting .~ newTagColorSetting
-        do {
-            let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
-            self.router?.showToast("[TODO] color changed message")
-            self.router?.closeScene()
-        } catch {
-            self.router?.showError(error)
+        Task { [weak self] in
+            do {
+                let newSetting = try await self?.uiSettingUsecase.changeDefaultEventTagColor(params)
+                self?.router?.showToast("[TODO] color changed message")
+                self?.router?.closeScene()
+            } catch {
+                self?.router?.showError(error)
+            }
         }
+        .store(in: &self.cancellables)
     }
     
     private func editTag(_ id: String) {

@@ -28,55 +28,67 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     }
     
     func notifySettingChanged(_ newSetting: AppearanceSettings) {
-        let newTagColorSet = EventTagColorSet(newSetting.tagColorSetting)
-        if self.appearance.tagColors != newTagColorSet {
-            self.appearance.tagColors = newTagColorSet
+        self.notifyDefaultEventTagColorChanged(newSetting.defaultTagColor)
+        self.notifyCalendarSettingChanged(newSetting.calendar)
+    }
+    
+    func notifyCalendarSettingChanged(_ newSetting: CalendarAppearanceSettings) {
+        Task { @MainActor in
+            if self.appearance.colorSet.key != newSetting.colorSetKey {
+                self.appearance.colorSet = newSetting.colorSetKey.convert()
+            }
+            if self.appearance.fontSet.key != newSetting.fontSetKey {
+                self.appearance.fontSet = newSetting.fontSetKey.convert()
+            }
+            // calendar
+            if self.appearance.accnetDayPolicy != newSetting.accnetDayPolicy {
+                self.appearance.accnetDayPolicy = newSetting.accnetDayPolicy
+            }
+            if self.appearance.showUnderLineOnEventDay != newSetting.showUnderLineOnEventDay {
+                self.appearance.showUnderLineOnEventDay = newSetting.showUnderLineOnEventDay
+            }
+            
+            // evnet on calendar
+            if self.appearance.eventOnCalenarTextAdditionalSize != newSetting.eventOnCalenarTextAdditionalSize {
+                self.appearance.eventOnCalenarTextAdditionalSize = newSetting.eventOnCalenarTextAdditionalSize
+            }
+            if self.appearance.eventOnCalendarIsBold != newSetting.eventOnCalendarIsBold {
+                self.appearance.eventOnCalendarIsBold = newSetting.eventOnCalendarIsBold
+            }
+            if self.appearance.eventOnCalendarShowEventTagColor != newSetting.eventOnCalendarShowEventTagColor {
+                self.appearance.eventOnCalendarShowEventTagColor = newSetting.eventOnCalendarShowEventTagColor
+            }
+            
+            // event list
+            if self.appearance.eventTextAdditionalSize != newSetting.eventTextAdditionalSize {
+                self.appearance.eventTextAdditionalSize = newSetting.eventTextAdditionalSize
+            }
+            if self.appearance.showHoliday != newSetting.showHoliday {
+                self.appearance.showHoliday = newSetting.showHoliday
+            }
+            if self.appearance.showLunarCalendarDate != newSetting.showLunarCalendarDate {
+                self.appearance.showLunarCalendarDate = newSetting.showLunarCalendarDate
+            }
+            if self.appearance.is24hourForm != newSetting.is24hourForm {
+                self.appearance.is24hourForm = newSetting.is24hourForm
+            }
+            
+            // general
+            if self.appearance.hapticEffectOff != newSetting.hapticEffectIsOn {
+                self.appearance.hapticEffectOff = newSetting.hapticEffectIsOn
+            }
+            if self.appearance.animationEffectOff != newSetting.animationEffectIsOn {
+                self.appearance.animationEffectOff = newSetting.animationEffectIsOn
+            }
         }
-        if self.appearance.colorSet.key != newSetting.colorSetKey {
-            self.appearance.colorSet = newSetting.colorSetKey.convert()
-        }
-        if self.appearance.fontSet.key != newSetting.fontSetKey {
-            self.appearance.fontSet = newSetting.fontSetKey.convert()
-        }
-        // calendar
-        if self.appearance.accnetDayPolicy != newSetting.accnetDayPolicy {
-            self.appearance.accnetDayPolicy = newSetting.accnetDayPolicy
-        }
-        if self.appearance.showUnderLineOnEventDay != newSetting.showUnderLineOnEventDay {
-            self.appearance.showUnderLineOnEventDay = newSetting.showUnderLineOnEventDay
-        }
-        
-        // evnet on calendar
-        if self.appearance.eventOnCalenarTextAdditionalSize != newSetting.eventOnCalenarTextAdditionalSize {
-            self.appearance.eventOnCalenarTextAdditionalSize = newSetting.eventOnCalenarTextAdditionalSize
-        }
-        if self.appearance.eventOnCalendarIsBold != newSetting.eventOnCalendarIsBold {
-            self.appearance.eventOnCalendarIsBold = newSetting.eventOnCalendarIsBold
-        }
-        if self.appearance.eventOnCalendarShowEventTagColor != newSetting.eventOnCalendarShowEventTagColor {
-            self.appearance.eventOnCalendarShowEventTagColor = newSetting.eventOnCalendarShowEventTagColor
-        }
-        
-        // event list
-        if self.appearance.eventTextAdditionalSize != newSetting.eventTextAdditionalSize {
-            self.appearance.eventTextAdditionalSize = newSetting.eventTextAdditionalSize
-        }
-        if self.appearance.showHoliday != newSetting.showHoliday {
-            self.appearance.showHoliday = newSetting.showHoliday
-        }
-        if self.appearance.showLunarCalendarDate != newSetting.showLunarCalendarDate {
-            self.appearance.showLunarCalendarDate = newSetting.showLunarCalendarDate
-        }
-        if self.appearance.is24hourForm != newSetting.is24hourForm {
-            self.appearance.is24hourForm = newSetting.is24hourForm
-        }
-        
-        // general
-        if self.appearance.hapticEffectOff != newSetting.hapticEffectIsOn {
-            self.appearance.hapticEffectOff = newSetting.hapticEffectIsOn
-        }
-        if self.appearance.animationEffectOff != newSetting.animationEffectIsOn {
-            self.appearance.animationEffectOff = newSetting.animationEffectIsOn
+    }
+    
+    func notifyDefaultEventTagColorChanged(_ newSetting: DefaultEventTagColorSetting) {
+        Task { @MainActor in
+            let newTagColorSet = EventTagColorSet(newSetting)
+            if self.appearance.tagColors != newTagColorSet {
+                self.appearance.tagColors = newTagColorSet
+            }
         }
     }
 }
@@ -159,8 +171,9 @@ extension ApplicationRootRouter {
     private func changeUsecaseFactroy(
         by auth: Auth?
     ) {
-        if auth != nil {
+        if let auth = auth {
             self.usecaseFactory = LoginUsecaseFactoryImple(
+                userId: auth.uid,
                 authUsecase: self.authUsecase,
                 accountUescase: self.accountUsecase,
                 viewAppearanceStore: self.viewAppearanceStore,

@@ -132,6 +132,18 @@ enum EventDetailEndpoints: Endpoint {
     }
 }
 
+// MARK: - AppSetting
+
+enum AppSettingEndpoints: Endpoint {
+    case defaultEventTagColor
+    
+    var subPath: String {
+        switch self {
+        case .defaultEventTagColor: return "event/tag/default/color"
+        }
+    }
+}
+
 // MARK: - migration
 
 enum MigrationEndpoints: Endpoint {
@@ -191,6 +203,10 @@ public struct RemoteEnvironment: Sendable {
         case let detail as EventDetailEndpoints:
             let prefix = "\(calendarAPIHost)/v1/event_details"
             return appendSubpathIfNotEmpty(prefix, detail.subPath)
+            
+        case let setting as AppSettingEndpoints:
+            let prefix = "\(calendarAPIHost)/v1/event_details"
+            return appendSubpathIfNotEmpty(prefix, setting.subPath)
             
         case let migration as MigrationEndpoints:
             let prefix = "\(calendarAPIHost)/v1/migration"

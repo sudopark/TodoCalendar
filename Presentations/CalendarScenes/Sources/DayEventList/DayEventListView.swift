@@ -419,14 +419,13 @@ private extension EventCellViewModel {
 struct DayEventListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
-        let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+        let calendar = CalendarAppearanceSettings(
             colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
-        let viewAppearance = ViewAppearance(
-            setting: setting
-        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting)
 //        viewAppearance.eventTextAdditionalSize = 4
         viewAppearance.showHoliday = true
         viewAppearance.showLunarCalendarDate = true

@@ -42,10 +42,7 @@ class AppearanceSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let timeZone = isSystemTimeZone ? TimeZone.current : TimeZone(abbreviation: "CST")!
         self.stubCalendarSettingUsecase.selectTimeZone(timeZone)
         
-        let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "", default: ""),
-            colorSetKey: .defaultLight, fontSetKey: .systemDefault
-        )
+        let setting = CalendarAppearanceSettings(colorSetKey: .defaultLight, fontSetKey: .systemDefault)
             |> \.hapticEffectIsOn .~ true
             |> \.animationEffectIsOn .~ false
         

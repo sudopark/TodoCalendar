@@ -102,7 +102,7 @@ extension EventListAppearnaceSettingViewModelTests {
         }
         
         // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.eventTextAdditionalSize, 4)
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.calendar.eventTextAdditionalSize, 4)
     }
     
     // holiday 이름 표시 여부 토글
@@ -136,7 +136,7 @@ extension EventListAppearnaceSettingViewModelTests {
         }
         
         // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.showHoliday, false)
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.calendar.showHoliday, false)
     }
     
     // 음력 표시여부 토글
@@ -169,7 +169,7 @@ extension EventListAppearnaceSettingViewModelTests {
         }
         
         // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.showLunarCalendarDate, false)
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.calendar.showLunarCalendarDate, false)
     }
     
     // 24시 포맷으로 출력 여부 토글
@@ -202,6 +202,6 @@ extension EventListAppearnaceSettingViewModelTests {
         }
         
         // then
-        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.is24hourForm, false)
+        XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.calendar.is24hourForm, false)
     }
 }

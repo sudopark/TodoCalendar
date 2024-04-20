@@ -153,26 +153,32 @@ extension EventTagDetailViewModelImpleTests {
     // 색장 변경
     func testViewModel_whenDefaultTag_provideDefaultTagColor() {
         // given
+        let expect = expectation(description: "wait changed")
         let viewModel = self.makeViewModel(info: self.holidayTagInfo)
+        self.stubUISettingUsecase.didDetaulEventTagColorChangedCallback = { expect.fulfill() }
         
         // when
         viewModel.selectColor("new_color")
         viewModel.save()
+        self.wait(for: [expect])
         
         // then
-        XCTAssertEqual(self.stubUISettingUsecase.didChangeAppearanceSetting?.tagColorSetting.holiday, "new_color")
+        XCTAssertEqual(self.stubUISettingUsecase.didChangeAppearanceSetting?.defaultTagColor.holiday, "new_color")
     }
     
     func testViewModel_whenDefaultTag_changeTagColor() {
         // given
+        let expect = expectation(description: "wait changed")
         let viewModel = self.makeViewModel(info: self.defaultTagInfo)
+        self.stubUISettingUsecase.didDetaulEventTagColorChangedCallback = { expect.fulfill() }
         
         // when
         viewModel.selectColor("new_color")
         viewModel.save()
+        self.wait(for: [expect])
         
         // then
-        XCTAssertEqual(self.stubUISettingUsecase.didChangeAppearanceSetting?.tagColorSetting.default, "new_color")
+        XCTAssertEqual(self.stubUISettingUsecase.didChangeAppearanceSetting?.defaultTagColor.default, "new_color")
     }
 }
 

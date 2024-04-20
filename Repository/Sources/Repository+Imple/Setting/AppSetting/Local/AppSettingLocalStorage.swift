@@ -1,29 +1,36 @@
 //
-//  AppSettingRepositoryImple.swift
+//  AppSettingLocalStorage.swift
 //  Repository
 //
-//  Created by sudo.park on 2023/08/07.
+//  Created by sudo.park on 4/20/24.
+//  Copyright © 2024 com.sudo.park. All rights reserved.
 //
 
 import Foundation
 import Prelude
 import Optics
 import Domain
+import Extensions
 
 
-public final class AppSettingRepositoryImple: AppSettingRepository {
+public struct AppSettingLocalStorage: Sendable {
     
     private let environmentStorage: any EnvironmentStorage
-    
     public init(environmentStorage: any EnvironmentStorage) {
         self.environmentStorage = environmentStorage
+    }
+    
+    private func keyWithUserId(_ userId: String?) -> (String) -> String {
+        return { key in
+            return userId.map { "\($0)::\(key)"} ?? key
+        }
     }
 }
 
 
 // MARK: - appearance setting
 
-extension AppSettingRepositoryImple {
+extension AppSettingLocalStorage {
     
     private var holidayTagColorKey: String { "holiday_tag_color" }
     private var defaultTagColorKey: String { "default_tag_color" }
@@ -51,21 +58,31 @@ extension AppSettingRepositoryImple {
     private var hapticEffectIsOn: String { "haptic_effect_on" }
     private var animationEffectIsOn: String { "animation_effect_on" }
     
-    public func loadSavedViewAppearance() -> AppearanceSettings {
-        let holidayTagColor: String? = self.environmentStorage.load(holidayTagColorKey)
-        let defaultTagColor: String? = self.environmentStorage.load(defaultTagColorKey)
+    func loadViewAppearance(for userId: String?) -> AppearanceSettings {
+        
+        let calendar = self.loadCalendarAppearanceSetting(for: userId)
+        let defaultTagColors = self.loadDefaultTagColorSetting(for: userId)
+        
+        return AppearanceSettings(
+           calendar: calendar,
+           defaultTagColor: defaultTagColors
+        )
+    }
+    
+    func saveViewAppearance(_ newValue: AppearanceSettings, for userId: String?) {
+        
+        self.updateDefaultEventTagColors(newValue.defaultTagColor, for: userId)
+        self.updateCalendarAppearanceSetting(newValue.calendar, for: userId)
+    }
+    
+    func loadCalendarAppearanceSetting(for userId: String?) -> CalendarAppearanceSettings {
         let colorSetRaw: String? = self.environmentStorage.load(colorSetKey)
         let fontSetRaw: String? = self.environmentStorage.load(fontSetKey)
         let colorSet = colorSetRaw.flatMap { ColorSetKeys(rawValue: $0) } ?? .defaultLight
         let fontSet = fontSetRaw.flatMap { FontSetKeys(rawValue: $0) } ?? .systemDefault
         
-        var setting = AppearanceSettings(
-            tagColorSetting: .init(
-                holiday: holidayTagColor ?? "#D6236A",
-                default: defaultTagColor ?? "#088CDA"
-            ),
-            colorSetKey: colorSet,
-            fontSetKey: fontSet
+        var calendar = CalendarAppearanceSettings(
+            colorSetKey: colorSet, fontSetKey: fontSet
         )
         
         // calendar
@@ -73,7 +90,7 @@ extension AppSettingRepositoryImple {
         let accentSaturday: Bool? = self.environmentStorage.load(accentDay_saturdayKey)
         let accentSunday: Bool? = self.environmentStorage.load(accentDay_sunday)
         let isShowUnderline: Bool? = self.environmentStorage.load(showUnderLineOnEventDayKey)
-        setting = setting
+        calendar = calendar
             |> \.accnetDayPolicy .~ [
                 .sunday: accentSunday ?? false,
                 .saturday: accentSaturday ?? false,
@@ -87,7 +104,7 @@ extension AppSettingRepositoryImple {
         self.environmentStorage.load(eventOnCalendarAdditionalFontSize) ?? 0
         let eventOnCalendarBold: Bool = self.environmentStorage.load(boldTextEventOnCalendar) ?? false
         let eventOnCalendarShowColor: Bool = self.environmentStorage.load(showEventTagColorOnCalendar) ?? true
-        setting = setting
+        calendar = calendar
             |> \.eventOnCalenarTextAdditionalSize .~ CGFloat(eventOnCalendarAdditionalFont)
             |> \.eventOnCalendarIsBold .~ eventOnCalendarBold
             |> \.eventOnCalendarShowEventTagColor .~ eventOnCalendarShowColor
@@ -97,7 +114,7 @@ extension AppSettingRepositoryImple {
         let holiday: Bool = self.environmentStorage.load(showHolidayNameOnEventList) ?? false
         let lunar: Bool = self.environmentStorage.load(showLunarCalendarDate) ?? false
         let is24From: Bool = self.environmentStorage.load(is24HourForm) ?? true
-        setting = setting
+        calendar = calendar
             |> \.eventTextAdditionalSize .~ CGFloat(eventFont)
             |> \.showHoliday .~ holiday
             |> \.showLunarCalendarDate .~ lunar
@@ -106,19 +123,13 @@ extension AppSettingRepositoryImple {
         // general
         let hapticIsOn: Bool = self.environmentStorage.load(hapticEffectIsOn) ?? true
         let animationIsOn: Bool = self.environmentStorage.load(animationEffectIsOn) ?? false
-        
-        return setting
+        calendar = calendar
             |> \.hapticEffectIsOn .~ hapticIsOn
             |> \.animationEffectIsOn .~ animationIsOn
+        return calendar
     }
     
-    public func saveViewAppearanceSetting(_ newValue: AppearanceSettings) {
-        self.environmentStorage.update(
-            self.holidayTagColorKey, newValue.tagColorSetting.holiday
-        )
-        self.environmentStorage.update(
-            self.defaultTagColorKey, newValue.tagColorSetting.default
-        )
+    func updateCalendarAppearanceSetting(_ newValue: CalendarAppearanceSettings, for userId: String?) {
         self.environmentStorage.update(
             self.colorSetKey, newValue.colorSetKey.rawValue
         )
@@ -170,27 +181,40 @@ extension AppSettingRepositoryImple {
         self.environmentStorage.update(animationEffectIsOn, newValue.animationEffectIsOn)
     }
     
-    public func changeAppearanceSetting(_ params: EditAppearanceSettingParams) -> AppearanceSettings {
-        let setting = self.loadSavedViewAppearance()
-        
-        let newSetting = setting.update(params)
-        
-        self.saveViewAppearanceSetting(newSetting)
-        
-        return newSetting
+    func loadDefaultTagColorSetting(for userId: String?) -> DefaultEventTagColorSetting {
+        let holidayTagColor: String? = self.environmentStorage.load(
+            holidayTagColorKey |> self.keyWithUserId(userId)
+        )
+        let defaultTagColor: String? = self.environmentStorage.load(
+            defaultTagColorKey |> self.keyWithUserId(userId)
+        )
+        return DefaultEventTagColorSetting(
+            holiday: holidayTagColor ?? "#D6236A",
+            default: defaultTagColor ?? "#088CDA"
+        )
+    }
+    
+    func updateDefaultEventTagColors(_ newValue: DefaultEventTagColorSetting, for userId: String?) {
+        self.environmentStorage.update(
+            self.holidayTagColorKey |> self.keyWithUserId(userId),
+            newValue.holiday
+        )
+        self.environmentStorage.update(
+            self.defaultTagColorKey |> self.keyWithUserId(userId),
+            newValue.default
+        )
     }
 }
 
-
 // MARK: - event setting
 
-extension AppSettingRepositoryImple {
+extension AppSettingLocalStorage {
     
     // event setting
     private var defaultNewEventTagId: String { "default_new_event_tagId" }
     private var defaultNewEventPeriod: String { "default_new_event_period" }
     
-    public func loadEventSetting() -> EventSettings {
+    func loadEventSetting(for userId: String?) -> EventSettings {
         let tagIdRaw: String? = self.environmentStorage.load(defaultNewEventTagId)
         let tagId: AllEventTagId = tagIdRaw.map { value in
             switch value {
@@ -210,17 +234,18 @@ extension AppSettingRepositoryImple {
             |> \.defaultNewEventPeriod .~ period
     }
     
-    public func changeEventSetting(_ params: EditEventSettingsParams) -> EventSettings {
-        let old = self.loadEventSetting()
-        let newSetting = old
-            |> \.defaultNewEventTagId .~ (params.defaultNewEventTagId ?? old.defaultNewEventTagId)
-            |> \.defaultNewEventPeriod .~ (params.defaultNewEventPeriod ??  old.defaultNewEventPeriod)
-        
-        self.environmentStorage.update(defaultNewEventTagId, newSetting.defaultNewEventTagId.rawValue)
-        self.environmentStorage.update(defaultNewEventPeriod, newSetting.defaultNewEventPeriod.rawValue)
-        return newSetting
+    func saveEventSetting(_ newValue: EventSettings, for userId: String?) {
+        self.environmentStorage.update(
+            defaultNewEventTagId,
+            newValue.defaultNewEventTagId.rawValue
+        )
+        self.environmentStorage.update(
+            defaultNewEventPeriod,
+            newValue.defaultNewEventPeriod.rawValue
+        )
     }
 }
+
 
 private extension AllEventTagId {
     

@@ -128,8 +128,8 @@ extension NonLoginUsecaseFactoryImple {
 extension NonLoginUsecaseFactoryImple {
     
     private func makeAppSettingUsecase() -> AppSettingUsecaseImple {
-        let repository = AppSettingRepositoryImple(
-            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
+        let repository = AppSettingLocalRepositoryImple(
+            storage: .init(environmentStorage: Singleton.shared.userDefaultEnvironmentStorage)
         )
         return AppSettingUsecaseImple(
             appSettingRepository: repository,
@@ -173,17 +173,20 @@ extension NonLoginUsecaseFactoryImple {
 
 struct LoginUsecaseFactoryImple: UsecaseFactory {
     
+    let userId: String
     let authUsecase: any AuthUsecase
     let accountUescase: any AccountUsecase
     let viewAppearanceStore: any ViewAppearanceStore
     let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     
     init(
+        userId: String,
         authUsecase: any AuthUsecase,
         accountUescase: any AccountUsecase,
         viewAppearanceStore: any ViewAppearanceStore,
         temporaryUserDataFilePath: String
     ) {
+        self.userId = userId
         self.authUsecase = authUsecase
         self.accountUescase = accountUescase
         self.viewAppearanceStore = viewAppearanceStore
@@ -290,8 +293,10 @@ extension LoginUsecaseFactoryImple {
 extension LoginUsecaseFactoryImple {
     
     private func makeAppSettingUsecase() -> AppSettingUsecaseImple {
-        let repository = AppSettingRepositoryImple(
-            environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
+        let repository = AppSettingRemoteRepositoryImple(
+            userId: userId,
+            remoteAPI: Singleton.shared.remoteAPI,
+            storage: .init(environmentStorage: Singleton.shared.userDefaultEnvironmentStorage)
         )
         return AppSettingUsecaseImple(
             appSettingRepository: repository,

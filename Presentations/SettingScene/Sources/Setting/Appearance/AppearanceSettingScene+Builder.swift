@@ -30,6 +30,6 @@ protocol AppearanceSettingSceneBuiler: AnyObject {
     
     @MainActor
     func makeAppearanceSettingScene(
-        inital setting: AppearanceSettings
+        inital setting: CalendarAppearanceSettings
     ) -> any AppearanceSettingScene
 }

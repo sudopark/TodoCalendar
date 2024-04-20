@@ -21,7 +21,7 @@ final class CalendarSectionAppearanceSettingViewState: ObservableObject {
     @Published var selectedWeekDay: DayOfWeeks = .sunday
     private var didFirstCalendarModelUpdated = false
     
-    init(_ setting: CalendarAppearanceSetting) {
+    init(_ setting: CalendarSectionAppearanceSetting) {
         self.accentDays = setting.accnetDayPolicy
         self.showUnderLine = setting.showUnderLineOnEventDay
     }
@@ -191,7 +191,7 @@ struct CalendarSectionAppearanceSettingView: View {
         .sunday, .monday, .tuesday, .wednesday, .thursday, .friday, .saturday
     ]
     
-    init(_ setting: CalendarAppearanceSetting) {
+    init(_ setting: CalendarSectionAppearanceSetting) {
         _state = .init(wrappedValue: .init(setting))
     }
     

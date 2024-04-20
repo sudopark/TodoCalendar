@@ -41,7 +41,7 @@ final class AppearanceSettingViewModelImple: AppearanceSettingViewModel, @unchec
     var router: (any AppearanceSettingRouting)?
     
     init(
-        setting: AppearanceSettings,
+        setting: CalendarAppearanceSettings,
         calendarSettingUsecase: any CalendarSettingUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
@@ -52,7 +52,7 @@ final class AppearanceSettingViewModelImple: AppearanceSettingViewModel, @unchec
     
     
     private struct Subject {
-        let uiSetting = CurrentValueSubject<AppearanceSettings?, Never>(nil)
+        let uiSetting = CurrentValueSubject<CalendarAppearanceSettings?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -74,7 +74,7 @@ extension AppearanceSettingViewModelImple {
               setting.hapticEffectIsOn != newValue
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.hapticEffectIsOn .~ newValue
+        let params = EditCalendarAppearanceSettingParams() |> \.hapticEffectIsOn .~ newValue
         self.updateSetting(params)
     }
     
@@ -83,13 +83,13 @@ extension AppearanceSettingViewModelImple {
               setting.animationEffectIsOn != newValue
         else { return }
         
-        let params = EditAppearanceSettingParams() |> \.animationEffectIsOn .~ newValue
+        let params = EditCalendarAppearanceSettingParams() |> \.animationEffectIsOn .~ newValue
         self.updateSetting(params)
     }
     
-    private func updateSetting(_ params: EditAppearanceSettingParams) {
+    private func updateSetting(_ params: EditCalendarAppearanceSettingParams) {
         do {
-            let newSetting = try self.uiSettingUsecase.changeAppearanceSetting(params)
+            let newSetting = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
             self.subject.uiSetting.send(newSetting)
         } catch {
             self.router?.showError(error)

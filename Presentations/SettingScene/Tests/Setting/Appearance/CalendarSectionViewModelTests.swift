@@ -26,7 +26,7 @@ class CalendarSectionViewModelTests: BaseTestCase, PublisherWaitable {
         self.cancelBag = nil
     }
     
-    private var dummySetting: CalendarAppearanceSetting {
+    private var dummySetting: CalendarSectionAppearanceSetting {
         return .init(accnetDayPolicy: [
             .sunday : true, .saturday: false, .holiday: false
         ], showUnderLineOnEventDay: true)

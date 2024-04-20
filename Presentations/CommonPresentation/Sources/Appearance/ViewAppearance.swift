@@ -37,27 +37,29 @@ public class ViewAppearance: ObservableObject {
     
     public init(setting: AppearanceSettings) {
         
+        let (calendar, defaultTagColor) = (setting.calendar, setting.defaultTagColor)
+        
         self.tagColors = .init(
-            holiday: UIColor.from(hex: setting.tagColorSetting.holiday) ?? .clear,
-            defaultColor: UIColor.from(hex: setting.tagColorSetting.default) ?? .clear
+            holiday: UIColor.from(hex: defaultTagColor.holiday) ?? .clear,
+            defaultColor: UIColor.from(hex: defaultTagColor.default) ?? .clear
         )
-        self.colorSet = setting.colorSetKey.convert()
-        self.fontSet = setting.fontSetKey.convert()
+        self.colorSet = calendar.colorSetKey.convert()
+        self.fontSet = calendar.fontSetKey.convert()
         
-        self.accnetDayPolicy = setting.accnetDayPolicy
-        self.showUnderLineOnEventDay = setting.showUnderLineOnEventDay
+        self.accnetDayPolicy = calendar.accnetDayPolicy
+        self.showUnderLineOnEventDay = calendar.showUnderLineOnEventDay
         
-        self.eventOnCalenarTextAdditionalSize = setting.eventOnCalenarTextAdditionalSize
-        self.eventOnCalendarIsBold = setting.eventOnCalendarIsBold
-        self.eventOnCalendarShowEventTagColor = setting.eventOnCalendarShowEventTagColor
+        self.eventOnCalenarTextAdditionalSize = calendar.eventOnCalenarTextAdditionalSize
+        self.eventOnCalendarIsBold = calendar.eventOnCalendarIsBold
+        self.eventOnCalendarShowEventTagColor = calendar.eventOnCalendarShowEventTagColor
         
-        self.eventTextAdditionalSize = setting.eventTextAdditionalSize
-        self.showHoliday = setting.showHoliday
-        self.showLunarCalendarDate = setting.showLunarCalendarDate
-        self.is24hourForm = setting.is24hourForm
+        self.eventTextAdditionalSize = calendar.eventTextAdditionalSize
+        self.showHoliday = calendar.showHoliday
+        self.showLunarCalendarDate = calendar.showLunarCalendarDate
+        self.is24hourForm = calendar.is24hourForm
         
-        self.hapticEffectOff = setting.hapticEffectIsOn
-        self.animationEffectOff = setting.animationEffectIsOn
+        self.hapticEffectOff = calendar.hapticEffectIsOn
+        self.animationEffectOff = calendar.animationEffectIsOn
     }
 }
 

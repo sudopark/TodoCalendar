@@ -37,7 +37,7 @@ extension AppearanceSettingSceneBuilerImple: AppearanceSettingSceneBuiler {
     
     @MainActor
     func makeAppearanceSettingScene(
-        inital setting: AppearanceSettings
+        inital setting: CalendarAppearanceSettings
     ) -> any AppearanceSettingScene {
         
         let uiSettingUsecase = self.usecaseFactory.makeUISettingUsecase()

@@ -34,8 +34,8 @@ final class ApplicationRootBuilder {
         )
         let prepareUsecase = ApplicationUsecaseImple(
             accountUsecase: accountUsecase,
-            latestAppSettingRepository: AppSettingRepositoryImple(
-                environmentStorage: Singleton.shared.userDefaultEnvironmentStorage
+            latestAppSettingRepository: AppSettingLocalRepositoryImple(
+                storage: .init(environmentStorage: Singleton.shared.userDefaultEnvironmentStorage)
             ),
             sharedDataStore: Singleton.shared.sharedDataStore,
             database: Singleton.shared.commonSqliteService

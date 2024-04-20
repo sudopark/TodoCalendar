@@ -327,11 +327,12 @@ import SwiftUI
 struct ViewControllerPreviewConverter: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> some UIViewController {
-        let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+        let calendar = CalendarAppearanceSettings(
             colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
         return MainViewController(
             viewModel: MainViewModelImple(
                 temporaryUserDataMigrationUsecase: NotNeedTemporaryUserDataMigrationUescaseImple()

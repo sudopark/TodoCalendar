@@ -17,13 +17,20 @@ public enum FontSetKeys: String, Sendable {
     case systemDefault
 }
 
-public struct EventTagColorSetting: Equatable {
+public struct DefaultEventTagColorSetting: Equatable {
     public let holiday: String
     public let `default`: String
     
     public init(holiday: String, `default`: String) {
         self.holiday = holiday
         self.default = `default`
+    }
+    
+    public func update(_ params: EditDefaultEventTagColorParams) -> DefaultEventTagColorSetting {
+        return DefaultEventTagColorSetting(
+            holiday: params.newHolidayTagColor ?? self.holiday,
+            default: params.newDefaultTagColor ?? self.default
+        )
     }
 }
 
@@ -33,9 +40,8 @@ public enum AccentDays: Sendable {
     case sunday
 }
 
-public struct AppearanceSettings: Equatable {
+public struct CalendarAppearanceSettings: Equatable {
     
-    public let tagColorSetting: EventTagColorSetting
     public let colorSetKey: ColorSetKeys
     public let fontSetKey: FontSetKeys
     
@@ -59,22 +65,16 @@ public struct AppearanceSettings: Equatable {
     public var animationEffectIsOn: Bool = false
     
     public init(
-        tagColorSetting: EventTagColorSetting,
         colorSetKey: ColorSetKeys,
         fontSetKey: FontSetKeys
     ) {
-        self.tagColorSetting = tagColorSetting
         self.colorSetKey = colorSetKey
         self.fontSetKey = fontSetKey
     }
     
-    public func update(_ params: EditAppearanceSettingParams) -> AppearanceSettings {
-        let newTagColorSetting = EventTagColorSetting(
-            holiday: params.newTagColorSetting?.newHolidayTagColor ?? self.tagColorSetting.holiday,
-            default: params.newTagColorSetting?.newDefaultTagColor ?? self.tagColorSetting.default
-        )
-        let newSetting = AppearanceSettings(
-            tagColorSetting: newTagColorSetting,
+    public func update(_ params: EditCalendarAppearanceSettingParams) -> CalendarAppearanceSettings {
+
+        let newSetting = CalendarAppearanceSettings(
             colorSetKey: params.newColorSetKey ?? self.colorSetKey,
             fontSetKey: params.newFontSetKcy ?? self.fontSetKey
         )
@@ -93,17 +93,35 @@ public struct AppearanceSettings: Equatable {
     }
 }
 
+public struct AppearanceSettings {
+    
+    public var calendar: CalendarAppearanceSettings
+    public var defaultTagColor: DefaultEventTagColorSetting
+    
+    public init(
+        calendar: CalendarAppearanceSettings,
+        defaultTagColor: DefaultEventTagColorSetting
+    ) {
+        self.calendar = calendar
+        self.defaultTagColor = defaultTagColor
+    }
+}
+
 // MARK: - edit params
 
-public struct EditAppearanceSettingParams {
+public struct EditDefaultEventTagColorParams {
+    public var newHolidayTagColor: String?
+    public var newDefaultTagColor: String?
+    public init() { }
     
-    public struct EditEventTagColorParams {
-        public var newHolidayTagColor: String?
-        public var newDefaultTagColor: String?
-        public init() { }
+    public var isValid: Bool {
+        return self.newHolidayTagColor != nil
+            || self.newDefaultTagColor != nil
     }
+}
+
+public struct EditCalendarAppearanceSettingParams {
     
-    public var newTagColorSetting: EditEventTagColorParams?
     public var newColorSetKey: ColorSetKeys?
     public var newFontSetKcy: FontSetKeys?
     
@@ -137,9 +155,7 @@ public struct EditAppearanceSettingParams {
     }
     
     private var isValidBaseValues: Bool {
-        return self.newTagColorSetting?.newHolidayTagColor != nil
-            || self.newTagColorSetting?.newDefaultTagColor != nil
-            || self.newColorSetKey != nil
+        return self.newColorSetKey != nil
             || self.newFontSetKcy != nil
     }
     

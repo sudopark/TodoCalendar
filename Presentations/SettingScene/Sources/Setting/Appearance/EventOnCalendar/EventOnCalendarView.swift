@@ -208,18 +208,17 @@ struct EventOnCalendarView: View {
 struct EventOnCalendarViewPreviewProvider: PreviewProvider {
     
     static var previews: some View {
-        let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+        let calendar = CalendarAppearanceSettings(
             colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
-        let viewAppearance = ViewAppearance(
-            setting: setting
-        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting)
         viewAppearance.eventOnCalenarTextAdditionalSize = -2
         
         let eventHandler = EventOnCalendarViewEventHandler()
-        return EventOnCalendarView(.init(setting))
+        return EventOnCalendarView(.init(setting.calendar))
             .eventHandler(\.stateBinding) { state in
                 state.additionalFontSizeModel = .init(0)
                 state.isBold = false

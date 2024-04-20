@@ -214,8 +214,9 @@ extension SettingItemListViewModelImple {
     }
     
     private func routeApearanceSetting() {
-        let setting = self.uiSettingUsecase.loadAppearanceSetting()
-        self.router?.routeToAppearanceSetting(inital: setting)
+        
+        let setting = self.uiSettingUsecase.loadSavedAppearanceSetting()
+        self.router?.routeToAppearanceSetting(inital: setting.calendar)
     }
 }
 

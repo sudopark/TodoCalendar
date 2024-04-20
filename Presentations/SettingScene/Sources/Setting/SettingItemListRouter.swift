@@ -18,7 +18,7 @@ import CommonPresentation
 protocol SettingItemListRouting: Routing, Sendable { 
  
     func routeToAppearanceSetting(
-        inital setting: AppearanceSettings
+        inital setting: CalendarAppearanceSettings
     )
     func routeToEventSetting()
     func routeToHolidaySetting()
@@ -56,7 +56,7 @@ extension SettingItemListRouter {
     }
     
     func routeToAppearanceSetting(
-        inital setting: AppearanceSettings
+        inital setting: CalendarAppearanceSettings
     ) {
         Task { @MainActor in
             

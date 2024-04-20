@@ -217,7 +217,7 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     
     var didRouteToAppearanceSetting: Bool?
     func routeToAppearanceSetting(
-        inital setting: AppearanceSettings
+        inital setting: CalendarAppearanceSettings
     ) {
         self.didRouteToAppearanceSetting = true
     }

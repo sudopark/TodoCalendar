@@ -388,14 +388,13 @@ struct MonthViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let viewModel = DummyMonthViewModel()
-        let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
+        let calendar = CalendarAppearanceSettings(
             colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
-        let viewAppearance = ViewAppearance(
-            setting: setting
-        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting)
         viewAppearance.eventOnCalenarTextAdditionalSize = 7
         viewAppearance.eventOnCalendarIsBold = true
         let containerView = MonthContainerView(viewAppearance: viewAppearance)

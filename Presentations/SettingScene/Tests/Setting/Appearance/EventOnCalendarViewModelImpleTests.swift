@@ -102,7 +102,7 @@ extension EventOnCalendarViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let models = self.waitOutputs(expect, for: viewModel.textIncreasedSizeText) {
+        let models = self.waitOutputs(expect, for: viewModel.textIncreasedSizeText, timeout: 0.1) {
             viewModel.increaseTextSize() // 4
             viewModel.increaseTextSize() // 5
             viewModel.increaseTextSize() // 6
@@ -156,7 +156,7 @@ extension EventOnCalendarViewModelImpleTests {
         let _ = self.waitOutputs(expect, for: viewModel.textIncreasedSizeText) {
             viewModel.increaseTextSize()
         }
-        let setting = self.spyUISettingUsecase.loadAppearanceSetting()
+        let setting = self.spyUISettingUsecase.loadSavedAppearanceSetting().calendar
         
         // then
         XCTAssertEqual(setting.eventOnCalenarTextAdditionalSize, 4)
@@ -176,7 +176,7 @@ extension EventOnCalendarViewModelImpleTests {
         
         // then
         XCTAssertEqual(isBolds, [false, true])
-        let setting = self.spyUISettingUsecase.loadAppearanceSetting()
+        let setting = self.spyUISettingUsecase.loadSavedAppearanceSetting().calendar
         XCTAssertEqual(setting.eventOnCalendarIsBold, true)
     }
     
@@ -194,7 +194,7 @@ extension EventOnCalendarViewModelImpleTests {
         
         // then
         XCTAssertEqual(isShows, [true, false])
-        let setting = self.spyUISettingUsecase.loadAppearanceSetting()
+        let setting = self.spyUISettingUsecase.loadSavedAppearanceSetting().calendar
         XCTAssertEqual(setting.eventOnCalendarShowEventTagColor, false)
     }
 }
