@@ -29,7 +29,7 @@ protocol ApplicationPrepareUsecase {
 }
 
 
-final class ApplicationUsecaseImple: ApplicationPrepareUsecase {
+final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     
     private let accountUsecase: any AccountUsecase
     private let latestAppSettingRepository: any AppSettingRepository
@@ -52,7 +52,7 @@ final class ApplicationUsecaseImple: ApplicationPrepareUsecase {
 }
 
 
-extension ApplicationUsecaseImple {
+extension ApplicationPrepareUsecaseImple {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult {
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()

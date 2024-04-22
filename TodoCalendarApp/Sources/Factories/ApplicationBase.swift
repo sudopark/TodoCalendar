@@ -1,5 +1,5 @@
 //
-//  Singleton.swift
+//  ApplicationBase.swift
 //  TodoCalendarApp
 //
 //  Created by sudo.park on 2023/07/30.
@@ -14,11 +14,9 @@ import Alamofire
 import SQLiteService
 
 
-final class Singleton {
+final class ApplicationBase {
     
-    private init() { }
-    
-    static let shared = Singleton()
+    init() { }
     
     let sharedDataStore: SharedDataStore = .init()
     

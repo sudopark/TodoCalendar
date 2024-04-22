@@ -108,14 +108,17 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     var viewAppearanceStore: ApplicationViewAppearanceStoreImple!
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
+    private let applicationBase: ApplicationBase
     private var usecaseFactory: (any UsecaseFactory)!
     
     init(
         authUsecase: any AuthUsecase,
-        accountUsecase: any AccountUsecase
+        accountUsecase: any AccountUsecase,
+        applicationBase: ApplicationBase
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
+        self.applicationBase = applicationBase
     }
     
     func showError(_ error: any Error) {
@@ -177,13 +180,15 @@ extension ApplicationRootRouter {
                 authUsecase: self.authUsecase,
                 accountUescase: self.accountUsecase,
                 viewAppearanceStore: self.viewAppearanceStore,
-                temporaryUserDataFilePath: AppEnvironment.dbFilePath(for: nil)
+                temporaryUserDataFilePath: AppEnvironment.dbFilePath(for: nil),
+                applicationBase: self.applicationBase
             )
         } else {
             self.usecaseFactory = NonLoginUsecaseFactoryImple(
                 authUsecase: self.authUsecase,
                 accountUescase: self.accountUsecase,
-                viewAppearanceStore: self.viewAppearanceStore
+                viewAppearanceStore: self.viewAppearanceStore,
+                applicationBase: applicationBase
             )
         }
     }

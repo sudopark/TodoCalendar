@@ -15,12 +15,14 @@ final class ApplicationRootBuilder {
     
     func makeRootViewModel() -> ApplicationRootViewModelImple {
         
-        let remote = Singleton.shared.remoteAPI
+        let applicationBase = ApplicationBase()
+        
+        let remote = applicationBase.remoteAPI
         let authRepository = AuthRepositoryImple(
             remoteAPI: remote,
-            authStore: Singleton.shared.keyChainStorage,
-            keyChainStorage: Singleton.shared.keyChainStorage,
-            firebaseAuthService: Singleton.shared.firebaseAuthService
+            authStore: applicationBase.keyChainStorage,
+            keyChainStorage: applicationBase.keyChainStorage,
+            firebaseAuthService: applicationBase.firebaseAuthService
         )
         let oauth2ServiceUsecaseProvider = OAuth2ServiceUsecaseProviderImple {
             // TODO: 이부분 객체로 바꿔줄필요있음
@@ -30,15 +32,15 @@ final class ApplicationRootBuilder {
         let accountUsecase: any AuthUsecase & AccountUsecase = AccountUsecaseImple(
             oauth2ServiceProvider: oauth2ServiceUsecaseProvider,
             authRepository: authRepository,
-            sharedStore: Singleton.shared.sharedDataStore
+            sharedStore: applicationBase.sharedDataStore
         )
-        let prepareUsecase = ApplicationUsecaseImple(
+        let prepareUsecase = ApplicationPrepareUsecaseImple(
             accountUsecase: accountUsecase,
             latestAppSettingRepository: AppSettingLocalRepositoryImple(
-                storage: .init(environmentStorage: Singleton.shared.userDefaultEnvironmentStorage)
+                storage: .init(environmentStorage: applicationBase.userDefaultEnvironmentStorage)
             ),
-            sharedDataStore: Singleton.shared.sharedDataStore,
-            database: Singleton.shared.commonSqliteService
+            sharedDataStore: applicationBase.sharedDataStore,
+            database: applicationBase.commonSqliteService
         )
         let rootViewModel = ApplicationRootViewModelImple(
             authUsecase: accountUsecase,
@@ -48,7 +50,8 @@ final class ApplicationRootBuilder {
         remote.attach(listener: rootViewModel)
         let rootRouter = ApplicationRootRouter(
             authUsecase: accountUsecase,
-            accountUsecase: accountUsecase
+            accountUsecase: accountUsecase,
+            applicationBase: applicationBase
         )
         rootViewModel.router = rootRouter
         
