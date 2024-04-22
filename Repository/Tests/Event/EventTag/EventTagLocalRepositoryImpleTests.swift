@@ -155,38 +155,6 @@ extension EventTagLocalRepositoryImpleTests {
 
 extension EventTagLocalRepositoryImpleTests {
     
-    private func makeRepositoryWithStubLatestUsedTag() -> EventTagLocalRepositoryImple {
-        self.fakeEnvStore.update("latest_used_event_tag_id", "latest")
-        return self.makeRepository()
-    }
-    
-    func testRepository_loadLatestUsedEventTag() async {
-        // given
-        let repository = self.makeRepositoryWithStubLatestUsedTag()
-        let tag = EventTag(uuid: "latest", name: "latest", colorHex: "some")
-        try? await self.localStorage.saveTag(tag)
-        
-        // when
-        let latestTag = try? await repository.loadLatestUsedTag()
-        
-        // then
-        XCTAssertEqual(latestTag?.uuid, "latest")
-    }
-    
-    func testRepository_whenLatestEventTagIdExistButTagNotExists_resultIsNil() async {
-        // given
-        let repository = self.makeRepositoryWithStubLatestUsedTag()
-        
-        // when
-        let latest = try? await repository.loadLatestUsedTag()
-        
-        // then
-        XCTAssertEqual(latest?.uuid, nil)
-    }
-}
-
-extension EventTagLocalRepositoryImpleTests {
-    
     
     // load tags
     private func makeRepositoryWithStubSaveTags(_ tags: [EventTag]) async throws -> EventTagLocalRepositoryImple {

@@ -25,7 +25,6 @@ public protocol EventTagUsecase: Sendable {
     func eventTag(id: String) -> AnyPublisher<EventTag, Never>
     func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never>
     func loadAllEventTags() -> AnyPublisher<[EventTag], any Error>
-    var latestUsedEventTag: AnyPublisher<EventTag?, Never> { get }
     
     func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId)
     func offEventTagIdsOnCalendar() -> AnyPublisher<Set<AllEventTagId>, Never>
@@ -91,20 +90,7 @@ extension EventTagUsecaseImple {
 extension EventTagUsecaseImple {
     
     public func prepare() {
-        self.loadAndUpdateLatestUsedTag()
         self.bindRefreshRequireTagInfos()
-    }
-    
-    private func loadAndUpdateLatestUsedTag() {
-        Task { [weak self] in
-            let key = ShareDataKeys.latestUsedEventTag.rawValue
-            if let tag = try await self?.tagRepository.loadLatestUsedTag() {
-                self?.sharedDataStore.put(EventTag.self, key: key, tag)
-            } else {
-                self?.sharedDataStore.delete(key)
-            }
-        }
-        .store(in: &self.cancellables)
     }
     
     private func bindRefreshRequireTagInfos() {
@@ -180,12 +166,6 @@ extension EventTagUsecaseImple {
         return self.tagRepository.loadAllTags()
             .handleEvents(receiveOutput: updateCached)
             .eraseToAnyPublisher()
-    }
-    
-    public var latestUsedEventTag: AnyPublisher<EventTag?, Never> {
-        
-        return self.sharedDataStore
-            .observe(EventTag.self, key: ShareDataKeys.latestUsedEventTag.rawValue)
     }
 }
 

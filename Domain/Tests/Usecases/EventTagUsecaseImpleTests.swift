@@ -348,22 +348,6 @@ extension EventTagUsecaseImpleTests {
         ])
     }
     
-    func testUsecase_whenPrepare_setupLatestUsedEventTag() {
-        // given
-        let expect = expectation(description: "prepare시에 마지막으로 사용한 이벤트 태그 불러와서 세팅")
-        expect.expectedFulfillmentCount = 2
-        let usecase = self.makeUsecase()
-        
-        // when
-        let tags = self.waitOutputs(expect, for: usecase.latestUsedEventTag) {
-            usecase.prepare()
-        }
-        
-        // then
-        let tagIds = tags.map { $0?.uuid }
-        XCTAssertEqual(tagIds, [nil, "latest"])
-    }
-    
     func testUsecase_loadAllTags() {
         // given
         let expect = expectation(description: "load all tags")

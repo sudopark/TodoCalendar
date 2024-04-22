@@ -38,7 +38,6 @@ extension TodoLocalRepositoryImple {
             throw RuntimeError("invalid parameter")
         }
         try await self.localStorage.saveTodoEvent(newTodo)
-        self.updateLatestUsedEventTag(params.eventTagId?.customTagId)
         return newTodo
     }
     
@@ -46,17 +45,7 @@ extension TodoLocalRepositoryImple {
         let origin = try await self.localStorage.loadTodoEvent(eventId)
         let updated = origin.apply(params)
         try await self.localStorage.updateTodoEvent(updated)
-        self.updateLatestUsedEventTag(params.eventTagId?.customTagId)
         return updated
-    }
-    
-    private func updateLatestUsedEventTag(_ tagId: String?) {
-        let key = "latest_used_event_tag_id"
-        if let id = tagId {
-            self.environmentStorage.update(key, id)
-        } else {
-            self.environmentStorage.remove(key)
-        }
     }
 }
 

@@ -98,14 +98,6 @@ extension EventTagLocalRepositoryImple {
         let newIdStringValues = newIds.map { $0.stringValue }
         self.environmentStorage.update(self.offIds, newIdStringValues)
     }
-    
-    public func loadLatestUsedTag() async throws -> EventTag? {
-        guard let tagId: String = self.environmentStorage.load("latest_used_event_tag_id")
-        else { return nil }
-        
-        let tags = try await self.localStorage.loadTags(in: [tagId])
-        return tags.first
-    }
 }
 
 

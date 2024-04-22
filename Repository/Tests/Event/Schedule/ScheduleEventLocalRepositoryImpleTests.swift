@@ -112,29 +112,6 @@ extension ScheduleEventLocalRepositoryImpleTests {
         let event = loadedEvents?.first(where: { $0.uuid == origin?.uuid })
         XCTAssertNotNil(event)
     }
-    
-    func testRepository_whenMakeOrUpdateTodo_udpateLatestEventTagId() async {
-        // given
-        let repository = self.makeRepository()
-        let key = "latest_used_event_tag_id"
-        
-        // when
-        let origin: String? = self.spyEnvStorage.load(key)
-        let makeParams = self.dummyMakeParams |> \.eventTagId .~ .custom("tag1")
-        let newSchedule = try? await repository.makeScheduleEvent(makeParams)
-        let updatedeAfterMake: String? = self.spyEnvStorage.load(key)
-        
-        let updateParams = ScheduleEditParams()
-            |> \.name .~ "new name"
-            |> \.eventTagId .~ nil
-        _ = try? await repository.updateScheduleEvent(newSchedule?.uuid ?? "", updateParams)
-        let updatedAfterUpdate: String? = self.spyEnvStorage.load(key)
-        
-        // then
-        XCTAssertEqual(origin, nil)
-        XCTAssertEqual(updatedeAfterMake, "tag1")
-        XCTAssertEqual(updatedAfterUpdate, nil)
-    }
 }
 
 
