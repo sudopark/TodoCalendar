@@ -202,9 +202,8 @@ private struct WeekRowView: View {
                 .foregroundColor(textColor)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 4)
-            Spacer()
+            Spacer(minLength: expectSize.height-17)
         }
-        .frame(height: expectSize.height)
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(backgroundColor)
