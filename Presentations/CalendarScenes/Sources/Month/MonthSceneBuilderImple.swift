@@ -40,7 +40,8 @@ extension MonthSceneBuilderImple: MonthSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
-            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase()
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )
         viewModel.listener = listener
         // TODO: setup router

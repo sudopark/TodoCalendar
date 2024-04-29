@@ -125,13 +125,25 @@ struct EventMoreModel: Equatable {
     let moreCount: Int
 }
 
-typealias WeekEventStackViewModel = [[WeekEventLineModel]]
+struct WeekEventStackViewModel: Equatable {
+    let linesStack: [[WeekEventLineModel]]
+    var shouldShowEventLinesDays: Set<Int> = []
+    
+    init(linesStack: [[WeekEventLineModel]], shouldMarkEventDays: Bool) {
+        self.linesStack = linesStack
+        guard shouldMarkEventDays else { return }
+        self.shouldShowEventLinesDays = linesStack.flatMap { $0 }
+            .filter { !($0.eventOnWeek.event is HolidayCalendarEvent) }
+            .reduce(Set<Int>()) { acc, line in acc.union(line.eventOnWeek.overlapDays) }
+    }
+}
+
 
 extension WeekEventStackViewModel {
     
     func eventMores(with maxSize: Int) -> [EventMoreModel] {
-        guard maxSize > 0, maxSize < self.count else { return [] }
-        let willHiddenRows = self[maxSize...]
+        guard maxSize > 0, maxSize < self.linesStack.count else { return [] }
+        let willHiddenRows = self.linesStack[maxSize...]
         let willHiddenEventsPerDaySeq = willHiddenRows.reduce(into: [Int: [WeekEventLineModel]]()) { acc, lines in
             lines.forEach { line in
                 line.eventOnWeek.daysSequence.forEach {
@@ -174,6 +186,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     private let todoUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let eventTagUsecase: any EventTagUsecase
+    private let uiSettingUsecase: any UISettingUsecase
     weak var listener: (any MonthSceneListener)?
     
     init(
@@ -182,13 +195,15 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         calendarSettingUsecase: any CalendarSettingUsecase,
         todoUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
-        eventTagUsecase: any EventTagUsecase
+        eventTagUsecase: any EventTagUsecase,
+        uiSettingUsecase: any UISettingUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.todoUsecase = todoUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
         self.eventTagUsecase = eventTagUsecase
+        self.uiSettingUsecase = uiSettingUsecase
         
         self.internalBind()
         self.updateMonthIfNeed(initialMonth)
@@ -393,6 +408,20 @@ extension MonthViewModelImple {
     }
     
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never> {
+        let transform: (CalendarAppearanceSettings, [[WeekEventLineModel]]) -> WeekEventStackViewModel
+        transform = { uiSetting, lines in
+            return .init(linesStack: lines, shouldMarkEventDays: uiSetting.showUnderLineOnEventDay)
+        }
+        return Publishers.CombineLatest(
+            self.uiSettingUsecase.currentCalendarUISeting,
+            self.eventStackElements(at: weekId)
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+    
+    private func eventStackElements(at weekId: String) -> AnyPublisher<[[WeekEventLineModel]], Never> {
         typealias StackAndTagMap = (WeekEventStack, [String: EventTag])
         let asStackAndTagMap: (WeekEventStack) -> AnyPublisher<StackAndTagMap, Never>
         asStackAndTagMap = { [weak self] stack in
@@ -407,7 +436,7 @@ extension MonthViewModelImple {
                 .map { (stack, $0) }
                 .eraseToAnyPublisher()
         }
-        let asStakModel: (StackAndTagMap) -> WeekEventStackViewModel = { pair in
+        let asStakModel: (StackAndTagMap) -> [[WeekEventLineModel]] = { pair in
             return pair.0.eventStacks.map { events -> [WeekEventLineModel] in
                 return events.map { event -> WeekEventLineModel in
                     let tag = event.eventTagId.customTagId.flatMap { pair.1[$0] }
@@ -420,7 +449,6 @@ extension MonthViewModelImple {
             .map(asStackAndTagMap)
             .switchToLatest()
             .map(asStakModel)
-            .removeDuplicates()
             .eraseToAnyPublisher()
     }
 }
@@ -452,7 +480,7 @@ private extension CalendarComponent {
 private extension WeekEventStackViewModel {
     
     func events(in day: Int) -> [any CalendarEvent] {
-        return self.reduce(into: [any CalendarEvent]()) { acc, lines in
+        return self.linesStack.reduce(into: [any CalendarEvent]()) { acc, lines in
             guard let eventLineOnDay = lines.first (where: { $0.eventOnWeek.overlapDays.contains(day) })
             else { return }
             acc += [eventLineOnDay.eventOnWeek.event]

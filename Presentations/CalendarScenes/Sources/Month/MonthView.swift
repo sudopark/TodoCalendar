@@ -89,7 +89,7 @@ private enum Metric {
     static let dayMinHeight: CGFloat = 80
     static let dayMaxHeight: CGFloat = 100
     static let eventRowHeightWithSpacing: CGFloat = 12
-    static let eventTopMargin: CGFloat = 22
+    static let eventTopMargin: CGFloat = 24
     static let eventInterspacing: CGFloat = 2
 }
 
@@ -149,7 +149,7 @@ private struct WeekRowView: View {
     @EnvironmentObject private var state: MonthViewState
     @EnvironmentObject private var appearance: ViewAppearance
     
-    @State private var eventStackModel: WeekEventStackViewModel = []
+    @State private var eventStackModel: WeekEventStackViewModel = .init(linesStack: [], shouldMarkEventDays: false)
     
     fileprivate var daySelected: (DayCellViewModel) -> Void = { _ in }
     
@@ -183,6 +183,13 @@ private struct WeekRowView: View {
                 return self.appearance.accentCalendarDayColor(day.accentDay).asColor
             }
         }()
+        let lineColor: Color = {
+            if day.identifier == self.state.selectedDay {
+                return self.appearance.colorSet.selectedDayText.asColor
+            } else {
+                return self.appearance.colorSet.weekDayText.asColor
+            }
+        }()
         let backgroundColor: Color = {
             if day.identifier == self.state.selectedDay {
                 return self.appearance.colorSet.selectedDayBackground.asColor
@@ -196,12 +203,18 @@ private struct WeekRowView: View {
             return day.identifier == self.state.selectedDay || day.isNotCurrentMonth == false
             ? 1.0 : 0.5
         }()
-        return VStack {
+        let showUnderLine = self.eventStackModel.shouldShowEventLinesDays.contains(day.day)
+        return VStack(spacing: 0) {
             Text("\(day.day)")
                 .font(self.appearance.fontSet.day.asFont)
                 .foregroundColor(textColor)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 4)
+            if showUnderLine {
+                Divider()
+                    .background(lineColor)
+                    .frame(width: 12, height: 0.5)
+            }
             Spacer(minLength: expectSize.height-17)
         }
         .background(
@@ -219,11 +232,11 @@ private struct WeekRowView: View {
         let maxDrawableEventRowCount = drawableRowCount - 1
         guard maxDrawableEventRowCount > 0 else { return EmptyView().asAnyView() }
         
-        let size = min(maxDrawableEventRowCount, self.eventStackModel.count)
+        let size = min(maxDrawableEventRowCount, self.eventStackModel.linesStack.count)
         let moreEvents = eventStackModel.eventMores(with: size)
         return VStack(alignment: .leading, spacing: 2) {
             ForEach(0..<size, id: \.self) {
-                return eventRowView(self.eventStackModel[$0])
+                return eventRowView(self.eventStackModel.linesStack[$0])
             }
             eventMoreViews(moreEvents)
         }
@@ -350,26 +363,28 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
             let event2_3_2 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], DummyCalendarEvent("t2_3_2", "ev:2_3_2", hasPeriod: false))
             let event2_3_3 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], DummyCalendarEvent("t2_3_3", "ev:2_3_3", hasPeriod: false))
             
-            return Just([
+            let lines: [[WeekEventLineModel]] = [
                 [.init(event1_5, nil)],
                 [.init(event2_6, nil)],
                 [.init(event2_3, nil), .init(event4_6, nil)],
                 [.init(event2_3_1, nil)],
                 [.init(event2_3_2, nil)],
                 [.init(event2_3_3, nil)]
-            ])
+            ]
+            return Just(.init(linesStack: lines, shouldMarkEventDays: true))
             .eraseToAnyPublisher()
             
         } else if weekId == "id:1" {
-            let eventw2 = EventOnWeek(0..<1, [2, 3, 4, 5], (2...5), [
+            let eventw2 = EventOnWeek(0..<1, [9, 10, 11, 12], (2...5), [
                 "2023-9-9", "2023-9-10", "2023-9-11", "2023-9-12"
             ], DummyCalendarEvent("ev-w2", "ev-w2- hohohohohohohohohohohohoh", hasPeriod: false))
-            return Just([
+            let lines: [[WeekEventLineModel]] = [
                 [.init(eventw2, nil)]
-            ])
+            ]
+            return Just(.init(linesStack: lines, shouldMarkEventDays: true))
                 .eraseToAnyPublisher()
         } else {
-            return Just([]).eraseToAnyPublisher()
+            return Just(.init(linesStack: [], shouldMarkEventDays: false)).eraseToAnyPublisher()
         }
     }
 

@@ -23,6 +23,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubTodoUsecase: PrivateStubTodoUsecase!
     private var stubScheduleUsecase: PrivateStubScheduleUsecase!
     private var stubTagUsecase: StubEventTagUsecase!
+    private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyListener: SpyListener?
     
     private var timeoutMillis: Int { return 10 }
@@ -33,6 +34,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTodoUsecase = .init()
         self.stubScheduleUsecase = .init()
         self.stubTagUsecase = .init()
+        self.stubUISettingUsecase = .init()
         self.spyListener = .init()
     }
 
@@ -42,6 +44,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTodoUsecase = nil
         self.stubScheduleUsecase = nil
         self.stubTagUsecase = nil
+        self.stubUISettingUsecase = nil
         self.spyListener = nil
     }
 
@@ -50,6 +53,8 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
             today: .init(year: 2023, month: 09, day: 10, weekDay: 1)
         )
         self.stubSettingUsecase.prepare()
+        
+        _ = self.stubUISettingUsecase.loadSavedAppearanceSetting()
 
         let viewModel = MonthViewModelImple(
             initialMonth: .init(year: 2023, month: 9),
@@ -57,7 +62,8 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
             calendarSettingUsecase: self.stubSettingUsecase,
             todoUsecase: self.stubTodoUsecase,
             scheduleEventUsecase: self.stubScheduleUsecase,
-            eventTagUsecase: self.stubTagUsecase
+            eventTagUsecase: self.stubTagUsecase,
+            uiSettingUsecase: self.stubUISettingUsecase
         )
         viewModel.listener = self.spyListener
         return viewModel
@@ -244,13 +250,14 @@ extension MonthViewModelImpleTests {
 
     func testEventStackModel_provideEventMoreCounts() {
         // given
-        let stack: [[WeekEventLineModel]] = [
+        let lines: [[WeekEventLineModel]] = [
             [self.dummyEventLine(1...5)],
             [self.dummyEventLine(2...4)],
             [self.dummyEventLine(1...3), self.dummyEventLine(4...7)],
             [self.dummyEventLine(1...4)],
             [self.dummyEventLine(1...6)]
         ]
+        let stack = WeekEventStackViewModel(linesStack: lines, shouldMarkEventDays: false)
         
         // when
         let moreModels = stack.eventMores(with: 3).sorted(by: { $0.daySequence < $1.daySequence })
@@ -306,6 +313,8 @@ extension MonthViewModelImpleTests {
         self.stubScheduleUsecase.eventsFor8 = [
             schedule_event_repeating
         ]
+        
+        
         return self.makeViewModel()
     }
 
@@ -330,7 +339,7 @@ extension MonthViewModelImpleTests {
         // assert week1
         let week1 = weeks?[safe: 0]
         let week1Events = try await viewModel.eventStack(at: week1?.id ?? "")
-            .firstValue(with: self.timeoutMillis) ?? []
+            .firstValue(with: self.timeoutMillis) ?? .init(linesStack: [], shouldMarkEventDays: false)
         let week1EventIds = week1Events.eventIds
         let week1EventDaysSequences = week1Events.daysSequences
             
@@ -346,7 +355,7 @@ extension MonthViewModelImpleTests {
         // assert week2
         let week2 = weeks?[safe: 1]
         let week2Events = try await viewModel.eventStack(at: week2?.id ?? "")
-            .firstValue(with: self.timeoutMillis) ?? []
+            .firstValue(with: self.timeoutMillis) ?? .init(linesStack: [], shouldMarkEventDays: false)
         let week2EventIds = week2Events.eventIds
         XCTAssertEqual(week2EventIds, [])
         
@@ -354,7 +363,7 @@ extension MonthViewModelImpleTests {
         // assert week3
         let week3 = weeks?[safe: 2]
         let week3Events = try await viewModel.eventStack(at: week3?.id ?? "")
-            .firstValue(with: self.timeoutMillis) ?? []
+            .firstValue(with: self.timeoutMillis) ?? .init(linesStack: [], shouldMarkEventDays: false)
         let week3EventIds = week3Events.eventIds
         let week3EventDaysSequences = week3Events.daysSequences
         XCTAssertEqual(week3EventIds, [
@@ -369,7 +378,7 @@ extension MonthViewModelImpleTests {
         // assert week4
         let week4 = weeks?[safe: 3]
         let week4Events = try await viewModel.eventStack(at: week4?.id ?? "")
-            .firstValue(with: self.timeoutMillis) ?? []
+            .firstValue(with: self.timeoutMillis) ?? .init(linesStack: [], shouldMarkEventDays: false)
         let week4EventIds = week4Events.eventIds
         let week4EventDaysSequences = week4Events.daysSequences
         XCTAssertEqual(week4EventIds, [
@@ -382,7 +391,7 @@ extension MonthViewModelImpleTests {
         // assert week5
         let week5 = weeks?[safe: 4]
         let week5Events = try await viewModel.eventStack(at: week5?.id ?? "")
-            .firstValue(with: self.timeoutMillis) ?? []
+            .firstValue(with: self.timeoutMillis) ?? .init(linesStack: [], shouldMarkEventDays: false)
         let week5EventIds = week5Events.eventIds
         let week5EventDaysSequences = week5Events.daysSequences
         XCTAssertEqual(week5EventIds, [
@@ -685,6 +694,35 @@ extension MonthViewModelImpleTests {
         let eventIds3 = eventIds[safe: 3]
         XCTAssertEqual(eventIds3, [])
     }
+    
+    private func toggleShowUnderLineOnEventDay(_ newValue: Bool) {
+        let params = EditCalendarAppearanceSettingParams()
+            |> \.showUnderLineOnEventDay .~ newValue
+        _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(params)
+    }
+    
+    func testViewModel_provideEventsWithUnderLineDays() {
+        // given
+        let expect = expectation(description: "이벤트 보유 날짜 밑줄표시 여부 변경에 따라 공휴일 제외하고 표시여부 정보도 같이 반환")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithStubEvents()
+        viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
+        
+        // when
+        let eventsIn8ThirdWeek = viewModel.eventStack(at: "2023-9-24-2023-9-30")
+        let eventStacks = self.waitOutputs(expect, for: eventsIn8ThirdWeek) {
+            self.toggleShowUnderLineOnEventDay(true)
+            self.toggleShowUnderLineOnEventDay(false)
+        }
+        
+        // then
+        let showUnderLineDays = eventStacks.map { $0.shouldShowEventLinesDays }
+        XCTAssertEqual(showUnderLineDays, [
+            [],
+            [24, 25, 26, 27, 28],
+            []
+        ])
+    }
 }
 
 // MARK: - doubles
@@ -807,11 +845,11 @@ private extension EventTime {
 private extension WeekEventStackViewModel {
     
     var eventIds: [[String]] {
-        return self.map { lines in lines.map { $0.eventId } }
+        return self.linesStack.map { lines in lines.map { $0.eventId } }
     }
     
     var daysSequences: [[ClosedRange<Int>]] {
-        return self.map { lines in lines.map { $0.eventOnWeek.daysSequence } }
+        return self.linesStack.map { lines in lines.map { $0.eventOnWeek.daysSequence } }
     }
 }
 

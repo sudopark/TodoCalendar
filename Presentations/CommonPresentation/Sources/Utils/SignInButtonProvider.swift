@@ -31,7 +31,7 @@ public struct SignInButtonProviderImple: SignInButtonProvider {
         _ action: @escaping () -> Void
     ) -> any View {
         switch provider {
-        case let google as GoogleOAuth2ServiceProvider:
+        case is GoogleOAuth2ServiceProvider:
             // TODO: model 에서 테마변경 감지해야함
             let model = GoogleSignInButtonViewModel(style: .wide)
             return GoogleSignInButton(viewModel: model, action: action)
