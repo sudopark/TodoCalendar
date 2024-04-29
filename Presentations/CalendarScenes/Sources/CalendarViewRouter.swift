@@ -13,6 +13,9 @@ protocol CalendarViewRouting: Routing, Sendable {
     
     @MainActor
     func attachInitialMonths(_ months: [CalendarMonth]) -> [any CalendarPaperSceneInteractor]
+    
+    @MainActor
+    func changeFocus(at index: Int)
 }
 
 final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unchecked Sendable {
@@ -30,5 +33,11 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
         let childScenes = months.map { self.paperSceneBuilder.makeCalendarPaperScene($0) }
         current.addChildMonths(childScenes)
         return childScenes.compactMap { $0.interactor }
+    }
+    
+    @MainActor
+    func changeFocus(at index: Int) {
+        guard let current = self.currentScene else { return }
+        current.changeFocus(at: index)
     }
 }

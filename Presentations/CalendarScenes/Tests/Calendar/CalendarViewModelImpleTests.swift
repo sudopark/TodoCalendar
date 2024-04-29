@@ -209,6 +209,10 @@ extension CalendarViewModelImpleTests {
         parameterizeTest(expect: [
             .init(year: 2023, month: 07), .init(year: 2023, month: 08), .init(year: 2023, month: 09)
         ]) { viewModel.focusChanged(from: 2, to: 1) }
+        
+        parameterizeTest(expect: [
+            .init(year: 2023, month: 07), .init(year: 2023, month: 08), .init(year: 2023, month: 09)
+        ], { viewModel.moveFocusToToday() })
     }
     
     func testViewModel_whenFocusedMonthChanged_notify() {
@@ -258,6 +262,9 @@ extension CalendarViewModelImpleTests {
         }
         parameterizeTest(.init(year: 2023, month: 06), false) {
             viewModel.focusChanged(from: 0, to: 2)
+        }
+        parameterizeTest(.init(year: 2023, month: 08), true) {
+            viewModel.moveFocusToToday()
         }
     }
 }
@@ -426,6 +433,11 @@ private extension CalendarViewModelImpleTests {
             self.spyInteractors = interactors
             self.didInitialMonthsAttached?()
             return interactors
+        }
+        
+        var didChangedFocusIndex: Int?
+        func changeFocus(at index: Int) {
+            self.didChangedFocusIndex = index
         }
     }
     

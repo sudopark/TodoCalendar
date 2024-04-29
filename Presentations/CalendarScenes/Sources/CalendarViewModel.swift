@@ -180,15 +180,9 @@ extension CalendarViewModelImple {
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
-        let currentMonth = CalendarMonth(year: today.year, month: today.month)
-        let months = [
-            currentMonth.previousMonth(),
-            currentMonth,
-            currentMonth.nextMonth()
-        ]
-        let totalMonths = TotalMonthsInRange(totalMonths: months, focusedIndex: 1)
+        let totalMonths = self.makeTotalMonths(around: today)
         Task { @MainActor in
-            self.calendarPaperInteractors = self.router?.attachInitialMonths(months)
+            self.calendarPaperInteractors = self.router?.attachInitialMonths(totalMonths.totalMonths)
             self.subject.monthsInCurrentRange.send(totalMonths)
         }
     }
@@ -219,7 +213,34 @@ extension CalendarViewModelImple {
     }
     
     func moveFocusToToday() {
-        // TODO: 
+        self.calendarUsecase.currentDay
+            .first()
+            .sink(receiveValue: { [weak self] today in
+                guard let self = self else { return }
+                let totalMonths = self.makeTotalMonths(around: today)
+                self.changeChilds(totalMonths)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func changeChilds(_ totalMonths: TotalMonthsInRange) {
+        Task { @MainActor in
+            self.router?.changeFocus(at: totalMonths.focusedIndex)
+            self.subject.monthsInCurrentRange.send(totalMonths)
+            totalMonths.totalMonths.enumerated().forEach { offset, month in
+                self.calendarPaperInteractors?[safe: offset]?.updateMonthIfNeed(month)
+            }
+        }
+    }
+    
+    private func makeTotalMonths(around day: CalendarComponent.Day) -> TotalMonthsInRange {
+        let currentMonth = CalendarMonth(year: day.year, month: day.month)
+        let months = [
+            currentMonth.previousMonth(),
+            currentMonth,
+            currentMonth.nextMonth()
+        ]
+        return TotalMonthsInRange(totalMonths: months, focusedIndex: 1)
     }
 }
 

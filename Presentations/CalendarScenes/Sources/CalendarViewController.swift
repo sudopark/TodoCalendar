@@ -58,6 +58,11 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
         let center = (monthScenes.count-1) / 2
         self.setViewControllers([monthScenes[center]], direction: .forward, animated: false)
     }
+    
+    func changeFocus(at index: Int) {
+        guard let center = self.monthViewControllers?[safe: index] else { return }
+        self.setViewControllers([center], direction: .forward, animated: false)
+    }
 }
 
 

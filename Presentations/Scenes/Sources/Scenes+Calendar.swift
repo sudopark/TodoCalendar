@@ -28,6 +28,9 @@ public protocol CalendarScene: Scene where Interactor == any CalendarSceneIntera
     
     @MainActor
     func addChildMonths(_ monthScenes: [any Scene])
+    
+    @MainActor
+    func changeFocus(at index: Int)
 }
 
 public protocol CalendarSceneBuilder {
