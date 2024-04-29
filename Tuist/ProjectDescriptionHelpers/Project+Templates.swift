@@ -128,7 +128,9 @@ extension Project {
                 "UILaunchStoryboardName": "LaunchScreen",
                 "ENABLE_TESTS": .boolean(true),
                 "NSLocalNetworkUsageDescription": "Network usage required for debugging purposes",
-                "NSBonjourServices": "_pulse._tcp",
+                "NSBonjourServices": [
+                    "_pulse._tcp"
+                ],
                 "UIApplicationSceneManifest": [
                     "UIApplicationSupportsMultipleScenes": false,
                     "UISceneConfigurations": [
