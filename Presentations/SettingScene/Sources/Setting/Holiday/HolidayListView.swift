@@ -23,12 +23,19 @@ final class HolidayListViewState: ObservableObject {
     
     @Published var countryName: String = ""
     @Published var holidays: [HolidayItemModel] = []
-    
+    @Published var isRefreshing = false
     
     func bind(_ viewModel: any HolidayListViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
+        
+        viewModel.isRefresingHolidays
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isRefreshing in
+                self?.isRefreshing = isRefreshing
+            })
+            .store(in: &self.cancellables)
         
         viewModel.currentCountryName
             .receive(on: RunLoop.main)
@@ -50,10 +57,17 @@ final class HolidayListViewState: ObservableObject {
 
 final class HolidayListViewEventHandler: ObservableObject {
     
-    // TODO: add handlers
     var onAppear: () -> Void = { }
+    var refresh: () -> Void = { }
     var selectCountry: () -> Void = { }
     var close: () -> Void = { }
+    
+    func bind(_ viewModel: any HolidayListViewModel) {
+        self.onAppear = viewModel.prepare
+        self.selectCountry = viewModel.selectCountry
+        self.refresh = viewModel.refresh
+        self.close = viewModel.close
+    }
 }
 
 
@@ -111,6 +125,19 @@ struct HolidayListView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton {
                         eventHandlers.close()
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    if state.isRefreshing {
+                        LoadingCircleView(appearance.colorSet.accent.asColor, lineWidth: 1)
+                            .frame(width: 20, height: 20)
+                    } else {
+                        Button {
+                            self.eventHandlers.refresh()
+                        } label: {
+                            Image(systemName: "arrow.clockwise")
+                        }
                     }
                 }
             }
@@ -209,7 +236,9 @@ struct HolidayListViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting)
         let state = HolidayListViewState()
         let eventHandlers = HolidayListViewEventHandler()
-        
+        eventHandlers.refresh = {
+            state.isRefreshing = true
+        }
         state.countryName = "대한민국"
         
         state.holidays = (0..<15).compactMap { int in

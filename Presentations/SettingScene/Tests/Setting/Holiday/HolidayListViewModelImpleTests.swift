@@ -104,6 +104,22 @@ extension HolidayListViewModelImpleTests {
         XCTAssertEqual(holidayLists.last?.first?.name, "holiday-1-US")
     }
     
+    func testViewModel_whenRefersh_refreshHolidayListAtGivenYear() {
+        // given
+        let expect = expectation(description: "공휴일 목록 갱신하면, 해당 년도의 공휴일 리스트 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeUsecaseWithStubHoliday()
+        
+        // when
+        let holidayLists = self.waitOutputs(expect, for: viewModel.currentYearHolidays) {
+            
+            viewModel.refresh()
+        }
+        
+        // then
+        XCTAssertEqual(holidayLists.count, 2)
+    }
+    
     func testViewModel_routeToCountrySelect() {
         // given
         let viewModel = self.makeUsecaseWithStubHoliday()

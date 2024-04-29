@@ -39,10 +39,12 @@ protocol HolidayListViewModel: AnyObject, Sendable, HolidayListSceneInteractor {
     
     // interactor
     func prepare()
+    func refresh()
     func selectCountry()
     func close()
     
     // presenter
+    var isRefresingHolidays: AnyPublisher<Bool, Never> { get }
     var currentCountryName: AnyPublisher<String, Never> { get }
     var currentYearHolidays: AnyPublisher<[HolidayItemModel], Never> { get }
 }
@@ -68,6 +70,7 @@ final class HolidayListViewModelImple: HolidayListViewModel, @unchecked Sendable
     
     private struct Subject {
         let currentYear = CurrentValueSubject<Int?, Never>(nil)
+        let isRefreshingHolidays = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -86,6 +89,21 @@ extension HolidayListViewModelImple {
                 self?.setupCurrentYear(timeZone)
             })
             .store(in: &self.cancellables)
+    }
+    
+    func refresh() {
+        guard !self.subject.isRefreshingHolidays.value else { return }
+        Task { [weak self] in
+            self?.subject.isRefreshingHolidays.send(true)
+            do {
+                try await self?.holidayUsecase.refreshHolidays()
+                self?.subject.isRefreshingHolidays.send(false)
+            } catch {
+                self?.subject.isRefreshingHolidays.send(false)
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
     }
     
     private func setupCurrentYear(_ timeZone: TimeZone) {
@@ -112,6 +130,12 @@ extension HolidayListViewModelImple {
 // MARK: - HolidayListViewModelImple Presenter
 
 extension HolidayListViewModelImple {
+    
+    var isRefresingHolidays: AnyPublisher<Bool, Never> {
+        return self.subject.isRefreshingHolidays
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     var currentCountryName: AnyPublisher<String, Never> {
         return self.holidayUsecase.currentSelectedCountry
