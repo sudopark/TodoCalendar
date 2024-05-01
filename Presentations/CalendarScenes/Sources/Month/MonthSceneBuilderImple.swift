@@ -28,12 +28,7 @@ final class MonthSceneBuilderImple {
 
 extension MonthSceneBuilderImple: MonthSceneBuilder {
     
-    @MainActor
-    func makeMonthScene(
-        _ month: CalendarMonth,
-        listener: (any MonthSceneListener)?
-    ) -> any MonthScene {
-        
+    func makeSceneComponent(_ month: CalendarMonth) -> MonthSceneComponent {
         let viewModel = MonthViewModelImple(
             initialMonth: month,
             calendarUsecase: self.usecaseFactory.makeCalendarUsecase(),
@@ -43,12 +38,6 @@ extension MonthSceneBuilderImple: MonthSceneBuilder {
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )
-        viewModel.listener = listener
-        // TODO: setup router
-        let viewController = MonthViewController(
-            viewModel: viewModel,
-            viewAppearance: self.viewAppearance
-        )
-        return viewController
+        return .init(viewModel: viewModel)
     }
 }

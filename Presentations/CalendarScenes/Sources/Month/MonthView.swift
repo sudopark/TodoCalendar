@@ -61,26 +61,38 @@ final class MonthViewState: ObservableObject {
     }
 }
 
+final class MonthViewEventHandler: ObservableObject {
+    var daySelected: (DayCellViewModel) -> Void = { _ in }
+    
+    func bind(_ viewModel: any MonthViewModel) {
+        self.daySelected = viewModel.select(_:)
+    }
+}
+
 struct MonthContainerView: View {
     
     @StateObject private var state: MonthViewState = .init()
     private let viewAppearance: ViewAppearance
+    private let eventHandler: MonthViewEventHandler
     
     var stateBinding: (MonthViewState) -> Void = { _ in }
-    var daySelected: (DayCellViewModel) -> Void = { _ in }
     
-    init(viewAppearance: ViewAppearance) {
+    init(
+        viewAppearance: ViewAppearance,
+        eventHandler: MonthViewEventHandler
+    ) {
         self.viewAppearance = viewAppearance
+        self.eventHandler = eventHandler
     }
     
     var body: some View {
         return MonthView()
-            .eventHandler(\.daySelected, self.daySelected)
             .onAppear {
                 self.stateBinding(self.state)
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
+            .environmentObject(eventHandler)
     }
 }
 
@@ -97,8 +109,7 @@ struct MonthView: View {
     
     @EnvironmentObject private var state: MonthViewState
     @EnvironmentObject private var appearance: ViewAppearance
-    
-    fileprivate var daySelected: (DayCellViewModel) -> Void = { _ in }
+    @EnvironmentObject private var eventHandler: MonthViewEventHandler
     
     var body: some View {
         VStack(spacing: 0) {
@@ -132,7 +143,7 @@ struct MonthView: View {
         return VStack(spacing: 0) {
             ForEach(self.state.weeks, id: \.id) {
                 WeekRowView(week: $0, expectSize)
-                    .eventHandler(\.daySelected, self.daySelected)
+                    .eventHandler(\.daySelected, eventHandler.daySelected)
                     .environmentObject(state)
                     .environmentObject(appearance)
             }
@@ -316,6 +327,9 @@ private struct WeekRowView: View {
 final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
     
     private let selectedDay = CurrentValueSubject<String?, Never>(nil)
+    func attachListener(_ listener: any MonthSceneListener) {
+        
+    }
     func select(_ day: DayCellViewModel) {
         self.selectedDay.send(day.identifier)
     }
@@ -411,9 +425,10 @@ struct MonthViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting)
         viewAppearance.eventOnCalenarTextAdditionalSize = 7
         viewAppearance.eventOnCalendarIsBold = true
-        let containerView = MonthContainerView(viewAppearance: viewAppearance)
+        let eventHandler = MonthViewEventHandler()
+        eventHandler.daySelected = viewModel.select(_:)
+        let containerView = MonthContainerView(viewAppearance: viewAppearance, eventHandler: eventHandler)
             .eventHandler(\.stateBinding, { $0.bind(viewModel) })
-            .eventHandler(\.daySelected, viewModel.select(_:))
         return containerView
     }
 }

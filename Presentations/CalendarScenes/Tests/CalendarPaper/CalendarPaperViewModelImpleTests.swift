@@ -16,27 +16,30 @@ import TestDoubles
 class CalendarPaperViewModelImpleTests: BaseTestCase {
     
     private var spyRouter: SpyRouter!
+    private var spyMonthInteractor: SpyMonthSceneInteractor!
+    private var spyEventListInteractor: SpyEventInteractor!
     
     override func setUpWithError() throws {
         self.spyRouter = .init()
+        self.spyMonthInteractor = .init()
+        self.spyEventListInteractor = .init()
     }
     
     override func tearDownWithError() throws {
         self.spyRouter = nil
+        self.spyMonthInteractor = nil
+        self.spyEventListInteractor = nil
     }
     
     private func makeViewModel() -> CalendarPaperViewModelImple {
         
-        let expect = expectation(description: "wait listener attached")
         let viewModel = CalendarPaperViewModelImple(
-            month: .init(year: 2023, month: 9)
+            month: .init(year: 2023, month: 9),
+            monthInteractor: self.spyMonthInteractor,
+            eventListInteractor: self.spyEventListInteractor
         )
         viewModel.router = self.spyRouter
-        self.spyRouter.didListenerAttached = {
-            expect.fulfill()
-        }
         viewModel.prepare()
-        self.wait(for: [expect], timeout: self.timeout)
         return viewModel
     }
 }
@@ -57,7 +60,7 @@ extension CalendarPaperViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(self.spyRouter.spyMonthInteractor.updatedMonths, months)
+        XCTAssertEqual(self.spyMonthInteractor.updatedMonths, months)
     }
     
     func testViewModel_updateCurrentSelectedDay() {
@@ -74,7 +77,7 @@ extension CalendarPaperViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(self.spyRouter.spyEventListInteractor.selectedDays, days)
+        XCTAssertEqual(self.spyEventListInteractor.selectedDays, days)
     }
 }
 
@@ -82,17 +85,6 @@ extension CalendarPaperViewModelImpleTests {
 extension CalendarPaperViewModelImpleTests {
     
     private class SpyRouter: BaseSpyRouter, CalendarPaperRouting, @unchecked Sendable {
-        
-        var didListenerAttached: (() -> Void)?
-        let spyMonthInteractor: SpyMonthSceneInteractor = .init()
-        let spyEventListInteractor: SpyEventInteractor = .init()
-        func attachMonthAndEventList(_ month: CalendarMonth) -> (
-            (any MonthSceneInteractor)?,
-            (any DayEventListSceneInteractor)?
-        )? {
-            self.didListenerAttached?()
-            return (spyMonthInteractor, spyEventListInteractor)
-        }
     }
     
     private class SpyMonthSceneInteractor: MonthSceneInteractor {

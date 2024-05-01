@@ -38,31 +38,27 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
 
 extension DayEventListRouter {
     
-    private var currentScene: (any DayEventListScene)? {
-        self.scene as? (any DayEventListScene)
-    }
-    
     // TODO: router implememnts
     
     func routeToMakeNewEvent(_ withParams: MakeEventParams) {
         Task { @MainActor in
             
             let next = self.eventDetailSceneBuilder.makeNewEventScene(withParams)
-            self.currentScene?.present(next, animated: true)
+            self.scene?.present(next, animated: true)
         }
     }
     
     func routeToTodoEventDetail(_ eventId: String) {
         Task { @MainActor in
             let next = self.eventDetailSceneBuilder.makeTodoEventDetailScene(eventId)
-            self.currentScene?.present(next, animated: true)
+            self.scene?.present(next, animated: true)
         }
     }
     
     func routeToScheduleEventDetail(_ eventId: String) {
         Task { @MainActor in
             let next = self.eventDetailSceneBuilder.makeScheduleEventDetailScene(eventId)
-            self.currentScene?.present(next, animated: true)
+            self.scene?.present(next, animated: true)
         }
     }
     

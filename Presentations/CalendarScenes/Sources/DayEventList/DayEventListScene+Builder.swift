@@ -33,8 +33,12 @@ protocol DayEventListScene: Scene where Interactor == any DayEventListSceneInter
 
 // MARK: - Builder + DependencyInjector Extension
 
+struct DayEventListSceneComponent {
+    let viewModel: any DayEventListViewModel
+    let router: any DayEventListRouting
+}
+
 protocol DayEventListSceneBuiler: AnyObject {
     
-    @MainActor
-    func makeDayEventListScene() -> any DayEventListScene
+    func makeSceneComponent() -> DayEventListSceneComponent
 }

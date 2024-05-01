@@ -24,14 +24,7 @@ protocol CalendarPaperSceneInteractor: AnyObject, MonthSceneListener {
 // MARK: - CalendarPaperScene
 
 protocol CalendarPaperScene: Scene where Interactor == any CalendarPaperSceneInteractor
-{
-    
-    @MainActor
-    func addMonth(_ monthScene: any Scene)
-    
-    @MainActor
-    func addDayEventList(_ eventListScene: any Scene)
-}
+{ }
 
 
 // MARK: - Builder + DependencyInjector Extension

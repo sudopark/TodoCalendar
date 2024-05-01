@@ -168,6 +168,7 @@ extension WeekEventStackViewModel {
 
 protocol MonthViewModel: AnyObject, Sendable, MonthSceneInteractor {
     
+    func attachListener(_ listener: any MonthSceneListener)
     func select(_ day: DayCellViewModel)
     
     var weekDays: AnyPublisher<[WeekDayModel], Never> { get }
@@ -187,7 +188,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let uiSettingUsecase: any UISettingUsecase
-    weak var listener: (any MonthSceneListener)?
+    private weak var listener: (any MonthSceneListener)?
     
     init(
         initialMonth: CalendarMonth,
@@ -316,6 +317,10 @@ extension MonthViewModelImple {
                 self?.subject.currentMonthComponent.send(component)
                 self?.subject.userSelectedDay.send(nil)
             })
+    }
+    
+    func attachListener(_ listener: any MonthSceneListener) {
+        self.listener = listener
     }
     
     func select(_ day: DayCellViewModel) {
