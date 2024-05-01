@@ -41,17 +41,24 @@ extension CalendarPaperSceneBuilerImple: CalendarPaperSceneBuiler {
     @MainActor
     func makeCalendarPaperScene(_ month: CalendarMonth) -> any CalendarPaperScene {
         
-        let viewModel = CalendarPaperViewModelImple(month: month)
+        let monthComponents = self.monthSceneBuilder.makeSceneComponent(month)
+        let eventListComponents = self.eventListSceneBuilder.makeSceneComponent()
+        let viewModel = CalendarPaperViewModelImple(
+            month: month,
+            monthInteractor: monthComponents.viewModel,
+            eventListInteractor: eventListComponents.viewModel
+        )
+        monthComponents.viewModel.attachListener(viewModel)
         
         let viewController = CalendarPaperViewController(
             viewModel: viewModel,
+            monthViewModel: monthComponents.viewModel,
+            eventListViewModel: eventListComponents.viewModel,
             viewAppearance: self.viewAppearance
         )
+        (eventListComponents.router as? BaseRouterImple)?.scene = viewController
         
-        let router = CalendarPaperRouter(
-            monthSceneBuilder: self.monthSceneBuilder,
-            eventListSceneBuilder: self.eventListSceneBuilder
-        )
+        let router = CalendarPaperRouter()
         router.scene = viewController
         viewModel.router = router
         

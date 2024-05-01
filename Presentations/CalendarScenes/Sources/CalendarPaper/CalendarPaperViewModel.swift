@@ -31,11 +31,17 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
     private let month: CalendarMonth
     
     var router: (any CalendarPaperRouting)?
-    private var monthInteractor: (any MonthSceneInteractor)?
-    private var eventListInteractor: (any DayEventListSceneInteractor)?
+    private var monthInteractor: any MonthSceneInteractor
+    private var eventListInteractor: any DayEventListSceneInteractor
     
-    init(month: CalendarMonth) {
+    init(
+        month: CalendarMonth,
+        monthInteractor: any MonthSceneInteractor,
+        eventListInteractor: any DayEventListSceneInteractor
+    ) {
         self.month = month
+        self.monthInteractor = monthInteractor
+        self.eventListInteractor = eventListInteractor
     }
     
     private var currentSelectedDayAndEvents: (CurrentSelectDayModel, [any CalendarEvent])?
@@ -47,18 +53,13 @@ final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Send
 extension CalendarPaperViewModelImple {
     
     func prepare() {
-        Task { @MainActor in
-            let interactors = self.router?.attachMonthAndEventList(self.month) ?? nil
-            self.monthInteractor = interactors?.0
-            self.eventListInteractor = interactors?.1
-            if let pair = currentSelectedDayAndEvents {
-                self.eventListInteractor?.selectedDayChanaged(pair.0, and: pair.1)
-            }
+        if let pair = currentSelectedDayAndEvents {
+            self.eventListInteractor.selectedDayChanaged(pair.0, and: pair.1)
         }
     }
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth) {
-        self.monthInteractor?.updateMonthIfNeed(newMonth)
+        self.monthInteractor.updateMonthIfNeed(newMonth)
     }
     
     func monthScene(
@@ -66,7 +67,7 @@ extension CalendarPaperViewModelImple {
         and eventsThatDay: [any CalendarEvent]
     ) {
         self.currentSelectedDayAndEvents = (currentSelectedDay, eventsThatDay)
-        self.eventListInteractor?.selectedDayChanaged(currentSelectedDay, and: eventsThatDay)
+        self.eventListInteractor.selectedDayChanaged(currentSelectedDay, and: eventsThatDay)
     }
 }
 

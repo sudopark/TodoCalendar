@@ -67,36 +67,52 @@ final class DayEventListViewState: ObservableObject {
 }
 
 
-// MARK: - DayEventListContainerView
-
-struct DayEventListContainerView: View {
-    
-    @StateObject private var state: DayEventListViewState = .init()
-    private let viewAppearance: ViewAppearance
-    
-    var stateBinding: (DayEventListViewState) -> Void = { _ in }
+final class DayEventListViewEventHandler: ObservableObject {
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestAddNewEventWhetherUsingTemplate: (Bool) -> Void = { _ in }
     var addNewTodoQuickly: (String) -> Void = { _ in }
     var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
     var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     
-    init(viewAppearance: ViewAppearance) {
+    func bind(_ viewModel: any DayEventListViewModel) {
+        self.requestDoneTodo = viewModel.doneTodo(_:)
+        self.requestAddNewEventWhetherUsingTemplate = { use in
+            if use { viewModel.makeEventByTemplate() }
+            else { viewModel.makeEvent() }
+        }
+        self.addNewTodoQuickly = viewModel.addNewTodoQuickly(withName:)
+        self.makeNewTodoWithGivenNameAndDetails = viewModel.makeTodoEvent(with:)
+        self.requestShowDetail = viewModel.selectEvent(_:)
+    }
+}
+
+
+// MARK: - DayEventListContainerView
+
+struct DayEventListContainerView: View {
+    
+    @StateObject private var state: DayEventListViewState = .init()
+    private let viewAppearance: ViewAppearance
+    private let eventHandler: DayEventListViewEventHandler
+    
+    var stateBinding: (DayEventListViewState) -> Void = { _ in }
+    
+    init(
+        viewAppearance: ViewAppearance,
+        eventHandler: DayEventListViewEventHandler
+    ) {
         self.viewAppearance = viewAppearance
+        self.eventHandler = eventHandler
     }
     
     var body: some View {
         return DayEventListView()
-            .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
-            .eventHandler(\.requestAddNewEventWhetherUsingTemplate, self.requestAddNewEventWhetherUsingTemplate)
-            .eventHandler(\.addNewTodoQuickly, self.addNewTodoQuickly)
-            .eventHandler(\.makeNewTodoWithGivenNameAndDetails, self.makeNewTodoWithGivenNameAndDetails)
-            .eventHandler(\.requestShowDetail, self.requestShowDetail)
             .onAppear {
                 self.stateBinding(self.state)
             }
             .environmentObject(state)
             .environmentObject(viewAppearance)
+            .environmentObject(eventHandler)
     }
 }
 
@@ -106,12 +122,7 @@ struct DayEventListView: View {
     
     @EnvironmentObject private var state: DayEventListViewState
     @EnvironmentObject private var appearance: ViewAppearance
-    
-    fileprivate var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
-    fileprivate var requestDoneTodo: (String) -> Void = { _ in }
-    fileprivate var requestAddNewEventWhetherUsingTemplate: (Bool) -> Void = { _ in }
-    fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
-    fileprivate var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
+    @EnvironmentObject private var eventHandler: DayEventListViewEventHandler
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -149,16 +160,16 @@ struct DayEventListView: View {
                 ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
                     
                     EventListCellView(cellViewModel: cellViewModel)
-                        .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
-                        .eventHandler(\.requestShowDetail, self.requestShowDetail)
+                        .eventHandler(\.requestDoneTodo, eventHandler.requestDoneTodo)
+                        .eventHandler(\.requestShowDetail, eventHandler.requestShowDetail)
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
             
             // todo 추가
             QuickAddNewTodoView()
-                .eventHandler(\.addNewTodoQuickly, self.addNewTodoQuickly)
-                .eventHandler(\.makeNewTodoWithGivenNameAndDetails, self.makeNewTodoWithGivenNameAndDetails)
+                .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
+                .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
             
             addNewButton()
         }
@@ -168,7 +179,7 @@ struct DayEventListView: View {
     private func addNewButton() -> some View {
         return HStack {
             Button {
-                self.requestAddNewEventWhetherUsingTemplate(false)
+                self.eventHandler.requestAddNewEventWhetherUsingTemplate(false)
             } label: {
                 HStack {
                     Image(systemName: "plus")
@@ -187,7 +198,7 @@ struct DayEventListView: View {
             }
             
             Button {
-                self.requestAddNewEventWhetherUsingTemplate(true)
+                self.eventHandler.requestAddNewEventWhetherUsingTemplate(true)
             } label: {
                 Image(systemName: "list.bullet.clipboard")
                     .tint(self.appearance.colorSet.normalText.asColor)
@@ -433,45 +444,47 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         state.dayModel = .init(dateText: "2020년 9월 15일(금)", lunarDateText: "6월 4일")
         state.dayModel?.holidayName = "크리스마스"
         state.cellViewModels = self.makeDummyCells()
-        let containerView = DayEventListView()
-            .eventHandler(\.requestDoneTodo) { id in
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    // 완료처리 실패하게 하던지
-                    withAnimation {
-    //                    state.requestDoneTodoIds = []
-                        
-                        // 혹은 완료처리 성공 이후 셀 목록 업데이트 시뮬레이션
-                        let newCells = state.cellViewModels.filter { $0.todoEventId != id }
-                        state.cellViewModels = newCells
-                    }
+        let eventHandler = DayEventListViewEventHandler()
+        eventHandler.requestDoneTodo = { id in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                // 완료처리 실패하게 하던지
+                withAnimation {
+//                    state.requestDoneTodoIds = []
+                    
+                    // 혹은 완료처리 성공 이후 셀 목록 업데이트 시뮬레이션
+                    let newCells = state.cellViewModels.filter { $0.todoEventId != id }
+                    state.cellViewModels = newCells
                 }
             }
-            .eventHandler(\.addNewTodoQuickly) { name in
-                let pending = PendingTodoEventCellViewModel(name: name, defaultTagId: nil)
-                    |> \.tagColor .~ .default
-                let index = state.cellViewModels.firstIndex(where: { !$0.name.starts(with: "current todo") })!
+        }
+        eventHandler.addNewTodoQuickly = { name in
+            let pending = PendingTodoEventCellViewModel(name: name, defaultTagId: nil)
+                |> \.tagColor .~ .default
+            let index = state.cellViewModels.firstIndex(where: { !$0.name.starts(with: "current todo") })!
+            
+            withAnimation {
+                state.cellViewModels.insert(pending, at: index)
                 
-                withAnimation {
-                    state.cellViewModels.insert(pending, at: index)
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                        if let index = state.cellViewModels.firstIndex(where: { $0.eventIdentifier == pending.eventIdentifier }) {
-                            withAnimation {
-                                // 삭제하여 실패했을때 가정
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    if let index = state.cellViewModels.firstIndex(where: { $0.eventIdentifier == pending.eventIdentifier }) {
+                        withAnimation {
+                            // 삭제하여 실패했을때 가정
 //                                state.cellViewModels.remove(at: index)
-                                
-                                // 추가하여 성공했을때 가정
-                                let newCell = TodoEventCellViewModel("new-current-todo", name: name)
-                                    |> \.periodText .~ .singleText(.init(text: "Todo".localized()))
-                                    |> \.tagColor .~ pending.tagColor
-                                state.cellViewModels[index] = newCell
-                            }
+                            
+                            // 추가하여 성공했을때 가정
+                            let newCell = TodoEventCellViewModel("new-current-todo", name: name)
+                                |> \.periodText .~ .singleText(.init(text: "Todo".localized()))
+                                |> \.tagColor .~ pending.tagColor
+                            state.cellViewModels[index] = newCell
                         }
                     }
                 }
             }
+        }
+        let containerView = DayEventListView()
             .environmentObject(viewAppearance)
             .environmentObject(state)
+            .environmentObject(eventHandler)
         return containerView
     }
     

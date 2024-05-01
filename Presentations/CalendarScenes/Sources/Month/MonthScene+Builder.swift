@@ -53,8 +53,11 @@ protocol MonthSceneListener: AnyObject {
 protocol MonthScene: Scene where Interactor == any MonthSceneInteractor {
 }
 
+struct MonthSceneComponent {
+    let viewModel: any MonthViewModel
+}
+
 protocol MonthSceneBuilder: AnyObject {
     
-    @MainActor
-    func makeMonthScene(_ month: CalendarMonth, listener: (any MonthSceneListener)?) -> any MonthScene
+    func makeSceneComponent(_ month: CalendarMonth) -> MonthSceneComponent
 }

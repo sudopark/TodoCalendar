@@ -34,27 +34,17 @@ final class DayEventListSceneBuilerImple {
 
 extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
     
-    @MainActor
-    func makeDayEventListScene() -> any DayEventListScene {
-        
+    func makeSceneComponent() -> DayEventListSceneComponent {
         let viewModel = DayEventListViewModelImple(
             calendarSettingUsecase: usecaseFactory.makeCalendarSettingUsecase(),
             todoEventUsecase: usecaseFactory.makeTodoEventUsecase(),
             eventTagUsecase: usecaseFactory.makeEventTagUsecase(),
             uiSettingUsecase: usecaseFactory.makeUISettingUsecase()
         )
-        
-        let viewController = DayEventListViewController(
-            viewModel: viewModel,
-            viewAppearance: self.viewAppearance
-        )
-        
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder
         )
-        router.scene = viewController
         viewModel.router = router
-        
-        return viewController
+        return .init(viewModel: viewModel, router: router)
     }
 }

@@ -65,7 +65,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventTagUsecase: self.stubTagUsecase,
             uiSettingUsecase: self.stubUISettingUsecase
         )
-        viewModel.listener = self.spyListener
+        viewModel.attachListener(self.spyListener!)
         return viewModel
     }
 }
