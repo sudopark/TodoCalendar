@@ -114,7 +114,11 @@ struct MonthView: View {
     var body: some View {
         VStack(spacing: 0) {
             headerView
-            self.gridWeeksView()
+            if state.weeks.isEmpty {
+                self.emptyGridView()
+            } else {
+                self.gridWeeksView()
+            }
         }
         .padding([.leading, .trailing], 8)
         .background(self.appearance.colorSet.dayBackground.asColor)
@@ -148,6 +152,12 @@ struct MonthView: View {
                     .environmentObject(appearance)
             }
         }
+    }
+    
+    private func emptyGridView() -> some View {
+        Rectangle()
+            .fill(appearance.colorSet.dayBackground.asColor)
+            .frame(height: 500)
     }
 }
 
