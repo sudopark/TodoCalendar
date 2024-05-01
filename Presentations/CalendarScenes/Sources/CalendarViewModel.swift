@@ -287,15 +287,15 @@ private struct TotalMonthRanges {
         
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         guard months.isEmpty == false,
-              let firstDate = months.first.flatMap(calendar.firstDateOfMonth(_:)),
-              let endDate = months.last.flatMap(calendar.lastDateOfMonth(_:))
+              let start = months.first.flatMap(calendar.thisYearLowerBound(of:)),
+              let end = months.last.flatMap(calendar.thisYearUpperBound(of:))
         else { return self }
 
-        let monthsRange = (firstDate.timeIntervalSince1970..<endDate.timeIntervalSince1970)
+        let range = (start.timeIntervalSince1970..<end.timeIntervalSince1970)
         
-        let notCheckedRanges = (self.checkedRange.map { monthsRange.notOverlapRanges(with: $0) } ?? [monthsRange])
+        let notCheckedRanges = (self.checkedRange.map { range.notOverlapRanges(with: $0) } ?? [range])
             
-        let newCheckedRange = self.checkedRange.map { $0.merge(with: monthsRange) } ?? monthsRange
+        let newCheckedRange = self.checkedRange.map { $0.merge(with: range) } ?? range
         return .init(
             checkedRange: newCheckedRange,
             newRanges: notCheckedRanges
@@ -306,19 +306,22 @@ private struct TotalMonthRanges {
 
 private extension Calendar {
     
-    func firstDateOfMonth(_ month: CalendarMonth) -> Date? {
+    func thisYearLowerBound(of month: CalendarMonth) -> Date? {
         let formatter = DateFormatter()
         formatter.timeZone = self.timeZone
         formatter.dateFormat = "yyyy-MM-dd"
-        let firstDateString = "\(month.year)-\(month.month.withLeadingZero())-01"
+        let firstDateString = "\(month.year)-01-01"
         return formatter.date(from: firstDateString)
             .flatMap { self.startOfDay(for: $0) }
     }
     
-    func lastDateOfMonth(_ month: CalendarMonth) -> Date? {
-        return self.firstDateOfMonth(month)
-            .flatMap { self.lastDayOfMonth(from: $0) }
-            .flatMap { self.endOfDay(for: $0) }
+    func thisYearUpperBound(of month: CalendarMonth) -> Date? {
+        let formatter = DateFormatter()
+        formatter.timeZone = self.timeZone
+        formatter.dateFormat = "yyyy-MM-dd"
+        let lastDateString = "\(month.year+1)-01-01"
+        return formatter.date(from: lastDateString)
+            .flatMap { self.startOfDay(for: $0) }
     }
 }
 

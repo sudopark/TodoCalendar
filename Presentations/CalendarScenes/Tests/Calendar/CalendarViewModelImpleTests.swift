@@ -322,74 +322,70 @@ extension CalendarViewModelImpleTests {
     func testViewModel_whenRangeChangeAndNewMonthAppened_reloadTodoEventsInTotalPeriod() {
         // given
         let expect = expectation(description: "calendar가 조회중인 전체 조회 기간이 길어지면 스케줄 이벤트 다시 조회")
-        expect.expectedFulfillmentCount = 4
+        expect.expectedFulfillmentCount = 2
         let viewModel = self.makeViewModelWithInitialSetup(
             .init(year: 2023, month: 10, day: 04, weekDay: 3)
         )
         
         // when
-        let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
+        let totalRange = self.range((2023, 01, 01), (2025, 01, 01))
         let source = self.spyTodoUsecase.todoEvents(in: totalRange)
         let todoLists = self.waitOutputs(expect, for: source) {
-            // 전체 범위 => 9~11월
+            // 전체 범위 => 9~11월 신규 => 2023년
             
-            // 전체 범위 => 8~11월, 신규 8~9
+            // 전체 범위 => 8~11월, 신규 x
             viewModel.focusChanged(from: 1, to: 0)
             
             // 전체범위 변동 없음 => 8~11
             viewModel.focusChanged(from: 0, to: 1)
             
-            // 전체 범위 => 8~12월, 신규 11~12
+            // 전체 범위 => 8~12월, 신규 x
             viewModel.focusChanged(from: 1, to: 2)
             
-            // 전체 범위 => 8~다음년도1월, 신규 12~1
+            // 전체 범위 => 8~다음년도1월, 신규 => 2024년
             viewModel.focusChanged(from: 2, to: 0)
         }
         
         // then
         let todoIdLists = todoLists.map { ts in ts.map { $0.uuid } }
         XCTAssertEqual(todoIdLists, [
-            ["kst-month: 9~11"],
-            ["kst-month: 9~11", "kst-month: 8~9"],
-            ["kst-month: 9~11", "kst-month: 8~9", "kst-month: 11~12"],
-            ["kst-month: 9~11", "kst-month: 8~9", "kst-month: 11~12", "kst-month: 12~1"]
+            ["kst-month: 2023.01.01_00:00..<2024.01.01_00:00"],
+            ["kst-month: 2023.01.01_00:00..<2024.01.01_00:00", "kst-month: 2024.01.01_00:00..<2025.01.01_00:00"]
         ])
     }
     
     func testViewModel_whenRangeChangeAndNewMonthAppened_reloadScheduleEventsInTotalPeriod() {
         // given
         let expect = expectation(description: "calendar가 조회중인 전체 조회 기간이 길어지면 시간정보 있는 할일 이벤트 다시 조회")
-        expect.expectedFulfillmentCount = 4
+        expect.expectedFulfillmentCount = 2
         let viewModel = self.makeViewModelWithInitialSetup(
             .init(year: 2023, month: 10, day: 04, weekDay: 3)
         )
         
         // when
-        let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
+        let totalRange = self.range((2023, 01, 01), (2025, 01, 01))
         let source = self.spyScheduleUsecase.scheduleEvents(in: totalRange)
         let scheduleLists = self.waitOutputs(expect, for: source) {
-            // 전체 범위 => 9~11월
+            // 전체 범위 => 9~11월, 신규 => 2023년
             
-            // 전체 범위 => 8~11월, 신규 8~9
+            // 전체 범위 => 8~11월, 신규 x
             viewModel.focusChanged(from: 1, to: 0)
             
             // 전체범위 변동 없음 => 8~11
             viewModel.focusChanged(from: 0, to: 1)
             
-            // 전체 범위 => 8~12월, 신규 11~12
+            // 전체 범위 => 8~12월, 신규 x
             viewModel.focusChanged(from: 1, to: 2)
             
-            // 전체 범위 => 8~다음년도1월, 신규 12~1
+            // 전체 범위 => 8~다음년도1월, 신규 => 2024년
             viewModel.focusChanged(from: 2, to: 0)
         }
         
         // then
         let scheduleIdLists = scheduleLists.map { ss in ss.map { $0.uuid } }
         XCTAssertEqual(scheduleIdLists, [
-            ["kst-month: 9~11"],
-            ["kst-month: 9~11", "kst-month: 8~9"],
-            ["kst-month: 9~11", "kst-month: 8~9", "kst-month: 11~12"],
-            ["kst-month: 9~11", "kst-month: 8~9", "kst-month: 11~12", "kst-month: 12~1"]
+            ["kst-month: 2023.01.01_00:00..<2024.01.01_00:00"],
+            ["kst-month: 2023.01.01_00:00..<2024.01.01_00:00", "kst-month: 2024.01.01_00:00..<2025.01.01_00:00"]
         ])
     }
     
@@ -399,25 +395,31 @@ extension CalendarViewModelImpleTests {
         let expect = expectation(description: "timeZone 변경시에 새로운 구간에 대한 todo 이벤트 조회")
         expect.expectedFulfillmentCount = 2
         let viewModel = self.makeViewModelWithInitialSetup(
-            .init(year: 2023, month: 10, day: 4, weekDay: 2)
+            .init(year: 2023, month: 11, day: 4, weekDay: 2)
         )
         
         // when
-        let totalRange = self.range((2023, 08, 01), (2024, 1, 31))
+        let totalRange = self.range((2023, 01, 01), (2025, 01, 01))
         let source = self.spyTodoUsecase.todoEvents(in: totalRange)
         let todoLists = self.waitOutputs(expect, for: source) {
             // 최초 9~11월 나몸
             
-            // timeZone pdt로 변경 => 현재보다 16시간 만큼 미래시간으로 지정됨
-            // 달력의 마지막날인 2023-11-30일 23:59:59에서 pdt로 빼낸 interval을 kst로 변경하면 12월 1일임
+            // timeZone pdt로 변경 => 현재보다 16+1시간 만큼 미래시간으로 지정됨(1월 1일 기준 pst로 계산됨)
+            // 달력의 마지막날인 2023-12-31일 23:59:59에서 pdt로 빼낸 interval을 kst로 변경하면 1월 1일임
+            // kst 기준 계산된 2023년도의 범위가 -> pdt 기준으로 변경되고, upper bound가 16+1시간 만큼 증가
             self.stubSettingUsecase.selectTimeZone(TimeZone(abbreviation: "PDT")!)
         }
         
         // then
         let todoIdLists = todoLists.map { ts in ts.map { $0.uuid } }
         XCTAssertEqual(todoIdLists, [
-            ["kst-month: 9~11"],
-            ["kst-month: 9~11", "kst-month: 11~12"]
+            [
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00"
+            ],
+            [
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00",
+                "kst-month: 2024.01.01_00:00..<2024.01.01_17:00"
+            ],
         ])
     }
 }
@@ -481,12 +483,18 @@ private extension CalendarViewModelImpleTests {
         
         private let todoEventsInRange = CurrentValueSubject<[TodoEvent]?, Never>(nil)
         override func refreshTodoEvents(in period: Range<TimeInterval>) {
-            let calendar = Calendar(identifier: .gregorian)
-                |> \.timeZone .~ TimeZone(abbreviation: "KST")!
-            let startMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.lowerBound))
-            let endMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.upperBound))
             
-            let newTodo = TodoEvent(uuid: "kst-month: \(startMonth)~\(endMonth)", name: "dummy")
+            let dateText: (Date) -> String = {
+                let formatter = DateFormatter() 
+                    |> \.dateFormat .~ "yyyy.MM.dd_HH:mm"
+                    |> \.timeZone .~ TimeZone(abbreviation: "KST")
+                return formatter.string(from: $0)
+            }
+            
+            let start = period.lowerBound |> Date.init(timeIntervalSince1970:) |> dateText
+            let end = period.upperBound |> Date.init(timeIntervalSince1970:) |> dateText
+            
+            let newTodo = TodoEvent(uuid: "kst-month: \(start)..<\(end)", name: "dummy")
                 |> \.time .~ EventTime.at(period.lowerBound)
             let newTodos = (self.todoEventsInRange.value ?? []) <> [newTodo]
             self.todoEventsInRange.send(newTodos)
@@ -511,13 +519,18 @@ private extension CalendarViewModelImpleTests {
         
         private let scheduleEventsInRange = CurrentValueSubject<[ScheduleEvent]?, Never>(nil)
         override func refreshScheduleEvents(in period: Range<TimeInterval>) {
-            let calendar = Calendar(identifier: .gregorian)
-                |> \.timeZone .~ TimeZone(abbreviation: "KST")!
-            let startMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.lowerBound))
-            let endMonth = calendar.component(.month, from: Date(timeIntervalSince1970: period.upperBound))
+            let dateText: (Date) -> String = {
+                let formatter = DateFormatter()
+                    |> \.dateFormat .~ "yyyy.MM.dd_HH:mm"
+                    |> \.timeZone .~ TimeZone(abbreviation: "KST")
+                return formatter.string(from: $0)
+            }
+            
+            let start = period.lowerBound |> Date.init(timeIntervalSince1970:) |> dateText
+            let end = period.upperBound |> Date.init(timeIntervalSince1970:) |> dateText
             
             let newOne = ScheduleEvent(
-                uuid: "kst-month: \(startMonth)~\(endMonth)",
+                uuid: "kst-month: \(start)..<\(end)",
                 name: "dummy",
                 time: .at(period.lowerBound)
             )
