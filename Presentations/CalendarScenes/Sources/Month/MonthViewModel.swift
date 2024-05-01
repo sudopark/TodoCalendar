@@ -314,6 +314,7 @@ extension MonthViewModelImple {
             .components(for: newMonth.month, of: newMonth.year)
             .sink(receiveValue: { [weak self] component in
                 self?.subject.currentMonthComponent.send(component)
+                self?.subject.userSelectedDay.send(nil)
             })
     }
     

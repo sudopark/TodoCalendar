@@ -203,12 +203,12 @@ extension MonthViewModelImpleTests {
 
     func testViewModel_whenSelectNotThisMonth_updateSelectedDay() {
         // given
-        let expect = expectation(description: "이번달이 아닌 날짜를 선택해도 선택날짜 업데이트")
-        expect.expectedFulfillmentCount = 2
+        let expect = expectation(description: "9월 달력에서 8월 말일 선택(ok) -> 9월 20일 선택 -> 이후 8월로 변경시 8월 1일로 선택값 변경 -> 다시 9월로 전환시 9월10(today)일로 선택값 변경")
+        expect.expectedFulfillmentCount = 5
         let viewModel = self.makeViewModel()
 
         // when
-        let selecteds = self.waitOutputs(expect, for: viewModel.currentSelectDayIdentifier) {
+        let selecteds = self.waitOutputs(expect, for: viewModel.currentSelectDayIdentifier, timeout: 0.01) {
             viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
             viewModel.select(
                 .init(
@@ -216,11 +216,19 @@ extension MonthViewModelImpleTests {
                     accentDay: nil
                 )
             )
+            viewModel.select(
+                .init(
+                    year: 2023, month: 9, day: 20, isNotCurrentMonth: true,
+                    accentDay: nil
+                )
+            )
+            viewModel.updateMonthIfNeed(.init(year: 2023, month: 08))
+            viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
         }
 
         // then
         XCTAssertEqual(selecteds, [
-            "2023-9-10", "2023-8-31"
+            "2023-9-10", "2023-8-31", "2023-9-20", "2023-8-1", "2023-9-10"
         ])
     }
 
