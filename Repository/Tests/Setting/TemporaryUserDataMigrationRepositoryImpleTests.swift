@@ -93,12 +93,14 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
         try await detailStorage.saveDetail(detail1)
     }
     
-    private func makeRepository() async throws -> TemporaryUserDataMigrationRepositoryImple {
+    private func makeRepository(withoutData: Bool = false) async throws -> TemporaryUserDataMigrationRepositoryImple {
         let repository = TemporaryUserDataMigrationRepositoryImple(
             tempUserDBPath: self.testDBPath(),
             remoteAPI: self.stubRemote
         )
-        try await self.prepareDummyData()
+        if !withoutData {
+            try await self.prepareDummyData()
+        }
         return repository
     }
 }
@@ -204,6 +206,20 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         // then
         XCTAssertEqual(countBeforeMigration, 4)
         XCTAssertEqual(countAfterMigration, nil)
+    }
+    
+    func testReposiotry_whenMigrateTargetDataIsEmpty_notUpload() async throws {
+        // given
+        let repository = try await self.makeRepository(withoutData: true)
+        
+        // when
+        try await repository.migrateEventTags()
+        try await repository.migrateTodoEvents()
+        try await repository.migrateScheduleEvents()
+        try await repository.migrateEventDetails()
+        
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedPaths.isEmpty, true)
     }
 }
 

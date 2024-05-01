@@ -48,6 +48,7 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
     )
     var didRequestedPath: String?
     var didRequestedParams: [String: Any]?
+    var didRequestedPaths: [String] = []
     
     func attach(listener: OAuthAutenticatorTokenRefreshListener) {
         
@@ -77,6 +78,7 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
             throw RuntimeError("invalid params")
         }
         self.didRequestedPath = path
+        self.didRequestedPaths.append(path)
         self.didRequestedParams = parameters
         
         guard let response = self.findResponse(method: method, path: path, header: header, parameters: parameters)

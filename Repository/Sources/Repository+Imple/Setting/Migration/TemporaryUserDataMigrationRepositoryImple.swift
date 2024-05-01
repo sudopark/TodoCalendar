@@ -60,6 +60,8 @@ extension TemporaryUserDataMigrationRepositoryImple {
         let storage = EventTagLocalStorageImple(sqliteService: service)
         let alltags = try await storage.loadAllTags()
         
+        guard !alltags.isEmpty else { return }
+        
         let endpoint = MigrationEndpoints.eventTags
         let payload = BatchEventTagPayload(tags: alltags)
         let _ : BatchWriteResult = try await self.remoteAPI.request(
@@ -77,6 +79,8 @@ extension TemporaryUserDataMigrationRepositoryImple {
         let storage = TodoLocalStorageImple(sqliteService: service)
         let todos = try await storage.loadAllEvents()
         
+        guard !todos.isEmpty else { return }
+        
         let endpoint = MigrationEndpoints.todos
         let payload = BatchTodoEventPayload(todos: todos)
         let _: BatchWriteResult = try await self.remoteAPI.request(
@@ -93,6 +97,8 @@ extension TemporaryUserDataMigrationRepositoryImple {
         
         let storage = ScheduleEventLocalStorageImple(sqliteService: service)
         let schedules = try await storage.loadAllEvents()
+        
+        guard !schedules.isEmpty else { return}
         
         let endpoint = MigrationEndpoints.schedules
         let payload = BatchScheduleEventPayload(events: schedules)
@@ -112,6 +118,8 @@ extension TemporaryUserDataMigrationRepositoryImple {
         let storage = EventDetailDataLocalStorageImple(sqliteService: service)
         let details = try await storage.loadAll()
         
+        guard !details.isEmpty else { return }
+        
         let endpoint = MigrationEndpoints.eventDetails
         let payload = BatchEventDetailPayload(details: details)
         let _ : BatchWriteResult = try await self.remoteAPI.request(
@@ -129,6 +137,8 @@ extension TemporaryUserDataMigrationRepositoryImple {
         
         let storage = TodoLocalStorageImple(sqliteService: service)
         let doneEvents = try await storage.loadAllDoneEvents()
+        
+        guard !doneEvents.isEmpty else { return }
         
         let endpoint = MigrationEndpoints.doneTodos
         let payload = BatchDoneTodoEventPayload(dones: doneEvents)
