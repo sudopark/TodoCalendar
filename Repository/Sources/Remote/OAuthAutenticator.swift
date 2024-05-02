@@ -98,15 +98,17 @@ extension OAuthAutenticator {
         completion: @escaping (Result<Credential, Error>) -> Void
     ) {
         
-        guard case .need = credential
+        guard case .need(let oldToken) = credential
         else {
             completion(.failure(RuntimeError("auth not exists")))
             return
         }
         
+        logger.log(level: .debug, "token refresh start..")
         self.firebaseAuthService.refreshToken { result in
             switch result {
             case .success(let refreshResult):
+                logger.log(level: .debug, "token refreshed! and is chanegd: \(oldToken.accessToken != refreshResult.idToken)")
                 let auth = Auth(
                     uid: refreshResult.uid,
                     accessToken: refreshResult.idToken,
@@ -117,6 +119,7 @@ extension OAuthAutenticator {
                 completion(.success(.need(auth)))
                 
             case .failure(let error):
+                logger.log(level: .error, "token refresh failed..\(error)")
                 try? self.firebaseAuthService.signOut()
                 self.authStore.removeAuth()
                 self.listener?.oauthAutenticator(didRefreshFailed: error)
@@ -132,7 +135,13 @@ extension OAuthAutenticator {
             
         case .need(let auth):
             let bearerToken = HTTPHeader.authorization(bearerToken: auth.accessToken).value
-            return urlRequest.headers["Authorization"] == bearerToken
+            let isSameCredential = urlRequest.headers["Authorization"] == bearerToken
+            if !isSameCredential {
+                logger.log(level: .debug, "credential changed, the request will resume, path: \(urlRequest.urlRequest?.url?.absoluteString ?? "")")
+            } else {
+                logger.log(level: .error, "current credential is invalid, will resume request after refresh(if need), path: \(urlRequest.urlRequest?.url?.absoluteString ?? "")")
+            }
+            return isSameCredential
         }
     }
 }
