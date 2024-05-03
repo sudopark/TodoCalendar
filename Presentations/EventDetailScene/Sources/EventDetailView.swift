@@ -29,9 +29,9 @@ final class EventDetailViewState: ObservableObject {
     @Published var selectedTime: SelectedTime?
     @Published var selectedRepeat: String?
     @Published var selectedNotificationTimeText: String?
-    @Published var isAllDay: Bool = false
     @Published var availableMoreActions: [[EventDetailMoreAction]] = []
     
+    @Published var isAllDay: Bool = false
     @Published var selectedStartDate: Date = Date()
     @Published var selectedEndDate: Date = Date().addingTimeInterval(60)
     @Published var url: String = ""

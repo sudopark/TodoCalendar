@@ -27,6 +27,7 @@ protocol SelectEventTimeViewModel: AnyObject, Sendable, SelectEventTimeSceneInte
     func selectEndTime(_ date: Date)
     func removeEndTime()
     func confirm()
+    func close()
     
     // presenter
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
@@ -117,6 +118,10 @@ extension SelectEventTimeViewModelImple {
         
         self.router?.closeScene()
         self.listener?.select(eventTime: time)
+    }
+    
+    func close() {
+        self.router?.closeScene()
     }
 }
 
