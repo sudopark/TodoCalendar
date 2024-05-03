@@ -272,7 +272,10 @@ extension EventDetailInputViewModelImple: SelectEventNotificationTimeSceneListen
     func selectNotificationTime() {
         guard let basicAndTimeZone = self.subject.basic.value,
               let (eventTime, isAllDay) = basicAndTimeZone.basic.selectedTime?.evnetTimeAndIsAllDay
-        else { return }
+        else {
+            self.routing?.showToast("choose event time first".localized())
+            return
+        }
         
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ basicAndTimeZone.timeZone
         let eventTimeComponents = calendar.dateComponents([

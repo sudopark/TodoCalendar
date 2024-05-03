@@ -25,6 +25,8 @@ struct CalenarPaperContainerView: View {
     private let eventListView: DayEventListContainerView
     private let eventHandler: CalenarPaperViewEventHandelr
     
+    @StateObject private var keyboardHeightObserver = KeyboardHeightObserver()
+    
     init(
         monthView: MonthContainerView,
         eventListView: DayEventListContainerView,
@@ -43,6 +45,7 @@ struct CalenarPaperContainerView: View {
                 self.monthView
                 self.eventListView
             }
+            .offset(y: -keyboardHeightObserver.showingKeyboardHeight)
         }
         .onAppear(perform: eventHandler.onAppear)
     }

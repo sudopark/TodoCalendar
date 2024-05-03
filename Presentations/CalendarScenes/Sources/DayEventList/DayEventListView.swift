@@ -387,6 +387,7 @@ private struct QuickAddNewTodoView: View {
                         self.addNewTodoQuickly(self.newTodoName)
                         self.resetStates()
                     }
+                    .submitLabel(.done)
                 
                 if !self.newTodoName.isEmpty {
                     Button {
