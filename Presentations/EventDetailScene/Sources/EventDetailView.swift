@@ -347,40 +347,46 @@ struct EventDetailView: View {
     
     private func selectedTimeView() -> some View {
         
-        func timeView(_ timeText: SelectTimeText, isStart: Bool, isInvalid: Bool) -> some View {
+        func timeView(_ timeText: SelectTimeText, _ position: TimeSelecting, isInvalid: Bool) -> some View {
+            
+            let isSelecting = self.isTimeSelecting == position
+            let textColor: Color = !isSelecting
+                ? appearance.colorSet.normalText.asColor
+                : appearance.colorSet.subNormalText.asColor
+            
             return VStack(alignment: .leading) {
                 
                 if let year = timeText.year {
                     Text(year)
                         .strikethrough(isInvalid)
                         .font(self.appearance.fontSet.size(14).asFont)
-                        .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                        .foregroundStyle(textColor)
                 }
                 
                 Text(timeText.day)
                     .lineLimit(1)
                     .strikethrough(isInvalid)
                     .font(self.appearance.fontSet.size(14).asFont)
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(textColor)
                 
                 if let time = timeText.time {
                     Text(time)
                         .strikethrough(isInvalid)
                         .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
-                        .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                        .foregroundStyle(textColor)
                 }
             }
             .onTapGesture {
-                self.updateTimePickerShowing(isStart ? .start : .end)
+                self.updateTimePickerShowing(position)
             }
         }
         
-        func emptyLabelView(isStart: Bool) -> some View {
+        func emptyLabelView(_ position: TimeSelecting) -> some View {
             return Text("--")
                 .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
                 .foregroundStyle(self.appearance.colorSet.normalText.asColor)
                 .onTapGesture {
-                    self.updateTimePickerShowing(isStart ? .start : .end)
+                    self.updateTimePickerShowing(position)
                 }
                 .frame(minWidth: 60)
         }
@@ -388,40 +394,40 @@ struct EventDetailView: View {
         switch self.state.selectedTime {
         case .none:
             return HStack(spacing: 16) {
-                emptyLabelView(isStart: true)
+                emptyLabelView(.start)
                 Image(systemName: "chevron.right")
-                emptyLabelView(isStart: false)
+                emptyLabelView(.end)
             }
             .asAnyView()
             
         case .at(let time):
             return HStack(spacing: 16) {
-                timeView(time, isStart: true, isInvalid: isInvalid)
+                timeView(time, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
-                emptyLabelView(isStart: false)
+                emptyLabelView(.end)
             }
             .asAnyView()
         case .period(let from, let to):
             return HStack(spacing: 16) {
-                timeView(from, isStart: true, isInvalid: isInvalid)
+                timeView(from, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
-                timeView(to, isStart: false, isInvalid: isInvalid)
+                timeView(to, .end, isInvalid: isInvalid)
             }
             .asAnyView()
             
         case .singleAllDay(let time):
             return HStack(spacing: 16) {
-                timeView(time, isStart: true, isInvalid: isInvalid)
+                timeView(time, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
-                emptyLabelView(isStart: false)
+                emptyLabelView(.end)
             }
             .asAnyView()
             
         case .alldayPeriod(let from, let to):
             return HStack(spacing: 16) {
-                timeView(from, isStart: true, isInvalid: isInvalid)
+                timeView(from, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
-                timeView(to, isStart: false, isInvalid: isInvalid)
+                timeView(to, .end, isInvalid: isInvalid)
             }
             .asAnyView()
         }
@@ -477,6 +483,15 @@ struct EventDetailView: View {
     }
     
     private func updateTimePickerShowing(_ selecting: TimeSelecting?) {
+        
+        guard self.isTimeSelecting != selecting
+        else {
+            withAnimation {
+                self.isTimeSelecting = nil
+            }
+            return
+        }
+        
         switch selecting {
         case .start:
             self.state.selectedStartDate = self.state.selectedTime?.startTime ?? Date()
@@ -498,7 +513,7 @@ struct EventDetailView: View {
                     ? self.$state.selectedStartDate : self.$state.selectedEndDate,
                 displayedComponents: self.state.isAllDay ? [.date] : [.date, .hourAndMinute]
             )
-            .datePickerStyle(GraphicalDatePickerStyle())
+            .datePickerStyle(.wheel)
             .onReceive(selecting == .start ? self.state.$selectedStartDate.dropFirst() : self.state.$selectedEndDate.dropFirst()) { date in
                 if selecting == .start {
                     self.selectStartTime(date)
@@ -508,19 +523,38 @@ struct EventDetailView: View {
             }
             .labelsHidden()
             
-            Button {
-                if selecting == .start {
-                    self.removeTime()
-                } else {
-                    self.removeEventEndTime()
+            HStack {
+                removeEventTimeView
+                if selecting == .end {
+                    removeEndTimeView
                 }
-                self.updateTimePickerShowing(nil)
-            } label: {
-                Text(
-                    selecting == .start ? "no event time".localized() : "no end time".localized()
-                )
-                .padding(.vertical, 4).padding(.horizontal, 8)
             }
+        }
+    }
+    
+    private var removeEventTimeView: some View {
+        Button {
+            self.removeTime()
+        } label: {
+            Text("clear event time")
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(lineWidth: 1)
+                )
+        }
+    }
+    
+    private var removeEndTimeView: some View {
+        Button {
+            self.removeEventEndTime()
+        } label: {
+            Text("no end time")
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(lineWidth: 1)
+                )
         }
     }
     

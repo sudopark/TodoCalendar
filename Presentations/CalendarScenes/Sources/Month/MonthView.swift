@@ -142,7 +142,7 @@ struct MonthView: View {
     private func gridWeeksView() -> some View {
         let expectSize = CGSize(
             width: UIScreen.main.bounds.width - 16,
-            height: 100
+            height: 75
         )
         return VStack(spacing: 0) {
             ForEach(self.state.weeks, id: \.id) {
