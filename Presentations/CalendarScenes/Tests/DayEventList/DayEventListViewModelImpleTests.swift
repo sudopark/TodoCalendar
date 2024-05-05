@@ -20,7 +20,7 @@ import TestDoubles
 class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
-    private var stubTodoUsecase: StubTodoEventUsecase!
+    private var stubTodoUsecase: PrivateStubTodoEventUsecase!
     private var stubTagUsecase: StubEventTagUsecase!
     private var spyRouter: SpyRouter!
     
@@ -403,7 +403,7 @@ extension DayEventListViewModelImpleTests {
         
         // when
         let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
-        let cvms = self.waitFirstOutput(expect, for: source) {
+        let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.01) {
             viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
         }
         
@@ -423,7 +423,7 @@ extension DayEventListViewModelImpleTests {
         
         // when
         let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
-        let cvmLists = self.waitOutputs(expect, for: source) {
+        let cvmLists = self.waitOutputs(expect, for: source, timeout: 0.01) {
             viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
             
             viewModel.doneTodo("todo-with-time")
@@ -448,7 +448,7 @@ extension DayEventListViewModelImpleTests {
         
         // when
         let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2})
-        let _ = self.waitFirstOutput(expect, for: source) {
+        let _ = self.waitFirstOutput(expect, for: source, timeout: 0.01) {
             viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
             
             viewModel.doneTodo("todo-with-time")
@@ -674,5 +674,14 @@ extension DayEventListViewModelImpleTests {
         func routeToScheduleEventDetail(_ eventId: String) {
             self.didRouteToScheduleDetail = true
         }
+    }
+}
+
+private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
+    
+    override var currentTodoEvents: AnyPublisher<[TodoEvent], Never> {
+        return super.currentTodoEvents
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
