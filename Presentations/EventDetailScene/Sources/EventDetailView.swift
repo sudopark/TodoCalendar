@@ -296,45 +296,62 @@ struct EventDetailView: View {
             return EmptyView().asAnyView()
         }
         
-        if let togglable = model.isTodoOrSchedule {
-            return self.togglableEventTypeView(togglable == .todo, model: model).asAnyView()
-        } else {
-            return self.normalEventTypeView(model).asAnyView()
+        switch model.selectType {
+        case _ where model.isTogglable:
+            return togglableEventTypeView(model: model).asAnyView()
+        case .todo:
+            return todoEventTypeView(model).asAnyView()
+        default:
+            return EmptyView().asAnyView()
         }
     }
     
-    private func togglableEventTypeView(_ isTodo: Bool, model: EventDetailTypeModel) -> some View {
+    private func togglableEventTypeView(model: EventDetailTypeModel) -> some View {
         HStack {
+            Image(systemName: "flag.fill")
+                .font(.system(size: 16, weight: .light))
+                .foregroundColor(self.appearance.colorSet.normalText.asColor)
+            Text(model.text)
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .font(self.appearance.fontSet.normal.asFont)
+            
             Button {
                 self.toggleIsTodo()
             } label: {
-                HStack {
-                    Image(systemName: isTodo ? "circle.fill" : "circle")
-                        .font(.system(size: 16, weight: .light))
-                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
-                    Text(model.text)
-                        .foregroundStyle(self.appearance.colorSet.normalText.asColor)
-                        .font(self.appearance.fontSet.normal.asFont)
-                }
+                Text(
+                    model.selectType == .todo ? "Yes" : "No"
+                )
+                .font(appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .padding(8)
+                .background(
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(self.appearance.colorSet.eventList.asColor)
+                )
             }
+            .padding(.leading, 12)
             
             Spacer()
         }
     }
     
-    private func normalEventTypeView(_ model: EventDetailTypeModel) -> some View {
+    private func todoEventTypeView(_ model: EventDetailTypeModel) -> some View {
         HStack(spacing: 6) {
+            Image(systemName: "flag.fill")
+                .font(.system(size: 16, weight: .light))
+                .foregroundColor(self.appearance.colorSet.normalText.asColor)
+            
             Text(model.text)
-                .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
-                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .font(self.appearance.fontSet.normal.asFont)
 
             if model.showHelpButton {
                 Button {
                     self.showEventDetailTypePopover = true
                 } label: {
                     Image(systemName: "questionmark.circle")
-                        .font(self.appearance.fontSet.subNormal.asFont)
-                        .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                        .font(self.appearance.fontSet.normal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
                 }
                 .popover(isPresented: self.$showEventDetailTypePopover) {
                     Text("[Todo] event type description")
