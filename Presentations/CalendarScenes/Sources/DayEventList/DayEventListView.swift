@@ -69,6 +69,7 @@ final class DayEventListViewState: ObservableObject {
 
 final class DayEventListViewEventHandler: ObservableObject {
     var requestDoneTodo: (String) -> Void = { _ in }
+    var requestCancelDoneTodo: (String) -> Void = { _ in }
     var requestAddNewEventWhetherUsingTemplate: (Bool) -> Void = { _ in }
     var addNewTodoQuickly: (String) -> Void = { _ in }
     var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
@@ -76,6 +77,7 @@ final class DayEventListViewEventHandler: ObservableObject {
     
     func bind(_ viewModel: any DayEventListViewModel) {
         self.requestDoneTodo = viewModel.doneTodo(_:)
+        self.requestCancelDoneTodo = viewModel.cancelDoneTodo(_:)
         self.requestAddNewEventWhetherUsingTemplate = { use in
             if use { viewModel.makeEventByTemplate() }
             else { viewModel.makeEvent() }
@@ -161,6 +163,7 @@ struct DayEventListView: View {
                     
                     EventListCellView(cellViewModel: cellViewModel)
                         .eventHandler(\.requestDoneTodo, eventHandler.requestDoneTodo)
+                        .eventHandler(\.requestCancelDoneTodo, eventHandler.requestCancelDoneTodo)
                         .eventHandler(\.requestShowDetail, eventHandler.requestShowDetail)
                 }
             }
@@ -218,6 +221,7 @@ private struct EventListCellView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     
     fileprivate var requestDoneTodo: (String) -> Void = { _ in }
+    fileprivate var requestCancelDoneTodo: (String) -> Void = { _ in }
     fileprivate var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     
     private let cellViewModel: any EventCellViewModel
@@ -327,19 +331,30 @@ private struct EventListCellView: View {
             }
             Spacer()
             if let todoId = cellViewModel.todoEventId {
-                Button {
-                    withAnimation {
-                        _ = self.state.tempDoneTodoIds.insert(todoId)
-                    }
+                todoDoneButton(todoId)
+            }
+        }
+    }
+    
+    private func todoDoneButton(_ todoId: String) -> some View {
+        Button {
+            let isUnderCompleteProcessing = self.state.tempDoneTodoIds.contains(todoId)
+            if !isUnderCompleteProcessing {
+                withAnimation { _ = self.state.tempDoneTodoIds.insert(todoId) }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    guard self.state.tempDoneTodoIds.contains(todoId) else { return }
                     self.requestDoneTodo(todoId)
-                    
-                } label: {
-                    if self.state.tempDoneTodoIds.contains(todoId) {
-                        Image(systemName: "circle.fill")
-                    } else {
-                        Image(systemName: "circle")
-                    }
                 }
+            } else {
+                withAnimation { _ = self.state.tempDoneTodoIds.remove(todoId) }
+                self.requestCancelDoneTodo(todoId)
+            }
+            
+        } label: {
+            if self.state.tempDoneTodoIds.contains(todoId) {
+                Image(systemName: "circle.fill")
+            } else {
+                Image(systemName: "circle")
             }
         }
     }

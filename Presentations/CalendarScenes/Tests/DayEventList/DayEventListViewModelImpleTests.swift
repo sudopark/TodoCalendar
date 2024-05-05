@@ -494,6 +494,35 @@ extension DayEventListViewModelImpleTests {
         XCTAssertEqual(failedId, "todo-with-time")
     }
     
+    func testViewModel_cancelCompleteTodo() {
+        // given
+        let expect = expectation(description: "todo 완료 이벤트 처리 취소")
+        let viewModel = self.makeViewModel()
+        let completeLatency = PassthroughSubject<Void, Never>()
+        self.stubTodoUsecase.completeTodoLatency = {
+            try await completeLatency.values.first(where: { _ in true }).unwrap()
+        }
+        
+        
+        // when
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
+        let cvmLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
+            
+            viewModel.doneTodo("current-todo-2")
+            viewModel.cancelDoneTodo("current-todo-2")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.001) {
+                completeLatency.send(())
+            }
+        }
+        
+        // then
+        let idLists = cvmLists.map { cs in cs.map { $0.eventIdentifier } }
+        XCTAssertEqual(idLists, [
+            ["current-todo-1", "current-todo-2"] + self.dummyEventIdStrings
+        ])
+    }
+    
     func testViewModel_provideEventListWithoutOffTagEvent() {
         // given
         let expect = expectation(description: "이벤트 목록 제공시에 비활성화된 태그에 해당하는 이벤트는 제외")
@@ -678,6 +707,15 @@ extension DayEventListViewModelImpleTests {
 }
 
 private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
+    
+    var completeTodoLatency: (() async throws -> Void)?
+    
+    override func completeTodo(_ eventId: String) async throws -> DoneTodoEvent {
+        if let latency = self.completeTodoLatency {
+            try await latency()
+        }
+        return try await super.completeTodo(eventId)
+    }
     
     override var currentTodoEvents: AnyPublisher<[TodoEvent], Never> {
         return super.currentTodoEvents

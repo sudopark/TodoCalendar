@@ -51,6 +51,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     // interactor
     func selectEvent(_ model: any EventCellViewModel)
     func doneTodo(_ eventId: String)
+    func cancelDoneTodo(_ eventId: String)
     func addNewTodoQuickly(withName: String)
     func makeTodoEvent(with givenName: String)
     func makeEvent()
@@ -101,6 +102,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     }
     
     private var cancellables: Set<AnyCancellable> = []
+    private var todoCompleteTaskMap: [String: Task<Void, any Error>] = [:]
     private let subject = Subject()
     
     private func internalBind() {
@@ -125,6 +127,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
             return self.eventTagUsecase.eventTags(ids)
         }
         .switchToLatest()
+        .removeDuplicates()
         .sink(receiveValue: { [weak self] tagMap in
             self?.subject.tagMaps.send(tagMap)
         })
@@ -161,7 +164,8 @@ extension DayEventListViewModelImple {
     }
     
     func doneTodo(_ eventId: String) {
-        Task { [weak self] in
+        self.cancelDoneTodo(eventId)
+        self.todoCompleteTaskMap[eventId] = Task { [weak self] in
             do {
                 _ = try await self?.todoEventUsecase.completeTodo(eventId)
             } catch {
@@ -169,7 +173,11 @@ extension DayEventListViewModelImple {
                 self?.router?.showError(error)
             }
         }
-        .store(in: &self.cancellables)
+    }
+    
+    func cancelDoneTodo(_ eventId: String) {
+        self.todoCompleteTaskMap[eventId]?.cancel()
+        self.todoCompleteTaskMap[eventId] = nil
     }
     
     func addNewTodoQuickly(withName: String) {
