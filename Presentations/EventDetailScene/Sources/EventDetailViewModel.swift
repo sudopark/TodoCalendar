@@ -14,32 +14,40 @@ import Domain
 
 struct EventDetailTypeModel: Equatable {
     
-    enum TogglableIsTodoOrSchedule {
+    enum SelectionType {
         case todo
         case schedule
+        case holiday
     }
     
-    var isTodoOrSchedule: TogglableIsTodoOrSchedule?
+    var selectType: SelectionType
+    let isTogglable: Bool
     let text: String
     var showHelpButton: Bool = false
 
     static func makeCase(_ isTodo: Bool) -> EventDetailTypeModel {
         return EventDetailTypeModel(
-            isTodoOrSchedule: isTodo ? .todo : .schedule, text: "Todo event".localized(), 
+            selectType: isTodo ? .todo : .schedule,
+            isTogglable: true,
+            text: "Is todo event?",
             showHelpButton: false
         )
     }
     
     static func todoCase() -> EventDetailTypeModel {
         return EventDetailTypeModel(
-            isTodoOrSchedule: nil, text: "Todo event".localized(), 
+            selectType: .todo,
+            isTogglable: false,
+            text: "Todo event".localized(),
             showHelpButton: true
         )
     }
     
     static func scheduleCase() -> EventDetailTypeModel {
         return EventDetailTypeModel(
-            isTodoOrSchedule: nil, text: "Schedule event".localized(), 
+            selectType: .schedule,
+            isTogglable: false,
+            text: "Schedule event".localized(),
             showHelpButton: true
         )
     }
@@ -47,7 +55,9 @@ struct EventDetailTypeModel: Equatable {
     static func holidayCase(_ country: String) -> EventDetailTypeModel {
         let text = "Public Holiday in %@".localized(with: country)
         return EventDetailTypeModel(
-            isTodoOrSchedule: nil, text: text, 
+            selectType: .holiday,
+            isTogglable: false,
+            text: text,
             showHelpButton: false
         )
     }
