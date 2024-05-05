@@ -19,7 +19,7 @@ public enum AllEventTagId: Sendable, Hashable {
     }
 }
 
-public struct EventTag: Sendable {
+public struct EventTag: Sendable, Equatable {
     
     public let uuid: String
     public var name: String
