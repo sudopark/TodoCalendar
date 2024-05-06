@@ -56,6 +56,8 @@ public enum TodoAPIEndpoints: Endpoint {
     case todos
     case currentTodo
     case done(String)
+    case dones
+    case revertDone(String)
     case replaceRepeating(String)
     
     public var subPath: String {
@@ -74,6 +76,12 @@ public enum TodoAPIEndpoints: Endpoint {
             
         case .done(let id):
             return "todo/\(id)/complete"
+            
+        case .dones:
+            return "todo/dones"
+            
+        case .revertDone(let id):
+            return "todo/dones/\(id)/revert"
             
         case .replaceRepeating(let id):
             return "todo/\(id)/replace"

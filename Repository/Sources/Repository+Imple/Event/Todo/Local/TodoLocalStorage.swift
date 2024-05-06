@@ -28,6 +28,11 @@ public protocol TodoLocalStorage: Sendable {
     func removeTodos(_ eventids: [String]) async throws
     func removeAll() async throws
     func removeAllDoneEvents() async throws
+    func loadDoneTodos(after cursor: TimeInterval?, size: Int) async throws -> [DoneTodoEvent]
+    func loadDoneTodoEvent(doneEventId: String) async throws -> DoneTodoEvent
+    func removeDoneTodos(pastThan cursor: TimeInterval) async throws
+    func removeDoneTodo(_ doneTodoEventIds: [String]) async throws
+    func updateDoneTodos(_ dones: [DoneTodoEvent]) async throws
 }
 
 public final class TodoLocalStorageImple: TodoLocalStorage, Sendable {
@@ -164,5 +169,99 @@ extension TodoLocalStorageImple {
     
     public func removeAllDoneEvents() async throws {
         try await self.sqliteService.async.run { try $0.dropTable(Dones.self) }
+    }
+}
+
+
+extension TodoLocalStorageImple {
+    
+    public func loadDoneTodos(after cursor: TimeInterval?, size: Int) async throws -> [DoneTodoEvent] {
+        let dones = try await self.loadDonesTodoWithoutTime(cursor, size: size)
+        let timesMap = try await self.loadDoneTodoTimes(dones).asDictionary { $0.eventId }
+        return dones.map { done in
+            return done |> \.eventTime .~ timesMap[done.uuid]?.eventTime
+        }
+    }
+    
+    public func loadDoneTodoEvent(doneEventId: String) async throws -> DoneTodoEvent {
+        let timeQuery = Times.selectAll()
+        let doneQuery = Dones.selectAll { $0.uuid == doneEventId }
+        let query = doneQuery.innerJoin(with: timeQuery, on: { ($0.uuid, $1.eventId) })
+        let mapping: (CursorIterator) throws -> DoneTodoEvent = { cursor in
+            return try DoneTodoEvent(cursor)
+            |> \.eventTime .~ (try? Times.Entity(cursor).eventTime)
+        }
+        return try await self.sqliteService.async.run(DoneTodoEvent.self) { db in
+            try db.createTableOrNot(Times.self)
+            return try db.loadOne(query, mapping: mapping).unwrap()
+        }
+    }
+    
+    private func loadDonesTodoWithoutTime(
+        _ cursor: TimeInterval?, size: Int
+    ) async throws -> [DoneTodoEvent] {
+        let query = if let cursor = cursor {
+            Dones.selectAll { $0.doneTime < cursor }
+                .orderBy(isAscending: false) { $0.doneTime }
+                .limit(size)
+        } else {
+            Dones.selectAll()
+                .orderBy(isAscending: false) { $0.doneTime }
+                .limit(size)
+        }
+        let mapping: (CursorIterator) throws -> DoneTodoEvent = {
+            return try DoneTodoEvent($0)
+        }
+        return try await self.sqliteService.async.run { db in
+            return try db.load(query, mapping: mapping)
+        }
+    }
+    
+    private func loadDoneTodoTimes(_ dones: [DoneTodoEvent]) async throws -> [Times.Entity] {
+        let eventIds = dones.map { $0.uuid }
+        let query = Times.selectAll { $0.eventId.in(eventIds) }
+        let mapping: (CursorIterator) throws -> Times.Entity? = {
+            return try? Times.Entity($0)
+        }
+        return try await self.sqliteService.async.run { db in
+            return try db.load(query, mapping: mapping).compactMap { $0 }
+        }
+    }
+    
+    public func removeDoneTodos(pastThan cursor: TimeInterval) async throws {
+        let dones = try await self.sqliteService.async.run { db in
+            let query = Dones.selectAll { $0.doneTime < cursor }
+            return try db.load(query, mapping: { try DoneTodoEvent($0) })
+        }
+        let ids = dones.map { $0.uuid }
+        try await self.sqliteService.async.run { db in
+            let query = Dones.delete().where { $0.uuid.in(ids) }
+            try db.delete(Dones.self, query: query)
+        }
+        try? await self.sqliteService.async.run { db in
+            let query = Times.delete().where { $0.eventId.in(ids) }
+            try db.delete(Times.self, query: query)
+        }
+    }
+    
+    public func removeDoneTodo(_ doneTodoEventIds: [String]) async throws {
+        try await self.sqliteService.async.run { db in
+            let query = Dones.delete().where { $0.uuid.in(doneTodoEventIds) }
+            try db.delete(Dones.self, query: query)
+        }
+        try? await self.sqliteService.async.run { db in
+            let query = Times.delete().where { $0.eventId.in(doneTodoEventIds) }
+            try db.delete(Times.self, query: query)
+        }
+    }
+    
+    public func updateDoneTodos(_ dones: [DoneTodoEvent]) async throws {
+        try await self.sqliteService.async.run { db in
+            let times = dones.map { Times.Entity($0.uuid, $0.eventTime, nil) }
+            try db.insert(Times.self, entities: times)
+        }
+        try await self.sqliteService.async.run { db in
+            try db.insert(Dones.self, entities: dones)
+        }
     }
 }

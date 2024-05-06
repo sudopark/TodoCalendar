@@ -133,3 +133,43 @@ extension TodoLocalRepositoryImple {
         .eraseToAnyPublisher()
     }
 }
+
+
+extension TodoLocalRepositoryImple {
+    
+    public func loadDoneTodoEvents(
+        _ params: DoneTodoLoadPagingParams
+    ) -> AnyPublisher<[DoneTodoEvent], any Error> {
+        return Publishers.create { [weak self] in
+            return try await self?.localStorage.loadDoneTodos(
+                after: params.cursorAfter, size: params.size
+            )
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
+        switch scope {
+        case .all:
+            return try await self.localStorage.removeAllDoneEvents()
+        case .pastThan(let time):
+            return try await localStorage.removeDoneTodos(pastThan: time)
+        }
+    }
+    
+    public func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
+        let done = try await self.localStorage.loadDoneTodoEvent(doneEventId: doneTodoId)
+        let params = TodoMakeParams()
+            |> \.name .~ done.name
+            |> \.eventTagId .~ done.eventTagId
+            |> \.time .~ done.eventTime
+            |> \.notificationOptions .~ pure(done.notificationOptions)
+        guard let revertTodo = TodoEvent(params)
+        else {
+            throw RuntimeError("invalid params")
+        }
+        try await self.localStorage.saveTodoEvent(revertTodo)
+        try await self.localStorage.removeDoneTodo([doneTodoId])
+        return revertTodo
+    }
+}

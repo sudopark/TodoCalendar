@@ -493,6 +493,99 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertNotNil(error)
     }
 }
+
+extension TodoRemoteRepositoryImpleTests {
+    
+    // load done todos
+    func testRepository_loadDoneTodos() {
+        // given
+        let expect = expectation(description: "완료된 할일 조회")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository()
+        
+        // when
+        let loading = repository.loadDoneTodoEvents(.init(cursorAfter: nil, size: 100))
+        let doneLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(doneLists.first?.map { $0.uuid }, ["cached"])
+        XCTAssertEqual(doneLists.last?.map { $0.uuid }, ["done_id"])
+        XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoIds, ["cached"])
+        XCTAssertEqual(self.spyTodoCache.didUpdatedDoneTodos?.map { $0.uuid }, ["done_id"])
+    }
+    
+    // load done todos, cached failed - ignore
+    func testRepository_whenLoadDoneTodosAndCacheFailed_ignore() {
+        // given
+        let expect = expectation(description: "완료된 할일 조회시 캐시데이터 조회 실패하면 무시")
+        let repository = self.makeRepository { cache, _ in
+            cache.shouldFailLoadDoneTodo = true
+        }
+        
+        // when
+        let loading = repository.loadDoneTodoEvents(.init(cursorAfter: nil, size: 100))
+        let doneLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(doneLists.first?.map { $0.uuid }, ["done_id"])
+        XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoIds, nil)
+        XCTAssertEqual(self.spyTodoCache.didUpdatedDoneTodos?.map { $0.uuid }, ["done_id"])
+    }
+    
+    // load done todos fail
+    func testRepository_loadDoneTodosFail() {
+        // given
+        let expect = expectation(description: "완료된 todo 조회 실패")
+        let repository = self.makeRepository { _, remote in
+            remote.shouldFailRequest = true
+        }
+        
+        // when
+        let loading = repository.loadDoneTodoEvents(.init(cursorAfter: nil, size: 100))
+        let error = self.waitError(expect, for: loading)
+        
+        // then
+        XCTAssertNotNil(error)
+    }
+    
+    // remvoe done todos
+    func testRepository_removeDoneTodosWithRange() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        try await repository.removeDoneTodos(.pastThan(3))
+        
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["past_than"] as? Double, 3)
+        XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoCursor, 3)
+    }
+    
+    func testReposiotry_removeAllDoneTodoEvents() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        try await repository.removeDoneTodos(.all)
+        
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["past_than"] as? Double, nil)
+        XCTAssertEqual(self.spyTodoCache.didRemoveAllDoneEvents, true)
+    }
+    
+    // revert done todo
+    func testRepository_revertDoneTodo() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let reverted = try await repository.revertDoneTodo("some")
+        
+        // then
+        XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, reverted.uuid)
+        XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoIds, ["some"])
+    }
+}
  
 
 private extension TodoRemoteRepositoryImpleTests {
@@ -684,6 +777,25 @@ private extension TodoRemoteRepositoryImpleTests {
                     [ \(self.dummySingleTodoResponse) ]
                     """
                 )
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.dones,
+                resultJsonString: .success(
+                    """
+                    [ \(self.dummyDoneTodoResponse) ]
+                    """
+                )
+            ),
+            .init(
+                method: .delete,
+                endpoint: TodoAPIEndpoints.dones,
+                resultJsonString: .success("{ \"status\": \"ok\" }")
+            ),
+            .init(
+                method: .post,
+                endpoint: TodoAPIEndpoints.revertDone("some"),
+                resultJsonString: .success(self.dummySingleTodoResponse)
             )
         ]
     }
@@ -770,5 +882,38 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
         self.didRemoveAll = true
     }
     
-    func removeAllDoneEvents() async throws { }
+    var didRemoveAllDoneEvents: Bool?
+    func removeAllDoneEvents() async throws {
+        self.didRemoveAllDoneEvents = true
+    }
+    
+    var shouldFailLoadDoneTodo: Bool = false
+    func loadDoneTodos(after cursor: TimeInterval?, size: Int) async throws -> [DoneTodoEvent] {
+        guard self.shouldFailLoadDoneTodo == false
+        else {
+            throw RuntimeError("failed")
+        }
+        return [
+            .init(uuid: "cached", name: "cached", originEventId: "some", doneTime: Date())
+        ]
+    }
+    
+    func loadDoneTodoEvent(doneEventId: String) async throws -> DoneTodoEvent {
+        return .init(uuid: doneEventId, name: "done", originEventId: "origin", doneTime: Date())
+    }
+    
+    var didRemovedDoneTodoIds: [String]?
+    func removeDoneTodo(_ doneTodoEventIds: [String]) async throws {
+        self.didRemovedDoneTodoIds = doneTodoEventIds
+    }
+    
+    var didRemovedDoneTodoCursor: TimeInterval?
+    func removeDoneTodos(pastThan cursor: TimeInterval) async throws {
+        self.didRemovedDoneTodoCursor = cursor
+    }
+    
+    var didUpdatedDoneTodos: [DoneTodoEvent]?
+    func updateDoneTodos(_ dones: [DoneTodoEvent]) async throws {
+        self.didUpdatedDoneTodos = dones
+    }
 }
