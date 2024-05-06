@@ -191,3 +191,24 @@ struct RemoveTodoResultMapper: Decodable {
         self.status = try container.decode(String.self, forKey: .status)
     }
 }
+
+
+extension DoneTodoLoadPagingParams {
+    
+    func asJson() -> [String: Any] {
+        var sender: [String: Any] = [:]
+        sender["cursor"] = self.cursorAfter
+        sender["size"] = self.size
+        return sender
+    }
+}
+
+extension RemoveDoneTodoScope {
+    
+    func asJson() -> [String: Any] {
+        switch self {
+        case .all: return [:]
+        case .pastThan(let time): return ["past_than": time]
+        }
+    }
+}

@@ -499,6 +499,124 @@ extension TodoLocalRepositoryImpleTests {
 }
 
 
+extension TodoLocalRepositoryImpleTests {
+    
+    private func makeRepositoryWithDoneEvents() async throws -> TodoLocalRepositoryImple {
+        let dones: [DoneTodoEvent] = (0..<10).map { int in
+            return .init(
+                uuid: "id:\(int)", name: "done:\(int)",
+                originEventId: "origin-\(int)",
+                doneTime: Date(timeIntervalSince1970: TimeInterval(int))
+            )
+        }
+        try await self.localStorage.updateDoneTodos(dones)
+        return self.makeRepository()
+    }
+    
+    // done todo paging -> [9, 8, 7], [6, 5, 4], [3, 2, 1], [0], []
+    func testRepository_loadDoneTodosWithPaging() async throws {
+        // given
+        let repository = try await self.makeRepositoryWithDoneEvents()
+        
+        // when
+        let page1 = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: nil, size: 3)
+        ).values.first(where: { _ in true })
+        let page2 = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: page1?.last?.doneTime.timeIntervalSince1970, size: 3)
+        ).values.first(where: { _ in true })
+        let page3 = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: page2?.last?.doneTime.timeIntervalSince1970, size: 3)
+        )
+        .values.first(where: { _ in true })
+        let page4 = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: page3?.last?.doneTime.timeIntervalSince1970, size: 3)
+        )
+        .values.first(where: { _ in true })
+        let page5 = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: page4?.last?.doneTime.timeIntervalSince1970, size: 3)
+        )
+        .values.first(where: { _ in true })
+        
+        // then
+        XCTAssertEqual(page1?.map { $0.uuid }, [9, 8, 7].map { "id:\($0)" })
+        XCTAssertEqual(page2?.map { $0.uuid }, [6, 5, 4].map { "id:\($0)" })
+        XCTAssertEqual(page3?.map { $0.uuid }, [3, 2, 1].map { "id:\($0)" })
+        XCTAssertEqual(page4?.map { $0.uuid }, [0].map { "id:\($0)" })
+        XCTAssertEqual(page5?.isEmpty, true)
+    }
+    
+    // remove done todo past than 3
+    func testRepository_removeDoneTodosPastThan3() async throws {
+        // given
+        let repository = try await self.makeRepositoryWithDoneEvents()
+        let donesBeforeRemove = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: nil, size: 20)
+        )
+        .values.first(where: { _ in true })
+        
+        // when
+        try await repository.removeDoneTodos(.pastThan(3))
+        let donesAfterRemove = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: nil, size: 20)
+        )
+        .values.first(where: { _ in true })
+        
+        // then
+        XCTAssertEqual(donesBeforeRemove?.map { $0.uuid }, (0..<10).reversed().map { "id:\($0)"})
+        XCTAssertEqual(donesAfterRemove?.map { $0.uuid }, (3..<10).reversed().map { "id:\($0)"})
+    }
+    
+    // remove all done todo
+    func testRepository_removeAllDoneTodos() async throws {
+        // given
+        let repository = try await self.makeRepositoryWithDoneEvents()
+        let donesBeforeRemove = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: nil, size: 20)
+        )
+        .values.first(where: { _ in true })
+        
+        // when
+        try await repository.removeDoneTodos(.all)
+        let donesAfterRemove = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: nil, size: 20)
+        )
+        .values.first(where: { _ in true })
+        
+        // then
+        XCTAssertEqual(donesBeforeRemove?.map { $0.uuid }, (0..<10).reversed().map { "id:\($0)"})
+        XCTAssertEqual(donesAfterRemove?.map { $0.uuid }, [])
+    }
+    
+    // revert done todo
+    func testRepository_revertDoneTodo() async throws {
+        // given
+        let repository = try await self.makeRepositoryWithDoneEvents()
+        let donesBeforeRevert = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: nil, size: 20)
+        )
+        .values.first(where: { _ in true })
+        
+        // when
+        let todo = try await repository.revertDoneTodo("id:4")
+        let donesAfterRevert = try await repository.loadDoneTodoEvents(
+            .init(cursorAfter: nil, size: 20)
+        )
+        .values.first(where: { _ in true })
+        
+        // then
+        XCTAssertNotEqual(todo.uuid, "origin-4")
+        XCTAssertEqual(
+            donesBeforeRevert?.map { $0.uuid },
+            (0..<10).reversed().map { "id:\($0)"}
+        )
+        XCTAssertEqual(
+            donesAfterRevert?.map { $0.uuid },
+            (0..<10).filter { $0 != 4 }.reversed().map { "id:\($0)"}
+        )
+    }
+}
+
 extension TimeInterval {
     
     static func range(from: String, to: String, in timeZone: TimeZone) throws -> Range<TimeInterval> {

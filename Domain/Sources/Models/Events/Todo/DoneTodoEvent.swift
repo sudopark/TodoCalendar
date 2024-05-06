@@ -55,3 +55,19 @@ public struct CompleteTodoResult {
         self.nextRepeatingTodoEvent = nextRepeatingTodoEvent
     }
 }
+
+
+public struct DoneTodoLoadPagingParams {
+    public let cursorAfter: TimeInterval?
+    public let size: Int
+    
+    public init(cursorAfter: TimeInterval?, size: Int) {
+        self.cursorAfter = cursorAfter
+        self.size = size
+    }
+}
+
+public enum RemoveDoneTodoScope {
+    case pastThan(_ time: TimeInterval)
+    case all
+}
