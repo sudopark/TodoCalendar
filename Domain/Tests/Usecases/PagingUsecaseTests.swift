@@ -46,11 +46,12 @@ class PagingUsecaseTests: BaseTestCase, PublisherWaitable {
     
     private func makeUsecase() -> PagingUsecase<DummyQuery, DummyResult> {
         
-        let option = PagingOption() |> \.loadThrottleIntervalMillis .~ 0
-        
-        return PagingUsecase(option: option) { query in
-            let response = try await self.loading(query)
-            return .init(query: query, isLastPage: !response.hasMore, dummies: response.dummies)
+        return PagingUsecase { query in
+            return Publishers.create(do: {
+                let response = try await self.loading(query)
+                return .init(query: query, isLastPage: !response.hasMore, dummies: response.dummies)
+            })
+            .eraseToAnyPublisher()
         }
     }
     

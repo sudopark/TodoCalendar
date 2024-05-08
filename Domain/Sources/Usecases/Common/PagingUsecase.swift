@@ -10,14 +10,14 @@ import Combine
 import AsyncFlatMap
 
 
-public protocol PagingQueryType: Sendable {
+public protocol PagingQueryType {
     
     var isFirst: Bool { get }
     
     func shouldResetResult(compareWith other: Self) -> Bool
 }
 
-public protocol PagingResultType: Sendable {
+public protocol PagingResultType {
     
     associatedtype Query = PagingQueryType
     
@@ -27,19 +27,11 @@ public protocol PagingResultType: Sendable {
     func append(_ next: Self) -> Self
 }
 
-
-public struct PagingOption {
-    public var loadThrottleIntervalMillis: Int = 500
-    public init() {}
-}
-
-public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingResultType>: @unchecked Sendable where ResultType.Query == QueryType {
+public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingResultType> where ResultType.Query == QueryType {
     
-    public typealias Loading = @Sendable (QueryType) async throws -> ResultType
-    private let option: PagingOption
+    public typealias Loading = (QueryType) -> AnyPublisher<ResultType, any Error>
     
-    public init(option: PagingOption = .init(), _ loading: @escaping Loading) {
-        self.option = option
+    public init(_ loading: @escaping Loading) {
         self.internalBinding(loading)
     }
     
@@ -64,16 +56,14 @@ public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingR
         }
         
         let loadWithoutError: (QueryType) -> AnyPublisher<ResultType, Never> = { query in
-            return Publishers.create(do: { [weak self] in
-                do {
-                    return try await loading(query)
-                } catch {
+            
+            return loading(query)
+                .catch { [weak self] error -> Empty<ResultType, Never> in
                     self?.subject.loadingStatus.send(nil)
                     self?.subject.occurredError.send(error)
-                    return nil
+                    return Empty()
                 }
-            })
-            .eraseToAnyPublisher()
+                .eraseToAnyPublisher()
         }
         
         let updatePagingResult: (ResultType) -> Void = { [weak self] result in
@@ -83,11 +73,6 @@ public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingR
         
         self.subject.query
             .compactMap { $0 }
-            .throttle(
-                for: .milliseconds(self.option.loadThrottleIntervalMillis),
-                scheduler: RunLoop.main,
-                latest: true
-            )
             .handleEvents(receiveOutput: updateIsLoading)
             .map(loadWithoutError)
             .switchToLatest()
