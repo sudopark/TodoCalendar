@@ -139,13 +139,10 @@ extension TodoLocalRepositoryImple {
     
     public func loadDoneTodoEvents(
         _ params: DoneTodoLoadPagingParams
-    ) -> AnyPublisher<[DoneTodoEvent], any Error> {
-        return Publishers.create { [weak self] in
-            return try await self?.localStorage.loadDoneTodos(
-                after: params.cursorAfter, size: params.size
-            )
-        }
-        .eraseToAnyPublisher()
+    ) async throws -> [DoneTodoEvent] {
+        return try await self.localStorage.loadDoneTodos(
+            after: params.cursorAfter, size: params.size
+        )
     }
     
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {

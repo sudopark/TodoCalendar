@@ -21,7 +21,7 @@ public protocol TodoEventRepository {
     func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], any Error>
     func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error>
     
-    func loadDoneTodoEvents(_ params: DoneTodoLoadPagingParams) -> AnyPublisher<[DoneTodoEvent], any Error>
+    func loadDoneTodoEvents(_ params: DoneTodoLoadPagingParams) async throws -> [DoneTodoEvent]
     func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws
     func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent
 }

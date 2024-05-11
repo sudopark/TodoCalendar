@@ -266,45 +266,17 @@ extension TodoRemoteRepositoryImple {
 
 extension TodoRemoteRepositoryImple {
     
-    public func loadDoneTodoEvents(_ params: DoneTodoLoadPagingParams) -> AnyPublisher<[DoneTodoEvent], any Error> {
-        return AnyPublisher<[DoneTodoEvent]?, any Error>.create { subscriber in
-            let task = Task { [weak self] in
-                let cached = try? await self?.cacheStorage.loadDoneTodos(
-                    after: params.cursorAfter, size: params.size
-                )
-                subscriber.send(cached)
-                
-                do {
-                    let refreshed = try await self?.loadDoneTodosFromRemote(params)
-                    await self?.replaceDoneTodoCache(cached, refreshed)
-                    subscriber.send(refreshed)
-                    subscriber.send(completion: .finished)
-                } catch {
-                    subscriber.send(completion: .failure(error))
-                }
-            }
-            return AnyCancellable { task.cancel() }
-        }
-        .compactMap { $0 }
-        .eraseToAnyPublisher()
-    }
-    
-    private func loadDoneTodosFromRemote(_ params: DoneTodoLoadPagingParams) async throws -> [DoneTodoEvent] {
+    public func loadDoneTodoEvents(
+        _ params: DoneTodoLoadPagingParams
+    ) async throws -> [DoneTodoEvent] {
         let mappers: [DoneTodoEventMapper] = try await self.remote.request(
             .get,
             TodoAPIEndpoints.dones,
             parameters: params.asJson()
         )
-        return mappers.map { $0.event }
-    }
-    
-    private func replaceDoneTodoCache(_ cached: [DoneTodoEvent]?, _ refreshed: [DoneTodoEvent]?) async {
-        if let cached {
-            try? await self.cacheStorage.removeDoneTodo(cached.map { $0.uuid })
-        }
-        if let refreshed {
-            try? await self.cacheStorage.updateDoneTodos(refreshed)
-        }
+        let events = mappers.map { $0.event }
+        try await self.cacheStorage.updateDoneTodos(events)
+        return events
     }
     
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {

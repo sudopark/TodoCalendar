@@ -497,55 +497,35 @@ extension TodoRemoteRepositoryImpleTests {
 extension TodoRemoteRepositoryImpleTests {
     
     // load done todos
-    func testRepository_loadDoneTodos() {
+    func testRepository_loadDoneTodos() async throws {
         // given
-        let expect = expectation(description: "완료된 할일 조회")
-        expect.expectedFulfillmentCount = 2
         let repository = self.makeRepository()
         
         // when
-        let loading = repository.loadDoneTodoEvents(.init(cursorAfter: nil, size: 100))
-        let doneLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        let dones = try await repository.loadDoneTodoEvents(.init(cursorAfter: nil, size: 100))
         
         // then
-        XCTAssertEqual(doneLists.first?.map { $0.uuid }, ["cached"])
-        XCTAssertEqual(doneLists.last?.map { $0.uuid }, ["done_id"])
-        XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoIds, ["cached"])
-        XCTAssertEqual(self.spyTodoCache.didUpdatedDoneTodos?.map { $0.uuid }, ["done_id"])
-    }
-    
-    // load done todos, cached failed - ignore
-    func testRepository_whenLoadDoneTodosAndCacheFailed_ignore() {
-        // given
-        let expect = expectation(description: "완료된 할일 조회시 캐시데이터 조회 실패하면 무시")
-        let repository = self.makeRepository { cache, _ in
-            cache.shouldFailLoadDoneTodo = true
-        }
-        
-        // when
-        let loading = repository.loadDoneTodoEvents(.init(cursorAfter: nil, size: 100))
-        let doneLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
-        
-        // then
-        XCTAssertEqual(doneLists.first?.map { $0.uuid }, ["done_id"])
-        XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoIds, nil)
+        XCTAssertEqual(dones.map { $0.uuid }, ["done_id"])
         XCTAssertEqual(self.spyTodoCache.didUpdatedDoneTodos?.map { $0.uuid }, ["done_id"])
     }
     
     // load done todos fail
-    func testRepository_loadDoneTodosFail() {
+    func testRepository_loadDoneTodosFail() async throws {
         // given
-        let expect = expectation(description: "완료된 todo 조회 실패")
         let repository = self.makeRepository { _, remote in
             remote.shouldFailRequest = true
         }
+        var failed: Error?
         
         // when
-        let loading = repository.loadDoneTodoEvents(.init(cursorAfter: nil, size: 100))
-        let error = self.waitError(expect, for: loading)
+        do {
+            let  _ = try await repository.loadDoneTodoEvents(.init(cursorAfter: nil, size: 100))
+        } catch {
+            failed = error
+        }
         
         // then
-        XCTAssertNotNil(error)
+        XCTAssertNotNil(failed)
     }
     
     // remvoe done todos
