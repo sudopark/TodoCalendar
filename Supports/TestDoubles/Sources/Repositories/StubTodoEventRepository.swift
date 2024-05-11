@@ -103,8 +103,8 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub {
         return Empty().eraseToAnyPublisher()
     }
     
-    open func loadDoneTodoEvents(_ params: DoneTodoLoadPagingParams) -> AnyPublisher<[DoneTodoEvent], any Error> {
-        return Empty().eraseToAnyPublisher()
+    open func loadDoneTodoEvents(_ params: DoneTodoLoadPagingParams) async throws -> [DoneTodoEvent] {
+        return []
     }
     
     open func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {

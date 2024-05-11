@@ -521,29 +521,26 @@ extension TodoLocalRepositoryImpleTests {
         // when
         let page1 = try await repository.loadDoneTodoEvents(
             .init(cursorAfter: nil, size: 3)
-        ).values.first(where: { _ in true })
+        )
         let page2 = try await repository.loadDoneTodoEvents(
-            .init(cursorAfter: page1?.last?.doneTime.timeIntervalSince1970, size: 3)
-        ).values.first(where: { _ in true })
+            .init(cursorAfter: page1.last?.doneTime.timeIntervalSince1970, size: 3)
+        )
         let page3 = try await repository.loadDoneTodoEvents(
-            .init(cursorAfter: page2?.last?.doneTime.timeIntervalSince1970, size: 3)
+            .init(cursorAfter: page2.last?.doneTime.timeIntervalSince1970, size: 3)
         )
-        .values.first(where: { _ in true })
         let page4 = try await repository.loadDoneTodoEvents(
-            .init(cursorAfter: page3?.last?.doneTime.timeIntervalSince1970, size: 3)
+            .init(cursorAfter: page3.last?.doneTime.timeIntervalSince1970, size: 3)
         )
-        .values.first(where: { _ in true })
         let page5 = try await repository.loadDoneTodoEvents(
-            .init(cursorAfter: page4?.last?.doneTime.timeIntervalSince1970, size: 3)
+            .init(cursorAfter: page4.last?.doneTime.timeIntervalSince1970, size: 3)
         )
-        .values.first(where: { _ in true })
         
         // then
-        XCTAssertEqual(page1?.map { $0.uuid }, [9, 8, 7].map { "id:\($0)" })
-        XCTAssertEqual(page2?.map { $0.uuid }, [6, 5, 4].map { "id:\($0)" })
-        XCTAssertEqual(page3?.map { $0.uuid }, [3, 2, 1].map { "id:\($0)" })
-        XCTAssertEqual(page4?.map { $0.uuid }, [0].map { "id:\($0)" })
-        XCTAssertEqual(page5?.isEmpty, true)
+        XCTAssertEqual(page1.map { $0.uuid }, [9, 8, 7].map { "id:\($0)" })
+        XCTAssertEqual(page2.map { $0.uuid }, [6, 5, 4].map { "id:\($0)" })
+        XCTAssertEqual(page3.map { $0.uuid }, [3, 2, 1].map { "id:\($0)" })
+        XCTAssertEqual(page4.map { $0.uuid }, [0].map { "id:\($0)" })
+        XCTAssertEqual(page5.isEmpty, true)
     }
     
     // remove done todo past than 3
@@ -553,18 +550,16 @@ extension TodoLocalRepositoryImpleTests {
         let donesBeforeRemove = try await repository.loadDoneTodoEvents(
             .init(cursorAfter: nil, size: 20)
         )
-        .values.first(where: { _ in true })
         
         // when
         try await repository.removeDoneTodos(.pastThan(3))
         let donesAfterRemove = try await repository.loadDoneTodoEvents(
             .init(cursorAfter: nil, size: 20)
         )
-        .values.first(where: { _ in true })
         
         // then
-        XCTAssertEqual(donesBeforeRemove?.map { $0.uuid }, (0..<10).reversed().map { "id:\($0)"})
-        XCTAssertEqual(donesAfterRemove?.map { $0.uuid }, (3..<10).reversed().map { "id:\($0)"})
+        XCTAssertEqual(donesBeforeRemove.map { $0.uuid }, (0..<10).reversed().map { "id:\($0)"})
+        XCTAssertEqual(donesAfterRemove.map { $0.uuid }, (3..<10).reversed().map { "id:\($0)"})
     }
     
     // remove all done todo
@@ -574,18 +569,16 @@ extension TodoLocalRepositoryImpleTests {
         let donesBeforeRemove = try await repository.loadDoneTodoEvents(
             .init(cursorAfter: nil, size: 20)
         )
-        .values.first(where: { _ in true })
         
         // when
         try await repository.removeDoneTodos(.all)
         let donesAfterRemove = try await repository.loadDoneTodoEvents(
             .init(cursorAfter: nil, size: 20)
         )
-        .values.first(where: { _ in true })
         
         // then
-        XCTAssertEqual(donesBeforeRemove?.map { $0.uuid }, (0..<10).reversed().map { "id:\($0)"})
-        XCTAssertEqual(donesAfterRemove?.map { $0.uuid }, [])
+        XCTAssertEqual(donesBeforeRemove.map { $0.uuid }, (0..<10).reversed().map { "id:\($0)"})
+        XCTAssertEqual(donesAfterRemove.map { $0.uuid }, [])
     }
     
     // revert done todo
@@ -595,23 +588,21 @@ extension TodoLocalRepositoryImpleTests {
         let donesBeforeRevert = try await repository.loadDoneTodoEvents(
             .init(cursorAfter: nil, size: 20)
         )
-        .values.first(where: { _ in true })
         
         // when
         let todo = try await repository.revertDoneTodo("id:4")
         let donesAfterRevert = try await repository.loadDoneTodoEvents(
             .init(cursorAfter: nil, size: 20)
         )
-        .values.first(where: { _ in true })
         
         // then
         XCTAssertNotEqual(todo.uuid, "origin-4")
         XCTAssertEqual(
-            donesBeforeRevert?.map { $0.uuid },
+            donesBeforeRevert.map { $0.uuid },
             (0..<10).reversed().map { "id:\($0)"}
         )
         XCTAssertEqual(
-            donesAfterRevert?.map { $0.uuid },
+            donesAfterRevert.map { $0.uuid },
             (0..<10).filter { $0 != 4 }.reversed().map { "id:\($0)"}
         )
     }
