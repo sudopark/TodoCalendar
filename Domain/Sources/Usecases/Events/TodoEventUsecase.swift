@@ -27,6 +27,7 @@ public protocol TodoEventUsecase {
     func refreshTodoEvents(in period: Range<TimeInterval>)
     func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never>
     func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error>
+    func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws
 }
 
 
@@ -145,6 +146,10 @@ extension TodoEventUsecaseImple {
             ($0 ?? [:])
             |> key(id) .~ removeResult.nextRepeatingTodo
         }
+    }
+    
+    public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
+        try await self.todoRepository.removeDoneTodos(scope)
     }
 }
 

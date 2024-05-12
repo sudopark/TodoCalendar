@@ -96,6 +96,8 @@ open class StubTodoEventUsecase: TodoEventUsecase {
     
     open func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
     }
+    
+    open func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws { }
         
     public var stubTodo: TodoEvent?
     open func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
