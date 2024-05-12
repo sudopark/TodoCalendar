@@ -112,6 +112,6 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub {
     }
     
     open func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
-        return .init(uuid: "some", name: "reverted")
+        return .init(uuid: "reverted", name: "reverted")
     }
 }
