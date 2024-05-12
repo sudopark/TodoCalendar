@@ -125,6 +125,20 @@ extension NonLoginUsecaseFactoryImple {
             localStorage: storage
         )
     }
+    
+    func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase {
+        let storage = TodoLocalStorageImple(
+            sqliteService: applicationBase.commonSqliteService
+        )
+        let repository = TodoLocalRepositoryImple(
+            localStorage: storage,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        return DoneTodoEventsPagingUsecaseImple(
+            pageSize: 100,
+            todoRepository: repository
+        )
+    }
 }
 
 
@@ -292,6 +306,20 @@ extension LoginUsecaseFactoryImple {
         return EventDetailDataRemoteRepostioryImple(
             remoteAPI: applicationBase.remoteAPI,
             cacheStorage: cache
+        )
+    }
+    
+    func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase {
+        let cache = TodoLocalStorageImple(
+            sqliteService: applicationBase.commonSqliteService
+        )
+        let repository = TodoRemoteRepositoryImple(
+            remote: applicationBase.remoteAPI,
+            cacheStorage: cache
+        )
+        return DoneTodoEventsPagingUsecaseImple(
+            pageSize: 100,
+            todoRepository: repository
         )
     }
 }
