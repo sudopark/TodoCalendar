@@ -72,6 +72,9 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         return DoneTodoEvent(TodoEvent(uuid: eventId, name: "some"))
     }
     
+    open func revertCompleteTodo(_ doneId: String) async throws -> TodoEvent {
+        throw RuntimeError("not implemented")
+    }
     
     open func refreshCurentTodoEvents() {
         

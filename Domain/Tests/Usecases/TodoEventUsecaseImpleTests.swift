@@ -342,31 +342,6 @@ extension TodoEventUsecaseImpleTests {
         XCTAssertNotNil(doneEvent)
     }
     
-    // todo 이벤트 완료 처리하고 스토어에 저장된 완료된 이벤트 업데이트
-    func testUsecase_whenAfterCompleteTodoEvent_updateSharedDoneEvents() {
-        // given
-        let expect = expectation(description: "todo 이벤트 완료처리하면 저장된 완료된 이벤트 업데이트")
-        expect.expectedFulfillmentCount = 2
-        let usecase = self.makeUsecase()
-        let oldEvent = self.stubTodoEvent()
-        
-        // when
-        let shareKey = ShareDataKeys.doneTodos.rawValue
-        let doneSource = self.spyStore.observe([String: DoneTodoEvent].self, key: shareKey)
-        let doneEvents = self.waitOutputs(expect, for: doneSource) {
-            Task {
-                _ = try? await usecase.completeTodo(oldEvent.uuid)
-            }
-        }
-        
-        // then
-        let doneOriginEventIds = doneEvents.map { $0?.values.map { $0.originEventId } }
-        XCTAssertEqual(doneOriginEventIds, [
-            nil,
-            [oldEvent.uuid]
-        ])
-    }
-    
     // 반복 안하는 일정은 완료 처리 이후에 스토어에 저장된 todo 삭제
     func testUsecase_whenNotRepeatingEvent_deleteSharedTodoAfterComplete() {
         // given
@@ -411,6 +386,38 @@ extension TodoEventUsecaseImpleTests {
         let newTodoExists = todos.map { $0?.keys.contains("next")}
         XCTAssertEqual(oldTodoExists, [true, false, false])
         XCTAssertEqual(newTodoExists, [false, false, true])
+    }
+    
+    func testUsecase_revertDoneTodo() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when
+        let reverted = try await usecase.revertCompleteTodo("done")
+        
+        // then
+        XCTAssertEqual(reverted.uuid, "reverted")
+    }
+    
+    func testUsecase_whenAfterRevertTodo_updateSharedDataStore() {
+        // given
+        let expect = expectation(description: "완료 todo revert 이후에 공유 스토어에 todo 업데이트")
+        let usecase = self.makeUsecase()
+        
+        // when
+        let shareKey = ShareDataKeys.todos.rawValue
+        let source = self.spyStore.observe([String: TodoEvent].self, key: shareKey)
+        let todos = self.waitOutputs(expect, for: source) {
+            Task {
+                _ = try await usecase.revertCompleteTodo("done")
+            }
+        }
+        
+        // then
+        let ids = todos.map { ts in ts?.map { $0.key }}
+        XCTAssertEqual(ids, [
+            nil, ["reverted"]
+        ])
     }
 }
 

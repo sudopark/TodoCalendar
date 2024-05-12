@@ -19,6 +19,7 @@ public protocol TodoEventUsecase {
     func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent
     func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent
     func completeTodo(_ eventId: String) async throws -> DoneTodoEvent
+    func revertCompleteTodo(_ doneId: String) async throws -> TodoEvent
     func removeTodo(_ id: String, onlyThisTime: Bool) async throws
     
     func refreshCurentTodoEvents()
@@ -112,10 +113,7 @@ extension TodoEventUsecaseImple {
         let doneResult = try await self.todoRepository.completeTodo(eventId)
         let (doneEvent, nextTodo) = (doneResult.doneEvent, doneResult.nextRepeatingTodoEvent)
         
-        let (todoKey, doneKey) = (ShareDataKeys.todos.rawValue, ShareDataKeys.doneTodos.rawValue)
-        self.sharedDataStore.update([String: DoneTodoEvent].self, key: doneKey) {
-            ($0 ?? [:]) |> key(doneEvent.originEventId) .~ doneEvent
-        }
+        let todoKey = ShareDataKeys.todos.rawValue
         self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
             ($0 ?? [:]) |> key(doneEvent.originEventId) .~ nil
         }
@@ -125,6 +123,15 @@ extension TodoEventUsecaseImple {
             }
         }
         return doneEvent
+    }
+    
+    public func revertCompleteTodo(_ doneId: String) async throws -> TodoEvent {
+        let reverted = try await self.todoRepository.revertDoneTodo(doneId)
+        let todoKey = ShareDataKeys.todos.rawValue
+        self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
+            ($0 ?? [:]) |> key(reverted.uuid) .~ reverted
+        }
+        return reverted
     }
     
     public func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
