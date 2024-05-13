@@ -163,6 +163,7 @@ struct DoneTodoListSectionModel {
 
 enum RemoveDoneTodoRange: CaseIterable {
     case all
+    case olderThan1Month
     case olderThan3Months
     case olderThan6Months
     case olderThan1Year
@@ -171,6 +172,9 @@ enum RemoveDoneTodoRange: CaseIterable {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         switch self {
         case .all: return .all
+        case .olderThan1Month:
+            let ref = calendar.addMonth(-1, from: Date())
+            return ref.map { .pastThan($0.timeIntervalSince1970) }
         case .olderThan3Months:
             let ref = calendar.addMonth(-3, from: Date())
             return ref.map { .pastThan($0.timeIntervalSince1970) }

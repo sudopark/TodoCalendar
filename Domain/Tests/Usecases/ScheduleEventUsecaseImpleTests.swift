@@ -711,7 +711,6 @@ extension ScheduleEventUsecaseImpleTests {
         
         func parameterizeTests(_ timeZone: TimeZone) {
             // given
-            print("start => \(timeZone)")
             let expect = expectation(description: "kst timezone에서 저장된 allday 2023.07.24~07.26 이벤트를 다른 timezone의 다음주 기간 에서도 조회할 수 있어야함")
             expect.assertForOverFulfill = false
             try! self.setUpWithError()
