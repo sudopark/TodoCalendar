@@ -56,6 +56,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func makeTodoEvent(with givenName: String)
     func makeEvent()
     func makeEventByTemplate()
+    func showDoneTodoList()
     
     // presenter
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
@@ -229,6 +230,10 @@ extension DayEventListViewModelImple {
         guard let current = self.subject.currentDayAndEventLists.value?.currentDay
         else { return nil }
         return Date(timeIntervalSince1970: current.range.lowerBound)
+    }
+    
+    func showDoneTodoList() {
+        self.router?.showDoneTodoList()
     }
 }
 
