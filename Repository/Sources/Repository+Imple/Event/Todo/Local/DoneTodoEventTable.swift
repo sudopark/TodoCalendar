@@ -57,10 +57,13 @@ struct DoneTodoEventTable: Table {
 extension DoneTodoEvent: RowValueType {
     
     public init(_ cursor: CursorIterator) throws {
+        let uuid: String = try cursor.next().unwrap()
+        let origin: String = try cursor.next().unwrap()
+        let name: String = try cursor.next().unwrap()
         self.init(
-            uuid: try cursor.next().unwrap(),
-            name: try cursor.next().unwrap(),
-            originEventId: try cursor.next().unwrap(),
+            uuid: uuid,
+            name: name,
+            originEventId: origin,
             doneTime: Date(timeIntervalSince1970: try cursor.next().unwrap())
         )
         self.eventTagId = cursor.next().map { AllEventTagId($0) }
