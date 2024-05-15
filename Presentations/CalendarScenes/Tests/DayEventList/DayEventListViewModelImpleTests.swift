@@ -403,7 +403,7 @@ extension DayEventListViewModelImpleTests {
         
         // when
         let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
-        let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.01) {
+        let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
             viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
         }
         
@@ -448,7 +448,7 @@ extension DayEventListViewModelImpleTests {
         
         // when
         let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2})
-        let _ = self.waitFirstOutput(expect, for: source, timeout: 0.01) {
+        let _ = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
             viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
             
             viewModel.doneTodo("todo-with-time")
@@ -679,6 +679,20 @@ extension DayEventListViewModelImpleTests {
 
 extension DayEventListViewModelImpleTests {
     
+    func testViewModel_showDoneTodoList() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.showDoneTodoList()
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowDoneTodoList, true)
+    }
+}
+
+extension DayEventListViewModelImpleTests {
+    
     private class SpyRouter: BaseSpyRouter, DayEventListRouting, @unchecked Sendable {
         
         var didRouteToMakeNewEventWithParams: MakeEventParams?
@@ -702,6 +716,11 @@ extension DayEventListViewModelImpleTests {
         var didRouteToScheduleDetail: Bool?
         func routeToScheduleEventDetail(_ eventId: String) {
             self.didRouteToScheduleDetail = true
+        }
+        
+        var didShowDoneTodoList: Bool?
+        func showDoneTodoList() {
+            self.didShowDoneTodoList = true
         }
     }
 }

@@ -19,15 +19,18 @@ final class DayEventListSceneBuilerImple {
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
+    private let eventListSceneBuilder: any EventListSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
-        eventDetailSceneBuilder: any EventDetailSceneBuilder
+        eventDetailSceneBuilder: any EventDetailSceneBuilder,
+        eventListSceneBuilder: any EventListSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
+        self.eventListSceneBuilder = eventListSceneBuilder
     }
 }
 
@@ -42,7 +45,8 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             uiSettingUsecase: usecaseFactory.makeUISettingUsecase()
         )
         let router = DayEventListRouter(
-            eventDetailSceneBuilder: self.eventDetailSceneBuilder
+            eventDetailSceneBuilder: self.eventDetailSceneBuilder,
+            eventListSceneBuilder: self.eventListSceneBuilder
         )
         viewModel.router = router
         return .init(viewModel: viewModel, router: router)

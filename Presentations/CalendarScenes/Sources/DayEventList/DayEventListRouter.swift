@@ -22,6 +22,7 @@ protocol DayEventListRouting: Routing, Sendable {
     func routeToScheduleEventDetail(_ eventId: String)
     // TODO: tempplate 관련해서 초기 파라미터 필요할 수 있음
     func routeToSelectTemplateForMakeEvent()
+    func showDoneTodoList()
 }
 
 // MARK: - Router
@@ -29,9 +30,14 @@ protocol DayEventListRouting: Routing, Sendable {
 final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked Sendable {
     
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
+    private let eventListSceneBuilder: any EventListSceneBuiler
     
-    init(eventDetailSceneBuilder: any EventDetailSceneBuilder) {
+    init(
+        eventDetailSceneBuilder: any EventDetailSceneBuilder,
+        eventListSceneBuilder: any EventListSceneBuiler
+    ) {
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
+        self.eventListSceneBuilder = eventListSceneBuilder
     }
 }
 
@@ -64,5 +70,12 @@ extension DayEventListRouter {
     
     func routeToSelectTemplateForMakeEvent() {
         // TODO: route to tempplate select scene
+    }
+    
+    func showDoneTodoList() {
+        Task { @MainActor in
+            let next = self.eventListSceneBuilder.makeDoneTodoEventListScene()
+            self.scene?.present(next, animated: true)
+        }
     }
 }

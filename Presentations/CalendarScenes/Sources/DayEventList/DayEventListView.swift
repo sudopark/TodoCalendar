@@ -74,6 +74,7 @@ final class DayEventListViewEventHandler: ObservableObject {
     var addNewTodoQuickly: (String) -> Void = { _ in }
     var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
     var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
+    var showDoneTodoList: () -> Void = { }
     
     func bind(_ viewModel: any DayEventListViewModel) {
         self.requestDoneTodo = viewModel.doneTodo(_:)
@@ -85,6 +86,7 @@ final class DayEventListViewEventHandler: ObservableObject {
         self.addNewTodoQuickly = viewModel.addNewTodoQuickly(withName:)
         self.makeNewTodoWithGivenNameAndDetails = viewModel.makeTodoEvent(with:)
         self.requestShowDetail = viewModel.selectEvent(_:)
+        self.showDoneTodoList = viewModel.showDoneTodoList
     }
 }
 
@@ -152,6 +154,14 @@ struct DayEventListView: View {
                                 self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
                             )
                             .foregroundColor(self.appearance.colorSet.subSubNormalText.asColor)
+                    }
+                    
+                    Spacer()
+                    
+                    Button {
+                        self.eventHandler.showDoneTodoList()
+                    } label: {
+                        Image(systemName: "checklist.checked")
                     }
                 }
                 .padding(.bottom, 3)
@@ -352,7 +362,7 @@ private struct EventListCellView: View {
             
         } label: {
             if self.state.tempDoneTodoIds.contains(todoId) {
-                Image(systemName: "circle.fill")
+                Image(systemName: "circle.inset.filled")
             } else {
                 Image(systemName: "circle")
             }
