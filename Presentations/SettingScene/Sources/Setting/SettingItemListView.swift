@@ -160,10 +160,23 @@ struct SettingItemListView: View {
     
     private func accountItemView(_ item: AccountSettingItemModel) -> some View{
         HStack {
-            Image(systemName: item.iconName)
-                .font(self.itemFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
-                .frame(minWidth: 25)
+            ZStack(alignment: .bottomTrailing) {
+                Image(systemName: item.iconName)
+                    .font(self.itemFont)
+                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .frame(minWidth: 25)
+                    .offset(y: -4)
+                
+                Text("beta")
+                    .font(appearance.fontSet.subSubNormal.asFont)
+                    .foregroundStyle(appearance.colorSet.white.asColor)
+                    .padding(.horizontal, 2)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(appearance.colorSet.accentOrange.asColor)
+                    )
+                    .offset(y: 6)
+            }
             
             Text(item.title)
                 .font(self.itemFont)
@@ -173,6 +186,7 @@ struct SettingItemListView: View {
             
             if let method = item.signInMethod {
                 Text(method)
+                    .lineLimit(1)
                     .font(self.appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
             }
@@ -244,6 +258,11 @@ struct SettingItemListViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting)
         let state = SettingItemListViewState()
         let eventHandlers = SettingItemListViewEventHandler()
+        state.sections = [
+            SettingSectionModel(headerText: "section", items: [
+                AccountSettingItemModel(.init("some"))
+            ])
+        ]
         
         let view = SettingItemListView()
             .environmentObject(state)
