@@ -37,11 +37,25 @@ private struct DoneTodoEventsPage: PagingResultType {
     
     let query: DoneTodoLoadPagingParams
     let events: [DoneTodoEvent]
-    let isLastPage: Bool
+    private let pageSize: Int
+    private let isLastPage: Bool
+    
+    init(query: DoneTodoLoadPagingParams, events: [DoneTodoEvent], pageSize: Int) {
+        self.query = query
+        self.events = events
+        self.pageSize = pageSize
+        self.isLastPage = events.count < pageSize
+    }
+    
+    var hasNextPage: Bool {
+        let thisPageIsEmpty = self.query.cursorAfter != nil
+            && self.query.cursorAfter == events.last?.doneTime.timeIntervalSince1970
+        return !self.isLastPage && !thisPageIsEmpty
+    }
     
     func nextQuery() -> DoneTodoLoadPagingParams? {
-        guard !isLastPage,
-              let last = self.events.last?.doneTime.timeIntervalSince1970
+        guard let last = self.events.last?.doneTime.timeIntervalSince1970,
+              self.hasNextPage
         else { return nil }
         return .init(
             cursorAfter: last,
@@ -54,7 +68,7 @@ private struct DoneTodoEventsPage: PagingResultType {
             .asDictionary { $0.uuid }
             .values
             .sorted(by: { $0.doneTime > $1.doneTime })
-        return .init(query: self.query, events: newTotal, isLastPage: next.isLastPage)
+        return .init(query: self.query, events: newTotal, pageSize: self.pageSize)
     }
 }
 
@@ -73,7 +87,7 @@ public final class DoneTodoEventsPagingUsecaseImple: DoneTodoEventsPagingUsecase
         self.internalUsecase = .init { query in
             return Publishers.create {
                 let events = try await todoRepository.loadDoneTodoEvents(query)
-                return DoneTodoEventsPage(query: query, events: events, isLastPage: events.count < pageSize)
+                return DoneTodoEventsPage(query: query, events: events, pageSize: pageSize)
             }
             .eraseToAnyPublisher()
         }
