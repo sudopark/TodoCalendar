@@ -78,10 +78,10 @@ public enum TodoAPIEndpoints: Endpoint {
             return "todo/\(id)/complete"
             
         case .dones:
-            return "todo/dones"
+            return "dones"
             
         case .revertDone(let id):
-            return "todo/dones/\(id)/revert"
+            return "dones/\(id)/revert"
             
         case .replaceRepeating(let id):
             return "todo/\(id)/replace"
