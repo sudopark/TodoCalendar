@@ -9,17 +9,24 @@ extension Project {
     static let organizationName = "com.sudo.park"
     
     /// Helper function to create the Project for this ExampleApp
-    public static func app(name: String,
-                           platform: Platform,
-                           iOSTargetVersion: String,
-                           dependencies: [TargetDependency] = []) -> Project {
-        let targets = makeAppTargets(name: name,
-                                     platform: platform,
-                                     iOSTargetVersion: iOSTargetVersion ,
-                                     dependencies: dependencies)
-        return Project(name: name,
-                       organizationName: organizationName,
-                       targets: targets)
+    public static func app(
+        name: String,
+        platform: Platform,
+        iOSTargetVersion: String,
+        dependencies: [TargetDependency] = [],
+        extensionTargets: [Target] = []
+    ) -> Project {
+        let targets = makeAppTargets(
+            name: name,
+            platform: platform,
+            iOSTargetVersion: iOSTargetVersion,
+            dependencies: dependencies
+        )
+        return Project(
+            name: name,
+            organizationName: organizationName,
+            targets: targets + extensionTargets
+        )
     }
     
     public static func frameworkWithTest(name: String,
@@ -111,10 +118,12 @@ extension Project {
     }
     
     /// Helper function to create the application target and the unit test target.
-    private static func makeAppTargets(name: String,
-                                       platform: Platform,
-                                       iOSTargetVersion: String,
-                                       dependencies: [TargetDependency])
+    private static func makeAppTargets(
+        name: String,
+        platform: Platform,
+        iOSTargetVersion: String,
+        dependencies: [TargetDependency]
+    )
     -> [Target]
     {
         let platform: Platform = platform
@@ -174,5 +183,57 @@ extension Project {
                 .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
             ])
         return [mainTarget, testTarget]
+    }
+    
+    public static func makeAppExtensionTargets(
+        appName: String,
+        extensionName: String,
+        platform: Platform,
+        iOSTargetVersion: String,
+        infoPlist: [String: Plist.Value] = [:],
+        dependencies: [TargetDependency]
+    ) -> [Target] {
+        
+        let targetName = "\(appName)\(extensionName)"
+        
+        let target = Target(
+            name: targetName,
+            platform: platform,
+            product: .appExtension,
+            bundleId: "\(organizationName).\(appName).\(extensionName)",
+            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+            infoPlist: .extendingDefault(with: infoPlist),
+            sources: ["AppExtensions/\(extensionName)/Sources/**"],
+            resources: ["AppExtensions/\(extensionName)/Resources/**"],
+//            entitlements: Entitlements.file(path: "./Extensions/\(extensionName)/\(targetName).entitlements"),
+            dependencies: dependencies
+        )
+        
+        let testTarget = Target(
+            name: "\(targetName)Tests",
+            platform: platform,
+            product: .unitTests,
+            bundleId: "\(organizationName).\(appName).\(extensionName)Tests",
+            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: [.iphone]),
+            infoPlist: .default,
+            sources: ["AppExtensions/\(extensionName)/Tests/**"],
+            dependencies: [
+                .target(name: appName),
+                .project(
+                    target: "UnitTestHelpKit", 
+                    path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")
+                ),
+                .project(
+                    target: "TestDoubles",
+                    path: .relativeToCurrentFile("../../Supports/TestDoubles")
+                ),
+                .project(
+                    target: "Common3rdParty",
+                    path: .relativeToCurrentFile("../../Supports/Common3rdParty")
+                )
+            ]
+        )
+        
+        return [target, testTarget]
     }
 }
