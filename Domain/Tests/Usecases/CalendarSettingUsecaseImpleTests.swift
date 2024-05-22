@@ -9,6 +9,7 @@ import XCTest
 import Combine
 import UnitTestHelpKit
 import Extensions
+import TestDoubles
 
 @testable import Domain
 
@@ -30,7 +31,7 @@ class CalendarSettingUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         savedFirstWeekDay: DayOfWeeks? = nil
     ) -> CalendarSettingUsecaseImple {
         
-        let repository = StubCalendarSetingRepository()
+        let repository = StubCalendarSettingRepository()
         if let timeZone = savedTimeZone {
             repository.saveTimeZone(timeZone)
         }

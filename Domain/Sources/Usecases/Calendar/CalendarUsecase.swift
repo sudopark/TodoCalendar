@@ -19,6 +19,12 @@ public protocol CalendarUsecase {
     func components(
         for month: Int, of year: Int
     ) -> AnyPublisher<CalendarComponent, Never>
+    
+    func getComponents(
+        _ year: Int,
+        _ month: Int,
+        _ startDayOfWeek: DayOfWeeks
+    ) throws -> CalendarComponent
 }
 
 
@@ -75,12 +81,12 @@ extension CalendarUsecaseImple {
     ) -> AnyPublisher<CalendarComponent, Never> {
         return self.calendarSettingUsecase.firstWeekDay
             .compactMap { [weak self] firstDay -> CalendarComponent? in
-                return try? self?.components(year, month, firstDay)
+                return try? self?.getComponents(year, month, firstDay)
             }
             .eraseToAnyPublisher()
     }
     
-    private func components(
+    public func getComponents(
         _ year: Int,
         _ month: Int,
         _ startDayOfWeek: DayOfWeeks

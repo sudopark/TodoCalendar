@@ -41,7 +41,7 @@ public struct CalendarComponent: Equatable {
             self.weekDay = weekDay
         }
         
-        init(_ date: Date, calendar: Calendar) {
+        public init(_ date: Date, calendar: Calendar) {
             self.year = calendar.component(.year, from: date)
             self.month = calendar.component(.month, from: date)
             self.day = calendar.component(.day, from: date)

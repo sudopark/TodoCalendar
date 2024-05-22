@@ -270,28 +270,3 @@ private extension Array where Element == Int {
         return (firstIndex+1...lastIndex+1)
     }
 }
-
-private extension Calendar {
-
-    private func dayIdentifier(_ date: Date) -> String {
-        let (year, month, day) = (
-            self.component(.year, from: date),
-            self.component(.month, from: date),
-            self.component(.day, from: date)
-        )
-        return "\(year)-\(month)-\(day)"
-    }
-    
-    func daysIdentifiers(_ range: Range<TimeInterval>) -> [String] {
-        guard let lastDateOfEnd = self.endOfDay(for: .init(timeIntervalSince1970: range.upperBound))
-        else { return [] }
-        var cursor = Date(timeIntervalSince1970: range.lowerBound)
-        var sender: [String] = []
-        while self.compare(cursor, to: lastDateOfEnd, toGranularity: .day) != .orderedDescending {
-            sender.append(self.dayIdentifier(cursor))
-            
-            cursor = cursor.addingTimeInterval(24 * 3600)
-        }
-        return sender
-    }
-}
