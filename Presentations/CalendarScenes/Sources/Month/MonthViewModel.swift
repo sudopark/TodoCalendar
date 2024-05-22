@@ -15,39 +15,47 @@ import Scenes
 
 // MARK: - week components
 
-struct WeekDayModel: Equatable {
-    let symbol: String
-    let isSunday: Bool
-    let isSaturday: Bool
+public struct WeekDayModel: Equatable {
+    public let symbol: String
+    public let isSunday: Bool
+    public let isSaturday: Bool
     
-    init(symbol: String, isSunday: Bool = false, isSaturday: Bool = false) {
+    public init(symbol: String, isSunday: Bool = false, isSaturday: Bool = false) {
         self.symbol = symbol
         self.isSunday = isSunday
         self.isSaturday = isSaturday
     }
     
-    static func allModels() -> [WeekDayModel] {
+    public static func allModels() -> [WeekDayModel] {
         return [
-            .init(symbol: "SUN", isSunday: true),
-            .init(symbol: "MON"),
-            .init(symbol: "TUE"),
-            .init(symbol: "WED"),
-            .init(symbol: "THU"),
-            .init(symbol: "FRI"),
-            .init(symbol: "SAT", isSaturday: true)
+            .init(symbol: "S", isSunday: true),
+            .init(symbol: "M"),
+            .init(symbol: "T"),
+            .init(symbol: "W"),
+            .init(symbol: "T"),
+            .init(symbol: "F"),
+            .init(symbol: "S", isSaturday: true)
         ]
+    }
+    
+    public static func allModels(of firstWeekDay: DayOfWeeks) -> [WeekDayModel] {
+        let models = self.allModels()
+        let startIndex = firstWeekDay.rawValue-1
+        return (startIndex..<startIndex+7).map { index in
+            return models[index % 7]
+        }
     }
 }
 
-struct DayCellViewModel: Equatable {
+public struct DayCellViewModel: Equatable {
     
-    let year: Int
-    let month: Int
-    let day: Int
-    let isNotCurrentMonth: Bool
-    let accentDay: AccentDays?
+    public let year: Int
+    public let month: Int
+    public let day: Int
+    public let isNotCurrentMonth: Bool
+    public let accentDay: AccentDays?
     
-    init(
+    public init(
         year: Int,
         month: Int,
         day: Int,
@@ -61,11 +69,11 @@ struct DayCellViewModel: Equatable {
         self.accentDay = accentDay
     }
     
-    var identifier: String {
+    public var identifier: String {
         "\(year)-\(month)-\(day)"
     }
     
-    init(_ day: CalendarComponent.Day, month: Int) {
+    public init(_ day: CalendarComponent.Day, month: Int) {
         self.year = day.year
         self.month = day.month
         self.day = day.day
@@ -84,16 +92,16 @@ struct DayCellViewModel: Equatable {
     }
 }
 
-struct WeekRowModel: Equatable {
-    let id: String
-    let days: [DayCellViewModel]
+public struct WeekRowModel: Equatable {
+    public let id: String
+    public let days: [DayCellViewModel]
     
-    init(_ id: String, _ days: [DayCellViewModel]) {
+    public init(_ id: String, _ days: [DayCellViewModel]) {
         self.id = id
         self.days = days
     }
     
-    init(_ week: CalendarComponent.Week, month: Int) {
+    public init(_ week: CalendarComponent.Week, month: Int) {
         self.id = week.id
         self.days = week.days.map { day -> DayCellViewModel in
             return .init(day, month: month)
@@ -350,12 +358,8 @@ extension MonthViewModelImple {
     }
     
     var weekDays: AnyPublisher<[WeekDayModel], Never> {
-        let models = WeekDayModel.allModels()
         let transform: (DayOfWeeks) -> [WeekDayModel] = { dayOfWeek in
-            let startIndex = dayOfWeek.rawValue-1
-            return (startIndex..<startIndex+7).map { index in
-                return models[index % 7]
-            }
+            return WeekDayModel.allModels(of: dayOfWeek)
         }
         return self.calendarSettingUsecase.firstWeekDay
             .map(transform)

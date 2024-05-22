@@ -501,14 +501,14 @@ extension MonthViewModelImpleTests {
         // then
         let weekDayLists = modelLists.map { ms in ms.map { $0.symbol } }
         XCTAssertEqual(weekDayLists, [
-            ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"],
-            ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"],
-            ["TUE", "WED", "THU", "FRI", "SAT", "SUN", "MON"],
-            ["WED", "THU", "FRI", "SAT", "SUN", "MON", "TUE"],
-            ["THU", "FRI", "SAT", "SUN", "MON", "TUE", "WED"],
-            ["FRI", "SAT", "SUN", "MON", "TUE", "WED", "THU"],
-            ["SAT", "SUN", "MON", "TUE", "WED", "THU", "FRI"],
-            ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"]
+            ["S", "M", "T", "W", "T", "F", "S"],
+            ["M", "T", "W", "T", "F", "S", "S"],
+            ["T", "W", "T", "F", "S", "S", "M"],
+            ["W", "T", "F", "S", "S", "M", "T"],
+            ["T", "F", "S", "S", "M", "T", "W"],
+            ["F", "S", "S", "M", "T", "W", "T"],
+            ["S", "S", "M", "T", "W", "T", "F"],
+            ["S", "M", "T", "W", "T", "F", "S"]
         ])
         let isWeekEnds = modelLists.map { ms in ms.map { $0.isSaturday || $0.isSunday } }
         XCTAssertEqual(isWeekEnds, [

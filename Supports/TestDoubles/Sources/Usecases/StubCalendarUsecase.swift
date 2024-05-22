@@ -32,6 +32,14 @@ open class StubCalendarUsecase: CalendarUsecase {
         of year: Int
     ) -> AnyPublisher<CalendarComponent, Never> {
      
+        let components = try! self.getComponents(year, month, .sunday)
+        return Just(components)
+            .eraseToAnyPublisher()
+    }
+    
+    open func getComponents(
+        _ year: Int, _ month: Int, _ startDayOfWeek: DayOfWeeks
+    ) throws -> CalendarComponent {
         let weekAndDays: [[(Int, Int)]] = [
             [(8, 27), (8, 28), (8, 29), (8, 30), (8, 31), (9, 1), (9, 2)],
             [(9, 3), (9, 4), (9, 5), (9, 6), (9, 7), (9, 8), (9, 9)],
@@ -45,8 +53,6 @@ open class StubCalendarUsecase: CalendarUsecase {
             }
             return CalendarComponent.Week(days: days)
         }
-        let components = CalendarComponent(year: year, month: month, weeks: weeks)
-        return Just(components)
-            .eraseToAnyPublisher()
+        return CalendarComponent(year: year, month: month, weeks: weeks)
     }
 }

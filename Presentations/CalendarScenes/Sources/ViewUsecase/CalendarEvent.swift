@@ -12,11 +12,11 @@ import Optics
 import Domain
 
 
-enum EventTimeOnCalendar: Hashable {
+public enum EventTimeOnCalendar: Hashable {
     case at(TimeInterval)
     case period(Range<TimeInterval>)
     
-    init(_ time: EventTime, timeZone: TimeZone) {
+    public init(_ time: EventTime, timeZone: TimeZone) {
         switch time {
         case .at(let interval):
             self = .at(interval)
@@ -27,7 +27,7 @@ enum EventTimeOnCalendar: Hashable {
         }
     }
     
-    func clamped(to period: Range<TimeInterval>) -> Range<TimeInterval>? {
+    public func clamped(to period: Range<TimeInterval>) -> Range<TimeInterval>? {
         switch self {
         case .at(let time):
             return period ~= time

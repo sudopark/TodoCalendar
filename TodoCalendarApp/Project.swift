@@ -85,6 +85,10 @@ let project = Project.app(
                 .project(
                     target: "CommonPresentation",
                     path: .relativeToCurrentFile("../Presentations/CommonPresentation")
+                ),
+                .project(
+                    target: "CalendarScenes",
+                    path: .relativeToCurrentFile("../Presentations/CalendarScenes")
                 )
             ]
         )

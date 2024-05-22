@@ -88,8 +88,35 @@ extension Calendar {
     
     public func dateBySetting(from date: Date, mutating: (inout DateComponents) -> Void) -> Date? {
         var components = self.dateComponents(in: self.timeZone, from: date)
+        components.yearForWeekOfYear = nil
         mutating(&components)
         return self.date(from: components)
     }
 }
 
+
+
+extension Calendar {
+
+    private func dayIdentifier(_ date: Date) -> String {
+        let (year, month, day) = (
+            self.component(.year, from: date),
+            self.component(.month, from: date),
+            self.component(.day, from: date)
+        )
+        return "\(year)-\(month)-\(day)"
+    }
+    
+    public func daysIdentifiers(_ range: Range<TimeInterval>) -> [String] {
+        guard let lastDateOfEnd = self.endOfDay(for: .init(timeIntervalSince1970: range.upperBound))
+        else { return [] }
+        var cursor = Date(timeIntervalSince1970: range.lowerBound)
+        var sender: [String] = []
+        while self.compare(cursor, to: lastDateOfEnd, toGranularity: .day) != .orderedDescending {
+            sender.append(self.dayIdentifier(cursor))
+            
+            cursor = cursor.addingTimeInterval(24 * 3600)
+        }
+        return sender
+    }
+}
