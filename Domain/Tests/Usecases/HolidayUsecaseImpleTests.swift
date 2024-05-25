@@ -158,7 +158,7 @@ extension HolidayUsecaseImpleTests {
         let holidays = self.waitFirstOutput(expect, for: usecase.holidays()) {
             Task {
                 try await usecase.prepare()
-                try await usecase.loadHolidays(2023)
+                try await usecase.refreshHolidays(2023)
             }
         }
         
@@ -178,8 +178,8 @@ extension HolidayUsecaseImpleTests {
         let holidayMaps = self.waitOutputs(expect, for: usecase.holidays()) {
             Task {
                 try await usecase.prepare()
-                try await usecase.loadHolidays(2023)
-                try await usecase.loadHolidays(2022)
+                try await usecase.refreshHolidays(2023)
+                try await usecase.refreshHolidays(2022)
             }
         }
         
@@ -206,7 +206,7 @@ extension HolidayUsecaseImpleTests {
             Task {
                 try await usecase.prepare()
                 // 최초 kr 공휴일 로드됨
-                try await usecase.loadHolidays(2023)
+                try await usecase.refreshHolidays(2023)
                 
                 // 이후 us 이벤트 나옴
                 try await usecase.selectCountry(.init(code: "US", name: "USA"))
@@ -236,8 +236,8 @@ extension HolidayUsecaseImpleTests {
         let holidayMap = self.waitOutputs(expect, for: usecase.holidays()) {
             Task {
                 try await usecase.prepare()
-                try await usecase.loadHolidays(2023)    // 2023 공휴일 준비
-                try await usecase.loadHolidays(2022)    // 2022, 2023 공휴일 준비
+                try await usecase.refreshHolidays(2023)    // 2023 공휴일 준비
+                try await usecase.refreshHolidays(2022)    // 2022, 2023 공휴일 준비
                 
                 try await usecase.selectCountry(.init(code: "US", name: "USA")) // 이후 us 이벤트 방출
             }
@@ -271,7 +271,7 @@ extension HolidayUsecaseImpleTests {
         let holidayMap = self.waitOutputs(expect, for: usecase.holidays()) {
             Task {
                 try await usecase.prepare()
-                try await usecase.loadHolidays(2023)
+                try await usecase.refreshHolidays(2023)
                 
                 try await usecase.refreshHolidays()
             }
@@ -282,6 +282,32 @@ extension HolidayUsecaseImpleTests {
             [2023: [.init(dateString: "2023", localName: "KR", name: "dummy")]],
             [2023: [.init(dateString: "2023", localName: "KR", name: "dummy-v2")]]
         ])
+    }
+    
+    func testUsecase_loadHolidays() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        try await usecase.prepare()
+        
+        // when
+        let holidays = try await usecase.loadHolidays(2023)
+        
+        // then
+        XCTAssertEqual(holidays.count, 1)
+        XCTAssertEqual(holidays.first?.dateString, "2023")
+    }
+    
+    func testUsecase_whenCurrenctCountryNotPrepared_loadHolidaysFail() async {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when + then
+        do {
+            let _ = try await usecase.loadHolidays(2023)
+            XCTFail("should fail")
+        } catch {
+            XCTAssert(true)
+        }
     }
 }
 

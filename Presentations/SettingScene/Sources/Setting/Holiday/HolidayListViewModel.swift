@@ -112,7 +112,7 @@ extension HolidayListViewModelImple {
         self.subject.currentYear.send(year)
         
         Task { [weak self] in
-            try await self?.holidayUsecase.loadHolidays(year)
+            try await self?.holidayUsecase.refreshHolidays(year)
         }
         .store(in: &self.cancellables)
     }
