@@ -72,9 +72,9 @@ extension ViewAppearance {
         case .holiday:
             return self.accnetDayPolicy[.holiday] == true ? self.colorSet.calendarAccentColor : self.colorSet.holidayText
         case .sunday:
-            return self.accnetDayPolicy[.sunday] == true ? self.colorSet.calendarAccentColor : self.colorSet.holidayText
+            return self.accnetDayPolicy[.sunday] == true ? self.colorSet.calendarAccentColor : self.colorSet.weekEndText
         case .saturday:
-            return self.accnetDayPolicy[.saturday] == true ? self.colorSet.calendarAccentColor : self.colorSet.holidayText
+            return self.accnetDayPolicy[.saturday] == true ? self.colorSet.calendarAccentColor : self.colorSet.weekEndText
         default:
             return self.colorSet.weekDayText
         }

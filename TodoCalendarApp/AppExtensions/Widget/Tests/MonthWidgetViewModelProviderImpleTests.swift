@@ -33,7 +33,7 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
     private func makeProvider(
         isEmptyEvent: Bool = false,
         shouldFailLoadEvent: Bool = false
-    ) -> MonthWidgetViewModelProviderImple {
+    ) -> MonthWidgetViewModelProvider {
         let calendarUsecase = StubCalendarUsecase()
         let settingRepository = StubCalendarSettingRepository()
         settingRepository.saveTimeZone(TimeZone(abbreviation: "KST")!)
@@ -46,7 +46,7 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
         scheduleRepostory.isEmptyEvent = isEmptyEvent
         scheduleRepostory.shouldFailLoad = shouldFailLoadEvent
         
-        return MonthWidgetViewModelProviderImple(
+        return MonthWidgetViewModelProvider(
             calendarUsecase: calendarUsecase,
             settingRepository: settingRepository,
             todoRepository: todoRepository,

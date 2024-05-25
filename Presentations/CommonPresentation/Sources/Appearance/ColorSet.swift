@@ -105,4 +105,6 @@ public struct DefaultLightColorSet: ColorSet {
     public let line: UIColor = UIColor.black.withAlphaComponent(0.2)
     
     public let background: UIColor = .white
+    
+    public init() { }
 }
