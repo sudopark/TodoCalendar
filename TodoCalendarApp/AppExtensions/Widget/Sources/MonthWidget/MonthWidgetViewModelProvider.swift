@@ -60,14 +60,7 @@ struct MonthWidgetViewModel {
 
 // MARK: - MonthWidgetViewModelProvider
 
-protocol MonthWidgetViewModelProvider {
-    
-    func makeSampleMonthViewModel(_ now: Date) throws -> MonthWidgetViewModel
-    
-    func getMonthViewModel(_ now: Date) async throws -> MonthWidgetViewModel
-}
-
-final class MonthWidgetViewModelProviderImple: MonthWidgetViewModelProvider {
+final class MonthWidgetViewModelProvider {
     
     private let calendarUsecase: any CalendarUsecase
     private let settingRepository: any CalendarSettingRepository
@@ -87,7 +80,7 @@ final class MonthWidgetViewModelProviderImple: MonthWidgetViewModelProvider {
     }
 }
 
-extension MonthWidgetViewModelProviderImple {
+extension MonthWidgetViewModelProvider {
     
     func makeSampleMonthViewModel(_ now: Date) throws -> MonthWidgetViewModel {
         let components = try self.calendarUsecase.getComponents(2024, 03, .sunday)

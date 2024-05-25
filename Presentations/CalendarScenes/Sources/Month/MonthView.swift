@@ -130,7 +130,7 @@ struct MonthView: View {
             return appearance.accentCalendarDayColor(accent).asColor
         }
         return HStack {
-            ForEach(self.state.weekDays, id: \.symbol) { weekDay in
+            ForEach(self.state.weekDays, id: \.identifier) { weekDay in
                 Text(weekDay.symbol)
                     .font(self.appearance.fontSet.weekday.asFont)
                     .foregroundColor(textColor(weekDay))
@@ -346,13 +346,13 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
 
     var weekDays: AnyPublisher<[WeekDayModel], Never> {
         return Just([
-            .init(symbol: "SUN", isSunday: true),
-            .init(symbol: "MON"),
-            .init(symbol: "TUE"),
-            .init(symbol: "WED"),
-            .init(symbol: "THU"),
-            .init(symbol: "FRI"),
-            .init(symbol: "SAT", isSaturday: true)
+            .init(symbol: "SUN", "SUN", isSunday: true),
+            .init(symbol: "MON", "MON"),
+            .init(symbol: "TUE", "TUE"),
+            .init(symbol: "WED", "WED"),
+            .init(symbol: "THU", "THU"),
+            .init(symbol: "FRI", "FRI"),
+            .init(symbol: "SAT", "SAT", isSaturday: true)
         ])
         .eraseToAnyPublisher()
     }

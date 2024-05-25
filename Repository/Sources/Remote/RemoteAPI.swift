@@ -66,29 +66,36 @@ public final class RemoteAPIImple: RemoteAPI, @unchecked Sendable {
  
     private let environment: RemoteEnvironment
     private let session: Session
-    private let authenticator: OAuthAutenticator
+    private let authenticator: OAuthAutenticator?
     
     public init(
         environment: RemoteEnvironment,
-        authenticator: OAuthAutenticator
+        authenticator: OAuthAutenticator?
     ) {
         self.environment = environment
         self.authenticator = authenticator
         
         let configure = URLSessionConfiguration.af.default
         configure.timeoutIntervalForRequest = 30
-        self.session = Session(
-            configuration: configure,
-            serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility),
-            interceptor: AuthenticationInterceptor(authenticator: authenticator)
-        )
+        if let authenticator {
+            self.session = Session(
+                configuration: configure,
+                serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility),
+                interceptor: AuthenticationInterceptor(authenticator: authenticator)
+            )
+        } else {
+            self.session = Session(
+                configuration: configure,
+                serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility)
+            )
+        }
     }
 }
 
 extension RemoteAPIImple {
     
     public func attach(listener: OAuthAutenticatorTokenRefreshListener) {
-        self.authenticator.listener = listener
+        self.authenticator?.listener = listener
     }
     
     public func setup(credential auth: Auth?) {

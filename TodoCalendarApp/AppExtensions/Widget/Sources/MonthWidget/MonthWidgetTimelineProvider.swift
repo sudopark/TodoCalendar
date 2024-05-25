@@ -20,12 +20,10 @@ struct MonthWidgetTimelineProvider: TimelineProvider {
     
     typealias Entry = ResultTimelineEntry<MonthWidgetViewModel>
     
-    private let viewModelProvider: any MonthWidgetViewModelProvider
+    private let viewModelProvider: MonthWidgetViewModelProvider
     
-    init(
-        viewModelProvider: any MonthWidgetViewModelProvider
-    ) {
-        self.viewModelProvider = viewModelProvider
+    init() {
+        self.viewModelProvider = WidgetViewModelProviderBuilder.makeMonthViewModelProvider()
     }
     
     func placeholder(in context: Context) -> Entry {

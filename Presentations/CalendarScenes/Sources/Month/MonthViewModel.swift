@@ -19,22 +19,24 @@ public struct WeekDayModel: Equatable {
     public let symbol: String
     public let isSunday: Bool
     public let isSaturday: Bool
+    public let identifier: String
     
-    public init(symbol: String, isSunday: Bool = false, isSaturday: Bool = false) {
+    public init(symbol: String, _ identifier: String, isSunday: Bool = false, isSaturday: Bool = false) {
         self.symbol = symbol
+        self.identifier = identifier
         self.isSunday = isSunday
         self.isSaturday = isSaturday
     }
     
     public static func allModels() -> [WeekDayModel] {
         return [
-            .init(symbol: "S", isSunday: true),
-            .init(symbol: "M"),
-            .init(symbol: "T"),
-            .init(symbol: "W"),
-            .init(symbol: "T"),
-            .init(symbol: "F"),
-            .init(symbol: "S", isSaturday: true)
+            .init(symbol: "S", "sunday", isSunday: true),
+            .init(symbol: "M", "moday"),
+            .init(symbol: "T", "tuesday"),
+            .init(symbol: "W", "wednesday"),
+            .init(symbol: "T", "thursday"),
+            .init(symbol: "F", "friday"),
+            .init(symbol: "S", "saturday", isSaturday: true)
         ]
     }
     
