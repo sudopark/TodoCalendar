@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import Prelude
 import Optics
+import Extensions
 
 
 // MARK: - HolidayUsecase
@@ -24,7 +25,8 @@ public protocol HolidayUsecase {
     var availableCountries: AnyPublisher<[HolidaySupportCountry], Never> { get }
     
     func refreshHolidays() async throws
-    func loadHolidays(_ year: Int) async throws
+    func refreshHolidays(_ year: Int) async throws
+    func loadHolidays(_ year: Int) async throws -> [Holiday]
     func holidays() -> AnyPublisher<[Int: [Holiday]], Never>
 }
 
@@ -162,7 +164,7 @@ extension HolidayUsecaseImple {
     ) async {
         
         await years.asyncForEach { [weak self] year in
-            try? await self?.loadHolidays(country, year: year)
+            try? await self?.refreshHolidays(country, year)
         }
     }
     
@@ -176,14 +178,15 @@ extension HolidayUsecaseImple {
         return holidayYearMap.keys.sorted()
     }
     
-    public func loadHolidays(_ year: Int) async throws {
+    public func refreshHolidays(_ year: Int) async throws {
+        
         guard let currentCountry = self.dataStore.value(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue)
         else { return }
         
-        try await self.loadHolidays(currentCountry, year: year)
+        try await self.refreshHolidays(currentCountry, year)
     }
     
-    private func loadHolidays(_ country: HolidaySupportCountry, year: Int) async throws {
+    private func refreshHolidays(_ country: HolidaySupportCountry, _ year: Int) async throws {
         let holidays = try await self.holidayRepository.loadHolidays(year, country.code)
         let shareKey = ShareDataKeys.holidays.rawValue
         self.dataStore.update(Holidays.self, key: shareKey) { old in
@@ -191,6 +194,16 @@ extension HolidayUsecaseImple {
                 return ($0 ?? [:]) |> key(year) .~ holidays
             }
         }
+    }
+    
+    public func loadHolidays(_ year: Int) async throws -> [Holiday] {
+        
+        guard let currentCountry = self.dataStore.value(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue)
+        else {
+            throw RuntimeError("current country not prepared")
+        }
+        
+        return try await self.holidayRepository.loadHolidays(year, currentCountry.code)
     }
     
     public func holidays() -> AnyPublisher<[Int: [Holiday]], Never> {

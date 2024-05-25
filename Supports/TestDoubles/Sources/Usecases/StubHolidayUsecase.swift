@@ -49,7 +49,7 @@ open class StubHolidayUsecase: HolidayUsecase {
         
         let years = holidays.keys.sorted()
         await years.asyncForEach { year in
-            try? await self.loadHolidays(year)
+            try? await self.refreshHolidays(year)
         }
     }
     
@@ -72,7 +72,8 @@ open class StubHolidayUsecase: HolidayUsecase {
     }
     
     let holidaysSubject = CurrentValueSubject<[String: [Int: [Holiday]]]?, Never>(nil)
-    open func loadHolidays(_ year: Int) async throws {
+    
+    open func refreshHolidays(_ year: Int) async throws {
         guard let country = self.currentSelectedCountrySubject.value
         else { return }
         let holidays = (1...5).map { int -> Holiday in
@@ -82,6 +83,15 @@ open class StubHolidayUsecase: HolidayUsecase {
         let newHolidays = (oldMap[country.code] ?? [:]) |> key(year) .~ holidays
         let newMap = oldMap |> key(country.code) .~ newHolidays
         self.holidaysSubject.send(newMap)
+    }
+    
+    public func loadHolidays(_ year: Int) async throws -> [Holiday] {
+        guard let country = self.currentSelectedCountrySubject.value
+        else { return [] }
+        let holidays = (1...5).map { int -> Holiday in
+            return Holiday(dateString: "\(year)-0\(int)-0\(int)", localName: "holiday-\(int)-\(country.code)", name: "holiday-\(int)-\(country.code)")
+        }
+        return holidays
     }
     
     open func holidays() -> AnyPublisher<[Int : [Holiday]], Never> {

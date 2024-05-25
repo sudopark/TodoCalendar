@@ -142,7 +142,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private func refreshHolidays(for newYears: [Int]) {
         Task { [weak self] in
             await newYears.asyncForEach { year in
-                try? await self?.holidayUsecase.loadHolidays(year)
+                try? await self?.holidayUsecase.refreshHolidays(year)
             }
         }
         .store(in: &self.cancellables)
