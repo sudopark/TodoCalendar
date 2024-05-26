@@ -103,7 +103,7 @@ struct MonthWidgetView: View {
     
     private func accentDayText(_ accent: AccentDays?) -> Color {
         switch accent {
-        case .holiday: return colorSet.holidayText.asColor
+        case .holiday: return colorSet.calendarAccentColor.asColor
         case .sunday, .saturday: return colorSet.weekEndText.asColor
         default: return colorSet.weekDayText.asColor
         }
@@ -170,7 +170,11 @@ struct MonthWidgetPreview_Provider: PreviewProvider {
         ]
         let weeks = weekAndDays.map { pairs -> CalendarComponent.Week in
             let days = pairs.enumerated().map { offset, pair -> CalendarComponent.Day in
-                return .init(year: 2024, month: pair.0, day: pair.1, weekDay: offset+1)
+                var day =  CalendarComponent.Day(year: 2024, month: pair.0, day: pair.1, weekDay: offset+1)
+                if day.identifier == "2024-9-11" || day.identifier == "2024-9-12" || day.identifier == "2024-9-13" {
+                    day.holiday = .init(dateString: day.identifier, localName: "some", name: "some")
+                }
+                return day
             }
             return CalendarComponent.Week(days: days)
         }

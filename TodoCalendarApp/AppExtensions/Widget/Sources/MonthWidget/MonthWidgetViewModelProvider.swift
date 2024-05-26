@@ -63,17 +63,20 @@ struct MonthWidgetViewModel {
 final class MonthWidgetViewModelProvider {
     
     private let calendarUsecase: any CalendarUsecase
+    private let holidayUsecase: any HolidayUsecase
     private let settingRepository: any CalendarSettingRepository
     private let todoRepository: any TodoEventRepository
     private let scheduleRepository: any ScheduleEventRepository
     
     init(
         calendarUsecase: any CalendarUsecase,
+        holidayUsecase: any HolidayUsecase,
         settingRepository: any CalendarSettingRepository,
         todoRepository: any TodoEventRepository,
         scheduleRepository: any ScheduleEventRepository
     ) {
         self.calendarUsecase = calendarUsecase
+        self.holidayUsecase = holidayUsecase
         self.settingRepository = settingRepository
         self.todoRepository = todoRepository
         self.scheduleRepository = scheduleRepository
@@ -96,7 +99,7 @@ extension MonthWidgetViewModelProvider {
     
     func getMonthViewModel(_ now: Date) async throws -> MonthWidgetViewModel {
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
-        var model = try self.currentMonthModel(now, timeZone)
+        var model = try await self.currentMonthModel(now, timeZone)
         if let ranges = model.eventRange {
             model.hasEventDaysIdentifiers = await self.loadEventExistsDayIdentifiers(
                 ranges, timeZone
@@ -105,16 +108,25 @@ extension MonthWidgetViewModelProvider {
         return model
     }
     
-    private func currentMonthModel(_ now: Date, _ timeZone: TimeZone) throws -> MonthWidgetViewModel {
+    private func currentMonthModel(_ now: Date, _ timeZone: TimeZone) async throws -> MonthWidgetViewModel {
         let firstWeekDay = self.settingRepository.firstWeekDay() ?? .sunday
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let today = CalendarComponent.Day(now, calendar: calendar)
-        let components = try self.calendarUsecase.getComponents(
-            calendar.component(.year, from: now),
-            calendar.component(.month, from: now),
-            firstWeekDay
+        let (year, month) = (
+            calendar.component(.year, from: now), 
+            calendar.component(.month, from: now)
         )
+        let holidays = await self.loadHolidays(year)
+        let components = try self.calendarUsecase
+            .getComponents(year, month, firstWeekDay)
+            .update(holidays: holidays)
+        
         return .init(now, firstWeekDay, timeZone, components, today.identifier)
+    }
+    
+    private func loadHolidays(_ year: Int) async -> [Holiday] {
+        try? await holidayUsecase.prepare()
+        return (try? await holidayUsecase.loadHolidays(year)) ?? []
     }
     
     private func loadEventExistsDayIdentifiers(

@@ -32,11 +32,15 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
     
     private func makeProvider(
         isEmptyEvent: Bool = false,
-        shouldFailLoadEvent: Bool = false
+        shouldFailLoadEvent: Bool = false,
+        shouldFailLoadHolidays: Bool = false
     ) -> MonthWidgetViewModelProvider {
         let calendarUsecase = StubCalendarUsecase()
         let settingRepository = StubCalendarSettingRepository()
         settingRepository.saveTimeZone(TimeZone(abbreviation: "KST")!)
+        
+        let holidayUsecase = PrivateStubHolidayUsecase()
+        holidayUsecase.shouldFailLoad = shouldFailLoadHolidays
         
         let todoRepository = PrivateStubTodoRepository()
         todoRepository.isEmptyEvent = isEmptyEvent
@@ -48,6 +52,7 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
         
         return MonthWidgetViewModelProvider(
             calendarUsecase: calendarUsecase,
+            holidayUsecase: holidayUsecase,
             settingRepository: settingRepository,
             todoRepository: todoRepository,
             scheduleRepository: scheduleRepostory
@@ -113,6 +118,35 @@ extension MonthWidgetViewModelProviderImpleTests {
         XCTAssertEqual(model.todayIdentifier, "2023-9-8")
         XCTAssertEqual(model.hasEventDaysIdentifiers, [])
     }
+    
+    // provide model with holiday info
+    func testProvider_provideViewModelWithHolidayInfo() async throws {
+        // given
+        let provider = self.makeProvider()
+        
+        // when
+        let model = try await provider.getMonthViewModel(self.dummyNow)
+        
+        // then
+        let holidays = model.weeks.flatMap { $0.days }.filter { $0.accentDay == .holiday }
+        let ids = holidays.map { $0.identifier }
+        XCTAssertEqual(ids, [
+            "2023-9-12", "2023-9-13", "2023-9-14"
+        ])
+    }
+    
+    func testProvider_whenLoadHolidaysFailed_ignore() async throws {
+        // given
+        let provider = self.makeProvider(shouldFailLoadHolidays: true)
+        
+        // when
+        let model = try await provider.getMonthViewModel(self.dummyNow)
+        
+        // then
+        let holidays = model.weeks.flatMap { $0.days }.filter { $0.accentDay == .holiday }
+        let ids = holidays.map { $0.identifier }
+        XCTAssertEqual(ids, [])
+    }
 }
 
 
@@ -155,5 +189,30 @@ private final class PrivateStubScheduleRepository: StubScheduleEventRepository {
         
         let eventAtLastDate = ScheduleEvent(uuid: "schedule", name: "some", time: .at(range.upperBound-1))
         return Just([eventAtLastDate]).mapAsAnyError().eraseToAnyPublisher()
+    }
+}
+
+
+private final class PrivateStubHolidayUsecase: StubHolidayUsecase {
+    
+    var shouldFailLoad: Bool = false
+    
+    override func loadHolidays(_ year: Int) async throws -> [Holiday] {
+        
+        guard shouldFailLoad == false
+        else {
+            throw RuntimeError("failed")
+        }
+        
+        guard self.currentSelectedCountrySubject.value != nil
+        else {
+            throw RuntimeError("no current country")
+        }
+        let holidays: [Holiday] = [
+            .init(dateString: "2023-09-12", localName: "some", name: "name"),
+            .init(dateString: "2023-09-13", localName: "some", name: "name"),
+            .init(dateString: "2023-09-14", localName: "some", name: "name")
+        ]
+        return holidays
     }
 }
