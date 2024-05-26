@@ -20,41 +20,46 @@ struct MonthWidgetTimelineProvider: TimelineProvider {
     
     typealias Entry = ResultTimelineEntry<MonthWidgetViewModel>
     
-    private let viewModelProvider: MonthWidgetViewModelProvider
-    
-    init() {
-        self.viewModelProvider = WidgetViewModelProviderBuilder.makeMonthViewModelProvider()
-    }
+    init() { }
     
     func placeholder(in context: Context) -> Entry {
         let now = Date()
         return .init(date: now) {
-            try self.viewModelProvider.makeSampleMonthViewModel(now)
+            try MonthWidgetViewModel.makeSample()
         }
     }
     
     func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
-        completion(self.placeholder(in: context))
+        guard context.isPreview == false
+        else {
+            completion(
+                .init(date: Date()) { try MonthWidgetViewModel.makeSample() }
+            )
+            return
+        }
+        self.getEntry { entry in
+            completion(entry)
+        }
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
      
-        self.getEntity { entity in
+        self.getEntry { entry in
             let timeline = Timeline(
-                entries: [entity],
+                entries: [entry],
                 policy: .after(Date().nextUpdateTime)
             )
             completion(timeline)
         }
     }
     
-    private func getEntity(_ completion: @escaping (Entry) -> Void) {
+    private func getEntry(_ completion: @escaping (Entry) -> Void) {
         
+        let viewModelProvider = WidgetViewModelProviderBuilder.makeMonthViewModelProvider()
         Task {
-            
             let now = Date()
             do {
-                let model = try await self.viewModelProvider.getMonthViewModel(now)
+                let model = try await viewModelProvider.getMonthViewModel(now)
                 completion(
                     .init(date: now, result: .success(model))
                 )
