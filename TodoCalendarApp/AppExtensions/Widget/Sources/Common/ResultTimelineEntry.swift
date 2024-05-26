@@ -9,22 +9,21 @@
 import Foundation
 import WidgetKit
 
+struct WidgetErrorModel: Error {
+    let error: any Error
+    let message: String
+    init(error: any Error, message: String? = nil) {
+        self.error = error
+        self.message = message ?? error.localizedDescription
+    }
+}
 
 struct ResultTimelineEntry<T>: TimelineEntry {
     
-    struct ErrorModel: Error {
-        let error: any Error
-        let message: String
-        init(error: any Error, message: String? = nil) {
-            self.error = error
-            self.message = message ?? error.localizedDescription
-        }
-    }
-    
     let date: Date
-    let result: Result<T, ErrorModel>
+    let result: Result<T, WidgetErrorModel>
     
-    init(date: Date, result: Result<T, ErrorModel>) {
+    init(date: Date, result: Result<T, WidgetErrorModel>) {
         self.date = date
         self.result = result
     }
@@ -36,7 +35,7 @@ struct ResultTimelineEntry<T>: TimelineEntry {
             self.result = .success(model)
         } catch {
             self.result = .failure(
-                ErrorModel(error: error)
+                WidgetErrorModel(error: error)
             )
         }
     }
