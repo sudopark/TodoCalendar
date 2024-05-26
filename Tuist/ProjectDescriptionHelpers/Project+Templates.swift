@@ -203,9 +203,12 @@ extension Project {
             bundleId: "\(organizationName).\(appName).\(extensionName)",
             deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
             infoPlist: .extendingDefault(with: infoPlist),
-            sources: ["AppExtensions/\(extensionName)/Sources/**"],
+            sources: [
+                "AppExtensions/\(extensionName)/Sources/**",
+                "Sources/AppEnvironment.swift"
+            ],
             resources: ["AppExtensions/\(extensionName)/Resources/**"],
-//            entitlements: Entitlements.file(path: "./Extensions/\(extensionName)/\(targetName).entitlements"),
+            entitlements: Entitlements.file(path: "./AppExtensions/\(extensionName)/\(targetName).entitlements"),
             dependencies: dependencies
         )
         
@@ -216,7 +219,11 @@ extension Project {
             bundleId: "\(organizationName).\(appName).\(extensionName)Tests",
             deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: [.iphone]),
             infoPlist: .default,
-            sources: ["AppExtensions/\(extensionName)/Tests/**"],
+            sources: [
+                "AppExtensions/\(extensionName)/Sources/**",
+                "Sources/AppEnvironment.swift",
+                "AppExtensions/\(extensionName)/Tests/**"
+            ],
             dependencies: [
                 .target(name: appName),
                 .project(

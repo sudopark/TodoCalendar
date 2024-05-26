@@ -177,12 +177,10 @@ struct MonthWidgetPreview_Provider: PreviewProvider {
 //        let entry = ResultTimelineEntry<MonthWidgetViewModel>(date: Date(), result: .failure(
 //            .init(error: RuntimeError("failed"), message: "Fail to load widget")
 //        ))
-        if #available(iOSApplicationExtension 17.0, *) {
+        if #available(iOS 17.0, *) {
             return MonthWidgetView(entry: entry)
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
-                .containerBackground(for: .widget) {
-                    
-                }
+                .containerBackground(.fill.tertiary, for: .widget)
         } else {
             return MonthWidgetView(entry: entry)
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
