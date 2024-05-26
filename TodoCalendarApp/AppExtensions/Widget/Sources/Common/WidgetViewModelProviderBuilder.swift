@@ -72,6 +72,7 @@ struct WidgetViewModelProviderBuilder {
         
         return .init(
             calendarUsecase: calendarUsecase,
+            holidayUsecase: holidayUsecase,
             settingRepository: calendarSettingRepository,
             todoRepository: todoRepository,
             scheduleRepository: scheduleEventRepository

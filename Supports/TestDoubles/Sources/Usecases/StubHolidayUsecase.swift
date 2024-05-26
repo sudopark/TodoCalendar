@@ -39,7 +39,7 @@ open class StubHolidayUsecase: HolidayUsecase {
         self.availableCountriesSubject.send(countries)
     }
     
-    private let currentSelectedCountrySubject = CurrentValueSubject<HolidaySupportCountry?, Never>(nil)
+    public let currentSelectedCountrySubject = CurrentValueSubject<HolidaySupportCountry?, Never>(nil)
     open func selectCountry(_ country: HolidaySupportCountry) async throws {
         let oldCountry = self.currentSelectedCountrySubject.value
         self.currentSelectedCountrySubject.send(country)
@@ -85,7 +85,7 @@ open class StubHolidayUsecase: HolidayUsecase {
         self.holidaysSubject.send(newMap)
     }
     
-    public func loadHolidays(_ year: Int) async throws -> [Holiday] {
+    open func loadHolidays(_ year: Int) async throws -> [Holiday] {
         guard let country = self.currentSelectedCountrySubject.value
         else { return [] }
         let holidays = (1...5).map { int -> Holiday in
