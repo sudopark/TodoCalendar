@@ -20,9 +20,15 @@ final class ApplicationBase {
     
     let sharedDataStore: SharedDataStore = .init()
     
-    let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple()
+    let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple(
+        suiteName: AppEnvironment.groupID
+    )
     
-    let keyChainStorage = KeyChainStorageImple(identifier: AppEnvironment.keyChainStoreName)
+    let keyChainStorage: KeyChainStorageImple = {
+        let store = KeyChainStorageImple(identifier: AppEnvironment.keyChainStoreName)
+        store.setupSharedGroup(AppEnvironment.groupID)
+        return store
+    }()
     
     lazy var commonSqliteService: SQLiteService = {
         let service = SQLiteService()

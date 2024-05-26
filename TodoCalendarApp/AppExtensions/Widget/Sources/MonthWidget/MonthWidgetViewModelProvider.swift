@@ -55,6 +55,32 @@ struct MonthWidgetViewModel {
         let startTime = calendar.startOfDay(for: start)
         self.eventRange = (startTime.timeIntervalSince1970..<endTime.timeIntervalSince1970)
     }
+    
+    static func makeSample() throws -> MonthWidgetViewModel {
+        let calendar = Calendar(identifier: .gregorian)
+        let today = try calendar.dateBySetting(from: Date()) {
+            $0.year = 2024; $0.month = 3; $0.day = 10
+        }.unwrap()
+        let weekAndDays: [[(Int, Int)]] = [
+            [(2, 25), (2, 26), (2, 27), (2, 28), (2, 29), (3, 1), (3, 2)],
+            [(3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9)],
+            [(3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (3, 16)],
+            [(3, 17), (3, 18), (3, 19), (3, 20), (3, 21), (3, 22), (3, 23)],
+            [(3, 24), (3, 25), (3, 26), (3, 27), (3, 28), (3, 29), (3, 30)],
+            [(3, 31), (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6)]
+        ]
+        let weeks = weekAndDays.map { pairs -> CalendarComponent.Week in
+            let days = pairs.enumerated().map { offset, pair -> CalendarComponent.Day in
+                return .init(year: 2024, month: pair.0, day: pair.1, weekDay: offset+1)
+            }
+            return CalendarComponent.Week(days: days)
+        }
+        let components = CalendarComponent(year: 2024, month: 3, weeks: weeks)
+        return MonthWidgetViewModel(today, .sunday, .current, components, "2024-3-10")
+            |> \.hasEventDaysIdentifiers .~ [
+                "2024-3-4", "2024-3-17", "2024-3-28"
+            ]
+    }
 }
 
 
@@ -84,18 +110,6 @@ final class MonthWidgetViewModelProvider {
 }
 
 extension MonthWidgetViewModelProvider {
-    
-    func makeSampleMonthViewModel(_ now: Date) throws -> MonthWidgetViewModel {
-        let components = try self.calendarUsecase.getComponents(2024, 03, .sunday)
-        let calendar = Calendar(identifier: .gregorian)
-        let today = try calendar.dateBySetting(from: Date()) {
-            $0.year = 2024; $0.month = 3; $0.day = 10
-        }.unwrap()
-        return MonthWidgetViewModel(today, .sunday, .current, components, "2024-3-10")
-            |> \.hasEventDaysIdentifiers .~ [
-                "2024-3-4", "2024-3-17", "2024-3-28"
-            ]
-    }
     
     func getMonthViewModel(_ now: Date) async throws -> MonthWidgetViewModel {
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current

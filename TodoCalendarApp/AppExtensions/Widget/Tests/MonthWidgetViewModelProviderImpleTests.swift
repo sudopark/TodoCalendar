@@ -63,17 +63,16 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
 extension MonthWidgetViewModelProviderImpleTests {
     
     // assert sample view model
-    func testProvider_makeSampleModel() {
+    func test_makeSampleModel() throws {
         // given
-        let provider = self.makeProvider()
         
         // when
-        let sample = try? provider.makeSampleMonthViewModel(self.dummyNow)
+        let sample = try MonthWidgetViewModel.makeSample()
         
         // then
         XCTAssertNotNil(sample)
-        XCTAssertEqual(sample?.todayIdentifier, "2024-3-10")
-        XCTAssertEqual(sample?.hasEventDaysIdentifiers, [
+        XCTAssertEqual(sample.todayIdentifier, "2024-3-10")
+        XCTAssertEqual(sample.hasEventDaysIdentifiers, [
             "2024-3-4", "2024-3-17", "2024-3-28"
         ])
     }

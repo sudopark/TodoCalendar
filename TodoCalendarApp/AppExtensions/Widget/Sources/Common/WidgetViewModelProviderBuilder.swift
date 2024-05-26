@@ -12,15 +12,25 @@ import Repository
 import SQLiteService
 import Alamofire
 
-final class WidgetBase {
-    static let shared: WidgetBase = .init()
-    private init() { }
+final class WidgetBaseDependency {
     
-    // TOOD: app group으로 변경해야함
-    let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple()
+    init() { }
+    
+    let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple(
+        suiteName: AppEnvironment.groupID
+    )
+    
+    let keyChainStorage: KeyChainStorageImple = {
+        let store = KeyChainStorageImple(identifier: AppEnvironment.keyChainStoreName)
+        store.setupSharedGroup(AppEnvironment.groupID)
+        return store
+    }()
     
     lazy var commonSqliteService: SQLiteService = {
         let service = SQLiteService()
+        let userId = self.keyChainStorage.loadCurrentAuth()?.uid
+        let path = AppEnvironment.dbFilePath(for: userId)
+        _ = service.open(path: path)
         return service
     }()
 }
@@ -28,7 +38,7 @@ final class WidgetBase {
 
 struct WidgetViewModelProviderBuilder {
     
-    private static func makeHolidayRepository(_ base: WidgetBase) -> HolidayRepositoryImple {
+    private static func makeHolidayRepository(_ base: WidgetBaseDependency) -> HolidayRepositoryImple {
         let remote = RemoteAPIImple(
             environment: .init(calendarAPIHost: ""),
             authenticator: nil
@@ -41,8 +51,8 @@ struct WidgetViewModelProviderBuilder {
         return repository
     }
     
-    static func makeMonthViewModelProvider() -> MonthWidgetViewModelProvider{
-        let base = WidgetBase.shared
+    static func makeMonthViewModelProvider() -> MonthWidgetViewModelProvider {
+        let base = WidgetBaseDependency()
         let calendarSettingRepository = CalendarSettingRepositoryImple(
             environmentStorage: base.userDefaultEnvironmentStorage
         )

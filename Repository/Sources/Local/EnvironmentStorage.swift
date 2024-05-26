@@ -15,30 +15,36 @@ public protocol EnvironmentStorage: AnyObject, Sendable {
 }
 
 
-public final class UserDefaultEnvironmentStorageImple: EnvironmentStorage {
+public final class UserDefaultEnvironmentStorageImple: EnvironmentStorage, @unchecked Sendable {
     
-    public init() { }
+    private let userDefaults: UserDefaults
+    
+    public init(
+        suiteName: String? = nil
+    ) {
+        self.userDefaults = suiteName.flatMap { UserDefaults(suiteName: $0) } ?? .standard
+    }
     
     public func load<T>(_ key: String) -> T? where T : Decodable {
         
         switch T.self {
         case is Bool.Type:
-            return UserDefaults.standard.bool(forKey: key) as? T
+            return self.userDefaults.bool(forKey: key) as? T
             
         case is Int.Type:
-            return UserDefaults.standard.integer(forKey: key) as? T
+            return self.userDefaults.integer(forKey: key) as? T
             
         case is Float.Type:
-            return UserDefaults.standard.float(forKey: key) as? T
+            return self.userDefaults.float(forKey: key) as? T
             
         case is Double.Type:
-            return UserDefaults.standard.double(forKey: key) as? T
+            return self.userDefaults.double(forKey: key) as? T
             
         case is String.Type:
-            return UserDefaults.standard.string(forKey: key) as? T
+            return self.userDefaults.string(forKey: key) as? T
             
         default:
-            return UserDefaults.standard.string(forKey: key)
+            return self.userDefaults.string(forKey: key)
                 .flatMap { $0.data(using: .utf8) }
                 .flatMap { try? JSONDecoder().decode(T.self, from: $0) }
         }
@@ -48,25 +54,25 @@ public final class UserDefaultEnvironmentStorageImple: EnvironmentStorage {
         
         switch T.self {
         case is Bool.Type:
-            UserDefaults.standard.setValue(value, forKey: key)
+            self.userDefaults.setValue(value, forKey: key)
         case is Int.Type:
-            UserDefaults.standard.setValue(value, forKey: key)
+            self.userDefaults.setValue(value, forKey: key)
         case is Float.Type:
-            UserDefaults.standard.setValue(value, forKey: key)
+            self.userDefaults.setValue(value, forKey: key)
         case is Double.Type:
-            UserDefaults.standard.setValue(value, forKey: key)
+            self.userDefaults.setValue(value, forKey: key)
         case is String.Type:
-            UserDefaults.standard.setValue(value, forKey: key)
+            self.userDefaults.setValue(value, forKey: key)
             
         default:
             guard let data = try? JSONEncoder().encode(value),
                   let dataText = String(data: data, encoding: .utf8)
             else { return }
-            UserDefaults.standard.setValue(dataText, forKey: key)
+            self.userDefaults.setValue(dataText, forKey: key)
         }
     }
     
     public func remove(_ key: String) {
-        UserDefaults.standard.removeObject(forKey: key)
+        self.userDefaults.removeObject(forKey: key)
     }
 }
