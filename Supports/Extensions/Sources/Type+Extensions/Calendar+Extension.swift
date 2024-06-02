@@ -120,3 +120,19 @@ extension Calendar {
         return sender
     }
 }
+
+
+// MARK: - range and compare
+
+extension Calendar {
+    
+    public func dayRange(_ date: Date) -> Range<TimeInterval>? {
+        guard let dayEnd = self.endOfDay(for: date) else { return nil }
+        let dayStart = self.startOfDay(for: date)
+        return dayStart.timeIntervalSince1970..<dayEnd.timeIntervalSince1970
+    }
+    
+    public func diffDays(_ lhs: Date, _ rhs: Date) -> Int {
+        return self.dateComponents([.day], from: lhs, to: rhs).day ?? 0
+    }
+}

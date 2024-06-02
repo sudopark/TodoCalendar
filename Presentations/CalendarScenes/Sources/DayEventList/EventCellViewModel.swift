@@ -12,31 +12,31 @@ import Optics
 
 // MARK: - EventPeriodText
 
-struct EventTimeText: Equatable {
-    let text: String
-    var pmOram: String?
+public struct EventTimeText: Equatable, Sendable {
+    public let text: String
+    public var pmOram: String?
     
-    init(text: String, pmOram: String? = nil) {
+    public init(text: String, pmOram: String? = nil) {
         self.text = text
         self.pmOram = pmOram
     }
     
-    init(day: TimeInterval, _ timeZone: TimeZone) {
+    public init(day: TimeInterval, _ timeZone: TimeZone) {
         self.text = day.dayText(timeZone)
     }
     
-    init(time: TimeInterval, _ timeZone: TimeZone, _ isShort: Bool) {
+    public init(time: TimeInterval, _ timeZone: TimeZone, _ isShort: Bool) {
         self.text = time.timeText(timeZone, isShort: isShort)
         self.pmOram = isShort ? time.isAmOrPmText(timeZone) : nil
     }
 }
 
-enum EventPeriodText: Equatable {
+public enum EventPeriodText: Equatable, Sendable {
     
     case singleText(_ text: EventTimeText)
     case doubleText(_ topText: EventTimeText, _ bottomText: EventTimeText)
     
-    init?(
+    public init?(
         _ todo: TodoCalendarEvent,
         in todayRange: Range<TimeInterval>,
         timeZone: TimeZone,
@@ -79,7 +79,7 @@ enum EventPeriodText: Equatable {
         }
     }
     
-    init?(
+    public init?(
         schedule eventTime: EventTime,
         in todayRange: Range<TimeInterval>,
         timeZone: TimeZone,
@@ -129,7 +129,7 @@ enum EventPeriodText: Equatable {
 }
 
 // MARK: - EventCellViewModel
-protocol EventCellViewModel: Sendable {
+public protocol EventCellViewModel: Sendable {
     
     var eventIdentifier: String { get }
     var tagId: AllEventTagId { get }
@@ -153,7 +153,7 @@ extension EventCellViewModel {
         return baseComponents.map { $0 ?? "nil" }.joined(separator: ",")
     }
     
-    mutating func applyTagColor(_ tag: EventTag?) {
+    public mutating func applyTagColor(_ tag: EventTag?) {
         switch self.tagId {
         case .default:
             self.tagColor = .default
@@ -167,23 +167,23 @@ extension EventCellViewModel {
 
 // MARK: - Todo
 
-struct TodoEventCellViewModel: EventCellViewModel {
+public struct TodoEventCellViewModel: EventCellViewModel {
     
-    let eventIdentifier: String
-    var tagId: AllEventTagId
-    let name: String
-    var periodText: EventPeriodText?
-    var periodDescription: String?
-    var tagColor: EventTagColor?
-    var customCompareKey: String { self.makeCustomCompareKey(["todo"]) }
+    public let eventIdentifier: String
+    public var tagId: AllEventTagId
+    public let name: String
+    public var periodText: EventPeriodText?
+    public var periodDescription: String?
+    public var tagColor: EventTagColor?
+    public var customCompareKey: String { self.makeCustomCompareKey(["todo"]) }
     
-    init(_ id: String, name: String) {
+    public init(_ id: String, name: String) {
         self.eventIdentifier = id
         self.name = name
         self.tagId = .default
     }
     
-    init?(
+    public init?(
         _ todo: TodoCalendarEvent,
         in todayRange: Range<TimeInterval>,
         _ timeZone: TimeZone,
@@ -222,21 +222,21 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
 
 // MARK: - Schedule
 
-struct ScheduleEventCellViewModel: EventCellViewModel {
+public struct ScheduleEventCellViewModel: EventCellViewModel {
     
-    let eventIdWithoutTurn: String
-    let eventIdentifier: String
-    let turn: Int?
-    var tagId: AllEventTagId
-    let name: String
-    var periodText: EventPeriodText?
-    var periodDescription: String?
-    var tagColor: EventTagColor?
-    var customCompareKey: String {
+    public let eventIdWithoutTurn: String
+    public let eventIdentifier: String
+    public let turn: Int?
+    public var tagId: AllEventTagId
+    public let name: String
+    public var periodText: EventPeriodText?
+    public var periodDescription: String?
+    public var tagColor: EventTagColor?
+    public var customCompareKey: String {
         self.makeCustomCompareKey(["schedule", self.turn.map { "\($0)" }])
     }
     
-    init(_ id: String, turn: Int? = nil, name: String) {
+    public init(_ id: String, turn: Int? = nil, name: String) {
         self.eventIdWithoutTurn = id
         self.eventIdentifier = "\(id)_\(turn ?? 0)"
         self.turn = turn
@@ -244,7 +244,7 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
         self.tagId = .default
     }
     
-    init?(
+    public init?(
         _ schedule: ScheduleCalendarEvent,
         in todayRange: Range<TimeInterval>,
         timeZone: TimeZone,
@@ -265,17 +265,17 @@ struct ScheduleEventCellViewModel: EventCellViewModel {
 
 
 // MARK: - Holiday
-struct HolidayEventCellViewModel: EventCellViewModel {
+public struct HolidayEventCellViewModel: EventCellViewModel {
     
-    let eventIdentifier: String
-    var tagId: AllEventTagId
-    let name: String
-    var periodText: EventPeriodText?
-    var periodDescription: String?
-    var tagColor: EventTagColor?
-    var customCompareKey: String { self.makeCustomCompareKey(["holidays"]) }
+    public let eventIdentifier: String
+    public var tagId: AllEventTagId
+    public let name: String
+    public var periodText: EventPeriodText?
+    public var periodDescription: String?
+    public var tagColor: EventTagColor?
+    public var customCompareKey: String { self.makeCustomCompareKey(["holidays"]) }
     
-    init(_ holiday: HolidayCalendarEvent) {
+    public init(_ holiday: HolidayCalendarEvent) {
         self.eventIdentifier = holiday.eventId
         self.name = holiday.name
         self.periodText = .singleText(
@@ -285,7 +285,7 @@ struct HolidayEventCellViewModel: EventCellViewModel {
         self.tagColor = .holiday
     }
     
-    mutating func applyTagColor(_ tag: EventTag?) {
+    public mutating func applyTagColor(_ tag: EventTag?) {
         self.tagColor = .holiday
     }
 }

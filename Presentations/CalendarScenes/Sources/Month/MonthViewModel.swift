@@ -546,10 +546,8 @@ private extension CurrentSelectDayModel {
         let component = DateComponents(year: year, month: month, day: day)
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         guard let date = calendar.date(from: component),
-              let dayEnd = calendar.endOfDay(for: date)
+              let range = calendar.dayRange(date)
         else { return nil }
-        let dayStart = calendar.startOfDay(for: date)
-        let range = dayStart.timeIntervalSince1970..<dayEnd.timeIntervalSince1970
         self.init(year, month, day, weekId: week.id, range: range)
     }
 }

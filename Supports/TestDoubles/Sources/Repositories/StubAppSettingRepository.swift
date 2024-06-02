@@ -1,21 +1,23 @@
 //
 //  StubAppSettingRepository.swift
-//  DomainTests
+//  TestDoubles
 //
-//  Created by sudo.park on 2023/10/08.
+//  Created by sudo.park on 6/2/24.
+//  Copyright © 2024 com.sudo.park. All rights reserved.
 //
 
 import Foundation
 import Prelude
 import Optics
+import Domain
 
-@testable import Domain
 
-
-class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
+open class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
     
-    var stubAppearanceSetting: AppearanceSettings?
-    func loadSavedViewAppearance() -> AppearanceSettings {
+    public init() { }
+    
+    public var stubAppearanceSetting: AppearanceSettings?
+    open func loadSavedViewAppearance() -> AppearanceSettings {
         if let setting = self.stubAppearanceSetting {
             return setting
         }
@@ -25,11 +27,11 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
         )
     }
     
-    func refreshAppearanceSetting() async throws -> AppearanceSettings {
+    open func refreshAppearanceSetting() async throws -> AppearanceSettings {
         return self.loadSavedViewAppearance()
     }
     
-    func changeCalendarAppearanceSetting(
+    open func changeCalendarAppearanceSetting(
         _ params: EditCalendarAppearanceSettingParams
     ) throws -> CalendarAppearanceSettings {
         let old = self.loadSavedViewAppearance()
@@ -38,7 +40,7 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
         return new.calendar
     }
     
-    func changeDefaultEventTagColor(
+    open func changeDefaultEventTagColor(
         _ params: EditDefaultEventTagColorParams
     ) async throws -> DefaultEventTagColorSetting {
         let old = self.loadSavedViewAppearance()
@@ -47,15 +49,15 @@ class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
         return new.defaultTagColor
     }
     
-    var stubEvnetSetting: EventSettings?
-    func loadEventSetting() -> EventSettings {
+    public var stubEvnetSetting: EventSettings?
+    open func loadEventSetting() -> EventSettings {
         if let setting = self.stubEvnetSetting {
             return setting
         }
         return EventSettings()
     }
     
-    func changeEventSetting(_ params: EditEventSettingsParams) -> EventSettings {
+    open func changeEventSetting(_ params: EditEventSettingsParams) -> EventSettings {
         let old = self.loadEventSetting()
         let newSetting = old
         |> \.defaultNewEventTagId .~ (params.defaultNewEventTagId ?? old.defaultNewEventTagId)
