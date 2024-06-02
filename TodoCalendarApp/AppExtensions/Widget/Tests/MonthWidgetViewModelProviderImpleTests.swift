@@ -15,8 +15,6 @@ import Extensions
 import UnitTestHelpKit
 import TestDoubles
 
-@testable import TodoCalendarAppWidget
-
 
 class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
     
@@ -42,6 +40,10 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
         let holidayUsecase = PrivateStubHolidayUsecase()
         holidayUsecase.shouldFailLoad = shouldFailLoadHolidays
         
+        let holidaysFetchUSecase = HolidaysFetchUsecaseImple(
+            holidayUsecase: holidayUsecase, cached: .init()
+        )
+        
         let todoRepository = PrivateStubTodoRepository()
         todoRepository.isEmptyEvent = isEmptyEvent
         todoRepository.shouldFailLoadTodosInRange = shouldFailLoadEvent
@@ -50,12 +52,19 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
         scheduleRepostory.isEmptyEvent = isEmptyEvent
         scheduleRepostory.shouldFailLoad = shouldFailLoadEvent
         
+        let eventsFetchUsecase = CalendarEventFetchUsecaseImple(
+            todoRepository: todoRepository,
+            scheduleRepository: scheduleRepostory,
+            holidayFetchUsecase: holidaysFetchUSecase,
+            eventTagRepository: StubEventTagRepository(),
+            cached: .init()
+        )
+        
         return MonthWidgetViewModelProvider(
             calendarUsecase: calendarUsecase,
-            holidayUsecase: holidayUsecase,
             settingRepository: settingRepository,
-            todoRepository: todoRepository,
-            scheduleRepository: scheduleRepostory
+            holidayFetchUsecase: holidaysFetchUSecase,
+            eventFetchUsecase: eventsFetchUsecase
         )
     }
 }
