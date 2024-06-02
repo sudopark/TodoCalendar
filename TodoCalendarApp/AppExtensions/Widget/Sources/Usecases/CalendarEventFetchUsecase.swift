@@ -18,9 +18,9 @@ import CalendarScenes
 // MARK: - CalendarEventFetchUsecase + CalendarEvents
 
 struct CalendarEvents {
-    let currentTodos: [TodoCalendarEvent]
-    let eventWithTimes: [any CalendarEvent]
-    let customTagMap: [String: EventTag]
+    var currentTodos: [TodoCalendarEvent]
+    var eventWithTimes: [any CalendarEvent]
+    var customTagMap: [String: EventTag]
 }
 
 protocol CalendarEventFetchUsecase {
