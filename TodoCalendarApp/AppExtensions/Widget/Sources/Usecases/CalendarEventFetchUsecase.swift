@@ -15,6 +15,8 @@ import Extensions
 import CalendarScenes
 
 
+// MARK: - CalendarEventFetchUsecase + CalendarEvents
+
 struct CalendarEvents {
     let currentTodos: [TodoCalendarEvent]
     let eventWithTimes: [any CalendarEvent]
@@ -23,12 +25,33 @@ struct CalendarEvents {
 
 protocol CalendarEventFetchUsecase {
     
-    func reset() async
-    
     func fetchEvents(
         in range: Range<TimeInterval>,
         _ timeZone: TimeZone
     ) async throws -> CalendarEvents
+}
+
+
+// MARK: - CalendarEventFetchUsecaseImple
+
+actor CalendarEventsFetchCacheStore {
+    var offTagIds: Set<AllEventTagId>?
+    var currentTodos: [TodoCalendarEvent]?
+    var allCustomTagsMap: [String: EventTag]?
+    
+    func updateOffTagIds(_ ids: Set<AllEventTagId>) {
+        self.offTagIds = ids
+    }
+    func updateCurrentTodos(_ todos: [TodoCalendarEvent]) {
+        self.currentTodos = todos
+    }
+    func updateAllCustomTagsMap(_ newValue: [String: EventTag]) {
+        self.allCustomTagsMap = newValue
+    }
+    func reset() {
+        self.offTagIds = nil
+        self.currentTodos = nil
+    }
 }
 
 
@@ -38,46 +61,24 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase {
     private let scheduleRepository: any ScheduleEventRepository
     private let holidayFetchUsecase: any HolidaysFetchUsecase
     private let eventTagRepository: any EventTagRepository
+    private let cached: CalendarEventsFetchCacheStore
     
     init(
         todoRepository: any TodoEventRepository,
         scheduleRepository: any ScheduleEventRepository,
         holidayFetchUsecase: any HolidaysFetchUsecase,
-        eventTagRepository: any EventTagRepository
+        eventTagRepository: any EventTagRepository,
+        cached: CalendarEventsFetchCacheStore
     ) {
         self.todoRepository = todoRepository
         self.scheduleRepository = scheduleRepository
         self.holidayFetchUsecase = holidayFetchUsecase
         self.eventTagRepository = eventTagRepository
+        self.cached = cached
     }
-    
-    private actor Cached {
-        var offTagIds: Set<AllEventTagId>?
-        var currentTodos: [TodoCalendarEvent]?
-        var allCustomTagsMap: [String: EventTag]?
-        
-        func updateOffTagIds(_ ids: Set<AllEventTagId>) {
-            self.offTagIds = ids
-        }
-        func updateCurrentTodos(_ todos: [TodoCalendarEvent]) {
-            self.currentTodos = todos
-        }
-        func updateAllCustomTagsMap(_ newValue: [String: EventTag]) {
-            self.allCustomTagsMap = newValue
-        }
-        func reset() {
-            self.offTagIds = nil
-            self.currentTodos = nil
-        }
-    }
-    private let cached = Cached()
 }
 
 extension CalendarEventFetchUsecaseImple {
-    
-    func reset() async {
-        await self.cached.reset()
-    }
     
     func fetchEvents(
         in range: Range<TimeInterval>,

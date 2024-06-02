@@ -89,23 +89,20 @@ struct MonthWidgetViewModel {
 final class MonthWidgetViewModelProvider {
     
     private let calendarUsecase: any CalendarUsecase
-    private let holidayUsecase: any HolidayUsecase
     private let settingRepository: any CalendarSettingRepository
-    private let todoRepository: any TodoEventRepository
-    private let scheduleRepository: any ScheduleEventRepository
+    private let holidayFetchUsecase: any HolidaysFetchUsecase
+    private let eventFetchUsecase: any CalendarEventFetchUsecase
     
     init(
         calendarUsecase: any CalendarUsecase,
-        holidayUsecase: any HolidayUsecase,
         settingRepository: any CalendarSettingRepository,
-        todoRepository: any TodoEventRepository,
-        scheduleRepository: any ScheduleEventRepository
+        holidayFetchUsecase: any HolidaysFetchUsecase,
+        eventFetchUsecase: any CalendarEventFetchUsecase
     ) {
         self.calendarUsecase = calendarUsecase
-        self.holidayUsecase = holidayUsecase
         self.settingRepository = settingRepository
-        self.todoRepository = todoRepository
-        self.scheduleRepository = scheduleRepository
+        self.holidayFetchUsecase = holidayFetchUsecase
+        self.eventFetchUsecase = eventFetchUsecase
     }
 }
 
@@ -130,7 +127,7 @@ extension MonthWidgetViewModelProvider {
             calendar.component(.year, from: now), 
             calendar.component(.month, from: now)
         )
-        let holidays = await self.loadHolidays(year)
+        let holidays = await self.loadHolidays(now, timeZone)
         let components = try self.calendarUsecase
             .getComponents(year, month, firstWeekDay)
             .update(holidays: holidays)
@@ -138,25 +135,25 @@ extension MonthWidgetViewModelProvider {
         return .init(now, firstWeekDay, timeZone, components, today.identifier)
     }
     
-    private func loadHolidays(_ year: Int) async -> [Holiday] {
-        try? await holidayUsecase.prepare()
-        return (try? await holidayUsecase.loadHolidays(year)) ?? []
+    private func loadHolidays(_ refTime: Date, _ timeZone: TimeZone) async -> [Holiday] {
+        let range = refTime.timeIntervalSince1970..<refTime.timeIntervalSince1970+1
+        return (try? await self.holidayFetchUsecase.holidaysGivenYears(range, timeZone: timeZone)) ?? []
     }
     
     private func loadEventExistsDayIdentifiers(
         _ range: Range<TimeInterval>,
         _ timeZone: TimeZone
     ) async -> Set<String> {
+        guard let events = try? await self.eventFetchUsecase.fetchEvents(in: range, timeZone)
+        else { return [] }
+        
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        let todos = try? await todoRepository.loadTodoEvents(in: range)
-            .values.first(where: { _ in true })
-        let schedules = try? await scheduleRepository.loadScheduleEvents(in: range)
-            .values.first(where: { _ in true })
-        let allEventTimes = (todos?.compactMap { $0.time } ?? []) + (schedules?.map { $0.time } ?? [])
-        let identifiers = allEventTimes
+        let eventTimeIdentifiers = events.eventWithTimes
+            .filter { ($0 is HolidayCalendarEvent) == false }
+            .compactMap { $0.eventTime }
             .map { EventTimeOnCalendar($0, timeZone: timeZone) }
             .compactMap { $0.clamped(to: range) }
-            .map { calendar.daysIdentifiers($0) }
-        return Set(identifiers.flatMap { $0 })
+            .flatMap { calendar.daysIdentifiers($0) }
+        return Set(eventTimeIdentifiers)
     }
 }

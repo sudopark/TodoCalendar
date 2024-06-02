@@ -40,7 +40,8 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
             todoRepository: todoRepository,
             scheduleRepository: scheduleRepository,
             holidayFetchUsecase: holidayFetchUsecase,
-            eventTagRepository: eventTagReopsitory
+            eventTagRepository: eventTagReopsitory,
+            cached: .init()
         )
     }
 }

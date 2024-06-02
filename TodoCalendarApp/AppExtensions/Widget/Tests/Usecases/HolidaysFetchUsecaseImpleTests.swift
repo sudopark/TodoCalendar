@@ -35,7 +35,7 @@ class HolidaysFetchUsecaseImpleTests: BaseTestCase {
             dataStore: .init(),
             localeProvider: Locale.current
         )
-        return .init(holidayUsecase: holidayUsecase)
+        return .init(holidayUsecase: holidayUsecase, cached: .init())
     }
     
     private var kst: TimeZone { TimeZone(abbreviation: "KST")! }
@@ -70,7 +70,6 @@ extension HolidaysFetchUsecaseImpleTests {
         // given
         let usecas = self.makeUsecase()
         let range = self.dummySingleYearRange
-        try await usecas.reset()
         
         // when
         let holidays1 = try await usecas.holidaysGivenYears(range, timeZone: kst)
@@ -88,7 +87,6 @@ extension HolidaysFetchUsecaseImpleTests {
         // given
         let usecase = self.makeUsecase()
         let range = self.dummyDoubleYearRanhe
-        try await usecase.reset()
         
         // when
         let holidays = try await usecase.holidaysGivenYears(range, timeZone: kst)
@@ -97,44 +95,6 @@ extension HolidaysFetchUsecaseImpleTests {
         XCTAssertEqual(holidays.count, 2)
         XCTAssertEqual(holidays.first?.dateString, "2023")
         XCTAssertEqual(holidays.last?.dateString, "2024")
-    }
-    
-    // 국가 변경시 reset하고 다시 휴일 조회
-    func testUsecase_whenCountryChanged_resetAndLoad() async throws {
-        // given
-        let usecase = self.makeUsecase()
-        let range = self.dummySingleYearRange
-        try await usecase.reset()
-        
-        // when
-        let holidaysForKr = try await usecase.holidaysGivenYears(range, timeZone: kst)
-        
-        let us = HolidaySupportCountry(code: "US", name: "USA")
-        try await self.spyRepository.saveSelectedCountry(us)
-        
-        try await usecase.reset()
-        let holidaysForUs = try await usecase.holidaysGivenYears(range, timeZone: kst)
-        
-        // then
-        XCTAssertEqual(holidaysForKr.first?.localName, "KR")
-        XCTAssertEqual(holidaysForUs.first?.localName, "US")
-    }
-    
-    // reset 안하고 조회 요청들어오면 에러
-    func testUsecase_whenLoadHolidaysWithoutReset_error() async {
-        // given
-        let usecase = self.makeUsecase()
-        var fail: Error?
-        
-        // when
-        do {
-            let _ = try await usecase.holidaysGivenYears(self.dummySingleYearRange, timeZone: kst)
-        } catch {
-            fail = error
-        }
-        
-        // then
-        XCTAssertNotNil(fail)
     }
 }
 

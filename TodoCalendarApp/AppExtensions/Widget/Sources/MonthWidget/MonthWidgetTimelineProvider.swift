@@ -55,8 +55,8 @@ struct MonthWidgetTimelineProvider: TimelineProvider {
     
     private func getEntry(_ completion: @escaping (Entry) -> Void) {
         
-        let viewModelProvider = WidgetViewModelProviderBuilder.makeMonthViewModelProvider()
         Task {
+            let viewModelProvider = await WidgetViewModelProviderBuilder.makeMonthViewModelProvider()
             let now = Date()
             do {
                 let model = try await viewModelProvider.getMonthViewModel(now)

@@ -36,7 +36,23 @@ final class WidgetBaseDependency {
 }
 
 
+final class FetchCacheStores {
+    let holidays: HolidaysFetchCacheStore = .init()
+    let events: CalendarEventsFetchCacheStore = .init()
+    private init() { }
+    static let shared: FetchCacheStores = .init()
+    
+    func reset() async {
+        await self.holidays.reset()
+        await self.events.reset()
+    }
+}
+
 struct WidgetViewModelProviderBuilder {
+    
+    private static func checkShouldReset() async {
+        // TODO: 백그라운드 진입 timestamp보고 갱신여부 결정
+    }
     
     private static func makeHolidayRepository(_ base: WidgetBaseDependency) -> HolidayRepositoryImple {
         let remote = RemoteAPIImple(
@@ -51,7 +67,54 @@ struct WidgetViewModelProviderBuilder {
         return repository
     }
     
-    static func makeMonthViewModelProvider() -> MonthWidgetViewModelProvider {
+    private static func makeHolidaysFetchUsecase(
+        _ base: WidgetBaseDependency,
+        _ holidayUsecase: HolidayUsecaseImple? = nil
+    ) -> HolidaysFetchUsecaseImple {
+        let holidayUsecase = holidayUsecase ?? HolidayUsecaseImple(
+            holidayRepository: self.makeHolidayRepository(base),
+            dataStore: .init(),
+            localeProvider: Locale.current
+        )
+        return HolidaysFetchUsecaseImple(
+            holidayUsecase: holidayUsecase,
+            cached: FetchCacheStores.shared.holidays
+        )
+    }
+    
+    private static func makeEventsFetchUsecase(
+        _ base: WidgetBaseDependency,
+        _ holidayFetchUsecase: HolidaysFetchUsecaseImple? = nil
+    ) -> CalendarEventFetchUsecaseImple {
+        
+        let todoLocalStorage = TodoLocalStorageImple(sqliteService: base.commonSqliteService)
+        let todoRepository = TodoLocalRepositoryImple(
+            localStorage: todoLocalStorage, environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        
+        let scheduleStorage = ScheduleEventLocalStorageImple(sqliteService: base.commonSqliteService)
+        let scheduleRepository = ScheduleEventLocalRepositoryImple(
+            localStorage: scheduleStorage, environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        let holidayFetchUsecase = holidayFetchUsecase ?? makeHolidaysFetchUsecase(base)
+        
+        let eventTagStorage = EventTagLocalStorageImple(sqliteService: base.commonSqliteService)
+        let eventTagRepository = EventTagLocalRepositoryImple(
+            localStorage: eventTagStorage, environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        
+        return CalendarEventFetchUsecaseImple(
+            todoRepository: todoRepository,
+            scheduleRepository: scheduleRepository,
+            holidayFetchUsecase: holidayFetchUsecase,
+            eventTagRepository: eventTagRepository,
+            cached: FetchCacheStores.shared.events
+        )
+    }
+    
+    static func makeMonthViewModelProvider() async -> MonthWidgetViewModelProvider {
+        await self.checkShouldReset()
+        
         let base = WidgetBaseDependency()
         let calendarSettingRepository = CalendarSettingRepositoryImple(
             environmentStorage: base.userDefaultEnvironmentStorage
@@ -60,9 +123,8 @@ struct WidgetViewModelProviderBuilder {
             settingRepository: calendarSettingRepository,
             shareDataStore: .init()
         )
-        let holidayReposiotry = self.makeHolidayRepository(base)
         let holidayUsecase = HolidayUsecaseImple(
-            holidayRepository: holidayReposiotry,
+            holidayRepository: self.makeHolidayRepository(base),
             dataStore: .init(),
             localeProvider: Locale.current
         )
@@ -71,21 +133,14 @@ struct WidgetViewModelProviderBuilder {
             holidayUsecase: holidayUsecase
         )
 
-        let todoRepository = TodoLocalRepositoryImple(
-            localStorage: TodoLocalStorageImple(sqliteService: base.commonSqliteService),
-            environmentStorage: base.userDefaultEnvironmentStorage
-        )
-        let scheduleEventRepository = ScheduleEventLocalRepositoryImple(
-            localStorage: ScheduleEventLocalStorageImple(sqliteService: base.commonSqliteService),
-            environmentStorage: base.userDefaultEnvironmentStorage
-        )
+        let holidaysFetchUsecase = self.makeHolidaysFetchUsecase(base, holidayUsecase)
+        let eventsFetchUsecase = self.makeEventsFetchUsecase(base, holidaysFetchUsecase)
         
-        return .init(
+        return MonthWidgetViewModelProvider(
             calendarUsecase: calendarUsecase,
-            holidayUsecase: holidayUsecase,
             settingRepository: calendarSettingRepository,
-            todoRepository: todoRepository,
-            scheduleRepository: scheduleEventRepository
+            holidayFetchUsecase: holidaysFetchUsecase,
+            eventFetchUsecase: eventsFetchUsecase
         )
     }
 }

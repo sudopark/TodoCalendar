@@ -14,10 +14,10 @@ import Domain
 import Extensions
 
 
+// MARK: - HolidaysFetchUsecase
+
 protocol HolidaysFetchUsecase {
  
-    func reset() async throws
-    
     func holidaysGivenYears(
         _ range: Range<TimeInterval>,
         timeZone: TimeZone
@@ -25,34 +25,37 @@ protocol HolidaysFetchUsecase {
 }
 
 
+// MARK: - HolidaysFetchUsecaseImple
+
+actor HolidaysFetchCacheStore {
+    var holidayMap: [Int: [Holiday]] = [:]
+    func update(_ year: Int, _ holidays: [Holiday]) {
+        self.holidayMap[year] = holidays
+    }
+    func reset() {
+        self.holidayMap = [:]
+    }
+}
+
 final class HolidaysFetchUsecaseImple: HolidaysFetchUsecase {
     
     private let holidayUsecase: any HolidayUsecase
-    init(holidayUsecase: any HolidayUsecase) {
+    private let cached: HolidaysFetchCacheStore
+    init(
+        holidayUsecase: any HolidayUsecase,
+        cached: HolidaysFetchCacheStore
+    ) {
         self.holidayUsecase = holidayUsecase
+        self.cached = cached
     }
-    
-    private actor Cache {
-        var holidayMap: [Int: [Holiday]] = [:]
-        func update(_ year: Int, _ holidays: [Holiday]) {
-            self.holidayMap[year] = holidays
-        }
-        func reset() {
-            self.holidayMap = [:]
-        }
-    }
-    private let cached = Cache()
 }
 
 
 extension HolidaysFetchUsecaseImple {
     
-    func reset() async throws {
-        await self.cached.reset()
-        try await self.holidayUsecase.prepare()
-    }
-    
     func holidaysGivenYears(_ range: Range<TimeInterval>, timeZone: TimeZone) async throws -> [Holiday] {
+        
+        try await self.holidayUsecase.prepare()
         
         func holidays(_ year: Int) async throws -> [Holiday] {
             if let cached = await self.cached.holidayMap[year] {
