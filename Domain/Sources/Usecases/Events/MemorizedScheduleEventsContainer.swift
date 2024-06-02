@@ -10,7 +10,7 @@ import Prelude
 import Optics
 
 
-struct MemorizedScheduleEventsContainer {
+public struct MemorizedScheduleEventsContainer {
         
     private struct CacheItem {
         
@@ -52,15 +52,21 @@ struct MemorizedScheduleEventsContainer {
     
     private var caches: [String: CacheItem] = [:]
     
-    func allCachedEvents() -> [ScheduleEvent] {
+    public func allCachedEvents() -> [ScheduleEvent] {
         return self.caches.values.map { $0.event }
     }
+    
+    private init(caches: [String : CacheItem]) {
+        self.caches = caches
+    }
+    
+    public init() { }
 }
 
 
 extension MemorizedScheduleEventsContainer {
     
-    func scheduleEvents(in period: Range<TimeInterval>) -> [ScheduleEvent] {
+    public func scheduleEvents(in period: Range<TimeInterval>) -> [ScheduleEvent] {
         return self.caches.values
             .map { $0 }
             .filter { $0.event.isOverlap(with: period) }
@@ -71,13 +77,13 @@ extension MemorizedScheduleEventsContainer {
             .map { $0.event }
     }
     
-    func invalidate(_ eventId: String) -> MemorizedScheduleEventsContainer {
+    public func invalidate(_ eventId: String) -> MemorizedScheduleEventsContainer {
         return MemorizedScheduleEventsContainer(
             caches: self.caches |> key(eventId) .~ nil
         )
     }
     
-    func append(_ newEvent: ScheduleEvent) -> MemorizedScheduleEventsContainer {
+    public func append(_ newEvent: ScheduleEvent) -> MemorizedScheduleEventsContainer {
         let newItem: CacheItem
         if let cached = self.caches[newEvent.uuid],
            newEvent.isEqualEventTimeAndRepeatOption(cached.event) {
@@ -90,7 +96,7 @@ extension MemorizedScheduleEventsContainer {
         )
     }
     
-    func refresh(_ events: [ScheduleEvent], in period: Range<TimeInterval>) -> MemorizedScheduleEventsContainer {
+    public func refresh(_ events: [ScheduleEvent], in period: Range<TimeInterval>) -> MemorizedScheduleEventsContainer {
         
         let cachedInPeriodMap = self.caches.values
             .filter { $0.event.isOverlap(with: period) }
