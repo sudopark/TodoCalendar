@@ -48,7 +48,7 @@ public enum EventTimeOnCalendar: Hashable {
 
 // MARK: - CalendarEvent
 
-protocol CalendarEvent {
+public protocol CalendarEvent {
     
     var eventId: String { get }
     var name: String { get }
@@ -59,7 +59,7 @@ protocol CalendarEvent {
 
 extension CalendarEvent {
     
-    var compareKey: String {
+    public var compareKey: String {
         return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)"
     }
 }
@@ -67,15 +67,15 @@ extension CalendarEvent {
 
 // MARK: - TodoCalenadrEvent
 
-struct TodoCalendarEvent: CalendarEvent {
+public struct TodoCalendarEvent: CalendarEvent {
     
-    let eventId: String
-    let name: String
-    let eventTime: EventTime?
-    let eventTimeOnCalendar: EventTimeOnCalendar?
-    let eventTagId: AllEventTagId
+    public let eventId: String
+    public let name: String
+    public let eventTime: EventTime?
+    public let eventTimeOnCalendar: EventTimeOnCalendar?
+    public let eventTagId: AllEventTagId
     
-    init(_ todo: TodoEvent, in timeZone: TimeZone) {
+    public init(_ todo: TodoEvent, in timeZone: TimeZone) {
         self.eventId = todo.uuid
         self.name = todo.name
         self.eventTime = todo.time
@@ -84,17 +84,17 @@ struct TodoCalendarEvent: CalendarEvent {
     }
 }
 
-struct ScheduleCalendarEvent: CalendarEvent {
+public struct ScheduleCalendarEvent: CalendarEvent {
     
-    let eventIdWithoutTurn: String
-    let eventId: String
-    let name: String
-    let eventTime: EventTime?
-    let eventTimeOnCalendar: EventTimeOnCalendar?
-    let eventTagId: AllEventTagId
-    var turn: Int = 0
+    public let eventIdWithoutTurn: String
+    public let eventId: String
+    public let name: String
+    public let eventTime: EventTime?
+    public let eventTimeOnCalendar: EventTimeOnCalendar?
+    public let eventTagId: AllEventTagId
+    public var turn: Int = 0
     
-    static func events(
+    public static func events(
         from schedule: ScheduleEvent,
         in timeZone: TimeZone
     ) -> [ScheduleCalendarEvent] {
@@ -115,15 +115,15 @@ struct ScheduleCalendarEvent: CalendarEvent {
 }
 
 
-struct HolidayCalendarEvent: CalendarEvent {
+public struct HolidayCalendarEvent: CalendarEvent {
     
-    let eventId: String
-    let name: String
-    let eventTime: EventTime?
-    let eventTimeOnCalendar: EventTimeOnCalendar?
-    let eventTagId: AllEventTagId
+    public let eventId: String
+    public let name: String
+    public let eventTime: EventTime?
+    public let eventTimeOnCalendar: EventTimeOnCalendar?
+    public let eventTagId: AllEventTagId
     
-    init?(_ holiday: Holiday, in timeZone: TimeZone) {
+    public init?(_ holiday: Holiday, in timeZone: TimeZone) {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         guard let components = holiday.dateComponents()
         else { return nil }
@@ -147,7 +147,7 @@ struct HolidayCalendarEvent: CalendarEvent {
 
 extension Publisher where Output: Sequence, Failure == Never {
     
-    func filterTagActivated(
+    public func filterTagActivated(
         _ tagUseacse: any EventTagUsecase,
         tagSelector: @escaping (Output.Element) -> AllEventTagId
     ) -> AnyPublisher<[Output.Element], Never> {
