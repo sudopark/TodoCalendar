@@ -15,7 +15,6 @@ import Extensions
 import CalendarScenes
 
 
-
 struct MonthWidgetTimelineProvider: TimelineProvider {
     
     typealias Entry = ResultTimelineEntry<MonthWidgetViewModel>
@@ -56,7 +55,8 @@ struct MonthWidgetTimelineProvider: TimelineProvider {
     private func getEntry(_ completion: @escaping (Entry) -> Void) {
         
         Task {
-            let viewModelProvider = await WidgetViewModelProviderBuilder.makeMonthViewModelProvider()
+            let bulder = WidgetViewModelProviderBuilder(base: .init())
+            let viewModelProvider = await bulder.makeMonthViewModelProvider()
             let now = Date()
             do {
                 let model = try await viewModelProvider.getMonthViewModel(now)

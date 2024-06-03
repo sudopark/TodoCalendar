@@ -83,6 +83,40 @@ struct EventListWidgetViewModel {
     
     let lists: [DayEventListModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
+    
+    static func sample() -> EventListWidgetViewModel {
+        
+        let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("Lunch".localized())")
+            |> \.tagColor .~ .default
+            |> \.periodText .~ .singleText(.init(text: "1:00"))
+            |> \.periodDescription .~ "June 3 01:00 ~ June 3 02:00(1hour)"
+        
+        let callTodoEvent = TodoEventCellViewModel("call", name: "📞 \("Call Sara".localized())")
+            |> \.tagColor .~ .default
+            |> \.periodText .~ .singleText(.init(text: "3:00"))
+        
+        let surfingEvent = ScheduleEventCellViewModel("surfing", name: "🏄‍♂️ \("Surfing".localized())")
+            |> \.tagColor .~ .default
+            |> \.periodText .~ .singleText(.init(text: "Allday".localized()))
+        
+        let june3 = DayEventListModel(dateText: "TUE, JUN 3", events: [
+            lunchEvent,
+            callTodoEvent
+        ])
+        
+        let july = DayEventListModel(dateText: "SUN, JUL 16", events: [
+            surfingEvent
+        ])
+
+        let defaultTagColorSetting = DefaultEventTagColorSetting(
+            holiday: "#D6236A", default: "#088CDA"
+        )
+        
+        return .init(
+            lists: [june3, july],
+            defaultTagColorSetting: defaultTagColorSetting
+        )
+    }
 }
 
 
