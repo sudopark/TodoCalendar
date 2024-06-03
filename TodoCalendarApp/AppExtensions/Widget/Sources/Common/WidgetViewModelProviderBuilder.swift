@@ -12,6 +12,9 @@ import Repository
 import SQLiteService
 import Alamofire
 
+
+// MARK: - WidgetBaseDependency
+
 final class WidgetBaseDependency {
     
     init() { }
@@ -48,13 +51,93 @@ final class FetchCacheStores {
     }
 }
 
+
+// MARK: - WidgetViewModelProviderBuilder
+
 struct WidgetViewModelProviderBuilder {
     
-    private static func checkShouldReset() async {
-        // TODO: 백그라운드 진입 timestamp보고 갱신여부 결정
+    private let base: WidgetBaseDependency
+    init(base: WidgetBaseDependency) {
+        self.base = base
     }
     
-    private static func makeHolidayRepository(_ base: WidgetBaseDependency) -> HolidayRepositoryImple {
+    private func checkShouldReset() async {
+        // TODO: 백그라운드 진입 timestamp보고 갱신여부 결정
+    }
+}
+
+
+// MARK: - make monthWidgetViewModel
+
+extension WidgetViewModelProviderBuilder {
+    
+    func makeMonthViewModelProvider() async -> MonthWidgetViewModelProvider {
+        await self.checkShouldReset()
+        
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        let calendarSettingUsecase = CalendarSettingUsecaseImple(
+            settingRepository: calendarSettingRepository,
+            shareDataStore: .init()
+        )
+        let holidayUsecase = HolidayUsecaseImple(
+            holidayRepository: self.makeHolidayRepository(),
+            dataStore: .init(),
+            localeProvider: Locale.current
+        )
+        let calendarUsecase = CalendarUsecaseImple(
+            calendarSettingUsecase: calendarSettingUsecase,
+            holidayUsecase: holidayUsecase
+        )
+
+        let holidaysFetchUsecase = self.makeHolidaysFetchUsecase(holidayUsecase)
+        let eventsFetchUsecase = self.makeEventsFetchUsecase(holidaysFetchUsecase)
+        
+        return MonthWidgetViewModelProvider(
+            calendarUsecase: calendarUsecase,
+            settingRepository: calendarSettingRepository,
+            holidayFetchUsecase: holidaysFetchUsecase,
+            eventFetchUsecase: eventsFetchUsecase
+        )
+    }
+}
+
+
+// MARK: - make event list widget viewModel
+
+extension WidgetViewModelProviderBuilder {
+    
+    func makeEventListViewModelProvider() async -> EventListWidgetViewModelProvider {
+        
+        await self.checkShouldReset()
+        
+        let fetchUsecase = self.makeEventsFetchUsecase()
+        
+        let appSettingRepository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
+        
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        
+        return EventListWidgetViewModelProvider(
+            eventsFetchUsecase: fetchUsecase, 
+            appSettingRepository: appSettingRepository,
+            calendarSettingRepository: calendarSettingRepository
+        )
+    }
+}
+
+
+// MARK: - common
+
+extension WidgetViewModelProviderBuilder {
+    
+    private func makeHolidayRepository() -> HolidayRepositoryImple {
         let remote = RemoteAPIImple(
             environment: .init(calendarAPIHost: ""),
             authenticator: nil
@@ -67,12 +150,11 @@ struct WidgetViewModelProviderBuilder {
         return repository
     }
     
-    private static func makeHolidaysFetchUsecase(
-        _ base: WidgetBaseDependency,
+    private func makeHolidaysFetchUsecase(
         _ holidayUsecase: HolidayUsecaseImple? = nil
     ) -> HolidaysFetchUsecaseImple {
         let holidayUsecase = holidayUsecase ?? HolidayUsecaseImple(
-            holidayRepository: self.makeHolidayRepository(base),
+            holidayRepository: self.makeHolidayRepository(),
             dataStore: .init(),
             localeProvider: Locale.current
         )
@@ -82,8 +164,7 @@ struct WidgetViewModelProviderBuilder {
         )
     }
     
-    private static func makeEventsFetchUsecase(
-        _ base: WidgetBaseDependency,
+    private func makeEventsFetchUsecase(
         _ holidayFetchUsecase: HolidaysFetchUsecaseImple? = nil
     ) -> CalendarEventFetchUsecaseImple {
         
@@ -96,7 +177,7 @@ struct WidgetViewModelProviderBuilder {
         let scheduleRepository = ScheduleEventLocalRepositoryImple(
             localStorage: scheduleStorage, environmentStorage: base.userDefaultEnvironmentStorage
         )
-        let holidayFetchUsecase = holidayFetchUsecase ?? makeHolidaysFetchUsecase(base)
+        let holidayFetchUsecase = holidayFetchUsecase ?? makeHolidaysFetchUsecase()
         
         let eventTagStorage = EventTagLocalStorageImple(sqliteService: base.commonSqliteService)
         let eventTagRepository = EventTagLocalRepositoryImple(
@@ -109,38 +190,6 @@ struct WidgetViewModelProviderBuilder {
             holidayFetchUsecase: holidayFetchUsecase,
             eventTagRepository: eventTagRepository,
             cached: FetchCacheStores.shared.events
-        )
-    }
-    
-    static func makeMonthViewModelProvider() async -> MonthWidgetViewModelProvider {
-        await self.checkShouldReset()
-        
-        let base = WidgetBaseDependency()
-        let calendarSettingRepository = CalendarSettingRepositoryImple(
-            environmentStorage: base.userDefaultEnvironmentStorage
-        )
-        let calendarSettingUsecase = CalendarSettingUsecaseImple(
-            settingRepository: calendarSettingRepository,
-            shareDataStore: .init()
-        )
-        let holidayUsecase = HolidayUsecaseImple(
-            holidayRepository: self.makeHolidayRepository(base),
-            dataStore: .init(),
-            localeProvider: Locale.current
-        )
-        let calendarUsecase = CalendarUsecaseImple(
-            calendarSettingUsecase: calendarSettingUsecase,
-            holidayUsecase: holidayUsecase
-        )
-
-        let holidaysFetchUsecase = self.makeHolidaysFetchUsecase(base, holidayUsecase)
-        let eventsFetchUsecase = self.makeEventsFetchUsecase(base, holidaysFetchUsecase)
-        
-        return MonthWidgetViewModelProvider(
-            calendarUsecase: calendarUsecase,
-            settingRepository: calendarSettingRepository,
-            holidayFetchUsecase: holidaysFetchUsecase,
-            eventFetchUsecase: eventsFetchUsecase
         )
     }
 }
