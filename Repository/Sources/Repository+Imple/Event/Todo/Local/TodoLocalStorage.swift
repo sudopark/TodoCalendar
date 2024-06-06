@@ -30,6 +30,7 @@ public protocol TodoLocalStorage: Sendable {
     func removeAllDoneEvents() async throws
     func loadDoneTodos(after cursor: TimeInterval?, size: Int) async throws -> [DoneTodoEvent]
     func loadDoneTodoEvent(doneEventId: String) async throws -> DoneTodoEvent
+    func findDoneTodoEvent(by todoId: String, _ time: EventTime?) async throws -> DoneTodoEvent?
     func removeDoneTodos(pastThan cursor: TimeInterval) async throws
     func removeDoneTodo(_ doneTodoEventIds: [String]) async throws
     func updateDoneTodos(_ dones: [DoneTodoEvent]) async throws
@@ -187,13 +188,29 @@ extension TodoLocalStorageImple {
         let timeQuery = Times.selectAll()
         let doneQuery = Dones.selectAll { $0.uuid == doneEventId }
         let query = doneQuery.innerJoin(with: timeQuery, on: { ($0.uuid, $1.eventId) })
+        return try await loadDoneEvent(query).unwrap()
+    }
+    
+    public func findDoneTodoEvent(
+        by todoId: String, _ time: EventTime?
+    ) async throws -> DoneTodoEvent? {
+        
+        let timeQuery = Times.matchingQuery(time)
+        let doneQuery = Dones.selectAll { $0.originEventId == todoId }
+        let query = doneQuery.innerJoin(with: timeQuery, on: {
+            ($0.uuid, $1.eventId)
+        })
+        return try await self.loadDoneEvent(query)
+    }
+    
+    private func loadDoneEvent(_ query: JoinQuery<Dones>) async throws -> DoneTodoEvent? {
         let mapping: (CursorIterator) throws -> DoneTodoEvent = { cursor in
             return try DoneTodoEvent(cursor)
             |> \.eventTime .~ (try? Times.Entity(cursor).eventTime)
         }
-        return try await self.sqliteService.async.run(DoneTodoEvent.self) { db in
+        return try await self.sqliteService.async.run(DoneTodoEvent?.self) { db in
             try db.createTableOrNot(Times.self)
-            return try db.loadOne(query, mapping: mapping).unwrap()
+            return try db.loadOne(query, mapping: mapping)
         }
     }
     

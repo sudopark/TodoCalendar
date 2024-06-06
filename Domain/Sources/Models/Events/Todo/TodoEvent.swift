@@ -112,3 +112,9 @@ public struct RemoveTodoResult {
     public var nextRepeatingTodo: TodoEvent?
     public init() { }
 }
+
+
+public enum TodoToggleResult {
+    case completed(DoneTodoEvent)
+    case reverted(TodoEvent)
+}
