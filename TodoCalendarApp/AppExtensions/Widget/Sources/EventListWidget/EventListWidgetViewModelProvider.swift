@@ -21,10 +21,12 @@ struct EventListWidgetViewModel {
     struct DayEventListModel {
         let dateText: String
         let events: [any EventCellViewModel]
+        var isStartDate: Bool = false
         
-        init(dateText: String, events: [any EventCellViewModel]) {
+        init(dateText: String, events: [any EventCellViewModel], isStartDate: Bool = false) {
             self.dateText = dateText
             self.events = events
+            self.isStartDate = isStartDate
         }
         
         fileprivate struct Builder {
@@ -73,7 +75,7 @@ struct EventListWidgetViewModel {
 
                     let dateText = Date(timeIntervalSince1970: dayRange.lowerBound)
                         .text("EEE, MMM d".localized(), timeZone: timeZone)
-                    return .init(dateText: dateText, events: models)
+                    return .init(dateText: dateText, events: models, isStartDate: offset == 0)
                 }
                 
                 return (0..<size+1).compactMap(gatherEventsPerDay)
@@ -89,7 +91,6 @@ struct EventListWidgetViewModel {
         let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("Lunch".localized())")
             |> \.tagColor .~ .default
             |> \.periodText .~ .singleText(.init(text: "1:00"))
-            |> \.periodDescription .~ "June 3 01:00 ~ June 3 02:00(1hour)"
         
         let callTodoEvent = TodoEventCellViewModel("call", name: "📞 \("Call Sara".localized())")
             |> \.tagColor .~ .default
@@ -99,10 +100,11 @@ struct EventListWidgetViewModel {
             |> \.tagColor .~ .default
             |> \.periodText .~ .singleText(.init(text: "Allday".localized()))
         
-        let june3 = DayEventListModel(dateText: "TUE, JUN 3", events: [
-            lunchEvent,
-            callTodoEvent
-        ])
+        let june3 = DayEventListModel(
+            dateText: "TUE, JUN 3",
+            events: [ lunchEvent, callTodoEvent ],
+            isStartDate: true
+        )
         
         let july = DayEventListModel(dateText: "SUN, JUL 16", events: [
             surfingEvent
