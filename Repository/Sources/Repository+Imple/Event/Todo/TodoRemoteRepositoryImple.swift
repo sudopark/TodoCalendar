@@ -301,4 +301,15 @@ extension TodoRemoteRepositoryImple {
         try await self.cacheStorage.updateTodoEvent(mapper.todo)
         return mapper.todo
     }
+    
+    public func toggleTodo(_ todoId: String, _ eventTime: EventTime?) async throws -> TodoToggleResult {
+        
+        if let doneTodo = try await self.cacheStorage.findDoneTodoEvent(by: todoId, eventTime) {
+            let reverted = try await self.revertDoneTodo(doneTodo.uuid)
+            return .reverted(reverted)
+        } else {
+            let completeResult = try await self.completeTodo(todoId)
+            return .completed(completeResult.doneEvent)
+        }
+    }
 }

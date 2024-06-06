@@ -40,6 +40,16 @@ struct EventTimeTable: Table {
         return timeQuery
     }
     
+    static func matchingQuery(_ time: EventTime?) -> SelectQuery<EventTimeTable> {
+        guard let time else {
+            return Self.selectAll()
+        }
+        return Self.selectAll()
+            .where { $0.timeType == time.typeText }
+            .where { $0.timeLowerInterval == time.lowerBoundWithFixed }
+            .where { $0.timeUpperInterval == time.upperBoundWithFixed }
+    }
+    
     enum Columns: String, TableColumn {
         case eventId = "event_id"
         case timeType = "time_type"

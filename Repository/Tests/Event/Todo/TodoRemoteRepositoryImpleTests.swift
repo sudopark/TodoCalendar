@@ -565,6 +565,31 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, reverted.uuid)
         XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoIds, ["some"])
     }
+    
+    // revert 할꺼면 done = "some" 이여야하고
+    // complete 처리할꺼면 = :origin
+    
+    func testReposiotry_toggleTodo_complete() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try await repository.toggleTodo("origin", nil)
+        
+        // then
+        XCTAssertNotNil(result.completed)
+    }
+    
+    func testRepository_toggleTodo_revert() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try await repository.toggleTodo("existing_done_todo", nil)
+        
+        // then
+        XCTAssertNotNil(result.reverted)
+    }
 }
  
 
@@ -880,6 +905,16 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     
     func loadDoneTodoEvent(doneEventId: String) async throws -> DoneTodoEvent {
         return .init(uuid: doneEventId, name: "done", originEventId: "origin", doneTime: Date())
+    }
+    
+    
+    func findDoneTodoEvent(by todoId: String, _ time: EventTime?) async throws -> DoneTodoEvent? {
+        guard self.shouldFailLoadDoneTodo == false
+        else {
+            throw RuntimeError("failed")
+        }
+        guard todoId == "existing_done_todo" else { return nil }
+        return .init(uuid: "some", name: "some", originEventId: todoId, doneTime: .init())
     }
     
     var didRemovedDoneTodoIds: [String]?

@@ -608,6 +608,82 @@ extension TodoLocalRepositoryImpleTests {
     }
 }
 
+extension TodoLocalRepositoryImpleTests {
+    
+    func makeRepositoryWithDoneFromRepeatingTodo() async throws -> TodoLocalRepositoryImple {
+        let doneAtEvent = DoneTodoEvent(
+            uuid: "done_at", name: "done_at", originEventId: "repeating_origin", doneTime: .init()
+        )
+        |> \.eventTime .~ .at(100)
+        let doneWithPeriodEvent = DoneTodoEvent(
+            uuid: "done_period", name: "done_period", originEventId: "repeating_origin", doneTime: .init()
+        )
+        |> \.eventTime .~ .period(0..<100)
+        let doneWithAlldayEvent = DoneTodoEvent(
+            uuid: "done_allday", name: "done_allday", originEventId: "repeating_origin", doneTime: .init()
+        )
+        |> \.eventTime .~ .allDay(0..<100, secondsFromGMT: 0)
+        
+        let doneWithoutTime = DoneTodoEvent(
+            uuid: "done", name: "done", originEventId: "not_repeating", doneTime: .init()
+        )
+        
+        try await self.localStorage.updateDoneTodos([
+            doneAtEvent, doneWithPeriodEvent, doneWithAlldayEvent, doneWithoutTime
+        ])
+        
+        let todo = TodoEvent(uuid: "todo", name: "todo")
+        try await self.localStorage.updateTodoEvent(todo)
+        return self.makeRepository()
+    }
+    
+    func testRepository_toggleTodo_complete() async throws {
+        // given
+        let repository = try await self.makeRepositoryWithDoneFromRepeatingTodo()
+        
+        // when
+        let result = try await repository.toggleTodo("todo", nil)
+        
+        // then
+        let completed = result.completed
+        XCTAssertEqual(completed?.name, "todo")
+        XCTAssertEqual(completed?.originEventId, "todo")
+    }
+    
+    func testRepository_toggleTodo_revert() async throws {
+        // given
+        let repository = try await self.makeRepositoryWithDoneFromRepeatingTodo()
+        
+        func parameterizeTest(
+            _ todoId: String,
+            _ time: EventTime?,
+            _ expectName: String
+        ) async throws {
+            // given
+            // when
+            let result = try await repository.toggleTodo(todoId, time)
+            
+            // then
+            let reverted = result.reverted
+            XCTAssertEqual(reverted?.name, expectName)
+        }
+        
+        // when + then
+        try await parameterizeTest(
+            "repeating_origin", .at(100), "done_at"
+        )
+        try await parameterizeTest(
+            "repeating_origin", .period(0..<100), "done_period"
+        )
+        try await parameterizeTest(
+            "repeating_origin", .allDay(0..<100, secondsFromGMT: 0), "done_allday"
+        )
+        try await parameterizeTest(
+            "not_repeating", nil, "done"
+        )
+    }
+}
+
 extension TimeInterval {
     
     static func range(from: String, to: String, in timeZone: TimeZone) throws -> Range<TimeInterval> {
@@ -618,5 +694,18 @@ extension TimeInterval {
         let start = try formatter.date(from: from).unwrap()
         let end = try formatter.date(from: to).unwrap()
         return (start.timeIntervalSince1970..<end.timeIntervalSince1970)
+    }
+}
+
+extension TodoToggleResult {
+    
+    var completed: DoneTodoEvent? {
+        guard case .completed(let done) = self else { return nil }
+        return done
+    }
+    
+    var reverted: TodoEvent? {
+        guard case .reverted(let todo) = self else { return nil }
+        return todo
     }
 }
