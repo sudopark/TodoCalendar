@@ -137,7 +137,6 @@ struct EventListView: View {
             
             Spacer()
             
-            // TODO: 일단은 임시로 구현
             if let todo = model as? TodoEventCellViewModel {
                 TodoToggleButton(id: todo.eventIdentifier, colorSet: colorSet)
             }
@@ -145,10 +144,23 @@ struct EventListView: View {
     }
 }
 
+
+// TODO: 일단은 임시로 구현
 struct DummyTodoIntent: AppIntent {
     
     static var title: LocalizedStringResource = "test"
+    
+    @Parameter(title: "todo id")
+    var id: String
+    
+    init() { }
+    
+    init(id: String) {
+        self.id = id
+    }
+    
     func perform() async throws -> some IntentResult {
+        try await Task.sleep(for: .seconds(10))
         return .result()
     }
 }
@@ -157,18 +169,20 @@ private struct TodoToggleButton: View {
     let id: String
     let colorSet: ColorSet
     
-    var body: some View {
-        if #available(iOSApplicationExtension 17.0, *) {
-            Toggle(isOn: false, intent: DummyTodoIntent()) {
-                Image(systemName: "circle")
-                    .font(.system(size: 10))
-                    .foregroundStyle(colorSet.accent.asColor)
-            }
-            .buttonStyle(PlainButtonStyle())
-            .asAnyView()
-        } else {
-            EmptyView().asAnyView()
+    struct TodoToggleStyle: ToggleStyle {
+        
+        let colorSet: ColorSet
+        
+        func makeBody(configuration: Configuration) -> some View {
+            Image(systemName: configuration.isOn ? "circle.inset.filled" : "circle")
+                .font(.system(size: 10))
+                .foregroundStyle(colorSet.accent.asColor)
         }
+    }
+    
+    var body: some View {
+        Toggle("", isOn: false, intent: DummyTodoIntent(id: id))
+            .toggleStyle(TodoToggleStyle(colorSet: colorSet))
     }
 }
 
