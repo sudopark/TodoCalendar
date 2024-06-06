@@ -177,14 +177,9 @@ struct MonthWidgetPreview_Provider: PreviewProvider {
 //        let entry = ResultTimelineEntry<MonthWidgetViewModel>(date: Date(), result: .failure(
 //            .init(error: RuntimeError("failed"), message: "Fail to load widget")
 //        ))
-        if #available(iOS 17.0, *) {
-            return MonthWidgetView(entry: entry)
-                .previewContext(WidgetPreviewContext(family: .systemSmall))
-                .containerBackground(.fill.tertiary, for: .widget)
-        } else {
-            return MonthWidgetView(entry: entry)
-                .previewContext(WidgetPreviewContext(family: .systemSmall))
-        }
+        return MonthWidgetView(entry: entry)
+            .previewContext(WidgetPreviewContext(family: .systemSmall))
+            .containerBackground(.fill.tertiary, for: .widget)
     }
     
     private static func makeDummyComponent() -> CalendarComponent {

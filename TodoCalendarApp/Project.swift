@@ -4,7 +4,7 @@ import ProjectDescription
 let project = Project.app(
     name: "TodoCalendarApp",
     platform: .iOS,
-    iOSTargetVersion: "16.4",
+    iOSTargetVersion: "17.0",
     dependencies: [
         .target(
             name: "TodoCalendarAppWidget", condition: nil
@@ -59,7 +59,7 @@ let project = Project.app(
             appName: "TodoCalendarApp",
             extensionName: "Widget",
             platform: .iOS,
-            iOSTargetVersion: "16.4",
+            iOSTargetVersion: "17.0",
             infoPlist: [
                 "NSExtension": .dictionary([
                     "NSExtensionPointIdentifier": .string("com.apple.widgetkit-extension")
