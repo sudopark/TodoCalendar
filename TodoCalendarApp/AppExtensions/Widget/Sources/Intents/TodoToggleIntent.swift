@@ -33,9 +33,13 @@ struct TodoToggleIntent: AppIntent {
     func perform() async throws -> some IntentResult {
         let factory = WidgetUsecaseFactory(base: .init())
         let usecase = factory.makeTodoToggleUsecase()
-        let result = try await usecase.toggleTodo(todoId, eventtime)
-        if result != nil {
-            WidgetCenter.shared.reloadAllTimelines()
+        do {
+            let result = try await usecase.toggleTodo(todoId, eventtime)
+            if result != nil {
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        } catch {
+            WidgetCenter.shared.reloadTimelines(ofKind: "EventList")
         }
         return .result()
     }
