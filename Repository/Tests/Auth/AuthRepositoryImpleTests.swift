@@ -126,6 +126,8 @@ extension AuthRepositoryImpleTests {
 
 class StubFirebaseAuthService: FirebaseAuthService {
     
+    func setup() throws { }
+    
     struct DummyResult: FirebaseAuthDataResult {
         var uid: String { "some" }
         

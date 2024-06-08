@@ -49,6 +49,8 @@ public struct AuthRefreshResult {
 
 public protocol FirebaseAuthService {
     
+    func setup() throws
+    
     func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult
     
     func refreshToken(
@@ -58,16 +60,30 @@ public protocol FirebaseAuthService {
     func signOut() throws
 }
 
-extension FirebaseAuth.Auth: FirebaseAuthService { 
+
+public final class FirebaseAuthServiceImple: FirebaseAuthService {
+    
+    private let appGroupId: String
+    public init(appGroupId: String, useEmulator: Bool = false) {
+        self.appGroupId = appGroupId
+        if useEmulator {
+            Auth.auth().useEmulator(withHost: "127.0.0.1", port: 9099)
+        }
+    }
+    
+    public func setup() throws {
+        try Auth.auth().useUserAccessGroup(self.appGroupId)
+    }
     
     public func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
+        
         switch credential {
         case let googleCredential as GoogleOAuth2Credential:
             let credential = GoogleAuthProvider.credential(
                 withIDToken: googleCredential.idToken,
                 accessToken: googleCredential.accessToken
             )
-            return try await self.signIn(with: credential)
+            return try await Auth.auth().signIn(with: credential)
             
         case let appleCredential as AppleOAuth2Credential:
             let credential = OAuthProvider.credential(
@@ -75,23 +91,22 @@ extension FirebaseAuth.Auth: FirebaseAuthService {
                 idToken: appleCredential.idToken,
                 rawNonce: appleCredential.nonce
             )
-            return try await self.signIn(with: credential)
+            return try await Auth.auth().signIn(with: credential)
             
         default:
             throw RuntimeError("not support signin credential")
         }
     }
     
-    public func refreshToken(
-        _ resultHandler: @escaping (Result<AuthRefreshResult, any Error>) -> Void
-    ) {
-        guard let currentUser = self.currentUser
+    public func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, any Error>) -> Void) {
+        
+        guard let currentUser = Auth.auth().currentUser
         else {
             resultHandler(.failure(RuntimeError("not current user")))
             return
         }
         
-        currentUser.getIDTokenResult(forcingRefresh: true) { [weak self] result, error in
+        currentUser.getIDTokenResult(forcingRefresh: true) { result, error in
             guard let result = result, error == nil
             else {
                 let error = error ?? RuntimeError("refresh failed")
@@ -101,10 +116,14 @@ extension FirebaseAuth.Auth: FirebaseAuthService {
             let refreshResult = AuthRefreshResult(
                 uid: currentUser.uid,
                 idToken: result.token,
-                refreshToken: self?.currentUser?.refreshToken
+                refreshToken: Auth.auth().currentUser?.refreshToken
             )
             resultHandler(.success(refreshResult))
         }
+    }
+    
+    public func signOut() throws {
+        try Auth.auth().signOut()
     }
 }
 
@@ -137,6 +156,9 @@ extension AuthRepositoryImple {
     private var accountInfoKey: String { "current_account_info" }
     
     public func loadLatestSignInAuth() async throws -> Account? {
+        
+        try self.firebaseAuthService.setup()
+        
         guard let auth = self.authStore.loadCurrentAuth(),
               let infoMapper: AccountInfoMapper = self.keyChainStorage.load(accountInfoKey)
         else {

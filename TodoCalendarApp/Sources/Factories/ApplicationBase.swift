@@ -36,7 +36,7 @@ final class ApplicationBase {
     }()
     
     private var remoteEnvironment: RemoteEnvironment = {
-        // TODO: host 값 읽어와야함
+        
         func readSecret() -> [String: Any] {
             guard let path = Bundle.main.path(forResource: "secrets", ofType: "json"),
                     let jsonData = try? Data(contentsOf: URL(fileURLWithPath: path))
@@ -58,11 +58,10 @@ final class ApplicationBase {
         if AppEnvironment.isTestBuild {
             return DummyFirebaseAuthService()
         } else {
-            let authService = Auth.auth()
-            if AppEnvironment.useEmulator {
-                authService.useEmulator(withHost:"127.0.0.1", port:9099)
-            }
-            return authService
+            return FirebaseAuthServiceImple(
+                appGroupId: AppEnvironment.groupID,
+                useEmulator: AppEnvironment.useEmulator
+            )
         }
     }()
     
@@ -84,6 +83,9 @@ final class ApplicationBase {
 // MARK: - dummy
 
 class DummyFirebaseAuthService: FirebaseAuthService {
+    
+    func setup() throws { }
+    
     func signOut() throws {
         
     }

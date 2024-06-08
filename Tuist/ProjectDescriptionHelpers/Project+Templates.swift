@@ -207,7 +207,11 @@ extension Project {
                 "AppExtensions/\(extensionName)/Sources/**",
                 "Sources/AppEnvironment.swift"
             ],
-            resources: ["AppExtensions/\(extensionName)/Resources/**"],
+            resources: [
+                "AppExtensions/\(extensionName)/Resources/**",
+                "Resources/secrets.json",
+                "Resources/GoogleService-Info.plist"
+            ],
             entitlements: Entitlements.file(path: "./AppExtensions/\(extensionName)/\(targetName).entitlements"),
             dependencies: dependencies
         )

@@ -8,7 +8,10 @@
 
 import Foundation
 import Domain
+import Extensions
 import Repository
+import FirebaseCore
+import FirebaseAuth
 import SQLiteService
 import Alamofire
 
@@ -37,7 +40,68 @@ final class WidgetBaseDependency {
         return service
     }()
     
-    lazy var remoteAPI: RemoteAPIImple = {
-        fatalError()
+    private lazy var firebaseAuthService: any FirebaseAuthService = {
+        if AppEnvironment.isTestBuild {
+            return DummyFirebaseAuthService()
+        } else {
+            FirebaseApp.configure()
+            return FirebaseAuthServiceImple(
+                appGroupId: AppEnvironment.groupID,
+                useEmulator: AppEnvironment.useEmulator
+            )
+        }
     }()
+    
+    private lazy var remoteEnvironment: RemoteEnvironment = {
+        func readSecret() -> [String: Any] {
+            guard let path = Bundle.main.path(forResource: "secrets", ofType: "json"),
+                    let jsonData = try? Data(contentsOf: URL(fileURLWithPath: path))
+            else { return [:] }
+            
+            return (try? JSONSerialization.jsonObject(with: jsonData, options: .allowFragments) as? [String: Any]) ?? [:]
+        }
+        let secrets = readSecret()
+        let host = AppEnvironment.useEmulator
+            ? secrets["emulator_caleandar_api_host"] as? String
+            : secrets["caleandar_api_host"] as? String
+        let environment = RemoteEnvironment(
+            calendarAPIHost: host ?? "https://dummy.com"
+        )
+        return environment
+    }()
+    
+    lazy var remoteAPI: RemoteAPIImple = {
+        let environment = self.remoteEnvironment
+        let authenticator = OAuthAutenticator(
+            authStore: self.keyChainStorage,
+            remoteEnvironment: environment,
+            firebaseAuthService: self.firebaseAuthService
+        )
+        return RemoteAPIImple(
+            environment: environment,
+            authenticator: authenticator
+        )
+    }()
+}
+
+
+// MARK: - dummy
+
+class DummyFirebaseAuthService: FirebaseAuthService {
+    
+    func setup() throws {
+        
+    }
+    
+    func signOut() throws {
+        
+    }
+    
+    func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
+        throw RuntimeError("failed")
+    }
+    
+    func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
+        
+    }
 }
