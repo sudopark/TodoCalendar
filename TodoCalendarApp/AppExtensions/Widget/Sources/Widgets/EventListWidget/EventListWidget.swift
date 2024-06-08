@@ -38,6 +38,10 @@ struct EventListView: View {
             ForEach(0..<model.lists.count, id: \.self) { index in
                 eventListPerDayView(model.lists[index])
             }
+            
+            if model.needBottomSpace {
+                Spacer()
+            }
         }
     }
     
@@ -49,7 +53,7 @@ struct EventListView: View {
             Text(model.dateText)
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(
-                    model.isStartDate
+                    model.accentDateText
                     ? colorSet.normalText.asColor : colorSet.subSubNormalText.asColor
                 )
             
@@ -242,7 +246,7 @@ struct EventListWidgetPreview_Provider: PreviewProvider {
         let june3 = EventListWidgetViewModel.DayEventListModel(
             dateText: "TUE, JUN 3",
             events: [ lunchEvent, callTodoEvent ],
-            isStartDate: true
+            accentDateText: true
         )
         
         let july = EventListWidgetViewModel.DayEventListModel(dateText: "SUN, JUL 16", events: [
@@ -254,8 +258,12 @@ struct EventListWidgetPreview_Provider: PreviewProvider {
         )
         
         let sample = EventListWidgetViewModel(
-            lists: [june3, july],
-            defaultTagColorSetting: defaultTagColorSetting
+            lists: [
+                june3,
+                july
+            ],
+            defaultTagColorSetting: defaultTagColorSetting,
+            needBottomSpace: false
         )
         let entry = ResultTimelineEntry(date: Date(), result: .success(sample))
         
