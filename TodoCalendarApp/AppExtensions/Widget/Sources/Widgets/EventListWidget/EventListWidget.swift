@@ -138,35 +138,14 @@ struct EventListView: View {
             Spacer()
             
             if let todo = model as? TodoEventCellViewModel {
-                TodoToggleButton(id: todo.eventIdentifier, colorSet: colorSet)
+                TodoToggleButton(todo: todo, colorSet: colorSet)
             }
         }
     }
 }
 
-
-// TODO: 일단은 임시로 구현
-struct DummyTodoIntent: AppIntent {
-    
-    static var title: LocalizedStringResource = "test"
-    
-    @Parameter(title: "todo id")
-    var id: String
-    
-    init() { }
-    
-    init(id: String) {
-        self.id = id
-    }
-    
-    func perform() async throws -> some IntentResult {
-        try await Task.sleep(for: .seconds(10))
-        return .result()
-    }
-}
-
 private struct TodoToggleButton: View {
-    let id: String
+    let todo: TodoEventCellViewModel
     let colorSet: ColorSet
     
     struct TodoToggleStyle: ToggleStyle {
@@ -181,8 +160,13 @@ private struct TodoToggleButton: View {
     }
     
     var body: some View {
-        Toggle("", isOn: false, intent: DummyTodoIntent(id: id))
-            .toggleStyle(TodoToggleStyle(colorSet: colorSet))
+        Toggle(
+            "", isOn: false,
+            intent: TodoToggleIntent(
+                id: todo.eventIdentifier, todo.eventTimeRawValue
+            )
+        )
+        .toggleStyle(TodoToggleStyle(colorSet: colorSet))
     }
 }
 

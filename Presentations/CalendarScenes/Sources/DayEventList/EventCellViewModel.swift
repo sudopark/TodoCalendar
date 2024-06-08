@@ -176,6 +176,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     public var periodDescription: String?
     public var tagColor: EventTagColor?
     public var customCompareKey: String { self.makeCustomCompareKey(["todo"]) }
+    public var eventTimeRawValue: EventTime?
     
     public init(_ id: String, name: String) {
         self.eventIdentifier = id
@@ -194,6 +195,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
         self.name = todo.name
         self.periodText = EventPeriodText(todo, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.periodDescription = todo.eventTime?.durationText(timeZone)
+        self.eventTimeRawValue = todo.eventTime
     }
 }
 
