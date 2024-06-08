@@ -20,13 +20,13 @@ struct EventListWidgetViewModel {
     
     struct DayEventListModel {
         let dateText: String
-        let events: [any EventCellViewModel]
-        var isStartDate: Bool = false
+        var events: [any EventCellViewModel]
+        var accentDateText: Bool = false
         
-        init(dateText: String, events: [any EventCellViewModel], isStartDate: Bool = false) {
+        init(dateText: String, events: [any EventCellViewModel], accentDateText: Bool = false) {
             self.dateText = dateText
             self.events = events
-            self.isStartDate = isStartDate
+            self.accentDateText = accentDateText
         }
         
         fileprivate struct Builder {
@@ -43,7 +43,7 @@ struct EventListWidgetViewModel {
                     TodoEventCellViewModel($0, in: range, self.timeZone, self.is24Form)
                 }.applyTag(customTags)
                 guard !models.isEmpty else { return nil }
-                return .init(dateText: "Current todo".localized(), events: models)
+                return .init(dateText: "Current todo".localized(), events: models, accentDateText: true)
             }
             
             func make(
@@ -75,7 +75,7 @@ struct EventListWidgetViewModel {
 
                     let dateText = Date(timeIntervalSince1970: dayRange.lowerBound)
                         .text("EEE, MMM d".localized(), timeZone: timeZone)
-                    return .init(dateText: dateText, events: models, isStartDate: offset == 0)
+                    return .init(dateText: dateText, events: models, accentDateText: offset == 0)
                 }
                 
                 return (0..<size+1).compactMap(gatherEventsPerDay)
@@ -83,8 +83,9 @@ struct EventListWidgetViewModel {
         }
     }
     
-    let lists: [DayEventListModel]
+    var lists: [DayEventListModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
+    var needBottomSpace: Bool = false
     
     static func sample() -> EventListWidgetViewModel {
         
@@ -103,7 +104,7 @@ struct EventListWidgetViewModel {
         let june3 = DayEventListModel(
             dateText: "TUE, JUN 3",
             events: [ lunchEvent, callTodoEvent ],
-            isStartDate: true
+            accentDateText: true
         )
         
         let july = DayEventListModel(dateText: "SUN, JUL 16", events: [
