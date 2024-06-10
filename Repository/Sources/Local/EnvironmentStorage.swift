@@ -7,11 +7,17 @@
 
 import Foundation
 
+public enum EnvironmentKeys: String {
+    case needCheckResetWidgetCache
+    case needCheckResetCurrentTodo
+}
+
 public protocol EnvironmentStorage: AnyObject, Sendable {
     
     func load<T: Decodable>(_ key: String) -> T?
     func update<T: Encodable>(_ key: String, _ value: T)
     func remove(_ key: String)
+    func synchronize()
 }
 
 
@@ -74,5 +80,9 @@ public final class UserDefaultEnvironmentStorageImple: EnvironmentStorage, @unch
     
     public func remove(_ key: String) {
         self.userDefaults.removeObject(forKey: key)
+    }
+    
+    public func synchronize() {
+        self.userDefaults.synchronize()
     }
 }

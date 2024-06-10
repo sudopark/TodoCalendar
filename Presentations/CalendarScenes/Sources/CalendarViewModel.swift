@@ -5,8 +5,9 @@
 //  Created by sudo.park on 2023/06/28.
 //
 
-import Foundation
+import UIKit
 import Combine
+import CombineExt
 import Prelude
 import Optics
 import Domain
@@ -92,6 +93,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 self.calendarSettingUsecase.currentTimeZone
             )
             .scan(TotalMonthRanges()) { acc, pair in acc.append(pair.0, in: pair.1) }
+            .share()
+        
         totalViewingMonths
             .map { $0.newRanges }
             .removeDuplicates()
@@ -100,6 +103,15 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             })
             .store(in: &self.cancellables)
         
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .withLatestFrom(totalViewingMonths) { $1 }
+            .compactMap { $0.checkedRange }
+            .sink(receiveValue: { [weak self] total in
+                self?.refreshEvents([total])
+                self?.todoEventUsecase.refreshCurentTodoEvents()
+            })
+            .store(in: &self.cancellables)
+
         self.bindFocusedMonthChanged()
     }
     
@@ -272,7 +284,7 @@ private struct TotalYears {
 
 private struct TotalMonthRanges {
 
-    private let checkedRange: Range<TimeInterval>?
+    let checkedRange: Range<TimeInterval>?
     let newRanges: [Range<TimeInterval>]
     
     init(

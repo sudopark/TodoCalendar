@@ -51,6 +51,11 @@ actor CalendarEventsFetchCacheStore {
     func reset() {
         self.offTagIds = nil
         self.currentTodos = nil
+        self.allCustomTagsMap = nil
+    }
+    
+    func resetCurrentTodo() {
+        self.currentTodos = nil
     }
 }
 

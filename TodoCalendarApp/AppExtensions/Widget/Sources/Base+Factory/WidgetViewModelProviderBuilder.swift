@@ -25,7 +25,41 @@ struct WidgetViewModelProviderBuilder {
     }
     
     private func checkShouldReset() async {
-        // TODO: 백그라운드 진입 timestamp보고 갱신여부 결정
+        
+        let storage = base.userDefaultEnvironmentStorage
+        switch (storage.shouldResetAll, storage.shouldResetCurrentTodo) {
+        case (true, _):
+            await FetchCacheStores.shared.reset()
+            storage.shouldResetAll = false
+            storage.shouldResetCurrentTodo = false
+            
+        case (false, true):
+            await FetchCacheStores.shared.resetCurrentTodo()
+            storage.shouldResetAll = false
+        default: break
+        }
+    }
+}
+
+private extension EnvironmentStorage {
+    var shouldResetAll: Bool {
+        get {
+            return self.load(EnvironmentKeys.needCheckResetWidgetCache.rawValue) ?? false
+        }
+        set {
+            self.update(EnvironmentKeys.needCheckResetWidgetCache.rawValue, newValue)
+            self.synchronize()
+        }
+    }
+    
+    var shouldResetCurrentTodo: Bool {
+        get {
+            return self.load(EnvironmentKeys.needCheckResetCurrentTodo.rawValue) ?? false
+        }
+        set {
+            self.update(EnvironmentKeys.needCheckResetCurrentTodo.rawValue, newValue)
+            self.synchronize()
+        }
     }
 }
 

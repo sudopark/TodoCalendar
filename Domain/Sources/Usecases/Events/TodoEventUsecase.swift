@@ -161,9 +161,11 @@ extension TodoEventUsecaseImple {
     public func refreshCurentTodoEvents() {
         
         let shareKey = ShareDataKeys.todos.rawValue
-        let updateCached: ([TodoEvent]) -> Void = { [weak self] todos in
+        let updateCached: ([TodoEvent]) -> Void = { [weak self] currents in
             self?.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
-                return todos.reduce(into: $0 ?? [:]) { $0[$1.uuid] = $1 }
+                let todosWithoutOldCurrentTodo = ($0 ?? [:]).filter { $0.value.time != nil }
+                return currents.reduce(into: todosWithoutOldCurrentTodo)
+                    { $0[$1.uuid] = $1 }
             }
         }
         
@@ -186,7 +188,11 @@ extension TodoEventUsecaseImple {
         let shareKey = ShareDataKeys.todos.rawValue
         let updateCache: ([TodoEvent]) -> Void = { [weak self] todos in
             self?.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
-                return todos.reduce(into: $0 ?? [:]) { $0[$1.uuid] = $1 }
+                let cachedInRange = ($0 ?? [:]).filter { $0.value.time?.isOverlap(with: period) ?? false }
+                let refreshed = todos.asDictionary { $0.uuid }
+                let removed = cachedInRange.filter { refreshed[$0.key] == nil }
+                let todosWithoutRemoved = ($0 ?? [:]).filter { removed[$0.key] == nil }
+                return todos.reduce(into: todosWithoutRemoved) { $0[$1.uuid] = $1 }
             }
         }
         self.todoRepository.loadTodoEvents(in: period)

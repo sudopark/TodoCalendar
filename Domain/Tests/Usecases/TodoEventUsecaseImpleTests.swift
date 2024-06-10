@@ -18,7 +18,7 @@ import TestDoubles
 final class TodoEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
-    private var stubTodoRepository: StubTodoEventRepository!
+    private var stubTodoRepository: PrivateTodoRepository!
     private var spyStore: SharedDataStore!
     
     override func setUpWithError() throws {
@@ -365,7 +365,7 @@ extension TodoEventUsecaseImpleTests {
     }
     
     // 반복하는 일정은 완료 처리 이후에도 스토어에 저장된 이전 todo 삭제하고 새로운 todo로 업데이트
-    func testUsecase_whenRepeatingEvent_notDeleteAfterCOmplete() {
+    func testUsecase_whenRepeatingEvent_notDeleteAfterComplete() {
         // given
         let expect = expectation(description: "반복되는 todo는 완료처리 이후에 저장된 공유 할일에서 삭제 안함")
         expect.expectedFulfillmentCount = 3
@@ -436,6 +436,16 @@ extension TodoEventUsecaseImpleTests {
     
     private func stubLoadCurrentTodosFail() {
         self.stubTodoRepository.shouldFailLoadCurrentTodoEvents = true
+    }
+    
+    private func stubLoadCurrrentTodoWithOnly10to14() {
+        self.stubTodoRepository.stubCurrrentTodo = (10..<15).map { TodoEvent.dummy($0) |> \.time .~ nil }
+    }
+    
+    private func stubLoadTodosInRangeOnly0to8() {
+        self.stubTodoRepository.stubTodosInRange = (0..<8).map {
+            TodoEvent.dummy($0) |> \.time .~ .at(TimeInterval($0))
+        }
     }
 
     func testUsecase_whenCachedCurrentTodoIsNotEmpty_refreshCurrentTodos() {
@@ -527,6 +537,26 @@ extension TodoEventUsecaseImpleTests {
         ])
     }
     
+    func testUsecase_whenRefershCurrentTodo_excludeRemoved() {
+        // given
+        let expect = expectation(description: "current todo refresh시에 삭제된것은 캐시에서 제외")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        self.stubTodoItemsWithTimeAndWithoutTime()
+        self.stubLoadCurrrentTodoWithOnly10to14()
+        
+        // when
+        let currentTodos = self.waitOutputs(expect, for: usecase.currentTodoEvents) {
+            usecase.refreshCurentTodoEvents()
+        }
+        // then
+        let ids = currentTodos.map { ts in ts.map { $0.uuid }.sorted() }
+        XCTAssertEqual(ids, [
+            Array(10..<20).map { "id:\($0)" },
+            Array(10..<15).map { "id:\($0)"}
+        ])
+    }
+    
     func testUsecase_whenCompleteTodoEvent_removeFromCurrentTodo() {
         // given
         let expect = expectation(description: "완료된 currenct todo 이벤트는 제외하고 반환")
@@ -580,7 +610,7 @@ extension TodoEventUsecaseImpleTests {
         }
         XCTAssertEqual(idsSets, [
             (0..<10).map { "id:\($0)" } |> Set.init,
-            (-10..<10).map { "id:\($0)" } |> Set.init,
+            (-10..<0).map { "id:\($0)" } |> Set.init,
         ])
     }
     
@@ -623,6 +653,27 @@ extension TodoEventUsecaseImpleTests {
         }
         XCTAssertEqual(idsSets, [
             (0..<10).map { "id:\($0)" } |> Set.init,
+        ])
+    }
+    
+    func testUsecase_whenLoadTodoEventsInPeriod_exlcudeRemoved() {
+        // given
+        let expect = expectation(description: "특정 기간동안의 todo로드시에 삭제된것은 캐시에서 제외하고 로드")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        self.stubTodoItemsWithTimeAndWithoutTime()
+        self.stubLoadTodosInRangeOnly0to8()
+        
+        // when
+        let todos = self.waitOutputs(expect, for: usecase.todoEvents(in: self.todosInRange)) {
+            usecase.refreshTodoEvents(in: self.todosInRange)
+        }
+        
+        // then
+        let ids = todos.map { ts in ts.map { $0.uuid }.sorted() }
+        XCTAssertEqual(ids, [
+            Array(0..<10).map { "id:\($0)" },
+            Array(0..<8).map { "id:\($0)" }
         ])
     }
 }
@@ -689,5 +740,24 @@ extension TodoEventUsecaseImpleTests {
         timeZones.forEach {
             parameterizeTests($0)
         }
+    }
+}
+
+private final class PrivateTodoRepository: StubTodoEventRepository {
+    
+    var stubCurrrentTodo: [TodoEvent]?
+    override func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error> {
+        if let stub = self.stubCurrrentTodo {
+            return Just(stub).mapNever().eraseToAnyPublisher()
+        }
+        return super.loadCurrentTodoEvents()
+    }
+    
+    var stubTodosInRange: [TodoEvent]?
+    override func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], any Error> {
+        if let stub = self.stubTodosInRange {
+            return Just(stub).mapNever().eraseToAnyPublisher()
+        }
+        return super.loadTodoEvents(in: range)
     }
 }

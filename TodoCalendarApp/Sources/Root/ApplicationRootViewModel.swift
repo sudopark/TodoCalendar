@@ -5,7 +5,8 @@
 //  Created by sudo.park on 2023/07/30.
 //
 
-import Foundation
+import UIKit
+import WidgetKit
 import Combine
 import Domain
 import Repository
@@ -17,6 +18,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
     private let prepareUsecase: any ApplicationPrepareUsecase
+    private let environmentStorage: any EnvironmentStorage
     var router: ApplicationRootRouter?
     
     private var cancellables: Set<AnyCancellable> = []
@@ -24,13 +26,16 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     init(
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
-        prepareUsecase: any ApplicationPrepareUsecase
+        prepareUsecase: any ApplicationPrepareUsecase,
+        environmentStorage: any EnvironmentStorage
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
         self.prepareUsecase = prepareUsecase
+        self.environmentStorage = environmentStorage
         
         self.bindAccountStatusChanged()
+        self.bindApplicationStatusChanged()
     }
 }
 
@@ -79,6 +84,29 @@ extension ApplicationRootViewModelImple: OAuthAutenticatorTokenRefreshListener {
     func oauthAutenticator(didRefreshFailed error: Error) {
         self.prepareUsecase.prepareSignedOut()
         self.router?.changeRootSceneAfter(signIn: nil)
+    }
+}
+
+// MARK: - handle application status chanegd
+
+extension ApplicationRootViewModelImple {
+    
+    private func bindApplicationStatusChanged() {
+
+        NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification)
+            .sink(receiveValue: { [weak self] _ in
+                self?.handleDidEnterBackground()
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func handleDidEnterBackground() {
+        self.environmentStorage.update(
+            EnvironmentKeys.needCheckResetWidgetCache.rawValue,
+            true
+        )
+        self.environmentStorage.synchronize()
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }
 
