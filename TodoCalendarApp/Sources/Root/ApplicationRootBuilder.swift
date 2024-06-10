@@ -45,7 +45,8 @@ final class ApplicationRootBuilder {
         let rootViewModel = ApplicationRootViewModelImple(
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
-            prepareUsecase: prepareUsecase
+            prepareUsecase: prepareUsecase,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         remote.attach(listener: rootViewModel)
         let rootRouter = ApplicationRootRouter(

@@ -23,6 +23,10 @@ final class FetchCacheStores {
         await self.holidays.reset()
         await self.events.reset()
     }
+    
+    func resetCurrentTodo() async {
+        await self.events.resetCurrentTodo()
+    }
 }
 
 

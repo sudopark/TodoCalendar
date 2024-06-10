@@ -29,4 +29,6 @@ final class FakeEnvironmentStorage: EnvironmentStorage, @unchecked Sendable {
     func remove(_ key: String) {
         self.storage.removeValue(forKey: key)
     }
+    
+    func synchronize() { }
 }

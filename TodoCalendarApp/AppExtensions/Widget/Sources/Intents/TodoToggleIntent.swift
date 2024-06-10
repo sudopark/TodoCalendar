@@ -12,6 +12,7 @@ import AppIntents
 import Prelude
 import Optics
 import Domain
+import Repository
 
 
 struct TodoToggleIntent: AppIntent {
@@ -31,13 +32,19 @@ struct TodoToggleIntent: AppIntent {
     }
     
     func perform() async throws -> some IntentResult {
-        let factory = WidgetUsecaseFactory(base: .init())
+        let base = WidgetBaseDependency()
+        let factory = WidgetUsecaseFactory(base: base)
         let usecase = factory.makeTodoToggleUsecase()
         do {
             let result = try await usecase.toggleTodo(todoId, eventtime)
-            if result != nil {
-                WidgetCenter.shared.reloadAllTimelines()
+            guard result != nil else { return .result()  }
+            if self.eventtime == nil {
+                base.userDefaultEnvironmentStorage.update(
+                    EnvironmentKeys.needCheckResetCurrentTodo.rawValue,
+                    true
+                )
             }
+            WidgetCenter.shared.reloadAllTimelines()
         } catch {
             WidgetCenter.shared.reloadTimelines(ofKind: "EventList")
         }

@@ -422,6 +422,83 @@ extension CalendarViewModelImpleTests {
             ],
         ])
     }
+    
+    func testViewModel_whenEnterForeground_refreshTodoEvents() {
+        // given
+        let expect = expectation(description: "포그라운드 진입시 조회중인 범위의 todo 이벤트 다시 조회")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 10, day: 4, weekDay: 3)
+        )
+        
+        // when
+        let totalRange = self.range((2023, 01, 01), (2025, 01, 01))
+        let source = self.spyTodoUsecase.todoEvents(in: totalRange)
+        let todoLists = self.waitOutputs(expect, for: source) {
+            NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+        }
+        
+        // then
+        let todoIdLists = todoLists.map { ts in ts.map { $0.uuid } }
+        XCTAssertEqual(todoIdLists, [
+            [
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00"
+            ],
+            [
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00",
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00"
+            ]
+        ])
+    }
+    
+    func testViewModel_whenEnterForeground_refreshScheduleEvents() {
+        // given
+        let expect = expectation(description: "포그라운드 진입시 조회중인 범위의 schedule 이벤트 다시 조회")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 10, day: 4, weekDay: 3)
+        )
+        
+        // when
+        let totalRange = self.range((2023, 01, 01), (2025, 01, 01))
+        let source = self.spyScheduleUsecase.scheduleEvents(in: totalRange)
+        let scheduleLists = self.waitOutputs(expect, for: source) {
+            NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+        }
+        // then
+        let scheduleIdLists = scheduleLists.map { ss in ss.map { $0.uuid } }
+        XCTAssertEqual(scheduleIdLists, [
+            [
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00"
+            ],
+            [
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00", 
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00"
+            ]
+        ])
+    }
+    
+    func testViewModel_whenEnterForeground_refreshCurrentTodos() {
+        // given
+        let expect = expectation(description: "포그라운드 진입시 조회중인 범위의 current todo 이벤트 다시 조회")
+        expect.expectedFulfillmentCount = 2
+        self.spyTodoUsecase.stubCurrentTodos = [TodoEvent(uuid: "current", name: "some")]
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 10, day: 4, weekDay: 3)
+        )
+        
+        // when
+        let source = self.spyTodoUsecase.currentTodoEvents
+        let currentTodos = self.waitOutputs(expect, for: source) {
+            NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+        }
+        
+        // then
+        let ids = currentTodos.map { ts in ts.map { $0.uuid } }
+        XCTAssertEqual(ids, [
+            ["current"], ["current"]
+        ])
+    }
 }
 
 private extension CalendarViewModelImpleTests {
