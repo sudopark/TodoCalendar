@@ -44,6 +44,7 @@ struct ResultTimelineEntry<T>: TimelineEntry {
 
 extension Date {
     
+    // TODO: 다음 업데이트 시간은 유저가 설정한 timeZone에 따라 다르게 구현할 필요가 있음
     var nextUpdateTime: Date {
         let calendar = Calendar(identifier: .gregorian)
         let nextHour = self.addingTimeInterval(3600)

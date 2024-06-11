@@ -128,3 +128,25 @@ extension WidgetViewModelProviderBuilder {
         )
     }
 }
+
+
+// MARK: - make today widget viewModel provider
+
+extension WidgetViewModelProviderBuilder {
+    
+    func makeTodayViewModelProvider() async -> TodayWidgetViewModelProvider {
+        
+        await self.checkShouldReset()
+        
+        
+        let fetchUsecase = self.usecaseFactory.makeEventsFetchUsecase()
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        
+        return TodayWidgetViewModelProvider(
+            eventsFetchusecase: fetchUsecase,
+            calednarSettingRepository: calendarSettingRepository
+        )
+    }
+}
