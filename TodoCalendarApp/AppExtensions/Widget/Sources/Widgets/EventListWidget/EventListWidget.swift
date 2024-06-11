@@ -57,9 +57,18 @@ struct EventListView: View {
                     ? colorSet.normalText.asColor : colorSet.subSubNormalText.asColor
                 )
             
-            ForEach(0..<model.events.count, id: \.self) { index in
-                eventView(model.events[index])
-                    .frame(height: 25)
+            if model.events.isEmpty {
+                Text("There is no events.".localized())
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .font(.system(size: 13))
+                    .foregroundStyle(colorSet.subNormalText.asColor)
+                    
+            } else {
+                ForEach(0..<model.events.count, id: \.self) { index in
+                    eventView(model.events[index])
+                        .frame(height: 25)
+                }
             }
         }
     }
@@ -137,7 +146,7 @@ struct EventListView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .font(.system(size: 13))
-                .foregroundColor(colorSet.normalText.asColor)
+                .foregroundStyle(colorSet.normalText.asColor)
             
             Spacer()
             
@@ -245,7 +254,9 @@ struct EventListWidgetPreview_Provider: PreviewProvider {
         
         let june3 = EventListWidgetViewModel.DayEventListModel(
             dateText: "TUE, JUN 3",
-            events: [ lunchEvent, callTodoEvent ],
+            events: [ 
+                lunchEvent, callTodoEvent
+            ],
             accentDateText: true
         )
         
