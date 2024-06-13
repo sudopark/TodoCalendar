@@ -12,7 +12,7 @@ import Optics
 
 // MARK: - schedule event
 
-public struct ScheduleEvent: Equatable {
+public struct ScheduleEvent: Sendable, Equatable {
     
     public let uuid: String
     public var name: String
@@ -25,7 +25,7 @@ public struct ScheduleEvent: Equatable {
     
     public var notificationOptions: [EventNotificationTimeOption] = []
     
-    public struct RepeatingTimes: Equatable {
+    public struct RepeatingTimes: Sendable, Equatable {
         public let time: EventTime
         public let turn: Int
         
