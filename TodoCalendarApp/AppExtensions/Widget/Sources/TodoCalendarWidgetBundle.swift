@@ -14,5 +14,6 @@ struct TodoCalendarWidgetBundle: WidgetBundle {
     var body: some Widget {
         MonthWidget()
         EventListWidget()
+        TodayWidget()
     }
 }

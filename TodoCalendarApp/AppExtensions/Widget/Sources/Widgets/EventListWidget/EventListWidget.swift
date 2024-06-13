@@ -26,8 +26,6 @@ struct EventListView: View {
         return colorScheme == .light ? DefaultLightColorSet() : DefaultLightColorSet()
     }
     
-    @State private var pendingDoneTodoIds: Set<String> = []
-    
     private let model: EventListWidgetViewModel
     init(model: EventListWidgetViewModel) {
         self.model = model
@@ -167,7 +165,7 @@ private struct TodoToggleButton: View {
         
         func makeBody(configuration: Configuration) -> some View {
             Image(systemName: configuration.isOn ? "circle.inset.filled" : "circle")
-                .font(.system(size: 10))
+                .font(.system(size: 18))
                 .foregroundStyle(colorSet.accent.asColor)
         }
     }
@@ -216,14 +214,8 @@ struct EventListWidget: Widget {
     
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: EventListWidgetTimeLineProvider()) { entry in
-            if #available(iOS 17.0, *) {
-                EventListWidgetView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
-            } else {
-                EventListWidgetView(entry: entry)
-                    .padding()
-                    .background()
-            }
+            EventListWidgetView(entry: entry)
+                .containerBackground(.fill.tertiary, for: .widget)
         }
         .configurationDisplayName("TODO: My Widget")
         .description("TODO: This is an example widget.")
@@ -278,13 +270,8 @@ struct EventListWidgetPreview_Provider: PreviewProvider {
         )
         let entry = ResultTimelineEntry(date: Date(), result: .success(sample))
         
-        if #available(iOS 17.0, *) {
-            return EventListWidgetView(entry: entry)
-                .previewContext(WidgetPreviewContext(family: .systemSmall))
-                .containerBackground(.fill.tertiary, for: .widget)
-        } else {
-            return EventListWidgetView(entry: entry)
-                .previewContext(WidgetPreviewContext(family: .systemSmall))
-        }
+        return EventListWidgetView(entry: entry)
+            .previewContext(WidgetPreviewContext(family: .systemSmall))
+            .containerBackground(.fill.tertiary, for: .widget)
     }
 }
