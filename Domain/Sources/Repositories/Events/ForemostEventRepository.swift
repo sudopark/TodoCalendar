@@ -13,6 +13,6 @@ import Combine
 public protocol ForemostEventRepository: Sendable {
     
     func foremostEvent() -> AnyPublisher<(any ForemostMarkableEvent)?, any Error>
-    func updateForemostEvent(_ eventId: String) async throws -> ForemostEventId
+    func updateForemostEvent(_ eventId: ForemostEventId) async throws -> ForemostEventId
     func removeForemostEvent() async throws
 }

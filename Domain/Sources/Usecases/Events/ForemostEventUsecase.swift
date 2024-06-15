@@ -46,7 +46,7 @@ extension ForemostEventUsecaseImple {
     }
     
     public func update(foremost eventId: ForemostEventId) async throws {
-        let eventId = try await self.repository.updateForemostEvent(eventId.eventId)
+        let eventId = try await self.repository.updateForemostEvent(eventId)
         self.updateForemost()(eventId)
     }
     
