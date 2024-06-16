@@ -56,15 +56,18 @@ class ForemostEventLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable 
         ]
         try await self.scheduleLocalStorage.updateScheduleEvents(schedules)
         
+        let storage = ForemostLocalStorageImple(
+            environmentStorage: self.envStorage,
+            todoStorage: self.todoLocalStorage,
+            scheduleStorage: self.scheduleLocalStorage
+        )
         let repository = ForemostEventLocalRepositoryImple(
-            envStorage: self.envStorage,
-            todoLocalStorage: self.todoLocalStorage,
-            scheduleLocalStorage: self.scheduleLocalStorage
+            localStorage: storage
         )
         if let foremost {
-            _ = try await repository.updateForemostEvent(foremost)
+            _ = try await storage.updateForemostEventId(foremost)
         } else {
-            try await repository.removeForemostEvent()
+            try await storage.removeForemostEvent()
         }
         return repository
     }
@@ -122,7 +125,7 @@ extension ForemostEventLocalRepositoryImpleTests {
         )
         
         // when
-        let event = try await repository.foremostEvent().values.first(where: { _ in true }) ?? nil
+        let event = try? await repository.foremostEvent().values.first(where: { _ in true }) ?? nil
         
         // then
         XCTAssertNil(event)

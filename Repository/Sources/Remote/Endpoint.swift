@@ -108,6 +108,18 @@ enum ScheduleEventEndpoints: Endpoint {
     }
 }
 
+// MARK: - ForemostEventEndpoints
+
+enum ForemostEventEndpoints: Endpoint {
+    case event
+    
+    var subPath: String {
+        switch self {
+        case .event:
+            return "event"
+        }
+    }
+}
 
 // MARK: - EventTag
 
@@ -203,6 +215,10 @@ public struct RemoteEnvironment: Sendable {
         case let schedule as ScheduleEventEndpoints:
             let prefix = "\(calendarAPIHost)/v1/schedules"
             return appendSubpathIfNotEmpty(prefix, schedule.subPath)
+            
+        case let foremost as ForemostEventEndpoints:
+            let prefix = "\(calendarAPIHost)/v1/foremost"
+            return appendSubpathIfNotEmpty(prefix, foremost.subPath)
             
         case let eventTag as EventTagEndpoints:
             let prefix = "\(calendarAPIHost)/v1/tags"
