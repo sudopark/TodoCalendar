@@ -50,14 +50,25 @@ extension KeyChainStorageImple {
     public func update<T>(_ key: String, _ value: T) where T : Encodable {
         switch value {
         case let bool as Bool:
-            self.keychain.set(bool, forKey: key)
+            self.keychain.set(
+                bool, forKey: key,
+                withAccess: .accessibleAfterFirstUnlockThisDeviceOnly
+            )
             
         case let string as String:
-            self.keychain.set(string, forKey: key)
+            self.keychain.set(
+                string, 
+                forKey: key,
+                withAccess: .accessibleAfterFirstUnlockThisDeviceOnly
+            )
             
         default:
             guard let data = try? JSONEncoder().encode(value) else { return }
-            self.keychain.set(data, forKey: key)
+            self.keychain.set(
+                data, 
+                forKey: key,
+                withAccess: .accessibleAfterFirstUnlockThisDeviceOnly
+            )
         }
     }
     
