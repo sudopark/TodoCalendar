@@ -20,12 +20,15 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
         
     private func makeProvider(
         withCurrentTodo: Bool = true,
-        withStartDateEvent: Bool = true
+        withStartDateEvent: Bool = true,
+        withoutAnyEventsIncludeHoliday: Bool = false
     ) -> EventListWidgetViewModelProvider {
         
         let fetchUsecase = StubCalendarEventsFetchUescase()
         fetchUsecase.hasCurrentTodo = withCurrentTodo
         fetchUsecase.hasEventAtStartDate = withStartDateEvent
+        fetchUsecase.withoutAnyEvents = withoutAnyEventsIncludeHoliday
+        fetchUsecase.hasHoliday = !withoutAnyEventsIncludeHoliday
         
         let calendarSettingRepository = StubCalendarSettingRepository()
         let appSettingRepository = StubAppSettingRepository()
@@ -62,14 +65,14 @@ extension EventListWidgetViewModelProviderTests {
         // then
         XCTAssertEqual(viewModel.lists.count, 3)
         let currentModel = viewModel.lists[safe: 0]
-        XCTAssertEqual(currentModel?.dateText, "Current todo".localized())
+        XCTAssertEqual(currentModel?.sectionTitle, "Current todo".localized())
         XCTAssertEqual(currentModel?.events.map { $0.name }, [
             "current"
         ])
         
         let firstDateModel = viewModel.lists[safe: 1]
         XCTAssertEqual(
-            firstDateModel?.dateText, 
+            firstDateModel?.sectionTitle,
             self.refDate.text("EEE, MMM d".localized(), timeZone: kst)
         )
         XCTAssertEqual(firstDateModel?.events.map { $0.name }, [
@@ -78,7 +81,7 @@ extension EventListWidgetViewModelProviderTests {
         
         let lastDateModel = viewModel.lists[safe: 2]
         XCTAssertEqual(
-            lastDateModel?.dateText,
+            lastDateModel?.sectionTitle,
             self.endDate.text("EEE, MMM d".localized(), timeZone: kst)
         )
         XCTAssertEqual(lastDateModel?.events.map { $0.name }, [
@@ -98,7 +101,7 @@ extension EventListWidgetViewModelProviderTests {
         // then
         XCTAssertEqual(viewModel.lists.count, 2)
         XCTAssertNil(
-            viewModel.lists.first(where: { $0.dateText == "Current todo".localized() })
+            viewModel.lists.first(where: { $0.isCurrentTodos  })
         )
     }
     
@@ -111,21 +114,21 @@ extension EventListWidgetViewModelProviderTests {
         
         // then
         let currentModel = viewModel.lists[safe: 0]
-        XCTAssertEqual(currentModel?.dateText, "Current todo".localized())
+        XCTAssertEqual(currentModel?.sectionTitle, "Current todo".localized())
         XCTAssertEqual(currentModel?.events.map { $0.name }, [
             "current"
         ])
         
         let firstDateModel = viewModel.lists[safe: 1]
         XCTAssertEqual(
-            firstDateModel?.dateText,
+            firstDateModel?.sectionTitle,
             self.refDate.text("EEE, MMM d".localized(), timeZone: kst)
         )
         XCTAssertEqual(firstDateModel?.events.map { $0.name }, [])
         
         let lastDateModel = viewModel.lists[safe: 2]
         XCTAssertEqual(
-            lastDateModel?.dateText,
+            lastDateModel?.sectionTitle,
             self.endDate.text("EEE, MMM d".localized(), timeZone: kst)
         )
         XCTAssertEqual(lastDateModel?.events.map { $0.name }, [
@@ -152,5 +155,21 @@ extension EventListWidgetViewModelProviderTests {
             .custom(hex: "t1"),  // last date schedule event
             .custom(hex: "t2")  // last date todo event
         ])
+    }
+    
+    func testProvider_whenEvenThoughEventsIsEmpty_provideFirstDateEvent() async throws {
+        // given
+        let provider = self.makeProvider(withoutAnyEventsIncludeHoliday: true)
+        
+        // when
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate)
+        
+        // then
+        XCTAssertEqual(viewModel.lists.count, 1)
+        XCTAssertEqual(
+            viewModel.lists.first?.sectionTitle, 
+            self.refDate.text("EEE, MMM d".localized(), timeZone: kst)
+        )
+        XCTAssertEqual(viewModel.lists.first?.events.count, 0)
     }
 }

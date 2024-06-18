@@ -18,15 +18,22 @@ import CalendarScenes
 
 struct EventListWidgetViewModel {
     
-    struct DayEventListModel {
-        let dateText: String
+    struct SectionModel {
+        let sectionTitle: String
         var events: [any EventCellViewModel]
-        var accentDateText: Bool = false
+        var shouldAccentTitle: Bool = false
+        var isCurrentTodos = false
         
-        init(dateText: String, events: [any EventCellViewModel], accentDateText: Bool = false) {
-            self.dateText = dateText
+        init(
+            title: String,
+            events: [any EventCellViewModel],
+            shouldAccentTitle: Bool = false,
+            isCurrentTodos: Bool = false
+        ) {
+            self.sectionTitle = title
             self.events = events
-            self.accentDateText = accentDateText
+            self.shouldAccentTitle = shouldAccentTitle
+            self.isCurrentTodos = isCurrentTodos
         }
         
         fileprivate struct Builder {
@@ -38,23 +45,28 @@ struct EventListWidgetViewModel {
             func makeCurrentTodoListModel(
                 _ events: [TodoCalendarEvent],
                 _ range: Range<TimeInterval>
-            ) -> DayEventListModel? {
+            ) -> SectionModel? {
                 let models: [any EventCellViewModel] = events.compactMap {
                     TodoEventCellViewModel($0, in: range, self.timeZone, self.is24Form)
                 }.applyTag(customTags)
                 guard !models.isEmpty else { return nil }
-                return .init(dateText: "Current todo".localized(), events: models, accentDateText: true)
+                return .init(
+                    title: "Current todo".localized(),
+                    events: models,
+                    shouldAccentTitle: true,
+                    isCurrentTodos: true
+                )
             }
             
             func make(
                 events: [any CalendarEvent],
                 in range: Range<TimeInterval>,
                 size: Int
-            ) -> [DayEventListModel] {
+            ) -> [SectionModel] {
                 
                 let start = Date(timeIntervalSince1970: range.lowerBound)
                 
-                let gatherEventsPerDay: (Int) -> EventListWidgetViewModel.DayEventListModel? = { offset in
+                let gatherEventsPerDay: (Int) -> EventListWidgetViewModel.SectionModel? = { offset in
                     guard let dayRange = calendar.addDays(offset, from: start).flatMap(calendar.dayRange(_:))
                     else { return nil }
                     
@@ -75,15 +87,29 @@ struct EventListWidgetViewModel {
 
                     let dateText = Date(timeIntervalSince1970: dayRange.lowerBound)
                         .text("EEE, MMM d".localized(), timeZone: timeZone)
-                    return .init(dateText: dateText, events: models, accentDateText: offset == 0)
+                    return .init(
+                        title: dateText,
+                        events: models,
+                        shouldAccentTitle: offset == 0
+                    )
                 }
                 
-                return (0..<size+1).compactMap(gatherEventsPerDay)
+                let models = (0..<size+1).compactMap(gatherEventsPerDay)
+                if models.isEmpty {
+                    let dateText = Date(timeIntervalSince1970: start.timeIntervalSince1970)
+                        .text("EEE, MMM d".localized(), timeZone: timeZone)
+                    let startDateModel = SectionModel(
+                        title: dateText, events: [],
+                        shouldAccentTitle: true
+                    )
+                    return [startDateModel]
+                }
+                return models
             }
         }
     }
     
-    var lists: [DayEventListModel]
+    var lists: [SectionModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
     var needBottomSpace: Bool = false
     
@@ -101,13 +127,13 @@ struct EventListWidgetViewModel {
             |> \.tagColor .~ .default
             |> \.periodText .~ .singleText(.init(text: "Allday".localized()))
         
-        let june3 = DayEventListModel(
-            dateText: "TUE, JUN 3",
+        let june3 = SectionModel(
+            title: "TUE, JUN 3",
             events: [ lunchEvent, callTodoEvent ],
-            accentDateText: true
+            shouldAccentTitle: true
         )
         
-        let july = DayEventListModel(dateText: "SUN, JUL 16", events: [
+        let july = SectionModel(title: "SUN, JUL 16", events: [
             surfingEvent
         ])
 
@@ -165,7 +191,7 @@ extension EventListWidgetViewModelProvider {
         _ start: Date,
         _ timeZone: TimeZone,
         _ is24Form: Bool
-    ) async throws -> [EventListWidgetViewModel.DayEventListModel] {
+    ) async throws -> [EventListWidgetViewModel.SectionModel] {
         
         let rangeSize: Int = 90
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
@@ -177,7 +203,7 @@ extension EventListWidgetViewModelProvider {
         
         let totalEvents = try await self.eventsFetchUsecase.fetchEvents(in: range, timeZone)
         
-        let builder = EventListWidgetViewModel.DayEventListModel.Builder(
+        let builder = EventListWidgetViewModel.SectionModel.Builder(
             calendar: calendar, timeZone: timeZone, is24Form: is24Form, customTags: totalEvents.customTagMap
         )
         
@@ -186,7 +212,6 @@ extension EventListWidgetViewModelProvider {
         if let currentModel = builder.makeCurrentTodoListModel(totalEvents.currentTodos, range) {
             modelLists.insert(currentModel, at: 0)
         }
-        
         return modelLists
     }
 }

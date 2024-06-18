@@ -101,28 +101,32 @@ private extension WidgetFamily {
 
 private extension EventListWidgetViewModel {
     
-    func prefixedEvents(_ max: Int) -> EventListWidgetViewModel {
+    func prefixedEvents(_ maxCount: Int) -> EventListWidgetViewModel {
         
-        var remain = max; var index = 0
-        var days: [DayEventListModel] = []
-        while index < self.lists.count && remain > 0 {
-            let day = self.lists[index].prefixIfNeed(remain)
-            if !day.events.isEmpty {
-                days.append(day)
-            }
-            remain -= day.events.count
-            index += 1
-        }
         let totalEventCount = self.lists.flatMap { $0.events }.count
+        let firstDateIndex = self.lists.firstIndex(where: { $0.isCurrentTodos == false })
+        var remain = maxCount; var index = 0
+        var days: [SectionModel] = []
+        
+        repeat {
+            let day = self.lists[index].prefixIfNeed(remain)
+            let isFirstDate = index == firstDateIndex
+            if isFirstDate || !day.events.isEmpty {
+                days.append(day)
+                remain -= max(1, day.events.count)
+            }
+            index += 1
+        } while index < self.lists.count && remain > 0
+        
         return self
             |> \.lists .~ days
-            |> \.needBottomSpace .~ (totalEventCount < max)
+            |> \.needBottomSpace .~ (totalEventCount < maxCount)
     }
 }
 
-private extension EventListWidgetViewModel.DayEventListModel {
+private extension EventListWidgetViewModel.SectionModel {
     
-    func prefixIfNeed(_ remainCount: Int) -> EventListWidgetViewModel.DayEventListModel {
+    func prefixIfNeed(_ remainCount: Int) -> EventListWidgetViewModel.SectionModel {
         if self.events.count > remainCount {
             return self |> \.events %~ { Array($0.prefix(remainCount)) }
         } else {

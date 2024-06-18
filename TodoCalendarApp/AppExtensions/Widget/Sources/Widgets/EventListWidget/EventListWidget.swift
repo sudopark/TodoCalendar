@@ -44,21 +44,21 @@ struct EventListView: View {
     }
     
     private func eventListPerDayView(
-        _ model: EventListWidgetViewModel.DayEventListModel
+        _ model: EventListWidgetViewModel.SectionModel
     ) -> some View {
         
         VStack(alignment: .leading, spacing: 2.5) {
-            Text(model.dateText)
+            Text(model.sectionTitle)
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(
-                    model.accentDateText
+                    model.shouldAccentTitle
                     ? colorSet.normalText.asColor : colorSet.subSubNormalText.asColor
                 )
             
             if model.events.isEmpty {
-                Text("There is no events.".localized())
+                Text("There are no events.".localized())
                     .lineLimit(1)
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.9)
                     .font(.system(size: 13))
                     .foregroundStyle(colorSet.subNormalText.asColor)
                     
@@ -244,15 +244,15 @@ struct EventListWidgetPreview_Provider: PreviewProvider {
             |> \.tagColor .~ .default
             |> \.periodText .~ .singleText(.init(text: "Allday".localized()))
         
-        let june3 = EventListWidgetViewModel.DayEventListModel(
-            dateText: "TUE, JUN 3",
-            events: [ 
+        let june3 = EventListWidgetViewModel.SectionModel(
+            title: "TUE, JUN 3",
+            events: [
                 lunchEvent, callTodoEvent
             ],
-            accentDateText: true
+            shouldAccentTitle: true
         )
         
-        let july = EventListWidgetViewModel.DayEventListModel(dateText: "SUN, JUL 16", events: [
+        let july = EventListWidgetViewModel.SectionModel(title: "SUN, JUL 16", events: [
             surfingEvent
         ])
 

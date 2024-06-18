@@ -14,7 +14,7 @@ struct WidgetErrorModel: Error {
     let message: String
     init(error: any Error, message: String? = nil) {
         self.error = error
-        self.message = message ?? error.localizedDescription
+        self.message = message ?? "\(error)"
     }
 }
 
