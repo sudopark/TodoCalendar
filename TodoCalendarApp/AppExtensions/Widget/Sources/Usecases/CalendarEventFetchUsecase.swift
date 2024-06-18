@@ -171,7 +171,7 @@ extension CalendarEventFetchUsecaseImple {
             range, timeZone: timeZone
         )
         let events = holidays.compactMap { HolidayCalendarEvent($0, in: timeZone) }
-        return events.filter { $0.eventTime?.isOverlap(with: range) ?? false }
+        return events.filter { $0.eventTime?.isRoughlyOverlap(with: range) ?? false }
     }
 }
 

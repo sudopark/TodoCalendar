@@ -70,7 +70,7 @@ struct EventListWidgetViewModel {
                     guard let dayRange = calendar.addDays(offset, from: start).flatMap(calendar.dayRange(_:))
                     else { return nil }
                     
-                    let eventsThisDay = events.filter { $0.eventTime?.isOverlap(with: dayRange) ?? false }
+                    let eventsThisDay = events.filter { $0.eventTime?.isOverlap(with: dayRange, in: self.timeZone) ?? false }
                     let models = eventsThisDay.compactMap { event -> (any EventCellViewModel)? in
                         switch event {
                         case let todo as TodoCalendarEvent:

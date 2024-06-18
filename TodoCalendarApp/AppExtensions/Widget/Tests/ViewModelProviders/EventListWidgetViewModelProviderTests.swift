@@ -173,3 +173,63 @@ extension EventListWidgetViewModelProviderTests {
         XCTAssertEqual(viewModel.lists.first?.events.count, 0)
     }
 }
+
+
+extension EventListWidgetViewModelProviderTests {
+    
+    private final class StubSingleEventFetchUsecase: StubCalendarEventsFetchUescase {
+        let event: any CalendarEvent
+        init(event: any CalendarEvent) {
+            self.event = event
+        }
+        
+        override func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
+            return .init(currentTodos: [], eventWithTimes: [self.event], customTagMap: [:])
+        }
+    }
+    
+    func makeProviderWithSingleEvent(_ event: CalendarEvent) -> EventListWidgetViewModelProvider {
+        
+        let usecase = StubSingleEventFetchUsecase(event: event)
+        let calendarSettingRepository = StubCalendarSettingRepository()
+        let appSettingRepository = StubAppSettingRepository()
+        
+        return EventListWidgetViewModelProvider(
+            eventsFetchUsecase: usecase,
+            appSettingRepository: appSettingRepository,
+            calendarSettingRepository: calendarSettingRepository
+        )
+    }
+    
+    var dummyPDTAlldayTodo: TodoCalendarEvent {
+        let pdt = TimeZone(abbreviation: "PDT")!
+        let calednar = Calendar(identifier: .gregorian)
+            |> \.timeZone .~ pdt
+        let refDateAsPdt = calednar.dateBySetting(from: Date()) {
+            $0.year = 2024; $0.month = 3; $0.day = 1
+        }
+        let allDayRange = calednar.dayRange(refDateAsPdt!)!
+        let todo = TodoEvent(uuid: "allday_todo", name: "allday todo")
+            |> \.time .~ .allDay(
+                allDayRange,
+                secondsFromGMT: TimeInterval(pdt.secondsFromGMT(
+                    for: Date(timeIntervalSince1970: allDayRange.lowerBound)
+                ))
+            )
+        return TodoCalendarEvent(todo, in: self.kst)
+    }
+    
+    func testProvider_whenEventIsAllDay_onlyShowThatDay() async throws {
+        // given
+        let usecase = self.makeProviderWithSingleEvent(self.dummyPDTAlldayTodo)
+        
+        // when
+        let viewModel = try await usecase.getEventListViewModel(for: self.refDate)
+        
+        // then
+        let allEvents = viewModel.lists.flatMap { $0.events }
+        let refDateEvent = allEvents.first as? TodoEventCellViewModel
+        XCTAssertEqual(refDateEvent?.name, "allday todo")
+        XCTAssertEqual(allEvents.count, 1)
+    }
+}

@@ -63,7 +63,7 @@ public struct ScheduleEvent: Equatable {
         if let repeating {
             return repeating.isOverlap(with: period, for: self.time)
         } else {
-            return time.isOverlap(with: period)
+            return time.isRoughlyOverlap(with: period)
         }
     }
     

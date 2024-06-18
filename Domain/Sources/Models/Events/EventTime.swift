@@ -36,7 +36,8 @@ public enum EventTime: Comparable, Sendable, Hashable {
         }
     }
     
-    public func isOverlap(with period: Range<TimeInterval>) -> Bool {
+    ///  allDayEvent의 경우 지정한 날짜를 어떤 타임존에서 조회하더라도 검색가능해야하기때문에 -> 날짜 검사 범위 확대
+    public func isRoughlyOverlap(with period: Range<TimeInterval>) -> Bool {
         switch self {
         case .at(let time):
             return period ~= time
@@ -47,19 +48,15 @@ public enum EventTime: Comparable, Sendable, Hashable {
         }
     }
     
-    public func clamped(to period: Range<TimeInterval>) -> Range<TimeInterval>? {
+    public func isOverlap(with period: Range<TimeInterval>, in timeZone: TimeZone) -> Bool {
         switch self {
         case .at(let time):
             return period ~= time
-                ? time..<time
-                : nil
         case .period(let range):
-            let clamped = range.clamped(to: period)
-            return clamped.isEmpty ? nil : clamped
-            
+            return range.overlaps(period)
         case .allDay(let range, let secondsFromGMT):
-            let clamped = range.intervalRanges(secondsFromGMT: secondsFromGMT).clamped(to: period)
-            return clamped.isEmpty ? nil : clamped
+            let shiftedRange = range.shiftting(secondsFromGMT, to: timeZone)
+            return shiftedRange.overlaps(period)
         }
     }
     
