@@ -30,6 +30,7 @@ public protocol EventUsecaseFactory {
     func makeEventTagUsecase() -> any EventTagUsecase
     func makeEventDetailDataUsecase() -> any EventDetailDataUsecase
     func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase
+    func makeForemostEventUsecase() -> any ForemostEventUsecase
 }
 
 public protocol SettingUsecaseFactory {

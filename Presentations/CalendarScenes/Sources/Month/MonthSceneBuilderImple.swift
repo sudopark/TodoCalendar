@@ -35,6 +35,7 @@ extension MonthSceneBuilderImple: MonthSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
+            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )
