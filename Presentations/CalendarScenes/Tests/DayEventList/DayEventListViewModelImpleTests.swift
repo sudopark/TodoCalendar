@@ -21,6 +21,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var stubTodoUsecase: PrivateStubTodoEventUsecase!
+    private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var stubTagUsecase: StubEventTagUsecase!
     private var spyRouter: SpyRouter!
     
@@ -34,6 +35,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.stubTodoUsecase = nil
+        self.stubForemostEventUsecase = nil
         self.stubTagUsecase = nil
         self.spyRouter = nil
     }
@@ -41,6 +43,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     // 9-10일: current-todo-1, current-todo-2, todo-with-time, not-repeating-schedule, repeating-schedule(turn 4)
     // 9-11일: current-todo-1, current-todo-2
     private func makeViewModel(
+        foremostEventId: ForemostEventId? = nil,
         shouldFailDoneTodo: Bool = false,
         shouldFailMakeTodo: Bool = false
     ) -> DayEventListViewModelImple {
@@ -65,9 +68,13 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         uiSettingUsecase.stubAppearanceSetting = setting
         _ = uiSettingUsecase.loadSavedAppearanceSetting()
         
+        self.stubForemostEventUsecase = .init(foremostId: foremostEventId)
+        self.stubForemostEventUsecase.refresh()
+        
         let viewModel = DayEventListViewModelImple(
             calendarSettingUsecase: calendarSettingUsecase,
             todoEventUsecase: self.stubTodoUsecase,
+            foremostEventUsecase: self.stubForemostEventUsecase,
             eventTagUsecase: self.stubTagUsecase,
             uiSettingUsecase: uiSettingUsecase
         )
@@ -363,6 +370,74 @@ extension DayEventListViewModelImpleTests {
         let allDay2Days: EventTime = .allDay(self.pdt9_9to9_10, secondsFromGMT: offset)
         parameterizeTest(allDay2Days, "Sep 9 ~ Sep 10(2days)")
     }
+    
+    func testCellViewModel_moresActions_fromTodo() {
+        // given
+        func parameterizeTest(_ todo: TodoEvent, isForemost: Bool = false, _ expectActions: [[EventListMoreAction]]) {
+            // given
+            let event = TodoCalendarEvent(todo, in: .current)
+                |> \.isForemost .~ isForemost
+            
+            // when
+            let cvm = TodoEventCellViewModel(event, in: 0..<10, .current, false)
+            let actions = cvm?.moreActions
+            
+            // then
+            XCTAssertEqual(actions, expectActions)
+        }
+        let dummyRepeating = EventRepeating(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
+        
+        // when + then
+        parameterizeTest(
+            TodoEvent(uuid: "current", name: "some"),
+            [[.remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+        )
+        parameterizeTest(
+            TodoEvent(uuid: "current", name: "some"), 
+            isForemost: true,
+            [[.remove(onlyThisTime: false)], [.toggle(isForemost: true)]]
+        )
+        parameterizeTest(
+            TodoEvent(uuid: "some", name: "some") |> \.time .~ .at(0),
+            [[.remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+        )
+        parameterizeTest(
+            TodoEvent(uuid: "some", name: "some")
+            |> \.time .~ .at(0) |> \.repeating .~ dummyRepeating,
+            [[.remove(onlyThisTime: true), .remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+        )
+    }
+    
+    func testCellViewModel_moresActions_fromSchedule() {
+        // given
+        func parameterizeTest(_ schedule: ScheduleEvent, isForemost: Bool = false, _ expectActions: [[EventListMoreAction]]) {
+            // given
+            let event = ScheduleCalendarEvent.events(from: schedule, in: .current, foremostId: isForemost ? schedule.uuid : nil).first!
+            
+            // when
+            let cvm = ScheduleEventCellViewModel(event, in: 0..<1, timeZone: .current, false)
+            let actions = cvm?.moreActions
+            
+            // then
+            XCTAssertEqual(actions, expectActions)
+        }
+        let dummyRepeating = EventRepeating(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
+        
+        // when + then
+        parameterizeTest(
+            ScheduleEvent(uuid: "some", name: "some", time: .at(0)),
+            [[.remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+        )
+        parameterizeTest(
+            ScheduleEvent(uuid: "some", name: "some", time: .at(0)),
+            isForemost: true,
+            [[.remove(onlyThisTime: false)], [.toggle(isForemost: true)]]
+        )
+        parameterizeTest(
+            ScheduleEvent(uuid: "some", name: "some", time: .at(0)) |> \.repeating .~ dummyRepeating,
+            [[.remove(onlyThisTime: true), .remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+        )
+    }
 }
 
 extension DayEventListViewModelImpleTests {
@@ -380,7 +455,13 @@ extension DayEventListViewModelImpleTests {
         let todo = TodoCalendarEvent(.init(uuid: ("todo-with-time"), name: "todo-with-time") |> \.eventTagId .~ .custom("some"), in: timeZone)
         let scheduleWithoutRepeating = ScheduleCalendarEvent(
             eventIdWithoutTurn: "ev",
-            eventId: "not-repeating-schedule", name: "not-repeating-schedule", eventTime: .at(self.todayRange.lowerBound), eventTimeOnCalendar: nil, eventTagId: .custom("some")) |> \.turn .~ 1
+            eventId: "not-repeating-schedule", 
+            name: "not-repeating-schedule",
+            eventTime: .at(self.todayRange.lowerBound),
+            eventTimeOnCalendar: nil,
+            eventTagId: .custom("some"),
+            isRepeating: false
+        ) |> \.turn .~ 1
         return [
             holiday, scheduleWithRepeating, todo, scheduleWithoutRepeating
         ]
@@ -399,7 +480,9 @@ extension DayEventListViewModelImpleTests {
     func testViewModel_provideEventListThatDayWithCurrentTodo() {
         // given
         let expect = expectation(description: "해당 하는 날짜의 이벤트 목록을 current todo와 함께 제공")
-        let viewModel = self.makeViewModel()
+        let viewModel = self.makeViewModel(
+            foremostEventId: .init("current-todo-2", true)
+        )
         
         // when
         let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
@@ -409,9 +492,11 @@ extension DayEventListViewModelImpleTests {
         
         // then
         let eventIdLists = cvms?.map { $0.eventIdentifier }
+        let isForemosts = cvms?.map { $0.isForemost }
         XCTAssertEqual(eventIdLists, [
             "current-todo-1", "current-todo-2"
         ] + self.dummyEventIdStrings)
+        XCTAssertEqual(isForemosts, [false, true, false, false, false, false])
     }
     
     // 선택된 날짜에 해당하는 todo event 완료 처리시 목록에서 제거
@@ -655,7 +740,15 @@ extension DayEventListViewModelImpleTests {
         // given
         let viewModel = self.makeViewModelWithInitialListLoaded()
         let timeZone = TimeZone(abbreviation: "KST")!
-        let schedule = ScheduleCalendarEvent(eventIdWithoutTurn: "ev", eventId: "dummy", name: "some", eventTime: .at(0), eventTimeOnCalendar: .at(0), eventTagId: .default)
+        let schedule = ScheduleCalendarEvent(
+            eventIdWithoutTurn: "ev",
+            eventId: "dummy",
+            name: "some",
+            eventTime: .at(0),
+            eventTimeOnCalendar: .at(0),
+            eventTagId: .default,
+            isRepeating: false
+        )
         
         // when
         let model = ScheduleEventCellViewModel(schedule, in: 0..<10, timeZone: timeZone, true)!

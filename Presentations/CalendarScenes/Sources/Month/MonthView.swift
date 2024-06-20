@@ -449,6 +449,8 @@ private struct DummyCalendarEvent: CalendarEvent {
     var eventTime: EventTime?
     var eventTimeOnCalendar: EventTimeOnCalendar?
     var eventTagId: AllEventTagId
+    var isRepeating: Bool = false
+    var isForemost: Bool = false
 
     init(_ id: String, _ name: String, hasPeriod: Bool = true) {
         self.eventId = id

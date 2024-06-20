@@ -55,12 +55,14 @@ public protocol CalendarEvent {
     var eventTime: EventTime? { get }
     var eventTimeOnCalendar: EventTimeOnCalendar? { get }
     var eventTagId: AllEventTagId { get }
+    var isForemost: Bool { get }
+    var isRepeating: Bool { get }
 }
 
 extension CalendarEvent {
     
     public var compareKey: String {
-        return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)"
+        return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)"
     }
 }
 
@@ -74,13 +76,27 @@ public struct TodoCalendarEvent: CalendarEvent {
     public let eventTime: EventTime?
     public let eventTimeOnCalendar: EventTimeOnCalendar?
     public let eventTagId: AllEventTagId
+    public let isRepeating: Bool
+    public var isForemost: Bool = false
     
-    public init(_ todo: TodoEvent, in timeZone: TimeZone) {
+    public init(current todo: TodoEvent, isForemost: Bool) {
+        self.eventId = todo.uuid
+        self.name = todo.name
+        self.eventTime = nil
+        self.eventTimeOnCalendar = nil
+        self.eventTagId = todo.eventTagId ?? .default
+        self.isRepeating = false
+        self.isForemost = isForemost
+    }
+    
+    public init(_ todo: TodoEvent, in timeZone: TimeZone, isForemost: Bool = false) {
         self.eventId = todo.uuid
         self.name = todo.name
         self.eventTime = todo.time
         self.eventTimeOnCalendar = todo.time.map { EventTimeOnCalendar($0, timeZone: timeZone) }
         self.eventTagId = todo.eventTagId ?? .default
+        self.isRepeating = todo.time != nil && todo.repeating != nil
+        self.isForemost = isForemost
     }
 }
 
@@ -93,10 +109,13 @@ public struct ScheduleCalendarEvent: CalendarEvent {
     public let eventTimeOnCalendar: EventTimeOnCalendar?
     public let eventTagId: AllEventTagId
     public var turn: Int = 0
+    public let isRepeating: Bool
+    public var isForemost: Bool = false
     
     public static func events(
         from schedule: ScheduleEvent,
-        in timeZone: TimeZone
+        in timeZone: TimeZone,
+        foremostId: String? = nil
     ) -> [ScheduleCalendarEvent] {
         
         return schedule.repeatingTimes
@@ -107,7 +126,9 @@ public struct ScheduleCalendarEvent: CalendarEvent {
                     name: schedule.name,
                     eventTime: $0.time,
                     eventTimeOnCalendar: .init($0.time, timeZone: timeZone),
-                    eventTagId: schedule.eventTagId ?? .default
+                    eventTagId: schedule.eventTagId ?? .default,
+                    isRepeating: schedule.repeating != nil,
+                    isForemost: foremostId == schedule.uuid
                 )
                 |> \.turn .~ $0.turn
             }
@@ -122,6 +143,8 @@ public struct HolidayCalendarEvent: CalendarEvent {
     public let eventTime: EventTime?
     public let eventTimeOnCalendar: EventTimeOnCalendar?
     public let eventTagId: AllEventTagId
+    public let isRepeating: Bool = true
+    public let isForemost: Bool = false
     
     public init?(_ holiday: Holiday, in timeZone: TimeZone) {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone

@@ -196,6 +196,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let todoUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
+    private let foremostEventUsecase: any ForemostEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let uiSettingUsecase: any UISettingUsecase
     private weak var listener: (any MonthSceneListener)?
@@ -206,6 +207,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         calendarSettingUsecase: any CalendarSettingUsecase,
         todoUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
+        foremostEventUsecase: any ForemostEventUsecase,
         eventTagUsecase: any EventTagUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
@@ -213,6 +215,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.todoUsecase = todoUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
+        self.foremostEventUsecase = foremostEventUsecase
         self.eventTagUsecase = eventTagUsecase
         self.uiSettingUsecase = uiSettingUsecase
         
@@ -344,14 +347,19 @@ extension MonthViewModelImple {
         
         let todos = self.todoUsecase.todoEvents(in: info.range)
         let schedules = self.scheduleEventUsecase.scheduleEvents(in: info.range)
+        let foremost = self.foremostEventUsecase.foremostEventId
         let holidayCalenarEvents = info.component.holidayCalendarEvents(with: info.timeZone)
-        let transform: ([TodoEvent], [ScheduleEvent]) -> [any CalendarEvent]
-        transform = { todos, schedules in
-            let todoEvents = todos.compactMap { TodoCalendarEvent($0, in: info.timeZone) }
-            let scheduleEvents = schedules.flatMap { ScheduleCalendarEvent.events(from: $0, in: info.timeZone) }
+        let transform: ([TodoEvent], [ScheduleEvent], ForemostEventId?) -> [any CalendarEvent]
+        transform = { todos, schedules, foremost in
+            let todoEvents = todos.compactMap {
+                TodoCalendarEvent($0, in: info.timeZone, isForemost: foremost?.eventId == $0.uuid)
+            }
+            let scheduleEvents = schedules.flatMap {
+                ScheduleCalendarEvent.events(from: $0, in: info.timeZone, foremostId: foremost?.eventId)
+            }
             return todoEvents + scheduleEvents + holidayCalenarEvents
         }
-        return Publishers.CombineLatest(todos, schedules)
+        return Publishers.CombineLatest3(todos, schedules, foremost)
             .map(transform)
             .eraseToAnyPublisher()
             .filterTagActivated(self.eventTagUsecase) { $0.eventTagId }

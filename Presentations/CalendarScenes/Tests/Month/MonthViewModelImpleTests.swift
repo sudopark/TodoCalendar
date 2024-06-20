@@ -22,6 +22,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubSettingUsecase: StubCalendarSettingUsecase!
     private var stubTodoUsecase: PrivateStubTodoUsecase!
     private var stubScheduleUsecase: PrivateStubScheduleUsecase!
+    private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var stubTagUsecase: StubEventTagUsecase!
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyListener: SpyListener?
@@ -43,18 +44,24 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubSettingUsecase = nil
         self.stubTodoUsecase = nil
         self.stubScheduleUsecase = nil
+        self.stubForemostEventUsecase = nil
         self.stubTagUsecase = nil
         self.stubUISettingUsecase = nil
         self.spyListener = nil
     }
 
-    private func makeViewModel() -> MonthViewModelImple {
+    private func makeViewModel(
+        foremostId: ForemostEventId? = nil
+    ) -> MonthViewModelImple {
         let calendarUsecase = PrivateStubCalendarUsecase(
             today: .init(year: 2023, month: 09, day: 10, weekDay: 1)
         )
         self.stubSettingUsecase.prepare()
         
         _ = self.stubUISettingUsecase.loadSavedAppearanceSetting()
+        
+        self.stubForemostEventUsecase = .init(foremostId: foremostId)
+        self.stubForemostEventUsecase.refresh()
 
         let viewModel = MonthViewModelImple(
             initialMonth: .init(year: 2023, month: 9),
@@ -62,6 +69,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
             calendarSettingUsecase: self.stubSettingUsecase,
             todoUsecase: self.stubTodoUsecase,
             scheduleEventUsecase: self.stubScheduleUsecase,
+            foremostEventUsecase: self.stubForemostEventUsecase,
             eventTagUsecase: self.stubTagUsecase,
             uiSettingUsecase: self.stubUISettingUsecase
         )
@@ -281,7 +289,9 @@ extension MonthViewModelImpleTests {
         ])
     }
 
-    private func makeViewModelWithStubEvents() -> MonthViewModelImple {
+    private func makeViewModelWithStubEvents(
+        foremostEventId: ForemostEventId? = nil
+    ) -> MonthViewModelImple {
         let todo_w2_sun_wed = TodoEvent(uuid: "todo_w2_sun_wed", name: "some")
             |> \.time .~ .dummyPeriod(from: (09, 10), to: (09, 13))
         let todo_w1_mon = TodoEvent(uuid: "todo_w1_mon", name: "some")
@@ -323,7 +333,7 @@ extension MonthViewModelImpleTests {
         ]
         
         
-        return self.makeViewModel()
+        return self.makeViewModel(foremostId: foremostEventId)
     }
 
     private func removeTodo0828() {
@@ -605,20 +615,25 @@ extension MonthViewModelImpleTests {
     // 5th 29일 선택 -> 이벤트 [
     func testViewModel_whenSelectedDayChanged_notify() {
         // given
-        let viewModel = self.makeViewModelWithStubEvents()
+        let viewModel = self.makeViewModelWithStubEvents(
+            foremostEventId: .init("todo_w2_sun_wed", true)
+        )
         viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
         
         func parameterizeTest(
             _ expectDay: String,
             _ expectEventIds: [String],
             _ expectHasHoliday: Bool,
+            _ expectForemost: [String] = [],
             _ action: () -> Void
         ) {
             // given
             let expect = expectation(description: "wait selected day notified")
             var model: CurrentSelectDayModel?; var eventIds: [String]?
+            var foremostEvnetIdsInThisWeek: [String] = []
             self.spyListener?.didCurrentDayChanged = {
                 model = $0; eventIds = $1.map { $0.eventId }
+                foremostEvnetIdsInThisWeek = $1.filter { $0.isForemost }.map { $0.eventId }
                 expect.fulfill()
             }
             
@@ -630,13 +645,14 @@ extension MonthViewModelImpleTests {
             XCTAssertEqual(model?.identifier, expectDay)
             XCTAssertEqual(eventIds, expectEventIds)
             XCTAssertEqual(model?.holiday != nil, expectHasHoliday)
+            XCTAssertEqual(foremostEvnetIdsInThisWeek, expectForemost)
         }
         
         // when + then
-        parameterizeTest("2023-9-11", ["todo_w2_sun_wed"], false) {
+        parameterizeTest("2023-9-11", ["todo_w2_sun_wed"], false, ["todo_w2_sun_wed"]) {
             viewModel.select(.init(2023, 9, 11))
         }
-        parameterizeTest("2023-9-13", ["todo_w2_sun_wed", "schedule_w2_tue_fri-1"], false) {
+        parameterizeTest("2023-9-13", ["todo_w2_sun_wed", "schedule_w2_tue_fri-1"], false, ["todo_w2_sun_wed"]) {
             viewModel.select(.init(2023, 9, 13))
         }
         parameterizeTest("2023-9-15", ["schedule_event_repeating-4", "schedule_w2_tue_fri-1"], false) {
