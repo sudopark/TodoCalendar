@@ -21,13 +21,15 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var stubTodoUsecase: PrivateStubTodoEventUsecase!
-    private var stubForemostEventUsecase: StubForemostEventUsecase!
+    private var stubScheduleUsecase: PrivateScheduleEventUsecase!
+    private var stubForemostEventUsecase: PrivateForemostEventUsecase!
     private var stubTagUsecase: StubEventTagUsecase!
     private var spyRouter: SpyRouter!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.stubTodoUsecase = .init()
+        self.stubScheduleUsecase = .init()
         self.stubTagUsecase = .init()
         self.spyRouter = .init()
     }
@@ -35,6 +37,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.stubTodoUsecase = nil
+        self.stubScheduleUsecase = nil
         self.stubForemostEventUsecase = nil
         self.stubTagUsecase = nil
         self.spyRouter = nil
@@ -74,6 +77,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let viewModel = DayEventListViewModelImple(
             calendarSettingUsecase: calendarSettingUsecase,
             todoEventUsecase: self.stubTodoUsecase,
+            scheduleEventUsecase: self.stubScheduleUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
             eventTagUsecase: self.stubTagUsecase,
             uiSettingUsecase: uiSettingUsecase
@@ -770,6 +774,202 @@ extension DayEventListViewModelImpleTests {
 //    }
 }
 
+// MARK: - handle more action
+
+extension DayEventListViewModelImpleTests {
+    
+    func testViewModel_removeTodoEvent() {
+        // given
+        func parameterizeTest(
+            _ description: String,
+            _ cellViewModel: TodoEventCellViewModel,
+            _ action: EventListMoreAction,
+            expectRemovedId: String,
+            and expectOnlyThisTime: Bool
+        ) {
+            // given
+            let expect = expectation(description: description)
+            let viewModel = self.makeViewModelWithInitialListLoaded()
+            var recordParams: (String, Bool)?
+            self.stubTodoUsecase.didRemoveTodoWithParamsCallback = {
+                recordParams = ($0, $1)
+                expect.fulfill()
+            }
+            
+            // when
+            viewModel.handleMoreAction(cellViewModel, action)
+            self.wait(for: [expect], timeout: self.timeout)
+            
+            // then
+            XCTAssertEqual(recordParams?.0, expectRemovedId)
+            XCTAssertEqual(recordParams?.1, expectOnlyThisTime)
+        }
+        // when + then
+        let dummy = TodoEventCellViewModel("todo", name: "some")
+        parameterizeTest(
+            "todo event 삭제",
+            dummy, .remove(onlyThisTime: false),
+            expectRemovedId: "todo", and: false
+        )
+        parameterizeTest(
+            "반복중인 todo event 이번 회차만 삭제",
+            dummy, .remove(onlyThisTime: true),
+            expectRemovedId: "todo", and: true
+        )
+    }
+    
+    func testViewModel_removeScheduleEvent() {
+        // given
+        func parameterizeTest(
+            _ description: String,
+            _ cellViewModel: ScheduleEventCellViewModel,
+            _ action: EventListMoreAction,
+            expectRemovedId: String,
+            and expectOnlyThisTime: EventTime?
+        ) {
+            // given
+            let expect = expectation(description: description)
+            let viewModel = self.makeViewModelWithInitialListLoaded()
+            var recordParams: (String, EventTime?)?
+            self.stubScheduleUsecase.didRemoveEventWithParamsCallback = {
+                recordParams = ($0, $1)
+                expect.fulfill()
+            }
+            
+            // when
+            viewModel.handleMoreAction(cellViewModel, action)
+            self.wait(for: [expect], timeout: self.timeout)
+            
+            // then
+            XCTAssertEqual(recordParams?.0, expectRemovedId)
+            XCTAssertEqual(recordParams?.1, expectOnlyThisTime)
+        }
+        // when + then
+        let dummy = ScheduleEventCellViewModel("schedule", name: "name")
+            |> \.eventTimeRawValue .~ .at(100)
+        parameterizeTest(
+            "schedule event 삭제",
+            dummy, .remove(onlyThisTime: false),
+            expectRemovedId: "schedule", and: nil
+        )
+        parameterizeTest(
+            "반복중인 schedule event 이번 회차만 삭제",
+            dummy, .remove(onlyThisTime: true),
+            expectRemovedId: "schedule", and: .at(100)
+        )
+    }
+    
+    func testViewModel_toggleIsForemostEvent() {
+        // given
+        enum ExpectedRecord: Equatable {
+            case removed
+            case updated(ForemostEventId)
+        }
+        func parameterizeTest(
+            _ description: String,
+            _ cellViewModel: any EventCellViewModel,
+            _ action: EventListMoreAction,
+            expectRecordedValue: ExpectedRecord
+        ) {
+            // given
+            let expect = expectation(description: description)
+            var recorded: ExpectedRecord?
+            let viewModel = self.makeViewModelWithInitialListLoaded()
+            switch expectRecordedValue {
+            case .updated:
+                self.stubForemostEventUsecase.didUpdateForemostCallback = {
+                    recorded = .updated($0)
+                    expect.fulfill()
+                }
+            case .removed:
+                self.stubForemostEventUsecase.didRemoveForemostCallback = {
+                    recorded = .removed
+                    expect.fulfill()
+                }
+            }
+            
+            // when
+            viewModel.handleMoreAction(cellViewModel, action)
+            self.wait(for: [expect], timeout: self.timeout)
+            
+            // then
+            XCTAssertEqual(recorded, expectRecordedValue)
+        }
+        
+        // when + then
+        let todo = TodoEventCellViewModel("todo", name: "name")
+        parameterizeTest(
+            "foremost 이벤트로 todo 등록",
+            todo,
+            .toggleTo(isForemost: true),
+            expectRecordedValue: .updated(.init("todo", true))
+        )
+        parameterizeTest(
+            "foremost 이벤트로 todo 등록 해제",
+            todo,
+            .toggleTo(isForemost: false),
+            expectRecordedValue: .removed
+        )
+        let schedule = ScheduleEventCellViewModel("schedule", name: "name")
+        parameterizeTest(
+            "foremost 이벤트로 schedule 등록",
+            schedule,
+            .toggleTo(isForemost: true),
+            expectRecordedValue: .updated(.init("schedule", false))
+        )
+        parameterizeTest(
+            "foremost 이벤트로 schedule 등록 해제",
+            schedule,
+            .toggleTo(isForemost: false),
+            expectRecordedValue: .removed
+        )
+    }
+    
+    func testViewModel_whenToggleIsForemost_updateEventList() {
+        // given
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        func waitCVMLists(
+            _ action: @escaping () -> Void
+        ) -> [[any EventCellViewModel]] {
+            // given
+            let expect = expectation(description: "foremost 이벤트 등록 여부에 따라 이벤트 리스트 업데이트")
+            expect.expectedFulfillmentCount = 2
+            expect.assertForOverFulfill = false
+            
+            // when
+            let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels, timeout: 0.1) {
+                action()
+            }
+            
+            // then
+            return cvmLists
+        }
+        let dummy = TodoEventCellViewModel("current-todo-2", name: "dummy")
+        
+        // when
+        let cvmListsOffToOn = waitCVMLists {
+            viewModel.handleMoreAction(dummy, .toggleTo(isForemost: true))
+        }
+        let cvmListsOnToOff = waitCVMLists {
+            viewModel.handleMoreAction(dummy, .toggleTo(isForemost: false))
+        }
+        
+        // then
+        let foremostEventIdWhenOffToOn = cvmListsOffToOn.map { ls in
+            ls.filter { $0.isForemost }.map { $0.eventIdentifier }
+        }
+        let foremostEventIsWhenOnToOff = cvmListsOnToOff.map { ls in
+            ls.filter { $0.isForemost }.map { $0.eventIdentifier }
+        }
+        XCTAssertEqual(foremostEventIdWhenOffToOn, [
+            [], ["current-todo-2"]
+        ])
+        XCTAssertEqual(foremostEventIsWhenOnToOff, [
+            ["current-todo-2"], []
+        ])
+    }
+}
+
 extension DayEventListViewModelImpleTests {
     
     func testViewModel_showDoneTodoList() {
@@ -833,5 +1033,33 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
         return super.currentTodoEvents
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    var didRemoveTodoWithParamsCallback: ((String, Bool) -> Void)?
+    override func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
+        self.didRemoveTodoWithParamsCallback?(id, onlyThisTime)
+    }
+}
+
+private final class PrivateScheduleEventUsecase: StubScheduleEventUsecase {
+    
+    var didRemoveEventWithParamsCallback: ((String, EventTime?) -> Void)?
+    override func removeScheduleEvent(_ eventId: String, onlyThisTime: EventTime?) async throws {
+        self.didRemoveEventWithParamsCallback?(eventId, onlyThisTime)
+    }
+}
+
+private final class PrivateForemostEventUsecase: StubForemostEventUsecase {
+    
+    var didUpdateForemostCallback: ((ForemostEventId) -> Void)?
+    override func update(foremost eventId: ForemostEventId) async throws {
+        self.didUpdateForemostCallback?(eventId)
+        try await super.update(foremost: eventId)
+    }
+    
+    var didRemoveForemostCallback: (() -> Void)?
+    override func remove() async throws {
+        self.didRemoveForemostCallback?()
+        try await super.remove()
     }
 }
