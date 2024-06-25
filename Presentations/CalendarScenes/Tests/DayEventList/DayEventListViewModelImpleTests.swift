@@ -373,69 +373,69 @@ extension DayEventListViewModelImpleTests {
     
     func testCellViewModel_moresActions_fromTodo() {
         // given
-        func parameterizeTest(_ todo: TodoEvent, isForemost: Bool = false, _ expectActions: [[EventListMoreAction]]) {
+        func parameterizeTest(_ todo: TodoEvent, isForemost: Bool = false, expectIsRepeating: Bool) {
             // given
             let event = TodoCalendarEvent(todo, in: .current)
                 |> \.isForemost .~ isForemost
             
             // when
             let cvm = TodoEventCellViewModel(event, in: 0..<10, .current, false)
-            let actions = cvm?.moreActions
             
             // then
-            XCTAssertEqual(actions, expectActions)
+            XCTAssertEqual(cvm?.isRepeating, expectIsRepeating)
+            XCTAssertEqual(cvm?.isForemost, isForemost)
         }
         let dummyRepeating = EventRepeating(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
         
         // when + then
         parameterizeTest(
             TodoEvent(uuid: "current", name: "some"),
-            [[.remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+            expectIsRepeating: false
         )
         parameterizeTest(
             TodoEvent(uuid: "current", name: "some"), 
             isForemost: true,
-            [[.remove(onlyThisTime: false)], [.toggle(isForemost: true)]]
+            expectIsRepeating: false
         )
         parameterizeTest(
             TodoEvent(uuid: "some", name: "some") |> \.time .~ .at(0),
-            [[.remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+            expectIsRepeating: false
         )
         parameterizeTest(
             TodoEvent(uuid: "some", name: "some")
             |> \.time .~ .at(0) |> \.repeating .~ dummyRepeating,
-            [[.remove(onlyThisTime: true), .remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+            expectIsRepeating: true
         )
     }
     
     func testCellViewModel_moresActions_fromSchedule() {
         // given
-        func parameterizeTest(_ schedule: ScheduleEvent, isForemost: Bool = false, _ expectActions: [[EventListMoreAction]]) {
+        func parameterizeTest(_ schedule: ScheduleEvent, isForemost: Bool = false, expectIsRepeating: Bool) {
             // given
             let event = ScheduleCalendarEvent.events(from: schedule, in: .current, foremostId: isForemost ? schedule.uuid : nil).first!
             
             // when
             let cvm = ScheduleEventCellViewModel(event, in: 0..<1, timeZone: .current, false)
-            let actions = cvm?.moreActions
             
             // then
-            XCTAssertEqual(actions, expectActions)
+            XCTAssertEqual(cvm?.isRepeating, expectIsRepeating)
+            XCTAssertEqual(cvm?.isForemost, isForemost)
         }
         let dummyRepeating = EventRepeating(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
         
         // when + then
         parameterizeTest(
             ScheduleEvent(uuid: "some", name: "some", time: .at(0)),
-            [[.remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+            expectIsRepeating: false
         )
         parameterizeTest(
             ScheduleEvent(uuid: "some", name: "some", time: .at(0)),
             isForemost: true,
-            [[.remove(onlyThisTime: false)], [.toggle(isForemost: true)]]
+            expectIsRepeating: false
         )
         parameterizeTest(
             ScheduleEvent(uuid: "some", name: "some", time: .at(0)) |> \.repeating .~ dummyRepeating,
-            [[.remove(onlyThisTime: true), .remove(onlyThisTime: false)], [.toggle(isForemost: false)]]
+            expectIsRepeating: true
         )
     }
 }

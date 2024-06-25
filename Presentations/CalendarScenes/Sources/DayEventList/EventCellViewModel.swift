@@ -131,8 +131,9 @@ public enum EventPeriodText: Equatable, Sendable {
 // MARK: - EventEditAction
 
 public enum EventListMoreAction: Sendable, Equatable {
+    
     case remove(onlyThisTime: Bool)
-    case toggle(isForemost: Bool)
+    case toggleTo(isForemost: Bool)
 }
 
 // MARK: - EventCellViewModel
@@ -144,8 +145,8 @@ public protocol EventCellViewModel: Sendable {
     var periodText: EventPeriodText? { get set }
     var periodDescription: String? { get set }
     var tagColor: EventTagColor? { get set }
-    var moreActions: [[EventListMoreAction]] { get set }
     var isForemost: Bool { get }
+    var isRepeating: Bool { get }
     var customCompareKey: String { get }
     
     mutating func applyTagColor(_ tag: EventTag?)
@@ -186,7 +187,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     public var tagColor: EventTagColor?
     public var customCompareKey: String { self.makeCustomCompareKey(["todo"]) }
     public var eventTimeRawValue: EventTime?
-    public var moreActions: [[EventListMoreAction]] = []
+    public var isRepeating: Bool = false
     public var isForemost: Bool = false
     
     public init(_ id: String, name: String) {
@@ -208,10 +209,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
         self.periodDescription = todo.eventTime?.durationText(timeZone)
         self.eventTimeRawValue = todo.eventTime
         
-        let removeActions: [EventListMoreAction] = todo.isRepeating
-            ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
-            : [.remove(onlyThisTime: false)]
-        self.moreActions = [removeActions, [.toggle(isForemost: todo.isForemost)]]
+        self.isRepeating = todo.isRepeating
         self.isForemost = todo.isForemost
     }
 }
@@ -229,7 +227,7 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     var customCompareKey: String {
         self.makeCustomCompareKey(["pending-todo"])
     }
-    public var moreActions: [[EventListMoreAction]] = []
+    let isRepeating: Bool = false
     let isForemost: Bool = false
     
     init(name: String, defaultTagId: String?) {
@@ -253,8 +251,8 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public var periodText: EventPeriodText?
     public var periodDescription: String?
     public var tagColor: EventTagColor?
-    public var moreActions: [[EventListMoreAction]] = []
-    public var isForemost: Bool
+    public let isRepeating: Bool
+    public let isForemost: Bool
     public var customCompareKey: String {
         self.makeCustomCompareKey(["schedule", self.turn.map { "\($0)" }])
     }
@@ -265,6 +263,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         self.turn = turn
         self.name = name
         self.tagId = .default
+        self.isRepeating = false
         self.isForemost = false
     }
     
@@ -285,10 +284,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         self.periodText = periodText
         self.periodDescription = schedule.eventTime?.durationText(timeZone)
         
-        let removeActions: [EventListMoreAction] = schedule.isRepeating
-            ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
-            : [.remove(onlyThisTime: false)]
-        self.moreActions = [removeActions, [.toggle(isForemost: schedule.isForemost)]]
+        self.isRepeating = schedule.isRepeating
         self.isForemost = schedule.isForemost
     }
 }
@@ -303,8 +299,8 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     public var periodText: EventPeriodText?
     public var periodDescription: String?
     public var tagColor: EventTagColor?
-    public var moreActions: [[EventListMoreAction]] = []
-    public var isForemost: Bool = false
+    public let isRepeating: Bool = false
+    public let isForemost: Bool = false
     public var customCompareKey: String { self.makeCustomCompareKey(["holidays"]) }
     
     public init(_ holiday: HolidayCalendarEvent) {
