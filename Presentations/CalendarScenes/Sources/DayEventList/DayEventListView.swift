@@ -75,6 +75,7 @@ final class DayEventListViewEventHandler: ObservableObject {
     var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
     var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     var showDoneTodoList: () -> Void = { }
+    var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     
     func bind(_ viewModel: any DayEventListViewModel) {
         self.requestDoneTodo = viewModel.doneTodo(_:)
@@ -87,6 +88,7 @@ final class DayEventListViewEventHandler: ObservableObject {
         self.makeNewTodoWithGivenNameAndDetails = viewModel.makeTodoEvent(with:)
         self.requestShowDetail = viewModel.selectEvent(_:)
         self.showDoneTodoList = viewModel.showDoneTodoList
+        self.handleMoreAction = viewModel.handleMoreAction(_:_:)
     }
 }
 
@@ -175,6 +177,7 @@ struct DayEventListView: View {
                         .eventHandler(\.requestDoneTodo, eventHandler.requestDoneTodo)
                         .eventHandler(\.requestCancelDoneTodo, eventHandler.requestCancelDoneTodo)
                         .eventHandler(\.requestShowDetail, eventHandler.requestShowDetail)
+                        .eventHandler(\.handleMoreAction, eventHandler.handleMoreAction)
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
@@ -233,6 +236,7 @@ private struct EventListCellView: View {
     fileprivate var requestDoneTodo: (String) -> Void = { _ in }
     fileprivate var requestCancelDoneTodo: (String) -> Void = { _ in }
     fileprivate var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
+    fileprivate var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     
     private let cellViewModel: any EventCellViewModel
     init(cellViewModel: any EventCellViewModel) {
@@ -259,6 +263,38 @@ private struct EventListCellView: View {
         .backgroundAsRoundedRectForEventList(self.appearance)
         .onTapGesture {
             self.requestShowDetail(self.cellViewModel)
+        }
+        .contextMenu {
+            if cellViewModel.isSupportContextMenu {
+                if cellViewModel.isRepeating {
+                    removeButton(true)
+                }
+                removeButton(false)
+                
+                Divider()
+                
+                toggleForemostButton(cellViewModel.isForemost)
+            }
+        }
+    }
+    
+    private func removeButton(_ onlyThisTime: Bool) -> some View {
+        return Button(role: .destructive) {
+            self.handleMoreAction(
+                self.cellViewModel, .remove(onlyThisTime: onlyThisTime)
+            )
+        } label: {
+            Text(onlyThisTime ? "remove event only this time".localized() : "remove event".localized())
+        }
+    }
+    
+    private func toggleForemostButton(_ isForemost: Bool) -> some View {
+        return Button {
+            self.handleMoreAction(
+                self.cellViewModel, .toggleTo(isForemost: !isForemost)
+            )
+        } label: {
+            Text(isForemost ? "unmark as foremost".localized() : "mark as foremost".localized())
         }
     }
     
@@ -448,6 +484,14 @@ private extension EventCellViewModel {
     
     var todoEventId: String? {
         return (self as? TodoEventCellViewModel)?.eventIdentifier
+    }
+    
+    var isSupportContextMenu: Bool {
+        switch self {
+        case is TodoEventCellViewModel: return true
+        case is ScheduleEventCellViewModel: return true
+        default: return false
+        }
     }
 }
 
