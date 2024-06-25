@@ -261,7 +261,10 @@ struct EventDetailView: View {
                 }
             } label: {
                 Image(systemName: "ellipsis")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
                     .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .frame(width: 20, height: 20)
             }
         }
     }
