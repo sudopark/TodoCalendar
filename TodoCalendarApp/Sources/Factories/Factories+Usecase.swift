@@ -139,6 +139,25 @@ extension NonLoginUsecaseFactoryImple {
             todoRepository: repository
         )
     }
+    
+    func makeForemostEventUsecase() -> any ForemostEventUsecase {
+        let storage = ForemostLocalStorageImple(
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage,
+            todoStorage: TodoLocalStorageImple(
+                sqliteService: applicationBase.commonSqliteService
+            ),
+            scheduleStorage: ScheduleEventLocalStorageImple(
+                sqliteService: applicationBase.commonSqliteService
+            )
+        )
+        let repository = ForemostEventLocalRepositoryImple(
+            localStorage: storage
+        )
+        return ForemostEventUsecaseImple(
+            repository: repository,
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+    }
 }
 
 
@@ -320,6 +339,27 @@ extension LoginUsecaseFactoryImple {
         return DoneTodoEventsPagingUsecaseImple(
             pageSize: 100,
             todoRepository: repository
+        )
+    }
+    
+    func makeForemostEventUsecase() -> any ForemostEventUsecase {
+        
+        let cache = ForemostLocalStorageImple(
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage,
+            todoStorage: TodoLocalStorageImple(
+                sqliteService: applicationBase.commonSqliteService
+            ),
+            scheduleStorage: ScheduleEventLocalStorageImple(
+                sqliteService: applicationBase.commonSqliteService
+            )
+        )
+        let repository = ForemostEventRemoteRepositoryImple(
+            remote: applicationBase.remoteAPI,
+            cacheStorage: cache
+        )
+        return ForemostEventUsecaseImple(
+            repository: repository, 
+            sharedDataStore: applicationBase.sharedDataStore
         )
     }
 }

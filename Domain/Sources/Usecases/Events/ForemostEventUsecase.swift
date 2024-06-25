@@ -24,7 +24,7 @@ public final class ForemostEventUsecaseImple: ForemostEventUsecase, @unchecked S
     
     private let repository: any ForemostEventRepository
     private let sharedDataStore: SharedDataStore
-    init(
+    public init(
         repository: any ForemostEventRepository,
         sharedDataStore: SharedDataStore
     ) {
