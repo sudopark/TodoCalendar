@@ -158,7 +158,8 @@ extension EventCellViewModel {
         let baseComponents: [String?] = [
             self.eventIdentifier, "\(self.tagId.hashValue)", self.name,
             self.periodText?.customCompareKey, self.periodDescription,
-            self.tagColor?.compareKey
+            self.tagColor?.compareKey,
+            "\(self.isForemost)"
         ]
         return baseComponents.map { $0 ?? "nil" }.joined(separator: ",")
     }
@@ -256,6 +257,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public var customCompareKey: String {
         self.makeCustomCompareKey(["schedule", self.turn.map { "\($0)" }])
     }
+    var eventTimeRawValue: EventTime?
     
     public init(_ id: String, turn: Int? = nil, name: String) {
         self.eventIdWithoutTurn = id
@@ -283,6 +285,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         self.name = schedule.name
         self.periodText = periodText
         self.periodDescription = schedule.eventTime?.durationText(timeZone)
+        self.eventTimeRawValue = schedule.eventTime
         
         self.isRepeating = schedule.isRepeating
         self.isForemost = schedule.isForemost

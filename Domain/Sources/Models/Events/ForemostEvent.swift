@@ -26,7 +26,7 @@ extension ScheduleEvent: ForemostMarkableEvent {
 
 // MARK: - ForemostEventId
 
-public struct ForemostEventId: Sendable {
+public struct ForemostEventId: Sendable, Equatable {
     
     public let eventId: String
     public let isTodo: Bool

@@ -57,6 +57,10 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func makeEvent()
     func makeEventByTemplate()
     func showDoneTodoList()
+    func handleMoreAction(
+        _ cellViewModel: any EventCellViewModel,
+        _ action: EventListMoreAction
+    )
     
     // presenter
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
@@ -71,6 +75,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let todoEventUsecase: any TodoEventUsecase
+    private let scheduleEventUsecase: any ScheduleEventUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let uiSettingUsecase: any UISettingUsecase
@@ -79,12 +84,14 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     init(
         calendarSettingUsecase: any CalendarSettingUsecase,
         todoEventUsecase: any TodoEventUsecase,
+        scheduleEventUsecase: any ScheduleEventUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
         eventTagUsecase: any EventTagUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.calendarSettingUsecase = calendarSettingUsecase
         self.todoEventUsecase = todoEventUsecase
+        self.scheduleEventUsecase = scheduleEventUsecase
         self.foremostEventUsecase = foremostEventUsecase
         self.eventTagUsecase = eventTagUsecase
         self.uiSettingUsecase = uiSettingUsecase
@@ -237,6 +244,62 @@ extension DayEventListViewModelImple {
     
     func showDoneTodoList() {
         self.router?.showDoneTodoList()
+    }
+    
+    func handleMoreAction(
+        _ cellViewModel: any EventCellViewModel,
+        _ action: EventListMoreAction
+    ) {
+        Task { [weak self] in
+            do {
+                switch action {
+                case .remove(let onlyThisTime):
+                    try await self?.removeEvent(cellViewModel, onlyThisTime)
+                case .toggleTo(let isForemost):
+                    try await self?.toggleForemostEvent(cellViewModel, isForemost)
+                }
+            } catch {
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+    
+    private func removeEvent(
+        _ cellViewModel: any EventCellViewModel,
+        _ onlyThisTime: Bool
+    ) async throws {
+        switch cellViewModel {
+        case let todo as TodoEventCellViewModel:
+            try await self.todoEventUsecase.removeTodo(
+                todo.eventIdentifier, onlyThisTime: onlyThisTime
+            )
+        case let schedule as ScheduleEventCellViewModel:
+            let time = onlyThisTime ? schedule.eventTimeRawValue : nil
+            try await self.scheduleEventUsecase.removeScheduleEvent(
+                schedule.eventIdWithoutTurn, onlyThisTime: time
+            )
+        default: break
+        }
+    }
+    
+    private func toggleForemostEvent(
+        _ cellViewModel: any EventCellViewModel,
+        _ newValue: Bool
+    ) async throws {
+        switch (cellViewModel, newValue) {
+        case (_, false):
+            try await self.foremostEventUsecase.remove()
+        case (let todo as TodoEventCellViewModel, _):
+            try await self.foremostEventUsecase.update(
+                foremost: .init(todo.eventIdentifier, true)
+            )
+        case (let schedule as ScheduleEventCellViewModel, _):
+            try await self.foremostEventUsecase.update(
+                foremost: .init(schedule.eventIdWithoutTurn, false)
+            )
+        default: break
+        }
     }
 }
 
