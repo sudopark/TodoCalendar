@@ -156,9 +156,20 @@ extension MainViewModelImple {
 extension MainViewModelImple {
     
     var currentMonth: AnyPublisher<String, Never> {
+        
+        let formatter = DateFormatter() |> \.dateFormat .~ "MMM".localized()
+        let calednar = Calendar(identifier: .gregorian)
+        let transform: (CalendarMonth) -> String = { month in
+            guard let date = calednar.date(bySetting: .month, value: month.month, of: Date())
+            else {
+                return "\(month.month)"
+            }
+            return formatter.string(from: date).uppercased()
+        }
+        
         return self.subject.focusedMonthInfo
-            .compactMap { $0 }
-            .map { "\($0.0.month)" }
+            .compactMap { $0?.0 }
+            .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

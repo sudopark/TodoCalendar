@@ -95,7 +95,7 @@ extension MainViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(months, ["8", "9", "10"])
+        XCTAssertEqual(months, ["AUG", "SEP", "OCT"])
     }
     
     func testViewModle_whenFocusChanged_updateIsShowReturnToToday() {
