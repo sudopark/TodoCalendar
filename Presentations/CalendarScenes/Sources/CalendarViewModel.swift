@@ -31,6 +31,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let holidayUsecase: any HolidayUsecase
     private let todoEventUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
+    private let foremostEventusecase: any ForemostEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
@@ -43,6 +44,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         holidayUsecase: any HolidayUsecase,
         todoEventUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
+        foremostEventusecase: any ForemostEventUsecase,
         eventTagUsecase: any EventTagUsecase
     ) {
         self.calendarUsecase = calendarUsecase
@@ -50,6 +52,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.holidayUsecase = holidayUsecase
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
+        self.foremostEventusecase = foremostEventusecase
         self.eventTagUsecase = eventTagUsecase
         
         self.internalBind()
@@ -189,6 +192,8 @@ extension CalendarViewModelImple {
         self.todoEventUsecase.refreshCurentTodoEvents()
         
         self.eventTagUsecase.prepare()
+        
+        self.foremostEventusecase.refresh()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {

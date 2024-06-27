@@ -43,6 +43,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             holidayUsecase: self.usecaseFactory.makeHolidayUsecase(),
             todoEventUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
+            foremostEventusecase: self.usecaseFactory.makeForemostEventUsecase(),
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase()
         )
         viewModel.listener = listener

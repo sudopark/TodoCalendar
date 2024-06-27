@@ -26,6 +26,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyScheduleUsecase: PrivateSpyScheduleEventUsecase!
     private var stubSettingUsecase: StubCalendarSettingUsecase!
     private var spyEventTagUsecase: PrivateSpyEventTagUsecase!
+    private var spyForemostEventUsecase: StubForemostEventUsecase!
     private var spyListener: SpyListener!
     
     override func setUpWithError() throws {
@@ -36,6 +37,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyScheduleUsecase = .init()
         self.stubSettingUsecase = .init()
         self.spyEventTagUsecase = .init()
+        self.spyForemostEventUsecase = .init(foremostId: .init("some", true))
         self.spyListener = .init()
     }
     
@@ -47,6 +49,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyScheduleUsecase = nil
         self.stubSettingUsecase = nil
         self.spyEventTagUsecase = nil
+        self.spyForemostEventUsecase = nil
         self.spyListener = nil
     }
     
@@ -62,6 +65,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             holidayUsecase: self.spyHolidayUsecase,
             todoEventUsecase: self.spyTodoUsecase,
             scheduleEventUsecase: self.spyScheduleUsecase,
+            foremostEventusecase: self.spyForemostEventUsecase,
             eventTagUsecase: self.spyEventTagUsecase
         )
         viewModel.router = self.spyRouter
@@ -141,6 +145,22 @@ extension CalendarViewModelImpleTests {
         ])
     }
     
+    func testViewModel_whenPrepare_refreshForemostEvent() {
+        // given
+        let expect = expectation(description: "prepare시에 foremostEvent 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let events = self.waitOutputs(expect, for: self.spyForemostEventUsecase.foremostEvent) {
+            viewModel.prepare()
+        }
+        
+        // then
+        let isForemostEventPrepared = events.map { $0 != nil }
+        XCTAssertEqual(isForemostEventPrepared, [false, true])
+    }
+    
     private func makeViewModelWithInitialSetup(_ today: CalendarComponent.Day) -> CalendarViewModelImple {
         // given
         let expect = expectation(description: "초기 월 세팅 대기")
@@ -154,7 +174,6 @@ extension CalendarViewModelImpleTests {
         // then
         return viewModel
     }
-    
     
     func testViewModel_whenUpdateFocus_updateMonths() {
         // given
