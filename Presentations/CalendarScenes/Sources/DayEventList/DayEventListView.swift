@@ -363,7 +363,9 @@ private struct EventListCellView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(cellViewModel.name)
                     .minimumScaleFactor(0.7)
-                    .font(self.appearance.eventTextFontOnList().asFont)
+                    .font(
+                        self.appearance.eventTextFontOnList(isForemost: cellViewModel.isForemost).asFont
+                    )
                     .foregroundColor(self.appearance.colorSet.normalText.asColor)
                 
                 if let periodDescription = cellViewModel.periodDescription {
@@ -579,6 +581,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 ),
             .init("todo3", name: "todo with at time")
                 |> \.tagColor .~ .default
+                |> \.isForemost .~ true
                 |> \.periodText .~ .doubleText(
                     .init(text: "Todo".localized()),
                     .init(text: "10:30", pmOram: "AM")
