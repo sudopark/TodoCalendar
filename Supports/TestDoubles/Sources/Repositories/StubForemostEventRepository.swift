@@ -31,10 +31,16 @@ open class StubForemostEventRepository: ForemostEventRepository, BaseStub, @unch
     }
     
     public var shouldFailUpdate: Bool = false
-    open func updateForemostEvent(_ eventId: ForemostEventId) async throws -> ForemostEventId {
+    open func updateForemostEvent(_ eventId: ForemostEventId) async throws -> any ForemostMarkableEvent {
         try self.checkShouldFail(self.shouldFailUpdate)
-        self.stubForemostEvent = TodoEvent(uuid: eventId.eventId, name: "new")
-        return eventId
+        let newEvent: ForemostMarkableEvent
+        if eventId.isTodo {
+            newEvent = TodoEvent(uuid: eventId.eventId, name: "new")
+        } else {
+            newEvent = ScheduleEvent(uuid: eventId.eventId, name: "new", time: .at(100))
+        }
+        self.stubForemostEvent = newEvent
+        return newEvent
     }
     
     public var shouldFailRemove: Bool = false

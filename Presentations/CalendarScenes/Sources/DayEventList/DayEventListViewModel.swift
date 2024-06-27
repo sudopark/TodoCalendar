@@ -383,7 +383,7 @@ extension DayEventListViewModelImple {
     }
     
     private var currentTodoEvents: AnyPublisher<[TodoCalendarEvent], Never> {
-        let transform: ([TodoEvent], ForemostEventId?) -> [TodoCalendarEvent]
+        let transform: ([TodoEvent], (any ForemostMarkableEvent)?) -> [TodoCalendarEvent]
         transform = { todos, foremost in
             return todos.map {
                 TodoCalendarEvent(current: $0, isForemost: foremost?.eventId == $0.uuid)
@@ -391,7 +391,7 @@ extension DayEventListViewModelImple {
         }
         return Publishers.CombineLatest(
             self.todoEventUsecase.currentTodoEvents,
-            self.foremostEventUsecase.foremostEventId
+            self.foremostEventUsecase.foremostEvent
         )
         .map(transform)
         .eraseToAnyPublisher()

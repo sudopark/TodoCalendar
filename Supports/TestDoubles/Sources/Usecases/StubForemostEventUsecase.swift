@@ -17,25 +17,35 @@ import Extensions
 open class StubForemostEventUsecase: ForemostEventUsecase, @unchecked Sendable {
     
     private let initialForemostID: ForemostEventId?
-    private let foremostIdSubject = CurrentValueSubject<ForemostEventId?, Never>(nil)
+    private let foremostEventSubject = CurrentValueSubject<(any ForemostMarkableEvent)?, Never>(nil)
     public init(foremostId: ForemostEventId? = nil) {
         self.initialForemostID = foremostId
     }
     
     open func refresh() {
-        self.foremostIdSubject.send(self.initialForemostID)
+        let event = self.initialForemostID.map { self.makeDummyEvent($0) }
+        self.foremostEventSubject.send(event)
     }
     
     open func update(foremost eventId: ForemostEventId) async throws {
-        self.foremostIdSubject.send(eventId)
+        let event = self.makeDummyEvent(eventId)
+        self.foremostEventSubject.send(event)
     }
     
     open func remove() async throws {
-        self.foremostIdSubject.send(nil)
+        self.foremostEventSubject.send(nil)
     }
     
-    open var foremostEventId: AnyPublisher<ForemostEventId?, Never> {
-        return self.foremostIdSubject
+    open var foremostEvent: AnyPublisher<(any ForemostMarkableEvent)?, Never> {
+        return self.foremostEventSubject
             .eraseToAnyPublisher()
+    }
+    
+    private func makeDummyEvent(_ foremostId: ForemostEventId) -> any ForemostMarkableEvent {
+        if foremostId.isTodo {
+            return TodoEvent(uuid: foremostId.eventId, name: "todo")
+        } else {
+            return ScheduleEvent(uuid: foremostId.eventId, name: "schedule", time: .at(100))
+        }
     }
 }

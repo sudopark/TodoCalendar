@@ -30,6 +30,7 @@ class ForemostEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     
     private func makeUsecase(
         isForemostNotExists: Bool = false,
+        foremostIsTodo: Bool = true,
         withFail: Bool = false
     ) -> ForemostEventUsecaseImple {
         let repository = StubForemostEventRepository()
@@ -39,7 +40,11 @@ class ForemostEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
             repository.shouldFailRemove = true
         }
         if !isForemostNotExists {
-            repository.stubForemostEvent = TodoEvent(uuid: "foremost", name: "old")
+            if foremostIsTodo {
+                repository.stubForemostEvent = TodoEvent(uuid: "foremost_todo", name: "old")
+            } else {
+                repository.stubForemostEvent = ScheduleEvent(uuid: "foremost_schedule", name: "old", time: .at(100))
+            }
         } else {
             repository.stubForemostEvent = nil
         }
@@ -52,17 +57,24 @@ extension ForemostEventUsecaseImpleTests {
     // 조회해서 이벤트 방출
     func testUsecase_whenAfterRefresh_updateFeatureId() {
         // given
-        let expect = expectation(description: "refresh 이후에 이벤트 방출")
-        expect.expectedFulfillmentCount = 2
-        let usecase = self.makeUsecase()
-        
-        // when
-        let events = self.waitOutputs(expect, for: usecase.foremostEventId) {
-            usecase.refresh()
+        func parameterizeTest(isTodo: Bool) {
+            // given
+            let expect = expectation(description: "refresh 이후에 이벤트 방출")
+            expect.expectedFulfillmentCount = 2
+            let usecase = self.makeUsecase(foremostIsTodo: isTodo)
+            
+            // when
+            let events = self.waitOutputs(expect, for: usecase.foremostEvent) {
+                usecase.refresh()
+            }
+            
+            // then
+            let expectId = isTodo ? "foremost_todo" : "foremost_schedule"
+            XCTAssertEqual(events.map { $0?.eventId }, [nil, expectId])
         }
-        
-        // then
-        XCTAssertEqual(events.map { $0?.eventId }, [nil, "foremost"])
+        // when + then
+        parameterizeTest(isTodo: true)
+        parameterizeTest(isTodo: false)
     }
     
     func testUsecase_whenAfterRefresh_updateForemostIdIsNilWhenNotExists() {
@@ -72,7 +84,7 @@ extension ForemostEventUsecaseImpleTests {
         let usecase = self.makeUsecase(isForemostNotExists: true)
         
         // when
-        let events = self.waitOutputs(expect, for: usecase.foremostEventId) {
+        let events = self.waitOutputs(expect, for: usecase.foremostEvent) {
             usecase.refresh()
         }
         
@@ -140,10 +152,12 @@ extension ForemostEventUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let events = self.waitOutputs(expect, for: usecase.foremostEventId) {
+        let events = self.waitOutputs(expect, for: usecase.foremostEvent, timeout: 0.1) {
             Task {
                 usecase.refresh()
+                try await Task.sleep(for: .milliseconds(10))
                 try await usecase.update(foremost: .init("new", true))
+                try await Task.sleep(for: .milliseconds(10))
                 try await usecase.remove()
             }
         }
@@ -151,7 +165,7 @@ extension ForemostEventUsecaseImpleTests {
         // then
         let ids = events.map { $0?.eventId }
         XCTAssertEqual(ids, [
-            nil, "foremost", "new", nil
+            nil, "foremost_todo", "new", nil
         ])
     }
 }
