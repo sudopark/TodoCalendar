@@ -88,11 +88,11 @@ extension ViewAppearance {
         )
     }
     
-    public func eventTextFontOnList() -> UIFont {
+    public func eventTextFontOnList(isForemost: Bool = false) -> UIFont {
         let defaultSize: CGFloat = 14
         return UIFont.systemFont(
             ofSize: defaultSize + self.eventTextAdditionalSize,
-            weight: .regular
+            weight: isForemost ? .bold : .regular
         )
     }
     
