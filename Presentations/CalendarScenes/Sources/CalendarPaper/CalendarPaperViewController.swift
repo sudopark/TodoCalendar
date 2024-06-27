@@ -30,6 +30,8 @@ final class CalendarPaperViewController: UIHostingController<CalenarPaperContain
         viewModel: any CalendarPaperViewModel,
         monthViewModel: any MonthViewModel,
         eventListViewModel: any DayEventListViewModel,
+        eventListCellEventHandleViewModel: any EventListCellEventHanleViewModel,
+        pendingCompleteTodoState: PendingCompleteTodoState,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
@@ -43,9 +45,13 @@ final class CalendarPaperViewController: UIHostingController<CalenarPaperContain
         .eventHandler(\.stateBinding, { $0.bind(monthViewModel) })
         
         let eventListViewEventHandler = DayEventListViewEventHandler()
-        eventListViewEventHandler.bind(eventListViewModel)
+        eventListViewEventHandler.bind(
+            eventListViewModel, eventListCellEventHandleViewModel
+        )
         let eventListView = DayEventListContainerView(
-            viewAppearance: viewAppearance, eventHandler: eventListViewEventHandler
+            viewAppearance: viewAppearance,
+            eventHandler: eventListViewEventHandler,
+            pendingDoneState: pendingCompleteTodoState
         )
         .eventHandler(\.stateBinding, { $0.bind(eventListViewModel) })
         

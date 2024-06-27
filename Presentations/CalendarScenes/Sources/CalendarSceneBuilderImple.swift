@@ -16,6 +16,7 @@ public struct CalendarSceneBuilderImple {
     private let viewAppearance: ViewAppearance
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
     private let eventListSceneBuilder: any EventListSceneBuiler
+    private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     
     public init(
         usecaseFactory: any UsecaseFactory,
@@ -28,6 +29,8 @@ public struct CalendarSceneBuilderImple {
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
     }
+    
+    private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
 }
 
 extension CalendarSceneBuilderImple: CalendarSceneBuilder {
@@ -62,11 +65,21 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder
         )
+        
+        let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            eventDetailSceneBuilder: self.eventDetailSceneBuilder
+        )
+        handleViewModelBuilder.router.attach(viewController)
+        self.pendingCompleteTodoState.bind(handleViewModelBuilder.viewModel)
+        
         let paperSceneBuilder = CalendarPaperSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             monthSceneBuilder: monthSceneBuilder,
-            eventListSceneBuilder: eventListSceneBuilder
+            eventListSceneBuilder: eventListSceneBuilder,
+            eventListCellEventHanleViewModelBuilder: handleViewModelBuilder,
+            pendingCompleteTodoState: pendingCompleteTodoState
         )
         let router = CalendarViewRouterImple(paperSceneBuilder)
         router.scene = viewController

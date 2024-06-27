@@ -21,17 +21,23 @@ final class CalendarPaperSceneBuilerImple {
     private let viewAppearance: ViewAppearance
     private let monthSceneBuilder: any MonthSceneBuilder
     private let eventListSceneBuilder: any DayEventListSceneBuiler
+    private let eventListCellEventHanleViewModelBuilder: any EventListCellEventHanleViewModelBuilder
+    private let pendingCompleteTodoState: PendingCompleteTodoState
     
     init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         monthSceneBuilder: any MonthSceneBuilder,
-        eventListSceneBuilder: any DayEventListSceneBuiler
+        eventListSceneBuilder: any DayEventListSceneBuiler,
+        eventListCellEventHanleViewModelBuilder: any EventListCellEventHanleViewModelBuilder,
+        pendingCompleteTodoState: PendingCompleteTodoState
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.monthSceneBuilder = monthSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
+        self.eventListCellEventHanleViewModelBuilder = eventListCellEventHanleViewModelBuilder
+        self.pendingCompleteTodoState = pendingCompleteTodoState
     }
 }
 
@@ -54,6 +60,8 @@ extension CalendarPaperSceneBuilerImple: CalendarPaperSceneBuiler {
             viewModel: viewModel,
             monthViewModel: monthComponents.viewModel,
             eventListViewModel: eventListComponents.viewModel,
+            eventListCellEventHandleViewModel: eventListCellEventHanleViewModelBuilder.viewModel,
+            pendingCompleteTodoState: pendingCompleteTodoState,
             viewAppearance: self.viewAppearance
         )
         (eventListComponents.router as? BaseRouterImple)?.scene = viewController

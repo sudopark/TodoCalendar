@@ -25,7 +25,6 @@ final class DayEventListViewState: ObservableObject {
     
     @Published fileprivate var dayModel: SelectedDayModel?
     @Published fileprivate var cellViewModels: [any EventCellViewModel] = []
-    @Published fileprivate var tempDoneTodoIds: Set<String> = []
     
     func bind(_ viewModel: any DayEventListViewModel) {
         
@@ -44,25 +43,9 @@ final class DayEventListViewState: ObservableObject {
             .sink(receiveValue: { [weak self] cellViewModels in
                 withAnimation {
                     self?.cellViewModels = cellViewModels
-                    self?.removeDoneTodoIdsFromTempDoneIds(from: cellViewModels)
                 }
             })
             .store(in: &self.cancellables)
-        
-        viewModel.doneTodoFailed
-            .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] todoId in
-                withAnimation {
-                    guard let self = self else { return }
-                    self.tempDoneTodoIds = self.tempDoneTodoIds |> elem(todoId) .~ false
-                }
-            })
-            .store(in: &self.cancellables)
-    }
-    
-    private func removeDoneTodoIdsFromTempDoneIds(from cellViewModels: [any EventCellViewModel]) {
-        let existingTodoIds = cellViewModels.compactMap { $0.todoEventId } |> Set.init
-        self.tempDoneTodoIds = tempDoneTodoIds.intersection(existingTodoIds)
     }
 }
 
@@ -77,18 +60,21 @@ final class DayEventListViewEventHandler: ObservableObject {
     var showDoneTodoList: () -> Void = { }
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     
-    func bind(_ viewModel: any DayEventListViewModel) {
-        self.requestDoneTodo = viewModel.doneTodo(_:)
-        self.requestCancelDoneTodo = viewModel.cancelDoneTodo(_:)
+    func bind(
+        _ viewModel: any DayEventListViewModel,
+        _ eventListCellEventHandleViewModel: any EventListCellEventHanleViewModel
+    ) {
+        self.requestDoneTodo = eventListCellEventHandleViewModel.doneTodo(_:)
+        self.requestCancelDoneTodo = eventListCellEventHandleViewModel.cancelDoneTodo(_:)
         self.requestAddNewEventWhetherUsingTemplate = { use in
             if use { viewModel.makeEventByTemplate() }
             else { viewModel.makeEvent() }
         }
         self.addNewTodoQuickly = viewModel.addNewTodoQuickly(withName:)
         self.makeNewTodoWithGivenNameAndDetails = viewModel.makeTodoEvent(with:)
-        self.requestShowDetail = viewModel.selectEvent(_:)
+        self.requestShowDetail = eventListCellEventHandleViewModel.selectEvent(_:)
         self.showDoneTodoList = viewModel.showDoneTodoList
-        self.handleMoreAction = viewModel.handleMoreAction(_:_:)
+        self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
     }
 }
 
@@ -100,15 +86,18 @@ struct DayEventListContainerView: View {
     @StateObject private var state: DayEventListViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: DayEventListViewEventHandler
+    private let pendingDoneState: PendingCompleteTodoState
     
     var stateBinding: (DayEventListViewState) -> Void = { _ in }
     
     init(
         viewAppearance: ViewAppearance,
-        eventHandler: DayEventListViewEventHandler
+        eventHandler: DayEventListViewEventHandler,
+        pendingDoneState: PendingCompleteTodoState
     ) {
         self.viewAppearance = viewAppearance
         self.eventHandler = eventHandler
+        self.pendingDoneState = pendingDoneState
     }
     
     var body: some View {
@@ -117,6 +106,7 @@ struct DayEventListContainerView: View {
                 self.stateBinding(self.state)
             }
             .environmentObject(state)
+            .environmentObject(pendingDoneState)
             .environmentObject(viewAppearance)
             .environmentObject(eventHandler)
     }
@@ -129,6 +119,7 @@ struct DayEventListView: View {
     @EnvironmentObject private var state: DayEventListViewState
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandler: DayEventListViewEventHandler
+    @EnvironmentObject private var pendingDoneState: PendingCompleteTodoState
     
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -225,189 +216,6 @@ struct DayEventListView: View {
     }
 }
 
-
-// MARK: - event list cellView
-
-private struct EventListCellView: View {
-    
-    @EnvironmentObject private var state: DayEventListViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    
-    fileprivate var requestDoneTodo: (String) -> Void = { _ in }
-    fileprivate var requestCancelDoneTodo: (String) -> Void = { _ in }
-    fileprivate var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
-    fileprivate var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
-    
-    private let cellViewModel: any EventCellViewModel
-    init(cellViewModel: any EventCellViewModel) {
-        self.cellViewModel = cellViewModel
-    }
-    
-    var body: some View {
-        let tagLineColor = cellViewModel.tagColor?.color(with: self.appearance).asColor ?? .clear
-        return HStack(spacing: 8) {
-            // left
-            self.eventLeftView(cellViewModel)
-                .frame(width: 52)
-                
-            // tag line
-            RoundedRectangle(cornerRadius: 3)
-                .fill(tagLineColor)
-                .frame(width: 6)
-            
-            // right
-            self.eventRightView(cellViewModel)
-        }
-        .padding(.vertical, 4).padding(.horizontal, 8)
-        .frame(idealHeight: 50)
-        .backgroundAsRoundedRectForEventList(self.appearance)
-        .onTapGesture {
-            self.requestShowDetail(self.cellViewModel)
-        }
-        .contextMenu {
-            if cellViewModel.isSupportContextMenu {
-                if cellViewModel.isRepeating {
-                    removeButton(true)
-                }
-                removeButton(false)
-                
-                Divider()
-                
-                toggleForemostButton(cellViewModel.isForemost)
-            }
-        }
-    }
-    
-    private func removeButton(_ onlyThisTime: Bool) -> some View {
-        return Button(role: .destructive) {
-            self.handleMoreAction(
-                self.cellViewModel, .remove(onlyThisTime: onlyThisTime)
-            )
-        } label: {
-            Text(onlyThisTime ? "remove event only this time".localized() : "remove event".localized())
-        }
-    }
-    
-    private func toggleForemostButton(_ isForemost: Bool) -> some View {
-        return Button {
-            self.handleMoreAction(
-                self.cellViewModel, .toggleTo(isForemost: !isForemost)
-            )
-        } label: {
-            Text(isForemost ? "unmark as foremost".localized() : "mark as foremost".localized())
-        }
-    }
-    
-    private func eventLeftView(_ cellViewModel: any EventCellViewModel) -> some View {
-        
-        func pmOrAmView(_ amOrPm: String) -> some View {
-            Text(amOrPm)
-                .minimumScaleFactor(0.7)
-                .font(appearance.fontSet.size(8+appearance.eventTextAdditionalSize).asFont)
-                .foregroundStyle(appearance.colorSet.normalText.asColor)
-        }
-        
-        func singleText(_ text: EventTimeText) -> some View {
-            return VStack(alignment: .center) {
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                    Text(text.text)
-                        .minimumScaleFactor(0.7)
-                        .font(
-                            self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
-                        )
-                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
-                    
-                    if let amPm = text.pmOram {
-                        pmOrAmView(amPm)
-                    }
-                }
-            }
-        }
-        func doubleText(_ top: EventTimeText, _ bottom: EventTimeText) -> some View {
-            return VStack(alignment: .center, spacing: 2) {
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                    Text(top.text)
-                        .minimumScaleFactor(0.7)
-                        .font(self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont)
-                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
-                    
-                    if let amPm = top.pmOram {
-                        pmOrAmView(amPm)
-                    }
-                }
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                 
-                    Text(bottom.text)
-                        .minimumScaleFactor(0.7)
-                        .font(self.appearance.fontSet.size(14+appearance.eventTextAdditionalSize).asFont)
-                        .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
-                    
-                    if let amPm = bottom.pmOram {
-                        pmOrAmView(amPm)
-                    }
-                }
-            }
-        }
-        switch cellViewModel.periodText {
-        case .singleText(let text):
-            return singleText(text).asAnyView()
-        case .doubleText(let topText, let bottomText):
-            return doubleText(topText, bottomText).asAnyView()
-        default:
-            return EmptyView().asAnyView()
-        }
-    }
-    
-    private func eventRightView(_ cellViewModel: any EventCellViewModel) -> some View {
-        return HStack(alignment: .center, spacing: 8) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(cellViewModel.name)
-                    .minimumScaleFactor(0.7)
-                    .font(
-                        self.appearance.eventTextFontOnList(isForemost: cellViewModel.isForemost).asFont
-                    )
-                    .foregroundColor(self.appearance.colorSet.normalText.asColor)
-                
-                if let periodDescription = cellViewModel.periodDescription {
-                    Text(periodDescription)
-                        .minimumScaleFactor(0.7)
-                        .font(
-                            self.appearance.fontSet.size(13+appearance.eventTextAdditionalSize).asFont
-                        )
-                        .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
-                }
-            }
-            Spacer()
-            if let todoId = cellViewModel.todoEventId {
-                todoDoneButton(todoId)
-            }
-        }
-    }
-    
-    private func todoDoneButton(_ todoId: String) -> some View {
-        Button {
-            let isUnderCompleteProcessing = self.state.tempDoneTodoIds.contains(todoId)
-            if !isUnderCompleteProcessing {
-                withAnimation { _ = self.state.tempDoneTodoIds.insert(todoId) }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    guard self.state.tempDoneTodoIds.contains(todoId) else { return }
-                    self.requestDoneTodo(todoId)
-                }
-            } else {
-                withAnimation { _ = self.state.tempDoneTodoIds.remove(todoId) }
-                self.requestCancelDoneTodo(todoId)
-            }
-            
-        } label: {
-            if self.state.tempDoneTodoIds.contains(todoId) {
-                Image(systemName: "circle.inset.filled")
-            } else {
-                Image(systemName: "circle")
-            }
-        }
-    }
-}
-
 private struct QuickAddNewTodoView: View {
     
     @EnvironmentObject private var state: DayEventListViewState
@@ -467,33 +275,6 @@ private struct QuickAddNewTodoView: View {
         .padding(.vertical, 4).padding(.horizontal, 8)
         .frame(height: 50)
         .backgroundAsRoundedRectForEventList(self.appearance)
-    }
-}
-
-private extension View {
-    
-    func backgroundAsRoundedRectForEventList(_ appearance: ViewAppearance) -> some View {
-        
-        return self
-            .background(
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(appearance.colorSet.eventList.asColor)
-            )
-    }
-}
-
-private extension EventCellViewModel {
-    
-    var todoEventId: String? {
-        return (self as? TodoEventCellViewModel)?.eventIdentifier
-    }
-    
-    var isSupportContextMenu: Bool {
-        switch self {
-        case is TodoEventCellViewModel: return true
-        case is ScheduleEventCellViewModel: return true
-        default: return false
-        }
     }
 }
 
