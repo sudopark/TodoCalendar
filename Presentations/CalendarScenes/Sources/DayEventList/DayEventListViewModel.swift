@@ -49,23 +49,15 @@ struct SelectedDayModel: Equatable {
 protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor {
 
     // interactor
-    func selectEvent(_ model: any EventCellViewModel)
-    func doneTodo(_ eventId: String)
-    func cancelDoneTodo(_ eventId: String)
     func addNewTodoQuickly(withName: String)
     func makeTodoEvent(with givenName: String)
     func makeEvent()
     func makeEventByTemplate()
     func showDoneTodoList()
-    func handleMoreAction(
-        _ cellViewModel: any EventCellViewModel,
-        _ action: EventListMoreAction
-    )
     
     // presenter
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> { get }
-    var doneTodoFailed: AnyPublisher<String, Never> { get }
 }
 
 
@@ -108,12 +100,10 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private struct Subject {
         let currentDayAndEventLists = CurrentValueSubject<CurrentDayAndEventLists?, Never>(nil)
         let tagMaps = CurrentValueSubject<[String: EventTag], Never>([:])
-        let doneFailedTodo = PassthroughSubject<String, Never>()
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
     }
     
     private var cancellables: Set<AnyCancellable> = []
-    private var todoCompleteTaskMap: [String: Task<Void, any Error>] = [:]
     private let subject = Subject()
     
     private func internalBind() {
@@ -158,37 +148,6 @@ extension DayEventListViewModelImple {
         self.subject.currentDayAndEventLists.send(
             .init(currentDay: newDay, events: eventThatDay)
         )
-    }
-    
-    func selectEvent(_ model: any EventCellViewModel) {
-        // TODO: show detail
-        switch model {
-        case let todo as TodoEventCellViewModel:
-            self.router?.routeToTodoEventDetail(todo.eventIdentifier)
-        case let schedule as ScheduleEventCellViewModel:
-            self.router?.routeToScheduleEventDetail(schedule.eventIdWithoutTurn)
-        case let holiday as HolidayEventCellViewModel:
-            // TODO:
-            break
-        default: break
-        }
-    }
-    
-    func doneTodo(_ eventId: String) {
-        self.cancelDoneTodo(eventId)
-        self.todoCompleteTaskMap[eventId] = Task { [weak self] in
-            do {
-                _ = try await self?.todoEventUsecase.completeTodo(eventId)
-            } catch {
-                self?.subject.doneFailedTodo.send(eventId)
-                self?.router?.showError(error)
-            }
-        }
-    }
-    
-    func cancelDoneTodo(_ eventId: String) {
-        self.todoCompleteTaskMap[eventId]?.cancel()
-        self.todoCompleteTaskMap[eventId] = nil
     }
     
     func addNewTodoQuickly(withName: String) {
@@ -244,62 +203,6 @@ extension DayEventListViewModelImple {
     
     func showDoneTodoList() {
         self.router?.showDoneTodoList()
-    }
-    
-    func handleMoreAction(
-        _ cellViewModel: any EventCellViewModel,
-        _ action: EventListMoreAction
-    ) {
-        Task { [weak self] in
-            do {
-                switch action {
-                case .remove(let onlyThisTime):
-                    try await self?.removeEvent(cellViewModel, onlyThisTime)
-                case .toggleTo(let isForemost):
-                    try await self?.toggleForemostEvent(cellViewModel, isForemost)
-                }
-            } catch {
-                self?.router?.showError(error)
-            }
-        }
-        .store(in: &self.cancellables)
-    }
-    
-    private func removeEvent(
-        _ cellViewModel: any EventCellViewModel,
-        _ onlyThisTime: Bool
-    ) async throws {
-        switch cellViewModel {
-        case let todo as TodoEventCellViewModel:
-            try await self.todoEventUsecase.removeTodo(
-                todo.eventIdentifier, onlyThisTime: onlyThisTime
-            )
-        case let schedule as ScheduleEventCellViewModel:
-            let time = onlyThisTime ? schedule.eventTimeRawValue : nil
-            try await self.scheduleEventUsecase.removeScheduleEvent(
-                schedule.eventIdWithoutTurn, onlyThisTime: time
-            )
-        default: break
-        }
-    }
-    
-    private func toggleForemostEvent(
-        _ cellViewModel: any EventCellViewModel,
-        _ newValue: Bool
-    ) async throws {
-        switch (cellViewModel, newValue) {
-        case (_, false):
-            try await self.foremostEventUsecase.remove()
-        case (let todo as TodoEventCellViewModel, _):
-            try await self.foremostEventUsecase.update(
-                foremost: .init(todo.eventIdentifier, true)
-            )
-        case (let schedule as ScheduleEventCellViewModel, _):
-            try await self.foremostEventUsecase.update(
-                foremost: .init(schedule.eventIdWithoutTurn, false)
-            )
-        default: break
-        }
     }
 }
 
@@ -410,11 +313,6 @@ extension DayEventListViewModelImple {
         )
         .map(combineEvents)
         .eraseToAnyPublisher()
-    }
-    
-    var doneTodoFailed: AnyPublisher<String, Never> {
-        return self.subject.doneFailedTodo
-            .eraseToAnyPublisher()
     }
 }
 

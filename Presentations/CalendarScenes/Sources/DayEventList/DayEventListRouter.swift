@@ -18,8 +18,6 @@ import CommonPresentation
 protocol DayEventListRouting: Routing, Sendable {
     
     func routeToMakeNewEvent(_ withParams: MakeEventParams)
-    func routeToTodoEventDetail(_ eventId: String)
-    func routeToScheduleEventDetail(_ eventId: String)
     // TODO: tempplate 관련해서 초기 파라미터 필요할 수 있음
     func routeToSelectTemplateForMakeEvent()
     func showDoneTodoList()
@@ -50,20 +48,6 @@ extension DayEventListRouter {
         Task { @MainActor in
             
             let next = self.eventDetailSceneBuilder.makeNewEventScene(withParams)
-            self.scene?.present(next, animated: true)
-        }
-    }
-    
-    func routeToTodoEventDetail(_ eventId: String) {
-        Task { @MainActor in
-            let next = self.eventDetailSceneBuilder.makeTodoEventDetailScene(eventId)
-            self.scene?.present(next, animated: true)
-        }
-    }
-    
-    func routeToScheduleEventDetail(_ eventId: String) {
-        Task { @MainActor in
-            let next = self.eventDetailSceneBuilder.makeScheduleEventDetailScene(eventId)
             self.scene?.present(next, animated: true)
         }
     }
