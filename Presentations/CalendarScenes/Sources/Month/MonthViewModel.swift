@@ -347,7 +347,7 @@ extension MonthViewModelImple {
         
         let todos = self.todoUsecase.todoEvents(in: info.range)
         let schedules = self.scheduleEventUsecase.scheduleEvents(in: info.range)
-        let foremost = self.foremostEventUsecase.foremostEventId
+        let foremost = self.foremostEventUsecase.foremostEvent.map { event in event.map { ForemostEventId(event: $0)} }
         let holidayCalenarEvents = info.component.holidayCalendarEvents(with: info.timeZone)
         let transform: ([TodoEvent], [ScheduleEvent], ForemostEventId?) -> [any CalendarEvent]
         transform = { todos, schedules, foremost in

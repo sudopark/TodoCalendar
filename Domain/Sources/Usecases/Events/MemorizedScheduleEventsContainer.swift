@@ -77,6 +77,10 @@ extension MemorizedScheduleEventsContainer {
             .map { $0.event }
     }
     
+    public func scheduleEvnet(_ eventId: String) -> ScheduleEvent? {
+        return self.caches[eventId]?.event
+    }
+    
     public func invalidate(_ eventId: String) -> MemorizedScheduleEventsContainer {
         return MemorizedScheduleEventsContainer(
             caches: self.caches |> key(eventId) .~ nil

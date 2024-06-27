@@ -36,9 +36,9 @@ extension ForemostEventLocalRepositoryImple {
         .eraseToAnyPublisher()
     }
     
-    public func updateForemostEvent(_ eventId: ForemostEventId) async throws -> ForemostEventId {
+    public func updateForemostEvent(_ eventId: ForemostEventId) async throws -> any ForemostMarkableEvent {
         try await self.localStorage.updateForemostEventId(eventId)
-        return eventId
+        return try await self.localStorage.loadForemostEvent(eventId).unwrap()
     }
     
     public func removeForemostEvent() async throws {

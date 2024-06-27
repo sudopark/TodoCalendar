@@ -16,6 +16,7 @@ import Extensions
 public protocol ForemostLocalStorage: AnyObject, Sendable {
  
     func loadForemostEvent() async throws -> (any ForemostMarkableEvent)?
+    func loadForemostEvent(_ eventId: ForemostEventId) async throws -> (any ForemostMarkableEvent)?
     func updateForemostEvent(_ event: any ForemostMarkableEvent) async throws
     func updateForemostEventId(_ eventId: ForemostEventId) async throws
     func removeForemostEvent() async throws
@@ -44,24 +45,28 @@ public final class ForemostLocalStorageImple: ForemostLocalStorage {
 extension ForemostLocalStorageImple {
     
     public func loadForemostEvent() async throws -> (any ForemostMarkableEvent)? {
-        let foremostId = self.loadForemostEventId()
-        
-        switch foremostId {
-        case .some(let id) where id.isTodo == true:
-            return try await self.todoStorage.loadTodoEvent(id.eventId)
-            
-        case .some(let id) where id.isTodo == false:
-            return try await self.scheduleStorage.loadScheduleEvent(id.eventId)
-            
-        default:
+        guard let foremostId = self.loadForemostEventId()
+        else {
             return nil
         }
         
+        return try await self.loadForemostEvent(foremostId)
     }
     
     private func loadForemostEventId() -> ForemostEventId? {
         let mapper: ForemostEventIdMapper? = self.environmentStorage.load(self.foremoestKey)
         return mapper?.id
+    }
+    
+    public func loadForemostEvent(
+        _ foremostId: ForemostEventId
+    ) async throws -> (any ForemostMarkableEvent)? {
+        switch foremostId.isTodo {
+        case true:
+            return try await self.todoStorage.loadTodoEvent(foremostId.eventId)
+        case false:
+            return try await self.scheduleStorage.loadScheduleEvent(foremostId.eventId)
+        }
     }
     
     public func updateForemostEvent(_ event: any ForemostMarkableEvent) async throws {

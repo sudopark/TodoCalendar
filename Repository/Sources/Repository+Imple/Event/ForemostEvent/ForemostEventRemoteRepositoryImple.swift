@@ -73,7 +73,7 @@ extension ForemostEventRemoteRepositoryImple {
         }
     }
     
-    public func updateForemostEvent(_ eventId: ForemostEventId) async throws -> ForemostEventId {
+    public func updateForemostEvent(_ eventId: ForemostEventId) async throws -> any ForemostMarkableEvent {
         let endpoint = ForemostEventEndpoints.event
         let mapper: ForemostMarkableEventResponseMapper = try await self.remote.request(
             .put,
@@ -82,7 +82,7 @@ extension ForemostEventRemoteRepositoryImple {
         )
         let event = try mapper.event.unwrap()
         try? await self.cacheStorage.updateForemostEvent(event)
-        return .init(event: event)
+        return event
     }
     
     public func removeForemostEvent() async throws {

@@ -114,7 +114,7 @@ extension ForemostEventRemoteRepositoryImpleTests {
         
         // then
         XCTAssertEqual(updated.eventId, "schedule")
-        XCTAssertEqual(updated.isTodo, false)
+        XCTAssertEqual(updated is ScheduleEvent, true)
         let cachedAfterUpdate = self.spyStorage.stubForemost
         XCTAssertEqual(cachedBeforeUpdate is TodoEvent, true)
         XCTAssertEqual(cachedAfterUpdate is ScheduleEvent, true)
@@ -248,6 +248,10 @@ private class StubForemostLocalStorage: ForemostLocalStorage, @unchecked Sendabl
         else {
             throw RuntimeError("failed")
         }
+        return self.stubForemost
+    }
+    
+    func loadForemostEvent(_ eventId: ForemostEventId) async throws -> (any ForemostMarkableEvent)? {
         return self.stubForemost
     }
     
