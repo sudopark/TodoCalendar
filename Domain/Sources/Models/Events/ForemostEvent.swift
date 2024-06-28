@@ -13,6 +13,7 @@ import Foundation
 
 public protocol ForemostMarkableEvent: Sendable {
     var eventId: String { get }
+    var eventTagId: AllEventTagId? { get }
 }
 
 extension TodoEvent: ForemostMarkableEvent {

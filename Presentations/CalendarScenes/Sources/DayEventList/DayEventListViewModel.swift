@@ -56,6 +56,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func showDoneTodoList()
     
     // presenter
+    var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> { get }
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> { get }
 }
@@ -65,6 +66,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
 
 final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendable {
     
+    private let calendarUsecase: any CalendarUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let todoEventUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
@@ -74,6 +76,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     var router: (any DayEventListRouting)?
     
     init(
+        calendarUsecase: any CalendarUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         todoEventUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
@@ -81,6 +84,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         eventTagUsecase: any EventTagUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
+        self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
@@ -119,10 +123,13 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let tagIdsFromCurrentTodo = self.todoEventUsecase.currentTodoEvents
             .map { $0.compactMap { $0.eventTagId?.customTagId } }
         
-        Publishers.CombineLatest(
-            customTagIdsFromCalenadrEvent, tagIdsFromCurrentTodo
+        let tagFromForemostEvent = self.foremostEventUsecase.foremostEvent
+            .compactMap { $0?.eventTagId?.customTagId }
+        
+        Publishers.CombineLatest3(
+            customTagIdsFromCalenadrEvent, tagIdsFromCurrentTodo, tagFromForemostEvent
         )
-        .map { $0 + $1 }
+        .map { $0 + $1 + [$2] }
         .map { [weak self] ids -> AnyPublisher<[String: EventTag], Never> in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
             return self.eventTagUsecase.eventTags(ids)
@@ -210,6 +217,61 @@ extension DayEventListViewModelImple {
 // MARK: - DayEventListViewModelImple Presenter
 
 extension DayEventListViewModelImple {
+    
+    var foremostEventModel: AnyPublisher<
+        (any EventCellViewModel)?, Never
+    > {
+        
+        let asCellViewModel: (
+            (any ForemostMarkableEvent)?, CalendarComponent.Day, TimeZone, Bool
+        ) -> (any EventCellViewModel)?
+        asCellViewModel = { event, today, timeZone, is24Form in
+            guard let todayRange = today.dayRange(timeZone)
+            else { return nil }
+            
+            switch event {
+            case let todo as TodoEvent:
+                let calendarEvent = TodoCalendarEvent(todo, in: timeZone, isForemost: true)
+                return TodoEventCellViewModel(
+                    calendarEvent, in: todayRange, timeZone, is24Form
+                )
+                
+            case let schedule as ScheduleEvent:
+                let calendarEvent = ScheduleCalendarEvent.events(
+                    from: schedule, in: timeZone
+                ).first
+                return calendarEvent.flatMap { event in
+                    return ScheduleEventCellViewModel(
+                        event, in: todayRange, timeZone: timeZone, is24Form
+                    )
+                }
+            default: return nil
+            }
+        }
+        let foremostModel = Publishers.CombineLatest4(
+            self.foremostEventUsecase.foremostEvent,
+            self.calendarUsecase.currentDay,
+            self.calendarSettingUsecase.currentTimeZone,
+            self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
+        )
+        .map(asCellViewModel)
+        
+        let applyTag: ((any EventCellViewModel)?, [String: EventTag]) -> (any EventCellViewModel)?
+        applyTag = { model, tagMap in
+            let tag = model?.tagId.customTagId.flatMap { tagMap[$0] }
+            var model = model
+            model?.applyTagColor(tag)
+            return model
+        }
+        
+        return Publishers.CombineLatest(
+            foremostModel,
+            self.subject.tagMaps
+        )
+        .map(applyTag)
+        .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
+        .eraseToAnyPublisher()
+    }
     
     var selectedDay: AnyPublisher<SelectedDayModel, Never> {
         let transform: (TimeZone, CurrentSelectDayModel) -> SelectedDayModel?

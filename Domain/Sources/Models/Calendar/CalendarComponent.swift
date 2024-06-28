@@ -47,6 +47,15 @@ public struct CalendarComponent: Equatable {
             self.day = calendar.component(.day, from: date)
             self.weekDay = calendar.component(.weekday, from: date)
         }
+        
+        public func dayRange(_ timeZone: TimeZone) -> Range<TimeInterval>? {
+            let calendar = Calendar(identifier: .gregorian)
+            |> \.timeZone .~ timeZone
+            guard let date = calendar.date(from: self),
+                  let range = calendar.dayRange(date)
+            else { return nil }
+            return range
+        }
     }
     
     public let year: Int
