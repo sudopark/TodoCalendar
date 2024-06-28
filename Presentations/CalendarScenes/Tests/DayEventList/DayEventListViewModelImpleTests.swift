@@ -75,6 +75,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubForemostEventUsecase.refresh()
         
         let viewModel = DayEventListViewModelImple(
+            calendarUsecase: StubCalendarUsecase(),
             calendarSettingUsecase: calendarSettingUsecase,
             todoEventUsecase: self.stubTodoUsecase,
             scheduleEventUsecase: self.stubScheduleUsecase,
@@ -650,6 +651,31 @@ extension DayEventListViewModelImpleTests {
 //        // when
 //        // then
 //    }
+}
+
+extension DayEventListViewModelImpleTests {
+    
+    func testViewModel_provideForemostEventModelIfExists() {
+        // given
+        let expect = expectation(description: "가장 중요 이벤트 정보 있으면 제공")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithInitialListLoaded()
+        
+        // when
+        let foremosts = self.waitOutputs(expect, for: viewModel.foremostEventModel, timeout: 0.1) {
+            Task {
+                try await self.stubForemostEventUsecase.update(
+                    foremost: .init("current-todo-1", true)
+                )
+                
+                try await self.stubForemostEventUsecase.remove()
+            }
+        }
+        
+        // then
+        let foremostEventIds = foremosts.map { $0?.eventIdentifier }
+        XCTAssertEqual(foremostEventIds, [nil, "current-todo-1", nil])
+    }
 }
 
 extension DayEventListViewModelImpleTests {
