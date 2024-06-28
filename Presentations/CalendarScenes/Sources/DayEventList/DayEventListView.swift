@@ -23,6 +23,7 @@ final class DayEventListViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
+    @Published fileprivate var foremostModel: (any EventCellViewModel)?
     @Published fileprivate var dayModel: SelectedDayModel?
     @Published fileprivate var cellViewModels: [any EventCellViewModel] = []
     
@@ -30,6 +31,15 @@ final class DayEventListViewState: ObservableObject {
         
         guard self.didBind == false else { return }
         self.didBind = true
+        
+        viewModel.foremostEventModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                withAnimation {
+                    self?.foremostModel = model
+                }
+            })
+            .store(in: &self.cancellables)
         
         viewModel.selectedDay
             .receive(on: RunLoop.main)
@@ -122,63 +132,75 @@ struct DayEventListView: View {
     @EnvironmentObject private var pendingDoneState: PendingCompleteTodoState
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            
-            // 상단 날짜 표시 헤더
-            VStack(alignment: .leading) {
-                
-                if let holidayName = self.state.dayModel?.holidayName, self.appearance.showHoliday {
-                    Text(holidayName)
-                        .font(appearance.eventSubNormalTextFontOnList().asFont)
-                        .foregroundStyle(appearance.colorSet.calendarAccentColor.asColor)
-                }
-                
-                // 상단 날짜표시 헤더 - 날짜 및 음력 표시
-                HStack {
-                    
-                    Text(self.state.dayModel?.dateText ?? "")
-                        .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
-                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
-                        
-                    
-                    if self.appearance.showLunarCalendarDate {
-                        Text(self.state.dayModel?.lunarDateText ?? "")
-                            .font(
-                                self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
-                            )
-                            .foregroundColor(self.appearance.colorSet.subSubNormalText.asColor)
-                    }
-                    
-                    Spacer()
-                    
-                    Button {
-                        self.eventHandler.showDoneTodoList()
-                    } label: {
-                        Image(systemName: "checklist.checked")
-                    }
-                }
-                .padding(.bottom, 3)
+        VStack(alignment: .leading, spacing: 16) {
+         
+            if let foremost = self.state.foremostModel {
+                ForemostEventView(viewModel: foremost)
+                    .eventHandler(\.requestDoneTodo, eventHandler.requestDoneTodo)
+                    .eventHandler(\.requestCancelDoneTodo, eventHandler.requestCancelDoneTodo)
+                    .eventHandler(\.requestShowDetail, eventHandler.requestShowDetail)
+                    .eventHandler(\.handleMoreAction, eventHandler.handleMoreAction)
             }
-            
-            // 이벤트 리스트
+         
+            // 날짜 및 이벤트 목록
             VStack(alignment: .leading, spacing: 6) {
-                ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
+                
+                // 상단 날짜 표시 헤더
+                VStack(alignment: .leading) {
                     
-                    EventListCellView(cellViewModel: cellViewModel)
-                        .eventHandler(\.requestDoneTodo, eventHandler.requestDoneTodo)
-                        .eventHandler(\.requestCancelDoneTodo, eventHandler.requestCancelDoneTodo)
-                        .eventHandler(\.requestShowDetail, eventHandler.requestShowDetail)
-                        .eventHandler(\.handleMoreAction, eventHandler.handleMoreAction)
+                    if let holidayName = self.state.dayModel?.holidayName, self.appearance.showHoliday {
+                        Text(holidayName)
+                            .font(appearance.eventSubNormalTextFontOnList().asFont)
+                            .foregroundStyle(appearance.colorSet.calendarAccentColor.asColor)
+                    }
+                    
+                    // 상단 날짜표시 헤더 - 날짜 및 음력 표시
+                    HStack {
+                        
+                        Text(self.state.dayModel?.dateText ?? "")
+                            .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
+                            .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                            
+                        
+                        if self.appearance.showLunarCalendarDate {
+                            Text(self.state.dayModel?.lunarDateText ?? "")
+                                .font(
+                                    self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
+                                )
+                                .foregroundColor(self.appearance.colorSet.subSubNormalText.asColor)
+                        }
+                        
+                        Spacer()
+                        
+                        Button {
+                            self.eventHandler.showDoneTodoList()
+                        } label: {
+                            Image(systemName: "checklist.checked")
+                        }
+                    }
+                    .padding(.bottom, 3)
                 }
+                
+                // 이벤트 리스트
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
+                        
+                        EventListCellView(cellViewModel: cellViewModel)
+                            .eventHandler(\.requestDoneTodo, eventHandler.requestDoneTodo)
+                            .eventHandler(\.requestCancelDoneTodo, eventHandler.requestCancelDoneTodo)
+                            .eventHandler(\.requestShowDetail, eventHandler.requestShowDetail)
+                            .eventHandler(\.handleMoreAction, eventHandler.handleMoreAction)
+                    }
+                }
+                .fixedSize(horizontal: false, vertical: true)
+                
+                // todo 추가
+                QuickAddNewTodoView()
+                    .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
+                    .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
+                
+                addNewButton()
             }
-            .fixedSize(horizontal: false, vertical: true)
-            
-            // todo 추가
-            QuickAddNewTodoView()
-                .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
-                .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
-            
-            addNewButton()
         }
         .padding()
     }
@@ -296,7 +318,9 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         let state = DayEventListViewState()
         state.dayModel = .init(dateText: "2020년 9월 15일(금)", lunarDateText: "6월 4일")
         state.dayModel?.holidayName = "크리스마스"
-        state.cellViewModels = self.makeDummyCells()
+        let cells = self.makeDummyCells()
+        state.cellViewModels = cells
+        state.foremostModel = cells.randomElement()
         let eventHandler = DayEventListViewEventHandler()
         eventHandler.requestDoneTodo = { id in
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -338,6 +362,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             .environmentObject(viewAppearance)
             .environmentObject(state)
             .environmentObject(eventHandler)
+            .environmentObject(PendingCompleteTodoState())
         return containerView
     }
     
@@ -354,12 +379,12 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
 //            .init(eventId: .todo("todo1"), name: "todo with anyTime")
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .anyTime,
-            .init("todo2", name: "todo with all day")
-                |> \.tagColor .~ .default
-                |> \.periodText .~ .doubleText(
-                    .init(text: "Todo".localized()),
-                    .init(text: "Allday")
-                ),
+//            .init("todo2", name: "todo with all day")
+//                |> \.tagColor .~ .default
+//                |> \.periodText .~ .doubleText(
+//                    .init(text: "Todo".localized()),
+//                    .init(text: "Allday")
+//                ),
             .init("todo3", name: "todo with at time")
                 |> \.tagColor .~ .default
                 |> \.isForemost .~ true
