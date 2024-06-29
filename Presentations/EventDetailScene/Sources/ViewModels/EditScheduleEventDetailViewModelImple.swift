@@ -20,6 +20,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
     private let eventTagUsecase: any EventTagUsecase
     private let eventDetailDataUsecase: any EventDetailDataUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let foremostEventUsecase: any ForemostEventUsecase
     var router: (any EventDetailRouting)?
     
     init(
@@ -27,13 +28,15 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
         scheduleUsecase: any ScheduleEventUsecase,
         eventTagUsecase: any EventTagUsecase,
         eventDetailDataUsecase: any EventDetailDataUsecase,
-        calendarSettingUsecase: any CalendarSettingUsecase
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        foremostEventUsecase: any ForemostEventUsecase
     ) {
         self.scheduleId = scheduleId
         self.scheduleUsecase = scheduleUsecase
         self.eventTagUsecase = eventTagUsecase
         self.eventDetailDataUsecase = eventDetailDataUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
+        self.foremostEventUsecase = foremostEventUsecase
         
         self.internalBinding()
     }
@@ -275,6 +278,14 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
 }
 
 extension EditScheduleEventDetailViewModelImple {
+    
+    var isForemost: AnyPublisher<Bool, Never> {
+        let scheduleId = self.scheduleId
+        return self.foremostEventUsecase.foremostEvent
+            .map { $0?.eventId == scheduleId }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     var isLoading: AnyPublisher<Bool, Never> {
         return self.subject.isLoading

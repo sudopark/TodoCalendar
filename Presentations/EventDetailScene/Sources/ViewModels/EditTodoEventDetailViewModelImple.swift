@@ -20,6 +20,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
     private let eventTagUsecase: any EventTagUsecase
     private let eventDetailDataUsecase: any EventDetailDataUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let foremostEventUsecase: any ForemostEventUsecase
     var router: (any EventDetailRouting)?
     
     init(
@@ -27,13 +28,15 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         todoUsecase: any TodoEventUsecase,
         eventTagUsecase: any EventTagUsecase,
         eventDetailDataUsecase: any EventDetailDataUsecase,
-        calendarSettingUsecase: any CalendarSettingUsecase
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        foremostEventUsecase: any ForemostEventUsecase
     ) {
         self.todoId = todoId
         self.todoUsecase = todoUsecase
         self.eventTagUsecase = eventTagUsecase
         self.eventDetailDataUsecase = eventDetailDataUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
+        self.foremostEventUsecase = foremostEventUsecase
         
         self.internalBinding()
     }
@@ -264,6 +267,14 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
 
 
 extension EditTodoEventDetailViewModelImple {
+    
+    var isForemost: AnyPublisher<Bool, Never> {
+        let todoId = self.todoId
+        return self.foremostEventUsecase.foremostEvent
+            .map { $0?.eventId == todoId }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     var isLoading: AnyPublisher<Bool, Never> {
         return self.subject.isLoading

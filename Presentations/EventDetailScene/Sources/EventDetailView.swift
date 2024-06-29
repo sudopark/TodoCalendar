@@ -31,6 +31,7 @@ final class EventDetailViewState: ObservableObject {
     @Published var selectedNotificationTimeText: String?
     @Published var isAllDay: Bool = false
     @Published var availableMoreActions: [[EventDetailMoreAction]] = []
+    @Published var isForemost: Bool = false
     
     @Published var selectedStartDate: Date = Date()
     @Published var selectedEndDate: Date = Date().addingTimeInterval(60)
@@ -85,6 +86,13 @@ final class EventDetailViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.selectedNotificationTimeText = text
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.isForemost
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isForemost in
+                self?.isForemost = isForemost
             })
             .store(in: &self.cancellables)
         
@@ -212,6 +220,9 @@ struct EventDetailView: View {
                 VStack(spacing: 25) {
                     self.moreActionView
                     self.nameInputView
+                    if state.isForemost {
+                        self.foremostEventView
+                    }
                     self.eventDetailTypeView
                     self.timeSelectView
                     self.selectRepeatView
@@ -306,6 +317,31 @@ struct EventDetailView: View {
             return todoEventTypeView(model).asAnyView()
         default:
             return EmptyView().asAnyView()
+        }
+    }
+    
+    private var foremostEventView: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "exclamationmark.circle.fill")
+                .font(.system(size: 16, weight: .light))
+                .foregroundColor(self.appearance.colorSet.accentRed.asColor)
+            
+            Text("Foremost event".localized())
+                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .font(self.appearance.fontSet.normal.asFont)
+            
+            Button {
+                self.showEventDetailTypePopover = true
+            } label: {
+                Image(systemName: "questionmark.circle")
+                    .font(self.appearance.fontSet.normal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+            }
+            .popover(isPresented: self.$showEventDetailTypePopover) {
+                Text("[Todo] foremost event description")
+            }
+            
+            Spacer()
         }
     }
     
@@ -782,6 +818,7 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
         let viewAppearance = ViewAppearance(setting: setting)
         let state = EventDetailViewState()
+        state.isForemost = true
         state.selectedTag = .defaultTag
         state.selectedTime = .period(
             .init(Date().timeIntervalSince1970, .current),
