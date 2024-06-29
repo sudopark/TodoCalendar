@@ -129,6 +129,9 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         case .remove(let onlyThisEvent):
             self.removeEventAfterConfirm(onlyThisTime: onlyThisEvent)
             
+        case .toggleTo(let isForemost):
+            self.toggleForemostAfterConfirm(toForemost: isForemost)
+            
         case .copy:
             // TODO:
             break
@@ -166,6 +169,40 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                     )
                     self?.router?.showToast("schedule removed".localized())
                     self?.router?.closeScene()
+                } catch {
+                    self?.router?.showError(error)
+                }
+            }
+            .store(in: &self.cancellables)
+        }
+    }
+    
+    private func toggleForemostAfterConfirm(toForemost: Bool) {
+        
+        let message = toForemost
+            ? "register foremost message".localized()
+            : "remove foremost message".localized()
+        let info = ConfirmDialogInfo()
+            |> \.title .~ "foremost event".localized()
+            |> \.message .~ pure(message)
+            |> \.confirmText .~ "confirm".localized()
+            |> \.confirmed .~ pure(self.toggleFormost(toForemost))
+            |> \.withCancel .~ true
+            |> \.cancelText .~ "cancel".localized()
+        self.router?.showConfirm(dialog: info)
+    }
+    
+    private func toggleFormost(_ toForemost: Bool) -> () -> Void {
+        let scheduleId = self.scheduleId
+        return { [weak self] in
+            guard let self = self else { return }
+            Task { [weak self] in
+                do {
+                    if toForemost {
+                        try await self?.foremostEventUsecase.update(foremost: .init(scheduleId, false))
+                    } else {
+                        try await self?.foremostEventUsecase.remove()
+                    }
                 } catch {
                     self?.router?.showError(error)
                 }
@@ -319,18 +356,25 @@ extension EditScheduleEventDetailViewModelImple {
     }
     
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
-        let transform: (EventDetailBasicData) -> [[EventDetailMoreAction]] = { basic in
+        let scheduleId = self.scheduleId
+        let transform: (EventDetailBasicData, (any ForemostMarkableEvent)?) -> [[EventDetailMoreAction]] = { basic, foremostEvent in
             let isRepeating = basic.selectedTime != nil && basic.eventRepeating != nil
+            let isForemost = foremostEvent?.eventId == scheduleId
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
-            return [removeActions, [.copy, .addToTemplate, .share]]
+            let otherActions: [EventDetailMoreAction] = isRepeating
+                ? [.share]
+                : [.toggleTo(isForemost: !isForemost), .share]
+            return [removeActions, otherActions]
         }
-        return self.subject.basicData
-            .compactMap { $0?.origin }
-            .map(transform)
-            .first()
-            .eraseToAnyPublisher()
+        return Publishers.CombineLatest(
+            self.subject.basicData.compactMap { $0?.origin },
+            self.foremostEventUsecase.foremostEvent
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
 }
 

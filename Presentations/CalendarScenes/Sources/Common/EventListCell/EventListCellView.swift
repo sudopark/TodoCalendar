@@ -97,7 +97,10 @@ struct EventListCellView: View {
                 self.cellViewModel, .remove(onlyThisTime: onlyThisTime)
             )
         } label: {
-            Text(onlyThisTime ? "remove event only this time".localized() : "remove event".localized())
+            HStack {
+                Text(onlyThisTime ? "remove event only this time".localized() : "remove event".localized())
+                Image(systemName: "trash")
+            }
         }
     }
     
@@ -107,7 +110,10 @@ struct EventListCellView: View {
                 self.cellViewModel, .toggleTo(isForemost: !isForemost)
             )
         } label: {
-            Text(isForemost ? "unmark as foremost".localized() : "mark as foremost".localized())
+            HStack {
+                Text(isForemost ? "unmark as foremost".localized() : "mark as foremost".localized())
+                Image(systemName: "exclamationmark.circle")
+            }
         }
     }
     
@@ -124,6 +130,7 @@ struct EventListCellView: View {
             return VStack(alignment: .center) {
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                     Text(text.text)
+                        .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .font(
                             self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
@@ -140,6 +147,7 @@ struct EventListCellView: View {
             return VStack(alignment: .center, spacing: 2) {
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                     Text(top.text)
+                        .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .font(self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont)
                         .foregroundColor(self.appearance.colorSet.normalText.asColor)

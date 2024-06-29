@@ -131,6 +131,9 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
         case .remove(let onlyThisEvent):
             self.removeEventAfterConfirm(onlyThisTime: onlyThisEvent)
             
+        case .toggleTo(let isForemost):
+            self.toggleForemostAfterConfirm(toForemost: isForemost)
+            
         case .copy:
             // TODO:
             break
@@ -162,6 +165,40 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
                     try await self?.todoUsecase.removeTodo(todoId, onlyThisTime: onlyThistime)
                     self?.router?.showToast("todo removed".localized())
                     self?.router?.closeScene()
+                } catch {
+                    self?.router?.showError(error)
+                }
+            }
+            .store(in: &self.cancellables)
+        }
+    }
+    
+    private func toggleForemostAfterConfirm(toForemost: Bool) {
+        
+        let message = toForemost
+            ? "register foremost message".localized()
+            : "remove foremost message".localized()
+        let info = ConfirmDialogInfo()
+            |> \.title .~ "foremost event".localized()
+            |> \.message .~ pure(message)
+            |> \.confirmText .~ "confirm".localized()
+            |> \.confirmed .~ pure(self.toggleFormost(toForemost))
+            |> \.withCancel .~ true
+            |> \.cancelText .~ "cancel".localized()
+        self.router?.showConfirm(dialog: info)
+    }
+    
+    private func toggleFormost(_ toForemost: Bool) -> () -> Void {
+        let todoId = self.todoId
+        return { [weak self] in
+            guard let self = self else { return }
+            Task { [weak self] in
+                do {
+                    if toForemost {
+                        try await self?.foremostEventUsecase.update(foremost: .init(todoId, true))
+                    } else {
+                        try await self?.foremostEventUsecase.remove()
+                    }
                 } catch {
                     self?.router?.showError(error)
                 }
@@ -309,18 +346,22 @@ extension EditTodoEventDetailViewModelImple {
     }
     
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
-        let transform: (EventDetailBasicData) -> [[EventDetailMoreAction]] = { basic in
+        let todoId = self.todoId
+        let transform: (EventDetailBasicData, (any ForemostMarkableEvent)?) -> [[EventDetailMoreAction]] = { basic, foremostEvent in
             let isRepeating = basic.selectedTime != nil && basic.eventRepeating != nil
+            let isForemost = foremostEvent?.eventId == todoId
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
-            return [removeActions, [.copy, .addToTemplate, .share]]
+            return [removeActions, [.toggleTo(isForemost: !isForemost), .share]]
         }
-        return self.subject.basicData
-            .compactMap { $0?.origin }
-            .map(transform)
-            .first()
-            .eraseToAnyPublisher()
+        return Publishers.CombineLatest(
+            self.subject.basicData.compactMap{ $0?.origin },
+            self.foremostEventUsecase.foremostEvent
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
 }
 
