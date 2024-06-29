@@ -165,6 +165,7 @@ struct EventDetailContainerView: View {
             .eventHandler(\.enterUrl, enterUrl)
             .eventHandler(\.enterMemo, enterMemo)
             .eventHandler(\.save, save)
+            .eventHandler(\.doMoreAction, doMoreAction)
             .onAppear {
                 self.stateBinding(self.state)
                 self.onAppear()
@@ -760,6 +761,8 @@ extension EventDetailMoreAction: Identifiable {
     var id: String {
         switch self {
         case .remove(let onlyThisEvent): return "remove:\(onlyThisEvent)"
+        case .toggleTo(let isForemost):
+            return "toggleTo:\(isForemost)"
         case .copy: return "copy"
         case .addToTemplate: return "addToTemplate"
         case .share: return "share"
@@ -773,6 +776,10 @@ extension EventDetailMoreAction: Identifiable {
             return onlyThisEvent
                 ? "remove event only this time".localized()
                 : "remove event".localized()
+        case .toggleTo(let isForemost):
+            return isForemost
+                ? "mark as foremost".localized()
+                : "unmark as foremost".localized()
         case .copy: return "copy".localized()
         case .addToTemplate: return "add to template".localized()
         case .share: return "share".localized()
@@ -782,6 +789,7 @@ extension EventDetailMoreAction: Identifiable {
     var imageName: String {
         switch self {
         case .remove: return "trash"
+        case .toggleTo: return "exclamationmark.circle"
         case .copy: return "doc.on.doc"
         case .addToTemplate: return "doc.plaintext"
         case .share: return "square.and.arrow.up"

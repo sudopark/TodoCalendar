@@ -29,7 +29,6 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.cancelBag = .init()
         self.spyScheduleUsecase = .init()
         self.spyEventDetailDataUsecase = .init()
-        self.stubForemostEventUsecase = .init()
         self.spyRouter = .init()
     }
     
@@ -47,7 +46,8 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     
     private func makeViewModel(
         customSchedule: ScheduleEvent? = nil,
-        shouldFailSave: Bool = false
+        shouldFailSave: Bool = false,
+        isForemost: Bool = false
     ) -> EditScheduleEventDetailViewModelImple {
         
         let (schedule, detail) = (customSchedule ?? self.dummyRepeatingSchedule, self.dummyDetail)
@@ -59,6 +59,11 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.selectTimeZone(self.timeZone)
+        
+        self.stubForemostEventUsecase = .init(
+            foremostId: isForemost ? .init(event: schedule) : nil
+        )
+        self.stubForemostEventUsecase.refresh()
         
         let viewModel = EditScheduleEventDetailViewModelImple(
             scheduleId: schedule.uuid,
@@ -194,13 +199,35 @@ extension EditScheduleEventDetailViewModelImpleTests {
         }
         // when + then
         let schedule = self.dummyRepeatingSchedule
-        parameterizeTest(self.makeViewModel(customSchedule: schedule), expect: [
-            [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)], [.copy, .addToTemplate, .share]
-        ])
+        parameterizeTest(
+            self.makeViewModel(customSchedule: schedule),
+            expect: [
+                [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
+                [.share]
+            ]
+        )
+        parameterizeTest(
+            self.makeViewModel(customSchedule: schedule, isForemost: true),
+            expect: [
+                [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
+                [.share]
+            ]
+        )
         let scheduleNotRepeating = schedule |> \.repeating .~ nil
-        parameterizeTest(self.makeViewModel(customSchedule: scheduleNotRepeating), expect: [
-            [.remove(onlyThisEvent: false)], [.copy, .addToTemplate, .share]
-        ])
+        parameterizeTest(
+            self.makeViewModel(customSchedule: scheduleNotRepeating),
+            expect: [
+                [.remove(onlyThisEvent: false)], 
+                [.toggleTo(isForemost: true), .share]
+            ]
+        )
+        parameterizeTest(
+            self.makeViewModel(customSchedule: scheduleNotRepeating, isForemost: true),
+            expect: [
+                [.remove(onlyThisEvent: false)],
+                [.toggleTo(isForemost: false), .share]
+            ]
+        )
     }
     
     func testViewModel_whenAfterRemoveSchedule_closeScene() {
@@ -215,6 +242,22 @@ extension EditScheduleEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "schedule removed".localized())
+    }
+    
+    func testViewModel_toggleForemost() {
+        // given
+        let expect = expectation(description: "foremost 토글")
+        expect.expectedFulfillmentCount = 2
+        let scheduleNotRepeating = self.dummyRepeatingSchedule |> \.repeating .~ nil
+        let viewModel = self.makeViewModel(customSchedule: scheduleNotRepeating)
+        
+        // when
+        let isForemosts = self.waitOutputs(expect, for: viewModel.isForemost) {
+            viewModel.handleMoreAction(.toggleTo(isForemost: true))
+        }
+        
+        // then
+        XCTAssertEqual(isForemosts, [false, true])
     }
 }
 

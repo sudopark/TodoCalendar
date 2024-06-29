@@ -29,7 +29,6 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.cancelBag = .init()
         self.spyTodoUsecase = .init()
         self.spyEventDetailDataUsecase = .init()
-        self.stubForemostEventUsecase = .init()
         self.spyRouter = .init()
     }
     
@@ -47,7 +46,8 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     private func makeViewModel(
         customTodo: TodoEvent? = nil,
-        shouldFailSave: Bool = false
+        shouldFailSave: Bool = false,
+        isForemost: Bool = false
     ) -> EditTodoEventDetailViewModelImple {
         
         let (todo, detail) = (customTodo ?? self.dummyRepeatingTodo, self.dummyDetail)
@@ -59,6 +59,11 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.selectTimeZone(self.timeZone)
+        
+        self.stubForemostEventUsecase = .init(
+            foremostId: isForemost ? .init(event: todo) : nil
+        )
+        self.stubForemostEventUsecase.refresh()
         
         let viewModel = EditTodoEventDetailViewModelImple(
             todoId: todo.uuid,
@@ -195,13 +200,28 @@ extension EditTodoEventDetailViewModelImpleTests {
         }
         // when + then
         let todo = self.dummyRepeatingTodo
-        parameterizeTest(self.makeViewModel(customTodo: todo), expect: [
-            [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)], [.copy, .addToTemplate, .share]
-        ])
+        parameterizeTest(
+            self.makeViewModel(customTodo: todo),
+            expect: [
+                [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)], 
+                [.toggleTo(isForemost: true), .share]
+            ]
+        )
+        parameterizeTest(
+            self.makeViewModel(customTodo: todo, isForemost: true),
+            expect: [
+                [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
+                [.toggleTo(isForemost: false), .share]
+            ]
+        )
         let todoNotRepeating = todo |> \.repeating .~ nil
-        parameterizeTest(self.makeViewModel(customTodo: todoNotRepeating), expect: [
-            [.remove(onlyThisEvent: false)], [.copy, .addToTemplate, .share]
-        ])
+        parameterizeTest(
+            self.makeViewModel(customTodo: todoNotRepeating),
+            expect: [
+                [.remove(onlyThisEvent: false)],
+                [.toggleTo(isForemost: true), .share]
+            ]
+        )
     }
     
     func testViewModel_whenAfterRemoveTodo_closeScene() {
@@ -216,6 +236,21 @@ extension EditTodoEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "todo removed".localized())
+    }
+    
+    func testViewModel_toggleForemost() {
+        // given
+        let expect = expectation(description: "foremost 토글")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isForemosts = self.waitOutputs(expect, for: viewModel.isForemost) {
+            viewModel.handleMoreAction(.toggleTo(isForemost: true))
+        }
+        
+        // then
+        XCTAssertEqual(isForemosts, [false, true])
     }
 }
 

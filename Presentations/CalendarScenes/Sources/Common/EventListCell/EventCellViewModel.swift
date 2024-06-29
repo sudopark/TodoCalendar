@@ -36,7 +36,7 @@ public enum EventPeriodText: Equatable, Sendable {
     case singleText(_ text: EventTimeText)
     case doubleText(_ topText: EventTimeText, _ bottomText: EventTimeText)
     
-    public init?(
+    public init(
         _ todo: TodoCalendarEvent,
         in todayRange: Range<TimeInterval>,
         timeZone: TimeZone,
@@ -79,7 +79,7 @@ public enum EventPeriodText: Equatable, Sendable {
         }
     }
     
-    public init?(
+    public init(
         schedule eventTime: EventTime,
         in todayRange: Range<TimeInterval>,
         timeZone: TimeZone,
@@ -114,9 +114,10 @@ public enum EventPeriodText: Equatable, Sendable {
                 .init(day: eventTime.lowerBoundWithFixed, timeZone),
                 .init(time: eventTime.upperBoundWithFixed, timeZone, !is24hourForm)
             )
-            
-        default:
-            return nil
+        case (_, false, false, _):
+            self = .singleText(
+                .init(day: eventTime.lowerBoundWithFixed, timeZone)
+            )
         }
     }
     
@@ -275,9 +276,8 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         timeZone: TimeZone,
         _ is24hourForm: Bool
     ) {
-        guard let time = schedule.eventTime,
-            let periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
-        else { return nil }
+        guard let time = schedule.eventTime else { return nil }
+        let periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.eventIdentifier = schedule.eventId
         self.eventIdWithoutTurn = schedule.eventIdWithoutTurn
         self.turn = schedule.turn
