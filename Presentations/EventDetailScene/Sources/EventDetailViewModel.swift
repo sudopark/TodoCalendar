@@ -82,6 +82,7 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     func save()
     
     // presenter
+    var isForemost: AnyPublisher<Bool, Never> { get }
     var isLoading: AnyPublisher<Bool, Never> { get }
     var eventDetailTypeModel: AnyPublisher<EventDetailTypeModel, Never> { get }
     var isSavable: AnyPublisher<Bool, Never> { get }

@@ -22,12 +22,14 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var spyTodoUsecase: StubTodoEventUsecase!
     private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
+    private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var spyRouter: SpyEventDetailRouter!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyTodoUsecase = .init()
         self.spyEventDetailDataUsecase = .init()
+        self.stubForemostEventUsecase = .init()
         self.spyRouter = .init()
     }
     
@@ -35,6 +37,7 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.cancelBag = nil
         self.spyTodoUsecase = nil
         self.spyEventDetailDataUsecase = nil
+        self.stubForemostEventUsecase = nil
         self.spyRouter = nil
     }
     
@@ -62,7 +65,8 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
             todoUsecase: self.spyTodoUsecase,
             eventTagUsecase: tagUsecase,
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
-            calendarSettingUsecase: calendarSettingUsecase
+            calendarSettingUsecase: calendarSettingUsecase,
+            foremostEventUsecase: self.stubForemostEventUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachInput()
@@ -135,6 +139,29 @@ extension EditTodoEventDetailViewModelImpleTests {
         XCTAssertEqual(preparedWith?.0.eventTagId, .custom("tag"))
         XCTAssertEqual(preparedWith?.0.eventNotifications, [.atTime, .before(seconds: 100)])
         XCTAssertEqual(preparedWith?.1, self.dummyDetail)
+    }
+    
+    func testViewModel_provideIsForemost() {
+        // given
+        let expect = expectation(description: "foremost 여부 제공")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isForemosts = self.waitOutputs(expect, for: viewModel.isForemost, timeout: 0.01) {
+            Task {
+                try await self.stubForemostEventUsecase.update(
+                    foremost: .init("dummy_todo", true)
+                )
+                
+                try await self.stubForemostEventUsecase.update(
+                    foremost: .init("another_todo", true)
+                )
+            }
+        }
+        
+        // then
+        XCTAssertEqual(isForemosts, [false, true, false])
     }
     
     // isTodo == true + isTodoOrScheduleTogglable == false

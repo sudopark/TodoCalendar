@@ -22,12 +22,14 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     var cancelBag: Set<AnyCancellable>!
     private var spyScheduleUsecase: StubScheduleEventUsecase!
     private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
+    private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var spyRouter: SpyEventDetailRouter!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyScheduleUsecase = .init()
         self.spyEventDetailDataUsecase = .init()
+        self.stubForemostEventUsecase = .init()
         self.spyRouter = .init()
     }
     
@@ -35,6 +37,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.cancelBag = nil
         self.spyScheduleUsecase = nil
         self.spyEventDetailDataUsecase = nil
+        self.stubForemostEventUsecase = nil
         self.spyRouter = nil
     }
     
@@ -62,7 +65,8 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
             scheduleUsecase: self.spyScheduleUsecase,
             eventTagUsecase: tagUsecase,
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
-            calendarSettingUsecase: calendarSettingUsecase
+            calendarSettingUsecase: calendarSettingUsecase,
+            foremostEventUsecase: self.stubForemostEventUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.attachInput()
@@ -76,14 +80,14 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     }
     
     private var dummyRepeatingSchedule: ScheduleEvent {
-        return ScheduleEvent(uuid: "dummy_todo", name: "dummy", time: .at(0))
+        return ScheduleEvent(uuid: "dummy_schedule", name: "dummy", time: .at(0))
         |> \.repeating .~ pure(self.dummyRepeating)
         |> \.eventTagId .~ .custom("tag")
         |> \.notificationOptions .~ [.atTime]
     }
     
     private var dummyDetail: EventDetailData {
-        return EventDetailData("dummy_todo")
+        return EventDetailData("dummy_schedule")
         |> \.url .~ "url"
         |> \.memo .~ "memo"
     }
@@ -134,6 +138,29 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(preparedWith?.0.eventTagId, .custom("tag"))
         XCTAssertEqual(preparedWith?.0.eventNotifications, [.atTime])
         XCTAssertEqual(preparedWith?.1, self.dummyDetail)
+    }
+    
+    func testViewModel_provideIsForemost() {
+        // given
+        let expect = expectation(description: "foremost 여부 제공")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isForemosts = self.waitOutputs(expect, for: viewModel.isForemost, timeout: 0.01) {
+            Task {
+                try await self.stubForemostEventUsecase.update(
+                    foremost: .init("dummy_schedule", false)
+                )
+                
+                try await self.stubForemostEventUsecase.update(
+                    foremost: .init("another_schedule", false)
+                )
+            }
+        }
+        
+        // then
+        XCTAssertEqual(isForemosts, [false, true, false])
     }
     
     // isTodo == false + isTodoOrScheduleTogglable == false

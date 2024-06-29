@@ -230,6 +230,10 @@ extension AddEventViewModelImple: EventDetailInputListener {
 
 extension AddEventViewModelImple {
     
+    var isForemost: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
+    
     var isLoading: AnyPublisher<Bool, Never> {
         let transform: (EventDetailBasicData?, EventDetailData?) -> Bool = { basic, addition in
             return basic == nil || addition == nil
