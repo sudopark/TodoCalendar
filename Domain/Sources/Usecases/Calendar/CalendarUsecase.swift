@@ -122,7 +122,7 @@ extension CalendarUsecaseImple {
 }
 
 
-private extension Calendar {
+extension Calendar {
     
     func startDateOfMonth(_ year: Int, _ month: Int) -> Date? {
         let components = DateComponents()
@@ -134,7 +134,7 @@ private extension Calendar {
             .map { self.startOfDay(for: $0) }
     }
     
-    func firstDateOfWeek(_ startDayOfWeek: DayOfWeeks, _ from: Date) -> Date? {
+    public func firstDateOfWeek(_ startDayOfWeek: DayOfWeeks, _ from: Date) -> Date? {
         let weekDay = self.component(.weekday, from: from)
         let daysToMinus = (weekDay - startDayOfWeek.rawValue + 7) % 7
         return self.addDays(-daysToMinus, from: from)
