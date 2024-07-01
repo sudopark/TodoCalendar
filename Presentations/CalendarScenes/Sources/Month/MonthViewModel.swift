@@ -55,7 +55,7 @@ public struct DayCellViewModel: Equatable {
     public let month: Int
     public let day: Int
     public let isNotCurrentMonth: Bool
-    public let accentDay: AccentDays?
+    public var accentDay: AccentDays?
     
     public init(
         year: Int,
@@ -96,7 +96,7 @@ public struct DayCellViewModel: Equatable {
 
 public struct WeekRowModel: Equatable {
     public let id: String
-    public let days: [DayCellViewModel]
+    public var days: [DayCellViewModel]
     
     public init(_ id: String, _ days: [DayCellViewModel]) {
         self.id = id
@@ -111,13 +111,13 @@ public struct WeekRowModel: Equatable {
     }
 }
 
-struct WeekEventLineModel: Equatable {
+public struct WeekEventLineModel: Equatable {
     
-    var eventId: String { self.eventOnWeek.eventId }
-    let eventOnWeek: EventOnWeek
-    let lineColor: EventTagColor
+    public var eventId: String { self.eventOnWeek.eventId }
+    public let eventOnWeek: EventOnWeek
+    public let lineColor: EventTagColor
     
-    init(_ eventOnWeek: EventOnWeek, _ tag: EventTag?) {
+    public init(_ eventOnWeek: EventOnWeek, _ tag: EventTag?) {
         self.eventOnWeek = eventOnWeek
         
         switch eventOnWeek.eventTagId {
@@ -135,11 +135,11 @@ struct EventMoreModel: Equatable {
     let moreCount: Int
 }
 
-struct WeekEventStackViewModel: Equatable {
-    let linesStack: [[WeekEventLineModel]]
-    var shouldShowEventLinesDays: Set<Int> = []
+public struct WeekEventStackViewModel: Equatable {
+    public let linesStack: [[WeekEventLineModel]]
+    public var shouldShowEventLinesDays: Set<Int> = []
     
-    init(linesStack: [[WeekEventLineModel]], shouldMarkEventDays: Bool) {
+    public init(linesStack: [[WeekEventLineModel]], shouldMarkEventDays: Bool) {
         self.linesStack = linesStack
         guard shouldMarkEventDays else { return }
         self.shouldShowEventLinesDays = linesStack.flatMap { $0 }

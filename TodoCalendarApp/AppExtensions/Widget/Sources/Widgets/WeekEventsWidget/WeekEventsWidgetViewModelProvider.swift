@@ -1,0 +1,317 @@
+//
+//  WeekEventsWidgetViewModelProvider.swift
+//  TodoCalendarApp
+//
+//  Created by sudo.park on 6/30/24.
+//  Copyright © 2024 com.sudo.park. All rights reserved.
+//
+
+import Foundation
+import Prelude
+import Optics
+import Domain
+import Extensions
+import CalendarScenes
+
+
+private struct WeeksWithRange {
+    let weeks: [CalendarComponent.Week]
+    let range: Range<TimeInterval>
+    
+    init(_ weeks: [CalendarComponent.Week], _ calendar: Calendar) throws {
+        self.weeks = weeks
+        guard let startDay = weeks.first?.days.first,
+              let endDay = weeks.last?.days.last,
+              let startDate = calendar.date(from: startDay),
+              let endDate = calendar.date(from: endDay)
+        else { throw RuntimeError("invalid period") }
+        let startTime = calendar.startOfDay(for: startDate)
+        let endTime = try calendar.endOfDay(for: endDate).unwrap()
+        self.range = startTime.timeIntervalSince1970..<endTime.timeIntervalSince1970
+    }
+}
+
+struct WeekEventsViewModel {
+    
+    let targetMonthText: String
+    let targetDayIndetifier: String
+    let orderedWeekDaysModel: [WeekDayModel]
+    let weeks: [WeekRowModel]
+    let eventStackModelMap: [String: WeekEventStackViewModel]
+    
+    init(
+        targetMonthText: String,
+        targetDayIndetifier: String,
+        orderedWeekDaysModel: [WeekDayModel],
+        weeks: [WeekRowModel],
+        eventStackModelMap: [String : WeekEventStackViewModel]
+    ) {
+        self.targetMonthText = targetMonthText
+        self.targetDayIndetifier = targetDayIndetifier
+        self.orderedWeekDaysModel = orderedWeekDaysModel
+        self.weeks = weeks
+        self.eventStackModelMap = eventStackModelMap
+    }
+    
+    static func sample(_ range: WeekEventsRange) -> WeekEventsViewModel {
+        switch range {
+        case .weeks(let count):
+            return self.weeksSample(count)
+        case .wholeMonth(let selection):
+            return self.wholeMonthSample(selection)
+        }
+    }
+    
+    private static func weeksSample(_ count: Int) -> WeekEventsViewModel {
+        let wholeModel = self.wholeMonthSample(.current)
+        let size = min(count, wholeModel.weeks.count)
+        let sliced = Array(wholeModel.weeks[1..<1+size])
+        return .init(
+            targetMonthText: wholeModel.targetMonthText,
+            targetDayIndetifier: wholeModel.targetDayIndetifier,
+            orderedWeekDaysModel: wholeModel.orderedWeekDaysModel,
+            weeks: wholeModel.weeks,
+            eventStackModelMap: wholeModel.eventStackModelMap
+        )
+    }
+    
+    private static func wholeMonthSample(_ selection: WeekEventsRange.SelectedMonth) -> WeekEventsViewModel {
+        let targetMonth = switch selection {
+        case .previous: (2, "FEBRUARY")
+        case .current: (3, "MARCH")
+        case .next: (4, "APRIL")
+        }
+        let targetDate = "2024-3-14"
+        let weekAndDays: [[(Int, Int)]] = switch selection {
+        case .previous: [
+            [(1, 31), (2, 1), (2, 2), (2, 3), (2, 4), (2, 5), (2, 6)],
+            [(2, 7), (2, 8), (2, 9), (2, 10), (2, 11), (2, 12), (2, 13)],
+            [(2, 14), (2, 15), (2, 16), (2, 17), (2, 18), (2, 19), (2, 20)],
+            [(2, 21), (2, 22), (2, 23), (2, 24), (2, 25), (2, 26), (2, 27)],
+            [(2, 28), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6)]
+        ]
+        case .current: [
+            [(2, 28), (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6)],
+            [(3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13)],
+            [(3, 14), (3, 15), (3, 16), (3, 17), (3, 18), (3, 19), (3, 20)],
+            [(3, 21), (3, 22), (3, 23), (3, 24), (3, 25), (3, 26), (3, 27)],
+            [(3, 28), (3, 29), (3, 30), (3, 31), (4, 1), (4, 2), (4, 3)]
+        ]
+        case .next: [
+            [(3, 28), (3, 29), (3, 30), (3, 31), (4, 1), (4, 2), (4, 3)],
+            [(4, 4), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (4, 10)],
+            [(4, 11), (4, 12), (4, 13), (4, 14), (4, 15), (4, 16), (4, 17)],
+            [(4, 18), (4, 19), (4, 20), (4, 21), (4, 22), (4, 23), (4, 24)],
+            [(4, 25), (4, 26), (4, 27), (4, 28), (4, 29), (4, 30), (5, 1)]
+        ]
+        }
+        let rowModels = weekAndDays.enumerated().map { weekOffset, week -> WeekRowModel in
+            let weekId = "\(targetMonth.0)-\(weekOffset)"
+            let days = week.enumerated().map { offset, pair -> DayCellViewModel in
+                let day = CalendarComponent.Day(
+                    year: 2024, month: pair.0, day: pair.1, weekDay: offset+1
+                )
+                return DayCellViewModel(day, month: targetMonth.0)
+            }
+            return WeekRowModel(weekId, days)
+        }
+        let eventStacks: [String: WeekEventStackViewModel] = [
+            "2-1": .init(linesStack: [
+                [], [], [], [],
+                [.init(.dummy(5, "2024-02-11", "🏔️ Hiking"), nil)],
+                [], []
+            ], shouldMarkEventDays: false),
+            "3-2": .init(linesStack: [
+                [.init(.dummy(1, "2024-03-14", "🥗 Lunch"), nil), .init(.dummy(1, "2024-03-14", "⛳️ Golf"), nil) ],
+                [],
+                [.init(.dummy(3, "2024-03-16", "📞 Call Sara"), nil)],
+                [], [], [],
+                [.init(.dummy(7, "2024-03-20", "Holiday", hasPeriod: true, tag: .holiday), nil)]
+            ], shouldMarkEventDays: false),
+            "4-4": .init(linesStack: [
+                [], [], [], [], [], [],
+                [.init(.dummy(7, "2024-04-24", "🚀 Launch"), nil)]
+            ], shouldMarkEventDays: false)
+        ]
+        
+        return .init(
+            targetMonthText: targetMonth.1,
+            targetDayIndetifier: targetDate,
+            orderedWeekDaysModel: WeekDayModel.allModels(),
+            weeks: rowModels,
+            eventStackModelMap: eventStacks
+        )
+    }
+}
+
+enum WeekEventsRange {
+    
+    enum SelectedMonth {
+        case previous
+        case current
+        case next
+    }
+    
+    case weeks(count: Int)
+    case wholeMonth(SelectedMonth)
+}
+
+final class WeekEventsWidgetViewModelProvider {
+    
+    private let calendarUsecase: any CalendarUsecase
+    private let eventFetchUsecase: any CalendarEventFetchUsecase
+    private let settingRepository: any CalendarSettingRepository
+    private let appSettingRepository: any AppSettingRepository
+    
+    init(
+        calendarUsecase: any CalendarUsecase,
+        eventFetchUsecase: any CalendarEventFetchUsecase,
+        settingRepository: any CalendarSettingRepository,
+        appSettingRepository: any AppSettingRepository
+    ) {
+        self.calendarUsecase = calendarUsecase
+        self.eventFetchUsecase = eventFetchUsecase
+        self.settingRepository = settingRepository
+        self.appSettingRepository = appSettingRepository
+    }
+}
+
+extension WeekEventsWidgetViewModelProvider {
+    
+    func getWeekEventsModel(
+        from date: Date, range: WeekEventsRange
+    ) async throws -> WeekEventsViewModel {
+        
+        let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
+        let firstWeekDay = self.settingRepository.firstWeekDay() ?? .sunday
+        let calenar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let targetMonth = calenar.component(.month, from: date)
+        let weeks = try self.getWeeks(date, firstWeekDay, range, calenar)
+        let events = try await self.eventFetchUsecase.fetchEvents(in: weeks.range, timeZone)
+        let targetDate = CalendarComponent.Day(date, calendar: calenar)
+        
+        return WeekEventsViewModel(
+            targetMonthText: date.text("MMMM".localized(), timeZone: timeZone).uppercased(),
+            targetDayIndetifier: targetDate.identifier,
+            orderedWeekDaysModel: WeekDayModel.allModels(of: firstWeekDay),
+            weeks: self.convertToWeekRowModels(weeks, events.eventWithTimes, targetMonth),
+            eventStackModelMap: self.convertToEventStackModelMap(events, weeks.weeks, timeZone)
+        )
+    }
+    
+    private func getWeeks(
+        _ date: Date,
+        _ firstWeekDay: DayOfWeeks,
+        _ range: WeekEventsRange,
+        _ calendar: Calendar
+    ) throws -> WeeksWithRange {
+        
+        func selectWeeks(_ count: Int) throws -> [CalendarComponent.Week] {
+            let start = try calendar.firstDateOfWeek(firstWeekDay, date).unwrap()
+            let getDays: (Int) throws -> [CalendarComponent.Day] = { weekOffset in
+                let weekStart = try calendar.addDays(7*weekOffset, from: start).unwrap()
+                return try (0..<7).map { offset in
+                    let date = try calendar.addDays(offset, from: weekStart).unwrap()
+                    return .init(date, calendar: calendar)
+                }
+            }
+            let weeks = try (0..<count).map { weekOffset in
+                let days = try getDays(weekOffset)
+                return CalendarComponent.Week(days: days)
+            }
+            return weeks
+        }
+        func wholeWeeks(_ select: WeekEventsRange.SelectedMonth) throws -> [CalendarComponent.Week] {
+            let offset = switch select {
+            case .previous: -1
+            case .current: 0
+            case .next: 1
+            }
+            let refDate = try calendar.addMonth(offset, from: date).unwrap()
+            let day = CalendarComponent.Day(refDate, calendar: calendar)
+            let component = try self.calendarUsecase.getComponents(
+                day.year, day.month, firstWeekDay
+            )
+            return component.weeks
+        }
+        
+        let weeks = switch range {
+        case .weeks(let count): try selectWeeks(count)
+        case .wholeMonth(let selection): try wholeWeeks(selection)
+        }
+        
+        return try WeeksWithRange(weeks, calendar)
+    }
+    
+    private func convertToWeekRowModels(
+        _ weeks: WeeksWithRange, _ events: [any CalendarEvent], _ targetMonth: Int
+    ) -> [WeekRowModel] {
+        let weekModels = weeks.weeks.map { WeekRowModel($0, month: targetMonth) }
+        let holidaysMap = events.compactMap { $0 as? HolidayCalendarEvent }.asDictionary { $0.dateString }
+        let weekModelsWithHoliday = weekModels.map { week -> WeekRowModel in
+            let days = week.days.map { model -> DayCellViewModel in
+                let holidayKey = "\(model.year)-\(model.month.withLeadingZero())-\(model.day.withLeadingZero())"
+                let hasHoliday = holidaysMap[holidayKey] != nil
+                return model |> \.accentDay .~ (hasHoliday ? .holiday : model.accentDay)
+            }
+            return week |> \.days .~ days
+        }
+        return weekModelsWithHoliday
+    }
+    
+    private func convertToEventStackModelMap(
+        _ events: CalendarEvents,
+        _ weeks: [CalendarComponent.Week],
+        _ timeZone: TimeZone
+    ) -> [String: WeekEventStackViewModel] {
+        let stackBuilder = WeekEventStackBuilder(timeZone)
+        let stackMap = weeks.reduce(into: [String: WeekEventStack]()) { acc, week in
+            let stack = stackBuilder.build(week, events: events.eventWithTimes)
+            acc[week.id] = stack
+        }
+        let lineListModelMap = stackMap.mapValues { stack in
+            return stack.eventStacks.map { es -> [WeekEventLineModel] in
+                return es.map { e -> WeekEventLineModel in
+                    let tag = e.eventTagId.customTagId.flatMap { events.customTagMap[$0] }
+                    return WeekEventLineModel(e, tag)
+                }
+            }
+        }
+        let uiSetting = self.appSettingRepository.loadSavedViewAppearance()
+        let stackModelMap = lineListModelMap.mapValues { lines in
+            return WeekEventStackViewModel(linesStack: lines, shouldMarkEventDays: uiSetting.calendar.showUnderLineOnEventDay)
+        }
+        return stackModelMap
+    }
+}
+
+
+private extension EventOnWeek {
+    
+    static func dummy(
+        _ dayNumber: Int, _ dateId: String,
+        _ name: String, hasPeriod: Bool = false, tag: AllEventTagId = .default
+    ) -> EventOnWeek {
+        let event = DummyCalendarEvent(name, name, hasPeriod: hasPeriod)
+        return EventOnWeek(0..<1, [dayNumber], (dayNumber...dayNumber), [dateId], event)
+    }
+}
+
+private struct DummyCalendarEvent: CalendarEvent {
+    var eventId: String
+    var name: String
+    var eventTime: EventTime?
+    var eventTimeOnCalendar: EventTimeOnCalendar?
+    var eventTagId: AllEventTagId
+    var isRepeating: Bool = false
+    var isForemost: Bool = false
+
+    init(_ id: String, _ name: String, hasPeriod: Bool = true, tag: AllEventTagId = .default) {
+        self.eventId = id
+        self.name = name
+        self.eventTagId = tag
+        if hasPeriod {
+            self.eventTimeOnCalendar = .init(.period(0..<1), timeZone: TimeZone.autoupdatingCurrent)
+        }
+    }
+}

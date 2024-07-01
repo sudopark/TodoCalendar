@@ -13,23 +13,23 @@ import Optics
 
 // MARK: - EventOnWeek + WeekEventStack
 
-struct EventOnWeek: Equatable {
-    let event: any CalendarEvent
-    var name: String { self.event.name }
-    let eventRangesOnWeek: Range<TimeInterval>
-    let overlapDays: Set<Int>
-    let daysSequence: ClosedRange<Int>
-    let daysIdentifiers: [String]
-    var eventId: String { self.event.eventId }
-    var eventTagId: AllEventTagId { self.event.eventTagId }
-    var hasPeriod: Bool { self.event.eventTimeOnCalendar?.isPeriod == true }
-    var isHoliday: Bool { self.event is HolidayCalendarEvent }
+public struct EventOnWeek: Equatable {
+    public let event: any CalendarEvent
+    public var name: String { self.event.name }
+    public let eventRangesOnWeek: Range<TimeInterval>
+    public let overlapDays: Set<Int>
+    public let daysSequence: ClosedRange<Int>
+    public let daysIdentifiers: [String]
+    public var eventId: String { self.event.eventId }
+    public var eventTagId: AllEventTagId { self.event.eventTagId }
+    public var hasPeriod: Bool { self.event.eventTimeOnCalendar?.isPeriod == true }
+    public var isHoliday: Bool { self.event is HolidayCalendarEvent }
     
     var eventStartDayIdentifierOnWeek: String? { self.daysIdentifiers.first }
     
     fileprivate var length: Int { self.overlapDays.count }
     
-    init?(_ event: any CalendarEvent, on weekRange: Range<TimeInterval>, with calendar: Calendar) {
+    public init?(_ event: any CalendarEvent, on weekRange: Range<TimeInterval>, with calendar: Calendar) {
         guard let overlapRange = event.eventTimeOnCalendar?.clamped(to: weekRange) else { return nil }
         self.event = event
         self.eventRangesOnWeek = overlapRange
@@ -45,7 +45,7 @@ struct EventOnWeek: Equatable {
         self.daysIdentifiers = calendar.daysIdentifiers(overlapRange)
     }
     
-    init(
+    public init(
         _ eventRangesOnWeek: Range<TimeInterval>,
         _ overlapDays: [Int],
         _ daysSequence: ClosedRange<Int>,
@@ -60,31 +60,31 @@ struct EventOnWeek: Equatable {
         self.event = event
     }
     
-    static func == (_ lhs: Self, _ rhs: Self) -> Bool {
+    public static func == (_ lhs: Self, _ rhs: Self) -> Bool {
         return lhs.event.compareKey == rhs.event.compareKey
             && lhs.eventRangesOnWeek == rhs.eventRangesOnWeek
     }
 }
 
-struct WeekEventStack {
+public struct WeekEventStack {
     
-    let eventStacks: [[EventOnWeek]]
+    public let eventStacks: [[EventOnWeek]]
 }
 
 
 // MARK: - WeekEventStackBuilder
 
-struct WeekEventStackBuilder {
+public struct WeekEventStackBuilder {
     
     private let calendar: Calendar
-    init(_ timeZone: TimeZone) {
+    public init(_ timeZone: TimeZone) {
         self.calendar = .init(identifier: .gregorian) |> \.timeZone .~ timeZone
     }
 }
 
 extension WeekEventStackBuilder {
     
-    func build(_ week: CalendarComponent.Week, events: [any CalendarEvent]) -> WeekEventStack {
+    public func build(_ week: CalendarComponent.Week, events: [any CalendarEvent]) -> WeekEventStack {
         guard let weekRange = self.calendar.weekRange(week)
         else { return .init(eventStacks: []) }
         

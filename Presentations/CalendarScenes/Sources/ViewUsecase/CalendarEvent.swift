@@ -138,6 +138,7 @@ public struct ScheduleCalendarEvent: CalendarEvent {
 
 public struct HolidayCalendarEvent: CalendarEvent {
     
+    public let dateString: String
     public let eventId: String
     public let name: String
     public let eventTime: EventTime?
@@ -158,6 +159,7 @@ public struct HolidayCalendarEvent: CalendarEvent {
               let end = calendar.date(from: endComponents)
         else { return nil }
         
+        self.dateString = holiday.dateString
         self.eventId = "\(holiday.dateString)-\(holiday.name)"
         self.name = holiday.localName
         let timeRange = start.timeIntervalSince1970..<end.timeIntervalSince1970
