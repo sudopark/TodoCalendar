@@ -145,15 +145,10 @@ struct MonthWidget: Widget {
     
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: self.kind, provider: MonthWidgetTimelineProvider()) { entry in
-            if #available(iOS 17.0, *) {
-                MonthWidgetView(entry: entry)
-                    .containerBackground(.fill.tertiary, for: .widget)
-            } else {
-                MonthWidgetView(entry: entry)
-                    .padding()
-                    .background()
-            }
+            MonthWidgetView(entry: entry)
+                .containerBackground(.background, for: .widget)
         }
+        .supportedFamilies([.systemSmall])
         .configurationDisplayName("TODO: My Widget")
         .description("TODO: This is an example widget.")
     }
@@ -179,7 +174,7 @@ struct MonthWidgetPreview_Provider: PreviewProvider {
 //        ))
         return MonthWidgetView(entry: entry)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
-            .containerBackground(.fill.tertiary, for: .widget)
+            .containerBackground(.background, for: .widget)
     }
     
     private static func makeDummyComponent() -> CalendarComponent {

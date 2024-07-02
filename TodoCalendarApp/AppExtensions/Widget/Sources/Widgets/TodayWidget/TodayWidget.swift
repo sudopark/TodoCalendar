@@ -139,8 +139,9 @@ struct TodayWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: TodayWidgetTimelineProvider()) { entry in
             TodayWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(.background, for: .widget)
         }
+        .supportedFamilies([.systemSmall])
         .configurationDisplayName("TODO: My Widget")
         .description("TODO: This is an example widget.")
     }
@@ -158,6 +159,6 @@ struct TodayWidgetPreview_Provider: PreviewProvider {
         let entry = ResultTimelineEntry(date: Date(), result: .success(model))
         return TodayWidgetView(entry: entry)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
-            .containerBackground(.fill.tertiary, for: .widget)
+            .containerBackground(.background, for: .widget)
     }
 }

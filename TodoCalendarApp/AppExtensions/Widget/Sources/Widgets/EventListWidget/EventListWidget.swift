@@ -215,8 +215,9 @@ struct EventListWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: EventListWidgetTimeLineProvider()) { entry in
             EventListWidgetView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(.background, for: .widget)
         }
+        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .configurationDisplayName("TODO: My Widget")
         .description("TODO: This is an example widget.")
     }
@@ -272,6 +273,6 @@ struct EventListWidgetPreview_Provider: PreviewProvider {
         
         return EventListWidgetView(entry: entry)
             .previewContext(WidgetPreviewContext(family: .systemSmall))
-            .containerBackground(.fill.tertiary, for: .widget)
+            .containerBackground(.background, for: .widget)
     }
 }
