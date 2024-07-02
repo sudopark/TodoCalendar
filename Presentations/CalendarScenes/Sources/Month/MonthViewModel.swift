@@ -129,10 +129,10 @@ public struct WeekEventLineModel: Equatable {
     }
 }
 
-struct EventMoreModel: Equatable {
-    let daySequence: Int
-    let dayIdentifier: String
-    let moreCount: Int
+public struct EventMoreModel: Equatable {
+    public let daySequence: Int
+    public let dayIdentifier: String
+    public let moreCount: Int
 }
 
 public struct WeekEventStackViewModel: Equatable {
@@ -151,7 +151,7 @@ public struct WeekEventStackViewModel: Equatable {
 
 extension WeekEventStackViewModel {
     
-    func eventMores(with maxSize: Int) -> [EventMoreModel] {
+    public func eventMores(with maxSize: Int) -> [EventMoreModel] {
         guard maxSize > 0, maxSize < self.linesStack.count else { return [] }
         let willHiddenRows = self.linesStack[maxSize...]
         let willHiddenEventsPerDaySeq = willHiddenRows.reduce(into: [Int: [WeekEventLineModel]]()) { acc, lines in

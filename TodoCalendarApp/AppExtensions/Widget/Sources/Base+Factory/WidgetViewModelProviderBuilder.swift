@@ -150,3 +150,47 @@ extension WidgetViewModelProviderBuilder {
         )
     }
 }
+
+
+// MARK: make WeekEventsWidgetViewModelProvider
+
+extension WidgetViewModelProviderBuilder {
+    
+    func makeWeekEventsWidgetViewModelProvider() async -> WeekEventsWidgetViewModelProvider {
+        
+        await self.checkShouldReset()
+        
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        let calendarSettingUsecase = CalendarSettingUsecaseImple(
+            settingRepository: calendarSettingRepository,
+            shareDataStore: .init()
+        )
+        let holidayUsecase = HolidayUsecaseImple(
+            holidayRepository: self.usecaseFactory.makeHolidayRepository(),
+            dataStore: .init(),
+            localeProvider: Locale.current
+        )
+        let calendarUsecase = CalendarUsecaseImple(
+            calendarSettingUsecase: calendarSettingUsecase,
+            holidayUsecase: holidayUsecase
+        )
+        
+        let holidayFetchUsecase = self.usecaseFactory.makeHolidaysFetchUsecase(holidayUsecase)
+        let eventFetchUsecase = self.usecaseFactory.makeEventsFetchUsecase(holidayFetchUsecase)
+        
+        let appSettingRepository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
+        
+        return WeekEventsWidgetViewModelProvider(
+            calendarUsecase: calendarUsecase,
+            eventFetchUsecase: eventFetchUsecase,
+            settingRepository: calendarSettingRepository,
+            appSettingRepository: appSettingRepository
+        )
+    }
+}
