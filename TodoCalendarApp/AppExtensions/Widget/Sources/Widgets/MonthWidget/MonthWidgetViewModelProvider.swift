@@ -20,7 +20,7 @@ struct MonthWidgetViewModel {
     let monthName: String
     let dayOfWeeksModels: [WeekDayModel]
     let weeks: [WeekRowModel]
-    let todayIdentifier: String
+    var todayIdentifier: String?
     var hasEventDaysIdentifiers: Set<String> = []
     
     fileprivate var eventRange: Range<TimeInterval>?
@@ -30,7 +30,7 @@ struct MonthWidgetViewModel {
         _ firstWeekDay: DayOfWeeks,
         _ timeZone: TimeZone,
         _ component: CalendarComponent,
-        _ todayIdentifier: String
+        _ todayIdentifier: String?
     ) {
         self.dayOfWeeksModels = WeekDayModel.allModels(of: firstWeekDay)
         self.weeks = component.weeks.map { week in
@@ -80,6 +80,28 @@ struct MonthWidgetViewModel {
             |> \.hasEventDaysIdentifiers .~ [
                 "2024-3-4", "2024-3-17", "2024-3-28"
             ]
+    }
+    
+    static func makeSampleNextMonth() throws -> MonthWidgetViewModel {
+        let calendar = Calendar(identifier: .gregorian)
+        let refDate = try calendar.dateBySetting(from: Date()) {
+            $0.year = 2024; $0.month = 4; $0.day = 10
+        }.unwrap()
+        let weekAndDays: [[(Int, Int)]] = [
+            [(3, 31), (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6)],
+            [(4, 7), (4, 8), (4, 9), (4, 10), (4, 11), (4, 12), (4, 13)],
+            [(4, 14), (4, 15), (4, 16), (4, 17), (4, 18), (4, 19), (4, 20)],
+            [(4, 21), (4, 22), (4, 23), (4, 24), (4, 25), (4, 26), (4, 27)],
+            [(4, 28), (4, 29), (4, 30), (5, 1), (5, 2), (5, 3), (5, 4)]
+        ]
+        let weeks = weekAndDays.map { pairs -> CalendarComponent.Week in
+            let days = pairs.enumerated().map { offset, pair -> CalendarComponent.Day in
+                return .init(year: 2024, month: pair.0, day: pair.1, weekDay: offset+1)
+            }
+            return CalendarComponent.Week(days: days)
+        }
+        let components = CalendarComponent(year: 2024, month: 4, weeks: weeks)
+        return MonthWidgetViewModel(refDate, .sunday, .current, components, nil)
     }
 }
 

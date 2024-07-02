@@ -68,10 +68,13 @@ private extension EnvironmentStorage {
 
 extension WidgetViewModelProviderBuilder {
     
-    func makeMonthViewModelProvider() async -> MonthWidgetViewModelProvider {
+    func makeMonthViewModelProvider(
+        shouldSkipCheckCacheReset: Bool = false,
+        calendarSettingRepository: (any CalendarSettingRepository)? = nil
+    ) async -> MonthWidgetViewModelProvider {
         await self.checkShouldReset()
         
-        let calendarSettingRepository = CalendarSettingRepositoryImple(
+        let calendarSettingRepository = calendarSettingRepository ?? CalendarSettingRepositoryImple(
             environmentStorage: base.userDefaultEnvironmentStorage
         )
         let calendarSettingUsecase = CalendarSettingUsecaseImple(
@@ -96,6 +99,18 @@ extension WidgetViewModelProviderBuilder {
             settingRepository: calendarSettingRepository,
             holidayFetchUsecase: holidaysFetchUsecase,
             eventFetchUsecase: eventsFetchUsecase
+        )
+    }
+    
+    func makeDoubleMonthViewModelProvider() async -> DoubleMonthWidgetViewModelProvider {
+        let repository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        let provider = await self.makeMonthViewModelProvider(
+            calendarSettingRepository: repository
+        )
+        return DoubleMonthWidgetViewModelProvider(
+            settingRepository: repository, monthViewModelProvider: provider
         )
     }
 }
