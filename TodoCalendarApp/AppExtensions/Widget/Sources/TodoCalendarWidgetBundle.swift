@@ -15,5 +15,12 @@ struct TodoCalendarWidgetBundle: WidgetBundle {
         MonthWidget()
         EventListWidget()
         TodayWidget()
+        OneWeekEventsWidget()
+        TwoWeekEventsWidget()
+        ThreeWeekEventsWidget()
+        FourWeekEventsWidget()
+        CurrentMonthEventsWidget()
+        LastMonthEventsWidget()
+        NextMonthEventsWidget()
     }
 }

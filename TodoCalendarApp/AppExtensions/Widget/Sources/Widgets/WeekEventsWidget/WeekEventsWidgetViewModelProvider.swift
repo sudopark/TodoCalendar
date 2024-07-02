@@ -14,6 +14,20 @@ import Extensions
 import CalendarScenes
 
 
+// MARK: - WeekEventsViewModel
+
+enum WeekEventsRange {
+    
+    enum SelectedMonth {
+        case previous
+        case current
+        case next
+    }
+    
+    case weeks(count: Int)
+    case wholeMonth(SelectedMonth)
+}
+
 private struct WeeksWithRange {
     let weeks: [CalendarComponent.Week]
     let range: Range<TimeInterval>
@@ -33,24 +47,30 @@ private struct WeeksWithRange {
 
 struct WeekEventsViewModel {
     
+    let range: WeekEventsRange
     let targetMonthText: String
     let targetDayIndetifier: String
     let orderedWeekDaysModel: [WeekDayModel]
     let weeks: [WeekRowModel]
     let eventStackModelMap: [String: WeekEventStackViewModel]
+    let defaultTagColorSetting: DefaultEventTagColorSetting
     
     init(
+        range: WeekEventsRange,
         targetMonthText: String,
         targetDayIndetifier: String,
         orderedWeekDaysModel: [WeekDayModel],
         weeks: [WeekRowModel],
-        eventStackModelMap: [String : WeekEventStackViewModel]
+        eventStackModelMap: [String : WeekEventStackViewModel],
+        defaultTagColorSetting: DefaultEventTagColorSetting
     ) {
+        self.range = range
         self.targetMonthText = targetMonthText
         self.targetDayIndetifier = targetDayIndetifier
         self.orderedWeekDaysModel = orderedWeekDaysModel
         self.weeks = weeks
         self.eventStackModelMap = eventStackModelMap
+        self.defaultTagColorSetting = defaultTagColorSetting
     }
     
     static func sample(_ range: WeekEventsRange) -> WeekEventsViewModel {
@@ -65,13 +85,16 @@ struct WeekEventsViewModel {
     private static func weeksSample(_ count: Int) -> WeekEventsViewModel {
         let wholeModel = self.wholeMonthSample(.current)
         let size = min(count, wholeModel.weeks.count)
-        let sliced = Array(wholeModel.weeks[1..<1+size])
+        let startPoint = count <= 2 ? 2 : 1
+        let sliced = Array(wholeModel.weeks[startPoint..<startPoint+size])
         return .init(
+            range: .weeks(count: count),
             targetMonthText: wholeModel.targetMonthText,
             targetDayIndetifier: wholeModel.targetDayIndetifier,
             orderedWeekDaysModel: wholeModel.orderedWeekDaysModel,
-            weeks: wholeModel.weeks,
-            eventStackModelMap: wholeModel.eventStackModelMap
+            weeks: sliced,
+            eventStackModelMap: wholeModel.eventStackModelMap,
+            defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA")
         )
     }
     
@@ -111,49 +134,48 @@ struct WeekEventsViewModel {
                 let day = CalendarComponent.Day(
                     year: 2024, month: pair.0, day: pair.1, weekDay: offset+1
                 )
+                let accentDay: AccentDays? = if day.month == 3 && day.day == 20 {
+                    .holiday
+                } else if day.weekDay == 1 {
+                    .sunday
+                } else if day.weekDay == 7 {
+                    .saturday
+                } else { nil }
                 return DayCellViewModel(day, month: targetMonth.0)
+                |> \.accentDay .~ accentDay
             }
             return WeekRowModel(weekId, days)
         }
         let eventStacks: [String: WeekEventStackViewModel] = [
             "2-1": .init(linesStack: [
-                [], [], [], [],
-                [.init(.dummy(5, "2024-02-11", "🏔️ Hiking"), nil)],
-                [], []
+                [.init(.dummy(5, "2024-02-11", "🏔️ Hiking"), nil)]
             ], shouldMarkEventDays: false),
             "3-2": .init(linesStack: [
-                [.init(.dummy(1, "2024-03-14", "🥗 Lunch"), nil), .init(.dummy(1, "2024-03-14", "⛳️ Golf"), nil) ],
-                [],
-                [.init(.dummy(3, "2024-03-16", "📞 Call Sara"), nil)],
-                [], [], [],
-                [.init(.dummy(7, "2024-03-20", "Holiday", hasPeriod: true, tag: .holiday), nil)]
+                [
+                    .init(.dummy(1, "2024-03-14", "🥗 Lunch"), nil),
+                    .init(.dummy(3, "2024-03-16", "📞 Call Sara"), nil),
+                    .init(.dummy(7, "2024-03-20", "Holiday", hasPeriod: true, tag: .holiday), nil)
+                ],
+                [ .init(.dummy(1, "2024-03-14", "⛳️ Golf"), nil)],
             ], shouldMarkEventDays: false),
-            "4-4": .init(linesStack: [
-                [], [], [], [], [], [],
+            "3-3": .init(linesStack: [
+                [.init(.dummy(4, "2024-03-25", "🔥 Workout"), nil)]
+            ], shouldMarkEventDays: false),
+            "4-3": .init(linesStack: [
                 [.init(.dummy(7, "2024-04-24", "🚀 Launch"), nil)]
             ], shouldMarkEventDays: false)
         ]
         
         return .init(
+            range: .wholeMonth(selection),
             targetMonthText: targetMonth.1,
             targetDayIndetifier: targetDate,
             orderedWeekDaysModel: WeekDayModel.allModels(),
             weeks: rowModels,
-            eventStackModelMap: eventStacks
+            eventStackModelMap: eventStacks,
+            defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA")
         )
     }
-}
-
-enum WeekEventsRange {
-    
-    enum SelectedMonth {
-        case previous
-        case current
-        case next
-    }
-    
-    case weeks(count: Int)
-    case wholeMonth(SelectedMonth)
 }
 
 final class WeekEventsWidgetViewModelProvider {
@@ -184,6 +206,7 @@ extension WeekEventsWidgetViewModelProvider {
         
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let firstWeekDay = self.settingRepository.firstWeekDay() ?? .sunday
+        let defaultTagColorSetting = self.appSettingRepository.loadSavedViewAppearance().defaultTagColor
         let calenar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let targetMonth = calenar.component(.month, from: date)
         let weeks = try self.getWeeks(date, firstWeekDay, range, calenar)
@@ -191,11 +214,13 @@ extension WeekEventsWidgetViewModelProvider {
         let targetDate = CalendarComponent.Day(date, calendar: calenar)
         
         return WeekEventsViewModel(
+            range: range,
             targetMonthText: date.text("MMMM".localized(), timeZone: timeZone).uppercased(),
             targetDayIndetifier: targetDate.identifier,
             orderedWeekDaysModel: WeekDayModel.allModels(of: firstWeekDay),
             weeks: self.convertToWeekRowModels(weeks, events.eventWithTimes, targetMonth),
-            eventStackModelMap: self.convertToEventStackModelMap(events, weeks.weeks, timeZone)
+            eventStackModelMap: self.convertToEventStackModelMap(events, weeks.weeks, timeZone),
+            defaultTagColorSetting: defaultTagColorSetting
         )
     }
     
@@ -277,9 +302,8 @@ extension WeekEventsWidgetViewModelProvider {
                 }
             }
         }
-        let uiSetting = self.appSettingRepository.loadSavedViewAppearance()
         let stackModelMap = lineListModelMap.mapValues { lines in
-            return WeekEventStackViewModel(linesStack: lines, shouldMarkEventDays: uiSetting.calendar.showUnderLineOnEventDay)
+            return WeekEventStackViewModel(linesStack: lines, shouldMarkEventDays: false)
         }
         return stackModelMap
     }
@@ -292,7 +316,7 @@ private extension EventOnWeek {
         _ dayNumber: Int, _ dateId: String,
         _ name: String, hasPeriod: Bool = false, tag: AllEventTagId = .default
     ) -> EventOnWeek {
-        let event = DummyCalendarEvent(name, name, hasPeriod: hasPeriod)
+        let event = DummyCalendarEvent(name, name, hasPeriod: hasPeriod, tag: tag)
         return EventOnWeek(0..<1, [dayNumber], (dayNumber...dayNumber), [dateId], event)
     }
 }
