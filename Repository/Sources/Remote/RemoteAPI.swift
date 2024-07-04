@@ -157,7 +157,7 @@ extension RemoteAPIMethod {
     
     func encoding() -> any ParameterEncoding {
         switch self {
-        case .post, .patch: return JSONEncoding.default
+        case .post, .patch, .put: return JSONEncoding.default
         default: return URLEncoding(arrayEncoding: .noBrackets, boolEncoding: .literal)
         }
     }
