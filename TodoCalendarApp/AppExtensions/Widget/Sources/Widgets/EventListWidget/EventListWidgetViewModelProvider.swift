@@ -113,7 +113,7 @@ struct EventListWidgetViewModel {
     let defaultTagColorSetting: DefaultEventTagColorSetting
     var needBottomSpace: Bool = false
     
-    static func sample() -> EventListWidgetViewModel {
+    static func sample(maxItemCount: Int) -> EventListWidgetViewModel {
         
         let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("Lunch".localized())")
             |> \.tagColor .~ .default
@@ -145,6 +145,7 @@ struct EventListWidgetViewModel {
             lists: [june3, july],
             defaultTagColorSetting: defaultTagColorSetting
         )
+        .prefixedEvents(maxItemCount)
     }
 }
 
@@ -171,7 +172,8 @@ final class EventListWidgetViewModelProvider {
 extension EventListWidgetViewModelProvider {
     
     func getEventListViewModel(
-        for refDate: Date
+        for refDate: Date,
+        maxItemCount: Int
     ) async throws -> EventListWidgetViewModel {
         
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
@@ -185,6 +187,7 @@ extension EventListWidgetViewModelProvider {
             lists: dayEventLists,
             defaultTagColorSetting: setting.defaultTagColor
         )
+        .prefixedEvents(maxItemCount)
     }
     
     private func loadDayEventListModel(
@@ -228,3 +231,41 @@ private extension Array where Element == EventCellViewModel {
         }
     }
 }
+
+
+private extension EventListWidgetViewModel {
+    
+    func prefixedEvents(_ maxCount: Int) -> EventListWidgetViewModel {
+        
+        let totalEventCount = self.lists.flatMap { $0.events }.count
+        let firstDateIndex = self.lists.firstIndex(where: { $0.isCurrentTodos == false })
+        var remain = maxCount; var index = 0
+        var days: [SectionModel] = []
+        
+        repeat {
+            let day = self.lists[index].prefixIfNeed(remain)
+            let isFirstDate = index == firstDateIndex
+            if isFirstDate || !day.events.isEmpty {
+                days.append(day)
+                remain -= max(1, day.events.count)
+            }
+            index += 1
+        } while index < self.lists.count && remain > 0
+        
+        return self
+            |> \.lists .~ days
+            |> \.needBottomSpace .~ (totalEventCount < maxCount)
+    }
+}
+
+private extension EventListWidgetViewModel.SectionModel {
+    
+    func prefixIfNeed(_ remainCount: Int) -> EventListWidgetViewModel.SectionModel {
+        if self.events.count > remainCount {
+            return self |> \.events %~ { Array($0.prefix(remainCount)) }
+        } else {
+            return self
+        }
+    }
+}
+
