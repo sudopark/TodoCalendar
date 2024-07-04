@@ -120,9 +120,13 @@ extension WidgetViewModelProviderBuilder {
 
 extension WidgetViewModelProviderBuilder {
     
-    func makeEventListViewModelProvider() async -> EventListWidgetViewModelProvider {
+    func makeEventListViewModelProvider(
+        shouldSkipCheckCacheReset: Bool = false
+    ) async -> EventListWidgetViewModelProvider {
         
-        await self.checkShouldReset()
+        if !shouldSkipCheckCacheReset {
+            await self.checkShouldReset()
+        }
         
         let fetchUsecase = self.usecaseFactory.makeEventsFetchUsecase()
         
@@ -206,6 +210,46 @@ extension WidgetViewModelProviderBuilder {
             eventFetchUsecase: eventFetchUsecase,
             settingRepository: calendarSettingRepository,
             appSettingRepository: appSettingRepository
+        )
+    }
+}
+
+
+// MARK: - composed
+
+extension WidgetViewModelProviderBuilder {
+    
+    func makeEventAndMonthWidgetViewModelProvider() async -> EventAndMonthWidgetViewModelProvider {
+        
+        await self.checkShouldReset()
+        
+        let eventList = await self.makeEventListViewModelProvider(
+            shouldSkipCheckCacheReset: true
+        )
+        
+        let month = await self.makeMonthViewModelProvider(
+            shouldSkipCheckCacheReset: true
+        )
+
+        return EventAndMonthWidgetViewModelProvider(
+            eventListViewModelProvider: eventList, 
+            monthViewModelProvider: month
+        )
+    }
+    
+    func makeTodayAndMonthWidgetViewModelProvider() async -> TodayAndMonthWidgetViewModelProvider {
+        
+        await self.checkShouldReset()
+        
+        let today = await self.makeTodayViewModelProvider()
+        
+        let month = await self.makeMonthViewModelProvider(
+            shouldSkipCheckCacheReset: true
+        )
+
+        return TodayAndMonthWidgetViewModelProvider(
+            todayViewModelProvider: today,
+            monthViewModelProvider: month
         )
     }
 }
