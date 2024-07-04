@@ -60,7 +60,7 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider()
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
         
         // then
         XCTAssertEqual(viewModel.lists.count, 3)
@@ -96,7 +96,7 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider(withCurrentTodo: false)
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
         
         // then
         XCTAssertEqual(viewModel.lists.count, 2)
@@ -110,7 +110,7 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider(withStartDateEvent: false)
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
         
         // then
         let currentModel = viewModel.lists[safe: 0]
@@ -143,7 +143,7 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider()
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
         
         // then
         let eventModels = viewModel.lists.flatMap { $0.events }
@@ -162,7 +162,7 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider(withoutAnyEventsIncludeHoliday: true)
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
         
         // then
         XCTAssertEqual(viewModel.lists.count, 1)
@@ -171,6 +171,150 @@ extension EventListWidgetViewModelProviderTests {
             self.refDate.text("EEE, MMM d".localized(), timeZone: kst)
         )
         XCTAssertEqual(viewModel.lists.first?.events.count, 0)
+    }
+}
+
+extension EventListWidgetViewModelProviderTests {
+    
+    private final class PrivateStubEventFetchUsecase: StubCalendarEventsFetchUescase {
+        let currentTodos: [TodoCalendarEvent]
+        let eventWithTimes: [any CalendarEvent]
+        
+        init(currentTodos: [TodoCalendarEvent], eventWithTimes: [any CalendarEvent]) {
+            self.currentTodos = currentTodos
+            self.eventWithTimes = eventWithTimes
+        }
+        
+        override func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
+            return .init(currentTodos: self.currentTodos, eventWithTimes: self.eventWithTimes, customTagMap: [:])
+        }
+    }
+    
+    private func makeProviderWthStub(
+        currentTodosCount: Int = 0,
+        todayEventCount: Int = 0,
+        otherDayEventCount: Int = 0
+    ) -> EventListWidgetViewModelProvider {
+        
+        let first = self.refDate.timeIntervalSince1970
+        let second = self.refDate.add(days: 1)!.timeIntervalSince1970
+        let currents = (0..<currentTodosCount).map {
+            let todo = TodoEvent(uuid: "current:\($0)", name: "dummy")
+            return TodoCalendarEvent(todo, in: kst)
+        }
+        let todays = (0..<todayEventCount).map {
+            let todo = TodoEvent(uuid: "today:\($0)", name: "dummy") |> \.time .~ .at(first + TimeInterval($0+1))
+            return TodoCalendarEvent(todo, in: kst)
+        }
+        let otherDays = (0..<otherDayEventCount).map {
+            let todo = TodoEvent(uuid: "other:\($0)", name: "dummy") |> \.time .~ .at(second + TimeInterval($0+1))
+            return TodoCalendarEvent(todo, in: kst)
+        }
+        
+        let usecase = PrivateStubEventFetchUsecase(
+            currentTodos: currents,
+            eventWithTimes: todays + otherDays
+        )
+        let calendarSettingRepository = StubCalendarSettingRepository()
+        let appSettingRepository = StubAppSettingRepository()
+        
+        return EventListWidgetViewModelProvider(
+            eventsFetchUsecase: usecase,
+            appSettingRepository: appSettingRepository,
+            calendarSettingRepository: calendarSettingRepository
+        )
+    }
+    
+    // 첫날에 해당하는 이벤트는 없는경우 빈 모델로 반환
+    func testProvider_whenFirstDayIsEmpty_provideEmptyFirstDateModel() async throws {
+        // given
+        let provider = self.makeProviderWthStub(
+            todayEventCount: 0,
+            otherDayEventCount: 0
+        )
+        
+        // when
+        let model = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 3)
+        
+        // then
+        XCTAssertEqual(model.lists.count, 1)
+        let todaySection = model.lists.first(where: { $0.sectionTitle == "Fri, Mar 1" })
+        XCTAssertNotNil(todaySection)
+        XCTAssertEqual(todaySection?.events.count, 0)
+    }
+
+    // current todo는 있지만 첫날에 해당하는 이벤트가 없는 경우에도 첫날은 빈 모델로 반환
+    func testProvider_whenCurrentTodoExistsAndFirstDayIsEmpty_provideEmptyFirstDateModel() async throws {
+        // given
+        let provider = self.makeProviderWthStub(
+            currentTodosCount: 1,
+            todayEventCount: 0,
+            otherDayEventCount: 0
+        )
+        
+        // when
+        let model = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 3)
+        
+        // then
+        XCTAssertEqual(model.lists.count, 2)
+        let currentSection = model.lists.first(where: { $0.isCurrentTodos == true })
+        XCTAssertEqual(currentSection?.events.count, 1)
+        let todaySection = model.lists.first(where: { $0.sectionTitle == "Fri, Mar 1" })
+        XCTAssertNotNil(todaySection)
+        XCTAssertEqual(todaySection?.events.count, 0)
+    }
+
+    // current todo가 max를 충족한경우 첫날은 미제공
+    func testProvider_whenCurrentTodoGTEMaxCount_notProvideFirstDate() async throws {
+        // given
+        let provider = self.makeProviderWthStub(
+            currentTodosCount: 3,
+            todayEventCount: 0,
+            otherDayEventCount: 0
+        )
+        
+        // when
+        let model = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 3)
+        
+        // then
+        XCTAssertEqual(model.lists.count, 1)
+        let currentSection = model.lists.first(where: { $0.isCurrentTodos == true })
+        XCTAssertEqual(currentSection?.events.count, 3)
+        let todaySection = model.lists.first(where: { $0.sectionTitle == "Fri, Mar 1" })
+        XCTAssertNil(todaySection)
+    }
+
+    // 전체 이벤트수 제한 걸린경우 필터링
+    func testProvider_limitTotalEventCount() async throws {
+        // given
+        func parameterizeTest(current: Int, today: Int, other: Int) async throws {
+            // given
+            let provider = self.makeProviderWthStub(
+                currentTodosCount: current,
+                todayEventCount: today,
+                otherDayEventCount: other
+            )
+            
+            // when
+            let model = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 3)
+            
+            // then
+            let totalCount = model.lists.reduce(0) { acc, section in
+                return section.events.isEmpty ? acc + 1 : acc + section.events.count
+            }
+            XCTAssertEqual(totalCount, 3)
+        }
+        
+        // when + then
+        try await parameterizeTest(current: 3, today: 1, other: 0)
+        try await parameterizeTest(current: 3, today: 1, other: 1)
+        try await parameterizeTest(current: 2, today: 0, other: 1)
+        try await parameterizeTest(current: 0, today: 3, other: 1)
+        try await parameterizeTest(current: 0, today: 4, other: 1)
+        try await parameterizeTest(current: 0, today: 0, other: 2)
+        try await parameterizeTest(current: 0, today: 0, other: 3)
+        try await parameterizeTest(current: 0, today: 0, other: 4)
+        
     }
 }
 
@@ -224,7 +368,7 @@ extension EventListWidgetViewModelProviderTests {
         let usecase = self.makeProviderWithSingleEvent(self.dummyPDTAlldayTodo)
         
         // when
-        let viewModel = try await usecase.getEventListViewModel(for: self.refDate)
+        let viewModel = try await usecase.getEventListViewModel(for: self.refDate, maxItemCount: 100)
         
         // then
         let allEvents = viewModel.lists.flatMap { $0.events }

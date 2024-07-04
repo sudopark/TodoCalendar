@@ -27,8 +27,9 @@ extension EventListWidgetTimeLineProvider {
     func placeholder(
         in context: Context
     ) -> ResultTimelineEntry<EventListWidgetViewModel> {
-        let sample = EventListWidgetViewModel.sample()
-            .prefixedEvents(context.family.preferedItemCount)
+        let sample = EventListWidgetViewModel.sample(
+            maxItemCount: context.family.preferedEventListItemCount
+        )
         return .init(date: Date(), result: .success(sample))
     }
     
@@ -39,15 +40,12 @@ extension EventListWidgetTimeLineProvider {
         
         guard context.isPreview == false
         else {
-            let sample = EventListWidgetViewModel.sample()
-                .prefixedEvents(context.family.preferedItemCount)
-            completion(
-                .init(date: Date()) { sample }
-            )
+            let sample = self.placeholder(in: context)
+            completion(sample)
             return
         }
         
-        getEntry(withPrefixed: context.family.preferedItemCount) { entry in
+        getEntry(context) { entry in
             completion(entry)
         }
     }
@@ -57,7 +55,7 @@ extension EventListWidgetTimeLineProvider {
         completion: @escaping (Timeline<ResultTimelineEntry<EventListWidgetViewModel>>) -> Void
     ) {
         
-        self.getEntry(withPrefixed: context.family.preferedItemCount) { entry in
+        self.getEntry(context) { entry in
             let timeline = Timeline(
                 entries: [entry], policy: .after(Date().nextUpdateTime)
             )
@@ -65,15 +63,18 @@ extension EventListWidgetTimeLineProvider {
         }
     }
     
-    private func getEntry(withPrefixed count: Int, _ completion: @escaping (Entry) -> Void) {
+    private func getEntry(_ context: Context, _ completion: @escaping (Entry) -> Void) {
         
+        let count = context.family.preferedEventListItemCount
         Task {
             let builder = WidgetViewModelProviderBuilder(base: .init())
             let viewModelProvider = await builder.makeEventListViewModelProvider()
             let now = Date()
             do {
-                let model = try await viewModelProvider.getEventListViewModel(for: now)
-                        .prefixedEvents(count)
+                let model = try await viewModelProvider.getEventListViewModel(
+                    for: now,
+                    maxItemCount: count
+                )
                 completion(
                     .init(date: now, result: .success(model))
                 )
@@ -87,9 +88,9 @@ extension EventListWidgetTimeLineProvider {
 }
 
 
-private extension WidgetFamily {
+extension WidgetFamily {
     
-    var preferedItemCount: Int {
+    var preferedEventListItemCount: Int {
         switch self {
         case .systemSmall: return 3
         case .systemMedium: return 3
@@ -98,40 +99,3 @@ private extension WidgetFamily {
         }
     }
 }
-
-private extension EventListWidgetViewModel {
-    
-    func prefixedEvents(_ maxCount: Int) -> EventListWidgetViewModel {
-        
-        let totalEventCount = self.lists.flatMap { $0.events }.count
-        let firstDateIndex = self.lists.firstIndex(where: { $0.isCurrentTodos == false })
-        var remain = maxCount; var index = 0
-        var days: [SectionModel] = []
-        
-        repeat {
-            let day = self.lists[index].prefixIfNeed(remain)
-            let isFirstDate = index == firstDateIndex
-            if isFirstDate || !day.events.isEmpty {
-                days.append(day)
-                remain -= max(1, day.events.count)
-            }
-            index += 1
-        } while index < self.lists.count && remain > 0
-        
-        return self
-            |> \.lists .~ days
-            |> \.needBottomSpace .~ (totalEventCount < maxCount)
-    }
-}
-
-private extension EventListWidgetViewModel.SectionModel {
-    
-    func prefixIfNeed(_ remainCount: Int) -> EventListWidgetViewModel.SectionModel {
-        if self.events.count > remainCount {
-            return self |> \.events %~ { Array($0.prefix(remainCount)) }
-        } else {
-            return self
-        }
-    }
-}
-

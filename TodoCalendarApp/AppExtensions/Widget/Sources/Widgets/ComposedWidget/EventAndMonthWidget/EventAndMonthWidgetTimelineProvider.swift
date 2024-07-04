@@ -34,10 +34,12 @@ struct EventAndMonthWidgetViewModelProvider {
         self.monthViewModelProvider = monthViewModelProvider
     }
     
-    func getViewModel(_ time: Date) async throws -> EventAndMonthWidgetViewModel {
+    func getViewModel(_ time: Date, maxItemCount: Int) async throws -> EventAndMonthWidgetViewModel {
         
         return EventAndMonthWidgetViewModel(
-            event: try await eventListViewModelProvider.getEventListViewModel(for: time),
+            event: try await eventListViewModelProvider.getEventListViewModel(
+                for: time, maxItemCount: maxItemCount
+            ),
             month: try await monthViewModelProvider.getMonthViewModel(time)
         )
     }
@@ -49,8 +51,11 @@ struct EventAndMonthWidgetTimelineProvider: TimelineProvider {
     
     func placeholder(in context: Context) -> Entry {
         return .init(date: Date()) {
-            .init(event: EventListWidgetViewModel.sample(),
-                  month: try MonthWidgetViewModel.makeSample()
+            .init(
+                event: EventListWidgetViewModel.sample(
+                    maxItemCount: context.family.preferedEventListItemCount
+                ),
+                month: try MonthWidgetViewModel.makeSample()
             )
         }
     }
@@ -61,26 +66,27 @@ struct EventAndMonthWidgetTimelineProvider: TimelineProvider {
             completion(placeholder(in: context))
             return
         }
-        getEntry { entry in
+        getEntry(context) { entry in
             completion(entry)
         }
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
-        self.getEntry { entry in
+        self.getEntry(context) { entry in
             let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
             completion(timeline)
         }
     }
     
-    private func getEntry(_ completion: @escaping (Entry) -> Void) {
+    private func getEntry(_ context: Context, _ completion: @escaping (Entry) -> Void) {
         
+        let count = context.family.preferedEventListItemCount
         Task {
             let builer = WidgetViewModelProviderBuilder(base: .init())
             let viewModelProvider = await builer.makeEventAndMonthWidgetViewModelProvider()
             let now = Date()
             do {
-                let model = try await viewModelProvider.getViewModel(now)
+                let model = try await viewModelProvider.getViewModel(now, maxItemCount: count)
                 completion(.init(date: now, result: .success(model)))
             } catch {
                 completion(.init(date: now, result: .failure(.init(error: error))))
