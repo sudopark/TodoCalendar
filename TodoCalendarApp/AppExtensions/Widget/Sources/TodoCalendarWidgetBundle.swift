@@ -15,11 +15,19 @@ struct TodoCalendarWidgetBundle: WidgetBundle {
         MonthWidget()
         EventListWidget()
         TodayWidget()
-        DoubleMonthWidget()
+        ComposedWidgetBundle().body
         WeeksWidgetBundle().body
     }
 }
 
+
+struct ComposedWidgetBundle: WidgetBundle {
+    
+    var body: some Widget {
+        DoubleMonthWidget()
+        EventAndMonthWidget()
+    }
+}
 
 struct WeeksWidgetBundle: WidgetBundle {
     
