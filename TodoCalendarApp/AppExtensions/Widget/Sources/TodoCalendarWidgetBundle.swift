@@ -26,6 +26,7 @@ struct ComposedWidgetBundle: WidgetBundle {
     var body: some Widget {
         DoubleMonthWidget()
         EventAndMonthWidget()
+        TodayAndMonthWidget()
     }
 }
 
