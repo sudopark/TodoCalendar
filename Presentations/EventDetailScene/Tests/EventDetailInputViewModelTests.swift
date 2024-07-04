@@ -148,6 +148,41 @@ extension EventDetailInputViewModelTests {
         // then
         XCTAssertEqual(names, ["old_name"])
     }
+    
+    // 입력한 값에 따라 초기 url값 제공
+    func testViewModel_whenAfterPrepare_provideInitailURL() {
+        // given
+        let expect = expectation(description: "prepare 이후에 이전에 입혁한 url 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let urls = self.waitOutputs(expect, for: viewModel.initailURL) {
+            self.prepareViewModelWithOldData(viewModel)
+            
+            viewModel.enter(name: "new name")
+            viewModel.enter(url: "new url")
+        }
+    
+        // then
+        XCTAssertEqual(urls, ["old_url"])
+    }
+    
+    // 입력한 값에 따라 초기 memo값 제공
+    func testViewModel_whenAfterPrepare_provideInitailMemo() {
+        // given
+        let expect = expectation(description: "prepare 이후에 이전에 입혁한 memo값 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let memos = self.waitOutputs(expect, for: viewModel.initialMemo) {
+            self.prepareViewModelWithOldData(viewModel)
+            
+            viewModel.enter(memo: "new memo")
+        }
+    
+        // then
+        XCTAssertEqual(memos, ["old_memo"])
+    }
 }
 
 

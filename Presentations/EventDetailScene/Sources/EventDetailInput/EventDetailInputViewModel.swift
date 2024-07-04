@@ -72,6 +72,8 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     func enter(memo: String)
     
     var initialName: AnyPublisher<String?, Never> { get }
+    var initailURL: AnyPublisher<String?, Never> { get }
+    var initialMemo: AnyPublisher<String?, Never> { get }
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOption: AnyPublisher<String?, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
@@ -341,6 +343,21 @@ extension EventDetailInputViewModelImple {
         return self.subject.basic
             .compactMap { $0 }
             .map { $0.basic.name }
+            .first()
+            .eraseToAnyPublisher()
+    }
+    
+    var initailURL: AnyPublisher<String?, Never> {
+        return self.subject.additional
+            .compactMap { $0 }
+            .map { $0.url }
+            .first()
+            .eraseToAnyPublisher()
+    }
+    var initialMemo: AnyPublisher<String?, Never> {
+        return self.subject.additional
+            .compactMap { $0 }
+            .map { $0.memo }
             .first()
             .eraseToAnyPublisher()
     }

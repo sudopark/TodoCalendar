@@ -13,7 +13,7 @@ import Domain
 
 
 enum EventDetailDataCodingKeys: String, CodingKey {
-    case eventId = "event_id"
+    case eventId
     case place
     case placeLat = "lat"
     case placeCoordinate = "coordinate"
