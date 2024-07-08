@@ -51,8 +51,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         shouldFailMakeTodo: Bool = false
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
-            .init(uuid: "current-todo-1", name: "current-todo-1"),
-            .init(uuid: "current-todo-2", name: "current-todo-2")
+            .init(uuid: "current-todo-1", name: "current-todo-1") |> \.creatTimeStamp .~ 100,
+            .init(uuid: "current-todo-2", name: "current-todo-2") |> \.creatTimeStamp .~ 3
         ]
 
         self.stubTodoUsecase.stubCurrentTodoEvents = currentTodos
@@ -499,9 +499,9 @@ extension DayEventListViewModelImpleTests {
         let eventIdLists = cvms?.map { $0.eventIdentifier }
         let isForemosts = cvms?.map { $0.isForemost }
         XCTAssertEqual(eventIdLists, [
-            "current-todo-1", "current-todo-2"
+            "current-todo-2", "current-todo-1"
         ] + self.dummyEventIdStrings)
-        XCTAssertEqual(isForemosts, [false, true, false, false, false, false])
+        XCTAssertEqual(isForemosts, [true, false, false, false, false, false])
     }
     
     private func makeViewModelWithInitialListLoaded(
@@ -551,7 +551,7 @@ extension DayEventListViewModelImpleTests {
     
     private var totalEventNameListWithoutPending: [String] {
         return [
-            "current-todo-1", "current-todo-2",
+            "current-todo-2", "current-todo-1",
             "holiday",
             "repeating-schedule",
             "todo-with-time",
@@ -561,7 +561,7 @@ extension DayEventListViewModelImpleTests {
     
     private var totalEventNameListsWithPending: [String] {
         return [
-            "current-todo-1", "current-todo-2",
+            "current-todo-2", "current-todo-1",
             "pending-quick-todo",
             "holiday",
             "repeating-schedule",

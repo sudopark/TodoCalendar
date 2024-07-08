@@ -78,6 +78,7 @@ public struct TodoCalendarEvent: CalendarEvent {
     public let eventTagId: AllEventTagId
     public let isRepeating: Bool
     public var isForemost: Bool = false
+    public var createdAt: TimeInterval?
     
     public init(current todo: TodoEvent, isForemost: Bool) {
         self.eventId = todo.uuid
@@ -87,6 +88,7 @@ public struct TodoCalendarEvent: CalendarEvent {
         self.eventTagId = todo.eventTagId ?? .default
         self.isRepeating = false
         self.isForemost = isForemost
+        self.createdAt = todo.creatTimeStamp
     }
     
     public init(_ todo: TodoEvent, in timeZone: TimeZone, isForemost: Bool = false) {
@@ -97,6 +99,22 @@ public struct TodoCalendarEvent: CalendarEvent {
         self.eventTagId = todo.eventTagId ?? .default
         self.isRepeating = todo.time != nil && todo.repeating != nil
         self.isForemost = isForemost
+        self.createdAt = todo.creatTimeStamp
+    }
+}
+
+extension Array where Element == TodoCalendarEvent {
+    
+    func sortedByCreateTime() -> Array {
+        let compare: (Element, Element) -> Bool = { lhs, rhs in
+            switch (lhs.createdAt, rhs.createdAt) {
+            case (.some, .none): return true
+            case (.none, .some): return false
+            case (.some(let lt), .some(let rt)): return lt <= rt
+            case (.none, .none): return lhs.name < rhs.name
+            }
+        }
+        return self.sorted(by: compare)
     }
 }
 

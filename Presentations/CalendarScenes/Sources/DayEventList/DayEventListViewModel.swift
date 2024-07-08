@@ -318,6 +318,7 @@ extension DayEventListViewModelImple {
             
             let range = dayAndEvents.currentDay.range
             let currentTodoCells = currentTodos
+                .sortedByCreateTime()
                 .compactMap { TodoEventCellViewModel($0, in: range, timeZone, is24HourForm) }
             
             let eventCellsWithTime = dayAndEvents.events.compactMap { event -> (any EventCellViewModel)? in
