@@ -135,7 +135,7 @@ extension EventDetailDataRemoteRepostioryImpleTests {
     ) -> String {
         return """
         {
-            "event_id": "\(id)",
+            "eventId": "\(id)",
             "place": {
                 "coordinate": {
                     "lat": 100.1, "long": 300.3
