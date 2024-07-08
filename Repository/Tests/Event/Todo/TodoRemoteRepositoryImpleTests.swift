@@ -103,6 +103,7 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertEqual(todo.repeating?.repeatOption.compareHash, self.dummyRepeating.repeatOption.compareHash)
         XCTAssertEqual(todo.repeating?.repeatingEndTime, refTime+3600*24*100)
         XCTAssertEqual(todo.notificationOptions, [.allDay9AMBefore(seconds: 300)])
+        XCTAssertEqual(todo.creatTimeStamp, 100)
     }
 }
 
@@ -600,6 +601,7 @@ private extension TodoRemoteRepositoryImpleTests {
         {
             "uuid": "new_uuid",
             "name": "todo_refreshed",
+            "create_timestamp": 100,
             "event_tag_id": "custom_id",
             "event_time": {
                 "time_type": "allday",
@@ -657,7 +659,8 @@ private extension TodoRemoteRepositoryImpleTests {
         {
             "uuid": "new_uuid",
             "name": "todo_name",
-            "event_tag_id": "custom_id"
+            "event_tag_id": "custom_id",
+            "create_timestamp": 100
         }
         """
     }
@@ -667,6 +670,7 @@ private extension TodoRemoteRepositoryImpleTests {
         {
             "uuid": "new_uuid",
             "name": "todo_name",
+            "create_timestamp": 100,
             "event_tag_id": "custom_id",
             "event_time": {
                 "time_type": "allday",

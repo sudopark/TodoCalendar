@@ -16,6 +16,7 @@ struct TodoEventTable: Table {
     enum Columns: String, TableColumn {
         case uuid
         case name
+        case createTimeStamp = "create_timestamp"
         case eventTagId = "tag_id"
         case repeatingStart = "repeating_start"
         case repeatingOption = "repeating_option"
@@ -26,6 +27,7 @@ struct TodoEventTable: Table {
             switch self {
             case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
             case .name: return .text([.notNull])
+            case .createTimeStamp: return .real([])
             case .eventTagId: return .text([])
             case .repeatingStart: return .real([])
             case .repeatingOption: return .text([])
@@ -37,12 +39,13 @@ struct TodoEventTable: Table {
     
     typealias ColumnType = Columns
     typealias EntityType = TodoEvent
-    static var tableName: String { "Todos" }
+    static var tableName: String { "TodoEvents" }
     
     static func scalar(_ entity: TodoEvent, for column: Columns) -> (any ScalarType)? {
         switch column {
         case .uuid: return  entity.uuid
         case .name: return entity.name
+        case .createTimeStamp: return entity.creatTimeStamp
         case .eventTagId: return entity.eventTagId?.customTagId
         case .repeatingStart: return entity.repeating?.repeatingStartTime
         case .repeatingOption: return entity.repeating
@@ -67,6 +70,7 @@ extension TodoEvent: RowValueType {
             uuid: try cursor.next().unwrap(),
             name: try cursor.next().unwrap()
         )
+        self.creatTimeStamp = cursor.next()
         self.eventTagId = cursor.next().map { AllEventTagId($0) }
         let start: Double? = cursor.next()
         let optionText: String? = cursor.next()

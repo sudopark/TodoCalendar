@@ -63,9 +63,11 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
             |> \.time .~ pure(self.dummyTime)
             |> \.repeating .~ pure(self.dummyRepeating)
             |> \.notificationOptions .~ self.dummyNotificationOptions
+            |> \.creatTimeStamp .~ 100
         
         let todo2 = TodoEvent(uuid: "todo2", name: "todo2")
             |> \.eventTagId .~ .custom("t2")
+            |> \.creatTimeStamp .~ 200
         let todoStorage = TodoLocalStorageImple(sqliteService: self.sqliteService)
         try await todoStorage.updateTodoEvents([todo1, todo2])
         
@@ -139,7 +141,13 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         
         // then
         let batchTodoIds = self.stubRemote.didRequestedParams?.keys.sorted().map { $0 }
+        let createTimestamps = self.stubRemote.didRequestedParams?.compactMapValues { payload -> TimeInterval? in
+            return (payload as? [String: Any])?["create_timestamp"] as? TimeInterval
+        }
         XCTAssertEqual(batchTodoIds, ["todo1", "todo2"])
+        XCTAssertEqual(createTimestamps, [
+            "todo1": 100, "todo2": 200
+        ])
     }
     
     func testRepository_migrationScheduleEvents() async throws {

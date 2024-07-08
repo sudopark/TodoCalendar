@@ -118,6 +118,7 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(event?.repeating?.repeatingStartTime, 100)
         XCTAssertEqual(event?.repeating?.repeatingEndTime, 200)
         XCTAssertEqual(event?.notificationOptions, [.before(seconds: 100), .atTime])
+        XCTAssertNotNil(event?.creatTimeStamp)
     }
     
     // update
@@ -232,6 +233,7 @@ extension TodoLocalRepositoryImpleTests {
             |> \.time .~ time.map { .at($0) }
             |> \.repeating .~ repeating
             |> \.notificationOptions .~ [.allDay9AMBefore(seconds: 100)]
+            |> \.creatTimeStamp .~ 100
     }
     
     private var dummyCurrentTodoAndHasTimes: [TodoEvent] {
@@ -340,6 +342,7 @@ extension TodoLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(result?.doneEvent.originEventId, "origin")
         XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(100.0 + 3600*24))
+        XCTAssertEqual(result?.nextRepeatingTodoEvent?.creatTimeStamp, 100)
     }
     
     // complete reapting todo + next event time is over end time -> no next event
@@ -406,8 +409,10 @@ extension TodoLocalRepositoryImpleTests {
         
         // then
         XCTAssertNotEqual(result?.newTodoEvent.uuid, "origin")
+        XCTAssertNotNil(result?.newTodoEvent.creatTimeStamp)
         XCTAssertEqual(result?.newTodoEvent.name, params.name)
         XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(100.0+24*3600))
+        XCTAssertEqual(result?.nextRepeatingTodoEvent?.creatTimeStamp, 100)
         let updated = todos?.first(where: { $0.uuid == origin.uuid })
         XCTAssertEqual(updated?.time, .at(100.0+24*3600))
     }
@@ -426,6 +431,7 @@ extension TodoLocalRepositoryImpleTests {
         
         // then
         XCTAssertNotEqual(result?.newTodoEvent.uuid, "origin")
+        XCTAssertNotNil(result?.newTodoEvent)
         XCTAssertEqual(result?.newTodoEvent.name, params.name)
         XCTAssertNil(result?.nextRepeatingTodoEvent)
         let updated = todos?.first(where: { $0.uuid == origin.uuid })
@@ -597,6 +603,7 @@ extension TodoLocalRepositoryImpleTests {
         
         // then
         XCTAssertNotEqual(todo.uuid, "origin-4")
+        XCTAssertNotNil(todo.creatTimeStamp)
         XCTAssertEqual(
             donesBeforeRevert.map { $0.uuid },
             (0..<10).reversed().map { "id:\($0)"}

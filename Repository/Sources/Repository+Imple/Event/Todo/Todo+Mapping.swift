@@ -14,6 +14,7 @@ import Domain
 enum TodoCodingKeys: String, CodingKey {
     case uuid
     case name
+    case createTime = "create_timestamp"
     case eventTagId = "event_tag_id"
     case time = "event_time"
     case repeating
@@ -111,6 +112,7 @@ struct TodoEventMapper: Decodable {
             uuid: try container.decode(String.self, forKey: .uuid),
             name: try container.decode(String.self, forKey: .name)
         )
+        todo.creatTimeStamp = try? container.decode(TimeInterval.self, forKey: .createTime)
         let customEventTagId: String? = try? container.decode(String.self, forKey: .eventTagId)
         todo.eventTagId = customEventTagId.map { .custom($0) }
         todo.time = try? container.decode(EventTimeMapper.self, forKey: .time).time

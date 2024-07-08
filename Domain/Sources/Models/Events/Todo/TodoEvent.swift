@@ -16,6 +16,7 @@ public struct TodoEvent: Sendable, Equatable {
     
     public let uuid: String
     public var name: String
+    public var creatTimeStamp: TimeInterval?
     
     public var eventTagId: AllEventTagId?
     
@@ -34,6 +35,7 @@ public struct TodoEvent: Sendable, Equatable {
         else { return nil }
         self.uuid = UUID().uuidString
         self.name = name
+        self.creatTimeStamp = Date().timeIntervalSince1970
         self.eventTagId = params.eventTagId
         self.time = params.time
         self.repeating = params.repeating

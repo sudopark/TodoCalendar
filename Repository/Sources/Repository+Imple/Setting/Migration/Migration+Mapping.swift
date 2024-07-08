@@ -46,7 +46,9 @@ struct BatchTodoEventPayload {
                 |> \.time .~ todo.time
                 |> \.repeating .~ todo.repeating
                 |> \.notificationOptions .~ pure(todo.notificationOptions)
-            acc[todo.uuid] = params.asJson()
+            var payload = params.asJson()
+            payload[TodoCodingKeys.createTime.rawValue] = todo.creatTimeStamp
+            acc[todo.uuid] = payload
         }
     }
 }
