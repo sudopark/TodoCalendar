@@ -72,8 +72,9 @@ final class WidgetBaseDependency {
     
     lazy var remoteAPI: RemoteAPIImple = {
         let environment = self.remoteEnvironment
+        let authStore = NeverRemoveAuthStorage(storage: self.keyChainStorage)
         let authenticator = OAuthAutenticator(
-            authStore: self.keyChainStorage,
+            authStore: authStore,
             remoteEnvironment: environment,
             firebaseAuthService: self.firebaseAuthService
         )
@@ -84,6 +85,28 @@ final class WidgetBaseDependency {
     }()
 }
 
+
+// MARK: - NeverRemoveAuthStorage
+
+struct NeverRemoveAuthStorage: AuthStore  {
+    
+    private let storage: KeyChainStorageImple
+    init(storage: KeyChainStorageImple) {
+        self.storage = storage
+    }
+    
+    func loadCurrentAuth() -> Domain.Auth? {
+        return self.storage.loadCurrentAuth()
+    }
+    
+    func updateAuth(_ auth: Domain.Auth) {
+        self.storage.updateAuth(auth)
+    }
+    
+    func removeAuth() {
+        // not remove auth
+    }
+}
 
 // MARK: - dummy
 
