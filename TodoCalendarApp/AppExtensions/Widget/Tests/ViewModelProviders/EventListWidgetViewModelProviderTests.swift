@@ -377,3 +377,67 @@ extension EventListWidgetViewModelProviderTests {
         XCTAssertEqual(allEvents.count, 1)
     }
 }
+
+
+extension EventListWidgetViewModelProviderTests {
+    
+    private final class UnSortedStubEventsFetchUsecase: CalendarEventFetchUsecase {
+        private let refDate: Date
+        init(refDate: Date) { self.refDate = refDate }
+        
+        func fetchEvents(
+            in range: Range<TimeInterval>, _ timeZone: TimeZone
+        ) async throws -> CalendarEvents {
+            
+            let refTime = self.refDate.timeIntervalSince1970
+            let kst = TimeZone(abbreviation: "KST")!
+            let currents = [30, 90, 1].map { int -> TodoEvent in
+                return TodoEvent(uuid: "current-\(int)", name: "current")
+                |> \.creatTimeStamp .~ (refTime + TimeInterval(int))
+            }
+            .map { TodoCalendarEvent($0, in: kst) }
+            let events = [20, 100, 10].map { int -> TodoEvent in
+                return TodoEvent(uuid: "todo-\(int)", name: "some")
+                |> \.time .~ .at(TimeInterval(int) + refTime)
+            }
+            .map { TodoCalendarEvent($0, in: kst) }
+            
+            return .init(
+                currentTodos: currents, eventWithTimes: events, customTagMap: [:]
+            )
+        }
+    }
+    
+    private func makeProviderWithStubUnsortedEvents() -> EventListWidgetViewModelProvider {
+        
+        let fetchUsecase = UnSortedStubEventsFetchUsecase(refDate: self.refDate)
+        let calendarSettingRepository = StubCalendarSettingRepository()
+        let appSettingRepository = StubAppSettingRepository()
+        return .init(
+            eventsFetchUsecase: fetchUsecase, 
+            appSettingRepository: appSettingRepository,
+            calendarSettingRepository: calendarSettingRepository
+        )
+    }
+    
+    func testProvider_sortEvents() async throws {
+        // given
+        let provider = self.makeProviderWithStubUnsortedEvents()
+        
+        // when
+        let viewModel = try await provider.getEventListViewModel(
+            for: self.refDate, maxItemCount: 100
+        )
+        
+        // then
+        XCTAssertEqual(viewModel.lists.count, 2)
+        let currents = viewModel.lists.first(where: { $0.isCurrentTodos })
+        let section0 = viewModel.lists.first(where: { !$0.isCurrentTodos })
+        XCTAssertEqual(currents?.events.map { $0.eventIdentifier}, [
+            "current-1", "current-30", "current-90",
+        ])
+        XCTAssertEqual(section0?.events.map { $0.eventIdentifier }, [
+            "todo-10", "todo-20", "todo-100"
+        ])
+    }
+}

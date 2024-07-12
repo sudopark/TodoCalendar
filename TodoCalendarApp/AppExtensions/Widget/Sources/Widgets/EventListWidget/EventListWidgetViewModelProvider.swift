@@ -46,9 +46,12 @@ struct EventListWidgetViewModel {
                 _ events: [TodoCalendarEvent],
                 _ range: Range<TimeInterval>
             ) -> SectionModel? {
-                let models: [any EventCellViewModel] = events.compactMap {
-                    TodoEventCellViewModel($0, in: range, self.timeZone, self.is24Form)
-                }.applyTag(customTags)
+                let models: [any EventCellViewModel] = events
+                    .sortedByCreateTime()
+                    .compactMap {
+                        TodoEventCellViewModel($0, in: range, self.timeZone, self.is24Form)
+                    }
+                    .applyTag(customTags)
                 guard !models.isEmpty else { return nil }
                 return .init(
                     title: "Current todo".localized(),
@@ -70,7 +73,9 @@ struct EventListWidgetViewModel {
                     guard let dayRange = calendar.addDays(offset, from: start).flatMap(calendar.dayRange(_:))
                     else { return nil }
                     
-                    let eventsThisDay = events.filter { $0.eventTime?.isOverlap(with: dayRange, in: self.timeZone) ?? false }
+                    let eventsThisDay = events
+                        .filter { $0.eventTime?.isOverlap(with: dayRange, in: self.timeZone) ?? false }
+                        .sortedByEventTime()
                     let models = eventsThisDay.compactMap { event -> (any EventCellViewModel)? in
                         switch event {
                         case let todo as TodoCalendarEvent:
@@ -217,6 +222,10 @@ extension EventListWidgetViewModelProvider {
         }
         return modelLists
     }
+}
+
+private extension Array where Element == any CalendarEvent {
+    
 }
 
 private extension Array where Element == EventCellViewModel {

@@ -59,6 +59,22 @@ public protocol CalendarEvent {
     var isRepeating: Bool { get }
 }
 
+extension Array where Element == any CalendarEvent {
+    
+    public func sortedByEventTime() -> Array {
+        
+        let compare: (Element, Element) -> Bool = { lhs, rhs in
+            switch (lhs.eventTime, rhs.eventTime) {
+            case (.some(let leftTime), .some(let rightTime)):
+                return leftTime.lowerBoundWithFixed < rightTime.lowerBoundWithFixed
+            default: return false
+            }
+        }
+        
+        return self.sorted(by: compare)
+    }
+}
+
 extension CalendarEvent {
     
     public var compareKey: String {
@@ -105,7 +121,7 @@ public struct TodoCalendarEvent: CalendarEvent {
 
 extension Array where Element == TodoCalendarEvent {
     
-    func sortedByCreateTime() -> Array {
+    public func sortedByCreateTime() -> Array {
         let compare: (Element, Element) -> Bool = { lhs, rhs in
             switch (lhs.createdAt, rhs.createdAt) {
             case (.some, .none): return true

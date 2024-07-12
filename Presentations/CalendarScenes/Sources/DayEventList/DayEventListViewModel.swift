@@ -381,22 +381,6 @@ extension DayEventListViewModelImple {
     }
 }
 
-private extension Array where Element == any CalendarEvent {
-    
-    func sortedByEventTime() -> Array {
-        
-        let compare: (Element, Element) -> Bool = { lhs, rhs in
-            switch (lhs.eventTime, rhs.eventTime) {
-            case (.some(let leftTime), .some(let rightTime)):
-                return leftTime.lowerBoundWithFixed < rightTime.lowerBoundWithFixed
-            default: return false
-            }
-        }
-        
-        return self.sorted(by: compare)
-    }
-}
-
 private extension EventTime {
     
     func durationText(_ timeZone: TimeZone) -> String? {
