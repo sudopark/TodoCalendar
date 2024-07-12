@@ -454,10 +454,14 @@ extension DayEventListViewModelImpleTests {
     private var dummyEvents: [any CalendarEvent] {
         let timeZone = TimeZone(abbreviation: "KST")!
         let holiday = HolidayCalendarEvent(.init(dateString: "2023-09-30", localName: "holiday", name: "holiday"), in: timeZone)!
-        let schedule4 = ScheduleEvent(uuid: "repeating-schedule", name: "repeating-schedule", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound), turn: 4)]
+        let schedule4 = ScheduleEvent(uuid: "repeating-schedule", name: "repeating-schedule", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound + 1), turn: 4)]
             |> \.eventTagId .~ .custom("some")
         let scheduleWithRepeating = ScheduleCalendarEvent.events(from: schedule4, in: timeZone).last!
-        let todo = TodoCalendarEvent(.init(uuid: ("todo-with-time"), name: "todo-with-time") |> \.eventTagId .~ .custom("some"), in: timeZone)
+        let todo = TodoCalendarEvent(
+            .init(uuid: "todo-with-time", name: "todo-with-time")
+            |> \.eventTagId .~ .custom("some") |> \.time .~ .at(self.todayRange.lowerBound + 100),
+            in: timeZone
+        )
         let scheduleWithoutRepeating = ScheduleCalendarEvent(
             eventIdWithoutTurn: "ev",
             eventId: "not-repeating-schedule", 
@@ -474,10 +478,10 @@ extension DayEventListViewModelImpleTests {
     
     private var dummyEventIdStrings: [String] {
         return [
-            "2023-09-30-holiday",
+            "not-repeating-schedule",
             "repeating-schedule-4",
             "todo-with-time",
-            "not-repeating-schedule"
+            "2023-09-30-holiday"
         ]
     }
     
@@ -552,10 +556,10 @@ extension DayEventListViewModelImpleTests {
     private var totalEventNameListWithoutPending: [String] {
         return [
             "current-todo-2", "current-todo-1",
-            "holiday",
+            "not-repeating-schedule",
             "repeating-schedule",
             "todo-with-time",
-            "not-repeating-schedule"
+            "holiday",
         ]
     }
     
@@ -563,10 +567,10 @@ extension DayEventListViewModelImpleTests {
         return [
             "current-todo-2", "current-todo-1",
             "pending-quick-todo",
-            "holiday",
+            "not-repeating-schedule",
             "repeating-schedule",
             "todo-with-time",
-            "not-repeating-schedule"
+            "holiday",
         ]
     }
     

@@ -321,17 +321,19 @@ extension DayEventListViewModelImple {
                 .sortedByCreateTime()
                 .compactMap { TodoEventCellViewModel($0, in: range, timeZone, is24HourForm) }
             
-            let eventCellsWithTime = dayAndEvents.events.compactMap { event -> (any EventCellViewModel)? in
-                switch event {
-                case let todo as TodoCalendarEvent:
-                    return TodoEventCellViewModel(todo, in: range, timeZone, is24HourForm)
+            let eventCellsWithTime = dayAndEvents.events
+                .sortedByEventTime()
+                .compactMap { event -> (any EventCellViewModel)? in
+                    switch event {
+                    case let todo as TodoCalendarEvent:
+                        return TodoEventCellViewModel(todo, in: range, timeZone, is24HourForm)
+                        
+                    case let schedule as ScheduleCalendarEvent:
+                        return ScheduleEventCellViewModel(schedule, in: range, timeZone: timeZone, is24HourForm)
+                    case let holiday as HolidayCalendarEvent:
+                        return HolidayEventCellViewModel(holiday)
                     
-                case let schedule as ScheduleCalendarEvent:
-                    return ScheduleEventCellViewModel(schedule, in: range, timeZone: timeZone, is24HourForm)
-                case let holiday as HolidayCalendarEvent:
-                    return HolidayEventCellViewModel(holiday)
-                
-                default: return nil
+                    default: return nil
                 }
             }
             
@@ -376,6 +378,22 @@ extension DayEventListViewModelImple {
         )
         .map(combineEvents)
         .eraseToAnyPublisher()
+    }
+}
+
+private extension Array where Element == any CalendarEvent {
+    
+    func sortedByEventTime() -> Array {
+        
+        let compare: (Element, Element) -> Bool = { lhs, rhs in
+            switch (lhs.eventTime, rhs.eventTime) {
+            case (.some(let leftTime), .some(let rightTime)):
+                return leftTime.lowerBoundWithFixed < rightTime.lowerBoundWithFixed
+            default: return false
+            }
+        }
+        
+        return self.sorted(by: compare)
     }
 }
 
