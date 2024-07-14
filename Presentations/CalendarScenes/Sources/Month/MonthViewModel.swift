@@ -339,6 +339,10 @@ extension MonthViewModelImple {
     func select(_ day: DayCellViewModel) {
         self.subject.userSelectedDay.send(day)
     }
+    
+    func clearDaySelection() {
+        self.subject.userSelectedDay.send(nil)
+    }
 }
 
 extension MonthViewModelImple {

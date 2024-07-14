@@ -17,6 +17,7 @@ import Domain
 protocol CalendarPaperSceneInteractor: AnyObject, MonthSceneListener {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
+    func selectToday()
 }
 //
 protocol CalendarPaperSceneListener: AnyObject {

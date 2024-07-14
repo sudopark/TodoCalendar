@@ -208,6 +208,30 @@ extension MonthViewModelImpleTests {
             "2023-9-10", "2023-9-23"
         ])
     }
+    
+    func testViewModel_whenClearSelection_returnToToday() {
+        // given
+        let expect = expectation(description: "날짜 선택 초기화시 오늘로 복귀")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let selecteds = self.waitOutputs(expect, for: viewModel.currentSelectDayIdentifier) {
+            viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
+            viewModel.select(
+                .init(
+                    year: 2023, month: 9, day: 23, isNotCurrentMonth: false,
+                    accentDay: nil
+                )
+            )
+            viewModel.clearDaySelection()
+        }
+
+        // then
+        XCTAssertEqual(selecteds, [
+            "2023-9-10", "2023-9-23", "2023-9-10"
+        ])
+    }
 
     func testViewModel_whenSelectNotThisMonth_updateSelectedDay() {
         // given

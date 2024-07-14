@@ -343,6 +343,10 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
     func select(_ day: DayCellViewModel) {
         self.selectedDay.send(day.identifier)
     }
+    
+    func clearDaySelection() {
+        self.selectedDay.send(nil)
+    }
 
     var weekDays: AnyPublisher<[WeekDayModel], Never> {
         return Just([

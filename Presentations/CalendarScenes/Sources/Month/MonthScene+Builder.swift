@@ -40,6 +40,7 @@ struct CurrentSelectDayModel: Equatable {
 protocol MonthSceneInteractor: AnyObject {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
+    func clearDaySelection()
 }
 
 protocol MonthSceneListener: AnyObject {

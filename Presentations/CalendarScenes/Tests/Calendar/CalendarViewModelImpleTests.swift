@@ -294,10 +294,24 @@ extension CalendarViewModelImpleTests {
         parameterizeTest(.init(year: 2023, month: 06), false) {
             viewModel.focusChanged(from: 0, to: 2)
         }
-        // TODO: 추후 수정 필요
-//        parameterizeTest(.init(year: 2023, month: 08), true) {
-//            viewModel.moveFocusToToday()
-//        }
+    }
+    
+    func testViewModel_whenReturnToToday_selectCurrentMonthAndToday() {
+        // given
+        let expect = expectation(description: "오늘로 복귀시에 이번달 및 오늘 선택")
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        self.spyRouter.spyInteractors[1].didSelectTodayRequestedCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.focusChanged(from: 1, to: 2)
+        viewModel.moveFocusToToday()
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        let requesteds = self.spyRouter.spyInteractors.map { $0.didSelectTodayRequested }
+        XCTAssertEqual(requesteds, [nil, true, nil])
     }
 }
 
@@ -561,6 +575,13 @@ private extension CalendarViewModelImpleTests {
         
         func updateMonthIfNeed(_ newMonth: CalendarMonth) {
             self.currentMonth = newMonth
+        }
+        
+        var didSelectTodayRequested: Bool?
+        var didSelectTodayRequestedCallback: (() -> Void)?
+        func selectToday() {
+            self.didSelectTodayRequested = true
+            self.didSelectTodayRequestedCallback?()
         }
         
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) { }

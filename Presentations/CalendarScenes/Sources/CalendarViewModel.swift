@@ -250,17 +250,21 @@ extension CalendarViewModelImple {
             .sink(receiveValue: { [weak self] today in
                 guard let self = self else { return }
                 let totalMonths = self.makeTotalMonths(around: today)
-                self.changeChilds(totalMonths)
+                self.changeChildsForToday(totalMonths)
             })
             .store(in: &self.cancellables)
     }
     
-    private func changeChilds(_ totalMonths: TotalMonthsInRange) {
+    private func changeChildsForToday(_ totalMonths: TotalMonthsInRange) {
         Task { @MainActor in
             self.router?.changeFocus(at: totalMonths.focusedIndex)
             self.subject.monthsInCurrentRange.send(totalMonths)
             totalMonths.totalMonths.enumerated().forEach { offset, month in
-                self.calendarPaperInteractors?[safe: offset]?.updateMonthIfNeed(month)
+                let interactor = self.calendarPaperInteractors?[safe: offset]
+                interactor?.updateMonthIfNeed(month)
+                if offset == totalMonths.focusedIndex {
+                    interactor?.selectToday()
+                }
             }
         }
     }
