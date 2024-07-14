@@ -67,6 +67,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     }
     private struct Subject {
         let monthsInCurrentRange = CurrentValueSubject<TotalMonthsInRange?, Never>(nil)
+        let selectedDayPerMonths = CurrentValueSubject<[CalendarMonth: CurrentSelectDayModel], Never>([:])
     }
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
@@ -119,24 +120,38 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     }
     
     private func bindFocusedMonthChanged() {
-        let transformWithFocusedMonthIsCurrent: (CalendarMonth, CalendarComponent.Day) -> (CalendarMonth, Bool)
-        transformWithFocusedMonthIsCurrent = { focusedMonth, currentDay in
-            let isCurrentMonth = currentDay.year == focusedMonth.year
-                && currentDay.month == focusedMonth.month
-            return (focusedMonth, isCurrentMonth)
+        typealias CurrentAndFocusInfo = (
+            focusedMonth: CalendarMonth,
+            focusedDayMap: [CalendarMonth: CurrentSelectDayModel],
+            currentDay: CalendarComponent.Day
+        )
+        let transformWithFocusedMonthAnsIsCurrentDay: (CurrentAndFocusInfo) -> (CalendarMonth, Bool)
+        transformWithFocusedMonthAnsIsCurrentDay = { info in
+            let isCurrentMonth = info.currentDay.year == info.focusedMonth.year
+                && info.currentDay.month == info.focusedMonth.month
+            guard isCurrentMonth
+            else {
+                return (info.focusedMonth, false)
+            }
+            let currentMonthSelectedDay = info.focusedDayMap[info.focusedMonth]
+            let isCurrentDaySelected = currentMonthSelectedDay?.year == info.currentDay.year
+                && currentMonthSelectedDay?.month == info.currentDay.month
+                && currentMonthSelectedDay?.day == info.currentDay.day
+            return (info.focusedMonth, isCurrentDaySelected)
         }
         let compare: ((CalendarMonth, Bool), (CalendarMonth, Bool)) -> Bool = { lhs, rhs in
             return lhs.0 == rhs.0 && lhs.1 == rhs.1
         }
         
-        Publishers.CombineLatest(
+        Publishers.CombineLatest3(
             self.subject.monthsInCurrentRange.compactMap { $0?.focusedMonth },
+            self.subject.selectedDayPerMonths,
             self.calendarUsecase.currentDay
         )
-        .map(transformWithFocusedMonthIsCurrent)
+        .map(transformWithFocusedMonthAnsIsCurrentDay)
         .removeDuplicates(by: compare)
         .sink(receiveValue: { [weak self] (focused, isCurrent) in
-            self?.listener?.calendarScene(focusChangedTo: focused, isCurrentMonth: isCurrent)
+            self?.listener?.calendarScene(focusChangedTo: focused, isCurrentDay: isCurrent)
         })
         .store(in: &self.cancellables)
     }
@@ -258,6 +273,15 @@ extension CalendarViewModelImple {
             currentMonth.nextMonth()
         ]
         return TotalMonthsInRange(totalMonths: months, focusedIndex: 1)
+    }
+}
+
+extension CalendarViewModelImple: CalendarPaperSceneListener {
+    
+    func calendarPaper(on month: CalendarMonth, didChange selectedDay: CurrentSelectDayModel) {
+        let newMap = self.subject.selectedDayPerMonths.value
+            |> key(month) .~ selectedDay
+        self.subject.selectedDayPerMonths.send(newMap)
     }
 }
 

@@ -30,7 +30,11 @@ final class CalendarViewRouterImple: BaseRouterImple, CalendarViewRouting, @unch
     func attachInitialMonths(_ months: [CalendarMonth]) -> [any CalendarPaperSceneInteractor] {
         guard let current = self.currentScene else { return [] }
         
-        let childScenes = months.map { self.paperSceneBuilder.makeCalendarPaperScene($0) }
+        let childScenes = months.map {
+            self.paperSceneBuilder.makeCalendarPaperScene(
+                $0, listener: current.interactor as? CalendarPaperSceneListener
+            )
+        }
         current.addChildMonths(childScenes)
         return childScenes.compactMap { $0.interactor }
     }

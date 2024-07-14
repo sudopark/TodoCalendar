@@ -56,9 +56,9 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.internalBinding()
     }
     
-    
+    private typealias FocusMonthAndIsCurrentDay = (CalendarMonth, Bool)
     private struct Subject {
-        let focusedMonthInfo = CurrentValueSubject<(CalendarMonth, Bool)?, Never>(nil)
+        let focusedMonthInfo = CurrentValueSubject<FocusMonthAndIsCurrentDay?, Never>(nil)
         let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
     }
     
@@ -145,8 +145,8 @@ extension MainViewModelImple {
         self.router?.routeToSettingScene()
     }
     
-    func calendarScene(focusChangedTo month: CalendarMonth, isCurrentMonth: Bool) {
-        self.subject.focusedMonthInfo.send((month, isCurrentMonth))
+    func calendarScene(focusChangedTo month: CalendarMonth, isCurrentDay: Bool) {
+        self.subject.focusedMonthInfo.send((month, isCurrentDay))
     }
 }
 

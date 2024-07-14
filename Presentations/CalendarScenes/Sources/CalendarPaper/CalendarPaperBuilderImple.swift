@@ -45,7 +45,10 @@ final class CalendarPaperSceneBuilerImple {
 extension CalendarPaperSceneBuilerImple: CalendarPaperSceneBuiler {
     
     @MainActor
-    func makeCalendarPaperScene(_ month: CalendarMonth) -> any CalendarPaperScene {
+    func makeCalendarPaperScene(
+        _ month: CalendarMonth,
+        listener: (any CalendarPaperSceneListener)?
+    ) -> any CalendarPaperScene {
         
         let monthComponents = self.monthSceneBuilder.makeSceneComponent(month)
         let eventListComponents = self.eventListSceneBuilder.makeSceneComponent()
@@ -54,6 +57,7 @@ extension CalendarPaperSceneBuilerImple: CalendarPaperSceneBuiler {
             monthInteractor: monthComponents.viewModel,
             eventListInteractor: eventListComponents.viewModel
         )
+        viewModel.listener = listener
         monthComponents.viewModel.attachListener(viewModel)
         
         let viewController = CalendarPaperViewController(

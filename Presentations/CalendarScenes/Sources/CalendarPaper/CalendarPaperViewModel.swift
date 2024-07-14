@@ -28,18 +28,19 @@ protocol CalendarPaperViewModel: AnyObject, Sendable, CalendarPaperSceneInteract
 
 final class CalendarPaperViewModelImple: CalendarPaperViewModel, @unchecked Sendable {
     
-    private let month: CalendarMonth
+    private var currentMonth: CalendarMonth
     
     var router: (any CalendarPaperRouting)?
     private var monthInteractor: any MonthSceneInteractor
     private var eventListInteractor: any DayEventListSceneInteractor
+    weak var listener: (any CalendarPaperSceneListener)?
     
     init(
         month: CalendarMonth,
         monthInteractor: any MonthSceneInteractor,
         eventListInteractor: any DayEventListSceneInteractor
     ) {
-        self.month = month
+        self.currentMonth = month
         self.monthInteractor = monthInteractor
         self.eventListInteractor = eventListInteractor
     }
@@ -59,6 +60,7 @@ extension CalendarPaperViewModelImple {
     }
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth) {
+        self.currentMonth = newMonth
         self.monthInteractor.updateMonthIfNeed(newMonth)
     }
     
@@ -68,6 +70,7 @@ extension CalendarPaperViewModelImple {
     ) {
         self.currentSelectedDayAndEvents = (currentSelectedDay, eventsThatDay)
         self.eventListInteractor.selectedDayChanaged(currentSelectedDay, and: eventsThatDay)
+        self.listener?.calendarPaper(on: self.currentMonth, didChange: currentSelectedDay)
     }
 }
 

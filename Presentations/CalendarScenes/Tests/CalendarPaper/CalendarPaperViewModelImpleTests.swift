@@ -18,17 +18,20 @@ class CalendarPaperViewModelImpleTests: BaseTestCase {
     private var spyRouter: SpyRouter!
     private var spyMonthInteractor: SpyMonthSceneInteractor!
     private var spyEventListInteractor: SpyEventInteractor!
+    private var spyListner: SpyCalendarPaperSceneListener!
     
     override func setUpWithError() throws {
         self.spyRouter = .init()
         self.spyMonthInteractor = .init()
         self.spyEventListInteractor = .init()
+        self.spyListner = .init()
     }
     
     override func tearDownWithError() throws {
         self.spyRouter = nil
         self.spyMonthInteractor = nil
         self.spyEventListInteractor = nil
+        self.spyListner = nil
     }
     
     private func makeViewModel() -> CalendarPaperViewModelImple {
@@ -39,6 +42,7 @@ class CalendarPaperViewModelImpleTests: BaseTestCase {
             eventListInteractor: self.spyEventListInteractor
         )
         viewModel.router = self.spyRouter
+        viewModel.listener = self.spyListner
         viewModel.prepare()
         return viewModel
     }
@@ -61,6 +65,27 @@ extension CalendarPaperViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyMonthInteractor.updatedMonths, months)
+    }
+    
+    func testViewModel_whenCurrentSelectedDayUpdates_notify() {
+        // given
+        let viewModel = self.makeViewModel()
+        let month = CalendarMonth(year: 2023, month: 02)
+        let day10 = CurrentSelectDayModel(2023, 02, 10, weekId: "some", range: 0..<0)
+        let day11 = CurrentSelectDayModel(2023, 02, 11, weekId: "some", range: 0..<0)
+        
+        // when
+        viewModel.updateMonthIfNeed(month)
+        viewModel.monthScene(didChange: day10, and: [])
+        viewModel.monthScene(didChange: day11, and: [])
+        
+        // then
+        XCTAssertEqual(self.spyListner.didChangeSelectedDay.map { $0.0 }, [
+            month, month
+        ])
+        XCTAssertEqual(self.spyListner.didChangeSelectedDay.map { $0.1.day }, [
+            10, 11
+        ])
     }
     
     func testViewModel_updateCurrentSelectedDay() {
@@ -102,6 +127,14 @@ extension CalendarPaperViewModelImpleTests {
         func selectedDayChanaged(_ newDay: CurrentSelectDayModel, and eventThatDay: [any CalendarEvent]) {
             self.selectedDays.append(newDay)
             self.selectedDayEvents.append(eventThatDay)
+        }
+    }
+    
+    private final class SpyCalendarPaperSceneListener: CalendarPaperSceneListener {
+        
+        var didChangeSelectedDay: [(CalendarMonth, CurrentSelectDayModel)] = []
+        func calendarPaper(on month: CalendarMonth, didChange selectedDay: CurrentSelectDayModel) {
+            self.didChangeSelectedDay.append((month, selectedDay))
         }
     }
 }

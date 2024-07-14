@@ -19,7 +19,12 @@ protocol CalendarPaperSceneInteractor: AnyObject, MonthSceneListener {
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
 }
 //
-//public protocol CalendarPaperSceneListener: AnyObject { }
+protocol CalendarPaperSceneListener: AnyObject {
+    
+    func calendarPaper(
+        on month: CalendarMonth, didChange selectedDay: CurrentSelectDayModel
+    )
+}
 
 // MARK: - CalendarPaperScene
 
@@ -33,5 +38,8 @@ protocol CalendarPaperSceneBuiler: AnyObject {
     
     // TODO: month 삭제 예정
     @MainActor
-    func makeCalendarPaperScene(_ month: CalendarMonth) -> any CalendarPaperScene
+    func makeCalendarPaperScene(
+        _ month: CalendarMonth,
+        listener: (any CalendarPaperSceneListener)?
+    ) -> any CalendarPaperScene
 }

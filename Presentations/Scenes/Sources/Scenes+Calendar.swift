@@ -20,7 +20,7 @@ public protocol CalendarSceneListener: Sendable, AnyObject {
     
     func calendarScene(
         focusChangedTo month: CalendarMonth,
-        isCurrentMonth: Bool
+        isCurrentDay: Bool
     )
 }
 
