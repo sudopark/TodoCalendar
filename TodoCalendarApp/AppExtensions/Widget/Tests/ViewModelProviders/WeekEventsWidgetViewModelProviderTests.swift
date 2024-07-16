@@ -154,7 +154,7 @@ extension WeekEventsWidgetViewModelProviderTests{
         XCTAssertEqual(eventIds, [
             "2024-6-9-2024-6-15": [["todo1"]],
             "2024-6-16-2024-6-22": [["2024-06-19-dummy_holiday"]],
-            "2024-6-23-2024-6-29": [["todo2"], ["schedule-1"]]
+            "2024-6-23-2024-6-29": [["schedule-1"], ["todo2"]]
         ])
         XCTAssertEqual(daySequences, [
             "2024-6-9-2024-6-15": [[(1...1)]],
@@ -200,7 +200,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             "2024-6-9-2024-6-15": [["todo1"]],
             "2024-6-16-2024-6-22": [["2024-06-19-dummy_holiday"]],
             "2024-6-23-2024-6-29": [],
-            "2024-6-30-2024-7-6": [["todo2"], ["schedule-1"]]
+            "2024-6-30-2024-7-6": [["schedule-1"], ["todo2"]]
         ])
         XCTAssertEqual(daySequences, [
             "2024-6-9-2024-6-15": [[(1...1)]],
@@ -253,7 +253,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             "2024-6-9-2024-6-15": [],
             "2024-6-16-2024-6-22": [["2024-06-19-dummy_holiday"]],
             "2024-6-23-2024-6-29": [],
-            "2024-6-30-2024-7-6": [["todo2"], ["schedule-1"]]
+            "2024-6-30-2024-7-6": [["schedule-1"], ["todo2"]]
         ])
         XCTAssertEqual(daySequences, [
             "2024-5-26-2024-6-1": [[(1...1)]],
@@ -305,7 +305,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             "2024-5-5-2024-5-11": [],
             "2024-5-12-2024-5-18": [],
             "2024-5-19-2024-5-25": [],
-            "2024-5-26-2024-6-1": [["todo2"], ["schedule-1"]]
+            "2024-5-26-2024-6-1": [["schedule-1"], ["todo2"]]
         ])
         XCTAssertEqual(daySequences, [
             "2024-4-28-2024-5-4": [[(1...1)]],
@@ -356,7 +356,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             "2024-7-7-2024-7-13": [],
             "2024-7-14-2024-7-20": [],
             "2024-7-21-2024-7-27": [],
-            "2024-7-28-2024-8-3": [["todo2"], ["schedule-1"]]
+            "2024-7-28-2024-8-3": [["schedule-1"], ["todo2"]]
         ])
         XCTAssertEqual(daySequences, [
             "2024-6-30-2024-7-6": [[(1...1)]],
