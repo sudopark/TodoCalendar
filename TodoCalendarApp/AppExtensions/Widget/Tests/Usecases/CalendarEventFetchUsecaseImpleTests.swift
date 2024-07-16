@@ -20,7 +20,8 @@ import TestDoubles
 class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
     
     private func makeUsecase(
-        withOffTags: [AllEventTagId] = []
+        withOffTags: [AllEventTagId] = [],
+        hasForemost: Bool = true
     ) -> CalendarEventFetchUsecaseImple {
         
         let todoRepository = PrivateStubTodoRepository()
@@ -35,10 +36,13 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
         withOffTags.forEach {
             _ = eventTagReopsitory.toggleTagIsOn($0)
         }
+        let foremostRepository = PrivateStubForemostEventRepository()
+        foremostRepository.stubHasForemost = hasForemost
         
         return CalendarEventFetchUsecaseImple(
             todoRepository: todoRepository,
             scheduleRepository: scheduleRepository,
+            foremostEventRepository: foremostRepository,
             holidayFetchUsecase: holidayFetchUsecase,
             eventTagRepository: eventTagReopsitory,
             cached: .init()
@@ -146,6 +150,26 @@ extension CalendarEventFetchUsecaseImpleTests {
     }
 }
 
+extension CalendarEventFetchUsecaseImpleTests {
+    
+    func testUsecase_fetchForemostEvent() async throws {
+        // given
+        func parameterizeTest(expectHasEvent: Bool) async throws {
+            // given
+            let usecase = self.makeUsecase(hasForemost: expectHasEvent)
+            
+            // when
+            let event = try await usecase.fetchForemostEvent()
+            
+            // then
+            XCTAssertEqual(event.foremostEvent != nil, expectHasEvent)
+        }
+        // when + then
+        try await parameterizeTest(expectHasEvent: false)
+        try await parameterizeTest(expectHasEvent: true)
+    }
+}
+
 private final class PrivateStubTodoRepository: StubTodoEventRepository {
     
     override func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error> {
@@ -170,6 +194,21 @@ private final class PrivateStubScheduleRepository: StubScheduleEventRepository {
         )
         |> \.eventTagId .~ .custom("t2")
         return Just([event]).mapAsAnyError().eraseToAnyPublisher()
+    }
+}
+
+
+private final class PrivateStubForemostEventRepository: StubForemostEventRepository {
+    
+    var stubHasForemost: Bool = true
+    override func foremostEvent() -> AnyPublisher<(any ForemostMarkableEvent)?, any Error> {
+        guard self.stubHasForemost
+        else {
+            return Just(nil).mapAsAnyError().eraseToAnyPublisher()
+        }
+        
+        let event = TodoEvent(uuid: "dummy_foremost", name: "some")
+        return Just(event).mapAsAnyError().eraseToAnyPublisher()
     }
 }
 

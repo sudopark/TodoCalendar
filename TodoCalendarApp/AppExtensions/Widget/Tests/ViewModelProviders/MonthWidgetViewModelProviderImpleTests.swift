@@ -55,6 +55,7 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
         let eventsFetchUsecase = CalendarEventFetchUsecaseImple(
             todoRepository: todoRepository,
             scheduleRepository: scheduleRepostory,
+            foremostEventRepository: StubForemostEventRepository(),
             holidayFetchUsecase: holidaysFetchUSecase,
             eventTagRepository: StubEventTagRepository(),
             cached: .init()

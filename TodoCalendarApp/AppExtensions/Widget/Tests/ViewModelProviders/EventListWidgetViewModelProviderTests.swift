@@ -406,6 +406,10 @@ extension EventListWidgetViewModelProviderTests {
                 currentTodos: currents, eventWithTimes: events, customTagMap: [:]
             )
         }
+        
+        func fetchForemostEvent() async throws -> ForemostEventAndTag {
+            return .init(foremostEvent: nil, tag: nil)
+        }
     }
     
     private func makeProviderWithStubUnsortedEvents() -> EventListWidgetViewModelProvider {
