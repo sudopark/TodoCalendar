@@ -91,7 +91,7 @@ extension WeekEventStackBuilder {
         let eventsOnThisWeek = events
             .compactMap { EventOnWeek($0, on: weekRange, with: self.calendar) }
             .filter { !$0.daysSequence.isEmpty }
-            .sorted(by: { $0.length > $1.length })
+            .sortUnStackedEvents()
         
         let sorting: ([EventOnWeek], [EventOnWeek]) -> Bool = { lhs, rhs in
             let (lhsLength, rhsLength) = (lhs.eventExistsLength, rhs.eventExistsLength)
@@ -141,7 +141,7 @@ extension WeekEventStackBuilder {
         let newRemains = (leftDropouts + dropouts + rightDropouts)
         return self.stack(
             remains: newRemains,
-            stacks: [newStackRow] + stacks
+            stacks: stacks + [newStackRow]
         )
     }
      
@@ -224,6 +224,15 @@ private extension Calendar {
 }
 
 private extension Array where Element == EventOnWeek {
+    
+    func sortUnStackedEvents() -> Array {
+        let compare: (Element, Element) -> Bool = { lhs, rhs in
+            return lhs.length != rhs.length
+                ? lhs.length > rhs.length
+                : lhs.eventRangesOnWeek.lowerBound < rhs.eventRangesOnWeek.lowerBound
+        }
+        return self.sorted(by: compare)
+    }
     
     func neighborCandidates(from center: EventOnWeek) -> (
         left: [EventOnWeek],

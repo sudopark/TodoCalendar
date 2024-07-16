@@ -27,10 +27,11 @@ class WeekEventStackBuilderTests: BaseTestCase {
         return .init(days: days)
     }
     
-    private func dummyEvent(on days: ClosedRange<Int>) -> any CalendarEvent {
+    private func dummyEvent(on days: ClosedRange<Int>, startTimeOffset: TimeInterval = 0) -> any CalendarEvent {
         let daysRange = days.lowerBound...days.upperBound
         let start = self.calendar.date(from: .init(year: 2023, month: 7, day: daysRange.lowerBound))!
             |> self.calendar.startOfDay(for:)
+            |> { $0.addingTimeInterval(startTimeOffset) }
         let end = self.calendar.date(from: .init(year: 2023, month: 7, day: daysRange.upperBound))!
             |> { self.calendar.endOfDay(for: $0)! }
         
@@ -38,7 +39,7 @@ class WeekEventStackBuilderTests: BaseTestCase {
         let timeStamps = dates.lowerBound.timeIntervalSince1970
             ..<
             dates.upperBound.timeIntervalSince1970
-        let todo = TodoEvent(uuid: "\(daysRange)", name: "some") |> \.time .~ .period(timeStamps)
+        let todo = TodoEvent(uuid: "\(daysRange)+\(startTimeOffset)", name: "some") |> \.time .~ .period(timeStamps)
         return TodoCalendarEvent(todo, in: TimeZone(abbreviation: "KST")!)
     }
     
@@ -194,6 +195,26 @@ extension WeekEventStackBuilderTests {
             [ (1...5), (7...7) ],
             [ (1...2), (5...7) ],
             [ (2...3), (4...5) ]
+        ])
+    }
+    
+    func testBuilder_whenEventIsSameDay_sortByEventTimeAsc() {
+        // given
+        let builder = self.makeBuilder()
+        
+        // when
+        let stack = builder.build(self.dummyWeek, events: [
+            self.dummyEvent(on: 12...12, startTimeOffset: 30),
+            self.dummyEvent(on: 12...12, startTimeOffset: 10),
+            self.dummyEvent(on: 12...12, startTimeOffset: 23)
+        ])
+        
+        // then
+        let ids = stack.eventStacks.map { row in row.map { $0.event.eventId } }
+        XCTAssertEqual(ids, [
+            ["12...12+10.0"],
+            ["12...12+23.0"],
+            ["12...12+30.0"]
         ])
     }
 }
