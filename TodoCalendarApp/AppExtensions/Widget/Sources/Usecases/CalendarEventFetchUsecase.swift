@@ -23,12 +23,19 @@ struct CalendarEvents {
     var customTagMap: [String: EventTag]
 }
 
+struct ForemostEventAndTag {
+    let foremostEvent: (any ForemostMarkableEvent)?
+    let tag: EventTag?
+}
+
 protocol CalendarEventFetchUsecase {
     
     func fetchEvents(
         in range: Range<TimeInterval>,
         _ timeZone: TimeZone
     ) async throws -> CalendarEvents
+    
+    func fetchForemostEvent() async throws -> ForemostEventAndTag
 }
 
 
@@ -38,6 +45,7 @@ actor CalendarEventsFetchCacheStore {
     var offTagIds: Set<AllEventTagId>?
     var currentTodos: [TodoCalendarEvent]?
     var allCustomTagsMap: [String: EventTag]?
+    var foremostMarkableEvent: (any ForemostMarkableEvent)??
     
     func updateOffTagIds(_ ids: Set<AllEventTagId>) {
         self.offTagIds = ids
@@ -48,10 +56,16 @@ actor CalendarEventsFetchCacheStore {
     func updateAllCustomTagsMap(_ newValue: [String: EventTag]) {
         self.allCustomTagsMap = newValue
     }
+    
+    func updateForemostEvent(_ newValue: (any ForemostMarkableEvent)?) {
+        self.foremostMarkableEvent = newValue
+    }
+    
     func reset() {
         self.offTagIds = nil
         self.currentTodos = nil
         self.allCustomTagsMap = nil
+        self.foremostMarkableEvent = nil
     }
     
     func resetCurrentTodo() {
@@ -64,6 +78,7 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase {
     
     private let todoRepository: any TodoEventRepository
     private let scheduleRepository: any ScheduleEventRepository
+    private let foremostEventRepository: any ForemostEventRepository
     private let holidayFetchUsecase: any HolidaysFetchUsecase
     private let eventTagRepository: any EventTagRepository
     private let cached: CalendarEventsFetchCacheStore
@@ -71,12 +86,14 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase {
     init(
         todoRepository: any TodoEventRepository,
         scheduleRepository: any ScheduleEventRepository,
+        foremostEventRepository: any ForemostEventRepository,
         holidayFetchUsecase: any HolidaysFetchUsecase,
         eventTagRepository: any EventTagRepository,
         cached: CalendarEventsFetchCacheStore
     ) {
         self.todoRepository = todoRepository
         self.scheduleRepository = scheduleRepository
+        self.foremostEventRepository = foremostEventRepository
         self.holidayFetchUsecase = holidayFetchUsecase
         self.eventTagRepository = eventTagRepository
         self.cached = cached
@@ -172,6 +189,27 @@ extension CalendarEventFetchUsecaseImple {
         )
         let events = holidays.compactMap { HolidayCalendarEvent($0, in: timeZone) }
         return events.filter { $0.eventTime?.isRoughlyOverlap(with: range) ?? false }
+    }
+}
+
+extension CalendarEventFetchUsecaseImple {
+    
+    func fetchForemostEvent() async throws -> ForemostEventAndTag {
+        let tags = try await self.allCustomEventTagMap()
+        let event = try await self.loadForemostEvent()
+        return ForemostEventAndTag(
+            foremostEvent: event,
+            tag: event.flatMap { $0.eventTagId?.customTagId }.flatMap { tags[$0] }
+        )
+    }
+    
+    private func loadForemostEvent() async throws -> (any ForemostMarkableEvent)? {
+        if let cached = await self.cached.foremostMarkableEvent {
+            return cached
+        }
+        let foremost = try await self.foremostEventRepository.foremostEvent().values.first(where: { _ in true }) ?? nil
+        await self.cached.updateForemostEvent(foremost)
+        return foremost
     }
 }
 

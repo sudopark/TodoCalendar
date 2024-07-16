@@ -89,9 +89,19 @@ extension WidgetUsecaseFactory {
             localStorage: eventTagStorage, environmentStorage: base.userDefaultEnvironmentStorage
         )
         
+        let foremostEventLocalStorage = ForemostLocalStorageImple(
+            environmentStorage: base.userDefaultEnvironmentStorage,
+            todoStorage: todoLocalStorage,
+            scheduleStorage: scheduleStorage
+        )
+        let foremostEventRepository = ForemostEventLocalRepositoryImple(
+            localStorage: foremostEventLocalStorage
+        )
+        
         return CalendarEventFetchUsecaseImple(
             todoRepository: todoRepository,
             scheduleRepository: scheduleRepository,
+            foremostEventRepository: foremostEventRepository,
             holidayFetchUsecase: holidayFetchUsecase,
             eventTagRepository: eventTagRepository,
             cached: FetchCacheStores.shared.events
