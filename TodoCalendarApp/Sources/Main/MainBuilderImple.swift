@@ -42,7 +42,8 @@ extension MainSceneBuilerImple: MainSceneBuiler {
         
         let viewModel = MainViewModelImple(
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
-            temporaryUserDataMigrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase
+            temporaryUserDataMigrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase,
+            eventNotificationUsecase: self.usecaseFactory.makeEventNotificationUsecase()
         )
         
         let viewController = MainViewController(

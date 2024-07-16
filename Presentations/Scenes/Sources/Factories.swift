@@ -42,4 +42,9 @@ public protocol SettingUsecaseFactory {
     var temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase { get }
 }
 
-public protocol UsecaseFactory: AcountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, SettingUsecaseFactory { }
+public protocol NotificationUsecaseFactory {
+    
+    func makeEventNotificationUsecase() -> any EventNotificationUsecase
+}
+
+public protocol UsecaseFactory: AcountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory { }

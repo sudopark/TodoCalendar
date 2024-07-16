@@ -20,12 +20,14 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyRouter: SpyRouter!
     private var spyUISettingUsecase: StubUISettingUsecase!
     private var stubMigrationUsecase: StubTemporaryUserDataMigrationUescase!
+    private var spyEventNotificationUsecase: SpyEventNotificationUsecase!
     var cancelBag: Set<AnyCancellable>!
     
     override func setUpWithError() throws {
         self.spyRouter = .init()
         self.spyUISettingUsecase = .init()
         self.stubMigrationUsecase = .init()
+        self.spyEventNotificationUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -34,6 +36,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyRouter = nil
         self.spyUISettingUsecase = nil
         self.stubMigrationUsecase = nil
+        self.spyEventNotificationUsecase = nil
         self.cancelBag = nil
     }
     
@@ -44,7 +47,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let expect = expectation(description: "wait until attached")
         let viewModel = MainViewModelImple(
             uiSettingUsecase: self.spyUISettingUsecase,
-            temporaryUserDataMigrationUsecase: self.stubMigrationUsecase
+            temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
+            eventNotificationUsecase: self.spyEventNotificationUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -61,7 +65,8 @@ extension MainViewModelImpleTests {
     private func makeViewModelWithoutPrepare() -> MainViewModelImple {
         let viewModel = MainViewModelImple(
             uiSettingUsecase: self.spyUISettingUsecase,
-            temporaryUserDataMigrationUsecase: self.stubMigrationUsecase
+            temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
+            eventNotificationUsecase: self.spyEventNotificationUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -79,6 +84,17 @@ extension MainViewModelImpleTests {
         
         // then
         XCTAssertNotNil(setting)
+    }
+    
+    func testViewModel_whenPrepare_runSyncEventNotifications() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+        
+        // when
+        viewModel.prepare()
+        
+        // then
+        XCTAssertEqual(self.spyEventNotificationUsecase.didRunSync, true)
     }
     
     func testViewModel_whenFocusChanged_updateCurrentMonth() {
@@ -239,6 +255,14 @@ extension MainViewModelImpleTests {
         var didFocusMovedToToday: Bool?
         func moveFocusToToday() {
             self.didFocusMovedToToday = true
+        }
+    }
+    
+    private final class SpyEventNotificationUsecase: EventNotificationUsecase, @unchecked Sendable {
+        
+        var didRunSync: Bool = false
+        func runSyncEventNotification() {
+            self.didRunSync = true
         }
     }
 }

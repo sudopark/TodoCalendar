@@ -44,14 +44,17 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     
     private let uiSettingUsecase: any UISettingUsecase
     private let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
+    private let eventNotificationUsecase: any EventNotificationUsecase
     var router: (any MainRouting)?
     
     init(
         uiSettingUsecase: any UISettingUsecase,
-        temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
+        temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase,
+        eventNotificationUsecase: any EventNotificationUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
+        self.eventNotificationUsecase = eventNotificationUsecase
         
         self.internalBinding()
     }
@@ -108,6 +111,8 @@ extension MainViewModelImple {
         }
         self.refreshViewAppearanceSettings()
         self.temporaryUserDataMigrationUsecase.checkIsNeedMigration()
+        
+        self.eventNotificationUsecase.runSyncEventNotification()
     }
     
     private func refreshViewAppearanceSettings() {

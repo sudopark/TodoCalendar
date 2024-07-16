@@ -163,6 +163,22 @@ extension NonLoginUsecaseFactoryImple {
 
 extension NonLoginUsecaseFactoryImple {
     
+    func makeEventNotificationUsecase() -> any EventNotificationUsecase {
+        let notificaitonRepository = EventNotificationRepositoryImple(
+            sqliteService: applicationBase.commonSqliteService,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        return EventNotificationUsecaseImple(
+            todoEventUsecase: self.makeTodoEventUsecase(),
+            scheduleEventUescase: self.makeScheduleEventUsecase(),
+            notificationRepository: notificaitonRepository
+        )
+    }
+}
+
+
+extension NonLoginUsecaseFactoryImple {
+    
     private func makeAppSettingUsecase() -> AppSettingUsecaseImple {
         let repository = AppSettingLocalRepositoryImple(
             storage: .init(environmentStorage: applicationBase.userDefaultEnvironmentStorage)
@@ -360,6 +376,22 @@ extension LoginUsecaseFactoryImple {
         return ForemostEventUsecaseImple(
             repository: repository, 
             sharedDataStore: applicationBase.sharedDataStore
+        )
+    }
+}
+
+
+extension LoginUsecaseFactoryImple {
+    
+    func makeEventNotificationUsecase() -> any EventNotificationUsecase {
+        let notificaitonRepository = EventNotificationRepositoryImple(
+            sqliteService: applicationBase.commonSqliteService,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        return EventNotificationUsecaseImple(
+            todoEventUsecase: self.makeTodoEventUsecase(),
+            scheduleEventUescase: self.makeScheduleEventUsecase(),
+            notificationRepository: notificaitonRepository
         )
     }
 }
