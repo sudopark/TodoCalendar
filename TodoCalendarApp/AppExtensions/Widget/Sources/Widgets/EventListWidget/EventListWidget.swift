@@ -8,7 +8,6 @@
 
 import WidgetKit
 import SwiftUI
-import AppIntents
 import Prelude
 import Optics
 import Domain
