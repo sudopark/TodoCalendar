@@ -212,6 +212,35 @@ extension WidgetViewModelProviderBuilder {
             appSettingRepository: appSettingRepository
         )
     }
+    
+    func makeForemostEventWidgetViewModelProvider() async -> ForemostEventWidgetViewModelProvider {
+        
+        await self.checkShouldReset()
+        
+        let appSettingRepository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
+        
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        
+        let holidayUsecase = HolidayUsecaseImple(
+            holidayRepository: self.usecaseFactory.makeHolidayRepository(),
+            dataStore: .init(),
+            localeProvider: Locale.current
+        )
+        let holidayFetchUsecase = self.usecaseFactory.makeHolidaysFetchUsecase(holidayUsecase)
+        let eventFetchUsecase = self.usecaseFactory.makeEventsFetchUsecase(holidayFetchUsecase)
+        
+        return ForemostEventWidgetViewModelProvider(
+            eventFetchUsecase: eventFetchUsecase,
+            calendarSettingRepository: calendarSettingRepository,
+            appSettingRepository: appSettingRepository
+        )
+    }
 }
 
 
