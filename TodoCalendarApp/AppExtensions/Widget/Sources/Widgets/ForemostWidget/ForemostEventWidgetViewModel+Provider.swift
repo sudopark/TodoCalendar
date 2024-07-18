@@ -18,14 +18,16 @@ import CalendarScenes
 
 struct ForemostEventWidgetViewModel {
     
-    let eventModel: (any EventCellViewModel)?
+    var eventModel: (any EventCellViewModel)?
     let defaultTagColorSetting: DefaultEventTagColorSetting
     
     static func sample() -> ForemostEventWidgetViewModel {
         
-        let event = TodoEventCellViewModel("tood", name: "⛱️ Take an umbrella!")
+        let event = TodoEventCellViewModel("tood", name: "Take an umbrella! ⛱️")
             |> \.tagColor .~ .default
-            |> \.periodText .~ .singleText(.init(text: "13:00"))
+            |> \.periodText .~ .doubleText(
+                .init(text: "Todo".localized()), .init(text: "13:00")
+            )
         let defaultTagColorSetting = DefaultEventTagColorSetting(
             holiday: "#D6236A", default: "#088CDA"
         )

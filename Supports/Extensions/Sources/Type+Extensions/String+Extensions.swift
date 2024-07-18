@@ -43,6 +43,17 @@ extension String {
 
 // MARK: - else
 
+extension String {
+    
+    public static var randomEmoji: String {
+        let emojis = 0x1F300...0x1F3F0
+        let selected = emojis.randomElement()
+            .flatMap { UnicodeScalar($0) }
+            .flatMap { String($0) }
+        return selected ?? "🙌"
+    }
+}
+
 extension Array where Element == String {
     
     public func andJoin(
