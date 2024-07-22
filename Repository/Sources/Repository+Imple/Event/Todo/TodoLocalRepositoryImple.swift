@@ -171,16 +171,35 @@ extension TodoLocalRepositoryImple {
     }
     
     public func toggleTodo(
-        _ todoId: String,
-        _ eventTime: EventTime?
-    ) async throws -> TodoToggleResult {
+        _ todoId: String
+    ) async throws -> TodoToggleResult? {
         
-        if let doneTodo = try await self.localStorage.findDoneTodoEvent(by: todoId, eventTime) {
-            let reverted = try await self.revertDoneTodo(doneTodo.uuid)
-            return .reverted(reverted)
-        } else {
-            let completeResult = try await self.completeTodo(todoId)
-            return .completed(completeResult.doneEvent)
+        func runActionWithUpdateState<R>(
+            startWith state: TodoToggleStateUpdateParamas,
+            _ action: () async throws -> R
+        ) async throws -> R {
+            do {
+                try await self.localStorage.updateTodoToggleState(todoId, state)
+                let result = try await action()
+                try await self.localStorage.updateTodoToggleState(todoId, .idle)
+                return result
+            } catch {
+                try await self.localStorage.updateTodoToggleState(todoId, .idle)
+                throw error
+            }
+        }
+        
+        let previousToggleState = try await self.localStorage.todoToggleState(todoId)
+        
+        switch previousToggleState {
+        case .idle(let target):
+            let result = try await runActionWithUpdateState(startWith: .completing(origin: target)) {
+                return try await self.completeTodo(todoId)
+            }
+            return .completed(result.doneEvent)
+            
+        case .completing, .reverting:
+            return nil
         }
     }
 }

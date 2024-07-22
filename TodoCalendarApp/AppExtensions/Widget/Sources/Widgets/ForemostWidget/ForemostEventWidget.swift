@@ -53,6 +53,7 @@ struct SystemSizeForemostEventView: View {
     var body: some View {
         if let event = model.eventModel {
             eventView(event)
+                .invalidatableContent()
         } else {
             emptyForemostEventView()
         }
@@ -204,7 +205,7 @@ struct SystemSizeForemostEventView: View {
         var body: some View {
             Toggle(
                 "", isOn: false,
-                intent: TodoToggleIntent(id: todo.eventIdentifier, todo.eventTimeRawValue)
+                intent: TodoToggleIntent(id: todo.eventIdentifier)
             )
             .toggleStyle(TodoToggleStyle(colorSet: colorSet))
         }
@@ -240,14 +241,14 @@ struct ForemostEventWidgetView: View {
 
 struct ForemostEventWidget: Widget {
     
-    let kind: String = "ForemostEventWidget"
+    static let kind: String = "ForemostEventWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: ForemostEventWidgetTimelineProvider()) { entry in
+        StaticConfiguration(kind: ForemostEventWidget.kind, provider: ForemostEventWidgetTimelineProvider()) { entry in
             ForemostEventWidgetView(entry: entry)
                 .containerBackground(.background, for: .widget)
         }
-        .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
+        .supportedFamilies([.systemSmall, .systemMedium])
         .configurationDisplayName("TODO: My Widget")
         .description("TODO: This is an example widget.")
     }

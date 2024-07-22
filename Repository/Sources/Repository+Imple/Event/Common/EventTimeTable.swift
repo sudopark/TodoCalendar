@@ -139,7 +139,7 @@ struct EventTimeTable: Table {
     }
 }
 
-private extension EventTime {
+extension EventTime {
     var typeText: String {
         switch self {
         case .at: return "at"
@@ -153,7 +153,7 @@ private extension EventTime {
         return secondsFromGMT
     }
     
-    var lowerBoundWithExtended: TimeInterval {
+    fileprivate var lowerBoundWithExtended: TimeInterval {
         switch self {
         case .allDay(let range, let secondsFromGMT):
             return range.lowerBound.earlistTimeZoneInterval(secondsFromGMT)
@@ -161,7 +161,7 @@ private extension EventTime {
         }
     }
     
-    var upperBoundWithExtended: TimeInterval {
+    fileprivate var upperBoundWithExtended: TimeInterval {
         switch self {
         case .allDay(let range, let secondsFromGMT):
             return range.upperBound.latestTimeZoneInterval(secondsFromGMT)

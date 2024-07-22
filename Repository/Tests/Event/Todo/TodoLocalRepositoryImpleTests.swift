@@ -649,45 +649,12 @@ extension TodoLocalRepositoryImpleTests {
         let repository = try await self.makeRepositoryWithDoneFromRepeatingTodo()
         
         // when
-        let result = try await repository.toggleTodo("todo", nil)
+        let result = try await repository.toggleTodo("todo")
         
         // then
-        let completed = result.completed
+        let completed = result?.completed
         XCTAssertEqual(completed?.name, "todo")
         XCTAssertEqual(completed?.originEventId, "todo")
-    }
-    
-    func testRepository_toggleTodo_revert() async throws {
-        // given
-        let repository = try await self.makeRepositoryWithDoneFromRepeatingTodo()
-        
-        func parameterizeTest(
-            _ todoId: String,
-            _ time: EventTime?,
-            _ expectName: String
-        ) async throws {
-            // given
-            // when
-            let result = try await repository.toggleTodo(todoId, time)
-            
-            // then
-            let reverted = result.reverted
-            XCTAssertEqual(reverted?.name, expectName)
-        }
-        
-        // when + then
-        try await parameterizeTest(
-            "repeating_origin", .at(100), "done_at"
-        )
-        try await parameterizeTest(
-            "repeating_origin", .period(0..<100), "done_period"
-        )
-        try await parameterizeTest(
-            "repeating_origin", .allDay(0..<100, secondsFromGMT: 0), "done_allday"
-        )
-        try await parameterizeTest(
-            "not_repeating", nil, "done"
-        )
     }
 }
 
@@ -704,7 +671,7 @@ extension TimeInterval {
     }
 }
 
-extension TodoToggleResult {
+private extension TodoToggleResult {
     
     var completed: DoneTodoEvent? {
         guard case .completed(let done) = self else { return nil }
