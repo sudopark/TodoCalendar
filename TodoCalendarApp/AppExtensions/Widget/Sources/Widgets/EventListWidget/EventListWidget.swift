@@ -40,6 +40,7 @@ struct EventListView: View {
                 Spacer()
             }
         }
+        .invalidatableContent()
     }
     
     private func eventListPerDayView(
@@ -79,7 +80,6 @@ struct EventListView: View {
             tagLineView(model.tagColor)
             
             nameAndActionView(model)
-            
         }
     }
     
@@ -172,9 +172,7 @@ private struct TodoToggleButton: View {
     var body: some View {
         Toggle(
             "", isOn: false,
-            intent: TodoToggleIntent(
-                id: todo.eventIdentifier, todo.eventTimeRawValue
-            )
+            intent: TodoToggleIntent(id: todo.eventIdentifier)
         )
         .toggleStyle(TodoToggleStyle(colorSet: colorSet))
     }
@@ -209,10 +207,10 @@ struct EventListWidgetView: View {
 
 struct EventListWidget: Widget {
     
-    let kind: String = "EventList"
+    static let kind: String = "EventList"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: EventListWidgetTimeLineProvider()) { entry in
+        StaticConfiguration(kind: EventListWidget.kind, provider: EventListWidgetTimeLineProvider()) { entry in
             EventListWidgetView(entry: entry)
                 .containerBackground(.background, for: .widget)
         }

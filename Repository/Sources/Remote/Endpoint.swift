@@ -59,6 +59,7 @@ public enum TodoAPIEndpoints: Endpoint {
     case dones
     case revertDone(String)
     case replaceRepeating(String)
+    case cancelDone
     
     public var subPath: String {
         switch self {
@@ -85,6 +86,9 @@ public enum TodoAPIEndpoints: Endpoint {
             
         case .replaceRepeating(let id):
             return "todo/\(id)/replace"
+            
+        case .cancelDone:
+            return "dones/cancel"
         }
     }
 }

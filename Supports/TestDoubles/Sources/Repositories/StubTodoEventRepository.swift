@@ -115,7 +115,7 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub {
         return .init(uuid: "reverted", name: "reverted")
     }
     
-    open func toggleTodo(_ todoId: String, _ eventTime: EventTime?) async throws -> TodoToggleResult {
+    open func toggleTodo(_ todoId: String) async throws -> TodoToggleResult? {
         throw RuntimeError("not implemented")
     }
 }

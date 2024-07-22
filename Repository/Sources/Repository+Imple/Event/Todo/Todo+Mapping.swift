@@ -214,3 +214,58 @@ extension RemoveDoneTodoScope {
         }
     }
 }
+
+
+// MARK: - toggling
+
+struct RevertToggleTodoDoneParameter {
+    let origin: TodoEvent
+    let doneTodoId: String?
+    
+    init(_ origin: TodoEvent, _ doneTodoId: String?) {
+        self.origin = origin
+        self.doneTodoId = doneTodoId
+    }
+    
+    func asJson() -> [String: Any] {
+        var originPayload: [String: Any] = [:]
+        originPayload[Key.uuid.rawValue] = self.origin.uuid
+        originPayload[Key.name.rawValue] = self.origin.name
+        originPayload[Key.createTime.rawValue] = self.origin.creatTimeStamp
+        originPayload[Key.eventTagId.rawValue] = self.origin.eventTagId?.customTagId
+        originPayload[Key.time.rawValue] = self.origin.time.map { EventTimeMapper(time: $0) }
+            .map { $0.asJson() }
+        originPayload[Key.repeating.rawValue] = self.origin.repeating.map { EventRepeatingMapper(repeating: $0) }
+            .map { $0.asJson() }
+        originPayload[Key.notificationOptions.rawValue] = self.origin.notificationOptions
+            .map { EventNotificationTimeOptionMapper(option: $0) }
+            .map { try? $0.asJson() }
+        
+        var payload: [String: Any] = [
+            "origin": originPayload
+        ]
+        payload["done_id"] = doneTodoId
+        return payload
+    }
+}
+
+
+struct RevertToggleTodoDoneResult: Decodable {
+    let reverted: TodoEvent
+    let deletedDoneTodoId: String?
+    
+    init(reverted: TodoEvent, deletedDoneTodoId: String?) {
+        self.reverted = reverted
+        self.deletedDoneTodoId = deletedDoneTodoId
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case reverted
+        case deletedDoneTodoId = "deleted_done_id"
+    }
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.reverted = try container.decode(TodoEventMapper.self, forKey: .reverted).todo
+        self.deletedDoneTodoId = try? container.decode(String.self, forKey: .deletedDoneTodoId)
+    }
+}

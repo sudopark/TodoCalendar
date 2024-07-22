@@ -55,6 +55,10 @@ extension WidgetUsecaseFactory {
         return repository
     }
     
+    func makeTodoToggleRepository() -> any TodoEventRepository {
+        return self.makeTodoRepositoryByUser()
+    }
+    
     func makeHolidaysFetchUsecase(
         _ holidayUsecase: (any HolidayUsecase)? = nil
     ) -> any HolidaysFetchUsecase {
@@ -105,14 +109,6 @@ extension WidgetUsecaseFactory {
             holidayFetchUsecase: holidayFetchUsecase,
             eventTagRepository: eventTagRepository,
             cached: FetchCacheStores.shared.events
-        )
-    }
-    
-    func makeTodoToggleUsecase() -> any TodoToggleUsecase {
-        let todoRepository = self.makeTodoRepositoryByUser()
-        return TodoToggleUsecaseImple(
-            processStorage: UserDefaults.standard, 
-            todoRepository: todoRepository
         )
     }
     

@@ -570,26 +570,106 @@ extension TodoRemoteRepositoryImpleTests {
     // revert 할꺼면 done = "some" 이여야하고
     // complete 처리할꺼면 = :origin
     
-    func testReposiotry_toggleTodo_complete() async throws {
-        // given
+    private func makeRepositoryWithUpdateToggleState(
+        _ id: String,
+        _ newValue: TodoToggleStateUpdateParamas?
+    ) async throws -> TodoRemoteRepositoryImple {
         let repository = self.makeRepository()
-        
-        // when
-        let result = try await repository.toggleTodo("origin", nil)
-        
-        // then
-        XCTAssertNotNil(result.completed)
+        try await self.spyTodoCache.updateTodoToggleState(id, newValue ?? .idle)
+        return repository
     }
     
-    func testRepository_toggleTodo_revert() async throws {
+    // toggle -> 완료
+    func testRepository_whenToggleTodoisNoneAndToggleRequested_completeTodo() async throws {
         // given
+        let todoId = "origin"
         let repository = self.makeRepository()
         
         // when
-        let result = try await repository.toggleTodo("existing_done_todo", nil)
+        let result = try await repository.toggleTodo(todoId)
         
         // then
-        XCTAssertNotNil(result.reverted)
+        XCTAssertEqual(result?.isCompleted, true)
+        XCTAssertEqual(self.spyTodoCache.stubToggleStateMap[todoId]?.isIdle, true)
+        XCTAssertEqual(
+            self.spyTodoCache.didUpdatedTodoToggleStatesMap[todoId]?.map { $0.recordedState },
+            [.completing, .idle]
+        )
+    }
+    
+    func testRepository_whenToggleTodoisIdleAndToggleRequested_completeTodo() async throws {
+        // given
+        let todoId = "origin"
+        let repository = try await self.makeRepositoryWithUpdateToggleState(todoId, .idle)
+        
+        // when
+        let result = try await repository.toggleTodo(todoId)
+        
+        // then
+        XCTAssertEqual(result?.isCompleted, true)
+        XCTAssertEqual(self.spyTodoCache.stubToggleStateMap[todoId]?.isIdle, true)
+        XCTAssertEqual(
+            self.spyTodoCache.didUpdatedTodoToggleStatesMap[todoId]?.map { $0.recordedState },
+            [.idle, .completing, .idle]
+        )
+    }
+
+    // toggle -> 완료 실패시에 상태 다시 idle로 변경
+    func testRepository_whenToggleTodoisIdleAndToggleRequestedFailed_stateIsIdle() async throws {
+        // given
+        let todoId = "complete_fail"
+        let repository = try await self.makeRepositoryWithUpdateToggleState(todoId, .idle)
+        
+        // when
+        let result = try? await repository.toggleTodo(todoId)
+        
+        // then
+        XCTAssertNil(result)
+        XCTAssertEqual(self.spyTodoCache.stubToggleStateMap[todoId]?.isIdle, true)
+        XCTAssertEqual(
+            self.spyTodoCache.didUpdatedTodoToggleStatesMap[todoId]?.map { $0.recordedState },
+            [.idle, .completing, .idle]
+        )
+    }
+    
+    // toggle -> 완료중일때는 revert
+    func testRepository_whenToggleTodoIsCompletingAndToggleRequested_revertToggle() async throws {
+        // given
+        let todoId = "origin"
+        let repository = try await self.makeRepositoryWithUpdateToggleState(
+            todoId, .completing(origin: TodoEvent(uuid: todoId, name: "origin"))
+        )
+        
+        // when
+        let result = try await repository.toggleTodo(todoId)
+        
+        // then
+        XCTAssertEqual(result?.isReverted, true)
+        XCTAssertEqual(self.spyTodoCache.stubToggleStateMap[todoId]?.isIdle, true)
+        XCTAssertEqual(
+            self.spyTodoCache.didUpdatedTodoToggleStatesMap[todoId]?.map { $0.recordedState },
+            [.completing, .reverting, .idle]
+        )
+    }
+    
+    // toggle -> reverting시에는 아무것도 안함
+    func testRepository_whenToggleTodoIsRevertingAndToggleRequested_doNothing() async throws {
+        // given
+        let todoId = "origin"
+        let repository = try await self.makeRepositoryWithUpdateToggleState(
+            todoId, .reverting
+        )
+        
+        // when
+        let result = try await repository.toggleTodo(todoId)
+        
+        // then
+        XCTAssertNil(result)
+        XCTAssertEqual(self.spyTodoCache.stubToggleStateMap[todoId]?.isReverting, true)
+        XCTAssertEqual(
+            self.spyTodoCache.didUpdatedTodoToggleStatesMap[todoId]?.map { $0.recordedState },
+            [.reverting]
+        )
     }
 }
  
@@ -702,6 +782,11 @@ private extension TodoRemoteRepositoryImpleTests {
             ),
             .init(
                 method: .get,
+                endpoint: TodoAPIEndpoints.todo("complete_fail"),
+                resultJsonString: .success(self.dummySingleTodoResponse)
+            ),
+            .init(
+                method: .get,
                 endpoint: TodoAPIEndpoints.todo("repeating-todo"),
                 resultJsonString: .success(self.dummySingleTodoResponse)
             ),
@@ -741,6 +826,11 @@ private extension TodoRemoteRepositoryImpleTests {
                 }
                 """
                 )
+            ),
+            .init(
+                method: .post,
+                endpoint: TodoAPIEndpoints.done("complete_fail"),
+                resultJsonString: .failure(RuntimeError("failed"))
             ),
             .init(
                 method: .post,
@@ -805,11 +895,71 @@ private extension TodoRemoteRepositoryImpleTests {
                 method: .post,
                 endpoint: TodoAPIEndpoints.revertDone("some"),
                 resultJsonString: .success(self.dummySingleTodoResponse)
+            ),
+            .init(
+                method: .post,
+                endpoint: TodoAPIEndpoints.cancelDone,
+                resultJsonString: .success(
+                    "{ \"reverted\": \(self.dummySingleTodoResponse), \"deleted_done_id\": \"some_done\" }"
+                )
             )
         ]
     }
 }
 
+
+private extension TodoToggleResult {
+    
+    var isCompleted: Bool {
+        guard case .completed = self else { return false }
+        return true
+    }
+    
+    var isReverted: Bool {
+        guard case .reverted = self else { return false }
+        return true
+    }
+}
+
+private extension TodoTogglingState {
+    
+    var isIdle: Bool {
+        guard case .idle = self else { return false }
+        return true
+    }
+    
+    var isCompleting: Bool {
+        guard case .completing = self else { return false }
+        return true
+    }
+    
+    var completedDoneId: String? {
+        guard case .completing(_, let doneId) = self else { return nil }
+        return doneId
+    }
+    
+    var isReverting: Bool {
+        guard case .reverting = self else { return false }
+        return true
+    }
+}
+
+private extension TodoToggleStateUpdateParamas {
+    
+    enum RecordedState {
+        case idle
+        case completing
+        case reverting
+    }
+    
+    var recordedState: RecordedState {
+        switch self {
+        case .idle: return .idle
+        case .completing: return .completing
+        case .reverting: return .reverting
+        }
+    }
+}
 
 private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     
@@ -911,16 +1061,6 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
         return .init(uuid: doneEventId, name: "done", originEventId: "origin", doneTime: Date())
     }
     
-    
-    func findDoneTodoEvent(by todoId: String, _ time: EventTime?) async throws -> DoneTodoEvent? {
-        guard self.shouldFailLoadDoneTodo == false
-        else {
-            throw RuntimeError("failed")
-        }
-        guard todoId == "existing_done_todo" else { return nil }
-        return .init(uuid: "some", name: "some", originEventId: todoId, doneTime: .init())
-    }
-    
     var didRemovedDoneTodoIds: [String]?
     func removeDoneTodo(_ doneTodoEventIds: [String]) async throws {
         self.didRemovedDoneTodoIds = doneTodoEventIds
@@ -934,5 +1074,28 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     var didUpdatedDoneTodos: [DoneTodoEvent]?
     func updateDoneTodos(_ dones: [DoneTodoEvent]) async throws {
         self.didUpdatedDoneTodos = dones
+    }
+    
+    var stubToggleStateMap: [String: TodoTogglingState] = [:]
+    func todoToggleState(_ id: String) async throws -> TodoTogglingState {
+        if let stub = self.stubToggleStateMap[id] {
+            return stub
+        }
+        let todo = try await self.loadTodoEvent(id)
+        return .idle(target: todo)
+    }
+    
+    var didUpdatedTodoToggleStatesMap: [String: [TodoToggleStateUpdateParamas]] = [:]
+    func updateTodoToggleState(_ id: String, _ params: TodoToggleStateUpdateParamas) async throws {
+        switch params {
+        case .idle:
+            let todo = try await self.loadTodoEvent(id)
+            self.stubToggleStateMap[id] = .idle(target: todo)
+        case .completing(let origin):
+            self.stubToggleStateMap[id] = .completing(origin: origin, doneId: nil)
+        case .reverting:
+            self.stubToggleStateMap[id] = .reverting
+        }
+        self.didUpdatedTodoToggleStatesMap = self.didUpdatedTodoToggleStatesMap |> key(id) %~ { ($0 ?? []) + [params] }
     }
 }

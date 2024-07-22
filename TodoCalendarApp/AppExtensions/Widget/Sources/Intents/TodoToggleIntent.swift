@@ -22,23 +22,23 @@ struct TodoToggleIntent: AppIntent {
     @Parameter(title: "to-do id")
     var todoId: String
 
-    var eventtime: EventTime?
-    
     init() { }
     
-    init(id: String, _ eventTime: EventTime?) {
+    init(id: String) {
         self.todoId = id
-        self.eventtime = eventTime
     }
     
     func perform() async throws -> some IntentResult {
         let base = WidgetBaseDependency()
         let factory = WidgetUsecaseFactory(base: base)
-        let usecase = factory.makeTodoToggleUsecase()
+        let repository = factory.makeTodoToggleRepository()
         do {
-            let result = try await usecase.toggleTodo(todoId, eventtime)
-            guard result != nil else { return .result()  }
-            if self.eventtime == nil {
+            guard let result = try await repository.toggleTodo(todoId)
+            else {
+                self.reloadOnlyTodoTogglableWidgets()
+                return .result()
+            }
+            if result.isToggledCurrentTodo == true {
                 base.userDefaultEnvironmentStorage.update(
                     EnvironmentKeys.needCheckResetCurrentTodo.rawValue,
                     true
@@ -46,8 +46,13 @@ struct TodoToggleIntent: AppIntent {
             }
             WidgetCenter.shared.reloadAllTimelines()
         } catch {
-            WidgetCenter.shared.reloadTimelines(ofKind: "EventList")
+            self.reloadOnlyTodoTogglableWidgets()
         }
         return .result()
+    }
+    
+    private func reloadOnlyTodoTogglableWidgets() {
+        WidgetCenter.shared.reloadTimelines(ofKind: EventListWidget.kind)
+        WidgetCenter.shared.reloadTimelines(ofKind: ForemostEventWidget.kind)
     }
 }

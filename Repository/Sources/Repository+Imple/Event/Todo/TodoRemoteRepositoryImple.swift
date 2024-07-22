@@ -302,14 +302,57 @@ extension TodoRemoteRepositoryImple {
         return mapper.todo
     }
     
-    public func toggleTodo(_ todoId: String, _ eventTime: EventTime?) async throws -> TodoToggleResult {
+    public func toggleTodo(_ todoId: String) async throws -> TodoToggleResult? {
         
-        if let doneTodo = try await self.cacheStorage.findDoneTodoEvent(by: todoId, eventTime) {
-            let reverted = try await self.revertDoneTodo(doneTodo.uuid)
-            return .reverted(reverted)
-        } else {
-            let completeResult = try await self.completeTodo(todoId)
-            return .completed(completeResult.doneEvent)
+        func runActionWithUpdateState<R>(
+            startWith state: TodoToggleStateUpdateParamas,
+            _ action: () async throws -> R
+        ) async throws -> R {
+            do {
+                try await self.cacheStorage.updateTodoToggleState(todoId, state)
+                let result = try await action()
+                try await self.cacheStorage.updateTodoToggleState(todoId, .idle)
+                return result
+            } catch {
+                try await self.cacheStorage.updateTodoToggleState(todoId, .idle)
+                throw error
+            }
         }
+        
+        let previousToggleState = try await self.cacheStorage.todoToggleState(todoId)
+        
+        switch previousToggleState {
+        case .idle(let target):
+            let result = try await runActionWithUpdateState(startWith: .completing(origin: target)) {
+                return try await self.completeTodo(todoId)
+            }
+            return .completed(result.doneEvent)
+            
+        case .completing(let origin, let doneId):
+            let result = try await runActionWithUpdateState(startWith: .reverting) {
+                return try await cancelDoneTodo(origin, doneId)
+            }
+            return .reverted(result.reverted)
+            
+        case .reverting:
+            return nil
+        }
+    }
+    
+    private func cancelDoneTodo(
+        _ origin: TodoEvent,
+        _ doneTodoId: String?
+    ) async throws -> RevertToggleTodoDoneResult {
+        let endpoint: TodoAPIEndpoints = .cancelDone
+        let result: RevertToggleTodoDoneResult = try await self.remote.request(
+            .post,
+            endpoint,
+            parameters: RevertToggleTodoDoneParameter(origin, doneTodoId).asJson()
+        )
+        try await self.cacheStorage.updateTodoEvent(result.reverted)
+        if let deletedDoneId = result.deletedDoneTodoId {
+            try await self.cacheStorage.removeDoneTodo([deletedDoneId])
+        }
+        return result
     }
 }

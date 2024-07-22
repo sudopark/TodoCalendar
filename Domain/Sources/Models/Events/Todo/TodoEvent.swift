@@ -68,6 +68,13 @@ public struct TodoMakeParams: Sendable {
     public var isValidForMaking: Bool {
         return self.name?.isEmpty == false
     }
+    
+    public init(_ todo: TodoEvent) {
+        self.name = todo.name
+        self.eventTagId = todo.eventTagId
+        self.time = todo.time
+        self.notificationOptions = todo.notificationOptions
+    }
 }
 
 public struct TodoEditParams: Sendable, Equatable {
@@ -115,8 +122,21 @@ public struct RemoveTodoResult {
     public init() { }
 }
 
+public enum TodoTogglingState {
+    
+    case idle(target: TodoEvent)
+    case completing(origin: TodoEvent, doneId: String?)
+    case reverting
+}
 
 public enum TodoToggleResult {
     case completed(DoneTodoEvent)
     case reverted(TodoEvent)
+    
+    public var isToggledCurrentTodo: Bool {
+        switch self {
+        case .completed(let done): return done.eventTime == nil
+        case .reverted(let todo): return todo.time == nil
+        }
+    }
 }
