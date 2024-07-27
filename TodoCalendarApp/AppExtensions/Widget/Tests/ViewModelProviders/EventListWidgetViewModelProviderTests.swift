@@ -19,6 +19,7 @@ import TestDoubles
 class EventListWidgetViewModelProviderTests: BaseTestCase {
         
     private func makeProvider(
+        selectTagId: AllEventTagId = .default,
         withCurrentTodo: Bool = true,
         withStartDateEvent: Bool = true,
         withoutAnyEventsIncludeHoliday: Bool = false
@@ -34,7 +35,10 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
         let appSettingRepository = StubAppSettingRepository()
         
         return .init(
-            eventsFetchUsecase: fetchUsecase, appSettingRepository: appSettingRepository, calendarSettingRepository: calendarSettingRepository
+            targetEventTagId: selectTagId,
+            eventsFetchUsecase: fetchUsecase,
+            appSettingRepository: appSettingRepository,
+            calendarSettingRepository: calendarSettingRepository
         )
     }
 }
@@ -219,6 +223,7 @@ extension EventListWidgetViewModelProviderTests {
         let appSettingRepository = StubAppSettingRepository()
         
         return EventListWidgetViewModelProvider(
+            targetEventTagId: .default,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository
@@ -339,6 +344,7 @@ extension EventListWidgetViewModelProviderTests {
         let appSettingRepository = StubAppSettingRepository()
         
         return EventListWidgetViewModelProvider(
+            targetEventTagId: .default,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository
@@ -418,7 +424,8 @@ extension EventListWidgetViewModelProviderTests {
         let calendarSettingRepository = StubCalendarSettingRepository()
         let appSettingRepository = StubAppSettingRepository()
         return .init(
-            eventsFetchUsecase: fetchUsecase, 
+            targetEventTagId: .default,
+            eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository
         )
@@ -443,5 +450,72 @@ extension EventListWidgetViewModelProviderTests {
         XCTAssertEqual(section0?.events.map { $0.eventIdentifier }, [
             "todo-10", "todo-20", "todo-100"
         ])
+    }
+}
+
+
+extension EventListWidgetViewModelProviderTests {
+    
+    private func makeProviderWithMultipleTagHasEvents(
+        select tagId: AllEventTagId
+    ) -> EventListWidgetViewModelProvider {
+        
+        final class EventsWithTagFetchUescase: CalendarEventFetchUsecase {
+            
+            func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
+                let kst = TimeZone(abbreviation: "KST")!
+                let currents = (0..<10).map { int -> TodoEvent in
+                    let tagId: AllEventTagId = int % 3 == 0
+                        ? .custom("t3") : int % 5 == 0 
+                        ? .custom("t5") : .default
+                    return TodoEvent(uuid: "\(int)", name: "current")
+                        |> \.eventTagId .~ tagId
+                }
+                .map { TodoCalendarEvent($0, in: kst) }
+                
+                let events = CalendarEvents(currentTodos: currents, eventWithTimes: [], customTagMap: [:])
+                return events
+            }
+            
+            func fetchForemostEvent() async throws -> ForemostEventAndTag {
+                return .init(foremostEvent: nil, tag: nil)
+            }
+        }
+        
+        let fetchUsecase = EventsWithTagFetchUescase()
+        let calendarSettingRepository = StubCalendarSettingRepository()
+        let appSettingRepository = StubAppSettingRepository()
+        return .init(
+            targetEventTagId: tagId,
+            eventsFetchUsecase: fetchUsecase,
+            appSettingRepository: appSettingRepository,
+            calendarSettingRepository: calendarSettingRepository
+        )
+    }
+    
+    func testProvider_provideEventsWithFilteringByTag() async throws {
+        // given
+        func parameterizeTest(
+            _ target: AllEventTagId,
+            expectIds: [String]
+        ) async throws {
+            // given
+            let provider = self.makeProviderWithMultipleTagHasEvents(select: target)
+            
+            // when
+            let vm = try await provider.getEventListViewModel(
+                for: self.refDate, maxItemCount: 100
+            )
+            
+            // then
+            let currents = vm.lists.first(where: { $0.isCurrentTodos })
+            let identifiers = currents?.events.map { $0.eventIdentifier }
+            XCTAssertEqual(identifiers, expectIds)
+        }
+        
+        // when + then
+        try await parameterizeTest(.custom("t3"), expectIds: ["0", "3", "6", "9"])
+        try await parameterizeTest(.custom("t5"), expectIds: ["5"])
+        try await parameterizeTest(.default, expectIds: (0..<10).map { "\($0)" })
     }
 }

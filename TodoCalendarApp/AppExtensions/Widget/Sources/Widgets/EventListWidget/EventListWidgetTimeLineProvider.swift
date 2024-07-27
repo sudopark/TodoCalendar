@@ -15,8 +15,9 @@ import Extensions
 import CalendarScenes
 
 
-struct EventListWidgetTimeLineProvider: TimelineProvider {
+struct EventListWidgetTimeLineProvider: IntentTimelineProvider {
     
+    typealias Intent = EventListTypeSelectIntent
     typealias Entry = ResultTimelineEntry<EventListWidgetViewModel>
     
     init() { }
@@ -34,6 +35,7 @@ extension EventListWidgetTimeLineProvider {
     }
     
     func getSnapshot(
+        for configuration: EventListTypeSelectIntent,
         in context: Context,
         completion: @escaping (ResultTimelineEntry<EventListWidgetViewModel>
         ) -> Void) {
@@ -45,17 +47,18 @@ extension EventListWidgetTimeLineProvider {
             return
         }
         
-        getEntry(context) { entry in
+        getEntry(configuration.eventType, context) { entry in
             completion(entry)
         }
     }
     
     func getTimeline(
+        for configuration: EventListTypeSelectIntent,
         in context: Context,
         completion: @escaping (Timeline<ResultTimelineEntry<EventListWidgetViewModel>>) -> Void
     ) {
         
-        self.getEntry(context) { entry in
+        self.getEntry(configuration.eventType, context) { entry in
             let timeline = Timeline(
                 entries: [entry], policy: .after(Date().nextUpdateTime)
             )
@@ -63,12 +66,17 @@ extension EventListWidgetTimeLineProvider {
         }
     }
     
-    private func getEntry(_ context: Context, _ completion: @escaping (Entry) -> Void) {
+    private func getEntry(
+        _ selected: EvnetListType?,
+        _ context: Context,
+        _ completion: @escaping (Entry) -> Void
+    ) {
         
+        let tagId = AllEventTagId(selected)
         let count = context.family.preferedEventListItemCount
         Task {
             let builder = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builder.makeEventListViewModelProvider()
+            let viewModelProvider = await builder.makeEventListViewModelProvider(targetEventTagId: tagId)
             let now = Date()
             do {
                 let model = try await viewModelProvider.getEventListViewModel(
@@ -83,6 +91,17 @@ extension EventListWidgetTimeLineProvider {
                     .init(date: now, result: .failure(.init(error: error)))
                 )
             }
+        }
+    }
+}
+
+extension AllEventTagId {
+    
+    init(_ listType: EvnetListType?) {
+        switch listType?.identifier {
+        case "default": self = .default
+        case .some(let value): self = .custom(value)
+        default: self = .default
         }
     }
 }

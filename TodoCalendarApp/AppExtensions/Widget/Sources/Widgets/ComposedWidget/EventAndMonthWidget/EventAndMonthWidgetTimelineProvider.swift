@@ -83,7 +83,7 @@ struct EventAndMonthWidgetTimelineProvider: TimelineProvider {
         let count = context.family.preferedEventListItemCount
         Task {
             let builer = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builer.makeEventAndMonthWidgetViewModelProvider()
+            let viewModelProvider = await builer.makeEventAndMonthWidgetViewModelProvider(targetEventTagId: .default)
             let now = Date()
             do {
                 let model = try await viewModelProvider.getViewModel(now, maxItemCount: count)

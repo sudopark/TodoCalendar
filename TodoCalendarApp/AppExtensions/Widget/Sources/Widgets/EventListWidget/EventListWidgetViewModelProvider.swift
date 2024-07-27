@@ -159,15 +159,18 @@ struct EventListWidgetViewModel {
 
 final class EventListWidgetViewModelProvider {
     
+    private let targetEventTagId: AllEventTagId
     private let eventsFetchUsecase: any CalendarEventFetchUsecase
     private let appSettingRepository: any AppSettingRepository
     private let calendarSettingRepository: any CalendarSettingRepository
     
     init(
+        targetEventTagId: AllEventTagId,
         eventsFetchUsecase: any CalendarEventFetchUsecase,
         appSettingRepository: any AppSettingRepository,
         calendarSettingRepository: any CalendarSettingRepository
     ) {
+        self.targetEventTagId = targetEventTagId
         self.eventsFetchUsecase = eventsFetchUsecase
         self.appSettingRepository = appSettingRepository
         self.calendarSettingRepository = calendarSettingRepository
@@ -209,7 +212,7 @@ extension EventListWidgetViewModelProvider {
         
         let range = calendar.startOfDay(for: start).timeIntervalSince1970..<endDate.timeIntervalSince1970
         
-        let totalEvents = try await self.eventsFetchUsecase.fetchEvents(in: range, timeZone)
+        let totalEvents = try await self.loadEventList(in: range, timeZone)
         
         let builder = EventListWidgetViewModel.SectionModel.Builder(
             calendar: calendar, timeZone: timeZone, is24Form: is24Form, customTags: totalEvents.customTagMap
@@ -221,6 +224,18 @@ extension EventListWidgetViewModelProvider {
             modelLists.insert(currentModel, at: 0)
         }
         return modelLists
+    }
+    
+    private func loadEventList(
+        in range: Range<TimeInterval>,
+        _ timeZone: TimeZone
+    ) async throws -> CalendarEvents {
+        let target = self.targetEventTagId
+        let total = try await self.eventsFetchUsecase.fetchEvents(in: range, timeZone)
+        guard target != .default else { return total }
+        return total
+            |> \.currentTodos .~ total.currentTodos.filter { $0.eventTagId == target }
+            |> \.eventWithTimes .~ total.eventWithTimes.filter { $0.eventTagId == target }
     }
 }
 
