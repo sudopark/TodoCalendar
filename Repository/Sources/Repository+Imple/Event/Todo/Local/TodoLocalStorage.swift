@@ -68,7 +68,10 @@ extension TodoLocalStorageImple {
     public func loadTodoEvent(_ eventId: String) async throws -> TodoEvent {
         guard let todo = try await self.findTodoEvent(eventId)
         else {
-            throw RuntimeError("todo :\(eventId) is not exists")
+            throw RuntimeError(
+                key: LocalErrorKeys.notExists.rawValue,
+                "todo :\(eventId) is not exists"
+            )
         }
         return todo
     }

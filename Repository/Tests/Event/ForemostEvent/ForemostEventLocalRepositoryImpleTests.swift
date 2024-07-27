@@ -125,7 +125,7 @@ extension ForemostEventLocalRepositoryImpleTests {
         )
         
         // when
-        let event = try? await repository.foremostEvent().values.first(where: { _ in true }) ?? nil
+        let event = try await repository.foremostEvent().values.first(where: { _ in true }) ?? nil
         
         // then
         XCTAssertNil(event)
