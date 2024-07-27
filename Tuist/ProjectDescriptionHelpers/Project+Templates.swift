@@ -161,7 +161,10 @@ extension Project {
                     ]
                 ]
             ]),
-            sources: ["Sources/**"],
+            sources: [
+                "Sources/**",
+                .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
+            ],
             resources: ["Resources/**"],
             entitlements: Entitlements.file(path: "./TodoCalendarApp.entitlements"),
             dependencies: dependencies
@@ -191,7 +194,8 @@ extension Project {
         platform: Platform,
         iOSTargetVersion: String,
         infoPlist: [String: Plist.Value] = [:],
-        dependencies: [TargetDependency]
+        dependencies: [TargetDependency],
+        withTest: Bool = true
     ) -> [Target] {
         
         let targetName = "\(appName)\(extensionName)"
@@ -204,8 +208,10 @@ extension Project {
             deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
             infoPlist: .extendingDefault(with: infoPlist),
             sources: [
+                "AppExtensions/Base/**",
                 "AppExtensions/\(extensionName)/Sources/**",
-                "Sources/AppEnvironment.swift"
+                "Sources/AppEnvironment.swift",
+                .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public)
             ],
             resources: [
                 "AppExtensions/\(extensionName)/Resources/**",
@@ -216,6 +222,8 @@ extension Project {
             dependencies: dependencies
         )
         
+        guard withTest else { return [target] }
+        
         let testTarget = Target(
             name: "\(targetName)Tests",
             platform: platform,
@@ -224,8 +232,10 @@ extension Project {
             deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: [.iphone]),
             infoPlist: .default,
             sources: [
+                "AppExtensions/Base/**",
                 "AppExtensions/\(extensionName)/Sources/**",
                 "Sources/AppEnvironment.swift",
+                .glob("Intents/TodoCalendarWidgetIntents.intentdefinition", codeGen: .public),
                 "AppExtensions/\(extensionName)/Tests/**"
             ],
             dependencies: [

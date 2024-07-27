@@ -9,6 +9,9 @@ let project = Project.app(
         .target(
             name: "TodoCalendarAppWidget", condition: nil
         ),
+        .target(
+            name: "TodoCalendarAppIntentExtensions", condition: nil
+        ),
         .project(
             target: "CalendarScenes",
             path: .relativeToCurrentFile("../Presentations/CalendarScenes")
@@ -92,5 +95,41 @@ let project = Project.app(
                 )
             ]
         )
+    + Project.makeAppExtensionTargets(
+        appName: "TodoCalendarApp",
+        extensionName: "IntentExtensions",
+        platform: .iOS,
+        iOSTargetVersion: "17.0",
+        infoPlist: [
+            "INIntentsSupported": .array([.string("EventListTypeSelect")]),
+            "NSExtension": .dictionary([
+                "NSExtensionAttributes" : .dictionary([
+                    "IntentsRestrictedWhileLocked": .array([]),
+                    "IntentsSupported": .array([.string("EventListTypeSelectIntent")])
+                ]),
+                "NSExtensionPointIdentifier": .string("com.apple.intents-service"),
+                "NSExtensionPrincipalClass": .string("$(PRODUCT_MODULE_NAME).IntentHandler")
+            ])
+        ],
+        dependencies: [
+            .project(
+                target: "Extensions",
+                path: .relativeToCurrentFile("../Supports/Extensions")
+            ),
+            .project(
+                target: "Common3rdParty",
+                path: .relativeToCurrentFile("../Supports/Common3rdParty")
+            ),
+            .project(
+                target: "Domain",
+                path: .relativeToCurrentFile("../Domain")
+            ),
+            .project(
+                target: "Repository",
+                path: .relativeToCurrentFile("../Repository")
+            ),
+        ],
+        withTest: false
+    )
 )
 
