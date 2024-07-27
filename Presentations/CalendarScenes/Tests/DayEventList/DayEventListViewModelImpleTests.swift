@@ -494,18 +494,16 @@ extension DayEventListViewModelImpleTests {
         )
         
         // when
-        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 2 })
+        let source = viewModel.cellViewModels.drop(while: { $0.count != self.dummyEvents.count + 1 })
         let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
             viewModel.selectedDayChanaged(self.dummyCurrentDay, and: self.dummyEvents)
         }
         
         // then
         let eventIdLists = cvms?.map { $0.eventIdentifier }
-        let isForemosts = cvms?.map { $0.isForemost }
         XCTAssertEqual(eventIdLists, [
-            "current-todo-2", "current-todo-1"
+            "current-todo-1"
         ] + self.dummyEventIdStrings)
-        XCTAssertEqual(isForemosts, [true, false, false, false, false, false])
     }
     
     private func makeViewModelWithInitialListLoaded(

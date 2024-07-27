@@ -340,6 +340,13 @@ extension DayEventListViewModelImple {
             return (currentTodoCells, eventCellsWithTime)
         }
         
+        let filterForemost: (CurrentAndEvents) -> CurrentAndEvents = { pair in
+            return (
+                pair.0.filter { !$0.isForemost },
+                pair.1.filter { !$0.isForemost }
+            )
+        }
+        
         return Publishers.CombineLatest4(
             self.subject.currentDayAndEventLists.compactMap { $0 },
             self.calendarSettingUsecase.currentTimeZone,
@@ -347,6 +354,7 @@ extension DayEventListViewModelImple {
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .map(asCellViewModel)
+        .map(filterForemost)
         .eraseToAnyPublisher()
     }
     
