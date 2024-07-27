@@ -59,7 +59,10 @@ extension ScheduleEventLocalStorageImple {
         let schedules = try await self.loadScheduleEvents(timeQuery, eventQuery)
         guard let schedule = schedules.first
         else {
-            throw RuntimeError("schedule : \(eventId) is not exists")
+            throw RuntimeError(
+                key: LocalErrorKeys.notExists.rawValue,
+                "schedule : \(eventId) is not exists"
+            )
         }
         return schedule
     }

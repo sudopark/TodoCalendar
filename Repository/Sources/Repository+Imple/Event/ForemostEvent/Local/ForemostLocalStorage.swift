@@ -61,11 +61,15 @@ extension ForemostLocalStorageImple {
     public func loadForemostEvent(
         _ foremostId: ForemostEventId
     ) async throws -> (any ForemostMarkableEvent)? {
-        switch foremostId.isTodo {
-        case true:
-            return try await self.todoStorage.loadTodoEvent(foremostId.eventId)
-        case false:
-            return try await self.scheduleStorage.loadScheduleEvent(foremostId.eventId)
+        do {
+            switch foremostId.isTodo {
+            case true:
+                return try await self.todoStorage.loadTodoEvent(foremostId.eventId)
+            case false:
+                return try await self.scheduleStorage.loadScheduleEvent(foremostId.eventId)
+            }
+        } catch let runtimeError as RuntimeError where runtimeError.key == LocalErrorKeys.notExists.rawValue {
+            return nil
         }
     }
     
