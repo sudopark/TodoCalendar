@@ -29,7 +29,7 @@ struct TodoToggleIntent: AppIntent {
     }
     
     func perform() async throws -> some IntentResult {
-        let base = WidgetBaseDependency()
+        let base = AppExtensionBase()
         let factory = WidgetUsecaseFactory(base: base)
         let repository = factory.makeTodoToggleRepository()
         do {
