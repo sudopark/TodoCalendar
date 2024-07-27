@@ -34,8 +34,8 @@ final class FetchCacheStores {
 
 struct WidgetUsecaseFactory {
     
-    private let base: WidgetBaseDependency
-    init(base: WidgetBaseDependency) {
+    private let base: AppExtensionBase
+    init(base: AppExtensionBase) {
         self.base = base
     }
 }

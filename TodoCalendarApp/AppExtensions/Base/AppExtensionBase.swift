@@ -1,10 +1,4 @@
-//
-//  WidgetBaseDependency.swift
-//  TodoCalendarApp
-//
-//  Created by sudo.park on 6/8/24.
-//  Copyright © 2024 com.sudo.park. All rights reserved.
-//
+
 
 import Foundation
 import Domain
@@ -16,9 +10,9 @@ import SQLiteService
 import Alamofire
 
 
-// MARK: - WidgetBaseDependency
+// MARK: - AppExtensionBase
 
-final class WidgetBaseDependency {
+final class AppExtensionBase {
     
     init() { }
     
@@ -84,7 +78,6 @@ final class WidgetBaseDependency {
         )
     }()
 }
-
 
 // MARK: - NeverRemoveAuthStorage
 

@@ -17,9 +17,9 @@ import Alamofire
 
 struct WidgetViewModelProviderBuilder {
     
-    private let base: WidgetBaseDependency
+    private let base: AppExtensionBase
     private let usecaseFactory: WidgetUsecaseFactory
-    init(base: WidgetBaseDependency) {
+    init(base: AppExtensionBase) {
         self.base = base
         self.usecaseFactory = .init(base: base)
     }
