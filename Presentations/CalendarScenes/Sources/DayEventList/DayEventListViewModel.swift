@@ -124,12 +124,12 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
             .map { $0.compactMap { $0.eventTagId?.customTagId } }
         
         let tagFromForemostEvent = self.foremostEventUsecase.foremostEvent
-            .compactMap { $0?.eventTagId?.customTagId }
+            .map { event in event?.eventTagId?.customTagId.map { [$0] } ?? [] }
         
         Publishers.CombineLatest3(
             customTagIdsFromCalenadrEvent, tagIdsFromCurrentTodo, tagFromForemostEvent
         )
-        .map { $0 + $1 + [$2] }
+        .map { $0 + $1 + $2 }
         .map { [weak self] ids -> AnyPublisher<[String: EventTag], Never> in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
             return self.eventTagUsecase.eventTags(ids)
