@@ -210,7 +210,11 @@ struct EventListWidget: Widget {
     static let kind: String = "EventList"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: EventListWidget.kind, provider: EventListWidgetTimeLineProvider()) { entry in
+        IntentConfiguration(
+            kind: Self.kind,
+            intent: EventListTypeSelectIntent.self,
+            provider: EventListWidgetTimeLineProvider()
+        ) { entry in
             EventListWidgetView(entry: entry)
                 .containerBackground(.background, for: .widget)
         }

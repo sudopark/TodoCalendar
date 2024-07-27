@@ -42,14 +42,10 @@ protocol CalendarEventFetchUsecase {
 // MARK: - CalendarEventFetchUsecaseImple
 
 actor CalendarEventsFetchCacheStore {
-    var offTagIds: Set<AllEventTagId>?
     var currentTodos: [TodoCalendarEvent]?
     var allCustomTagsMap: [String: EventTag]?
     var foremostMarkableEvent: (any ForemostMarkableEvent)??
     
-    func updateOffTagIds(_ ids: Set<AllEventTagId>) {
-        self.offTagIds = ids
-    }
     func updateCurrentTodos(_ todos: [TodoCalendarEvent]) {
         self.currentTodos = todos
     }
@@ -62,7 +58,6 @@ actor CalendarEventsFetchCacheStore {
     }
     
     func reset() {
-        self.offTagIds = nil
         self.currentTodos = nil
         self.allCustomTagsMap = nil
         self.foremostMarkableEvent = nil
@@ -107,7 +102,6 @@ extension CalendarEventFetchUsecaseImple {
         _ timeZone: TimeZone
     ) async throws -> CalendarEvents {
         
-        let offTagIds = await self.offTagIds()
         let customTagMap = try await self.allCustomEventTagMap()
         let currentTodos = try await self.currentTodoEvents(timeZone)
         let todosInRange = try await self.todoEvents(in: range, timeZone)
@@ -117,22 +111,13 @@ extension CalendarEventFetchUsecaseImple {
         let eventsWithTime: [any CalendarEvent] = todosInRange + schedulesInRange + holidaysInRage
         
         let events = CalendarEvents(
-            currentTodos: currentTodos.filter { !offTagIds.contains($0.eventTagId) },
-            eventWithTimes: eventsWithTime.filter { !offTagIds.contains($0.eventTagId) }.sorted(),
+            currentTodos: currentTodos,
+            eventWithTimes: eventsWithTime.sorted(),
             customTagMap: customTagMap
         )
         return events
     }
-    
-    private func offTagIds() async -> Set<AllEventTagId> {
-        if let cached = await self.cached.offTagIds {
-            return cached
-        }
-        let ids = self.eventTagRepository.loadOffTags()
-        await self.cached.updateOffTagIds(ids)
-        return ids
-    }
-    
+
     private func allCustomEventTagMap() async throws -> [String: EventTag] {
         if let cached = await self.cached.allCustomTagsMap {
             return cached

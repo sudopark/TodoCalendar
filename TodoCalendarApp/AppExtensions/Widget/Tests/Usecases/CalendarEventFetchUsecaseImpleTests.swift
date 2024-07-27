@@ -115,8 +115,8 @@ extension CalendarEventFetchUsecaseImpleTests {
         ])
     }
     
-    // 이벤트 반환시 비활성화된 이벤트는 제외
-    func testUsecase_whenFetchEvents_excludeOffEvents() async throws {
+    // 이벤트 반환시 비활성화된 이벤트는 제외하지 않음
+    func testUsecase_whenFetchEvents_notExcludeOffEvents() async throws {
         // given
         let usecase = self.makeUsecase(withOffTags: [
             .custom("t2")
@@ -129,7 +129,7 @@ extension CalendarEventFetchUsecaseImpleTests {
         // then
         let eventNames = events.eventWithTimes.map { $0.name }
         XCTAssertEqual(eventNames, [
-            "삼일절", "todo_with_lowerbound_time"
+            "삼일절", "todo_with_lowerbound_time", "scheudle_with_upperbound_time"
         ])
     }
     
