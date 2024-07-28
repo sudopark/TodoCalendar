@@ -49,7 +49,9 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
         self.refDate = nil
     }
     
-    private func makeViewModel() -> EventDetailInputViewModelImple {
+    private func makeViewModel(
+        defaultEventPeriod: EventSettings.DefaultNewEventPeriod = .minute0
+    ) -> EventDetailInputViewModelImple {
         
         let tagUsecase = StubEventTagUsecase()
         tagUsecase.prepare()
@@ -57,9 +59,14 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
         
+        let eventSettingUsecase = StubEventSettingUsecase()
+        eventSettingUsecase.stubSetting = .init()
+        eventSettingUsecase.stubSetting?.defaultNewEventPeriod = defaultEventPeriod
+        
         let viewModel = EventDetailInputViewModelImple(
             eventTagUsecase: tagUsecase,
-            calendarSettingUsecase: settingUsecase
+            calendarSettingUsecase: settingUsecase,
+            eventSettingUsecase: eventSettingUsecase
         )
         viewModel.routing = self.spyRouter
         viewModel.listener = self.spyListener
@@ -182,6 +189,61 @@ extension EventDetailInputViewModelTests {
     
         // then
         XCTAssertEqual(memos, ["old_memo"])
+    }
+    
+    func testViewModel_provideDefaultEventStartTimeWithNormalize() {
+        // given
+        let viewModel = self.makeViewModel()
+        let calendar = Calendar(identifier: .gregorian)
+        func parameterizeTest(_ currentMinutes: Int, expectMinutes: Int) {
+            // given
+            let now = calendar.dateBySetting(from: Date()) { $0.minute = currentMinutes }!
+            
+            // when
+            let startDate = viewModel.startTimeDefaultDate(for: now)
+            
+            // then
+            let newMinutes = calendar.component(.minute, from: startDate)
+            XCTAssertEqual(newMinutes, expectMinutes)
+        }
+        
+        // when + then
+        parameterizeTest(40, expectMinutes: 40)
+        parameterizeTest(41, expectMinutes: 45)
+        parameterizeTest(43, expectMinutes: 45)
+        parameterizeTest(44, expectMinutes: 45)
+        parameterizeTest(45, expectMinutes: 45)
+        parameterizeTest(46, expectMinutes: 50)
+        parameterizeTest(49, expectMinutes: 50)
+    }
+    
+    func testViewModel_provideDefaultEventEndtimeByEventTimePeriodSetting() {
+        // given
+        func parameterizeTest(
+            _ defaultPeriod: EventSettings.DefaultNewEventPeriod,
+            expectInterval: Int
+        ) {
+            // given
+            let viewModel = self.makeViewModel(defaultEventPeriod: defaultPeriod)
+            let now = Date()
+            // when
+            let endTime = viewModel.endTimeDefaultDate(from: now)
+            
+            // then
+            let interval = endTime.timeIntervalSince(now)
+            XCTAssertEqual(expectInterval, Int(interval))
+        }
+        
+        // when + then
+        parameterizeTest(.minute0, expectInterval: 60*60)
+        parameterizeTest(.minute5, expectInterval: 5*60)
+        parameterizeTest(.minute10, expectInterval: 10*60)
+        parameterizeTest(.minute15, expectInterval: 15*60)
+        parameterizeTest(.minute30, expectInterval: 30*60)
+        parameterizeTest(.minute45, expectInterval: 45*60)
+        parameterizeTest(.hour1, expectInterval: 60*60)
+        parameterizeTest(.hour2, expectInterval: 120*60)
+        parameterizeTest(.allDay, expectInterval: 60*60)
     }
 }
 

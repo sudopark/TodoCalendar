@@ -74,6 +74,8 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     var initialName: AnyPublisher<String?, Never> { get }
     var initailURL: AnyPublisher<String?, Never> { get }
     var initialMemo: AnyPublisher<String?, Never> { get }
+    func startTimeDefaultDate(for now: Date) -> Date
+    func endTimeDefaultDate(from startDate: Date) -> Date
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOption: AnyPublisher<String?, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
@@ -86,15 +88,18 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
     
     private let eventTagUsecase: any EventTagUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let eventSettingUsecase: any EventSettingUsecase
     weak var routing: (any EventDetailInputRouting)?
     weak var listener: (any EventDetailInputListener)?
     
     init(
         eventTagUsecase: any EventTagUsecase,
-        calendarSettingUsecase: any CalendarSettingUsecase
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        eventSettingUsecase: any EventSettingUsecase
     ) {
         self.eventTagUsecase = eventTagUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
+        self.eventSettingUsecase = eventSettingUsecase
     }
     
     private struct BasicAndTimeZoneData {
@@ -105,6 +110,7 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
     private struct Subject {
         let basic = CurrentValueSubject<BasicAndTimeZoneData?, Never>(nil)
         let additional = CurrentValueSubject<EventDetailData?, Never>(nil)
+        let eventSetting = CurrentValueSubject<EventSettings?, Never>(nil)
         
         func mutateBasicIfPossible(
             _ mutating: (BasicAndTimeZoneData) -> BasicAndTimeZoneData?
@@ -143,6 +149,9 @@ extension EventDetailInputViewModelImple {
             self?.listener?.eventDetail(didInput: basic, additional: additional)
         })
         .store(in: &self.cancellables)
+        
+        let setting = self.eventSettingUsecase.loadEventSetting()
+        self.subject.eventSetting.send(setting)
     }
     
     func prepared(basic: EventDetailBasicData, additional: EventDetailData) {
@@ -360,6 +369,31 @@ extension EventDetailInputViewModelImple {
             .map { $0.memo }
             .first()
             .eraseToAnyPublisher()
+    }
+    
+    func startTimeDefaultDate(for now: Date) -> Date {
+        let calendar = Calendar(identifier: .gregorian)
+        let minutes = calendar.component(.minute, from: now)
+        let (quotient, remainder) = minutes.quotientAndRemainder(dividingBy: 5)
+        let newMinutes = remainder == 0 ? minutes : (quotient + 1) * 5
+        let interval = newMinutes - minutes
+        return now.addingTimeInterval(TimeInterval(interval) * 60)
+    }
+    
+    func endTimeDefaultDate(from startDate: Date) -> Date {
+        let period = self.subject.eventSetting.value?.defaultNewEventPeriod ?? .hour1
+        let suggestingEndtimeInterval = switch period {
+        case .minute0: 60 * 60
+        case .minute5: 60 * 5
+        case .minute10: 60 * 10
+        case .minute15: 60 * 15
+        case .minute30: 60 * 30
+        case .minute45: 60 * 45
+        case .hour1: 60 * 60
+        case .hour2: 60 * 120
+        case .allDay: 60 * 60
+        }
+        return startDate.addingTimeInterval(TimeInterval(suggestingEndtimeInterval))
     }
     
     var selectedTime: AnyPublisher<SelectedTime?, Never> {

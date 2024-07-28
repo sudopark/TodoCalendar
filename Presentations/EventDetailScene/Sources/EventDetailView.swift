@@ -47,6 +47,10 @@ final class EventDetailViewState: ObservableObject {
         self.didBind = true
         
         // TODO: bind state
+        self.selectedStartDate = inputViewModel.startTimeDefaultDate(for: Date())
+        self.selectedEndDate = inputViewModel.endTimeDefaultDate(from: selectedStartDate)
+        print("set a new state: \(self.selectedStartDate)")
+        
         viewModel.eventDetailTypeModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
@@ -565,10 +569,10 @@ struct EventDetailView: View {
         
         switch selecting {
         case .start:
-            self.state.selectedStartDate = self.state.selectedTime?.startTime ?? Date()
+            self.state.selectedStartDate = self.state.selectedTime?.startTime ?? self.state.selectedStartDate
         case .end:
             guard let time = self.state.selectedTime else { return }
-            self.state.selectedEndDate = time.endTime ?? time.startTime.addingTimeInterval(3600)
+            self.state.selectedEndDate = time.endTime ?? self.state.selectedEndDate
             
         default: break
         }
@@ -585,7 +589,7 @@ struct EventDetailView: View {
                 displayedComponents: self.state.isAllDay ? [.date] : [.date, .hourAndMinute]
             )
             .datePickerStyle(.wheel)
-            .onReceive(selecting == .start ? self.state.$selectedStartDate.dropFirst() : self.state.$selectedEndDate.dropFirst()) { date in
+            .onReceive(selecting == .start ? self.state.$selectedStartDate : self.state.$selectedEndDate) { date in
                 if selecting == .start {
                     self.selectStartTime(date)
                 } else {
