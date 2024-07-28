@@ -28,7 +28,7 @@ public struct EventSettings: Sendable, Equatable {
     }
     
     public var defaultNewEventTagId: AllEventTagId = .default
-    public var defaultNewEventPeriod: DefaultNewEventPeriod = .hour1
+    public var defaultNewEventPeriod: DefaultNewEventPeriod = .minute0
     
     public init() { }
     

@@ -191,7 +191,7 @@ extension AppSettingUsecaseImpleTests {
         
         // then
         XCTAssertEqual(setting.defaultNewEventTagId, .default)
-        XCTAssertEqual(setting.defaultNewEventPeriod, .hour1)
+        XCTAssertEqual(setting.defaultNewEventPeriod, .minute0)
     }
     
     func testUsecase_whenAfterLoadEventSettingSetting_notifyByCurrentSetting() {

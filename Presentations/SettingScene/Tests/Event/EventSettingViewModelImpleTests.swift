@@ -102,7 +102,7 @@ extension EventSettingViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(period?.period, .hour1)
+        XCTAssertEqual(period?.period, .minute0)
     }
     
     // 기간 업데이트
@@ -120,7 +120,7 @@ extension EventSettingViewModelImpleTests {
         }
         
         // then
-        XCTAssertEqual(periods.map { $0.period }, [.hour1, .minute10])
+        XCTAssertEqual(periods.map { $0.period }, [.minute0, .minute10])
     }
 }
 
