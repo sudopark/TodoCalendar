@@ -162,7 +162,12 @@ extension ApplicationRootRouter {
                 by: prepareResult.latestLoginAcount?.auth
             )
             self.refreshRoot()
+            self.setupBaseViewAppearanceSetting()
         }
+    }
+    
+    @MainActor private func setupBaseViewAppearanceSetting() {
+        UIDatePicker.appearance().minuteInterval = 5
     }
 
     func changeRootSceneAfter(signIn auth: Auth?) {
