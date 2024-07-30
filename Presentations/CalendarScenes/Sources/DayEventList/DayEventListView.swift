@@ -272,7 +272,7 @@ private struct QuickAddNewTodoView: View {
             
             HStack(spacing: 8) {
                 TextField("Add a new todo quickly".localized(), text: $newTodoName)
-                    .focused($isFocusInput)
+                    .focused($isFocusInput, equals: true)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
                     .onSubmit {
@@ -284,14 +284,16 @@ private struct QuickAddNewTodoView: View {
                 
                 if !self.newTodoName.isEmpty {
                     Button {
-                        self.makeNewTodoWithGivenNameAndDetails(self.newTodoName)
+                        let newName = self.newTodoName
                         self.resetStates()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                            self.makeNewTodoWithGivenNameAndDetails(newName)
+                        }
                     } label: {
                         Image(systemName: "info.circle")
                     }
                 }
             }
-                
         }
         .opacity(self.isEntering ? 1.0 : 0.5)
         .padding(.vertical, 4).padding(.horizontal, 8)
