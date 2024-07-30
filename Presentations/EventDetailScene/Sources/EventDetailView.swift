@@ -35,6 +35,7 @@ final class EventDetailViewState: ObservableObject {
     
     @Published var selectedStartDate: Date = Date()
     @Published var selectedEndDate: Date = Date().addingTimeInterval(60)
+    var suggestEventEndTime: () -> Date? = { nil }
     @Published var url: String = ""
     @Published var memo: String = ""
     
@@ -49,7 +50,10 @@ final class EventDetailViewState: ObservableObject {
         // TODO: bind state
         self.selectedStartDate = inputViewModel.startTimeDefaultDate(for: Date())
         self.selectedEndDate = inputViewModel.endTimeDefaultDate(from: selectedStartDate)
-        print("set a new state: \(self.selectedStartDate)")
+        self.suggestEventEndTime = { [weak self, weak inputViewModel] in
+            guard let start = self?.selectedTime?.startTime ?? self?.selectedStartDate else { return nil }
+            return inputViewModel?.endTimeDefaultDate(from: start)
+        }
         
         viewModel.eventDetailTypeModel
             .receive(on: RunLoop.main)
@@ -572,7 +576,7 @@ struct EventDetailView: View {
             self.state.selectedStartDate = self.state.selectedTime?.startTime ?? self.state.selectedStartDate
         case .end:
             guard let time = self.state.selectedTime else { return }
-            self.state.selectedEndDate = time.endTime ?? self.state.selectedEndDate
+            self.state.selectedEndDate = time.endTime ?? self.state.suggestEventEndTime() ?? self.state.selectedEndDate
             
         default: break
         }
@@ -610,6 +614,7 @@ struct EventDetailView: View {
     private var removeEventTimeView: some View {
         Button {
             self.removeTime()
+            self.updateTimePickerShowing(nil)
         } label: {
             Text("clear event time")
                 .padding(8)
