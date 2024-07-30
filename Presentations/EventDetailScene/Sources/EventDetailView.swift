@@ -83,6 +83,7 @@ final class EventDetailViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] time in
                 self?.selectedTime = time
+                self?.isAllDay = time?.isAllDay ?? false
             })
             .store(in: &self.cancellables)
         
@@ -523,7 +524,6 @@ struct EventDetailView: View {
         }
         let textColor: Color = self.state.isAllDay ? .white : self.appearance.colorSet.subSubNormalText.asColor
         return Button {
-            self.state.isAllDay.toggle()
             self.toggleIsAllDay()
             
         } label: {

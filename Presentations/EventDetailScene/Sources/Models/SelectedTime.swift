@@ -39,6 +39,13 @@ enum SelectedTime: Equatable {
     case singleAllDay(SelectTimeText)
     case alldayPeriod(SelectTimeText, SelectTimeText)
     
+    var isAllDay: Bool {
+        switch self {
+        case .singleAllDay, .alldayPeriod: return true
+        default: return false
+        }
+    }
+    
     init(_ time: EventTime, _ timeZone: TimeZone) {
         switch time {
         case .at(let timeStamp):
