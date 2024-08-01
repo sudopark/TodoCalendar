@@ -105,13 +105,60 @@ public struct DefaultLightColorSet: ColorSet {
     // accent colors
     public let accent: UIColor = .systemBlue
     public let accentInfo: UIColor = UIColor(rgb: 0xff7417)
-    public let accentWarn: UIColor = .systemRed
+    public let accentWarn: UIColor = UIColor(rgb: 0xea4444)
     
     
     // line + background
     public let line: UIColor = UIColor.black.withAlphaComponent(0.2)
     public let bg0: UIColor = .white
     public let bg1: UIColor = UIColor(rgb: 0xf4f4f4)
+    
+    public init() { }
+}
+
+
+// MARK: - default dark
+
+public struct DefaultDarkColorSet: ColorSet {
+    
+    public let key: ColorSetKeys = .defaultDark
+
+    // calendar component
+    public let weekDayText: UIColor = UIColor(rgb: 0xf3f4f7)
+    public let weekEndText: UIColor = UIColor(rgb: 0xe2e4eb)
+    public let dayBackground: UIColor = UIColor(rgb: 0x2e2a22)
+    public let selectedDayBackground: UIColor = UIColor(rgb: 0xf8f8f9)
+    public let selectedDayText: UIColor = UIColor(rgb: 0x1a153d)
+    public let holidayText: UIColor = UIColor(rgb: 0xf4f2f8)
+    public let todayBackground: UIColor = UIColor(rgb: 0x626e8e)
+    public let eventText: UIColor = UIColor(rgb: 0xe2e4eb)
+    public let eventTextSelected: UIColor = UIColor(rgb: 0x151131)
+    public let holidayOrWeekEndWithAccent: UIColor = UIColor.red
+    
+    // normal text color
+    public let text0: UIColor = UIColor(rgb: 0xf8f8f9)
+    public let text1: UIColor = UIColor(rgb: 0xf1f1f1)
+    public let text2: UIColor = UIColor(rgb: 0xe5e5e4)
+    public let text0_inverted: UIColor = UIColor(rgb: 0x393c3c)
+    
+    // normal button colors
+    public let primaryBtnBackground: UIColor = .systemBlue
+    public let primaryBtnText: UIColor = .white
+    public let secondaryBtnBackground: UIColor = UIColor(rgb: 0x71717a)
+    public var secondaryBtnText: UIColor { self.text0 }
+    public let negativeBtnBackground: UIColor = .systemRed
+    public let negativeBtnText: UIColor = .white
+    
+    // accent colors
+    public let accent: UIColor = .systemBlue
+    public let accentInfo: UIColor = UIColor(rgb: 0xff7417)
+    public let accentWarn: UIColor = UIColor(rgb: 0xea4444)
+    
+    
+    // line + background
+    public let line: UIColor = UIColor.white.withAlphaComponent(0.2)
+    public let bg0: UIColor = UIColor(rgb: 0x18181a)
+    public let bg1: UIColor = UIColor(rgb: 0x393c3c)
     
     public init() { }
 }

@@ -122,15 +122,13 @@ extension ColorSetKeys {
     public func convert(isSystemDarkTheme: Bool) -> any ColorSet {
         switch self {
         case .systemTheme where isSystemDarkTheme:
-            // TOOD: 교체 필요
-            return DefaultLightColorSet()
+            return DefaultDarkColorSet()
         case .systemTheme:
             return DefaultLightColorSet()
         case .defaultLight:
             return DefaultLightColorSet()
         case .defaultDark:
-            // TOOD: 교체 필요
-            return DefaultLightColorSet()
+            return DefaultDarkColorSet()
         }
     }
 }
