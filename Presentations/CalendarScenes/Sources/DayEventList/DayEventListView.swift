@@ -203,6 +203,7 @@ struct DayEventListView: View {
             }
         }
         .padding()
+        .background(self.appearance.colorSet.bg0.asColor)
     }
     
     private func addNewButton() -> some View {
@@ -308,7 +309,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

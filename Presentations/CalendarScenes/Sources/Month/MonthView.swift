@@ -420,7 +420,10 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
         return self.selectedDay.compactMap{ $0 }.eraseToAnyPublisher()
     }
 
-    var todayIdentifier: AnyPublisher<String, Never> { Empty().eraseToAnyPublisher() }
+    var todayIdentifier: AnyPublisher<String, Never> {
+        Just("2023-9-4")
+            .eraseToAnyPublisher()
+    }
 
     func updateMonthIfNeed(_ newMonth: Domain.CalendarMonth) { }
 }
@@ -431,7 +434,7 @@ struct MonthViewPreviewProvider: PreviewProvider {
     static var previews: some View {
         let viewModel = DummyMonthViewModel()
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

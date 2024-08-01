@@ -119,10 +119,11 @@ struct CountrySelectView: View {
                     countryView(country)
                 }
                 .listRowSeparator(.hidden)
-                
+                .listRowBackground(appearance.colorSet.bg0.asColor)
             }
             .navigationTitle("Country".localized())
             .listStyle(.plain)
+            .background(appearance.colorSet.bg0.asColor)
             .listRowSpacing(0)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -191,7 +192,7 @@ struct CountrySelectViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

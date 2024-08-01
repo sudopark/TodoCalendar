@@ -104,9 +104,11 @@ struct EventTagListView: View {
                 ForEach(self.state.cellviewModels, id: \.compareKey) {
                     self.cellView($0)
                         .listRowSeparator(.hidden)
+                        .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
             }
             .listStyle(.plain)
+            .background(appearance.colorSet.bg0.asColor)
             .toolbar {
                 if self.hasNavigation {
                  
@@ -220,7 +222,7 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

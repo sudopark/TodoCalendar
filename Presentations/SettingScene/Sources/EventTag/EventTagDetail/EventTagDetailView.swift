@@ -122,6 +122,7 @@ struct EventTagDetailView: View {
             self.buttonViews
         }
         .padding()
+        .background(appearance.colorSet.bg0.asColor)
     }
     
     private var nameInputView: some View {
@@ -237,7 +238,7 @@ struct EventTagDetailView: View {
             if self.state.isDeletable {
                 ConfirmButton(
                     title: "Delete".localized(),
-                    textColor: self.appearance.colorSet.negativeBtnBackground.asColor,
+                    textColor: self.appearance.colorSet.accentWarn.asColor,
                     backgroundColor: self.appearance.colorSet.secondaryBtnBackground.asColor
                 )
                 .eventHandler(\.onTap, self.deleteTag)
@@ -259,7 +260,7 @@ struct EventTagDetailViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

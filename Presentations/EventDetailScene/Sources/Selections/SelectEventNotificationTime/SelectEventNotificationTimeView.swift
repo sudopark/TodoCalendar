@@ -138,6 +138,7 @@ struct SelectEventNotificationTimeView: View {
                     }
                     .listRowInsets(.init(top: 20, leading: 20, bottom: 30, trailing: 20))
                     .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                     
                     // default options
                     Section {
@@ -147,10 +148,12 @@ struct SelectEventNotificationTimeView: View {
                     }
                     .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                     .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                     
                     Spacer()
                         .frame(height: 0)
                         .listRowSeparator(.hidden)
+                        .listRowBackground(appearance.colorSet.bg0.asColor)
                     
                     // custom options
                     Section {
@@ -165,16 +168,19 @@ struct SelectEventNotificationTimeView: View {
                     }
                     .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                     .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                     
                     // add custom optoin
                     self.addCustimOptionView
                         .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                         .listRowSeparator(.hidden)
+                        .listRowBackground(appearance.colorSet.bg0.asColor)
                     
                     // move to setting view
                     self.moveToSettingView
                         .listRowInsets(.init(top: 30, leading: 20, bottom: 0, trailing: 20))
                         .listRowSeparator(.hidden)
+                        .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
                 .listStyle(.plain)
                 .environment(\.defaultMinListRowHeight, 10)
@@ -185,6 +191,7 @@ struct SelectEventNotificationTimeView: View {
                     }
                 }
             }
+            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("event_notification_select::title".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -336,7 +343,7 @@ struct SelectEventNotificationTimeViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

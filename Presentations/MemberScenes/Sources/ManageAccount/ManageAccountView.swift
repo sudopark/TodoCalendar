@@ -144,6 +144,7 @@ struct ManageAccountView: View {
                 }
                 .padding()
             }
+            .background(appearance.colorSet.bg0.asColor)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton(tapHandler: self.eventHandlers.close)
@@ -238,7 +239,7 @@ struct ManageAccountViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

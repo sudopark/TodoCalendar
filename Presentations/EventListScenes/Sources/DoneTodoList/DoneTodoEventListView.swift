@@ -124,11 +124,12 @@ struct DoneTodoEventListView: View {
                         sectionView(section)
                     }
                     .listSectionSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
                 lastLine
             }
             .background(appearance.colorSet.bg0.asColor)
-            .listStyle(PlainListStyle())
+            .listStyle(.plain)
             .navigationTitle(
                 Text("Done Todos".localized())
             )
@@ -256,7 +257,7 @@ struct DoneTodoEventListViewPreviewProvider: PreviewProvider {
     static var previews: some View {
         
         let setting = AppearanceSettings(
-            calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
+            calendar: .init(colorSetKey: .defaultDark, fontSetKey: .systemDefault),
             defaultTagColor: .init(holiday: "#ff0000", default: "#ff00ff")
         )
         let viewAppearance = ViewAppearance(
