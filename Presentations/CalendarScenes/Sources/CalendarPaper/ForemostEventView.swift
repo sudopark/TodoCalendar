@@ -44,6 +44,7 @@ struct ForemostEventView: View {
                 .frame(height: 50)
                 .layoutPriority(1)
         }
+        .background(appearance.colorSet.bg0.asColor)
     }
 }
 

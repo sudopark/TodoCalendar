@@ -118,8 +118,10 @@ struct SelectEventRepeatOptionView: View {
                     self.sectionView($0)
                 }
                 .listRowSeparator(.hidden)
+                .listRowBackground(appearance.colorSet.bg0.asColor)
             }
-            .listStyle(.inset)
+            .listStyle(.plain)
+            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("Repeating".localized())
             .toolbar {
                 CloseButton()
@@ -211,12 +213,13 @@ struct SelectEventRepeatOptionViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
+        let handler = SelectEventRepeatOptionViewEventHandlers()
         let view = SelectEventRepeatOptionView()
         let state = SelectEventRepeatOptionViewState()
         state.optionList = [
@@ -230,5 +233,6 @@ struct SelectEventRepeatOptionViewPreviewProvider: PreviewProvider {
         return view
             .environmentObject(viewAppearance)
             .environmentObject(state)
+            .environmentObject(handler)
     }
 }

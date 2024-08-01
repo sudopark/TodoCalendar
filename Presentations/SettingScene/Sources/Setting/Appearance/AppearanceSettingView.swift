@@ -49,7 +49,7 @@ struct AppearanceRow< Content: View>: View {
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(UIColor.systemGroupedBackground.asColor)
+                .fill(appearance.colorSet.bg1.asColor)
         )
     }
 }
@@ -182,25 +182,25 @@ struct AppearanceSettingView: View {
                 CalendarSectionAppearanceSettingView(.init(self.initialSetting))
                     .eventHandler(\.stateBinding, calendarSectionStateBinding)
                     .listRowSeparator(.hidden)
-                    .listRowBackground(self.appearance.colorSet.dayBackground.asColor)
+                    .listRowBackground(self.appearance.colorSet.bg0.asColor)
                 
                 EventOnCalendarView(.init(self.initialSetting))
                     .eventHandler(\.stateBinding, eventOnCalendarSectionStateBinding)
                     .listRowSeparator(.hidden)
-                    .listRowBackground(self.appearance.colorSet.dayBackground.asColor)
+                    .listRowBackground(self.appearance.colorSet.bg0.asColor)
                 
                 EventListAppearanceSettingView(.init(self.initialSetting))
                     .eventHandler(\.stateBinding, eventListSettingStateBinding)
                     .listRowSeparator(.hidden)
-                    .listRowBackground(appearance.colorSet.dayBackground.asColor)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                 
                 generalSettingView
                     .listRowSeparator(.hidden)
-                    .listRowBackground(appearance.colorSet.dayBackground.asColor)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
-            .background(self.appearance.colorSet.dayBackground.asColor)
+            .background(self.appearance.colorSet.bg0.asColor)
             .navigationTitle("Appearance".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -274,7 +274,7 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

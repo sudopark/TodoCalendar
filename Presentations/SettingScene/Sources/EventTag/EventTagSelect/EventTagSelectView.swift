@@ -107,14 +107,17 @@ struct EventTagSelectView: View {
                     .font(appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(appearance.colorSet.text2.asColor)
                     .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                     .padding(.bottom, 16)
                 
                 ForEach(state.cellViewModels, id: \.compareKey) { cvm in
                     cellView(cvm)
                         .listRowSeparator(.hidden)
+                        .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
             }
             .listStyle(.plain)
+            .background(appearance.colorSet.bg0.asColor)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton(tapHandler: eventHandlers.onClose)
@@ -166,7 +169,7 @@ struct EventTagSelectViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

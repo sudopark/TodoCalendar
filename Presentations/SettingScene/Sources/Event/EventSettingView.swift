@@ -143,6 +143,7 @@ struct EventSettingView: View {
                 .padding(.horizontal, 16)
             }
             .listStyle(.plain)
+            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("Event Settings".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -158,7 +159,7 @@ struct EventSettingView: View {
             .padding(.vertical, 12)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(UIColor.systemGroupedBackground.asColor)
+                    .fill(appearance.colorSet.bg1.asColor)
             )
             .listRowSeparator(.hidden)
     }
@@ -282,7 +283,7 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

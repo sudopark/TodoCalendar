@@ -115,11 +115,14 @@ struct HolidayListView: View {
             List {
                 countrySelectSectionView
                     .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                 
                 holidayListSectionView
                     .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
             }
             .listStyle(.plain)
+            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("Holiday".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -228,7 +231,7 @@ struct HolidayListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

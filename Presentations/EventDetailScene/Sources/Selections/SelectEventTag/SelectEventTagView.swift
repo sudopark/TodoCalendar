@@ -111,14 +111,18 @@ struct SelectEventTagView: View {
                     self.tagCellView($0)
                 }
                 .listRowSeparator(.hidden)
+                .listRowBackground(appearance.colorSet.bg0.asColor)
                 
                 self.addTagView
                     .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                 
                 self.seeAllEventTypesView
                     .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
             }
-            .listStyle(.inset)
+            .listStyle(.plain)
+            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("Event Type".localized())
             .toolbar {
                 CloseButton()
@@ -208,7 +212,7 @@ struct SelectEventTagViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

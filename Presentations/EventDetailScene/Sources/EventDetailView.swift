@@ -273,6 +273,7 @@ struct EventDetailView: View {
                 .eventHandler(\.onTap, self.save)
             }
         }
+        .background(appearance.colorSet.bg0.asColor)
     }
     
     private var moreActionView: some View {
@@ -842,7 +843,7 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

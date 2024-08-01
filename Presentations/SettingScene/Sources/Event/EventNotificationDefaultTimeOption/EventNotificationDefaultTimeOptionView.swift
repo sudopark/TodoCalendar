@@ -123,8 +123,10 @@ struct EventNotificationDefaultTimeOptionView: View {
                         optionView($0)
                     }
                     .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
                 .listStyle(.plain)
+                .background(appearance.colorSet.bg0.asColor)
                 .safeAreaInset(edge: .bottom) {
                     if state.isNeedNotificationPermission {
                         permissionNeedView
@@ -219,7 +221,7 @@ struct EventNotificationDefaultTimeOptionViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

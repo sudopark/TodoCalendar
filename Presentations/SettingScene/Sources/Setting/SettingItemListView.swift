@@ -92,9 +92,11 @@ struct SettingItemListView: View {
                 ForEach(0..<state.sections.count, id: \.self) { index in
                     sectionView(state.sections[index])
                         .listRowSeparator(.hidden)
+                        .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
             }
             .listStyle(.plain)
+            .background(appearance.colorSet.bg0.asColor)
             .toolbar {
                 CloseButton()
                     .eventHandler(\.onTap, self.eventHandlers.close)
@@ -250,7 +252,7 @@ struct SettingItemListViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
