@@ -135,7 +135,7 @@ struct EventListAppearanceSettingView: View {
                         .font(
                             self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont
                         )
-                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                        .foregroundColor(self.appearance.colorSet.text0.asColor)
                         .padding(.bottom, 3)
                     
                     if let lunarDate = state.sampleModel?.lunarDateText {
@@ -143,7 +143,7 @@ struct EventListAppearanceSettingView: View {
                             .font(
                                 self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
                             )
-                            .foregroundColor(self.appearance.colorSet.subSubNormalText.asColor)
+                            .foregroundColor(self.appearance.colorSet.text2.asColor)
                             .padding(.bottom, 3)
                     }
                     
@@ -165,12 +165,12 @@ struct EventListAppearanceSettingView: View {
                         Text("🥗 Event name")
                             .minimumScaleFactor(0.7)
                             .font(self.appearance.eventTextFontOnList().asFont)
-                            .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                            .foregroundColor(self.appearance.colorSet.text0.asColor)
                         
                         Text("description")
                             .minimumScaleFactor(0.7)
                             .font(self.appearance.fontSet.size(13+appearance.eventTextAdditionalSize).asFont)
-                            .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
+                            .foregroundColor(self.appearance.colorSet.text1.asColor)
                     }
                     Spacer()
                 }
@@ -178,7 +178,7 @@ struct EventListAppearanceSettingView: View {
             .padding(.vertical, 4).padding(.horizontal, 8)
             .background(
                 RoundedRectangle(cornerRadius: 5)
-                    .fill(appearance.colorSet.eventList.asColor)
+                    .fill(appearance.colorSet.bg1.asColor)
             )
         }
     }
@@ -191,14 +191,14 @@ struct EventListAppearanceSettingView: View {
                 .font(
                     self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
                 )
-                .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                .foregroundColor(self.appearance.colorSet.text0.asColor)
         }
         
         let pmView: some View = {
             Text("PM")
                 .minimumScaleFactor(0.7)
                 .font(appearance.fontSet.size(9+appearance.eventTextAdditionalSize).asFont)
-                .foregroundStyle(appearance.colorSet.normalText.asColor)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
         }()
         
         return VStack(alignment: .center, spacing: 2) {
@@ -224,7 +224,7 @@ struct EventListAppearanceSettingView: View {
             
             Text(state.additionalFontSizeModel.sizeText)
                 .font(appearance.fontSet.size(12).asFont)
-                .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                .foregroundStyle(appearance.colorSet.text2.asColor)
             
             HStack(spacing: 2) {
                 
@@ -233,7 +233,7 @@ struct EventListAppearanceSettingView: View {
                 } label: {
                     Text("-")
                         .font(appearance.fontSet.normal.asFont)
-                        .foregroundStyle(appearance.colorSet.normalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
                         .padding(.vertical, 2)
                         .padding(.leading, 8).padding(.trailing, 2)
                 }
@@ -247,7 +247,7 @@ struct EventListAppearanceSettingView: View {
                 } label: {
                     Text("+")
                         .font(appearance.fontSet.normal.asFont)
-                        .foregroundStyle(appearance.colorSet.normalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
                         .padding(.vertical, 2)
                         .padding(.leading, 2).padding(.trailing, 8)
                 }

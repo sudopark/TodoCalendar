@@ -62,7 +62,7 @@ struct SystemSizeForemostEventView: View {
     private func eventTypeView() -> some View {
         Text("Foremost event")
             .font(.system(size: 12))
-            .foregroundStyle(colorSet.subSubNormalText.asColor)
+            .foregroundStyle(colorSet.text2.asColor)
     }
     
     private func emptyForemostEventView() -> some View {
@@ -82,7 +82,7 @@ struct SystemSizeForemostEventView: View {
                         .font(.system(size: metric.emptyMessageFontSize, weight: .semibold))
                         .multilineTextAlignment(.center)
                         .minimumScaleFactor(0.7)
-                        .foregroundStyle(colorSet.subNormalText.asColor)
+                        .foregroundStyle(colorSet.text1.asColor)
                 }
                 Spacer()
             }
@@ -122,7 +122,7 @@ struct SystemSizeForemostEventView: View {
                 .lineLimit(metric.eventNameNumberOfLines)
                 .minimumScaleFactor(0.7)
                 .font(.system(size: metric.eventNameFontSize, weight: .semibold))
-                .foregroundStyle(colorSet.normalText.asColor)
+                .foregroundStyle(colorSet.text0.asColor)
             
             Spacer()
         }
@@ -142,7 +142,7 @@ struct SystemSizeForemostEventView: View {
                     .lineLimit(1)
                     .font(.system(size: metric.timeInfoFontSize))
                     .minimumScaleFactor(0.7)
-                    .foregroundColor(colorSet.subNormalText.asColor)
+                    .foregroundColor(colorSet.text1.asColor)
             }
         }
         
@@ -152,7 +152,7 @@ struct SystemSizeForemostEventView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .font(.system(size: metric.timeInfoFontSize))
-                .foregroundColor(colorSet.subNormalText.asColor)
+                .foregroundColor(colorSet.text1.asColor)
         }
         
         switch periodText {

@@ -70,11 +70,11 @@ extension ViewAppearance {
     public func accentCalendarDayColor(_ accent: AccentDays?) -> UIColor {
         switch accent {
         case .holiday:
-            return self.accnetDayPolicy[.holiday] == true ? self.colorSet.calendarAccentColor : self.colorSet.holidayText
+            return self.accnetDayPolicy[.holiday] == true ? self.colorSet.holidayOrWeekEndWithAccent : self.colorSet.holidayText
         case .sunday:
-            return self.accnetDayPolicy[.sunday] == true ? self.colorSet.calendarAccentColor : self.colorSet.weekEndText
+            return self.accnetDayPolicy[.sunday] == true ? self.colorSet.holidayOrWeekEndWithAccent : self.colorSet.weekEndText
         case .saturday:
-            return self.accnetDayPolicy[.saturday] == true ? self.colorSet.calendarAccentColor : self.colorSet.weekEndText
+            return self.accnetDayPolicy[.saturday] == true ? self.colorSet.holidayOrWeekEndWithAccent : self.colorSet.weekEndText
         default:
             return self.colorSet.weekDayText
         }

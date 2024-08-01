@@ -117,7 +117,7 @@ struct TimeZoneSelectView: View {
                         Section {
                             timezoneView(system)
                                 .listRowSeparator(.hidden)
-                                .listRowBackground(appearance.colorSet.eventList.asColor)
+                                .listRowBackground(appearance.colorSet.bg1.asColor)
                         }
                     }
                     
@@ -125,7 +125,7 @@ struct TimeZoneSelectView: View {
                         ForEach(state.timeZones, id: \.identifier) { model in
                             timezoneView(model)
                         }
-                        .listRowBackground(appearance.colorSet.eventList.asColor)
+                        .listRowBackground(appearance.colorSet.bg1.asColor)
                     }
                 }
                 .scrollContentBackground(.hidden)
@@ -144,14 +144,14 @@ struct TimeZoneSelectView: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .font(appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
             
             TextField(text: $state.searchKeyword) {
                 Text("Search".localized())
                     .font(appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text1.asColor)
             }
-            .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+            .foregroundStyle(self.appearance.colorSet.text0.asColor)
             .font(self.appearance.fontSet.subNormal.asFont)
             .focused($searchDidFocused)
             .autocorrectionDisabled()
@@ -164,7 +164,7 @@ struct TimeZoneSelectView: View {
         .padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(appearance.colorSet.eventList.asColor)
+                .fill(appearance.colorSet.bg1.asColor)
         )
     }
     
@@ -173,14 +173,14 @@ struct TimeZoneSelectView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(model.title)
                     .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
                 Text(model.identifier)
                     .font(appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text1.asColor)
                 if let description = model.description {
                     Text(description)
                         .font(appearance.fontSet.subNormal.asFont)
-                        .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text1.asColor)
                 }
             }
             
@@ -189,7 +189,7 @@ struct TimeZoneSelectView: View {
             if model.identifier == state.selectedIdentifier {
                 Image(systemName: "checkmark")
                     .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
         // TODO: 터치영역 증가 필요

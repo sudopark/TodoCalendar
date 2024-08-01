@@ -52,7 +52,7 @@ struct EventListView: View {
                 .font(.system(size: 13, weight: .bold))
                 .foregroundStyle(
                     model.shouldAccentTitle
-                    ? colorSet.normalText.asColor : colorSet.subSubNormalText.asColor
+                    ? colorSet.text0.asColor : colorSet.text2.asColor
                 )
             
             if model.events.isEmpty {
@@ -60,7 +60,7 @@ struct EventListView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.9)
                     .font(.system(size: 13))
-                    .foregroundStyle(colorSet.subNormalText.asColor)
+                    .foregroundStyle(colorSet.text1.asColor)
                     
             } else {
                 ForEach(0..<model.events.count, id: \.self) { index in
@@ -91,7 +91,7 @@ struct EventListView: View {
                     .lineLimit(1)
                     .font(.system(size: 12))
                     .minimumScaleFactor(0.7)
-                    .foregroundColor(colorSet.subNormalText.asColor)
+                    .foregroundColor(colorSet.text1.asColor)
             }
         }
         
@@ -102,7 +102,7 @@ struct EventListView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .font(.system(size: 12))
-                        .foregroundColor(colorSet.subNormalText.asColor)
+                        .foregroundColor(colorSet.text1.asColor)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                  
@@ -110,7 +110,7 @@ struct EventListView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .font(.system(size: 12))
-                        .foregroundColor(colorSet.subNormalText.asColor)
+                        .foregroundColor(colorSet.text1.asColor)
                 }
             }
         }
@@ -143,7 +143,7 @@ struct EventListView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
                 .font(.system(size: 13))
-                .foregroundStyle(colorSet.normalText.asColor)
+                .foregroundStyle(colorSet.text0.asColor)
             
             Spacer()
             

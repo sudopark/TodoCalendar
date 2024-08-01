@@ -139,7 +139,7 @@ struct SelectEventRepeatOptionView: View {
                 HStack {
                     Text(option.text)
                         .font(self.appearance.fontSet.normal.asFont)
-                        .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
                         .lineLimit(1)
                     
                     Spacer()
@@ -152,7 +152,7 @@ struct SelectEventRepeatOptionView: View {
                 .padding(.horizontal, 12)
                 .background {
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(self.appearance.colorSet.eventList.asColor)
+                        .fill(self.appearance.colorSet.bg1.asColor)
                 }
                 .onTapGesture {
                     self.eventHandlers.itemSelect(option.id)

@@ -52,13 +52,13 @@ struct WeekEventsView: View {
         HStack {
             Text(model.targetMonthText)
                 .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(colorSet.normalText.asColor)
+                .foregroundStyle(colorSet.text0.asColor)
             Spacer()
             if let label = model.range.monthLabel {
                 Text(label)
                     .font(.system(size: 10))
                     .padding(3)
-                    .foregroundStyle(colorSet.subNormalText.asColor)
+                    .foregroundStyle(colorSet.text1.asColor)
                     .background(
                         RoundedRectangle(cornerRadius: 7)
                             .fill(colorSet.todayBackground.asColor)
@@ -191,7 +191,7 @@ struct WeekEventsView: View {
              Text(line.eventOnWeek.name)
                 .font(.system(size: 8))
                 .minimumScaleFactor(0.5)
-                .foregroundColor(colorSet.event.asColor)
+                .foregroundColor(colorSet.eventText.asColor)
                  .lineLimit(1)
         }
         .clipped()
@@ -208,7 +208,7 @@ struct WeekEventsView: View {
             ForEach(moreModels, id: \.daySequence) {
                 Text("+\($0.moreCount)")
                     .font(.system(size: 8))
-                    .foregroundColor(colorSet.event.asColor)
+                    .foregroundColor(colorSet.eventText.asColor)
                     .frame(width: dayWidth)
                     .offset(x: offsetX($0))
             }

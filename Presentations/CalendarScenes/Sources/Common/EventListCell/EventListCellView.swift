@@ -123,7 +123,7 @@ struct EventListCellView: View {
             Text(amOrPm)
                 .minimumScaleFactor(0.7)
                 .font(appearance.fontSet.size(8+appearance.eventTextAdditionalSize).asFont)
-                .foregroundStyle(appearance.colorSet.normalText.asColor)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
         }
         
         func singleText(_ text: EventTimeText) -> some View {
@@ -135,7 +135,7 @@ struct EventListCellView: View {
                         .font(
                             self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
                         )
-                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                        .foregroundColor(self.appearance.colorSet.text0.asColor)
                     
                     if let amPm = text.pmOram {
                         pmOrAmView(amPm)
@@ -150,7 +150,7 @@ struct EventListCellView: View {
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                         .font(self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont)
-                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                        .foregroundColor(self.appearance.colorSet.text0.asColor)
                     
                     if let amPm = top.pmOram {
                         pmOrAmView(amPm)
@@ -161,7 +161,7 @@ struct EventListCellView: View {
                     Text(bottom.text)
                         .minimumScaleFactor(0.7)
                         .font(self.appearance.fontSet.size(14+appearance.eventTextAdditionalSize).asFont)
-                        .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
+                        .foregroundColor(self.appearance.colorSet.text1.asColor)
                     
                     if let amPm = bottom.pmOram {
                         pmOrAmView(amPm)
@@ -187,7 +187,7 @@ struct EventListCellView: View {
                     .font(
                         self.appearance.eventTextFontOnList(isForemost: cellViewModel.isForemost).asFont
                     )
-                    .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                    .foregroundColor(self.appearance.colorSet.text0.asColor)
                 
                 if let periodDescription = cellViewModel.periodDescription {
                     Text(periodDescription)
@@ -195,7 +195,7 @@ struct EventListCellView: View {
                         .font(
                             self.appearance.fontSet.size(13+appearance.eventTextAdditionalSize).asFont
                         )
-                        .foregroundColor(self.appearance.colorSet.subNormalText.asColor)
+                        .foregroundColor(self.appearance.colorSet.text1.asColor)
                 }
             }
             Spacer()
@@ -256,7 +256,7 @@ extension View {
         return self
             .background(
                 RoundedRectangle(cornerRadius: 5)
-                    .fill(appearance.colorSet.eventList.asColor)
+                    .fill(appearance.colorSet.bg1.asColor)
             )
     }
 }

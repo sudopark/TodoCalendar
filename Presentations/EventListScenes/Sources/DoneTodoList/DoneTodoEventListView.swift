@@ -127,7 +127,7 @@ struct DoneTodoEventListView: View {
                 }
                 lastLine
             }
-            .background(appearance.colorSet.background.asColor)
+            .background(appearance.colorSet.bg0.asColor)
             .listStyle(PlainListStyle())
             .navigationTitle(
                 Text("Done Todos".localized())
@@ -143,13 +143,13 @@ struct DoneTodoEventListView: View {
     private func sectionView(_ section: DoneTodoListSectionModel) -> some View {
         HStack {
             Text(section.sectionTitle)
-                .foregroundStyle(appearance.colorSet.normalText.asColor)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
                 .font(appearance.fontSet.big.asFont)
                 .padding(.vertical, 12)
                 .padding(.horizontal, 20)
             Spacer()
         }
-        .background(appearance.colorSet.background.asColor)
+        .background(appearance.colorSet.bg0.asColor)
         .listRowInsets(.init(top: 0, leading: 0, bottom: 0, trailing: 0))
     }
     
@@ -159,31 +159,31 @@ struct DoneTodoEventListView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(cell.name)
-                    .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
                     .font(appearance.fontSet.normal.asFont)
                 
                 if let eventTime = cell.eventTimeText {
                     HStack(spacing: 2) {
                         Text("event time:".localized())
-                            .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                            .foregroundStyle(appearance.colorSet.text2.asColor)
                             .font(appearance.fontSet.subNormal.asFont)
                         Text(eventTime)
-                            .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                            .foregroundStyle(appearance.colorSet.text2.asColor)
                             .font(appearance.fontSet.subNormal.asFont)
                     }
                 }
                 HStack(spacing: 2) {
                     Text("dont at:".localized())
-                        .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text2.asColor)
                         .font(appearance.fontSet.subNormal.asFont)
                     Text(cell.doneTimeText)
-                        .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text2.asColor)
                         .font(appearance.fontSet.subNormal.asFont)
                 }
             }
             .padding(.bottom, 4)
         }
-        .listRowBackground(appearance.colorSet.background.asColor)
+        .listRowBackground(appearance.colorSet.bg0.asColor)
     }
     
     private func revertDoneButton(_ doneId: String) -> some View {

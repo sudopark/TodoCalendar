@@ -136,7 +136,7 @@ struct SelectEventTagView: View {
             
             Text(tag.name)
                 .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .lineLimit(1)
             
             Spacer()
@@ -149,7 +149,7 @@ struct SelectEventTagView: View {
         .padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {
             self.eventHandlers.selectTag(tag.id)
@@ -159,12 +159,12 @@ struct SelectEventTagView: View {
     private var addTagView: some View {
         HStack(spacing: 10) {
             Image(systemName: "plus")
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(.system(size: 12))
             
             Text("Add new event type".localized())
                 .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .lineLimit(1)
             
             Spacer()
@@ -173,7 +173,7 @@ struct SelectEventTagView: View {
         .padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {
             self.eventHandlers.addTag()

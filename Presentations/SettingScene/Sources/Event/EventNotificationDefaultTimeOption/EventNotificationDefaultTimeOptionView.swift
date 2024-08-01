@@ -157,7 +157,7 @@ struct EventNotificationDefaultTimeOptionView: View {
                 Text("event_notification_setting::need_permission_message".localized())
                     .multilineTextAlignment(.center)
                     .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
                 
                 ConfirmButton(title: "event_notification_setting::need_permission::go_setting".localized())
                     .eventHandler(\.onTap, eventHandlers.requestPermission)
@@ -165,7 +165,7 @@ struct EventNotificationDefaultTimeOptionView: View {
             .padding()
             .background(
                 Rectangle()
-                    .fill(appearance.colorSet.eventList.asColor)
+                    .fill(appearance.colorSet.bg1.asColor)
                     .ignoresSafeArea(edges: .bottom)
             )
         }
@@ -175,21 +175,21 @@ struct EventNotificationDefaultTimeOptionView: View {
         return HStack {
             Text(model.text)
                 .font(appearance.fontSet.normal.asFont)
-                .foregroundStyle(appearance.colorSet.normalText.asColor)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
             
             Spacer(minLength: 20)
             
             if model.option == self.state.selectedOption {
                 Image(systemName: "checkmark")
                     .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
-                .fill(appearance.colorSet.eventList.asColor)
+                .fill(appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {
             eventHandlers.selectOption(model.option)

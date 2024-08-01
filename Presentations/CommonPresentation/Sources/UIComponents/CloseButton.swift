@@ -23,8 +23,8 @@ public struct CloseButton: View {
             Image(systemName: "xmark.circle.fill")
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(
-                    self.appearance.colorSet.event.asColor,
-                    self.appearance.colorSet.eventList.asColor
+                    self.appearance.colorSet.eventText.asColor,
+                    self.appearance.colorSet.bg1.asColor
                 )
                 .font(.system(size: 20))
         }

@@ -150,23 +150,23 @@ struct HolidayListView: View {
             
             Text("Current Country".localized())
                 .font(self.appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
             HStack {
                 Text(self.state.countryName)
                     .font(self.appearance.fontSet.normal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
                     .font(self.appearance.fontSet.size(8).asFont)
-                    .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(self.appearance.colorSet.eventList.asColor)
+                    .fill(self.appearance.colorSet.bg1.asColor)
             )
             .onTapGesture {
                 self.eventHandlers.selectCountry()
@@ -179,7 +179,7 @@ struct HolidayListView: View {
         VStack(alignment: .leading) {
             Text("Holidays".localized())
                 .font(self.appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
             
             ForEach(self.state.holidays, id: \.compareKey) { item in
                 
@@ -194,11 +194,11 @@ struct HolidayListView: View {
                         Text(item.name)
                             .minimumScaleFactor(0.7)
                             .font(self.appearance.fontSet.size(16).asFont)
-                            .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                            .foregroundStyle(self.appearance.colorSet.text0.asColor)
                         
                         Text(item.dateText)
                             .font(self.appearance.fontSet.size(12).asFont)
-                            .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                            .foregroundStyle(self.appearance.colorSet.text2.asColor)
                     }
                     
                     Spacer()
@@ -207,7 +207,7 @@ struct HolidayListView: View {
                 .padding(.horizontal, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 8)
-                        .fill(self.appearance.colorSet.eventList.asColor)
+                        .fill(self.appearance.colorSet.bg1.asColor)
                 )
             }
         }

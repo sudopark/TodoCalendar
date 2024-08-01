@@ -34,7 +34,7 @@ struct ForemostEventView: View {
                 .font(
                     appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont
                 )
-                .foregroundStyle(appearance.colorSet.normalText.asColor)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
             
             EventListCellView(cellViewModel: viewModel)
                 .eventHandler(\.requestDoneTodo, self.requestDoneTodo)

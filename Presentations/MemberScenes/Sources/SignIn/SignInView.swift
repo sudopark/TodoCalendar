@@ -123,13 +123,13 @@ struct SignInView: View {
                     
                     Text("signIn::title".localized())
                         .font(appearance.fontSet.normal.asFont)
-                        .foregroundStyle(appearance.colorSet.normalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
                         .lineLimit(0)
                         .multilineTextAlignment(.center)
                     
                     Text("signIn:description".localized())
                         .font(appearance.fontSet.subNormal.asFont)
-                        .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text1.asColor)
                         .lineLimit(0)
                         .multilineTextAlignment(.center)
                     

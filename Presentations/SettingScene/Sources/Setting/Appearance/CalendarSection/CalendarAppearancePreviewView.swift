@@ -95,7 +95,7 @@ struct CalendarAppearanceSampleView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("MARCH".localized())
                     .font(self.appearance.fontSet.size(12, weight: .semibold).asFont)
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 Grid(alignment: .center, horizontalSpacing: 4, verticalSpacing: 5) {
                     GridRow {
                         ForEach(model.weekDays, id: \.rawValue) { day in
@@ -161,7 +161,7 @@ struct CalendarAppearanceSampleView: View {
                     Spacer()
                     
                     RoundedRectangle(cornerRadius: 0.5)
-                        .fill(self.appearance.colorSet.event.asColor)
+                        .fill(self.appearance.colorSet.eventText.asColor)
                         .frame(height: 0.5)
                         .padding(.horizontal, 2.5)
                         .padding(.vertical, 1)
@@ -238,11 +238,11 @@ extension CalendarSectionAppearanceSettingView {
                         if day == state.selectedWeekDay {
                             Image(systemName: "checkmark")
                                 .font(appearance.fontSet.normal.asFont)
-                                .foregroundStyle(appearance.colorSet.normalText.asColor)
+                                .foregroundStyle(appearance.colorSet.text0.asColor)
                         }
                         Text(day.text)
                             .font(appearance.fontSet.normal.asFont)
-                            .foregroundStyle(appearance.colorSet.normalText.asColor)
+                            .foregroundStyle(appearance.colorSet.text0.asColor)
                     }
                 }
             } label: {
@@ -252,11 +252,11 @@ extension CalendarSectionAppearanceSettingView {
             HStack(spacing: 4) {
                 Text(state.selectedWeekDay.text)
                     .font(self.appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
                 
                 Image(systemName: "chevron.up.chevron.down")
                     .font(self.appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
             }
         }
     }
@@ -264,13 +264,13 @@ extension CalendarSectionAppearanceSettingView {
     private func accentDayView(_ day: AccentDays) -> some View {
         let isOn = state.accentDays[day] ?? false
         let textColor: UIColor = isOn
-            ? self.appearance.colorSet.white
-            : self.appearance.colorSet.subSubNormalText
+            ? self.appearance.colorSet.text0_inverted
+            : self.appearance.colorSet.text2
         let lineColor: UIColor = isOn
             ? .clear
-            : self.appearance.colorSet.subSubNormalText
+            : self.appearance.colorSet.text2
         let backgroundColor: UIColor = isOn
-            ? self.appearance.colorSet.normalText
+            ? self.appearance.colorSet.text0
             : .clear
         
         return Text(day.text)
@@ -296,7 +296,7 @@ extension CalendarSectionAppearanceSettingView {
             
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
         }
     }
     
