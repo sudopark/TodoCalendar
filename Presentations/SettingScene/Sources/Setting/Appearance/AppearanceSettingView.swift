@@ -279,7 +279,7 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        let viewAppearance = ViewAppearance(setting: setting)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         viewAppearance.accnetDayPolicy = [
             .sunday : true, .saturday: true, .holiday: true
         ]

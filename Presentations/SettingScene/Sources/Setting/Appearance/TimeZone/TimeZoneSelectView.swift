@@ -212,7 +212,7 @@ struct TimeZoneSelectViewPreviewProvider: PreviewProvider {
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        let viewAppearance = ViewAppearance(setting: setting)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = TimeZoneSelectViewState()
         let eventHandlers = TimeZoneSelectViewEventHandler()
         eventHandlers.timeZoneSelected = { state.selectedIdentifier = $0 }

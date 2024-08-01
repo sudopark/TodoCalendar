@@ -23,9 +23,36 @@ import SQLiteService
 final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked Sendable {
     
     let appearance: ViewAppearance
-    init(_ setting: AppearanceSettings) {
+    @MainActor weak var window: UIWindow?
+    
+    @MainActor
+    init(_ setting: AppearanceSettings, _ window: UIWindow?) {
         
-        self.appearance = .init(setting: setting)
+        self.window = window
+        self.appearance = .init(
+            setting: setting, 
+            isSystemDarkTheme: window?.traitCollection.userInterfaceStyle == .dark
+        )
+        self.bindSystemColorThemeChanged()
+    }
+    
+    @MainActor
+    private func bindSystemColorThemeChanged() {
+        guard let window = self.window else { return }
+        
+        window.registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (wd: UIWindow, _) in
+            let isDark = wd.traitCollection.userInterfaceStyle == .dark
+            self.notifySystemColorThemeChangedIfNeed(isDark: isDark)
+        }
+    }
+    
+    @MainActor
+    private func notifySystemColorThemeChangedIfNeed(isDark: Bool) {
+        guard self.appearance.colorSet.key == .systemTheme else { return }
+        let newSet = self.appearance.colorSet.key.convert(isSystemDarkTheme: isDark)
+        let didSetChanged = type(of: self.appearance.colorSet) != type(of: newSet)
+        guard didSetChanged else { return }
+        self.appearance.colorSet = newSet
     }
     
     func notifySettingChanged(_ newSetting: AppearanceSettings) {
@@ -36,7 +63,9 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     func notifyCalendarSettingChanged(_ newSetting: CalendarAppearanceSettings) {
         Task { @MainActor in
             if self.appearance.colorSet.key != newSetting.colorSetKey {
-                self.appearance.colorSet = newSetting.colorSetKey.convert()
+                self.appearance.colorSet = newSetting.colorSetKey.convert(
+                    isSystemDarkTheme: self.window?.traitCollection.userInterfaceStyle == .dark
+                )
             }
             if self.appearance.fontSet.key != newSetting.fontSetKey {
                 self.appearance.fontSet = newSetting.fontSetKey.convert()
@@ -155,9 +184,9 @@ extension ApplicationRootRouter {
     ) {
         
         guard !AppEnvironment.isTestBuild else { return }
-        self.viewAppearanceStore = .init(prepareResult.appearnceSetings)
         
         Task { @MainActor in
+            self.viewAppearanceStore = .init(prepareResult.appearnceSetings, self.window)
             self.changeUsecaseFactroy(
                 by: prepareResult.latestLoginAcount?.auth
             )

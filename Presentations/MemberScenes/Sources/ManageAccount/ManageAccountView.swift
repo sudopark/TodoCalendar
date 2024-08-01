@@ -243,7 +243,7 @@ struct ManageAccountViewPreviewProvider: PreviewProvider {
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        let viewAppearance = ViewAppearance(setting: setting)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = ManageAccountViewState()
         state.migrationNeedEventCount = 100
         state.accountInfo = .init(emailAddress: "sudo.park@kakao.com", signInMethod: "google", lastSignedIn: "2023-03-03 12:00:00 ")

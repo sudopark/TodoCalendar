@@ -260,7 +260,7 @@ struct DoneTodoEventListViewPreviewProvider: PreviewProvider {
             defaultTagColor: .init(holiday: "#ff0000", default: "#ff00ff")
         )
         let viewAppearance = ViewAppearance(
-            setting: setting
+            setting: setting, isSystemDarkTheme: false
         )
         let state = DoneTodoEventListViewState()
         let eventHandlers = DoneTodoEventListViewEventHandler()
