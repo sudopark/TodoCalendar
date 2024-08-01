@@ -160,7 +160,7 @@ struct SelectEventNotificationTimeView: View {
                     } header: {
                         Text("Custom".localized())
                             .font(appearance.fontSet.bigBold.asFont)
-                            .foregroundStyle(appearance.colorSet.normalText.asColor)
+                            .foregroundStyle(appearance.colorSet.text0.asColor)
                         
                     }
                     .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
@@ -201,20 +201,20 @@ struct SelectEventNotificationTimeView: View {
                 model?.text ?? "event_notification_setting::option_title::no_notification".localized()
             )
             .font(appearance.fontSet.normal.asFont)
-            .foregroundStyle(appearance.colorSet.normalText.asColor)
+            .foregroundStyle(appearance.colorSet.text0.asColor)
             
             Spacer(minLength: 20)
             
             if state.isSelectedDefaultModel(model?.option) {
                 Image(systemName: "checkmark")
                     .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
         .padding(.vertical, 8).padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
-                .fill(appearance.colorSet.eventList.asColor)
+                .fill(appearance.colorSet.bg1.asColor)
         }
         .onTapGesture { eventHandlers.toggleSelectDefaultOption(model?.option) }
     }
@@ -224,22 +224,22 @@ struct SelectEventNotificationTimeView: View {
             VStack {
                 Text(model.dateText)
                     .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
                 Text(model.diffTimeText)
                     .font(appearance.fontSet.subSubNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
             }
             
             Spacer(minLength: 20)
             
             Image(systemName: "checkmark")
                 .font(appearance.fontSet.normal.asFont)
-                .foregroundStyle(appearance.colorSet.normalText.asColor)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
         }
         .padding(.vertical, 8).padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
-                .fill(appearance.colorSet.eventList.asColor)
+                .fill(appearance.colorSet.bg1.asColor)
         }
         .onTapGesture { eventHandlers.removeCustomTimeOption(model.components) }
     }
@@ -273,7 +273,7 @@ struct SelectEventNotificationTimeView: View {
         .padding(.vertical, 8).padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
-                .fill(appearance.colorSet.eventList.asColor)
+                .fill(appearance.colorSet.bg1.asColor)
         }
     }
     
@@ -307,7 +307,7 @@ struct SelectEventNotificationTimeView: View {
                 Text("event_notification_setting::need_permission_message".localized())
                     .multilineTextAlignment(.center)
                     .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
                 
                 ConfirmButton(title: "event_notification_setting::need_permission::go_setting".localized())
                     .eventHandler(\.onTap, eventHandlers.moveSystemNotificationSetting)
@@ -315,7 +315,7 @@ struct SelectEventNotificationTimeView: View {
             .padding()
             .background(
                 Rectangle()
-                    .fill(appearance.colorSet.eventList.asColor)
+                    .fill(appearance.colorSet.bg1.asColor)
                     .ignoresSafeArea(edges: .bottom)
             )
         }

@@ -108,7 +108,7 @@ struct SettingItemListView: View {
             if let headerText = section.headerText {
                 Text(headerText)
                     .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
                     .padding(.top, 8)
             }
             ForEach(section.items, id: \.compareKey) { item in
@@ -134,24 +134,24 @@ struct SettingItemListView: View {
         HStack {
             Image(systemName: item.iconNamge)
                 .font(self.itemFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .frame(minWidth: 25)
             
             Text(item.text)
                 .font(self.itemFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
             
             Spacer()
             
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.size(8).asFont)
-                .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {
             self.eventHandlers.selectItem(item)
@@ -163,24 +163,24 @@ struct SettingItemListView: View {
             ZStack(alignment: .bottomTrailing) {
                 Image(systemName: item.iconName)
                     .font(self.itemFont)
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
                     .frame(minWidth: 25)
                     .offset(y: -4)
                 
                 Text("beta")
                     .font(appearance.fontSet.subSubNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.white.asColor)
+                    .foregroundStyle(appearance.colorSet.text0_inverted.asColor)
                     .padding(.horizontal, 2)
                     .background(
                         RoundedRectangle(cornerRadius: 4)
-                            .fill(appearance.colorSet.accentOrange.asColor)
+                            .fill(appearance.colorSet.accentInfo.asColor)
                     )
                     .offset(y: 6)
             }
             
             Text(item.title)
                 .font(self.itemFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
             
             Spacer()
             
@@ -188,18 +188,18 @@ struct SettingItemListView: View {
                 Text(method)
                     .lineLimit(1)
                     .font(self.appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
             }
             
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.size(8).asFont)
-                .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {
             self.eventHandlers.selectItem(item)
@@ -216,12 +216,12 @@ struct SettingItemListView: View {
             VStack(alignment: .leading) {
                 Text(item.name)
                     .font(self.appearance.fontSet.size(14).asFont)
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 
                 if let description = item.description {
                     Text(description)
                         .font(self.appearance.fontSet.subNormal.asFont)
-                        .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                        .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 }
             }
             
@@ -229,13 +229,13 @@ struct SettingItemListView: View {
             
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.size(8).asFont)
-                .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {
             self.eventHandlers.selectItem(item)

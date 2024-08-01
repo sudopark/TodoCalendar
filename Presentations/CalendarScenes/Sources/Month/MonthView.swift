@@ -290,8 +290,8 @@ private struct WeekRowView: View {
         }()
         let textColor: Color = {
             return self.state.selectedDay == line.eventOnWeek.eventStartDayIdentifierOnWeek
-            ? self.appearance.colorSet.eventSelected.asColor
-            : self.appearance.colorSet.event.asColor
+            ? self.appearance.colorSet.eventTextSelected.asColor
+            : self.appearance.colorSet.eventText.asColor
         }()
         return HStack(spacing: 2) {
              RoundedRectangle(cornerRadius: 12)
@@ -313,8 +313,8 @@ private struct WeekRowView: View {
     private func eventMoreViews(_ moreModels: [EventMoreModel]) -> some View {
         let textColor: (EventMoreModel) -> Color = { model in
             return self.state.selectedDay == model.dayIdentifier
-            ? self.appearance.colorSet.eventSelected.asColor
-            : self.appearance.colorSet.event.asColor
+            ? self.appearance.colorSet.eventTextSelected.asColor
+            : self.appearance.colorSet.eventText.asColor
         }
         let offsetX: (EventMoreModel) -> CGFloat = { model in
             return CGFloat(model.daySequence-1) * dayWidth

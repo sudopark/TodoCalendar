@@ -190,13 +190,13 @@ private final class HeaderView: UIView {
         switch status {
         case .migrating:
             self.migrationButton.isHidden = false
-            self.migrationButton.tintColor = self.currentColorSet?.normalText
+            self.migrationButton.tintColor = self.currentColorSet?.text0
             self.migrationButton.setImage(UIImage(systemName: "arrow.triangle.2.circlepath"), for: .normal)
             self.runMigrationAnimation()
             
         case .need:
             self.migrationButton.isHidden = false
-            self.migrationButton.tintColor = self.currentColorSet?.accentOrange
+            self.migrationButton.tintColor = self.currentColorSet?.accentInfo
             self.migrationButton.setImage(UIImage(systemName: "exclamationmark.triangle"), for: .normal)
             self.stopMigrationAnimation()
             
@@ -296,26 +296,26 @@ private final class HeaderView: UIView {
         self.currentColorSet = colorSet
         
         self.monthLabel.font = fontSet.bigMonth
-        self.monthLabel.textColor = colorSet.normalText
+        self.monthLabel.textColor = colorSet.text0
         
-        self.returnTodayImage.tintColor = colorSet.normalText
+        self.returnTodayImage.tintColor = colorSet.text0
         self.returnTodayImage.image = UIImage(systemName: "arrow.uturn.right")
         
         self.returnTodayLabel.font = fontSet.subNormalWithBold
-        self.returnTodayLabel.textColor = colorSet.normalText
+        self.returnTodayLabel.textColor = colorSet.text0
         
-        self.returnTodayView.layer.borderColor = colorSet.normalText.cgColor
+        self.returnTodayView.layer.borderColor = colorSet.text0.cgColor
         
         switch self.migrationStatus {
         case .migrating:
-            self.migrationButton.tintColor = colorSet.normalText
+            self.migrationButton.tintColor = colorSet.text0
         case .need:
-            self.migrationButton.tintColor = colorSet.accentOrange
+            self.migrationButton.tintColor = colorSet.accentInfo
         default: break
         }
-        self.eventTypeFilterButton.tintColor = colorSet.normalText
+        self.eventTypeFilterButton.tintColor = colorSet.text0
         self.eventTypeFilterButton.setImage(UIImage(systemName: "line.3.horizontal.decrease.circle"), for: .normal)
-        self.settingButton.tintColor = colorSet.normalText
+        self.settingButton.tintColor = colorSet.text0
         self.settingButton.setImage(UIImage(systemName: "gearshape"), for: .normal)
     }
 }

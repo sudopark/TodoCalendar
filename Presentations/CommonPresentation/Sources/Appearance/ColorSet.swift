@@ -40,16 +40,17 @@ public protocol ColorSet: Sendable {
     var selectedDayText: UIColor { get }
     var holidayText: UIColor { get }
     var todayBackground: UIColor { get }
-    var event: UIColor { get }
-    var eventSelected: UIColor { get }
-    var calendarAccentColor: UIColor { get }
+    var eventText: UIColor { get }
+    var eventTextSelected: UIColor { get }
+    var holidayOrWeekEndWithAccent: UIColor { get }
     
-    var normalText: UIColor { get }
-    var subNormalText: UIColor { get }
-    var subSubNormalText: UIColor { get }
+    // normal text color
+    var text0: UIColor { get }
+    var text1: UIColor { get }
+    var text2: UIColor { get }
+    var text0_inverted: UIColor { get }
     
-    var eventList: UIColor { get }
-    
+    // normal button colors
     var primaryBtnBackground: UIColor { get }
     var primaryBtnText: UIColor { get }
     var secondaryBtnBackground: UIColor { get }
@@ -57,14 +58,15 @@ public protocol ColorSet: Sendable {
     var negativeBtnBackground: UIColor { get }
     var negativeBtnText: UIColor { get }
     
+    // accent colors
     var accent: UIColor { get }
-    var accentOrange: UIColor { get }
-    var accentRed: UIColor { get }
+    var accentInfo: UIColor { get }
+    var accentWarn: UIColor { get }
     
-    var white: UIColor { get }
+    // line + background
     var line: UIColor { get }
-    
-    var background: UIColor { get }
+    var bg0: UIColor { get }
+    var bg1: UIColor { get }
 }
 
 
@@ -82,31 +84,34 @@ public struct DefaultLightColorSet: ColorSet {
     public let selectedDayText: UIColor = UIColor.white
     public let holidayText: UIColor = UIColor(rgb: 0x233238)
     public let todayBackground: UIColor = UIColor(rgb: 0xf4f4f4)
-    public let event: UIColor = UIColor(rgb: 0x45454a)
-    public let eventSelected: UIColor = UIColor.white
-    public let calendarAccentColor: UIColor = UIColor.red
+    public let eventText: UIColor = UIColor(rgb: 0x45454a)
+    public let eventTextSelected: UIColor = UIColor.white
+    public let holidayOrWeekEndWithAccent: UIColor = UIColor.red
     
-    public let normalText: UIColor = UIColor(rgb: 0x323232)
-    public let subNormalText: UIColor = UIColor(rgb: 0x646464)
-    public let subSubNormalText: UIColor = UIColor(rgb: 0x969696)
+    // normal text color
+    public let text0: UIColor = UIColor(rgb: 0x323232)
+    public let text1: UIColor = UIColor(rgb: 0x646464)
+    public let text2: UIColor = UIColor(rgb: 0x969696)
+    public let text0_inverted: UIColor = .white
     
-    public let eventList: UIColor = UIColor(rgb: 0xf4f4f4)
-    
+    // normal button colors
     public let primaryBtnBackground: UIColor = .systemBlue
     public let primaryBtnText: UIColor = .white
     public var secondaryBtnBackground: UIColor { .systemGray5 }
-    public var secondaryBtnText: UIColor { self.normalText }
+    public var secondaryBtnText: UIColor { self.text0 }
     public let negativeBtnBackground: UIColor = .systemRed
     public let negativeBtnText: UIColor = .white
     
+    // accent colors
     public let accent: UIColor = .systemBlue
-    public let accentOrange: UIColor = UIColor(rgb: 0xff7417)
-    public let accentRed: UIColor = .systemRed
+    public let accentInfo: UIColor = UIColor(rgb: 0xff7417)
+    public let accentWarn: UIColor = .systemRed
     
-    public let white: UIColor = .white
+    
+    // line + background
     public let line: UIColor = UIColor.black.withAlphaComponent(0.2)
-    
-    public let background: UIColor = .white
+    public let bg0: UIColor = .white
+    public let bg1: UIColor = UIColor(rgb: 0xf4f4f4)
     
     public init() { }
 }

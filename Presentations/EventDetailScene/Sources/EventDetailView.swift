@@ -298,7 +298,7 @@ struct EventDetailView: View {
                 Image(systemName: "ellipsis")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
                     .frame(width: 20, height: 20)
             }
         }
@@ -320,7 +320,7 @@ struct EventDetailView: View {
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
             .font(self.appearance.fontSet.size(22, weight: .semibold).asFont)
-            .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+            .foregroundStyle(self.appearance.colorSet.text0.asColor)
             .onSubmit {
                 self.isFocusInput = nil
             }
@@ -348,10 +348,10 @@ struct EventDetailView: View {
         HStack(spacing: 6) {
             Image(systemName: "exclamationmark.circle.fill")
                 .font(.system(size: 16, weight: .light))
-                .foregroundColor(self.appearance.colorSet.accentRed.asColor)
+                .foregroundColor(self.appearance.colorSet.accentWarn.asColor)
             
             Text("Foremost event".localized())
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(self.appearance.fontSet.normal.asFont)
             
             Button {
@@ -359,7 +359,7 @@ struct EventDetailView: View {
             } label: {
                 Image(systemName: "questionmark.circle")
                     .font(self.appearance.fontSet.normal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
             }
             .popover(isPresented: self.$showEventDetailTypePopover) {
                 Text("[Todo] foremost event description")
@@ -373,9 +373,9 @@ struct EventDetailView: View {
         HStack {
             Image(systemName: "flag.fill")
                 .font(.system(size: 16, weight: .light))
-                .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                .foregroundColor(self.appearance.colorSet.text0.asColor)
             Text(model.text)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(self.appearance.fontSet.normal.asFont)
             
             Button {
@@ -385,11 +385,11 @@ struct EventDetailView: View {
                     model.selectType == .todo ? "Yes" : "No"
                 )
                 .font(appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: 14)
-                        .fill(self.appearance.colorSet.eventList.asColor)
+                        .fill(self.appearance.colorSet.bg1.asColor)
                 )
             }
             .padding(.leading, 12)
@@ -402,10 +402,10 @@ struct EventDetailView: View {
         HStack(spacing: 6) {
             Image(systemName: "flag.fill")
                 .font(.system(size: 16, weight: .light))
-                .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                .foregroundColor(self.appearance.colorSet.text0.asColor)
             
             Text(model.text)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(self.appearance.fontSet.normal.asFont)
 
             if model.showHelpButton {
@@ -414,7 +414,7 @@ struct EventDetailView: View {
                 } label: {
                     Image(systemName: "questionmark.circle")
                         .font(self.appearance.fontSet.normal.asFont)
-                        .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                        .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 }
                 .popover(isPresented: self.$showEventDetailTypePopover) {
                     Text("[Todo] event type description")
@@ -431,8 +431,8 @@ struct EventDetailView: View {
             
             let isSelecting = self.isTimeSelecting == position
             let textColor: Color = !isSelecting
-                ? appearance.colorSet.normalText.asColor
-                : appearance.colorSet.subNormalText.asColor
+                ? appearance.colorSet.text0.asColor
+                : appearance.colorSet.text1.asColor
             
             return VStack(alignment: .leading) {
                 
@@ -464,7 +464,7 @@ struct EventDetailView: View {
         func emptyLabelView(_ position: TimeSelecting) -> some View {
             return Text("--")
                 .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .onTapGesture {
                     self.updateTimePickerShowing(position)
                 }
@@ -518,15 +518,15 @@ struct EventDetailView: View {
         func backGroundView() -> some View {
             if self.state.isAllDay {
                 return RoundedRectangle(cornerRadius: 16)
-                    .fill(self.appearance.colorSet.normalText.asColor)
+                    .fill(self.appearance.colorSet.text0.asColor)
                     .asAnyView()
             } else {
                 return RoundedRectangle(cornerRadius: 16)
-                    .stroke(self.appearance.colorSet.subSubNormalText.asColor, lineWidth: 1)
+                    .stroke(self.appearance.colorSet.text2.asColor, lineWidth: 1)
                     .asAnyView()
             }
         }
-        let textColor: Color = self.state.isAllDay ? .white : self.appearance.colorSet.subSubNormalText.asColor
+        let textColor: Color = self.state.isAllDay ? .white : self.appearance.colorSet.text2.asColor
         return Button {
             self.toggleIsAllDay()
             
@@ -647,8 +647,8 @@ struct EventDetailView: View {
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(
                     self.state.selectedRepeat == nil
-                    ? self.appearance.colorSet.subSubNormalText.asColor
-                    : self.appearance.colorSet.normalText.asColor
+                    ? self.appearance.colorSet.text2.asColor
+                    : self.appearance.colorSet.text0.asColor
                 )
                 .padding(8)
                 .background(
@@ -656,7 +656,7 @@ struct EventDetailView: View {
                         .fill(
                             self.state.selectedRepeat == nil
                             ? .clear
-                            : self.appearance.colorSet.eventList.asColor
+                            : self.appearance.colorSet.bg1.asColor
                         )
                 )
                 .onTapGesture {
@@ -678,12 +678,12 @@ struct EventDetailView: View {
                 
                 Text(self.state.selectedTag?.name ?? "")
                     .font(self.appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
             }
             .padding(8)
             .background(
                 RoundedRectangle(cornerRadius: 14)
-                    .fill(self.appearance.colorSet.eventList.asColor)
+                    .fill(self.appearance.colorSet.bg1.asColor)
             )
             .onTapGesture {
                 self.selectTag()
@@ -704,8 +704,8 @@ struct EventDetailView: View {
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(
                     self.state.selectedNotificationTimeText == nil
-                    ? self.appearance.colorSet.subSubNormalText.asColor
-                    : self.appearance.colorSet.normalText.asColor
+                    ? self.appearance.colorSet.text2.asColor
+                    : self.appearance.colorSet.text0.asColor
                 )
                 .padding(8)
                 .background(
@@ -713,7 +713,7 @@ struct EventDetailView: View {
                         .fill(
                             self.state.selectedNotificationTimeText == nil
                             ? .clear
-                            : self.appearance.colorSet.eventList.asColor
+                            : self.appearance.colorSet.bg1.asColor
                         )
                 )
                 .onTapGesture {
@@ -731,7 +731,7 @@ struct EventDetailView: View {
             TextField("URL".localized(), text: self.$state.url)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(self.appearance.fontSet.size(14).asFont)
                 .focused(self.$isFocusInput, equals: .url)
                 .onSubmit {
@@ -749,7 +749,7 @@ struct EventDetailView: View {
             TextField("Memo".localized(), text: self.$state.memo)
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.never)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(self.appearance.fontSet.size(14).asFont)
                 .focused(self.$isFocusInput, equals: .memo)
                 .onSubmit {

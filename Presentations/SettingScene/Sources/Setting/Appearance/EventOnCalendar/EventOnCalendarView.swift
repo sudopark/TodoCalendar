@@ -81,7 +81,7 @@ struct EventOnCalendarViewPreviewView: View {
                     
                     Text("All day".localized())
                         .font(appearance.eventTextFontOnCalendar().asFont)
-                        .foregroundStyle(appearance.colorSet.event.asColor)
+                        .foregroundStyle(appearance.colorSet.eventText.asColor)
                         .lineLimit(1)
                 }
                 .frame(width: 52, alignment: .leading)
@@ -98,7 +98,7 @@ struct EventOnCalendarViewPreviewView: View {
                     
                     Text("Some time".localized())
                         .font(appearance.eventTextFontOnCalendar().asFont)
-                        .foregroundStyle(appearance.colorSet.event.asColor)
+                        .foregroundStyle(appearance.colorSet.eventText.asColor)
                         .lineLimit(1)
                 }
                 .frame(width: 52, alignment: .leading)
@@ -154,7 +154,7 @@ struct EventOnCalendarView: View {
             
             Text(state.additionalFontSizeModel.sizeText)
                 .font(appearance.fontSet.size(12).asFont)
-                .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                .foregroundStyle(appearance.colorSet.text2.asColor)
             
             HStack(spacing: 2) {
                 
@@ -163,7 +163,7 @@ struct EventOnCalendarView: View {
                 } label: {
                     Text("-")
                         .font(appearance.fontSet.normal.asFont)
-                        .foregroundStyle(appearance.colorSet.normalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
                         .padding(.vertical, 2)
                         .padding(.leading, 8).padding(.trailing, 2)
                 }
@@ -177,7 +177,7 @@ struct EventOnCalendarView: View {
                 } label: {
                     Text("+")
                         .font(appearance.fontSet.normal.asFont)
-                        .foregroundStyle(appearance.colorSet.normalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
                         .padding(.vertical, 2)
                         .padding(.leading, 2).padding(.trailing, 8)
                 }

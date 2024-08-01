@@ -158,17 +158,17 @@ struct ManageAccountView: View {
             Text(key)
                 .layoutPriority(1)
                 .font(self.appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
             Spacer(minLength: 20)
             Text(value ?? "-")
                 .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         )
     }
     
@@ -177,11 +177,11 @@ struct ManageAccountView: View {
             VStack(alignment: .leading, spacing: 6) {
                 Text("manage_account::migration::title")
                     .font(self.appearance.fontSet.normal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 
                 Text("manage_account::migration::description".localized(with: count))
                     .font(self.appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
             }
             
             Spacer(minLength: 50)
@@ -192,14 +192,14 @@ struct ManageAccountView: View {
             } else {
                 Image(systemName: "chevron.right")
                     .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture(perform: self.eventHandlers.handleMigration)
     }
@@ -214,7 +214,7 @@ struct ManageAccountView: View {
         } label: {
             Text("manage_account::signout_button::title")
                 .font(appearance.fontSet.normal.asFont)
-                .foregroundStyle(appearance.colorSet.white.asColor)
+                .foregroundStyle(appearance.colorSet.negativeBtnText.asColor)
                 .frame(maxWidth: .infinity)
                 .padding(12)
                 .background(

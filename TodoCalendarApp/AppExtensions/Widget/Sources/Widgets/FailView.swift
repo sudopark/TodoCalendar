@@ -24,6 +24,6 @@ struct FailView: View {
     var body: some View {
         Text(errorModel.message)
             .font(.system(size: 15))
-            .foregroundStyle(colorSet.normalText.asColor)
+            .foregroundStyle(colorSet.text0.asColor)
     }
 }

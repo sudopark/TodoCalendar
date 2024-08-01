@@ -167,7 +167,7 @@ struct EventSettingView: View {
         HStack {
             Text("Event Type".localized())
                 .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
             Spacer()
             Circle()
                 .fill(
@@ -176,11 +176,11 @@ struct EventSettingView: View {
                 .frame(width: 6, height: 6)
             Text(state.tagModel?.name ?? "")
                 .font(self.appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(self.appearance.colorSet.subNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
         }
     }
     
@@ -188,7 +188,7 @@ struct EventSettingView: View {
         HStack {
             Text("NotificationTime".localized())
                 .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .layoutPriority(1)
             
             Spacer()
@@ -196,11 +196,11 @@ struct EventSettingView: View {
             Text(state.selectedEventNotificationTimeText ?? "")
                 .lineLimit(1)
                 .font(appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
             
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
         }
     }
     
@@ -211,11 +211,11 @@ struct EventSettingView: View {
                 VStack(alignment: .leading) {
                     Text("NotificationTime".localized())
                         .font(self.appearance.fontSet.normal.asFont)
-                        .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
                     
                     Text("Allday".localized())
                         .font(appearance.fontSet.subSubNormal.asFont)
-                        .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text1.asColor)
                 }
                 .layoutPriority(1)
                 
@@ -224,11 +224,11 @@ struct EventSettingView: View {
                 Text(state.selectedAllDayEventNotificationTimeText ?? "")
                     .lineLimit(1)
                     .font(appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text1.asColor)
                 
                 Image(systemName: "chevron.right")
                     .font(self.appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
             }
         }
     }
@@ -237,7 +237,7 @@ struct EventSettingView: View {
         HStack {
             Text("Event Period".localized())
                 .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
             
             Spacer()
             
@@ -250,11 +250,11 @@ struct EventSettingView: View {
                             if model.period == state.periodModel.period {
                                 Image(systemName: "checkmark")
                                     .font(appearance.fontSet.normal.asFont)
-                                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                                    .foregroundStyle(appearance.colorSet.text0.asColor)
                             }
                             Text(model.text)
                                 .font(appearance.fontSet.normal.asFont)
-                                .foregroundStyle(appearance.colorSet.normalText.asColor)
+                                .foregroundStyle(appearance.colorSet.text0.asColor)
                         }
                     }
                 } label: { EmptyView() }
@@ -263,11 +263,11 @@ struct EventSettingView: View {
                 HStack(spacing: 4) {
                     Text(state.periodModel.text)
                         .font(appearance.fontSet.subNormal.asFont)
-                        .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text1.asColor)
                     
                     Image(systemName: "chevron.up.chevron.down")
                         .font(self.appearance.fontSet.subNormal.asFont)
-                        .foregroundStyle(appearance.colorSet.subNormalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text1.asColor)
                 }
             }
         }

@@ -49,12 +49,12 @@ struct TodaySummaryView: View {
             VStack(alignment: .leading, spacing: -2) {
                 Text(model.weekDayText)
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(colorSet.normalText.asColor)
+                    .foregroundStyle(colorSet.text0.asColor)
                 
                 if let holiday = model.holidayName {
                     Text(holiday)
                         .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(colorSet.accentRed.asColor)
+                        .foregroundStyle(colorSet.holidayOrWeekEndWithAccent.asColor)
                 }
             }
             
@@ -63,21 +63,21 @@ struct TodaySummaryView: View {
                 HStack(alignment: .lastTextBaseline) {
                     Text("\(model.day)")
                         .font(.system(size: 44, weight: .semibold))
-                        .foregroundStyle(colorSet.normalText.asColor)
+                        .foregroundStyle(colorSet.text0.asColor)
                         
                     VStack(alignment: .leading) {
                         
                         if let timeZone = model.timeZoneText {
                             Text(timeZone)
                                 .font(.system(size: 10))
-                                .foregroundStyle(colorSet.subNormalText.asColor)
+                                .foregroundStyle(colorSet.text1.asColor)
                         }
                         
                         Text(model.monthAndYearText)
                             .lineLimit(1)
                             .minimumScaleFactor(0.7)
                             .font(.system(size: 13))
-                            .foregroundStyle(colorSet.subNormalText.asColor)
+                            .foregroundStyle(colorSet.text1.asColor)
                     }
                 }
             }
@@ -91,17 +91,17 @@ struct TodaySummaryView: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(colorSet.normalText.asColor)
+                    .foregroundStyle(colorSet.text0.asColor)
                 HStack(spacing: 2) {
                     if model.todoEventCount > 0 {
                         Text(String(format: "todo::count".localized(), model.todoEventCount))
                             .font(.system(size: 10))
-                            .foregroundStyle(colorSet.subSubNormalText.asColor)
+                            .foregroundStyle(colorSet.text2.asColor)
                     }
                     if model.scheduleEventcount > 0 {
                         Text(String(format: "schedule::count".localized(), model.scheduleEventcount))
                             .font(.system(size: 10))
-                            .foregroundStyle(colorSet.subSubNormalText.asColor)
+                            .foregroundStyle(colorSet.text2.asColor)
                     }
                 }
             }

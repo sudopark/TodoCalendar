@@ -33,7 +33,7 @@ public struct BottomSlideView<ContentView: View>: View {
             .padding()
             .background(
                 Rectangle()
-                    .fill(appearance.colorSet.background.asColor)
+                    .fill(appearance.colorSet.bg0.asColor)
                     .clipShape(.rect(
                         topLeadingRadius: 10, topTrailingRadius: 10
                     ))

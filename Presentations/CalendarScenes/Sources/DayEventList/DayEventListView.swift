@@ -151,7 +151,7 @@ struct DayEventListView: View {
                     if let holidayName = self.state.dayModel?.holidayName, self.appearance.showHoliday {
                         Text(holidayName)
                             .font(appearance.eventSubNormalTextFontOnList().asFont)
-                            .foregroundStyle(appearance.colorSet.calendarAccentColor.asColor)
+                            .foregroundStyle(appearance.colorSet.holidayOrWeekEndWithAccent.asColor)
                     }
                     
                     // 상단 날짜표시 헤더 - 날짜 및 음력 표시
@@ -159,7 +159,7 @@ struct DayEventListView: View {
                         
                         Text(self.state.dayModel?.dateText ?? "")
                             .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
-                            .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                            .foregroundColor(self.appearance.colorSet.text0.asColor)
                             
                         
                         if self.appearance.showLunarCalendarDate {
@@ -167,7 +167,7 @@ struct DayEventListView: View {
                                 .font(
                                     self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
                                 )
-                                .foregroundColor(self.appearance.colorSet.subSubNormalText.asColor)
+                                .foregroundColor(self.appearance.colorSet.text2.asColor)
                         }
                         
                         Spacer()
@@ -212,12 +212,12 @@ struct DayEventListView: View {
             } label: {
                 HStack {
                     Image(systemName: "plus")
-                        .tint(self.appearance.colorSet.normalText.asColor)
+                        .tint(self.appearance.colorSet.text0.asColor)
                     Text("Add New Event")
                         .font(
                             self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize).asFont
                         )
-                        .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                        .foregroundColor(self.appearance.colorSet.text0.asColor)
                     Spacer()
                 }
                 .padding(.leading, 16)
@@ -230,7 +230,7 @@ struct DayEventListView: View {
                 self.eventHandler.requestAddNewEventWhetherUsingTemplate(true)
             } label: {
                 Image(systemName: "list.bullet.clipboard")
-                    .tint(self.appearance.colorSet.normalText.asColor)
+                    .tint(self.appearance.colorSet.text0.asColor)
                     .frame(width: 50, height: 50)
                     .backgroundAsRoundedRectForEventList(self.appearance)
             }
@@ -263,7 +263,7 @@ private struct QuickAddNewTodoView: View {
                 .font(
                     self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
                 )
-                .foregroundColor(self.appearance.colorSet.normalText.asColor)
+                .foregroundColor(self.appearance.colorSet.text0.asColor)
                 .frame(width: 52)
             
             RoundedRectangle(cornerRadius: 3)

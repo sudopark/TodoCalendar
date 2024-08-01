@@ -142,7 +142,7 @@ struct EventTagDetailView: View {
             .textInputAutocapitalization(.never)
             .font(self.appearance.fontSet.size(22, weight: .semibold).asFont)
             .foregroundColor(
-                self.appearance.colorSet.normalText.asColor
+                self.appearance.colorSet.text0.asColor
                     .opacity(self.state.isNameChangable ? 1.0 : 0.55)
             )
             .onSubmit {
@@ -175,7 +175,7 @@ struct EventTagDetailView: View {
         .padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         )
     }
     

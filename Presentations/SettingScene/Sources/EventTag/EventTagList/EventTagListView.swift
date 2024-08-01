@@ -140,8 +140,8 @@ struct EventTagListView: View {
             Image(systemName: "plus.circle.fill")
                 .symbolRenderingMode(.palette)
                 .foregroundStyle(
-                    self.appearance.colorSet.event.asColor,
-                    self.appearance.colorSet.eventList.asColor
+                    self.appearance.colorSet.eventText.asColor,
+                    self.appearance.colorSet.bg1.asColor
                 )
                 .font(.system(size: 20))
         }
@@ -160,16 +160,16 @@ struct EventTagListView: View {
             Text(cellViewModel.name)
                 .lineLimit(1)
                 .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.normalText.asColor)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
             Spacer()
             Button {
                 self.showTagDetail(cellViewModel.id)
             } label: {
                 HStack {
                     RoundedRectangle(cornerRadius: 1).frame(width: 1)
-                        .foregroundStyle(self.appearance.colorSet.subNormalText.withAlphaComponent(0.1).asColor)
+                        .foregroundStyle(self.appearance.colorSet.text1.withAlphaComponent(0.1).asColor)
                     Image(systemName: "info.circle")
-                        .foregroundStyle(self.appearance.colorSet.subNormalText.withAlphaComponent(0.6).asColor)
+                        .foregroundStyle(self.appearance.colorSet.text1.withAlphaComponent(0.6).asColor)
                 }
             }
         }
@@ -177,7 +177,7 @@ struct EventTagListView: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         )
     }
 }

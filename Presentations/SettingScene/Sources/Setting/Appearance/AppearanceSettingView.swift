@@ -32,12 +32,12 @@ struct AppearanceRow< Content: View>: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(self.appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.normalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
                 
                 if let subTitle {
                     Text(subTitle)
                         .font(self.appearance.fontSet.size(10).asFont)
-                        .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                        .foregroundStyle(appearance.colorSet.text2.asColor)
                 }
             }
             
@@ -219,11 +219,11 @@ struct AppearanceSettingView: View {
                 
                 Text(appearanceState.timeZoneName ?? "")
                     .font(self.appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
                 
                 Image(systemName: "chevron.right")
                     .font(self.appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.subSubNormalText.asColor)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
             }
         }
         

@@ -105,7 +105,7 @@ struct EventTagSelectView: View {
                 
                 Text("This is the event type selected by default when creating a new event.".localized())
                     .font(appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.subSubNormalText.asColor)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
                     .listRowSeparator(.hidden)
                     .padding(.bottom, 16)
                 
@@ -135,8 +135,8 @@ struct EventTagSelectView: View {
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(
                     cellViewModel.isOn
-                    ? appearance.colorSet.normalText.asColor
-                    : appearance.colorSet.subSubNormalText.asColor
+                    ? appearance.colorSet.text0.asColor
+                    : appearance.colorSet.text2.asColor
                 )
                 .lineLimit(1)
             
@@ -151,7 +151,7 @@ struct EventTagSelectView: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 8)
-                .fill(self.appearance.colorSet.eventList.asColor)
+                .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {
             eventHandlers.selectTag(cellViewModel.id)

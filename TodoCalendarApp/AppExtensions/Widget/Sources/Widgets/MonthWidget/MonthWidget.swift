@@ -32,7 +32,7 @@ struct SingleMonthView: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(model.monthName)
                 .font(.system(size: 12, weight: .semibold))
-                .foregroundStyle(colorSet.normalText.asColor)
+                .foregroundStyle(colorSet.text0.asColor)
             
             Grid(alignment: .center, horizontalSpacing: 4, verticalSpacing: 2) {
                 GridRow {
@@ -104,7 +104,7 @@ struct SingleMonthView: View {
     
     private func accentDayText(_ accent: AccentDays?) -> Color {
         switch accent {
-        case .holiday: return colorSet.calendarAccentColor.asColor
+        case .holiday: return colorSet.holidayOrWeekEndWithAccent.asColor
         case .sunday, .saturday: return colorSet.weekEndText.asColor
         default: return colorSet.weekDayText.asColor
         }
