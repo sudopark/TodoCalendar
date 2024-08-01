@@ -225,7 +225,7 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        let viewAppearance = ViewAppearance(setting: setting)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = EventTagListViewState()
         state.cellviewModels = (0..<20).map {
             EventTagCellViewModel(id: .custom("id:\($0)"), name: "name:\($0)", color: .custom(hex: "#ff0000"))

@@ -10,7 +10,9 @@ import Prelude
 import Optics
 
 public enum ColorSetKeys: String, Sendable {
+    case systemTheme
     case defaultLight
+    case defaultDark
 }
 
 public enum FontSetKeys: String, Sendable {

@@ -35,7 +35,7 @@ public class ViewAppearance: ObservableObject {
     @Published public var hapticEffectOff: Bool
     @Published public var animationEffectOff: Bool
     
-    public init(setting: AppearanceSettings) {
+    public init(setting: AppearanceSettings, isSystemDarkTheme: Bool) {
         
         let (calendar, defaultTagColor) = (setting.calendar, setting.defaultTagColor)
         
@@ -43,7 +43,7 @@ public class ViewAppearance: ObservableObject {
             holiday: UIColor.from(hex: defaultTagColor.holiday) ?? .clear,
             defaultColor: UIColor.from(hex: defaultTagColor.default) ?? .clear
         )
-        self.colorSet = calendar.colorSetKey.convert()
+        self.colorSet = calendar.colorSetKey.convert(isSystemDarkTheme: isSystemDarkTheme)
         self.fontSet = calendar.fontSetKey.convert()
         
         self.accnetDayPolicy = calendar.accnetDayPolicy
@@ -119,9 +119,18 @@ extension ViewAppearance {
 
 extension ColorSetKeys {
     
-    public func convert() -> any ColorSet {
+    public func convert(isSystemDarkTheme: Bool) -> any ColorSet {
         switch self {
-        case .defaultLight: return DefaultLightColorSet()
+        case .systemTheme where isSystemDarkTheme:
+            // TOOD: 교체 필요
+            return DefaultLightColorSet()
+        case .systemTheme:
+            return DefaultLightColorSet()
+        case .defaultLight:
+            return DefaultLightColorSet()
+        case .defaultDark:
+            // TOOD: 교체 필요
+            return DefaultLightColorSet()
         }
     }
 }

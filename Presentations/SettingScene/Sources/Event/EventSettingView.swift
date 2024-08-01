@@ -287,7 +287,7 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        let viewAppearance = ViewAppearance(setting: setting)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = EventSettingViewState()
         state.tagModel = .init(id: .default, name: "default", color: .default)
         state.periodModel = .init(EventSettings.DefaultNewEventPeriod.minute15)

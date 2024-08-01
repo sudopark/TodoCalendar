@@ -264,7 +264,7 @@ struct EventTagDetailViewPreviewProvider: PreviewProvider {
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
-        let viewAppearance = ViewAppearance(setting: setting)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let detailView = EventTagDetailView()
         let state = EventTagDetailViewState()
         state.selectedColor = .default
