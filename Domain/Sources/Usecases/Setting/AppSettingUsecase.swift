@@ -47,6 +47,11 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         return setting
     }
     
+    public func loadAvailableColorThemes() async throws -> [ColorSetKeys] {
+        // TODO: 추후 커스텀 테마도 지원하도록 확장할 예정
+        return [.systemTheme, .defaultLight, .defaultDark]
+    }
+    
     public func refreshAppearanceSetting() async throws -> AppearanceSettings {
         let setting = try await self.appSettingRepository.refreshAppearanceSetting()
         self.sharedDataStore.put(
