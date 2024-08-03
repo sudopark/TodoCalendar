@@ -23,6 +23,10 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
         return setting
     }
     
+    public func loadAvailableColorThemes() async throws -> [ColorSetKeys] {
+        return [.systemTheme, .defaultLight, .defaultDark]
+    }
+    
     private let settingSubject = CurrentValueSubject<AppearanceSettings?, Never>(nil)
     open func refreshAppearanceSetting() async throws -> AppearanceSettings {
         let setting = self.readSetting()

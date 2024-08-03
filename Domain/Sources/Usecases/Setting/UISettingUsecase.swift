@@ -26,6 +26,7 @@ public protocol UISettingUsecase: Sendable {
     
     func loadSavedAppearanceSetting() -> AppearanceSettings
     func refreshAppearanceSetting() async throws -> AppearanceSettings
+    func loadAvailableColorThemes() async throws -> [ColorSetKeys]
     
     func changeCalendarAppearanceSetting(
         _ params: EditCalendarAppearanceSettingParams
