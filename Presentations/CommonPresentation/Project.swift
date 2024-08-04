@@ -7,7 +7,7 @@ let project = Project.framework(name: "CommonPresentation",
                                             requirement: .upToNextMajor(from: "7.10.0"))
                                 ],
                                 platform: .iOS,
-                                iOSTargetVersion: "16.0",
+                                iOSTargetVersion: "17.0",
                                 dependencies: [
                                     .project(target: "Common3rdParty",
                                              path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
