@@ -21,11 +21,16 @@ protocol AppearanceSettingRouting: Routing, Sendable {
 
 // MARK: - Router
 
-final class AppearanceSettingRouter: BaseRouterImple, AppearanceSettingRouting, @unchecked Sendable {
+final class AppearanceSettingRouter: BaseRouterImple, AppearanceSettingRouting, CalendarSectionRouting, @unchecked Sendable {
     
+    private let colorThemeSelectSceneBuiler: any ColorThemeSelectSceneBuiler
     private let timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler
     
-    init(timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler) {
+    init(
+        colorThemeSelectSceneBuiler: any ColorThemeSelectSceneBuiler,
+        timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler
+    ) {
+        self.colorThemeSelectSceneBuiler = colorThemeSelectSceneBuiler
         self.timeZoneSelectBuilder = timeZoneSelectBuilder
     }
     
@@ -42,6 +47,13 @@ extension AppearanceSettingRouter {
     }
     
     // TODO: router implememnts
+    
+    func routeToSelectColorTheme() {
+        Task { @MainActor in
+            let next = self.colorThemeSelectSceneBuiler.makeColorThemeSelectScene()
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
     
     func routeToSelectTimeZone() {
         Task { @MainActor in

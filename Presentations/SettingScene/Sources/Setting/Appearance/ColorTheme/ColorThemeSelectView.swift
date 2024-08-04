@@ -123,17 +123,20 @@ struct ColorThemeSelectView: View {
                     LazyVGrid(columns: gridRow) {
                         ForEach(0..<state.themeModels.count, id: \.self) { index in
                             ColorThemeItemView(model: state.themeModels[index])
+                                .onTapGesture {
+                                    eventHandlers.selectTheme(state.themeModels[index])
+                                }
                         }
                     }
                     .padding(.top, 40)
                 }
                 .background(
-                    appearance.colorSet.bg0.asColor
+                    appearance.colorSet.bg1.asColor
                         .shadow(radius: 1)
                         .ignoresSafeArea(.container)
                 )
             }
-            .background(appearance.colorSet.bg1.asColor)
+            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("Color Theme".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {

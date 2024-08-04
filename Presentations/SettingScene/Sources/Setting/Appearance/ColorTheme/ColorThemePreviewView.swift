@@ -17,6 +17,7 @@ struct ColorThemePreviewView: View {
     struct Metric {
         let fontSize: CGFloat
         let circleSize: CGFloat
+        let circlePadding: CGFloat
     }
     
     private let model: ColorThemeModel
@@ -37,8 +38,8 @@ struct ColorThemePreviewView: View {
                     Circle()
                         .fill(colorSet.holidayOrWeekEndWithAccent.asColor)
                         .frame(width: metric.circleSize, height: metric.circleSize)
-                        .padding(.trailing, 8)
-                        .padding(.top, 8)
+                        .padding(.trailing, metric.circlePadding)
+                        .padding(.top, metric.circlePadding)
                 }
                 Spacer()
             }
@@ -75,7 +76,7 @@ struct ColorThemeItemView: View {
             
             ColorThemePreviewView(
                 model: model,
-                metric: .init(fontSize: 20, circleSize: 8),
+                metric: .init(fontSize: 20, circleSize: 8, circlePadding: 8),
                 isSystemDark: self.colorScheme == .dark
             )
             .frame(width: 60, height: 60)
@@ -84,7 +85,7 @@ struct ColorThemeItemView: View {
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(
                     model.isSelected 
-                    ? appearance.colorSet.selectedDayText.asColor
+                    ? appearance.colorSet.primaryBtnText.asColor
                     : appearance.colorSet.weekDayText.asColor
                 )
                 .padding(6)
@@ -92,7 +93,7 @@ struct ColorThemeItemView: View {
                     RoundedRectangle(cornerRadius: 4)
                         .fill(
                             model.isSelected 
-                            ? appearance.colorSet.selectedDayBackground.asColor
+                            ? appearance.colorSet.primaryBtnBackground.asColor
                             : .clear
                         )
                 )

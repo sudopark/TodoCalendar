@@ -19,7 +19,12 @@ protocol ColorThemeSelectRouting: Routing, Sendable { }
 
 // MARK: - Router
 
-final class ColorThemeSelectRouter: BaseRouterImple, ColorThemeSelectRouting, @unchecked Sendable { }
+final class ColorThemeSelectRouter: BaseRouterImple, ColorThemeSelectRouting, @unchecked Sendable { 
+    
+    override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
+        self.currentScene?.navigationController?.popViewController(animated: true)
+    }
+}
 
 
 extension ColorThemeSelectRouter {
