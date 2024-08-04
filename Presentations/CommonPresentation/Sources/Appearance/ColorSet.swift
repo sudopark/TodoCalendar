@@ -30,8 +30,6 @@ public struct EventTagColorSet: Equatable {
 
 public protocol ColorSet: Sendable {
     
-    var key: ColorSetKeys { get }
-    
     // calendar component
     var weekDayText: UIColor { get }
     var weekEndText: UIColor { get }
@@ -74,8 +72,6 @@ public protocol ColorSet: Sendable {
 
 public struct DefaultLightColorSet: ColorSet {
     
-    public let key: ColorSetKeys = .defaultLight
-
     // calendar component
     public let weekDayText: UIColor = UIColor(rgb: 0x323232)
     public let weekEndText: UIColor = UIColor(rgb: 0x646464)
@@ -120,8 +116,6 @@ public struct DefaultLightColorSet: ColorSet {
 // MARK: - default dark
 
 public struct DefaultDarkColorSet: ColorSet {
-    
-    public let key: ColorSetKeys = .defaultDark
 
     // calendar component
     public let weekDayText: UIColor = UIColor(rgb: 0xf3f4f7)

@@ -48,8 +48,8 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     
     @MainActor
     private func notifySystemColorThemeChangedIfNeed(isDark: Bool) {
-        guard self.appearance.colorSet.key == .systemTheme else { return }
-        let newSet = self.appearance.colorSet.key.convert(isSystemDarkTheme: isDark)
+        guard self.appearance.colorSetKey == .systemTheme else { return }
+        let newSet = self.appearance.colorSetKey.convert(isSystemDarkTheme: isDark)
         let didSetChanged = type(of: self.appearance.colorSet) != type(of: newSet)
         guard didSetChanged else { return }
         self.appearance.colorSet = newSet
@@ -62,7 +62,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     
     func notifyCalendarSettingChanged(_ newSetting: CalendarAppearanceSettings) {
         Task { @MainActor in
-            if self.appearance.colorSet.key != newSetting.colorSetKey {
+            if self.appearance.colorSetKey != newSetting.colorSetKey {
                 self.appearance.colorSet = newSetting.colorSetKey.convert(
                     isSystemDarkTheme: self.window?.traitCollection.userInterfaceStyle == .dark
                 )
