@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.framework(name: "TestDoubles",
                                 platform: .iOS,
-                                iOSTargetVersion: "16.0",
+                                iOSTargetVersion: "17.0",
                                 dependencies: [
                                     .project(target: "Common3rdParty",
                                              path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
