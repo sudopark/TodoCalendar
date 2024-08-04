@@ -12,6 +12,7 @@ import Domain
 
 public class ViewAppearance: ObservableObject {
     
+    public var colorSetKey: ColorSetKeys
     @Published public var tagColors: EventTagColorSet
     @Published public var colorSet: any ColorSet
     @Published public var fontSet: any FontSet
@@ -43,6 +44,7 @@ public class ViewAppearance: ObservableObject {
             holiday: UIColor.from(hex: defaultTagColor.holiday) ?? .clear,
             defaultColor: UIColor.from(hex: defaultTagColor.default) ?? .clear
         )
+        self.colorSetKey = calendar.colorSetKey
         self.colorSet = calendar.colorSetKey.convert(isSystemDarkTheme: isSystemDarkTheme)
         self.fontSet = calendar.fontSetKey.convert()
         
