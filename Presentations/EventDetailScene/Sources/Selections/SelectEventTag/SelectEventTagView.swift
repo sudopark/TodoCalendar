@@ -129,6 +129,7 @@ struct SelectEventTagView: View {
                     .eventHandler(\.onTap, eventHandlers.close)
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     private func tagCellView(_ tag: TagCellViewModel) -> some View {

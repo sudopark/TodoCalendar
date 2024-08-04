@@ -146,6 +146,7 @@ struct ColorThemeSelectView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
 }
 

@@ -133,6 +133,7 @@ struct SelectEventRepeatOptionView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     private func sectionView(_ section: [SelectRepeatingOptionModel]) -> some View {

@@ -144,6 +144,7 @@ struct EventNotificationDefaultTimeOptionView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     private var permissionNeedView: some View {

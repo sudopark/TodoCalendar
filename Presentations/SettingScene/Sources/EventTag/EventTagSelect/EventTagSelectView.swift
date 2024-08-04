@@ -100,7 +100,6 @@ struct EventTagSelectView: View {
     var body: some View {
         NavigationStack {
             
-            
             List {
                 
                 Text("This is the event type selected by default when creating a new event.".localized())
@@ -125,6 +124,7 @@ struct EventTagSelectView: View {
             }
             .navigationTitle("Default Event Type".localized())
         }
+            .id(appearance.navigationBarId)
     }
     
     private func cellView(_ cellViewModel: EventTagCellViewModel) -> some View {

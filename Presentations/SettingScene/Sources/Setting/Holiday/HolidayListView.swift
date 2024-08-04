@@ -145,6 +145,7 @@ struct HolidayListView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     private var countrySelectSectionView: some View {

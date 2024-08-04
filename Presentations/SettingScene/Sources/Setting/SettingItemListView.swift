@@ -103,6 +103,7 @@ struct SettingItemListView: View {
             }
             .navigationTitle("Settings".localized())
         }
+        .id(appearance.navigationBarId)
     }
     
     private func sectionView(_ section: any SettingSectionModelType) -> some View {
