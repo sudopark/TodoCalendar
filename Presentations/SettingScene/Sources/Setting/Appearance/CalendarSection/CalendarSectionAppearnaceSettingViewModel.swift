@@ -111,6 +111,7 @@ protocol CalendarSectionAppearnaceSettingViewModel: AnyObject, Sendable {
     var currentWeekStartDay: AnyPublisher<DayOfWeeks, Never> { get }
     var calendarAppearanceModel: AnyPublisher<CalendarAppearanceModel, Never> { get }
     var accentDaysActivatedMap: AnyPublisher<[AccentDays: Bool], Never> { get }
+    var selectedColorTheme: AnyPublisher<ColorThemeModel, Never> { get }
     var isShowUnderLineOnEventDay: AnyPublisher<Bool, Never> { get }
 }
 
@@ -224,6 +225,14 @@ extension CalendarSectionViewModelImple {
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
+    
+    var selectedColorTheme: AnyPublisher<ColorThemeModel, Never> {
+        return self.uiSettingUsecase.currentCalendarUISeting
+            .map { ColorThemeModel($0.colorSetKey) }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
     var isShowUnderLineOnEventDay: AnyPublisher<Bool, Never> {
         return self.subject.setting
             .compactMap { $0?.showUnderLineOnEventDay }

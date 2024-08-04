@@ -17,13 +17,16 @@ import TestDoubles
 class CalendarSectionViewModelTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
+    private var spyRouter: SpyRouter!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
+        self.spyRouter = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
+        self.spyRouter = nil
     }
     
     private var dummySetting: CalendarSectionAppearanceSetting {
@@ -37,12 +40,14 @@ class CalendarSectionViewModelTests: BaseTestCase, PublisherWaitable {
         let uiSettingUsecase = StubUISettingUsecase()
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.prepare()
+        _ = uiSettingUsecase.loadSavedAppearanceSetting()
         
         let viewModel = CalendarSectionViewModelImple(
             setting: self.dummySetting,
             calendarSettingUsecase: calendarSettingUsecase,
             uiSettingUsecase: uiSettingUsecase
         )
+        viewModel.router = self.spyRouter
         return viewModel
     }
 }
@@ -229,6 +234,28 @@ extension CalendarSectionViewModelTests {
 extension CalendarSectionViewModelTests {
     
     // TODO: 테마 변경으로 이동
+    func testViewModel_provideCurrentColorTheme() {
+        // given
+        let expect = expectation(description: "현재 컬러테마값 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let model = self.waitFirstOutput(expect, for: viewModel.selectedColorTheme)
+        
+        // then
+        XCTAssertEqual(model?.key, .defaultLight)
+    }
+    
+    func testViewModel_routeSelectToColorTheme() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.changeColorTheme()
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToSelectColorTheme, true)
+    }
 }
 
 

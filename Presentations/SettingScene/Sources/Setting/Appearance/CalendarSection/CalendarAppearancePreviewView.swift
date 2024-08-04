@@ -19,6 +19,7 @@ final class CalendarSectionAppearanceSettingViewState: ObservableObject {
     @Published var accentDays: [AccentDays: Bool] = [:]
     @Published var showUnderLine: Bool = false
     @Published var selectedWeekDay: DayOfWeeks = .sunday
+    @Published var selectedColorTheme: ColorThemeModel = .init(.systemTheme)
     private var didFirstCalendarModelUpdated = false
     
     init(_ setting: CalendarSectionAppearanceSetting) {
@@ -63,6 +64,13 @@ final class CalendarSectionAppearanceSettingViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] flag in
                 self?.showUnderLine = flag
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.selectedColorTheme
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.selectedColorTheme = model
             })
             .store(in: &self.cancellables)
     }
@@ -184,6 +192,7 @@ struct CalendarSectionAppearanceSettingView: View {
     @StateObject private var state: CalendarSectionAppearanceSettingViewState
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandlers: CalendarSectionAppearanceSettingViewEventHandler
+    @Environment(\.colorScheme) var colorScheme
     
     var stateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
     
@@ -293,6 +302,13 @@ extension CalendarSectionAppearanceSettingView {
     
     private var colorThemePreview: some View {
         HStack {
+            
+            ColorThemePreviewView(
+                model: self.state.selectedColorTheme,
+                metric: .init(fontSize: 15, circleSize: 4, circlePadding: 6),
+                isSystemDark: colorScheme == .dark
+            )
+            .frame(width: 40, height: 40)
             
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.subNormal.asFont)
