@@ -16,6 +16,10 @@ public class ViewAppearance: ObservableObject {
     @Published public var tagColors: EventTagColorSet
     @Published public var colorSet: any ColorSet
     @Published public var fontSet: any FontSet
+    @Published public var navigationBarId: String = UUID().uuidString
+    public func forceReloadNavigationBar() {
+        self.navigationBarId = UUID().uuidString
+    }
     
     // calendar
     @Published public var accnetDayPolicy: [AccentDays: Bool]

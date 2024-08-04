@@ -200,6 +200,7 @@ struct SelectEventNotificationTimeView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     private func defaultOptionView(_ model: NotificationTimeOptionModel?) -> some View {

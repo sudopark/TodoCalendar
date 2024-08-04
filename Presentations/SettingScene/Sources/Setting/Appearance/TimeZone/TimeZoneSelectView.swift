@@ -138,6 +138,7 @@ struct TimeZoneSelectView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     private var searchBarView: some View {

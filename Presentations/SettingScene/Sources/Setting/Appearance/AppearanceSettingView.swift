@@ -210,6 +210,7 @@ struct AppearanceSettingView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     private var generalSettingView: some View {

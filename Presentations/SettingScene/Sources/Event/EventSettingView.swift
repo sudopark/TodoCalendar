@@ -151,6 +151,7 @@ struct EventSettingView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     private func rowView(_ content: some View) -> some View {

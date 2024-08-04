@@ -139,6 +139,7 @@ struct DoneTodoEventListView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     private func sectionView(_ section: DoneTodoListSectionModel) -> some View {

@@ -136,6 +136,7 @@ struct CountrySelectView: View {
                 }
             }
         }
+            .id(appearance.navigationBarId)
     }
     
     func countryView(_ country: HolidaySupportCountry) -> some View {

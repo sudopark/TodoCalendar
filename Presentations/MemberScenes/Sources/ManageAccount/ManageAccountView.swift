@@ -152,6 +152,7 @@ struct ManageAccountView: View {
             }
             .navigationTitle("manage_account::title".localized())
         }
+            .id(appearance.navigationBarId)
     }
     
     private func loginInfoView(_ key: String, _ value: String?) -> some View {

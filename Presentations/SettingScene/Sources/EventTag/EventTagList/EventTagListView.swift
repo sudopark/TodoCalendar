@@ -133,6 +133,7 @@ struct EventTagListView: View {
             }
             .navigationTitle("Event Types".localized())
         }
+            .id(appearance.navigationBarId)
     }
     
     private var addButton: some View {

@@ -34,6 +34,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
             isSystemDarkTheme: window?.traitCollection.userInterfaceStyle == .dark
         )
         self.bindSystemColorThemeChanged()
+        self.changeNavigationBarAppearnace(self.appearance.colorSet)
     }
     
     @MainActor
@@ -52,7 +53,9 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         let newSet = self.appearance.colorSetKey.convert(isSystemDarkTheme: isDark)
         let didSetChanged = type(of: self.appearance.colorSet) != type(of: newSet)
         guard didSetChanged else { return }
+        self.changeNavigationBarAppearnace(newSet)
         self.appearance.colorSet = newSet
+        self.appearance.forceReloadNavigationBar()
     }
     
     func notifySettingChanged(_ newSetting: AppearanceSettings) {
@@ -63,9 +66,13 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     func notifyCalendarSettingChanged(_ newSetting: CalendarAppearanceSettings) {
         Task { @MainActor in
             if self.appearance.colorSetKey != newSetting.colorSetKey {
-                self.appearance.colorSet = newSetting.colorSetKey.convert(
+                self.appearance.colorSetKey = newSetting.colorSetKey
+                let newSet = newSetting.colorSetKey.convert(
                     isSystemDarkTheme: self.window?.traitCollection.userInterfaceStyle == .dark
                 )
+                self.changeNavigationBarAppearnace(newSet)
+                self.appearance.colorSet = newSet
+                self.appearance.forceReloadNavigationBar()
             }
             if self.appearance.fontSet.key != newSetting.fontSetKey {
                 self.appearance.fontSet = newSetting.fontSetKey.convert()
@@ -120,6 +127,13 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
                 self.appearance.tagColors = newTagColorSet
             }
         }
+    }
+    
+    @MainActor
+    private func changeNavigationBarAppearnace(_ newSet: any ColorSet) {
+        
+        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: newSet.text0]
+        UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: newSet.text0]
     }
 }
 
