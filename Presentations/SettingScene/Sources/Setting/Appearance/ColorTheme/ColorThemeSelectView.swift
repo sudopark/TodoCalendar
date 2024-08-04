@@ -11,6 +11,8 @@
 
 import SwiftUI
 import Combine
+import Prelude
+import Optics
 import Domain
 import CommonPresentation
 
@@ -22,12 +24,28 @@ final class ColorThemeSelectViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
+    @Published fileprivate var sampleModel: CalendarAppearanceModel = .init(.sunday)
+    @Published fileprivate var themeModels: [ColorThemeModel] = []
+    
     func bind(_ viewModel: any ColorThemeSelectViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
         
         // TODO: bind state
+        viewModel.sampleModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.sampleModel = model
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.colorThemeModels
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] models in
+                self?.themeModels = models
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -38,9 +56,14 @@ final class ColorThemeSelectViewEventHandler: ObservableObject {
     // TODO: add handlers
     var onAppear: () -> Void = { }
     var close: () -> Void = { }
+    var selectTheme: (ColorThemeModel) -> Void = { _ in }
 
     func bind(_ viewModel: any ColorThemeSelectViewModel) {
         // TODO: bind handlers
+        
+        self.onAppear = viewModel.prepare
+        self.close = viewModel.close
+        self.selectTheme = viewModel.selectTheme(_:)
     }
 }
 
@@ -83,8 +106,43 @@ struct ColorThemeSelectView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandlers: ColorThemeSelectViewEventHandler
     
+    private let gridRow: [GridItem] = [
+        .init(.flexible(minimum: 60, maximum: 100)),
+        .init(.flexible(minimum: 60, maximum: 100)),
+        .init(.flexible(minimum: 60, maximum: 100))
+    ]
+    
     var body: some View {
-        Text("ColorThemeSelectView")
+        NavigationStack {
+            VStack {
+                
+                CalendarAppearanceSampleView(model: self.$state.sampleModel)
+                    .padding(.vertical, 60)
+                
+                ScrollView {
+                    LazyVGrid(columns: gridRow) {
+                        ForEach(0..<state.themeModels.count, id: \.self) { index in
+                            ColorThemeItemView(model: state.themeModels[index])
+                        }
+                    }
+                    .padding(.top, 40)
+                }
+                .background(
+                    appearance.colorSet.bg0.asColor
+                        .shadow(radius: 1)
+                        .ignoresSafeArea(.container)
+                )
+            }
+            .background(appearance.colorSet.bg1.asColor)
+            .navigationTitle("Color Theme".localized())
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    NavigationBackButton {
+                        eventHandlers.close()
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -105,6 +163,11 @@ struct ColorThemeSelectViewPreviewProvider: PreviewProvider {
             setting: setting, isSystemDarkTheme: false
         )
         let state = ColorThemeSelectViewState()
+        state.themeModels = [
+            .init(.systemTheme) |> \.isSelected .~ true,
+            .init(.defaultLight),
+            .init(.defaultDark)
+        ]
         let eventHandlers = ColorThemeSelectViewEventHandler()
         
         let view = ColorThemeSelectView()
