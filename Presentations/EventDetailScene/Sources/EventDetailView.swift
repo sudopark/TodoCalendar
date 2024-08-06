@@ -312,9 +312,11 @@ struct EventDetailView: View {
                 .frame(width: 6)
             
             TextField(
-                "Add new event name".localized(),
+                "",
                 text: self.$state.enterName,
-                axis: .vertical
+                prompt: Text("Add new event name".localized())
+                    .foregroundStyle(appearance.colorSet.placeHolder.asColor)
+                            
             )
             .onReceive(self.state.$enterName, perform: self.nameEntered)
             .focused($isFocusInput, equals: .name)
@@ -479,6 +481,7 @@ struct EventDetailView: View {
             return HStack(spacing: 16) {
                 emptyLabelView(.start)
                 Image(systemName: "chevron.right")
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 emptyLabelView(.end)
             }
             .asAnyView()
@@ -487,6 +490,7 @@ struct EventDetailView: View {
             return HStack(spacing: 16) {
                 timeView(time, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 emptyLabelView(.end)
             }
             .asAnyView()
@@ -494,6 +498,7 @@ struct EventDetailView: View {
             return HStack(spacing: 16) {
                 timeView(from, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 timeView(to, .end, isInvalid: isInvalid)
             }
             .asAnyView()
@@ -502,6 +507,7 @@ struct EventDetailView: View {
             return HStack(spacing: 16) {
                 timeView(time, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 emptyLabelView(.end)
             }
             .asAnyView()
@@ -510,6 +516,7 @@ struct EventDetailView: View {
             return HStack(spacing: 16) {
                 timeView(from, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 timeView(to, .end, isInvalid: isInvalid)
             }
             .asAnyView()
@@ -521,7 +528,7 @@ struct EventDetailView: View {
         func backGroundView() -> some View {
             if self.state.isAllDay {
                 return RoundedRectangle(cornerRadius: 16)
-                    .fill(self.appearance.colorSet.text0.asColor)
+                    .fill(self.appearance.colorSet.selectedDayBackground.asColor)
                     .asAnyView()
             } else {
                 return RoundedRectangle(cornerRadius: 16)
@@ -529,7 +536,9 @@ struct EventDetailView: View {
                     .asAnyView()
             }
         }
-        let textColor: Color = self.state.isAllDay ? .white : self.appearance.colorSet.text2.asColor
+        let textColor: Color = self.state.isAllDay
+            ? self.appearance.colorSet.selectedDayText.asColor
+            : self.appearance.colorSet.text2.asColor
         return Button {
             self.toggleIsAllDay()
             
@@ -550,6 +559,7 @@ struct EventDetailView: View {
             HStack(spacing: 16) {
                 Image(systemName: "clock")
                     .font(.system(size: 16, weight: .light))
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 
                 selectedTimeView()
                 
@@ -604,6 +614,7 @@ struct EventDetailView: View {
                 }
             }
             .labelsHidden()
+            .invertColorIfNeed(appearance)
             
             HStack {
                 removeEventTimeView
@@ -645,6 +656,7 @@ struct EventDetailView: View {
         HStack(spacing: 16) {
             Image(systemName: "arrow.clockwise")
                 .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
             Text(self.state.selectedRepeat ?? "no repeat".localized())
                 .font(self.appearance.fontSet.subNormal.asFont)
@@ -674,6 +686,7 @@ struct EventDetailView: View {
         HStack(spacing: 16) {
             Image(systemName: "calendar")
                 .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
             HStack {
                 Circle()
@@ -701,6 +714,7 @@ struct EventDetailView: View {
         HStack(spacing: 16) {
             Image(systemName: "bell.fill")
                 .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
             Text(
                 self.state.selectedNotificationTimeText 
@@ -733,17 +747,22 @@ struct EventDetailView: View {
         HStack(spacing: 16) {
             Image(systemName: "link")
                 .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
-            TextField("URL".localized(), text: self.$state.url)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                .font(self.appearance.fontSet.size(14).asFont)
-                .focused(self.$isFocusInput, equals: .url)
-                .onSubmit {
-                    self.isFocusInput = nil
-                }
-                .onReceive(self.state.$url, perform: self.enterUrl)
+            TextField(
+                "",
+                text: self.$state.url,
+                prompt: Text("URL").foregroundStyle(appearance.colorSet.placeHolder.asColor)
+            )
+            .autocorrectionDisabled()
+            .textInputAutocapitalization(.never)
+            .foregroundStyle(self.appearance.colorSet.text0.asColor)
+            .font(self.appearance.fontSet.size(14).asFont)
+            .focused(self.$isFocusInput, equals: .url)
+            .onSubmit {
+                self.isFocusInput = nil
+            }
+            .onReceive(self.state.$url, perform: self.enterUrl)
         }
     }
     
@@ -751,17 +770,22 @@ struct EventDetailView: View {
         HStack(spacing: 16) {
             Image(systemName: "doc.text")
                 .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
-            TextField("Memo".localized(), text: self.$state.memo)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                .font(self.appearance.fontSet.size(14).asFont)
-                .focused(self.$isFocusInput, equals: .memo)
-                .onSubmit {
-                    self.isFocusInput = nil
-                }
-                .onReceive(self.state.$memo, perform: self.enterMemo)
+            TextField(
+                "",
+                text: self.$state.memo,
+                prompt: Text("Memo".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor)
+            )
+            .autocorrectionDisabled()
+            .textInputAutocapitalization(.never)
+            .foregroundStyle(self.appearance.colorSet.text0.asColor)
+            .font(self.appearance.fontSet.size(14).asFont)
+            .focused(self.$isFocusInput, equals: .memo)
+            .onSubmit {
+                self.isFocusInput = nil
+            }
+            .onReceive(self.state.$memo, perform: self.enterMemo)
         }
     }
 }
@@ -876,6 +900,7 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
 //            state.isSaving = true
 //        }
         let eventView = EventDetailView()
+            .eventHandler(\.toggleIsAllDay) { state.isAllDay.toggle() }
             .environmentObject(viewAppearance)
             .environmentObject(state)
         return eventView

@@ -161,10 +161,19 @@ struct SelectEventNotificationTimeView: View {
                             self.customOptionView($0)
                         }
                     } header: {
-                        Text("Custom".localized())
-                            .font(appearance.fontSet.bigBold.asFont)
-                            .foregroundStyle(appearance.colorSet.text0.asColor)
-                        
+                        VStack {
+                            Spacer()
+                            HStack {
+                                Text("Custom".localized())
+                                    .font(appearance.fontSet.bigBold.asFont)
+                                    .foregroundStyle(appearance.colorSet.text0.asColor)
+                                    .padding(.leading, 20)
+                                Spacer()
+                            }
+                            Spacer()
+                        }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+                        .background(appearance.colorSet.bg0.asColor)
                     }
                     .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                     .listRowSeparator(.hidden)
@@ -268,6 +277,7 @@ struct SelectEventNotificationTimeView: View {
             )
             .datePickerStyle(.compact)
             .labelsHidden()
+            .invertColorIfNeed(appearance)
             
             Spacer()
             
@@ -306,6 +316,7 @@ struct SelectEventNotificationTimeView: View {
                     .foregroundStyle(appearance.colorSet.accent.asColor)
             }
         }
+        .padding(.bottom, 40)
     }
     
     private var permissionNeedView: some View {
@@ -329,7 +340,7 @@ struct SelectEventNotificationTimeView: View {
             .padding()
             .background(
                 Rectangle()
-                    .fill(appearance.colorSet.bg1.asColor)
+                    .fill(appearance.colorSet.bg2.asColor)
                     .ignoresSafeArea(edges: .bottom)
             )
         }

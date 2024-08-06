@@ -46,6 +46,7 @@ public protocol ColorSet: Sendable {
     var text0: UIColor { get }
     var text1: UIColor { get }
     var text2: UIColor { get }
+    var placeHolder: UIColor { get }
     var text0_inverted: UIColor { get }
     
     // normal button colors
@@ -90,6 +91,7 @@ public struct DefaultLightColorSet: ColorSet {
     public let text1: UIColor = UIColor(rgb: 0x646464)
     public let text2: UIColor = UIColor(rgb: 0x969696)
     public let text0_inverted: UIColor = .white
+    public let placeHolder: UIColor = UIColor(rgb: 0xccd0dc)
     
     // normal button colors
     public let primaryBtnBackground: UIColor = .systemBlue
@@ -136,6 +138,7 @@ public struct DefaultDarkColorSet: ColorSet {
     public let text1: UIColor = UIColor(rgb: 0xf1f1f1)
     public let text2: UIColor = UIColor(rgb: 0xe5e5e4)
     public let text0_inverted: UIColor = UIColor(rgb: 0x393c3c)
+    public let placeHolder: UIColor = UIColor(rgb: 0xa0a0a7)
     
     // normal button colors
     public let primaryBtnBackground: UIColor = .systemBlue

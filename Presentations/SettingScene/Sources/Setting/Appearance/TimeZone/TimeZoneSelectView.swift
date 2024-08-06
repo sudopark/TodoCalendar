@@ -125,12 +125,14 @@ struct TimeZoneSelectView: View {
                         ForEach(state.timeZones, id: \.identifier) { model in
                             timezoneView(model)
                         }
+                        .listRowSeparatorTint(appearance.colorSet.line.asColor, edges: .all)
                         .listRowBackground(appearance.colorSet.bg1.asColor)
                     }
                 }
                 .scrollContentBackground(.hidden)
                 .listStyle(.insetGrouped)
             }
+            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("TimeZone")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -209,7 +211,7 @@ struct TimeZoneSelectViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultLight,
+            colorSetKey: .defaultDark,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

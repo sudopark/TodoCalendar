@@ -127,6 +127,8 @@ struct DoneTodoEventListView: View {
                     .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
                 lastLine
+                    .listSectionSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
             }
             .background(appearance.colorSet.bg0.asColor)
             .listStyle(.plain)

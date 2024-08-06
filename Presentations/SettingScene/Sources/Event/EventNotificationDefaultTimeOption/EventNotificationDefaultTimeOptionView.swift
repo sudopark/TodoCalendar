@@ -168,7 +168,7 @@ struct EventNotificationDefaultTimeOptionView: View {
             .padding()
             .background(
                 Rectangle()
-                    .fill(appearance.colorSet.bg1.asColor)
+                    .fill(appearance.colorSet.bg2.asColor)
                     .ignoresSafeArea(edges: .bottom)
             )
         }

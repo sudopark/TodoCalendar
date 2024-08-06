@@ -127,6 +127,8 @@ struct SelectEventRepeatOptionView: View {
                 CloseButton()
                     .eventHandler(\.onTap, self.eventHandlers.close)
             }
+            .toolbarBackground(appearance.colorSet.bg2.asColor, for: .bottomBar)
+            .toolbarBackground(.visible, for: .bottomBar)
             .toolbar {
                 ToolbarItem(placement: .bottomBar) {
                     self.repeatEndBarView
@@ -149,6 +151,7 @@ struct SelectEventRepeatOptionView: View {
                     if self.state.selectedOptionId == option.id {
                         Image(systemName: "checkmark")
                             .font(.system(size: 12))
+                            .foregroundStyle(appearance.colorSet.text0.asColor)
                     }
                 }
                 .padding(.vertical, 8)
@@ -163,14 +166,24 @@ struct SelectEventRepeatOptionView: View {
                 }
             }
         } header: {
-            Text("")
+            VStack {
+                Spacer()
+                HStack {
+                    Text("")
+                    Spacer()
+                }
+                Spacer()
+            }
+            .listRowInsets(EdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 0))
+            .background(appearance.colorSet.bg0.asColor)
         }
     }
     
     private var repeatEndBarView: some View {
         HStack {
             Text("Repeat end date".localized())
-            
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
             Spacer()
             
             DatePicker(
@@ -178,6 +191,7 @@ struct SelectEventRepeatOptionView: View {
                 selection: self.$state.selectedEndDate,
                 displayedComponents: [.date]
             )
+            .invertColorIfNeed(appearance)
             .labelsHidden()
             .onChange(of: self.state.selectedEndDate) { date in
                 self.eventHandlers.endTimeSelect(date)

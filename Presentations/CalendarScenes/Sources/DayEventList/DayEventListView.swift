@@ -272,7 +272,11 @@ private struct QuickAddNewTodoView: View {
                 .frame(width: 6)
             
             HStack(spacing: 8) {
-                TextField("Add a new todo quickly".localized(), text: $newTodoName)
+                TextField(
+                    "",
+                    text: $newTodoName,
+                    prompt: Text("Add a new todo quickly".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor)
+                )
                     .focused($isFocusInput, equals: true)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)

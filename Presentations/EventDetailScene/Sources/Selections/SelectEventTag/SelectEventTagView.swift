@@ -148,6 +148,7 @@ struct SelectEventTagView: View {
             if self.state.selectedTagId == tag.id {
                 Image(systemName: "checkmark")
                     .font(.system(size: 12))
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
         .padding(.vertical, 8)

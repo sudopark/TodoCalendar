@@ -151,7 +151,7 @@ struct CountrySelectView: View {
             if self.state.selectedCountryCode == country.code {
                 Image(systemName: "checkmark")
                     .font(self.appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.accent.asColor)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
         .padding(.vertical, 8)

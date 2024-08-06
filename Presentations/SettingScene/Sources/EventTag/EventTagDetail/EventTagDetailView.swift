@@ -113,6 +113,7 @@ struct EventTagDetailView: View {
             
             Text("Event color".localized())
                 .font(self.appearance.fontSet.normal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 .padding(.top, 24)
             
             self.suggestColorView
@@ -132,8 +133,9 @@ struct EventTagDetailView: View {
                 .foregroundStyle(self.state.selectedColor?.color(with: self.appearance).asColor ?? .clear)
             
             TextField(
-                "Add new tag name".localized(),
+                "",
                 text: self.$state.newTagName,
+                prompt: Text("Add new tag name".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor),
                 axis: .vertical
             )
             .disabled(!self.state.isNameChangable)

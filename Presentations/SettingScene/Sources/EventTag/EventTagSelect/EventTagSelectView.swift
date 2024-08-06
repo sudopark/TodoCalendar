@@ -148,6 +148,7 @@ struct EventTagSelectView: View {
             if cellViewModel.id == state.selectedId {
                 Image(systemName: "checkmark")
                     .font(.system(size: 12))
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
         .padding(.horizontal, 12)

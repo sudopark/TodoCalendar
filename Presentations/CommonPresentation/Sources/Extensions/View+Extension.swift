@@ -21,6 +21,15 @@ extension View {
     ) -> Self {
         return self |> keyPath .~ handler
     }
+    
+    public func invertColorIfNeed(_ appearance: ViewAppearance) -> some View {
+        let currentScheme = UITraitCollection.current.userInterfaceStyle
+        switch (currentScheme, appearance.colorSetKey) {
+        case (.light, .defaultDark): return self.colorInvert().asAnyView()
+        case (.dark, .defaultLight): return self.colorInvert().asAnyView()
+        default: return self.asAnyView()
+        }
+    }
 }
 
 
