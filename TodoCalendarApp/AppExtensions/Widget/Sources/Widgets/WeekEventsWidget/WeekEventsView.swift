@@ -25,7 +25,7 @@ struct WeekEventsView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultLightColorSet()
+        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
     }
     
     private let model: WeekEventsViewModel

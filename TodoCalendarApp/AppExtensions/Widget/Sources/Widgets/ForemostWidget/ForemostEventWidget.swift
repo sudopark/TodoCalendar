@@ -23,7 +23,7 @@ struct SystemSizeForemostEventView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultLightColorSet()
+        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
     }
     
     private struct Metric {
@@ -219,7 +219,7 @@ struct ForemostEventWidgetView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultLightColorSet()
+        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
     }
     
     private let entry: ResultTimelineEntry<ForemostEventWidgetViewModelWithSize>
