@@ -131,8 +131,11 @@ struct ColorThemeSelectView: View {
                     .padding(.top, 40)
                 }
                 .background(
-                    appearance.colorSet.bg1.asColor
-                        .shadow(radius: 1)
+                    appearance.colorSet.bg2.asColor
+                        .shadow(
+                            color: appearance.colorSet.text0.withAlphaComponent(0.4).asColor,
+                            radius: 1
+                        )
                         .ignoresSafeArea(.container)
                 )
             }
