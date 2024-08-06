@@ -243,7 +243,10 @@ private struct WeekRowView: View {
                 .fill(backgroundColor)
         )
         .opacity(opacity)
-        .onTapGesture { self.daySelected(day) }
+        .onTapGesture {
+            appearance.impactIfNeed()
+            self.daySelected(day)
+        }
     }
     
     private func eventStackView() -> some View {

@@ -41,7 +41,10 @@ public struct BottomConfirmButton: View {
                 isEnable: self._isEnable,
                 isProcessing: self._isProcessing
             )
-            .eventHandler(\.onTap, self.onTap)
+            .eventHandler(\.onTap, {
+                self.appearance.impactIfNeed(.light)
+                self.onTap()
+            })
         }
         .padding()
         .background(

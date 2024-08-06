@@ -47,6 +47,7 @@ public struct ConfirmButton: View {
     
     public var body: some View {
         Button {
+            self.appearance.impactIfNeed(.light)
             self.onTap()
         } label: {
             if self.isProcessing {

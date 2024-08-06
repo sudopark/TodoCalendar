@@ -110,6 +110,7 @@ extension MainViewController {
         
         self.headerView.migrationButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
+                self?.viewAppearance.impactIfNeed()
                 self?.viewModel.handleMigration()
             })
             .store(in: &self.cancellables)
@@ -117,18 +118,21 @@ extension MainViewController {
         self.headerView.eventTypeFilterButton
             .addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
+                self?.viewAppearance.impactIfNeed()
                 self?.viewModel.moveToEventTypeFilterSetting()
             })
             .store(in: &self.cancellables)
         
         self.headerView.settingButton.addTapGestureRecognizerPublisher()
             .sink { [weak self] in
+                self?.viewAppearance.impactIfNeed()
                 self?.viewModel.moveToSetting()
             }
             .store(in: &self.cancellables)
         
         self.headerView.logButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
+                self?.viewAppearance.impactIfNeed()
                 let consoleBuilder = LoggerConsoleBuilder()
                 let consoleVC = consoleBuilder.makeConsoleView()
                 self?.present(consoleVC, animated: true)

@@ -157,6 +157,7 @@ struct EventTagSelectView: View {
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {
+            self.appearance.impactIfNeed()
             eventHandlers.selectTag(cellViewModel.id)
         }
     }

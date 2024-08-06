@@ -109,6 +109,12 @@ extension ViewAppearance {
             weight: .regular
         )
     }
+    
+    public func impactIfNeed(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .soft) {
+        guard self.hapticEffectOff else { return }
+        let generator = UIImpactFeedbackGenerator(style: style)
+        generator.impactOccurred()
+    }
 }
 
 extension ViewAppearance {

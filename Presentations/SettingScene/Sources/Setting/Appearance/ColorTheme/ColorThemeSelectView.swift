@@ -124,6 +124,7 @@ struct ColorThemeSelectView: View {
                         ForEach(0..<state.themeModels.count, id: \.self) { index in
                             ColorThemeItemView(model: state.themeModels[index])
                                 .onTapGesture {
+                                    appearance.impactIfNeed()
                                     eventHandlers.selectTheme(state.themeModels[index])
                                 }
                         }

@@ -205,6 +205,7 @@ struct SettingItemListView: View {
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {
+            self.appearance.impactIfNeed()
             self.eventHandlers.selectItem(item)
         }
     }
@@ -241,6 +242,7 @@ struct SettingItemListView: View {
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {
+            self.appearance.impactIfNeed()
             self.eventHandlers.selectItem(item)
         }
     }

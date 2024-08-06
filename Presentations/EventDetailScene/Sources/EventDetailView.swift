@@ -458,6 +458,7 @@ struct EventDetailView: View {
                 }
             }
             .onTapGesture {
+                self.appearance.impactIfNeed()
                 self.updateTimePickerShowing(position)
             }
         }
@@ -467,6 +468,7 @@ struct EventDetailView: View {
                 .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .onTapGesture {
+                    self.appearance.impactIfNeed()
                     self.updateTimePickerShowing(position)
                 }
                 .frame(minWidth: 60)
@@ -661,6 +663,7 @@ struct EventDetailView: View {
                         )
                 )
                 .onTapGesture {
+                    self.appearance.impactIfNeed()
                     self.selectRepeatOption()
                 }
             Spacer()
@@ -687,6 +690,7 @@ struct EventDetailView: View {
                     .fill(self.appearance.colorSet.bg1.asColor)
             )
             .onTapGesture {
+                self.appearance.impactIfNeed()
                 self.selectTag()
             }
             Spacer()
@@ -718,6 +722,7 @@ struct EventDetailView: View {
                         )
                 )
                 .onTapGesture {
+                    self.appearance.impactIfNeed()
                     self.selectNotificationOption()
                 }
             Spacer()

@@ -157,6 +157,7 @@ struct SelectEventTagView: View {
                 .fill(self.appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {
+            self.appearance.impactIfNeed()
             self.eventHandlers.selectTag(tag.id)
         }
     }
@@ -181,6 +182,7 @@ struct SelectEventTagView: View {
                 .fill(self.appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {
+            self.appearance.impactIfNeed()
             self.eventHandlers.addTag()
         }
     }

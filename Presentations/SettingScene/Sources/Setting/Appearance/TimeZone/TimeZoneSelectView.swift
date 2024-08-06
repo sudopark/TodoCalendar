@@ -195,6 +195,7 @@ struct TimeZoneSelectView: View {
         }
         // TODO: 터치영역 증가 필요
         .onTapGesture {
+            appearance.impactIfNeed()
             eventHandlers.timeZoneSelected(model.identifier)
             searchDidFocused = false
         }

@@ -158,6 +158,7 @@ struct EventTagListView: View {
                 .font(.title3)
                 .animation(.easeIn, value: cellViewModel.isOn)
                 .onTapGesture {
+                    self.appearance.impactIfNeed()
                     self.toggleEventTagViewingIsOn(cellViewModel.id)
                 }
             Text(cellViewModel.name)

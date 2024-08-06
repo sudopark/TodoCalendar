@@ -158,6 +158,7 @@ struct SelectEventRepeatOptionView: View {
                         .fill(self.appearance.colorSet.bg1.asColor)
                 }
                 .onTapGesture {
+                    self.appearance.impactIfNeed()
                     self.eventHandlers.itemSelect(option.id)
                 }
             }

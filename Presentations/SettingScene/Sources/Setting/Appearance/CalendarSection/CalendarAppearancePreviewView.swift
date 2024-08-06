@@ -299,6 +299,7 @@ extension CalendarSectionAppearanceSettingView {
                     .stroke(lineColor.asColor, lineWidth: 1)
             }
             .onTapGesture {
+                self.appearance.impactIfNeed()
                 eventHandlers.toggleAccentDay(day)
             }
     }
@@ -346,6 +347,9 @@ private struct SmallToggleStyle: ToggleStyle {
         Image(systemName: configuration.isOn ? "checkmark.square" : "square")
             .resizable()
             .frame(width: 22, height: 22)
-            .onTapGesture { configuration.isOn.toggle() }
+            .onTapGesture {
+                self.appearance.impactIfNeed(.medium)
+                configuration.isOn.toggle()
+            }
     }
 }

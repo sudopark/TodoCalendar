@@ -224,7 +224,10 @@ struct SelectEventNotificationTimeView: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(appearance.colorSet.bg1.asColor)
         }
-        .onTapGesture { eventHandlers.toggleSelectDefaultOption(model?.option) }
+        .onTapGesture {
+            appearance.impactIfNeed()
+            eventHandlers.toggleSelectDefaultOption(model?.option)
+        }
     }
     
     private func customOptionView(_ model: CustomTimeOptionModel) -> some View {
@@ -249,7 +252,10 @@ struct SelectEventNotificationTimeView: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(appearance.colorSet.bg1.asColor)
         }
-        .onTapGesture { eventHandlers.removeCustomTimeOption(model.components) }
+        .onTapGesture {
+            appearance.impactIfNeed()
+            eventHandlers.removeCustomTimeOption(model.components)
+        }
     }
     
     private var addCustimOptionView: some View {

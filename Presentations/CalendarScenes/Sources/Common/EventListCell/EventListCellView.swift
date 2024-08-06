@@ -75,6 +75,7 @@ struct EventListCellView: View {
         .frame(idealHeight: 50)
         .backgroundAsRoundedRectForEventList(self.appearance)
         .onTapGesture {
+            self.appearance.impactIfNeed()
             self.requestShowDetail(self.cellViewModel)
         }
         .contextMenu {
