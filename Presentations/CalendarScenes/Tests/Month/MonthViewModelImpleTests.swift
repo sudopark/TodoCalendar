@@ -304,12 +304,12 @@ extension MonthViewModelImpleTests {
         
         // then
         XCTAssertEqual(moreModels, [
-            .init(daySequence: 1, dayIdentifier: "2023-9-1", moreCount: 2),
-            .init(daySequence: 2, dayIdentifier: "2023-9-2", moreCount: 2),
-            .init(daySequence: 3, dayIdentifier: "2023-9-3", moreCount: 2),
-            .init(daySequence: 4, dayIdentifier: "2023-9-4", moreCount: 2),
-            .init(daySequence: 5, dayIdentifier: "2023-9-5", moreCount: 1),
-            .init(daySequence: 6, dayIdentifier: "2023-9-6", moreCount: 1)
+            .init(daySequence: 1, moreCount: 2),
+            .init(daySequence: 2, moreCount: 2),
+            .init(daySequence: 3, moreCount: 2),
+            .init(daySequence: 4, moreCount: 2),
+            .init(daySequence: 5, moreCount: 1),
+            .init(daySequence: 6, moreCount: 1)
         ])
     }
 

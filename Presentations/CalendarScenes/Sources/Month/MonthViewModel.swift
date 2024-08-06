@@ -131,7 +131,6 @@ public struct WeekEventLineModel: Equatable {
 
 public struct EventMoreModel: Equatable {
     public let daySequence: Int
-    public let dayIdentifier: String
     public let moreCount: Int
 }
 
@@ -161,13 +160,9 @@ extension WeekEventStackViewModel {
                 }
             }
         }
-        return willHiddenEventsPerDaySeq.compactMap {
-            guard let event = $0.value.first?.eventOnWeek,
-                  let dayIdentifier = event.daysIdentifiers[safe: $0.key-1]
-            else { return nil }
+        return willHiddenEventsPerDaySeq.map {
             return EventMoreModel(
                 daySequence: $0.key,
-                dayIdentifier: dayIdentifier,
                 moreCount: $0.value.count
             )
         }

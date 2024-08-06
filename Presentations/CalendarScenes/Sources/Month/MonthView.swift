@@ -315,7 +315,8 @@ private struct WeekRowView: View {
     
     private func eventMoreViews(_ moreModels: [EventMoreModel]) -> some View {
         let textColor: (EventMoreModel) -> Color = { model in
-            return self.state.selectedDay == model.dayIdentifier
+            let eventIdOnThisWeek = self.week.days[safe: model.daySequence-1]?.identifier
+            return self.state.selectedDay == eventIdOnThisWeek
             ? self.appearance.colorSet.eventTextSelected.asColor
             : self.appearance.colorSet.eventText.asColor
         }
