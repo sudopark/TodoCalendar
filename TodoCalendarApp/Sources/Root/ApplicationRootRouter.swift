@@ -132,8 +132,15 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
     @MainActor
     private func changeNavigationBarAppearnace(_ newSet: any ColorSet) {
         
-        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: newSet.text0]
-        UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: newSet.text0]
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.titleTextAttributes = [.foregroundColor: newSet.text0]
+        appearance.largeTitleTextAttributes = [.foregroundColor: newSet.text0]
+        appearance.backgroundColor = newSet.bg0
+        appearance.shadowColor = .clear
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().compactAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
     }
 }
 
