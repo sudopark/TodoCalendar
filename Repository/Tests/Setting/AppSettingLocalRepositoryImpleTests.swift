@@ -31,7 +31,7 @@ extension AppSettingLocalRepositoryImpleTests {
         let appearance = repository.loadSavedViewAppearance()
         
         // then
-        XCTAssertEqual(appearance.calendar.colorSetKey, .defaultLight)
+        XCTAssertEqual(appearance.calendar.colorSetKey, .systemTheme)
         XCTAssertEqual(appearance.calendar.fontSetKey, .systemDefault)
         XCTAssertEqual(appearance.calendar.showUnderLineOnEventDay, true)
         XCTAssertEqual(appearance.calendar.accnetDayPolicy, [

@@ -46,7 +46,7 @@ extension AppSettingLocalStorage {
     // event on calendar
     private var eventOnCalendarAdditionalFontSize: String { "event_on_calendar_additional_font_size" }
     private var boldTextEventOnCalendar: String { "bold_text_event_on_calendar" }
-    private var showEventTagColorOnCalendar: String { "show_event_tag_color_on_calendar" }
+    private var notShowEventTagColorOnCalendar: String { "not_show_event_tag_color_on_calendar" }
     
     // event list
     private var eventAdditionaFontSize: String { "event_additiona_font_size" }
@@ -55,7 +55,7 @@ extension AppSettingLocalStorage {
     private var is24HourForm: String { "is_24_hourForm" }
     
     // general
-    private var hapticEffectIsOn: String { "haptic_effect_on" }
+    private var hapticEffectIsOff: String { "haptic_effect_off" }
     private var animationEffectIsOn: String { "animation_effect_on" }
     
     func loadViewAppearance(for userId: String?) -> AppearanceSettings {
@@ -78,7 +78,7 @@ extension AppSettingLocalStorage {
     func loadCalendarAppearanceSetting(for userId: String?) -> CalendarAppearanceSettings {
         let colorSetRaw: String? = self.environmentStorage.load(colorSetKey)
         let fontSetRaw: String? = self.environmentStorage.load(fontSetKey)
-        let colorSet = colorSetRaw.flatMap { ColorSetKeys(rawValue: $0) } ?? .defaultLight
+        let colorSet = colorSetRaw.flatMap { ColorSetKeys(rawValue: $0) } ?? .systemTheme
         let fontSet = fontSetRaw.flatMap { FontSetKeys(rawValue: $0) } ?? .systemDefault
         
         var calendar = CalendarAppearanceSettings(
@@ -103,7 +103,7 @@ extension AppSettingLocalStorage {
         let eventOnCalendarAdditionalFont: Int =
         self.environmentStorage.load(eventOnCalendarAdditionalFontSize) ?? 0
         let eventOnCalendarBold: Bool = self.environmentStorage.load(boldTextEventOnCalendar) ?? false
-        let eventOnCalendarShowColor: Bool = self.environmentStorage.load(showEventTagColorOnCalendar) ?? true
+        let eventOnCalendarShowColor: Bool = !(self.environmentStorage.load(notShowEventTagColorOnCalendar) ?? false)
         calendar = calendar
             |> \.eventOnCalenarTextAdditionalSize .~ CGFloat(eventOnCalendarAdditionalFont)
             |> \.eventOnCalendarIsBold .~ eventOnCalendarBold
@@ -121,7 +121,7 @@ extension AppSettingLocalStorage {
             |> \.is24hourForm .~ is24From
         
         // general
-        let hapticIsOn: Bool = self.environmentStorage.load(hapticEffectIsOn) ?? true
+        let hapticIsOn: Bool = !(self.environmentStorage.load(hapticEffectIsOff) ?? false)
         let animationIsOn: Bool = self.environmentStorage.load(animationEffectIsOn) ?? false
         calendar = calendar
             |> \.hapticEffectIsOn .~ hapticIsOn
@@ -159,7 +159,7 @@ extension AppSettingLocalStorage {
             boldTextEventOnCalendar, newValue.eventOnCalendarIsBold
         )
         self.environmentStorage.update(
-            showEventTagColorOnCalendar, newValue.eventOnCalendarShowEventTagColor
+            notShowEventTagColorOnCalendar, !newValue.eventOnCalendarShowEventTagColor
         )
         
         // event list
@@ -177,7 +177,7 @@ extension AppSettingLocalStorage {
         )
         
         // general
-        self.environmentStorage.update(hapticEffectIsOn, newValue.hapticEffectIsOn)
+        self.environmentStorage.update(hapticEffectIsOff, !newValue.hapticEffectIsOn)
         self.environmentStorage.update(animationEffectIsOn, newValue.animationEffectIsOn)
     }
     
@@ -227,7 +227,7 @@ extension AppSettingLocalStorage {
         let periodRaw: String? = self.environmentStorage.load(defaultNewEventPeriod)
         let period: EventSettings.DefaultNewEventPeriod = periodRaw.flatMap {
             EventSettings.DefaultNewEventPeriod(rawValue: $0)
-        } ?? .hour1
+        } ?? .minute0
         
         return EventSettings()
             |> \.defaultNewEventTagId .~ tagId
