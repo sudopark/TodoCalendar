@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 import Domain
 import Scenes
 import CommonPresentation
@@ -17,6 +18,8 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
     
     @MainActor
     var interactor: (any CalendarSceneInteractor)? { self.viewModel }
+    
+    private var cancellables: Set<AnyCancellable> = []
     
     init(
         viewModel: any CalendarViewModel,
@@ -36,7 +39,6 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
     override func loadView() {
         super.loadView()
         self.setupLayouts()
-        self.setupStyling()
     }
     
     override func viewDidLoad() {
@@ -44,6 +46,7 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
         
         self.setupPager()
         self.viewModel.prepare()
+        self.bind()
     }
     
     private func setupPager() {
@@ -62,6 +65,16 @@ final class CalendarViewController: UIPageViewController, CalendarScene {
     func changeFocus(at index: Int) {
         guard let center = self.monthViewControllers?[safe: index] else { return }
         self.setViewControllers([center], direction: .forward, animated: false)
+    }
+    
+    private func bind() {
+     
+        self.viewAppearance.didUpdated
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] tuple in
+                self?.setupStyling(tuple.1, tuple.2)
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -128,7 +141,9 @@ extension CalendarViewController {
         
     }
     
-    private func setupStyling() {
-        self.view.backgroundColor = self.viewAppearance.colorSet.dayBackground
+    private func setupStyling(
+        _ fontSet: any FontSet, _ colorSet: any ColorSet
+    ) {
+        self.view.backgroundColor = colorSet.bg0
     }
 }
