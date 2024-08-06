@@ -23,6 +23,7 @@ struct ColorThemePreviewView: View {
     private let model: ColorThemeModel
     private let metric: Metric
     private let colorSet: ColorSet
+    @EnvironmentObject private var appearance: ViewAppearance
     
     init(model: ColorThemeModel, metric: Metric, isSystemDark: Bool) {
         self.model = model
@@ -55,7 +56,8 @@ struct ColorThemePreviewView: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(colorSet.bg0.asColor)
                 .shadow(
-                    color: UIColor.black.withAlphaComponent(0.1).asColor, radius: 8
+                    color: appearance.colorSet.text0.withAlphaComponent(0.1).asColor,
+                    radius: 8
                 )
         )
     }

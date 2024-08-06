@@ -65,6 +65,7 @@ public protocol ColorSet: Sendable {
     var line: UIColor { get }
     var bg0: UIColor { get }
     var bg1: UIColor { get }
+    var bg2: UIColor { get }
 }
 
 
@@ -107,7 +108,8 @@ public struct DefaultLightColorSet: ColorSet {
     // line + background
     public let line: UIColor = UIColor.black.withAlphaComponent(0.2)
     public let bg0: UIColor = .white
-    public let bg1: UIColor = UIColor(rgb: 0xf4f4f4)
+    public let bg1: UIColor = UIColor(rgb: 0xf3f4f7)
+    public let bg2: UIColor = UIColor(rgb: 0xf4f4f4)
     
     public init() { }
 }
@@ -120,11 +122,11 @@ public struct DefaultDarkColorSet: ColorSet {
     // calendar component
     public let weekDayText: UIColor = UIColor(rgb: 0xf3f4f7)
     public let weekEndText: UIColor = UIColor(rgb: 0xe2e4eb)
-    public let dayBackground: UIColor = UIColor(rgb: 0x2e2a22)
-    public let selectedDayBackground: UIColor = UIColor(rgb: 0xf8f8f9)
+    public var dayBackground: UIColor { self.bg0 }
+    public let selectedDayBackground: UIColor = UIColor(rgb: 0xccd0dc)
     public let selectedDayText: UIColor = UIColor(rgb: 0x1a153d)
     public let holidayText: UIColor = UIColor(rgb: 0xf4f2f8)
-    public let todayBackground: UIColor = UIColor(rgb: 0x626e8e)
+    public let todayBackground: UIColor = UIColor(rgb: 0x45454a)
     public let eventText: UIColor = UIColor(rgb: 0xe2e4eb)
     public let eventTextSelected: UIColor = UIColor(rgb: 0x151131)
     public let holidayOrWeekEndWithAccent: UIColor = UIColor.red
@@ -152,7 +154,8 @@ public struct DefaultDarkColorSet: ColorSet {
     // line + background
     public let line: UIColor = UIColor.white.withAlphaComponent(0.2)
     public let bg0: UIColor = UIColor(rgb: 0x18181a)
-    public let bg1: UIColor = UIColor(rgb: 0x393c3c)
+    public let bg1: UIColor = UIColor(rgb: 0x45454a)
+    public let bg2: UIColor = UIColor(rgb: 0x393c3c)
     
     public init() { }
 }

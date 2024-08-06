@@ -108,7 +108,10 @@ struct EventOnCalendarViewPreviewView: View {
             .background(
                 RoundedRectangle(cornerRadius: 10)
                     .fill(self.appearance.colorSet.dayBackground.asColor)
-                    .shadow(radius: 10)
+                    .shadow(
+                        color: appearance.colorSet.text0.withAlphaComponent(0.4).asColor,
+                        radius: 10
+                    )
             )
             Spacer()
         }
