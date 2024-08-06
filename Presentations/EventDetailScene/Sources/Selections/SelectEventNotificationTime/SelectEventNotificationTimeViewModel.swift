@@ -53,7 +53,6 @@ protocol SelectEventNotificationTimeViewModel: AnyObject, Sendable, SelectEventN
     func toggleSelectDefaultOption(_ option: EventNotificationTimeOption?)
     func addCustomTimeOption(_ components: DateComponents)
     func removeCustomTimeOption(_ components: DateComponents)
-    func moveEventSetting()
     func moveSystemNotificationSetting()
     func close()
     
@@ -188,10 +187,6 @@ extension SelectEventNotificationTimeViewModelImple {
         
         let newOptions = options.filter { $0.customOptionDateComponents != components }
         self.subject.selectedOptions.send(newOptions)
-    }
-    
-    func moveEventSetting() {
-        self.router?.routeToEventSetting()
     }
     
     func moveSystemNotificationSetting() {

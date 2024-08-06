@@ -17,7 +17,6 @@ import CommonPresentation
 
 protocol SelectEventNotificationTimeRouting: Routing, Sendable { 
     
-    func routeToEventSetting()
     func openSystemNotificationSetting()
 }
 
@@ -30,11 +29,6 @@ extension SelectEventNotificationTimeRouter {
     
     private var currentScene: (any SelectEventNotificationTimeScene)? {
         self.scene as? (any SelectEventNotificationTimeScene)
-    }
-    
-    // TODO: router implememnts
-    func routeToEventSetting() {
-        // TODO: 
     }
     
     func openSystemNotificationSetting() {

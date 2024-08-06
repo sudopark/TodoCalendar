@@ -81,7 +81,6 @@ final class SelectEventNotificationTimeViewEventHandler: ObservableObject {
     var toggleSelectDefaultOption: (EventNotificationTimeOption?) -> Void = { _ in }
     var addCustomTimeOption: (DateComponents) -> Void = { _ in }
     var removeCustomTimeOption: (DateComponents) -> Void = { _ in }
-    var moveEventSetting: () -> Void = { }
     var moveSystemNotificationSetting: () -> Void = { }
     var close: () -> Void = { }
 }
@@ -182,12 +181,6 @@ struct SelectEventNotificationTimeView: View {
                     // add custom optoin
                     self.addCustimOptionView
                         .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(appearance.colorSet.bg0.asColor)
-                    
-                    // move to setting view
-                    self.moveToSettingView
-                        .listRowInsets(.init(top: 30, leading: 20, bottom: 0, trailing: 20))
                         .listRowSeparator(.hidden)
                         .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
@@ -299,24 +292,6 @@ struct SelectEventNotificationTimeView: View {
             RoundedRectangle(cornerRadius: 8)
                 .fill(appearance.colorSet.bg1.asColor)
         }
-    }
-    
-    private var moveToSettingView: some View {
-        Button {
-            eventHandlers.moveEventSetting()
-        } label: {
-            HStack(spacing: 4) {
-                Spacer()
-                Text("event_notification_select::move_to_setting".localized())
-                    .font(appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.accent.asColor)
-                
-                Image(systemName: "chevron.right")
-                    .font(appearance.fontSet.subNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.accent.asColor)
-            }
-        }
-        .padding(.bottom, 40)
     }
     
     private var permissionNeedView: some View {

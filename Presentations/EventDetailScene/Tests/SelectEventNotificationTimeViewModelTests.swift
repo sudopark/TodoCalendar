@@ -203,21 +203,6 @@ extension SelectEventNotificationTimeViewModelTests {
     }
 }
 
-extension SelectEventNotificationTimeViewModelTests {
-    
-    // 이벤트 세팅화면으로 이동
-    func testViewModel_routeToEventSetting() {
-        // given
-        let viewModel = self.makeViewModel(startWith: [])
-        
-        // when
-        viewModel.moveEventSetting()
-        
-        // then
-        XCTAssertEqual(self.spyRouter.didRouteToEventSetting, true)
-    }
-}
-
 // MARK: - test notification permission
 
 extension SelectEventNotificationTimeViewModelTests {
@@ -308,11 +293,6 @@ extension SelectEventNotificationTimeViewModelTests {
 
 
 private class SpyRouter: BaseSpyRouter, SelectEventNotificationTimeRouting, @unchecked Sendable {
-    
-    var didRouteToEventSetting: Bool?
-    func routeToEventSetting() {
-        self.didRouteToEventSetting = true
-    }
     
     var didOpenSystemNotificationSetting: Bool?
     func openSystemNotificationSetting() {
