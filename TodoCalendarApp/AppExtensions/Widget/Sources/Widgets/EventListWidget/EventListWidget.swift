@@ -22,7 +22,7 @@ struct EventListView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultLightColorSet()
+        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
     }
     
     private let model: EventListWidgetViewModel
@@ -184,7 +184,7 @@ struct EventListWidgetView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultLightColorSet()
+        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
     }
     
     private let entry: ResultTimelineEntry<EventListWidgetViewModel>
