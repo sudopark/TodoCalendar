@@ -38,7 +38,7 @@ final class EventTagListViewController: UIHostingController<EventTagListContaine
             hasNavigation: hasNavigation,
             viewAppearance: viewAppearance
         )
-        .eventHandler(\.stateBinding, { $0.bind(viewModel) })
+        .eventHandler(\.stateBinding, { $0.bind(viewModel, viewAppearance) })
         .eventHandler(\.onAppear, viewModel.reload)
         .eventHandler(\.addTag, viewModel.addNewTag)
         .eventHandler(\.closeScene, viewModel.close)

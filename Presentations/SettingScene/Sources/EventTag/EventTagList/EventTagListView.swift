@@ -25,7 +25,7 @@ final class EventTagListViewState: ObservableObject {
     
     @Published var cellviewModels: [EventTagCellViewModel] = []
     
-    func bind(_ viewModel: any EventTagListViewModel) {
+    func bind(_ viewModel: any EventTagListViewModel, _ appearance: ViewAppearance) {
         
         guard self.didBind == false else { return }
         self.didBind = true
@@ -33,8 +33,8 @@ final class EventTagListViewState: ObservableObject {
         // TODO: bind state
         viewModel.cellViewModels
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] cellViewModels in
-                withAnimation {
+            .sink(receiveValue: { [weak self, weak appearance] cellViewModels in
+                appearance?.withAnimationIfNeed {
                     self?.cellviewModels = cellViewModels
                 }
             })

@@ -578,7 +578,7 @@ struct EventDetailView: View {
         
         guard self.isTimeSelecting != selecting
         else {
-            withAnimation {
+            appearance.withAnimationIfNeed {
                 self.isTimeSelecting = nil
             }
             return

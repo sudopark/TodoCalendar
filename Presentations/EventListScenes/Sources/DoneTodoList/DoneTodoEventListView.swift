@@ -194,13 +194,13 @@ struct DoneTodoEventListView: View {
         return Button {
             let isPending = self.state.pendingRevertDoneTodoIds.contains(doneId)
             if !isPending {
-                withAnimation { _ = self.state.pendingRevertDoneTodoIds.insert(doneId) }
+                appearance.withAnimationIfNeed { _ = self.state.pendingRevertDoneTodoIds.insert(doneId) }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     guard self.state.pendingRevertDoneTodoIds.contains(doneId) else { return }
                     self.eventHandlers.revertDoneTodo(doneId)
                 }
             } else {
-                withAnimation { _ = self.state.pendingRevertDoneTodoIds.remove(doneId) }
+                appearance.withAnimationIfNeed { _ = self.state.pendingRevertDoneTodoIds.remove(doneId) }
                 self.eventHandlers.cancelRevertDoneTodo(doneId)
             }
         } label: {

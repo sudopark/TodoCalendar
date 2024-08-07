@@ -27,15 +27,15 @@ final class DayEventListViewState: ObservableObject {
     @Published fileprivate var dayModel: SelectedDayModel?
     @Published fileprivate var cellViewModels: [any EventCellViewModel] = []
     
-    func bind(_ viewModel: any DayEventListViewModel) {
+    func bind(_ viewModel: any DayEventListViewModel, _ appearance: ViewAppearance) {
         
         guard self.didBind == false else { return }
         self.didBind = true
         
         viewModel.foremostEventModel
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] model in
-                withAnimation {
+            .sink(receiveValue: { [weak self, weak appearance] model in
+                appearance?.withAnimationIfNeed {
                     self?.foremostModel = model
                 }
             })
@@ -50,8 +50,8 @@ final class DayEventListViewState: ObservableObject {
         
         viewModel.cellViewModels
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] cellViewModels in
-                withAnimation {
+            .sink(receiveValue: { [weak self, weak appearance] cellViewModels in
+                appearance?.withAnimationIfNeed {
                     self?.cellViewModels = cellViewModels
                 }
             })

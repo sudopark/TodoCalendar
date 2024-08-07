@@ -5,7 +5,7 @@
 //  Created by sudo.park on 2023/08/05.
 //
 
-import UIKit
+import SwiftUI
 import Combine
 import Domain
 
@@ -114,6 +114,17 @@ extension ViewAppearance {
         guard self.hapticEffectOff else { return }
         let generator = UIImpactFeedbackGenerator(style: style)
         generator.impactOccurred()
+    }
+    
+    public func withAnimationIfNeed<R>(
+        _ animation: Animation? = .default,
+        _ body: () throws -> R
+    ) rethrows -> R {
+        guard animationEffectOff == false
+        else {
+            return try body()
+        }
+        return try withAnimation(animation, body)
     }
 }
 

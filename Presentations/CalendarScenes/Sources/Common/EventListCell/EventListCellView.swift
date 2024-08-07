@@ -22,15 +22,15 @@ final class PendingCompleteTodoState: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     @Published var ids: Set<String> = []
     
-    func bind(_ viewModel: EventListCellEventHanleViewModel) {
+    func bind(_ viewModel: EventListCellEventHanleViewModel, _ appearance: ViewAppearance) {
         
         guard self.didBind == false else { return }
         self.didBind = true
         
         viewModel.doneTodoResult
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] result in
-                withAnimation {
+            .sink(receiveValue: { [weak self, weak appearance] result in
+                appearance?.withAnimationIfNeed {
                     guard let self = self else { return }
                     self.ids.remove(result.id)
                 }
@@ -210,13 +210,13 @@ struct EventListCellView: View {
         Button {
             let isUnderCompleteProcessing = self.pendingDoneState.ids.contains(todoId)
             if !isUnderCompleteProcessing {
-                withAnimation { _ = self.pendingDoneState.ids.insert(todoId) }
+                appearance.withAnimationIfNeed { _ = self.pendingDoneState.ids.insert(todoId) }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     guard self.pendingDoneState.ids.contains(todoId) else { return }
                     self.requestDoneTodo(todoId)
                 }
             } else {
-                withAnimation { _ = self.pendingDoneState.ids.remove(todoId) }
+                appearance.withAnimationIfNeed { _ = self.pendingDoneState.ids.remove(todoId) }
                 self.requestCancelDoneTodo(todoId)
             }
             

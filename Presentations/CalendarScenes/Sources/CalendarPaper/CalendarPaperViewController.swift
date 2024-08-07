@@ -53,7 +53,7 @@ final class CalendarPaperViewController: UIHostingController<CalenarPaperContain
             eventHandler: eventListViewEventHandler,
             pendingDoneState: pendingCompleteTodoState
         )
-        .eventHandler(\.stateBinding, { $0.bind(eventListViewModel) })
+        .eventHandler(\.stateBinding, { $0.bind(eventListViewModel, viewAppearance) })
         
         let eventHandler = CalenarPaperViewEventHandelr()
         eventHandler.bind(viewModel)

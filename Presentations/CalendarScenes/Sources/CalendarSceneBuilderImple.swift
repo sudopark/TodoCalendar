@@ -71,7 +71,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             eventDetailSceneBuilder: self.eventDetailSceneBuilder
         )
         handleViewModelBuilder.router.attach(viewController)
-        self.pendingCompleteTodoState.bind(handleViewModelBuilder.viewModel)
+        self.pendingCompleteTodoState.bind(handleViewModelBuilder.viewModel, viewAppearance)
         
         let paperSceneBuilder = CalendarPaperSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
