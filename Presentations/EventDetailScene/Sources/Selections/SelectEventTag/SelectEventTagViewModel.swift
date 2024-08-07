@@ -103,7 +103,8 @@ extension SelectEventTagViewModelImple {
     func refresh() {
         
         let loaded: ([EventTag]) -> Void = { [weak self] tags in
-            self?.subject.tags.send(tags)
+            let sortedTags = tags.sorted(by: { $0.uuid < $1.uuid })
+            self?.subject.tags.send(sortedTags)
         }
         let handleError: (any Error) -> Void = { [weak self] error in
             self?.router?.showError(error)

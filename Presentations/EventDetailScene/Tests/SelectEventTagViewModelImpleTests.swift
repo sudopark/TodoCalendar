@@ -39,7 +39,7 @@ class SelectEventTagViewModelImpleTests: BaseTestCase, PublisherWaitable {
     ) -> SelectEventTagViewModelImple {
         
         let usecase = StubEventTagUsecase()
-        let tags = (0..<3).map {
+        let tags = (0..<3).reversed().map {
             return EventTag(uuid: "id:\($0)", name: "n:\($0)", colorHex: "some")
         }
         usecase.allTagsLoadResult = .success(tags)
