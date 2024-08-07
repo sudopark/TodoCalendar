@@ -130,16 +130,29 @@ struct DayEventListView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandler: DayEventListViewEventHandler
     @EnvironmentObject private var pendingDoneState: PendingCompleteTodoState
+    @FocusState var isFocusInput: Bool
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
          
             if let foremost = self.state.foremostModel {
                 ForemostEventView(viewModel: foremost)
-                    .eventHandler(\.requestDoneTodo, eventHandler.requestDoneTodo)
-                    .eventHandler(\.requestCancelDoneTodo, eventHandler.requestCancelDoneTodo)
-                    .eventHandler(\.requestShowDetail, eventHandler.requestShowDetail)
-                    .eventHandler(\.handleMoreAction, eventHandler.handleMoreAction)
+                    .eventHandler(\.requestDoneTodo) {
+                        self.isFocusInput = false
+                        eventHandler.requestDoneTodo($0)
+                    }
+                    .eventHandler(\.requestCancelDoneTodo) {
+                        self.isFocusInput = false
+                        eventHandler.requestCancelDoneTodo($0)
+                    }
+                    .eventHandler(\.requestShowDetail) {
+                        self.isFocusInput = false
+                        eventHandler.requestShowDetail($0)
+                    }
+                    .eventHandler(\.handleMoreAction) {
+                        self.isFocusInput = false
+                        eventHandler.handleMoreAction($0, $1)
+                    }
             }
          
             // 날짜 및 이벤트 목록
@@ -173,6 +186,7 @@ struct DayEventListView: View {
                         Spacer()
                         
                         Button {
+                            self.isFocusInput = false
                             self.eventHandler.showDoneTodoList()
                         } label: {
                             Image(systemName: "checklist.checked")
@@ -186,21 +200,36 @@ struct DayEventListView: View {
                     ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
                         
                         EventListCellView(cellViewModel: cellViewModel)
-                            .eventHandler(\.requestDoneTodo, eventHandler.requestDoneTodo)
-                            .eventHandler(\.requestCancelDoneTodo, eventHandler.requestCancelDoneTodo)
-                            .eventHandler(\.requestShowDetail, eventHandler.requestShowDetail)
-                            .eventHandler(\.handleMoreAction, eventHandler.handleMoreAction)
+                            .eventHandler(\.requestDoneTodo) {
+                                self.isFocusInput = false
+                                eventHandler.requestDoneTodo($0)
+                            }
+                            .eventHandler(\.requestCancelDoneTodo) {
+                                self.isFocusInput = false
+                                eventHandler.requestCancelDoneTodo($0)
+                            }
+                            .eventHandler(\.requestShowDetail) {
+                                self.isFocusInput = false
+                                eventHandler.requestShowDetail($0)
+                            }
+                            .eventHandler(\.handleMoreAction) {
+                                self.isFocusInput = false
+                                eventHandler.handleMoreAction($0, $1)
+                            }
                     }
                 }
                 .fixedSize(horizontal: false, vertical: true)
                 
                 // todo 추가
-                QuickAddNewTodoView()
+                QuickAddNewTodoView(isFocusInput: $isFocusInput)
                     .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
                     .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
                 
                 addNewButton()
             }
+        }
+        .onTapGesture {
+            self.isFocusInput = false
         }
         .padding()
         .background(self.appearance.colorSet.bg0.asColor)
@@ -227,14 +256,15 @@ struct DayEventListView: View {
                 .backgroundAsRoundedRectForEventList(self.appearance)
             }
             
-            Button {
-                self.eventHandler.requestAddNewEventWhetherUsingTemplate(true)
-            } label: {
-                Image(systemName: "list.bullet.clipboard")
-                    .tint(self.appearance.colorSet.text0.asColor)
-                    .frame(width: 50, height: 50)
-                    .backgroundAsRoundedRectForEventList(self.appearance)
-            }
+            // TODO: 템플릿 추가버튼 임시 비활성화
+//            Button {
+//                self.eventHandler.requestAddNewEventWhetherUsingTemplate(true)
+//            } label: {
+//                Image(systemName: "list.bullet.clipboard")
+//                    .tint(self.appearance.colorSet.text0.asColor)
+//                    .frame(width: 50, height: 50)
+//                    .backgroundAsRoundedRectForEventList(self.appearance)
+//            }
         }
     }
 }
@@ -245,7 +275,7 @@ private struct QuickAddNewTodoView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     
     @State private var newTodoName: String = ""
-    @FocusState private var isFocusInput: Bool
+    @FocusState.Binding var isFocusInput: Bool
     private var isEntering: Bool { !self.newTodoName.isEmpty }
     
     private func resetStates() {
@@ -277,15 +307,16 @@ private struct QuickAddNewTodoView: View {
                     text: $newTodoName,
                     prompt: Text("Add a new todo quickly".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor)
                 )
-                    .focused($isFocusInput, equals: true)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .onSubmit {
-                        guard !self.newTodoName.isEmpty else { return }
-                        self.addNewTodoQuickly(self.newTodoName)
-                        self.resetStates()
-                    }
-                    .submitLabel(.done)
+                .focused($isFocusInput, equals: true)
+                .autocorrectionDisabled()
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                .textInputAutocapitalization(.never)
+                .onSubmit {
+                    guard !self.newTodoName.isEmpty else { return }
+                    self.addNewTodoQuickly(self.newTodoName)
+                    self.resetStates()
+                }
+                .submitLabel(.done)
                 
                 if !self.newTodoName.isEmpty {
                     Button {
