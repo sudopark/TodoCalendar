@@ -1,5 +1,5 @@
 {
-  "originHash" : "3bd60cfdd3f58518775345ab40ed426b31c9f4acabf92c21274c28c6ecda1ac1",
+  "originHash" : "90fc0469f7b661141879fa34445f7a1bcfffb0b2c023eeb42fbbfcd227c13a04",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -296,6 +296,15 @@
       "state" : {
         "revision" : "6ad4ea24b01559dde0773e3d091f1b9e36175036",
         "version" : "509.0.2"
+      }
+    },
+    {
+      "identity" : "swiftlinkpreview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/LeonardoCardoso/SwiftLinkPreview.git",
+      "state" : {
+        "revision" : "3eb30b1832a9cf0eaeec3e2cf6cfc0ed18ef763f",
+        "version" : "3.4.0"
       }
     },
     {

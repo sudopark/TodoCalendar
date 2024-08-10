@@ -140,6 +140,9 @@ extension Project {
                 "NSBonjourServices": [
                     "_pulse._tcp"
                 ],
+                "NSAppTransportSecurity": [
+                    "NSAllowsArbitraryLoads": true
+                ],
                 "UIApplicationSceneManifest": [
                     "UIApplicationSupportsMultipleScenes": false,
                     "UISceneConfigurations": [
