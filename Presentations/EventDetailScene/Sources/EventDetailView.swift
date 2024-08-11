@@ -37,6 +37,8 @@ final class EventDetailViewState: ObservableObject {
     @Published var selectedEndDate: Date = Date().addingTimeInterval(60)
     var suggestEventEndTime: () -> Date? = { nil }
     @Published var url: String = ""
+    @Published var isValidURLEntered: Bool = false
+    @Published var linkPreviewModel: LinkPreviewModel?
     @Published var memo: String = ""
     
     func bind(
@@ -73,6 +75,20 @@ final class EventDetailViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] value in
                 self?.url = value ?? ""
+            })
+            .store(in: &self.cancellables)
+        
+        inputViewModel.isValidURLEntered
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isValid in
+                self?.isValidURLEntered = isValid
+            })
+            .store(in: &self.cancellables)
+        
+        inputViewModel.linkPreview
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.linkPreviewModel = model
             })
             .store(in: &self.cancellables)
         
@@ -164,6 +180,7 @@ struct EventDetailContainerView: View {
     var selectNotificationOption: () -> Void = { }
     var selectPlace: () -> Void = { }
     var enterUrl: (String) -> Void = { _ in }
+    var openURL: () -> Void = { }
     var enterMemo: (String) -> Void = { _ in }
     var save: () -> Void = { }
     var doMoreAction: (EventDetailMoreAction) -> Void = { _ in }
@@ -186,6 +203,7 @@ struct EventDetailContainerView: View {
             .eventHandler(\.selectTag, selectTag)
             .eventHandler(\.selectPlace, selectPlace)
             .eventHandler(\.enterUrl, enterUrl)
+            .eventHandler(\.openURL, openURL)
             .eventHandler(\.enterMemo, enterMemo)
             .eventHandler(\.save, save)
             .eventHandler(\.doMoreAction, doMoreAction)
@@ -230,6 +248,7 @@ struct EventDetailView: View {
     fileprivate var selectNotificationOption: () -> Void = { }
     fileprivate var selectPlace: () -> Void = { }
     fileprivate var enterUrl: (String) -> Void = { _ in }
+    fileprivate var openURL: () -> Void = { }
     fileprivate var enterMemo: (String) -> Void = { _ in }
     fileprivate var save: () -> Void = { }
     var doMoreAction: (EventDetailMoreAction) -> Void = { _ in }
@@ -256,6 +275,9 @@ struct EventDetailView: View {
                     Spacer(minLength: 12)
                     self.enterLinkView
                     self.enterMemokView
+                    if let model = state.linkPreviewModel {
+                        self.linkPreview(model)
+                    }
                 }
                 .padding(.top, 20)
                 .padding(.horizontal, 12)
@@ -763,6 +785,16 @@ struct EventDetailView: View {
                 self.isFocusInput = nil
             }
             .onReceive(self.state.$url, perform: self.enterUrl)
+            
+            if state.isValidURLEntered {
+                Button {
+                    self.openURL()
+                } label: {
+                    Image(systemName: "globe")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                }
+            }
         }
     }
     
@@ -786,6 +818,58 @@ struct EventDetailView: View {
                 self.isFocusInput = nil
             }
             .onReceive(self.state.$memo, perform: self.enterMemo)
+        }
+    }
+    
+    private func linkPreview(_ model: LinkPreviewModel) -> some View {
+        VStack(spacing: 0) {
+            if let image = model.imageUrl {
+                RemoteImageView(image)
+                    .resize()
+                    .scaledToFill()
+                    .frame(maxHeight: 200)
+                    .clipped()
+            }
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(model.title)
+                        .lineLimit(1)
+                        .font(appearance.fontSet.normal.asFont)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
+                    
+                    if let description = model.description {
+                        Text(description)
+                            .lineLimit(2)
+                            .font(appearance.fontSet.subSubNormal.asFont)
+                            .foregroundStyle(appearance.colorSet.text2.asColor)
+                    }
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(appearance.colorSet.bg1.asColor)
+        }
+        .background(appearance.colorSet.bg2.asColor)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(alignment: .topLeading) {
+            if model.imageUrl != nil {
+                Text("URL Preview".localized())
+                    .font(appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+                    .padding(4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(
+                                appearance.colorSet.bg0.withAlphaComponent(0.5).asColor
+                            )
+                    )
+                    .offset(x: 4, y: 4)
+            }
+        }
+        .zIndex(-1)
+        .onTapGesture {
+            self.openURL()
         }
     }
 }
@@ -890,6 +974,11 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
             [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
             [.copy, .addToTemplate, .share]
         ]
+        state.linkPreviewModel = LinkPreviewModel(
+            title: "Naver",
+            description: "https://stackoverflow.com/questions/62040461/swiftui-mask-a-rectangle-inside-a-rounded-rectangle",
+            imageUrl: "http://krmkt.co.kr/wp-content/uploads/2019/01/190123-5.png"
+        )
 //        state.selectedNotificationTimeText = "some time"
         state.eventDetailTypeModel = .makeCase(true)
 //        state.eventDetailTypeModel = .todoCase()

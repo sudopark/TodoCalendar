@@ -65,7 +65,7 @@ struct LinkPreviewModel {
     init?(_ preview: LinkPreview) {
         guard let title = preview.title else { return nil }
         self.title = title
-        self.description = preview.description
+        self.description = preview.description ?? preview.url?.absoluteString
         self.imageUrl = preview.mainImagePath ?? preview.images.first
     }
 }

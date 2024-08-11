@@ -56,6 +56,7 @@ final class EventDetailViewController: UIHostingController<EventDetailContainerV
         .eventHandler(\.selectNotificationOption, inputViewModel.selectNotificationTime)
 //        .eventHandler(\.selectPlace, TODO)
         .eventHandler(\.enterUrl, inputViewModel.enter(url:))
+        .eventHandler(\.openURL, inputViewModel.openURL)
         .eventHandler(\.enterMemo, inputViewModel.enter(memo:))
         .eventHandler(\.save, viewModel.save)
         .eventHandler(\.doMoreAction, viewModel.handleMoreAction(_:))
