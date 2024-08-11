@@ -222,10 +222,11 @@ struct EventDetailView: View {
     
     @EnvironmentObject private var state: EventDetailViewState
     @EnvironmentObject private var appearance: ViewAppearance
-    private enum InputFields {
+    private enum InputFields: String {
         case name
         case url
         case memo
+        var id: String { "EventDetailView::InputFields::\(self.rawValue)" }
     }
     @FocusState private var isFocusInput: InputFields?
     
@@ -259,29 +260,39 @@ struct EventDetailView: View {
     
     var body: some View {
         ZStack {
-            ScrollView {
-                VStack(spacing: 25) {
-                    self.moreActionView
-                    self.nameInputView
-                    if state.isForemost {
-                        self.foremostEventView
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 25) {
+                        self.moreActionView
+                        self.nameInputView
+                        if state.isForemost {
+                            self.foremostEventView
+                        }
+                        self.eventDetailTypeView
+                        self.timeSelectView
+                        self.selectRepeatView
+                        Spacer(minLength: 12)
+                        self.selectTagView
+                        self.selectNotificationView
+                        Spacer(minLength: 12)
+                        self.enterLinkView
+                            .id(InputFields.url.id)
+                        self.enterMemokView
+                            .id(InputFields.memo.id)
+                        if let model = state.linkPreviewModel {
+                            self.linkPreview(model)
+                        }
                     }
-                    self.eventDetailTypeView
-                    self.timeSelectView
-                    self.selectRepeatView
-                    Spacer(minLength: 12)
-                    self.selectTagView
-                    self.selectNotificationView
-                    Spacer(minLength: 12)
-                    self.enterLinkView
-                    self.enterMemokView
-                    if let model = state.linkPreviewModel {
-                        self.linkPreview(model)
+                    .padding(.top, 20)
+                    .padding(.horizontal, 12)
+                    .padding(.bottom, 120)
+                }
+                .onChange(of: isFocusInput) { _, new in
+                    guard let id = new?.id else { return }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                        withAnimation { proxy.scrollTo(id, anchor: .center) }
                     }
                 }
-                .padding(.top, 20)
-                .padding(.horizontal, 12)
-                .padding(.bottom, 120)
             }
             
             VStack {
