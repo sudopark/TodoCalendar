@@ -47,4 +47,9 @@ public protocol NotificationUsecaseFactory {
     func makeEventNotificationUsecase() -> any EventNotificationUsecase
 }
 
-public protocol UsecaseFactory: AcountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory { }
+public protocol CommonUsecaseFactory {
+    
+    func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase
+}
+
+public protocol UsecaseFactory: AcountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory { }

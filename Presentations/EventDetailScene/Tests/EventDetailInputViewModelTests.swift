@@ -66,7 +66,8 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
         let viewModel = EventDetailInputViewModelImple(
             eventTagUsecase: tagUsecase,
             calendarSettingUsecase: settingUsecase,
-            eventSettingUsecase: eventSettingUsecase
+            eventSettingUsecase: eventSettingUsecase,
+            linkPreviewFetchUsecase: StubLinkPreviewFetchUsecase()
         )
         viewModel.routing = self.spyRouter
         viewModel.listener = self.spyListener
@@ -151,7 +152,7 @@ extension EventDetailInputViewModelTests {
             
             viewModel.enter(name: "new name")
         }
-    
+        
         // then
         XCTAssertEqual(names, ["old_name"])
     }
@@ -169,9 +170,72 @@ extension EventDetailInputViewModelTests {
             viewModel.enter(name: "new name")
             viewModel.enter(url: "new url")
         }
-    
+        
         // then
         XCTAssertEqual(urls, ["old_url"])
+    }
+    
+    func testViewModel_whenEnterURLAddress_checkIsValid() {
+        // given
+        let expect = expectation(description: "url 입력시 올바른 형식인지 검사")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isValids = self.waitOutputs(expect, for: viewModel.isValidURLEntered) {
+            self.prepareViewModelWithOldData(viewModel)
+            
+            viewModel.enter(url: "https://www.naver.com")
+            viewModel.enter(url: "wrong url address")
+            viewModel.enter(url: "https://www.google.com")
+        }
+        
+        // then
+        XCTAssertEqual(isValids, [false, true, false, true])
+    }
+    
+    func testViewModel_whenEnterValidURL_providePreviewModel() {
+        // given
+        let expect = expectation(description: "올바른 형식의 url 입력시 preview 정보 제공")
+        expect.expectedFulfillmentCount = 5
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let models = self.waitOutputs(expect, for: viewModel.linkPreview, timeout: 3) {
+            self.prepareViewModelWithOldData(viewModel)
+            Task {
+                try await Task.sleep(for: .milliseconds(400))
+                viewModel.enter(url: "https://www.google.com")
+                
+                try await Task.sleep(for: .milliseconds(400))
+                viewModel.enter(url: "wrong url")
+                
+                try await Task.sleep(for: .milliseconds(400))
+                viewModel.enter(url: "https://naver.com")
+            }
+        }
+        
+        // then
+        let descriptions = models.map { $0?.description }
+        XCTAssertEqual(descriptions, [
+            nil, nil, "desc:https://www.google.com", nil, "desc:https://naver.com"
+        ])
+    }
+    
+    func testViewModel_openEnteringURL() {
+        // given
+        let expect = expectation(description: "wait valid url enter")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let _ = self.waitFirstOutput(expect, for: viewModel.isValidURLEntered.filter { $0 }) {
+            self.prepareViewModelWithOldData(viewModel)
+            viewModel.enter(url: "https://www.google.com")
+        }
+        viewModel.openURL()
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "https://www.google.com")
     }
     
     // 입력한 값에 따라 초기 memo값 제공

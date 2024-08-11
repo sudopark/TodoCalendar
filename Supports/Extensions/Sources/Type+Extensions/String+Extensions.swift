@@ -36,7 +36,15 @@ extension String {
         let path = self.isEscaped()
             ? self
             : self.addingPercentEncoding(withAllowedCharacters: allowCharSet) ?? self
-        return URL(string: path)
+        let checkIsValid = (try? self.isValidURL(path)) ?? true
+        return checkIsValid ? URL(string: path) : nil
+    }
+    
+    public func isValidURL(_ urlString: String) throws -> Bool {
+        let pattern = #"^(https?|ftp)://[^\s/$.?#].[^\s]*$"#
+        let regex = try NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+        let range = NSRange(location: 0, length: urlString.utf16.count)
+        return regex.firstMatch(in: urlString, options: [], range: range) != nil
     }
 }
 

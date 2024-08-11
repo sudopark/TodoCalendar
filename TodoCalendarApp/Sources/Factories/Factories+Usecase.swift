@@ -11,7 +11,6 @@ import Domain
 import Repository
 import Scenes
 
-
 // MARK: - NonLoginUsecaseFactoryImple
 
 struct NonLoginUsecaseFactoryImple: UsecaseFactory {
@@ -216,6 +215,15 @@ extension NonLoginUsecaseFactoryImple {
     
     var temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase {
         return NotNeedTemporaryUserDataMigrationUescaseImple()
+    }
+}
+
+extension NonLoginUsecaseFactoryImple {
+    
+    func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
+        return LinkPreviewFetchUsecaesImple(
+            previewEngine: applicationBase.linkPreviewEngine
+        )
     }
 }
 
@@ -432,6 +440,16 @@ extension LoginUsecaseFactoryImple {
         )
         return EventNotificationSettingUsecaseImple(
             notificationRepository: repository
+        )
+    }
+}
+
+
+extension LoginUsecaseFactoryImple {
+    
+    func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
+        return LinkPreviewFetchUsecaesImple(
+            previewEngine: applicationBase.linkPreviewEngine
         )
     }
 }

@@ -16,7 +16,7 @@ open class StubLinkPreviewFetchUsecase: LinkPreviewFetchUsecase, @unchecked Send
     
     open func fetchPreview(_ url: URL) async throws -> LinkPreview {
         let preview = LinkPreview(
-            url: url, title: "title", description: "description", mainImagePath: "image", images: []
+            url: url, title: "title", description: "desc:\(url)", mainImagePath: "image", images: []
         )
         return preview
     }

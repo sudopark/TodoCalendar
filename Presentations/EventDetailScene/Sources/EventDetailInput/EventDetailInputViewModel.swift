@@ -51,6 +51,25 @@ protocol EventDetailInputRouting: Routing, Sendable, AnyObject {
 }
 
 
+struct LinkPreviewModel {
+    let title: String
+    var description: String?
+    var imageUrl: String?
+    
+    init(title: String, description: String? = nil, imageUrl: String? = nil) {
+        self.title = title
+        self.description = description
+        self.imageUrl = imageUrl
+    }
+    
+    init?(_ preview: LinkPreview) {
+        guard let title = preview.title else { return nil }
+        self.title = title
+        self.description = preview.description
+        self.imageUrl = preview.mainImagePath ?? preview.images.first
+    }
+}
+
 // MARK: - EventDetailInputViewModel
 
 protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInteractor {
@@ -70,6 +89,7 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     func selectPlace()
     func enter(url: String)
     func enter(memo: String)
+    func openURL()
     
     var initialName: AnyPublisher<String?, Never> { get }
     var initailURL: AnyPublisher<String?, Never> { get }
@@ -81,6 +101,8 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
     var selectedPlace: AnyPublisher<Place?, Never> { get }
     var selectedNotificationTimeText: AnyPublisher<String?, Never> { get }
+    var isValidURLEntered: AnyPublisher<Bool, Never> { get }
+    var linkPreview: AnyPublisher<LinkPreviewModel?, Never> { get }
 }
 
 
@@ -89,17 +111,20 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
     private let eventTagUsecase: any EventTagUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let eventSettingUsecase: any EventSettingUsecase
+    private let linkPreviewFetchUsecase: any LinkPreviewFetchUsecase
     weak var routing: (any EventDetailInputRouting)?
     weak var listener: (any EventDetailInputListener)?
     
     init(
         eventTagUsecase: any EventTagUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        eventSettingUsecase: any EventSettingUsecase
+        eventSettingUsecase: any EventSettingUsecase,
+        linkPreviewFetchUsecase: any LinkPreviewFetchUsecase
     ) {
         self.eventTagUsecase = eventTagUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.eventSettingUsecase = eventSettingUsecase
+        self.linkPreviewFetchUsecase = linkPreviewFetchUsecase
     }
     
     private struct BasicAndTimeZoneData {
@@ -111,6 +136,7 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
         let basic = CurrentValueSubject<BasicAndTimeZoneData?, Never>(nil)
         let additional = CurrentValueSubject<EventDetailData?, Never>(nil)
         let eventSetting = CurrentValueSubject<EventSettings?, Never>(nil)
+        let linkPreview = CurrentValueSubject<LinkPreview?, Never>(nil)
         
         func mutateBasicIfPossible(
             _ mutating: (BasicAndTimeZoneData) -> BasicAndTimeZoneData?
@@ -152,6 +178,28 @@ extension EventDetailInputViewModelImple {
         
         let setting = self.eventSettingUsecase.loadEventSetting()
         self.subject.eventSetting.send(setting)
+        
+        self.bindLinkPreview()
+    }
+    
+    private func bindLinkPreview() {
+        
+        self.subject.additional
+            .map { $0?.url?.asURL() }
+            .throttle(for: .milliseconds(300), scheduler: RunLoop.main, latest: true)
+            .removeDuplicates()
+            .map { url -> AnyPublisher<LinkPreview?, Never> in
+                guard let url = url else { return Just(nil).eraseToAnyPublisher() }
+                return Publishers.create(do: { [weak self] in
+                    return try await self?.linkPreviewFetchUsecase.fetchPreview(url)
+                })
+                .eraseToAnyPublisher()
+            }
+            .switchToLatest()
+            .sink(receiveValue: { [weak self] preview in
+                self?.subject.linkPreview.send(preview)
+            })
+            .store(in: &self.cancellables)
     }
     
     func prepared(basic: EventDetailBasicData, additional: EventDetailData) {
@@ -338,10 +386,30 @@ extension EventDetailInputViewModelImple {
         }
     }
     
+    
+    func openURL() {
+        guard let url = self.subject.additional.value?.url, !url.isEmpty else { return }
+        self.routing?.openSafari(url)
+    }
+    
     func enter(memo: String) {
         self.subject.mutateAdditionalIfPossible {
             return $0 |> \.memo .~ memo
         }
+    }
+    
+    var isValidURLEntered: AnyPublisher<Bool, Never> {
+        return self.subject.additional
+            .map { $0?.url?.asURL() }
+            .map { $0 != nil }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var linkPreview: AnyPublisher<LinkPreviewModel?, Never> {
+        return self.subject.linkPreview
+            .map { preview in preview.flatMap { LinkPreviewModel($0) } }
+            .eraseToAnyPublisher()
     }
 }
 

@@ -12,6 +12,7 @@ import Extensions
 import FirebaseAuth
 import Alamofire
 import SQLiteService
+import SwiftLinkPreview
 
 
 final class ApplicationBase {
@@ -33,6 +34,10 @@ final class ApplicationBase {
     lazy var commonSqliteService: SQLiteService = {
         let service = SQLiteService()
         return service
+    }()
+    
+    let linkPreviewEngine: SwiftLinkPreview = {
+       return SwiftLinkPreview(cache: InMemoryCache())
     }()
     
     private var remoteEnvironment: RemoteEnvironment = {
