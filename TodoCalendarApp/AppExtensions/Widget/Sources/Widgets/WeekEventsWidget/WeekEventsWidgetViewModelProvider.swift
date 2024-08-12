@@ -208,14 +208,15 @@ extension WeekEventsWidgetViewModelProvider {
         let firstWeekDay = self.settingRepository.firstWeekDay() ?? .sunday
         let defaultTagColorSetting = self.appSettingRepository.loadSavedViewAppearance().defaultTagColor
         let calenar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        let targetMonth = calenar.component(.month, from: date)
+        let targetMonthDate = calenar.targetMonthRefDate(date, for: range)
+        let targetMonth = calenar.component(.month, from: targetMonthDate)
         let weeks = try self.getWeeks(date, firstWeekDay, range, calenar)
         let events = try await self.eventFetchUsecase.fetchEvents(in: weeks.range, timeZone)
         let targetDate = CalendarComponent.Day(date, calendar: calenar)
         
         return WeekEventsViewModel(
             range: range,
-            targetMonthText: date.text("MMMM".localized(), timeZone: timeZone).uppercased(),
+            targetMonthText: targetMonthDate.text("MMMM".localized(), timeZone: timeZone).uppercased(),
             targetDayIndetifier: targetDate.identifier,
             orderedWeekDaysModel: WeekDayModel.allModels(of: firstWeekDay),
             weeks: self.convertToWeekRowModels(weeks, events.eventWithTimes, targetMonth),
@@ -309,6 +310,18 @@ extension WeekEventsWidgetViewModelProvider {
     }
 }
 
+
+private extension Calendar {
+    
+    func targetMonthRefDate(_ date: Date, for range: WeekEventsRange) -> Date {
+        switch range {
+        case .weeks: return date
+        case .wholeMonth(.current): return date
+        case .wholeMonth(.previous): return self.addMonth(-1, from: date) ?? date
+        case .wholeMonth(.next): return self.addMonth(1, from: date) ?? date
+        }
+    }
+}
 
 private extension EventOnWeek {
     

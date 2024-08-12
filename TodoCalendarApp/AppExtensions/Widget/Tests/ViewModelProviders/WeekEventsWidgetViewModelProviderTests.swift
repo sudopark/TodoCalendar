@@ -276,7 +276,7 @@ extension WeekEventsWidgetViewModelProviderTests{
         )
         
         // then
-        XCTAssertEqual(model.targetMonthText, "JUNE")
+        XCTAssertEqual(model.targetMonthText, "MAY")
         XCTAssertEqual(model.targetDayIndetifier, "2024-6-12")
         let days = model.weeks.map { w in w.days.map { $0.day } }
         let accentDays = model.weeks.map { w in w.days.map { $0.accentDay }}
@@ -327,7 +327,7 @@ extension WeekEventsWidgetViewModelProviderTests{
         )
         
         // then
-        XCTAssertEqual(model.targetMonthText, "JUNE")
+        XCTAssertEqual(model.targetMonthText, "JULY")
         XCTAssertEqual(model.targetDayIndetifier, "2024-6-12")
         let days = model.weeks.map { w in w.days.map { $0.day } }
         let accentDays = model.weeks.map { w in w.days.map { $0.accentDay }}
