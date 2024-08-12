@@ -34,15 +34,17 @@ final class AppExtensionBase {
         return service
     }()
     
-    private lazy var firebaseAuthService: any FirebaseAuthService = {
+    lazy var firebaseAuthService: any FirebaseAuthService = {
         if AppEnvironment.isTestBuild {
             return DummyFirebaseAuthService()
         } else {
             FirebaseApp.configure()
-            return FirebaseAuthServiceImple(
+            let service = FirebaseAuthServiceImple(
                 appGroupId: AppEnvironment.groupID,
                 useEmulator: AppEnvironment.useEmulator
             )
+            try? service.setup()
+            return service
         }
     }()
     
