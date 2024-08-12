@@ -210,9 +210,8 @@ struct EventListCellView: View {
         Button {
             let isUnderCompleteProcessing = self.pendingDoneState.ids.contains(todoId)
             if !isUnderCompleteProcessing {
-                appearance.withAnimationIfNeed { _ = self.pendingDoneState.ids.insert(todoId) }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    guard self.pendingDoneState.ids.contains(todoId) else { return }
+                appearance.withAnimationIfNeed {
+                    _ = self.pendingDoneState.ids.insert(todoId)
                     self.requestDoneTodo(todoId)
                 }
             } else {
