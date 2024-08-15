@@ -53,8 +53,10 @@ final class ApplicationBase {
         let host = AppEnvironment.useEmulator 
             ? secrets["emulator_caleandar_api_host"] as? String
             : secrets["caleandar_api_host"] as? String
+        let csAPi = secrets["cs_api"] as? String
         let environment = RemoteEnvironment(
-            calendarAPIHost: host ?? "https://dummy.com"
+            calendarAPIHost: host ?? "https://dummy.com",
+            csAPI: csAPi ?? "https://dummy.com"
         )
         return environment
     }()
