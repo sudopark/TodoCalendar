@@ -44,7 +44,7 @@ extension WidgetUsecaseFactory {
     
     func makeHolidayRepository() -> any HolidayRepository {
         let remote = RemoteAPIImple(
-            environment: .init(calendarAPIHost: ""),
+            environment: .init(calendarAPIHost: "", csAPI: ""),
             authenticator: nil
         )
         let repository = HolidayRepositoryImple(

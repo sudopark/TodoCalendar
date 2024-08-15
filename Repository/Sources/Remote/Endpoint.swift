@@ -188,15 +188,28 @@ enum MigrationEndpoints: Endpoint {
     }
 }
 
+enum FeedbackEndpoints: Endpoint {
+    case post
+    
+    var subPath: String {
+        switch self {
+        case .post: return ""
+        }
+    }
+}
+
 // MARK: - RemoteEnvironment
 
 public struct RemoteEnvironment: Sendable {
     
     let calendarAPIHost: String
+    private let csAPI: String
     public init(
-        calendarAPIHost: String
+        calendarAPIHost: String,
+        csAPI: String
     ) {
         self.calendarAPIHost = calendarAPIHost
+        self.csAPI = csAPI
     }
     
     func path(_ endpoint: any Endpoint) -> String? {
@@ -239,6 +252,9 @@ public struct RemoteEnvironment: Sendable {
         case let migration as MigrationEndpoints:
             let prefix = "\(calendarAPIHost)/v1/migration"
             return appendSubpathIfNotEmpty(prefix, migration.subPath)
+            
+        case let feedback as FeedbackEndpoints:
+            return appendSubpathIfNotEmpty(self.csAPI, feedback.subPath)
             
         default: return nil
         }
