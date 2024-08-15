@@ -5,7 +5,9 @@
 //  Created by sudo.park on 2023/07/30.
 //
 
-import Foundation
+import UIKit
+import Prelude
+import Optics
 import Domain
 import Repository
 import Extensions
@@ -86,6 +88,54 @@ final class ApplicationBase {
     }()
 }
 
+
+struct DeviceInfoFetchServiceImple: DeviceInfoFetchService {
+    
+    @MainActor
+    func fetchDeviceInfo() async -> DeviceInfo {
+        return DeviceInfo()
+        |> \.appVersion .~ appVersion()
+        |> \.osVersion .~ pure(osVersion())
+        |> \.deviceModel .~ deviceModel()
+        |> \.isiOSAppOnMac .~ pure(isiOSAppOnMac)
+    }
+    
+    private func markettingVersion() -> String? {
+        return Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
+    }
+    
+    private func buildNumber() -> String? {
+        return Bundle.main.infoDictionary?["CFBundleVersion"] as? String
+    }
+    
+    private func appVersion() -> String? {
+        let markettingVersion = self.markettingVersion()
+        let buildNumber = self.buildNumber()
+        return markettingVersion.map {
+            return "\($0)(\(buildNumber ?? "0"))"
+        }
+    }
+    
+    @MainActor
+    private func osVersion() -> String {
+        return UIDevice.current.systemVersion
+    }
+    
+    private func deviceModel() -> String? {
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        let modelCode = withUnsafePointer(to: &systemInfo.machine) {
+            $0.withMemoryRebound(to: CChar.self, capacity: 1) {
+                ptr in String.init(validatingUTF8: ptr)
+            }
+        }
+        return modelCode
+    }
+    
+    private var isiOSAppOnMac: Bool {
+        return ProcessInfo.processInfo.isiOSAppOnMac
+    }
+}
 
 // MARK: - dummy
 
