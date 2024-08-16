@@ -25,6 +25,7 @@ protocol SettingItemListRouting: Routing, Sendable {
     func routeToFeedbackPost()
     func routeToAccountManage()
     func routeToSignIn()
+    func openShare(link path: String)
 }
 
 // MARK: - Router
@@ -107,6 +108,22 @@ extension SettingItemListRouter {
         Task { @MainActor in
             let next = self.memberSceneBuilder.makeSignInScene()
             self.currentScene?.present(next, animated: true)
+        }
+    }
+    
+    func openShare(link path: String) {
+        Task { @MainActor in
+            guard let url = URL(string: path) else { return }
+            let shareItems: [Any] = [
+                "To-do Calendar" as Any,
+                url as Any
+            ]
+            let activityViewController = UIActivityViewController(
+                activityItems: shareItems,
+                applicationActivities: nil
+            )
+            activityViewController.popoverPresentationController?.sourceView = self.currentScene?.view
+            self.currentScene?.present(activityViewController, animated: true)
         }
     }
 }

@@ -13,15 +13,18 @@ import CommonPresentation
 
 public final class SettingSceneBuilderImple: SettingSceneBuiler {
     
+    private let appId: String
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let memberSceneBuilder: any MemberSceneBuilder
     
     public init(
+        appId: String,
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         memberSceneBuilder: any MemberSceneBuilder
     ) {
+        self.appId = appId
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.memberSceneBuilder = memberSceneBuilder
@@ -115,6 +118,7 @@ extension SettingSceneBuilderImple {
         )
         
         let builder = SettingItemListSceneBuilerImple(
+            appId: self.appId,
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             appearanceSceneBuilder: apperanceSceneBuilder,

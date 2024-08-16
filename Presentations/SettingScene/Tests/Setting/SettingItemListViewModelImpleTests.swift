@@ -32,6 +32,7 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private func makeViewModel(_ account: AccountInfo? = nil) -> SettingItemListViewModelImple {
         let accountUsecase = StubAccountUsecase(account)
         let viewModel = SettingItemListViewModelImple(
+            appId: "some",
             accountUsecase: accountUsecase,
             uiSettingUsecase: StubUISettingUsecase()
         )
@@ -223,6 +224,57 @@ extension SettingItemListViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyRouter.didRouteToFeedback, true)
     }
+    
+    func testViewModel_routeShareApp() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        
+        // when
+        guard let share = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .shareApp })
+        else {
+            XCTAssert(false)
+            return
+        }
+        viewModel.selectItem(share)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenShareLink, true)
+    }
+    
+    func testViewModel_routeToAppReview() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        
+        // when
+        guard let review = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .addReview })
+        else {
+            XCTAssert(false)
+            return
+        }
+        viewModel.selectItem(review)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "http://itunes.apple.com/app/id/some")
+    }
+    
+    func testViewModel_routeToSourceCode() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        
+        // when
+        guard let source = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .sourceCode })
+        else {
+            XCTAssert(false)
+            return
+        }
+        viewModel.selectItem(source)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "https://github.com/sudopark/TodoCalendar")
+    }
 }
 
 private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Sendable {
@@ -257,5 +309,10 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     var didRouteToFeedback: Bool?
     func routeToFeedbackPost() {
         self.didRouteToFeedback = true
+    }
+    
+    var didOpenShareLink: Bool?
+    func openShare(link path: String) {
+        self.didOpenShareLink = true
     }
 }

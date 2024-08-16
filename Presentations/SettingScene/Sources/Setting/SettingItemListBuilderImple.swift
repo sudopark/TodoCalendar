@@ -16,6 +16,7 @@ import CommonPresentation
 
 final class SettingItemListSceneBuilerImple {
     
+    private let appId: String
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let appearanceSceneBuilder: any AppearanceSettingSceneBuiler
@@ -25,6 +26,7 @@ final class SettingItemListSceneBuilerImple {
     private let feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     
     init(
+        appId: String,
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
@@ -33,6 +35,7 @@ final class SettingItemListSceneBuilerImple {
         memberSceneBuilder: any MemberSceneBuilder,
         feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     ) {
+        self.appId = appId
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.appearanceSceneBuilder = appearanceSceneBuilder
@@ -50,6 +53,7 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
     func makeSettingItemListScene() -> any SettingItemListScene {
         
         let viewModel = SettingItemListViewModelImple(
+            appId: self.appId,
             accountUsecase: self.usecaseFactory.accountUescase,
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )

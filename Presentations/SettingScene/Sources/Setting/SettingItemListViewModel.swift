@@ -144,14 +144,17 @@ protocol SettingItemListViewModel: AnyObject, Sendable, SettingItemListSceneInte
 
 final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked Sendable {
     
+    private let appId: String
     private let accountUsecase: any AccountUsecase
     private let uiSettingUsecase: any UISettingUsecase
     var router: (any SettingItemListRouting)?
     
     init(
+        appId: String,
         accountUsecase: any AccountUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
+        self.appId = appId
         self.accountUsecase = accountUsecase
         self.uiSettingUsecase = uiSettingUsecase
     }
@@ -163,6 +166,10 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
     
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
+    
+    private var appstoreLinkPath: String {
+        return "http://itunes.apple.com/app/id/\(self.appId)"
+    }
 }
 
 
@@ -200,10 +207,17 @@ extension SettingItemListViewModelImple {
         case .feedback:
             self.router?.routeToFeedbackPost()
             
-        case .faq: break
-        case .shareApp: break
-        case .addReview: break
-        case .sourceCode: break
+        case .faq: 
+            break
+            
+        case .shareApp:
+            self.router?.openShare(link: self.appstoreLinkPath)
+            
+        case .addReview:
+            self.router?.openSafari(self.appstoreLinkPath)
+            
+        case .sourceCode:
+            self.router?.openSafari("https://github.com/sudopark/TodoCalendar")
         }
     }
     

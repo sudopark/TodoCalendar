@@ -31,6 +31,8 @@ struct AppEnvironment {
         return "group.sudo.park.todo-calendar"
     }
     
+    static var appId: String { "6639620385" }
+    
     static func dbFilePath(for userId: String?) -> String {
         let directory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: self.groupID)
         let fileName = userId.map { "\(self.dbFileName)_\($0)" } ?? self.dbFileName
