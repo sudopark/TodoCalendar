@@ -52,4 +52,9 @@ public protocol CommonUsecaseFactory {
     func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase
 }
 
-public protocol UsecaseFactory: AcountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory { }
+public protocol SupportUsecaseFactory {
+    
+    func makeFeedbackUsecase() -> any FeedbackUsecase
+}
+
+public protocol UsecaseFactory: AcountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory { }

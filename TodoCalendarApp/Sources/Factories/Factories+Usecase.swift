@@ -227,6 +227,18 @@ extension NonLoginUsecaseFactoryImple {
     }
 }
 
+extension NonLoginUsecaseFactoryImple {
+    
+    func makeFeedbackUsecase() -> any FeedbackUsecase {
+        let feedbackRepository = FeedbackRepositoryImple(remote: self.applicationBase.remoteAPI)
+        return FeedbackUsecaseImple(
+            accountUsecase: self.accountUescase,
+            feedbackRepository: feedbackRepository,
+            deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
+    }
+}
+
 
 // MARK: - LoginUsecaseFactoryImple
 
@@ -450,6 +462,18 @@ extension LoginUsecaseFactoryImple {
     func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
         return LinkPreviewFetchUsecaesImple(
             previewEngine: applicationBase.linkPreviewEngine
+        )
+    }
+}
+
+extension LoginUsecaseFactoryImple {
+    
+    func makeFeedbackUsecase() -> any FeedbackUsecase {
+        let feedbackRepository = FeedbackRepositoryImple(remote: self.applicationBase.remoteAPI)
+        return FeedbackUsecaseImple(
+            accountUsecase: self.accountUescase,
+            feedbackRepository: feedbackRepository,
+            deviceInfoFetchService: DeviceInfoFetchServiceImple()
         )
     }
 }
