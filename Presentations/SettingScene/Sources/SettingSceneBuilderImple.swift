@@ -109,13 +109,19 @@ extension SettingSceneBuilderImple {
             countrySelectSceneBuilder: countrySelectSceneBuilder
         )
         
+        let feedbackSceneBuilder = FeedbackPostSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
         let builder = SettingItemListSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             appearanceSceneBuilder: apperanceSceneBuilder,
             eventSettingSceneBuilder: eventSettingSceneBuilder,
             holidayListSceneBuilder: holidayListSceneBuilder,
-            memberSceneBuilder: self.memberSceneBuilder
+            memberSceneBuilder: self.memberSceneBuilder,
+            feedbackPostSceneBuiler: feedbackSceneBuilder
         )
         return builder.makeSettingItemListScene()
     }

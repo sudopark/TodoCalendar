@@ -197,7 +197,9 @@ extension SettingItemListViewModelImple {
         case .holidaySetting:
             self.router?.routeToHolidaySetting()
             
-        case .feedback: break
+        case .feedback:
+            self.router?.routeToFeedbackPost()
+            
         case .faq: break
         case .shareApp: break
         case .addReview: break

@@ -206,6 +206,23 @@ extension SettingItemListViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyRouter.didRouteToHoliday, true)
     }
+    
+    func testViewModel_routeToFeedbackPost() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        
+        // when
+        guard let feedback = items.compactMap({ $0 as? SettingItemModel }).first(where: { $0.itemId == .feedback })
+        else {
+            XCTAssert(false)
+            return
+        }
+        viewModel.selectItem(feedback)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToFeedback, true)
+    }
 }
 
 private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Sendable {
@@ -235,5 +252,10 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     var didRouteToAccountManage: Bool?
     func routeToAccountManage() {
         self.didRouteToAccountManage = true
+    }
+    
+    var didRouteToFeedback: Bool?
+    func routeToFeedbackPost() {
+        self.didRouteToFeedback = true
     }
 }
