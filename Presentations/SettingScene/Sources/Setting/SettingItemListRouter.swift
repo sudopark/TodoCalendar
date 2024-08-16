@@ -22,6 +22,7 @@ protocol SettingItemListRouting: Routing, Sendable {
     )
     func routeToEventSetting()
     func routeToHolidaySetting()
+    func routeToFeedbackPost()
     func routeToAccountManage()
     func routeToSignIn()
 }
@@ -34,17 +35,20 @@ final class SettingItemListRouter: BaseRouterImple, SettingItemListRouting, @unc
     private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     private let memberSceneBuilder: any MemberSceneBuilder
+    private let feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     
     init(
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
         eventSettingSceneBuilder: any EventSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler,
-        memberSceneBuilder: any MemberSceneBuilder
+        memberSceneBuilder: any MemberSceneBuilder,
+        feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     ) {
         self.appearanceSceneBuilder = appearanceSceneBuilder
         self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
+        self.feedbackPostSceneBuiler = feedbackPostSceneBuiler
     }
 }
 
@@ -74,13 +78,19 @@ extension SettingItemListRouter {
         }
     }
     
-    // TODO: router implememnts
     func routeToHolidaySetting() {
         
         Task { @MainActor in
             
             let next = self.holidayListSceneBuilder.makeHolidayListScene()
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+    
+    func routeToFeedbackPost() {
+        Task { @MainActor in
+            let next = self.feedbackPostSceneBuiler.makeFeedbackPostScene()
+            self.currentScene?.present(next, animated: true)
         }
     }
     

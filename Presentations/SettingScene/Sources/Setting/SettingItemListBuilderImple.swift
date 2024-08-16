@@ -22,6 +22,7 @@ final class SettingItemListSceneBuilerImple {
     private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let holidayListSceneBuilder: any HolidayListSceneBuiler
     private let memberSceneBuilder: any MemberSceneBuilder
+    private let feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
@@ -29,7 +30,8 @@ final class SettingItemListSceneBuilerImple {
         appearanceSceneBuilder: any AppearanceSettingSceneBuiler,
         eventSettingSceneBuilder: any EventSettingSceneBuiler,
         holidayListSceneBuilder: any HolidayListSceneBuiler,
-        memberSceneBuilder: any MemberSceneBuilder
+        memberSceneBuilder: any MemberSceneBuilder,
+        feedbackPostSceneBuiler: any FeedbackPostSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -37,6 +39,7 @@ final class SettingItemListSceneBuilerImple {
         self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.holidayListSceneBuilder = holidayListSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
+        self.feedbackPostSceneBuiler = feedbackPostSceneBuiler
     }
 }
 
@@ -60,7 +63,8 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
             appearanceSceneBuilder: self.appearanceSceneBuilder,
             eventSettingSceneBuilder: self.eventSettingSceneBuilder,
             holidayListSceneBuilder: self.holidayListSceneBuilder,
-            memberSceneBuilder: self.memberSceneBuilder
+            memberSceneBuilder: self.memberSceneBuilder,
+            feedbackPostSceneBuiler: self.feedbackPostSceneBuiler
         )
         router.scene = viewController
         viewModel.router = router
