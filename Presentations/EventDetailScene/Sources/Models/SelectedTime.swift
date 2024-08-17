@@ -142,7 +142,7 @@ extension Optional where Wrapped == SelectedTime {
             case .singleAllDay(let start) where start.date.isSameDay(date, at: timeZone):
                 .singleAllDay(timeText |> \.time .~ nil)
             case .singleAllDay:
-                .singleAllDay(timeText)
+                .singleAllDay(timeText |> \.time .~ nil)
             case .alldayPeriod(_, let end): .alldayPeriod(timeText |> \.time .~ nil, end)
         }
     }

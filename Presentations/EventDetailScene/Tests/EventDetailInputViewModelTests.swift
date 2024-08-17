@@ -492,6 +492,31 @@ extension EventDetailInputViewModelTests {
         XCTAssertEqual(times[safe: 8]??.startTime.timeIntervalSince1970, Date(timeIntervalSince1970: 0).add(days: 1)!.timeIntervalSince1970)
     }
     
+    func testViewModel_whenChangeStartTimeAfterSelectAllDay_doNotProvideTimeText() {
+        // given
+        let expect = expectation(description: "시작시간 allday 선택 이후에 날짜 변경시 시간정보는 제공 안함")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let times = self.waitOutputs(expect, for: viewModel.selectedTime) {
+            self.prepareViewModelWithOldData(viewModel) // 1. 최초 period
+            viewModel.removeEventEndTime()
+            viewModel.toggleIsAllDay() //2. isSingle all day
+            viewModel.selectStartTime(Date(timeIntervalSince1970: 10).add(days: 1)!)
+        }
+        
+        // then
+        XCTAssertEqual(times[safe: 0]??.isPeriod, true)
+        XCTAssertEqual(times[safe: 0]??.startTimeText != nil, true)
+        XCTAssertEqual(times[safe: 1]??.isAt, true)
+        XCTAssertEqual(times[safe: 1]??.startTimeText != nil, true)
+        XCTAssertEqual(times[safe: 2]??.isSingleAllDay, true)
+        XCTAssertEqual(times[safe: 2]??.startTimeText != nil, false)
+        XCTAssertEqual(times[safe: 3]??.isSingleAllDay, true)
+        XCTAssertEqual(times[safe: 3]??.startTimeText != nil, false)
+    }
+    
     // 태그 선택
     func testViewModel_selectEventTag() {
         // given
@@ -786,6 +811,15 @@ private extension SelectedTime {
     var isAllDayPeriod: Bool {
         guard case .alldayPeriod = self else { return false }
         return true
+    }
+    
+    var startTimeText: String? {
+        switch self {
+        case .at(let time): return time.time
+        case .period(let start, _): return start.time
+        case .singleAllDay(let time): return time.time
+        case .alldayPeriod(let start, _): return start.time
+        }
     }
     
     var startTime: Date {
