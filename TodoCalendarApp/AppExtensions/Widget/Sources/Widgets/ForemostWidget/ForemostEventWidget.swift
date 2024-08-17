@@ -205,7 +205,7 @@ struct SystemSizeForemostEventView: View {
         var body: some View {
             Toggle(
                 "", isOn: false,
-                intent: TodoToggleIntent(id: todo.eventIdentifier)
+                intent: TodoToggleIntent(id: todo.eventIdentifier, isForemost: true)
             )
             .toggleStyle(TodoToggleStyle(colorSet: colorSet))
         }

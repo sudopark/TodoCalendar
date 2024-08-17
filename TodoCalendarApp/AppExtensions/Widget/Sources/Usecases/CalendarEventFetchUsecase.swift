@@ -44,7 +44,6 @@ protocol CalendarEventFetchUsecase {
 actor CalendarEventsFetchCacheStore {
     var currentTodos: [TodoCalendarEvent]?
     var allCustomTagsMap: [String: EventTag]?
-    var foremostMarkableEvent: (any ForemostMarkableEvent)??
     
     func updateCurrentTodos(_ todos: [TodoCalendarEvent]) {
         self.currentTodos = todos
@@ -52,15 +51,10 @@ actor CalendarEventsFetchCacheStore {
     func updateAllCustomTagsMap(_ newValue: [String: EventTag]) {
         self.allCustomTagsMap = newValue
     }
-    
-    func updateForemostEvent(_ newValue: (any ForemostMarkableEvent)?) {
-        self.foremostMarkableEvent = newValue
-    }
-    
+
     func reset() {
         self.currentTodos = nil
         self.allCustomTagsMap = nil
-        self.foremostMarkableEvent = nil
     }
     
     func resetCurrentTodo() {
@@ -189,12 +183,7 @@ extension CalendarEventFetchUsecaseImple {
     }
     
     private func loadForemostEvent() async throws -> (any ForemostMarkableEvent)? {
-        if let cached = await self.cached.foremostMarkableEvent {
-            return cached
-        }
-        let foremost = try await self.foremostEventRepository.foremostEvent().values.first(where: { _ in true }) ?? nil
-        await self.cached.updateForemostEvent(foremost)
-        return foremost
+        return try await self.foremostEventRepository.foremostEvent().values.first(where: { _ in true }) ?? nil
     }
 }
 

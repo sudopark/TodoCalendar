@@ -172,7 +172,7 @@ private struct TodoToggleButton: View {
     var body: some View {
         Toggle(
             "", isOn: false,
-            intent: TodoToggleIntent(id: todo.eventIdentifier)
+            intent: TodoToggleIntent(id: todo.eventIdentifier, isForemost: false)
         )
         .toggleStyle(TodoToggleStyle(colorSet: colorSet))
     }

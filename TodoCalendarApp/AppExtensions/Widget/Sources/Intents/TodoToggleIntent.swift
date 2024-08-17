@@ -21,11 +21,15 @@ struct TodoToggleIntent: AppIntent {
     
     @Parameter(title: "to-do id")
     var todoId: String
+    
+    @Parameter(title: "is foremost event")
+    var isForemost: Bool
 
     init() { }
     
-    init(id: String) {
+    init(id: String, isForemost: Bool) {
         self.todoId = id
+        self.isForemost = isForemost
     }
     
     func perform() async throws -> some IntentResult {
@@ -38,7 +42,12 @@ struct TodoToggleIntent: AppIntent {
                 self.reloadOnlyTodoTogglableWidgets()
                 return .result()
             }
-            if result.isToggledCurrentTodo == true {
+            if self.isForemost {
+                base.userDefaultEnvironmentStorage.update(
+                    EnvironmentKeys.needCheckResetWidgetCache.rawValue,
+                    true
+                )
+            } else if result.isToggledCurrentTodo == true {
                 base.userDefaultEnvironmentStorage.update(
                     EnvironmentKeys.needCheckResetCurrentTodo.rawValue,
                     true
