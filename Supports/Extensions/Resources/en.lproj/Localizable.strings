@@ -9,6 +9,8 @@
 
 // MARK: - common
 "common::and" = "and";
+"common::wait:message" = "Wait please..";
+"common::back" = "Back";
 
 
 // MARK: - date form
@@ -22,6 +24,7 @@
 "date_form::MMM_d_HH:mm" = "MMM d HH:mm";
 "date_form::MMM_d" = "MMM d";
 "date_form::yyyy_MM_dd_E_" = "yyyy MM dd (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd hh:mm";
 
 // MARK: - event
 
@@ -59,6 +62,18 @@
 "event_notification::allday_today" = "All day today";
 "event_notification::allday_tomorrow" = "All day tomorrow";
 "event_notification::some_allday" = "%@ all day";
+"event_notification_setting::option_title::no_notification" = "No notifications";
+"event_notification_setting::option_title::at_time" = "At the event time";
+"event_notification_setting::option_title::allday_9am" = "At 9 a.m. that day";
+"event_notification_setting::option_title::allday_12pm" = "At noon that day";
+"event_notification_setting::option_title::customTime" = "Custom time: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Custom time";
+"event_notification_setting::option_title::before_minutes" = "%d minute(s) before the event";
+"event_notification_setting::option_title::before_hours" = "%d hour(s) before the event";
+"event_notification_setting::option_title::before_days" = "%d day(s) before the event";
+"event_notification_setting::option_title::before_weeks" = "%d week(s) before the event";
+"event_notification_setting::option_title::allday_9am_before_days" = "At 9:00 AM %d day(s) ago";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "At 9:00 AM %d week(s) ago";
 
 
 // MARK: - calendar
@@ -83,3 +98,4 @@
 "calendar::event::more_action:edit:item_name" = "Edit";
 "calednar::event::add_new" = "Add a new event";
 "calednar::event::add_new:place_holder" = "Add a new to-do event quickly.";
+

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Extensions
 
 
 public struct NavigationBackButton: View {
@@ -17,7 +18,7 @@ public struct NavigationBackButton: View {
         text: String? = nil,
         tapHandler: @escaping () -> Void
     ) {
-        self.text = text ?? "Back".localized()
+        self.text = text ?? R.String.commonBack
         self.tapHandler = tapHandler
     }
     
