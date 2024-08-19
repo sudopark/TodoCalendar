@@ -219,6 +219,7 @@ extension Project {
             resources: [
                 "AppExtensions/\(extensionName)/Resources/**",
                 "Resources/secrets.json",
+                "Resources/Localize/**",
                 "Resources/GoogleService-Info.plist"
             ],
             entitlements: Entitlements.file(path: "./AppExtensions/\(extensionName)/\(targetName).entitlements"),
