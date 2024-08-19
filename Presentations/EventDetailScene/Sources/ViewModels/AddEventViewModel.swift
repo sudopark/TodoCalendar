@@ -280,10 +280,12 @@ extension AddEventViewModelImple {
     }
     
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
-        return Just([
-            [.copy, .addToTemplate]
-        ])
-        .eraseToAnyPublisher()
+        return Empty().eraseToAnyPublisher()
+        // TODO: 일단 비활성화
+//        return Just([
+//            [.copy, .addToTemplate]
+//        ])
+//        .eraseToAnyPublisher()
     }
 }
 

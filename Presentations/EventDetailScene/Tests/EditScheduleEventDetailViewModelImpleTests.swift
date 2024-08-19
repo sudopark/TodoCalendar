@@ -203,14 +203,14 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.makeViewModel(customSchedule: schedule),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.share]
+                []
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: schedule, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.share]
+                []
             ]
         )
         let scheduleNotRepeating = schedule |> \.repeating .~ nil
@@ -218,14 +218,14 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.makeViewModel(customSchedule: scheduleNotRepeating),
             expect: [
                 [.remove(onlyThisEvent: false)], 
-                [.toggleTo(isForemost: true), .share]
+                [.toggleTo(isForemost: true)]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: scheduleNotRepeating, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: false), .share]
+                [.toggleTo(isForemost: false)]
             ]
         )
     }

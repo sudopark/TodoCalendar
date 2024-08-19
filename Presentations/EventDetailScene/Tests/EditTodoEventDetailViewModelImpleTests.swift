@@ -204,14 +204,14 @@ extension EditTodoEventDetailViewModelImpleTests {
             self.makeViewModel(customTodo: todo),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)], 
-                [.toggleTo(isForemost: true), .share]
+                [.toggleTo(isForemost: true)]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customTodo: todo, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: false), .share]
+                [.toggleTo(isForemost: false)]
             ]
         )
         let todoNotRepeating = todo |> \.repeating .~ nil
@@ -219,7 +219,7 @@ extension EditTodoEventDetailViewModelImpleTests {
             self.makeViewModel(customTodo: todoNotRepeating),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: true), .share]
+                [.toggleTo(isForemost: true)]
             ]
         )
     }

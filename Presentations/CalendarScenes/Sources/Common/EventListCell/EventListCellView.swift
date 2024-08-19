@@ -88,6 +88,7 @@ struct EventListCellView: View {
                 Divider()
                 
                 toggleForemostButton(cellViewModel.isForemost)
+                editEventButton()
             }
         }
     }
@@ -114,6 +115,17 @@ struct EventListCellView: View {
             HStack {
                 Text(isForemost ? "unmark as foremost".localized() : "mark as foremost".localized())
                 Image(systemName: "exclamationmark.circle")
+            }
+        }
+    }
+    
+    private func editEventButton() -> some View {
+        return Button {
+            self.requestShowDetail(self.cellViewModel)
+        } label: {
+            HStack {
+                Text("edit".localized())
+                Image(systemName: "pencil")
             }
         }
     }

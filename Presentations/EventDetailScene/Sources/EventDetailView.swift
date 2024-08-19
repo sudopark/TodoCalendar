@@ -313,27 +313,29 @@ struct EventDetailView: View {
         HStack {
             Spacer()
             
-            Menu {
-                ForEach(0..<self.state.availableMoreActions.count, id: \.self) { sectionIndex in
-                    Section {
-                        ForEach(self.state.availableMoreActions[sectionIndex]) { action in
-                            Button(role: action.isRemove ? .destructive : nil) {
-                                self.doMoreAction(action)
-                            } label: {
-                                HStack {
-                                    Text(action.text)
-                                    Image(systemName: action.imageName)
+            if !state.availableMoreActions.isEmpty {
+                Menu {
+                    ForEach(0..<self.state.availableMoreActions.count, id: \.self) { sectionIndex in
+                        Section {
+                            ForEach(self.state.availableMoreActions[sectionIndex]) { action in
+                                Button(role: action.isRemove ? .destructive : nil) {
+                                    self.doMoreAction(action)
+                                } label: {
+                                    HStack {
+                                        Text(action.text)
+                                        Image(systemName: action.imageName)
+                                    }
                                 }
                             }
                         }
                     }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                        .frame(width: 20, height: 20)
                 }
-            } label: {
-                Image(systemName: "ellipsis")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                    .frame(width: 20, height: 20)
             }
         }
     }

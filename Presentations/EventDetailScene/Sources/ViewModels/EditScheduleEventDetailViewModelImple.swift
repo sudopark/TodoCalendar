@@ -363,9 +363,12 @@ extension EditScheduleEventDetailViewModelImple {
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
+            // TODO: share 기능 일단 비활성화
             let otherActions: [EventDetailMoreAction] = isRepeating
-                ? [.share]
-                : [.toggleTo(isForemost: !isForemost), .share]
+//                ? [.share]
+//                : [.toggleTo(isForemost: !isForemost), .share]
+                ? []
+                : [.toggleTo(isForemost: !isForemost)]
             return [removeActions, otherActions]
         }
         return Publishers.CombineLatest(

@@ -353,7 +353,9 @@ extension EditTodoEventDetailViewModelImple {
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
-            return [removeActions, [.toggleTo(isForemost: !isForemost), .share]]
+            // TODO: share 기능 일단 비활성화
+//            return [removeActions, [.toggleTo(isForemost: !isForemost), .share]]
+            return [removeActions, [.toggleTo(isForemost: !isForemost)]]
         }
         return Publishers.CombineLatest(
             self.subject.basicData.compactMap{ $0?.origin },
