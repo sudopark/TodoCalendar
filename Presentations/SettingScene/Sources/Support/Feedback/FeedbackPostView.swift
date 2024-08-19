@@ -138,6 +138,7 @@ struct FeedbackPostView: View {
             }
             .padding()
             .padding(.top, 20)
+            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("Feedback".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -266,7 +267,7 @@ struct FeedbackPostViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let setting = AppearanceSettings(
-            calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
+            calendar: .init(colorSetKey: .defaultDark, fontSetKey: .systemDefault),
             defaultTagColor: .init(holiday: "#ff0000", default: "#ff00ff")
         )
         let viewAppearance = ViewAppearance(
