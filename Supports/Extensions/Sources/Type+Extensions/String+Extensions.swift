@@ -66,7 +66,7 @@ extension Array where Element == String {
     
     public func andJoin(
         seperator: String = ", ",
-        lastSeperator: String = "and".localized()
+        lastSeperator: String = "common::and".localized()
     ) -> String {
         guard self.count > 1
         else {

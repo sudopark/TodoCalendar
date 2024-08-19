@@ -7,6 +7,10 @@
 */
 
 
+// MARK: - common
+"common::and" = "and";
+
+
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
 "date_form::MM_d__HH:mm" = "MM d, HH:mm";
