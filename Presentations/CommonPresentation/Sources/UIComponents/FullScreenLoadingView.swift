@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Extensions
 
 
 public struct FullScreenLoadingView: View {
@@ -20,7 +21,7 @@ public struct FullScreenLoadingView: View {
         message: String? = nil
     ) {
         self._isLoading = isLoading
-        self.message = "Wait please..".localized()
+        self.message = R.String.commonWaitMessage
     }
     
     public var body: some View {
