@@ -11,6 +11,7 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import Extensions
 import UnitTestHelpKit
 import TestDoubles
 
@@ -144,7 +145,7 @@ extension DayEventListViewModelImpleTests {
         // then
         XCTAssertEqual(cellViewModel?.name, "current todo")
         XCTAssertEqual(cellViewModel?.periodText, .singleText(
-            .init(text: "Todo".localized())
+            .init(text: "calendar::event_time::todo".localized())
         ))
         XCTAssertEqual(cellViewModel?.periodDescription, nil)
     }
@@ -160,7 +161,7 @@ extension DayEventListViewModelImpleTests {
         // then
         XCTAssertEqual(cellViewModel.name, "삼일절")
         XCTAssertEqual(cellViewModel.periodText, .singleText(
-            .init(text: "Allday".localized())
+            .init(text: "calendar::event_time::allday".localized())
         ))
         XCTAssertEqual(cellViewModel.periodDescription, nil)
     }
@@ -220,19 +221,19 @@ extension DayEventListViewModelImpleTests {
         }
         // when + then
         parameterizeTest(nil, .singleText(
-            .init(text: "Todo".localized())
+            .init(text: "calendar::event_time::todo".localized())
         ))
         parameterizeTest(self.rangeFromPastToToday, .doubleText(
-            .init(text: "Todo".localized()), .init(text: "23:58")
+            .init(text: "calendar::event_time::todo".localized()), .init(text: "23:58")
         ))
         parameterizeTest(self.rangeFromTodayToFuture, .doubleText(
-            .init(text: "Todo".localized()), .init(text: "11 (Mon)")
+            .init(text: "calendar::event_time::todo".localized()), .init(text: "11 (Mon)")
         ))
         parameterizeTest(self.rangeFromPastToFuture, .doubleText(
-            .init(text: "Todo".localized()), .init(text: "Allday".localized())
+            .init(text: "calendar::event_time::todo".localized()), .init(text: "Allday".localized())
         ))
         parameterizeTest(self.rangeFromTodayToToday, .doubleText(
-            .init(text: "Todo".localized()), .init(text: "23:58")
+            .init(text: "calendar::event_time::todo".localized()), .init(text: "23:58")
         ))
     }
     
@@ -259,7 +260,7 @@ extension DayEventListViewModelImpleTests {
             .init(text: "0:01"), .init(text: "11 (Mon)")
         ))
         parameterizeTest(self.rangeFromPastToFuture, .singleText(
-            .init(text: "Allday".localized())
+            .init(text: "calendar::event_time::allday".localized())
         ))
         parameterizeTest(self.rangeFromTodayToToday, .doubleText(
             .init(text: "0:01"), .init(text: "23:58")
@@ -318,16 +319,16 @@ extension DayEventListViewModelImpleTests {
         }
         // when + then
         parameterizeTest(self.pdt9_9to9_10, .singleText(
-            .init(text: "Allday".localized())
+            .init(text: "calendar::event_time::allday".localized())
         ))
         parameterizeTest(self.pdt9_9to9_11, .singleText(
-            .init(text: "Allday".localized())
+            .init(text: "calendar::event_time::allday".localized())
         ))
         parameterizeTest(self.pdt9_10, .singleText(
-            .init(text: "Allday".localized())
+            .init(text: "calendar::event_time::allday".localized())
         ))
         parameterizeTest(self.pdt9_10to9_11, .singleText(
-            .init(text: "Allday".localized())
+            .init(text: "calendar::event_time::allday".localized())
         ))
     }
     

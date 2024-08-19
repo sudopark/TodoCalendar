@@ -10,6 +10,7 @@ import SwiftUI
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -30,7 +31,7 @@ struct ForemostEventView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             
-            Text("Foremost Event".localized())
+            Text(R.String.calendarForemosteventTitle)
                 .font(
                     appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont
                 )

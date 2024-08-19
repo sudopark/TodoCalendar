@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -243,7 +244,7 @@ struct DayEventListView: View {
                 HStack {
                     Image(systemName: "plus")
                         .tint(self.appearance.colorSet.text0.asColor)
-                    Text("Add New Event")
+                    Text(R.String.calednarEventAddNew)
                         .font(
                             self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize).asFont
                         )
@@ -289,7 +290,7 @@ private struct QuickAddNewTodoView: View {
     var body: some View {
         HStack(spacing: 8) {
             
-            Text("Todo".localized())
+            Text(R.String.calendarEventTimeTodo)
                 .minimumScaleFactor(0.7)
                 .font(
                     self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
@@ -305,7 +306,9 @@ private struct QuickAddNewTodoView: View {
                 TextField(
                     "",
                     text: $newTodoName,
-                    prompt: Text("Add a new todo quickly".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor)
+                    prompt: Text(
+                        R.String.calednarEventAddNewPlaceHolder
+                    ).foregroundStyle(appearance.colorSet.placeHolder.asColor)
                 )
                 .focused($isFocusInput, equals: true)
                 .autocorrectionDisabled()
