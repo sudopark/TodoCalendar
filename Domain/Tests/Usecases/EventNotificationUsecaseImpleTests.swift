@@ -77,9 +77,9 @@ extension EventNotificationUsecaseImpleTests {
         XCTAssertEqual(scheduledNotificationReqs.count, 3)
         let eventNames = scheduledNotificationReqs.map { $0.content.title }
         XCTAssertEqual(eventNames, [
-            "(\("event_notification::todo:prefix".localized()))\(futureTodoEvent1.name)",
-            "(\("event_notification::todo:prefix".localized()))\(futureTodoEvent2.name)",
-            "(\("event_notification::todo:prefix".localized()))\(futureTodoWithCustomTime.name)"
+            "(\(R.String.eventNotificationTodoPrefix))\(futureTodoEvent1.name)",
+            "(\(R.String.eventNotificationTodoPrefix))\(futureTodoEvent2.name)",
+            "(\(R.String.eventNotificationTodoPrefix))\(futureTodoWithCustomTime.name)"
         ])
         XCTAssertEqual(
             self.spyNotificationRepository.eventAndNotificationSets[futureTodoEvent1.uuid],
@@ -139,7 +139,7 @@ extension EventNotificationUsecaseImpleTests {
         XCTAssertEqual(updatedNotificationReqs.count, 1)
         let eventNames = updatedNotificationReqs.map { $0.content.title }
         XCTAssertEqual(eventNames, [
-            "(\("event_notification::todo:prefix".localized()))future todo 2 - updated",
+            "(\(R.String.eventNotificationTodoPrefix))future todo 2 - updated",
         ])
         XCTAssertEqual(
             self.spyNotificationRepository.eventAndNotificationSets[futureTodoEvent2.uuid],

@@ -29,19 +29,27 @@ extension Project {
         )
     }
     
-    public static func frameworkWithTest(name: String,
-                                         packages: [Package] = [],
-                                         platform: Platform,
-                                         iOSTargetVersion: String,
-                                         dependencies: [TargetDependency] = []) -> Project {
-        let targets = makeFrameworkTargetsWithTest(name: name,
-                                                   platform: platform,
-                                                   iOSTargetVersion: iOSTargetVersion,
-                                                   dependencies: dependencies)
-        return Project(name: name,
-                       organizationName: organizationName,
-                       packages: packages,
-                       targets: targets)
+    public static func frameworkWithTest(
+        name: String,
+        packages: [Package] = [],
+        platform: Platform,
+        iOSTargetVersion: String,
+        resources: ResourceFileElements? = nil,
+        dependencies: [TargetDependency] = []
+    ) -> Project {
+        let targets = makeFrameworkTargetsWithTest(
+            name: name,
+            platform: platform,
+            iOSTargetVersion: iOSTargetVersion,
+            resources: resources,
+            dependencies: dependencies
+        )
+        return Project(
+            name: name,
+            organizationName: organizationName,
+            packages: packages,
+            targets: targets
+        )
     }
     
     public static func framework(name: String,
@@ -64,10 +72,13 @@ extension Project {
     // MARK: - Private
     
     /// Helper function to create a framework target and an associated unit test target
-    private static func makeFrameworkTargetsWithTest(name: String,
-                                                     platform: Platform,
-                                                     iOSTargetVersion: String,
-                                                     dependencies: [TargetDependency] = [])
+    private static func makeFrameworkTargetsWithTest(
+        name: String,
+        platform: Platform,
+        iOSTargetVersion: String,
+        resources: ResourceFileElements? = nil,
+        dependencies: [TargetDependency] = []
+    )
     -> [Target]
     {
         let sources = Target(name: name,
@@ -77,7 +88,7 @@ extension Project {
                              deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
                              infoPlist: .default,
                              sources: ["Sources/**"],
-                             resources: [],
+                             resources: resources,
                              headers: Headers.headers(public: "\(name).h"),
                              dependencies: dependencies)
         let tests = Target(name: "\(name)Tests",
@@ -219,7 +230,6 @@ extension Project {
             resources: [
                 "AppExtensions/\(extensionName)/Resources/**",
                 "Resources/secrets.json",
-                "Resources/Localize/**",
                 "Resources/GoogleService-Info.plist"
             ],
             entitlements: Entitlements.file(path: "./AppExtensions/\(extensionName)/\(targetName).entitlements"),
