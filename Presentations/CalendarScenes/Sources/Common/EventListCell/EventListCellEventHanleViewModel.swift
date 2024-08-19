@@ -191,21 +191,21 @@ private extension EventListMoreAction {
     
     var confirmTitle: String {
         switch self {
-        case .remove: return "remove event".localized()
-        case .toggleTo: return "foremost event".localized()
+        case .remove: return R.String.calendarEventMoreActionRemoveTitle
+        case .toggleTo: return R.String.calendarEventMoreActionForemostEventTitle
         }
     }
     
     var confirmMessage: String {
         switch self {
         case .remove(let onlyThisTime) where onlyThisTime:
-            return "remove only this time message".localized()
+            return R.String.calendarEventMoreActionRemoveOnlyThistimeMessage
         case .remove:
-            return "remove event message".localized()
+            return R.String.calendarEventMoreActionRemoveMessage
         case .toggleTo(let isForemost) where isForemost:
-            return "register foremost message".localized()
+            return R.String.calendarEventMoreActionMarkAsForemost
         case .toggleTo:
-            return "remove foremost message".localized()
+            return R.String.calendarEventMoreActionUnmarkAsForemost
         }
     }
 }

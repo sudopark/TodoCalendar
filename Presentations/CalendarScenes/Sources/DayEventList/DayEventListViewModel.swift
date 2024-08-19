@@ -30,14 +30,14 @@ struct SelectedDayModel: Equatable {
         let date = Date(timeIntervalSince1970: currentModel.range.lowerBound)
         
         let formatter = DateFormatter() |> \.timeZone .~ timeZone
-        formatter.dateFormat = "yyyy MM dd (E)".localized()
+        formatter.dateFormat = "date_form::yyyy_MM_dd_E_".localized()
         self.dateText = formatter.string(from: date)
         
         let lunarFormatter = DateFormatter() 
             |> \.timeZone .~ timeZone
             |> \.calendar .~ Calendar(identifier: .chinese)
         
-        lunarFormatter.dateFormat = "MM dd".localized()
+        lunarFormatter.dateFormat = "date_form::MM_dd".localized()
         self.lunarDateText = lunarFormatter.string(from: date)
         
         self.holidayName = currentModel.holiday?.localName
@@ -396,15 +396,15 @@ private extension EventTime {
         switch self {
         case .period(let range):
             let formatter = DateFormatter() |> \.timeZone .~ timeZone
-            formatter.dateFormat = "MMM d HH:mm"
+            formatter.dateFormat = R.String.dateFormMMMDHHMm
             return "\(range.rangeText(formatter))(\(range.totalPeriodText()))"
             
         case .allDay(let range, let secondsFrom):
             let formatter = DateFormatter() |> \.timeZone .~ timeZone
-            formatter.dateFormat = "MMM d"
+            formatter.dateFormat = R.String.dateFormMMMD
             let shifttingRange = range.shiftting(secondsFrom, to: timeZone)
             let days = Int(shifttingRange.upperBound-shifttingRange.lowerBound) / (24 * 3600)
-            let totalPeriodText = days > 0 ? "%ddays".localized(with: days+1) : nil
+            let totalPeriodText = days > 0 ? R.String.calendarEventTimePeriodSomeDays(days+1) : nil
             let rangeText = shifttingRange.rangeText(formatter)
             return totalPeriodText.map { "\(rangeText)(\($0))"}
             
@@ -429,11 +429,11 @@ private extension Range where Bound == TimeInterval {
         
         switch (days, hours, minutes) {
         case let (d, h, m) where d == 0 && h == 0:
-            return "%dminutes".localized(with: m)
+            return R.String.calendarEventTimePeriodSomeMinutes(m)
         case let (d, h, _) where d == 0:
-            return "%dhours".localized(with: h)
+            return R.String.calendarEventTimePeriodSomeHours(h)
         case let (d, h, _):
-            return "%ddays %dhours".localized(with: d, h)
+            return R.String.calendarEventTimePeriodSomeDaysSomeHours(d, h)
         }
     }
 }

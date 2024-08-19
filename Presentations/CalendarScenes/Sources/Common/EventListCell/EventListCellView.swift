@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -100,7 +101,10 @@ struct EventListCellView: View {
             )
         } label: {
             HStack {
-                Text(onlyThisTime ? "remove event only this time".localized() : "remove event".localized())
+                Text(onlyThisTime
+                     ? R.String.calendarEventMoreActionRemoveOnlyThistimeItemName
+                     : R.String.calendarEventMoreActionRemoveItemName
+                )
                 Image(systemName: "trash")
             }
         }
@@ -113,7 +117,10 @@ struct EventListCellView: View {
             )
         } label: {
             HStack {
-                Text(isForemost ? "unmark as foremost".localized() : "mark as foremost".localized())
+                Text(isForemost
+                     ? R.String.calendarEventMoreActionForemostUnmarkItemName
+                     : R.String.calendarEventMoreActionForemostMarkItemName
+                )
                 Image(systemName: "exclamationmark.circle")
             }
         }
@@ -124,7 +131,7 @@ struct EventListCellView: View {
             self.requestShowDetail(self.cellViewModel)
         } label: {
             HStack {
-                Text("edit".localized())
+                Text(R.String.calendarEventMoreActionEditItemName)
                 Image(systemName: "pencil")
             }
         }

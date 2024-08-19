@@ -7,6 +7,7 @@
 
 import Foundation
 import Domain
+import Extensions
 import Prelude
 import Optics
 
@@ -45,7 +46,7 @@ public enum EventPeriodText: Equatable, Sendable {
         guard let time = todo.eventTime
         else {
             self = .singleText(
-                .init(text: "Todo".localized())
+                .init(text: R.String.calendarEventTimeTodo)
             )
             return
         }
@@ -55,25 +56,25 @@ public enum EventPeriodText: Equatable, Sendable {
         switch (time, endTimeInToday, isAllTodayTimeContains) {
         case (_, _, true):
             self = .doubleText(
-                .init(text: "Todo".localized()),
-                .init(text: "Allday".localized())
+                .init(text: R.String.calendarEventTimeTodo),
+                .init(text: R.String.calendarEventTimeAllday)
             )
             
         case (.at(let t), true, _):
             self = .doubleText(
-                .init(text: "Todo".localized()),
+                .init(text: R.String.calendarEventTimeTodo),
                 .init(time: t, timeZone, !is24hourForm)
             )
             
         case (_, true, _):
             self = .doubleText(
-                .init(text: "Todo".localized()),
+                .init(text: R.String.calendarEventTimeTodo),
                 .init(time: time.upperBoundWithFixed, timeZone, !is24hourForm)
             )
             
         case (_, false, _):
             self = .doubleText(
-                .init(text: "Todo".localized()),
+                .init(text: R.String.calendarEventTimeTodo),
                 .init(day: time.upperBoundWithFixed, timeZone)
             )
         }
@@ -89,7 +90,7 @@ public enum EventPeriodText: Equatable, Sendable {
         switch (eventTime, startTimeInToday, endTimeInToday, isAllDay) {
         case (_, _, _, true):
             self = .singleText(
-                .init(text: "Allday".localized())
+                .init(text: R.String.calendarEventTimeAllday)
             )
             
         case (.at(let time), true, true, _):
@@ -222,7 +223,7 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     var tagId: AllEventTagId
     let name: String
     var periodText: EventPeriodText? = .singleText(
-        .init(text: "Todo".localized())
+        .init(text: R.String.calendarEventTimeTodo)
     )
     var periodDescription: String?
     var tagColor: EventTagColor?
@@ -310,7 +311,7 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
         self.eventIdentifier = holiday.eventId
         self.name = holiday.name
         self.periodText = .singleText(
-            .init(text: "Allday".localized())
+            .init(text: R.String.calendarEventTimeAllday)
         )
         self.tagId = .holiday
         self.tagColor = .holiday
@@ -336,14 +337,14 @@ private extension TimeInterval {
     func timeText(_ timeZone: TimeZone, isShort: Bool) -> String {
         let formatter = DateFormatter()
         formatter.timeZone = timeZone
-        formatter.dateFormat = isShort ? "h:mm".localized() : "H:mm".localized()
+        formatter.dateFormat = isShort ? R.String.dateForm24offHMm : R.String.dateForm24onHMm
         return formatter.string(from: Date(timeIntervalSince1970: self))
     }
     
     func dayText(_ timeZone: TimeZone) -> String {
         let formatter = DateFormatter()
         formatter.timeZone = timeZone
-        formatter.dateFormat = "d (E)".localized()
+        formatter.dateFormat = R.String.dateFormDE.localized()
         return formatter.string(from: Date(timeIntervalSince1970: self))
     }
 }
@@ -355,15 +356,15 @@ private extension EventTime {
         switch self {
         case .period(let range):
             let formatter = DateFormatter() |> \.timeZone .~ timeZone
-            formatter.dateFormat = "MMM d HH:mm"
+            formatter.dateFormat = R.String.dateFormMMMDHHMm
             return "\(range.rangeText(formatter))(\(range.totalPeriodText()))"
             
         case .allDay(let range, let secondsFrom):
             let formatter = DateFormatter() |> \.timeZone .~ timeZone
-            formatter.dateFormat = "MMM d"
+            formatter.dateFormat = R.String.dateFormMMMD
             let shifttingRange = range.shiftting(secondsFrom, to: timeZone)
             let days = Int(shifttingRange.upperBound-shifttingRange.lowerBound) / (24 * 3600)
-            let totalPeriodText = days > 0 ? "%ddays".localized(with: days+1) : nil
+            let totalPeriodText = days > 0 ? R.String.calendarEventTimePeriodSomeDays(days+1) : nil
             let rangeText = shifttingRange.rangeText(formatter)
             return totalPeriodText.map { "\(rangeText)(\($0))"}
             
@@ -388,11 +389,11 @@ private extension Range where Bound == TimeInterval {
         
         switch (days, hours, minutes) {
         case let (d, h, m) where d == 0 && h == 0:
-            return "%dminutes".localized(with: m)
+            return R.String.calendarEventTimePeriodSomeMinutes(m)
         case let (d, h, _) where d == 0:
-            return "%dhours".localized(with: h)
+            return R.String.calendarEventTimePeriodSomeHours(h)
         case let (d, h, _):
-            return "%ddays %dhours".localized(with: d, h)
+            return R.String.calendarEventTimePeriodSomeDaysSomeHours(d, h)
         }
     }
 }

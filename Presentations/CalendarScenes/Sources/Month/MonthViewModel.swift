@@ -11,6 +11,7 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import Extensions
 
 
 // MARK: - week components
@@ -30,13 +31,13 @@ public struct WeekDayModel: Equatable {
     
     public static func allModels() -> [WeekDayModel] {
         return [
-            .init(symbol: "S", "sunday", isSunday: true),
-            .init(symbol: "M", "moday"),
-            .init(symbol: "T", "tuesday"),
-            .init(symbol: "W", "wednesday"),
-            .init(symbol: "T", "thursday"),
-            .init(symbol: "F", "friday"),
-            .init(symbol: "S", "saturday", isSaturday: true)
+            .init(symbol: R.String.daynameSundayVeryShort, "sunday", isSunday: true),
+            .init(symbol: R.String.daynameMondayVeryShort, "moday"),
+            .init(symbol: R.String.daynameTuesdayVeryShort, "tuesday"),
+            .init(symbol: R.String.daynameWednesdayVeryShort, "wednesday"),
+            .init(symbol: R.String.daynameThursdayVeryShort, "thursday"),
+            .init(symbol: R.String.daynameFridayVeryShort, "friday"),
+            .init(symbol: R.String.daynameSaturdayVeryShort, "saturday", isSaturday: true)
         ]
     }
     
