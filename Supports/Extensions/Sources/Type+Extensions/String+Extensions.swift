@@ -10,16 +10,37 @@ import Foundation
 
 // MARK: - localizing
 
+extension Bundle {
+    
+    private final class Resource { }
+    
+    static var thisBundle: Bundle {
+        return Bundle(for: Resource.self)
+    }
+}
+
+public enum R {
+    public typealias String = ExtensionsStrings
+}
+
 extension String {
     
     public func localized() -> String {
         
-        return NSLocalizedString(self, bundle: Bundle.main, comment: "")
+        return NSLocalizedString(
+            self, 
+            bundle: Bundle.thisBundle, 
+            comment: ""
+        )
     }
     
     public func localized(with args: any CVarArg...) -> String {
         let format = self.localized()
         return String(format: format, arguments: args)
+    }
+    
+    public func formed(with args: any CVarArg...) -> String {
+        return String(format: self, arguments: args)
     }
 }
 
@@ -66,7 +87,7 @@ extension Array where Element == String {
     
     public func andJoin(
         seperator: String = ", ",
-        lastSeperator: String = "common::and".localized()
+        lastSeperator: String = R.String.commonAnd
     ) -> String {
         guard self.count > 1
         else {

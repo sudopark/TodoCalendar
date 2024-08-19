@@ -1,0 +1,86 @@
+/* 
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 8/20/24.
+  Copyright © 2024 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+// MARK: - common
+"common::and" = "and";
+
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::MM_d__HH:mm" = "MM d, HH:mm";
+"date_form::MM_d" = "MM d";
+"date_form::MM_dd" = "MM dd";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "MMM d HH:mm";
+"date_form::MMM_d" = "MMM d";
+"date_form::yyyy_MM_dd_E_" = "yyyy MM dd (E)";
+
+// MARK: - event
+
+"dayname::sunday" = "Sunday";
+"dayname::monday" = "Monday";
+"dayname::tuesday" = "Tuesday";
+"dayname::wednesday" = "Wednesday";
+"dayname::thursday" = "Thursday";
+"dayname::friday" = "Friday";
+"dayname::saturday" = "Saturday";
+
+"dayname::sunday:short" = "SUN";
+"dayname::monday:short" = "MON";
+"dayname::tuesday:short" = "TUE";
+"dayname::wednesday:short" = "WED";
+"dayname::thursday:short" = "THU";
+"dayname::friday:short" = "FRI";
+"dayname::saturday:short" = "SAT";
+
+"dayname::sunday:very_short" = "S";
+"dayname::monday:very_short" = "M";
+"dayname::tuesday:very_short" = "T";
+"dayname::wednesday:very_short" = "W";
+"dayname::thursday:very_short" = "T";
+"dayname::friday:very_short" = "F";
+"dayname::saturday:very_short" = "S";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Today events";
+"event_notification::todo:prefix" = "Todo";
+"event_notification::today:prefix" = "Today";
+"event_notification::tomorrow:prefix" = "Tomorrow";
+"event_notification::allday_today" = "All day today";
+"event_notification::allday_tomorrow" = "All day tomorrow";
+"event_notification::some_allday" = "%@ all day";
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Foremost Event";
+"calendar::event_time::todo" = "Todo";
+"calendar::event_time::allday" = "Allday";
+"calendar::event_time::period:some_days" = "%ddays";
+"calendar::event_time::period:some_minutes" = "%dminutes";
+"calendar::event_time::period:some_hours" = "%dhours";
+"calendar::event_time::period:some_days:some_hours" = "%ddays %dhours";
+"calendar::event::more_action::remove:title" = "Remove Event";
+"calendar::event::more_action::foremost_event:title" = "Foremost event";
+"calendar::event::more_action::remove_only_thistime:message" = "Do you want to remove only this event among all repeating events?";
+"calendar::event::more_action::remove:message" = "Do you want to remove this event?";
+"calendar::event::more_action::mark_as_foremost" = "Do you want to mark this event as your most important event?";
+"calendar::event::more_action::unmark_as_foremost" = "Do you want to unmark this event as your most important event?";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Remove only this round of events";
+"calendar::event::more_action:remove:item_name" = "Remove event";
+"calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";
+"calendar::event::more_action:foremost:unmark:item_name" = "Unmark as foremost";
+"calendar::event::more_action:edit:item_name" = "Edit";
+"calednar::event::add_new" = "Add a new event";
+"calednar::event::add_new:place_holder" = "Add a new to-do event quickly.";
