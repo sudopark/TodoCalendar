@@ -5,3 +5,46 @@
   Created by sudo.park on 8/20/24.
   Copyright © 2024 com.sudo.park. All rights reserved.
 */
+
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::MM_d__HH:mm" = "MM d, HH:mm";
+"date_form::MM_d" = "MM d";
+
+// MARK: - event
+
+"dayname::sunday" = "Sunday";
+"dayname::monday" = "Monday";
+"dayname::tuesday" = "Tuesday";
+"dayname::wednesday" = "Wednesday";
+"dayname::thursday" = "Thursday";
+"dayname::friday" = "Friday";
+"dayname::saturday" = "Saturday";
+
+"dayname::sunday:short" = "SUN";
+"dayname::monday:short" = "MON";
+"dayname::tuesday:short" = "TUE";
+"dayname::wednesday:short" = "WED";
+"dayname::thursday:short" = "THU";
+"dayname::friday:short" = "FRI";
+"dayname::saturday:short" = "SAT";
+
+"dayname::sunday:very_short" = "S";
+"dayname::monday:very_short" = "M";
+"dayname::tuesday:very_short" = "T";
+"dayname::wednesday:very_short" = "W";
+"dayname::thursday:very_short" = "T";
+"dayname::friday:very_short" = "F";
+"dayname::saturday:very_short" = "S";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Today events";
+"event_notification::todo:prefix" = "Todo";
+"event_notification::today:prefix" = "Today";
+"event_notification::tomorrow:prefix" = "Tomorrow";
+"event_notification::allday_today" = "All day today";
+"event_notification::allday_tomorrow" = "All day tomorrow";
+"event_notification::some_allday" = "%@ all day";

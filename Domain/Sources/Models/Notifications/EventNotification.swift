@@ -63,7 +63,7 @@ public struct TodayEventsNotification: EventNotification {
     public let eventTimeAndNames: [String]
     public let scheduleDateComponents: DateComponents
     
-    public var title: String { "Today events".localized() }
+    public var title: String { "event_notification::today:title".localized() }
     public var message: String { self.eventTimeAndNames.joined(separator: "\n") }
     
     init(
@@ -102,7 +102,7 @@ public struct SingleEventNotificationMakeParams: Sendable, Equatable {
         
         self.eventType = .todo
         self.eventId = todo.uuid
-        self.eventName = "(\("Todo".localized()))\(todo.name)"
+        self.eventName = "(\("event_notification::todo:prefix".localized()))\(todo.name)"
         
         guard let time = todo.time,
               let (timeText, scheduleTime) = time.notificationTimeInfo(timeOption: timeOption)
@@ -147,16 +147,16 @@ private extension EventTime {
             
             let calendar = Calendar(identifier: .gregorian)
             if calendar.isDateInToday(startDate) {
-                dateFormatter.dateFormat = "HH:mm".localized()
-                let timeText = "\("Today".localized()) \(dateFormatter.string(from: startDate))"
+                dateFormatter.dateFormat = "date_form::HH:mm".localized()
+                let timeText = "\("event_notification::today:prefix".localized()) \(dateFormatter.string(from: startDate))"
                 return (timeText, notificationTime)
             } else if calendar.isDateInTomorrow(startDate) {
-                dateFormatter.dateFormat = "HH:mm".localized()
-                let timeText =  "\("Tomorrow".localized()) \(dateFormatter.string(from: startDate))"
+                dateFormatter.dateFormat = "date_form::HH:mm".localized()
+                let timeText =  "\("event_notification::tomorrow:prefix".localized()) \(dateFormatter.string(from: startDate))"
                 return (timeText, notificationTime)
                 
             } else {
-                dateFormatter.dateFormat = "MM d, HH:mm".localized()
+                dateFormatter.dateFormat = "date_form::MM_d__HH:mm".localized()
                 let timeText = dateFormatter.string(from: startDate)
                 return (timeText, notificationTime)
             }
@@ -176,15 +176,15 @@ private extension EventTime {
             
             let systemCalendar = Calendar(identifier: .gregorian)
             if systemCalendar.isDateInToday(startDate) {
-                let timeText = "All day today".localized()
+                let timeText = "event_notification::allday_today".localized()
                 return (timeText, notificationTime)
             } else if systemCalendar.isDateInTomorrow(startDate) {
-                let timeText = "All day tomorrow".localized()
+                let timeText = "event_notification::allday_tomorrow".localized()
                 return (timeText, notificationTime)
             } else {
                 let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "MM d".localized()
-                let timetext = "\(dateFormatter.string(from: startDate)) all day".localized()
+                dateFormatter.dateFormat = "date_form::MM_d".localized()
+                let timetext = "event_notification::some_allday".localized(with: dateFormatter.string(from: startDate))
                 return (timetext, notificationTime)
             }
         }
