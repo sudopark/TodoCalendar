@@ -100,7 +100,7 @@ final class ManageAccountViewModelImple: ManageAccountViewModel, @unchecked Send
             .sink(receiveValue: { [weak self] result in
                 switch result {
                 case .success:
-                    self?.router?.showToast("manage_account::migration_finished::message")
+                    self?.router?.showToast("manage_account::migration_finished::message".localized())
                 case .failure(let error):
                     self?.router?.showError(error)
                 }
