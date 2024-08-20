@@ -32,37 +32,37 @@ private struct TimeText {
         let dateText = self.dateText()
         guard withTime else { return dateText }
         let formatter = DateFormatter()
-        formatter.dateFormat = is24Form ? "HH:mm".localized() : "a h:mm".localized()
+        formatter.dateFormat = is24Form ? "date_form::HH:mm".localized() : "date_form::a_h:mm".localized()
         return "\(dateText) \(formatter.string(from: self.refDate))"
     }
     
     private func dateText() -> String {
         
         if self.calendar.isDateInToday(self.refDate) {
-            return "today".localized()
+            return "eventList::today::title".localized()
         } else if self.calendar.isDateInYesterday(self.refDate) {
-            return "yesterday".localized()
+            return "eventList::yesterday::title".localized()
         } else {
             let formatter = DateFormatter()
-            formatter.dateFormat = "yyyy.MM.dd".localized()
+            formatter.dateFormat = "date_form.yyyy_MM_dd".localized()
             return formatter.string(from: refDate)
         }
     }
     
     func sectionGroupText() -> String {
         if calendar.isDateInToday(refDate) {
-            return "today".localized()
+            return "eventList::today::title".localized()
         } else  if calendar.isDateInYesterday(refDate) {
-            return "yesterday".localized()
+            return "eventList::yesterday::title".localized()
         }
         let today = calendar.dateComponents([.year, .month, .day], from: Date())
         let refDay = calendar.dateComponents([.year, .month, .day], from: refDate)
         if today.year == refDay.year && today.month == refDay.month {
-            return "this month".localized()
+            return "eventList::thisMonth::title".localized()
         } else if today.year == refDay.year {
-            return (DateFormatter() |> \.dateFormat .~ "MM".localized()).string(from: refDate)
+            return (DateFormatter() |> \.dateFormat .~ "MM").string(from: refDate)
         } else {
-            return (DateFormatter() |> \.dateFormat .~ "yyyy".localized()).string(from: refDate)
+            return (DateFormatter() |> \.dateFormat .~ "yyyy").string(from: refDate)
         }
     }
 }

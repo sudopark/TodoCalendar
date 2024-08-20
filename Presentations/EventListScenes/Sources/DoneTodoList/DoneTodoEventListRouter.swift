@@ -45,7 +45,7 @@ extension DoneTodoEventListRouter {
          
             let actionSheet = UIAlertController(
                 title: nil,
-                message: "remove done todo history".localized(),
+                message: "eventList::remove::confirm::message".localized(),
                 preferredStyle: .actionSheet
             )
             RemoveDoneTodoRange.allCases.forEach { range in
@@ -55,7 +55,7 @@ extension DoneTodoEventListRouter {
                 actionSheet.addAction(action)
             }
             actionSheet.addAction(
-                UIAlertAction(title: "Cancel".localized(), style: .cancel)
+                UIAlertAction(title: "common.cancel".localized(), style: .cancel)
             )
             self.currentScene?.present(actionSheet, animated: true)
         }
@@ -66,11 +66,11 @@ private extension RemoveDoneTodoRange {
     
     var buttonTitle: String {
         switch self {
-        case .all: return "all done todos".localized()
-        case .olderThan1Month: return "older than 1 month"
-        case .olderThan3Months: return "older than 3 months"
-        case .olderThan6Months: return "older than 6 months"
-        case .olderThan1Year: return "older than 1 year"
+        case .all: return "eventList::remove::confirm::button::all".localized()
+        case .olderThan1Month: return "eventList::remove::confirm::button::olderThan1m".localized()
+        case .olderThan3Months: return "eventList::remove::confirm::button::olderThan3m".localized()
+        case .olderThan6Months: return "eventList::remove::confirm::button::olderThan6m".localized()
+        case .olderThan1Year: return "eventList::remove::confirm::button::olderThan1y".localized()
         }
     }
 }

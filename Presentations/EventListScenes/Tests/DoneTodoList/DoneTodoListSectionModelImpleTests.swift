@@ -105,12 +105,12 @@ extension DoneTodoListSectionModelImpleTests {
         parameterizeTest(
             .at(time().timeIntervalSince1970),
             is24: false,
-            "\("today".localized()) PM 3:14"
+            "\("eventList::today::title".localized()) PM 3:14"
         )
         parameterizeTest(
             .at(yesterDayTime.timeIntervalSince1970),
             is24: false,
-            "\("yesterday".localized()) PM 3:14"
+            "\("eventList::yesterday::title".localized()) PM 3:14"
         )
         parameterizeTest(
             .at(time(self.refDate.add(days: -3)!).timeIntervalSince1970),
@@ -120,12 +120,12 @@ extension DoneTodoListSectionModelImpleTests {
         parameterizeTest(
             .at(time().timeIntervalSince1970),
             is24: true,
-            "\("today".localized()) 15:14"
+            "\("eventList::today::title".localized()) 15:14"
         )
         parameterizeTest(
             .at(yesterDayTime.timeIntervalSince1970),
             is24: true,
-            "\("yesterday".localized()) 15:14"
+            "\("eventList::yesterday::title".localized()) 15:14"
         )
         parameterizeTest(
             .at(time(self.refDate.add(days: -3)!).timeIntervalSince1970),
@@ -140,7 +140,7 @@ extension DoneTodoListSectionModelImpleTests {
                 self.time().timeIntervalSince1970
             ), 
             is24: false,
-            "2024.05.09 PM 3:14 ~ \("today".localized()) PM 3:14"
+            "2024.05.09 PM 3:14 ~ \("eventList::today::title".localized()) PM 3:14"
         )
         parameterizeTest(
             .period(
@@ -149,7 +149,7 @@ extension DoneTodoListSectionModelImpleTests {
                 self.yesterDayTime.timeIntervalSince1970
             ), 
             is24: false,
-            "2024.05.09 PM 3:14 ~ \("yesterday".localized()) PM 3:14"
+            "2024.05.09 PM 3:14 ~ \("eventList::yesterday::title".localized()) PM 3:14"
         )
         // all day
         parameterizeTest(
@@ -160,7 +160,7 @@ extension DoneTodoListSectionModelImpleTests {
                 secondsFromGMT: 32400
             ), 
             is24: false,
-            "2024.05.09 ~ \("today".localized())"
+            "2024.05.09 ~ \("eventList::today::title".localized())"
         )
         parameterizeTest(
             .allDay(
@@ -170,7 +170,7 @@ extension DoneTodoListSectionModelImpleTests {
                 secondsFromGMT: 32400
             ),
             is24: false,
-            "2024.05.09 ~ \("yesterday".localized())"
+            "2024.05.09 ~ \("eventList::yesterday::title".localized())"
         )
     }
     
@@ -205,15 +205,15 @@ extension DoneTodoListSectionModelImpleTests {
         
         // then
         XCTAssertEqual(sections.count, 4)
-        XCTAssertEqual(sections[safe: 0]?.sectionTitle, "today".localized())
+        XCTAssertEqual(sections[safe: 0]?.sectionTitle, "eventList::today::title".localized())
         XCTAssertEqual(sections[safe: 0]?.cells.count, 3)
         XCTAssertEqual(sections[safe: 0]?.shouldShowSectionGroupTitle, true)
-        XCTAssertEqual(sections[safe: 0]?.sectionGroupTitle, "today".localized())
+        XCTAssertEqual(sections[safe: 0]?.sectionGroupTitle, "eventList::today::title".localized())
         
-        XCTAssertEqual(sections[safe: 1]?.sectionTitle, "yesterday".localized())
+        XCTAssertEqual(sections[safe: 1]?.sectionTitle, "eventList::yesterday::title".localized())
         XCTAssertEqual(sections[safe: 1]?.cells.count, 2)
         XCTAssertEqual(sections[safe: 1]?.shouldShowSectionGroupTitle, true)
-        XCTAssertEqual(sections[safe: 1]?.sectionGroupTitle, "yesterday".localized())
+        XCTAssertEqual(sections[safe: 1]?.sectionGroupTitle, "eventList::yesterday::title".localized())
         
         XCTAssertEqual(sections[safe: 2]?.sectionTitle, "2023.05.13")
         XCTAssertEqual(sections[safe: 2]?.cells.count, 3)
