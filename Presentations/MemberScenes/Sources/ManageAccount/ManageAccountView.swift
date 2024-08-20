@@ -126,9 +126,9 @@ struct ManageAccountView: View {
             
             ScrollView {
                 VStack(spacing: 8) {
-                    loginInfoView("manage_account::login_method", self.state.accountInfo?.signInMethod)
-                    loginInfoView("manage_account::email", self.state.accountInfo?.emailAddress)
-                    loginInfoView("manage_account::last_signedIn_at", self.state.accountInfo?.lastSignedIn)
+                    loginInfoView("manage_account::login_method".localized(), self.state.accountInfo?.signInMethod)
+                    loginInfoView("manage_account::email".localized(), self.state.accountInfo?.emailAddress)
+                    loginInfoView("manage_account::last_signedIn_at".localized(), self.state.accountInfo?.lastSignedIn)
                     
                     Spacer()
                         .frame(height: 20)
@@ -177,7 +177,7 @@ struct ManageAccountView: View {
     private func migrationView(_ count: Int) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 6) {
-                Text("manage_account::migration::title")
+                Text("manage_account::migration::title".localized())
                     .font(self.appearance.fontSet.normal.asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 
@@ -214,7 +214,7 @@ struct ManageAccountView: View {
         Button {
             self.eventHandlers.signOut()
         } label: {
-            Text("manage_account::signout_button::title")
+            Text("manage_account::signout_button::title".localized())
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.negativeBtnText.asColor)
                 .frame(maxWidth: .infinity)
