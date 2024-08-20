@@ -11,6 +11,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -122,7 +123,7 @@ struct SelectEventRepeatOptionView: View {
             }
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("Repeating".localized())
+            .navigationTitle(R.String.EventDetail.Repeating.title)
             .toolbar {
                 CloseButton()
                     .eventHandler(\.onTap, self.eventHandlers.close)
@@ -181,7 +182,7 @@ struct SelectEventRepeatOptionView: View {
     
     private var repeatEndBarView: some View {
         HStack {
-            Text("Repeat end date".localized())
+            Text(R.String.EventDetail.Repeating.endtimeTitle)
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
             Spacer()

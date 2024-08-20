@@ -11,6 +11,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -123,7 +124,8 @@ struct SelectEventTagView: View {
             }
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("Event Type".localized())
+            
+            .navigationTitle(R.String.EventTag.title)
             .toolbar {
                 CloseButton()
                     .eventHandler(\.onTap, eventHandlers.close)
@@ -169,7 +171,7 @@ struct SelectEventTagView: View {
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(.system(size: 12))
             
-            Text("Add new event type".localized())
+            Text(R.String.EventTag.addNewPlaceholder)
                 .font(self.appearance.fontSet.normal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .lineLimit(1)
@@ -192,7 +194,7 @@ struct SelectEventTagView: View {
         
         HStack {
             Spacer()
-            Text("All event types >".localized())
+            Text(R.String.EventTag.allEventTypes)
                 .foregroundStyle(self.appearance.colorSet.accent.asColor)
                 .font(self.appearance.fontSet.normal.asFont)
                 .onTapGesture {

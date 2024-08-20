@@ -369,7 +369,7 @@ extension AddEventViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavings, [false, true, false])
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] todo saved".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.add_new_todo::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
         
         let madeParams = self.spyTodoUsecase.didMakeTodoWithParams
@@ -395,7 +395,7 @@ extension AddEventViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavings, [false, true, false])
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] schedule saved".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.add_new_schedule::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
         
         let madeParams = self.spyScheduleUsecase.didMakeScheduleParams
@@ -460,7 +460,7 @@ extension AddEventViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavings, [false, true, false])
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] todo saved".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.add_new_todo::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
     }
 }

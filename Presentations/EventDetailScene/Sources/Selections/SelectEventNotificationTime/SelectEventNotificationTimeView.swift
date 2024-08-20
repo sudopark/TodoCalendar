@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 // MARK: - SelectEventNotificationTimeViewState
@@ -163,7 +164,8 @@ struct SelectEventNotificationTimeView: View {
                         VStack {
                             Spacer()
                             HStack {
-                                Text("Custom".localized())
+                                
+                                Text(R.String.EventDetail.Notification.customEventTimeTitle)
                                     .font(appearance.fontSet.bigBold.asFont)
                                     .foregroundStyle(appearance.colorSet.text0.asColor)
                                     .padding(.leading, 20)
@@ -194,7 +196,7 @@ struct SelectEventNotificationTimeView: View {
                 }
             }
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("event_notification_select::title".localized())
+            .navigationTitle(R.String.EventDetail.Notification.title)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     CloseButton()
@@ -208,7 +210,7 @@ struct SelectEventNotificationTimeView: View {
     private func defaultOptionView(_ model: NotificationTimeOptionModel?) -> some View {
         return HStack {
             Text(
-                model?.text ?? "event_notification_setting::option_title::no_notification".localized()
+                model?.text ?? R.String.eventNotificationSettingOptionTitleNoNotification
             )
             .font(appearance.fontSet.normal.asFont)
             .foregroundStyle(appearance.colorSet.text0.asColor)
@@ -304,12 +306,12 @@ struct SelectEventNotificationTimeView: View {
                 .frame(height: 0.5)
             
             VStack(spacing: 16) {
-                Text("event_notification_setting::need_permission_message".localized())
+                Text(R.String.eventNotificationSettingNeedPermissionMessage)
                     .multilineTextAlignment(.center)
                     .font(appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
                 
-                ConfirmButton(title: "event_notification_setting::need_permission::go_setting".localized())
+                ConfirmButton(title: R.String.eventNotificationSettingNeedPermissionGoSetting)
                     .eventHandler(\.onTap, eventHandlers.moveSystemNotificationSetting)
             }
             .padding()

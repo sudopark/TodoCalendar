@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 import CommonPresentation
 
@@ -273,13 +274,13 @@ extension EventDetailInputViewModelImple: SelectEventRepeatOptionSceneListener {
         guard let basic = self.subject.basic.value,
               let time = basic.basic.selectedTime
         else {
-            self.routing?.showToast("choose event time first".localized())
+            self.routing?.showToast(R.String.EventDetail.Messages.selectTimeFirst)
             return
         }
         
         guard let eventTime = time.eventTime(basic.timeZone)
         else {
-            self.routing?.showToast("enter valid event time".localized())
+            self.routing?.showToast(R.String.EventDetail.Messages.selectValidTime)
             return
         }
         
@@ -332,7 +333,7 @@ extension EventDetailInputViewModelImple: SelectEventNotificationTimeSceneListen
         guard let basicAndTimeZone = self.subject.basic.value,
               let (eventTime, isAllDay) = basicAndTimeZone.basic.selectedTime?.evnetTimeAndIsAllDay
         else {
-            self.routing?.showToast("choose event time first".localized())
+            self.routing?.showToast(R.String.EventDetail.Messages.selectTimeFirst)
             return
         }
         

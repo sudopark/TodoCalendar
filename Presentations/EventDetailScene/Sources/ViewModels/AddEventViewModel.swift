@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -176,7 +177,7 @@ extension AddEventViewModelImple: EventDetailInputListener {
                 let newTodo = try await self?.todoUsecase.makeTodoEvent(params)
                 await self?.saveEventDetailWithoutError(newTodo?.uuid)
                 
-                self?.router?.showToast("[TODO] todo saved".localized())
+                self?.router?.showToast(R.String.EventDetail.addNewTodoMessage)
                 self?.router?.closeScene(animate: true, nil)
             } catch {
                 self?.router?.showError(error)
@@ -205,7 +206,7 @@ extension AddEventViewModelImple: EventDetailInputListener {
                 let newSchedule = try await self?.scheduleUsecase.makeScheduleEvent(params)
                 await self?.saveEventDetailWithoutError(newSchedule?.uuid)
                 
-                self?.router?.showToast("[TODO] schedule saved".localized())
+                self?.router?.showToast(R.String.EventDetail.addNewScheduleMessage)
                 self?.router?.closeScene(animate: true, nil)
             } catch {
                 self?.router?.showError(error)

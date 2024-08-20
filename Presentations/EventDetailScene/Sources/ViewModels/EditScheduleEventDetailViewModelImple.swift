@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -148,13 +149,16 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         guard let timeZone = self.subject.timeZone.value,
               let time = self.subject.basicData.value?.origin.selectedTime?.eventTime(timeZone)
         else { return }
+        let message = onlyThisTime
+            ? R.String.calendarEventMoreActionRemoveOnlyThistimeMessage
+            : R.String.calendarEventMoreActionRemoveMessage
         let onlyThisTime = onlyThisTime ? time : nil
         let info = ConfirmDialogInfo()
-            |> \.message .~ pure("do you want to remove this event".localized())
-            |> \.confirmText .~ "remove".localized()
+            |> \.message .~ pure(message)
+            |> \.confirmText .~ R.String.Common.remove
             |> \.confirmed .~ pure(self.removeSchedule(onlyThisTime))
             |> \.withCancel .~ true
-            |> \.cancelText .~ "cancel".localized()
+            |> \.cancelText .~ R.String.Common.cancel
         self.router?.showConfirm(dialog: info)
     }
     
@@ -167,7 +171,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                     try await self?.scheduleUsecase.removeScheduleEvent(
                         scheduleId, onlyThisTime: onlyThistime
                     )
-                    self?.router?.showToast("schedule removed".localized())
+                    self?.router?.showToast(R.String.EventDetail.scheduleEventRemovedMessage)
                     self?.router?.closeScene()
                 } catch {
                     self?.router?.showError(error)
@@ -180,15 +184,15 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     private func toggleForemostAfterConfirm(toForemost: Bool) {
         
         let message = toForemost
-            ? "register foremost message".localized()
-            : "remove foremost message".localized()
+            ? R.String.calendarEventMoreActionMarkAsForemost
+            : R.String.calendarEventMoreActionUnmarkAsForemost
         let info = ConfirmDialogInfo()
-            |> \.title .~ "foremost event".localized()
+            |> \.title .~ R.String.calendarEventMoreActionForemostEventTitle
             |> \.message .~ pure(message)
-            |> \.confirmText .~ "confirm".localized()
+            |> \.confirmText .~ R.String.Common.confirm
             |> \.confirmed .~ pure(self.toggleFormost(toForemost))
             |> \.withCancel .~ true
-            |> \.cancelText .~ "cancel".localized()
+            |> \.cancelText .~ R.String.Common.cancel
         self.router?.showConfirm(dialog: info)
     }
     
@@ -269,12 +273,12 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             self?.editSchedule(params |> \.repeatingUpdateScope .~ .all, addition)
         }
         let info = ConfirmDialogInfo()
-            |> \.title .~ pure("[TODO] edit schedule scope".localized())
-            |> \.message .~ pure("[TODO] select scope".localized())
-            |> \.confirmText .~ "only this time".localized()
+            |> \.title .~ pure(R.String.EventDetail.editRepeatingConfirmTtile)
+            |> \.message .~ pure(R.String.EventDetail.editRepeatingConfirmMessage)
+            |> \.confirmText .~ R.String.EventDetail.editRepeatingConfirmOnlyThisTimeButton
             |> \.confirmed .~ pure(onlyThisTimeConfirmed)
             |> \.withCancel .~ true
-            |> \.cancelText .~ "all".localized()
+            |> \.cancelText .~ R.String.EventDetail.editRepeatingConfirmAllButton
             |> \.canceled .~ pure(allConfirmed)
         self.router?.showConfirm(dialog: info)
     }
@@ -292,7 +296,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                 let _ = try await self?.scheduleUsecase.updateScheduleEvent(scheduleId, params)
                 let _ = try? await self?.eventDetailDataUsecase.saveDetail(addition)
                 
-                self?.router?.showToast("[TODO] schedule saved".localized())
+                self?.router?.showToast("eventDetail.scheduleEvent_saved::message".localized())
                 self?.router?.closeScene(animate: true, nil)
             } catch {
                 self?.router?.showError(error)

@@ -11,7 +11,13 @@
 "common::and" = "and";
 "common::wait:message" = "Wait please..";
 "common::back" = "Back";
-
+"common.remove" = "Remove";
+"common.confirm" = "Confirm";
+"common.cancel" = "Cancel";
+"common.close" = "Close";
+"common.yes" = "Yes";
+"common.no" = "No";
+"common.save" = "Save";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
@@ -25,6 +31,10 @@
 "date_form::MMM_d" = "MMM d";
 "date_form::yyyy_MM_dd_E_" = "yyyy MM dd (E)";
 "date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd hh:mm";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "MMM dd (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "yyyy.MM.dd";
 
 // MARK: - event
 
@@ -74,6 +84,9 @@
 "event_notification_setting::option_title::before_weeks" = "%d week(s) before the event";
 "event_notification_setting::option_title::allday_9am_before_days" = "At 9:00 AM %d day(s) ago";
 "event_notification_setting::option_title::allday_9am_before_weeks" = "At 9:00 AM %d week(s) ago";
+"event_notification_setting::need_permission_message" = "Notification permission required";
+"event_notification_setting::need_permission::go_setting" = "To use the event notification feature, you need the notification permission.\nGo to the System App Settings and allow notifications.";
+
 
 
 // MARK: - calendar
@@ -99,3 +112,61 @@
 "calednar::event::add_new" = "Add a new event";
 "calednar::event::add_new:place_holder" = "Add a new to-do event quickly.";
 
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Please select an event time first.";
+"eventDetail.messages.selectValidTime" = "Please select the valid event time.";
+"eventDetail.notification.custom_eventTime:title" = "Custom";
+"eventDetail.notification.title" = "Event notification time";
+"eventDetail.repeating.title" = "Repeating";
+"eventDetail.repeating.notRepeating::title" = "No repeats";
+"eventDetail.repeating.endtime:title" = "Repeat end time";
+"eventDetail.repeating.everyDay:title" = "Everyday";
+"eventDetail.repeating.everyWeek:title" = "Every Week";
+"eventDetail.repeating.everySomeWeek:title" = "Every %@ Week";
+"eventDetail.repeating.everyMonth:title" = "Every Month";
+"eventDetail.repeating.everyMonth_someDay:title" = "Every %@ of every month.";
+"eventDetail.repeating.everyYear:title" = "Every Month";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Every day of the last week of every month";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "The first %@ of every month";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "The second %@ of every month";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "The third %@ of every month";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "The fourth %@ of every month";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "The fifth %@ of every month";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "The Sixth %@ of every month";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "The Seventh %@ of every month";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "The last %@ of every month";
+"eventDetail.add_new_todo::message" = "A new to-do event has been added.";
+"eventDetail.add_new_schedule::message" = "A new schedule event has been added.";
+"eventDetail.scheduleEvent_removed::message" = "The schedule event has been removed.";
+"eventDetail.edit::repeating::confirm::ttile" = "Edit event";
+"eventDetail.edit::repeating::confirm::message" = "This event is a repeating event.\nDo you want to edit just this event or all events?";
+"eventDetail.edit::repeating::confirm::all::button" = "All";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Only this time";
+"eventDetail.scheduleEvent_saved::message" = "The schedule event has been saved.";
+"eventDetail.todoEvent_removed::message" = "The to-do event has been removed.";
+"eventDetail.todoEvent_saved::message" = "The to-do event has been saved.";
+"eventDetail.cancel_edit::title" = "Edit event";
+"eventDetail.cancel_edit::message" = "Do you want to discard these changes?";
+"eventDetail.cancel_edit::continue::button" = "Continue";
+
+"eventDetail.edit::add_new_name::placeholder" = "Add a new event name";
+"eventDetail.edit::clearEventTime::button" = "Clear event time";
+"eventDetail.edit::noEventTime::button" = "No event time";
+"eventDetail.edit::memo" = "Memo";
+"eventDetail.edit::urlPreview" = "URL Preview";
+
+"eventDetail.edit::make::case" = "Is to-do event?";
+"eventDetail.edit::todo::case" = "To-do Event";
+"eventDetail.edit::schedule::case" = "Schedule Event";
+"eventDetail.edit::holiday::case" = "Public Holiday in %@";
+
+
+// MARK: - event tag
+
+"eventTag.title" = "Event Type";
+"eventTag.defaults.default::name" = "Default";
+"eventTag.defaults.holiday::name" = "Holiday";
+"eventTag.addNew::placeholder" = "Add a new event type";
+"eventTag.allEventTypes" = "All event types >";

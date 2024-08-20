@@ -71,24 +71,24 @@ extension SelectEventRepeatOptionViewModelTests {
     private var defaultOptionListTexts: [[String]] {
         [
             [
-                "not repeat".localized(),
+                "eventDetail.repeating.notRepeating::title".localized(),
             ],
             [
-                "Everyday".localized(),
-                "Every Week".localized(),
-                "every 2 week".localized(),
-                "every 3 week".localized(),
-                "every 4 week".localized(),
-                "Every Month".localized(),
-                "Every Year".localized(),
+                "eventDetail.repeating.everyDay:title".localized(),
+                "eventDetail.repeating.everyWeek:title".localized(),
+                "eventDetail.repeating.everySomeWeek:title".localized(with: "2nd"),
+                "eventDetail.repeating.everySomeWeek:title".localized(with: "3rd"),
+                "eventDetail.repeating.everySomeWeek:title".localized(with: "4th"),
+                "eventDetail.repeating.everyMonth:title".localized(),
+                "eventDetail.repeating.everyYear:title".localized(),
             ],
             [
-                "Every month last week all days".localized(),
-                "\("Every month".localized()) 1\("week_suffix".localized()) \("weekday_1".localized())",
-                "\("Every month".localized()) 2\("week_suffix".localized()) \("weekday_1".localized())",
-                "\("Every month".localized()) 3\("week_suffix".localized()) \("weekday_1".localized())",
-                "\("Every month".localized()) 4\("week_suffix".localized()) \("weekday_1".localized())",
-                "\("Every month last".localized()) \("weekday_1".localized())"
+                "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title".localized(),
+                "eventDetail.repeating.every1WeekOfEveryMonth::someday".localized(with: "Sunday"),
+                "eventDetail.repeating.every2WeekOfEveryMonth::someday".localized(with: "Sunday"),
+                "eventDetail.repeating.every3WeekOfEveryMonth::someday".localized(with: "Sunday"),
+                "eventDetail.repeating.every4WeekOfEveryMonth::someday".localized(with: "Sunday"),
+                "eventDetail.repeating.everyLastWeekOfEveryMonth::someday".localized(with: "Sunday")
             ]
         ]
     }
@@ -152,7 +152,7 @@ extension SelectEventRepeatOptionViewModelTests {
         
         // then
         XCTAssertNotNil(id)
-        let weekPer2Id = options?.flatMap { $0 }.first(where: { $0.text == "every 2 week".localized() })?.id
+        let weekPer2Id = options?.flatMap { $0 }.first(where: { $0.text == "eventDetail.repeating.everySomeWeek:title".localized(with: "2nd") })?.id
         XCTAssertEqual(id, weekPer2Id)
         XCTAssertEqual(options?.count, self.defaultOptionListTexts.count)
     }
@@ -174,7 +174,7 @@ extension SelectEventRepeatOptionViewModelTests {
         
         // then
         XCTAssertNotNil(id)
-        let findingText = "\("Every month".localized()) 3\("week_suffix".localized()) \("weekday_4".localized())"
+        let findingText = "eventDetail.repeating.every3WeekOfEveryMonth::someday".localized(with: "Wednesday")
         let week3thWedId = options?.flatMap { $0 }.first(where: { $0.text == findingText })?.id
         XCTAssertEqual(id, week3thWedId)
         let allItemCount = options?.flatMap { $0 }.count
