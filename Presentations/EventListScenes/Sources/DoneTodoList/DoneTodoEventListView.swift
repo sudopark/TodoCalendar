@@ -133,7 +133,7 @@ struct DoneTodoEventListView: View {
             .background(appearance.colorSet.bg0.asColor)
             .listStyle(.plain)
             .navigationTitle(
-                Text("Done Todos".localized())
+                Text("eventList::done_todos::title".localized())
             )
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -168,7 +168,7 @@ struct DoneTodoEventListView: View {
                 
                 if let eventTime = cell.eventTimeText {
                     HStack(spacing: 2) {
-                        Text("event time:".localized())
+                        Text("eventList::done_todos::eventTime".localized())
                             .foregroundStyle(appearance.colorSet.text2.asColor)
                             .font(appearance.fontSet.subNormal.asFont)
                         Text(eventTime)
@@ -177,7 +177,7 @@ struct DoneTodoEventListView: View {
                     }
                 }
                 HStack(spacing: 2) {
-                    Text("dont at:".localized())
+                    Text("eventList::done_todos::doneAt".localized())
                         .foregroundStyle(appearance.colorSet.text2.asColor)
                         .font(appearance.fontSet.subNormal.asFont)
                     Text(cell.doneTimeText)
@@ -220,7 +220,7 @@ struct DoneTodoEventListView: View {
             return Button {
                 self.eventHandlers.removeDoneTodos()
             } label: {
-                Text("Remove")
+                Text("common.remove".localized())
             }
             .asAnyView()
         }

@@ -21,6 +21,7 @@
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "a h:mm";
 "date_form::MM_d__HH:mm" = "MM d, HH:mm";
 "date_form::MM_d" = "MM d";
 "date_form::MM_dd" = "MM dd";
@@ -171,3 +172,19 @@
 "eventTag.defaults.holiday::name" = "Holiday";
 "eventTag.addNew::placeholder" = "Add a new event type";
 "eventTag.allEventTypes" = "All event types >";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Today";
+"eventList::yesterday::title" = "Yesterday";
+"eventList::thisMonth::title" = "This month";
+"eventList::done_todos::title" = "Completed To Do List";
+"eventList::done_todos::eventTime" = "Event time:";
+"eventList::done_todos::doneAt" = "Completion time:";
+"eventList::remove::confirm::message" = "Delete completed to-do list";
+"eventList::remove::confirm::button::all" = "All completed to-do events";
+"eventList::remove::confirm::button::olderThan1m" = "Older than 1 month";
+"eventList::remove::confirm::button::olderThan3m" = "Older than 3 months";
+"eventList::remove::confirm::button::olderThan6m" = "Older than 6 months";
+"eventList::remove::confirm::button::olderThan1y" = "Older than 1 year";
