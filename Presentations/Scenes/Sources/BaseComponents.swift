@@ -12,10 +12,10 @@ public struct ConfirmDialogInfo: @unchecked Sendable {
     
     public var title: String?
     public var message: String?
-    public var confirmText: String = "confirm".localized()
+    public var confirmText: String = "common.confirm".localized()
     public var confirmed: (() -> Void)?
     public var withCancel: Bool = true
-    public var cancelText: String = "cancel".localized()
+    public var cancelText: String = "common.cancel".localized()
     public var canceled: (() -> Void)?
     
     public init() { }
@@ -77,7 +77,7 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     
     public func showConfirm(dialog info: ConfirmDialogInfo) {
         Task { @MainActor in
-            let title = info.title ?? "info".localized()
+            let title = info.title ?? "common.info".localized()
             assert(info.message != nil, "messaeg should exists")
             
             let controller = UIAlertController(

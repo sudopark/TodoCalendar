@@ -18,6 +18,7 @@
 "common.yes" = "Yes";
 "common.no" = "No";
 "common.save" = "Save";
+"common.info" = "Info";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
