@@ -9,6 +9,7 @@
 
 import UIKit
 import Domain
+import Extensions
 import Scenes
 
 
@@ -36,11 +37,11 @@ struct SelectedTag: Equatable {
     }
     
     static var defaultTag: SelectedTag {
-        return .init(.default, "default".localized(), .default)
+        return .init(.default, R.String.EventTag.Defaults.defaultName, .default)
     }
     
     static var holiday: SelectedTag {
-        return .init(.holiday, "holiday".localized(), .holiday)
+        return .init(.holiday, R.String.EventTag.Defaults.holidayName, .holiday)
     }
 }
 

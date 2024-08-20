@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 
 
 struct EventDetailTypeModel: Equatable {
@@ -25,11 +26,12 @@ struct EventDetailTypeModel: Equatable {
     let text: String
     var showHelpButton: Bool = false
 
+    
     static func makeCase(_ isTodo: Bool) -> EventDetailTypeModel {
         return EventDetailTypeModel(
             selectType: isTodo ? .todo : .schedule,
             isTogglable: true,
-            text: "Is todo event?",
+            text: "eventDetail.edit::make::case".localized(),
             showHelpButton: false
         )
     }
@@ -38,7 +40,7 @@ struct EventDetailTypeModel: Equatable {
         return EventDetailTypeModel(
             selectType: .todo,
             isTogglable: false,
-            text: "Todo event".localized(),
+            text: "eventDetail.edit::todo::case".localized(),
             showHelpButton: true
         )
     }
@@ -47,13 +49,13 @@ struct EventDetailTypeModel: Equatable {
         return EventDetailTypeModel(
             selectType: .schedule,
             isTogglable: false,
-            text: "Schedule event".localized(),
+            text: "eventDetail.edit::schedule::case".localized(),
             showHelpButton: true
         )
     }
     
     static func holidayCase(_ country: String) -> EventDetailTypeModel {
-        let text = "Public Holiday in %@".localized(with: country)
+        let text = "eventDetail.edit::holiday::case".localized(with: country)
         return EventDetailTypeModel(
             selectType: .holiday,
             isTogglable: false,

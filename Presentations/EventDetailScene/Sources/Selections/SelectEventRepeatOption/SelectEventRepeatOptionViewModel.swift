@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -130,37 +131,35 @@ struct SelectRepeatingOptionModel: Equatable {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         switch supportOption {
         case .everyDay:
-            self = .init("Everyday".localized(), option)
+            self = .init(R.String.EventDetail.Repeating.everyDayTitle, option)
             
         case .everyWeek(let seq) where seq == 1:
-            self = .init("Every Week".localized(), option)
+            self = .init(R.String.EventDetail.Repeating.everyWeekTitle, option)
             
         case .everyWeek(let seq):
-            self = .init("every \(seq) week".localized(), option)
+            let ordinal = seq.ordinal ?? "\(seq)"
+            self = .init("eventDetail.repeating.everySomeWeek:title".localized(with: ordinal), option)
             
         case .everyMonth(let day):
             let currentDay = calendar.component(.day, from: startTime)
             if currentDay == day {
-                self = .init("Every Month".localized(), option)
+                self = .init(R.String.EventDetail.Repeating.everyMonthTitle, option)
             } else {
-                self = .init("Every Month".localized() + "\(day)day".localized(), option)
+                let ordinal = day.ordinal ?? "\(day)"
+                self = .init(R.String.EventDetail.Repeating.everyMonthSomeDayTitle(ordinal), option)
             }
         case .everyYear:
-            self = .init("Every Year".localized(), option)
+            self = .init(R.String.EventDetail.Repeating.everyYearTitle, option)
             
         case .everyMonthLastAllWeekDays:
-            self = .init("Every month last week all days".localized(), option)
+            self = .init(R.String.EventDetail.Repeating.everyLastWeekDaysOfEveryMonthTitle, option)
             
         case .everyMonthSomeWeekDay(let seq, let weekDay):
-            let text = "Every month".localized() + " "
-                + "\(seq)" + "week_suffix".localized() + " "
-                + "weekday_\(weekDay.rawValue)".localized()
+            let text = "eventDetail.repeating.every\(seq)WeekOfEveryMonth::someday".localized(with: weekDay.text)
             self = .init(text, option)
             
         case .everyMonthLastWeekDay(let weekDay):
-            let text = "Every month last".localized()
-                + " "
-                + "weekday_\(weekDay.rawValue)".localized()
+            let text = R.String.EventDetail.Repeating.everyLastWeekOfEveryMonthSomeday(weekDay.text)
             self = .init(text, option)
         }
     }
@@ -188,7 +187,7 @@ struct RepeatEndTime: Equatable {
             
         let formatter = DateFormatter() 
             |> \.timeZone .~ timeZone
-            |> \.dateFormat .~ "yyyy.MM.dd".localized()
+            |> \.dateFormat .~ R.String.DateForm.yyyyMMDd
         self.text = formatter.string(from: self.date)
     }
     
@@ -295,7 +294,7 @@ extension SelectEventRepeatOptionViewModelImple {
         _ previousSelectOption: EventRepeating?
     ) {
         
-        let notRepeatOptionModel = SelectRepeatingOptionModel("not repeat".localized(), nil)
+        let notRepeatOptionModel = SelectRepeatingOptionModel(R.String.EventDetail.Repeating.notRepeatingTitle, nil)
         let previousOptionModel = previousSelectOption.flatMap {
             SelectRepeatingOptionModel($0.repeatOption, self.startTime, timeZone)
         }

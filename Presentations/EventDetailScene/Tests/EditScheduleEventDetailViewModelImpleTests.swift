@@ -241,7 +241,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
         
         // then
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "schedule removed".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.scheduleEvent_removed::message".localized())
     }
     
     func testViewModel_toggleForemost() {
@@ -383,7 +383,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavings, [false, true, false])
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] schedule saved".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.scheduleEvent_saved::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
         
         let updateParams = self.spyScheduleUsecase.didUpdateEditParams
@@ -426,7 +426,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavings, [false, true, false])
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] schedule saved".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.scheduleEvent_saved::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
         
         let updateParams = self.spyScheduleUsecase.didUpdateEditParams
@@ -469,7 +469,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavings, [false, true, false])
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] schedule saved".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.scheduleEvent_saved::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
         
         let updateParams = self.spyScheduleUsecase.didUpdateEditParams

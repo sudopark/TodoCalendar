@@ -32,13 +32,14 @@ extension EventDetailRouting {
         let confirmed: () -> Void = { [weak self] in
             self?.closeScene(animate: true, nil)
         }
+        
         let info = ConfirmDialogInfo()
-            |> \.title .~ pure("edit_close_ocnfirm_title".localized())
-            |> \.message .~ pure("edit_close_confirm_message".localized())
-            |> \.confirmText .~ "close".localized()
+            |> \.title .~ pure("eventDetail.cancel_edit::title".localized())
+            |> \.message .~ pure("eventDetail.cancel_edit::message".localized())
+            |> \.confirmText .~ "common.close".localized()
             |> \.confirmed .~ pure(confirmed)
             |> \.withCancel .~ true
-            |> \.cancelText .~ "continue".localized()
+            |> \.cancelText .~ "eventDetail.cancel_edit::continue::button".localized()
         self.showConfirm(dialog: info)
     }
 }

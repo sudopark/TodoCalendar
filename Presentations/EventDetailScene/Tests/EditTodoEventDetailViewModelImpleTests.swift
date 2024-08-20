@@ -235,7 +235,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
         
         // then
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "todo removed".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.todoEvent_removed::message".localized())
     }
     
     func testViewModel_toggleForemost() {
@@ -373,7 +373,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavings, [false, true, false])
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] todo saved".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.todoEvent_saved::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
         
         let updateParams = self.spyTodoUsecase.didUpdateEditParams
@@ -416,7 +416,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavings, [false, true, false])
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] todo saved".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.todoEvent_saved::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
         
         let updateParams = self.spyTodoUsecase.didUpdateEditParams
@@ -459,7 +459,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavings, [false, true, false])
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "[TODO] todo saved".localized())
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.todoEvent_saved::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
         
         let updateParams = self.spyTodoUsecase.didUpdateEditParams

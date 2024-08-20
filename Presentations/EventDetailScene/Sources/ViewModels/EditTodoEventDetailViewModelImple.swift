@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import Scenes
 
 
@@ -147,12 +148,15 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
     }
     
     private func removeEventAfterConfirm(onlyThisTime: Bool) {
+        let message = onlyThisTime
+            ? R.String.calendarEventMoreActionRemoveOnlyThistimeMessage
+            : R.String.calendarEventMoreActionRemoveMessage
         let info = ConfirmDialogInfo()
-            |> \.message .~ pure("do you want to remove this event".localized())
-            |> \.confirmText .~ "remove".localized()
+            |> \.message .~ pure(message)
+            |> \.confirmText .~ R.String.Common.remove
             |> \.confirmed .~ pure(self.removeTodo(onlyThistime: onlyThisTime))
             |> \.withCancel .~ true
-            |> \.cancelText .~ "cancel".localized()
+            |> \.cancelText .~ R.String.Common.cancel
         self.router?.showConfirm(dialog: info)
     }
     
@@ -163,7 +167,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             Task { [weak self] in
                 do {
                     try await self?.todoUsecase.removeTodo(todoId, onlyThisTime: onlyThistime)
-                    self?.router?.showToast("todo removed".localized())
+                    self?.router?.showToast("eventDetail.todoEvent_removed::message".localized())
                     self?.router?.closeScene()
                 } catch {
                     self?.router?.showError(error)
@@ -176,15 +180,15 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
     private func toggleForemostAfterConfirm(toForemost: Bool) {
         
         let message = toForemost
-            ? "register foremost message".localized()
-            : "remove foremost message".localized()
+            ? R.String.calendarEventMoreActionMarkAsForemost
+            : R.String.calendarEventMoreActionUnmarkAsForemost
         let info = ConfirmDialogInfo()
-            |> \.title .~ "foremost event".localized()
+            |> \.title .~ R.String.calendarEventMoreActionForemostEventTitle
             |> \.message .~ pure(message)
-            |> \.confirmText .~ "confirm".localized()
+            |> \.confirmText .~ R.String.Common.confirm
             |> \.confirmed .~ pure(self.toggleFormost(toForemost))
             |> \.withCancel .~ true
-            |> \.cancelText .~ "cancel".localized()
+            |> \.cancelText .~ R.String.Common.cancel
         self.router?.showConfirm(dialog: info)
     }
     
@@ -259,12 +263,12 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             self?.editTodo(params |> \.repeatingUpdateScope .~ .all, addition)
         }
         let info = ConfirmDialogInfo()
-            |> \.title .~ pure("[TODO] edit todo scope".localized())
-            |> \.message .~ pure("[TODO] select scope".localized())
-            |> \.confirmText .~ "only this time".localized()
+            |> \.title .~ pure("eventDetail.edit::repeating::confirm::ttile".localized())
+            |> \.message .~ pure("eventDetail.edit::repeating::confirm::message".localized())
+            |> \.confirmText .~ "eventDetail.edit::repeating::confirm::onlyThisTime::button".localized()
             |> \.confirmed .~ pure(onlyThisTimeConfirmed)
             |> \.withCancel .~ true
-            |> \.cancelText .~ "all".localized()
+            |> \.cancelText .~ "eventDetail.edit::repeating::confirm::all::button".localized()
             |> \.canceled .~ pure(allConfirmed)
         self.router?.showConfirm(dialog: info)
     }
@@ -282,7 +286,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
                 let _ = try await self?.todoUsecase.updateTodoEvent(todoId, params)
                 let _ = try? await self?.eventDetailDataUsecase.saveDetail(addition)
                 
-                self?.router?.showToast("[TODO] todo saved".localized())
+                self?.router?.showToast("eventDetail.todoEvent_saved::message".localized())
                 self?.router?.closeScene(animate: true, nil)
             } catch {
                 self?.router?.showError(error)

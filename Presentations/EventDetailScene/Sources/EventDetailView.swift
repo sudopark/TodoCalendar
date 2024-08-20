@@ -11,6 +11,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -299,7 +300,7 @@ struct EventDetailView: View {
                 Spacer()
                 
                 BottomConfirmButton(
-                    title: "Save".localized(), 
+                    title: "common.save".localized(),
                     isEnable: self.$state.isSavable,
                     isProcessing: self.$state.isSaving
                 )
@@ -349,7 +350,7 @@ struct EventDetailView: View {
             TextField(
                 "",
                 text: self.$state.enterName,
-                prompt: Text("Add new event name".localized())
+                prompt: Text("eventDetail.edit::add_new_name::placeholder".localized())
                     .foregroundStyle(appearance.colorSet.placeHolder.asColor)
                             
             )
@@ -388,7 +389,7 @@ struct EventDetailView: View {
                 .font(.system(size: 16, weight: .light))
                 .foregroundColor(self.appearance.colorSet.accentWarn.asColor)
             
-            Text("Foremost event".localized())
+            Text("calendar::event::more_action::foremost_event:title".localized())
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(self.appearance.fontSet.normal.asFont)
             
@@ -420,7 +421,7 @@ struct EventDetailView: View {
                 self.toggleIsTodo()
             } label: {
                 Text(
-                    model.selectType == .todo ? "Yes" : "No"
+                    model.selectType == .todo ? "common.yes".localized() : "common.no".localized()
                 )
                 .font(appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
@@ -578,7 +579,7 @@ struct EventDetailView: View {
             self.toggleIsAllDay()
             
         } label: {
-            Text("Allday".localized())
+            Text("calendar::event_time::allday".localized())
                 .foregroundStyle(textColor)
                 .padding(.vertical, 8)
                 .padding(.horizontal, 16)
@@ -665,7 +666,7 @@ struct EventDetailView: View {
             self.removeTime()
             self.updateTimePickerShowing(nil)
         } label: {
-            Text("clear event time")
+            Text("eventDetail.edit::clearEventTime::button".localized())
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: 4)
@@ -678,7 +679,7 @@ struct EventDetailView: View {
         Button {
             self.removeEventEndTime()
         } label: {
-            Text("no end time")
+            Text("eventDetail.edit::noEventTime::button".localized())
                 .padding(8)
                 .background(
                     RoundedRectangle(cornerRadius: 4)
@@ -693,7 +694,7 @@ struct EventDetailView: View {
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
-            Text(self.state.selectedRepeat ?? "no repeat".localized())
+            Text(self.state.selectedRepeat ?? "eventDetail.repeating.notRepeating::title".localized())
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(
                     self.state.selectedRepeat == nil
@@ -820,7 +821,8 @@ struct EventDetailView: View {
             TextField(
                 "",
                 text: self.$state.memo,
-                prompt: Text("Memo".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor)
+                prompt: Text("eventDetail.edit::memo".localized())
+                    .foregroundStyle(appearance.colorSet.placeHolder.asColor)
             )
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
@@ -867,7 +869,7 @@ struct EventDetailView: View {
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(alignment: .topLeading) {
             if model.imageUrl != nil {
-                Text("URL Preview".localized())
+                Text("eventDetail.edit::urlPreview".localized())
                     .font(appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
                     .padding(4)
@@ -924,12 +926,12 @@ extension EventDetailMoreAction: Identifiable {
         switch self {
         case .remove(let onlyThisEvent): 
             return onlyThisEvent
-                ? "remove event only this time".localized()
-                : "remove event".localized()
+                ? "calendar::event::more_action:remove_only_thistime:item_name".localized()
+                : "calendar::event::more_action:remove:item_name".localized()
         case .toggleTo(let isForemost):
             return isForemost
-                ? "mark as foremost".localized()
-                : "unmark as foremost".localized()
+                ? "calendar::event::more_action:foremost:mark:item_name".localized()
+                : "calendar::event::more_action:foremost:unmark:item_name".localized()
         case .copy: return "copy".localized()
         case .addToTemplate: return "add to template".localized()
         case .share: return "share".localized()

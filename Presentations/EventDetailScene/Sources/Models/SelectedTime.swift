@@ -9,6 +9,7 @@ import Foundation
 import Prelude
 import Optics
 import Domain
+import Extensions
 
 
 // MARK: - selectedTime
@@ -174,21 +175,21 @@ extension Date {
     func yearText(at timeZone: TimeZone) -> String {
         let dateForm = DateFormatter()
         dateForm.timeZone = timeZone
-        dateForm.dateFormat = "yyyy".localized()
+        dateForm.dateFormat = R.String.DateForm.yyyy
         return dateForm.string(from: self)
     }
     
     func dateText(at timeZone: TimeZone) -> String {
         let dateForm = DateFormatter()
         dateForm.timeZone = timeZone
-        dateForm.dateFormat = "MMM dd (E)".localized()
+        dateForm.dateFormat = R.String.DateForm.mmmDdE
         return dateForm.string(from: self)
     }
     
     func timeText(at timeZone: TimeZone) -> String {
         let timeForm = DateFormatter()
         timeForm.timeZone = timeZone
-        timeForm.dateFormat = "HH:mm".localized()
+        timeForm.dateFormat = R.String.DateForm.hhMm
         return timeForm.string(from: self)
     }
     
