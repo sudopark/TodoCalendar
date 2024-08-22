@@ -71,7 +71,7 @@ extension AppearanceSettingViewModelImpleTests {
         }
         
         // then
-        let isSystemTimeZoneName = names.map { $0 == "System Time".localized() }
+        let isSystemTimeZoneName = names.map { $0 == "setting.timezone::systemTime::name".localized() }
         XCTAssertEqual(isSystemTimeZoneName, [true, false])
     }
     

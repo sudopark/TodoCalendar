@@ -28,7 +28,7 @@ struct HolidayItemModel {
         guard let date = formatter.date(from: holiday.dateString) else { return nil }
         
         let presentFormatter = DateFormatter()
-        presentFormatter.dateFormat = "yyyy MMM dd"
+        presentFormatter.dateFormat = "date_form.yyyy_MMM_dd".localized()
         self.dateText = presentFormatter.string(from: date)
     }
 }

@@ -135,7 +135,7 @@ struct EventTagDetailView: View {
             TextField(
                 "",
                 text: self.$state.newTagName,
-                prompt: Text("Add new tag name".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor),
+                prompt: Text("eventTag.addNew::placeholder".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor),
                 axis: .vertical
             )
             .disabled(!self.state.isNameChangable)
@@ -239,7 +239,7 @@ struct EventTagDetailView: View {
         return HStack {
             if self.state.isDeletable {
                 ConfirmButton(
-                    title: "Delete".localized(),
+                    title: "common.remove".localized(),
                     textColor: self.appearance.colorSet.accentWarn.asColor,
                     backgroundColor: self.appearance.colorSet.secondaryBtnBackground.asColor
                 )
@@ -247,7 +247,7 @@ struct EventTagDetailView: View {
             }
             
             ConfirmButton(
-                title: "Save".localized(),
+                title: "common.save".localized(),
                 isEnable: self.$state.isSavable
             )
             .eventHandler(\.onTap, self.saveChanges)

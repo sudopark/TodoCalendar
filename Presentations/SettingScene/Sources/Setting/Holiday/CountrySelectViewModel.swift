@@ -96,9 +96,9 @@ extension CountrySelectViewModelImple {
             self?.saveSelectCountry(country)
         }
         
-        let message = "change_country_confirm".localized(with: country.name)
+        let message = "setting.holiday.country.changeConfirm::message".localized(with: country.name)
         let info = ConfirmDialogInfo()
-            |> \.title .~ "Change Country".localized()
+            |> \.title .~ "setting.holiday.country.changeConfirm::title".localized()
             |> \.message .~ pure(message)
             |> \.confirmed .~ pure(confirm)
             |> \.withCancel .~ true
@@ -112,7 +112,7 @@ extension CountrySelectViewModelImple {
             do {
                 try await self?.holidayUsecase.selectCountry(country)
                 self?.subject.isSaving.send(true)
-                self?.router?.showToast("holiday_country_selected".localized())
+                self?.router?.showToast("setting.holiday.country.changed::message".localized())
                 self?.router?.closeScene()
             } catch {
                 self?.subject.isSaving.send(false)

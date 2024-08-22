@@ -141,7 +141,7 @@ struct ColorThemeSelectView: View {
                 )
             }
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("Color Theme".localized())
+            .navigationTitle("setting.appearance.calendar.colorTheme".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton {

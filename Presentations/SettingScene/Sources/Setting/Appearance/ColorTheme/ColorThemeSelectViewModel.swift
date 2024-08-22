@@ -24,9 +24,9 @@ struct ColorThemeModel: Equatable {
     init(_ colorSetKey: ColorSetKeys) {
         self.key = colorSetKey
         switch colorSetKey {
-        case .systemTheme: self.title = "System".localized()
-        case .defaultLight: self.title = "Light".localized()
-        case .defaultDark: self.title = "Dark".localized()
+        case .systemTheme: self.title = "setting.appearance.calendar.colorTheme::system".localized()
+        case .defaultLight: self.title = "setting.appearance.calendar.colorTheme::light".localized()
+        case .defaultDark: self.title = "setting.appearance.calendar.colorTheme::dark".localized()
         }
     }
 }

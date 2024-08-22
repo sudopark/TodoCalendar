@@ -144,7 +144,7 @@ struct EventSettingView: View {
             }
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("Event Settings".localized())
+            .navigationTitle("event_setting::title".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton(tapHandler: eventHandlers.close)
@@ -167,7 +167,7 @@ struct EventSettingView: View {
     
     private var eventTypeView: some View {
         HStack {
-            Text("Event Type".localized())
+            Text("event_setting::eventType".localized())
                 .font(self.appearance.fontSet.normal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
             Spacer()
@@ -188,7 +188,7 @@ struct EventSettingView: View {
     
     private var eventNotificationTimeView: some View {
         HStack {
-            Text("NotificationTime".localized())
+            Text("event_notification_setting::title::NotforAllDay".localized())
                 .font(self.appearance.fontSet.normal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .layoutPriority(1)
@@ -211,11 +211,11 @@ struct EventSettingView: View {
             HStack {
                 
                 VStack(alignment: .leading) {
-                    Text("NotificationTime".localized())
+                    Text("event_notification_setting::title::NotforAllDay".localized())
                         .font(self.appearance.fontSet.normal.asFont)
                         .foregroundStyle(self.appearance.colorSet.text0.asColor)
                     
-                    Text("Allday".localized())
+                    Text("event_notification_setting::title::forAllDay".localized())
                         .font(appearance.fontSet.subSubNormal.asFont)
                         .foregroundStyle(appearance.colorSet.text1.asColor)
                 }
@@ -237,7 +237,7 @@ struct EventSettingView: View {
     
     private var periodView: some View {
         HStack {
-            Text("Event Period".localized())
+            Text("event_setting::eventPeriod".localized())
                 .font(self.appearance.fontSet.normal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
             

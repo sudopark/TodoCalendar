@@ -111,7 +111,7 @@ extension AppearanceSettingViewModelImple {
             let systemTimeZone = TimeZone.current
             
             return systemTimeZone == timeZone
-                ? "System Time".localized()
+                ? "setting.timezone::systemTime::name".localized()
                 : timeZone.localizedName(for: .generic, locale: .current)
         }
         

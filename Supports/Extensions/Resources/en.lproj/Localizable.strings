@@ -19,6 +19,9 @@
 "common.no" = "No";
 "common.save" = "Save";
 "common.info" = "Info";
+"common.search" = "Search";
+"common.clear" = "Clear";
+"common.send" = "Send";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
@@ -37,6 +40,7 @@
 "date_form.MMM_dd_E" = "MMM dd (E)";
 "date_form.HH:mm" = "HH:mm";
 "date_form.yyyy_MM_dd" = "yyyy.MM.dd";
+"date_form.yyyy_MMM_dd" = "yyyy MMM dd";
 
 // MARK: - event
 
@@ -88,6 +92,8 @@
 "event_notification_setting::option_title::allday_9am_before_weeks" = "At 9:00 AM %d week(s) ago";
 "event_notification_setting::need_permission_message" = "Notification permission required";
 "event_notification_setting::need_permission::go_setting" = "To use the event notification feature, you need the notification permission.\nGo to the System App Settings and allow notifications.";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "App notification permission is required to use the event reminder feature.";
 
 
 
@@ -95,7 +101,7 @@
 
 "calendar::foremostevent:title" = "Foremost Event";
 "calendar::event_time::todo" = "Todo";
-"calendar::event_time::allday" = "Allday";
+"calendar::event_time::allday" = "All day";
 "calendar::event_time::period:some_days" = "%ddays";
 "calendar::event_time::period:some_minutes" = "%dminutes";
 "calendar::event_time::period:some_hours" = "%dhours";
@@ -169,10 +175,18 @@
 // MARK: - event tag
 
 "eventTag.title" = "Event Type";
+"eventTag.list::title" = "Event Types";
 "eventTag.defaults.default::name" = "Default";
 "eventTag.defaults.holiday::name" = "Holiday";
 "eventTag.addNew::placeholder" = "Add a new event type";
 "eventTag.allEventTypes" = "All event types >";
+"eventTag.remove::confirm::message" = "Do you want to remove this event type?";
+"eventTag.removed::message" = "This event type has been removed.";
+"eventTag.color::changed::message" = "The color has been changed.";
+"eventTag.changed::message" = "The event type has been modified.";
+"eventTag.makeNew::message" = "A new event type has been created.";
+"eventTag.default::title" = "Default Event Type";
+"eventTag.default::selection::explain" = "This is the event type that will be selected by default when creating an event.";
 
 
 // MARK: - event list
@@ -205,3 +219,63 @@
 "manage_account::sign_out::confirm::message" = "Do you want to log out of your current account?";
 "signIn::title" = "Login";
 "signIn:description" = "Backup your event list and sync it across other iOS devices\n(Supported platforms will be expanded.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Event Settings";
+"event_setting::eventType" = "Event Type";
+"event_setting::eventPeriod" = "Event Period";
+"event_notification_setting::title::forAllDay" = "All day";
+"event_notification_setting::title::NotforAllDay" = "Notification Time";
+"setting.title" = "Settings";
+"setting.appearance.title" = "Appearance";
+"setting.appearance.calendar.samplemonth::march" = "MARCH";
+"setting.appearance.calendar.startDayOfWeek" = "Start day of the week";
+"setting.appearance.calendar.accentDay" = "Accent Days";
+"setting.appearance.calendar.accentDay::holiday" = "Holiday";
+"setting.appearance.calendar.accentDay::saturday" = "Saturday";
+"setting.appearance.calendar.accentDay::sunday" = "Sunday";
+"setting.appearance.calendar.colorTheme" = "Color theme";
+"setting.appearance.calendar.colorTheme::system" = "System";
+"setting.appearance.calendar.colorTheme::light" = "Light";
+"setting.appearance.calendar.colorTheme::dark" = "Dark";
+"setting.appearance.calendar.underline" = "Underline on event days";
+"setting.appearance.event.edit::name" = "Edit Event";
+"setting.appearance.event.fontSize" = "Event text font size";
+"setting.appearance.event.show_holidayName" = "Show holiday name";
+"setting.appearance.event.show_lunar" = "Lunar calendar";
+"setting.appearance.event._24form" = "24 hour form";
+"setting.appearance.event.sample::name" = "🥗 Event name";
+"setting.appearance.event.sample::description" = "description";
+"setting.appearance.event.sample::christmas" = "Christmas";
+"setting.appearance.event.sample::sometime" = "Some time";
+"setting.appearance.event.boldText" = "Bold text";
+"setting.appearance.event.eventColor" = "Event color";
+"setting.timezone::title" = "TimeZone";
+"setting.timezone::systemTimeZone::name" = "System TimeZone";
+"setting.timezone::systemTime::name" = "System Time";
+"setting.haptic::name" = "Haptic feedback";
+"setting.minimize_animation::name" = "Minimize animation effect";
+"setting.holiday.title" = "Holiday";
+"setting.holiday.item::name" = "Holiday Setting";
+"setting.holiday.list::sectionTitle" = "Holidays";
+"setting.holiday.country.title" = "Country";
+"setting.holiday.country.current::title" = "Current Country";
+"setting.holiday.country.changeConfirm::title" = "Change country";
+"setting.holiday.country.changeConfirm::message" = "Do you want to change the country of your calendar?";
+"setting.holiday.country.changed::message" = "The country has changed.";
+"setting.feedback::name" = "Feedback";
+"setting.help::name" = "Help";
+"setting.share::name" = "Share App";
+"setting.write_review::name" = "Write an app review";
+"setting.account.signedIn::manageAccount" = "Account";
+"setting.account.needSignIn" = "Login";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Manage your reading list";
+"setting.section.support::name" = "Support";
+"setting.section.app::name" = "App";
+"setting.section.suggest::name" = "Suggest";
+"feedback::guide:message" = "Please feel free to provide feedback, including bug reports, comments, and service suggestions.\nYour comments will greatly help us improve our service.";
+"feedback::enterMessage::placeholder" = "Enter a message";
+"feedback::contact::placeholder" = "Reply email address";
+"feedback::posted:message" = "Your feedback has been successfully registered.";

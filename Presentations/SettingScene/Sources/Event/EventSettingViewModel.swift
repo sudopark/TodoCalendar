@@ -23,15 +23,15 @@ struct SelectedPeriodModel: Hashable {
     init(_ period: EventSettings.DefaultNewEventPeriod) {
         self.period = period
         self.text = switch period {
-        case .minute0: "%d minutes".localized(with: 0)
-        case .minute5: "%d minutes".localized(with: 5)
-        case .minute10: "%d minutes".localized(with: 10)
-        case .minute15: "%d minutes".localized(with: 15)
-        case .minute30: "%d minutes".localized(with: 30)
-        case .minute45: "%d minutes".localized(with: 45)
-        case .hour1: "%d hours".localized(with: 1)
-        case .hour2: "%d hours".localized(with: 2)
-        case .allDay: "Allday".localized()
+        case .minute0: "calendar::event_time::period:some_minutes".localized(with: 0)
+        case .minute5: "calendar::event_time::period:some_minutes".localized(with: 5)
+        case .minute10: "calendar::event_time::period:some_minutes".localized(with: 10)
+        case .minute15: "calendar::event_time::period:some_minutes".localized(with: 15)
+        case .minute30: "calendar::event_time::period:some_minutes".localized(with: 30)
+        case .minute45: "calendar::event_time::period:some_minutes".localized(with: 45)
+        case .hour1: "calendar::event_time::period:some_hours".localized(with: 1)
+        case .hour2: "calendar::event_time::period:some_hours".localized(with: 2)
+        case .allDay: "calendar::event_time::allday".localized()
         }
     }
     

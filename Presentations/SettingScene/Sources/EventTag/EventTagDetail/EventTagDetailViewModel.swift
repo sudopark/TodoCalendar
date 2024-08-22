@@ -93,7 +93,7 @@ extension EventTagDetailViewModelImple {
             self?.deleteTag(id)
         }
         let info = ConfirmDialogInfo()
-            |> \.message .~ "[TODO] delte alert message".localized()
+            |> \.message .~ "eventTag.remove::confirm::message".localized()
             |> \.confirmed .~ pure(confirmed)
         self.router?.showConfirm(dialog: info)
     }
@@ -102,7 +102,7 @@ extension EventTagDetailViewModelImple {
         Task { [weak self] in
             do {
                 try await self?.eventTagUsecase.deleteTag(tagId)
-                self?.show(message: "[TODO] delete message") { [weak self] in
+                self?.show(message: "eventTag.removed::message".localized()) { [weak self] in
                     self?.listener?.eventTag(deleted: tagId)
                 }
             } catch {
@@ -138,7 +138,7 @@ extension EventTagDetailViewModelImple {
         Task { [weak self] in
             do {
                 let newSetting = try await self?.uiSettingUsecase.changeDefaultEventTagColor(params)
-                self?.router?.showToast("[TODO] color changed message")
+                self?.router?.showToast("eventTag.color::changed::message".localized())
                 self?.router?.closeScene()
             } catch {
                 self?.router?.showError(error)
@@ -157,7 +157,7 @@ extension EventTagDetailViewModelImple {
             guard let self = self else { return }
             do {
                 let newTag = try await self.eventTagUsecase.editTag(id, params)
-                self.show(message: "[TODO] edited messagte".localized()) {
+                self.show(message: "eventTag.changed::message".localized()) {
                     self.listener?.eventTag(updated: newTag)
                 }
             } catch {
@@ -176,7 +176,7 @@ extension EventTagDetailViewModelImple {
             guard let self = self else { return }
             do {
                 let newTag = try await self.eventTagUsecase.makeNewTag(params)
-                self.show(message: "[TODO] make message") {
+                self.show(message: "eventTag.makeNew::message".localized()) {
                     self.listener?.eventTag(created: newTag)
                 }
             } catch {

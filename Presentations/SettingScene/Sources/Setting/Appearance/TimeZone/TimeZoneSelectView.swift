@@ -133,7 +133,7 @@ struct TimeZoneSelectView: View {
                 .listStyle(.insetGrouped)
             }
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("TimeZone")
+            .navigationTitle("setting.timezone::title".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton(tapHandler: eventHandlers.close)
@@ -150,7 +150,7 @@ struct TimeZoneSelectView: View {
                 .foregroundStyle(appearance.colorSet.text1.asColor)
             
             TextField(text: $state.searchKeyword) {
-                Text("Search".localized())
+                Text("common.search".localized())
                     .font(appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(appearance.colorSet.text1.asColor)
             }

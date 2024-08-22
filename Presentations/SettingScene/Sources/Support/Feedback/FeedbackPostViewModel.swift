@@ -92,7 +92,7 @@ extension FeedbackPostViewModelImple {
             self?.router?.closeScene()
         }
         let info = ConfirmDialogInfo()
-            |> \.title .~ "feedback".localized()
+            |> \.title .~ "setting.feedback::name".localized()
             |> \.message .~ pure("feedback::posted:message".localized())
             |> \.confirmed .~ pure(confirmed)
             |> \.withCancel .~ false

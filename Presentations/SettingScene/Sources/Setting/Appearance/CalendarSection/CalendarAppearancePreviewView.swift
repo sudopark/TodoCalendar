@@ -101,7 +101,7 @@ struct CalendarAppearanceSampleView: View {
         HStack {
             Spacer()
             VStack(alignment: .leading, spacing: 4) {
-                Text("MARCH".localized())
+                Text("setting.appearance.calendar.samplemonth::march".localized())
                     .font(self.appearance.fontSet.size(12, weight: .semibold).asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 Grid(alignment: .center, horizontalSpacing: 4, verticalSpacing: 5) {
@@ -213,19 +213,19 @@ struct CalendarSectionAppearanceSettingView: View {
             CalendarAppearanceSampleView(model: $state.calendarModel)
             
             VStack(spacing: 8) {
-                AppearanceRow("Start day of week".localized(), pickerView)
+                AppearanceRow("setting.appearance.calendar.startDayOfWeek".localized(), pickerView)
                     .onReceive(state.$selectedWeekDay, perform: eventHandlers.weekStartDaySelected)
                 
-                AppearanceRow("Accent days".localized(), HStack {
+                AppearanceRow("setting.appearance.calendar.accentDay".localized(), HStack {
                     accentDayView(.holiday)
                     accentDayView(.saturday)
                     accentDayView(.sunday)
                 })
                 
-                AppearanceRow("Color theme".localized(), colorThemePreview)
+                AppearanceRow("setting.appearance.calendar.colorTheme".localized(), colorThemePreview)
                     .onTapGesture(perform: eventHandlers.changeColorTheme)
                 
-                AppearanceRow("Underline scheduled days".localized(), subTitle: "Widget".localized(), showUnderlineView)
+                AppearanceRow("setting.appearance.calendar.underline".localized(),  showUnderlineView)
                     .onReceive(state.$showUnderLine, perform: eventHandlers.toggleShowUnderline)
             }
         }
@@ -332,9 +332,9 @@ private extension AccentDays {
     
     var text: String {
         switch self {
-        case .holiday: return "Holiday".localized()
-        case .saturday: return "Saturday".localized()
-        case .sunday: return "Sunday".localized()
+        case .holiday: return "setting.appearance.calendar.accentDay::holiday".localized()
+        case .saturday: return "setting.appearance.calendar.accentDay::saturday".localized()
+        case .sunday: return "setting.appearance.calendar.accentDay::sunday".localized()
         }
     }
 }

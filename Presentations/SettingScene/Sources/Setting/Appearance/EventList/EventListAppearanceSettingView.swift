@@ -100,15 +100,15 @@ struct EventListAppearanceSettingView: View {
             eventListSampleView
                 .padding(.bottom, 12)
             
-            AppearanceRow("Event text font size".localized(), fontSizeSettingView)
+            AppearanceRow("setting.appearance.event.fontSize".localized(), fontSizeSettingView)
             
-            AppearanceRow("Holiday name".localized(), showHolidayNameView)
+            AppearanceRow("setting.appearance.event.show_holidayName".localized(), showHolidayNameView)
                 .onReceive(state.$showHolidayName, perform: eventHandler.toggleIsShowHolidayName)
             
-            AppearanceRow("Lunar calendar".localized(), showLunarCalendarView)
+            AppearanceRow("setting.appearance.event.show_lunar".localized(), showLunarCalendarView)
                 .onReceive(state.$showLunarCalendarDate, perform: eventHandler.toggleShowLunarCalendarDate)
             
-            AppearanceRow("24 hour form".localized(), is24HourFormView)
+            AppearanceRow("setting.appearance.event._24form".localized(), is24HourFormView)
                 .onReceive(state.$is24hourTimeForm, perform: eventHandler.toggleIs24HourFom)
             
         }
@@ -162,12 +162,12 @@ struct EventListAppearanceSettingView: View {
                 
                 HStack(alignment: .center, spacing: 8) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("🥗 Event name")
+                        Text("setting.appearance.event.sample::name".localized())
                             .minimumScaleFactor(0.7)
                             .font(self.appearance.eventTextFontOnList().asFont)
                             .foregroundColor(self.appearance.colorSet.text0.asColor)
                         
-                        Text("description")
+                        Text("setting.appearance.event.sample::description".localized())
                             .minimumScaleFactor(0.7)
                             .font(self.appearance.fontSet.size(13+appearance.eventTextAdditionalSize).asFont)
                             .foregroundColor(self.appearance.colorSet.text1.asColor)

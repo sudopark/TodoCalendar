@@ -139,7 +139,7 @@ struct FeedbackPostView: View {
             .padding()
             .padding(.top, 20)
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("Feedback".localized())
+            .navigationTitle("setting.feedback::name".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     CloseButton()
@@ -153,7 +153,7 @@ struct FeedbackPostView: View {
         ZStack(alignment: .topLeading) {
             
             if state.inputMessage.isEmpty {
-                Text("Enter a message".localized())
+                Text("feedback::enterMessage::placeholder".localized())
                     .font(appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.placeHolder.asColor)
                     .padding(.top, 8)
@@ -183,7 +183,7 @@ struct FeedbackPostView: View {
     private var contactInput: some View {
         TextField(
             "", text: $state.inputContact,
-            prompt: Text("Contact Email Address")
+            prompt: Text("feedback::contact::placeholder".localized())
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.placeHolder.asColor)
             )
@@ -208,7 +208,7 @@ struct FeedbackPostView: View {
             self.state.inputMessage = ""
             self.inputField = nil
         } label: {
-            Text("Clear".localized())
+            Text("common.clear".localized())
                 .font(appearance.fontSet.size(16).asFont)
                 .foregroundStyle(appearance.colorSet.secondaryBtnText.asColor)
                 .padding()
@@ -240,7 +240,7 @@ struct FeedbackPostView: View {
                         .frame(width: 32, height: 32)
                 } else {
                     Image(systemName: "paperplane")
-                    Text("Send".localized())
+                    Text("common.send".localized())
                 }
             }
             .padding()

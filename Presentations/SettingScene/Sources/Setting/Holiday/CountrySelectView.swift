@@ -121,7 +121,7 @@ struct CountrySelectView: View {
                 .listRowSeparator(.hidden)
                 .listRowBackground(appearance.colorSet.bg0.asColor)
             }
-            .navigationTitle("Country".localized())
+            .navigationTitle("setting.holiday.country.title".localized())
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
             .listRowSpacing(0)
@@ -179,7 +179,7 @@ struct CountrySelectView: View {
             return Button {
                 self.eventHandlers.confirm()
             } label: {
-                Text("Confirm".localized())
+                Text("common.confirm".localized())
             }
             .disabled(!self.state.isSavable)
             .asAnyView()
