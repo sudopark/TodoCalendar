@@ -69,7 +69,7 @@ extension EventListWidgetViewModelProviderTests {
         // then
         XCTAssertEqual(viewModel.lists.count, 3)
         let currentModel = viewModel.lists[safe: 0]
-        XCTAssertEqual(currentModel?.sectionTitle, "Current todo".localized())
+        XCTAssertEqual(currentModel?.sectionTitle, "widget.events.currentTodos".localized())
         XCTAssertEqual(currentModel?.events.map { $0.name }, [
             "current"
         ])
@@ -77,7 +77,7 @@ extension EventListWidgetViewModelProviderTests {
         let firstDateModel = viewModel.lists[safe: 1]
         XCTAssertEqual(
             firstDateModel?.sectionTitle,
-            self.refDate.text("EEE, MMM d".localized(), timeZone: kst)
+            self.refDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
         )
         XCTAssertEqual(firstDateModel?.events.map { $0.name }, [
             "todo_at_start"
@@ -86,7 +86,7 @@ extension EventListWidgetViewModelProviderTests {
         let lastDateModel = viewModel.lists[safe: 2]
         XCTAssertEqual(
             lastDateModel?.sectionTitle,
-            self.endDate.text("EEE, MMM d".localized(), timeZone: kst)
+            self.endDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
         )
         XCTAssertEqual(lastDateModel?.events.map { $0.name }, [
             "holiday",
@@ -118,7 +118,7 @@ extension EventListWidgetViewModelProviderTests {
         
         // then
         let currentModel = viewModel.lists[safe: 0]
-        XCTAssertEqual(currentModel?.sectionTitle, "Current todo".localized())
+        XCTAssertEqual(currentModel?.sectionTitle, "widget.events.currentTodos".localized())
         XCTAssertEqual(currentModel?.events.map { $0.name }, [
             "current"
         ])
@@ -126,14 +126,14 @@ extension EventListWidgetViewModelProviderTests {
         let firstDateModel = viewModel.lists[safe: 1]
         XCTAssertEqual(
             firstDateModel?.sectionTitle,
-            self.refDate.text("EEE, MMM d".localized(), timeZone: kst)
+            self.refDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
         )
         XCTAssertEqual(firstDateModel?.events.map { $0.name }, [])
         
         let lastDateModel = viewModel.lists[safe: 2]
         XCTAssertEqual(
             lastDateModel?.sectionTitle,
-            self.endDate.text("EEE, MMM d".localized(), timeZone: kst)
+            self.endDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
         )
         XCTAssertEqual(lastDateModel?.events.map { $0.name }, [
             "holiday",

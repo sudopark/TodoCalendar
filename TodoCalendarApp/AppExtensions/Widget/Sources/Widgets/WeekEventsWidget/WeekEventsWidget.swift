@@ -55,8 +55,8 @@ struct OneWeekEventsWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemMedium])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.weeks.thisWeek".localized())
+        .description("widget.common::explain".localized())
     }
 }
 
@@ -73,8 +73,8 @@ struct TwoWeekEventsWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemMedium])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.weeks.twoWeek".localized())
+        .description("widget.common::explain".localized())
     }
 }
 
@@ -91,8 +91,8 @@ struct ThreeWeekEventsWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemLarge])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.weeks.threeWeek".localized())
+        .description("widget.common::explain".localized())
     }
 }
 
@@ -109,8 +109,8 @@ struct FourWeekEventsWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemLarge])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.weeks.fourWeek".localized())
+        .description("widget.common::explain" .localized())
     }
 }
 
@@ -127,8 +127,8 @@ struct LastMonthEventsWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemLarge])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.weeks.lastMonth".localized())
+        .description("widget.common::explain".localized())
     }
 }
 
@@ -145,8 +145,8 @@ struct CurrentMonthEventsWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemLarge])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.weeks.thisMonth".localized())
+        .description("widget.common::explain".localized())
     }
 }
 
@@ -163,8 +163,8 @@ struct NextMonthEventsWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemLarge])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.weeks.nextMonth".localized())
+        .description("widget.common::explain".localized())
     }
 }
 

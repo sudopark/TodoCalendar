@@ -56,7 +56,7 @@ struct EventListView: View {
                 )
             
             if model.events.isEmpty {
-                Text("There are no events.".localized())
+                Text("widget.events.noEvents::message".localized())
                     .lineLimit(1)
                     .minimumScaleFactor(0.9)
                     .font(.system(size: 13))
@@ -219,8 +219,8 @@ struct EventListWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.events::name".localized())
+        .description("widget.common::explain".localized())
     }
 }
 

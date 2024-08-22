@@ -38,7 +38,7 @@ struct MonthWidgetViewModel {
         }
         
         self.todayIdentifier = todayIdentifier
-        let formatter = DateFormatter() |> \.dateFormat .~ "MMM".localized()
+        let formatter = DateFormatter() |> \.dateFormat .~ "date_form.MMM".localized()
         self.monthName = formatter.string(from: date)
         
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone

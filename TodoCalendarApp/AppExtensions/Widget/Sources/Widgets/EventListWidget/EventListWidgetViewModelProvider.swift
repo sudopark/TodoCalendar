@@ -54,7 +54,7 @@ struct EventListWidgetViewModel {
                     .applyTag(customTags)
                 guard !models.isEmpty else { return nil }
                 return .init(
-                    title: "Current todo".localized(),
+                    title: "widget.events.currentTodos".localized(),
                     events: models,
                     shouldAccentTitle: true,
                     isCurrentTodos: true
@@ -91,7 +91,7 @@ struct EventListWidgetViewModel {
                     guard offset == 0 || !models.isEmpty else { return nil }
 
                     let dateText = Date(timeIntervalSince1970: dayRange.lowerBound)
-                        .text("EEE, MMM d".localized(), timeZone: timeZone)
+                        .text("date_form.EEE_MMM_d".localized(), timeZone: timeZone)
                     return .init(
                         title: dateText,
                         events: models,
@@ -102,7 +102,7 @@ struct EventListWidgetViewModel {
                 let models = (0..<size+1).compactMap(gatherEventsPerDay)
                 if models.isEmpty {
                     let dateText = Date(timeIntervalSince1970: start.timeIntervalSince1970)
-                        .text("EEE, MMM d".localized(), timeZone: timeZone)
+                        .text("date_form.EEE_MMM_d".localized(), timeZone: timeZone)
                     let startDateModel = SectionModel(
                         title: dateText, events: [],
                         shouldAccentTitle: true
@@ -120,7 +120,7 @@ struct EventListWidgetViewModel {
     
     static func sample(maxItemCount: Int) -> EventListWidgetViewModel {
         
-        let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("Lunch".localized())")
+        let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("widget.events.sample::luch".localized())")
             |> \.tagColor .~ .default
             |> \.periodText .~ .singleText(.init(text: "1:00"))
         
@@ -128,17 +128,17 @@ struct EventListWidgetViewModel {
             |> \.tagColor .~ .default
             |> \.periodText .~ .singleText(.init(text: "3:00"))
         
-        let surfingEvent = ScheduleEventCellViewModel("surfing", name: "🏄‍♂️ \("Surfing".localized())")
+        let surfingEvent = ScheduleEventCellViewModel("surfing", name: "🏄‍♂️ \("widget.events.sample::surfing".localized())")
             |> \.tagColor .~ .default
-            |> \.periodText .~ .singleText(.init(text: "Allday".localized()))
+            |> \.periodText .~ .singleText(.init(text: "calendar::event_time::allday".localized()))
         
         let june3 = SectionModel(
-            title: "TUE, JUN 3",
+            title: "widget.events.sample::june3".localized(),
             events: [ lunchEvent, callTodoEvent ],
             shouldAccentTitle: true
         )
         
-        let july = SectionModel(title: "SUN, JUL 16", events: [
+        let july = SectionModel(title: "widget.events.sample::july16".localized(), events: [
             surfingEvent
         ])
 

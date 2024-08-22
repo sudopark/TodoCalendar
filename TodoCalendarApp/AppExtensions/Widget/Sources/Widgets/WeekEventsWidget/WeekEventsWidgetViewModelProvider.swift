@@ -100,9 +100,9 @@ struct WeekEventsViewModel {
     
     private static func wholeMonthSample(_ selection: WeekEventsRange.SelectedMonth) -> WeekEventsViewModel {
         let targetMonth = switch selection {
-        case .previous: (2, "FEBRUARY")
-        case .current: (3, "MARCH")
-        case .next: (4, "APRIL")
+        case .previous: (2, "widget.weeks.sample::feb".localized())
+        case .current: (3, "widget.weeks.sample::march".localized())
+        case .next: (4, "widget.weeks.sample::april".localized())
         }
         let targetDate = "2024-3-14"
         let weekAndDays: [[(Int, Int)]] = switch selection {
@@ -148,21 +148,21 @@ struct WeekEventsViewModel {
         }
         let eventStacks: [String: WeekEventStackViewModel] = [
             "2-1": .init(linesStack: [
-                [.init(.dummy(5, "2024-02-11", "🏔️ Hiking"), nil)]
+                [.init(.dummy(5, "2024-02-11", "widget.weeks.sample::hiking".localized()), nil)]
             ], shouldMarkEventDays: false),
             "3-2": .init(linesStack: [
                 [
-                    .init(.dummy(1, "2024-03-14", "🥗 Lunch"), nil),
-                    .init(.dummy(3, "2024-03-16", "📞 Call Sara"), nil),
-                    .init(.dummy(7, "2024-03-20", "Holiday", hasPeriod: true, tag: .holiday), nil)
+                    .init(.dummy(1, "2024-03-14", "widget.weeks.sample::lunch".localized()), nil),
+                    .init(.dummy(3, "2024-03-16", "widget.weeks.sample::call".localized()), nil),
+                    .init(.dummy(7, "2024-03-20", "widget.weeks.sample::holiday".localized(), hasPeriod: true, tag: .holiday), nil)
                 ],
-                [ .init(.dummy(1, "2024-03-14", "⛳️ Golf"), nil)],
+                [ .init(.dummy(1, "2024-03-14", "widget.weeks.sample::golf".localized()), nil)],
             ], shouldMarkEventDays: false),
             "3-3": .init(linesStack: [
-                [.init(.dummy(4, "2024-03-25", "🔥 Workout"), nil)]
+                [.init(.dummy(4, "2024-03-25", "widget.weeks.sample::workout".localized()), nil)]
             ], shouldMarkEventDays: false),
             "4-3": .init(linesStack: [
-                [.init(.dummy(7, "2024-04-24", "🚀 Launch"), nil)]
+                [.init(.dummy(7, "2024-04-24", "widget.weeks.sample::launch".localized()), nil)]
             ], shouldMarkEventDays: false)
         ]
         
@@ -216,7 +216,7 @@ extension WeekEventsWidgetViewModelProvider {
         
         return WeekEventsViewModel(
             range: range,
-            targetMonthText: targetMonthDate.text("MMMM".localized(), timeZone: timeZone).uppercased(),
+            targetMonthText: targetMonthDate.text("date_form.MMMM".localized(), timeZone: timeZone).uppercased(),
             targetDayIndetifier: targetDate.identifier,
             orderedWeekDaysModel: WeekDayModel.allModels(of: firstWeekDay),
             weeks: self.convertToWeekRowModels(weeks, events.eventWithTimes, targetMonth),
