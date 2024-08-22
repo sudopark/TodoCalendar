@@ -90,7 +90,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
                 self?.subject.temporaryUserDataMigrationStatus.send(nil)
                 switch result {
                 case .success:
-                    self?.router?.showToast("temporary_user_data::migration_success::message".localized())
+                    self?.router?.showToast("manage_account::migration_finished::message".localized())
                 case .failure(let error):
                     self?.router?.showError(error)
                 }
@@ -135,8 +135,8 @@ extension MainViewModelImple {
             self?.temporaryUserDataMigrationUsecase.startMigration()
         }
         let info = ConfirmDialogInfo()
-            |> \.title .~ pure("temporary_user_data::migration::confirm::title".localized())
-            |> \.message .~ pure("temporary_user_data::migration::confirm::message".localized(with: count))
+            |> \.title .~ pure("manage_account::migration::title".localized())
+            |> \.message .~ pure("manage_account::migration::description".localized(with: count))
             |> \.withCancel .~ true
             |> \.confirmed .~ pure(runMigration)
         self.router?.showConfirm(dialog: info)
@@ -162,7 +162,7 @@ extension MainViewModelImple {
     
     var currentMonth: AnyPublisher<String, Never> {
         
-        let formatter = DateFormatter() |> \.dateFormat .~ "MMM".localized()
+        let formatter = DateFormatter() |> \.dateFormat .~ "date_form.MMM".localized()
         let calednar = Calendar(identifier: .gregorian)
         let transform: (CalendarMonth) -> String = { month in
             guard let date = calednar.date(bySetting: .month, value: month.month, of: Date())
