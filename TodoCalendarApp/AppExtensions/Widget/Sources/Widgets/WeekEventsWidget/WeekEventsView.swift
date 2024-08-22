@@ -242,9 +242,9 @@ private extension WeekEventsRange {
     var monthLabel: String? {
         switch self {
         case .wholeMonth(let selection) where selection == .previous:
-            return "Last month".localized()
+            return "widget.weeks.lastMonth".localized()
         case .wholeMonth(let selection) where selection == .next:
-            return "Next month".localized()
+            return "widget.weeks.nextMonth".localized()
         default: return nil
         }
     }

@@ -60,7 +60,7 @@ struct SystemSizeForemostEventView: View {
     }
     
     private func eventTypeView() -> some View {
-        Text("Foremost event")
+        Text("calendar::foremostevent:title".localized())
             .font(.system(size: 12))
             .foregroundStyle(colorSet.text2.asColor)
     }
@@ -78,7 +78,7 @@ struct SystemSizeForemostEventView: View {
                     
                     Text(String.randomEmoji)
                  
-                    Text("It's all finished!".localized())
+                    Text("widget.events.foremost::allFinished::message".localized())
                         .font(.system(size: metric.emptyMessageFontSize, weight: .semibold))
                         .multilineTextAlignment(.center)
                         .minimumScaleFactor(0.7)
@@ -188,7 +188,7 @@ struct SystemSizeForemostEventView: View {
             func makeBody(configuration: Configuration) -> some View {
                 HStack {
                     Spacer()
-                    Text(configuration.isOn ? "Cancel".localized() : "Done".localized())
+                    Text(configuration.isOn ? "common.cancel".localized() : "common.done".localized())
                         .font(.callout)
                         .foregroundStyle(.white)
                     Spacer()
@@ -249,8 +249,8 @@ struct ForemostEventWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemSmall, .systemMedium])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.events.foremost".localized())
+        .description("widget.common::explain".localized())
     }
 }
 

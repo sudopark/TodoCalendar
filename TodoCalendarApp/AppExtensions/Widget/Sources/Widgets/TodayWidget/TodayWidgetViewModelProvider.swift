@@ -40,9 +40,9 @@ struct TodayWidgetViewModel {
     
     init(_ today: Date, _ calendar: Calendar) {
         let timeZone = calendar.timeZone
-        self.weekDayText = today.text("EEEE", timeZone: timeZone).uppercased()
+        self.weekDayText = today.text("date_form.EEEE".localized(), timeZone: timeZone).uppercased()
         self.day = calendar.component(.day, from: today)
-        self.monthAndYearText = today.text("MMM yyyy", timeZone: timeZone).uppercased()
+        self.monthAndYearText = today.text("date_form.MMM_yyyy".localized(), timeZone: timeZone).uppercased()
         if timeZone != TimeZone.current {
             self.timeZoneText = timeZone.localizedName(for: .shortStandard, locale: .current)
         }
@@ -60,9 +60,9 @@ struct TodayWidgetViewModel {
     
     static func sample() -> TodayWidgetViewModel {
         return .init(
-            weekDayText: "SUNDAY".localized(),
+            weekDayText: "widget.events.today::sample::sunday".localized(),
             day: 14,
-            monthAndYearText: "\("MARCH".localized()) 2024"
+            monthAndYearText: "widget.events.today::sample::march2024".localized()
         )
         |> \.todoEventCount .~ 3
         |> \.scheduleEventcount .~ 4

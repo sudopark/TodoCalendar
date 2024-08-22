@@ -23,10 +23,10 @@ struct ForemostEventWidgetViewModel {
     
     static func sample() -> ForemostEventWidgetViewModel {
         
-        let event = TodoEventCellViewModel("tood", name: "Take an umbrella! ⛱️")
+        let event = TodoEventCellViewModel("tood", name: "widget.events.foremost::sample::message".localized())
             |> \.tagColor .~ .default
             |> \.periodText .~ .doubleText(
-                .init(text: "Todo".localized()), .init(text: "13:00")
+                .init(text: "calendar::event_time::todo".localized()), .init(text: "13:00")
             )
         let defaultTagColorSetting = DefaultEventTagColorSetting(
             holiday: "#D6236A", default: "#088CDA"

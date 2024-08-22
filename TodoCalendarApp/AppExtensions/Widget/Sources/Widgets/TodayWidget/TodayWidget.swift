@@ -142,8 +142,8 @@ struct TodayWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemSmall])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.events.today".localized())
+        .description("widget.common::explain".localized())
     }
 }
 

@@ -54,8 +54,8 @@ struct EventAndMonthWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemMedium])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.eventAndMonth::name".localized())
+        .description("widget.common::explain".localized())
     }
 }
 

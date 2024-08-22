@@ -22,6 +22,7 @@
 "common.search" = "Search";
 "common.clear" = "Clear";
 "common.send" = "Send";
+"common.done" = "Done";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
@@ -42,7 +43,11 @@
 "date_form.yyyy_MM_dd" = "yyyy.MM.dd";
 "date_form.yyyy_MMM_dd" = "yyyy MMM dd";
 "date_form.MMM" = "MMM";
-
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, MMM d";
+"date_form.MMM_yyyy" = "MMM yyyy";
+ 
 // MARK: - event
 
 "dayname::sunday" = "Sunday";
@@ -280,3 +285,46 @@
 "feedback::enterMessage::placeholder" = "Enter a message";
 "feedback::contact::placeholder" = "Reply email address";
 "feedback::posted:message" = "Your feedback has been successfully registered.";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Check out our upcoming events.";
+"widget.doubleMonth::name" = "Calendar + Calendar";
+"widget.eventAndMonth::name" = "Events + Calendar";
+"widget.todayAndMonth::name" = "TODAY + Calendar";
+"widget.events::name" = "Events";
+"widget.events.noEvents::message" = "There are no events.";
+"widget.events.currentTodos" = "Current To do list";
+"widget.events.sample::luch" = "Lunch";
+"widget.events.sample::call" = "Call Sara";
+"widget.events.sample::surfing" = "Surfing";
+"widget.events.sample::june3" = "TUE, JUN 3";
+"widget.events.sample::july16" = "SUN, JUL 16";
+"widget.events.foremost" = "Foremost Event";
+"widget.events.foremost::allFinished::message" = "It's all finished!";
+"widget.events.foremost::sample::message" = "Take an umbrella! ⛱️";
+"widget.events.calendar" = "Calendar";
+"widget.events.today" = "TODAY";
+"widget.events.today::sample::sunday" = "SUNDAY";
+"widget.events.today::sample::march2024" = "MARCH 2024";
+"total::event::count" = "%d Events";
+"todo::count" = "%d To-do";
+"schedule::count" = "%d Schedule";
+"widget.weeks.lastMonth" = "Last month";
+"widget.weeks.thisMonth" = "This month";
+"widget.weeks.nextMonth" = "Next month";
+"widget.weeks.thisWeek" = "This week";
+"widget.weeks.twoWeek" = "2 weeks";
+"widget.weeks.threeWeek" = "3 weeks";
+"widget.weeks.fourWeek" = "4 weeks";
+"widget.weeks.sample::feb" = "FEBRUARY";
+"widget.weeks.sample::march" = "MARCH";
+"widget.weeks.sample::april" = "APRIL";
+"widget.weeks.sample::hiking" = "🏔️ Hiking";
+"widget.weeks.sample::lunch" = "🥗 Lunch";
+"widget.weeks.sample::call" = "📞 Call Sara";
+"widget.weeks.sample::holiday" = "Holiday";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Workout";
+"widget.weeks.sample::launch" = "🚀 Launch";

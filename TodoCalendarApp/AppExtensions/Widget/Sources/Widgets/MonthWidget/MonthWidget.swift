@@ -149,8 +149,8 @@ struct MonthWidget: Widget {
                 .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemSmall])
-        .configurationDisplayName("TODO: My Widget")
-        .description("TODO: This is an example widget.")
+        .configurationDisplayName("widget.events.calendar".localized())
+        .description("widget.common::explain".localized())
     }
 }
 
