@@ -186,7 +186,7 @@ extension EventSettingViewModelImpleTests {
         XCTAssertEqual(texts, [
             "event_notification_setting::option_title::no_notification".localized(),
             "event_notification_setting::option_title::allday_9am".localized(),
-            "\("event_notification_setting::option_title::allday_12am".localized())",
+            "event_notification_setting::option_title::allday_12pm".localized(),
             "event_notification_setting::option_title::no_notification".localized(),
         ])
         XCTAssertEqual(self.spyRouter.didRouteToEventNotificationTimeForAllDays, [true, true, true])

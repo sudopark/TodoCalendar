@@ -38,25 +38,25 @@ struct SettingItemModel: SettingItemModelType {
         switch itemId {
         case .appearance:
             self.iconNamge = "eyeglasses"
-            self.text = "Appearance".localized()
+            self.text = "setting.appearance.title".localized()
         case .editEvent:
             self.iconNamge = "calendar"
-            self.text = "Edit Event".localized()
+            self.text = "setting.appearance.event.edit::name".localized()
         case .holidaySetting:
             self.iconNamge = "globe"
-            self.text = "Holiday Setting".localized()
+            self.text = "setting.holiday.item::name".localized()
         case .feedback:
             self.iconNamge = "ellipsis.bubble"
-            self.text = "Feedback".localized()
+            self.text = "setting.feedback::name".localized()
         case .faq:
             self.iconNamge = "questionmark.circle"
-            self.text = "Help".localized()
+            self.text = "setting.help::name".localized()
         case .shareApp:
             self.iconNamge = "square.and.arrow.up"
-            self.text = "Share App".localized()
+            self.text = "setting.share::name".localized()
         case .addReview:
             self.iconNamge = "star"
-            self.text = "Write an App Store review".localized()
+            self.text = "setting.write_review::name".localized()
         case .sourceCode:
             self.iconNamge = "pc"
             self.text = "Source Code"
@@ -76,7 +76,9 @@ struct AccountSettingItemModel: SettingItemModelType {
         return self.isSignIn ? "person.crop.circle" : "person.crop.circle.badge.plus"
     }
     var title: String {
-        return self.isSignIn ? "setting:account:signedIn".localized() : "setting:account:need_signIn".localized()
+        return self.isSignIn
+            ? "setting.account.signedIn::manageAccount".localized()
+            : "setting.account.needSignIn".localized()
     }
     
     init(_ accountInfo: AccountInfo?) {
@@ -97,8 +99,8 @@ struct SuggestAppItemModel: SettingItemModelType {
     static func readmind() -> SuggestAppItemModel {
         return SuggestAppItemModel(
             imagePath: "https://is1-ssl.mzstatic.com/image/thumb/Purple116/v4/c8/77/ec/c877ec10-f7bb-2762-f512-0fa769ff6d6f/AppIcon-1x_U007emarketing-0-10-0-85-220.png/230x0w.webp",
-            name: "Readmind",
-            description: "Reading list management".localized(),
+            name: "setting.suggest::readmind::appName".localized(),
+            description: "setting.suggest::readmind::message".localized(),
             sourcePath: "http://itunes.apple.com/app/id/id1565634642"
         )
     }
@@ -259,17 +261,17 @@ extension SettingItemListViewModelImple {
                 .init(.feedback),
                 .init(.faq)
             ]
-            let supportSection = SettingSectionModel(headerText: "Support".localized(), items: supportSectionItems)
+            let supportSection = SettingSectionModel(headerText: "setting.section.support::name".localized(), items: supportSectionItems)
             
             let appInfoSectionItems: [SettingItemModel] = [
                 .init(.shareApp),
                 .init(.addReview),
                 .init(.sourceCode)
             ]
-            let appInfoSection = SettingSectionModel(headerText: "App".localized(), items: appInfoSectionItems)
+            let appInfoSection = SettingSectionModel(headerText: "setting.section.app::name".localized(), items: appInfoSectionItems)
             
             let suggestItem = SuggestAppItemModel.readmind()
-            let suggestSection = SettingSectionModel(headerText: "Suggest".localized(), items: [suggestItem])
+            let suggestSection = SettingSectionModel(headerText: "setting.section.suggest::name".localized(), items: [suggestItem])
             
             let sections: [any SettingSectionModelType] = [
                 baseSection, supportSection, appInfoSection, suggestSection

@@ -102,7 +102,7 @@ struct EventTagSelectView: View {
             
             List {
                 
-                Text("This is the event type selected by default when creating a new event.".localized())
+                Text("eventTag.default::selection::explain".localized())
                     .font(appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(appearance.colorSet.text2.asColor)
                     .listRowSeparator(.hidden)
@@ -122,7 +122,7 @@ struct EventTagSelectView: View {
                     NavigationBackButton(tapHandler: eventHandlers.onClose)
                 }
             }
-            .navigationTitle("Default Event Type".localized())
+            .navigationTitle("eventTag.default::title".localized())
         }
             .id(appearance.navigationBarId)
     }

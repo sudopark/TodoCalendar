@@ -110,7 +110,9 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
     private func routeToBaseTagEdit(_ tagId: AllEventTagId) {
         let info = OriginalTagInfo(
             id: tagId,
-            name: tagId == .holiday ? "holiday".localized() : "default".localized(),
+            name: tagId == .holiday 
+                ? "eventTag.defaults.holiday::name".localized()
+                : "eventTag.defaults.default::name".localized(),
             color: tagId == .holiday ? .holiday : .default
         )
         self.router?.routeToEditTag(info, listener: self)

@@ -123,7 +123,7 @@ struct HolidayListView: View {
             }
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
-            .navigationTitle("Holiday".localized())
+            .navigationTitle("setting.holiday.title".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton {
@@ -152,7 +152,7 @@ struct HolidayListView: View {
 
         VStack(alignment: .leading) {
             
-            Text("Current Country".localized())
+            Text("setting.holiday.country.current::title".localized())
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text2.asColor)
             HStack {
@@ -182,7 +182,7 @@ struct HolidayListView: View {
     private var holidayListSectionView: some View {
         
         VStack(alignment: .leading) {
-            Text("Holidays".localized())
+            Text("setting.holiday.list::sectionTitle".localized())
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text2.asColor)
             

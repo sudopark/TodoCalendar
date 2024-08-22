@@ -28,7 +28,7 @@ struct TimeZoneModel: Equatable {
         self.identifier = timeZone.identifier
         guard let title = timeZone.localizedName(for: .generic, locale: .current)
         else { return nil }
-        self.title = isSystem ? "System timeZone".localized() : title
+        self.title = isSystem ? "setting.timezone::systemTimeZone::name".localized() : title
         
         let standardName = timeZone.localizedName(for: .standard, locale: .current)
         self.description = standardName.map {

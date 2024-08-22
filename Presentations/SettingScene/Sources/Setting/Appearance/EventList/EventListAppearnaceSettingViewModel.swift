@@ -53,16 +53,16 @@ struct EventListAppearanceSampleModel: Equatable {
         guard let christmas = calendar.dateBySetting(from: Date(), mutating: { $0.month = 12; $0.day = 25 })
         else { return nil }
         
-        let form = DateFormatter() |> \.dateFormat .~ "yyyy MM dd (E)".localized()
+        let form = DateFormatter() |> \.dateFormat .~ "date_form::yyyy_MM_dd_E_".localized()
         self.dateText = form.string(from: christmas)
         self.is24HourForm = setting.is24hourForm
         if setting.showHoliday {
-            self.holidayName = "Chrismas".localized()
+            self.holidayName = "setting.appearance.event.sample::christmas".localized()
         }
         
         if setting.showLunarCalendarDate {
             let lunarForm = DateFormatter() 
-                |> \.dateFormat .~ "MM dd".localized()
+                |> \.dateFormat .~ "date_form::MM_dd".localized()
                 |> \.calendar .~ Calendar(identifier: .chinese)
             self.lunarDateText = lunarForm.string(from: christmas)
         }

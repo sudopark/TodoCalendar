@@ -201,7 +201,7 @@ struct AppearanceSettingView: View {
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .background(self.appearance.colorSet.bg0.asColor)
-            .navigationTitle("Appearance".localized())
+            .navigationTitle("setting.appearance.title".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton {
@@ -242,13 +242,13 @@ struct AppearanceSettingView: View {
         
         return VStack {
             
-            AppearanceRow("Timezone".localized(), timeZoneView())
+            AppearanceRow("setting.timezone::title".localized(), timeZoneView())
                 .onTapGesture(perform: appearanceSettingEventHandler.changeTimeZone)
             
-            AppearanceRow("Haptic feedback", hapticView())
+            AppearanceRow("setting.haptic::name".localized(), hapticView())
                 .onReceive(appearanceState.$hapticOn, perform: appearanceSettingEventHandler.toggleHapticFeedback)
             
-            AppearanceRow("Minimize animation effect", animationView())
+            AppearanceRow("setting.minimize_animation::name".localized(), animationView())
                 .onReceive(appearanceState.$animationOn, perform: appearanceSettingEventHandler.toggleAnimationEffect)
         }
         .padding(.top, 20)

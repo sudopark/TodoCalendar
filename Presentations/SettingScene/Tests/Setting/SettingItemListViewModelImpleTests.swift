@@ -55,7 +55,10 @@ extension SettingItemListViewModelImpleTests {
         // then
         let sectionTitles = sections?.map { $0.headerText }
         XCTAssertEqual(sectionTitles, [
-            nil, "Support".localized(), "App".localized(), "Suggest".localized()
+            nil,
+            "setting.section.support::name".localized(),
+            "setting.section.app::name".localized(),
+            "setting.section.suggest::name".localized()
         ])
         
         let baseSection = sections?[safe: 0]
@@ -94,7 +97,10 @@ extension SettingItemListViewModelImpleTests {
         // then
         let sectionTitles = sections?.map { $0.headerText }
         XCTAssertEqual(sectionTitles, [
-            nil, "Support".localized(), "App".localized(), "Suggest".localized()
+            nil,
+            "setting.section.support::name".localized(),
+            "setting.section.app::name".localized(),
+            "setting.section.suggest::name".localized()
         ])
         
         let baseSection = sections?[safe: 0]

@@ -132,7 +132,7 @@ extension EventNotificationDefaultTimeOptionViewModelImple {
     
     private func showNotificationPermissionDenied() {
         let info = ConfirmDialogInfo()
-            |> \.title .~ pure("event_notification_setting::need_permission_title")
+            |> \.title .~ pure("event_notification_setting::need_permission_title".localized())
             |> \.message .~ pure("event_notification_setting::permission_denied".localized())
         self.router?.showConfirm(dialog: info)
     }

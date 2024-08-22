@@ -70,7 +70,7 @@ struct EventOnCalendarViewPreviewView: View {
         HStack {
             Spacer()
             VStack {
-                Text("1")
+                Text("16")
                     .font(appearance.fontSet.day.asFont)
                     .foregroundStyle(appearance.colorSet.weekDayText.asColor)
                 HStack(spacing: 2) {
@@ -79,7 +79,7 @@ struct EventOnCalendarViewPreviewView: View {
                         .frame(width: 3, height: 12)
                         .padding(.leading, 1)
                     
-                    Text("All day".localized())
+                    Text("calendar::event_time::allday".localized())
                         .font(appearance.eventTextFontOnCalendar().asFont)
                         .foregroundStyle(appearance.colorSet.eventText.asColor)
                         .lineLimit(1)
@@ -96,7 +96,7 @@ struct EventOnCalendarViewPreviewView: View {
                         .frame(width: 3, height: 12)
                         .padding(.leading, 1)
                     
-                    Text("Some time".localized())
+                    Text("setting.appearance.event.sample::sometime".localized())
                         .font(appearance.eventTextFontOnCalendar().asFont)
                         .foregroundStyle(appearance.colorSet.eventText.asColor)
                         .lineLimit(1)
@@ -136,12 +136,12 @@ struct EventOnCalendarView: View {
             EventOnCalendarViewPreviewView()
             
             VStack(spacing: 8) {
-                AppearanceRow("Event font size".localized(), fontSizeSettingView)
+                AppearanceRow("setting.appearance.event.fontSize".localized(), fontSizeSettingView)
                 
-                AppearanceRow("Bold text".localized(), boldTextView)
+                AppearanceRow("setting.appearance.event.boldText".localized(), boldTextView)
                     .onReceive(state.$isBold, perform: eventHandler.toggleIsBold)
                 
-                AppearanceRow("Event color".localized(), showEventTagColorView)
+                AppearanceRow("setting.appearance.event.eventColor".localized(), showEventTagColorView)
                     .onReceive(state.$isShowEventTagColor, perform: eventHandler.toggleShowEventTagColor)
             }
         }

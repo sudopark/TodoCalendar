@@ -101,7 +101,7 @@ struct SettingItemListView: View {
                 CloseButton()
                     .eventHandler(\.onTap, self.eventHandlers.close)
             }
-            .navigationTitle("Settings".localized())
+            .navigationTitle("setting.title".localized())
         }
         .id(appearance.navigationBarId)
     }

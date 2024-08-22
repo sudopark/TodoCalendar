@@ -131,7 +131,7 @@ struct EventTagListView: View {
                     }
                 }
             }
-            .navigationTitle("Event Types".localized())
+            .navigationTitle("eventTag.list::title".localized())
         }
             .id(appearance.navigationBarId)
     }
