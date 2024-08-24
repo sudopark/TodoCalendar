@@ -8,7 +8,7 @@
 
 
 // MARK: - common
-"common::and" = "and";
+"common::and" = " and";
 "common::wait:message" = "Wait please..";
 "common::back" = "Back";
 "common.remove" = "Remove";
@@ -168,7 +168,7 @@
 
 "eventDetail.edit::add_new_name::placeholder" = "Add a new event name";
 "eventDetail.edit::clearEventTime::button" = "Clear event time";
-"eventDetail.edit::noEventTime::button" = "No event time";
+"eventDetail.edit::noEventTime::button" = "No end time";
 "eventDetail.edit::memo" = "Memo";
 "eventDetail.edit::urlPreview" = "URL Preview";
 
