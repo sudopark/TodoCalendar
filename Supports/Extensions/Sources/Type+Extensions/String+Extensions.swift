@@ -96,6 +96,6 @@ extension Array where Element == String {
         
         var elements = self; let last = elements.removeLast()
         let leading = elements.joined(separator: seperator)
-        return "\(leading) \(lastSeperator) \(last)"
+        return "\(leading)\(lastSeperator) \(last)"
     }
 }

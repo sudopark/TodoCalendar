@@ -230,7 +230,7 @@ extension DayEventListViewModelImpleTests {
             .init(text: "calendar::event_time::todo".localized()), .init(text: "11 (Mon)")
         ))
         parameterizeTest(self.rangeFromPastToFuture, .doubleText(
-            .init(text: "calendar::event_time::todo".localized()), .init(text: "Allday".localized())
+            .init(text: "calendar::event_time::todo".localized()), .init(text: "calendar::event_time::allday".localized())
         ))
         parameterizeTest(self.rangeFromTodayToToday, .doubleText(
             .init(text: "calendar::event_time::todo".localized()), .init(text: "23:58")
