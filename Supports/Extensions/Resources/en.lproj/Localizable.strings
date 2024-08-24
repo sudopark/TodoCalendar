@@ -328,3 +328,4 @@
 "widget.weeks.sample::golf" = "⛳️ Golf";
 "widget.weeks.sample::workout" = "🔥 Workout";
 "widget.weeks.sample::launch" = "🚀 Launch";
+"widget.fail.message" = "A temporary error occurred.\nPlease try running the app again.";

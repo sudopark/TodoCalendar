@@ -8,13 +8,16 @@
 
 import Foundation
 import WidgetKit
+import Extensions
 
 struct WidgetErrorModel: Error {
     let error: any Error
     let message: String
+    let reason: String?
     init(error: any Error, message: String? = nil) {
         self.error = error
-        self.message = message ?? "\(error)"
+        self.message = message ?? "widget.fail.message".localized()
+        self.reason = "\(error)"
     }
 }
 
