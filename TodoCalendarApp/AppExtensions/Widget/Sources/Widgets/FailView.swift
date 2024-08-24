@@ -7,7 +7,10 @@
 //
 
 import SwiftUI
+import WidgetKit
 import CommonPresentation
+import Extensions
+
 
 struct FailView: View {
     
@@ -22,8 +25,30 @@ struct FailView: View {
     }
     
     var body: some View {
-        Text(errorModel.message)
-            .font(.system(size: 15))
-            .foregroundStyle(colorSet.text0.asColor)
+        VStack(spacing: 8) {
+            Text(errorModel.message)
+                .font(.system(size: 14))
+                .foregroundStyle(colorSet.text0.asColor)
+            
+            if let reason = errorModel.reason {
+                Text(reason)
+                    .font(.system(size: 10))
+                    .foregroundStyle(colorSet.text1.asColor)
+            }
+        }
+    }
+}
+
+
+struct FailViewPreviewProvider: PreviewProvider {
+    static var previews: some View {
+        FailView(
+            errorModel: .init(
+                error: RuntimeError("raw error"),
+                message: nil
+            )
+        )
+        .previewContext(WidgetPreviewContext(family: .systemSmall))
+        .containerBackground(.background , for: .widget)
     }
 }
