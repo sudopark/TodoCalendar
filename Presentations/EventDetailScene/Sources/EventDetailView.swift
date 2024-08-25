@@ -818,21 +818,29 @@ struct EventDetailView: View {
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
-            TextField(
-                "",
-                text: self.$state.memo,
-                prompt: Text("eventDetail.edit::memo".localized())
-                    .foregroundStyle(appearance.colorSet.placeHolder.asColor)
-            )
-            .autocorrectionDisabled()
-            .textInputAutocapitalization(.never)
-            .foregroundStyle(self.appearance.colorSet.text0.asColor)
-            .font(self.appearance.fontSet.size(14).asFont)
-            .focused(self.$isFocusInput, equals: .memo)
-            .onSubmit {
-                self.isFocusInput = nil
+            ZStack(alignment: .topLeading) {
+                
+                if state.memo.isEmpty {
+                    Text("eventDetail.edit::memo".localized())
+                        .foregroundStyle(appearance.colorSet.placeHolder.asColor)
+                        .padding(.leading, 4)
+                }
+             
+                TextEditor(text: $state.memo)
+                    .focused(self.$isFocusInput, equals: .memo)
+                    .autocorrectionDisabled()
+                    .multilineTextAlignment(.leading)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                    .font(self.appearance.fontSet.size(14).asFont)
+                    .textInputAutocapitalization(.never)
+                    .scrollContentBackground(.hidden)
+                    .frame(maxHeight: 100)
+                    .padding(.leading, 0)
+                    .onSubmit {
+                        self.isFocusInput = nil
+                    }
+                    .onReceive(self.state.$memo, perform: self.enterMemo)
             }
-            .onReceive(self.state.$memo, perform: self.enterMemo)
         }
     }
     
