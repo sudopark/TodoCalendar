@@ -236,14 +236,9 @@ struct SelectEventNotificationTimeView: View {
     
     private func customOptionView(_ model: CustomTimeOptionModel) -> some View {
         return HStack {
-            VStack {
-                Text(model.dateText)
-                    .font(appearance.fontSet.normal.asFont)
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-                Text(model.diffTimeText)
-                    .font(appearance.fontSet.subSubNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.text2.asColor)
-            }
+            Text(model.timeText)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
             
             Spacer(minLength: 20)
             

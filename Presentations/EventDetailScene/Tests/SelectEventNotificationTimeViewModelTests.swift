@@ -174,6 +174,22 @@ extension SelectEventNotificationTimeViewModelTests {
         ])
     }
     
+    func testViewModel_whenCustomNotificationTime_provideDateAndTimeInfo() {
+        // given
+        let expect = expectation(description: "커스텀 시간의 경우 날짜, 시간정보 제공")
+        let viewModel = self.makeViewModel(startWith: [])
+        
+        // when
+        let options = self.waitFirstOutput(expect, for: viewModel.customTimeOptions.dropFirst()) {
+            viewModel.prepare()
+            viewModel.addCustomTimeOption(self.dummyCustomOption1.customOptionDateComponents!)
+        }
+        
+        // then
+        let custom = options?.first
+        XCTAssertEqual(custom?.timeText, "2023.12.12 02:20")
+    }
+    
     // 선택옵션 변경시에 listener로 변경사항 전파
     func testViewModel_whenSelectOptionChanged_notifyByListener() {
         // given

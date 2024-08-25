@@ -76,9 +76,9 @@ extension SelectEventRepeatOptionViewModelTests {
             [
                 "eventDetail.repeating.everyDay:title".localized(),
                 "eventDetail.repeating.everyWeek:title".localized(),
-                "eventDetail.repeating.everySomeWeek:title".localized(with: "2nd"),
-                "eventDetail.repeating.everySomeWeek:title".localized(with: "3rd"),
-                "eventDetail.repeating.everySomeWeek:title".localized(with: "4th"),
+                "eventDetail.repeating.everySomeWeek:title".localized(with: 2.ordinal ?? ""),
+                "eventDetail.repeating.everySomeWeek:title".localized(with: 3.ordinal ?? ""),
+                "eventDetail.repeating.everySomeWeek:title".localized(with: 4.ordinal ?? ""),
                 "eventDetail.repeating.everyMonth:title".localized(),
                 "eventDetail.repeating.everyYear:title".localized(),
             ],
@@ -152,7 +152,8 @@ extension SelectEventRepeatOptionViewModelTests {
         
         // then
         XCTAssertNotNil(id)
-        let weekPer2Id = options?.flatMap { $0 }.first(where: { $0.text == "eventDetail.repeating.everySomeWeek:title".localized(with: "2nd") })?.id
+        let ordinal = 2.ordinal ?? ""
+        let weekPer2Id = options?.flatMap { $0 }.first(where: { $0.text == "eventDetail.repeating.everySomeWeek:title".localized(with: ordinal) })?.id
         XCTAssertEqual(id, weekPer2Id)
         XCTAssertEqual(options?.count, self.defaultOptionListTexts.count)
     }

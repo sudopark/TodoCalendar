@@ -84,9 +84,9 @@ private extension TimeInterval {
     }
 }
 
-private extension Calendar {
+extension Calendar {
     
-    func customTimeText(_ component: DateComponents) -> String? {
+    public func customTimeText(_ component: DateComponents) -> String? {
         guard let date = self.date(from: component) else { return nil }
         let form = DateFormatter() |> \.dateFormat .~ R.String.DateFormYyyy.mmDdHhMm
         return form.string(from: date)

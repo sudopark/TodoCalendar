@@ -14,6 +14,7 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import CommonPresentation
 
 
 struct NotificationTimeOptionModel: Equatable {
@@ -29,18 +30,14 @@ struct NotificationTimeOptionModel: Equatable {
 struct CustomTimeOptionModel: Equatable {
     let option: EventNotificationTimeOption
     let components: DateComponents
-    let dateText: String
-    let diffTimeText: String
+    let timeText: String
     
-    // TODO: init with custom
     init?(option: EventNotificationTimeOption) {
         guard case let .custom(compos) = option else { return nil }
         self.option = option
         self.components = compos
         let calendar = Calendar(identifier: .gregorian)
-        self.dateText = calendar.customOptionTimeText(compos) ?? ""
-        // TOOD: diffTimeText
-        self.diffTimeText = "TODO"
+        self.timeText = calendar.customTimeText(compos) ?? ""
     }
 }
 
@@ -257,15 +254,6 @@ private extension Array where Element == EventNotificationTimeOption {
             guard case .custom = option else { return false }
             return true
         }
-    }
-}
-
-private extension Calendar {
-    
-    func customOptionTimeText(_ components: DateComponents) -> String? {
-        guard let date = self.date(from: components) else { return nil }
-        let formatter = DateFormatter() |> \.dateFormat .~ "yyyy".localized()
-        return formatter.string(from: date)
     }
 }
 
