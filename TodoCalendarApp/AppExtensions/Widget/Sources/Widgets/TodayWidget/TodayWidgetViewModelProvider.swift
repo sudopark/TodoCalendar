@@ -92,9 +92,24 @@ extension TodayWidgetViewModelProvider {
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calednar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let todayRange = try calednar.dayRange(today).unwrap()
-        let events = try await self.eventsFetchusecase.fetchEvents(in: todayRange, timeZone
-        )
+        let events = try await self.todayEvents(todayRange, timeZone)
         return TodayWidgetViewModel(today, calednar)
             .updated(events: events)
+    }
+    
+    private func todayEvents(
+        _ todayRange: Range<TimeInterval>,
+        _ timeZone: TimeZone
+    ) async throws -> CalendarEvents {
+        
+        let events = try await self.eventsFetchusecase.fetchEvents(
+            in: todayRange, timeZone
+        )
+        let filteredEventsWithTime = events.eventWithTimes.filter { event in
+            guard let time = event.eventTime else { return false }
+            return time.isOverlap(with: todayRange, in: timeZone)
+        }
+        return events
+            |> \.eventWithTimes .~ filteredEventsWithTime
     }
 }
