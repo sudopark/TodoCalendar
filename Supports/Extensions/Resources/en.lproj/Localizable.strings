@@ -23,6 +23,7 @@
 "common.clear" = "Clear";
 "common.send" = "Send";
 "common.done" = "Done";
+"common.errorMessage" = "A temporary error has occurred.\nPlease report if the problem persists.";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";

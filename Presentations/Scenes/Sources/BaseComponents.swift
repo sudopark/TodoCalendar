@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import Prelude
+import Optics
 import Extensions
 import CommonPresentation
 import Toaster
@@ -58,10 +60,13 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     public init() { }
     
     open func showError(_ error: any Error) {
-        // TODO: show error
-        Task { @MainActor in
-            logger.log(level: .error, "\(error)")
-        }
+        logger.log(level: .error, "\(error)")
+        
+        let info = ConfirmDialogInfo()
+            |> \.message .~ pure("common.errorMessage".localized())
+            |> \.confirmText .~ "common.confirm".localized()
+            |> \.withCancel .~ false
+        self.showConfirm(dialog: info)
     }
     
     public func showToast(_ message: String) {
