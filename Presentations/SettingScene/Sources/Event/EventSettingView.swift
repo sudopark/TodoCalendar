@@ -25,7 +25,7 @@ final class EventSettingViewState: ObservableObject {
     @Published var tagModel: EventTagCellViewModel?
     @Published var selectedEventNotificationTimeText: String?
     @Published var selectedAllDayEventNotificationTimeText: String?
-    @Published var periodModel: SelectedPeriodModel = .init(.hour1)
+    @Published var periodModel: SelectedPeriodModel = .init(.minute0)
     
     func bind(_ viewModel: any EventSettingViewModel) {
         
