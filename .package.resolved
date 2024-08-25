@@ -1,5 +1,5 @@
 {
-  "originHash" : "90fc0469f7b661141879fa34445f7a1bcfffb0b2c023eeb42fbbfcd227c13a04",
+  "originHash" : "da6e2d95c64501d6096de41354a8a558850756f6a047fdcc0b928f6c5ad3bcb1",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -305,6 +305,15 @@
       "state" : {
         "revision" : "3eb30b1832a9cf0eaeec3e2cf6cfc0ed18ef763f",
         "version" : "3.4.0"
+      }
+    },
+    {
+      "identity" : "toaster",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/devxoul/Toaster.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "a5aacb802cc6c243c3283899529a11f7b0f2ab53"
       }
     },
     {

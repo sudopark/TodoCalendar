@@ -7,6 +7,8 @@
 
 import UIKit
 import Extensions
+import CommonPresentation
+import Toaster
 
 public struct ConfirmDialogInfo: @unchecked Sendable {
     
@@ -63,9 +65,9 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     }
     
     public func showToast(_ message: String) {
-        // TODO: show toast
         Task { @MainActor in
-            
+            let toast = Toast(text: message)
+            toast.show()
         }
     }
     
