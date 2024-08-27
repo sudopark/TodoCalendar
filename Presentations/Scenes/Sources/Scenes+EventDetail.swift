@@ -34,5 +34,8 @@ public protocol EventDetailSceneBuilder {
     func makeTodoEventDetailScene(_ todoId: String) -> any EventDetailScene
     
     @MainActor
-    func makeScheduleEventDetailScene(_ scheduleId: String) -> any EventDetailScene
+    func makeScheduleEventDetailScene(
+        _ scheduleId: String,
+        _ repeatingEventTargetTime: EventTime?
+    ) -> any EventDetailScene
 }

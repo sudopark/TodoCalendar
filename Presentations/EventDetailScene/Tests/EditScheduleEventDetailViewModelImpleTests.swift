@@ -46,6 +46,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     
     private func makeViewModel(
         customSchedule: ScheduleEvent? = nil,
+        repeatingEventTargetTime: EventTime? = nil,
         shouldFailSave: Bool = false,
         isForemost: Bool = false
     ) -> EditScheduleEventDetailViewModelImple {
@@ -67,6 +68,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         
         let viewModel = EditScheduleEventDetailViewModelImple(
             scheduleId: schedule.uuid,
+            repeatingEventTargetTime: repeatingEventTargetTime,
             scheduleUsecase: self.spyScheduleUsecase,
             eventTagUsecase: tagUsecase,
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
@@ -143,6 +145,21 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(preparedWith?.0.eventTagId, .custom("tag"))
         XCTAssertEqual(preparedWith?.0.eventNotifications, [.atTime])
         XCTAssertEqual(preparedWith?.1, self.dummyDetail)
+    }
+    
+    func testViewModel_whenRepeatingEventTimeSelected_sendItAsEventDetail() {
+        // given
+        let expect = expectation(description: "prepare시에 반복이벤트 선택된 시간 지정된경우 해당값 전달")
+        self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModel(repeatingEventTargetTime: .at(100))
+        
+        // when
+        viewModel.prepare()
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        let preparedWith = self.spyRouter.spyInteractor.didPreparedWith
+        XCTAssertEqual(preparedWith?.0.selectedTime, .init(.at(100), self.timeZone))
     }
     
     func testViewModel_provideIsForemost() {

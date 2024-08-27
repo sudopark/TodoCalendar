@@ -65,14 +65,18 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
 extension EventListCellEventHanleViewModelImple {
     
     func selectEvent(_ model: any EventCellViewModel) {
-        // TODO: show detail
         switch model {
         case let todo as TodoEventCellViewModel:
             self.router?.routeToTodoEventDetail(todo.eventIdentifier)
+            
         case let schedule as ScheduleEventCellViewModel:
-            self.router?.routeToScheduleEventDetail(schedule.eventIdWithoutTurn)
+            self.router?.routeToScheduleEventDetail(
+                schedule.eventIdWithoutTurn,
+                schedule.eventTimeRawValue
+            )
+            
         case let holiday as HolidayEventCellViewModel:
-            // TODO:
+            // TODO: show toast
             break
         default: break
         }

@@ -16,7 +16,10 @@ protocol EventListCellEventHanleRouting: Routing, Sendable {
     
     func attach(_ scene: any Scene)
     func routeToTodoEventDetail(_ eventId: String)
-    func routeToScheduleEventDetail(_ eventId: String)
+    func routeToScheduleEventDetail(
+        _ eventId: String,
+        _ repeatingEventTargetTime: EventTime?
+    )
 }
 
 
@@ -41,9 +44,14 @@ extension EventListCellEventHanleRouter {
         }
     }
     
-    func routeToScheduleEventDetail(_ eventId: String) {
+    func routeToScheduleEventDetail(
+        _ eventId: String,
+        _ repeatingEventTargetTime: EventTime?
+    ) {
         Task { @MainActor in
-            let next = self.eventDetailSceneBuilder.makeScheduleEventDetailScene(eventId)
+            let next = self.eventDetailSceneBuilder.makeScheduleEventDetailScene(
+                eventId, repeatingEventTargetTime
+            )
             self.scene?.present(next, animated: true)
         }
     }

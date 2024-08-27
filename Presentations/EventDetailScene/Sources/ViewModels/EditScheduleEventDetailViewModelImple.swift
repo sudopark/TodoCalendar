@@ -17,6 +17,7 @@ import Scenes
 final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchecked Sendable {
     
     private let scheduleId: String
+    private let repeatingEventTargetTime: EventTime?
     private let scheduleUsecase: any ScheduleEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let eventDetailDataUsecase: any EventDetailDataUsecase
@@ -26,6 +27,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
     
     init(
         scheduleId: String,
+        repeatingEventTargetTime: EventTime?,
         scheduleUsecase: any ScheduleEventUsecase,
         eventTagUsecase: any EventTagUsecase,
         eventDetailDataUsecase: any EventDetailDataUsecase,
@@ -33,6 +35,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
         foremostEventUsecase: any ForemostEventUsecase
     ) {
         self.scheduleId = scheduleId
+        self.repeatingEventTargetTime = repeatingEventTargetTime
         self.scheduleUsecase = scheduleUsecase
         self.eventTagUsecase = eventTagUsecase
         self.eventDetailDataUsecase = eventDetailDataUsecase
@@ -107,8 +110,9 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     }
     
     private func prepareBasicData() -> AnyPublisher<EventDetailBasicData, any Error> {
+        let targetTime = self.repeatingEventTargetTime
         let transform: (ScheduleEvent, TimeZone) -> EventDetailBasicData = { schedule, timeZone in
-            return EventDetailBasicData(schedule, timeZone)
+            return EventDetailBasicData(schedule, targetTime, timeZone)
         }
         return Publishers.CombineLatest(
             self.scheduleUsecase.scheduleEvent(self.scheduleId).removeDuplicates(),
@@ -387,9 +391,15 @@ extension EditScheduleEventDetailViewModelImple {
 
 private extension EventDetailBasicData {
     
-    init(_ schedule: ScheduleEvent, _ timeZone: TimeZone) {
+    init(
+        _ schedule: ScheduleEvent,
+        _ repeatingEventTargetTime: EventTime?,
+        _ timeZone: TimeZone
+    ) {
         self.name = schedule.name
-        self.selectedTime = SelectedTime(schedule.time, timeZone)
+        self.selectedTime = SelectedTime(
+            repeatingEventTargetTime ?? schedule.time, timeZone
+        )
         self.eventRepeating = EventRepeatingTimeSelectResult.make(schedule.time, schedule.repeating, timeZone)
         self.eventTagId = schedule.eventTagId ?? .default
         self.eventNotifications = schedule.notificationOptions

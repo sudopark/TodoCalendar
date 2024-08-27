@@ -63,9 +63,13 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
     }
     
     @MainActor
-    public func makeScheduleEventDetailScene(_ scheduleId: String) -> any EventDetailScene {
+    public func makeScheduleEventDetailScene(
+        _ scheduleId: String,
+        _ repeatingEventTargetTime: EventTime?
+    ) -> any EventDetailScene {
         let viewModel = EditScheduleEventDetailViewModelImple(
             scheduleId: scheduleId,
+            repeatingEventTargetTime: repeatingEventTargetTime,
             scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),

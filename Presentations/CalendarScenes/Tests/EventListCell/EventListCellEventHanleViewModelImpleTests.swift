@@ -309,8 +309,13 @@ private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @u
     }
     
     var didRouteToScheduleDetail: Bool?
-    func routeToScheduleEventDetail(_ eventId: String) {
+    var didRouteToScheduleDetailWithTargetTime: EventTime?
+    func routeToScheduleEventDetail(
+        _ eventId: String,
+        _ repeatingEventTargetTime: EventTime?
+    ) {
         self.didRouteToScheduleDetail = true
+        self.didRouteToScheduleDetailWithTargetTime = repeatingEventTargetTime
     }
 }
 
