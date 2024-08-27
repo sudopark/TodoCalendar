@@ -157,7 +157,7 @@
 "eventDetail.add_new_schedule::message" = "A new schedule event has been added.";
 "eventDetail.scheduleEvent_removed::message" = "The schedule event has been removed.";
 "eventDetail.edit::repeating::confirm::ttile" = "Edit event";
-"eventDetail.edit::repeating::confirm::message" = "This event is a repeating event.\nDo you want to edit just this event or all events?";
+"eventDetail.edit::repeating::confirm::message" = "This event is a repeating event.\nDo you want to edit just this event or all events?\n(The selected order will be excluded from the list of repeating events, and a new non-repeating event will be created with the changes you made.)";
 "eventDetail.edit::repeating::confirm::all::button" = "All";
 "eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Only this time";
 "eventDetail.scheduleEvent_saved::message" = "The schedule event has been saved.";

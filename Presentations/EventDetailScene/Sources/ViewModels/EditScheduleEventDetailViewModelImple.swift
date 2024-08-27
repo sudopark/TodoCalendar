@@ -269,7 +269,9 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         
         let onlyThisTimeConfirmed: () -> Void = { [weak self] in
             self?.editSchedule(
-                params |> \.repeatingUpdateScope .~ .onlyThisTime(originEventTime),
+                params 
+                    |> \.repeatingUpdateScope .~ .onlyThisTime(originEventTime)
+                    |> \.repeating .~ nil,
                 addition
             )
         }

@@ -423,7 +423,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.name, "new_name")
         XCTAssertEqual(updateParams?.eventTagId, .default)
         XCTAssertEqual(updateParams?.time, .at(100))
-        XCTAssertEqual(updateParams?.repeating, self.dummyRepeating)
+        XCTAssertEqual(updateParams?.repeating, nil)
         XCTAssertEqual(updateParams?.repeatingUpdateScope, .onlyThisTime)
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         

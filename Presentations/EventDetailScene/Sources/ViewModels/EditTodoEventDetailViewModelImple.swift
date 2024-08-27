@@ -257,7 +257,12 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
     ) {
         
         let onlyThisTimeConfirmed: () -> Void = { [weak self] in
-            self?.editTodo(params |> \.repeatingUpdateScope .~ .onlyThisTime, addition)
+            self?.editTodo(
+                params 
+                    |> \.repeatingUpdateScope .~ .onlyThisTime
+                    |> \.repeating .~ nil,
+                addition
+            )
         }
         let allConfirmed: () -> Void = { [weak self] in
             self?.editTodo(params |> \.repeatingUpdateScope .~ .all, addition)
