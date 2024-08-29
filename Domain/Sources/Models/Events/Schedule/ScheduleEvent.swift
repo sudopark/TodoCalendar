@@ -36,7 +36,11 @@ public struct ScheduleEvent: Sendable, Equatable {
     }
     public var nextRepeatingTimes: [RepeatingTimes] = []
     public var repeatingTimes: [RepeatingTimes] {
-        return [.init(time: self.time, turn: 1)] + self.nextRepeatingTimes
+        if self.repeatingTimeToExcludes.contains(self.time.customKey) {
+            return self.nextRepeatingTimes
+        } else {
+            return [.init(time: self.time, turn: 1)] + self.nextRepeatingTimes
+        }
     }
     public var repeatingTimeToExcludes: Set<String> = []
     

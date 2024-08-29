@@ -283,6 +283,23 @@ extension MemorizedScheduleEventsContainerTests {
         XCTAssertEqual(days, Array(4...20))
         XCTAssertEqual(turns, Array(1...17))
     }
+    
+    func testContainer_whenScheduleEventIsExcludeFirstEventTime_provideRepeatingEventWithoutStartTime() {
+        // given
+        var container = self.makeContainer()
+        let startTime = EventTime.at(4.days)
+        let event = self.repeatingEvent(4) |> \.repeatingTimeToExcludes .~ [startTime.customKey]
+        container = container.refresh([event], in: self.period(4..<10))
+        
+        // when
+        let calculatedEvent = container.scheduleEvents(in: self.period(0..<20)).first
+        
+        // then
+        let days = calculatedEvent?.repeatingTimes.map { $0.day }
+        let turns = calculatedEvent?.repeatingTimes.map { $0.turn }
+        XCTAssertEqual(days, Array(5...20))
+        XCTAssertEqual(turns, Array(2...17))
+    }
 }
 
 private extension Int {

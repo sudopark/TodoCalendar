@@ -77,11 +77,11 @@ public enum EventTime: Comparable, Sendable, Hashable {
     
     public var customKey: String {
         switch self {
-        case .at(let time): return "\(time)"
+        case .at(let time): return "\(Int(time))"
         case .period(let range):
-            return "\(range.lowerBound)..<\(range.upperBound)"
+            return "\(Int(range.lowerBound))..<\(Int(range.upperBound))"
         case .allDay(let range, let secondsFromGMT):
-            return "\(range.lowerBound)..<\(range.upperBound)+\(secondsFromGMT)"
+            return "\(Int(range.lowerBound))..<\(Int(range.upperBound))+\(Int(secondsFromGMT))"
         }
     }
     
