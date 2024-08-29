@@ -129,7 +129,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         self.assertEvent(result.newEvent)
         let params = self.stubRemote.didRequestedParams ?? [:]
         let new = params["new"] as? [String: Any]
-        let excludeTime = params["exlcude_time"] as? String
+        let excludeTime = params["exclude_repeatings"] as? String
         XCTAssertNotNil(new)
         XCTAssertNotNil(excludeTime)
         XCTAssertEqual(self.spyCache.didUpdateEvents?.first?.uuid, "origin_repeating")
@@ -391,7 +391,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
             ),
             .init(
                 method: .patch,
-                endpoint: ScheduleEventEndpoints.schedule(id: "origin"),
+                endpoint: ScheduleEventEndpoints.exclude(id: "origin"),
                 resultJsonString: .success("""
                 {
                     "uuid": "origin",

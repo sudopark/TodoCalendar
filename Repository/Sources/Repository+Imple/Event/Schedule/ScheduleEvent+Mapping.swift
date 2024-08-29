@@ -83,7 +83,8 @@ struct ScheduleEventMapper: Decodable {
         event.repeating = try? container.decode(EventRepeatingMapper.self, forKey: .repeating).repeating
         event.notificationOptions = (try? container.decode([EventNotificationTimeOptionMapper].self, forKey: .notificationOptions).map { $0.option }) ?? []
         event.showTurn = (try? container.decode(Bool.self, forKey: .showTurns)) ?? false
-        event.repeatingTimeToExcludes = (try? container.decode(Set<String>.self, forKey: .excludeTimes)) ?? []
+        let excludes: [String] = (try? container.decode([String].self, forKey: .excludeTimes)) ?? []
+        event.repeatingTimeToExcludes = Set(excludes)
         self.event = event
     }
 }
@@ -101,7 +102,7 @@ struct ExcludeScheduleEventTimeParams {
     func asJson() -> [String: Any] {
         return [
             "new": self.newParams.asJson(),
-            "exlcude_time": excludeTime.customKey
+            "exclude_repeatings": excludeTime.customKey
         ]
     }
 }

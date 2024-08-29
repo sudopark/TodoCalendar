@@ -95,9 +95,9 @@ extension ScheduleEventRemoteRepositoryImple {
     private func removeRepeatingScheduleEventTime(
         _ eventId: String, _ time: EventTime
     ) async throws -> RemoveSheduleEventResult {
-        let endpoint = ScheduleEventEndpoints.schedule(id: eventId)
+        let endpoint = ScheduleEventEndpoints.exclude(id: eventId)
         let payload: [String: Any] = [
-            "exlcude_time": time.customKey
+            "exclude_repeatings": time.customKey
         ]
         let mapper: ScheduleEventMapper = try await remote.request(
             .patch,

@@ -115,7 +115,7 @@
 "calendar::event_time::period:some_days:some_hours" = "%d일 %d시간";
 "calendar::event::more_action::remove:title" = "이벤트 삭제";
 "calendar::event::more_action::foremost_event:title" = "제일 중요한 이벤트";
-"calendar::event::more_action::remove_only_thistime:message" = "이번 차수의 이벤트만을 삭제하거나 혹은 전체 반복 이벤트를 삭제하시겠습니까?";
+"calendar::event::more_action::remove_only_thistime:message" = "전체 반복 이벤트 중 이번 이벤트만을 삭제하기 원합니까?";
 "calendar::event::more_action::remove:message" = "이벤트를 삭제하시겠습니까?";
 "calendar::event::more_action::mark_as_foremost" = "제일 중요한 이벤트로 등록할까요?";
 "calendar::event::more_action::unmark_as_foremost" = "제일 중요한 이벤트를 해제할까요?";
@@ -157,7 +157,7 @@
 "eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";
 "eventDetail.scheduleEvent_removed::message" = "일정이 삭제되었습니다.";
 "eventDetail.edit::repeating::confirm::ttile" = "이벤트 수정";
-"eventDetail.edit::repeating::confirm::message" = "이 이벤트는 반복이벤트 입니다.\n이번 차수의 이벤트만을 수정하거나 혹은 전체 반복 이벤트를 수정하시겠습니까?\n(선택된 차수를 반복 이벤트 목록에서 제외하고, 수정하신 내용으로 반복하지 않는 신규 이벤트가 말들어집니다.)";
+"eventDetail.edit::repeating::confirm::message" = "이 이벤트는 반복이벤트 입니다.\n이번 이벤트만을 수정하거나 혹은 전체 반복 이벤트를 수정하시겠습니까?\n(선택된 이벤트를 제외하고, 수정하신 내용으로 반복하지 않는 신규 이벤트가 말들어집니다.)";
 "eventDetail.edit::repeating::confirm::all::button" = "모두";
 "eventDetail.edit::repeating::confirm::onlyThisTime::button" = "이번만";
 "eventDetail.scheduleEvent_saved::message" = "일정이 저장되었습니다.";
