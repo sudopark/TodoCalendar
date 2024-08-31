@@ -321,7 +321,7 @@ extension ScheduleEventUsecaseImpleTests {
         let event = self.notReapeatingEvent(at: 0)
         
         // when
-        let params = ScheduleEditParams()
+        let params = SchedulePutParams()
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
         
         // then
@@ -335,9 +335,10 @@ extension ScheduleEventUsecaseImpleTests {
         let event = self.notReapeatingEvent(at: 0)
         
         // when
-        let params = ScheduleEditParams()
+        let params = SchedulePutParams()
             |> \.name .~ "new"
             |> \.time .~ .at(100)
+            |> \.repeatingTimeToExcludes .~ []
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
         
         // then
@@ -358,9 +359,10 @@ extension ScheduleEventUsecaseImpleTests {
         let source = usecase.scheduleEvents(in: 0..<100)
         let eventLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
             Task {
-                let params = ScheduleEditParams()
+                let params = SchedulePutParams()
                     |> \.name .~ old.name
                     |> \.time .~ pure(EventTime.at(4))
+                    |> \.repeatingTimeToExcludes .~ []
                 _ = try await usecase.updateScheduleEvent(old.uuid, params)
             }
         }
@@ -387,7 +389,7 @@ extension ScheduleEventUsecaseImpleTests {
         let event = self.stubUpdateRepeatingEvent()
         
         // when
-        let params = ScheduleEditParams()
+        let params = SchedulePutParams()
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
         
         // then
@@ -401,10 +403,11 @@ extension ScheduleEventUsecaseImpleTests {
         let event = self.stubUpdateRepeatingEvent()
         
         // when
-        let params = ScheduleEditParams()
+        let params = SchedulePutParams()
             |> \.name .~ event.name
             |> \.time .~ pure(EventTime.at(4))
             |> \.repeatingUpdateScope .~ .all
+            |> \.repeatingTimeToExcludes .~ []
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
         
         // then
@@ -426,10 +429,11 @@ extension ScheduleEventUsecaseImpleTests {
         )
         let eventLists = self.waitOutputs(expect, for: source) {
             Task {
-                let params = ScheduleEditParams()
+                let params = SchedulePutParams()
                     |> \.name .~ old.name
                     |> \.time .~ pure(EventTime.at(4.0))
                     |> \.repeatingUpdateScope .~ .all
+                    |> \.repeatingTimeToExcludes .~ []
                 _ = try await usecase.updateScheduleEvent(old.uuid, params)
             }
         }
@@ -461,7 +465,7 @@ extension ScheduleEventUsecaseImpleTests {
         let event = self.stubUpdateRepeatingEvent()
         
         // when
-        let params = ScheduleEditParams()
+        let params = SchedulePutParams()
             |> \.time .~ .at(4)
             |> \.repeatingUpdateScope .~ .onlyThisTime(EventTime.at(0))
         let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
@@ -477,7 +481,7 @@ extension ScheduleEventUsecaseImpleTests {
         let event = self.stubUpdateRepeatingEvent()
         
         // when
-        let params = ScheduleEditParams()
+        let params = SchedulePutParams()
             |> \.name .~ event.name
             |> \.time .~ .at(4)
             |> \.repeatingUpdateScope .~ .onlyThisTime(EventTime.at(0))
@@ -501,7 +505,7 @@ extension ScheduleEventUsecaseImpleTests {
         let source = usecase.scheduleEvents(in: range)
         let eventLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
             Task {
-                let params = ScheduleEditParams()
+                let params = SchedulePutParams()
                     |> \.name .~ old.name
                     |> \.time .~ .at(4)
                     |> \.repeatingUpdateScope .~ .onlyThisTime(EventTime.at(2*24*3600))

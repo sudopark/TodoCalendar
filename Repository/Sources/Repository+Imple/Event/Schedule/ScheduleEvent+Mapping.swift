@@ -46,7 +46,7 @@ extension ScheduleMakeParams {
 }
 
 
-extension ScheduleEditParams {
+extension SchedulePutParams {
     
     func asJson() -> [String: Any] {
         var sender: [String: Any] = [:]
@@ -62,6 +62,7 @@ extension ScheduleEditParams {
                 .map { try? $0.asJson() }
         }
         sender[Key.showTurns.rawValue] = self.showTurn
+        sender[Key.excludeTimes.rawValue] = self.repeatingTimeToExcludes ?? []
         return sender
     }
 }

@@ -385,6 +385,7 @@ extension EventDetailBasicData {
         self.eventRepeating = EventRepeatingTimeSelectResult.make(todo.time, todo.repeating, timeZone)
         self.eventTagId = todo.eventTagId ?? .default
         self.eventNotifications = todo.notificationOptions
+        self.excludeTimes = []
     }
 }
 

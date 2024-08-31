@@ -26,8 +26,8 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase {
     }
     
     public var shouldUpdateEventFail: Bool = false
-    public var didUpdateEditParams: ScheduleEditParams?
-    open func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent {
+    public var didUpdateEditParams: SchedulePutParams?
+    open func updateScheduleEvent(_ eventId: String, _ params: SchedulePutParams) async throws -> ScheduleEvent {
         self.didUpdateEditParams = params
         guard self.shouldUpdateEventFail == false
         else {

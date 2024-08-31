@@ -40,10 +40,10 @@ extension ScheduleEventLocalRepositoryImple {
     
     public func updateScheduleEvent(
         _ eventId: String,
-        _ params: ScheduleEditParams
+        _ params: SchedulePutParams
     ) async throws -> ScheduleEvent {
         let origin = try await self.localStorage.loadScheduleEvent(eventId)
-        let updated = origin.apply(params)
+        let updated = origin.applyUpdate(params)
         try await self.localStorage.updateScheduleEvent(updated)
         return updated
     }
@@ -94,5 +94,20 @@ extension ScheduleEventLocalRepositoryImple {
             return try await self?.localStorage.loadScheduleEvent(eventId)
         }
         .eraseToAnyPublisher()
+    }
+}
+
+private extension ScheduleEvent {
+    
+    func applyUpdate(_ params: SchedulePutParams) -> ScheduleEvent {
+        let excludeTimes: Set<String> = params.repeatingTimeToExcludes.map { Set($0) } ?? []
+        return self
+            |> \.name .~ (params.name ?? self.name)
+            |> \.time .~ (params.time ?? self.time)
+            |> \.eventTagId .~ params.eventTagId
+            |> \.repeating .~ params.repeating
+            |> \.showTurn .~ (params.showTurn ?? false)
+            |> \.notificationOptions .~ (params.notificationOptions ?? [])
+            |> \.repeatingTimeToExcludes .~ excludeTimes
     }
 }

@@ -17,7 +17,7 @@ import Extensions
 public protocol ScheduleEventUsecase {
     
     func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent
-    func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent
+    func updateScheduleEvent(_ eventId: String, _ params: SchedulePutParams) async throws -> ScheduleEvent
     func removeScheduleEvent(
         _ eventId: String, onlyThisTime: EventTime?
     ) async throws
@@ -65,7 +65,7 @@ extension ScheduleEventUsecaseImple {
     
     public func updateScheduleEvent(
         _ eventId: String,
-        _ params: ScheduleEditParams
+        _ params: SchedulePutParams
     ) async throws -> ScheduleEvent {
         
         guard params.isValidForUpdate
@@ -82,7 +82,7 @@ extension ScheduleEventUsecaseImple {
     
     private func updateCurrentScheduleEvent(
         _ eventId: String,
-        _ params: ScheduleEditParams
+        _ params: SchedulePutParams
     ) async throws -> ScheduleEvent {
         let updated = try await self.scheduleRepository.updateScheduleEvent(eventId, params)
         let shareKey = ShareDataKeys.schedules.rawValue
@@ -95,13 +95,13 @@ extension ScheduleEventUsecaseImple {
     private func makeNewScheduleEventAndExcludeFromOriginEvent(
         _ originEventId: String,
         _ currentTime: EventTime,
-        _ params: ScheduleEditParams
+        _ params: SchedulePutParams
     ) async throws -> ScheduleEvent {
         // exclude
         let excludeResult = try await self.scheduleRepository.excludeRepeatingEvent(
             originEventId,
             at: currentTime,
-            asNew: params.asMakeParams()
+            asNew: params.asMakeParamsForExcludingFromRepeatingEvent()
         )
         let shareKey = ShareDataKeys.schedules.rawValue
         self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {

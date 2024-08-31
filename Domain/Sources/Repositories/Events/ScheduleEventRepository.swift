@@ -13,7 +13,7 @@ public protocol ScheduleEventRepository {
     
     func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent
     
-    func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent
+    func updateScheduleEvent(_ eventId: String, _ params: SchedulePutParams) async throws -> ScheduleEvent
     
     func excludeRepeatingEvent(
         _ originEventId: String,

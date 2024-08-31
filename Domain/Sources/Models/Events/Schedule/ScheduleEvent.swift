@@ -70,17 +70,6 @@ public struct ScheduleEvent: Sendable, Equatable {
             return time.isRoughlyOverlap(with: period)
         }
     }
-    
-    public func apply(_ params: ScheduleEditParams) -> ScheduleEvent {
-        return self
-            |> \.name .~ (params.name ?? self.name)
-            |> \.time .~ (params.time ?? self.time)
-            |> \.eventTagId .~ params.eventTagId
-            |> \.repeating .~ params.repeating
-            |> \.showTurn .~ (params.showTurn ?? false)
-            |> \.notificationOptions .~ (params.notificationOptions ?? self.notificationOptions)
-            |> \.repeatingTimeToExcludes .~ self.repeatingTimeToExcludes
-    }
 }
 
 
@@ -104,7 +93,7 @@ public struct ScheduleMakeParams {
 }
 
 
-public struct ScheduleEditParams: Equatable {
+public struct SchedulePutParams: Equatable {
     
     public enum RepeatingUpdateScope: Equatable {
         case all
@@ -118,21 +107,23 @@ public struct ScheduleEditParams: Equatable {
     public var repeatingUpdateScope: RepeatingUpdateScope?
     public var showTurn: Bool?
     public var notificationOptions: [EventNotificationTimeOption]?
+    public var repeatingTimeToExcludes: [String]?
     
     public init() { }
     
     public var isValidForUpdate: Bool {
         switch self.repeatingUpdateScope {
         case .onlyThisTime:
-            return self.asMakeParams().isValidForMaking
+            return self.asMakeParamsForExcludingFromRepeatingEvent().isValidForMaking
             
         default:
             return self.name?.isEmpty == false
                 && self.time != nil
+                && self.repeatingTimeToExcludes != nil
         }
     }
     
-    public func asMakeParams() -> ScheduleMakeParams {
+    public func asMakeParamsForExcludingFromRepeatingEvent() -> ScheduleMakeParams {
         return ScheduleMakeParams()
             |> \.name .~ self.name
             |> \.eventTagId .~ self.eventTagId

@@ -101,7 +101,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let params = ScheduleEditParams()
+        let params = SchedulePutParams()
             |> \.name .~ "some"
             |> \.time .~ .at(0)
         let updated = try await repository.updateScheduleEvent("edit", params)

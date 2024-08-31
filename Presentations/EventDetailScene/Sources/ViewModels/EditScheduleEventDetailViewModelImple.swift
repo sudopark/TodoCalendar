@@ -263,7 +263,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     
     private func saveAfterShowConfirm(
         _ originEventTime: EventTime,
-        _ params: ScheduleEditParams,
+        _ params: SchedulePutParams,
         _ addition: EventDetailData
     ) {
         
@@ -290,7 +290,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     }
     
     private func editSchedule(
-        _ params: ScheduleEditParams,
+        _ params: SchedulePutParams,
         _ addition: EventDetailData
     ) {
         
@@ -312,14 +312,15 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         .store(in: &self.cancellables)
     }
     
-    private func scheduleEditParams(from basic: EventDetailBasicData, _ timeZone: TimeZone) -> ScheduleEditParams {
+    private func scheduleEditParams(from basic: EventDetailBasicData, _ timeZone: TimeZone) -> SchedulePutParams {
         
-        return ScheduleEditParams()
+        return SchedulePutParams()
             |> \.name .~ basic.name
             |> \.eventTagId .~ pure(basic.eventTagId)
             |> \.time .~ basic.selectedTime?.eventTime(timeZone)
             |> \.repeating .~ basic.eventRepeating?.repeating
             |> \.notificationOptions .~ pure(basic.eventNotifications)
+            |> \.repeatingTimeToExcludes .~ pure(Array(basic.excludeTimes))
         
     }
 }
@@ -405,5 +406,6 @@ private extension EventDetailBasicData {
         self.eventRepeating = EventRepeatingTimeSelectResult.make(schedule.time, schedule.repeating, timeZone)
         self.eventTagId = schedule.eventTagId ?? .default
         self.eventNotifications = schedule.notificationOptions
+        self.excludeTimes = schedule.repeatingTimeToExcludes
     }
 }

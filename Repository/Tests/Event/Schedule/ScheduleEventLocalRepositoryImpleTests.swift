@@ -97,7 +97,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
         let origin = try? await repository.makeScheduleEvent(self.dummyMakeParams)
         
         // when
-        let params = ScheduleEditParams()
+        let params = SchedulePutParams()
             |> \.time .~ .at(0)
         let updated = try? await repository.updateScheduleEvent(origin?.uuid ?? "", params)
         let loadedEvents = try? await repository.loadScheduleEvents(in: self.dummyRange(0..<10))

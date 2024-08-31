@@ -47,7 +47,7 @@ extension ScheduleEventRemoteRepositoryImple {
     
     public func updateScheduleEvent(
         _ eventId: String,
-        _ params: ScheduleEditParams
+        _ params: SchedulePutParams
     ) async throws -> ScheduleEvent {
         let endpoint = ScheduleEventEndpoints.schedule(id: eventId)
         let payload = params.asJson()

@@ -29,7 +29,7 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
     public var updateOriginEventMocking: ScheduleEvent?
     
     public var shouldFailUpdate: Bool = false
-    open func updateScheduleEvent(_ eventId: String, _ params: ScheduleEditParams) async throws -> ScheduleEvent {
+    open func updateScheduleEvent(_ eventId: String, _ params: SchedulePutParams) async throws -> ScheduleEvent {
         try self.checkShouldFail(self.shouldFailUpdate)
         let time: EventTime = params.time ?? .at(0)
         let eventTagId: AllEventTagId? = params.eventTagId ?? self.updateOriginEventMocking?.eventTagId
