@@ -19,6 +19,8 @@ struct EventRepeatingOptionCodableMapper: Codable {
         case monthDaySelection
         case months
         case weekOrdinals
+        case month
+        case day
     }
     
     let option: any EventRepeatingOption
@@ -76,7 +78,11 @@ struct EventRepeatingOptionCodableMapper: Codable {
             else {
                 throw RuntimeError("invalid time zone value: \(timeZoneIdentifier ?? "")")
             }
-            var option = EventRepeatingOptions.EveryYearSomeDay(timeZone: timeZone)
+            var option = EventRepeatingOptions.EveryYearSomeDay(
+                timeZone,
+                try container.decode(Int.self, forKey: .month),
+                try container.decode(Int.self, forKey: .day)
+            )
             option.interval = try container.decode(Int.self, forKey: .interval)
             self = .init(option: option)
             

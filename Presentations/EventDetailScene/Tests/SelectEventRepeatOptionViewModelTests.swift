@@ -76,9 +76,9 @@ extension SelectEventRepeatOptionViewModelTests {
             [
                 "eventDetail.repeating.everyDay:title".localized(),
                 "eventDetail.repeating.everyWeek:title".localized(),
-                "eventDetail.repeating.everySomeWeek:title".localized(with: 2.ordinal ?? ""),
-                "eventDetail.repeating.everySomeWeek:title".localized(with: 3.ordinal ?? ""),
-                "eventDetail.repeating.everySomeWeek:title".localized(with: 4.ordinal ?? ""),
+                "eventDetail.repeating.everySomeWeek:title".localized(with: 2),
+                "eventDetail.repeating.everySomeWeek:title".localized(with: 3),
+                "eventDetail.repeating.everySomeWeek:title".localized(with: 4),
                 "eventDetail.repeating.everyMonth:title".localized(),
                 "eventDetail.repeating.everyYear:title".localized(),
             ],
@@ -142,7 +142,9 @@ extension SelectEventRepeatOptionViewModelTests {
         let expect = expectation(description: "이전 선텍값 있고 + 해당 옵션이 디폴트 선택 리스트에 있는 경우에 해당 옵션 선택한 상태로 제공")
         let previous = EventRepeating(
             repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
-            repeatOption: EventRepeatingOptions.EveryWeek(self.timeZone) |> \.interval .~ 2
+            repeatOption: EventRepeatingOptions.EveryWeek(self.timeZone) 
+                |> \.interval .~ 2
+                |> \.dayOfWeeks .~ [.sunday]
         )
         let viewModel = self.makeViewModel(previous: previous)
         let options = self.waitFirstNotEmptyOptionList(viewModel)
@@ -152,8 +154,7 @@ extension SelectEventRepeatOptionViewModelTests {
         
         // then
         XCTAssertNotNil(id)
-        let ordinal = 2.ordinal ?? ""
-        let weekPer2Id = options?.flatMap { $0 }.first(where: { $0.text == "eventDetail.repeating.everySomeWeek:title".localized(with: ordinal) })?.id
+        let weekPer2Id = options?.flatMap { $0 }.first(where: { $0.text == "eventDetail.repeating.everySomeWeek:title".localized(with: 2) })?.id
         XCTAssertEqual(id, weekPer2Id)
         XCTAssertEqual(options?.count, self.defaultOptionListTexts.count)
     }

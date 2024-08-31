@@ -187,7 +187,7 @@ extension SelectEventNotificationTimeViewModelTests {
         
         // then
         let custom = options?.first
-        XCTAssertEqual(custom?.timeText, "2023.12.12 02:20")
+        XCTAssertEqual(custom?.timeText, "12/12/2023 02:20")
     }
     
     // 선택옵션 변경시에 listener로 변경사항 전파

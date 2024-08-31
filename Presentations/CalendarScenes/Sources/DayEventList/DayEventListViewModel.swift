@@ -38,7 +38,7 @@ struct SelectedDayModel: Equatable {
             |> \.calendar .~ Calendar(identifier: .chinese)
         
         lunarFormatter.dateFormat = "date_form::MM_dd".localized()
-        self.lunarDateText = lunarFormatter.string(from: date)
+        self.lunarDateText = "🌕 \(lunarFormatter.string(from: date))"
         
         self.holidayName = currentModel.holiday?.localName
     }

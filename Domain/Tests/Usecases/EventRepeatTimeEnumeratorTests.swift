@@ -444,12 +444,16 @@ class EventRepeatEnumeratorTests_everyYear_someDay: BaseEventRepeatTimeEnumerato
     private func parameterizeTest(
         interval: Int = 1,
         from: String,
+        _ fromMonth: Int, _ fromDay: Int,
         expected: String?,
         endTime: String? = nil
     ) {
         // given
-        let option = EventRepeatingOptions.EveryYearSomeDay(timeZone: TimeZone(abbreviation: "KST")!)
-            |> \.interval .~ interval
+        
+        let option = EventRepeatingOptions.EveryYearSomeDay(
+            TimeZone(abbreviation: "KST")!, fromMonth, fromDay
+        )
+        |> \.interval .~ interval
         let enumerator = self.makeEnumerator(option)
         let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
         
@@ -472,12 +476,30 @@ class EventRepeatEnumeratorTests_everyYear_someDay: BaseEventRepeatTimeEnumerato
     func testEnumerator_nextTimePerInterval() {
         // given
         // when + then
-        self.parameterizeTest(interval: 1, from: "2023-03-01 01:00", expected: "2024-03-01 01:00")
-        self.parameterizeTest(interval: 2, from: "2023-03-01 01:00", expected: "2025-03-01 01:00")
-        self.parameterizeTest(interval: 1, from: "2020-02-29 01:00", expected: "2021-02-28 01:00")
-        self.parameterizeTest(interval: 2, from: "2020-02-29 01:00", expected: "2022-02-28 01:00")
-        self.parameterizeTest(interval: 3, from: "2020-02-29 01:00", expected: "2023-02-28 01:00")
-        self.parameterizeTest(interval: 4, from: "2020-02-29 01:00", expected: "2024-02-29 01:00")
+        self.parameterizeTest(
+            interval: 1, from: "2023-03-01 01:00", 3, 1,
+            expected: "2024-03-01 01:00"
+        )
+        self.parameterizeTest(
+            interval: 2, from: "2023-03-01 01:00", 3, 1,
+            expected: "2025-03-01 01:00"
+        )
+        self.parameterizeTest(
+            interval: 1, from: "2020-02-29 01:00", 2, 29,
+            expected: "2021-02-28 01:00"
+        )
+        self.parameterizeTest(
+            interval: 2, from: "2020-02-29 01:00", 2, 29,
+            expected: "2022-02-28 01:00"
+        )
+        self.parameterizeTest(
+            interval: 3, from: "2020-02-29 01:00", 2, 29,
+            expected: "2023-02-28 01:00"
+        )
+        self.parameterizeTest(
+            interval: 4, from: "2020-02-29 01:00", 2, 29,
+            expected: "2024-02-29 01:00"
+        )
     }
 }
 

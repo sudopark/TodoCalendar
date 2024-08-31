@@ -76,9 +76,13 @@ public enum EventRepeatingOptions {
     public struct EveryYearSomeDay: EventRepeatingOption, Hashable {
         public var interval: Int = 1
         public let timeZone: TimeZone
+        public let month: Int
+        public let day: Int
         
-        public init(timeZone: TimeZone) {
+        public init(_ timeZone: TimeZone, _ month: Int, _ day: Int) {
             self.timeZone = timeZone
+            self.month = month
+            self.day = day
         }
     }
 }

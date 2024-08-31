@@ -30,13 +30,13 @@
 "date_form::a_h:mm" = "a h:mm";
 "date_form::MM_d__HH:mm" = "MM d, HH:mm";
 "date_form::MM_d" = "MM d";
-"date_form::MM_dd" = "MM dd";
+"date_form::MM_dd" = "MM.dd";
 "date_form::24off_h:mm" = "h:mm";
 "date_form::24on_H:mm" = "H:mm";
 "date_form::d_E_" = "d (E)";
 "date_form::MMM_d_HH:mm" = "MMM d HH:mm";
 "date_form::MMM_d" = "MMM d";
-"date_form::yyyy_MM_dd_E_" = "yyyy MM dd (E)";
+"date_form::yyyy_MM_dd_E_" = "yyyy.MM.dd (E)";
 "date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd hh:mm";
 "date_form.yyyy" = "yyyy";
 "date_form.MMM_dd_E" = "MMM dd (E)";
@@ -47,7 +47,7 @@
 "date_form.MMMM" = "MMMM";
 "date_form.EEEE" = "EEEE";
 "date_form.EEE_MMM_d" = "EEE, MMM d";
-"date_form.MMM_yyyy" = "MMM yyyy";
+"date_form.MMM_yyyy" = "yyyy MMM";
  
 // MARK: - event
 
@@ -139,11 +139,14 @@
 "eventDetail.repeating.endtime:title" = "반복 종료 시간";
 "eventDetail.repeating.everyDay:title" = "매일";
 "eventDetail.repeating.everyWeek:title" = "매주";
-"eventDetail.repeating.everySomeWeek:title" = "매%@주간";
+"eventDetail.repeating.everyWeekSomeDay:title" = "매주 %@";
+"eventDetail.repeating.everySomeWeek:title" = "매%d주";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "매%d주 %@";
 "eventDetail.repeating.everyMonth:title" = "매달";
 "eventDetail.repeating.everyMonth_someDay:title" = "매달 %@일";
 "eventDetail.repeating.everyYear:title" = "매년";
-"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "매달의 마지막주 모든일";
+"eventDetail.repeating.everyYearSomeDay:title" = "매년 %@";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "매달의 마지막주의 모든일";
 "eventDetail.repeating.every1WeekOfEveryMonth::someday" = "매달 첫번째 %@";
 "eventDetail.repeating.every2WeekOfEveryMonth::someday" = "매달 두번째 %@";
 "eventDetail.repeating.every3WeekOfEveryMonth::someday" = "매달 세번째 %@";
