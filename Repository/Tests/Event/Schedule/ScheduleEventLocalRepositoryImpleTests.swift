@@ -238,6 +238,42 @@ extension ScheduleEventLocalRepositoryImpleTests {
 
 extension ScheduleEventLocalRepositoryImpleTests {
     
+    private var dummyRepeatingOrigin: ScheduleEvent {
+        let option = EventRepeatingOptions.EveryDay()
+        let repeating = EventRepeating(repeatingStartTime: 0, repeatOption: option)
+        return ScheduleEvent(uuid: "repeating", name: "origin", time: .at(0))
+            |> \.repeating .~ repeating
+    }
+    
+    func testRepository_brachNewRepeatingEventFromOriginRepeating() async throws {
+        // given
+        let reposiotry = self.makeRepository()
+        let origin = self.dummyRepeatingOrigin
+        try await self.localStorage.saveScheduleEvent(origin)
+        
+        // when
+        let params = SchedulePutParams()
+        |> \.name .~ "new"
+        |> \.time .~ .at(100)
+        |> \.repeating .~ pure(EventRepeating(repeatingStartTime: 100, repeatOption: EventRepeatingOptions.EveryDay()))
+        let result = try await reposiotry.branchNewRepeatingEvent(
+            "repeating", fromTime: 100, params
+        )
+        
+        // then
+        XCTAssertEqual(result.reppatingEndOriginEvent.name, "origin")
+        XCTAssertEqual(result.reppatingEndOriginEvent.time, .at(0))
+        XCTAssertEqual(result.reppatingEndOriginEvent.repeating?.repeatingStartTime, 0)
+        XCTAssertEqual(result.reppatingEndOriginEvent.repeating?.repeatOption.compareHash, EventRepeatingOptions.EveryDay().compareHash)
+        XCTAssertEqual(result.reppatingEndOriginEvent.repeating?.repeatingEndTime, 100)
+        
+        XCTAssertEqual(result.newRepeatingEvent.name, "new")
+        XCTAssertEqual(result.newRepeatingEvent.time, .at(100))
+        XCTAssertEqual(result.newRepeatingEvent.repeating?.repeatingStartTime, 100)
+        XCTAssertEqual(result.newRepeatingEvent.repeating?.repeatOption.compareHash, EventRepeatingOptions.EveryDay().compareHash)
+        XCTAssertEqual(result.newRepeatingEvent.repeating?.repeatingEndTime, nil)
+    }
+    
     // exclude
     func testRepository_excludeRepeatingEvent() async {
         // given

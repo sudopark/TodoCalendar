@@ -63,6 +63,30 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
         return .init(newEvent: newEvent, originEvent: originEvent)
     }
     
+    public var shouldFailBranch: Bool = false
+    open func branchNewRepeatingEvent(
+        _ originEventId: String,
+        fromTime: TimeInterval,
+        _ params: SchedulePutParams
+    ) async throws -> BranchNewRepeatingScheduleFromOriginResult {
+        
+        try self.checkShouldFail(self.shouldFailBranch)
+        
+        let newEvent = ScheduleEvent(uuid: "new", name: params.name ?? "", time: params.time ?? .at(0))
+            |> \.eventTagId .~ params.eventTagId
+            |> \.repeating .~ params.repeating
+            |> \.showTurn .~ (params.showTurn ?? false)
+        
+        let repeating = EventRepeating(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
+            |> \.repeatingEndTime .~ fromTime
+        let originEvent = (
+            updateOriginEventMocking ?? ScheduleEvent(uuid: originEventId, name: "origin", time: .at(0))
+        )
+        |> \.repeating .~ repeating
+        
+        return .init(reppatingEndOriginEvent: originEvent, newRepeatingEvent: newEvent)
+    }
+    
     public var shouldFailLoad: Bool = false
     public var eventsMocking: (Range<TimeInterval>) -> [ScheduleEvent] = { range in
         

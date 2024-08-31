@@ -539,6 +539,96 @@ extension ScheduleEventUsecaseImpleTests {
         XCTAssertEqual(newEvent?.time, EventTime.at(4))
     }
     
+    // 반복하는 일정 + 이번부터 수정시에 - 파라미터가 불충분하면 실패
+    func testUsecase_whenUpdateRepeatingEventFromNowWithInvalidParams_updateFail() async {
+        // given
+        let usecase = self.makeUsecase()
+        let event = self.stubUpdateRepeatingEvent()
+        
+        // when
+        let params = SchedulePutParams()
+            |> \.time .~ .at(4)
+            |> \.repeatingUpdateScope .~ .fromNow(EventTime.at(0))
+        let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
+        
+        // then
+        XCTAssertNil(updated)
+    }
+    
+    // 반복하는 일정 + 이번부터 수정시 분기된 새 반복 일정 반환
+    func testUsecase_updateRepeatingEventFromNow() async {
+        // given
+        let usecase = self.makeUsecase()
+        let event = self.stubUpdateRepeatingEvent()
+        
+        // when
+        let params = SchedulePutParams()
+            |> \.name .~ event.name
+            |> \.time .~ .at(4)
+            |> \.repeatingUpdateScope .~ .fromNow(EventTime.at(0))
+        let updated = try? await usecase.updateScheduleEvent(event.uuid, params)
+        
+        // then
+        XCTAssertEqual(updated?.time, EventTime.at(4))
+    }
+    
+    // 반복하는 일정 + 이번부터 수정시에 새 일정이 구독중인 이벤트로 반환되고, 기존 일정은 반복 종료되어 다시 계산해서 반환
+    func testUsecase_whenRepeatingEventFromNowUpdated_updateSubscribingPeriodEvents() {
+        // given
+        let expect = expectation(description: "반복하는 일정 + 이번부터 수정시에 새 일정이 구독중인 이벤트로 반환되고, 기존 일정은 반복 종료되어 다시 계산해서 반환")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        let old = self.stubUpdateRepeatingEvent()
+        self.replaceMemorized([old])
+        
+        // when
+        let range = self.dummyRange(0..<3)
+        let source = usecase.scheduleEvents(in: range)
+        let eventLists = self.waitOutputs(expect, for: source, timeout: 0.1) {
+            Task {
+                let newTime: EventTime = .at(1*24*3600)
+                let repeating = EventRepeating(
+                    repeatingStartTime: newTime.lowerBoundWithFixed,
+                    repeatOption: EventRepeatingOptions.EveryDay()
+                )
+                let params = SchedulePutParams()
+                    |> \.name .~ old.name
+                    |> \.time .~ pure(newTime)
+                    |> \.repeating .~ pure(repeating)
+                    |> \.repeatingUpdateScope .~ .fromNow(newTime)
+                _ = try await usecase.updateScheduleEvent(old.uuid, params)
+            }
+        }
+        
+        // then
+        let eventCounts = eventLists.map { $0.count }
+        XCTAssertEqual(eventCounts, [1, 2])
+        let eventNames = eventLists.map { es in es.map { $0.name }}
+        XCTAssertEqual(eventNames, [
+            [old.name],
+            [old.name, old.name]
+        ])
+        let memorizedOriginEvent = eventLists.first?.first(where: { $0.uuid == old.uuid })
+        XCTAssertEqual(memorizedOriginEvent?.repeatingTimes.map { $0.time }, [
+            EventTime.at(0), EventTime.at(1*24*3600), EventTime.at(2*24*3600), EventTime.at(3*24*3600)
+        ])
+        XCTAssertEqual(memorizedOriginEvent?.repeatingTimes.map { $0.turn }, [
+            1, 2, 3, 4
+        ])
+        let updatedOriginEvent = eventLists.last?.first(where: { $0.uuid == old.uuid })
+        XCTAssertEqual(updatedOriginEvent?.repeatingTimes.map { $0.time }, [
+            EventTime.at(0)
+        ])
+        XCTAssertEqual(updatedOriginEvent?.repeatingTimes.map { $0.turn }, [
+            1
+        ])
+        let newEvent = eventLists.last?.first(where: { $0.uuid == "new" })
+        XCTAssertEqual(newEvent?.time, EventTime.at(1*24*3600))
+        XCTAssertEqual(newEvent?.repeatingTimes.map { $0.time }, [
+            EventTime.at(1*24*3600), EventTime.at(2*24*3600), EventTime.at(3*24*3600)
+        ])
+    }
+    
     private func stubScheduleEvent() {
         self.stubRepository.stubEvent = .init(uuid: "some", name: "name", time: .at(1))
     }

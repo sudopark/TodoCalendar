@@ -61,6 +61,27 @@ extension ScheduleEventLocalRepositoryImple {
         return .init(newEvent: newEvent, originEvent: updated)
     }
     
+    public func branchNewRepeatingEvent(
+        _ originEventId: String, 
+        fromTime: TimeInterval,
+        _ params: SchedulePutParams
+    ) async throws -> BranchNewRepeatingScheduleFromOriginResult {
+        let endOriginEvent = try await self.endRepeatingEvent(originEventId, endTime: fromTime)
+        let makeParams = params.asMakeParams()
+        let newEvent = try await self.makeScheduleEvent(makeParams)
+        return .init(reppatingEndOriginEvent: endOriginEvent, newRepeatingEvent: newEvent)
+    }
+    
+    private func endRepeatingEvent(_ originEventId: String, endTime: TimeInterval) async throws -> ScheduleEvent {
+        let origin = try await self.localStorage.loadScheduleEvent(originEventId)
+        guard let repeating = origin.repeating else { return origin }
+        
+        let newRepeating = repeating |> \.repeatingEndTime .~ endTime
+        let updatedOrigin = origin |> \.repeating .~ newRepeating
+        try await self.localStorage.updateScheduleEvent(updatedOrigin)
+        return updatedOrigin
+    }
+    
     public func removeEvent(
         _ eventId: String, onlyThisTime: EventTime?
     ) async throws -> RemoveSheduleEventResult {

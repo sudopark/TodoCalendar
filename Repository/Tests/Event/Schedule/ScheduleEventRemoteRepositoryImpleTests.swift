@@ -68,6 +68,16 @@ class ScheduleEventRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
             |> \.showTurn .~ true
     }
     
+    private var dummyPutParams: SchedulePutParams {
+        return SchedulePutParams()
+            |> \.name .~ "name"
+            |> \.eventTagId .~ .custom("custom_id")
+            |> \.time .~ .allDay(0..<100, secondsFromGMT: 300)
+            |> \.repeating .~ pure(self.dummyRepeating)
+            |> \.notificationOptions .~ [self.dummyNotificationOption]
+            |> \.showTurn .~ true
+    }
+    
     private func assertEvent(_ event: ScheduleEvent) {
         XCTAssertEqual(event.uuid, "new_uuid")
         XCTAssertEqual(event.name, "refreshed")
@@ -132,6 +142,27 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         let excludeTime = params["exclude_repeatings"] as? String
         XCTAssertNotNil(new)
         XCTAssertNotNil(excludeTime)
+        XCTAssertEqual(self.spyCache.didUpdateEvents?.first?.uuid, "origin_repeating")
+        XCTAssertEqual(self.spyCache.didSaveEvent?.uuid, "new_uuid")
+    }
+    
+    func testRepository_branchRepeatingEvent() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try await repository.branchNewRepeatingEvent(
+            "origin_repeating", fromTime: 100, self.dummyPutParams
+        )
+        
+        // then
+        XCTAssertEqual(result.reppatingEndOriginEvent.uuid, "origin_repeating")
+        self.assertEvent(result.newRepeatingEvent)
+        let params = self.stubRemote.didRequestedParams ?? [:]
+        let new = params["new"] as? [String: Any]
+        let endTime = params["end_time"] as? Double
+        XCTAssertNotNil(new)
+        XCTAssertNotNil(endTime)
         XCTAssertEqual(self.spyCache.didUpdateEvents?.first?.uuid, "origin_repeating")
         XCTAssertEqual(self.spyCache.didSaveEvent?.uuid, "new_uuid")
     }
@@ -385,6 +416,36 @@ extension ScheduleEventRemoteRepositoryImpleTests {
                             "seconds_from_gmt": 300
                         },
                         "exclude_repeatings": ["100"]
+                    }
+                }
+                """)
+            ),
+            .init(
+                method: .post,
+                endpoint: ScheduleEventEndpoints.branchRepeating(id: "origin_repeating"),
+                resultJsonString: .success("""
+                {
+                    "new": \(self.dummySingleEvent),
+                    "origin": {
+                        "uuid": "origin_repeating",
+                        "name": "origin",
+                        "event_time": {
+                            "time_type": "allday",
+                            "period_start": \(refTime+100),
+                            "period_end": \(refTime+200),
+                            "seconds_from_gmt": 300
+                        },
+                        "exclude_repeatings": ["100"],
+                        "repeating": {
+                            "start": 300,
+                            "end": \(refTime+3600*24*100),
+                            "option": {
+                                "optionType": "every_week",
+                                "interval": 1,
+                                "dayOfWeek": [1],
+                                "timeZone": "Asia/Seoul"
+                            }
+                        }
                     }
                 }
                 """)

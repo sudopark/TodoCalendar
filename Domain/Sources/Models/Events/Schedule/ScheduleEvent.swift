@@ -98,6 +98,7 @@ public struct SchedulePutParams: Equatable {
     public enum RepeatingUpdateScope: Equatable {
         case all
         case onlyThisTime(EventTime)
+        case fromNow(EventTime)
     }
     
     public var name: String?
@@ -113,8 +114,8 @@ public struct SchedulePutParams: Equatable {
     
     public var isValidForUpdate: Bool {
         switch self.repeatingUpdateScope {
-        case .onlyThisTime:
-            return self.asMakeParamsForExcludingFromRepeatingEvent().isValidForMaking
+        case .onlyThisTime, .fromNow:
+            return self.asMakeParams().isValidForMaking
             
         default:
             return self.name?.isEmpty == false
@@ -123,7 +124,7 @@ public struct SchedulePutParams: Equatable {
         }
     }
     
-    public func asMakeParamsForExcludingFromRepeatingEvent() -> ScheduleMakeParams {
+    public func asMakeParams() -> ScheduleMakeParams {
         return ScheduleMakeParams()
             |> \.name .~ self.name
             |> \.eventTagId .~ self.eventTagId
@@ -145,6 +146,19 @@ public struct ExcludeRepeatingEventResult {
     ) {
         self.newEvent = newEvent
         self.originEvent = originEvent
+    }
+}
+
+public struct BranchNewRepeatingScheduleFromOriginResult {
+    public let reppatingEndOriginEvent: ScheduleEvent
+    public let newRepeatingEvent: ScheduleEvent
+    
+    public init(
+        reppatingEndOriginEvent: ScheduleEvent,
+        newRepeatingEvent: ScheduleEvent
+    ) {
+        self.reppatingEndOriginEvent = reppatingEndOriginEvent
+        self.newRepeatingEvent = newRepeatingEvent
     }
 }
 

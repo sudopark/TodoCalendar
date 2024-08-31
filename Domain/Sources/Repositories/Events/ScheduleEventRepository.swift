@@ -21,6 +21,12 @@ public protocol ScheduleEventRepository {
         asNew params: ScheduleMakeParams
     ) async throws -> ExcludeRepeatingEventResult
     
+    func branchNewRepeatingEvent(
+        _ originEventId: String,
+        fromTime: TimeInterval,
+        _ params: SchedulePutParams
+    ) async throws -> BranchNewRepeatingScheduleFromOriginResult
+    
     func removeEvent(
         _ eventId: String, onlyThisTime: EventTime?
     ) async throws -> RemoveSheduleEventResult

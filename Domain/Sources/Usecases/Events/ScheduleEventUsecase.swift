@@ -73,9 +73,13 @@ extension ScheduleEventUsecaseImple {
             throw RuntimeError("invalid parameter for update Schedule event")
         }
         
-        if case let .onlyThisTime(current) = params.repeatingUpdateScope {
+        switch params.repeatingUpdateScope {
+        case .onlyThisTime(let current):
             return try await self.makeNewScheduleEventAndExcludeFromOriginEvent(eventId, current, params)
-        } else {
+        case .fromNow(let time):
+            return try await self.branchNewRepeatingEvent(eventId, fromTime: time, params)
+            
+        default:
             return try await self.updateCurrentScheduleEvent(eventId, params)
         }
     }
@@ -101,7 +105,7 @@ extension ScheduleEventUsecaseImple {
         let excludeResult = try await self.scheduleRepository.excludeRepeatingEvent(
             originEventId,
             at: currentTime,
-            asNew: params.asMakeParamsForExcludingFromRepeatingEvent()
+            asNew: params.asMakeParams()
         )
         let shareKey = ShareDataKeys.schedules.rawValue
         self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
@@ -111,6 +115,25 @@ extension ScheduleEventUsecaseImple {
                 .append(excludeResult.originEvent)
         }
         return excludeResult.newEvent
+    }
+    
+    private func branchNewRepeatingEvent(
+        _ originEventId: String,
+        fromTime: EventTime,
+        _ params: SchedulePutParams
+    ) async throws -> ScheduleEvent {
+        
+        let updateResult = try await self.scheduleRepository.branchNewRepeatingEvent(
+            originEventId, fromTime: fromTime.lowerBoundWithFixed-1, params
+        )
+        let shareKey = ShareDataKeys.schedules.rawValue
+        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+            ($0 ?? .init())
+                .invalidate(originEventId)
+                .append(updateResult.reppatingEndOriginEvent)
+                .append(updateResult.newRepeatingEvent)
+        }
+        return updateResult.newRepeatingEvent
     }
     
     public func removeScheduleEvent(

@@ -81,6 +81,27 @@ extension ScheduleEventRemoteRepositoryImple {
         return result
     }
     
+    public func branchNewRepeatingEvent(
+        _ originEventId: String,
+        fromTime: TimeInterval,
+        _ params: SchedulePutParams
+    ) async throws -> BranchNewRepeatingScheduleFromOriginResult {
+        let payload = BranchNewRepeatingScheduleFromOriginParams(
+            fromTime, params.asMakeParams()
+        ).asJson()
+        let endpoint = ScheduleEventEndpoints.branchRepeating(id: originEventId)
+        let mapper: BranchNewRepeatingScheduleFromOriginResultMapper = try await self.remote.request(
+            .post,
+            endpoint,
+            parameters: payload
+        )
+        
+        let result = mapper.result
+        try? await cacheStore.updateScheduleEvent(result.reppatingEndOriginEvent)
+        try? await cacheStore.saveScheduleEvent(result.newRepeatingEvent)
+        return result
+    }
+    
     public func removeEvent(
         _ eventId: String,
         onlyThisTime: EventTime?

@@ -100,6 +100,7 @@ enum ScheduleEventEndpoints: Endpoint {
     case make
     case schedule(id: String)
     case exclude(id: String)
+    case branchRepeating(id: String)
     case schedules
     
     var subPath: String {
@@ -107,6 +108,7 @@ enum ScheduleEventEndpoints: Endpoint {
         case .make: return "schedule"
         case .schedule(let id): return "schedule/\(id)"
         case .exclude(let id): return "schedule/\(id)/exclude"
+        case .branchRepeating(id: let id): return "schedule/\(id)/branch_repeating"
         case .schedules: return ""
         }
     }

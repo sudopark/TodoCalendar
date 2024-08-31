@@ -126,6 +126,44 @@ struct ExcludeRepeatingEventResultMapper: Decodable {
     }
 }
 
+struct BranchNewRepeatingScheduleFromOriginParams {
+    let endTime: TimeInterval
+    let newParams: ScheduleMakeParams
+    
+    init(
+        _ endTime: TimeInterval,
+        _ newParams: ScheduleMakeParams
+    ) {
+        self.endTime = endTime
+        self.newParams = newParams
+    }
+    
+    func asJson() -> [String: Any] {
+        return [
+            "end_time": self.endTime,
+            "new": self.newParams.asJson()
+        ]
+    }
+}
+
+struct BranchNewRepeatingScheduleFromOriginResultMapper: Decodable {
+    
+    private enum CodingKeys: String, CodingKey {
+        case origin
+        case new
+    }
+    
+    let result: BranchNewRepeatingScheduleFromOriginResult
+    
+    init(from decoder: any Decoder) throws {
+        let contaienr = try decoder.container(keyedBy: CodingKeys.self)
+        self.result = .init(
+            reppatingEndOriginEvent: try contaienr.decode(ScheduleEventMapper.self, forKey: .origin).event,
+            newRepeatingEvent: try contaienr.decode(ScheduleEventMapper.self, forKey: .new).event
+        )
+    }
+}
+
 struct RemoveSheduleEventResultMapper: Decodable {
     
     init(from decoder: any Decoder) throws {
