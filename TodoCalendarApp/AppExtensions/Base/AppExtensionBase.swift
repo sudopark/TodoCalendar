@@ -26,9 +26,16 @@ final class AppExtensionBase {
         return store
     }()
     
+    lazy var authStore: AuthStoreImple = {
+        return AuthStoreImple(
+            keyChainStorage: self.keyChainStorage,
+            environmentStorage: self.userDefaultEnvironmentStorage
+        )
+    }()
+    
     lazy var commonSqliteService: SQLiteService = {
         let service = SQLiteService()
-        let userId = self.keyChainStorage.loadCurrentAuth()?.uid
+        let userId = self.authStore.loadCurrentAuth()?.uid
         let path = AppEnvironment.dbFilePath(for: userId)
         _ = service.open(path: path)
         return service
@@ -70,7 +77,7 @@ final class AppExtensionBase {
     
     lazy var remoteAPI: RemoteAPIImple = {
         let environment = self.remoteEnvironment
-        let authStore = NeverRemoveAuthStorage(storage: self.keyChainStorage)
+        let authStore = NeverRemoveAuthStorage(storage: self.authStore)
         let authenticator = OAuthAutenticator(
             authStore: authStore,
             remoteEnvironment: environment,
@@ -87,8 +94,8 @@ final class AppExtensionBase {
 
 struct NeverRemoveAuthStorage: AuthStore  {
     
-    private let storage: KeyChainStorageImple
-    init(storage: KeyChainStorageImple) {
+    private let storage: AuthStoreImple
+    init(storage: AuthStoreImple) {
         self.storage = storage
     }
     

@@ -113,7 +113,7 @@ extension WidgetUsecaseFactory {
     }
     
     private func makeTodoRepositoryByUser() -> any TodoEventRepository {
-        let auth = self.base.keyChainStorage.loadCurrentAuth()
+        let auth = self.base.authStore.loadCurrentAuth()
         let localStorage = TodoLocalStorageImple(
             sqliteService: base.commonSqliteService
         )

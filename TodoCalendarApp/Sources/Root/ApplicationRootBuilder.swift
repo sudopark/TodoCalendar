@@ -20,7 +20,7 @@ final class ApplicationRootBuilder {
         let remote = applicationBase.remoteAPI
         let authRepository = AuthRepositoryImple(
             remoteAPI: remote,
-            authStore: applicationBase.keyChainStorage,
+            authStore: applicationBase.authStore,
             keyChainStorage: applicationBase.keyChainStorage,
             firebaseAuthService: applicationBase.firebaseAuthService
         )

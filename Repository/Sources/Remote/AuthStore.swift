@@ -16,21 +16,37 @@ public protocol AuthStore: Sendable {
     func removeAuth()
 }
 
-
-extension KeyChainStorageImple: AuthStore {
+public struct AuthStoreImple: AuthStore {
+    
+    private let keyChainStorage: any KeyChainStorage
+    private let environmentStorage: any EnvironmentStorage
+    public init(
+        keyChainStorage: any KeyChainStorage,
+        environmentStorage: any EnvironmentStorage
+    ) {
+        self.keyChainStorage = keyChainStorage
+        self.environmentStorage = environmentStorage
+    }
     
     private var key: String { "current_auth" }
+    private var isLoginKey: String { "isLogIn" }
     
     public func loadCurrentAuth() -> Auth? {
-        let mapper: AuthMapper? = self.load(self.key)
-        return mapper?.auth
+        guard let mapper: AuthMapper = self.keyChainStorage.load(self.key),
+              let isLogin: Bool = self.environmentStorage.load(self.isLoginKey),
+              isLogin
+        else { return nil }
+        return mapper.auth
     }
+    
     public func updateAuth(_ auth: Auth) {
         let mapper = AuthMapper(auth: auth)
-        self.update(self.key, mapper)
+        self.keyChainStorage.update(self.key, mapper)
+        self.environmentStorage.update(self.isLoginKey, true)
     }
     
     public func removeAuth() {
-        self.remove(self.key)
+        self.keyChainStorage.remove(self.key)
+        self.environmentStorage.remove(self.isLoginKey)
     }
 }

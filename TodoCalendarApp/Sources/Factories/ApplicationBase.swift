@@ -33,6 +33,13 @@ final class ApplicationBase {
         return store
     }()
     
+    lazy var authStore: AuthStoreImple = {
+        return AuthStoreImple(
+            keyChainStorage: self.keyChainStorage,
+            environmentStorage: self.userDefaultEnvironmentStorage
+        )
+    }()
+    
     lazy var commonSqliteService: SQLiteService = {
         let service = SQLiteService()
         return service
@@ -77,7 +84,7 @@ final class ApplicationBase {
     lazy var remoteAPI: RemoteAPIImple = {
         let environment = self.remoteEnvironment
         let authenticator = OAuthAutenticator(
-            authStore: self.keyChainStorage,
+            authStore: self.authStore,
             remoteEnvironment: environment,
             firebaseAuthService: self.firebaseAuthService
         )
