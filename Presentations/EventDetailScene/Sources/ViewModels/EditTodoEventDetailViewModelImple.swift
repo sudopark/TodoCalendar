@@ -256,26 +256,26 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
         _ addition: EventDetailData
     ) {
         
-        let onlyThisTimeConfirmed: () -> Void = { [weak self] in
+        var form = ActionSheetForm()
+            |> \.title .~ pure("eventDetail.edit::repeating::confirm::ttile".localized())
+            |> \.message .~ pure("eventDetail.edit::repeating::confirm::message".localized())
+        let allAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::fromNow::button".localized()) { [weak self] in
+            self?.editTodo(params |> \.repeatingUpdateScope .~ .all, addition)
+        }
+        form.actions.append(allAction)
+        
+        let onlyThisTimeAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::onlyThisTime::button".localized()) { [weak self] in
             self?.editTodo(
-                params 
+                params
                     |> \.repeatingUpdateScope .~ .onlyThisTime
                     |> \.repeating .~ nil,
                 addition
             )
         }
-        let allConfirmed: () -> Void = { [weak self] in
-            self?.editTodo(params |> \.repeatingUpdateScope .~ .all, addition)
-        }
-        let info = ConfirmDialogInfo()
-            |> \.title .~ pure("eventDetail.edit::repeating::confirm::ttile".localized())
-            |> \.message .~ pure("eventDetail.edit::repeating::confirm::message".localized())
-            |> \.confirmText .~ "eventDetail.edit::repeating::confirm::onlyThisTime::button".localized()
-            |> \.confirmed .~ pure(onlyThisTimeConfirmed)
-            |> \.withCancel .~ true
-            |> \.cancelText .~ "eventDetail.edit::repeating::confirm::all::button".localized()
-            |> \.canceled .~ pure(allConfirmed)
-        self.router?.showConfirm(dialog: info)
+        form.actions.append(onlyThisTimeAction)
+        form.actions.append(.init("common.cancel".localized(), isCancel: true))
+        
+        self.router?.showActionSheet(form)
     }
     
     private func editTodo(

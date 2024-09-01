@@ -267,26 +267,35 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         _ addition: EventDetailData
     ) {
         
-        let onlyThisTimeConfirmed: () -> Void = { [weak self] in
+        var form = ActionSheetForm()
+            |> \.title .~ pure("eventDetail.edit::repeating::confirm::ttile".localized())
+            |> \.message .~ pure("eventDetail.edit::repeating::confirm::message".localized())
+        let allAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::all::button".localized()) { [weak self] in
+            self?.editSchedule(params |> \.repeatingUpdateScope .~ .all, addition)
+        }
+        form.actions.append(allAction)
+        
+        if let time = self.repeatingEventTargetTime {
+            let fromNowAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::fromNow::button".localized()) { [weak self] in
+                self?.editSchedule(
+                    params |> \.repeatingUpdateScope .~ .fromNow(time), addition
+                )
+            }
+            form.actions.append(fromNowAction)
+        }
+        
+        let onlyThisTimeAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::onlyThisTime::button".localized()) { [weak self] in
             self?.editSchedule(
-                params 
+                params
                     |> \.repeatingUpdateScope .~ .onlyThisTime(originEventTime)
                     |> \.repeating .~ nil,
                 addition
             )
         }
-        let allConfirmed: () -> Void = { [weak self] in
-            self?.editSchedule(params |> \.repeatingUpdateScope .~ .all, addition)
-        }
-        let info = ConfirmDialogInfo()
-            |> \.title .~ pure(R.String.EventDetail.editRepeatingConfirmTtile)
-            |> \.message .~ pure(R.String.EventDetail.editRepeatingConfirmMessage)
-            |> \.confirmText .~ R.String.EventDetail.editRepeatingConfirmOnlyThisTimeButton
-            |> \.confirmed .~ pure(onlyThisTimeConfirmed)
-            |> \.withCancel .~ true
-            |> \.cancelText .~ R.String.EventDetail.editRepeatingConfirmAllButton
-            |> \.canceled .~ pure(allConfirmed)
-        self.router?.showConfirm(dialog: info)
+        form.actions.append(onlyThisTimeAction)
+        form.actions.append(.init("common.cancel".localized(), isCancel: true))
+        
+        self.router?.showActionSheet(form)
     }
     
     private func editSchedule(

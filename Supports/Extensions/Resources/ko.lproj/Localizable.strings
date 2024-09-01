@@ -160,9 +160,10 @@
 "eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";
 "eventDetail.scheduleEvent_removed::message" = "일정이 삭제되었습니다.";
 "eventDetail.edit::repeating::confirm::ttile" = "이벤트 수정";
-"eventDetail.edit::repeating::confirm::message" = "이 이벤트는 반복이벤트 입니다.\n이번 이벤트만을 수정하거나 혹은 전체 반복 이벤트를 수정하시겠습니까?\n(선택된 이벤트를 제외하고, 수정하신 내용으로 반복하지 않는 신규 이벤트가 말들어집니다.)";
-"eventDetail.edit::repeating::confirm::all::button" = "모두";
-"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "이번만";
+"eventDetail.edit::repeating::confirm::message" = "이 이벤트는 반복이벤트 입니다.\n반복 이벤트의 수정할 범위를 선택하세요.";
+"eventDetail.edit::repeating::confirm::all::button" = "모두 수정";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "이번 이벤트부터 수정";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "이번 이벤트만 수정";
 "eventDetail.scheduleEvent_saved::message" = "일정이 저장되었습니다.";
 "eventDetail.todoEvent_removed::message" = "할일이 삭제되었습니다.";
 "eventDetail.todoEvent_saved::message" = "할일이 저장되었습니다.";

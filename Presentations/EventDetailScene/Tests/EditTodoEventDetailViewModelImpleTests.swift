@@ -395,7 +395,9 @@ extension EditTodoEventDetailViewModelImpleTests {
         let expect = expectation(description: "반복 이벤트의 경우 - 이번 이벤트만 업데이트")
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithPrepare(isNotRepeating: false)
-        self.spyRouter.shouldConfirmNotCancel = true
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventDetail.edit::repeating::confirm::onlyThisTime::button".localized() })
+        }
         
         // when
         let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
@@ -438,7 +440,9 @@ extension EditTodoEventDetailViewModelImpleTests {
         let expect = expectation(description: "반복 이벤트의 경우 - 모든 이벤트 변경")
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithPrepare(isNotRepeating: false)
-        self.spyRouter.shouldConfirmNotCancel = false
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventDetail.edit::repeating::confirm::fromNow::button".localized() })
+        }
         
         // when
         let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
@@ -480,6 +484,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         // given
         let expect = expectation(description: "todo 수정 실패시에 에러 알림")
         let viewModel = self.makeViewModelWithPrepare(shouldFailEdit: true)
+        self.spyRouter.actionSheetSelectionMocking = { $0.actions.first }
         self.spyRouter.didShowErrorCallback = { _ in expect.fulfill() }
         
         // when
