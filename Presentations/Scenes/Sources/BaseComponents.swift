@@ -8,6 +8,7 @@
 import UIKit
 import Prelude
 import Optics
+import Domain
 import Extensions
 import CommonPresentation
 import Toaster
@@ -21,6 +22,31 @@ public struct ConfirmDialogInfo: @unchecked Sendable {
     public var withCancel: Bool = true
     public var cancelText: String = "common.cancel".localized()
     public var canceled: (() -> Void)?
+    
+    public init() { }
+}
+
+public struct ActionSheetForm: @unchecked Sendable {
+    
+    public struct Action: @unchecked Sendable {
+        public let text: String
+        public var isCancel: Bool
+        public let selected: (() -> Void)?
+        
+        public init(
+            _ text: String,
+            isCancel: Bool = false,
+            _ selected: (() -> Void)? = nil
+        ) {
+            self.text = text
+            self.isCancel = isCancel
+            self.selected = selected
+        }
+    }
+    
+    public var title: String?
+    public var message: String?
+    public var actions: [Action] = []
     
     public init() { }
 }
@@ -43,6 +69,7 @@ public protocol Routing: AnyObject {
     func showToast(_ message: String)
     func closeScene(animate: Bool, _ dismissed: (@Sendable () -> Void)?)
     func showConfirm(dialog info: ConfirmDialogInfo)
+    func showActionSheet(_ form: ActionSheetForm)
     func openSafari(_ path: String)
 }
 
@@ -62,8 +89,12 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     open func showError(_ error: any Error) {
         logger.log(level: .error, "\(error)")
         
+        let defaultErrorMessage = "common.errorMessage".localized()
+        let message = error.errorMessage
+            .map { "\(defaultErrorMessage)\n\n(\($0))" } ?? defaultErrorMessage
+        
         let info = ConfirmDialogInfo()
-            |> \.message .~ pure("common.errorMessage".localized())
+            |> \.message .~ pure(message)
             |> \.confirmText .~ "common.confirm".localized()
             |> \.withCancel .~ false
         self.showConfirm(dialog: info)
@@ -112,6 +143,25 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         }
     }
     
+    public func showActionSheet(_ form: ActionSheetForm) {
+        Task { @MainActor in
+            
+            assert(!form.actions.isEmpty)
+            
+            let sheet = UIAlertController(
+                title: form.title, message: form.message, preferredStyle: .actionSheet
+            )
+            form.actions.forEach { ac in
+                let action = UIAlertAction(title: ac.text, style: ac.isCancel ? .cancel : .default) { _ in
+                    ac.selected?()
+                }
+                sheet.addAction(action)
+            }
+            
+            self.scene?.present(sheet, animated: true)
+        }
+    }
+    
     public func openSafari(_ path: String) {
         Task { @MainActor in
             
@@ -122,6 +172,20 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
             }
             
             UIApplication.shared.open(url)
+        }
+    }
+}
+
+
+private extension Error {
+    
+    var errorMessage: String? {
+        switch self {
+        case let runtime as RuntimeError:
+            return runtime.message
+        case let server as ServerErrorModel:
+            return server.message
+        default: return self.localizedDescription
         }
     }
 }

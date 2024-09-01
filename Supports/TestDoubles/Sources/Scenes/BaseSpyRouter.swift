@@ -46,6 +46,16 @@ open class BaseSpyRouter: Routing {
         }
     }
     
+    public var didShowActionSheet: Bool? { self.didShowActionSheetWith != nil }
+    public var didShowActionSheetWith: ActionSheetForm?
+    public var actionSheetSelectionMocking: ((ActionSheetForm) -> ActionSheetForm.Action?)?
+    open func showActionSheet(_ form: ActionSheetForm) {
+        self.didShowActionSheetWith = form
+        if let selection = self.actionSheetSelectionMocking?(form) {
+            selection.selected?()
+        }
+    }
+    
     public var didOpenSafariPath: String?
     public func openSafari(_ path: String) {
         self.didOpenSafariPath = path
