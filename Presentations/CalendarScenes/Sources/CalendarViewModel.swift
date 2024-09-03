@@ -33,6 +33,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let scheduleEventUsecase: any ScheduleEventUsecase
     private let foremostEventusecase: any ForemostEventUsecase
     private let eventTagUsecase: any EventTagUsecase
+    private let migrationUsecase: any TemporaryUserDataMigrationUescase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
@@ -45,7 +46,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         todoEventUsecase: any TodoEventUsecase,
         scheduleEventUsecase: any ScheduleEventUsecase,
         foremostEventusecase: any ForemostEventUsecase,
-        eventTagUsecase: any EventTagUsecase
+        eventTagUsecase: any EventTagUsecase,
+        migrationUsecase: any TemporaryUserDataMigrationUescase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -54,6 +56,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.scheduleEventUsecase = scheduleEventUsecase
         self.foremostEventusecase = foremostEventusecase
         self.eventTagUsecase = eventTagUsecase
+        self.migrationUsecase = migrationUsecase
         
         self.internalBind()
     }
@@ -107,7 +110,11 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             })
             .store(in: &self.cancellables)
         
-        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+        let refreshAfterEnterForeground = NotificationCenter.default.publisher(
+            for: UIApplication.willEnterForegroundNotification
+        ).map { _ in }
+        let refreshAfterMigration = self.migrationUsecase.migrationResult.filter { $0.isSuccess }.map { _ in }
+        Publishers.Merge(refreshAfterEnterForeground, refreshAfterMigration)
             .withLatestFrom(totalViewingMonths) { $1 }
             .compactMap { $0.checkedRange }
             .sink(receiveValue: { [weak self] total in
@@ -387,3 +394,10 @@ private extension Range where Bound == TimeInterval {
     }
 }
 
+
+private extension Result {
+    var isSuccess: Bool {
+        guard case .success = self else { return false }
+        return true
+    }
+}

@@ -27,6 +27,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubSettingUsecase: StubCalendarSettingUsecase!
     private var spyEventTagUsecase: PrivateSpyEventTagUsecase!
     private var spyForemostEventUsecase: StubForemostEventUsecase!
+    private var stubMigrationUsecase: PrivateStubMigrationUsecase!
     private var spyListener: SpyListener!
     
     override func setUpWithError() throws {
@@ -38,6 +39,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubSettingUsecase = .init()
         self.spyEventTagUsecase = .init()
         self.spyForemostEventUsecase = .init(foremostId: .init("some", true))
+        self.stubMigrationUsecase = .init()
         self.spyListener = .init()
     }
     
@@ -50,6 +52,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubSettingUsecase = nil
         self.spyEventTagUsecase = nil
         self.spyForemostEventUsecase = nil
+        self.stubMigrationUsecase = nil
         self.spyListener = nil
     }
     
@@ -66,7 +69,8 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             todoEventUsecase: self.spyTodoUsecase,
             scheduleEventUsecase: self.spyScheduleUsecase,
             foremostEventusecase: self.spyForemostEventUsecase,
-            eventTagUsecase: self.spyEventTagUsecase
+            eventTagUsecase: self.spyEventTagUsecase,
+            migrationUsecase: self.stubMigrationUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -545,6 +549,34 @@ extension CalendarViewModelImpleTests {
             ["current"], ["current"]
         ])
     }
+    
+    
+    func testViewModel_whenAfterMigration_refreshEvents() {
+        // given
+        let expect = expectation(description: "migration 완료 이후 조회중인 범위의 이벤트 다시 조회")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 10, day: 4, weekDay: 3)
+        )
+        
+        // when
+        let totalRange = self.range((2023, 01, 01), (2025, 01, 01))
+        let source = self.spyScheduleUsecase.scheduleEvents(in: totalRange)
+        let scheduleLists = self.waitOutputs(expect, for: source) {
+            self.stubMigrationUsecase.migrationEndMocking.send(.success(()))
+        }
+        // then
+        let scheduleIdLists = scheduleLists.map { ss in ss.map { $0.uuid } }
+        XCTAssertEqual(scheduleIdLists, [
+            [
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00"
+            ],
+            [
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00",
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00"
+            ]
+        ])
+    }
 }
 
 private extension CalendarViewModelImpleTests {
@@ -671,6 +703,16 @@ private extension CalendarViewModelImpleTests {
         override func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never> {
             return self.scheduleEventsInRange
                 .compactMap { $0 }
+                .eraseToAnyPublisher()
+        }
+    }
+    
+    private class PrivateStubMigrationUsecase: StubTemporaryUserDataMigrationUescase {
+        
+        let migrationEndMocking = PassthroughSubject<Result<Void, any Error>, Never>()
+        
+        override var migrationResult: AnyPublisher<Result<Void, any Error>, Never> {
+            return self.migrationEndMocking
                 .eraseToAnyPublisher()
         }
     }
