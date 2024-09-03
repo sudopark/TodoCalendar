@@ -110,7 +110,7 @@ struct SignInView: View {
         ZStack {
          
             BottomSlideView {
-                VStack {
+                VStack(spacing: 18) {
                     
                     Text("🧐")
                         .font(appearance.fontSet.size(30).asFont)
@@ -122,15 +122,13 @@ struct SignInView: View {
                         }
                     
                     Text("signIn::title".localized())
-                        .font(appearance.fontSet.normal.asFont)
+                        .font(appearance.fontSet.big.asFont)
                         .foregroundStyle(appearance.colorSet.text0.asColor)
-                        .lineLimit(0)
                         .multilineTextAlignment(.center)
                     
                     Text("signIn:description".localized())
                         .font(appearance.fontSet.subNormal.asFont)
                         .foregroundStyle(appearance.colorSet.text1.asColor)
-                        .lineLimit(0)
                         .multilineTextAlignment(.center)
                     
                     VStack(spacing: 10) {
