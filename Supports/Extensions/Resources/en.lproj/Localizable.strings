@@ -223,7 +223,7 @@
 "manage_account::email" = "Email";
 "manage_account::last_signedIn_at" = "Last login time";
 "manage_account::migration::title" = "Migrate temporary user data";
-"manage_account::migration::description" = "All events created before logging in (%d events) are being migrated to the logged in account.\nEvents that are attributed to a user can be accessed regardless of the device.";
+"manage_account::migration::description" = "All events created before logging in (%d event(s)) are being migrated to the logged in account.\nEvents that are attributed to a user can be accessed regardless of the device.";
 "manage_account::migration_finished::message" = "Migration is complete!";
 "manage_account::signout_button::title" = "Logout";
 "manage_account::sign_out::confirm::title" = "Logout";

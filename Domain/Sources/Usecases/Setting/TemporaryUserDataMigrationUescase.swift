@@ -73,12 +73,12 @@ extension TemporaryUserDataMigrationUescaseImple {
                 try? await self?.migrationRepository.clearTemporaryUserData()
                 self?.subject.isMigrating.send(false)
                 self?.subject.migrationResult.send(.success(()))
+                self?.subject.migrationNeedEventsCount.send(0)
             } catch {
                 self?.subject.isMigrating.send(false)
                 self?.subject.migrationResult.send(.failure(error))
+                try await self?.updateMigrationNeedCount()
             }
-            
-            try await self?.updateMigrationNeedCount()
         }
         .store(in: &self.cancellables)
     }
