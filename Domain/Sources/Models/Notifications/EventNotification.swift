@@ -87,6 +87,14 @@ public struct SingleEventNotificationMakeParams: Sendable, Equatable {
     public enum ScheduleTime: Equatable, Sendable {
         case at(TimeInterval)
         case components(DateComponents)
+        
+        func notificationFireDate(_ calendar: Calendar) -> Date? {
+            switch self {
+            case .at(let interval): return Date(timeIntervalSince1970: interval)
+            case .components(let components):
+                return calendar.date(from: components)
+            }
+        }
     }
     
     public let eventType: SingleNotificationEventSourceType
@@ -139,18 +147,20 @@ private extension EventTime {
         func notAllDayNotificationTime(_ startTime: TimeInterval) -> (
             String, SingleEventNotificationMakeParams.ScheduleTime
         )? {
-            guard let notificationTime = startTime.notAllDayNotificationTime(option: timeOption)
-            else { return nil }
-            
-            let startDate = Date(timeIntervalSince1970: startTime)
-            let dateFormatter = DateFormatter()
             
             let calendar = Calendar(identifier: .gregorian)
-            if calendar.isDateInToday(startDate) {
+            
+            guard let notificationTime = startTime.notAllDayNotificationTime(option: timeOption),
+                  let notificationFireDate = notificationTime.notificationFireDate(calendar)
+            else { return nil }
+            
+            let dateFormatter = DateFormatter()
+            let startDate = Date(timeIntervalSince1970: startTime)
+            if calendar.isDateInToday(notificationFireDate) {
                 dateFormatter.dateFormat = "date_form::HH:mm".localized()
                 let timeText = "\("event_notification::today:prefix".localized()) \(dateFormatter.string(from: startDate))"
                 return (timeText, notificationTime)
-            } else if calendar.isDateInTomorrow(startDate) {
+            } else if calendar.isDateInTomorrow(notificationFireDate) {
                 dateFormatter.dateFormat = "date_form::HH:mm".localized()
                 let timeText =  "\("event_notification::tomorrow:prefix".localized()) \(dateFormatter.string(from: startDate))"
                 return (timeText, notificationTime)
@@ -169,16 +179,17 @@ private extension EventTime {
         )? {
             guard let timeZone = TimeZone(secondsFromGMT: Int(secondsFromGMT)) else { return nil }
             let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-            guard let notificationTime = startTime.allDayNotificationTime(option: timeOption, calendar: calendar)
+            let systemCalendar = Calendar(identifier: .gregorian)
+            guard let notificationTime = startTime.allDayNotificationTime(option: timeOption, calendar: calendar),
+                  let notificationFireDate = notificationTime.notificationFireDate(systemCalendar)
             else { return nil }
  
             let startDate = Date(timeIntervalSince1970: startTime)
             
-            let systemCalendar = Calendar(identifier: .gregorian)
-            if systemCalendar.isDateInToday(startDate) {
+            if systemCalendar.isDateInToday(notificationFireDate) {
                 let timeText = "event_notification::allday_today".localized()
                 return (timeText, notificationTime)
-            } else if systemCalendar.isDateInTomorrow(startDate) {
+            } else if systemCalendar.isDateInTomorrow(notificationFireDate) {
                 let timeText = "event_notification::allday_tomorrow".localized()
                 return (timeText, notificationTime)
             } else {
