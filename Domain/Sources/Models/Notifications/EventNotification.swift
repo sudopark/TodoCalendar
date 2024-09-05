@@ -156,11 +156,11 @@ private extension EventTime {
             
             let dateFormatter = DateFormatter()
             let startDate = Date(timeIntervalSince1970: startTime)
-            if calendar.isDateInToday(notificationFireDate) {
+            if calendar.isToday(from: notificationFireDate, with: startDate) {
                 dateFormatter.dateFormat = "date_form::HH:mm".localized()
                 let timeText = "\("event_notification::today:prefix".localized()) \(dateFormatter.string(from: startDate))"
                 return (timeText, notificationTime)
-            } else if calendar.isDateInTomorrow(notificationFireDate) {
+            } else if calendar.isTomorrow(from: notificationFireDate, with: startDate) {
                 dateFormatter.dateFormat = "date_form::HH:mm".localized()
                 let timeText =  "\("event_notification::tomorrow:prefix".localized()) \(dateFormatter.string(from: startDate))"
                 return (timeText, notificationTime)
@@ -186,10 +186,10 @@ private extension EventTime {
  
             let startDate = Date(timeIntervalSince1970: startTime)
             
-            if systemCalendar.isDateInToday(notificationFireDate) {
+            if systemCalendar.isToday(from: notificationFireDate, with: startDate) {
                 let timeText = "event_notification::allday_today".localized()
                 return (timeText, notificationTime)
-            } else if systemCalendar.isDateInTomorrow(notificationFireDate) {
+            } else if systemCalendar.isTomorrow(from: notificationFireDate, with: startDate) {
                 let timeText = "event_notification::allday_tomorrow".localized()
                 return (timeText, notificationTime)
             } else {
@@ -273,5 +273,25 @@ private extension TimeInterval {
             
         default: return nil
         }
+    }
+}
+
+private extension Calendar {
+    
+    func isToday(from notificationDate: Date, with eventDate : Date) -> Bool {
+        return self.isSameDate(notificationDate, eventDate)
+    }
+    
+    func isTomorrow(from notificationDate: Date, with eventDate : Date) -> Bool {
+        guard let notificationNextDate = self.addDays(1, from: notificationDate) else { return false }
+        return self.isSameDate(notificationNextDate, eventDate)
+    }
+    
+    private func isSameDate(_ lhs: Date, _ rhs: Date) -> Bool {
+        let lhsComponents = self.dateComponents([.year, .month, .day], from: lhs)
+        let rhsComponents = self.dateComponents([.year, .month, .day], from: rhs)
+        return lhsComponents.year == rhsComponents.year
+            && lhsComponents.month == rhsComponents.month
+            && lhsComponents.day == rhsComponents.day
     }
 }
