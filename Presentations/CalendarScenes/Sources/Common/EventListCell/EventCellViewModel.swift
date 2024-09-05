@@ -163,7 +163,8 @@ extension EventCellViewModel {
             self.tagColor?.compareKey,
             "\(self.isForemost)"
         ]
-        return baseComponents.map { $0 ?? "nil" }.joined(separator: ",")
+        let components = baseComponents + additionalComponents
+        return components.map { $0 ?? "nil" }.joined(separator: ",")
     }
     
     public mutating func applyTagColor(_ tag: EventTag?) {

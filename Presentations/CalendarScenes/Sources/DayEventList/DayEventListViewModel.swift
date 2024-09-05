@@ -109,6 +109,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
+    private let cvmCombineScheduler = DispatchQueue(label: "serial-combine")
     
     private func internalBind() {
         
@@ -381,8 +382,8 @@ extension DayEventListViewModelImple {
         }
         
         return Publishers.CombineLatest(
-            self.currentAndEventCellViewModels,
-            self.subject.pendingTodoEvents
+            self.currentAndEventCellViewModels.receive(on: self.cvmCombineScheduler),
+            self.subject.pendingTodoEvents.receive(on: self.cvmCombineScheduler)
         )
         .map(combineEvents)
         .eraseToAnyPublisher()
