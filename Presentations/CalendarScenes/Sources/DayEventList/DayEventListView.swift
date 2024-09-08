@@ -221,7 +221,6 @@ struct DayEventListView: View {
                 }
                 .fixedSize(horizontal: false, vertical: true)
                 
-                // todo 추가
                 QuickAddNewTodoView(isFocusInput: $isFocusInput)
                     .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
                     .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)

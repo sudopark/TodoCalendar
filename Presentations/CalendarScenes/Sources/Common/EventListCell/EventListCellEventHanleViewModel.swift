@@ -76,8 +76,8 @@ extension EventListCellEventHanleViewModelImple {
             )
             
         case let holiday as HolidayEventCellViewModel:
-            // TODO: show toast
-            break
+            self.router?.showToast("eventDetail.notSupport::holiday".localized())
+            
         default: break
         }
     }

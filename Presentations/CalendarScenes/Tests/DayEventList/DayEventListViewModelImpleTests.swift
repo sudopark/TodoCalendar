@@ -643,17 +643,6 @@ extension DayEventListViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyRouter.didRouteToMakeNewEventWithParams?.initialTodoInfo?.name, "some")
     }
-    
-    // TODO: evnet 생성 기능 추가한 이후에 구현
-//    func testViewModel_makeNewEvent() {
-//
-//    }
-//
-//    func testViewModel_makeNewEventUsingTemplate() {
-//        // given
-//        // when
-//        // then
-//    }
 }
 
 extension DayEventListViewModelImpleTests {

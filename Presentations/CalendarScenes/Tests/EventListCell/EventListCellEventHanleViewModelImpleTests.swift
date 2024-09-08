@@ -97,6 +97,22 @@ extension EventListCellEventHanleViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyRouter.didRouteToScheduleDetail, true)
     }
+    
+    func testViewModel_whenSelectHolidayEvent_showNotSupportToast() {
+        // given
+        let viewModel = self.makeViewModel()
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let holiday = HolidayCalendarEvent(
+            .init(dateString: "2023-02-03", localName: "dummy", name: "dummy"), in: timeZone
+        )!
+        
+        // when
+        let model = HolidayEventCellViewModel(holiday)
+        viewModel.selectEvent(model)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.notSupport::holiday".localized())
+    }
 }
 
 
