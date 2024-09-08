@@ -22,12 +22,25 @@ struct IntentReposiotryFactory {
 extension IntentReposiotryFactory {
     
     func makeEventTagRepository() -> any EventTagRepository {
-
-        return EventTagLocalRepositoryImple(
-            localStorage: EventTagLocalStorageImple(
-                sqliteService: base.commonSqliteService
-            ),
-            environmentStorage: base.userDefaultEnvironmentStorage
+        
+        let auth = self.base.authStore.loadCurrentAuth()
+        let localStorage = EventTagLocalStorageImple(
+            sqliteService: base.commonSqliteService
         )
+        
+        if let auth {
+            let remote = base.remoteAPI
+            remote.setup(credential: auth)
+            return EventTagRemoteRepositoryImple(
+                remote: remote,
+                cacheStorage: localStorage,
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        } else {
+            return EventTagLocalRepositoryImple(
+                localStorage: localStorage,
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        }
     }
 }
