@@ -98,20 +98,10 @@ extension Color {
     public func hex(_ env: EnvironmentValues) -> String? {
         // TODO: resolve 는 나중에(p3 color일때 rgb 다르게 나옴 vs description은 제대로 나옴)
         let rgba: (r: Float, g: Float, b: Float, a: Float)
-//        if #available(iOS 17.0, *) {
-//            let resolve = self.resolve(in: env)
-//            rgba = (
-//                resolve.red, resolve.green, resolve.blue, resolve.opacity
-//            )
-//        } else {
-            guard let components = self.cgColor?.components, components.count >= 3 else { return nil }
-            rgba = (
-                components[0] |> Float.init,
-                components[1] |> Float.init,
-                components[2] |> Float.init,
-                (components[safe: 3] ?? 1.0) |> Float.init
-            )
-//        }
+        let resolve = self.resolve(in: env)
+        rgba = (
+            resolve.red, resolve.green, resolve.blue, resolve.opacity
+        )
         
         return String(
             format: "#%02lX%02lX%02lX%02lX",
