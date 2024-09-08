@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Manifest Scanner Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 p-5">
+    <h1 class="text-3xl font-bold text-blue-600 mb-4">Privacy Manifest Scanner Report</h1>
+    <ul class="list-none">
+        <li class="font-semibold"><span class="text-gray-600">Scan Date:</span> 2024-09-07 17:11:50</li>
+        <li class="font-semibold"><span class="text-gray-600">Root Directory:</span> /Users/sudo.park/Documents/codebase/TodoCalendar</li>
+        <li class="font-semibold text-red-500"><span class="text-gray-600">Issue Found:</span> 50</li>
+        <li class="font-semibold"><span class="text-gray-600">Scan Duration:</span> 31.02 seconds</li>
+    </ul>
+    <div class="overflow-x-auto mt-6">
+        <table class="w-full table-auto bg-white rounded-lg overflow-hidden">
+            <thead class="bg-blue-500 text-white">
+                <tr>
+                    <th class="px-4 py-2">Serial No.</th>
+                    <th class="px-4 py-2">File Path</th>
+                    <th class="px-4 py-2">Used API</th>
+                    <th class="px-4 py-2">Line Content</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">1</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Alamofire/Source/AuthenticationInterceptor.swift:289</td>
+                <td class="border px-4 py-2">systemUptime</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">mutableState.refreshTimestamps.append(ProcessInfo.processInfo.<span class="text-red-500">systemUptime</span>)</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">2</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Alamofire/Source/AuthenticationInterceptor.swift:307</td>
+                <td class="border px-4 py-2">systemUptime</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let refreshWindowMin = ProcessInfo.processInfo.<span class="text-red-500">systemUptime</span> - refreshWindow.interval</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">3</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Alamofire/Source/ResponseSerialization.swift:188</td>
+                <td class="border px-4 py-2">systemUptime</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let start = ProcessInfo.processInfo.<span class="text-red-500">systemUptime</span></td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">4</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Alamofire/Source/ResponseSerialization.swift:197</td>
+                <td class="border px-4 py-2">systemUptime</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let end = ProcessInfo.processInfo.<span class="text-red-500">systemUptime</span></td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">5</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Alamofire/Source/ResponseSerialization.swift:305</td>
+                <td class="border px-4 py-2">systemUptime</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let start = ProcessInfo.processInfo.<span class="text-red-500">systemUptime</span></td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">6</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Alamofire/Source/ResponseSerialization.swift:314</td>
+                <td class="border px-4 py-2">systemUptime</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let end = ProcessInfo.processInfo.<span class="text-red-500">systemUptime</span></td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">7</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/RxSwift/Tests/Microoptimizations/PerformanceTools.swift:121</td>
+                <td class="border px-4 py-2">mach_absolute_time()</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let start = <span class="text-red-500">mach_absolute_time()</span></td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">8</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/RxSwift/Tests/Microoptimizations/PerformanceTools.swift:125</td>
+                <td class="border px-4 py-2">mach_absolute_time()</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let timeInNano = (<span class="text-red-500">mach_absolute_time()</span> - start) * UInt64(timebaseInfo.numer) / UInt64(timebaseInfo.denom)</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">9</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/RemoteLogger/RemoteLogger-Connection.swift:29</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let isLogEnabled = <span class="text-red-500">UserDefaults</span>.standard.bool(forKey: "com.github.kean.pulse.debug")</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">10</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/RemoteLogger/RemoteLogger.swift:26</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com-github-kean-pulse-is-remote-logger-enabled")</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">11</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/RemoteLogger/RemoteLogger.swift:28</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com-github-kean-pulse-selected-server")</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">12</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/RemoteLogger/RemoteLogger.swift:71</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com-github-kean-pulse-known-servers")</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">13</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/RemoteLogger/RemoteLogger.swift:113</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let isLogEnabled = <span class="text-red-500">UserDefaults</span>.standard.bool(forKey: "com.github.kean.pulse.debug")</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">14</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/RemoteLogger/RemoteLogger.swift:555</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">if let value = <span class="text-red-500">UserDefaults</span>.standard.string(forKey: key), let uuid = UUID(uuidString: value) {</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">15</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/RemoteLogger/RemoteLogger.swift:559</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">UserDefaults</span>.standard.set(id.uuidString, forKey: key)</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">16</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/LoggerStore/LoggerStore.swift:883</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">info<span class="text-red-500">.creationDate</span> = configuration.makeCurrentDate()</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">17</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/LoggerStore/LoggerStore.swift:884</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">info.modifiedDate = info<span class="text-red-500">.creationDate</span></td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">18</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/LoggerStore/LoggerStore.swift:1024</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">creationDate: (databaseAttributes[<span class="text-red-500">.creationDate</span>] as? Date) ?? Date(),</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">19</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/Pulse/LoggerStore/LoggerStore.swift:1025</td>
+                <td class="border px-4 py-2">.modificationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">modifiedDate: (databaseAttributes[<span class="text-red-500">.modificationDate</span>] as? Date) ?? Date(),</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">20</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Settings/StoreDetailsView.swift:137</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">("Created", dateFormatter.string(from: info<span class="text-red-500">.creationDate</span>)),</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">21</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Settings/UserSettings.swift:11</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com.github.kean.pulse.console.mode")</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">22</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Settings/UserSettings.swift:14</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com.github.kean.pulse.console.cell.line.limit")</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">23</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Settings/UserSettings.swift:17</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com.github.kean.pulse.link.detection")</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">24</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Settings/UserSettings.swift:20</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com.github.kean.pulse.sharing.output")</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">25</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Settings/UserSettings.swift:33</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com.github.kean.pulse.display.headers")</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">26</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Settings/UserSettings.swift:37</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com.github.kean.pulse.show-current-request")</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">27</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Inspector/NetworkInspectorView-macos.swift:77</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("network-inspector-selected-tab")</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">28</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Search/Services/ConsoleSearchRecentSearchesStore.swift:13</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">self.searches = decode([ConsoleSearchTerm].self, from: <span class="text-red-500">UserDefaults</span>.standard.string(forKey: searchesKey) ?? "[]") ?? []</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">29</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Search/Services/ConsoleSearchRecentSearchesStore.swift:14</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">self.filters = decode([ConsoleSearchFilter].self, from: <span class="text-red-500">UserDefaults</span>.standard.string(forKey: filtersKey) ?? "[]") ?? []</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">30</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Search/Services/ConsoleSearchRecentSearchesStore.swift:35</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">UserDefaults</span>.standard.set((encode(searches) ?? "[]"), forKey: searchesKey)</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">31</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Search/Services/ConsoleSearchRecentSearchesStore.swift:46</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">UserDefaults</span>.standard.set((encode(filters) ?? "[]"), forKey: filtersKey)</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">32</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Features/Console/Views/ConsoleContextMenu-ios.swift:35</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">if !<span class="text-red-500">UserDefaults</span>.standard.bool(forKey: "pulse-disable-support-prompts") {</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">33</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Pulse/Sources/PulseUI/Views/ShareView.swift:90</td>
+                <td class="border px-4 py-2">AppStorage</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">@<span class="text-red-500">AppStorage</span>("com-github-kean-selected-task-sharing-option") private var output: Output = .plainText</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">34</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:150</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.creationDate</span>: now.fileAttributeDate,</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">35</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:152</td>
+                <td class="border px-4 py-2">.modificationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.modificationDate</span>: expiration.estimatedExpirationSinceNow.fileAttributeDate</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">36</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:202</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let resourceKeys: Set<URLResourceKey> = [.contentModificationDateKey, <span class="text-red-500">.creationDate</span>Key]</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">37</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:202</td>
+                <td class="border px-4 py-2">.creationDateKey</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let resourceKeys: Set<URLResourceKey> = [.contentModificationDateKey, <span class="text-red-500">.creationDateKey</span>]</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">38</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:202</td>
+                <td class="border px-4 py-2">.contentModificationDateKey</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let resourceKeys: Set<URLResourceKey> = [<span class="text-red-500">.contentModificationDateKey</span>, .creationDateKey]</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">39</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:202</td>
+                <td class="border px-4 py-2">.creationDateKey</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">let resourceKeys: Set<URLResourceKey> = [.contentModificationDateKey, <span class="text-red-500">.creationDateKey</span>]</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">40</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:328</td>
+                <td class="border px-4 py-2">.contentModificationDateKey</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.contentModificationDateKey</span></td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">41</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:359</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.creationDate</span>Key,</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">42</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:359</td>
+                <td class="border px-4 py-2">.creationDateKey</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.creationDateKey</span>,</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">43</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:359</td>
+                <td class="border px-4 py-2">.creationDateKey</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.creationDateKey</span>,</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">44</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:467</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">lastAccessDate: meta<span class="text-red-500">.creationDate</span>,</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">45</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:505</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.creationDate</span>: Date().fileAttributeDate,</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">46</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:506</td>
+                <td class="border px-4 py-2">.modificationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.modificationDate</span>: originalExpiration.estimatedExpirationSinceNow.fileAttributeDate</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">47</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:510</td>
+                <td class="border px-4 py-2">.creationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.creationDate</span>: Date().fileAttributeDate,</td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">48</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Tuist/Dependencies/SwiftPackageManager/.build/checkouts/Kingfisher/Sources/Cache/DiskStorage.swift:511</td>
+                <td class="border px-4 py-2">.modificationDate</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;"><span class="text-red-500">.modificationDate</span>: expirationTime.estimatedExpirationSinceNow.fileAttributeDate</td>
+            </tr>            <tr class="bg-gray-100">
+                <td class="border px-4 py-2 font-semibold text-center">49</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Repository/Sources/Local/EnvironmentStorage.swift:21</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">private let userDefaults: <span class="text-red-500">UserDefaults</span></td>
+            </tr>            <tr class="bg-white">
+                <td class="border px-4 py-2 font-semibold text-center">50</td>
+                <td class="border px-4 py-2">/Users/sudo.park/Documents/codebase/TodoCalendar/Repository/Sources/Local/EnvironmentStorage.swift:26</td>
+                <td class="border px-4 py-2">UserDefaults</td>
+                <td class="border px-4 py-2 italic" style="white-space: pre-wrap;">self.userDefaults = suiteName.flatMap { <span class="text-red-500">UserDefaults</span>(suiteName: $0) } ?? .standard</td>
+            </tr>            </tbody>
+        </table>
+    </div>
+</body>
+</html>

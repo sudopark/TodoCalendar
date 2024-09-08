@@ -6,7 +6,7 @@ let project = Project.framework(
     packages: [
         .remote(
             url: "https://github.com/onevcat/Kingfisher.git",
-            requirement: .upToNextMajor(from: "7.10.0")
+            requirement: .upToNextMajor(from: "7.12.0")
         ),
         .remote(
             url: "https://github.com/devxoul/Toaster.git",
