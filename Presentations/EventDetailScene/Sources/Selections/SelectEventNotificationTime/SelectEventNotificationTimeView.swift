@@ -189,7 +189,6 @@ struct SelectEventNotificationTimeView: View {
                 .listStyle(.plain)
                 .environment(\.defaultMinListRowHeight, 10)
                 .safeAreaInset(edge: .bottom) {
-                    // TODO: permission 필요 뷰
                     if state.notificaitonPermissionDenied {
                         self.permissionNeedView
                     }
@@ -301,13 +300,15 @@ struct SelectEventNotificationTimeView: View {
                 .frame(height: 0.5)
             
             VStack(spacing: 16) {
-                Text(R.String.eventNotificationSettingNeedPermissionMessage)
+                Text("event_notification_setting::need_permission_message".localized())
                     .multilineTextAlignment(.center)
                     .font(appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
                 
-                ConfirmButton(title: R.String.eventNotificationSettingNeedPermissionGoSetting)
-                    .eventHandler(\.onTap, eventHandlers.moveSystemNotificationSetting)
+                ConfirmButton(
+                    title: "event_notification_setting::need_permission::go_setting".localized()
+                )
+                .eventHandler(\.onTap, eventHandlers.moveSystemNotificationSetting)
             }
             .padding()
             .background(

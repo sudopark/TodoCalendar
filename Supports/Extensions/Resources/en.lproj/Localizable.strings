@@ -97,8 +97,8 @@
 "event_notification_setting::option_title::before_weeks" = "%d week(s) before the event";
 "event_notification_setting::option_title::allday_9am_before_days" = "At 9:00 AM %d day(s) ago";
 "event_notification_setting::option_title::allday_9am_before_weeks" = "At 9:00 AM %d week(s) ago";
-"event_notification_setting::need_permission_message" = "Notification permission required";
-"event_notification_setting::need_permission::go_setting" = "To use the event notification feature, you need the notification permission.\nGo to the System App Settings and allow notifications.";
+"event_notification_setting::need_permission_message" = "To use the event notification feature, you need the notification permission.\nGo to the System App Settings and allow notifications.";
+"event_notification_setting::need_permission::go_setting" = "Go to settings";
 "event_notification_setting::need_permission_title" = "Info";
 "event_notification_setting::permission_denied" = "App notification permission is required to use the event reminder feature.";
 
@@ -181,6 +181,8 @@
 "eventDetail.edit::todo::case" = "To-do Event";
 "eventDetail.edit::schedule::case" = "Schedule Event";
 "eventDetail.edit::holiday::case" = "Public Holiday in %@";
+
+"eventDetail.notSupport::holiday" = "The information modification function is not supported on public holidays.";
 
 
 // MARK: - event tag

@@ -97,8 +97,8 @@
 "event_notification_setting::option_title::before_weeks" = "이벤트 %d주 전에";
 "event_notification_setting::option_title::allday_9am_before_days" = "이벤트 %d일전 아침 9시에";
 "event_notification_setting::option_title::allday_9am_before_weeks" = "이벤트 %d주전 아침 9시에";
-"event_notification_setting::need_permission_message" = "알림 허용";
-"event_notification_setting::need_permission::go_setting" = "이벤트 미리알림 기능을 사용하기 위해서는 앱 알림이 허용되어야합니다.\n설정으로 이동해 허용해주세요.";
+"event_notification_setting::need_permission_message" = "이벤트 미리알림 기능을 사용하기 위해서는 앱 알림이 허용되어야합니다.\n설정으로 이동해 허용해주세요.";
+"event_notification_setting::need_permission::go_setting" = "설정으로 이동";
 "event_notification_setting::need_permission_title" = "안내";
 "event_notification_setting::permission_denied" = "이벤트 미리알림 기능을 사용하기 위해서는 앱 알림이 허용되어야합니다.";
 
@@ -181,6 +181,8 @@
 "eventDetail.edit::todo::case" = "할일";
 "eventDetail.edit::schedule::case" = "일정";
 "eventDetail.edit::holiday::case" = "%@의 공휴일";
+
+"eventDetail.notSupport::holiday" = "공휴일은 정보 수정 기능을 지원하지 않습니다.";
 
 
 // MARK: - event tag

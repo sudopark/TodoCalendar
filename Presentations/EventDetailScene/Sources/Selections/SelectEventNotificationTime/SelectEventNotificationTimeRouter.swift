@@ -32,6 +32,10 @@ extension SelectEventNotificationTimeRouter {
     }
     
     func openSystemNotificationSetting() {
-        // TODO: 
+        Task { @MainActor in
+            guard let url = URL(string: UIApplication.openSettingsURLString)
+            else { return }
+            UIApplication.shared.open(url)
+        }
     }
 }
