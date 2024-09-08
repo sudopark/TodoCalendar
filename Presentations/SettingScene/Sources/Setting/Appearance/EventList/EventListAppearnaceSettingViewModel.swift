@@ -92,6 +92,7 @@ final class EventListAppearnaceSettingViewModelImple: EventListAppearnaceSetting
     }
     
     private let uiSettingUsecase: any UISettingUsecase
+    weak var router: (any EventListAppearnaceSettingViewRouting)?
     init(
         setting: EventListAppearanceSetting,
         uiSettingUsecase: any UISettingUsecase
@@ -161,7 +162,7 @@ extension EventListAppearnaceSettingViewModelImple {
             let newSetting = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
             self.subject.setting.send(.init(newSetting))
         } catch {
-            // TODO: show error
+            self.router?.showError(error)
         }
     }
 }

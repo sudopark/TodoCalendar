@@ -82,6 +82,8 @@ extension AppearanceSettingSceneBuilerImple: AppearanceSettingSceneBuiler {
         )
         router.scene = viewController
         viewModel.router = router
+        eventOnCalendarViewModel.router = router
+        eventListSettingViewModel.router = router
         calendarSectionViewModel.router = router
         
         return viewController

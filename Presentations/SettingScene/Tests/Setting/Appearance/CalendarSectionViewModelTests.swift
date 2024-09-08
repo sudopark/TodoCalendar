@@ -233,7 +233,6 @@ extension CalendarSectionViewModelTests {
 
 extension CalendarSectionViewModelTests {
     
-    // TODO: 테마 변경으로 이동
     func testViewModel_provideCurrentColorTheme() {
         // given
         let expect = expectation(description: "현재 컬러테마값 제공")

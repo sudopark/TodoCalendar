@@ -61,6 +61,7 @@ protocol EventOnCalendarViewModel: AnyObject, Sendable {
 final class EventOnCalendarViewModelImple: EventOnCalendarViewModel, @unchecked Sendable {
     
     private let uiSettingUsecase: any UISettingUsecase
+    weak var router: (any EventOnCalendarViewRouting)?
     init(
         setting: EventOnCalendarAppearanceSetting,
         uiSettingUsecase: any UISettingUsecase
@@ -122,7 +123,7 @@ extension EventOnCalendarViewModelImple {
             let newSetting = try self.uiSettingUsecase.changeCalendarAppearanceSetting(params)
             self.subject.setting.send(.init(newSetting))
         } catch {
-            // TODO: show error
+            self.router?.showError(error)
         }
     }
 }

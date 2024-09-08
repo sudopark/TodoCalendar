@@ -21,7 +21,7 @@ protocol AppearanceSettingRouting: Routing, Sendable {
 
 // MARK: - Router
 
-final class AppearanceSettingRouter: BaseRouterImple, AppearanceSettingRouting, CalendarSectionRouting, @unchecked Sendable {
+final class AppearanceSettingRouter: BaseRouterImple, AppearanceSettingRouting, CalendarSectionRouting, EventListAppearnaceSettingViewRouting, EventOnCalendarViewRouting, @unchecked Sendable {
     
     private let colorThemeSelectSceneBuiler: any ColorThemeSelectSceneBuiler
     private let timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler

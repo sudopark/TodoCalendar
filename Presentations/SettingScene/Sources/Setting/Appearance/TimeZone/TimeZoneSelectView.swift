@@ -195,7 +195,7 @@ struct TimeZoneSelectView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        // TODO: 터치영역 증가 필요
+        .contentShape(Rectangle())
         .onTapGesture {
             appearance.impactIfNeed()
             eventHandlers.timeZoneSelected(model.identifier)
