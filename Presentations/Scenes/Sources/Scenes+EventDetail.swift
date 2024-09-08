@@ -8,7 +8,6 @@
 import Foundation
 import Domain
 
-
 public protocol EventDetailScene: Scene { }
 
 public struct MakeEventParams: Sendable {

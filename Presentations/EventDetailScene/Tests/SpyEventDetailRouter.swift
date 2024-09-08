@@ -34,4 +34,12 @@ final class SpyEventDetailRouter: BaseSpyRouter, EventDetailRouting, @unchecked 
         self.didAttachInput = true
         return self.spyInteractor
     }
+    
+    func showTodoEventGuide() {
+        
+    }
+    
+    func showForemostEventGuide() {
+        
+    }
 }

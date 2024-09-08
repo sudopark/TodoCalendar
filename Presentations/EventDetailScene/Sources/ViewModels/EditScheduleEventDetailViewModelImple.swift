@@ -226,6 +226,12 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     // do nothing
     func toggleIsTodo() { }
     
+    func showTodoGuide() { }
+    
+    func showForemostEventGuide() {
+        self.router?.showForemostEventGuide()
+    }
+    
     func eventDetail(didInput basic: EventDetailBasicData, additional: EventDetailData) {
         
         guard let oldBasic = self.subject.basicData.value,

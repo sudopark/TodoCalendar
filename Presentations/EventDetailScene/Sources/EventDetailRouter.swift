@@ -23,6 +23,10 @@ protocol EventDetailRouting: Routing, Sendable, AnyObject {
         // TODO: listener 삭제해도됨
         _ listener: (any EventDetailInputListener)?
     ) -> (any EventDetailInputInteractor)?
+    
+    func showTodoEventGuide()
+    
+    func showForemostEventGuide()
 }
 
 
@@ -51,16 +55,19 @@ final class EventDetailRouter: BaseRouterImple, EventDetailRouting, EventDetailI
     private let selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler
     private let selectEventTagSceneBuilder: any SelectEventTagSceneBuiler
     private let selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler
+    private let guideSceneBuilder: any GuideSceneBuilder
     weak var inputViewModel: (any EventDetailInputViewModel)?
     
     init(
         selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler,
         selectEventTagSceneBuilder: any SelectEventTagSceneBuiler,
-        selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler
+        selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler,
+        guideSceneBuilder: any GuideSceneBuilder
     ) {
         self.selectRepeatOptionSceneBuilder = selectRepeatOptionSceneBuilder
         self.selectEventTagSceneBuilder = selectEventTagSceneBuilder
         self.selectNotificationTimeSceneBuilder = selectNotificationTimeSceneBuilder
+        self.guideSceneBuilder = guideSceneBuilder
     }
 }
 
@@ -78,7 +85,20 @@ extension EventDetailRouter {
         return inputViewModel
     }
     
-    // TODO: router implememnts
+    func showTodoEventGuide() {
+        Task { @MainActor in
+            let vc = self.guideSceneBuilder.makeTodoEventGuide()
+            self.currentScene?.present(vc, animated: true)
+        }
+    }
+    
+    func showForemostEventGuide() {
+        Task { @MainActor in
+            let vc = self.guideSceneBuilder.makeForemostEventGuide()
+            self.currentScene?.present(vc, animated: true)
+        }
+    }
+    
     func routeToEventRepeatOptionSelect(
         startTime: Date,
         with initalOption: EventRepeating?,

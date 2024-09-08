@@ -82,6 +82,8 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     func handleMoreAction(_ action: EventDetailMoreAction)
     func close()
     func toggleIsTodo()
+    func showTodoGuide()
+    func showForemostEventGuide()
     func save()
     
     // presenter

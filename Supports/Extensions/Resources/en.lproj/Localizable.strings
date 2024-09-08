@@ -184,6 +184,18 @@
 
 "eventDetail.notSupport::holiday" = "The information modification function is not supported on public holidays.";
 
+"eventDetail:todo:guide:message1" = "To-do event represents something that needs to be done.";
+"eventDetail:todo:guide:message2" = "Unlike regular schedules that are displayed on the calendar with a specific time (or period), to-do events provide the ability to check whether they have been completed.";
+"eventDetail:todo:guide:message3" = "You can add a to-do event without a specified time information. For example, you can record a task that needs to be done soon, but not right away.";
+"eventDetail:todo:guide:process:message" = "To-do events behave differently from regular schedules when the repeat option is turned on:";
+"eventDetail:todo:guide:process:bullet1" = "Current or past repeating to-do events that have not yet been completed are displayed on the calendar.";
+"eventDetail:todo:guide:process:bullet2" = "When a to-do event is completed, the event is added to the list of completed events and the next repeat event is newly added on the calendar.";
+"eventDetail:todo:guide:process:bullet3" = "If there is no next repetition due to the repetition end time, the repeat to-do event ends.";
+"eventDetail:foremost:guide:message1" = "Mark an event as foremost to emphasize that it is the most important event.\nThe foremost event is always visible in the calendar and supports a separate widget.";
+"eventDetail:foremost:guide:supports:message" = "The following are the types of events you can register for as your foremost event:";
+"eventDetail:foremost:guide:supports:todo" = "To-do event";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Non-repeating scheduled events";
+
 
 // MARK: - event tag
 

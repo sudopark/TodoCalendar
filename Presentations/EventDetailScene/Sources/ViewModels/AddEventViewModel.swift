@@ -144,6 +144,8 @@ extension AddEventViewModelImple: EventDetailInputListener {
         self.subject.isTodo.send(!self.subject.isTodo.value)
     }
     
+    func showTodoGuide() { }
+    func showForemostEventGuide() { }
     
     func save() {
         let isTodo = self.subject.isTodo.value

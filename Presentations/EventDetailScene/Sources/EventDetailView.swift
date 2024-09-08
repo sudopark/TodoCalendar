@@ -185,6 +185,8 @@ struct EventDetailContainerView: View {
     var enterMemo: (String) -> Void = { _ in }
     var save: () -> Void = { }
     var doMoreAction: (EventDetailMoreAction) -> Void = { _ in }
+    var showTodoEventGuide: () -> Void = { }
+    var showForemostEventGuide: () -> Void = { }
     
     init(viewAppearance: ViewAppearance) {
         self.viewAppearance = viewAppearance
@@ -208,6 +210,8 @@ struct EventDetailContainerView: View {
             .eventHandler(\.enterMemo, enterMemo)
             .eventHandler(\.save, save)
             .eventHandler(\.doMoreAction, doMoreAction)
+            .eventHandler(\.showTodoEventGuide, showTodoEventGuide)
+            .eventHandler(\.showForemostEventGuide, showForemostEventGuide)
             .onAppear {
                 self.stateBinding(self.state)
                 self.onAppear()
@@ -236,7 +240,6 @@ struct EventDetailView: View {
         case end
     }
     @State private var isTimeSelecting: TimeSelecting?
-    @State private var showEventDetailTypePopover: Bool = false
     
     fileprivate var nameEntered: (String) -> Void = { _ in }
     fileprivate var toggleIsTodo: () -> Void = { }
@@ -254,6 +257,8 @@ struct EventDetailView: View {
     fileprivate var enterMemo: (String) -> Void = { _ in }
     fileprivate var save: () -> Void = { }
     var doMoreAction: (EventDetailMoreAction) -> Void = { _ in }
+    fileprivate var showTodoEventGuide: () -> Void = { }
+    fileprivate var showForemostEventGuide: () -> Void = { }
 
     private var selectedTagColor: Color? {
         return self.state.selectedTag?.color.color(with: self.appearance).asColor
@@ -394,14 +399,11 @@ struct EventDetailView: View {
                 .font(self.appearance.fontSet.normal.asFont)
             
             Button {
-                self.showEventDetailTypePopover = true
+                self.showForemostEventGuide()
             } label: {
                 Image(systemName: "questionmark.circle")
                     .font(self.appearance.fontSet.normal.asFont)
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
-            }
-            .popover(isPresented: self.$showEventDetailTypePopover) {
-                Text("[Todo] foremost event description")
             }
             
             Spacer()
@@ -449,14 +451,11 @@ struct EventDetailView: View {
 
             if model.showHelpButton {
                 Button {
-                    self.showEventDetailTypePopover = true
+                    self.showTodoEventGuide()
                 } label: {
                     Image(systemName: "questionmark.circle")
                         .font(self.appearance.fontSet.normal.asFont)
                         .foregroundStyle(self.appearance.colorSet.text1.asColor)
-                }
-                .popover(isPresented: self.$showEventDetailTypePopover) {
-                    Text("[Todo] event type description")
                 }
             }
             

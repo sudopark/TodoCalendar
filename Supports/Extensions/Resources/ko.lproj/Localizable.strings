@@ -184,6 +184,18 @@
 
 "eventDetail.notSupport::holiday" = "공휴일은 정보 수정 기능을 지원하지 않습니다.";
 
+"eventDetail:todo:guide:message1" = "할일 이벤트는 해야할 일을 나타냅니다.";
+"eventDetail:todo:guide:message2" = "달력에 특정 시간(혹은 기간)과 함께 표시되는 일반 일정과는 달리 할일 이벤트는 완료 여부를 체트할 수 있는 기능을 제공합니다.";
+"eventDetail:todo:guide:message3" = "지정된 시간 정보가 없이도 할일 이벤트를 등록할 수 있습니다. 당장은 아니지만 빠른시일내에 처리해야하는 작업을 기록하는 케이스를 예로 들 수 있습니다.";
+"eventDetail:todo:guide:process:message" = "할일 이벤트는 일반 일정과 달리 반복옵션이 켜진 경우에 다음과 같이 동작합니다.";
+"eventDetail:todo:guide:process:bullet1" = "현재 혹은 아직 완료하지않은 과거의 반복 할일 이벤트가 달력에 노출됩니다.";
+"eventDetail:todo:guide:process:bullet2" = "할일 이벤트 완료시 해당 이벤트는 완료 이벤트 목록에 추가되며 다음번 반복 차수의 이벤트가 달력에 새로 등록됩니다.";
+"eventDetail:todo:guide:process:bullet3" = "반복 종료 시간에 의해 다음번 반복 차수가 없는경우, 반복 할일 이벤트는 종료됩니다.";
+"eventDetail:foremost:guide:message1" = "달력내 표시되는 일정 중 제일 중요한 이벤트를 등록하세요.\n제일 중요 이벤트는 일정 목록에서 항시 표시되며 별도의 위젯을 지원합니다.";
+"eventDetail:foremost:guide:supports:message" = "제일 중요한 이벤트로 등록할 수 있는 이벤트 종류는 다음과 같습니다.";
+"eventDetail:foremost:guide:supports:todo" = "할일 이벤트";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "반복되지 않는 일정 이벤트";
+
 
 // MARK: - event tag
 
