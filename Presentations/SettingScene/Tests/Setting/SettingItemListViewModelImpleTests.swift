@@ -72,7 +72,7 @@ extension SettingItemListViewModelImpleTests {
         let supportSection = sections?[safe: 1]
         let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(supportItemIds, [
-            .feedback, .faq
+            .feedback, .help
         ])
         
         let appInfoSection = sections?[safe: 2]
@@ -114,7 +114,7 @@ extension SettingItemListViewModelImpleTests {
         let supportSection = sections?[safe: 1]
         let supportItemIds = supportSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(supportItemIds, [
-            .feedback, .faq
+            .feedback, .help
         ])
         
         let appInfoSection = sections?[safe: 2]
@@ -263,6 +263,26 @@ extension SettingItemListViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyRouter.didOpenSafariPath, "http://itunes.apple.com/app/id/some")
+    }
+    
+    func testViewModel_showHelpPage() {
+        // given
+        let viewModel = self.makeViewModel()
+        let items = self.WaitItemLoaded(viewModel)
+        
+        // when
+        guard let help = items.compactMap ({ $0 as? SettingItemModel }).first(where: { $0.itemId == .help })
+        else {
+            XCTAssert(false)
+            return
+        }
+        viewModel.selectItem(help)
+        
+        // then
+        let expectPath = Locale.current.language.languageCode == .korean
+        ? "https://readmind.notion.site/To-do-Calendar-36cba0bdc84b44de9abdfd7d8721cd91"
+        : "https://readmind.notion.site/To-do-Calendar-Help-a2183ee1a41946faa8e0658640fb4c6a?pvs=4"
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, expectPath)
     }
     
     func testViewModel_routeToSourceCode() {

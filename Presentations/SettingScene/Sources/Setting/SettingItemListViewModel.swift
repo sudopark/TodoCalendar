@@ -23,7 +23,7 @@ struct SettingItemModel: SettingItemModelType {
         case editEvent
         case holidaySetting
         case feedback
-        case faq
+        case help
         case shareApp
         case addReview
         case sourceCode
@@ -48,7 +48,7 @@ struct SettingItemModel: SettingItemModelType {
         case .feedback:
             self.iconNamge = "ellipsis.bubble"
             self.text = "setting.feedback::name".localized()
-        case .faq:
+        case .help:
             self.iconNamge = "questionmark.circle"
             self.text = "setting.help::name".localized()
         case .shareApp:
@@ -172,6 +172,14 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
     private var appstoreLinkPath: String {
         return "http://itunes.apple.com/app/id/\(self.appId)"
     }
+    
+    private var helpPath_ko: String {
+        return "https://readmind.notion.site/To-do-Calendar-36cba0bdc84b44de9abdfd7d8721cd91"
+    }
+    
+    private var helpPath_en: String {
+        return "https://readmind.notion.site/To-do-Calendar-Help-a2183ee1a41946faa8e0658640fb4c6a?pvs=4"
+    }
 }
 
 
@@ -209,8 +217,11 @@ extension SettingItemListViewModelImple {
         case .feedback:
             self.router?.routeToFeedbackPost()
             
-        case .faq: 
-            break
+        case .help:
+            let isKorean = Locale.current.language.languageCode == .korean
+            self.router?.openSafari(
+                isKorean ? self.helpPath_ko : self.helpPath_en
+            )
             
         case .shareApp:
             self.router?.openShare(link: self.appstoreLinkPath)
@@ -259,7 +270,7 @@ extension SettingItemListViewModelImple {
             
             let supportSectionItems: [SettingItemModel] = [
                 .init(.feedback),
-                .init(.faq)
+                .init(.help)
             ]
             let supportSection = SettingSectionModel(headerText: "setting.section.support::name".localized(), items: supportSectionItems)
             
