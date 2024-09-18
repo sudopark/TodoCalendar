@@ -1,0 +1,132 @@
+//
+//  SettingSceneBuilderImple.swift
+//  SettingScene
+//
+//  Created by sudo.park on 10/31/23.
+//
+
+import Foundation
+import Domain
+import Scenes
+import CommonPresentation
+
+
+public final class SettingSceneBuilderImple: SettingSceneBuiler {
+    
+    private let appId: String
+    private let usecaseFactory: any UsecaseFactory
+    private let viewAppearance: ViewAppearance
+    private let memberSceneBuilder: any MemberSceneBuilder
+    
+    public init(
+        appId: String,
+        usecaseFactory: any UsecaseFactory,
+        viewAppearance: ViewAppearance,
+        memberSceneBuilder: any MemberSceneBuilder
+    ) {
+        self.appId = appId
+        self.usecaseFactory = usecaseFactory
+        self.viewAppearance = viewAppearance
+        self.memberSceneBuilder = memberSceneBuilder
+    }
+}
+
+
+extension SettingSceneBuilderImple {
+    
+    @MainActor
+    public func makeEventTagDetailScene(
+        originalInfo: OriginalTagInfo?,
+        listener: (any EventTagDetailSceneListener)?
+    ) -> any EventTagDetailScene {
+        
+        let detailBuilder = EventTagDetailSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory, 
+            viewAppearance: self.viewAppearance
+        )
+        return detailBuilder.makeEventTagDetailScene(
+            originalInfo: originalInfo, listener: listener
+        )
+    }
+    
+    @MainActor
+    public func makeEventTagListScene(
+        hasNavigation: Bool,
+        listener: (any EventTagListSceneListener)?
+    ) -> any EventTagListScene {
+        
+        let listBuilder = EventTagListSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        return listBuilder.makeEventTagListScene(
+            hasNavigation: hasNavigation, listener: listener
+        )
+    }
+    
+    @MainActor
+    public func makeSettingItemListScene() -> any SettingItemListScene {
+        
+        let colorThemeSelectSceneBuilder = ColorThemeSelectSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
+        let timeZoneSelectSceneBuilder = TimeZoneSelectSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
+        let apperanceSceneBuilder = AppearanceSettingSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            colorThemeSelectSceneBuiler: colorThemeSelectSceneBuilder,
+            timeZoneSelectSceneBuilder: timeZoneSelectSceneBuilder
+        )
+        
+        let eventTagSelectSceneBuilder = EventTagSelectSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
+        let eventNotificationDefaultTimeOptionSceneBuilder = EventNotificationDefaultTimeOptionSceneBuilerImple(
+            usecaesFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
+        let eventSettingSceneBuilder = EventSettingSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            eventTagSelectSceneBuilder: eventTagSelectSceneBuilder,
+            eventDefaultNotificationTimeSceneBuilder: eventNotificationDefaultTimeOptionSceneBuilder
+        )
+        
+        let countrySelectSceneBuilder = CountrySelectSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
+        let holidayListSceneBuilder = HolidayListSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            countrySelectSceneBuilder: countrySelectSceneBuilder
+        )
+        
+        let feedbackSceneBuilder = FeedbackPostSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
+        let builder = SettingItemListSceneBuilerImple(
+            appId: self.appId,
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            appearanceSceneBuilder: apperanceSceneBuilder,
+            eventSettingSceneBuilder: eventSettingSceneBuilder,
+            holidayListSceneBuilder: holidayListSceneBuilder,
+            memberSceneBuilder: self.memberSceneBuilder,
+            feedbackPostSceneBuiler: feedbackSceneBuilder
+        )
+        return builder.makeSettingItemListScene()
+    }
+}

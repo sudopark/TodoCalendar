@@ -1,0 +1,350 @@
+/* 
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 8/20/24.
+  Copyright © 2024 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " and";
+"common::wait:message" = "Wait please..";
+"common::back" = "Back";
+"common.remove" = "Remove";
+"common.confirm" = "Confirm";
+"common.cancel" = "Cancel";
+"common.close" = "Close";
+"common.yes" = "Yes";
+"common.no" = "No";
+"common.save" = "Save";
+"common.info" = "Info";
+"common.search" = "Search";
+"common.clear" = "Clear";
+"common.send" = "Send";
+"common.done" = "Done";
+"common.errorMessage" = "A temporary error has occurred.\nPlease report if the problem persists.";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "a h:mm";
+"date_form::MM_d__HH:mm" = "MM d, HH:mm";
+"date_form::MM_d" = "MM d";
+"date_form::MM_dd" = "MM/dd";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "MMM d HH:mm";
+"date_form::MMM_d" = "MMM d";
+"date_form::yyyy_MM_dd_E_" = "MM/dd/yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "MM/dd/yyyy hh:mm";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "MMM dd (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "MM/dd/yyyy";
+"date_form.yyyy_MMM_dd" = "MMM dd yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, MMM d";
+"date_form.MMM_yyyy" = "MMM yyyy";
+ 
+// MARK: - event
+
+"dayname::sunday" = "Sunday";
+"dayname::monday" = "Monday";
+"dayname::tuesday" = "Tuesday";
+"dayname::wednesday" = "Wednesday";
+"dayname::thursday" = "Thursday";
+"dayname::friday" = "Friday";
+"dayname::saturday" = "Saturday";
+
+"dayname::sunday:short" = "SUN";
+"dayname::monday:short" = "MON";
+"dayname::tuesday:short" = "TUE";
+"dayname::wednesday:short" = "WED";
+"dayname::thursday:short" = "THU";
+"dayname::friday:short" = "FRI";
+"dayname::saturday:short" = "SAT";
+
+"dayname::sunday:very_short" = "S";
+"dayname::monday:very_short" = "M";
+"dayname::tuesday:very_short" = "T";
+"dayname::wednesday:very_short" = "W";
+"dayname::thursday:very_short" = "T";
+"dayname::friday:very_short" = "F";
+"dayname::saturday:very_short" = "S";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Today events";
+"event_notification::todo:prefix" = "Todo";
+"event_notification::today:prefix" = "Today";
+"event_notification::tomorrow:prefix" = "Tomorrow";
+"event_notification::allday_today" = "All day today";
+"event_notification::allday_tomorrow" = "All day tomorrow";
+"event_notification::some_allday" = "%@ all day";
+"event_notification_setting::option_title::no_notification" = "No notifications";
+"event_notification_setting::option_title::at_time" = "At the event time";
+"event_notification_setting::option_title::allday_9am" = "At 9 a.m. that day";
+"event_notification_setting::option_title::allday_12pm" = "At noon that day";
+"event_notification_setting::option_title::customTime" = "Custom time: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Custom time";
+"event_notification_setting::option_title::before_minutes" = "%d minute(s) before the event";
+"event_notification_setting::option_title::before_hours" = "%d hour(s) before the event";
+"event_notification_setting::option_title::before_days" = "%d day(s) before the event";
+"event_notification_setting::option_title::before_weeks" = "%d week(s) before the event";
+"event_notification_setting::option_title::allday_9am_before_days" = "At 9:00 AM %d day(s) ago";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "At 9:00 AM %d week(s) ago";
+"event_notification_setting::need_permission_message" = "To use the event notification feature, you need the notification permission.\nGo to the System App Settings and allow notifications.";
+"event_notification_setting::need_permission::go_setting" = "Go to settings";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "App notification permission is required to use the event reminder feature.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Foremost Event";
+"calendar::event_time::todo" = "Todo";
+"calendar::event_time::allday" = "All day";
+"calendar::event_time::period:some_days" = "%ddays";
+"calendar::event_time::period:some_minutes" = "%dminutes";
+"calendar::event_time::period:some_hours" = "%dhours";
+"calendar::event_time::period:some_days:some_hours" = "%ddays %dhours";
+"calendar::event::more_action::remove:title" = "Remove Event";
+"calendar::event::more_action::foremost_event:title" = "Foremost event";
+"calendar::event::more_action::remove_only_thistime:message" = "Do you want to delete only this event from all repeating events?";
+"calendar::event::more_action::remove:message" = "Do you want to remove this event?";
+"calendar::event::more_action::mark_as_foremost" = "Do you want to mark this event as your most important event?";
+"calendar::event::more_action::unmark_as_foremost" = "Do you want to unmark this event as your most important event?";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Remove only this event";
+"calendar::event::more_action:remove:item_name" = "Remove event";
+"calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";
+"calendar::event::more_action:foremost:unmark:item_name" = "Unmark as foremost";
+"calendar::event::more_action:edit:item_name" = "Edit";
+"calednar::event::add_new" = "Add a new event";
+"calednar::event::add_new:place_holder" = "Add a new to-do event quickly.";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Please select an event time first.";
+"eventDetail.messages.selectValidTime" = "Please select the valid event time.";
+"eventDetail.notification.custom_eventTime:title" = "Custom";
+"eventDetail.notification.title" = "Event notification time";
+"eventDetail.repeating.title" = "Repeating";
+"eventDetail.repeating.notRepeating::title" = "No repeats";
+"eventDetail.repeating.endtime:title" = "Repeat end time";
+"eventDetail.repeating.everyDay:title" = "Everyday";
+"eventDetail.repeating.everyWeek:title" = "Every Week";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Every %@";
+"eventDetail.repeating.everySomeWeek:title" = "Every %d Weeks";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Every %d Weeks %@";
+"eventDetail.repeating.everyMonth:title" = "Every Month";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ of every month.";
+"eventDetail.repeating.everyYear:title" = "Every Year";
+"eventDetail.repeating.everyYearSomeDay:title" = "Every Year %@";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "All days of the last week of every month";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "The first %@ of every month";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "The second %@ of every month";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "The third %@ of every month";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "The fourth %@ of every month";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "The fifth %@ of every month";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "The Sixth %@ of every month";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "The Seventh %@ of every month";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "The last %@ of every month";
+
+"eventDetail.add_new_todo::message" = "A new to-do event has been added.";
+"eventDetail.add_new_schedule::message" = "A new schedule event has been added.";
+"eventDetail.scheduleEvent_removed::message" = "The schedule event has been removed.";
+"eventDetail.edit::repeating::confirm::ttile" = "Edit event";
+"eventDetail.edit::repeating::confirm::message" = "This event is a repeating event.\nSelect the scope of the repeating event you want to edit.";
+"eventDetail.edit::repeating::confirm::all::button" = "All events";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "From this time";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Only this time";
+"eventDetail.scheduleEvent_saved::message" = "The schedule event has been saved.";
+"eventDetail.todoEvent_removed::message" = "The to-do event has been removed.";
+"eventDetail.todoEvent_saved::message" = "The to-do event has been saved.";
+"eventDetail.cancel_edit::title" = "Edit event";
+"eventDetail.cancel_edit::message" = "Do you want to discard these changes?";
+"eventDetail.cancel_edit::continue::button" = "Continue";
+
+"eventDetail.edit::add_new_name::placeholder" = "Add a new event name";
+"eventDetail.edit::clearEventTime::button" = "Clear event time";
+"eventDetail.edit::noEventTime::button" = "No end time";
+"eventDetail.edit::memo" = "Memo";
+"eventDetail.edit::urlPreview" = "URL Preview";
+
+"eventDetail.edit::make::case" = "Is to-do event?";
+"eventDetail.edit::todo::case" = "To-do Event";
+"eventDetail.edit::schedule::case" = "Schedule Event";
+"eventDetail.edit::holiday::case" = "Public Holiday in %@";
+
+"eventDetail.notSupport::holiday" = "The information modification function is not supported on public holidays.";
+
+"eventDetail:todo:guide:message1" = "To-do event represents something that needs to be done.";
+"eventDetail:todo:guide:message2" = "Unlike regular schedules that are displayed on the calendar with a specific time (or period), to-do events provide the ability to check whether they have been completed.";
+"eventDetail:todo:guide:message3" = "You can add a to-do event without a specified time information. For example, you can record a task that needs to be done soon, but not right away.";
+"eventDetail:todo:guide:process:message" = "To-do events behave differently from regular schedules when the repeat option is turned on:";
+"eventDetail:todo:guide:process:bullet1" = "Current or past repeating to-do events that have not yet been completed are displayed on the calendar.";
+"eventDetail:todo:guide:process:bullet2" = "When a to-do event is completed, the event is added to the list of completed events and the next repeat event is newly added on the calendar.";
+"eventDetail:todo:guide:process:bullet3" = "If there is no next repetition due to the repetition end time, the repeat to-do event ends.";
+"eventDetail:foremost:guide:message1" = "Mark an event as foremost to emphasize that it is the most important event.\nThe foremost event is always visible in the calendar and supports a separate widget.";
+"eventDetail:foremost:guide:supports:message" = "The following are the types of events you can register for as your foremost event:";
+"eventDetail:foremost:guide:supports:todo" = "To-do event";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Non-repeating scheduled events";
+
+
+// MARK: - event tag
+
+"eventTag.title" = "Event Type";
+"eventTag.list::title" = "Event Types";
+"eventTag.defaults.default::name" = "Default";
+"eventTag.defaults.holiday::name" = "Holiday";
+"eventTag.addNew::placeholder" = "Add a new event type";
+"eventTag.allEventTypes" = "All event types >";
+"eventTag.remove::confirm::message" = "Do you want to remove this event type?";
+"eventTag.removed::message" = "This event type has been removed.";
+"eventTag.color::changed::message" = "The color has been changed.";
+"eventTag.changed::message" = "The event type has been modified.";
+"eventTag.makeNew::message" = "A new event type has been created.";
+"eventTag.default::title" = "Default Event Type";
+"eventTag.default::selection::explain" = "This is the event type that will be selected by default when creating an event.";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Today";
+"eventList::yesterday::title" = "Yesterday";
+"eventList::thisMonth::title" = "This month";
+"eventList::done_todos::title" = "Completed To Do List";
+"eventList::done_todos::eventTime" = "Event time:";
+"eventList::done_todos::doneAt" = "Completion time:";
+"eventList::remove::confirm::message" = "Delete completed to-do list";
+"eventList::remove::confirm::button::all" = "All completed to-do events";
+"eventList::remove::confirm::button::olderThan1m" = "Older than 1 month";
+"eventList::remove::confirm::button::olderThan3m" = "Older than 3 months";
+"eventList::remove::confirm::button::olderThan6m" = "Older than 6 months";
+"eventList::remove::confirm::button::olderThan1y" = "Older than 1 year";
+
+
+// MARK: - account
+
+"manage_account::title" = "Account Management";
+"manage_account::login_method" = "Login method";
+"manage_account::email" = "Email";
+"manage_account::last_signedIn_at" = "Last login time";
+"manage_account::migration::title" = "Migrate temporary user data";
+"manage_account::migration::description" = "All events created before logging in (%d event(s)) are being migrated to the logged in account.\nEvents that are attributed to a user can be accessed regardless of the device.";
+"manage_account::migration_finished::message" = "Migration is complete!";
+"manage_account::signout_button::title" = "Logout";
+"manage_account::sign_out::confirm::title" = "Logout";
+"manage_account::sign_out::confirm::message" = "Do you want to log out of your current account?";
+"signIn::title" = "Login";
+"signIn:description" = "Backup your event list and sync it across other iOS devices\n(Supported platforms will be expanded.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Event Settings";
+"event_setting::eventType" = "Event Type";
+"event_setting::eventPeriod" = "Event Period";
+"event_notification_setting::title::forAllDay" = "All day";
+"event_notification_setting::title::NotforAllDay" = "Notification Time";
+"setting.title" = "Settings";
+"setting.appearance.title" = "Appearance";
+"setting.appearance.calendar.samplemonth::march" = "MARCH";
+"setting.appearance.calendar.startDayOfWeek" = "Start day of the week";
+"setting.appearance.calendar.accentDay" = "Accent Days";
+"setting.appearance.calendar.accentDay::holiday" = "Holiday";
+"setting.appearance.calendar.accentDay::saturday" = "Saturday";
+"setting.appearance.calendar.accentDay::sunday" = "Sunday";
+"setting.appearance.calendar.colorTheme" = "Color theme";
+"setting.appearance.calendar.colorTheme::system" = "System";
+"setting.appearance.calendar.colorTheme::light" = "Light";
+"setting.appearance.calendar.colorTheme::dark" = "Dark";
+"setting.appearance.calendar.underline" = "Underline on event days";
+"setting.appearance.event.edit::name" = "Edit Event";
+"setting.appearance.event.fontSize" = "Event text font size";
+"setting.appearance.event.show_holidayName" = "Show holiday name";
+"setting.appearance.event.show_lunar" = "Lunar calendar";
+"setting.appearance.event._24form" = "24 hour form";
+"setting.appearance.event.sample::name" = "🥗 Event name";
+"setting.appearance.event.sample::description" = "description";
+"setting.appearance.event.sample::christmas" = "Christmas";
+"setting.appearance.event.sample::sometime" = "Some time";
+"setting.appearance.event.boldText" = "Bold text";
+"setting.appearance.event.eventColor" = "Event color";
+"setting.timezone::title" = "TimeZone";
+"setting.timezone::systemTimeZone::name" = "System TimeZone";
+"setting.timezone::systemTime::name" = "System Time";
+"setting.haptic::name" = "Haptic feedback";
+"setting.minimize_animation::name" = "Minimize animation effect";
+"setting.holiday.title" = "Holiday";
+"setting.holiday.item::name" = "Holiday Setting";
+"setting.holiday.list::sectionTitle" = "Holidays";
+"setting.holiday.country.title" = "Country";
+"setting.holiday.country.current::title" = "Current Country";
+"setting.holiday.country.changeConfirm::title" = "Change country";
+"setting.holiday.country.changeConfirm::message" = "Do you want to change the country of your calendar?";
+"setting.holiday.country.changed::message" = "The country has changed.";
+"setting.feedback::name" = "Feedback";
+"setting.help::name" = "Help";
+"setting.share::name" = "Share App";
+"setting.write_review::name" = "Write an app review";
+"setting.account.signedIn::manageAccount" = "Account";
+"setting.account.needSignIn" = "Login";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Manage your reading list";
+"setting.section.support::name" = "Support";
+"setting.section.app::name" = "App";
+"setting.section.suggest::name" = "Suggest";
+"feedback::guide:message" = "Please feel free to provide feedback, including bug reports, comments, and service suggestions.\nYour comments will greatly help us improve our service.";
+"feedback::enterMessage::placeholder" = "Enter a message";
+"feedback::contact::placeholder" = "Reply email address";
+"feedback::posted:message" = "Your feedback has been successfully registered.";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Check out our upcoming events.";
+"widget.doubleMonth::name" = "Calendar + Calendar";
+"widget.eventAndMonth::name" = "Events + Calendar";
+"widget.todayAndMonth::name" = "TODAY + Calendar";
+"widget.events::name" = "Events";
+"widget.events.noEvents::message" = "There are no events.";
+"widget.events.currentTodos" = "Current To do list";
+"widget.events.sample::luch" = "Lunch";
+"widget.events.sample::call" = "Call Sara";
+"widget.events.sample::surfing" = "Surfing";
+"widget.events.sample::june3" = "TUE, JUN 3";
+"widget.events.sample::july16" = "SUN, JUL 16";
+"widget.events.foremost" = "Foremost Event";
+"widget.events.foremost::allFinished::message" = "It's all finished!";
+"widget.events.foremost::sample::message" = "Take an umbrella! ⛱️";
+"widget.events.calendar" = "Calendar";
+"widget.events.today" = "TODAY";
+"widget.events.today::sample::sunday" = "SUNDAY";
+"widget.events.today::sample::march2024" = "MARCH 2024";
+"total::event::count" = "%d Events";
+"todo::count" = "%d To-do";
+"schedule::count" = "%d Schedule";
+"widget.weeks.lastMonth" = "Last month";
+"widget.weeks.thisMonth" = "This month";
+"widget.weeks.nextMonth" = "Next month";
+"widget.weeks.thisWeek" = "This week";
+"widget.weeks.twoWeek" = "2 weeks";
+"widget.weeks.threeWeek" = "3 weeks";
+"widget.weeks.fourWeek" = "4 weeks";
+"widget.weeks.sample::feb" = "FEBRUARY";
+"widget.weeks.sample::march" = "MARCH";
+"widget.weeks.sample::april" = "APRIL";
+"widget.weeks.sample::hiking" = "🏔️ Hiking";
+"widget.weeks.sample::lunch" = "🥗 Lunch";
+"widget.weeks.sample::call" = "📞 Call Sara";
+"widget.weeks.sample::holiday" = "Holiday";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Workout";
+"widget.weeks.sample::launch" = "🚀 Launch";
+"widget.fail.message" = "A temporary error occurred.\nPlease try running the app again.";

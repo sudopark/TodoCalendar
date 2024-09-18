@@ -1,0 +1,350 @@
+/* 
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 8/20/24.
+  Copyright © 2024 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = ",";
+"common::wait:message" = "잠시만 기다려주세요..";
+"common::back" = "뒤로가기";
+"common.remove" = "삭제";
+"common.confirm" = "확인";
+"common.cancel" = "취소";
+"common.close" = "닫기";
+"common.yes" = "예";
+"common.no" = "아니요";
+"common.save" = "저장";
+"common.info" = "안내";
+"common.search" = "검색";
+"common.clear" = "초기화";
+"common.send" = "보내기";
+"common.done" = "완료";
+"common.errorMessage" = "일시적인 오류가 발생했습니다.\n문제가 반복된다면 제보해주세요.";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "a h:mm";
+"date_form::MM_d__HH:mm" = "MM d, HH:mm";
+"date_form::MM_d" = "MM d";
+"date_form::MM_dd" = "MM.dd";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "MMM d HH:mm";
+"date_form::MMM_d" = "MMM d";
+"date_form::yyyy_MM_dd_E_" = "yyyy.MM.dd (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd hh:mm";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "MMM dd (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "yyyy.MM.dd";
+"date_form.yyyy_MMM_dd" = "yyyy MMM dd";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, MMM d";
+"date_form.MMM_yyyy" = "yyyy MMM";
+ 
+// MARK: - event
+
+"dayname::sunday" = "일요일";
+"dayname::monday" = "월요일";
+"dayname::tuesday" = "화요일";
+"dayname::wednesday" = "수요일";
+"dayname::thursday" = "목요일";
+"dayname::friday" = "금요일";
+"dayname::saturday" = "토요일";
+
+"dayname::sunday:short" = "일";
+"dayname::monday:short" = "월";
+"dayname::tuesday:short" = "화";
+"dayname::wednesday:short" = "수";
+"dayname::thursday:short" = "목";
+"dayname::friday:short" = "금";
+"dayname::saturday:short" = "토";
+
+"dayname::sunday:very_short" = "일";
+"dayname::monday:very_short" = "월";
+"dayname::tuesday:very_short" = "화";
+"dayname::wednesday:very_short" = "수";
+"dayname::thursday:very_short" = "목";
+"dayname::friday:very_short" = "금";
+"dayname::saturday:very_short" = "토";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "오늘 이벤트";
+"event_notification::todo:prefix" = "할일";
+"event_notification::today:prefix" = "오늘";
+"event_notification::tomorrow:prefix" = "내일";
+"event_notification::allday_today" = "오늘 하루종일";
+"event_notification::allday_tomorrow" = "내일 하루종일";
+"event_notification::some_allday" = "%@ 하루종일";
+"event_notification_setting::option_title::no_notification" = "알림없음";
+"event_notification_setting::option_title::at_time" = "이벤트 시간에";
+"event_notification_setting::option_title::allday_9am" = "이벤트가 있는날 아침 9시에";
+"event_notification_setting::option_title::allday_12pm" = "이벤트가 있는날 정오에";
+"event_notification_setting::option_title::customTime" = "사용자 지정: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "사용자 지정 시간";
+"event_notification_setting::option_title::before_minutes" = "이벤트 %d분 전에";
+"event_notification_setting::option_title::before_hours" = "이벤트 %d시간 전에";
+"event_notification_setting::option_title::before_days" = "이벤트 %d일 전에";
+"event_notification_setting::option_title::before_weeks" = "이벤트 %d주 전에";
+"event_notification_setting::option_title::allday_9am_before_days" = "이벤트 %d일전 아침 9시에";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "이벤트 %d주전 아침 9시에";
+"event_notification_setting::need_permission_message" = "이벤트 미리알림 기능을 사용하기 위해서는 앱 알림이 허용되어야합니다.\n설정으로 이동해 허용해주세요.";
+"event_notification_setting::need_permission::go_setting" = "설정으로 이동";
+"event_notification_setting::need_permission_title" = "안내";
+"event_notification_setting::permission_denied" = "이벤트 미리알림 기능을 사용하기 위해서는 앱 알림이 허용되어야합니다.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "제일 중요한 이벤트";
+"calendar::event_time::todo" = "할일";
+"calendar::event_time::allday" = "하루종일";
+"calendar::event_time::period:some_days" = "%d일";
+"calendar::event_time::period:some_minutes" = "%d분";
+"calendar::event_time::period:some_hours" = "%d시간";
+"calendar::event_time::period:some_days:some_hours" = "%d일 %d시간";
+"calendar::event::more_action::remove:title" = "이벤트 삭제";
+"calendar::event::more_action::foremost_event:title" = "제일 중요한 이벤트";
+"calendar::event::more_action::remove_only_thistime:message" = "전체 반복 이벤트 중 이번 이벤트만을 삭제하기 원합니까?";
+"calendar::event::more_action::remove:message" = "이벤트를 삭제하시겠습니까?";
+"calendar::event::more_action::mark_as_foremost" = "제일 중요한 이벤트로 등록할까요?";
+"calendar::event::more_action::unmark_as_foremost" = "제일 중요한 이벤트를 해제할까요?";
+"calendar::event::more_action:remove_only_thistime:item_name" = "이번만 삭제";
+"calendar::event::more_action:remove:item_name" = "이벤트 삭제";
+"calendar::event::more_action:foremost:mark:item_name" = "제일 중요 이벤트 등록";
+"calendar::event::more_action:foremost:unmark:item_name" = "제일 중요 이벤트 해제";
+"calendar::event::more_action:edit:item_name" = "수정";
+"calednar::event::add_new" = "새 이벤트 추가";
+"calednar::event::add_new:place_holder" = "새로운 할일을 등록하세요.";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "이벤트 시간을 먼저 선택해주세요.";
+"eventDetail.messages.selectValidTime" = "올바른 이벤트 시간을 선택해주세요.";
+"eventDetail.notification.custom_eventTime:title" = "사용자 지정";
+"eventDetail.notification.title" = "이벤트 미리알림";
+"eventDetail.repeating.title" = "반복";
+"eventDetail.repeating.notRepeating::title" = "반복 없음";
+"eventDetail.repeating.endtime:title" = "반복 종료 시간";
+"eventDetail.repeating.everyDay:title" = "매일";
+"eventDetail.repeating.everyWeek:title" = "매주";
+"eventDetail.repeating.everyWeekSomeDay:title" = "매주 %@";
+"eventDetail.repeating.everySomeWeek:title" = "매%d주";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "매%d주 %@";
+"eventDetail.repeating.everyMonth:title" = "매달";
+"eventDetail.repeating.everyMonth_someDay:title" = "매달 %@일";
+"eventDetail.repeating.everyYear:title" = "매년";
+"eventDetail.repeating.everyYearSomeDay:title" = "매년 %@";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "매달의 마지막주의 모든일";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "매달 첫번째 %@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "매달 두번째 %@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "매달 세번째 %@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "매달 네번째 %@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "매달 다섯번째 %@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "매달 여섯번째 %@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "매달 일곱번째 %@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "매달 마지막 %@";
+
+"eventDetail.add_new_todo::message" = "신규 할일이 등록되었습니다.";
+"eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";
+"eventDetail.scheduleEvent_removed::message" = "일정이 삭제되었습니다.";
+"eventDetail.edit::repeating::confirm::ttile" = "이벤트 수정";
+"eventDetail.edit::repeating::confirm::message" = "이 이벤트는 반복이벤트 입니다.\n반복 이벤트의 수정할 범위를 선택하세요.";
+"eventDetail.edit::repeating::confirm::all::button" = "모두 수정";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "이번 이벤트부터 수정";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "이번 이벤트만 수정";
+"eventDetail.scheduleEvent_saved::message" = "일정이 저장되었습니다.";
+"eventDetail.todoEvent_removed::message" = "할일이 삭제되었습니다.";
+"eventDetail.todoEvent_saved::message" = "할일이 저장되었습니다.";
+"eventDetail.cancel_edit::title" = "이벤트 수정";
+"eventDetail.cancel_edit::message" = "수정사항을 폐기할까요 아님 계속 수정할까요?";
+"eventDetail.cancel_edit::continue::button" = "계속하기";
+
+"eventDetail.edit::add_new_name::placeholder" = "이벤트 이름 입력";
+"eventDetail.edit::clearEventTime::button" = "이벤트 시간 삭제";
+"eventDetail.edit::noEventTime::button" = "종료 시간 없음";
+"eventDetail.edit::memo" = "메모";
+"eventDetail.edit::urlPreview" = "URL 미리보기";
+
+"eventDetail.edit::make::case" = "할일로 등록할까요?";
+"eventDetail.edit::todo::case" = "할일";
+"eventDetail.edit::schedule::case" = "일정";
+"eventDetail.edit::holiday::case" = "%@의 공휴일";
+
+"eventDetail.notSupport::holiday" = "공휴일은 정보 수정 기능을 지원하지 않습니다.";
+
+"eventDetail:todo:guide:message1" = "할일 이벤트는 해야할 일을 나타냅니다.";
+"eventDetail:todo:guide:message2" = "달력에 특정 시간(혹은 기간)과 함께 표시되는 일반 일정과는 달리 할일 이벤트는 완료 여부를 체트할 수 있는 기능을 제공합니다.";
+"eventDetail:todo:guide:message3" = "지정된 시간 정보가 없이도 할일 이벤트를 등록할 수 있습니다. 당장은 아니지만 빠른시일내에 처리해야하는 작업을 기록하는 케이스를 예로 들 수 있습니다.";
+"eventDetail:todo:guide:process:message" = "할일 이벤트는 일반 일정과 달리 반복옵션이 켜진 경우에 다음과 같이 동작합니다.";
+"eventDetail:todo:guide:process:bullet1" = "현재 혹은 아직 완료하지않은 과거의 반복 할일 이벤트가 달력에 노출됩니다.";
+"eventDetail:todo:guide:process:bullet2" = "할일 이벤트 완료시 해당 이벤트는 완료 이벤트 목록에 추가되며 다음번 반복 차수의 이벤트가 달력에 새로 등록됩니다.";
+"eventDetail:todo:guide:process:bullet3" = "반복 종료 시간에 의해 다음번 반복 차수가 없는경우, 반복 할일 이벤트는 종료됩니다.";
+"eventDetail:foremost:guide:message1" = "달력내 표시되는 일정 중 제일 중요한 이벤트를 등록하세요.\n제일 중요 이벤트는 일정 목록에서 항시 표시되며 별도의 위젯을 지원합니다.";
+"eventDetail:foremost:guide:supports:message" = "제일 중요한 이벤트로 등록할 수 있는 이벤트 종류는 다음과 같습니다.";
+"eventDetail:foremost:guide:supports:todo" = "할일 이벤트";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "반복되지 않는 일정 이벤트";
+
+
+// MARK: - event tag
+
+"eventTag.title" = "이벤트 종류";
+"eventTag.list::title" = "이벤트 종류";
+"eventTag.defaults.default::name" = "기본";
+"eventTag.defaults.holiday::name" = "공휴일";
+"eventTag.addNew::placeholder" = "새 이벤트 타입 추가";
+"eventTag.allEventTypes" = "모든 이벤트 타입 >";
+"eventTag.remove::confirm::message" = "이 이벤트 타입을 삭제할까요?";
+"eventTag.removed::message" = "이벤트 타입이 삭제되었습니다..";
+"eventTag.color::changed::message" = "색상이 변경되었습니다.";
+"eventTag.changed::message" = "이벤트 타입이 수정되었습니다..";
+"eventTag.makeNew::message" = "신규 이벤트 타입이 생성되었습니다..";
+"eventTag.default::title" = "기본 이벤트 타입";
+"eventTag.default::selection::explain" = "이벤트 생성시에 기본으로 지정할 이벤트 타입을 선택합니다.";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "오늘";
+"eventList::yesterday::title" = "어제";
+"eventList::thisMonth::title" = "이번달";
+"eventList::done_todos::title" = "완료된 할일 목록";
+"eventList::done_todos::eventTime" = "이벤트 시간:";
+"eventList::done_todos::doneAt" = "완료 시간:";
+"eventList::remove::confirm::message" = "완료된 이벤트 삭제";
+"eventList::remove::confirm::button::all" = "모두 삭제";
+"eventList::remove::confirm::button::olderThan1m" = "한달 이상 오래된";
+"eventList::remove::confirm::button::olderThan3m" = "세달 이상 오래된";
+"eventList::remove::confirm::button::olderThan6m" = "반년 이상 오래된";
+"eventList::remove::confirm::button::olderThan1y" = "일년 이상 오래된";
+
+
+// MARK: - account
+
+"manage_account::title" = "계정 관리";
+"manage_account::login_method" = "로그인 방식";
+"manage_account::email" = "이메일";
+"manage_account::last_signedIn_at" = "마지막 로그인 시간";
+"manage_account::migration::title" = "임시 유저 데이터";
+"manage_account::migration::description" = "로그인 이전에 생성한 모든 이벤트를(%d개) 로그인된 계정으로 마이그레이션 합니다.\n계정에 등록된 이벤트들은 장치에 관계없이 엑세스할 수 있습니다.";
+"manage_account::migration_finished::message" = "마이그레이션 완료!";
+"manage_account::signout_button::title" = "로그아웃";
+"manage_account::sign_out::confirm::title" = "로그아웃";
+"manage_account::sign_out::confirm::message" = "현재 계정에서 로그아웃하시겠습니까?";
+"signIn::title" = "로그인";
+"signIn:description" = "이벤트 목록을 백업하고 다른 iOS 기기와 동기화하세요\n(지원 플랫폼은 확장될 예정입니다.)";
+
+
+// MARK: - setting
+"event_setting::title" = "이벤트 설정";
+"event_setting::eventType" = "이벤트 종류";
+"event_setting::eventPeriod" = "이벤트 기간";
+"event_notification_setting::title::forAllDay" = "하루종일";
+"event_notification_setting::title::NotforAllDay" = "미리알림 시간";
+"setting.title" = "설정";
+"setting.appearance.title" = "외관";
+"setting.appearance.calendar.samplemonth::march" = "3월";
+"setting.appearance.calendar.startDayOfWeek" = "주 시작 요일";
+"setting.appearance.calendar.accentDay" = "강조 요일";
+"setting.appearance.calendar.accentDay::holiday" = "공휴일";
+"setting.appearance.calendar.accentDay::saturday" = "토요일";
+"setting.appearance.calendar.accentDay::sunday" = "일요일";
+"setting.appearance.calendar.colorTheme" = "컬러 테마";
+"setting.appearance.calendar.colorTheme::system" = "시스템";
+"setting.appearance.calendar.colorTheme::light" = "라이트";
+"setting.appearance.calendar.colorTheme::dark" = "다크";
+"setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";
+"setting.appearance.event.edit::name" = "이벤트 수정";
+"setting.appearance.event.fontSize" = "이벤트 글자 크기";
+"setting.appearance.event.show_holidayName" = "공휴일 표시";
+"setting.appearance.event.show_lunar" = "음력 표시";
+"setting.appearance.event._24form" = "24시간 표시";
+"setting.appearance.event.sample::name" = "🥗 이벤트 이름";
+"setting.appearance.event.sample::description" = "설명";
+"setting.appearance.event.sample::christmas" = "크리스마스";
+"setting.appearance.event.sample::sometime" = "특정시간";
+"setting.appearance.event.boldText" = "텍스트 볼드처리";
+"setting.appearance.event.eventColor" = "이벤트 색상";
+"setting.timezone::title" = "타임존";
+"setting.timezone::systemTimeZone::name" = "시스템 타임존";
+"setting.timezone::systemTime::name" = "시스템 시간";
+"setting.haptic::name" = "햅티 피드백";
+"setting.minimize_animation::name" = "에니메이션 효과 최소화";
+"setting.holiday.title" = "공휴일";
+"setting.holiday.item::name" = "공휴일 설정";
+"setting.holiday.list::sectionTitle" = "공휴일";
+"setting.holiday.country.title" = "국가";
+"setting.holiday.country.current::title" = "현재 국가";
+"setting.holiday.country.changeConfirm::title" = "국가 변경";
+"setting.holiday.country.changeConfirm::message" = "달력에 적용될 국가를 변경하시겠습니까?";
+"setting.holiday.country.changed::message" = "국가가 변경되었습니다.";
+"setting.feedback::name" = "피드백";
+"setting.help::name" = "도움말";
+"setting.share::name" = "앱 공유";
+"setting.write_review::name" = "앱 리뷰쓰기";
+"setting.account.signedIn::manageAccount" = "계정";
+"setting.account.needSignIn" = "로그인";
+"setting.suggest::readmind::appName" = "Readmind";
+"setting.suggest::readmind::message" = "읽기 목록을 관리하세요!";
+"setting.section.support::name" = "지원";
+"setting.section.app::name" = "앱";
+"setting.section.suggest::name" = "제안";
+"feedback::guide:message" = "버그, 의견, 서비스 제안 등 피드백을 자유롭게 제공해 주세요.\n귀하의 의견은 저희 서비스를 개선하는 데 큰 도움이 됩니다.";
+"feedback::enterMessage::placeholder" = "내용 입력";
+"feedback::contact::placeholder" = "연락받을 이메일 주소";
+"feedback::posted:message" = "피드백이 성공적으로 등록되었습니다.";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "다가오는 일정을 관리하세요.";
+"widget.doubleMonth::name" = "캘린더 + 캘린더";
+"widget.eventAndMonth::name" = "이벤트 + 캘린더";
+"widget.todayAndMonth::name" = "TODAY + 캘린더";
+"widget.events::name" = "이벤트";
+"widget.events.noEvents::message" = "이벤트가 없습니다.";
+"widget.events.currentTodos" = "지금 할일";
+"widget.events.sample::luch" = "점심";
+"widget.events.sample::call" = "전화하기";
+"widget.events.sample::surfing" = "서핑";
+"widget.events.sample::june3" = "6월 3일 화요일";
+"widget.events.sample::july16" = "7월 16일 일요일";
+"widget.events.foremost" = "제일 중요한 이벤트";
+"widget.events.foremost::allFinished::message" = "모두 완료되었습니다!";
+"widget.events.foremost::sample::message" = "우산챙기기! ⛱️";
+"widget.events.calendar" = "캘린더";
+"widget.events.today" = "TODAY";
+"widget.events.today::sample::sunday" = "일요일";
+"widget.events.today::sample::march2024" = "2024년 3월";
+"total::event::count" = "%d개의 이벤트";
+"todo::count" = "%d개의 할일";
+"schedule::count" = "%d개의 일정";
+"widget.weeks.lastMonth" = "지난달";
+"widget.weeks.thisMonth" = "이번달";
+"widget.weeks.nextMonth" = "다음달";
+"widget.weeks.thisWeek" = "이번주";
+"widget.weeks.twoWeek" = "2주";
+"widget.weeks.threeWeek" = "3주";
+"widget.weeks.fourWeek" = "4주";
+"widget.weeks.sample::feb" = "2월";
+"widget.weeks.sample::march" = "3월";
+"widget.weeks.sample::april" = "4월";
+"widget.weeks.sample::hiking" = "🏔️ 등산";
+"widget.weeks.sample::lunch" = "🥗 점심";
+"widget.weeks.sample::call" = "📞 전화하기";
+"widget.weeks.sample::holiday" = "공휴일";
+"widget.weeks.sample::golf" = "⛳️ 골프";
+"widget.weeks.sample::workout" = "🔥 운동";
+"widget.weeks.sample::launch" = "🚀 런칭";
+"widget.fail.message" = "일시적인 오류가 발생했습니다. 앱을 다시 실행해주세요.";
