@@ -64,7 +64,7 @@ extension EventSettingViewModelImpleTests {
         
         // then
         XCTAssertEqual(model?.id, .default)
-        XCTAssertEqual(model?.name, "default".localized())
+        XCTAssertEqual(model?.name, "eventTag.defaults.default::name".localized())
     }
     
     // 태그 선택화면으로 이동 및 업데이트

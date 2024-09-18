@@ -21,11 +21,19 @@ struct EventTagCellViewModel: Equatable {
     let color: EventTagColor
     
     static var `default`: EventTagCellViewModel {
-        return .init(id: .default, name: "default".localized(), color: .default)
+        return .init(
+            id: .default,
+            name: "eventTag.defaults.default::name".localized(),
+            color: .default
+        )
     }
     
     static var holiday: EventTagCellViewModel {
-        return .init(id: .holiday, name: "holiday".localized(), color: .holiday)
+        return .init(
+            id: .holiday,
+            name: "eventTag.defaults.holiday::name".localized(),
+            color: .holiday
+        )
     }
 }
 
