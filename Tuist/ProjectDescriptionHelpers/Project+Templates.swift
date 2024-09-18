@@ -173,7 +173,8 @@ extension Project {
                             "\(googleReverseAppId)"
                         ]
                     ]
-                ]
+                ],
+                "ITSAppUsesNonExemptEncryption": false
             ]),
             sources: [
                 "Sources/**",
