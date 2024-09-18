@@ -69,12 +69,16 @@ extension ApplicationRootViewModelImple: OAuthAutenticatorTokenRefreshListener {
     
     private func handleUserSignedIn(_ account: Account) {
         self.prepareUsecase.prepareSignedIn(account.auth)
-        self.router?.changeRootSceneAfter(signIn: account.auth)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.router?.changeRootSceneAfter(signIn: account.auth)
+        }
     }
     
     private func handleUserSignedOut() {
         self.prepareUsecase.prepareSignedOut()
-        self.router?.changeRootSceneAfter(signIn: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.router?.changeRootSceneAfter(signIn: nil)
+        }
     }
     
     func oauthAutenticator(didRefresh auth: Auth) {

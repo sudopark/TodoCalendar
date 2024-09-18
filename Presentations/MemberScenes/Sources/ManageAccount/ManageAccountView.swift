@@ -25,6 +25,7 @@ final class ManageAccountViewState: ObservableObject {
     @Published var isMigrating = false
     @Published var accountInfo: AccountInfoModel?
     @Published var isSignOuts = false
+    @Published var isDeletingAccount = false
     @Published var migrationNeedEventCount = 0
     
     func bind(_ viewModel: any ManageAccountViewModel) {
@@ -60,6 +61,13 @@ final class ManageAccountViewState: ObservableObject {
                 self?.isSignOuts = flag
             })
             .store(in: &self.cancellables)
+        
+        viewModel.isDeletingAccount
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] flag in
+                self?.isDeletingAccount = flag
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -72,6 +80,7 @@ final class ManageAccountViewEventHandler: ObservableObject {
     var close: () -> Void = { }
     var handleMigration: () -> Void = { }
     var signOut: () -> Void = { }
+    var deleteAccount: () -> Void = { }
 
     func bind(_ viewModel: any ManageAccountViewModel) {
         
@@ -79,6 +88,7 @@ final class ManageAccountViewEventHandler: ObservableObject {
         close = viewModel.close
         handleMigration = viewModel.handleMigration
         signOut = viewModel.signOut
+        deleteAccount = viewModel.deleteAccount
     }
 }
 
@@ -140,7 +150,13 @@ struct ManageAccountView: View {
                     Spacer()
                         .frame(height: 20)
                     
-                    signOutButton()
+                    VStack(spacing: 20) {
+                        signOutButton()
+                        VStack(spacing: 8) {
+                            deleteAccountButton()
+                            deleteAccountDescription()
+                        }
+                    }
                 }
                 .padding()
             }
@@ -207,7 +223,7 @@ struct ManageAccountView: View {
     }
     
     private var isSignOutButtonDisabled: Bool {
-        return self.state.isSignOuts || self.state.isMigrating
+        return self.state.isSignOuts || self.state.isDeletingAccount || self.state.isMigrating
     }
     
     private func signOutButton() -> some View {
@@ -215,6 +231,32 @@ struct ManageAccountView: View {
             self.eventHandlers.signOut()
         } label: {
             Text("manage_account::signout_button::title".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.secondaryBtnText.asColor)
+                .frame(maxWidth: .infinity)
+                .padding(12)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(
+                            appearance.colorSet.secondaryBtnBackground.asColor
+                                .opacity(
+                                    self.isSignOutButtonDisabled ? 0.6 : 1.0
+                                )
+                        )
+                )
+        }
+        .disabled(self.isSignOutButtonDisabled)
+    }
+    
+    private var isDeleteAccountDisabled: Bool {
+        return self.state.isDeletingAccount || self.state.isSignOuts || self.state.isMigrating
+    }
+    
+    private func deleteAccountButton() -> some View {
+        Button {
+            self.eventHandlers.deleteAccount()
+        } label: {
+            Text("manage_account::delete_account_button::title".localized())
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.negativeBtnText.asColor)
                 .frame(maxWidth: .infinity)
@@ -224,12 +266,19 @@ struct ManageAccountView: View {
                         .fill(
                             appearance.colorSet.negativeBtnBackground.asColor
                                 .opacity(
-                                    self.isSignOutButtonDisabled ? 0.6 : 1.0
+                                    self.isDeleteAccountDisabled ? 0.6 : 1.0
                                 )
                         )
                 )
         }
-        .disabled(self.isSignOutButtonDisabled)
+        .disabled(self.isDeleteAccountDisabled)
+    }
+    
+    private func deleteAccountDescription() -> some View {
+        DescriptionView(
+            descriptions: "manage_account::delete_account_button::description".localized()
+                .components(separatedBy: "\n")
+        )
     }
 }
 

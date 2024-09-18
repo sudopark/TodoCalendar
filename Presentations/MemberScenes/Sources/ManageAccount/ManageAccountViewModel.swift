@@ -31,12 +31,14 @@ protocol ManageAccountViewModel: AnyObject, Sendable, ManageAccountSceneInteract
     func prepare()
     func handleMigration()
     func signOut()
+    func deleteAccount()
     
     // presenter
     var currentAccountInfo: AnyPublisher<AccountInfoModel, Never> { get }
     var isNeedMigrationEventCount: AnyPublisher<Int, Never> { get }
     var isMigrating: AnyPublisher<Bool, Never> { get }
     var isSigningOut: AnyPublisher<Bool, Never> { get }
+    var isDeletingAccount: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -71,6 +73,7 @@ final class ManageAccountViewModelImple: ManageAccountViewModel, @unchecked Send
         let migrationNeedEventCount = CurrentValueSubject<Int, Never>(0)
         let isMigrating = CurrentValueSubject<Bool, Never>(false)
         let isSigningOut = CurrentValueSubject<Bool, Never>(false)
+        let isDeletingAccount = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -158,6 +161,36 @@ extension ManageAccountViewModelImple {
         }
         .store(in: &self.cancellables)
     }
+    
+    func deleteAccount() {
+        guard !self.subject.isDeletingAccount.value else { return }
+        
+        let confirmed: () -> Void = { [weak self] in
+            self?.processDeleteAccount()
+        }
+        
+        let confirmMessage = "\("manage_account::delete_account_button::confirm:message".localized())\n\n\("manage_account::delete_account_button::description".localized())"
+        let info = ConfirmDialogInfo()
+            |> \.title .~ "manage_account::delete_account_button::title".localized()
+            |> \.message .~ pure(confirmMessage)
+            |> \.confirmed .~ pure(confirmed)
+            |> \.withCancel .~ true
+        self.router?.showConfirm(dialog: info)
+    }
+    
+    private func processDeleteAccount() {
+        Task { [weak self] in
+            self?.subject.isDeletingAccount.send(true)
+            do {
+                try await self?.authUsecase.deleteAccount()
+                self?.subject.isDeletingAccount.send(false)
+            } catch {
+                self?.subject.isDeletingAccount.send(false)
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
 }
 
 
@@ -196,6 +229,12 @@ extension ManageAccountViewModelImple {
     
     var isSigningOut: AnyPublisher<Bool, Never> {
         return self.subject.isSigningOut
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var isDeletingAccount: AnyPublisher<Bool, Never> {
+        return self.subject.isDeletingAccount
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

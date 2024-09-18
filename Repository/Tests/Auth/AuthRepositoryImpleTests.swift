@@ -116,9 +116,23 @@ extension AuthRepositoryImpleTests {
         try await repository.signOut()
         
         // then
-        let authAfterSignIn = try? await repository.loadLatestSignInAuth()
+        let authAfterSignout = try? await repository.loadLatestSignInAuth()
         XCTAssertEqual(self.spyFirebaseAuthService.didSignout, true)
-        XCTAssertNil(authAfterSignIn)
+        XCTAssertNil(authAfterSignout)
+        XCTAssertNil(self.stubRemote.credential)
+    }
+    
+    func testRepository_deleteAccount() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        try await repository.deleteAccount()
+        
+        // then
+        let authAfterDelete = try? await repository.loadLatestSignInAuth()
+        XCTAssertEqual(self.spyFirebaseAuthService.didDelete, true)
+        XCTAssertNil(authAfterDelete)
         XCTAssertNil(self.stubRemote.credential)
     }
 }
@@ -161,6 +175,11 @@ class StubFirebaseAuthService: FirebaseAuthService {
     var didSignout: Bool?
     func signOut() throws {
         self.didSignout = true
+    }
+    
+    var didDelete: Bool?
+    func deleteAccount() async throws {
+        self.didDelete = true
     }
 }
 
@@ -216,7 +235,16 @@ extension AuthRepositoryImpleTests {
                     "last_signed_in": 0
                 }
                 """
-                ))
+                )),
+            .init(
+                method: .delete,
+                endpoint: AccountAPIEndpoints.account,
+                resultJsonString: .success(
+                    """
+                    { "status": "ok" }
+                    """
+                )
+            )
         ]
     }
 }

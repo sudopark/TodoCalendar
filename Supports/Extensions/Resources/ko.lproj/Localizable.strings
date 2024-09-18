@@ -242,6 +242,9 @@
 "manage_account::signout_button::title" = "로그아웃";
 "manage_account::sign_out::confirm::title" = "로그아웃";
 "manage_account::sign_out::confirm::message" = "현재 계정에서 로그아웃하시겠습니까?";
+"manage_account::delete_account_button::title" = "회원 탈퇴";
+"manage_account::delete_account_button::confirm:message" = "회원 탈퇴를 진행 하시겠습니까?";
+"manage_account::delete_account_button::description" = "계정 삭제 요청이후에, 귀하의 계정은 삭제됩니다.\n한번 삭제된 계정 정보는 다시 복구할 수 없습니다.";
 "signIn::title" = "로그인";
 "signIn:description" = "이벤트 목록을 백업하고 다른 iOS 기기와 동기화하세요\n(지원 플랫폼은 확장될 예정입니다.)";
 

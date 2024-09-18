@@ -242,6 +242,9 @@
 "manage_account::signout_button::title" = "Logout";
 "manage_account::sign_out::confirm::title" = "Logout";
 "manage_account::sign_out::confirm::message" = "Do you want to log out of your current account?";
+"manage_account::delete_account_button::title" = "Delete Account";
+"manage_account::delete_account_button::confirm:message" = "Are you sure you want to delete your account?";
+"manage_account::delete_account_button::description" = "After requesting account deletion, your account will be deleted.\Once deleted, account information cannot be recovered.";
 "signIn::title" = "Login";
 "signIn:description" = "Backup your event list and sync it across other iOS devices\n(Supported platforms will be expanded.)";
 
