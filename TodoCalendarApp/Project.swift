@@ -66,7 +66,8 @@ let project = Project.app(
             infoPlist: [
                 "NSExtension": .dictionary([
                     "NSExtensionPointIdentifier": .string("com.apple.widgetkit-extension")
-                ])
+                ]),
+                "CFBundleDisplayName": "To-do Calendar Widget"
             ],
             dependencies: [
                 .project(
@@ -109,7 +110,8 @@ let project = Project.app(
                 ]),
                 "NSExtensionPointIdentifier": .string("com.apple.intents-service"),
                 "NSExtensionPrincipalClass": .string("$(PRODUCT_MODULE_NAME).IntentHandler")
-            ])
+            ]),
+            "CFBundleDisplayName": "To-do Calendar intent extension"
         ],
         dependencies: [
             .project(
