@@ -175,7 +175,9 @@ extension Project {
                     ]
                 ],
                 "ITSAppUsesNonExemptEncryption": false,
-                "CFBundleDisplayName": "To-do Calendar"
+                "CFBundleDisplayName": "To-do Calendar",
+                "CFBundleShortVersionString": "1.0.0",
+                "CFBundleVersion": "2"
             ]),
             sources: [
                 "Sources/**",
