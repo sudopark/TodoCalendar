@@ -99,3 +99,8 @@ struct AccountMapper: Decodable {
         )
     }
 }
+
+struct AccountDeleteResultMapper: Decodable {
+    
+    init(from decoder: any Decoder) throws { }
+}

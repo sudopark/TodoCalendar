@@ -124,6 +124,10 @@ class DummyFirebaseAuthService: FirebaseAuthService {
         
     }
     
+    func deleteAccount() async throws {
+        
+    }
+    
     func authorize(with credential: any OAuth2Credential) async throws -> any FirebaseAuthDataResult {
         throw RuntimeError("failed")
     }

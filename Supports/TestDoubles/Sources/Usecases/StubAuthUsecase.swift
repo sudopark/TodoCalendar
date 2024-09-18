@@ -38,4 +38,8 @@ open class StubAuthUsecase: AuthUsecase, @unchecked Sendable {
     open func signOut() async throws {
         
     }
+    
+    open func deleteAccount() async throws {
+        
+    }
 }

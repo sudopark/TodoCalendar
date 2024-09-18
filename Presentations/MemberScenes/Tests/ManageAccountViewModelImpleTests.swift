@@ -148,6 +148,32 @@ extension ManageAccountViewModelImpleTests {
         // then
         XCTAssertEqual(flags, [false, true, false])
     }
+    
+    func testViewModel_deleteAccountWithConfirm() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.deleteAccount()
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith != nil, true)
+    }
+    
+    func testViewModel_whenDeleteAccount_updateIsSignOut() {
+        // given
+        let expect = expectation(description: "회원탈퇴 중에는 탈퇴중임을 알림")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let flags = self.waitOutputs(expect, for: viewModel.isDeletingAccount) {
+            viewModel.deleteAccount()
+        }
+        
+        // then
+        XCTAssertEqual(flags, [false, true, false])
+    }
 }
 
 private class SpyRouter: BaseSpyRouter, ManageAccountRouting, @unchecked Sendable { }

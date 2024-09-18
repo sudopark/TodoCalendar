@@ -55,6 +55,12 @@ extension AccountUsecaseImple: AuthUsecase {
         self.accountChangedEventSubject.send(.signOut)
     }
     
+    public func deleteAccount() async throws {
+        try await self.authRepository.deleteAccount()
+        self.setupAccount(nil)
+        self.accountChangedEventSubject.send(.signOut)
+    }
+    
     public var supportOAuth2Service: [OAuth2ServiceProvider] {
         return self.oauth2ServiceProvider.supportOAuth2Service
     }

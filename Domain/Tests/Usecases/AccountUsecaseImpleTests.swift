@@ -263,6 +263,56 @@ extension AccountUsecaseImpleTests {
         }
     }
     
+    func testUescase_deleteAccount() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when
+        try await usecase.deleteAccount()
+        
+        // then
+        XCTAssert(true)
+    }
+    
+    func testUsecase_whenAfterDeleteAccount_clearSharedAccountInfo() {
+        // given
+        let expect = expectation(description: "회원탈퇴 이후 공유중인 계정정보 초기화")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecase()
+        
+        // when
+        let infos = self.waitOutputs(expect, for: usecase.currentAccountInfo) {
+            Task {
+                _ = try await usecase.signIn(GoogleOAuth2ServiceProvider())
+                try await usecase.deleteAccount()
+            }
+        }
+        
+        // then
+        let accountInfoIsNils = infos.map { $0 == nil }
+        XCTAssertEqual(accountInfoIsNils, [true, false, true])
+    }
+    
+    func testUsecase_whenAfterDeleteAccount_notify() {
+        // given
+        let expect = expectation(description: "회원탈퇴 이후 이벤트 전파")
+        let usecase = self.makeUsecase()
+        
+        // when
+        let event = self.waitFirstOutput(expect, for: usecase.accountStatusChanged) {
+            Task {
+                try await usecase.deleteAccount()
+            }
+        }
+        
+        // then
+        if case .signOut = event {
+            XCTAssert(true)
+        } else {
+            XCTFail("기대한 이벤트가 아님")
+        }
+    }
+    
     func testUsecase_appleSignIn() async throws {
         // given
         let usecase = self.makeUsecase()

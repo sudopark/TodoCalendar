@@ -58,6 +58,8 @@ public protocol FirebaseAuthService {
     )
     
     func signOut() throws
+    
+    func deleteAccount() async throws
 }
 
 
@@ -124,6 +126,11 @@ public final class FirebaseAuthServiceImple: FirebaseAuthService {
     
     public func signOut() throws {
         try Auth.auth().signOut()
+    }
+    
+    public func deleteAccount() async throws {
+        guard let auth = Auth.auth().currentUser else { return }
+        try await auth.delete()
     }
 }
 
@@ -210,5 +217,22 @@ extension AuthRepositoryImple {
         self.authStore.removeAuth()
         self.keyChainStorage.remove(accountInfoKey)
         self.remoteAPI.setup(credential: nil)
+    }
+    
+    public func deleteAccount() async throws {
+        try? await self.requestDeleteAllUserDate()
+        try await self.firebaseAuthService.deleteAccount()
+        self.authStore.removeAuth()
+        self.keyChainStorage.remove(accountInfoKey)
+        self.remoteAPI.setup(credential: nil)
+    }
+    
+    private func requestDeleteAllUserDate() async throws {
+        let endpoint: AccountAPIEndpoints = .account
+        let _: AccountDeleteResultMapper = try await self.remoteAPI.request(
+            .delete,
+            endpoint
+        )
+        return
     }
 }

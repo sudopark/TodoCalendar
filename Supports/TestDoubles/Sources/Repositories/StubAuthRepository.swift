@@ -38,4 +38,8 @@ open class StubAuthRepository: AuthRepository, @unchecked Sendable {
     public func signOut() async throws {
         self.latestAccount = nil
     }
+    
+    public func deleteAccount() async throws {
+        self.latestAccount = nil
+    }
 }
