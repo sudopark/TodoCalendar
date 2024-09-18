@@ -163,23 +163,10 @@ struct SettingItemListView: View {
     
     private func accountItemView(_ item: AccountSettingItemModel) -> some View{
         HStack {
-            ZStack(alignment: .bottomTrailing) {
-                Image(systemName: item.iconName)
-                    .font(self.itemFont)
-                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                    .frame(minWidth: 25)
-                    .offset(y: -4)
-                
-                Text("beta")
-                    .font(appearance.fontSet.subSubNormal.asFont)
-                    .foregroundStyle(appearance.colorSet.text0_inverted.asColor)
-                    .padding(.horizontal, 2)
-                    .background(
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(appearance.colorSet.accentInfo.asColor)
-                    )
-                    .offset(y: 6)
-            }
+            Image(systemName: item.iconName)
+                .font(self.itemFont)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                .frame(minWidth: 25)
             
             Text(item.title)
                 .font(self.itemFont)
