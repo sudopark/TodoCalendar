@@ -76,22 +76,22 @@ public struct CalendarAppearanceSettings: Equatable {
     
     public func update(_ params: EditCalendarAppearanceSettingParams) -> CalendarAppearanceSettings {
 
-        let newSetting = CalendarAppearanceSettings(
+        var newSetting = CalendarAppearanceSettings(
             colorSetKey: params.newColorSetKey ?? self.colorSetKey,
             fontSetKey: params.newFontSetKcy ?? self.fontSetKey
         )
+        newSetting.accnetDayPolicy = (params.accnetDayPolicy ?? self.accnetDayPolicy)
+        newSetting.showUnderLineOnEventDay = (params.showUnderLineOnEventDay ?? self.showUnderLineOnEventDay)
+        newSetting.eventOnCalenarTextAdditionalSize = (params.eventOnCalenarTextAdditionalSize ?? self.eventOnCalenarTextAdditionalSize)
+        newSetting.eventOnCalendarIsBold = (params.eventOnCalendarIsBold ?? self.eventOnCalendarIsBold)
+        newSetting.eventOnCalendarShowEventTagColor = (params.eventOnCalendarShowEventTagColor ?? self.eventOnCalendarShowEventTagColor)
+        newSetting.eventTextAdditionalSize = (params.eventTextAdditionalSize ?? self.eventTextAdditionalSize)
+        newSetting.showHoliday = (params.showHoliday ?? self.showHoliday)
+        newSetting.showLunarCalendarDate = (params.showLunarCalendarDate ?? self.showLunarCalendarDate)
+        newSetting.is24hourForm = (params.is24hourForm ?? self.is24hourForm)
+        newSetting.hapticEffectIsOn = (params.hapticEffectIsOn ?? self.hapticEffectIsOn)
+        newSetting.animationEffectIsOn = (params.animationEffectIsOn ?? self.animationEffectIsOn)
         return newSetting
-            |> \.accnetDayPolicy .~ (params.accnetDayPolicy ?? self.accnetDayPolicy)
-            |> \.showUnderLineOnEventDay .~ (params.showUnderLineOnEventDay ?? self.showUnderLineOnEventDay)
-            |> \.eventOnCalenarTextAdditionalSize .~ (params.eventOnCalenarTextAdditionalSize ?? self.eventOnCalenarTextAdditionalSize)
-            |> \.eventOnCalendarIsBold .~ (params.eventOnCalendarIsBold ?? self.eventOnCalendarIsBold)
-            |> \.eventOnCalendarShowEventTagColor .~ (params.eventOnCalendarShowEventTagColor ?? self.eventOnCalendarShowEventTagColor)
-            |> \.eventTextAdditionalSize .~ (params.eventTextAdditionalSize ?? self.eventTextAdditionalSize)
-            |> \.showHoliday .~ (params.showHoliday ?? self.showHoliday)
-            |> \.showLunarCalendarDate .~ (params.showLunarCalendarDate ?? self.showLunarCalendarDate)
-            |> \.is24hourForm .~ (params.is24hourForm ?? self.is24hourForm)
-            |> \.hapticEffectIsOn .~ (params.hapticEffectIsOn ?? self.hapticEffectIsOn)
-            |> \.animationEffectIsOn .~ (params.animationEffectIsOn ?? self.animationEffectIsOn)
     }
 }
 

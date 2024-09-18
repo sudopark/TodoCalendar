@@ -408,7 +408,7 @@ private final class PrivateStubScheduleEventUsecase: StubScheduleEventUsecase {
     }
 }
 
-private final class SpyEventNotificationRepository: StubEventNotificationRepository {
+private final class SpyEventNotificationRepository: StubEventNotificationRepository, @unchecked Sendable {
     
     
     var eventAndNotificationSets: [String: Set<String>] = [:]

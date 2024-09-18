@@ -316,7 +316,7 @@ extension SelectEventRepeatOptionViewModelTests {
         let options = self.waitFirstNotEmptyOptionList(viewModel)?.flatMap { $0 }
         
         // when
-        let everyDay = options!.first(where: { $0.text == "Everyday".localized() })!
+        let everyDay = options!.first(where: { $0.text == "eventDetail.repeating.everyDay:title".localized() })!
         let notRepeat = options!.first(where: { $0.isNotRepeat })!
         viewModel.selectOption(everyDay.id)
         viewModel.selectOption(notRepeat.id)
@@ -335,7 +335,7 @@ extension SelectEventRepeatOptionViewModelTests {
         let options = self.waitFirstNotEmptyOptionList(viewModel)?.flatMap { $0 }
         
         // when
-        let everyDay = options?.first(where: { $0.text == "Everyday".localized() })
+        let everyDay = options?.first(where: { $0.text == "eventDetail.repeating.everyDay:title".localized() })
         viewModel.selectRepeatEndDate("2023.11.20 00:00:00".date()) // end time 지정은 하지만 반복안함 옵션임 -> not select
         viewModel.selectOption(everyDay?.id ?? "") // 반복설정 생기면서 종료시간이랑 같이 업데이트
         viewModel.toggleHasRepeatEnd(isOn: false) // notify

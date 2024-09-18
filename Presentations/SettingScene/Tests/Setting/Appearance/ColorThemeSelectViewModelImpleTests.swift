@@ -86,10 +86,11 @@ extension ColorThemeSelectViewModelImpleTests {
         let expect = expectation(description: "선택테마 업데이트시에, 선택된값 반영하여 선택가능 테마 모델 업데이트")
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel()
+        viewModel.prepare()
         
         // when
-        let models = self.waitOutputs(expect, for: viewModel.colorThemeModels) {
-            viewModel.prepare()
+        let models = self.waitOutputs(expect, for: viewModel.colorThemeModels, timeout: 0.1) {
+            
             viewModel.selectTheme(.init(.systemTheme))
             viewModel.selectTheme(.init(.defaultDark))
         }

@@ -115,7 +115,7 @@ extension EventTagRemoteRepositoryImpleTests {
         
         // when
         let loading = repository.loadAllTags()
-        let tagLists = self.waitOutputs(expect, for: loading)
+        let tagLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
         
         // then
         let idsFirst = tagLists.first.map { $0.map { $0.uuid }}
