@@ -20,6 +20,7 @@ public struct ServerErrorModel: Error, @unchecked Sendable, Decodable {
     public enum ErrorCode: String, Sendable, Decodable {
         case unauthorized = "Unauthorized"
         case invalidAccessKey = "InvalidAccessKey"
+        case cancelled
     }
     
     public var code: ErrorCode?

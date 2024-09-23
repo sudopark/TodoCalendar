@@ -87,6 +87,7 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     public init() { }
     
     open func showError(_ error: any Error) {
+        guard (error as? ServerErrorModel)?.code != .cancelled else { return }
         logger.log(level: .error, "\(error)")
         
         let defaultErrorMessage = "common.errorMessage".localized()

@@ -7,6 +7,8 @@
 
 import Foundation
 import Alamofire
+import Prelude
+import Optics
 import Domain
 import Extensions
 
@@ -45,14 +47,19 @@ extension RemoteAPI {
         with header: [String: String]? = nil,
         parameters: [String: Any] = [:]
     ) async throws -> T {
-        let data = try await self.request(
-            method, endpoint, with: header, parameters: parameters
-        )
         do {
+            let data = try await self.request(
+                method, endpoint, with: header, parameters: parameters
+            )
             let decodeResult = try JSONDecoder().decode(T.self, from: data)
             return decodeResult
-        } catch {
-            // TOOD: log error..
+        }
+        catch let afError as AFError where afError.isExplicitlyCancelledError {
+            let cancelError = ServerErrorModel()
+                |> \.code .~ .cancelled
+            throw cancelError
+        }
+        catch {
             throw error
         }
     }
