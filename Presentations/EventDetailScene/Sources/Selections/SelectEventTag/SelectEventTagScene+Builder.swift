@@ -50,7 +50,7 @@ struct SelectedTag: Equatable {
 
 protocol SelectEventTagSceneInteractor: AnyObject, EventTagDetailSceneListener, EventTagListSceneListener { }
 //
-protocol SelectEventTagSceneListener: AnyObject {
+protocol SelectEventTagSceneListener: AnyObject, Sendable {
     
     func selectEventTag(didSelected tag: SelectedTag)
 }

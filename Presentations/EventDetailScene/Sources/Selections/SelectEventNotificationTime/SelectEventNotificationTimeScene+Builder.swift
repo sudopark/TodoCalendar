@@ -17,7 +17,7 @@ import Scenes
 
 protocol SelectEventNotificationTimeSceneInteractor: AnyObject { }
 //
-public protocol SelectEventNotificationTimeSceneListener: AnyObject { 
+public protocol SelectEventNotificationTimeSceneListener: AnyObject, Sendable { 
     
     func selectEventNotificationTime(didUpdate selectedTimeOptions: [EventNotificationTimeOption])
 }
