@@ -204,6 +204,46 @@ public struct HolidayCalendarEvent: CalendarEvent {
 }
 
 
+extension EventTagUsecase {
+    
+    func cellWithTagInfo<P: Publisher>(
+        _ source: P
+    ) -> AnyPublisher<[any EventCellViewModel], Never>
+    where P.Output == [any EventCellViewModel], P.Failure == Never {
+        
+        typealias CellsAndTag = (P.Output, [String: EventTag])
+        let withTags: (P.Output) -> AnyPublisher<CellsAndTag, Never>
+        withTags = { [weak self] cells in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            let customTagIds = cells.compactMap { $0.tagId.customTagId }
+            guard !customTagIds.isEmpty
+            else {
+                return Just((cells, [:])).eraseToAnyPublisher()
+            }
+            return self.eventTags(customTagIds)
+                .map { (cells, $0) }
+                .eraseToAnyPublisher()
+        }
+        
+        let applyTag: (CellsAndTag) -> [any EventCellViewModel] = { pair in
+            let (cells, tags) = pair
+            return cells.map { cell -> any EventCellViewModel in
+                let tag = cell.tagId.customTagId.flatMap { tags[$0] }
+                var cell = cell
+                cell.applyTagColor(tag)
+                return cell
+            }
+        }
+        
+        return source
+            .map(withTags)
+            .switchToLatest()
+            .map(applyTag)
+            .eraseToAnyPublisher()
+    }
+}
+
+
 extension Publisher where Output: Sequence, Failure == Never {
     
     public func filterTagActivated(

@@ -14,7 +14,7 @@ import Extensions
 
 // MARK: - EventTagUsecase
 
-public protocol EventTagUsecase: Sendable {
+public protocol EventTagUsecase: AnyObject, Sendable {
     
     func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag
     func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag

@@ -113,34 +113,6 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     
     private func internalBind() {
         
-        self.bindTags()
-    }
-    
-    private func bindTags() {
-        
-        let customTagIdsFromCalenadrEvent = self.subject.currentDayAndEventLists
-            .compactMap { $0?.events }
-            .map { $0.compactMap { $0.eventTagId.customTagId } }
-        let tagIdsFromCurrentTodo = self.todoEventUsecase.currentTodoEvents
-            .map { $0.compactMap { $0.eventTagId?.customTagId } }
-        
-        let tagFromForemostEvent = self.foremostEventUsecase.foremostEvent
-            .map { event in event?.eventTagId?.customTagId.map { [$0] } ?? [] }
-        
-        Publishers.CombineLatest3(
-            customTagIdsFromCalenadrEvent, tagIdsFromCurrentTodo, tagFromForemostEvent
-        )
-        .map { $0 + $1 + $2 }
-        .map { [weak self] ids -> AnyPublisher<[String: EventTag], Never> in
-            guard let self = self else { return Empty().eraseToAnyPublisher() }
-            return self.eventTagUsecase.eventTags(ids)
-        }
-        .switchToLatest()
-        .removeDuplicates()
-        .sink(receiveValue: { [weak self] tagMap in
-            self?.subject.tagMaps.send(tagMap)
-        })
-        .store(in: &self.cancellables)
     }
 }
 
@@ -257,19 +229,22 @@ extension DayEventListViewModelImple {
         )
         .map(asCellViewModel)
         
-        let applyTag: ((any EventCellViewModel)?, [String: EventTag]) -> (any EventCellViewModel)?
-        applyTag = { model, tagMap in
-            let tag = model?.tagId.customTagId.flatMap { tagMap[$0] }
-            var model = model
-            model?.applyTagColor(tag)
-            return model
+        let applyTag: ((any EventCellViewModel)?) -> AnyPublisher<(any EventCellViewModel)?, Never>
+        applyTag = { [weak self] model in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            guard let tagId = model?.tagId.customTagId else { return Just(model).eraseToAnyPublisher() }
+            return self.eventTagUsecase.eventTag(id: tagId)
+                .map { tag -> (any EventCellViewModel)? in
+                    var model = model
+                    model?.applyTagColor(tag)
+                    return model
+                }
+                .eraseToAnyPublisher()
         }
         
-        return Publishers.CombineLatest(
-            foremostModel,
-            self.subject.tagMaps
-        )
+        return foremostModel
         .map(applyTag)
+        .switchToLatest()
         .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
         .eraseToAnyPublisher()
     }
@@ -290,20 +265,7 @@ extension DayEventListViewModelImple {
     
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> {
         
-        let applyTag: ([any EventCellViewModel], [String: EventTag]) -> [any EventCellViewModel]
-        applyTag = { cellViewModels, tagMap in
-            return cellViewModels.map { cellViewModel in
-                let tag = cellViewModel.tagId.customTagId.flatMap { tagMap[$0] }
-                var cellViewModel = cellViewModel
-                cellViewModel.applyTagColor(tag)
-                return cellViewModel
-            }
-        }
-        return Publishers.CombineLatest(
-            self.cellViewModelsFromEvent,
-            self.subject.tagMaps
-        )
-        .map(applyTag)
+        return self.eventTagUsecase.cellWithTagInfo(self.cellViewModelsFromEvent)
         .filterTagActivated(self.eventTagUsecase) { $0.tagId }
         .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
         .eraseToAnyPublisher()
