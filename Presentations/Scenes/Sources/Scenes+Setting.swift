@@ -11,7 +11,7 @@ import Domain
 
 // MARK: - EventTagDetailScene Interactable & Listenable
 
-public struct OriginalTagInfo {
+public struct OriginalTagInfo: Sendable {
     public let id: AllEventTagId
     public let name: String
     public let color: EventTagColor
@@ -25,7 +25,7 @@ public struct OriginalTagInfo {
 
 public protocol EventTagDetailSceneInteractor: AnyObject { }
 //
-public protocol EventTagDetailSceneListener: AnyObject {
+public protocol EventTagDetailSceneListener: AnyObject, Sendable {
     
     func eventTag(deleted tagId: String)
     func eventTag(created newTag: EventTag)

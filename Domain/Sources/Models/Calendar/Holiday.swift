@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - HolidaySupportCountry
 
-public struct HolidaySupportCountry {
+public struct HolidaySupportCountry: Sendable {
     
     public let code: String
     public let name: String

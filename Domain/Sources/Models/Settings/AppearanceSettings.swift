@@ -42,7 +42,7 @@ public enum AccentDays: Sendable {
     case sunday
 }
 
-public struct CalendarAppearanceSettings: Equatable {
+public struct CalendarAppearanceSettings: Equatable, Sendable {
     
     public let colorSetKey: ColorSetKeys
     public let fontSetKey: FontSetKeys
