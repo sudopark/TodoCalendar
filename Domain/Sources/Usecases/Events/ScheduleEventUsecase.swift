@@ -14,7 +14,7 @@ import Extensions
 
 // MARK: - ScheduleEventUsecase
 
-public protocol ScheduleEventUsecase {
+public protocol ScheduleEventUsecase: Sendable {
     
     func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent
     func updateScheduleEvent(_ eventId: String, _ params: SchedulePutParams) async throws -> ScheduleEvent
@@ -30,7 +30,7 @@ public protocol ScheduleEventUsecase {
 
 // MARK: - ScheduleEventUsecaseImple
 
-public final class ScheduleEventUsecaseImple: ScheduleEventUsecase {
+public final class ScheduleEventUsecaseImple: ScheduleEventUsecase, @unchecked Sendable {
     
     private let scheduleRepository: any ScheduleEventRepository
     private let sharedDataStore: SharedDataStore

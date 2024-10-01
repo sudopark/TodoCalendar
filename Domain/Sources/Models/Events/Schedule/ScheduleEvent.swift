@@ -93,9 +93,9 @@ public struct ScheduleMakeParams {
 }
 
 
-public struct SchedulePutParams: Equatable {
+public struct SchedulePutParams: Sendable, Equatable {
     
-    public enum RepeatingUpdateScope: Equatable {
+    public enum RepeatingUpdateScope: Sendable, Equatable {
         case all
         case onlyThisTime(EventTime)
         case fromNow(EventTime)
