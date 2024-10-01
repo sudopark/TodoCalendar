@@ -40,7 +40,7 @@ protocol EventListCellEventHanleViewModel {
 }
 
 
-final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewModel {
+final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewModel, @unchecked Sendable {
     
     private let todoEventUsecase: any TodoEventUsecase
     private let scheduleEventUsecase: any ScheduleEventUsecase
