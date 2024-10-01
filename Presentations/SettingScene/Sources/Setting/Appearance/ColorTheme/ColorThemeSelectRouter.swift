@@ -22,7 +22,9 @@ protocol ColorThemeSelectRouting: Routing, Sendable { }
 final class ColorThemeSelectRouter: BaseRouterImple, ColorThemeSelectRouting, @unchecked Sendable { 
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
-        self.currentScene?.navigationController?.popViewController(animated: true)
+        Task { @MainActor in
+            self.currentScene?.navigationController?.popViewController(animated: true)
+        }
     }
 }
 
