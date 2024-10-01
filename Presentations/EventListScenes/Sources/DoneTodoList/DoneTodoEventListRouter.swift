@@ -18,16 +18,18 @@ import CommonPresentation
 protocol DoneTodoEventListRouting: Routing, Sendable { 
     
     func showSelectRemoveDoneTodoRangePicker(
-        _ selected: @escaping (RemoveDoneTodoRange) -> Void
+        _ selected: @Sendable @escaping (RemoveDoneTodoRange) -> Void
     )
 }
 
 // MARK: - Router
 
-final class DoneTodoEventListRouter: BaseRouterImple, DoneTodoEventListRouting, @unchecked Sendable { 
+final class DoneTodoEventListRouter: BaseRouterImple, DoneTodoEventListRouting, @unchecked Sendable {
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
-        self.currentScene?.dismiss(animated: true)
+        Task { @MainActor in
+            self.currentScene?.dismiss(animated: true)
+        }
     }
 }
 
@@ -39,7 +41,7 @@ extension DoneTodoEventListRouter {
     }
     
     func showSelectRemoveDoneTodoRangePicker(
-        _ selected: @escaping (RemoveDoneTodoRange) -> Void
+        _ selected: @Sendable @escaping (RemoveDoneTodoRange) -> Void
     ) {
         Task { @MainActor in
          
