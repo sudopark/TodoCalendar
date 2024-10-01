@@ -52,7 +52,7 @@ struct EventRepeatingTimeSelectResult: Equatable {
 
 protocol SelectEventRepeatOptionSceneInteractor: AnyObject { }
 //
-protocol SelectEventRepeatOptionSceneListener: AnyObject {
+protocol SelectEventRepeatOptionSceneListener: Sendable, AnyObject {
     
     func selectEventRepeatOption(didSelect repeating: EventRepeatingTimeSelectResult)
     func selectEventRepeatOptionNotRepeat()

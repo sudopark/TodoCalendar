@@ -11,7 +11,7 @@ import Domain
 import Extensions
 
 
-open class StubScheduleEventUsecase: ScheduleEventUsecase {
+open class StubScheduleEventUsecase: ScheduleEventUsecase, @unchecked Sendable {
     
     public init() { }
     
