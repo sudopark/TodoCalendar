@@ -90,7 +90,12 @@ extension Project {
                              sources: ["Sources/**"],
                              resources: resources,
                              headers: Headers.headers(public: "\(name).h"),
-                             dependencies: dependencies)
+                             dependencies: dependencies,
+                             settings: .settings(
+                                base: .init().swiftVersion("6.0"),
+                                configurations: []
+                             )
+        )
         let tests = Target(name: "\(name)Tests",
                            platform: platform,
                            product: .unitTests,
@@ -124,7 +129,12 @@ extension Project {
                              sources: withSourceFile ? ["Sources/**"] : [],
                              resources: [],
                              headers: Headers.headers(public: "\(name).h"),
-                             dependencies: dependencies)
+                             dependencies: dependencies,
+                             settings: .settings(
+                                base: .init().swiftVersion("6.0"),
+                                configurations: []
+                             )
+        )
         return [sources]
     }
     
@@ -183,7 +193,11 @@ extension Project {
             ],
             resources: ["Resources/**"],
             entitlements: Entitlements.file(path: "./TodoCalendarApp.entitlements"),
-            dependencies: dependencies
+            dependencies: dependencies,
+            settings: .settings(
+               base: .init().swiftVersion("6.0"),
+               configurations: []
+            )
         )
         
         let testTarget = Target(
@@ -235,7 +249,11 @@ extension Project {
                 "Resources/GoogleService-Info.plist"
             ],
             entitlements: Entitlements.file(path: "./AppExtensions/\(extensionName)/\(targetName).entitlements"),
-            dependencies: dependencies
+            dependencies: dependencies,
+            settings: .settings(
+               base: .init().swiftVersion("6.0"),
+               configurations: []
+            )
         )
         
         guard withTest else { return [target] }

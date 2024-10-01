@@ -11,11 +11,12 @@ import Combine
 import Prelude
 import Optics
 import AsyncFlatMap
+import CombineExt
 import Domain
 import Extensions
 
 
-public final class EventTagRemoteRepositoryImple: EventTagRepository {
+public final class EventTagRemoteRepositoryImple: EventTagRepository, @unchecked Sendable {
     
     private let remote: any RemoteAPI
     private let cacheStorage: any EventTagLocalStorage
@@ -170,3 +171,6 @@ extension EventTagRemoteRepositoryImple {
         self.environmentStorage.update(self.offIds, newIdStringValues)
     }
 }
+
+
+extension Publishers.Create.Subscriber: @unchecked Sendable { }

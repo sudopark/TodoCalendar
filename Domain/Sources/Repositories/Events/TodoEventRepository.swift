@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 
-public protocol TodoEventRepository {
+public protocol TodoEventRepository: Sendable {
     
     func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent
     func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent

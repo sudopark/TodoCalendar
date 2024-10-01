@@ -16,6 +16,7 @@ import CryptoKit
 
 public protocol SignInButtonProvider {
     
+    @MainActor
     func button(
         _ provider: any OAuth2ServiceProvider,
         _ action: @escaping () -> Void
@@ -26,6 +27,7 @@ public struct SignInButtonProviderImple: SignInButtonProvider {
     
     public init() { }
     
+    @MainActor
     public func button(
         _ provider: any OAuth2ServiceProvider,
         _ action: @escaping () -> Void

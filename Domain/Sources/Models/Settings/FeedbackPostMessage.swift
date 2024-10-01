@@ -9,7 +9,7 @@
 import Foundation
 
 
-public struct DeviceInfo {
+public struct DeviceInfo: Sendable {
     public var osVersion: String?
     public var appVersion: String?
     public var deviceModel: String?
