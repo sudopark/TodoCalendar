@@ -161,7 +161,7 @@ struct DoneTodoListSectionModel {
     }
 }
 
-enum RemoveDoneTodoRange: CaseIterable {
+enum RemoveDoneTodoRange: CaseIterable, Sendable {
     case all
     case olderThan1Month
     case olderThan3Months
