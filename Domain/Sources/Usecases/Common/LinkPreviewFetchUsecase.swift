@@ -26,7 +26,7 @@ public final class LinkPreviewFetchUsecaesImple: LinkPreviewFetchUsecase, @unche
 
 extension LinkPreviewFetchUsecaesImple {
     
-    final class FetchTask {
+    final class FetchTask: @unchecked Sendable {
         let engine: SwiftLinkPreview
         let url: URL
         private var request: Cancellable?

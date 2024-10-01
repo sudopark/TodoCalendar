@@ -57,7 +57,7 @@ public struct CompleteTodoResult {
 }
 
 
-public struct DoneTodoLoadPagingParams {
+public struct DoneTodoLoadPagingParams: Sendable {
     public let cursorAfter: TimeInterval?
     public let size: Int
     

@@ -14,7 +14,7 @@ import Extensions
 import UnitTestHelpKit
 
 
-open class StubTodoEventRepository: TodoEventRepository, BaseStub {
+open class StubTodoEventRepository: TodoEventRepository, BaseStub, @unchecked Sendable {
     
     public init() {}
     
