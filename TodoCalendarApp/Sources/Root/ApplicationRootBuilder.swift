@@ -13,6 +13,7 @@ import Extensions
 
 final class ApplicationRootBuilder {
     
+    @MainActor
     func makeRootViewModel() -> ApplicationRootViewModelImple {
         
         let applicationBase = ApplicationBase()

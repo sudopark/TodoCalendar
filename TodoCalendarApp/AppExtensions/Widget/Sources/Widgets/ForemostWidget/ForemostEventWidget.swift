@@ -241,7 +241,7 @@ struct ForemostEventWidgetView: View {
 
 struct ForemostEventWidget: Widget {
     
-    static let kind: String = "ForemostEventWidget"
+    nonisolated static let kind: String = "ForemostEventWidget"
     
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: ForemostEventWidget.kind, provider: ForemostEventWidgetTimelineProvider()) { entry in
