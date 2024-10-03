@@ -189,7 +189,7 @@ extension EventDetailInputViewModelImple {
             .map { $0?.url?.asURL() }
             .throttle(for: .milliseconds(300), scheduler: RunLoop.main, latest: true)
             .removeDuplicates()
-            .map { url -> AnyPublisher<LinkPreview?, Never> in
+            .map { [weak self] url -> AnyPublisher<LinkPreview?, Never> in
                 guard let url = url else { return Just(nil).eraseToAnyPublisher() }
                 return Publishers.create(do: { [weak self] in
                     return try await self?.linkPreviewFetchUsecase.fetchPreview(url)
