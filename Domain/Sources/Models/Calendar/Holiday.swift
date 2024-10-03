@@ -21,7 +21,7 @@ public struct HolidaySupportCountry: Sendable {
     }
 }
 
-public struct Holiday: Equatable {
+public struct Holiday: Equatable, Sendable {
     
     public let dateString: String
     public let localName: String

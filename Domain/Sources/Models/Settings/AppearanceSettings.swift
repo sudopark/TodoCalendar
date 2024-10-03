@@ -19,7 +19,7 @@ public enum FontSetKeys: String, Sendable {
     case systemDefault
 }
 
-public struct DefaultEventTagColorSetting: Equatable {
+public struct DefaultEventTagColorSetting: Equatable, Sendable {
     public let holiday: String
     public let `default`: String
     
@@ -95,7 +95,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
     }
 }
 
-public struct AppearanceSettings {
+public struct AppearanceSettings: Sendable {
     
     public var calendar: CalendarAppearanceSettings
     public var defaultTagColor: DefaultEventTagColorSetting

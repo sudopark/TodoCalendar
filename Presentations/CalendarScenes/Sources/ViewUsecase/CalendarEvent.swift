@@ -12,7 +12,7 @@ import Optics
 import Domain
 
 
-public enum EventTimeOnCalendar: Hashable {
+public enum EventTimeOnCalendar: Hashable, Sendable {
     case at(TimeInterval)
     case period(Range<TimeInterval>)
     
@@ -48,7 +48,7 @@ public enum EventTimeOnCalendar: Hashable {
 
 // MARK: - CalendarEvent
 
-public protocol CalendarEvent {
+public protocol CalendarEvent: Sendable {
     
     var eventId: String { get }
     var name: String { get }

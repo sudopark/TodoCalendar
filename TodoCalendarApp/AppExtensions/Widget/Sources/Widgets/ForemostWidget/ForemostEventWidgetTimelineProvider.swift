@@ -53,7 +53,7 @@ extension ForemostEventWidgetTimelineProvider {
         return .init(date: Date(), result: .success(model))
     }
     
-    func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
+    func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
         
         guard context.isPreview == false
         else {
@@ -67,7 +67,7 @@ extension ForemostEventWidgetTimelineProvider {
         }
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
+    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<Entry>) -> Void) {
         
         self.getEntry(context) { entry in
             let timeline = Timeline(
@@ -77,15 +77,16 @@ extension ForemostEventWidgetTimelineProvider {
         }
     }
     
-    private func getEntry(_ context: Context, _  completion: @escaping (Entry) -> Void) {
+    private func getEntry(_ context: Context, _  completion: @Sendable @escaping (Entry) -> Void) {
         
+        let family = context.family
         Task {
             let builder = WidgetViewModelProviderBuilder(base: .init())
             let viewModelProvider = await builder.makeForemostEventWidgetViewModelProvider()
             let now = Date()
             do {
                 let model = try await viewModelProvider.getViewModel(now)
-                let modelWithSize = ForemostEventWidgetViewModelWithSize(model: model, size: .init(context.family))
+                let modelWithSize = ForemostEventWidgetViewModelWithSize(model: model, size: .init(family))
                 completion(
                     .init(date: now, result: .success(modelWithSize))
                 )

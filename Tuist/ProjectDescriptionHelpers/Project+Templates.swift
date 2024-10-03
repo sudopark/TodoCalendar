@@ -25,6 +25,10 @@ extension Project {
         return Project(
             name: name,
             organizationName: organizationName,
+            options: .options(
+                disableBundleAccessors: true,
+                disableSynthesizedResourceAccessors: true
+            ),
             targets: targets + extensionTargets
         )
     }
