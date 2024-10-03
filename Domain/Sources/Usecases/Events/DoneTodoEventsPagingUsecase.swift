@@ -72,11 +72,32 @@ private struct DoneTodoEventsPage: PagingResultType {
     }
 }
 
+fileprivate final class DoneEventPagingRepository: PagingRepository {
+    typealias QueryType = DoneTodoLoadPagingParams
+    typealias ResultType = DoneTodoEventsPage
+    
+    private let todoRepository: any TodoEventRepository
+    private let pageSize: Int
+    init(todoRepository: any TodoEventRepository, pageSize: Int) {
+        self.todoRepository = todoRepository
+        self.pageSize = pageSize
+    }
+    
+    func loading(_ query: DoneTodoLoadPagingParams) -> AnyPublisher<DoneTodoEventsPage, any Error> {
+        let size = self.pageSize
+        return Publishers.create { [weak self] in
+            guard let repository = self?.todoRepository else { return nil }
+            let events = try await repository.loadDoneTodoEvents(query)
+            return DoneTodoEventsPage(query: query, events: events, pageSize: size)
+        }
+        .eraseToAnyPublisher()
+    }
+}
 
 public final class DoneTodoEventsPagingUsecaseImple: DoneTodoEventsPagingUsecase, @unchecked Sendable {
     
     private let pageSize: Int
-    private let internalUsecase: PagingUsecase<DoneTodoLoadPagingParams, DoneTodoEventsPage>
+    private let internalUsecase: PagingUsecase<DoneEventPagingRepository>!
     
     public init(
         pageSize: Int,
@@ -84,13 +105,10 @@ public final class DoneTodoEventsPagingUsecaseImple: DoneTodoEventsPagingUsecase
     ) {
         
         self.pageSize = pageSize
-        self.internalUsecase = .init { query in
-            return Publishers.create {
-                let events = try await todoRepository.loadDoneTodoEvents(query)
-                return DoneTodoEventsPage(query: query, events: events, pageSize: pageSize)
-            }
-            .eraseToAnyPublisher()
-        }
+        let doneEventRepository = DoneEventPagingRepository(
+            todoRepository: todoRepository, pageSize: pageSize
+        )
+        self.internalUsecase = .init(doneEventRepository)
     }
 }
 

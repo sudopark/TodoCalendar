@@ -15,9 +15,31 @@ import UnitTestHelpKit
 @testable import Domain
 
 class PagingUsecaseTests: BaseTestCase, PublisherWaitable {
+    
+    private final class StubPagingReposiotry: PagingRepository, @unchecked Sendable {
+        typealias QueryType = DummyQuery
+        typealias ResultType = DummyResult
+        
+        var shouldLoadFail: Bool = false
+        func loading(_ query: PagingUsecaseTests.DummyQuery) -> AnyPublisher<PagingUsecaseTests.DummyResult, any Error> {
+            return Publishers.create {
+                if self.shouldLoadFail {
+                    throw RuntimeError("failed")
+                }
+                let range = (query.pageNumber*10..<query.pageNumber*10+10)
+                let prefix = query.query
+                let dummies = range.map { "\(prefix):\($0)" }
+                let isLast = query.pageNumber == 2
+                let response: LoadingResponse = .init(dummies: dummies, pageNumber: query.pageNumber, hasMore: !isLast)
+                return .init(query: query, isLastPage: !response.hasMore, dummies: response.dummies)
+            }
+            .eraseToAnyPublisher()
+        }
+    }
 
     var cancelBag: Set<AnyCancellable>!
-    private var usecase: PagingUsecase<DummyQuery, DummyResult>!
+    private var stubRepository: StubPagingReposiotry!
+    private var usecase: PagingUsecase<StubPagingReposiotry>!
     private var recordedResultSubject: CurrentValueSubject<DummyResult?, Never>!
     
     override func setUpWithError() throws {
@@ -32,27 +54,9 @@ class PagingUsecaseTests: BaseTestCase, PublisherWaitable {
         self.recordedResultSubject = nil
     }
     
-    private var shouldLoadFail: Bool = false
-    private func loading(_ query: DummyQuery) async throws -> LoadingResponse {
-        if self.shouldLoadFail {
-            throw RuntimeError("failed")
-        }
-        let range = (query.pageNumber*10..<query.pageNumber*10+10)
-        let prefix = query.query
-        let dummies = range.map { "\(prefix):\($0)" }
-        let isLast = query.pageNumber == 2
-        return .init(dummies: dummies, pageNumber: query.pageNumber, hasMore: !isLast)
-    }
-    
-    private func makeUsecase() -> PagingUsecase<DummyQuery, DummyResult> {
-        
-        return PagingUsecase { query in
-            return Publishers.create(do: {
-                let response = try await self.loading(query)
-                return .init(query: query, isLastPage: !response.hasMore, dummies: response.dummies)
-            })
-            .eraseToAnyPublisher()
-        }
+    private func makeUsecase() -> PagingUsecase<StubPagingReposiotry> {
+        self.stubRepository = .init()
+        return .init(self.stubRepository)
     }
     
     private func recordTotalResult() {
@@ -63,13 +67,13 @@ class PagingUsecaseTests: BaseTestCase, PublisherWaitable {
     }
     
     private func updateLoadFailMocking(_ fail: Bool) {
-        self.shouldLoadFail = fail
+        self.stubRepository.shouldLoadFail = fail
     }
 }
 
 extension PagingUsecaseTests {
     
-    private func waitNewLoadPage(willNotUpdate: Bool = false, _ action: @escaping (PagingUsecase<DummyQuery, DummyResult>) -> Void) -> DummyResult? {
+    private func waitNewLoadPage(willNotUpdate: Bool = false, _ action: @escaping (PagingUsecase<StubPagingReposiotry>) -> Void) -> DummyResult? {
         // given
         let expect = expectation(description: "wait new page")
         expect.assertForOverFulfill = false
