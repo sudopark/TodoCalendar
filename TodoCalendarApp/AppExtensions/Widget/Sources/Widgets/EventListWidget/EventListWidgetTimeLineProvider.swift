@@ -37,7 +37,7 @@ extension EventListWidgetTimeLineProvider {
     func getSnapshot(
         for configuration: EventListTypeSelectIntent,
         in context: Context,
-        completion: @escaping (ResultTimelineEntry<EventListWidgetViewModel>
+        completion: @Sendable @escaping (ResultTimelineEntry<EventListWidgetViewModel>
         ) -> Void) {
         
         guard context.isPreview == false
@@ -55,7 +55,7 @@ extension EventListWidgetTimeLineProvider {
     func getTimeline(
         for configuration: EventListTypeSelectIntent,
         in context: Context,
-        completion: @escaping (Timeline<ResultTimelineEntry<EventListWidgetViewModel>>) -> Void
+        completion: @Sendable @escaping (Timeline<ResultTimelineEntry<EventListWidgetViewModel>>) -> Void
     ) {
         
         self.getEntry(configuration.eventType, context) { entry in
@@ -69,7 +69,7 @@ extension EventListWidgetTimeLineProvider {
     private func getEntry(
         _ selected: EvnetListType?,
         _ context: Context,
-        _ completion: @escaping (Entry) -> Void
+        _ completion: @Sendable @escaping (Entry) -> Void
     ) {
         
         let tagId = AllEventTagId(selected)

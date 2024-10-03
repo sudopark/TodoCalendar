@@ -10,7 +10,7 @@ import Foundation
 
 // MARK: - HolidaySupportCountry
 
-public struct HolidaySupportCountry {
+public struct HolidaySupportCountry: Sendable {
     
     public let code: String
     public let name: String
@@ -21,7 +21,7 @@ public struct HolidaySupportCountry {
     }
 }
 
-public struct Holiday: Equatable {
+public struct Holiday: Equatable, Sendable {
     
     public let dateString: String
     public let localName: String

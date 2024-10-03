@@ -17,7 +17,7 @@ import Repository
 
 struct TodoToggleIntent: AppIntent {
     
-    static var title: LocalizedStringResource = "To-do completion processing"
+    static let title: LocalizedStringResource = "To-do completion processing"
     
     @Parameter(title: "to-do id")
     var todoId: String

@@ -9,7 +9,7 @@
 import UIKit
 import FirebaseCore
 import FirebaseAuth
-import GoogleSignIn
+@preconcurrency import GoogleSignIn
 import Extensions
 
 

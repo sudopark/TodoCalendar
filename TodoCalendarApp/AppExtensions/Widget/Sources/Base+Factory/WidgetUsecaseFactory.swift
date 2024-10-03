@@ -13,7 +13,7 @@ import Repository
 
 // MARK: - FetchCacheStores
 
-final class FetchCacheStores {
+final class FetchCacheStores: Sendable {
     let holidays: HolidaysFetchCacheStore = .init()
     let events: CalendarEventsFetchCacheStore = .init()
     private init() { }

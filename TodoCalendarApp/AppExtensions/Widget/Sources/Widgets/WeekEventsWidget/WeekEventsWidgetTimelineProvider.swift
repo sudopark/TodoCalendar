@@ -31,7 +31,7 @@ struct WeekEventsWidgetTimelineProvider: TimelineProvider {
         }
     }
     
-    func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
+    func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
        
         guard context.isPreview == false
         else {
@@ -46,7 +46,7 @@ struct WeekEventsWidgetTimelineProvider: TimelineProvider {
         }
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void
+    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<Entry>) -> Void
     ) {
         self.getEntry { entry in
             let timeline = Timeline(
@@ -57,7 +57,7 @@ struct WeekEventsWidgetTimelineProvider: TimelineProvider {
         }
     }
     
-    private func getEntry(_ completion: @escaping (Entry) -> Void) {
+    private func getEntry(_ completion: @Sendable @escaping (Entry) -> Void) {
         
         Task {
             let builder = WidgetViewModelProviderBuilder(base: .init())

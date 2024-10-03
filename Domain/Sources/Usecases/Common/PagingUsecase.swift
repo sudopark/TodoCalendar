@@ -27,12 +27,22 @@ public protocol PagingResultType {
     func append(_ next: Self) -> Self
 }
 
-public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingResultType> where ResultType.Query == QueryType {
+public protocol PagingRepository: AnyObject, Sendable {
+    associatedtype QueryType: PagingQueryType
+    associatedtype ResultType: PagingResultType where ResultType.Query == QueryType
     
-    public typealias Loading = (QueryType) -> AnyPublisher<ResultType, any Error>
+    func loading(_ query: QueryType) -> AnyPublisher<ResultType, any Error>
+}
+
+public final class PagingUsecase<Repository: PagingRepository> {
     
-    public init(_ loading: @escaping Loading) {
-        self.internalBinding(loading)
+    private let repository: Repository
+    private typealias QueryType = Repository.QueryType
+    private typealias ResultType = Repository.ResultType
+    
+    public init(_ repository: Repository) {
+        self.repository = repository
+        self.internalBinding()
     }
     
     private enum LoadingStatus {
@@ -49,15 +59,15 @@ public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingR
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
     
-    private func internalBinding(_ loading: @escaping Loading) {
+    private func internalBinding() {
         
         let updateIsLoading: (QueryType) -> Void = { [weak self] query in
             self?.subject.loadingStatus.send(query.isFirst ? .refreshing : .loadingMore)
         }
         
-        let loadWithoutError: (QueryType) -> AnyPublisher<ResultType, Never> = { query in
-            
-            return loading(query)
+        let loadWithoutError: (QueryType) -> AnyPublisher<ResultType, Never> = { [weak self] query in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            return self.repository.loading(query)
                 .catch { [weak self] error -> Empty<ResultType, Never> in
                     self?.subject.loadingStatus.send(nil)
                     self?.subject.occurredError.send(error)
@@ -84,7 +94,7 @@ public final class PagingUsecase<QueryType: PagingQueryType, ResultType: PagingR
 
 extension PagingUsecase {
     
-    public func refresh(_ query: QueryType) {
+    public func refresh(_ query: Repository.QueryType) {
         self.subject.query.send(query)
     }
     
@@ -125,7 +135,7 @@ extension PagingUsecase {
             .eraseToAnyPublisher()
     }
     
-    public var totalResult: AnyPublisher<ResultType?, Never> {
+    public var totalResult: AnyPublisher<Repository.ResultType?, Never> {
         
         let accumulatePagingIfNeed: (ResultType?, ResultType?) -> ResultType? = { accumulated, newPage in
             

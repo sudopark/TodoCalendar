@@ -207,7 +207,7 @@ struct EventListWidgetView: View {
 
 struct EventListWidget: Widget {
     
-    static let kind: String = "EventList"
+    nonisolated static let kind: String = "EventList"
     
     var body: some WidgetConfiguration {
         IntentConfiguration(

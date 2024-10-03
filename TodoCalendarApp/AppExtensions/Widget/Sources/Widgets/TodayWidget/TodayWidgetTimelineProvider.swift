@@ -24,7 +24,7 @@ struct TodayWidgetTimelineProvider: TimelineProvider {
         return .init(date: now) { TodayWidgetViewModel.sample() }
     }
     
-    func getSnapshot(in context: Context, completion: @escaping (ResultTimelineEntry<TodayWidgetViewModel>) -> Void) {
+    func getSnapshot(in context: Context, completion: @Sendable @escaping (ResultTimelineEntry<TodayWidgetViewModel>) -> Void) {
         
         guard context.isPreview == false
         else {
@@ -38,7 +38,7 @@ struct TodayWidgetTimelineProvider: TimelineProvider {
         }
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<ResultTimelineEntry<TodayWidgetViewModel>>) -> Void) {
+    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<ResultTimelineEntry<TodayWidgetViewModel>>) -> Void) {
         
         self.getEntry { entry in
             let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
@@ -46,7 +46,7 @@ struct TodayWidgetTimelineProvider: TimelineProvider {
         }
     }
     
-    private func getEntry(_ completion: @escaping (Entry) -> Void) {
+    private func getEntry(_ completion: @Sendable @escaping (Entry) -> Void) {
         
         Task {
             let builder = WidgetViewModelProviderBuilder(base: .init())

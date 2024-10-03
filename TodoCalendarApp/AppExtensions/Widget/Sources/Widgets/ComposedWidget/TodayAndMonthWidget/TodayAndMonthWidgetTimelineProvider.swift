@@ -55,7 +55,7 @@ struct TodayAndMonthWidgetTimelineProvider: TimelineProvider {
         }
     }
     
-    func getSnapshot(in context: Context, completion: @escaping (Entry) -> Void) {
+    func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
         guard context.isPreview == false
         else {
             completion(placeholder(in: context))
@@ -66,14 +66,14 @@ struct TodayAndMonthWidgetTimelineProvider: TimelineProvider {
         }
     }
     
-    func getTimeline(in context: Context, completion: @escaping (Timeline<Entry>) -> Void) {
+    func getTimeline(in context: Context, completion: @Sendable @escaping (Timeline<Entry>) -> Void) {
         self.getEntry { entry in
             let timeline = Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
             completion(timeline)
         }
     }
     
-    private func getEntry(_ completion: @escaping (Entry) -> Void) {
+    private func getEntry(_ completion: @Sendable @escaping (Entry) -> Void) {
         
         Task {
             let builer = WidgetViewModelProviderBuilder(base: .init())

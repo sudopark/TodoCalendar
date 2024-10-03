@@ -176,7 +176,7 @@ extension EventNotificationUsecaseImple {
 }
 
 
-private struct EventChanges<T: Equatable> {
+private struct EventChanges<T: Equatable>: @unchecked Sendable {
     var changed: [String: T] = [:]
     var origin: [String: T] = [:]
     var removed: [String: T] = [:]

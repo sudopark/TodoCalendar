@@ -25,7 +25,9 @@ protocol EventNotificationDefaultTimeOptionRouting: Routing, Sendable {
 final class EventNotificationDefaultTimeOptionRouter: BaseRouterImple, EventNotificationDefaultTimeOptionRouting, @unchecked Sendable { 
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
-        self.currentScene?.navigationController?.popViewController(animated: animate)
+        Task { @MainActor in
+            self.currentScene?.navigationController?.popViewController(animated: animate)
+        }
     }
 }
 

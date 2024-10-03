@@ -110,6 +110,7 @@ extension ViewAppearance {
         )
     }
     
+    @MainActor
     public func impactIfNeed(_ style: UIImpactFeedbackGenerator.FeedbackStyle = .soft) {
         guard self.hapticEffectOff else { return }
         let generator = UIImpactFeedbackGenerator(style: style)
