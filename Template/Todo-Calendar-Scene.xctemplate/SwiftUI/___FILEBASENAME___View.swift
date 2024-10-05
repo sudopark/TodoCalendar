@@ -88,13 +88,15 @@ struct ___VARIABLE_sceneName___View: View {
 struct ___VARIABLE_sceneName___ViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
+        let calendarSetting = CalendarAppearanceSettings(
+            colorSetKey: .defaultLight, fontSetKey: .systemDefault
+        )
         let setting = AppearanceSettings(
-            tagColorSetting: .init(holiday: "#ff0000", default: "#ff00ff"),
-            colorSetKey: .defaultLight,
-            fontSetKey: .systemDefault
+            calendar: calendarSetting,
+            defaultTagColor: .init(holiday: "#ff0000", default: "#ff00ff")
         )
         let viewAppearance = ViewAppearance(
-            setting: setting
+            setting: setting, isSystemDarkTheme: false
         )
         let state = ___VARIABLE_sceneName___ViewState()
         let eventHandlers = ___VARIABLE_sceneName___ViewEventHandler()
