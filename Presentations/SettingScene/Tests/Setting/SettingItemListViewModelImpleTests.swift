@@ -262,7 +262,7 @@ extension SettingItemListViewModelImpleTests {
         viewModel.selectItem(review)
         
         // then
-        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "http://itunes.apple.com/app/id/some")
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "https://itunes.apple.com/app/id/some")
     }
     
     func testViewModel_showHelpPage() {
