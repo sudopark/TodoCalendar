@@ -73,3 +73,95 @@ extension PublisherWaitable where Self: XCTestCase {
         return self.waitOutputs(expect, for: source, timeout: timeout, action).first
     }
 }
+
+
+// MARK: - Testing
+
+
+
+import Testing
+
+
+
+@available(iOS 16.0, *)
+public final class ConfirmationExpectation {
+    let comment: Comment?
+    public var count: Int
+    public var timeout: Duration
+    
+    init(comment: Comment?, count: Int, timeout: Duration) {
+        self.comment = comment
+        self.count = count
+        self.timeout = timeout
+    }
+}
+
+extension PublisherWaitable {
+    
+    @available(iOS 16.0, *)
+    public func expectConfirm(
+        _ description: String
+    ) -> ConfirmationExpectation {
+        return .init(comment: .init(stringLiteral: description), count: 1, timeout: .milliseconds(1))
+    }
+
+    @available(iOS 16.0, *)
+    public func outputs<P: Publisher>(
+        _ confirmExpect: ConfirmationExpectation,
+        for source: P,
+        _ action: (() -> Void)? = nil
+    ) async throws -> [P.Output] {
+        return try await confirmation(confirmExpect.comment, expectedCount: confirmExpect.count) { confirm in
+            
+            var sender: [P.Output] = []
+            
+            source
+                .sink { _ in } receiveValue: { output in
+                    sender.append(output)
+                    confirm()
+                }
+                .store(in: &self.cancelBag)
+            
+            action?()
+            
+            try await Task.sleep(for: confirmExpect.timeout)
+            return sender
+        }
+    }
+ 
+    @available(iOS 16.0, *)
+    public func firstOutput<P: Publisher>(
+        _ confirmExpect: ConfirmationExpectation,
+        for source: P,
+        _ action: (() -> Void)? = nil
+    ) async throws -> P.Output? {
+        return try await self.outputs(confirmExpect, for: source, action).first
+    }
+    
+    @available(iOS 16.0, *)
+    public func failure<P: Publisher>(
+        _ confirmExpect: ConfirmationExpectation,
+        for source: P,
+        _ action: (() -> Void)? = nil
+    ) async throws -> P.Failure? {
+        return try await confirmation { confirm in
+            
+            var error: P.Failure?
+            
+            source
+                .sink { completion in
+                    guard case let .failure(failure) = completion else { return }
+                    error = failure
+                    confirm()
+                    
+                } receiveValue: { _ in }
+                .store(in: &self.cancelBag)
+            
+            action?()
+            
+            try await Task.sleep(for: confirmExpect.timeout)
+            
+            return error
+        }
+    }
+}

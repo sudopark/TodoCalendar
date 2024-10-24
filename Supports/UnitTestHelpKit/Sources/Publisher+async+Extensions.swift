@@ -11,7 +11,7 @@ import Combine
 
 extension Publisher {
     
-    public func values(with timeoutMillis: Int) async throws -> AsyncThrowingPublisher<AnyPublisher<Output, Failure>> {
+    public func values(with timeoutMillis: Int) -> AsyncThrowingPublisher<AnyPublisher<Output, Failure>> {
         
         return self.timeout(.milliseconds(timeoutMillis), scheduler: RunLoop.main)
             .eraseToAnyPublisher()
