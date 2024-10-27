@@ -215,6 +215,10 @@ extension TodoRemoteRepositoryImple {
         .eraseToAnyPublisher()
     }
     
+    public func loadUncompletedTodos() -> AnyPublisher<[TodoEvent], any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
+    
     private func loadTodoEvent(_ id: String) async throws -> TodoEvent {
         let endpoint = TodoAPIEndpoints.todo(id)
         let mapper: TodoEventMapper = try await self.remote.request(

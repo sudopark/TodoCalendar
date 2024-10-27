@@ -90,6 +90,10 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub, @unchecked Se
         return Just(events).mapNever().eraseToAnyPublisher()
     }
     
+    open func loadUncompletedTodos() -> AnyPublisher<[TodoEvent], any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
+    
     public var stubRemoveTodoNextRepeatingExists: Bool = false
     open func removeTodo(_ eventId: String, onlyThisTime: Bool) async throws -> RemoveTodoResult {
         if stubRemoveTodoNextRepeatingExists {

@@ -1098,4 +1098,8 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
         }
         self.didUpdatedTodoToggleStatesMap = self.didUpdatedTodoToggleStatesMap |> key(id) %~ { ($0 ?? []) + [params] }
     }
+    
+    func loadUncompletedTodos(_ now: Date) async throws -> [TodoEvent] {
+        return []
+    }
 }
