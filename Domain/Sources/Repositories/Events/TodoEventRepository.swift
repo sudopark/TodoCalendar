@@ -20,6 +20,7 @@ public protocol TodoEventRepository: AnyObject, Sendable {
     func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error>
     func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], any Error>
     func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error>
+    func loadUncompletedTodos() -> AnyPublisher<[TodoEvent], any Error>
     
     func loadDoneTodoEvents(_ params: DoneTodoLoadPagingParams) async throws -> [DoneTodoEvent]
     func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws
