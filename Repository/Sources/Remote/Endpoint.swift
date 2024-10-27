@@ -57,6 +57,7 @@ public enum TodoAPIEndpoints: Endpoint {
     case make
     case todo(String)
     case todos
+    case uncompleteds
     case currentTodo
     case done(String)
     case dones
@@ -74,6 +75,9 @@ public enum TodoAPIEndpoints: Endpoint {
             
         case .todos:
             return ""
+            
+        case .uncompleteds:
+            return "/uncompleted"
             
         case .currentTodo:
             return ""
