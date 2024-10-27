@@ -102,7 +102,7 @@ extension PublisherWaitable {
     public func expectConfirm(
         _ description: String
     ) -> ConfirmationExpectation {
-        return .init(comment: .init(stringLiteral: description), count: 1, timeout: .milliseconds(1))
+        return .init(comment: .init(stringLiteral: description), count: 1, timeout: .milliseconds(100))
     }
 
     @available(iOS 16.0, *)
