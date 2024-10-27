@@ -16,16 +16,16 @@ import UnitTestHelpKit
 
 @testable import Repository
 
-private let refTime = Date().timeIntervalSince1970
-
 class TodoRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
     
     private var stubRemote: StubRemoteAPI!
     private var spyTodoCache: SpyTodoLocalStorage!
+    private var dummyResponse: DummyResponse!
     var cancelBag: Set<AnyCancellable>!
     
     override func setUpWithError() throws {
-        self.stubRemote = .init(responses: self.reponses)
+        self.dummyResponse = .init()
+        self.stubRemote = .init(responses: self.dummyResponse.reponses)
         self.spyTodoCache = .init()
         self.cancelBag = .init()
     }
@@ -95,6 +95,7 @@ extension TodoRemoteRepositoryImpleTests {
     }
     
     private func assertTodo(_ todo: TodoEvent) {
+        let refTime = self.dummyResponse.refTime
         XCTAssertEqual(todo.uuid, "new_uuid")
         XCTAssertEqual(todo.name, "todo_refreshed")
         XCTAssertEqual(todo.eventTagId, .custom("custom_id"))
@@ -672,15 +673,132 @@ extension TodoRemoteRepositoryImpleTests {
         )
     }
 }
- 
 
-private extension TodoRemoteRepositoryImpleTests {
+
+// MARK: - swift testing
+
+import Testing
+
+class TodoRemoteRepositoryImpleTestsV2: PublisherWaitable {
+    
+    var cancelBag: Set<AnyCancellable>! = []
+    private let stubRemote: StubRemoteAPI
+    private let spyTodoCache: SpyTodoLocalStorage
+    
+    init() {
+        self.stubRemote = .init(responses: DummyResponse().reponses)
+        self.spyTodoCache = .init()
+    }
+    
+    private func makeRepository(
+        stubbing: ((SpyTodoLocalStorage, StubRemoteAPI) -> Void)? = nil
+    ) -> TodoRemoteRepositoryImple {
+        stubbing?(self.spyTodoCache, self.stubRemote)
+        return TodoRemoteRepositoryImple(remote: self.stubRemote, cacheStorage: self.spyTodoCache)
+    }
+}
+
+extension TodoRemoteRepositoryImpleTestsV2 {
+    
+    @Test func repository_loadUncompletedTodos_withCachedAndRemote() async throws {
+        // given
+        let expect = expectConfirm("load uncompleted todos")
+        expect.count = 2
+        let repository = self.makeRepository()
+        
+        // when
+        let loading = repository.loadUncompletedTodos()
+        let todoLists = try await self.outputs(expect, for: loading)
+        
+        // then
+        let requestedRefTime = self.stubRemote.didRequestedParams?["refTime"] as? TimeInterval
+        #expect(requestedRefTime != nil)
+        let nameLists = todoLists.map { ts in ts.map { $0.name } }
+        #expect(nameLists == [
+            (0..<10).map { "cached_todo:\($0)" },
+            (0..<10).map { "todo_refreshed:\($0)" }
+        ])
+    }
+    
+    @Test func repository_whenLoadUncompletedTodos_refreshCached() async throws {
+        // given
+        let expect = expectConfirm("load uncompleted todos and refresh cached")
+        expect.count = 2
+        let repository = self.makeRepository()
+        
+        // when
+        let loading = repository.loadUncompletedTodos()
+        let _ = try await self.outputs(expect, for: loading)
+        
+        // then
+        let updateds = self.spyTodoCache.didUpdatedTodos
+        let updatedNames = updateds?.map { $0.name }
+        #expect(updatedNames == (0..<10).map { "todo_refreshed:\($0)" })
+    }
+    
+    @Test func repository_whenLoadUncompletedTodosAndLoadCachFail_ignore() async throws {
+        // given
+        let expect = expectConfirm("load uncompleted todos and load from cache fails ignore")
+        let repository = self.makeRepository { cache, _ in
+            cache.shouldFailLoadUncompleted = true
+        }
+        
+        // when
+        let loading = repository.loadUncompletedTodos()
+        let todoLists = try await self.outputs(expect, for: loading)
+        
+        // then
+        let nameLists = todoLists.map { ts in ts.map { $0.name } }
+        #expect(nameLists == [
+            (0..<10).map { "todo_refreshed:\($0)" }
+        ])
+    }
+}
+
+
+private struct DummyResponse {
+    
+    let refTime = Date().timeIntervalSince1970
     
     private var dummySingleTodoResponse: String {
         return """
         {
             "uuid": "new_uuid",
             "name": "todo_refreshed",
+            "create_timestamp": 100,
+            "event_tag_id": "custom_id",
+            "event_time": {
+                "time_type": "allday",
+                "period_start": \(refTime+100),
+                "period_end": \(refTime+200),
+                "seconds_from_gmt": 300
+            },
+            "repeating": {
+                "start": 300,
+                "end": \(refTime+3600*24*100),
+                "option": {
+
+                    "optionType": "every_week",
+                    "interval": 1,
+                    "dayOfWeek": [1],
+                    "timeZone": "Asia/Seoul"
+                }
+            },
+            "notification_options": [
+                {
+                    "type_text": "allDay9AMBefore",
+                    "before_seconds": 300
+                }
+            ]
+        }
+        """
+    }
+    
+    private func dummyUncompletedTodoRespons(_ int: Int) -> String {
+        return """
+        {
+            "uuid": "todo:\(int)",
+            "name": "todo_refreshed:\(int)",
             "create_timestamp": 100,
             "event_tag_id": "custom_id",
             "event_time": {
@@ -773,7 +891,7 @@ private extension TodoRemoteRepositoryImpleTests {
         """
     }
     
-    private var reponses: [StubRemoteAPI.Resopnse] {
+    var reponses: [StubRemoteAPI.Resopnse] {
         return [
             .init(
                 method: .get,
@@ -874,6 +992,15 @@ private extension TodoRemoteRepositoryImpleTests {
                 resultJsonString: .success(
                     """
                     [ \(self.dummySingleTodoResponse) ]
+                    """
+                )
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.uncompleteds,
+                resultJsonString: .success(
+                    """
+                    [ \((0..<10).map { self.dummyUncompletedTodoRespons($0) }.joined(separator: ",")) ]
                     """
                 )
             ),
@@ -1099,7 +1226,14 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
         self.didUpdatedTodoToggleStatesMap = self.didUpdatedTodoToggleStatesMap |> key(id) %~ { ($0 ?? []) + [params] }
     }
     
+    var shouldFailLoadUncompleted: Bool = false
     func loadUncompletedTodos(_ now: Date) async throws -> [TodoEvent] {
-        return []
+        if shouldFailLoadUncompleted {
+            throw RuntimeError("failed")
+        }
+        let todos = (0..<10).map { int in
+            return TodoEvent(uuid: "todo:\(int)", name: "cached_todo:\(int)")
+        }
+        return todos
     }
 }
