@@ -743,7 +743,38 @@ extension TodoEventUsecaseImpleTests {
     }
 }
 
-private final class PrivateTodoRepository: StubTodoEventRepository {
+extension TodoEventUsecaseImpleTests {
+    
+    private func makeUsecaseWithStubUncompleted() -> TodoEventUsecaseImple {
+        let todos1 = (0..<10).map { TodoEvent(uuid: "id:\($0)", name: "name") }
+        let todos2 = (10..<20).map { TodoEvent(uuid: "id:\($0)", name: "name") }
+        self.stubTodoRepository.stubUncompletedTodos = [todos1, todos2]
+        return self.makeUsecase()
+    }
+    
+    func testUsecase_refreshUncompletedTodos() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일 조회")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecaseWithStubUncompleted()
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos) {
+            usecase.refreshUncompletedTodos()
+            usecase.refreshUncompletedTodos()
+        }
+        
+        // then
+        let idLists = todoLists.map { ts in ts.map { $0.uuid } }
+        XCTAssertEqual(idLists, [
+            [],
+            (0..<10).map { "id:\($0)" },
+            (10..<20).map { "id:\($0)" }
+        ])
+    }
+}
+
+private final class PrivateTodoRepository: StubTodoEventRepository, @unchecked Sendable {
     
     var stubCurrrentTodo: [TodoEvent]?
     override func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error> {
@@ -759,5 +790,15 @@ private final class PrivateTodoRepository: StubTodoEventRepository {
             return Just(stub).mapNever().eraseToAnyPublisher()
         }
         return super.loadTodoEvents(in: range)
+    }
+    
+    var stubUncompletedTodos: [[TodoEvent]] = []
+    override func loadUncompletedTodos() -> AnyPublisher<[TodoEvent], any Error> {
+        guard !stubUncompletedTodos.isEmpty
+        else {
+            return Just([]).mapNever().eraseToAnyPublisher()
+        }
+        let first = self.stubUncompletedTodos.removeFirst()
+        return Just(first).mapNever().eraseToAnyPublisher()
     }
 }

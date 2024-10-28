@@ -28,6 +28,9 @@ public protocol TodoEventUsecase {
     func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never>
     func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error>
     func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws
+    
+    func refreshUncompletedTodos()
+    var uncompletedTodos: AnyPublisher<[TodoEvent], Never> { get }
 }
 
 
@@ -226,6 +229,28 @@ extension TodoEventUsecaseImple {
         }
         return self.todoRepository.todoEvent(id)
             .handleEvents(receiveOutput: updateStore)
+            .eraseToAnyPublisher()
+    }
+}
+
+
+extension TodoEventUsecaseImple {
+    
+    public func refreshUncompletedTodos() {
+        
+        let shareKey = ShareDataKeys.uncompletedTodos.rawValue
+        let refreshCached: ([TodoEvent]) -> Void = { [weak self] todos in
+            self?.sharedDataStore.put([TodoEvent].self, key: shareKey, todos)
+        }
+        self.todoRepository.loadUncompletedTodos()
+            .sink(receiveValue: refreshCached)
+            .store(in: &self.cancellables)
+    }
+    
+    public var uncompletedTodos: AnyPublisher<[TodoEvent], Never> {
+        let shareKey = ShareDataKeys.uncompletedTodos.rawValue
+        return self.sharedDataStore.observe([TodoEvent].self, key: shareKey)
+            .map { $0 ?? [] }
             .eraseToAnyPublisher()
     }
 }
