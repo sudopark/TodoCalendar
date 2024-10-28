@@ -25,6 +25,7 @@ public enum ShareDataKeys: String {
     case defaultEventTagColor
     case eventSetting
     case foremostEventId
+    case uncompletedTodos
 }
 
 
