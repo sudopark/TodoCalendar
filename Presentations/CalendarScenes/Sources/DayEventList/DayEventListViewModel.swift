@@ -228,25 +228,13 @@ extension DayEventListViewModelImple {
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .map(asCellViewModel)
-        
-        let applyTag: ((any EventCellViewModel)?) -> AnyPublisher<(any EventCellViewModel)?, Never>
-        applyTag = { [weak self] model in
-            guard let self = self else { return Empty().eraseToAnyPublisher() }
-            guard let tagId = model?.tagId.customTagId else { return Just(model).eraseToAnyPublisher() }
-            return self.eventTagUsecase.eventTag(id: tagId)
-                .map { tag -> (any EventCellViewModel)? in
-                    var model = model
-                    model?.applyTagColor(tag)
-                    return model
-                }
-                .eraseToAnyPublisher()
-        }
-        
-        return foremostModel
-        .map(applyTag)
-        .switchToLatest()
-        .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
-        .eraseToAnyPublisher()
+
+        let formostAsArray = foremostModel.map { fm in fm.map { [$0] } ?? [] }.eraseToAnyPublisher()
+        return self.eventTagUsecase
+            .cellWithTagInfo(formostAsArray)
+            .map { $0.first }
+            .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
+            .eraseToAnyPublisher()
     }
     
     var selectedDay: AnyPublisher<SelectedDayModel, Never> {
@@ -265,10 +253,11 @@ extension DayEventListViewModelImple {
     
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> {
         
-        return self.eventTagUsecase.cellWithTagInfo(self.cellViewModelsFromEvent)
-        .filterTagActivated(self.eventTagUsecase) { $0.tagId }
-        .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
-        .eraseToAnyPublisher()
+        return self.eventTagUsecase
+            .cellWithTagInfo(self.cellViewModelsFromEvent)
+            .filterTagActivated(self.eventTagUsecase) { $0.tagId }
+            .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
+            .eraseToAnyPublisher()
     }
     
     private typealias CurrentAndEvents = ([any EventCellViewModel], [any EventCellViewModel])
