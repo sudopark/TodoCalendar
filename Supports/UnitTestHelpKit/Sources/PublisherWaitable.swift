@@ -110,7 +110,7 @@ extension PublisherWaitable {
         _ confirmExpect: ConfirmationExpectation,
         for source: P,
         _ action: (() -> Void)? = nil
-    ) async throws -> [P.Output] {
+    ) async throws -> [P.Output] where P.Output: Sendable {
         return try await confirmation(confirmExpect.comment, expectedCount: confirmExpect.count) { confirm in
             
             var sender: [P.Output] = []
@@ -134,7 +134,7 @@ extension PublisherWaitable {
         _ confirmExpect: ConfirmationExpectation,
         for source: P,
         _ action: (() -> Void)? = nil
-    ) async throws -> P.Output? {
+    ) async throws -> P.Output? where P.Output: Sendable {
         return try await self.outputs(confirmExpect, for: source, action).first
     }
     
