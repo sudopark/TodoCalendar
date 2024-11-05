@@ -53,6 +53,7 @@ extension AppSettingLocalStorage {
     private var showHolidayNameOnEventList: String { "show_holiday_name_on_eventList" }
     private var showLunarCalendarDate: String { "show_lunar_calendar_date" }
     private var is24HourForm: String { "is_24_hourForm" }
+    private var hideUncompletedTodos: String { "hide_uncompleted_todos" }
     
     // general
     private var hapticEffectIsOff: String { "haptic_effect_off" }
@@ -114,11 +115,13 @@ extension AppSettingLocalStorage {
         let holiday: Bool = self.environmentStorage.load(showHolidayNameOnEventList) ?? false
         let lunar: Bool = self.environmentStorage.load(showLunarCalendarDate) ?? false
         let is24From: Bool = self.environmentStorage.load(is24HourForm) ?? true
+        let hideUncompletedTodos: Bool = self.environmentStorage.load(hideUncompletedTodos) ?? false
         calendar = calendar
             |> \.eventTextAdditionalSize .~ CGFloat(eventFont)
             |> \.showHoliday .~ holiday
             |> \.showLunarCalendarDate .~ lunar
             |> \.is24hourForm .~ is24From
+            |> \.showUncompletedTodos .~ !hideUncompletedTodos
         
         // general
         let hapticIsOn: Bool = !(self.environmentStorage.load(hapticEffectIsOff) ?? false)
@@ -174,6 +177,9 @@ extension AppSettingLocalStorage {
         )
         self.environmentStorage.update(
             is24HourForm, newValue.is24hourForm
+        )
+        self.environmentStorage.update(
+            hideUncompletedTodos, !newValue.showUncompletedTodos
         )
         
         // general

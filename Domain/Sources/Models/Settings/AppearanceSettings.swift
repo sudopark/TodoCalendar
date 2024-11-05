@@ -61,6 +61,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
     public var showHoliday: Bool = false
     public var showLunarCalendarDate: Bool = false
     public var is24hourForm: Bool = false
+    public var showUncompletedTodos: Bool = true
     
     // general
     public var hapticEffectIsOn: Bool = false
@@ -89,6 +90,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
         newSetting.showHoliday = (params.showHoliday ?? self.showHoliday)
         newSetting.showLunarCalendarDate = (params.showLunarCalendarDate ?? self.showLunarCalendarDate)
         newSetting.is24hourForm = (params.is24hourForm ?? self.is24hourForm)
+        newSetting.showUncompletedTodos = (params.showUncompletedTodos ?? self.showUncompletedTodos)
         newSetting.hapticEffectIsOn = (params.hapticEffectIsOn ?? self.hapticEffectIsOn)
         newSetting.animationEffectIsOn = (params.animationEffectIsOn ?? self.animationEffectIsOn)
         return newSetting
@@ -140,6 +142,7 @@ public struct EditCalendarAppearanceSettingParams {
     public var showHoliday: Bool?
     public var showLunarCalendarDate: Bool?
     public var is24hourForm: Bool?
+    public var showUncompletedTodos: Bool?
     
     // general
     public var hapticEffectIsOn: Bool?
@@ -177,6 +180,7 @@ public struct EditCalendarAppearanceSettingParams {
             || self.showHoliday != nil
             || self.showLunarCalendarDate != nil
             || self.is24hourForm != nil
+            || self.showUncompletedTodos != nil
     }
     
     private var isValidGeneralValues: Bool {
