@@ -58,6 +58,7 @@ extension AppSettingRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(settingBeforeRefresh.defaultTagColor.holiday, "old_holiday")
         XCTAssertEqual(settingBeforeRefresh.defaultTagColor.default, "old_default")
+        XCTAssertEqual(settingBeforeRefresh.calendar.showUncompletedTodos, true)
         XCTAssertEqual(setting.defaultTagColor.holiday, "holiday_color")
         XCTAssertEqual(setting.defaultTagColor.default, "default_color")
         
