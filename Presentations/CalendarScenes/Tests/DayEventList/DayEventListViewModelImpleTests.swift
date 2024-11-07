@@ -25,6 +25,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubScheduleUsecase: StubScheduleEventUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var stubTagUsecase: StubEventTagUsecase!
+    private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyRouter: SpyRouter!
     
     override func setUpWithError() throws {
@@ -32,6 +33,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTodoUsecase = .init()
         self.stubScheduleUsecase = .init()
         self.stubTagUsecase = .init()
+        self.stubUISettingUsecase = .init()
         self.spyRouter = .init()
     }
     
@@ -41,6 +43,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubScheduleUsecase = nil
         self.stubForemostEventUsecase = nil
         self.stubTagUsecase = nil
+        self.stubUISettingUsecase = nil
         self.spyRouter = nil
     }
     
@@ -63,14 +66,13 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
         
-        let uiSettingUsecase = StubUISettingUsecase()
         var setting = AppearanceSettings(
             calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
             defaultTagColor: .init(holiday: "", default: "")
         )
         setting.calendar.is24hourForm = true
-        uiSettingUsecase.stubAppearanceSetting = setting
-        _ = uiSettingUsecase.loadSavedAppearanceSetting()
+        self.stubUISettingUsecase.stubAppearanceSetting = setting
+        _ = self.stubUISettingUsecase.loadSavedAppearanceSetting()
         
         self.stubForemostEventUsecase = .init(foremostId: foremostEventId)
         self.stubForemostEventUsecase.refresh()
@@ -82,7 +84,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             scheduleEventUsecase: self.stubScheduleUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
             eventTagUsecase: self.stubTagUsecase,
-            uiSettingUsecase: uiSettingUsecase
+            uiSettingUsecase: self.stubUISettingUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -645,6 +647,8 @@ extension DayEventListViewModelImpleTests {
     }
 }
 
+// TODO: show formost
+
 extension DayEventListViewModelImpleTests {
     
     func testViewModel_provideForemostEventModelIfExists() {
@@ -669,6 +673,89 @@ extension DayEventListViewModelImpleTests {
         let formostEventTagColor = foremosts.map { $0?.tagColor }
         XCTAssertEqual(foremostEventIds, [nil, "current-todo-1", nil])
         XCTAssertEqual(formostEventTagColor, [nil, .default, nil])
+    }
+}
+
+extension DayEventListViewModelImpleTests {
+    
+    private func makeViewModelWithUncompletedTodoAndWithInitialListLoaded(
+    ) -> DayEventListViewModelImple {
+        let uncompleted = [
+            [TodoEvent.dummy(1), TodoEvent.dummy(2)],
+            [TodoEvent.dummy(1)]
+        ]
+        self.stubTodoUsecase.stubUncompletedTodos = uncompleted
+        return self.makeViewModelWithInitialListLoaded()
+    }
+    
+    // 완료되지않은 할일 존재하는 경우 노출
+    func testViewModel_whenUncompletedTodoExists_showList() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일 존재시에 노출")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithUncompletedTodoAndWithInitialListLoaded()
+        
+        // when
+        let uncompleteds = self.waitOutputs(expect, for: viewModel.uncompletedTodoEventModels) {
+            viewModel.refreshUncompletedTodoEvents()
+            viewModel.refreshUncompletedTodoEvents()
+        }
+        
+        // then
+        let ids = uncompleteds.map { ts in ts.map { $0.eventIdentifier } }
+        XCTAssertEqual(ids, [
+            ["id:1", "id:2"], ["id:1"]
+        ])
+    }
+    
+    // 완료되지않은 할일 노출 옵션 꺼진경우 완료되지않은 할일 존재하더라도 미노출
+    func testViewModel_whenShowUncompletedOptionsIsOff_hideList() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일 노출옵션 꺼진경우 리스트 미노출")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithUncompletedTodoAndWithInitialListLoaded()
+        
+        // when
+        let uncompleteds = self.waitOutputs(expect, for: viewModel.uncompletedTodoEventModels) {
+            viewModel.refreshUncompletedTodoEvents()
+            
+            _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(
+                .init() |> \.showUncompletedTodos .~ false
+            )
+        }
+        
+        // then
+        let ids = uncompleteds.map { ts in ts.map { $0.eventIdentifier } }
+        XCTAssertEqual(ids, [
+            ["id:1", "id:2"], []
+        ])
+    }
+    
+    // 완료되지않은 할일이 foremost 이벤트로 등록된 경우 목록에서 미노출
+    func testViewModel_whenFormostEventIsUncompletedTodo_hideFromList() {
+        // given
+        let expect = expectation(description: "제일 중요 이벤트가 완료되지않은 할일인 경우, 완료되지않은 할일 목록에서 미노출")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithUncompletedTodoAndWithInitialListLoaded()
+        
+        // when
+        let uncompleteds = self.waitOutputs(expect, for: viewModel.uncompletedTodoEventModels, timeout: 0.1) {
+            viewModel.refreshUncompletedTodoEvents()
+            
+            Task {
+                try await self.stubForemostEventUsecase.update(
+                    foremost: .init("id:1", true)
+                )
+                
+                try await self.stubForemostEventUsecase.remove()
+            }
+        }
+        
+        // then
+        let ids = uncompleteds.map { ts in ts.map { $0.eventIdentifier } }
+        XCTAssertEqual(ids, [
+            ["id:1", "id:2"], ["id:2"], ["id:1", "id:2"]
+        ])
     }
 }
 
@@ -721,5 +808,19 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
     var didRemoveTodoWithParamsCallback: ((String, Bool) -> Void)?
     override func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
         self.didRemoveTodoWithParamsCallback?(id, onlyThisTime)
+    }
+    
+    private let fakeUncompletedTodos = CurrentValueSubject<[TodoEvent]?, Never>(nil)
+    var stubUncompletedTodos = [[TodoEvent]]()
+    override func refreshUncompletedTodos() {
+        guard !self.stubUncompletedTodos.isEmpty else { return }
+        let first = self.stubUncompletedTodos.removeFirst()
+        self.fakeUncompletedTodos.send(first)
+    }
+    
+    override var uncompletedTodos: AnyPublisher<[TodoEvent], Never> {
+        return self.fakeUncompletedTodos
+            .compactMap { $0 }
+            .eraseToAnyPublisher()
     }
 }
