@@ -32,7 +32,13 @@ class EventListAppearnaceSettingViewModelTests: BaseTestCase, PublisherWaitable 
     }
     
     private var dummySetting: EventListAppearanceSetting {
-        return .init(eventTextAdditionalSize: 3, showHoliday: true, showLunarCalendarDate: true, is24hourForm: true, dimOnPastEvent: true)
+        return .init(
+            eventTextAdditionalSize: 3,
+            showHoliday: true,
+            showLunarCalendarDate: true,
+            is24hourForm: true,
+            showUncompletedTodos: true
+        )
     }
     
     private func makeViewModel() -> EventListAppearnaceSettingViewModelImple {
@@ -203,5 +209,21 @@ extension EventListAppearnaceSettingViewModelTests {
         
         // then
         XCTAssertEqual(self.spyUsecase.didChangeAppearanceSetting?.calendar.is24hourForm, false)
+    }
+    
+    func testViewModel_toggleUncompletedTodos() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일 노출여부 토글")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isShows = self.waitOutputs(expect, for: viewModel.showUncompletedTodo) {
+            viewModel.toggleShowUncompletedTodos(false)
+            viewModel.toggleShowUncompletedTodos(true)
+        }
+        
+        // then
+        XCTAssertEqual(isShows, [true, false, true])
     }
 }

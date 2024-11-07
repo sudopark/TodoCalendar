@@ -62,6 +62,7 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         eventListSettingHandler.toggleIsShowHolidayName = eventListAppearanceSettingViewModel.toggleShowHolidayName(_:)
         eventListSettingHandler.toggleShowLunarCalendarDate = eventListAppearanceSettingViewModel.toggleShowLunarCalendarDate(_:)
         eventListSettingHandler.toggleIs24HourFom = eventListAppearanceSettingViewModel.toggleIsShowTimeWith24HourForm(_:)
+        eventListSettingHandler.toggleShowUncompletedTodo = eventListAppearanceSettingViewModel.toggleShowUncompletedTodos(_:)
         
         let appearanceEventHandler = AppearanceSettingViewEventHandler()
         appearanceEventHandler.changeTimeZone = viewModel.routeToSelectTimezone

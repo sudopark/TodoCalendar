@@ -20,12 +20,14 @@ final class EventListAppearanceSettingViewState: ObservableObject {
     @Published var showHolidayName: Bool = false
     @Published var showLunarCalendarDate: Bool = false
     @Published var is24hourTimeForm: Bool = false
+    @Published var showUncompletedTodos: Bool = true
     
     init(_ setting: EventListAppearanceSetting) {
         self.additionalFontSizeModel = .init(setting.eventTextAdditionalSize)
         self.showHolidayName = setting.showHoliday
         self.showLunarCalendarDate = setting.showLunarCalendarDate
         self.is24hourTimeForm = setting.is24hourForm
+        self.showUncompletedTodos = setting.showUncompletedTodos
     }
     
     func bind(_ viewModel: any EventListAppearnaceSettingViewModel) {
@@ -67,6 +69,13 @@ final class EventListAppearanceSettingViewState: ObservableObject {
                 self?.is24hourTimeForm = flag
             })
             .store(in: &self.cancellables)
+        
+        viewModel.showUncompletedTodo
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] show in
+                self?.showUncompletedTodos = show
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -79,6 +88,7 @@ final class EventListAppearanceSettingViewEventHandler: ObservableObject {
     var toggleIsShowHolidayName: (Bool) -> Void = { _ in }
     var toggleShowLunarCalendarDate: (Bool) -> Void = { _ in }
     var toggleIs24HourFom: (Bool) -> Void = { _ in }
+    var toggleShowUncompletedTodo: (Bool) -> Void = { _ in }
 }
 
 
@@ -110,6 +120,9 @@ struct EventListAppearanceSettingView: View {
             
             AppearanceRow("setting.appearance.event._24form".localized(), is24HourFormView)
                 .onReceive(state.$is24hourTimeForm, perform: eventHandler.toggleIs24HourFom)
+            
+            AppearanceRow("setting.appearance.event.sample::uncompleted_todo::toggle".localized(), showUncompletedTodoView)
+                .onReceive(state.$showUncompletedTodos, perform: eventHandler.toggleShowUncompletedTodo)
             
         }
         .padding(.top, 20)
@@ -272,6 +285,11 @@ struct EventListAppearanceSettingView: View {
     
     private var is24HourFormView: some View {
         Toggle("", isOn: $state.is24hourTimeForm)
+            .labelsHidden()
+    }
+    
+    private var showUncompletedTodoView: some View {
+        Toggle("", isOn: $state.showUncompletedTodos)
             .labelsHidden()
     }
 }

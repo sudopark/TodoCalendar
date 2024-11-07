@@ -18,18 +18,20 @@ struct EventListAppearanceSetting {
     let showHoliday: Bool
     let showLunarCalendarDate: Bool
     let is24hourForm: Bool
+    let showUncompletedTodos: Bool
     
     init(
         eventTextAdditionalSize: CGFloat,
         showHoliday: Bool,
         showLunarCalendarDate: Bool,
-        is24hourForm: Bool, 
-        dimOnPastEvent: Bool
+        is24hourForm: Bool,
+        showUncompletedTodos: Bool
     ) {
         self.eventTextAdditionalSize = eventTextAdditionalSize
         self.showHoliday = showHoliday
         self.showLunarCalendarDate = showLunarCalendarDate
         self.is24hourForm = is24hourForm
+        self.showUncompletedTodos = showUncompletedTodos
     }
     
     init(_ setting: CalendarAppearanceSettings) {
@@ -37,6 +39,7 @@ struct EventListAppearanceSetting {
         self.showHoliday = setting.showHoliday
         self.showLunarCalendarDate = setting.showLunarCalendarDate
         self.is24hourForm = setting.is24hourForm
+        self.showUncompletedTodos = setting.showUncompletedTodos
     }
 }
 
@@ -76,7 +79,9 @@ protocol EventListAppearnaceSettingViewModel: AnyObject, Sendable {
     func toggleShowHolidayName(_ show: Bool)
     func toggleShowLunarCalendarDate(_ show: Bool)
     func toggleIsShowTimeWith24HourForm(_ isOn: Bool)
+    func toggleShowUncompletedTodos(_ show: Bool)
     
+    var showUncompletedTodo: AnyPublisher<Bool, Never> { get }
     var eventListSamepleModel: AnyPublisher<EventListAppearanceSampleModel, Never> { get }
     var eventFontIncreasedSizeModel: AnyPublisher<EventTextAdditionalSizeModel, Never> { get }
     var isShowHolidayName: AnyPublisher<Bool, Never> { get }
@@ -156,6 +161,15 @@ extension EventListAppearnaceSettingViewModelImple {
         self.updateSetting(params)
     }
     
+    func toggleShowUncompletedTodos(_ show: Bool) {
+        guard let setting = self.subject.setting.value,
+              setting.showUncompletedTodos != show
+        else { return }
+        
+        let params = EditCalendarAppearanceSettingParams() |> \.showUncompletedTodos .~ show
+        self.updateSetting(params)
+    }
+    
     private func updateSetting(_ params: EditCalendarAppearanceSettingParams) {
         
         do {
@@ -168,6 +182,14 @@ extension EventListAppearnaceSettingViewModelImple {
 }
 
 extension EventListAppearnaceSettingViewModelImple {
+    
+    var showUncompletedTodo: AnyPublisher<Bool, Never> {
+        return self.subject.setting
+            .compactMap { $0 }
+            .map { $0.showUncompletedTodos }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     var eventListSamepleModel: AnyPublisher<EventListAppearanceSampleModel, Never> {
         return self.subject.setting
