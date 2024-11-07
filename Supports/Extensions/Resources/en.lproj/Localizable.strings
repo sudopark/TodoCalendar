@@ -277,6 +277,7 @@
 "setting.appearance.event.sample::description" = "description";
 "setting.appearance.event.sample::christmas" = "Christmas";
 "setting.appearance.event.sample::sometime" = "Some time";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Show uncompleted To-do";
 "setting.appearance.event.boldText" = "Bold text";
 "setting.appearance.event.eventColor" = "Event color";
 "setting.timezone::title" = "TimeZone";
