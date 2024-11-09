@@ -34,19 +34,19 @@
 "date_form::24off_h:mm" = "h:mm";
 "date_form::24on_H:mm" = "H:mm";
 "date_form::d_E_" = "d (E)";
-"date_form::MMM_d_HH:mm" = "MMM d HH:mm";
-"date_form::MMM_d" = "MMM d";
+"date_form::MMM_d_HH:mm" = "MMM d일 HH:mm";
+"date_form::MMM_d" = "MMM d일";
 "date_form::yyyy_MM_dd_E_" = "yyyy.MM.dd (E)";
 "date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd hh:mm";
 "date_form.yyyy" = "yyyy";
-"date_form.MMM_dd_E" = "MMM dd (E)";
+"date_form.MMM_dd_E" = "MMM dd일 (E)";
 "date_form.HH:mm" = "HH:mm";
 "date_form.yyyy_MM_dd" = "yyyy.MM.dd";
 "date_form.yyyy_MMM_dd" = "yyyy MMM dd";
 "date_form.MMM" = "MMM";
 "date_form.MMMM" = "MMMM";
 "date_form.EEEE" = "EEEE";
-"date_form.EEE_MMM_d" = "EEE, MMM d";
+"date_form.EEE_MMM_d" = "EEE, MMM d일";
 "date_form.MMM_yyyy" = "yyyy MMM";
  
 // MARK: - event
@@ -110,6 +110,7 @@
 "calendar::uncompletedTodos:title" = "완료되지 않은 할일";
 "calendar::event_time::todo" = "할일";
 "calendar::event_time::allday" = "하루종일";
+"calendar::event_time::allday::with" = "%@ 하루종일";
 "calendar::event_time::period:some_days" = "%d일";
 "calendar::event_time::period:some_minutes" = "%d분";
 "calendar::event_time::period:some_hours" = "%d시간";

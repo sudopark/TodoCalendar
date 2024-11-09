@@ -212,7 +212,8 @@ extension DayEventListViewModelImple {
             case let todo as TodoEvent:
                 let calendarEvent = TodoCalendarEvent(todo, in: timeZone, isForemost: true)
                 return TodoEventCellViewModel(
-                    calendarEvent, in: todayRange, timeZone, is24Form
+                    calendarEvent, in: todayRange, timeZone, is24Form,
+                    forceShowEventDateDurationText: true
                 )
                 
             case let schedule as ScheduleEvent:
@@ -221,7 +222,8 @@ extension DayEventListViewModelImple {
                 ).first
                 return calendarEvent.flatMap { event in
                     return ScheduleEventCellViewModel(
-                        event, in: todayRange, timeZone: timeZone, is24Form
+                        event, in: todayRange, timeZone: timeZone, is24Form,
+                        forceShowEventDateDurationText: true
                     )
                 }
             default: return nil
@@ -252,7 +254,7 @@ extension DayEventListViewModelImple {
             return todos.map { TodoCalendarEvent($0, in: timeZone) }
                 .sortedByCreateTime()
                 .compactMap {
-                    TodoEventCellViewModel($0, in: todayRange, timeZone, is24Form)
+                    TodoEventCellViewModel($0, in: todayRange, timeZone, is24Form, forceShowEventDateDurationText: true)
                 }
         }
         let todoCells = Publishers.CombineLatest4(
