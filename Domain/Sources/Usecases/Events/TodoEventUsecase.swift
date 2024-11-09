@@ -93,6 +93,7 @@ extension TodoEventUsecaseImple {
         self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
             ($0 ?? [:]) |> key(eventId) .~ updatedEvent
         }
+        self.updateUncompletedTodoAtListIfNeed(updatedEvent)
         return updatedEvent
     }
     
@@ -110,6 +111,7 @@ extension TodoEventUsecaseImple {
             |> key(eventId) .~ replaceResult.nextRepeatingTodoEvent
             |> key(replaceResult.newTodoEvent.uuid) .~ replaceResult.newTodoEvent
         }
+        self.updateUncompletedTodoAtListIfNeed(replaceResult.newTodoEvent)
         return replaceResult.newTodoEvent
     }
     
@@ -126,6 +128,7 @@ extension TodoEventUsecaseImple {
                 ($0 ?? [:]) |> key(next.uuid) .~ next
             }
         }
+        self.removeUncompletedTodoAtListIfNeed(eventId)
         return doneEvent
     }
     
@@ -149,6 +152,7 @@ extension TodoEventUsecaseImple {
             ($0 ?? [:])
             |> key(id) .~ removeResult.nextRepeatingTodo
         }
+        self.removeUncompletedTodoAtListIfNeed(id)
     }
     
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
@@ -252,5 +256,24 @@ extension TodoEventUsecaseImple {
         return self.sharedDataStore.observe([TodoEvent].self, key: shareKey)
             .map { $0 ?? [] }
             .eraseToAnyPublisher()
+    }
+    
+    private func updateUncompletedTodoAtListIfNeed(_ todo: TodoEvent) {
+        let shareKey = ShareDataKeys.uncompletedTodos.rawValue
+        self.sharedDataStore.update([TodoEvent].self, key: shareKey) { todos in
+            var todos = todos ?? []
+            guard let index = todos.firstIndex(where: { $0.eventId == todo.uuid })
+            else { return todos }
+            
+            todos[index] = todo
+            return todos
+        }
+    }
+    
+    private func removeUncompletedTodoAtListIfNeed(_ todoId: String) {
+        let shareKey = ShareDataKeys.uncompletedTodos.rawValue
+        self.sharedDataStore.update([TodoEvent].self, key: shareKey) {
+            return ($0 ?? []).filter { $0.uuid != todoId }
+        }
     }
 }
