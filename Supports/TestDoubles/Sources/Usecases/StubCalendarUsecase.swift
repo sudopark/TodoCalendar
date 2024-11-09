@@ -21,6 +21,9 @@ open class StubCalendarUsecase: CalendarUsecase {
     }
     
     private let currentDaySubject = CurrentValueSubject<CalendarComponent.Day?, Never>(nil)
+    public func makeFakeDayChanedEvent(_ newDay: CalendarComponent.Day) {
+        self.currentDaySubject.send(newDay)
+    }
     open var currentDay: AnyPublisher<CalendarComponent.Day, Never> {
         return self.currentDaySubject
             .compactMap { $0 }
