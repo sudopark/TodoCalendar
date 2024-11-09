@@ -34,6 +34,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let foremostEventusecase: any ForemostEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let migrationUsecase: any TemporaryUserDataMigrationUescase
+    private let uiSettingUsecase: any UISettingUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
@@ -47,7 +48,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         scheduleEventUsecase: any ScheduleEventUsecase,
         foremostEventusecase: any ForemostEventUsecase,
         eventTagUsecase: any EventTagUsecase,
-        migrationUsecase: any TemporaryUserDataMigrationUescase
+        migrationUsecase: any TemporaryUserDataMigrationUescase,
+        uiSettingUsecase: any UISettingUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -57,6 +59,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.foremostEventusecase = foremostEventusecase
         self.eventTagUsecase = eventTagUsecase
         self.migrationUsecase = migrationUsecase
+        self.uiSettingUsecase = uiSettingUsecase
         
         self.internalBind()
     }
@@ -216,6 +219,8 @@ extension CalendarViewModelImple {
         self.eventTagUsecase.prepare()
         
         self.foremostEventusecase.refresh()
+        
+        self.bindUncompletedTodoRefresh()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
@@ -284,6 +289,35 @@ extension CalendarViewModelImple {
             currentMonth.nextMonth()
         ]
         return TotalMonthsInRange(totalMonths: months, focusedIndex: 1)
+    }
+}
+
+
+// MARK: - uncompleted todo
+
+extension CalendarViewModelImple {
+    
+    private func bindUncompletedTodoRefresh() {
+        
+        let refreshAfterEnterForeground = NotificationCenter.default.publisher(
+            for: UIApplication.willEnterForegroundNotification
+        ).map { _ in }
+        
+        let refreshWhenDateChanged = self.calendarUsecase.currentDay.removeDuplicates().dropFirst().map { _ in }
+        
+        let refreshWithFirst = Publishers
+            .Merge(refreshAfterEnterForeground, refreshWhenDateChanged)
+            .prepend(())
+        
+        Publishers.CombineLatest(
+            refreshWithFirst,
+            self.uiSettingUsecase.currentCalendarUISeting.map { $0.showUncompletedTodos }
+        )
+        .filter { $1 }
+        .sink(receiveValue: { [weak self] _, _ in
+            self?.todoEventUsecase.refreshUncompletedTodos()
+        })
+        .store(in: &self.cancellables)
     }
 }
 

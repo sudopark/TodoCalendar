@@ -48,7 +48,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             foremostEventusecase: self.usecaseFactory.makeForemostEventUsecase(),
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
-            migrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase
+            migrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase,
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
         )
         viewModel.listener = listener
         let viewController = CalendarViewController(

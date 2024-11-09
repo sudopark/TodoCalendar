@@ -21,6 +21,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
+    private var stubCalendarUsecase: StubCalendarUsecase!
     private var spyHolidayUsecase: StubHolidayUsecase!
     private var spyTodoUsecase: PrivateSpyTodoEventUsecase!
     private var spyScheduleUsecase: PrivateSpyScheduleEventUsecase!
@@ -28,6 +29,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyEventTagUsecase: PrivateSpyEventTagUsecase!
     private var spyForemostEventUsecase: StubForemostEventUsecase!
     private var stubMigrationUsecase: PrivateStubMigrationUsecase!
+    private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyListener: SpyListener!
     
     override func setUpWithError() throws {
@@ -40,11 +42,13 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventTagUsecase = .init()
         self.spyForemostEventUsecase = .init(foremostId: .init("some", true))
         self.stubMigrationUsecase = .init()
+        self.stubUISettingUsecase = .init()
         self.spyListener = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
+        self.stubCalendarUsecase = nil
         self.spyHolidayUsecase = nil
         self.spyRouter = nil
         self.spyTodoUsecase = nil
@@ -53,6 +57,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventTagUsecase = nil
         self.spyForemostEventUsecase = nil
         self.stubMigrationUsecase = nil
+        self.stubUISettingUsecase = nil
         self.spyListener = nil
     }
     
@@ -61,6 +66,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     ) -> CalendarViewModelImple {
         
         let calendarUsecase = StubCalendarUsecase(today: today)
+        self.stubCalendarUsecase = calendarUsecase
         
         let viewModel = CalendarViewModelImple(
             calendarUsecase: calendarUsecase,
@@ -70,7 +76,8 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             scheduleEventUsecase: self.spyScheduleUsecase,
             foremostEventusecase: self.spyForemostEventUsecase,
             eventTagUsecase: self.spyEventTagUsecase,
-            migrationUsecase: self.stubMigrationUsecase
+            migrationUsecase: self.stubMigrationUsecase,
+            uiSettingUsecase: self.stubUISettingUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -579,6 +586,91 @@ extension CalendarViewModelImpleTests {
     }
 }
 
+// MARK: - refresh uncompleted todos
+
+extension CalendarViewModelImpleTests {
+    
+    private func makeViewModelWithShowUncompletedTodo(show: Bool) -> CalendarViewModelImple {
+        _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(
+            .init() |> \.showUncompletedTodos .~ show
+        )
+        return self.makeViewModel()
+    }
+    
+    func testViewModel_whenPrepare_refreshUncompletedTodos() {
+        // given
+        let expect = expectation(description: "prepare시에 완료되지 않은 할일 조회")
+        let viewModel = self.makeViewModelWithShowUncompletedTodo(show: true)
+        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = {
+            expect.fulfill()
+        }
+        
+        // when
+        viewModel.prepare()
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
+    
+    // prepare시에 완료되지않은 할일 노출 옵션 꺼진 경우 조회 안함
+    func testViewModel_whenPrepareAndShowUncompletedTodoOptionIsOff_notRefresh() {
+        // given
+        let expect = expectation(description: "prepare시에 완료되지않은 할일 노출 옵션 꺼진 경우 조회 안함")
+        expect.isInverted = true
+        let viewModel = self.makeViewModelWithShowUncompletedTodo(show: false)
+        
+        // when
+        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = {
+            expect.fulfill()
+        }
+        viewModel.prepare()
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
+    
+    // 완료되지않은 할일 옵션이 off -> on 으로 변경된 경우 할일 조회
+    func testViewModel_whenShowUncompletedTodoOptionChangedToOn_refresh() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일 노출 옵션이 off -> on으로 변경된경우 refresh")
+        let viewModel = self.makeViewModelWithShowUncompletedTodo(show: false)
+        viewModel.prepare()
+        
+        // when
+        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = {
+            expect.fulfill()
+        }
+        _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(
+            .init() |> \.showUncompletedTodos .~ true
+        )
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
+    
+    func testViewModel_whenEnterForegroundOrDateChaned_refresh() {
+        // given
+        let expect = expectation(description: "포그라운드 복귀하거나, 날짜 변경된 경우 refresh")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithShowUncompletedTodo(show: true)
+        viewModel.prepare()
+        
+        // when
+        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = {
+            expect.fulfill()
+        }
+        NotificationCenter.default.post(
+            Notification(name: UIApplication.willEnterForegroundNotification)
+        )
+        self.stubCalendarUsecase.makeFakeDayChanedEvent(
+            .init(year: 2023, month: 03, day: 04, weekDay: 3)
+        )
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
+}
+
 private extension CalendarViewModelImpleTests {
     
     class SpyRouter: BaseSpyRouter, CalendarViewRouting, @unchecked Sendable {
@@ -666,6 +758,11 @@ private extension CalendarViewModelImpleTests {
             return self.todoEventsInRange
                 .compactMap { $0 }
                 .eraseToAnyPublisher()
+        }
+        
+        var didRefreshUncompletedTodoCalledCallback: (() -> Void)?
+        override func refreshUncompletedTodos() {
+            self.didRefreshUncompletedTodoCalledCallback?()
         }
     }
     
