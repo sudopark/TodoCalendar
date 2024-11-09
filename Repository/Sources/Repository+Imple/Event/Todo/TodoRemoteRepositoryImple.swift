@@ -224,9 +224,34 @@ extension TodoRemoteRepositoryImple {
         return mapper.todo
     }
     
+    public func loadUncompletedTodos() -> AnyPublisher<[TodoEvent], any Error> {
+        let now = Date()
+        return self.loadTodosWithReplaceCached { [weak self] in
+            return try await self?.cacheStorage.loadUncompletedTodos(now)
+        } thenFromRemote: { [weak self] in
+            return try await self?.loadUncompletedTodosFromRemote(now)
+        } withRefreshCache: { [weak self] _, refreshed in
+            if let refreshed {
+                try? await self?.cacheStorage.updateTodoEvents(refreshed)
+            }
+        }
+        .eraseToAnyPublisher()
+    }
+    
+    private func loadUncompletedTodosFromRemote(_ now: Date) async throws -> [TodoEvent] {
+        let params = ["refTime": now.timeIntervalSince1970]
+        let mapper: [TodoEventMapper] = try await self.remote.request(
+            .get,
+            TodoAPIEndpoints.uncompleteds,
+            parameters: params
+        )
+        return mapper.map { $0.todo }
+    }
+    
     private func loadTodosWithReplaceCached(
         startWithCached cacheOperation: @Sendable @escaping () async throws -> [TodoEvent]?,
-        thenFromRemote remoteOperation: @Sendable @escaping () async throws -> [TodoEvent]?
+        thenFromRemote remoteOperation: @Sendable @escaping () async throws -> [TodoEvent]?,
+        withRefreshCache replaceCacheOperation: (@Sendable ([TodoEvent]?, [TodoEvent]?) async -> Void)? = nil
     ) -> AnyPublisher<[TodoEvent], any Error> {
         
         return AnyPublisher<[TodoEvent]?, any Error>.create { subscriber in
@@ -237,7 +262,11 @@ extension TodoRemoteRepositoryImple {
                 }
                 do {
                     let refreshed = try await remoteOperation()
-                    await self?.replaceCached(cached, refreshed)
+                    if let customReplaceOperation = replaceCacheOperation {
+                        await customReplaceOperation(cached, refreshed)
+                    } else {
+                        await self?.replaceCached(cached, refreshed)
+                    }
                     subscriber.send(refreshed)
                     subscriber.send(completion: .finished)
                 } catch {

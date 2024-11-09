@@ -109,4 +109,12 @@ open class StubTodoEventUsecase: TodoEventUsecase {
             .mapNever()
             .eraseToAnyPublisher()
     }
+    
+    open func refreshUncompletedTodos() {
+        
+    }
+    
+    open var uncompletedTodos: AnyPublisher<[TodoEvent], Never> {
+        return Empty().eraseToAnyPublisher()
+    }
 }

@@ -107,8 +107,10 @@
 // MARK: - calendar
 
 "calendar::foremostevent:title" = "Foremost Event";
+"calendar::uncompletedTodos:title" = "Uncompleted To-do";
 "calendar::event_time::todo" = "Todo";
 "calendar::event_time::allday" = "All day";
+"calendar::event_time::allday::with" = "%@ all day";
 "calendar::event_time::period:some_days" = "%ddays";
 "calendar::event_time::period:some_minutes" = "%dminutes";
 "calendar::event_time::period:some_hours" = "%dhours";
@@ -277,6 +279,7 @@
 "setting.appearance.event.sample::description" = "description";
 "setting.appearance.event.sample::christmas" = "Christmas";
 "setting.appearance.event.sample::sometime" = "Some time";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Show uncompleted To-do";
 "setting.appearance.event.boldText" = "Bold text";
 "setting.appearance.event.eventColor" = "Event color";
 "setting.timezone::title" = "TimeZone";

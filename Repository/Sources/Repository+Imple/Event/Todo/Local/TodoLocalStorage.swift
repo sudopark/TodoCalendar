@@ -41,6 +41,7 @@ public protocol TodoLocalStorage: Sendable {
     func updateDoneTodos(_ dones: [DoneTodoEvent]) async throws
     func todoToggleState(_ id: String) async throws -> TodoTogglingState
     func updateTodoToggleState(_ id: String, _ params: TodoToggleStateUpdateParamas) async throws
+    func loadUncompletedTodos(_ now: Date) async throws -> [TodoEvent]
 }
 
 public final class TodoLocalStorageImple: TodoLocalStorage, Sendable {
@@ -362,5 +363,11 @@ extension TodoLocalStorageImple {
                 try db.insert(ToggleTable.self, entities: [state], shouldReplace: true)
             }
         }
+    }
+    
+    public func loadUncompletedTodos(_ now: Date) async throws -> [TodoEvent] {
+        let timeQuery = Times.selectAll { $0.timeUpperInterval < now.timeIntervalSince1970 }
+        let todoQuery = Todo.selectAll()
+        return try await self.loadTodoEvents(timeQuery, todoQuery)
     }
 }

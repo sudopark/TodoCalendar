@@ -54,9 +54,11 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func makeEvent()
     func makeEventByTemplate()
     func showDoneTodoList()
+    func refreshUncompletedTodoEvents()
     
     // presenter
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> { get }
+    var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> { get }
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> { get }
 }
@@ -184,6 +186,10 @@ extension DayEventListViewModelImple {
     func showDoneTodoList() {
         self.router?.showDoneTodoList()
     }
+    
+    func refreshUncompletedTodoEvents() {
+        self.todoEventUsecase.refreshUncompletedTodos()
+    }
 }
 
 
@@ -206,7 +212,8 @@ extension DayEventListViewModelImple {
             case let todo as TodoEvent:
                 let calendarEvent = TodoCalendarEvent(todo, in: timeZone, isForemost: true)
                 return TodoEventCellViewModel(
-                    calendarEvent, in: todayRange, timeZone, is24Form
+                    calendarEvent, in: todayRange, timeZone, is24Form,
+                    forceShowEventDateDurationText: true
                 )
                 
             case let schedule as ScheduleEvent:
@@ -215,7 +222,8 @@ extension DayEventListViewModelImple {
                 ).first
                 return calendarEvent.flatMap { event in
                     return ScheduleEventCellViewModel(
-                        event, in: todayRange, timeZone: timeZone, is24Form
+                        event, in: todayRange, timeZone: timeZone, is24Form,
+                        forceShowEventDateDurationText: true
                     )
                 }
             default: return nil
@@ -228,24 +236,54 @@ extension DayEventListViewModelImple {
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .map(asCellViewModel)
-        
-        let applyTag: ((any EventCellViewModel)?) -> AnyPublisher<(any EventCellViewModel)?, Never>
-        applyTag = { [weak self] model in
-            guard let self = self else { return Empty().eraseToAnyPublisher() }
-            guard let tagId = model?.tagId.customTagId else { return Just(model).eraseToAnyPublisher() }
-            return self.eventTagUsecase.eventTag(id: tagId)
-                .map { tag -> (any EventCellViewModel)? in
-                    var model = model
-                    model?.applyTagColor(tag)
-                    return model
+
+        let formostAsArray = foremostModel.map { fm in fm.map { [$0] } ?? [] }.eraseToAnyPublisher()
+        return self.eventTagUsecase
+            .cellWithTagInfo(formostAsArray)
+            .map { $0.first }
+            .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
+            .eraseToAnyPublisher()
+    }
+    
+    var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> {
+        let asCellViewModels: (
+            [TodoEvent], CalendarComponent.Day, TimeZone, Bool
+        ) -> [any EventCellViewModel]?
+        asCellViewModels = { todos, today, timeZone, is24Form in
+            guard let todayRange = today.dayRange(timeZone) else { return nil }
+            return todos.map { TodoCalendarEvent($0, in: timeZone) }
+                .sortedByCreateTime()
+                .compactMap {
+                    TodoEventCellViewModel($0, in: todayRange, timeZone, is24Form, forceShowEventDateDurationText: true)
                 }
-                .eraseToAnyPublisher()
         }
+        let todoCells = Publishers.CombineLatest4(
+            self.notFormostUncompletedTodos,
+            self.calendarUsecase.currentDay,
+            self.calendarSettingUsecase.currentTimeZone,
+            self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
+        )
+        .compactMap(asCellViewModels)
+        .eraseToAnyPublisher()
         
-        return foremostModel
-        .map(applyTag)
-        .switchToLatest()
-        .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
+        return self.eventTagUsecase.cellWithTagInfo(todoCells)
+            .filterTagActivated(self.eventTagUsecase) { $0.tagId }
+            .map { ts in ts.compactMap { $0 as? TodoEventCellViewModel } }
+            .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
+            .eraseToAnyPublisher()
+    }
+    
+    private var notFormostUncompletedTodos: AnyPublisher<[TodoEvent], Never>  {
+        let transform: (Bool, [TodoEvent], (any ForemostMarkableEvent)?) -> [TodoEvent] = { show, todos, formost in
+            guard show else { return [] }
+            return todos.filter { $0.uuid != formost?.eventId }
+        }
+        return Publishers.CombineLatest3(
+            self.uiSettingUsecase.currentCalendarUISeting.map { $0.showUncompletedTodos },
+            self.todoEventUsecase.uncompletedTodos,
+            self.foremostEventUsecase.foremostEvent
+        )
+        .map(transform)
         .eraseToAnyPublisher()
     }
     
@@ -265,10 +303,11 @@ extension DayEventListViewModelImple {
     
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> {
         
-        return self.eventTagUsecase.cellWithTagInfo(self.cellViewModelsFromEvent)
-        .filterTagActivated(self.eventTagUsecase) { $0.tagId }
-        .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
-        .eraseToAnyPublisher()
+        return self.eventTagUsecase
+            .cellWithTagInfo(self.cellViewModelsFromEvent)
+            .filterTagActivated(self.eventTagUsecase) { $0.tagId }
+            .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
+            .eraseToAnyPublisher()
     }
     
     private typealias CurrentAndEvents = ([any EventCellViewModel], [any EventCellViewModel])

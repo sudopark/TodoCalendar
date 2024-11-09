@@ -161,6 +161,32 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(event?.eventTagId, .custom("new tag"))
         XCTAssertEqual(event?.time, .at(22))
     }
+    
+    func testReposiotry_loadUncompletedTodos() async throws {
+        // given
+        let now = Date()
+        let repository = self.makeRepository()
+        func stubTodos() async throws {
+            let pastTodos = (-4..<0).map { int in
+                return TodoEvent(uuid: "id:\(int)", name: "todo:\(int)")
+                    |> \.time .~ .at(now.timeIntervalSince1970 - TimeInterval(int+100))
+            }
+            let nowAndFutureTodos = (0..<4).map { int in
+                return TodoEvent(uuid: "id:\(int)", name: "todo:\(int)")
+                    |> \.time .~ .at(now.timeIntervalSince1970 + TimeInterval(int+100))
+            }
+            try await self.localStorage.updateTodoEvents(pastTodos + nowAndFutureTodos)
+        }
+        try await stubTodos()
+        
+        // when
+        let uncompletedTodos = try await repository.loadUncompletedTodos().firstValue(with: 100)
+        
+        
+        // then
+        let uncompletedTodoIds = uncompletedTodos?.map(\.uuid)
+        XCTAssertEqual(uncompletedTodoIds, (-4..<0).map{ "id:\($0)" })
+    }
 }
 
 

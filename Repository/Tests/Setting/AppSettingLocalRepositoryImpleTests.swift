@@ -37,5 +37,6 @@ extension AppSettingLocalRepositoryImpleTests {
         XCTAssertEqual(appearance.calendar.accnetDayPolicy, [
             .holiday: false, .sunday: false, .saturday: false
         ])
+        XCTAssertEqual(appearance.calendar.showUncompletedTodos, true)
     }
 }

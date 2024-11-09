@@ -132,6 +132,14 @@ extension TodoLocalRepositoryImple {
         }
         .eraseToAnyPublisher()
     }
+    
+    public func loadUncompletedTodos() -> AnyPublisher<[TodoEvent], any Error> {
+        return Publishers.create { [weak self] in
+            let now = Date()
+            return try await self?.localStorage.loadUncompletedTodos(now)
+        }
+        .eraseToAnyPublisher()
+    }
 }
 
 

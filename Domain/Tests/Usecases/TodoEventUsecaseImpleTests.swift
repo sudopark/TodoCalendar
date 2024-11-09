@@ -743,7 +743,112 @@ extension TodoEventUsecaseImpleTests {
     }
 }
 
-private final class PrivateTodoRepository: StubTodoEventRepository {
+extension TodoEventUsecaseImpleTests {
+    
+    private func makeUsecaseWithStubUncompleted() -> TodoEventUsecaseImple {
+        let todos1 = (0..<10).map { TodoEvent(uuid: "id:\($0)", name: "name:\($0)") }
+        let todos2 = (10..<20).map { TodoEvent(uuid: "id:\($0)", name: "name:\($0)") }
+        self.stubTodoRepository.stubUncompletedTodos = [todos1, todos2]
+        return self.makeUsecase()
+    }
+    
+    func testUsecase_refreshUncompletedTodos() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일 조회")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecaseWithStubUncompleted()
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos) {
+            usecase.refreshUncompletedTodos()
+            usecase.refreshUncompletedTodos()
+        }
+        
+        // then
+        let idLists = todoLists.map { ts in ts.map { $0.uuid } }
+        XCTAssertEqual(idLists, [
+            [],
+            (0..<10).map { "id:\($0)" },
+            (10..<20).map { "id:\($0)" }
+        ])
+    }
+    
+    func testUsecae_whenAfterUpdateUncompletedTodo_updateList() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일을 업데이트 한 경우, 업데이트해서 결과 전파")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecaseWithStubUncompleted()
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos, timeout: 0.1) {
+            usecase.refreshUncompletedTodos()
+            
+            Task {
+                _ = try await usecase.updateTodoEvent("id:4", .init() |> \.name .~ "new name")
+            }
+        }
+        
+        // then
+        let nameLists = todoLists.map { ts in ts.map { $0.name } }
+        XCTAssertEqual(nameLists, [
+            [],
+            (0..<10).map { "name:\($0)" },
+            (0..<4).map { "name:\($0)" } + ["new name"] + (5..<10).map { "name:\($0)" }
+        ])
+    }
+    
+    func testUsecase_whenAfterCompleteUncompletedTodo_removeFromUncompletedTodoList() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일을 완료처리 한 경우, 완료되지않은 할일 목록에서 제거해서 결과 전파")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecaseWithStubUncompleted()
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos, timeout: 0.1) {
+            usecase.refreshUncompletedTodos()
+            
+            Task {
+                _ = try await usecase.completeTodo("id:4")
+            }
+        }
+        
+        // then
+        let nameLists = todoLists.map { ts in ts.map { $0.name } }
+        XCTAssertEqual(nameLists, [
+            [],
+            (0..<10).map { "name:\($0)" },
+            (0..<4).map { "name:\($0)" } + (5..<10).map { "name:\($0)" }
+        ])
+    }
+    
+    func testUsecase_whenAfterRemoveUncompletedTodo_removeFromUncompletedTodoList() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일을 제거한 경우, 완료되지않은 할일 목록에서 제거해서 결과 전파")
+        expect.expectedFulfillmentCount = 4
+        let usecase = self.makeUsecaseWithStubUncompleted()
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos, timeout: 0.1) {
+            usecase.refreshUncompletedTodos()
+            
+            Task {
+                try await usecase.removeTodo("id:4", onlyThisTime: false)
+                try await usecase.removeTodo("id:5", onlyThisTime: true)
+            }
+        }
+        
+        // then
+        let nameLists = todoLists.map { ts in ts.map { $0.name } }
+        XCTAssertEqual(nameLists, [
+            [],
+            (0..<10).map { "name:\($0)" },
+            (0..<4).map { "name:\($0)" } + (5..<10).map { "name:\($0)" },
+            (0..<4).map { "name:\($0)" } + (6..<10).map { "name:\($0)" }
+        ])
+    }
+}
+
+private final class PrivateTodoRepository: StubTodoEventRepository, @unchecked Sendable {
     
     var stubCurrrentTodo: [TodoEvent]?
     override func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error> {
@@ -759,5 +864,15 @@ private final class PrivateTodoRepository: StubTodoEventRepository {
             return Just(stub).mapNever().eraseToAnyPublisher()
         }
         return super.loadTodoEvents(in: range)
+    }
+    
+    var stubUncompletedTodos: [[TodoEvent]] = []
+    override func loadUncompletedTodos() -> AnyPublisher<[TodoEvent], any Error> {
+        guard !stubUncompletedTodos.isEmpty
+        else {
+            return Just([]).mapNever().eraseToAnyPublisher()
+        }
+        let first = self.stubUncompletedTodos.removeFirst()
+        return Just(first).mapNever().eraseToAnyPublisher()
     }
 }

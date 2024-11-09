@@ -170,7 +170,7 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
     private let subject = Subject()
     
     private var appstoreLinkPath: String {
-        return "http://itunes.apple.com/app/id/\(self.appId)"
+        return "https://itunes.apple.com/app/id/\(self.appId)"
     }
     
     private var helpPath_ko: String {

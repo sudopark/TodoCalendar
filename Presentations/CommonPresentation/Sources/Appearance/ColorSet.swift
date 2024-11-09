@@ -41,6 +41,7 @@ public protocol ColorSet: Sendable {
     var eventText: UIColor { get }
     var eventTextSelected: UIColor { get }
     var holidayOrWeekEndWithAccent: UIColor { get }
+    var uncompletedTodo: UIColor { get }
     
     // normal text color
     var text0: UIColor { get }
@@ -85,6 +86,7 @@ public struct DefaultLightColorSet: ColorSet {
     public let eventText: UIColor = UIColor(rgb: 0x45454a)
     public let eventTextSelected: UIColor = UIColor.white
     public let holidayOrWeekEndWithAccent: UIColor = UIColor.red
+    public let uncompletedTodo: UIColor = UIColor(rgb: 0xea4444)
     
     // normal text color
     public let text0: UIColor = UIColor(rgb: 0x323232)
@@ -132,6 +134,7 @@ public struct DefaultDarkColorSet: ColorSet {
     public let eventText: UIColor = UIColor(rgb: 0xe2e4eb)
     public let eventTextSelected: UIColor = UIColor(rgb: 0x151131)
     public let holidayOrWeekEndWithAccent: UIColor = UIColor.red
+    public let uncompletedTodo: UIColor = UIColor(rgb: 0xea4444)
     
     // normal text color
     public let text0: UIColor = UIColor(rgb: 0xf8f8f9)
