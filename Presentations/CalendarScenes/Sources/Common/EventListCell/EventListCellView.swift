@@ -53,8 +53,13 @@ struct EventListCellView: View {
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     
     private let cellViewModel: any EventCellViewModel
-    init(cellViewModel: any EventCellViewModel) {
+    private let isUncompletedTodo: Bool
+    init(
+        cellViewModel: any EventCellViewModel,
+        isUncompletedTodo: Bool = false
+    ) {
         self.cellViewModel = cellViewModel
+        self.isUncompletedTodo = isUncompletedTodo
     }
     
     var body: some View {
@@ -200,6 +205,9 @@ struct EventListCellView: View {
     }
     
     private func eventRightView(_ cellViewModel: any EventCellViewModel) -> some View {
+        let nameColor = self.isUncompletedTodo
+            ? self.appearance.colorSet.uncompletedTodo
+            : self.appearance.colorSet.text0
         return HStack(alignment: .center, spacing: 8) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(cellViewModel.name)
@@ -207,7 +215,7 @@ struct EventListCellView: View {
                     .font(
                         self.appearance.eventTextFontOnList(isForemost: cellViewModel.isForemost).asFont
                     )
-                    .foregroundColor(self.appearance.colorSet.text0.asColor)
+                    .foregroundColor(nameColor.asColor)
                 
                 if let periodDescription = cellViewModel.periodDescription {
                     Text(periodDescription)

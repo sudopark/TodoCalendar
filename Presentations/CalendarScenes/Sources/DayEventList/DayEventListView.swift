@@ -25,6 +25,7 @@ final class DayEventListViewState: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     
     @Published fileprivate var foremostModel: (any EventCellViewModel)?
+    @Published fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
     @Published fileprivate var dayModel: SelectedDayModel?
     @Published fileprivate var cellViewModels: [any EventCellViewModel] = []
     
@@ -38,6 +39,15 @@ final class DayEventListViewState: ObservableObject {
             .sink(receiveValue: { [weak self, weak appearance] model in
                 appearance?.withAnimationIfNeed {
                     self?.foremostModel = model
+                }
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.uncompletedTodoEventModels
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self, weak appearance] models in
+                appearance?.withAnimationIfNeed {
+                    self?.uncompletedTodos = models
                 }
             })
             .store(in: &self.cancellables)
@@ -70,6 +80,7 @@ final class DayEventListViewEventHandler: ObservableObject {
     var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     var showDoneTodoList: () -> Void = { }
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
+    var refreshUncompletedTodos: () -> Void = { }
     
     func bind(
         _ viewModel: any DayEventListViewModel,
@@ -86,6 +97,7 @@ final class DayEventListViewEventHandler: ObservableObject {
         self.requestShowDetail = eventListCellEventHandleViewModel.selectEvent(_:)
         self.showDoneTodoList = viewModel.showDoneTodoList
         self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
+        self.refreshUncompletedTodos = viewModel.refreshUncompletedTodoEvents
     }
 }
 
@@ -137,89 +149,21 @@ struct DayEventListView: View {
         VStack(alignment: .leading, spacing: 16) {
          
             if let foremost = self.state.foremostModel {
-                ForemostEventView(viewModel: foremost)
-                    .eventHandler(\.requestDoneTodo) {
-                        self.isFocusInput = false
-                        eventHandler.requestDoneTodo($0)
-                    }
-                    .eventHandler(\.requestCancelDoneTodo) {
-                        self.isFocusInput = false
-                        eventHandler.requestCancelDoneTodo($0)
-                    }
-                    .eventHandler(\.requestShowDetail) {
-                        self.isFocusInput = false
-                        eventHandler.requestShowDetail($0)
-                    }
-                    .eventHandler(\.handleMoreAction) {
-                        self.isFocusInput = false
-                        eventHandler.handleMoreAction($0, $1)
-                    }
+                self.foremostSectionView(foremost)
+            }
+            
+            if !self.state.uncompletedTodos.isEmpty {
+                self.uncompletedTodosSectionView(self.state.uncompletedTodos)
             }
          
             // 날짜 및 이벤트 목록
             VStack(alignment: .leading, spacing: 6) {
                 
                 // 상단 날짜 표시 헤더
-                VStack(alignment: .leading) {
-                    
-                    if let holidayName = self.state.dayModel?.holidayName, self.appearance.showHoliday {
-                        Text(holidayName)
-                            .font(appearance.eventSubNormalTextFontOnList().asFont)
-                            .foregroundStyle(appearance.colorSet.holidayOrWeekEndWithAccent.asColor)
-                    }
-                    
-                    // 상단 날짜표시 헤더 - 날짜 및 음력 표시
-                    HStack {
-                        
-                        Text(self.state.dayModel?.dateText ?? "")
-                            .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
-                            .foregroundColor(self.appearance.colorSet.text0.asColor)
-                            
-                        
-                        if self.appearance.showLunarCalendarDate {
-                            Text(self.state.dayModel?.lunarDateText ?? "")
-                                .font(
-                                    self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
-                                )
-                                .foregroundColor(self.appearance.colorSet.text2.asColor)
-                        }
-                        
-                        Spacer()
-                        
-                        Button {
-                            self.isFocusInput = false
-                            self.eventHandler.showDoneTodoList()
-                        } label: {
-                            Image(systemName: "checklist.checked")
-                        }
-                    }
-                    .padding(.bottom, 3)
-                }
+                self.dateInfoView()
                 
                 // 이벤트 리스트
-                VStack(alignment: .leading, spacing: 6) {
-                    ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
-                        
-                        EventListCellView(cellViewModel: cellViewModel)
-                            .eventHandler(\.requestDoneTodo) {
-                                self.isFocusInput = false
-                                eventHandler.requestDoneTodo($0)
-                            }
-                            .eventHandler(\.requestCancelDoneTodo) {
-                                self.isFocusInput = false
-                                eventHandler.requestCancelDoneTodo($0)
-                            }
-                            .eventHandler(\.requestShowDetail) {
-                                self.isFocusInput = false
-                                eventHandler.requestShowDetail($0)
-                            }
-                            .eventHandler(\.handleMoreAction) {
-                                self.isFocusInput = false
-                                eventHandler.handleMoreAction($0, $1)
-                            }
-                    }
-                }
-                .fixedSize(horizontal: false, vertical: true)
+                self.eventListView()
                 
                 QuickAddNewTodoView(isFocusInput: $isFocusInput)
                     .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
@@ -266,6 +210,114 @@ struct DayEventListView: View {
 //                    .backgroundAsRoundedRectForEventList(self.appearance)
 //            }
         }
+    }
+    
+    private func foremostSectionView(_ foremost: any EventCellViewModel) -> some View {
+        ForemostEventView(viewModel: foremost)
+            .eventHandler(\.requestDoneTodo) {
+                self.isFocusInput = false
+                eventHandler.requestDoneTodo($0)
+            }
+            .eventHandler(\.requestCancelDoneTodo) {
+                self.isFocusInput = false
+                eventHandler.requestCancelDoneTodo($0)
+            }
+            .eventHandler(\.requestShowDetail) {
+                self.isFocusInput = false
+                eventHandler.requestShowDetail($0)
+            }
+            .eventHandler(\.handleMoreAction) {
+                self.isFocusInput = false
+                eventHandler.handleMoreAction($0, $1)
+            }
+    }
+    
+    private func uncompletedTodosSectionView(_ models: [TodoEventCellViewModel]) -> some View {
+        UncompletedTodoView(models)
+            .eventHandler(\.requestDoneTodo) {
+                self.isFocusInput = false
+                eventHandler.requestDoneTodo($0)
+            }
+            .eventHandler(\.requestCancelDoneTodo) {
+                self.isFocusInput = false
+                eventHandler.requestCancelDoneTodo($0)
+            }
+            .eventHandler(\.requestShowDetail) {
+                self.isFocusInput = false
+                eventHandler.requestShowDetail($0)
+            }
+            .eventHandler(\.handleMoreAction) {
+                self.isFocusInput = false
+                eventHandler.handleMoreAction($0, $1)
+            }
+            .eventHandler(\.refreshList) {
+                self.isFocusInput = false
+                eventHandler.refreshUncompletedTodos()
+            }
+    }
+    
+    private func dateInfoView() -> some View {
+        VStack(alignment: .leading) {
+            
+            if let holidayName = self.state.dayModel?.holidayName, self.appearance.showHoliday {
+                Text(holidayName)
+                    .font(appearance.eventSubNormalTextFontOnList().asFont)
+                    .foregroundStyle(appearance.colorSet.holidayOrWeekEndWithAccent.asColor)
+            }
+            
+            // 상단 날짜표시 헤더 - 날짜 및 음력 표시
+            HStack {
+                
+                Text(self.state.dayModel?.dateText ?? "")
+                    .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
+                    .foregroundColor(self.appearance.colorSet.text0.asColor)
+                    
+                
+                if self.appearance.showLunarCalendarDate {
+                    Text(self.state.dayModel?.lunarDateText ?? "")
+                        .font(
+                            self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
+                        )
+                        .foregroundColor(self.appearance.colorSet.text2.asColor)
+                }
+                
+                Spacer()
+                
+                Button {
+                    self.isFocusInput = false
+                    self.eventHandler.showDoneTodoList()
+                } label: {
+                    Image(systemName: "checklist.checked")
+                }
+            }
+            .padding(.bottom, 3)
+        }
+    }
+    
+    private func eventListView() -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
+                
+                EventListCellView(cellViewModel: cellViewModel)
+                    .eventHandler(\.requestDoneTodo) {
+                        self.isFocusInput = false
+                        eventHandler.requestDoneTodo($0)
+                    }
+                    .eventHandler(\.requestCancelDoneTodo) {
+                        self.isFocusInput = false
+                        eventHandler.requestCancelDoneTodo($0)
+                    }
+                    .eventHandler(\.requestShowDetail) {
+                        self.isFocusInput = false
+                        eventHandler.requestShowDetail($0)
+                    }
+                    .eventHandler(\.handleMoreAction) {
+                        self.isFocusInput = false
+                        eventHandler.handleMoreAction($0, $1)
+                    }
+            }
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -361,6 +413,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         let cells = self.makeDummyCells()
         state.cellViewModels = cells
         state.foremostModel = cells.randomElement()
+        state.uncompletedTodos = self.dummyUncompleteds()
         let eventHandler = DayEventListViewEventHandler()
         eventHandler.requestDoneTodo = { id in
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -404,6 +457,24 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             .environmentObject(eventHandler)
             .environmentObject(PendingCompleteTodoState())
         return containerView
+    }
+    
+    private static func dummyUncompleteds() -> [TodoEventCellViewModel] {
+        return [
+            .init("uncompleted-todo1", name: "uncompleted - todo1")
+                |> \.tagColor .~ .default
+                |> \.periodText .~ .doubleText(
+                    .init(text: "Todo".localized()),
+                    .init(text: "10:30", pmOram: "AM")
+                ),
+                .init("uncompleted-todo2", name: "uncompleted - todo2")
+                |> \.tagColor .~ .default
+                |> \.periodText .~ .doubleText(
+                    .init(text: "Todo".localized()),
+                    .init(text: "9 (Sat)")
+                )
+                |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
+        ]
     }
     
     private static func makeDummyCells() -> [any EventCellViewModel] {
