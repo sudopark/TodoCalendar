@@ -204,13 +204,16 @@ public struct TodoEventCellViewModel: EventCellViewModel {
         _ todo: TodoCalendarEvent,
         in todayRange: Range<TimeInterval>,
         _ timeZone: TimeZone,
-        _ is24hourForm: Bool
+        _ is24hourForm: Bool,
+        forceShowEventDateDurationText: Bool = false
     ) {
         self.eventIdentifier = todo.eventId
         self.tagId = todo.eventTagId
         self.name = todo.name
         self.periodText = EventPeriodText(todo, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
-        self.periodDescription = todo.eventTime?.durationText(timeZone)
+        self.periodDescription = todo.eventTime?.durationText(
+            timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText
+        )
         self.eventTimeRawValue = todo.eventTime
         
         self.isRepeating = todo.isRepeating
@@ -276,7 +279,8 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         _ schedule: ScheduleCalendarEvent,
         in todayRange: Range<TimeInterval>,
         timeZone: TimeZone,
-        _ is24hourForm: Bool
+        _ is24hourForm: Bool,
+        forceShowEventDateDurationText: Bool = false
     ) {
         guard let time = schedule.eventTime else { return nil }
         let periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
@@ -286,7 +290,9 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         self.tagId = schedule.eventTagId
         self.name = schedule.name
         self.periodText = periodText
-        self.periodDescription = schedule.eventTime?.durationText(timeZone)
+        self.periodDescription = schedule.eventTime?.durationText(
+            timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText
+        )
         self.eventTimeRawValue = schedule.eventTime
         
         self.isRepeating = schedule.isRepeating
@@ -352,9 +358,17 @@ private extension TimeInterval {
 
 private extension EventTime {
     
-    func durationText(_ timeZone: TimeZone) -> String? {
+    func durationText(
+        _ timeZone: TimeZone,
+        forceShowEventDateDurationText: Bool
+    ) -> String? {
         
         switch self {
+        case .at(let time) where forceShowEventDateDurationText:
+            let formatter = DateFormatter() |> \.timeZone .~ timeZone
+            formatter.dateFormat = R.String.dateFormMMMD
+            return formatter.string(from: Date(timeIntervalSince1970: time))
+            
         case .period(let range):
             let formatter = DateFormatter() |> \.timeZone .~ timeZone
             formatter.dateFormat = R.String.dateFormMMMDHHMm
@@ -365,10 +379,18 @@ private extension EventTime {
             formatter.dateFormat = R.String.dateFormMMMD
             let shifttingRange = range.shiftting(secondsFrom, to: timeZone)
             let days = Int(shifttingRange.upperBound-shifttingRange.lowerBound) / (24 * 3600)
-            let totalPeriodText = days > 0 ? R.String.calendarEventTimePeriodSomeDays(days+1) : nil
-            let rangeText = shifttingRange.rangeText(formatter)
-            return totalPeriodText.map { "\(rangeText)(\($0))"}
-            
+            if days > 0 {
+                let totalPeriodText = R.String.calendarEventTimePeriodSomeDays(days+1)
+                let rangeText = shifttingRange.rangeText(formatter)
+                return "\(rangeText)(\(totalPeriodText))"
+            } else if forceShowEventDateDurationText {
+                return "calendar::event_time::allday::with".localized(
+                    with: formatter.string(from: Date(timeIntervalSince1970: shifttingRange.lowerBound))
+                )
+            } else {
+                return nil
+            }
+
         default: return nil
         }
     }

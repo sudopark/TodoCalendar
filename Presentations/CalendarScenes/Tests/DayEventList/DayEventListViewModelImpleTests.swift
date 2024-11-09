@@ -379,6 +379,53 @@ extension DayEventListViewModelImpleTests {
         parameterizeTest(allDay2Days, "Sep 9 ~ Sep 10(2days)")
     }
     
+    func testCellViewModel_whenForceShowDurationText_showPeriodDescription() {
+        // given
+        let timeZone = TimeZone(abbreviation: "KST")!
+        func parameterizeTest(
+            _ time: EventTime,
+            _ expectedDescription: String?
+        ) {
+            let schedule = ScheduleEvent(uuid: "event", name: "some", time: time)
+            let event = ScheduleCalendarEvent.events(from: schedule, in: timeZone).first!
+            
+            let cellViewModel = ScheduleEventCellViewModel(
+                event,in: self.todayRange, timeZone: timeZone, true, forceShowEventDateDurationText: true
+            )
+            
+            XCTAssertEqual(cellViewModel?.periodDescription, expectedDescription)
+        }
+        
+        // when + then
+        let timeAt = EventTime.at(self.todayRange.lowerBound)
+        parameterizeTest(timeAt, "Sep 10")
+        
+        let periodHasDays: EventTime = .period(
+            self.todayRange.lowerBound-24*3600*3..<self.todayRange.upperBound
+        )
+        parameterizeTest(periodHasDays, "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)")
+        
+        let periodHasNoDays: EventTime = .period(
+            self.todayRange.lowerBound-12*3600..<self.todayRange.upperBound-20*3600+1
+        )
+        parameterizeTest(periodHasNoDays, "Sep 9 12:00 ~ Sep 10 04:00(16hours)")
+        
+        let periodOnyHasMinutes: EventTime = .period(
+            self.todayRange.lowerBound..<self.todayRange.lowerBound+10*60
+        )
+        parameterizeTest(periodOnyHasMinutes, "Sep 10 00:00 ~ Sep 10 00:10(10minutes)")
+        
+        let pdtTimeZone = TimeZone(abbreviation: "PDT")!
+        let offset = pdtTimeZone.secondsFromGMT(
+            for: Date(timeIntervalSince1970: self.pdt9_10.lowerBound)
+        ) |> TimeInterval.init
+        let allDayToday: EventTime = .allDay(self.pdt9_10, secondsFromGMT: offset)
+        parameterizeTest(allDayToday, "calendar::event_time::allday::with".localized(with: "Sep 10"))
+        
+        let allDay2Days: EventTime = .allDay(self.pdt9_9to9_10, secondsFromGMT: offset)
+        parameterizeTest(allDay2Days, "Sep 9 ~ Sep 10(2days)")
+    }
+    
     func testCellViewModel_moresActions_fromTodo() {
         // given
         func parameterizeTest(_ todo: TodoEvent, isForemost: Bool = false, expectIsRepeating: Bool) {
