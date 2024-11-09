@@ -107,6 +107,7 @@
 // MARK: - calendar
 
 "calendar::foremostevent:title" = "Foremost Event";
+"calendar::uncompletedTodos:title" = "Uncompleted To-do";
 "calendar::event_time::todo" = "Todo";
 "calendar::event_time::allday" = "All day";
 "calendar::event_time::period:some_days" = "%ddays";
