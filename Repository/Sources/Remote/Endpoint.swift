@@ -77,7 +77,7 @@ public enum TodoAPIEndpoints: Endpoint {
             return ""
             
         case .uncompleteds:
-            return "/uncompleted"
+            return "uncompleted"
             
         case .currentTodo:
             return ""
