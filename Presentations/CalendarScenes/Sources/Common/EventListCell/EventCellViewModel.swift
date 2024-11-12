@@ -265,13 +265,13 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     }
     var eventTimeRawValue: EventTime?
     
-    public init(_ id: String, turn: Int? = nil, name: String) {
+    public init(_ id: String, turn: Int? = nil, name: String, isRepeating: Bool = false) {
         self.eventIdWithoutTurn = id
         self.eventIdentifier = "\(id)_\(turn ?? 0)"
         self.turn = turn
         self.name = name
         self.tagId = .default
-        self.isRepeating = false
+        self.isRepeating = isRepeating
         self.isForemost = false
     }
     
