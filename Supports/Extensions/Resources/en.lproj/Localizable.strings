@@ -121,6 +121,7 @@
 "calendar::event::more_action::remove:message" = "Do you want to remove this event?";
 "calendar::event::more_action::mark_as_foremost" = "Do you want to mark this event as your most important event?";
 "calendar::event::more_action::unmark_as_foremost" = "Do you want to unmark this event as your most important event?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Repeating schedule event cannot be marked as the most important events.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Remove only this event";
 "calendar::event::more_action:remove:item_name" = "Remove event";
 "calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";

@@ -110,6 +110,11 @@ extension EventListCellEventHanleViewModelImple {
         _ action: EventListMoreAction
     ) {
         
+        if self.checkIsTryToRegisterForemostFromRepeatingTodo(cellViewModel, action) {
+            self.showUnavailToMarkRepeatingScheduleAsForemostEvent()
+            return
+        }
+        
         self.runMoreActionAfterConfirm(
             action.confirmTitle,
             action.confirmMessage
@@ -131,6 +136,29 @@ extension EventListCellEventHanleViewModelImple {
             }
             .store(in: &self.cancellables)
         }
+    }
+    
+    private func checkIsTryToRegisterForemostFromRepeatingTodo(
+        _ cellViewModel: any EventCellViewModel, _ action: EventListMoreAction
+    ) -> Bool {
+        let schedule = cellViewModel as? ScheduleEventCellViewModel
+        let isRepeatingSchedule = schedule?.isRepeating == true
+        
+        guard isRepeatingSchedule,
+              case .toggleTo(let isForemost) = action,
+              isForemost
+        else { return false }
+        
+        return true
+    }
+    
+    private func showUnavailToMarkRepeatingScheduleAsForemostEvent() {
+        let info = ConfirmDialogInfo()
+            |> \.title .~ "calendar::event::more_action::foremost_event:title".localized()
+            |> \.message .~ "calendar::event::more_action::mark_as_foremost::unavail".localized()
+            |> \.withCancel .~ false
+            |> \.confirmText .~ "common.close".localized()
+        self.router?.showConfirm(dialog: info)
     }
     
     private func runMoreActionAfterConfirm(

@@ -313,6 +313,30 @@ extension EventListCellEventHanleViewModelImpleTests {
             expectRecordedValue: .removed
         )
     }
+    
+    func testViewModel_whenTryToMarkRepeatingScheduleEventAsForemostEvent_showNotSupports() {
+        // given
+        let expect = expectation(description: "반복되는 일정을 제일중요 이벤트로 등록하려 하는 경우 불가함을 알림")
+        let viewModel = self.makeViewModel()
+        var confirmWith: ConfirmDialogInfo?
+        self.spyRouter.didShowConfirmWithCallback = { info in
+            confirmWith = info
+            expect.fulfill()
+        }
+        
+        // when
+        let cellViewModel = ScheduleEventCellViewModel(
+            "repeating-schedule", turn: 2, name: "schedule", isRepeating: true
+        )
+        viewModel.handleMoreAction(cellViewModel, .toggleTo(isForemost: true))
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        let message = confirmWith?.message
+        XCTAssertEqual(
+            message, "calendar::event::more_action::mark_as_foremost::unavail".localized()
+        )
+    }
 }
 
 private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @unchecked Sendable {

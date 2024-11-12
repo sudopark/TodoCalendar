@@ -121,6 +121,7 @@
 "calendar::event::more_action::remove:message" = "이벤트를 삭제하시겠습니까?";
 "calendar::event::more_action::mark_as_foremost" = "제일 중요한 이벤트로 등록할까요?";
 "calendar::event::more_action::unmark_as_foremost" = "제일 중요한 이벤트를 해제할까요?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "반복되는 일정 이벤트는 가장 중요한 이벤트로 등록할 수 없습니다.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "이번만 삭제";
 "calendar::event::more_action:remove:item_name" = "이벤트 삭제";
 "calendar::event::more_action:foremost:mark:item_name" = "제일 중요 이벤트 등록";

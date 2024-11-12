@@ -218,7 +218,8 @@ extension DayEventListViewModelImple {
                 
             case let schedule as ScheduleEvent:
                 let calendarEvent = ScheduleCalendarEvent.events(
-                    from: schedule, in: timeZone
+                    from: schedule, in: timeZone,
+                    foremostId: schedule.uuid
                 ).first
                 return calendarEvent.flatMap { event in
                     return ScheduleEventCellViewModel(
@@ -231,7 +232,7 @@ extension DayEventListViewModelImple {
         }
         let foremostModel = Publishers.CombineLatest4(
             self.foremostEventUsecase.foremostEvent,
-            self.calendarUsecase.currentDay,
+            self.calendarUsecase.currentDay.removeDuplicates(),
             self.calendarSettingUsecase.currentTimeZone,
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
