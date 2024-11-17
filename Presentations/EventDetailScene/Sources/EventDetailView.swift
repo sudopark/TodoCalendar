@@ -22,7 +22,7 @@ final class EventDetailViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
-    @Published var selectedTag: SelectedTag?
+    @Published var selectedTag: SelectedTag = .defaultTag
     @Published var enterName: String = ""
     @Published var eventDetailTypeModel: EventDetailTypeModel?
     @Published var isSaving: Bool = false
@@ -260,8 +260,8 @@ struct EventDetailView: View {
     fileprivate var showTodoEventGuide: () -> Void = { }
     fileprivate var showForemostEventGuide: () -> Void = { }
 
-    private var selectedTagColor: Color? {
-        return self.state.selectedTag?.color.color(with: self.appearance).asColor
+    private var selectedTagColor: Color {
+        return self.state.selectedTag.color.color(with: self.appearance).asColor
     }
     
     var body: some View {
@@ -349,7 +349,7 @@ struct EventDetailView: View {
     private var nameInputView: some View {
         HStack {
             RoundedRectangle(cornerRadius: 3)
-                .fill(self.selectedTagColor ?? .clear)
+                .fill(self.selectedTagColor)
                 .frame(width: 6)
             
             TextField(
@@ -726,9 +726,9 @@ struct EventDetailView: View {
             HStack {
                 Circle()
                     .frame(width: 4, height: 4)
-                    .foregroundStyle(self.selectedTagColor ?? .clear)
+                    .foregroundStyle(self.selectedTagColor)
                 
-                Text(self.state.selectedTag?.name ?? "")
+                Text(self.state.selectedTag.name)
                     .font(self.appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
             }
