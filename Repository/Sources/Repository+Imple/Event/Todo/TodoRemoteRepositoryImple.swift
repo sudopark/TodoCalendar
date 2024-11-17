@@ -50,8 +50,9 @@ extension TodoRemoteRepositoryImple {
     public func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
         let endpoint = TodoAPIEndpoints.todo(eventId)
         let payload = params.asJson()
+        let method: RemoteAPIMethod = params.editMethod == .put ? .put : .patch
         let mapper: TodoEventMapper = try await self.remote.request(
-            .put,
+            method,
             endpoint,
             parameters: payload
         )
@@ -141,16 +142,8 @@ extension TodoRemoteRepositoryImple {
         else{
             return try await self.removeTodo(eventId: eventid)
         }
-        let params = TodoEditParams() |> \.time .~ nextEventTime
-        let endpoint = TodoAPIEndpoints.todo(eventid)
-        let mapper: TodoEventMapper = try await self.remote.request(
-            .patch,
-            endpoint,
-            parameters: params.asJson()
-        )
-        
-        let updated = mapper.todo
-        try? await self.cacheStorage.updateTodoEvent(updated)
+        let params = TodoEditParams(.patch) |> \.time .~ nextEventTime
+        let updated = try await self.updateTodoEvent(eventid, params)
         return .init()
             |> \.nextRepeatingTodo .~ updated
     }

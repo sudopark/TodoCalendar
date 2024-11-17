@@ -128,7 +128,7 @@ extension TodoLocalRepositoryImpleTests {
         self.stubSaveTodo([old])
         let repository = self.makeRepository()
         // when
-        let params = TodoEditParams()
+        let params = TodoEditParams(.put)
             |> \.name .~ old.name
             |> \.eventTagId .~ old.eventTagId
         let updated = try? await repository.updateTodoEvent(old.uuid, params)
@@ -145,7 +145,7 @@ extension TodoLocalRepositoryImpleTests {
         // given
         let repository = self.makeRepository()
         let old = try await repository.makeTodoEvent(self.dummyMakeParams)
-        let params = TodoEditParams()
+        let params = TodoEditParams(.put)
             |> \.name .~ "new name"
             |> \.eventTagId .~ .custom("new tag")
             |> \.time .~ .at(22)
@@ -160,6 +160,26 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(event?.name, "new name")
         XCTAssertEqual(event?.eventTagId, .custom("new tag"))
         XCTAssertEqual(event?.time, .at(22))
+    }
+    
+    func testReposiotry_loadTodoAfterPatchTodo() async throws {
+        // given
+        let repository = self.makeRepository()
+        let old = try await repository.makeTodoEvent(self.dummyMakeParams)
+        let params = TodoEditParams(.patch) |> \.name .~ "new name"
+        let _ = try await repository.updateTodoEvent(old.uuid, params)
+        
+        // when
+        let events = try await repository.loadTodoEvents(in: self.dummyRange(0..<10)).firstValue(with: 10)
+        
+        // then
+        XCTAssertEqual(events?.count, 1)
+        let event = events?.first
+        XCTAssertEqual(event?.name, "new name")
+        XCTAssertEqual(event?.eventTagId, .custom("some"))
+        XCTAssertEqual(event?.time, .period(0.0..<100.0))
+        XCTAssertNotNil(event?.repeating)
+        XCTAssertEqual(event?.notificationOptions.count, 2)
     }
     
     func testReposiotry_loadUncompletedTodos() async throws {
