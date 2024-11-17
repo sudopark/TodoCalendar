@@ -86,8 +86,21 @@ extension TodoRemoteRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let params = TodoEditParams() |> \.eventTagId .~ .custom("some")
+        let params = TodoEditParams(.put) |> \.eventTagId .~ .custom("some")
         let todo = try await repository.updateTodoEvent("new_uuid", params)
+        
+        // then
+        self.assertTodo(todo)
+        XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, "new_uuid")
+    }
+    
+    func testRepository_updateTodoWithPatch() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let params = TodoEditParams(.patch) |> \.name .~ "new"
+        let todo = try await repository.updateTodoEvent("repeating-todo", params)
         
         // then
         self.assertTodo(todo)

@@ -104,7 +104,7 @@ extension TodoEventUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let params = TodoEditParams()
+        let params = TodoEditParams(.put)
             |> \.name .~ "name"
             |> \.eventTagId .~ .custom("some")
         let updated = try? await usecase.updateTodoEvent("id", params)
@@ -119,7 +119,7 @@ extension TodoEventUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let params = TodoEditParams()
+        let params = TodoEditParams(.put)
         let updated = try? await usecase.updateTodoEvent("id", params)
         
         // then
@@ -141,7 +141,7 @@ extension TodoEventUsecaseImpleTests {
         let todoSource = self.spyStore.observe([String: TodoEvent].self, key: shareKey)
         let todos = self.waitOutputs(expect, for: todoSource) {
             Task {
-                let params = TodoEditParams()
+                let params = TodoEditParams(.put)
                     |> \.name .~ "new"
                 _ = try? await usecase.updateTodoEvent("id", params)
             }
@@ -174,7 +174,7 @@ extension TodoEventUsecaseImpleTests {
         )
         let todos = self.waitOutputs(expect, for: todoSource) {
             Task {
-                let params = TodoEditParams()
+                let params = TodoEditParams(.put)
                     |> \.name .~ "name"
                     |> \.time .~ .at(4)
                     |> \.repeatingUpdateScope .~ .all
@@ -203,7 +203,7 @@ extension TodoEventUsecaseImpleTests {
         )
         let todos = self.waitOutputs(expect, for: todoSource) {
             Task {
-                let params = TodoEditParams()
+                let params = TodoEditParams(.put)
                     |> \.name .~ oldEvent.name
                     |> \.time .~ .at(4)
                     |> \.repeatingUpdateScope .~ .onlyThisTime
@@ -784,7 +784,7 @@ extension TodoEventUsecaseImpleTests {
             usecase.refreshUncompletedTodos()
             
             Task {
-                _ = try await usecase.updateTodoEvent("id:4", .init() |> \.name .~ "new name")
+                _ = try await usecase.updateTodoEvent("id:4", .init(.put) |> \.name .~ "new name")
             }
         }
         

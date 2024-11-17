@@ -310,7 +310,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
     }
     
     private func todoEditParams(from basic: EventDetailBasicData, _ timeZone: TimeZone) -> TodoEditParams {
-        return TodoEditParams()
+        return TodoEditParams(.put)
             |> \.name .~ basic.name
             |> \.eventTagId .~ pure(basic.eventTagId)
             |> \.time .~ basic.selectedTime?.eventTime(timeZone)

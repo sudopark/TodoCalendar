@@ -43,7 +43,10 @@ extension TodoLocalRepositoryImple {
     
     public func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
         let origin = try await self.localStorage.loadTodoEvent(eventId)
-        let updated = origin.apply(params)
+        let updated = switch params.editMethod {
+            case .put: origin.apply(params)
+            case .patch: origin.applyIfNotNil(params)
+        }
         try await self.localStorage.updateTodoEvent(updated)
         return updated
     }
@@ -87,7 +90,7 @@ extension TodoLocalRepositoryImple {
         
         let nextTodo = origin |> \.time .~ nextEventTime
         try await self.localStorage.updateTodoEvent(nextTodo)
-        return origin |> \.time .~ nextEventTime
+        return nextTodo
     }
 }
 
