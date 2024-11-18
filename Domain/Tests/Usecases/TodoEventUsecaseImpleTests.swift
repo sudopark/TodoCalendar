@@ -848,6 +848,125 @@ extension TodoEventUsecaseImpleTests {
     }
 }
 
+// MARK: - skip todo
+
+extension TodoEventUsecaseImpleTests {
+    
+    private func makeUsecaseWithStubRepeatingTodo(
+        nextTodoTime: EventTime? = nil
+    ) -> TodoEventUsecaseImple {
+        let todo = TodoEvent(uuid: "repeating", name: "todo")
+            |> \.time .~ .at(10)
+            |> \.repeating .~ EventRepeating(
+                repeatingStartTime: 10, repeatOption: EventRepeatingOptions.EveryDay()
+            )
+        self.stubTodoRepository.stubTodosInRange = [todo]
+        self.stubTodoRepository.stubUncompletedTodos = [[todo]]
+        self.stubTodoRepository.stubSkipTodoTime = nextTodoTime
+        return self.makeUsecase()
+    }
+    
+    // skip to next
+    func testUsecaes_skipTodoToNext() async throws {
+        // given
+        let usecase = self.makeUsecaseWithStubRepeatingTodo()
+        
+        // when
+        let skipped = try await usecase.skipRepeatingTodo("repeating", .next)
+        
+        // then
+        XCTAssertEqual(skipped.uuid, "repeating")
+        XCTAssertEqual(skipped.time, .at(20))
+    }
+    
+    // skip to some time
+    func testUsecase_skipToSomeTime() async throws {
+        // given
+        let usecase = self.makeUsecaseWithStubRepeatingTodo()
+        
+        // when
+        let skipped = try await usecase.skipRepeatingTodo(
+            "repeating", .until(.at(100))
+        )
+        
+        // then
+        XCTAssertEqual(skipped.uuid, "repeating")
+        XCTAssertEqual(skipped.time, .at(100))
+    }
+    
+    // when skip todo update event list
+    func testUsecase_whenSkipTodo_updateTodoList() {
+        // given
+        let expect = expectation(description: "todo skip시에 조회중인 todo list 업데이트")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecaseWithStubRepeatingTodo()
+        
+        // when
+        let source = usecase.todoEvents(in: 0..<200)
+        let todoLists = self.waitOutputs(expect, for: source, timeout: 0.01) {
+            
+            Task {
+                usecase.refreshTodoEvents(in: 0..<200)
+                
+                _ = try await usecase.skipRepeatingTodo("repeating", .next)
+            }
+        }
+        
+        // then
+        let repeatingTodos = todoLists.map { ts in ts.first(where: { $0.uuid == "repeating" })}
+        XCTAssertEqual(repeatingTodos.map { $0?.time }, [
+            nil, .at(10), .at(20)
+        ])
+    }
+    
+    // when skip todo update uncompleted todo
+    func testUsecase_whenSkipTodo_updateUncompletedTodo() {
+        // given
+        let expect = expectation(description: "todo skip시에 조회중인 미완료 todo list 업데이트")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecaseWithStubRepeatingTodo()
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos) {
+            Task {
+                usecase.refreshUncompletedTodos()
+                
+                _ = try await usecase.skipRepeatingTodo("repeating", .next)
+            }
+        }
+        
+        // then
+        let repeatingTodos = todoLists.map { ts in ts.first(where: { $0.uuid == "repeating" })}
+        XCTAssertEqual(repeatingTodos.map { $0?.time }, [
+            nil, .at(10), .at(20)
+        ])
+    }
+    
+    func testUsecase_whenSkipTodoAndSkippedTodoEventTimeIsFuture_removeFromUncompletedTodo() {
+        // given
+        let expect = expectation(description: "todo skip시에 업데이트된 todo가 미래의 todo라면 완료 목록에서 제거")
+        expect.expectedFulfillmentCount = 4
+        let usecase = self.makeUsecaseWithStubRepeatingTodo(
+            nextTodoTime: .at(Date().timeIntervalSince1970 + 1000)
+        )
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos, timeout: 0.01) {
+            Task {
+                usecase.refreshUncompletedTodos()
+                
+                _ = try await usecase.skipRepeatingTodo("repeating", .next)
+            }
+        }
+        
+        // then
+        let repeatingTodos = todoLists.map { ts in ts.first(where: { $0.uuid == "repeating" })}
+        XCTAssertEqual(repeatingTodos.map { $0 != nil }, [
+            false, true, true, false
+        ])
+    }
+}
+
 private final class PrivateTodoRepository: StubTodoEventRepository, @unchecked Sendable {
     
     var stubCurrrentTodo: [TodoEvent]?
@@ -874,5 +993,15 @@ private final class PrivateTodoRepository: StubTodoEventRepository, @unchecked S
         }
         let first = self.stubUncompletedTodos.removeFirst()
         return Just(first).mapNever().eraseToAnyPublisher()
+    }
+    
+    var stubSkipTodoTime: EventTime?
+    override func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent {
+        let todo = TodoEvent(uuid: "repeating", name: "todo")
+            |> \.time .~ (self.stubSkipTodoTime ?? .at(20))
+            |> \.repeating .~ EventRepeating(
+                repeatingStartTime: 10, repeatOption: EventRepeatingOptions.EveryDay()
+            )
+        return todo
     }
 }

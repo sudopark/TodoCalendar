@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import AsyncFlatMap
 import UnitTestHelpKit
 
@@ -482,6 +483,64 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertNil(result?.nextRepeatingTodoEvent)
         let updated = todos?.first(where: { $0.uuid == origin.uuid })
         XCTAssertNil(updated)
+    }
+}
+
+extension TodoLocalRepositoryImpleTests {
+    
+    func testRepository_skipRepeatingTodo() async throws {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100, from: 100, end: nil)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let next = try await repository.skipRepeatingTodo("origin")
+        
+        // then
+        XCTAssertEqual(next.time?.lowerBoundWithFixed, 100 + 24 * 3600)
+    }
+    
+    func testRepository_whenSkipNotRepeatingTodo_error() async throws {
+        // given
+        let origin = self.makeDummyTodo(id: "origin")
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        var reason: (any Error)?
+        do {
+            let _ = try await repository.skipRepeatingTodo("origin")
+        } catch let err {
+            reason = err
+        }
+        
+        // then
+        XCTAssertEqual(
+            (reason as? RuntimeError)?.key,
+            ClientErrorKeys.notARepeatingEvent.rawValue
+        )
+    }
+    
+    func testRepository_whenSkipLastRepeatingTodo_error() async throws {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100, from: 100, end: 200)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        var reason: (any Error)?
+        do {
+            let _ = try await repository.skipRepeatingTodo("origin")
+        } catch let err {
+            reason = err
+        }
+        
+        // then
+        XCTAssertEqual(
+            (reason as? RuntimeError)?.key,
+            ClientErrorKeys.repeatingIsEnd.rawValue
+        )
     }
 }
 

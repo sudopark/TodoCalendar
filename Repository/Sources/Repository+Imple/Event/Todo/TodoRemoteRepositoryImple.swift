@@ -69,7 +69,7 @@ extension TodoRemoteRepositoryImple {
     public func completeTodo(_ eventId: String) async throws -> CompleteTodoResult {
         
         let origin = try await self.loadTodoEvent(eventId)
-        let nextTime = self.findNextRepeatingEvent(origin)
+        let nextTime = try? self.findNextRepeatingEvent(origin)
         
         let payload = DoneTodoEventParams(origin, nextTime)
         let endpoint = TodoAPIEndpoints.done(eventId)
@@ -95,7 +95,7 @@ extension TodoRemoteRepositoryImple {
     ) async throws -> ReplaceRepeatingTodoEventResult {
         
         let origin = try await self.loadTodoEvent(eventId)
-        let nextTime = self.findNextRepeatingEvent(origin)
+        let nextTime = try? self.findNextRepeatingEvent(origin)
         
         let payload = ReplaceRepeatingTodoEventParams(newParams, nextTime)
         let endpoint = TodoAPIEndpoints.replaceRepeating(eventId)
@@ -115,12 +115,18 @@ extension TodoRemoteRepositoryImple {
         return result
     }
     
-    private func findNextRepeatingEvent(_ origin: TodoEvent) -> EventTime? {
+    private func findNextRepeatingEvent(_ origin: TodoEvent) throws -> EventTime {
         guard let repeating = origin.repeating,
               let time = origin.time
-        else { return nil }
+        else {
+            throw RuntimeError(key: ClientErrorKeys.notARepeatingEvent.rawValue, "not a repeating event")
+        }
         
-        return EventRepeatTimeEnumerator(repeating.repeatOption)?.nextEventTime(from: time, until: repeating.repeatingEndTime)
+        guard let next =  EventRepeatTimeEnumerator(repeating.repeatOption)?.nextEventTime(from: time, until: repeating.repeatingEndTime)
+        else {
+            throw RuntimeError(key: ClientErrorKeys.repeatingIsEnd.rawValue, "repeaitng end")
+        }
+        return next
     }
 }
 
@@ -138,7 +144,7 @@ extension TodoRemoteRepositoryImple {
     
     private func replaceCurrentTodoToNext(_ eventid: String) async throws -> RemoveTodoResult {
         let origin = try await self.loadTodoEvent(eventid)
-        guard let nextEventTime = self.findNextRepeatingEvent(origin)
+        guard let nextEventTime = try? self.findNextRepeatingEvent(origin)
         else{
             return try await self.removeTodo(eventId: eventid)
         }
@@ -156,6 +162,18 @@ extension TodoRemoteRepositoryImple {
         )
         try? await self.cacheStorage.removeTodo(eventId)
         return .init()
+    }
+}
+
+// MARK: - skip
+
+extension TodoRemoteRepositoryImple {
+    
+    public func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent {
+        let origin = try await self.loadTodoEvent(todoId)
+        let next = try self.findNextRepeatingEvent(origin)
+        let params = TodoEditParams(.patch) |> \.time .~ next
+        return try await self.updateTodoEvent(todoId, params)
     }
 }
 

@@ -769,6 +769,56 @@ extension TodoRemoteRepositoryImpleTestsV2 {
 }
 
 
+extension TodoRemoteRepositoryImpleTestsV2 {
+    
+    @Test func repository_skipRepeatingTodo() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let next = try await repository.skipRepeatingTodo("repeating")
+        
+        // then
+        let params = self.stubRemote.didRequestedParams ?? [:]
+        let timeParams = params["event_time"] as? [String: Any]
+        #expect(params.count == 1)
+        #expect(timeParams != nil)
+        #expect(next != nil)
+    }
+    
+    @Test func repository_whenSkipNotRepeatingTodo_error() async throws {
+        // given
+        let repository = self.makeRepository()
+        var reason: (any Error)?
+        // when
+        do {
+            let _ = try await repository.skipRepeatingTodo("not_repeating")
+        } catch let err {
+            reason = err
+        }
+        
+        // then
+        let runtimeError = (reason as? RuntimeError)
+        #expect(runtimeError?.key == ClientErrorKeys.notARepeatingEvent.rawValue)
+    }
+    
+    @Test func repository_whenSkipLastRepeatingTodo_error() async throws {
+        // given
+        let repository = self.makeRepository()
+        var reason: (any Error)?
+        // when
+        do {
+            let _ = try await repository.skipRepeatingTodo("last_repeating")
+        } catch let err {
+            reason = err
+        }
+        
+        // then
+        let runtimeError = (reason as? RuntimeError)
+        #expect(runtimeError?.key == ClientErrorKeys.repeatingIsEnd.rawValue)
+    }
+}
+
 private struct DummyResponse {
     
     let refTime = Date().timeIntervalSince1970
@@ -803,6 +853,51 @@ private struct DummyResponse {
                     "before_seconds": 300
                 }
             ]
+        }
+        """
+    }
+    
+    private var dummyNotRepeatingTodo: String {
+        return """
+        {
+            "uuid": "not_repeating",
+            "name": "todo_refreshed",
+            "create_timestamp": 100,
+            "event_tag_id": "custom_id",
+            "event_time": {
+                "time_type": "allday",
+                "period_start": \(refTime+100),
+                "period_end": \(refTime+200),
+                "seconds_from_gmt": 300
+            }
+        }
+        """
+    }
+    
+    private var dummyLastRepeatingTodo: String {
+        return """
+        {
+            "uuid": "last_repeating",
+            "name": "todo_refreshed",
+            "create_timestamp": 100,
+            "event_tag_id": "custom_id",
+            "event_time": {
+                "time_type": "allday",
+                "period_start": \(refTime+100),
+                "period_end": \(refTime+200),
+                "seconds_from_gmt": 300
+            }, 
+            "repeating": {
+                "start": 300,
+                "end": \(refTime+300),
+                "option": {
+
+                    "optionType": "every_week",
+                    "interval": 1,
+                    "dayOfWeek": [1],
+                    "timeZone": "Asia/Seoul"
+                }
+            },
         }
         """
     }
@@ -1042,7 +1137,27 @@ private struct DummyResponse {
                 resultJsonString: .success(
                     "{ \"reverted\": \(self.dummySingleTodoResponse), \"deleted_done_id\": \"some_done\" }"
                 )
-            )
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.todo("repeating"),
+                resultJsonString: .success(self.dummySingleTodoResponse)
+            ),
+            .init(
+                method: .patch,
+                endpoint: TodoAPIEndpoints.todo("repeating"),
+                resultJsonString: .success(self.dummySingleTodoResponse)
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.todo("not_repeating"),
+                resultJsonString: .success(self.dummyNotRepeatingTodo)
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.todo("last_repeating"),
+                resultJsonString: .success(self.dummyLastRepeatingTodo)
+            ),
         ]
     }
 }
