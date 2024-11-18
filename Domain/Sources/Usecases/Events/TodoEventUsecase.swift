@@ -31,6 +31,8 @@ public protocol TodoEventUsecase {
     
     func refreshUncompletedTodos()
     var uncompletedTodos: AnyPublisher<[TodoEvent], Never> { get }
+    
+    func skipRepeatingTodo(_ todoId: String, _ params: SkipTodoParams) async throws -> TodoEvent
 }
 
 
@@ -72,7 +74,7 @@ extension TodoEventUsecaseImple {
     }
     
     public func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
-        guard params.name?.isEmpty == false
+        guard params.isValidForUpdate
         else {
             throw RuntimeError("invalid parameter for update Todo event")
         }
@@ -89,12 +91,16 @@ extension TodoEventUsecaseImple {
         _ params: TodoEditParams
     ) async throws -> TodoEvent {
         let updatedEvent = try await self.todoRepository.updateTodoEvent(eventId, params)
+        self.notifyUpdatedEvent(updatedEvent)
+        return updatedEvent
+    }
+    
+    private func notifyUpdatedEvent(_ event: TodoEvent) {
         let shareKey = ShareDataKeys.todos.rawValue
         self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
-            ($0 ?? [:]) |> key(eventId) .~ updatedEvent
+            ($0 ?? [:]) |> key(event.uuid) .~ event
         }
-        self.updateUncompletedTodoAtListIfNeed(updatedEvent)
-        return updatedEvent
+        self.updateUncompletedTodoAtListIfNeed(event)
     }
     
     private func replaceCurrentTodoAndMakeNewEvent(
@@ -237,6 +243,7 @@ extension TodoEventUsecaseImple {
     }
 }
 
+// MARK: - uncompleted todo
 
 extension TodoEventUsecaseImple {
     
@@ -274,6 +281,36 @@ extension TodoEventUsecaseImple {
         let shareKey = ShareDataKeys.uncompletedTodos.rawValue
         self.sharedDataStore.update([TodoEvent].self, key: shareKey) {
             return ($0 ?? []).filter { $0.uuid != todoId }
+        }
+    }
+}
+
+
+// MARK: - skip todo
+
+extension TodoEventUsecaseImple {
+    
+    public func skipRepeatingTodo(
+        _ todoId: String, _ params: SkipTodoParams
+    ) async throws -> TodoEvent {
+        
+        func removeUpdatedEventFromUncompletedIfNeed(_ updated: TodoEvent) {
+            guard let time = updated.time, time.lowerBoundWithFixed > Date().timeIntervalSince1970 else { return }
+            self.removeUncompletedTodoAtListIfNeed(updated.uuid)
+        }
+        
+        switch params {
+        case .next:
+            let skipped = try await self.todoRepository.skipRepeatingTodo(todoId)
+            self.notifyUpdatedEvent(skipped)
+            removeUpdatedEventFromUncompletedIfNeed(skipped)
+            return skipped
+            
+        case .until(let next):
+            let params = TodoEditParams(.patch) |> \.time .~ next
+            let skipped = try await self.updateTodoEvent(todoId, params)
+            removeUpdatedEventFromUncompletedIfNeed(skipped)
+            return skipped
         }
     }
 }

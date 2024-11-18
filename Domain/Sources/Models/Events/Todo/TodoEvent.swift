@@ -127,6 +127,19 @@ public struct TodoEditParams: Sendable, Equatable {
             |> \.repeating .~ self.repeating
             |> \.notificationOptions .~ self.notificationOptions
     }
+    
+    public var isValidForUpdate: Bool {
+        switch self.editMethod {
+        case .put:
+            return self.name?.isEmpty == false
+        case .patch:
+            return self.name?.isEmpty == false
+                || self.eventTagId != nil
+                || self.time != nil
+                || self.repeating != nil
+                || self.notificationOptions != nil
+        }
+    }
 }
 
 
@@ -166,4 +179,12 @@ public enum TodoToggleResult {
         case .reverted(let todo): return todo.time == nil
         }
     }
+}
+
+
+// MARK: - skip todo
+
+public enum SkipTodoParams {
+    case next
+    case until(EventTime)
 }
