@@ -129,6 +129,8 @@
 "calendar::event::more_action:edit:item_name" = "Edit";
 "calednar::event::add_new" = "Add a new event";
 "calednar::event::add_new:place_holder" = "Add a new to-do event quickly.";
+"calednar::event::skip_todo" = "Skip this to-do";
+"calednar::event::skip_todo_until" = "Select a time to skip this to-do";
 
 
 // MARK: - event detail

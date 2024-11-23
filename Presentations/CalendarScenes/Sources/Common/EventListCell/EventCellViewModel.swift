@@ -136,6 +136,14 @@ public enum EventListMoreAction: Sendable, Equatable {
     
     case remove(onlyThisTime: Bool)
     case toggleTo(isForemost: Bool)
+    case skipTodo
+    case skipTodoUntil
+    case edit
+}
+
+public struct EventListMoreActionModel: Sendable, Equatable {
+    let basicActions: [EventListMoreAction]
+    let removeActions: [EventListMoreAction]
 }
 
 // MARK: - EventCellViewModel
@@ -150,6 +158,7 @@ public protocol EventCellViewModel: Sendable {
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
     var customCompareKey: String { get }
+    var moreActions: EventListMoreActionModel? { get }
     
     mutating func applyTagColor(_ tag: EventTag?)
 }
@@ -219,6 +228,19 @@ public struct TodoEventCellViewModel: EventCellViewModel {
         self.isRepeating = todo.isRepeating
         self.isForemost = todo.isForemost
     }
+    
+    public var moreActions: EventListMoreActionModel? {
+        let removeActions: [EventListMoreAction] = self.isRepeating
+            ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
+            : [.remove(onlyThisTime: false)]
+        let skipActions: [EventListMoreAction] = self.isRepeating
+            ? [.skipTodo, .skipTodoUntil] : []
+        let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)] + skipActions + [.edit]
+        return .init(
+            basicActions: basicActions,
+            removeActions: removeActions
+        )
+    }
 }
 
 struct PendingTodoEventCellViewModel: EventCellViewModel {
@@ -244,6 +266,7 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     }
     
     // TOOD: make custom compare key
+    var moreActions: EventListMoreActionModel? { nil }
 }
 
 // MARK: - Schedule
@@ -298,6 +321,16 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         self.isRepeating = schedule.isRepeating
         self.isForemost = schedule.isForemost
     }
+    
+    public var moreActions: EventListMoreActionModel? {
+        let removeActions: [EventListMoreAction] = self.isRepeating
+            ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
+            : [.remove(onlyThisTime: false)]
+        return .init(
+            basicActions: [.toggleTo(isForemost: self.isForemost), .edit],
+            removeActions: removeActions
+        )
+    }
 }
 
 
@@ -327,6 +360,8 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     public mutating func applyTagColor(_ tag: EventTag?) {
         self.tagColor = .holiday
     }
+    
+    public var moreActions: EventListMoreActionModel? { nil }
 }
 
 

@@ -337,6 +337,38 @@ extension EventListCellEventHanleViewModelImpleTests {
             message, "calendar::event::more_action::mark_as_foremost::unavail".localized()
         )
     }
+    
+    func testViewModel_skipRepeatingTodo() {
+        // given
+        let expect = expectation(description: "다음차수로 todo skip")
+        let dummyId = "some"
+        let viewModel = self.makeViewModel()
+        let todo = TodoEventCellViewModel(dummyId, name: "origin")
+        
+        // when
+        let todos = self.waitOutputs(expect, for: self.spyTodoUsecase.todoEvent(dummyId)) {
+            viewModel.handleMoreAction(todo, .skipTodo)
+        }
+        
+        // then
+        let names = todos.map { $0.name }
+        XCTAssertEqual(names, ["origin", "skipped"])
+    }
+    
+    func testViewModel_selectRepeatingTodoSkipTime() {
+        // given
+        let expect = expectation(description: "todo 건너뀔 특정 시간 선택")
+        let dummyId = "some"
+        let viewModel = self.makeViewModel()
+        let todo = TodoEventCellViewModel(dummyId, name: "origin")
+        self.spyRouter.didRouteToSelectTodoSkipCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.handleMoreAction(todo, .skipTodoUntil)
+        
+        // then
+        self.wait(for: [expect], timeout: 0.001)
+    }
 }
 
 private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @unchecked Sendable {
@@ -357,6 +389,11 @@ private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @u
         self.didRouteToScheduleDetail = true
         self.didRouteToScheduleDetailWithTargetTime = repeatingEventTargetTime
     }
+    
+    var didRouteToSelectTodoSkipCallback: (() -> Void)?
+    func routeToSelectTodoSkipTime(_ eventId: String) {
+        self.didRouteToSelectTodoSkipCallback?()
+    }
 }
 
 private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
@@ -374,6 +411,20 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
     var didRemoveTodoWithParamsCallback: ((String, Bool) -> Void)?
     override func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
         self.didRemoveTodoWithParamsCallback?(id, onlyThisTime)
+    }
+    
+    private let fakeTodo = CurrentValueSubject<TodoEvent, Never>(TodoEvent(uuid: "some", name: "origin"))
+    override func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
+        return fakeTodo
+            .mapNever()
+            .eraseToAnyPublisher()
+    }
+    
+    override func skipRepeatingTodo(_ todoId: String, _ params: SkipTodoParams) async throws -> TodoEvent {
+        
+        let newTodo = TodoEvent(uuid: todoId, name: "skipped")
+        self.fakeTodo.send(newTodo)
+        return newTodo
     }
 }
 

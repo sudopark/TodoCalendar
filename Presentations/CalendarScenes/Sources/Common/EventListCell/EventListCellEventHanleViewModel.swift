@@ -75,7 +75,7 @@ extension EventListCellEventHanleViewModelImple {
                 schedule.eventTimeRawValue
             )
             
-        case let holiday as HolidayEventCellViewModel:
+        case is HolidayEventCellViewModel:
             self.router?.showToast("eventDetail.notSupport::holiday".localized())
             
         default: break
@@ -110,25 +110,50 @@ extension EventListCellEventHanleViewModelImple {
         _ action: EventListMoreAction
     ) {
         
-        if self.checkIsTryToRegisterForemostFromRepeatingTodo(cellViewModel, action) {
-            self.showUnavailToMarkRepeatingScheduleAsForemostEvent()
-            return
+        switch action {
+        case .remove(let onlyThisTime):
+            self.removeEvent(cellViewModel, onlyThisTime)
+            
+        case .toggleTo(let isForemost):
+            self.toggleForemostEvent(cellViewModel, isForemost)
+            
+        case .edit:
+            self.selectEvent(cellViewModel)
+            
+        case .skipTodo:
+            guard let todo = cellViewModel as? TodoEventCellViewModel else { return }
+            self.skipTodoToNext(todo)
+            
+        case .skipTodoUntil:
+            guard let todo = cellViewModel as? TodoEventCellViewModel else { return }
+            self.router?.routeToSelectTodoSkipTime(todo.eventIdentifier)
         }
-        
-        self.runMoreActionAfterConfirm(
-            action.confirmTitle,
-            action.confirmMessage
-        ) { [weak self] in
-            
+    }
+
+    private func removeEvent(
+        _ cellViewModel: any EventCellViewModel,
+        _ onlyThisTime: Bool
+    ) {
+
+        let title = R.String.calendarEventMoreActionRemoveTitle
+        let message = onlyThisTime
+            ? R.String.calendarEventMoreActionRemoveOnlyThistimeMessage
+            : R.String.calendarEventMoreActionRemoveMessage
+        self.runMoreActionAfterConfirm(title, message) { [weak self] in
             guard let self = self else { return }
-            
             Task { [weak self] in
                 do {
-                    switch action {
-                    case .remove(let onlyThisTime):
-                        try await self?.removeEvent(cellViewModel, onlyThisTime)
-                    case .toggleTo(let isForemost):
-                        try await self?.toggleForemostEvent(cellViewModel, isForemost)
+                    switch cellViewModel {
+                    case let todo as TodoEventCellViewModel:
+                        try await self?.todoEventUsecase.removeTodo(
+                            todo.eventIdentifier, onlyThisTime: onlyThisTime
+                        )
+                    case let schedule as ScheduleEventCellViewModel:
+                        let time = onlyThisTime ? schedule.eventTimeRawValue : nil
+                        try await self?.scheduleEventUsecase.removeScheduleEvent(
+                            schedule.eventIdWithoutTurn, onlyThisTime: time
+                        )
+                    default: break
                     }
                 } catch {
                     self?.router?.showError(error)
@@ -138,18 +163,43 @@ extension EventListCellEventHanleViewModelImple {
         }
     }
     
-    private func checkIsTryToRegisterForemostFromRepeatingTodo(
-        _ cellViewModel: any EventCellViewModel, _ action: EventListMoreAction
-    ) -> Bool {
-        let schedule = cellViewModel as? ScheduleEventCellViewModel
-        let isRepeatingSchedule = schedule?.isRepeating == true
+    private func toggleForemostEvent(
+        _ cellViewModel: any EventCellViewModel,
+        _ newValue: Bool
+    )  {
         
-        guard isRepeatingSchedule,
-              case .toggleTo(let isForemost) = action,
-              isForemost
-        else { return false }
+        if newValue && cellViewModel.isRepeatingSchedule {
+            self.showUnavailToMarkRepeatingScheduleAsForemostEvent()
+            return
+        }
         
-        return true
+        let title = R.String.calendarEventMoreActionForemostEventTitle
+        let message = newValue
+            ? R.String.calendarEventMoreActionMarkAsForemost
+            : R.String.calendarEventMoreActionUnmarkAsForemost
+        self.runMoreActionAfterConfirm(title, message) { [weak self] in
+            guard let self = self else { return }
+            Task { [weak self] in
+                do {
+                    switch (cellViewModel, newValue) {
+                    case (_, false):
+                        try await self?.foremostEventUsecase.remove()
+                    case (let todo as TodoEventCellViewModel, _):
+                        try await self?.foremostEventUsecase.update(
+                            foremost: .init(todo.eventIdentifier, true)
+                        )
+                    case (let schedule as ScheduleEventCellViewModel, _):
+                        try await self?.foremostEventUsecase.update(
+                            foremost: .init(schedule.eventIdWithoutTurn, false)
+                        )
+                    default: break
+                    }
+                } catch {
+                    self?.router?.showError(error)
+                }
+            }
+            .store(in: &self.cancellables)
+        }
     }
     
     private func showUnavailToMarkRepeatingScheduleAsForemostEvent() {
@@ -159,6 +209,17 @@ extension EventListCellEventHanleViewModelImple {
             |> \.withCancel .~ false
             |> \.confirmText .~ "common.close".localized()
         self.router?.showConfirm(dialog: info)
+    }
+    
+    private func skipTodoToNext(_ cellViewModel: TodoEventCellViewModel) {
+        Task { [weak self] in
+            do {
+                _ = try await self?.todoEventUsecase.skipRepeatingTodo(cellViewModel.eventIdentifier, .next)
+            } catch {
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
     }
     
     private func runMoreActionAfterConfirm(
@@ -172,43 +233,6 @@ extension EventListCellEventHanleViewModelImple {
             |> \.withCancel .~ true
         self.router?.showConfirm(dialog: info)
     }
-    
-    private func removeEvent(
-        _ cellViewModel: any EventCellViewModel,
-        _ onlyThisTime: Bool
-    ) async throws {
-        switch cellViewModel {
-        case let todo as TodoEventCellViewModel:
-            try await self.todoEventUsecase.removeTodo(
-                todo.eventIdentifier, onlyThisTime: onlyThisTime
-            )
-        case let schedule as ScheduleEventCellViewModel:
-            let time = onlyThisTime ? schedule.eventTimeRawValue : nil
-            try await self.scheduleEventUsecase.removeScheduleEvent(
-                schedule.eventIdWithoutTurn, onlyThisTime: time
-            )
-        default: break
-        }
-    }
-    
-    private func toggleForemostEvent(
-        _ cellViewModel: any EventCellViewModel,
-        _ newValue: Bool
-    ) async throws {
-        switch (cellViewModel, newValue) {
-        case (_, false):
-            try await self.foremostEventUsecase.remove()
-        case (let todo as TodoEventCellViewModel, _):
-            try await self.foremostEventUsecase.update(
-                foremost: .init(todo.eventIdentifier, true)
-            )
-        case (let schedule as ScheduleEventCellViewModel, _):
-            try await self.foremostEventUsecase.update(
-                foremost: .init(schedule.eventIdWithoutTurn, false)
-            )
-        default: break
-        }
-    }
 }
 
 extension EventListCellEventHanleViewModelImple {
@@ -219,25 +243,9 @@ extension EventListCellEventHanleViewModelImple {
     }
 }
 
-private extension EventListMoreAction {
+private extension EventCellViewModel {
     
-    var confirmTitle: String {
-        switch self {
-        case .remove: return R.String.calendarEventMoreActionRemoveTitle
-        case .toggleTo: return R.String.calendarEventMoreActionForemostEventTitle
-        }
-    }
-    
-    var confirmMessage: String {
-        switch self {
-        case .remove(let onlyThisTime) where onlyThisTime:
-            return R.String.calendarEventMoreActionRemoveOnlyThistimeMessage
-        case .remove:
-            return R.String.calendarEventMoreActionRemoveMessage
-        case .toggleTo(let isForemost) where isForemost:
-            return R.String.calendarEventMoreActionMarkAsForemost
-        case .toggleTo:
-            return R.String.calendarEventMoreActionUnmarkAsForemost
-        }
+    var isRepeatingSchedule: Bool {
+        return (self as? ScheduleEventCellViewModel)?.isRepeating == true
     }
 }

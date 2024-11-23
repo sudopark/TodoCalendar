@@ -85,17 +85,32 @@ struct EventListCellView: View {
             self.requestShowDetail(self.cellViewModel)
         }
         .contextMenu {
-            if cellViewModel.isSupportContextMenu {
-                if cellViewModel.isRepeating {
-                    removeButton(true)
+            if let moreActions = cellViewModel.moreActions {
+                ForEach(0..<moreActions.basicActions.count, id: \.self) {
+                    moreActionsView(moreActions.basicActions[$0])
                 }
-                removeButton(false)
                 
                 Divider()
                 
-                toggleForemostButton(cellViewModel.isForemost)
-                editEventButton()
+                ForEach(0..<moreActions.removeActions.count, id: \.self) {
+                    moreActionsView(moreActions.removeActions[$0])
+                }
             }
+        }
+    }
+    
+    private func moreActionsView(_ action: EventListMoreAction) -> some View {
+        switch action {
+        case .edit:
+            return editEventButton().asAnyView()
+        case .remove(let onlyThisTime):
+            return removeButton(onlyThisTime).asAnyView()
+        case .toggleTo(let isForemost):
+            return toggleForemostButton(isForemost).asAnyView()
+        case .skipTodo:
+            return skipTodoButton(isNext: true).asAnyView()
+        case .skipTodoUntil:
+            return skipTodoButton(isNext: false).asAnyView()
         }
     }
     
@@ -138,6 +153,22 @@ struct EventListCellView: View {
             HStack {
                 Text(R.String.calendarEventMoreActionEditItemName)
                 Image(systemName: "pencil")
+            }
+        }
+    }
+    
+    private func skipTodoButton(isNext: Bool) -> some View {
+        let buttonTitle = isNext
+            ? "calednar::event::skip_todo".localized()
+            : "calednar::event::skip_todo_until".localized()
+        let imageTitle = isNext ? "forward" : "forward.end.alt"
+        let action: EventListMoreAction = isNext ? .skipTodo : .skipTodoUntil
+        return Button {
+            self.handleMoreAction(self.cellViewModel, action)
+        } label: {
+            HStack {
+                Text(buttonTitle)
+                Image(systemName: imageTitle)
             }
         }
     }
@@ -263,14 +294,6 @@ extension EventCellViewModel {
     
     var todoEventId: String? {
         return (self as? TodoEventCellViewModel)?.eventIdentifier
-    }
-    
-    var isSupportContextMenu: Bool {
-        switch self {
-        case is TodoEventCellViewModel: return true
-        case is ScheduleEventCellViewModel: return true
-        default: return false
-        }
     }
 }
 

@@ -129,6 +129,8 @@
 "calendar::event::more_action:edit:item_name" = "수정";
 "calednar::event::add_new" = "새 이벤트 추가";
 "calednar::event::add_new:place_holder" = "새로운 할일을 등록하세요.";
+"calednar::event::skip_todo" = "할일 건너뛰기";
+"calednar::event::skip_todo_until" = "할일 건너뛰기할 날짜 선택";
 
 
 // MARK: - event detail
