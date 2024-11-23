@@ -123,10 +123,6 @@ extension EventListCellEventHanleViewModelImple {
         case .skipTodo:
             guard let todo = cellViewModel as? TodoEventCellViewModel else { return }
             self.skipTodoToNext(todo)
-            
-        case .skipTodoUntil:
-            guard let todo = cellViewModel as? TodoEventCellViewModel else { return }
-            self.router?.routeToSelectTodoSkipTime(todo.eventIdentifier)
         }
     }
 

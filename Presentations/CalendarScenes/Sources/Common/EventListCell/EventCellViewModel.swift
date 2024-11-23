@@ -137,7 +137,6 @@ public enum EventListMoreAction: Sendable, Equatable {
     case remove(onlyThisTime: Bool)
     case toggleTo(isForemost: Bool)
     case skipTodo
-    case skipTodoUntil
     case edit
 }
 
@@ -234,7 +233,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
             ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
             : [.remove(onlyThisTime: false)]
         let skipActions: [EventListMoreAction] = self.isRepeating
-            ? [.skipTodo, .skipTodoUntil] : []
+            ? [.skipTodo] : []
         let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)] + skipActions + [.edit]
         return .init(
             basicActions: basicActions,

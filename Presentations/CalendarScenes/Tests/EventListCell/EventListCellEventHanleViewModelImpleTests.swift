@@ -354,21 +354,6 @@ extension EventListCellEventHanleViewModelImpleTests {
         let names = todos.map { $0.name }
         XCTAssertEqual(names, ["origin", "skipped"])
     }
-    
-    func testViewModel_selectRepeatingTodoSkipTime() {
-        // given
-        let expect = expectation(description: "todo 건너뀔 특정 시간 선택")
-        let dummyId = "some"
-        let viewModel = self.makeViewModel()
-        let todo = TodoEventCellViewModel(dummyId, name: "origin")
-        self.spyRouter.didRouteToSelectTodoSkipCallback = { expect.fulfill() }
-        
-        // when
-        viewModel.handleMoreAction(todo, .skipTodoUntil)
-        
-        // then
-        self.wait(for: [expect], timeout: 0.001)
-    }
 }
 
 private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @unchecked Sendable {
@@ -388,11 +373,6 @@ private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @u
     ) {
         self.didRouteToScheduleDetail = true
         self.didRouteToScheduleDetailWithTargetTime = repeatingEventTargetTime
-    }
-    
-    var didRouteToSelectTodoSkipCallback: (() -> Void)?
-    func routeToSelectTodoSkipTime(_ eventId: String) {
-        self.didRouteToSelectTodoSkipCallback?()
     }
 }
 
