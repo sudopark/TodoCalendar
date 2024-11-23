@@ -108,9 +108,7 @@ struct EventListCellView: View {
         case .toggleTo(let isForemost):
             return toggleForemostButton(isForemost).asAnyView()
         case .skipTodo:
-            return skipTodoButton(isNext: true).asAnyView()
-        case .skipTodoUntil:
-            return skipTodoButton(isNext: false).asAnyView()
+            return skipTodoButton().asAnyView()
         }
     }
     
@@ -157,18 +155,13 @@ struct EventListCellView: View {
         }
     }
     
-    private func skipTodoButton(isNext: Bool) -> some View {
-        let buttonTitle = isNext
-            ? "calednar::event::skip_todo".localized()
-            : "calednar::event::skip_todo_until".localized()
-        let imageTitle = isNext ? "forward" : "forward.end.alt"
-        let action: EventListMoreAction = isNext ? .skipTodo : .skipTodoUntil
+    private func skipTodoButton() -> some View {
         return Button {
-            self.handleMoreAction(self.cellViewModel, action)
+            self.handleMoreAction(self.cellViewModel, .skipTodo)
         } label: {
             HStack {
-                Text(buttonTitle)
-                Image(systemName: imageTitle)
+                Text("calednar::event::skip_todo".localized())
+                Image(systemName: "forward")
             }
         }
     }

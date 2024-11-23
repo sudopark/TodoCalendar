@@ -515,7 +515,7 @@ extension DayEventListViewModelImpleTests {
         XCTAssertEqual(
             todoWithRepeating.moreActions,
             .init(
-                basicActions: [.toggleTo(isForemost: false), .skipTodo, .skipTodoUntil, .edit],
+                basicActions: [.toggleTo(isForemost: false), .skipTodo, .edit],
                 removeActions: [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
             )
         )

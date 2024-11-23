@@ -20,7 +20,6 @@ protocol EventListCellEventHanleRouting: Routing, Sendable {
         _ eventId: String,
         _ repeatingEventTargetTime: EventTime?
     )
-    func routeToSelectTodoSkipTime(_ eventId: String)
 }
 
 
@@ -55,9 +54,5 @@ extension EventListCellEventHanleRouter {
             )
             self.scene?.present(next, animated: true)
         }
-    }
-    
-    func routeToSelectTodoSkipTime(_ eventId: String) {
-        // TODO: 
     }
 }
