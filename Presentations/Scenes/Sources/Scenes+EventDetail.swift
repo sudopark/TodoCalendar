@@ -10,7 +10,21 @@ import Domain
 
 public protocol EventDetailScene: Scene { }
 
+public protocol EventDetailSceneListener: AnyObject {
+    
+    func eventDetail(copyFromTodo params: TodoMakeParams, detail: EventDetailData?)
+    func eventDetail(copyFromSchedule schedule: ScheduleMakeParams, detail: EventDetailData?)
+}
+
 public struct MakeEventParams: Sendable {
+    
+    public enum MakeSource: Sendable {
+        case todo(withName: String?)
+        case schedule
+        case todoFromCopy(TodoMakeParams, EventDetailData)
+        case scheduleFromCopy(ScheduleMakeParams, EventDetailData)
+    }
+    
     public struct InitialTodoInfo: Sendable {
         public var name: String?
         public init(name: String? = nil) {
@@ -30,11 +44,15 @@ public protocol EventDetailSceneBuilder {
     func makeNewEventScene(_ params: MakeEventParams) -> any EventDetailScene
     
     @MainActor
-    func makeTodoEventDetailScene(_ todoId: String) -> any EventDetailScene
+    func makeTodoEventDetailScene(
+        _ todoId: String,
+        listener: EventDetailSceneListener?
+    ) -> any EventDetailScene
     
     @MainActor
     func makeScheduleEventDetailScene(
         _ scheduleId: String,
-        _ repeatingEventTargetTime: EventTime?
+        _ repeatingEventTargetTime: EventTime?,
+        listener: EventDetailSceneListener?
     ) -> any EventDetailScene
 }

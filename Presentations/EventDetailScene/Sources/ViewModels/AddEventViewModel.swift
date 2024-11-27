@@ -286,7 +286,7 @@ extension AddEventViewModelImple {
         return Empty().eraseToAnyPublisher()
         // TODO: 일단 비활성화
 //        return Just([
-//            [.copy, .addToTemplate]
+//            [.addToTemplate]
 //        ])
 //        .eraseToAnyPublisher()
     }
