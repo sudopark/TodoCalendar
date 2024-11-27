@@ -162,14 +162,15 @@ extension DayEventListViewModelImple {
     
     func makeTodoEvent(with givenName: String) {
         guard let selectDate = self.currentDate else { return }
-        let params = MakeEventParams(selectedDate: selectDate)
-            |> \.initialTodoInfo .~ .init(name: givenName)
+        let params = MakeEventParams(
+            selectedDate: selectDate, makeSource: .todo(withName: givenName)
+        )
         self.router?.routeToMakeNewEvent(params)
     }
     
     func makeEvent() {
         guard let selectDate = self.currentDate else { return }
-        let params = MakeEventParams(selectedDate: selectDate)
+        let params = MakeEventParams(selectedDate: selectDate, makeSource: .schedule)
         self.router?.routeToMakeNewEvent(params)
     }
     

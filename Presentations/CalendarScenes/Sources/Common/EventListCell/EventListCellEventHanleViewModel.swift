@@ -26,7 +26,7 @@ enum DoneTodoResult {
     }
 }
 
-protocol EventListCellEventHanleViewModel {
+protocol EventListCellEventHanleViewModel: EventDetailSceneListener {
     
     func selectEvent(_ model: any EventCellViewModel)
     func doneTodo(_ eventId: String)
@@ -228,6 +228,27 @@ extension EventListCellEventHanleViewModelImple {
             |> \.confirmed .~ pure(action)
             |> \.withCancel .~ true
         self.router?.showConfirm(dialog: info)
+    }
+}
+
+// MARK: - handle event detail scene listener
+
+extension EventListCellEventHanleViewModelImple {
+    
+    func eventDetail(
+        copyFromTodo params: TodoMakeParams, detail: EventDetailData?
+    ) {
+        self.router?.routeToMakeNewEvent(
+            .init(selectedDate: Date(), makeSource: .todoFromCopy(params, detail))
+        )
+    }
+    
+    func eventDetail(
+        copyFromSchedule schedule: ScheduleMakeParams, detail: EventDetailData?
+    ) {
+        self.router?.routeToMakeNewEvent(
+            .init(selectedDate: Date(), makeSource: .scheduleFromCopy(schedule, detail))
+        )
     }
 }
 
