@@ -49,7 +49,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
     
     @MainActor
     public func makeTodoEventDetailScene(
-        _ todoId: String
+        _ todoId: String,
+        listener: EventDetailSceneListener?
     ) -> any EventDetailScene {
         let viewModel = EditTodoEventDetailViewModelImple(
             todoId: todoId,
@@ -59,13 +60,15 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase()
         )
+        viewModel.listener = listener
         return self.makeEventDetailScene(viewModel)
     }
     
     @MainActor
     public func makeScheduleEventDetailScene(
         _ scheduleId: String,
-        _ repeatingEventTargetTime: EventTime?
+        _ repeatingEventTargetTime: EventTime?,
+        listener: EventDetailSceneListener?
     ) -> any EventDetailScene {
         let viewModel = EditScheduleEventDetailViewModelImple(
             scheduleId: scheduleId,
@@ -76,6 +79,7 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase()
         )
+        viewModel.listener = listener
         return self.makeEventDetailScene(viewModel)
     }
     

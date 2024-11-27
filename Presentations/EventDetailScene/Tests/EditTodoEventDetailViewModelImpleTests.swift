@@ -24,12 +24,14 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var spyRouter: SpyEventDetailRouter!
+    private var spyListener: SpyEventDetailListener!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyTodoUsecase = .init()
         self.spyEventDetailDataUsecase = .init()
         self.spyRouter = .init()
+        self.spyListener = .init()
     }
     
     override func tearDownWithError() throws {
@@ -38,6 +40,7 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyEventDetailDataUsecase = nil
         self.stubForemostEventUsecase = nil
         self.spyRouter = nil
+        self.spyListener = nil
     }
     
     private var timeZone: TimeZone {
@@ -74,6 +77,7 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
             foremostEventUsecase: self.stubForemostEventUsecase
         )
         viewModel.router = self.spyRouter
+        viewModel.listener = self.spyListener
         viewModel.attachInput()
         return viewModel
     }
@@ -204,14 +208,14 @@ extension EditTodoEventDetailViewModelImpleTests {
             self.makeViewModel(customTodo: todo),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)], 
-                [.toggleTo(isForemost: true)]
+                [.toggleTo(isForemost: true), .copy]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customTodo: todo, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: false)]
+                [.toggleTo(isForemost: false), .copy]
             ]
         )
         let todoNotRepeating = todo |> \.repeating .~ nil
@@ -219,7 +223,7 @@ extension EditTodoEventDetailViewModelImpleTests {
             self.makeViewModel(customTodo: todoNotRepeating),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: true)]
+                [.toggleTo(isForemost: true), .copy]
             ]
         )
     }
@@ -251,6 +255,27 @@ extension EditTodoEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(isForemosts, [false, true])
+    }
+    
+    func testViewModel_whenCopyEvent_closeAndNotify() {
+        // given
+        let expect = expectation(description: "이벤트 복사시에 화면 닫고, 복사 요청")
+        let viewModel = self.makeViewModelWithPrepare()
+        self.spyListener.didCopyCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.handleMoreAction(.copy)
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        let pair = self.spyListener.didRequestCopyFromTodo
+        XCTAssertEqual(pair?.0.name, self.dummyRepeatingTodo.name)
+        XCTAssertEqual(pair?.0.eventTagId, self.dummyRepeatingTodo.eventTagId)
+        XCTAssertEqual(pair?.0.time, self.dummyRepeatingTodo.time)
+        XCTAssertEqual(pair?.0.repeating, self.dummyRepeatingTodo.repeating)
+        XCTAssertEqual(pair?.0.notificationOptions, self.dummyRepeatingTodo.notificationOptions)
+        XCTAssertEqual(pair?.1, self.dummyDetail)
     }
 }
 

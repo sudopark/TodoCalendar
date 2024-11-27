@@ -43,3 +43,26 @@ final class SpyEventDetailRouter: BaseSpyRouter, EventDetailRouting, @unchecked 
         
     }
 }
+
+final class SpyEventDetailListener: EventDetailSceneListener {
+    
+    var didCopyCallback: (() -> Void)?
+    
+    var didRequestCopyFromTodo: (TodoMakeParams, EventDetailData?)?
+    func eventDetail(
+        copyFromTodo params: TodoMakeParams,
+        detail: EventDetailData?
+    ) {
+        self.didRequestCopyFromTodo = (params, detail)
+        self.didCopyCallback?()
+    }
+    
+    var didRequestCopyFromSchedule: (ScheduleMakeParams, EventDetailData?)?
+    func eventDetail(
+        copyFromSchedule schedule: ScheduleMakeParams,
+        detail: EventDetailData?
+    ) {
+        self.didRequestCopyFromSchedule = (schedule, detail)
+        self.didCopyCallback?()
+    }
+}

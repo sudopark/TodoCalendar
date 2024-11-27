@@ -24,6 +24,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     var router: (any EventDetailRouting)?
+    weak var listener: EventDetailSceneListener?
     
     init(
         scheduleId: String,
@@ -138,8 +139,8 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             self.toggleForemostAfterConfirm(toForemost: isForemost)
             
         case .copy:
-            // TODO:
-            break
+            self.copyEvent()
+            
         case .addToTemplate:
             // TODO:
             break
@@ -216,6 +217,18 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                 }
             }
             .store(in: &self.cancellables)
+        }
+    }
+    
+    private func copyEvent() {
+        guard let basic = self.subject.basicData.value?.current,
+              let timeZone = self.subject.timeZone.value
+        else { return }
+        
+        let params = ScheduleMakeParams(basic, timeZone)
+        let additional = self.subject.additionalData.value?.current
+        self.router?.closeScene(animate: true) { [weak self] in
+            self?.listener?.eventDetail(copyFromSchedule: params, detail: additional)
         }
     }
     
@@ -393,8 +406,8 @@ extension EditScheduleEventDetailViewModelImple {
             let otherActions: [EventDetailMoreAction] = isRepeating
 //                ? [.share]
 //                : [.toggleTo(isForemost: !isForemost), .share]
-                ? []
-                : [.toggleTo(isForemost: !isForemost)]
+                ? [.copy]
+                : [.toggleTo(isForemost: !isForemost), .copy]
             return [removeActions, otherActions]
         }
         return Publishers.CombineLatest(
@@ -422,5 +435,18 @@ private extension EventDetailBasicData {
         self.eventTagId = schedule.eventTagId ?? .default
         self.eventNotifications = schedule.notificationOptions
         self.excludeTimes = schedule.repeatingTimeToExcludes
+    }
+}
+
+
+private extension ScheduleMakeParams {
+    
+    init(_ basic: EventDetailBasicData, _ timeZone: TimeZone) {
+        self.init()
+        self.name = basic.name
+        self.time = basic.selectedTime?.eventTime(timeZone)
+        self.eventTagId = basic.eventTagId
+        self.repeating = basic.eventRepeating?.repeating
+        self.notificationOptions = basic.eventNotifications
     }
 }

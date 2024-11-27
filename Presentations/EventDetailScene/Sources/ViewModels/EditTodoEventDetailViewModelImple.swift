@@ -23,6 +23,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     var router: (any EventDetailRouting)?
+    weak var listener: EventDetailSceneListener?
     
     init(
         todoId: String,
@@ -136,8 +137,8 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             self.toggleForemostAfterConfirm(toForemost: isForemost)
             
         case .copy:
-            // TODO:
-            break
+            self.copyEvent()
+            
         case .addToTemplate:
             // TODO:
             break
@@ -190,6 +191,19 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             |> \.withCancel .~ true
             |> \.cancelText .~ R.String.Common.cancel
         self.router?.showConfirm(dialog: info)
+    }
+    
+    private func copyEvent() {
+        guard let basic = self.subject.basicData.value?.current,
+              let timeZone = self.subject.timeZone.value
+        else { return }
+        
+        let params = TodoMakeParams(basic, timeZone)
+        let additional = self.subject.additionalData.value?.current
+        
+        self.router?.closeScene(animate: true) { [weak self] in
+            self?.listener?.eventDetail(copyFromTodo: params, detail: additional)
+        }
     }
     
     private func toggleFormost(_ toForemost: Bool) -> () -> Void {
@@ -372,7 +386,7 @@ extension EditTodoEventDetailViewModelImple {
                 : [.remove(onlyThisEvent: false)]
             // TODO: share 기능 일단 비활성화
 //            return [removeActions, [.toggleTo(isForemost: !isForemost), .share]]
-            return [removeActions, [.toggleTo(isForemost: !isForemost)]]
+            return [removeActions, [.toggleTo(isForemost: !isForemost), .copy]]
         }
         return Publishers.CombineLatest(
             self.subject.basicData.compactMap{ $0?.origin },
@@ -406,5 +420,17 @@ extension EventRepeatingTimeSelectResult {
         else { return nil }
          return .init(text: model.text, repeating: repeating)
         
+    }
+}
+
+private extension TodoMakeParams {
+    
+    init(_ basic: EventDetailBasicData, _ timeZone: TimeZone) {
+        self.init()
+        self.name = basic.name
+        self.eventTagId = basic.eventTagId
+        self.time = basic.selectedTime?.eventTime(timeZone)
+        self.repeating = basic.eventRepeating?.repeating
+        self.notificationOptions = basic.eventNotifications
     }
 }
