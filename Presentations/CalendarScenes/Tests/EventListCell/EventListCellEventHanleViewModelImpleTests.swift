@@ -356,6 +356,41 @@ extension EventListCellEventHanleViewModelImpleTests {
     }
 }
 
+extension EventListCellEventHanleViewModelImpleTests {
+    
+    func testViewModel_makeTodoFromCopy() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.eventDetail(copyFromTodo: .init(), detail: nil)
+        
+        // then
+        let params = self.spyRouter.didRouteToMakeNewEventWithParams
+        if case .todoFromCopy = params?.makeSource {
+            XCTAssert(true)
+        } else {
+            XCTFail("기대한 타입이 아님")
+        }
+    }
+    
+    func testViewModel_makeScheduleFromCopy() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.eventDetail(copyFromSchedule: .init(), detail: nil)
+        
+        // then
+        let params = self.spyRouter.didRouteToMakeNewEventWithParams
+        if case .scheduleFromCopy = params?.makeSource {
+            XCTAssert(true)
+        } else {
+            XCTFail("기대한 타입이 아님")
+        }
+    }
+}
+
 private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @unchecked Sendable {
     
     func attach(_ scene: any Scene) { }
@@ -373,6 +408,11 @@ private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @u
     ) {
         self.didRouteToScheduleDetail = true
         self.didRouteToScheduleDetailWithTargetTime = repeatingEventTargetTime
+    }
+    
+    var didRouteToMakeNewEventWithParams: MakeEventParams?
+    func routeToMakeNewEvent(_ withParams: MakeEventParams) {
+        self.didRouteToMakeNewEventWithParams = withParams
     }
 }
 

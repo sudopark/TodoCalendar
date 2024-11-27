@@ -75,7 +75,7 @@ public struct ScheduleEvent: Sendable, Equatable {
 
 // MARK: - Schedule make params
 
-public struct ScheduleMakeParams {
+public struct ScheduleMakeParams: Sendable {
     
     public var name: String?
     public var time: EventTime?

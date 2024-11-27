@@ -20,12 +20,16 @@ protocol EventListCellEventHanleRouting: Routing, Sendable {
         _ eventId: String,
         _ repeatingEventTargetTime: EventTime?
     )
+    func routeToMakeNewEvent(_ withParams: MakeEventParams)
 }
 
 
 final class EventListCellEventHanleRouter: BaseRouterImple, EventListCellEventHanleRouting, @unchecked Sendable {
     
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
+    
+    weak var eventDetailListener: (any EventDetailSceneListener)?
+    
     init(eventDetailSceneBuilder: any EventDetailSceneBuilder) {
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
     }
@@ -39,7 +43,9 @@ extension EventListCellEventHanleRouter {
     
     func routeToTodoEventDetail(_ eventId: String) {
         Task { @MainActor in
-            let next = self.eventDetailSceneBuilder.makeTodoEventDetailScene(eventId)
+            let next = self.eventDetailSceneBuilder.makeTodoEventDetailScene(
+                eventId, listener: self.eventDetailListener
+            )
             self.scene?.present(next, animated: true)
         }
     }
@@ -50,8 +56,16 @@ extension EventListCellEventHanleRouter {
     ) {
         Task { @MainActor in
             let next = self.eventDetailSceneBuilder.makeScheduleEventDetailScene(
-                eventId, repeatingEventTargetTime
+                eventId, repeatingEventTargetTime, listener: self.eventDetailListener
             )
+            self.scene?.present(next, animated: true)
+        }
+    }
+    
+    func routeToMakeNewEvent(_ withParams: MakeEventParams) {
+        Task { @MainActor in
+            
+            let next = self.eventDetailSceneBuilder.makeNewEventScene(withParams)
             self.scene?.present(next, animated: true)
         }
     }
