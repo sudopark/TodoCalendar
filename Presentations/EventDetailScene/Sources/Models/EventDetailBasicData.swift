@@ -16,6 +16,12 @@ struct EventDetailBasicData: Equatable {
     var eventNotifications: [EventNotificationTimeOption]
     let excludeTimes: Set<String>
     
+    init() {
+        self.eventTagId = .default
+        self.eventNotifications = []
+        self.excludeTimes = []
+    }
+    
     init(
         name: String?,
         selectedTime: SelectedTime? = nil,
