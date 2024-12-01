@@ -50,6 +50,7 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeViewModel(
+        params: MakeEventParams? = nil,
         latestTagExists: Bool = true,
         defaultPeriod: EventSettings.DefaultNewEventPeriod = .hour1,
         shouldFailSaveDetailData: Bool = false
@@ -71,7 +72,7 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         eventNotificationSettingUsecase.saveDefaultNotificationTimeOption(forAllDay: false, option: .atTime)
         
         let viewModel = AddEventViewModelImple(
-            params: .init(selectedDate: self.refDate),
+            params: params ?? .init(selectedDate: self.refDate, makeSource: .schedule),
             todoUsecase: self.spyTodoUsecase,
             scheduleUsecase: self.spyScheduleUsecase,
             eventTagUsease: tagUsecase,
@@ -462,5 +463,149 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(isSavings, [false, true, false])
         XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.add_new_todo::message".localized())
         XCTAssertEqual(self.spyRouter.didClosed, true)
+    }
+}
+
+extension AddEventViewModelImpleTests {
+    
+    private var dummyRepeating: EventRepeating {
+        let option = EventRepeatingOptions.EveryDay()
+        return .init(repeatingStartTime: 0, repeatOption: option)
+            |> \.repeatingEndTime .~ 100
+    }
+    
+    private var dummyTodoMakeParams: TodoMakeParams {
+        return TodoMakeParams()
+        |> \.name .~ "name"
+        |> \.eventTagId .~ .custom("tag")
+        |> \.time .~ .period(0..<10)
+        |> \.repeating .~ dummyRepeating
+        |> \.notificationOptions .~ [.allDay12AM]
+    }
+    
+    private var dummyScheduleMakeParams: ScheduleMakeParams {
+        return ScheduleMakeParams()
+        |> \.name .~ "name"
+        |> \.eventTagId .~ .custom("tag")
+        |> \.time .~ .period(0..<10)
+        |> \.repeating .~ dummyRepeating
+        |> \.notificationOptions .~ [.allDay12AM]
+    }
+    
+    private var dummyAddition: EventDetailData {
+        return .init("some")
+            |> \.url .~ "url address"
+            |> \.memo .~ "memo"
+    }
+    
+    private func makeViewModelWithSource(
+        _ source: MakeEventParams.MakeSource
+    ) -> AddEventViewModelImple {
+        let params = MakeEventParams(selectedDate: self.refDate, makeSource: source)
+        return self.makeViewModel(params: params)
+    }
+    
+    func testViewModel_makeNewTodo() {
+        // given
+        let expect = expectation(description: "wait prepare")
+        let viewModel = self.makeViewModelWithSource(.todo(withName: "name"))
+        self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.prepare()
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        let basic = self.spyRouter.spyInteractor.didPreparedWith?.0
+        XCTAssertEqual(basic?.name, "name")
+        XCTAssertEqual(basic?.selectedTime, self.defaultCurrentAndNextHourSelectTime)
+        XCTAssertEqual(basic?.eventRepeating, nil)
+        XCTAssertEqual(basic?.eventTagId, .custom("latest"))
+        XCTAssertEqual(basic?.eventNotifications, [.atTime])
+        
+        let addition = self.spyRouter.spyInteractor.didPreparedWith?.1
+        XCTAssertEqual(addition?.eventId, "pending")
+    }
+    
+    func testViewModel_makeNewSchedule() {
+        // given
+        let expect = expectation(description: "wait prepare")
+        let viewModel = self.makeViewModelWithSource(.schedule)
+        self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.prepare()
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        let basic = self.spyRouter.spyInteractor.didPreparedWith?.0
+        XCTAssertEqual(basic?.name, nil)
+        XCTAssertEqual(basic?.selectedTime, self.defaultCurrentAndNextHourSelectTime)
+        XCTAssertEqual(basic?.eventRepeating, nil)
+        XCTAssertEqual(basic?.eventTagId, .custom("latest"))
+        XCTAssertEqual(basic?.eventNotifications, [.atTime])
+        
+        let addition = self.spyRouter.spyInteractor.didPreparedWith?.1
+        XCTAssertEqual(addition?.eventId, "pending")
+    }
+    
+    func testViewModel_makeFromTodoWithCopy() {
+        // given
+        let expect = expectation(description: "wait prepare")
+        let viewModel = self.makeViewModelWithSource(
+            .todoFromCopy(self.dummyTodoMakeParams, self.dummyAddition)
+        )
+        self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.prepare()
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        let basic = self.spyRouter.spyInteractor.didPreparedWith?.0
+        XCTAssertEqual(basic?.name, "name")
+        XCTAssertEqual(basic?.selectedTime?.eventTime(self.timeZone), .period(refDate.timeIntervalSince1970..<refDate.timeIntervalSince1970+10))
+        let expectedRepeating = EventRepeating(
+            repeatingStartTime: self.refDate.timeIntervalSince1970,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        ) |> \.repeatingEndTime .~ (self.refDate.timeIntervalSince1970+100)
+        XCTAssertEqual(basic?.eventRepeating?.repeating, expectedRepeating)
+        XCTAssertEqual(basic?.eventTagId, .custom("tag"))
+        XCTAssertEqual(basic?.eventNotifications, [.allDay12AM])
+        
+        let addition = self.spyRouter.spyInteractor.didPreparedWith?.1
+        XCTAssertEqual(addition?.eventId, "some")
+        XCTAssertEqual(addition?.url, "url address")
+        XCTAssertEqual(addition?.memo, "memo")
+    }
+    
+    func testViewModel_makeFromScheduleWithCopy() {
+        // given
+        let expect = expectation(description: "wait prepare")
+        let viewModel = self.makeViewModelWithSource(
+            .scheduleFromCopy(self.dummyScheduleMakeParams, self.dummyAddition)
+        )
+        self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.prepare()
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        let basic = self.spyRouter.spyInteractor.didPreparedWith?.0
+        XCTAssertEqual(basic?.name, "name")
+        XCTAssertEqual(basic?.selectedTime?.eventTime(self.timeZone), .period(refDate.timeIntervalSince1970..<refDate.timeIntervalSince1970+10))
+        let expectedRepeating = EventRepeating(
+            repeatingStartTime: self.refDate.timeIntervalSince1970,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        ) |> \.repeatingEndTime .~ (self.refDate.timeIntervalSince1970+100)
+        XCTAssertEqual(basic?.eventRepeating?.repeating, expectedRepeating)
+        XCTAssertEqual(basic?.eventTagId, .custom("tag"))
+        XCTAssertEqual(basic?.eventNotifications, [.allDay12AM])
+        
+        let addition = self.spyRouter.spyInteractor.didPreparedWith?.1
+        XCTAssertEqual(addition?.eventId, "some")
+        XCTAssertEqual(addition?.url, "url address")
+        XCTAssertEqual(addition?.memo, "memo")
     }
 }
