@@ -70,6 +70,7 @@ extension TodoEventUsecaseImple {
         self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
             ($0 ?? [:]) |> key(newEvent.uuid) .~ newEvent
         }
+        self.updateUncompletedTodoList(by: newEvent)
         return newEvent
     }
     
@@ -273,22 +274,22 @@ extension TodoEventUsecaseImple {
             self.removeUncompletedTodoAtList(updatedTodo.uuid)
             
         case .some(let t) where t.upperBoundWithFixed <= now:
-            self.notifyUncompletedTodoAtList(updatedTodo)
+            self.updateOrAppendUncompletedTodoAtList(updatedTodo)
             
         case .some:
             self.removeUncompletedTodoAtList(updatedTodo.uuid)
         }
     }
     
-    private func notifyUncompletedTodoAtList(_ todo: TodoEvent) {
+    private func updateOrAppendUncompletedTodoAtList(_ todo: TodoEvent) {
         let shareKey = ShareDataKeys.uncompletedTodos.rawValue
         self.sharedDataStore.update([TodoEvent].self, key: shareKey) { todos in
-            var todos = todos ?? []
-            guard let index = todos.firstIndex(where: { $0.eventId == todo.uuid })
-            else { return todos }
-            
-            todos[index] = todo
-            return todos
+            let todos = todos ?? []
+            if let index = todos.firstIndex(where: { $0.eventId == todo.uuid }) {
+                return todos |> ix(index) .~ todo
+            } else {
+                return todos + [todo]
+            }
         }
     }
     

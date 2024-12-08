@@ -876,6 +876,36 @@ extension TodoEventUsecaseImpleTests {
             (0..<4).map { "name:\($0)" } + (6..<10).map { "name:\($0)" }
         ])
     }
+    
+    func testUsecase_whenMakeNewTodoAndIsUncompletedEvent_appendFromUncompletedTodoList() {
+        // given
+        let expect = expectation(description: "신규이벤트 추가시에, 이미 과거 할일이면 완료되지않은 할일 목록에 추가")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecaseWithStubUncompleted()
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos, timeout: 0.1) {
+            
+            usecase.refreshUncompletedTodos()
+            
+            Task {
+                let params = TodoMakeParams()
+                    |> \.name .~ "new uncompleted todo"
+                    |> \.time .~ .at(
+                        Date().timeIntervalSince1970 - 1000
+                    )
+                _ = try await usecase.makeTodoEvent(params)
+            }
+        }
+        
+        // then
+        let nameLists = todoLists.map { ts in ts.map { $0.name } }
+        XCTAssertEqual(nameLists, [
+            [],
+            (0..<10).map { "name:\($0)" },
+            (0..<10).map { "name:\($0)" } + ["new uncompleted todo"]
+        ])
+    }
 }
 
 // MARK: - skip todo
