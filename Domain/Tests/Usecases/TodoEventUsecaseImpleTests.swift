@@ -784,7 +784,12 @@ extension TodoEventUsecaseImpleTests {
             usecase.refreshUncompletedTodos()
             
             Task {
-                _ = try await usecase.updateTodoEvent("id:4", .init(.put) |> \.name .~ "new name")
+                let params = TodoEditParams(.put)
+                    |> \.name .~ "new name"
+                    |> \.time .~ .at(
+                        Date().timeIntervalSince1970 - 1000
+                    )
+                _ = try await usecase.updateTodoEvent("id:4", params)
             }
         }
         
@@ -795,6 +800,31 @@ extension TodoEventUsecaseImpleTests {
             (0..<10).map { "name:\($0)" },
             (0..<4).map { "name:\($0)" } + ["new name"] + (5..<10).map { "name:\($0)" }
         ])
+    }
+    
+    func testUsecase_whenUpdateUncompletedTodoToFuture_removeFromList() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일의 시간을 미래로 업데이트한 경우, 완료되지않은 할일 목록에서 제거")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecaseWithStubUncompleted()
+        
+        // when
+        let todoList = self.waitOutputs(expect, for: usecase.uncompletedTodos, timeout: 0.1) {
+            usecase.refreshUncompletedTodos()
+            
+            Task {
+                let params = TodoEditParams(.put)
+                    |> \.name .~ "new name"
+                    |> \.time .~ .at(
+                        Date().timeIntervalSince1970 + 1000
+                    )
+                _ = try await usecase.updateTodoEvent("id:3", params)
+            }
+        }
+        
+        // then
+        let id3TodoExists = todoList.map { ts in ts.first(where: { $0.uuid == "id:3"} ) != nil }
+        XCTAssertEqual(id3TodoExists, [false, true, false])
     }
     
     func testUsecase_whenAfterCompleteUncompletedTodo_removeFromUncompletedTodoList() {
@@ -945,7 +975,7 @@ extension TodoEventUsecaseImpleTests {
     func testUsecase_whenSkipTodoAndSkippedTodoEventTimeIsFuture_removeFromUncompletedTodo() {
         // given
         let expect = expectation(description: "todo skip시에 업데이트된 todo가 미래의 todo라면 완료 목록에서 제거")
-        expect.expectedFulfillmentCount = 4
+        expect.expectedFulfillmentCount = 3
         let usecase = self.makeUsecaseWithStubRepeatingTodo(
             nextTodoTime: .at(Date().timeIntervalSince1970 + 1000)
         )
@@ -962,7 +992,7 @@ extension TodoEventUsecaseImpleTests {
         // then
         let repeatingTodos = todoLists.map { ts in ts.first(where: { $0.uuid == "repeating" })}
         XCTAssertEqual(repeatingTodos.map { $0 != nil }, [
-            false, true, true, false
+            false, true, false
         ])
     }
 }

@@ -92,6 +92,7 @@ extension TodoEventUsecaseImple {
     ) async throws -> TodoEvent {
         let updatedEvent = try await self.todoRepository.updateTodoEvent(eventId, params)
         self.notifyUpdatedEvent(updatedEvent)
+        self.updateUncompletedTodoList(by: updatedEvent)
         return updatedEvent
     }
     
@@ -100,7 +101,6 @@ extension TodoEventUsecaseImple {
         self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
             ($0 ?? [:]) |> key(event.uuid) .~ event
         }
-        self.updateUncompletedTodoAtListIfNeed(event)
     }
     
     private func replaceCurrentTodoAndMakeNewEvent(
@@ -117,7 +117,7 @@ extension TodoEventUsecaseImple {
             |> key(eventId) .~ replaceResult.nextRepeatingTodoEvent
             |> key(replaceResult.newTodoEvent.uuid) .~ replaceResult.newTodoEvent
         }
-        self.updateUncompletedTodoAtListIfNeed(replaceResult.newTodoEvent)
+        self.updateUncompletedTodoList(by: replaceResult.newTodoEvent)
         return replaceResult.newTodoEvent
     }
     
@@ -133,8 +133,9 @@ extension TodoEventUsecaseImple {
             self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
                 ($0 ?? [:]) |> key(next.uuid) .~ next
             }
+            self.updateUncompletedTodoList(by: next)
         }
-        self.removeUncompletedTodoAtListIfNeed(eventId)
+        self.removeUncompletedTodoAtList(eventId)
         return doneEvent
     }
     
@@ -158,7 +159,7 @@ extension TodoEventUsecaseImple {
             ($0 ?? [:])
             |> key(id) .~ removeResult.nextRepeatingTodo
         }
-        self.removeUncompletedTodoAtListIfNeed(id)
+        self.removeUncompletedTodoAtList(id)
     }
     
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
@@ -265,7 +266,21 @@ extension TodoEventUsecaseImple {
             .eraseToAnyPublisher()
     }
     
-    private func updateUncompletedTodoAtListIfNeed(_ todo: TodoEvent) {
+    private func updateUncompletedTodoList(by updatedTodo: TodoEvent) {
+        let time = updatedTodo.time; let now = Date().timeIntervalSince1970
+        switch time {
+        case .none:
+            self.removeUncompletedTodoAtList(updatedTodo.uuid)
+            
+        case .some(let t) where t.upperBoundWithFixed <= now:
+            self.notifyUncompletedTodoAtList(updatedTodo)
+            
+        case .some:
+            self.removeUncompletedTodoAtList(updatedTodo.uuid)
+        }
+    }
+    
+    private func notifyUncompletedTodoAtList(_ todo: TodoEvent) {
         let shareKey = ShareDataKeys.uncompletedTodos.rawValue
         self.sharedDataStore.update([TodoEvent].self, key: shareKey) { todos in
             var todos = todos ?? []
@@ -277,7 +292,7 @@ extension TodoEventUsecaseImple {
         }
     }
     
-    private func removeUncompletedTodoAtListIfNeed(_ todoId: String) {
+    private func removeUncompletedTodoAtList(_ todoId: String) {
         let shareKey = ShareDataKeys.uncompletedTodos.rawValue
         self.sharedDataStore.update([TodoEvent].self, key: shareKey) {
             return ($0 ?? []).filter { $0.uuid != todoId }
@@ -294,22 +309,17 @@ extension TodoEventUsecaseImple {
         _ todoId: String, _ params: SkipTodoParams
     ) async throws -> TodoEvent {
         
-        func removeUpdatedEventFromUncompletedIfNeed(_ updated: TodoEvent) {
-            guard let time = updated.time, time.lowerBoundWithFixed > Date().timeIntervalSince1970 else { return }
-            self.removeUncompletedTodoAtListIfNeed(updated.uuid)
-        }
-        
         switch params {
         case .next:
             let skipped = try await self.todoRepository.skipRepeatingTodo(todoId)
             self.notifyUpdatedEvent(skipped)
-            removeUpdatedEventFromUncompletedIfNeed(skipped)
+            self.updateUncompletedTodoList(by: skipped)
             return skipped
             
         case .until(let next):
             let params = TodoEditParams(.patch) |> \.time .~ next
             let skipped = try await self.updateTodoEvent(todoId, params)
-            removeUpdatedEventFromUncompletedIfNeed(skipped)
+            self.updateUncompletedTodoList(by: skipped)
             return skipped
         }
     }
