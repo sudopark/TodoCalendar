@@ -252,6 +252,7 @@ struct DayEventListView: View {
             }
             .eventHandler(\.refreshList) {
                 self.isFocusInput = false
+                self.appearance.impactIfNeed()
                 eventHandler.refreshUncompletedTodos()
             }
     }
