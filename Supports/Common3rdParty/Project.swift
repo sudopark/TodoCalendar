@@ -56,10 +56,12 @@ let project = Project.framework(
         .package(product: "Optics"),
         .package(product: "FirebaseAuth"),
         .package(product: "FirebaseCrashlytics"),
+        .package(product: "FirebaseAnalytics"),
         .package(product: "GoogleSignIn"),
         .package(product: "GoogleSignInSwift"),
         .package(product: "KeychainSwift"),
         .package(product: "CombineExt"),
         .package(product: "SwiftLinkPreview")
-    ]
+    ],
+    customSetting: .init().otherLinkerFlags(["-ObjC"])
 )
