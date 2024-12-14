@@ -92,20 +92,25 @@ extension AddEventViewModelImple: EventDetailInputListener {
     func prepare() {
         
         let params = self.initailMakeParams
-        
+        typealias Pair = (EventDetailBasicData, EventDetailData)
         self.subject.timeZone.compactMap { $0 }
             .first()
-            .sink(receiveValue: { [weak self] timeZone in
-                guard let self = self else { return }
-                let basic = self.basicData(params, timeZone)
-                let addition = params.additionalData ?? .init("pending")
-                self.inputInteractor?.prepared(basic: basic, additional: addition)
-                self.subject.isTodo.send(params.isTodoCase)
+            .flatMap { [weak self] timeZone async -> Pair? in
+                guard let self = self else { return nil }
+                let basic = await self.prepareBasicData(params, timeZone)
+                let addition = await self.prepareAdditional(params) ?? .init("pending")
+                return Pair(basic, addition)
+            }
+            .sink(receiveValue: { [weak self] pair in
+                self?.inputInteractor?.prepared(basic: pair.0, additional: pair.1)
+                self?.subject.isTodo.send(params.isTodoCase)
             })
             .store(in: &self.cancellables)
     }
     
-    private func basicData(_ params: MakeEventParams, _ timeZone: TimeZone) -> EventDetailBasicData {
+    private func prepareBasicData(
+        _ params: MakeEventParams, _ timeZone: TimeZone
+    ) async -> EventDetailBasicData {
         
         let defaultSetting = self.eventSettingUsecase.loadEventSetting()
         let eventTimeFromDefaultOption: () -> SelectedTime? = {
@@ -120,42 +125,80 @@ extension AddEventViewModelImple: EventDetailInputListener {
             .loadDefailtNotificationTimeOption(forAllDay: false)
             .map { [$0] } ?? []
         
-        var basic = EventDetailBasicData()
+        func basicFromTodo(_ makeParams: TodoMakeParams?) -> EventDetailBasicData {
+            let time = makeParams?.time
+                .map { $0.copy(with: params.selectedDate) }
+                .map { SelectedTime($0, timeZone) } ?? eventTimeFromDefaultOption()
+            let repeating = makeParams?.repeating
+                .map { $0.copy(with: params.selectedDate) }
+                .flatMap { EventRepeatingTimeSelectResult($0, timeZone: timeZone) }
+            return EventDetailBasicData()
+                |> \.name .~ makeParams?.name
+                |> \.selectedTime .~ time
+                |> \.eventRepeating .~ repeating
+                |> \.eventTagId .~ (makeParams?.eventTagId ?? defaultTag)
+                |> \.eventNotifications .~ (makeParams?.notificationOptions ?? defaultNotification)
+        }
+        
+        func basicFromSchedule(_ makeParams: ScheduleMakeParams?) -> EventDetailBasicData {
+            let time = makeParams?.time
+                .map { $0.copy(with: params.selectedDate) }
+                .map { SelectedTime($0, timeZone) } ?? eventTimeFromDefaultOption()
+            let repeating = makeParams?.repeating
+                .map { $0.copy(with: params.selectedDate) }
+                .flatMap { EventRepeatingTimeSelectResult($0, timeZone: timeZone) }
+            return EventDetailBasicData()
+                |> \.name .~ makeParams?.name
+                |> \.selectedTime .~ time
+                |> \.eventRepeating .~ repeating
+                |> \.eventTagId .~ (makeParams?.eventTagId ?? defaultTag)
+                |> \.eventNotifications .~ (makeParams?.notificationOptions ?? defaultNotification)
+        }
+        
         switch params.makeSource {
         case .todo(let name):
-            basic.name = name
-            basic.selectedTime = eventTimeFromDefaultOption()
-            basic.eventTagId = defaultTag
-            basic.eventNotifications = defaultNotification
+            return EventDetailBasicData()
+                |> \.name .~ name
+                |> \.selectedTime .~ eventTimeFromDefaultOption()
+                |> \.eventTagId .~ defaultTag
+                |> \.eventNotifications .~ defaultNotification
             
         case .schedule:
-            basic.selectedTime = eventTimeFromDefaultOption()
-            basic.eventTagId = defaultTag
-            basic.eventNotifications = defaultNotification
+            return EventDetailBasicData()
+                |> \.selectedTime .~ eventTimeFromDefaultOption()
+                |> \.eventTagId .~ defaultTag
+                |> \.eventNotifications .~ defaultNotification
             
         case .todoFromCopy(let makeParams, _):
-            basic.name = makeParams.name
-            basic.selectedTime = makeParams.time
-                .map { $0.copy(with: params.selectedDate) }
-                .map { SelectedTime($0, timeZone)} ?? eventTimeFromDefaultOption()
-            basic.eventRepeating = makeParams.repeating
-                .map { $0.copy(with: params.selectedDate) }
-                .flatMap { .init($0, timeZone: timeZone) }
-            basic.eventTagId = makeParams.eventTagId ?? defaultTag
-            basic.eventNotifications = makeParams.notificationOptions ?? defaultNotification
+            return basicFromTodo(makeParams)
             
         case .scheduleFromCopy(let makeParams, _):
-            basic.name = makeParams.name
-            basic.selectedTime = makeParams.time
-                .map { $0.copy(with: params.selectedDate) }
-                .map { SelectedTime($0, timeZone)} ?? eventTimeFromDefaultOption()
-            basic.eventRepeating = makeParams.repeating
-                .map { $0.copy(with: params.selectedDate) }
-                .flatMap { .init($0, timeZone: timeZone) }
-            basic.eventTagId = makeParams.eventTagId ?? defaultTag
-            basic.eventNotifications = makeParams.notificationOptions ?? defaultNotification
+            return basicFromSchedule(makeParams)
+            
+        case .todoFromOrigin(let id):
+            let todo = try? await self.todoUsecase.todoEvent(id).last().values.first(where: { _ in true })
+            let makeParams = todo.map { TodoMakeParams($0) }
+            return basicFromTodo(makeParams)
+            
+        case .scheduleFromOrigin(let id):
+            let schedule = try? await self.scheduleUsecase.scheduleEvent(id).last().values.first(where: { _ in true })
+            let makeParams = schedule.map { ScheduleMakeParams($0) }
+            return basicFromSchedule(makeParams)
         }
-        return basic
+    }
+    
+    private func prepareAdditional(_ params: MakeEventParams) async -> EventDetailData? {
+        switch params.makeSource {
+        case .todoFromCopy(_, let data): return data
+        case .scheduleFromCopy(_, let data): return data
+        case .todoFromOrigin(let id):
+            return try? await self.eventDetailDataUsecase
+                .loadDetail(id).last().values.first(where: { _ in true })
+        case .scheduleFromOrigin(let id):
+            return try? await self.eventDetailDataUsecase
+                .loadDetail(id).last().values.first(where: { _ in true })
+        default: return nil
+        }
     }
     
     func handleMoreAction(_ action: EventDetailMoreAction) {
@@ -366,18 +409,10 @@ private extension Date {
 
 private extension MakeEventParams {
         
-    var additionalData: EventDetailData? {
-        switch self.makeSource {
-        case .todoFromCopy(_, let data): return data
-        case .scheduleFromCopy(_, let data): return data
-        default: return nil
-        }
-    }
-    
     var isTodoCase: Bool {
         switch self.makeSource {
-        case .todo, .todoFromCopy: return true
-        case .schedule, .scheduleFromCopy: return false
+        case .todo, .todoFromCopy, .todoFromOrigin: return true
+        case .schedule, .scheduleFromCopy, .scheduleFromOrigin: return false
         }
     }
 }

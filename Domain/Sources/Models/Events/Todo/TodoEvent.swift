@@ -93,6 +93,7 @@ public struct TodoMakeParams: Sendable {
         self.name = todo.name
         self.eventTagId = todo.eventTagId
         self.time = todo.time
+        self.repeating = todo.repeating
         self.notificationOptions = todo.notificationOptions
     }
 }

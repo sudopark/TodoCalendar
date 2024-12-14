@@ -939,7 +939,7 @@ extension EventDetailMoreAction: Identifiable {
             return isForemost
                 ? "calendar::event::more_action:foremost:mark:item_name".localized()
                 : "calendar::event::more_action:foremost:unmark:item_name".localized()
-        case .copy: return "copy".localized()
+        case .copy: return "calendar::event::more_action:copy:item_name".localized()
         case .addToTemplate: return "add to template".localized()
         case .share: return "share".localized()
         }

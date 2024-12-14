@@ -20,9 +20,9 @@ import TestDoubles
 class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
-    private var spyTodoUsecase: StubTodoEventUsecase!
-    private var spyScheduleUsecase: StubScheduleEventUsecase!
-    private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
+    private var spyTodoUsecase: PrivateStubTodoUsecase!
+    private var spyScheduleUsecase: PrivateStubScheduleUsecase!
+    private var spyEventDetailDataUsecase: PrivateEventDetailUsecase!
     private var spyRouter: SpyEventDetailRouter!
     private var refDate: Date!
     private var timeZone: TimeZone {
@@ -466,13 +466,13 @@ extension AddEventViewModelImpleTests {
     }
 }
 
+private var dummyRepeating: EventRepeating {
+    let option = EventRepeatingOptions.EveryDay()
+    return .init(repeatingStartTime: 0, repeatOption: option)
+        |> \.repeatingEndTime .~ 100
+}
+
 extension AddEventViewModelImpleTests {
-    
-    private var dummyRepeating: EventRepeating {
-        let option = EventRepeatingOptions.EveryDay()
-        return .init(repeatingStartTime: 0, repeatOption: option)
-            |> \.repeatingEndTime .~ 100
-    }
     
     private var dummyTodoMakeParams: TodoMakeParams {
         return TodoMakeParams()
@@ -607,5 +607,107 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(addition?.eventId, "some")
         XCTAssertEqual(addition?.url, "url address")
         XCTAssertEqual(addition?.memo, "memo")
+    }
+    
+    func testViewModel_makeFromTodoWithCopyOrigin() {
+        // given
+        let expect = expectation(description: "wait prepare")
+        let viewModel = self.makeViewModelWithSource(
+            .todoFromOrigin("todo:origin")
+        )
+        self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.prepare()
+        self.wait(for: [expect], timeout: self.timeoutLong)
+        
+        // then
+        let basic = self.spyRouter.spyInteractor.didPreparedWith?.0
+        XCTAssertEqual(basic?.name, "origin")
+        XCTAssertEqual(basic?.selectedTime?.eventTime(self.timeZone), .period(refDate.timeIntervalSince1970..<refDate.timeIntervalSince1970+10))
+        let expectedRepeating = EventRepeating(
+            repeatingStartTime: self.refDate.timeIntervalSince1970,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        ) |> \.repeatingEndTime .~ (self.refDate.timeIntervalSince1970+100)
+        XCTAssertEqual(basic?.eventRepeating?.repeating, expectedRepeating)
+        XCTAssertEqual(basic?.eventTagId, .custom("tag"))
+        XCTAssertEqual(basic?.eventNotifications, [.allDay12AM])
+        
+        let addition = self.spyRouter.spyInteractor.didPreparedWith?.1
+        XCTAssertEqual(addition?.eventId, "todo:origin")
+        XCTAssertEqual(addition?.url, "url address")
+        XCTAssertEqual(addition?.memo, "memo")
+    }
+    
+    func testViewModel_makeFromScheduleWithCopyOrigin() {
+        // given
+        let expect = expectation(description: "wait prepare")
+        let viewModel = self.makeViewModelWithSource(
+            .scheduleFromOrigin("schedule:origin")
+        )
+        self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.prepare()
+        self.wait(for: [expect], timeout: self.timeoutLong)
+        
+        // then
+        let basic = self.spyRouter.spyInteractor.didPreparedWith?.0
+        XCTAssertEqual(basic?.name, "origin")
+        XCTAssertEqual(basic?.selectedTime?.eventTime(self.timeZone), .period(refDate.timeIntervalSince1970..<refDate.timeIntervalSince1970+10))
+        let expectedRepeating = EventRepeating(
+            repeatingStartTime: self.refDate.timeIntervalSince1970,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        ) |> \.repeatingEndTime .~ (self.refDate.timeIntervalSince1970+100)
+        XCTAssertEqual(basic?.eventRepeating?.repeating, expectedRepeating)
+        XCTAssertEqual(basic?.eventTagId, .custom("tag"))
+        XCTAssertEqual(basic?.eventNotifications, [.allDay12AM])
+        
+        let addition = self.spyRouter.spyInteractor.didPreparedWith?.1
+        XCTAssertEqual(addition?.eventId, "schedule:origin")
+        XCTAssertEqual(addition?.url, "url address")
+        XCTAssertEqual(addition?.memo, "memo")
+    }
+}
+
+
+private final class PrivateStubTodoUsecase: StubTodoEventUsecase {
+    
+    override func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
+        let todo = TodoEvent(uuid: id, name: "origin")
+            |> \.time .~ .period(0..<10)
+            |> \.eventTagId .~ .custom("tag")
+            |> \.repeating .~ dummyRepeating
+            |> \.notificationOptions .~ [.allDay12AM]
+        return [TodoEvent(uuid: id, name: "local"), todo]
+            .publisher
+            .mapAsAnyError()
+            .eraseToAnyPublisher()
+    }
+}
+
+private final class PrivateStubScheduleUsecase: StubScheduleEventUsecase, @unchecked Sendable {
+    
+    override func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error> {
+        let schedule = ScheduleEvent(uuid: eventId, name: "origin", time: .period(0..<10))
+            |> \.repeating .~ dummyRepeating
+            |> \.eventTagId .~ .custom("tag")
+            |> \.notificationOptions .~ [.allDay12AM]
+        return [ScheduleEvent(uuid: eventId, name: "initial", time: .at(1)), schedule]
+            .publisher
+            .mapAsAnyError()
+            .eraseToAnyPublisher()
+    }
+}
+
+private final class PrivateEventDetailUsecase: StubEventDetailDataUsecase, @unchecked Sendable {
+    
+    override func loadDetail(_ id: String) -> AnyPublisher<EventDetailData, any Error> {
+        let data = EventDetailData(id)
+            |> \.url .~ "url address"
+            |> \.memo .~ "memo"
+        return Just(data)
+            .mapAsAnyError()
+            .eraseToAnyPublisher()
     }
 }
