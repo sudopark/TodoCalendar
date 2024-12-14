@@ -23,6 +23,8 @@ public struct MakeEventParams: Sendable {
         case schedule
         case todoFromCopy(TodoMakeParams, EventDetailData?)
         case scheduleFromCopy(ScheduleMakeParams, EventDetailData?)
+        case todoFromOrigin(_ id: String)
+        case scheduleFromOrigin(_ id: String)
     }
     
     public let selectedDate: Date

@@ -389,6 +389,38 @@ extension EventListCellEventHanleViewModelImpleTests {
             XCTFail("기대한 타입이 아님")
         }
     }
+    
+    func testViewModel_copyTodoEventFromList() {
+        // given
+        let viewModel = self.makeViewModel()
+        let todo = TodoEventCellViewModel("some", name: "origin")
+        
+        // when
+        viewModel.handleMoreAction(todo, .copy)
+        
+        // then
+        if case .todoFromOrigin = self.spyRouter.didRouteToMakeNewEventWithParams?.makeSource {
+            XCTAssert(true)
+        } else {
+            XCTFail("기대한 이벤트가 아님")
+        }
+    }
+    
+    func testViewModel_copyScheduleEventFromList() {
+        // given
+        let viewModel = self.makeViewModel()
+        let schedule = ScheduleEventCellViewModel("some", name: "origin")
+        
+        // when
+        viewModel.handleMoreAction(schedule, .copy)
+        
+        // then
+        if case .scheduleFromOrigin = self.spyRouter.didRouteToMakeNewEventWithParams?.makeSource {
+            XCTAssert(true)
+        } else {
+            XCTFail("기대한 이벤트가 아님")
+        }
+    }
 }
 
 private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @unchecked Sendable {

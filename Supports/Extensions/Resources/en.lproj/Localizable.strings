@@ -126,11 +126,13 @@
 "calendar::event::more_action:remove:item_name" = "Remove event";
 "calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";
 "calendar::event::more_action:foremost:unmark:item_name" = "Unmark as foremost";
+"calendar::event::more_action:copy:item_name" = "Copy event";
 "calendar::event::more_action:edit:item_name" = "Edit";
 "calednar::event::add_new" = "Add a new event";
 "calednar::event::add_new:place_holder" = "Add a new to-do event quickly.";
 "calednar::event::skip_todo" = "Skip this to-do";
 "calednar::event::skip_todo_until" = "Select a time to skip this to-do";
+"calednar::event::copy" = "Copy event";
 
 
 // MARK: - event detail

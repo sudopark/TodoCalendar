@@ -109,6 +109,8 @@ struct EventListCellView: View {
             return toggleForemostButton(isForemost).asAnyView()
         case .skipTodo:
             return skipTodoButton().asAnyView()
+        case .copy:
+            return copyButton().asAnyView()
         }
     }
     
@@ -162,6 +164,17 @@ struct EventListCellView: View {
             HStack {
                 Text("calednar::event::skip_todo".localized())
                 Image(systemName: "forward")
+            }
+        }
+    }
+    
+    private func copyButton() -> some View {
+        return Button {
+            self.handleMoreAction(self.cellViewModel, .copy)
+        } label: {
+            HStack {
+                Text("calednar::event::copy".localized())
+                Image(systemName: "doc.on.doc")
             }
         }
     }

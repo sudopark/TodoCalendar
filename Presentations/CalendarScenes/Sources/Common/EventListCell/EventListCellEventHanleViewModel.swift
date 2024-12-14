@@ -48,7 +48,11 @@ final class EventListCellEventHanleViewModelImple: EventListCellEventHanleViewMo
     
     var router: (any EventListCellEventHanleRouting)?
     
-    init(todoEventUsecase: any TodoEventUsecase, scheduleEventUsecase: any ScheduleEventUsecase, foremostEventUsecase: any ForemostEventUsecase) {
+    init(
+        todoEventUsecase: any TodoEventUsecase,
+        scheduleEventUsecase: any ScheduleEventUsecase,
+        foremostEventUsecase: any ForemostEventUsecase
+    ) {
         self.todoEventUsecase = todoEventUsecase
         self.scheduleEventUsecase = scheduleEventUsecase
         self.foremostEventUsecase = foremostEventUsecase
@@ -123,6 +127,9 @@ extension EventListCellEventHanleViewModelImple {
         case .skipTodo:
             guard let todo = cellViewModel as? TodoEventCellViewModel else { return }
             self.skipTodoToNext(todo)
+            
+        case .copy:
+            self.copyEvent(cellViewModel)
         }
     }
 
@@ -216,6 +223,20 @@ extension EventListCellEventHanleViewModelImple {
             }
         }
         .store(in: &self.cancellables)
+    }
+    
+    private func copyEvent(_ cellViewModel: any EventCellViewModel) {
+        switch cellViewModel {
+        case let todo as TodoEventCellViewModel:
+            self.router?.routeToMakeNewEvent(
+                .init(selectedDate: Date(), makeSource: .todoFromOrigin(todo.eventIdentifier))
+            )
+        case let schedule as ScheduleEventCellViewModel:
+            self.router?.routeToMakeNewEvent(
+                .init(selectedDate: Date(), makeSource: .scheduleFromOrigin(schedule.eventIdWithoutTurn))
+            )
+        default: return
+        }
     }
     
     private func runMoreActionAfterConfirm(

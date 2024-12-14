@@ -138,6 +138,7 @@ public enum EventListMoreAction: Sendable, Equatable {
     case toggleTo(isForemost: Bool)
     case skipTodo
     case edit
+    case copy
 }
 
 public struct EventListMoreActionModel: Sendable, Equatable {
@@ -234,7 +235,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
             : [.remove(onlyThisTime: false)]
         let skipActions: [EventListMoreAction] = self.isRepeating
             ? [.skipTodo] : []
-        let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)] + skipActions + [.edit]
+        let basicActions: [EventListMoreAction] = [.toggleTo(isForemost: self.isForemost)] + skipActions + [.edit, .copy]
         return .init(
             basicActions: basicActions,
             removeActions: removeActions
@@ -326,7 +327,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
             ? [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
             : [.remove(onlyThisTime: false)]
         return .init(
-            basicActions: [.toggleTo(isForemost: self.isForemost), .edit],
+            basicActions: [.toggleTo(isForemost: self.isForemost), .edit, .copy],
             removeActions: removeActions
         )
     }
