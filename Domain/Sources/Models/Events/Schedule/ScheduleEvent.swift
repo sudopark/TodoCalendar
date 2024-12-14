@@ -86,6 +86,15 @@ public struct ScheduleMakeParams: Sendable {
     
     public init() { }
     
+    public init(_ schedule: ScheduleEvent) {
+        self.name = schedule.name
+        self.time = schedule.time
+        self.eventTagId = schedule.eventTagId
+        self.repeating = schedule.repeating
+        self.showTurn = schedule.showTurn
+        self.notificationOptions = schedule.notificationOptions
+    }
+    
     public var isValidForMaking: Bool {
         return self.name?.isEmpty == false
             && self.time != nil
