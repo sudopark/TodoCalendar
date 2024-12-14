@@ -508,21 +508,21 @@ extension DayEventListViewModelImpleTests {
         XCTAssertEqual(
             todoNotRepeating.moreActions,
             .init(
-                basicActions: [.toggleTo(isForemost: false), .edit],
+                basicActions: [.toggleTo(isForemost: false), .edit, .copy],
                 removeActions: [.remove(onlyThisTime: false)]
             )
         )
         XCTAssertEqual(
             todoWithRepeating.moreActions,
             .init(
-                basicActions: [.toggleTo(isForemost: false), .skipTodo, .edit],
+                basicActions: [.toggleTo(isForemost: false), .skipTodo, .edit, .copy],
                 removeActions: [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
             )
         )
         XCTAssertEqual(
             todoAsForemost.moreActions,
             .init(
-                basicActions: [.toggleTo(isForemost: true), .edit],
+                basicActions: [.toggleTo(isForemost: true), .edit, .copy],
                 removeActions: [.remove(onlyThisTime: false)]
             )
         )
@@ -543,15 +543,15 @@ extension DayEventListViewModelImpleTests {
         
         // then
         XCTAssertEqual(repeating?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: false), .edit],
+            basicActions: [.toggleTo(isForemost: false), .edit, .copy],
             removeActions: [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
         ))
         XCTAssertEqual(notRepeating?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: false), .edit],
+            basicActions: [.toggleTo(isForemost: false), .edit, .copy],
             removeActions: [.remove(onlyThisTime: false)]
         ))
         XCTAssertEqual(foremostEvent?.moreActions, .init(
-            basicActions: [.toggleTo(isForemost: true), .edit],
+            basicActions: [.toggleTo(isForemost: true), .edit, .copy],
             removeActions: [.remove(onlyThisTime: false)]
         ))
     }
