@@ -162,6 +162,7 @@
 "eventDetail.repeating.every6WeekOfEveryMonth::someday" = "매달 여섯번째 %@";
 "eventDetail.repeating.every7WeekOfEveryMonth::someday" = "매달 일곱번째 %@";
 "eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "매달 마지막 %@";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "이벤트 반복 종료시간은 시작시간보다 미래의 시간이여야 합니다.\n(반복 시작시간: %@)";
 
 "eventDetail.add_new_todo::message" = "신규 할일이 등록되었습니다.";
 "eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";

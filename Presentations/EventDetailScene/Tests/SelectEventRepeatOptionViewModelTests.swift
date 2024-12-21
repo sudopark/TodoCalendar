@@ -21,6 +21,7 @@ class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyListener: SpyListener!
+    private var spyRouter: SpyRouter!
     private var timeZone: TimeZone { TimeZone(abbreviation: "KST")! }
     
     private var defaultStartTime: Date { "2023-10-22 02:30:22".date() }
@@ -28,11 +29,13 @@ class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyListener = .init()
+        self.spyRouter = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.spyListener = nil
+        self.spyRouter = nil
     }
     
     private func makeViewModel(
@@ -46,6 +49,7 @@ class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {
             previousSelected: previous,
             calendarSettingUsecase: settingUsecase
         )
+        viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
         return viewModel
     }
@@ -358,25 +362,59 @@ extension SelectEventRepeatOptionViewModelTests {
         ])
     }
     
-    func testViewModel_whenPreviousOptionExistsAndChanged_notUpdateStartTime() {
-        // given
+    private func makeViewModelWithPreviousRepeating() -> SelectEventRepeatOptionViewModelImple {
         let previous = EventRepeating(
             repeatingStartTime: 100,
             repeatOption: EventRepeatingOptions.EveryMonth(timeZone: self.timeZone)
             |> \.selection .~ .week([.seq(3)], [.wednesday])
         )
-        let viewModel = self.makeViewModel(previous: previous)
+        return self.makeViewModel(previous: previous)
+    }
+    
+    func testViewModel_whenPreviousOptionExistsAndChanged_notUpdateStartTime() {
+        // given
+        let viewModel = self.makeViewModelWithPreviousRepeating()
         viewModel.prepare()
         
         // when
         viewModel.toggleHasRepeatEnd(isOn: true)
         
         // then
-        XCTAssertEqual(
-            self.spyListener.didEventRepeatingSelectOrNot.count, 1
-        )
+        XCTAssertEqual(self.spyListener.didEventRepeatingSelectOrNot.count, 1)
         let first = self.spyListener.didEventRepeatingSelectOrNot.first
         XCTAssertEqual(first??.repeatingStartTime, 100)
+    }
+    
+    func testViewModel_whenSelectedRepeatingEndTimeIsInvalid_showToast() {
+        // given
+        let viewModel = self.makeViewModelWithPreviousRepeating()
+        viewModel.prepare()
+        
+        // when
+        viewModel.selectRepeatEndDate(Date(timeIntervalSince1970: 40))
+        
+        // then
+        XCTAssertEqual(self.spyListener.didEventRepeatingSelectOrNot.count, 1)
+        let first = self.spyListener.didEventRepeatingSelectOrNot.first
+        XCTAssertEqual(first??.repeatingEndTime, nil)
+        XCTAssertEqual(self.spyRouter.didShowRepeatingEndTimeIsInvalid, true)
+    }
+    
+    func testViewModel_whenSelectRepeatingEndTimeIsInvalid_toggleOffHasEndTime() {
+        // given
+        let expect = expectation(description: "종료시간이 유효하지 않은경우(시작시간보다 미래가 아님) 종료시간이 없도록 다시 토글")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithPreviousRepeating()
+        viewModel.prepare()
+        
+        // when
+        let isExists = self.waitOutputs(expect, for: viewModel.hasRepeatEnd) {
+            
+            viewModel.selectRepeatEndDate(Date(timeIntervalSince1970: 40))
+        }
+        
+        // then
+        XCTAssertEqual(isExists, [false, true, false])
     }
 }
 
@@ -389,5 +427,13 @@ private class SpyListener: SelectEventRepeatOptionSceneListener, @unchecked Send
     
     func selectEventRepeatOptionNotRepeat() {
         self.didEventRepeatingSelectOrNot.append(nil)
+    }
+}
+
+private class SpyRouter: BaseSpyRouter, SelectEventRepeatOptionRouting, @unchecked Sendable {
+    
+    var didShowRepeatingEndTimeIsInvalid: Bool?
+    func showRepeatingEndTimeIsInvalid(startDate: Date) {
+        self.didShowRepeatingEndTimeIsInvalid = true
     }
 }

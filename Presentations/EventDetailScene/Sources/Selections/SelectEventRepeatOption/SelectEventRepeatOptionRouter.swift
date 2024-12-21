@@ -14,7 +14,12 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol SelectEventRepeatOptionRouting: Routing, Sendable { }
+protocol SelectEventRepeatOptionRouting: Routing, Sendable {
+    
+    func showRepeatingEndTimeIsInvalid(
+        startDate: Date
+    )
+}
 
 // MARK: - Router
 
@@ -27,5 +32,13 @@ extension SelectEventRepeatOptionRouter {
         self.scene as? (any SelectEventRepeatOptionScene)
     }
     
-    // TODO: router implememnts
+    func showRepeatingEndTimeIsInvalid(
+        startDate: Date
+    ) {
+        
+        let startDateText = startDate.text("date_form:yyyy.MM_dd_hh:mm".localized())
+        self.showToast(
+            "eventDetail.repeating.endtime::shouldFutureThanStartTime".localized(with: startDateText)
+        )
+    }
 }

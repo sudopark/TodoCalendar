@@ -366,14 +366,14 @@ extension SelectEventRepeatOptionViewModelImple {
     
     func selectOption(_ id: String) {
         self.subject.selectedOptionId.send(id)
-        self.notifyOptionSelected()
+        self.checkIsValidAndNotifyOptionSelected()
     }
     
     func toggleHasRepeatEnd(isOn: Bool) {
         guard let time = self.subject.repeatEndTime.value else { return }
         let newTime = time |> \.isOn .~ isOn
         self.subject.repeatEndTime.send(newTime)
-        self.notifyOptionSelected()
+        self.checkIsValidAndNotifyOptionSelected()
     }
     
     func selectRepeatEndDate(_ date: Date) {
@@ -383,26 +383,38 @@ extension SelectEventRepeatOptionViewModelImple {
         let time = RepeatEndTime(date, from: self.selectTime, timeZone: timeZone)
             |> \.isOn .~ true
         self.subject.repeatEndTime.send(time)
-        self.notifyOptionSelected()
+        self.checkIsValidAndNotifyOptionSelected()
     }
     
-    private func notifyOptionSelected() {
+    private func checkIsValidAndNotifyOptionSelected() {
         guard let optionId = self.subject.selectedOptionId.value,
               let model = self.subject.options.value.option(optionId)
         else { return }
         
-        if let option = model.option {
-            let startTime = self.previousSelectOption?.repeatingStartTime ?? self.selectTime.timeIntervalSince1970
-            let repeating = EventRepeating(
-                repeatingStartTime: startTime,
-                repeatOption: option
-            )
-            |> \.repeatingEndTime .~ self.subject.repeatEndTime.value?.endTimeIfOn?.timeIntervalSince1970
-            let result = EventRepeatingTimeSelectResult(text: model.text, repeating: repeating)
-            self.listener?.selectEventRepeatOption(didSelect: result)
-        } else {
+        guard let option = model.option
+        else {
             self.listener?.selectEventRepeatOptionNotRepeat()
+            return
         }
+        
+        let startTime = self.previousSelectOption?.repeatingStartTime ?? self.selectTime.timeIntervalSince1970
+        let endTime = self.subject.repeatEndTime.value?.endTimeIfOn?.timeIntervalSince1970
+        
+        let isValidPeriod = endTime.map { startTime < $0 } ?? true
+        guard isValidPeriod
+        else {
+            self.router?.showRepeatingEndTimeIsInvalid(
+                startDate: Date(timeIntervalSince1970: startTime)
+            )
+            self.toggleHasRepeatEnd(isOn: false)
+            return
+        }
+        
+        let repeating = EventRepeating(
+            repeatingStartTime: startTime, repeatOption: option
+        ) |> \.repeatingEndTime .~ endTime
+        let result = EventRepeatingTimeSelectResult(text: model.text, repeating: repeating)
+        self.listener?.selectEventRepeatOption(didSelect: result)
     }
     
     func close() {

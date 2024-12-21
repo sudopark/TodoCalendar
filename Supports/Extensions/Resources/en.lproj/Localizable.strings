@@ -162,6 +162,7 @@
 "eventDetail.repeating.every6WeekOfEveryMonth::someday" = "The Sixth %@ of every month";
 "eventDetail.repeating.every7WeekOfEveryMonth::someday" = "The Seventh %@ of every month";
 "eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "The last %@ of every month";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "The repeat end time must be in the future than the start time.\n(Repeat start date: %@)";
 
 "eventDetail.add_new_todo::message" = "A new to-do event has been added.";
 "eventDetail.add_new_schedule::message" = "A new schedule event has been added.";
