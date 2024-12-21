@@ -100,14 +100,14 @@ extension EventDetailRouter {
     }
     
     func routeToEventRepeatOptionSelect(
-        startTime: Date,
+        selectTime: Date,
         with initalOption: EventRepeating?,
         listener: (any SelectEventRepeatOptionSceneListener)?
     ) {
         Task { @MainActor in
             
             let next = self.selectRepeatOptionSceneBuilder.makeSelectEventRepeatOptionScene(
-                startTime: startTime,
+                selectTime: selectTime,
                 previousSelected: initalOption,
                 listener: listener
             )

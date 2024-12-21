@@ -758,7 +758,7 @@ private class SpyRouter: BaseSpyRouter, EventDetailInputRouting, @unchecked Send
     
     var didRouteToEventRepeatOptionSelect: Bool?
     func routeToEventRepeatOptionSelect(
-        startTime: Date, with initalOption: EventRepeating?,
+        selectTime: Date, with initalOption: EventRepeating?,
         listener: (any SelectEventRepeatOptionSceneListener)?
     ) {
         self.didRouteToEventRepeatOptionSelect = true

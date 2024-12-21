@@ -34,13 +34,13 @@ extension SelectEventRepeatOptionSceneBuilerImple: SelectEventRepeatOptionSceneB
     
     @MainActor
     func makeSelectEventRepeatOptionScene(
-        startTime: Date,
+        selectTime: Date,
         previousSelected repeating: EventRepeating?,
         listener: (any SelectEventRepeatOptionSceneListener)?
     ) -> any SelectEventRepeatOptionScene {
         
         let viewModel = SelectEventRepeatOptionViewModelImple(
-            startTime: startTime,
+            selectTime: selectTime,
             previousSelected: repeating,
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase()
         )

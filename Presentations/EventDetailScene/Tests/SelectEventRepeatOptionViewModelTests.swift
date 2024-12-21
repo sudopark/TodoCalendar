@@ -42,7 +42,7 @@ class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.selectTimeZone(self.timeZone)
         let viewModel = SelectEventRepeatOptionViewModelImple(
-            startTime: self.defaultStartTime,
+            selectTime: self.defaultStartTime,
             previousSelected: previous,
             calendarSettingUsecase: settingUsecase
         )
@@ -357,9 +357,30 @@ extension SelectEventRepeatOptionViewModelTests {
             ) |> \.repeatingEndTime .~ "2023.11.24 02:30:22".date().timeIntervalSince1970,
         ])
     }
+    
+    func testViewModel_whenPreviousOptionExistsAndChanged_notUpdateStartTime() {
+        // given
+        let previous = EventRepeating(
+            repeatingStartTime: 100,
+            repeatOption: EventRepeatingOptions.EveryMonth(timeZone: self.timeZone)
+            |> \.selection .~ .week([.seq(3)], [.wednesday])
+        )
+        let viewModel = self.makeViewModel(previous: previous)
+        viewModel.prepare()
+        
+        // when
+        viewModel.toggleHasRepeatEnd(isOn: true)
+        
+        // then
+        XCTAssertEqual(
+            self.spyListener.didEventRepeatingSelectOrNot.count, 1
+        )
+        let first = self.spyListener.didEventRepeatingSelectOrNot.first
+        XCTAssertEqual(first??.repeatingStartTime, 100)
+    }
 }
 
-private class SpyListener: SelectEventRepeatOptionSceneListener {
+private class SpyListener: SelectEventRepeatOptionSceneListener, @unchecked Sendable {
     
     var didEventRepeatingSelectOrNot: [EventRepeating?] = []
     func selectEventRepeatOption(didSelect repeating: EventRepeatingTimeSelectResult) {
