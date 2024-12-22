@@ -20,12 +20,16 @@ class EventTagRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyCache: SpyLocalStorage!
+    private var spyTodoCache: SpyTodoLocalStorage!
+    private var spyScheduleCache: SpyScheduleEventLocalStorage!
     private var stubRemote: StubRemoteAPI!
     private var fakeEnvStore: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyCache = .init()
+        self.spyTodoCache = .init()
+        self.spyScheduleCache = .init()
         self.fakeEnvStore = .init()
         self.stubRemote = .init(responses: self.response)
     }
@@ -41,6 +45,8 @@ class EventTagRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
         return .init(
             remote: self.stubRemote,
             cacheStorage: self.spyCache,
+            todoCacheStorage: self.spyTodoCache,
+            scheduleCacheStorage: self.spyScheduleCache,
             environmentStorage: self.fakeEnvStore
         )
     }
@@ -91,6 +97,21 @@ extension EventTagRemoteRepositoryImpleTests {
         XCTAssertEqual(self.spyCache.didDeleteTagIds, ["origin"])
         XCTAssertEqual(offIdsBeforeDelete, [.custom("origin")])
         XCTAssertEqual(offIdsAfterDelete, [])
+    }
+    
+    func testRepository_deleteTagWithEvents() async throws {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try await repository.deleteTagWithAllEvents("t1")
+        
+        // then
+        XCTAssertEqual(result.todoIds, ["todo1", "todo2"])
+        XCTAssertEqual(result.scheduleIds, ["sc1", "sc2"])
+        XCTAssertEqual(self.spyCache.didDeleteTagIds, ["t1"])
+        XCTAssertEqual(self.spyTodoCache.didRemovedTodoIds, result.todoIds)
+        XCTAssertEqual(self.spyScheduleCache.didRemoveIds, result.scheduleIds)
     }
 }
 
@@ -226,6 +247,11 @@ extension EventTagRemoteRepositoryImpleTests {
                 resultJsonString: .success("{ \"status\": \"ok\"}")
             ),
             .init(
+                method: .delete,
+                endpoint: EventTagEndpoints.tagAndEvents(id: "t1"),
+                resultJsonString: .success(RemoveEventTagWithEventsResult.dummyJSON())
+            ),
+            .init(
                 method: .get,
                 endpoint: EventTagEndpoints.allTags,
                 resultJsonString: .success(
@@ -250,6 +276,15 @@ extension EventTagRemoteRepositoryImpleTests {
                 )
             )
         ]
+    }
+}
+
+private extension RemoveEventTagWithEventsResult {
+    
+    static func dummyJSON() -> String {
+        return """
+        { "todos": ["todo1", "todo2"], "schedules": ["sc1", "sc2"] }
+        """
     }
 }
 

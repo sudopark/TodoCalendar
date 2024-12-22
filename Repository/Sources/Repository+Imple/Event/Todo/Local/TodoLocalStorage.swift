@@ -34,6 +34,7 @@ public protocol TodoLocalStorage: Sendable {
     func removeTodos(_ eventids: [String]) async throws
     func removeAll() async throws
     func removeAllDoneEvents() async throws
+    func removeTodosWith(tagId: String) async throws -> [String]
     func loadDoneTodos(after cursor: TimeInterval?, size: Int) async throws -> [DoneTodoEvent]
     func loadDoneTodoEvent(doneEventId: String) async throws -> DoneTodoEvent
     func removeDoneTodos(pastThan cursor: TimeInterval) async throws
@@ -185,6 +186,22 @@ extension TodoLocalStorageImple {
     
     public func removeAllDoneEvents() async throws {
         try await self.sqliteService.async.run { try $0.dropTable(Dones.self) }
+    }
+    
+    public func removeTodosWith(tagId: String) async throws -> [String] {
+        let todoIds = try await self.sqliteService.async.run([String].self) { db in
+            let query = Todo.selectSome { [$0.uuid] }.where { $0.eventTagId == tagId }
+            return try db.load(query) { cursor -> String in try cursor.next().unwrap() }
+        }
+        try await self.sqliteService.async.run { db in
+            let query = Times.delete().where { $0.eventId.in(todoIds) }
+            try db.delete(Times.self, query: query)
+        }
+        try await self.sqliteService.async.run { db in
+            let query = Todo.delete().where { $0.uuid.in(todoIds) }
+            try db.delete(Todo.self, query: query)
+        }
+        return todoIds
     }
 }
 

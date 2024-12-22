@@ -42,3 +42,21 @@ extension EventTagMakeParams {
 struct RemoveEventTagResult: Decodable {
     init(from decoder: any Decoder) throws { }
 }
+
+
+struct RemoveEventTagAndResultMapper: Decodable {
+    
+    private enum CodingKeys: String, CodingKey {
+        case todos
+        case schedules
+    }
+    let result: RemoveEventTagWithEventsResult
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.result = .init(
+            todoIds: try container.decode([String].self, forKey: .todos),
+            scheduleIds: try container.decode([String].self, forKey: .schedules)
+        )
+    }
+}
