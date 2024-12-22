@@ -21,6 +21,7 @@ public protocol TodoEventUsecase {
     func completeTodo(_ eventId: String) async throws -> DoneTodoEvent
     func revertCompleteTodo(_ doneId: String) async throws -> TodoEvent
     func removeTodo(_ id: String, onlyThisTime: Bool) async throws
+    func handleRemovedTodos(_ ids: [String])
     
     func refreshCurentTodoEvents()
     var currentTodoEvents: AnyPublisher<[TodoEvent], Never> { get }
@@ -161,6 +162,18 @@ extension TodoEventUsecaseImple {
             |> key(id) .~ removeResult.nextRepeatingTodo
         }
         self.removeUncompletedTodoAtList(id)
+    }
+    
+    public func handleRemovedTodos(_ ids: [String]) {
+        let idSet = Set(ids)
+        let todoKey = ShareDataKeys.todos.rawValue
+        self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
+            return ($0 ?? [:]).filter { !idSet.contains($0.key) }
+        }
+        let uncompletedKey = ShareDataKeys.uncompletedTodos.rawValue
+        self.sharedDataStore.update([TodoEvent].self, key: uncompletedKey) { todos in
+            return (todos ?? []).filter { !idSet.contains($0.uuid) }
+        }
     }
     
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {

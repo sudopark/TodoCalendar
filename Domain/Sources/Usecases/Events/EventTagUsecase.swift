@@ -19,6 +19,7 @@ public protocol EventTagUsecase: AnyObject, Sendable {
     func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag
     func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag
     func deleteTag(_ tagId: String) async throws
+    func deleteTagWithAllEvents(_ tagId: String) async throws
     
     func prepare()
     func refreshTags(_ ids: [String])
@@ -34,15 +35,21 @@ public protocol EventTagUsecase: AnyObject, Sendable {
 public final class EventTagUsecaseImple: EventTagUsecase, @unchecked Sendable {
     
     private let tagRepository: any EventTagRepository
+    private let todoEventusecase: any TodoEventUsecase
+    private let scheduleEventUsecase: any ScheduleEventUsecase
     private let sharedDataStore: SharedDataStore
     private let refreshBindingQueue: DispatchQueue
     
     public init(
         tagRepository: any EventTagRepository,
+        todoEventusecase: any TodoEventUsecase,
+        scheduleEventUsecase: any ScheduleEventUsecase,
         sharedDataStore: SharedDataStore,
         refreshBindingQueue: DispatchQueue? = nil
     ) {
         self.tagRepository = tagRepository
+        self.todoEventusecase = todoEventusecase
+        self.scheduleEventUsecase = scheduleEventUsecase
         self.sharedDataStore = sharedDataStore
         self.refreshBindingQueue = refreshBindingQueue ?? DispatchQueue(label: "event-tag-binding")
     }
@@ -71,6 +78,17 @@ extension EventTagUsecaseImple {
     
     public func deleteTag(_ tagId: String) async throws {
         try await self.tagRepository.deleteTag(tagId)
+        self.handleTagDeleted(tagId)
+    }
+    
+    public func deleteTagWithAllEvents(_ tagId: String) async throws {
+        let result = try await self.tagRepository.deleteTagWithAllEvents(tagId)
+        self.handleTagDeleted(tagId)
+        self.todoEventusecase.handleRemovedTodos(result.todoIds)
+        self.scheduleEventUsecase.handleRemovedSchedules(result.scheduleIds)
+    }
+    
+    private func handleTagDeleted(_ tagId: String) {
         self.sharedDataStore.update([String: EventTag].self, key: self.shareKey) {
             ($0 ?? [:]) |> key(tagId) .~ nil
         }

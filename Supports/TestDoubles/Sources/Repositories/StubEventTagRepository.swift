@@ -37,7 +37,7 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         
     }
     
-    public func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveEventTagWithEventsResult {
+    open func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveEventTagWithEventsResult {
         return .init(todoIds: ["todo"], scheduleIds: ["schedule"])
     }
     

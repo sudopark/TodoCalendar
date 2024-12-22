@@ -312,6 +312,89 @@ extension TodoEventUsecaseImpleTests {
         let todoIsNils = todos.map { $0 == nil }
         XCTAssertEqual(todoIsNils, [false, true])
     }
+    
+    private func makeUsecaseWithStubRemoveWithTag() -> TodoEventUsecaseImple {
+        let todoWithTime = TodoEvent(uuid: "todo_with_time", name: "name") |> \.time .~ .at(200)
+        let currentTodo = TodoEvent(uuid: "current_todo", name: "current")
+        let uncompletedTodo = TodoEvent(uuid: "uncompleted", name: "uncompleted") |> \.time .~ .at(100)
+        let notRemoveTarget = TodoEvent(uuid: "not_remove_target", name: "not") |> \.time .~ .at(200)
+        let notRemoveCurrent = TodoEvent(uuid: "note_remove_current", name: "not")
+        let notRemoveUncompleted = TodoEvent(uuid: "not_remove_uncompleted", name: "not")
+            |> \.time .~ .at(10)
+        self.spyStore.put(
+            [String: TodoEvent].self, key: ShareDataKeys.todos.rawValue,
+            [
+                todoWithTime, currentTodo, uncompletedTodo,
+                notRemoveTarget, notRemoveCurrent, notRemoveUncompleted
+            ].asDictionary { $0.uuid }
+        )
+        self.spyStore.put(
+            [TodoEvent].self, key: ShareDataKeys.uncompletedTodos.rawValue,
+            [uncompletedTodo, notRemoveUncompleted]
+        )
+        let usecase = self.makeUsecase()
+        return usecase
+    }
+    
+    func testUsecase_wheHandleRemoveTodos_updateSharedEvents() {
+        // given
+        let expect = expectation(description: "삭제된 todo 처리이후 공유중인 todo 리스트에서 제거")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubRemoveWithTag()
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.todoEvents(in: 0..<300)) {
+            
+            usecase.handleRemovedTodos(["todo_with_time", "current_todo", "uncompleted"])
+        }
+        
+        // then
+        let idLists = todoLists.map { ts in ts.map { $0.uuid }.sorted() }
+        XCTAssertEqual(idLists, [
+            ["not_remove_target", "not_remove_uncompleted",
+             "todo_with_time", "uncompleted"],
+            ["not_remove_target", "not_remove_uncompleted"]
+        ])
+    }
+    
+    func testUsecase_whenHandleRemoveTodos_updateCurrentTodoList() {
+        // given
+        let expect = expectation(description: "삭제된 todo 처리시에 current todo 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubRemoveWithTag()
+
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.currentTodoEvents) {
+            
+            usecase.handleRemovedTodos(["todo_with_time", "current_todo", "uncompleted"])
+        }
+        
+        // then
+        let idLists = todoLists.map { ts in ts.map { $0.uuid }.sorted() }
+        XCTAssertEqual(idLists, [
+            ["current_todo", "note_remove_current"],
+            ["note_remove_current"]
+        ])
+    }
+    
+    func testUsecase_whenHandleRemoveTodos_updateUncompletedTodoList() {
+        // given
+        let expect = expectation(description: "삭제된 todo 처리시에 완료되지않은 할일 리스트 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubRemoveWithTag()
+        
+        // when
+        let todoLists = self.waitOutputs(expect, for: usecase.uncompletedTodos) {
+            usecase.handleRemovedTodos(["todo_with_time", "current_todo", "uncompleted"])
+        }
+        
+        // then
+        let idLists = todoLists.map { ts in ts.map { $0.uuid }.sorted() }
+        XCTAssertEqual(idLists, [
+            ["not_remove_uncompleted", "uncompleted"],
+            ["not_remove_uncompleted"]
+        ])
+    }
 }
 
 

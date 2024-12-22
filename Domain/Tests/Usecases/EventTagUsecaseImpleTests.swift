@@ -22,12 +22,16 @@ class EventTagUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var stubRepository: StubEventTagRepository!
     private var sharedDataStore: SharedDataStore!
+    private var spyTodoUsecase: StubTodoEventUsecase!
+    private var spyScheduleUsecase: StubScheduleEventUsecase!
     private var serialQueue: DispatchQueue!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.stubRepository = .init()
         self.sharedDataStore = .init()
+        self.spyTodoUsecase = .init()
+        self.spyScheduleUsecase = .init()
         self.serialQueue = DispatchQueue.main
     }
     
@@ -42,6 +46,8 @@ class EventTagUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         self.stubRepository.stubLatestUsecaseTag = .init(uuid: "latest", name: "latest", colorHex: "some")
         return EventTagUsecaseImple(
             tagRepository: self.stubRepository,
+            todoEventusecase: self.spyTodoUsecase,
+            scheduleEventUsecase: self.spyScheduleUsecase,
             sharedDataStore: self.sharedDataStore,
             refreshBindingQueue: self.serialQueue
         )
@@ -158,6 +164,46 @@ extension EventTagUsecaseImpleTests {
         let pairs = self.waitOutputs(expect, for: source) {
             Task {
                 try await usecase.deleteTag("id:4")
+            }
+        }
+        
+        // then
+        XCTAssertEqual(pairs.map { $0.0.keys }.map { $0.sorted() }, [
+            Array(0..<10).map { "id:\($0)" },
+            Array(0..<10).filter { $0 != 4 }.map { "id:\($0)" }
+        ])
+        XCTAssertEqual(pairs.map { $0.1 }, [
+            [.custom("id:3"), .custom("id:4")], [.custom("id:3")]
+        ])
+    }
+    
+    func testUsecase_deleteTagWithEvents() async {
+        // given
+        let usecase = self.makeUsecaseWithTagAndOffed()
+        
+        // when
+        let result: Void? = try? await usecase.deleteTagWithAllEvents("id:2")
+        
+        // then
+        XCTAssertNotNil(result)
+        XCTAssertEqual(self.spyTodoUsecase.didHandleRemoveTodoIds, ["todo"])
+        XCTAssertEqual(self.spyScheduleUsecase.didHandleRemoveScheduleIds, ["schedule"])
+    }
+    
+    func testUsecase_whenDeleTagWithEvents_updateSharedTags() {
+        // given
+        let expect = expectation(description: "이벤트와 함께 tag 삭제 이후 공유중인 이벤트 목록과 off id 에서 제외")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithTagAndOffed()
+        
+        // when
+        let ids = (0..<10).map { "id:\($0)" }
+        let tagSource = usecase.eventTags(ids)
+        let offIdSource = usecase.offEventTagIdsOnCalendar()
+        let source = Publishers.Zip(tagSource, offIdSource)
+        let pairs = self.waitOutputs(expect, for: source) {
+            Task {
+                try await usecase.deleteTagWithAllEvents("id:4")
             }
         }
         
