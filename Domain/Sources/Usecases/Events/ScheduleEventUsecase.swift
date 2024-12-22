@@ -21,6 +21,7 @@ public protocol ScheduleEventUsecase: Sendable {
     func removeScheduleEvent(
         _ eventId: String, onlyThisTime: EventTime?
     ) async throws
+    func handleRemovedSchedules(_ ids: [String])
     
     func refreshScheduleEvents(in period: Range<TimeInterval>)
     func scheduleEvents(in period: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], Never>
@@ -148,6 +149,15 @@ extension ScheduleEventUsecaseImple {
         self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
             ($0 ?? .init())
                 .replace(eventId, ifExists: result.nextRepeatingEvnet)
+        }
+    }
+    
+    public func handleRemovedSchedules(_ ids: [String]) {
+        let shareKey = ShareDataKeys.schedules.rawValue
+        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+            return ids.reduce($0 ?? .init()) { acc, id in
+                return acc.invalidate(id)
+            }
         }
     }
 }
