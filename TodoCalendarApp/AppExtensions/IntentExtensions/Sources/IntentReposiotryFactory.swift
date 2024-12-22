@@ -24,9 +24,9 @@ extension IntentReposiotryFactory {
     func makeEventTagRepository() -> any EventTagRepository {
         
         let auth = self.base.authStore.loadCurrentAuth()
-        let localStorage = EventTagLocalStorageImple(
-            sqliteService: base.commonSqliteService
-        )
+        let localStorage = EventTagLocalStorageImple(sqliteService: base.commonSqliteService)
+        let todoLocalStorage = TodoLocalStorageImple(sqliteService: base.commonSqliteService)
+        let scheduleLocalStorage = ScheduleEventLocalStorageImple(sqliteService: base.commonSqliteService)
         
         if let auth {
             let remote = base.remoteAPI
@@ -34,11 +34,15 @@ extension IntentReposiotryFactory {
             return EventTagRemoteRepositoryImple(
                 remote: remote,
                 cacheStorage: localStorage,
+                todoCacheStorage: todoLocalStorage,
+                scheduleCacheStorage: scheduleLocalStorage,
                 environmentStorage: base.userDefaultEnvironmentStorage
             )
         } else {
             return EventTagLocalRepositoryImple(
                 localStorage: localStorage,
+                todoLocalStorage: todoLocalStorage,
+                scheduleLocalStorage: scheduleLocalStorage,
                 environmentStorage: base.userDefaultEnvironmentStorage
             )
         }

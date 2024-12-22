@@ -29,17 +29,24 @@ public struct ConfirmDialogInfo: @unchecked Sendable {
 public struct ActionSheetForm: @unchecked Sendable {
     
     public struct Action: @unchecked Sendable {
+        
+        public enum Style {
+            case `default`
+            case cancel
+            case destructive
+        }
+        
         public let text: String
-        public var isCancel: Bool
+        public var style: Style
         public let selected: (() -> Void)?
         
         public init(
             _ text: String,
-            isCancel: Bool = false,
+            style: Style = .default,
             _ selected: (() -> Void)? = nil
         ) {
             self.text = text
-            self.isCancel = isCancel
+            self.style = style
             self.selected = selected
         }
     }
@@ -153,7 +160,7 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
                 title: form.title, message: form.message, preferredStyle: .actionSheet
             )
             form.actions.forEach { ac in
-                let action = UIAlertAction(title: ac.text, style: ac.isCancel ? .cancel : .default) { _ in
+                let action = UIAlertAction(title: ac.text, style: ac.style.uiStyle) { _ in
                     ac.selected?()
                 }
                 sheet.addAction(action)
@@ -177,6 +184,16 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     }
 }
 
+private extension ActionSheetForm.Action.Style {
+    
+    var uiStyle: UIAlertAction.Style {
+        switch self {
+        case .cancel: return .cancel
+        case .default: return .default
+        case .destructive: return .destructive
+        }
+    }
+}
 
 private extension Error {
     

@@ -295,7 +295,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             )
         }
         form.actions.append(onlyThisTimeAction)
-        form.actions.append(.init("common.cancel".localized(), isCancel: true))
+        form.actions.append(.init("common.cancel".localized(), style: .cancel))
         
         self.router?.showActionSheet(form)
     }
