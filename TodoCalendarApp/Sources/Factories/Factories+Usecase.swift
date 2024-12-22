@@ -102,8 +102,12 @@ extension NonLoginUsecaseFactoryImple {
         let storage = EventTagLocalStorageImple(
             sqliteService: applicationBase.commonSqliteService
         )
+        let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let repository = EventTagLocalRepositoryImple(
             localStorage: storage,
+            todoLocalStorage: todoLocal,
+            scheduleLocalStorage: scheduleLocal,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         return repository
@@ -112,6 +116,8 @@ extension NonLoginUsecaseFactoryImple {
     func makeEventTagUsecase() -> any EventTagUsecase {
         return EventTagUsecaseImple(
             tagRepository: self.makeEventTagRepository(),
+            todoEventusecase: self.makeTodoEventUsecase(),
+            scheduleEventUsecase: self.makeScheduleEventUsecase(),
             sharedDataStore: applicationBase.sharedDataStore
         )
     }
@@ -343,13 +349,23 @@ extension LoginUsecaseFactoryImple {
         let cache = EventTagLocalStorageImple(
             sqliteService: applicationBase.commonSqliteService
         )
+        let todoCache = TodoLocalStorageImple(
+            sqliteService: applicationBase.commonSqliteService
+        )
+        let scheduleCache = ScheduleEventLocalStorageImple(
+            sqliteService: applicationBase.commonSqliteService
+        )
         let repository = EventTagRemoteRepositoryImple(
             remote: applicationBase.remoteAPI,
             cacheStorage: cache,
+            todoCacheStorage: todoCache,
+            scheduleCacheStorage: scheduleCache,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         return EventTagUsecaseImple(
             tagRepository: repository,
+            todoEventusecase: self.makeTodoEventUsecase(),
+            scheduleEventUsecase: self.makeScheduleEventUsecase(),
             sharedDataStore: applicationBase.sharedDataStore
         )
     }

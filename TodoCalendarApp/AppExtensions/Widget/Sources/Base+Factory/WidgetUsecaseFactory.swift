@@ -90,7 +90,10 @@ extension WidgetUsecaseFactory {
         
         let eventTagStorage = EventTagLocalStorageImple(sqliteService: base.commonSqliteService)
         let eventTagRepository = EventTagLocalRepositoryImple(
-            localStorage: eventTagStorage, environmentStorage: base.userDefaultEnvironmentStorage
+            localStorage: eventTagStorage,
+            todoLocalStorage: todoLocalStorage,
+            scheduleLocalStorage: scheduleStorage,
+            environmentStorage: base.userDefaultEnvironmentStorage
         )
         
         let foremostEventLocalStorage = ForemostLocalStorageImple(

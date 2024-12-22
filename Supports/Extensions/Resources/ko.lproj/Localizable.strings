@@ -213,11 +213,14 @@
 "eventTag.defaults.holiday::name" = "공휴일";
 "eventTag.addNew::placeholder" = "새 이벤트 타입 추가";
 "eventTag.allEventTypes" = "모든 이벤트 타입 >";
-"eventTag.remove::confirm::message" = "이 이벤트 타입을 삭제할까요?";
-"eventTag.removed::message" = "이벤트 타입이 삭제되었습니다..";
+"eventTag.remove::confirm::message" = "이 이벤트 타입을 삭제할까요? 혹은 연관된 모든 이벤트도 같이 삭제할까요?";
+"eventTag.remove::only_tag" = "이 이벤트 타입만 삭제";
+"eventTag.remove::tag_and_evets" = "연관된 모든 이벤트도 같이 삭제";
+"eventTag.removed::message" = "이벤트 타입이 삭제되었습니다.";
+"eventTag.removed_with_events::message" = "이벤트 타입 및 연관된 모든 이벤트가 삭제되었습니다.";
 "eventTag.color::changed::message" = "색상이 변경되었습니다.";
-"eventTag.changed::message" = "이벤트 타입이 수정되었습니다..";
-"eventTag.makeNew::message" = "신규 이벤트 타입이 생성되었습니다..";
+"eventTag.changed::message" = "이벤트 타입이 수정되었습니다.";
+"eventTag.makeNew::message" = "신규 이벤트 타입이 생성되었습니다.";
 "eventTag.default::title" = "기본 이벤트 타입";
 "eventTag.default::selection::explain" = "이벤트 생성시에 기본으로 지정할 이벤트 타입을 선택합니다.";
 

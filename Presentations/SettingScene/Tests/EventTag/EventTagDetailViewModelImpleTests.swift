@@ -226,14 +226,20 @@ extension EventTagDetailViewModelImpleTests {
         // given
         let expect = expectation(description: "custom tag 삭제")
         let viewModel = self.makeViewModel(info: self.customTagInfo)
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventTag.remove::only_tag".localized() })
+        }
         self.spyListener.didDeleted = { _ in expect.fulfill() }
         // when
         viewModel.delete()
         self.wait(for: [expect], timeout: self.timeout)
         
         // then
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage != nil, true)
-        XCTAssertEqual(self.spyRouter.didShowConfirmWith != nil, true)
+        XCTAssertEqual(
+            self.spyRouter.didShowToastWithMessage,
+            "eventTag.removed::message".localized()
+        )
+        XCTAssertEqual(self.spyRouter.didShowActionSheetWith != nil, true)
         XCTAssertEqual(self.spyRouter.didClosed, true)
     }
     
@@ -242,6 +248,9 @@ extension EventTagDetailViewModelImpleTests {
         // given
         let expect = expectation(description: "tag 삭제 실패시에 에러 출력")
         let viewModel = self.makeViewModel(info: self.customTagInfo)
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventTag.remove::only_tag".localized() })
+        }
         self.stubActionFail()
         
         self.spyRouter.didShowErrorCallback = { _ in expect.fulfill() }
@@ -253,6 +262,27 @@ extension EventTagDetailViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
     }
     
+    func testViewModel_deleteTagWithEvents() {
+        // given
+        let expect = expectation(description: "tag 및 이벤트 삭제")
+        let viewModel = self.makeViewModel(info: self.customTagInfo)
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventTag.remove::tag_and_evets".localized() })
+        }
+        self.spyListener.didDeleted = { _ in expect.fulfill() }
+        
+        // when
+        viewModel.delete()
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowToastWithMessage,
+            "eventTag.removed_with_events::message".localized()
+        )
+        XCTAssertEqual(self.spyRouter.didShowActionSheetWith != nil, true)
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+    }
 
     // save new tag
     func testViewModel_makeNewTag() {
@@ -328,7 +358,7 @@ private class SpyRouter: BaseSpyRouter, EventTagDetailRouting, @unchecked Sendab
     
 }
 
-private class SpyListener: EventTagDetailSceneListener {
+private class SpyListener: EventTagDetailSceneListener, @unchecked Sendable {
     
     var didCreated: ((EventTag) -> Void)?
     func eventTag(created newTag: EventTag) {
