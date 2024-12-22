@@ -17,12 +17,19 @@ import Extensions
 public final class EventTagLocalRepositoryImple: EventTagRepository {
     
     private let localStorage: any EventTagLocalStorage
+    private let todoLocalStorage: any TodoLocalStorage
+    private let scheduleLocalStorage: any ScheduleEventLocalStorage
+    
     private let environmentStorage: any EnvironmentStorage
     public init(
         localStorage: any EventTagLocalStorage,
+        todoLocalStorage: any TodoLocalStorage,
+        scheduleLocalStorage: any ScheduleEventLocalStorage,
         environmentStorage: any EnvironmentStorage
     ) {
         self.localStorage = localStorage
+        self.todoLocalStorage = todoLocalStorage
+        self.scheduleLocalStorage = scheduleLocalStorage
         self.environmentStorage = environmentStorage
     }
 }
@@ -57,6 +64,14 @@ extension EventTagLocalRepositoryImple {
     public func deleteTag(_ tagId: String) async throws {
         try await self.localStorage.deleteTag(tagId)
         self.deleteOfftagId(tagId)
+    }
+    
+    public func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveEventTagWithEventsResult {
+        
+        try await self.deleteTag(tagId)
+        let todoIds = try await self.todoLocalStorage.removeTodosWith(tagId: tagId)
+        let scheduleIds = try await self.scheduleLocalStorage.removeSchedulesWith(tagId: tagId)
+        return .init(todoIds: todoIds, scheduleIds: scheduleIds)
     }
 }
 

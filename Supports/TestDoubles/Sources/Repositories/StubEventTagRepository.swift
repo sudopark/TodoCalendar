@@ -37,6 +37,10 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         
     }
     
+    public func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveEventTagWithEventsResult {
+        return .init(todoIds: ["todo"], scheduleIds: ["schedule"])
+    }
+    
     public var shouldFailLoadTagsInRange: Bool = false
     public var tagsMocking: ([String]) -> [EventTag] = { ids in
         return ids.map {

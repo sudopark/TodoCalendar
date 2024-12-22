@@ -20,15 +20,21 @@ public final class EventTagRemoteRepositoryImple: EventTagRepository, @unchecked
     
     private let remote: any RemoteAPI
     private let cacheStorage: any EventTagLocalStorage
+    private let todoCacheStorage: any TodoLocalStorage
+    private let scheduleCacheStorage: any ScheduleEventLocalStorage
     private let environmentStorage: any EnvironmentStorage
     
     public init(
         remote: any RemoteAPI,
         cacheStorage: any EventTagLocalStorage,
+        todoCacheStorage: any TodoLocalStorage,
+        scheduleCacheStorage: any ScheduleEventLocalStorage,
         environmentStorage: any EnvironmentStorage
     ) {
         self.remote = remote
         self.cacheStorage = cacheStorage
+        self.todoCacheStorage = todoCacheStorage
+        self.scheduleCacheStorage = scheduleCacheStorage
         self.environmentStorage = environmentStorage
     }
 }
@@ -69,6 +75,20 @@ extension EventTagRemoteRepositoryImple {
         )
         try? await self.cacheStorage.deleteTag(tagId)
         self.deleteOfftagId(tagId)
+    }
+    
+    public func deleteTagWithAllEvents(
+        _ tagId: String
+    ) async throws -> RemoveEventTagWithEventsResult {
+        let endpoint = EventTagEndpoints.tagAndEvents(id: tagId)
+        let mapper: RemoveEventTagAndResultMapper = try await self.remote.request(
+            .delete, endpoint
+        )
+        let result = mapper.result
+        try? await self.cacheStorage.deleteTag(tagId)
+        try? await self.todoCacheStorage.removeTodos(result.todoIds)
+        try? await self.scheduleCacheStorage.removeScheduleEvents(result.scheduleIds)
+        return result
     }
     
     public func loadAllTags() -> AnyPublisher<[EventTag], any Error> {

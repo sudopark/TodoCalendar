@@ -1216,7 +1216,7 @@ private extension TodoToggleStateUpdateParamas {
     }
 }
 
-private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
+class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     
     func loadAllEvents() async throws -> [TodoEvent] {
         return []
@@ -1299,6 +1299,12 @@ private class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     var didRemoveAllDoneEvents: Bool?
     func removeAllDoneEvents() async throws {
         self.didRemoveAllDoneEvents = true
+    }
+    
+    var didRemoveTodoWithTagId: String?
+    func removeTodosWith(tagId: String) async throws -> [String] {
+        self.didRemoveTodoWithTagId = tagId
+        return ["some:todo"]
     }
     
     var shouldFailLoadDoneTodo: Bool = false
