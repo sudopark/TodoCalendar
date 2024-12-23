@@ -281,10 +281,12 @@ struct EventDetailView: View {
                         self.selectTagView
                         self.selectNotificationView
                         Spacer(minLength: 12)
-                        self.enterLinkView
-                            .id(InputFields.url.id)
-                        self.enterMemokView
-                            .id(InputFields.memo.id)
+                        VStack(spacing: 17) {
+                            self.enterLinkView
+                                .id(InputFields.url.id)
+                            self.enterMemoView
+                                .id(InputFields.memo.id)
+                        }
                         if let model = state.linkPreviewModel {
                             self.linkPreview(model)
                         }
@@ -811,18 +813,21 @@ struct EventDetailView: View {
         }
     }
     
-    private var enterMemokView: some View {
-        HStack(spacing: 16) {
+    private var enterMemoView: some View {
+        HStack(alignment: .top, spacing: 16) {
             Image(systemName: "doc.text")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                .padding(.top, 8)
             
             ZStack(alignment: .topLeading) {
                 
                 if state.memo.isEmpty {
                     Text("eventDetail.edit::memo".localized())
                         .foregroundStyle(appearance.colorSet.placeHolder.asColor)
+                        .font(self.appearance.fontSet.size(14).asFont)
                         .padding(.leading, 4)
+                        .padding(.top, 8)
                 }
              
                 TextEditor(text: $state.memo)
@@ -833,7 +838,7 @@ struct EventDetailView: View {
                     .font(self.appearance.fontSet.size(14).asFont)
                     .textInputAutocapitalization(.never)
                     .scrollContentBackground(.hidden)
-                    .frame(maxHeight: 100)
+                    .frame(minHeight: 34, maxHeight: 100)
                     .padding(.leading, 0)
                     .onSubmit {
                         self.isFocusInput = nil
