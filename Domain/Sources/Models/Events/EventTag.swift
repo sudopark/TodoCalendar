@@ -62,3 +62,15 @@ public enum EventTagColor: Equatable, Sendable {
         return hex
     }
 }
+
+
+public struct RemoveEventTagWithEventsResult: Sendable {
+    
+    public let todoIds: [String]
+    public let scheduleIds: [String]
+    
+    public init(todoIds: [String], scheduleIds: [String]) {
+        self.todoIds = todoIds
+        self.scheduleIds = scheduleIds
+    }
+}

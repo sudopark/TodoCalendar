@@ -21,6 +21,7 @@ public protocol TodoEventUsecase {
     func completeTodo(_ eventId: String) async throws -> DoneTodoEvent
     func revertCompleteTodo(_ doneId: String) async throws -> TodoEvent
     func removeTodo(_ id: String, onlyThisTime: Bool) async throws
+    func handleRemovedTodos(_ ids: [String])
     
     func refreshCurentTodoEvents()
     var currentTodoEvents: AnyPublisher<[TodoEvent], Never> { get }
@@ -31,6 +32,8 @@ public protocol TodoEventUsecase {
     
     func refreshUncompletedTodos()
     var uncompletedTodos: AnyPublisher<[TodoEvent], Never> { get }
+    
+    func skipRepeatingTodo(_ todoId: String, _ params: SkipTodoParams) async throws -> TodoEvent
 }
 
 
@@ -68,11 +71,12 @@ extension TodoEventUsecaseImple {
         self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
             ($0 ?? [:]) |> key(newEvent.uuid) .~ newEvent
         }
+        self.updateUncompletedTodoList(by: newEvent)
         return newEvent
     }
     
     public func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
-        guard params.name?.isEmpty == false
+        guard params.isValidForUpdate
         else {
             throw RuntimeError("invalid parameter for update Todo event")
         }
@@ -89,12 +93,16 @@ extension TodoEventUsecaseImple {
         _ params: TodoEditParams
     ) async throws -> TodoEvent {
         let updatedEvent = try await self.todoRepository.updateTodoEvent(eventId, params)
+        self.notifyUpdatedEvent(updatedEvent)
+        self.updateUncompletedTodoList(by: updatedEvent)
+        return updatedEvent
+    }
+    
+    private func notifyUpdatedEvent(_ event: TodoEvent) {
         let shareKey = ShareDataKeys.todos.rawValue
         self.sharedDataStore.update([String: TodoEvent].self, key: shareKey) {
-            ($0 ?? [:]) |> key(eventId) .~ updatedEvent
+            ($0 ?? [:]) |> key(event.uuid) .~ event
         }
-        self.updateUncompletedTodoAtListIfNeed(updatedEvent)
-        return updatedEvent
     }
     
     private func replaceCurrentTodoAndMakeNewEvent(
@@ -111,7 +119,7 @@ extension TodoEventUsecaseImple {
             |> key(eventId) .~ replaceResult.nextRepeatingTodoEvent
             |> key(replaceResult.newTodoEvent.uuid) .~ replaceResult.newTodoEvent
         }
-        self.updateUncompletedTodoAtListIfNeed(replaceResult.newTodoEvent)
+        self.updateUncompletedTodoList(by: replaceResult.newTodoEvent)
         return replaceResult.newTodoEvent
     }
     
@@ -127,8 +135,9 @@ extension TodoEventUsecaseImple {
             self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
                 ($0 ?? [:]) |> key(next.uuid) .~ next
             }
+            self.updateUncompletedTodoList(by: next)
         }
-        self.removeUncompletedTodoAtListIfNeed(eventId)
+        self.removeUncompletedTodoAtList(eventId)
         return doneEvent
     }
     
@@ -152,7 +161,19 @@ extension TodoEventUsecaseImple {
             ($0 ?? [:])
             |> key(id) .~ removeResult.nextRepeatingTodo
         }
-        self.removeUncompletedTodoAtListIfNeed(id)
+        self.removeUncompletedTodoAtList(id)
+    }
+    
+    public func handleRemovedTodos(_ ids: [String]) {
+        let idSet = Set(ids)
+        let todoKey = ShareDataKeys.todos.rawValue
+        self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
+            return ($0 ?? [:]).filter { !idSet.contains($0.key) }
+        }
+        let uncompletedKey = ShareDataKeys.uncompletedTodos.rawValue
+        self.sharedDataStore.update([TodoEvent].self, key: uncompletedKey) { todos in
+            return (todos ?? []).filter { !idSet.contains($0.uuid) }
+        }
     }
     
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
@@ -237,6 +258,7 @@ extension TodoEventUsecaseImple {
     }
 }
 
+// MARK: - uncompleted todo
 
 extension TodoEventUsecaseImple {
     
@@ -258,22 +280,61 @@ extension TodoEventUsecaseImple {
             .eraseToAnyPublisher()
     }
     
-    private func updateUncompletedTodoAtListIfNeed(_ todo: TodoEvent) {
-        let shareKey = ShareDataKeys.uncompletedTodos.rawValue
-        self.sharedDataStore.update([TodoEvent].self, key: shareKey) { todos in
-            var todos = todos ?? []
-            guard let index = todos.firstIndex(where: { $0.eventId == todo.uuid })
-            else { return todos }
+    private func updateUncompletedTodoList(by updatedTodo: TodoEvent) {
+        let time = updatedTodo.time; let now = Date().timeIntervalSince1970
+        switch time {
+        case .none:
+            self.removeUncompletedTodoAtList(updatedTodo.uuid)
             
-            todos[index] = todo
-            return todos
+        case .some(let t) where t.upperBoundWithFixed <= now:
+            self.updateOrAppendUncompletedTodoAtList(updatedTodo)
+            
+        case .some:
+            self.removeUncompletedTodoAtList(updatedTodo.uuid)
         }
     }
     
-    private func removeUncompletedTodoAtListIfNeed(_ todoId: String) {
+    private func updateOrAppendUncompletedTodoAtList(_ todo: TodoEvent) {
+        let shareKey = ShareDataKeys.uncompletedTodos.rawValue
+        self.sharedDataStore.update([TodoEvent].self, key: shareKey) { todos in
+            let todos = todos ?? []
+            if let index = todos.firstIndex(where: { $0.eventId == todo.uuid }) {
+                return todos |> ix(index) .~ todo
+            } else {
+                return todos + [todo]
+            }
+        }
+    }
+    
+    private func removeUncompletedTodoAtList(_ todoId: String) {
         let shareKey = ShareDataKeys.uncompletedTodos.rawValue
         self.sharedDataStore.update([TodoEvent].self, key: shareKey) {
             return ($0 ?? []).filter { $0.uuid != todoId }
+        }
+    }
+}
+
+
+// MARK: - skip todo
+
+extension TodoEventUsecaseImple {
+    
+    public func skipRepeatingTodo(
+        _ todoId: String, _ params: SkipTodoParams
+    ) async throws -> TodoEvent {
+        
+        switch params {
+        case .next:
+            let skipped = try await self.todoRepository.skipRepeatingTodo(todoId)
+            self.notifyUpdatedEvent(skipped)
+            self.updateUncompletedTodoList(by: skipped)
+            return skipped
+            
+        case .until(let next):
+            let params = TodoEditParams(.patch) |> \.time .~ next
+            let skipped = try await self.updateTodoEvent(todoId, params)
+            self.updateUncompletedTodoList(by: skipped)
+            return skipped
         }
     }
 }

@@ -753,6 +753,37 @@ extension ScheduleEventUsecaseImpleTests {
         let isNils = schedules.map { $0 == nil }
         XCTAssertEqual(isNils, [false, true])
     }
+    
+    private func makeUsecaseWithStubRemoveEventWithTag() -> ScheduleEventUsecaseImple {
+        let sc1 = ScheduleEvent(uuid: "sc1", name: "sc1", time: .at(100))
+        let sc4 = ScheduleEvent(uuid: "sc4", name: "sc4", time: .at(101))
+        let sc3 = ScheduleEvent(uuid: "sc3", name: "sc3", time: .at(102))
+        let usecase = self.makeUsecase()
+        self.stubNoMemorized()
+        self.replaceMemorized([sc1, sc4, sc3])
+        return usecase
+    }
+    
+    func testUsecase_whenHandleRemoveSchedules_updateList() {
+        // given
+        let expect = expectation(description: "삭제된 이벤트 처리시에 공유중인 리스트에서 제거")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubRemoveEventWithTag()
+        
+        // when
+        let source = usecase.scheduleEvents(in: 0..<200)
+        let eventLists = self.waitOutputs(expect, for: source) {
+            
+            usecase.handleRemovedSchedules(["sc1", "sc3"])
+        }
+        
+        // then
+        let idLists = eventLists.map { es in es.map { $0.uuid }.sorted() }
+        XCTAssertEqual(idLists, [
+            ["sc1", "sc3", "sc4"],
+            ["sc4"]
+        ])
+    }
 }
 
 

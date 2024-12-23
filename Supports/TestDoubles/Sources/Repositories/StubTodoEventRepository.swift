@@ -102,6 +102,10 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub, @unchecked Se
             return RemoveTodoResult()
         }
     }
+    
+    open func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent {
+        throw RuntimeError("not implemented")
+    }
         
     open func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
         return Empty().eraseToAnyPublisher()

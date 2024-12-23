@@ -70,7 +70,7 @@ protocol SelectEventRepeatOptionSceneBuiler: AnyObject {
     
     @MainActor
     func makeSelectEventRepeatOptionScene(
-        startTime: Date,
+        selectTime: Date,
         previousSelected repeating: EventRepeating?,
         listener: (any SelectEventRepeatOptionSceneListener)?
     ) -> any SelectEventRepeatOptionScene

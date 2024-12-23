@@ -243,7 +243,7 @@ protocol SelectEventRepeatOptionViewModel: AnyObject, Sendable, SelectEventRepea
 
 final class SelectEventRepeatOptionViewModelImple: SelectEventRepeatOptionViewModel, @unchecked Sendable {
     
-    private let startTime: Date
+    private let selectTime: Date
     private let previousSelectOption: EventRepeating?
     private let calendarSettingUsecase: any CalendarSettingUsecase
     
@@ -251,11 +251,11 @@ final class SelectEventRepeatOptionViewModelImple: SelectEventRepeatOptionViewMo
     var router: (any SelectEventRepeatOptionRouting)?
     
     init(
-        startTime: Date,
+        selectTime: Date,
         previousSelected repeating: EventRepeating?,
         calendarSettingUsecase: any CalendarSettingUsecase
     ) {
-        self.startTime = startTime
+        self.selectTime = selectTime
         self.previousSelectOption = repeating
         self.calendarSettingUsecase = calendarSettingUsecase
     }
@@ -320,11 +320,11 @@ extension SelectEventRepeatOptionViewModelImple {
         
         let notRepeatOptionModel = SelectRepeatingOptionModel(R.String.EventDetail.Repeating.notRepeatingTitle, nil)
         let previousOptionModel = previousSelectOption.flatMap {
-            SelectRepeatingOptionModel($0.repeatOption, self.startTime, timeZone)
+            SelectRepeatingOptionModel($0.repeatOption, self.selectTime, timeZone)
         }
-        let supportOptionModels = SupportingOptions.supports(from: self.startTime, timeZone: timeZone)
+        let supportOptionModels = SupportingOptions.supports(from: self.selectTime, timeZone: timeZone)
             .map { options in
-                options.compactMap { SelectRepeatingOptionModel($0, self.startTime, timeZone) }
+                options.compactMap { SelectRepeatingOptionModel($0, self.selectTime, timeZone) }
             }
         
         let sameOptionWithPrevious = supportOptionModels.flatMap { $0 }.first(where: { $0.option?.compareHash == previousSelectOption?.repeatOption.compareHash })
@@ -356,52 +356,65 @@ extension SelectEventRepeatOptionViewModelImple {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         
         guard let targetDate = previousSelectOption?.repeatingEndTime.map ({ Date(timeIntervalSince1970: $0) })
-                ?? calendar.lastDayOfMonth(from: self.startTime)
+                ?? calendar.lastDayOfMonth(from: self.selectTime)
         else { return }
         
-        let endTime = RepeatEndTime(targetDate, from: self.startTime, timeZone: timeZone)
+        let endTime = RepeatEndTime(targetDate, from: self.selectTime, timeZone: timeZone)
         |> \.isOn .~ (previousSelectOption?.repeatingEndTime != nil)
         self.subject.repeatEndTime.send(endTime)
     }
     
     func selectOption(_ id: String) {
         self.subject.selectedOptionId.send(id)
-        self.notifyOptionSelected()
+        self.checkIsValidAndNotifyOptionSelected()
     }
     
     func toggleHasRepeatEnd(isOn: Bool) {
         guard let time = self.subject.repeatEndTime.value else { return }
         let newTime = time |> \.isOn .~ isOn
         self.subject.repeatEndTime.send(newTime)
-        self.notifyOptionSelected()
+        self.checkIsValidAndNotifyOptionSelected()
     }
     
     func selectRepeatEndDate(_ date: Date) {
         guard let timeZone = self.subject.timeZone.value,
               self.subject.repeatEndTime.value?.date != date
         else { return }
-        let time = RepeatEndTime(date, from: self.startTime, timeZone: timeZone)
+        let time = RepeatEndTime(date, from: self.selectTime, timeZone: timeZone)
             |> \.isOn .~ true
         self.subject.repeatEndTime.send(time)
-        self.notifyOptionSelected()
+        self.checkIsValidAndNotifyOptionSelected()
     }
     
-    private func notifyOptionSelected() {
+    private func checkIsValidAndNotifyOptionSelected() {
         guard let optionId = self.subject.selectedOptionId.value,
               let model = self.subject.options.value.option(optionId)
         else { return }
         
-        if let option = model.option {
-            let repeating = EventRepeating(
-                repeatingStartTime: self.startTime.timeIntervalSince1970,
-                repeatOption: option
-            )
-            |> \.repeatingEndTime .~ self.subject.repeatEndTime.value?.endTimeIfOn?.timeIntervalSince1970
-            let result = EventRepeatingTimeSelectResult(text: model.text, repeating: repeating)
-            self.listener?.selectEventRepeatOption(didSelect: result)
-        } else {
+        guard let option = model.option
+        else {
             self.listener?.selectEventRepeatOptionNotRepeat()
+            return
         }
+        
+        let startTime = self.previousSelectOption?.repeatingStartTime ?? self.selectTime.timeIntervalSince1970
+        let endTime = self.subject.repeatEndTime.value?.endTimeIfOn?.timeIntervalSince1970
+        
+        let isValidPeriod = endTime.map { startTime < $0 } ?? true
+        guard isValidPeriod
+        else {
+            self.router?.showRepeatingEndTimeIsInvalid(
+                startDate: Date(timeIntervalSince1970: startTime)
+            )
+            self.toggleHasRepeatEnd(isOn: false)
+            return
+        }
+        
+        let repeating = EventRepeating(
+            repeatingStartTime: startTime, repeatOption: option
+        ) |> \.repeatingEndTime .~ endTime
+        let result = EventRepeatingTimeSelectResult(text: model.text, repeating: repeating)
+        self.listener?.selectEventRepeatOption(didSelect: result)
     }
     
     func close() {

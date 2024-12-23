@@ -46,7 +46,11 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase, @unchecked Sendable {
     }
     
     open func removeScheduleEvent(_ eventId: String, onlyThisTime: EventTime?) async throws {
-        
+    }
+    
+    public var didHandleRemoveScheduleIds: [String]?
+    open func handleRemovedSchedules(_ ids: [String]) {
+        self.didHandleRemoveScheduleIds = ids
     }
     
     public var stubEvent: ScheduleEvent?

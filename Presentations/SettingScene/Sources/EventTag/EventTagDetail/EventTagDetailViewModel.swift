@@ -89,13 +89,17 @@ extension EventTagDetailViewModelImple {
     
     func delete() {
         guard case let .custom(id) = self.originalInfo?.id else { return }
-        let confirmed: () -> Void = { [weak self] in
+        let onlyRemoveTag = ActionSheetForm.Action("eventTag.remove::only_tag".localized()) { [weak self] in
             self?.deleteTag(id)
         }
-        let info = ConfirmDialogInfo()
+        let withAllEvents = ActionSheetForm.Action("eventTag.remove::tag_and_evets".localized(), style: .destructive) { [weak self] in
+            self?.deleteTagWithEvents(id)
+        }
+        let cancelAction = ActionSheetForm.Action("common.cancel".localized(), style: .cancel)
+        let form = ActionSheetForm()
             |> \.message .~ "eventTag.remove::confirm::message".localized()
-            |> \.confirmed .~ pure(confirmed)
-        self.router?.showConfirm(dialog: info)
+            |> \.actions .~ [onlyRemoveTag, withAllEvents, cancelAction]
+        self.router?.showActionSheet(form)
     }
     
     private func deleteTag(_ tagId: String) {
@@ -103,6 +107,20 @@ extension EventTagDetailViewModelImple {
             do {
                 try await self?.eventTagUsecase.deleteTag(tagId)
                 self?.show(message: "eventTag.removed::message".localized()) { [weak self] in
+                    self?.listener?.eventTag(deleted: tagId)
+                }
+            } catch {
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+    
+    private func deleteTagWithEvents(_ tagId: String) {
+        Task { [weak self] in
+            do {
+                try await self?.eventTagUsecase.deleteTagWithAllEvents(tagId)
+                self?.show(message: "eventTag.removed_with_events::message".localized()) { [weak self] in
                     self?.listener?.eventTag(deleted: tagId)
                 }
             } catch {

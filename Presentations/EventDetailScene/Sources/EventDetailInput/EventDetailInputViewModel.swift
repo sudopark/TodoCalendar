@@ -33,7 +33,7 @@ protocol EventDetailInputListener: AnyObject {
 protocol EventDetailInputRouting: Routing, Sendable, AnyObject {
     
     func routeToEventRepeatOptionSelect(
-        startTime: Date,
+        selectTime: Date,
         with initalOption: EventRepeating?,
         listener: (any SelectEventRepeatOptionSceneListener)?
     )
@@ -285,7 +285,7 @@ extension EventDetailInputViewModelImple: SelectEventRepeatOptionSceneListener {
         }
         
         self.routing?.routeToEventRepeatOptionSelect(
-            startTime: Date(timeIntervalSince1970: eventTime.lowerBoundWithFixed),
+            selectTime: Date(timeIntervalSince1970: eventTime.lowerBoundWithFixed),
             with: basic.basic.eventRepeating?.repeating,
             listener: self)
     }

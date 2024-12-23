@@ -50,6 +50,26 @@ public struct TodoEvent: Sendable, Equatable {
             |> \.repeating .~ params.repeating
             |> \.notificationOptions .~ (params.notificationOptions ?? self.notificationOptions)
     }
+    
+    public func applyIfNotNil(_ params: TodoEditParams) -> TodoEvent {
+        var sender = self
+        if let name = params.name {
+            sender.name = name
+        }
+        if let eventTagId = params.eventTagId {
+            sender.eventTagId = eventTagId
+        }
+        if let time = params.time {
+            sender.time = time
+        }
+        if let repeating = params.repeating {
+            sender.repeating = repeating
+        }
+        if let notificationOptions = params.notificationOptions {
+            sender.notificationOptions = notificationOptions
+        }
+        return sender
+    }
 }
 
 
@@ -73,6 +93,7 @@ public struct TodoMakeParams: Sendable {
         self.name = todo.name
         self.eventTagId = todo.eventTagId
         self.time = todo.time
+        self.repeating = todo.repeating
         self.notificationOptions = todo.notificationOptions
     }
 }
@@ -83,6 +104,11 @@ public struct TodoEditParams: Sendable, Equatable {
         case all
         case onlyThisTime
     }
+    public enum EditMethod: Equatable, Sendable {
+        case put
+        case patch
+    }
+    public let editMethod: EditMethod
     public var name: String?
     public var eventTagId: AllEventTagId?
     public var time: EventTime?
@@ -90,7 +116,9 @@ public struct TodoEditParams: Sendable, Equatable {
     public var repeatingUpdateScope: RepeatingUpdateScope?
     public var notificationOptions: [EventNotificationTimeOption]?
     
-    public init() { }
+    public init(_ editMethod: EditMethod) {
+        self.editMethod = editMethod
+    }
     
     public func asMakeParams() -> TodoMakeParams {
         return TodoMakeParams()
@@ -99,6 +127,19 @@ public struct TodoEditParams: Sendable, Equatable {
             |> \.time .~ self.time
             |> \.repeating .~ self.repeating
             |> \.notificationOptions .~ self.notificationOptions
+    }
+    
+    public var isValidForUpdate: Bool {
+        switch self.editMethod {
+        case .put:
+            return self.name?.isEmpty == false
+        case .patch:
+            return self.name?.isEmpty == false
+                || self.eventTagId != nil
+                || self.time != nil
+                || self.repeating != nil
+                || self.notificationOptions != nil
+        }
     }
 }
 
@@ -139,4 +180,12 @@ public enum TodoToggleResult {
         case .reverted(let todo): return todo.time == nil
         }
     }
+}
+
+
+// MARK: - skip todo
+
+public enum SkipTodoParams {
+    case next
+    case until(EventTime)
 }

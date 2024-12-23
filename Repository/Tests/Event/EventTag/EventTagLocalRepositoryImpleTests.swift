@@ -7,6 +7,8 @@
 
 import XCTest
 import Combine
+import Prelude
+import Optics
 import AsyncFlatMap
 import Domain
 import Extensions
@@ -18,12 +20,16 @@ import UnitTestHelpKit
 class EventTagLocalRepositoryImpleTests: BaseLocalTests {
     
     private var localStorage: EventTagLocalStorageImple!
+    private var todoLocalStorage: TodoLocalStorageImple!
+    private var scheduleLocalStorage: ScheduleEventLocalStorageImple!
     private var fakeEnvStore: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {
         self.fileName = "tags"
         try super.setUpWithError()
         self.localStorage = .init(sqliteService: self.sqliteService)
+        self.todoLocalStorage = .init(sqliteService: self.sqliteService)
+        self.scheduleLocalStorage = .init(sqliteService: self.sqliteService)
         self.sqliteService.run { db in
             try db.createTableOrNot(EventTagTable.self)
         }
@@ -39,6 +45,8 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
     private func makeRepository() -> EventTagLocalRepositoryImple {
         return .init(
             localStorage: self.localStorage,
+            todoLocalStorage: self.todoLocalStorage,
+            scheduleLocalStorage: self.scheduleLocalStorage,
             environmentStorage: self.fakeEnvStore
         )
     }
@@ -150,6 +158,45 @@ extension EventTagLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(tagAfterDelete?.count, 0)
         XCTAssertEqual(offIdsAfterDelete, [])
+    }
+    
+    private func stubTodoAndSchedule() async throws {
+        func makeTodo(_ id: Int, with tag: String) -> TodoEvent {
+            return TodoEvent.dummy(id)
+                |> \.eventTagId .~ .custom(tag)
+                |> \.time .~ .at(100)
+        }
+        func makeSchedule(_ id: Int, with tag: String) -> ScheduleEvent {
+            return ScheduleEvent(uuid: "sc:\(id)", name: "some", time: .at(100))
+                |> \.eventTagId .~ .custom(tag)
+        }
+        let todoWithTag1 = (0..<3).map { makeTodo($0, with: "t1") }
+        let todoWithTag2 = (3..<7).map { makeTodo($0, with: "t2") }
+        let scheduleWithTag1 = (0..<3).map { makeSchedule($0, with: "t1") }
+        let scheduleWithTag2 = (3..<7).map { makeSchedule($0, with: "t2") }
+        try await self.todoLocalStorage.updateTodoEvents(todoWithTag1 + todoWithTag2)
+        try await self.scheduleLocalStorage.updateScheduleEvents(scheduleWithTag1 + scheduleWithTag2)
+        
+        let tag1 = EventTag(uuid: "t1", name: "t1", colorHex: "some")
+        let tag2 = EventTag(uuid: "t2", name: "t2", colorHex: "some")
+        try await self.localStorage.updateTags([tag1, tag2])
+    }
+    
+    func testRepository_deleteTagWithEvents() async throws {
+        // given
+        try await self.stubTodoAndSchedule()
+        let repository = self.makeRepository()
+        
+        // when
+        let result = try await repository.deleteTagWithAllEvents("t1")
+        
+        // then
+        XCTAssertEqual(result.todoIds, (0..<3).map { "id:\($0)" })
+        XCTAssertEqual(result.scheduleIds, (0..<3).map { "sc:\($0)" })
+        let allTodos = try await self.todoLocalStorage.loadAllEvents()
+        let allSchedules = try await self.scheduleLocalStorage.loadAllEvents()
+        XCTAssertEqual(allTodos.map { $0.uuid }, (3..<7).map { "id:\($0)" })
+        XCTAssertEqual(allSchedules.map { $0.uuid }, (3..<7).map { "sc:\($0)" })
     }
 }
 

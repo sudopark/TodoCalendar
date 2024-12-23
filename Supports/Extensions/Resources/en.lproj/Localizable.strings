@@ -126,9 +126,13 @@
 "calendar::event::more_action:remove:item_name" = "Remove event";
 "calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";
 "calendar::event::more_action:foremost:unmark:item_name" = "Unmark as foremost";
+"calendar::event::more_action:copy:item_name" = "Copy event";
 "calendar::event::more_action:edit:item_name" = "Edit";
 "calednar::event::add_new" = "Add a new event";
 "calednar::event::add_new:place_holder" = "Add a new to-do event quickly.";
+"calednar::event::skip_todo" = "Skip this to-do";
+"calednar::event::skip_todo_until" = "Select a time to skip this to-do";
+"calednar::event::copy" = "Copy event";
 
 
 // MARK: - event detail
@@ -158,6 +162,7 @@
 "eventDetail.repeating.every6WeekOfEveryMonth::someday" = "The Sixth %@ of every month";
 "eventDetail.repeating.every7WeekOfEveryMonth::someday" = "The Seventh %@ of every month";
 "eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "The last %@ of every month";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "The repeat end time must be in the future than the start time.\n(Repeat start date: %@)";
 
 "eventDetail.add_new_todo::message" = "A new to-do event has been added.";
 "eventDetail.add_new_schedule::message" = "A new schedule event has been added.";
@@ -208,8 +213,11 @@
 "eventTag.defaults.holiday::name" = "Holiday";
 "eventTag.addNew::placeholder" = "Add a new event type";
 "eventTag.allEventTypes" = "All event types >";
-"eventTag.remove::confirm::message" = "Do you want to remove this event type?";
+"eventTag.remove::confirm::message" = "Do you want to remove this event type? or want to remove all related events?";
+"eventTag.remove::only_tag" = "Remove only event type";
+"eventTag.remove::tag_and_evets" = "Remove with related events";
 "eventTag.removed::message" = "This event type has been removed.";
+"eventTag.removed_with_events::message" = "This event type and related events have been removed.";
 "eventTag.color::changed::message" = "The color has been changed.";
 "eventTag.changed::message" = "The event type has been modified.";
 "eventTag.makeNew::message" = "A new event type has been created.";

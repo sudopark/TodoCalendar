@@ -493,6 +493,82 @@ extension DayEventListViewModelImpleTests {
             expectIsRepeating: true
         )
     }
+    
+    func testTodoEventCellViewModel_provideMoreAction() {
+        // given
+        let kst = TimeZone(abbreviation: "KST")!
+        let dummyTodo = TodoCalendarEvent(.dummy(), in: kst)
+        
+        // when
+        let todoNotRepeating = TodoEventCellViewModel(dummyTodo, in: 0..<10, kst, true)!
+        let todoWithRepeating = todoNotRepeating |> \..isRepeating .~ true
+        let todoAsForemost = todoNotRepeating |> \.isForemost .~ true
+        
+        // then
+        XCTAssertEqual(
+            todoNotRepeating.moreActions,
+            .init(
+                basicActions: [.toggleTo(isForemost: false), .edit, .copy],
+                removeActions: [.remove(onlyThisTime: false)]
+            )
+        )
+        XCTAssertEqual(
+            todoWithRepeating.moreActions,
+            .init(
+                basicActions: [.toggleTo(isForemost: false), .skipTodo, .edit, .copy],
+                removeActions: [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
+            )
+        )
+        XCTAssertEqual(
+            todoAsForemost.moreActions,
+            .init(
+                basicActions: [.toggleTo(isForemost: true), .edit, .copy],
+                removeActions: [.remove(onlyThisTime: false)]
+            )
+        )
+    }
+    
+    func testScheduleEventCellViewModel_provideMoreAction() {
+        // given
+        let kst = TimeZone(abbreviation: "KST")!
+        let dummyRepeating = EventRepeating(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
+        let repeatingSchedule = ScheduleEvent(uuid: "id", name: "some", time: .at(10))
+            |> \.repeating .~ dummyRepeating
+        let notRepeatingSchedule = repeatingSchedule |> \.repeating .~  nil
+        
+        // when
+        let repeating = ScheduleEventCellViewModel(ScheduleCalendarEvent.events(from: repeatingSchedule, in: kst).first!, in: 0..<20, timeZone: kst, true)
+        let notRepeating = ScheduleEventCellViewModel(ScheduleCalendarEvent.events(from: notRepeatingSchedule, in: kst).first!, in: 0..<20, timeZone: kst, true)
+        let foremostEvent = ScheduleEventCellViewModel(ScheduleCalendarEvent.events(from: notRepeatingSchedule, in: kst, foremostId: "id").first!, in: 0..<20, timeZone: kst, true)
+        
+        // then
+        XCTAssertEqual(repeating?.moreActions, .init(
+            basicActions: [.toggleTo(isForemost: false), .edit, .copy],
+            removeActions: [.remove(onlyThisTime: true), .remove(onlyThisTime: false)]
+        ))
+        XCTAssertEqual(notRepeating?.moreActions, .init(
+            basicActions: [.toggleTo(isForemost: false), .edit, .copy],
+            removeActions: [.remove(onlyThisTime: false)]
+        ))
+        XCTAssertEqual(foremostEvent?.moreActions, .init(
+            basicActions: [.toggleTo(isForemost: true), .edit, .copy],
+            removeActions: [.remove(onlyThisTime: false)]
+        ))
+    }
+    
+    func testHolidayCellViewModel_notProvideMoreAction() {
+        // given
+        let kst = TimeZone(abbreviation: "KST")!
+        let holiday = Holiday(dateString: "2020-03-01", localName: "삼일절", name: "삼일절")
+        
+        // when
+        let cellViewModel = HolidayEventCellViewModel(
+            .init(holiday, in: kst)!
+        )
+        
+        // then
+        XCTAssertEqual(cellViewModel.moreActions, nil)
+    }
 }
 
 extension DayEventListViewModelImpleTests {
@@ -690,7 +766,11 @@ extension DayEventListViewModelImpleTests {
         viewModel.makeTodoEvent(with: "some")
         
         // then
-        XCTAssertEqual(self.spyRouter.didRouteToMakeNewEventWithParams?.initialTodoInfo?.name, "some")
+        if case .todo(let withName) = self.spyRouter.didRouteToMakeNewEventWithParams?.makeSource {
+            XCTAssertEqual(withName, "some")
+        } else {
+            XCTFail("기대한 타입이 아님")
+        }
     }
 }
 

@@ -85,17 +85,32 @@ struct EventListCellView: View {
             self.requestShowDetail(self.cellViewModel)
         }
         .contextMenu {
-            if cellViewModel.isSupportContextMenu {
-                if cellViewModel.isRepeating {
-                    removeButton(true)
+            if let moreActions = cellViewModel.moreActions {
+                ForEach(0..<moreActions.basicActions.count, id: \.self) {
+                    moreActionsView(moreActions.basicActions[$0])
                 }
-                removeButton(false)
                 
                 Divider()
                 
-                toggleForemostButton(cellViewModel.isForemost)
-                editEventButton()
+                ForEach(0..<moreActions.removeActions.count, id: \.self) {
+                    moreActionsView(moreActions.removeActions[$0])
+                }
             }
+        }
+    }
+    
+    private func moreActionsView(_ action: EventListMoreAction) -> some View {
+        switch action {
+        case .edit:
+            return editEventButton().asAnyView()
+        case .remove(let onlyThisTime):
+            return removeButton(onlyThisTime).asAnyView()
+        case .toggleTo(let isForemost):
+            return toggleForemostButton(isForemost).asAnyView()
+        case .skipTodo:
+            return skipTodoButton().asAnyView()
+        case .copy:
+            return copyButton().asAnyView()
         }
     }
     
@@ -138,6 +153,28 @@ struct EventListCellView: View {
             HStack {
                 Text(R.String.calendarEventMoreActionEditItemName)
                 Image(systemName: "pencil")
+            }
+        }
+    }
+    
+    private func skipTodoButton() -> some View {
+        return Button {
+            self.handleMoreAction(self.cellViewModel, .skipTodo)
+        } label: {
+            HStack {
+                Text("calednar::event::skip_todo".localized())
+                Image(systemName: "forward")
+            }
+        }
+    }
+    
+    private func copyButton() -> some View {
+        return Button {
+            self.handleMoreAction(self.cellViewModel, .copy)
+        } label: {
+            HStack {
+                Text("calednar::event::copy".localized())
+                Image(systemName: "doc.on.doc")
             }
         }
     }
@@ -263,14 +300,6 @@ extension EventCellViewModel {
     
     var todoEventId: String? {
         return (self as? TodoEventCellViewModel)?.eventIdentifier
-    }
-    
-    var isSupportContextMenu: Bool {
-        switch self {
-        case is TodoEventCellViewModel: return true
-        case is ScheduleEventCellViewModel: return true
-        default: return false
-        }
     }
 }
 

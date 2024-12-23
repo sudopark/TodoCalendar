@@ -24,12 +24,14 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var spyRouter: SpyEventDetailRouter!
+    private var spyListener: SpyEventDetailListener!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyScheduleUsecase = .init()
         self.spyEventDetailDataUsecase = .init()
         self.spyRouter = .init()
+        self.spyListener = .init()
     }
     
     override func tearDownWithError() throws {
@@ -38,6 +40,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyEventDetailDataUsecase = nil
         self.stubForemostEventUsecase = nil
         self.spyRouter = nil
+        self.spyListener = nil
     }
     
     private var timeZone: TimeZone {
@@ -76,6 +79,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
             foremostEventUsecase: self.stubForemostEventUsecase
         )
         viewModel.router = self.spyRouter
+        viewModel.listener = self.spyListener
         viewModel.attachInput()
         return viewModel
     }
@@ -220,14 +224,14 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.makeViewModel(customSchedule: schedule),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                []
+                [.copy]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: schedule, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                []
+                [.copy]
             ]
         )
         let scheduleNotRepeating = schedule |> \.repeating .~ nil
@@ -235,14 +239,14 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.makeViewModel(customSchedule: scheduleNotRepeating),
             expect: [
                 [.remove(onlyThisEvent: false)], 
-                [.toggleTo(isForemost: true)]
+                [.toggleTo(isForemost: true), .copy]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: scheduleNotRepeating, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: false)]
+                [.toggleTo(isForemost: false), .copy]
             ]
         )
     }
@@ -275,6 +279,27 @@ extension EditScheduleEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(isForemosts, [false, true])
+    }
+    
+    func testViewModel_whenCopyEvent_closeAndNotify() {
+        // given
+        let expect = expectation(description: "이벤트 복사시에 화면 닫고, 복사 요청")
+        let viewModel = self.makeViewModelWithPrepare()
+        self.spyListener.didCopyCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.handleMoreAction(.copy)
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        let pair = self.spyListener.didRequestCopyFromSchedule
+        XCTAssertEqual(pair?.0.name, self.dummyRepeatingSchedule.name)
+        XCTAssertEqual(pair?.0.eventTagId, self.dummyRepeatingSchedule.eventTagId)
+        XCTAssertEqual(pair?.0.time, self.dummyRepeatingSchedule.time)
+        XCTAssertEqual(pair?.0.repeating, self.dummyRepeatingSchedule.repeating)
+        XCTAssertEqual(pair?.0.notificationOptions, self.dummyRepeatingSchedule.notificationOptions)
+        XCTAssertEqual(pair?.1, self.dummyDetail)
     }
 }
 

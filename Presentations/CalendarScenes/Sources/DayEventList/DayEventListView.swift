@@ -252,6 +252,7 @@ struct DayEventListView: View {
             }
             .eventHandler(\.refreshList) {
                 self.isFocusInput = false
+                self.appearance.impactIfNeed()
                 eventHandler.refreshUncompletedTodos()
             }
     }
@@ -502,7 +503,8 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 |> \.periodText .~ .doubleText(
                     .init(text: "Todo".localized()),
                     .init(text: "10:30", pmOram: "AM")
-                ),
+                )
+                |> \.isRepeating .~ true,
 //            .init(eventId: .todo("todo4"), name: "todo with in today")
 //                |> \.colorHex .~ "#0000ff"
 //                |> \.periodText .~ .inToday("9:30", "20:30")

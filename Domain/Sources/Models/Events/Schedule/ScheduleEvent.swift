@@ -75,7 +75,7 @@ public struct ScheduleEvent: Sendable, Equatable {
 
 // MARK: - Schedule make params
 
-public struct ScheduleMakeParams {
+public struct ScheduleMakeParams: Sendable {
     
     public var name: String?
     public var time: EventTime?
@@ -85,6 +85,15 @@ public struct ScheduleMakeParams {
     public var notificationOptions: [EventNotificationTimeOption]?
     
     public init() { }
+    
+    public init(_ schedule: ScheduleEvent) {
+        self.name = schedule.name
+        self.time = schedule.time
+        self.eventTagId = schedule.eventTagId
+        self.repeating = schedule.repeating
+        self.showTurn = schedule.showTurn
+        self.notificationOptions = schedule.notificationOptions
+    }
     
     public var isValidForMaking: Bool {
         return self.name?.isEmpty == false

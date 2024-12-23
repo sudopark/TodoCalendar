@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import AsyncFlatMap
 import UnitTestHelpKit
 
@@ -128,7 +129,7 @@ extension TodoLocalRepositoryImpleTests {
         self.stubSaveTodo([old])
         let repository = self.makeRepository()
         // when
-        let params = TodoEditParams()
+        let params = TodoEditParams(.put)
             |> \.name .~ old.name
             |> \.eventTagId .~ old.eventTagId
         let updated = try? await repository.updateTodoEvent(old.uuid, params)
@@ -145,7 +146,7 @@ extension TodoLocalRepositoryImpleTests {
         // given
         let repository = self.makeRepository()
         let old = try await repository.makeTodoEvent(self.dummyMakeParams)
-        let params = TodoEditParams()
+        let params = TodoEditParams(.put)
             |> \.name .~ "new name"
             |> \.eventTagId .~ .custom("new tag")
             |> \.time .~ .at(22)
@@ -160,6 +161,26 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(event?.name, "new name")
         XCTAssertEqual(event?.eventTagId, .custom("new tag"))
         XCTAssertEqual(event?.time, .at(22))
+    }
+    
+    func testReposiotry_loadTodoAfterPatchTodo() async throws {
+        // given
+        let repository = self.makeRepository()
+        let old = try await repository.makeTodoEvent(self.dummyMakeParams)
+        let params = TodoEditParams(.patch) |> \.name .~ "new name"
+        let _ = try await repository.updateTodoEvent(old.uuid, params)
+        
+        // when
+        let events = try await repository.loadTodoEvents(in: self.dummyRange(0..<10)).firstValue(with: 10)
+        
+        // then
+        XCTAssertEqual(events?.count, 1)
+        let event = events?.first
+        XCTAssertEqual(event?.name, "new name")
+        XCTAssertEqual(event?.eventTagId, .custom("some"))
+        XCTAssertEqual(event?.time, .period(0.0..<100.0))
+        XCTAssertNotNil(event?.repeating)
+        XCTAssertEqual(event?.notificationOptions.count, 2)
     }
     
     func testReposiotry_loadUncompletedTodos() async throws {
@@ -462,6 +483,64 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertNil(result?.nextRepeatingTodoEvent)
         let updated = todos?.first(where: { $0.uuid == origin.uuid })
         XCTAssertNil(updated)
+    }
+}
+
+extension TodoLocalRepositoryImpleTests {
+    
+    func testRepository_skipRepeatingTodo() async throws {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100, from: 100, end: nil)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        let next = try await repository.skipRepeatingTodo("origin")
+        
+        // then
+        XCTAssertEqual(next.time?.lowerBoundWithFixed, 100 + 24 * 3600)
+    }
+    
+    func testRepository_whenSkipNotRepeatingTodo_error() async throws {
+        // given
+        let origin = self.makeDummyTodo(id: "origin")
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        var reason: (any Error)?
+        do {
+            let _ = try await repository.skipRepeatingTodo("origin")
+        } catch let err {
+            reason = err
+        }
+        
+        // then
+        XCTAssertEqual(
+            (reason as? RuntimeError)?.key,
+            ClientErrorKeys.notARepeatingEvent.rawValue
+        )
+    }
+    
+    func testRepository_whenSkipLastRepeatingTodo_error() async throws {
+        // given
+        let origin = self.makeDummyTodo(id: "origin", time: 100, from: 100, end: 200)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+        
+        // when
+        var reason: (any Error)?
+        do {
+            let _ = try await repository.skipRepeatingTodo("origin")
+        } catch let err {
+            reason = err
+        }
+        
+        // then
+        XCTAssertEqual(
+            (reason as? RuntimeError)?.key,
+            ClientErrorKeys.repeatingIsEnd.rawValue
+        )
     }
 }
 

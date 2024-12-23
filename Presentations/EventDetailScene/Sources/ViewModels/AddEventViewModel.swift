@@ -92,36 +92,113 @@ extension AddEventViewModelImple: EventDetailInputListener {
     func prepare() {
         
         let params = self.initailMakeParams
-        let defaultSetting = self.eventSettingUsecase.loadEventSetting()
-        
-        let defaultSelectTime = self.subject.timeZone.compactMap { $0 }
+        typealias Pair = (EventDetailBasicData, EventDetailData)
+        self.subject.timeZone.compactMap { $0 }
             .first()
-            .compactMap { timeZone in
-                return params.selectedDate.selectDateDefaultTime(
-                    timeZone,
-                    defaultPeriod: defaultSetting.defaultNewEventPeriod
-                )
+            .flatMap { [weak self] timeZone async -> Pair? in
+                guard let self = self else { return nil }
+                let basic = await self.prepareBasicData(params, timeZone)
+                let addition = await self.prepareAdditional(params) ?? .init("pending")
+                return Pair(basic, addition)
             }
-
+            .sink(receiveValue: { [weak self] pair in
+                self?.inputInteractor?.prepared(basic: pair.0, additional: pair.1)
+                self?.subject.isTodo.send(params.isTodoCase)
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func prepareBasicData(
+        _ params: MakeEventParams, _ timeZone: TimeZone
+    ) async -> EventDetailBasicData {
+        
+        let defaultSetting = self.eventSettingUsecase.loadEventSetting()
+        let eventTimeFromDefaultOption: () -> SelectedTime? = {
+            return params.selectedDate.selectDateDefaultTime(
+                timeZone, defaultPeriod: defaultSetting.defaultNewEventPeriod
+            )
+        }
+        
         let defaultTag = self.eventSettingUsecase.loadEventSetting().defaultNewEventTagId
         
         let defaultNotification = self.eventNotificationSettingUsecase
             .loadDefailtNotificationTimeOption(forAllDay: false)
+            .map { [$0] } ?? []
         
-        defaultSelectTime
-            .sink(receiveValue: { [weak self] time in
-                let initailData = EventDetailBasicData(
-                    name: params.initialTodoInfo?.name,
-                    eventTagId: defaultTag
-                )
+        func basicFromTodo(_ makeParams: TodoMakeParams?) -> EventDetailBasicData {
+            let time = makeParams?.time
+                .map { $0.copy(with: params.selectedDate) }
+                .map { SelectedTime($0, timeZone) } ?? eventTimeFromDefaultOption()
+            let repeating = makeParams?.repeating
+                .map { $0.copy(with: params.selectedDate) }
+                .flatMap { EventRepeatingTimeSelectResult($0, timeZone: timeZone) }
+            return EventDetailBasicData()
+                |> \.name .~ makeParams?.name
                 |> \.selectedTime .~ time
-                |> \.eventNotifications .~ (defaultNotification.map { [$0] } ?? [])
-                self?.inputInteractor?.prepared(
-                    basic: initailData, additional: .init("pending")
-                )
-                self?.subject.isTodo.send(params.initialTodoInfo != nil)
-            })
-            .store(in: &self.cancellables)
+                |> \.eventRepeating .~ repeating
+                |> \.eventTagId .~ (makeParams?.eventTagId ?? defaultTag)
+                |> \.eventNotifications .~ (makeParams?.notificationOptions ?? defaultNotification)
+        }
+        
+        func basicFromSchedule(_ makeParams: ScheduleMakeParams?) -> EventDetailBasicData {
+            let time = makeParams?.time
+                .map { $0.copy(with: params.selectedDate) }
+                .map { SelectedTime($0, timeZone) } ?? eventTimeFromDefaultOption()
+            let repeating = makeParams?.repeating
+                .map { $0.copy(with: params.selectedDate) }
+                .flatMap { EventRepeatingTimeSelectResult($0, timeZone: timeZone) }
+            return EventDetailBasicData()
+                |> \.name .~ makeParams?.name
+                |> \.selectedTime .~ time
+                |> \.eventRepeating .~ repeating
+                |> \.eventTagId .~ (makeParams?.eventTagId ?? defaultTag)
+                |> \.eventNotifications .~ (makeParams?.notificationOptions ?? defaultNotification)
+        }
+        
+        switch params.makeSource {
+        case .todo(let name):
+            return EventDetailBasicData()
+                |> \.name .~ name
+                |> \.selectedTime .~ eventTimeFromDefaultOption()
+                |> \.eventTagId .~ defaultTag
+                |> \.eventNotifications .~ defaultNotification
+            
+        case .schedule:
+            return EventDetailBasicData()
+                |> \.selectedTime .~ eventTimeFromDefaultOption()
+                |> \.eventTagId .~ defaultTag
+                |> \.eventNotifications .~ defaultNotification
+            
+        case .todoFromCopy(let makeParams, _):
+            return basicFromTodo(makeParams)
+            
+        case .scheduleFromCopy(let makeParams, _):
+            return basicFromSchedule(makeParams)
+            
+        case .todoFromOrigin(let id):
+            let todo = try? await self.todoUsecase.todoEvent(id).last().values.first(where: { _ in true })
+            let makeParams = todo.map { TodoMakeParams($0) }
+            return basicFromTodo(makeParams)
+            
+        case .scheduleFromOrigin(let id):
+            let schedule = try? await self.scheduleUsecase.scheduleEvent(id).last().values.first(where: { _ in true })
+            let makeParams = schedule.map { ScheduleMakeParams($0) }
+            return basicFromSchedule(makeParams)
+        }
+    }
+    
+    private func prepareAdditional(_ params: MakeEventParams) async -> EventDetailData? {
+        switch params.makeSource {
+        case .todoFromCopy(_, let data): return data
+        case .scheduleFromCopy(_, let data): return data
+        case .todoFromOrigin(let id):
+            return try? await self.eventDetailDataUsecase
+                .loadDetail(id).last().values.first(where: { _ in true })
+        case .scheduleFromOrigin(let id):
+            return try? await self.eventDetailDataUsecase
+                .loadDetail(id).last().values.first(where: { _ in true })
+        default: return nil
+        }
     }
     
     func handleMoreAction(_ action: EventDetailMoreAction) {
@@ -286,7 +363,7 @@ extension AddEventViewModelImple {
         return Empty().eraseToAnyPublisher()
         // TODO: 일단 비활성화
 //        return Just([
-//            [.copy, .addToTemplate]
+//            [.addToTemplate]
 //        ])
 //        .eraseToAnyPublisher()
     }
@@ -326,5 +403,48 @@ private extension Date {
         case .hour2: return period(120 * 60)
         case .allDay: return .singleAllDay(.init(start.timeIntervalSince1970, timeZone, withoutTime: true))
         }
+    }
+}
+
+
+private extension MakeEventParams {
+        
+    var isTodoCase: Bool {
+        switch self.makeSource {
+        case .todo, .todoFromCopy, .todoFromOrigin: return true
+        case .schedule, .scheduleFromCopy, .scheduleFromOrigin: return false
+        }
+    }
+}
+
+private extension EventTime {
+    
+    func copy(with newStartDate: Date) -> EventTime {
+        let time = newStartDate.timeIntervalSince1970
+        switch self {
+        case .at:
+            return .at(time)
+        case .period(let range):
+            let interval = range.upperBound - range.lowerBound
+            return .period(time..<time+interval)
+        case .allDay(let range, let secondsFromGMT):
+            let interval = range.upperBound - range.lowerBound
+            return .allDay(time..<time+interval, secondsFromGMT: secondsFromGMT)
+        }
+    }
+}
+
+private extension EventRepeating {
+    
+    func copy(with newStartDate: Date) -> EventRepeating {
+        let time = newStartDate.timeIntervalSince1970
+        guard let endTime = self.repeatingEndTime
+        else {
+            return  .init(repeatingStartTime: time, repeatOption: self.repeatOption)
+        }
+        let interval = endTime - self.repeatingStartTime
+        let newEndTime = time + interval
+        return .init(repeatingStartTime: time, repeatOption: self.repeatOption)
+            |> \.repeatingEndTime .~ newEndTime
     }
 }

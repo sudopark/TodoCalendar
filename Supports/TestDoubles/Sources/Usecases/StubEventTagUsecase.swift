@@ -42,6 +42,10 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
         }
     }
     
+    open func deleteTagWithAllEvents(_ tagId: String) async throws {
+        
+    }
+    
     public var stubLatestUsecaseEventTag: EventTag?
     open func prepare() {
         self.latestUsedEventTagSubject.send(self.stubLatestUsecaseEventTag)

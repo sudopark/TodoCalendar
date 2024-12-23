@@ -487,7 +487,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
 }
 
 
-private class SpyScheduleEventLocalStorage: ScheduleEventLocalStorage, @unchecked Sendable {
+class SpyScheduleEventLocalStorage: ScheduleEventLocalStorage, @unchecked Sendable {
     
     func loadAllEvents() async throws -> [ScheduleEvent] {
         return []
@@ -534,4 +534,10 @@ private class SpyScheduleEventLocalStorage: ScheduleEventLocalStorage, @unchecke
     }
     
     func removeAll() async throws { }
+    
+    var didRemoveScheduleWithTagId: String?
+    func removeSchedulesWith(tagId: String) async throws -> [String] {
+        self.didRemoveScheduleWithTagId = tagId
+        return ["some:schedule"]
+    }
 }

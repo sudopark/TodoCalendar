@@ -126,9 +126,13 @@
 "calendar::event::more_action:remove:item_name" = "이벤트 삭제";
 "calendar::event::more_action:foremost:mark:item_name" = "제일 중요 이벤트 등록";
 "calendar::event::more_action:foremost:unmark:item_name" = "제일 중요 이벤트 해제";
+"calendar::event::more_action:copy:item_name" = "이벤트 복사";
 "calendar::event::more_action:edit:item_name" = "수정";
 "calednar::event::add_new" = "새 이벤트 추가";
 "calednar::event::add_new:place_holder" = "새로운 할일을 등록하세요.";
+"calednar::event::skip_todo" = "할일 건너뛰기";
+"calednar::event::skip_todo_until" = "할일 건너뛰기할 날짜 선택";
+"calednar::event::copy" = "이벤트 복사";
 
 
 // MARK: - event detail
@@ -158,6 +162,7 @@
 "eventDetail.repeating.every6WeekOfEveryMonth::someday" = "매달 여섯번째 %@";
 "eventDetail.repeating.every7WeekOfEveryMonth::someday" = "매달 일곱번째 %@";
 "eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "매달 마지막 %@";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "이벤트 반복 종료시간은 시작시간보다 미래의 시간이여야 합니다.\n(반복 시작시간: %@)";
 
 "eventDetail.add_new_todo::message" = "신규 할일이 등록되었습니다.";
 "eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";
@@ -208,11 +213,14 @@
 "eventTag.defaults.holiday::name" = "공휴일";
 "eventTag.addNew::placeholder" = "새 이벤트 타입 추가";
 "eventTag.allEventTypes" = "모든 이벤트 타입 >";
-"eventTag.remove::confirm::message" = "이 이벤트 타입을 삭제할까요?";
-"eventTag.removed::message" = "이벤트 타입이 삭제되었습니다..";
+"eventTag.remove::confirm::message" = "이 이벤트 타입을 삭제할까요? 혹은 연관된 모든 이벤트도 같이 삭제할까요?";
+"eventTag.remove::only_tag" = "이 이벤트 타입만 삭제";
+"eventTag.remove::tag_and_evets" = "연관된 모든 이벤트도 같이 삭제";
+"eventTag.removed::message" = "이벤트 타입이 삭제되었습니다.";
+"eventTag.removed_with_events::message" = "이벤트 타입 및 연관된 모든 이벤트가 삭제되었습니다.";
 "eventTag.color::changed::message" = "색상이 변경되었습니다.";
-"eventTag.changed::message" = "이벤트 타입이 수정되었습니다..";
-"eventTag.makeNew::message" = "신규 이벤트 타입이 생성되었습니다..";
+"eventTag.changed::message" = "이벤트 타입이 수정되었습니다.";
+"eventTag.makeNew::message" = "신규 이벤트 타입이 생성되었습니다.";
 "eventTag.default::title" = "기본 이벤트 타입";
 "eventTag.default::selection::explain" = "이벤트 생성시에 기본으로 지정할 이벤트 타입을 선택합니다.";
 

@@ -56,17 +56,23 @@ extension Project {
         )
     }
     
-    public static func framework(name: String,
-                                 packages: [Package] = [],
-                                 platform: Platform,
-                                 iOSTargetVersion: String,
-                                 withSourceFile: Bool = true,
-                                 dependencies: [TargetDependency] = []) -> Project {
-        let targets = makeFrameworkTargets(name: name,
-                                           platform: platform,
-                                           iOSTargetVersion: iOSTargetVersion,
-                                           withSourceFile: withSourceFile,
-                                           dependencies: dependencies)
+    public static func framework(
+        name: String,
+        packages: [Package] = [],
+        platform: Platform,
+        iOSTargetVersion: String,
+        withSourceFile: Bool = true,
+        dependencies: [TargetDependency] = [],
+        customSetting: [String: SettingValue] = [:]
+    ) -> Project {
+        let targets = makeFrameworkTargets(
+            name: name,
+            platform: platform,
+            iOSTargetVersion: iOSTargetVersion,
+            withSourceFile: withSourceFile,
+            dependencies: dependencies,
+            customSetting: customSetting
+        )
         return Project(name: name,
                        organizationName: organizationName,
                        packages: packages,
@@ -117,13 +123,17 @@ extension Project {
         return [sources, tests]
     }
     
-    private static func makeFrameworkTargets(name: String,
-                                             platform: Platform,
-                                             iOSTargetVersion: String,
-                                             withSourceFile: Bool,
-                                             dependencies: [TargetDependency] = [])
+    private static func makeFrameworkTargets(
+        name: String,
+        platform: Platform,
+        iOSTargetVersion: String,
+        withSourceFile: Bool,
+        dependencies: [TargetDependency] = [],
+        customSetting: [String: SettingValue] = [:]
+    )
     -> [Target]
     {
+        let settingDict = customSetting.swiftVersion("6.0")
         let sources = Target(name: name,
                              platform: platform,
                              product: .framework,
@@ -135,7 +145,7 @@ extension Project {
                              headers: Headers.headers(public: "\(name).h"),
                              dependencies: dependencies,
                              settings: .settings(
-                                base: .init().swiftVersion("6.0"),
+                                base: settingDict,
                                 configurations: []
                              )
         )

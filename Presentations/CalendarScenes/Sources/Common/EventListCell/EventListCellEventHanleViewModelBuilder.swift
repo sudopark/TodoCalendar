@@ -43,6 +43,7 @@ final class EventListCellEventHanleViewModelBuilderImple: EventListCellEventHanl
         )
         self.viewModel = viewModel
         viewModel.router = router
+        router.eventDetailListener = viewModel
         self.router = router
     }
 }
