@@ -314,6 +314,7 @@ struct EventDetailView: View {
                 .eventHandler(\.onTap, self.save)
             }
         }
+        .allowsHitTesting(!state.isSaving)
         .background(appearance.colorSet.bg0.asColor)
     }
     
