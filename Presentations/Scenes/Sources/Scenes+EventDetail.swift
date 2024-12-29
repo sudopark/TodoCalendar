@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 import Domain
 
 public protocol EventDetailScene: Scene { }
@@ -19,12 +21,19 @@ public protocol EventDetailSceneListener: AnyObject {
 public struct MakeEventParams: Sendable {
     
     public enum MakeSource: Sendable {
-        case todo(withName: String?)
-        case schedule
-        case todoFromCopy(TodoMakeParams, EventDetailData?)
-        case scheduleFromCopy(ScheduleMakeParams, EventDetailData?)
-        case todoFromOrigin(_ id: String)
-        case scheduleFromOrigin(_ id: String)
+        case todoWith(TodoMakeParams, EventDetailData?)
+        case scheduleWith(ScheduleMakeParams, EventDetailData?)
+        case todoFromCopy(_ id: String)
+        case scheduleFromCopy(_ id: String)
+        
+        public static func todo(withName: String?) -> MakeSource {
+            let params = TodoMakeParams() |> \.name .~ withName
+            return .todoWith(params, nil)
+        }
+        
+        public static func schedule() -> MakeSource {
+            return .scheduleWith(.init(), nil)
+        }
     }
     
     public let selectedDate: Date
