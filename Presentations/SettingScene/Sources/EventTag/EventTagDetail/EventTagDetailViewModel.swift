@@ -36,6 +36,7 @@ protocol EventTagDetailViewModel: AnyObject, Sendable, EventTagDetailSceneIntera
     var isNameChangable: Bool { get }
     var isDeletable: Bool { get }
     var isSavable: AnyPublisher<Bool, Never> { get }
+    var isProcessing: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -68,6 +69,7 @@ final class EventTagDetailViewModelImple: EventTagDetailViewModel, @unchecked Se
     private struct Subject {
         let name = CurrentValueSubject<String?, Never>(nil)
         let color = CurrentValueSubject<EventTagColor?, Never>(nil)
+        let isProcessing = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -103,6 +105,7 @@ extension EventTagDetailViewModelImple {
     }
     
     private func deleteTag(_ tagId: String) {
+        self.subject.isProcessing.send(true)
         Task { [weak self] in
             do {
                 try await self?.eventTagUsecase.deleteTag(tagId)
@@ -112,11 +115,13 @@ extension EventTagDetailViewModelImple {
             } catch {
                 self?.router?.showError(error)
             }
+            self?.subject.isProcessing.send(false)
         }
         .store(in: &self.cancellables)
     }
     
     private func deleteTagWithEvents(_ tagId: String) {
+        self.subject.isProcessing.send(true)
         Task { [weak self] in
             do {
                 try await self?.eventTagUsecase.deleteTagWithAllEvents(tagId)
@@ -126,6 +131,7 @@ extension EventTagDetailViewModelImple {
             } catch {
                 self?.router?.showError(error)
             }
+            self?.subject.isProcessing.send(false)
         }
         .store(in: &self.cancellables)
     }
@@ -153,14 +159,16 @@ extension EventTagDetailViewModelImple {
         } else {
             EditDefaultEventTagColorParams() |> \.newDefaultTagColor .~ newColor
         }
+        self.subject.isProcessing.send(true)
         Task { [weak self] in
             do {
-                let newSetting = try await self?.uiSettingUsecase.changeDefaultEventTagColor(params)
+                let _ = try await self?.uiSettingUsecase.changeDefaultEventTagColor(params)
                 self?.router?.showToast("eventTag.color::changed::message".localized())
                 self?.router?.closeScene()
             } catch {
                 self?.router?.showError(error)
             }
+            self?.subject.isProcessing.send(false)
         }
         .store(in: &self.cancellables)
     }
@@ -171,6 +179,7 @@ extension EventTagDetailViewModelImple {
         else { return }
         let params = EventTagEditParams(name: name, colorHex: colorHext)
         
+        self.subject.isProcessing.send(true)
         Task { [weak self] in
             guard let self = self else { return }
             do {
@@ -181,6 +190,7 @@ extension EventTagDetailViewModelImple {
             } catch {
                 self.router?.showError(error)
             }
+            self.subject.isProcessing.send(false)
         }
         .store(in: &self.cancellables)
     }
@@ -190,6 +200,8 @@ extension EventTagDetailViewModelImple {
               let colorHex = self.subject.color.value?.customHex
         else { return }
         let params = EventTagMakeParams(name: name, colorHex: colorHex)
+        
+        self.subject.isProcessing.send(true)
         Task { [weak self] in
             guard let self = self else { return }
             do {
@@ -200,6 +212,7 @@ extension EventTagDetailViewModelImple {
             } catch {
                 self.router?.showError(error)
             }
+            self.subject.isProcessing.send(false)
         }
         .store(in: &self.cancellables)
     }
@@ -266,5 +279,11 @@ extension EventTagDetailViewModelImple {
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+    
+    var isProcessing: AnyPublisher<Bool, Never> {
+        return self.subject.isProcessing
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
