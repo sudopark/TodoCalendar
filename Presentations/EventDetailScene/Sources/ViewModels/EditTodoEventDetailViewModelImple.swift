@@ -355,6 +355,20 @@ extension EditTodoEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
     
+    var hasChanges: AnyPublisher<Bool, Never> {
+        let transform: (Subject.Basic?, Subject.Addition?) -> Bool = { basic, addition in
+            guard let basic, let addition else { return false }
+            return basic.isChanged || addition.isChanged
+        }
+        return Publishers.CombineLatest(
+            self.subject.basicData,
+            self.subject.additionalData
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+    
     var isSavable: AnyPublisher<Bool, Never> {
         
         let transform: (EventDetailBasicData?) -> Bool = { basic in

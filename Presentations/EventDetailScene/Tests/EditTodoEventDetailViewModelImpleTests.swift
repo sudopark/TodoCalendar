@@ -321,6 +321,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         )
         |> \.selectedTime .~ todo.time.map { .init($0, self.timeZone) }
         |> \.eventRepeating .~ todo.repeating.flatMap { .init($0, timeZone: self.timeZone) }
+        |> \.eventNotifications .~ todo.notificationOptions
         let newBasic = basic(oldBasic)
         let newDetail = detaiil(self.dummyDetail)
         viewModel.eventDetail(didInput: newBasic, additional: newDetail)
@@ -354,6 +355,22 @@ extension EditTodoEventDetailViewModelImpleTests {
         
         // then
         XCTAssertEqual(isSavables, [true, false, true, false, true, false])
+    }
+    
+    func testViewModel_updateHasChangesByInput() {
+        // given
+        let expect = expectation(description: "입력여부 업데이트")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithPrepare()
+        
+        // when
+        let hasChanges = self.waitOutputs(expect, for: viewModel.hasChanges) {
+            self.enter(viewModel) { $0 |> \.name .~ "edited" }
+            self.enter(viewModel) { $0 |> \.name .~ "dummy" }
+        }
+        
+        // then
+        XCTAssertEqual(hasChanges, [false, true, false])
     }
     
     // 변경사항이 없는경우 저장시 바로 완료

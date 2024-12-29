@@ -90,6 +90,7 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     var isForemost: AnyPublisher<Bool, Never> { get }
     var isLoading: AnyPublisher<Bool, Never> { get }
     var eventDetailTypeModel: AnyPublisher<EventDetailTypeModel, Never> { get }
+    var hasChanges: AnyPublisher<Bool, Never> { get }
     var isSavable: AnyPublisher<Bool, Never> { get }
     var isSaving: AnyPublisher<Bool, Never> { get }
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> { get }
