@@ -204,6 +204,9 @@
 "eventDetail:foremost:guide:supports:todo" = "할일 이벤트";
 "eventDetail:foremost:guide:supports:notRepeating_schedule" = "반복되지 않는 일정 이벤트";
 
+"eventDetail:isSaving:toast:message" = "변경사항 저장중입니다. 잠시 기다려 주세요.";
+"eventDetail:hasChanges:confirm:message" = "변경사항이 존재합니다. 이를 폐기할까요?";
+"eventDetail:hasChanges:confirm:continue" = "계속 수정하기";
 
 // MARK: - event tag
 

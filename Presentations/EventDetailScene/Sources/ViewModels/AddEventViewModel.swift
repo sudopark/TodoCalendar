@@ -319,6 +319,10 @@ extension AddEventViewModelImple {
             .eraseToAnyPublisher()
     }
     
+    var hasChanges: AnyPublisher<Bool, Never> {
+        return self.isSavable
+    }
+    
     var isSavable: AnyPublisher<Bool, Never> {
         let transform: (Bool, EventDetailBasicData?) -> Bool = { isTodo, basic in
             let nameIsNotEmpty = basic?.name?.isEmpty == false
