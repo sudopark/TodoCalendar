@@ -229,11 +229,11 @@ extension EventListCellEventHanleViewModelImple {
         switch cellViewModel {
         case let todo as TodoEventCellViewModel:
             self.router?.routeToMakeNewEvent(
-                .init(selectedDate: Date(), makeSource: .todoFromOrigin(todo.eventIdentifier))
+                .init(selectedDate: Date(), makeSource: .todoFromCopy(todo.eventIdentifier))
             )
         case let schedule as ScheduleEventCellViewModel:
             self.router?.routeToMakeNewEvent(
-                .init(selectedDate: Date(), makeSource: .scheduleFromOrigin(schedule.eventIdWithoutTurn))
+                .init(selectedDate: Date(), makeSource: .scheduleFromCopy(schedule.eventIdWithoutTurn))
             )
         default: return
         }
@@ -260,7 +260,7 @@ extension EventListCellEventHanleViewModelImple {
         copyFromTodo params: TodoMakeParams, detail: EventDetailData?
     ) {
         self.router?.routeToMakeNewEvent(
-            .init(selectedDate: Date(), makeSource: .todoFromCopy(params, detail))
+            .init(selectedDate: Date(), makeSource: .todoWith(params, detail))
         )
     }
     
@@ -268,7 +268,7 @@ extension EventListCellEventHanleViewModelImple {
         copyFromSchedule schedule: ScheduleMakeParams, detail: EventDetailData?
     ) {
         self.router?.routeToMakeNewEvent(
-            .init(selectedDate: Date(), makeSource: .scheduleFromCopy(schedule, detail))
+            .init(selectedDate: Date(), makeSource: .scheduleWith(schedule, detail))
         )
     }
 }

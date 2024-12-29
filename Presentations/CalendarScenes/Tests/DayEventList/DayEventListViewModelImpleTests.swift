@@ -766,8 +766,8 @@ extension DayEventListViewModelImpleTests {
         viewModel.makeTodoEvent(with: "some")
         
         // then
-        if case .todo(let withName) = self.spyRouter.didRouteToMakeNewEventWithParams?.makeSource {
-            XCTAssertEqual(withName, "some")
+        if case .todoWith(let params, _) = self.spyRouter.didRouteToMakeNewEventWithParams?.makeSource {
+            XCTAssertEqual(params.name, "some")
         } else {
             XCTFail("기대한 타입이 아님")
         }
