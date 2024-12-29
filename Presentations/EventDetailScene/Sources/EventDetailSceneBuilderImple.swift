@@ -132,6 +132,7 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
         viewModel.router = router
         inputViewModel.routing = router
         viewModel.attachInput()
+        viewController.router = router
         
         return viewController
     }

@@ -204,6 +204,10 @@
 "eventDetail:foremost:guide:supports:todo" = "To-do event";
 "eventDetail:foremost:guide:supports:notRepeating_schedule" = "Non-repeating scheduled events";
 
+"eventDetail:isSaving:toast:message" = "Saving changes. Please wait.";
+"eventDetail:hasChanges:confirm:message" = "There are changes. Do you want to discard them?";
+"eventDetail:hasChanges:confirm:continue" = "Keep editing";
+
 
 // MARK: - event tag
 
