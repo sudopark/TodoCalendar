@@ -319,6 +319,52 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(isSavables, [false, true, false])
     }
     
+    func testViewModel_whenMakeTodo_hasChanegesWhenEnterName() {
+        // given
+        let expect = expectation(description: "todo의 경우 이름만 입력하면 변경되었다 판단")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges) {
+            viewModel.prepare()
+            viewModel.toggleIsTodo()
+            self.enter(viewModel) {
+                $0 |> \.name .~ "some"
+            }
+        }
+        
+        // then
+        XCTAssertEqual(isSavables, [false, true])
+    }
+    
+    // schedule event의 경우 이름 및 시간이 입력되어야함
+    func testViewModel_whenMakeScheduleEvent_hasChangesWhenEnterNameAndSelectTime() {
+        // given
+        let expect = expectation(description: "schedule event의 경우 이름 및 시간이 입력해야 변경되었다 판단")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges) {
+            viewModel.prepare()
+            
+            self.enter(viewModel) {
+                $0
+                |> \.name .~ "some"
+                |> \.selectedTime .~ self.defaultCurrentAndNextHourSelectTime
+            }
+            self.enter(viewModel) {
+                $0
+                |> \.name .~ "some"
+                |> \.selectedTime .~ nil
+            }
+        }
+        
+        // then
+        XCTAssertEqual(isSavables, [false, true, false])
+    }
+    
     private var dummyNewSelectTime: SelectedTime {
         let time = EventTime.at(0)
         return .init(time, self.timeZone)
