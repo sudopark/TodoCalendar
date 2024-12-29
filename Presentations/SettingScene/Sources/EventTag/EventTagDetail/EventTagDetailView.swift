@@ -28,6 +28,7 @@ final class EventTagDetailViewState: ObservableObject {
     @Published fileprivate var isDeletable: Bool = false
     @Published fileprivate var isNameChangable: Bool = false
     @Published fileprivate var isSavable: Bool = false
+    @Published fileprivate var isProcessing: Bool = false
     
     func bind(_ viewModel: any EventTagDetailViewModel) {
         
@@ -51,6 +52,13 @@ final class EventTagDetailViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] color in
                 self?.selectedColor = color
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.isProcessing
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] flag in
+                self?.isProcessing = flag
             })
             .store(in: &self.cancellables)
     }
@@ -107,22 +115,26 @@ struct EventTagDetailView: View {
     private let suggestColorColums = [GridItem(.adaptive(minimum: 40))]
     
     var body: some View {
-        VStack(alignment: .leading) {
+        ZStack {
+            VStack(alignment: .leading) {
+                
+                self.nameInputView
+                
+                Text("Event color".localized())
+                    .font(self.appearance.fontSet.normal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                    .padding(.top, 24)
+                
+                self.suggestColorView
+                
+                Spacer()
+                
+                self.buttonViews
+            }
+            .padding()
             
-            self.nameInputView
-            
-            Text("Event color".localized())
-                .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.text1.asColor)
-                .padding(.top, 24)
-            
-            self.suggestColorView
-            
-            Spacer()
-            
-            self.buttonViews
+            FullScreenLoadingView(isLoading: $state.isProcessing)
         }
-        .padding()
         .background(appearance.colorSet.bg0.asColor)
     }
     
