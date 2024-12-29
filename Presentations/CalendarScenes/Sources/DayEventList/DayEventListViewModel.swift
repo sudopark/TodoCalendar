@@ -170,7 +170,7 @@ extension DayEventListViewModelImple {
     
     func makeEvent() {
         guard let selectDate = self.currentDate else { return }
-        let params = MakeEventParams(selectedDate: selectDate, makeSource: .schedule)
+        let params = MakeEventParams(selectedDate: selectDate, makeSource: .schedule())
         self.router?.routeToMakeNewEvent(params)
     }
     
