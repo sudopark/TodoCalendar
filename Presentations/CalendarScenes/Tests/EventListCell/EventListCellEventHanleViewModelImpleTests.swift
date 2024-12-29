@@ -358,7 +358,7 @@ extension EventListCellEventHanleViewModelImpleTests {
 
 extension EventListCellEventHanleViewModelImpleTests {
     
-    func testViewModel_makeTodoFromCopy() {
+    func testViewModel_makeTodoWithParams() {
         // given
         let viewModel = self.makeViewModel()
         
@@ -367,14 +367,14 @@ extension EventListCellEventHanleViewModelImpleTests {
         
         // then
         let params = self.spyRouter.didRouteToMakeNewEventWithParams
-        if case .todoFromCopy = params?.makeSource {
+        if case .todoWith = params?.makeSource {
             XCTAssert(true)
         } else {
             XCTFail("기대한 타입이 아님")
         }
     }
     
-    func testViewModel_makeScheduleFromCopy() {
+    func testViewModel_makeScheduleWithParams() {
         // given
         let viewModel = self.makeViewModel()
         
@@ -383,7 +383,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         
         // then
         let params = self.spyRouter.didRouteToMakeNewEventWithParams
-        if case .scheduleFromCopy = params?.makeSource {
+        if case .scheduleWith = params?.makeSource {
             XCTAssert(true)
         } else {
             XCTFail("기대한 타입이 아님")
@@ -399,7 +399,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         viewModel.handleMoreAction(todo, .copy)
         
         // then
-        if case .todoFromOrigin = self.spyRouter.didRouteToMakeNewEventWithParams?.makeSource {
+        if case .todoFromCopy = self.spyRouter.didRouteToMakeNewEventWithParams?.makeSource {
             XCTAssert(true)
         } else {
             XCTFail("기대한 이벤트가 아님")
@@ -415,7 +415,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         viewModel.handleMoreAction(schedule, .copy)
         
         // then
-        if case .scheduleFromOrigin = self.spyRouter.didRouteToMakeNewEventWithParams?.makeSource {
+        if case .scheduleFromCopy = self.spyRouter.didRouteToMakeNewEventWithParams?.makeSource {
             XCTAssert(true)
         } else {
             XCTFail("기대한 이벤트가 아님")
