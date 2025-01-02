@@ -451,7 +451,10 @@ extension EditScheduleEventDetailViewModelImpleTests {
         // given
         let expect = expectation(description: "반복 이벤트의 경우 - 이번 이벤트만 업데이트")
         expect.expectedFulfillmentCount = 3
-        let viewModel = self.makeViewModelWithPrepare(isNotRepeating: false)
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: false,
+            repeatingEventTargetTime: .at(100)
+        )
         self.spyRouter.actionSheetSelectionMocking = {
             $0.actions.first(where: { $0.text == "eventDetail.edit::repeating::confirm::onlyThisTime::button".localized() })
         }
@@ -461,6 +464,55 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.enter(viewModel) {
                 $0
                 |> \.name .~ "new_name"
+                |> \.selectedTime .~ pure(SelectedTime(.at(200), self.timeZone))
+                |> \.eventRepeating .~ .init(self.dummyRepeating, timeZone: self.timeZone)
+                |> \.eventTagId .~ .default
+                |> \.eventNotifications .~ [.atTime]
+                
+            } detaiil: {
+                $0 |> \.memo .~ "new_memo"
+                    |> \.url .~ "new_url"
+            }
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.scheduleEvent_saved::message".localized())
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        
+        let updateParams = self.spyScheduleUsecase.didUpdateEditParams
+        XCTAssertEqual(updateParams?.name, "new_name")
+        XCTAssertEqual(updateParams?.eventTagId, .default)
+        XCTAssertEqual(updateParams?.time, .at(200))
+        XCTAssertEqual(updateParams?.repeating, nil)
+        XCTAssertEqual(updateParams?.repeatingUpdateScope, .onlyThisTime(.at(100)))
+        XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
+        
+        let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.memo, "new_memo")
+        XCTAssertEqual(savedDetail?.url, "new_url")
+    }
+    
+    // 반복 이벤트의 경우 - 이번 이벤트만 업데이트 - params scope - 시간은 안바꿈
+    func testViewModel_whenEditRepeatingSchedule_askScope_andUpdateOnlyThistime_withoutChangeTime() {
+        // given
+        let expect = expectation(description: "반복 이벤트의 경우 - 이번 이벤트만 업데이트")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: false,
+            repeatingEventTargetTime: .at(100)
+        )
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventDetail.edit::repeating::confirm::onlyThisTime::button".localized() })
+        }
+        
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+            self.enter(viewModel) {
+                $0
+                |> \.name .~ "new_name"
+                // 실제로 초기값 현재 시간으로 선택됨
                 |> \.selectedTime .~ pure(SelectedTime(.at(100), self.timeZone))
                 |> \.eventRepeating .~ .init(self.dummyRepeating, timeZone: self.timeZone)
                 |> \.eventTagId .~ .default
@@ -483,7 +535,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.eventTagId, .default)
         XCTAssertEqual(updateParams?.time, .at(100))
         XCTAssertEqual(updateParams?.repeating, nil)
-        XCTAssertEqual(updateParams?.repeatingUpdateScope, .onlyThisTime(.at(0)))
+        XCTAssertEqual(updateParams?.repeatingUpdateScope, .onlyThisTime(.at(100)))
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
@@ -493,6 +545,51 @@ extension EditScheduleEventDetailViewModelImpleTests {
     
     // 반복 이벤트의 경우 - 이번부터 이벤트 변경
     func testViewModel_whenEditRepeatingSchedule_askScope_andUpdateFromNow() {
+        // given
+        let expect = expectation(description: "반복 이벤트의 경우 - 이번부터 이벤트 변경")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithPrepare(isNotRepeating: false, repeatingEventTargetTime: .at(100))
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventDetail.edit::repeating::confirm::fromNow::button".localized() })
+        }
+        
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+            self.enter(viewModel) {
+                $0
+                |> \.name .~ "new_name"
+                |> \.selectedTime .~ pure(SelectedTime(.at(200), self.timeZone))
+                |> \.eventRepeating .~ .init(self.dummyRepeating, timeZone: self.timeZone)
+                |> \.eventTagId .~ .default
+                |> \.eventNotifications .~ [.atTime]
+                
+            } detaiil: {
+                $0 |> \.memo .~ "new_memo"
+                    |> \.url .~ "new_url"
+            }
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.scheduleEvent_saved::message".localized())
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        
+        let updateParams = self.spyScheduleUsecase.didUpdateEditParams
+        XCTAssertEqual(updateParams?.name, "new_name")
+        XCTAssertEqual(updateParams?.eventTagId, .default)
+        XCTAssertEqual(updateParams?.time, .at(200))
+        XCTAssertEqual(updateParams?.repeating, self.dummyRepeating)
+        XCTAssertEqual(updateParams?.repeatingUpdateScope, .fromNow(.at(100)))
+        XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
+        
+        let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.memo, "new_memo")
+        XCTAssertEqual(savedDetail?.url, "new_url")
+    }
+    
+    // 반복 이벤트의 경우 - 이번부터 이벤트 변경 - 시간변경은 안함
+    func testViewModel_whenEditRepeatingSchedule_askScope_andUpdateFromNow_withoutSelectTime() {
         // given
         let expect = expectation(description: "반복 이벤트의 경우 - 이번부터 이벤트 변경")
         expect.expectedFulfillmentCount = 3
@@ -541,7 +638,10 @@ extension EditScheduleEventDetailViewModelImpleTests {
         // given
         let expect = expectation(description: "반복 이벤트의 경우 - 모든 이벤트 변경")
         expect.expectedFulfillmentCount = 3
-        let viewModel = self.makeViewModelWithPrepare(isNotRepeating: false)
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: false,
+            repeatingEventTargetTime: .at(100)
+        )
         self.spyRouter.actionSheetSelectionMocking = {
             $0.actions.first(where: { $0.text == "eventDetail.edit::repeating::confirm::all::button".localized() })
         }
@@ -551,7 +651,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.enter(viewModel) {
                 $0
                 |> \.name .~ "new_name"
-                |> \.selectedTime .~ pure(SelectedTime(.at(100), self.timeZone))
+                |> \.selectedTime .~ pure(SelectedTime(.at(200), self.timeZone))
                 |> \.eventRepeating .~ .init(self.dummyRepeating, timeZone: self.timeZone)
                 |> \.eventTagId .~ .default
                 |> \.eventNotifications .~ [.atTime]
@@ -571,7 +671,54 @@ extension EditScheduleEventDetailViewModelImpleTests {
         let updateParams = self.spyScheduleUsecase.didUpdateEditParams
         XCTAssertEqual(updateParams?.name, "new_name")
         XCTAssertEqual(updateParams?.eventTagId, .default)
-        XCTAssertEqual(updateParams?.time, .at(100))
+        XCTAssertEqual(updateParams?.time, .at(200))
+        XCTAssertEqual(updateParams?.repeating, self.dummyRepeating)
+        XCTAssertEqual(updateParams?.repeatingUpdateScope, .all)
+        XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
+        
+        let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.memo, "new_memo")
+        XCTAssertEqual(savedDetail?.url, "new_url")
+    }
+    
+    // 반복 이벤트의 경우 - 모든 이벤트 변경 - 시간 변경은 없이
+    func testViewModel_whenEditRepeatingSchedule_askScope_andUpdateAll_withoutSelectTime() {
+        // given
+        let expect = expectation(description: "반복 이벤트의 경우 - 모든 이벤트 변경")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: false,
+            repeatingEventTargetTime: .at(100)
+        )
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventDetail.edit::repeating::confirm::all::button".localized() })
+        }
+        
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+            self.enter(viewModel) {
+                $0
+                |> \.name .~ "new_name"
+                |> \.eventRepeating .~ .init(self.dummyRepeating, timeZone: self.timeZone)
+                |> \.eventTagId .~ .default
+                |> \.eventNotifications .~ [.atTime]
+                
+            } detaiil: {
+                $0 |> \.memo .~ "new_memo"
+                    |> \.url .~ "new_url"
+            }
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.scheduleEvent_saved::message".localized())
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        
+        let updateParams = self.spyScheduleUsecase.didUpdateEditParams
+        XCTAssertEqual(updateParams?.name, "new_name")
+        XCTAssertEqual(updateParams?.eventTagId, .default)
+        XCTAssertEqual(updateParams?.time, .at(0))
         XCTAssertEqual(updateParams?.repeating, self.dummyRepeating)
         XCTAssertEqual(updateParams?.repeatingUpdateScope, .all)
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])

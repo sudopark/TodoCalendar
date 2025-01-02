@@ -10,6 +10,7 @@ import Domain
 
 struct EventDetailBasicData: Equatable {
     var name: String?
+    var originEventTime: EventTime?
     var selectedTime: SelectedTime?
     var eventRepeating: EventRepeatingTimeSelectResult?
     var eventTagId: AllEventTagId
