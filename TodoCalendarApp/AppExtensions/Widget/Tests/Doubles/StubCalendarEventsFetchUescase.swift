@@ -71,7 +71,13 @@ class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {
     }
     
     var stubForemost: (any ForemostMarkableEvent)?
-    func fetchForemostEvent() async throws -> ForemostEventAndTag {
+    func fetchForemostEvent() async throws -> ForemostEvent {
         return .init(foremostEvent: self.stubForemost, tag: nil)
+    }
+    
+    func fetchNextEvent(
+        _ refTime: Date, within todayRange: Range<TimeInterval>, _ timeZone: TimeZone
+    ) async throws -> TodayNextEvent? {
+        return nil
     }
 }

@@ -413,8 +413,14 @@ extension EventListWidgetViewModelProviderTests {
             )
         }
         
-        func fetchForemostEvent() async throws -> ForemostEventAndTag {
+        func fetchForemostEvent() async throws -> ForemostEvent {
             return .init(foremostEvent: nil, tag: nil)
+        }
+        
+        func fetchNextEvent(
+            _ refTime: Date, within todayRange: Range<TimeInterval>, _ timeZone: TimeZone
+        ) async throws -> TodayNextEvent? {
+            return nil
         }
     }
     
@@ -477,8 +483,14 @@ extension EventListWidgetViewModelProviderTests {
                 return events
             }
             
-            func fetchForemostEvent() async throws -> ForemostEventAndTag {
+            func fetchForemostEvent() async throws -> ForemostEvent {
                 return .init(foremostEvent: nil, tag: nil)
+            }
+            
+            func fetchNextEvent(
+                _ refTime: Date, within todayRange: Range<TimeInterval>, _ timeZone: TimeZone
+            ) async throws -> TodayNextEvent? {
+                return nil
             }
         }
         
