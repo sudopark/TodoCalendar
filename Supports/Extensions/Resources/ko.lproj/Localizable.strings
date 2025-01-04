@@ -143,6 +143,8 @@
 "eventDetail.notification.title" = "이벤트 미리알림";
 "eventDetail.repeating.title" = "반복";
 "eventDetail.repeating.notRepeating::title" = "반복 없음";
+"eventDetail.repeating.starttime:title" = "반복 시작 시간";
+"eventDetail.repeating.starttime:form" = "yyyy. M. d.";
 "eventDetail.repeating.endtime:title" = "반복 종료 시간";
 "eventDetail.repeating.everyDay:title" = "매일";
 "eventDetail.repeating.everyWeek:title" = "매주";
