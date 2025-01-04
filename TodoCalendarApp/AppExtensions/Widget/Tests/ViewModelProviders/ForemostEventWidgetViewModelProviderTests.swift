@@ -132,7 +132,7 @@ private final class PrivateStubEventFetchUsecase: StubCalendarEventsFetchUescase
     
     var shouldFailFetchForemost: Bool = false
     var foremostEvent: (any ForemostMarkableEvent)?
-    override func fetchForemostEvent() async throws -> ForemostEventAndTag {
+    override func fetchForemostEvent() async throws -> ForemostEvent {
         guard self.shouldFailFetchForemost == false
         else {
             throw RuntimeError("failed")
