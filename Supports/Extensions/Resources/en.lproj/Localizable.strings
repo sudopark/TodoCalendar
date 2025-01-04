@@ -143,6 +143,8 @@
 "eventDetail.notification.title" = "Event notification time";
 "eventDetail.repeating.title" = "Repeating";
 "eventDetail.repeating.notRepeating::title" = "No repeats";
+"eventDetail.repeating.starttime:form" = "MMM d, yyyy";
+"eventDetail.repeating.starttime:title" = "Repeat start time";
 "eventDetail.repeating.endtime:title" = "Repeat end time";
 "eventDetail.repeating.everyDay:title" = "Everyday";
 "eventDetail.repeating.everyWeek:title" = "Every Week";
