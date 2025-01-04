@@ -319,6 +319,7 @@ extension EditTodoEventDetailViewModelImpleTests {
             name: todo.name,
             eventTagId: todo.eventTagId ?? .default
         )
+        |> \.originEventTime .~ todo.time
         |> \.selectedTime .~ todo.time.map { .init($0, self.timeZone) }
         |> \.eventRepeating .~ todo.repeating.flatMap { .init($0, timeZone: self.timeZone) }
         |> \.eventNotifications .~ todo.notificationOptions

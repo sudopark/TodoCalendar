@@ -348,6 +348,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
             name: schedule.name,
             eventTagId: schedule.eventTagId ?? .default
         )
+        |> \.originEventTime .~ schedule.time
         |> \.selectedTime .~ .init(schedule.time, self.timeZone)
         |> \.eventRepeating .~ schedule.repeating.flatMap { .init($0, timeZone: self.timeZone) }
         |> \.eventNotifications .~ schedule.notificationOptions
