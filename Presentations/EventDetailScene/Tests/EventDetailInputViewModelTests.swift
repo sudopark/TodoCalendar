@@ -576,6 +576,49 @@ extension EventDetailInputViewModelTests {
             nil,
         ])
     }
+    
+    func testViewModel_whenRepeatTimeSelected_updatePeriodText() {
+        // given
+        let expect = expectation(description: "이벤트 반복 옵션 선택 이후에 반복시간 기간정보 업데이트")
+        expect.expectedFulfillmentCount = 5
+        let viewModel = self.makeViewModel()
+        let dummy = EventRepeatingTimeSelectResult(
+            text: "Everyday".localized(),
+            repeating: EventRepeating(
+                repeatingStartTime: Date(timeIntervalSince1970: 0).timeIntervalSince1970,
+                repeatOption: EventRepeatingOptions.EveryDay()
+            )
+        )
+        let dummyWithEndTime = EventRepeatingTimeSelectResult(
+            text: dummy.text,
+            repeating: dummy.repeating |> \.repeatingEndTime .~ Date(timeIntervalSince1970: 0).add(days: 1)!.timeIntervalSince1970
+        )
+        
+        // when
+        let periods = self.waitOutputs(expect, for: viewModel.repeatOptionPeriod) {
+            self.prepareViewModelWithOldData(viewModel)
+            
+            viewModel.selectRepeatOption()
+            viewModel.selectEventRepeatOption(didSelect: dummy) // on
+            
+            viewModel.selectRepeatOption()
+            viewModel.selectEventRepeatOptionNotRepeat() // off
+            
+            viewModel.selectRepeatOption()
+            viewModel.selectEventRepeatOption(didSelect: dummyWithEndTime) // on
+            
+            viewModel.removeTime()
+        }
+        
+        // then
+        XCTAssertEqual(periods, [
+            "Jan 1, 1970 ~ Jan 1, 1970",
+            "Jan 1, 1970 ~ ",
+            nil,
+            "Jan 1, 1970 ~ Jan 2, 1970",
+            nil,
+        ])
+    }
 }
 
 
