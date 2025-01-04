@@ -99,6 +99,7 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     func endTimeDefaultDate(from startDate: Date) -> Date
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOption: AnyPublisher<String?, Never> { get }
+    var repeatOptionPeriod: AnyPublisher<String?, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
     var selectedPlace: AnyPublisher<Place?, Never> { get }
     var selectedNotificationTimeText: AnyPublisher<String?, Never> { get }
@@ -477,6 +478,24 @@ extension EventDetailInputViewModelImple {
         return self.subject.basic
             .compactMap { $0 }
             .map { $0.basic.eventRepeating?.text }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var repeatOptionPeriod: AnyPublisher<String?, Never> {
+        let transform: (BasicAndTimeZoneData) -> String? = { basicAndTimeZone in
+            guard let repeating = basicAndTimeZone.basic.eventRepeating?.repeating else { return nil }
+            let format = "date_form.yyyy_MMM_dd".localized()
+            let start = Date(timeIntervalSince1970: repeating.repeatingStartTime)
+                .text(format, timeZone: basicAndTimeZone.timeZone)
+            let end = repeating.repeatingEndTime.map { Date(timeIntervalSince1970: $0) }?
+                .text(format, timeZone: basicAndTimeZone.timeZone)
+            
+            return end.map { "\(start) ~ \($0)" } ?? "\(start) ~ "
+        }
+        return self.subject.basic
+            .compactMap { $0 }
+            .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

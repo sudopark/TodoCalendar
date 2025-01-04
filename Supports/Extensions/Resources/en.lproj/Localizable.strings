@@ -42,7 +42,7 @@
 "date_form.MMM_dd_E" = "MMM dd (E)";
 "date_form.HH:mm" = "HH:mm";
 "date_form.yyyy_MM_dd" = "MM/dd/yyyy";
-"date_form.yyyy_MMM_dd" = "MMM dd yyyy";
+"date_form.yyyy_MMM_dd" = "MMM d, yyyy";
 "date_form.MMM" = "MMM";
 "date_form.MMMM" = "MMMM";
 "date_form.EEEE" = "EEEE";
