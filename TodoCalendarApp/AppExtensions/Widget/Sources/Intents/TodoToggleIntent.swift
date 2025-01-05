@@ -63,5 +63,6 @@ struct TodoToggleIntent: AppIntent {
     private func reloadOnlyTodoTogglableWidgets() {
         WidgetCenter.shared.reloadTimelines(ofKind: EventListWidget.kind)
         WidgetCenter.shared.reloadTimelines(ofKind: ForemostEventWidget.kind)
+        WidgetCenter.shared.reloadTimelines(ofKind: NextEventWidget.kind)
     }
 }

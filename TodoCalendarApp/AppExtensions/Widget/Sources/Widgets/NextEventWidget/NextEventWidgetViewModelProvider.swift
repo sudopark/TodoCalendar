@@ -16,7 +16,7 @@ import CalendarScenes
 
 // MARK: - NextEventWidgetViewModel + builder
 
-struct NextEventWidgetViewModel {
+struct NextEventWidgetViewModel: Sendable {
     let timeText: String?
     let eventTitle: String
     var refreshAfter: Date?
@@ -31,6 +31,10 @@ struct NextEventWidgetViewModel {
         return .init(
             timeText: nil, eventTitle: "widget.next.noEvent".localized(), refreshAfter: nil
         )
+    }
+    
+    static var sample: Self {
+        return .init(timeText: "11:29", eventTitle: "widget.next.sample".localized())
     }
 }
 
