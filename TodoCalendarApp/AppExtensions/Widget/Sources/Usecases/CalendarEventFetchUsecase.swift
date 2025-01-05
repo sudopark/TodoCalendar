@@ -22,9 +22,11 @@ struct CalendarEvents {
     var eventWithTimes: [any CalendarEvent]
     var customTagMap: [String: EventTag]
     
-    func findFirstFutureEvent(from time: TimeInterval) -> (any CalendarEvent)? {
+    func findFirstFutureEvent(from time: TimeInterval, todayRange: Range<TimeInterval>) -> (any CalendarEvent)? {
         return self.eventWithTimes.first { event in
-            guard !(event is HolidayCalendarEvent), let eventTime = event.eventTime
+            guard !(event is HolidayCalendarEvent),
+                  let eventTime = event.eventTime,
+                  todayRange ~= eventTime.lowerBoundWithFixed
             else { return false }
             return eventTime.lowerBoundWithFixed > time
         }
@@ -213,12 +215,12 @@ extension CalendarEventFetchUsecaseImple {
         
         let events = try await self.fetchEvents(in: todayRange, timeZone)
         
-        guard let firstFutureEvent = events.findFirstFutureEvent(from: refTime.timeIntervalSince1970)
+        guard let firstFutureEvent = events.findFirstFutureEvent(from: refTime.timeIntervalSince1970, todayRange: todayRange)
         else {
             return nil
         }
         let secondFutureEvent = firstFutureEvent.eventTime.flatMap {
-            return events.findFirstFutureEvent(from: $0.lowerBoundWithFixed)
+            return events.findFirstFutureEvent(from: $0.lowerBoundWithFixed, todayRange: todayRange)
         }
         let tag = firstFutureEvent.eventTagId.customTagId.flatMap {
             return events.customTagMap[$0]
