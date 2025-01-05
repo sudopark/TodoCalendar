@@ -191,14 +191,16 @@ extension CalendarEventFetchUsecaseImpleTests {
         
         let todo = TodoEvent(uuid: "first", name: "first-event")
             |> \.time .~ .at(refDate.timeIntervalSince1970 + 10)
+        let nextDayTodo = TodoEvent(uuid: "next-day", name: "next-day")
+            |> \.time .~ .at(refDate.add(days: 1)!.timeIntervalSince1970)
         let schedule = ScheduleEvent(
             uuid: "second", name: "second-event", time: .at(refDate.timeIntervalSince1970 + 30)
         )
         
         if hasNext {
-            self.stubTodoRepository.todoEventsMocking = [todo]
+            self.stubTodoRepository.todoEventsMocking = [todo, nextDayTodo]
         } else {
-            self.stubTodoRepository.todoEventsMocking = []
+            self.stubTodoRepository.todoEventsMocking = [nextDayTodo]
         }
         
         if hasNext && hasNextNext {
