@@ -245,6 +245,29 @@ extension WidgetViewModelProviderBuilder {
     }
 }
 
+extension WidgetViewModelProviderBuilder {
+    
+    func makeNextEventModelProvider() async -> NextEventWidgetViewModelProvider {
+        await self.checkShouldReset()
+        let appSettingRepository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
+        
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        
+        let eventFetchUsecase = self.usecaseFactory.makeEventsFetchUsecase()
+        
+        return NextEventWidgetViewModelProvider(
+            eventsFetchusecase: eventFetchUsecase,
+            appSettingRepository: appSettingRepository,
+            calednarSettingRepository: calendarSettingRepository
+        )
+    }
+}
 
 // MARK: - composed
 
