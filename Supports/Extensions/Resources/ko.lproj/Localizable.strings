@@ -368,3 +368,4 @@
 "widget.weeks.sample::workout" = "🔥 운동";
 "widget.weeks.sample::launch" = "🚀 런칭";
 "widget.fail.message" = "일시적인 오류가 발생했습니다. 앱을 다시 실행해주세요.";
+"widget.next.noEvent" = "다음 일정이 없습니다.";
