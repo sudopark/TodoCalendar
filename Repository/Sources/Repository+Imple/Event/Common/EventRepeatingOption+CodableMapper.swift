@@ -120,6 +120,8 @@ struct EventRepeatingOptionCodableMapper: Codable {
         case let everyYear as EventRepeatingOptions.EveryYearSomeDay:
             try container.encode("every_year_some_day", forKey: .optionType)
             try container.encode(everyYear.interval, forKey: .interval)
+            try container.encode(everyYear.month, forKey: .month)
+            try container.encode(everyYear.day, forKey: .day)
             try container.encodeIfPresent(everyYear.timeZone.identifier, forKey: .timeZone)
             
         default: throw RuntimeError("not support option type")
