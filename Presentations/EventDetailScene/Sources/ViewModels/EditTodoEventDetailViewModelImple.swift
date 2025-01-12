@@ -417,6 +417,7 @@ extension EventDetailBasicData {
     
     init(todo: TodoEvent, _ timeZone: TimeZone) {
         self.name = todo.name
+        self.originEventTime = todo.time
         self.selectedTime = todo.time.map { SelectedTime($0, timeZone) }
         self.eventRepeating = EventRepeatingTimeSelectResult.make(todo.time, todo.repeating, timeZone)
         self.eventTagId = todo.eventTagId ?? .default

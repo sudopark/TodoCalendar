@@ -25,6 +25,7 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
     @Published var optionList: [[SelectRepeatingOptionModel]] = []
     @Published var selectedOptionId: String?
     @Published var repeatStartTimeText: String?
+    @Published var isEndDatePrepared = false
     @Published var selectedEndDate: Date = Date()
     @Published var hasEndTime: Bool = false
     
@@ -57,6 +58,7 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
         viewModel.repeatEndTime
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] date in
+                self?.isEndDatePrepared = true
                 self?.selectedEndDate = date
             })
             .store(in: &self.cancellables)
@@ -228,6 +230,7 @@ struct SelectEventRepeatOptionView: View {
             .invertColorIfNeed(appearance)
             .labelsHidden()
             .onChange(of: self.state.selectedEndDate) { date in
+                guard self.state.isEndDatePrepared else { return }
                 self.eventHandlers.endTimeSelect(date)
             }
             
