@@ -262,8 +262,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     func save() {
         guard let basic = self.subject.basicData.value,
               let addition = self.subject.additionalData.value,
-              let timeZone = self.subject.timeZone.value,
-              let originEventTime = basic.origin.selectedTime?.eventTime(timeZone)
+              let timeZone = self.subject.timeZone.value
         else { return }
         
         guard basic.isChanged || addition.isChanged
@@ -276,42 +275,57 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         let params = self.scheduleEditParams(from: basic.current, timeZone)
         
         originalScheduleIsRepeating
-            ? saveAfterShowConfirm(originEventTime, params, addition.current)
+            ? saveAfterShowConfirmEditRepeatingEvent(timeZone, params, addition.current)
             : editSchedule(params, addition.current)
     }
     
-    private func saveAfterShowConfirm(
-        _ originEventTime: EventTime,
+    private func saveAfterShowConfirmEditRepeatingEvent(
+        _ timeZone: TimeZone,
         _ params: SchedulePutParams,
         _ addition: EventDetailData
     ) {
         
+        let basic = self.subject.basicData.value
+        let userSelectTime = basic?.userSelectedTime(timeZone)
+        
         var form = ActionSheetForm()
             |> \.title .~ pure("eventDetail.edit::repeating::confirm::ttile".localized())
             |> \.message .~ pure("eventDetail.edit::repeating::confirm::message".localized())
-        let allAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::all::button".localized()) { [weak self] in
-            self?.editSchedule(params |> \.repeatingUpdateScope .~ .all, addition)
-        }
-        form.actions.append(allAction)
         
-        if let time = self.repeatingEventTargetTime {
+        // 모두 수정
+        if let originEventTime = basic?.origin.originEventTime {
+            let allAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::all::button".localized()) { [weak self] in
+                self?.editSchedule(
+                    params
+                        |> \.repeatingUpdateScope .~ .all
+                        |> \.time .~ (userSelectTime ?? originEventTime),
+                    addition
+                )
+            }
+            form.actions.append(allAction)
+        }
+        
+        if let repeatingTargetTime = self.repeatingEventTargetTime {
+            // 이번부터 수정
             let fromNowAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::fromNow::button".localized()) { [weak self] in
                 self?.editSchedule(
-                    params |> \.repeatingUpdateScope .~ .fromNow(time), addition
+                    params |> \.repeatingUpdateScope .~ .fromNow(repeatingTargetTime),
+                    addition
                 )
             }
             form.actions.append(fromNowAction)
+            
+            // 이번만 수정
+            let onlyThisTimeAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::onlyThisTime::button".localized()) { [weak self] in
+                self?.editSchedule(
+                    params
+                        |> \.repeatingUpdateScope .~ .onlyThisTime(repeatingTargetTime)
+                        |> \.repeating .~ nil,
+                    addition
+                )
+            }
+            form.actions.append(onlyThisTimeAction)
         }
-        
-        let onlyThisTimeAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::onlyThisTime::button".localized()) { [weak self] in
-            self?.editSchedule(
-                params
-                    |> \.repeatingUpdateScope .~ .onlyThisTime(originEventTime)
-                    |> \.repeating .~ nil,
-                addition
-            )
-        }
-        form.actions.append(onlyThisTimeAction)
         form.actions.append(.init("common.cancel".localized(), style: .cancel))
         
         self.router?.showActionSheet(form)
@@ -443,6 +457,7 @@ private extension EventDetailBasicData {
         _ timeZone: TimeZone
     ) {
         self.name = schedule.name
+        self.originEventTime = schedule.time
         self.selectedTime = SelectedTime(
             repeatingEventTargetTime ?? schedule.time, timeZone
         )
@@ -453,6 +468,13 @@ private extension EventDetailBasicData {
     }
 }
 
+private extension OriginalAndCurrent where T == EventDetailBasicData {
+    
+    func userSelectedTime(_ timeZone: TimeZone) -> EventTime? {
+        let isUserSelected = self.origin.selectedTime != self.current.selectedTime
+        return isUserSelected ? self.current.selectedTime?.eventTime(timeZone) : nil
+    }
+}
 
 private extension ScheduleMakeParams {
     
