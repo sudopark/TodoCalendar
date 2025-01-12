@@ -97,6 +97,34 @@ extension SelectEventRepeatOptionViewModelTests {
         ]
     }
     
+    func testViewModel_provideRepeatStartTime() {
+        // given
+        func parameterizeTest(
+            _ description: String, previous: EventRepeating?, _ expectText: String?
+        ) {
+            // given
+            let expect = expectation(description: "wait start time")
+            let viewModel = self.makeViewModel(previous: previous)
+            
+            // when
+            let text = self.waitFirstOutput(expect, for: viewModel.repeatStartTimeText) {
+                viewModel.prepare()
+            }
+            
+            // then
+            XCTAssertEqual(text, expectText)
+        }
+        
+        // when + then
+        let option = EventRepeating(
+            repeatingStartTime: Date(timeIntervalSince1970: 0).timeIntervalSince1970,
+            repeatOption: EventRepeatingOptions.EveryWeek(self.timeZone)
+                |> \.interval .~ 1
+        )
+        parameterizeTest("반복옵션 있으면 옵션의 시작시간", previous: option, "Jan 1, 1970")
+        parameterizeTest("반복옵션 없으면 현재 선택된 시간", previous: nil, "Oct 22, 2023")
+    }
+    
     // 이전 선택값 없을때 - 디폴트 선택옵션 리스트 제공
     func testViewModel_whenPreviousSelectNotExists_provideOptionList() {
         // given

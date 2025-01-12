@@ -19,13 +19,24 @@ import TestDoubles
 
 class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
     
+    private var stubTodoRepository: PrivateStubTodoRepository!
+    private var stubScheduleRepository: PrivateStubScheduleRepository!
+    
+    override func setUpWithError() throws {
+        self.stubTodoRepository = .init()
+        self.stubScheduleRepository = .init()
+    }
+    
+    override func tearDownWithError() throws {
+        self.stubTodoRepository = nil
+        self.stubScheduleRepository = nil
+    }
+    
     private func makeUsecase(
         withOffTags: [AllEventTagId] = [],
         hasForemost: Bool = true
     ) -> CalendarEventFetchUsecaseImple {
         
-        let todoRepository = PrivateStubTodoRepository()
-        let scheduleRepository = PrivateStubScheduleRepository()
         let holidayFetchUsecase = StubHolidaysFetchUsecase()
         let eventTagReopsitory = StubEventTagRepository()
         eventTagReopsitory.allTagsStubbing = [
@@ -40,8 +51,8 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
         foremostRepository.stubHasForemost = hasForemost
         
         return CalendarEventFetchUsecaseImple(
-            todoRepository: todoRepository,
-            scheduleRepository: scheduleRepository,
+            todoRepository: self.stubTodoRepository,
+            scheduleRepository: self.stubScheduleRepository,
             foremostEventRepository: foremostRepository,
             holidayFetchUsecase: holidayFetchUsecase,
             eventTagRepository: eventTagReopsitory,
@@ -170,7 +181,89 @@ extension CalendarEventFetchUsecaseImpleTests {
     }
 }
 
-private final class PrivateStubTodoRepository: StubTodoEventRepository {
+extension CalendarEventFetchUsecaseImpleTests {
+    
+    private func makeUsecaseWithStubNextEvents(
+        _ refDate: Date,
+        hasNext: Bool = true,
+        hasNextNext: Bool = true
+    ) -> CalendarEventFetchUsecaseImple {
+        
+        let todo = TodoEvent(uuid: "first", name: "first-event")
+            |> \.time .~ .at(refDate.timeIntervalSince1970 + 10)
+        let nextDayTodo = TodoEvent(uuid: "next-day", name: "next-day")
+            |> \.time .~ .at(refDate.add(days: 1)!.timeIntervalSince1970)
+        let schedule = ScheduleEvent(
+            uuid: "second", name: "second-event", time: .at(refDate.timeIntervalSince1970 + 30)
+        )
+        
+        if hasNext {
+            self.stubTodoRepository.todoEventsMocking = [todo, nextDayTodo]
+        } else {
+            self.stubTodoRepository.todoEventsMocking = [nextDayTodo]
+        }
+        
+        if hasNext && hasNextNext {
+            self.stubScheduleRepository.scheduleMocking = [schedule]
+        } else {
+            self.stubScheduleRepository.scheduleMocking = []
+        }
+        return self.makeUsecase()
+    }
+    
+    func testUsecase_fetchNextEvent() async throws {
+        // given
+        let refDate = Date(timeIntervalSince1970: 0)
+        let usecase = self.makeUsecaseWithStubNextEvents(refDate)
+        
+        // when
+        let range = refDate.timeIntervalSince1970..<refDate.add(days: 1)!.timeIntervalSince1970
+        let next = try await usecase.fetchNextEvent(refDate, within: range, self.kst)
+        
+        // then
+        XCTAssertEqual(next?.nextEvent.name, "first-event")
+        XCTAssertEqual(
+            next?.andThenNextEventStartDate,
+            refDate.addingTimeInterval(30)
+        )
+    }
+    
+    func testUsecase_fetchNextEvent_withoutSecondNextEvent() async throws {
+        // given
+        let refDate = Date(timeIntervalSince1970: 0)
+        let usecase = self.makeUsecaseWithStubNextEvents(
+            refDate, hasNextNext: false
+        )
+        
+        // when
+        let range = refDate.timeIntervalSince1970..<refDate.add(days: 1)!.timeIntervalSince1970
+        let next = try await usecase.fetchNextEvent(refDate, within: range, self.kst)
+        
+        // then
+        XCTAssertEqual(next?.nextEvent.name, "first-event")
+        XCTAssertEqual(
+            next?.andThenNextEventStartDate,
+            nil
+        )
+    }
+    
+    func testUsecase_fetchNextEvent_withoutNextEvent() async throws {
+        // given
+        let refDate = Date(timeIntervalSince1970: 0)
+        let usecase = self.makeUsecaseWithStubNextEvents(
+            refDate, hasNext: false
+        )
+        
+        // when
+        let range = refDate.timeIntervalSince1970..<refDate.add(days: 1)!.timeIntervalSince1970
+        let next = try await usecase.fetchNextEvent(refDate, within: range, self.kst)
+        
+        // then
+        XCTAssertNil(next)
+    }
+}
+
+private final class PrivateStubTodoRepository: StubTodoEventRepository, @unchecked Sendable {
     
     override func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error> {
         
@@ -179,15 +272,29 @@ private final class PrivateStubTodoRepository: StubTodoEventRepository {
         return Just([todo]).mapAsAnyError().eraseToAnyPublisher()
     }
     
+    var todoEventsMocking: [TodoEvent]?
+    
     override func loadTodoEvents(in range: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], any Error> {
+        
+        if let mocking = self.todoEventsMocking {
+            return Just(mocking).mapNever().eraseToAnyPublisher()
+        }
+        
         let todo = TodoEvent(uuid: "todo", name: "todo_with_lowerbound_time")
             |> \.time .~ .at(range.lowerBound + 1)
         return Just([todo]).mapAsAnyError().eraseToAnyPublisher()
     }
 }
-private final class PrivateStubScheduleRepository: StubScheduleEventRepository {
+private final class PrivateStubScheduleRepository: StubScheduleEventRepository, @unchecked Sendable {
+    
+    var scheduleMocking: [ScheduleEvent]?
  
     override func loadScheduleEvents(in range: Range<TimeInterval>) -> AnyPublisher<[ScheduleEvent], any Error> {
+        
+        if let mocking = self.scheduleMocking {
+            return Just(mocking).mapNever().eraseToAnyPublisher()
+        }
+        
         let event = ScheduleEvent(
             uuid: "schedule", name: "scheudle_with_upperbound_time",
             time: .at(range.upperBound-1)
@@ -198,7 +305,7 @@ private final class PrivateStubScheduleRepository: StubScheduleEventRepository {
 }
 
 
-private final class PrivateStubForemostEventRepository: StubForemostEventRepository {
+private final class PrivateStubForemostEventRepository: StubForemostEventRepository, @unchecked Sendable {
     
     var stubHasForemost: Bool = true
     override func foremostEvent() -> AnyPublisher<(any ForemostMarkableEvent)?, any Error> {

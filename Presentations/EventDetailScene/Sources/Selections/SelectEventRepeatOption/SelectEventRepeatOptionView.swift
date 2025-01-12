@@ -24,6 +24,7 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
     
     @Published var optionList: [[SelectRepeatingOptionModel]] = []
     @Published var selectedOptionId: String?
+    @Published var repeatStartTimeText: String?
     @Published var isEndDatePrepared = false
     @Published var selectedEndDate: Date = Date()
     @Published var hasEndTime: Bool = false
@@ -33,7 +34,13 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
         guard self.didBind == false else { return }
         self.didBind = true
         
-        // TODO: bind state
+        viewModel.repeatStartTimeText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.repeatStartTimeText = text
+            })
+            .store(in: &self.cancellables)
+        
         viewModel.options
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] list in
@@ -117,12 +124,20 @@ struct SelectEventRepeatOptionView: View {
         NavigationStack {
             
             List {
+                
+                if let start = self.state.repeatStartTimeText {
+                    self.repeatStartTimeView(start)
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(appearance.colorSet.bg0.asColor)
+                }
+                
                 ForEach(self.state.optionList, id: \.compareKey) {
                     self.sectionView($0)
                 }
                 .listRowSeparator(.hidden)
                 .listRowBackground(appearance.colorSet.bg0.asColor)
             }
+            .listSectionSpacing(0)
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
             .navigationTitle(R.String.EventDetail.Repeating.title)
@@ -139,6 +154,24 @@ struct SelectEventRepeatOptionView: View {
             }
         }
             .id(appearance.navigationBarId)
+    }
+    
+    private func repeatStartTimeView(_ text: String) -> some View {
+        Section {
+            HStack {
+                Text("eventDetail.repeating.starttime:title".localized())
+                    .font(self.appearance.fontSet.normal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                
+                Spacer()
+                
+                Text(text)
+                    .font(self.appearance.fontSet.size(16).asFont)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                
+            }
+            .padding(.top, 20)
+        }
     }
     
     private func sectionView(_ section: [SelectRepeatingOptionModel]) -> some View {
@@ -242,6 +275,7 @@ struct SelectEventRepeatOptionViewPreviewProvider: PreviewProvider {
         let handler = SelectEventRepeatOptionViewEventHandlers()
         let view = SelectEventRepeatOptionView()
         let state = SelectEventRepeatOptionViewState()
+        state.repeatStartTimeText = Date().text("eventDetail.repeating.starttime:form".localized())
         state.optionList = [
             [.init("some", nil)],
             [.init("option1", nil), .init("option2", nil), .init("option3", nil)],

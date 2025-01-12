@@ -84,6 +84,61 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertNotNil(todo)
     }
     
+    func testRepository_makeNewTodoWithRepeating() async {
+        // given
+        let kst = TimeZone(abbreviation: "KST")!
+        
+        func parameterizeTest(_ option: EventRepeatingOption) async {
+            // given
+            let repository = self.makeRepository()
+            
+            // when
+            let repeating = EventRepeating(repeatingStartTime: 100, repeatOption: option)
+                |> \.repeatingEndTime .~ 200
+            let params = self.dummyMakeParams |> \.repeating .~ repeating
+            let todo = try? await repository.makeTodoEvent(params)
+            
+            // then
+            XCTAssertEqual(todo?.name, "new")
+            XCTAssertEqual(todo?.eventTagId, .custom("some"))
+            XCTAssertEqual(todo?.time, .period(0.0..<100.0))
+            XCTAssertEqual(todo?.repeating?.repeatingStartTime, 100)
+            XCTAssertEqual(todo?.repeating?.repeatOption.compareHash, option.compareHash)
+            XCTAssertEqual(todo?.repeating?.repeatingEndTime, 200)
+            XCTAssertEqual(todo?.notificationOptions, [.before(seconds: 100), .atTime])
+        }
+        
+        // when
+        let days3 = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
+        await parameterizeTest(days3)
+        
+        let week3 = EventRepeatingOptions.EveryWeek(kst)
+            |> \.interval .~ 3
+            |> \.dayOfWeeks .~ [.friday, .saturday]
+        await parameterizeTest(week3)
+        
+        let monthWithDay = EventRepeatingOptions.EveryMonth(timeZone: kst)
+            |> \.interval .~ 3
+            |> \.selection .~ .days([1, 2, 3])
+        await parameterizeTest(monthWithDay)
+        
+        let monthWithWeekOrdinal = EventRepeatingOptions.EveryMonth(timeZone: kst)
+            |> \.interval .~ 3
+            |> \.selection .~ .week([.seq(1), .last], [.monday, .saturday])
+        await parameterizeTest(monthWithWeekOrdinal)
+        
+        let year3 = EventRepeatingOptions.EveryYear(timeZone: kst)
+            |> \.interval .~ 10
+            |> \.months .~ [.april, .august]
+            |> \.weekOrdinals .~ [.last, .seq(1)]
+            |> \.dayOfWeek .~ [.friday, .saturday]
+        await parameterizeTest(year3)
+        
+        let yearSomeDay = EventRepeatingOptions.EveryYearSomeDay(kst, 12, 20)
+            |> \.interval .~ 3
+        await parameterizeTest(yearSomeDay)
+    }
+    
     private func stubSaveTodo(
         _ todos: [TodoEvent]
     ) {

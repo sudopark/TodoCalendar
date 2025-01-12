@@ -235,6 +235,7 @@ protocol SelectEventRepeatOptionViewModel: AnyObject, Sendable, SelectEventRepea
     var options: AnyPublisher<[[SelectRepeatingOptionModel]], Never> { get }
     var selectedOptionId: AnyPublisher<String, Never> { get }
     var hasRepeatEnd: AnyPublisher<Bool, Never> { get }
+    var repeatStartTimeText: AnyPublisher<String, Never> { get }
     var repeatEndTime: AnyPublisher<Date, Never> { get }
 }
 
@@ -361,6 +362,7 @@ extension SelectEventRepeatOptionViewModelImple {
         
         let endTime = RepeatEndTime(targetDate, from: self.selectTime, timeZone: timeZone)
         |> \.isOn .~ (previousSelectOption?.repeatingEndTime != nil)
+        
         self.subject.repeatEndTime.send(endTime)
     }
     
@@ -440,6 +442,22 @@ extension SelectEventRepeatOptionViewModelImple {
     var selectedOptionId: AnyPublisher<String, Never> {
         return self.subject.selectedOptionId
             .compactMap { $0 }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var repeatStartTimeText: AnyPublisher<String, Never> {
+        let transform: (TimeZone?) -> String? = { [weak self] timeZone in
+            guard let self = self, let timeZone = timeZone else { return nil }
+            let date = self.previousSelectOption
+                .map { Date(timeIntervalSince1970: $0.repeatingStartTime ) }
+            ?? self.selectTime
+            return date.text(
+                "eventDetail.repeating.starttime:form".localized(), timeZone: timeZone
+            )
+        }
+        return self.subject.timeZone
+            .compactMap(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

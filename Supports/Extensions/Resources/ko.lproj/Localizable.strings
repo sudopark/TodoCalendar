@@ -143,6 +143,8 @@
 "eventDetail.notification.title" = "이벤트 미리알림";
 "eventDetail.repeating.title" = "반복";
 "eventDetail.repeating.notRepeating::title" = "반복 없음";
+"eventDetail.repeating.starttime:title" = "반복 시작 시간";
+"eventDetail.repeating.starttime:form" = "yyyy. M. d.";
 "eventDetail.repeating.endtime:title" = "반복 종료 시간";
 "eventDetail.repeating.everyDay:title" = "매일";
 "eventDetail.repeating.everyWeek:title" = "매주";
@@ -204,6 +206,9 @@
 "eventDetail:foremost:guide:supports:todo" = "할일 이벤트";
 "eventDetail:foremost:guide:supports:notRepeating_schedule" = "반복되지 않는 일정 이벤트";
 
+"eventDetail:isSaving:toast:message" = "변경사항 저장중입니다. 잠시 기다려 주세요.";
+"eventDetail:hasChanges:confirm:message" = "변경사항이 존재합니다. 이를 폐기할까요?";
+"eventDetail:hasChanges:confirm:continue" = "계속 수정하기";
 
 // MARK: - event tag
 
@@ -363,3 +368,6 @@
 "widget.weeks.sample::workout" = "🔥 운동";
 "widget.weeks.sample::launch" = "🚀 런칭";
 "widget.fail.message" = "일시적인 오류가 발생했습니다. 앱을 다시 실행해주세요.";
+"widget.next.noEvent" = "다음 이벤트가 없습니다.";
+"widget.next.sample" = "🔥 운동";
+"widget.next.title" = "다음 이벤트";

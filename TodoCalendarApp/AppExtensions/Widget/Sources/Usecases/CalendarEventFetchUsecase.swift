@@ -21,11 +21,27 @@ struct CalendarEvents {
     var currentTodos: [TodoCalendarEvent]
     var eventWithTimes: [any CalendarEvent]
     var customTagMap: [String: EventTag]
+    
+    func findFirstFutureEvent(from time: TimeInterval, todayRange: Range<TimeInterval>) -> (any CalendarEvent)? {
+        return self.eventWithTimes.first { event in
+            guard !(event is HolidayCalendarEvent),
+                  let eventTime = event.eventTime,
+                  todayRange ~= eventTime.lowerBoundWithFixed
+            else { return false }
+            return eventTime.lowerBoundWithFixed > time
+        }
+    }
 }
 
-struct ForemostEventAndTag {
+struct ForemostEvent {
     let foremostEvent: (any ForemostMarkableEvent)?
     let tag: EventTag?
+}
+
+struct TodayNextEvent {
+    let nextEvent: any CalendarEvent
+    let tag: EventTag?
+    var andThenNextEventStartDate: Date?
 }
 
 protocol CalendarEventFetchUsecase {
@@ -35,7 +51,11 @@ protocol CalendarEventFetchUsecase {
         _ timeZone: TimeZone
     ) async throws -> CalendarEvents
     
-    func fetchForemostEvent() async throws -> ForemostEventAndTag
+    func fetchForemostEvent() async throws -> ForemostEvent
+    
+    func fetchNextEvent(
+        _ refTime: Date, within todayRange: Range<TimeInterval>, _ timeZone: TimeZone
+    ) async throws -> TodayNextEvent?
 }
 
 
@@ -173,10 +193,10 @@ extension CalendarEventFetchUsecaseImple {
 
 extension CalendarEventFetchUsecaseImple {
     
-    func fetchForemostEvent() async throws -> ForemostEventAndTag {
+    func fetchForemostEvent() async throws -> ForemostEvent {
         let tags = try await self.allCustomEventTagMap()
         let event = try await self.loadForemostEvent()
-        return ForemostEventAndTag(
+        return ForemostEvent(
             foremostEvent: event,
             tag: event.flatMap { $0.eventTagId?.customTagId }.flatMap { tags[$0] }
         )
@@ -184,6 +204,32 @@ extension CalendarEventFetchUsecaseImple {
     
     private func loadForemostEvent() async throws -> (any ForemostMarkableEvent)? {
         return try await self.foremostEventRepository.foremostEvent().values.first(where: { _ in true }) ?? nil
+    }
+}
+
+extension CalendarEventFetchUsecaseImple {
+    
+    func fetchNextEvent(
+        _ refTime: Date, within todayRange: Range<TimeInterval>, _ timeZone: TimeZone
+    ) async throws -> TodayNextEvent? {
+        
+        let events = try await self.fetchEvents(in: todayRange, timeZone)
+        
+        guard let firstFutureEvent = events.findFirstFutureEvent(from: refTime.timeIntervalSince1970, todayRange: todayRange)
+        else {
+            return nil
+        }
+        let secondFutureEvent = firstFutureEvent.eventTime.flatMap {
+            return events.findFirstFutureEvent(from: $0.lowerBoundWithFixed, todayRange: todayRange)
+        }
+        let tag = firstFutureEvent.eventTagId.customTagId.flatMap {
+            return events.customTagMap[$0]
+        }
+        
+        return TodayNextEvent(nextEvent: firstFutureEvent, tag: tag)
+            |> \.andThenNextEventStartDate .~ secondFutureEvent?.eventTime.map {
+                Date(timeIntervalSince1970: $0.lowerBoundWithFixed)
+            }
     }
 }
 

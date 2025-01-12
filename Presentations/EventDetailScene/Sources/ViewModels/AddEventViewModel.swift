@@ -156,31 +156,18 @@ extension AddEventViewModelImple: EventDetailInputListener {
         }
         
         switch params.makeSource {
-        case .todo(let name):
-            return EventDetailBasicData()
-                |> \.name .~ name
-                |> \.selectedTime .~ eventTimeFromDefaultOption()
-                |> \.eventTagId .~ defaultTag
-                |> \.eventNotifications .~ defaultNotification
-            
-        case .schedule:
-            return EventDetailBasicData()
-                |> \.selectedTime .~ eventTimeFromDefaultOption()
-                |> \.eventTagId .~ defaultTag
-                |> \.eventNotifications .~ defaultNotification
-            
-        case .todoFromCopy(let makeParams, _):
+        case .todoWith(let makeParams, _):
             return basicFromTodo(makeParams)
             
-        case .scheduleFromCopy(let makeParams, _):
+        case .scheduleWith(let makeParams, _):
             return basicFromSchedule(makeParams)
             
-        case .todoFromOrigin(let id):
+        case .todoFromCopy(let id):
             let todo = try? await self.todoUsecase.todoEvent(id).last().values.first(where: { _ in true })
             let makeParams = todo.map { TodoMakeParams($0) }
             return basicFromTodo(makeParams)
             
-        case .scheduleFromOrigin(let id):
+        case .scheduleFromCopy(let id):
             let schedule = try? await self.scheduleUsecase.scheduleEvent(id).last().values.first(where: { _ in true })
             let makeParams = schedule.map { ScheduleMakeParams($0) }
             return basicFromSchedule(makeParams)
@@ -189,15 +176,14 @@ extension AddEventViewModelImple: EventDetailInputListener {
     
     private func prepareAdditional(_ params: MakeEventParams) async -> EventDetailData? {
         switch params.makeSource {
-        case .todoFromCopy(_, let data): return data
-        case .scheduleFromCopy(_, let data): return data
-        case .todoFromOrigin(let id):
+        case .todoWith(_, let data): return data
+        case .scheduleWith(_, let data): return data
+        case .todoFromCopy(let id):
             return try? await self.eventDetailDataUsecase
                 .loadDetail(id).last().values.first(where: { _ in true })
-        case .scheduleFromOrigin(let id):
+        case .scheduleFromCopy(let id):
             return try? await self.eventDetailDataUsecase
                 .loadDetail(id).last().values.first(where: { _ in true })
-        default: return nil
         }
     }
     
@@ -333,6 +319,10 @@ extension AddEventViewModelImple {
             .eraseToAnyPublisher()
     }
     
+    var hasChanges: AnyPublisher<Bool, Never> {
+        return self.isSavable
+    }
+    
     var isSavable: AnyPublisher<Bool, Never> {
         let transform: (Bool, EventDetailBasicData?) -> Bool = { isTodo, basic in
             let nameIsNotEmpty = basic?.name?.isEmpty == false
@@ -411,8 +401,8 @@ private extension MakeEventParams {
         
     var isTodoCase: Bool {
         switch self.makeSource {
-        case .todo, .todoFromCopy, .todoFromOrigin: return true
-        case .schedule, .scheduleFromCopy, .scheduleFromOrigin: return false
+        case .todoWith, .todoFromCopy: return true
+        case .scheduleWith, .scheduleFromCopy: return false
         }
     }
 }

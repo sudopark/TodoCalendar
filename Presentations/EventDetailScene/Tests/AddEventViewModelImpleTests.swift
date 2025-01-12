@@ -72,7 +72,7 @@ class AddEventViewModelImpleTests: BaseTestCase, PublisherWaitable {
         eventNotificationSettingUsecase.saveDefaultNotificationTimeOption(forAllDay: false, option: .atTime)
         
         let viewModel = AddEventViewModelImple(
-            params: params ?? .init(selectedDate: self.refDate, makeSource: .schedule),
+            params: params ?? .init(selectedDate: self.refDate, makeSource: .schedule()),
             todoUsecase: self.spyTodoUsecase,
             scheduleUsecase: self.spyScheduleUsecase,
             eventTagUsease: tagUsecase,
@@ -319,6 +319,52 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(isSavables, [false, true, false])
     }
     
+    func testViewModel_whenMakeTodo_hasChanegesWhenEnterName() {
+        // given
+        let expect = expectation(description: "todo의 경우 이름만 입력하면 변경되었다 판단")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges) {
+            viewModel.prepare()
+            viewModel.toggleIsTodo()
+            self.enter(viewModel) {
+                $0 |> \.name .~ "some"
+            }
+        }
+        
+        // then
+        XCTAssertEqual(isSavables, [false, true])
+    }
+    
+    // schedule event의 경우 이름 및 시간이 입력되어야함
+    func testViewModel_whenMakeScheduleEvent_hasChangesWhenEnterNameAndSelectTime() {
+        // given
+        let expect = expectation(description: "schedule event의 경우 이름 및 시간이 입력해야 변경되었다 판단")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges) {
+            viewModel.prepare()
+            
+            self.enter(viewModel) {
+                $0
+                |> \.name .~ "some"
+                |> \.selectedTime .~ self.defaultCurrentAndNextHourSelectTime
+            }
+            self.enter(viewModel) {
+                $0
+                |> \.name .~ "some"
+                |> \.selectedTime .~ nil
+            }
+        }
+        
+        // then
+        XCTAssertEqual(isSavables, [false, true, false])
+    }
+    
     private var dummyNewSelectTime: SelectedTime {
         let time = EventTime.at(0)
         return .init(time, self.timeZone)
@@ -530,7 +576,7 @@ extension AddEventViewModelImpleTests {
     func testViewModel_makeNewSchedule() {
         // given
         let expect = expectation(description: "wait prepare")
-        let viewModel = self.makeViewModelWithSource(.schedule)
+        let viewModel = self.makeViewModelWithSource(.schedule())
         self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
         
         // when
@@ -553,7 +599,7 @@ extension AddEventViewModelImpleTests {
         // given
         let expect = expectation(description: "wait prepare")
         let viewModel = self.makeViewModelWithSource(
-            .todoFromCopy(self.dummyTodoMakeParams, self.dummyAddition)
+            .todoWith(self.dummyTodoMakeParams, self.dummyAddition)
         )
         self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
         
@@ -583,7 +629,7 @@ extension AddEventViewModelImpleTests {
         // given
         let expect = expectation(description: "wait prepare")
         let viewModel = self.makeViewModelWithSource(
-            .scheduleFromCopy(self.dummyScheduleMakeParams, self.dummyAddition)
+            .scheduleWith(self.dummyScheduleMakeParams, self.dummyAddition)
         )
         self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
         
@@ -613,7 +659,7 @@ extension AddEventViewModelImpleTests {
         // given
         let expect = expectation(description: "wait prepare")
         let viewModel = self.makeViewModelWithSource(
-            .todoFromOrigin("todo:origin")
+            .todoFromCopy("todo:origin")
         )
         self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
         
@@ -643,7 +689,7 @@ extension AddEventViewModelImpleTests {
         // given
         let expect = expectation(description: "wait prepare")
         let viewModel = self.makeViewModelWithSource(
-            .scheduleFromOrigin("schedule:origin")
+            .scheduleFromCopy("schedule:origin")
         )
         self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
         

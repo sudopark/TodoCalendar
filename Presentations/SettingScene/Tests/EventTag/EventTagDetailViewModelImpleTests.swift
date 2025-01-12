@@ -180,6 +180,22 @@ extension EventTagDetailViewModelImpleTests {
         // then
         XCTAssertEqual(self.stubUISettingUsecase.didChangeAppearanceSetting?.defaultTagColor.default, "new_color")
     }
+    
+    func testViewModel_whenDefaultTagSaving_updateIsProcessing() {
+        // given
+        let expect = expectation(description: "wait is processing")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(info: self.defaultTagInfo)
+        
+        // when
+        let isProcessings = self.waitOutputs(expect, for: viewModel.isProcessing) {
+            viewModel.selectColor("new_color")
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isProcessings, [false, true, false])
+    }
 }
 
 extension EventTagDetailViewModelImpleTests {
@@ -262,6 +278,24 @@ extension EventTagDetailViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
     }
     
+    func testViewModel_whenDeleteTag_updateIsProcessing() {
+        // given
+        let expect = expectation(description: "wait is processing")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(info: self.customTagInfo)
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventTag.remove::only_tag".localized() })
+        }
+        
+        // when
+        let isProcessings = self.waitOutputs(expect, for: viewModel.isProcessing) {
+            viewModel.delete()
+        }
+        
+        // then
+        XCTAssertEqual(isProcessings, [false, true, false])
+    }
+    
     func testViewModel_deleteTagWithEvents() {
         // given
         let expect = expectation(description: "tag 및 이벤트 삭제")
@@ -282,6 +316,24 @@ extension EventTagDetailViewModelImpleTests {
         )
         XCTAssertEqual(self.spyRouter.didShowActionSheetWith != nil, true)
         XCTAssertEqual(self.spyRouter.didClosed, true)
+    }
+    
+    func testViewModel_whenDeleteTagWithEvents_updateIsProcessing() {
+        // given
+        let expect = expectation(description: "wait is processing")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(info: self.customTagInfo)
+        self.spyRouter.actionSheetSelectionMocking = {
+            $0.actions.first(where: { $0.text == "eventTag.remove::tag_and_evets".localized() })
+        }
+        
+        // when
+        let isProcessings = self.waitOutputs(expect, for: viewModel.isProcessing) {
+            viewModel.delete()
+        }
+        
+        // then
+        XCTAssertEqual(isProcessings, [false, true, false])
     }
 
     // save new tag
@@ -319,6 +371,23 @@ extension EventTagDetailViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
     }
     
+    func testViewModel_whenMakeNewTag_updateIsProcessing() {
+        // given
+        let expect = expectation(description: "새로운 tag 저장시에 처리중임을 알림")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(info: nil)
+        
+        // when
+        let isProcessings = self.waitOutputs(expect, for: viewModel.isProcessing) {
+            viewModel.enterName("new")
+            viewModel.selectColor("some")
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isProcessings, [false, true, false])
+    }
+    
     // edit tag
     func testViewModel_editNewTag() {
         // given
@@ -350,6 +419,22 @@ extension EventTagDetailViewModelImpleTests {
         
         // then
         self.wait(for: [expect], timeout: self.timeout)
+    }
+    
+    func testViewModel_whenEditTag_updateIsProcessing() {
+        // given
+        let expect = expectation(description: "tag 수정시에 처리중임을 알림")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(info: self.customTagInfo)
+        
+        // when
+        let isProcessings = self.waitOutputs(expect, for: viewModel.isProcessing) {
+            viewModel.enterName("new")
+            viewModel.save()
+        }
+        
+        // then
+        XCTAssertEqual(isProcessings, [false, true, false])
     }
 }
 

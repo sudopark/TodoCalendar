@@ -42,7 +42,7 @@
 "date_form.MMM_dd_E" = "MMM dd (E)";
 "date_form.HH:mm" = "HH:mm";
 "date_form.yyyy_MM_dd" = "MM/dd/yyyy";
-"date_form.yyyy_MMM_dd" = "MMM dd yyyy";
+"date_form.yyyy_MMM_dd" = "MMM d, yyyy";
 "date_form.MMM" = "MMM";
 "date_form.MMMM" = "MMMM";
 "date_form.EEEE" = "EEEE";
@@ -143,6 +143,8 @@
 "eventDetail.notification.title" = "Event notification time";
 "eventDetail.repeating.title" = "Repeating";
 "eventDetail.repeating.notRepeating::title" = "No repeats";
+"eventDetail.repeating.starttime:form" = "MMM d, yyyy";
+"eventDetail.repeating.starttime:title" = "Repeat start time";
 "eventDetail.repeating.endtime:title" = "Repeat end time";
 "eventDetail.repeating.everyDay:title" = "Everyday";
 "eventDetail.repeating.everyWeek:title" = "Every Week";
@@ -203,6 +205,10 @@
 "eventDetail:foremost:guide:supports:message" = "The following are the types of events you can register for as your foremost event:";
 "eventDetail:foremost:guide:supports:todo" = "To-do event";
 "eventDetail:foremost:guide:supports:notRepeating_schedule" = "Non-repeating scheduled events";
+
+"eventDetail:isSaving:toast:message" = "Saving changes. Please wait.";
+"eventDetail:hasChanges:confirm:message" = "There are changes. Do you want to discard them?";
+"eventDetail:hasChanges:confirm:continue" = "Keep editing";
 
 
 // MARK: - event tag
@@ -363,3 +369,6 @@
 "widget.weeks.sample::workout" = "🔥 Workout";
 "widget.weeks.sample::launch" = "🚀 Launch";
 "widget.fail.message" = "A temporary error occurred.\nPlease try running the app again.";
+"widget.next.noEvent" = "There is no next event.";
+"widget.next.sample" = "🔥 Workout";
+"widget.next.title" = "Next event";

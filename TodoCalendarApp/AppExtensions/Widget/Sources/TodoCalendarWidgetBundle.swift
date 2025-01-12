@@ -12,15 +12,22 @@ import SwiftUI
 @main
 struct TodoCalendarWidgetBundle: WidgetBundle {
     var body: some Widget {
-        MonthWidget()
-        EventListWidget()
-        TodayWidget()
-        ForemostEventWidget()
+        BaseWidgetBundle().body
         ComposedWidgetBundle().body
         WeeksWidgetBundle().body
     }
 }
 
+struct BaseWidgetBundle: WidgetBundle {
+    
+    var body: some Widget {
+        MonthWidget()
+        EventListWidget()
+        TodayWidget()
+        ForemostEventWidget()
+        NextEventWidget()
+    }
+}
 
 struct ComposedWidgetBundle: WidgetBundle {
     

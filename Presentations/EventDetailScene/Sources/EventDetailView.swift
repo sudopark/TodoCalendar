@@ -29,6 +29,7 @@ final class EventDetailViewState: ObservableObject {
     @Published var isSavable: Bool = false
     @Published var selectedTime: SelectedTime?
     @Published var selectedRepeat: String?
+    @Published var selectedRepeatPeriod: String?
     @Published var selectedNotificationTimeText: String?
     @Published var isAllDay: Bool = false
     @Published var availableMoreActions: [[EventDetailMoreAction]] = []
@@ -112,6 +113,13 @@ final class EventDetailViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] option in
                 self?.selectedRepeat = option
+            })
+            .store(in: &self.cancellables)
+        
+        inputViewModel.repeatOptionPeriod
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] period in
+                self?.selectedRepeatPeriod = period
             })
             .store(in: &self.cancellables)
         
@@ -314,6 +322,7 @@ struct EventDetailView: View {
                 .eventHandler(\.onTap, self.save)
             }
         }
+        .allowsHitTesting(!state.isSaving)
         .background(appearance.colorSet.bg0.asColor)
     }
     
@@ -690,32 +699,42 @@ struct EventDetailView: View {
     }
     
     private var selectRepeatView: some View {
-        HStack(spacing: 16) {
-            Image(systemName: "arrow.clockwise")
-                .font(.system(size: 16, weight: .light))
-                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+        VStack(alignment: .leading, spacing: 4) {
             
-            Text(self.state.selectedRepeat ?? "eventDetail.repeating.notRepeating::title".localized())
-                .font(self.appearance.fontSet.subNormal.asFont)
-                .foregroundStyle(
-                    self.state.selectedRepeat == nil
-                    ? self.appearance.colorSet.text2.asColor
-                    : self.appearance.colorSet.text0.asColor
-                )
-                .padding(8)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(
-                            self.state.selectedRepeat == nil
-                            ? .clear
-                            : self.appearance.colorSet.bg1.asColor
-                        )
-                )
-                .onTapGesture {
-                    self.appearance.impactIfNeed()
-                    self.selectRepeatOption()
-                }
-            Spacer()
+            HStack(spacing: 16) {
+                Image(systemName: "arrow.clockwise")
+                    .font(.system(size: 16, weight: .light))
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                
+                Text(self.state.selectedRepeat ?? "eventDetail.repeating.notRepeating::title".localized())
+                    .font(self.appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(
+                        self.state.selectedRepeat == nil
+                        ? self.appearance.colorSet.text2.asColor
+                        : self.appearance.colorSet.text0.asColor
+                    )
+                    .padding(8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 14)
+                            .fill(
+                                self.state.selectedRepeat == nil
+                                ? .clear
+                                : self.appearance.colorSet.bg1.asColor
+                            )
+                    )
+                    .onTapGesture {
+                        self.appearance.impactIfNeed()
+                        self.selectRepeatOption()
+                    }
+                Spacer()
+            }
+            
+            if let period = self.state.selectedRepeatPeriod {
+                Text(period)
+                    .font(self.appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
+                    .padding(.leading, 32)
+            }
         }
     }
     
