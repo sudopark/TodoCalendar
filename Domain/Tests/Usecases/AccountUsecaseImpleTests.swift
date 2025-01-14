@@ -396,7 +396,9 @@ private class StubGoogleOAuth2Usecase: OAuth2ServiceUsecase, @unchecked Sendable
         else {
             throw RuntimeError("failed")
         }
-        return GoogleOAuth2Credential(idToken: "some", accessToken: "token")
+        return GoogleOAuth2Credential(
+            idToken: "some", accessToken: "token", refreshToken: "refresh"
+        )
     }
     
     func handle(open url: URL) -> Bool {

@@ -39,8 +39,9 @@ public final class OAuth2ServiceUsecaseProviderImple: OAuth2ServiceUsecaseProvid
     ) -> (any OAuth2ServiceUsecase)? {
         
         switch provider {
-        case is GoogleOAuth2ServiceProvider:
+        case let google as GoogleOAuth2ServiceProvider:
             return GoogleOAuth2ServiceUsecaseImple(
+                additionalScope: google.scopes,
                 topViewControllerFinding: self.topViewControllerFinding
             )
             
