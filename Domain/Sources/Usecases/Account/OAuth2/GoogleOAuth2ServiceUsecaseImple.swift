@@ -15,6 +15,8 @@ import Extensions
 
 public final class GoogleOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unchecked Sendable {
     
+    public typealias CredentialType = GoogleOAuth2Credential
+    
     private let topViewControllerFinding: () -> UIViewController?
     public init(topViewControllerFinding: @escaping () -> UIViewController?) {
         self.topViewControllerFinding = topViewControllerFinding
@@ -24,7 +26,7 @@ public final class GoogleOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unche
 extension GoogleOAuth2ServiceUsecaseImple {
     
     @MainActor
-    public func requestAuthentication() async throws -> OAuth2Credential {
+    public func requestAuthentication() async throws -> GoogleOAuth2Credential {
         guard let topViewController = self.topViewControllerFinding()
         else {
             throw RuntimeError(key: "GoogleSignIn_oauth_fail", "top viewController not found")
