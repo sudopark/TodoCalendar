@@ -11,8 +11,10 @@ import UIKit
 
 public protocol OAuth2ServiceUsecase: Sendable {
     
+    associatedtype CredentialType: OAuth2Credential
+    
     @MainActor
-    func requestAuthentication() async throws -> any OAuth2Credential
+    func requestAuthentication() async throws -> CredentialType
     
     func handle(open url: URL) -> Bool
 }
