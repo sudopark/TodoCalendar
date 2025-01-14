@@ -52,7 +52,7 @@ extension AuthRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token")
+        let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token", refreshToken: "refresh")
         let result = try? await repository.signIn(credential)
         
         // then
@@ -78,7 +78,7 @@ extension AuthRepositoryImpleTests {
         // when
         var failed: (any Error)?
         do {
-            let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token")
+            let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token", refreshToken: "refresh")
             let _ = try await repository.signIn(credential)
         } catch {
             failed = error
@@ -96,7 +96,7 @@ extension AuthRepositoryImpleTests {
         let authBeforeSignIn = try? await repository.loadLatestSignInAuth()
         let credentialBeforeSignIn = self.stubRemote.credential
         
-        let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token")
+        let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token", refreshToken: "refresh")
         let _ = try? await repository.signIn(credential)
         
         let authAfterSignIn = try? await repository.loadLatestSignInAuth()

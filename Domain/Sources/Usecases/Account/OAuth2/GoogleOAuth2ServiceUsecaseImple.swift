@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Prelude
+import Optics
 import FirebaseCore
 import FirebaseAuth
 @preconcurrency import GoogleSignIn
@@ -17,8 +19,13 @@ public final class GoogleOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unche
     
     public typealias CredentialType = GoogleOAuth2Credential
     
+    private let additionalScope: [String]?
     private let topViewControllerFinding: () -> UIViewController?
-    public init(topViewControllerFinding: @escaping () -> UIViewController?) {
+    public init(
+        additionalScope: [String]?,
+        topViewControllerFinding: @escaping () -> UIViewController?
+    ) {
+        self.additionalScope = additionalScope
         self.topViewControllerFinding = topViewControllerFinding
     }
 }
@@ -39,7 +46,11 @@ extension GoogleOAuth2ServiceUsecaseImple {
         let config = GIDConfiguration(clientID: clientId)
         GIDSignIn.sharedInstance.configuration = config
         
-        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: topViewController)
+        let result = try await GIDSignIn.sharedInstance.signIn(
+            withPresenting: topViewController,
+            hint: nil,
+            additionalScopes: self.additionalScope
+        )
         
         guard let idToken = result.user.idToken?.tokenString
         else {
@@ -48,8 +59,11 @@ extension GoogleOAuth2ServiceUsecaseImple {
         
         return GoogleOAuth2Credential(
             idToken: idToken,
-            accessToken: result.user.accessToken.tokenString
+            accessToken: result.user.accessToken.tokenString,
+            refreshToken: result.user.refreshToken.tokenString
         )
+        |> \.accessTokenExpirationDate .~ result.user.accessToken.expirationDate
+        |> \.refreshTokenExpirationDate .~ result.user.refreshToken.expirationDate
     }
     
     public func handle(open url: URL) -> Bool {
