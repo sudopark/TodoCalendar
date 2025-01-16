@@ -51,13 +51,13 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
     var didRequestedParams: [String: Any]?
     var didRequestedPaths: [String] = []
     
-    func attach(listener: OAuthAutenticatorTokenRefreshListener) {
+    func attach(listener: any AutenticatorTokenRefreshListener) {
         
     }
     
-    var credential: Auth?
-    func setup(credential auth: Auth?) {
-        self.credential = auth
+    var credential: APICredential?
+    func setup(credential: APICredential?) {
+        self.credential = credential
     }
     
     var shouldFailRequest: Bool = false

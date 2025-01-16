@@ -32,11 +32,9 @@ public protocol RemoteAPI: AnyObject, Sendable {
         parameters: [String: Any]
     ) async throws -> Data
     
-    func attach(listener: any OAuthAutenticatorTokenRefreshListener)
+    func attach(listener: any AutenticatorTokenRefreshListener)
     
-    func setup(
-        credential auth: Auth?
-    )
+    func setup(credential: APICredential?)
 }
 
 extension RemoteAPI {
@@ -73,41 +71,28 @@ public final class RemoteAPIImple: RemoteAPI, @unchecked Sendable {
  
     private let environment: RemoteEnvironment
     private let session: Session
-    private let authenticator: OAuthAutenticator?
+    private let interceptor: (any APIRequestInterceptor)?
     
     public init(
+        session: Session,
         environment: RemoteEnvironment,
-        authenticator: OAuthAutenticator?
+        interceptor: (any APIRequestInterceptor)?
     ) {
+        self.session = session
         self.environment = environment
-        self.authenticator = authenticator
-        
-        let configure = URLSessionConfiguration.af.default
-        configure.timeoutIntervalForRequest = 30
-        if let authenticator {
-            self.session = Session(
-                configuration: configure,
-                serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility),
-                interceptor: AuthenticationInterceptor(authenticator: authenticator)
-            )
-        } else {
-            self.session = Session(
-                configuration: configure,
-                serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility)
-            )
-        }
+        self.interceptor = interceptor
     }
 }
 
 extension RemoteAPIImple {
     
-    public func attach(listener: OAuthAutenticatorTokenRefreshListener) {
-        self.authenticator?.listener = listener
+    public func attach(listener: AutenticatorTokenRefreshListener) {
+        self.interceptor?.attach(listener: listener)
     }
     
-    public func setup(credential auth: Auth?) {
-        let credential: OptionalAuthCredential = auth.map { .need($0) } ?? .notNeed
-        (self.session.interceptor as? AuthenticationInterceptor<OAuthAutenticator>)?.credential = credential
+    public func setup(credential: APICredential?) {
+        
+        self.interceptor?.update(credential: credential)
     }
     
     public func request(
@@ -122,12 +107,15 @@ extension RemoteAPIImple {
             throw RuntimeError("not support endpoint: \(endpoint)")
         }
         
+        let shouldAdapt = self.interceptor?.shouldAdapt(endpoint) ?? false
+        
         let dataTask = self.session.request(
             path,
             method: method.asHttpMethod(),
             parameters: parameters,
             encoding: method.encoding(),
-            headers: header.map { HTTPHeaders($0) }
+            headers: header.map { HTTPHeaders($0) },
+            interceptor: shouldAdapt ? self.interceptor : nil
         )
         .validate()
         .serializingData()

@@ -44,8 +44,9 @@ extension WidgetUsecaseFactory {
     
     func makeHolidayRepository() -> any HolidayRepository {
         let remote = RemoteAPIImple(
+            session: self.base.remoteSession,
             environment: .init(calendarAPIHost: "", csAPI: ""),
-            authenticator: nil
+            interceptor: nil
         )
         let repository = HolidayRepositoryImple(
             localEnvironmentStorage: base.userDefaultEnvironmentStorage,
@@ -122,7 +123,8 @@ extension WidgetUsecaseFactory {
         )
         if let auth {
             let remote = base.remoteAPI
-            remote.setup(credential: auth)
+            let credential = APICredential(auth: auth)
+            remote.setup(credential: credential)
             return TodoRemoteRepositoryImple(
                 remote: base.remoteAPI,
                 cacheStorage: localStorage
