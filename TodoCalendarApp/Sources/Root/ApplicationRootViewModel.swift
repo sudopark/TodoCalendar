@@ -42,7 +42,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
 
 // MARK: - handle root routing
 
-extension ApplicationRootViewModelImple: OAuthAutenticatorTokenRefreshListener {
+extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     
     func prepareInitialScene() {
         Task {
@@ -81,7 +81,7 @@ extension ApplicationRootViewModelImple: OAuthAutenticatorTokenRefreshListener {
         }
     }
     
-    func oauthAutenticator(didRefresh auth: Auth) {
+    func oauthAutenticator(didRefresh credential: APICredential) {
         // do nothing
     }
     

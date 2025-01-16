@@ -172,7 +172,7 @@ extension AuthRepositoryImple {
             self.remoteAPI.setup(credential: nil)
             return nil
         }
-        self.remoteAPI.setup(credential: auth)
+        self.remoteAPI.setup(credential: .init(auth: auth))
         return .init(auth: auth, info: infoMapper.info)
     }
     
@@ -198,9 +198,9 @@ extension AuthRepositoryImple {
     
     private func postSignInAction(_ auth: Domain.Auth) async throws -> Account {
         let info = try await self.loadAccountInfo(auth)
-        self.authStore.updateAuth(auth)
+        self.authStore.saveAuth(auth)
         self.keyChainStorage.update(accountInfoKey, AccountInfoMapper(info: info))
-        self.remoteAPI.setup(credential: auth)
+        self.remoteAPI.setup(credential: .init(auth: auth))
         return .init(auth: auth, info: info)
     }
     

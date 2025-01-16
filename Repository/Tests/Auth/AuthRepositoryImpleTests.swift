@@ -184,7 +184,7 @@ class StubFirebaseAuthService: FirebaseAuthService {
 }
 
 
-class SpyKeyChainStorage: KeyChainStorage, AuthStore, @unchecked Sendable {
+class SpyKeyChainStorage: KeyChainStorage, AuthStore, APICredentialStore, @unchecked Sendable {
     
     private var storage: [String: any Codable] = [:]
     
@@ -199,7 +199,7 @@ class SpyKeyChainStorage: KeyChainStorage, AuthStore, @unchecked Sendable {
         return mapper?.auth
     }
     
-    func updateAuth(_ auth: Domain.Auth) {
+    func saveAuth(_ auth: Domain.Auth) {
         let mapper = AuthMapper(auth: auth)
         self.update("current_auth", mapper)
     }
@@ -208,12 +208,26 @@ class SpyKeyChainStorage: KeyChainStorage, AuthStore, @unchecked Sendable {
         self.storage[key] = value as? Codable
     }
     
+    func updateCredential(_ credential: APICredential) {
+        guard let auth = self.loadCurrentAuth() else { return }
+        let newAuth = Auth(
+            uid: auth.uid,
+            accessToken: credential.accessToken,
+            refreshToken: credential.refreshToken
+        )
+        self.saveAuth(newAuth)
+    }
+    
     func remove(_ key: String) {
         self.storage[key] = nil
     }
     
     func removeAuth() {
         self.storage.removeValue(forKey: "current_auth")
+    }
+    
+    func removeCredential() {
+        self.removeAuth()
     }
 }
 

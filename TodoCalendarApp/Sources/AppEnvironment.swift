@@ -41,4 +41,6 @@ struct AppEnvironment {
     }
     
     static var keyChainStoreName: String { "TodoCalendar" }
+    
+    static let apiDefaultTimeoutSeconds: TimeInterval = 30
 }

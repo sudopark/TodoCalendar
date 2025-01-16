@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 import Domain
 import Extensions
 import Repository
@@ -30,7 +32,8 @@ extension IntentReposiotryFactory {
         
         if let auth {
             let remote = base.remoteAPI
-            remote.setup(credential: auth)
+            let credential = APICredential(auth: auth)
+            remote.setup(credential: credential)
             return EventTagRemoteRepositoryImple(
                 remote: remote,
                 cacheStorage: localStorage,

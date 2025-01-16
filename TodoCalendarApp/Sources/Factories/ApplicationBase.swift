@@ -81,16 +81,28 @@ final class ApplicationBase {
         }
     }()
     
+    var remoteSession: Session = {
+        let configure = URLSessionConfiguration.af.default
+        configure.timeoutIntervalForRequest = AppEnvironment.apiDefaultTimeoutSeconds
+        return Session(
+            configuration: configure,
+            serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility)
+        )
+    }()
+    
     lazy var remoteAPI: RemoteAPIImple = {
         let environment = self.remoteEnvironment
-        let authenticator = OAuthAutenticator(
-            authStore: self.authStore,
-            remoteEnvironment: environment,
+        let authenticator = CalendarAPIAutenticator(
+            credentialStore: self.authStore,
             firebaseAuthService: self.firebaseAuthService
         )
-        return RemoteAPIImple(
-            environment: environment,
+        let interceptor = AuthenticationInterceptorProxy(
             authenticator: authenticator
+        )
+        return RemoteAPIImple(
+            session: self.remoteSession,
+            environment: environment,
+            interceptor: interceptor
         )
     }()
 }
