@@ -22,7 +22,7 @@ class CalendarAPIAutenticatorTests: BaseTestCase {
     private var remoteEnvironment: RemoteEnvironment!
     private var spyAuthStore: SpyKeyChainStorage!
     private var stubFirebaseService: StubFirebaseAuthService!
-    private var spyListener: SpyListener?
+    private var spyListener: SpyAutenticatorTokenRefreshListener?
     
     override func setUpWithError() throws {
         self.remoteEnvironment = .init(calendarAPIHost: "https://calendar.come", csAPI: "cs_api")
@@ -225,7 +225,7 @@ extension CalendarAPIAutenticatorTests {
     }
 }
 
-private final class SpyListener: AutenticatorTokenRefreshListener {
+final class SpyAutenticatorTokenRefreshListener: AutenticatorTokenRefreshListener {
     
     var didTokenRefreshed: Bool?
     func oauthAutenticator(didRefresh credential: APICredential) {
