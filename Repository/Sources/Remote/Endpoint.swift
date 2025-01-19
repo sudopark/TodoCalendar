@@ -209,6 +209,31 @@ enum FeedbackEndpoints: Endpoint {
     }
 }
 
+// MARK: - google account endpoint
+
+enum GoogleAuthEndpoint: Endpoint {
+    case token
+    
+    var subPath: String {
+        switch self {
+        case .token: return "token"
+        }
+    }
+}
+
+// MARK: - google calendar endpoint
+
+enum GoogleCalendarEndpoint: Endpoint {
+    case calednarList
+    
+    var subPath: String {
+        switch self {
+        case .calednarList: return "calendarList"
+        }
+    }
+}
+
+
 // MARK: - RemoteEnvironment
 
 public struct RemoteEnvironment: Sendable {
@@ -266,6 +291,13 @@ public struct RemoteEnvironment: Sendable {
             
         case let feedback as FeedbackEndpoints:
             return appendSubpathIfNotEmpty(self.csAPI, feedback.subPath)
+            
+        case let googleAuth as GoogleAuthEndpoint:
+            return appendSubpathIfNotEmpty("https://oauth2.googleapis.com", googleAuth.subPath)
+            
+        case let googleCalendar as GoogleCalendarEndpoint:
+            let prefix = "https://www.googleapis.com/calendar/v3/users/me"
+            return appendSubpathIfNotEmpty(prefix, googleCalendar.subPath)
             
         default: return nil
         }

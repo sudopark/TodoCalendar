@@ -14,7 +14,7 @@ import Extensions
 
 // MARK: - Credential
 
-public struct APICredential: AuthenticationCredential {
+public struct APICredential: AuthenticationCredential, Sendable {
     
     public let accessToken: String
     public var refreshToken: String?
