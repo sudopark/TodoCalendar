@@ -19,11 +19,12 @@ import UnitTestHelpKit
 struct GoogleAPIAuthenticatorTests {
     
     private let spyRemote: StubRemoteAPI
-    private let spyCredentialStore = SpyCredentailStore()
+    private let spyCredentialStore: GoogleAPICredentialStoreImple
     private let spyListener = SpyAutenticatorTokenRefreshListener()
     
     init() {
         self.spyRemote = .init(responses: Self.response)
+        self.spyCredentialStore = .init(keyChainStore: FakeKeyChainStore())
     }
     
     private func makeAuthenticator() -> GoogleAPIAuthenticator {
@@ -32,6 +33,8 @@ struct GoogleAPIAuthenticatorTests {
         )
         authenticator.remoteAPI = self.spyRemote
         authenticator.listener = self.spyListener
+        let oldCredential = APICredential(accessToken: "old_credential")
+        self.spyCredentialStore.saveCredential(oldCredential)
         return authenticator
     }
 }
@@ -64,6 +67,7 @@ extension GoogleAPIAuthenticatorTests {
     @Test func authenticator_refreshToken_success() async throws {
         // given
         let authenticator = self.makeAuthenticator()
+        let credentialBeforeRefresh = self.spyCredentialStore.loadCredential()
         
         // when
         let credential = APICredential(accessToken: "access")
@@ -91,13 +95,16 @@ extension GoogleAPIAuthenticatorTests {
         #expect(newCredentail.accessToken == "new_token")
         #expect(newCredentail.refreshToken == "refresh_success")
         
-        #expect(self.spyCredentialStore.didUpdateCredentail != nil)
+        let credentialAfterRefresh = self.spyCredentialStore.loadCredential()
+        #expect(credentialBeforeRefresh?.accessToken == "old_credential")
+        #expect(credentialAfterRefresh?.accessToken == "new_token")
         #expect(self.spyListener.didTokenRefreshed == true)
     }
     
     @Test func authenticator_refreshToken_fail() async throws {
         // given
         let authenticator = self.makeAuthenticator()
+        let credentialBeforeRefresh = self.spyCredentialStore.loadCredential()
         
         // when
         let credential = APICredential(accessToken: "access")
@@ -121,21 +128,31 @@ extension GoogleAPIAuthenticatorTests {
             Issue.record("토큰갱신이 실패하지 않음")
             return
         }
-        #expect(self.spyCredentialStore.didRemoveCredentail == true)
+        let credentailAfterRefreshFail = self.spyCredentialStore.loadCredential()
+        #expect(credentialBeforeRefresh?.accessToken == "old_credential")
+        #expect(credentailAfterRefreshFail == nil)
         #expect(self.spyListener.didTokenRefreshFailed == true)
     }
 }
 
-private final class SpyCredentailStore: APICredentialStore {
+private final class FakeKeyChainStore: KeyChainStorage, @unchecked Sendable {
     
-    var didUpdateCredentail: APICredential?
-    func updateCredential(_ credential: APICredential) {
-        self.didUpdateCredentail = credential
+    func setupSharedGroup(_ identifier: String) { }
+    private var dataMap: [String: Data] = [:]
+    
+    func load<T>(_ key: String) -> T? where T : Decodable {
+        return self.dataMap[key]
+            .flatMap { try? JSONDecoder().decode(T.self, from: $0) }
     }
     
-    var didRemoveCredentail: Bool?
-    func removeCredential() {
-        self.didRemoveCredentail = true
+    func update<T>(_ key: String, _ value: T) where T : Encodable {
+        guard let data = try? JSONEncoder().encode(value)
+        else { return }
+        self.dataMap[key] = data
+    }
+    
+    func remove(_ key: String) {
+        self.dataMap[key] = nil
     }
 }
 
