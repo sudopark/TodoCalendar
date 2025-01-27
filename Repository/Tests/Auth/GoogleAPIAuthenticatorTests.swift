@@ -24,7 +24,10 @@ struct GoogleAPIAuthenticatorTests {
     
     init() {
         self.spyRemote = .init(responses: Self.response)
-        self.spyCredentialStore = .init(keyChainStore: FakeKeyChainStore())
+        self.spyCredentialStore = .init(
+            serviceIdentifier: "google",
+            keyChainStore: FakeKeyChainStore()
+        )
     }
     
     private func makeAuthenticator() -> GoogleAPIAuthenticator {

@@ -44,6 +44,8 @@ public struct APICredential: AuthenticationCredential, Sendable {
 // MAR: - APICredentialStore
 
 public protocol APICredentialStore {
+    func loadCredential() -> APICredential?
+    func saveCredential(_ credential: APICredential)
     func updateCredential(_ credential: APICredential)
     func removeCredential()
 }
