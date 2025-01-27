@@ -11,28 +11,23 @@ import Foundation
 
 // MARK: - GoogleAPICredentialStore
 
-public protocol GoogleAPICredentialStore: APICredentialStore {
+public final class GoogleAPICredentialStoreImple: APICredentialStore {
     
-    func loadCredential() -> APICredential?
-    func saveCredential(_ credential: APICredential)
-}
-
-public final class GoogleAPICredentialStoreImple: GoogleAPICredentialStore {
-    
-    private let keyChainStore: any KeyChainStorage
-    public init(keyChainStore: any KeyChainStorage) {
-        self.keyChainStore = keyChainStore
+    private let serviceIdentifier: String
+    private let integratedStore: IntegratedAPICredentialStore
+    public init(
+        serviceIdentifier: String,
+        keyChainStore: any KeyChainStorage
+    ) {
+        self.serviceIdentifier = serviceIdentifier
+        self.integratedStore = .init(keyChainStore: keyChainStore)
     }
-    
-    private var key: String { "google_api_token" }
 }
 
 extension GoogleAPICredentialStoreImple {
     
     public func loadCredential() -> APICredential? {
-        guard let mapper: APICredentialMapper = self.keyChainStore.load(self.key)
-        else { return nil }
-        return mapper.credential
+        return self.integratedStore.loadCredential(for: self.serviceIdentifier)
     }
     
     public func saveCredential(_ credential: APICredential) {
@@ -40,11 +35,10 @@ extension GoogleAPICredentialStoreImple {
     }
     
     public func updateCredential(_ credential: APICredential) {
-        let mapper = APICredentialMapper(credential: credential)
-        self.keyChainStore.update(self.key, mapper)
+        self.integratedStore.updateCredential(for: self.serviceIdentifier, credential)
     }
     
     public func removeCredential() {
-        self.keyChainStore.remove(self.key)
+        self.integratedStore.removeCredential(for: self.serviceIdentifier)
     }
 }

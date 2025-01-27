@@ -39,10 +39,18 @@ public struct AuthStoreImple: AuthStore, APICredentialStore {
         return mapper.auth
     }
     
+    public func loadCredential() -> APICredential? {
+        return self.loadCurrentAuth().map { APICredential(auth: $0) }
+    }
+    
     public func saveAuth(_ auth: Auth) {
         let mapper = AuthMapper(auth: auth)
         self.keyChainStorage.update(self.key, mapper)
         self.environmentStorage.update(self.isLoginKey, true)
+    }
+    
+    public func saveCredential(_ credential: APICredential) {
+        self.updateCredential(credential)
     }
     
     public func updateCredential(_ credential: APICredential) {

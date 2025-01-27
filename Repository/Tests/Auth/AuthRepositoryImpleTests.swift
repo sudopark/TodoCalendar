@@ -186,6 +186,14 @@ class StubFirebaseAuthService: FirebaseAuthService {
 
 class SpyKeyChainStorage: KeyChainStorage, AuthStore, APICredentialStore, @unchecked Sendable {
     
+    func loadCredential() -> APICredential? {
+        nil
+    }
+    
+    func saveCredential(_ credential: APICredential) {
+        
+    }
+    
     private var storage: [String: any Codable] = [:]
     
     func setupSharedGroup(_ identifier: String) {}
