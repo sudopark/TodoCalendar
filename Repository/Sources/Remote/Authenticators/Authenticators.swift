@@ -55,8 +55,12 @@ public protocol APICredentialStore {
 
 public protocol AutenticatorTokenRefreshListener: AnyObject {
     
-    func oauthAutenticator(didRefresh credential: APICredential)
-    func oauthAutenticator(didRefreshFailed error: any Error)
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?, didRefresh credential: APICredential
+    )
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?, didRefreshFailed error: any Error
+    )
 }
 
 // MARK: - authenticator & interceptor

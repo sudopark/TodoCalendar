@@ -188,10 +188,6 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         // TODO: 
     }
     
-    func showConfirm(dialog info: ConfirmDialogInfo) {
-        // ignore
-    }
-    
     func openSafari(_ path: String) {
         // ignore
     }
@@ -229,6 +225,30 @@ extension ApplicationRootRouter {
             self.changeUsecaseFactroy(by: auth)
             self.refreshRoot()
         }
+    }
+    
+    func showConfirm(dialog info: ConfirmDialogInfo) {
+        Task { @MainActor in
+            guard let topViewController = self.findTopViewController(from: self.window.rootViewController)
+            else { return }
+            
+            let alertController = info.asAlertViewController()
+            topViewController.present(alertController, animated: true)
+        }
+    }
+    
+    @MainActor
+    private func findTopViewController(
+        from viewController: UIViewController?) -> UIViewController? {
+            guard let viewController else { return nil }
+            if let navigationController = viewController as? UINavigationController {
+                return self.findTopViewController(from: navigationController.visibleViewController)
+            }
+            if let presented = viewController.presentedViewController {
+                return self.findTopViewController(from: presented)
+            }
+            
+            return viewController
     }
     
     private func changeUsecaseFactroy(

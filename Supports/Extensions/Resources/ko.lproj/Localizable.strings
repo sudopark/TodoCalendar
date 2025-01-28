@@ -325,6 +325,11 @@
 "feedback::contact::placeholder" = "연락받을 이메일 주소";
 "feedback::posted:message" = "피드백이 성공적으로 등록되었습니다.";
 
+// MARK: - external service
+
+"external_service.name::google" = "구글 캘린더";
+"external_service.expired::message" = "%@ 연동이 만료되었습니다. 설정 화면으로 이동하여 다시 시도해주세요.";
+
 
 // MARK: - widget
 

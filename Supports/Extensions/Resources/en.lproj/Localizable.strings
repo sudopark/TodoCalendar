@@ -326,6 +326,11 @@
 "feedback::contact::placeholder" = "Reply email address";
 "feedback::posted:message" = "Your feedback has been successfully registered.";
 
+// MARK: - external service
+
+"external_service.name::google" = "Google Calendar";
+"external_service.expired::message" = "%@ integration has expired. Please go to Settings and try again";
+
 
 // MARK: - widget
 
