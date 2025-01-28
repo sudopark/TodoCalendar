@@ -228,12 +228,18 @@ extension CalendarAPIAutenticatorTests {
 final class SpyAutenticatorTokenRefreshListener: AutenticatorTokenRefreshListener {
     
     var didTokenRefreshed: Bool?
-    func oauthAutenticator(didRefresh credential: APICredential) {
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?,
+        didRefresh credential: APICredential
+    ) {
         self.didTokenRefreshed = true
     }
     
     var didTokenRefreshFailed: Bool?
-    func oauthAutenticator(didRefreshFailed error: any Error) {
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?,
+        didRefreshFailed error: any Error
+    ) {
         self.didTokenRefreshFailed = true
     }
 }

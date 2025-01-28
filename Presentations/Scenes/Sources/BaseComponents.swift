@@ -24,6 +24,35 @@ public struct ConfirmDialogInfo: @unchecked Sendable {
     public var canceled: (() -> Void)?
     
     public init() { }
+    
+    @MainActor
+    public func asAlertViewController() -> UIAlertController {
+        let title = self.title ?? "common.info".localized()
+        assert(self.message != nil, "messaeg should exists")
+        
+        let controller = UIAlertController(
+            title: title,
+            message: self.message,
+            preferredStyle: .alert
+        )
+        let confirmAction = UIAlertAction(
+            title: self.confirmText,
+            style: .default,
+            handler: { _ in self.confirmed?() }
+        )
+        controller.addAction(confirmAction)
+        
+        if self.withCancel {
+            let cancelAction = UIAlertAction(
+                title: self.cancelText,
+                style: .cancel,
+                handler: { _ in self.canceled?()}
+            )
+            controller.addAction(cancelAction)
+        }
+        
+        return controller
+    }
 }
 
 public struct ActionSheetForm: @unchecked Sendable {
@@ -123,31 +152,8 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     
     public func showConfirm(dialog info: ConfirmDialogInfo) {
         Task { @MainActor in
-            let title = info.title ?? "common.info".localized()
-            assert(info.message != nil, "messaeg should exists")
-            
-            let controller = UIAlertController(
-                title: title,
-                message: info.message,
-                preferredStyle: .alert
-            )
-            let confirmAction = UIAlertAction(
-                title: info.confirmText,
-                style: .default, 
-                handler: { _ in info.confirmed?() }
-            )
-            controller.addAction(confirmAction)
-            
-            if info.withCancel {
-                let cancelAction = UIAlertAction(
-                    title: info.cancelText,
-                    style: .cancel,
-                    handler: { _ in info.canceled?()}
-                )
-                controller.addAction(cancelAction)
-            }
-            
-            self.scene?.present(controller, animated: true)
+            let alertController = info.asAlertViewController()
+            self.scene?.present(alertController, animated: true)
         }
     }
     

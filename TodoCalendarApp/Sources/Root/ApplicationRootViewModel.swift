@@ -8,8 +8,11 @@
 import UIKit
 import WidgetKit
 import Combine
+import Prelude
+import Optics
 import Domain
 import Repository
+import Scenes
 import Extensions
 
 
@@ -81,13 +84,36 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
         }
     }
     
-    func oauthAutenticator(didRefresh credential: APICredential) {
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?, didRefresh credential: APICredential
+    ) {
         // do nothing
     }
     
-    func oauthAutenticator(didRefreshFailed error: Error) {
-        self.prepareUsecase.prepareSignedOut()
-        self.router?.changeRootSceneAfter(signIn: nil)
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?, didRefreshFailed error: any Error
+    ) {
+        switch authenticator {
+        case is CalendarAPIAutenticator:
+            self.prepareUsecase.prepareSignedOut()
+            self.router?.changeRootSceneAfter(signIn: nil)
+            
+        case is GoogleAPIAuthenticator:
+            // TODO: clear shared google calendar events
+            self.showExternalServiceAccessTokenExpired(
+                "external_service.name::google".localized()
+            )
+            
+        default: break
+        }
+    }
+    
+    private func showExternalServiceAccessTokenExpired(_ serviceName: String) {
+        let message = "external_service.expired::message".localized(with: serviceName)
+        let info = ConfirmDialogInfo()
+            |> \.message .~ message
+            |> \.withCancel .~ false
+        self.router?.showConfirm(dialog: info)
     }
 }
 

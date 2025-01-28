@@ -84,14 +84,14 @@ extension CalendarAPIAutenticator {
                 let credential = APICredential(accessToken: refreshResult.idToken)
                     |> \.refreshToken .~ refreshResult.refreshToken
                 self?.credentialStore.updateCredential(credential)
-                self?.listener?.oauthAutenticator(didRefresh: credential)
+                self?.listener?.oauthAutenticator(self, didRefresh: credential)
                 completion(.success(credential))
                 
             case .failure(let error):
                 logger.log(level: .error, "token refresh failed..\(error)")
                 try? self?.firebaseAuthService.signOut()
                 self?.credentialStore.removeCredential()
-                self?.listener?.oauthAutenticator(didRefreshFailed: error)
+                self?.listener?.oauthAutenticator(self, didRefreshFailed: error)
                 completion(.failure(error))
             }
         }

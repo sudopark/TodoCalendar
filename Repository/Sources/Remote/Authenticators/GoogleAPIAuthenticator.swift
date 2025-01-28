@@ -125,12 +125,12 @@ extension GoogleAPIAuthenticator {
                     |> \.refreshToken .~ refreshToken
                     |> \.accessTokenExpirationDate .~ (Date().addingTimeInterval(result.expiresIn))
                 self?.credentialStore.updateCredential(newCredential)
-                self?.listener?.oauthAutenticator(didRefresh: newCredential)
+                self?.listener?.oauthAutenticator(self, didRefresh: newCredential)
                 completion(.success(newCredential))
             } catch {
                 logger.log(level: .error, "google api token refresh fail..:\(error)")
                 self?.credentialStore.removeCredential()
-                self?.listener?.oauthAutenticator(didRefreshFailed: error)
+                self?.listener?.oauthAutenticator(self, didRefreshFailed: error)
                 completion(.failure(error))
             }
         }

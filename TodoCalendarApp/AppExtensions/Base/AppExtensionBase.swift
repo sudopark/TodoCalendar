@@ -115,6 +115,14 @@ struct NeverRemoveAuthStorage: AuthStore, APICredentialStore  {
         return self.storage.loadCurrentAuth()
     }
     
+    func loadCredential() -> APICredential? {
+        return self.loadCurrentAuth().map { .init(auth: $0) }
+    }
+    
+    func saveCredential(_ credential: APICredential) {
+        self.updateCredential(credential)
+    }
+    
     func saveAuth(_ auth: Domain.Auth) {
         self.storage.saveAuth(auth)
     }
