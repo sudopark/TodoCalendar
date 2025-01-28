@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Domain
 
 
 struct AppEnvironment {
@@ -43,4 +44,9 @@ struct AppEnvironment {
     static var keyChainStoreName: String { "TodoCalendar" }
     
     static let apiDefaultTimeoutSeconds: TimeInterval = 30
+    
+    static let googleCalendarService = GoogleCalendarService(scopes: [.readOnly])
+    static var supportExternalCalendarServices: [ExternalCalendarService] {
+        return [googleCalendarService]
+    }
 }

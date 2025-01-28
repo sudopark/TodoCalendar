@@ -17,17 +17,20 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     
     let authUsecase: any AuthUsecase
     let accountUescase: any AccountUsecase
+    let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     let viewAppearanceStore: any ViewAppearanceStore
     private let applicationBase: ApplicationBase
     
     init(
         authUsecase: any AuthUsecase,
         accountUescase: any AccountUsecase,
+        externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         viewAppearanceStore: any ViewAppearanceStore,
         applicationBase: ApplicationBase
     ) {
         self.authUsecase = authUsecase
         self.accountUescase = accountUescase
+        self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.viewAppearanceStore = viewAppearanceStore
         self.applicationBase = applicationBase
     }
@@ -254,6 +257,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let userId: String
     let authUsecase: any AuthUsecase
     let accountUescase: any AccountUsecase
+    let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     let viewAppearanceStore: any ViewAppearanceStore
     let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     private let applicationBase: ApplicationBase
@@ -262,6 +266,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         userId: String,
         authUsecase: any AuthUsecase,
         accountUescase: any AccountUsecase,
+        externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         viewAppearanceStore: any ViewAppearanceStore,
         temporaryUserDataFilePath: String,
         applicationBase: ApplicationBase
@@ -269,6 +274,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         self.userId = userId
         self.authUsecase = authUsecase
         self.accountUescase = accountUescase
+        self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.viewAppearanceStore = viewAppearanceStore
         self.applicationBase = applicationBase
         

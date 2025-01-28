@@ -24,7 +24,7 @@ public final class GoogleAPIAuthenticator: APIAuthenticator, @unchecked Sendable
     public weak var remoteAPI: (any RemoteAPI)?
     public weak var listener: (any AutenticatorTokenRefreshListener)?
     
-    init(
+    public init(
         googleClientId: String,
         credentialStore: any APICredentialStore
     ) {

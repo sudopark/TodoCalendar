@@ -105,6 +105,35 @@ final class ApplicationBase {
             interceptor: interceptor
         )
     }()
+    
+    lazy var googleCalendarRemoteAPI: RemoteAPIImple = {
+        
+        func readClientId() -> String {
+            let plist = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist")
+                .map { URL(fileURLWithPath: $0) }
+                .flatMap { try? Data(contentsOf: $0) }
+                .flatMap {
+                    try? PropertyListSerialization.propertyList(from: $0, format: nil)
+                }
+                .flatMap { $0 as? [String: Any] }
+            return plist?["CLIENT_ID"] as? String ?? "dummy_id"
+        }
+        let environment = self.remoteEnvironment
+        let googleAPICredentialStore = GoogleAPICredentialStoreImple(
+            serviceIdentifier: AppEnvironment.googleCalendarService.identifier,
+            keyChainStore: self.keyChainStorage
+        )
+        let authenticator = GoogleAPIAuthenticator(
+            googleClientId: readClientId(),
+            credentialStore: googleAPICredentialStore
+        )
+        let interceptor = AuthenticationInterceptorProxy(authenticator: authenticator)
+        return RemoteAPIImple(
+            session: self.remoteSession,
+            environment: environment,
+            interceptor: interceptor
+        )
+    }()
 }
 
 
