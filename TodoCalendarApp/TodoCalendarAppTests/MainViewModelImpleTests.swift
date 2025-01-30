@@ -21,6 +21,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyUISettingUsecase: StubUISettingUsecase!
     private var stubMigrationUsecase: StubTemporaryUserDataMigrationUescase!
     private var spyEventNotificationUsecase: SpyEventNotificationUsecase!
+    private var stubEventTagUsecase: StubEventTagUsecase!
     var cancelBag: Set<AnyCancellable>!
     
     override func setUpWithError() throws {
@@ -28,6 +29,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyUISettingUsecase = .init()
         self.stubMigrationUsecase = .init()
         self.spyEventNotificationUsecase = .init()
+        self.stubEventTagUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -37,6 +39,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyUISettingUsecase = nil
         self.stubMigrationUsecase = nil
         self.spyEventNotificationUsecase = nil
+        self.stubEventTagUsecase = nil
         self.cancelBag = nil
     }
     
@@ -48,7 +51,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let viewModel = MainViewModelImple(
             uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
-            eventNotificationUsecase: self.spyEventNotificationUsecase
+            eventNotificationUsecase: self.spyEventNotificationUsecase,
+            eventTagUsecase: self.stubEventTagUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -66,7 +70,8 @@ extension MainViewModelImpleTests {
         let viewModel = MainViewModelImple(
             uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
-            eventNotificationUsecase: self.spyEventNotificationUsecase
+            eventNotificationUsecase: self.spyEventNotificationUsecase,
+            eventTagUsecase: self.stubEventTagUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -95,6 +100,19 @@ extension MainViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyEventNotificationUsecase.didRunSync, true)
+    }
+    
+    func testViewModel_whenPrepare_runApplyEventTagColor() {
+        // given
+        let expect = expectation(description: "앱 시작이후 전체 이벤트 태그 컬러 색상 정보 bind")
+        let viewModel = self.makeViewModelWithoutPrepare()
+        self.spyUISettingUsecase.didAppluEventTagColorCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.prepare()
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
     }
     
     func testViewModel_whenFocusChanged_updateCurrentMonth() {
