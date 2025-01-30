@@ -408,6 +408,24 @@ extension EventTagUsecaseImpleTests {
             "tag-t1", "tag-t3", "tag-s2"
         ])
     }
+    
+    func testUsecase_sharedAllEventTags() {
+        // given
+        let expect = expectation(description: "조회된 태그정보 공유됨")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithStubEvents()
+        
+        // when
+        let tagLists = self.waitOutputs(expect, for: usecase.sharedEventTags) {
+            usecase.loadAllEventTags()
+                .sink { _ in }
+                .store(in: &self.cancelBag)
+        }
+        
+        // then
+        let idLists = tagLists.map { ts in ts.keys.sorted() }
+        XCTAssertEqual(idLists, [[], ["tag-s2", "tag-t1", "tag-t3"]])
+    }
 }
 
 

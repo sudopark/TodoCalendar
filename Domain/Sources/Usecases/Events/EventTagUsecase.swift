@@ -26,6 +26,7 @@ public protocol EventTagUsecase: AnyObject, Sendable {
     func eventTag(id: String) -> AnyPublisher<EventTag, Never>
     func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never>
     func loadAllEventTags() -> AnyPublisher<[EventTag], any Error>
+    var sharedEventTags: AnyPublisher<[String: EventTag], Never> { get }
     
     func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId)
     func offEventTagIdsOnCalendar() -> AnyPublisher<Set<AllEventTagId>, Never>
@@ -183,6 +184,13 @@ extension EventTagUsecaseImple {
         }
         return self.tagRepository.loadAllTags()
             .handleEvents(receiveOutput: updateCached)
+            .eraseToAnyPublisher()
+    }
+    
+    public var sharedEventTags: AnyPublisher<[String: EventTag], Never> {
+        return self.sharedDataStore.observe([String: EventTag].self, key: self.shareKey)
+            .map { $0 ?? [:] }
+            .removeDuplicates()
             .eraseToAnyPublisher()
     }
 }
