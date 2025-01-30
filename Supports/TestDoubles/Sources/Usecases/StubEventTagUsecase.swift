@@ -84,4 +84,8 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
         return self.latestUsedEventTagSubject
             .eraseToAnyPublisher()
     }
+    
+    public var sharedEventTags: AnyPublisher<[String : EventTag], Never> {
+        return Empty().eraseToAnyPublisher()
+    }
 }
