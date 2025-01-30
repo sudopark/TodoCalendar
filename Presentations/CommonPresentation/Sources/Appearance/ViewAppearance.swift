@@ -40,6 +40,9 @@ public class ViewAppearance: ObservableObject {
     @Published public var hapticEffectOff: Bool
     @Published public var animationEffectOff: Bool
     
+    // event tag color
+    @Published public var allEventTagColorMap: [AllEventTagId: UIColor] = [:]
+    
     public init(setting: AppearanceSettings, isSystemDarkTheme: Bool) {
         
         let (calendar, defaultTagColor) = (setting.calendar, setting.defaultTagColor)
@@ -66,6 +69,17 @@ public class ViewAppearance: ObservableObject {
         
         self.hapticEffectOff = calendar.hapticEffectIsOn
         self.animationEffectOff = calendar.animationEffectIsOn
+    }
+    
+    public func updateEventColorMap(by allEventTags: [EventTag]) {
+        let defColors: [AllEventTagId: UIColor] = [
+            .holiday: self.tagColors.holiday,
+            .default: self.tagColors.defaultColor
+        ]
+        let customColors = allEventTags.reduce(into: [AllEventTagId: UIColor]()) { acc, tag in
+            acc[.custom(tag.uuid)] = UIColor.from(hex: tag.colorHex)
+        }
+        self.allEventTagColorMap = customColors.merging(defColors) { $1 }
     }
 }
 

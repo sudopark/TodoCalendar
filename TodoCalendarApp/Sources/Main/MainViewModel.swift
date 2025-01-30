@@ -45,16 +45,19 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let uiSettingUsecase: any UISettingUsecase
     private let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     private let eventNotificationUsecase: any EventNotificationUsecase
+    private let eventTagUsecase: any EventTagUsecase
     var router: (any MainRouting)?
     
     init(
         uiSettingUsecase: any UISettingUsecase,
         temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase,
-        eventNotificationUsecase: any EventNotificationUsecase
+        eventNotificationUsecase: any EventNotificationUsecase,
+        eventTagUsecase: any EventTagUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
         self.eventNotificationUsecase = eventNotificationUsecase
+        self.eventTagUsecase = eventTagUsecase
         
         self.internalBinding()
     }
@@ -113,6 +116,7 @@ extension MainViewModelImple {
         self.temporaryUserDataMigrationUsecase.checkIsNeedMigration()
         
         self.eventNotificationUsecase.runSyncEventNotification()
+        self.bindEventTagColorMap()
     }
     
     private func refreshViewAppearanceSettings() {
@@ -120,6 +124,16 @@ extension MainViewModelImple {
             _ = try await self?.uiSettingUsecase.refreshAppearanceSetting()
         }
         .store(in: &self.cancellables)
+    }
+    
+    private func bindEventTagColorMap() {
+        
+        self.eventTagUsecase.sharedEventTags
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] tags in
+                self?.uiSettingUsecase.applyEventTagColors(Array(tags.values))
+            })
+            .store(in: &self.cancellables)
     }
     
     func returnToToday() {

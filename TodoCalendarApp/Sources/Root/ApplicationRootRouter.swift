@@ -129,6 +129,10 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         }
     }
     
+    func applyEventTagColors(_ tags: [EventTag]) {
+        self.appearance.updateEventColorMap(by: tags)
+    }
+    
     @MainActor
     private func changeNavigationBarAppearnace(_ newSet: any ColorSet) {
         
