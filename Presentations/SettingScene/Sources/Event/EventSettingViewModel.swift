@@ -164,7 +164,7 @@ extension EventSettingViewModelImple {
             case .custom(let value):
                 return self.eventTagUsecase.eventTag(id: value)
                     .map { t -> EventTagCellViewModel in
-                        return .init(id: .custom(t.uuid), name: t.name, color: .custom(hex: t.colorHex))
+                        return .init(id: .custom(t.uuid), name: t.name, customTagColorHex: t.colorHex)
                     }
                     .eraseToAnyPublisher()
             }

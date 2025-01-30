@@ -42,6 +42,15 @@ public class ViewAppearance: ObservableObject {
     
     // event tag color
     @Published public var allEventTagColorMap: [AllEventTagId: UIColor] = [:]
+    public func color(_ id: AllEventTagId?) -> UIColor {
+        return allEventTagColorMap[id ?? .default] ??  allEventTagColorMap[.default] ?? .clear
+    }
+    
+    public func colorOnCalendar(_ id: AllEventTagId?) -> UIColor {
+        guard self.eventOnCalendarShowEventTagColor
+        else { return .clear }
+        return self.color(id)
+    }
     
     public init(setting: AppearanceSettings, isSystemDarkTheme: Bool) {
         

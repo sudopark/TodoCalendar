@@ -113,18 +113,18 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
             name: tagId == .holiday 
                 ? "eventTag.defaults.holiday::name".localized()
                 : "eventTag.defaults.default::name".localized(),
-            color: tagId == .holiday ? .holiday : .default
+            customColorHex: nil
         )
         self.router?.routeToEditTag(info, listener: self)
     }
     
     private func routeToCustomTagEdit(_ tagId: String) {
         guard let model = self.subject.cvms.value?.first(where: { $0.id.customTagId == tagId }),
-              let customColor = model.color.customHex
+              let customColor = model.customTagColorHex
         else { return }
         
         let info = OriginalTagInfo(
-            id: .custom(tagId), name: model.name, color: .custom(hex: customColor)
+            id: .custom(tagId), name: model.name, customColorHex: customColor
         )
         self.router?.routeToEditTag(info, listener: self)
     }
@@ -133,7 +133,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         let newModel = EventTagCellViewModel(
             id: .custom(newTag.uuid),
             name: newTag.name,
-            color: .custom(hex: newTag.colorHex)
+            customTagColorHex: newTag.colorHex
         )
         let newTags = [newModel] + (self.subject.cvms.value ?? [])
         self.subject.cvms.send(newTags)
@@ -147,7 +147,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         let newModel = EventTagCellViewModel(
             id: .custom(newTag.uuid),
             name: newTag.name,
-            color: .custom(hex: newTag.colorHex)
+            customTagColorHex: newTag.colorHex
         )
         let newTags = cvms |> ix(index) .~ newModel
         self.subject.cvms.send(newTags)

@@ -160,8 +160,8 @@ extension EventTagListViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didRouteToEditTag, true)
         XCTAssertEqual(tagCounts, [22, 22])
         XCTAssertEqual(tag4s.map { $0?.name }, ["n:4", "edited name"])
-        XCTAssertEqual(tag4s.map { $0?.color }, [
-            .custom(hex: "some"), .custom(hex: "edited color hex")
+        XCTAssertEqual(tag4s.map { $0?.customTagColorHex }, [
+            "some", "edited color hex"
         ])
     }
     

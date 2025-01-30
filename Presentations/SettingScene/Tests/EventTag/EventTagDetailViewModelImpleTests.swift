@@ -59,15 +59,15 @@ class EventTagDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private var customTagInfo: OriginalTagInfo {
-        return .init(id: .custom("some"), name: "custom", color: .custom(hex: "old-hex"))
+        return .init(id: .custom("some"), name: "custom", customColorHex: "old-hex")
     }
     
     private var holidayTagInfo: OriginalTagInfo {
-        return .init(id: .holiday, name: "holiday", color: .holiday)
+        return .init(id: .holiday, name: "holiday", customColorHex: nil)
     }
     
     private var defaultTagInfo: OriginalTagInfo {
-        return .init(id: .default, name: "default", color: .default)
+        return .init(id: .default, name: "default", customColorHex: nil)
     }
 }
 

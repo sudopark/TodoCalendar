@@ -20,11 +20,11 @@ struct ForemostEventWidgetViewModel {
     
     var eventModel: (any EventCellViewModel)?
     let defaultTagColorSetting: DefaultEventTagColorSetting
+    var tag: EventTag?
     
     static func sample() -> ForemostEventWidgetViewModel {
         
         let event = TodoEventCellViewModel("tood", name: "widget.events.foremost::sample::message".localized())
-            |> \.tagColor .~ .default
             |> \.periodText .~ .doubleText(
                 .init(text: "calendar::event_time::todo".localized()), .init(text: "13:00")
             )
@@ -62,15 +62,16 @@ extension ForemostEventWidgetViewModelProvider {
         let setting = self.appSettingRepository.loadSavedViewAppearance()
         let eventModel = try await self.loadForemostEventModel(refTime, setting.calendar)
         return ForemostEventWidgetViewModel(
-            eventModel: eventModel,
-            defaultTagColorSetting: setting.defaultTagColor
+            eventModel: eventModel.0,
+            defaultTagColorSetting: setting.defaultTagColor,
+            tag: eventModel.1
         )
     }
     
     private func loadForemostEventModel(
         _ refTime: Date,
         _ setting: CalendarAppearanceSettings
-    ) async throws -> (any EventCellViewModel)? {
+    ) async throws -> ((any EventCellViewModel)?, EventTag?) {
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let dayRange = try calendar.dayRange(refTime).unwrap()
@@ -92,7 +93,6 @@ extension ForemostEventWidgetViewModelProvider {
             default: return nil
             }
         }()
-        model?.applyTagColor(eventAndTag.tag)
-        return model
+        return (model, eventAndTag.tag)
     }
 }

@@ -173,7 +173,7 @@ struct EventSettingView: View {
             Spacer()
             Circle()
                 .fill(
-                    self.state.tagModel?.color.color(with: appearance).asColor ?? .clear
+                    appearance.color(self.state.tagModel?.id).asColor
                 )
                 .frame(width: 6, height: 6)
             Text(state.tagModel?.name ?? "")
@@ -291,7 +291,7 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = EventSettingViewState()
-        state.tagModel = .init(id: .default, name: "default", color: .default)
+        state.tagModel = .init(id: .default, name: "default", customTagColorHex: nil)
         state.periodModel = .init(EventSettings.DefaultNewEventPeriod.minute15)
         state.selectedEventNotificationTimeText = "so long text hahahahhahahha hahah"
         state.selectedAllDayEventNotificationTimeText = "so long text hahahahhahahha hahah"

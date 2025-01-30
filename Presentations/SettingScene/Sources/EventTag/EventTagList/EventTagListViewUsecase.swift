@@ -18,21 +18,19 @@ struct EventTagCellViewModel: Equatable {
     var isOn: Bool = true
     let id: AllEventTagId
     let name: String
-    let color: EventTagColor
+    var customTagColorHex: String?
     
     static var `default`: EventTagCellViewModel {
         return .init(
             id: .default,
-            name: "eventTag.defaults.default::name".localized(),
-            color: .default
+            name: "eventTag.defaults.default::name".localized()
         )
     }
     
     static var holiday: EventTagCellViewModel {
         return .init(
             id: .holiday,
-            name: "eventTag.defaults.holiday::name".localized(),
-            color: .holiday
+            name: "eventTag.defaults.holiday::name".localized()
         )
     }
 }
@@ -83,7 +81,7 @@ extension EventTagListViewUsecase {
                 EventTagCellViewModel(
                     id: .custom($0.uuid),
                     name: $0.name,
-                    color: .custom(hex: $0.colorHex)
+                    customTagColorHex: $0.colorHex
                 )
             }
             return [holidayTag, defaultTag] + customCells

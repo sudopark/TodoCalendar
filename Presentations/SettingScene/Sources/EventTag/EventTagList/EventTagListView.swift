@@ -154,7 +154,7 @@ struct EventTagListView: View {
         
         HStack {
             Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
-                .foregroundStyle(cellViewModel.color.color(with: self.appearance).asColor)
+                .foregroundStyle(appearance.color(cellViewModel.id).asColor)
                 .font(.title3)
                 .animation(.easeIn, value: cellViewModel.isOn)
                 .onTapGesture {
@@ -210,7 +210,7 @@ extension EventTagCellViewModel {
     
     var compareKey: String {
         let components = [
-            self.id.compareKey, self.name, self.color.compareKey, "\(self.isOn)"
+            self.id.compareKey, self.name, self.customTagColorHex ?? "nil", "\(self.isOn)"
         ]
         return components.joined(separator: "-")
     }
@@ -232,7 +232,7 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = EventTagListViewState()
         state.cellviewModels = (0..<20).map {
-            EventTagCellViewModel(id: .custom("id:\($0)"), name: "name:\($0)", color: .custom(hex: "#ff0000"))
+            EventTagCellViewModel(id: .custom("id:\($0)"), name: "name:\($0)", customTagColorHex: "#ff0000")
         }
         return EventTagListView(hasNavigation: true)
             .eventHandler(\.toggleEventTagViewingIsOn) { id in

@@ -11,6 +11,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Scenes
 import CommonPresentation
 
 
@@ -142,7 +143,9 @@ struct EventTagDetailView: View {
         return HStack(spacing: 16) {
             Circle()
                 .frame(width: 15, height: 15)
-                .foregroundStyle(self.state.selectedColor?.color(with: self.appearance).asColor ?? .clear)
+                .foregroundStyle(
+                    appearance.color(for: self.state.selectedColor).asColor
+                )
             
             TextField(
                 "",
@@ -197,7 +200,7 @@ struct EventTagDetailView: View {
     private func circleView(
         _ tagColor: EventTagColor
     ) -> some View {
-        let color = tagColor.color(with: self.appearance).asColor
+        let color = appearance.color(for: tagColor).asColor
         return Button {
             self.colorSelected(tagColor)
         } label: {
@@ -231,7 +234,7 @@ struct EventTagDetailView: View {
             Circle()
                 .frame(width: 20, height: 20)
                 .foregroundStyle(
-                    self.state.selectedColor?.color(with: self.appearance).asColor ?? .clear
+                    self.appearance.color(for: self.state.selectedColor).asColor
                 )
                 
         }
@@ -267,6 +270,18 @@ struct EventTagDetailView: View {
     }
 }
 
+
+private extension ViewAppearance {
+    
+    func color(for eventTagColor: EventTagColor?) -> UIColor {
+        switch eventTagColor {
+        case .default: return self.color(.default)
+        case .holiday: return self.color(.holiday)
+        case .custom(let hex): return UIColor.from(hex: hex) ?? .clear
+        default: return .clear
+        }
+    }
+}
 
 // MARK: - preview
 

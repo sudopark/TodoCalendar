@@ -268,7 +268,7 @@ private struct WeekRowView: View {
         .asAnyView()
     }
     
-    private func eventRowView(_ lines: [WeekEventLineModel]) -> some View {
+    private func eventRowView(_ lines: [EventOnWeek]) -> some View {
         return ZStack(alignment: .leading) {
             ForEach(0..<lines.count, id: \.self) {
                 return eventLineView(lines[$0])
@@ -277,12 +277,12 @@ private struct WeekRowView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func eventLineView(_ line: WeekEventLineModel) -> some View {
-        let offsetX = CGFloat(line.eventOnWeek.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
-        let width = CGFloat(line.eventOnWeek.daysSequence.count) * dayWidth - Metric.eventInterspacing
-        let lineColor = line.lineColor.colorForEventOnCalendar(appearance).asColor
+    private func eventLineView(_ line: EventOnWeek) -> some View {
+        let offsetX = CGFloat(line.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
+        let width = CGFloat(line.daysSequence.count) * dayWidth - Metric.eventInterspacing
+        let lineColor = self.appearance.colorOnCalendar(line.eventTagId).asColor
         let background: some View = {
-            if line.eventOnWeek.hasPeriod {
+            if line.hasPeriod {
                 return RoundedRectangle(cornerRadius: 2).fill(
                     lineColor.opacity(0.5)
                 )
@@ -292,7 +292,7 @@ private struct WeekRowView: View {
             }
         }()
         let textColor: Color = {
-            return self.state.selectedDay == line.eventOnWeek.eventStartDayIdentifierOnWeek
+            return self.state.selectedDay == line.eventStartDayIdentifierOnWeek
             ? self.appearance.colorSet.eventTextSelected.asColor
             : self.appearance.colorSet.eventText.asColor
         }()
@@ -302,7 +302,7 @@ private struct WeekRowView: View {
                  .frame(width: 3, height: 12)
                  .padding(.leading, 1)
              
-             Text(line.eventOnWeek.name)
+             Text(line.name)
                 .font(self.appearance.eventTextFontOnCalendar().asFont)
                  .foregroundColor(textColor)
                  .lineLimit(1)
@@ -395,13 +395,13 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
             let event2_3_2 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], DummyCalendarEvent("t2_3_2", "ev:2_3_2", hasPeriod: false))
             let event2_3_3 = EventOnWeek(0..<1, [2, 3], (2...3), ["2023-9-2", "2023-9-3"], DummyCalendarEvent("t2_3_3", "ev:2_3_3", hasPeriod: false))
             
-            let lines: [[WeekEventLineModel]] = [
-                [.init(event1_5, nil)],
-                [.init(event2_6, nil)],
-                [.init(event2_3, nil), .init(event4_6, nil)],
-                [.init(event2_3_1, nil)],
-                [.init(event2_3_2, nil)],
-                [.init(event2_3_3, nil)]
+            let lines: [[EventOnWeek]] = [
+                [event1_5],
+                [event2_6],
+                [event2_3, event4_6],
+                [event2_3_1],
+                [event2_3_2],
+                [event2_3_3]
             ]
             return Just(.init(linesStack: lines, shouldMarkEventDays: true))
             .eraseToAnyPublisher()
@@ -410,8 +410,8 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
             let eventw2 = EventOnWeek(0..<1, [9, 10, 11, 12], (2...5), [
                 "2023-9-9", "2023-9-10", "2023-9-11", "2023-9-12"
             ], DummyCalendarEvent("ev-w2", "ev-w2- hohohohohohohohohohohohoh", hasPeriod: false))
-            let lines: [[WeekEventLineModel]] = [
-                [.init(eventw2, nil)]
+            let lines: [[EventOnWeek]] = [
+                [eventw2]
             ]
             return Just(.init(linesStack: lines, shouldMarkEventDays: true))
                 .eraseToAnyPublisher()
