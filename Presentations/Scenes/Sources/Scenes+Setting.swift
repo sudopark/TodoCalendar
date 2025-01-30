@@ -14,12 +14,12 @@ import Domain
 public struct OriginalTagInfo: Sendable {
     public let id: AllEventTagId
     public let name: String
-    public let color: EventTagColor
+    public let customColorHex: String?
     
-    public init(id: AllEventTagId, name: String, color: EventTagColor) {
+    public init(id: AllEventTagId, name: String, customColorHex: String?) {
         self.id = id
         self.name = name
-        self.color = color
+        self.customColorHex = customColorHex
     }
 }
 

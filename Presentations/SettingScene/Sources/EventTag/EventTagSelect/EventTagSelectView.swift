@@ -131,7 +131,7 @@ struct EventTagSelectView: View {
         HStack(spacing: 12) {
             
             Circle()
-                .fill(cellViewModel.color.color(with: appearance).asColor)
+                .fill(appearance.color(cellViewModel.id).asColor)
                 .frame(width: 8, height: 8)
             
             Text(cellViewModel.name)
@@ -179,7 +179,7 @@ struct EventTagSelectViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = EventTagSelectViewState()
         state.cellViewModels = (0..<20).map {
-            EventTagCellViewModel(id: .custom("id:\($0)"), name: "name:\($0)", color: .custom(hex: "#ff0000"))
+            EventTagCellViewModel(id: .custom("id:\($0)"), name: "name:\($0)", customTagColorHex: "#ff0000")
             |> \.isOn .~ ($0 % 2 == 0)
         }
         state.selectedId = .custom("id:3")

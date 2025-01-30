@@ -269,7 +269,7 @@ struct EventDetailView: View {
     fileprivate var showForemostEventGuide: () -> Void = { }
 
     private var selectedTagColor: Color {
-        return self.state.selectedTag.color.color(with: self.appearance).asColor
+        return self.appearance.color(self.state.selectedTag.tagId).asColor
     }
     
     var body: some View {

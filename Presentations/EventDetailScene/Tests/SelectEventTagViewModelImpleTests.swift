@@ -247,7 +247,7 @@ extension SelectEventTagViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyListener.didSelectedTags, [
-            .init(.custom("id:1"), "n:1", .custom(hex: "some")),
+            .init(.custom("id:1"), "n:1", "some"),
             .defaultTag
         ])
     }
@@ -267,7 +267,7 @@ private class SpyRouter: BaseSpyRouter, SelectEventTagRouting, @unchecked Sendab
     }
 }
 
-private class SpyListener: SelectEventTagSceneListener {
+private class SpyListener: SelectEventTagSceneListener, @unchecked Sendable {
     
     var didSelectedTags: [SelectedTag] = []
     var didSelectedtagNotify: (() -> Void)?

@@ -54,6 +54,7 @@ struct WeekEventsViewModel {
     let weeks: [WeekRowModel]
     let eventStackModelMap: [String: WeekEventStackViewModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
+    let tagMap: [String: EventTag]
     
     init(
         range: WeekEventsRange,
@@ -62,7 +63,8 @@ struct WeekEventsViewModel {
         orderedWeekDaysModel: [WeekDayModel],
         weeks: [WeekRowModel],
         eventStackModelMap: [String : WeekEventStackViewModel],
-        defaultTagColorSetting: DefaultEventTagColorSetting
+        defaultTagColorSetting: DefaultEventTagColorSetting,
+        tagMap: [String: EventTag]
     ) {
         self.range = range
         self.targetMonthText = targetMonthText
@@ -71,6 +73,7 @@ struct WeekEventsViewModel {
         self.weeks = weeks
         self.eventStackModelMap = eventStackModelMap
         self.defaultTagColorSetting = defaultTagColorSetting
+        self.tagMap = tagMap
     }
     
     static func sample(_ range: WeekEventsRange) -> WeekEventsViewModel {
@@ -94,7 +97,8 @@ struct WeekEventsViewModel {
             orderedWeekDaysModel: wholeModel.orderedWeekDaysModel,
             weeks: sliced,
             eventStackModelMap: wholeModel.eventStackModelMap,
-            defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA")
+            defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA"),
+            tagMap: [:]
         )
     }
     
@@ -148,21 +152,21 @@ struct WeekEventsViewModel {
         }
         let eventStacks: [String: WeekEventStackViewModel] = [
             "2-1": .init(linesStack: [
-                [.init(.dummy(5, "2024-02-11", "widget.weeks.sample::hiking".localized()), nil)]
+                [.dummy(5, "2024-02-11", "widget.weeks.sample::hiking".localized())]
             ], shouldMarkEventDays: false),
             "3-2": .init(linesStack: [
                 [
-                    .init(.dummy(1, "2024-03-14", "widget.weeks.sample::lunch".localized()), nil),
-                    .init(.dummy(3, "2024-03-16", "widget.weeks.sample::call".localized()), nil),
-                    .init(.dummy(7, "2024-03-20", "widget.weeks.sample::holiday".localized(), hasPeriod: true, tag: .holiday), nil)
+                    .dummy(1, "2024-03-14", "widget.weeks.sample::lunch".localized()),
+                    .dummy(3, "2024-03-16", "widget.weeks.sample::call".localized()),
+                    .dummy(7, "2024-03-20", "widget.weeks.sample::holiday".localized(), hasPeriod: true, tag: .holiday)
                 ],
-                [ .init(.dummy(1, "2024-03-14", "widget.weeks.sample::golf".localized()), nil)],
+                [.dummy(1, "2024-03-14", "widget.weeks.sample::golf".localized())],
             ], shouldMarkEventDays: false),
             "3-3": .init(linesStack: [
-                [.init(.dummy(4, "2024-03-25", "widget.weeks.sample::workout".localized()), nil)]
+                [.dummy(4, "2024-03-25", "widget.weeks.sample::workout".localized())]
             ], shouldMarkEventDays: false),
             "4-3": .init(linesStack: [
-                [.init(.dummy(7, "2024-04-24", "widget.weeks.sample::launch".localized()), nil)]
+                [.dummy(7, "2024-04-24", "widget.weeks.sample::launch".localized())]
             ], shouldMarkEventDays: false)
         ]
         
@@ -173,7 +177,8 @@ struct WeekEventsViewModel {
             orderedWeekDaysModel: WeekDayModel.allModels(),
             weeks: rowModels,
             eventStackModelMap: eventStacks,
-            defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA")
+            defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA"),
+            tagMap: [:]
         )
     }
 }
@@ -221,7 +226,8 @@ extension WeekEventsWidgetViewModelProvider {
             orderedWeekDaysModel: WeekDayModel.allModels(of: firstWeekDay),
             weeks: self.convertToWeekRowModels(weeks, events.eventWithTimes, targetMonth),
             eventStackModelMap: self.convertToEventStackModelMap(events, weeks.weeks, timeZone),
-            defaultTagColorSetting: defaultTagColorSetting
+            defaultTagColorSetting: defaultTagColorSetting,
+            tagMap: events.customTagMap
         )
     }
     
@@ -295,16 +301,9 @@ extension WeekEventsWidgetViewModelProvider {
             let stack = stackBuilder.build(week, events: events.eventWithTimes)
             acc[week.id] = stack
         }
-        let lineListModelMap = stackMap.mapValues { stack in
-            return stack.eventStacks.map { es -> [WeekEventLineModel] in
-                return es.map { e -> WeekEventLineModel in
-                    let tag = e.eventTagId.customTagId.flatMap { events.customTagMap[$0] }
-                    return WeekEventLineModel(e, tag)
-                }
-            }
-        }
-        let stackModelMap = lineListModelMap.mapValues { lines in
-            return WeekEventStackViewModel(linesStack: lines, shouldMarkEventDays: false)
+        
+        let stackModelMap = stackMap.mapValues { stack in
+            return WeekEventStackViewModel(linesStack: stack.eventStacks, shouldMarkEventDays: false)
         }
         return stackModelMap
     }

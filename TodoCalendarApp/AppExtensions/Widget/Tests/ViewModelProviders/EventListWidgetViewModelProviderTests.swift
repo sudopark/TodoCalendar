@@ -151,13 +151,13 @@ extension EventListWidgetViewModelProviderTests {
         
         // then
         let eventModels = viewModel.lists.flatMap { $0.events }
-        let colors = eventModels.map { $0.tagColor }
+        let colors = eventModels.map { $0.tagId }
         XCTAssertEqual(colors, [
             .default,   // current todo
             .default,   // start date todo,
             .holiday,   // last date
-            .custom(hex: "t1"),  // last date schedule event
-            .custom(hex: "t2")  // last date todo event
+            .custom("t1"),  // last date schedule event
+            .custom("t2")  // last date todo event
         ])
     }
     

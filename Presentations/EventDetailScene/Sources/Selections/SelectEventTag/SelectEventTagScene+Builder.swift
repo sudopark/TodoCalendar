@@ -18,30 +18,30 @@ import Scenes
 struct SelectedTag: Equatable {
     let tagId: AllEventTagId
     let name: String
-    let color: EventTagColor
+    let customColorHex: String?
     
     init(
         _ tagId: AllEventTagId,
         _ name: String,
-        _ color: EventTagColor
+        _ customColorHex: String?
     ) {
         self.tagId = tagId
         self.name = name
-        self.color = color
+        self.customColorHex = customColorHex
     }
     
     init(_ tag: EventTag) {
         self.tagId = .custom(tag.uuid)
         self.name = tag.name
-        self.color = .custom(hex: tag.colorHex)
+        self.customColorHex = tag.colorHex
     }
     
     static var defaultTag: SelectedTag {
-        return .init(.default, R.String.EventTag.Defaults.defaultName, .default)
+        return .init(.default, R.String.EventTag.Defaults.defaultName, nil)
     }
     
     static var holiday: SelectedTag {
-        return .init(.holiday, R.String.EventTag.Defaults.holidayName, .holiday)
+        return .init(.holiday, R.String.EventTag.Defaults.holidayName, nil)
     }
 }
 

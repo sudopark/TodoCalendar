@@ -69,7 +69,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             stack.linesStack.map { ls in ls.map { $0.eventId } }
         }
         let daySequences = model.eventStackModelMap.mapValues { stack in
-            stack.linesStack.map { ls in ls.map { $0.eventOnWeek.daysSequence } }
+            stack.linesStack.map { ls in ls.map { $0.daysSequence } }
         }
         XCTAssertEqual(days, [[9, 10, 11, 12, 13, 14, 15]])
         XCTAssertEqual(accentDays, [[.sunday, nil, nil, nil, nil, nil, .saturday]])
@@ -100,7 +100,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             stack.linesStack.map { ls in ls.map { $0.eventId } }
         }
         let daySequences = model.eventStackModelMap.mapValues { stack in
-            stack.linesStack.map { ls in ls.map { $0.eventOnWeek.daysSequence } }
+            stack.linesStack.map { ls in ls.map { $0.daysSequence } }
         }
         XCTAssertEqual(days, [
             [9, 10, 11, 12, 13, 14, 15],
@@ -139,7 +139,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             stack.linesStack.map { ls in ls.map { $0.eventId } }
         }
         let daySequences = model.eventStackModelMap.mapValues { stack in
-            stack.linesStack.map { ls in ls.map { $0.eventOnWeek.daysSequence } }
+            stack.linesStack.map { ls in ls.map { $0.daysSequence } }
         }
         XCTAssertEqual(days, [
             [9, 10, 11, 12, 13, 14, 15],
@@ -182,7 +182,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             stack.linesStack.map { ls in ls.map { $0.eventId } }
         }
         let daySequences = model.eventStackModelMap.mapValues { stack in
-            stack.linesStack.map { ls in ls.map { $0.eventOnWeek.daysSequence } }
+            stack.linesStack.map { ls in ls.map { $0.daysSequence } }
         }
         XCTAssertEqual(days, [
             [9, 10, 11, 12, 13, 14, 15],
@@ -229,7 +229,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             stack.linesStack.map { ls in ls.map { $0.eventId } }
         }
         let daySequences = model.eventStackModelMap.mapValues { stack in
-            stack.linesStack.map { ls in ls.map { $0.eventOnWeek.daysSequence } }
+            stack.linesStack.map { ls in ls.map { $0.daysSequence } }
         }
         XCTAssertEqual(days, [
             [26, 27, 28, 29, 30, 31, 1],
@@ -284,7 +284,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             stack.linesStack.map { ls in ls.map { $0.eventId } }
         }
         let daySequences = model.eventStackModelMap.mapValues { stack in
-            stack.linesStack.map { ls in ls.map { $0.eventOnWeek.daysSequence } }
+            stack.linesStack.map { ls in ls.map { $0.daysSequence } }
         }
         XCTAssertEqual(days, [
             [28, 29, 30, 1, 2, 3, 4],
@@ -335,7 +335,7 @@ extension WeekEventsWidgetViewModelProviderTests{
             stack.linesStack.map { ls in ls.map { $0.eventId } }
         }
         let daySequences = model.eventStackModelMap.mapValues { stack in
-            stack.linesStack.map { ls in ls.map { $0.eventOnWeek.daysSequence } }
+            stack.linesStack.map { ls in ls.map { $0.daysSequence } }
         }
         XCTAssertEqual(days, [
             [30, 1, 2, 3, 4, 5, 6],

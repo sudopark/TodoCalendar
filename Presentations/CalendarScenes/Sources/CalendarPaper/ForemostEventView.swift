@@ -56,7 +56,6 @@ struct ForemostEventViewPreview_Provider: PreviewProvider {
         let cvm = TodoEventCellViewModel(
             "current-todo1", name: "current todo 1"
         )
-        |> \.tagColor .~ .default
         |> \.periodText .~ .singleText(.init(text: "Todo".localized()))
         let vm = cvm
     }

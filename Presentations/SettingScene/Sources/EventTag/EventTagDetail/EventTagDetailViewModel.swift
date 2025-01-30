@@ -19,6 +19,17 @@ import Scenes
 
 // MARK: - EventTagDetailViewModel
 
+enum EventTagColor: Equatable, Sendable {
+    case `default`
+    case holiday
+    case custom(hex: String)
+    
+    var customHex: String? {
+        guard case let .custom(hex) = self else { return nil }
+        return hex
+    }
+}
+
 protocol EventTagDetailViewModel: AnyObject, Sendable, EventTagDetailSceneInteractor {
 
     // interactor
@@ -60,9 +71,14 @@ final class EventTagDetailViewModelImple: EventTagDetailViewModel, @unchecked Se
         self.uiSettingUsecase = uiSettingUsecase
         
         self.subject.name.send(originalInfo?.name)
-        self.subject.color.send(
-            originalInfo?.color ?? self.suggestColorHexes.randomElement().map { .custom(hex: $0) }
-        )
+        
+        let originColor = switch originalInfo?.id {
+        case .default: EventTagColor.default
+        case .holiday: EventTagColor.holiday
+        case .custom: originalInfo?.customColorHex.map { EventTagColor.custom(hex: $0) }
+        default: self.suggestColorHexes.randomElement().map { EventTagColor.custom(hex: $0) }
+        }
+        self.subject.color.send(originColor)
     }
     
     
@@ -236,8 +252,14 @@ extension EventTagDetailViewModelImple {
     var originalName: String? {
         return self.originalInfo?.name
     }
+    
     var originalColor: EventTagColor {
-        return self.originalInfo?.color ?? .default
+        switch self.originalInfo?.id {
+        case .default: return .default
+        case .holiday: return .holiday
+        case .custom: return originalInfo?.customColorHex.map { .custom(hex: $0) } ?? .default
+        default: return .default
+        }
     }
     
     var suggestColorHexes: [String] {

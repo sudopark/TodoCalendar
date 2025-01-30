@@ -63,7 +63,7 @@ struct EventListCellView: View {
     }
     
     var body: some View {
-        let tagLineColor = cellViewModel.tagColor?.color(with: self.appearance).asColor ?? .clear
+        let tagLineColor = self.appearance.color(cellViewModel.tagId).asColor
         return HStack(spacing: 8) {
             // left
             self.eventLeftView(cellViewModel)

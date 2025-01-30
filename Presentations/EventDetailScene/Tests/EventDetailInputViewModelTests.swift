@@ -528,7 +528,7 @@ extension EventDetailInputViewModelTests {
         let tags = self.waitOutputs(expect, for: viewModel.selectedTag) {
             self.prepareViewModelWithOldData(viewModel)
             viewModel.selectEventTag()
-            viewModel.selectEventTag(didSelected: .init(.holiday, "some", .holiday))
+            viewModel.selectEventTag(didSelected: .init(.holiday, "some", nil))
         }
         
         // then

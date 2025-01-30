@@ -281,16 +281,16 @@ extension MonthViewModelImpleTests {
 
 extension MonthViewModelImpleTests {
     
-    private func dummyEventLine(_ days: ClosedRange<Int>) -> WeekEventLineModel {
+    private func dummyEventLine(_ days: ClosedRange<Int>) -> EventOnWeek {
         let dayIdentifiers = days.map { "2023-9-\($0)" }
         let todo = TodoCalendarEvent(.init(uuid: "\(days)", name: "todo:\(days)"), in: TimeZone.current)
         let event = EventOnWeek(0..<1, [], days, dayIdentifiers, todo)
-        return .init(event, nil)
+        return event
     }
 
     func testEventStackModel_provideEventMoreCounts() {
         // given
-        let lines: [[WeekEventLineModel]] = [
+        let lines: [[EventOnWeek]] = [
             [self.dummyEventLine(1...5)],
             [self.dummyEventLine(2...4)],
             [self.dummyEventLine(1...3), self.dummyEventLine(4...7)],
@@ -819,7 +819,7 @@ extension MonthViewModelImpleTests {
         }
     }
 
-    private class PrivateStubScheduleUsecase: StubScheduleEventUsecase {
+    private class PrivateStubScheduleUsecase: StubScheduleEventUsecase, @unchecked Sendable {
 
         var eventsFor8: [ScheduleEvent] = [] {
             didSet {
@@ -897,7 +897,7 @@ private extension WeekEventStackViewModel {
     }
     
     var daysSequences: [[ClosedRange<Int>]] {
-        return self.linesStack.map { lines in lines.map { $0.eventOnWeek.daysSequence } }
+        return self.linesStack.map { lines in lines.map { $0.daysSequence } }
     }
 }
 
