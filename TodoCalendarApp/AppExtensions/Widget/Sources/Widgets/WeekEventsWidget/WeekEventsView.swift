@@ -240,6 +240,9 @@ private extension WeekEventsViewModel {
         case .custom(let id):
             return self.tagMap[id]
                 .flatMap { UIColor.from(hex: $0.colorHex) }?.asColor ?? self.tagColor(.default)
+        case .externalCalendar:
+            // TODO: 
+            return .clear
         }
     }
 }

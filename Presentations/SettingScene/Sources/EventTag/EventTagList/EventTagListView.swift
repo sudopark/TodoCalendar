@@ -192,6 +192,7 @@ private extension EventTagId {
         case .holiday: return "holiday"
         case .default: return "default"
         case .custom(let id): return id
+        case .externalCalendar(let serviceId, let id): return "external::\(serviceId)::\(id)"
         }
     }
 }

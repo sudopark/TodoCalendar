@@ -147,6 +147,9 @@ extension EventTagDetailViewModelImple {
         case .custom(let id):
             self.editTag(id)
             
+        case .externalCalendar:
+            break
+            
         case nil:
             self.saveNewTag()
         }
