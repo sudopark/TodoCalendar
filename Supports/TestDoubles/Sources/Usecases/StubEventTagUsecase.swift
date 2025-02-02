@@ -64,6 +64,8 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
             DefaultEventTag.holiday("holiday")
         case .custom(let customId):
             CustomEventTag(uuid: customId, name: "some", colorHex: "0x000000")
+        case .externalCalendar:
+            ExternalCalendarEventTag(tagId: id, name: "external", colorHex: "external")
         }
         return Just(tag).eraseToAnyPublisher()
     }

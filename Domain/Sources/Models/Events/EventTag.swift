@@ -13,6 +13,7 @@ public enum EventTagId: Sendable, Hashable {
     case holiday
     case `default`
     case custom(String)
+    case externalCalendar(serviceId: String, id: String)
     
     public var customTagId: String? {
         guard case let .custom(id) = self else { return nil }
@@ -104,5 +105,25 @@ public struct RemoveCustomEventTagWithEventsResult: Sendable {
     public init(todoIds: [String], scheduleIds: [String]) {
         self.todoIds = todoIds
         self.scheduleIds = scheduleIds
+    }
+}
+
+
+// MARK: - external calendar
+
+public struct ExternalCalendarEventTag: EventTag {
+    public let tagId: EventTagId
+    public let name: String
+    public let colorHex: String
+    public var foregroundColorHex: String?
+    
+    public init(
+        tagId: EventTagId,
+        name: String,
+        colorHex: String
+    ) {
+        self.tagId = tagId
+        self.name = name
+        self.colorHex = colorHex
     }
 }

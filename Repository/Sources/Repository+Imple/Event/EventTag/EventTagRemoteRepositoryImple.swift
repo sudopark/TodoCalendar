@@ -172,7 +172,7 @@ extension EventTagRemoteRepositoryImple {
     
     public func loadOffTags() -> Set<EventTagId> {
         let idStringValues: [String]? = self.environmentStorage.load(self.offIds)
-        let ids = idStringValues?.map { EventTagId($0) }
+        let ids = idStringValues?.compactMap { EventTagId($0) }
         return (ids ?? []) |> Set.init
     }
     

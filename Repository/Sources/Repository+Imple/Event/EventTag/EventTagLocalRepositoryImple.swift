@@ -95,7 +95,7 @@ extension EventTagLocalRepositoryImple {
     
     public func loadOffTags() -> Set<EventTagId> {
         let idStringValues: [String]? = self.environmentStorage.load(self.offIds)
-        let ids = idStringValues?.map { EventTagId($0) }
+        let ids = idStringValues?.compactMap { EventTagId($0) }
         return (ids ?? []) |> Set.init
     }
     
@@ -123,14 +123,22 @@ extension EventTagId {
         case .holiday: return "holiday"
         case .default: return "default"
         case .custom(let id): return id
+        case .externalCalendar(let serviceId, let id): return "external::\(serviceId)::\(id)"
         }
     }
     
-    init(_ stringValue: String) {
+    init?(_ stringValue: String) {
         switch stringValue {
         case "holiday": self = .holiday
         case "default": self = .default
-        default: self = .custom(stringValue)
+        default:
+            if stringValue.starts(with: "external:") {
+                let compos = stringValue.components(separatedBy: "::")
+                guard compos.count == 2 else { return nil }
+                self = .externalCalendar(serviceId: compos[1], id: compos[2])
+            } else {
+                self = .custom(stringValue)
+            }
         }
     }
 }

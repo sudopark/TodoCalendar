@@ -66,7 +66,7 @@ extension DoneTodoEvent: RowValueType {
             originEventId: origin,
             doneTime: Date(timeIntervalSince1970: try cursor.next().unwrap())
         )
-        self.eventTagId = cursor.next().map { EventTagId($0) }
+        self.eventTagId = cursor.next().flatMap { EventTagId($0) }
         let notificationOptionText: String? = cursor.next()
         let mappers = notificationOptionText?.data(using: .utf8)
             .flatMap {
