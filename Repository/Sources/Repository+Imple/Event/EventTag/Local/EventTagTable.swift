@@ -1,5 +1,5 @@
 //
-//  EventTagTable.swift
+//  CustomEventTagTable.swift
 //  Repository
 //
 //  Created by sudo.park on 2023/05/28.
@@ -10,7 +10,7 @@ import SQLiteService
 import Domain
 import Extensions
 
-struct EventTagTable: Table {
+struct CustomEventTagTable: Table {
     
     enum Columns: String, TableColumn {
         case uuid
@@ -27,7 +27,7 @@ struct EventTagTable: Table {
     }
     
     typealias ColumnType = Columns
-    typealias EntityType = EventTag
+    typealias EntityType = CustomEventTag
     static var tableName: String { "EventTags" }
     
     static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
@@ -39,7 +39,7 @@ struct EventTagTable: Table {
     }
 }
 
-extension EventTag: RowValueType {
+extension CustomEventTag: RowValueType {
     
     public init(_ cursor: CursorIterator) throws {
         self.init(

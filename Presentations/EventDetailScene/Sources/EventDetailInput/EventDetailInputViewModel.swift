@@ -39,7 +39,7 @@ protocol EventDetailInputRouting: Routing, Sendable, AnyObject {
     )
     
     func routeToEventTagSelect(
-        currentSelectedTagId: AllEventTagId,
+        currentSelectedTagId: EventTagId,
         listener: (any SelectEventTagSceneListener)?
     )
     
@@ -501,18 +501,11 @@ extension EventDetailInputViewModelImple {
     }
     
     var selectedTag: AnyPublisher<SelectedTag, Never> {
-        let transform: (AllEventTagId) -> AnyPublisher<SelectedTag, Never> = { [weak self] eventId in
+        let transform: (EventTagId) -> AnyPublisher<SelectedTag, Never> = { [weak self] tagId in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
-            switch eventId {
-            case .default:
-                return Just(SelectedTag.defaultTag).eraseToAnyPublisher()
-            case .holiday:
-                return Just(SelectedTag.holiday).eraseToAnyPublisher()
-            case .custom(let id):
-                return self.eventTagUsecase.eventTag(id: id)
-                    .map { SelectedTag($0) }
-                    .eraseToAnyPublisher()
-            }
+            return self.eventTagUsecase.eventTag(id: tagId)
+                .map { SelectedTag($0) }
+                .eraseToAnyPublisher()
         }
         
         return self.subject.basic

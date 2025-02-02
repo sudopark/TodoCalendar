@@ -152,22 +152,11 @@ extension EventSettingViewModelImple {
 extension EventSettingViewModelImple {
     
     var selectedTagModel: AnyPublisher<EventTagCellViewModel, Never> {
-        let asEventTag: (AllEventTagId) -> AnyPublisher<EventTagCellViewModel, Never> = { [weak self] id in
+        let asEventTag: (EventTagId) -> AnyPublisher<EventTagCellViewModel, Never> = { [weak self] id in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
-            switch id {
-            case .holiday: 
-                return Just(EventTagCellViewModel.holiday).eraseToAnyPublisher()
-                
-            case .default:
-                return Just(EventTagCellViewModel.default).eraseToAnyPublisher()
-                
-            case .custom(let value):
-                return self.eventTagUsecase.eventTag(id: value)
-                    .map { t -> EventTagCellViewModel in
-                        return .init(id: .custom(t.uuid), name: t.name, customTagColorHex: t.colorHex)
-                    }
-                    .eraseToAnyPublisher()
-            }
+            return self.eventTagUsecase.eventTag(id: id)
+                .map { .init($0) }
+                .eraseToAnyPublisher()
         }
         
         return self.eventSettingUsecase.currentEventSetting

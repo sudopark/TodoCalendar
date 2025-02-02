@@ -18,7 +18,7 @@ public struct TodoEvent: Sendable, Equatable {
     public var name: String
     public var creatTimeStamp: TimeInterval?
     
-    public var eventTagId: AllEventTagId?
+    public var eventTagId: EventTagId?
     
     public var time: EventTime?
     public var repeating: EventRepeating?
@@ -78,7 +78,7 @@ public struct TodoEvent: Sendable, Equatable {
 public struct TodoMakeParams: Sendable {
     
     public var name: String?
-    public var eventTagId: AllEventTagId?
+    public var eventTagId: EventTagId?
     public var time: EventTime?
     public var repeating: EventRepeating?
     public var notificationOptions: [EventNotificationTimeOption]?
@@ -110,7 +110,7 @@ public struct TodoEditParams: Sendable, Equatable {
     }
     public let editMethod: EditMethod
     public var name: String?
-    public var eventTagId: AllEventTagId?
+    public var eventTagId: EventTagId?
     public var time: EventTime?
     public var repeating: EventRepeating?
     public var repeatingUpdateScope: RepeatingUpdateScope?

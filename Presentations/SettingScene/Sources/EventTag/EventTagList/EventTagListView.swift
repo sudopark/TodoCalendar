@@ -55,8 +55,8 @@ struct EventTagListContainerView: View {
     var onAppear: () -> Void = { }
     var addTag: () -> Void = { }
     var closeScene: () -> Void = { }
-    var toggleEventTagViewingIsOn: (AllEventTagId) -> Void = { _ in }
-    var showTagDetail: (AllEventTagId) -> Void = { _ in }
+    var toggleEventTagViewingIsOn: (EventTagId) -> Void = { _ in }
+    var showTagDetail: (EventTagId) -> Void = { _ in }
     
     init(
         hasNavigation: Bool,
@@ -91,8 +91,8 @@ struct EventTagListView: View {
     private let hasNavigation: Bool
     fileprivate var addTag: () -> Void = { }
     fileprivate var closeScene: () -> Void = { }
-    fileprivate var toggleEventTagViewingIsOn: (AllEventTagId) -> Void = { _ in }
-    fileprivate var showTagDetail: (AllEventTagId) -> Void = { _ in }
+    fileprivate var toggleEventTagViewingIsOn: (EventTagId) -> Void = { _ in }
+    fileprivate var showTagDetail: (EventTagId) -> Void = { _ in }
     
     init(hasNavigation: Bool) {
         self.hasNavigation = hasNavigation
@@ -186,7 +186,7 @@ struct EventTagListView: View {
     }
 }
 
-private extension AllEventTagId {
+private extension EventTagId {
     var compareKey: String {
         switch self {
         case .holiday: return "holiday"
@@ -196,21 +196,12 @@ private extension AllEventTagId {
     }
 }
 
-private extension EventTagColor {
-    var compareKey: String {
-        switch self {
-        case .holiday: return "holiday"
-        case .default: return "default"
-        case .custom(let hex): return hex
-        }
-    }
-}
 
 extension EventTagCellViewModel {
     
     var compareKey: String {
         let components = [
-            self.id.compareKey, self.name, self.customTagColorHex ?? "nil", "\(self.isOn)"
+            self.id.compareKey, self.name, self.colorHex, "\(self.isOn)"
         ]
         return components.joined(separator: "-")
     }
@@ -232,7 +223,8 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = EventTagListViewState()
         state.cellviewModels = (0..<20).map {
-            EventTagCellViewModel(id: .custom("id:\($0)"), name: "name:\($0)", customTagColorHex: "#ff0000")
+            let tag = CustomEventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "#ff0000")
+            return EventTagCellViewModel(tag)
         }
         return EventTagListView(hasNavigation: true)
             .eventHandler(\.toggleEventTagViewingIsOn) { id in

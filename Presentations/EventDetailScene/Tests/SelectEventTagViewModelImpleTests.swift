@@ -35,12 +35,12 @@ class SelectEventTagViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeViewModel(
-        previous: AllEventTagId
+        previous: EventTagId
     ) -> SelectEventTagViewModelImple {
         
         let usecase = StubEventTagUsecase()
-        let tags = (0..<3).reversed().map {
-            return EventTag(uuid: "id:\($0)", name: "n:\($0)", colorHex: "some")
+        let tags = (0..<3).map {
+            return CustomEventTag(uuid: "id:\($0)", name: "n:\($0)", colorHex: "some")
         }
         usecase.allTagsLoadResult = .success(tags)
         
@@ -141,7 +141,9 @@ extension SelectEventTagViewModelImpleTests {
         // when
         let tagLists = self.waitOutputs(expect, for: viewModel.tags) {
             viewModel.addTag()
-            viewModel.eventTag(created: .init(uuid: "new_tag", name: "new tag", colorHex: "some"))
+            viewModel.eventTag(
+                created: CustomEventTag(uuid: "new_tag", name: "new tag", colorHex: "some")
+            )
         }
         
         // then
@@ -162,7 +164,9 @@ extension SelectEventTagViewModelImpleTests {
         // when
         let selectedIds = self.waitOutputs(expect, for: viewModel.selectedTagId) {
             viewModel.addTag()
-            viewModel.eventTag(created: .init(uuid: "new_tag", name: "new tag", colorHex: "some"))
+            viewModel.eventTag(
+                created: CustomEventTag(uuid: "new_tag", name: "new tag", colorHex: "some")
+            )
         }
         
         // then
@@ -180,7 +184,9 @@ extension SelectEventTagViewModelImpleTests {
         // when
         let tagLists = self.waitOutputs(expect, for: viewModel.tags) {
             viewModel.moveToTagSetting()
-            viewModel.eventTag(updated: .init(uuid: "id:1", name: "new_name", colorHex: "some"))
+            viewModel.eventTag(
+                updated: CustomEventTag(uuid: "id:1", name: "new_name", colorHex: "some")
+            )
         }
         
         // then
@@ -203,7 +209,7 @@ extension SelectEventTagViewModelImpleTests {
         // when
         let tagLists = self.waitOutputs(expect, for: viewModel.tags) {
             viewModel.moveToTagSetting()
-            viewModel.eventTag(deleted: "id:1")
+            viewModel.eventTag(deleted: .custom("id:1"))
         }
         
         // then
@@ -224,7 +230,7 @@ extension SelectEventTagViewModelImpleTests {
         let selectedIds = self.waitOutputs(expect, for: viewModel.selectedTagId) {
             viewModel.selectTag(.custom("id:1"))
             viewModel.moveToTagSetting()
-            viewModel.eventTag(deleted: "id:1")
+            viewModel.eventTag(deleted: .custom("id:1"))
         }
         
         // then
@@ -246,10 +252,8 @@ extension SelectEventTagViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
         
         // then
-        XCTAssertEqual(self.spyListener.didSelectedTags, [
-            .init(.custom("id:1"), "n:1", "some"),
-            .defaultTag
-        ])
+        let selectTagIds = self.spyListener.didSelectedTags.map { $0.tagId }
+        XCTAssertEqual(selectTagIds, [.custom("id:1"), .default])
     }
 }
 

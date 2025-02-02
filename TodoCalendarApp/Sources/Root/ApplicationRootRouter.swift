@@ -129,7 +129,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         }
     }
     
-    func applyEventTagColors(_ tags: [EventTag]) {
+    func applyEventTagColors(_ tags: [any EventTag]) {
         self.appearance.updateEventColorMap(by: tags)
     }
     

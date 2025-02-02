@@ -222,11 +222,11 @@ extension AppSettingLocalStorage {
     
     func loadEventSetting(for userId: String?) -> EventSettings {
         let tagIdRaw: String? = self.environmentStorage.load(defaultNewEventTagId)
-        let tagId: AllEventTagId = tagIdRaw.map { value in
+        let tagId: EventTagId = tagIdRaw.map { value in
             switch value {
-            case "holiday": return AllEventTagId.holiday
-            case "default": return AllEventTagId.default
-            default: return AllEventTagId.custom(value)
+            case "holiday": return EventTagId.holiday
+            case "default": return EventTagId.default
+            default: return EventTagId.custom(value)
             }
         } ?? .default
         
@@ -253,7 +253,7 @@ extension AppSettingLocalStorage {
 }
 
 
-private extension AllEventTagId {
+private extension EventTagId {
     
     var rawValue: String {
         switch self {

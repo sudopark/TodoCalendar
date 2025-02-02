@@ -31,7 +31,7 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
         self.todoLocalStorage = .init(sqliteService: self.sqliteService)
         self.scheduleLocalStorage = .init(sqliteService: self.sqliteService)
         self.sqliteService.run { db in
-            try db.createTableOrNot(EventTagTable.self)
+            try db.createTableOrNot(CustomEventTagTable.self)
         }
         self.fakeEnvStore = .init()
     }
@@ -61,7 +61,7 @@ extension EventTagLocalRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let params = EventTagMakeParams(name: "some", colorHex: "hex")
+        let params = CustomEventTagMakeParams(name: "some", colorHex: "hex")
         let result = try? await repository.makeNewTag(params)
         
         // then
@@ -73,7 +73,7 @@ extension EventTagLocalRepositoryImpleTests {
     func testRepository_whenMakeNewTag_sameNameExists_error() async {
         // given
         let repository = self.makeRepository()
-        let params = EventTagEditParams(name: "some", colorHex: "hex")
+        let params = CustomEventTagEditParams(name: "some", colorHex: "hex")
         let _ = try? await repository.makeNewTag(params)
         
         // when
@@ -92,11 +92,11 @@ extension EventTagLocalRepositoryImpleTests {
     func testRepository_editTag() async {
         // given
         let repository = self.makeRepository()
-        let params = EventTagMakeParams(name: "old name", colorHex: "hex")
+        let params = CustomEventTagMakeParams(name: "old name", colorHex: "hex")
         let origin = try? await repository.makeNewTag(params)
         
         // when
-        let editParams = EventTagEditParams(name: "new name", colorHex: "new hex")
+        let editParams = CustomEventTagEditParams(name: "new name", colorHex: "new hex")
         let newOne = try? await repository.editTag(origin?.uuid ?? "", editParams)
         
         // then
@@ -109,13 +109,13 @@ extension EventTagLocalRepositoryImpleTests {
     func testRepository_whenEditTagAndSameNameExists_error() async {
         // given
         let repository = self.makeRepository()
-        let params = EventTagMakeParams(name: "same name", colorHex: "hex")
+        let params = CustomEventTagMakeParams(name: "same name", colorHex: "hex")
         let _ = try? await repository.makeNewTag(params)
-        let params2 = EventTagMakeParams(name: "not same name", colorHex: "hex2")
+        let params2 = CustomEventTagMakeParams(name: "not same name", colorHex: "hex2")
         let origin = try? await repository.makeNewTag(params2)
         
         // when
-        let editParams = EventTagEditParams(name: "same name", colorHex: "hex")
+        let editParams = CustomEventTagEditParams(name: "same name", colorHex: "hex")
         var failReason: RuntimeError?
         do {
             let _ = try await repository.editTag(origin?.uuid ?? "", editParams)
@@ -130,11 +130,11 @@ extension EventTagLocalRepositoryImpleTests {
     func testRepository_editOnlyhex() async {
         // given
         let repository = self.makeRepository()
-        let params = EventTagMakeParams(name: "origin", colorHex: "hex")
+        let params = CustomEventTagMakeParams(name: "origin", colorHex: "hex")
         let origin = try? await repository.makeNewTag(params)
         
         // when
-        let editParams = EventTagEditParams(name: "origin", colorHex: "new hex")
+        let editParams = CustomEventTagEditParams(name: "origin", colorHex: "new hex")
         let result = try? await repository.editTag(origin?.uuid ?? "", editParams)
         
         // then
@@ -146,13 +146,13 @@ extension EventTagLocalRepositoryImpleTests {
     func testRepository_whenDeleteTag_removeFromTagAndOffIds() async throws {
         // given
         let repository = self.makeRepository()
-        let params = EventTagMakeParams(name: "some", colorHex: "hex")
+        let params = CustomEventTagMakeParams(name: "some", colorHex: "hex")
         let origin = try await repository.makeNewTag(params)
         let _ = repository.toggleTagIsOn(.custom(origin.uuid))
         
         // when
         try await repository.deleteTag(origin.uuid)
-        let tagAfterDelete = try await repository.loadTags([origin.uuid]).firstValue(with: 100)
+        let tagAfterDelete = try await repository.loadCustomTags([origin.uuid]).firstValue(with: 100)
         let offIdsAfterDelete = repository.loadOffTags()
         
         // then
@@ -177,8 +177,8 @@ extension EventTagLocalRepositoryImpleTests {
         try await self.todoLocalStorage.updateTodoEvents(todoWithTag1 + todoWithTag2)
         try await self.scheduleLocalStorage.updateScheduleEvents(scheduleWithTag1 + scheduleWithTag2)
         
-        let tag1 = EventTag(uuid: "t1", name: "t1", colorHex: "some")
-        let tag2 = EventTag(uuid: "t2", name: "t2", colorHex: "some")
+        let tag1 = CustomEventTag(uuid: "t1", name: "t1", colorHex: "some")
+        let tag2 = CustomEventTag(uuid: "t2", name: "t2", colorHex: "some")
         try await self.localStorage.updateTags([tag1, tag2])
     }
     
@@ -204,7 +204,7 @@ extension EventTagLocalRepositoryImpleTests {
     
     
     // load tags
-    private func makeRepositoryWithStubSaveTags(_ tags: [EventTag]) async throws -> EventTagLocalRepositoryImple {
+    private func makeRepositoryWithStubSaveTags(_ tags: [CustomEventTag]) async throws -> EventTagLocalRepositoryImple {
         try await self.localStorage.updateTags(tags)
         return self.makeRepository()
     }
@@ -212,12 +212,12 @@ extension EventTagLocalRepositoryImpleTests {
     func testRepository_loadTagsByIds() async throws {
         // given
         let totalIds = (0..<10).map { "\($0)" }
-        let stubTags = totalIds.map { EventTag(uuid: $0, name: "name:\($0)", colorHex: "hex:\($0)")}
+        let stubTags = totalIds.map { CustomEventTag(uuid: $0, name: "name:\($0)", colorHex: "hex:\($0)")}
         let repository = try await self.makeRepositoryWithStubSaveTags(stubTags)
         
         // when
         let someIds = (0..<10).filter { $0 % 2 == 0 }.map { "\($0)" }
-        let tags = try await repository.loadTags(someIds).values.first(where: { _ in true })
+        let tags = try await repository.loadCustomTags(someIds).values.first(where: { _ in true })
         
         // then
         let ids = tags?.map { $0.uuid }
@@ -226,13 +226,13 @@ extension EventTagLocalRepositoryImpleTests {
     
     func testRepository_loadAllTags() async throws {
         // given
-        let totalTags = (0..<100).map { int -> EventTag in
+        let totalTags = (0..<100).map { int -> CustomEventTag in
             return .init(uuid: "id:\(int)", name: "some:\(int)", colorHex: "some")
         }
         let repository = try await self.makeRepositoryWithStubSaveTags(totalTags)
         
         // when
-        let tags = try await repository.loadAllTags().firstValue(with: 10)
+        let tags = try await repository.loadAllCustomTags().firstValue(with: 10)
         
         // then
         XCTAssertEqual(tags?.map { $0.uuid }, totalTags.map { $0.uuid })

@@ -20,7 +20,7 @@ struct ForemostEventWidgetViewModel {
     
     var eventModel: (any EventCellViewModel)?
     let defaultTagColorSetting: DefaultEventTagColorSetting
-    var tag: EventTag?
+    var tag: CustomEventTag?
     
     static func sample() -> ForemostEventWidgetViewModel {
         
@@ -71,7 +71,7 @@ extension ForemostEventWidgetViewModelProvider {
     private func loadForemostEventModel(
         _ refTime: Date,
         _ setting: CalendarAppearanceSettings
-    ) async throws -> ((any EventCellViewModel)?, EventTag?) {
+    ) async throws -> ((any EventCellViewModel)?, CustomEventTag?) {
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let dayRange = try calendar.dayRange(refTime).unwrap()

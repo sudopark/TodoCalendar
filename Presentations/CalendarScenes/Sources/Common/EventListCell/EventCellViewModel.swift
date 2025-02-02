@@ -150,7 +150,7 @@ public struct EventListMoreActionModel: Sendable, Equatable {
 public protocol EventCellViewModel: Sendable {
     
     var eventIdentifier: String { get }
-    var tagId: AllEventTagId { get }
+    var tagId: EventTagId { get }
     var name: String { get }
     var periodText: EventPeriodText? { get set }
     var periodDescription: String? { get set }
@@ -178,7 +178,7 @@ extension EventCellViewModel {
 public struct TodoEventCellViewModel: EventCellViewModel {
     
     public let eventIdentifier: String
-    public var tagId: AllEventTagId
+    public var tagId: EventTagId
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
@@ -230,7 +230,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
 struct PendingTodoEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
-    var tagId: AllEventTagId
+    var tagId: EventTagId
     let name: String
     var periodText: EventPeriodText? = .singleText(
         .init(text: R.String.calendarEventTimeTodo)
@@ -259,7 +259,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public let eventIdWithoutTurn: String
     public let eventIdentifier: String
     public let turn: Int?
-    public var tagId: AllEventTagId
+    public var tagId: EventTagId
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
@@ -320,7 +320,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
 public struct HolidayEventCellViewModel: EventCellViewModel {
     
     public let eventIdentifier: String
-    public var tagId: AllEventTagId
+    public var tagId: EventTagId
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?

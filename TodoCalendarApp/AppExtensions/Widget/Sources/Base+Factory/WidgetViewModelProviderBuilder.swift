@@ -122,7 +122,7 @@ extension WidgetViewModelProviderBuilder {
     
     func makeEventListViewModelProvider(
         shouldSkipCheckCacheReset: Bool = false,
-        targetEventTagId: AllEventTagId
+        targetEventTagId: EventTagId
     ) async -> EventListWidgetViewModelProvider {
         
         if !shouldSkipCheckCacheReset {
@@ -274,7 +274,7 @@ extension WidgetViewModelProviderBuilder {
 extension WidgetViewModelProviderBuilder {
     
     func makeEventAndMonthWidgetViewModelProvider(
-        targetEventTagId: AllEventTagId
+        targetEventTagId: EventTagId
     ) async -> EventAndMonthWidgetViewModelProvider {
         
         await self.checkShouldReset()

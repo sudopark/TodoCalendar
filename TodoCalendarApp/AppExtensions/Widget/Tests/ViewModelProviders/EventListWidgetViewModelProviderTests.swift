@@ -19,7 +19,7 @@ import TestDoubles
 class EventListWidgetViewModelProviderTests: BaseTestCase {
         
     private func makeProvider(
-        selectTagId: AllEventTagId = .default,
+        selectTagId: EventTagId = .default,
         withCurrentTodo: Bool = true,
         withStartDateEvent: Bool = true,
         withoutAnyEventsIncludeHoliday: Bool = false
@@ -463,7 +463,7 @@ extension EventListWidgetViewModelProviderTests {
 extension EventListWidgetViewModelProviderTests {
     
     private func makeProviderWithMultipleTagHasEvents(
-        select tagId: AllEventTagId
+        select tagId: EventTagId
     ) -> EventListWidgetViewModelProvider {
         
         final class EventsWithTagFetchUescase: CalendarEventFetchUsecase {
@@ -471,7 +471,7 @@ extension EventListWidgetViewModelProviderTests {
             func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
                 let kst = TimeZone(abbreviation: "KST")!
                 let currents = (0..<10).map { int -> TodoEvent in
-                    let tagId: AllEventTagId = int % 3 == 0
+                    let tagId: EventTagId = int % 3 == 0
                         ? .custom("t3") : int % 5 == 0 
                         ? .custom("t5") : .default
                     return TodoEvent(uuid: "\(int)", name: "current")
@@ -508,7 +508,7 @@ extension EventListWidgetViewModelProviderTests {
     func testProvider_provideEventsWithFilteringByTag() async throws {
         // given
         func parameterizeTest(
-            _ target: AllEventTagId,
+            _ target: EventTagId,
             expectIds: [String]
         ) async throws {
             // given

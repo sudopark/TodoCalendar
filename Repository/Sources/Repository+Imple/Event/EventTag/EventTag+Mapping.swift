@@ -15,9 +15,9 @@ private enum CodingKeys: String, CodingKey {
     case colorHex = "color_hex"
 }
 
-struct EventTagMapper: Decodable {
+struct CustomEventTagMapper: Decodable {
     
-    let tag: EventTag
+    let tag: CustomEventTag
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -29,7 +29,7 @@ struct EventTagMapper: Decodable {
     }
 }
 
-extension EventTagMakeParams {
+extension CustomEventTagMakeParams {
     
     func asJson() -> [String: Any] {
         return [
@@ -50,7 +50,7 @@ struct RemoveEventTagAndResultMapper: Decodable {
         case todos
         case schedules
     }
-    let result: RemoveEventTagWithEventsResult
+    let result: RemoveCustomEventTagWithEventsResult
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

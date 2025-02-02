@@ -41,12 +41,12 @@ public class ViewAppearance: ObservableObject {
     @Published public var animationEffectOff: Bool
     
     // event tag color
-    @Published public var allEventTagColorMap: [AllEventTagId: UIColor] = [:]
-    public func color(_ id: AllEventTagId?) -> UIColor {
+    @Published public var allEventTagColorMap: [EventTagId: UIColor] = [:]
+    public func color(_ id: EventTagId?) -> UIColor {
         return allEventTagColorMap[id ?? .default] ??  allEventTagColorMap[.default] ?? .clear
     }
     
-    public func colorOnCalendar(_ id: AllEventTagId?) -> UIColor {
+    public func colorOnCalendar(_ id: EventTagId?) -> UIColor {
         guard self.eventOnCalendarShowEventTagColor
         else { return .clear }
         return self.color(id)
@@ -80,15 +80,10 @@ public class ViewAppearance: ObservableObject {
         self.animationEffectOff = calendar.animationEffectIsOn
     }
     
-    public func updateEventColorMap(by allEventTags: [EventTag]) {
-        let defColors: [AllEventTagId: UIColor] = [
-            .holiday: self.tagColors.holiday,
-            .default: self.tagColors.defaultColor
-        ]
-        let customColors = allEventTags.reduce(into: [AllEventTagId: UIColor]()) { acc, tag in
-            acc[.custom(tag.uuid)] = UIColor.from(hex: tag.colorHex)
+    public func updateEventColorMap(by allEventTags: [any EventTag]) {
+        self.allEventTagColorMap = allEventTags.reduce(into: [EventTagId: UIColor]()) { acc, tag in
+            acc[tag.tagId] = UIColor.from(hex: tag.colorHex)
         }
-        self.allEventTagColorMap = customColors.merging(defColors) { $1 }
     }
 }
 

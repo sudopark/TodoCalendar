@@ -59,64 +59,68 @@ class EventTagDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private var customTagInfo: OriginalTagInfo {
-        return .init(id: .custom("some"), name: "custom", customColorHex: "old-hex")
+        return .init(id: .custom("some"), name: "custom", colorHex: "old-hex")
     }
     
     private var holidayTagInfo: OriginalTagInfo {
-        return .init(id: .holiday, name: "holiday", customColorHex: nil)
+        return .init(id: .holiday, name: "holiday", colorHex: "holiday")
     }
     
     private var defaultTagInfo: OriginalTagInfo {
-        return .init(id: .default, name: "default", customColorHex: nil)
+        return .init(id: .default, name: "default", colorHex: "default")
     }
 }
 
 extension EventTagDetailViewModelImpleTests {
     
     // holiday => original info + deletable
-    func testViewModel_provideInfosForHolidayTag() {
+    func testViewModel_provideInfosForHolidayTag() async throws {
         // given
         let viewModel = self.makeViewModel(info: self.holidayTagInfo)
         
         // when + then
         XCTAssertEqual(viewModel.originalName, "holiday")
-        XCTAssertEqual(viewModel.originalColor, .holiday)
+        let originColor = try await viewModel.originalColorHex.firstValue(with: 1)
+        XCTAssertEqual(originColor, "holiday")
         XCTAssertEqual(viewModel.isDeletable, false)
         XCTAssertEqual(viewModel.isNameChangable, false)
     }
     
     // default => original info  + deletable
-    func testViewModel_provideInfosForDefaultTag() {
+    func testViewModel_provideInfosForDefaultTag() async throws {
         // given
         let viewModel = self.makeViewModel(info: self.defaultTagInfo)
         
         // when + then
         XCTAssertEqual(viewModel.originalName, "default")
-        XCTAssertEqual(viewModel.originalColor, .default)
+        let originColor = try await viewModel.originalColorHex.firstValue(with: 1)
+        XCTAssertEqual(originColor, "default")
         XCTAssertEqual(viewModel.isDeletable, false)
         XCTAssertEqual(viewModel.isNameChangable, false)
     }
     
     // custom => original info  + deletable
-    func testViewModel_provideInfoForCustomTag() {
+    func testViewModel_provideInfoForCustomTag() async throws {
         // given
         let viewModel = self.makeViewModel(info: self.customTagInfo)
         
         // when + then
         XCTAssertEqual(viewModel.originalName, "custom")
-        XCTAssertEqual(viewModel.originalColor, .custom(hex: "old-hex"))
+        let originColor = try await viewModel.originalColorHex.firstValue(with: 1)
+        XCTAssertEqual(originColor, "old-hex")
         XCTAssertEqual(viewModel.isDeletable, true)
         XCTAssertEqual(viewModel.isNameChangable, true)
     }
     
     // make case
-    func testViewModel_provideInfoForMakeCase() {
+    func testViewModel_provideInfoForMakeCase() async throws {
         // given
         let viewModel = self.makeViewModel(info: nil)
         
         // when + then
         XCTAssertEqual(viewModel.originalName, nil)
-        XCTAssertEqual(viewModel.originalColor, .default)
+        let originColor = try await viewModel.originalColorHex.firstValue(with: 1)
+        XCTAssertEqual(originColor != nil, true)
         XCTAssertEqual(viewModel.isDeletable, false)
         XCTAssertEqual(viewModel.isNameChangable, true)
     }
@@ -128,24 +132,26 @@ extension EventTagDetailViewModelImpleTests {
 extension EventTagDetailViewModelImpleTests {
     
     // 색상정보 제공
-    func testViewModel_whenHolidayTag_provideHolidayColor() {
+    func testViewModel_whenHolidayTag_provideHolidayColor() async throws {
         // given
         let viewModel = self.makeViewModel(info: self.holidayTagInfo)
         
         // when
         XCTAssertEqual(viewModel.originalName, "holiday")
-        XCTAssertEqual(viewModel.originalColor, .holiday)
+        let originColor = try await viewModel.originalColorHex.firstValue(with: 1)
+        XCTAssertEqual(originColor, "holiday")
         XCTAssertEqual(viewModel.isDeletable, false)
         XCTAssertEqual(viewModel.isNameChangable, false)
     }
     
-    func testViewModel_whenHoliday_changeColor() {
+    func testViewModel_whenHoliday_changeColor() async throws {
         // given
         let viewModel = self.makeViewModel(info: self.defaultTagInfo)
         
         // when
         XCTAssertEqual(viewModel.originalName, "default")
-        XCTAssertEqual(viewModel.originalColor, .default)
+        let originColor = try await viewModel.originalColorHex.firstValue(with: 1)
+        XCTAssertEqual(originColor, "default")
         XCTAssertEqual(viewModel.isDeletable, false)
         XCTAssertEqual(viewModel.isNameChangable, false)
     }
@@ -208,14 +214,14 @@ extension EventTagDetailViewModelImpleTests {
         let viewModel = self.makeViewModel(info: self.customTagInfo)
         
         // when
-        let colors = self.waitOutputs(expect, for: viewModel.selectedColor) {
+        let colors = self.waitOutputs(expect, for: viewModel.selectedColorHex) {
             viewModel.selectColor("new-color-1")
             viewModel.selectColor("new-color-2")
         }
         
         // then
         XCTAssertEqual(colors, [
-            .custom(hex: "old-hex"), .custom(hex: "new-color-1"), .custom(hex: "new-color-2")
+            "old-hex", "new-color-1", "new-color-2"
         ])
     }
     
@@ -445,18 +451,18 @@ private class SpyRouter: BaseSpyRouter, EventTagDetailRouting, @unchecked Sendab
 
 private class SpyListener: EventTagDetailSceneListener, @unchecked Sendable {
     
-    var didCreated: ((EventTag) -> Void)?
-    func eventTag(created newTag: EventTag) {
+    var didCreated: ((any EventTag) -> Void)?
+    func eventTag(created newTag: any EventTag) {
         self.didCreated?(newTag)
     }
     
-    var didDeleted: ((String) -> Void)?
-    func eventTag(deleted tagId: String) {
+    var didDeleted: ((EventTagId) -> Void)?
+    func eventTag(deleted tagId: EventTagId) {
         self.didDeleted?(tagId)
     }
     
-    var didUpdated: ((EventTag) -> Void)?
-    func eventTag(updated newTag: EventTag) {
+    var didUpdated: ((any EventTag) -> Void)?
+    func eventTag(updated newTag: any EventTag) {
         self.didUpdated?(newTag)
     }
 }

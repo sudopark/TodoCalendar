@@ -37,7 +37,7 @@ extension SelectEventTagSceneBuilerImple: SelectEventTagSceneBuiler {
     
     @MainActor
     func makeSelectEventTagScene(
-        startWith initail: AllEventTagId,
+        startWith initail: EventTagId,
         listener: (any SelectEventTagSceneListener)?
     ) -> any SelectEventTagScene {
         

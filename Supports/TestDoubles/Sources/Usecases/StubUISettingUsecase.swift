@@ -75,8 +75,8 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
     }
     
     public var didAppluEventTagColorCallback: (() -> Void)?
-    public var didApplyTagColorsRequestedWith: [EventTag]?
-    public func applyEventTagColors(_ tags: [EventTag]) {
+    public var didApplyTagColorsRequestedWith: [any EventTag]?
+    public func applyEventTagColors(_ tags: [any EventTag]) {
         self.didApplyTagColorsRequestedWith = tags
         self.didAppluEventTagColorCallback?()
     }

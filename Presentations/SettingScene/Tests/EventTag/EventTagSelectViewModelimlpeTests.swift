@@ -37,8 +37,8 @@ class EventTagSelectViewModelimlpeTests: BaseTestCase, PublisherWaitable {
     
     func makeViewModel() -> EventTagSelectViewModelImple {
         
-        let tags: [EventTag] = (0..<10).map {
-            return EventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "")
+        let tags: [any EventTag] = (0..<10).map {
+            return CustomEventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "")
         }
         let tagUsecase = StubEventTagUsecase()
         tagUsecase.allTagsLoadResult = .success(tags)
@@ -68,7 +68,7 @@ extension EventTagSelectViewModelimlpeTests {
         // then
         let ids = tags?.map { $0.id }
         XCTAssertEqual(
-            ids, [.default] + (0..<10).map { AllEventTagId.custom("id:\($0)") }
+            ids, [.default] + (0..<10).map { EventTagId.custom("id:\($0)") }
         )
     }
     

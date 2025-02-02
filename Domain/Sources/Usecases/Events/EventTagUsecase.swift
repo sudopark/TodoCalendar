@@ -16,20 +16,20 @@ import Extensions
 
 public protocol EventTagUsecase: AnyObject, Sendable {
     
-    func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag
-    func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag
+    func makeNewTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag
+    func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag
     func deleteTag(_ tagId: String) async throws
     func deleteTagWithAllEvents(_ tagId: String) async throws
     
     func prepare()
-    func refreshTags(_ ids: [String])
-    func eventTag(id: String) -> AnyPublisher<EventTag, Never>
-    func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never>
-    func loadAllEventTags() -> AnyPublisher<[EventTag], any Error>
-    var sharedEventTags: AnyPublisher<[String: EventTag], Never> { get }
+    func refreshCustomTags(_ ids: [String])
+    func eventTag(id: EventTagId) -> AnyPublisher<any EventTag, Never>
+    func eventTags(_ ids: [EventTagId]) -> AnyPublisher<[EventTagId: any EventTag], Never>
+    func loadAllEventTags() -> AnyPublisher<[any EventTag], any Error>
+    var sharedEventTags: AnyPublisher<[EventTagId: any EventTag], Never> { get }
     
-    func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId)
-    func offEventTagIdsOnCalendar() -> AnyPublisher<Set<AllEventTagId>, Never>
+    func toggleEventTagIsOnCalendar(_ tagId: EventTagId)
+    func offEventTagIdsOnCalendar() -> AnyPublisher<Set<EventTagId>, Never>
 }
 
 
@@ -65,13 +65,13 @@ public final class EventTagUsecaseImple: EventTagUsecase, @unchecked Sendable {
 
 extension EventTagUsecaseImple {
     
-    public func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag {
+    public func makeNewTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag {
         let tag = try await self.tagRepository.makeNewTag(params)
         self.updateSharedTags([tag])
         return tag
     }
     
-    public func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag {
+    public func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag {
         let updated = try await self.tagRepository.editTag(tagId, params)
         self.updateSharedTags([updated])
         return updated
@@ -90,17 +90,17 @@ extension EventTagUsecaseImple {
     }
     
     private func handleTagDeleted(_ tagId: String) {
-        self.sharedDataStore.update([String: EventTag].self, key: self.shareKey) {
-            ($0 ?? [:]) |> key(tagId) .~ nil
+        self.sharedDataStore.update([EventTagId: any EventTag].self, key: self.shareKey) {
+            ($0 ?? [:]) |> key(.custom(tagId)) .~ nil
         }
-        self.sharedDataStore.update(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue) {
+        self.sharedDataStore.update(Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue) {
             ($0 ?? []) |> elem(.custom(tagId)) .~ false
         }
     }
     
-    private func updateSharedTags(_ tags: [EventTag]) {
-        let newMap = tags.asDictionary { $0.uuid }
-        self.sharedDataStore.update([String: EventTag].self, key: self.shareKey) {
+    private func updateSharedTags(_ tags: [CustomEventTag]) {
+        let newMap = tags.asDictionary { $0.tagId }
+        self.sharedDataStore.update([EventTagId: any EventTag].self, key: self.shareKey) {
             ($0 ?? [:]).merging(newMap) { $1 }
         }
     }
@@ -109,6 +109,7 @@ extension EventTagUsecaseImple {
 extension EventTagUsecaseImple {
     
     public func prepare() {
+        self.bindDefaultTags()
         self.bindRefreshRequireTagInfos()
     }
     
@@ -124,6 +125,8 @@ extension EventTagUsecaseImple {
             .map { ss in ss.compactMap { $0.eventTagId?.customTagId } }
             .map { Set($0) }
         
+        // TODO: 완료되지않은 할일 tag도 합성 필요
+        
         let refreshNeedTagIds = Publishers.CombineLatest(allTagIdsFromTodos, allTagIdsSchedules)
             .map { $0.0.union($0.1 ) }
             .scan(AllTagIds.empty) { $0.updated($1) }
@@ -135,76 +138,114 @@ extension EventTagUsecaseImple {
         refreshNeedTagIds
             .subscribe(on: self.refreshBindingQueue)
             .sink(receiveValue: { [weak self] ids in
-                self?.refreshTags(ids)
+                self?.refreshCustomTags(ids)
             })
             .store(in: &self.cancellables)
         
         let offIds = self.tagRepository.loadOffTags()
-        self.sharedDataStore.put(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, offIds)
+        self.sharedDataStore.put(Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, offIds)
     }
     
-    public func refreshTags(_ ids: [String]) {
+    private func bindDefaultTags() {
+        let key = self.shareKey
+        let updateStore: ([EventTagId: DefaultEventTag]) -> Void = { [weak self] defs in
+            self?.sharedDataStore.update([EventTagId: any EventTag].self, key: key) {
+                ($0 ?? [:]).merging(defs) { $1 }
+            }
+        }
+        
+        self.defaultTags
+            .removeDuplicates()
+            .map { $0.asDictionary { $0.tagId }}
+            .sink(receiveValue: updateStore)
+            .store(in: &self.cancellables)
+    }
+    
+    public func refreshCustomTags(_ ids: [String]) {
         
         let shareKey = self.shareKey
-        let updateCached: ([EventTag]) -> Void = { [weak self] tags in
-            let newMap = tags.asDictionary { $0.uuid }
-            self?.sharedDataStore.update([String: EventTag].self, key: shareKey) {
+        let updateCached: ([CustomEventTag]) -> Void = { [weak self] tags in
+            let newMap = tags.reduce(into: [EventTagId: any EventTag]()) { acc, tag in
+                acc[.custom(tag.uuid)] = tag
+            }
+            self?.sharedDataStore.update([EventTagId: any EventTag].self, key: shareKey) {
                 ($0 ?? [:]).merging(newMap) { $1 }
             }
         }
         
-        self.tagRepository.loadTags(ids)
+        self.tagRepository.loadCustomTags(ids)
             .sink(receiveCompletion: { _ in }, receiveValue: updateCached)
             .store(in: &self.cancellables)
     }
     
-    public func eventTag(id: String) -> AnyPublisher<EventTag, Never> {
-        return self.sharedDataStore.observe([String: EventTag].self, key: self.shareKey)
+    public func eventTag(id: EventTagId) -> AnyPublisher<any EventTag, Never> {
+        return self.sharedDataStore.observe([EventTagId: any EventTag].self, key: self.shareKey)
             .compactMap { $0?[id] }
             .eraseToAnyPublisher()
     }
     
-    public func eventTags(_ ids: [String]) -> AnyPublisher<[String : EventTag], Never> {
+    public func eventTags(_ ids: [EventTagId]) -> AnyPublisher<[EventTagId : any EventTag], Never> {
+        
         let idsSet = Set(ids)
-        return self.sharedDataStore.observe([String: EventTag].self, key: self.shareKey)
+        return self.sharedDataStore.observe([EventTagId: any EventTag].self, key: self.shareKey)
             .map { tagMap in
                 return (tagMap ?? [:]).filter { idsSet.contains($0.key) }
             }
             .eraseToAnyPublisher()
     }
     
-    public func loadAllEventTags() -> AnyPublisher<[EventTag], any Error> {
-        let updateCached: ([EventTag]) -> Void = { [weak self] tags in
-            let newMap = tags.asDictionary { $0.uuid }
-            self?.sharedDataStore.put(
-                [String: EventTag].self,
-                key: ShareDataKeys.tags.rawValue,
-                newMap
-            )
+    public func loadAllEventTags() -> AnyPublisher<[any EventTag], any Error> {
+        let key = self.shareKey
+        let updateCached: ([CustomEventTag]) -> Void = { [weak self] tags in
+            let newMap = tags.asDictionary { $0.tagId }.mapValues { $0 as any EventTag }
+            self?.sharedDataStore.update([EventTagId: any EventTag].self, key: key) { oldMap in
+                let defs = (oldMap ?? [:]).filter { $0.key == .default || $0.key == .holiday }
+                let combined = newMap.merging(defs) { c, _ in c  }
+                return combined
+            }
         }
-        return self.tagRepository.loadAllTags()
+        
+        let loadAllCustomTagsWithUpdateCache = self.tagRepository.loadAllCustomTags()
             .handleEvents(receiveOutput: updateCached)
+            .map { $0 as [any EventTag] }
+        
+        typealias Pair = ([any EventTag], [DefaultEventTag])
+        return loadAllCustomTagsWithUpdateCache
+            .compactMap { [weak self] customs in
+                return self?.defaultTags.map { Pair(customs, $0) }
+            }
+            .switchToLatest()
+            .map { $0.0 + $0.1 }
             .eraseToAnyPublisher()
     }
     
-    public var sharedEventTags: AnyPublisher<[String: EventTag], Never> {
-        return self.sharedDataStore.observe([String: EventTag].self, key: self.shareKey)
+    public var sharedEventTags: AnyPublisher<[EventTagId: any EventTag], Never> {
+        return self.sharedDataStore.observe([EventTagId: any EventTag].self, key: self.shareKey)
             .map { $0 ?? [:] }
-            .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    private var defaultTags: AnyPublisher<[DefaultEventTag], Never> {
+        return self.sharedDataStore.observe(
+            DefaultEventTagColorSetting.self, key: ShareDataKeys.defaultEventTagColor.rawValue
+        )
+        .map { setting in
+            return setting.map { [DefaultEventTag.default($0.default), .holiday($0.holiday)] } ?? []
+        }
+        .eraseToAnyPublisher()
     }
 }
 
 extension EventTagUsecaseImple {
     
-    public func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId) {
+    public func toggleEventTagIsOnCalendar(_ tagId: EventTagId) {
         let newSet = self.tagRepository.toggleTagIsOn(tagId)
-        self.sharedDataStore.put(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, newSet)
+        self.sharedDataStore.put(Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, newSet)
     }
     
-    public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<AllEventTagId>, Never> {
+    public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<EventTagId>, Never> {
         return self.sharedDataStore
-            .observe(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue)
+            .observe(Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue)
             .map { $0 ?? [] }
             .eraseToAnyPublisher()
     }

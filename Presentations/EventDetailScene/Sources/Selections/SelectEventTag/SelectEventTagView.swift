@@ -23,7 +23,7 @@ final class SelectEventTagViewState: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     
     @Published var tags: [TagCellViewModel] = []
-    @Published var selectedTagId: AllEventTagId?
+    @Published var selectedTagId: EventTagId?
     
     func bind(_ viewModel: any SelectEventTagViewModel) {
         
@@ -51,7 +51,7 @@ final class SelectEventTagViewState: ObservableObject {
 final class SelectEventTagViewEventHandler: ObservableObject {
  
     var onAppear: () -> Void = { }
-    var selectTag: (AllEventTagId) -> Void = { _ in }
+    var selectTag: (EventTagId) -> Void = { _ in }
     var addTag: () -> Void = { }
     var moveToTagSeting: () -> Void = { }
     var close: () -> Void = { }
@@ -226,7 +226,7 @@ struct SelectEventTagViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = SelectEventTagViewState()
         state.tags = [
-            .init(.init(.default, "default", nil)),
+            .init(.init(.default, "default", "#ff00ff")),
             .init(.init(.custom("some"), "some", "#00ffdd")),
             .init(.init(.custom("some1"), "some1", "#00ffdd")),
             .init(.init(.custom("som2"), "some2", "#00ffdd")),

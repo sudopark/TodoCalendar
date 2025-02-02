@@ -10,14 +10,14 @@ import Combine
 
 public protocol EventTagRepository: Sendable {
     
-    func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag
-    func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag
+    func makeNewTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag
+    func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag
     func deleteTag(_ tagId: String) async throws
-    func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveEventTagWithEventsResult
+    func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult
     
-    func loadAllTags() -> AnyPublisher<[EventTag], any Error>
-    func loadTags(_ ids: [String]) -> AnyPublisher<[EventTag], any Error>
+    func loadAllCustomTags() -> AnyPublisher<[CustomEventTag], any Error>
+    func loadCustomTags(_ ids: [String]) -> AnyPublisher<[CustomEventTag], any Error>
     
-    func loadOffTags() -> Set<AllEventTagId>
-    func toggleTagIsOn(_ tagId: AllEventTagId) -> Set<AllEventTagId>
+    func loadOffTags() -> Set<EventTagId>
+    func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId>
 }
