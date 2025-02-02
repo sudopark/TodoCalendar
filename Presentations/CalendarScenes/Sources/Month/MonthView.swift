@@ -459,7 +459,7 @@ private struct DummyCalendarEvent: CalendarEvent {
     var name: String
     var eventTime: EventTime?
     var eventTimeOnCalendar: EventTimeOnCalendar?
-    var eventTagId: AllEventTagId
+    var eventTagId: EventTagId
     var isRepeating: Bool = false
     var isForemost: Bool = false
 

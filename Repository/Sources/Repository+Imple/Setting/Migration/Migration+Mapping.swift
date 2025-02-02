@@ -18,14 +18,14 @@ struct BatchWriteResult: Decodable {
 
 struct BatchEventTagPayload {
     
-    private let tags: [EventTag]
-    init(tags: [EventTag]) {
+    private let tags: [CustomEventTag]
+    init(tags: [CustomEventTag]) {
         self.tags = tags
     }
     
     func asJson() -> [String: Any] {
         return self.tags.reduce(into: [String: Any]()) { acc, tag in
-            let params = EventTagMakeParams(name: tag.name, colorHex: tag.colorHex)
+            let params = CustomEventTagMakeParams(name: tag.name, colorHex: tag.colorHex)
             acc[tag.uuid] = params.asJson()
         }
     }

@@ -19,8 +19,8 @@ extension IntentHandler: EventListTypeSelectIntentHandling {
         
         let factory = IntentReposiotryFactory(base: AppExtensionBase())
         let repository = factory.makeEventTagRepository()
-        var allTags: [EventTag] = []
-        for try await ts in repository.loadAllTags().values {
+        var allTags: [CustomEventTag] = []
+        for try await ts in repository.loadAllCustomTags().values {
             allTags = ts
         }
         let defaultType = EvnetListType(identifier: "default", display: "All")

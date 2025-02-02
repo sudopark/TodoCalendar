@@ -32,7 +32,7 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
     open func updateScheduleEvent(_ eventId: String, _ params: SchedulePutParams) async throws -> ScheduleEvent {
         try self.checkShouldFail(self.shouldFailUpdate)
         let time: EventTime = params.time ?? .at(0)
-        let eventTagId: AllEventTagId? = params.eventTagId ?? self.updateOriginEventMocking?.eventTagId
+        let eventTagId: EventTagId? = params.eventTagId ?? self.updateOriginEventMocking?.eventTagId
         let repeating: EventRepeating? = params.repeating ?? self.updateOriginEventMocking?.repeating
         let showTurn: Bool = params.showTurn ?? self.updateOriginEventMocking?.showTurn ?? false
         return ScheduleEvent(uuid: eventId, name: params.name ?? "", time: time)

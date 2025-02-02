@@ -52,8 +52,8 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
     private func prepareDummyData() async throws {
         defer { self.sqliteService.close() }
         let tags = [
-            EventTag(uuid: "t1", name: "n1", colorHex: "some"),
-            EventTag(uuid: "t2", name: "n2", colorHex: "some"),
+            CustomEventTag(uuid: "t1", name: "n1", colorHex: "some"),
+            CustomEventTag(uuid: "t2", name: "n2", colorHex: "some"),
         ]
         let tagStorage = EventTagLocalStorageImple(sqliteService: self.sqliteService)
         try await tagStorage.updateTags(tags)

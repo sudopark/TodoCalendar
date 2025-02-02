@@ -54,7 +54,7 @@ public protocol CalendarEvent: Sendable {
     var name: String { get }
     var eventTime: EventTime? { get }
     var eventTimeOnCalendar: EventTimeOnCalendar? { get }
-    var eventTagId: AllEventTagId { get }
+    var eventTagId: EventTagId { get }
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
 }
@@ -91,7 +91,7 @@ public struct TodoCalendarEvent: CalendarEvent {
     public let name: String
     public let eventTime: EventTime?
     public let eventTimeOnCalendar: EventTimeOnCalendar?
-    public let eventTagId: AllEventTagId
+    public let eventTagId: EventTagId
     public let isRepeating: Bool
     public var isForemost: Bool = false
     public var createdAt: TimeInterval?
@@ -141,7 +141,7 @@ public struct ScheduleCalendarEvent: CalendarEvent {
     public let name: String
     public let eventTime: EventTime?
     public let eventTimeOnCalendar: EventTimeOnCalendar?
-    public let eventTagId: AllEventTagId
+    public let eventTagId: EventTagId
     public var turn: Int = 0
     public let isRepeating: Bool
     public var isForemost: Bool = false
@@ -177,7 +177,7 @@ public struct HolidayCalendarEvent: CalendarEvent {
     public let name: String
     public let eventTime: EventTime?
     public let eventTimeOnCalendar: EventTimeOnCalendar?
-    public let eventTagId: AllEventTagId
+    public let eventTagId: EventTagId
     public let isRepeating: Bool = true
     public let isForemost: Bool = false
     
@@ -207,10 +207,10 @@ extension Publisher where Output: Sequence, Failure == Never {
     
     public func filterTagActivated(
         _ tagUseacse: any EventTagUsecase,
-        tagSelector: @escaping (Output.Element) -> AllEventTagId
+        tagSelector: @escaping (Output.Element) -> EventTagId
     ) -> AnyPublisher<[Output.Element], Never> {
         
-        let filtering: (Output, Set<AllEventTagId>) -> [Output.Element]
+        let filtering: (Output, Set<EventTagId>) -> [Output.Element]
         filtering = { outputs, offIds in
             return outputs.filter { !offIds.contains(tagSelector($0)) }
         }

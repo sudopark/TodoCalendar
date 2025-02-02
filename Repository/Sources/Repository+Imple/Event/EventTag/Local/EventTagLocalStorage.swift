@@ -11,13 +11,13 @@ import Domain
 
 
 public protocol EventTagLocalStorage: Sendable {
-    func saveTag(_ tag: EventTag) async throws
-    func editTag(_ uuid: String, with params: EventTagEditParams) async throws
-    func updateTags(_ tags: [EventTag]) async throws
+    func saveTag(_ tag: CustomEventTag) async throws
+    func editTag(_ uuid: String, with params: CustomEventTagEditParams) async throws
+    func updateTags(_ tags: [CustomEventTag]) async throws
     func deleteTags(_ tagIds: [String]) async throws
-    func loadTag(match name: String) async throws -> [EventTag]
-    func loadTags(in ids: [String]) async throws -> [EventTag]
-    func loadAllTags() async throws -> [EventTag]
+    func loadTag(match name: String) async throws -> [CustomEventTag]
+    func loadTags(in ids: [String]) async throws -> [CustomEventTag]
+    func loadAllTags() async throws -> [CustomEventTag]
     func removeAllTags() async throws
 }
 extension EventTagLocalStorage {
@@ -34,19 +34,19 @@ public final class EventTagLocalStorageImple: EventTagLocalStorage {
         self.sqliteService = sqliteService
     }
     
-    private typealias Tags = EventTagTable
+    private typealias Tags = CustomEventTagTable
 }
 
 
 extension EventTagLocalStorageImple {
     
-    public func saveTag(_ tag: EventTag) async throws {
+    public func saveTag(_ tag: CustomEventTag) async throws {
         try await self.sqliteService.async.run { db in
             try db.insertOne(Tags.self, entity: tag, shouldReplace: true)
         }
     }
     
-    public func editTag(_ uuid: String, with params: EventTagEditParams) async throws {
+    public func editTag(_ uuid: String, with params: CustomEventTagEditParams) async throws {
         try await self.sqliteService.async.run { db in
             let query = Tags.update {[
                 $0.name == params.name,
@@ -57,7 +57,7 @@ extension EventTagLocalStorageImple {
         }
     }
     
-    public func updateTags(_ tags: [EventTag]) async throws {
+    public func updateTags(_ tags: [CustomEventTag]) async throws {
         try await self.sqliteService.async.run { db in
             try db.insert(Tags.self, entities: tags)
         }
@@ -70,19 +70,19 @@ extension EventTagLocalStorageImple {
         }
     }
     
-    public func loadTag(match name: String) async throws -> [EventTag] {
+    public func loadTag(match name: String) async throws -> [CustomEventTag] {
         let query = Tags.selectAll { $0.name == name }
         return try await self.sqliteService.async.run { try $0.load(query) }
     }
     
-    public func loadTags(in ids: [String]) async throws -> [EventTag] {
+    public func loadTags(in ids: [String]) async throws -> [CustomEventTag] {
         let query = Tags.selectAll { $0.uuid.in(ids) }
         return try await self.sqliteService.async.run { db in
             return try db.load(Tags.self, query: query)
         }
     }
     
-    public func loadAllTags() async throws -> [EventTag] {
+    public func loadAllTags() async throws -> [CustomEventTag] {
         let query = Tags.selectAll()
         return try await self.sqliteService.async.run { db in
             return try db.load(Tags.self, query: query)

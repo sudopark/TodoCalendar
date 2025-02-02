@@ -20,7 +20,7 @@ import CalendarScenes
 struct CalendarEvents {
     var currentTodos: [TodoCalendarEvent]
     var eventWithTimes: [any CalendarEvent]
-    var customTagMap: [String: EventTag]
+    var customTagMap: [String: CustomEventTag]
     
     func findFirstFutureEvent(from time: TimeInterval, todayRange: Range<TimeInterval>) -> (any CalendarEvent)? {
         return self.eventWithTimes.first { event in
@@ -35,12 +35,12 @@ struct CalendarEvents {
 
 struct ForemostEvent {
     let foremostEvent: (any ForemostMarkableEvent)?
-    let tag: EventTag?
+    let tag: CustomEventTag?
 }
 
 struct TodayNextEvent {
     let nextEvent: any CalendarEvent
-    let tag: EventTag?
+    let tag: CustomEventTag?
     var andThenNextEventStartDate: Date?
 }
 
@@ -63,12 +63,12 @@ protocol CalendarEventFetchUsecase {
 
 actor CalendarEventsFetchCacheStore {
     var currentTodos: [TodoCalendarEvent]?
-    var allCustomTagsMap: [String: EventTag]?
+    var allCustomTagsMap: [String: CustomEventTag]?
     
     func updateCurrentTodos(_ todos: [TodoCalendarEvent]) {
         self.currentTodos = todos
     }
-    func updateAllCustomTagsMap(_ newValue: [String: EventTag]) {
+    func updateAllCustomTagsMap(_ newValue: [String: CustomEventTag]) {
         self.allCustomTagsMap = newValue
     }
 
@@ -132,11 +132,11 @@ extension CalendarEventFetchUsecaseImple {
         return events
     }
 
-    private func allCustomEventTagMap() async throws -> [String: EventTag] {
+    private func allCustomEventTagMap() async throws -> [String: CustomEventTag] {
         if let cached = await self.cached.allCustomTagsMap {
             return cached
         }
-        let tags = try await self.eventTagRepository.loadAllTags()
+        let tags = try await self.eventTagRepository.loadAllCustomTags()
             .values.first(where: { _ in true }) ?? []
         let tagMap = tags.asDictionary { $0.uuid }
         await self.cached.updateAllCustomTagsMap(tagMap)

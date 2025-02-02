@@ -52,7 +52,7 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         return [.systemTheme, .defaultLight, .defaultDark]
     }
     
-    public func applyEventTagColors(_ tags: [EventTag]) {
+    public func applyEventTagColors(_ tags: [any EventTag]) {
         self.viewAppearanceStore.applyEventTagColors(tags)
     }
     

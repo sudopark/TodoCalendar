@@ -72,7 +72,7 @@ extension EventListWidgetTimeLineProvider {
         _ completion: @Sendable @escaping (Entry) -> Void
     ) {
         
-        let tagId = AllEventTagId(selected)
+        let tagId = EventTagId(selected)
         let count = context.family.preferedEventListItemCount
         Task {
             let builder = WidgetViewModelProviderBuilder(base: .init())
@@ -95,7 +95,7 @@ extension EventListWidgetTimeLineProvider {
     }
 }
 
-extension AllEventTagId {
+extension EventTagId {
     
     init(_ listType: EvnetListType?) {
         switch listType?.identifier {

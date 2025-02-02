@@ -291,7 +291,9 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = EventSettingViewState()
-        state.tagModel = .init(id: .default, name: "default", customTagColorHex: nil)
+        state.tagModel = .init(
+            DefaultEventTag.default("#ff00ff")
+        )
         state.periodModel = .init(EventSettings.DefaultNewEventPeriod.minute15)
         state.selectedEventNotificationTimeText = "so long text hahahahhahahha hahah"
         state.selectedAllDayEventNotificationTimeText = "so long text hahahahhahahha hahah"

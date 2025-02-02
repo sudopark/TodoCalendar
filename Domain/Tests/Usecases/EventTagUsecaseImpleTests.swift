@@ -71,7 +71,7 @@ extension EventTagUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let params = EventTagMakeParams(name: "new", colorHex: "hex")
+        let params = CustomEventTagMakeParams(name: "new", colorHex: "hex")
         let new = try? await usecase.makeNewTag(params)
         
         // then
@@ -86,7 +86,7 @@ extension EventTagUsecaseImpleTests {
         self.stubMakeFail()
         
         // when
-        let params = EventTagMakeParams(name: "new", colorHex: "hex")
+        let params = CustomEventTagMakeParams(name: "new", colorHex: "hex")
         let new = try? await usecase.makeNewTag(params)
         
         // then
@@ -97,11 +97,11 @@ extension EventTagUsecaseImpleTests {
     func testUsecase_updateTag() async {
         // given
         let usecase = self.makeUsecase()
-        let makeParams = EventTagMakeParams(name: "origin", colorHex: "hex")
+        let makeParams = CustomEventTagMakeParams(name: "origin", colorHex: "hex")
         let origin = try? await usecase.makeNewTag(makeParams)
         
         // when
-        let updateParams = EventTagEditParams(name: "new name", colorHex: "new hex")
+        let updateParams = CustomEventTagEditParams(name: "new name", colorHex: "new hex")
         let new = try? await usecase.editTag(origin?.uuid ?? "", updateParams)
         
         // then
@@ -115,11 +115,11 @@ extension EventTagUsecaseImpleTests {
         // given
         let usecase = self.makeUsecase()
         self.stubUpdateFail()
-        let makeParams = EventTagMakeParams(name: "origin", colorHex: "hex")
+        let makeParams = CustomEventTagMakeParams(name: "origin", colorHex: "hex")
         let origin = try? await usecase.makeNewTag(makeParams)
         
         // when
-        let updateParams = EventTagEditParams(name: "new name", colorHex: "new hex")
+        let updateParams = CustomEventTagEditParams(name: "new name", colorHex: "new hex")
         let new = try? await usecase.editTag(origin?.uuid ?? "", updateParams)
         
         // then
@@ -127,11 +127,14 @@ extension EventTagUsecaseImpleTests {
     }
     
     private func makeUsecaseWithTagAndOffed() -> EventTagUsecaseImple {
-        let tags: [EventTag] = (0..<10).map {
-            EventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "some")
+        let tags: [CustomEventTag] = (0..<10).map {
+            CustomEventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "some")
         }
-        self.sharedDataStore.put([String: EventTag].self, key: ShareDataKeys.tags.rawValue, tags.asDictionary { $0.uuid })
-        self.sharedDataStore.put(Set<AllEventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, [
+        let tagMap = tags.reduce(into: [EventTagId: any EventTag]()) { acc, tag in
+            acc[.custom(tag.uuid)] = tag
+        }
+        self.sharedDataStore.put([EventTagId: any EventTag].self, key: ShareDataKeys.tags.rawValue, tagMap)
+        self.sharedDataStore.put(Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, [
             .custom("id:3"), .custom("id:4")
         ])
         return self.makeUsecase()
@@ -158,7 +161,7 @@ extension EventTagUsecaseImpleTests {
         
         // when
         let ids = (0..<10).map { "id:\($0)" }
-        let tagSource = usecase.eventTags(ids)
+        let tagSource = usecase.eventTags(ids.map { .custom($0) })
         let offIdSource = usecase.offEventTagIdsOnCalendar()
         let source = Publishers.Zip(tagSource, offIdSource)
         let pairs = self.waitOutputs(expect, for: source) {
@@ -168,7 +171,7 @@ extension EventTagUsecaseImpleTests {
         }
         
         // then
-        XCTAssertEqual(pairs.map { $0.0.keys }.map { $0.sorted() }, [
+        XCTAssertEqual(pairs.map { $0.0.keys }.map { $0.compactMap { $0.customTagId }.sorted() }, [
             Array(0..<10).map { "id:\($0)" },
             Array(0..<10).filter { $0 != 4 }.map { "id:\($0)" }
         ])
@@ -198,7 +201,7 @@ extension EventTagUsecaseImpleTests {
         
         // when
         let ids = (0..<10).map { "id:\($0)" }
-        let tagSource = usecase.eventTags(ids)
+        let tagSource = usecase.eventTags(ids.map { .custom($0) })
         let offIdSource = usecase.offEventTagIdsOnCalendar()
         let source = Publishers.Zip(tagSource, offIdSource)
         let pairs = self.waitOutputs(expect, for: source) {
@@ -208,7 +211,7 @@ extension EventTagUsecaseImpleTests {
         }
         
         // then
-        XCTAssertEqual(pairs.map { $0.0.keys }.map { $0.sorted() }, [
+        XCTAssertEqual(pairs.map { $0.0.keys }.map { $0.compactMap { $0.customTagId }.sorted() }, [
             Array(0..<10).map { "id:\($0)" },
             Array(0..<10).filter { $0 != 4 }.map { "id:\($0)" }
         ])
@@ -229,13 +232,13 @@ extension EventTagUsecaseImpleTests {
         
         // when
         let ids = (0..<10).map { "id:\($0)"}
-        let tagSource = usecase.eventTags(ids)
+        let tagSource = usecase.eventTags(ids.map { .custom($0) })
         let tagMaps = self.waitOutputs(expect, for: tagSource) {
-            usecase.refreshTags(ids)
+            usecase.refreshCustomTags(ids)
         }
         
         // then
-        let tagMapKeys = tagMaps.map { $0.keys.map { $0 }.sorted() }
+        let tagMapKeys = tagMaps.map { $0.keys.compactMap { $0.customTagId }.sorted() }
         XCTAssertEqual(tagMapKeys, [
             [],
             ids
@@ -248,19 +251,19 @@ extension EventTagUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        let tagSource = usecase.eventTag(id: "some")
+        let tagSource = usecase.eventTag(id: .custom("some"))
         let tag = self.waitFirstOutput(expect, for: tagSource) {
-            usecase.refreshTags(["some"])
+            usecase.refreshCustomTags(["some"])
         }
         
         // then
-        XCTAssertEqual(tag?.uuid, "some")
+        XCTAssertEqual(tag?.tagId, .custom("some"))
     }
     
-    private func stubMakeTag(_ usecase: any EventTagUsecase) -> EventTag {
+    private func stubMakeTag(_ usecase: any EventTagUsecase) -> CustomEventTag {
         let expect = expectation(description: "tag 생성 조회")
         
-        let making: AsyncFlatMapPublisher<Void, Error, EventTag> = Publishers.create {
+        let making: AsyncFlatMapPublisher<Void, Error, CustomEventTag> = Publishers.create {
             try await usecase.makeNewTag(.init(name: "origin", colorHex: "hex"))
         }
         
@@ -278,17 +281,17 @@ extension EventTagUsecaseImpleTests {
         
         // when
         let ids = [origin.uuid]
-        let tagSource = usecase.eventTags(ids)
+        let tagSource = usecase.eventTags(ids.map { .custom($0) })
         let tagMaps = self.waitOutputs(expect, for: tagSource) {
             Task {
-                let params = EventTagEditParams(name: "new name", colorHex: "hex")
+                let params = CustomEventTagEditParams(name: "new name", colorHex: "hex")
                 _ = try await usecase.editTag(origin.uuid, params)
             }
         }
         
         // then
-        let loadedOrigin = tagMaps.first?[origin.uuid]
-        let loadedUpdated = tagMaps.last?[origin.uuid]
+        let loadedOrigin = tagMaps.first?[.custom(origin.uuid)] as? CustomEventTag
+        let loadedUpdated = tagMaps.last?[.custom(origin.uuid)] as? CustomEventTag
         XCTAssertEqual(tagMaps.count, 2)
         XCTAssertEqual(loadedOrigin?.name, "origin")
         XCTAssertEqual(loadedUpdated?.name, "new name")
@@ -335,8 +338,8 @@ extension EventTagUsecaseImpleTests {
         return makeUsecase()
     }
     
-    private var allTagIds: [String] {
-        return ["tag-t1", "tag-t3", "tag-s2", "tag-t2", "tag-s3", "tag-t1-new"]
+    private var allTagIds: [EventTagId] {
+        return ["tag-t1", "tag-t3", "tag-s2", "tag-t2", "tag-s3", "tag-t1-new"].map { .custom($0) }
     }
     
     private func addTagT2ToTodo2() {
@@ -385,7 +388,7 @@ extension EventTagUsecaseImpleTests {
         }
         
         // then
-        let tagIdSets = tagMaps.map { mp in Set(mp.keys) }
+        let tagIdSets = tagMaps.map { mp in Set(mp.keys.compactMap{ $0.customTagId }) }
         XCTAssertEqual(tagIdSets, [
             ["tag-t1", "tag-t3", "tag-s2"],
             ["tag-t1", "tag-t3", "tag-s2", "tag-t2"],
@@ -403,7 +406,7 @@ extension EventTagUsecaseImpleTests {
         let tags = self.waitFirstOutput(expect, for: usecase.loadAllEventTags())
         
         // then
-        let ids = tags?.map { $0.uuid }
+        let ids = tags?.compactMap { $0.tagId.customTagId }
         XCTAssertEqual(ids, [
             "tag-t1", "tag-t3", "tag-s2"
         ])
@@ -423,11 +426,58 @@ extension EventTagUsecaseImpleTests {
         }
         
         // then
-        let idLists = tagLists.map { ts in ts.keys.sorted() }
+        let idLists = tagLists.map { ts in ts.keys.compactMap { $0.customTagId }.sorted() }
         XCTAssertEqual(idLists, [[], ["tag-s2", "tag-t1", "tag-t3"]])
     }
 }
 
+extension EventTagUsecaseImpleTests {
+    
+    private func makeUsecaseWithPrepareDefaultTags() -> EventTagUsecaseImple {
+        
+        let setting = DefaultEventTagColorSetting(holiday: "holiday", default: "default")
+        self.sharedDataStore.put(DefaultEventTagColorSetting.self, key: ShareDataKeys.defaultEventTagColor.rawValue, setting)
+        return self.makeUsecaseWithStubEvents()
+    }
+    
+    func testUsecase_provideAllTagsWithDefaults() {
+        // given
+        let expect = expectation(description: "모든 태그 제공시에 디폴트 태그값 같이 제공")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecaseWithPrepareDefaultTags()
+        
+        // when
+        let tagLists = self.waitOutputs(expect, for: usecase.sharedEventTags) {
+            usecase.prepare()
+        }
+        
+        // then
+        let idLists = tagLists.map { $0.keys }.map { Set($0) }
+        XCTAssertEqual(
+            idLists, [
+                [],
+                [.default, .holiday],
+            ]
+        )
+    }
+    
+    func testUsecase_whenLoadAllTags_provideDefaults() {
+        // given
+        let expect = expectation(description: "모든 태그 조회시에 디폴트 태그값 같이 제공")
+        let usecase = self.makeUsecaseWithPrepareDefaultTags()
+        
+        // when
+        let load = usecase.loadAllEventTags()
+        let tags = self.waitFirstOutput(expect, for: load)
+        
+        // then
+        let ids = tags.map { ts in Set(ts.map { $0.tagId }) } ?? []
+        XCTAssertEqual(
+            ids,
+            [.default, .holiday, .custom("tag-t1"), .custom("tag-s2"), .custom("tag-t3")]
+        )
+    }
+}
 
 extension EventTagUsecaseImpleTests {
     

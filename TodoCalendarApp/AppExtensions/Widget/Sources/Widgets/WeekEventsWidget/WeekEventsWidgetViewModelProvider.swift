@@ -54,7 +54,7 @@ struct WeekEventsViewModel {
     let weeks: [WeekRowModel]
     let eventStackModelMap: [String: WeekEventStackViewModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
-    let tagMap: [String: EventTag]
+    let tagMap: [String: CustomEventTag]
     
     init(
         range: WeekEventsRange,
@@ -64,7 +64,7 @@ struct WeekEventsViewModel {
         weeks: [WeekRowModel],
         eventStackModelMap: [String : WeekEventStackViewModel],
         defaultTagColorSetting: DefaultEventTagColorSetting,
-        tagMap: [String: EventTag]
+        tagMap: [String: CustomEventTag]
     ) {
         self.range = range
         self.targetMonthText = targetMonthText
@@ -326,7 +326,7 @@ private extension EventOnWeek {
     
     static func dummy(
         _ dayNumber: Int, _ dateId: String,
-        _ name: String, hasPeriod: Bool = false, tag: AllEventTagId = .default
+        _ name: String, hasPeriod: Bool = false, tag: EventTagId = .default
     ) -> EventOnWeek {
         let event = DummyCalendarEvent(name, name, hasPeriod: hasPeriod, tag: tag)
         return EventOnWeek(0..<1, [dayNumber], (dayNumber...dayNumber), [dateId], event)
@@ -338,11 +338,11 @@ private struct DummyCalendarEvent: CalendarEvent {
     var name: String
     var eventTime: EventTime?
     var eventTimeOnCalendar: EventTimeOnCalendar?
-    var eventTagId: AllEventTagId
+    var eventTagId: EventTagId
     var isRepeating: Bool = false
     var isForemost: Bool = false
 
-    init(_ id: String, _ name: String, hasPeriod: Bool = true, tag: AllEventTagId = .default) {
+    init(_ id: String, _ name: String, hasPeriod: Bool = true, tag: EventTagId = .default) {
         self.eventId = id
         self.name = name
         self.eventTagId = tag

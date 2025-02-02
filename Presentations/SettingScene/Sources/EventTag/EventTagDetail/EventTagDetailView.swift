@@ -24,8 +24,8 @@ final class EventTagDetailViewState: ObservableObject {
     
     @Published fileprivate var suggestColorHexes: [String] = []
     @Published fileprivate var newTagName: String = ""
-    @Published fileprivate var originalColor: EventTagColor?
-    @Published fileprivate var selectedColor: EventTagColor?
+    @Published fileprivate var originalColorHex: String?
+    @Published fileprivate var selectedColorHex: String?
     @Published fileprivate var isDeletable: Bool = false
     @Published fileprivate var isNameChangable: Bool = false
     @Published fileprivate var isSavable: Bool = false
@@ -36,11 +36,17 @@ final class EventTagDetailViewState: ObservableObject {
         guard self.didBind == false else { return }
         self.didBind = true
         
-        self.originalColor = viewModel.originalColor
         self.suggestColorHexes = viewModel.suggestColorHexes
         self.newTagName = viewModel.originalName ?? ""
         self.isDeletable = viewModel.isDeletable
         self.isNameChangable = viewModel.isNameChangable
+        
+        viewModel.originalColorHex
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] hex in
+                self?.originalColorHex = hex
+            })
+            .store(in: &self.cancellables)
         
         viewModel.isSavable
             .receive(on: RunLoop.main)
@@ -49,10 +55,10 @@ final class EventTagDetailViewState: ObservableObject {
             })
             .store(in: &self.cancellables)
         
-        viewModel.selectedColor
+        viewModel.selectedColorHex
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] color in
-                self?.selectedColor = color
+                self?.selectedColorHex = color
             })
             .store(in: &self.cancellables)
         
@@ -75,7 +81,7 @@ struct EventTagDetailContainerView: View {
     
     var stateBinding: (EventTagDetailViewState) -> Void = { _ in }
     var nameEntered: (String) -> Void = { _ in }
-    var colorSelected: (EventTagColor) -> Void = { _ in }
+    var colorSelected: (String) -> Void = { _ in }
     var requestSelectOtherColor: () -> Void = { }
     var saveChanges: () -> Void = { }
     var deleteTag: () -> Void = { }
@@ -109,7 +115,7 @@ struct EventTagDetailView: View {
     @State private var selectedOtherColor: Color = .clear
     
     fileprivate var nameEntered: (String) -> Void = { _ in }
-    fileprivate var colorSelected: (EventTagColor) -> Void = { _ in }
+    fileprivate var colorSelected: (String) -> Void = { _ in }
     fileprivate var saveChanges: () -> Void = { }
     fileprivate var deleteTag: () -> Void = { }
     
@@ -144,7 +150,7 @@ struct EventTagDetailView: View {
             Circle()
                 .frame(width: 15, height: 15)
                 .foregroundStyle(
-                    appearance.color(for: self.state.selectedColor).asColor
+                    self.state.selectedColorHex?.asColor ?? .clear
                 )
             
             TextField(
@@ -174,13 +180,13 @@ struct EventTagDetailView: View {
             LazyVGrid(columns: self.suggestColorColums, spacing: 20) {
                 Section {
                     ForEach(self.state.suggestColorHexes, id: \.self) { hex in
-                        self.circleView(.custom(hex: hex))
+                        self.circleView(hex)
                     }
                 }
                 
                 Section {
                     
-                    self.circleView(self.state.originalColor ?? .default)
+                    self.circleView(self.state.originalColorHex)
                     
                     self.selectColorView
                     
@@ -198,18 +204,19 @@ struct EventTagDetailView: View {
     }
     
     private func circleView(
-        _ tagColor: EventTagColor
+        _ tagColorHex: String?
     ) -> some View {
-        let color = appearance.color(for: tagColor).asColor
+        let color = tagColorHex?.asColor ?? .clear
         return Button {
-            self.colorSelected(tagColor)
+            guard let hex = tagColorHex else { return }
+            self.colorSelected(hex)
         } label: {
             ZStack {
                 Circle()
                     .frame(width: 28, height: 28)
                     .foregroundStyle(color)
                 
-                if tagColor == self.state.selectedColor {
+                if tagColorHex == self.state.selectedColorHex {
                     Image(systemName: "checkmark")
                         .font(.system(size: 12, weight: .bold))
                         .foregroundStyle(.white)
@@ -234,7 +241,7 @@ struct EventTagDetailView: View {
             Circle()
                 .frame(width: 20, height: 20)
                 .foregroundStyle(
-                    self.appearance.color(for: self.state.selectedColor).asColor
+                    self.state.selectedColorHex?.asColor ?? .clear
                 )
                 
         }
@@ -245,7 +252,7 @@ struct EventTagDetailView: View {
         }
         .onChange(of: self.selectedOtherColor) { newColor in
             guard let hex = newColor.hex(environment) else { return }
-            self.colorSelected(.custom(hex: hex))
+            self.colorSelected(hex)
         }
     }
     
@@ -271,15 +278,9 @@ struct EventTagDetailView: View {
 }
 
 
-private extension ViewAppearance {
-    
-    func color(for eventTagColor: EventTagColor?) -> UIColor {
-        switch eventTagColor {
-        case .default: return self.color(.default)
-        case .holiday: return self.color(.holiday)
-        case .custom(let hex): return UIColor.from(hex: hex) ?? .clear
-        default: return .clear
-        }
+private extension String {
+    var asColor: Color {
+        return UIColor.from(hex: self)?.asColor ?? .clear
     }
 }
 
@@ -297,16 +298,15 @@ struct EventTagDetailViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let detailView = EventTagDetailView()
         let state = EventTagDetailViewState()
-        state.selectedColor = .default
-        state.originalColor = .custom(hex: "#ff0000")
+        state.selectedColorHex = "#ff0000"
+        state.originalColorHex = "#ff0000"
         state.newTagName = "some name".localized()
         state.isDeletable = true
         state.isNameChangable = true
         return detailView
-            .eventHandler(\.colorSelected) { state.selectedColor = $0 }
+            .eventHandler(\.colorSelected) { state.selectedColorHex = $0 }
             .eventHandler(\.nameEntered) { state.isSavable = !$0.isEmpty }
             .environmentObject(viewAppearance)
             .environmentObject(state)
     }
 }
-

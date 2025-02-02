@@ -22,12 +22,12 @@ protocol EventTagSelectViewModel: AnyObject, Sendable, EventTagSelectSceneIntera
 
     // interactor
     func loadList()
-    func select(_ tagId: AllEventTagId)
+    func select(_ tagId: EventTagId)
     func close()
     
     // presenter
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> { get }
-    var selectedId: AnyPublisher<AllEventTagId, Never> { get }
+    var selectedId: AnyPublisher<EventTagId, Never> { get }
 }
 
 
@@ -49,7 +49,7 @@ final class EventTagSelectViewModelImple: EventTagSelectViewModel, @unchecked Se
     
     
     private struct Subject {
-        let selectedId = CurrentValueSubject<AllEventTagId?, Never>(nil)
+        let selectedId = CurrentValueSubject<EventTagId?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -68,7 +68,7 @@ extension EventTagSelectViewModelImple {
         self.subject.selectedId.send(setting.defaultNewEventTagId)
     }
     
-    func select(_ tagId: AllEventTagId) {
+    func select(_ tagId: EventTagId) {
         guard let old = self.subject.selectedId.value,
               old != tagId
         else { return }
@@ -102,7 +102,7 @@ extension EventTagSelectViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var selectedId: AnyPublisher<AllEventTagId, Never> {
+    var selectedId: AnyPublisher<EventTagId, Never> {
         return self.subject.selectedId
             .compactMap { $0 }
             .removeDuplicates()

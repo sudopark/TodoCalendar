@@ -231,7 +231,7 @@ extension ColorSet {
 
 private extension WeekEventsViewModel {
     
-    func tagColor(_ id: AllEventTagId) -> Color {
+    func tagColor(_ id: EventTagId) -> Color {
         switch id {
         case .default:
             return UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear

@@ -122,7 +122,7 @@ struct EventListView: View {
         }
     }
     
-    private func tagLineView(_ tagId: AllEventTagId?) -> some View {
+    private func tagLineView(_ tagId: EventTagId?) -> some View {
         let defColors = EventTagColorSet(model.defaultTagColorSetting)
         let color = switch tagId {
         case .holiday: defColors.holiday

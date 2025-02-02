@@ -116,7 +116,7 @@ extension EventDetailRouter {
     }
     
     func routeToEventTagSelect(
-        currentSelectedTagId: AllEventTagId,
+        currentSelectedTagId: EventTagId,
         listener: (any SelectEventTagSceneListener)?
     ) {
         Task { @MainActor in

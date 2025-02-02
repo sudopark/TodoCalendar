@@ -19,17 +19,6 @@ import Scenes
 
 // MARK: - EventTagDetailViewModel
 
-enum EventTagColor: Equatable, Sendable {
-    case `default`
-    case holiday
-    case custom(hex: String)
-    
-    var customHex: String? {
-        guard case let .custom(hex) = self else { return nil }
-        return hex
-    }
-}
-
 protocol EventTagDetailViewModel: AnyObject, Sendable, EventTagDetailSceneInteractor {
 
     // interactor
@@ -40,9 +29,9 @@ protocol EventTagDetailViewModel: AnyObject, Sendable, EventTagDetailSceneIntera
     
     // presenter
     var originalName: String? { get }
-    var originalColor: EventTagColor { get }
+    var originalColorHex: AnyPublisher<String, Never> { get }
     var suggestColorHexes: [String] { get }
-    var selectedColor: AnyPublisher<EventTagColor, Never> { get }
+    var selectedColorHex: AnyPublisher<String, Never> { get }
     
     var isNameChangable: Bool { get }
     var isDeletable: Bool { get }
@@ -72,19 +61,14 @@ final class EventTagDetailViewModelImple: EventTagDetailViewModel, @unchecked Se
         
         self.subject.name.send(originalInfo?.name)
         
-        let originColor = switch originalInfo?.id {
-        case .default: EventTagColor.default
-        case .holiday: EventTagColor.holiday
-        case .custom: originalInfo?.customColorHex.map { EventTagColor.custom(hex: $0) }
-        default: self.suggestColorHexes.randomElement().map { EventTagColor.custom(hex: $0) }
-        }
-        self.subject.color.send(originColor)
+        let initialColor = originalInfo?.colorHex ?? self.suggestColorHexes.randomElement()
+        self.subject.color.send(initialColor)
     }
     
     
     private struct Subject {
         let name = CurrentValueSubject<String?, Never>(nil)
-        let color = CurrentValueSubject<EventTagColor?, Never>(nil)
+        let color = CurrentValueSubject<String?, Never>(nil)
         let isProcessing = CurrentValueSubject<Bool, Never>(false)
     }
     
@@ -102,7 +86,7 @@ extension EventTagDetailViewModelImple {
     }
     
     func selectColor(_ color: String) {
-        self.subject.color.send(.custom(hex: color))
+        self.subject.color.send(color)
     }
     
     func delete() {
@@ -126,7 +110,7 @@ extension EventTagDetailViewModelImple {
             do {
                 try await self?.eventTagUsecase.deleteTag(tagId)
                 self?.show(message: "eventTag.removed::message".localized()) { [weak self] in
-                    self?.listener?.eventTag(deleted: tagId)
+                    self?.listener?.eventTag(deleted: .custom(tagId))
                 }
             } catch {
                 self?.router?.showError(error)
@@ -142,7 +126,7 @@ extension EventTagDetailViewModelImple {
             do {
                 try await self?.eventTagUsecase.deleteTagWithAllEvents(tagId)
                 self?.show(message: "eventTag.removed_with_events::message".localized()) { [weak self] in
-                    self?.listener?.eventTag(deleted: tagId)
+                    self?.listener?.eventTag(deleted: .custom(tagId))
                 }
             } catch {
                 self?.router?.showError(error)
@@ -169,7 +153,7 @@ extension EventTagDetailViewModelImple {
     }
     
     private func changeBaseTagColor(isHoliday: Bool) {
-        guard let newColor = self.subject.color.value?.customHex else { return }
+        guard let newColor = self.subject.color.value else { return }
         let params  = if isHoliday {
             EditDefaultEventTagColorParams() |> \.newHolidayTagColor .~ newColor
         } else {
@@ -191,9 +175,9 @@ extension EventTagDetailViewModelImple {
     
     private func editTag(_ id: String) {
         guard let name = self.subject.name.value,
-              let colorHext = self.subject.color.value?.customHex
+              let colorHex = self.subject.color.value
         else { return }
-        let params = EventTagEditParams(name: name, colorHex: colorHext)
+        let params = CustomEventTagEditParams(name: name, colorHex: colorHex)
         
         self.subject.isProcessing.send(true)
         Task { [weak self] in
@@ -213,9 +197,9 @@ extension EventTagDetailViewModelImple {
     
     private func saveNewTag() {
         guard let name = self.subject.name.value,
-              let colorHex = self.subject.color.value?.customHex
+              let colorHex = self.subject.color.value
         else { return }
-        let params = EventTagMakeParams(name: name, colorHex: colorHex)
+        let params = CustomEventTagMakeParams(name: name, colorHex: colorHex)
         
         self.subject.isProcessing.send(true)
         Task { [weak self] in
@@ -253,13 +237,11 @@ extension EventTagDetailViewModelImple {
         return self.originalInfo?.name
     }
     
-    var originalColor: EventTagColor {
-        switch self.originalInfo?.id {
-        case .default: return .default
-        case .holiday: return .holiday
-        case .custom: return originalInfo?.customColorHex.map { .custom(hex: $0) } ?? .default
-        default: return .default
-        }
+    var originalColorHex: AnyPublisher<String, Never> {
+        return self.subject.color
+            .compactMap { $0 }
+            .first()
+            .eraseToAnyPublisher()
     }
     
     var suggestColorHexes: [String] {
@@ -270,7 +252,7 @@ extension EventTagDetailViewModelImple {
         ]
     }
     
-    var selectedColor: AnyPublisher<EventTagColor, Never> {
+    var selectedColorHex: AnyPublisher<String, Never> {
         return self.subject.color
             .compactMap { $0 }
             .removeDuplicates()
@@ -291,7 +273,7 @@ extension EventTagDetailViewModelImple {
     }
     
     var isSavable: AnyPublisher<Bool, Never> {
-        let transform: (String?, EventTagColor?) -> Bool = { name, color in
+        let transform: (String?, String?) -> Bool = { name, color in
             return name?.isEmpty == false && color != nil
         }
         return Publishers.CombineLatest(

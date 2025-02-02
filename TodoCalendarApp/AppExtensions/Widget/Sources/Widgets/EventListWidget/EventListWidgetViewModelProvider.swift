@@ -40,7 +40,7 @@ struct EventListWidgetViewModel {
             let calendar: Calendar
             let timeZone: TimeZone
             let is24Form: Bool
-            let customTags: [String: EventTag]
+            let customTags: [String: any EventTag]
             
             func makeCurrentTodoListModel(
                 _ events: [TodoCalendarEvent],
@@ -115,7 +115,7 @@ struct EventListWidgetViewModel {
     
     var lists: [SectionModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
-    let customTagMap: [String: EventTag]
+    let customTagMap: [String: any EventTag]
     var needBottomSpace: Bool = false
     
     static func sample(maxItemCount: Int) -> EventListWidgetViewModel {
@@ -157,13 +157,13 @@ struct EventListWidgetViewModel {
 
 final class EventListWidgetViewModelProvider {
     
-    private let targetEventTagId: AllEventTagId
+    private let targetEventTagId: EventTagId
     private let eventsFetchUsecase: any CalendarEventFetchUsecase
     private let appSettingRepository: any AppSettingRepository
     private let calendarSettingRepository: any CalendarSettingRepository
     
     init(
-        targetEventTagId: AllEventTagId,
+        targetEventTagId: EventTagId,
         eventsFetchUsecase: any CalendarEventFetchUsecase,
         appSettingRepository: any AppSettingRepository,
         calendarSettingRepository: any CalendarSettingRepository
@@ -201,7 +201,7 @@ extension EventListWidgetViewModelProvider {
         _ start: Date,
         _ timeZone: TimeZone,
         _ is24Form: Bool
-    ) async throws -> ([EventListWidgetViewModel.SectionModel], [String: EventTag]) {
+    ) async throws -> ([EventListWidgetViewModel.SectionModel], [String: any EventTag]) {
         
         let rangeSize: Int = 90
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone

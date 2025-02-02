@@ -23,10 +23,10 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
 
     // interactor
     func reload()
-    func toggleIsOn(_ tagId: AllEventTagId)
+    func toggleIsOn(_ tagId: EventTagId)
     func close()
     func addNewTag()
-    func showTagDetail(_ tagId: AllEventTagId)
+    func showTagDetail(_ tagId: EventTagId)
     
     // presenter
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> { get }
@@ -92,70 +92,42 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         self.router?.routeToAddNewTag(listener: self)
     }
     
-    func toggleIsOn(_ tagId: AllEventTagId) {
+    func toggleIsOn(_ tagId: EventTagId) {
         self.tagUsecase.toggleEventTagIsOnCalendar(tagId)
     }
     
-    func showTagDetail(_ tagId: AllEventTagId) {
+    func showTagDetail(_ tagId: EventTagId) {
         
-        switch tagId {
-        case .holiday, .default:
-            self.routeToBaseTagEdit(tagId)
-            
-        case .custom(let id):
-            self.routeToCustomTagEdit(id)
-        }
-    }
-    
-    private func routeToBaseTagEdit(_ tagId: AllEventTagId) {
-        let info = OriginalTagInfo(
-            id: tagId,
-            name: tagId == .holiday 
-                ? "eventTag.defaults.holiday::name".localized()
-                : "eventTag.defaults.default::name".localized(),
-            customColorHex: nil
-        )
-        self.router?.routeToEditTag(info, listener: self)
-    }
-    
-    private func routeToCustomTagEdit(_ tagId: String) {
-        guard let model = self.subject.cvms.value?.first(where: { $0.id.customTagId == tagId }),
-              let customColor = model.customTagColorHex
+        guard let model = self.subject.cvms.value?.first(where: { $0.id == tagId })
         else { return }
         
         let info = OriginalTagInfo(
-            id: .custom(tagId), name: model.name, customColorHex: customColor
+            id: tagId,
+            name: model.name,
+            colorHex: model.colorHex
         )
         self.router?.routeToEditTag(info, listener: self)
     }
     
-    func eventTag(created newTag: EventTag) {
-        let newModel = EventTagCellViewModel(
-            id: .custom(newTag.uuid),
-            name: newTag.name,
-            customTagColorHex: newTag.colorHex
-        )
+    func eventTag(created newTag: any EventTag) {
+        let newModel = EventTagCellViewModel(newTag)
         let newTags = [newModel] + (self.subject.cvms.value ?? [])
         self.subject.cvms.send(newTags)
         self.listener?.eventTag(created: newTag)
     }
     
-    func eventTag(updated newTag: EventTag) {
+    func eventTag(updated newTag: any EventTag) {
         let cvms = self.subject.cvms.value ?? []
-        guard let index = cvms.firstIndex(where: { $0.id.customTagId == newTag.uuid })
+        guard let index = cvms.firstIndex(where: { $0.id == newTag.tagId })
         else { return }
-        let newModel = EventTagCellViewModel(
-            id: .custom(newTag.uuid),
-            name: newTag.name,
-            customTagColorHex: newTag.colorHex
-        )
+        let newModel = EventTagCellViewModel(newTag)
         let newTags = cvms |> ix(index) .~ newModel
         self.subject.cvms.send(newTags)
         self.listener?.eventTag(updated: newTag)
     }
     
-    func eventTag(deleted tagId: String) {
-        let newTags = self.subject.cvms.value?.filter { $0.id.customTagId != tagId }
+    func eventTag(deleted tagId: EventTagId) {
+        let newTags = self.subject.cvms.value?.filter { $0.id != tagId }
         self.subject.cvms.send(newTags)
         self.listener?.eventTag(deleted: tagId)
     }

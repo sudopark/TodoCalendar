@@ -37,7 +37,7 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             usecase.allTagsLoadResult = .failure(RuntimeError("failed"))
         } else {
             let tags = (0..<20).map {
-                return EventTag(uuid: "id:\($0)", name: "n:\($0)", colorHex: "some")
+                return CustomEventTag(uuid: "id:\($0)", name: "n:\($0)", colorHex: "some")
             }
             usecase.allTagsLoadResult = .success(tags)
         }
@@ -61,8 +61,8 @@ extension EventTagListViewModelImpleTests {
         
         // then
         XCTAssertEqual(cells?.count, 22)
-        XCTAssertEqual(cells?[safe: 0]?.id, .holiday)
-        XCTAssertEqual(cells?[safe: 1]?.id, .default)
+        XCTAssertEqual(cells?[safe: 0]?.id, .default)
+        XCTAssertEqual(cells?[safe: 1]?.id, .holiday)
     }
     
     func testViewModel_whenLoadAllTagsFail_showError() {
@@ -160,7 +160,7 @@ extension EventTagListViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didRouteToEditTag, true)
         XCTAssertEqual(tagCounts, [22, 22])
         XCTAssertEqual(tag4s.map { $0?.name }, ["n:4", "edited name"])
-        XCTAssertEqual(tag4s.map { $0?.customTagColorHex }, [
+        XCTAssertEqual(tag4s.map { $0?.colorHex }, [
             "some", "edited color hex"
         ])
     }
@@ -195,7 +195,7 @@ extension EventTagListViewModelImpleTests {
         var didRouteToAddNewTag: Bool?
         func routeToAddNewTag(listener: EventTagDetailSceneListener) {
             self.didRouteToAddNewTag = true
-            let newTag = EventTag(name: "new", colorHex: "some")
+            let newTag = CustomEventTag(name: "new", colorHex: "some")
             listener.eventTag(created: newTag)
         }
         
@@ -207,9 +207,9 @@ extension EventTagListViewModelImpleTests {
         ) {
             self.didRouteToEditTag = true
             if shouldDeleteTagWhenEdit {
-                listener.eventTag(deleted: tagInfo.id.customTagId ?? "")
+                listener.eventTag(deleted: tagInfo.id)
             } else {
-                let newTag = EventTag(
+                let newTag = CustomEventTag(
                     uuid: tagInfo.id.customTagId ?? "",
                     name: "edited name",
                     colorHex: "edited color hex"

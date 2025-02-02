@@ -18,7 +18,7 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
     public init() { } 
     
     public var makeFailError: (any Error)?
-    open func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag {
+    open func makeNewTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag {
         if let error = self.makeFailError {
             throw error
         }
@@ -26,7 +26,7 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
     }
     
     public var updateFailError: (any Error)?
-    open func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag {
+    open func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag {
         if let error = updateFailError {
             throw error
         }
@@ -37,17 +37,17 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         
     }
     
-    open func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveEventTagWithEventsResult {
+    open func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult {
         return .init(todoIds: ["todo"], scheduleIds: ["schedule"])
     }
     
     public var shouldFailLoadTagsInRange: Bool = false
-    public var tagsMocking: ([String]) -> [EventTag] = { ids in
+    public var tagsMocking: ([String]) -> [CustomEventTag] = { ids in
         return ids.map {
             return .init(uuid: $0, name: "name:\($0)", colorHex: "color")
         }
     }
-    open func loadTags(_ ids: [String]) -> AnyPublisher<[EventTag], any Error> {
+    open func loadCustomTags(_ ids: [String]) -> AnyPublisher<[CustomEventTag], any Error> {
         guard self.shouldFailLoadTagsInRange == false
         else {
             return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
@@ -55,26 +55,26 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         return Just(self.tagsMocking(ids)).mapNever().eraseToAnyPublisher()
     }
     
-    public var allTagsStubbing: [EventTag] = []
-    public func loadAllTags() -> AnyPublisher<[EventTag], any Error> {
+    public var allTagsStubbing: [CustomEventTag] = []
+    public func loadAllCustomTags() -> AnyPublisher<[CustomEventTag], any Error> {
         return Just(allTagsStubbing)
             .mapNever()
             .eraseToAnyPublisher()
     }
     
-    private var offTagIdSet: Set<AllEventTagId> = []
-    public func loadOffTags() -> Set<AllEventTagId> {
+    private var offTagIdSet: Set<EventTagId> = []
+    public func loadOffTags() -> Set<EventTagId> {
         return offTagIdSet
     }
     
-    public func toggleTagIsOn(_ tagId: AllEventTagId) -> Set<AllEventTagId> {
+    public func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId> {
         let newSet = self.offTagIdSet |> elem(tagId) .~ !offTagIdSet.contains(tagId)
         self.offTagIdSet = newSet
         return newSet
     }
     
-    public var stubLatestUsecaseTag: EventTag?
-    open func loadLatestUsedTag() async throws -> EventTag? {
+    public var stubLatestUsecaseTag: CustomEventTag?
+    open func loadLatestUsedTag() async throws -> CustomEventTag? {
         return self.stubLatestUsecaseTag
     }
 }

@@ -16,22 +16,14 @@ import Domain
 struct EventTagCellViewModel: Equatable {
     
     var isOn: Bool = true
-    let id: AllEventTagId
+    let id: EventTagId
     let name: String
-    var customTagColorHex: String?
+    var colorHex: String
     
-    static var `default`: EventTagCellViewModel {
-        return .init(
-            id: .default,
-            name: "eventTag.defaults.default::name".localized()
-        )
-    }
-    
-    static var holiday: EventTagCellViewModel {
-        return .init(
-            id: .holiday,
-            name: "eventTag.defaults.holiday::name".localized()
-        )
+    init(_ tag: any EventTag) {
+        self.id = tag.tagId
+        self.name = tag.name
+        self.colorHex = tag.colorHex
     }
 }
 
@@ -43,7 +35,7 @@ final class EventTagListViewUsecase {
         self.tagUsecase = tagUsecase
     }
     
-    private let allTags = CurrentValueSubject<[EventTag]?, Never>(nil)
+    private let allTags = CurrentValueSubject<[any EventTag]?, Never>(nil)
     private let occuredError = PassthroughSubject<any Error, Never>()
     private var cancellables: Set<AnyCancellable> = []
 }
@@ -52,7 +44,7 @@ extension EventTagListViewUsecase {
     
     func reload() {
         
-        let loaded: ([EventTag]) -> Void = { [weak self] tags in
+        let loaded: ([any EventTag]) -> Void = { [weak self] tags in
             self?.allTags.send(tags)
         }
         
@@ -74,20 +66,13 @@ extension EventTagListViewUsecase {
     }
     
     var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> {
-        let asCellViewModels: ([EventTag]) -> [EventTagCellViewModel] = { tags in
-            let holidayTag = EventTagCellViewModel.holiday
-            let defaultTag = EventTagCellViewModel.default
-            let customCells = tags.map {
-                EventTagCellViewModel(
-                    id: .custom($0.uuid),
-                    name: $0.name,
-                    customTagColorHex: $0.colorHex
-                )
-            }
-            return [holidayTag, defaultTag] + customCells
+        let asCellViewModels: ([any EventTag]) -> [EventTagCellViewModel] = { tags in
+            return tags
+                .sortDefaultTagsAtFirst()
+                .map { EventTagCellViewModel($0) }
         }
         
-        let applyOnOff: ([EventTagCellViewModel], Set<AllEventTagId>) -> [EventTagCellViewModel] = { cvms, offTagIdSet in
+        let applyOnOff: ([EventTagCellViewModel], Set<EventTagId>) -> [EventTagCellViewModel] = { cvms, offTagIdSet in
             
             return cvms
                 .map { $0 |> \.isOn .~ !offTagIdSet.contains($0.id) }

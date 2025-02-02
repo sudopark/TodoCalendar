@@ -105,7 +105,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     
     private struct Subject {
         let currentDayAndEventLists = CurrentValueSubject<CurrentDayAndEventLists?, Never>(nil)
-        let tagMaps = CurrentValueSubject<[String: EventTag], Never>([:])
+        let tagMaps = CurrentValueSubject<[String: any EventTag], Never>([:])
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
     }
     
