@@ -271,6 +271,12 @@
 "event_setting::eventPeriod" = "이벤트 기간";
 "event_notification_setting::title::forAllDay" = "하루종일";
 "event_notification_setting::title::NotforAllDay" = "미리알림 시간";
+"event_setting::external_calendar::title" = "외부 캘린더";
+"event_setting::external_calendar::start" = "연동";
+"event_setting::external_calendar::start::message" = "외부 캘린더 연동이 완료되었습니다.";
+"event_setting::external_calendar::stop" = "연동 해제";
+"event_setting::external_calendar::stop::message" = "외부 캘린더 연동이 해제되었습니다.";
+"event_setting::external_calendar::google::serviceName" = "구글 캘린더";
 "setting.title" = "설정";
 "setting.appearance.title" = "외관";
 "setting.appearance.calendar.samplemonth::march" = "3월";

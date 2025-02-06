@@ -272,6 +272,12 @@
 "event_setting::eventPeriod" = "Event Period";
 "event_notification_setting::title::forAllDay" = "All day";
 "event_notification_setting::title::NotforAllDay" = "Notification Time";
+"event_setting::external_calendar::title" = "External calendars";
+"event_setting::external_calendar::start" = "Connect";
+"event_setting::external_calendar::start::message" = "Connected to an external calendar.";
+"event_setting::external_calendar::stop" = "Disconnect";
+"event_setting::external_calendar::stop::message" = "The external calendar connection has been disconnected.";
+"event_setting::external_calendar::google::serviceName" = "Google Calendar";
 "setting.title" = "Settings";
 "setting.appearance.title" = "Appearance";
 "setting.appearance.calendar.samplemonth::march" = "MARCH";

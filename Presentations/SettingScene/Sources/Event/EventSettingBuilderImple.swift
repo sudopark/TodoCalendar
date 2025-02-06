@@ -9,6 +9,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -17,17 +18,20 @@ import CommonPresentation
 
 final class EventSettingSceneBuilerImple {
     
+    private let supportExternalCalendarServices: [any ExternalCalendarService]
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
     private let eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
     
     init(
+        supportExternalCalendarServices: [any ExternalCalendarService],
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler,
         eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
     ) {
+        self.supportExternalCalendarServices = supportExternalCalendarServices
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.eventTagSelectSceneBuilder = eventTagSelectSceneBuilder
@@ -44,7 +48,9 @@ extension EventSettingSceneBuilerImple: EventSettingSceneBuiler {
         let viewModel = EventSettingViewModelImple(
             eventSettingUsecase: usecaseFactory.makeEventSettingUsecase(),
             eventNotificationSettingUsecase: usecaseFactory.makeEventNotificationSettingUsecase(),
-            eventTagUsecase: usecaseFactory.makeEventTagUsecase()
+            eventTagUsecase: usecaseFactory.makeEventTagUsecase(),
+            supportExternalCalendarServices: supportExternalCalendarServices,
+            externalCalendarServiceUsecase: usecaseFactory.externalCalenarIntegrationUsecase
         )
         
         let viewController = EventSettingViewController(
