@@ -40,6 +40,34 @@ struct SelectedPeriodModel: Hashable {
     }
 }
 
+struct ExternalCalanserServiceModel: Hashable {
+    
+    enum IntegrateStatus: Hashable {
+        case integrated(accountName: String?)
+        case notIntegrated
+    }
+    
+    let serviceName: String
+    let serviceIconName: String
+    let status: IntegrateStatus
+    
+    init?(
+        _ service: any ExternalCalendarService,
+        with account: ExternalServiceAccountinfo?
+    ) {
+        switch service {
+        case is GoogleCalendarService:
+            self.serviceName = "event_setting::external_calendar::google::serviceName".localized()
+            self.serviceIconName = "google_calendar_icon"
+            self.status = account
+                .map { IntegrateStatus.integrated(accountName: $0.email) }
+                ?? .notIntegrated
+        default:
+            return nil
+        }
+    }
+}
+
 // MARK: - EventSettingViewModel
 
 protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor {
@@ -50,6 +78,8 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
     func selectTag()
     func selectEventNotificationTimeOption(forAllDay: Bool)
     func selectPeriod(_ newValue: EventSettings.DefaultNewEventPeriod)
+    func connectExternalCalendar(_ serviceIdentifier: String)
+    func disconnectExternalCalendar(_ serviceIdentifier: String)
     func close()
     
     // presenter
@@ -57,6 +87,8 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
     var selectedEventNotificationTimeText: AnyPublisher<String, Never> { get }
     var selectedAllDayEventNotificationTimeText: AnyPublisher<String, Never> { get }
     var selectedPeriod: AnyPublisher<SelectedPeriodModel, Never> { get }
+    var integratedExternalCalendars: AnyPublisher<[ExternalCalanserServiceModel], Never> { get }
+    var isConnectOrDisconnectExternalCalednar: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -67,16 +99,22 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
     private let eventSettingUsecase: any EventSettingUsecase
     private let eventNotificationSettingUsecase: any EventNotificationSettingUsecase
     private let eventTagUsecase: any EventTagUsecase
+    private let supportExternalCalendarServices: [any ExternalCalendarService]
+    private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     var router: (any EventSettingRouting)?
     
     init(
         eventSettingUsecase: any EventSettingUsecase,
         eventNotificationSettingUsecase: any EventNotificationSettingUsecase,
-        eventTagUsecase: any EventTagUsecase
+        eventTagUsecase: any EventTagUsecase,
+        supportExternalCalendarServices: [any ExternalCalendarService],
+        externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     ) {
         self.eventSettingUsecase = eventSettingUsecase
         self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
         self.eventTagUsecase = eventTagUsecase
+        self.supportExternalCalendarServices = supportExternalCalendarServices
+        self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
      
         self.internalBinding()
     }
@@ -86,6 +124,7 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
         let setting = CurrentValueSubject<EventSettings?, Never>(nil)
         let eventNotificationTimeOption = CurrentValueSubject<EventNotificationTimeOption??, Never>(nil)
         let allDayEventNotificationTimeOption = CurrentValueSubject<EventNotificationTimeOption??, Never>(nil)
+        let isConnectOrDisconnectExternalCalednar = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -141,6 +180,47 @@ extension EventSettingViewModelImple {
         }
     }
     
+    func connectExternalCalendar(_ serviceIdentifier: String) {
+        guard let service = self.supportExternalCalendarServices.first(where: { $0.identifier == serviceIdentifier })
+        else { return }
+        
+        self.subject.isConnectOrDisconnectExternalCalednar.send(true)
+        Task { [weak self] in
+            do {
+                _ = try await self?.externalCalendarServiceUsecase.integrate(external: service)
+                self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
+                self?.router?.showToast(
+                    "event_setting::external_calendar::start::message".localized()
+                )
+            } catch {
+                self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+    
+    func disconnectExternalCalendar(_ serviceIdentifier: String) {
+        guard let service = self.supportExternalCalendarServices.first(where: { $0.identifier == serviceIdentifier })
+        else { return }
+        
+        self.subject.isConnectOrDisconnectExternalCalednar.send(true)
+        Task { [weak self] in
+            
+            do {
+                try await self?.externalCalendarServiceUsecase.stopIntegrate(external: service)
+                self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
+                self?.router?.showToast(
+                    "event_setting::external_calendar::stop::message".localized()
+                )
+            } catch {
+                self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+    
     func close() {
         self.router?.closeScene()
     }
@@ -194,6 +274,31 @@ extension EventSettingViewModelImple {
         return self.eventSettingUsecase.currentEventSetting
             .map { $0.defaultNewEventPeriod }
             .map { SelectedPeriodModel($0) }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var integratedExternalCalendars: AnyPublisher<[ExternalCalanserServiceModel], Never> {
+        
+        let supporServices = self.supportExternalCalendarServices
+        
+        let transform: ([String: ExternalServiceAccountinfo]) -> [ExternalCalanserServiceModel] = { accounts in
+            
+            return supporServices.compactMap { service in
+                return ExternalCalanserServiceModel(
+                    service, with: accounts[service.identifier]
+                )
+            }
+        }
+        
+        return self.externalCalendarServiceUsecase.integratedServiceAccounts
+            .map(transform)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var isConnectOrDisconnectExternalCalednar: AnyPublisher<Bool, Never> {
+        return self.subject.isConnectOrDisconnectExternalCalednar
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

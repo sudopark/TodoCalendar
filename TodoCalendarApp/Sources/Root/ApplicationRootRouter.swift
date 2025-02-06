@@ -302,6 +302,7 @@ extension ApplicationRootRouter {
     private func settingSceneBuilder() -> any SettingSceneBuiler {
         return SettingSceneBuilderImple(
             appId: AppEnvironment.appId,
+            supportExternalCalendarServices: AppEnvironment.supportExternalCalendarServices,
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
             memberSceneBuilder: self.memberSceneBuilder()
