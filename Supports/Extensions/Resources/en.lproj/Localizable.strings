@@ -285,7 +285,7 @@
 "setting.appearance.calendar.colorTheme::light" = "Light";
 "setting.appearance.calendar.colorTheme::dark" = "Dark";
 "setting.appearance.calendar.underline" = "Underline on event days";
-"setting.appearance.event.edit::name" = "Edit Event";
+"setting.appearance.event.edit::name" = "Event settings and external calendars";
 "setting.appearance.event.fontSize" = "Event text font size";
 "setting.appearance.event.show_holidayName" = "Show holiday name";
 "setting.appearance.event.show_lunar" = "Lunar calendar";
