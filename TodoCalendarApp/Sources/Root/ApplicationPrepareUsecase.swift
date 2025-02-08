@@ -74,6 +74,7 @@ extension ApplicationPrepareUsecaseImple {
     func prepareSignedIn(_ auth: Auth) {
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.accountInfo.rawValue
+            || $0 != ShareDataKeys.externalCalendarAccounts.rawValue
         }
         let closeResult = self.database.close()
         switch closeResult {
@@ -85,7 +86,9 @@ extension ApplicationPrepareUsecaseImple {
     }
     
     func prepareSignedOut() {
-        self.sharedDataStore.clearAll()
+        self.sharedDataStore.clearAll {
+            $0 != ShareDataKeys.externalCalendarAccounts.rawValue
+        }
         let closeResult = self.database.close()
         switch closeResult {
         case .success:

@@ -51,7 +51,7 @@ public final class ExternalCalendarIntegrationUsecaseImple: ExternalCalendarInte
 
 extension ExternalCalendarIntegrationUsecaseImple {
     
-    private var shareKey: String { "external_service_accounts" }
+    private var shareKey: String { ShareDataKeys.externalCalendarAccounts.rawValue }
     private typealias AccountsMap = [String: ExternalServiceAccountinfo]
     
     public func prepareIntegratedAccounts() async throws {
