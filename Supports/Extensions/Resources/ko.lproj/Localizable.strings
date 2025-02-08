@@ -272,6 +272,7 @@
 "event_notification_setting::title::forAllDay" = "하루종일";
 "event_notification_setting::title::NotforAllDay" = "미리알림 시간";
 "event_setting::external_calendar::title" = "외부 캘린더";
+"event_setting::external_calendar::connected::account" = "계정: %@";
 "event_setting::external_calendar::start" = "연동";
 "event_setting::external_calendar::start::message" = "외부 캘린더 연동이 완료되었습니다.";
 "event_setting::external_calendar::stop" = "연동 해제";

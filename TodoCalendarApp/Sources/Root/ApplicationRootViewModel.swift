@@ -21,6 +21,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
     private let prepareUsecase: any ApplicationPrepareUsecase
+    private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     private let environmentStorage: any EnvironmentStorage
     var router: ApplicationRootRouter?
     
@@ -30,11 +31,13 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
         prepareUsecase: any ApplicationPrepareUsecase,
+        externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
         environmentStorage: any EnvironmentStorage
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
         self.prepareUsecase = prepareUsecase
+        self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
         self.environmentStorage = environmentStorage
         
         self.bindAccountStatusChanged()
@@ -146,6 +149,12 @@ extension ApplicationRootViewModelImple {
 extension ApplicationRootViewModelImple {
     
     func handle(open url: URL) -> Bool {
+        
+        if self.externalCalendarServiceUsecase.handleAuthenticationResultOrNot(open: url
+        ) {
+            return true
+        }
+        
         if self.authUsecase.handleAuthenticationResultOrNot(open: url) {
             return true
         }
