@@ -26,6 +26,8 @@ final class EventSettingViewState: ObservableObject {
     @Published var selectedEventNotificationTimeText: String?
     @Published var selectedAllDayEventNotificationTimeText: String?
     @Published var periodModel: SelectedPeriodModel = .init(.minute0)
+    @Published var externalCalendarServiceModels: [ExternalCalanserServiceModel] = []
+    @Published var isConnectOrDisconnectingExternalService: Bool = false
     
     func bind(_ viewModel: any EventSettingViewModel) {
         
@@ -60,6 +62,20 @@ final class EventSettingViewState: ObservableObject {
                 self?.periodModel = model
             })
             .store(in: &self.cancellables)
+        
+        viewModel.integratedExternalCalendars
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] models in
+                self?.externalCalendarServiceModels = models
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.isConnectOrDisconnectExternalCalednar
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] flag in
+                self?.isConnectOrDisconnectingExternalService = flag
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -74,6 +90,8 @@ final class EventSettingViewEventHandler: ObservableObject {
     var selectEventNotificationTime: () -> Void = { }
     var selectAllDayEventNotificationTime: () -> Void = { }
     var selectPeriod: (EventSettings.DefaultNewEventPeriod) -> Void = { _ in }
+    var connectExternalCalendar: (String) -> Void = { _ in }
+    var disconnectExternalCalendar: (String) -> Void = { _ in }
     var close: () -> Void = { }
 }
 
@@ -125,25 +143,32 @@ struct EventSettingView: View {
     var body: some View {
         NavigationStack {
             
-            ScrollView {
-                
-                VStack {
-                    rowView(eventTypeView)
-                        .onTapGesture(perform: eventHandlers.selectTag)
-                    
-                    rowView(eventNotificationTimeView)
-                        .onTapGesture(perform: eventHandlers.selectEventNotificationTime)
-                    
-                    rowView(allDayEventNotificationTimeView)
-                        .onTapGesture(perform: eventHandlers.selectAllDayEventNotificationTime)
-                    
-                    rowView(periodView)
+            ZStack {
+                ScrollView {
+                    VStack(alignment: .leading) {
+                        rowView(eventTypeView)
+                            .onTapGesture(perform: eventHandlers.selectTag)
+                        
+                        rowView(eventNotificationTimeView)
+                            .onTapGesture(perform: eventHandlers.selectEventNotificationTime)
+                        
+                        rowView(allDayEventNotificationTimeView)
+                            .onTapGesture(perform: eventHandlers.selectAllDayEventNotificationTime)
+                        
+                        rowView(periodView)
+                        
+                        if !self.state.externalCalendarServiceModels.isEmpty {
+                            self.externalCalendarSectionView(state.externalCalendarServiceModels)
+                        }
+                    }
+                    .padding(.top, 20)
+                    .padding(.horizontal, 16)
                 }
-                .padding(.top, 20)
-                .padding(.horizontal, 16)
+                .listStyle(.plain)
+                .background(appearance.colorSet.bg0.asColor)
+                
+                FullScreenLoadingView(isLoading: $state.isConnectOrDisconnectingExternalService)
             }
-            .listStyle(.plain)
-            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("event_setting::title".localized())
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
@@ -151,7 +176,7 @@ struct EventSettingView: View {
                 }
             }
         }
-            .id(appearance.navigationBarId)
+        .id(appearance.navigationBarId)
     }
     
     private func rowView(_ content: some View) -> some View {
@@ -275,6 +300,80 @@ struct EventSettingView: View {
         }
         .onReceive(state.$periodModel.map { $0.period}, perform: eventHandlers.selectPeriod)
     }
+    
+    private func externalCalendarSectionView(_ models: [ExternalCalanserServiceModel]) -> some View {
+        
+        VStack(alignment: .leading) {
+            Text("event_setting::external_calendar::title".localized())
+                .font(appearance.fontSet.size(16, weight: .semibold).asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+            
+            ForEach(models, id: \.compareKey) { model in
+                rowView(externalCalendarRowView(model))
+            }
+        }
+        .padding(.top, 20)
+    }
+    
+    private func externalCalendarRowView(_ model: ExternalCalanserServiceModel) -> some View {
+        return HStack {
+            Image(model.serviceIconName)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 25, height: 25)
+            
+            VStack(alignment: .leading) {
+                Text(model.serviceName)
+                    .font(appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+                
+                if let account = model.accountName {
+                    Text("event_setting::external_calendar::connected::account".localized(with: account))
+                        .font(appearance.fontSet.subSubNormal.asFont)
+                        .foregroundStyle(appearance.colorSet.text1.asColor)
+                }
+            }
+            
+            Spacer()
+            
+            switch model.status {
+            case .integrated:
+               Button {
+                   eventHandlers.disconnectExternalCalendar(model.serviceId)
+                } label: {
+                    Text("event_setting::external_calendar::stop".localized())
+                        .font(appearance.fontSet.subNormal.asFont)
+                        .foregroundStyle(appearance.colorSet.negativeBtnBackground.asColor)
+                }
+                
+                
+            case .notIntegrated:
+                Button {
+                    eventHandlers.connectExternalCalendar(model.serviceId)
+                 } label: {
+                     Text("event_setting::external_calendar::start".localized())
+                         .font(appearance.fontSet.subNormal.asFont)
+                         .foregroundStyle(appearance.colorSet.primaryBtnBackground.asColor)
+                 }
+            }
+        }
+    }
+}
+
+private extension ExternalCalanserServiceModel {
+    
+    var accountName: String? {
+        guard case .integrated(let accountName) = self.status else { return nil }
+        return accountName
+    }
+    
+    var compareKey: String {
+        let statusKey = switch self.status {
+        case .notIntegrated: "notIntegrated"
+        case .integrated(let accountName): "integrated:\(accountName ?? "none")"
+        }
+        return "\(self.serviceId)_\(statusKey)"
+    }
 }
 
 
@@ -284,7 +383,7 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultDark,
+            colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
@@ -297,7 +396,17 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
         state.periodModel = .init(EventSettings.DefaultNewEventPeriod.minute15)
         state.selectedEventNotificationTimeText = "so long text hahahahhahahha hahah"
         state.selectedAllDayEventNotificationTimeText = "so long text hahahahhahahha hahah"
+        state.externalCalendarServiceModels = [
+            ExternalCalanserServiceModel(
+                GoogleCalendarService(scopes: [.readOnly]),
+                with: nil
+//                        .init("google", email: "some@email.com")
+            )!
+        ]
         let eventHandlers = EventSettingViewEventHandler()
+        eventHandlers.connectExternalCalendar = { _ in
+            state.isConnectOrDisconnectingExternalService = true
+        }
         let view = EventSettingView()
             .environmentObject(state)
             .environmentObject(viewAppearance)

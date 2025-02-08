@@ -47,6 +47,7 @@ final class ApplicationRootBuilder {
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
             prepareUsecase: prepareUsecase,
+            externalCalendarServiceUsecase: externalCalendarIntegrationUsecase,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         remote.attach(listener: rootViewModel)

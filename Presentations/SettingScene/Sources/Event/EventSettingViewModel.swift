@@ -47,6 +47,7 @@ struct ExternalCalanserServiceModel: Hashable {
         case notIntegrated
     }
     
+    let serviceId: String
     let serviceName: String
     let serviceIconName: String
     let status: IntegrateStatus
@@ -55,6 +56,8 @@ struct ExternalCalanserServiceModel: Hashable {
         _ service: any ExternalCalendarService,
         with account: ExternalServiceAccountinfo?
     ) {
+        self.serviceId = service.identifier
+        
         switch service {
         case is GoogleCalendarService:
             self.serviceName = "event_setting::external_calendar::google::serviceName".localized()
@@ -181,7 +184,8 @@ extension EventSettingViewModelImple {
     }
     
     func connectExternalCalendar(_ serviceIdentifier: String) {
-        guard let service = self.supportExternalCalendarServices.first(where: { $0.identifier == serviceIdentifier })
+        guard !self.subject.isConnectOrDisconnectExternalCalednar.value,
+              let service = self.supportExternalCalendarServices.first(where: { $0.identifier == serviceIdentifier })
         else { return }
         
         self.subject.isConnectOrDisconnectExternalCalednar.send(true)
@@ -201,7 +205,8 @@ extension EventSettingViewModelImple {
     }
     
     func disconnectExternalCalendar(_ serviceIdentifier: String) {
-        guard let service = self.supportExternalCalendarServices.first(where: { $0.identifier == serviceIdentifier })
+        guard !self.subject.isConnectOrDisconnectExternalCalednar.value,
+              let service = self.supportExternalCalendarServices.first(where: { $0.identifier == serviceIdentifier })
         else { return }
         
         self.subject.isConnectOrDisconnectExternalCalednar.send(true)
