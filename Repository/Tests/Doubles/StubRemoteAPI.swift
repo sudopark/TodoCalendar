@@ -13,7 +13,7 @@ import Extensions
 
 final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
     
-    struct Resopnse {
+    struct Response {
         let method: RemoteAPIMethod
         let endpoint: any Endpoint
         let header: [String: String]?
@@ -38,8 +38,8 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         }
     }
     
-    private let responses: [Resopnse]
-    init(responses: [Resopnse]) {
+    private let responses: [Response]
+    init(responses: [Response]) {
         self.responses = responses
     }
     
@@ -105,7 +105,7 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         path: String,
         header: [String: String]?,
         parameters: [String: Any]
-    ) -> Resopnse? {
+    ) -> Response? {
         
         return self.responses.first(where: { response in
             return response.method == method

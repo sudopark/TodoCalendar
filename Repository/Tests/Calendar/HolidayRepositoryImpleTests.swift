@@ -177,7 +177,7 @@ extension HolidayRepositoryImpleTests {
 
 extension HolidayRepositoryImpleTests {
     
-    private var responses: [StubRemoteAPI.Resopnse] {
+    private var responses: [StubRemoteAPI.Response] {
         return [
             .init(
                 endpoint: HolidayAPIEndpoints.supportCountry,

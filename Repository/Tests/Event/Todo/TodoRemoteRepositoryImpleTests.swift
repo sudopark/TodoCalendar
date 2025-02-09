@@ -999,7 +999,7 @@ private struct DummyResponse {
         """
     }
     
-    var reponses: [StubRemoteAPI.Resopnse] {
+    var reponses: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .get,

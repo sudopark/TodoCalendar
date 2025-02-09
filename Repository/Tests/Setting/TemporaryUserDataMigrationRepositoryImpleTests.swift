@@ -239,7 +239,7 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         """
     }
     
-    private var responses: [StubRemoteAPI.Resopnse] {
+    private var responses: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .post,

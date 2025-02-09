@@ -149,7 +149,7 @@ extension EventDetailDataRemoteRepostioryImpleTests {
         """
     }
     
-    private var response: [StubRemoteAPI.Resopnse] {
+    private var response: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .get,

@@ -224,11 +224,13 @@ enum GoogleAuthEndpoint: Endpoint {
 // MARK: - google calendar endpoint
 
 enum GoogleCalendarEndpoint: Endpoint {
+    case colors
     case calednarList
     
     var subPath: String {
         switch self {
-        case .calednarList: return "calendarList"
+        case .colors: return "colors"
+        case .calednarList: return "users/me/calendarList"
         }
     }
 }
@@ -296,7 +298,7 @@ public struct RemoteEnvironment: Sendable {
             return appendSubpathIfNotEmpty("https://oauth2.googleapis.com", googleAuth.subPath)
             
         case let googleCalendar as GoogleCalendarEndpoint:
-            let prefix = "https://www.googleapis.com/calendar/v3/users/me"
+            let prefix = "https://www.googleapis.com/calendar/v3"
             return appendSubpathIfNotEmpty(prefix, googleCalendar.subPath)
             
         default: return nil

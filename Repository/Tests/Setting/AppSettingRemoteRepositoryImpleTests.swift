@@ -114,7 +114,7 @@ private extension AppSettingRemoteRepositoryImpleTests {
         """
     }
     
-    var response: [StubRemoteAPI.Resopnse] {
+    var response: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .get,

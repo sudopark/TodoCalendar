@@ -65,7 +65,7 @@ extension FeedbackRepositoryImpleTests {
 
 private extension FeedbackRepositoryImpleTests {
     
-    private var responses: [StubRemoteAPI.Resopnse] {
+    private var responses: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .post,
