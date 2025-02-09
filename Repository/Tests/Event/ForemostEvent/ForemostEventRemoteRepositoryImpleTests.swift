@@ -217,7 +217,7 @@ private extension ForemostEventRemoteRepositoryImpleTests {
         """
     }
     
-    private var responses: [StubRemoteAPI.Resopnse] {
+    private var responses: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .get,

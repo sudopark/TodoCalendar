@@ -161,7 +161,7 @@ private final class FakeKeyChainStore: KeyChainStorage, @unchecked Sendable {
 
 extension GoogleAPIAuthenticatorTests {
     
-    private static var response: [StubRemoteAPI.Resopnse] {
+    private static var response: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .post,

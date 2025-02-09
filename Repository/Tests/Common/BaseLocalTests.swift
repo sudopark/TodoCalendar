@@ -38,3 +38,36 @@ class BaseLocalTests: BaseTestCase {
         try? FileManager.default.removeItem(atPath: self.testDBPath())
     }
 }
+
+
+protocol LocalTestable {
+    
+    var sqliteService: SQLiteService { get }
+}
+
+extension LocalTestable {
+    
+    private func testDBPath(name: String) -> String {
+        return try! FileManager.default
+            .url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            .appendingPathComponent("\(name).db")
+            .path
+    }
+    
+    private func open(db fileName: String) throws{
+        let path = self.testDBPath(name: fileName)
+        _ = self.sqliteService.open(path: path)
+    }
+    
+    private func closeAndRemove(db fileName: String) throws {
+        let path = self.testDBPath(name: fileName)
+        self.sqliteService.close()
+        try FileManager.default.removeItem(atPath: path)
+    }
+    
+    func runTestWithOpenClose(_ fileName: String, _ testing: @escaping() async throws -> Void) async throws {
+        try? self.open(db: fileName)
+        try await testing()
+        try? self.closeAndRemove(db: fileName)
+    }
+}
