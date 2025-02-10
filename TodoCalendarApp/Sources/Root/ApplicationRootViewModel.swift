@@ -42,6 +42,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         
         self.bindAccountStatusChanged()
         self.bindApplicationStatusChanged()
+        self.bindExternalCalenarIntegratedStatus()
     }
 }
 
@@ -68,6 +69,20 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
                     self?.handleUserSignedIn(account)
                 case .signOut:
                     self?.handleUserSignedOut()
+                }
+            })
+            .store(in: &self.cancellables)
+    }
+    
+    private func bindExternalCalenarIntegratedStatus() {
+        
+        self.externalCalendarServiceUsecase.integrationStatusChanged
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] status in
+                if status.account != nil {
+                    self?.prepareUsecase.prepareExternalCalendarIntegrated(status.serviceId)
+                } else {
+                    self?.prepareUsecase.prepareExternalCalendarStopIntegrated(status.serviceId)
                 }
             })
             .store(in: &self.cancellables)
