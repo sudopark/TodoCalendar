@@ -46,4 +46,8 @@ open class StubExternalCalendarIntegrationUsecase: ExternalCalendarIntegrationUs
         return self.fakeAccountMapSubject
             .eraseToAnyPublisher()
     }
+    
+    public var integrationStatusChanged: AnyPublisher<ExternalCalendarIntegrationStatus, Never> {
+        return Empty().eraseToAnyPublisher()
+    }
 }

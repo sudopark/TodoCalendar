@@ -191,6 +191,27 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         // then
         #expect(handled == false)
     }
+    
+    @Test func usecase_whenServiceIntegrationStatusChanged_notify() async throws {
+        // given
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let expect = self.expectConfirm("연동여부 변경시에 외부에 전파")
+        expect.count = 2
+        let usecase = self.makeUsecase()
+        
+        // when
+        let statues = try await self.outputs(expect, for: usecase.integrationStatusChanged) {
+            
+            _ = try await usecase.integrate(external: service)
+            try await usecase.stopIntegrate(external: service)
+        }
+        
+        // then
+        let services = statues.map { $0.serviceId }
+        let isIntegrated = statues.map { $0.isIntegrated }
+        #expect(services == [service.identifier, service.identifier])
+        #expect(isIntegrated == [true, false])
+    }
 }
 
 

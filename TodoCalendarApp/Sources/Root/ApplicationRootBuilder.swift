@@ -36,6 +36,7 @@ final class ApplicationRootBuilder {
         
         let prepareUsecase = ApplicationPrepareUsecaseImple(
             accountUsecase: accountUsecase,
+            supportExternalServices: AppEnvironment.supportExternalCalendarServices,
             externalCalenarIntegrationUsecase: externalCalendarIntegrationUsecase,
             latestAppSettingRepository: AppSettingLocalRepositoryImple(
                 storage: .init(environmentStorage: applicationBase.userDefaultEnvironmentStorage)

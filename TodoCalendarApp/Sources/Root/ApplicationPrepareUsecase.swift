@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 import Domain
 import CommonPresentation
 import Extensions
@@ -26,19 +27,26 @@ protocol ApplicationPrepareUsecase {
     func prepareLaunch() async throws -> ApplicationPrepareResult
     func prepareSignedIn(_ auth: Auth)
     func prepareSignedOut()
+    func prepareExternalCalendarIntegrated(_ serviceId: String)
+    func prepareExternalCalendarStopIntegrated(_ serviceId: String)
 }
 
 
 final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     
     private let accountUsecase: any AccountUsecase
+    private let supportExternalServices: [any ExternalCalendarService]
     private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let latestAppSettingRepository: any AppSettingRepository
     private let sharedDataStore: SharedDataStore
     private let database: SQLiteService
     private let databasePathFinding: (String?) -> String
+
+    private var cancelBag: Set<AnyCancellable> = []
+    
     init(
         accountUsecase: any AccountUsecase,
+        supportExternalServices: [any ExternalCalendarService],
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         latestAppSettingRepository: any AppSettingRepository,
         sharedDataStore: SharedDataStore,
@@ -46,6 +54,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
     ) {
         self.accountUsecase = accountUsecase
+        self.supportExternalServices = supportExternalServices
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.latestAppSettingRepository = latestAppSettingRepository
         self.sharedDataStore = sharedDataStore
@@ -64,7 +73,6 @@ extension ApplicationPrepareUsecaseImple {
         self.prepareDatabase(for: latestLoginAccount?.auth.uid)
         
         try? await self.externalCalenarIntegrationUsecase.prepareIntegratedAccounts()
-        
         return .init(
             latestLoginAcount: latestLoginAccount,
             appearnceSetings: appearance
@@ -118,5 +126,35 @@ extension ApplicationPrepareUsecaseImple {
         let dbPath = self.databasePathFinding(accountId)
         let openResult = database.open(path: dbPath)
         logger.log(level: .info, "db open result: \(openResult) -> path: \(dbPath)")
+    }
+}
+
+
+extension ApplicationPrepareUsecaseImple {
+    
+    func prepareExternalCalendarIntegrated(_ serviceId: String) {
+        guard let service = self.supportExternalServices.first(where: { $0.identifier == serviceId })
+        else { return }
+        
+        switch service {
+        case let google as GoogleCalendarService:
+            // TODO: handle connected
+            break
+            
+        default: break
+        }
+    }
+    
+    func prepareExternalCalendarStopIntegrated(_ serviceId: String) {
+        guard let service = self.supportExternalServices.first(where: { $0.identifier == serviceId })
+        else { return }
+        
+        switch service {
+        case let google as GoogleCalendarService:
+            // TODO: handle disconnected
+            break
+            
+        default: break
+        }
     }
 }
