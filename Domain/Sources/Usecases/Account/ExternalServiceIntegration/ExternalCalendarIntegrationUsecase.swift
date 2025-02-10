@@ -12,6 +12,19 @@ import Prelude
 import Optics
 import Extensions
 
+// MARK: - ExternalCalendarIntegrationStatus
+
+public struct ExternalCalendarIntegrationStatus: Sendable {
+    public let serviceId: String
+    public let account: ExternalServiceAccountinfo?
+    public var isIntegrated: Bool { self.account != nil }
+    
+    public init(serviceId: String, account: ExternalServiceAccountinfo?) {
+        self.serviceId = serviceId
+        self.account = account
+    }
+}
+
 
 // MARK: - ExternalCalendarIntegrationUsecase
 
@@ -26,6 +39,7 @@ public protocol ExternalCalendarIntegrationUsecase: Sendable {
     func handleAuthenticationResultOrNot(open url: URL) -> Bool
     
     var integratedServiceAccounts: AnyPublisher<[String: ExternalServiceAccountinfo], Never> { get }
+    var integrationStatusChanged: AnyPublisher<ExternalCalendarIntegrationStatus, Never> { get }
 }
 
 
@@ -37,6 +51,8 @@ public final class ExternalCalendarIntegrationUsecaseImple: ExternalCalendarInte
     private let externalServiceIntegrateRepository: any ExternalCalendarIntegrateRepository
     private let sharedDataStore: SharedDataStore
     private var lastestUsedOAuthUsecase: (any OAuth2ServiceUsecase)?
+    
+    private let integrationStatusChangedSubject = PassthroughSubject<ExternalCalendarIntegrationStatus, Never>()
     
     public init(
         oauth2ServiceProvider: any ExternalCalendarOAuthUsecaseProvider,
@@ -75,6 +91,9 @@ extension ExternalCalendarIntegrationUsecaseImple {
         self.sharedDataStore.update(AccountsMap.self, key: self.shareKey) { old in
             (old ?? [:]) |> key(service.identifier) .~ account
         }
+        self.integrationStatusChangedSubject.send(
+            .init(serviceId: service.identifier, account: account)
+        )
         return account
     }
 
@@ -86,6 +105,9 @@ extension ExternalCalendarIntegrationUsecaseImple {
         self.sharedDataStore.update(AccountsMap.self, key: self.shareKey) { old in
             (old ?? [:]) |> key(service.identifier) .~ nil
         }
+        self.integrationStatusChangedSubject.send(
+            .init(serviceId: service.identifier, account: nil)
+        )
     }
     
     public func handleAuthenticationResultOrNot(open url: URL) -> Bool {
@@ -98,6 +120,11 @@ extension ExternalCalendarIntegrationUsecaseImple {
     public var integratedServiceAccounts: AnyPublisher<[String : ExternalServiceAccountinfo], Never> {
         return self.sharedDataStore.observe(AccountsMap.self, key: self.shareKey)
             .map { $0 ?? [:] }
+            .eraseToAnyPublisher()
+    }
+    
+    public var integrationStatusChanged: AnyPublisher<ExternalCalendarIntegrationStatus, Never> {
+        return self.integrationStatusChangedSubject
             .eraseToAnyPublisher()
     }
 }
