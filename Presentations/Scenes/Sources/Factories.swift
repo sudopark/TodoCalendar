@@ -58,7 +58,12 @@ public protocol SupportUsecaseFactory {
     func makeFeedbackUsecase() -> any FeedbackUsecase
 }
 
-public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory {
+public protocol ExternalCalendarUsecaseFactory {
+    
+    func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase
+}
+
+public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory {
     
     var eventNotifyService: SharedEventNotifyService { get }
 }
