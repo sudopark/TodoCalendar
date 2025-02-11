@@ -52,6 +52,10 @@ public class ViewAppearance: ObservableObject {
         return self.color(id)
     }
     
+    
+    // Google calendar color
+    @Published public var googleCalendarColor: GoogleCalendarColors?
+    
     public init(setting: AppearanceSettings, isSystemDarkTheme: Bool) {
         
         let (calendar, defaultTagColor) = (setting.calendar, setting.defaultTagColor)

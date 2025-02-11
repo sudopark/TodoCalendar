@@ -194,9 +194,10 @@ extension AppSettingLocalStorage {
         let defaultTagColor: String? = self.environmentStorage.load(
             defaultTagColorKey |> self.keyWithUserId(userId)
         )
+        let defSetting = DefaultEventTagColorSetting.defaultSetting
         return DefaultEventTagColorSetting(
-            holiday: holidayTagColor ?? "#D6236A",
-            default: defaultTagColor ?? "#088CDA"
+            holiday: holidayTagColor ?? defSetting.holiday,
+            default: defaultTagColor ?? defSetting.default
         )
     }
     

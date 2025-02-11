@@ -22,6 +22,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubMigrationUsecase: StubTemporaryUserDataMigrationUescase!
     private var spyEventNotificationUsecase: SpyEventNotificationUsecase!
     private var stubEventTagUsecase: StubEventTagUsecase!
+    private var spyGoogleCalendarUsecase: StubGoogleCalendarUsecase!
     var cancelBag: Set<AnyCancellable>!
     
     override func setUpWithError() throws {
@@ -30,6 +31,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubMigrationUsecase = .init()
         self.spyEventNotificationUsecase = .init()
         self.stubEventTagUsecase = .init()
+        self.spyGoogleCalendarUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -40,6 +42,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubMigrationUsecase = nil
         self.spyEventNotificationUsecase = nil
         self.stubEventTagUsecase = nil
+        self.spyGoogleCalendarUsecase = nil
         self.cancelBag = nil
     }
     
@@ -52,7 +55,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
             eventNotificationUsecase: self.spyEventNotificationUsecase,
-            eventTagUsecase: self.stubEventTagUsecase
+            eventTagUsecase: self.stubEventTagUsecase,
+            googleCalendarUsecase: self.spyGoogleCalendarUsecase
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -71,7 +75,8 @@ extension MainViewModelImpleTests {
             uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
             eventNotificationUsecase: self.spyEventNotificationUsecase,
-            eventTagUsecase: self.stubEventTagUsecase
+            eventTagUsecase: self.stubEventTagUsecase,
+            googleCalendarUsecase: self.spyGoogleCalendarUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -113,6 +118,17 @@ extension MainViewModelImpleTests {
         
         // then
         self.wait(for: [expect], timeout: self.timeout)
+    }
+    
+    func testViewModel_whenPrepare_prepareGoogleCalendar() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+        
+        // when
+        viewModel.prepare()
+        
+        // then
+        XCTAssertEqual(self.spyGoogleCalendarUsecase.didPrepared, true)
     }
     
     func testViewModel_whenFocusChanged_updateCurrentMonth() {

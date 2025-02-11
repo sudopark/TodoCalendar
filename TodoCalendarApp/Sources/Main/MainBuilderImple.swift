@@ -44,7 +44,8 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             temporaryUserDataMigrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase,
             eventNotificationUsecase: self.usecaseFactory.makeEventNotificationUsecase(),
-            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase()
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase()
         )
         
         let viewController = MainViewController(

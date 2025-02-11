@@ -34,6 +34,10 @@ public struct DefaultEventTagColorSetting: Equatable, Sendable {
             default: params.newDefaultTagColor ?? self.default
         )
     }
+    
+    public static var defaultSetting: DefaultEventTagColorSetting {
+        return .init(holiday: "#D6236A", default: "#088CDA")
+    }
 }
 
 public enum AccentDays: Sendable {

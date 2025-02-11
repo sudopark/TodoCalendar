@@ -46,18 +46,21 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     private let eventNotificationUsecase: any EventNotificationUsecase
     private let eventTagUsecase: any EventTagUsecase
+    private let googleCalendarUsecase: any GoogleCalendarUsecase
     var router: (any MainRouting)?
     
     init(
         uiSettingUsecase: any UISettingUsecase,
         temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase,
         eventNotificationUsecase: any EventNotificationUsecase,
-        eventTagUsecase: any EventTagUsecase
+        eventTagUsecase: any EventTagUsecase,
+        googleCalendarUsecase: any GoogleCalendarUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
         self.eventNotificationUsecase = eventNotificationUsecase
         self.eventTagUsecase = eventTagUsecase
+        self.googleCalendarUsecase = googleCalendarUsecase
         
         self.internalBinding()
     }
@@ -118,6 +121,7 @@ extension MainViewModelImple {
         
         self.eventNotificationUsecase.runSyncEventNotification()
         self.bindEventTagColorMap()
+        self.googleCalendarUsecase.prepare()
     }
     
     private func refreshViewAppearanceSettings() {
