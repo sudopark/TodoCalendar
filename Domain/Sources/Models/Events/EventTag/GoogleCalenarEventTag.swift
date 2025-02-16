@@ -9,6 +9,8 @@
 import Foundation
 
 
+// MARK: - GoogleCalendarColors
+
 public struct GoogleCalendarColors: Equatable, Sendable {
     
     public struct ColorSet: Equatable, Sendable {
@@ -27,5 +29,28 @@ public struct GoogleCalendarColors: Equatable, Sendable {
     public init(calendars: [String : ColorSet], events: [String : ColorSet]) {
         self.calendars = calendars
         self.events = events
+    }
+}
+
+
+// MARK: - GoogleCalendarEventTag
+
+public struct GoogleCalendarEventTag: EventTag {
+    
+    public let tagId: EventTagId
+    public let id: String
+    public let name: String
+    public var description: String?
+    public var backgroundColorHex: String?
+    public var foregroundColorHex: String?
+    public var colorId: String?
+    public var colorHex: String {
+        return backgroundColorHex ?? "#000000"
+    }
+    
+    public init(id: String, name: String) {
+        self.id = id
+        self.tagId = .externalCalendar(serviceId: GoogleCalendarService.id, id: id)
+        self.name = name
     }
 }

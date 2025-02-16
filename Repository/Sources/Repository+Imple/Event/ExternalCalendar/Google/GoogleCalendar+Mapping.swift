@@ -7,9 +7,13 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 import Domain
 import Extensions
 
+
+// MARK: - GoogleCalendarColorsMapper
 
 struct GoogleCalendarColorsMapper {
     
@@ -42,5 +46,50 @@ struct GoogleCalendarColorsMapper {
             calendars: calendarJson.compactMapValues(decodeColorSet),
             events: eventJson.compactMapValues(decodeColorSet)
         )
+    }
+}
+
+
+// MARK: - GoogleCalendarEventTagMapper
+
+struct GoogleCalendarEventTagMapper: Decodable {
+    
+    let calendar: GoogleCalendarEventTag
+    
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case summary
+        case description
+        case backgroundColor
+        case foregroundColor
+        case colorId
+    }
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.calendar = GoogleCalendarEventTag(
+            id: try container.decode(String.self, forKey: .id),
+            name: try container.decode(String.self, forKey: .summary)
+        )
+        |> \.description .~ (try? container.decode(String.self, forKey: .description))
+        |> \.backgroundColorHex .~ (try? container.decode(String.self, forKey: .backgroundColor))
+        |> \.foregroundColorHex .~ (try? container.decode(String.self, forKey: .foregroundColor))
+        |> \.colorId .~ (try? container.decode(String.self, forKey: .colorId))
+    }
+}
+
+
+struct GoogleCalendarEventTagListMapper: Decodable {
+    
+    let calendars: [GoogleCalendarEventTag]
+    
+    private enum CodingKeys: String, CodingKey {
+        case items
+    }
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let mappers = try container.decode([GoogleCalendarEventTagMapper].self, forKey: .items)
+        self.calendars = mappers.map { $0.calendar }
     }
 }

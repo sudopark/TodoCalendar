@@ -128,6 +128,10 @@ private final class PrivateStubRepository: GoogleCalendarRepository {
             .mapAsAnyError()
             .eraseToAnyPublisher()
     }
+    
+    func loadCalendarTags() -> AnyPublisher<[GoogleCalendarEventTag], any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
 }
 
 private final class SpyGoogleCalendarViewAppearanceStore: GoogleCalendarViewAppearanceStore, @unchecked Sendable {

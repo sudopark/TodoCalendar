@@ -11,6 +11,7 @@ import Combine
 import Domain
 import CombineExt
 import SQLiteService
+import Extensions
 
 
 public final class GoogleCalendarRepositoryImple: GoogleCalendarRepository {
@@ -31,29 +32,13 @@ extension GoogleCalendarRepositoryImple {
     
     public func loadColors() -> AnyPublisher<GoogleCalendarColors, any Error> {
         
-        return AnyPublisher<GoogleCalendarColors, any Error>.create { subscriber in
-            let task = Task { [weak self] in
-                
-                if let cached = try? await self?.cacheStorage.loadColors() {
-                    subscriber.send(cached)
-                }
-                
-                do {
-                    guard let refreshed = try await self?.loadColorsFromRemote()
-                    else {
-                        subscriber.send(completion: .finished)
-                        return
-                    }
-                    try? await self?.cacheStorage.updateColors(refreshed)
-                    subscriber.send(refreshed)
-                    subscriber.send(completion: .finished)
-                    
-                } catch {
-                    subscriber.send(completion: .failure(error))
-                }
-            }
-            
-            return AnyCancellable { task.cancel() }
+        return self.load { [weak self] in
+            return try? await self?.cacheStorage.loadColors()
+        } thenFromRemote: { [weak self] in
+            return try await self?.loadColorsFromRemote()
+        } withRefreshCache: { _, refreshed in
+            guard let refreshed else { return }
+            try? await self.cacheStorage.updateColors(refreshed)
         }
     }
     
@@ -64,5 +49,54 @@ extension GoogleCalendarRepositoryImple {
         )
         let mapper = try GoogleCalendarColorsMapper(decode: jsonData)
         return mapper.colors
+    }
+    
+    public func loadCalendarTags() -> AnyPublisher<[GoogleCalendarEventTag], any Error> {
+        return self.load { [weak self] in
+            return try? await self?.cacheStorage.loadCalendarList()
+        } thenFromRemote: { [weak self] in
+            return try await self?.loadCalendarTagsFromRemote()
+        } withRefreshCache: { _, refreshed in
+            guard let refreshed else { return }
+            try? await self.cacheStorage.updateCalendarList(refreshed)
+        }
+    }
+    
+    private func loadCalendarTagsFromRemote() async throws -> [GoogleCalendarEventTag] {
+        let endpoint = GoogleCalendarEndpoint.calednarList
+        let mapper: GoogleCalendarEventTagListMapper = try await self.remote.request(
+            .get, endpoint
+        )
+        return mapper.calendars
+    }
+    
+    private func load<T>(
+        startWith readCacheOperation: @Sendable @escaping () async throws -> T?,
+        thenFromRemote remoteOperation: @Sendable @escaping () async throws -> T?,
+        withRefreshCache replaceCacheOperation: (@Sendable (T?, T?) async -> Void)? = nil
+    ) -> AnyPublisher<T, any Error> {
+        
+        return AnyPublisher<T?, any Error>.create { subscriber in
+            let task = Task {
+                let cached = try? await readCacheOperation()
+                if let cached {
+                    subscriber.send(cached)
+                }
+                
+                do {
+                    let refreshed = try await remoteOperation()
+                    if let replaceOperation = replaceCacheOperation {
+                        await replaceOperation(cached, refreshed)
+                    }
+                    subscriber.send(refreshed)
+                    subscriber.send(completion: .finished)
+                } catch {
+                    subscriber.send(completion: .failure(error))
+                }
+            }
+            return AnyCancellable { task.cancel() }
+        }
+        .compactMap { $0 }
+        .eraseToAnyPublisher()
     }
 }
