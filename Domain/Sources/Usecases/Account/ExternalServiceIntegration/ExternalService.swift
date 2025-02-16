@@ -55,8 +55,12 @@ public struct GoogleCalendarService: ExternalCalendarService {
         case readOnly = "https://www.googleapis.com/auth/calendar.readonly"
     }
     
-    public let identifier: String = "google"
+    public let identifier: String = GoogleCalendarService.id
     public let scopes: [Scope]
+    
+    public static var id: String {
+        return "google"
+    }
     
     public init(scopes: [Scope]) {
         self.scopes = scopes
