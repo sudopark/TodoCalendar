@@ -15,6 +15,8 @@ public protocol GoogleCalendarLocalStorage: Sendable {
  
     func loadColors() async throws -> GoogleCalendarColors?
     func updateColors(_ colors: GoogleCalendarColors) async throws
+    func loadCalendarList() async throws -> [GoogleCalendarEventTag]
+    func updateCalendarList(_ calendars: [GoogleCalendarEventTag]) async throws
 }
 
 
@@ -26,6 +28,7 @@ public final class GoogleCalendarLocalStorageImple: GoogleCalendarLocalStorage {
     }
     
     private typealias Colors = GoogleCalendarColorsTable
+    private typealias Calendars = GoogleCalendarEventTagTable
 }
 
 
@@ -54,7 +57,6 @@ extension GoogleCalendarLocalStorageImple {
     }
     
     public func updateColors(_ colors: GoogleCalendarColors) async throws {
-        try await self.sqliteService.async.run { try $0.dropTable(Colors.self) }
         let calendars = colors.calendars.reduce([Colors.Entity]()) { arr, color in
             arr + [.init(calendar: color.key, color.value)]
         }
@@ -63,7 +65,22 @@ extension GoogleCalendarLocalStorageImple {
         }
         let entities = calendars + events
         try await self.sqliteService.async.run { db in
+            try db.dropTable(Colors.self)
             try db.insert(Colors.self, entities: entities)
+        }
+    }
+    
+    public func loadCalendarList() async throws -> [GoogleCalendarEventTag] {
+        return try await self.sqliteService.async.run { db in
+            let query = Calendars.selectAll()
+            return try db.load(query)
+        }
+    }
+    
+    public func updateCalendarList(_ calendars: [GoogleCalendarEventTag]) async throws {
+        try await self.sqliteService.async.run { db in
+            try db.dropTable(Calendars.self)
+            try db.insert(Calendars.self, entities: calendars)
         }
     }
 }
