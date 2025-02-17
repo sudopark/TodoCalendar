@@ -47,12 +47,18 @@ public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked
     }
     
     private var cancelBag: Set<AnyCancellable> = []
+    private func clearCancelBag() {
+        self.cancelBag.forEach { $0.cancel() }
+        self.cancelBag = []
+    }
 }
 
 
 extension GoogleCalendarUsecaseImple {
     
     public func prepare() {
+        
+        self.clearCancelBag()
         
         let serviceId = self.googleService.identifier
         let hasAccount = self.sharedDataStore
@@ -67,8 +73,10 @@ extension GoogleCalendarUsecaseImple {
             .sink(receiveValue: { [weak self] has in
                 if has {
                     self?.refreshColors()
+                    self?.refreshGoogleCalendarEventTags()
                 } else {
                     self?.appearanceStore.clearGoogleCalendarColors()
+                    self?.clearGoogleCalendarEventTag()
                 }
             })
             .store(in: &self.cancelBag)
@@ -80,5 +88,35 @@ extension GoogleCalendarUsecaseImple {
                 self?.appearanceStore.apply(colors: colors)
             })
             .store(in: &self.cancelBag)
+    }
+    
+    private func refreshGoogleCalendarEventTags() {
+        let updateTags: ([GoogleCalendarEventTag]) -> Void = { [weak self] tags in
+            self?.sharedDataStore.update(tags)
+        }
+        self.repository.loadCalendarTags()
+            .sink(receiveValue: updateTags)
+            .store(in: &self.cancelBag)
+    }
+    
+    private func clearGoogleCalendarEventTag() {
+        self.sharedDataStore.update([])
+    }
+}
+
+
+private extension SharedDataStore {
+    
+    func update(_ tags: [GoogleCalendarEventTag]) {
+        let newDict = tags.reduce(into: [EventTagId: GoogleCalendarEventTag]()) { acc, tag in
+            acc[tag.tagId] = tag
+        }
+        self.update(
+            [EventTagId: any EventTag].self, key: ShareDataKeys.tags.rawValue
+        ) { allDict in
+            return (allDict ?? [:])
+                .filter { $0.key.externalServiceId != GoogleCalendarService.id }
+                .merging(newDict) { $1 }
+        }
     }
 }

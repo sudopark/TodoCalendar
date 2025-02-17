@@ -8,15 +8,18 @@
 
 import Testing
 import Combine
+import UnitTestHelpKit
 import TestDoubles
 
 @testable import Domain
 
-struct GoogleCalendarUsecaseImpleTests {
+final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
     
     private let spyViewAppearanceStore: SpyGoogleCalendarViewAppearanceStore = .init()
     private let stubStore: SharedDataStore = .init()
     private let service = GoogleCalendarService(scopes: [.readOnly])
+    
+    var cancelBag: Set<AnyCancellable>! = []
     
     private func updateAccountIntegrated(_ hasAccount: Bool) {
         if hasAccount {
@@ -116,6 +119,44 @@ extension GoogleCalendarUsecaseImpleTests {
     }
 }
 
+extension GoogleCalendarUsecaseImpleTests {
+    
+    @Test func usecase_updateCalendarTag_byIntegrationStatusChanged() async throws {
+        // given
+        let expect = expectConfirm("연동 여부에 따라 구글 캘린더 태그정보 업데이트")
+        expect.count = 4
+        let usecase = self.makeUsecase(hasAccount: false)
+        self.stubStore.put([EventTagId: any EventTag].self, key: ShareDataKeys.tags.rawValue, [
+            .custom("some"): CustomEventTag(uuid: "custom", name: "name", colorHex: "hex")
+        ])
+        
+        // when
+        let tagSource = self.stubStore.observe(
+            [EventTagId: any EventTag].self, key: ShareDataKeys.tags.rawValue
+        )
+        let tagLists = try await self.outputs(expect, for: tagSource) {
+            usecase.prepare()
+            
+            self.updateAccountIntegrated(true)
+            
+            self.updateAccountIntegrated(false)
+        }
+        
+        // then
+        let idSets = tagLists.map { ts in ts?.map { $0.key } ?? [] }.map { Set($0) }
+        #expect(idSets == [
+            [.custom("some")],
+            [.custom("some")],
+            [
+                .custom("some"),
+                .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag1"),
+                .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag2")
+            ],
+            [EventTagId.custom("some")],
+        ])
+    }
+}
+
 
 private final class PrivateStubRepository: GoogleCalendarRepository {
     
@@ -130,7 +171,13 @@ private final class PrivateStubRepository: GoogleCalendarRepository {
     }
     
     func loadCalendarTags() -> AnyPublisher<[GoogleCalendarEventTag], any Error> {
-        return Empty().eraseToAnyPublisher()
+        let tags = [
+            GoogleCalendarEventTag(id: "tag1", name: "tag1"),
+            GoogleCalendarEventTag(id: "tag2", name: "tag2"),
+        ]
+        return Just(tags)
+            .mapAsAnyError()
+            .eraseToAnyPublisher()
     }
 }
 
