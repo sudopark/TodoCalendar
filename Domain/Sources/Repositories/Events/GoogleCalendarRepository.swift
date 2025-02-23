@@ -11,6 +11,6 @@ import Combine
 
 public protocol GoogleCalendarRepository: Sendable {
     
-    func loadColors() -> AnyPublisher<GoogleCalendarColors, any Error>
-    func loadCalendarTags() -> AnyPublisher<[GoogleCalendarEventTag], any Error>
+    func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error>
+    func loadCalendarTags() -> AnyPublisher<[GoogleCalendar.Tag], any Error>
 }

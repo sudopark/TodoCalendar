@@ -30,7 +30,7 @@ public final class GoogleCalendarRepositoryImple: GoogleCalendarRepository {
 
 extension GoogleCalendarRepositoryImple {
     
-    public func loadColors() -> AnyPublisher<GoogleCalendarColors, any Error> {
+    public func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
         
         return self.load { [weak self] in
             return try? await self?.cacheStorage.loadColors()
@@ -42,7 +42,7 @@ extension GoogleCalendarRepositoryImple {
         }
     }
     
-    private func loadColorsFromRemote() async throws -> GoogleCalendarColors {
+    private func loadColorsFromRemote() async throws -> GoogleCalendar.Colors {
         let endpoint = GoogleCalendarEndpoint.colors
         let jsonData = try await self.remote.request(
             .get, endpoint, with: [:], parameters: [:]
@@ -51,7 +51,7 @@ extension GoogleCalendarRepositoryImple {
         return mapper.colors
     }
     
-    public func loadCalendarTags() -> AnyPublisher<[GoogleCalendarEventTag], any Error> {
+    public func loadCalendarTags() -> AnyPublisher<[GoogleCalendar.Tag], any Error> {
         return self.load { [weak self] in
             return try? await self?.cacheStorage.loadCalendarList()
         } thenFromRemote: { [weak self] in
@@ -62,7 +62,7 @@ extension GoogleCalendarRepositoryImple {
         }
     }
     
-    private func loadCalendarTagsFromRemote() async throws -> [GoogleCalendarEventTag] {
+    private func loadCalendarTagsFromRemote() async throws -> [GoogleCalendar.Tag] {
         let endpoint = GoogleCalendarEndpoint.calednarList
         let mapper: GoogleCalendarEventTagListMapper = try await self.remote.request(
             .get, endpoint

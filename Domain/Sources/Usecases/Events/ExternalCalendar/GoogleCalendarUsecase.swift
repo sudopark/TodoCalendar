@@ -14,7 +14,7 @@ import Combine
 
 public protocol GoogleCalendarViewAppearanceStore: Sendable {
     
-    func apply(colors: GoogleCalendarColors)
+    func apply(colors: GoogleCalendar.Colors)
     func clearGoogleCalendarColors()
 }
 
@@ -91,7 +91,7 @@ extension GoogleCalendarUsecaseImple {
     }
     
     private func refreshGoogleCalendarEventTags() {
-        let updateTags: ([GoogleCalendarEventTag]) -> Void = { [weak self] tags in
+        let updateTags: ([GoogleCalendar.Tag]) -> Void = { [weak self] tags in
             self?.sharedDataStore.update(tags)
         }
         self.repository.loadCalendarTags()
@@ -107,8 +107,8 @@ extension GoogleCalendarUsecaseImple {
 
 private extension SharedDataStore {
     
-    func update(_ tags: [GoogleCalendarEventTag]) {
-        let newDict = tags.reduce(into: [EventTagId: GoogleCalendarEventTag]()) { acc, tag in
+    func update(_ tags: [GoogleCalendar.Tag]) {
+        let newDict = tags.reduce(into: [EventTagId: GoogleCalendar.Tag]()) { acc, tag in
             acc[tag.tagId] = tag
         }
         self.update(
