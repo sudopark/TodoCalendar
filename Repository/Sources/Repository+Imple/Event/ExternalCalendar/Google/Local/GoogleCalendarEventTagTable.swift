@@ -10,7 +10,7 @@ import Foundation
 import Domain
 import SQLiteService
 
-extension GoogleCalendarEventTag: @retroactive RowValueType {
+extension GoogleCalendar.Tag: @retroactive RowValueType {
     
     public init(_ cursor: CursorIterator) throws {
         self.init(
@@ -47,10 +47,10 @@ struct GoogleCalendarEventTagTable: Table {
     }
     
     typealias ColumnType = Columns
-    typealias EntityType = GoogleCalendarEventTag
+    typealias EntityType = GoogleCalendar.Tag
     static let tableName: String = "google_calendar_list"
     
-    static func scalar(_ entity: GoogleCalendarEventTag, for column: Columns) -> (any ScalarType)? {
+    static func scalar(_ entity: GoogleCalendar.Tag, for column: Columns) -> (any ScalarType)? {
         switch column {
         case .tagId: return entity.id
         case .name: return entity.name

@@ -150,7 +150,7 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
 
 extension ApplicationViewAppearanceStoreImple: GoogleCalendarViewAppearanceStore {
     
-    func apply(colors: GoogleCalendarColors) {
+    func apply(colors: GoogleCalendar.Colors) {
         Task { @MainActor in
             self.appearance.googleCalendarColor = colors
         }

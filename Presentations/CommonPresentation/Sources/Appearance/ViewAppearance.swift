@@ -54,7 +54,7 @@ public class ViewAppearance: ObservableObject {
     
     
     // Google calendar color
-    @Published public var googleCalendarColor: GoogleCalendarColors?
+    @Published public var googleCalendarColor: GoogleCalendar.Colors?
     
     public init(setting: AppearanceSettings, isSystemDarkTheme: Bool) {
         

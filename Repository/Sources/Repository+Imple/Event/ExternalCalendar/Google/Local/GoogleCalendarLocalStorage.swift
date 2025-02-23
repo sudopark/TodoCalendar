@@ -13,10 +13,10 @@ import SQLiteService
 
 public protocol GoogleCalendarLocalStorage: Sendable {
  
-    func loadColors() async throws -> GoogleCalendarColors?
-    func updateColors(_ colors: GoogleCalendarColors) async throws
-    func loadCalendarList() async throws -> [GoogleCalendarEventTag]
-    func updateCalendarList(_ calendars: [GoogleCalendarEventTag]) async throws
+    func loadColors() async throws -> GoogleCalendar.Colors?
+    func updateColors(_ colors: GoogleCalendar.Colors) async throws
+    func loadCalendarList() async throws -> [GoogleCalendar.Tag]
+    func updateCalendarList(_ calendars: [GoogleCalendar.Tag]) async throws
 }
 
 
@@ -34,7 +34,7 @@ public final class GoogleCalendarLocalStorageImple: GoogleCalendarLocalStorage {
 
 extension GoogleCalendarLocalStorageImple {
     
-    public func loadColors() async throws -> GoogleCalendarColors? {
+    public func loadColors() async throws -> GoogleCalendar.Colors? {
         let entities = try await self.sqliteService.async.run { db in
             let query = Colors.selectAll()
             return try db.load(Colors.self, query: query)
@@ -42,21 +42,21 @@ extension GoogleCalendarLocalStorageImple {
         guard !entities.isEmpty else { return nil }
         
         let calendars = entities.filter { $0.colorType == "calendar" }
-            .reduce(into: [String: GoogleCalendarColors.ColorSet]()) { acc, entity in
-                acc[entity.colorKey] = GoogleCalendarColors.ColorSet(
+            .reduce(into: [String: GoogleCalendar.Colors.ColorSet]()) { acc, entity in
+                acc[entity.colorKey] = GoogleCalendar.Colors.ColorSet(
                     foregroundHex: entity.foreground, backgroudHex: entity.background
                 )
             }
         let events = entities.filter { $0.colorKey == "event" }
-            .reduce(into: [String: GoogleCalendarColors.ColorSet]()) { acc, entity in
-                acc[entity.colorKey] = GoogleCalendarColors.ColorSet(
+            .reduce(into: [String: GoogleCalendar.Colors.ColorSet]()) { acc, entity in
+                acc[entity.colorKey] = GoogleCalendar.Colors.ColorSet(
                     foregroundHex: entity.foreground, backgroudHex: entity.background
                 )
             }
         return .init(calendars: calendars, events: events)
     }
     
-    public func updateColors(_ colors: GoogleCalendarColors) async throws {
+    public func updateColors(_ colors: GoogleCalendar.Colors) async throws {
         let calendars = colors.calendars.reduce([Colors.Entity]()) { arr, color in
             arr + [.init(calendar: color.key, color.value)]
         }
@@ -70,14 +70,14 @@ extension GoogleCalendarLocalStorageImple {
         }
     }
     
-    public func loadCalendarList() async throws -> [GoogleCalendarEventTag] {
+    public func loadCalendarList() async throws -> [GoogleCalendar.Tag] {
         return try await self.sqliteService.async.run { db in
             let query = Calendars.selectAll()
             return try db.load(query)
         }
     }
     
-    public func updateCalendarList(_ calendars: [GoogleCalendarEventTag]) async throws {
+    public func updateCalendarList(_ calendars: [GoogleCalendar.Tag]) async throws {
         try await self.sqliteService.async.run { db in
             try db.dropTable(Calendars.self)
             try db.insert(Calendars.self, entities: calendars)
