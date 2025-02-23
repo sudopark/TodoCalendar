@@ -37,14 +37,14 @@ struct GoogleCalendarColorsTable: Table {
         let background: String
         let foreground: String
         
-        init(calendar key: String, _ colorSet: GoogleCalendarColors.ColorSet) {
+        init(calendar key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
             self.colorType = "calendar"
             self.colorKey = key
             self.background = colorSet.backgroudHex
             self.foreground = colorSet.foregroundHex
         }
         
-        init(event key: String, _ colorSet: GoogleCalendarColors.ColorSet) {
+        init(event key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
             self.colorType = "event"
             self.colorKey = key
             self.background = colorSet.backgroudHex

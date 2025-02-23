@@ -160,8 +160,8 @@ extension GoogleCalendarUsecaseImpleTests {
 
 private final class PrivateStubRepository: GoogleCalendarRepository {
     
-    func loadColors() -> AnyPublisher<GoogleCalendarColors, any Error> {
-        let color = GoogleCalendarColors(
+    func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
+        let color = GoogleCalendar.Colors(
             calendars: ["0": .init(foregroundHex: "f0", backgroudHex: "b0")],
             events: ["1": .init(foregroundHex: "f1", backgroudHex: "b1")]
         )
@@ -170,10 +170,10 @@ private final class PrivateStubRepository: GoogleCalendarRepository {
             .eraseToAnyPublisher()
     }
     
-    func loadCalendarTags() -> AnyPublisher<[GoogleCalendarEventTag], any Error> {
+    func loadCalendarTags() -> AnyPublisher<[GoogleCalendar.Tag], any Error> {
         let tags = [
-            GoogleCalendarEventTag(id: "tag1", name: "tag1"),
-            GoogleCalendarEventTag(id: "tag2", name: "tag2"),
+            GoogleCalendar.Tag(id: "tag1", name: "tag1"),
+            GoogleCalendar.Tag(id: "tag2", name: "tag2"),
         ]
         return Just(tags)
             .mapAsAnyError()
@@ -183,10 +183,10 @@ private final class PrivateStubRepository: GoogleCalendarRepository {
 
 private final class SpyGoogleCalendarViewAppearanceStore: GoogleCalendarViewAppearanceStore, @unchecked Sendable {
     
-    var color: GoogleCalendarColors?
+    var color: GoogleCalendar.Colors?
     
-    var didUpdatecColors: ((GoogleCalendarColors?) -> Void)?
-    func apply(colors: GoogleCalendarColors) {
+    var didUpdatecColors: ((GoogleCalendar.Colors?) -> Void)?
+    func apply(colors: GoogleCalendar.Colors) {
         self.color = colors
         self.didUpdatecColors?(colors)
     }

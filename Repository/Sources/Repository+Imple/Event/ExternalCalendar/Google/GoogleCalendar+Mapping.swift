@@ -24,7 +24,7 @@ struct GoogleCalendarColorsMapper {
         case event
     }
     
-    let colors: GoogleCalendarColors
+    let colors: GoogleCalendar.Colors
     
     init(decode data: Data) throws {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
@@ -34,7 +34,7 @@ struct GoogleCalendarColorsMapper {
         let calendarJson = json[CodingKeys.calendar.rawValue] as? [String: Any] ?? [:]
         let eventJson = json[CodingKeys.event.rawValue] as? [String: Any] ?? [:]
         
-        let decodeColorSet: (Any) -> GoogleCalendarColors.ColorSet? = { any in
+        let decodeColorSet: (Any) -> GoogleCalendar.Colors.ColorSet? = { any in
             guard let subDict = any as? [String: Any],
                   let background = subDict[CodingKeys.background.rawValue] as? String,
                   let foreground = subDict[CodingKeys.foreground.rawValue] as? String
@@ -54,7 +54,7 @@ struct GoogleCalendarColorsMapper {
 
 struct GoogleCalendarEventTagMapper: Decodable {
     
-    let calendar: GoogleCalendarEventTag
+    let calendar: GoogleCalendar.Tag
     
     private enum CodingKeys: String, CodingKey {
         case id
@@ -67,7 +67,7 @@ struct GoogleCalendarEventTagMapper: Decodable {
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.calendar = GoogleCalendarEventTag(
+        self.calendar = GoogleCalendar.Tag(
             id: try container.decode(String.self, forKey: .id),
             name: try container.decode(String.self, forKey: .summary)
         )
@@ -81,7 +81,7 @@ struct GoogleCalendarEventTagMapper: Decodable {
 
 struct GoogleCalendarEventTagListMapper: Decodable {
     
-    let calendars: [GoogleCalendarEventTag]
+    let calendars: [GoogleCalendar.Tag]
     
     private enum CodingKeys: String, CodingKey {
         case items

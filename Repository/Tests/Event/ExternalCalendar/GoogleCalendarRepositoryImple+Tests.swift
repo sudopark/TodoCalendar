@@ -90,7 +90,7 @@ extension GoogleCalendarRepositoryImple_Tests {
     }
     
     private func stubColorCache() async throws {
-        let color = GoogleCalendarColors(
+        let color = GoogleCalendar.Colors(
             calendars: ["1": .init(foregroundHex: "fore", backgroudHex: "back")],
             events: [:]
         )
@@ -162,13 +162,13 @@ extension GoogleCalendarRepositoryImple_Tests {
     }
     
     private func stubCalendarTag() async throws {
-        let calendars: [GoogleCalendarEventTag] = [
+        let calendars: [GoogleCalendar.Tag] = [
             .init(id: "old", name: "old")
         ]
         try await self.cacheStorage.updateCalendarList(calendars)
     }
     
-    private func assertTagFromRemote(_ tag: GoogleCalendarEventTag?) {
+    private func assertTagFromRemote(_ tag: GoogleCalendar.Tag?) {
         #expect(tag?.id == "some@gmail.com")
         #expect(tag?.name == "some@gmail.com")
         #expect(tag?.description == nil)
