@@ -388,10 +388,10 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
 
 private final class PrivateStubScheduleEventUsecase: StubScheduleEventUsecase {
     
-    private let fakeSubject = CurrentValueSubject<MemorizedScheduleEventsContainer, Never>(.init())
+    private let fakeSubject = CurrentValueSubject<MemorizedEventsContainer<ScheduleEvent>, Never>(.init())
     
     func makeScheduleChangeInPeriodEvent(_ schedules: [ScheduleEvent]) {
-        var container = MemorizedScheduleEventsContainer()
+        var container = MemorizedEventsContainer<ScheduleEvent>()
         schedules.forEach {
             container = container.invalidate($0.uuid)
             container = container.append($0)
@@ -403,7 +403,7 @@ private final class PrivateStubScheduleEventUsecase: StubScheduleEventUsecase {
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[ScheduleEvent], Never> {
         return self.fakeSubject
-            .map { $0.scheduleEvents(in: period) }
+            .map { $0.events(in: period) }
             .eraseToAnyPublisher()
     }
 }

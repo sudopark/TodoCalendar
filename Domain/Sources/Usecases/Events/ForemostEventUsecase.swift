@@ -138,7 +138,7 @@ private extension SharedDataStore {
     
     func updateSchedule(_ schedule: ScheduleEvent) {
         let dataKey = ShareDataKeys.schedules.rawValue
-        self.update(MemorizedScheduleEventsContainer.self, key: dataKey) {
+        self.update(MemorizedEventsContainer<ScheduleEvent>.self, key: dataKey) {
             ($0 ?? .init()).append(schedule)
         }
     }
@@ -152,8 +152,8 @@ private extension SharedDataStore {
     
     func schedule(_ id: String) -> AnyPublisher<(any ForemostMarkableEvent)?, Never> {
         let dataKey = ShareDataKeys.schedules.rawValue
-        return self.observe(MemorizedScheduleEventsContainer.self, key: dataKey)
-            .map { $0?.scheduleEvnet(id) }
+        return self.observe(MemorizedEventsContainer<ScheduleEvent>.self, key: dataKey)
+            .map { $0?.evnet(id) }
             .eraseToAnyPublisher()
     }
 }
