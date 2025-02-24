@@ -171,7 +171,7 @@ extension CalendarEventFetchUsecaseImple {
     ) async throws -> [ScheduleCalendarEvent] {
         let events = try await scheduleRepository.loadScheduleEvents(in: range)
             .values.first(where: { _ in true }) ?? []
-        let eventContainer = MemorizedScheduleEventsContainer()
+        let eventContainer = MemorizedEventsContainer<ScheduleEvent>()
             .refresh(events, in: range)
         let eventWithRepeatTimeCalculated = eventContainer.allCachedEvents()
         return eventWithRepeatTimeCalculated.flatMap {
