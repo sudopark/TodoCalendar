@@ -328,8 +328,8 @@ extension EventTagUsecaseImpleTests {
             ScheduleEvent(uuid: "sc1", name: "sc1", time: .at(0)),
             ScheduleEvent(uuid: "sc2", name: "sc2", time: .at(0)) |> \.eventTagId .~ .custom("tag-s2")
         ]
-        let scheduleContainer = schedules.reduce(MemorizedScheduleEventsContainer()) { $0.append($1) }
-        self.sharedDataStore.put(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue, scheduleContainer)
+        let scheduleContainer = schedules.reduce(MemorizedEventsContainer<ScheduleEvent>()) { $0.append($1) }
+        self.sharedDataStore.put(MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue, scheduleContainer)
         self.stubRepository.allTagsStubbing = [
             .init(uuid: "tag-t1", name: "t1", colorHex: "some"),
             .init(uuid: "tag-t3", name: "t2", colorHex: "some"),
@@ -351,7 +351,7 @@ extension EventTagUsecaseImpleTests {
     
     private func addSchedule3WithTagS3() {
         let schedule3 = ScheduleEvent(uuid: "sc3", name: "sc3", time: .at(0)) |> \.eventTagId .~ .custom("tag-s3")
-        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue) {
+        self.sharedDataStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue) {
             ($0 ?? .init()).append(schedule3)
         }
     }

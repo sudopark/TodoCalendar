@@ -12,6 +12,16 @@ import Optics
 
 // MARK: - schedule event
 
+public struct RepeatingTimes: Sendable, Equatable {
+    public let time: EventTime
+    public let turn: Int
+    
+    public init(time: EventTime, turn: Int) {
+        self.time = time
+        self.turn = turn
+    }
+}
+
 public struct ScheduleEvent: Sendable, Equatable {
     
     public let uuid: String
@@ -25,15 +35,6 @@ public struct ScheduleEvent: Sendable, Equatable {
     
     public var notificationOptions: [EventNotificationTimeOption] = []
     
-    public struct RepeatingTimes: Sendable, Equatable {
-        public let time: EventTime
-        public let turn: Int
-        
-        public init(time: EventTime, turn: Int) {
-            self.time = time
-            self.turn = turn
-        }
-    }
     public var nextRepeatingTimes: [RepeatingTimes] = []
     public var repeatingTimes: [RepeatingTimes] {
         if self.repeatingTimeToExcludes.contains(self.time.customKey) {
@@ -61,14 +62,6 @@ public struct ScheduleEvent: Sendable, Equatable {
         self.repeating = params.repeating
         self.showTurn = params.showTurn ?? false
         self.notificationOptions = params.notificationOptions ?? []
-    }
-    
-    func isOverlap(with period: Range<TimeInterval>) -> Bool {
-        if let repeating {
-            return repeating.isOverlap(with: period, for: self.time)
-        } else {
-            return time.isRoughlyOverlap(with: period)
-        }
     }
 }
 
