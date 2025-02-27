@@ -150,8 +150,7 @@ extension ApplicationRootViewModelImple {
     
     func handle(open url: URL) -> Bool {
         
-        if self.externalCalendarServiceUsecase.handleAuthenticationResultOrNot(open: url
-        ) {
+        if FeatureFlag.isEnable(.googleCalendar) && self.externalCalendarServiceUsecase.handleAuthenticationResultOrNot(open: url) {
             return true
         }
         

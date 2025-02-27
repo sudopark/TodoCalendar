@@ -157,7 +157,7 @@ struct EventSettingView: View {
                         
                         rowView(periodView)
                         
-                        if !self.state.externalCalendarServiceModels.isEmpty {
+                        if FeatureFlag.isEnable(.googleCalendar) && !self.state.externalCalendarServiceModels.isEmpty {
                             self.externalCalendarSectionView(state.externalCalendarServiceModels)
                         }
                     }
@@ -167,7 +167,9 @@ struct EventSettingView: View {
                 .listStyle(.plain)
                 .background(appearance.colorSet.bg0.asColor)
                 
-                FullScreenLoadingView(isLoading: $state.isConnectOrDisconnectingExternalService)
+                if FeatureFlag.isEnable(.googleCalendar) {
+                    FullScreenLoadingView(isLoading: $state.isConnectOrDisconnectingExternalService)
+                }
             }
             .navigationTitle("event_setting::title".localized())
             .toolbar {
