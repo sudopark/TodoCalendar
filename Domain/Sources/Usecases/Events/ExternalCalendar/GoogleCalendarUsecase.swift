@@ -24,6 +24,10 @@ public protocol GoogleCalendarViewAppearanceStore: Sendable {
 public protocol GoogleCalendarUsecase: Sendable {
     
     func prepare()
+    
+//    func refreshEvents(in period: Range<TimeInterval>)
+//    func events(in period: Range<TimeInterval>) -> AnyPublisher<[GoogleCalendar.Event], Never>
+//    func event(_ eventId: String) -> AnyPublisher<GoogleCalendar.Event, any Error>
 }
 
 
@@ -46,6 +50,10 @@ public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked
         self.sharedDataStore = sharedDataStore
     }
     
+    private struct Subject {
+        let hasAccount = CurrentValueSubject<Bool, Never>(false)
+    }
+    private let subject = Subject()
     private var cancelBag: Set<AnyCancellable> = []
     private func clearCancelBag() {
         self.cancelBag.forEach { $0.cancel() }
@@ -71,12 +79,14 @@ extension GoogleCalendarUsecaseImple {
         hasAccount
             .removeDuplicates()
             .sink(receiveValue: { [weak self] has in
+                self?.subject.hasAccount.send(has)
                 if has {
                     self?.refreshColors()
                     self?.refreshGoogleCalendarEventTags()
                 } else {
                     self?.appearanceStore.clearGoogleCalendarColors()
                     self?.clearGoogleCalendarEventTag()
+                    // TODO: clear event
                 }
             })
             .store(in: &self.cancelBag)
@@ -104,6 +114,23 @@ extension GoogleCalendarUsecaseImple {
     }
 }
 
+extension GoogleCalendarUsecaseImple {
+    
+    public func refreshEvents(in period: Range<TimeInterval>) {
+        guard self.subject.hasAccount.value else { return }
+    }
+    public func events(
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], Never> {
+        return Empty().eraseToAnyPublisher()
+    }
+    
+    public func event(
+        _ eventId: String
+    ) -> AnyPublisher<GoogleCalendar.Event, any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
+}
 
 private extension SharedDataStore {
     
