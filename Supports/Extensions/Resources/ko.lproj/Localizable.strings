@@ -291,6 +291,7 @@
 "setting.appearance.calendar.colorTheme::light" = "라이트";
 "setting.appearance.calendar.colorTheme::dark" = "다크";
 "setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";
+"setting.appearance.event.edit::name_old" = "이벤트 수정";
 "setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";
 "setting.appearance.event.fontSize" = "이벤트 글자 크기";
 "setting.appearance.event.show_holidayName" = "공휴일 표시";
