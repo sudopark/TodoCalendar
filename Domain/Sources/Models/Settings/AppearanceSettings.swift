@@ -23,6 +23,10 @@ public struct DefaultEventTagColorSetting: Equatable, Sendable {
     public let holiday: String
     public let `default`: String
     
+    public static let `default`: DefaultEventTagColorSetting = .init(
+        holiday: "#D6236A", default: "#088CDA"
+    )
+    
     public init(holiday: String, `default`: String) {
         self.holiday = holiday
         self.default = `default`
