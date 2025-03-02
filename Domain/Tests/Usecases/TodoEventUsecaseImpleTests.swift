@@ -9,6 +9,7 @@ import XCTest
 import Combine
 import Prelude
 import Optics
+import Extensions
 import UnitTestHelpKit
 import TestDoubles
 
@@ -20,6 +21,7 @@ final class TodoEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var stubTodoRepository: PrivateTodoRepository!
     private var spyStore: SharedDataStore!
+    private var spyEventNotifyService: SharedEventNotifyService!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -31,12 +33,15 @@ final class TodoEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         self.cancelBag = nil
         self.stubTodoRepository = nil
         self.spyStore = nil
+        self.spyEventNotifyService = nil
     }
     
     private func makeUsecase() -> TodoEventUsecaseImple {
+        self.spyEventNotifyService = .init(notifyQueue: nil)
         return TodoEventUsecaseImple(
             todoRepository: self.stubTodoRepository,
-            sharedDataStore: self.spyStore
+            sharedDataStore: self.spyStore,
+            eventNotifyService: self.spyEventNotifyService
         )
     }
 }
@@ -595,6 +600,32 @@ extension TodoEventUsecaseImpleTests {
         ])
     }
     
+    func testUecase_whenRefreshingCurrentTodo_notify() {
+        // given
+        func parameterizeTest(stubShouldLoadFail: Bool = false) {
+            // given
+            if stubShouldLoadFail { self.stubLoadCurrentTodosFail() }
+            let expect = expectation(description: "refresh 중임을 알림")
+            expect.expectedFulfillmentCount = 2
+            let usecase = self.makeUsecase()
+            
+            // when
+            let refreshingEvent: AnyPublisher<RefreshingEvent, Never> = self.spyEventNotifyService.event()
+            let isRefreshings = self.waitOutputs(expect, for: refreshingEvent) {
+                usecase.refreshCurentTodoEvents()
+            }
+            
+            // then
+            XCTAssertEqual(isRefreshings, [
+                RefreshingEvent.refreshingCurrentTodo(true),
+                RefreshingEvent.refreshingCurrentTodo(false)
+            ])
+        }
+        // when + then
+        parameterizeTest()
+        parameterizeTest(stubShouldLoadFail: true)
+    }
+    
     func testUsecase_whenMakeNewTodoEventWithoutTime_updateCurrentTodo() {
         // given
         let expect = expectation(description: "새로만들어진 currenct todo 이벤트도 반환")
@@ -758,6 +789,32 @@ extension TodoEventUsecaseImpleTests {
             Array(0..<10).map { "id:\($0)" },
             Array(0..<8).map { "id:\($0)" }
         ])
+    }
+    
+    func testUsecase_whenRefreshingTodoInPeriod_notify() {
+        // given
+        func parameterizeTest(stubShouldLoadFail: Bool = false) {
+            // given
+            self.stubTodoRepository.shouldFailLoadTodosInRange = stubShouldLoadFail
+            let expect = expectation(description: "refresh 중임을 알림")
+            expect.expectedFulfillmentCount = 2
+            let usecase = self.makeUsecase()
+            
+            // when
+            let refreshingEvent: AnyPublisher<RefreshingEvent, Never> = self.spyEventNotifyService.event()
+            let isRefreshings = self.waitOutputs(expect, for: refreshingEvent) {
+                usecase.refreshTodoEvents(in: self.todosInRange)
+            }
+            
+            // then
+            XCTAssertEqual(isRefreshings, [
+                RefreshingEvent.refreshingTodo(true),
+                RefreshingEvent.refreshingTodo(false)
+            ])
+        }
+        // when + then
+        parameterizeTest()
+        parameterizeTest(stubShouldLoadFail: true)
     }
 }
 
@@ -989,6 +1046,32 @@ extension TodoEventUsecaseImpleTests {
             (0..<10).map { "name:\($0)" } + ["new uncompleted todo"]
         ])
     }
+    
+    func testUsecase_whenRefreshingUncompletedTodos_notify() {
+        // given
+        func parameterizeTest(stubShouldLoadFail: Bool = false) {
+            // given
+            self.stubTodoRepository.shouldFailLoadUncompletedTodos = true
+            let expect = expectation(description: "refresh 중임을 알림")
+            expect.expectedFulfillmentCount = 2
+            let usecase = self.makeUsecase()
+            
+            // when
+            let refreshingEvent: AnyPublisher<RefreshingEvent, Never> = self.spyEventNotifyService.event()
+            let isRefreshings = self.waitOutputs(expect, for: refreshingEvent) {
+                usecase.refreshUncompletedTodos()
+            }
+            
+            // then
+            XCTAssertEqual(isRefreshings, [
+                RefreshingEvent.refreshingUncompletedTodo(true),
+                RefreshingEvent.refreshingUncompletedTodo(false)
+            ])
+        }
+        // when + then
+        parameterizeTest()
+        parameterizeTest(stubShouldLoadFail: true)
+    }
 }
 
 // MARK: - skip todo
@@ -1129,7 +1212,12 @@ private final class PrivateTodoRepository: StubTodoEventRepository, @unchecked S
     }
     
     var stubUncompletedTodos: [[TodoEvent]] = []
+    var shouldFailLoadUncompletedTodos = false
     override func loadUncompletedTodos() -> AnyPublisher<[TodoEvent], any Error> {
+        guard self.shouldFailLoadUncompletedTodos == false
+        else {
+            return Fail(error: RuntimeError("failed")).eraseToAnyPublisher()
+        }
         guard !stubUncompletedTodos.isEmpty
         else {
             return Just([]).mapNever().eraseToAnyPublisher()

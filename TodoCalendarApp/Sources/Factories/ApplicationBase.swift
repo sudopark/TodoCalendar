@@ -22,6 +22,7 @@ final class ApplicationBase {
     init() { }
     
     let sharedDataStore: SharedDataStore = .init()
+    let eventNotifyService: SharedEventNotifyService = .init()
     
     let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple(
         suiteName: AppEnvironment.groupID

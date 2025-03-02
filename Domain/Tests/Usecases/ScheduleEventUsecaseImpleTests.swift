@@ -20,6 +20,7 @@ final class ScheduleEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     var cancelBag: Set<AnyCancellable>!
     private var stubRepository: StubScheduleEventRepository!
     private var spyStore: SharedDataStore!
+    private var spyEventNotifyService: SharedEventNotifyService!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -31,6 +32,7 @@ final class ScheduleEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         self.cancelBag = nil
         self.stubRepository = nil
         self.spyStore = nil
+        self.spyEventNotifyService = nil
     }
     
     private func makeUsecase() -> ScheduleEventUsecaseImple {
@@ -39,9 +41,11 @@ final class ScheduleEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         self.spyStore.update(MemorizedScheduleEventsContainer.self, key: key.rawValue) {
             return ($0 ?? .init()).refresh(events, in: self.dummyRange())
         }
+        self.spyEventNotifyService = .init(notifyQueue: nil)
         return ScheduleEventUsecaseImple(
             scheduleRepository: self.stubRepository,
-            sharedDataStore: self.spyStore
+            sharedDataStore: self.spyStore,
+            eventNotifyService: self.spyEventNotifyService
         )
     }
     
@@ -252,6 +256,32 @@ extension ScheduleEventUsecaseImpleTests {
         let repeatingEvent = events.first(where: { $0.uuid == "id:10" })
         XCTAssertEqual(notRepeatingEvent?.repeatingTimes.count, 1)
         XCTAssertEqual(repeatingEvent?.repeatingTimes.count, 11)
+    }
+    
+    func testUsecase_whenRefreshSchedules_notify() {
+        // given
+        func parameterizeTest(stubShouldLoadFail: Bool = false) {
+            // given
+            self.stubRepository.shouldFailLoad = stubShouldLoadFail
+            let expect = expectation(description: "refresh 중임을 알림")
+            expect.expectedFulfillmentCount = 2
+            let usecase = self.makeUsecase()
+            
+            // when
+            let refreshingEvent: AnyPublisher<RefreshingEvent, Never> = self.spyEventNotifyService.event()
+            let isRefreshings = self.waitOutputs(expect, for: refreshingEvent) {
+                usecase.refreshScheduleEvents(in: self.dummyRange())
+            }
+            
+            // then
+            XCTAssertEqual(isRefreshings, [
+                RefreshingEvent.refreshingSchedule(true),
+                RefreshingEvent.refreshingSchedule(false)
+            ])
+        }
+        // when + then
+        parameterizeTest()
+        parameterizeTest(stubShouldLoadFail: true)
     }
     
     func testUsecase_whenMakeNewRepeatingEventDuringObserving_update() {
