@@ -26,12 +26,16 @@ public final class ForemostEventUsecaseImple: ForemostEventUsecase, @unchecked S
     
     private let repository: any ForemostEventRepository
     private let sharedDataStore: SharedDataStore
+    private let eventNotifyService: SharedEventNotifyService
+    
     public init(
         repository: any ForemostEventRepository,
-        sharedDataStore: SharedDataStore
+        sharedDataStore: SharedDataStore,
+        eventNotifyService: SharedEventNotifyService
     ) {
         self.repository = repository
         self.sharedDataStore = sharedDataStore
+        self.eventNotifyService = eventNotifyService
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -54,6 +58,9 @@ extension ForemostEventUsecaseImple {
         }
         
         self.repository.foremostEvent()
+            .handleNotify(self.eventNotifyService) {
+                $0 ? RefreshingEvent.refreshForemostEvent(true) : .refreshForemostEvent(false)
+            }
             .sink(receiveValue: handleRefreshed)
             .store(in: &self.cancellables)
     }

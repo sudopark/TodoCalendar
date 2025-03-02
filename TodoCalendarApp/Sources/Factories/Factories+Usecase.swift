@@ -83,7 +83,8 @@ extension NonLoginUsecaseFactoryImple {
         )
         return TodoEventUsecaseImple(
             todoRepository: repository,
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventNotifyService: applicationBase.eventNotifyService
         )
     }
     
@@ -97,7 +98,8 @@ extension NonLoginUsecaseFactoryImple {
         )
         return ScheduleEventUsecaseImple(
             scheduleRepository: repository,
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventNotifyService: applicationBase.eventNotifyService
         )
     }
     
@@ -163,7 +165,8 @@ extension NonLoginUsecaseFactoryImple {
         )
         return ForemostEventUsecaseImple(
             repository: repository,
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventNotifyService: applicationBase.eventNotifyService
         )
     }
 }
@@ -333,7 +336,8 @@ extension LoginUsecaseFactoryImple {
         )
         return TodoEventUsecaseImple(
             todoRepository: repository,
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventNotifyService: applicationBase.eventNotifyService
         )
     }
     
@@ -347,7 +351,8 @@ extension LoginUsecaseFactoryImple {
         )
         return ScheduleEventUsecaseImple(
             scheduleRepository: repository,
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventNotifyService: applicationBase.eventNotifyService
         )
     }
     
@@ -417,7 +422,8 @@ extension LoginUsecaseFactoryImple {
         )
         return ForemostEventUsecaseImple(
             repository: repository, 
-            sharedDataStore: applicationBase.sharedDataStore
+            sharedDataStore: applicationBase.sharedDataStore,
+            eventNotifyService: applicationBase.eventNotifyService
         )
     }
 }

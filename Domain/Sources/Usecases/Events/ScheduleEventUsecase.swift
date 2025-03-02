@@ -35,13 +35,16 @@ public final class ScheduleEventUsecaseImple: ScheduleEventUsecase, @unchecked S
     
     private let scheduleRepository: any ScheduleEventRepository
     private let sharedDataStore: SharedDataStore
+    private let eventNotifyService: SharedEventNotifyService
     
     public init(
         scheduleRepository: any ScheduleEventRepository,
-        sharedDataStore: SharedDataStore
+        sharedDataStore: SharedDataStore,
+        eventNotifyService: SharedEventNotifyService
     ) {
         self.scheduleRepository = scheduleRepository
         self.sharedDataStore = sharedDataStore
+        self.eventNotifyService = eventNotifyService
     }
     
     private let eventMemorizationQueue = DispatchQueue(label: "schedule-event-memorize")
@@ -176,6 +179,9 @@ extension ScheduleEventUsecaseImple {
         }
 
         self.scheduleRepository.loadScheduleEvents(in: period)
+            .handleNotify(self.eventNotifyService) {
+                $0 ? RefreshingEvent.refreshingSchedule(true) : .refreshingSchedule(false)
+            }
             .receive(on: self.eventMemorizationQueue)
             .sink(receiveCompletion: { _ in }, receiveValue: updateCache)
             .store(in: &self.cancellables)
