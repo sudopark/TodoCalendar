@@ -58,4 +58,7 @@ public protocol SupportUsecaseFactory {
     func makeFeedbackUsecase() -> any FeedbackUsecase
 }
 
-public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory { }
+public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory {
+    
+    var eventNotifyService: SharedEventNotifyService { get }
+}

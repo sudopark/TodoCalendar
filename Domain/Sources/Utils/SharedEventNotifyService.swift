@@ -39,7 +39,7 @@ public final class SharedEventNotifyService: @unchecked Sendable {
 
 extension SharedEventNotifyService {
     
-    func notify(_ event: any SharedEvent) {
+    public func notify(_ event: any SharedEvent) {
         if let queue = self.notifyQueue {
             queue.async { self.notifySubject.send(event) }
         } else {
@@ -47,7 +47,7 @@ extension SharedEventNotifyService {
         }
     }
     
-    func event<E: SharedEvent>() -> AnyPublisher<E, Never> {
+    public func event<E: SharedEvent>() -> AnyPublisher<E, Never> {
         return self.notifySubject
             .compactMap { $0 as? E }
             .eraseToAnyPublisher()
@@ -57,7 +57,7 @@ extension SharedEventNotifyService {
 
 extension Publisher {
     
-    func handleNotify(
+    public func handleNotify(
         _ notifyService: SharedEventNotifyService,
         _ eventSelectorWhetherRefreshing: @Sendable @escaping (Bool) -> any SharedEvent
     ) -> Publishers.HandleEvents<Self> {
