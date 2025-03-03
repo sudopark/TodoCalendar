@@ -22,6 +22,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubMigrationUsecase: StubTemporaryUserDataMigrationUescase!
     private var spyEventNotificationUsecase: SpyEventNotificationUsecase!
     private var stubEventTagUsecase: StubEventTagUsecase!
+    private var stubEventNotifyService: SharedEventNotifyService!
     var cancelBag: Set<AnyCancellable>!
     
     override func setUpWithError() throws {
@@ -30,6 +31,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubMigrationUsecase = .init()
         self.spyEventNotificationUsecase = .init()
         self.stubEventTagUsecase = .init()
+        self.stubEventNotifyService = .init(notifyQueue: nil)
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -40,6 +42,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubMigrationUsecase = nil
         self.spyEventNotificationUsecase = nil
         self.stubEventTagUsecase = nil
+        self.stubEventNotifyService = nil
         self.cancelBag = nil
     }
     
@@ -52,7 +55,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
             eventNotificationUsecase: self.spyEventNotificationUsecase,
-            eventTagUsecase: self.stubEventTagUsecase
+            eventTagUsecase: self.stubEventTagUsecase,
+            eventNotifyService: self.stubEventNotifyService
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -71,7 +75,8 @@ extension MainViewModelImpleTests {
             uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
             eventNotificationUsecase: self.spyEventNotificationUsecase,
-            eventTagUsecase: self.stubEventTagUsecase
+            eventTagUsecase: self.stubEventTagUsecase,
+            eventNotifyService: self.stubEventNotifyService
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -245,6 +250,42 @@ extension MainViewModelImpleTests {
     }
 }
 
+extension MainViewModelImpleTests {
+    
+    func testViewModel_notifyRefreshingCalendarEvent() {
+        // given
+        func parameterizeTest(
+            _ event: RefreshingEvent,
+            expectIsLoading: Bool?
+        ) {
+            // given
+            let expect = expectation(description: "캘린더 이벤트 갱신중임을 알림")
+            expect.isInverted = expectIsLoading == nil
+            expect.assertForOverFulfill = false
+            let viewModel = self.makeViewModel()
+            
+            // when
+            let isLoading = self.waitFirstOutput(expect, for: viewModel.isLoadingCalendarEvents) {
+                
+                self.stubEventNotifyService.notify(event)
+            }
+            
+            // then
+            XCTAssertEqual(isLoading, expectIsLoading)
+        }
+        // when + then
+        parameterizeTest(.refreshingTodo(true), expectIsLoading: true)
+        parameterizeTest(.refreshingTodo(false), expectIsLoading: false)
+        parameterizeTest(.refreshingSchedule(true), expectIsLoading: true)
+        parameterizeTest(.refreshingSchedule(false), expectIsLoading: false)
+        parameterizeTest(.refreshForemostEvent(true), expectIsLoading: true)
+        parameterizeTest(.refreshForemostEvent(false), expectIsLoading: false)
+        parameterizeTest(.refreshingCurrentTodo(true), expectIsLoading: true)
+        parameterizeTest(.refreshingCurrentTodo(false), expectIsLoading: false)
+        parameterizeTest(.refreshingUncompletedTodo(true), expectIsLoading: true)
+        parameterizeTest(.refreshingUncompletedTodo(false), expectIsLoading: false)
+    }
+}
 
 extension MainViewModelImpleTests {
     

@@ -20,8 +20,10 @@ import Extensions
 
 final class MainViewController: UIViewController, MainScene {
     
+    private let headerAreaStackView = UIStackView()
     private let headerView = HeaderView()
     private let calendarContainerView = UIView()
+    private let compositeLoadingBarView = CompositeLoadingBarView()
     
     private let viewModel: any MainViewModel
     private let viewAppearance: ViewAppearance
@@ -102,6 +104,13 @@ extension MainViewController {
             })
             .store(in: &self.cancellables)
         
+        self.viewModel.isLoadingCalendarEvents
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isLoading in
+                self?.compositeLoadingBarView.updateIsLoading(isLoading)
+            })
+            .store(in: &self.cancellables)
+        
         self.headerView.returnTodayView.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewModel.returnToToday()
@@ -145,23 +154,33 @@ extension MainViewController {
 
 extension MainViewController {
     
-    
     private func setupLayout() {
         
-        self.view.addSubview(self.headerView)
-        headerView.autoLayout.active(with: self.view) {
+        self.view.addSubview(headerAreaStackView)
+        headerAreaStackView.autoLayout.active(with: self.view) {
             $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
             $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
             $0.topAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.topAnchor)
+        }
+        headerAreaStackView.axis = .vertical
+        headerAreaStackView.spacing = 0
+        
+        headerAreaStackView.addArrangedSubview(headerView)
+        headerView.autoLayout.active {
             $0.heightAnchor.constraint(equalToConstant: 44)
         }
-        self.headerView.setupLayout()
+        headerView.setupLayout()
+        
+        headerAreaStackView.addArrangedSubview(compositeLoadingBarView)
+        compositeLoadingBarView.autoLayout.active {
+            $0.heightAnchor.constraint(equalToConstant: 2)
+        }
         
         self.view.addSubview(calendarContainerView)
         calendarContainerView.autoLayout.active(with: self.view) {
             $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
             $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
-            $0.topAnchor.constraint(equalTo: headerView.bottomAnchor, constant: 16)
+            $0.topAnchor.constraint(equalTo: headerAreaStackView.bottomAnchor, constant: 14)
             $0.bottomAnchor.constraint(equalTo: $1.bottomAnchor)
         }
     }
@@ -171,6 +190,7 @@ extension MainViewController {
     ) {
         self.view.backgroundColor = colorSet.dayBackground
         self.headerView.setupStyling(fontSet, colorSet)
+        self.compositeLoadingBarView.setupStyling(fontSet, colorSet)
     }
 }
 

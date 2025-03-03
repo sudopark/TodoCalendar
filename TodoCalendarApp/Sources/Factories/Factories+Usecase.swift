@@ -34,6 +34,10 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.viewAppearanceStore = viewAppearanceStore
         self.applicationBase = applicationBase
     }
+    
+    var eventNotifyService: SharedEventNotifyService {
+        return self.applicationBase.eventNotifyService
+    }
 }
 
 extension NonLoginUsecaseFactoryImple {
@@ -288,6 +292,10 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         self.temporaryUserDataMigrationUsecase = TemporaryUserDataMigrationUescaseImple(
             migrationRepository: migrationRepository
         )
+    }
+    
+    var eventNotifyService: SharedEventNotifyService {
+        return self.applicationBase.eventNotifyService
     }
 }
 

@@ -35,6 +35,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     var currentMonth: AnyPublisher<String, Never> { get }
     var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
+    var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -46,18 +47,21 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     private let eventNotificationUsecase: any EventNotificationUsecase
     private let eventTagUsecase: any EventTagUsecase
+    private let eventNotifyService: SharedEventNotifyService
     var router: (any MainRouting)?
     
     init(
         uiSettingUsecase: any UISettingUsecase,
         temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase,
         eventNotificationUsecase: any EventNotificationUsecase,
-        eventTagUsecase: any EventTagUsecase
+        eventTagUsecase: any EventTagUsecase,
+        eventNotifyService: SharedEventNotifyService
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
         self.eventNotificationUsecase = eventNotificationUsecase
         self.eventTagUsecase = eventTagUsecase
+        self.eventNotifyService = eventNotifyService
         
         self.internalBinding()
     }
@@ -204,6 +208,22 @@ extension MainViewModelImple {
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> {
         return self.subject.temporaryUserDataMigrationStatus
             .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var isLoadingCalendarEvents: AnyPublisher<Bool, Never> {
+        let transform: (RefreshingEvent) -> Bool = { event in
+            switch event {
+            case .refreshingTodo(let isLoading): return isLoading
+            case .refreshingSchedule(let isLoading): return isLoading
+            case .refreshForemostEvent(let isLoading): return isLoading
+            case .refreshingCurrentTodo(let isLoading): return isLoading
+            case .refreshingUncompletedTodo(let isLoading): return isLoading
+            }
+        }
+        let refreshingEvent: AnyPublisher<RefreshingEvent, Never> = self.eventNotifyService.event()
+        return refreshingEvent
+            .compactMap(transform)
             .eraseToAnyPublisher()
     }
 }
