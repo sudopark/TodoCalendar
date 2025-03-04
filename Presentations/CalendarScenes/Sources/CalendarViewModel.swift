@@ -135,22 +135,23 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             focusedDayMap: [CalendarMonth: CurrentSelectDayModel],
             currentDay: CalendarComponent.Day
         )
-        let transformWithFocusedMonthAnsIsCurrentDay: (CurrentAndFocusInfo) -> (CalendarMonth, Bool)
+        let transformWithFocusedMonthAnsIsCurrentDay: (CurrentAndFocusInfo) -> (CalendarMonth, Bool, Bool)
         transformWithFocusedMonthAnsIsCurrentDay = { info in
-            let isCurrentMonth = info.currentDay.year == info.focusedMonth.year
+            let isCurrentYear = info.currentDay.year == info.focusedMonth.year
+            let isCurrentMonth = isCurrentYear
                 && info.currentDay.month == info.focusedMonth.month
             guard isCurrentMonth
             else {
-                return (info.focusedMonth, false)
+                return (info.focusedMonth, isCurrentYear, false)
             }
             let currentMonthSelectedDay = info.focusedDayMap[info.focusedMonth]
             let isCurrentDaySelected = currentMonthSelectedDay?.year == info.currentDay.year
                 && currentMonthSelectedDay?.month == info.currentDay.month
                 && currentMonthSelectedDay?.day == info.currentDay.day
-            return (info.focusedMonth, isCurrentDaySelected)
+            return (info.focusedMonth, isCurrentYear, isCurrentDaySelected)
         }
-        let compare: ((CalendarMonth, Bool), (CalendarMonth, Bool)) -> Bool = { lhs, rhs in
-            return lhs.0 == rhs.0 && lhs.1 == rhs.1
+        let compare: ((CalendarMonth, Bool, Bool), (CalendarMonth, Bool, Bool)) -> Bool = { lhs, rhs in
+            return lhs.0 == rhs.0 && lhs.1 == rhs.1 && lhs.2 == rhs.2
         }
         
         Publishers.CombineLatest3(
@@ -160,8 +161,12 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         )
         .map(transformWithFocusedMonthAnsIsCurrentDay)
         .removeDuplicates(by: compare)
-        .sink(receiveValue: { [weak self] (focused, isCurrent) in
-            self?.listener?.calendarScene(focusChangedTo: focused, isCurrentDay: isCurrent)
+        .sink(receiveValue: { [weak self] (focused, isCurrentYear, isCurrent) in
+            self?.listener?.calendarScene(
+                focusChangedTo: focused,
+                isCurrentYear: isCurrentYear,
+                isCurrentDay: isCurrent
+            )
         })
         .store(in: &self.cancellables)
     }

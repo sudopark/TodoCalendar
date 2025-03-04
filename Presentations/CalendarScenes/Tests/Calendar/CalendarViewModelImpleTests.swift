@@ -252,57 +252,77 @@ extension CalendarViewModelImpleTests {
         )
         func parameterizeTest(
             _ month: CalendarMonth,
+            _ isCurrentYear: Bool,
             _ isCurrent: Bool,
             _ action: () -> Void
         ) {
             let expect = expectation(description: "현재 포커스된 달 조회 변경")
-            var pair: (CalendarMonth, Bool)?
-            self.spyListener.didMonthChanged = { focuse, flag in
-                pair = (focuse, flag)
+            var pair: (CalendarMonth, Bool, Bool)?
+            self.spyListener.didMonthChanged = { focuse, yearFlag, todayFlag in
+                pair = (focuse, yearFlag, todayFlag)
                 expect.fulfill()
             }
             action()
             self.wait(for: [expect], timeout: self.timeout)
             
             XCTAssertEqual(pair?.0, month)
-            XCTAssertEqual(pair?.1, isCurrent)
+            XCTAssertEqual(pair?.1, isCurrentYear)
+            XCTAssertEqual(pair?.2, isCurrent)
         }
         
         // when + then
-        parameterizeTest(.init(year: 2023, month: 09), false) {
+        parameterizeTest(.init(year: 2023, month: 09), true, false) {
             viewModel.focusChanged(from: 1, to: 2)
         }
-        parameterizeTest(.init(year: 2023, month: 10), false) {
+        parameterizeTest(.init(year: 2023, month: 10), true, false) {
             viewModel.focusChanged(from: 2, to: 0)
         }
-        parameterizeTest(.init(year: 2023, month: 11), false) {
+        parameterizeTest(.init(year: 2023, month: 11), true, false) {
             viewModel.focusChanged(from: 0, to: 1)
         }
-        parameterizeTest(.init(year: 2023, month: 10), false) {
+        parameterizeTest(.init(year: 2023, month: 10), true, false) {
             viewModel.focusChanged(from: 1, to: 0)
         }
-        parameterizeTest(.init(year: 2023, month: 09), false) {
+        parameterizeTest(.init(year: 2023, month: 09), true, false) {
             viewModel.focusChanged(from: 0, to: 2)
         }
-        parameterizeTest(.init(year: 2023, month: 08), false) {
+        parameterizeTest(.init(year: 2023, month: 08), true, false) {
             viewModel.focusChanged(from: 2, to: 1)
         }
-        parameterizeTest(.init(year: 2023, month: 08), true) {
+        parameterizeTest(.init(year: 2023, month: 08), true, true) {
             viewModel.calendarPaper(
                 on: .init(year: 2023, month: 08),
                 didChange: .dummy(2023, 08, 02)
             )
         }
-        parameterizeTest(.init(year: 2023, month: 08), false) {
+        parameterizeTest(.init(year: 2023, month: 08), true, false) {
             viewModel.calendarPaper(
                 on: .init(year: 2023, month: 08),
                 didChange: .dummy(2023, 08, 03)
             )
         }
-        parameterizeTest(.init(year: 2023, month: 07), false) {
+        parameterizeTest(.init(year: 2023, month: 07), true, false) {
             viewModel.focusChanged(from: 1, to: 0)
         }
-        parameterizeTest(.init(year: 2023, month: 06), false) {
+        parameterizeTest(.init(year: 2023, month: 06), true, false) {
+            viewModel.focusChanged(from: 0, to: 2)
+        }
+        parameterizeTest(.init(year: 2023, month: 05), true, false) {
+            viewModel.focusChanged(from: 2, to: 1)
+        }
+        parameterizeTest(.init(year: 2023, month: 04), true, false) {
+            viewModel.focusChanged(from: 1, to: 0)
+        }
+        parameterizeTest(.init(year: 2023, month: 03), true, false) {
+            viewModel.focusChanged(from: 0, to: 2)
+        }
+        parameterizeTest(.init(year: 2023, month: 02), true, false) {
+            viewModel.focusChanged(from: 2, to: 1)
+        }
+        parameterizeTest(.init(year: 2023, month: 01), true, false) {
+            viewModel.focusChanged(from: 1, to: 0)
+        }
+        parameterizeTest(.init(year: 2022, month: 12), false, false) {
             viewModel.focusChanged(from: 0, to: 2)
         }
     }
@@ -713,13 +733,14 @@ private extension CalendarViewModelImpleTests {
     
     final class SpyListener: CalendarSceneListener, @unchecked Sendable {
         
-        var didMonthChanged: ((CalendarMonth, Bool) -> Void)?
+        var didMonthChanged: ((CalendarMonth, Bool, Bool) -> Void)?
         
         func calendarScene(
             focusChangedTo month: CalendarMonth,
+            isCurrentYear: Bool,
             isCurrentDay: Bool
         ) {
-            self.didMonthChanged?(month, isCurrentDay)
+            self.didMonthChanged?(month, isCurrentYear, isCurrentDay)
         }
     }
     
