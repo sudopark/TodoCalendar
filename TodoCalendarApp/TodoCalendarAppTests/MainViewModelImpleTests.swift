@@ -123,18 +123,20 @@ extension MainViewModelImpleTests {
     func testViewModel_whenFocusChanged_updateCurrentMonth() {
         // given
         let expect = expectation(description: "update current month")
-        expect.expectedFulfillmentCount = 3
+        expect.expectedFulfillmentCount = 4
         let viewModel = self.makeViewModel()
         
         // when
         let months = self.waitOutputs(expect, for: viewModel.currentMonth) {
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentDay: true)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentDay: false)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 10), isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentYear: true,  isCurrentDay: true)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentYear: true, isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 10), isCurrentYear: true, isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2022, month: 09), isCurrentYear: false, isCurrentDay: false)
         }
         
         // then
-        XCTAssertEqual(months, ["AUG", "SEP", "OCT"])
+        XCTAssertEqual(months.map { $0.monthText }, ["AUG", "SEP", "OCT", "SEP"])
+        XCTAssertEqual(months.map { $0.yearText }, [nil, nil, nil, "2022"])
     }
     
     func testViewModle_whenFocusChanged_updateIsShowReturnToToday() {
@@ -145,12 +147,12 @@ extension MainViewModelImpleTests {
         
         // when
         let isShow = self.waitOutputs(expect, for: viewModel.isShowReturnToToday) {
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentDay: true)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentDay: false)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 10), isCurrentDay: false)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentDay: false)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentDay: true)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentYear: true, isCurrentDay: true)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentYear: true, isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 10), isCurrentYear: true, isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentYear: true, isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentYear: true, isCurrentDay: true)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentYear: true, isCurrentDay: false)
         }
         
         // then
@@ -165,7 +167,7 @@ extension MainViewModelImpleTests {
         
         // when
         let _ = self.waitFirstOutput(expect, for: viewModel.isShowReturnToToday) {
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentYear: true, isCurrentDay: false)
         }
         viewModel.returnToToday()
         

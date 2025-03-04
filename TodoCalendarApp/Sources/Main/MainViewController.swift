@@ -86,7 +86,8 @@ extension MainViewController {
         self.viewModel.currentMonth
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] month in
-                self?.headerView.monthLabel.text = month
+                self?.headerView.monthLabel.text = month.monthText
+                self?.headerView.yearLabel.text = month.yearText
             })
             .store(in: &self.cancellables)
         
@@ -200,6 +201,7 @@ private final class HeaderView: UIView {
     private var currentColorSet: (any ColorSet)?
     
     let monthLabel = UILabel()
+    let yearLabel = UILabel()
     let returnTodayView = UIView()
     private let returnTodayImage = UIImageView()
     private let returnTodayLabel = UILabel()
@@ -251,6 +253,11 @@ private final class HeaderView: UIView {
         monthLabel.autoLayout.active(with: self) {
             $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
             $0.leadingAnchor.constraint(equalTo: $1.leadingAnchor, constant: 16)
+        }
+        self.addSubview(yearLabel)
+        yearLabel.autoLayout.active(with: self.monthLabel) {
+            $0.bottomAnchor.constraint(equalTo: $1.lastBaselineAnchor)
+            $0.leadingAnchor.constraint(equalTo: $1.trailingAnchor, constant: 4)
         }
         
         self.addSubview(returnTodayView)
@@ -321,6 +328,9 @@ private final class HeaderView: UIView {
         
         self.monthLabel.font = fontSet.bigMonth
         self.monthLabel.textColor = colorSet.text0
+        
+        self.yearLabel.font = fontSet.normal
+        self.yearLabel.textColor = colorSet.text0
         
         self.returnTodayImage.tintColor = colorSet.text0
         self.returnTodayImage.image = UIImage(systemName: "arrow.uturn.right")

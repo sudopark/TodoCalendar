@@ -22,6 +22,11 @@ enum TemporaryUserDataMigrationStatus: Equatable {
     case migrating
 }
 
+public struct CurrentMonth: Equatable {
+    let monthText: String
+    var yearText: String?
+}
+
 protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // interactor
@@ -32,7 +37,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     func moveToSetting()
     
     // presenter
-    var currentMonth: AnyPublisher<String, Never> { get }
+    var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
     var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
@@ -66,9 +71,11 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.internalBinding()
     }
     
-    private typealias FocusMonthAndIsCurrentDay = (CalendarMonth, Bool)
+    private typealias FocusMonthInfo = (
+        selected: CalendarMonth, isCurrentYear: Bool, isCurrentDay: Bool
+    )
     private struct Subject {
-        let focusedMonthInfo = CurrentValueSubject<FocusMonthAndIsCurrentDay?, Never>(nil)
+        let focusedMonthInfo = CurrentValueSubject<FocusMonthInfo?, Never>(nil)
         let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
     }
     
@@ -168,8 +175,16 @@ extension MainViewModelImple {
         self.router?.routeToSettingScene()
     }
     
-    func calendarScene(focusChangedTo month: CalendarMonth, isCurrentDay: Bool) {
-        self.subject.focusedMonthInfo.send((month, isCurrentDay))
+    func calendarScene(
+        focusChangedTo month: CalendarMonth,
+        isCurrentYear: Bool,
+        isCurrentDay: Bool
+    ) {
+        self.subject.focusedMonthInfo.send(
+            (month, isCurrentYear, isCurrentDay)
+        )
+    }
+    
     }
 }
 
@@ -178,21 +193,24 @@ extension MainViewModelImple {
 
 extension MainViewModelImple {
     
-    var currentMonth: AnyPublisher<String, Never> {
+    var currentMonth: AnyPublisher<CurrentMonth, Never> {
         
         let formatter = DateFormatter() |> \.dateFormat .~ "date_form.MMM".localized()
         let calednar = Calendar(identifier: .gregorian)
-        let transform: (CalendarMonth) -> String = { month in
-            guard let date = calednar.date(bySetting: .month, value: month.month, of: Date())
+        let transform: (FocusMonthInfo?) -> CurrentMonth? = { info in
+            guard let info else { return nil }
+            guard let date = calednar.date(bySetting: .month, value: info.selected.month, of: Date())
             else {
-                return "\(month.month)"
+                return .init(monthText: "\(info.selected.month)")
             }
-            return formatter.string(from: date).uppercased()
+            return .init(
+                monthText: formatter.string(from: date).uppercased(),
+                yearText: info.isCurrentYear ? nil : "\(info.selected.year)"
+            )
         }
         
         return self.subject.focusedMonthInfo
-            .compactMap { $0?.0 }
-            .map(transform)
+            .compactMap(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
@@ -200,7 +218,7 @@ extension MainViewModelImple {
     var isShowReturnToToday: AnyPublisher<Bool, Never> {
         return self.subject.focusedMonthInfo
             .compactMap { $0 }
-            .map { !$0.1 }
+            .map { !$0.isCurrentDay }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
