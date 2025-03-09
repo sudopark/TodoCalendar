@@ -140,6 +140,13 @@ extension MainViewController {
             }
             .store(in: &self.cancellables)
         
+        self.headerView.jumpButton.addTapGestureRecognizerPublisher()
+            .sink { [weak self] in
+                self?.viewAppearance.impactIfNeed()
+                self?.viewModel.jumpDate()
+            }
+            .store(in: &self.cancellables)
+        
         self.headerView.logButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewAppearance.impactIfNeed()
@@ -207,6 +214,7 @@ private final class HeaderView: UIView {
     private let returnTodayLabel = UILabel()
     private let buttonsStackView = UIStackView()
     let migrationButton = UIButton()
+    let jumpButton = UIButton()
     let eventTypeFilterButton = UIButton()
     let settingButton = UIButton()
     let logButton = UIButton()
@@ -294,7 +302,7 @@ private final class HeaderView: UIView {
             $0.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16)
             $0.leadingAnchor.constraint(greaterThanOrEqualTo: returnTodayView.trailingAnchor, constant: 4)
         }
-        buttonsStackView.spacing = 12
+        buttonsStackView.spacing = 8
         
         #if DEBUG
         buttonsStackView.addArrangedSubview(logButton)
@@ -309,11 +317,19 @@ private final class HeaderView: UIView {
             $0.heightAnchor.constraint(equalToConstant: 25)
         }
         migrationButton.isHidden = true
+        
+        buttonsStackView.addArrangedSubview(jumpButton)
+        jumpButton.autoLayout.active {
+            $0.widthAnchor.constraint(equalToConstant: 25)
+            $0.heightAnchor.constraint(equalToConstant: 25)
+        }
+        
         buttonsStackView.addArrangedSubview(eventTypeFilterButton)
         eventTypeFilterButton.autoLayout.active {
             $0.widthAnchor.constraint(equalToConstant: 25)
             $0.heightAnchor.constraint(equalToConstant: 25)
         }
+        
         buttonsStackView.addArrangedSubview(settingButton)
         settingButton.autoLayout.active {
             $0.widthAnchor.constraint(equalToConstant: 25)
@@ -347,6 +363,8 @@ private final class HeaderView: UIView {
             self.migrationButton.tintColor = colorSet.accentInfo
         default: break
         }
+        self.jumpButton.tintColor = colorSet.text0
+        self.jumpButton.setImage(UIImage(systemName: "calendar"), for: .normal)
         self.eventTypeFilterButton.tintColor = colorSet.text0
         self.eventTypeFilterButton.setImage(UIImage(systemName: "line.3.horizontal.decrease.circle"), for: .normal)
         self.settingButton.tintColor = colorSet.text0
