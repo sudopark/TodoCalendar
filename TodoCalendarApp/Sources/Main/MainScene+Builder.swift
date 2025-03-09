@@ -13,7 +13,7 @@ import Scenes
 
 // MARK: - MainScene Interactable & Listenable
 
-public protocol MainSceneInteractor: Sendable, CalendarSceneListener { }
+public protocol MainSceneInteractor: Sendable, CalendarSceneListener, SelectDayDialogSceneListener { }
 //
 //public protocol MainSceneListener: AnyObject { }
 

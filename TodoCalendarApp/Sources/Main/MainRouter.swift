@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -21,6 +22,7 @@ protocol MainRouting: Routing, Sendable {
     
     func routeToEventTypeFilterSetting()
     func routeToSettingScene()
+    func showJumpDateSelectDialog(current: CalendarComponent.Day)
 }
 
 // MARK: - Router
@@ -75,6 +77,16 @@ extension MainRouter {
             let scene = self.settingSceneBuilder.makeSettingItemListScene()
             let navigation = UINavigationController(rootViewController: scene)
             self.currentScene?.present(navigation, animated: true)
+        }
+    }
+    
+    func showJumpDateSelectDialog(current: CalendarComponent.Day) {
+        Task { @MainActor in
+            
+            let dialog = self.calendarSceneBulder.makeSelectDialog(
+                current: current, self.currentScene?.interactor
+            )
+            self.currentScene?.present(dialog, animated: true)
         }
     }
 }

@@ -309,6 +309,10 @@ extension MainViewModelImpleTests {
         func routeToSettingScene() {
             self.didRouteToSetting = true
         }
+        
+        func showJumpDateSelectDialog(current: CalendarComponent.Day) {
+            
+        }
     }
     
     private class SpyCalendarInteractor: CalendarSceneInteractor, @unchecked Sendable {

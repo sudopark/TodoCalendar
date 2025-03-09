@@ -133,6 +133,7 @@
 "calednar::event::skip_todo" = "할일 건너뛰기";
 "calednar::event::skip_todo_until" = "할일 건너뛰기할 날짜 선택";
 "calednar::event::copy" = "이벤트 복사";
+"calendar::move_date" = "날짜 이동";
 
 
 // MARK: - event detail

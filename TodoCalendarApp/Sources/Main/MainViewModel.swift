@@ -35,6 +35,7 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     func handleMigration()
     func moveToEventTypeFilterSetting()
     func moveToSetting()
+    func jumpDate()
     
     // presenter
     var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
@@ -185,6 +186,12 @@ extension MainViewModelImple {
         )
     }
     
+    func jumpDate() {
+        
+    }
+    
+    func daySelectDialog(didSelect day: SelectDayInfo) {
+        
     }
 }
 

@@ -90,3 +90,27 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
         return viewController
     }
 }
+
+
+extension CalendarSceneBuilderImple {
+    
+    @MainActor
+    public func makeSelectDialog(
+        current: CalendarComponent.Day,
+        _ listener: (any SelectDayDialogSceneListener)?
+    ) -> any SelectDayDialogScene {
+    
+        let viewModel = SelectDayDialogViewModelImple(
+            currentDay: current,
+            calendarUsecase: usecaseFactory.makeCalendarUsecase()
+        )
+        let viewController = SelectDayDialogViewController(
+            viewModel: viewModel, viewAppearance: viewAppearance
+        )
+        let router = SelectDayDialogRouter()
+        router.scene = viewController
+        viewModel.router = router
+        
+        return viewController
+    }
+}
