@@ -291,6 +291,29 @@ extension MainViewModelImpleTests {
 
 extension MainViewModelImpleTests {
     
+    func testViewModel_jumpDay() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.calendarScene(
+            focusChangedTo: .init(2023, 07, 23, isCurrentYear: true, isCurrentDay: true)
+        )
+        
+        // when
+        viewModel.jumpDate()
+        viewModel.daySelectDialog(
+            didSelect: .init(2021, 02, 03, isCurrentYear: false, isCurrentDay: false)
+        )
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowJumpDaySelectDialogWith != nil, true)
+        XCTAssertEqual(
+            self.spyRouter.interactor.didRequestMoveDay, .init(2021, 02, 03)
+        )
+    }
+}
+
+extension MainViewModelImpleTests {
+    
     private class SpyRouter: BaseSpyRouter, MainRouting, @unchecked Sendable {
         
         var interactor = SpyCalendarInteractor()
@@ -310,8 +333,9 @@ extension MainViewModelImpleTests {
             self.didRouteToSetting = true
         }
         
-        func showJumpDateSelectDialog(current: CalendarComponent.Day) {
-            
+        var didShowJumpDaySelectDialogWith: CalendarDay?
+        func showJumpDaySelectDialog(current: CalendarDay) {
+            self.didShowJumpDaySelectDialogWith = current
         }
     }
     
@@ -320,6 +344,11 @@ extension MainViewModelImpleTests {
         var didFocusMovedToToday: Bool?
         func moveFocusToToday() {
             self.didFocusMovedToToday = true
+        }
+        
+        var didRequestMoveDay: CalendarDay?
+        func moveDay(_ day: CalendarDay) {
+            self.didRequestMoveDay = day
         }
     }
     

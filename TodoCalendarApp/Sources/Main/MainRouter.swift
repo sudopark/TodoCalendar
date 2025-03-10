@@ -22,7 +22,7 @@ protocol MainRouting: Routing, Sendable {
     
     func routeToEventTypeFilterSetting()
     func routeToSettingScene()
-    func showJumpDateSelectDialog(current: CalendarComponent.Day)
+    func showJumpDaySelectDialog(current: CalendarDay)
 }
 
 // MARK: - Router
@@ -80,7 +80,7 @@ extension MainRouter {
         }
     }
     
-    func showJumpDateSelectDialog(current: CalendarComponent.Day) {
+    func showJumpDaySelectDialog(current: CalendarDay) {
         Task { @MainActor in
             
             let dialog = self.calendarSceneBulder.makeSelectDialog(

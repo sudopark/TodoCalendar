@@ -22,13 +22,13 @@ protocol SelectDayDialogViewModel: Sendable, AnyObject {
 
 final class SelectDayDialogViewModelImple: SelectDayDialogViewModel, @unchecked Sendable {
     
-    private let currentDay: CalendarComponent.Day
+    private let currentDay: CalendarDay
     private let calendarUsecase: any CalendarUsecase
     var router: (any SelectDayDialogRouting)?
     weak var listener: (any SelectDayDialogSceneListener)?
     
     init(
-        currentDay: CalendarComponent.Day,
+        currentDay: CalendarDay,
         calendarUsecase: any CalendarUsecase
     ) {
         self.currentDay = currentDay
@@ -85,6 +85,11 @@ extension SelectDayDialogViewModelImple {
     
     var initialCurrentSelectDate: Date {
         let calendar = Calendar.current
-        return calendar.date(from: self.currentDay) ?? Date()
+        let components = DateComponents(
+            year: self.currentDay.year,
+            month: self.currentDay.month,
+            day: self.currentDay.day
+        )
+        return calendar.date(from: components) ?? Date()
     }
 }

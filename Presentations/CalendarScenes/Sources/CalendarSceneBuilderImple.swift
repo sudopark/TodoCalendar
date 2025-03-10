@@ -96,7 +96,7 @@ extension CalendarSceneBuilderImple {
     
     @MainActor
     public func makeSelectDialog(
-        current: CalendarComponent.Day,
+        current: CalendarDay,
         _ listener: (any SelectDayDialogSceneListener)?
     ) -> any SelectDayDialogScene {
     
@@ -110,6 +110,7 @@ extension CalendarSceneBuilderImple {
         let router = SelectDayDialogRouter()
         router.scene = viewController
         viewModel.router = router
+        viewModel.listener = listener
         
         return viewController
     }

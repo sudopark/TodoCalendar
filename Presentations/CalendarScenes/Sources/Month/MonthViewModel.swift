@@ -215,7 +215,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     private struct Subject: @unchecked Sendable {
         let currentMonthComponent = CurrentValueSubject<CalendarComponent?, Never>(nil)
         let currentMonthInfo = CurrentValueSubject<CurrentMonthInfo?, Never>(nil)
-        let userSelectedDay = CurrentValueSubject<DayCellViewModel?, Never>(nil)
+        let userSelectedDay = CurrentValueSubject<CalendarDay?, Never>(nil)
         let eventStackMap = CurrentValueSubject<[String: WeekEventStack], Never>([:])
     }
     private let subject = Subject()
@@ -307,11 +307,12 @@ extension MonthViewModelImple {
         guard shouldChange else { return }
         
         self.currentMonthComponentsBinding?.cancel()
+        
+        self.subject.userSelectedDay.send(nil)
         self.currentMonthComponentsBinding = self.calendarUsecase
             .components(for: newMonth.month, of: newMonth.year)
             .sink(receiveValue: { [weak self] component in
                 self?.subject.currentMonthComponent.send(component)
-                self?.subject.userSelectedDay.send(nil)
             })
     }
     
@@ -320,11 +321,17 @@ extension MonthViewModelImple {
     }
     
     func select(_ day: DayCellViewModel) {
-        self.subject.userSelectedDay.send(day)
+        self.subject.userSelectedDay.send(
+            .init(day.year, day.month, day.day)
+        )
     }
     
     func clearDaySelection() {
         self.subject.userSelectedDay.send(nil)
+    }
+    
+    func selectDay(_ day: CalendarDay) {
+        self.subject.userSelectedDay.send(day)
     }
 }
 
@@ -379,11 +386,11 @@ extension MonthViewModelImple {
     }
     
     private var currentSelectedDay: AnyPublisher<CurrentSelectDayModel, Never> {
-        let transform: (DayCellViewModel?, CalendarComponent.Day, CurrentMonthInfo) -> CurrentSelectDayModel?
+        let transform: (CalendarDay?, CalendarComponent.Day, CurrentMonthInfo) -> CurrentSelectDayModel?
         transform = { selected, today, thisMonth -> CurrentSelectDayModel? in
             switch (selected, today, thisMonth) {
             case (.some(let day), _, let month):
-                return .init(dayCellViewModel: day, month.component, month.timeZone)
+                return .init(day: day, month.component, month.timeZone)
             case (_, let t, let m)
                 where t.year == m.component.year && t.month == m.component.month:
                 return .init(today: t, m.component, m.timeZone)
@@ -474,14 +481,14 @@ private extension WeekEventStackViewModel {
 private extension CurrentSelectDayModel {
     
     init?(
-        dayCellViewModel: DayCellViewModel,
+        day: CalendarDay,
         _ component: CalendarComponent,
         _ timeZone: TimeZone
     ) {
         self.init(
-            dayCellViewModel.year, dayCellViewModel.month, dayCellViewModel.day, component, timeZone
+            day.year, day.month, day.day, component, timeZone
         )
-        self.holiday = component.holiday(dayCellViewModel.month, dayCellViewModel.day)
+        self.holiday = component.holiday(day.month, day.day)
     }
     
     init?(

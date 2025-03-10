@@ -24,7 +24,9 @@ struct SelectDayViewModelTests {
     private func makeViewModel(
     ) -> SelectDayDialogViewModelImple {
         let current = Dummies.currentDay.day
-        let calendarUsecase = StubCalendarUsecase(today: current)
+        let calendarUsecase = StubCalendarUsecase(
+            today: .init(year: current.year, month: current.month, day: current.day, weekDay: 1)
+        )
         let viewModel = SelectDayDialogViewModelImple(
             currentDay: current,
             calendarUsecase: calendarUsecase
@@ -42,26 +44,26 @@ struct SelectDayViewModelTests {
             case nextYear
         }
         let name: Name
-        let day: CalendarComponent.Day
+        let day: CalendarDay
         
         static var currentDay: Self {
             return .init(
-                name: .currentDay, day: .init(year: 2023, month: 09, day: 2, weekDay: 1)
+                name: .currentDay, day: .init(2023, 09, 2)
             )
         }
         static var sameMonth: Self {
             return .init(
-                name: .sameMonth, day: .init(year: 2023, month: 09, day: 19, weekDay: 1)
+                name: .sameMonth, day: .init(2023, 09, 19)
             )
         }
         static var nextMonth: Self {
             return .init(
-                name: .nextMonth, day: .init(year: 2023, month: 10, day: 1, weekDay: 1)
+                name: .nextMonth, day: .init(2023, 10, 1)
             )
         }
         static var nextYear: Self {
             return .init(
-                name: .nextYear, day: .init(year: 2024, month: 10, day: 3, weekDay: 3)
+                name: .nextYear, day: .init(2024, 10, 3)
             )
         }
     }
@@ -126,9 +128,12 @@ private final class SpyListener: SelectDayDialogSceneListener, @unchecked Sendab
     }
 }
 
-private extension CalendarComponent.Day {
+private extension CalendarDay {
     
     func asDate() -> Date {
-        return Calendar.current.date(from: self) ?? Date()
+        let components = DateComponents(
+            year: self.year, month: self.month, day: self.day
+        )
+        return Calendar.current.date(from: components) ?? Date()
     }
 }
