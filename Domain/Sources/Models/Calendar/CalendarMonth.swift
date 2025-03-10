@@ -34,3 +34,16 @@ public struct CalendarMonth: Hashable, Comparable, Sendable {
         : .init(year: self.year, month: self.month - 1)
     }
 }
+
+
+public struct CalendarDay: Hashable, Sendable {
+    
+    public let year: Int
+    public let month: Int
+    public let day: Int
+    public init(_ year: Int, _ month: Int, _ day: Int) {
+        self.year = year
+        self.month = month
+        self.day = day
+    }
+}

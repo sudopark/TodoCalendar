@@ -14,7 +14,7 @@ import Domain
 public protocol CalendarSceneInteractor: Sendable, AnyObject {
     
     func moveFocusToToday()
-//    func moveDay(_ day: CalendarComponent.Day)
+    func moveDay(_ day: CalendarDay)
 }
 
 public protocol CalendarSceneListener: Sendable, AnyObject {
@@ -35,9 +35,10 @@ public protocol CalendarScene: Scene where Interactor == any CalendarSceneIntera
 // MARK: - SelectDayDialogScene
 
 public struct SelectDayInfo: Sendable, Equatable {
-    public let year: Int
-    public let month: Int
-    public let day: Int
+    public let dayInfo: CalendarDay
+    public var year: Int { dayInfo.year }
+    public var month: Int { dayInfo.month }
+    public var day: Int { dayInfo.day }
     public let isCurrentYear: Bool
     public let isCurrentDay: Bool
     
@@ -46,9 +47,7 @@ public struct SelectDayInfo: Sendable, Equatable {
         isCurrentYear: Bool,
         isCurrentDay: Bool
     ) {
-        self.year = year
-        self.month = month
-        self.day = day
+        self.dayInfo = .init(year, month, day)
         self.isCurrentYear = isCurrentYear
         self.isCurrentDay = isCurrentDay
     }
@@ -73,7 +72,7 @@ public protocol CalendarSceneBuilder {
     
     @MainActor
     func makeSelectDialog(
-        current: CalendarComponent.Day,
+        current: CalendarDay,
         _ listener: (any SelectDayDialogSceneListener)?
     ) -> any SelectDayDialogScene
 }

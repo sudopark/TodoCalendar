@@ -178,11 +178,15 @@ extension MainViewModelImple {
     }
     
     func jumpDate() {
-        
+        guard let current = self.subject.focusedDayInfo.value else { return }
+        self.router?.showJumpDaySelectDialog(current: current.dayInfo)
     }
     
     func daySelectDialog(didSelect day: SelectDayInfo) {
-        
+        guard let current = self.subject.focusedDayInfo.value,
+              current.dayInfo != day.dayInfo
+        else { return }
+        self.calendarSceneInteractor?.moveDay(day.dayInfo)
     }
 }
 

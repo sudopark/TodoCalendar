@@ -250,6 +250,7 @@ extension CalendarViewModelImpleTests {
         let viewModel = self.makeViewModelWithInitialSetup(
             .init(year: 2023, month: 08, day: 02, weekDay: 3)
         )
+        viewModel.calendarPaper(on: .init(year: 2023, month: 08), didChange: .dummy(2023, 08, 02))
         func parameterizeTest(
             _ month: CalendarMonth,
             _ isCurrentYear: Bool,
@@ -274,12 +275,15 @@ extension CalendarViewModelImpleTests {
         // when + then
         parameterizeTest(.init(year: 2023, month: 09), true, false) {
             viewModel.focusChanged(from: 1, to: 2)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 09), didChange: .dummy(2023, 09, 01))
         }
         parameterizeTest(.init(year: 2023, month: 10), true, false) {
             viewModel.focusChanged(from: 2, to: 0)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 10), didChange: .dummy(2023, 10, 01))
         }
         parameterizeTest(.init(year: 2023, month: 11), true, false) {
             viewModel.focusChanged(from: 0, to: 1)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 11), didChange: .dummy(2023, 11, 01))
         }
         parameterizeTest(.init(year: 2023, month: 10), true, false) {
             viewModel.focusChanged(from: 1, to: 0)
@@ -287,14 +291,8 @@ extension CalendarViewModelImpleTests {
         parameterizeTest(.init(year: 2023, month: 09), true, false) {
             viewModel.focusChanged(from: 0, to: 2)
         }
-        parameterizeTest(.init(year: 2023, month: 08), true, false) {
-            viewModel.focusChanged(from: 2, to: 1)
-        }
         parameterizeTest(.init(year: 2023, month: 08), true, true) {
-            viewModel.calendarPaper(
-                on: .init(year: 2023, month: 08),
-                didChange: .dummy(2023, 08, 02)
-            )
+            viewModel.focusChanged(from: 2, to: 1)
         }
         parameterizeTest(.init(year: 2023, month: 08), true, false) {
             viewModel.calendarPaper(
@@ -302,29 +300,43 @@ extension CalendarViewModelImpleTests {
                 didChange: .dummy(2023, 08, 03)
             )
         }
+        parameterizeTest(.init(year: 2023, month: 08), true, false) {
+            viewModel.calendarPaper(
+                on: .init(year: 2023, month: 08),
+                didChange: .dummy(2023, 08, 04)
+            )
+        }
         parameterizeTest(.init(year: 2023, month: 07), true, false) {
             viewModel.focusChanged(from: 1, to: 0)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 7), didChange: .dummy(2023, 7, 01))
         }
         parameterizeTest(.init(year: 2023, month: 06), true, false) {
             viewModel.focusChanged(from: 0, to: 2)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 6), didChange: .dummy(2023, 6, 01))
         }
         parameterizeTest(.init(year: 2023, month: 05), true, false) {
             viewModel.focusChanged(from: 2, to: 1)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 5), didChange: .dummy(2023, 5, 01))
         }
         parameterizeTest(.init(year: 2023, month: 04), true, false) {
             viewModel.focusChanged(from: 1, to: 0)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 04), didChange: .dummy(2023, 04, 01))
         }
         parameterizeTest(.init(year: 2023, month: 03), true, false) {
             viewModel.focusChanged(from: 0, to: 2)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 3), didChange: .dummy(2023, 3, 01))
         }
         parameterizeTest(.init(year: 2023, month: 02), true, false) {
             viewModel.focusChanged(from: 2, to: 1)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 2), didChange: .dummy(2023, 2, 01))
         }
         parameterizeTest(.init(year: 2023, month: 01), true, false) {
             viewModel.focusChanged(from: 1, to: 0)
+            viewModel.calendarPaper(on: .init(year: 2023, month: 1), didChange: .dummy(2023, 1, 01))
         }
         parameterizeTest(.init(year: 2022, month: 12), false, false) {
             viewModel.focusChanged(from: 0, to: 2)
+            viewModel.calendarPaper(on: .init(year: 2022, month: 12), didChange: .dummy(2022, 12, 01))
         }
     }
     
@@ -344,6 +356,27 @@ extension CalendarViewModelImpleTests {
         // then
         let requesteds = self.spyRouter.spyInteractors.map { $0.didSelectTodayRequested }
         XCTAssertEqual(requesteds, [nil, true, nil])
+    }
+    
+    func testViewModel_moveDay() {
+        // given
+        let expect = expectation(description: "특정 일자로 이동")
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 08, day: 02, weekDay: 3)
+        )
+        self.spyRouter.spyInteractors[1].didSelectDayCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.moveDay(.init(2024, 04, 03))
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        let requested = self.spyRouter.spyInteractors.map {
+            $0.didSelectDay
+        }
+        XCTAssertEqual(requested, [
+            nil, .init(2024, 04, 03), nil
+        ])
     }
 }
 
@@ -727,6 +760,13 @@ private extension CalendarViewModelImpleTests {
         func selectToday() {
             self.didSelectTodayRequested = true
             self.didSelectTodayRequestedCallback?()
+        }
+        
+        var didSelectDay: CalendarDay?
+        var didSelectDayCallback: (() -> Void)?
+        func selectDay(_ day: CalendarDay) {
+            self.didSelectDay = day
+            self.didSelectDayCallback?()
         }
         
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) { }

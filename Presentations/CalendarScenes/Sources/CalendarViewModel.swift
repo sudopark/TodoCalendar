@@ -228,7 +228,7 @@ extension CalendarViewModelImple {
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
-        let totalMonths = self.makeTotalMonths(around: today)
+        let totalMonths = self.makeTotalMonths(around: today.year, today.month)
         Task { @MainActor in
             self.calendarPaperInteractors = self.router?.attachInitialMonths(totalMonths.totalMonths)
             self.subject.monthsInCurrentRange.send(totalMonths)
@@ -265,13 +265,25 @@ extension CalendarViewModelImple {
             .first()
             .sink(receiveValue: { [weak self] today in
                 guard let self = self else { return }
-                let totalMonths = self.makeTotalMonths(around: today)
-                self.changeChildsForToday(totalMonths)
+                let totalMonths = self.makeTotalMonths(around: today.year, today.month)
+                self.changeChilds(totalMonths) { thisMonthInteractor in
+                    thisMonthInteractor?.selectToday()
+                }
             })
             .store(in: &self.cancellables)
     }
     
-    private func changeChildsForToday(_ totalMonths: TotalMonthsInRange) {
+    func moveDay(_ day: CalendarDay) {
+        let totalMonths = self.makeTotalMonths(around: day.year, day.month)
+        self.changeChilds(totalMonths) { selectMontthInteractor in
+            selectMontthInteractor?.selectDay(day)
+        }
+    }
+    
+    private func changeChilds(
+        _ totalMonths: TotalMonthsInRange,
+        andSelectDay: @Sendable @escaping ((any CalendarPaperSceneInteractor)?) -> Void
+    ) {
         Task { @MainActor in
             self.router?.changeFocus(at: totalMonths.focusedIndex)
             self.subject.monthsInCurrentRange.send(totalMonths)
@@ -279,14 +291,16 @@ extension CalendarViewModelImple {
                 let interactor = self.calendarPaperInteractors?[safe: offset]
                 interactor?.updateMonthIfNeed(month)
                 if offset == totalMonths.focusedIndex {
-                    interactor?.selectToday()
+                    andSelectDay(interactor)
                 }
             }
         }
     }
     
-    private func makeTotalMonths(around day: CalendarComponent.Day) -> TotalMonthsInRange {
-        let currentMonth = CalendarMonth(year: day.year, month: day.month)
+    private func makeTotalMonths(
+        around year: Int, _ month: Int
+    ) -> TotalMonthsInRange {
+        let currentMonth = CalendarMonth(year: year, month: month)
         let months = [
             currentMonth.previousMonth(),
             currentMonth,
