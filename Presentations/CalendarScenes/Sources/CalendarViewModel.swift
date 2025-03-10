@@ -12,6 +12,8 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import Extensions
+
 
 // MARK: - CalendarViewModel
 
@@ -135,23 +137,23 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             focusedDayMap: [CalendarMonth: CurrentSelectDayModel],
             currentDay: CalendarComponent.Day
         )
-        let transformWithFocusedMonthAnsIsCurrentDay: (CurrentAndFocusInfo) -> (CalendarMonth, Bool, Bool)
+        let transformWithFocusedMonthAnsIsCurrentDay: (CurrentAndFocusInfo) -> SelectDayInfo?
         transformWithFocusedMonthAnsIsCurrentDay = { info in
+            guard let currentMonthSelectedDay = info.focusedDayMap[info.focusedMonth]?.day
+            else { return nil }
             let isCurrentYear = info.currentDay.year == info.focusedMonth.year
             let isCurrentMonth = isCurrentYear
                 && info.currentDay.month == info.focusedMonth.month
-            guard isCurrentMonth
-            else {
-                return (info.focusedMonth, isCurrentYear, false)
-            }
-            let currentMonthSelectedDay = info.focusedDayMap[info.focusedMonth]
-            let isCurrentDaySelected = currentMonthSelectedDay?.year == info.currentDay.year
-                && currentMonthSelectedDay?.month == info.currentDay.month
-                && currentMonthSelectedDay?.day == info.currentDay.day
-            return (info.focusedMonth, isCurrentYear, isCurrentDaySelected)
-        }
-        let compare: ((CalendarMonth, Bool, Bool), (CalendarMonth, Bool, Bool)) -> Bool = { lhs, rhs in
-            return lhs.0 == rhs.0 && lhs.1 == rhs.1 && lhs.2 == rhs.2
+            let isCurrentDaySelected = isCurrentYear && isCurrentMonth
+                && currentMonthSelectedDay == info.currentDay.day
+            
+            return .init(
+                info.focusedMonth.year,
+                info.focusedMonth.month,
+                currentMonthSelectedDay,
+                isCurrentYear: isCurrentYear,
+                isCurrentDay: isCurrentDaySelected
+            )
         }
         
         Publishers.CombineLatest3(
@@ -159,14 +161,11 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             self.subject.selectedDayPerMonths,
             self.calendarUsecase.currentDay
         )
-        .map(transformWithFocusedMonthAnsIsCurrentDay)
-        .removeDuplicates(by: compare)
-        .sink(receiveValue: { [weak self] (focused, isCurrentYear, isCurrent) in
-            self?.listener?.calendarScene(
-                focusChangedTo: focused,
-                isCurrentYear: isCurrentYear,
-                isCurrentDay: isCurrent
-            )
+        .compactMap(transformWithFocusedMonthAnsIsCurrentDay)
+        .removeDuplicates()
+        .sink(receiveValue: { [weak self] selected in
+            logger.log(level: .debug, "select day changed: \(selected)")
+            self?.listener?.calendarScene(focusChangedTo: selected)
         })
         .store(in: &self.cancellables)
     }

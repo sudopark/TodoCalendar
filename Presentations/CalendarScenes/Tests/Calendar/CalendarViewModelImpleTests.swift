@@ -257,17 +257,18 @@ extension CalendarViewModelImpleTests {
             _ action: () -> Void
         ) {
             let expect = expectation(description: "현재 포커스된 달 조회 변경")
-            var pair: (CalendarMonth, Bool, Bool)?
-            self.spyListener.didMonthChanged = { focuse, yearFlag, todayFlag in
-                pair = (focuse, yearFlag, todayFlag)
+            var selected: SelectDayInfo?
+            self.spyListener.didSelectionChanged = { info in
+                selected = info
                 expect.fulfill()
             }
             action()
             self.wait(for: [expect], timeout: self.timeout)
             
-            XCTAssertEqual(pair?.0, month)
-            XCTAssertEqual(pair?.1, isCurrentYear)
-            XCTAssertEqual(pair?.2, isCurrent)
+            XCTAssertEqual(selected?.year, month.year)
+            XCTAssertEqual(selected?.month, month.month)
+            XCTAssertEqual(selected?.isCurrentYear, isCurrentYear)
+            XCTAssertEqual(selected?.isCurrentDay, isCurrent)
         }
         
         // when + then
@@ -733,14 +734,10 @@ private extension CalendarViewModelImpleTests {
     
     final class SpyListener: CalendarSceneListener, @unchecked Sendable {
         
-        var didMonthChanged: ((CalendarMonth, Bool, Bool) -> Void)?
+        var didSelectionChanged: ((SelectDayInfo) -> Void)?
         
-        func calendarScene(
-            focusChangedTo month: CalendarMonth,
-            isCurrentYear: Bool,
-            isCurrentDay: Bool
-        ) {
-            self.didMonthChanged?(month, isCurrentYear, isCurrentDay)
+        func calendarScene(focusChangedTo selected: SelectDayInfo) {
+            self.didSelectionChanged?(selected)
         }
     }
     
@@ -787,7 +784,7 @@ private extension CalendarViewModelImpleTests {
         }
     }
     
-    private class PrivateSpyEventTagUsecase: StubEventTagUsecase {
+    private class PrivateSpyEventTagUsecase: StubEventTagUsecase, @unchecked Sendable {
         
         var didPrepared: (() -> Void)?
         override func prepare() {
@@ -795,7 +792,7 @@ private extension CalendarViewModelImpleTests {
         }
     }
     
-    class PrivateSpyScheduleEventUsecase: StubScheduleEventUsecase {
+    class PrivateSpyScheduleEventUsecase: StubScheduleEventUsecase, @unchecked Sendable {
         
         private let scheduleEventsInRange = CurrentValueSubject<[ScheduleEvent]?, Never>(nil)
         override func refreshScheduleEvents(in period: Range<TimeInterval>) {
@@ -825,7 +822,7 @@ private extension CalendarViewModelImpleTests {
         }
     }
     
-    private class PrivateStubMigrationUsecase: StubTemporaryUserDataMigrationUescase {
+    private class PrivateStubMigrationUsecase: StubTemporaryUserDataMigrationUescase, @unchecked Sendable {
         
         let migrationEndMocking = PassthroughSubject<Result<Void, any Error>, Never>()
         
