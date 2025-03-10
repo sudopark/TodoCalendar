@@ -19,11 +19,7 @@ public protocol CalendarSceneInteractor: Sendable, AnyObject {
 
 public protocol CalendarSceneListener: Sendable, AnyObject {
     
-    func calendarScene(
-        focusChangedTo month: CalendarMonth,
-        isCurrentYear: Bool,
-        isCurrentDay: Bool
-    )
+    func calendarScene(focusChangedTo selected: SelectDayInfo)
 }
 
 public protocol CalendarScene: Scene where Interactor == any CalendarSceneInteractor {
@@ -38,7 +34,7 @@ public protocol CalendarScene: Scene where Interactor == any CalendarSceneIntera
 
 // MARK: - SelectDayDialogScene
 
-public struct SelectDayInfo: Sendable {
+public struct SelectDayInfo: Sendable, Equatable {
     public let year: Int
     public let month: Int
     public let day: Int

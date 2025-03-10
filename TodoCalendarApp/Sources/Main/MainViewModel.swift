@@ -72,11 +72,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.internalBinding()
     }
     
-    private typealias FocusMonthInfo = (
-        selected: CalendarMonth, isCurrentYear: Bool, isCurrentDay: Bool
-    )
     private struct Subject {
-        let focusedMonthInfo = CurrentValueSubject<FocusMonthInfo?, Never>(nil)
+        let focusedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
         let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
     }
     
@@ -176,14 +173,8 @@ extension MainViewModelImple {
         self.router?.routeToSettingScene()
     }
     
-    func calendarScene(
-        focusChangedTo month: CalendarMonth,
-        isCurrentYear: Bool,
-        isCurrentDay: Bool
-    ) {
-        self.subject.focusedMonthInfo.send(
-            (month, isCurrentYear, isCurrentDay)
-        )
+    func calendarScene(focusChangedTo selected: SelectDayInfo) {
+        self.subject.focusedDayInfo.send(selected)
     }
     
     func jumpDate() {
@@ -204,26 +195,26 @@ extension MainViewModelImple {
         
         let formatter = DateFormatter() |> \.dateFormat .~ "date_form.MMM".localized()
         let calednar = Calendar(identifier: .gregorian)
-        let transform: (FocusMonthInfo?) -> CurrentMonth? = { info in
+        let transform: (SelectDayInfo?) -> CurrentMonth? = { info in
             guard let info else { return nil }
-            guard let date = calednar.date(bySetting: .month, value: info.selected.month, of: Date())
+            guard let date = calednar.date(bySetting: .month, value: info.month, of: Date())
             else {
-                return .init(monthText: "\(info.selected.month)")
+                return .init(monthText: "\(info.month)")
             }
             return .init(
                 monthText: formatter.string(from: date).uppercased(),
-                yearText: info.isCurrentYear ? nil : "\(info.selected.year)"
+                yearText: info.isCurrentYear ? nil : "\(info.year)"
             )
         }
         
-        return self.subject.focusedMonthInfo
+        return self.subject.focusedDayInfo
             .compactMap(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
     
     var isShowReturnToToday: AnyPublisher<Bool, Never> {
-        return self.subject.focusedMonthInfo
+        return self.subject.focusedDayInfo
             .compactMap { $0 }
             .map { !$0.isCurrentDay }
             .removeDuplicates()
