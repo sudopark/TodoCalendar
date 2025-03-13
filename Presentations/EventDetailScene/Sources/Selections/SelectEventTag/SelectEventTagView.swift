@@ -23,7 +23,7 @@ final class SelectEventTagViewState: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     
     @Published var tags: [TagCellViewModel] = []
-    @Published var selectedTagId: AllEventTagId?
+    @Published var selectedTagId: EventTagId?
     
     func bind(_ viewModel: any SelectEventTagViewModel) {
         
@@ -51,7 +51,7 @@ final class SelectEventTagViewState: ObservableObject {
 final class SelectEventTagViewEventHandler: ObservableObject {
  
     var onAppear: () -> Void = { }
-    var selectTag: (AllEventTagId) -> Void = { _ in }
+    var selectTag: (EventTagId) -> Void = { _ in }
     var addTag: () -> Void = { }
     var moveToTagSeting: () -> Void = { }
     var close: () -> Void = { }
@@ -139,7 +139,7 @@ struct SelectEventTagView: View {
             
             Circle()
                 .frame(width: 8, height: 8)
-                .foregroundStyle(tag.color.color(with: self.appearance).asColor)
+                .foregroundStyle(appearance.color(tag.id).asColor)
             
             Text(tag.name)
                 .font(self.appearance.fontSet.normal.asFont)
@@ -207,7 +207,7 @@ struct SelectEventTagView: View {
 private extension TagCellViewModel {
     
     var compareKey: String {
-        return "id:\(id.hashValue)_\(name)_\(color)"
+        return "id:\(id.hashValue)_\(name)"
     }
 }
 
@@ -226,10 +226,10 @@ struct SelectEventTagViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = SelectEventTagViewState()
         state.tags = [
-            .init(.init(.default, "default", .default)),
-            .init(.init(.custom("some"), "some", .custom(hex: "#00ffdd"))),
-            .init(.init(.custom("some1"), "some1", .custom(hex: "#00ffdd"))),
-            .init(.init(.custom("som2"), "some2", .custom(hex: "#00ffdd"))),
+            .init(.init(.default, "default", "#ff00ff")),
+            .init(.init(.custom("some"), "some", "#00ffdd")),
+            .init(.init(.custom("some1"), "some1", "#00ffdd")),
+            .init(.init(.custom("som2"), "some2", "#00ffdd")),
         ]
         let eventHandler = SelectEventTagViewEventHandler()
         let view = SelectEventTagView()

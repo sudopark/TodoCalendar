@@ -21,6 +21,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyUISettingUsecase: StubUISettingUsecase!
     private var stubMigrationUsecase: StubTemporaryUserDataMigrationUescase!
     private var spyEventNotificationUsecase: SpyEventNotificationUsecase!
+    private var stubEventTagUsecase: StubEventTagUsecase!
+    private var stubEventNotifyService: SharedEventNotifyService!
     var cancelBag: Set<AnyCancellable>!
     
     override func setUpWithError() throws {
@@ -28,6 +30,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyUISettingUsecase = .init()
         self.stubMigrationUsecase = .init()
         self.spyEventNotificationUsecase = .init()
+        self.stubEventTagUsecase = .init()
+        self.stubEventNotifyService = .init(notifyQueue: nil)
         self.cancelBag = .init()
         self.timeout = 0.01
     }
@@ -37,6 +41,8 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyUISettingUsecase = nil
         self.stubMigrationUsecase = nil
         self.spyEventNotificationUsecase = nil
+        self.stubEventTagUsecase = nil
+        self.stubEventNotifyService = nil
         self.cancelBag = nil
     }
     
@@ -48,7 +54,9 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let viewModel = MainViewModelImple(
             uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
-            eventNotificationUsecase: self.spyEventNotificationUsecase
+            eventNotificationUsecase: self.spyEventNotificationUsecase,
+            eventTagUsecase: self.stubEventTagUsecase,
+            eventNotifyService: self.stubEventNotifyService
         )
         viewModel.router = self.spyRouter
         self.spyRouter.didCalendarAttached = {
@@ -66,7 +74,9 @@ extension MainViewModelImpleTests {
         let viewModel = MainViewModelImple(
             uiSettingUsecase: self.spyUISettingUsecase,
             temporaryUserDataMigrationUsecase: self.stubMigrationUsecase,
-            eventNotificationUsecase: self.spyEventNotificationUsecase
+            eventNotificationUsecase: self.spyEventNotificationUsecase,
+            eventTagUsecase: self.stubEventTagUsecase,
+            eventNotifyService: self.stubEventNotifyService
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -97,21 +107,36 @@ extension MainViewModelImpleTests {
         XCTAssertEqual(self.spyEventNotificationUsecase.didRunSync, true)
     }
     
+    func testViewModel_whenPrepare_runApplyEventTagColor() {
+        // given
+        let expect = expectation(description: "앱 시작이후 전체 이벤트 태그 컬러 색상 정보 bind")
+        let viewModel = self.makeViewModelWithoutPrepare()
+        self.spyUISettingUsecase.didAppluEventTagColorCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.prepare()
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
+    
     func testViewModel_whenFocusChanged_updateCurrentMonth() {
         // given
         let expect = expectation(description: "update current month")
-        expect.expectedFulfillmentCount = 3
+        expect.expectedFulfillmentCount = 4
         let viewModel = self.makeViewModel()
         
         // when
         let months = self.waitOutputs(expect, for: viewModel.currentMonth) {
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentDay: true)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentDay: false)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 10), isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(2023, 08, 1, isCurrentYear: true, isCurrentDay: true))
+            viewModel.calendarScene(focusChangedTo: .init(2023, 09, 1, isCurrentYear: true, isCurrentDay: false))
+            viewModel.calendarScene(focusChangedTo: .init(2023, 10, 1, isCurrentYear: true, isCurrentDay: false))
+            viewModel.calendarScene(focusChangedTo: .init(2022, 09, 1, isCurrentYear: false, isCurrentDay: false))
         }
         
         // then
-        XCTAssertEqual(months, ["AUG", "SEP", "OCT"])
+        XCTAssertEqual(months.map { $0.monthText }, ["AUG", "SEP", "OCT", "SEP"])
+        XCTAssertEqual(months.map { $0.yearText }, [nil, nil, nil, "2022"])
     }
     
     func testViewModle_whenFocusChanged_updateIsShowReturnToToday() {
@@ -122,12 +147,12 @@ extension MainViewModelImpleTests {
         
         // when
         let isShow = self.waitOutputs(expect, for: viewModel.isShowReturnToToday) {
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentDay: true)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentDay: false)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 10), isCurrentDay: false)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentDay: false)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentDay: true)
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 08), isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(2023, 08, 1, isCurrentYear: true, isCurrentDay: true))
+            viewModel.calendarScene(focusChangedTo: .init(2023, 09, 1, isCurrentYear: true, isCurrentDay: false))
+            viewModel.calendarScene(focusChangedTo: .init(2023, 10, 1, isCurrentYear: true, isCurrentDay: false))
+            viewModel.calendarScene(focusChangedTo: .init(2023, 09, 1, isCurrentYear: true, isCurrentDay: false))
+            viewModel.calendarScene(focusChangedTo: .init(2023, 08, 1, isCurrentYear: true, isCurrentDay: true))
+            viewModel.calendarScene(focusChangedTo: .init(2023, 08, 2, isCurrentYear: true, isCurrentDay: false))
         }
         
         // then
@@ -142,7 +167,7 @@ extension MainViewModelImpleTests {
         
         // when
         let _ = self.waitFirstOutput(expect, for: viewModel.isShowReturnToToday) {
-            viewModel.calendarScene(focusChangedTo: .init(year: 2023, month: 09), isCurrentDay: false)
+            viewModel.calendarScene(focusChangedTo: .init(2023, 09, 1, isCurrentYear: true, isCurrentDay: false))
         }
         viewModel.returnToToday()
         
@@ -227,6 +252,65 @@ extension MainViewModelImpleTests {
     }
 }
 
+extension MainViewModelImpleTests {
+    
+    func testViewModel_notifyRefreshingCalendarEvent() {
+        // given
+        func parameterizeTest(
+            _ event: RefreshingEvent,
+            expectIsLoading: Bool?
+        ) {
+            // given
+            let expect = expectation(description: "캘린더 이벤트 갱신중임을 알림")
+            expect.isInverted = expectIsLoading == nil
+            expect.assertForOverFulfill = false
+            let viewModel = self.makeViewModel()
+            
+            // when
+            let isLoading = self.waitFirstOutput(expect, for: viewModel.isLoadingCalendarEvents) {
+                
+                self.stubEventNotifyService.notify(event)
+            }
+            
+            // then
+            XCTAssertEqual(isLoading, expectIsLoading)
+        }
+        // when + then
+        parameterizeTest(.refreshingTodo(true), expectIsLoading: true)
+        parameterizeTest(.refreshingTodo(false), expectIsLoading: false)
+        parameterizeTest(.refreshingSchedule(true), expectIsLoading: true)
+        parameterizeTest(.refreshingSchedule(false), expectIsLoading: false)
+        parameterizeTest(.refreshForemostEvent(true), expectIsLoading: true)
+        parameterizeTest(.refreshForemostEvent(false), expectIsLoading: false)
+        parameterizeTest(.refreshingCurrentTodo(true), expectIsLoading: true)
+        parameterizeTest(.refreshingCurrentTodo(false), expectIsLoading: false)
+        parameterizeTest(.refreshingUncompletedTodo(true), expectIsLoading: true)
+        parameterizeTest(.refreshingUncompletedTodo(false), expectIsLoading: false)
+    }
+}
+
+extension MainViewModelImpleTests {
+    
+    func testViewModel_jumpDay() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.calendarScene(
+            focusChangedTo: .init(2023, 07, 23, isCurrentYear: true, isCurrentDay: true)
+        )
+        
+        // when
+        viewModel.jumpDate()
+        viewModel.daySelectDialog(
+            didSelect: .init(2021, 02, 03, isCurrentYear: false, isCurrentDay: false)
+        )
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowJumpDaySelectDialogWith != nil, true)
+        XCTAssertEqual(
+            self.spyRouter.interactor.didRequestMoveDay, .init(2021, 02, 03)
+        )
+    }
+}
 
 extension MainViewModelImpleTests {
     
@@ -248,6 +332,11 @@ extension MainViewModelImpleTests {
         func routeToSettingScene() {
             self.didRouteToSetting = true
         }
+        
+        var didShowJumpDaySelectDialogWith: CalendarDay?
+        func showJumpDaySelectDialog(current: CalendarDay) {
+            self.didShowJumpDaySelectDialogWith = current
+        }
     }
     
     private class SpyCalendarInteractor: CalendarSceneInteractor, @unchecked Sendable {
@@ -255,6 +344,11 @@ extension MainViewModelImpleTests {
         var didFocusMovedToToday: Bool?
         func moveFocusToToday() {
             self.didFocusMovedToToday = true
+        }
+        
+        var didRequestMoveDay: CalendarDay?
+        func moveDay(_ day: CalendarDay) {
+            self.didRequestMoveDay = day
         }
     }
     

@@ -16,20 +16,20 @@ import Scenes
 
 
 struct TagCellViewModel: Equatable {
-    let id: AllEventTagId
+    let id: EventTagId
     let name: String
-    let color: EventTagColor
+    let colorHex: String
     
-    init(_ tag: EventTag) {
-        self.id = .custom(tag.uuid)
+    init(_ tag: any EventTag) {
+        self.id = tag.tagId
         self.name = tag.name
-        self.color = .custom(hex: tag.colorHex)
+        self.colorHex = tag.colorHex
     }
     
     init(_ selectedTag: SelectedTag) {
         self.id = selectedTag.tagId
         self.name = selectedTag.name
-        self.color = selectedTag.color
+        self.colorHex = selectedTag.colorHex
     }
 }
 
@@ -40,12 +40,12 @@ protocol SelectEventTagViewModel: AnyObject, Sendable, SelectEventTagSceneIntera
     // interactor
     func close()
     func refresh()
-    func selectTag(_ id: AllEventTagId)
+    func selectTag(_ id: EventTagId)
     func addTag()
     func moveToTagSetting()
     
     // presenter
-    var selectedTagId: AnyPublisher<AllEventTagId, Never> { get }
+    var selectedTagId: AnyPublisher<EventTagId, Never> { get }
     var tags: AnyPublisher<[TagCellViewModel], Never> { get }
 }
 
@@ -59,7 +59,7 @@ final class SelectEventTagViewModelImple: SelectEventTagViewModel, @unchecked Se
     var listener: (any SelectEventTagSceneListener)?
     
     init(
-        startWith initail: AllEventTagId,
+        startWith initail: EventTagId,
         tagUsecase: any EventTagUsecase
     ) {
         
@@ -72,8 +72,8 @@ final class SelectEventTagViewModelImple: SelectEventTagViewModel, @unchecked Se
     
     
     private struct Subject {
-        let selectedTagId = CurrentValueSubject<AllEventTagId?, Never>(nil)
-        let tags = CurrentValueSubject<[EventTag]?, Never>(nil)
+        let selectedTagId = CurrentValueSubject<EventTagId?, Never>(nil)
+        let tags = CurrentValueSubject<[any EventTag]?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -102,9 +102,8 @@ extension SelectEventTagViewModelImple {
     // TODO: view에서 호출시에 최초 1회만 하도록, listener로 태그 리스트 변경 받은 경우에 명시적으로 refresh 예정
     func refresh() {
         
-        let loaded: ([EventTag]) -> Void = { [weak self] tags in
-            let sortedTags = tags.sorted(by: { $0.uuid < $1.uuid })
-            self?.subject.tags.send(sortedTags)
+        let loaded: ([any EventTag]) -> Void = { [weak self] tags in
+            self?.subject.tags.send(tags)
         }
         let handleError: (any Error) -> Void = { [weak self] error in
             self?.router?.showError(error)
@@ -115,7 +114,7 @@ extension SelectEventTagViewModelImple {
             .store(in: &self.cancellables)
     }
     
-    func selectTag(_ id: AllEventTagId) {
+    func selectTag(_ id: EventTagId) {
         self.subject.selectedTagId.send(id)
     }
     
@@ -127,27 +126,26 @@ extension SelectEventTagViewModelImple {
         self.router?.routeToTagListScene()
     }
     
-    func eventTag(created newTag: EventTag) {
+    func eventTag(created newTag: any EventTag) {
         defer {
-            self.subject.selectedTagId.send(.custom(newTag.uuid))
+            self.subject.selectedTagId.send(newTag.tagId)
         }
         let tags = self.subject.tags.value ?? []
-        guard !tags.contains(where: { $0.uuid == newTag.uuid })
-        else { return }
+        guard !tags.contains(where: { $0.tagId == newTag.tagId }) else { return }
         let newTags = [newTag] + tags
         self.subject.tags.send(newTags)
     }
     
-    func eventTag(updated newTag: EventTag) {
+    func eventTag(updated newTag: any EventTag) {
         guard let tags = self.subject.tags.value,
-              let index = tags.firstIndex(where: { $0.uuid == newTag.uuid })
+              let index = tags.firstIndex(where: { $0.tagId == newTag.tagId })
         else { return }
         let newTags = tags |> ix(index) .~ newTag
         self.subject.tags.send(newTags)
     }
     
-    func eventTag(deleted tagId: String) {
-        let newTags = self.subject.tags.value?.filter { $0.uuid != tagId }
+    func eventTag(deleted tagId: EventTagId) {
+        let newTags = self.subject.tags.value?.filter { $0.tagId != tagId }
         self.subject.tags.send(newTags)
     }
 }
@@ -158,28 +156,25 @@ extension SelectEventTagViewModelImple {
 extension SelectEventTagViewModelImple {
     
     private var selectedTag: AnyPublisher<SelectedTag, Never> {
-        let transform: ([EventTag], AllEventTagId) -> SelectedTag
+        let transform: ([any EventTag], EventTagId) -> SelectedTag?
         transform = { tags, selected in
-            guard let customId = selected.customTagId 
+            guard let selectedTag = tags.first(where: { $0.tagId == selected })
             else {
-                return selected == .holiday ? .holiday : .defaultTag
+                return tags.first(where: { $0.tagId == .default })
+                    .map { .init($0) }
             }
-            guard let selectedCustomTag = tags.first(where: { $0.uuid == customId })
-            else {
-                return .defaultTag
-            }
-            return .init(selectedCustomTag)
+            return .init(selectedTag)
         }
         return Publishers.CombineLatest(
             self.subject.tags.compactMap { $0 },
             self.subject.selectedTagId.compactMap { $0 }
         )
-        .map(transform)
+        .compactMap(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
     }
     
-    var selectedTagId: AnyPublisher<AllEventTagId, Never> {
+    var selectedTagId: AnyPublisher<EventTagId, Never> {
         
         return selectedTag
             .map { $0.tagId }
@@ -187,10 +182,11 @@ extension SelectEventTagViewModelImple {
     }
     
     var tags: AnyPublisher<[TagCellViewModel], Never> {
-        let transform: ([EventTag]) -> [TagCellViewModel] = { tags in
-            let defaultCVM = TagCellViewModel(.defaultTag)
-            let cvms = tags.map { TagCellViewModel($0) }
-            return [defaultCVM] + cvms
+        let transform: ([any EventTag]) -> [TagCellViewModel] = { tags in
+            let tagsWithoutHoliday = tags.filter { $0.tagId != .holiday }
+            return tagsWithoutHoliday
+                .sortDefaultTagsAtFirst()
+                .map{ .init($0) }
         }
         return self.subject.tags
             .compactMap { $0 }

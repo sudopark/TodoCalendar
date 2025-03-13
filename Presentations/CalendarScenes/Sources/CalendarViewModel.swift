@@ -12,6 +12,8 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import Extensions
+
 
 // MARK: - CalendarViewModel
 
@@ -135,22 +137,23 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             focusedDayMap: [CalendarMonth: CurrentSelectDayModel],
             currentDay: CalendarComponent.Day
         )
-        let transformWithFocusedMonthAnsIsCurrentDay: (CurrentAndFocusInfo) -> (CalendarMonth, Bool)
+        let transformWithFocusedMonthAnsIsCurrentDay: (CurrentAndFocusInfo) -> SelectDayInfo?
         transformWithFocusedMonthAnsIsCurrentDay = { info in
-            let isCurrentMonth = info.currentDay.year == info.focusedMonth.year
+            guard let currentMonthSelectedDay = info.focusedDayMap[info.focusedMonth]?.day
+            else { return nil }
+            let isCurrentYear = info.currentDay.year == info.focusedMonth.year
+            let isCurrentMonth = isCurrentYear
                 && info.currentDay.month == info.focusedMonth.month
-            guard isCurrentMonth
-            else {
-                return (info.focusedMonth, false)
-            }
-            let currentMonthSelectedDay = info.focusedDayMap[info.focusedMonth]
-            let isCurrentDaySelected = currentMonthSelectedDay?.year == info.currentDay.year
-                && currentMonthSelectedDay?.month == info.currentDay.month
-                && currentMonthSelectedDay?.day == info.currentDay.day
-            return (info.focusedMonth, isCurrentDaySelected)
-        }
-        let compare: ((CalendarMonth, Bool), (CalendarMonth, Bool)) -> Bool = { lhs, rhs in
-            return lhs.0 == rhs.0 && lhs.1 == rhs.1
+            let isCurrentDaySelected = isCurrentYear && isCurrentMonth
+                && currentMonthSelectedDay == info.currentDay.day
+            
+            return .init(
+                info.focusedMonth.year,
+                info.focusedMonth.month,
+                currentMonthSelectedDay,
+                isCurrentYear: isCurrentYear,
+                isCurrentDay: isCurrentDaySelected
+            )
         }
         
         Publishers.CombineLatest3(
@@ -158,10 +161,11 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             self.subject.selectedDayPerMonths,
             self.calendarUsecase.currentDay
         )
-        .map(transformWithFocusedMonthAnsIsCurrentDay)
-        .removeDuplicates(by: compare)
-        .sink(receiveValue: { [weak self] (focused, isCurrent) in
-            self?.listener?.calendarScene(focusChangedTo: focused, isCurrentDay: isCurrent)
+        .compactMap(transformWithFocusedMonthAnsIsCurrentDay)
+        .removeDuplicates()
+        .sink(receiveValue: { [weak self] selected in
+            logger.log(level: .debug, "select day changed: \(selected)")
+            self?.listener?.calendarScene(focusChangedTo: selected)
         })
         .store(in: &self.cancellables)
     }
@@ -224,7 +228,7 @@ extension CalendarViewModelImple {
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
-        let totalMonths = self.makeTotalMonths(around: today)
+        let totalMonths = self.makeTotalMonths(around: today.year, today.month)
         Task { @MainActor in
             self.calendarPaperInteractors = self.router?.attachInitialMonths(totalMonths.totalMonths)
             self.subject.monthsInCurrentRange.send(totalMonths)
@@ -261,13 +265,25 @@ extension CalendarViewModelImple {
             .first()
             .sink(receiveValue: { [weak self] today in
                 guard let self = self else { return }
-                let totalMonths = self.makeTotalMonths(around: today)
-                self.changeChildsForToday(totalMonths)
+                let totalMonths = self.makeTotalMonths(around: today.year, today.month)
+                self.changeChilds(totalMonths) { thisMonthInteractor in
+                    thisMonthInteractor?.selectToday()
+                }
             })
             .store(in: &self.cancellables)
     }
     
-    private func changeChildsForToday(_ totalMonths: TotalMonthsInRange) {
+    func moveDay(_ day: CalendarDay) {
+        let totalMonths = self.makeTotalMonths(around: day.year, day.month)
+        self.changeChilds(totalMonths) { selectMontthInteractor in
+            selectMontthInteractor?.selectDay(day)
+        }
+    }
+    
+    private func changeChilds(
+        _ totalMonths: TotalMonthsInRange,
+        andSelectDay: @Sendable @escaping ((any CalendarPaperSceneInteractor)?) -> Void
+    ) {
         Task { @MainActor in
             self.router?.changeFocus(at: totalMonths.focusedIndex)
             self.subject.monthsInCurrentRange.send(totalMonths)
@@ -275,14 +291,16 @@ extension CalendarViewModelImple {
                 let interactor = self.calendarPaperInteractors?[safe: offset]
                 interactor?.updateMonthIfNeed(month)
                 if offset == totalMonths.focusedIndex {
-                    interactor?.selectToday()
+                    andSelectDay(interactor)
                 }
             }
         }
     }
     
-    private func makeTotalMonths(around day: CalendarComponent.Day) -> TotalMonthsInRange {
-        let currentMonth = CalendarMonth(year: day.year, month: day.month)
+    private func makeTotalMonths(
+        around year: Int, _ month: Int
+    ) -> TotalMonthsInRange {
+        let currentMonth = CalendarMonth(year: year, month: month)
         let months = [
             currentMonth.previousMonth(),
             currentMonth,

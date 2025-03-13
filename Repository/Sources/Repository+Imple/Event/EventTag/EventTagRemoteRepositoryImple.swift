@@ -41,10 +41,10 @@ public final class EventTagRemoteRepositoryImple: EventTagRepository, @unchecked
 
 extension EventTagRemoteRepositoryImple {
     
-    public func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag {
+    public func makeNewTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag {
         let endpoint = EventTagEndpoints.make
         let payload = params.asJson()
-        let mapper: EventTagMapper = try await self.remote.request(
+        let mapper: CustomEventTagMapper = try await self.remote.request(
             .post,
             endpoint,
             parameters: payload
@@ -54,10 +54,10 @@ extension EventTagRemoteRepositoryImple {
         return tag
     }
     
-    public func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag {
+    public func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag {
         let endpoint = EventTagEndpoints.tag(id: tagId)
         let payload = params.asJson()
-        let mapper: EventTagMapper = try await self.remote.request(
+        let mapper: CustomEventTagMapper = try await self.remote.request(
             .put,
             endpoint,
             parameters: payload
@@ -79,7 +79,7 @@ extension EventTagRemoteRepositoryImple {
     
     public func deleteTagWithAllEvents(
         _ tagId: String
-    ) async throws -> RemoveEventTagWithEventsResult {
+    ) async throws -> RemoveCustomEventTagWithEventsResult {
         let endpoint = EventTagEndpoints.tagAndEvents(id: tagId)
         let mapper: RemoveEventTagAndResultMapper = try await self.remote.request(
             .delete, endpoint
@@ -91,7 +91,7 @@ extension EventTagRemoteRepositoryImple {
         return result
     }
     
-    public func loadAllTags() -> AnyPublisher<[EventTag], any Error> {
+    public func loadAllCustomTags() -> AnyPublisher<[CustomEventTag], any Error> {
         return self.loadTagsAndReplaceCache { [weak self] in
             return try await self?.cacheStorage.loadAllTags()
         } thenFromRemote: { [weak self] in
@@ -99,15 +99,15 @@ extension EventTagRemoteRepositoryImple {
         }
     }
     
-    private func loadAllEventsFromRemote() async throws -> [EventTag] {
+    private func loadAllEventsFromRemote() async throws -> [CustomEventTag] {
         let endpoint = EventTagEndpoints.allTags
-        let mappers: [EventTagMapper] = try await self.remote.request(
+        let mappers: [CustomEventTagMapper] = try await self.remote.request(
             .get, endpoint
         )
         return mappers.map { $0.tag }
     }
     
-    public func loadTags(_ ids: [String]) -> AnyPublisher<[EventTag], any Error> {
+    public func loadCustomTags(_ ids: [String]) -> AnyPublisher<[CustomEventTag], any Error> {
         return self.loadTagsAndReplaceCache { [weak self] in
             return try await self?.cacheStorage.loadTags(in: ids)
         } thenFromRemote: { [weak self] in
@@ -115,9 +115,9 @@ extension EventTagRemoteRepositoryImple {
         }
     }
     
-    private func loadTagsFromRemote(_ ids: [String]) async throws -> [EventTag] {
+    private func loadTagsFromRemote(_ ids: [String]) async throws -> [CustomEventTag] {
         let endpoint = EventTagEndpoints.tags
-        let mappers: [EventTagMapper] = try await self.remote.request(
+        let mappers: [CustomEventTagMapper] = try await self.remote.request(
             .get,
             endpoint,
             parameters: ["ids": ids]
@@ -126,10 +126,10 @@ extension EventTagRemoteRepositoryImple {
     }
     
     private func loadTagsAndReplaceCache(
-        startWithCached cacheOperation: @Sendable @escaping () async throws -> [EventTag]?,
-        thenFromRemote remoteOperation: @Sendable @escaping () async throws -> [EventTag]?
-    ) -> AnyPublisher<[EventTag], any Error> {
-        return AnyPublisher<[EventTag]?, any Error>.create { subscriber in
+        startWithCached cacheOperation: @Sendable @escaping () async throws -> [CustomEventTag]?,
+        thenFromRemote remoteOperation: @Sendable @escaping () async throws -> [CustomEventTag]?
+    ) -> AnyPublisher<[CustomEventTag], any Error> {
+        return AnyPublisher<[CustomEventTag]?, any Error>.create { subscriber in
             let task = Task { [weak self] in
                 let cached = try? await cacheOperation()
                 if let cached {
@@ -151,8 +151,8 @@ extension EventTagRemoteRepositoryImple {
     }
     
     private func replaceCached(
-        _ cached: [EventTag]?,
-        _ refreshed: [EventTag]?
+        _ cached: [CustomEventTag]?,
+        _ refreshed: [CustomEventTag]?
     ) async {
         if let cached {
             try? await self.cacheStorage.deleteTags(cached.map { $0.uuid })
@@ -170,13 +170,13 @@ extension EventTagRemoteRepositoryImple {
     
     private var offIds: String { "off_eventtagIds_on_calendar" }
     
-    public func loadOffTags() -> Set<AllEventTagId> {
+    public func loadOffTags() -> Set<EventTagId> {
         let idStringValues: [String]? = self.environmentStorage.load(self.offIds)
-        let ids = idStringValues?.map { AllEventTagId($0) }
+        let ids = idStringValues?.compactMap { EventTagId($0) }
         return (ids ?? []) |> Set.init
     }
     
-    public func toggleTagIsOn(_ tagId: AllEventTagId) -> Set<AllEventTagId> {
+    public func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId> {
         let oldOffIds = self.loadOffTags()
         let newIds = oldOffIds |> elem(tagId) .~ !oldOffIds.contains(tagId)
         let newIdStringValues = newIds.map { $0.stringValue }

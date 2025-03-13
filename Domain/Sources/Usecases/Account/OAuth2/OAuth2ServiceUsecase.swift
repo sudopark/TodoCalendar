@@ -11,8 +11,10 @@ import UIKit
 
 public protocol OAuth2ServiceUsecase: Sendable {
     
+    associatedtype CredentialType: OAuth2Credential
+    
     @MainActor
-    func requestAuthentication() async throws -> any OAuth2Credential
+    func requestAuthentication() async throws -> CredentialType
     
     func handle(open url: URL) -> Bool
 }
@@ -37,8 +39,9 @@ public final class OAuth2ServiceUsecaseProviderImple: OAuth2ServiceUsecaseProvid
     ) -> (any OAuth2ServiceUsecase)? {
         
         switch provider {
-        case is GoogleOAuth2ServiceProvider:
+        case let google as GoogleOAuth2ServiceProvider:
             return GoogleOAuth2ServiceUsecaseImple(
+                additionalScope: google.scopes,
                 topViewControllerFinding: self.topViewControllerFinding
             )
             

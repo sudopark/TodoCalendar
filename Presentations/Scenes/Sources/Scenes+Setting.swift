@@ -12,14 +12,14 @@ import Domain
 // MARK: - EventTagDetailScene Interactable & Listenable
 
 public struct OriginalTagInfo: Sendable {
-    public let id: AllEventTagId
+    public let id: EventTagId
     public let name: String
-    public let color: EventTagColor
+    public let colorHex: String
     
-    public init(id: AllEventTagId, name: String, color: EventTagColor) {
+    public init(id: EventTagId, name: String, colorHex: String) {
         self.id = id
         self.name = name
-        self.color = color
+        self.colorHex = colorHex
     }
 }
 
@@ -27,9 +27,9 @@ public protocol EventTagDetailSceneInteractor: AnyObject { }
 //
 public protocol EventTagDetailSceneListener: AnyObject, Sendable {
     
-    func eventTag(deleted tagId: String)
-    func eventTag(created newTag: EventTag)
-    func eventTag(updated newTag: EventTag)
+    func eventTag(deleted tagId: EventTagId)
+    func eventTag(created newTag: any EventTag)
+    func eventTag(updated newTag: any EventTag)
 }
 
 // MARK: - EventTagDetailScene

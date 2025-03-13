@@ -159,7 +159,7 @@ struct WeekEventsView: View {
         .asAnyView()
     }
     
-    private func eventRowView(_ lines: [WeekEventLineModel], _ dayWidth: CGFloat) -> some View {
+    private func eventRowView(_ lines: [EventOnWeek], _ dayWidth: CGFloat) -> some View {
         return ZStack(alignment: .leading) {
             ForEach(0..<lines.count, id: \.self) {
                 eventLineView(lines[$0], dayWidth)
@@ -168,12 +168,12 @@ struct WeekEventsView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    private func eventLineView(_ line: WeekEventLineModel, _ dayWidth: CGFloat) -> some View {
-        let offsetX = CGFloat(line.eventOnWeek.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
-        let width = CGFloat(line.eventOnWeek.daysSequence.count) * dayWidth - Metric.eventInterspacing
-        let lineColor = colorSet.tagColor(line.lineColor, model.defaultTagColorSetting).asColor
+    private func eventLineView(_ line: EventOnWeek, _ dayWidth: CGFloat) -> some View {
+        let offsetX = CGFloat(line.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
+        let width = CGFloat(line.daysSequence.count) * dayWidth - Metric.eventInterspacing
+        let lineColor = model.tagColor(line.eventTagId)
         let background: some View = {
-            if line.eventOnWeek.hasPeriod {
+            if line.hasPeriod {
                 return RoundedRectangle(cornerRadius: 2).fill(
                     lineColor.opacity(0.5)
                 )
@@ -188,7 +188,7 @@ struct WeekEventsView: View {
                  .frame(width: 2, height: 8)
                  .padding(.leading, 1)
              
-             Text(line.eventOnWeek.name)
+             Text(line.name)
                 .font(.system(size: 8))
                 .minimumScaleFactor(0.5)
                 .foregroundColor(colorSet.eventText.asColor)
@@ -227,12 +227,22 @@ extension ColorSet {
         default: return self.weekDayText
         }
     }
+}
+
+private extension WeekEventsViewModel {
     
-    func tagColor(_ tagColor: EventTagColor, _ defaultSetting: DefaultEventTagColorSetting) -> UIColor {
-        switch tagColor {
-        case .holiday: return UIColor.from(hex: defaultSetting.holiday) ?? .clear
-        case .default: return UIColor.from(hex: defaultSetting.default) ?? .clear
-        case .custom(let hex): return UIColor.from(hex: hex) ?? .clear
+    func tagColor(_ id: EventTagId) -> Color {
+        switch id {
+        case .default:
+            return UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear
+        case .holiday:
+            return UIColor.from(hex: self.defaultTagColorSetting.holiday)?.asColor ?? .clear
+        case .custom(let id):
+            return self.tagMap[id]
+                .flatMap { UIColor.from(hex: $0.colorHex) }?.asColor ?? self.tagColor(.default)
+        case .externalCalendar:
+            // TODO: 
+            return .clear
         }
     }
 }

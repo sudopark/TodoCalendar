@@ -115,6 +115,19 @@ extension CalendarPaperViewModelImpleTests {
         // then
         XCTAssertEqual(self.spyMonthInteractor.didClearDaySelection, true)
     }
+    
+    func testViewModel_selectDay() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.selectDay(.init(2023, 01, 01))
+        
+        // then
+        XCTAssertEqual(
+            self.spyMonthInteractor.didSelectDay, .init(2023, 01, 01)
+        )
+    }
 }
 
 
@@ -133,6 +146,11 @@ extension CalendarPaperViewModelImpleTests {
         var didClearDaySelection: Bool?
         func clearDaySelection() {
             self.didClearDaySelection = true
+        }
+        
+        var didSelectDay: CalendarDay?
+        func selectDay(_ day: CalendarDay) {
+            self.didSelectDay = day
         }
     }
     

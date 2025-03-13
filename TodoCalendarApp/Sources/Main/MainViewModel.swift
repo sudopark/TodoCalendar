@@ -22,6 +22,11 @@ enum TemporaryUserDataMigrationStatus: Equatable {
     case migrating
 }
 
+public struct CurrentMonth: Equatable {
+    let monthText: String
+    var yearText: String?
+}
+
 protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
 
     // interactor
@@ -30,11 +35,13 @@ protocol MainViewModel: AnyObject, Sendable, MainSceneInteractor {
     func handleMigration()
     func moveToEventTypeFilterSetting()
     func moveToSetting()
+    func jumpDate()
     
     // presenter
-    var currentMonth: AnyPublisher<String, Never> { get }
+    var currentMonth: AnyPublisher<CurrentMonth, Never> { get }
     var isShowReturnToToday: AnyPublisher<Bool, Never> { get }
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> { get }
+    var isLoadingCalendarEvents: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -45,23 +52,28 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let uiSettingUsecase: any UISettingUsecase
     private let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     private let eventNotificationUsecase: any EventNotificationUsecase
+    private let eventTagUsecase: any EventTagUsecase
+    private let eventNotifyService: SharedEventNotifyService
     var router: (any MainRouting)?
     
     init(
         uiSettingUsecase: any UISettingUsecase,
         temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase,
-        eventNotificationUsecase: any EventNotificationUsecase
+        eventNotificationUsecase: any EventNotificationUsecase,
+        eventTagUsecase: any EventTagUsecase,
+        eventNotifyService: SharedEventNotifyService
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
         self.eventNotificationUsecase = eventNotificationUsecase
+        self.eventTagUsecase = eventTagUsecase
+        self.eventNotifyService = eventNotifyService
         
         self.internalBinding()
     }
     
-    private typealias FocusMonthAndIsCurrentDay = (CalendarMonth, Bool)
     private struct Subject {
-        let focusedMonthInfo = CurrentValueSubject<FocusMonthAndIsCurrentDay?, Never>(nil)
+        let focusedDayInfo = CurrentValueSubject<SelectDayInfo?, Never>(nil)
         let temporaryUserDataMigrationStatus = CurrentValueSubject<TemporaryUserDataMigrationStatus?, Never>(nil)
     }
     
@@ -113,6 +125,7 @@ extension MainViewModelImple {
         self.temporaryUserDataMigrationUsecase.checkIsNeedMigration()
         
         self.eventNotificationUsecase.runSyncEventNotification()
+        self.bindEventTagColorMap()
     }
     
     private func refreshViewAppearanceSettings() {
@@ -120,6 +133,16 @@ extension MainViewModelImple {
             _ = try await self?.uiSettingUsecase.refreshAppearanceSetting()
         }
         .store(in: &self.cancellables)
+    }
+    
+    private func bindEventTagColorMap() {
+        
+        self.eventTagUsecase.sharedEventTags
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] tags in
+                self?.uiSettingUsecase.applyEventTagColors(Array(tags.values))
+            })
+            .store(in: &self.cancellables)
     }
     
     func returnToToday() {
@@ -150,8 +173,20 @@ extension MainViewModelImple {
         self.router?.routeToSettingScene()
     }
     
-    func calendarScene(focusChangedTo month: CalendarMonth, isCurrentDay: Bool) {
-        self.subject.focusedMonthInfo.send((month, isCurrentDay))
+    func calendarScene(focusChangedTo selected: SelectDayInfo) {
+        self.subject.focusedDayInfo.send(selected)
+    }
+    
+    func jumpDate() {
+        guard let current = self.subject.focusedDayInfo.value else { return }
+        self.router?.showJumpDaySelectDialog(current: current.dayInfo)
+    }
+    
+    func daySelectDialog(didSelect day: SelectDayInfo) {
+        guard let current = self.subject.focusedDayInfo.value,
+              current.dayInfo != day.dayInfo
+        else { return }
+        self.calendarSceneInteractor?.moveDay(day.dayInfo)
     }
 }
 
@@ -160,29 +195,32 @@ extension MainViewModelImple {
 
 extension MainViewModelImple {
     
-    var currentMonth: AnyPublisher<String, Never> {
+    var currentMonth: AnyPublisher<CurrentMonth, Never> {
         
         let formatter = DateFormatter() |> \.dateFormat .~ "date_form.MMM".localized()
         let calednar = Calendar(identifier: .gregorian)
-        let transform: (CalendarMonth) -> String = { month in
-            guard let date = calednar.date(bySetting: .month, value: month.month, of: Date())
+        let transform: (SelectDayInfo?) -> CurrentMonth? = { info in
+            guard let info else { return nil }
+            guard let date = calednar.date(bySetting: .month, value: info.month, of: Date())
             else {
-                return "\(month.month)"
+                return .init(monthText: "\(info.month)")
             }
-            return formatter.string(from: date).uppercased()
+            return .init(
+                monthText: formatter.string(from: date).uppercased(),
+                yearText: info.isCurrentYear ? nil : "\(info.year)"
+            )
         }
         
-        return self.subject.focusedMonthInfo
-            .compactMap { $0?.0 }
-            .map(transform)
+        return self.subject.focusedDayInfo
+            .compactMap(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
     
     var isShowReturnToToday: AnyPublisher<Bool, Never> {
-        return self.subject.focusedMonthInfo
+        return self.subject.focusedDayInfo
             .compactMap { $0 }
-            .map { !$0.1 }
+            .map { !$0.isCurrentDay }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
@@ -190,6 +228,22 @@ extension MainViewModelImple {
     var temporaryUserDataMigrationStatus: AnyPublisher<TemporaryUserDataMigrationStatus?, Never> {
         return self.subject.temporaryUserDataMigrationStatus
             .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var isLoadingCalendarEvents: AnyPublisher<Bool, Never> {
+        let transform: (RefreshingEvent) -> Bool = { event in
+            switch event {
+            case .refreshingTodo(let isLoading): return isLoading
+            case .refreshingSchedule(let isLoading): return isLoading
+            case .refreshForemostEvent(let isLoading): return isLoading
+            case .refreshingCurrentTodo(let isLoading): return isLoading
+            case .refreshingUncompletedTodo(let isLoading): return isLoading
+            }
+        }
+        let refreshingEvent: AnyPublisher<RefreshingEvent, Never> = self.eventNotifyService.event()
+        return refreshingEvent
+            .compactMap(transform)
             .eraseToAnyPublisher()
     }
 }

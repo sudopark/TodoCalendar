@@ -129,6 +129,10 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
         }
     }
     
+    func applyEventTagColors(_ tags: [any EventTag]) {
+        self.appearance.updateEventColorMap(by: tags)
+    }
+    
     @MainActor
     private func changeNavigationBarAppearnace(_ newSet: any ColorSet) {
         
@@ -159,16 +163,19 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     var viewAppearanceStore: ApplicationViewAppearanceStoreImple!
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
+    private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let applicationBase: ApplicationBase
     private var usecaseFactory: (any UsecaseFactory)!
     
     init(
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
+        externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         applicationBase: ApplicationBase
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
+        self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.applicationBase = applicationBase
     }
     
@@ -186,10 +193,6 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     
     func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
         // TODO: 
-    }
-    
-    func showConfirm(dialog info: ConfirmDialogInfo) {
-        // ignore
     }
     
     func openSafari(_ path: String) {
@@ -231,6 +234,16 @@ extension ApplicationRootRouter {
         }
     }
     
+    func showConfirm(dialog info: ConfirmDialogInfo) {
+        Task { @MainActor in
+            guard let topViewController = self.window.rootViewController?.topPresentedViewController()
+            else { return }
+            
+            let alertController = info.asAlertViewController()
+            topViewController.present(alertController, animated: true)
+        }
+    }
+    
     private func changeUsecaseFactroy(
         by auth: Auth?
     ) {
@@ -239,6 +252,7 @@ extension ApplicationRootRouter {
                 userId: auth.uid,
                 authUsecase: self.authUsecase,
                 accountUescase: self.accountUsecase,
+                externalCalenarIntegrationUsecase: self.externalCalenarIntegrationUsecase,
                 viewAppearanceStore: self.viewAppearanceStore,
                 temporaryUserDataFilePath: AppEnvironment.dbFilePath(for: nil),
                 applicationBase: self.applicationBase
@@ -247,6 +261,7 @@ extension ApplicationRootRouter {
             self.usecaseFactory = NonLoginUsecaseFactoryImple(
                 authUsecase: self.authUsecase,
                 accountUescase: self.accountUsecase,
+                externalCalenarIntegrationUsecase: self.externalCalenarIntegrationUsecase,
                 viewAppearanceStore: self.viewAppearanceStore,
                 applicationBase: applicationBase
             )
@@ -287,6 +302,7 @@ extension ApplicationRootRouter {
     private func settingSceneBuilder() -> any SettingSceneBuiler {
         return SettingSceneBuilderImple(
             appId: AppEnvironment.appId,
+            supportExternalCalendarServices: AppEnvironment.supportExternalCalendarServices,
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
             memberSceneBuilder: self.memberSceneBuilder()

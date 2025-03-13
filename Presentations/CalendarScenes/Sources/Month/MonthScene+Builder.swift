@@ -41,6 +41,7 @@ protocol MonthSceneInteractor: AnyObject {
     
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
     func clearDaySelection()
+    func selectDay(_ day: CalendarDay)
 }
 
 protocol MonthSceneListener: AnyObject {

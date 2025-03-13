@@ -801,9 +801,7 @@ extension DayEventListViewModelImpleTests {
         
         // then
         let foremostEventIds = foremosts.map { $0?.eventIdentifier }
-        let formostEventTagColor = foremosts.map { $0?.tagColor }
         XCTAssertEqual(foremostEventIds, [nil, "current-todo-1", nil, "schedule-1"])
-        XCTAssertEqual(formostEventTagColor, [nil, .default, nil, .default])
         XCTAssertEqual(foremosts.map { $0?.isForemost }, [nil, true, nil, true])
     }
 }

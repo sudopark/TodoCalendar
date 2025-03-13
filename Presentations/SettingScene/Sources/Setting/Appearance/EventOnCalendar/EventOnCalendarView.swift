@@ -75,7 +75,7 @@ struct EventOnCalendarViewPreviewView: View {
                     .foregroundStyle(appearance.colorSet.weekDayText.asColor)
                 HStack(spacing: 2) {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(EventTagColor.holiday.colorForEventOnCalendar(appearance).asColor)
+                        .fill(appearance.colorOnCalendar(.holiday).asColor)
                         .frame(width: 3, height: 12)
                         .padding(.leading, 1)
                     
@@ -87,12 +87,12 @@ struct EventOnCalendarViewPreviewView: View {
                 .frame(width: 52, alignment: .leading)
                 .background(
                     RoundedRectangle(cornerRadius: 2)
-                        .fill(EventTagColor.holiday.colorForEventOnCalendar(appearance).asColor)
+                        .fill(appearance.colorOnCalendar(.holiday).asColor)
                 )
                 
                 HStack(spacing: 2) {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(EventTagColor.default.colorForEventOnCalendar(appearance).asColor)
+                        .fill(appearance.colorOnCalendar(.default).asColor)
                         .frame(width: 3, height: 12)
                         .padding(.leading, 1)
                     

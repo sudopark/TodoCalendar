@@ -33,7 +33,7 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
     }
     
     private func makeUsecase(
-        withOffTags: [AllEventTagId] = [],
+        withOffTags: [EventTagId] = [],
         hasForemost: Bool = true
     ) -> CalendarEventFetchUsecaseImple {
         

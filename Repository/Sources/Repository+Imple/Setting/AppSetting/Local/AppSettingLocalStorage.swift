@@ -194,9 +194,10 @@ extension AppSettingLocalStorage {
         let defaultTagColor: String? = self.environmentStorage.load(
             defaultTagColorKey |> self.keyWithUserId(userId)
         )
+        let defaultSetting = DefaultEventTagColorSetting.default
         return DefaultEventTagColorSetting(
-            holiday: holidayTagColor ?? "#D6236A",
-            default: defaultTagColor ?? "#088CDA"
+            holiday: holidayTagColor ?? defaultSetting.holiday,
+            default: defaultTagColor ?? defaultSetting.default
         )
     }
     
@@ -222,11 +223,11 @@ extension AppSettingLocalStorage {
     
     func loadEventSetting(for userId: String?) -> EventSettings {
         let tagIdRaw: String? = self.environmentStorage.load(defaultNewEventTagId)
-        let tagId: AllEventTagId = tagIdRaw.map { value in
+        let tagId: EventTagId = tagIdRaw.map { value in
             switch value {
-            case "holiday": return AllEventTagId.holiday
-            case "default": return AllEventTagId.default
-            default: return AllEventTagId.custom(value)
+            case "holiday": return EventTagId.holiday
+            case "default": return EventTagId.default
+            default: return EventTagId.custom(value)
             }
         } ?? .default
         
@@ -253,13 +254,14 @@ extension AppSettingLocalStorage {
 }
 
 
-private extension AllEventTagId {
+private extension EventTagId {
     
     var rawValue: String {
         switch self {
         case .holiday: return "holiday"
         case .default: return "default"
         case .custom(let value): return value
+        case .externalCalendar(let serviceId, let id): return "external::\(serviceId)::\(id)"
         }
     }
 }

@@ -75,24 +75,36 @@ final class AppExtensionBase {
         return environment
     }()
     
+    var remoteSession: Session = {
+        let configure = URLSessionConfiguration.af.default
+        configure.timeoutIntervalForRequest = AppEnvironment.apiDefaultTimeoutSeconds
+        return Session(
+            configuration: configure,
+            serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility)
+        )
+    }()
+    
     lazy var remoteAPI: RemoteAPIImple = {
         let environment = self.remoteEnvironment
         let authStore = NeverRemoveAuthStorage(storage: self.authStore)
-        let authenticator = OAuthAutenticator(
-            authStore: authStore,
-            remoteEnvironment: environment,
+        let authenticator = CalendarAPIAutenticator(
+            credentialStore: authStore,
             firebaseAuthService: self.firebaseAuthService
         )
-        return RemoteAPIImple(
-            environment: environment,
+        let interceptor = AuthenticationInterceptorProxy(
             authenticator: authenticator
+        )
+        return RemoteAPIImple(
+            session: self.remoteSession,
+            environment: environment,
+            interceptor: interceptor
         )
     }()
 }
 
 // MARK: - NeverRemoveAuthStorage
 
-struct NeverRemoveAuthStorage: AuthStore  {
+struct NeverRemoveAuthStorage: AuthStore, APICredentialStore  {
     
     private let storage: AuthStoreImple
     init(storage: AuthStoreImple) {
@@ -103,12 +115,28 @@ struct NeverRemoveAuthStorage: AuthStore  {
         return self.storage.loadCurrentAuth()
     }
     
-    func updateAuth(_ auth: Domain.Auth) {
-        self.storage.updateAuth(auth)
+    func loadCredential() -> APICredential? {
+        return self.loadCurrentAuth().map { .init(auth: $0) }
+    }
+    
+    func saveCredential(_ credential: APICredential) {
+        self.updateCredential(credential)
+    }
+    
+    func saveAuth(_ auth: Domain.Auth) {
+        self.storage.saveAuth(auth)
     }
     
     func removeAuth() {
         // not remove auth
+    }
+    
+    func updateCredential(_ credential: APICredential) {
+        self.storage.updateCredential(credential)
+    }
+    
+    func removeCredential() {
+        // not remove credential
     }
 }
 

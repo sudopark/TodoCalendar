@@ -528,7 +528,7 @@ extension EventDetailInputViewModelTests {
         let tags = self.waitOutputs(expect, for: viewModel.selectedTag) {
             self.prepareViewModelWithOldData(viewModel)
             viewModel.selectEventTag()
-            viewModel.selectEventTag(didSelected: .init(.holiday, "some", .holiday))
+            viewModel.selectEventTag(didSelected: .init(.holiday, "some", "holiday"))
         }
         
         // then
@@ -701,7 +701,9 @@ extension EventDetailInputViewModelTests {
             .custom("some")
         )
         viewModel.selectEventTag()
-        viewModel.selectEventTag(didSelected: .defaultTag)
+        viewModel.selectEventTag(
+            didSelected: SelectedTag(DefaultEventTag.default("default"))
+        )
         XCTAssertEqual(self.spyListener.didUpdateBasics.last?.eventTagId, .default)
         
         // enter url and memo
@@ -809,7 +811,7 @@ private class SpyRouter: BaseSpyRouter, EventDetailInputRouting, @unchecked Send
     
     var didRouteToSelectEventTag: Bool?
     func routeToEventTagSelect(
-        currentSelectedTagId: AllEventTagId,
+        currentSelectedTagId: EventTagId,
         listener: (any SelectEventTagSceneListener)?
     ) {
         self.didRouteToSelectEventTag = true

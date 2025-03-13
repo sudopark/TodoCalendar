@@ -42,6 +42,8 @@ final class EventSettingViewController: UIHostingController<EventSettingContaine
         eventHandlers.selectEventNotificationTime = { viewModel.selectEventNotificationTimeOption(forAllDay: false) }
         eventHandlers.selectAllDayEventNotificationTime = { viewModel.selectEventNotificationTimeOption(forAllDay: true) }
         eventHandlers.selectPeriod = viewModel.selectPeriod(_:)
+        eventHandlers.connectExternalCalendar = viewModel.connectExternalCalendar(_:)
+        eventHandlers.disconnectExternalCalendar = viewModel.disconnectExternalCalendar(_:)
         
         let containerView = EventSettingContainerView(
             viewAppearance: viewAppearance,

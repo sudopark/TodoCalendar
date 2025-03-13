@@ -22,7 +22,7 @@ final class EventDetailViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
-    @Published var selectedTag: SelectedTag = .defaultTag
+    @Published var selectedTag: SelectedTag?
     @Published var enterName: String = ""
     @Published var eventDetailTypeModel: EventDetailTypeModel?
     @Published var isSaving: Bool = false
@@ -269,7 +269,8 @@ struct EventDetailView: View {
     fileprivate var showForemostEventGuide: () -> Void = { }
 
     private var selectedTagColor: Color {
-        return self.state.selectedTag.color.color(with: self.appearance).asColor
+        guard let tag = self.state.selectedTag else { return .clear }
+        return self.appearance.color(tag.tagId).asColor
     }
     
     var body: some View {
@@ -749,7 +750,7 @@ struct EventDetailView: View {
                     .frame(width: 4, height: 4)
                     .foregroundStyle(self.selectedTagColor)
                 
-                Text(self.state.selectedTag.name)
+                Text(self.state.selectedTag?.name ?? "")
                     .font(self.appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
             }
@@ -1010,7 +1011,7 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = EventDetailViewState()
         state.isForemost = true
-        state.selectedTag = .defaultTag
+        state.selectedTag = .init(.default, "default", "#ff00ff")
         state.selectedTime = .period(
             .init(Date().timeIntervalSince1970, .current),
             .init(Date().addingTimeInterval(+10).timeIntervalSince1970, .current)

@@ -18,7 +18,7 @@ public struct ScheduleEvent: Sendable, Equatable {
     public var name: String
     public var time: EventTime
     
-    public var eventTagId: AllEventTagId?
+    public var eventTagId: EventTagId?
     
     public var repeating: EventRepeating?
     public var showTurn: Bool = false
@@ -79,7 +79,7 @@ public struct ScheduleMakeParams: Sendable {
     
     public var name: String?
     public var time: EventTime?
-    public var eventTagId: AllEventTagId?
+    public var eventTagId: EventTagId?
     public var repeating: EventRepeating?
     public var showTurn: Bool?
     public var notificationOptions: [EventNotificationTimeOption]?
@@ -112,7 +112,7 @@ public struct SchedulePutParams: Sendable, Equatable {
     
     public var name: String?
     public var time: EventTime?
-    public var eventTagId: AllEventTagId?
+    public var eventTagId: EventTagId?
     public var repeating: EventRepeating?
     public var repeatingUpdateScope: RepeatingUpdateScope?
     public var showTurn: Bool?

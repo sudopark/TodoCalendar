@@ -112,39 +112,26 @@ public struct WeekRowModel: Equatable {
     }
 }
 
-public struct WeekEventLineModel: Equatable {
-    
-    public var eventId: String { self.eventOnWeek.eventId }
-    public let eventOnWeek: EventOnWeek
-    public let lineColor: EventTagColor
-    
-    public init(_ eventOnWeek: EventOnWeek, _ tag: EventTag?) {
-        self.eventOnWeek = eventOnWeek
-        
-        switch eventOnWeek.eventTagId {
-        case .holiday:
-            self.lineColor = .holiday
-        default:
-            self.lineColor = tag.map { .custom(hex: $0.colorHex) } ?? .default
-        }
-    }
-}
-
 public struct EventMoreModel: Equatable {
     public let daySequence: Int
     public let moreCount: Int
+    
+    public init(daySequence: Int, moreCount: Int) {
+        self.daySequence = daySequence
+        self.moreCount = moreCount
+    }
 }
 
 public struct WeekEventStackViewModel: Equatable {
-    public let linesStack: [[WeekEventLineModel]]
+    public let linesStack: [[EventOnWeek]]
     public var shouldShowEventLinesDays: Set<Int> = []
     
-    public init(linesStack: [[WeekEventLineModel]], shouldMarkEventDays: Bool) {
+    public init(linesStack: [[EventOnWeek]], shouldMarkEventDays: Bool) {
         self.linesStack = linesStack
         guard shouldMarkEventDays else { return }
         self.shouldShowEventLinesDays = linesStack.flatMap { $0 }
-            .filter { !($0.eventOnWeek.event is HolidayCalendarEvent) }
-            .reduce(Set<Int>()) { acc, line in acc.union(line.eventOnWeek.overlapDays) }
+            .filter { !($0.event is HolidayCalendarEvent) }
+            .reduce(Set<Int>()) { acc, line in acc.union(line.overlapDays) }
     }
 }
 
@@ -154,9 +141,9 @@ extension WeekEventStackViewModel {
     public func eventMores(with maxSize: Int) -> [EventMoreModel] {
         guard maxSize > 0, maxSize < self.linesStack.count else { return [] }
         let willHiddenRows = self.linesStack[maxSize...]
-        let willHiddenEventsPerDaySeq = willHiddenRows.reduce(into: [Int: [WeekEventLineModel]]()) { acc, lines in
+        let willHiddenEventsPerDaySeq = willHiddenRows.reduce(into: [Int: [EventOnWeek]]()) { acc, lines in
             lines.forEach { line in
-                line.eventOnWeek.daysSequence.forEach {
+                line.daysSequence.forEach {
                     acc[$0] = (acc[$0] ?? []) + [line]
                 }
             }
@@ -228,7 +215,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     private struct Subject: @unchecked Sendable {
         let currentMonthComponent = CurrentValueSubject<CalendarComponent?, Never>(nil)
         let currentMonthInfo = CurrentValueSubject<CurrentMonthInfo?, Never>(nil)
-        let userSelectedDay = CurrentValueSubject<DayCellViewModel?, Never>(nil)
+        let userSelectedDay = CurrentValueSubject<CalendarDay?, Never>(nil)
         let eventStackMap = CurrentValueSubject<[String: WeekEventStack], Never>([:])
     }
     private let subject = Subject()
@@ -320,11 +307,12 @@ extension MonthViewModelImple {
         guard shouldChange else { return }
         
         self.currentMonthComponentsBinding?.cancel()
+        
+        self.subject.userSelectedDay.send(nil)
         self.currentMonthComponentsBinding = self.calendarUsecase
             .components(for: newMonth.month, of: newMonth.year)
             .sink(receiveValue: { [weak self] component in
                 self?.subject.currentMonthComponent.send(component)
-                self?.subject.userSelectedDay.send(nil)
             })
     }
     
@@ -333,11 +321,17 @@ extension MonthViewModelImple {
     }
     
     func select(_ day: DayCellViewModel) {
-        self.subject.userSelectedDay.send(day)
+        self.subject.userSelectedDay.send(
+            .init(day.year, day.month, day.day)
+        )
     }
     
     func clearDaySelection() {
         self.subject.userSelectedDay.send(nil)
+    }
+    
+    func selectDay(_ day: CalendarDay) {
+        self.subject.userSelectedDay.send(day)
     }
 }
 
@@ -392,11 +386,11 @@ extension MonthViewModelImple {
     }
     
     private var currentSelectedDay: AnyPublisher<CurrentSelectDayModel, Never> {
-        let transform: (DayCellViewModel?, CalendarComponent.Day, CurrentMonthInfo) -> CurrentSelectDayModel?
+        let transform: (CalendarDay?, CalendarComponent.Day, CurrentMonthInfo) -> CurrentSelectDayModel?
         transform = { selected, today, thisMonth -> CurrentSelectDayModel? in
             switch (selected, today, thisMonth) {
             case (.some(let day), _, let month):
-                return .init(dayCellViewModel: day, month.component, month.timeZone)
+                return .init(day: day, month.component, month.timeZone)
             case (_, let t, let m)
                 where t.year == m.component.year && t.month == m.component.month:
                 return .init(today: t, m.component, m.timeZone)
@@ -428,7 +422,7 @@ extension MonthViewModelImple {
     }
     
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never> {
-        let transform: (CalendarAppearanceSettings, [[WeekEventLineModel]]) -> WeekEventStackViewModel
+        let transform: (CalendarAppearanceSettings, [[EventOnWeek]]) -> WeekEventStackViewModel
         transform = { uiSetting, lines in
             return .init(linesStack: lines, shouldMarkEventDays: uiSetting.showUnderLineOnEventDay)
         }
@@ -441,34 +435,10 @@ extension MonthViewModelImple {
         .eraseToAnyPublisher()
     }
     
-    private func eventStackElements(at weekId: String) -> AnyPublisher<[[WeekEventLineModel]], Never> {
-        typealias StackAndTagMap = (WeekEventStack, [String: EventTag])
-        let asStackAndTagMap: (WeekEventStack) -> AnyPublisher<StackAndTagMap, Never>
-        asStackAndTagMap = { [weak self] stack in
-            guard let self = self else { return Empty().eraseToAnyPublisher() }
-            let tagIds = stack.eventStacks.flatMap { $0.compactMap { $0.eventTagId.customTagId } }
-            guard !tagIds.isEmpty
-            else {
-                return Just((stack, [:])).eraseToAnyPublisher()
-            }
-
-            return self.eventTagUsecase.eventTags(tagIds)
-                .map { (stack, $0) }
-                .eraseToAnyPublisher()
-        }
-        let asStakModel: (StackAndTagMap) -> [[WeekEventLineModel]] = { pair in
-            return pair.0.eventStacks.map { events -> [WeekEventLineModel] in
-                return events.map { event -> WeekEventLineModel in
-                    let tag = event.eventTagId.customTagId.flatMap { pair.1[$0] }
-                    return WeekEventLineModel(event, tag)
-                }
-            }
-        }
+    private func eventStackElements(at weekId: String) -> AnyPublisher<[[EventOnWeek]], Never> {
         return self.subject.eventStackMap
             .compactMap { $0[weekId] }
-            .map(asStackAndTagMap)
-            .switchToLatest()
-            .map(asStakModel)
+            .map{ $0.eventStacks }
             .eraseToAnyPublisher()
     }
 }
@@ -501,9 +471,9 @@ private extension WeekEventStackViewModel {
     
     func events(in day: Int) -> [any CalendarEvent] {
         return self.linesStack.reduce(into: [any CalendarEvent]()) { acc, lines in
-            guard let eventLineOnDay = lines.first (where: { $0.eventOnWeek.overlapDays.contains(day) })
+            guard let eventLineOnDay = lines.first (where: { $0.overlapDays.contains(day) })
             else { return }
-            acc += [eventLineOnDay.eventOnWeek.event]
+            acc += [eventLineOnDay.event]
         }
     }
 }
@@ -511,14 +481,14 @@ private extension WeekEventStackViewModel {
 private extension CurrentSelectDayModel {
     
     init?(
-        dayCellViewModel: DayCellViewModel,
+        day: CalendarDay,
         _ component: CalendarComponent,
         _ timeZone: TimeZone
     ) {
         self.init(
-            dayCellViewModel.year, dayCellViewModel.month, dayCellViewModel.day, component, timeZone
+            day.year, day.month, day.day, component, timeZone
         )
-        self.holiday = component.holiday(dayCellViewModel.month, dayCellViewModel.day)
+        self.holiday = component.holiday(day.month, day.day)
     }
     
     init?(

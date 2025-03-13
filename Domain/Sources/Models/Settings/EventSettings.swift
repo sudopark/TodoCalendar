@@ -27,7 +27,7 @@ public struct EventSettings: Sendable, Equatable {
         case allDay
     }
     
-    public var defaultNewEventTagId: AllEventTagId = .default
+    public var defaultNewEventTagId: EventTagId = .default
     public var defaultNewEventPeriod: DefaultNewEventPeriod = .minute0
     
     public init() { }
@@ -45,7 +45,7 @@ public struct EventSettings: Sendable, Equatable {
 
 public struct EditEventSettingsParams: Sendable, Equatable {
     
-    public var defaultNewEventTagId: AllEventTagId?
+    public var defaultNewEventTagId: EventTagId?
     public var defaultNewEventPeriod: EventSettings.DefaultNewEventPeriod?
     
     public init() { }

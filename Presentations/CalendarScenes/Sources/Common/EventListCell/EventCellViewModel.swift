@@ -150,17 +150,14 @@ public struct EventListMoreActionModel: Sendable, Equatable {
 public protocol EventCellViewModel: Sendable {
     
     var eventIdentifier: String { get }
-    var tagId: AllEventTagId { get }
+    var tagId: EventTagId { get }
     var name: String { get }
     var periodText: EventPeriodText? { get set }
     var periodDescription: String? { get set }
-    var tagColor: EventTagColor? { get set }
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
     var customCompareKey: String { get }
     var moreActions: EventListMoreActionModel? { get }
-    
-    mutating func applyTagColor(_ tag: EventTag?)
 }
 
 extension EventCellViewModel {
@@ -169,22 +166,10 @@ extension EventCellViewModel {
         let baseComponents: [String?] = [
             self.eventIdentifier, "\(self.tagId.hashValue)", self.name,
             self.periodText?.customCompareKey, self.periodDescription,
-            self.tagColor?.compareKey,
             "\(self.isForemost)"
         ]
         let components = baseComponents + additionalComponents
         return components.map { $0 ?? "nil" }.joined(separator: ",")
-    }
-    
-    public mutating func applyTagColor(_ tag: EventTag?) {
-        switch self.tagId {
-        case .default:
-            self.tagColor = .default
-        case .custom:
-            self.tagColor = tag.map { EventTagColor.custom(hex: $0.colorHex) } ?? .default
-        case .holiday:
-            self.tagColor = .holiday
-        }
     }
 }
 
@@ -193,11 +178,10 @@ extension EventCellViewModel {
 public struct TodoEventCellViewModel: EventCellViewModel {
     
     public let eventIdentifier: String
-    public var tagId: AllEventTagId
+    public var tagId: EventTagId
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
-    public var tagColor: EventTagColor?
     public var customCompareKey: String { self.makeCustomCompareKey(["todo"]) }
     public var eventTimeRawValue: EventTime?
     public var isRepeating: Bool = false
@@ -246,13 +230,12 @@ public struct TodoEventCellViewModel: EventCellViewModel {
 struct PendingTodoEventCellViewModel: EventCellViewModel {
     
     let eventIdentifier: String
-    var tagId: AllEventTagId
+    var tagId: EventTagId
     let name: String
     var periodText: EventPeriodText? = .singleText(
         .init(text: R.String.calendarEventTimeTodo)
     )
     var periodDescription: String?
-    var tagColor: EventTagColor?
     var customCompareKey: String {
         self.makeCustomCompareKey(["pending-todo"])
     }
@@ -276,11 +259,10 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public let eventIdWithoutTurn: String
     public let eventIdentifier: String
     public let turn: Int?
-    public var tagId: AllEventTagId
+    public var tagId: EventTagId
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
-    public var tagColor: EventTagColor?
     public let isRepeating: Bool
     public let isForemost: Bool
     public var customCompareKey: String {
@@ -338,11 +320,10 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
 public struct HolidayEventCellViewModel: EventCellViewModel {
     
     public let eventIdentifier: String
-    public var tagId: AllEventTagId
+    public var tagId: EventTagId
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
-    public var tagColor: EventTagColor?
     public let isRepeating: Bool = false
     public let isForemost: Bool = false
     public var customCompareKey: String { self.makeCustomCompareKey(["holidays"]) }
@@ -354,11 +335,6 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
             .init(text: R.String.calendarEventTimeAllday)
         )
         self.tagId = .holiday
-        self.tagColor = .holiday
-    }
-    
-    public mutating func applyTagColor(_ tag: EventTag?) {
-        self.tagColor = .holiday
     }
     
     public var moreActions: EventListMoreActionModel? { nil }
@@ -471,16 +447,5 @@ private extension Range where Bound == TimeInterval {
             && self.upperBound <= eventTimeRange.upperBound
         
         return (isAllDay, startTimeInToday, endTimeInToday)
-    }
-}
-
-private extension EventTagColor {
-    
-    var compareKey: String {
-        switch self {
-        case .default: return "default"
-        case .holiday: return "holiday"
-        case .custom(let hex): return "custom:\(hex)"
-        }
     }
 }

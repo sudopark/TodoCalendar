@@ -128,7 +128,7 @@ struct SystemSizeForemostEventView: View {
         }
         .background(
             HStack(alignment: .center) {
-                tagLineView(event.tagColor)
+                tagLineView()
                 Spacer()
             }
         )
@@ -162,12 +162,12 @@ struct SystemSizeForemostEventView: View {
         }
     }
     
-    private func tagLineView(_ tagColor: EventTagColor?) -> some View {
+    private func tagLineView() -> some View {
         let defColors = EventTagColorSet(model.defaultTagColorSetting)
-        let color = switch tagColor {
+        let color = switch model.eventModel?.tagId {
         case .holiday: defColors.holiday
         case .default: defColors.defaultColor
-        case .custom(let hex): UIColor.from(hex: hex) ?? defColors.defaultColor
+        case .custom: model.tag.flatMap { UIColor.from(hex: $0.colorHex) } ?? defColors.defaultColor
         default: defColors.defaultColor
         }
         

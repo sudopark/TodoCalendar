@@ -36,6 +36,7 @@ public final class AppleOAuth2ServiceProvider: OAuth2ServiceProvider, @unchecked
 
 public struct GoogleOAuth2ServiceProvider: OAuth2ServiceProvider {
     public let identifier: String = "google"
+    public var scopes: [String]?
     public init() { }
 }
 
@@ -65,12 +66,18 @@ public struct GoogleOAuth2Credential: OAuth2Credential {
     
     public let idToken: String
     public let accessToken: String
+    public let refreshToken: String
+    public var accessTokenExpirationDate: Date?
+    public var refreshTokenExpirationDate: Date?
+    public var email: String?
     
     public init(
         idToken: String,
-        accessToken: String
+        accessToken: String,
+        refreshToken: String
     ) {
         self.idToken = idToken
         self.accessToken = accessToken
+        self.refreshToken = refreshToken
     }
 }

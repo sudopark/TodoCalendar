@@ -8,8 +8,11 @@
 import UIKit
 import WidgetKit
 import Combine
+import Prelude
+import Optics
 import Domain
 import Repository
+import Scenes
 import Extensions
 
 
@@ -18,6 +21,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
     private let prepareUsecase: any ApplicationPrepareUsecase
+    private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     private let environmentStorage: any EnvironmentStorage
     var router: ApplicationRootRouter?
     
@@ -27,11 +31,13 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
         prepareUsecase: any ApplicationPrepareUsecase,
+        externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
         environmentStorage: any EnvironmentStorage
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
         self.prepareUsecase = prepareUsecase
+        self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
         self.environmentStorage = environmentStorage
         
         self.bindAccountStatusChanged()
@@ -42,7 +48,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
 
 // MARK: - handle root routing
 
-extension ApplicationRootViewModelImple: OAuthAutenticatorTokenRefreshListener {
+extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     
     func prepareInitialScene() {
         Task {
@@ -81,13 +87,36 @@ extension ApplicationRootViewModelImple: OAuthAutenticatorTokenRefreshListener {
         }
     }
     
-    func oauthAutenticator(didRefresh auth: Auth) {
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?, didRefresh credential: APICredential
+    ) {
         // do nothing
     }
     
-    func oauthAutenticator(didRefreshFailed error: Error) {
-        self.prepareUsecase.prepareSignedOut()
-        self.router?.changeRootSceneAfter(signIn: nil)
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?, didRefreshFailed error: any Error
+    ) {
+        switch authenticator {
+        case is CalendarAPIAutenticator:
+            self.prepareUsecase.prepareSignedOut()
+            self.router?.changeRootSceneAfter(signIn: nil)
+            
+        case is GoogleAPIAuthenticator:
+            // TODO: clear shared google calendar events
+            self.showExternalServiceAccessTokenExpired(
+                "external_service.name::google".localized()
+            )
+            
+        default: break
+        }
+    }
+    
+    private func showExternalServiceAccessTokenExpired(_ serviceName: String) {
+        let message = "external_service.expired::message".localized(with: serviceName)
+        let info = ConfirmDialogInfo()
+            |> \.message .~ message
+            |> \.withCancel .~ false
+        self.router?.showConfirm(dialog: info)
     }
 }
 
@@ -120,6 +149,11 @@ extension ApplicationRootViewModelImple {
 extension ApplicationRootViewModelImple {
     
     func handle(open url: URL) -> Bool {
+        
+        if FeatureFlag.isEnable(.googleCalendar) && self.externalCalendarServiceUsecase.handleAuthenticationResultOrNot(open: url) {
+            return true
+        }
+        
         if self.authUsecase.handleAuthenticationResultOrNot(open: url) {
             return true
         }

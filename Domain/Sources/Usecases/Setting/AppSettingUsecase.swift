@@ -52,6 +52,10 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         return [.systemTheme, .defaultLight, .defaultDark]
     }
     
+    public func applyEventTagColors(_ tags: [any EventTag]) {
+        self.viewAppearanceStore.applyEventTagColors(tags)
+    }
+    
     public func refreshAppearanceSetting() async throws -> AppearanceSettings {
         let setting = try await self.appSettingRepository.refreshAppearanceSetting()
         self.sharedDataStore.put(

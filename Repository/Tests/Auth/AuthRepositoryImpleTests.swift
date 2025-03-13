@@ -52,7 +52,7 @@ extension AuthRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token")
+        let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token", refreshToken: "refresh")
         let result = try? await repository.signIn(credential)
         
         // then
@@ -78,7 +78,7 @@ extension AuthRepositoryImpleTests {
         // when
         var failed: (any Error)?
         do {
-            let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token")
+            let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token", refreshToken: "refresh")
             let _ = try await repository.signIn(credential)
         } catch {
             failed = error
@@ -96,7 +96,7 @@ extension AuthRepositoryImpleTests {
         let authBeforeSignIn = try? await repository.loadLatestSignInAuth()
         let credentialBeforeSignIn = self.stubRemote.credential
         
-        let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token")
+        let credential = GoogleOAuth2Credential(idToken: "some", accessToken: "token", refreshToken: "refresh")
         let _ = try? await repository.signIn(credential)
         
         let authAfterSignIn = try? await repository.loadLatestSignInAuth()
@@ -184,7 +184,15 @@ class StubFirebaseAuthService: FirebaseAuthService {
 }
 
 
-class SpyKeyChainStorage: KeyChainStorage, AuthStore, @unchecked Sendable {
+class SpyKeyChainStorage: KeyChainStorage, AuthStore, APICredentialStore, @unchecked Sendable {
+    
+    func loadCredential() -> APICredential? {
+        nil
+    }
+    
+    func saveCredential(_ credential: APICredential) {
+        
+    }
     
     private var storage: [String: any Codable] = [:]
     
@@ -199,7 +207,7 @@ class SpyKeyChainStorage: KeyChainStorage, AuthStore, @unchecked Sendable {
         return mapper?.auth
     }
     
-    func updateAuth(_ auth: Domain.Auth) {
+    func saveAuth(_ auth: Domain.Auth) {
         let mapper = AuthMapper(auth: auth)
         self.update("current_auth", mapper)
     }
@@ -208,12 +216,26 @@ class SpyKeyChainStorage: KeyChainStorage, AuthStore, @unchecked Sendable {
         self.storage[key] = value as? Codable
     }
     
+    func updateCredential(_ credential: APICredential) {
+        guard let auth = self.loadCurrentAuth() else { return }
+        let newAuth = Auth(
+            uid: auth.uid,
+            accessToken: credential.accessToken,
+            refreshToken: credential.refreshToken
+        )
+        self.saveAuth(newAuth)
+    }
+    
     func remove(_ key: String) {
         self.storage[key] = nil
     }
     
     func removeAuth() {
         self.storage.removeValue(forKey: "current_auth")
+    }
+    
+    func removeCredential() {
+        self.removeAuth()
     }
 }
 

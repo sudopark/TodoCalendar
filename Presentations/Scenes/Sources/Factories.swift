@@ -10,10 +10,11 @@ import Domain
 
 // MARK: - Usecase Factory
 
-public protocol AcountUsecaseFactory {
+public protocol AccountUsecaseFactory {
     
     var authUsecase: any AuthUsecase { get }
     var accountUescase: any AccountUsecase { get }
+    var externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase { get }
 }
 
 public protocol CalendarUsecaseFactory {
@@ -57,4 +58,7 @@ public protocol SupportUsecaseFactory {
     func makeFeedbackUsecase() -> any FeedbackUsecase
 }
 
-public protocol UsecaseFactory: AcountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory { }
+public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory {
+    
+    var eventNotifyService: SharedEventNotifyService { get }
+}

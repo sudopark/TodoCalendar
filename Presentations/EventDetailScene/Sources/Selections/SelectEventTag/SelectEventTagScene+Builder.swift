@@ -16,32 +16,24 @@ import Scenes
 // MARK: - SelectedTag
 
 struct SelectedTag: Equatable {
-    let tagId: AllEventTagId
+    let tagId: EventTagId
     let name: String
-    let color: EventTagColor
+    let colorHex: String
     
     init(
-        _ tagId: AllEventTagId,
+        _ tagId: EventTagId,
         _ name: String,
-        _ color: EventTagColor
+        _ colorHex: String
     ) {
         self.tagId = tagId
         self.name = name
-        self.color = color
+        self.colorHex = colorHex
     }
     
-    init(_ tag: EventTag) {
-        self.tagId = .custom(tag.uuid)
+    init(_ tag: any EventTag) {
+        self.tagId = tag.tagId
         self.name = tag.name
-        self.color = .custom(hex: tag.colorHex)
-    }
-    
-    static var defaultTag: SelectedTag {
-        return .init(.default, R.String.EventTag.Defaults.defaultName, .default)
-    }
-    
-    static var holiday: SelectedTag {
-        return .init(.holiday, R.String.EventTag.Defaults.holidayName, .holiday)
+        self.colorHex = tag.colorHex
     }
 }
 
@@ -67,7 +59,7 @@ protocol SelectEventTagSceneBuiler: AnyObject {
     
     @MainActor
     func makeSelectEventTagScene(
-        startWith initail: AllEventTagId,
+        startWith initail: EventTagId,
         listener: (any SelectEventTagSceneListener)?
     ) -> any SelectEventTagScene
 }

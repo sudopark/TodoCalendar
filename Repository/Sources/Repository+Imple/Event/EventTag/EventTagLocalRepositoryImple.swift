@@ -37,21 +37,21 @@ public final class EventTagLocalRepositoryImple: EventTagRepository {
 
 extension EventTagLocalRepositoryImple {
     
-    public func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag {
+    public func makeNewTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag {
         let sameNameTags = try await self.localStorage.loadTag(match: params.name)
         guard sameNameTags.isEmpty
         else {
             throw RuntimeError(key: "EvnetTag_Name_Duplicated", "event tag name:\(params.name) is already exists")
         }
-        let tag = EventTag(uuid: UUID().uuidString, name: params.name, colorHex: params.colorHex)
+        let tag = CustomEventTag(uuid: UUID().uuidString, name: params.name, colorHex: params.colorHex)
         try await self.localStorage.saveTag(tag)
         return tag
     }
     
     public func editTag(
         _ tagId: String,
-        _ params: EventTagEditParams
-    ) async throws -> EventTag {
+        _ params: CustomEventTagEditParams
+    ) async throws -> CustomEventTag {
         let sameNameOtherTags = try await self.localStorage.loadTag(match: params.name).filter { $0.uuid != tagId }
         guard sameNameOtherTags.isEmpty
         else {
@@ -66,7 +66,7 @@ extension EventTagLocalRepositoryImple {
         self.deleteOfftagId(tagId)
     }
     
-    public func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveEventTagWithEventsResult {
+    public func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult {
         
         try await self.deleteTag(tagId)
         let todoIds = try await self.todoLocalStorage.removeTodosWith(tagId: tagId)
@@ -77,14 +77,14 @@ extension EventTagLocalRepositoryImple {
 
 extension EventTagLocalRepositoryImple {
     
-    public func loadTags(_ ids: [String]) -> AnyPublisher<[EventTag], any Error> {
+    public func loadCustomTags(_ ids: [String]) -> AnyPublisher<[CustomEventTag], any Error> {
         return Publishers.create { [weak self] in
             return try await self?.localStorage.loadTags(in: ids)
         }
         .eraseToAnyPublisher()
     }
     
-    public func loadAllTags() -> AnyPublisher<[EventTag], any Error> {
+    public func loadAllCustomTags() -> AnyPublisher<[CustomEventTag], any Error> {
         return Publishers.create { [weak self] in
             return try await self?.localStorage.loadAllTags()
         }
@@ -93,13 +93,13 @@ extension EventTagLocalRepositoryImple {
     
     private var offIds: String { "off_eventtagIds_on_calendar" }
     
-    public func loadOffTags() -> Set<AllEventTagId> {
+    public func loadOffTags() -> Set<EventTagId> {
         let idStringValues: [String]? = self.environmentStorage.load(self.offIds)
-        let ids = idStringValues?.map { AllEventTagId($0) }
+        let ids = idStringValues?.compactMap { EventTagId($0) }
         return (ids ?? []) |> Set.init
     }
     
-    public func toggleTagIsOn(_ tagId: AllEventTagId) -> Set<AllEventTagId> {
+    public func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId> {
         let oldOffIds = self.loadOffTags()
         let newIds = oldOffIds |> elem(tagId) .~ !oldOffIds.contains(tagId)
         let newIdStringValues = newIds.map { $0.stringValue }
@@ -116,21 +116,29 @@ extension EventTagLocalRepositoryImple {
 }
 
 
-extension AllEventTagId {
+extension EventTagId {
     
     var stringValue: String {
         switch self {
         case .holiday: return "holiday"
         case .default: return "default"
         case .custom(let id): return id
+        case .externalCalendar(let serviceId, let id): return "external::\(serviceId)::\(id)"
         }
     }
     
-    init(_ stringValue: String) {
+    init?(_ stringValue: String) {
         switch stringValue {
         case "holiday": self = .holiday
         case "default": self = .default
-        default: self = .custom(stringValue)
+        default:
+            if stringValue.starts(with: "external:") {
+                let compos = stringValue.components(separatedBy: "::")
+                guard compos.count == 2 else { return nil }
+                self = .externalCalendar(serviceId: compos[1], id: compos[2])
+            } else {
+                self = .custom(stringValue)
+            }
         }
     }
 }

@@ -71,7 +71,7 @@ extension TodoEvent: RowValueType {
             name: try cursor.next().unwrap()
         )
         self.creatTimeStamp = cursor.next()
-        self.eventTagId = cursor.next().map { AllEventTagId($0) }
+        self.eventTagId = cursor.next().flatMap { EventTagId($0) }
         let start: Double? = cursor.next()
         let optionText: String? = cursor.next()
         let end: Double? = cursor.next()

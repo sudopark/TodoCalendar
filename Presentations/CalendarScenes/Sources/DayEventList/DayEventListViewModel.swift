@@ -105,7 +105,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     
     private struct Subject {
         let currentDayAndEventLists = CurrentValueSubject<CurrentDayAndEventLists?, Never>(nil)
-        let tagMaps = CurrentValueSubject<[String: EventTag], Never>([:])
+        let tagMaps = CurrentValueSubject<[String: any EventTag], Never>([:])
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
     }
     
@@ -239,10 +239,7 @@ extension DayEventListViewModelImple {
         )
         .map(asCellViewModel)
 
-        let formostAsArray = foremostModel.map { fm in fm.map { [$0] } ?? [] }.eraseToAnyPublisher()
-        return self.eventTagUsecase
-            .cellWithTagInfo(formostAsArray)
-            .map { $0.first }
+        return foremostModel
             .removeDuplicates(by: { $0?.customCompareKey == $1?.customCompareKey })
             .eraseToAnyPublisher()
     }
@@ -266,9 +263,8 @@ extension DayEventListViewModelImple {
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .compactMap(asCellViewModels)
-        .eraseToAnyPublisher()
         
-        return self.eventTagUsecase.cellWithTagInfo(todoCells)
+        return todoCells
             .filterTagActivated(self.eventTagUsecase) { $0.tagId }
             .map { ts in ts.compactMap { $0 as? TodoEventCellViewModel } }
             .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
@@ -305,8 +301,18 @@ extension DayEventListViewModelImple {
     
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> {
         
-        return self.eventTagUsecase
-            .cellWithTagInfo(self.cellViewModelsFromEvent)
+        let combineEvents: (CurrentAndEvents, [PendingTodoEventCellViewModel]) -> [any EventCellViewModel]
+        combineEvents = { pair, pending in
+            return pair.0 + pending + pair.1
+        }
+        
+        let cells = Publishers.CombineLatest(
+            self.currentAndEventCellViewModels.receive(on: self.cvmCombineScheduler),
+            self.subject.pendingTodoEvents.receive(on: self.cvmCombineScheduler)
+        )
+        .map(combineEvents)
+        
+        return cells
             .filterTagActivated(self.eventTagUsecase) { $0.tagId }
             .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
             .eraseToAnyPublisher()
@@ -374,21 +380,6 @@ extension DayEventListViewModelImple {
             self.foremostEventUsecase.foremostEvent
         )
         .map(transform)
-        .eraseToAnyPublisher()
-    }
-    
-    private var cellViewModelsFromEvent: AnyPublisher<[any EventCellViewModel], Never> {
-        
-        let combineEvents: (CurrentAndEvents, [PendingTodoEventCellViewModel]) -> [any EventCellViewModel]
-        combineEvents = { pair, pending in
-            return pair.0 + pending + pair.1
-        }
-        
-        return Publishers.CombineLatest(
-            self.currentAndEventCellViewModels.receive(on: self.cvmCombineScheduler),
-            self.subject.pendingTodoEvents.receive(on: self.cvmCombineScheduler)
-        )
-        .map(combineEvents)
         .eraseToAnyPublisher()
     }
 }

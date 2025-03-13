@@ -6,12 +6,14 @@
 //
 
 import Foundation
+import Extensions
 
 
-public enum AllEventTagId: Sendable, Hashable {
+public enum EventTagId: Sendable, Hashable {
     case holiday
     case `default`
     case custom(String)
+    case externalCalendar(serviceId: String, id: String)
     
     public var customTagId: String? {
         guard case let .custom(id) = self else { return nil }
@@ -19,8 +21,47 @@ public enum AllEventTagId: Sendable, Hashable {
     }
 }
 
-public struct EventTag: Sendable, Equatable {
+public protocol EventTag: Sendable, Equatable {
     
+    var tagId: EventTagId { get }
+    var name: String { get }
+    var colorHex: String { get }
+}
+
+// MARK: - default event tag
+
+public enum DefaultEventTag: EventTag {
+    case `default`(_ color: String)
+    case holiday(_ color: String)
+    
+    public var tagId: EventTagId {
+        switch self {
+        case .default: return .default
+        case .holiday: return .holiday
+        }
+    }
+    
+    public var name: String {
+        switch self {
+        case .holiday:
+            return "eventTag.defaults.holiday::name".localized()
+        case .default:
+            return "eventTag.defaults.default::name".localized()
+        }
+    }
+    
+    public var colorHex: String {
+        switch self {
+        case .default(let color): return color
+        case .holiday(let color): return color
+        }
+    }
+}
+
+// MARK: - custom event tag
+
+public struct CustomEventTag: EventTag {
+ 
     public let uuid: String
     public var name: String
     public var colorHex: String
@@ -36,10 +77,13 @@ public struct EventTag: Sendable, Equatable {
         self.name = name
         self.colorHex = colorHex
     }
+    
+    public var tagId: EventTagId {
+        return .custom(self.uuid)
+    }
 }
 
-
-public struct EventTagMakeParams {
+public struct CustomEventTagMakeParams {
     public var name: String
     public var colorHex: String
     
@@ -49,22 +93,11 @@ public struct EventTagMakeParams {
     }
 }
 
-public typealias EventTagEditParams = EventTagMakeParams
+public typealias CustomEventTagEditParams = CustomEventTagMakeParams
 
 
-public enum EventTagColor: Equatable, Sendable {
-    case `default`
-    case holiday
-    case custom(hex: String)
-    
-    public var customHex: String? {
-        guard case let .custom(hex) = self else { return nil }
-        return hex
-    }
-}
 
-
-public struct RemoveEventTagWithEventsResult: Sendable {
+public struct RemoveCustomEventTagWithEventsResult: Sendable {
     
     public let todoIds: [String]
     public let scheduleIds: [String]
@@ -72,5 +105,25 @@ public struct RemoveEventTagWithEventsResult: Sendable {
     public init(todoIds: [String], scheduleIds: [String]) {
         self.todoIds = todoIds
         self.scheduleIds = scheduleIds
+    }
+}
+
+
+// MARK: - external calendar
+
+public struct ExternalCalendarEventTag: EventTag {
+    public let tagId: EventTagId
+    public let name: String
+    public let colorHex: String
+    public var foregroundColorHex: String?
+    
+    public init(
+        tagId: EventTagId,
+        name: String,
+        colorHex: String
+    ) {
+        self.tagId = tagId
+        self.name = name
+        self.colorHex = colorHex
     }
 }

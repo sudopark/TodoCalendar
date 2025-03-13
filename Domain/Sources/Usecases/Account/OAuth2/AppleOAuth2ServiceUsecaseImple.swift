@@ -12,6 +12,8 @@ import Extensions
 
 public final class AppleOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unchecked Sendable {
     
+    public typealias CredentialType = AppleOAuth2Credential
+    
     private let preHandleResult: Result<AppleOAuth2ServiceProvider.AppleLoginIDTokenWithMetaData, any Error>?
     init(
         preHandleResult: Result<AppleOAuth2ServiceProvider.AppleLoginIDTokenWithMetaData, any Error>?
@@ -24,7 +26,7 @@ public final class AppleOAuth2ServiceUsecaseImple: OAuth2ServiceUsecase, @unchec
 extension AppleOAuth2ServiceUsecaseImple {
     
     @MainActor
-    public func requestAuthentication() async throws -> any OAuth2Credential {
+    public func requestAuthentication() async throws -> AppleOAuth2Credential {
         switch self.preHandleResult {
         case .success(let data):
             let credential = AppleOAuth2Credential(

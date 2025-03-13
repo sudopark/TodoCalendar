@@ -68,6 +68,10 @@ extension CalendarPaperViewModelImple {
         self.monthInteractor.clearDaySelection()
     }
     
+    func selectDay(_ day: CalendarDay) {
+        self.monthInteractor.selectDay(day)
+    }
+    
     func monthScene(
         didChange currentSelectedDay: CurrentSelectDayModel,
         and eventsThatDay: [any CalendarEvent]

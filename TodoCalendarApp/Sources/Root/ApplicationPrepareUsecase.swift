@@ -32,18 +32,21 @@ protocol ApplicationPrepareUsecase {
 final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     
     private let accountUsecase: any AccountUsecase
+    private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let latestAppSettingRepository: any AppSettingRepository
     private let sharedDataStore: SharedDataStore
     private let database: SQLiteService
     private let databasePathFinding: (String?) -> String
     init(
         accountUsecase: any AccountUsecase,
+        externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         latestAppSettingRepository: any AppSettingRepository,
         sharedDataStore: SharedDataStore,
         database: SQLiteService,
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
     ) {
         self.accountUsecase = accountUsecase
+        self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.latestAppSettingRepository = latestAppSettingRepository
         self.sharedDataStore = sharedDataStore
         self.database = database
@@ -60,6 +63,8 @@ extension ApplicationPrepareUsecaseImple {
         
         self.prepareDatabase(for: latestLoginAccount?.auth.uid)
         
+        try? await self.externalCalenarIntegrationUsecase.prepareIntegratedAccounts()
+        
         return .init(
             latestLoginAcount: latestLoginAccount,
             appearnceSetings: appearance
@@ -69,6 +74,7 @@ extension ApplicationPrepareUsecaseImple {
     func prepareSignedIn(_ auth: Auth) {
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.accountInfo.rawValue
+            || $0 != ShareDataKeys.externalCalendarAccounts.rawValue
         }
         let closeResult = self.database.close()
         switch closeResult {
@@ -80,7 +86,9 @@ extension ApplicationPrepareUsecaseImple {
     }
     
     func prepareSignedOut() {
-        self.sharedDataStore.clearAll()
+        self.sharedDataStore.clearAll {
+            $0 != ShareDataKeys.externalCalendarAccounts.rawValue
+        }
         let closeResult = self.database.close()
         switch closeResult {
         case .success:

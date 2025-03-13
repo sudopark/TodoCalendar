@@ -20,8 +20,10 @@ import Extensions
 
 final class MainViewController: UIViewController, MainScene {
     
+    private let headerAreaStackView = UIStackView()
     private let headerView = HeaderView()
     private let calendarContainerView = UIView()
+    private let compositeLoadingBarView = CompositeLoadingBarView()
     
     private let viewModel: any MainViewModel
     private let viewAppearance: ViewAppearance
@@ -84,7 +86,8 @@ extension MainViewController {
         self.viewModel.currentMonth
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] month in
-                self?.headerView.monthLabel.text = month
+                self?.headerView.monthLabel.text = month.monthText
+                self?.headerView.yearLabel.text = month.yearText
             })
             .store(in: &self.cancellables)
         
@@ -99,6 +102,13 @@ extension MainViewController {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] status in
                 self?.headerView.updateMigrationStatus(status)
+            })
+            .store(in: &self.cancellables)
+        
+        self.viewModel.isLoadingCalendarEvents
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isLoading in
+                self?.compositeLoadingBarView.updateIsLoading(isLoading)
             })
             .store(in: &self.cancellables)
         
@@ -130,6 +140,13 @@ extension MainViewController {
             }
             .store(in: &self.cancellables)
         
+        self.headerView.jumpButton.addTapGestureRecognizerPublisher()
+            .sink { [weak self] in
+                self?.viewAppearance.impactIfNeed()
+                self?.viewModel.jumpDate()
+            }
+            .store(in: &self.cancellables)
+        
         self.headerView.logButton.addTapGestureRecognizerPublisher()
             .sink(receiveValue: { [weak self] in
                 self?.viewAppearance.impactIfNeed()
@@ -145,23 +162,33 @@ extension MainViewController {
 
 extension MainViewController {
     
-    
     private func setupLayout() {
         
-        self.view.addSubview(self.headerView)
-        headerView.autoLayout.active(with: self.view) {
+        self.view.addSubview(headerAreaStackView)
+        headerAreaStackView.autoLayout.active(with: self.view) {
             $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
             $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
             $0.topAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.topAnchor)
+        }
+        headerAreaStackView.axis = .vertical
+        headerAreaStackView.spacing = 0
+        
+        headerAreaStackView.addArrangedSubview(headerView)
+        headerView.autoLayout.active {
             $0.heightAnchor.constraint(equalToConstant: 44)
         }
-        self.headerView.setupLayout()
+        headerView.setupLayout()
+        
+        headerAreaStackView.addArrangedSubview(compositeLoadingBarView)
+        compositeLoadingBarView.autoLayout.active {
+            $0.heightAnchor.constraint(equalToConstant: 2)
+        }
         
         self.view.addSubview(calendarContainerView)
         calendarContainerView.autoLayout.active(with: self.view) {
             $0.leadingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.leadingAnchor)
             $0.trailingAnchor.constraint(equalTo: $1.safeAreaLayoutGuide.trailingAnchor)
-            $0.topAnchor.constraint(equalTo: headerView.bottomAnchor, constant: 16)
+            $0.topAnchor.constraint(equalTo: headerAreaStackView.bottomAnchor, constant: 14)
             $0.bottomAnchor.constraint(equalTo: $1.bottomAnchor)
         }
     }
@@ -171,6 +198,7 @@ extension MainViewController {
     ) {
         self.view.backgroundColor = colorSet.dayBackground
         self.headerView.setupStyling(fontSet, colorSet)
+        self.compositeLoadingBarView.setupStyling(fontSet, colorSet)
     }
 }
 
@@ -180,11 +208,13 @@ private final class HeaderView: UIView {
     private var currentColorSet: (any ColorSet)?
     
     let monthLabel = UILabel()
+    let yearLabel = UILabel()
     let returnTodayView = UIView()
     private let returnTodayImage = UIImageView()
     private let returnTodayLabel = UILabel()
     private let buttonsStackView = UIStackView()
     let migrationButton = UIButton()
+    let jumpButton = UIButton()
     let eventTypeFilterButton = UIButton()
     let settingButton = UIButton()
     let logButton = UIButton()
@@ -232,6 +262,11 @@ private final class HeaderView: UIView {
             $0.centerYAnchor.constraint(equalTo: $1.centerYAnchor)
             $0.leadingAnchor.constraint(equalTo: $1.leadingAnchor, constant: 16)
         }
+        self.addSubview(yearLabel)
+        yearLabel.autoLayout.active(with: self.monthLabel) {
+            $0.bottomAnchor.constraint(equalTo: $1.lastBaselineAnchor)
+            $0.leadingAnchor.constraint(equalTo: $1.trailingAnchor, constant: 4)
+        }
         
         self.addSubview(returnTodayView)
         returnTodayView.autoLayout.active(with: self) {
@@ -267,7 +302,7 @@ private final class HeaderView: UIView {
             $0.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -16)
             $0.leadingAnchor.constraint(greaterThanOrEqualTo: returnTodayView.trailingAnchor, constant: 4)
         }
-        buttonsStackView.spacing = 12
+        buttonsStackView.spacing = 8
         
         #if DEBUG
         buttonsStackView.addArrangedSubview(logButton)
@@ -282,11 +317,19 @@ private final class HeaderView: UIView {
             $0.heightAnchor.constraint(equalToConstant: 25)
         }
         migrationButton.isHidden = true
+        
+        buttonsStackView.addArrangedSubview(jumpButton)
+        jumpButton.autoLayout.active {
+            $0.widthAnchor.constraint(equalToConstant: 25)
+            $0.heightAnchor.constraint(equalToConstant: 25)
+        }
+        
         buttonsStackView.addArrangedSubview(eventTypeFilterButton)
         eventTypeFilterButton.autoLayout.active {
             $0.widthAnchor.constraint(equalToConstant: 25)
             $0.heightAnchor.constraint(equalToConstant: 25)
         }
+        
         buttonsStackView.addArrangedSubview(settingButton)
         settingButton.autoLayout.active {
             $0.widthAnchor.constraint(equalToConstant: 25)
@@ -301,6 +344,9 @@ private final class HeaderView: UIView {
         
         self.monthLabel.font = fontSet.bigMonth
         self.monthLabel.textColor = colorSet.text0
+        
+        self.yearLabel.font = fontSet.normal
+        self.yearLabel.textColor = colorSet.text0
         
         self.returnTodayImage.tintColor = colorSet.text0
         self.returnTodayImage.image = UIImage(systemName: "arrow.uturn.right")
@@ -317,6 +363,8 @@ private final class HeaderView: UIView {
             self.migrationButton.tintColor = colorSet.accentInfo
         default: break
         }
+        self.jumpButton.tintColor = colorSet.text0
+        self.jumpButton.setImage(UIImage(systemName: "calendar"), for: .normal)
         self.eventTypeFilterButton.tintColor = colorSet.text0
         self.eventTypeFilterButton.setImage(UIImage(systemName: "line.3.horizontal.decrease.circle"), for: .normal)
         self.settingButton.tintColor = colorSet.text0

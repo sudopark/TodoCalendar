@@ -382,6 +382,8 @@ private class FakeOAuthUsecaseProvider: OAuth2ServiceUsecaseProvider, @unchecked
 
 private class StubGoogleOAuth2Usecase: OAuth2ServiceUsecase, @unchecked Sendable {
     
+    typealias CredentialType = GoogleOAuth2Credential
+    
     var provider: OAuth2ServiceProvider { GoogleOAuth2ServiceProvider() }
     let shouldFailOAuth: Bool
     
@@ -389,12 +391,14 @@ private class StubGoogleOAuth2Usecase: OAuth2ServiceUsecase, @unchecked Sendable
         self.shouldFailOAuth = shouldFailOAuth
     }
     
-    func requestAuthentication() async throws -> any OAuth2Credential {
+    func requestAuthentication() async throws -> GoogleOAuth2Credential {
         guard self.shouldFailOAuth == false
         else {
             throw RuntimeError("failed")
         }
-        return GoogleOAuth2Credential(idToken: "some", accessToken: "token")
+        return GoogleOAuth2Credential(
+            idToken: "some", accessToken: "token", refreshToken: "refresh"
+        )
     }
     
     func handle(open url: URL) -> Bool {

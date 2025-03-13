@@ -21,7 +21,7 @@ public struct EventOnWeek: Equatable {
     public let daysSequence: ClosedRange<Int>
     public let daysIdentifiers: [String]
     public var eventId: String { self.event.eventId }
-    public var eventTagId: AllEventTagId { self.event.eventTagId }
+    public var eventTagId: EventTagId { self.event.eventTagId }
     public var hasPeriod: Bool { self.event.eventTimeOnCalendar?.isPeriod == true }
     public var isHoliday: Bool { self.event is HolidayCalendarEvent }
     

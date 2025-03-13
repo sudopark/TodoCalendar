@@ -23,7 +23,7 @@ public struct CalendarComponent: Equatable {
         }
     }
     
-    public struct Day: Equatable {
+    public struct Day: Equatable, Sendable {
         public let year: Int
         public let month: Int
         public let day: Int

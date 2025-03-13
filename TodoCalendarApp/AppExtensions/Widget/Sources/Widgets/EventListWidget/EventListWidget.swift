@@ -77,7 +77,7 @@ struct EventListView: View {
             timeTextView(model.periodText)
                 .frame(width: 30)
             
-            tagLineView(model.tagColor)
+            tagLineView(model.tagId)
             
             nameAndActionView(model)
         }
@@ -122,12 +122,12 @@ struct EventListView: View {
         }
     }
     
-    private func tagLineView(_ tagColor: EventTagColor?) -> some View {
+    private func tagLineView(_ tagId: EventTagId?) -> some View {
         let defColors = EventTagColorSet(model.defaultTagColorSetting)
-        let color = switch tagColor {
+        let color = switch tagId {
         case .holiday: defColors.holiday
         case .default: defColors.defaultColor
-        case .custom(let hex): UIColor.from(hex: hex) ?? defColors.defaultColor
+        case .custom(let id): self.model.customTagMap[id].flatMap { UIColor.from(hex: $0.colorHex) } ?? defColors.defaultColor
         default: defColors.defaultColor
         }
         
@@ -232,18 +232,15 @@ struct EventListWidgetPreview_Provider: PreviewProvider {
     static var previews: some View {
         
         let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("Lunch".localized())")
-            |> \.tagColor .~ .default
             |> \.periodText .~ .singleText(.init(text: "1:00"))
         
         let callTodoEvent = TodoEventCellViewModel("call", name: "📞 \("Call Sara".localized())")
-            |> \.tagColor .~ .default
             |> \.periodText .~ .doubleText(
                 .init(text: "01:00"),
                 .init(text: "3:00")
             )
         
         let surfingEvent = ScheduleEventCellViewModel("surfing", name: "🏄‍♂️ \("Surfing".localized())")
-            |> \.tagColor .~ .default
             |> \.periodText .~ .singleText(.init(text: "Allday".localized()))
         
         let june3 = EventListWidgetViewModel.SectionModel(
@@ -268,6 +265,7 @@ struct EventListWidgetPreview_Provider: PreviewProvider {
                 july
             ],
             defaultTagColorSetting: defaultTagColorSetting,
+            customTagMap: [:],
             needBottomSpace: false
         )
         let entry = ResultTimelineEntry(date: Date(), result: .success(sample))

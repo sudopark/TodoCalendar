@@ -18,7 +18,7 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
     public init() { }
     
     public var shouldMakeFail: Bool = false
-    open func makeNewTag(_ params: EventTagMakeParams) async throws -> EventTag {
+    open func makeNewTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag {
         guard self.shouldMakeFail == false
         else {
             throw RuntimeError("failed")
@@ -26,7 +26,7 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
         return .init(name: params.name, colorHex: params.colorHex)
     }
     public var shouldEditFail: Bool = false
-    open func editTag(_ tagId: String, _ params: EventTagEditParams) async throws -> EventTag {
+    open func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag {
         guard self.shouldEditFail == false
         else {
             throw RuntimeError("failed")
@@ -46,42 +46,53 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
         
     }
     
-    public var stubLatestUsecaseEventTag: EventTag?
-    open func prepare() {
-        self.latestUsedEventTagSubject.send(self.stubLatestUsecaseEventTag)
-    }
+    open func prepare() { }
     
-    open func refreshTags(_ ids: [String]) { }
-    open func eventTags(_ ids: [String]) -> AnyPublisher<[String: EventTag], Never> {
+    open func refreshCustomTags(_ ids: [String]) { }
+    open func eventTags(_ ids: [EventTagId]) -> AnyPublisher<[EventTagId : any EventTag], Never> {
         let tags = ids
-            .map { EventTag(uuid: $0, name: "some", colorHex: "0x000000") }
-            .asDictionary { $0.uuid }
+            .map { CustomEventTag(uuid: $0.customTagId ?? "", name: "some", colorHex: "0x000000") }
+            .asDictionary { $0.tagId }
         return Just(tags).eraseToAnyPublisher()
     }
     
-    public func eventTag(id: String) -> AnyPublisher<EventTag, Never> {
-        let tag = EventTag(uuid: id, name: "some", colorHex: "0x000000")
+    public func eventTag(id: EventTagId) -> AnyPublisher<any EventTag, Never> {
+        let tag: any EventTag = switch id {
+        case .default:
+            DefaultEventTag.default("default")
+        case .holiday:
+            DefaultEventTag.holiday("holiday")
+        case .custom(let customId):
+            CustomEventTag(uuid: customId, name: "some", colorHex: "0x000000")
+        case .externalCalendar:
+            ExternalCalendarEventTag(tagId: id, name: "external", colorHex: "external")
+        }
         return Just(tag).eraseToAnyPublisher()
     }
     
-    public var allTagsLoadResult: Result<[EventTag], any Error> = .success([])
-    public func loadAllEventTags() -> AnyPublisher<[EventTag], any Error> {
-        return allTagsLoadResult.eraseToAnyPublisher()
+    public var allTagsLoadResult: Result<[any EventTag], any Error> = .success([])
+    public func loadAllEventTags() -> AnyPublisher<[any EventTag], any Error> {
+        switch allTagsLoadResult {
+        case .success(let success):
+            let defaults: [DefaultEventTag] = [.default("default"), .holiday("holiday")]
+            return Just(defaults + success).mapAsAnyError().eraseToAnyPublisher()
+        case .failure(let failure):
+            return Fail(error: failure).eraseToAnyPublisher()
+        }
     }
     
-    private let offIds = CurrentValueSubject<Set<AllEventTagId>, Never>([])
-    public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<AllEventTagId>, Never> {
+    private let offIds = CurrentValueSubject<Set<EventTagId>, Never>([])
+    public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<EventTagId>, Never> {
         return offIds.eraseToAnyPublisher()
     }
     
-    public func toggleEventTagIsOnCalendar(_ tagId: AllEventTagId) {
+    public func toggleEventTagIsOnCalendar(_ tagId: EventTagId) {
         let newSet = offIds.value |> elem(tagId) .~ !offIds.value.contains(tagId)
         self.offIds.send(newSet)
     }
     
-    private let latestUsedEventTagSubject = CurrentValueSubject<EventTag?, Never>(nil)
-    public var latestUsedEventTag: AnyPublisher<EventTag?, Never> {
-        return self.latestUsedEventTagSubject
-            .eraseToAnyPublisher()
+    
+    public var sharedEventTags: AnyPublisher<[EventTagId : any EventTag], Never> {
+        return Just([:]).eraseToAnyPublisher()
     }
 }

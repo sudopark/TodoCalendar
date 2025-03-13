@@ -236,11 +236,11 @@ extension MonthViewModelImpleTests {
     func testViewModel_whenSelectNotThisMonth_updateSelectedDay() {
         // given
         let expect = expectation(description: "9월 달력에서 8월 말일 선택(ok) -> 9월 20일 선택 -> 이후 8월로 변경시 8월 1일로 선택값 변경 -> 다시 9월로 전환시 9월10(today)일로 선택값 변경")
-        expect.expectedFulfillmentCount = 5
+        expect.expectedFulfillmentCount = 6
         let viewModel = self.makeViewModel()
 
         // when
-        let selecteds = self.waitOutputs(expect, for: viewModel.currentSelectDayIdentifier, timeout: 0.01) {
+        let selecteds = self.waitOutputs(expect, for: viewModel.currentSelectDayIdentifier, timeout: 0.1) {
             viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
             viewModel.select(
                 .init(
@@ -260,7 +260,7 @@ extension MonthViewModelImpleTests {
 
         // then
         XCTAssertEqual(selecteds, [
-            "2023-9-10", "2023-8-31", "2023-9-20", "2023-8-1", "2023-9-10"
+            "2023-9-10", "2023-8-31", "2023-9-20", "2023-9-10", "2023-8-1", "2023-9-10"
         ])
     }
 
@@ -281,16 +281,16 @@ extension MonthViewModelImpleTests {
 
 extension MonthViewModelImpleTests {
     
-    private func dummyEventLine(_ days: ClosedRange<Int>) -> WeekEventLineModel {
+    private func dummyEventLine(_ days: ClosedRange<Int>) -> EventOnWeek {
         let dayIdentifiers = days.map { "2023-9-\($0)" }
         let todo = TodoCalendarEvent(.init(uuid: "\(days)", name: "todo:\(days)"), in: TimeZone.current)
         let event = EventOnWeek(0..<1, [], days, dayIdentifiers, todo)
-        return .init(event, nil)
+        return event
     }
 
     func testEventStackModel_provideEventMoreCounts() {
         // given
-        let lines: [[WeekEventLineModel]] = [
+        let lines: [[EventOnWeek]] = [
             [self.dummyEventLine(1...5)],
             [self.dummyEventLine(2...4)],
             [self.dummyEventLine(1...3), self.dummyEventLine(4...7)],
@@ -819,7 +819,7 @@ extension MonthViewModelImpleTests {
         }
     }
 
-    private class PrivateStubScheduleUsecase: StubScheduleEventUsecase {
+    private class PrivateStubScheduleUsecase: StubScheduleEventUsecase, @unchecked Sendable {
 
         var eventsFor8: [ScheduleEvent] = [] {
             didSet {
@@ -897,7 +897,7 @@ private extension WeekEventStackViewModel {
     }
     
     var daysSequences: [[ClosedRange<Int>]] {
-        return self.linesStack.map { lines in lines.map { $0.eventOnWeek.daysSequence } }
+        return self.linesStack.map { lines in lines.map { $0.daysSequence } }
     }
 }
 

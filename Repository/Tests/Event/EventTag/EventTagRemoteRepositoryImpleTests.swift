@@ -59,7 +59,7 @@ extension EventTagRemoteRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let params = EventTagMakeParams(name: "some", colorHex: "color")
+        let params = CustomEventTagMakeParams(name: "some", colorHex: "color")
         let tag = try await repository.makeNewTag(params)
         
         // then
@@ -75,7 +75,7 @@ extension EventTagRemoteRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let params = EventTagEditParams(name: "new name", colorHex: "color")
+        let params = CustomEventTagEditParams(name: "new name", colorHex: "color")
         let tag = try await repository.editTag("id", params)
         
         // then
@@ -135,7 +135,7 @@ extension EventTagRemoteRepositoryImpleTests {
         let _ = repository.toggleTagIsOn(.custom("t2"))
         
         // when
-        let loading = repository.loadAllTags()
+        let loading = repository.loadAllCustomTags()
         let tagLists = self.waitOutputs(expect, for: loading, timeout: 0.1)
         
         // then
@@ -156,7 +156,7 @@ extension EventTagRemoteRepositoryImpleTests {
         let repository = self.makeRepositoryWithStubbing { $0.shouldFailLoadAllTags = true }
         
         // when
-        let loading = repository.loadAllTags()
+        let loading = repository.loadAllCustomTags()
         let tagLists = self.waitOutputs(expect, for: loading)
         
         // then
@@ -170,7 +170,7 @@ extension EventTagRemoteRepositoryImpleTests {
         let repository = self.makeRepositoryWithStubbing(shouldFailRemote: true)
         
         // when
-        let error = self.waitError(expect, for: repository.loadAllTags())
+        let error = self.waitError(expect, for: repository.loadAllCustomTags())
         
         // then
         XCTAssertNotNil(error)
@@ -183,7 +183,7 @@ extension EventTagRemoteRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let loading = repository.loadTags(["t1", "t3"])
+        let loading = repository.loadCustomTags(["t1", "t3"])
         let tagLists = self.waitOutputs(expect, for: loading)
         
         // then
@@ -198,7 +198,7 @@ extension EventTagRemoteRepositoryImpleTests {
         let repository = self.makeRepositoryWithStubbing { $0.shouldFailLoadTags = true }
         
         // when
-        let loading = repository.loadTags(["t1", "t3"])
+        let loading = repository.loadCustomTags(["t1", "t3"])
         let tagLists = self.waitOutputs(expect, for: loading)
         
         // then
@@ -211,7 +211,7 @@ extension EventTagRemoteRepositoryImpleTests {
         let repository = self.makeRepositoryWithStubbing(shouldFailRemote: true)
         
         // when
-        let loading = repository.loadTags(["t1", "t3"])
+        let loading = repository.loadCustomTags(["t1", "t3"])
         let error = self.waitError(expect, for: loading)
         
         // then
@@ -249,7 +249,7 @@ extension EventTagRemoteRepositoryImpleTests {
             .init(
                 method: .delete,
                 endpoint: EventTagEndpoints.tagAndEvents(id: "t1"),
-                resultJsonString: .success(RemoveEventTagWithEventsResult.dummyJSON())
+                resultJsonString: .success(RemoveCustomEventTagWithEventsResult.dummyJSON())
             ),
             .init(
                 method: .get,
@@ -279,7 +279,7 @@ extension EventTagRemoteRepositoryImpleTests {
     }
 }
 
-private extension RemoveEventTagWithEventsResult {
+private extension RemoveCustomEventTagWithEventsResult {
     
     static func dummyJSON() -> String {
         return """
@@ -291,17 +291,17 @@ private extension RemoveEventTagWithEventsResult {
 
 private final class SpyLocalStorage: EventTagLocalStorage, @unchecked Sendable {
     
-    var didSavrTag: EventTag?
-    func saveTag(_ tag: EventTag) async throws {
+    var didSavrTag: CustomEventTag?
+    func saveTag(_ tag: CustomEventTag) async throws {
         self.didSavrTag = tag
     }
     
-    func editTag(_ uuid: String, with params: EventTagEditParams) async throws {
+    func editTag(_ uuid: String, with params: CustomEventTagEditParams) async throws {
         
     }
     
-    var didUpdateTags: [EventTag]?
-    func updateTags(_ tags: [EventTag]) async throws {
+    var didUpdateTags: [CustomEventTag]?
+    func updateTags(_ tags: [CustomEventTag]) async throws {
         self.didUpdateTags = tags
     }
     
@@ -310,12 +310,12 @@ private final class SpyLocalStorage: EventTagLocalStorage, @unchecked Sendable {
         self.didDeleteTagIds = tagIds
     }
     
-    func loadTag(match name: String) async throws -> [EventTag] {
+    func loadTag(match name: String) async throws -> [CustomEventTag] {
         return []
     }
     
     var shouldFailLoadTags: Bool = false
-    func loadTags(in ids: [String]) async throws -> [EventTag] {
+    func loadTags(in ids: [String]) async throws -> [CustomEventTag] {
         guard shouldFailLoadTags == false
         else {
             throw RuntimeError("failed")
@@ -326,7 +326,7 @@ private final class SpyLocalStorage: EventTagLocalStorage, @unchecked Sendable {
     }
     
     var shouldFailLoadAllTags: Bool = false
-    func loadAllTags() async throws -> [EventTag] {
+    func loadAllTags() async throws -> [CustomEventTag] {
         guard shouldFailLoadAllTags == false
         else {
             throw RuntimeError("failed")

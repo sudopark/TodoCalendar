@@ -13,7 +13,7 @@ struct EventDetailBasicData: Equatable {
     var originEventTime: EventTime?
     var selectedTime: SelectedTime?
     var eventRepeating: EventRepeatingTimeSelectResult?
-    var eventTagId: AllEventTagId
+    var eventTagId: EventTagId
     var eventNotifications: [EventNotificationTimeOption]
     let excludeTimes: Set<String>
     
@@ -27,7 +27,7 @@ struct EventDetailBasicData: Equatable {
         name: String?,
         selectedTime: SelectedTime? = nil,
         eventRepeating: EventRepeatingTimeSelectResult? = nil,
-        eventTagId: AllEventTagId,
+        eventTagId: EventTagId,
         eventNotifications: [EventNotificationTimeOption] = [],
         excludeTimes: Set<String> = []
     ) {

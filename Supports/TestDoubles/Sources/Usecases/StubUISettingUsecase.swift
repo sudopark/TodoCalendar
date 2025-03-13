@@ -73,4 +73,11 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
             .compactMap { $0?.calendar }
             .eraseToAnyPublisher()
     }
+    
+    public var didAppluEventTagColorCallback: (() -> Void)?
+    public var didApplyTagColorsRequestedWith: [any EventTag]?
+    public func applyEventTagColors(_ tags: [any EventTag]) {
+        self.didApplyTagColorsRequestedWith = tags
+        self.didAppluEventTagColorCallback?()
+    }
 }

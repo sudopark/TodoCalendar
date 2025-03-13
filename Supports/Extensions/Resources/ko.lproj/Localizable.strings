@@ -133,6 +133,7 @@
 "calednar::event::skip_todo" = "할일 건너뛰기";
 "calednar::event::skip_todo_until" = "할일 건너뛰기할 날짜 선택";
 "calednar::event::copy" = "이벤트 복사";
+"calendar::move_date" = "날짜 이동";
 
 
 // MARK: - event detail
@@ -271,6 +272,13 @@
 "event_setting::eventPeriod" = "이벤트 기간";
 "event_notification_setting::title::forAllDay" = "하루종일";
 "event_notification_setting::title::NotforAllDay" = "미리알림 시간";
+"event_setting::external_calendar::title" = "외부 캘린더";
+"event_setting::external_calendar::connected::account" = "계정: %@";
+"event_setting::external_calendar::start" = "연동";
+"event_setting::external_calendar::start::message" = "외부 캘린더 연동이 완료되었습니다.";
+"event_setting::external_calendar::stop" = "연동 해제";
+"event_setting::external_calendar::stop::message" = "외부 캘린더 연동이 해제되었습니다.";
+"event_setting::external_calendar::google::serviceName" = "구글 캘린더";
 "setting.title" = "설정";
 "setting.appearance.title" = "외관";
 "setting.appearance.calendar.samplemonth::march" = "3월";
@@ -284,7 +292,8 @@
 "setting.appearance.calendar.colorTheme::light" = "라이트";
 "setting.appearance.calendar.colorTheme::dark" = "다크";
 "setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";
-"setting.appearance.event.edit::name" = "이벤트 수정";
+"setting.appearance.event.edit::name_old" = "이벤트 수정";
+"setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";
 "setting.appearance.event.fontSize" = "이벤트 글자 크기";
 "setting.appearance.event.show_holidayName" = "공휴일 표시";
 "setting.appearance.event.show_lunar" = "음력 표시";
@@ -324,6 +333,11 @@
 "feedback::enterMessage::placeholder" = "내용 입력";
 "feedback::contact::placeholder" = "연락받을 이메일 주소";
 "feedback::posted:message" = "피드백이 성공적으로 등록되었습니다.";
+
+// MARK: - external service
+
+"external_service.name::google" = "구글 캘린더";
+"external_service.expired::message" = "%@ 연동이 만료되었습니다. 설정 화면으로 이동하여 다시 시도해주세요.";
 
 
 // MARK: - widget

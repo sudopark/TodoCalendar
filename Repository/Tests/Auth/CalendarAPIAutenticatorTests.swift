@@ -1,5 +1,5 @@
 //
-//  OAuthAutenticatorTests.swift
+//  CalendarAPIAutenticatorTests.swift
 //  Repository
 //
 //  Created by sudo.park on 3/2/24.
@@ -17,12 +17,12 @@ import UnitTestHelpKit
 @testable import Repository
 
 
-class OAuthAutenticatorTests: BaseTestCase {
+class CalendarAPIAutenticatorTests: BaseTestCase {
     
     private var remoteEnvironment: RemoteEnvironment!
     private var spyAuthStore: SpyKeyChainStorage!
     private var stubFirebaseService: StubFirebaseAuthService!
-    private var spyListener: SpyListener?
+    private var spyListener: SpyAutenticatorTokenRefreshListener?
     
     override func setUpWithError() throws {
         self.remoteEnvironment = .init(calendarAPIHost: "https://calendar.come", csAPI: "cs_api")
@@ -38,11 +38,10 @@ class OAuthAutenticatorTests: BaseTestCase {
         self.spyListener = nil
     }
     
-    private func makeAuthenticator() -> OAuthAutenticator {
+    private func makeAuthenticator() -> CalendarAPIAutenticator {
         
-        let authenticator = OAuthAutenticator(
-            authStore: self.spyAuthStore,
-            remoteEnvironment: self.remoteEnvironment,
+        let authenticator = CalendarAPIAutenticator(
+            credentialStore: self.spyAuthStore,
             firebaseAuthService: self.stubFirebaseService
         )
         authenticator.listener = self.spyListener
@@ -54,7 +53,7 @@ class OAuthAutenticatorTests: BaseTestCase {
     }
 }
 
-extension OAuthAutenticatorTests {
+extension CalendarAPIAutenticatorTests {
     
     private func makeRequest(_ endpoint: any Endpoint, method: HTTPMethod) -> URLRequest? {
         guard let path = self.remoteEnvironment.path(endpoint),
@@ -75,24 +74,13 @@ extension OAuthAutenticatorTests {
             expecthasToken: Bool
         ) {
             // given
-            guard var request = self.makeRequest(endpoint, method: method)
-            else {
-                XCTFail("invalid endpoint")
-                return
-            }
             
             // when
-            let credential = OptionalAuthCredential.need(self.dummyAuth)
-            authenticator.apply(credential, to: &request)
+            let isNeed = authenticator.shouldAdapt(endpoint)
+            
             
             // then
-            let authHeader = request.headers["Authorization"]
-            let token = authHeader?.components(separatedBy: "Bearer ")[safe: 1]
-            if expecthasToken {
-                XCTAssertEqual(token, "access")
-            } else {
-                XCTAssertNil(token)
-            }
+            XCTAssertEqual(isNeed, expecthasToken)
         }
         // when + then
         parameterizeTest(
@@ -105,44 +93,9 @@ extension OAuthAutenticatorTests {
             TodoAPIEndpoints.currentTodo, method: .get, expecthasToken: true
         )
     }
-    
-    func testAuthenticator_whenCredentialNotNeed_notApplyToken() {
-        // given
-        let authenticator = self.makeAuthenticator()
-        func parameterizeTest(
-            _ endpoint: any Endpoint,
-            method: HTTPMethod
-        ) {
-            // given
-            guard var request = self.makeRequest(endpoint, method: method)
-            else {
-                XCTFail("invalid endpoint")
-                return
-            }
-            
-            // when
-            let credential = OptionalAuthCredential.notNeed
-            authenticator.apply(credential, to: &request)
-            
-            // then
-            let authHeader = request.headers["Authorization"]
-            let token = authHeader?.components(separatedBy: "Bearer ")[safe: 1]
-            XCTAssertNil(token)
-        }
-        // when + then
-        parameterizeTest(
-            HolidayAPIEndpoints.supportCountry, method: .get
-        )
-        parameterizeTest(
-            AccountAPIEndpoints.info, method: .put
-        )
-        parameterizeTest(
-            TodoAPIEndpoints.currentTodo, method: .get
-        )
-    }
 }
 
-extension OAuthAutenticatorTests {
+extension CalendarAPIAutenticatorTests {
     
     private func makeRequestAndResponse(_ endpoint: any Endpoint, method: HTTPMethod, statusCode: Int) -> (URLRequest, HTTPURLResponse)? {
         guard let path = self.remoteEnvironment.path(endpoint),
@@ -187,12 +140,6 @@ extension OAuthAutenticatorTests {
             HolidayAPIEndpoints.supportCountry, .get, 403, isNeed: false
         )
         parameterizeTest(
-            HolidayAPIEndpoints.supportCountry, .get, 401, isNeed: false
-        )
-        parameterizeTest(
-            AccountAPIEndpoints.info, .put, 401, isNeed: false
-        )
-        parameterizeTest(
             AccountAPIEndpoints.info, .put, 403, isNeed: false
         )
         parameterizeTest(
@@ -210,12 +157,13 @@ extension OAuthAutenticatorTests {
         let authenticator = self.makeAuthenticator()
         func parameterizeTest(_ shouldFail: Bool) {
             // given
+            self.spyAuthStore.saveAuth(self.dummyAuth)
             self.stubFirebaseService.shouldFailRefresh = shouldFail
             let expect = expectation(description: "wait-refresh")
-            var result: Result<OptionalAuthCredential, any Error>?
+            var result: Result<APICredential, any Error>?
             
             // when
-            let credential = OptionalAuthCredential.need(self.dummyAuth)
+            let credential = APICredential(auth: self.dummyAuth)
             authenticator.refresh(credential, for: Session()) {
                 result = $0
                 expect.fulfill()
@@ -244,40 +192,6 @@ extension OAuthAutenticatorTests {
         parameterizeTest(false)
     }
     
-    func testAuthenticator_whenCredentialNotNeed_alwayNotRefreshToken() {
-        // given
-        let authenticator = self.makeAuthenticator()
-        func parameterizeTest() {
-            // given
-            let expect = expectation(description: "wait-refresh")
-            var result: Result<OptionalAuthCredential, any Error>?
-            
-            // when
-            let credential = OptionalAuthCredential.notNeed
-            authenticator.refresh(credential, for: Session()) {
-                result = $0
-                expect.fulfill()
-            }
-            self.wait(for: [expect], timeout: self.timeout)
-            
-            // then
-            switch result {
-            case .success:
-                XCTFail("성공해서는 안됨")
-                
-            case .failure:
-                XCTAssert(true)
-                XCTAssertNotEqual(self.spyListener?.didTokenRefreshFailed, true, "해당케이스에서는 리스너 호출안함")
-            default:
-                XCTFail("refresh failed without response")
-            }
-        }
-        
-        // when + then
-        parameterizeTest()
-        parameterizeTest()
-    }
-    
     // check token has changed
     func testAuthenticator_checkTokenChanged() {
         // given
@@ -296,7 +210,7 @@ extension OAuthAutenticatorTests {
             request.setValue(stubToken, forHTTPHeaderField: "Authorization")
             
             // when
-            let credential = OptionalAuthCredential.need(newAuth)
+            let credential = APICredential(auth: newAuth)
             let result = authenticator.isRequest(request, authenticatedWith: credential)
             
             // then
@@ -309,46 +223,23 @@ extension OAuthAutenticatorTests {
         parameterizeTest("Bearer old", isEqual: false)
         parameterizeTest("Bearer access-new", isEqual: true)
     }
-    
-    func testAuthenticator_whenCredentialNotNeed_checkTokenChangedAlwaysTrue() {
-        // given
-        let authenticator = self.makeAuthenticator()
-        func parameterizeTest(
-            _ stubToken: String?
-        ) {
-            // given
-            guard var request = self.makeRequest(TodoAPIEndpoints.currentTodo, method: .get)
-            else {
-                XCTFail("invalid endpoint")
-                return
-            }
-            request.setValue(stubToken, forHTTPHeaderField: "Authorization")
-            
-            // when
-            let credential = OptionalAuthCredential.notNeed
-            let result = authenticator.isRequest(request, authenticatedWith: credential)
-            
-            // then
-            XCTAssertEqual(result, true)
-        }
-        
-        // when + then
-        parameterizeTest(nil)
-        parameterizeTest("wrong auth")
-        parameterizeTest("Bearer old")
-        parameterizeTest("Bearer access-new")
-    }
 }
 
-private final class SpyListener: OAuthAutenticatorTokenRefreshListener {
+final class SpyAutenticatorTokenRefreshListener: AutenticatorTokenRefreshListener {
     
     var didTokenRefreshed: Bool?
-    func oauthAutenticator(didRefresh auth: Auth) {
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?,
+        didRefresh credential: APICredential
+    ) {
         self.didTokenRefreshed = true
     }
     
     var didTokenRefreshFailed: Bool?
-    func oauthAutenticator(didRefreshFailed error: any Error) {
+    func oauthAutenticator(
+        _ authenticator: (any APIAuthenticator)?,
+        didRefreshFailed error: any Error
+    ) {
         self.didTokenRefreshFailed = true
     }
 }

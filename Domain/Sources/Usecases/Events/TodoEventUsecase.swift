@@ -43,13 +43,16 @@ public final class TodoEventUsecaseImple: TodoEventUsecase {
     
     private let todoRepository: any TodoEventRepository
     private let sharedDataStore: SharedDataStore
+    private let eventNotifyService: SharedEventNotifyService
     
     public init(
         todoRepository: any TodoEventRepository,
-        sharedDataStore: SharedDataStore
+        sharedDataStore: SharedDataStore,
+        eventNotifyService: SharedEventNotifyService
     ) {
         self.todoRepository = todoRepository
         self.sharedDataStore = sharedDataStore
+        self.eventNotifyService = eventNotifyService
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -198,6 +201,9 @@ extension TodoEventUsecaseImple {
         }
         
         self.todoRepository.loadCurrentTodoEvents()
+            .handleNotify(self.eventNotifyService) {
+                $0 ? RefreshingEvent.refreshingCurrentTodo(true) : .refreshingCurrentTodo(false)
+            }
             .sink(receiveCompletion: { _ in }, receiveValue: updateCached)
             .store(in: &self.cancellables)
     }
@@ -224,6 +230,9 @@ extension TodoEventUsecaseImple {
             }
         }
         self.todoRepository.loadTodoEvents(in: period)
+            .handleNotify(self.eventNotifyService) {
+                $0 ? RefreshingEvent.refreshingTodo(true) : .refreshingTodo(false)
+            }
             .sink(receiveCompletion: { _ in }, receiveValue: updateCache)
             .store(in: &self.cancellables)
     }
@@ -269,6 +278,9 @@ extension TodoEventUsecaseImple {
             self?.sharedDataStore.put([TodoEvent].self, key: shareKey, todos)
         }
         self.todoRepository.loadUncompletedTodos()
+            .handleNotify(self.eventNotifyService) {
+                $0 ? RefreshingEvent.refreshingUncompletedTodo(true) : .refreshingUncompletedTodo(false)
+            }
             .sink(receiveValue: refreshCached)
             .store(in: &self.cancellables)
     }

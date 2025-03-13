@@ -272,4 +272,6 @@ private class SpyViewAppearanceStore: ViewAppearanceStore, @unchecked Sendable {
     func notifyDefaultEventTagColorChanged(_ newSetting: DefaultEventTagColorSetting) {
         self.didChangedDefaultTagColor = newSetting
     }
+    
+    func applyEventTagColors(_ tags: [any EventTag]) { }
 }

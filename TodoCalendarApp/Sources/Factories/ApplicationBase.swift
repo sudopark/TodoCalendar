@@ -22,6 +22,7 @@ final class ApplicationBase {
     init() { }
     
     let sharedDataStore: SharedDataStore = .init()
+    let eventNotifyService: SharedEventNotifyService = .init()
     
     let userDefaultEnvironmentStorage = UserDefaultEnvironmentStorageImple(
         suiteName: AppEnvironment.groupID
@@ -81,16 +82,57 @@ final class ApplicationBase {
         }
     }()
     
+    var remoteSession: Session = {
+        let configure = URLSessionConfiguration.af.default
+        configure.timeoutIntervalForRequest = AppEnvironment.apiDefaultTimeoutSeconds
+        return Session(
+            configuration: configure,
+            serializationQueue: DispatchQueue(label: "af.serialization", qos: .utility)
+        )
+    }()
+    
     lazy var remoteAPI: RemoteAPIImple = {
         let environment = self.remoteEnvironment
-        let authenticator = OAuthAutenticator(
-            authStore: self.authStore,
-            remoteEnvironment: environment,
+        let authenticator = CalendarAPIAutenticator(
+            credentialStore: self.authStore,
             firebaseAuthService: self.firebaseAuthService
         )
-        return RemoteAPIImple(
-            environment: environment,
+        let interceptor = AuthenticationInterceptorProxy(
             authenticator: authenticator
+        )
+        return RemoteAPIImple(
+            session: self.remoteSession,
+            environment: environment,
+            interceptor: interceptor
+        )
+    }()
+    
+    lazy var googleCalendarRemoteAPI: RemoteAPIImple = {
+        
+        func readClientId() -> String {
+            let plist = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist")
+                .map { URL(fileURLWithPath: $0) }
+                .flatMap { try? Data(contentsOf: $0) }
+                .flatMap {
+                    try? PropertyListSerialization.propertyList(from: $0, format: nil)
+                }
+                .flatMap { $0 as? [String: Any] }
+            return plist?["CLIENT_ID"] as? String ?? "dummy_id"
+        }
+        let environment = self.remoteEnvironment
+        let googleAPICredentialStore = GoogleAPICredentialStoreImple(
+            serviceIdentifier: AppEnvironment.googleCalendarService.identifier,
+            keyChainStore: self.keyChainStorage
+        )
+        let authenticator = GoogleAPIAuthenticator(
+            googleClientId: readClientId(),
+            credentialStore: googleAPICredentialStore
+        )
+        let interceptor = AuthenticationInterceptorProxy(authenticator: authenticator)
+        return RemoteAPIImple(
+            session: self.remoteSession,
+            environment: environment,
+            interceptor: interceptor
         )
     }()
 }

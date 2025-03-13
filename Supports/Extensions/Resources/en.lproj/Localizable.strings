@@ -133,6 +133,7 @@
 "calednar::event::skip_todo" = "Skip this to-do";
 "calednar::event::skip_todo_until" = "Select a time to skip this to-do";
 "calednar::event::copy" = "Copy event";
+"calendar::move_date" = "Move date";
 
 
 // MARK: - event detail
@@ -272,6 +273,13 @@
 "event_setting::eventPeriod" = "Event Period";
 "event_notification_setting::title::forAllDay" = "All day";
 "event_notification_setting::title::NotforAllDay" = "Notification Time";
+"event_setting::external_calendar::title" = "External calendars";
+"event_setting::external_calendar::connected::account" = "Connected: %@";
+"event_setting::external_calendar::start" = "Connect";
+"event_setting::external_calendar::start::message" = "Connected to an external calendar.";
+"event_setting::external_calendar::stop" = "Disconnect";
+"event_setting::external_calendar::stop::message" = "The external calendar connection has been disconnected.";
+"event_setting::external_calendar::google::serviceName" = "Google Calendar";
 "setting.title" = "Settings";
 "setting.appearance.title" = "Appearance";
 "setting.appearance.calendar.samplemonth::march" = "MARCH";
@@ -285,7 +293,8 @@
 "setting.appearance.calendar.colorTheme::light" = "Light";
 "setting.appearance.calendar.colorTheme::dark" = "Dark";
 "setting.appearance.calendar.underline" = "Underline on event days";
-"setting.appearance.event.edit::name" = "Edit Event";
+"setting.appearance.event.edit::name_old" = "Edit Event";
+"setting.appearance.event.edit::name" = "Event settings and external calendars";
 "setting.appearance.event.fontSize" = "Event text font size";
 "setting.appearance.event.show_holidayName" = "Show holiday name";
 "setting.appearance.event.show_lunar" = "Lunar calendar";
@@ -325,6 +334,11 @@
 "feedback::enterMessage::placeholder" = "Enter a message";
 "feedback::contact::placeholder" = "Reply email address";
 "feedback::posted:message" = "Your feedback has been successfully registered.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Calendar";
+"external_service.expired::message" = "%@ integration has expired. Please go to Settings and try again";
 
 
 // MARK: - widget

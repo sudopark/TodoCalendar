@@ -19,6 +19,7 @@ import TestDoubles
 class ForemostEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
+    private var spyEventNotifyService: SharedEventNotifyService!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -26,6 +27,7 @@ class ForemostEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
+        self.spyEventNotifyService = nil
     }
     
     private func makeUsecase(
@@ -48,7 +50,12 @@ class ForemostEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         } else {
             repository.stubForemostEvent = nil
         }
-        return .init(repository: repository, sharedDataStore: .init())
+        self.spyEventNotifyService = .init(notifyQueue: nil)
+        return .init(
+            repository: repository,
+            sharedDataStore: .init(),
+            eventNotifyService: self.spyEventNotifyService
+        )
     }
 }
 
@@ -90,6 +97,31 @@ extension ForemostEventUsecaseImpleTests {
         
         // then
         XCTAssertEqual(events.map { $0?.eventId }, [nil, nil])
+    }
+    
+    func testUsecase_whenRefresh_notify() {
+        // given
+        func parameterizeTest(stubShouldLoadFail: Bool = false) {
+            // given
+            let expect = expectation(description: "refresh 중임을 알림")
+            expect.expectedFulfillmentCount = 2
+            let usecase = self.makeUsecase(withFail: stubShouldLoadFail)
+            
+            // when
+            let refreshingEvent: AnyPublisher<RefreshingEvent, Never> = self.spyEventNotifyService.event()
+            let isRefreshings = self.waitOutputs(expect, for: refreshingEvent) {
+                usecase.refresh()
+            }
+            
+            // then
+            XCTAssertEqual(isRefreshings, [
+                RefreshingEvent.refreshForemostEvent(true),
+                RefreshingEvent.refreshForemostEvent(false)
+            ])
+        }
+        // when + then
+        parameterizeTest()
+        parameterizeTest(stubShouldLoadFail: true)
     }
     
     // 업데이트

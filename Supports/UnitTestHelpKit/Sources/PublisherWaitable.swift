@@ -109,7 +109,7 @@ extension PublisherWaitable {
     public func outputs<P: Publisher>(
         _ confirmExpect: ConfirmationExpectation,
         for source: P,
-        _ action: (() -> Void)? = nil
+        _ action: (() async throws -> Void)? = nil
     ) async throws -> [P.Output] where P.Output: Sendable {
         return try await confirmation(confirmExpect.comment, expectedCount: confirmExpect.count) { confirm in
             
@@ -122,7 +122,7 @@ extension PublisherWaitable {
                 }
                 .store(in: &self.cancelBag)
             
-            action?()
+            try await action?()
             
             try await Task.sleep(for: confirmExpect.timeout)
             return sender
@@ -133,7 +133,7 @@ extension PublisherWaitable {
     public func firstOutput<P: Publisher>(
         _ confirmExpect: ConfirmationExpectation,
         for source: P,
-        _ action: (() -> Void)? = nil
+        _ action: (() async throws -> Void)? = nil
     ) async throws -> P.Output? where P.Output: Sendable {
         return try await self.outputs(confirmExpect, for: source, action).first
     }
@@ -142,7 +142,7 @@ extension PublisherWaitable {
     public func failure<P: Publisher>(
         _ confirmExpect: ConfirmationExpectation,
         for source: P,
-        _ action: (() -> Void)? = nil
+        _ action: (() async throws -> Void)? = nil
     ) async throws -> P.Failure? {
         return try await confirmation { confirm in
             
@@ -157,7 +157,7 @@ extension PublisherWaitable {
                 } receiveValue: { _ in }
                 .store(in: &self.cancelBag)
             
-            action?()
+            try await action?()
             
             try await Task.sleep(for: confirmExpect.timeout)
             

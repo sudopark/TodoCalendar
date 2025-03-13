@@ -17,6 +17,7 @@ public protocol ViewAppearanceStore: Sendable {
     func notifySettingChanged(_ newSetting: AppearanceSettings)
     func notifyCalendarSettingChanged(_ newSetting: CalendarAppearanceSettings)
     func notifyDefaultEventTagColorChanged(_ newSetting: DefaultEventTagColorSetting)
+    func applyEventTagColors(_ tags: [any EventTag])
 }
 
 
@@ -27,6 +28,7 @@ public protocol UISettingUsecase: Sendable {
     func loadSavedAppearanceSetting() -> AppearanceSettings
     func refreshAppearanceSetting() async throws -> AppearanceSettings
     func loadAvailableColorThemes() async throws -> [ColorSetKeys]
+    func applyEventTagColors(_ tags: [any EventTag])
     
     func changeCalendarAppearanceSetting(
         _ params: EditCalendarAppearanceSettingParams
