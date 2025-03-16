@@ -428,13 +428,13 @@ private extension EventRepeating {
     
     func copy(with newStartDate: Date) -> EventRepeating {
         let time = newStartDate.timeIntervalSince1970
-        guard let endTime = self.repeatingEndTime
+        guard let endTime = self.repeatingEndOption?.endTime
         else {
             return  .init(repeatingStartTime: time, repeatOption: self.repeatOption)
         }
         let interval = endTime - self.repeatingStartTime
         let newEndTime = time + interval
         return .init(repeatingStartTime: time, repeatOption: self.repeatOption)
-            |> \.repeatingEndTime .~ newEndTime
+            |> \.repeatingEndOption .~ RepeatEndOption.until(newEndTime)
     }
 }

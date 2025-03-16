@@ -33,8 +33,12 @@ class MemorizedScheduleEventsContainerTests: BaseTestCase {
     
     private func repeatingEvent(_ int: Int, customId: String? = nil, end: Int? = nil) -> ScheduleEvent {
         let time = int.days
-        let repeating = EventRepeating(repeatingStartTime: time, repeatOption: EventRepeatingOptions.EveryDay())
-            |> \.repeatingEndTime .~ end.map { $0.days }
+        let endTime: EventRepeating.RepeatEndOption? = end.map { .until($0.days) }
+        let repeating = EventRepeating(
+            repeatingStartTime: time,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        )
+        |> \.repeatingEndOption .~ endTime
         return ScheduleEvent(uuid: customId ?? "id:\(int)", name: "some", time: .at(time))
             |> \.repeating .~ repeating
         
@@ -89,7 +93,7 @@ extension MemorizedScheduleEventsContainerTests {
         var events = container.events(in: period)
         var ids = events.map { $0.uuid }.sorted()
         XCTAssertEqual(ids, ["id:2", "id:5", "id:6"])
-        XCTAssertEqual(events.first(where: { $0.uuid == "id:6" })?.repeating?.repeatingEndTime, nil)
+        XCTAssertEqual(events.first(where: { $0.uuid == "id:6" })?.repeating?.repeatingEndOption, nil)
         
         // 추가된 이벤트 20
         period = self.period(19..<21)

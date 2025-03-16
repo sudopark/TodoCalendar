@@ -488,7 +488,7 @@ extension EventDetailInputViewModelImple {
             let format = "date_form.yyyy_MMM_dd".localized()
             let start = Date(timeIntervalSince1970: repeating.repeatingStartTime)
                 .text(format, timeZone: basicAndTimeZone.timeZone)
-            let end = repeating.repeatingEndTime.map { Date(timeIntervalSince1970: $0) }?
+            let end = repeating.repeatingEndOption?.endTime.map { Date(timeIntervalSince1970: $0) }?
                 .text(format, timeZone: basicAndTimeZone.timeZone)
             
             return end.map { "\(start) ~ \($0)" } ?? "\(start) ~ "

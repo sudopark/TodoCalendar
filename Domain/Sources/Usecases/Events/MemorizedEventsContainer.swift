@@ -178,19 +178,21 @@ extension MemorizedEventsContainer {
         }
         let cached = cached ?? CacheItem(event: event)
         guard let enumerator = EventRepeatTimeEnumerator(
-            repeating.repeatOption, without: event.repeatingTimeToExcludes
+            repeating.repeatOption,
+            endOption: repeating.repeatingEndOption,
+            without: event.repeatingTimeToExcludes
         )
         else { return cached }
         
         let (startTime, end) = (
             event.time,
-            repeating.repeatingEndTime.map { min($0, period.upperBound) } ?? period.upperBound
+            repeating.repeatingEndOption?.endTime.map { min($0, period.upperBound) } ?? period.upperBound
         )
         
         let calculatedResult = self.calculateRepeatingTimesBlock(
             enumerator,
             from: .init(time: startTime, turn: 1),
-            unitl: end,
+            until: end,
             acc: .empty(cached)
         )
         guard let newRange = calculatedResult.newRange
@@ -229,7 +231,7 @@ extension MemorizedEventsContainer {
     private func calculateRepeatingTimesBlock(
         _ enumerator: EventRepeatTimeEnumerator,
         from start: RepeatingTimes,
-        unitl end: TimeInterval,
+        until end: TimeInterval,
         acc result: BlockCalculateResult<Event>
     ) -> BlockCalculateResult<Event> {
         let startTime = start.time.lowerBoundWithFixed
@@ -252,7 +254,7 @@ extension MemorizedEventsContainer {
             // -> subBlock1: cache -> block.start..<block.end
             // -> subBlock2: block.end..<period.end
             let block_to_end = self.calculateRepeatingTimesBlock(
-                enumerator, from: block.last ?? start, unitl: end, acc: result
+                enumerator, from: block.last ?? start, until: end, acc: result
             )
             // return 3
             return .init(
@@ -274,7 +276,7 @@ extension MemorizedEventsContainer {
                 enumerator, from: start, until: blockRange.lowerBound
             )
             let block_to_end = self.calculateRepeatingTimesBlock(
-                enumerator, from: block.last ?? start, unitl: newEnd, acc: result
+                enumerator, from: block.last ?? start, until: newEnd, acc: result
             )
             // return 4
             return .init(
@@ -297,12 +299,7 @@ extension MemorizedEventsContainer {
         from start: RepeatingTimes,
         until end: TimeInterval
     ) -> [RepeatingTimes] {
-        let nextFirstTurn = start.turn + 1
-        return enumerator.nextEventTimes(from: start.time, until: end)
-            .enumerated()
-            .map { pair -> RepeatingTimes in
-                return .init(time: pair.element, turn: nextFirstTurn + pair.offset)
-            }
+        return enumerator.nextEventTimes(from: start, until: end)
     }
 }
 

@@ -87,7 +87,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var dummyRepeating: EventRepeating {
         return EventRepeating(
             repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay()
-        ) |> \.repeatingEndTime .~ 100
+        ) |> \.repeatingEndOption .~ .until(100)
     }
     
     private var dummyRepeatingSchedule: ScheduleEvent {

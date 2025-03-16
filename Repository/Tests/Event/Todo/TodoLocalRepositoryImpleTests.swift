@@ -60,7 +60,7 @@ extension TodoLocalRepositoryImpleTests {
         let option = EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!)
             |> \.interval .~ 2
         let repeating = EventRepeating(repeatingStartTime: 100, repeatOption: option)
-            |> \.repeatingEndTime .~ 200
+            |> \.repeatingEndOption .~ .until(200)
         return TodoMakeParams()
             |> \.name .~ "new"
             |> \.eventTagId .~ .custom("some")
@@ -94,7 +94,7 @@ extension TodoLocalRepositoryImpleTests {
             
             // when
             let repeating = EventRepeating(repeatingStartTime: 100, repeatOption: option)
-                |> \.repeatingEndTime .~ 200
+                |> \.repeatingEndOption .~ .until(200)
             let params = self.dummyMakeParams |> \.repeating .~ repeating
             let todo = try? await repository.makeTodoEvent(params)
             
@@ -104,7 +104,7 @@ extension TodoLocalRepositoryImpleTests {
             XCTAssertEqual(todo?.time, .period(0.0..<100.0))
             XCTAssertEqual(todo?.repeating?.repeatingStartTime, 100)
             XCTAssertEqual(todo?.repeating?.repeatOption.compareHash, option.compareHash)
-            XCTAssertEqual(todo?.repeating?.repeatingEndTime, 200)
+            XCTAssertEqual(todo?.repeating?.repeatingEndOption?.endTime, 200)
             XCTAssertEqual(todo?.notificationOptions, [.before(seconds: 100), .atTime])
         }
         
@@ -172,7 +172,7 @@ extension TodoLocalRepositoryImpleTests {
         let repeatOption = event?.repeating?.repeatOption as? EventRepeatingOptions.EveryWeek
         XCTAssertEqual(repeatOption?.interval, 2)
         XCTAssertEqual(event?.repeating?.repeatingStartTime, 100)
-        XCTAssertEqual(event?.repeating?.repeatingEndTime, 200)
+        XCTAssertEqual(event?.repeating?.repeatingEndOption?.endTime, 200)
         XCTAssertEqual(event?.notificationOptions, [.before(seconds: 100), .atTime])
         XCTAssertNotNil(event?.creatTimeStamp)
     }
@@ -329,7 +329,7 @@ extension TodoLocalRepositoryImpleTests {
                     repeatingStartTime: $0,
                     repeatOption: EventRepeatingOptions.EveryDay()
                 )
-                |> \.repeatingEndTime .~ end
+                |> \.repeatingEndOption .~ end.map { .until($0) }
             }
         return TodoEvent(uuid: id, name: "name:\(id)")
             |> \.time .~ time.map { .at($0) }

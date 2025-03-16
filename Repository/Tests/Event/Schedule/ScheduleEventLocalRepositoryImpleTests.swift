@@ -57,7 +57,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
     private var dummyMakeParams: ScheduleMakeParams {
         let option = EventRepeatingOptions.EveryDay()
         let repeating = EventRepeating(repeatingStartTime: 100.0, repeatOption: option)
-            |> \.repeatingEndTime .~ 200.0
+            |> \.repeatingEndOption .~ .until(200.0)
         return ScheduleMakeParams()
             |> \.name .~ "new"
             |> \.eventTagId .~ .custom("some")
@@ -176,7 +176,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
                     repeatingStartTime: $0,
                     repeatOption: EventRepeatingOptions.EveryDay()
                 )
-                |> \.repeatingEndTime .~ end
+                |> \.repeatingEndOption .~ end.map { .until($0) }
             }
         return ScheduleEvent(uuid: id, name: "name:\(id)", time: .at(time))
             |> \.repeating .~ repeating
@@ -265,13 +265,13 @@ extension ScheduleEventLocalRepositoryImpleTests {
         XCTAssertEqual(result.reppatingEndOriginEvent.time, .at(0))
         XCTAssertEqual(result.reppatingEndOriginEvent.repeating?.repeatingStartTime, 0)
         XCTAssertEqual(result.reppatingEndOriginEvent.repeating?.repeatOption.compareHash, EventRepeatingOptions.EveryDay().compareHash)
-        XCTAssertEqual(result.reppatingEndOriginEvent.repeating?.repeatingEndTime, 100)
+        XCTAssertEqual(result.reppatingEndOriginEvent.repeating?.repeatingEndOption?.endTime, 100)
         
         XCTAssertEqual(result.newRepeatingEvent.name, "new")
         XCTAssertEqual(result.newRepeatingEvent.time, .at(100))
         XCTAssertEqual(result.newRepeatingEvent.repeating?.repeatingStartTime, 100)
         XCTAssertEqual(result.newRepeatingEvent.repeating?.repeatOption.compareHash, EventRepeatingOptions.EveryDay().compareHash)
-        XCTAssertEqual(result.newRepeatingEvent.repeating?.repeatingEndTime, nil)
+        XCTAssertEqual(result.newRepeatingEvent.repeating?.repeatingEndOption?.endTime, nil)
     }
     
     // exclude

@@ -266,7 +266,9 @@ extension SelectEventRepeatOptionViewModelTests {
             repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
             repeatOption: EventRepeatingOptions.EveryDay()
         )
-        |> \.repeatingEndTime .~ "2023.11.30 10:33:33".date().timeIntervalSince1970
+        |> \.repeatingEndOption .~ .until(
+            "2023.11.30 10:33:33".date().timeIntervalSince1970
+        )
         let viewModel = self.makeViewModel(previous: previous)
         
         // when
@@ -378,7 +380,7 @@ extension SelectEventRepeatOptionViewModelTests {
             EventRepeating(
                 repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
                 repeatOption: EventRepeatingOptions.EveryDay()
-            ) |> \.repeatingEndTime .~ "2023.11.20 02:30:22".date().timeIntervalSince1970,
+            ) |> \.repeatingEndOption .~ .until("2023.11.20 02:30:22".date().timeIntervalSince1970),
             EventRepeating(
                 repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
                 repeatOption: EventRepeatingOptions.EveryDay()
@@ -386,7 +388,7 @@ extension SelectEventRepeatOptionViewModelTests {
             EventRepeating(
                 repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
                 repeatOption: EventRepeatingOptions.EveryDay()
-            ) |> \.repeatingEndTime .~ "2023.11.24 02:30:22".date().timeIntervalSince1970,
+            ) |> \.repeatingEndOption .~ .until("2023.11.24 02:30:22".date().timeIntervalSince1970),
         ])
     }
     
@@ -424,7 +426,7 @@ extension SelectEventRepeatOptionViewModelTests {
         // then
         XCTAssertEqual(self.spyListener.didEventRepeatingSelectOrNot.count, 1)
         let first = self.spyListener.didEventRepeatingSelectOrNot.first
-        XCTAssertEqual(first??.repeatingEndTime, nil)
+        XCTAssertEqual(first??.repeatingEndOption?.endTime, nil)
         XCTAssertEqual(self.spyRouter.didShowRepeatingEndTimeIsInvalid, true)
     }
     
