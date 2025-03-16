@@ -89,9 +89,24 @@ public enum EventRepeatingOptions {
 
 public struct EventRepeating: Equatable, Sendable {
     
+    public enum RepeatEndOption: Equatable, Sendable {
+        case until(TimeInterval)
+        case count(Int)
+        
+        public var endTime: TimeInterval? {
+            guard case .until(let time) = self else { return nil }
+            return time
+        }
+        
+        public var endCount: Int? {
+            guard case .count(let value) = self else { return nil }
+            return value
+        }
+    }
+    
     public let repeatingStartTime: TimeInterval
     public var repeatOption: any EventRepeatingOption
-    public var repeatingEndTime: TimeInterval?
+    public var repeatingEndOption: RepeatEndOption?
 
     public init(repeatingStartTime: TimeInterval,
                 repeatOption: any EventRepeatingOption) {
@@ -107,10 +122,11 @@ public struct EventRepeating: Equatable, Sendable {
     }
     
     public func endTime(for eventTime: EventTime) -> TimeInterval? {
+        guard let endTime = self.repeatingEndOption?.endTime else { return nil }
         switch eventTime {
         case .allDay(_, let secondsFromGMT):
-            return self.repeatingEndTime.map { $0.latestTimeZoneInterval(secondsFromGMT) }
-        default: return self.repeatingEndTime
+            return  endTime.latestTimeZoneInterval(secondsFromGMT)
+        default: return endTime
         }
     }
     
@@ -126,7 +142,7 @@ public struct EventRepeating: Equatable, Sendable {
     public static func == (lhs: EventRepeating, rhs: EventRepeating) -> Bool {
         return lhs.repeatingStartTime == rhs.repeatingStartTime
             && lhs.repeatOption.compareHash == rhs.repeatOption.compareHash
-            && lhs.repeatingEndTime == rhs.repeatingEndTime
+        && lhs.repeatingEndOption == rhs.repeatingEndOption
     }
 }
 

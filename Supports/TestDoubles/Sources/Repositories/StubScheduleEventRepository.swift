@@ -78,7 +78,7 @@ open class StubScheduleEventRepository: ScheduleEventRepository, BaseStub {
             |> \.showTurn .~ (params.showTurn ?? false)
         
         let repeating = EventRepeating(repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay())
-            |> \.repeatingEndTime .~ fromTime
+            |> \.repeatingEndOption .~ .until(fromTime)
         let originEvent = (
             updateOriginEventMocking ?? ScheduleEvent(uuid: originEventId, name: "origin", time: .at(0))
         )

@@ -88,12 +88,17 @@ extension TodoLocalRepositoryImple {
         else {
             throw RuntimeError(key: ClientErrorKeys.notARepeatingEvent.rawValue, "not a repeating event")
         }
-        guard let nextEventTime = EventRepeatTimeEnumerator(repeating.repeatOption)?.nextEventTime(from: time, until: repeating.repeatingEndTime)
+        let enumerator = EventRepeatTimeEnumerator(
+            repeating.repeatOption, endOption: repeating.repeatingEndOption)
+        guard let nextEventTime = enumerator?.nextEventTime(
+            from: .init(time: time, turn: 0),
+            until: repeating.repeatingEndOption?.endTime
+        )
         else {
             throw RuntimeError(key: ClientErrorKeys.repeatingIsEnd.rawValue, "repeaitng end")
         }
         
-        let nextTodo = origin |> \.time .~ nextEventTime
+        let nextTodo = origin |> \.time .~ nextEventTime.time
         try await self.localStorage.updateTodoEvent(nextTodo)
         return nextTodo
     }

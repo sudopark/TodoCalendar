@@ -50,7 +50,7 @@ class ScheduleEventRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
             repeatingStartTime: 300,
             repeatOption: EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!) |> \.dayOfWeeks .~ [.sunday]
         )
-        |> \.repeatingEndTime .~ 400
+        |> \.repeatingEndOption .~ .until(400)
         
     }
     
@@ -85,7 +85,7 @@ class ScheduleEventRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
         XCTAssertEqual(event.time, .allDay(refTime+100..<refTime+200, secondsFromGMT: 300))
         XCTAssertEqual(event.repeating?.repeatingStartTime, 300)
         XCTAssertEqual(event.repeating?.repeatOption.compareHash, self.dummyRepeating.repeatOption.compareHash)
-        XCTAssertEqual(event.repeating?.repeatingEndTime, refTime+3600*24*100)
+        XCTAssertEqual(event.repeating?.repeatingEndOption?.endTime, refTime+3600*24*100)
         XCTAssertEqual(event.notificationOptions, [.allDay9AMBefore(seconds: 300)])
         XCTAssertEqual(event.showTurn, true)
     }

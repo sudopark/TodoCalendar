@@ -434,7 +434,7 @@ extension AddEventViewModelImpleTests {
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithPrepare()
         // when
-        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving, timeout: 0.1) {
             self.enterAllInfo(viewModel)
             
             viewModel.save()
@@ -460,7 +460,7 @@ extension AddEventViewModelImpleTests {
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithPrepare()
         // when
-        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving, timeout: 0.1) {
             viewModel.toggleIsTodo()
             self.enterAllInfo(viewModel)
             
@@ -479,7 +479,7 @@ extension AddEventViewModelImpleTests {
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithPrepare()
         // when
-        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving, timeout: 0.1) {
             self.enterAllInfo(viewModel)
             
             viewModel.save()
@@ -515,7 +515,7 @@ extension AddEventViewModelImpleTests {
 private var dummyRepeating: EventRepeating {
     let option = EventRepeatingOptions.EveryDay()
     return .init(repeatingStartTime: 0, repeatOption: option)
-        |> \.repeatingEndTime .~ 100
+        |> \.repeatingEndOption .~ .until(100)
 }
 
 extension AddEventViewModelImpleTests {
@@ -605,7 +605,7 @@ extension AddEventViewModelImpleTests {
         
         // when
         viewModel.prepare()
-        self.wait(for: [expect], timeout: self.timeout)
+        self.wait(for: [expect], timeout: 0.1)
         
         // then
         let basic = self.spyRouter.spyInteractor.didPreparedWith?.0
@@ -614,7 +614,7 @@ extension AddEventViewModelImpleTests {
         let expectedRepeating = EventRepeating(
             repeatingStartTime: self.refDate.timeIntervalSince1970,
             repeatOption: EventRepeatingOptions.EveryDay()
-        ) |> \.repeatingEndTime .~ (self.refDate.timeIntervalSince1970+100)
+        ) |> \.repeatingEndOption .~ .until(self.refDate.timeIntervalSince1970+100)
         XCTAssertEqual(basic?.eventRepeating?.repeating, expectedRepeating)
         XCTAssertEqual(basic?.eventTagId, .custom("tag"))
         XCTAssertEqual(basic?.eventNotifications, [.allDay12AM])
@@ -635,7 +635,7 @@ extension AddEventViewModelImpleTests {
         
         // when
         viewModel.prepare()
-        self.wait(for: [expect], timeout: self.timeout)
+        self.wait(for: [expect], timeout: 0.1)
         
         // then
         let basic = self.spyRouter.spyInteractor.didPreparedWith?.0
@@ -644,7 +644,7 @@ extension AddEventViewModelImpleTests {
         let expectedRepeating = EventRepeating(
             repeatingStartTime: self.refDate.timeIntervalSince1970,
             repeatOption: EventRepeatingOptions.EveryDay()
-        ) |> \.repeatingEndTime .~ (self.refDate.timeIntervalSince1970+100)
+        ) |> \.repeatingEndOption .~ .until(self.refDate.timeIntervalSince1970+100)
         XCTAssertEqual(basic?.eventRepeating?.repeating, expectedRepeating)
         XCTAssertEqual(basic?.eventTagId, .custom("tag"))
         XCTAssertEqual(basic?.eventNotifications, [.allDay12AM])
@@ -674,7 +674,7 @@ extension AddEventViewModelImpleTests {
         let expectedRepeating = EventRepeating(
             repeatingStartTime: self.refDate.timeIntervalSince1970,
             repeatOption: EventRepeatingOptions.EveryDay()
-        ) |> \.repeatingEndTime .~ (self.refDate.timeIntervalSince1970+100)
+        ) |> \.repeatingEndOption .~ .until(self.refDate.timeIntervalSince1970+100)
         XCTAssertEqual(basic?.eventRepeating?.repeating, expectedRepeating)
         XCTAssertEqual(basic?.eventTagId, .custom("tag"))
         XCTAssertEqual(basic?.eventNotifications, [.allDay12AM])
@@ -704,7 +704,7 @@ extension AddEventViewModelImpleTests {
         let expectedRepeating = EventRepeating(
             repeatingStartTime: self.refDate.timeIntervalSince1970,
             repeatOption: EventRepeatingOptions.EveryDay()
-        ) |> \.repeatingEndTime .~ (self.refDate.timeIntervalSince1970+100)
+        ) |> \.repeatingEndOption .~ .until(self.refDate.timeIntervalSince1970+100)
         XCTAssertEqual(basic?.eventRepeating?.repeating, expectedRepeating)
         XCTAssertEqual(basic?.eventTagId, .custom("tag"))
         XCTAssertEqual(basic?.eventNotifications, [.allDay12AM])

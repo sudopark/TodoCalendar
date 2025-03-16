@@ -85,7 +85,7 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var dummyRepeating: EventRepeating {
         return EventRepeating(
             repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay()
-        ) |> \.repeatingEndTime .~ 100
+        ) |> \.repeatingEndOption .~ .until(100)
     }
     
     private var dummyRepeatingTodo: TodoEvent {
