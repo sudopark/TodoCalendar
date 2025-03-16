@@ -89,16 +89,21 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     }
     
     private func handleUserSignedIn(_ account: Account) {
-        self.prepareUsecase.prepareSignedIn(account.auth)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.router?.changeRootSceneAfter(signIn: account.auth)
+        Task { [weak self] in
+            await self?.prepareUsecase.prepareSignedIn(account.auth)
+            
+            try? await Task.sleep(for: .milliseconds(100))
+            self?.router?.changeRootSceneAfter(signIn: account.auth)
         }
+        .store(in: &self.cancellables)
     }
     
     private func handleUserSignedOut() {
-        self.prepareUsecase.prepareSignedOut()
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.router?.changeRootSceneAfter(signIn: nil)
+        Task { [weak self] in
+            await self?.prepareUsecase.prepareSignedOut()
+            
+            try? await Task.sleep(for: .milliseconds(100))
+            self?.router?.changeRootSceneAfter(signIn: nil)
         }
     }
     
@@ -113,8 +118,7 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     ) {
         switch authenticator {
         case is CalendarAPIAutenticator:
-            self.prepareUsecase.prepareSignedOut()
-            self.router?.changeRootSceneAfter(signIn: nil)
+            self.handleUserSignedOut()
             
         case is GoogleAPIAuthenticator:
             // TODO: clear shared google calendar events

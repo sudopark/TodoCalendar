@@ -23,6 +23,7 @@ struct ScheduleEventTable: Table {
         case showTurn = "show_turn"
         case excludeTimes = "exclude_times"
         case notificationOptions = "notification_options"
+        case repeatingEndCount = "repeating_count"
         
         var dataType: ColumnDataType {
             switch self {
@@ -35,6 +36,7 @@ struct ScheduleEventTable: Table {
             case .showTurn: return .integer([.notNull, .default(0)])
             case .excludeTimes: return .text([])
             case .notificationOptions: return .text([])
+            case .repeatingEndCount: return .integer([])
             }
         }
     }
@@ -72,6 +74,8 @@ struct ScheduleEventTable: Table {
                 .flatMap { try? JSONDecoder().decode([String].self, from: $0) }
                 ?? []
             let notificationOptionsText: String? = cursor.next()
+            let endCount: Int? = cursor.next()
+            
             let notificationOptionsMappers = notificationOptionsText?.data(using: .utf8)
                 .flatMap {
                     try? JSONDecoder().decode([EventNotificationTimeOptionMapper].self, from: $0)
@@ -89,13 +93,25 @@ struct ScheduleEventTable: Table {
                 repeatingStartTime: startInterval,
                 repeatOption: option
             )
-            self.repeating?.repeatingEndTime = end
+            if let end {
+                self.repeating?.repeatingEndOption = .until(end)
+            } else if let endCount {
+                self.repeating?.repeatingEndOption = .count(endCount)
+            }
         }
     }
     
     typealias ColumnType = Columns
     typealias EntityType = Entity
     static var tableName: String { "Schedules" }
+    
+    static func migrateStatement(for version: Int32) -> String? {
+        switch version {
+        case 0:
+            return Self.addColumnStatement(.repeatingEndCount)
+        default: return nil
+        }
+    }
     
     static func scalar(_ entity: EntityType, for column: Columns) -> (any ScalarType)? {
         switch column {
@@ -107,7 +123,7 @@ struct ScheduleEventTable: Table {
                 .map { EventRepeatingOptionCodableMapper(option: $0.repeatOption) }
                 .flatMap { try? JSONEncoder().encode($0) }
                 .flatMap { String(data: $0, encoding: .utf8) }
-        case .repeatingEnd: return entity.repeating?.repeatingEndTime
+        case .repeatingEnd: return entity.repeating?.repeatingEndOption?.endTime
         case .showTurn: return entity.showTurn
         case .excludeTimes: return (try? JSONEncoder().encode(entity.excludeTimes))
                 .flatMap { String(data: $0, encoding: .utf8) }
@@ -117,6 +133,8 @@ struct ScheduleEventTable: Table {
             }
             let data = try? JSONEncoder().encode(mappers)
             return data.flatMap { String(data: $0, encoding: .utf8) }
+        case .repeatingEndCount:
+            return entity.repeating?.repeatingEndOption?.endCount
         }
     }
 }

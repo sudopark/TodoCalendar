@@ -49,4 +49,6 @@ struct AppEnvironment {
     static var supportExternalCalendarServices: [ExternalCalendarService] {
         return [googleCalendarService]
     }
+    
+    static let dbVersion: Int32 = 1
 }

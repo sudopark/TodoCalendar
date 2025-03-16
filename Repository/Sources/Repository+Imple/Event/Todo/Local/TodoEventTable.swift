@@ -22,6 +22,7 @@ struct TodoEventTable: Table {
         case repeatingOption = "repeating_option"
         case repeatingEnd = "repeating_end"
         case notificationOptions = "notification_options"
+        case repeatingEndCount = "repeating_count"
         
         var dataType: ColumnDataType {
             switch self {
@@ -33,6 +34,7 @@ struct TodoEventTable: Table {
             case .repeatingOption: return .text([])
             case .repeatingEnd: return .real([])
             case .notificationOptions: return .text([])
+            case .repeatingEndCount: return .integer([])
             }
         }
     }
@@ -40,6 +42,14 @@ struct TodoEventTable: Table {
     typealias ColumnType = Columns
     typealias EntityType = TodoEvent
     static var tableName: String { "TodoEvents" }
+    
+    static func migrateStatement(for version: Int32) -> String? {
+        switch version {
+        case 0:
+            return Self.addColumnStatement(.repeatingEndCount)
+        default: return nil
+        }
+    }
     
     static func scalar(_ entity: TodoEvent, for column: Columns) -> (any ScalarType)? {
         switch column {
@@ -53,11 +63,14 @@ struct TodoEventTable: Table {
                 .flatMap { try? JSONEncoder().encode($0) }
                 .flatMap { String(data: $0, encoding: .utf8) }
             
-        case .repeatingEnd: return entity.repeating?.repeatingEndTime
+        case .repeatingEnd:
+            return entity.repeating?.repeatingEndOption?.endTime
         case .notificationOptions:
             let mappers = entity.notificationOptions.map { EventNotificationTimeOptionMapper(option: $0) }
             let data = try? JSONEncoder().encode(mappers)
             return data.flatMap { String(data: $0, encoding: .utf8) }
+        case .repeatingEndCount:
+            return entity.repeating?.repeatingEndOption?.endCount
         }
     }
     
@@ -76,6 +89,7 @@ extension TodoEvent: RowValueType {
         let optionText: String? = cursor.next()
         let end: Double? = cursor.next()
         let notificationOptionText: String? = cursor.next()
+        let endCount: Int? = cursor.next()
         
         let notificationOpionMappers = notificationOptionText?.data(using: .utf8)
             .flatMap {
@@ -95,7 +109,11 @@ extension TodoEvent: RowValueType {
             repeatingStartTime: startInterval,
             repeatOption: option
         )
-        self.repeating?.repeatingEndTime = end
+        if let end {
+            self.repeating?.repeatingEndOption = .until(end)
+        } else if let endCount {
+            self.repeating?.repeatingEndOption = .count(endCount)
+        }
     }
 }
 
