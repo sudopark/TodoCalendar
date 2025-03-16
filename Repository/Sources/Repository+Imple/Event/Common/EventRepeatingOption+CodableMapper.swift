@@ -212,6 +212,7 @@ struct EventRepeatingMapper: Decodable {
         case start
         case end
         case option
+        case endCount = "end_count"
     }
     
     let repeating: EventRepeating
@@ -225,14 +226,20 @@ struct EventRepeatingMapper: Decodable {
             repeatingStartTime: try container.decode(TimeInterval.self, forKey: .start),
             repeatOption: try container.decode(EventRepeatingOptionCodableMapper.self, forKey: .option).option
         )
-        repeating.repeatingEndTime = try? container.decode(TimeInterval.self, forKey: .end)
+        if let endTime = try? container.decode(TimeInterval.self, forKey: .end) {
+            repeating.repeatingEndOption = .until(endTime)
+        }
+        if let endCount = try? container.decode(Int.self, forKey: .endCount) {
+            repeating.repeatingEndOption = .count(endCount)
+        }
         self.repeating = repeating
     }
     
     func asJson() -> [String: Any] {
         var sender: [String: Any] = [:]
         sender["start"] = self.repeating.repeatingStartTime
-        sender["end"] = self.repeating.repeatingEndTime
+        sender["end"] = self.repeating.repeatingEndOption?.endTime
+        sender["end_count"] = self.repeating.repeatingEndOption?.endCount
         sender["option"] = try? EventRepeatingOptionCodableMapper(option: self.repeating.repeatOption).asJson()
         return sender
     }

@@ -27,6 +27,7 @@ struct PendingDoneTodoEventTable: Table {
         case timeLowerBound = "time_lower_bound"
         case timeUpperBound = "time_upper_bound"
         case secondsFromGMT = "seconds_from_gmt"
+        case repeatingEndCount = "repeating_count"
         
         var dataType: ColumnDataType {
             switch self {
@@ -42,6 +43,7 @@ struct PendingDoneTodoEventTable: Table {
             case .timeLowerBound: return .real([])
             case .timeUpperBound: return .real([])
             case .secondsFromGMT: return .real([])
+            case .repeatingEndCount: return .integer([])
             }
         }
     }
@@ -85,6 +87,14 @@ struct PendingDoneTodoEventTable: Table {
     typealias EntityType = PendingDoneTodo
     static var tableName: String { "PendingDoneTodoEvent" }
     
+    static func migrateStatement(for version: Int32) -> String? {
+        switch version {
+        case 0:
+            return Self.addColumnStatement(.repeatingEndCount)
+        default: return nil
+        }
+    }
+    
     static func scalar(_ entity: PendingDoneTodo, for column: Columns) -> (any ScalarType)? {
         switch column {
         case .uuid: return  entity.todoEvent.uuid
@@ -97,7 +107,7 @@ struct PendingDoneTodoEventTable: Table {
                 .flatMap { try? JSONEncoder().encode($0) }
                 .flatMap { String(data: $0, encoding: .utf8) }
             
-        case .repeatingEnd: return entity.todoEvent.repeating?.repeatingEndTime
+        case .repeatingEnd: return entity.todoEvent.repeating?.repeatingEndOption?.endTime
         case .notificationOptions:
             let mappers = entity.todoEvent.notificationOptions.map { EventNotificationTimeOptionMapper(option: $0) }
             let data = try? JSONEncoder().encode(mappers)
@@ -106,6 +116,7 @@ struct PendingDoneTodoEventTable: Table {
         case .timeLowerBound: return entity.todoEvent.time?.lowerBoundWithFixed
         case .timeUpperBound: return entity.todoEvent.time?.upperBoundWithFixed
         case .secondsFromGMT: return entity.todoEvent.time?.secondsFromGMT ?? 0
+        case .repeatingEndCount: return entity.todoEvent.repeating?.repeatingEndOption?.endCount
         }
     }
 }
