@@ -130,7 +130,9 @@ extension MainViewModelImple {
         
         self.eventNotificationUsecase.runSyncEventNotification()
         self.bindEventTagColorMap()
-        self.googleCalendarUsecase.prepare()
+        if FeatureFlag.isEnable(.googleCalendar) {
+            self.googleCalendarUsecase.prepare()
+        }
     }
     
     private func refreshViewAppearanceSettings() {
