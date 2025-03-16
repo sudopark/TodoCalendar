@@ -28,6 +28,10 @@ extension FeatureFlag {
         FeatureFlag.shared.enableFlags.insert(flag)
     }
     
+    public static func disable(_ flag: Flags) {
+        FeatureFlag.shared.enableFlags.remove(flag)
+    }
+    
     public static func isEnable(_ flag: Flags) -> Bool {
         return FeatureFlag.shared.enableFlags.contains(flag)
     }

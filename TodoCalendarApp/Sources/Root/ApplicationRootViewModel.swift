@@ -75,7 +75,7 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     }
     
     private func bindExternalCalenarIntegratedStatus() {
-        
+        guard FeatureFlag.isEnable(.googleCalendar) else { return }
         self.externalCalendarServiceUsecase.integrationStatusChanged
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] status in
