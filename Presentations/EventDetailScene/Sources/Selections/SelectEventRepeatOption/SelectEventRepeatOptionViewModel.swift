@@ -356,12 +356,12 @@ extension SelectEventRepeatOptionViewModelImple {
     ) {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         
-        guard let targetDate = previousSelectOption?.repeatingEndTime.map ({ Date(timeIntervalSince1970: $0) })
+        guard let targetDate = previousSelectOption?.repeatingEndOption?.endTime.map ({ Date(timeIntervalSince1970: $0) })
                 ?? calendar.lastDayOfMonth(from: self.selectTime)
         else { return }
         
         let endTime = RepeatEndTime(targetDate, from: self.selectTime, timeZone: timeZone)
-        |> \.isOn .~ (previousSelectOption?.repeatingEndTime != nil)
+        |> \.isOn .~ (previousSelectOption?.repeatingEndOption?.endTime != nil)
         
         self.subject.repeatEndTime.send(endTime)
     }
@@ -414,7 +414,7 @@ extension SelectEventRepeatOptionViewModelImple {
         
         let repeating = EventRepeating(
             repeatingStartTime: startTime, repeatOption: option
-        ) |> \.repeatingEndTime .~ endTime
+        ) |> \.repeatingEndOption .~ endTime.map { .until($0)}
         let result = EventRepeatingTimeSelectResult(text: model.text, repeating: repeating)
         self.listener?.selectEventRepeatOption(didSelect: result)
     }

@@ -44,7 +44,7 @@ struct EventRepeatingTimeSelectResult: Equatable {
             repeatingStartTime: startTime,
             repeatOption: self.repeating.repeatOption
         )
-        |> \.repeatingEndTime .~ self.repeating.repeatingEndTime
+        |> \.repeatingEndOption .~ self.repeating.repeatingEndOption
         let model = SelectRepeatingOptionModel(self.repeating.repeatOption, Date(timeIntervalSince1970: startTime), timeZone)
         return model.map { .init(text: $0.text, repeating: newRepeating)}
     }

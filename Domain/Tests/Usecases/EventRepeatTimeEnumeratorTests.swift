@@ -15,8 +15,14 @@ import UnitTestHelpKit
 
 class BaseEventRepeatTimeEnumeratorTests: BaseTestCase {
     
-    func makeEnumerator(_ option: any EventRepeatingOption) -> EventRepeatTimeEnumerator {
-        return EventRepeatTimeEnumerator(option)!
+    func makeEnumerator(
+        _ option: any EventRepeatingOption,
+        endOption: EventRepeating.RepeatEndOption? = nil,
+        without: Set<String> = []
+    ) -> EventRepeatTimeEnumerator {
+        return EventRepeatTimeEnumerator(
+            option, endOption: endOption, without: without
+        )!
     }
     
     func dummyDate(_ dateString: String) -> Date {
@@ -32,12 +38,12 @@ class BaseEventRepeatTimeEnumeratorTests: BaseTestCase {
 
 class EventRepeatTimeEnumeratorTests_everyDay: BaseEventRepeatTimeEnumeratorTests {
     
-    private var dummyTimeAt: EventTime {
-        return .at(10)
+    private var dummyTimeAt: RepeatingTimes {
+        return .init(time: .at(10), turn: 0)
     }
     
-    private var dummyTimeRange: EventTime {
-        return .period(10..<110)
+    private var dummyTimeRange: RepeatingTimes {
+        return .init(time: .period(10..<110), turn: 0)
     }
 }
 
@@ -51,20 +57,25 @@ extension EventRepeatTimeEnumeratorTests_everyDay {
         
         // when + then
         // 1일 간격으로 반복시
-        var next = enumerator.nextEventTime(from: self.dummyTimeAt, until: nil)
-        XCTAssertEqual(next, .at(10 + .days(1)))
+        var next = enumerator.nextEventTime(
+            from: self.dummyTimeAt, until: nil
+        )
+        XCTAssertEqual(next?.time, .at(10 + .days(1)))
+        XCTAssertEqual(next?.turn, 1)
         
         // 3일 간격으로 반복시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)
         next = enumerator.nextEventTime(from: self.dummyTimeAt, until: nil)
-        XCTAssertEqual(next, .at(10 + .days(3)))
+        XCTAssertEqual(next?.time, .at(10 + .days(3)))
+        XCTAssertEqual(next?.turn, 1)
         
         // 반복 종료 시간과 동일한 경우
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)
         next = enumerator.nextEventTime(from: self.dummyTimeAt, until: .days(3) + 10)
-        XCTAssertEqual(next, .at(10 + .days(3)))
+        XCTAssertEqual(next?.time, .at(10 + .days(3)))
+        XCTAssertEqual(next?.turn, 1)
         
         // 반복종료시간 초과시
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
@@ -82,13 +93,15 @@ extension EventRepeatTimeEnumeratorTests_everyDay {
         // when + then
         // 특정 기간 1일 간격으로 반복
         var next = enumerator.nextEventTime(from: self.dummyTimeRange, until: nil)
-        XCTAssertEqual(next, self.dummyTimeRange.shift(.days(1)))
+        XCTAssertEqual(next?.time, self.dummyTimeRange.time.shift(.days(1)))
+        XCTAssertEqual(next?.turn, 1)
         
         // 특정기간 3일 간격으로 반복
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)
         next = enumerator.nextEventTime(from: self.dummyTimeRange, until: nil)
-        XCTAssertEqual(next, self.dummyTimeRange.shift(.days(3)))
+        XCTAssertEqual(next?.time, self.dummyTimeRange.time.shift(.days(3)))
+        XCTAssertEqual(next?.turn, 1)
         
         option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
         enumerator = self.makeEnumerator(option)
@@ -102,16 +115,19 @@ extension EventRepeatTimeEnumeratorTests_everyDay {
 
 class EventRepeatTimeEnumeratorTests_everyWeek: BaseEventRepeatTimeEnumeratorTests {
     
-    private var dummyTimeAt: EventTime {
+    private var dummyTimeAt: RepeatingTimes {
         let date = self.dummyDate("2023-04-11 07:00")
-        return .at(date.timeIntervalSince1970)
+        return .init(time: .at(date.timeIntervalSince1970), turn: 0)
     }
     
-    private var dummyTimeRange: EventTime {
+    private var dummyTimeRange: RepeatingTimes {
         let start = self.dummyDate("2023-04-11 07:00")
         let end = self.dummyDate("2023-04-11 08:00")
-        return .period(
-            start.timeIntervalSince1970..<end.timeIntervalSince1970
+        return .init(
+            time: .period(
+                start.timeIntervalSince1970..<end.timeIntervalSince1970
+            ),
+            turn: 0
         )
     }
 }
@@ -135,7 +151,8 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
             // then
             if let expected = expected {
                 let nextWeekEvent = self.dummyDate(expected)
-                XCTAssertEqual(next, .at(nextWeekEvent.timeIntervalSince1970))
+                XCTAssertEqual(next?.time, .at(nextWeekEvent.timeIntervalSince1970))
+                XCTAssertEqual(next?.turn, 1)
             } else {
                 XCTAssertNil(next)
             }
@@ -169,7 +186,8 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
                         ..<
                     self.dummyDate(expected.1).timeIntervalSince1970
                 )
-                XCTAssertEqual(next, nextWeekEvents)
+                XCTAssertEqual(next?.time, nextWeekEvents)
+                XCTAssertEqual(next?.turn, 1)
             } else {
                 XCTAssertNil(next)
             }
@@ -198,7 +216,8 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
             // then
             if let expected {
                 let sameWeekEvent = self.dummyDate(expected)
-                XCTAssertEqual(next, .at(sameWeekEvent.timeIntervalSince1970))
+                XCTAssertEqual(next?.time, .at(sameWeekEvent.timeIntervalSince1970))
+                XCTAssertEqual(next?.turn, 1)
             } else {
                 XCTAssertNil(next)
             }
@@ -231,7 +250,8 @@ extension EventRepeatTimeEnumeratorTests_everyWeek {
                     ..<
                     self.dummyDate(expected.1).timeIntervalSince1970
                 )
-                XCTAssertEqual(next, sameWeekPeriod)
+                XCTAssertEqual(next?.time, sameWeekPeriod)
+                XCTAssertEqual(next?.turn, 1)
             } else {
                 XCTAssertNil(next)
             }
@@ -267,14 +287,17 @@ class EventRepeatEnumeratorTests_everyMonthWithSelectWeeks: BaseEventRepeatTimeE
         let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
         
         // when
-        let next = enumerator.nextEventTime(from: .at(
-            self.dummyDate(from).timeIntervalSince1970
-        ), until: endTime)
+        let start = RepeatingTimes(
+            time: .at(self.dummyDate(from).timeIntervalSince1970),
+            turn: 0
+        )
+        let next = enumerator.nextEventTime(from: start, until: endTime)
         
         // then
         if let expected {
             let nextTime = self.dummyDate(expected).timeIntervalSince1970
-            XCTAssertEqual(next, .at(nextTime))
+            XCTAssertEqual(next?.time, .at(nextTime))
+            XCTAssertEqual(next?.turn, 1)
         } else {
             XCTAssertNil(next)
         }
@@ -336,14 +359,17 @@ class EventRepeatEnumeratorTests_everyMonthWithSelectDays: BaseEventRepeatTimeEn
         let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
         
         // when
-        let next = enumerator.nextEventTime(from: .at(
-            self.dummyDate(from).timeIntervalSince1970
-        ), until: endTime)
+        let start = RepeatingTimes(
+            time: .at(self.dummyDate(from).timeIntervalSince1970),
+            turn: 0
+        )
+        let next = enumerator.nextEventTime(from: start, until: endTime)
         
         // then
         if let expected {
             let nextTime = self.dummyDate(expected).timeIntervalSince1970
-            XCTAssertEqual(next, .at(nextTime))
+            XCTAssertEqual(next?.time, .at(nextTime))
+            XCTAssertEqual(next?.turn, 1)
         } else {
             XCTAssertNil(next)
         }
@@ -391,14 +417,16 @@ class EventRepeatEnumeratorTests_everyYear: BaseEventRepeatTimeEnumeratorTests {
         let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
         
         // when
-        let next = enumerator.nextEventTime(from: .at(
-            self.dummyDate(from).timeIntervalSince1970
-        ), until: endTime)
+        let start = RepeatingTimes(
+            time: .at(self.dummyDate(from).timeIntervalSince1970), turn: 0
+        )
+        let next = enumerator.nextEventTime(from: start, until: endTime)
         
         // then
         if let expected {
             let nextTime = self.dummyDate(expected).timeIntervalSince1970
-            XCTAssertEqual(next, .at(nextTime))
+            XCTAssertEqual(next?.time, .at(nextTime))
+            XCTAssertEqual(next?.turn, 1)
         } else{
             XCTAssertNil(next)
         }
@@ -458,15 +486,16 @@ class EventRepeatEnumeratorTests_everyYear_someDay: BaseEventRepeatTimeEnumerato
         let endTime = endTime.map { self.dummyDate($0).timeIntervalSince1970 }
         
         // when
-        let next = enumerator.nextEventTime(
-            from: .at(self.dummyDate(from).timeIntervalSince1970),
-            until: endTime
+        let start = RepeatingTimes(
+            time: .at(self.dummyDate(from).timeIntervalSince1970), turn: 0
         )
+        let next = enumerator.nextEventTime(from: start, until: endTime)
         
         // then
         if let expected {
             let expectedNextTime = self.dummyDate(expected).timeIntervalSince1970
-            XCTAssertEqual(next, .at(expectedNextTime))
+            XCTAssertEqual(next?.time, .at(expectedNextTime))
+            XCTAssertEqual(next?.turn, 1)
         } else {
             XCTAssertNil(next)
         }
@@ -512,18 +541,83 @@ class EventRepeatEnumeratorTests_EnumeratesUntilEnd: BaseEventRepeatTimeEnumerat
         let option = EventRepeatingOptions.EveryDay()
             |> \.interval .~ 3
         let enumerator = self.makeEnumerator(option)
-        let startTimeStamp = self.dummyDate("2023-05-20 01:00").timeIntervalSince1970
+        let startTimeStamp = RepeatingTimes(
+            time: .at(self.dummyDate("2023-05-20 01:00").timeIntervalSince1970),
+            turn: 0
+        )
         let endTime = self.dummyDate("2023-06-01 01:00").timeIntervalSince1970
         
         // when
-        let eventTimes = enumerator.nextEventTimes(from: .at(startTimeStamp), until: endTime)
+        let eventTimes = enumerator.nextEventTimes(from: startTimeStamp, until: endTime)
         
         // then
-        XCTAssertEqual(eventTimes, [
+        XCTAssertEqual(eventTimes.map { $0.time }, [
             .at(self.dummyDate("2023-05-23 01:00").timeIntervalSince1970),
             .at(self.dummyDate("2023-05-26 01:00").timeIntervalSince1970),
             .at(self.dummyDate("2023-05-29 01:00").timeIntervalSince1970),
             .at(self.dummyDate("2023-06-01 01:00").timeIntervalSince1970),
+        ])
+        XCTAssertEqual(eventTimes.map { $0.turn }, [
+            1, 2, 3, 4
+        ])
+    }
+}
+
+
+// MARK: - enumerate end by count
+
+final class EventRepeatEnumeratorTests_EnmeratesEndByCount: BaseEventRepeatTimeEnumeratorTests {
+    
+    func testEnumerator_enumerateByCount() {
+        // given
+        let option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
+        let enumerator = self.makeEnumerator(option, endOption: .count(3))
+        let startTimeStamp = RepeatingTimes(
+            time: .at(self.dummyDate("2023-05-20 01:00").timeIntervalSince1970),
+            turn: 0
+        )
+        let endTime = self.dummyDate("2024-06-01 01:00").timeIntervalSince1970
+        
+        // when
+        let eventTimes = enumerator.nextEventTimes(from: startTimeStamp, until: endTime)
+        
+        // then
+        XCTAssertEqual(eventTimes.map { $0.time }, [
+            .at(self.dummyDate("2023-05-23 01:00").timeIntervalSince1970),
+            .at(self.dummyDate("2023-05-26 01:00").timeIntervalSince1970),
+        ])
+        XCTAssertEqual(eventTimes.map { $0.turn }, [
+            1, 2
+        ])
+    }
+    
+    func testEnumerator_whenExcludeDateExists_excludeCount() {
+        // given
+        let option = EventRepeatingOptions.EveryDay() |> \.interval .~ 3
+        let excludes = ["2023-05-26 01:00", "2023-06-01 01:00"]
+            .map { self.dummyDate($0).timeIntervalSince1970 }
+            .map { EventTime.at($0) }
+            .map { $0.customKey }
+        let enumerator = self.makeEnumerator(
+            option, endOption: .count(4), without: Set(excludes)
+        )
+        let startTimeStamp = RepeatingTimes(
+            time: .at(self.dummyDate("2023-05-20 01:00").timeIntervalSince1970),
+            turn: 0
+        )
+        let endTime = self.dummyDate("2024-06-01 01:00").timeIntervalSince1970
+        
+        // when
+        let eventTimes = enumerator.nextEventTimes(from: startTimeStamp, until: endTime)
+        
+        // then
+        XCTAssertEqual(eventTimes.map { $0.time }, [
+            .at(self.dummyDate("2023-05-23 01:00").timeIntervalSince1970),
+            .at(self.dummyDate("2023-05-29 01:00").timeIntervalSince1970),
+            .at(self.dummyDate("2023-06-04 01:00").timeIntervalSince1970),
+        ])
+        XCTAssertEqual(eventTimes.map { $0.turn }, [
+            1, 2, 3
         ])
     }
 }

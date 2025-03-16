@@ -90,7 +90,7 @@ extension PagingUsecaseTests {
         return result
     }
     
-    // refresh + load more unitl end
+    // refresh + load more until end
     func testUsecase_refreshAndLoadMoreUntilEnd() {
         // given
         self.recordTotalResult()

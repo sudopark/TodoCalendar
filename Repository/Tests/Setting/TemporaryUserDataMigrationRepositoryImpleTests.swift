@@ -40,7 +40,7 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
             repeatingStartTime: 100,
             repeatOption: EventRepeatingOptions.EveryDay()
         )
-        |> \.repeatingEndTime .~ 1000
+        |> \.repeatingEndOption .~ .until(1000)
     }
     
     private var dummyNotificationOptions: [EventNotificationTimeOption] {

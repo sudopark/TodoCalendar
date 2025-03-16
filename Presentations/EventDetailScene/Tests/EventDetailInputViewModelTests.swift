@@ -112,7 +112,7 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
             repeatingStartTime: 0,
             repeatOption: EventRepeatingOptions.EveryDay()
         )
-        |> \.repeatingEndTime .~ 100
+        |> \.repeatingEndOption .~ .until(100)
     }
     
     private var dummyPreviousBasic: EventDetailBasicData {
@@ -591,7 +591,9 @@ extension EventDetailInputViewModelTests {
         )
         let dummyWithEndTime = EventRepeatingTimeSelectResult(
             text: dummy.text,
-            repeating: dummy.repeating |> \.repeatingEndTime .~ Date(timeIntervalSince1970: 0).add(days: 1)!.timeIntervalSince1970
+            repeating: dummy.repeating |> \.repeatingEndOption .~ .until(
+                Date(timeIntervalSince1970: 0).add(days: 1)!.timeIntervalSince1970
+            )
         )
         
         // when
