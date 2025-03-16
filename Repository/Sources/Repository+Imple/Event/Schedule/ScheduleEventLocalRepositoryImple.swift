@@ -76,7 +76,7 @@ extension ScheduleEventLocalRepositoryImple {
         let origin = try await self.localStorage.loadScheduleEvent(originEventId)
         guard let repeating = origin.repeating else { return origin }
         
-        let newRepeating = repeating |> \.repeatingEndTime .~ endTime
+        let newRepeating = repeating |> \.repeatingEndOption .~ .until(endTime)
         let updatedOrigin = origin |> \.repeating .~ newRepeating
         try await self.localStorage.updateScheduleEvent(updatedOrigin)
         return updatedOrigin
