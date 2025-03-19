@@ -50,9 +50,10 @@ extension HolidayRepositoryImpleTests {
         let countries = try? await repository.loadAvailableCountrise()
         
         // then
+        let algeria = countries?.first(where: { $0.name == "Algeria" })
         XCTAssertEqual(countries?.count, 3)
-        XCTAssertEqual(countries?.first?.code, "AD")
-        XCTAssertEqual(countries?.first?.name, "Andorra")
+        XCTAssertEqual(algeria?.code, "dz")
+        XCTAssertEqual(algeria?.name, "Algeria")
     }
     
     func testRepository_saveAndLoadLatestSelectedCountry() async {
@@ -181,22 +182,15 @@ extension HolidayRepositoryImpleTests {
         return [
             .init(
                 endpoint: HolidayAPIEndpoints.supportCountry,
+                header: [:],
+                parameters: [:],
                 resultJsonString: .success(
                 """
-                [
-                  {
-                    "countryCode": "AD",
-                    "name": "Andorra"
-                  },
-                  {
-                    "countryCode": "AL",
-                    "name": "Albania"
-                  },
-                  {
-                    "countryCode": "AR",
-                    "name": "Argentina"
-                  }
-                ]
+                {
+                  "Afghanistan": "en.af#holiday@group.v.calendar.google.com",
+                  "Albania": "en.al#holiday@group.v.calendar.google.com",
+                  "Algeria": "en.dz#holiday@group.v.calendar.google.com"
+                }
                 """
             )),
             .init(
