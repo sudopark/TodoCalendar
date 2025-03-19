@@ -26,7 +26,8 @@ public enum HolidayAPIEndpoints: Endpoint {
     public var subPath: String {
         switch self {
         case .supportCountry: 
-            return "AvailableCountries"
+            return "6b0374e86447b5ccbc82c8983289170a/raw/81fe89dddf2fa2cf72d62adad8d3c737c35efb5d/holidays.json"
+            
         case .holidays(let year, let countryCode):
             return "PublicHolidays/\(year)/\(countryCode)"
         }
@@ -257,6 +258,9 @@ public struct RemoteEnvironment: Sendable {
         }
         
         switch endpoint {
+        case .supportCountry as HolidayAPIEndpoints:
+            return "https://gist.githubusercontent.com/sudopark/\(endpoint.subPath)"
+            
         case let holiday as HolidayAPIEndpoints:
             return "https://date.nager.at/api/v3/\(holiday.subPath)"
             

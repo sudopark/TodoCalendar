@@ -27,7 +27,7 @@ public final class HolidayRepositoryImple: HolidayRepository {
         self.remoteAPI = remoteAPI
     }
     
-    private var selectedCountryKey: String { "user_holiday_country" }
+    private var selectedCountryKey: String { "user_holiday_country_v2" }
 }
 
 
@@ -38,9 +38,11 @@ extension HolidayRepositoryImple {
     private var host: String { "https://date.nager.at/api/v3" }
     
     public func loadAvailableCountrise() async throws -> [HolidaySupportCountry] {
-        let dtos: [HolidaySupportCountryDTO] = try await self.remoteAPI.request(
-            .get, HolidayAPIEndpoints.supportCountry
+        let jsonData = try await self.remoteAPI.request(
+            .get, HolidayAPIEndpoints.supportCountry,
+            with: [:], parameters: [:]
         )
+        let dtos = try HolidaySupportCountryDTO.decodeList(jsonData)
         return dtos.map { $0.country }
     }
     
@@ -78,6 +80,25 @@ extension HolidayRepositoryImple {
             var container = encoder.container(keyedBy: CodingKeys.self)
             try container.encode(self.country.code, forKey: .code)
             try container.encode(self.country.name, forKey: .name)
+        }
+        
+        static func decodeList(
+            _ jsonData: Data
+        ) throws -> [HolidaySupportCountryDTO] {
+            
+            guard let json = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any]
+            else {
+                throw RuntimeError("invalid form of json")
+            }
+            return json.compactMap { pair -> HolidaySupportCountryDTO? in
+                guard
+                    let id = pair.value as? String,
+                    let localeAndCountryCode = id.components(separatedBy: "#").first,
+                    let countryCode = localeAndCountryCode.components(separatedBy: ".").last
+                else { return nil }
+                
+                return .init(country: .init(code: countryCode, name: pair.key))
+            }
         }
     }
 }
