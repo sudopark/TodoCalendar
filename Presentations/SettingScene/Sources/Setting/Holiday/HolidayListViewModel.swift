@@ -149,12 +149,16 @@ extension HolidayListViewModelImple {
                 .compactMap { $0[year] }
                 .eraseToAnyPublisher()
         }
+        let sortItems: ([Holiday]) -> [Holiday] = { holidays in
+            return holidays.sorted(by: { $0.dateString < $1.dateString })
+        }
         let asItemModel: ([Holiday]) -> [HolidayItemModel] = { holidays in
             return holidays.compactMap { HolidayItemModel($0) }
         }
         return self.subject.currentYear
             .compactMap{ $0 }
             .flatMap(selectHolidayFromYear)
+            .map(sortItems)
             .map(asItemModel)
             .eraseToAnyPublisher()
     }
