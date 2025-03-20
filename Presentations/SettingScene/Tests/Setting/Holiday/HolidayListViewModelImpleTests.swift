@@ -64,7 +64,7 @@ extension HolidayListViewModelImpleTests {
     
     private func changeToUSA() {
         Task {
-            let country = HolidaySupportCountry(code: "US", name: "USA")
+            let country = HolidaySupportCountry(regionCode: "us", code: "US", name: "USA")
             try await self.stubHolidayUsecase.selectCountry(country)
         }
     }

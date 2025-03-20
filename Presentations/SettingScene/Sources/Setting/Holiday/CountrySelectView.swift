@@ -204,7 +204,7 @@ struct CountrySelectViewPreviewProvider: PreviewProvider {
         let eventHandlers = CountrySelectViewEventHandler()
         
         state.countries = (0..<20).map {
-            return HolidaySupportCountry(code: "code:\($0)", name: "name:\($0)")
+            return HolidaySupportCountry(regionCode: "region:\($0)", code: "code:\($0)", name: "name:\($0)")
         }
         state.selectedCountryCode = "code:3"
         state.isSavable = true

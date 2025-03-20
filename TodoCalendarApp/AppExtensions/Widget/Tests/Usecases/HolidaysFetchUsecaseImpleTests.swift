@@ -29,7 +29,7 @@ class HolidaysFetchUsecaseImpleTests: BaseTestCase {
     
     private func makeUsecase() -> HolidaysFetchUsecaseImple {
         
-        self.spyRepository.stubCurrentCountry = .init(code: "KR", name: "Korea")
+        self.spyRepository.stubCurrentCountry = .init(regionCode: "kr", code: "KR", name: "Korea")
         let holidayUsecase = HolidayUsecaseImple(
             holidayRepository: self.spyRepository,
             dataStore: .init(),
@@ -101,8 +101,8 @@ extension HolidaysFetchUsecaseImpleTests {
 private final class PrivateStubHolidayRepository: StubHolidayRepository {
     
     var loadHolidaysCallWith: [(Int, String)] = []
-    override func loadHolidays(_ year: Int, _ countryCode: String) async throws -> [Holiday] {
+    override func loadHolidays(_ year: Int, _ countryCode: String, _ locale: String) async throws -> [Holiday] {
         self.loadHolidaysCallWith.append((year, countryCode))
-        return try await super.loadHolidays(year, countryCode)
+        return try await super.loadHolidays(year, countryCode, locale)
     }
 }

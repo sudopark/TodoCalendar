@@ -254,7 +254,7 @@ extension EventSettingViewModelImpleTests {
         let viewModel = self.makeViewModel(accounts: [account])
         
         // when
-        let isConnectings = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar) {
+        let isConnectings = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar, timeout: 0.1) {
             viewModel.disconnectExternalCalendar(service.identifier)
         }
         

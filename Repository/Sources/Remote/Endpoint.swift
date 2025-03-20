@@ -21,15 +21,15 @@ public protocol Endpoint: Sendable {
 
 public enum HolidayAPIEndpoints: Endpoint {
     case supportCountry
-    case holidays(year: Int, countryCode: String)
+    case holidays
     
     public var subPath: String {
         switch self {
         case .supportCountry: 
-            return "6b0374e86447b5ccbc82c8983289170a/raw/81fe89dddf2fa2cf72d62adad8d3c737c35efb5d/holidays.json"
+            return "31ca6b64687c1436ca7e5f705017071a/raw/251dd3885ab5b7ac112140e7b0e6a542fe2901f5/google_calendar_country"
             
-        case .holidays(let year, let countryCode):
-            return "PublicHolidays/\(year)/\(countryCode)"
+        case .holidays:
+            return ""
         }
     }
 }
@@ -262,7 +262,8 @@ public struct RemoteEnvironment: Sendable {
             return "https://gist.githubusercontent.com/sudopark/\(endpoint.subPath)"
             
         case let holiday as HolidayAPIEndpoints:
-            return "https://date.nager.at/api/v3/\(holiday.subPath)"
+            let prefix = "\(calendarAPIHost)/v1/holiday"
+            return appendSubpathIfNotEmpty(prefix, endpoint.subPath)
             
         case let account as AccountAPIEndpoints:
             return "\(calendarAPIHost)/v1/accounts/\(account.subPath)"

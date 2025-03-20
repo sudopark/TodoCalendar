@@ -247,7 +247,7 @@ struct HolidayListViewPreviewProvider: PreviewProvider {
         state.countryName = "대한민국"
         
         state.holidays = (0..<15).compactMap { int in
-            let holiday = Holiday(dateString: "2023-01-\(int+1)", localName: "some: \(int)", name: "some: \(int)")
+            let holiday = Holiday(dateString: "2023-01-\(int+1)", name: "some: \(int)")
             return HolidayItemModel(holiday)
         }
         

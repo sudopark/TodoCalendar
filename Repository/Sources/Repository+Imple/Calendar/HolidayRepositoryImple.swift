@@ -38,11 +38,9 @@ extension HolidayRepositoryImple {
     private var host: String { "https://date.nager.at/api/v3" }
     
     public func loadAvailableCountrise() async throws -> [HolidaySupportCountry] {
-        let jsonData = try await self.remoteAPI.request(
-            .get, HolidayAPIEndpoints.supportCountry,
-            with: [:], parameters: [:]
+        let dtos: [HolidaySupportCountryDTO] = try await self.remoteAPI.request(
+            .get, HolidayAPIEndpoints.supportCountry
         )
-        let dtos = try HolidaySupportCountryDTO.decodeList(jsonData)
         return dtos.map { $0.country }
     }
     
@@ -59,7 +57,8 @@ extension HolidayRepositoryImple {
     private struct HolidaySupportCountryDTO: Codable {
         
         private enum CodingKeys: String, CodingKey {
-            case code = "countryCode"
+            case regionCode
+            case code
             case name
         }
         let country: HolidaySupportCountry
@@ -71,6 +70,7 @@ extension HolidayRepositoryImple {
         init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self.country = .init(
+                regionCode: try container.decode(String.self, forKey: .regionCode),
                 code: try container.decode(String.self, forKey: .code),
                 name: try container.decode(String.self, forKey: .name)
             )
@@ -78,27 +78,9 @@ extension HolidayRepositoryImple {
         
         func encode(to encoder: any Encoder) throws {
             var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(self.country.regionCode, forKey: .regionCode)
             try container.encode(self.country.code, forKey: .code)
             try container.encode(self.country.name, forKey: .name)
-        }
-        
-        static func decodeList(
-            _ jsonData: Data
-        ) throws -> [HolidaySupportCountryDTO] {
-            
-            guard let json = try JSONSerialization.jsonObject(with: jsonData) as? [String: Any]
-            else {
-                throw RuntimeError("invalid form of json")
-            }
-            return json.compactMap { pair -> HolidaySupportCountryDTO? in
-                guard
-                    let id = pair.value as? String,
-                    let localeAndCountryCode = id.components(separatedBy: "#").first,
-                    let countryCode = localeAndCountryCode.components(separatedBy: ".").last
-                else { return nil }
-                
-                return .init(country: .init(code: countryCode, name: pair.key))
-            }
         }
     }
 }
@@ -108,19 +90,24 @@ extension HolidayRepositoryImple {
 
 extension HolidayRepositoryImple {
     
-    public func loadHolidays(_ year: Int, _ countryCode: String) async throws -> [Holiday] {
-        if let cached = try? await self.loadHolidaysFromCache(year, countryCode),
+    public func loadHolidays(
+        _ year: Int, _ countryCode: String, _ locale: String
+    ) async throws -> [Holiday] {
+        if let cached = try? await self.loadHolidaysFromCache(year, countryCode, locale),
            cached.isEmpty == false {
             return cached
         }
-        let refreshed =  try await self.loadHolidaysFromRemote(year, countryCode)
-        try? await self.updateHolidayCache(year, countryCode, refreshed)
+        let refreshed =  try await self.loadHolidaysFromRemote(year, countryCode, locale)
+        try? await self.updateHolidayCache(year, countryCode, locale, refreshed)
         return refreshed
     }
     
-    private func loadHolidaysFromCache(_ year: Int, _ countryCode: String) async throws -> [Holiday] {
+    private func loadHolidaysFromCache(
+        _ year: Int, _ countryCode: String, _ locale: String
+    ) async throws -> [Holiday] {
         let query = HolidayTable.selectAll()
             .where { $0.countryCode == countryCode }
+            .where { $0.locale == locale }
             .where { $0.year == year }
         let mappging: (CursorIterator) throws -> Holiday = { cursor in
             return try HolidayTable.Entity(cursor).holiday
@@ -128,13 +115,17 @@ extension HolidayRepositoryImple {
         return try await self.sqliteService.async.run { try $0.load(query, mapping: mappging) }
     }
     
-    private func updateHolidayCache(_ year: Int, _ countryCode: String, _ holidays: [Holiday]) async throws {
+    private func updateHolidayCache(
+        _ year: Int, _ countryCode: String, _ locale: String,
+        _ holidays: [Holiday]
+    ) async throws {
         let entities: [HolidayTable.Entity] = holidays.map {
-            return .init(countryCode, year, $0)
+            return .init(countryCode, locale, year, $0)
         }
         try await self.sqliteService.async.run { db in
             let deleteQuery = HolidayTable.delete()
                 .where { $0.countryCode == countryCode }
+                .where { $0.locale == locale }
                 .where { $0.year == year }
             try? db.delete(HolidayTable.self, query: deleteQuery)
             
@@ -142,12 +133,20 @@ extension HolidayRepositoryImple {
         }
     }
     
-    private func loadHolidaysFromRemote(_ year: Int, _ countryCode: String) async throws -> [Holiday] {
-        let dtos: [HolidayDTO] = try await self.remoteAPI.request(
+    private func loadHolidaysFromRemote(
+        _ year: Int, _ countryCode: String, _ locale: String
+    ) async throws -> [Holiday] {
+        let params: [String: Any] = [
+            "year": year,
+            "locale": locale,
+            "code": countryCode
+        ]
+        let list: HolidayListDTO = try await self.remoteAPI.request(
             .get,
-            HolidayAPIEndpoints.holidays(year: year, countryCode: countryCode)
+            HolidayAPIEndpoints.holidays,
+            parameters: params
         )
-        return dtos.map { $0.holiday }
+        return list.items.map { $0.holiday }
     }
     
     public func clearHolidayCache() async throws {
@@ -159,16 +158,16 @@ extension HolidayRepositoryImple {
         enum Columns: String, TableColumn {
             case countryCode = "c_code"
             case year
+            case locale
             case dateString = "d_txt"
-            case localName
             case name
             
             var dataType: ColumnDataType {
                 switch self {
                 case .countryCode: return .text([.notNull])
                 case .year: return .integer([.notNull])
-                case .dateString: return .text([.notNull, .unique])
-                case .localName: return .text([.notNull])
+                case .locale: return .text([.notNull])
+                case .dateString: return .text([.notNull])
                 case .name: return .text([.notNull])
                 }
             }
@@ -177,10 +176,15 @@ extension HolidayRepositoryImple {
         struct Entity: RowValueType {
             let countryCode: String
             let year: Int
+            let locale: String
             let holiday: Holiday
             
-            init(_ countryCode: String, _ year: Int, _ holiday: Holiday) {
+            init(
+                _ countryCode: String, _ locale: String, _ year: Int,
+                _ holiday: Holiday
+            ) {
                 self.countryCode = countryCode
+                self.locale = locale
                 self.year = year
                 self.holiday = holiday
             }
@@ -188,9 +192,9 @@ extension HolidayRepositoryImple {
             init(_ cursor: CursorIterator) throws {
                 self.countryCode = try cursor.next().unwrap()
                 self.year = try cursor.next().unwrap()
+                self.locale = try cursor.next().unwrap()
                 self.holiday = .init(
                     dateString: try cursor.next().unwrap(),
-                    localName: try cursor.next().unwrap(),
                     name: try cursor.next().unwrap()
                 )
             }
@@ -198,25 +202,29 @@ extension HolidayRepositoryImple {
         
         typealias ColumnType = Columns
         typealias EntityType = Entity
-        static var tableName: String { "Holidays" }
+        static var tableName: String { "Holidays_v2" }
         
         static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
             switch column {
             case .countryCode: return entity.countryCode
+            case .locale: return entity.locale
             case .year: return entity.year
             case .dateString: return entity.holiday.dateString
-            case .localName: return entity.holiday.localName
             case .name: return entity.holiday.name
             }
         }
     }
     
+    private struct HolidayListDTO: Decodable {
+        let items: [HolidayDTO]
+    }
+    
     private struct HolidayDTO: Decodable {
         
         private enum CodingKeys: String, CodingKey {
+            case start
             case date
-            case localName
-            case name
+            case summary
         }
         let holiday: Holiday
         
@@ -226,10 +234,10 @@ extension HolidayRepositoryImple {
         
         init(from decoder: any Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
+            let startContainer = try container.nestedContainer(keyedBy: CodingKeys.self, forKey: .start)
             self.init(holiday: .init(
-                dateString: try container.decode(String.self, forKey: .date),
-                localName: try container.decode(String.self, forKey: .localName),
-                name: try container.decode(String.self, forKey: .name))
+                dateString: try startContainer.decode(String.self, forKey: .date),
+                name: try container.decode(String.self, forKey: .summary))
             )
         }
     }
