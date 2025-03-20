@@ -67,7 +67,7 @@ extension CountrySelectViewModelImple {
         self.holidayUsecase.currentSelectedCountry
             .first()
             .sink(receiveValue: { [weak self] country in
-                self?.subject.selectedCode.send(country.code)
+                self?.subject.selectedCode.send(country?.code)
             })
             .store(in: &self.cancellables)
         

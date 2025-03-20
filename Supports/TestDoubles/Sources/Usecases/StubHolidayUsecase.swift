@@ -53,9 +53,8 @@ open class StubHolidayUsecase: HolidayUsecase {
         }
     }
     
-    open var currentSelectedCountry: AnyPublisher<HolidaySupportCountry, Never> {
+    open var currentSelectedCountry: AnyPublisher<HolidaySupportCountry?, Never> {
         return self.currentSelectedCountrySubject
-            .compactMap { $0 }
             .eraseToAnyPublisher()
     }
     
@@ -103,7 +102,11 @@ open class StubHolidayUsecase: HolidayUsecase {
     open func holidays() -> AnyPublisher<[Int : [Holiday]], Never> {
         
         return self.currentSelectedCountry
-            .compactMap { country in
+            .map { country in
+                guard let country
+                else {
+                    return Just([Int:[Holiday]]()).eraseToAnyPublisher()
+                }
                 return self.holidaysSubject.compactMap { $0?[country.code] }
                     .eraseToAnyPublisher()
             }

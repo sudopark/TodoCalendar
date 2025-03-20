@@ -316,6 +316,7 @@
 "setting.holiday.list::sectionTitle" = "Holidays";
 "setting.holiday.country.title" = "Country";
 "setting.holiday.country.current::title" = "Current Country";
+"setting.holiday.country.current::placeHolder" = "Select Country";
 "setting.holiday.country.changeConfirm::title" = "Change country";
 "setting.holiday.country.changeConfirm::message" = "Do you want to change the country of your calendar?";
 "setting.holiday.country.changed::message" = "The country has changed.";

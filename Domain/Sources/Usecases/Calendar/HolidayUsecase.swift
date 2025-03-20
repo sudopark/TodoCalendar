@@ -21,7 +21,7 @@ public protocol HolidayUsecase {
     func refreshAvailableCountries() async throws
     func selectCountry(_ country: HolidaySupportCountry) async throws
     
-    var currentSelectedCountry: AnyPublisher<HolidaySupportCountry, Never> { get }
+    var currentSelectedCountry: AnyPublisher<HolidaySupportCountry?, Never> { get }
     var availableCountries: AnyPublisher<[HolidaySupportCountry], Never> { get }
     
     func refreshHolidays() async throws
@@ -133,10 +133,9 @@ extension HolidayUsecaseImple {
         )
     }
     
-    public var currentSelectedCountry: AnyPublisher<HolidaySupportCountry, Never> {
+    public var currentSelectedCountry: AnyPublisher<HolidaySupportCountry?, Never> {
         return self.dataStore
             .observe(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue)
-            .compactMap { $0 }
             .eraseToAnyPublisher()
     }
     
@@ -219,9 +218,12 @@ extension HolidayUsecaseImple {
     
     public func holidays() -> AnyPublisher<[Int: [Holiday]], Never> {
         
-        let asCountryHoliday: (HolidaySupportCountry) -> AnyPublisher<[Int: [Holiday]], Never>?
+        let asCountryHoliday: (HolidaySupportCountry?) -> AnyPublisher<[Int: [Holiday]], Never>?
         asCountryHoliday = { [weak self] country in
             guard let self = self else { return nil }
+            guard let country else {
+                return Just([:]).eraseToAnyPublisher()
+            }
             return self.dataStore
                 .observe(Holidays.self, key: ShareDataKeys.holidays.rawValue)
                 .compactMap { $0 }
