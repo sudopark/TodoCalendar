@@ -137,7 +137,7 @@ extension HolidayListViewModelImple {
     
     var currentCountryName: AnyPublisher<String, Never> {
         return self.holidayUsecase.currentSelectedCountry
-            .map { $0.name }
+            .map { $0?.name ?? "setting.holiday.country.current::placeHolder".localized() }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

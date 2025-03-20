@@ -55,17 +55,18 @@ extension HolidayUsecaseImpleTests {
     func testUsecase_whenWitLatestSelectedCountry_updateCurrentCountry() {
         // given
         let expect = expectation(description: "prepare 시에 저장된 국가 있으면 현재국가 업데이트됨")
+        expect.expectedFulfillmentCount = 2
         let usecase = self.makeUsecase(latestSelectedCountryCode: "US")
         
         // when
-        let current = self.waitFirstOutput(expect, for: usecase.currentSelectedCountry) {
+        let currents = self.waitOutputs(expect, for: usecase.currentSelectedCountry) {
             Task {
                 try await usecase.prepare()
             }
         }
         
         // then
-        XCTAssertEqual(current?.code, "US")
+        XCTAssertEqual(currents.map { $0?.code }, [nil, "US"])
     }
     
     func testUsecase_whenWithoutLatestSelectedCountry_updateCurrentCountryFromCurrentLocale() async {
@@ -74,7 +75,7 @@ extension HolidayUsecaseImpleTests {
         let usecase = self.makeUsecase(withCurrentLocale: "kr", latestSelectedCountryCode: nil)
         
         // when
-        let current = self.waitFirstOutput(expect, for: usecase.currentSelectedCountry) {
+        let current = self.waitFirstOutput(expect, for: usecase.currentSelectedCountry.compactMap { $0 }) {
             Task {
                 try await usecase.prepare()
             }
@@ -90,7 +91,6 @@ extension HolidayUsecaseImpleTests {
     func testUsecase_whenWithoutLatestSelectedCountryAndCurrentLocaleIsNotSupport_currentCountryIsNotProvided() {
         // given
         let expect = expectation(description: "prepare 시에 저장된 국가 없고 현재 locale도 지원하지 않으면 현재국가 업데이트 안함")
-        expect.isInverted = true
         let usecase = self.makeUsecase(withCurrentLocale: "not_support", latestSelectedCountryCode: nil)
         
         // when
@@ -98,7 +98,7 @@ extension HolidayUsecaseImpleTests {
             Task {
                 try await usecase.prepare()
             }
-        }
+        } ?? nil
         
         // then
         XCTAssertNil(current)
@@ -130,7 +130,7 @@ extension HolidayUsecaseImpleTests {
     func testUsecase_whenAfterSelectCountry_udpateCurrentCountry() {
         // given
         let expect = expectation(description: "선택국가 변경시에 선택국가 업데이트됨")
-        expect.expectedFulfillmentCount = 2
+        expect.expectedFulfillmentCount = 3
         let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
         
         // when
@@ -142,7 +142,7 @@ extension HolidayUsecaseImpleTests {
         }
         
         // then
-        XCTAssertEqual(countries.map { $0.code }, ["kr", "us"])
+        XCTAssertEqual(countries.map { $0?.code }, [nil, "kr", "us"])
     }
 }
 
@@ -153,10 +153,11 @@ extension HolidayUsecaseImpleTests {
     func testUsecase_provideCurrentSelectedCountryHolidays() {
         // given
         let expect = expectation(description: "마지막에 저장했던 국가 기준으로 현재 년도 국경일 제공")
+        expect.expectedFulfillmentCount = 2
         let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
         
         // when
-        let holidays = self.waitFirstOutput(expect, for: usecase.holidays()) {
+        let holidayss = self.waitOutputs(expect, for: usecase.holidays()) {
             Task {
                 try await usecase.prepare()
                 try await usecase.refreshHolidays(2023)
@@ -164,15 +165,16 @@ extension HolidayUsecaseImpleTests {
         }
         
         // then
-        XCTAssertEqual(holidays, [
-            2023: [.init(dateString: "2023", name: "kr")]
+        XCTAssertEqual(holidayss, [
+            [:],
+            [ 2023: [.init(dateString: "2023", name: "kr")] ]
         ])
     }
     
     func testUsecase_whenYearChanged_provideHolidays() {
         // given
         let expect = expectation(description: "조회 년도 변경시에 국경일 정보 추가해서 제공")
-        expect.expectedFulfillmentCount = 2
+        expect.expectedFulfillmentCount = 3
         let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
         
         // when
@@ -186,6 +188,7 @@ extension HolidayUsecaseImpleTests {
         
         // then
         XCTAssertEqual(holidayMaps, [
+            [:],
             [
                 2023: [.init(dateString: "2023", name: "kr")]
             ],
@@ -199,7 +202,7 @@ extension HolidayUsecaseImpleTests {
     func testUsecase_whenCountryChanged_provideChangedCountryHoliday() {
         // given
         let expect = expectation(description: "국가 변경시에 변경된 국가의 현재 년도 국경일 제공")
-        expect.expectedFulfillmentCount = 3
+        expect.expectedFulfillmentCount = 4
         let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
         
         // when
@@ -219,6 +222,8 @@ extension HolidayUsecaseImpleTests {
         
         // then
         XCTAssertEqual(holidayMaps, [
+            [:],
+            
             [2023: [.init(dateString: "2023", name: "kr")]],
             
             [2023: [.init(dateString: "2023", name: "us")]],
@@ -230,7 +235,7 @@ extension HolidayUsecaseImpleTests {
     func testUsecase_whenSelectOtherCountry_loadAllHolidaysForCurrentPreparedYears() {
         // given
         let expect = expectation(description: "국가변경시에 현재 로드되었던 년도에 해당하는 공휴일 모두 로드")
-        expect.expectedFulfillmentCount = 3
+        expect.expectedFulfillmentCount = 4
         let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
         
         // when
@@ -246,6 +251,7 @@ extension HolidayUsecaseImpleTests {
         
         // then
         XCTAssertEqual(holidayMap, [
+            [:],
             [
                 2023: [.init(dateString: "2023", name: "kr")]
             ],
@@ -266,7 +272,7 @@ extension HolidayUsecaseImpleTests {
         // given
         let expect = expectation(description: "현재 공휴일 refresh")
         let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
-        expect.expectedFulfillmentCount = 2
+        expect.expectedFulfillmentCount = 3
         
         // when
         let holidayMap = self.waitOutputs(expect, for: usecase.holidays()) {
@@ -280,6 +286,7 @@ extension HolidayUsecaseImpleTests {
         
         // then
         XCTAssertEqual(holidayMap, [
+            [:],
             [2023: [.init(dateString: "2023", name: "kr")]],
             [2023: [.init(dateString: "2023", name: "kr-v2")]]
         ])
