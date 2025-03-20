@@ -18,8 +18,8 @@ open class StubHolidayRepository: HolidayRepository {
     
     open func loadAvailableCountrise() async throws -> [HolidaySupportCountry] {
         return [
-            .init(code: "KR", name: "Korea"),
-            .init(code: "US", name: "USA")
+            .init(regionCode: "kr", code: "kr", name: "Korea"),
+            .init(regionCode: "us", code: "us", name: "USA")
         ]
     }
     
@@ -31,10 +31,12 @@ open class StubHolidayRepository: HolidayRepository {
         self.stubCurrentCountry = country
     }
     
-    open func loadHolidays(_ year: Int, _ countryCode: String) async throws -> [Holiday] {
-        let name = self.holidayCachCleared ? "dummy-v2" : "dummy"
+    open func loadHolidays(
+        _ year: Int, _ countryCode: String, _ locale: String
+    ) async throws -> [Holiday] {
+        let name = self.holidayCachCleared ? "\(countryCode)-v2" : "\(countryCode)"
         return [
-            .init(dateString: "\(year)", localName: "\(countryCode)", name: name)
+            .init(dateString: "\(year)", name: name)
         ]
     }
     

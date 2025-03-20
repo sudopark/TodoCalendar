@@ -35,12 +35,17 @@ public protocol HolidayUsecase {
 
 public protocol LocaleProvider {
     func currentRegionCode() -> String?
+    func currentLocaleIdentifier() -> String
 }
 
 extension Locale: LocaleProvider {
     
     public func currentRegionCode() -> String? {
         return self.region?.identifier
+    }
+    
+    public func currentLocaleIdentifier() -> String {
+        return Locale.current.identifier
     }
 }
 
@@ -89,11 +94,11 @@ extension HolidayUsecaseImple {
         if let savedCountry = try? await self.holidayRepository.loadLatestSelectedCountry() {
             return savedCountry
         }
-        guard let regionCode = self.localeProvider.currentRegionCode()?.uppercased()
+        guard let regionCode = self.localeProvider.currentRegionCode()?.lowercased()
         else { return nil }
         
         let supportCountries = try await self.loadAvailableCountriesWithUpdateStore()
-        guard let country = supportCountries.first(where: { $0.code == regionCode })
+        guard let country = supportCountries.first(where: { $0.regionCode == regionCode })
         else {
             return nil
         }
@@ -187,7 +192,10 @@ extension HolidayUsecaseImple {
     }
     
     private func refreshHolidays(_ country: HolidaySupportCountry, _ year: Int) async throws {
-        let holidays = try await self.holidayRepository.loadHolidays(year, country.code)
+        let locale = self.localeProvider.currentLocaleIdentifier()
+        let holidays = try await self.holidayRepository.loadHolidays(
+            year, country.code, locale
+        )
         let shareKey = ShareDataKeys.holidays.rawValue
         self.dataStore.update(Holidays.self, key: shareKey) { old in
             return (old ?? [:]) |> key(country.code) %~ {
@@ -203,7 +211,10 @@ extension HolidayUsecaseImple {
             throw RuntimeError("current country not prepared")
         }
         
-        return try await self.holidayRepository.loadHolidays(year, currentCountry.code)
+        let locale = self.localeProvider.currentLocaleIdentifier()
+        return try await self.holidayRepository.loadHolidays(
+            year, currentCountry.code, locale
+        )
     }
     
     public func holidays() -> AnyPublisher<[Int: [Holiday]], Never> {

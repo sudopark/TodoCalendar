@@ -911,6 +911,6 @@ private extension DayCellViewModel {
 private extension String {
     
     func asHoliday(_ name: String) -> Holiday {
-        return .init(dateString: self, localName: name, name: name)
+        return .init(dateString: self, name: name)
     }
 }

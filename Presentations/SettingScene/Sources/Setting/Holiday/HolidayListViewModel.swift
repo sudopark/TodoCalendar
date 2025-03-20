@@ -17,12 +17,10 @@ import Scenes
 
 struct HolidayItemModel {
     let name: String
-    let engName: String
     let dateText: String
     
     init?(_ holiday: Holiday) {
-        self.name = holiday.localName
-        self.engName = holiday.name
+        self.name = holiday.name
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         guard let date = formatter.date(from: holiday.dateString) else { return nil }

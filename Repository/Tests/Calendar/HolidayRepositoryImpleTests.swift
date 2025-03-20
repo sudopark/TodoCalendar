@@ -50,10 +50,10 @@ extension HolidayRepositoryImpleTests {
         let countries = try? await repository.loadAvailableCountrise()
         
         // then
-        let algeria = countries?.first(where: { $0.name == "Algeria" })
-        XCTAssertEqual(countries?.count, 3)
-        XCTAssertEqual(algeria?.code, "dz")
-        XCTAssertEqual(algeria?.name, "Algeria")
+        XCTAssertEqual(countries?.count, 2)
+        XCTAssertEqual(countries?.first?.code, "dutch")
+        XCTAssertEqual(countries?.first?.name, "Netherlands")
+        XCTAssertEqual(countries?.first?.regionCode, "nl")
     }
     
     func testRepository_saveAndLoadLatestSelectedCountry() async {
@@ -62,7 +62,7 @@ extension HolidayRepositoryImpleTests {
         
         // when
         let countryBeforeSave = try? await repository.loadLatestSelectedCountry()
-        let newCountry = HolidaySupportCountry(code: "new", name: "new country")
+        let newCountry = HolidaySupportCountry(regionCode: "nw", code: "new", name: "new country")
         try? await repository.saveSelectedCountry(newCountry)
         let countryAfterSave = try? await repository.loadLatestSelectedCountry()
         
@@ -78,11 +78,11 @@ extension HolidayRepositoryImpleTests {
 extension HolidayRepositoryImpleTests {
     
     private func makeRepositoryWithHolidayCaches(
-        _ pairs: [(Int, String)]
+        _ pairs: [(Int, String, String)]
     ) async -> HolidayRepositoryImple {
         let repository = self.makeRepository()
         await pairs.asyncForEach {
-            _ = try? await repository.loadHolidays($0.0, $0.1)
+            _ = try? await repository.loadHolidays($0.0, $0.1, $0.2)
         }
         self.spyRemote.didRequestedPath = nil
         return repository
@@ -94,11 +94,11 @@ extension HolidayRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let holidays = try? await repository.loadHolidays(2023, "KR")
+        let holidays = try? await repository.loadHolidays(2023, "KR", "ko")
         
         // then
         XCTAssertEqual(holidays, [
-            .init(dateString: "2023-01-01", localName: "새해", name: "New Year's Day")
+            .init(dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertNotNil(self.spyRemote.didRequestedPath)
     }
@@ -106,14 +106,14 @@ extension HolidayRepositoryImpleTests {
     // 캐시 있으면 캐시만 반환
     func testReposiotry_loadHolidays_withCache() async {
         // given
-        let repository = await self.makeRepositoryWithHolidayCaches([(2023, "KR")])
+        let repository = await self.makeRepositoryWithHolidayCaches([(2023, "KR", "ko")])
         
         // when
-        let holidays = try? await repository.loadHolidays(2023, "KR")
+        let holidays = try? await repository.loadHolidays(2023, "KR", "ko")
         
         // then
         XCTAssertEqual(holidays, [
-            .init(dateString: "2023-01-01", localName: "새해", name: "New Year's Day")
+            .init(dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertNil(self.spyRemote.didRequestedPath)
     }
@@ -122,19 +122,19 @@ extension HolidayRepositoryImpleTests {
     func testRepository_loadHolidaysFromCache_byCountry() async {
         // given
         let repository = await self.makeRepositoryWithHolidayCaches([
-            (2023, "KR"), (2023, "US")
+            (2023, "KR", "ko"), (2023, "US", "en")
         ])
         
         // when
-        let holidaysKR = try? await repository.loadHolidays(2023, "KR")
-        let holidaysUS = try? await repository.loadHolidays(2023, "US")
+        let holidaysKR = try? await repository.loadHolidays(2023, "KR", "ko")
+        let holidaysUS = try? await repository.loadHolidays(2023, "US", "en")
         
         // then
         XCTAssertEqual(holidaysKR, [
-            .init(dateString: "2023-01-01", localName: "새해", name: "New Year's Day")
+            .init(dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertEqual(holidaysUS, [
-            .init(dateString: "2023-01-01", localName: "New Year's Day", name: "New Year's Day")
+            .init(dateString: "2023-01-01", name: "New Year's Day")
         ])
     }
     
@@ -142,34 +142,34 @@ extension HolidayRepositoryImpleTests {
     func testReposiotry_loadHolidaysFromCache_byYear() async {
         // given
         let repository = await self.makeRepositoryWithHolidayCaches([
-            (2023, "KR"), (2022, "KR")
+            (2023, "KR", "ko"), (2022, "KR", "ko")
         ])
         
         // when
-        let holidays2023 = try? await repository.loadHolidays(2023, "KR")
-        let holidays2022 = try? await repository.loadHolidays(2022, "KR")
+        let holidays2023 = try? await repository.loadHolidays(2023, "KR", "ko")
+        let holidays2022 = try? await repository.loadHolidays(2022, "KR", "ko")
         
         // then
         XCTAssertEqual(holidays2023, [
-            .init(dateString: "2023-01-01", localName: "새해", name: "New Year's Day")
+            .init(dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertEqual(holidays2022, [
-            .init(dateString: "2022-01-01", localName: "새해", name: "New Year's Day")
+            .init(dateString: "2022-01-01", name: "새해")
         ])
     }
     
     // 캐시 삭제 이후에 다시 로드
     func testRepository_loadHolidaysAfterInvalidateCache() async {
         // given
-        let repository = await self.makeRepositoryWithHolidayCaches([(2023, "KR")])
+        let repository = await self.makeRepositoryWithHolidayCaches([(2023, "KR", "ko")])
         
         // when
         try? await repository.clearHolidayCache()
-        let holidays = try? await repository.loadHolidays(2023, "KR")
+        let holidays = try? await repository.loadHolidays(2023, "KR", "ko")
         
         // then
         XCTAssertEqual(holidays, [
-            .init(dateString: "2023-01-01", localName: "새해", name: "New Year's Day")
+            .init(dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertNotNil(self.spyRemote.didRequestedPath)
     }
@@ -182,78 +182,83 @@ extension HolidayRepositoryImpleTests {
         return [
             .init(
                 endpoint: HolidayAPIEndpoints.supportCountry,
-                header: [:],
-                parameters: [:],
+                resultJsonString: .success(
+                """
+                [
+                {
+                    "code": "dutch",
+                    "name": "Netherlands",
+                    "regionCode": "nl"
+                  },
+                  {
+                    "code": "vietnamese",
+                    "name": "Vietnam",
+                    "regionCode": "vn"
+                  },
+                ]
+                """
+            )),
+            .init(
+                endpoint: HolidayAPIEndpoints.holidays,
+                parameterCompare: { _, req in
+                    return req["year"] as? Int == 2023
+                    && req["locale"] as? String == "ko"
+                    && req["code"] as? String == "KR"
+                },
                 resultJsonString: .success(
                 """
                 {
-                  "Afghanistan": "en.af#holiday@group.v.calendar.google.com",
-                  "Albania": "en.al#holiday@group.v.calendar.google.com",
-                  "Algeria": "en.dz#holiday@group.v.calendar.google.com"
+                    "items": [
+                      {
+                        "start": {
+                            "date": "2023-01-01"
+                        },
+                        "summary": "새해"
+                      }
+                    ]
                 }
                 """
             )),
             .init(
-                endpoint: HolidayAPIEndpoints.holidays(year: 2023, countryCode: "KR"),
+                endpoint: HolidayAPIEndpoints.holidays,
+                parameterCompare: { _, req in
+                    return req["year"] as? Int == 2022
+                    && req["locale"] as? String == "ko"
+                    && req["code"] as? String == "KR"
+                },
                 resultJsonString: .success(
                 """
-                [
-                  {
-                    "date": "2023-01-01",
-                    "localName": "새해",
-                    "name": "New Year's Day",
-                    "countryCode": "KR",
-                    "fixed": true,
-                    "global": true,
-                    "counties": null,
-                    "launchYear": null,
-                    "types": [
-                      "Public"
+                {
+                    "items": [
+                      {
+                        "start": {
+                            "date": "2022-01-01"
+                        },
+                        "summary": "새해"
+                      }
                     ]
-                  }
-                ]
+                }
                 """
             )),
             .init(
-                endpoint: HolidayAPIEndpoints.holidays(year: 2022, countryCode: "KR"),
+                endpoint: HolidayAPIEndpoints.holidays,
+                parameterCompare: { _, req in
+                    return req["year"] as? Int == 2023
+                    && req["locale"] as? String == "en"
+                    && req["code"] as? String == "US"
+                },
                 resultJsonString: .success(
                 """
-                [
-                  {
-                    "date": "2022-01-01",
-                    "localName": "새해",
-                    "name": "New Year's Day",
-                    "countryCode": "KR",
-                    "fixed": true,
-                    "global": true,
-                    "counties": null,
-                    "launchYear": null,
-                    "types": [
-                      "Public"
+                {
+                    "items": [
+                      {
+                        "start": {
+                            "date": "2023-01-01"
+                        },
+                        "summary": "New Year's Day"
+                      }
                     ]
-                  }
-                ]
-                """
-            )),
-            .init(
-                endpoint: HolidayAPIEndpoints.holidays(year: 2023, countryCode: "US"),
-                resultJsonString: .success(
-                """
-                [
-                  {
-                    "date": "2023-01-01",
-                    "localName": "New Year's Day",
-                    "name": "New Year's Day",
-                    "countryCode": "US",
-                    "fixed": true,
-                    "global": true,
-                    "counties": null,
-                    "launchYear": null,
-                    "types": [
-                      "Public"
-                    ]
-                  }
-                ]
+                }
                 """
             )),
         ]

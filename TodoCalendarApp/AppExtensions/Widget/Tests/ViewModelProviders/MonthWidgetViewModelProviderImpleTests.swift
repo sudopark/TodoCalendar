@@ -218,9 +218,9 @@ private final class PrivateStubHolidayUsecase: StubHolidayUsecase {
             throw RuntimeError("no current country")
         }
         let holidays: [Holiday] = [
-            .init(dateString: "2023-09-12", localName: "some", name: "name"),
-            .init(dateString: "2023-09-13", localName: "some", name: "name"),
-            .init(dateString: "2023-09-14", localName: "some", name: "name")
+            .init(dateString: "2023-09-12", name: "name"),
+            .init(dateString: "2023-09-13", name: "name"),
+            .init(dateString: "2023-09-14", name: "name")
         ]
         return holidays
     }
