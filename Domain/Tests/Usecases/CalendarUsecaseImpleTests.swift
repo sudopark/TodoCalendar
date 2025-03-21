@@ -47,12 +47,12 @@ class CalendarUsecaseImpleTests: BaseTestCase, PublisherWaitable {
                 .init(dateString: "2023-05-05", name: "어린이날"),
                 .init(dateString: "2023-05-27", name: "부처님오신날"),
                 .init(dateString: "2023-06-06", name: "현충일"),
-                .init(dateString: "2023-06-06", name: "현충일"),
                 .init(dateString: "2023-08-15", name: "광복절"),
                 .init(dateString: "2023-09-28", name: "추석"),
                 .init(dateString: "2023-09-29", name: "추석"),
                 .init(dateString: "2023-09-30", name: "추석"),
                 .init(dateString: "2023-10-03", name: "개천절"),
+                .init(dateString: "2023-10-03", name: "개천절-중복"),
                 .init(dateString: "2023-10-09", name: "한글날"),
                 .init(dateString: "2023-12-25", name: "크리스마스")
             ]]
@@ -243,12 +243,15 @@ extension CalendarUsecaseImpleTests {
         
         // then
         let holidayExistDays = components?.weeks.flatMap { $0.days }
-            .filter { $0.holiday != nil }
+            .filter { !$0.holidays.isEmpty }
         XCTAssertEqual(holidayExistDays, [
-            .init(year: 2023, month: 09, day: 28, weekDay: 5) |> \.holiday .~ .init(dateString: "2023-09-28", name: "추석"),
-            .init(year: 2023, month: 09, day: 29, weekDay: 6) |> \.holiday .~ .init(dateString: "2023-09-29", name: "추석"),
-            .init(year: 2023, month: 09, day: 30, weekDay: 7) |> \.holiday .~ .init(dateString: "2023-09-30", name: "추석"),
-            .init(year: 2023, month: 10, day: 03, weekDay: 3) |> \.holiday .~ .init(dateString: "2023-10-03", name: "개천절"),
+            .init(year: 2023, month: 09, day: 28, weekDay: 5) |> \.holidays .~ [.init(dateString: "2023-09-28", name: "추석")],
+            .init(year: 2023, month: 09, day: 29, weekDay: 6) |> \.holidays .~ [.init(dateString: "2023-09-29", name: "추석")],
+            .init(year: 2023, month: 09, day: 30, weekDay: 7) |> \.holidays .~ [.init(dateString: "2023-09-30", name: "추석")],
+            .init(year: 2023, month: 10, day: 03, weekDay: 3) |> \.holidays .~ [
+                .init(dateString: "2023-10-03", name: "개천절"),
+                .init(dateString: "2023-10-03", name: "개천절-중복")
+            ],
         ])
     }
 }
