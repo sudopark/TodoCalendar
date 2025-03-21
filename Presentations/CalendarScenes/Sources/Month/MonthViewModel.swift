@@ -82,7 +82,7 @@ public struct DayCellViewModel: Equatable {
         self.day = day.day
         self.isNotCurrentMonth = day.month != month
         let dayOfWeek = DayOfWeeks(rawValue: day.weekDay)
-        switch (dayOfWeek, day.holiday != nil) {
+        switch (dayOfWeek, !day.holidays.isEmpty ) {
         case (_, true):
             self.accentDay = .holiday
         case (.sunday, _):
@@ -462,7 +462,7 @@ private extension CalendarComponent {
     func holidayCalendarEvents(with timeZone: TimeZone) -> [any CalendarEvent] {
         return self.weeks
             .flatMap { $0.days }
-            .compactMap { $0.holiday }
+            .flatMap { $0.holidays }
             .compactMap { HolidayCalendarEvent($0, in: timeZone) }
     }
 }
@@ -488,7 +488,7 @@ private extension CurrentSelectDayModel {
         self.init(
             day.year, day.month, day.day, component, timeZone
         )
-        self.holiday = component.holiday(day.month, day.day)
+        self.holidays = component.holiday(day.month, day.day) ?? []
     }
     
     init?(
@@ -497,7 +497,7 @@ private extension CurrentSelectDayModel {
         _ timeZone: TimeZone
     ) {
         self.init(today.year, today.month, today.day, component, timeZone)
-        self.holiday = component.holiday(today.month, today.day)
+        self.holidays = component.holiday(today.month, today.day) ?? []
     }
     
     init?(
@@ -507,7 +507,7 @@ private extension CurrentSelectDayModel {
         guard let firstDay = month.weeks.flatMap({ $0.days }).first(where: { $0.month == month.month && $0.day == 1 })
         else { return nil }
         self.init(firstDay.year, firstDay.month, firstDay.day, month, timeZone)
-        self.holiday = month.holiday(firstDay.month, firstDay.day)
+        self.holidays = month.holiday(firstDay.month, firstDay.day) ?? []
     }
     
     private init?(

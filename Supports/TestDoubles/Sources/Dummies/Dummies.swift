@@ -88,11 +88,13 @@ extension CalendarComponent {
 private extension CalendarComponent {
     
     func applyHolidays(_ holidays: [Holiday]) -> CalendarComponent {
-        let holidaysMap = holidays.asDictionary { $0.dateString }
+        let holidaysMap = holidays.reduce(into: [String: [Holiday]]()) { acc, holiday in
+            acc[holiday.dateString] = (acc[holiday.dateString] ?? []) + [holiday]
+        }
         let newWeeks = self.weeks.map { week -> CalendarComponent.Week in
             let newDays = week.days.map { day -> CalendarComponent.Day in
                 let dateString = "\(day.year)-\(day.month.withLeadingZero())-\(day.day.withLeadingZero())"
-                return day |> \.holiday .~ holidaysMap[dateString]
+                return day |> \.holidays .~ (holidaysMap[dateString] ?? [])
             }
             return .init(days: newDays)
         }

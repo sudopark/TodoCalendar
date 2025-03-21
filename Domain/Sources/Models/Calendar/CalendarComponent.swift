@@ -28,7 +28,7 @@ public struct CalendarComponent: Equatable {
         public let month: Int
         public let day: Int
         public let weekDay: Int
-        public var holiday: Holiday?
+        public var holidays: [Holiday] = []
         
         public var identifier: String {
             return "\(year)-\(month)-\(day)"
@@ -62,11 +62,11 @@ public struct CalendarComponent: Equatable {
     public let month: Int
     public var weeks: [Week]
     
-    public func holiday(_ month: Int, _ day: Int) -> Holiday? {
+    public func holiday(_ month: Int, _ day: Int) -> [Holiday]? {
         return self.weeks
             .flatMap { $0.days }
             .first(where: { $0.month == month && $0.day == day })?
-            .holiday
+            .holidays
     }
     
     public init(year: Int, month: Int, weeks: [Week]) {
@@ -76,11 +76,13 @@ public struct CalendarComponent: Equatable {
     }
     
     public func update(holidays: [Holiday]) -> CalendarComponent {
-        let holidayMap = holidays.reduce(into: [String: Holiday]()) { $0[$1.dateString] = $1 }
+        let holidayMap = holidays.reduce(into: [String: [Holiday]]()) {
+            $0[$1.dateString] = ($0[$1.dateString] ?? []) + [$1]
+        }
         let newWeeks = self.weeks.map { week -> Week in
             let newDays = week.days.map { day -> Day in
                 let dateString = "\(day.year)-\(day.month.withLeadingZero())-\(day.day.withLeadingZero())"
-                return day |> \.holiday .~ holidayMap[dateString]
+                return day |> \.holidays .~ (holidayMap[dateString] ?? [])
             }
             return .init(days: newDays)
         }

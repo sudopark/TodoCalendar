@@ -668,7 +668,7 @@ extension MonthViewModelImpleTests {
             // then
             XCTAssertEqual(model?.identifier, expectDay)
             XCTAssertEqual(eventIds, expectEventIds)
-            XCTAssertEqual(model?.holiday != nil, expectHasHoliday)
+            XCTAssertEqual(!(model?.holidays.isEmpty ?? true), expectHasHoliday)
             XCTAssertEqual(foremostEvnetIdsInThisWeek, expectForemost)
         }
         
