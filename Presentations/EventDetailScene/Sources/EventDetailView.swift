@@ -652,7 +652,7 @@ struct EventDetailView: View {
                     ? self.$state.selectedStartDate : self.$state.selectedEndDate,
                 displayedComponents: self.state.isAllDay ? [.date] : [.date, .hourAndMinute]
             )
-            .datePickerStyle(.wheel)
+            .datePickerStyle(.compact)
             .onReceive(selecting == .start ? self.state.$selectedStartDate : self.state.$selectedEndDate) { date in
                 if selecting == .start {
                     self.selectStartTime(date)
