@@ -17,12 +17,10 @@ import Scenes
 
 struct HolidayItemModel {
     let name: String
-    let engName: String
     let dateText: String
     
     init?(_ holiday: Holiday) {
-        self.name = holiday.localName
-        self.engName = holiday.name
+        self.name = holiday.name
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd"
         guard let date = formatter.date(from: holiday.dateString) else { return nil }
@@ -139,7 +137,7 @@ extension HolidayListViewModelImple {
     
     var currentCountryName: AnyPublisher<String, Never> {
         return self.holidayUsecase.currentSelectedCountry
-            .map { $0.name }
+            .map { $0?.name ?? "setting.holiday.country.current::placeHolder".localized() }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
@@ -151,12 +149,16 @@ extension HolidayListViewModelImple {
                 .compactMap { $0[year] }
                 .eraseToAnyPublisher()
         }
+        let sortItems: ([Holiday]) -> [Holiday] = { holidays in
+            return holidays.sorted(by: { $0.dateString < $1.dateString })
+        }
         let asItemModel: ([Holiday]) -> [HolidayItemModel] = { holidays in
             return holidays.compactMap { HolidayItemModel($0) }
         }
         return self.subject.currentYear
             .compactMap{ $0 }
             .flatMap(selectHolidayFromYear)
+            .map(sortItems)
             .map(asItemModel)
             .eraseToAnyPublisher()
     }

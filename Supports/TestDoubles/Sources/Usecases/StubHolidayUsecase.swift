@@ -15,7 +15,7 @@ import Optics
 open class StubHolidayUsecase: HolidayUsecase {
     
     public init(
-        country: HolidaySupportCountry = .init(code: "KST", name: "Korea"),
+        country: HolidaySupportCountry = .init(regionCode: "kr", code: "KST", name: "Korea"),
         holidays: [Int: [Holiday]]? = nil
     ) {
         self.currentSelectedCountrySubject.send(country)
@@ -26,15 +26,15 @@ open class StubHolidayUsecase: HolidayUsecase {
     }
     
     open func prepare() async throws {
-        let country = HolidaySupportCountry(code: "KST", name: "Korea")
+        let country = HolidaySupportCountry(regionCode: "kr", code: "KST", name: "Korea")
         self.currentSelectedCountrySubject.send(country)
     }
     
     open func refreshAvailableCountries() async throws {
         let countries: [HolidaySupportCountry] = [
-            .init(code: "KST", name: "Korea"),
-            .init(code: "US", name: "USA"),
-            .init(code: "Some", name: "Dummy")
+            .init(regionCode: "kr", code: "KST", name: "Korea"),
+            .init(regionCode: "us", code: "US", name: "USA"),
+            .init(regionCode: "sm", code: "Some", name: "Dummy")
         ]
         self.availableCountriesSubject.send(countries)
     }
@@ -53,9 +53,8 @@ open class StubHolidayUsecase: HolidayUsecase {
         }
     }
     
-    open var currentSelectedCountry: AnyPublisher<HolidaySupportCountry, Never> {
+    open var currentSelectedCountry: AnyPublisher<HolidaySupportCountry?, Never> {
         return self.currentSelectedCountrySubject
-            .compactMap { $0 }
             .eraseToAnyPublisher()
     }
     
@@ -77,7 +76,10 @@ open class StubHolidayUsecase: HolidayUsecase {
         guard let country = self.currentSelectedCountrySubject.value
         else { return }
         let holidays = (1...5).map { int -> Holiday in
-            return Holiday(dateString: "\(year)-0\(int)-0\(int)", localName: "holiday-\(int)-\(country.code)", name: "holiday-\(int)-\(country.code)")
+            return Holiday(
+                dateString: "\(year)-0\(int)-0\(int)",
+                name: "holiday-\(int)-\(country.code)"
+            )
         }
         let oldMap = self.holidaysSubject.value ?? [:]
         let newHolidays = (oldMap[country.code] ?? [:]) |> key(year) .~ holidays
@@ -89,7 +91,10 @@ open class StubHolidayUsecase: HolidayUsecase {
         guard let country = self.currentSelectedCountrySubject.value
         else { return [] }
         let holidays = (1...5).map { int -> Holiday in
-            return Holiday(dateString: "\(year)-0\(int)-0\(int)", localName: "holiday-\(int)-\(country.code)", name: "holiday-\(int)-\(country.code)")
+            return Holiday(
+                dateString: "\(year)-0\(int)-0\(int)",
+                name: "holiday-\(int)-\(country.code)"
+            )
         }
         return holidays
     }
@@ -97,7 +102,11 @@ open class StubHolidayUsecase: HolidayUsecase {
     open func holidays() -> AnyPublisher<[Int : [Holiday]], Never> {
         
         return self.currentSelectedCountry
-            .compactMap { country in
+            .map { country in
+                guard let country
+                else {
+                    return Just([Int:[Holiday]]()).eraseToAnyPublisher()
+                }
                 return self.holidaysSubject.compactMap { $0?[country.code] }
                     .eraseToAnyPublisher()
             }

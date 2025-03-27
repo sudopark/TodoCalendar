@@ -61,7 +61,7 @@ extension ScheduleEventUsecaseImple {
         }
         let newEvent = try await self.scheduleRepository.makeScheduleEvent(params)
         let shareKey = ShareDataKeys.schedules.rawValue
-        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+        self.sharedDataStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: shareKey) {
             ( $0 ?? .init() ).append(newEvent)
         }
         return newEvent
@@ -94,7 +94,7 @@ extension ScheduleEventUsecaseImple {
     ) async throws -> ScheduleEvent {
         let updated = try await self.scheduleRepository.updateScheduleEvent(eventId, params)
         let shareKey = ShareDataKeys.schedules.rawValue
-        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+        self.sharedDataStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: shareKey) {
             ($0 ?? .init()).append(updated)
         }
         return updated
@@ -112,7 +112,7 @@ extension ScheduleEventUsecaseImple {
             asNew: params.asMakeParams()
         )
         let shareKey = ShareDataKeys.schedules.rawValue
-        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+        self.sharedDataStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: shareKey) {
             ($0 ?? .init())
                 .invalidate(originEventId)
                 .append(excludeResult.newEvent)
@@ -131,7 +131,7 @@ extension ScheduleEventUsecaseImple {
             originEventId, fromTime: fromTime.lowerBoundWithFixed-1, params
         )
         let shareKey = ShareDataKeys.schedules.rawValue
-        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+        self.sharedDataStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: shareKey) {
             ($0 ?? .init())
                 .invalidate(originEventId)
                 .append(updateResult.reppatingEndOriginEvent)
@@ -149,7 +149,7 @@ extension ScheduleEventUsecaseImple {
         )
         
         let shareKey = ShareDataKeys.schedules.rawValue
-        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+        self.sharedDataStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: shareKey) {
             ($0 ?? .init())
                 .replace(eventId, ifExists: result.nextRepeatingEvnet)
         }
@@ -157,7 +157,7 @@ extension ScheduleEventUsecaseImple {
     
     public func handleRemovedSchedules(_ ids: [String]) {
         let shareKey = ShareDataKeys.schedules.rawValue
-        self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: shareKey) {
+        self.sharedDataStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: shareKey) {
             return ids.reduce($0 ?? .init()) { acc, id in
                 return acc.invalidate(id)
             }
@@ -173,7 +173,7 @@ extension ScheduleEventUsecaseImple {
         let updateCache: ([ScheduleEvent]) -> Void = { [weak self] events in
             guard let self = self else { return }
             let key = ShareDataKeys.schedules
-            self.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: key.rawValue) {
+            self.sharedDataStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: key.rawValue) {
                 return ($0 ?? .init()).refresh(events, in: period)
             }
         }
@@ -190,36 +190,20 @@ extension ScheduleEventUsecaseImple {
     public func scheduleEvents(in period: Range<TimeInterval>)  -> AnyPublisher<[ScheduleEvent], Never> {
         let key = ShareDataKeys.schedules
         return self.sharedDataStore
-            .observe(MemorizedScheduleEventsContainer.self, key: key.rawValue)
-            .map { $0?.scheduleEvents(in: period) ?? [] }
+            .observe(MemorizedEventsContainer<ScheduleEvent>.self, key: key.rawValue)
+            .map { $0?.events(in: period) ?? [] }
             .eraseToAnyPublisher()
     }
     
     public func scheduleEvent(_ eventId: String) -> AnyPublisher<ScheduleEvent, any Error> {
         let updateStore: (ScheduleEvent) -> Void = { [weak self] schedule in
             let key = ShareDataKeys.schedules.rawValue
-            self?.sharedDataStore.update(MemorizedScheduleEventsContainer.self, key: key) {
+            self?.sharedDataStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: key) {
                 ($0 ?? .init()).append(schedule)
             }
         }
         return self.scheduleRepository.scheduleEvent(eventId)
             .handleEvents(receiveOutput: updateStore)
             .eraseToAnyPublisher()
-    }
-}
-
-
-private extension MemorizedScheduleEventsContainer {
-    
-    func replace(
-        _ eventId: String, ifExists next: ScheduleEvent?
-    ) -> MemorizedScheduleEventsContainer {
-        
-        guard let next else {
-            return self.invalidate(eventId)
-        }
-        
-        return self.invalidate(eventId)
-            .append(next)
     }
 }

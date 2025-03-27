@@ -10,14 +10,45 @@ import Prelude
 import Optics
 
 
-public struct MemorizedScheduleEventsContainer {
+// MARK: - MemorizableEventType
+
+public protocol MemorizableEventType {
+    var uuid: String { get }
+    var time: EventTime { get }
+    var repeating: EventRepeating? { get }
+    var nextRepeatingTimes: [RepeatingTimes] { get set }
+    var repeatingTimeToExcludes: Set<String> { get }
+}
+
+extension MemorizableEventType {
+    
+    func isOverlap(with period: Range<TimeInterval>) -> Bool {
+        if let repeating {
+            return repeating.isOverlap(with: period, for: self.time)
+        } else {
+            return time.isRoughlyOverlap(with: period)
+        }
+    }
+    
+    fileprivate func isEqualEventTimeAndRepeatOption(_ old: Self) -> Bool {
+        return self.time == old.time
+            && self.repeating == old.repeating
+    }
+}
+
+extension ScheduleEvent: MemorizableEventType { }
+
+
+// MARK: - MemorizedEventsContainer
+
+public struct MemorizedEventsContainer<Event: MemorizableEventType> {
         
-    private struct CacheItem {
+    private struct CacheItem<Item: MemorizableEventType> {
         
-        var event: ScheduleEvent
-        var calculatedRangeAndTimes: [(Range<TimeInterval>, [ScheduleEvent.RepeatingTimes])] = []
+        var event: Item
+        var calculatedRangeAndTimes: [(Range<TimeInterval>, [RepeatingTimes])] = []
         
-        init(event: ScheduleEvent) {
+        init(event: Item) {
             self.event = event
         }
         
@@ -39,24 +70,24 @@ public struct MemorizedScheduleEventsContainer {
             })
         }
         
-        mutating func append(new : (Range<TimeInterval>, [ScheduleEvent.RepeatingTimes])) {
+        mutating func append(new : (Range<TimeInterval>, [RepeatingTimes])) {
             self.calculatedRangeAndTimes.append(new)
             self.event.nextRepeatingTimes = self.calculatedRangeAndTimes.flatMap { $0.1 }
         }
         
-        func replaced(_ newEvent: ScheduleEvent) -> CacheItem {
+        func replaced(_ newEvent: Item) -> CacheItem {
             return self
                 |> \.event .~ (newEvent |> \.nextRepeatingTimes .~ self.event.nextRepeatingTimes)
         }
     }
     
-    private var caches: [String: CacheItem] = [:]
+    private var caches: [String: CacheItem<Event>] = [:]
     
-    public func allCachedEvents() -> [ScheduleEvent] {
+    public func allCachedEvents() -> [Event] {
         return self.caches.values.map { $0.event }
     }
     
-    private init(caches: [String : CacheItem]) {
+    private init(caches: [String : CacheItem<Event>]) {
         self.caches = caches
     }
     
@@ -64,9 +95,9 @@ public struct MemorizedScheduleEventsContainer {
 }
 
 
-extension MemorizedScheduleEventsContainer {
+extension MemorizedEventsContainer {
     
-    public func scheduleEvents(in period: Range<TimeInterval>) -> [ScheduleEvent] {
+    public func events(in period: Range<TimeInterval>) -> [Event] {
         return self.caches.values
             .map { $0 }
             .filter { $0.event.isOverlap(with: period) }
@@ -77,30 +108,30 @@ extension MemorizedScheduleEventsContainer {
             .map { $0.event }
     }
     
-    public func scheduleEvnet(_ eventId: String) -> ScheduleEvent? {
+    public func evnet(_ eventId: String) -> Event? {
         return self.caches[eventId]?.event
     }
     
-    public func invalidate(_ eventId: String) -> MemorizedScheduleEventsContainer {
-        return MemorizedScheduleEventsContainer(
+    public func invalidate(_ eventId: String) -> MemorizedEventsContainer {
+        return MemorizedEventsContainer(
             caches: self.caches |> key(eventId) .~ nil
         )
     }
     
-    public func append(_ newEvent: ScheduleEvent) -> MemorizedScheduleEventsContainer {
-        let newItem: CacheItem
+    public func append(_ newEvent: Event) -> MemorizedEventsContainer {
+        let newItem: CacheItem<Event>
         if let cached = self.caches[newEvent.uuid],
            newEvent.isEqualEventTimeAndRepeatOption(cached.event) {
             newItem = cached.replaced(newEvent)
         } else {
             newItem = .init(event: newEvent)
         }
-        return MemorizedScheduleEventsContainer(
+        return MemorizedEventsContainer(
             caches: self.caches |> key(newEvent.uuid) .~ newItem
         )
     }
     
-    public func refresh(_ events: [ScheduleEvent], in period: Range<TimeInterval>) -> MemorizedScheduleEventsContainer {
+    public func refresh(_ events: [Event], in period: Range<TimeInterval>) -> MemorizedEventsContainer {
         
         let cachedInPeriodMap = self.caches.values
             .filter { $0.event.isOverlap(with: period) }
@@ -124,11 +155,23 @@ extension MemorizedScheduleEventsContainer {
         return .init(caches: newItems)
     }
     
+    func replace(
+        _ eventId: String, ifExists next: Event?
+    ) -> MemorizedEventsContainer {
+        
+        guard let next else {
+            return self.invalidate(eventId)
+        }
+        
+        return self.invalidate(eventId)
+            .append(next)
+    }
+    
     private func calculateRepeatingTimes(
-        _ event: ScheduleEvent,
-        with cached: CacheItem?,
+        _ event: Event,
+        with cached: CacheItem<Event>?,
         in period: Range<TimeInterval>
-    ) -> CacheItem {
+    ) -> CacheItem<Event> {
         guard let repeating = event.repeating
         else {
             return .init(event: event)
@@ -160,21 +203,21 @@ extension MemorizedScheduleEventsContainer {
         return newItem
     }
     
-    private struct BlockCalculateResult {
+    private struct BlockCalculateResult<Item: MemorizableEventType> {
         let newRange: Range<TimeInterval>?
-        let newCalculated: [ScheduleEvent.RepeatingTimes]
-        var cacheItem: CacheItem
+        let newCalculated: [RepeatingTimes]
+        var cacheItem: CacheItem<Item>
         init(
             _ newRange: Range<TimeInterval>?,
-            _ newCalculated: [ScheduleEvent.RepeatingTimes],
-            _ cacheItem: CacheItem
+            _ newCalculated: [RepeatingTimes],
+            _ cacheItem: CacheItem<Item>
         ) {
             self.newRange = newRange
             self.newCalculated = newCalculated
             self.cacheItem = cacheItem
         }
         
-        static func empty(_ cachedItem: CacheItem) -> BlockCalculateResult {
+        static func empty(_ cachedItem: CacheItem<Item>) -> BlockCalculateResult {
             return .init(nil, [], cachedItem)
         }
     }
@@ -185,10 +228,10 @@ extension MemorizedScheduleEventsContainer {
     // 달 조회를 많이 할수록 파편화돤 캐시블럭은 많아지겠지만 계산시에 return 2 or return 5에 걸리고 해당 연산량은 그리 크지 않을것으로 예상
     private func calculateRepeatingTimesBlock(
         _ enumerator: EventRepeatTimeEnumerator,
-        from start: ScheduleEvent.RepeatingTimes,
+        from start: RepeatingTimes,
         unitl end: TimeInterval,
-        acc result: BlockCalculateResult
-    ) -> BlockCalculateResult {
+        acc result: BlockCalculateResult<Event>
+    ) -> BlockCalculateResult<Event> {
         let startTime = start.time.lowerBoundWithFixed
         // return 1
         guard startTime < end else { return result }
@@ -251,23 +294,15 @@ extension MemorizedScheduleEventsContainer {
     
     private func enumerateEventTimes(
         _ enumerator: EventRepeatTimeEnumerator,
-        from start: ScheduleEvent.RepeatingTimes,
+        from start: RepeatingTimes,
         until end: TimeInterval
-    ) -> [ScheduleEvent.RepeatingTimes] {
+    ) -> [RepeatingTimes] {
         let nextFirstTurn = start.turn + 1
         return enumerator.nextEventTimes(from: start.time, until: end)
             .enumerated()
-            .map { pair -> ScheduleEvent.RepeatingTimes in
+            .map { pair -> RepeatingTimes in
                 return .init(time: pair.element, turn: nextFirstTurn + pair.offset)
             }
-    }
-}
-
-private extension ScheduleEvent {
-    
-    func isEqualEventTimeAndRepeatOption(_ old: ScheduleEvent) -> Bool {
-        return self.time == old.time
-            && self.repeating == old.repeating
     }
 }
 

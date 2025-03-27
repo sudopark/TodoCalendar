@@ -19,6 +19,11 @@ public enum EventTagId: Sendable, Hashable {
         guard case let .custom(id) = self else { return nil }
         return id
     }
+    
+    public var externalServiceId: String? {
+        guard case .externalCalendar(let serviceId, _) = self else { return nil }
+        return serviceId
+    }
 }
 
 public protocol EventTag: Sendable, Equatable {

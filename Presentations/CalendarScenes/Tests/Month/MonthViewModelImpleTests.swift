@@ -668,7 +668,7 @@ extension MonthViewModelImpleTests {
             // then
             XCTAssertEqual(model?.identifier, expectDay)
             XCTAssertEqual(eventIds, expectEventIds)
-            XCTAssertEqual(model?.holiday != nil, expectHasHoliday)
+            XCTAssertEqual(!(model?.holidays.isEmpty ?? true), expectHasHoliday)
             XCTAssertEqual(foremostEvnetIdsInThisWeek, expectForemost)
         }
         
@@ -911,6 +911,6 @@ private extension DayCellViewModel {
 private extension String {
     
     func asHoliday(_ name: String) -> Holiday {
-        return .init(dateString: self, localName: name, name: name)
+        return .init(dateString: self, name: name)
     }
 }

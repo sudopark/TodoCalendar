@@ -39,7 +39,7 @@ class HolidayListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         return calendar.component(.year, from: Date())
     }
     
-    private func makeUsecaseWithStubHoliday() -> HolidayListViewModelImple {
+    private func makeViewModelWithStubHoliday() -> HolidayListViewModelImple {
         let expect = expectation(description: "wait holiday")
         expect.assertForOverFulfill = false
         
@@ -58,15 +58,40 @@ class HolidayListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         
         return viewModel
     }
+    
+    private func makeViewModelWithoutHolidays() -> HolidayListViewModelImple {
+        let calendarSettingUsecase = StubCalendarSettingUsecase()
+        calendarSettingUsecase.prepare()
+        let viewModel = HolidayListViewModelImple(
+            holidayUsecase: NoCountryStubHolidayUsecase(),
+            calendarSettingUscase: calendarSettingUsecase
+        )
+        viewModel.router = self.spyRouter
+        return viewModel
+    }
 }
 
 extension HolidayListViewModelImpleTests {
     
     private func changeToUSA() {
         Task {
-            let country = HolidaySupportCountry(code: "US", name: "USA")
+            let country = HolidaySupportCountry(regionCode: "us", code: "US", name: "USA")
             try await self.stubHolidayUsecase.selectCountry(country)
         }
+    }
+    
+    func testViewModel_whenSelectCountryNotExists_providePlaceHolder() {
+        // given
+        let expect = expectation(description: "선택된 국가정보 없으면 플레이스홀더 문구 노출")
+        let viewModel = self.makeViewModelWithoutHolidays()
+        
+        // when
+        let name = self.waitFirstOutput(expect, for: viewModel.currentCountryName) {
+            viewModel.prepare()
+        }
+        
+        // then
+        XCTAssertEqual(name, "setting.holiday.country.current::placeHolder".localized())
     }
     
     // 현재 선택한 국가 업데이트시에 이름 업데이트
@@ -74,7 +99,7 @@ extension HolidayListViewModelImpleTests {
         // given
         let expect = expectation(description: "현재 선택한 국가 업데이트시에 이름 업데이트")
         expect.expectedFulfillmentCount = 2
-        let viewModel = self.makeUsecaseWithStubHoliday()
+        let viewModel = self.makeViewModelWithStubHoliday()
         
         // when
         let names = self.waitOutputs(expect, for: viewModel.currentCountryName) {
@@ -91,7 +116,7 @@ extension HolidayListViewModelImpleTests {
         // given
         let expect = expectation(description: "현재 선택한 국가 업데이트시에 업데이트된 국가의 올해 공휴일 리스트 반환")
         expect.expectedFulfillmentCount = 2
-        let viewModel = self.makeUsecaseWithStubHoliday()
+        let viewModel = self.makeViewModelWithStubHoliday()
         
         // when
         let holidayLists = self.waitOutputs(expect, for: viewModel.currentYearHolidays) {
@@ -108,7 +133,7 @@ extension HolidayListViewModelImpleTests {
         // given
         let expect = expectation(description: "공휴일 목록 갱신하면, 해당 년도의 공휴일 리스트 업데이트")
         expect.expectedFulfillmentCount = 2
-        let viewModel = self.makeUsecaseWithStubHoliday()
+        let viewModel = self.makeViewModelWithStubHoliday()
         
         // when
         let holidayLists = self.waitOutputs(expect, for: viewModel.currentYearHolidays) {
@@ -122,7 +147,7 @@ extension HolidayListViewModelImpleTests {
     
     func testViewModel_routeToCountrySelect() {
         // given
-        let viewModel = self.makeUsecaseWithStubHoliday()
+        let viewModel = self.makeViewModelWithStubHoliday()
         
         // when
         viewModel.selectCountry()
@@ -137,5 +162,12 @@ private class SpyRouter: BaseSpyRouter, HolidayListRouting, @unchecked Sendable 
     var didRouteToCountrySelect: Bool?
     func routeToSelectCountry() {
         self.didRouteToCountrySelect = true
+    }
+}
+
+private final class NoCountryStubHolidayUsecase: StubHolidayUsecase {
+    
+    override var currentSelectedCountry: AnyPublisher<HolidaySupportCountry?, Never> {
+        return Just(nil).eraseToAnyPublisher()
     }
 }

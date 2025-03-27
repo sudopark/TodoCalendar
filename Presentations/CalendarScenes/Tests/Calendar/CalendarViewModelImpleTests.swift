@@ -114,7 +114,10 @@ extension CalendarViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let currentCountry = self.waitFirstOutput(expect, for: self.spyHolidayUsecase.currentSelectedCountry.removeDuplicates(by: { $0.code == $1.code })) {
+        let source = self.spyHolidayUsecase.currentSelectedCountry
+            .compactMap { $0 }
+            .removeAllDuplicates(by: { $0.code == $1.code })
+        let currentCountry = self.waitFirstOutput(expect, for: source) {
             viewModel.prepare()
         }
         

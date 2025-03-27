@@ -38,7 +38,7 @@ final class ScheduleEventUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     private func makeUsecase() -> ScheduleEventUsecaseImple {
         let key = ShareDataKeys.schedules
         let events = self.dummyEvents(0..<10)
-        self.spyStore.update(MemorizedScheduleEventsContainer.self, key: key.rawValue) {
+        self.spyStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: key.rawValue) {
             return ($0 ?? .init()).refresh(events, in: self.dummyRange())
         }
         self.spyEventNotifyService = .init(notifyQueue: nil)
@@ -143,25 +143,25 @@ extension ScheduleEventUsecaseImpleTests {
     
     private func stubNoMemorized() {
         self.spyStore.update(
-            MemorizedScheduleEventsContainer.self,
+            MemorizedEventsContainer<ScheduleEvent>.self,
             key: ShareDataKeys.schedules.rawValue
         ) { _ in .init() }
     }
     
     private func appendMemorized(_ event: ScheduleEvent) {
         self.spyStore.update(
-            MemorizedScheduleEventsContainer.self,
+            MemorizedEventsContainer<ScheduleEvent>.self,
             key: ShareDataKeys.schedules.rawValue
         ) { ($0 ?? .init()).append(event) }
     }
     
     private func replaceMemorized(_ events: [ScheduleEvent]) {
-        var container = MemorizedScheduleEventsContainer()
+        var container = MemorizedEventsContainer<ScheduleEvent>()
         events.forEach {
             container = container.append($0)
         }
         self.spyStore.update(
-            MemorizedScheduleEventsContainer.self,
+            MemorizedEventsContainer<ScheduleEvent>.self,
             key: ShareDataKeys.schedules.rawValue) { _ in container }
         
     }
@@ -683,8 +683,8 @@ extension ScheduleEventUsecaseImpleTests {
         self.stubScheduleEvent()
         
         // when
-        let source = self.spyStore.observe(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue)
-            .compactMap { $0?.scheduleEvents(in: 0..<10) }
+        let source = self.spyStore.observe(MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue)
+            .compactMap { $0?.events(in: 0..<10) }
             .compactMap { $0.first(where: { $0.uuid == "some"} )}
         let event = self.waitFirstOutput(expect, for: source) {
             usecase.scheduleEvent("some")
@@ -716,7 +716,7 @@ extension ScheduleEventUsecaseImpleTests {
         let usecase = self.makeUsecase()
         self.stubRepository.stubRemoveScheduleNextRepeatingExists = nextEventExists
         let schedule = ScheduleEvent(uuid: "will_removing_todo", name: "old", time: .at(0))
-        self.spyStore.update(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue) {
+        self.spyStore.update(MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue) {
             ($0 ?? .init()).append(schedule)
         }
         return usecase
@@ -724,8 +724,8 @@ extension ScheduleEventUsecaseImpleTests {
     
     private var willRemovingScheduleAtStore: AnyPublisher<ScheduleEvent?, Never> {
         return self.spyStore
-            .observe(MemorizedScheduleEventsContainer.self, key: ShareDataKeys.schedules.rawValue)
-            .map { $0?.scheduleEvents(in: 0..<10) }
+            .observe(MemorizedEventsContainer<ScheduleEvent>.self, key: ShareDataKeys.schedules.rawValue)
+            .map { $0?.events(in: 0..<10) }
             .map { $0?.first(where: { $0.uuid == "will_removing_todo" })}
             .eraseToAnyPublisher()
     }

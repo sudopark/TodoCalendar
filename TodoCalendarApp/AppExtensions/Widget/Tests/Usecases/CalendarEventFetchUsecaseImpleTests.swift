@@ -326,7 +326,7 @@ private final class StubHolidaysFetchUsecase: HolidaysFetchUsecase {
     func holidaysGivenYears(
         _ range: Range<TimeInterval>, timeZone: TimeZone
     ) async throws -> [Holiday] {
-        let holiday = Holiday(dateString: "2024-03-01", localName: "삼일절", name: "삼일절")
+        let holiday = Holiday(dateString: "2024-03-01", name: "삼일절")
         return [holiday]
     }
 }

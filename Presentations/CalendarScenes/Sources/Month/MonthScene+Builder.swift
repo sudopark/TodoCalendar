@@ -19,7 +19,7 @@ struct CurrentSelectDayModel: Equatable {
     let day: Int
     let weekId: String
     let range: Range<TimeInterval>
-    var holiday: Holiday?
+    var holidays: [Holiday] = []
     
     var identifier: String { "\(year)-\(month)-\(day)" }
     

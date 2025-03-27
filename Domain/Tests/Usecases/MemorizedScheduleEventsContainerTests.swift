@@ -15,7 +15,7 @@ import UnitTestHelpKit
 
 class MemorizedScheduleEventsContainerTests: BaseTestCase {
     
-    private func makeContainer() -> MemorizedScheduleEventsContainer {
+    private func makeContainer() -> MemorizedEventsContainer<ScheduleEvent> {
         return .init()
     }
     
@@ -55,7 +55,7 @@ extension MemorizedScheduleEventsContainerTests {
         
         // when
         let period = self.period(2..<9)
-        let events = container.scheduleEvents(in: period)
+        let events = container.events(in: period)
         
         // then
         let ids = events.map { $0.uuid }.sorted()
@@ -86,20 +86,20 @@ extension MemorizedScheduleEventsContainerTests {
         // 삭제될 이벤트 -> 3
         // 업데이트된 이벤트 -> 6(종료 시간 사라짐)
         var period = self.period(2..<9)
-        var events = container.scheduleEvents(in: period)
+        var events = container.events(in: period)
         var ids = events.map { $0.uuid }.sorted()
         XCTAssertEqual(ids, ["id:2", "id:5", "id:6"])
         XCTAssertEqual(events.first(where: { $0.uuid == "id:6" })?.repeating?.repeatingEndTime, nil)
         
         // 추가된 이벤트 20
         period = self.period(19..<21)
-        events = container.scheduleEvents(in: period)
+        events = container.events(in: period)
         ids = events.map { $0.uuid }.sorted()
         XCTAssertEqual(ids, ["id:20", "id:6"])
         
         // 계속 보관중인 이벤트 -> 1
         period = self.period(0..<2)
-        events = container.scheduleEvents(in: period)
+        events = container.events(in: period)
         ids = events.map { $0.uuid }.sorted()
         XCTAssertEqual(ids, ["id:1"])
     }
@@ -116,7 +116,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.append(sameEventWithUpdateName)
         
         // then
-        let event = container.scheduleEvents(in: self.period(0..<2)).first  // 캐시 유지됨
+        let event = container.events(in: self.period(0..<2)).first  // 캐시 유지됨
         XCTAssertEqual(event?.repeatingTimes.map { $0.day }, [0, 1, 2, 3])
         XCTAssertEqual(event?.repeatingTimes.map { $0.turn }, [1, 2, 3, 4])
     }
@@ -132,7 +132,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.append(newEvent)
         
         // then
-        let event = container.scheduleEvents(in: self.period(0..<3)).first // 캐시 초기화되고 1, 2, 3가 새로 계산됨
+        let event = container.events(in: self.period(0..<3)).first // 캐시 초기화되고 1, 2, 3가 새로 계산됨
         
         XCTAssertEqual(event?.repeatingTimes.map { $0.day }, [1, 2, 3])
         XCTAssertEqual(event?.repeatingTimes.map { $0.turn}, [1, 2, 3])
@@ -149,7 +149,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.append(newEvent)
         
         // then
-        let event = container.scheduleEvents(in: self.period(0..<3)).first // 캐시 초기화되고 0, 1, 2가 새로 계산됨
+        let event = container.events(in: self.period(0..<3)).first // 캐시 초기화되고 0, 1, 2가 새로 계산됨
         XCTAssertEqual(event?.repeatingTimes.map { $0.day }, [0, 1, 2])
         XCTAssertEqual(event?.repeatingTimes.map { $0.turn }, [1, 2, 3])
     }
@@ -164,7 +164,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.append(self.repeatingEvent(0))
         
         // when
-        let event = container.scheduleEvents(in: self.period(3..<5)).first
+        let event = container.events(in: self.period(3..<5)).first
         
         // then
         let days = event?.repeatingTimes.map { $0.day }   // 0..<5 범위가 새로 게산되어야함
@@ -181,7 +181,7 @@ extension MemorizedScheduleEventsContainerTests {
         containr = containr.refresh([self.repeatingEvent(0)], in: self.period(0..<10))  // 0~10 까지 계산되어있는 상황
         
         // when
-        let event = containr.scheduleEvents(in: self.period(3..<6)).first
+        let event = containr.events(in: self.period(3..<6)).first
         
         // then
         let days = event?.repeatingTimes.map { $0.day }
@@ -196,7 +196,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.refresh([self.repeatingEvent(0, end: 7)], in: self.period(0..<7))
         
         // when
-        let event = container.scheduleEvents(in: self.period(3..<10)).first
+        let event = container.events(in: self.period(3..<10)).first
         
         // then
         let days = event?.repeatingTimes.map { $0.day }
@@ -213,7 +213,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.refresh([self.repeatingEvent(0)], in: self.period(0..<5)) // 0~5 까지만 계산한 상황
         
         // when
-        let event = container.scheduleEvents(in: self.period(10..<15)).first // 0~5까지 캐시 이용하고 5~15까지 새로 계산
+        let event = container.events(in: self.period(10..<15)).first // 0~5까지 캐시 이용하고 5~15까지 새로 계산
         
         // then
         let days = event?.repeatingTimes.map { $0.day }
@@ -228,7 +228,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.refresh([self.repeatingEvent(0, end: 7)], in: self.period(0..<5))
         
         // when
-        let event = container.scheduleEvents(in: self.period(6..<15)).first
+        let event = container.events(in: self.period(6..<15)).first
         
         // then
         let days = event?.repeatingTimes.map { $0.day }
@@ -245,7 +245,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.refresh([self.repeatingEvent(4)], in: self.period(4..<10)) // 4~10 캐시 계산됨
         
         // when
-        let event = container.scheduleEvents(in: self.period(0..<7)).first
+        let event = container.events(in: self.period(0..<7)).first
         
         // then
         let days = event?.repeatingTimes.map { $0.day }
@@ -260,7 +260,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.refresh([self.repeatingEvent(4, end: 6)], in: self.period(4..<10)) // 4~10 캐시 계산됨
         
         // when
-        let event = container.scheduleEvents(in: self.period(0..<7)).first
+        let event = container.events(in: self.period(0..<7)).first
         
         // then
         let days = event?.repeatingTimes.map { $0.day }
@@ -275,7 +275,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.refresh([self.repeatingEvent(4)], in: self.period(4..<10))
         
         // when
-        let event = container.scheduleEvents(in: self.period(0..<20)).first
+        let event = container.events(in: self.period(0..<20)).first
         
         // then
         let days = event?.repeatingTimes.map { $0.day }
@@ -292,7 +292,7 @@ extension MemorizedScheduleEventsContainerTests {
         container = container.refresh([event], in: self.period(4..<10))
         
         // when
-        let calculatedEvent = container.scheduleEvents(in: self.period(0..<20)).first
+        let calculatedEvent = container.events(in: self.period(0..<20)).first
         
         // then
         let days = calculatedEvent?.repeatingTimes.map { $0.day }
@@ -309,7 +309,7 @@ private extension Int {
     }
 }
 
-private extension ScheduleEvent.RepeatingTimes {
+private extension RepeatingTimes {
     
     var day: Int {
         return (self.time.lowerBoundWithFixed / 24 / 3600) |> Int.init

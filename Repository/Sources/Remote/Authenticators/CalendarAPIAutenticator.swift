@@ -75,11 +75,13 @@ extension CalendarAPIAutenticator {
         completion: @escaping (Result<Credential, Error>) -> Void
     ) {
         
+        let refreshStartTime = Date()
         logger.log(level: .debug, "token refresh start..")
         self.firebaseAuthService.refreshToken {  [weak self] result in
             switch result {
             case .success(let refreshResult):
-                logger.log(level: .debug, "token refreshed! and is chanegd: \(credential.accessToken != refreshResult.idToken)")
+                let interval = Date().timeIntervalSince(refreshStartTime)
+                logger.log(level: .debug, "token refreshed!, interval: \(interval*1000)ms and is chanegd: \(credential.accessToken != refreshResult.idToken)")
 
                 let credential = APICredential(accessToken: refreshResult.idToken)
                     |> \.refreshToken .~ refreshResult.refreshToken

@@ -241,7 +241,7 @@ class SpyKeyChainStorage: KeyChainStorage, AuthStore, APICredentialStore, @unche
 
 extension AuthRepositoryImpleTests {
     
-    private var responses: [StubRemoteAPI.Resopnse] {
+    private var responses: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .put,

@@ -18,14 +18,14 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let authUsecase: any AuthUsecase
     let accountUescase: any AccountUsecase
     let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
-    let viewAppearanceStore: any ViewAppearanceStore
+    let viewAppearanceStore: ApplicationViewAppearanceStoreImple
     private let applicationBase: ApplicationBase
     
     init(
         authUsecase: any AuthUsecase,
         accountUescase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
-        viewAppearanceStore: any ViewAppearanceStore,
+        viewAppearanceStore: ApplicationViewAppearanceStoreImple,
         applicationBase: ApplicationBase
     ) {
         self.authUsecase = authUsecase
@@ -255,6 +255,25 @@ extension NonLoginUsecaseFactoryImple {
     }
 }
 
+extension NonLoginUsecaseFactoryImple {
+    
+    func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
+        let cacheStorage = GoogleCalendarLocalStorageImple(
+            sqliteService: self.applicationBase.commonSqliteService
+        )
+        let repository = GoogleCalendarRepositoryImple(
+            remote: self.applicationBase.googleCalendarRemoteAPI,
+            cacheStorage: cacheStorage
+        )
+        return GoogleCalendarUsecaseImple(
+            googleService: AppEnvironment.googleCalendarService,
+            repository: repository,
+            appearanceStore: self.viewAppearanceStore,
+            sharedDataStore: self.applicationBase.sharedDataStore
+        )
+    }
+}
+
 
 // MARK: - LoginUsecaseFactoryImple
 
@@ -265,7 +284,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let authUsecase: any AuthUsecase
     let accountUescase: any AccountUsecase
     let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
-    let viewAppearanceStore: any ViewAppearanceStore
+    let viewAppearanceStore: ApplicationViewAppearanceStoreImple
     let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     private let applicationBase: ApplicationBase
     
@@ -274,7 +293,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         authUsecase: any AuthUsecase,
         accountUescase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
-        viewAppearanceStore: any ViewAppearanceStore,
+        viewAppearanceStore: ApplicationViewAppearanceStoreImple,
         temporaryUserDataFilePath: String,
         applicationBase: ApplicationBase
     ) {
@@ -510,6 +529,26 @@ extension LoginUsecaseFactoryImple {
             accountUsecase: self.accountUescase,
             feedbackRepository: feedbackRepository,
             deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
+    }
+}
+
+
+extension LoginUsecaseFactoryImple {
+    
+    func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
+        let cacheStorage = GoogleCalendarLocalStorageImple(
+            sqliteService: self.applicationBase.commonSqliteService
+        )
+        let repository = GoogleCalendarRepositoryImple(
+            remote: self.applicationBase.googleCalendarRemoteAPI,
+            cacheStorage: cacheStorage
+        )
+        return GoogleCalendarUsecaseImple(
+            googleService: AppEnvironment.googleCalendarService,
+            repository: repository,
+            appearanceStore: self.viewAppearanceStore,
+            sharedDataStore: self.applicationBase.sharedDataStore
         )
     }
 }

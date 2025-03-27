@@ -120,7 +120,7 @@ extension EventTagUsecaseImple {
             .map { $0.flatMap { Array($0.values)} ?? [] }
             .map { ts in ts.compactMap { $0.eventTagId?.customTagId } }
             .map { Set($0) }
-        let allTagIdsSchedules = self.sharedDataStore.observe(MemorizedScheduleEventsContainer.self, key: scheduleKey)
+        let allTagIdsSchedules = self.sharedDataStore.observe(MemorizedEventsContainer<ScheduleEvent>.self, key: scheduleKey)
             .map { $0?.allCachedEvents() ?? []}
             .map { ss in ss.compactMap { $0.eventTagId?.customTagId } }
             .map { Set($0) }

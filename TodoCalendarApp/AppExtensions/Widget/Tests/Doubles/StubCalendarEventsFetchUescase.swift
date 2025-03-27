@@ -41,7 +41,7 @@ class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {
         
         if self.hasHoliday {
             let endDateString = Date(timeIntervalSince1970: range.upperBound-1).text("yyyy-MM-dd", timeZone: timeZone)
-            let holiday = Holiday(dateString: endDateString, localName: "holiday", name: "holiday")
+            let holiday = Holiday(dateString: endDateString, name: "holiday")
             if let holidayEvent = HolidayCalendarEvent(holiday, in: timeZone) {
                 sender.eventWithTimes.append(holidayEvent)
             }

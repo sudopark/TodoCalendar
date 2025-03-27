@@ -214,10 +214,11 @@ extension EventSettingViewModelImple {
             
             do {
                 try await self?.externalCalendarServiceUsecase.stopIntegrate(external: service)
-                self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
                 self?.router?.showToast(
                     "event_setting::external_calendar::stop::message".localized()
                 )
+                self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
+                
             } catch {
                 self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
                 self?.router?.showError(error)

@@ -154,7 +154,7 @@ extension DayEventListViewModelImpleTests {
     
     func testCellViewModel_makeFromHoliday() {
         // given
-        let holiday = Holiday(dateString: "2020-03-01", localName: "삼일절", name: "삼일절")
+        let holiday = Holiday(dateString: "2020-03-01", name: "삼일절")
         let event = HolidayCalendarEvent(holiday, in: TimeZone(abbreviation: "KST")!)!
         
         // when
@@ -559,7 +559,7 @@ extension DayEventListViewModelImpleTests {
     func testHolidayCellViewModel_notProvideMoreAction() {
         // given
         let kst = TimeZone(abbreviation: "KST")!
-        let holiday = Holiday(dateString: "2020-03-01", localName: "삼일절", name: "삼일절")
+        let holiday = Holiday(dateString: "2020-03-01", name: "삼일절")
         
         // when
         let cellViewModel = HolidayEventCellViewModel(
@@ -579,7 +579,7 @@ extension DayEventListViewModelImpleTests {
     
     private var dummyEvents: [any CalendarEvent] {
         let timeZone = TimeZone(abbreviation: "KST")!
-        let holiday = HolidayCalendarEvent(.init(dateString: "2023-09-30", localName: "holiday", name: "holiday"), in: timeZone)!
+        let holiday = HolidayCalendarEvent(.init(dateString: "2023-09-30", name: "holiday"), in: timeZone)!
         let schedule4 = ScheduleEvent(uuid: "repeating-schedule", name: "repeating-schedule", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound + 1), turn: 4)]
             |> \.eventTagId .~ .custom("some")
         let scheduleWithRepeating = ScheduleCalendarEvent.events(from: schedule4, in: timeZone).last!

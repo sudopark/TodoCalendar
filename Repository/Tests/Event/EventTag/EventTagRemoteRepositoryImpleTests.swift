@@ -230,7 +230,7 @@ extension EventTagRemoteRepositoryImpleTests {
         """
     }
     
-    private var response: [StubRemoteAPI.Resopnse] {
+    private var response: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .post,

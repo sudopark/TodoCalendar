@@ -12,10 +12,13 @@ import Foundation
 
 public struct HolidaySupportCountry: Sendable {
     
+    // ISO 3166-2
+    public let regionCode: String
     public let code: String
     public let name: String
     
-    public init(code: String, name: String) {
+    public init(regionCode: String, code: String, name: String) {
+        self.regionCode = regionCode
         self.code = code
         self.name = name
     }
@@ -24,12 +27,10 @@ public struct HolidaySupportCountry: Sendable {
 public struct Holiday: Equatable, Sendable {
     
     public let dateString: String
-    public let localName: String
     public let name: String
     
-    public init(dateString: String, localName: String, name: String) {
+    public init(dateString: String, name: String) {
         self.dateString = dateString
-        self.localName = localName
         self.name = name
     }
     

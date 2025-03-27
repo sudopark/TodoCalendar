@@ -54,6 +54,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let eventNotificationUsecase: any EventNotificationUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let eventNotifyService: SharedEventNotifyService
+    private let googleCalendarUsecase: any GoogleCalendarUsecase
     var router: (any MainRouting)?
     
     init(
@@ -61,13 +62,15 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase,
         eventNotificationUsecase: any EventNotificationUsecase,
         eventTagUsecase: any EventTagUsecase,
-        eventNotifyService: SharedEventNotifyService
+        eventNotifyService: SharedEventNotifyService,
+        googleCalendarUsecase: any GoogleCalendarUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
         self.eventNotificationUsecase = eventNotificationUsecase
         self.eventTagUsecase = eventTagUsecase
         self.eventNotifyService = eventNotifyService
+        self.googleCalendarUsecase = googleCalendarUsecase
         
         self.internalBinding()
     }
@@ -122,10 +125,14 @@ extension MainViewModelImple {
             self.calendarSceneInteractor = self.router?.attachCalendar()
         }
         self.refreshViewAppearanceSettings()
+        // TODO: google calendar 연동 여부에 따라 color 조회
         self.temporaryUserDataMigrationUsecase.checkIsNeedMigration()
         
         self.eventNotificationUsecase.runSyncEventNotification()
         self.bindEventTagColorMap()
+        if FeatureFlag.isEnable(.googleCalendar) {
+            self.googleCalendarUsecase.prepare()
+        }
     }
     
     private func refreshViewAppearanceSettings() {

@@ -21,14 +21,15 @@ public protocol Endpoint: Sendable {
 
 public enum HolidayAPIEndpoints: Endpoint {
     case supportCountry
-    case holidays(year: Int, countryCode: String)
+    case holidays
     
     public var subPath: String {
         switch self {
         case .supportCountry: 
-            return "AvailableCountries"
-        case .holidays(let year, let countryCode):
-            return "PublicHolidays/\(year)/\(countryCode)"
+            return "31ca6b64687c1436ca7e5f705017071a/raw/251dd3885ab5b7ac112140e7b0e6a542fe2901f5/google_calendar_country"
+            
+        case .holidays:
+            return ""
         }
     }
 }
@@ -224,11 +225,13 @@ enum GoogleAuthEndpoint: Endpoint {
 // MARK: - google calendar endpoint
 
 enum GoogleCalendarEndpoint: Endpoint {
+    case colors
     case calednarList
     
     var subPath: String {
         switch self {
-        case .calednarList: return "calendarList"
+        case .colors: return "colors"
+        case .calednarList: return "users/me/calendarList"
         }
     }
 }
@@ -255,8 +258,12 @@ public struct RemoteEnvironment: Sendable {
         }
         
         switch endpoint {
+        case .supportCountry as HolidayAPIEndpoints:
+            return "https://gist.githubusercontent.com/sudopark/\(endpoint.subPath)"
+            
         case let holiday as HolidayAPIEndpoints:
-            return "https://date.nager.at/api/v3/\(holiday.subPath)"
+            let prefix = "\(calendarAPIHost)/v1/holiday"
+            return appendSubpathIfNotEmpty(prefix, endpoint.subPath)
             
         case let account as AccountAPIEndpoints:
             return "\(calendarAPIHost)/v1/accounts/\(account.subPath)"
@@ -296,7 +303,7 @@ public struct RemoteEnvironment: Sendable {
             return appendSubpathIfNotEmpty("https://oauth2.googleapis.com", googleAuth.subPath)
             
         case let googleCalendar as GoogleCalendarEndpoint:
-            let prefix = "https://www.googleapis.com/calendar/v3/users/me"
+            let prefix = "https://www.googleapis.com/calendar/v3"
             return appendSubpathIfNotEmpty(prefix, googleCalendar.subPath)
             
         default: return nil

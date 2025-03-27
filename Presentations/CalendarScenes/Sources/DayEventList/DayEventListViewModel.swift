@@ -40,7 +40,9 @@ struct SelectedDayModel: Equatable {
         lunarFormatter.dateFormat = "date_form::MM_dd".localized()
         self.lunarDateText = "🌕 \(lunarFormatter.string(from: date))"
         
-        self.holidayName = currentModel.holiday?.localName
+        self.holidayName = currentModel.holidays.isEmpty
+            ? nil
+            : currentModel.holidays.map { $0.name }.joined(separator: "\n")
     }
 }
 

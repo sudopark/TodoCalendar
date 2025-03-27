@@ -38,23 +38,23 @@ class CalendarUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         
         let holidayUsecase = StubHolidayUsecase(
             holidays: [2023: [
-                .init(dateString: "2023-01-01", localName: "신정", name: "신정"),
-                .init(dateString: "2023-01-21", localName: "설날", name: "설날"),
-                .init(dateString: "2023-01-22", localName: "설날", name: "설날"),
-                .init(dateString: "2023-01-23", localName: "설날", name: "설날"),
-                .init(dateString: "2023-01-24", localName: "설날(대체)", name: "설날(대체)"),
-                .init(dateString: "2023-03-01", localName: "삼일절", name: "삼일절"),
-                .init(dateString: "2023-05-05", localName: "어린이날", name: "어린이날"),
-                .init(dateString: "2023-05-27", localName: "부처님오신날", name: "부처님오신날"),
-                .init(dateString: "2023-06-06", localName: "현충일", name: "현충일"),
-                .init(dateString: "2023-06-06", localName: "현충일", name: "현충일"),
-                .init(dateString: "2023-08-15", localName: "광복절", name: "광복절"),
-                .init(dateString: "2023-09-28", localName: "추석", name: "추석"),
-                .init(dateString: "2023-09-29", localName: "추석", name: "추석"),
-                .init(dateString: "2023-09-30", localName: "추석", name: "추석"),
-                .init(dateString: "2023-10-03", localName: "개천절", name: "개천절"),
-                .init(dateString: "2023-10-09", localName: "한글날", name: "한글날"),
-                .init(dateString: "2023-12-25", localName: "크리스마스", name: "크리스마스")
+                .init(dateString: "2023-01-01", name: "신정"),
+                .init(dateString: "2023-01-21", name: "설날"),
+                .init(dateString: "2023-01-22", name: "설날"),
+                .init(dateString: "2023-01-23", name: "설날"),
+                .init(dateString: "2023-01-24", name: "설날(대체)"),
+                .init(dateString: "2023-03-01", name: "삼일절"),
+                .init(dateString: "2023-05-05", name: "어린이날"),
+                .init(dateString: "2023-05-27", name: "부처님오신날"),
+                .init(dateString: "2023-06-06", name: "현충일"),
+                .init(dateString: "2023-08-15", name: "광복절"),
+                .init(dateString: "2023-09-28", name: "추석"),
+                .init(dateString: "2023-09-29", name: "추석"),
+                .init(dateString: "2023-09-30", name: "추석"),
+                .init(dateString: "2023-10-03", name: "개천절"),
+                .init(dateString: "2023-10-03", name: "개천절-중복"),
+                .init(dateString: "2023-10-09", name: "한글날"),
+                .init(dateString: "2023-12-25", name: "크리스마스")
             ]]
         )
         
@@ -243,12 +243,15 @@ extension CalendarUsecaseImpleTests {
         
         // then
         let holidayExistDays = components?.weeks.flatMap { $0.days }
-            .filter { $0.holiday != nil }
+            .filter { !$0.holidays.isEmpty }
         XCTAssertEqual(holidayExistDays, [
-            .init(year: 2023, month: 09, day: 28, weekDay: 5) |> \.holiday .~ .init(dateString: "2023-09-28", localName: "추석", name: "추석"),
-            .init(year: 2023, month: 09, day: 29, weekDay: 6) |> \.holiday .~ .init(dateString: "2023-09-29", localName: "추석", name: "추석"),
-            .init(year: 2023, month: 09, day: 30, weekDay: 7) |> \.holiday .~ .init(dateString: "2023-09-30", localName: "추석", name: "추석"),
-            .init(year: 2023, month: 10, day: 03, weekDay: 3) |> \.holiday .~ .init(dateString: "2023-10-03", localName: "개천절", name: "개천절"),
+            .init(year: 2023, month: 09, day: 28, weekDay: 5) |> \.holidays .~ [.init(dateString: "2023-09-28", name: "추석")],
+            .init(year: 2023, month: 09, day: 29, weekDay: 6) |> \.holidays .~ [.init(dateString: "2023-09-29", name: "추석")],
+            .init(year: 2023, month: 09, day: 30, weekDay: 7) |> \.holidays .~ [.init(dateString: "2023-09-30", name: "추석")],
+            .init(year: 2023, month: 10, day: 03, weekDay: 3) |> \.holidays .~ [
+                .init(dateString: "2023-10-03", name: "개천절"),
+                .init(dateString: "2023-10-03", name: "개천절-중복")
+            ],
         ])
     }
 }

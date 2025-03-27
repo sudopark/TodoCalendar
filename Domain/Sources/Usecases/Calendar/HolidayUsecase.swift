@@ -21,7 +21,7 @@ public protocol HolidayUsecase {
     func refreshAvailableCountries() async throws
     func selectCountry(_ country: HolidaySupportCountry) async throws
     
-    var currentSelectedCountry: AnyPublisher<HolidaySupportCountry, Never> { get }
+    var currentSelectedCountry: AnyPublisher<HolidaySupportCountry?, Never> { get }
     var availableCountries: AnyPublisher<[HolidaySupportCountry], Never> { get }
     
     func refreshHolidays() async throws
@@ -35,12 +35,17 @@ public protocol HolidayUsecase {
 
 public protocol LocaleProvider {
     func currentRegionCode() -> String?
+    func currentLocaleIdentifier() -> String
 }
 
 extension Locale: LocaleProvider {
     
     public func currentRegionCode() -> String? {
         return self.region?.identifier
+    }
+    
+    public func currentLocaleIdentifier() -> String {
+        return Locale.current.identifier
     }
 }
 
@@ -89,11 +94,11 @@ extension HolidayUsecaseImple {
         if let savedCountry = try? await self.holidayRepository.loadLatestSelectedCountry() {
             return savedCountry
         }
-        guard let regionCode = self.localeProvider.currentRegionCode()?.uppercased()
+        guard let regionCode = self.localeProvider.currentRegionCode()?.lowercased()
         else { return nil }
         
         let supportCountries = try await self.loadAvailableCountriesWithUpdateStore()
-        guard let country = supportCountries.first(where: { $0.code == regionCode })
+        guard let country = supportCountries.first(where: { $0.regionCode == regionCode })
         else {
             return nil
         }
@@ -128,10 +133,9 @@ extension HolidayUsecaseImple {
         )
     }
     
-    public var currentSelectedCountry: AnyPublisher<HolidaySupportCountry, Never> {
+    public var currentSelectedCountry: AnyPublisher<HolidaySupportCountry?, Never> {
         return self.dataStore
             .observe(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue)
-            .compactMap { $0 }
             .eraseToAnyPublisher()
     }
     
@@ -187,7 +191,10 @@ extension HolidayUsecaseImple {
     }
     
     private func refreshHolidays(_ country: HolidaySupportCountry, _ year: Int) async throws {
-        let holidays = try await self.holidayRepository.loadHolidays(year, country.code)
+        let locale = self.localeProvider.currentLocaleIdentifier()
+        let holidays = try await self.holidayRepository.loadHolidays(
+            year, country.code, locale
+        )
         let shareKey = ShareDataKeys.holidays.rawValue
         self.dataStore.update(Holidays.self, key: shareKey) { old in
             return (old ?? [:]) |> key(country.code) %~ {
@@ -203,14 +210,20 @@ extension HolidayUsecaseImple {
             throw RuntimeError("current country not prepared")
         }
         
-        return try await self.holidayRepository.loadHolidays(year, currentCountry.code)
+        let locale = self.localeProvider.currentLocaleIdentifier()
+        return try await self.holidayRepository.loadHolidays(
+            year, currentCountry.code, locale
+        )
     }
     
     public func holidays() -> AnyPublisher<[Int: [Holiday]], Never> {
         
-        let asCountryHoliday: (HolidaySupportCountry) -> AnyPublisher<[Int: [Holiday]], Never>?
+        let asCountryHoliday: (HolidaySupportCountry?) -> AnyPublisher<[Int: [Holiday]], Never>?
         asCountryHoliday = { [weak self] country in
             guard let self = self else { return nil }
+            guard let country else {
+                return Just([:]).eraseToAnyPublisher()
+            }
             return self.dataStore
                 .observe(Holidays.self, key: ShareDataKeys.holidays.rawValue)
                 .compactMap { $0 }
