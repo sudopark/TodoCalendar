@@ -288,44 +288,45 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         let basic = self.subject.basicData.value
         let userSelectTime = basic?.userSelectedTime(timeZone)
         
+        guard let repeatingStartTime = basic?.origin.originEventTime,
+              let repeatingEventTargetTime = self.repeatingEventTargetTime
+        else { return }
+        
         var form = ActionSheetForm()
             |> \.title .~ pure("eventDetail.edit::repeating::confirm::ttile".localized())
             |> \.message .~ pure("eventDetail.edit::repeating::confirm::message".localized())
         
-        // 모두 수정
-        if let originEventTime = basic?.origin.originEventTime {
+        let isEditingRepeatingStartTime = repeatingStartTime == repeatingEventTargetTime
+        if isEditingRepeatingStartTime {
             let allAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::all::button".localized()) { [weak self] in
                 self?.editSchedule(
                     params
                         |> \.repeatingUpdateScope .~ .all
-                        |> \.time .~ (userSelectTime ?? originEventTime),
+                        |> \.time .~ (userSelectTime ?? repeatingStartTime),
                     addition
                 )
             }
             form.actions.append(allAction)
-        }
-        
-        if let repeatingTargetTime = self.repeatingEventTargetTime {
-            // 이번부터 수정
+        } else {
             let fromNowAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::fromNow::button".localized()) { [weak self] in
                 self?.editSchedule(
-                    params |> \.repeatingUpdateScope .~ .fromNow(repeatingTargetTime),
+                    params |> \.repeatingUpdateScope .~ .fromNow(repeatingEventTargetTime),
                     addition
                 )
             }
             form.actions.append(fromNowAction)
-            
-            // 이번만 수정
-            let onlyThisTimeAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::onlyThisTime::button".localized()) { [weak self] in
-                self?.editSchedule(
-                    params
-                        |> \.repeatingUpdateScope .~ .onlyThisTime(repeatingTargetTime)
-                        |> \.repeating .~ nil,
-                    addition
-                )
-            }
-            form.actions.append(onlyThisTimeAction)
         }
+        
+        let onlyThisTimeAction = ActionSheetForm.Action("eventDetail.edit::repeating::confirm::onlyThisTime::button".localized()) { [weak self] in
+            self?.editSchedule(
+                params
+                    |> \.repeatingUpdateScope .~ .onlyThisTime(repeatingEventTargetTime)
+                    |> \.repeating .~ nil,
+                addition
+            )
+        }
+        form.actions.append(onlyThisTimeAction)
+        
         form.actions.append(.init("common.cancel".localized(), style: .cancel))
         
         self.router?.showActionSheet(form)
