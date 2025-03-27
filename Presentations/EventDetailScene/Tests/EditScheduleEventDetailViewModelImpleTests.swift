@@ -463,6 +463,52 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(savedDetail?.memo, "new_memo")
         XCTAssertEqual(savedDetail?.url, "new_url")
     }
+    
+    // 반복이벤트 - 수정하려는 instance가 반복 시작시간인 경우 - 모두수정, 이번만 수정 옵션 제공
+    func testViewModel_whenEditRepeatingEventAndTargetEventTurnIsRepeatingStart_provideEditOption_allAndOnlyThisTime() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: false,
+            repeatingEventTargetTime: .at(0)
+        )
+        
+        // when
+        self.enter(viewModel) {
+            $0 |> \.name .~ "new name"
+        }
+        viewModel.save()
+        
+        // then
+        let actions = self.spyRouter.didShowActionSheetWith?.actions
+        XCTAssertEqual(actions?.map { $0.text }, [
+            "eventDetail.edit::repeating::confirm::all::button".localized(),
+            "eventDetail.edit::repeating::confirm::onlyThisTime::button".localized(),
+            "common.cancel".localized()
+        ])
+    }
+    
+    // 반복이벤트 - 수정하려는 instance가 반복 시작시간이 아닌경우 - 이번부터 수정, 이번만 수정 옵션 제공
+    func testViewModel_whenEditRepeatingEventAndTargetEventTurnIsNotRepeatingStart_provideEditOption_fromNowAndOnlyThisTime() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: false,
+            repeatingEventTargetTime: .at(100)
+        )
+        
+        // when
+        self.enter(viewModel) {
+            $0 |> \.name .~ "new name"
+        }
+        viewModel.save()
+        
+        // then
+        let actions = self.spyRouter.didShowActionSheetWith?.actions
+        XCTAssertEqual(actions?.map { $0.text }, [
+            "eventDetail.edit::repeating::confirm::fromNow::button".localized(),
+            "eventDetail.edit::repeating::confirm::onlyThisTime::button".localized(),
+            "common.cancel".localized()
+        ])
+    }
 
     // 반복 이벤트의 경우 - 이번 이벤트만 업데이트 - params scope
     func testViewModel_whenEditRepeatingSchedule_askScope_andUpdateOnlyThistime() {
@@ -658,7 +704,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithPrepare(
             isNotRepeating: false,
-            repeatingEventTargetTime: .at(100)
+            repeatingEventTargetTime: .at(0)
         )
         self.spyRouter.actionSheetSelectionMocking = {
             $0.actions.first(where: { $0.text == "eventDetail.edit::repeating::confirm::all::button".localized() })
@@ -706,7 +752,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithPrepare(
             isNotRepeating: false,
-            repeatingEventTargetTime: .at(100)
+            repeatingEventTargetTime: .at(0)
         )
         self.spyRouter.actionSheetSelectionMocking = {
             $0.actions.first(where: { $0.text == "eventDetail.edit::repeating::confirm::all::button".localized() })
@@ -749,8 +795,11 @@ extension EditScheduleEventDetailViewModelImpleTests {
     // 이벤트 저장 실패시 에러 알림
     func testViewModel_whenEditTodoFail_showError() {
         // given
-        let expect = expectation(description: "todo 수정 실패시에 에러 알림")
-        let viewModel = self.makeViewModelWithPrepare(shouldFailEdit: true)
+        let expect = expectation(description: "schedule 수정 실패시에 에러 알림")
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: true,
+            shouldFailEdit: true
+        )
         self.spyRouter.actionSheetSelectionMocking = { $0.actions.first }
         self.spyRouter.didShowErrorCallback = { _ in expect.fulfill() }
         
