@@ -488,10 +488,16 @@ extension EventDetailInputViewModelImple {
             let format = "date_form.yyyy_MMM_dd".localized()
             let start = Date(timeIntervalSince1970: repeating.repeatingStartTime)
                 .text(format, timeZone: basicAndTimeZone.timeZone)
-            let end = repeating.repeatingEndOption?.endTime.map { Date(timeIntervalSince1970: $0) }?
-                .text(format, timeZone: basicAndTimeZone.timeZone)
             
-            return end.map { "\(start) ~ \($0)" } ?? "\(start) ~ "
+            switch repeating.repeatingEndOption {
+            case .none:
+                return "\(start) ~ "
+            case .until(let end):
+                let endTime = Date(timeIntervalSince1970: end).text(format, timeZone: basicAndTimeZone.timeZone)
+                return "\(start) ~ \(endTime)"
+            case .count(let count):
+                return "eventDetail.repeating::period_endcount".localized(with: start, count)
+            }
         }
         return self.subject.basic
             .compactMap { $0 }

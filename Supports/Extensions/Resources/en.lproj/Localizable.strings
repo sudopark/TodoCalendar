@@ -170,6 +170,7 @@
 "eventDetail.repeating.endtime::option::after" = "After";
 "eventDetail.repeating.endtime::option::after_occurrences" = "occurrences";
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "The repeat end time must be in the future than the start time.\n(Repeat start date: %@)";
+"eventDetail.repeating::period_endcount" = "Starting %@ %d times";
 
 "eventDetail.add_new_todo::message" = "A new to-do event has been added.";
 "eventDetail.add_new_schedule::message" = "A new schedule event has been added.";

@@ -170,6 +170,7 @@
 "eventDetail.repeating.endtime::option::after" = "횟수";
 "eventDetail.repeating.endtime::option::after_occurrences" = "회 반복";
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "이벤트 반복 종료시간은 시작시간보다 미래의 시간이여야 합니다.\n(반복 시작시간: %@)";
+"eventDetail.repeating::period_endcount" = "%@ 부터 %d회";
 
 "eventDetail.add_new_todo::message" = "신규 할일이 등록되었습니다.";
 "eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";
