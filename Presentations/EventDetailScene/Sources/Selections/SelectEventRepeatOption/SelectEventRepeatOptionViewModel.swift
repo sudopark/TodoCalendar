@@ -196,27 +196,41 @@ struct SelectRepeatingOptionModel: Equatable {
 struct RepeatEndTime: Equatable {
     
     let text: String
-    var isOn: Bool = false
-    fileprivate let date: Date
+    let date: Date
     
-    init(_ date: Date, from startTime: Date, timeZone: TimeZone) {
+    init(_ date: Date, timeZone: TimeZone) {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        
-        self.date = calendar
-            .dateBySetting(from: date) {
-                $0.hour = calendar.component(.hour, from: startTime)
-                $0.minute = calendar.component(.minute, from: startTime)
-                $0.second = calendar.component(.second, from: startTime)
-            } ?? date
-            
-        let formatter = DateFormatter() 
+        let lastTimeOfDate = calendar.endOfDay(for: date) ?? date
+        let formatter = DateFormatter()
             |> \.timeZone .~ timeZone
             |> \.dateFormat .~ R.String.DateForm.yyyyMMDd
-        self.text = formatter.string(from: self.date)
+        self.text = formatter.string(from: lastTimeOfDate)
+        self.date = lastTimeOfDate
     }
     
-    var endTimeIfOn: Date? {
-        return self.isOn ? self.date : nil
+    static func defaultTime(_ startTime: Date, timeZone: TimeZone) -> RepeatEndTime {
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        let targetDate = calendar.lastDayOfMonth(from: startTime) ?? Date()
+        return .init(targetDate, timeZone: timeZone)
+    }
+}
+
+enum RepeatEndOptionModel: Equatable {
+    case never
+    case on(date: RepeatEndTime)
+    case after(count: Int)
+    
+    var endDate: Date? {
+        guard case .on(let date) = self else { return nil }
+        return date.date
+    }
+    
+    var asEndOption: EventRepeating.RepeatEndOption? {
+        switch self {
+        case .never: return nil
+        case .on(let date): return .until(date.date.timeIntervalSince1970)
+        case .after(let count): return .count(count)
+        }
     }
 }
 
@@ -227,16 +241,17 @@ protocol SelectEventRepeatOptionViewModel: AnyObject, Sendable, SelectEventRepea
     // interactor
     func prepare()
     func selectOption(_ id: String)
-    func toggleHasRepeatEnd(isOn: Bool)
+    func removeRepeatEndOption()
     func selectRepeatEndDate(_ date: Date)
+    func selectRepeatEndCount(_ count: Int)
     func close()
     
     // presenter
     var options: AnyPublisher<[[SelectRepeatingOptionModel]], Never> { get }
     var selectedOptionId: AnyPublisher<String, Never> { get }
-    var hasRepeatEnd: AnyPublisher<Bool, Never> { get }
     var repeatStartTimeText: AnyPublisher<String, Never> { get }
-    var repeatEndTime: AnyPublisher<Date, Never> { get }
+    var defaultRepeatEndDate: AnyPublisher<Date, Never> { get }
+    var repeatEndOption: AnyPublisher<RepeatEndOptionModel, Never> { get }
 }
 
 
@@ -288,7 +303,8 @@ final class SelectEventRepeatOptionViewModelImple: SelectEventRepeatOptionViewMo
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let options = CurrentValueSubject<OptionSeqMap, Never>(.init())
         let selectedOptionId = CurrentValueSubject<String?, Never>(nil)
-        let repeatEndTime = CurrentValueSubject<RepeatEndTime?, Never>(nil)
+        let defaultRepeatEndDate = CurrentValueSubject<Date?, Never>(nil)
+        let endOption = CurrentValueSubject<RepeatEndOptionModel?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -305,7 +321,7 @@ extension SelectEventRepeatOptionViewModelImple {
         let setupValue: (TimeZone) -> Void = { [weak self] timeZone in
             self?.subject.timeZone.send(timeZone)
             self?.setupOptionModels(timeZone, previousSelectOption)
-            self?.setupInitailEndTime(timeZone, previousSelectOption)
+            self?.setupInitailEndOption(timeZone, previousSelectOption)
         }
         
         self.calendarSettingUsecase.currentTimeZone
@@ -350,20 +366,28 @@ extension SelectEventRepeatOptionViewModelImple {
         }
     }
     
-    private func setupInitailEndTime(
+    private func setupInitailEndOption(
         _ timeZone: TimeZone,
         _ previousSelectOption: EventRepeating?
     ) {
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         
-        guard let targetDate = previousSelectOption?.repeatingEndOption?.endTime.map ({ Date(timeIntervalSince1970: $0) })
-                ?? calendar.lastDayOfMonth(from: self.selectTime)
-        else { return }
+        let defaultEndTime = RepeatEndTime.defaultTime(self.selectTime, timeZone: timeZone)
+        self.subject.defaultRepeatEndDate.send(defaultEndTime.date)
         
-        let endTime = RepeatEndTime(targetDate, from: self.selectTime, timeZone: timeZone)
-        |> \.isOn .~ (previousSelectOption?.repeatingEndOption?.endTime != nil)
-        
-        self.subject.repeatEndTime.send(endTime)
+        switch previousSelectOption?.repeatingEndOption {
+        case .none:
+            self.subject.endOption.send(.never)
+            
+        case .count(let count):
+            self.subject.endOption.send(.after(count: count))
+            
+        case .until(let endDate):
+            let time = RepeatEndTime(
+                Date(timeIntervalSince1970: endDate), timeZone: timeZone
+            )
+            self.subject.endOption.send(.on(date: time))
+            
+        }
     }
     
     func selectOption(_ id: String) {
@@ -371,20 +395,22 @@ extension SelectEventRepeatOptionViewModelImple {
         self.checkIsValidAndNotifyOptionSelected()
     }
     
-    func toggleHasRepeatEnd(isOn: Bool) {
-        guard let time = self.subject.repeatEndTime.value else { return }
-        let newTime = time |> \.isOn .~ isOn
-        self.subject.repeatEndTime.send(newTime)
+    func removeRepeatEndOption() {
+        self.subject.endOption.send(.never)
         self.checkIsValidAndNotifyOptionSelected()
     }
     
     func selectRepeatEndDate(_ date: Date) {
         guard let timeZone = self.subject.timeZone.value,
-              self.subject.repeatEndTime.value?.date != date
+              self.subject.endOption.value?.endDate != date
         else { return }
-        let time = RepeatEndTime(date, from: self.selectTime, timeZone: timeZone)
-            |> \.isOn .~ true
-        self.subject.repeatEndTime.send(time)
+        let time = RepeatEndTime(date, timeZone: timeZone)
+        self.subject.endOption.send(.on(date: time))
+        self.checkIsValidAndNotifyOptionSelected()
+    }
+    
+    func selectRepeatEndCount(_ count: Int) {
+        self.subject.endOption.send(.after(count: count))
         self.checkIsValidAndNotifyOptionSelected()
     }
     
@@ -399,22 +425,25 @@ extension SelectEventRepeatOptionViewModelImple {
             return
         }
         
-        let startTime = self.previousSelectOption?.repeatingStartTime ?? self.selectTime.timeIntervalSince1970
-        let endTime = self.subject.repeatEndTime.value?.endTimeIfOn?.timeIntervalSince1970
+        let endOption = self.subject.endOption.value
         
+        let startTime = self.previousSelectOption?.repeatingStartTime ?? self.selectTime.timeIntervalSince1970
+        let endTime = endOption?.endDate?.timeIntervalSince1970
+        
+        // 종료시간 선택된 경우, 올바른지 검사
         let isValidPeriod = endTime.map { startTime < $0 } ?? true
         guard isValidPeriod
         else {
             self.router?.showRepeatingEndTimeIsInvalid(
                 startDate: Date(timeIntervalSince1970: startTime)
             )
-            self.toggleHasRepeatEnd(isOn: false)
+            self.removeRepeatEndOption()
             return
         }
         
         let repeating = EventRepeating(
             repeatingStartTime: startTime, repeatOption: option
-        ) |> \.repeatingEndOption .~ endTime.map { .until($0)}
+        ) |> \.repeatingEndOption .~ endOption?.asEndOption
         let result = EventRepeatingTimeSelectResult(text: model.text, repeating: repeating)
         self.listener?.selectEventRepeatOption(didSelect: result)
     }
@@ -462,16 +491,15 @@ extension SelectEventRepeatOptionViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var repeatEndTime: AnyPublisher<Date, Never> {
-        return self.subject.repeatEndTime
-            .compactMap { $0?.date }
-            .removeDuplicates()
+    var defaultRepeatEndDate: AnyPublisher<Date, Never> {
+        return self.subject.defaultRepeatEndDate
+            .compactMap { $0 }
             .eraseToAnyPublisher()
     }
     
-    var hasRepeatEnd: AnyPublisher<Bool, Never> {
-        return self.subject.repeatEndTime
-            .compactMap { $0?.isOn }
+    var repeatEndOption: AnyPublisher<RepeatEndOptionModel, Never> {
+        return self.subject.endOption
+            .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

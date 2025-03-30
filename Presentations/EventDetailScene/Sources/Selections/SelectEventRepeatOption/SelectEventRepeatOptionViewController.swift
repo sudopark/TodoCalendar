@@ -36,8 +36,9 @@ final class SelectEventRepeatOptionViewController: UIHostingController<SelectEve
         let eventHandler = SelectEventRepeatOptionViewEventHandlers()
         eventHandler.close = viewModel.close
         eventHandler.itemSelect = viewModel.selectOption(_:)
+        eventHandler.removeEndOption = viewModel.removeRepeatEndOption
         eventHandler.endTimeSelect = viewModel.selectRepeatEndDate(_:)
-        eventHandler.toggleHasEndTime = viewModel.toggleHasRepeatEnd(isOn:)
+        eventHandler.endCountSelect = viewModel.selectRepeatEndCount(_:)
         eventHandler.onAppear = viewModel.prepare
         let containerView = SelectEventRepeatOptionContainerView(
             viewAppearance: viewAppearance,

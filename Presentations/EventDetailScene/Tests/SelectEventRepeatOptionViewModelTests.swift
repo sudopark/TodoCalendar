@@ -242,24 +242,39 @@ extension SelectEventRepeatOptionViewModelTests {
 extension SelectEventRepeatOptionViewModelTests {
     
     // 이전 선택값 없을떄 - 초기 종료 시간은 해당 월의 마지막일 + off
-    func testViewModel_whenPreviousSelectNotExists_repeatEndTimeIsMonthLastDayAndOff() {
+    func testViewModel_provideDefaultRepeatEndDate() {
         // given
-        let expect = expectation(description: "이전 선택값 없을떄 - 초기 종료 시간은 해당 월의 마지막일 + off")
+        let expect = expectation(description: "기본 이벤트 종료시간 정보 제공")
         let viewModel = self.makeViewModel()
         
         // when
-        let endTimeOfIsOn = Publishers.CombineLatest(viewModel.repeatEndTime, viewModel.hasRepeatEnd)
-        let endTime = self.waitFirstOutput(expect, for: endTimeOfIsOn) {
+        let date = self.waitFirstOutput(expect, for: viewModel.defaultRepeatEndDate) {
             viewModel.prepare()
         }
         
         // then
-        XCTAssertEqual(endTime?.0.text("yyyy.MM.dd", timeZone: TimeZone(abbreviation: "KST")!), "2023.10.31")
-        XCTAssertEqual(endTime?.1, false)
+        XCTAssertEqual(date?.text("yyyy.MM.dd HH:mm:ss", timeZone: TimeZone(abbreviation: "KST")!), "2023.10.31 23:59:59")
     }
     
-    // 이전 선택값에 이벤트 종료시간 포함되는 경우 해당 시간 노출
-    func testViewModel_whenPreviousSelectExists_repeatEndTimeIsPreviousAndOn() {
+    func testViewModel_whenEndOptionNotExists_provideNeverOption() {
+        // given
+        let expect = expectation(description: "반복 종료 옵션이 없는경우, 반복종료 없음 옵션모델 제공")
+        let previous = EventRepeating(
+            repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        )
+        let viewModel = self.makeViewModel(previous: previous)
+        
+        // when
+        let option = self.waitFirstOutput(expect, for: viewModel.repeatEndOption) {
+            viewModel.prepare()
+        }
+        
+        // then
+        XCTAssertEqual(option?.isNever, true)
+    }
+    
+    func testViewModel_whenPreviousEndOptionIsOn_provideDateInfo() {
         // given
         let expect = expectation(description: "이전 선택값에 이벤트 종료시간 포함되는 경우 해당 시간 노출")
         let previous = EventRepeating(
@@ -272,72 +287,58 @@ extension SelectEventRepeatOptionViewModelTests {
         let viewModel = self.makeViewModel(previous: previous)
         
         // when
-        let endTimeOfIsOn = Publishers.CombineLatest(viewModel.repeatEndTime, viewModel.hasRepeatEnd)
-        let endTime = self.waitFirstOutput(expect, for: endTimeOfIsOn) {
+        let option = self.waitFirstOutput(expect, for: viewModel.repeatEndOption) {
             viewModel.prepare()
         }
         
         // then
-        XCTAssertEqual(endTime?.0.text("yyyy.MM.dd", timeZone: TimeZone(abbreviation: "KST")!), "2023.11.30")
-        XCTAssertEqual(endTime?.1, true)
+        XCTAssertEqual(option?.endDateText, "11/30/2023")
+        XCTAssertEqual(option?.endDate, "2023.11.30 23:59:59".date())
     }
     
-    // 이벤트 종료시간 토글
-    func testViewModel_toggleHasEventEndTime() {
+    func testViewModel_whenPreviousEndOptionIsAfter_provideCountInfo() {
         // given
-        let expect = expectation(description: "이벤트 종료시간 토글")
-        expect.expectedFulfillmentCount = 3
-        let viewModel = self.makeViewModel()
+        let expect = expectation(description: "이전에 선택한 종료 옵션이 횟수인경우, 횟수정보 제공")
+        let previous = EventRepeating(
+            repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        )
+        |> \.repeatingEndOption .~ .count(100)
+        let viewModel = self.makeViewModel(previous: previous)
         
         // when
-        let isOns = self.waitOutputs(expect, for: viewModel.hasRepeatEnd) {
+        let option = self.waitFirstOutput(expect, for: viewModel.repeatEndOption) {
             viewModel.prepare()
-            viewModel.toggleHasRepeatEnd(isOn: true)
-            viewModel.toggleHasRepeatEnd(isOn: false)
         }
         
         // then
-        XCTAssertEqual(isOns, [false, true, false])
+        XCTAssertEqual(option?.endCount, 100)
     }
     
-    // 이벤트 종료시간 선택시에 off 되어있으면 자동으로 on 시킴
-    func testViewModel_whenUpdateEvnetEndtime_updateTime() {
+    func testViewModel_updateSelectRepeatEndOption() {
         // given
-        let expect = expectation(description: "이벤트 종료시간 선택시에 텍스트 업데이트")
-        expect.expectedFulfillmentCount = 3
-        let viewModel = self.makeViewModel()
-        self.waitFirstNotEmptyOptionList(viewModel)
+        let expect = expectation(description: "이벤트 종료 옵션 변경")
+        expect.expectedFulfillmentCount = 4
+        let previous = EventRepeating(
+            repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        )
+        let viewModel = self.makeViewModel(previous: previous)
         
         // when
-        let times = self.waitOutputs(expect, for: viewModel.repeatEndTime) {
-            viewModel.selectRepeatEndDate("2023.10.28 12:33:33".date())
-            viewModel.selectRepeatEndDate("2024.01.01 00:00:00".date())
+        let options = self.waitOutputs(expect, for: viewModel.repeatEndOption) {
+            viewModel.prepare()
+            
+            viewModel.selectRepeatEndDate("2023.11.30 10:33:33".date())
+            viewModel.selectRepeatEndCount(33)
+            viewModel.removeRepeatEndOption()
         }
         
         // then
-        let texts = times.map { $0.text("yyyy.MM.dd", timeZone: TimeZone(abbreviation: "KST")!) }
-        XCTAssertEqual(texts, [
-            "2023.10.31", "2023.10.28", "2024.01.01"
-        ])
-    }
-    
-    func testViewModel_whenUpdateEvnetEndtime_updateTimeAndTurnOnIfOffed() {
-        // given
-        let expect = expectation(description: "이벤트 종료시간 선택시에 off 되어있으면 자동으로 on 시킴")
-        expect.expectedFulfillmentCount = 2
-        let viewModel = self.makeViewModel()
-        self.waitFirstNotEmptyOptionList(viewModel)
-        
-        // when
-        let isOns = self.waitOutputs(expect, for: viewModel.hasRepeatEnd) {
-            viewModel.selectRepeatEndDate("2023.10.28 12:33:33".date())
-            viewModel.selectRepeatEndDate("2024.01.01 00:00:00".date())
-        }
-        
-        // then
-        XCTAssertEqual(isOns, [
-            false, true
-        ])
+        XCTAssertEqual(options[safe: 0]?.isNever, true)
+        XCTAssertEqual(options[safe: 1]?.endDateText, "11/30/2023")
+        XCTAssertEqual(options[safe: 2]?.endCount, 33)
+        XCTAssertEqual(options[safe: 3]?.isNever, true)
     }
 }
 
@@ -370,17 +371,11 @@ extension SelectEventRepeatOptionViewModelTests {
         
         // when
         let everyDay = options?.first(where: { $0.text == "eventDetail.repeating.everyDay:title".localized() })
-        viewModel.selectRepeatEndDate("2023.11.20 00:00:00".date()) // end time 지정은 하지만 반복안함 옵션임 -> not select
+
         viewModel.selectOption(everyDay?.id ?? "") // 반복설정 생기면서 종료시간이랑 같이 업데이트
-        viewModel.toggleHasRepeatEnd(isOn: false) // notify
         viewModel.selectRepeatEndDate("2023.11.24 00:00:00".date())
         
         XCTAssertEqual(self.spyListener.didEventRepeatingSelectOrNot, [
-            nil,
-            EventRepeating(
-                repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
-                repeatOption: EventRepeatingOptions.EveryDay()
-            ) |> \.repeatingEndOption .~ .until("2023.11.20 02:30:22".date().timeIntervalSince1970),
             EventRepeating(
                 repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
                 repeatOption: EventRepeatingOptions.EveryDay()
@@ -388,7 +383,7 @@ extension SelectEventRepeatOptionViewModelTests {
             EventRepeating(
                 repeatingStartTime: self.defaultStartTime.timeIntervalSince1970,
                 repeatOption: EventRepeatingOptions.EveryDay()
-            ) |> \.repeatingEndOption .~ .until("2023.11.24 02:30:22".date().timeIntervalSince1970),
+            ) |> \.repeatingEndOption .~ .until("2023.11.24 23:59:59".date().timeIntervalSince1970),
         ])
     }
     
@@ -407,7 +402,7 @@ extension SelectEventRepeatOptionViewModelTests {
         viewModel.prepare()
         
         // when
-        viewModel.toggleHasRepeatEnd(isOn: true)
+        viewModel.selectRepeatEndCount(3)
         
         // then
         XCTAssertEqual(self.spyListener.didEventRepeatingSelectOrNot.count, 1)
@@ -421,7 +416,8 @@ extension SelectEventRepeatOptionViewModelTests {
         viewModel.prepare()
         
         // when
-        viewModel.selectRepeatEndDate(Date(timeIntervalSince1970: 40))
+        let endDate = Date(timeIntervalSince1970: 0).add(days: -10)!
+        viewModel.selectRepeatEndDate(endDate)
         
         // then
         XCTAssertEqual(self.spyListener.didEventRepeatingSelectOrNot.count, 1)
@@ -438,13 +434,13 @@ extension SelectEventRepeatOptionViewModelTests {
         viewModel.prepare()
         
         // when
-        let isExists = self.waitOutputs(expect, for: viewModel.hasRepeatEnd) {
-            
-            viewModel.selectRepeatEndDate(Date(timeIntervalSince1970: 40))
+        let options = self.waitOutputs(expect, for: viewModel.repeatEndOption) {
+            let endDate = Date(timeIntervalSince1970: 0).add(days: -10)!
+            viewModel.selectRepeatEndDate(endDate)
         }
         
         // then
-        XCTAssertEqual(isExists, [false, true, false])
+        XCTAssertEqual(options.map{ $0.isNever }, [true, false, true])
     }
 }
 
@@ -465,5 +461,23 @@ private class SpyRouter: BaseSpyRouter, SelectEventRepeatOptionRouting, @uncheck
     var didShowRepeatingEndTimeIsInvalid: Bool?
     func showRepeatingEndTimeIsInvalid(startDate: Date) {
         self.didShowRepeatingEndTimeIsInvalid = true
+    }
+}
+
+private extension RepeatEndOptionModel {
+    
+    var isNever: Bool {
+        guard case .never = self else { return false }
+        return true
+    }
+    
+    var endCount: Int? {
+        guard case .after(let count) = self else { return nil }
+        return count
+    }
+    
+    var endDateText: String? {
+        guard case .on(let date) = self else { return nil }
+        return date.text
     }
 }

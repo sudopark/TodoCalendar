@@ -37,7 +37,7 @@
 "date_form::MMM_d_HH:mm" = "MMM d HH:mm";
 "date_form::MMM_d" = "MMM d";
 "date_form::yyyy_MM_dd_E_" = "MM/dd/yyyy (E)";
-"date_form:yyyy.MM_dd_hh:mm" = "MM/dd/yyyy hh:mm";
+"date_form:yyyy.MM_dd_hh:mm" = "MM/dd/yyyy HH:mm";
 "date_form.yyyy" = "yyyy";
 "date_form.MMM_dd_E" = "MMM dd (E)";
 "date_form.HH:mm" = "HH:mm";
@@ -146,7 +146,6 @@
 "eventDetail.repeating.notRepeating::title" = "No repeats";
 "eventDetail.repeating.starttime:form" = "MMM d, yyyy";
 "eventDetail.repeating.starttime:title" = "Repeat start time";
-"eventDetail.repeating.endtime:title" = "Repeat end time";
 "eventDetail.repeating.everyDay:title" = "Everyday";
 "eventDetail.repeating.everyWeek:title" = "Every Week";
 "eventDetail.repeating.everyWeekSomeDay:title" = "Every %@";
@@ -165,6 +164,11 @@
 "eventDetail.repeating.every6WeekOfEveryMonth::someday" = "The Sixth %@ of every month";
 "eventDetail.repeating.every7WeekOfEveryMonth::someday" = "The Seventh %@ of every month";
 "eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "The last %@ of every month";
+"eventDetail.repeating.endtime::title" = "Repeat Ends";
+"eventDetail.repeating.endtime::option::never" = "Never";
+"eventDetail.repeating.endtime::option::on" = "On";
+"eventDetail.repeating.endtime::option::after" = "After";
+"eventDetail.repeating.endtime::option::after_occurrences" = "occurrences";
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "The repeat end time must be in the future than the start time.\n(Repeat start date: %@)";
 
 "eventDetail.add_new_todo::message" = "A new to-do event has been added.";
