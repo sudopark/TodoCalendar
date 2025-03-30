@@ -252,6 +252,7 @@ protocol SelectEventRepeatOptionViewModel: AnyObject, Sendable, SelectEventRepea
     var repeatStartTimeText: AnyPublisher<String, Never> { get }
     var defaultRepeatEndDate: AnyPublisher<Date, Never> { get }
     var repeatEndOption: AnyPublisher<RepeatEndOptionModel, Never> { get }
+    var isNoRepeatOption: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -502,6 +503,19 @@ extension SelectEventRepeatOptionViewModelImple {
             .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    var isNoRepeatOption: AnyPublisher<Bool, Never> {
+        let transform: (String?, OptionSeqMap) -> Bool = { id, seqMap in
+            return id.flatMap { seqMap.option($0) }?.option == nil
+        }
+        return Publishers.CombineLatest(
+            self.subject.selectedOptionId,
+            self.subject.options
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
 }
 
