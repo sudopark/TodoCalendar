@@ -574,7 +574,7 @@ final class EventRepeatEnumeratorTests_EnmeratesEndByCount: BaseEventRepeatTimeE
         let enumerator = self.makeEnumerator(option, endOption: .count(3))
         let startTimeStamp = RepeatingTimes(
             time: .at(self.dummyDate("2023-05-20 01:00").timeIntervalSince1970),
-            turn: 0
+            turn: 1
         )
         let endTime = self.dummyDate("2024-06-01 01:00").timeIntervalSince1970
         
@@ -587,7 +587,7 @@ final class EventRepeatEnumeratorTests_EnmeratesEndByCount: BaseEventRepeatTimeE
             .at(self.dummyDate("2023-05-26 01:00").timeIntervalSince1970),
         ])
         XCTAssertEqual(eventTimes.map { $0.turn }, [
-            1, 2
+            2, 3
         ])
     }
     
@@ -603,7 +603,7 @@ final class EventRepeatEnumeratorTests_EnmeratesEndByCount: BaseEventRepeatTimeE
         )
         let startTimeStamp = RepeatingTimes(
             time: .at(self.dummyDate("2023-05-20 01:00").timeIntervalSince1970),
-            turn: 0
+            turn: 1
         )
         let endTime = self.dummyDate("2024-06-01 01:00").timeIntervalSince1970
         
@@ -617,7 +617,7 @@ final class EventRepeatEnumeratorTests_EnmeratesEndByCount: BaseEventRepeatTimeE
             .at(self.dummyDate("2023-06-04 01:00").timeIntervalSince1970),
         ])
         XCTAssertEqual(eventTimes.map { $0.turn }, [
-            1, 2, 3
+            2, 3, 4
         ])
     }
 }
