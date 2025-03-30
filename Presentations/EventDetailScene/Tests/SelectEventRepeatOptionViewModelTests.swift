@@ -340,6 +340,25 @@ extension SelectEventRepeatOptionViewModelTests {
         XCTAssertEqual(options[safe: 2]?.endCount, 33)
         XCTAssertEqual(options[safe: 3]?.isNever, true)
     }
+    
+    func testViewMode_whenSelectNoRepeatOptionOrNot_updateIsNoRepeat() {
+        // given
+        let expect = expectation(description: "이벤트 반복 옵션 선택 유무에 따라, 플래그 업데이트")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        let options = self.waitFirstNotEmptyOptionList(viewModel)?.flatMap { $0 }
+        let noRepeatOption = options!.first(where: { $0.isNotRepeat == true })!
+        let repeatingOption = options!.first(where: { $0.isNotRepeat == false })!
+        
+        // when
+        let isNoOptions = self.waitOutputs(expect, for: viewModel.isNoRepeatOption) {
+            viewModel.selectOption(repeatingOption.id)
+            viewModel.selectOption(noRepeatOption.id)
+        }
+        
+        // then
+        XCTAssertEqual(isNoOptions, [true, false, true])
+    }
 }
 
 extension SelectEventRepeatOptionViewModelTests {

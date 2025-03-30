@@ -42,6 +42,7 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
     @Published var selectedEndCountText: String = "10"
     @Published var selectedEndDate: Date = Date()
     @Published var selectEndOptionType: SelectEndOptionType = .never
+    @Published var isNoRepeatOption = false
     let availableEndOptionTypee: [SelectEndOptionType] = [.after, .on, .never]
     
     func bind(_ viewModel: any SelectEventRepeatOptionViewModel) {
@@ -92,6 +93,13 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
                     self?.selectedEndCountText = "\(count)"
                     self?.selectEndOptionType = .after
                 }
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.isNoRepeatOption
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] flag in
+                self?.isNoRepeatOption = flag
             })
             .store(in: &self.cancellables)
     }
@@ -176,7 +184,9 @@ struct SelectEventRepeatOptionView: View {
                 
                 VStack(spacing: 0) {
                     Spacer()
-                    self.repeatEndOptionView
+                    if !self.state.isNoRepeatOption {
+                        self.repeatEndOptionView
+                    }
                 }
             }
             .navigationTitle(R.String.EventDetail.Repeating.title)
