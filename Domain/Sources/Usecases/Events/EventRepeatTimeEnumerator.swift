@@ -113,7 +113,7 @@ public final class EventRepeatTimeEnumerator: Sendable {
         if let endTime, nextTime.upperBoundWithFixed > endTime {
             return nil
         }
-        if let endCount = self.endOption?.endCount, next.turn >= endCount {
+        if let endCount = self.endOption?.endCount, next.turn > endCount {
             return nil
         }
         return next
