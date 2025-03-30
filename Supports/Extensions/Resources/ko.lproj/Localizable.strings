@@ -146,7 +146,6 @@
 "eventDetail.repeating.notRepeating::title" = "반복 없음";
 "eventDetail.repeating.starttime:title" = "반복 시작 시간";
 "eventDetail.repeating.starttime:form" = "yyyy. M. d.";
-"eventDetail.repeating.endtime:title" = "반복 종료 시간";
 "eventDetail.repeating.everyDay:title" = "매일";
 "eventDetail.repeating.everyWeek:title" = "매주";
 "eventDetail.repeating.everyWeekSomeDay:title" = "매주 %@";
@@ -165,6 +164,11 @@
 "eventDetail.repeating.every6WeekOfEveryMonth::someday" = "매달 여섯번째 %@";
 "eventDetail.repeating.every7WeekOfEveryMonth::someday" = "매달 일곱번째 %@";
 "eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "매달 마지막 %@";
+"eventDetail.repeating.endtime::title" = "반복 종료";
+"eventDetail.repeating.endtime::option::never" = "안함";
+"eventDetail.repeating.endtime::option::on" = "시간";
+"eventDetail.repeating.endtime::option::after" = "횟수";
+"eventDetail.repeating.endtime::option::after_occurrences" = "회 반복";
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "이벤트 반복 종료시간은 시작시간보다 미래의 시간이여야 합니다.\n(반복 시작시간: %@)";
 
 "eventDetail.add_new_todo::message" = "신규 할일이 등록되었습니다.";
