@@ -35,8 +35,6 @@ public final class HolidayRepositoryImple: HolidayRepository {
 
 extension HolidayRepositoryImple {
     
-    private var host: String { "https://date.nager.at/api/v3" }
-    
     public func loadAvailableCountrise() async throws -> [HolidaySupportCountry] {
         let dtos: [HolidaySupportCountryDTO] = try await self.remoteAPI.request(
             .get, HolidayAPIEndpoints.supportCountry

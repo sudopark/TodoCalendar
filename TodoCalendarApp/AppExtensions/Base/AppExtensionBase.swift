@@ -56,7 +56,7 @@ final class AppExtensionBase {
         }
     }()
     
-    private lazy var remoteEnvironment: RemoteEnvironment = {
+    lazy var remoteEnvironment: RemoteEnvironment = {
         func readSecret() -> [String: Any] {
             guard let path = Bundle.main.path(forResource: "secrets", ofType: "json"),
                     let jsonData = try? Data(contentsOf: URL(fileURLWithPath: path))
