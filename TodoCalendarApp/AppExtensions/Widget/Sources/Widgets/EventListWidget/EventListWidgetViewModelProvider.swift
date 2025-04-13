@@ -431,11 +431,10 @@ private extension Array where Element == EventListWidgetViewModel.SectionModel {
                 switch totalRows[index] {
                 case .section(var newSection):
                     newSection = newSection |> \.events .~ []
-                    let newRowCount = if newSection.isCurrentDay && isCurrentDayEventEmpty { 2 } else { 1 }
-                    guard isRemainRow(afterAppendRow: newRowCount) else { return false }
+                    guard isRemainRow(afterAppendRow: 2) else { return false }
                     
-                    rowCount += newRowCount
                     currentPage.append(section: newSection)
+                    rowCount += 1
                     
                 case .event(let event):
                     guard isRemainRow(afterAppendRow: 1) else { return false }

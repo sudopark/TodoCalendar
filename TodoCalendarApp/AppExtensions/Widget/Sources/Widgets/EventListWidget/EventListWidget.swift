@@ -62,7 +62,7 @@ struct EventListView: View {
                     )
             }
             
-            if model.events.isEmpty {
+            if model.isCurrentDay && model.events.isEmpty {
                 Text("widget.events.noEvents::message".localized())
                     .lineLimit(1)
                     .minimumScaleFactor(0.9)
