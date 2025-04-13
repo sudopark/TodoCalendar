@@ -31,13 +31,18 @@ struct EventListView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            ForEach(0..<model.lists.count, id: \.self) { index in
-                eventListPerDayView(model.lists[index])
-            }
-            
-            if model.needBottomSpace {
-                Spacer()
+        HStack(alignment: .top, spacing: 12) {
+            ForEach(0..<model.pages.count, id: \.self) { pageIndex in
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(0..<model.pages[pageIndex].sections.count, id: \.self) { index in
+                        eventListPerDayView(model.pages[pageIndex].sections[index])
+                    }
+                    
+                    if model.pages[pageIndex].needBottomSpace {
+                        Spacer()
+                    }
+                }
             }
         }
         .invalidatableContent()
@@ -48,14 +53,16 @@ struct EventListView: View {
     ) -> some View {
         
         VStack(alignment: .leading, spacing: 2.5) {
-            Text(model.sectionTitle)
-                .font(.system(size: 13, weight: .bold))
-                .foregroundStyle(
-                    model.shouldAccentTitle
-                    ? colorSet.text0.asColor : colorSet.text2.asColor
-                )
+            if let title = model.sectionTitle {
+                Text(title)
+                    .font(.system(size: 13, weight: .bold))
+                    .foregroundStyle(
+                        model.shouldAccentTitle
+                        ? colorSet.text0.asColor : colorSet.text2.asColor
+                    )
+            }
             
-            if model.events.isEmpty {
+            if model.isCurrentDay && model.events.isEmpty {
                 Text("widget.events.noEvents::message".localized())
                     .lineLimit(1)
                     .minimumScaleFactor(0.9)
@@ -231,47 +238,12 @@ struct EventListWidgetPreview_Provider: PreviewProvider {
     
     static var previews: some View {
         
-        let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("Lunch".localized())")
-            |> \.periodText .~ .singleText(.init(text: "1:00"))
-        
-        let callTodoEvent = TodoEventCellViewModel("call", name: "📞 \("Call Sara".localized())")
-            |> \.periodText .~ .doubleText(
-                .init(text: "01:00"),
-                .init(text: "3:00")
-            )
-        
-        let surfingEvent = ScheduleEventCellViewModel("surfing", name: "🏄‍♂️ \("Surfing".localized())")
-            |> \.periodText .~ .singleText(.init(text: "Allday".localized()))
-        
-        let june3 = EventListWidgetViewModel.SectionModel(
-            title: "TUE, JUN 3",
-            events: [
-                lunchEvent, callTodoEvent
-            ],
-            shouldAccentTitle: true
-        )
-        
-        let july = EventListWidgetViewModel.SectionModel(title: "SUN, JUL 16", events: [
-            surfingEvent
-        ])
-
-        let defaultTagColorSetting = DefaultEventTagColorSetting(
-            holiday: "#D6236A", default: "#088CDA"
-        )
-        
-        let sample = EventListWidgetViewModel(
-            lists: [
-                june3,
-                july
-            ],
-            defaultTagColorSetting: defaultTagColorSetting,
-            customTagMap: [:],
-            needBottomSpace: false
-        )
+        let size: WidgetFamily = .systemMedium
+        let sample = EventListWidgetViewModel.sample(size: .init(size))
         let entry = ResultTimelineEntry(date: Date(), result: .success(sample))
         
         return EventListWidgetView(entry: entry)
-            .previewContext(WidgetPreviewContext(family: .systemSmall))
+            .previewContext(WidgetPreviewContext(family: size))
             .containerBackground(.background, for: .widget)
     }
 }

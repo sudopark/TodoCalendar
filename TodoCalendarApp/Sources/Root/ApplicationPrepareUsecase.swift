@@ -25,8 +25,8 @@ struct ApplicationPrepareResult {
 protocol ApplicationPrepareUsecase {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult
-    func prepareSignedIn(_ auth: Auth)
-    func prepareSignedOut()
+    func prepareSignedIn(_ auth: Auth) async
+    func prepareSignedOut() async
     func prepareExternalCalendarIntegrated(_ serviceId: String)
     func prepareExternalCalendarStopIntegrated(_ serviceId: String)
 }
@@ -39,6 +39,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let latestAppSettingRepository: any AppSettingRepository
     private let sharedDataStore: SharedDataStore
+    private let dbVersion: Int32
     private let database: SQLiteService
     private let databasePathFinding: (String?) -> String
 
@@ -50,6 +51,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         latestAppSettingRepository: any AppSettingRepository,
         sharedDataStore: SharedDataStore,
+        dbVersion: Int32,
         database: SQLiteService,
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
     ) {
@@ -58,6 +60,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.latestAppSettingRepository = latestAppSettingRepository
         self.sharedDataStore = sharedDataStore
+        self.dbVersion = dbVersion
         self.database = database
         self.databasePathFinding = databasePathFinding
     }
@@ -70,7 +73,7 @@ extension ApplicationPrepareUsecaseImple {
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()
         let appearance = try await self.prepareLatestAppearanceSeting()
         
-        self.prepareDatabase(for: latestLoginAccount?.auth.uid)
+        try? await self.prepareDatabase(for: latestLoginAccount?.auth.uid)
         
         try? await self.externalCalenarIntegrationUsecase.prepareIntegratedAccounts()
         return .init(
@@ -79,7 +82,7 @@ extension ApplicationPrepareUsecaseImple {
         )
     }
     
-    func prepareSignedIn(_ auth: Auth) {
+    func prepareSignedIn(_ auth: Auth) async {
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.accountInfo.rawValue
             || $0 != ShareDataKeys.externalCalendarAccounts.rawValue
@@ -87,20 +90,20 @@ extension ApplicationPrepareUsecaseImple {
         let closeResult = self.database.close()
         switch closeResult {
         case .success:
-            self.prepareDatabase(for: auth.uid)
+            try? await self.prepareDatabase(for: auth.uid)
         case .failure(let error):
             logger.log(level: .critical, "signIn -> close db failed..: \(error)")
         }
     }
     
-    func prepareSignedOut() {
+    func prepareSignedOut() async {
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.externalCalendarAccounts.rawValue
         }
         let closeResult = self.database.close()
         switch closeResult {
         case .success:
-            self.prepareDatabase(for: nil)
+            try? await self.prepareDatabase(for: nil)
         case .failure(let error):
             logger.log(level: .critical, "signOut -> close db failed..: \(error)")
         }
@@ -121,11 +124,18 @@ extension ApplicationPrepareUsecaseImple {
         return appearance
     }
     
-    private func prepareDatabase(for accountId: String?) {
+    private func prepareDatabase(for accountId: String?) async throws {
         let database = self.database
         let dbPath = self.databasePathFinding(accountId)
         let openResult = database.open(path: dbPath)
         logger.log(level: .info, "db open result: \(openResult) -> path: \(dbPath)")
+        switch openResult {
+        case .success:
+            try await database.runMigration(upTo: self.dbVersion)
+            
+        case .failure(let error):
+            throw error
+        }
     }
 }
 

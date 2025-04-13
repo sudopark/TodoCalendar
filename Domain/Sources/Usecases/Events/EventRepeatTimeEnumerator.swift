@@ -13,10 +13,16 @@ public final class EventRepeatTimeEnumerator: Sendable {
     
     private let calendar: Calendar
     private let option: any EventRepeatingOption
+    private let endOption: EventRepeating.RepeatEndOption?
     private let igonreTimeKeys: Set<String>
     
-    public init?(_ option: any EventRepeatingOption, without timesKey: Set<String> = []) {
+    public init?(
+        _ option: any EventRepeatingOption,
+        endOption: EventRepeating.RepeatEndOption?,
+        without timesKey: Set<String> = []
+    ) {
         self.option = option
+        self.endOption = endOption
         self.igonreTimeKeys = timesKey
         
         switch option {
@@ -75,8 +81,8 @@ public final class EventRepeatTimeEnumerator: Sendable {
         }
     }
     
-    public func nextEventTime(from time: EventTime, until endTime: TimeInterval?) -> EventTime? {
-        let currentEventStartDate = Date(timeIntervalSince1970: time.lowerBoundWithFixed)
+    public func nextEventTime(from time: RepeatingTimes, until endTime: TimeInterval?) -> RepeatingTimes? {
+        let currentEventStartDate = Date(timeIntervalSince1970: time.time.lowerBoundWithFixed)
         guard let current = Current(self.calendar, date: currentEventStartDate) else { return nil }
         let nextDate: Date?
         switch self.option {
@@ -97,24 +103,29 @@ public final class EventRepeatTimeEnumerator: Sendable {
         guard let interval = nextDate.map ({ $0.timeIntervalSince(currentEventStartDate) })
         else { return nil }
         
-        let nextTime = time.shift(interval)
+        let nextTime = time.time.shift(interval)
+        if self.igonreTimeKeys.contains(nextTime.customKey) {
+            return nextEventTime(
+                from: .init(time: nextTime, turn: time.turn), until: endTime
+            )
+        }
+        let next = RepeatingTimes(time: nextTime, turn: time.turn+1)
         if let endTime, nextTime.upperBoundWithFixed > endTime {
             return nil
         }
-        
-        if self.igonreTimeKeys.contains(nextTime.customKey) {
-            return nextEventTime(from: nextTime, until: endTime)
+        if let endCount = self.endOption?.endCount, next.turn > endCount {
+            return nil
         }
-        return nextTime
+        return next
     }
     
     func nextEventTimes(
-        from start: EventTime,
+        from start: RepeatingTimes,
         until endTime: TimeInterval
-    ) -> [EventTime] {
+    ) -> [RepeatingTimes] {
         
-        var sender: [EventTime] = []
-        var next: EventTime?
+        var sender: [RepeatingTimes] = []
+        var next: RepeatingTimes?
         var cursor = start
         repeat {
             next = self.nextEventTime(from: cursor, until: endTime)

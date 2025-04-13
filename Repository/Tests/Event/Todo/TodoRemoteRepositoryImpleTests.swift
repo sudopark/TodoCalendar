@@ -55,7 +55,7 @@ extension TodoRemoteRepositoryImpleTests {
             repeatingStartTime: 300,
             repeatOption: EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!) |> \.dayOfWeeks .~ [.sunday]
         )
-        |> \.repeatingEndTime .~ 400
+        |> \.repeatingEndOption .~ .until(400)
         
     }
     
@@ -115,7 +115,7 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertEqual(todo.time, .allDay(refTime+100..<refTime+200, secondsFromGMT: 300))
         XCTAssertEqual(todo.repeating?.repeatingStartTime, 300)
         XCTAssertEqual(todo.repeating?.repeatOption.compareHash, self.dummyRepeating.repeatOption.compareHash)
-        XCTAssertEqual(todo.repeating?.repeatingEndTime, refTime+3600*24*100)
+        XCTAssertEqual(todo.repeating?.repeatingEndOption?.endTime, refTime+3600*24*100)
         XCTAssertEqual(todo.notificationOptions, [.allDay9AMBefore(seconds: 300)])
         XCTAssertEqual(todo.creatTimeStamp, 100)
     }

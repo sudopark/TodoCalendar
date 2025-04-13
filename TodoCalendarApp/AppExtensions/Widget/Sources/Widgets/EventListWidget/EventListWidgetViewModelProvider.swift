@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import WidgetKit
 import Prelude
 import Optics
 import Domain
@@ -16,23 +17,41 @@ import CalendarScenes
 
 // MARK: - EventListWidgetViewModel
 
+enum EventListWidgetSize {
+    case small
+    case medium
+    case large
+    
+    init(_ family: WidgetFamily) {
+        switch family {
+        case .systemSmall: self = .small
+        case .systemMedium: self = .medium
+        case .systemLarge: self = .large
+        default: self = .large
+        }
+    }
+}
+
 struct EventListWidgetViewModel {
     
     struct SectionModel {
-        let sectionTitle: String
+        var sectionTitle: String?
         var events: [any EventCellViewModel]
         var shouldAccentTitle: Bool = false
+        var isCurrentDay = false
         var isCurrentTodos = false
         
         init(
-            title: String,
+            title: String?,
             events: [any EventCellViewModel],
             shouldAccentTitle: Bool = false,
+            isCurrentDay: Bool = false,
             isCurrentTodos: Bool = false
         ) {
             self.sectionTitle = title
             self.events = events
             self.shouldAccentTitle = shouldAccentTitle
+            self.isCurrentDay = isCurrentDay
             self.isCurrentTodos = isCurrentTodos
         }
         
@@ -94,7 +113,8 @@ struct EventListWidgetViewModel {
                     return .init(
                         title: dateText,
                         events: models,
-                        shouldAccentTitle: offset == 0
+                        shouldAccentTitle: offset == 0,
+                        isCurrentDay: offset == 0
                     )
                 }
                 
@@ -104,7 +124,8 @@ struct EventListWidgetViewModel {
                         .text("date_form.EEE_MMM_d".localized(), timeZone: timeZone)
                     let startDateModel = SectionModel(
                         title: dateText, events: [],
-                        shouldAccentTitle: true
+                        shouldAccentTitle: true,
+                        isCurrentDay: true
                     )
                     return [startDateModel]
                 }
@@ -112,13 +133,28 @@ struct EventListWidgetViewModel {
             }
         }
     }
+    struct PageModel {
+        var sections: [SectionModel]
+        var needBottomSpace: Bool = false
+        
+        mutating func append(section: SectionModel) {
+            self.sections.append(section)
+        }
+        
+        mutating func append(event: any EventCellViewModel) {
+            guard !self.sections.isEmpty else { return }
+            self.sections[self.sections.count-1].events.append(event)
+        }
+    }
     
-    var lists: [SectionModel]
+    var pages: [PageModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
     let customTagMap: [String: any EventTag]
-    var needBottomSpace: Bool = false
     
-    static func sample(maxItemCount: Int) -> EventListWidgetViewModel {
+    static func sample(size: EventListWidgetSize) -> EventListWidgetViewModel {
+        
+        let runningEvent = ScheduleEventCellViewModel("running", name: "🏃‍♂️ \("widget.events.sample::running".localized())")
+            |> \.periodText .~ .singleText(.init(text: "8:00"))
         
         let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("widget.events.sample::luch".localized())")
             |> \.periodText .~ .singleText(.init(text: "1:00"))
@@ -129,26 +165,118 @@ struct EventListWidgetViewModel {
         let surfingEvent = ScheduleEventCellViewModel("surfing", name: "🏄‍♂️ \("widget.events.sample::surfing".localized())")
             |> \.periodText .~ .singleText(.init(text: "calendar::event_time::allday".localized()))
         
-        let june3 = SectionModel(
-            title: "widget.events.sample::june3".localized(),
-            events: [ lunchEvent, callTodoEvent ],
-            shouldAccentTitle: true
+        let meeting = ScheduleEventCellViewModel("meeting", name: "widget.events.sample::meeting".localized())
+        |> \.periodText .~ .singleText(.init(text: "10:00"))
+        
+        let golf = ScheduleEventCellViewModel("golf", name: "widget.weeks.sample::golf".localized())
+        |> \.periodText .~ .singleText(.init(text: "calendar::event_time::allday".localized()))
+        
+        let recycle = TodoEventCellViewModel("recycle", name: "widget.events.sample::recycle".localized())
+        |> \.periodText .~ .singleText(.init(text: "8:00"))
+        
+        let takeMedicine = TodoEventCellViewModel("take", name: "widget.events.sample::take_medicine".localized())
+        |> \.periodText .~ .singleText(.init(text: "9:00"))
+        
+        let watering = TodoEventCellViewModel("water", name: "widget.events.sample::watering".localized())
+        |> \.periodText .~ .singleText(.init(text: "12:00"))
+        
+        let holiday = HolidayEventCellViewModel(
+            .init(.init(dateString: "2023-10-10", name: "widget.weeks.sample::holiday".localized()), in: .current)!
         )
         
-        let july = SectionModel(title: "widget.events.sample::july16".localized(), events: [
-            surfingEvent
-        ])
-
         let defaultTagColorSetting = DefaultEventTagColorSetting(
             holiday: "#D6236A", default: "#088CDA"
         )
         
-        return .init(
-            lists: [june3, july],
-            defaultTagColorSetting: defaultTagColorSetting,
-            customTagMap: [:]
-        )
-        .prefixedEvents(maxItemCount)
+        switch size {
+        case .small:
+            let june3 = SectionModel(
+                title: "widget.events.sample::june3".localized(),
+                events: [ lunchEvent, callTodoEvent ],
+                shouldAccentTitle: true
+            )
+            
+            let july = SectionModel(title: "widget.events.sample::july16".localized(), events: [
+                runningEvent, surfingEvent
+            ])
+            return .init(
+                pages: [
+                    .init(sections: [june3, july])
+                ],
+                defaultTagColorSetting: defaultTagColorSetting, customTagMap: [:]
+            )
+            
+        case .medium:
+            let june3 = SectionModel(
+                title: "widget.events.sample::june3".localized(),
+                events: [ lunchEvent, callTodoEvent ],
+                shouldAccentTitle: true
+            )
+            
+            let july = SectionModel(title: "widget.events.sample::july16".localized(), events: [
+                runningEvent, surfingEvent
+            ])
+            let july21 = SectionModel(
+                title: "widget.events.sample::july21".localized(), events: [
+                    meeting
+                ]
+            )
+            let oct = SectionModel(
+                title: "widget.events.sample::oct10".localized(), events: [
+                    holiday
+                ]
+            )
+            return .init(
+                pages: [
+                    .init(sections: [june3, july]),
+                    .init(sections: [july21, oct], needBottomSpace: true)
+                ],
+                defaultTagColorSetting: defaultTagColorSetting, customTagMap: [:]
+            )
+            
+        case .large:
+            let june3 = SectionModel(
+                title: "widget.events.sample::june3".localized(),
+                events: [ runningEvent, lunchEvent, callTodoEvent ],
+                shouldAccentTitle: true
+            )
+            
+            let july = SectionModel(title: "widget.events.sample::july16".localized(), events: [
+                runningEvent, surfingEvent
+            ])
+            let july21 = SectionModel(
+                title: "widget.events.sample::july21".localized(), events: [
+                    meeting
+                ]
+            )
+            let july27 = SectionModel(
+                title: "widget.events.sample::july29".localized(), events: [
+                    golf, recycle
+                ]
+            )
+            let aug2 = SectionModel(
+                title: "widget.events.sample::aug2".localized(), events: [
+                    takeMedicine, meeting
+                ]
+            )
+            let aug3 = SectionModel(
+                title: "widget.events.sample::aug3".localized(), events: [
+                    watering
+                ]
+            )
+            let oct = SectionModel(
+                title: "widget.events.sample::oct10".localized(), events: [
+                    holiday
+                ]
+            )
+            return .init(
+                pages: [
+                    .init(sections: [june3, july, july21, july27]),
+                    .init(sections: [aug2, aug3, oct], needBottomSpace: true)
+                ],
+                defaultTagColorSetting: defaultTagColorSetting, customTagMap: [:]
+            )
+        }
     }
 }
 
@@ -179,7 +307,7 @@ extension EventListWidgetViewModelProvider {
     
     func getEventListViewModel(
         for refDate: Date,
-        maxItemCount: Int
+        widgetSize: EventListWidgetSize
     ) async throws -> EventListWidgetViewModel {
         
         let timeZone = self.calendarSettingRepository.loadUserSelectedTImeZone() ?? .current
@@ -188,15 +316,14 @@ extension EventListWidgetViewModelProvider {
         let dayEventLists = try await self.loadDayEventListModel(
             refDate, timeZone, setting.calendar.is24hourForm
         )
-        
+        let pages = dayEventLists.0.pagination(widgetSize)
         return .init(
-            lists: dayEventLists.0,
+            pages: pages,
             defaultTagColorSetting: setting.defaultTagColor,
             customTagMap: dayEventLists.1
         )
-        .prefixedEvents(maxItemCount)
     }
-    
+   
     private func loadDayEventListModel(
         _ start: Date,
         _ timeZone: TimeZone,
@@ -242,28 +369,102 @@ private extension Array where Element == any CalendarEvent {
     
 }
 
-private extension EventListWidgetViewModel {
+private extension Array where Element == EventListWidgetViewModel.SectionModel {
     
-    func prefixedEvents(_ maxCount: Int) -> EventListWidgetViewModel {
+    struct ItemMaxCountPerPage {
+        let singleSection: Int
+        let mutipleSection: Int
+    }
+    
+    func pagination(_ size: EventListWidgetSize) -> [EventListWidgetViewModel.PageModel] {
+        switch size {
+        case .small:
+            return self.split(
+                .init(singleSection: 5, mutipleSection: 5),
+                maxPageCount: 1
+            )
+        case .medium:
+            return self.split(
+                .init(singleSection: 5, mutipleSection: 5),
+                maxPageCount: 2
+            )
+        case .large:
+            return self.split(
+                .init(singleSection: 12, mutipleSection: 12),
+                maxPageCount: 2
+            )
+        }
+    }
+    
+    private enum Row {
+        case section(EventListWidgetViewModel.SectionModel)
+        case event(any EventCellViewModel)
+    }
+    
+    func split(
+        _ counts: ItemMaxCountPerPage, maxPageCount: Int
+    ) -> [EventListWidgetViewModel.PageModel] {
+           
+        let totalRows = self.reduce(into: [Row]()) { acc, section in
+            acc.append(.section(section))
+            acc.append(contentsOf: section.events.map { .event($0)})
+        }
+        let isCurrentDayEventEmpty = self.first(where: { $0.isCurrentDay })?.events.isEmpty ?? false
         
-        let totalEventCount = self.lists.flatMap { $0.events }.count
-        let firstDateIndex = self.lists.firstIndex(where: { $0.isCurrentTodos == false })
-        var remain = maxCount; var index = 0
-        var days: [SectionModel] = []
+        var pages: [EventListWidgetViewModel.PageModel] = []; var pageIndex = 0; var index = 0;
         
-        repeat {
-            let day = self.lists[index].prefixIfNeed(remain)
-            let isFirstDate = index == firstDateIndex
-            if isFirstDate || !day.events.isEmpty {
-                days.append(day)
-                remain -= max(1, day.events.count)
+        while pageIndex < maxPageCount {
+            
+            var currentPage = EventListWidgetViewModel.PageModel(sections: [])
+            var rowCount = 0
+            
+            func isRemainRow(afterAppendRow: Int = 0) -> Bool {
+                let thisPageHasMultipleSection = currentPage.sections.count > 1
+                if thisPageHasMultipleSection {
+                    return rowCount + afterAppendRow <= counts.mutipleSection
+                } else {
+                    return rowCount + afterAppendRow <= counts.singleSection
+                }
             }
-            index += 1
-        } while index < self.lists.count && remain > 0
+            
+            func appendRowsIfRemain() -> Bool {
+                switch totalRows[index] {
+                case .section(var newSection):
+                    newSection = newSection |> \.events .~ []
+                    guard isRemainRow(afterAppendRow: 2) else { return false }
+                    
+                    currentPage.append(section: newSection)
+                    rowCount += 1
+                    
+                case .event(let event):
+                    guard isRemainRow(afterAppendRow: 1) else { return false }
+                    if currentPage.sections.last == nil {
+                        currentPage.append(section: .init(title: nil, events: []))
+                    }
+                    currentPage.append(event: event)
+                    rowCount += 1
+                }
+                return true
+            }
+            
+            while index < totalRows.count {
+                if appendRowsIfRemain() {
+                    index += 1
+                } else {
+                    break
+                }
+            }
+            
+            if pageIndex == maxPageCount-1 {
+                currentPage.needBottomSpace = isRemainRow(afterAppendRow: 1)
+            }
+            if !currentPage.sections.isEmpty {
+                pages.append(currentPage)
+            }
+            pageIndex += 1
+        }
         
-        return self
-            |> \.lists .~ days
-            |> \.needBottomSpace .~ (totalEventCount < maxCount)
+        return pages
     }
 }
 

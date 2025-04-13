@@ -146,7 +146,6 @@
 "eventDetail.repeating.notRepeating::title" = "반복 없음";
 "eventDetail.repeating.starttime:title" = "반복 시작 시간";
 "eventDetail.repeating.starttime:form" = "yyyy. M. d.";
-"eventDetail.repeating.endtime:title" = "반복 종료 시간";
 "eventDetail.repeating.everyDay:title" = "매일";
 "eventDetail.repeating.everyWeek:title" = "매주";
 "eventDetail.repeating.everyWeekSomeDay:title" = "매주 %@";
@@ -165,7 +164,13 @@
 "eventDetail.repeating.every6WeekOfEveryMonth::someday" = "매달 여섯번째 %@";
 "eventDetail.repeating.every7WeekOfEveryMonth::someday" = "매달 일곱번째 %@";
 "eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "매달 마지막 %@";
+"eventDetail.repeating.endtime::title" = "반복 종료";
+"eventDetail.repeating.endtime::option::never" = "안함";
+"eventDetail.repeating.endtime::option::on" = "시간";
+"eventDetail.repeating.endtime::option::after" = "횟수";
+"eventDetail.repeating.endtime::option::after_occurrences" = "회 반복";
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "이벤트 반복 종료시간은 시작시간보다 미래의 시간이여야 합니다.\n(반복 시작시간: %@)";
+"eventDetail.repeating::period_endcount" = "%@ 부터 %d회";
 
 "eventDetail.add_new_todo::message" = "신규 할일이 등록되었습니다.";
 "eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";
@@ -347,14 +352,25 @@
 "widget.doubleMonth::name" = "캘린더 + 캘린더";
 "widget.eventAndMonth::name" = "이벤트 + 캘린더";
 "widget.todayAndMonth::name" = "TODAY + 캘린더";
+"widget.eventAndForesmot::name" = "이벤트 + 제일중요";
 "widget.events::name" = "이벤트";
 "widget.events.noEvents::message" = "이벤트가 없습니다.";
 "widget.events.currentTodos" = "지금 할일";
+"widget.events.sample::running" = "러닝";
 "widget.events.sample::luch" = "점심";
 "widget.events.sample::call" = "전화하기";
 "widget.events.sample::surfing" = "서핑";
+"widget.events.sample::meeting" = "정기 미팅";
+"widget.events.sample::recycle" = "재활용하기";
+"widget.events.sample::take_medicine" = "약먹기";
+"widget.events.sample::watering" = "화분 물주기";
 "widget.events.sample::june3" = "6월 3일 화요일";
 "widget.events.sample::july16" = "7월 16일 일요일";
+"widget.events.sample::july21" = "7월 21일 금요일";
+"widget.events.sample::july29" = "7월 29일 토요일";
+"widget.events.sample::aug2" = "8월 2일 수요일";
+"widget.events.sample::aug3" = "8월 3일 목요일";
+"widget.events.sample::oct10" = "10월 10일 월요일";
 "widget.events.foremost" = "제일 중요한 이벤트";
 "widget.events.foremost::allFinished::message" = "모두 완료되었습니다!";
 "widget.events.foremost::sample::message" = "우산챙기기! ⛱️";

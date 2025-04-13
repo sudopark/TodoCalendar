@@ -17,6 +17,20 @@ import CommonPresentation
 
 // MARK: - SelectEventRepeatOptionViewController
 
+enum SelectEndOptionType: Int {
+    case never
+    case on
+    case after
+    
+    var text: String {
+        switch self {
+        case .never: return "eventDetail.repeating.endtime::option::never".localized()
+        case .on: return "eventDetail.repeating.endtime::option::on".localized()
+        case .after: return "eventDetail.repeating.endtime::option::after".localized()
+        }
+    }
+}
+
 final class SelectEventRepeatOptionViewState: ObservableObject {
     
     private var didBind = false
@@ -25,9 +39,11 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
     @Published var optionList: [[SelectRepeatingOptionModel]] = []
     @Published var selectedOptionId: String?
     @Published var repeatStartTimeText: String?
-    @Published var isEndDatePrepared = false
+    @Published var selectedEndCountText: String = "10"
     @Published var selectedEndDate: Date = Date()
-    @Published var hasEndTime: Bool = false
+    @Published var selectEndOptionType: SelectEndOptionType = .never
+    @Published var isNoRepeatOption = false
+    let availableEndOptionTypee: [SelectEndOptionType] = [.after, .on, .never]
     
     func bind(_ viewModel: any SelectEventRepeatOptionViewModel) {
         
@@ -55,18 +71,35 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
             })
             .store(in: &self.cancellables)
         
-        viewModel.repeatEndTime
+        viewModel.defaultRepeatEndDate
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] date in
-                self?.isEndDatePrepared = true
                 self?.selectedEndDate = date
             })
             .store(in: &self.cancellables)
         
-        viewModel.hasRepeatEnd
+        viewModel.repeatEndOption
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] isOn in
-                self?.hasEndTime = isOn
+            .sink(receiveValue: { [weak self] model in
+                let optionType = model.asType
+                guard self?.selectEndOptionType != optionType else { return }
+                switch model {
+                case .never:
+                    self?.selectEndOptionType = .never
+                case .on(let date):
+                    self?.selectedEndDate = date.date
+                    self?.selectEndOptionType = .on
+                case .after(let count):
+                    self?.selectedEndCountText = "\(count)"
+                    self?.selectEndOptionType = .after
+                }
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.isNoRepeatOption
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] flag in
+                self?.isNoRepeatOption = flag
             })
             .store(in: &self.cancellables)
     }
@@ -76,8 +109,9 @@ final class SelectEventRepeatOptionViewEventHandlers: ObservableObject {
     var onAppear: () -> Void = { }
     var close: () -> Void = { }
     var itemSelect: (String) -> Void = { _ in }
+    var removeEndOption: () -> Void = { }
     var endTimeSelect: (Date) -> Void = { _ in }
-    var toggleHasEndTime: (Bool) -> Void = { _ in }
+    var endCountSelect: (Int) -> Void = { _ in }
 }
 
 
@@ -119,41 +153,49 @@ struct SelectEventRepeatOptionView: View {
     @EnvironmentObject private var appearance: ViewAppearance
     
     @EnvironmentObject private var eventHandlers: SelectEventRepeatOptionViewEventHandlers
+    @FocusState private var isEditing: Bool
     
     var body: some View {
         NavigationStack {
             
-            List {
+            ZStack {
                 
-                if let start = self.state.repeatStartTimeText {
-                    self.repeatStartTimeView(start)
+                List {
+                    
+                    if let start = self.state.repeatStartTimeText {
+                        self.repeatStartTimeView(start)
+                            .listRowSeparator(.hidden)
+                            .listRowBackground(appearance.colorSet.bg0.asColor)
+                    }
+                    
+                    ForEach(self.state.optionList, id: \.compareKey) {
+                        self.sectionView($0)
+                    }
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
+                    
+                    Spacer()
+                        .frame(height: 80)
                         .listRowSeparator(.hidden)
-                        .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
+                .listSectionSpacing(0)
+                .listStyle(.plain)
+                .background(appearance.colorSet.bg0.asColor)
                 
-                ForEach(self.state.optionList, id: \.compareKey) {
-                    self.sectionView($0)
+                VStack(spacing: 0) {
+                    Spacer()
+                    if !self.state.isNoRepeatOption {
+                        self.repeatEndOptionView
+                    }
                 }
-                .listRowSeparator(.hidden)
-                .listRowBackground(appearance.colorSet.bg0.asColor)
             }
-            .listSectionSpacing(0)
-            .listStyle(.plain)
-            .background(appearance.colorSet.bg0.asColor)
             .navigationTitle(R.String.EventDetail.Repeating.title)
             .toolbar {
                 CloseButton()
                     .eventHandler(\.onTap, self.eventHandlers.close)
             }
-            .toolbarBackground(appearance.colorSet.bg2.asColor, for: .bottomBar)
-            .toolbarBackground(.visible, for: .bottomBar)
-            .toolbar {
-                ToolbarItem(placement: .bottomBar) {
-                    self.repeatEndBarView
-                }
-            }
         }
-            .id(appearance.navigationBarId)
+        .id(appearance.navigationBarId)
     }
     
     private func repeatStartTimeView(_ text: String) -> some View {
@@ -199,6 +241,7 @@ struct SelectEventRepeatOptionView: View {
                 .onTapGesture {
                     self.appearance.impactIfNeed()
                     self.eventHandlers.itemSelect(option.id)
+                    self.isEditing = false
                 }
             }
         } header: {
@@ -215,33 +258,105 @@ struct SelectEventRepeatOptionView: View {
         }
     }
     
-    private var repeatEndBarView: some View {
+    private var repeatEndOptionView: some View {
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(appearance.colorSet.line.asColor)
+                .frame(height: 0.5)
+            
+            HStack() {
+                
+                Text("eventDetail.repeating.endtime::title".localized())
+                    .font(appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+                
+                Spacer()
+                
+                Menu {
+                    ForEach(self.state.availableEndOptionTypee, id: \.self) { option in
+                        Button {
+                            self.state.selectEndOptionType = option
+                            switch option {
+                            case .never:
+                                self.eventHandlers.removeEndOption()
+                                self.isEditing = false
+                            case .on:
+                                self.eventHandlers.endTimeSelect(self.state.selectedEndDate)
+                                self.isEditing = false
+                            case .after:
+                                let count = Int(self.state.selectedEndCountText) ?? 0
+                                self.eventHandlers.endCountSelect(count)
+                                self.isEditing = true
+                            }
+                        } label: {
+                            HStack {
+                                if state.selectEndOptionType == option {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 12))
+                                        .foregroundStyle(appearance.colorSet.text0.asColor)
+                                }
+                                Text(option.text)
+                            }
+                        }
+                    }
+                    
+                } label: {
+                    Button { } label: {
+                        Text(self.state.selectEndOptionType.text)
+                            .foregroundStyle(appearance.colorSet.text0.asColor)
+                    }
+                    .buttonStyle(BorderedButtonStyle())
+                    .invertColorIfNeed(appearance)
+                }
+                
+                switch self.state.selectEndOptionType {
+                case .never:
+                    EmptyView()
+                case .on:
+                    repeatEndTimeView
+                case .after:
+                    repeatEndCountView
+                }
+            }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 16)
+        }
+        .padding(.top, 0)
+        .background(appearance.colorSet.bg2.asColor)
+        .onTapGesture {
+            isEditing = false
+        }
+    }
+    
+    private var repeatEndTimeView: some View {
+        DatePicker(
+            "",
+            selection: self.$state.selectedEndDate,
+            displayedComponents: [.date]
+        )
+        .invertColorIfNeed(appearance)
+        .labelsHidden()
+        .onChange(of: self.state.selectedEndDate) { _, date in
+            self.eventHandlers.endTimeSelect(date)
+        }
+    }
+    
+    private var repeatEndCountView: some View {
         HStack {
-            Text(R.String.EventDetail.Repeating.endtimeTitle)
+            TextField("", text: $state.selectedEndCountText)
+                .keyboardType(.numberPad)
+                .focused($isEditing)
+                .onChange(of: state.selectedEndCountText) { _, new in
+                    let newCount = Int(new) ?? 0
+                    self.eventHandlers.endCountSelect(newCount)
+                }
+                .multilineTextAlignment(.trailing)
+                .frame(maxWidth: 50)
+                .textFieldStyle(.roundedBorder)
+                .invertColorIfNeed(appearance)
+            Text("eventDetail.repeating.endtime::option::after_occurrences".localized())
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
-            Spacer()
-            
-            DatePicker(
-                "",
-                selection: self.$state.selectedEndDate,
-                displayedComponents: [.date]
-            )
-            .invertColorIfNeed(appearance)
-            .labelsHidden()
-            .onChange(of: self.state.selectedEndDate) { date in
-                guard self.state.isEndDatePrepared else { return }
-                self.eventHandlers.endTimeSelect(date)
-            }
-            
-            Toggle(isOn: self.$state.hasEndTime) {
-                Text("")
-            }
-            .onChange(of: self.state.hasEndTime) { new in
-                self.eventHandlers.toggleHasEndTime(new)
-            }
-            .labelsHidden()
-            .toggleStyle(.switch)
         }
     }
 }
@@ -260,13 +375,24 @@ private extension Array where Element == SelectRepeatingOptionModel {
     }
 }
 
+private extension RepeatEndOptionModel {
+    
+    var asType: SelectEndOptionType {
+        switch self {
+        case .never: return .never
+        case .on: return .on
+        case .after: return .after
+        }
+    }
+}
+
 // MARK: - preview
 
 struct SelectEventRepeatOptionViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultDark,
+            colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

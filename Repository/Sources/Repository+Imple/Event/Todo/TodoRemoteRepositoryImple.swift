@@ -122,11 +122,17 @@ extension TodoRemoteRepositoryImple {
             throw RuntimeError(key: ClientErrorKeys.notARepeatingEvent.rawValue, "not a repeating event")
         }
         
-        guard let next =  EventRepeatTimeEnumerator(repeating.repeatOption)?.nextEventTime(from: time, until: repeating.repeatingEndTime)
+        let enumerator = EventRepeatTimeEnumerator(
+            repeating.repeatOption, endOption: repeating.repeatingEndOption
+        )
+        guard let next =  enumerator?.nextEventTime(
+            from: .init(time: time, turn: 0),
+            until: repeating.repeatingEndOption?.endTime
+        )
         else {
             throw RuntimeError(key: ClientErrorKeys.repeatingIsEnd.rawValue, "repeaitng end")
         }
-        return next
+        return next.time
     }
 }
 

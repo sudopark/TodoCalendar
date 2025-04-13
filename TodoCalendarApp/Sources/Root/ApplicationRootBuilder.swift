@@ -42,6 +42,7 @@ final class ApplicationRootBuilder {
                 storage: .init(environmentStorage: applicationBase.userDefaultEnvironmentStorage)
             ),
             sharedDataStore: applicationBase.sharedDataStore,
+            dbVersion: AppEnvironment.dbVersion,
             database: applicationBase.commonSqliteService
         )
         let rootViewModel = ApplicationRootViewModelImple(
