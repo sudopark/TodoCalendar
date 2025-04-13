@@ -353,6 +353,7 @@
 "widget.doubleMonth::name" = "Calendar + Calendar";
 "widget.eventAndMonth::name" = "Events + Calendar";
 "widget.todayAndMonth::name" = "TODAY + Calendar";
+"widget.eventAndForesmot::name" = "Events + Foremost";
 "widget.events::name" = "Events";
 "widget.events.noEvents::message" = "There are no events.";
 "widget.events.currentTodos" = "Current To do list";

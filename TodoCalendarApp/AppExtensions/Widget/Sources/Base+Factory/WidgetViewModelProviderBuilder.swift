@@ -215,9 +215,13 @@ extension WidgetViewModelProviderBuilder {
         )
     }
     
-    func makeForemostEventWidgetViewModelProvider() async -> ForemostEventWidgetViewModelProvider {
+    func makeForemostEventWidgetViewModelProvider(
+        shouldSkipCheckCacheReset: Bool = false
+    ) async -> ForemostEventWidgetViewModelProvider {
         
-        await self.checkShouldReset()
+        if !shouldSkipCheckCacheReset {
+            await self.checkShouldReset()
+        }
         
         let appSettingRepository = AppSettingLocalRepositoryImple(
             storage: AppSettingLocalStorage(
@@ -307,6 +311,25 @@ extension WidgetViewModelProviderBuilder {
         return TodayAndMonthWidgetViewModelProvider(
             todayViewModelProvider: today,
             monthViewModelProvider: month
+        )
+    }
+    
+    func makeEventListAndForemostWidgetViewModelProvider(
+        targetEventTagId: EventTagId
+    ) async -> EventAndForemostWidgetViewModelProvider {
+        
+        await self.checkShouldReset()
+        
+        let eventList = await self.makeEventListViewModelProvider(
+            shouldSkipCheckCacheReset: true,
+            targetEventTagId: targetEventTagId
+        )
+
+        let foremost = await self.makeForemostEventWidgetViewModelProvider()
+        
+        return .init(
+            eventListViewModelProvider: eventList,
+            foremostEventViewModelProvider: foremost
         )
     }
 }

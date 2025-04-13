@@ -34,6 +34,7 @@ struct ComposedWidgetBundle: WidgetBundle {
     var body: some Widget {
         DoubleMonthWidget()
         EventAndMonthWidget()
+        EventAndForemostWidget()
         TodayAndMonthWidget()
     }
 }

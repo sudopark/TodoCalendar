@@ -92,11 +92,9 @@ struct SystemSizeForemostEventView: View {
     }
     
     private func eventView(_ event: any EventCellViewModel) -> some View {
-        VStack(alignment: .leading) {
+        VStack(alignment: .leading, spacing: 12) {
             
             eventTypeView()
-            
-            Spacer(minLength: 12)
             
             VStack(alignment: .leading, spacing: 8) {
                 eventTimeView(event.periodText, isTodo: event is TodoEventCellViewModel)

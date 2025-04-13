@@ -34,11 +34,11 @@ struct EventAndMonthWidgetViewModelProvider {
         self.monthViewModelProvider = monthViewModelProvider
     }
     
-    func getViewModel(_ time: Date, size: EventListWidgetSize) async throws -> EventAndMonthWidgetViewModel {
+    func getViewModel(_ time: Date) async throws -> EventAndMonthWidgetViewModel {
         
         return EventAndMonthWidgetViewModel(
             event: try await eventListViewModelProvider.getEventListViewModel(
-                for: time, widgetSize: size
+                for: time, widgetSize: .small
             ),
             month: try await monthViewModelProvider.getMonthViewModel(time)
         )
@@ -85,7 +85,7 @@ struct EventAndMonthWidgetTimelineProvider: TimelineProvider {
             let viewModelProvider = await builer.makeEventAndMonthWidgetViewModelProvider(targetEventTagId: .default)
             let now = Date()
             do {
-                let model = try await viewModelProvider.getViewModel(now, size: .small)
+                let model = try await viewModelProvider.getViewModel(now)
                 completion(.init(date: now, result: .success(model)))
             } catch {
                 completion(.init(date: now, result: .failure(.init(error: error))))

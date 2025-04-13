@@ -46,10 +46,10 @@ struct EventAndMonthWidgetView: View {
 
 struct EventAndMonthWidget: Widget {
     
-    let kind = "EventAndMonthWidget"
+    nonisolated static let kind = "EventAndMonthWidget"
     
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: EventAndMonthWidgetTimelineProvider()) { entry in
+        StaticConfiguration(kind: EventAndMonthWidget.kind, provider: EventAndMonthWidgetTimelineProvider()) { entry in
             EventAndMonthWidgetView(entry: entry)
                 .containerBackground(.background, for: .widget)
         }
