@@ -352,6 +352,7 @@
 "widget.doubleMonth::name" = "캘린더 + 캘린더";
 "widget.eventAndMonth::name" = "이벤트 + 캘린더";
 "widget.todayAndMonth::name" = "TODAY + 캘린더";
+"widget.eventAndForesmot::name" = "이벤트 + 제일중요";
 "widget.events::name" = "이벤트";
 "widget.events.noEvents::message" = "이벤트가 없습니다.";
 "widget.events.currentTodos" = "지금 할일";
