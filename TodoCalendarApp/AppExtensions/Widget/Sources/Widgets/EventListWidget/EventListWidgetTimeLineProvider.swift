@@ -29,7 +29,7 @@ extension EventListWidgetTimeLineProvider {
         in context: Context
     ) -> ResultTimelineEntry<EventListWidgetViewModel> {
         let sample = EventListWidgetViewModel.sample(
-            maxItemCount: context.family.preferedEventListItemCount
+            size: .init(context.family)
         )
         return .init(date: Date(), result: .success(sample))
     }
@@ -73,7 +73,7 @@ extension EventListWidgetTimeLineProvider {
     ) {
         
         let tagId = EventTagId(selected)
-        let count = context.family.preferedEventListItemCount
+        let size = EventListWidgetSize(context.family)
         Task {
             let builder = WidgetViewModelProviderBuilder(base: .init())
             let viewModelProvider = await builder.makeEventListViewModelProvider(targetEventTagId: tagId)
@@ -81,7 +81,7 @@ extension EventListWidgetTimeLineProvider {
             do {
                 let model = try await viewModelProvider.getEventListViewModel(
                     for: now,
-                    maxItemCount: count
+                    widgetSize: size
                 )
                 completion(
                     .init(date: now, result: .success(model))
@@ -102,19 +102,6 @@ extension EventTagId {
         case "default": self = .default
         case .some(let value): self = .custom(value)
         default: self = .default
-        }
-    }
-}
-
-
-extension WidgetFamily {
-    
-    var preferedEventListItemCount: Int {
-        switch self {
-        case .systemSmall: return 3
-        case .systemMedium: return 3
-        case .systemLarge: return 6
-        default: return 0
         }
     }
 }

@@ -34,11 +34,11 @@ struct EventAndMonthWidgetViewModelProvider {
         self.monthViewModelProvider = monthViewModelProvider
     }
     
-    func getViewModel(_ time: Date, maxItemCount: Int) async throws -> EventAndMonthWidgetViewModel {
+    func getViewModel(_ time: Date, size: EventListWidgetSize) async throws -> EventAndMonthWidgetViewModel {
         
         return EventAndMonthWidgetViewModel(
             event: try await eventListViewModelProvider.getEventListViewModel(
-                for: time, maxItemCount: maxItemCount
+                for: time, widgetSize: size
             ),
             month: try await monthViewModelProvider.getMonthViewModel(time)
         )
@@ -53,7 +53,7 @@ struct EventAndMonthWidgetTimelineProvider: TimelineProvider {
         return .init(date: Date()) {
             .init(
                 event: EventListWidgetViewModel.sample(
-                    maxItemCount: context.family.preferedEventListItemCount
+                    size: .small
                 ),
                 month: try MonthWidgetViewModel.makeSample()
             )
@@ -80,13 +80,12 @@ struct EventAndMonthWidgetTimelineProvider: TimelineProvider {
     
     private func getEntry(_ context: Context, _ completion: @Sendable @escaping (Entry) -> Void) {
         
-        let count = context.family.preferedEventListItemCount
         Task {
             let builer = WidgetViewModelProviderBuilder(base: .init())
             let viewModelProvider = await builer.makeEventAndMonthWidgetViewModelProvider(targetEventTagId: .default)
             let now = Date()
             do {
-                let model = try await viewModelProvider.getViewModel(now, maxItemCount: count)
+                let model = try await viewModelProvider.getViewModel(now, size: .small)
                 completion(.init(date: now, result: .success(model)))
             } catch {
                 completion(.init(date: now, result: .failure(.init(error: error))))

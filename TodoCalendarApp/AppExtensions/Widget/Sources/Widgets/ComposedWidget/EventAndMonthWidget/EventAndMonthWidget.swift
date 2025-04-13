@@ -66,7 +66,7 @@ struct EventAndMonthWidgetPreview_Provider: PreviewProvider {
     
     static var previews: some View {
         let model = EventAndMonthWidgetViewModel(
-            event: EventListWidgetViewModel.sample(maxItemCount: 3),
+            event: EventListWidgetViewModel.sample(size: .small),
             month: try! MonthWidgetViewModel.makeSample()
         )
         let entry = ResultTimelineEntry(date: Date(), result: .success(model))
