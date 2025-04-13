@@ -69,7 +69,7 @@ extension EventListWidgetViewModelProviderTests {
         // then
         XCTAssertEqual(viewModel.pages.count, 1)
         let firstPage = viewModel.pages.first
-        XCTAssertEqual(firstPage?.sections.count, 3)
+        XCTAssertEqual(firstPage?.sections.count, 2)
         let currentModel = firstPage?.sections[safe: 0]
         XCTAssertEqual(currentModel?.sectionTitle, "widget.events.currentTodos".localized())
         XCTAssertEqual(currentModel?.events.map { $0.name }, [
@@ -83,14 +83,6 @@ extension EventListWidgetViewModelProviderTests {
         )
         XCTAssertEqual(firstDateModel?.events.map { $0.name }, [
             "todo_at_start"
-        ])
-        
-        let lastDateModel = firstPage?.sections[safe: 2]
-        XCTAssertEqual(
-            lastDateModel?.sectionTitle,
-            self.endDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
-        )
-        XCTAssertEqual(lastDateModel?.events.map { $0.name }, [
         ])
     }
     
@@ -139,6 +131,7 @@ extension EventListWidgetViewModelProviderTests {
             self.endDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
         )
         XCTAssertEqual(lastDateModel?.events.map { $0.name }, [
+            "holiday"
         ])
     }
     
@@ -321,10 +314,10 @@ extension EventListWidgetViewModelProviderTests {
         try await parameterizeTest(current: 0, today: 1, other: 2, expect: 3)
         try await parameterizeTest(current: 0, today: 1, other: 3, expect: 3)
         try await parameterizeTest(current: 0, today: 1, other: 4, expect: 3)
-        try await parameterizeTest(current: 0, today: 3, other: 1, expect: 4)
+        try await parameterizeTest(current: 0, today: 3, other: 1, expect: 3)
         try await parameterizeTest(current: 0, today: 0, other: 2, expect: 3)
-        try await parameterizeTest(current: 0, today: 0, other: 3, expect: 3)
-        try await parameterizeTest(current: 0, today: 0, other: 4, expect: 3)
+        try await parameterizeTest(current: 0, today: 0, other: 3, expect: 4)
+        try await parameterizeTest(current: 0, today: 0, other: 4, expect: 4)
     }
     
     func testProvider_whenWidgetIsMedium_provideEventsWithPaging() async throws {
