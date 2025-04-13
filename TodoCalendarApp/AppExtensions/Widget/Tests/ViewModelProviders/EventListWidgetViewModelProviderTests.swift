@@ -64,17 +64,19 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider()
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
         
         // then
-        XCTAssertEqual(viewModel.lists.count, 3)
-        let currentModel = viewModel.lists[safe: 0]
+        XCTAssertEqual(viewModel.pages.count, 1)
+        let firstPage = viewModel.pages.first
+        XCTAssertEqual(firstPage?.sections.count, 3)
+        let currentModel = firstPage?.sections[safe: 0]
         XCTAssertEqual(currentModel?.sectionTitle, "widget.events.currentTodos".localized())
         XCTAssertEqual(currentModel?.events.map { $0.name }, [
             "current"
         ])
         
-        let firstDateModel = viewModel.lists[safe: 1]
+        let firstDateModel = firstPage?.sections[safe: 1]
         XCTAssertEqual(
             firstDateModel?.sectionTitle,
             self.refDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
@@ -83,15 +85,12 @@ extension EventListWidgetViewModelProviderTests {
             "todo_at_start"
         ])
         
-        let lastDateModel = viewModel.lists[safe: 2]
+        let lastDateModel = firstPage?.sections[safe: 2]
         XCTAssertEqual(
             lastDateModel?.sectionTitle,
             self.endDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
         )
         XCTAssertEqual(lastDateModel?.events.map { $0.name }, [
-            "holiday",
-            "scheudle_at_last",
-            "todo_at_last"
         ])
     }
     
@@ -100,12 +99,13 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider(withCurrentTodo: false)
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
         
         // then
-        XCTAssertEqual(viewModel.lists.count, 2)
+        XCTAssertEqual(viewModel.pages.count, 1)
+        XCTAssertEqual(viewModel.pages.first?.sections.count, 2)
         XCTAssertNil(
-            viewModel.lists.first(where: { $0.isCurrentTodos  })
+            viewModel.pages.first?.sections.first(where: { $0.isCurrentTodos  })
         )
     }
     
@@ -114,31 +114,31 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider(withStartDateEvent: false)
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
         
         // then
-        let currentModel = viewModel.lists[safe: 0]
+        XCTAssertEqual(viewModel.pages.count, 1)
+        let page = viewModel.pages.first
+        XCTAssertEqual(page?.sections.count, 3)
+        let currentModel = page?.sections[safe: 0]
         XCTAssertEqual(currentModel?.sectionTitle, "widget.events.currentTodos".localized())
         XCTAssertEqual(currentModel?.events.map { $0.name }, [
             "current"
         ])
         
-        let firstDateModel = viewModel.lists[safe: 1]
+        let firstDateModel = page?.sections[safe: 1]
         XCTAssertEqual(
             firstDateModel?.sectionTitle,
             self.refDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
         )
         XCTAssertEqual(firstDateModel?.events.map { $0.name }, [])
         
-        let lastDateModel = viewModel.lists[safe: 2]
+        let lastDateModel = page?.sections[safe: 2]
         XCTAssertEqual(
             lastDateModel?.sectionTitle,
             self.endDate.text("date_form.EEE_MMM_d".localized(), timeZone: kst)
         )
         XCTAssertEqual(lastDateModel?.events.map { $0.name }, [
-            "holiday",
-            "scheudle_at_last",
-            "todo_at_last"
         ])
     }
     
@@ -147,17 +147,17 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider()
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .large)
         
         // then
-        let eventModels = viewModel.lists.flatMap { $0.events }
+        let eventModels = viewModel.pages.flatMap { $0.sections }.flatMap { $0.events }
         let colors = eventModels.map { $0.tagId }
         XCTAssertEqual(colors, [
             .default,   // current todo
             .default,   // start date todo,
             .holiday,   // last date
-            .custom("t1"),  // last date schedule event
-            .custom("t2")  // last date todo event
+            .custom("t1"),
+            .custom("t2")
         ])
     }
     
@@ -166,15 +166,15 @@ extension EventListWidgetViewModelProviderTests {
         let provider = self.makeProvider(withoutAnyEventsIncludeHoliday: true)
         
         // when
-        let viewModel = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 100)
+        let viewModel = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
         
         // then
-        XCTAssertEqual(viewModel.lists.count, 1)
+        XCTAssertEqual(viewModel.pages.first?.sections.count, 1)
         XCTAssertEqual(
-            viewModel.lists.first?.sectionTitle, 
+            viewModel.pages.first?.sections.first?.sectionTitle,
             self.refDate.text("EEE, MMM d".localized(), timeZone: kst)
         )
-        XCTAssertEqual(viewModel.lists.first?.events.count, 0)
+        XCTAssertEqual(viewModel.pages.first?.sections.first?.events.count, 0)
     }
 }
 
@@ -239,11 +239,11 @@ extension EventListWidgetViewModelProviderTests {
         )
         
         // when
-        let model = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 3)
+        let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
         
         // then
-        XCTAssertEqual(model.lists.count, 1)
-        let todaySection = model.lists.first(where: { $0.sectionTitle == "Fri, Mar 1" })
+        XCTAssertEqual(model.pages.first?.sections.count, 1)
+        let todaySection = model.pages.first?.sections.first(where: { $0.sectionTitle == "Fri, Mar 1" })
         XCTAssertNotNil(todaySection)
         XCTAssertEqual(todaySection?.events.count, 0)
     }
@@ -258,13 +258,14 @@ extension EventListWidgetViewModelProviderTests {
         )
         
         // when
-        let model = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 3)
+        let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
         
         // then
-        XCTAssertEqual(model.lists.count, 2)
-        let currentSection = model.lists.first(where: { $0.isCurrentTodos == true })
+        let page = model.pages.first
+        XCTAssertEqual(page?.sections.count, 2)
+        let currentSection = page?.sections.first(where: { $0.isCurrentTodos == true })
         XCTAssertEqual(currentSection?.events.count, 1)
-        let todaySection = model.lists.first(where: { $0.sectionTitle == "Fri, Mar 1" })
+        let todaySection = page?.sections.first(where: { $0.sectionTitle == "Fri, Mar 1" })
         XCTAssertNotNil(todaySection)
         XCTAssertEqual(todaySection?.events.count, 0)
     }
@@ -279,20 +280,21 @@ extension EventListWidgetViewModelProviderTests {
         )
         
         // when
-        let model = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 3)
+        let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
         
         // then
-        XCTAssertEqual(model.lists.count, 1)
-        let currentSection = model.lists.first(where: { $0.isCurrentTodos == true })
+        let page = model.pages.first
+        XCTAssertEqual(page?.sections.count, 1)
+        let currentSection = page?.sections.first(where: { $0.isCurrentTodos == true })
         XCTAssertEqual(currentSection?.events.count, 3)
-        let todaySection = model.lists.first(where: { $0.sectionTitle == "Fri, Mar 1" })
+        let todaySection = page?.sections.first(where: { $0.sectionTitle == "Fri, Mar 1" })
         XCTAssertNil(todaySection)
     }
 
     // 전체 이벤트수 제한 걸린경우 필터링
     func testProvider_limitTotalEventCount() async throws {
         // given
-        func parameterizeTest(current: Int, today: Int, other: Int) async throws {
+        func parameterizeTest(current: Int, today: Int, other: Int, expect: Int) async throws {
             // given
             let provider = self.makeProviderWthStub(
                 currentTodosCount: current,
@@ -301,25 +303,136 @@ extension EventListWidgetViewModelProviderTests {
             )
             
             // when
-            let model = try await provider.getEventListViewModel(for: self.refDate, maxItemCount: 3)
+            let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .small)
             
             // then
-            let totalCount = model.lists.reduce(0) { acc, section in
+            let totalCount = model.pages.first?.sections.reduce(0) { acc, section in
                 return section.events.isEmpty ? acc + 1 : acc + section.events.count
             }
-            XCTAssertEqual(totalCount, 3)
+            XCTAssertEqual(totalCount, expect)
         }
         
         // when + then
-        try await parameterizeTest(current: 3, today: 1, other: 0)
-        try await parameterizeTest(current: 3, today: 1, other: 1)
-        try await parameterizeTest(current: 2, today: 0, other: 1)
-        try await parameterizeTest(current: 0, today: 3, other: 1)
-        try await parameterizeTest(current: 0, today: 4, other: 1)
-        try await parameterizeTest(current: 0, today: 0, other: 2)
-        try await parameterizeTest(current: 0, today: 0, other: 3)
-        try await parameterizeTest(current: 0, today: 0, other: 4)
+        try await parameterizeTest(current: 4, today: 1, other: 0, expect: 4)
+        try await parameterizeTest(current: 4, today: 1, other: 1, expect: 4)
+        try await parameterizeTest(current: 3, today: 0, other: 1, expect: 3)
+        try await parameterizeTest(current: 0, today: 4, other: 1, expect: 4)
+        try await parameterizeTest(current: 0, today: 1, other: 1, expect: 2)
+        try await parameterizeTest(current: 0, today: 1, other: 2, expect: 3)
+        try await parameterizeTest(current: 0, today: 1, other: 3, expect: 3)
+        try await parameterizeTest(current: 0, today: 1, other: 4, expect: 3)
+        try await parameterizeTest(current: 0, today: 3, other: 1, expect: 4)
+        try await parameterizeTest(current: 0, today: 0, other: 2, expect: 3)
+        try await parameterizeTest(current: 0, today: 0, other: 3, expect: 3)
+        try await parameterizeTest(current: 0, today: 0, other: 4, expect: 3)
+    }
+    
+    func testProvider_whenWidgetIsMedium_provideEventsWithPaging() async throws {
+        // given
+        func parameterizeTest(
+            page2EventSourceCount: Int,
+            expectPage2Count: Int,
+            needBottomSpace: Bool
+        ) async throws {
+            // given
+            let provider = self.makeProviderWthStub(
+                currentTodosCount: 0,
+                todayEventCount: 4,
+                otherDayEventCount: page2EventSourceCount
+            )
+            
+            // when
+            let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .medium)
+            
+            // then
+            XCTAssertEqual(model.pages.count, 2)
+            let firstPage = model.pages.first; let lastPage = model.pages.last
+            XCTAssertEqual(firstPage?.sections.count, 1)
+            XCTAssertEqual(firstPage?.sections.first?.events.count, 4)
+            XCTAssertEqual(firstPage?.needBottomSpace, false)
+            XCTAssertEqual(lastPage?.sections.count, 1)
+            XCTAssertEqual(lastPage?.sections.first?.events.count, expectPage2Count)
+            XCTAssertEqual(lastPage?.needBottomSpace, needBottomSpace)
+        }
+        // when + then
+        try await parameterizeTest(page2EventSourceCount: 1, expectPage2Count: 1, needBottomSpace: true)
+        try await parameterizeTest(page2EventSourceCount: 2, expectPage2Count: 2, needBottomSpace: true)
+        try await parameterizeTest(page2EventSourceCount: 3, expectPage2Count: 3, needBottomSpace: true)
+        try await parameterizeTest(page2EventSourceCount: 4, expectPage2Count: 4, needBottomSpace: false)
+        try await parameterizeTest(page2EventSourceCount: 5, expectPage2Count: 4, needBottomSpace: false)
+    }
+    
+    func testProvider_whenWidgetIsLarge_provideEventsWithPaging() async throws {
+        // given
+        func parameterizeTest(
+            page2EventSourceCount: Int,
+            expectPage2Count: Int,
+            needBottomSpace: Bool
+        ) async throws {
+            // given
+            let provider = self.makeProviderWthStub(
+                currentTodosCount: 0,
+                todayEventCount: 11,
+                otherDayEventCount: page2EventSourceCount
+            )
+            
+            // when
+            let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .large)
+            
+            // then
+            XCTAssertEqual(model.pages.count, 2)
+            let firstPage = model.pages.first; let lastPage = model.pages.last
+            XCTAssertEqual(firstPage?.sections.count, 1)
+            XCTAssertEqual(firstPage?.sections.first?.events.count, 11)
+            XCTAssertEqual(firstPage?.needBottomSpace, false)
+            
+            XCTAssertEqual(lastPage?.sections.count, 1)
+            XCTAssertEqual(lastPage?.sections.first?.events.count, expectPage2Count)
+            XCTAssertEqual(lastPage?.needBottomSpace, needBottomSpace)
+        }
+        // when + then
+        try await parameterizeTest(page2EventSourceCount: 1, expectPage2Count: 1, needBottomSpace: true)
+        try await parameterizeTest(page2EventSourceCount: 2, expectPage2Count: 2, needBottomSpace: true)
+        try await parameterizeTest(page2EventSourceCount: 3, expectPage2Count: 3, needBottomSpace: true)
+        try await parameterizeTest(page2EventSourceCount: 4, expectPage2Count: 4, needBottomSpace: true)
+        try await parameterizeTest(page2EventSourceCount: 10, expectPage2Count: 10, needBottomSpace: true)
+        try await parameterizeTest(page2EventSourceCount: 11, expectPage2Count: 11, needBottomSpace: false)
+        try await parameterizeTest(page2EventSourceCount: 12, expectPage2Count: 11, needBottomSpace: false)
+        try await parameterizeTest(page2EventSourceCount: 13, expectPage2Count: 11, needBottomSpace: false)
+    }
+    
+    func testProvider_whenMutiplePageAndPage1SectionIsStartFromPage2_page2FirstSectionIsInvisible() async throws {
+        // given
+        let provider = self.makeProviderWthStub(
+            currentTodosCount: 0, todayEventCount: 5, otherDayEventCount: 3
+        )
         
+        // when
+        let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .medium)
+        
+        // then
+        XCTAssertEqual(model.pages.count, 2)
+        let lastPage = model.pages.last
+        let firstSectionAtLastPage = lastPage?.sections.first
+        XCTAssertNotNil(firstSectionAtLastPage)
+        XCTAssertEqual(firstSectionAtLastPage?.sectionTitle, nil)
+        XCTAssertEqual(
+            (firstSectionAtLastPage?.events.first as? TodoEventCellViewModel)?.eventIdentifier,
+            "today:4"
+        )
+    }
+    
+    func testProvider_whenNotSmallSize_butEventCountIsNotEnoughForTwoPage_provideOnlyFirstPage() async throws {
+        // given
+        let provider = self.makeProviderWthStub(
+            currentTodosCount: 0, todayEventCount: 1
+        )
+        
+        // when
+        let model = try await provider.getEventListViewModel(for: self.refDate, widgetSize: .medium)
+        
+        // then
+        XCTAssertEqual(model.pages.count, 1)
     }
 }
 
@@ -374,10 +487,10 @@ extension EventListWidgetViewModelProviderTests {
         let usecase = self.makeProviderWithSingleEvent(self.dummyPDTAlldayTodo)
         
         // when
-        let viewModel = try await usecase.getEventListViewModel(for: self.refDate, maxItemCount: 100)
+        let viewModel = try await usecase.getEventListViewModel(for: self.refDate, widgetSize: .small)
         
         // then
-        let allEvents = viewModel.lists.flatMap { $0.events }
+        let allEvents = viewModel.pages.first?.sections.flatMap { $0.events } ?? []
         let refDateEvent = allEvents.first as? TodoEventCellViewModel
         XCTAssertEqual(refDateEvent?.name, "allday todo")
         XCTAssertEqual(allEvents.count, 1)
@@ -443,13 +556,14 @@ extension EventListWidgetViewModelProviderTests {
         
         // when
         let viewModel = try await provider.getEventListViewModel(
-            for: self.refDate, maxItemCount: 100
+            for: self.refDate, widgetSize: .large
         )
         
         // then
-        XCTAssertEqual(viewModel.lists.count, 2)
-        let currents = viewModel.lists.first(where: { $0.isCurrentTodos })
-        let section0 = viewModel.lists.first(where: { !$0.isCurrentTodos })
+        let page = viewModel.pages.first
+        XCTAssertEqual(page?.sections.count, 2)
+        let currents = page?.sections.first(where: { $0.isCurrentTodos })
+        let section0 = page?.sections.first(where: { !$0.isCurrentTodos })
         XCTAssertEqual(currents?.events.map { $0.eventIdentifier}, [
             "current-1", "current-30", "current-90",
         ])
@@ -516,11 +630,11 @@ extension EventListWidgetViewModelProviderTests {
             
             // when
             let vm = try await provider.getEventListViewModel(
-                for: self.refDate, maxItemCount: 100
+                for: self.refDate, widgetSize: .large
             )
             
             // then
-            let currents = vm.lists.first(where: { $0.isCurrentTodos })
+            let currents = vm.pages.first?.sections.first(where: { $0.isCurrentTodos })
             let identifiers = currents?.events.map { $0.eventIdentifier }
             XCTAssertEqual(identifiers, expectIds)
         }
