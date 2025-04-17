@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import Prelude
+import Optics
+import Extensions
 
 // MARK: - google calendar namespace
 
@@ -70,39 +73,40 @@ extension GoogleCalendar {
 
 extension GoogleCalendar {
     
-    public struct Event: Codable, Sendable {
+    public struct EventRawValue: Decodable, Sendable {
         public let id: String
         public let summary: String
         public var htmlLink: String?
-        public var created: String?
-        public var updated: String?
         public var description: String?
         public var location: String?
         public var colorId: String?
+        // 이벤트 생성자
         public var creator: Creator?
+        // 이벤트 주최자
         public var organizer: Organizer?
-        public var start: EventTime?
-        public var end: EventTime?
+        public var start: GoogleEventTime?
+        public var end: GoogleEventTime?
         public var endTimeUnspecified: Bool = false
         public var recurrence: [String]?
         public var recurringEventId: String?
-        public var originalStartTime: EventTime?
-        public var iCalUID: String?
         public var sequence: Int?
+        // 참석자
         public var attendees: [Attendee]?
-        public var attendeesOmitted: Bool?
         public var hangoutLink: String?
+        // 회의 정보
         public var conferenceData: ConferenceData?
+        // 첨부파일
         public var attachments: [Attachment]?
-        public var birthdayProperties: BirthdayProperties?
         public var eventType: String?
         
-        public init(id: String, summary: String) {
+        public init(
+            id: String, summary: String
+        ) {
             self.id = id
             self.summary = summary
         }
 
-        public struct Creator: Codable, Sendable {
+        public struct Creator: Decodable, Sendable {
             public var id: String?
             public var email: String?
             public var displayName: String?
@@ -111,7 +115,7 @@ extension GoogleCalendar {
             public init() { }
         }
 
-        public struct Organizer: Codable, Sendable {
+        public struct Organizer: Decodable, Sendable {
             public var id: String?
             public var email: String?
             public var displayName: String?
@@ -120,7 +124,7 @@ extension GoogleCalendar {
             public init() { }
         }
 
-        public struct EventTime: Codable, Sendable {
+        public struct GoogleEventTime: Decodable, Sendable {
             public var date: String?
             public var dateTime: String?
             public var timeZone: String?
@@ -128,7 +132,7 @@ extension GoogleCalendar {
             public init() { }
         }
 
-        public struct Attendee: Codable, Sendable {
+        public struct Attendee: Decodable, Sendable {
             public var id: String?
             public var email: String?
             public var displayName: String?
@@ -137,31 +141,19 @@ extension GoogleCalendar {
             public var resource: Bool?
             public var optional: Bool?
             public var responseStatus: String?
-            public var comment: String?
-            public var additionalGuests: Int?
             
             public init() { }
         }
 
 
-        public struct ConferenceData: Codable, Sendable {
-            public var createRequest: CreateRequest?
+        public struct ConferenceData: Decodable, Sendable {
             public var entryPoints: [EntryPoint]?
             public var conferenceId: String?
-            public var signature: String?
-            public var notes: String?
             
             public init() { }
 
-            public struct CreateRequest: Codable, Sendable {
-                public var requestId: String?
-                public var conferenceSolutionKey: String?
-                public var status: String?
-                
-                public init() { }
-            }
 
-            public struct EntryPoint: Codable, Sendable {
+            public struct EntryPoint: Decodable, Sendable {
                 public var entryPointType: String?
                 public var uri: String?
                 public var label: String?
@@ -175,14 +167,14 @@ extension GoogleCalendar {
             }
         }
         
-        public struct Source: Codable, Sendable {
+        public struct Source: Decodable, Sendable {
             public var url: String?
             public var title: String?
             
             public init() { }
         }
         
-        public struct Attachment: Codable, Sendable {
+        public struct Attachment: Decodable, Sendable {
             public var fileUrl: String?
             public var title: String?
             public var mimeType: String?
@@ -191,13 +183,82 @@ extension GoogleCalendar {
             
             public init() { }
         }
-
-        public struct BirthdayProperties: Codable, Sendable {
-            public var contact: String?
-            public var type: String?
-            public var customTypeName: String?
+    }
+    public struct EventRawValueList: Decodable, Sendable {
+        public var timeZone: String?
+        public var items: [EventRawValue] = []
+    }
+    
+    public struct Event: Sendable {
+        public let eventId: String
+        public let name: String
+        public var eventTagId: EventTagId?
+        public let eventTime: EventTime
+        
+        public var nextRepeatingTimes: [RepeatingTimes] = []
+        public var repeatingTimeToExcludes: Set<String> = []
+        
+        public init?(
+            _ origin: EventRawValue, _ calendarId: String, _ defaultTimeZone: String?
+        ) {
+            self.eventId = origin.id
+            self.name = origin.summary
+            self.eventTagId = .externalCalendar(
+                serviceId: GoogleCalendarService.id, id: calendarId
+            )
+            let start = origin.start?.supportEventTimeElemnt(defaultTimeZone)
+            let end = origin.end?.supportEventTimeElemnt(defaultTimeZone)
             
-            public init() { }
+            switch (start, end) {
+            case (.period(let st), .period(let et)):
+                self.eventTime = .period(
+                    st.timeIntervalSince1970..<et.timeIntervalSince1970
+                )
+            case (.allDay(let st, let sz), .allDay(let et, _)):
+                self.eventTime = .allDay(
+                    st.timeIntervalSince1970..<et.timeIntervalSince1970,
+                    secondsFromGMT: TimeInterval(sz.secondsFromGMT())
+                )
+            default:
+                return nil
+            }
+        }
+    }
+}
+
+extension GoogleCalendar.EventRawValue.GoogleEventTime {
+    
+    enum SupportEventTimeElemnt {
+        case period(Date)
+        case allDay(Date, TimeZone)
+    }
+    
+    func supportEventTimeElemnt(_ defaultTimeZone: String?) -> SupportEventTimeElemnt? {
+        
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [
+            .withFullDate, .withDashSeparatorInDate
+        ]
+        
+        let dateTimeFormatter = ISO8601DateFormatter()
+        dateTimeFormatter.formatOptions = [
+            .withInternetDateTime
+        ]
+        
+        let timeZone = self.timeZone ?? defaultTimeZone
+        
+        if
+            let timeZone = timeZone.flatMap ({ TimeZone(identifier: $0) }),
+            let date = self.date.flatMap ({
+                dateFormatter.timeZone = timeZone
+                return dateFormatter.date(from: $0)
+            })
+        {
+            return .allDay(date, timeZone)
+        } else if let dateTime = self.dateTime.flatMap({ dateTimeFormatter.date(from: $0) }) {
+            return .period(dateTime)
+        } else {
+            return nil
         }
     }
 }

@@ -18,7 +18,7 @@ public extension String {
         let timeZone = TimeZone(abbreviation: timeZoneAbbre) ?? TimeZone.current
         let formatter = DateFormatter()
             |> \.timeZone .~ timeZone
-            |> \.dateFormat .~ "yyyy.MM.dd HH:mm:ss"
+            |> \.dateFormat .~ form
         return formatter.date(from: self)!
     }
 }
