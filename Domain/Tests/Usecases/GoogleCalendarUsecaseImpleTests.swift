@@ -8,6 +8,8 @@
 
 import Testing
 import Combine
+import Prelude
+import Optics
 import UnitTestHelpKit
 import TestDoubles
 
@@ -154,6 +156,85 @@ extension GoogleCalendarUsecaseImpleTests {
             ],
             [EventTagId.custom("some")],
         ])
+    }
+}
+
+// MARK: - events
+
+extension GoogleCalendarUsecaseImpleTests {
+    
+    private var dummyAllDayEvent: GoogleCalendar.EventRawValue {
+        var rawValue = GoogleCalendar.EventRawValue(id: "id", summary: "summary")
+        rawValue.start = .init()
+            |> \.date .~ "2023-03-03"
+            |> \.timeZone .~ "Asia/Seoul"
+        rawValue.end = .init()
+            |> \.date .~ "2023-04-03"
+        return rawValue
+    }
+    
+    private var dummyPeriodEvent: GoogleCalendar.EventRawValue {
+        var rawValue = GoogleCalendar.EventRawValue(id: "id", summary: "summary")
+        rawValue.start = .init()
+            |> \.dateTime .~ "2023-03-05T00:00:00+09:00"
+        rawValue.end = .init()
+            |> \.dateTime .~ "2023-03-06T00:00:00+09:00"
+        return rawValue
+    }
+    
+    // eventRawValue -> event
+    @Test func convertEventRawValue_whenTimeIsAllday_converToEvent() {
+        // given
+        let origin = self.dummyAllDayEvent
+        
+        // when
+        let event = GoogleCalendar.Event(
+            origin, "calendar_id", "Asia/Seoul"
+        )
+        
+        // then
+        #expect(event?.eventId == "id")
+        #expect(event?.name == "summary")
+        #expect(
+            event?.eventTagId == .externalCalendar(serviceId: GoogleCalendarService.id, id: "calendar_id")
+        )
+        let lowBound = "2023-03-03".date(
+            form: "yyyy-MM-dd", timeZoneAbbre: "KST"
+        )
+        let upperBound = "2023-04-03".date(
+                form: "yyyy-MM-dd", timeZoneAbbre: "KST"
+        )
+        let kst = TimeZone(abbreviation: "KST")!
+        #expect(event?.eventTime == .allDay(
+            lowBound.timeIntervalSince1970..<upperBound.timeIntervalSince1970,
+            secondsFromGMT: Double(kst.secondsFromGMT()))
+        )
+    }
+    
+    @Test func convertEventRawValue_whenTimeIsPeriod_converToEvent() {
+        // given
+        let origin = self.dummyPeriodEvent
+        
+        // when
+        let event = GoogleCalendar.Event(
+            origin, "calendar_id", "Asia/Seoul"
+        )
+        
+        // then
+        #expect(event?.eventId == "id")
+        #expect(event?.name == "summary")
+        #expect(
+            event?.eventTagId == .externalCalendar(serviceId: GoogleCalendarService.id, id: "calendar_id")
+        )
+        let lowBound = "2023-03-05T00:00:00+09:00".date(
+            form: "yyyy-MM-dd'T'HH:mm:ssz", timeZoneAbbre: "KST"
+        )
+        let upperBound = "2023-03-06T00:00:00+09:00".date(
+                form: "yyyy-MM-dd'T'HH:mm:ssZ", timeZoneAbbre: "KST"
+        )
+        #expect(event?.eventTime == .period(
+            lowBound.timeIntervalSince1970..<upperBound.timeIntervalSince1970
+        ))
     }
 }
 
