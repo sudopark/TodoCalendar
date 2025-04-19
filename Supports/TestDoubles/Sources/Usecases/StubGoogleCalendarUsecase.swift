@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 import Domain
 
 
@@ -17,5 +18,17 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     public var didPrepared = false
     open func prepare() {
         self.didPrepared = true
+    }
+    
+    open func refreshEvents(in period: Range<TimeInterval>) {
+        
+    }
+    
+    open func events(in period: Range<TimeInterval>) -> AnyPublisher<[GoogleCalendar.Event], Never> {
+        return Empty().eraseToAnyPublisher()
+    }
+    
+    open func eventDetail(_ calendarId: String, _ eventId: String) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        return Empty().eraseToAnyPublisher()
     }
 }

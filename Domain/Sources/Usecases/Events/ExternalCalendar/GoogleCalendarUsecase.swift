@@ -24,6 +24,17 @@ public protocol GoogleCalendarViewAppearanceStore: Sendable {
 public protocol GoogleCalendarUsecase: Sendable {
     
     func prepare()
+    
+    func refreshEvents(in period: Range<TimeInterval>)
+    
+    func events(
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], Never>
+    
+    func eventDetail(
+        _ calendarId: String,
+        _ eventId: String
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
 }
 
 
@@ -46,13 +57,21 @@ public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked
         self.sharedDataStore = sharedDataStore
     }
     
+    private struct Subject {
+        let hasAccount = CurrentValueSubject<Bool, Never>(false)
+        let calendars = CurrentValueSubject<[GoogleCalendar.Tag], Never>([])
+    }
+    private let subject = Subject()
     private var cancelBag: Set<AnyCancellable> = []
+    private var refreshEventBag: Set<AnyCancellable> = []
     private func clearCancelBag() {
         self.cancelBag.forEach { $0.cancel() }
         self.cancelBag = []
     }
 }
 
+
+// MARK: - color and tags
 
 extension GoogleCalendarUsecaseImple {
     
@@ -71,12 +90,17 @@ extension GoogleCalendarUsecaseImple {
         hasAccount
             .removeDuplicates()
             .sink(receiveValue: { [weak self] has in
+                self?.subject.hasAccount.send(has)
                 if has {
                     self?.refreshColors()
                     self?.refreshGoogleCalendarEventTags()
                 } else {
                     self?.appearanceStore.clearGoogleCalendarColors()
                     self?.clearGoogleCalendarEventTag()
+                    self?.subject.calendars.send([])
+                    self?.sharedDataStore.delete(
+                        ShareDataKeys.googleCalendarEvents.rawValue
+                    )
                 }
             })
             .store(in: &self.cancelBag)
@@ -93,6 +117,7 @@ extension GoogleCalendarUsecaseImple {
     private func refreshGoogleCalendarEventTags() {
         let updateTags: ([GoogleCalendar.Tag]) -> Void = { [weak self] tags in
             self?.sharedDataStore.update(tags)
+            self?.subject.calendars.send(tags)
         }
         self.repository.loadCalendarTags()
             .sink(receiveValue: updateTags)
@@ -104,6 +129,76 @@ extension GoogleCalendarUsecaseImple {
     }
 }
 
+
+// MARK: - events
+
+extension GoogleCalendarUsecaseImple {
+    
+    private func cancelRefresh() {
+        self.refreshEventBag.forEach { $0.cancel() }
+        self.refreshEventBag = []
+    }
+    
+    public func refreshEvents(in period: Range<TimeInterval>) {
+        guard self.subject.hasAccount.value else { return }
+        
+        self.cancelRefresh()
+        
+        self.subject.calendars
+            .sink(receiveValue: { [weak self] calednars in
+                guard let self = self else { return }
+                calednars.forEach {
+                    self.refreshEvents($0.id, in: period)
+                }
+            })
+            .store(in: &self.refreshEventBag)
+    }
+    
+    private func refreshEvents(
+        _ calendarId: String, in period: Range<TimeInterval>
+    ) {
+       
+        let updateEvents: ([GoogleCalendar.Event]) -> Void = { [weak self] events in
+            
+            let newMap = events.asDictionary { $0.eventId }
+            self?.sharedDataStore.update(
+                [String: GoogleCalendar.Event].self,
+                key: ShareDataKeys.googleCalendarEvents.rawValue
+            ) { old in
+                return (old ?? [:]).merging(newMap) { $1 }
+            }
+        }
+        
+        self.repository.loadEvents(calendarId, in: period)
+            .sink(receiveValue: updateEvents)
+            .store(in: &self.refreshEventBag)
+    }
+    
+    public func events(
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], Never> {
+        let shareKey = ShareDataKeys.googleCalendarEvents.rawValue
+        
+        let filterInRange: ([GoogleCalendar.Event]) -> [GoogleCalendar.Event] = { events in
+            return events.filter { event in
+                return event.eventTime.isRoughlyOverlap(with: period)
+            }
+        }
+        return self.sharedDataStore
+            .observe([String: GoogleCalendar.Event].self, key: shareKey)
+            .map { $0?.values.map { $0 } ?? [] }
+            .map(filterInRange)
+            .eraseToAnyPublisher()
+    }
+    
+    public func eventDetail(
+        _ calendarId: String,
+        _ eventId: String
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        
+        return self.repository.loadEventDetail(calendarId, eventId)
+    }
+}
 
 private extension SharedDataStore {
     

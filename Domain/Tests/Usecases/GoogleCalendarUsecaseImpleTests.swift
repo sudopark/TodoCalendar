@@ -163,8 +163,8 @@ extension GoogleCalendarUsecaseImpleTests {
 
 extension GoogleCalendarUsecaseImpleTests {
     
-    private var dummyAllDayEvent: GoogleCalendar.EventRawValue {
-        var rawValue = GoogleCalendar.EventRawValue(id: "id", summary: "summary")
+    private var dummyAllDayEvent: GoogleCalendar.EventOrigin {
+        var rawValue = GoogleCalendar.EventOrigin(id: "id", summary: "summary")
         rawValue.start = .init()
             |> \.date .~ "2023-03-03"
             |> \.timeZone .~ "Asia/Seoul"
@@ -173,8 +173,8 @@ extension GoogleCalendarUsecaseImpleTests {
         return rawValue
     }
     
-    private var dummyPeriodEvent: GoogleCalendar.EventRawValue {
-        var rawValue = GoogleCalendar.EventRawValue(id: "id", summary: "summary")
+    private var dummyPeriodEvent: GoogleCalendar.EventOrigin {
+        var rawValue = GoogleCalendar.EventOrigin(id: "id", summary: "summary")
         rawValue.start = .init()
             |> \.dateTime .~ "2023-03-05T00:00:00+09:00"
         rawValue.end = .init()
@@ -239,6 +239,120 @@ extension GoogleCalendarUsecaseImpleTests {
 }
 
 
+// MARK: - events
+
+extension GoogleCalendarUsecaseImpleTests {
+    
+    @Test func usecase_refreshEventsInRange() async throws {
+        // given
+        let expect = expectConfirm("주어진 기간에 해당하는 구글 이벤트 조회")
+        expect.count = 3
+        let usecase = self.makeUsecase(hasAccount: true)
+        usecase.prepare()
+        
+        // when
+        let eventSource = usecase.events(in: 0..<100)
+        let eventLists = try await self.outputs(expect, for: eventSource) {
+            try await Task.sleep(for: .milliseconds(10))
+            
+            usecase.refreshEvents(in: 0..<100)
+        }
+        
+        // then
+        let eventCounts = eventLists.map { $0.count }
+        #expect(eventCounts == [0, 10, 20])
+        let calednar1Events = eventLists.last?.filter { $0.calendarId == "tag1" }
+        #expect(calednar1Events?.count == 10)
+        let calednar2Events = eventLists.last?.filter { $0.calendarId == "tag2" }
+        #expect(calednar2Events?.count == 10)
+    }
+    
+    @Test func usecase_whenAccountNotIntegrated_notRefreshEvents() async throws {
+        // given
+        let expect = expectConfirm("계정 연동 안되어있는경우 이벤트 조회 안함")
+        expect.count = 0
+        let usecase = self.makeUsecase(hasAccount: false)
+        usecase.prepare()
+        
+        // when
+        let eventSource = usecase.events(in: 0..<100).filter { !$0.isEmpty }
+        let eventLists = try await self.outputs(expect, for: eventSource) {
+            try await Task.sleep(for: .milliseconds(10))
+            
+            usecase.refreshEvents(in: 0..<10)
+        }
+        
+        // then
+        #expect(eventLists.count == 0)
+    }
+    
+    @Test func usecase_provideEvents_inRange() async throws {
+        // given
+        let expect = expectConfirm("주어진 기간에 해당하는 이벤트만 제공")
+        expect.count = 3
+        let usecase = self.makeUsecase(hasAccount: true)
+        usecase.prepare()
+        
+        // when
+        let eventSource = usecase.events(in: 3..<20)
+        let eventLists = try await self.outputs(expect, for: eventSource) {
+            try await Task.sleep(for: .milliseconds(10))
+            
+            usecase.refreshEvents(in: 0..<10)
+        }
+        
+        // then
+        #expect(eventLists.count == 3)
+        let last = eventLists.last
+        let calendar1Events = last?.filter { $0.calendarId == "tag1" }
+        #expect(
+            calendar1Events?.map { $0.eventId }.sorted() == (3..<10).map { "event:\($0)-tag1" }
+        )
+        let calendar2Events = last?.filter { $0.calendarId == "tag2" }
+        #expect(
+            calendar2Events?.map { $0.eventId }.sorted() == (3..<10).map { "event:\($0)-tag2" }
+        )
+    }
+    
+    @Test func usecase_loadEventDetail() async throws {
+        // given
+        let expect = expectConfirm("구글 이벤트 디테일 조회")
+        let usecase = self.makeUsecase(hasAccount: true)
+        
+        // when
+        let loading = usecase.eventDetail("calendar1", "event")
+        let origin = try await self.firstOutput(expect, for: loading)
+        
+        // then
+        #expect(origin != nil)
+    }
+    
+    @Test func usecase_whenAfterDisconnectAccount_clearEvents() async throws {
+        // given
+        let expect = self.expectConfirm("계정 연동 해제된 경우, 저장된 이벤트 삭제")
+        expect.count = 4
+        expect.timeout = .milliseconds(1000)
+        let usecase = self.makeUsecase(hasAccount: true)
+        usecase.prepare()
+        
+        // when
+        let eventSource = usecase.events(in: 0..<100)
+        let eventLists = try await self.outputs(expect, for: eventSource) {
+            try await Task.sleep(for: .milliseconds(10))
+            
+            usecase.refreshEvents(in: 0..<100)
+            
+            try await Task.sleep(for: .milliseconds(100))
+            self.updateAccountIntegrated(false)
+        }
+        
+        // then
+        let eventCounts = eventLists.map { $0.count }
+        #expect(eventCounts == [0, 10, 20, 0])
+    }
+}
+
+
 private final class PrivateStubRepository: GoogleCalendarRepository {
     
     func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
@@ -257,6 +371,30 @@ private final class PrivateStubRepository: GoogleCalendarRepository {
             GoogleCalendar.Tag(id: "tag2", name: "tag2"),
         ]
         return Just(tags)
+            .mapAsAnyError()
+            .eraseToAnyPublisher()
+    }
+    
+    func loadEvents(
+        _ calendarId: String, in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        let events = (0..<10).map { int -> GoogleCalendar.Event in
+            return .init(
+                "event:\(int)-\(calendarId)", calendarId,
+                name: "some name",
+                time: .period(period.lowerBound..<period.lowerBound+TimeInterval(int+1))
+            )
+        }
+        return Just(events)
+            .mapAsAnyError()
+            .eraseToAnyPublisher()
+    }
+    
+    func loadEventDetail(
+        _ calendarId: String, _ eventId: String
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        let origin = GoogleCalendar.EventOrigin(id: eventId, summary: "some")
+        return Just(origin)
             .mapAsAnyError()
             .eraseToAnyPublisher()
     }
