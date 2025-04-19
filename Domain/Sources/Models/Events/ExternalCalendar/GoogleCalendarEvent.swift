@@ -73,7 +73,7 @@ extension GoogleCalendar {
 
 extension GoogleCalendar {
     
-    public struct EventRawValue: Decodable, Sendable {
+    public struct EventOrigin: Decodable, Sendable {
         public let id: String
         public let summary: String
         public var htmlLink: String?
@@ -184,13 +184,14 @@ extension GoogleCalendar {
             public init() { }
         }
     }
-    public struct EventRawValueList: Decodable, Sendable {
+    public struct EventOriginValueList: Decodable, Sendable {
         public var timeZone: String?
-        public var items: [EventRawValue] = []
+        public var items: [EventOrigin] = []
     }
     
     public struct Event: Sendable {
         public let eventId: String
+        public let calendarId: String
         public let name: String
         public var eventTagId: EventTagId?
         public let eventTime: EventTime
@@ -198,10 +199,21 @@ extension GoogleCalendar {
         public var nextRepeatingTimes: [RepeatingTimes] = []
         public var repeatingTimeToExcludes: Set<String> = []
         
+        public init(
+            _ eventId: String, _ calendarId: String,
+            name: String, time: EventTime
+        ) {
+            self.eventId = eventId
+            self.calendarId = calendarId
+            self.name = name
+            self.eventTime = time
+        }
+        
         public init?(
-            _ origin: EventRawValue, _ calendarId: String, _ defaultTimeZone: String?
+            _ origin: EventOrigin, _ calendarId: String, _ defaultTimeZone: String?
         ) {
             self.eventId = origin.id
+            self.calendarId = calendarId
             self.name = origin.summary
             self.eventTagId = .externalCalendar(
                 serviceId: GoogleCalendarService.id, id: calendarId
@@ -226,7 +238,7 @@ extension GoogleCalendar {
     }
 }
 
-extension GoogleCalendar.EventRawValue.GoogleEventTime {
+extension GoogleCalendar.EventOrigin.GoogleEventTime {
     
     enum SupportEventTimeElemnt {
         case period(Date)

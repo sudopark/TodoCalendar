@@ -28,6 +28,8 @@ public final class GoogleCalendarRepositoryImple: GoogleCalendarRepository {
 }
 
 
+// MARK: - load colors and tags
+
 extension GoogleCalendarRepositoryImple {
     
     public func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
@@ -69,6 +71,29 @@ extension GoogleCalendarRepositoryImple {
         )
         return mapper.calendars
     }
+}
+
+
+// MARK: - load events
+
+extension GoogleCalendarRepositoryImple {
+    
+    public func loadEvents(
+        _ calendarId: String,
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
+    
+    public func loadEventDetail(
+        _ calendarId: String, _ eventId: String
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
+}
+
+
+extension GoogleCalendarRepositoryImple {
     
     private func load<T>(
         startWith readCacheOperation: @Sendable @escaping () async throws -> T?,
