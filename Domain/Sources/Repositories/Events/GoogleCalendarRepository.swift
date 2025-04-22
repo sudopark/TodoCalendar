@@ -21,6 +21,6 @@ public protocol GoogleCalendarRepository: Sendable {
     ) -> AnyPublisher<[GoogleCalendar.Event], any Error>
     
     func loadEventDetail(
-        _ calendarId: String, _ eventId: String
+        _ calendarId: String, _ timeZone: String, _ eventId: String
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
 }

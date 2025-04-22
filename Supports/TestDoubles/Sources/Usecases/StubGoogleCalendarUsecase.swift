@@ -28,7 +28,9 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         return Empty().eraseToAnyPublisher()
     }
     
-    open func eventDetail(_ calendarId: String, _ eventId: String) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+    open func eventDetail(
+        _ calendarId: String, _ eventId: String, at timeZone: TimeZone
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         return Empty().eraseToAnyPublisher()
     }
 }

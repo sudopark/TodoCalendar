@@ -33,7 +33,8 @@ public protocol GoogleCalendarUsecase: Sendable {
     
     func eventDetail(
         _ calendarId: String,
-        _ eventId: String
+        _ eventId: String,
+        at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
 }
 
@@ -193,10 +194,13 @@ extension GoogleCalendarUsecaseImple {
     
     public func eventDetail(
         _ calendarId: String,
-        _ eventId: String
+        _ eventId: String,
+        at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         
-        return self.repository.loadEventDetail(calendarId, eventId)
+        return self.repository.loadEventDetail(
+            calendarId, timeZone.identifier, eventId
+        )
     }
 }
 

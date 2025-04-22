@@ -86,7 +86,7 @@ extension GoogleCalendar {
         public var organizer: Organizer?
         public var start: GoogleEventTime?
         public var end: GoogleEventTime?
-        public var endTimeUnspecified: Bool = false
+        public var endTimeUnspecified: Bool?
         public var recurrence: [String]?
         public var recurringEventId: String?
         public var sequence: Int?
@@ -106,25 +106,25 @@ extension GoogleCalendar {
             self.summary = summary
         }
 
-        public struct Creator: Decodable, Sendable {
+        public struct Creator: Codable, Sendable {
             public var id: String?
             public var email: String?
             public var displayName: String?
-            public var selfValue: Bool?
+            public var `self`: Bool?
             
             public init() { }
         }
 
-        public struct Organizer: Decodable, Sendable {
+        public struct Organizer: Codable, Sendable {
             public var id: String?
             public var email: String?
             public var displayName: String?
-            public var selfValue: Bool?
+            public var `self`: Bool?
             
             public init() { }
         }
 
-        public struct GoogleEventTime: Decodable, Sendable {
+        public struct GoogleEventTime: Codable, Sendable {
             public var date: String?
             public var dateTime: String?
             public var timeZone: String?
@@ -132,7 +132,7 @@ extension GoogleCalendar {
             public init() { }
         }
 
-        public struct Attendee: Decodable, Sendable {
+        public struct Attendee: Codable, Sendable {
             public var id: String?
             public var email: String?
             public var displayName: String?
@@ -146,14 +146,14 @@ extension GoogleCalendar {
         }
 
 
-        public struct ConferenceData: Decodable, Sendable {
+        public struct ConferenceData: Codable, Sendable {
             public var entryPoints: [EntryPoint]?
             public var conferenceId: String?
             
             public init() { }
 
 
-            public struct EntryPoint: Decodable, Sendable {
+            public struct EntryPoint: Codable, Sendable {
                 public var entryPointType: String?
                 public var uri: String?
                 public var label: String?
@@ -167,14 +167,7 @@ extension GoogleCalendar {
             }
         }
         
-        public struct Source: Decodable, Sendable {
-            public var url: String?
-            public var title: String?
-            
-            public init() { }
-        }
-        
-        public struct Attachment: Decodable, Sendable {
+        public struct Attachment: Codable, Sendable {
             public var fileUrl: String?
             public var title: String?
             public var mimeType: String?
@@ -187,6 +180,9 @@ extension GoogleCalendar {
     public struct EventOriginValueList: Decodable, Sendable {
         public var timeZone: String?
         public var items: [EventOrigin] = []
+        public var nextPageToken: String?
+        
+        public init() { }
     }
     
     public struct Event: Sendable {
