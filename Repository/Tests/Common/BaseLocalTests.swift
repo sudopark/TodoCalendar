@@ -56,6 +56,7 @@ extension LocalTestable {
     
     private func open(db fileName: String) throws{
         let path = self.testDBPath(name: fileName)
+        print(path)
         _ = self.sqliteService.open(path: path)
     }
     
@@ -67,7 +68,9 @@ extension LocalTestable {
     
     func runTestWithOpenClose(_ fileName: String, _ testing: @escaping() async throws -> Void) async throws {
         try? self.open(db: fileName)
+        defer {
+            try? self.closeAndRemove(db: fileName)
+        }
         try await testing()
-        try? self.closeAndRemove(db: fileName)
     }
 }

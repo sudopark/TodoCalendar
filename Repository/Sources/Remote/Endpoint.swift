@@ -227,11 +227,19 @@ enum GoogleAuthEndpoint: Endpoint {
 enum GoogleCalendarEndpoint: Endpoint {
     case colors
     case calednarList
+    case eventList(calendarId: String)
+    case event(calendarId: String, eventId: String)
     
     var subPath: String {
         switch self {
-        case .colors: return "colors"
-        case .calednarList: return "users/me/calendarList"
+        case .colors: 
+            return "colors"
+        case .calednarList: 
+            return "users/me/calendarList"
+        case .eventList(let calendarId): 
+            return "calendars/\(calendarId)/events"
+        case .event(let calendarId, let eventId):
+            return "calendars/\(calendarId)/events/\(eventId)"
         }
     }
 }

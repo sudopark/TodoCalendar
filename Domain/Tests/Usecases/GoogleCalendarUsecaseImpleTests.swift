@@ -320,7 +320,7 @@ extension GoogleCalendarUsecaseImpleTests {
         let usecase = self.makeUsecase(hasAccount: true)
         
         // when
-        let loading = usecase.eventDetail("calendar1", "event")
+        let loading = usecase.eventDetail("calendar1", "event", at: .current)
         let origin = try await self.firstOutput(expect, for: loading)
         
         // then
@@ -391,7 +391,7 @@ private final class PrivateStubRepository: GoogleCalendarRepository {
     }
     
     func loadEventDetail(
-        _ calendarId: String, _ eventId: String
+        _ calendarId: String, _ timeZone: String, _ eventId: String
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         let origin = GoogleCalendar.EventOrigin(id: eventId, summary: "some")
         return Just(origin)
