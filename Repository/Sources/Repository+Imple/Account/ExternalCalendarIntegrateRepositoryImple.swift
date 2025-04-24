@@ -16,7 +16,7 @@ import Extensions
 public final class ExternalCalendarIntegrateRepositoryImple: ExternalCalendarIntegrateRepository, @unchecked Sendable {
     
     private let supportServices: [any ExternalCalendarService]
-    private let removeAPIPerService: [String: any RemoteAPI]
+    private let remoteAPIPerService: [String: any RemoteAPI]
     private let keyChainStore: any KeyChainStorage
     private let credentialStore: IntegratedAPICredentialStore
     
@@ -26,7 +26,7 @@ public final class ExternalCalendarIntegrateRepositoryImple: ExternalCalendarInt
         keyChainStore: any KeyChainStorage
     ) {
         self.supportServices = supportServices
-        self.removeAPIPerService = removeAPIPerService
+        self.remoteAPIPerService = removeAPIPerService
         self.keyChainStore = keyChainStore
         self.credentialStore = .init(keyChainStore: keyChainStore)
     }
@@ -51,7 +51,7 @@ extension ExternalCalendarIntegrateRepositoryImple {
             .compactMapValues { self.credentialStore.loadCredential(for: $0.serviceIdentifier) }
         
         self.supportServices.forEach {
-            self.removeAPIPerService[$0.identifier]?.setup(
+            self.remoteAPIPerService[$0.identifier]?.setup(
                 credential: accountCredentialMap[$0.identifier]
             )
         }
@@ -66,7 +66,7 @@ extension ExternalCalendarIntegrateRepositoryImple {
         case let google as GoogleOAuth2Credential:
             let apiCredential = APICredential(google: google)
             self.credentialStore.saveCredential(for: service.identifier, apiCredential)
-            self.removeAPIPerService[service.identifier]?.setup(credential: apiCredential)
+            self.remoteAPIPerService[service.identifier]?.setup(credential: apiCredential)
             
             let account = ExternalServiceAccountinfo(
                 service.identifier, email: google.email
@@ -82,7 +82,7 @@ extension ExternalCalendarIntegrateRepositoryImple {
     
     public func removeAccount(for serviceIdentifier: String) async throws {
         self.credentialStore.removeCredential(for: serviceIdentifier)
-        self.removeAPIPerService[serviceIdentifier]?.setup(credential: nil)
+        self.remoteAPIPerService[serviceIdentifier]?.setup(credential: nil)
         self.keyChainStore.remove(self.accountKey(serviceIdentifier))
     }
 }

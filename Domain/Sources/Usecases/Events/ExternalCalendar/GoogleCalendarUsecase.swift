@@ -36,6 +36,8 @@ public protocol GoogleCalendarUsecase: Sendable {
         _ eventId: String,
         at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
+    
+    var integratedAccount: AnyPublisher<ExternalServiceAccountinfo?, Never> { get }
 }
 
 
@@ -201,6 +203,23 @@ extension GoogleCalendarUsecaseImple {
         return self.repository.loadEventDetail(
             calendarId, timeZone.identifier, eventId
         )
+    }
+}
+
+
+// MARK: - account
+
+extension GoogleCalendarUsecaseImple {
+    
+    public var integratedAccount: AnyPublisher<ExternalServiceAccountinfo?, Never> {
+        let serviceId = self.googleService.identifier
+        return self.sharedDataStore.observe(
+            [String: ExternalServiceAccountinfo].self,
+            key: ShareDataKeys.externalCalendarAccounts.rawValue
+        )
+        .map { $0?[serviceId] }
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
 }
 

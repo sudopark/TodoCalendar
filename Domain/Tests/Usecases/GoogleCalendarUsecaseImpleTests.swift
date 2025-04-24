@@ -352,6 +352,28 @@ extension GoogleCalendarUsecaseImpleTests {
     }
 }
 
+extension GoogleCalendarUsecaseImpleTests {
+    
+    @Test func usecase_provideIntegratedAccount() async throws {
+        // given
+        let expect = self.expectConfirm("연동된 계정정보 제공")
+        expect.count = 3
+        let usecase = self.makeUsecase(hasAccount: false)
+        usecase.prepare()
+        
+        // when
+        let accounts = try await self.outputs(expect, for: usecase.integratedAccount) {
+            
+            self.updateAccountIntegrated(true)
+            
+            self.updateAccountIntegrated(false)
+        }
+        
+        // then
+        let hasAccounts = accounts.map { $0 != nil }
+        #expect(hasAccounts == [false, true, false])
+    }
+}
 
 private final class PrivateStubRepository: GoogleCalendarRepository {
     

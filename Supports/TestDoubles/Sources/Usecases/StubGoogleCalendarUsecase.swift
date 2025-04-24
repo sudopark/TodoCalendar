@@ -33,4 +33,8 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         return Empty().eraseToAnyPublisher()
     }
+    
+    open var integratedAccount: AnyPublisher<ExternalServiceAccountinfo?, Never> {
+        return Empty().eraseToAnyPublisher()
+    }
 }
