@@ -9,7 +9,7 @@
 import Foundation
 
 
-public struct ExternalServiceAccountinfo: Sendable {
+public struct ExternalServiceAccountinfo: Sendable, Equatable {
     
     public let serviceIdentifier: String
     public var email: String?
