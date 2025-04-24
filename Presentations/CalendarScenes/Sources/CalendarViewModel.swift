@@ -37,6 +37,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let eventTagUsecase: any EventTagUsecase
     private let migrationUsecase: any TemporaryUserDataMigrationUescase
     private let uiSettingUsecase: any UISettingUsecase
+    private let googleCalendarUsecase: any GoogleCalendarUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
@@ -51,7 +52,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         foremostEventusecase: any ForemostEventUsecase,
         eventTagUsecase: any EventTagUsecase,
         migrationUsecase: any TemporaryUserDataMigrationUescase,
-        uiSettingUsecase: any UISettingUsecase
+        uiSettingUsecase: any UISettingUsecase,
+        googleCalendarUsecase: any GoogleCalendarUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -62,6 +64,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.eventTagUsecase = eventTagUsecase
         self.migrationUsecase = migrationUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        self.googleCalendarUsecase = googleCalendarUsecase
         
         self.internalBind()
     }
@@ -196,6 +199,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         ranges.forEach {
             self.scheduleEventUsecase.refreshScheduleEvents(in: $0)
             self.todoEventUsecase.refreshTodoEvents(in: $0)
+            self.googleCalendarUsecase.refreshEvents(in: $0)
         }
     }
 }
