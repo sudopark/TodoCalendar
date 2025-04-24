@@ -34,7 +34,12 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         return Empty().eraseToAnyPublisher()
     }
     
+    private let accountSubject = CurrentValueSubject<ExternalServiceAccountinfo?, Never>(nil)
+    public func updateHasAccount(_ account: ExternalServiceAccountinfo?) {
+        self.accountSubject.send(account)
+    }
     open var integratedAccount: AnyPublisher<ExternalServiceAccountinfo?, Never> {
-        return Empty().eraseToAnyPublisher()
+        return self.accountSubject
+            .eraseToAnyPublisher()
     }
 }
