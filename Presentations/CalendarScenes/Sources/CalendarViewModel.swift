@@ -139,6 +139,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             })
             .store(in: &self.cancellables)
         
+        guard FeatureFlag.isEnable(.googleCalendar) else { return }
         let refreshAfterGoogleCalendarIntegrated = self.googleCalendarUsecase.integratedAccount
             .filter { $0 != nil }
         refreshAfterGoogleCalendarIntegrated
@@ -215,7 +216,9 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         ranges.forEach {
             self.scheduleEventUsecase.refreshScheduleEvents(in: $0)
             self.todoEventUsecase.refreshTodoEvents(in: $0)
-            self.googleCalendarUsecase.refreshEvents(in: $0)
+            if FeatureFlag.isEnable(.googleCalendar) {
+                self.googleCalendarUsecase.refreshEvents(in: $0)
+            }
         }
     }
 }
