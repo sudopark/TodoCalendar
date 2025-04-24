@@ -533,6 +533,38 @@ extension CalendarViewModelImpleTests {
         ])
     }
     
+    func testViewModel_whenAfterGoogleCalendarIntegrated_refreshEventsAllCheckedRanges() {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 10, day: 04, weekDay: 3)
+        )
+
+        // when
+        // 전체 범위 => 8~11월, 신규 x
+        viewModel.focusChanged(from: 1, to: 0)
+        
+        // 전체범위 변동 없음 => 8~11
+        viewModel.focusChanged(from: 0, to: 1)
+        
+        // 전체 범위 => 8~12월, 신규 x
+        viewModel.focusChanged(from: 1, to: 2)
+        
+        // 전체 범위 => 8~다음년도1월, 신규 => 2024년
+        viewModel.focusChanged(from: 2, to: 0)
+        
+        // 연동 완료
+        self.spyGoogleCalednarUsecase.updateHasAccount(
+            .init(GoogleCalendarService.id, email: "some")
+        )
+        
+        // then
+        XCTAssertEqual(self.spyGoogleCalednarUsecase.didRefreshedPeriod, [
+            "2023.01.01_00:00..<2024.01.01_00:00",
+            "2024.01.01_00:00..<2025.01.01_00:00",
+            "2023.01.01_00:00..<2025.01.01_00:00"
+        ])
+    }
+    
     // timeZone 변경시도 테스트 추가해야함
     func testViewModel_whenTimeZoneChanged_refreshNotCheckedRange() {
         // given

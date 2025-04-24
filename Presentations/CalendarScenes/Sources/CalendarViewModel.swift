@@ -100,6 +100,12 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 }
             })
             .store(in: &self.cancellables)
+
+        self.bindRefreshEvents()
+        self.bindFocusedMonthChanged()
+    }
+    
+    private func bindRefreshEvents() {
         
         // Timezone 변경시에 조회중인 달력은 안바뀜 하지만 조회 가능한 범위는 달라짐
         // ex) 동일날짜의 시간이라도 kst는 utc보다 9시간 빠름
@@ -120,8 +126,10 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         
         let refreshAfterEnterForeground = NotificationCenter.default.publisher(
             for: UIApplication.willEnterForegroundNotification
-        ).map { _ in }
-        let refreshAfterMigration = self.migrationUsecase.migrationResult.filter { $0.isSuccess }.map { _ in }
+        ).map { _ in  }
+        let refreshAfterMigration = self.migrationUsecase.migrationResult
+            .filter { $0.isSuccess }.map { _ in  }
+        
         Publishers.Merge(refreshAfterEnterForeground, refreshAfterMigration)
             .withLatestFrom(totalViewingMonths) { $1 }
             .compactMap { $0.checkedRange }
@@ -130,8 +138,16 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 self?.todoEventUsecase.refreshCurentTodoEvents()
             })
             .store(in: &self.cancellables)
-
-        self.bindFocusedMonthChanged()
+        
+        let refreshAfterGoogleCalendarIntegrated = self.googleCalendarUsecase.integratedAccount
+            .filter { $0 != nil }
+        refreshAfterGoogleCalendarIntegrated
+            .withLatestFrom(totalViewingMonths) { $1 }
+            .compactMap { $0.checkedRange }
+            .sink(receiveValue: { [weak self] total in
+                self?.googleCalendarUsecase.refreshEvents(in: total)
+            })
+            .store(in: &self.cancellables)
     }
     
     private func bindFocusedMonthChanged() {
