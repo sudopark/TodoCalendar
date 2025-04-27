@@ -22,7 +22,7 @@ final class EventSettingViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
-    @Published var tagModel: EventTagCellViewModel?
+    @Published var tagModel: BaseCalendarEventTagCellViewModel?
     @Published var selectedEventNotificationTimeText: String?
     @Published var selectedAllDayEventNotificationTimeText: String?
     @Published var periodModel: SelectedPeriodModel = .init(.minute0)

@@ -23,7 +23,7 @@ final class EventTagListViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
-    @Published var cellviewModels: [EventTagCellViewModel] = []
+    @Published var cellviewModels: [BaseCalendarEventTagCellViewModel] = []
     
     func bind(_ viewModel: any EventTagListViewModel, _ appearance: ViewAppearance) {
         
@@ -150,7 +150,7 @@ struct EventTagListView: View {
         }
     }
     
-    private func cellView(_ cellViewModel: EventTagCellViewModel) -> some View {
+    private func cellView(_ cellViewModel: BaseCalendarEventTagCellViewModel) -> some View {
         
         HStack {
             Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
@@ -198,7 +198,7 @@ private extension EventTagId {
 }
 
 
-extension EventTagCellViewModel {
+extension BaseCalendarEventTagCellViewModel {
     
     var compareKey: String {
         let components = [
@@ -225,7 +225,7 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
         let state = EventTagListViewState()
         state.cellviewModels = (0..<20).map {
             let tag = CustomEventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "#ff0000")
-            return EventTagCellViewModel(tag)
+            return BaseCalendarEventTagCellViewModel(tag)
         }
         return EventTagListView(hasNavigation: true)
             .eventHandler(\.toggleEventTagViewingIsOn) { id in

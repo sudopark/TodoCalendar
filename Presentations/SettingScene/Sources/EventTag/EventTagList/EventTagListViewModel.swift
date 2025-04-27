@@ -29,7 +29,7 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
     func showTagDetail(_ tagId: EventTagId)
     
     // presenter
-    var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> { get }
+    var cellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> { get }
 }
 
 
@@ -52,7 +52,7 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
     }
     
     private struct Subject {
-        let cvms = CurrentValueSubject<[EventTagCellViewModel]?, Never>(nil)
+        let cvms = CurrentValueSubject<[BaseCalendarEventTagCellViewModel]?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -60,7 +60,7 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
     
     private func internalBinding() {
         
-        self.eventTagListUsecase.cellViewModels
+        self.eventTagListUsecase.baseCalenadrCellViewModels
             .sink(receiveValue: { [weak self] cvms in
                 self?.subject.cvms.send(cvms)
             })
@@ -110,7 +110,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
     }
     
     func eventTag(created newTag: any EventTag) {
-        let newModel = EventTagCellViewModel(newTag)
+        let newModel = BaseCalendarEventTagCellViewModel(newTag)
         let newTags = [newModel] + (self.subject.cvms.value ?? [])
         self.subject.cvms.send(newTags)
         self.listener?.eventTag(created: newTag)
@@ -120,7 +120,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         let cvms = self.subject.cvms.value ?? []
         guard let index = cvms.firstIndex(where: { $0.id == newTag.tagId })
         else { return }
-        let newModel = EventTagCellViewModel(newTag)
+        let newModel = BaseCalendarEventTagCellViewModel(newTag)
         let newTags = cvms |> ix(index) .~ newModel
         self.subject.cvms.send(newTags)
         self.listener?.eventTag(updated: newTag)
@@ -138,7 +138,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
 
 extension EventTagListViewModelImple {
     
-    var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> {
+    var cellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> {
         return self.subject.cvms
             .compactMap { $0 }
             .removeDuplicates()
