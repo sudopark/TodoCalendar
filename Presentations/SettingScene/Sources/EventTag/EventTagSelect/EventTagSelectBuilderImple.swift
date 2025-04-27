@@ -37,7 +37,8 @@ extension EventTagSelectSceneBuilerImple: EventTagSelectSceneBuiler {
         
         let viewModel = EventTagSelectViewModelImple(
             tagUsecase: self.usecaseFactory.makeEventTagUsecase(),
-            eventSettingUsecase: self.usecaseFactory.makeEventSettingUsecase()
+            eventSettingUsecase: self.usecaseFactory.makeEventSettingUsecase(),
+            googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase()
         )
         
         let viewController = EventTagSelectViewController(

@@ -41,10 +41,14 @@ final class EventTagSelectViewModelImple: EventTagSelectViewModel, @unchecked Se
     
     init(
         tagUsecase: any EventTagUsecase,
-        eventSettingUsecase: any EventSettingUsecase
+        eventSettingUsecase: any EventSettingUsecase,
+        googleCalendarUsecase: any GoogleCalendarUsecase
     ) {
         self.settingUsecase = eventSettingUsecase
-        self.tagListUsecase = .init(tagUsecase: tagUsecase)
+        self.tagListUsecase = .init(
+            tagUsecase: tagUsecase,
+            googleCalendarUsecase: googleCalendarUsecase
+        )
     }
     
     

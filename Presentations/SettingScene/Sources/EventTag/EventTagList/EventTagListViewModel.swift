@@ -30,6 +30,7 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
     
     // presenter
     var cellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> { get }
+    var externalCalendarSections: AnyPublisher<[ExternalCalendarEventTagListSectionModel], Never> { get }
 }
 
 
@@ -43,9 +44,13 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
     var listener: (any EventTagListSceneListener)?
     
     init(
-        tagUsecase: EventTagUsecase
+        tagUsecase: any EventTagUsecase,
+        googleCalendarUsecase: any GoogleCalendarUsecase
     ) {
-        self.eventTagListUsecase = .init(tagUsecase: tagUsecase)
+        self.eventTagListUsecase = .init(
+            tagUsecase: tagUsecase,
+            googleCalendarUsecase: googleCalendarUsecase
+        )
         self.tagUsecase = tagUsecase
         
         self.internalBinding()
@@ -82,6 +87,9 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
     func reload() {
         
         self.eventTagListUsecase.reload()
+        
+        guard FeatureFlag.isEnable(.googleCalendar) else { return }
+        self.eventTagListUsecase.reloadExternalCalendar()
     }
     
     func close() {
@@ -143,5 +151,10 @@ extension EventTagListViewModelImple {
             .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    var externalCalendarSections: AnyPublisher<[ExternalCalendarEventTagListSectionModel], Never> {
+        
+        return self.eventTagListUsecase.externalCalendars
     }
 }

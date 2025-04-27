@@ -20,12 +20,18 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         self.didPrepared = true
     }
     
+    private let tagsSubject = CurrentValueSubject<[GoogleCalendar.Tag]?, Never>(nil)
     open func refreshGoogleCalendarEventTags() {
-        
+        let tags = (0..<10).map { int -> GoogleCalendar.Tag in
+            return .init(id: "g:\(int)", name: "g:\(int)")
+        }
+        self.tagsSubject.send(tags)
     }
     
     open var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
-        return Empty().eraseToAnyPublisher()
+        return self.tagsSubject
+            .compactMap { $0 }
+            .eraseToAnyPublisher()
     }
     
     open func refreshEvents(in period: Range<TimeInterval>) {
