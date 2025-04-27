@@ -134,7 +134,7 @@ extension EventTagId {
         default:
             if stringValue.starts(with: "external:") {
                 let compos = stringValue.components(separatedBy: "::")
-                guard compos.count == 2 else { return nil }
+                guard compos.count == 3 else { return nil }
                 self = .externalCalendar(serviceId: compos[1], id: compos[2])
             } else {
                 self = .custom(stringValue)
