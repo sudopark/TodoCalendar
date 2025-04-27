@@ -121,6 +121,7 @@ public struct ExternalCalendarEventTag: EventTag {
     public let name: String
     public let colorHex: String?
     public var foregroundColorHex: String?
+    public var colorId: String?
     
     public init(
         tagId: EventTagId,
@@ -137,5 +138,6 @@ public struct ExternalCalendarEventTag: EventTag {
         self.name = tag.name
         self.colorHex = tag.colorHex
         self.foregroundColorHex = tag.foregroundColorHex
+        self.colorId = tag.colorId
     }
 }

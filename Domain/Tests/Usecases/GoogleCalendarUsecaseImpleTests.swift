@@ -128,15 +128,9 @@ extension GoogleCalendarUsecaseImpleTests {
         let expect = expectConfirm("연동 여부에 따라 구글 캘린더 태그정보 업데이트")
         expect.count = 4
         let usecase = self.makeUsecase(hasAccount: false)
-        self.stubStore.put([EventTagId: any EventTag].self, key: ShareDataKeys.tags.rawValue, [
-            .custom("some"): CustomEventTag(uuid: "custom", name: "name", colorHex: "hex")
-        ])
         
         // when
-        let tagSource = self.stubStore.observe(
-            [EventTagId: any EventTag].self, key: ShareDataKeys.tags.rawValue
-        )
-        let tagLists = try await self.outputs(expect, for: tagSource) {
+        let tagLists = try await self.outputs(expect, for: usecase.calendarTags) {
             usecase.prepare()
             
             self.updateAccountIntegrated(true)
@@ -145,16 +139,15 @@ extension GoogleCalendarUsecaseImpleTests {
         }
         
         // then
-        let idSets = tagLists.map { ts in ts?.map { $0.key } ?? [] }.map { Set($0) }
+        let idSets = tagLists.map { ts in ts.map { $0.tagId }}
         #expect(idSets == [
-            [.custom("some")],
-            [.custom("some")],
+            [],
+            [],
             [
-                .custom("some"),
                 .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag1"),
                 .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag2")
             ],
-            [EventTagId.custom("some")],
+            [],
         ])
     }
     

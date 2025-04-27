@@ -36,10 +36,16 @@ struct ExternalCalendarEventTagCellViewModel: Equatable {
     var isOn: Bool = true
     let id: EventTagId
     let name: String
+    var backgroundColor: String?
+    var foregroundColor: String?
+    var colorId: String?
     
     init(_ tag: ExternalCalendarEventTag) {
         self.id = tag.tagId
         self.name = tag.name
+        self.backgroundColor = tag.colorHex
+        self.foregroundColor = tag.foregroundColorHex
+        self.colorId = tag.colorId
     }
 }
 
