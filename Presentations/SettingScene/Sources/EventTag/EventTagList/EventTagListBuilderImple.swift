@@ -38,7 +38,8 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
     ) -> any EventTagListScene {
         
         let viewModel = EventTagListViewModelImple(
-            tagUsecase: self.usecaseFactory.makeEventTagUsecase()
+            tagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase()
         )
         
         let viewController = EventTagListViewController(

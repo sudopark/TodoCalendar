@@ -45,7 +45,8 @@ class EventTagSelectViewModelimlpeTests: BaseTestCase, PublisherWaitable {
         
         let viewModel = EventTagSelectViewModelImple(
             tagUsecase: tagUsecase,
-            eventSettingUsecase: self.spySettingUsecase
+            eventSettingUsecase: self.spySettingUsecase,
+            googleCalendarUsecase: StubGoogleCalendarUsecase()
         )
         viewModel.router = self.spyRouter
         return viewModel
