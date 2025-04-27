@@ -235,6 +235,7 @@
 "eventTag.makeNew::message" = "A new event type has been created.";
 "eventTag.default::title" = "Default Event Type";
 "eventTag.default::selection::explain" = "This is the event type that will be selected by default when creating an event.";
+"eventTag.externalCalendar::integrate_button" = "Connect calendar";
 
 
 // MARK: - event list

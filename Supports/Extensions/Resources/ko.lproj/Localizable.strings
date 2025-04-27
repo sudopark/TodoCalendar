@@ -234,6 +234,7 @@
 "eventTag.makeNew::message" = "신규 이벤트 타입이 생성되었습니다.";
 "eventTag.default::title" = "기본 이벤트 타입";
 "eventTag.default::selection::explain" = "이벤트 생성시에 기본으로 지정할 이벤트 타입을 선택합니다.";
+"eventTag.externalCalendar::integrate_button" = "캘린더 연동하기";
 
 
 // MARK: - event list

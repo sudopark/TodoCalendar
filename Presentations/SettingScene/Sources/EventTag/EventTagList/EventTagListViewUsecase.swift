@@ -54,7 +54,7 @@ struct ExternalCalendarEventTagListSectionModel: Equatable {
         serviceTitle: String,
         icon: String? = nil,
         cellViewModels: [ExternalCalendarEventTagCellViewModel],
-        offIds: Set<EventTagId> = []
+        offIds: Set<EventTagId>
     ) {
         self.serviceId = serviceId
         self.serviceTitle = serviceTitle

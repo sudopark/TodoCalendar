@@ -256,6 +256,17 @@ extension EventTagListViewModelImpleTests {
         XCTAssertEqual(tagCounts, [22, 21])
         XCTAssertEqual(hasTag4s, [true, false])
     }
+    
+    func testViewModel_whenIntegrateExternalCalendar_routeToEventSetting() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.integrateCalendar(serviceId: GoogleCalendarService.id)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToEventSetting, true)
+    }
 }
 
 extension EventTagListViewModelImpleTests {
@@ -288,6 +299,11 @@ extension EventTagListViewModelImpleTests {
                 )
                 listener.eventTag(updated: newTag)
             }
+        }
+        
+        var didRouteToEventSetting: Bool?
+        func routeToEventSetting() {
+            self.didRouteToEventSetting = true
         }
     }
 }
