@@ -114,16 +114,21 @@ struct EventTagListView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(self.state.cellviewModels, id: \.compareKey) {
-                    self.cellView($0)
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(appearance.colorSet.bg0.asColor)
+                Section {
+                    ForEach(self.state.cellviewModels) {
+                        self.cellView($0)
+                    }
                 }
+                .listRowSeparator(.hidden)
+                .listRowBackground(appearance.colorSet.bg0.asColor)
                 
-                if !self.state.externalCalendarTagSections.isEmpty {
-                    self.externalSectionList
-                        .listRowSeparator(.hidden)
-                        .listRowBackground(appearance.colorSet.bg0.asColor)
+                ForEach(self.state.externalCalendarTagSections) { section in
+                    Section {
+                        self.externalSectionView(section)
+                    }
+                    .padding(.top, 16)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
             }
             .listStyle(.plain)
@@ -175,6 +180,7 @@ struct EventTagListView: View {
             Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
                 .foregroundStyle(appearance.color(cellViewModel.id).asColor)
                 .font(.title3)
+                .animation(.easeIn, value: cellViewModel.isOn)
                 .onTapGesture {
                     self.appearance.impactIfNeed()
                     self.toggleEventTagViewingIsOn(cellViewModel.id)
@@ -203,13 +209,6 @@ struct EventTagListView: View {
         )
     }
     
-    private var externalSectionList: some View {
-        ForEach(self.state.externalCalendarTagSections, id: \.compareKey) { section in
-            self.externalSectionView(section)
-        }
-        .padding(.top, 16)
-    }
-    
     private func externalSectionView(_ section: ExternalCalendarEventTagListSectionModel) -> some View {
         
         VStack(alignment: .leading) {
@@ -220,7 +219,7 @@ struct EventTagListView: View {
             if section.cellViewModels.isEmpty {
                 serviceIntegrateView(section.serviceId)
             } else {
-                ForEach(section.cellViewModels, id: \.compareKey) { cell in
+                ForEach(section.cellViewModels) { cell in
                     self.externalCellView(cell)
                 }
             }
@@ -251,6 +250,7 @@ struct EventTagListView: View {
             Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
                 .foregroundStyle(appearance.color(cellViewModel.id).asColor)
                 .font(.title3)
+                .animation(.easeIn, value: cellViewModel.isOn)
                 .onTapGesture {
                     self.appearance.impactIfNeed()
                     self.toggleEventTagViewingIsOn(cellViewModel.id)
@@ -283,36 +283,14 @@ private extension EventTagId {
     }
 }
 
-extension ExternalCalendarEventTagListSectionModel {
+extension ExternalCalendarEventTagListSectionModel: Identifiable {
     
-    var compareKey: String {
-        let components = [
-            self.serviceId, self.serviceTitle, self.icon ?? "nil", self.cellViewModels.map { $0.compareKey }.joined(separator: ",")
-        ]
-        return components.joined(separator: "-")
-    }
+    var id: String { self.serviceId }
 }
 
-extension ExternalCalendarEventTagCellViewModel {
-    
-    var compareKey: String {
-        let components = [
-            "\(self.id)", self.name, "\(self.isOn)"
-        ]
-        return components.joined(separator: "-")
-    }
-}
+extension ExternalCalendarEventTagCellViewModel: Identifiable { }
 
-
-extension BaseCalendarEventTagCellViewModel {
-    
-    var compareKey: String {
-        let components = [
-            self.id.compareKey, self.name, self.colorHex, "\(self.isOn)"
-        ]
-        return components.joined(separator: "-")
-    }
-}
+extension BaseCalendarEventTagCellViewModel: Identifiable { }
 
 
 
