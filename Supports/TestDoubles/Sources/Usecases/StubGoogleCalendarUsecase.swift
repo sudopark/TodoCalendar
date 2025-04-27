@@ -20,6 +20,14 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         self.didPrepared = true
     }
     
+    open func refreshGoogleCalendarEventTags() {
+        
+    }
+    
+    open var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
+        return Empty().eraseToAnyPublisher()
+    }
+    
     open func refreshEvents(in period: Range<TimeInterval>) {
         
     }
