@@ -109,7 +109,7 @@ struct EventTagSelectView: View {
                     .listRowBackground(appearance.colorSet.bg0.asColor)
                     .padding(.bottom, 16)
                 
-                ForEach(state.cellViewModels, id: \.compareKey) { cvm in
+                ForEach(state.cellViewModels) { cvm in
                     cellView(cvm)
                         .listRowSeparator(.hidden)
                         .listRowBackground(appearance.colorSet.bg0.asColor)

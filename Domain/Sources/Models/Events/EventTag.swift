@@ -30,7 +30,7 @@ public protocol EventTag: Sendable, Equatable {
     
     var tagId: EventTagId { get }
     var name: String { get }
-    var colorHex: String { get }
+    var colorHex: String? { get }
 }
 
 // MARK: - default event tag
@@ -55,7 +55,7 @@ public enum DefaultEventTag: EventTag {
         }
     }
     
-    public var colorHex: String {
+    public var colorHex: String? {
         switch self {
         case .default(let color): return color
         case .holiday(let color): return color
@@ -69,7 +69,7 @@ public struct CustomEventTag: EventTag {
  
     public let uuid: String
     public var name: String
-    public var colorHex: String
+    public var colorHex: String?
     
     public init(uuid: String, name: String, colorHex: String) {
         self.uuid = uuid
@@ -119,7 +119,7 @@ public struct RemoveCustomEventTagWithEventsResult: Sendable {
 public struct ExternalCalendarEventTag: EventTag {
     public let tagId: EventTagId
     public let name: String
-    public let colorHex: String
+    public let colorHex: String?
     public var foregroundColorHex: String?
     
     public init(

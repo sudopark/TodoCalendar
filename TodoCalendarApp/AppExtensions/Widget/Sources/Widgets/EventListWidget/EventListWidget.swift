@@ -134,7 +134,7 @@ struct EventListView: View {
         let color = switch tagId {
         case .holiday: defColors.holiday
         case .default: defColors.defaultColor
-        case .custom(let id): self.model.customTagMap[id].flatMap { UIColor.from(hex: $0.colorHex) } ?? defColors.defaultColor
+        case .custom(let id): self.model.customTagMap[id]?.colorHex.flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor
         default: defColors.defaultColor
         }
         
