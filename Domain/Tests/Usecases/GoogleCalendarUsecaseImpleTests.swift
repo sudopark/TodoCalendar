@@ -157,6 +157,61 @@ extension GoogleCalendarUsecaseImpleTests {
             [EventTagId.custom("some")],
         ])
     }
+    
+    @Test func usecase_refreshGoogleCalendarEventTags() async throws {
+        // given
+        let expect = expectConfirm("구글 캘린더 이벤트 태그 목록 새로고침")
+        expect.count = 3
+        let usecase = self.makeUsecase(hasAccount: true)
+        
+        // when
+        let tagLists = try await self.outputs(expect, for: usecase.calendarTags) {
+            usecase.prepare()
+            
+            try await Task.sleep(for: .milliseconds(10))
+            
+            usecase.refreshGoogleCalendarEventTags()
+        }
+        
+        // then
+        let nameLists = tagLists
+            .map { ts in ts.map { $0.name } }
+            .map { $0.sorted() }
+        #expect(nameLists == [
+            [],
+            ["tag1", "tag2"],
+            ["tag1-new", "tag2-new"]
+        ])
+    }
+    
+    @Test func usecaes_whenRefreshGoogleCalendarEventTags_refreshColors() async throws {
+        // given
+        let usecase = self.makeUsecase(hasAccount: true)
+        
+        // when
+        let colors = try await confirmation(
+            "구글 캘린더 입네트 태그 목록 새로고침시에 color도 다시 조회",
+            expectedCount: 2
+        ) { confirm in
+            
+            var colors: [GoogleCalendar.Colors?] = []
+            self.spyViewAppearanceStore.didUpdatecColors = {
+                colors.append($0)
+                confirm()
+            }
+            
+            usecase.prepare()
+            
+            try await Task.sleep(for: .milliseconds(10))
+            
+            usecase.refreshGoogleCalendarEventTags()
+                    
+            return colors
+        }
+        // then
+        let calendarColorNames = colors.map { $0?.calendars.values }.map { $0?.first?.backgroudHex }
+        #expect(calendarColorNames == ["b0", "new-b0"])
+    }
 }
 
 // MARK: - events
@@ -375,24 +430,53 @@ extension GoogleCalendarUsecaseImpleTests {
     }
 }
 
-private final class PrivateStubRepository: GoogleCalendarRepository {
+private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked Sendable {
+    
+    private var stubColors: [GoogleCalendar.Colors] = []
+    private var stubCalendarTags: [[GoogleCalendar.Tag]] = []
+    
+    init() {
+        self.stubColors = [
+            .init(
+                calendars: ["0": .init(foregroundHex: "f0", backgroudHex: "b0")],
+                events: ["1": .init(foregroundHex: "f1", backgroudHex: "b1")]
+            ),
+            .init(
+                calendars: ["0": .init(foregroundHex: "new-f0", backgroudHex: "new-b0")],
+                events: ["1": .init(foregroundHex: "new-f1", backgroudHex: "new-b1")]
+            )
+        ]
+        
+        self.stubCalendarTags = [
+            [
+                GoogleCalendar.Tag(id: "tag1", name: "tag1"),
+                GoogleCalendar.Tag(id: "tag2", name: "tag2"),
+            ],
+            [
+                GoogleCalendar.Tag(id: "tag1", name: "tag1-new"),
+                GoogleCalendar.Tag(id: "tag2", name: "tag2-new"),
+            ]
+        ]
+    }
     
     func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
-        let color = GoogleCalendar.Colors(
-            calendars: ["0": .init(foregroundHex: "f0", backgroudHex: "b0")],
-            events: ["1": .init(foregroundHex: "f1", backgroudHex: "b1")]
-        )
-        return Just(color)
+        guard !self.stubColors.isEmpty
+        else {
+            return Empty().eraseToAnyPublisher()
+        }
+        let first = stubColors.removeFirst()
+        return Just(first)
             .mapAsAnyError()
             .eraseToAnyPublisher()
     }
     
     func loadCalendarTags() -> AnyPublisher<[GoogleCalendar.Tag], any Error> {
-        let tags = [
-            GoogleCalendar.Tag(id: "tag1", name: "tag1"),
-            GoogleCalendar.Tag(id: "tag2", name: "tag2"),
-        ]
-        return Just(tags)
+        guard !self.stubCalendarTags.isEmpty
+        else {
+            return Empty().eraseToAnyPublisher()
+        }
+        let first = self.stubCalendarTags.removeFirst()
+        return Just(first)
             .mapAsAnyError()
             .eraseToAnyPublisher()
     }
@@ -424,7 +508,7 @@ private final class PrivateStubRepository: GoogleCalendarRepository {
 
 private final class SpyGoogleCalendarViewAppearanceStore: GoogleCalendarViewAppearanceStore, @unchecked Sendable {
     
-    var color: GoogleCalendar.Colors?
+     var color: GoogleCalendar.Colors?
     
     var didUpdatecColors: ((GoogleCalendar.Colors?) -> Void)?
     func apply(colors: GoogleCalendar.Colors) {

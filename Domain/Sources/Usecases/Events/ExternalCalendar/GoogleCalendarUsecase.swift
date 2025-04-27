@@ -25,6 +25,12 @@ public protocol GoogleCalendarUsecase: Sendable {
     
     func prepare()
     
+    // calendar
+    func refreshGoogleCalendarEventTags()
+    
+    var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> { get }
+    
+    // events
     func refreshEvents(in period: Range<TimeInterval>)
     
     func events(
@@ -95,12 +101,9 @@ extension GoogleCalendarUsecaseImple {
             .sink(receiveValue: { [weak self] has in
                 self?.subject.hasAccount.send(has)
                 if has {
-                    self?.refreshColors()
                     self?.refreshGoogleCalendarEventTags()
                 } else {
-                    self?.appearanceStore.clearGoogleCalendarColors()
                     self?.clearGoogleCalendarEventTag()
-                    self?.subject.calendars.send([])
                     self?.sharedDataStore.delete(
                         ShareDataKeys.googleCalendarEvents.rawValue
                     )
@@ -109,15 +112,7 @@ extension GoogleCalendarUsecaseImple {
             .store(in: &self.cancelBag)
     }
     
-    private func refreshColors() {
-        self.repository.loadColors()
-            .sink(receiveValue: { [weak self] colors in
-                self?.appearanceStore.apply(colors: colors)
-            })
-            .store(in: &self.cancelBag)
-    }
-    
-    private func refreshGoogleCalendarEventTags() {
+    public func refreshGoogleCalendarEventTags() {
         let updateTags: ([GoogleCalendar.Tag]) -> Void = { [weak self] tags in
             self?.sharedDataStore.update(tags)
             self?.subject.calendars.send(tags)
@@ -125,10 +120,23 @@ extension GoogleCalendarUsecaseImple {
         self.repository.loadCalendarTags()
             .sink(receiveValue: updateTags)
             .store(in: &self.cancelBag)
+        
+        self.repository.loadColors()
+            .sink(receiveValue: { [weak self] colors in
+                self?.appearanceStore.apply(colors: colors)
+            })
+            .store(in: &self.cancelBag)
     }
     
     private func clearGoogleCalendarEventTag() {
         self.sharedDataStore.update([])
+        self.appearanceStore.clearGoogleCalendarColors()
+        self.subject.calendars.send([])
+    }
+    
+    public var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
+        return self.subject.calendars
+            .eraseToAnyPublisher()
     }
 }
 
