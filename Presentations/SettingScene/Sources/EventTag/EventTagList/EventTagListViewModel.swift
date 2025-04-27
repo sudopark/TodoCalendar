@@ -27,6 +27,7 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
     func close()
     func addNewTag()
     func showTagDetail(_ tagId: EventTagId)
+    func integrateCalendar(serviceId: String)
     
     // presenter
     var cellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> { get }
@@ -138,6 +139,10 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         let newTags = self.subject.cvms.value?.filter { $0.id != tagId }
         self.subject.cvms.send(newTags)
         self.listener?.eventTag(deleted: tagId)
+    }
+    
+    func integrateCalendar(serviceId: String) {
+        self.router?.routeToEventSetting()
     }
 }
 

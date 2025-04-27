@@ -44,6 +44,7 @@ final class EventTagListViewController: UIHostingController<EventTagListContaine
         .eventHandler(\.closeScene, viewModel.close)
         .eventHandler(\.toggleEventTagViewingIsOn, viewModel.toggleIsOn(_:))
         .eventHandler(\.showTagDetail, viewModel.showTagDetail(_:))
+        .eventHandler(\.integrateService, viewModel.integrateCalendar(serviceId:))
         super.init(rootView: containerView)
     }
     

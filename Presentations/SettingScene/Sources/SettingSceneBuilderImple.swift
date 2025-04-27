@@ -58,9 +58,17 @@ extension SettingSceneBuilderImple {
         listener: (any EventTagListSceneListener)?
     ) -> any EventTagListScene {
         
-        let listBuilder = EventTagListSceneBuilerImple(
+        let settingSceneBuilder = self.eventSettingSceneBuilder()
+        let detailSceneBuilder = EventTagDetailSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
+        )
+        
+        let listBuilder = EventTagListSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            settingSceneBuilder: settingSceneBuilder,
+            tagDetailSceneBuilder: detailSceneBuilder
         )
         return listBuilder.makeEventTagListScene(
             hasNavigation: hasNavigation, listener: listener
@@ -87,23 +95,7 @@ extension SettingSceneBuilderImple {
             timeZoneSelectSceneBuilder: timeZoneSelectSceneBuilder
         )
         
-        let eventTagSelectSceneBuilder = EventTagSelectSceneBuilerImple(
-            usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
-        )
-        
-        let eventNotificationDefaultTimeOptionSceneBuilder = EventNotificationDefaultTimeOptionSceneBuilerImple(
-            usecaesFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
-        )
-        
-        let eventSettingSceneBuilder = EventSettingSceneBuilerImple(
-            supportExternalCalendarServices: self.supportExternalCalendarServices,
-            usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance,
-            eventTagSelectSceneBuilder: eventTagSelectSceneBuilder,
-            eventDefaultNotificationTimeSceneBuilder: eventNotificationDefaultTimeOptionSceneBuilder
-        )
+        let eventSettingSceneBuilder = self.eventSettingSceneBuilder()
         
         let countrySelectSceneBuilder = CountrySelectSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
@@ -132,5 +124,26 @@ extension SettingSceneBuilderImple {
             feedbackPostSceneBuiler: feedbackSceneBuilder
         )
         return builder.makeSettingItemListScene()
+    }
+    
+    private func eventSettingSceneBuilder() -> EventSettingSceneBuilerImple {
+        let eventTagSelectSceneBuilder = EventTagSelectSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
+        let eventNotificationDefaultTimeOptionSceneBuilder = EventNotificationDefaultTimeOptionSceneBuilerImple(
+            usecaesFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
+        let eventSettingSceneBuilder = EventSettingSceneBuilerImple(
+            supportExternalCalendarServices: self.supportExternalCalendarServices,
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            eventTagSelectSceneBuilder: eventTagSelectSceneBuilder,
+            eventDefaultNotificationTimeSceneBuilder: eventNotificationDefaultTimeOptionSceneBuilder
+        )
+        return eventSettingSceneBuilder
     }
 }
