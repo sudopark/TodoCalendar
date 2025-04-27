@@ -8,7 +8,8 @@
 
 import Foundation
 import Combine
-
+import Prelude
+import Optics
 
 // MARK: - GoogleCalendarViewAppearanceStore
 
@@ -66,11 +67,6 @@ public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked
         self.sharedDataStore = sharedDataStore
     }
     
-    private struct Subject {
-        let hasAccount = CurrentValueSubject<Bool, Never>(false)
-        let calendars = CurrentValueSubject<[GoogleCalendar.Tag], Never>([])
-    }
-    private let subject = Subject()
     private var cancelBag: Set<AnyCancellable> = []
     private var refreshEventBag: Set<AnyCancellable> = []
     private func clearCancelBag() {
@@ -99,7 +95,6 @@ extension GoogleCalendarUsecaseImple {
         hasAccount
             .removeDuplicates()
             .sink(receiveValue: { [weak self] has in
-                self?.subject.hasAccount.send(has)
                 if has {
                     self?.refreshGoogleCalendarEventTags()
                 } else {
@@ -114,8 +109,11 @@ extension GoogleCalendarUsecaseImple {
     
     public func refreshGoogleCalendarEventTags() {
         let updateTags: ([GoogleCalendar.Tag]) -> Void = { [weak self] tags in
-            self?.sharedDataStore.update(tags)
-            self?.subject.calendars.send(tags)
+            self?.sharedDataStore.put(
+                [GoogleCalendar.Tag].self,
+                key: ShareDataKeys.googleCalendarTags.rawValue,
+                tags
+            )
         }
         self.repository.loadCalendarTags()
             .sink(receiveValue: updateTags)
@@ -129,14 +127,16 @@ extension GoogleCalendarUsecaseImple {
     }
     
     private func clearGoogleCalendarEventTag() {
-        self.sharedDataStore.update([])
+        self.sharedDataStore.delete(ShareDataKeys.googleCalendarTags.rawValue)
         self.appearanceStore.clearGoogleCalendarColors()
-        self.subject.calendars.send([])
     }
     
     public var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
-        return self.subject.calendars
-            .eraseToAnyPublisher()
+        return self.sharedDataStore.observe(
+            [GoogleCalendar.Tag].self, key: ShareDataKeys.googleCalendarTags.rawValue
+        )
+        .map { $0 ?? [] }
+        .eraseToAnyPublisher()
     }
 }
 
@@ -150,12 +150,17 @@ extension GoogleCalendarUsecaseImple {
         self.refreshEventBag = []
     }
     
+    private func checkHasAccount() -> Bool {
+        let accounts = self.sharedDataStore.value([String: ExternalServiceAccountinfo].self, key: ShareDataKeys.externalCalendarAccounts.rawValue)
+        return accounts?[self.googleService.identifier] != nil
+    }
+    
     public func refreshEvents(in period: Range<TimeInterval>) {
-        guard self.subject.hasAccount.value else { return }
+        guard self.checkHasAccount() else { return }
         
         self.cancelRefresh()
         
-        self.subject.calendars
+        self.calendarTags
             .sink(receiveValue: { [weak self] calednars in
                 guard let self = self else { return }
                 calednars.forEach {
@@ -228,21 +233,5 @@ extension GoogleCalendarUsecaseImple {
         .map { $0?[serviceId] }
         .removeDuplicates()
         .eraseToAnyPublisher()
-    }
-}
-
-private extension SharedDataStore {
-    
-    func update(_ tags: [GoogleCalendar.Tag]) {
-        let newDict = tags.reduce(into: [EventTagId: GoogleCalendar.Tag]()) { acc, tag in
-            acc[tag.tagId] = tag
-        }
-        self.update(
-            [EventTagId: any EventTag].self, key: ShareDataKeys.tags.rawValue
-        ) { allDict in
-            return (allDict ?? [:])
-                .filter { $0.key.externalServiceId != GoogleCalendarService.id }
-                .merging(newDict) { $1 }
-        }
     }
 }
