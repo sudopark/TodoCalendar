@@ -13,7 +13,9 @@ import Optics
 import Domain
 
 
-struct EventTagCellViewModel: Equatable {
+// MARK: - base calednar event tag
+
+struct BaseCalendarEventTagCellViewModel: Equatable {
     
     var isOn: Bool = true
     let id: EventTagId
@@ -65,14 +67,14 @@ extension EventTagListViewUsecase {
             .eraseToAnyPublisher()
     }
     
-    var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> {
-        let asCellViewModels: ([any EventTag]) -> [EventTagCellViewModel] = { tags in
+    var baseCalenadrCellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> {
+        let asCellViewModels: ([any EventTag]) -> [BaseCalendarEventTagCellViewModel] = { tags in
             return tags
                 .sortDefaultTagsAtFirst()
-                .map { EventTagCellViewModel($0) }
+                .map { BaseCalendarEventTagCellViewModel($0) }
         }
         
-        let applyOnOff: ([EventTagCellViewModel], Set<EventTagId>) -> [EventTagCellViewModel] = { cvms, offTagIdSet in
+        let applyOnOff: ([BaseCalendarEventTagCellViewModel], Set<EventTagId>) -> [BaseCalendarEventTagCellViewModel] = { cvms, offTagIdSet in
             
             return cvms
                 .map { $0 |> \.isOn .~ !offTagIdSet.contains($0.id) }

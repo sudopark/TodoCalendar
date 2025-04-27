@@ -26,7 +26,7 @@ protocol EventTagSelectViewModel: AnyObject, Sendable, EventTagSelectSceneIntera
     func close()
     
     // presenter
-    var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> { get }
+    var cellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> { get }
     var selectedId: AnyPublisher<EventTagId, Never> { get }
 }
 
@@ -93,11 +93,11 @@ extension EventTagSelectViewModelImple {
 
 extension EventTagSelectViewModelImple {
     
-    var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> {
-        let excludeHoliday: ([EventTagCellViewModel]) -> [EventTagCellViewModel] = { cvms in
+    var cellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> {
+        let excludeHoliday: ([BaseCalendarEventTagCellViewModel]) -> [BaseCalendarEventTagCellViewModel] = { cvms in
             return cvms.filter { $0.id != .holiday }
         }
-        return self.tagListUsecase.cellViewModels
+        return self.tagListUsecase.baseCalenadrCellViewModels
             .map(excludeHoliday)
             .eraseToAnyPublisher()
     }

@@ -86,7 +86,7 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
     func close()
     
     // presenter
-    var selectedTagModel: AnyPublisher<EventTagCellViewModel, Never> { get }
+    var selectedTagModel: AnyPublisher<BaseCalendarEventTagCellViewModel, Never> { get }
     var selectedEventNotificationTimeText: AnyPublisher<String, Never> { get }
     var selectedAllDayEventNotificationTimeText: AnyPublisher<String, Never> { get }
     var selectedPeriod: AnyPublisher<SelectedPeriodModel, Never> { get }
@@ -237,8 +237,8 @@ extension EventSettingViewModelImple {
 
 extension EventSettingViewModelImple {
     
-    var selectedTagModel: AnyPublisher<EventTagCellViewModel, Never> {
-        let asEventTag: (EventTagId) -> AnyPublisher<EventTagCellViewModel, Never> = { [weak self] id in
+    var selectedTagModel: AnyPublisher<BaseCalendarEventTagCellViewModel, Never> {
+        let asEventTag: (EventTagId) -> AnyPublisher<BaseCalendarEventTagCellViewModel, Never> = { [weak self] id in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
             return self.eventTagUsecase.eventTag(id: id)
                 .map { .init($0) }
