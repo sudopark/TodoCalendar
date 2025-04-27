@@ -86,7 +86,7 @@ public class ViewAppearance: ObservableObject {
     
     public func updateEventColorMap(by allEventTags: [any EventTag]) {
         self.allEventTagColorMap = allEventTags.reduce(into: [EventTagId: UIColor]()) { acc, tag in
-            acc[tag.tagId] = UIColor.from(hex: tag.colorHex)
+            acc[tag.tagId] = tag.colorHex.flatMap { UIColor.from(hex: $0) }
         }
     }
 }

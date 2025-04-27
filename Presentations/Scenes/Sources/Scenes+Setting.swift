@@ -14,9 +14,9 @@ import Domain
 public struct OriginalTagInfo: Sendable {
     public let id: EventTagId
     public let name: String
-    public let colorHex: String
+    public let colorHex: String?
     
-    public init(id: EventTagId, name: String, colorHex: String) {
+    public init(id: EventTagId, name: String, colorHex: String?) {
         self.id = id
         self.name = name
         self.colorHex = colorHex

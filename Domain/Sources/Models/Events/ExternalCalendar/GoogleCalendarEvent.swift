@@ -56,9 +56,7 @@ extension GoogleCalendar {
         public var backgroundColorHex: String?
         public var foregroundColorHex: String?
         public var colorId: String?
-        public var colorHex: String {
-            return backgroundColorHex ?? "#000000"
-        }
+        public var colorHex: String? { backgroundColorHex }
         
         public init(id: String, name: String) {
             self.id = id

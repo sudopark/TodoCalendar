@@ -20,7 +20,7 @@ struct BaseCalendarEventTagCellViewModel: Equatable {
     var isOn: Bool = true
     let id: EventTagId
     let name: String
-    var colorHex: String
+    var colorHex: String?
     
     init(_ tag: any EventTag) {
         self.id = tag.tagId

@@ -165,7 +165,7 @@ struct SystemSizeForemostEventView: View {
         let color = switch model.eventModel?.tagId {
         case .holiday: defColors.holiday
         case .default: defColors.defaultColor
-        case .custom: model.tag.flatMap { UIColor.from(hex: $0.colorHex) } ?? defColors.defaultColor
+        case .custom: model.tag?.colorHex.flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor
         default: defColors.defaultColor
         }
         
