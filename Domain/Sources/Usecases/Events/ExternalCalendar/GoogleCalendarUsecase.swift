@@ -112,10 +112,7 @@ extension GoogleCalendarUsecaseImple {
     
     public func refreshGoogleCalendarEventTags() {
         let updateTags: ([GoogleCalendar.Tag]) -> Void = { [weak self] tags in
-            let holidayTags = tags.filter { $0.isHoliday }
-            holidayTags.forEach {
-                self?.eventTagUsecase.toggleEventTagIsOnCalendar($0.tagId)
-            }
+            let tags = tags.filter { !$0.isHoliday }
             self?.sharedDataStore.put(
                 [GoogleCalendar.Tag].self,
                 key: ShareDataKeys.googleCalendarTags.rawValue,
