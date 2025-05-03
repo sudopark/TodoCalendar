@@ -156,7 +156,8 @@ extension GoogleCalendarRepositoryImple {
         _ timeMin: String, _ timeMax: String,
         next: String?
     ) async throws -> GoogleCalendar.EventOriginValueList {
-        let endpoint = GoogleCalendarEndpoint.eventList(calendarId: calendarId)
+        let id = calendarId.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? calendarId
+        let endpoint = GoogleCalendarEndpoint.eventList(calendarId: id)
         var params: [String: Any] = [:]
         params["timeMin"] = timeMin; params["timeMax"] = timeMax
         params["singleEvents"] = true
