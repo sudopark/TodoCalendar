@@ -258,16 +258,24 @@ extension NonLoginUsecaseFactoryImple {
 extension NonLoginUsecaseFactoryImple {
     
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
+        let db = self.applicationBase.commonSqliteService
         let cacheStorage = GoogleCalendarLocalStorageImple(
-            sqliteService: self.applicationBase.commonSqliteService
+            sqliteService: db
         )
         let repository = GoogleCalendarRepositoryImple(
             remote: self.applicationBase.googleCalendarRemoteAPI,
             cacheStorage: cacheStorage
         )
+        let tagRepository = EventTagLocalRepositoryImple(
+            localStorage: EventTagLocalStorageImple(sqliteService: db),
+            todoLocalStorage: TodoLocalStorageImple(sqliteService: db),
+            scheduleLocalStorage: ScheduleEventLocalStorageImple(sqliteService: db),
+            environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+        )
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
             repository: repository,
+            eventTagRepository: tagRepository,
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
         )
@@ -537,16 +545,25 @@ extension LoginUsecaseFactoryImple {
 extension LoginUsecaseFactoryImple {
     
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
+        let db = self.applicationBase.commonSqliteService
         let cacheStorage = GoogleCalendarLocalStorageImple(
-            sqliteService: self.applicationBase.commonSqliteService
+            sqliteService: db
         )
         let repository = GoogleCalendarRepositoryImple(
             remote: self.applicationBase.googleCalendarRemoteAPI,
             cacheStorage: cacheStorage
         )
+        let tagRepository = EventTagRemoteRepositoryImple(
+            remote: self.applicationBase.remoteAPI,
+            cacheStorage: EventTagLocalStorageImple(sqliteService: db),
+            todoCacheStorage: TodoLocalStorageImple(sqliteService: db),
+            scheduleCacheStorage: ScheduleEventLocalStorageImple(sqliteService: db),
+            environmentStorage: self.applicationBase.userDefaultEnvironmentStorage
+        )
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
             repository: repository,
+            eventTagRepository: tagRepository,
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
         )

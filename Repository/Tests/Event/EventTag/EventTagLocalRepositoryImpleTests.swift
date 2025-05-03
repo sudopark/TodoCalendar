@@ -160,6 +160,23 @@ extension EventTagLocalRepositoryImpleTests {
         XCTAssertEqual(offIdsAfterDelete, [])
     }
     
+    func testRepository_resetExternalCalendarOffTagIds() {
+        // given
+        let repository = self.makeRepository()
+        let customTags = (0..<10).map { EventTagId.custom("id:\($0)") }
+        let externalTags = (0..<10).map { EventTagId.externalCalendar(serviceId: "google", id: "id:\($0)")}
+        (customTags + externalTags).forEach { id in
+            _ = repository.toggleTagIsOn(id)
+        }
+        
+        // when
+        repository.resetExternalCalendarOffTagId("google")
+        let ids = repository.loadOffTags()
+        
+        // then
+        XCTAssertEqual(ids, Set(customTags))
+    }
+    
     private func stubTodoAndSchedule() async throws {
         func makeTodo(_ id: Int, with tag: String) -> TodoEvent {
             return TodoEvent.dummy(id)
