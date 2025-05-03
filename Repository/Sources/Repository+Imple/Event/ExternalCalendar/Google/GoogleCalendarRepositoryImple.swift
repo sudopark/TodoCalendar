@@ -186,8 +186,8 @@ extension GoogleCalendarRepositoryImple {
     }
     
     private func timeMinAndMax(_ period: Range<TimeInterval>) -> (String, String) {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssz"
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
         formatter.timeZone = .init(secondsFromGMT: 0)
         
         return (
