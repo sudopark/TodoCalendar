@@ -73,6 +73,11 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         return newSet
     }
     
+    public func resetExternalCalendarOffTagId(_ serviceId: String) {
+        let newSet = self.offTagIdSet.filter { $0.externalServiceId != serviceId }
+        self.offTagIdSet = newSet
+    }
+    
     public var stubLatestUsecaseTag: CustomEventTag?
     open func loadLatestUsedTag() async throws -> CustomEventTag? {
         return self.stubLatestUsecaseTag

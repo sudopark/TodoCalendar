@@ -20,6 +20,7 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
     private let spyViewAppearanceStore: SpyGoogleCalendarViewAppearanceStore = .init()
     private let stubStore: SharedDataStore = .init()
     private let service = GoogleCalendarService(scopes: [.readOnly])
+    private let stubEventTagRepository = StubEventTagRepository()
     
     var cancelBag: Set<AnyCancellable>! = []
     
@@ -44,10 +45,15 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
         hasAccount: Bool
     ) -> GoogleCalendarUsecaseImple {
         let repository = PrivateStubRepository()
+        let tags = (0..<10).map { EventTagId.custom("id:\($0)") }
+        tags.forEach { id in
+            _ = self.stubEventTagRepository.toggleTagIsOn(id)
+        }
         self.updateAccountIntegrated(hasAccount)
         return .init(
             googleService: GoogleCalendarService(scopes: [.readOnly]),
             repository: repository,
+            eventTagRepository: self.stubEventTagRepository,
             appearanceStore: self.spyViewAppearanceStore,
             sharedDataStore: self.stubStore
         )
@@ -149,6 +155,31 @@ extension GoogleCalendarUsecaseImpleTests {
             ],
             [],
         ])
+    }
+    
+    @Test func usecase_whenServiceDisconnected_clearOffTagIds() async throws {
+        // given
+        let expect = expectConfirm("서비스 연동이 해제된 경우, 저장된 offTagId에서 서비스에 해당하는 아이디 삭제")
+        expect.count = 3
+        let usecase = self.makeUsecase(hasAccount: true)
+        
+        // when
+        let _ = try await self.outputs(expect, for: usecase.calendarTags) {
+            usecase.prepare()
+            
+            _ = self.stubEventTagRepository.toggleTagIsOn(
+                .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag1")
+            )
+            _ = self.stubEventTagRepository.toggleTagIsOn(
+                .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag2")
+            )
+            self.updateAccountIntegrated(false)
+        }
+        
+        // then
+        let offids = self.stubEventTagRepository.loadOffTags()
+        let ids = (0..<10).map { EventTagId.custom("id:\($0)") }
+        #expect(offids == Set(ids))
     }
     
     @Test func usecase_refreshGoogleCalendarEventTags() async throws {

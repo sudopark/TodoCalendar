@@ -52,17 +52,20 @@ public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked
     
     private let googleService: GoogleCalendarService
     private let repository: any GoogleCalendarRepository
+    private let eventTagRepository: any EventTagRepository
     private let appearanceStore: any GoogleCalendarViewAppearanceStore
     private let sharedDataStore: SharedDataStore
     
     public init(
         googleService: GoogleCalendarService,
         repository: any GoogleCalendarRepository,
+        eventTagRepository: any EventTagRepository,
         appearanceStore: any GoogleCalendarViewAppearanceStore,
         sharedDataStore: SharedDataStore
     ) {
         self.googleService = googleService
         self.repository = repository
+        self.eventTagRepository = eventTagRepository
         self.appearanceStore = appearanceStore
         self.sharedDataStore = sharedDataStore
     }
@@ -129,6 +132,7 @@ extension GoogleCalendarUsecaseImple {
     private func clearGoogleCalendarEventTag() {
         self.sharedDataStore.delete(ShareDataKeys.googleCalendarTags.rawValue)
         self.appearanceStore.clearGoogleCalendarColors()
+        self.clearOffTagIds()
     }
     
     public var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
@@ -137,6 +141,16 @@ extension GoogleCalendarUsecaseImple {
         )
         .map { $0 ?? [] }
         .eraseToAnyPublisher()
+    }
+    
+    private func clearOffTagIds() {
+        let serviceId = self.googleService.identifier
+        self.eventTagRepository.resetExternalCalendarOffTagId(serviceId)
+        self.sharedDataStore.update(
+            Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue
+        ) { old in
+            return (old ?? []).filter { $0.externalServiceId != serviceId }
+        }
     }
 }
 

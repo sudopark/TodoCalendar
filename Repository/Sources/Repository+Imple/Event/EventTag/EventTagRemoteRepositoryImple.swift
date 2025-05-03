@@ -190,6 +190,11 @@ extension EventTagRemoteRepositoryImple {
         let newIdStringValues = newIds.map { $0.stringValue }
         self.environmentStorage.update(self.offIds, newIdStringValues)
     }
+    
+    public func resetExternalCalendarOffTagId(_ serviceId: String) {
+        let newIds = self.loadOffTags().filter { $0.externalServiceId != serviceId }
+        self.environmentStorage.update(self.offIds, newIds.map { $0.stringValue })
+    }
 }
 
 
