@@ -198,20 +198,20 @@ extension GoogleCalendarUsecaseImpleTests {
     // 캘린더목록 조회시에 공휴일 정보 포함되어있으면 기본 off 처리
     @Test func usecase_whenRefreshCalendarListAndContainHoliday_offGoogleCalendarHoliday() async throws {
         // given
-        let expect = expectConfirm("구글 캘린더 목록 조회시에 공휴일 캘린더가 있는 경우, 기본 off 처리")
+        let expect = expectConfirm("구글 캘린더 목록 조회시에 공휴일 캘린더가 있는 경우 제외")
         expect.count = 2
         let usecase = self.makeUsecaseWithHoliday()
         
         // when
-        let offIds = try await self.outputs(expect, for: self.stubEventTagUsecae.offEventTagIdsOnCalendar()) {
+        let tagLists = try await self.outputs(expect, for: usecase.calendarTags) {
             usecase.prepare()
         }
         
         // then
-        let offIdsInExternals = offIds.map { os in os.filter { $0.externalServiceId == "google"} }
-        #expect(offIdsInExternals == [
+        let idLists = tagLists.map { ts in ts.map { $0.tagId } }
+        #expect(idLists == [
             [],
-            [.externalCalendar(serviceId: "google", id: "$ko.kr.official#holiday@group.v.calendar.google.com")]
+            [.externalCalendar(serviceId: "google", id: "real")]
         ])
     }
     
@@ -430,7 +430,10 @@ extension GoogleCalendarUsecaseImpleTests {
         // given
         let expect = expectConfirm("이벤트 조회시 off 처리된 캘린더는 제외")
         expect.count = 2
-        let usecase = self.makeUsecaseWithHoliday()
+        let usecase = self.makeUsecase(hasAccount: true)
+        self.stubEventTagUsecae.toggleEventTagIsOnCalendar(
+            .externalCalendar(serviceId: "google", id: "tag1")
+        )
         usecase.prepare()
         
         // when
@@ -445,7 +448,7 @@ extension GoogleCalendarUsecaseImpleTests {
         #expect(eventList.count == 2)
         let last = eventList.last
         let calendarIds = Set(last?.map { $0.calendarId } ?? [])
-        #expect(calendarIds == ["real"])
+        #expect(calendarIds == ["tag2"])
     }
     
     @Test func usecase_loadEventDetail() async throws {
