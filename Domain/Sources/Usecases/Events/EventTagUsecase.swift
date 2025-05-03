@@ -30,6 +30,7 @@ public protocol EventTagUsecase: AnyObject, Sendable {
     
     func toggleEventTagIsOnCalendar(_ tagId: EventTagId)
     func offEventTagIdsOnCalendar() -> AnyPublisher<Set<EventTagId>, Never>
+    func resetExternalCalendarOffTagId(_ serviceId: String)
 }
 
 
@@ -248,6 +249,15 @@ extension EventTagUsecaseImple {
             .observe(Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue)
             .map { $0 ?? [] }
             .eraseToAnyPublisher()
+    }
+    
+    public func resetExternalCalendarOffTagId(_ serviceId: String) {
+        self.tagRepository.resetExternalCalendarOffTagId(serviceId)
+        self.sharedDataStore.update(
+            Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue
+        ) { old in
+            return (old ?? []).filter { $0.externalServiceId != serviceId }
+        }
     }
 }
 

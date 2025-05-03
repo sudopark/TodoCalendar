@@ -91,6 +91,10 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
         self.offIds.send(newSet)
     }
     
+    public func resetExternalCalendarOffTagId(_ serviceId: String) {
+        let newSet = offIds.value.filter { $0.externalServiceId != serviceId }
+        self.offIds.send(newSet)
+    }
     
     public var sharedEventTags: AnyPublisher<[EventTagId : any EventTag], Never> {
         return Just([:]).eraseToAnyPublisher()

@@ -52,20 +52,20 @@ public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked
     
     private let googleService: GoogleCalendarService
     private let repository: any GoogleCalendarRepository
-    private let eventTagRepository: any EventTagRepository
+    private let eventTagUsecase: any EventTagUsecase
     private let appearanceStore: any GoogleCalendarViewAppearanceStore
     private let sharedDataStore: SharedDataStore
     
     public init(
         googleService: GoogleCalendarService,
         repository: any GoogleCalendarRepository,
-        eventTagRepository: any EventTagRepository,
+        eventTagUsecase: any EventTagUsecase,
         appearanceStore: any GoogleCalendarViewAppearanceStore,
         sharedDataStore: SharedDataStore
     ) {
         self.googleService = googleService
         self.repository = repository
-        self.eventTagRepository = eventTagRepository
+        self.eventTagUsecase = eventTagUsecase
         self.appearanceStore = appearanceStore
         self.sharedDataStore = sharedDataStore
     }
@@ -112,6 +112,10 @@ extension GoogleCalendarUsecaseImple {
     
     public func refreshGoogleCalendarEventTags() {
         let updateTags: ([GoogleCalendar.Tag]) -> Void = { [weak self] tags in
+            let holidayTags = tags.filter { $0.isHoliday }
+            holidayTags.forEach {
+                self?.eventTagUsecase.toggleEventTagIsOnCalendar($0.tagId)
+            }
             self?.sharedDataStore.put(
                 [GoogleCalendar.Tag].self,
                 key: ShareDataKeys.googleCalendarTags.rawValue,
@@ -132,7 +136,7 @@ extension GoogleCalendarUsecaseImple {
     private func clearGoogleCalendarEventTag() {
         self.sharedDataStore.delete(ShareDataKeys.googleCalendarTags.rawValue)
         self.appearanceStore.clearGoogleCalendarColors()
-        self.clearOffTagIds()
+        self.eventTagUsecase.resetExternalCalendarOffTagId(self.googleService.identifier)
     }
     
     public var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
@@ -143,13 +147,6 @@ extension GoogleCalendarUsecaseImple {
         .eraseToAnyPublisher()
     }
     
-    private func clearOffTagIds() {
-        let serviceId = self.googleService.identifier
-        self.eventTagRepository.resetExternalCalendarOffTagId(serviceId)
-        self.sharedDataStore.update(
-            Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue
-        ) { old in
-            return (old ?? []).filter { $0.externalServiceId != serviceId }
         }
     }
 }
@@ -174,7 +171,7 @@ extension GoogleCalendarUsecaseImple {
         
         self.cancelRefresh()
         
-        self.calendarTags
+        self.activeCalendarTags
             .sink(receiveValue: { [weak self] calednars in
                 guard let self = self else { return }
                 calednars.forEach {
@@ -247,5 +244,13 @@ extension GoogleCalendarUsecaseImple {
         .map { $0?[serviceId] }
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+}
+
+
+private extension GoogleCalendar.Tag {
+    
+    var isHoliday: Bool {
+        return id.hasSuffix("holiday@group.v.calendar.google.com")
     }
 }

@@ -20,7 +20,7 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
     private let spyViewAppearanceStore: SpyGoogleCalendarViewAppearanceStore = .init()
     private let stubStore: SharedDataStore = .init()
     private let service = GoogleCalendarService(scopes: [.readOnly])
-    private let stubEventTagRepository = StubEventTagRepository()
+    private let stubEventTagUsecae = StubEventTagUsecase()
     
     var cancelBag: Set<AnyCancellable>! = []
     
@@ -42,18 +42,21 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
     }
     
     private func makeUsecase(
-        hasAccount: Bool
+        hasAccount: Bool,
+        customCalendarsStubbing: [GoogleCalendar.Tag]? = nil
     ) -> GoogleCalendarUsecaseImple {
-        let repository = PrivateStubRepository()
+        let repository = PrivateStubRepository(
+            customCalendarsStubbing: customCalendarsStubbing
+        )
         let tags = (0..<10).map { EventTagId.custom("id:\($0)") }
         tags.forEach { id in
-            _ = self.stubEventTagRepository.toggleTagIsOn(id)
+            self.stubEventTagUsecae.toggleEventTagIsOnCalendar(id)
         }
         self.updateAccountIntegrated(hasAccount)
         return .init(
             googleService: GoogleCalendarService(scopes: [.readOnly]),
             repository: repository,
-            eventTagRepository: self.stubEventTagRepository,
+            eventTagUsecase: self.stubEventTagUsecae,
             appearanceStore: self.spyViewAppearanceStore,
             sharedDataStore: self.stubStore
         )
@@ -160,26 +163,52 @@ extension GoogleCalendarUsecaseImpleTests {
     @Test func usecase_whenServiceDisconnected_clearOffTagIds() async throws {
         // given
         let expect = expectConfirm("서비스 연동이 해제된 경우, 저장된 offTagId에서 서비스에 해당하는 아이디 삭제")
-        expect.count = 3
+        expect.count = 2
         let usecase = self.makeUsecase(hasAccount: true)
+        self.stubEventTagUsecae.toggleEventTagIsOnCalendar(
+            .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag1")
+        )
+        self.stubEventTagUsecae.toggleEventTagIsOnCalendar(
+            .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag2")
+        )
         
         // when
-        let _ = try await self.outputs(expect, for: usecase.calendarTags) {
+        let offIdLists = try await self.outputs(expect, for: stubEventTagUsecae.offEventTagIdsOnCalendar()) {
             usecase.prepare()
             
-            _ = self.stubEventTagRepository.toggleTagIsOn(
-                .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag1")
-            )
-            _ = self.stubEventTagRepository.toggleTagIsOn(
-                .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag2")
-            )
+            
             self.updateAccountIntegrated(false)
         }
         
         // then
-        let offids = self.stubEventTagRepository.loadOffTags()
-        let ids = (0..<10).map { EventTagId.custom("id:\($0)") }
-        #expect(offids == Set(ids))
+        let hasGoogleServiceIds = offIdLists.map { os in
+            return os.contains(where: { $0.externalServiceId == "google" })
+        }
+        #expect(hasGoogleServiceIds == [true, false])
+    }
+    
+    // 캘린더목록 조회시에 공휴일 정보 포함되어있으면 기본 off 처리
+    @Test func usecase_whenRefreshCalendarListAndContainHoliday_offGoogleCalendarHoliday() async throws {
+        // given
+        let expect = expectConfirm("구글 캘린더 목록 조회시에 공휴일 캘린더가 있는 경우, 기본 off 처리")
+        expect.count = 2
+        let stub: [GoogleCalendar.Tag] = [
+            .init(id: "real", name: "name"),
+            .init(id: "$ko.kr.official#holiday@group.v.calendar.google.com", name: "hoiday")
+        ]
+        let usecase = self.makeUsecase(hasAccount: true, customCalendarsStubbing: stub)
+        
+        // when
+        let offIds = try await self.outputs(expect, for: self.stubEventTagUsecae.offEventTagIdsOnCalendar()) {
+            usecase.prepare()
+        }
+        
+        // then
+        let offIdsInExternals = offIds.map { os in os.filter { $0.externalServiceId == "google"} }
+        #expect(offIdsInExternals == [
+            [],
+            [.externalCalendar(serviceId: "google", id: "$ko.kr.official#holiday@group.v.calendar.google.com")]
+        ])
     }
     
     @Test func usecase_refreshGoogleCalendarEventTags() async throws {
@@ -459,7 +488,9 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
     private var stubColors: [GoogleCalendar.Colors] = []
     private var stubCalendarTags: [[GoogleCalendar.Tag]] = []
     
-    init() {
+    init(
+        customCalendarsStubbing: [GoogleCalendar.Tag]? = nil
+    ) {
         self.stubColors = [
             .init(
                 calendars: ["0": .init(foregroundHex: "f0", backgroudHex: "b0")],
@@ -471,7 +502,7 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
             )
         ]
         
-        self.stubCalendarTags = [
+        let defaultCalendar = [
             [
                 GoogleCalendar.Tag(id: "tag1", name: "tag1"),
                 GoogleCalendar.Tag(id: "tag2", name: "tag2"),
@@ -481,6 +512,7 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
                 GoogleCalendar.Tag(id: "tag2", name: "tag2-new"),
             ]
         ]
+        self.stubCalendarTags = customCalendarsStubbing.map { [$0] } ?? defaultCalendar
     }
     
     func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
