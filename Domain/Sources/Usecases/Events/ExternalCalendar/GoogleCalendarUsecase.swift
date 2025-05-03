@@ -147,7 +147,19 @@ extension GoogleCalendarUsecaseImple {
         .eraseToAnyPublisher()
     }
     
+    private var activeCalendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
+        
+        let transform: ([GoogleCalendar.Tag], Set<EventTagId>) -> [GoogleCalendar.Tag]
+        transform = { totalTags, offIds in
+            return totalTags.filter { !offIds.contains($0.tagId) }
         }
+        return Publishers.CombineLatest(
+            self.calendarTags,
+            self.eventTagUsecase.offEventTagIdsOnCalendar()
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
 }
 

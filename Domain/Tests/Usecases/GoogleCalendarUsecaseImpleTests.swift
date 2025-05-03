@@ -61,6 +61,14 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
             sharedDataStore: self.stubStore
         )
     }
+    
+    private func makeUsecaseWithHoliday() -> GoogleCalendarUsecaseImple {
+        let stub: [GoogleCalendar.Tag] = [
+            .init(id: "real", name: "name"),
+            .init(id: "$ko.kr.official#holiday@group.v.calendar.google.com", name: "hoiday")
+        ]
+        return self.makeUsecase(hasAccount: true, customCalendarsStubbing: stub)
+    }
 }
 
 
@@ -192,11 +200,7 @@ extension GoogleCalendarUsecaseImpleTests {
         // given
         let expect = expectConfirm("구글 캘린더 목록 조회시에 공휴일 캘린더가 있는 경우, 기본 off 처리")
         expect.count = 2
-        let stub: [GoogleCalendar.Tag] = [
-            .init(id: "real", name: "name"),
-            .init(id: "$ko.kr.official#holiday@group.v.calendar.google.com", name: "hoiday")
-        ]
-        let usecase = self.makeUsecase(hasAccount: true, customCalendarsStubbing: stub)
+        let usecase = self.makeUsecaseWithHoliday()
         
         // when
         let offIds = try await self.outputs(expect, for: self.stubEventTagUsecae.offEventTagIdsOnCalendar()) {
@@ -420,6 +424,28 @@ extension GoogleCalendarUsecaseImpleTests {
         #expect(
             calendar2Events?.map { $0.eventId }.sorted() == (3..<10).map { "event:\($0)-tag2" }
         )
+    }
+    
+    @Test func usecase_whenRefreshEvent_excludeOffCalendar() async throws {
+        // given
+        let expect = expectConfirm("이벤트 조회시 off 처리된 캘린더는 제외")
+        expect.count = 2
+        let usecase = self.makeUsecaseWithHoliday()
+        usecase.prepare()
+        
+        // when
+        let eventSource = usecase.events(in: 3..<20)
+        let eventList = try await self.outputs(expect, for: eventSource) {
+            try await Task.sleep(for: .milliseconds(10))
+            
+            usecase.refreshEvents(in: 0..<10)
+        }
+        
+        // then
+        #expect(eventList.count == 2)
+        let last = eventList.last
+        let calendarIds = Set(last?.map { $0.calendarId } ?? [])
+        #expect(calendarIds == ["real"])
     }
     
     @Test func usecase_loadEventDetail() async throws {
