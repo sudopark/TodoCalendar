@@ -199,6 +199,9 @@ extension GoogleCalendar {
         ) {
             self.eventId = eventId
             self.calendarId = calendarId
+            self.eventTagId = .externalCalendar(
+                serviceId: GoogleCalendarService.id, id: calendarId
+            )
             self.name = name
             self.eventTime = time
         }

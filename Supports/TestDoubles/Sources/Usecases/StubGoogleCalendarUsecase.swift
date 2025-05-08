@@ -38,8 +38,9 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         
     }
     
+    public var stubEvents: [GoogleCalendar.Event] = []
     open func events(in period: Range<TimeInterval>) -> AnyPublisher<[GoogleCalendar.Event], Never> {
-        return Empty().eraseToAnyPublisher()
+        return Just(self.stubEvents).eraseToAnyPublisher()
     }
     
     open func eventDetail(
