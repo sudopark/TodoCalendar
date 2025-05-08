@@ -203,6 +203,27 @@ public struct HolidayCalendarEvent: CalendarEvent {
     }
 }
 
+public struct GoogleCalendarEvent: CalendarEvent {
+    
+    public let eventId: String
+    public let name: String
+    public let eventTime: EventTime?
+    public let eventTimeOnCalendar: EventTimeOnCalendar?
+    public let eventTagId: Domain.EventTagId
+    public let isForemost: Bool
+    public let isRepeating: Bool
+    
+    public init(_ event: GoogleCalendar.Event, in timeZone: TimeZone) {
+        self.eventId = event.eventId
+        self.name = event.name
+        self.eventTime = event.eventTime
+        self.eventTimeOnCalendar = EventTimeOnCalendar(event.eventTime, timeZone: timeZone)
+        self.eventTagId = event.eventTagId ?? .default
+        self.isForemost = false
+        self.isRepeating = false
+    }
+}
+
 extension Publisher where Output: Sequence, Failure == Never {
     
     public func filterTagActivated(

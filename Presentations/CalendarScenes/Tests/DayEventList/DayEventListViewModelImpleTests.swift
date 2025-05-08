@@ -725,7 +725,7 @@ extension DayEventListViewModelImpleTests {
         let viewModel = self.makeViewModelWithInitialListLoaded(shouldFailMakeTodo: true)
         
         // when
-        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels, timeout: 0.1) {
             viewModel.addNewTodoQuickly(withName: "pending-quick-todo")
         }
         
