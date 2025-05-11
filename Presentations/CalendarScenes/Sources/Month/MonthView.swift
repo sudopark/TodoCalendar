@@ -280,7 +280,16 @@ private struct WeekRowView: View {
     private func eventLineView(_ line: EventOnWeek) -> some View {
         let offsetX = CGFloat(line.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
         let width = CGFloat(line.daysSequence.count) * dayWidth - Metric.eventInterspacing
-        let lineColor = self.appearance.colorOnCalendar(line.eventTagId).asColor
+        let lineColor = {
+            switch line.event {
+            case let google as GoogleCalendarEvent:
+                return self.appearance.googleEventColorOnCalendar(
+                    google.colorId, google.calendarId
+                ).asColor
+            default:
+                return self.appearance.colorOnCalendar(line.eventTagId).asColor
+            }
+        }()
         let background: some View = {
             if line.hasPeriod {
                 return RoundedRectangle(cornerRadius: 2).fill(
@@ -442,7 +451,7 @@ struct MonthViewPreviewProvider: PreviewProvider {
     static var previews: some View {
         let viewModel = DummyMonthViewModel()
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultDark,
+            colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
@@ -450,6 +459,10 @@ struct MonthViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         viewAppearance.eventOnCalenarTextAdditionalSize = 7
         viewAppearance.eventOnCalendarIsBold = true
+        viewAppearance.updateEventColorMap(by: [
+            DefaultEventTag.default("#ff00ff"),
+            DefaultEventTag.holiday("#ff0000")
+        ])
         let eventHandler = MonthViewEventHandler()
         eventHandler.daySelected = viewModel.select(_:)
         let containerView = MonthContainerView(viewAppearance: viewAppearance, eventHandler: eventHandler)

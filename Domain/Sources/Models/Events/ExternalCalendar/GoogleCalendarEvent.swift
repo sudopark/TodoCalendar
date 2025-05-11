@@ -188,6 +188,7 @@ extension GoogleCalendar {
         public let calendarId: String
         public let name: String
         public var eventTagId: EventTagId?
+        public var colorId: String?
         public let eventTime: EventTime
         
         public var nextRepeatingTimes: [RepeatingTimes] = []
@@ -195,7 +196,9 @@ extension GoogleCalendar {
         
         public init(
             _ eventId: String, _ calendarId: String,
-            name: String, time: EventTime
+            name: String,
+            colorId: String?,
+            time: EventTime
         ) {
             self.eventId = eventId
             self.calendarId = calendarId
@@ -203,6 +206,7 @@ extension GoogleCalendar {
                 serviceId: GoogleCalendarService.id, id: calendarId
             )
             self.name = name
+            self.colorId = colorId
             self.eventTime = time
         }
         
@@ -215,6 +219,7 @@ extension GoogleCalendar {
             self.eventTagId = .externalCalendar(
                 serviceId: GoogleCalendarService.id, id: calendarId
             )
+            self.colorId = origin.colorId
             let start = origin.start?.supportEventTimeElemnt(defaultTimeZone)
             let end = origin.end?.supportEventTimeElemnt(defaultTimeZone)
             
