@@ -29,15 +29,25 @@ final class MonthSceneBuilderImple {
 extension MonthSceneBuilderImple: MonthSceneBuilder {
     
     func makeSceneComponent(_ month: CalendarMonth) -> MonthSceneComponent {
+        let calendarSettingUsecase = self.usecaseFactory.makeCalendarSettingUsecase()
+        let tagUsecase = self.usecaseFactory.makeEventTagUsecase()
+        let uiSettingUsecase = self.usecaseFactory.makeUISettingUsecase()
+        let eventListUsecase = CalendarEventListhUsecaseImple(
+            todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
+            scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
+            googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
+            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
+            calendarSettingUsecase: calendarSettingUsecase,
+            eventTagUsecase: tagUsecase,
+            uiSettingUsecase: uiSettingUsecase
+        )
         let viewModel = MonthViewModelImple(
             initialMonth: month,
             calendarUsecase: self.usecaseFactory.makeCalendarUsecase(),
-            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
-            todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
-            scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
-            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
-            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
-            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
+            calendarSettingUsecase: calendarSettingUsecase,
+            eventListUsecase: eventListUsecase,
+            eventTagUsecase: tagUsecase,
+            uiSettingUsecase: uiSettingUsecase
         )
         return .init(viewModel: viewModel)
     }
