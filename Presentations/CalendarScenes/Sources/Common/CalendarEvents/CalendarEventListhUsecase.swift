@@ -160,7 +160,36 @@ extension CalendarEventListhUsecaseImple {
     }
     
     func uncompletedTodos() -> AnyPublisher<[TodoCalendarEvent], Never> {
-        return Empty().eraseToAnyPublisher()
+        let transform: ([TodoEvent], (any ForemostMarkableEvent)?, TimeZone) -> [TodoCalendarEvent]
+        transform = { todos, foremost, timeZone in
+            return todos.compactMap {
+                TodoCalendarEvent($0, in: timeZone, isForemost: $0.uuid == foremost?.eventId )
+            }
+            .sortedByCreateTime()
+        }
+        return Publishers.CombineLatest3(
+            self.activeUncompletedTodos(),
+            self.subject.foremostEvent,
+            self.subject.timeZone.compactMap{ $0 }
+        )
+        .map(transform)
+        .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey }})
+        .eraseToAnyPublisher()
+    }
+    
+    private func activeUncompletedTodos() -> AnyPublisher<[TodoEvent], Never> {
+        let transform: (Bool, [TodoEvent], Set<EventTagId>) -> [TodoEvent]
+        transform = { isOn, todos, offIds in
+            guard isOn else { return [] }
+            return todos.filter { !offIds.contains($0.eventTagId ?? .default) }
+        }
+        return Publishers.CombineLatest3(
+            self.uiSettingUsecase.currentCalendarUISeting.map { $0.showUncompletedTodos },
+            self.todoUsecase.uncompletedTodos,
+            self.subject.offTagIds
+        )
+        .map(transform)
+        .eraseToAnyPublisher()
     }
 }
 
