@@ -77,13 +77,22 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubForemostEventUsecase = .init(foremostId: foremostEventId)
         self.stubForemostEventUsecase.refresh()
         
+        let eventListUsecase = CalendarEventListhUsecaseImple(
+            todoUsecase: self.stubTodoUsecase,
+            scheduleUsecase: self.stubScheduleUsecase,
+            googleCalendarUsecase: StubGoogleCalendarUsecase(),
+            foremostEventUsecase: self.stubForemostEventUsecase,
+            calendarSettingUsecase: calendarSettingUsecase,
+            eventTagUsecase: self.stubTagUsecase,
+            uiSettingUsecase: self.stubUISettingUsecase
+        )
+        
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
             calendarSettingUsecase: calendarSettingUsecase,
+            eventListUsecase: eventListUsecase,
             todoEventUsecase: self.stubTodoUsecase,
-            scheduleEventUsecase: self.stubScheduleUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
-            eventTagUsecase: self.stubTagUsecase,
             uiSettingUsecase: self.stubUISettingUsecase
         )
         viewModel.router = self.spyRouter
@@ -661,7 +670,7 @@ extension DayEventListViewModelImpleTests {
         let viewModel = self.makeViewModelWithInitialListLoaded()
         
         // when
-        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels, timeout: 0.1) {
             self.stubTagUsecase.toggleEventTagIsOnCalendar(.default)
         }
         

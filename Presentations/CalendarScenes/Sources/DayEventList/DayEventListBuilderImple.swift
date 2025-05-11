@@ -38,14 +38,26 @@ final class DayEventListSceneBuilerImple {
 extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
     
     func makeSceneComponent() -> DayEventListSceneComponent {
+        let calendarSettingUsecase = self.usecaseFactory.makeCalendarSettingUsecase()
+        let todoEventUsecase = self.usecaseFactory.makeTodoEventUsecase()
+        let foremostEventUsecase = self.usecaseFactory.makeForemostEventUsecase()
+        let uiSettingUsecase = self.usecaseFactory.makeUISettingUsecase()
+        let eventListUsecase = CalendarEventListhUsecaseImple(
+            todoUsecase: todoEventUsecase,
+            scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
+            googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
+            foremostEventUsecase: foremostEventUsecase,
+            calendarSettingUsecase: calendarSettingUsecase,
+            eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            uiSettingUsecase: uiSettingUsecase
+        )
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: usecaseFactory.makeCalendarUsecase(),
-            calendarSettingUsecase: usecaseFactory.makeCalendarSettingUsecase(),
-            todoEventUsecase: usecaseFactory.makeTodoEventUsecase(),
-            scheduleEventUsecase: usecaseFactory.makeScheduleEventUsecase(),
-            foremostEventUsecase: usecaseFactory.makeForemostEventUsecase(),
-            eventTagUsecase: usecaseFactory.makeEventTagUsecase(),
-            uiSettingUsecase: usecaseFactory.makeUISettingUsecase()
+            calendarSettingUsecase: calendarSettingUsecase,
+            eventListUsecase: eventListUsecase,
+            todoEventUsecase: todoEventUsecase,
+            foremostEventUsecase: foremostEventUsecase,
+            uiSettingUsecase: uiSettingUsecase
         )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,

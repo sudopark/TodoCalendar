@@ -72,28 +72,25 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     
     private let calendarUsecase: any CalendarUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let eventListUsecase: any CalendarEventListhUsecase
     private let todoEventUsecase: any TodoEventUsecase
-    private let scheduleEventUsecase: any ScheduleEventUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
-    private let eventTagUsecase: any EventTagUsecase
     private let uiSettingUsecase: any UISettingUsecase
     var router: (any DayEventListRouting)?
     
     init(
         calendarUsecase: any CalendarUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
+        eventListUsecase: any CalendarEventListhUsecase,
         todoEventUsecase: any TodoEventUsecase,
-        scheduleEventUsecase: any ScheduleEventUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
-        eventTagUsecase: any EventTagUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
+        self.eventListUsecase = eventListUsecase
         self.todoEventUsecase = todoEventUsecase
-        self.scheduleEventUsecase = scheduleEventUsecase
         self.foremostEventUsecase = foremostEventUsecase
-        self.eventTagUsecase = eventTagUsecase
         self.uiSettingUsecase = uiSettingUsecase
         
         self.internalBind()
@@ -248,42 +245,23 @@ extension DayEventListViewModelImple {
     
     var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> {
         let asCellViewModels: (
-            [TodoEvent], CalendarComponent.Day, TimeZone, Bool
-        ) -> [any EventCellViewModel]?
+            [TodoCalendarEvent], CalendarComponent.Day, TimeZone, Bool
+        ) -> [TodoEventCellViewModel]?
         asCellViewModels = { todos, today, timeZone, is24Form in
             guard let todayRange = today.dayRange(timeZone) else { return nil }
-            return todos.map { TodoCalendarEvent($0, in: timeZone) }
-                .sortedByCreateTime()
+            return todos
+                .filter { !$0.isForemost }
                 .compactMap {
                     TodoEventCellViewModel($0, in: todayRange, timeZone, is24Form, forceShowEventDateDurationText: true)
                 }
         }
-        let todoCells = Publishers.CombineLatest4(
-            self.notFormostUncompletedTodos,
+        return Publishers.CombineLatest4(
+            self.eventListUsecase.uncompletedTodos(),
             self.calendarUsecase.currentDay,
             self.calendarSettingUsecase.currentTimeZone,
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .compactMap(asCellViewModels)
-        
-        return todoCells
-            .filterTagActivated(self.eventTagUsecase) { $0.tagId }
-            .map { ts in ts.compactMap { $0 as? TodoEventCellViewModel } }
-            .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
-            .eraseToAnyPublisher()
-    }
-    
-    private var notFormostUncompletedTodos: AnyPublisher<[TodoEvent], Never>  {
-        let transform: (Bool, [TodoEvent], (any ForemostMarkableEvent)?) -> [TodoEvent] = { show, todos, formost in
-            guard show else { return [] }
-            return todos.filter { $0.uuid != formost?.eventId }
-        }
-        return Publishers.CombineLatest3(
-            self.uiSettingUsecase.currentCalendarUISeting.map { $0.showUncompletedTodos },
-            self.todoEventUsecase.uncompletedTodos,
-            self.foremostEventUsecase.foremostEvent
-        )
-        .map(transform)
         .eraseToAnyPublisher()
     }
     
@@ -315,7 +293,6 @@ extension DayEventListViewModelImple {
         .map(combineEvents)
         
         return cells
-            .filterTagActivated(self.eventTagUsecase) { $0.tagId }
             .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
             .eraseToAnyPublisher()
     }
@@ -362,26 +339,11 @@ extension DayEventListViewModelImple {
         return Publishers.CombineLatest4(
             self.subject.currentDayAndEventLists.compactMap { $0 },
             self.calendarSettingUsecase.currentTimeZone,
-            self.currentTodoEvents,
+            self.eventListUsecase.currentTodoEvents(),
             self.uiSettingUsecase.currentCalendarUISeting.map { $0.is24hourForm }.removeDuplicates()
         )
         .map(asCellViewModel)
         .map(filterForemost)
-        .eraseToAnyPublisher()
-    }
-    
-    private var currentTodoEvents: AnyPublisher<[TodoCalendarEvent], Never> {
-        let transform: ([TodoEvent], (any ForemostMarkableEvent)?) -> [TodoCalendarEvent]
-        transform = { todos, foremost in
-            return todos.map {
-                TodoCalendarEvent(current: $0, isForemost: foremost?.eventId == $0.uuid)
-            }
-        }
-        return Publishers.CombineLatest(
-            self.todoEventUsecase.currentTodoEvents,
-            self.foremostEventUsecase.foremostEvent
-        )
-        .map(transform)
         .eraseToAnyPublisher()
     }
 }
