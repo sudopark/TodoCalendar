@@ -141,7 +141,22 @@ extension CalendarEventListhUsecaseImple {
     }
     
     func currentTodoEvents() -> AnyPublisher<[TodoCalendarEvent], Never> {
-        return Empty().eraseToAnyPublisher()
+        
+        let transform: ([TodoEvent], (any ForemostMarkableEvent)?, Set<EventTagId>) -> [TodoCalendarEvent]
+        transform = { todos, foremost, offIds in
+            return todos
+                .filter { offIds.notContains($0.eventTagId) }
+                .map { TodoCalendarEvent(current: $0, isForemost: $0.uuid == foremost?.eventId) }
+        }
+        
+        return Publishers.CombineLatest3(
+            self.todoUsecase.currentTodoEvents,
+            self.subject.foremostEvent,
+            self.subject.offTagIds
+        )
+        .map(transform)
+        .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey }})
+        .eraseToAnyPublisher()
     }
     
     func uncompletedTodos() -> AnyPublisher<[TodoCalendarEvent], Never> {

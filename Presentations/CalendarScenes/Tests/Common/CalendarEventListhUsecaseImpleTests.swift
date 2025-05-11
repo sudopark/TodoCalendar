@@ -39,8 +39,13 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
             return GoogleCalendar.Event("g:\(int)", "google", name: "g", time: .at(0))
                 |> \.eventTagId .~ .externalCalendar(serviceId: GoogleCalendarService.id, id: "google")
         }
+        let currentTodos = (0..<3).map { int in
+            return TodoEvent(uuid: "c-t:\(int)", name: "curent")
+                |> \.eventTagId .~ .default
+        }
         let todoUsecase = StubTodoEventUsecase()
         todoUsecase.stubTodoEventsInRange = todos
+        todoUsecase.stubCurrentTodoEvents = currentTodos
         
         let scheduleUsecase = StubScheduleEventUsecase()
         scheduleUsecase.stubScheduleEventsInRange = schedules
@@ -138,6 +143,75 @@ extension CalendarEventListhUsecaseImpleTests {
             onlyGoogles,
             [],
             withoutGoogles
+        ])
+    }
+}
+
+extension CalendarEventListhUsecaseImpleTests {
+    
+    @Test func usecase_provideCurrentTodoList() async throws {
+        // given
+        let expect = expectConfirm("current todo 정보 제공")
+        let usecase = self.makeUsecase()
+        
+        // when
+        let todos = try await self.firstOutput(expect, for: usecase.currentTodoEvents())
+        
+        // then
+        let ids = todos?.map { $0.eventId }
+        #expect(ids == (0..<3).map { "c-t:\($0)" })
+    }
+    
+    @Test func uscase_provideCurrentTodoListWithIsForemost() async throws {
+        // given
+        let expect = expectConfirm("current todo 제공시에 foremost 이벤트 여부 같이 제공")
+        expect.count = 4
+        let usecase = self.makeUsecase()
+        
+        // when
+        let todoLists = try await self.outputs(expect, for: usecase.currentTodoEvents()) {
+            
+            Task {
+                try await self.foremostUsecase.update(foremost: .init("c-t:1", true))
+                
+                try await self.foremostUsecase.update(foremost: .init("c-t:0", false))
+                
+                try await self.foremostUsecase.remove()
+            }
+        }
+        
+        // then
+        let currentTodoIds = todoLists
+                .map { ts in ts.filter { $0.isForemost } }
+                .map { ts in ts.map { $0.eventId } }
+        #expect(currentTodoIds == [
+            [],
+            ["c-t:1"],
+            ["c-t:0"],
+            []
+        ])
+    }
+    
+    @Test func usecase_provideCurrentTodo_withoutTagOff() async throws {
+        // given
+        let expect = expectConfirm("current todo 제공시 off id에 따라 필터링")
+        expect.count = 3
+        let usecase = self.makeUsecase()
+        
+        // when
+        let todoLists = try await self.outputs(expect, for: usecase.currentTodoEvents()) {
+            
+            self.eventTagUsecase.toggleEventTagIsOnCalendar(.default)
+            self.eventTagUsecase.toggleEventTagIsOnCalendar(.default)
+        }
+        
+        // then
+        let allCurrentTodoIds = (0..<3).map { "c-t:\($0)" }
+        let idLists = todoLists.map { ts in ts.map { $0.eventId } }
+        #expect(idLists == [
+            allCurrentTodoIds,
+            [],
+            allCurrentTodoIds
         ])
     }
 }
