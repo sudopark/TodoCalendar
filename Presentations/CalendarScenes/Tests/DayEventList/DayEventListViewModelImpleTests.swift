@@ -814,7 +814,7 @@ extension DayEventListViewModelImpleTests {
             [TodoEvent.dummy(1), TodoEvent.dummy(2)],
             [TodoEvent.dummy(1)]
         ]
-        self.stubTodoUsecase.stubUncompletedTodos = uncompleted
+        self.stubTodoUsecase.stubUncompletedTodoLists = uncompleted
         return self.makeViewModelWithInitialListLoaded()
     }
     
@@ -941,10 +941,10 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
     }
     
     private let fakeUncompletedTodos = CurrentValueSubject<[TodoEvent]?, Never>(nil)
-    var stubUncompletedTodos = [[TodoEvent]]()
+    var stubUncompletedTodoLists = [[TodoEvent]]()
     override func refreshUncompletedTodos() {
-        guard !self.stubUncompletedTodos.isEmpty else { return }
-        let first = self.stubUncompletedTodos.removeFirst()
+        guard !self.stubUncompletedTodoLists.isEmpty else { return }
+        let first = self.stubUncompletedTodoLists.removeFirst()
         self.fakeUncompletedTodos.send(first)
     }
     

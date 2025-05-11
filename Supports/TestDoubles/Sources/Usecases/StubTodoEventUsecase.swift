@@ -123,7 +123,9 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         
     }
     
+    public var stubUncompletedTodos: [TodoEvent] = []
     open var uncompletedTodos: AnyPublisher<[TodoEvent], Never> {
-        return Empty().eraseToAnyPublisher()
+        return Just(stubUncompletedTodos)
+            .eraseToAnyPublisher()
     }
 }

@@ -25,7 +25,7 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
     private let eventTagUsecase = StubEventTagUsecase()
     private let uiSettingUsecase = StubUISettingUsecase()
     
-    private func makeUsecase() -> CalendarEventListhUsecaseImple {
+    private func makeUsecase() async throws -> CalendarEventListhUsecaseImple {
         let todos = (0..<3).map { int in
             return TodoEvent(uuid: "todo:\(int)", name: "todo")
                 |> \.time .~ .at(0)
@@ -43,9 +43,16 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
             return TodoEvent(uuid: "c-t:\(int)", name: "curent")
                 |> \.eventTagId .~ .default
         }
+        let uncompletedTodos = (0..<3).map { int in
+            return TodoEvent(uuid: "u-t:\(int)", name: "uncompleted")
+                |> \.eventTagId .~ .default
+                |> \.time .~ .at(0)
+                |> \.creatTimeStamp .~ (100-TimeInterval(int))
+        }
         let todoUsecase = StubTodoEventUsecase()
         todoUsecase.stubTodoEventsInRange = todos
         todoUsecase.stubCurrentTodoEvents = currentTodos
+        todoUsecase.stubUncompletedTodos = uncompletedTodos
         
         let scheduleUsecase = StubScheduleEventUsecase()
         scheduleUsecase.stubScheduleEventsInRange = schedules
@@ -55,6 +62,8 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
         
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.prepare()
+        
+        _ = try await self.uiSettingUsecase.refreshAppearanceSetting()
         
         return .init(
             todoUsecase: todoUsecase,
@@ -69,12 +78,14 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
 }
 
 
+// MARK: - calendar events
+
 extension CalendarEventListhUsecaseImpleTests {
     
     @Test func usecase_getCalendarEvents() async throws {
         // given
         let expect = expectConfirm("이벤트 리스트 제공, todo, schedule, google event")
-        let usecase = self.makeUsecase()
+        let usecase = try await self.makeUsecase()
         
         // when
         let eventSource = usecase.calendarEvents(in: 0..<10)
@@ -90,7 +101,7 @@ extension CalendarEventListhUsecaseImpleTests {
         let expect = expectConfirm("foremost 설정 여부에 따라 리스트 업데이트")
         expect.count = 4
         expect.timeout = .milliseconds(500)
-        let usecase = self.makeUsecase()
+        let usecase = try await self.makeUsecase()
         
         // when
         let eventSource = usecase.calendarEvents(in: 0..<10)
@@ -121,7 +132,7 @@ extension CalendarEventListhUsecaseImpleTests {
         let expect = expectConfirm("비활성화된 태그 이벤트는 제외")
         expect.count = 4
         expect.timeout = .milliseconds(500)
-        let usecase = self.makeUsecase()
+        let usecase = try await self.makeUsecase()
         
         // when
         let eventSource = usecase.calendarEvents(in: 0..<10)
@@ -147,12 +158,15 @@ extension CalendarEventListhUsecaseImpleTests {
     }
 }
 
+
+// MARK: - current todo
+
 extension CalendarEventListhUsecaseImpleTests {
     
     @Test func usecase_provideCurrentTodoList() async throws {
         // given
         let expect = expectConfirm("current todo 정보 제공")
-        let usecase = self.makeUsecase()
+        let usecase = try await self.makeUsecase()
         
         // when
         let todos = try await self.firstOutput(expect, for: usecase.currentTodoEvents())
@@ -166,7 +180,7 @@ extension CalendarEventListhUsecaseImpleTests {
         // given
         let expect = expectConfirm("current todo 제공시에 foremost 이벤트 여부 같이 제공")
         expect.count = 4
-        let usecase = self.makeUsecase()
+        let usecase = try await self.makeUsecase()
         
         // when
         let todoLists = try await self.outputs(expect, for: usecase.currentTodoEvents()) {
@@ -181,10 +195,10 @@ extension CalendarEventListhUsecaseImpleTests {
         }
         
         // then
-        let currentTodoIds = todoLists
+        let foresmotTodoIds = todoLists
                 .map { ts in ts.filter { $0.isForemost } }
                 .map { ts in ts.map { $0.eventId } }
-        #expect(currentTodoIds == [
+        #expect(foresmotTodoIds == [
             [],
             ["c-t:1"],
             ["c-t:0"],
@@ -196,7 +210,7 @@ extension CalendarEventListhUsecaseImpleTests {
         // given
         let expect = expectConfirm("current todo 제공시 off id에 따라 필터링")
         expect.count = 3
-        let usecase = self.makeUsecase()
+        let usecase = try await self.makeUsecase()
         
         // when
         let todoLists = try await self.outputs(expect, for: usecase.currentTodoEvents()) {
@@ -212,6 +226,105 @@ extension CalendarEventListhUsecaseImpleTests {
             allCurrentTodoIds,
             [],
             allCurrentTodoIds
+        ])
+    }
+}
+
+// MARK: - uncompleted todo
+
+extension CalendarEventListhUsecaseImpleTests {
+    
+    @Test func usecase_provideUncompletedTodos() async throws {
+        // given
+        let expect = expectConfirm("완료되지않은 할일 리스트 제공")
+        let usecase = try await self.makeUsecase()
+        
+        // when
+        let todos = try await self.firstOutput(expect, for: usecase.uncompletedTodos())
+        
+        // then
+        let ids = todos?.map { $0.eventId }
+        #expect(ids == (0..<3).reversed().map { "u-t:\($0)" })
+    }
+    
+    @Test func usecase_provideUncompletedTodoListWithIsForemost() async throws {
+        // given
+        let expect = expectConfirm("완료되지않은 할일 리스트 제공시 foremost 여부와 같이 제공")
+        expect.count = 4
+        let usecase = try await self.makeUsecase()
+        
+        // when
+        let todoLists = try await self.outputs(expect, for: usecase.uncompletedTodos()) {
+            
+            Task {
+                try await self.foremostUsecase.update(foremost: .init("u-t:1", true))
+                
+                try await self.foremostUsecase.update(foremost: .init("u-t:0", false))
+                
+                try await self.foremostUsecase.remove()
+            }
+        }
+        
+        // then
+        let foresmotTodoIds = todoLists
+                .map { ts in ts.filter { $0.isForemost } }
+                .map { ts in ts.map { $0.eventId } }
+        #expect(foresmotTodoIds == [
+            [],
+            ["u-t:1"],
+            ["u-t:0"],
+            []
+        ])
+    }
+    
+    @Test func usecase_provideUncompletedTodo_withoutTagOff() async throws {
+        // given
+        let expect = expectConfirm("완료되지않은 할일 리스트 제공시 tagId off된 항목 제외")
+        expect.count = 3
+        let usecase = try await self.makeUsecase()
+        
+        // when
+        let todoLists = try await self.outputs(expect, for: usecase.uncompletedTodos()) {
+            
+            self.eventTagUsecase.toggleEventTagIsOnCalendar(.default)
+            self.eventTagUsecase.toggleEventTagIsOnCalendar(.default)
+        }
+        
+        // then
+        let allTodoIds = (0..<3).reversed().map { "u-t:\($0)" }
+        let idLists = todoLists.map { ts in ts.map { $0.eventId } }
+        #expect(idLists == [
+            allTodoIds,
+            [],
+            allTodoIds
+        ])
+    }
+    
+    @Test func usecase_provideUncompletedTodoList_byShowOption() async throws {
+        // given
+        let expect = expectConfirm("완료되지않은 할일 리스트 제공시 노출 옵션 꺼져있으면 빈배열 반환")
+        expect.count = 3
+        let usecase = try await self.makeUsecase()
+        
+        // when
+        let todoLists = try await self.outputs(expect, for: usecase.uncompletedTodos()) {
+            let params = EditCalendarAppearanceSettingParams()
+            
+            _ = try self.uiSettingUsecase.changeCalendarAppearanceSetting(
+                params |> \.showUncompletedTodos .~ false
+            )
+            _ = try self.uiSettingUsecase.changeCalendarAppearanceSetting(
+                params |> \.showUncompletedTodos .~ true
+            )
+        }
+        
+        // then
+        let allTodoIds = (0..<3).reversed().map { "u-t:\($0)" }
+        let idLists = todoLists.map { ts in ts.map { $0.eventId } }
+        #expect(idLists == [
+            allTodoIds,
+            [],
+            allTodoIds
         ])
     }
 }
