@@ -62,14 +62,22 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
         
         self.stubForemostEventUsecase = .init(foremostId: foremostId)
         self.stubForemostEventUsecase.refresh()
+        
+        let eventListUsecase = CalendarEventListhUsecaseImple(
+            todoUsecase: self.stubTodoUsecase,
+            scheduleUsecase: self.stubScheduleUsecase,
+            googleCalendarUsecase: StubGoogleCalendarUsecase(),
+            foremostEventUsecase: self.stubForemostEventUsecase,
+            calendarSettingUsecase: self.stubSettingUsecase,
+            eventTagUsecase: self.stubTagUsecase,
+            uiSettingUsecase: self.stubUISettingUsecase
+        )
 
         let viewModel = MonthViewModelImple(
             initialMonth: .init(year: 2023, month: 9),
             calendarUsecase: calendarUsecase,
             calendarSettingUsecase: self.stubSettingUsecase,
-            todoUsecase: self.stubTodoUsecase,
-            scheduleEventUsecase: self.stubScheduleUsecase,
-            foremostEventUsecase: self.stubForemostEventUsecase,
+            eventListUsecase: eventListUsecase,
             eventTagUsecase: self.stubTagUsecase,
             uiSettingUsecase: self.stubUISettingUsecase
         )
