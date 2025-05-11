@@ -156,6 +156,12 @@ extension ApplicationViewAppearanceStoreImple: GoogleCalendarViewAppearanceStore
         }
     }
     
+    func apply(googleCalendarTags: [GoogleCalendar.Tag]) {
+        Task { @MainActor in
+            self.appearance.googleCalendarTagMap = googleCalendarTags.asDictionary{ $0.id }
+        }
+    }
+    
     func clearGoogleCalendarColors() {
         Task { @MainActor in
             self.appearance.googleCalendarColor = nil

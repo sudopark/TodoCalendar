@@ -111,7 +111,7 @@ extension GoogleCalendarLocalStorageImple {
     ) async throws -> [GoogleCalendar.Event] {
         let timeQuery = Times.overlapQuery(with: range)
         let eventQuery = Events
-            .selectSome { [$0.id, $0.summary] }
+            .selectSome { [$0.id, $0.summary, $0.colorId] }
             .where { $0.calendarId == calendarId }
         let query = eventQuery.innerJoin(with: timeQuery, on: { ($0.id, $1.eventId) })
         let mapping: (CursorIterator) throws -> GoogleCalendar.Event = { cursor in
@@ -119,6 +119,7 @@ extension GoogleCalendarLocalStorageImple {
                 try cursor.next().unwrap(),
                 calendarId,
                 name: try cursor.next().unwrap(),
+                colorId: cursor.next(),
                 time: try Times.Entity(cursor).eventTime.unwrap()
             )
         }

@@ -206,19 +206,23 @@ public struct HolidayCalendarEvent: CalendarEvent {
 public struct GoogleCalendarEvent: CalendarEvent {
     
     public let eventId: String
+    public let calendarId: String
     public let name: String
     public let eventTime: EventTime?
     public let eventTimeOnCalendar: EventTimeOnCalendar?
-    public let eventTagId: Domain.EventTagId
+    public let eventTagId: EventTagId
+    public let colorId: String?
     public let isForemost: Bool
     public let isRepeating: Bool
     
     public init(_ event: GoogleCalendar.Event, in timeZone: TimeZone) {
         self.eventId = event.eventId
+        self.calendarId = event.calendarId
         self.name = event.name
         self.eventTime = event.eventTime
         self.eventTimeOnCalendar = EventTimeOnCalendar(event.eventTime, timeZone: timeZone)
         self.eventTagId = event.eventTagId ?? .default
+        self.colorId = event.colorId
         self.isForemost = false
         self.isRepeating = false
     }

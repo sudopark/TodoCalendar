@@ -168,6 +168,28 @@ extension GoogleCalendarUsecaseImpleTests {
         ])
     }
     
+    @Test func usecase_whenAfterConnectToService_loadTagListsAndApplyToAppearanceStore() async throws {
+        // given
+        let usecase = self.makeUsecase(hasAccount: false)
+        
+        // when
+        try await confirmation("서비스 연동 이후에, 캘린더 태그 조회하고, viewAppearanceStore에 적용") { confirm in
+            
+            usecase.prepare()
+            
+            self.spyViewAppearanceStore.didUpdateTags = {
+                confirm.confirm()
+            }
+            
+            self.updateAccountIntegrated(true)
+            try await Task.sleep(for: .milliseconds(100))
+        }
+        
+        // then
+        let tagIds = self.spyViewAppearanceStore.tagMaps.keys.sorted()
+        #expect(tagIds == ["tag1", "tag2"])
+    }
+    
     @Test func usecase_whenServiceDisconnected_clearOffTagIds() async throws {
         // given
         let expect = expectConfirm("서비스 연동이 해제된 경우, 저장된 offTagId에서 서비스에 해당하는 아이디 삭제")
@@ -573,6 +595,7 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
             return .init(
                 "event:\(int)-\(calendarId)", calendarId,
                 name: "some name",
+                colorId: "color",
                 time: .period(period.lowerBound..<period.lowerBound+TimeInterval(int+1))
             )
         }
@@ -593,12 +616,19 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
 
 private final class SpyGoogleCalendarViewAppearanceStore: GoogleCalendarViewAppearanceStore, @unchecked Sendable {
     
-     var color: GoogleCalendar.Colors?
+    var color: GoogleCalendar.Colors?
+    var tagMaps: [String: GoogleCalendar.Tag] = [:]
     
     var didUpdatecColors: ((GoogleCalendar.Colors?) -> Void)?
     func apply(colors: GoogleCalendar.Colors) {
         self.color = colors
         self.didUpdatecColors?(colors)
+    }
+    
+    var didUpdateTags: (() -> Void)?
+    func apply(googleCalendarTags: [GoogleCalendar.Tag]) {
+        self.tagMaps = googleCalendarTags.asDictionary{ $0.id }
+        self.didUpdateTags?()
     }
     
     var didClearColor: (() -> Void)?

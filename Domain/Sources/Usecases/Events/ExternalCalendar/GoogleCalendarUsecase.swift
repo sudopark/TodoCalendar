@@ -16,6 +16,7 @@ import Optics
 public protocol GoogleCalendarViewAppearanceStore: Sendable {
     
     func apply(colors: GoogleCalendar.Colors)
+    func apply(googleCalendarTags: [GoogleCalendar.Tag])
     func clearGoogleCalendarColors()
 }
 
@@ -118,6 +119,7 @@ extension GoogleCalendarUsecaseImple {
                 key: ShareDataKeys.googleCalendarTags.rawValue,
                 tags
             )
+            self?.appearanceStore.apply(googleCalendarTags: tags)
         }
         self.repository.loadCalendarTags()
             .sink(receiveValue: updateTags)

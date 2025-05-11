@@ -36,7 +36,7 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
                 |> \.eventTagId .~ .default
         }
         let googles = (0..<3).map { int in
-            return GoogleCalendar.Event("g:\(int)", "google", name: "g", time: .at(0))
+            return GoogleCalendar.Event("g:\(int)", "google", name: "g", colorId: "color", time: .at(0))
                 |> \.eventTagId .~ .externalCalendar(serviceId: GoogleCalendarService.id, id: "google")
         }
         let currentTodos = (0..<3).map { int in
