@@ -82,6 +82,21 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
 
 extension CalendarEventListhUsecaseImpleTests {
     
+    @Test func googleCalendarEvent_whenTimeIsAllDay_eventTimeOnCalendarUpperboundIsMinus1Second() {
+        // given
+        let event = GoogleCalendar.Event("id", "calendar", name: "name", colorId: "color", time: .allDay(0..<100, secondsFromGMT: 0))
+        
+        // when
+        let calendarEvent = GoogleCalendarEvent(event, in: TimeZone(abbreviation: "UTC")!)
+        
+        // then
+        let periodRange: Range<TimeInterval>? = switch calendarEvent.eventTimeOnCalendar {
+            case .period(let range): range
+            default: nil
+        }
+        #expect(periodRange == (0..<99))
+    }
+    
     @Test func usecase_getCalendarEvents() async throws {
         // given
         let expect = expectConfirm("이벤트 리스트 제공, todo, schedule, google event")
