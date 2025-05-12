@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Domain
 import Extensions
 import FirebaseCore
 
@@ -21,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         #if DEBUG
         logger.prepare()
+        FeatureFlag.enable(.googleCalendar)
         #endif
         
         if AppEnvironment.isTestBuild == false {
