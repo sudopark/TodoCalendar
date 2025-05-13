@@ -134,6 +134,7 @@
 "calednar::event::skip_todo_until" = "Select a time to skip this to-do";
 "calednar::event::copy" = "Copy event";
 "calendar::move_date" = "Move date";
+"calednar::event::google::edit" = "Edit Google Calendar Event";
 
 
 // MARK: - event detail

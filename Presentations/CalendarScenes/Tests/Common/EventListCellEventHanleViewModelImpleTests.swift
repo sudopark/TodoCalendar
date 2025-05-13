@@ -98,6 +98,18 @@ extension EventListCellEventHanleViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didRouteToScheduleDetail, true)
     }
     
+    func testViewModel_whenSelectGoogleCalendarEvent_showDetail() {
+        // given
+        let viewModel = self.makeViewModel()
+        let model = GoogleCalendarEventCellViewModel.dummy()
+        
+        // when
+        viewModel.selectEvent(model)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToGoogleEventDetailWithId, "google")
+    }
+    
     func testViewModel_whenSelectHolidayEvent_showNotSupportToast() {
         // given
         let viewModel = self.makeViewModel()
@@ -354,6 +366,18 @@ extension EventListCellEventHanleViewModelImpleTests {
         let names = todos.map { $0.name }
         XCTAssertEqual(names, ["origin", "skipped"])
     }
+    
+    func testViewModel_handleEditGoogleCalendarEventDetail() {
+        // given
+        let viewModel = self.makeViewModel()
+        let model = GoogleCalendarEventCellViewModel.dummy()
+        
+        // when
+        viewModel.handleMoreAction(model, .editGoogleEvent)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToEditGoogleEventWithId, "google")
+    }
 }
 
 extension EventListCellEventHanleViewModelImpleTests {
@@ -442,6 +466,16 @@ private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @u
         self.didRouteToScheduleDetailWithTargetTime = repeatingEventTargetTime
     }
     
+    var didRouteToGoogleEventDetailWithId: String?
+    func routeToGoogleEventDetail(_ eventId: String) {
+        self.didRouteToGoogleEventDetailWithId = eventId
+    }
+    
+    var didRouteToEditGoogleEventWithId: String?
+    func routeToEditGoogleEvent(_ eventId: String) {
+        self.didRouteToEditGoogleEventWithId = eventId
+    }
+    
     var didRouteToMakeNewEventWithParams: MakeEventParams?
     func routeToMakeNewEvent(_ withParams: MakeEventParams) {
         self.didRouteToMakeNewEventWithParams = withParams
@@ -513,5 +547,18 @@ private extension DoneTodoResult {
     var failedReason: (any Error)? {
         guard case let .failed(_, reason) = self else { return nil }
         return reason
+    }
+}
+
+private extension GoogleCalendarEventCellViewModel {
+    
+    static func dummy() -> GoogleCalendarEventCellViewModel {
+        let google = GoogleCalendar.Event(
+            "google", "calendar", name: "name", colorId: "id", time: .at(1)
+        )
+        let googleEvent = GoogleCalendarEvent(google, in: TimeZone.current)
+        return GoogleCalendarEventCellViewModel(
+            googleEvent, in: 0..<10, TimeZone.current, true
+        )!
     }
 }
