@@ -139,6 +139,7 @@ public enum EventListMoreAction: Sendable, Equatable {
     case skipTodo
     case edit
     case copy
+    case editGoogleEvent
 }
 
 public struct EventListMoreActionModel: Sendable, Equatable {
@@ -376,7 +377,7 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     }
     
     public var moreActions: EventListMoreActionModel? {
-        return .init(basicActions: [], removeActions: [])
+        return .init(basicActions: [.editGoogleEvent], removeActions: [])
     }
 }
 

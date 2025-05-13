@@ -20,6 +20,10 @@ protocol EventListCellEventHanleRouting: Routing, Sendable {
         _ eventId: String,
         _ repeatingEventTargetTime: EventTime?
     )
+    func routeToGoogleEventDetail(
+        _ eventId: String
+    )
+    func routeToEditGoogleEvent(_ eventId: String)
     func routeToMakeNewEvent(_ withParams: MakeEventParams)
 }
 
@@ -59,6 +63,18 @@ extension EventListCellEventHanleRouter {
                 eventId, repeatingEventTargetTime, listener: self.eventDetailListener
             )
             self.scene?.present(next, animated: true)
+        }
+    }
+    
+    func routeToGoogleEventDetail(_ eventId: String) {
+        Task { @MainActor in
+            // TODO: route to google event detail
+        }
+    }
+    
+    func routeToEditGoogleEvent(_ eventId: String) {
+        Task { @MainActor in
+            // TODO: route to edit google event
         }
     }
     
