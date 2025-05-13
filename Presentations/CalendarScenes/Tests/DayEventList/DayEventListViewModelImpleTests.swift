@@ -606,8 +606,12 @@ extension DayEventListViewModelImpleTests {
             eventTagId: .custom("some"),
             isRepeating: false
         ) |> \.turn .~ 1
+        let google = GoogleCalendar.Event(
+            "google", "calendarId", name: "google", colorId: "color", time: .at(self.todayRange.lowerBound + 200)
+        )
+        let googleEvent = GoogleCalendarEvent(google, in: timeZone)
         return [
-            holiday, scheduleWithRepeating, todo, scheduleWithoutRepeating
+            holiday, scheduleWithRepeating, todo, scheduleWithoutRepeating, googleEvent
         ]
     }
     
@@ -616,6 +620,7 @@ extension DayEventListViewModelImpleTests {
             "not-repeating-schedule",
             "repeating-schedule-4",
             "todo-with-time",
+            "google",
             "2023-09-30-holiday"
         ]
     }
@@ -692,6 +697,7 @@ extension DayEventListViewModelImpleTests {
             "not-repeating-schedule",
             "repeating-schedule",
             "todo-with-time",
+            "google",
             "holiday",
         ]
     }
@@ -703,6 +709,7 @@ extension DayEventListViewModelImpleTests {
             "not-repeating-schedule",
             "repeating-schedule",
             "todo-with-time",
+            "google",
             "holiday",
         ]
     }
