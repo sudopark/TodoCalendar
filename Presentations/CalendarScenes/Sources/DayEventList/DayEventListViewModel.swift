@@ -321,6 +321,9 @@ extension DayEventListViewModelImple {
                         return ScheduleEventCellViewModel(schedule, in: range, timeZone: timeZone, is24HourForm)
                     case let holiday as HolidayCalendarEvent:
                         return HolidayEventCellViewModel(holiday)
+                        
+                    case let google as GoogleCalendarEvent:
+                        return GoogleCalendarEventCellViewModel(google, in: range, timeZone, is24HourForm)
                     
                     default: return nil
                 }
