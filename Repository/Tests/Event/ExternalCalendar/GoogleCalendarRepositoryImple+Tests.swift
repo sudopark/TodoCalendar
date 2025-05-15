@@ -236,6 +236,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             #expect(eventFromCache?.map { $0.eventId } == ["time_is_date"])
             #expect(eventFromCache?.map { $0.name } == ["old"])
             #expect(eventFromCache?.map { $0.colorId } == ["color"])
+            #expect(eventFromCache?.map { $0.htmlLink } == ["link"])
             
             let eventFromRemote = eventLists.last
             #expect(eventFromRemote?.map { $0.eventId } == [
@@ -372,6 +373,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             |> \.start .~ start
             |> \.end .~ end
             |> \.colorId .~ "color"
+            |> \.htmlLink .~ "link"
         let timeZone = "Asia/Seoul"
         let originEvent = GoogleCalendar.Event(origin, "c_id", timeZone)!
         let list = GoogleCalendar.EventOriginValueList()

@@ -190,6 +190,7 @@ extension GoogleCalendar {
         public var eventTagId: EventTagId?
         public var colorId: String?
         public let eventTime: EventTime
+        public var htmlLink: String?
         
         public var nextRepeatingTimes: [RepeatingTimes] = []
         public var repeatingTimeToExcludes: Set<String> = []
@@ -198,6 +199,7 @@ extension GoogleCalendar {
             _ eventId: String, _ calendarId: String,
             name: String,
             colorId: String?,
+            htmlLink: String? = nil,
             time: EventTime
         ) {
             self.eventId = eventId
@@ -207,6 +209,7 @@ extension GoogleCalendar {
             )
             self.name = name
             self.colorId = colorId
+            self.htmlLink = htmlLink
             self.eventTime = time
         }
         
@@ -220,6 +223,7 @@ extension GoogleCalendar {
                 serviceId: GoogleCalendarService.id, id: calendarId
             )
             self.colorId = origin.colorId
+            self.htmlLink = origin.htmlLink
             let start = origin.start?.supportEventTimeElemnt(defaultTimeZone)
             let end = origin.end?.supportEventTimeElemnt(defaultTimeZone)
             
