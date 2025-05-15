@@ -139,7 +139,7 @@ public enum EventListMoreAction: Sendable, Equatable {
     case skipTodo
     case edit
     case copy
-    case editGoogleEvent
+    case editGoogleEvent(link: String)
 }
 
 public struct EventListMoreActionModel: Sendable, Equatable {
@@ -354,6 +354,7 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     public var isForemost: Bool = false
     public let calendarId: String
     public let colorId: String?
+    public let htmlLink: String?
     public var customCompareKey: String {
         self.makeCustomCompareKey(["google", self.colorId ?? "nil"])
     }
@@ -374,10 +375,14 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
         self.isForemost = event.isForemost
         self.calendarId = event.calendarId
         self.colorId = event.colorId
+        self.htmlLink = event.htmlLink
     }
     
     public var moreActions: EventListMoreActionModel? {
-        return .init(basicActions: [.editGoogleEvent], removeActions: [])
+        guard let link = self.htmlLink else { return nil }
+        return .init(
+            basicActions: [.editGoogleEvent(link: link)], removeActions: []
+        )
     }
 }
 

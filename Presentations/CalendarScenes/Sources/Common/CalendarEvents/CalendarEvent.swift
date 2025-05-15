@@ -212,6 +212,7 @@ public struct GoogleCalendarEvent: CalendarEvent {
     public let eventTimeOnCalendar: EventTimeOnCalendar?
     public let eventTagId: EventTagId
     public let colorId: String?
+    public let htmlLink: String?
     public let isForemost: Bool
     public let isRepeating: Bool
     
@@ -235,6 +236,7 @@ public struct GoogleCalendarEvent: CalendarEvent {
         }
         self.eventTagId = event.eventTagId ?? .default
         self.colorId = event.colorId
+        self.htmlLink = event.htmlLink
         self.isForemost = false
         self.isRepeating = false
     }

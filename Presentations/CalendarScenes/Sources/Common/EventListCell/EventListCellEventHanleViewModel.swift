@@ -134,8 +134,8 @@ extension EventListCellEventHanleViewModelImple {
         case .copy:
             self.copyEvent(cellViewModel)
             
-        case .editGoogleEvent:
-            self.router?.routeToEditGoogleEvent(cellViewModel.eventIdentifier)
+        case .editGoogleEvent(let link):
+            self.router?.routeToEditGoogleEvent(link)
         }
     }
 
