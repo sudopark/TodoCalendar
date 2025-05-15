@@ -373,10 +373,10 @@ extension EventListCellEventHanleViewModelImpleTests {
         let model = GoogleCalendarEventCellViewModel.dummy()
         
         // when
-        viewModel.handleMoreAction(model, .editGoogleEvent)
+        viewModel.handleMoreAction(model, .editGoogleEvent(link: "link"))
         
         // then
-        XCTAssertEqual(self.spyRouter.didRouteToEditGoogleEventWithId, "google")
+        XCTAssertEqual(self.spyRouter.didRouteToEditGoogleEventWithLink, "link")
     }
 }
 
@@ -471,9 +471,9 @@ private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @u
         self.didRouteToGoogleEventDetailWithId = eventId
     }
     
-    var didRouteToEditGoogleEventWithId: String?
-    func routeToEditGoogleEvent(_ eventId: String) {
-        self.didRouteToEditGoogleEventWithId = eventId
+    var didRouteToEditGoogleEventWithLink: String?
+    func routeToEditGoogleEvent(_ link: String) {
+        self.didRouteToEditGoogleEventWithLink = link
     }
     
     var didRouteToMakeNewEventWithParams: MakeEventParams?
@@ -550,11 +550,13 @@ private extension DoneTodoResult {
     }
 }
 
-private extension GoogleCalendarEventCellViewModel {
+extension GoogleCalendarEventCellViewModel {
     
-    static func dummy() -> GoogleCalendarEventCellViewModel {
+    static func dummy(_ link: String? = "link") -> GoogleCalendarEventCellViewModel {
         let google = GoogleCalendar.Event(
-            "google", "calendar", name: "name", colorId: "id", time: .at(1)
+            "google", "calendar", name: "name",
+            colorId: "id", htmlLink: link,
+            time: .at(1)
         )
         let googleEvent = GoogleCalendarEvent(google, in: TimeZone.current)
         return GoogleCalendarEventCellViewModel(
