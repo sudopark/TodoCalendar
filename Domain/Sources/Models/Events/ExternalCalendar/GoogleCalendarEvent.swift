@@ -246,12 +246,12 @@ extension GoogleCalendar {
 
 extension GoogleCalendar.EventOrigin.GoogleEventTime {
     
-    enum SupportEventTimeElemnt {
+    public enum SupportEventTimeElemnt: Equatable {
         case period(Date)
         case allDay(Date, TimeZone)
     }
     
-    func supportEventTimeElemnt(_ defaultTimeZone: String?) -> SupportEventTimeElemnt? {
+    public func supportEventTimeElemnt(_ defaultTimeZone: String?) -> SupportEventTimeElemnt? {
         
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [

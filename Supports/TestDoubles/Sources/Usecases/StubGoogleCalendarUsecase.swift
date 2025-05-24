@@ -8,6 +8,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 
 
@@ -24,6 +26,8 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     open func refreshGoogleCalendarEventTags() {
         let tags = (0..<10).map { int -> GoogleCalendar.Tag in
             return .init(id: "g:\(int)", name: "g:\(int)")
+                |> \.colorId .~ "color"
+                |> \.backgroundColorHex .~ "hex"
         }
         self.tagsSubject.send(tags)
     }
@@ -43,10 +47,15 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
         return Just(self.stubEvents).eraseToAnyPublisher()
     }
     
+    public var stubDetail: GoogleCalendar.EventOrigin?
     open func eventDetail(
         _ calendarId: String, _ eventId: String, at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
-        return Empty().eraseToAnyPublisher()
+        guard let detail = self.stubDetail
+        else {
+            return Empty().eraseToAnyPublisher()
+        }
+        return Just(detail).mapAsAnyError().eraseToAnyPublisher()
     }
     
     private let accountSubject = CurrentValueSubject<ExternalServiceAccountinfo?, Never>(nil)
