@@ -173,6 +173,13 @@
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "The repeat end time must be in the future than the start time.\n(Repeat start date: %@)";
 "eventDetail.repeating::period_endcount" = "Starting %@ %d times";
 
+"eventDetail.repeating.everyNDays:title" = "Every %d Days";
+"eventDetail.repeating.last" = "Last";
+"eventDetail.repeating.everyNMonths:title" = "Every %d Months";
+"eventDetail.repeating.everyNYears:title" = "Every %d Years";
+"eventDetail.repeating::endoption_until" = "Until %@";
+"eventDetail.repeating::endoption_times" = "%d time(s)";
+
 "eventDetail.add_new_todo::message" = "A new to-do event has been added.";
 "eventDetail.add_new_schedule::message" = "A new schedule event has been added.";
 "eventDetail.scheduleEvent_removed::message" = "The schedule event has been removed.";
