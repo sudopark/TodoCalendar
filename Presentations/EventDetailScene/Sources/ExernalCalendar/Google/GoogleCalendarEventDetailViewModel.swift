@@ -187,7 +187,26 @@ extension GoogleCalendarEventDetailViewModelImple {
     }
     
     var repeatOPtion: AnyPublisher<String?, Never> {
-        return Empty().eraseToAnyPublisher()
+        
+        let transform: (GoogleCalendar.EventOrigin, TimeZone) -> String? = { origin, timeZone in
+            guard let recurrence = origin.recurrence?.first,
+                  let rrule = RRuleParser.parse(recurrence)
+            else { return nil }
+            
+            let frequencyText = rrule.frequencyText()
+            if let endOptionText = rrule.endOptionText(timeZone) {
+                return "\(frequencyText)\n\(endOptionText)"
+            }
+            return frequencyText
+        }
+        
+        return Publishers.CombineLatest(
+            self.subject.origin.compactMap { $0 },
+            self.subject.timeZone.compactMap { $0 }
+        )
+        .map(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
     
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> {
@@ -209,5 +228,89 @@ extension GoogleCalendarEventDetailViewModelImple {
             .map { $0.location }
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+}
+
+private extension RRule {
+    
+    func frequencyText() -> String {
+        switch self.freq {
+        case .DAILY where self.interval == 1:
+            return "eventDetail.repeating.everyDay:title".localized()
+            
+        case .DAILY:
+            return  "eventDetail.repeating.everyNDays:title".localized(with: self.interval)
+            
+        case .WEEKLY where self.interval == 1:
+            return "eventDetail.repeating.everyWeek:title".localized()
+                .appendDaysText(self.byDays)
+            
+        case .WEEKLY:
+            return "eventDetail.repeating.everySomeWeek:title".localized(with: self.interval)
+                .appendDaysText(self.byDays)
+            
+        case .MONTHLY where self.interval == 1:
+            return "eventDetail.repeating.everyMonth:title".localized()
+                .appendDaysText(self.byDays)
+            
+        case .MONTHLY:
+            return "eventDetail.repeating.everyNMonths:title".localized(with: self.interval)
+                .appendDaysText(self.byDays)
+            
+        case .YEARLY where self.interval == 1:
+            return "eventDetail.repeating.everyYear:title".localized()
+            
+        case .YEARLY:
+            return "eventDetail.repeating.everyNYears:title".localized(with: self.interval)
+        }
+    }
+    
+    func endOptionText(_ timeZone: TimeZone) -> String? {
+        if let until = self.until {
+            let dateText = until.text("date_form.yyyy_MMM_dd".localized(), timeZone: timeZone)
+            return "eventDetail.repeating::endoption_until".localized(with: dateText)
+        } else  if let count = self.count {
+            return "eventDetail.repeating::endoption_times".localized(with: count)
+        } else {
+            return nil
+        }
+    }
+}
+
+private extension String {
+    
+    func appendDaysText(_ byDays: [RRule.ByDay]) -> String {
+        guard !byDays.isEmpty else { return self }
+        let texts = byDays.map { $0.text() }.joined(separator: ",")
+        return "\(self) \(texts)"
+    }
+}
+
+private extension RRule.ByDay {
+    
+    func text() -> String {
+        switch self.ordinal {
+        case .none:
+            return self.weekDay.text()
+        case .some(let n) where n == -1:
+            return "\("eventDetail.repeating.last".localized()) \(self.weekDay.text())"
+        case .some(let n):
+            return n.ordinal.map { "\($0) \(self.weekDay.text())"} ?? self.weekDay.text()
+        }
+    }
+}
+
+private extension RRule.ByDay.WeekDay {
+    
+    func text() -> String {
+        switch self {
+        case .MO: return "dayname::monday:short".localized()
+        case .TU: return "dayname::tuesday:short".localized()
+        case .WE: return "dayname::wednesday:short".localized()
+        case .TH: return "dayname::thursday:short".localized()
+        case .FR: return "dayname::friday:short".localized()
+        case .SA: return "dayname::saturday:short".localized()
+        case .SU: return "dayname::sunday:short".localized()
+        }
     }
 }

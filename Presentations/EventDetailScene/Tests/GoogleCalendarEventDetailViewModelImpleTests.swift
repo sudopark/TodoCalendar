@@ -23,12 +23,18 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
     var cancelBag: Set<AnyCancellable>! = []
     private let spyRouter = SpyRouter()
     
-    private func makeViewModel() -> GoogleCalendarEventDetailViewModelImple {
+    private func makeViewModel(
+        recurrence: String? = nil
+    ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
         
         let calendarUsecase = PrivateStubGoogleCalendarUsecase()
+        calendarUsecase.additionalStubbing = { stub in
+            stub |> \.recurrence .~ (recurrence.map { [$0] })
+        }
         calendarUsecase.refreshGoogleCalendarEventTags()
+        
         let viewModel = GoogleCalendarEventDetailViewModelImple(
             calenadrId: "g:7", eventId: "id",
             googleCalendarUsecase: calendarUsecase,
@@ -105,6 +111,56 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         // then
         #expect(location == "location")
     }
+    
+    private func expectRecurrenceText(_ recurrence: String?) -> String? {
+        switch recurrence {
+        case .none: return nil
+        case "RRULE:FREQ=DAILY": return "Everyday"
+        case "RRULE:FREQ=DAILY;INTERVAL=5": return "Every 5 Days"
+        case "RRULE:FREQ=WEEKLY;BYDAY=TU": return "Every Week TUE"
+        case "RRULE:FREQ=WEEKLY;INTERVAL=3;BYDAY=TU": return "Every 3 Weeks TUE"
+        case "RRULE:FREQ=MONTHLY;BYDAY=-1WE": return "Every Month Last WED"
+        case "RRULE:FREQ=MONTHLY;INTERVAL=3;BYDAY=2WE": return "Every 3 Months 2nd WED"
+        case "RRULE:FREQ=MONTHLY;INTERVAL=2": return "Every 2 Months"
+        case "RRULE:FREQ=YEARLY": return "Every Year"
+        case "RRULE:FREQ=YEARLY;INTERVAL=3": return "Every 3 Years"
+        case "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE": return "Every Week FRI,MON,THU,TUE,WED"
+        case "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20250816T145959Z;BYDAY=SA": return "Every Week SAT\nUntil Aug 16, 2025"
+        case "RRULE:FREQ=DAILY;COUNT=3": return "Everyday\n3 time(s)"
+        default: return ""
+        }
+    }
+    
+    @Test(arguments: [
+        nil,
+        "RRULE:FREQ=DAILY",
+        "RRULE:FREQ=DAILY;INTERVAL=5",
+        "RRULE:FREQ=WEEKLY;BYDAY=TU",
+        "RRULE:FREQ=WEEKLY;INTERVAL=3;BYDAY=TU",
+        "RRULE:FREQ=MONTHLY;BYDAY=-1WE",
+        "RRULE:FREQ=MONTHLY;INTERVAL=3;BYDAY=2WE",
+        "RRULE:FREQ=MONTHLY;INTERVAL=2",
+        "RRULE:FREQ=YEARLY",
+        "RRULE:FREQ=YEARLY;INTERVAL=3",
+        "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE",
+        "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20250816T145959Z;BYDAY=SA",
+        "RRULE:FREQ=DAILY;COUNT=3"
+    ])
+    func viewModel_provideRecurrenceText(_ recurrence: String?) async throws {
+        // given
+        let expect = self.expectConfirm("이벤트 반복 정보 제공")
+        let viewModel = self.makeViewModel(recurrence: recurrence)
+        
+        // when
+        let text = try await self.firstOutput(expect, for: viewModel.repeatOPtion) {
+            viewModel.refresh()
+        }
+        
+        // then
+        let expectText = self.expectRecurrenceText(recurrence)
+        let comment = Comment(stringLiteral: recurrence ?? "nil")
+        #expect(text == expectText, comment)
+    }
 }
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
@@ -124,6 +180,8 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
 
 private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase, @unchecked Sendable {
     
+    var additionalStubbing: ((GoogleCalendar.EventOrigin) -> GoogleCalendar.EventOrigin)?
+    
     override func eventDetail(
         _ calendarId: String, _ eventId: String, at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
@@ -138,7 +196,9 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
             |> \.location .~ "location"
             |> \.htmlLink .~ "link"
         
-        return Just(origin).mapAsAnyError().eraseToAnyPublisher()
+        let stub = additionalStubbing?(origin) ?? origin
+        
+        return Just(stub).mapAsAnyError().eraseToAnyPublisher()
     }
 }
 
