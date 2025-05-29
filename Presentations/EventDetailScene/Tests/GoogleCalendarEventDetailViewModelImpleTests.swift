@@ -208,6 +208,18 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         // then
         #expect(self.spyRouter.didRouteToEditEventWebViewWithLink == "link")
     }
+    
+    @Test func viewModel_selectURL() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.refresh()
+        
+        // when
+        viewModel.selectLink(URL(string: "https://www.google.com")!)
+        
+        // then
+        #expect(self.spyRouter.didOpenSafariPath == "https://www.google.com")
+    }
 }
 
 private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase, @unchecked Sendable {
