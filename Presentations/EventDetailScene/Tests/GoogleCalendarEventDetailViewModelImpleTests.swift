@@ -161,6 +161,38 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         let comment = Comment(stringLiteral: recurrence ?? "nil")
         #expect(text == expectText, comment)
     }
+    
+    @Test func viewModel_provideDescriptionHTMLText() async throws {
+        // given
+        let expect = expectConfirm("이벤트 설명 html text 정보 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let text = try await self.firstOutput(expect, for: viewModel.descriptionHTMLText) {
+            viewModel.refresh()
+        }
+        
+        // then
+        #expect(text == "그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?")
+    }
+    
+    @Test func viewModel_provideAttachmentModels() async throws {
+        // given
+        let expect = expectConfirm("attachment model 정보 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let models = try await self.firstOutput(expect, for: viewModel.attachments) {
+            viewModel.refresh()
+        } ?? nil
+        
+        // then
+        #expect(models?.count == 1)
+        let first = models?.first
+        #expect(first?.title == "file_title")
+        #expect(first?.fileURL == "fileurl")
+        #expect(first?.iconLink == "icon")
+    }
 }
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
@@ -190,11 +222,17 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
             |> \.dateTime .~ "2025-05-24T12:00:00+09:00"
         let end = GoogleCalendar.EventOrigin.GoogleEventTime()
             |> \.dateTime .~ "2025-05-25T12:00:00+09:00"
+        let attachment = GoogleCalendar.EventOrigin.Attachment()
+            |> \.fileUrl .~ "fileurl"
+            |> \.title .~ "file_title"
+            |> \.iconLink .~ "icon"
         let origin = GoogleCalendar.EventOrigin(id: eventId, summary: "name")
             |> \.start .~ start
             |> \.end .~ end
             |> \.location .~ "location"
             |> \.htmlLink .~ "link"
+            |> \.description .~ "그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?"
+            |> \.attachments .~ [attachment]
         
         let stub = additionalStubbing?(origin) ?? origin
         

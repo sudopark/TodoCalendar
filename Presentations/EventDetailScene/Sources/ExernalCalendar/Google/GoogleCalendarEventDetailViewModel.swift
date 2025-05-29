@@ -33,6 +33,12 @@ struct GoogleCalendarModel: Equatable {
     var colorHex: String?
 }
 
+struct AttachmentModel: Equatable {
+    let fileURL: String
+    let title: String
+    var iconLink: String?
+}
+
 protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendarEventDetailSceneInteractor {
 
     // interactor
@@ -48,8 +54,8 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var location: AnyPublisher<String?, Never> { get }
 //    var attendeeModels: AnyPublisher<[AttendeeViewModelModel], Never> { get }
     // 회의 모델
-    // 메모 정보
-    // 첨부파일 정보
+    var descriptionHTMLText: AnyPublisher<String?, Never> { get }
+    var attachments: AnyPublisher<[AttachmentModel]?, Never> { get }
 }
 
 
@@ -226,6 +232,34 @@ extension GoogleCalendarEventDetailViewModelImple {
         return self.subject.origin
             .compactMap { $0 }
             .map { $0.location }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var descriptionHTMLText: AnyPublisher<String?, Never> {
+        return self.subject.origin
+            .compactMap { $0 }
+            .map { $0.description }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var attachments: AnyPublisher<[AttachmentModel]?, Never> {
+        let transform: ([GoogleCalendar.EventOrigin.Attachment]?) -> [AttachmentModel]? = { attachments in
+            
+            return attachments?.compactMap { attachment in
+                guard let fileURL = attachment.fileUrl,
+                      let title = attachment.title
+                else { return nil }
+                return .init(
+                    fileURL: fileURL, title: title, iconLink: attachment.iconLink
+                )
+            }
+        }
+        return self.subject.origin
+            .compactMap { $0 }
+            .map { $0.attachments }
+            .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
