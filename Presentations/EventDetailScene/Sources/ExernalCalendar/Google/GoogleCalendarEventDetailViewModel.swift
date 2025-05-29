@@ -44,9 +44,11 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     // interactor
     func refresh()
     func editEvent()
+    func selectLink(_ link: URL)
     func close()
     
     // presenter
+    var hasDetailLink: AnyPublisher<Bool, Never> { get }
     var eventName: AnyPublisher<String, Never> { get }
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOPtion: AnyPublisher<String?, Never> { get }
@@ -140,6 +142,10 @@ extension GoogleCalendarEventDetailViewModelImple {
         self.router?.routeToEditEventWebView(link)
     }
     
+    func selectLink(_ link: URL) {
+        self.router?.openSafari(link.absoluteString)
+    }
+    
     func close() {
         self.router?.closeScene()
     }
@@ -149,6 +155,14 @@ extension GoogleCalendarEventDetailViewModelImple {
 // MARK: - GoogleCalendarEventDetailViewModelImple Presenter
 
 extension GoogleCalendarEventDetailViewModelImple {
+    
+    var hasDetailLink: AnyPublisher<Bool, Never> {
+        return self.subject.origin
+            .compactMap { $0 }
+            .map { $0.htmlLink != nil }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     var eventName: AnyPublisher<String, Never> {
         
