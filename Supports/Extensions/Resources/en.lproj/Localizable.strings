@@ -225,6 +225,12 @@
 "eventDetail:hasChanges:confirm:continue" = "Keep editing";
 
 
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "View in Google Calendar";
+"eventDetail::gogoleEvent::calendar" = "Calendar";
+"eventDetail::gogoleEvent::calendar::event" = "Google Calendar Event";
+
 // MARK: - event tag
 
 "eventTag.title" = "Event Type";

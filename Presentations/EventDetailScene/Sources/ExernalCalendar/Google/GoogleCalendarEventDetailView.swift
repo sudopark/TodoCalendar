@@ -9,6 +9,7 @@
 //
 
 
+import UIKit
 import SwiftUI
 import Combine
 import Domain
@@ -22,12 +23,75 @@ final class GoogleCalendarEventDetailViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
+    @Published var hasDetailLink: Bool = false
+    @Published var eventName: String?
+    @Published var timeText: SelectedTime?
+    @Published var repeatOptionText: String?
+    @Published var calendarModel: GoogleCalendarModel?
+    @Published var location: String?
+    @Published var descriptionHTMLText: String?
+    @Published var attachments: [AttachmentModel]?
+    
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
         
-        // TODO: bind state
+        viewModel.hasDetailLink
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] has in
+                self?.hasDetailLink = has
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.eventName
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] name in
+                self?.eventName = name
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.timeText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.timeText = text
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.repeatOPtion
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] option in
+                self?.repeatOptionText = option
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.calendarModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.calendarModel = model
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.location
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.location = text
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.descriptionHTMLText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.descriptionHTMLText = text
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.attachments
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] models in
+                self?.attachments = models
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -37,10 +101,20 @@ final class GoogleCalendarEventDetailViewEventHandler: ObservableObject {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
+    var enterForeground: () -> Void = { }
+    var editEvent: () -> Void = { }
+    var selectURL: (URL) -> Void = { _ in }
+    var selectAttachment: (AttachmentModel) -> Void = { _ in }
     var close: () -> Void = { }
 
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
         // TODO: bind handlers
+        onAppear = viewModel.refresh
+        enterForeground = viewModel.refresh
+        editEvent = viewModel.editEvent
+        selectURL = viewModel.selectLink(_:)
+        selectAttachment = viewModel.selectAttachment(_:)
+        close = viewModel.close
     }
 }
 
@@ -84,10 +158,257 @@ struct GoogleCalendarEventDetailView: View {
     @EnvironmentObject private var eventHandlers: GoogleCalendarEventDetailViewEventHandler
     
     var body: some View {
-        Text("GoogleCalendarEventDetailView")
+        ZStack {
+            
+            ScrollView {
+                VStack(spacing: 25) {
+                    // nameView
+                    self.nameView
+                    self.eventTypeView
+                    
+                    // event time view
+                    VStack(spacing: 12) {
+                        if let time = self.state.timeText {
+                            self.eventTimeView(time)
+                        }
+                        if let repeatOption = self.state.repeatOptionText {
+                            self.repeatOptionText(repeatOption)
+                        }
+                    }
+                    if let location = state.location {
+                        self.locationView(location)
+                    }
+                    
+                    Spacer(minLength: 12)
+                    
+                    // calendar model view
+                    if let model = self.state.calendarModel {
+                        self.calendarView(model)
+                    }
+                    
+                    Spacer(minLength: 12)
+                    
+                    if let description = state.descriptionHTMLText {
+                        VStack(spacing: 8) {
+                            self.descriptionHTMLView(description)
+                            self.attachmentsView(state.attachments ?? [])
+                        }
+                    }                    
+                }
+            }
+            .padding(.top, 20)
+            .padding(.horizontal, 12)
+            .padding(.bottom, 120)
+            
+            VStack {
+                Spacer()
+                
+                if self.state.hasDetailLink {
+                    BottomConfirmButton(
+                        title: "eventDetail::gogoleEvent::viewOnCalendar".localized(),
+                    )
+                    .eventHandler(\.onTap, self.eventHandlers.editEvent)
+                }
+            }
+        }
+        .background(appearance.colorSet.bg0.asColor)
+    }
+    
+    private var selectedTagColor: Color {
+        guard let model = self.state.calendarModel else { return .clear }
+        return self.appearance.googleEventColor(model.colorId, model.calenarId).asColor
+    }
+    
+    private var nameView: some View {
+        HStack {
+            
+            RoundedRectangle(cornerRadius: 3)
+                .fill(self.selectedTagColor)
+                .frame(width: 6)
+            
+            Text(self.state.eventName ?? "")
+                .font(appearance.fontSet.size(22, weight: .semibold).asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+            
+            Spacer()
+        }
+    }
+    
+    private var eventTypeView: some View {
+        HStack(spacing: 6) {
+            Image("google_calendar_icon")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 25, height: 25)
+            
+            Text("eventDetail::gogoleEvent::calendar::event".localized())
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                .font(self.appearance.fontSet.normal.asFont)
+            
+            Spacer()
+        }
+    }
+    
+    private func eventTimeView(_ time: SelectedTime) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: "clock")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            
+            switch time {
+            case .period(let start, let end):
+                HStack(spacing: 16) {
+                    timeView(start)
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                    timeView(end)
+                }
+                .asAnyView()
+                
+            case .singleAllDay(let day):
+                HStack(spacing: 16) {
+                    timeView(day)
+                    Spacer()
+                }
+                .asAnyView()
+                
+            case .alldayPeriod(let start, let end):
+                HStack(spacing: 16) {
+                    timeView(start)
+                    Image(systemName: "chevron.right")
+                        .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                    timeView(end)
+                }
+                .asAnyView()
+                
+            default:
+                EmptyView()
+                    .asAnyView()
+            }
+            
+            Spacer()
+        }
+    }
+    
+    private func timeView(_ time: SelectTimeText) -> some View {
+        VStack(alignment: .leading) {
+            if let year = time.year {
+                Text(year)
+                    .font(appearance.fontSet.size(14).asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+            }
+            
+            Text(time.day)
+                .lineLimit(1)
+                .font(self.appearance.fontSet.size(14).asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+            
+            if let timeValue = time.time {
+                Text(timeValue)
+                    .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+            }
+        }
+    }
+    
+    private func repeatOptionText(_ text: String) -> some View {
+        HStack {
+            
+            Text(text)
+                .font(self.appearance.fontSet.size(14).asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+            
+            Spacer()
+        }
+        .padding(.leading, 32)
+    }
+    
+    private func locationView(_ location: String) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: "map")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            
+            Text(location)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+            
+            Spacer()
+        }
+    }
+    
+    private func calendarView(_ model: GoogleCalendarModel) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: "calendar")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text("eventDetail::gogoleEvent::calendar".localized())
+                    .font(appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(appearance.colorSet.text1.asColor)
+                
+                Text(model.name)
+                    .font(appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+            }
+            
+            Spacer()
+        }
+    }
+    
+    private func descriptionHTMLView(_ html: String) -> some View {
+        return HStack(alignment: .top, spacing: 16) {
+            
+            Image(systemName: "doc.text")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            
+            HTMLAttributedTextView(htmlText: html) { url in
+                self.eventHandlers.selectURL(url)
+            }
+            
+            Spacer()
+        }
+        .asAnyView()
+    }
+    
+    private func attachmentsView(_ attachments: [AttachmentModel]) -> some View {
+        return ForEach(attachments) { attach in
+            HStack {
+                HStack(spacing: 6) {
+                    if let iconPath = attach.iconLink {
+                        RemoteImageView(iconPath)
+                            .resize()
+                            .scaledToFit()
+                            .frame(width: 12, height: 12)
+                            .clipped()
+                    }
+                    
+                    Text(attach.title)
+                        .lineLimit(1)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
+                        .font(appearance.fontSet.subNormal.asFont)
+                }
+                .padding(6)
+                .cornerRadius(4)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 4)
+                        .stroke(appearance.colorSet.line.asColor, lineWidth: 0.5)
+                )
+                .onTapGesture {
+                    eventHandlers.selectAttachment(attach)
+                }
+                
+                Spacer()
+            }
+            .padding(.leading, 32)
+        }
     }
 }
 
+
+extension AttachmentModel: Identifiable {}
 
 // MARK: - preview
 
@@ -104,8 +425,45 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(
             setting: setting, isSystemDarkTheme: false
         )
+        let colors = GoogleCalendar.Colors(
+            calendars: [
+                "colorId": .init(foregroundHex: "#ff0000", backgroudHex: "#ff00ff")
+            ],
+            events: [
+                "colorId": .init(foregroundHex: "#ff0000", backgroudHex: "#ff00ff")
+            ]
+        )
+        viewAppearance.googleCalendarColor = colors
         let state = GoogleCalendarEventDetailViewState()
+        state.eventName = "google calendar event"
+        state.hasDetailLink = true
+        state.timeText = .period(.init(100, .current), .init(500, .current))
+        state.repeatOptionText = "반복 옵션 텍스트"
+        state.location = "장소 텍스트"
+        state.calendarModel = .init(
+            calenarId: "some", name: "some@calendar.com", colorId: "colorId"
+        )
+        state.descriptionHTMLText = """
+        그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?<br><ol><li>목차1</li><li>목차2</li></ol><br><ul><li>목차3</li><li>목차4</li></ul><br><a href="https://www.google.com">링크다잉</a>
+        """
+        state.attachments = [
+            .init(
+                id: "1VwH4QR5_vOrdbl94z3aKJfFt8PvE7F7I",
+                fileURL: "some",
+                title: "매우 긴 이름의 파일이름 하나둘셋넷 다섯 여섯 일곱 여덟 아홉 열 일",
+                iconLink: "https://drive-thirdparty.googleusercontent.com/16/type/image/png"
+            ),
+            .init(
+                id: "1VwH4QR5_vOrdbl94z3aKJfFt8PvE7F7I-2",
+                fileURL: "some",
+                title: "appstore.png",
+                iconLink: "https://drive-thirdparty.googleusercontent.com/16/type/image/png"
+            )
+        ]
         let eventHandlers = GoogleCalendarEventDetailViewEventHandler()
+        eventHandlers.selectAttachment = { _ in
+            state.attachments?.removeLast()
+        }
         
         let view = GoogleCalendarEventDetailView()
             .environmentObject(state)
