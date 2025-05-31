@@ -312,10 +312,18 @@ extension ApplicationRootRouter {
         )
     }
     
+    private func googleCalendarEventDetailBuilder() -> any GoogleCalendarEventDetailSceneBuiler {
+        return GoogleCalendarEventDetailSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance
+        )
+    }
+    
     private func eventDetailSceneBuilder() -> any EventDetailSceneBuilder {
         return EventDetailSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
+            googleCalendarEventDetailSceneBuilder: self.googleCalendarEventDetailBuilder(),
             settingSceneBuilder: settingSceneBuilder()
         )
     }

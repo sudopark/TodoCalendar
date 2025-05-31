@@ -15,12 +15,12 @@ import CommonPresentation
 
 // MARK: - GoogleCalendarEventDetailSceneBuilerImple
 
-final class GoogleCalendarEventDetailSceneBuilerImple {
+public final class GoogleCalendarEventDetailSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     
-    init(
+    public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
@@ -33,7 +33,7 @@ final class GoogleCalendarEventDetailSceneBuilerImple {
 extension GoogleCalendarEventDetailSceneBuilerImple: GoogleCalendarEventDetailSceneBuiler {
     
     @MainActor
-    func makeGoogleCalendarEventDetailScene(
+    public func makeGoogleCalendarEventDetailScene(
         calendarId: String, eventId: String
     ) -> any GoogleCalendarEventDetailScene {
         

@@ -12,21 +12,9 @@ import UIKit
 import Scenes
 
 
-// MARK: - GoogleCalendarEventDetailScene Interactable & Listenable
-
-protocol GoogleCalendarEventDetailSceneInteractor: AnyObject { }
-//
-//public protocol GoogleCalendarEventDetailSceneListener: AnyObject { }
-
-// MARK: - GoogleCalendarEventDetailScene
-
-protocol GoogleCalendarEventDetailScene: Scene where Interactor == any GoogleCalendarEventDetailSceneInteractor
-{ }
-
-
 // MARK: - Builder + DependencyInjector Extension
 
-protocol GoogleCalendarEventDetailSceneBuiler: AnyObject {
+public protocol GoogleCalendarEventDetailSceneBuiler: AnyObject {
     
     @MainActor
     func makeGoogleCalendarEventDetailScene(
