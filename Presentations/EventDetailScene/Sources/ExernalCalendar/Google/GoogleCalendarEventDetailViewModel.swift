@@ -34,6 +34,7 @@ struct GoogleCalendarModel: Equatable {
 }
 
 struct AttachmentModel: Equatable {
+    let id: String
     let fileURL: String
     let title: String
     var iconLink: String?
@@ -45,6 +46,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     func refresh()
     func editEvent()
     func selectLink(_ link: URL)
+    func selectAttachment(_ model: AttachmentModel)
     func close()
     
     // presenter
@@ -144,6 +146,10 @@ extension GoogleCalendarEventDetailViewModelImple {
     
     func selectLink(_ link: URL) {
         self.router?.openSafari(link.absoluteString)
+    }
+    
+    func selectAttachment(_ model: AttachmentModel) {
+        self.router?.openSafari(model.fileURL)
     }
     
     func close() {
@@ -262,11 +268,12 @@ extension GoogleCalendarEventDetailViewModelImple {
         let transform: ([GoogleCalendar.EventOrigin.Attachment]?) -> [AttachmentModel]? = { attachments in
             
             return attachments?.compactMap { attachment in
-                guard let fileURL = attachment.fileUrl,
+                guard let id = attachment.fileId,
+                      let fileURL = attachment.fileUrl,
                       let title = attachment.title
                 else { return nil }
                 return .init(
-                    fileURL: fileURL, title: title, iconLink: attachment.iconLink
+                    id: id, fileURL: fileURL, title: title, iconLink: attachment.iconLink
                 )
             }
         }

@@ -220,6 +220,19 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         // then
         #expect(self.spyRouter.didOpenSafariPath == "https://www.google.com")
     }
+    
+    @Test func viewModel_selectAttachment() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.refresh()
+        
+        // when
+        let attach = AttachmentModel(id: "some", fileURL: "url", title: "title")
+        viewModel.selectAttachment(attach)
+        
+        // then
+        #expect(self.spyRouter.didOpenSafariPath == "url")
+    }
 }
 
 private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase, @unchecked Sendable {
@@ -235,6 +248,7 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
         let end = GoogleCalendar.EventOrigin.GoogleEventTime()
             |> \.dateTime .~ "2025-05-25T12:00:00+09:00"
         let attachment = GoogleCalendar.EventOrigin.Attachment()
+            |> \.fileId .~ "id"
             |> \.fileUrl .~ "fileurl"
             |> \.title .~ "file_title"
             |> \.iconLink .~ "icon"
