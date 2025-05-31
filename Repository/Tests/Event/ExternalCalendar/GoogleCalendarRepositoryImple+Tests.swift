@@ -345,8 +345,8 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(end?.timeZone == nil)
         
         #expect(origin?.endTimeUnspecified == nil)
-        #expect(origin?.recurrence == nil)
-        #expect(origin?.recurringEventId == nil)
+        #expect(origin?.recurrence == ["RRULE:FREQ=DAILY;COUNT=3"])
+        #expect(origin?.recurringEventId == "origin")
         #expect(origin?.sequence == 0)
         
         #expect(origin?.attendees == nil)
@@ -421,7 +421,14 @@ private struct DummyResponse {
             .init(
                 method: .get,
                 endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "time_is_date"),
-                resultJsonString: .success(self.dummyNewEvent)
+                resultJsonString: .success(self.dummyNewEvent("time_is_date"))
+            ),
+            .init(
+                method: .get,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "origin"),
+                resultJsonString: .success(
+                    self.dummyNewEvent("origin", isRepeatOrigin: true)
+                )
             )
         ]
     }
@@ -658,14 +665,23 @@ private struct DummyResponse {
         """
     }
     
-    private var dummyNewEvent: String {
+    private func dummyNewEvent(_ id: String, isRepeatOrigin: Bool = false) -> String {
+        let repeatOriginRecurrence = """
+        "recurrence": [
+          "RRULE:FREQ=DAILY;COUNT=3"
+         ],
+        """
+        let notRepeatOriginRecurrence = """
+        "recurringEventId": "origin",    
+        """
         return """
         {
          "kind": "calendar#event",
          "etag": "\\"3489807262385694\\"",
-         "id": "time_is_date",
+         "id": "\(id)",
          "status": "confirmed",
          "htmlLink": "https://www.google.com/calendar/event?eid=M241a2Y2dWk5bWM2M3Vqa3I4b3JsOWR0bjggZ2Vhcm1hbW4wNkBt",
+        \(isRepeatOrigin ? repeatOriginRecurrence : notRepeatOriginRecurrence)
          "created": "2025-04-17T15:27:11.000Z",
          "updated": "2025-04-17T15:27:11.192Z",
          "summary": "하루죙일",

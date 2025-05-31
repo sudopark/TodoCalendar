@@ -8,6 +8,8 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
 import CombineExt
 import SQLiteService
@@ -124,7 +126,7 @@ extension GoogleCalendarRepositoryImple {
         return self.load { [weak self] in
             return try await self?.cacheStorage.loadEventDetail(eventId)
         } thenFromRemote: { [weak self] in
-            return try await self?.loadEventDetailFromRemote(calendarId, eventId, at: timeZone)
+            return try await self?.loadEventDetailFromRemoteWithRecurrenceIfNeed(calendarId, eventId, at: timeZone)
         } withRefreshCache: { _, refreshed in
             guard let refreshed else { return }
             try? await self.cacheStorage.updateEventDetail(calendarId, timeZone, refreshed)
@@ -168,6 +170,20 @@ extension GoogleCalendarRepositoryImple {
             parameters: params
         )
         return list
+    }
+    
+    private func loadEventDetailFromRemoteWithRecurrenceIfNeed(
+        _ calendarId: String,
+        _ eventId: String,
+        at timeZone: String
+    ) async throws -> GoogleCalendar.EventOrigin {
+        let event = try await self.loadEventDetailFromRemote(calendarId, eventId, at: timeZone)
+        guard let recurringEventId = event.recurringEventId
+        else {
+            return event
+        }
+        let origin = try await self.loadEventDetailFromRemote(calendarId, recurringEventId, at: timeZone)
+        return event |> \.recurrence .~ origin.recurrence
     }
     
     private func loadEventDetailFromRemote(
