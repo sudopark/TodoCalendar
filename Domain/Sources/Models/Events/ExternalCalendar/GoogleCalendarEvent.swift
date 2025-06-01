@@ -140,6 +140,10 @@ extension GoogleCalendar {
             public var optional: Bool?
             public var responseStatus: String?
             
+            public var isAccepted: Bool {
+                return self.responseStatus == "accepted"
+            }
+            
             public init() { }
         }
 

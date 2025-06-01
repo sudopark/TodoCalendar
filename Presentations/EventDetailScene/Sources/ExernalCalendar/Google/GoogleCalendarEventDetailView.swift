@@ -12,6 +12,8 @@
 import UIKit
 import SwiftUI
 import Combine
+import Prelude
+import Optics
 import Domain
 import CommonPresentation
 
@@ -31,6 +33,7 @@ final class GoogleCalendarEventDetailViewState: ObservableObject {
     @Published var location: String?
     @Published var descriptionHTMLText: String?
     @Published var attachments: [AttachmentModel]?
+    @Published var attendees: AttendeeListViewModel?
     
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
         
@@ -90,6 +93,13 @@ final class GoogleCalendarEventDetailViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
                 self?.attachments = models
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.attendees
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.attendees = model
             })
             .store(in: &self.cancellables)
     }
@@ -162,11 +172,11 @@ struct GoogleCalendarEventDetailView: View {
             
             ScrollView {
                 VStack(spacing: 25) {
-                    // nameView
                     self.nameView
+                        .padding(.top, 20)
+                    
                     self.eventTypeView
                     
-                    // event time view
                     VStack(spacing: 12) {
                         if let time = self.state.timeText {
                             self.eventTimeView(time)
@@ -179,21 +189,20 @@ struct GoogleCalendarEventDetailView: View {
                         self.locationView(location)
                     }
                     
-                    Spacer(minLength: 12)
-                    
-                    // calendar model view
-                    if let model = self.state.calendarModel {
-                        self.calendarView(model)
+                    if let list = state.attendees, !list.attendees.isEmpty {
+                        self.attendeesView(list)
                     }
-                    
-                    Spacer(minLength: 12)
                     
                     if let description = state.descriptionHTMLText {
                         VStack(spacing: 8) {
                             self.descriptionHTMLView(description)
                             self.attachmentsView(state.attachments ?? [])
                         }
-                    }                    
+                    }
+                    
+                    if let model = self.state.calendarModel {
+                        self.calendarView(model)
+                    }
                 }
             }
             .padding(.top, 20)
@@ -337,6 +346,52 @@ struct GoogleCalendarEventDetailView: View {
         }
     }
     
+    private func attendeesView(_ list: AttendeeListViewModel) -> some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "person.2")
+                    .font(.system(size: 16, weight: .light))
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                
+                Text("eventDetail::gogoleEvent::attendees".localized(with: list.totalCounts))
+                    .font(appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+                
+                Spacer()
+            }
+            
+            VStack(spacing: 4) {
+                ForEach(list.attendees) {
+                    attendeeView($0)
+                }
+                .padding(.leading, 32)
+            }
+        }
+    }
+    
+    private func attendeeView(_ attendee: AttendeeViewModelModel) -> some View {
+        HStack {
+            
+            Image(systemName: attendee.isAccepted ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: 12, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            
+            VStack(alignment: .leading) {
+                Text(attendee.name)
+                    .font(appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(appearance.colorSet.text1.asColor)
+                
+                if attendee.isOrganizer {
+                    Text("eventDetail::gogoleEvent::attendees::organizer".localized())
+                        .font(appearance.fontSet.subSubNormal.asFont)
+                        .foregroundStyle(appearance.colorSet.text2.asColor)
+                }
+            }
+            
+            Spacer()
+        }
+    }
+    
     private func calendarView(_ model: GoogleCalendarModel) -> some View {
         HStack(spacing: 16) {
             Image(systemName: "calendar")
@@ -409,6 +464,7 @@ struct GoogleCalendarEventDetailView: View {
 
 
 extension AttachmentModel: Identifiable {}
+extension AttendeeViewModelModel: Identifiable { }
 
 // MARK: - preview
 
@@ -460,6 +516,13 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
                 iconLink: "https://drive-thirdparty.googleusercontent.com/16/type/image/png"
             )
         ]
+        let attendees = (0..<10).map { int -> AttendeeViewModelModel in
+            return AttendeeViewModelModel("id:\(int)", "name:\(int)")
+                |> \.isOrganizer .~ (int == 0)
+                |> \.isAccepted .~ (int < 4)
+            
+        }
+        state.attendees = .init(attendees: attendees, totalCounts: 100)
         let eventHandlers = GoogleCalendarEventDetailViewEventHandler()
         eventHandlers.selectAttachment = { _ in
             state.attachments?.removeLast()

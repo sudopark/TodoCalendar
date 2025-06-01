@@ -177,7 +177,7 @@
 "eventDetail.repeating.last" = "Last";
 "eventDetail.repeating.everyNMonths:title" = "Every %d Months";
 "eventDetail.repeating.everyNYears:title" = "Every %d Years";
-"eventDetail.repeating::endoption_until" = "Until %@";
+"eventDetail.repeating::endoption_until" = "until %@";
 "eventDetail.repeating::endoption_times" = "%d time(s)";
 
 "eventDetail.add_new_todo::message" = "A new to-do event has been added.";
@@ -230,6 +230,9 @@
 "eventDetail::gogoleEvent::viewOnCalendar" = "View in Google Calendar";
 "eventDetail::gogoleEvent::calendar" = "Calendar";
 "eventDetail::gogoleEvent::calendar::event" = "Google Calendar Event";
+"eventDetail::gogoleEvent::attendee::unknown" = "Unknown";
+"eventDetail::gogoleEvent::attendees" = "Attendees (%d people)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organizer";
 
 // MARK: - event tag
 

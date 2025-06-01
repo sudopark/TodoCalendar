@@ -193,6 +193,32 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         #expect(first?.fileURL == "fileurl")
         #expect(first?.iconLink == "icon")
     }
+    
+    @Test func viewModel_provideAttendeeModels() async throws {
+        // given
+        let expect = expectConfirm("attendee 정보 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let list = try await self.firstOutput(expect, for: viewModel.attendees) {
+            viewModel.refresh()
+        } ?? nil
+        
+        // then
+        #expect(list?.totalCounts == 33)
+        let organizer = list?.attendees.first(where: { $0.isOrganizer })
+        #expect(organizer?.id == "id:12")
+        let ids = list?.attendees.map { $0.id }
+        #expect(ids == [
+            "id:12", "id:31", "id:0", "id:2", "id:4",
+            "id:6", "id:8", "id:10", "id:14", "id:16"
+        ])
+        let isAccepts = list?.attendees.map { $0.isAccepted }
+        #expect(isAccepts == [
+            true, false, true, true, true,
+            true, true, true, true, true
+        ])
+    }
 }
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
@@ -252,6 +278,15 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
             |> \.fileUrl .~ "fileurl"
             |> \.title .~ "file_title"
             |> \.iconLink .~ "icon"
+        let attendees = (0..<33).map { int -> GoogleCalendar.EventOrigin.Attendee in
+            let attendee = GoogleCalendar.EventOrigin.Attendee()
+                |> \.id .~ "id:\(int)"
+                |> \.displayName .~ "name:\(int)"
+                |> \.organizer .~ (int == 12)
+                |> \.selfValue .~ (int == 31)
+                |> \.responseStatus .~ (int % 2 == 0 ? "accepted" : "needsAction")
+            return attendee
+        }
         let origin = GoogleCalendar.EventOrigin(id: eventId, summary: "name")
             |> \.start .~ start
             |> \.end .~ end
@@ -259,6 +294,7 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
             |> \.htmlLink .~ "link"
             |> \.description .~ "그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?"
             |> \.attachments .~ [attachment]
+            |> \.attendees .~ attendees
         
         let stub = additionalStubbing?(origin) ?? origin
         
