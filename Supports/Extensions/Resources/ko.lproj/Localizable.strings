@@ -229,6 +229,9 @@
 "eventDetail::gogoleEvent::viewOnCalendar" = "구글 캘린더에서 보기";
 "eventDetail::gogoleEvent::calendar" = "캘린더";
 "eventDetail::gogoleEvent::calendar::event" = "구글 캘린더 이벤트";
+"eventDetail::gogoleEvent::attendee::unknown" = "알수없음";
+"eventDetail::gogoleEvent::attendees" = "참석자 (%d명)";
+"eventDetail::gogoleEvent::attendees::organizer" = "주최자";
 
 // MARK: - event tag
 

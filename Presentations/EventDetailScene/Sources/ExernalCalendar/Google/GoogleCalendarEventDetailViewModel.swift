@@ -18,12 +18,29 @@ import Scenes
 
 // MARK: - GoogleCalendarEventDetailViewModel
 
-struct AttendeeViewModelModel {
+struct AttendeeViewModelModel: Equatable {
     
-    var thumbnailPath: String?
+    var id: String?
     let name: String
     var isOrganizer: Bool = false
     var isAccepted: Bool = false
+    
+    init(_ id: String, _ name: String) {
+        self.id = id
+        self.name = name
+    }
+    
+    init(_ attendee: GoogleCalendar.EventOrigin.Attendee) {
+        self.id = attendee.id
+        self.name = attendee.displayName ?? "eventDetail::gogoleEvent::attendee::unknown".localized()
+        self.isOrganizer = attendee.organizer ?? false
+        self.isAccepted = attendee.isAccepted
+    }
+}
+
+struct AttendeeListViewModel: Equatable {
+    let attendees: [AttendeeViewModelModel]
+    let totalCounts: Int
 }
 
 struct GoogleCalendarModel: Equatable {
@@ -56,7 +73,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var repeatOPtion: AnyPublisher<String?, Never> { get }
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
-//    var attendeeModels: AnyPublisher<[AttendeeViewModelModel], Never> { get }
+    var attendees: AnyPublisher<AttendeeListViewModel?, Never> { get }
     // 회의 모델
     var descriptionHTMLText: AnyPublisher<String?, Never> { get }
     var attachments: AnyPublisher<[AttachmentModel]?, Never> { get }
@@ -235,6 +252,30 @@ extension GoogleCalendarEventDetailViewModelImple {
         .eraseToAnyPublisher()
     }
     
+    var attendees: AnyPublisher<AttendeeListViewModel?, Never> {
+        let sortAndPrefix: ([GoogleCalendar.EventOrigin.Attendee]?) -> (([GoogleCalendar.EventOrigin.Attendee], Int)?) = { attendees in
+            guard let attendees else { return nil }
+            
+            let sorted = attendees.sortAttendees()
+            return (Array(sorted.prefix(10)), attendees.count)
+        }
+        
+        let transform: (([GoogleCalendar.EventOrigin.Attendee], Int)?) -> AttendeeListViewModel?
+        transform = { pair in
+            guard let pair else { return nil }
+            return .init(
+                attendees: pair.0.map { .init($0) },
+                totalCounts: pair.1
+            )
+        }
+        return self.subject.origin
+            .compactMap { $0?.attendees }
+            .map(sortAndPrefix)
+            .map(transform)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> {
         let transform: (GoogleCalendar.Tag) -> GoogleCalendarModel = { tag in
             return .init(calenarId: tag.id, name: tag.name)
@@ -366,6 +407,48 @@ private extension RRule.ByDay.WeekDay {
         case .FR: return "dayname::friday:short".localized()
         case .SA: return "dayname::saturday:short".localized()
         case .SU: return "dayname::sunday:short".localized()
+        }
+    }
+}
+
+private extension Array where Element == GoogleCalendar.EventOrigin.Attendee {
+    
+    func sortAttendees() -> Array {
+        
+        let organizer = self.first(where: { $0.organizer == true })
+        let selfValue = self.first(where: { $0.selfValue == true })
+        let notOrganizerOrSelfValue: (Element) -> Bool = {
+            return $0.id != nil && $0.id != organizer?.id && $0.id != selfValue?.id
+        }
+        let attendees = self.filter(notOrganizerOrSelfValue)
+        let accepts = attendees.filter { $0.isAccepted }
+        let notAccepts = attendees.filter { !$0.isAccepted }
+        
+        let prefix = organizer?.id != selfValue?.id ? [organizer, selfValue] : [organizer]
+        return prefix.compactMap { $0 } + accepts + notAccepts
+    }
+    
+    private func sortByOrganizer(_ lhs: Element, _ rhs: Element) -> Bool? {
+        switch (lhs.organizer == true, rhs.organizer == true) {
+        case (false, true): return false
+        case (true, false): return true
+        default: return nil
+        }
+    }
+    
+    private func sortBySelf(_ lhs: Element, _ rhs: Element) -> Bool? {
+        switch (lhs.selfValue == true, rhs.selfValue == true) {
+        case (false, true): return false
+        case (true, false): return true
+        default: return nil
+        }
+    }
+    
+    private func sortByAccpet(_ lhs: Element, _ rhs: Element) -> Bool {
+        switch (lhs.isAccepted, rhs.isAccepted) {
+        case (false, true): return false
+        case (true, false): return true
+        default: return (lhs.displayName ?? "") < (rhs.displayName ?? "")
         }
     }
 }
