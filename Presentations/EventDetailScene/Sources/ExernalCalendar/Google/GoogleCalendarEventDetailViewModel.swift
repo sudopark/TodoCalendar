@@ -9,14 +9,13 @@
 //
 
 import Foundation
+import UIKit
 import Combine
 import Prelude
 import Optics
 import Domain
 import Scenes
 
-
-// MARK: - GoogleCalendarEventDetailViewModel
 
 struct AttendeeViewModelModel: Equatable {
     
@@ -57,6 +56,61 @@ struct AttachmentModel: Equatable {
     var iconLink: String?
 }
 
+
+struct ConferenceEntryModel: Equatable {
+    let uri: String
+    
+    var entryCodeKey: String?
+    var entryCodeValue: String?
+    
+    init(uri: String) {
+        self.uri = uri
+    }
+    
+    init?(_ entry: GoogleCalendar.EventOrigin.ConferenceData.EntryPoint) {
+        guard let uri = entry.uri
+        else { return nil }
+        self.uri = uri
+        if let code = entry.accessCode {
+            self.entryCodeKey = "eventDetail::gogoleEvent::conference::accessCode".localized()
+            self.entryCodeValue = code
+        } else if let code = entry.meetingCode {
+            self.entryCodeKey = "eventDetail::gogoleEvent::conference::meetingCode".localized()
+            self.entryCodeValue = code
+        } else if let code = entry.passcode {
+            self.entryCodeKey = "eventDetail::gogoleEvent::conference::passCode".localized()
+            self.entryCodeValue = code
+        } else if let code = entry.passcode {
+            self.entryCodeKey = "eventDetail::gogoleEvent::conference::password".localized()
+            self.entryCodeValue = code
+        }
+    }
+}
+
+struct ConferenceModel: Equatable {
+    
+    let iconURL: String
+    let name: String
+    let entries: [ConferenceEntryModel]
+    
+    init(iconURL: String, name: String, entries: [ConferenceEntryModel]) {
+        self.iconURL = iconURL
+        self.name = name
+        self.entries = entries
+    }
+    
+    init?(_ data: GoogleCalendar.EventOrigin.ConferenceData) {
+        guard let icon = data.conferenceSolution?.iconUri,
+              let name = data.conferenceSolution?.name
+        else { return nil }
+        self.iconURL = icon
+        self.name = name
+        self.entries = data.entryPoints?.compactMap { .init($0) } ?? []
+    }
+}
+
+// MARK: - GoogleCalendarEventDetailViewModel
+
 protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendarEventDetailSceneInteractor {
 
     // interactor
@@ -64,6 +118,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     func editEvent()
     func selectLink(_ link: URL)
     func selectAttachment(_ model: AttachmentModel)
+    func copyText(_ text: String)
     func close()
     
     // presenter
@@ -73,6 +128,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var repeatOPtion: AnyPublisher<String?, Never> { get }
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
+    var conferenceModel: AnyPublisher<ConferenceModel?, Never> { get }
     var attendees: AnyPublisher<AttendeeListViewModel?, Never> { get }
     // 회의 모델
     var descriptionHTMLText: AnyPublisher<String?, Never> { get }
@@ -169,6 +225,13 @@ extension GoogleCalendarEventDetailViewModelImple {
         self.router?.openSafari(model.fileURL)
     }
     
+    func copyText(_ text: String) {
+        UIPasteboard.general.string = text
+        self.router?.showToast(
+            "eventDetail::gogoleEvent::copy::message".localized()
+        )
+    }
+    
     func close() {
         self.router?.closeScene()
     }
@@ -250,6 +313,20 @@ extension GoogleCalendarEventDetailViewModelImple {
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+    
+    var conferenceModel: AnyPublisher<ConferenceModel?, Never> {
+        let transform: (GoogleCalendar.EventOrigin.ConferenceData?) -> ConferenceModel?
+        transform = { conference in
+            return conference.flatMap { .init($0) }
+        }
+        
+        return self.subject.origin
+            .compactMap { $0 }
+            .map { $0.conferenceData }
+            .map(transform)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
     
     var attendees: AnyPublisher<AttendeeListViewModel?, Never> {

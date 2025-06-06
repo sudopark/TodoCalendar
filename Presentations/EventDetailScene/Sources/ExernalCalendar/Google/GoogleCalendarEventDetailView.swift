@@ -34,6 +34,7 @@ final class GoogleCalendarEventDetailViewState: ObservableObject {
     @Published var descriptionHTMLText: String?
     @Published var attachments: [AttachmentModel]?
     @Published var attendees: AttendeeListViewModel?
+    @Published var conferenceData: ConferenceModel?
     
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
         
@@ -102,6 +103,13 @@ final class GoogleCalendarEventDetailViewState: ObservableObject {
                 self?.attendees = model
             })
             .store(in: &self.cancellables)
+        
+        viewModel.conferenceModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.conferenceData = model
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -115,6 +123,7 @@ final class GoogleCalendarEventDetailViewEventHandler: ObservableObject {
     var editEvent: () -> Void = { }
     var selectURL: (URL) -> Void = { _ in }
     var selectAttachment: (AttachmentModel) -> Void = { _ in }
+    var copyText: (String) -> Void = { _ in }
     var close: () -> Void = { }
 
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
@@ -124,6 +133,7 @@ final class GoogleCalendarEventDetailViewEventHandler: ObservableObject {
         editEvent = viewModel.editEvent
         selectURL = viewModel.selectLink(_:)
         selectAttachment = viewModel.selectAttachment(_:)
+        copyText = viewModel.copyText(_:)
         close = viewModel.close
     }
 }
@@ -187,6 +197,10 @@ struct GoogleCalendarEventDetailView: View {
                     }
                     if let location = state.location {
                         self.locationView(location)
+                    }
+                    
+                    if let data = state.conferenceData {
+                        self.conferenceView(data)
                     }
                     
                     if let list = state.attendees, !list.attendees.isEmpty {
@@ -341,8 +355,60 @@ struct GoogleCalendarEventDetailView: View {
             Text(location)
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
+                .onTapGesture {
+                    self.eventHandlers.copyText(location)
+                }
             
             Spacer()
+        }
+    }
+    
+    private func conferenceView(_ model: ConferenceModel) -> some View {
+        return VStack(spacing: 8) {
+         
+            HStack(spacing: 16) {
+                RemoteImageView(model.iconURL)
+                    .resize()
+                    .scaledToFill()
+                    .frame(width: 16, height: 16)
+                    .clipped()
+                
+                Text(model.name)
+                    .font(appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+                
+                Spacer()
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                ForEach(model.entries) { entry in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(entry.uri)
+                                .foregroundStyle(appearance.colorSet.primaryBtnBackground.asColor)
+                                .font(appearance.fontSet.subNormal.asFont)
+                                .underline()
+                                .onTapGesture {
+                                    guard let url = URL(string: entry.uri) else { return }
+                                    self.eventHandlers.selectURL(url)
+                                }
+                            
+                            if let key = entry.entryCodeKey, let value = entry.entryCodeValue {
+                                
+                                Text("\(key): \(value)")
+                                    .foregroundStyle(appearance.colorSet.text1.asColor)
+                                    .font(appearance.fontSet.subNormal.asFont)
+                                    .onTapGesture {
+                                        self.eventHandlers.copyText(value)
+                                    }
+                            }
+                        }
+                        
+                        Spacer()
+                    }
+                }
+                .padding(.leading, 32)
+            }
         }
     }
     
@@ -465,6 +531,9 @@ struct GoogleCalendarEventDetailView: View {
 
 extension AttachmentModel: Identifiable {}
 extension AttendeeViewModelModel: Identifiable { }
+extension ConferenceEntryModel: Identifiable {
+    var id: String { self.uri }
+}
 
 // MARK: - preview
 
@@ -523,6 +592,19 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
             
         }
         state.attendees = .init(attendees: attendees, totalCounts: 100)
+        
+        let entries = (0..<1).map { int -> ConferenceEntryModel in
+            return .init(uri: "https://some.uri.com")
+                |> \.entryCodeKey .~ "Pin Code"
+                |> \.entryCodeValue .~ "xifurrb"
+        }
+        let data = ConferenceModel(
+            iconURL: "https://drive-thirdparty.googleusercontent.com/32/type/image/png",
+            name: "Google meet",
+            entries: entries
+        )
+        state.conferenceData = data
+        
         let eventHandlers = GoogleCalendarEventDetailViewEventHandler()
         eventHandlers.selectAttachment = { _ in
             state.attachments?.removeLast()

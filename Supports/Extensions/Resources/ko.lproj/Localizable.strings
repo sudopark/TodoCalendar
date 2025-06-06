@@ -232,6 +232,11 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "알수없음";
 "eventDetail::gogoleEvent::attendees" = "참석자 (%d명)";
 "eventDetail::gogoleEvent::attendees::organizer" = "주최자";
+"eventDetail::gogoleEvent::conference::accessCode" = "어세스 코드";
+"eventDetail::gogoleEvent::conference::meetingCode" = "미팅코드";
+"eventDetail::gogoleEvent::conference::passCode" = "패스코드";
+"eventDetail::gogoleEvent::conference::password" = "비밀번호";
+"eventDetail::gogoleEvent::copy::message" = "클립보드에 복사되었습니다.";
 
 // MARK: - event tag
 
