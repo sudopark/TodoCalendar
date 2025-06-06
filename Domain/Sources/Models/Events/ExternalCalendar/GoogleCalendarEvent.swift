@@ -149,11 +149,19 @@ extension GoogleCalendar {
 
 
         public struct ConferenceData: Codable, Sendable {
-            public var entryPoints: [EntryPoint]?
             public var conferenceId: String?
+            public var conferenceSolution: Solution?
+            public var entryPoints: [EntryPoint]?
             
             public init() { }
-
+            
+            
+            public struct Solution: Codable, Sendable {
+                public var iconUri: String?
+                public var name: String?
+                
+                public init() { }
+            }
 
             public struct EntryPoint: Codable, Sendable {
                 public var entryPointType: String?

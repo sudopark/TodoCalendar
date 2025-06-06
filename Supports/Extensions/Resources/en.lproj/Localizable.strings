@@ -233,6 +233,11 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "Unknown";
 "eventDetail::gogoleEvent::attendees" = "Attendees (%d people)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Organizer";
+"eventDetail::gogoleEvent::conference::accessCode" = "Access Code";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Metting Code";
+"eventDetail::gogoleEvent::conference::passCode" = "Pass Code";
+"eventDetail::gogoleEvent::conference::password" = "Password";
+"eventDetail::gogoleEvent::copy::message" = "Copied to clipboard.";
 
 // MARK: - event tag
 

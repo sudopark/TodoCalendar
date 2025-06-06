@@ -125,7 +125,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         case "RRULE:FREQ=YEARLY": return "Every Year"
         case "RRULE:FREQ=YEARLY;INTERVAL=3": return "Every 3 Years"
         case "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE": return "Every Week FRI,MON,THU,TUE,WED"
-        case "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20250816T145959Z;BYDAY=SA": return "Every Week SAT\nUntil Aug 16, 2025"
+        case "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20250816T145959Z;BYDAY=SA": return "Every Week SAT\nuntil Aug 16, 2025"
         case "RRULE:FREQ=DAILY;COUNT=3": return "Everyday\n3 time(s)"
         default: return ""
         }
@@ -219,6 +219,25 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
             true, true, true, true, true
         ])
     }
+    
+    @Test func viewModel_provideConferenceData() async throws {
+        // given
+        let expect = expectConfirm("conference data 정보 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let model = try await self.firstOutput(expect, for: viewModel.conferenceModel) {
+            viewModel.refresh()
+        } ?? nil
+        
+        // then
+        #expect(model?.name == "solution")
+        #expect(model?.iconURL == "icon")
+        #expect(model?.entries.count == 1)
+        #expect(model?.entries.first?.uri == "some.com")
+        #expect(model?.entries.first?.entryCodeKey == "eventDetail::gogoleEvent::conference::passCode".localized())
+        #expect(model?.entries.first?.entryCodeValue == "pass code")
+    }
 }
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
@@ -287,6 +306,18 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
                 |> \.responseStatus .~ (int % 2 == 0 ? "accepted" : "needsAction")
             return attendee
         }
+        let entries = (0..<1).map { int -> GoogleCalendar.EventOrigin.ConferenceData.EntryPoint in
+            return GoogleCalendar.EventOrigin.ConferenceData.EntryPoint()
+                |> \.uri .~ "some.com"
+                |> \.passcode .~ "pass code"
+        }
+        let solution = GoogleCalendar.EventOrigin.ConferenceData.Solution()
+            |> \.iconUri .~ "icon"
+            |> \.name .~ "solution"
+        let data = GoogleCalendar.EventOrigin.ConferenceData()
+            |> \.conferenceId .~ "id"
+            |> \.conferenceSolution .~ solution
+            |> \.entryPoints .~ entries
         let origin = GoogleCalendar.EventOrigin(id: eventId, summary: "name")
             |> \.start .~ start
             |> \.end .~ end
@@ -295,6 +326,7 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
             |> \.description .~ "그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?"
             |> \.attachments .~ [attachment]
             |> \.attendees .~ attendees
+            |> \.conferenceData .~ data
         
         let stub = additionalStubbing?(origin) ?? origin
         
