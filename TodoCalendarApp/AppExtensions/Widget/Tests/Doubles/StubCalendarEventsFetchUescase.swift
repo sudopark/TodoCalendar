@@ -24,7 +24,7 @@ class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {
         in range: Range<TimeInterval>, _ timeZone: TimeZone
     ) async throws -> CalendarEvents {
         
-        var sender: CalendarEvents = .init(currentTodos: [], eventWithTimes: [], customTagMap: [:])
+        var sender: CalendarEvents = .init()
         
         if !withoutAnyEvents && hasCurrentTodo {
             let currentTodo = TodoEvent(uuid: "current", name: "current")

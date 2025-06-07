@@ -58,6 +58,8 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
             foremostEventRepository: StubForemostEventRepository(),
             holidayFetchUsecase: holidaysFetchUSecase,
             eventTagRepository: StubEventTagRepository(),
+            externalCalendarIntegrateRepository: StubExternalCalendarRepository(isGoogleAccountIntegrated: false),
+            googleCalendarRepository: StubGoogleCalendarRepository(),
             cached: .init()
         )
         

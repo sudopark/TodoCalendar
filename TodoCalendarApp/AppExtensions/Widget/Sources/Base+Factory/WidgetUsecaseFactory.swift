@@ -106,12 +106,24 @@ extension WidgetUsecaseFactory {
             localStorage: foremostEventLocalStorage
         )
         
+        let externalCalendarRepository = ExternalCalendarIntegrateRepositoryImple(
+            supportServices: AppEnvironment.supportExternalCalendarServices,
+            removeAPIPerService: [:],
+            keyChainStore: base.keyChainStorage
+        )
+        let googleCalendarRepository = GoogleCalendarRepositoryImple(
+            remote: EmptyRemote(),
+            cacheStorage: GoogleCalendarLocalStorageImple(sqliteService: base.commonSqliteService)
+        )
+        
         return CalendarEventFetchUsecaseImple(
             todoRepository: todoRepository,
             scheduleRepository: scheduleRepository,
             foremostEventRepository: foremostEventRepository,
             holidayFetchUsecase: holidayFetchUsecase,
             eventTagRepository: eventTagRepository,
+            externalCalendarIntegrateRepository: externalCalendarRepository,
+            googleCalendarRepository: googleCalendarRepository,
             cached: FetchCacheStores.shared.events
         )
     }

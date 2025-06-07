@@ -34,7 +34,8 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
     
     private func makeUsecase(
         withOffTags: [EventTagId] = [],
-        hasForemost: Bool = true
+        hasForemost: Bool = true,
+        isGoogleAccountIntegrated: Bool = false
     ) -> CalendarEventFetchUsecaseImple {
         
         let holidayFetchUsecase = StubHolidaysFetchUsecase()
@@ -50,12 +51,17 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
         let foremostRepository = PrivateStubForemostEventRepository()
         foremostRepository.stubHasForemost = hasForemost
         
+        let externalCalendarRepository = StubExternalCalendarRepository(isGoogleAccountIntegrated: isGoogleAccountIntegrated)
+        let googleCalendarRepository = StubGoogleCalendarRepository()
+        
         return CalendarEventFetchUsecaseImple(
             todoRepository: self.stubTodoRepository,
             scheduleRepository: self.stubScheduleRepository,
             foremostEventRepository: foremostRepository,
             holidayFetchUsecase: holidayFetchUsecase,
             eventTagRepository: eventTagReopsitory,
+            externalCalendarIntegrateRepository: externalCalendarRepository,
+            googleCalendarRepository: googleCalendarRepository,
             cached: .init()
         )
     }
@@ -108,6 +114,46 @@ extension CalendarEventFetchUsecaseImpleTests {
             $0 as? HolidayCalendarEvent
         }.first
         XCTAssertEqual(holiday?.name, "삼일절")
+        
+        XCTAssertEqual(events.googleCalendarTags.isEmpty, true)
+        XCTAssertEqual(events.googleCalendarColors, nil)
+    }
+    
+    func testUsecase_whenGoogleCalendarIntegrated_provideGoogleCalendarEvents() async throws {
+        // given
+        let usecase = self.makeUsecase(isGoogleAccountIntegrated: true)
+        let range = self.dummyRange
+        
+        // when
+        let events = try await usecase.fetchEvents(in: range, kst)
+        
+        // then
+        XCTAssertEqual(events.currentTodos.count, 1)
+        XCTAssertEqual(events.currentTodos.first?.name, "current todo")
+        
+        XCTAssertEqual(events.eventWithTimes.count, 5)
+        let todoWithTime = events.eventWithTimes.compactMap {
+            $0 as? TodoCalendarEvent
+        }.first
+        XCTAssertEqual(todoWithTime?.name, "todo_with_lowerbound_time")
+        
+        let schedule = events.eventWithTimes.compactMap {
+            $0 as? ScheduleCalendarEvent
+        }.first
+        XCTAssertEqual(schedule?.name, "scheudle_with_upperbound_time")
+        
+        let holiday = events.eventWithTimes.compactMap {
+            $0 as? HolidayCalendarEvent
+        }.first
+        XCTAssertEqual(holiday?.name, "삼일절")
+        
+        let google = events.eventWithTimes.compactMap {
+            $0 as? GoogleCalendarEvent
+        }.first
+        XCTAssertEqual(google?.name, "google")
+        XCTAssertEqual(events.googleCalendarTags.count, 2)
+        XCTAssertEqual(events.googleCalendarColors?.events.count, 1)
+        XCTAssertEqual(events.googleCalendarColors?.calendars.count, 1)
     }
     
     // 해당시간에 해당하는 이벤트 정보 반환시에 시간순 정렬
