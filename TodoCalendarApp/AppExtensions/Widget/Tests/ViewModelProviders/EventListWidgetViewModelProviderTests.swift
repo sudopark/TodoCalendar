@@ -183,7 +183,9 @@ extension EventListWidgetViewModelProviderTests {
         }
         
         override func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
-            return .init(currentTodos: self.currentTodos, eventWithTimes: self.eventWithTimes, customTagMap: [:])
+            return CalendarEvents()
+                |> \.currentTodos .~ self.currentTodos
+                |> \.eventWithTimes .~ self.eventWithTimes
         }
     }
     
@@ -439,7 +441,8 @@ extension EventListWidgetViewModelProviderTests {
         }
         
         override func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
-            return .init(currentTodos: [], eventWithTimes: [self.event], customTagMap: [:])
+            return CalendarEvents()
+                |> \.eventWithTimes .~ [self.event]
         }
     }
     
@@ -514,9 +517,9 @@ extension EventListWidgetViewModelProviderTests {
             }
             .map { TodoCalendarEvent($0, in: kst) }
             
-            return .init(
-                currentTodos: currents, eventWithTimes: events, customTagMap: [:]
-            )
+            return CalendarEvents()
+                |> \.currentTodos .~ currents
+                |> \.eventWithTimes .~ events
         }
         
         func fetchForemostEvent() async throws -> ForemostEvent {
@@ -586,8 +589,8 @@ extension EventListWidgetViewModelProviderTests {
                 }
                 .map { TodoCalendarEvent($0, in: kst) }
                 
-                let events = CalendarEvents(currentTodos: currents, eventWithTimes: [], customTagMap: [:])
-                return events
+                return CalendarEvents()
+                    |> \.currentTodos .~ currents
             }
             
             func fetchForemostEvent() async throws -> ForemostEvent {
