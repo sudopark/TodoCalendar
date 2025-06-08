@@ -113,6 +113,8 @@ extension GoogleCalendarUsecaseImple {
     }
     
     public func refreshGoogleCalendarEventTags() {
+        guard self.checkHasAccount() else { return }
+        
         let updateTags: ([GoogleCalendar.Tag]) -> Void = { [weak self] tags in
             let tags = tags.filter { !$0.isHoliday }
             self?.sharedDataStore.put(

@@ -152,6 +152,7 @@ extension GoogleCalendarUsecaseImpleTests {
             
             self.updateAccountIntegrated(true)
             
+            try await Task.sleep(for: .milliseconds(10))
             self.updateAccountIntegrated(false)
         }
         
