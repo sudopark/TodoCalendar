@@ -214,6 +214,13 @@ extension GoogleCalendarRepositoryImple {
     }
 }
 
+extension GoogleCalendarRepositoryImple {
+    
+    public func resetCache() async throws {
+        try await self.cacheStorage.resetAll()
+    }
+}
+
 
 extension GoogleCalendarRepositoryImple {
     
