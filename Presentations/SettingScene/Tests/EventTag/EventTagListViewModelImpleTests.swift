@@ -92,7 +92,6 @@ extension EventTagListViewModelImpleTests {
     
     func testViewModel_provideExternalCalendarTags() {
         // given
-        FeatureFlag.enable(.googleCalendar)
         let expect = expectation(description: "외부 캘린더 목록 제공")
         let viewModel = self.makeViewModel(isGoogleCalendarIntegrated: true)
         
@@ -106,7 +105,6 @@ extension EventTagListViewModelImpleTests {
         let first = sections?.first
         XCTAssertEqual(first?.serviceId, GoogleCalendarService.id)
         XCTAssertEqual(first?.cellViewModels.count, 10)
-        FeatureFlag.disable(.googleCalendar)
     }
     
     private func makeViewModelWithInitialListLoaded() -> EventTagListViewModelImple {
@@ -164,7 +162,6 @@ extension EventTagListViewModelImpleTests {
     
     func testViewModel_whenToogleExternalCalendarTag_updateList() {
         // given
-        FeatureFlag.enable(.googleCalendar)
         let viewModel = self.makeViewModelWithInitialExternalCalendarLoaded()
         let expect = expectation(description: "외부 캘린더 tag 활성화 여부 업데이트시에 리스트 업데이트")
         expect.expectedFulfillmentCount = 4
@@ -193,7 +190,6 @@ extension EventTagListViewModelImpleTests {
             [.externalCalendar(serviceId: GoogleCalendarService.id, id: "g:2"), .externalCalendar(serviceId: GoogleCalendarService.id, id: "g:3")],
             [.externalCalendar(serviceId: GoogleCalendarService.id, id: "g:3")]
         ])
-        FeatureFlag.disable(.googleCalendar)
     }
 }
 

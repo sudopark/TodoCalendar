@@ -127,7 +127,6 @@ extension MainViewModelImpleTests {
     
     func testViewModel_whenPrepare_prepareGoogleCalendar() {
         // given
-        FeatureFlag.enable(.googleCalendar)
         let viewModel = self.makeViewModelWithoutPrepare()
         
         // when
@@ -135,7 +134,6 @@ extension MainViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyGoogleCalendarUsecase.didPrepared, true)
-        FeatureFlag.disable(.googleCalendar)
     }
     
     func testViewModel_whenFocusChanged_updateCurrentMonth() {

@@ -41,9 +41,7 @@ struct SettingItemModel: SettingItemModelType {
             self.text = "setting.appearance.title".localized()
         case .editEvent:
             self.iconNamge = "calendar"
-            self.text = FeatureFlag.isEnable(.googleCalendar)
-                ? "setting.appearance.event.edit::name".localized()
-                : "setting.appearance.event.edit::name_old".localized()
+            self.text = "setting.appearance.event.edit::name".localized()
         case .holidaySetting:
             self.iconNamge = "globe"
             self.text = "setting.holiday.item::name".localized()

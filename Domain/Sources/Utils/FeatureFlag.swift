@@ -12,7 +12,7 @@ import Foundation
 public final class FeatureFlag: @unchecked Sendable {
     
     public enum Flags: Sendable {
-        case googleCalendar
+        case reservedFlag
     }
     
     private var enableFlags: Set<Flags> = []

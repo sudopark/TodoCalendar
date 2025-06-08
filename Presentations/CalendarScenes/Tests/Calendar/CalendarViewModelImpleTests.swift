@@ -509,7 +509,6 @@ extension CalendarViewModelImpleTests {
     
     func testViewModel_whenRefreshEvents_requestRefreshGoogleCalendarEvent() {
         // given
-        FeatureFlag.enable(.googleCalendar)
         let viewModel = self.makeViewModelWithInitialSetup(
             .init(year: 2023, month: 10, day: 04, weekDay: 3)
         )
@@ -532,12 +531,10 @@ extension CalendarViewModelImpleTests {
             "2023.01.01_00:00..<2024.01.01_00:00",
             "2024.01.01_00:00..<2025.01.01_00:00"
         ])
-        FeatureFlag.disable(.googleCalendar)
     }
     
     func testViewModel_whenAfterGoogleCalendarIntegrated_refreshEventsAllCheckedRanges() {
         // given
-        FeatureFlag.enable(.googleCalendar)
         let viewModel = self.makeViewModelWithInitialSetup(
             .init(year: 2023, month: 10, day: 04, weekDay: 3)
         )
@@ -566,7 +563,6 @@ extension CalendarViewModelImpleTests {
             "2024.01.01_00:00..<2025.01.01_00:00",
             "2023.01.01_00:00..<2025.01.01_00:00"
         ])
-        FeatureFlag.disable(.googleCalendar)
     }
     
     // timeZone 변경시도 테스트 추가해야함

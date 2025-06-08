@@ -89,7 +89,6 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         
         self.eventTagListUsecase.reload()
         
-        guard FeatureFlag.isEnable(.googleCalendar) else { return }
         self.eventTagListUsecase.reloadExternalCalendarIfNeed()
     }
     
