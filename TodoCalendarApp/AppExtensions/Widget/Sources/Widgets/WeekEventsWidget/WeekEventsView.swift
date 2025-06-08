@@ -171,7 +171,7 @@ struct WeekEventsView: View {
     private func eventLineView(_ line: EventOnWeek, _ dayWidth: CGFloat) -> some View {
         let offsetX = CGFloat(line.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
         let width = CGFloat(line.daysSequence.count) * dayWidth - Metric.eventInterspacing
-        let lineColor = model.tagColor(line.eventTagId)
+        let lineColor = model.lineColor(line)
         let background: some View = {
             if line.hasPeriod {
                 return RoundedRectangle(cornerRadius: 2).fill(
@@ -231,17 +231,28 @@ extension ColorSet {
 
 private extension WeekEventsViewModel {
     
-    func tagColor(_ id: EventTagId) -> Color {
-        switch id {
+    func lineColor(_ line: EventOnWeek) -> Color {
+        switch line.eventTagId {
         case .default:
             return UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear
+            
         case .holiday:
             return UIColor.from(hex: self.defaultTagColorSetting.holiday)?.asColor ?? .clear
+            
         case .custom(let id):
             return self.tagMap[id]?.colorHex
-                .flatMap { UIColor.from(hex: $0) }?.asColor ?? self.tagColor(.default)
-        case .externalCalendar:
-            // TODO: 
+                .flatMap { UIColor.from(hex: $0) }?.asColor
+            ?? UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear
+            
+        case .externalCalendar(let serviceId, _) where serviceId == GoogleCalendarService.id:
+            let appearance = ViewAppearance(
+                google: self.googleCalendarColor ?? .init(calendars: [:], events: [:]),
+                self.googleCalendarTags
+            )
+            let google = line.event as? GoogleCalendarEvent
+            return google.flatMap { appearance.googleEventColor($0.colorId, $0.calendarId) }?.asColor ?? .clear
+            
+        default:
             return .clear
         }
     }

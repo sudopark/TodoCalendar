@@ -59,7 +59,7 @@ struct EventListWidgetViewModel {
             let calendar: Calendar
             let timeZone: TimeZone
             let is24Form: Bool
-            let customTags: [String: any EventTag]
+            let events: CalendarEvents
             
             func makeCurrentTodoListModel(
                 _ events: [TodoCalendarEvent],
@@ -102,6 +102,8 @@ struct EventListWidgetViewModel {
                             return ScheduleEventCellViewModel(schedule, in: dayRange, timeZone: timeZone, is24Form)
                         case let holiday as HolidayCalendarEvent:
                             return HolidayEventCellViewModel(holiday)
+                        case let google as GoogleCalendarEvent:
+                            return GoogleCalendarEventCellViewModel(google, in: dayRange, timeZone, is24Form)
                         default: return nil
                         }
                     }
@@ -150,6 +152,8 @@ struct EventListWidgetViewModel {
     var pages: [PageModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
     let customTagMap: [String: any EventTag]
+    var googleCalendarColors: GoogleCalendar.Colors = .init(calendars: [:], events: [:])
+    var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
     
     static func sample(size: EventListWidgetSize) -> EventListWidgetViewModel {
         
@@ -317,31 +321,33 @@ extension EventListWidgetViewModelProvider {
             refDate, timeZone, setting.calendar.is24hourForm
         )
         let pages = dayEventLists.0.pagination(widgetSize)
-        return .init(
+        return EventListWidgetViewModel(
             pages: pages,
             defaultTagColorSetting: setting.defaultTagColor,
-            customTagMap: dayEventLists.1
+            customTagMap: dayEventLists.1.customTagMap
         )
+        |> \.googleCalendarColors .~ (dayEventLists.1.googleCalendarColors ?? .init(calendars: [:], events: [:]))
+        |> \.googleCalendarTags .~ dayEventLists.1.googleCalendarTags
     }
    
     private func loadDayEventListModel(
         _ start: Date,
         _ timeZone: TimeZone,
         _ is24Form: Bool
-    ) async throws -> ([EventListWidgetViewModel.SectionModel], [String: any EventTag]) {
+    ) async throws -> ([EventListWidgetViewModel.SectionModel], CalendarEvents) {
         
         let rangeSize: Int = 90
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         
         guard let endDate = calendar.addDays(rangeSize, from: start).flatMap(calendar.endOfDay(for:))
-        else { return ([], [:]) }
+        else { return ([], .init()) }
         
         let range = calendar.startOfDay(for: start).timeIntervalSince1970..<endDate.timeIntervalSince1970
         
         let totalEvents = try await self.loadEventList(in: range, timeZone)
         
         let builder = EventListWidgetViewModel.SectionModel.Builder(
-            calendar: calendar, timeZone: timeZone, is24Form: is24Form, customTags: totalEvents.customTagMap
+            calendar: calendar, timeZone: timeZone, is24Form: is24Form, events: totalEvents
         )
         
         var modelLists = builder.make(events: totalEvents.eventWithTimes, in: range, size: rangeSize)
@@ -349,7 +355,7 @@ extension EventListWidgetViewModelProvider {
         if let currentModel = builder.makeCurrentTodoListModel(totalEvents.currentTodos, range) {
             modelLists.insert(currentModel, at: 0)
         }
-        return (modelLists, totalEvents.customTagMap)
+        return (modelLists, totalEvents)
     }
     
     private func loadEventList(
