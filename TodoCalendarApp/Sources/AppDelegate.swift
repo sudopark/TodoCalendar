@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Domain
 import Extensions
 import FirebaseCore
 

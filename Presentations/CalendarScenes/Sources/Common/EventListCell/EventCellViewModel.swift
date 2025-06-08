@@ -139,6 +139,7 @@ public enum EventListMoreAction: Sendable, Equatable {
     case skipTodo
     case edit
     case copy
+    case editGoogleEvent(link: String)
 }
 
 public struct EventListMoreActionModel: Sendable, Equatable {
@@ -338,6 +339,51 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     }
     
     public var moreActions: EventListMoreActionModel? { nil }
+}
+
+
+// MARK: - GoogleCalendarEvent
+public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
+    
+    public let eventIdentifier: String
+    public let tagId: EventTagId
+    public let name: String
+    public var periodText: EventPeriodText?
+    public var periodDescription: String?
+    public let isRepeating: Bool = false
+    public var isForemost: Bool = false
+    public let calendarId: String
+    public let colorId: String?
+    public let htmlLink: String?
+    public var customCompareKey: String {
+        self.makeCustomCompareKey(["google", self.colorId ?? "nil"])
+    }
+    
+    public init?(
+        _ event: GoogleCalendarEvent,
+        in todayRange: Range<TimeInterval>,
+        _ timeZone: TimeZone,
+        _ is24hourForm: Bool,
+        forceShowEventDateDurationText: Bool = false
+    ) {
+        guard let time = event.eventTime else { return nil }
+        self.eventIdentifier = event.eventId
+        self.tagId = event.eventTagId
+        self.name = event.name
+        self.periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
+        self.periodDescription = event.eventTime?.durationText(timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText)
+        self.isForemost = event.isForemost
+        self.calendarId = event.calendarId
+        self.colorId = event.colorId
+        self.htmlLink = event.htmlLink
+    }
+    
+    public var moreActions: EventListMoreActionModel? {
+        guard let link = self.htmlLink else { return nil }
+        return .init(
+            basicActions: [.editGoogleEvent(link: link)], removeActions: []
+        )
+    }
 }
 
 

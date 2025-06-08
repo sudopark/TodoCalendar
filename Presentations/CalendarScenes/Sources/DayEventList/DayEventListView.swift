@@ -549,9 +549,12 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             HolidayCalendarEvent(.init(dateString: "2023-09-30", name: "추석"), in: TimeZone.current)!
         )
         
-        return currentTodoCells + (
-            scheduleCells + todoCells + [holidayCell]
-        )
+        let google = GoogleCalendar.Event("some", "cal", name: "google event", colorId: "colorId", time: .at(100))
+        let googleEvent = GoogleCalendarEvent(google, in: TimeZone.current)
+        let googleCell = GoogleCalendarEventCellViewModel(googleEvent, in: 0..<200, TimeZone.current, true)
+        
+        let basicCells: [any EventCellViewModel] = currentTodoCells + scheduleCells + todoCells
+        return basicCells + [holidayCell] + [googleCell!]
 //        .shuffled()
     }
 }

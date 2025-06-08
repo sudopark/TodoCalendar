@@ -100,7 +100,19 @@ extension EventTagId {
     init(_ listType: EvnetListType?) {
         switch listType?.identifier {
         case "default": self = .default
+            
+        case _ where listType?.identifier?.starts(with: "external") == true:
+            guard let components = listType?.identifier?.components(separatedBy: "::"),
+                  components.count == 3
+            else {
+                self = .default
+                return
+            }
+            let serviceId = components[1]; let tagId = components[2]
+            self = .externalCalendar(serviceId: serviceId, id: tagId)
+            
         case .some(let value): self = .custom(value)
+            
         default: self = .default
         }
     }

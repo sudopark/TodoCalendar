@@ -22,16 +22,24 @@ protocol EventTagListRouting: Routing, Sendable {
         _ tagInfo: OriginalTagInfo,
         listener: EventTagDetailSceneListener
     )
+    
+    func routeToEventSetting()
 }
 
 // MARK: - Router
 
 final class EventTagListRouter: BaseRouterImple, EventTagListRouting, @unchecked Sendable { 
     
+    private let hasNavigation: Bool
+    private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let tagDetailSceneBuilder: any EventTagDetailSceneBuiler
     init(
+        hasNavigation: Bool,
+        eventSettingSceneBuilder: any EventSettingSceneBuiler,
         tagDetailSceneBuilder: any EventTagDetailSceneBuiler
     ) {
+        self.hasNavigation = hasNavigation
+        self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.tagDetailSceneBuilder = tagDetailSceneBuilder
     }
     
@@ -75,6 +83,21 @@ extension EventTagListRouter {
                 listener: listener
             )
             self.currentScene?.present(nextScene, animated: true)
+        }
+    }
+    
+    func routeToEventSetting() {
+        
+        Task { @MainActor in
+            let nextScene = self.eventSettingSceneBuilder.makeEventSettingScene()
+        
+            if self.hasNavigation {
+                // navigation 있는 케이스: 이벤트 상세 - 태그 선택 - 모든 태그 보기
+                self.currentScene?.navigationController?.pushViewController(nextScene, animated: true)
+            } else {
+                // navigation 없는 케이스: 메인화면 - 이벤트 리스트 바로 진입
+                self.currentScene?.present(nextScene, animated: true)
+            }
         }
     }
 }

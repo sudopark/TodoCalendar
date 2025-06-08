@@ -119,7 +119,7 @@ extension HolidayListViewModelImpleTests {
         let viewModel = self.makeViewModelWithStubHoliday()
         
         // when
-        let holidayLists = self.waitOutputs(expect, for: viewModel.currentYearHolidays) {
+        let holidayLists = self.waitOutputs(expect, for: viewModel.currentYearHolidays, timeout: 0.1) {
 
             self.changeToUSA()
         }

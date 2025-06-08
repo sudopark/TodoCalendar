@@ -203,6 +203,45 @@ public struct HolidayCalendarEvent: CalendarEvent {
     }
 }
 
+public struct GoogleCalendarEvent: CalendarEvent {
+    
+    public let eventId: String
+    public let calendarId: String
+    public let name: String
+    public let eventTime: EventTime?
+    public let eventTimeOnCalendar: EventTimeOnCalendar?
+    public let eventTagId: EventTagId
+    public let colorId: String?
+    public let htmlLink: String?
+    public let isForemost: Bool
+    public let isRepeating: Bool
+    
+    public init(_ event: GoogleCalendar.Event, in timeZone: TimeZone) {
+        self.eventId = event.eventId
+        self.calendarId = event.calendarId
+        self.name = event.name
+        self.eventTime = event.eventTime
+        switch event.eventTime {
+        case .allDay(let range, let secondsFromGMT):
+            // 앱내 allDay event의 경우 하루 시작..<다음날 시작-1초
+            // 구글 캘린더의 경우 하루 시작..<다름날 시작
+            // 구글 캘린더의 형식이 맞지만 현 상황에서는 앱내 allDay 형식에 맞춰야함
+            let range = (range.lowerBound..<range.upperBound-1)
+            self.eventTimeOnCalendar = .period(
+                range.shiftting(secondsFromGMT, to: timeZone)
+            )
+            
+        default:
+            self.eventTimeOnCalendar = EventTimeOnCalendar(event.eventTime, timeZone: timeZone)
+        }
+        self.eventTagId = event.eventTagId ?? .default
+        self.colorId = event.colorId
+        self.htmlLink = event.htmlLink
+        self.isForemost = false
+        self.isRepeating = false
+    }
+}
+
 extension Publisher where Output: Sequence, Failure == Never {
     
     public func filterTagActivated(

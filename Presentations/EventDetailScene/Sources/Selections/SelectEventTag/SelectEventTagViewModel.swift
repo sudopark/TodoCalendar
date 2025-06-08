@@ -18,7 +18,7 @@ import Scenes
 struct TagCellViewModel: Equatable {
     let id: EventTagId
     let name: String
-    let colorHex: String
+    let colorHex: String?
     
     init(_ tag: any EventTag) {
         self.id = tag.tagId

@@ -134,6 +134,7 @@
 "calednar::event::skip_todo_until" = "Select a time to skip this to-do";
 "calednar::event::copy" = "Copy event";
 "calendar::move_date" = "Move date";
+"calednar::event::google::edit" = "Edit Google Calendar Event";
 
 
 // MARK: - event detail
@@ -171,6 +172,13 @@
 "eventDetail.repeating.endtime::option::after_occurrences" = "occurrences";
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "The repeat end time must be in the future than the start time.\n(Repeat start date: %@)";
 "eventDetail.repeating::period_endcount" = "Starting %@ %d times";
+
+"eventDetail.repeating.everyNDays:title" = "Every %d Days";
+"eventDetail.repeating.last" = "Last";
+"eventDetail.repeating.everyNMonths:title" = "Every %d Months";
+"eventDetail.repeating.everyNYears:title" = "Every %d Years";
+"eventDetail.repeating::endoption_until" = "until %@";
+"eventDetail.repeating::endoption_times" = "%d time(s)";
 
 "eventDetail.add_new_todo::message" = "A new to-do event has been added.";
 "eventDetail.add_new_schedule::message" = "A new schedule event has been added.";
@@ -217,6 +225,20 @@
 "eventDetail:hasChanges:confirm:continue" = "Keep editing";
 
 
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "View in Google Calendar";
+"eventDetail::gogoleEvent::calendar" = "Calendar";
+"eventDetail::gogoleEvent::calendar::event" = "Google Calendar Event";
+"eventDetail::gogoleEvent::attendee::unknown" = "Unknown";
+"eventDetail::gogoleEvent::attendees" = "Attendees (%d people)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organizer";
+"eventDetail::gogoleEvent::conference::accessCode" = "Access Code";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Metting Code";
+"eventDetail::gogoleEvent::conference::passCode" = "Pass Code";
+"eventDetail::gogoleEvent::conference::password" = "Password";
+"eventDetail::gogoleEvent::copy::message" = "Copied to clipboard.";
+
 // MARK: - event tag
 
 "eventTag.title" = "Event Type";
@@ -235,6 +257,7 @@
 "eventTag.makeNew::message" = "A new event type has been created.";
 "eventTag.default::title" = "Default Event Type";
 "eventTag.default::selection::explain" = "This is the event type that will be selected by default when creating an event.";
+"eventTag.externalCalendar::integrate_button" = "Connect calendar";
 
 
 // MARK: - event list

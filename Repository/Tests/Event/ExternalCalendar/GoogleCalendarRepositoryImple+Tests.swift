@@ -8,6 +8,8 @@
 
 import Testing
 import Combine
+import Prelude
+import Optics
 import Domain
 import SQLiteService
 import UnitTestHelpKit
@@ -178,6 +180,214 @@ extension GoogleCalendarRepositoryImple_Tests {
     }
 }
 
+// MARK: - events
+
+extension GoogleCalendarRepositoryImple_Tests {
+    
+    private var range: Range<TimeInterval> {
+        let start = "2025.04.01 00:00:00".date()
+        let end = "2025.05.01 00:00:00".date()
+        return (start.timeIntervalSince1970..<end.timeIntervalSince1970)
+    }
+    
+    @Test func repository_loadEventsWithoutCache() async throws {
+        try await self.runTestWithOpenClose("test_google_event_1") {
+            // given
+            let expect = self.expectConfirm("캐시 없는 상태에서 remote에서 이벤트 조회 -> 주어진 기간내 자동으로 페이징")
+            expect.count = 1
+            expect.timeout = .milliseconds(100)
+            let repository = self.makeRepository()
+            
+            // when
+            let load = repository.loadEvents("c_id", in: self.range)
+            let eventLists = try await self.outputs(expect, for: load)
+            
+            // then
+            try #require(eventLists.count == 1)
+            
+            let eventFromCache = eventLists.first
+            #expect(eventFromCache?.isEmpty != true)
+            
+            let eventFromRemote = eventLists.last
+            let ids = eventFromRemote?.map { $0.eventId }
+            #expect(ids == [
+                "time_is_date", "out_of_period", "time_is_dateTime", "second_page_event"
+            ])
+            self.assertEventTimeIsDate(eventFromRemote?.first)
+        }
+    }
+    
+    @Test func repository_loadEvents_witHCache() async throws {
+        try await self.runTestWithOpenClose("test_google_event_2") {
+            // given
+            try await self.saveCache()
+            let expect = self.expectConfirm("캐시 있는 상태에서 조회시, 캐시값 먼저 나가고, 이후 리모트값 나감")
+            expect.count = 2
+            expect.timeout = .milliseconds(100)
+            let repository = self.makeRepository()
+            
+            // when
+            let load = repository.loadEvents("c_id", in: self.range)
+            let eventLists = try await self.outputs(expect, for: load)
+            
+            // then
+            try #require(eventLists.count == 2)
+            let eventFromCache = eventLists.first
+            #expect(eventFromCache?.map { $0.eventId } == ["time_is_date"])
+            #expect(eventFromCache?.map { $0.name } == ["old"])
+            #expect(eventFromCache?.map { $0.colorId } == ["color"])
+            #expect(eventFromCache?.map { $0.htmlLink } == ["link"])
+            
+            let eventFromRemote = eventLists.last
+            #expect(eventFromRemote?.map { $0.eventId } == [
+                "time_is_date", "out_of_period", "time_is_dateTime", "second_page_event"
+            ])
+            let name = eventFromRemote?.first(where: { $0.eventId == "time_is_date" })?.name
+            #expect(name == "하루죙일")
+        }
+    }
+    
+    // remote 조회시에 로컬에 저장
+    @Test func repository_whenAfterLoadEvents_updateCache() async throws {
+        try await self.runTestWithOpenClose("test_google_event_3") {
+            // given
+            try await self.saveCache()
+            let expect = self.expectConfirm("이벤트 조회 이후에 캐시 업데이트")
+            expect.count = 2
+            expect.timeout = .milliseconds(100)
+            let repository = self.makeRepository()
+            
+            // when
+            let load = repository.loadEvents("c_id", in: self.range)
+            let eventLists = try await self.outputs(expect, for: load)
+            try #require(eventLists.count == 2)
+            
+            let eventsFromCache = try await self.cacheStorage.loadEvents("c_id", self.range)
+            
+            // then
+            let ids = eventsFromCache.map { $0.eventId }
+            #expect(ids == [
+                "time_is_date", "time_is_dateTime", "second_page_event"
+            ])
+            self.assertEventTimeIsDate(eventsFromCache.first)
+        }
+    }
+    
+    // 이벤트 상세 조회시, 캐싱된 값 먼저 나가고, 리모트에서 새로 조회된값 나감
+    @Test func repository_loadEventDetail() async throws {
+        try await self.runTestWithOpenClose("test_google_event_4") {
+            // given
+            try await self.saveCache()
+            let expect = self.expectConfirm("이벤트 상세 조회시, 캐싱된 값 먼저 나가고, 리모트에서 새로 조회된값 나감")
+            expect.count = 2
+            expect.timeout = .milliseconds(100)
+            let repository = self.makeRepository()
+            
+            // when
+            let load = repository.loadEventDetail("c_id", "Asia/Seoul", "time_is_date")
+            let details = try await self.outputs(expect, for: load)
+            let refreshedCache = try await self.cacheStorage.loadEventDetail("time_is_date")
+            
+            // then
+            try #require(details.count == 2)
+            let cached = details.first
+            let refreshed = details.last
+            
+            #expect(cached?.summary == "old")
+            self.assertEventOrigin(refreshed)
+            self.assertEventOrigin(refreshedCache)
+        }
+    }
+    
+    private func assertEventTimeIsDate(_ event: GoogleCalendar.Event?) {
+        #expect(event?.eventId == "time_is_date")
+        #expect(event?.calendarId == "c_id")
+        #expect(event?.name == "하루죙일")
+        
+        let kst = TimeZone(identifier: "Asia/Seoul")!
+        let start = "2025-04-11".asAllDayDate(kst)!
+        let end = "2025-04-12".asAllDayDate(kst)!
+        let time = EventTime.allDay(
+            start.timeIntervalSince1970..<end.timeIntervalSince1970,
+            secondsFromGMT: TimeInterval(kst.secondsFromGMT())
+        )
+        #expect(time == event?.eventTime)
+    }
+    
+    private func assertEventOrigin(_ origin: GoogleCalendar.EventOrigin?) {
+        #expect(origin?.id == "time_is_date")
+        #expect(origin?.summary == "하루죙일")
+        #expect(origin?.htmlLink == "https://www.google.com/calendar/event?eid=M241a2Y2dWk5bWM2M3Vqa3I4b3JsOWR0bjggZ2Vhcm1hbW4wNkBt")
+        #expect(origin?.description == "description")
+        #expect(origin?.location == "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea")
+        #expect(origin?.colorId == "2")
+        
+        let creator = origin?.creator
+        #expect(creator?.id == nil)
+        #expect(creator?.email == "gearmamn06@gmail.com")
+        #expect(creator?.displayName == nil)
+        #expect(creator?.`self` == true)
+        
+        let organizer = origin?.organizer
+        #expect(organizer?.id == nil)
+        #expect(organizer?.email == "gearmamn06@gmail.com")
+        #expect(organizer?.displayName == nil)
+        #expect(organizer?.`self` == true)
+        
+        let start = origin?.start
+        #expect(start?.date == "2025-04-11")
+        #expect(start?.dateTime == nil)
+        #expect(start?.timeZone == nil)
+        
+        let end = origin?.end
+        #expect(end?.date == "2025-04-12")
+        #expect(end?.dateTime == nil)
+        #expect(end?.timeZone == nil)
+        
+        #expect(origin?.endTimeUnspecified == nil)
+        #expect(origin?.recurrence == ["RRULE:FREQ=DAILY;COUNT=3"])
+        #expect(origin?.recurringEventId == "origin")
+        #expect(origin?.sequence == 0)
+        
+        #expect(origin?.attendees == nil)
+        #expect(origin?.hangoutLink == "https://meet.google.com/piw-hphe-juu")
+        
+        let conf = origin?.conferenceData
+        #expect(conf?.conferenceId == "piw-hphe-juu")
+        let point = conf?.entryPoints?.first
+        #expect(point?.entryPointType == "video")
+        #expect(point?.uri == "https://meet.google.com/piw-hphe-juu")
+        #expect(point?.label == "meet.google.com/piw-hphe-juu")
+        
+        #expect(origin?.attachments == nil)
+        #expect(origin?.eventType == "default")
+    }
+    
+    private var dummyOldEventListsAndEvents: (GoogleCalendar.EventOriginValueList, GoogleCalendar.Event) {
+        
+        let start = GoogleCalendar.EventOrigin.GoogleEventTime()
+            |> \.date .~ "2025-04-11"
+        let end = GoogleCalendar.EventOrigin.GoogleEventTime()
+            |> \.date .~ "2025-04-12"
+        let origin = GoogleCalendar.EventOrigin(id: "time_is_date", summary: "old")
+            |> \.start .~ start
+            |> \.end .~ end
+            |> \.colorId .~ "color"
+            |> \.htmlLink .~ "link"
+        let timeZone = "Asia/Seoul"
+        let originEvent = GoogleCalendar.Event(origin, "c_id", timeZone)!
+        let list = GoogleCalendar.EventOriginValueList()
+            |> \.timeZone .~ timeZone
+            |> \.items .~ [origin]
+        
+        return (list, originEvent)
+    }
+    
+    private func saveCache() async throws {
+        let (list, event) = self.dummyOldEventListsAndEvents
+        try await self.cacheStorage.updateEvents("c_id", list, [event])
+    }
+}
 
 private struct DummyResponse {
     
@@ -193,6 +403,32 @@ private struct DummyResponse {
                 method: .get,
                 endpoint: GoogleCalendarEndpoint.calednarList,
                 resultJsonString: .success(self.dummyCalednarList)
+            ),
+            .init(
+                method: .get,
+                endpoint: GoogleCalendarEndpoint.eventList(calendarId: "c_id"),
+                parameters: ["pageToken": "next"],
+                parameterCompare: { _, params in params["pageToken"] as? String == "next" },
+                resultJsonString: .success(self.dummyEventListPage2)
+            ),
+            .init(
+                method: .get,
+                endpoint: GoogleCalendarEndpoint.eventList(calendarId: "c_id"),
+                parameters: [:],
+                parameterCompare: { _, params in params["pageToken"] as? String == nil },
+                resultJsonString: .success(self.dummyEventListPage1)
+            ),
+            .init(
+                method: .get,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "time_is_date"),
+                resultJsonString: .success(self.dummyNewEvent("time_is_date"))
+            ),
+            .init(
+                method: .get,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "origin"),
+                resultJsonString: .success(
+                    self.dummyNewEvent("origin", isRepeatOrigin: true)
+                )
             )
         ]
     }
@@ -427,5 +663,300 @@ private struct DummyResponse {
          ]
         }
         """
+    }
+    
+    private func dummyNewEvent(_ id: String, isRepeatOrigin: Bool = false) -> String {
+        let repeatOriginRecurrence = """
+        "recurrence": [
+          "RRULE:FREQ=DAILY;COUNT=3"
+         ],
+        """
+        let notRepeatOriginRecurrence = """
+        "recurringEventId": "origin",    
+        """
+        return """
+        {
+         "kind": "calendar#event",
+         "etag": "\\"3489807262385694\\"",
+         "id": "\(id)",
+         "status": "confirmed",
+         "htmlLink": "https://www.google.com/calendar/event?eid=M241a2Y2dWk5bWM2M3Vqa3I4b3JsOWR0bjggZ2Vhcm1hbW4wNkBt",
+        \(isRepeatOrigin ? repeatOriginRecurrence : notRepeatOriginRecurrence)
+         "created": "2025-04-17T15:27:11.000Z",
+         "updated": "2025-04-17T15:27:11.192Z",
+         "summary": "하루죙일",
+         "description": "description",
+         "location": "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea",
+         "colorId": "2",
+         "creator": {
+          "email": "gearmamn06@gmail.com",
+          "self": true
+         },
+         "organizer": {
+          "email": "gearmamn06@gmail.com",
+          "self": true
+         },
+         "start": {
+          "date": "2025-04-11"
+         },
+         "end": {
+          "date": "2025-04-12"
+         },
+         "transparency": "transparent",
+         "iCalUID": "3n5kf6ui9mc63ujkr8orl9dtn8@google.com",
+         "sequence": 0,
+         "hangoutLink": "https://meet.google.com/piw-hphe-juu",
+         "conferenceData": {
+          "entryPoints": [
+           {
+            "entryPointType": "video",
+            "uri": "https://meet.google.com/piw-hphe-juu",
+            "label": "meet.google.com/piw-hphe-juu"
+           }
+          ],
+          "conferenceSolution": {
+           "key": {
+            "type": "hangoutsMeet"
+           },
+           "name": "Google Meet",
+           "iconUri": "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v6/web-512dp/logo_meet_2020q4_color_2x_web_512dp.png"
+          },
+          "conferenceId": "piw-hphe-juu"
+         },
+         "reminders": {
+          "useDefault": false,
+          "overrides": [
+           {
+            "method": "popup",
+            "minutes": 30
+           },
+           {
+            "method": "email",
+            "minutes": 450
+           }
+          ]
+         },
+         "eventType": "default"
+        }
+        """
+    }
+    
+    private var dummyEventListPage1: String {
+        return """
+        {
+         "kind": "calendar#events",
+         "etag": "\\"p327p1akgnbfoo0o\\"",
+         "summary": "gearmamn06@gmail.com",
+         "description": "",
+         "updated": "2025-04-17T16:09:57.043Z",
+         "timeZone": "Asia/Seoul",
+         "accessRole": "owner",
+         "defaultReminders": [
+          {
+           "method": "popup",
+           "minutes": 30
+          },
+          {
+           "method": "email",
+           "minutes": 30
+          }
+         ],
+         "nextSyncToken": "CI-QqpC634wDEI-QqpC634wDGAUg5r_L5AIo5r_L5AI=",
+         "nextPageToken": "next",
+         "items": [
+          {
+           "kind": "calendar#event",
+           "etag": "\\"3489807262385694\\"",
+           "id": "time_is_date",
+           "status": "confirmed",
+           "htmlLink": "https://www.google.com/calendar/event?eid=M241a2Y2dWk5bWM2M3Vqa3I4b3JsOWR0bjggZ2Vhcm1hbW4wNkBt",
+           "created": "2025-04-17T15:27:11.000Z",
+           "updated": "2025-04-17T15:27:11.192Z",
+           "summary": "하루죙일",
+           "description": "description",
+           "location": "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea",
+           "colorId": "2",
+           "creator": {
+            "email": "gearmamn06@gmail.com",
+            "self": true
+           },
+           "organizer": {
+            "email": "gearmamn06@gmail.com",
+            "self": true
+           },
+           "start": {
+            "date": "2025-04-11"
+           },
+           "end": {
+            "date": "2025-04-12"
+           },
+           "transparency": "transparent",
+           "iCalUID": "3n5kf6ui9mc63ujkr8orl9dtn8@google.com",
+           "sequence": 0,
+           "hangoutLink": "https://meet.google.com/piw-hphe-juu",
+           "conferenceData": {
+            "entryPoints": [
+             {
+              "entryPointType": "video",
+              "uri": "https://meet.google.com/piw-hphe-juu",
+              "label": "meet.google.com/piw-hphe-juu"
+             }
+            ],
+            "conferenceSolution": {
+             "key": {
+              "type": "hangoutsMeet"
+             },
+             "name": "Google Meet",
+             "iconUri": "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v6/web-512dp/logo_meet_2020q4_color_2x_web_512dp.png"
+            },
+            "conferenceId": "piw-hphe-juu"
+           },
+           "reminders": {
+            "useDefault": false,
+            "overrides": [
+             {
+              "method": "popup",
+              "minutes": 30
+             },
+             {
+              "method": "email",
+              "minutes": 450
+             }
+            ]
+           },
+           "eventType": "default"
+          }, 
+          {
+           "kind": "calendar#event",
+           "etag": "\\"3489807262385694\\"",
+           "id": "out_of_period",
+           "status": "confirmed",
+           "summary": "2026년도 일정",
+           "start": {
+            "date": "2026-04-11"
+           },
+           "end": {
+            "date": "2026-04-12"
+           }
+          }, 
+          {
+           "kind": "calendar#event",
+           "etag": "\\"3489807262385694\\"",
+           "id": "time_is_dateTime",
+           "status": "confirmed",
+           "summary": "특정시간 일정",
+           "start": {
+                "dateTime": "2025-04-09T14:00:00+09:00",
+                "timeZone": "Asia/Seoul"
+           },
+           "end": {
+                "dateTime": "2025-04-09T15:00:00+09:00",
+                "timeZone": "Asia/Seoul"
+            }
+          }
+         ]
+        }
+        """
+    }
+    
+    private var dummyEventListPage2: String {
+        return """
+        {
+         "kind": "calendar#events",
+         "etag": "\\"p327p1akgnbfoo0o\\"",
+         "summary": "gearmamn06@gmail.com",
+         "description": "",
+         "updated": "2025-04-17T16:09:57.043Z",
+         "timeZone": "Asia/Seoul",
+         "accessRole": "owner",
+         "defaultReminders": [
+          {
+           "method": "popup",
+           "minutes": 30
+          },
+          {
+           "method": "email",
+           "minutes": 30
+          }
+         ],
+         "nextSyncToken": "CI-QqpC634wDEI-QqpC634wDGAUg5r_L5AIo5r_L5AI=",
+         "items": [
+          {
+           "kind": "calendar#event",
+           "etag": "\\"3489807262385694\\"",
+           "id": "second_page_event",
+           "status": "confirmed",
+           "htmlLink": "https://www.google.com/calendar/event?eid=M241a2Y2dWk5bWM2M3Vqa3I4b3JsOWR0bjggZ2Vhcm1hbW4wNkBt",
+           "created": "2025-04-17T15:27:11.000Z",
+           "updated": "2025-04-17T15:27:11.192Z",
+           "summary": "두번째 페이지 - 하루죙일",
+           "description": "description",
+           "location": "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea",
+           "colorId": "2",
+           "creator": {
+            "email": "gearmamn06@gmail.com",
+            "self": true
+           },
+           "organizer": {
+            "email": "gearmamn06@gmail.com",
+            "self": true
+           },
+           "start": {
+            "date": "2025-04-11"
+           },
+           "end": {
+            "date": "2025-04-12"
+           },
+           "transparency": "transparent",
+           "iCalUID": "3n5kf6ui9mc63ujkr8orl9dtn8@google.com",
+           "sequence": 0,
+           "hangoutLink": "https://meet.google.com/piw-hphe-juu",
+           "conferenceData": {
+            "entryPoints": [
+             {
+              "entryPointType": "video",
+              "uri": "https://meet.google.com/piw-hphe-juu",
+              "label": "meet.google.com/piw-hphe-juu"
+             }
+            ],
+            "conferenceSolution": {
+             "key": {
+              "type": "hangoutsMeet"
+             },
+             "name": "Google Meet",
+             "iconUri": "https://fonts.gstatic.com/s/i/productlogos/meet_2020q4/v6/web-512dp/logo_meet_2020q4_color_2x_web_512dp.png"
+            },
+            "conferenceId": "piw-hphe-juu"
+           },
+           "reminders": {
+            "useDefault": false,
+            "overrides": [
+             {
+              "method": "popup",
+              "minutes": 30
+             },
+             {
+              "method": "email",
+              "minutes": 450
+             }
+            ]
+           },
+           "eventType": "default"
+          }
+         ]
+        }
+        """
+    }
+}
+
+private extension String {
+    
+    func asAllDayDate(_ timeZone: TimeZone) -> Date? {
+        let dateFormatter = ISO8601DateFormatter()
+        dateFormatter.formatOptions = [
+            .withFullDate, .withDashSeparatorInDate
+        ]
+        dateFormatter.timeZone = timeZone
+        return dateFormatter.date(from: self)
     }
 }

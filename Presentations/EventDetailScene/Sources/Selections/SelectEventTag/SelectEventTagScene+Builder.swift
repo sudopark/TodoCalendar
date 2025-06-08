@@ -18,7 +18,7 @@ import Scenes
 struct SelectedTag: Equatable {
     let tagId: EventTagId
     let name: String
-    let colorHex: String
+    let colorHex: String?
     
     init(
         _ tagId: EventTagId,

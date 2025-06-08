@@ -23,7 +23,7 @@ final class EventTagSelectViewState: ObservableObject {
     
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
-    @Published var cellViewModels: [EventTagCellViewModel] = []
+    @Published var cellViewModels: [BaseCalendarEventTagCellViewModel] = []
     @Published var selectedId: EventTagId?
     
     func bind(_ viewModel: any EventTagSelectViewModel) {
@@ -109,7 +109,7 @@ struct EventTagSelectView: View {
                     .listRowBackground(appearance.colorSet.bg0.asColor)
                     .padding(.bottom, 16)
                 
-                ForEach(state.cellViewModels, id: \.compareKey) { cvm in
+                ForEach(state.cellViewModels) { cvm in
                     cellView(cvm)
                         .listRowSeparator(.hidden)
                         .listRowBackground(appearance.colorSet.bg0.asColor)
@@ -127,7 +127,7 @@ struct EventTagSelectView: View {
             .id(appearance.navigationBarId)
     }
     
-    private func cellView(_ cellViewModel: EventTagCellViewModel) -> some View {
+    private func cellView(_ cellViewModel: BaseCalendarEventTagCellViewModel) -> some View {
         HStack(spacing: 12) {
             
             Circle()
@@ -179,7 +179,7 @@ struct EventTagSelectViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = EventTagSelectViewState()
         state.cellViewModels = (0..<20).map {
-            EventTagCellViewModel(
+            BaseCalendarEventTagCellViewModel(
                 CustomEventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "#ff0000")
             )
             |> \.isOn .~ ($0 % 2 == 0)

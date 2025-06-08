@@ -268,6 +268,7 @@ extension NonLoginUsecaseFactoryImple {
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
             repository: repository,
+            eventTagUsecase: self.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
         )
@@ -547,6 +548,7 @@ extension LoginUsecaseFactoryImple {
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
             repository: repository,
+            eventTagUsecase: self.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
         )

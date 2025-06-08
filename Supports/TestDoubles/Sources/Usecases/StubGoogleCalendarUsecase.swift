@@ -7,6 +7,9 @@
 //
 
 import Foundation
+import Combine
+import Prelude
+import Optics
 import Domain
 
 
@@ -17,5 +20,50 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     public var didPrepared = false
     open func prepare() {
         self.didPrepared = true
+    }
+    
+    private let tagsSubject = CurrentValueSubject<[GoogleCalendar.Tag]?, Never>(nil)
+    open func refreshGoogleCalendarEventTags() {
+        let tags = (0..<10).map { int -> GoogleCalendar.Tag in
+            return .init(id: "g:\(int)", name: "g:\(int)")
+                |> \.colorId .~ "color"
+                |> \.backgroundColorHex .~ "hex"
+        }
+        self.tagsSubject.send(tags)
+    }
+    
+    open var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
+        return self.tagsSubject
+            .compactMap { $0 }
+            .eraseToAnyPublisher()
+    }
+    
+    open func refreshEvents(in period: Range<TimeInterval>) {
+        
+    }
+    
+    public var stubEvents: [GoogleCalendar.Event] = []
+    open func events(in period: Range<TimeInterval>) -> AnyPublisher<[GoogleCalendar.Event], Never> {
+        return Just(self.stubEvents).eraseToAnyPublisher()
+    }
+    
+    public var stubDetail: GoogleCalendar.EventOrigin?
+    open func eventDetail(
+        _ calendarId: String, _ eventId: String, at timeZone: TimeZone
+    ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
+        guard let detail = self.stubDetail
+        else {
+            return Empty().eraseToAnyPublisher()
+        }
+        return Just(detail).mapAsAnyError().eraseToAnyPublisher()
+    }
+    
+    private let accountSubject = CurrentValueSubject<ExternalServiceAccountinfo?, Never>(nil)
+    public func updateHasAccount(_ account: ExternalServiceAccountinfo?) {
+        self.accountSubject.send(account)
+    }
+    open var integratedAccount: AnyPublisher<ExternalServiceAccountinfo?, Never> {
+        return self.accountSubject
+            .eraseToAnyPublisher()
     }
 }

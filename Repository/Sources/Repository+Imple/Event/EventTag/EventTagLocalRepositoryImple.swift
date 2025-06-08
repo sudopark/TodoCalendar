@@ -113,6 +113,11 @@ extension EventTagLocalRepositoryImple {
         let newIdStringValues = newIds.map { $0.stringValue }
         self.environmentStorage.update(self.offIds, newIdStringValues)
     }
+    
+    public func resetExternalCalendarOffTagId(_ serviceId: String) {
+        let newIds = self.loadOffTags().filter { $0.externalServiceId != serviceId }
+        self.environmentStorage.update(self.offIds, newIds.map { $0.stringValue })
+    }
 }
 
 
@@ -134,7 +139,7 @@ extension EventTagId {
         default:
             if stringValue.starts(with: "external:") {
                 let compos = stringValue.components(separatedBy: "::")
-                guard compos.count == 2 else { return nil }
+                guard compos.count == 3 else { return nil }
                 self = .externalCalendar(serviceId: compos[1], id: compos[2])
             } else {
                 self = .custom(stringValue)

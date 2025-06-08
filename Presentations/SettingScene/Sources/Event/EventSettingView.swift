@@ -22,7 +22,7 @@ final class EventSettingViewState: ObservableObject {
     private var didBind = false
     private var cancellables: Set<AnyCancellable> = []
     
-    @Published var tagModel: EventTagCellViewModel?
+    @Published var tagModel: BaseCalendarEventTagCellViewModel?
     @Published var selectedEventNotificationTimeText: String?
     @Published var selectedAllDayEventNotificationTimeText: String?
     @Published var periodModel: SelectedPeriodModel = .init(.minute0)
@@ -157,7 +157,7 @@ struct EventSettingView: View {
                         
                         rowView(periodView)
                         
-                        if FeatureFlag.isEnable(.googleCalendar) && !self.state.externalCalendarServiceModels.isEmpty {
+                        if !self.state.externalCalendarServiceModels.isEmpty {
                             self.externalCalendarSectionView(state.externalCalendarServiceModels)
                         }
                     }
@@ -167,9 +167,7 @@ struct EventSettingView: View {
                 .listStyle(.plain)
                 .background(appearance.colorSet.bg0.asColor)
                 
-                if FeatureFlag.isEnable(.googleCalendar) {
-                    FullScreenLoadingView(isLoading: $state.isConnectOrDisconnectingExternalService)
-                }
+                FullScreenLoadingView(isLoading: $state.isConnectOrDisconnectingExternalService)
             }
             .navigationTitle("event_setting::title".localized())
             .toolbar {

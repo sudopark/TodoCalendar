@@ -129,11 +129,13 @@ final class ApplicationBase {
             credentialStore: googleAPICredentialStore
         )
         let interceptor = AuthenticationInterceptorProxy(authenticator: authenticator)
-        return RemoteAPIImple(
+        let remote = RemoteAPIImple(
             session: self.remoteSession,
             environment: environment,
             interceptor: interceptor
         )
+        authenticator.remoteAPI = remote
+        return remote
     }()
 }
 

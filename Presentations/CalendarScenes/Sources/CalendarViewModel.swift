@@ -37,6 +37,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let eventTagUsecase: any EventTagUsecase
     private let migrationUsecase: any TemporaryUserDataMigrationUescase
     private let uiSettingUsecase: any UISettingUsecase
+    private let googleCalendarUsecase: any GoogleCalendarUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
@@ -51,7 +52,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         foremostEventusecase: any ForemostEventUsecase,
         eventTagUsecase: any EventTagUsecase,
         migrationUsecase: any TemporaryUserDataMigrationUescase,
-        uiSettingUsecase: any UISettingUsecase
+        uiSettingUsecase: any UISettingUsecase,
+        googleCalendarUsecase: any GoogleCalendarUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -62,6 +64,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.eventTagUsecase = eventTagUsecase
         self.migrationUsecase = migrationUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        self.googleCalendarUsecase = googleCalendarUsecase
         
         self.internalBind()
     }
@@ -97,6 +100,12 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 }
             })
             .store(in: &self.cancellables)
+
+        self.bindRefreshEvents()
+        self.bindFocusedMonthChanged()
+    }
+    
+    private func bindRefreshEvents() {
         
         // Timezone 변경시에 조회중인 달력은 안바뀜 하지만 조회 가능한 범위는 달라짐
         // ex) 동일날짜의 시간이라도 kst는 utc보다 9시간 빠름
@@ -117,8 +126,10 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         
         let refreshAfterEnterForeground = NotificationCenter.default.publisher(
             for: UIApplication.willEnterForegroundNotification
-        ).map { _ in }
-        let refreshAfterMigration = self.migrationUsecase.migrationResult.filter { $0.isSuccess }.map { _ in }
+        ).map { _ in  }
+        let refreshAfterMigration = self.migrationUsecase.migrationResult
+            .filter { $0.isSuccess }.map { _ in  }
+        
         Publishers.Merge(refreshAfterEnterForeground, refreshAfterMigration)
             .withLatestFrom(totalViewingMonths) { $1 }
             .compactMap { $0.checkedRange }
@@ -127,8 +138,16 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
                 self?.todoEventUsecase.refreshCurentTodoEvents()
             })
             .store(in: &self.cancellables)
-
-        self.bindFocusedMonthChanged()
+        
+        let refreshAfterGoogleCalendarIntegrated = self.googleCalendarUsecase.integratedAccount
+            .filter { $0 != nil }
+        refreshAfterGoogleCalendarIntegrated
+            .withLatestFrom(totalViewingMonths) { $1 }
+            .compactMap { $0.checkedRange }
+            .sink(receiveValue: { [weak self] total in
+                self?.googleCalendarUsecase.refreshEvents(in: total)
+            })
+            .store(in: &self.cancellables)
     }
     
     private func bindFocusedMonthChanged() {
@@ -196,6 +215,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         ranges.forEach {
             self.scheduleEventUsecase.refreshScheduleEvents(in: $0)
             self.todoEventUsecase.refreshTodoEvents(in: $0)
+            self.googleCalendarUsecase.refreshEvents(in: $0)
         }
     }
 }

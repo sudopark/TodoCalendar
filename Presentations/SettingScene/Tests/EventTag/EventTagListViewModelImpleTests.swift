@@ -31,7 +31,10 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyRouter = nil
     }
     
-    private func makeViewModel(shouldLoadFail: Bool = false) -> EventTagListViewModelImple {
+    private func makeViewModel(
+        shouldLoadFail: Bool = false,
+        isGoogleCalendarIntegrated: Bool = false
+    ) -> EventTagListViewModelImple {
         let usecase = StubEventTagUsecase()
         if shouldLoadFail {
             usecase.allTagsLoadResult = .failure(RuntimeError("failed"))
@@ -41,7 +44,14 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             }
             usecase.allTagsLoadResult = .success(tags)
         }
-        let viewModel = EventTagListViewModelImple(tagUsecase: usecase)
+        let googleUsecae = StubGoogleCalendarUsecase()
+        if isGoogleCalendarIntegrated {
+            googleUsecae.updateHasAccount(.init(GoogleCalendarService.id))
+        }
+        let viewModel = EventTagListViewModelImple(
+            tagUsecase: usecase,
+            googleCalendarUsecase: googleUsecae
+        )
         viewModel.router = self.spyRouter
         return viewModel
     }
@@ -80,6 +90,23 @@ extension EventTagListViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
     }
     
+    func testViewModel_provideExternalCalendarTags() {
+        // given
+        let expect = expectation(description: "외부 캘린더 목록 제공")
+        let viewModel = self.makeViewModel(isGoogleCalendarIntegrated: true)
+        
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
+            viewModel.reload()
+        }
+        
+        // then
+        XCTAssertEqual(sections?.count, 1)
+        let first = sections?.first
+        XCTAssertEqual(first?.serviceId, GoogleCalendarService.id)
+        XCTAssertEqual(first?.cellViewModels.count, 10)
+    }
+    
     private func makeViewModelWithInitialListLoaded() -> EventTagListViewModelImple {
         // given
         let expect = expectation(description: "wait initial list")
@@ -115,6 +142,53 @@ extension EventTagListViewModelImpleTests {
             [.custom("id:3")],
             [.custom("id:3"), .custom("id:4")],
             [.custom("id:4")]
+        ])
+    }
+    
+    private func makeViewModelWithInitialExternalCalendarLoaded() -> EventTagListViewModelImple {
+        // given
+        let expect = expectation(description: "wait initial list")
+        expect.assertForOverFulfill = false
+        let viewModel = self.makeViewModel(isGoogleCalendarIntegrated: true)
+        
+        // when
+        let _ = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
+            viewModel.reload()
+        }
+        
+        // then
+        return viewModel
+    }
+    
+    func testViewModel_whenToogleExternalCalendarTag_updateList() {
+        // given
+        let viewModel = self.makeViewModelWithInitialExternalCalendarLoaded()
+        let expect = expectation(description: "외부 캘린더 tag 활성화 여부 업데이트시에 리스트 업데이트")
+        expect.expectedFulfillmentCount = 4
+        
+        // when
+        let sectionLists = self.waitOutputs(expect, for: viewModel.externalCalendarSections) {
+            viewModel.toggleIsOn(
+                .externalCalendar(serviceId: GoogleCalendarService.id, id: "g:2")
+            )
+            viewModel.toggleIsOn(
+                .externalCalendar(serviceId: GoogleCalendarService.id, id: "g:3")
+            )
+            viewModel.toggleIsOn(
+                .externalCalendar(serviceId: GoogleCalendarService.id, id: "g:2")
+            )
+        }
+        
+        // then
+        let offTagIds = sectionLists
+            .map { $0.first?.cellViewModels }
+            .map { cs in cs?.filter { !$0.isOn } }
+            .map { cs in cs?.map { $0.id }}
+        XCTAssertEqual(offTagIds, [
+            [],
+            [.externalCalendar(serviceId: GoogleCalendarService.id, id: "g:2")],
+            [.externalCalendar(serviceId: GoogleCalendarService.id, id: "g:2"), .externalCalendar(serviceId: GoogleCalendarService.id, id: "g:3")],
+            [.externalCalendar(serviceId: GoogleCalendarService.id, id: "g:3")]
         ])
     }
 }
@@ -184,6 +258,17 @@ extension EventTagListViewModelImpleTests {
         XCTAssertEqual(tagCounts, [22, 21])
         XCTAssertEqual(hasTag4s, [true, false])
     }
+    
+    func testViewModel_whenIntegrateExternalCalendar_routeToEventSetting() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.integrateCalendar(serviceId: GoogleCalendarService.id)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToEventSetting, true)
+    }
 }
 
 extension EventTagListViewModelImpleTests {
@@ -216,6 +301,11 @@ extension EventTagListViewModelImpleTests {
                 )
                 listener.eventTag(updated: newTag)
             }
+        }
+        
+        var didRouteToEventSetting: Bool?
+        func routeToEventSetting() {
+            self.didRouteToEventSetting = true
         }
     }
 }

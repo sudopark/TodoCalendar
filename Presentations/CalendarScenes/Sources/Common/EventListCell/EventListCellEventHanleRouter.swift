@@ -20,6 +20,10 @@ protocol EventListCellEventHanleRouting: Routing, Sendable {
         _ eventId: String,
         _ repeatingEventTargetTime: EventTime?
     )
+    func routeToGoogleEventDetail(
+        calendarId: String, eventId: String
+    )
+    func routeToEditGoogleEvent(_ htmlLink: String)
     func routeToMakeNewEvent(_ withParams: MakeEventParams)
 }
 
@@ -60,6 +64,22 @@ extension EventListCellEventHanleRouter {
             )
             self.scene?.present(next, animated: true)
         }
+    }
+    
+    func routeToGoogleEventDetail(
+        calendarId: String, eventId: String
+    ) {
+        Task { @MainActor in
+            let next = self.eventDetailSceneBuilder.makeGoogleCalendarDetailScene(
+                calendarId: calendarId,
+                eventId: eventId
+            )
+            self.scene?.present(next, animated: true)
+        }
+    }
+    
+    func routeToEditGoogleEvent(_ htmlLink: String) {
+        self.openSafari(htmlLink)
     }
     
     func routeToMakeNewEvent(_ withParams: MakeEventParams) {

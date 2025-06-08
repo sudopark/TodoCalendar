@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -18,13 +19,19 @@ final class EventTagListSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let settingSceneBuilder: any EventSettingSceneBuiler
+    private let tagDetailSceneBuilder: any EventTagDetailSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        settingSceneBuilder: any EventSettingSceneBuiler,
+        tagDetailSceneBuilder: any EventTagDetailSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.settingSceneBuilder = settingSceneBuilder
+        self.tagDetailSceneBuilder = tagDetailSceneBuilder
     }
 }
 
@@ -38,7 +45,8 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
     ) -> any EventTagListScene {
         
         let viewModel = EventTagListViewModelImple(
-            tagUsecase: self.usecaseFactory.makeEventTagUsecase()
+            tagUsecase: self.usecaseFactory.makeEventTagUsecase(),
+            googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase()
         )
         
         let viewController = EventTagListViewController(
@@ -47,12 +55,10 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
             viewAppearance: self.viewAppearance
         )
     
-        let tagDetailBuilder = EventTagDetailSceneBuilerImple(
-            usecaseFactory: self.usecaseFactory,
-            viewAppearance: self.viewAppearance
-        )
         let router = EventTagListRouter(
-            tagDetailSceneBuilder: tagDetailBuilder
+            hasNavigation: hasNavigation,
+            eventSettingSceneBuilder: self.settingSceneBuilder,
+            tagDetailSceneBuilder: self.tagDetailSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

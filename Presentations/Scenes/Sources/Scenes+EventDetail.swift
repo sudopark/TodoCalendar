@@ -10,6 +10,9 @@ import Prelude
 import Optics
 import Domain
 
+
+// MARK: - EventDetail scene
+
 public protocol EventDetailScene: Scene { }
 
 public protocol EventDetailSceneListener: AnyObject {
@@ -46,6 +49,20 @@ public struct MakeEventParams: Sendable {
     }
 }
 
+// MARK: - GoogleCalendarEventDetailScene Interactable & Listenable
+
+public protocol GoogleCalendarEventDetailSceneInteractor: AnyObject { }
+//
+//public protocol GoogleCalendarEventDetailSceneListener: AnyObject { }
+
+// MARK: - GoogleCalendarEventDetailScene
+
+public protocol GoogleCalendarEventDetailScene: Scene where Interactor == any GoogleCalendarEventDetailSceneInteractor
+{ }
+
+
+// MARK: - EventDetailSceneBuilder
+
 public protocol EventDetailSceneBuilder {
     
     @MainActor
@@ -63,4 +80,9 @@ public protocol EventDetailSceneBuilder {
         _ repeatingEventTargetTime: EventTime?,
         listener: EventDetailSceneListener?
     ) -> any EventDetailScene
+    
+    @MainActor
+    func makeGoogleCalendarDetailScene(
+        calendarId: String, eventId: String
+    ) -> any GoogleCalendarEventDetailScene
 }

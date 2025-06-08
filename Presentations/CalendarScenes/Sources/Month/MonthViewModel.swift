@@ -135,7 +135,6 @@ public struct WeekEventStackViewModel: Equatable {
     }
 }
 
-
 extension WeekEventStackViewModel {
     
     public func eventMores(with maxSize: Int) -> [EventMoreModel] {
@@ -177,9 +176,7 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
     
     private let calendarUsecase: any CalendarUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
-    private let todoUsecase: any TodoEventUsecase
-    private let scheduleEventUsecase: any ScheduleEventUsecase
-    private let foremostEventUsecase: any ForemostEventUsecase
+    private let eventListUsecase: any CalendarEventListhUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let uiSettingUsecase: any UISettingUsecase
     private weak var listener: (any MonthSceneListener)?
@@ -188,17 +185,13 @@ final class MonthViewModelImple: MonthViewModel, @unchecked Sendable {
         initialMonth: CalendarMonth,
         calendarUsecase: any CalendarUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        todoUsecase: any TodoEventUsecase,
-        scheduleEventUsecase: any ScheduleEventUsecase,
-        foremostEventUsecase: any ForemostEventUsecase,
+        eventListUsecase: any CalendarEventListhUsecase,
         eventTagUsecase: any EventTagUsecase,
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
-        self.todoUsecase = todoUsecase
-        self.scheduleEventUsecase = scheduleEventUsecase
-        self.foremostEventUsecase = foremostEventUsecase
+        self.eventListUsecase = eventListUsecase
         self.eventTagUsecase = eventTagUsecase
         self.uiSettingUsecase = uiSettingUsecase
         
@@ -339,26 +332,22 @@ extension MonthViewModelImple {
     
     private func calendarEvents(from info: CurrentMonthInfo) -> AnyPublisher<[any CalendarEvent], Never> {
         
-        let todos = self.todoUsecase.todoEvents(in: info.range)
-        let schedules = self.scheduleEventUsecase.scheduleEvents(in: info.range)
-        let foremost = self.foremostEventUsecase.foremostEvent.map { event in event.map { ForemostEventId(event: $0)} }
-        let holidayCalenarEvents = info.component.holidayCalendarEvents(with: info.timeZone)
-        let transform: ([TodoEvent], [ScheduleEvent], ForemostEventId?) -> [any CalendarEvent]
-        transform = { todos, schedules, foremost in
-            let todoEvents = todos.compactMap {
-                TodoCalendarEvent($0, in: info.timeZone, isForemost: foremost?.eventId == $0.uuid)
-            }
-            let scheduleEvents = schedules.flatMap {
-                ScheduleCalendarEvent.events(from: $0, in: info.timeZone, foremostId: foremost?.eventId)
-            }
-            return todoEvents + scheduleEvents + holidayCalenarEvents
+        let activeHolidays = self.eventTagUsecase.offEventTagIdsOnCalendar().map { offIds -> [any CalendarEvent] in
+            guard !offIds.contains(.holiday) else { return [] }
+            let holidayCalenarEvents = info.component.holidayCalendarEvents(with: info.timeZone)
+            return holidayCalenarEvents
         }
-        return Publishers.CombineLatest3(todos, schedules, foremost)
-            .map(transform)
-            .eraseToAnyPublisher()
-            .filterTagActivated(self.eventTagUsecase) { $0.eventTagId }
-            .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey } })
-            .eraseToAnyPublisher()
+        
+        let transform: ([any CalendarEvent], [any CalendarEvent]) -> [any CalendarEvent]
+        transform = { events, holidays in
+            return events + holidays
+        }
+        return Publishers.CombineLatest(
+            self.eventListUsecase.calendarEvents(in: info.range),
+            activeHolidays
+        )
+        .map(transform)
+        .eraseToAnyPublisher()
     }
     
     var weekDays: AnyPublisher<[WeekDayModel], Never> {

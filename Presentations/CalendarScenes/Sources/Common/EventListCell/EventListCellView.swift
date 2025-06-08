@@ -63,7 +63,14 @@ struct EventListCellView: View {
     }
     
     var body: some View {
-        let tagLineColor = self.appearance.color(cellViewModel.tagId).asColor
+        let tagLineColor = {
+            switch self.cellViewModel {
+            case let google as GoogleCalendarEventCellViewModel:
+                return self.appearance.googleEventColor(google.colorId, google.calendarId).asColor
+            default:
+                return self.appearance.color(cellViewModel.tagId).asColor
+            }
+        }()
         return HStack(spacing: 8) {
             // left
             self.eventLeftView(cellViewModel)
@@ -111,6 +118,8 @@ struct EventListCellView: View {
             return skipTodoButton().asAnyView()
         case .copy:
             return copyButton().asAnyView()
+        case .editGoogleEvent(let link):
+            return editGoogleEventButton(link).asAnyView()
         }
     }
     
@@ -176,6 +185,17 @@ struct EventListCellView: View {
                 Text("calednar::event::copy".localized())
                 Image(systemName: "doc.on.doc")
             }
+        }
+    }
+    
+    private func editGoogleEventButton(_ link: String) -> some View {
+        return Button {
+            self.handleMoreAction(self.cellViewModel, .editGoogleEvent(link: link))
+        } label: {
+            Text("calednar::event::google::edit".localized())
+            Image("google_calendar_icon")
+                .resizable()
+                .scaledToFill()
         }
     }
     

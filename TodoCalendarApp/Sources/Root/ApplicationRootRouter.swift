@@ -156,6 +156,12 @@ extension ApplicationViewAppearanceStoreImple: GoogleCalendarViewAppearanceStore
         }
     }
     
+    func apply(googleCalendarTags: [GoogleCalendar.Tag]) {
+        Task { @MainActor in
+            self.appearance.googleCalendarTagMap = googleCalendarTags.asDictionary{ $0.id }
+        }
+    }
+    
     func clearGoogleCalendarColors() {
         Task { @MainActor in
             self.appearance.googleCalendarColor = nil
@@ -306,10 +312,18 @@ extension ApplicationRootRouter {
         )
     }
     
+    private func googleCalendarEventDetailBuilder() -> any GoogleCalendarEventDetailSceneBuiler {
+        return GoogleCalendarEventDetailSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance
+        )
+    }
+    
     private func eventDetailSceneBuilder() -> any EventDetailSceneBuilder {
         return EventDetailSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
+            googleCalendarEventDetailSceneBuilder: self.googleCalendarEventDetailBuilder(),
             settingSceneBuilder: settingSceneBuilder()
         )
     }

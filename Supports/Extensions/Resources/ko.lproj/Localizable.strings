@@ -134,6 +134,7 @@
 "calednar::event::skip_todo_until" = "할일 건너뛰기할 날짜 선택";
 "calednar::event::copy" = "이벤트 복사";
 "calendar::move_date" = "날짜 이동";
+"calednar::event::google::edit" = "구글캘린더 이벤트 수정";
 
 
 // MARK: - event detail
@@ -171,6 +172,13 @@
 "eventDetail.repeating.endtime::option::after_occurrences" = "회 반복";
 "eventDetail.repeating.endtime::shouldFutureThanStartTime" = "이벤트 반복 종료시간은 시작시간보다 미래의 시간이여야 합니다.\n(반복 시작시간: %@)";
 "eventDetail.repeating::period_endcount" = "%@ 부터 %d회";
+
+"eventDetail.repeating.everyNDays:title" = "매%d일";
+"eventDetail.repeating.last" = "마지막";
+"eventDetail.repeating.everyNMonths:title" = "매%d달";
+"eventDetail.repeating.everyNYears:title" = "매%d년";
+"eventDetail.repeating::endoption_until" = "%@ 까지";
+"eventDetail.repeating::endoption_times" = "%d번 반복";
 
 "eventDetail.add_new_todo::message" = "신규 할일이 등록되었습니다.";
 "eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";
@@ -216,6 +224,20 @@
 "eventDetail:hasChanges:confirm:message" = "변경사항이 존재합니다. 이를 폐기할까요?";
 "eventDetail:hasChanges:confirm:continue" = "계속 수정하기";
 
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "구글 캘린더에서 보기";
+"eventDetail::gogoleEvent::calendar" = "캘린더";
+"eventDetail::gogoleEvent::calendar::event" = "구글 캘린더 이벤트";
+"eventDetail::gogoleEvent::attendee::unknown" = "알수없음";
+"eventDetail::gogoleEvent::attendees" = "참석자 (%d명)";
+"eventDetail::gogoleEvent::attendees::organizer" = "주최자";
+"eventDetail::gogoleEvent::conference::accessCode" = "어세스 코드";
+"eventDetail::gogoleEvent::conference::meetingCode" = "미팅코드";
+"eventDetail::gogoleEvent::conference::passCode" = "패스코드";
+"eventDetail::gogoleEvent::conference::password" = "비밀번호";
+"eventDetail::gogoleEvent::copy::message" = "클립보드에 복사되었습니다.";
+
 // MARK: - event tag
 
 "eventTag.title" = "이벤트 종류";
@@ -234,6 +256,7 @@
 "eventTag.makeNew::message" = "신규 이벤트 타입이 생성되었습니다.";
 "eventTag.default::title" = "기본 이벤트 타입";
 "eventTag.default::selection::explain" = "이벤트 생성시에 기본으로 지정할 이벤트 타입을 선택합니다.";
+"eventTag.externalCalendar::integrate_button" = "캘린더 연동하기";
 
 
 // MARK: - event list

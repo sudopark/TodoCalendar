@@ -55,6 +55,8 @@ struct WeekEventsViewModel {
     let eventStackModelMap: [String: WeekEventStackViewModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
     let tagMap: [String: CustomEventTag]
+    var googleCalendarColor: GoogleCalendar.Colors?
+    var googleCalendarTags: [String: GoogleCalendar.Tag]
     
     init(
         range: WeekEventsRange,
@@ -64,7 +66,9 @@ struct WeekEventsViewModel {
         weeks: [WeekRowModel],
         eventStackModelMap: [String : WeekEventStackViewModel],
         defaultTagColorSetting: DefaultEventTagColorSetting,
-        tagMap: [String: CustomEventTag]
+        tagMap: [String: CustomEventTag],
+        googleCalendarColor: GoogleCalendar.Colors? = nil,
+        googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
     ) {
         self.range = range
         self.targetMonthText = targetMonthText
@@ -74,6 +78,8 @@ struct WeekEventsViewModel {
         self.eventStackModelMap = eventStackModelMap
         self.defaultTagColorSetting = defaultTagColorSetting
         self.tagMap = tagMap
+        self.googleCalendarColor = googleCalendarColor
+        self.googleCalendarTags = googleCalendarTags
     }
     
     static func sample(_ range: WeekEventsRange) -> WeekEventsViewModel {
@@ -227,7 +233,9 @@ extension WeekEventsWidgetViewModelProvider {
             weeks: self.convertToWeekRowModels(weeks, events.eventWithTimes, targetMonth),
             eventStackModelMap: self.convertToEventStackModelMap(events, weeks.weeks, timeZone),
             defaultTagColorSetting: defaultTagColorSetting,
-            tagMap: events.customTagMap
+            tagMap: events.customTagMap,
+            googleCalendarColor: events.googleCalendarColors,
+            googleCalendarTags: events.googleCalendarTags
         )
     }
     

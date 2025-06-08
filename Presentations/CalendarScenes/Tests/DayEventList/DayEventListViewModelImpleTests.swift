@@ -77,13 +77,22 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubForemostEventUsecase = .init(foremostId: foremostEventId)
         self.stubForemostEventUsecase.refresh()
         
+        let eventListUsecase = CalendarEventListhUsecaseImple(
+            todoUsecase: self.stubTodoUsecase,
+            scheduleUsecase: self.stubScheduleUsecase,
+            googleCalendarUsecase: StubGoogleCalendarUsecase(),
+            foremostEventUsecase: self.stubForemostEventUsecase,
+            calendarSettingUsecase: calendarSettingUsecase,
+            eventTagUsecase: self.stubTagUsecase,
+            uiSettingUsecase: self.stubUISettingUsecase
+        )
+        
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
             calendarSettingUsecase: calendarSettingUsecase,
+            eventListUsecase: eventListUsecase,
             todoEventUsecase: self.stubTodoUsecase,
-            scheduleEventUsecase: self.stubScheduleUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
-            eventTagUsecase: self.stubTagUsecase,
             uiSettingUsecase: self.stubUISettingUsecase
         )
         viewModel.router = self.spyRouter
@@ -569,6 +578,28 @@ extension DayEventListViewModelImpleTests {
         // then
         XCTAssertEqual(cellViewModel.moreActions, nil)
     }
+    
+    func testGoogleCalendarEventCellViewModel_provideMoreActionWhenHtmlLinkExists() {
+        // given
+        func parameterizeTest(_ link: String?) {
+            // given
+            let cvm = GoogleCalendarEventCellViewModel.dummy(link)
+            
+            // when
+            let actions = cvm.moreActions
+            
+            // then
+            if let link {
+                XCTAssertEqual(actions, .init(basicActions: [.editGoogleEvent(link: link)], removeActions: []))
+            } else {
+                XCTAssertEqual(actions, nil)
+            }
+        }
+        
+        // when + then
+        parameterizeTest("some")
+        parameterizeTest(nil)
+    }
 }
 
 extension DayEventListViewModelImpleTests {
@@ -597,8 +628,12 @@ extension DayEventListViewModelImpleTests {
             eventTagId: .custom("some"),
             isRepeating: false
         ) |> \.turn .~ 1
+        let google = GoogleCalendar.Event(
+            "google", "calendarId", name: "google", colorId: "color", time: .at(self.todayRange.lowerBound + 200)
+        )
+        let googleEvent = GoogleCalendarEvent(google, in: timeZone)
         return [
-            holiday, scheduleWithRepeating, todo, scheduleWithoutRepeating
+            holiday, scheduleWithRepeating, todo, scheduleWithoutRepeating, googleEvent
         ]
     }
     
@@ -607,6 +642,7 @@ extension DayEventListViewModelImpleTests {
             "not-repeating-schedule",
             "repeating-schedule-4",
             "todo-with-time",
+            "google",
             "2023-09-30-holiday"
         ]
     }
@@ -661,7 +697,7 @@ extension DayEventListViewModelImpleTests {
         let viewModel = self.makeViewModelWithInitialListLoaded()
         
         // when
-        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels, timeout: 0.1) {
             self.stubTagUsecase.toggleEventTagIsOnCalendar(.default)
         }
         
@@ -683,6 +719,7 @@ extension DayEventListViewModelImpleTests {
             "not-repeating-schedule",
             "repeating-schedule",
             "todo-with-time",
+            "google",
             "holiday",
         ]
     }
@@ -694,6 +731,7 @@ extension DayEventListViewModelImpleTests {
             "not-repeating-schedule",
             "repeating-schedule",
             "todo-with-time",
+            "google",
             "holiday",
         ]
     }
@@ -725,7 +763,7 @@ extension DayEventListViewModelImpleTests {
         let viewModel = self.makeViewModelWithInitialListLoaded(shouldFailMakeTodo: true)
         
         // when
-        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels) {
+        let cvmLists = self.waitOutputs(expect, for: viewModel.cellViewModels, timeout: 0.1) {
             viewModel.addNewTodoQuickly(withName: "pending-quick-todo")
         }
         
@@ -814,7 +852,7 @@ extension DayEventListViewModelImpleTests {
             [TodoEvent.dummy(1), TodoEvent.dummy(2)],
             [TodoEvent.dummy(1)]
         ]
-        self.stubTodoUsecase.stubUncompletedTodos = uncompleted
+        self.stubTodoUsecase.stubUncompletedTodoLists = uncompleted
         return self.makeViewModelWithInitialListLoaded()
     }
     
@@ -941,10 +979,10 @@ private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
     }
     
     private let fakeUncompletedTodos = CurrentValueSubject<[TodoEvent]?, Never>(nil)
-    var stubUncompletedTodos = [[TodoEvent]]()
+    var stubUncompletedTodoLists = [[TodoEvent]]()
     override func refreshUncompletedTodos() {
-        guard !self.stubUncompletedTodos.isEmpty else { return }
-        let first = self.stubUncompletedTodos.removeFirst()
+        guard !self.stubUncompletedTodoLists.isEmpty else { return }
+        let first = self.stubUncompletedTodoLists.removeFirst()
         self.fakeUncompletedTodos.send(first)
     }
     

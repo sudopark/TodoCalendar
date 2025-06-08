@@ -55,6 +55,34 @@ public class ViewAppearance: ObservableObject {
     
     // Google calendar color
     @Published public var googleCalendarColor: GoogleCalendar.Colors?
+    @Published public var googleCalendarTagMap: [String: GoogleCalendar.Tag] = [:]
+    
+    public func googleEventColor(
+        _ colorId: String?, _ calendarId: String
+    ) -> UIColor {
+        
+        if let colorId {
+            return self.googleCalendarColor?.events[colorId]
+                .flatMap { UIColor.from(hex: $0.backgroudHex) } ?? .clear
+        } else {
+            let colorOnCalendar = self.googleCalendarTagMap[calendarId]
+                .flatMap { $0.backgroundColorHex }
+                .flatMap { UIColor.from(hex: $0) }
+            let colorOnPalette = self.googleCalendarTagMap[calendarId]
+                .flatMap { $0.colorId }
+                .flatMap { self.googleCalendarColor?.calendars[$0] }
+                .flatMap { UIColor.from(hex: $0.backgroudHex) }
+            return colorOnCalendar ?? colorOnPalette ?? .clear
+        }
+    }
+    
+    public func googleEventColorOnCalendar(
+        _ colorId: String?, _ calendarId: String
+    ) -> UIColor {
+        guard self.eventOnCalendarShowEventTagColor
+        else { return .clear }
+        return googleEventColor(colorId, calendarId)
+    }
     
     public init(setting: AppearanceSettings, isSystemDarkTheme: Bool) {
         
@@ -86,7 +114,7 @@ public class ViewAppearance: ObservableObject {
     
     public func updateEventColorMap(by allEventTags: [any EventTag]) {
         self.allEventTagColorMap = allEventTags.reduce(into: [EventTagId: UIColor]()) { acc, tag in
-            acc[tag.tagId] = UIColor.from(hex: tag.colorHex)
+            acc[tag.tagId] = tag.colorHex.flatMap { UIColor.from(hex: $0) }
         }
     }
 }

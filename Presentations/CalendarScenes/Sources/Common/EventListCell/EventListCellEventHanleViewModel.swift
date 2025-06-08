@@ -79,6 +79,11 @@ extension EventListCellEventHanleViewModelImple {
                 schedule.eventTimeRawValue
             )
             
+        case let google as GoogleCalendarEventCellViewModel:
+            self.router?.routeToGoogleEventDetail(
+                calendarId: google.calendarId, eventId: google.eventIdentifier
+            )
+            
         case is HolidayEventCellViewModel:
             self.router?.showToast("eventDetail.notSupport::holiday".localized())
             
@@ -130,6 +135,9 @@ extension EventListCellEventHanleViewModelImple {
             
         case .copy:
             self.copyEvent(cellViewModel)
+            
+        case .editGoogleEvent(let link):
+            self.router?.routeToEditGoogleEvent(link)
         }
     }
 

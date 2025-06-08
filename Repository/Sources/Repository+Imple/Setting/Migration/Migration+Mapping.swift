@@ -25,7 +25,8 @@ struct BatchEventTagPayload {
     
     func asJson() -> [String: Any] {
         return self.tags.reduce(into: [String: Any]()) { acc, tag in
-            let params = CustomEventTagMakeParams(name: tag.name, colorHex: tag.colorHex)
+            guard let color = tag.colorHex else { return }
+            let params = CustomEventTagMakeParams(name: tag.name, colorHex: color)
             acc[tag.uuid] = params.asJson()
         }
     }

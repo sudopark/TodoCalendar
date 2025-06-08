@@ -808,6 +808,6 @@ extension EditScheduleEventDetailViewModelImpleTests {
         viewModel.save()
         
         // then
-        self.wait(for: [expect], timeout: self.timeout)
+        self.wait(for: [expect], timeout: 0.1)
     }
 }

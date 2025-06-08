@@ -21,6 +21,14 @@ struct CalendarEvents {
     var currentTodos: [TodoCalendarEvent]
     var eventWithTimes: [any CalendarEvent]
     var customTagMap: [String: CustomEventTag]
+    var googleCalendarColors: GoogleCalendar.Colors?
+    var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
+    
+    init() {
+        self.currentTodos = []
+        self.eventWithTimes = []
+        self.customTagMap = [:]
+    }
     
     func findFirstFutureEvent(from time: TimeInterval, todayRange: Range<TimeInterval>) -> (any CalendarEvent)? {
         return self.eventWithTimes.first { event in
@@ -62,34 +70,46 @@ protocol CalendarEventFetchUsecase {
 // MARK: - CalendarEventFetchUsecaseImple
 
 actor CalendarEventsFetchCacheStore {
-    var currentTodos: [TodoCalendarEvent]?
-    var allCustomTagsMap: [String: CustomEventTag]?
     
-    func updateCurrentTodos(_ todos: [TodoCalendarEvent]) {
-        self.currentTodos = todos
+    struct Storage {
+        var currentTodos: [TodoCalendarEvent]?
+        var allCustomTagsMap: [String: CustomEventTag]?
+        var externalAccountMap: [String: ExternalServiceAccountinfo]?
+        var googleCalendarColors: GoogleCalendar.Colors?
+        var googleCalendarTags: [String: GoogleCalendar.Tag]?
     }
-    func updateAllCustomTagsMap(_ newValue: [String: CustomEventTag]) {
-        self.allCustomTagsMap = newValue
+    
+    private var storage = Storage()
+    
+    func update<T>(_ keyPath: WritableKeyPath<CalendarEventsFetchCacheStore.Storage, T>, _ newValue: T) {
+        self.storage[keyPath: keyPath] = newValue
+    }
+    
+    func value<T>(
+        _ keyPath: KeyPath<CalendarEventsFetchCacheStore.Storage, T>
+    ) -> T {
+        return self.storage[keyPath: keyPath]
     }
 
     func reset() {
-        self.currentTodos = nil
-        self.allCustomTagsMap = nil
+        self.storage = .init()
     }
     
     func resetCurrentTodo() {
-        self.currentTodos = nil
+        self.storage.currentTodos = nil
     }
 }
 
 
-final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase {
+final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase, @unchecked Sendable {
     
     private let todoRepository: any TodoEventRepository
     private let scheduleRepository: any ScheduleEventRepository
     private let foremostEventRepository: any ForemostEventRepository
     private let holidayFetchUsecase: any HolidaysFetchUsecase
     private let eventTagRepository: any EventTagRepository
+    private let externalCalendarIntegrateRepository: any ExternalCalendarIntegrateRepository
+    private let googleCalendarRepository: any GoogleCalendarRepository
     private let cached: CalendarEventsFetchCacheStore
     
     init(
@@ -98,6 +118,8 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase {
         foremostEventRepository: any ForemostEventRepository,
         holidayFetchUsecase: any HolidaysFetchUsecase,
         eventTagRepository: any EventTagRepository,
+        externalCalendarIntegrateRepository: any ExternalCalendarIntegrateRepository,
+        googleCalendarRepository: any GoogleCalendarRepository,
         cached: CalendarEventsFetchCacheStore
     ) {
         self.todoRepository = todoRepository
@@ -105,6 +127,8 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase {
         self.foremostEventRepository = foremostEventRepository
         self.holidayFetchUsecase = holidayFetchUsecase
         self.eventTagRepository = eventTagRepository
+        self.externalCalendarIntegrateRepository = externalCalendarIntegrateRepository
+        self.googleCalendarRepository = googleCalendarRepository
         self.cached = cached
     }
 }
@@ -122,37 +146,80 @@ extension CalendarEventFetchUsecaseImple {
         let schedulesInRange = try await self.scheduleEvents(in: range, timeZone)
         let holidaysInRage = try await self.holidays(in: range, timeZone)
         
-        let eventsWithTime: [any CalendarEvent] = todosInRange + schedulesInRange + holidaysInRage
+        var eventsWithTime: [any CalendarEvent] = todosInRange + schedulesInRange + holidaysInRage
         
-        let events = CalendarEvents(
-            currentTodos: currentTodos,
-            eventWithTimes: eventsWithTime.sorted(),
-            customTagMap: customTagMap
-        )
+        var events = CalendarEvents()
+        events.currentTodos = currentTodos
+        events.customTagMap = customTagMap
+        
+        if await self.checkGoogleCalendarIntegrated() {
+            events.googleCalendarColors = try await self.googleCalendarColors()
+            let tags = try await self.googleCalendarTags()
+            events.googleCalendarTags = tags
+            
+            let allTagIds = Array(tags.keys)
+            let googleEvents = try await self.googleCalendarEvents(allTagIds, in: range, timeZone)
+            eventsWithTime += googleEvents
+        }
+        
+        events.eventWithTimes = eventsWithTime.sorted()
+        
         return events
     }
 
     private func allCustomEventTagMap() async throws -> [String: CustomEventTag] {
-        if let cached = await self.cached.allCustomTagsMap {
+        if let cached = await self.cached.value(\.allCustomTagsMap) {
             return cached
         }
         let tags = try await self.eventTagRepository.loadAllCustomTags()
             .values.first(where: { _ in true }) ?? []
         let tagMap = tags.asDictionary { $0.uuid }
-        await self.cached.updateAllCustomTagsMap(tagMap)
+        await self.cached.update(\.allCustomTagsMap, tagMap)
+        return tagMap
+    }
+    
+    private func checkGoogleCalendarIntegrated() async -> Bool {
+        let serviceId = GoogleCalendarService.id
+        if let cached = await self.cached.value(\.externalAccountMap) {
+            return cached[serviceId] != nil
+        }
+        let accounts = (try? await self.externalCalendarIntegrateRepository.loadIntegratedAccounts()) ?? []
+        let accountMap = accounts.asDictionary{ $0.serviceIdentifier }
+        await self.cached.update(\.externalAccountMap, accountMap)
+        return accountMap[serviceId] != nil
+    }
+    
+    private func googleCalendarColors() async throws -> GoogleCalendar.Colors {
+        if let cached = await self.cached.value(\.googleCalendarColors) {
+            return cached
+        }
+        let colors = try await self.googleCalendarRepository.loadColors()
+            .values.first(where: { _ in true }) ?? .init(calendars: [:], events: [:])
+        await self.cached.update(\.googleCalendarColors, colors)
+        return colors
+    }
+    
+    private func googleCalendarTags() async throws -> [String: GoogleCalendar.Tag] {
+        if let cached = await self.cached.value(\.googleCalendarTags) {
+            return cached
+        }
+        let tags = try await self.googleCalendarRepository.loadCalendarTags()
+            .values.first(where: { _ in true }) ?? []
+        let tagMap = tags.asDictionary { $0.id }
+        await self.cached.update(\.googleCalendarTags, tagMap)
         return tagMap
     }
     
     private func currentTodoEvents(
         _ timeZone: TimeZone
     ) async throws -> [TodoCalendarEvent] {
-        if let cached = await self.cached.currentTodos {
+        if let cached = await self.cached.value(\.currentTodos) {
             return cached
         }
         let todos = (try await self.todoRepository.loadCurrentTodoEvents()
             .values.first(where: { _ in true }) ?? [])
             .map { TodoCalendarEvent($0, in: timeZone) }
-        await self.cached.updateCurrentTodos(todos)
+        await self.cached.update(\.currentTodos, todos)
         return todos
     }
     
@@ -188,6 +255,21 @@ extension CalendarEventFetchUsecaseImple {
         )
         let events = holidays.compactMap { HolidayCalendarEvent($0, in: timeZone) }
         return events.filter { $0.eventTime?.isRoughlyOverlap(with: range) ?? false }
+    }
+    
+    private func googleCalendarEvents(
+        _ calendarIds: [String],
+        in range: Range<TimeInterval>,
+        _ timeZone: TimeZone
+    ) async throws -> [GoogleCalendarEvent] {
+        let events = try await calendarIds.async.reduce(into: [GoogleCalendar.Event]()) { [weak self] acc, id in
+            
+            let list = try await self?.googleCalendarRepository.loadEvents(id, in: range)
+                .values.first(where: { _ in true }) ?? []
+            acc += list
+        }
+        let calendarEvents = events.map { GoogleCalendarEvent($0, in: timeZone) }
+        return calendarEvents
     }
 }
 

@@ -50,4 +50,20 @@ extension IntentReposiotryFactory {
             )
         }
     }
+    
+    func makeExternalCalendarAcountRepository() -> any ExternalCalendarIntegrateRepository {
+        
+        return ExternalCalendarIntegrateRepositoryImple(
+            supportServices: AppEnvironment.supportExternalCalendarServices,
+            removeAPIPerService: [:],
+            keyChainStore: self.base.keyChainStorage
+        )
+    }
+    
+    func makeGoogleCalendarRepository() -> any GoogleCalendarRepository {
+        return GoogleCalendarRepositoryImple(
+            remote: EmptyRemote(),
+            cacheStorage: GoogleCalendarLocalStorageImple(sqliteService: base.commonSqliteService)
+        )
+    }
 }

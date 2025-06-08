@@ -27,6 +27,8 @@ public enum ShareDataKeys: String {
     case foremostEventId
     case uncompletedTodos
     case externalCalendarAccounts
+    case googleCalendarTags
+    case googleCalendarEvents
 }
 
 

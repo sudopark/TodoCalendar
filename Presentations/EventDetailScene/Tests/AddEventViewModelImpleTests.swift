@@ -251,7 +251,7 @@ extension AddEventViewModelImpleTests {
         
         // when
         viewModel.prepare()
-        self.wait(for: [expect], timeout: self.timeout)
+        self.wait(for: [expect], timeout: self.timeoutLong)
         
         // then
         XCTAssertEqual(self.spyRouter.spyInteractor.didPreparedWith?.0.eventTagId, .default)

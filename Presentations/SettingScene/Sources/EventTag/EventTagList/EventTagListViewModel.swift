@@ -27,9 +27,11 @@ protocol EventTagListViewModel: AnyObject, Sendable, EventTagListSceneInteractor
     func close()
     func addNewTag()
     func showTagDetail(_ tagId: EventTagId)
+    func integrateCalendar(serviceId: String)
     
     // presenter
-    var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> { get }
+    var cellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> { get }
+    var externalCalendarSections: AnyPublisher<[ExternalCalendarEventTagListSectionModel], Never> { get }
 }
 
 
@@ -43,16 +45,20 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
     var listener: (any EventTagListSceneListener)?
     
     init(
-        tagUsecase: EventTagUsecase
+        tagUsecase: any EventTagUsecase,
+        googleCalendarUsecase: any GoogleCalendarUsecase
     ) {
-        self.eventTagListUsecase = .init(tagUsecase: tagUsecase)
+        self.eventTagListUsecase = .init(
+            tagUsecase: tagUsecase,
+            googleCalendarUsecase: googleCalendarUsecase
+        )
         self.tagUsecase = tagUsecase
         
         self.internalBinding()
     }
     
     private struct Subject {
-        let cvms = CurrentValueSubject<[EventTagCellViewModel]?, Never>(nil)
+        let cvms = CurrentValueSubject<[BaseCalendarEventTagCellViewModel]?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -60,7 +66,7 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
     
     private func internalBinding() {
         
-        self.eventTagListUsecase.cellViewModels
+        self.eventTagListUsecase.baseCalenadrCellViewModels
             .sink(receiveValue: { [weak self] cvms in
                 self?.subject.cvms.send(cvms)
             })
@@ -82,6 +88,8 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
     func reload() {
         
         self.eventTagListUsecase.reload()
+        
+        self.eventTagListUsecase.reloadExternalCalendarIfNeed()
     }
     
     func close() {
@@ -110,7 +118,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
     }
     
     func eventTag(created newTag: any EventTag) {
-        let newModel = EventTagCellViewModel(newTag)
+        let newModel = BaseCalendarEventTagCellViewModel(newTag)
         let newTags = [newModel] + (self.subject.cvms.value ?? [])
         self.subject.cvms.send(newTags)
         self.listener?.eventTag(created: newTag)
@@ -120,7 +128,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         let cvms = self.subject.cvms.value ?? []
         guard let index = cvms.firstIndex(where: { $0.id == newTag.tagId })
         else { return }
-        let newModel = EventTagCellViewModel(newTag)
+        let newModel = BaseCalendarEventTagCellViewModel(newTag)
         let newTags = cvms |> ix(index) .~ newModel
         self.subject.cvms.send(newTags)
         self.listener?.eventTag(updated: newTag)
@@ -131,6 +139,10 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         self.subject.cvms.send(newTags)
         self.listener?.eventTag(deleted: tagId)
     }
+    
+    func integrateCalendar(serviceId: String) {
+        self.router?.routeToEventSetting()
+    }
 }
 
 
@@ -138,10 +150,15 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
 
 extension EventTagListViewModelImple {
     
-    var cellViewModels: AnyPublisher<[EventTagCellViewModel], Never> {
+    var cellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> {
         return self.subject.cvms
             .compactMap { $0 }
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    var externalCalendarSections: AnyPublisher<[ExternalCalendarEventTagListSectionModel], Never> {
+        
+        return self.eventTagListUsecase.externalCalendars
     }
 }
