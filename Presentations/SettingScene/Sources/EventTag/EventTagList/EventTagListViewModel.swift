@@ -90,7 +90,7 @@ extension EventTagListViewModelImple: EventTagDetailSceneListener {
         self.eventTagListUsecase.reload()
         
         guard FeatureFlag.isEnable(.googleCalendar) else { return }
-        self.eventTagListUsecase.reloadExternalCalendar()
+        self.eventTagListUsecase.reloadExternalCalendarIfNeed()
     }
     
     func close() {

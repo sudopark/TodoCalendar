@@ -72,7 +72,7 @@ extension ColorThemeSelectViewModelImpleTests {
         let viewModel = self.makeViewModel()
         
         // when
-        let models = self.waitFirstOutput(expect, for: viewModel.colorThemeModels) {
+        let models = self.waitFirstOutput(expect, for: viewModel.colorThemeModels, timeout: 0.1) {
             viewModel.prepare()
         } ?? []
         

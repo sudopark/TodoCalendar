@@ -31,7 +31,10 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyRouter = nil
     }
     
-    private func makeViewModel(shouldLoadFail: Bool = false) -> EventTagListViewModelImple {
+    private func makeViewModel(
+        shouldLoadFail: Bool = false,
+        isGoogleCalendarIntegrated: Bool = false
+    ) -> EventTagListViewModelImple {
         let usecase = StubEventTagUsecase()
         if shouldLoadFail {
             usecase.allTagsLoadResult = .failure(RuntimeError("failed"))
@@ -42,6 +45,9 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             usecase.allTagsLoadResult = .success(tags)
         }
         let googleUsecae = StubGoogleCalendarUsecase()
+        if isGoogleCalendarIntegrated {
+            googleUsecae.updateHasAccount(.init(GoogleCalendarService.id))
+        }
         let viewModel = EventTagListViewModelImple(
             tagUsecase: usecase,
             googleCalendarUsecase: googleUsecae
@@ -88,7 +94,7 @@ extension EventTagListViewModelImpleTests {
         // given
         FeatureFlag.enable(.googleCalendar)
         let expect = expectation(description: "외부 캘린더 목록 제공")
-        let viewModel = self.makeViewModel()
+        let viewModel = self.makeViewModel(isGoogleCalendarIntegrated: true)
         
         // when
         let sections = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
@@ -145,7 +151,7 @@ extension EventTagListViewModelImpleTests {
         // given
         let expect = expectation(description: "wait initial list")
         expect.assertForOverFulfill = false
-        let viewModel = self.makeViewModel()
+        let viewModel = self.makeViewModel(isGoogleCalendarIntegrated: true)
         
         // when
         let _ = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
