@@ -259,7 +259,7 @@ extension GoogleCalendarUsecaseImple {
 }
 
 
-private extension GoogleCalendar.Tag {
+public extension GoogleCalendar.Tag {
     
     var isHoliday: Bool {
         return id.hasSuffix("holiday@group.v.calendar.google.com")
