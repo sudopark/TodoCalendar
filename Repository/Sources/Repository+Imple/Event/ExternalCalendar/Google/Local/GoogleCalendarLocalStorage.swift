@@ -31,6 +31,7 @@ public protocol GoogleCalendarLocalStorage: Sendable {
         _ defaultTimeZone: String?,
         _ origin: GoogleCalendar.EventOrigin
     ) async throws
+    func resetAll() async throws
 }
 
 
@@ -185,6 +186,15 @@ extension GoogleCalendarLocalStorageImple {
                 let timeEntity = Times.Entity(event.eventId, event.eventTime, nil)
                 try db.insert(Times.self, entities: [timeEntity])
             }
+        }
+    }
+    
+    public func resetAll() async throws {
+
+        try await self.sqliteService.async.run { db in
+            try db.dropTable(Colors.self)
+            try db.dropTable(Calendars.self)
+            try db.dropTable(Events.self)
         }
     }
 }

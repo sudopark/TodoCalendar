@@ -612,6 +612,8 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
             .mapAsAnyError()
             .eraseToAnyPublisher()
     }
+    
+    func resetCache() async throws { }
 }
 
 private final class SpyGoogleCalendarViewAppearanceStore: GoogleCalendarViewAppearanceStore, @unchecked Sendable {

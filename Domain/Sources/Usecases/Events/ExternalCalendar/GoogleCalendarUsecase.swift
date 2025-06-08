@@ -106,6 +106,7 @@ extension GoogleCalendarUsecaseImple {
                     self?.sharedDataStore.delete(
                         ShareDataKeys.googleCalendarEvents.rawValue
                     )
+                    self?.clearGoogleCalendarCache()
                 }
             })
             .store(in: &self.cancelBag)
@@ -136,6 +137,12 @@ extension GoogleCalendarUsecaseImple {
         self.sharedDataStore.delete(ShareDataKeys.googleCalendarTags.rawValue)
         self.appearanceStore.clearGoogleCalendarColors()
         self.eventTagUsecase.resetExternalCalendarOffTagId(self.googleService.identifier)
+    }
+    
+    private func clearGoogleCalendarCache() {
+        Task {
+            try await self.repository.resetCache()
+        }
     }
     
     public var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
