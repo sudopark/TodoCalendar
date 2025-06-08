@@ -105,8 +105,14 @@ extension EventTagListViewUsecase {
             .store(in: &self.cancellables)
     }
     
-    func reloadExternalCalendar() {
-        self.googleCalendarUsecase.refreshGoogleCalendarEventTags()
+    func reloadExternalCalendarIfNeed() {
+        self.googleCalendarUsecase.integratedAccount
+            .first()
+            .sink(receiveValue: { [weak self] account in
+                guard account != nil else { return }
+                self?.googleCalendarUsecase.refreshGoogleCalendarEventTags()
+            })
+            .store(in: &self.cancellables)
     }
 }
 

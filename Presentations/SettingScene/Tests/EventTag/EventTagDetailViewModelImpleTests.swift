@@ -281,7 +281,7 @@ extension EventTagDetailViewModelImpleTests {
         viewModel.delete()
         
         // then
-        self.wait(for: [expect], timeout: self.timeout)
+        self.wait(for: [expect], timeout: 0.1)
     }
     
     func testViewModel_whenDeleteTag_updateIsProcessing() {
