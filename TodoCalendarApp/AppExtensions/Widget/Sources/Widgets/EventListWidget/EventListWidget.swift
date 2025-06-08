@@ -84,7 +84,7 @@ struct EventListView: View {
             timeTextView(model.periodText)
                 .frame(width: 30)
             
-            tagLineView(model.tagId)
+            tagLineView(model)
             
             nameAndActionView(model)
         }
@@ -129,14 +129,28 @@ struct EventListView: View {
         }
     }
     
-    private func tagLineView(_ tagId: EventTagId?) -> some View {
+    private func tagLineView(_ cvm: any EventCellViewModel) -> some View {
         let defColors = EventTagColorSet(model.defaultTagColorSetting)
-        let color = switch tagId {
-        case .holiday: defColors.holiday
-        case .default: defColors.defaultColor
-        case .custom(let id): self.model.customTagMap[id]?.colorHex.flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor
-        default: defColors.defaultColor
-        }
+        let color = {
+            switch cvm.tagId {
+            case .holiday:
+                return defColors.holiday
+            case .default:
+                return defColors.defaultColor
+            case .custom(let id):
+                return self.model.customTagMap[id]?.colorHex.flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor
+            case .externalCalendar(let serviceId, _) where serviceId == GoogleCalendarService.id:
+                let appearance = ViewAppearance(
+                    google: model.googleCalendarColors,
+                    model.googleCalendarTags
+                )
+                let google = cvm as? GoogleCalendarEventCellViewModel
+                return google.flatMap { appearance.googleEventColor($0.colorId, $0.calendarId) } ?? .clear
+                
+            default:
+                return defColors.defaultColor
+            }
+        }()
         
         return RoundedRectangle(cornerRadius: 1.5)
             .fill(color.asColor)
@@ -228,6 +242,20 @@ struct EventListWidget: Widget {
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .configurationDisplayName("widget.events::name".localized())
         .description("widget.common::explain".localized())
+    }
+}
+
+extension ViewAppearance {
+    
+    convenience init(google colors: GoogleCalendar.Colors, _ tags: [String: GoogleCalendar.Tag]) {
+        self.init(
+            setting: .init(
+                calendar: .init(colorSetKey: .systemTheme, fontSetKey: .systemDefault),
+                defaultTagColor: .default),
+            isSystemDarkTheme: false
+        )
+        self.googleCalendarColor = colors
+        self.googleCalendarTagMap = tags
     }
 }
 
