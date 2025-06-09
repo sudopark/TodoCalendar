@@ -205,14 +205,21 @@ extension GoogleCalendarUsecaseImple {
         _ calendarId: String, in period: Range<TimeInterval>
     ) {
        
-        let updateEvents: ([GoogleCalendar.Event]) -> Void = { [weak self] events in
+        let updateEvents: ([GoogleCalendar.Event]) -> Void = { [weak self] refreshed in
             
-            let newMap = events.asDictionary { $0.eventId }
             self?.sharedDataStore.update(
                 [String: GoogleCalendar.Event].self,
                 key: ShareDataKeys.googleCalendarEvents.rawValue
             ) { old in
-                return (old ?? [:]).merging(newMap) { $1 }
+                let cachedInRange = (old ?? [:]).filter {
+                    $0.value.eventTime.isRoughlyOverlap(with: period)
+                }
+                let newMap = refreshed.asDictionary { $0.eventId }
+                let removed = cachedInRange.filter {
+                    $0.value.calendarId == calendarId && newMap[$0.key] == nil
+                }
+                let eventWithoutRemoved = (old ?? [:]).filter { removed[$0.key] == nil }
+                return refreshed.reduce(into: eventWithoutRemoved) { $0[$1.eventId] = $1 }
             }
         }
         

@@ -43,11 +43,13 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
     
     private func makeUsecase(
         hasAccount: Bool,
-        customCalendarsStubbing: [GoogleCalendar.Tag]? = nil
+        customCalendarsStubbing: [GoogleCalendar.Tag]? = nil,
+        eventsLoadMockingSubject: PassthroughSubject<[GoogleCalendar.Event], any Error>? = nil
     ) -> GoogleCalendarUsecaseImple {
         let repository = PrivateStubRepository(
             customCalendarsStubbing: customCalendarsStubbing
         )
+        repository.eventsMocking = eventsLoadMockingSubject
         let tags = (0..<10).map { EventTagId.custom("id:\($0)") }
         tags.forEach { id in
             self.stubEventTagUsecae.toggleEventTagIsOnCalendar(id)
@@ -474,6 +476,45 @@ extension GoogleCalendarUsecaseImpleTests {
         #expect(calendarIds == ["tag2"])
     }
     
+    @Test func usecase_whenRefreshEventsInRange_excludeRemovedEvent() async throws {
+        // given
+        let expect = expectConfirm("이벤트 목록 새로고침시에 삭제된 이벤트는 제외")
+        expect.count = 3
+        let mocking = PassthroughSubject<[GoogleCalendar.Event], any Error>()
+        let usecase = self.makeUsecase(
+            hasAccount: true,
+            customCalendarsStubbing: [.init(id: "tag1", name: "some")],
+            eventsLoadMockingSubject: mocking
+        )
+        usecase.prepare()
+        
+        let dummyEvents = (0..<20).map { int -> GoogleCalendar.Event in
+            return .init(
+                "\(int)-tag1", "tag1", name: "some", colorId: "some",
+                time: .period(0..<10))
+        }
+        
+        // when
+        let eventSource = usecase.events(in: 0..<20)
+        let eventList = try await self.outputs(expect, for: eventSource) {
+            try await Task.sleep(for: .milliseconds(10))
+            
+            usecase.refreshEvents(in: 0..<10)
+            try await Task.sleep(for: .milliseconds(10))
+            mocking.send(dummyEvents)
+            
+            try await Task.sleep(for: .milliseconds(10))
+            let eventsWithout2 = dummyEvents.filter { $0.eventId != "2-tag1"}
+            mocking.send(eventsWithout2)
+        }
+        
+        // then
+        let hasEvent2s = eventList.map { es in
+            return es.first(where: { $0.eventId == "2-tag1" }) != nil
+        }
+        #expect(hasEvent2s == [false, true, false])
+    }
+    
     @Test func usecase_loadEventDetail() async throws {
         // given
         let expect = expectConfirm("구글 이벤트 디테일 조회")
@@ -589,9 +630,15 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
             .eraseToAnyPublisher()
     }
     
+    var eventsMocking: PassthroughSubject<[GoogleCalendar.Event], any Error>?
     func loadEvents(
         _ calendarId: String, in period: Range<TimeInterval>
     ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        
+        if let mocking = self.eventsMocking {
+            return mocking.eraseToAnyPublisher()
+        }
+        
         let events = (0..<10).map { int -> GoogleCalendar.Event in
             return .init(
                 "event:\(int)-\(calendarId)", calendarId,
