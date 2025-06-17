@@ -26,6 +26,7 @@ final class GoogleCalendarEventDetailViewState: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     
     @Published var hasDetailLink: Bool = false
+    @Published var eventColor: GoogleCalendarEventColorModel?
     @Published var eventName: String?
     @Published var timeText: SelectedTime?
     @Published var repeatOptionText: String?
@@ -45,6 +46,13 @@ final class GoogleCalendarEventDetailViewState: ObservableObject {
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] has in
                 self?.hasDetailLink = has
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.eventColorModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.eventColor = model
             })
             .store(in: &self.cancellables)
         
@@ -238,8 +246,8 @@ struct GoogleCalendarEventDetailView: View {
     }
     
     private var selectedTagColor: Color {
-        guard let model = self.state.calendarModel else { return .clear }
-        return self.appearance.googleEventColor(model.colorId, model.calenarId).asColor
+        guard let model = self.state.eventColor else { return .clear }
+        return self.appearance.googleEventColor(model.colorId, model.calendarId).asColor
     }
     
     private var nameView: some View {
@@ -567,7 +575,7 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
         state.repeatOptionText = "반복 옵션 텍스트"
         state.location = "장소 텍스트"
         state.calendarModel = .init(
-            calenarId: "some", name: "some@calendar.com", colorId: "colorId"
+            calenarId: "some", name: "some@calendar.com"
         )
         state.descriptionHTMLText = """
         그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?<br><ol><li>목차1</li><li>목차2</li></ol><br><ul><li>목차3</li><li>목차4</li></ul><br><a href="https://www.google.com">링크다잉</a>

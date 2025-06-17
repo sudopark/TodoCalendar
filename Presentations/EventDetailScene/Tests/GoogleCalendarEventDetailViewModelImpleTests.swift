@@ -47,6 +47,21 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
     
+    @Test func viewModel_provideEventColorModel() async throws {
+        // given
+        let expect = expectConfirm("이벤트 색상 정보 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let model = try await self.firstOutput(expect, for: viewModel.eventColorModel) {
+            viewModel.refresh()
+        }
+        
+        // then
+        #expect(model?.colorId == "color_id")
+        #expect(model?.calendarId == "g:7")
+    }
+    
     @Test func viewModel_provideEventName() async throws {
         // given
         let expect = expectConfirm("이벤트 이름정보 제공")
@@ -94,8 +109,6 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         // then
         #expect(model?.calenarId == "g:7")
         #expect(model?.name == "g:7")
-        #expect(model?.colorId == "color")
-        #expect(model?.colorHex == "hex")
     }
     
     @Test func viewModel_provideLocation() async throws {
@@ -327,6 +340,7 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
             |> \.attachments .~ [attachment]
             |> \.attendees .~ attendees
             |> \.conferenceData .~ data
+            |> \.colorId .~ "color_id"
         
         let stub = additionalStubbing?(origin) ?? origin
         
