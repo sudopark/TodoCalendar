@@ -45,8 +45,11 @@ struct AttendeeListViewModel: Equatable {
 struct GoogleCalendarModel: Equatable {
     let calenarId: String
     let name: String
-    var colorId: String?
-    var colorHex: String?
+}
+
+struct GoogleCalendarEventColorModel: Equatable {
+    let colorId: String?
+    let calendarId: String
 }
 
 struct AttachmentModel: Equatable {
@@ -123,6 +126,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     
     // presenter
     var hasDetailLink: AnyPublisher<Bool, Never> { get }
+    var eventColorModel: AnyPublisher<GoogleCalendarEventColorModel, Never> { get }
     var eventName: AnyPublisher<String, Never> { get }
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOPtion: AnyPublisher<String?, Never> { get }
@@ -250,6 +254,17 @@ extension GoogleCalendarEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
     
+    var eventColorModel: AnyPublisher<GoogleCalendarEventColorModel, Never> {
+        let calendarId = self.calendarId
+        return self.subject.origin
+            .compactMap { $0 }
+            .map {
+                GoogleCalendarEventColorModel(colorId: $0.colorId, calendarId: calendarId)
+            }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
     var eventName: AnyPublisher<String, Never> {
         
         return self.subject.origin
@@ -356,8 +371,6 @@ extension GoogleCalendarEventDetailViewModelImple {
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> {
         let transform: (GoogleCalendar.Tag) -> GoogleCalendarModel = { tag in
             return .init(calenarId: tag.id, name: tag.name)
-                |> \.colorId .~ tag.colorId
-                |> \.colorHex .~ tag.backgroundColorHex
         }
         return self.subject.calendarTag
             .compactMap { $0 }
