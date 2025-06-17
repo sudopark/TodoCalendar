@@ -488,6 +488,7 @@ struct GoogleCalendarEventDetailView: View {
             HTMLAttributedTextView(htmlText: html) { url in
                 self.eventHandlers.selectURL(url)
             }
+            .frame(maxWidth: .infinity)
             
             Spacer()
         }
