@@ -243,6 +243,9 @@ struct GoogleCalendarEventDetailView: View {
             }
         }
         .background(appearance.colorSet.bg0.asColor)
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            self.eventHandlers.onAppear()
+        }
     }
     
     private var selectedTagColor: Color {
