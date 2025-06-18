@@ -57,6 +57,8 @@ public protocol CalendarEvent: Sendable {
     var eventTagId: EventTagId { get }
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
+    
+    var compareKey: String { get }
 }
 
 extension Array where Element == any CalendarEvent {
@@ -239,6 +241,10 @@ public struct GoogleCalendarEvent: CalendarEvent {
         self.htmlLink = event.htmlLink
         self.isForemost = false
         self.isRepeating = false
+    }
+    
+    public var compareKey: String {
+        return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.colorId ?? "nil")-\(self.htmlLink ?? "nil")"
     }
 }
 
