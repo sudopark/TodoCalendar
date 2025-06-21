@@ -50,5 +50,5 @@ struct AppEnvironment {
         return [googleCalendarService]
     }
     
-    static let dbVersion: Int32 = 1
+    static let dbVersion: Int32 = 2
 }
