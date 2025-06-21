@@ -23,7 +23,7 @@ public protocol EventTagUsecase: AnyObject, Sendable {
     
     func prepare()
     func refreshCustomTags(_ ids: [String])
-    func eventTag(id: EventTagId) -> AnyPublisher<any EventTag, Never>
+    func eventTag(id: EventTagId) -> AnyPublisher<(any EventTag)?, Never>
     func eventTags(_ ids: [EventTagId]) -> AnyPublisher<[EventTagId: any EventTag], Never>
     func loadAllEventTags() -> AnyPublisher<[any EventTag], any Error>
     var sharedEventTags: AnyPublisher<[EventTagId: any EventTag], Never> { get }
@@ -179,9 +179,9 @@ extension EventTagUsecaseImple {
             .store(in: &self.cancellables)
     }
     
-    public func eventTag(id: EventTagId) -> AnyPublisher<any EventTag, Never> {
+    public func eventTag(id: EventTagId) -> AnyPublisher<(any EventTag)?, Never> {
         return self.sharedDataStore.observe([EventTagId: any EventTag].self, key: self.shareKey)
-            .compactMap { $0?[id] }
+            .map { $0?[id] }
             .eraseToAnyPublisher()
     }
     
