@@ -206,11 +206,20 @@ extension GoogleCalendarEventDetailViewModelImple {
         }
         eventOrigin
             .sink(receiveValue: { [weak self] event in
+                if event.status == .cancelled {
+                    self?.alertEventCanceled()
+                    return
+                }
                 self?.subject.origin.send(event)
             }, receiveError: { [weak self] error in
                 self?.router?.showError(error)
             })
             .store(in: &self.cancellables)
+    }
+    
+    private func alertEventCanceled() {
+        self.router?.showToast("eventDetail::gogoleEvent::canceled::message".localized())
+        self.router?.closeScene()
     }
     
     func editEvent() {
