@@ -97,11 +97,19 @@ extension GoogleCalendar {
         public var attachments: [Attachment]?
         public var eventType: String?
         
+        public var status: Status?
+        
         public init(
             id: String, summary: String
         ) {
             self.id = id
             self.summary = summary
+        }
+        
+        public enum Status: String, Decodable, Sendable {
+            case confirmed
+            case tentative
+            case cancelled
         }
 
         public struct Creator: Codable, Sendable {

@@ -361,6 +361,8 @@ extension GoogleCalendarRepositoryImple_Tests {
         
         #expect(origin?.attachments == nil)
         #expect(origin?.eventType == "default")
+        
+        #expect(origin?.status == .confirmed)
     }
     
     private var dummyOldEventListsAndEvents: (GoogleCalendar.EventOriginValueList, GoogleCalendar.Event) {
