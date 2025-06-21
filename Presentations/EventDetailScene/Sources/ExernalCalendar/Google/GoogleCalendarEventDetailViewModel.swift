@@ -45,8 +45,11 @@ struct AttendeeListViewModel: Equatable {
 struct GoogleCalendarModel: Equatable {
     let calenarId: String
     let name: String
-    var colorId: String?
-    var colorHex: String?
+}
+
+struct GoogleCalendarEventColorModel: Equatable {
+    let colorId: String?
+    let calendarId: String
 }
 
 struct AttachmentModel: Equatable {
@@ -123,6 +126,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     
     // presenter
     var hasDetailLink: AnyPublisher<Bool, Never> { get }
+    var eventColorModel: AnyPublisher<GoogleCalendarEventColorModel, Never> { get }
     var eventName: AnyPublisher<String, Never> { get }
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
     var repeatOPtion: AnyPublisher<String?, Never> { get }
@@ -202,11 +206,20 @@ extension GoogleCalendarEventDetailViewModelImple {
         }
         eventOrigin
             .sink(receiveValue: { [weak self] event in
+                if event.status == .cancelled {
+                    self?.alertEventCanceled()
+                    return
+                }
                 self?.subject.origin.send(event)
             }, receiveError: { [weak self] error in
                 self?.router?.showError(error)
             })
             .store(in: &self.cancellables)
+    }
+    
+    private func alertEventCanceled() {
+        self.router?.showToast("eventDetail::gogoleEvent::canceled::message".localized())
+        self.router?.closeScene()
     }
     
     func editEvent() {
@@ -246,6 +259,17 @@ extension GoogleCalendarEventDetailViewModelImple {
         return self.subject.origin
             .compactMap { $0 }
             .map { $0.htmlLink != nil }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var eventColorModel: AnyPublisher<GoogleCalendarEventColorModel, Never> {
+        let calendarId = self.calendarId
+        return self.subject.origin
+            .compactMap { $0 }
+            .map {
+                GoogleCalendarEventColorModel(colorId: $0.colorId, calendarId: calendarId)
+            }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
@@ -356,8 +380,6 @@ extension GoogleCalendarEventDetailViewModelImple {
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> {
         let transform: (GoogleCalendar.Tag) -> GoogleCalendarModel = { tag in
             return .init(calenarId: tag.id, name: tag.name)
-                |> \.colorId .~ tag.colorId
-                |> \.colorHex .~ tag.backgroundColorHex
         }
         return self.subject.calendarTag
             .compactMap { $0 }

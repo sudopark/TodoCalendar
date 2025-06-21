@@ -97,13 +97,15 @@ extension GoogleCalendar {
         public var attachments: [Attachment]?
         public var eventType: String?
         
+        public var status: EventStatus?
+        
         public init(
             id: String, summary: String
         ) {
             self.id = id
             self.summary = summary
         }
-
+        
         public struct Creator: Codable, Sendable {
             public var id: String?
             public var email: String?
@@ -195,6 +197,12 @@ extension GoogleCalendar {
         public init() { }
     }
     
+    public enum EventStatus: String, Decodable, Sendable {
+        case confirmed
+        case tentative
+        case cancelled
+    }
+
     public struct Event: Sendable {
         public let eventId: String
         public let calendarId: String
@@ -203,6 +211,7 @@ extension GoogleCalendar {
         public var colorId: String?
         public let eventTime: EventTime
         public var htmlLink: String?
+        public var status: EventStatus?
         
         public var nextRepeatingTimes: [RepeatingTimes] = []
         public var repeatingTimeToExcludes: Set<String> = []
@@ -238,6 +247,7 @@ extension GoogleCalendar {
             self.htmlLink = origin.htmlLink
             let start = origin.start?.supportEventTimeElemnt(defaultTimeZone)
             let end = origin.end?.supportEventTimeElemnt(defaultTimeZone)
+            self.status = origin.status
             
             switch (start, end) {
             case (.period(let st), .period(let et)):

@@ -102,6 +102,7 @@ struct GoogleCalendarEventOriginTable: Table {
         case conferenceData
         case attachments
         case eventType
+        case status
         
         var dataType: ColumnDataType {
             switch self {
@@ -126,6 +127,7 @@ struct GoogleCalendarEventOriginTable: Table {
             case .conferenceData: return .text([])
             case .attachments: return .text([])
             case .eventType: return .text([])
+            case .status: return .text([])
             }
         }
     }
@@ -154,6 +156,14 @@ struct GoogleCalendarEventOriginTable: Table {
     typealias EntityType = Entity
     static let tableName: String = "google_calendar_event_origin"
     
+    static func migrateStatement(for version: Int32) -> String? {
+        switch version {
+        case 1:
+            return Self.addColumnStatement(.status)
+        default: return nil
+        }
+    }
+    
     static func scalar(
         _ entity: Entity, for column: Columns
     ) -> (any ScalarType)? {
@@ -180,6 +190,7 @@ struct GoogleCalendarEventOriginTable: Table {
         case .conferenceData: return entity.origin.conferenceData?.asText()
         case .attachments: return entity.origin.attachments?.asText()
         case .eventType: return entity.origin.eventType
+        case .status: return entity.origin.status?.rawValue
         }
     }
     
@@ -209,6 +220,8 @@ extension GoogleCalendar.EventOrigin {
         self.conferenceData = cursor.nextDecodable()
         self.attachments = cursor.nextDecodable()
         self.eventType = cursor.next()
+        let statusText: String? = cursor.next()
+        self.status = statusText.flatMap { .init(rawValue: $0) }
     }
 }
 

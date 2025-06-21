@@ -35,9 +35,12 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
             return ScheduleEvent(uuid: "sc:\(int)", name: "sc", time: .at(0))
                 |> \.eventTagId .~ .default
         }
-        let googles = (0..<3).map { int in
-            return GoogleCalendar.Event("g:\(int)", "google", name: "g", colorId: "color", time: .at(0))
-                |> \.eventTagId .~ .externalCalendar(serviceId: GoogleCalendarService.id, id: "google")
+        let googles = (0..<4).map { int in
+            return GoogleCalendar.Event(
+                "g:\(int)", "google", name: "g", colorId: "color", time: .at(0)
+            )
+            |> \.eventTagId .~ .externalCalendar(serviceId: GoogleCalendarService.id, id: "google")
+            |> \.status .~ (int == 3 ? .cancelled : .confirmed)
         }
         let currentTodos = (0..<3).map { int in
             return TodoEvent(uuid: "c-t:\(int)", name: "curent")

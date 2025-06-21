@@ -241,6 +241,7 @@ extension EventSettingViewModelImple {
         let asEventTag: (EventTagId) -> AnyPublisher<BaseCalendarEventTagCellViewModel, Never> = { [weak self] id in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
             return self.eventTagUsecase.eventTag(id: id)
+                .compactMap { $0 }
                 .map { .init($0) }
                 .eraseToAnyPublisher()
         }

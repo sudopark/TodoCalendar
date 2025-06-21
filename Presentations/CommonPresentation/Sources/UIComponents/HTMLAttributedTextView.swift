@@ -14,7 +14,7 @@ public struct HTMLAttributedTextView: UIViewRepresentable {
     
     @EnvironmentObject private var appearance: ViewAppearance
     let attributeText: NSAttributedString
-    var onLinkTap: ((URL) -> Void)?
+    let onLinkTap: ((URL) -> Void)?
     
     public init(_ attributeText: NSAttributedString, _ onLinkTap: ((URL) -> Void)? = nil) {
         self.attributeText = attributeText
@@ -32,6 +32,7 @@ public struct HTMLAttributedTextView: UIViewRepresentable {
                 )
         else {
             self.attributeText = .init()
+            self.onLinkTap = onLinkTap
             return
         }
         self.attributeText = nsAttributeText
@@ -47,16 +48,42 @@ public struct HTMLAttributedTextView: UIViewRepresentable {
         textView.textContainer.lineFragmentPadding = 0
         textView.backgroundColor = .clear
         textView.delegate = context.coordinator
+        
+        textView.setContentHuggingPriority(.defaultLow, for: .vertical)
+        textView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        textView.setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
+        textView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
         return textView
     }
     
     public func updateUIView(_ uiView: UITextView, context: Context) {
+        guard uiView.attributedText.string != self.attributeText.string
+        else { return }
         let fullRange = NSRange(location: 0, length: attributeText.length)
         let mutableText = NSMutableAttributedString(attributedString: self.attributeText)
         mutableText.addAttributes([
             .foregroundColor: appearance.colorSet.text1
         ], range: fullRange)
         uiView.attributedText = mutableText
+    }
+    
+    public func sizeThatFits(
+        _ proposal: ProposedViewSize, uiView: UITextView, context: Context
+    ) -> CGSize? {
+        
+        guard let width = proposal.width, width > 0, !width.isInfinite
+        else {
+            return nil
+        }
+        
+        let proposedSize = CGSize(width: width, height: .infinity)
+        let fittingSize = uiView.systemLayoutSizeFitting(
+            proposedSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+        
+        return .init(width: proposedSize.width, height: fittingSize.height)
     }
     
     public func makeCoordinator() -> Coordinator {

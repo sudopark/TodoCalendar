@@ -24,14 +24,17 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
     private let spyRouter = SpyRouter()
     
     private func makeViewModel(
-        recurrence: String? = nil
+        recurrence: String? = nil,
+        isCanceled: Bool = false
     ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
         
         let calendarUsecase = PrivateStubGoogleCalendarUsecase()
         calendarUsecase.additionalStubbing = { stub in
-            stub |> \.recurrence .~ (recurrence.map { [$0] })
+            stub
+                |> \.recurrence .~ (recurrence.map { [$0] })
+                |> \.status .~ (isCanceled ? .cancelled : .confirmed)
         }
         calendarUsecase.refreshGoogleCalendarEventTags()
         
@@ -46,6 +49,21 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
 }
 
 extension GoogleCalendarEventDetailViewModelImpleTests {
+    
+    @Test func viewModel_provideEventColorModel() async throws {
+        // given
+        let expect = expectConfirm("이벤트 색상 정보 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let model = try await self.firstOutput(expect, for: viewModel.eventColorModel) {
+            viewModel.refresh()
+        }
+        
+        // then
+        #expect(model?.colorId == "color_id")
+        #expect(model?.calendarId == "g:7")
+    }
     
     @Test func viewModel_provideEventName() async throws {
         // given
@@ -94,8 +112,6 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         // then
         #expect(model?.calenarId == "g:7")
         #expect(model?.name == "g:7")
-        #expect(model?.colorId == "color")
-        #expect(model?.colorHex == "hex")
     }
     
     @Test func viewModel_provideLocation() async throws {
@@ -278,6 +294,25 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         // then
         #expect(self.spyRouter.didOpenSafariPath == "url")
     }
+    
+    @Test func viewModel_whenRefreshAndCanceled_showToastAndClose() async throws {
+        // given
+        let viewModel = self.makeViewModel(isCanceled: true)
+        
+        // when
+        try await confirmation("취소된 이벤트의 경우 취소되었음을 알림") { confirm in
+            self.spyRouter.didCloseCallback = {
+                confirm.confirm()
+            }
+            
+            viewModel.refresh()
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        
+        // then
+        #expect(self.spyRouter.didShowToastWithMessage == "eventDetail::gogoleEvent::canceled::message".localized())
+        
+    }
 }
 
 private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase, @unchecked Sendable {
@@ -327,6 +362,7 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
             |> \.attachments .~ [attachment]
             |> \.attendees .~ attendees
             |> \.conferenceData .~ data
+            |> \.colorId .~ "color_id"
         
         let stub = additionalStubbing?(origin) ?? origin
         

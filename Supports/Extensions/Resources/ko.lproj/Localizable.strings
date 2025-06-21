@@ -237,6 +237,7 @@
 "eventDetail::gogoleEvent::conference::passCode" = "패스코드";
 "eventDetail::gogoleEvent::conference::password" = "비밀번호";
 "eventDetail::gogoleEvent::copy::message" = "클립보드에 복사되었습니다.";
+"eventDetail::gogoleEvent::canceled::message" = "취소된 일정입니다.";
 
 // MARK: - event tag
 

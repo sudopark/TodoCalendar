@@ -56,12 +56,14 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
         return Just(tags).eraseToAnyPublisher()
     }
     
-    public func eventTag(id: EventTagId) -> AnyPublisher<any EventTag, Never> {
-        let tag: any EventTag = switch id {
+    public func eventTag(id: EventTagId) -> AnyPublisher<(any EventTag)?, Never> {
+        let tag: (any EventTag)? = switch id {
         case .default:
             DefaultEventTag.default("default")
         case .holiday:
             DefaultEventTag.holiday("holiday")
+        case .custom(let customId) where customId == "not_exists":
+            nil
         case .custom(let customId):
             CustomEventTag(uuid: customId, name: "some", colorHex: "0x000000")
         case .externalCalendar:
