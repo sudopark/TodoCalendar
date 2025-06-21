@@ -252,9 +252,9 @@ extension EventTagUsecaseImpleTests {
         
         // when
         let tagSource = usecase.eventTag(id: .custom("some"))
-        let tag = self.waitFirstOutput(expect, for: tagSource) {
+        let tag = self.waitFirstOutput(expect, for: tagSource.dropFirst()) {
             usecase.refreshCustomTags(["some"])
-        }
+        } ?? nil
         
         // then
         XCTAssertEqual(tag?.tagId, .custom("some"))

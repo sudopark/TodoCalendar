@@ -536,6 +536,21 @@ extension EventDetailInputViewModelTests {
         XCTAssertEqual(selectedTagIds, [.custom("some"), .holiday])
     }
     
+    func testViewModel_whenSelectedTagNotExists_provideDefaultTag() {
+        // given
+        let expect = expectation(description: "매칭되는 태그 존재 안하는 경우 디폴트 태그 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let tag = self.waitFirstOutput(expect, for: viewModel.selectedTag) {
+            let basic = self.dummyPreviousBasic |> \.eventTagId .~ .custom("not_exists")
+            viewModel.prepared(basic: basic, additional: self.dummyPreviousAddition)
+        }
+        
+        // then
+        XCTAssertEqual(tag?.tagId, .default)
+    }
+    
     // 반복옵션 선택
     func testViewModel_whenRepeatTimeSelected_update() {
         // given

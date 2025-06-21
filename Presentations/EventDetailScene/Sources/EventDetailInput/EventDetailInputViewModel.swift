@@ -507,10 +507,26 @@ extension EventDetailInputViewModelImple {
     }
     
     var selectedTag: AnyPublisher<SelectedTag, Never> {
-        let transform: (EventTagId) -> AnyPublisher<SelectedTag, Never> = { [weak self] tagId in
+        let transform: ((any EventTag)?, (any EventTag)?) -> SelectedTag?
+        transform = { customTag, defaultTag in
+            guard let tag = customTag ?? defaultTag else { return nil }
+            return SelectedTag(tag)
+        }
+        
+        return Publishers.CombineLatest(
+            self.eventTag,
+            self.eventTagUsecase.eventTag(id: .default)
+        )
+        .compactMap(transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+    
+    private var eventTag: AnyPublisher<(any EventTag)?, Never> {
+        
+        let transform: (EventTagId) -> AnyPublisher<(any EventTag)?, Never> = { [weak self] tagId in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
             return self.eventTagUsecase.eventTag(id: tagId)
-                .map { SelectedTag($0) }
                 .eraseToAnyPublisher()
         }
         
@@ -518,7 +534,6 @@ extension EventDetailInputViewModelImple {
             .compactMap { $0 }
             .map { $0.basic.eventTagId }
             .flatMap(transform)
-            .removeDuplicates()
             .eraseToAnyPublisher()
     }
     
