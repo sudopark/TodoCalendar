@@ -132,7 +132,7 @@ extension CalendarEventListhUsecaseImple {
         return Publishers.CombineLatest4(
             self.todoUsecase.todoEvents(in: range),
             self.scheduleUsecase.scheduleEvents(in: range),
-            self.googleCalendarUsecase.events(in: range),
+            self.googleCalendarUsecase.eventsWithoutCanceled(in: range),
             self.subject.offTagIds
         )
         .map { (($0, $1, $2), $3) }
@@ -190,6 +190,19 @@ extension CalendarEventListhUsecaseImple {
         )
         .map(transform)
         .eraseToAnyPublisher()
+    }
+}
+
+private extension GoogleCalendarUsecase {
+    
+    func eventsWithoutCanceled(
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[GoogleCalendar.Event], Never> {
+        return self.events(in: period)
+            .map { events in
+                return events.filter { $0.status != .cancelled }
+            }
+            .eraseToAnyPublisher()
     }
 }
 
