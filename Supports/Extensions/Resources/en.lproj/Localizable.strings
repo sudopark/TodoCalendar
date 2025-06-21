@@ -238,6 +238,7 @@
 "eventDetail::gogoleEvent::conference::passCode" = "Pass Code";
 "eventDetail::gogoleEvent::conference::password" = "Password";
 "eventDetail::gogoleEvent::copy::message" = "Copied to clipboard.";
+"eventDetail::gogoleEvent::canceled::message" = "This event has been cancelled.";
 
 // MARK: - event tag
 

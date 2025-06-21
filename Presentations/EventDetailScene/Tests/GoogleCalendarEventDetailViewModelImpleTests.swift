@@ -24,14 +24,17 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
     private let spyRouter = SpyRouter()
     
     private func makeViewModel(
-        recurrence: String? = nil
+        recurrence: String? = nil,
+        isCanceled: Bool = false
     ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
         
         let calendarUsecase = PrivateStubGoogleCalendarUsecase()
         calendarUsecase.additionalStubbing = { stub in
-            stub |> \.recurrence .~ (recurrence.map { [$0] })
+            stub
+                |> \.recurrence .~ (recurrence.map { [$0] })
+                |> \.status .~ (isCanceled ? .cancelled : .confirmed)
         }
         calendarUsecase.refreshGoogleCalendarEventTags()
         
@@ -290,6 +293,25 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         
         // then
         #expect(self.spyRouter.didOpenSafariPath == "url")
+    }
+    
+    @Test func viewModel_whenRefreshAndCanceled_showToastAndClose() async throws {
+        // given
+        let viewModel = self.makeViewModel(isCanceled: true)
+        
+        // when
+        try await confirmation("취소된 이벤트의 경우 취소되었음을 알림") { confirm in
+            self.spyRouter.didCloseCallback = {
+                confirm.confirm()
+            }
+            
+            viewModel.refresh()
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        
+        // then
+        #expect(self.spyRouter.didShowToastWithMessage == "eventDetail::gogoleEvent::canceled::message".localized())
+        
     }
 }
 
