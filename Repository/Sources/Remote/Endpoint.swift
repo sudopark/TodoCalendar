@@ -210,6 +210,21 @@ enum FeedbackEndpoints: Endpoint {
     }
 }
 
+// MARK: - sync api
+
+enum EventSyncEndPoints: Endpoint {
+    
+    case sync
+    case syncAll
+    
+    var subPath: String {
+        switch self {
+        case .sync: return ""
+        case .syncAll: return "all"
+        }
+    }
+}
+
 // MARK: - google account endpoint
 
 enum GoogleAuthEndpoint: Endpoint {
@@ -271,7 +286,7 @@ public struct RemoteEnvironment: Sendable {
             
         case let holiday as HolidayAPIEndpoints:
             let prefix = "\(calendarAPIHost)/v1/holiday"
-            return appendSubpathIfNotEmpty(prefix, endpoint.subPath)
+            return appendSubpathIfNotEmpty(prefix, holiday.subPath)
             
         case let account as AccountAPIEndpoints:
             return "\(calendarAPIHost)/v1/accounts/\(account.subPath)"
@@ -306,6 +321,10 @@ public struct RemoteEnvironment: Sendable {
             
         case let feedback as FeedbackEndpoints:
             return appendSubpathIfNotEmpty(self.csAPI, feedback.subPath)
+            
+        case let sync as EventSyncEndPoints:
+            let prefix = "\(calendarAPIHost)/v1/sync"
+            return appendSubpathIfNotEmpty(prefix, sync.subPath)
             
         case let googleAuth as GoogleAuthEndpoint:
             return appendSubpathIfNotEmpty("https://oauth2.googleapis.com", googleAuth.subPath)
