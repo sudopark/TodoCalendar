@@ -39,7 +39,7 @@ struct CustomEventTagTable: Table {
     }
 }
 
-extension CustomEventTag: RowValueType {
+extension CustomEventTag: @retroactive RowValueType {
     
     public init(_ cursor: CursorIterator) throws {
         self.init(
