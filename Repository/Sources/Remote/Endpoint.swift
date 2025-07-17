@@ -214,13 +214,15 @@ enum FeedbackEndpoints: Endpoint {
 
 enum EventSyncEndPoints: Endpoint {
     
-    case sync
-    case syncAll
+    case check
+    case start
+    case `continue`
     
     var subPath: String {
         switch self {
-        case .sync: return ""
-        case .syncAll: return "all"
+        case .check: return "check"
+        case .start: return "start"
+        case .continue: return "continue"
         }
     }
 }

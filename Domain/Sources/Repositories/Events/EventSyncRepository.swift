@@ -11,11 +11,19 @@ import Foundation
 
 public protocol EventSyncRepository: Sendable {
     
-    func syncIfNeed<T: Sendable>(
+    func checkIsNeedSync(
         for dataType: SyncDataType
+    ) async throws -> EventSyncCheckRespose
+    
+    func startSync<T: Sendable>(
+        for dataType: SyncDataType,
+        startFrom timestamp: Int?,
+        pageSize: Int
     ) async throws -> EventSyncResponse<T>
     
-    func syncAll<T: Sendable>(
-        for dataType: SyncDataType
+    func continueSync<T: Sendable>(
+        for dataType: SyncDataType,
+        cursor: String,
+        pageSize: Int
     ) async throws -> EventSyncResponse<T>
 }

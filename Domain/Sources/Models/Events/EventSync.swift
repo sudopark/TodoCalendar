@@ -30,9 +30,9 @@ public struct EventSyncTimestamp: Equatable, Sendable {
 }
 
 
-// MARK: - sync response
+// MARK: - check sync response
 
-public struct EventSyncResponse<T: Sendable>: Sendable {
+public struct EventSyncCheckRespose: Sendable {
     
     public enum CheckResult: String, Sendable, Decodable {
         case noNeedToSync
@@ -41,12 +41,23 @@ public struct EventSyncResponse<T: Sendable>: Sendable {
     }
     
     public let result: CheckResult
-    public var newSyncTime: EventSyncTimestamp?
+    public var startTimestamp: Int?
+    
+    public init(result: CheckResult) {
+        self.result = result
+    }
+}
+
+
+// MARK: - sync response
+
+public struct EventSyncResponse<T: Sendable>: Sendable {
+    
     public var created: [T]?
     public var updated: [T]?
     public var deletedIds: [String]?
+    public var nextPageCursor: String?
+    public var newSyncTime: EventSyncTimestamp?
     
-    public init(_ result: CheckResult) {
-        self.result = result
-    }
+    public init() { }
 }

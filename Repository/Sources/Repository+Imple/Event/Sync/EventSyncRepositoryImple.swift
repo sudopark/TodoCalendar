@@ -37,59 +37,65 @@ public final class EventSyncRepositoryImple: EventSyncRepository {
 
 extension EventSyncRepositoryImple {
     
-    public func syncIfNeed<T: Sendable>(
+    public func checkIsNeedSync(
         for dataType: SyncDataType
-    ) async throws -> EventSyncResponse<T> {
+    ) async throws -> EventSyncCheckRespose {
         
         let timestamp = try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: dataType)
-        let endpoint = EventSyncEndPoints.sync
+        let endpoint = EventSyncEndPoints.check
         var payload: [String: Any] = [ "dataType": dataType.rawValue ]
         payload["timestamp"] = timestamp?.timeStampInt
+        
+        let mapper: EventSyncCheckResposeMapper = try await self.remote.request(
+            .get, endpoint, parameters: payload
+        )
+        return mapper.response
+    }
+    
+    public func startSync<T: Sendable>(
+        for dataType: SyncDataType, startFrom timestamp: Int?, pageSize: Int
+    ) async throws -> EventSyncResponse<T> {
+        
+        let endpoint = EventSyncEndPoints.start
+        var payload: [String: Any] = [
+            "dataType": dataType.rawValue,
+            "size": pageSize
+        ]
+        payload["timestamp"] = timestamp
         
         let mapper: EventSyncResponseMapper<T> = try await self.remote.request(
             .get, endpoint, parameters: payload
         )
-        
         try await self.handleSyncResponse(dataType, mapper.response)
         return mapper.response
     }
     
-    public func syncAll<T: Sendable>(
-        for dataType: SyncDataType
+    public func continueSync<T: Sendable>(
+        for dataType: SyncDataType, cursor: String, pageSize: Int
     ) async throws -> EventSyncResponse<T> {
         
-        let endpoint = EventSyncEndPoints.syncAll
-        let payload: [String: Any] = ["dataType": dataType.rawValue]
-        
+        let endpoint = EventSyncEndPoints.continue
+        let payload: [String: Any] = [
+            "dataType": dataType.rawValue,
+            "cursor": cursor,
+            "size": pageSize
+        ]
         let mapper: EventSyncResponseMapper<T> = try await self.remote.request(
             .get, endpoint, parameters: payload
         )
-        
         try await self.handleSyncResponse(dataType, mapper.response)
         return mapper.response
     }
+}
+
+extension EventSyncRepositoryImple {
     
     private func handleSyncResponse<T>(
         _ dataType: SyncDataType,
         _ syncResponse: EventSyncResponse<T>
     ) async throws {
-        switch syncResponse.result {
-        case .noNeedToSync:
-            return
-            
-        case .needToSync:
-            try await self.updateCreatedOrUpdated(
-                dataType, created: syncResponse.created, updated: syncResponse.updated
-            )
-            try await self.deleteRemoved(dataType, syncResponse.deletedIds)
-            
-        case .migrationNeeds:
-            // TODO: 추후 migration Need 케이스는 페이징으로 변환할것임 -> 위 응답을 받으면 syncAll
-            try await self.updateCreatedOrUpdated(
-                dataType, updated: syncResponse.updated
-            )
-            try await self.deleteRemoved(dataType, syncResponse.deletedIds)
-        }
+        try await updateCreatedOrUpdated(dataType, created: syncResponse.created, updated: syncResponse.updated)
+        try await deleteRemoved(dataType, syncResponse.deletedIds)
         
         guard let timeStamp = syncResponse.newSyncTime else { return }
         try await self.syncTimestampLocalStorage.updateLocalTimestamp(by: timeStamp)
@@ -97,9 +103,10 @@ extension EventSyncRepositoryImple {
     
     private func updateCreatedOrUpdated<T>(
         _ dataType: SyncDataType,
-        created: [T]? = nil, updated: [T]?
+        created: [T]?, updated: [T]?
     ) async throws {
         let total = (created ?? []) + (updated ?? [])
+        guard !total.isEmpty else { return }
         switch dataType {
         case .eventTag:
             let tags = total.compactMap { $0 as? CustomEventTag }
