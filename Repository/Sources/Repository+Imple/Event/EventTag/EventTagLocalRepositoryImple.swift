@@ -61,14 +61,15 @@ extension EventTagLocalRepositoryImple {
         return try await self.localStorage.loadTags(in: [tagId]).first.unwrap()
     }
     
-    public func deleteTag(_ tagId: String) async throws {
+    public func deleteTag(_ tagId: String) async throws -> RemoveCustomEventTagResult {
         try await self.localStorage.deleteTag(tagId)
         self.deleteOfftagId(tagId)
+        return .init()
     }
     
     public func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult {
         
-        try await self.deleteTag(tagId)
+        _ = try await self.deleteTag(tagId)
         let todoIds = try await self.todoLocalStorage.removeTodosWith(tagId: tagId)
         let scheduleIds = try await self.scheduleLocalStorage.removeSchedulesWith(tagId: tagId)
         return .init(todoIds: todoIds, scheduleIds: scheduleIds)

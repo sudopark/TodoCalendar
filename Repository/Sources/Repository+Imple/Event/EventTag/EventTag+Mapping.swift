@@ -13,11 +13,12 @@ private enum CodingKeys: String, CodingKey {
     case uuid
     case name
     case colorHex = "color_hex"
+    case syncTimestamp
 }
 
 struct CustomEventTagMapper: Decodable {
     
-    let tag: CustomEventTag
+    var tag: CustomEventTag
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -26,6 +27,7 @@ struct CustomEventTagMapper: Decodable {
             name: try container.decode(String.self, forKey: .name),
             colorHex: try container.decode(String.self, forKey: .colorHex)
         )
+        self.tag.syncTimestamp = try? container.decode(Int.self, forKey: .syncTimestamp)
     }
 }
 
@@ -39,8 +41,20 @@ extension CustomEventTagMakeParams {
     }
 }
 
-struct RemoveEventTagResult: Decodable {
-    init(from decoder: any Decoder) throws { }
+struct RemoveEventTagResultMapper: Decodable {
+    
+    private enum CodingKeys: String, CodingKey {
+        case syncTimestamp
+    }
+    
+    let result: RemoveCustomEventTagResult
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.result = .init(
+            syncTimestamp: try? container.decode(Int.self, forKey: .syncTimestamp)
+        )
+    }
 }
 
 
@@ -49,8 +63,9 @@ struct RemoveEventTagAndResultMapper: Decodable {
     private enum CodingKeys: String, CodingKey {
         case todos
         case schedules
+        case syncTimestamp
     }
-    let result: RemoveCustomEventTagWithEventsResult
+    var result: RemoveCustomEventTagWithEventsResult
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -58,5 +73,6 @@ struct RemoveEventTagAndResultMapper: Decodable {
             todoIds: try container.decode([String].self, forKey: .todos),
             scheduleIds: try container.decode([String].self, forKey: .schedules)
         )
+        self.result.syncTimestamp = try? container.decode(Int.self, forKey: .syncTimestamp)
     }
 }

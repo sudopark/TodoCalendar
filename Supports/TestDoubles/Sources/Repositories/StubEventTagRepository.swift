@@ -33,8 +33,8 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         return .init(uuid: tagId, name: params.name, colorHex: params.colorHex)
     }
     
-    public func deleteTag(_ tagId: String) async throws {
-        
+    public func deleteTag(_ tagId: String) async throws -> RemoveCustomEventTagResult {
+        return .init()
     }
     
     open func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult {

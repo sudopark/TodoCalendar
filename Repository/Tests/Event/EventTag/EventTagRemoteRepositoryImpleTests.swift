@@ -66,6 +66,7 @@ extension EventTagRemoteRepositoryImpleTests {
         XCTAssertEqual(tag.uuid, "id")
         XCTAssertEqual(tag.name, "some")
         XCTAssertEqual(tag.colorHex, "color")
+        XCTAssertEqual(tag.syncTimestamp, 100)
         
         XCTAssertEqual(self.spyCache.didSavrTag?.uuid, "id")
     }
@@ -80,6 +81,7 @@ extension EventTagRemoteRepositoryImpleTests {
         
         // then
         XCTAssertEqual(tag.name, "new name")
+        XCTAssertEqual(tag.syncTimestamp, 100)
         XCTAssertEqual(self.spyCache.didUpdateTags?.count, 1)
     }
     
@@ -90,10 +92,11 @@ extension EventTagRemoteRepositoryImpleTests {
         let offIdsBeforeDelete = repository.loadOffTags()
         
         // when
-        try await repository.deleteTag("origin")
+        let result = try await repository.deleteTag("origin")
         let offIdsAfterDelete = repository.loadOffTags()
         
         // then
+        XCTAssertEqual(result.syncTimestamp, 100)
         XCTAssertEqual(self.spyCache.didDeleteTagIds, ["origin"])
         XCTAssertEqual(offIdsBeforeDelete, [.custom("origin")])
         XCTAssertEqual(offIdsAfterDelete, [])
@@ -109,6 +112,7 @@ extension EventTagRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(result.todoIds, ["todo1", "todo2"])
         XCTAssertEqual(result.scheduleIds, ["sc1", "sc2"])
+        XCTAssertEqual(result.syncTimestamp, 100)
         XCTAssertEqual(self.spyCache.didDeleteTagIds, ["t1"])
         XCTAssertEqual(self.spyTodoCache.didRemovedTodoIds, result.todoIds)
         XCTAssertEqual(self.spyScheduleCache.didRemoveIds, result.scheduleIds)
@@ -226,7 +230,7 @@ extension EventTagRemoteRepositoryImpleTests {
         name: String = "some"
     ) -> String {
         return """
-        { "uuid": "\(id)", "name": "\(name)", "color_hex": "color" }
+        { "uuid": "\(id)", "name": "\(name)", "color_hex": "color", "syncTimestamp": 100 }
         """
     }
     
@@ -244,7 +248,7 @@ extension EventTagRemoteRepositoryImpleTests {
             .init(
                 method: .delete,
                 endpoint: EventTagEndpoints.tag(id: "origin"),
-                resultJsonString: .success("{ \"status\": \"ok\"}")
+                resultJsonString: .success("{ \"status\": \"ok\", \"syncTimestamp\": 100}")
             ),
             .init(
                 method: .delete,
@@ -283,7 +287,7 @@ private extension RemoveCustomEventTagWithEventsResult {
     
     static func dummyJSON() -> String {
         return """
-        { "todos": ["todo1", "todo2"], "schedules": ["sc1", "sc2"] }
+        { "todos": ["todo1", "todo2"], "schedules": ["sc1", "sc2"], "syncTimestamp": 100 }
         """
     }
 }

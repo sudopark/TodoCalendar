@@ -67,14 +67,15 @@ extension EventTagRemoteRepositoryImple {
         return tag
     }
     
-    public func deleteTag(_ tagId: String) async throws {
+    public func deleteTag(_ tagId: String) async throws -> RemoveCustomEventTagResult {
         let endpoint = EventTagEndpoints.tag(id: tagId)
-        let _: RemoveEventTagResult = try await self.remote.request(
+        let mapper: RemoveEventTagResultMapper = try await self.remote.request(
             .delete,
             endpoint
         )
         try? await self.cacheStorage.deleteTag(tagId)
         self.deleteOfftagId(tagId)
+        return mapper.result
     }
     
     public func deleteTagWithAllEvents(
