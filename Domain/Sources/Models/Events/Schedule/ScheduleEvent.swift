@@ -45,6 +45,8 @@ public struct ScheduleEvent: Sendable, Equatable {
     }
     public var repeatingTimeToExcludes: Set<String> = []
     
+    public var syncTimestamp: Int?
+    
     public init(uuid: String, name: String, time: EventTime) {
         self.uuid = uuid
         self.name = name
@@ -141,6 +143,7 @@ public struct ExcludeRepeatingEventResult {
     
     public let newEvent: ScheduleEvent
     public let originEvent: ScheduleEvent
+    public var syncTimestamp: Int?
     
     public init(
         newEvent: ScheduleEvent,
@@ -154,6 +157,7 @@ public struct ExcludeRepeatingEventResult {
 public struct BranchNewRepeatingScheduleFromOriginResult {
     public let reppatingEndOriginEvent: ScheduleEvent
     public let newRepeatingEvent: ScheduleEvent
+    public var syncTimestamp: Int?
     
     public init(
         reppatingEndOriginEvent: ScheduleEvent,
@@ -167,5 +171,6 @@ public struct BranchNewRepeatingScheduleFromOriginResult {
 
 public struct RemoveSheduleEventResult {
     public var nextRepeatingEvnet: ScheduleEvent?
+    public var syncTimestamp: Int?
     public init() { }
 }

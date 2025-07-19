@@ -127,18 +127,21 @@ extension ScheduleEventRemoteRepositoryImple {
         )
         let updated = mapper.event
         try? await self.cacheStore.updateScheduleEvent(updated)
-        return RemoveSheduleEventResult() |> \.nextRepeatingEvnet .~ updated
+        return RemoveSheduleEventResult()
+            |> \.nextRepeatingEvnet .~ updated
+            |> \.syncTimestamp .~ updated.syncTimestamp
     }
     
     private func removeScheduleEvent(
         _ eventId: String
     ) async throws -> RemoveSheduleEventResult {
         let endpoint = ScheduleEventEndpoints.schedule(id: eventId)
-        let _: RemoveSheduleEventResultMapper = try await self.remote.request(
+        let mapper: RemoveSheduleEventResultMapper = try await self.remote.request(
             .delete, endpoint
         )
         try? await self.cacheStore.removeScheduleEvent(eventId)
-        return .init()
+        return RemoveSheduleEventResult()
+            |> \.syncTimestamp .~ mapper.syncTimestamp
     }
 }
 
