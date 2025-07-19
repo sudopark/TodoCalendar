@@ -19,6 +19,7 @@ enum TodoCodingKeys: String, CodingKey {
     case time = "event_time"
     case repeating
     case notificationOptions = "notification_options"
+    case syncTimestamp
     
     // done
     case originEventId = "origin_event_id"
@@ -118,6 +119,7 @@ struct TodoEventMapper: Decodable {
         todo.time = try? container.decode(EventTimeMapper.self, forKey: .time).time
         todo.repeating = try? container.decode(EventRepeatingMapper.self, forKey: .repeating).repeating
         todo.notificationOptions = (try? container.decode([EventNotificationTimeOptionMapper].self, forKey: .notificationOptions).map { $0.option }) ?? []
+        todo.syncTimestamp = try? container.decode(Int.self, forKey: .syncTimestamp)
         self.todo = todo
     }
 }
@@ -148,6 +150,7 @@ struct CompleteTodoResultMapper: Decodable {
     private enum CodingKeys: String, CodingKey {
         case done
         case nextRepeating = "next_repeating"
+        case syncTimestamp
     }
     
     let result: CompleteTodoResult
@@ -158,6 +161,7 @@ struct CompleteTodoResultMapper: Decodable {
             doneEvent: try container.decode(DoneTodoEventMapper.self, forKey: .done).event,
             nextRepeatingTodoEvent: try? container.decode(TodoEventMapper.self, forKey: .nextRepeating).todo
         )
+        |> \.syncTimestamp .~ (try? container.decode(Int.self, forKey: .syncTimestamp))
     }
 }
 
@@ -166,6 +170,7 @@ struct ReplaceRepeatingTodoEventResultMapper: Decodable {
     private enum CodingKeys: String, CodingKey {
         case newTodo = "new_todo"
         case nextRepeating = "next_repeating"
+        case syncTimestamp
     }
     
     let result: ReplaceRepeatingTodoEventResult
@@ -176,6 +181,7 @@ struct ReplaceRepeatingTodoEventResultMapper: Decodable {
             newTodoEvent: try container.decode(TodoEventMapper.self, forKey: .newTodo).todo
         )
         |> \.nextRepeatingTodoEvent .~ (try? container.decode(TodoEventMapper.self, forKey: .nextRepeating).todo)
+        |> \.syncTimestamp .~ (try? container.decode(Int.self, forKey: .syncTimestamp))
     }
 }
 
@@ -183,14 +189,17 @@ struct ReplaceRepeatingTodoEventResultMapper: Decodable {
 struct RemoveTodoResultMapper: Decodable {
     
     let status: String
+    var syncTimestamp: Int?
     
     private enum CodingKeys: String, CodingKey {
         case status
+        case syncTimestamp
     }
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.status = try container.decode(String.self, forKey: .status)
+        self.syncTimestamp = try? container.decode(Int.self, forKey: .syncTimestamp)
     }
 }
 

@@ -25,6 +25,8 @@ public struct TodoEvent: Sendable, Equatable {
     
     public var notificationOptions: [EventNotificationTimeOption] = []
     
+    public var syncTimestamp: Int?
+    
     public init(uuid: String, name: String) {
         self.uuid = uuid
         self.name = name
@@ -150,6 +152,7 @@ public struct ReplaceRepeatingTodoEventResult {
     
     public let newTodoEvent: TodoEvent
     public var nextRepeatingTodoEvent: TodoEvent?
+    public var syncTimestamp: Int?
     
     public init(newTodoEvent: TodoEvent) {
         self.newTodoEvent = newTodoEvent
@@ -160,6 +163,7 @@ public struct ReplaceRepeatingTodoEventResult {
 public struct RemoveTodoResult {
     
     public var nextRepeatingTodo: TodoEvent?
+    public var syncTimestamp: Int?
     public init() { }
 }
 

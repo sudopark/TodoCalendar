@@ -158,16 +158,18 @@ extension TodoRemoteRepositoryImple {
         let updated = try await self.updateTodoEvent(eventid, params)
         return .init()
             |> \.nextRepeatingTodo .~ updated
+            |> \.syncTimestamp .~ updated.syncTimestamp
     }
     
     private func removeTodo(eventId: String) async throws -> RemoveTodoResult {
         let endpoint = TodoAPIEndpoints.todo(eventId)
-        let _ : RemoveTodoResultMapper = try await self.remote.request(
+        let mapper : RemoveTodoResultMapper = try await self.remote.request(
             .delete,
             endpoint
         )
         try? await self.cacheStorage.removeTodo(eventId)
-        return .init()
+        return RemoveTodoResult()
+            |> \.syncTimestamp .~ mapper.syncTimestamp
     }
 }
 
