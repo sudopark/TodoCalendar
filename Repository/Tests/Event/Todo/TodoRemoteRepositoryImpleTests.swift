@@ -78,6 +78,7 @@ extension TodoRemoteRepositoryImpleTests {
         
         // then
         self.assertTodo(todo)
+        XCTAssertEqual(todo.syncTimestamp, 100)
         XCTAssertEqual(self.spyTodoCache.didSavedTodoEvent?.uuid, "new_uuid")
     }
     
@@ -91,6 +92,7 @@ extension TodoRemoteRepositoryImpleTests {
         
         // then
         self.assertTodo(todo)
+        XCTAssertEqual(todo.syncTimestamp, 100)
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, "new_uuid")
     }
     
@@ -104,6 +106,7 @@ extension TodoRemoteRepositoryImpleTests {
         
         // then
         self.assertTodo(todo)
+        XCTAssertEqual(todo.syncTimestamp, 100)
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, "new_uuid")
     }
     
@@ -153,6 +156,7 @@ extension TodoRemoteRepositoryImpleTests {
         let origin = params["origin"] as? [String: Any]
         XCTAssertNotNil(nextTime)
         XCTAssertNotNil(origin)
+        XCTAssertEqual(result?.syncTimestamp, 100)
     }
     
     // complete 이후에 기존 todo 제거 + 신규 이벤트 저장 + 다음 이벤트 저장
@@ -190,6 +194,7 @@ extension TodoRemoteRepositoryImpleTests {
         let newPayload = params["new"] as? [String: Any]
         XCTAssertNotNil(nextTime)
         XCTAssertNotNil(newPayload)
+        XCTAssertEqual(result?.syncTimestamp, 100)
     }
     
     // replace 이후에 기존 todo 제거, 신규 todo 저장, 다음 이벤트 저장
@@ -222,6 +227,7 @@ extension TodoRemoteRepositoryImpleTests {
         // then
         XCTAssertNotNil(result)
         XCTAssertNil(result?.nextRepeatingTodo)
+        XCTAssertEqual(result?.syncTimestamp, 100)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "repeating-todo")
     }
     
@@ -236,6 +242,7 @@ extension TodoRemoteRepositoryImpleTests {
         // then
         XCTAssertNotNil(result)
         XCTAssertNotNil(result?.nextRepeatingTodo)
+        XCTAssertEqual(result?.syncTimestamp, 100)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, nil)
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, result?.nextRepeatingTodo?.uuid)
     }
@@ -251,6 +258,7 @@ extension TodoRemoteRepositoryImpleTests {
         // then
         XCTAssertNotNil(result)
         XCTAssertNil(result?.nextRepeatingTodo)
+        XCTAssertEqual(result?.syncTimestamp, 100)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "no-next-repeating-todo")
     }
     
@@ -265,6 +273,7 @@ extension TodoRemoteRepositoryImpleTests {
         // then
         XCTAssertNotNil(result)
         XCTAssertNil(result?.nextRepeatingTodo)
+        XCTAssertEqual(result?.syncTimestamp, 100)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "not-repeating-todo")
     }
 }
@@ -579,6 +588,7 @@ extension TodoRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, reverted.uuid)
         XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoIds, ["some"])
+        XCTAssertEqual(reverted.syncTimestamp, 100)
     }
     
     // revert 할꺼면 done = "some" 이여야하고
@@ -659,6 +669,7 @@ extension TodoRemoteRepositoryImpleTests {
         
         // then
         XCTAssertEqual(result?.isReverted, true)
+        XCTAssertEqual(result?.reverted?.syncTimestamp, 100)
         XCTAssertEqual(self.spyTodoCache.stubToggleStateMap[todoId]?.isIdle, true)
         XCTAssertEqual(
             self.spyTodoCache.didUpdatedTodoToggleStatesMap[todoId]?.map { $0.recordedState },
@@ -783,7 +794,7 @@ extension TodoRemoteRepositoryImpleTestsV2 {
         let timeParams = params["event_time"] as? [String: Any]
         #expect(params.count == 1)
         #expect(timeParams != nil)
-        #expect(next != nil)
+        #expect(next.syncTimestamp == 100)
     }
     
     @Test func repository_whenSkipNotRepeatingTodo_error() async throws {
@@ -852,7 +863,8 @@ private struct DummyResponse {
                     "type_text": "allDay9AMBefore",
                     "before_seconds": 300
                 }
-            ]
+            ], 
+            "syncTimestamp": 100
         }
         """
     }
@@ -994,7 +1006,8 @@ private struct DummyResponse {
                     "dayOfWeek": [1],
                     "timeZone": "Asia/Seoul"
                 }
-            }
+            }, 
+            "syncTimestamp": 100
         }
         """
     }
@@ -1048,7 +1061,8 @@ private struct DummyResponse {
                 """
                 {
                     "done": \(self.dummyDoneTodoResponse),
-                    "next_repeating": \(self.dummySingleTodoResponse)
+                    "next_repeating": \(self.dummySingleTodoResponse), 
+                    "syncTimestamp": 100
                 }
                 """
                 )
@@ -1065,7 +1079,8 @@ private struct DummyResponse {
                 """
                 {
                     "new_todo": \(self.dummySingleTodoResponse),
-                    "next_repeating": \(self.dummySingleTodoResponse)
+                    "next_repeating": \(self.dummySingleTodoResponse), 
+                    "syncTimestamp": 100
                 }
                 """
                 )
@@ -1073,17 +1088,17 @@ private struct DummyResponse {
             .init(
                 method: .delete,
                 endpoint: TodoAPIEndpoints.todo("repeating-todo"),
-                resultJsonString: .success("{ \"status\": \"ok\" }")
+                resultJsonString: .success("{ \"status\": \"ok\", \"syncTimestamp\": 100 }")
             ),
             .init(
                 method: .delete,
                 endpoint: TodoAPIEndpoints.todo("not-repeating-todo"),
-                resultJsonString: .success("{ \"status\": \"ok\" }")
+                resultJsonString: .success("{ \"status\": \"ok\", \"syncTimestamp\": 100 }")
             ),
             .init(
                 method: .delete,
                 endpoint: TodoAPIEndpoints.todo("no-next-repeating-todo"),
-                resultJsonString: .success("{ \"status\": \"ok\" }")
+                resultJsonString: .success("{ \"status\": \"ok\", \"syncTimestamp\": 100 }")
             ),
             .init(
                 method: .get,
@@ -1124,7 +1139,7 @@ private struct DummyResponse {
             .init(
                 method: .delete,
                 endpoint: TodoAPIEndpoints.dones,
-                resultJsonString: .success("{ \"status\": \"ok\" }")
+                resultJsonString: .success("{ \"status\": \"ok\", \"syncTimestamp\": 100 }")
             ),
             .init(
                 method: .post,
@@ -1166,13 +1181,21 @@ private struct DummyResponse {
 private extension TodoToggleResult {
     
     var isCompleted: Bool {
-        guard case .completed = self else { return false }
-        return true
+        return self.completed != nil
     }
     
     var isReverted: Bool {
-        guard case .reverted = self else { return false }
-        return true
+        return self.reverted != nil
+    }
+    
+    var completed: DoneTodoEvent? {
+        guard case let .completed(doneTodoEvent) = self else { return nil }
+        return doneTodoEvent
+    }
+    
+    var reverted: TodoEvent? {
+        guard case let .reverted(todo) = self else { return nil }
+        return todo
     }
 }
 
