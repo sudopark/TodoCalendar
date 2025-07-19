@@ -64,6 +64,11 @@ extension Logger {
             }
         }
         #if DEBUG
+        
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+            return
+        }
+        
         let formattedFractional = Date().formatted(.dateTime.hour().minute().second().secondFraction(.fractional(3)))
         print("[\(label)] - \(formattedFractional):(\(level)): \(message) with: \(metadata ?? [:])")
         #endif
