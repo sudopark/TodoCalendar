@@ -39,7 +39,7 @@ public final class EventSyncUsecaseImple: EventSyncUsecase, @unchecked Sendable 
         let isSyncing = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
-    private var syncTask: Task<Void, any Error>?
+    private var syncTaskMap: [SyncDataType: Task<Void, Never>] = [:]
 }
 
 
@@ -47,15 +47,17 @@ extension EventSyncUsecaseImple {
     
     public func sync(_ dataType: SyncDataType) {
         
-        self.syncTask?.cancel()
+        self.syncTaskMap[dataType]?.cancel()
+        self.syncTaskMap[dataType] = nil
         
-        self.syncTask = Task { [weak self] in
+        let task = Task { [weak self] in
             self?.subject.isSyncing.send(true)
             do {
                 try await self?.runSync(dataType)
             } catch { }
             self?.subject.isSyncing.send(false)
         }
+        self.syncTaskMap[dataType] = task
     }
     
     private func runSync(_ dataType: SyncDataType) async throws {
