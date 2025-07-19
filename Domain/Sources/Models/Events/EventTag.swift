@@ -70,6 +70,7 @@ public struct CustomEventTag: EventTag {
     public let uuid: String
     public var name: String
     public var colorHex: String?
+    public var syncTimestamp: Int?
     
     public init(uuid: String, name: String, colorHex: String) {
         self.uuid = uuid
@@ -101,11 +102,19 @@ public struct CustomEventTagMakeParams {
 public typealias CustomEventTagEditParams = CustomEventTagMakeParams
 
 
+public struct RemoveCustomEventTagResult: Sendable {
+    
+    public var syncTimestamp: Int?
+    public init(syncTimestamp: Int? = nil) {
+        self.syncTimestamp = syncTimestamp
+    }
+}
 
 public struct RemoveCustomEventTagWithEventsResult: Sendable {
     
     public let todoIds: [String]
     public let scheduleIds: [String]
+    public var syncTimestamp: Int?
     
     public init(todoIds: [String], scheduleIds: [String]) {
         self.todoIds = todoIds

@@ -12,7 +12,7 @@ public protocol EventTagRepository: Sendable {
     
     func makeNewTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag
     func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag
-    func deleteTag(_ tagId: String) async throws
+    func deleteTag(_ tagId: String) async throws -> RemoveCustomEventTagResult
     func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult
     
     func loadAllCustomTags() -> AnyPublisher<[CustomEventTag], any Error>
