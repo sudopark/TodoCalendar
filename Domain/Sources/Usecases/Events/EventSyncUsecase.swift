@@ -52,9 +52,13 @@ extension EventSyncUsecaseImple {
         
         let task = Task { [weak self] in
             self?.subject.isSyncing.send(true)
+            logger.log(level: .debug, "\(dataType) sync start")
             do {
                 try await self?.runSync(dataType)
-            } catch { }
+                logger.log(level: .debug, "\(dataType) sync end")
+            } catch let error {
+                logger.log(level: .error, "\(dataType) sync fail: \(error)")
+            }
             self?.subject.isSyncing.send(false)
         }
         self.syncTaskMap[dataType] = task
@@ -64,8 +68,7 @@ extension EventSyncUsecaseImple {
         let checkIsNeed = try await self.syncRepository.checkIsNeedSync(for: dataType)
         switch (checkIsNeed.result, dataType) {
         case (.noNeedToSync, _):
-            // TODO: log
-            return
+            logger.log(level: .debug, "\(dataType) no need to sync")
         case (.migrationNeeds, .eventTag):
             try await self.startSync(CustomEventTag.self, dataType)
             
