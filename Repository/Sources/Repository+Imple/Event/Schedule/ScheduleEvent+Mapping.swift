@@ -21,6 +21,7 @@ enum ScheduleEventCodingKeys: String, CodingKey {
     case notificationOptions = "notification_options"
     case showTurns = "show_turns"
     case excludeTimes = "exclude_repeatings"
+    case syncTimestamp
 }
 
 private typealias Key = ScheduleEventCodingKeys
@@ -86,6 +87,7 @@ struct ScheduleEventMapper: Decodable {
         event.showTurn = (try? container.decode(Bool.self, forKey: .showTurns)) ?? false
         let excludes: [String] = (try? container.decode([String].self, forKey: .excludeTimes)) ?? []
         event.repeatingTimeToExcludes = Set(excludes)
+        event.syncTimestamp = try? container.decode(Int.self, forKey: .syncTimestamp)
         self.event = event
     }
 }
@@ -113,6 +115,7 @@ struct ExcludeRepeatingEventResultMapper: Decodable {
     private enum CodingKeys: String, CodingKey {
         case newSchedule = "new_schedule"
         case updatedOrigin = "updated_origin"
+        case syncTimestamp
     }
     
     let result: ExcludeRepeatingEventResult
@@ -123,6 +126,7 @@ struct ExcludeRepeatingEventResultMapper: Decodable {
             newEvent: try container.decode(ScheduleEventMapper.self, forKey: .newSchedule).event,
             originEvent: try container.decode(ScheduleEventMapper.self, forKey: .updatedOrigin).event
         )
+        |> \.syncTimestamp .~ (try? container.decode(Int.self, forKey: .syncTimestamp))
     }
 }
 
@@ -151,6 +155,7 @@ struct BranchNewRepeatingScheduleFromOriginResultMapper: Decodable {
     private enum CodingKeys: String, CodingKey {
         case origin
         case new
+        case syncTimestamp
     }
     
     let result: BranchNewRepeatingScheduleFromOriginResult
@@ -161,11 +166,16 @@ struct BranchNewRepeatingScheduleFromOriginResultMapper: Decodable {
             reppatingEndOriginEvent: try contaienr.decode(ScheduleEventMapper.self, forKey: .origin).event,
             newRepeatingEvent: try contaienr.decode(ScheduleEventMapper.self, forKey: .new).event
         )
+        |> \.syncTimestamp .~ (try? contaienr.decode(Int.self, forKey: .syncTimestamp))
     }
 }
 
 struct RemoveSheduleEventResultMapper: Decodable {
     
+    var syncTimestamp: Int?
+    
     init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: ScheduleEventCodingKeys.self)
+        self.syncTimestamp = try? container.decode(Int.self, forKey: .syncTimestamp)
     }
 }

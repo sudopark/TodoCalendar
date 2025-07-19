@@ -102,6 +102,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         
         // then
         self.assertEvent(event)
+        XCTAssertEqual(event.syncTimestamp, 100)
         XCTAssertEqual(self.spyCache.didSaveEvent?.uuid, "new_uuid")
     }
     
@@ -118,6 +119,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         
         // then
         self.assertEvent(updated)
+        XCTAssertEqual(updated.syncTimestamp, 100)
         XCTAssertEqual(self.spyCache.didUpdateEvents?.first?.uuid, updated.uuid)
     }
 }
@@ -137,6 +139,8 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         XCTAssertEqual(result.originEvent.uuid, "origin_repeating")
         XCTAssertEqual(result.originEvent.repeatingTimeToExcludes, ["100"])
         self.assertEvent(result.newEvent)
+        XCTAssertEqual(result.syncTimestamp, 100)
+        
         let params = self.stubRemote.didRequestedParams ?? [:]
         let new = params["new"] as? [String: Any]
         let excludeTime = params["exclude_repeatings"] as? String
@@ -158,6 +162,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(result.reppatingEndOriginEvent.uuid, "origin_repeating")
         self.assertEvent(result.newRepeatingEvent)
+        XCTAssertEqual(result.syncTimestamp, 100)
         let params = self.stubRemote.didRequestedParams ?? [:]
         let new = params["new"] as? [String: Any]
         let endTime = params["end_time"] as? Double
@@ -177,6 +182,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(result.nextRepeatingEvnet?.uuid, "origin")
         XCTAssertEqual(result.nextRepeatingEvnet?.repeatingTimeToExcludes, ["100"])
+        XCTAssertEqual(result.syncTimestamp, 100)
         XCTAssertEqual(self.spyCache.didUpdateEvents?.first?.uuid, "origin")
     }
     
@@ -190,6 +196,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         // then
         XCTAssertNotNil(result)
         XCTAssertNil(result.nextRepeatingEvnet)
+        XCTAssertEqual(result.syncTimestamp, 100)
         XCTAssertEqual(self.spyCache.didRemoveIds, ["origin"])
     }
 }
@@ -383,7 +390,8 @@ extension ScheduleEventRemoteRepositoryImpleTests {
                     "before_seconds": 300
                 }
             ],
-            "show_turns": true
+            "show_turns": true, 
+            "syncTimestamp": 100
         }
         """
     }
@@ -416,7 +424,8 @@ extension ScheduleEventRemoteRepositoryImpleTests {
                             "seconds_from_gmt": 300
                         },
                         "exclude_repeatings": ["100"]
-                    }
+                    }, 
+                    "syncTimestamp": 100
                 }
                 """)
             ),
@@ -446,7 +455,8 @@ extension ScheduleEventRemoteRepositoryImpleTests {
                                 "timeZone": "Asia/Seoul"
                             }
                         }
-                    }
+                    }, 
+                    "syncTimestamp": 100
                 }
                 """)
             ),
@@ -463,14 +473,15 @@ extension ScheduleEventRemoteRepositoryImpleTests {
                         "period_end": \(refTime+200),
                         "seconds_from_gmt": 300
                     },
-                    "exclude_repeatings": ["100"]
+                    "exclude_repeatings": ["100"], 
+                    "syncTimestamp": 100
                 }
                 """)
             ),
             .init(
                 method: .delete,
                 endpoint: ScheduleEventEndpoints.schedule(id: "origin"),
-                resultJsonString: .success("{}")
+                resultJsonString: .success("{ \"status\": \"ok\", \"syncTimestamp\": 100 }")
             ),
             .init(
                 method: .get,
