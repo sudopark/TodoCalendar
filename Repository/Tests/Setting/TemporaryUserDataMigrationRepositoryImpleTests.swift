@@ -20,6 +20,10 @@ import UnitTestHelpKit
 class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
     
     private var stubRemote: StubRemoteAPI!
+    private var eventTagLocalStorage: EventTagLocalStorageImple!
+    private var todoLocalStorage: TodoLocalStorageImple!
+    private var scheduleLocalStorage: ScheduleEventLocalStorageImple!
+    private var eventDetailLocalStorage: EventDetailDataLocalStorageImple!
     private var syncTimeLocalStorage: EventSyncTimestampLocalStorageImple!
     private let tempDBPath: String = "temp"
     
@@ -27,6 +31,10 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
         self.fileName = "user_db"
         try super.setUpWithError()
         self.stubRemote = .init(responses: self.responses)
+        self.eventTagLocalStorage = .init(sqliteService: self.sqliteService)
+        self.todoLocalStorage = .init(sqliteService: self.sqliteService)
+        self.scheduleLocalStorage = .init(sqliteService: self.sqliteService)
+        self.eventDetailLocalStorage = .init(sqliteService: self.sqliteService)
         self.syncTimeLocalStorage = EventSyncTimestampLocalStorageImple(sqliteService: self.sqliteService)
     }
     
@@ -106,6 +114,10 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
         let repository = TemporaryUserDataMigrationRepositoryImple(
             tempUserDBPath: self.tempDBPath,
             remoteAPI: self.stubRemote,
+            eventTagLocalStorage: self.eventTagLocalStorage,
+            todoLocalStorage: self.todoLocalStorage,
+            scheduleLocalStorage: self.scheduleLocalStorage,
+            eventDetailLocalStorage: self.eventDetailLocalStorage,
             syncTimeLocalStorage: self.syncTimeLocalStorage
         )
         if !withoutData {
@@ -145,6 +157,10 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         
         let timestamp = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .eventTag)
         XCTAssertEqual(timestamp, .init(.eventTag, 100))
+        
+        let tagsInUserDB = try await self.eventTagLocalStorage.loadAllTags()
+        let ids = tagsInUserDB.map { $0.uuid }
+        XCTAssertEqual(ids, ["t1", "t2"])
     }
     
     func testRepository_migrationTodoEvents() async throws {
@@ -166,6 +182,10 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         
         let timestamp = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .todo)
         XCTAssertEqual(timestamp, .init(.todo, 101))
+        
+        let todosInUserDB = try await self.todoLocalStorage.loadAllEvents()
+        let ids = todosInUserDB.map { $0.uuid }
+        XCTAssertEqual(ids, ["todo1", "todo2"])
     }
     
     func testRepository_migrationScheduleEvents() async throws {
@@ -181,6 +201,10 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         
         let timestamp = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .schedule)
         XCTAssertEqual(timestamp, .init(.schedule, 102))
+        
+        let schedulesInUserDB = try await self.scheduleLocalStorage.loadAllEvents()
+        let ids = schedulesInUserDB.map { $0.uuid }
+        XCTAssertEqual(ids, ["sc1", "sc2"])
     }
     
     func testRepository_migrationEventDetails() async throws {
@@ -193,6 +217,10 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         // then
         let detailEventIds = self.stubRemote.didRequestedParams?.keys.sorted().map { $0 }
         XCTAssertEqual(detailEventIds, ["todo1"])
+        
+        let detailsInUserDB = try await self.eventDetailLocalStorage.loadAll()
+        let ids = detailsInUserDB.map { $0.eventId }
+        XCTAssertEqual(ids, ["todo1"])
     }
     
     func testRespository_migrateDoneTodoEvents() async throws {
@@ -205,6 +233,10 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         // then
         let doneIds = self.stubRemote.didRequestedParams?.keys.sorted().map { $0 }
         XCTAssertEqual(doneIds, ["d1", "d2"])
+        
+        let doneTodosInUserBD = try await self.todoLocalStorage.loadAllDoneEvents()
+        let ids = doneTodosInUserBD.map { $0.uuid }
+        XCTAssertEqual(ids, ["d1", "d2"])
     }
     
     func testReposiotry_clearTempUserData() async throws {

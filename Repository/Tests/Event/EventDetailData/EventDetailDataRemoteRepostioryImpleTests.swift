@@ -192,6 +192,8 @@ private class SpyCache: EventDetailDataLocalStorage, @unchecked Sendable {
         self.didSaveDetailEventId = detail.eventId
     }
     
+    func saveDetails(_ details: [EventDetailData]) async throws { }
+    
     var didRemoveDetailId: String?
     func removeDetail(_ id: String) async throws {
         self.didRemoveDetailId = id
