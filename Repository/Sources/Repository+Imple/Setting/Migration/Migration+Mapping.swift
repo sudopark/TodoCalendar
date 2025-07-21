@@ -12,8 +12,17 @@ import Optics
 import Domain
 
 struct BatchWriteResult: Decodable {
+    
+    var syncTimestamp: Int?
+    
+    private enum CodingKeys: String, CodingKey {
+        case syncTimestamp
+    }
 
-    init(from decoder: any Decoder) throws { }
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.syncTimestamp = try? container.decode(Int.self, forKey: .syncTimestamp)
+    }
 }
 
 struct BatchEventTagPayload {
