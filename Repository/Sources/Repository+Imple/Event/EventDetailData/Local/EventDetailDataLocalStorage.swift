@@ -14,6 +14,7 @@ public protocol EventDetailDataLocalStorage: Sendable {
     func loadAll() async throws -> [EventDetailData]
     func loadDetail(_ id: String) async throws -> EventDetailData?
     func saveDetail(_ detail: EventDetailData) async throws
+    func saveDetails(_ details: [EventDetailData]) async throws
     func removeDetail(_ id: String) async throws
     func removeAll() async throws
 }
@@ -46,6 +47,12 @@ extension EventDetailDataLocalStorageImple {
     public func saveDetail(_ detail: EventDetailData) async throws {
         try await self.sqliteService.async.run { db in
             try db.insertOne(Detail.self, entity: detail, shouldReplace: true)
+        }
+    }
+    
+    public func saveDetails(_ details: [EventDetailData]) async throws {
+        try await self.sqliteService.async.run { db in
+            try db.insert(Detail.self, entities: details, shouldReplace: true)
         }
     }
     

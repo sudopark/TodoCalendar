@@ -16,15 +16,27 @@ public final class TemporaryUserDataMigrationRepositoryImple: TemporaryUserDataM
     
     private let tempUserDBPath: String
     private let remoteAPI: any RemoteAPI
+    private let eventTagLocalStorage: any EventTagLocalStorage
+    private let todoLocalStorage: any TodoLocalStorage
+    private let scheduleLocalStorage: any ScheduleEventLocalStorage
+    private let eventDetailLocalStorage: any EventDetailDataLocalStorage
     private let syncTimeLocalStorage: any EventSyncTimestampLocalStorage
     
     public init(
         tempUserDBPath: String,
         remoteAPI: any RemoteAPI,
+        eventTagLocalStorage: any EventTagLocalStorage,
+        todoLocalStorage: any TodoLocalStorage,
+        scheduleLocalStorage: any ScheduleEventLocalStorage,
+        eventDetailLocalStorage: any EventDetailDataLocalStorage,
         syncTimeLocalStorage: any EventSyncTimestampLocalStorage
     ) {
         self.tempUserDBPath = tempUserDBPath
         self.remoteAPI = remoteAPI
+        self.eventTagLocalStorage = eventTagLocalStorage
+        self.todoLocalStorage = todoLocalStorage
+        self.scheduleLocalStorage = scheduleLocalStorage
+        self.eventDetailLocalStorage = eventDetailLocalStorage
         self.syncTimeLocalStorage = syncTimeLocalStorage
     }
 }
@@ -60,8 +72,8 @@ extension TemporaryUserDataMigrationRepositoryImple {
         let service = try await self.prepareTempDBsqliteService()
         defer { service.close() }
         
-        let storage = EventTagLocalStorageImple(sqliteService: service)
-        let alltags = try await storage.loadAllTags()
+        let tempStorage = EventTagLocalStorageImple(sqliteService: service)
+        let alltags = try await tempStorage.loadAllTags()
         
         guard !alltags.isEmpty else { return }
         
@@ -72,16 +84,21 @@ extension TemporaryUserDataMigrationRepositoryImple {
             endpoint,
             parameters: payload.asJson()
         )
-        try? await storage.removeAllTags()
-        await self.updateTimestampIfNeed(.eventTag, result.syncTimestamp)
+        try? await tempStorage.removeAllTags()
+        do {
+            try await eventTagLocalStorage.updateTags(alltags)
+            await self.updateTimestampIfNeed(.eventTag, result.syncTimestamp)
+        } catch let error {
+            throw error
+        }
     }
     
     public func migrateTodoEvents() async throws {
         let service = try await self.prepareTempDBsqliteService()
         defer { service.close() }
         
-        let storage = TodoLocalStorageImple(sqliteService: service)
-        let todos = try await storage.loadAllEvents()
+        let tempStorage = TodoLocalStorageImple(sqliteService: service)
+        let todos = try await tempStorage.loadAllEvents()
         
         guard !todos.isEmpty else { return }
         
@@ -92,16 +109,21 @@ extension TemporaryUserDataMigrationRepositoryImple {
             endpoint,
             parameters: payload.asJson()
         )
-        try? await storage.removeAll()
-        await self.updateTimestampIfNeed(.todo, result.syncTimestamp)
+        try? await tempStorage.removeAll()
+        do {
+            try await todoLocalStorage.updateTodoEvents(todos)
+            await self.updateTimestampIfNeed(.todo, result.syncTimestamp)
+        } catch let error {
+            throw error
+        }
     }
     
     public func migrateScheduleEvents() async throws {
         let service = try await self.prepareTempDBsqliteService()
         defer { service.close() }
         
-        let storage = ScheduleEventLocalStorageImple(sqliteService: service)
-        let schedules = try await storage.loadAllEvents()
+        let tempSorage = ScheduleEventLocalStorageImple(sqliteService: service)
+        let schedules = try await tempSorage.loadAllEvents()
         
         guard !schedules.isEmpty else { return }
         
@@ -113,8 +135,13 @@ extension TemporaryUserDataMigrationRepositoryImple {
             parameters: payload.asJson()
         )
         
-        try? await storage.removeAll()
-        await updateTimestampIfNeed(.schedule, result.syncTimestamp)
+        try? await tempSorage.removeAll()
+        do {
+            try await self.scheduleLocalStorage.updateScheduleEvents(schedules)
+            await updateTimestampIfNeed(.schedule, result.syncTimestamp)
+        } catch let error {
+            throw error
+        }
     }
     
     private func updateTimestampIfNeed(_ dataType: SyncDataType, _ timestamp: Int?) async {
@@ -127,8 +154,8 @@ extension TemporaryUserDataMigrationRepositoryImple {
         let service = try await self.prepareTempDBsqliteService()
         defer { service.close() }
         
-        let storage = EventDetailDataLocalStorageImple(sqliteService: service)
-        let details = try await storage.loadAll()
+        let tempStorage = EventDetailDataLocalStorageImple(sqliteService: service)
+        let details = try await tempStorage.loadAll()
         
         guard !details.isEmpty else { return }
         
@@ -140,15 +167,16 @@ extension TemporaryUserDataMigrationRepositoryImple {
             parameters: payload.asJson()
         )
         
-        try? await storage.removeAll()
+        try? await tempStorage.removeAll()
+        try await self.eventDetailLocalStorage.saveDetails(details)
     }
     
     public func migrateDoneEvents() async throws {
         let service = try await self.prepareTempDBsqliteService()
         defer { service.close() }
         
-        let storage = TodoLocalStorageImple(sqliteService: service)
-        let doneEvents = try await storage.loadAllDoneEvents()
+        let tempStorage = TodoLocalStorageImple(sqliteService: service)
+        let doneEvents = try await tempStorage.loadAllDoneEvents()
         
         guard !doneEvents.isEmpty else { return }
         
@@ -160,7 +188,8 @@ extension TemporaryUserDataMigrationRepositoryImple {
             parameters: payload.asJson()
         )
         
-        try? await storage.removeAllDoneEvents()
+        try? await tempStorage.removeAllDoneEvents()
+        try await self.todoLocalStorage.updateDoneTodos(doneEvents)
     }
     
     public func clearTemporaryUserData() async throws {
