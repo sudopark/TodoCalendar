@@ -16,13 +16,16 @@ public final class TemporaryUserDataMigrationRepositoryImple: TemporaryUserDataM
     
     private let tempUserDBPath: String
     private let remoteAPI: any RemoteAPI
+    private let syncTimeLocalStorage: any EventSyncTimestampLocalStorage
     
     public init(
         tempUserDBPath: String,
-        remoteAPI: any RemoteAPI
+        remoteAPI: any RemoteAPI,
+        syncTimeLocalStorage: any EventSyncTimestampLocalStorage
     ) {
         self.tempUserDBPath = tempUserDBPath
         self.remoteAPI = remoteAPI
+        self.syncTimeLocalStorage = syncTimeLocalStorage
     }
 }
 
@@ -64,12 +67,13 @@ extension TemporaryUserDataMigrationRepositoryImple {
         
         let endpoint = MigrationEndpoints.eventTags
         let payload = BatchEventTagPayload(tags: alltags)
-        let _ : BatchWriteResult = try await self.remoteAPI.request(
+        let result : BatchWriteResult = try await self.remoteAPI.request(
             .post,
             endpoint,
             parameters: payload.asJson()
         )
         try? await storage.removeAllTags()
+        await self.updateTimestampIfNeed(.eventTag, result.syncTimestamp)
     }
     
     public func migrateTodoEvents() async throws {
@@ -83,12 +87,13 @@ extension TemporaryUserDataMigrationRepositoryImple {
         
         let endpoint = MigrationEndpoints.todos
         let payload = BatchTodoEventPayload(todos: todos)
-        let _: BatchWriteResult = try await self.remoteAPI.request(
-            .post, 
+        let result: BatchWriteResult = try await self.remoteAPI.request(
+            .post,
             endpoint,
             parameters: payload.asJson()
         )
         try? await storage.removeAll()
+        await self.updateTimestampIfNeed(.todo, result.syncTimestamp)
     }
     
     public func migrateScheduleEvents() async throws {
@@ -98,17 +103,24 @@ extension TemporaryUserDataMigrationRepositoryImple {
         let storage = ScheduleEventLocalStorageImple(sqliteService: service)
         let schedules = try await storage.loadAllEvents()
         
-        guard !schedules.isEmpty else { return}
+        guard !schedules.isEmpty else { return }
         
         let endpoint = MigrationEndpoints.schedules
         let payload = BatchScheduleEventPayload(events: schedules)
-        let _ : BatchWriteResult = try await self.remoteAPI.request(
+        let result: BatchWriteResult = try await self.remoteAPI.request(
             .post,
             endpoint,
             parameters: payload.asJson()
         )
         
         try? await storage.removeAll()
+        await updateTimestampIfNeed(.schedule, result.syncTimestamp)
+    }
+    
+    private func updateTimestampIfNeed(_ dataType: SyncDataType, _ timestamp: Int?) async {
+        guard let timestamp else { return }
+        let serverTimestamp = EventSyncTimestamp(dataType, timestamp)
+        try? await self.syncTimeLocalStorage.updateLocalTimestamp(by: serverTimestamp)
     }
     
     public func migrateEventDetails() async throws {

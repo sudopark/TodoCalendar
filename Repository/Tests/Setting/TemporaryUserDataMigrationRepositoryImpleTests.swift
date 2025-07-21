@@ -10,6 +10,7 @@ import XCTest
 import Combine
 import Prelude
 import Optics
+import SQLiteService
 import Domain
 import UnitTestHelpKit
 
@@ -19,16 +20,20 @@ import UnitTestHelpKit
 class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
     
     private var stubRemote: StubRemoteAPI!
+    private var syncTimeLocalStorage: EventSyncTimestampLocalStorageImple!
+    private let tempDBPath: String = "temp"
     
     override func setUpWithError() throws {
-        self.fileName = "temps"
+        self.fileName = "user_db"
         try super.setUpWithError()
         self.stubRemote = .init(responses: self.responses)
+        self.syncTimeLocalStorage = EventSyncTimestampLocalStorageImple(sqliteService: self.sqliteService)
     }
     
     override func tearDownWithError() throws {
         try super.tearDownWithError()
         self.stubRemote = nil
+        self.syncTimeLocalStorage = nil
     }
     
     private var dummyTime: EventTime {
@@ -50,12 +55,14 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
     }
     
     private func prepareDummyData() async throws {
-        defer { self.sqliteService.close() }
+        let tempDBService = SQLiteService()
+        _ = tempDBService.open(path: self.tempDBPath)
+        defer { tempDBService.close() }
         let tags = [
             CustomEventTag(uuid: "t1", name: "n1", colorHex: "some"),
             CustomEventTag(uuid: "t2", name: "n2", colorHex: "some"),
         ]
-        let tagStorage = EventTagLocalStorageImple(sqliteService: self.sqliteService)
+        let tagStorage = EventTagLocalStorageImple(sqliteService: tempDBService)
         try await tagStorage.updateTags(tags)
         
         let todo1 = TodoEvent(uuid: "todo1", name: "todo1")
@@ -68,7 +75,7 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
         let todo2 = TodoEvent(uuid: "todo2", name: "todo2")
             |> \.eventTagId .~ .custom("t2")
             |> \.creatTimeStamp .~ 200
-        let todoStorage = TodoLocalStorageImple(sqliteService: self.sqliteService)
+        let todoStorage = TodoLocalStorageImple(sqliteService: tempDBService)
         try await todoStorage.updateTodoEvents([todo1, todo2])
         
         let done1 = DoneTodoEvent(uuid: "d1", name: "d1", originEventId: "todo1", doneTime: Date())
@@ -85,23 +92,28 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
             |> \.showTurn .~ true
             |> \.repeatingTimeToExcludes .~ ["some"]
         let sc2 = ScheduleEvent(uuid: "sc2", name: "sc2", time: self.dummyTime)
-        let scheduleStorage = ScheduleEventLocalStorageImple(sqliteService: self.sqliteService)
+        let scheduleStorage = ScheduleEventLocalStorageImple(sqliteService: tempDBService)
         try await scheduleStorage.updateScheduleEvents([sc1, sc2])
         
         let detail1 = EventDetailData("todo1")
             |> \.memo .~ "memo"
             |> \.place .~ .init("place", .init(200, 300))
-        let detailStorage = EventDetailDataLocalStorageImple(sqliteService: self.sqliteService)
+        let detailStorage = EventDetailDataLocalStorageImple(sqliteService: tempDBService)
         try await detailStorage.saveDetail(detail1)
     }
     
     private func makeRepository(withoutData: Bool = false) async throws -> TemporaryUserDataMigrationRepositoryImple {
         let repository = TemporaryUserDataMigrationRepositoryImple(
-            tempUserDBPath: self.testDBPath(),
-            remoteAPI: self.stubRemote
+            tempUserDBPath: self.tempDBPath,
+            remoteAPI: self.stubRemote,
+            syncTimeLocalStorage: self.syncTimeLocalStorage
         )
         if !withoutData {
             try await self.prepareDummyData()
+        } else {
+            let service = SQLiteService()
+            _ = service.open(path: self.tempDBPath)
+            service.close()
         }
         return repository
     }
@@ -130,6 +142,9 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         // then
         let batchTagIds = self.stubRemote.didRequestedParams?.keys.sorted().map { $0 }
         XCTAssertEqual(batchTagIds, ["t1", "t2"])
+        
+        let timestamp = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .eventTag)
+        XCTAssertEqual(timestamp, .init(.eventTag, 100))
     }
     
     func testRepository_migrationTodoEvents() async throws {
@@ -148,6 +163,9 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         XCTAssertEqual(createTimestamps, [
             "todo1": 100, "todo2": 200
         ])
+        
+        let timestamp = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .todo)
+        XCTAssertEqual(timestamp, .init(.todo, 101))
     }
     
     func testRepository_migrationScheduleEvents() async throws {
@@ -160,6 +178,9 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         // then
         let batchScheduleEventIds = self.stubRemote.didRequestedParams?.keys.sorted().map { $0 }
         XCTAssertEqual(batchScheduleEventIds, ["sc1", "sc2"])
+        
+        let timestamp = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .schedule)
+        XCTAssertEqual(timestamp, .init(.schedule, 102))
     }
     
     func testRepository_migrationEventDetails() async throws {
@@ -189,13 +210,13 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
     func testReposiotry_clearTempUserData() async throws {
         // given
         let repository = try await self.makeRepository()
-        XCTAssertEqual(FileManager.default.fileExists(atPath: self.testDBPath()), true)
+        XCTAssertEqual(FileManager.default.fileExists(atPath: self.tempDBPath), true)
         
         // when
         try await repository.clearTemporaryUserData()
         
         // then
-        XCTAssertEqual(FileManager.default.fileExists(atPath: self.testDBPath()), false)
+        XCTAssertEqual(FileManager.default.fileExists(atPath: self.tempDBPath), false)
     }
     
     func testRepository_migrate() async throws {
@@ -214,6 +235,13 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         // then
         XCTAssertEqual(countBeforeMigration, 4)
         XCTAssertEqual(countAfterMigration, nil)
+        
+        let timestampTag = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .eventTag)
+        XCTAssertEqual(timestampTag, .init(.eventTag, 100))
+        let timestampTodo = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .todo)
+        XCTAssertEqual(timestampTodo, .init(.todo, 101))
+        let timestampSchedule = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .schedule)
+        XCTAssertEqual(timestampSchedule, .init(.schedule, 102))
     }
     
     func testReposiotry_whenMigrateTargetDataIsEmpty_notUpload() async throws {
@@ -228,6 +256,13 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         
         // then
         XCTAssertEqual(self.stubRemote.didRequestedPaths.isEmpty, true)
+        
+        let timestampTag = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .eventTag)
+        XCTAssertNil(timestampTag)
+        let timestampTodo = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .todo)
+        XCTAssertNil(timestampTodo)
+        let timestampSchedule = try await self.syncTimeLocalStorage.loadLocalTimestamp(for: .schedule)
+        XCTAssertNil(timestampSchedule)
     }
 }
 
@@ -239,22 +274,28 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         """
     }
     
+    private func okResponse(with timestamp: Int) -> String {
+        return """
+        { "status": "ok", "syncTimestamp": \(timestamp) }
+        """
+    }
+    
     private var responses: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .post,
                 endpoint: MigrationEndpoints.eventTags,
-                resultJsonString: .success(self.okReponse)
+                resultJsonString: .success(self.okResponse(with: 100))
             ),
             .init(
                 method: .post,
                 endpoint: MigrationEndpoints.todos,
-                resultJsonString: .success(self.okReponse)
+                resultJsonString: .success(self.okResponse(with: 101))
             ),
             .init(
                 method: .post,
                 endpoint: MigrationEndpoints.schedules,
-                resultJsonString: .success(self.okReponse)
+                resultJsonString: .success(self.okResponse(with: 102))
             ),
             .init(
                 method: .post,
