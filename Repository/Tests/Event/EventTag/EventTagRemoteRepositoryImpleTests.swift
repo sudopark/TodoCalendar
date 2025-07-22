@@ -43,7 +43,7 @@ class EventTagRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
     
     private func makeRepository() -> EventTagRemoteRepositoryImple {
         return .init(
-            remote: self.stubRemote,
+            remote: EventTagRemoteImple(remote: self.stubRemote),
             cacheStorage: self.spyCache,
             todoCacheStorage: self.spyTodoCache,
             scheduleCacheStorage: self.spyScheduleCache,
@@ -157,7 +157,7 @@ extension EventTagRemoteRepositoryImpleTests {
         
         // when
         let loading = repository.loadAllCustomTags()
-        let tagLists = self.waitOutputs(expect, for: loading)
+        let tagLists = self.waitOutputs(expect, for: loading, timeout: 1)
         
         // then
         XCTAssertEqual(tagLists.count, 1)

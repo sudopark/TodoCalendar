@@ -395,7 +395,7 @@ extension LoginUsecaseFactoryImple {
             sqliteService: applicationBase.commonSqliteService
         )
         let repository = EventTagRemoteRepositoryImple(
-            remote: applicationBase.remoteAPI,
+            remote: EventTagRemoteImple(remote: applicationBase.remoteAPI),
             cacheStorage: cache,
             todoCacheStorage: todoCache,
             scheduleCacheStorage: scheduleCache,
