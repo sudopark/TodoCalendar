@@ -18,14 +18,14 @@ import Extensions
 
 public final class EventTagRemoteRepositoryImple: EventTagRepository, @unchecked Sendable {
     
-    private let remote: any RemoteAPI
+    private let remote: any EventTagRemote
     private let cacheStorage: any EventTagLocalStorage
     private let todoCacheStorage: any TodoLocalStorage
     private let scheduleCacheStorage: any ScheduleEventLocalStorage
     private let environmentStorage: any EnvironmentStorage
     
     public init(
-        remote: any RemoteAPI,
+        remote: any EventTagRemote,
         cacheStorage: any EventTagLocalStorage,
         todoCacheStorage: any TodoLocalStorage,
         scheduleCacheStorage: any ScheduleEventLocalStorage,
@@ -42,49 +42,28 @@ public final class EventTagRemoteRepositoryImple: EventTagRepository, @unchecked
 extension EventTagRemoteRepositoryImple {
     
     public func makeNewTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag {
-        let endpoint = EventTagEndpoints.make
-        let payload = params.asJson()
-        let mapper: CustomEventTagMapper = try await self.remote.request(
-            .post,
-            endpoint,
-            parameters: payload
-        )
-        let tag = mapper.tag
+        let tag = try await self.remote.makeTag(params)
         try? await self.cacheStorage.saveTag(tag)
         return tag
     }
     
     public func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag {
-        let endpoint = EventTagEndpoints.tag(id: tagId)
-        let payload = params.asJson()
-        let mapper: CustomEventTagMapper = try await self.remote.request(
-            .put,
-            endpoint,
-            parameters: payload
-        )
-        let tag = mapper.tag
+        let tag = try await self.remote.editTag(tagId, params)
         try? await self.cacheStorage.updateTags([tag])
         return tag
     }
     
     public func deleteTag(_ tagId: String) async throws {
-        let endpoint = EventTagEndpoints.tag(id: tagId)
-        let _: RemoveEventTagResult = try await self.remote.request(
-            .delete,
-            endpoint
-        )
+        let result = try await self.remote.deleteTag(tagId)
         try? await self.cacheStorage.deleteTag(tagId)
         self.deleteOfftagId(tagId)
+        return result
     }
     
     public func deleteTagWithAllEvents(
         _ tagId: String
     ) async throws -> RemoveCustomEventTagWithEventsResult {
-        let endpoint = EventTagEndpoints.tagAndEvents(id: tagId)
-        let mapper: RemoveEventTagAndResultMapper = try await self.remote.request(
-            .delete, endpoint
-        )
-        let result = mapper.result
+        let result = try await self.remote.deleteTagWithAllEvents(tagId)
         try? await self.cacheStorage.deleteTag(tagId)
         try? await self.todoCacheStorage.removeTodos(result.todoIds)
         try? await self.scheduleCacheStorage.removeScheduleEvents(result.scheduleIds)
@@ -95,34 +74,16 @@ extension EventTagRemoteRepositoryImple {
         return self.loadTagsAndReplaceCache { [weak self] in
             return try await self?.cacheStorage.loadAllTags()
         } thenFromRemote: { [weak self] in
-            return try await self?.loadAllEventsFromRemote()
+            return try await self?.remote.loadAllEventTags()
         }
-    }
-    
-    private func loadAllEventsFromRemote() async throws -> [CustomEventTag] {
-        let endpoint = EventTagEndpoints.allTags
-        let mappers: [CustomEventTagMapper] = try await self.remote.request(
-            .get, endpoint
-        )
-        return mappers.map { $0.tag }
     }
     
     public func loadCustomTags(_ ids: [String]) -> AnyPublisher<[CustomEventTag], any Error> {
         return self.loadTagsAndReplaceCache { [weak self] in
             return try await self?.cacheStorage.loadTags(in: ids)
         } thenFromRemote: { [weak self] in
-            return try await self?.loadTagsFromRemote(ids)
+            return try await self?.remote.loadCustomTags(ids)
         }
-    }
-    
-    private func loadTagsFromRemote(_ ids: [String]) async throws -> [CustomEventTag] {
-        let endpoint = EventTagEndpoints.tags
-        let mappers: [CustomEventTagMapper] = try await self.remote.request(
-            .get,
-            endpoint,
-            parameters: ["ids": ids]
-        )
-        return mappers.map { $0.tag }
     }
     
     private func loadTagsAndReplaceCache(

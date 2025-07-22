@@ -35,7 +35,7 @@ extension IntentReposiotryFactory {
             let credential = APICredential(auth: auth)
             remote.setup(credential: credential)
             return EventTagRemoteRepositoryImple(
-                remote: remote,
+                remote: EventTagRemoteImple(remote: remote),
                 cacheStorage: localStorage,
                 todoCacheStorage: todoLocalStorage,
                 scheduleCacheStorage: scheduleLocalStorage,
