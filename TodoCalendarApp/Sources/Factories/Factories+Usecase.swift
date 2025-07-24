@@ -374,7 +374,7 @@ extension LoginUsecaseFactoryImple {
             sqliteService: applicationBase.commonSqliteService
         )
         let repository = ScheduleEventRemoteRepositoryImple(
-            remote: applicationBase.remoteAPI,
+            remote: ScheduleEventRemoteImple(remote: applicationBase.remoteAPI),
             cacheStore: cache
         )
         return ScheduleEventUsecaseImple(
