@@ -138,7 +138,7 @@ extension WidgetUsecaseFactory {
             let credential = APICredential(auth: auth)
             remote.setup(credential: credential)
             return TodoRemoteRepositoryImple(
-                remote: base.remoteAPI,
+                remote: TodoRemoteImple(remote: base.remoteAPI),
                 cacheStorage: localStorage
             )
         } else {
