@@ -17,12 +17,12 @@ import Extensions
 
 public final class TodoRemoteRepositoryImple: TodoEventRepository, @unchecked Sendable {
     
-    private let remote: any RemoteAPI
+    private let remote: any TodoRemote
     private let cacheStorage: any TodoLocalStorage
     private var cancellables: Set<AnyCancellable> = []
     
     public init(
-        remote: any RemoteAPI,
+        remote: any TodoRemote,
         cacheStorage: any TodoLocalStorage
     ) {
         self.remote = remote
@@ -35,28 +35,13 @@ public final class TodoRemoteRepositoryImple: TodoEventRepository, @unchecked Se
 extension TodoRemoteRepositoryImple {
     
     public func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent {
-        let endpoint = TodoAPIEndpoints.make
-        let payload = params.asJson()
-        let mapper: TodoEventMapper = try await self.remote.request(
-            .post, 
-            endpoint, 
-            parameters: payload
-        )
-        let newTodo = mapper.todo
+        let newTodo = try await self.remote.makeTodoEvent(params)
         try? await self.cacheStorage.saveTodoEvent(newTodo)
         return newTodo
     }
     
     public func updateTodoEvent(_ eventId: String, _ params: TodoEditParams) async throws -> TodoEvent {
-        let endpoint = TodoAPIEndpoints.todo(eventId)
-        let payload = params.asJson()
-        let method: RemoteAPIMethod = params.editMethod == .put ? .put : .patch
-        let mapper: TodoEventMapper = try await self.remote.request(
-            method,
-            endpoint,
-            parameters: payload
-        )
-        let updated = mapper.todo
+        let updated = try await self.remote.updateTodoEvent(eventId, params)
         try? await self.cacheStorage.updateTodoEvent(updated)
         return updated
     }
@@ -68,17 +53,10 @@ extension TodoRemoteRepositoryImple {
     
     public func completeTodo(_ eventId: String) async throws -> CompleteTodoResult {
         
-        let origin = try await self.loadTodoEvent(eventId)
+        let origin = try await self.remote.loadTodo(eventId)
         let nextTime = try? self.findNextRepeatingEvent(origin)
         
-        let payload = DoneTodoEventParams(origin, nextTime)
-        let endpoint = TodoAPIEndpoints.done(eventId)
-        let mapper: CompleteTodoResultMapper = try await remote.request(
-            .post,
-            endpoint,
-            parameters: payload.asJson()
-        )
-        let result = mapper.result
+        let result = try await self.remote.completeTodo(origin: origin, nextTime: nextTime)
         
         // update cache
         try? await cacheStorage.removeTodo(eventId)
@@ -94,17 +72,12 @@ extension TodoRemoteRepositoryImple {
         to newParams: TodoMakeParams
     ) async throws -> ReplaceRepeatingTodoEventResult {
         
-        let origin = try await self.loadTodoEvent(eventId)
+        let origin = try await self.remote.loadTodo(eventId)
         let nextTime = try? self.findNextRepeatingEvent(origin)
         
-        let payload = ReplaceRepeatingTodoEventParams(newParams, nextTime)
-        let endpoint = TodoAPIEndpoints.replaceRepeating(eventId)
-        let mapper: ReplaceRepeatingTodoEventResultMapper = try await remote.request(
-            .post,
-            endpoint,
-            parameters: payload.asJson()
+        let result = try await self.remote.replaceRepeatingTodo(
+            origin: origin, to: newParams, nextTime: nextTime
         )
-        let result = mapper.result
         
         // update cache
         try? await cacheStorage.removeTodo(eventId)
@@ -149,7 +122,7 @@ extension TodoRemoteRepositoryImple {
     }
     
     private func replaceCurrentTodoToNext(_ eventid: String) async throws -> RemoveTodoResult {
-        let origin = try await self.loadTodoEvent(eventid)
+        let origin = try await self.remote.loadTodo(eventid)
         guard let nextEventTime = try? self.findNextRepeatingEvent(origin)
         else{
             return try await self.removeTodo(eventId: eventid)
@@ -161,13 +134,9 @@ extension TodoRemoteRepositoryImple {
     }
     
     private func removeTodo(eventId: String) async throws -> RemoveTodoResult {
-        let endpoint = TodoAPIEndpoints.todo(eventId)
-        let _ : RemoveTodoResultMapper = try await self.remote.request(
-            .delete,
-            endpoint
-        )
+        let result = try await self.remote.removeTodo(eventId: eventId)
         try? await self.cacheStorage.removeTodo(eventId)
-        return .init()
+        return result
     }
 }
 
@@ -176,7 +145,7 @@ extension TodoRemoteRepositoryImple {
 extension TodoRemoteRepositoryImple {
     
     public func skipRepeatingTodo(_ todoId: String) async throws -> TodoEvent {
-        let origin = try await self.loadTodoEvent(todoId)
+        let origin = try await self.remote.loadTodo(todoId)
         let next = try self.findNextRepeatingEvent(origin)
         let params = TodoEditParams(.patch) |> \.time .~ next
         return try await self.updateTodoEvent(todoId, params)
@@ -194,11 +163,7 @@ extension TodoRemoteRepositoryImple {
         return self.loadTodosWithReplaceCached { [weak self] in
             return try await self?.cacheStorage.loadCurrentTodoEvents()
         } thenFromRemote: { [weak self] in
-            let mappers: [TodoEventMapper]? = try await self?.remote.request(
-                .get, 
-                TodoAPIEndpoints.currentTodo
-            )
-            return mappers?.map { $0.todo }
+            return try await self?.remote.loadCurrentTodos()
         }
     }
     
@@ -209,13 +174,7 @@ extension TodoRemoteRepositoryImple {
         return self.loadTodosWithReplaceCached { [weak self] in
             return try await self?.cacheStorage.loadTodoEvents(in: range)
         } thenFromRemote: { [weak self] in
-            let payload: [String: Any] = ["lower": range.lowerBound, "upper": range.upperBound]
-            let mappers: [TodoEventMapper]? = try await self?.remote.request(
-                .get, 
-                TodoAPIEndpoints.todos,
-                parameters: payload
-            )
-            return mappers?.map { $0.todo }
+            return try await self?.remote.loadTodos(in: range)
         }
     }
     
@@ -225,20 +184,11 @@ extension TodoRemoteRepositoryImple {
             let cache = try await self?.cacheStorage.loadTodoEvent(id)
             return cache.map { [$0] }
         } thenFromRemote: { [weak self] in
-            let refreshed = try await self?.loadTodoEvent(id)
+            let refreshed = try await self?.remote.loadTodo(id)
             return refreshed.map { [$0] }
         }
         .compactMap { $0.first }
         .eraseToAnyPublisher()
-    }
-    
-    private func loadTodoEvent(_ id: String) async throws -> TodoEvent {
-        let endpoint = TodoAPIEndpoints.todo(id)
-        let mapper: TodoEventMapper = try await self.remote.request(
-            .get,
-            endpoint
-        )
-        return mapper.todo
     }
     
     public func loadUncompletedTodos() -> AnyPublisher<[TodoEvent], any Error> {
@@ -246,23 +196,13 @@ extension TodoRemoteRepositoryImple {
         return self.loadTodosWithReplaceCached { [weak self] in
             return try await self?.cacheStorage.loadUncompletedTodos(now)
         } thenFromRemote: { [weak self] in
-            return try await self?.loadUncompletedTodosFromRemote(now)
+            return try await self?.remote.loadUncompletedTodosFromRemote(now)
         } withRefreshCache: { [weak self] _, refreshed in
             if let refreshed {
                 try? await self?.cacheStorage.updateTodoEvents(refreshed)
             }
         }
         .eraseToAnyPublisher()
-    }
-    
-    private func loadUncompletedTodosFromRemote(_ now: Date) async throws -> [TodoEvent] {
-        let params = ["refTime": now.timeIntervalSince1970]
-        let mapper: [TodoEventMapper] = try await self.remote.request(
-            .get,
-            TodoAPIEndpoints.uncompleteds,
-            parameters: params
-        )
-        return mapper.map { $0.todo }
     }
     
     private func loadTodosWithReplaceCached(
@@ -315,23 +255,13 @@ extension TodoRemoteRepositoryImple {
     public func loadDoneTodoEvents(
         _ params: DoneTodoLoadPagingParams
     ) async throws -> [DoneTodoEvent] {
-        let mappers: [DoneTodoEventMapper] = try await self.remote.request(
-            .get,
-            TodoAPIEndpoints.dones,
-            parameters: params.asJson()
-        )
-        let events = mappers.map { $0.event }
+        let events = try await self.remote.loadDoneTodoEvents(params)
         try await self.cacheStorage.updateDoneTodos(events)
         return events
     }
     
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
-        typealias RemoveDoneTodoResultMapper = RemoveTodoResultMapper
-        let _: RemoveDoneTodoResultMapper = try await remote.request(
-            .delete,
-            TodoAPIEndpoints.dones,
-            parameters: scope.asJson()
-        )
+        try await self.remote.removeDoneTodos(scope)
         switch scope {
         case .all: try await self.cacheStorage.removeAllDoneEvents()
         case .pastThan(let time): try await self.cacheStorage.removeDoneTodos(pastThan: time)
@@ -339,13 +269,10 @@ extension TodoRemoteRepositoryImple {
     }
     
     public func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
-        let mapper: TodoEventMapper = try await self.remote.request(
-            .post,
-            TodoAPIEndpoints.revertDone(doneTodoId)
-        )
+        let todo = try await self.remote.revertDoneTodo(doneTodoId)
         try await self.cacheStorage.removeDoneTodo([doneTodoId])
-        try await self.cacheStorage.updateTodoEvent(mapper.todo)
-        return mapper.todo
+        try await self.cacheStorage.updateTodoEvent(todo)
+        return todo
     }
     
     public func toggleTodo(_ todoId: String) async throws -> TodoToggleResult? {
@@ -389,12 +316,7 @@ extension TodoRemoteRepositoryImple {
         _ origin: TodoEvent,
         _ doneTodoId: String?
     ) async throws -> RevertToggleTodoDoneResult {
-        let endpoint: TodoAPIEndpoints = .cancelDone
-        let result: RevertToggleTodoDoneResult = try await self.remote.request(
-            .post,
-            endpoint,
-            parameters: RevertToggleTodoDoneParameter(origin, doneTodoId).asJson()
-        )
+        let result = try await self.remote.cancelDoneTodo(origin, doneTodoId)
         try await self.cacheStorage.updateTodoEvent(result.reverted)
         if let deletedDoneId = result.deletedDoneTodoId {
             try await self.cacheStorage.removeDoneTodo([deletedDoneId])

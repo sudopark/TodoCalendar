@@ -250,7 +250,7 @@ struct RevertToggleTodoDoneParameter {
 }
 
 
-struct RevertToggleTodoDoneResult: Decodable {
+public struct RevertToggleTodoDoneResult: Decodable {
     let reverted: TodoEvent
     let deletedDoneTodoId: String?
     
@@ -263,7 +263,7 @@ struct RevertToggleTodoDoneResult: Decodable {
         case reverted
         case deletedDoneTodoId = "deleted_done_id"
     }
-    init(from decoder: any Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.reverted = try container.decode(TodoEventMapper.self, forKey: .reverted).todo
         self.deletedDoneTodoId = try? container.decode(String.self, forKey: .deletedDoneTodoId)

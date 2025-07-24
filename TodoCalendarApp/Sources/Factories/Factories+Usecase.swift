@@ -359,7 +359,7 @@ extension LoginUsecaseFactoryImple {
             sqliteService: applicationBase.commonSqliteService
         )
         let repository = TodoRemoteRepositoryImple(
-            remote: applicationBase.remoteAPI,
+            remote: TodoRemoteImple(remote: applicationBase.remoteAPI),
             cacheStorage: cache
         )
         return TodoEventUsecaseImple(
@@ -424,7 +424,7 @@ extension LoginUsecaseFactoryImple {
             sqliteService: applicationBase.commonSqliteService
         )
         let repository = TodoRemoteRepositoryImple(
-            remote: applicationBase.remoteAPI,
+            remote: TodoRemoteImple(remote: applicationBase.remoteAPI),
             cacheStorage: cache
         )
         return DoneTodoEventsPagingUsecaseImple(
