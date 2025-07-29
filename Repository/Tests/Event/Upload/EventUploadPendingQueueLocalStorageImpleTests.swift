@@ -7,6 +7,8 @@
 //
 
 import Testing
+import Prelude
+import Optics
 import SQLiteService
 import Domain
 import Extensions
@@ -45,9 +47,12 @@ extension EventUploadPendingQueueLocalStorageImpleTests {
         }
     }
     
-    private func saveTasks(_ storage: EventUploadPendingQueueLocalStorageImple) async throws {
+    private func saveTasks(
+        _ storage: EventUploadPendingQueueLocalStorageImple,
+        _ tasks: [EventUploadingTask]? = nil
+    ) async throws {
         
-        let tasks: [EventUploadingTask] = (0..<4).map { int in
+        let tasks: [EventUploadingTask] = tasks ?? (0..<4).map { int in
             return .init(timestamp: TimeInterval(int), dataType: .eventTag, uuid: "id:\(int)", isRemovingTask: int % 2 == 0)
         }
         for task in tasks {
@@ -72,6 +77,49 @@ extension EventUploadPendingQueueLocalStorageImpleTests {
             // then
             let ids = tasks.map { $0?.uuid }
             #expect(ids == ["id:0", "id:1", "id:2", "id:3", nil])
+        }
+    }
+    
+    @Test func storage_whenPopTask_ignoreUploadFailCountGTE3() async throws {
+        try await self.runTestWithOpenClose("pending-3") {
+            // given
+            let storage = self.makeStorage()
+            let tasks = (0..<5).map { int in
+                return EventUploadingTask(dataType: .eventTag, uuid: "id:\(int)", isRemovingTask: false)
+                |> \.uploadFailCount .~ int
+            }
+            try await self.saveTasks(storage, tasks)
+            
+            // when
+            var popTasks: [EventUploadingTask?] = []
+            while let task = try await storage.popTask() {
+                popTasks.append(task)
+            }
+            
+            // then
+            let ids = popTasks.map { $0?.uuid }
+            #expect(ids == ["id:0", "id:1", "id:2"])
+        }
+    }
+    
+    @Test func storage_pushUploadFailedTasks() async throws {
+        try await self.runTestWithOpenClose("pending-4") {
+            // given
+            let storage = self.makeStorage()
+            let tasks = (0..<5).map { int in
+                return EventUploadingTask(dataType: .eventTag, uuid: "id:\(int)", isRemovingTask: false)
+            }
+            try await storage.pushFailedTask(tasks)
+            
+            // when
+            var popTasks: [EventUploadingTask?] = []
+            while let task = try await storage.popTask() {
+                popTasks.append(task)
+            }
+            
+            // then
+            let ids = popTasks.map { $0?.uuid }
+            #expect(ids == ["id:0", "id:1", "id:2", "id:3", "id:4"])
         }
     }
 }

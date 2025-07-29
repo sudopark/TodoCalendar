@@ -21,6 +21,7 @@ public struct EventUploadingTask: Sendable {
     public let dataType: DataType
     public let uuid: String
     public let isRemovingTask: Bool
+    public var uploadFailCount: Int = 0
     
     public init(
         timestamp: TimeInterval = Date().timeIntervalSince1970,
