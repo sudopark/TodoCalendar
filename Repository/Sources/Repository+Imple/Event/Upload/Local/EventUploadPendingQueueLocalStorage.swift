@@ -16,6 +16,7 @@ public protocol EventUploadPendingQueueLocalStorage: Sendable {
     
     func popTask() async throws -> EventUploadingTask?
     func pushTask(_ task: EventUploadingTask) async throws
+    func pushFailedTask(_ tasks: [EventUploadingTask]) async throws
 }
 
 
@@ -34,6 +35,7 @@ extension EventUploadPendingQueueLocalStorageImple {
     public func popTask() async throws -> EventUploadingTask? {
         try await self.sqliteService.async.run { db in
             let query = Queue.selectAll()
+                .where { $0.uploadFailCount < 3 }
                 .orderBy(isAscending: true) { $0.timestamp }
             guard let firstTask = try db.loadOne(Queue.self, query: query)
             else { return nil }
@@ -47,6 +49,12 @@ extension EventUploadPendingQueueLocalStorageImple {
     public func pushTask(_ task: EventUploadingTask) async throws {
         try await self.sqliteService.async.run { db in
             try db.insertOne(Queue.self, entity: task, shouldReplace: true)
+        }
+    }
+    
+    public func pushFailedTask(_ tasks: [EventUploadingTask]) async throws {
+        try await self.sqliteService.async.run { db in
+            try db.insert(Queue.self, entities: tasks, shouldReplace: true)
         }
     }
 }

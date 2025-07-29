@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 import SQLiteService
 import Domain
 import Extensions
@@ -19,6 +21,7 @@ struct EventUploadPendingQueueTable: Table {
         case dataType = "data_type"
         case uuid
         case isRemove = "is_remove"
+        case uploadFailCount = "upload_fail_count"
         
         var dataType: ColumnDataType {
             switch self {
@@ -26,6 +29,7 @@ struct EventUploadPendingQueueTable: Table {
             case .dataType: return .text([.notNull])
             case .uuid: return .text([.unique, .notNull])
             case .isRemove: return .integer([.default(0), .notNull])
+            case .uploadFailCount: return .integer([.default(0), .notNull])
             }
         }
     }
@@ -40,6 +44,7 @@ struct EventUploadPendingQueueTable: Table {
         case .dataType: return entity.dataType.rawValue
         case .uuid: return entity.uuid
         case .isRemove: return entity.isRemovingTask
+        case .uploadFailCount: return entity.uploadFailCount
         }
     }
 }
@@ -53,7 +58,8 @@ extension EventUploadingTask: @retroactive RowValueType {
             dataType: try EventUploadingTask.DataType(
                 rawValue: try cursor.next().unwrap()).unwrap(),
             uuid: try cursor.next().unwrap(),
-            isRemovingTask: try cursor.next().unwrap()
+            isRemovingTask: try cursor.next().unwrap(),
         )
+        self.uploadFailCount = try cursor.next().unwrap()
     }
 }
