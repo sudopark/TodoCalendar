@@ -18,6 +18,7 @@ import UnitTestHelpKit
 @testable import Repository
 
 
+@Suite("EventSyncRepositoryImpleTests", .serialized)
 final class EventSyncRepositoryImpleTests: PublisherWaitable, LocalTestable {
     
     var cancelBag: Set<AnyCancellable>! = []

@@ -17,6 +17,7 @@ import UnitTestHelpKit
 @testable import Repository
 
 
+@Suite("GoogleCalendarRepositoryImple_Tests", .serialized)
 final class GoogleCalendarRepositoryImple_Tests: PublisherWaitable, LocalTestable {
     
     var cancelBag: Set<AnyCancellable>! = []

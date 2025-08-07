@@ -693,6 +693,7 @@ extension TodoRemoteRepositoryImpleTests {
 
 import Testing
 
+@Suite("TodoRemoteRepositoryImpleTestsV2", .serialized)
 class TodoRemoteRepositoryImpleTestsV2: PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>! = []

@@ -17,6 +17,7 @@ import UnitTestHelpKit
 @testable import Repository
 
 
+@Suite("EventUploadPendingQueueLocalStorageImpleTests", .serialized)
 final class EventUploadPendingQueueLocalStorageImpleTests: LocalTestable {
     
     let sqliteService: SQLiteService = .init()
