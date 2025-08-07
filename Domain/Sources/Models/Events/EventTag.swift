@@ -91,6 +91,7 @@ public struct CustomEventTag: EventTag {
 public struct CustomEventTagMakeParams {
     public var name: String
     public var colorHex: String
+    public var skipCheckDuplicationName = false
     
     public init(name: String, colorHex: String) {
         self.name = name

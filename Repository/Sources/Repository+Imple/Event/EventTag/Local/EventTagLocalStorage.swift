@@ -25,6 +25,10 @@ extension EventTagLocalStorage {
     func deleteTag(_ tagId: String) async throws {
         return try await deleteTags([tagId])
     }
+    
+    func loadTag(_ id: String) async throws -> CustomEventTag? {
+        return try await self.loadTags(in: [id]).first
+    }
 }
 
 public final class EventTagLocalStorageImple: EventTagLocalStorage {
