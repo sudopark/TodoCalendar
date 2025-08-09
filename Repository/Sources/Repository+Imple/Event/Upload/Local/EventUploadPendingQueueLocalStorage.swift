@@ -15,8 +15,14 @@ import Extensions
 public protocol EventUploadPendingQueueLocalStorage: Sendable {
     
     func popTask() async throws -> EventUploadingTask?
-    func pushTask(_ task: EventUploadingTask) async throws
-    func pushFailedTask(_ tasks: [EventUploadingTask]) async throws
+    func pushTasks(_ tasks: [EventUploadingTask]) async throws
+}
+
+extension EventUploadPendingQueueLocalStorage {
+    
+    public func pushTask(_ task: EventUploadingTask) async throws {
+        try await self.pushTasks([task])
+    }
 }
 
 
@@ -46,13 +52,7 @@ extension EventUploadPendingQueueLocalStorageImple {
         }
     }
     
-    public func pushTask(_ task: EventUploadingTask) async throws {
-        try await self.sqliteService.async.run { db in
-            try db.insertOne(Queue.self, entity: task, shouldReplace: true)
-        }
-    }
-    
-    public func pushFailedTask(_ tasks: [EventUploadingTask]) async throws {
+    public func pushTasks(_ tasks: [EventUploadingTask]) async throws {
         try await self.sqliteService.async.run { db in
             try db.insert(Queue.self, entities: tasks, shouldReplace: true)
         }
