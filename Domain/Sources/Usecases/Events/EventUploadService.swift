@@ -31,15 +31,18 @@ public struct EventUploadingFlag: @unchecked Sendable {
 
 public protocol EventUploadService: Sendable {
     
-    func append(_ task: EventUploadingTask) async throws
+    func append(_ tasks: [EventUploadingTask]) async throws
     func resume() async throws
     func pause() async
-    func rescheduleUploadFailedJobs() async throws
     
     var isUploading: EventUploadingFlag { get async }
 }
 
 extension EventUploadService {
+    
+    public func append(_ task: EventUploadingTask) async throws {
+        try await self.append([task])
+    }
     
     public func waitUntilUploadingEnd(
         _ checkInterval: Duration = .milliseconds(10)

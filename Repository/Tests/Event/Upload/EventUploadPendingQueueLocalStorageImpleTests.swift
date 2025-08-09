@@ -110,7 +110,7 @@ extension EventUploadPendingQueueLocalStorageImpleTests {
             let tasks = (0..<5).map { int in
                 return EventUploadingTask(dataType: .eventTag, uuid: "id:\(int)", isRemovingTask: false)
             }
-            try await storage.pushFailedTask(tasks)
+            try await storage.pushTasks(tasks)
             
             // when
             var popTasks: [EventUploadingTask?] = []
