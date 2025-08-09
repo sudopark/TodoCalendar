@@ -38,7 +38,7 @@ class TodoLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable {
         self.spyEnvStorage = nil
     }
     
-    private func makeRepository() -> TodoLocalRepositoryImple {
+    func makeRepository() -> any TodoEventRepository {
         return TodoLocalRepositoryImple(
             localStorage: self.localStorage,
             environmentStorage: self.spyEnvStorage
@@ -56,7 +56,7 @@ extension TodoLocalRepositoryImpleTests {
         TimeInterval(range.upperBound)*oneDay
     }
     
-    private var dummyMakeParams: TodoMakeParams {
+    var dummyMakeParams: TodoMakeParams {
         let option = EventRepeatingOptions.EveryWeek(TimeZone(abbreviation: "KST")!)
             |> \.interval .~ 2
         let repeating = EventRepeating(repeatingStartTime: 100, repeatOption: option)
@@ -139,7 +139,7 @@ extension TodoLocalRepositoryImpleTests {
         await parameterizeTest(yearSomeDay)
     }
     
-    private func stubSaveTodo(
+    func stubSaveTodo(
         _ todos: [TodoEvent]
     ) {
         let expect = expectation(description: "wait-save")
@@ -270,9 +270,9 @@ extension TodoLocalRepositoryImpleTests {
 
 extension TodoLocalRepositoryImpleTests {
     
-    private func makeRepositoryWithStubTodo(
+   func makeRepositoryWithStubTodo(
         _ todo: TodoEvent
-    ) async throws -> TodoLocalRepositoryImple {
+    ) async throws -> any TodoEventRepository {
         let repository = self.makeRepository()
         try await self.localStorage.saveTodoEvent(todo)
         return repository
@@ -317,7 +317,7 @@ extension TodoLocalRepositoryImpleTests {
 
 extension TodoLocalRepositoryImpleTests {
     
-    private func makeDummyTodo(
+    func makeDummyTodo(
         id: String,
         time: TimeInterval? = nil,
         from: TimeInterval? = nil,
@@ -624,7 +624,7 @@ extension TodoLocalRepositoryImpleTests {
             |> \.time .~ .allDay(range, secondsFromGMT: secondsFromGMT)
     }
     
-    private func makeRepositoryWithSaveAllDayTodo() async throws -> TodoLocalRepositoryImple {
+    private func makeRepositoryWithSaveAllDayTodo() async throws -> any TodoEventRepository {
         let repository = self.makeRepository()
         _ = try await repository.makeTodoEvent(self.dummyParams)
         return repository
@@ -667,7 +667,7 @@ extension TodoLocalRepositoryImpleTests {
 
 extension TodoLocalRepositoryImpleTests {
     
-    private func makeRepositoryWithDoneEvents() async throws -> TodoLocalRepositoryImple {
+    func makeRepositoryWithDoneEvents() async throws -> any TodoEventRepository {
         let dones: [DoneTodoEvent] = (0..<10).map { int in
             return .init(
                 uuid: "id:\(int)", name: "done:\(int)",
@@ -777,7 +777,7 @@ extension TodoLocalRepositoryImpleTests {
 
 extension TodoLocalRepositoryImpleTests {
     
-    func makeRepositoryWithDoneFromRepeatingTodo() async throws -> TodoLocalRepositoryImple {
+    func makeRepositoryWithDoneFromRepeatingTodo() async throws -> any TodoEventRepository {
         let doneAtEvent = DoneTodoEvent(
             uuid: "done_at", name: "done_at", originEventId: "repeating_origin", doneTime: .init()
         )
