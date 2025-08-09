@@ -19,10 +19,10 @@ import UnitTestHelpKit
 
 class EventTagLocalRepositoryImpleTests: BaseLocalTests {
     
-    private var localStorage: EventTagLocalStorageImple!
-    private var todoLocalStorage: TodoLocalStorageImple!
-    private var scheduleLocalStorage: ScheduleEventLocalStorageImple!
-    private var fakeEnvStore: FakeEnvironmentStorage!
+    var localStorage: EventTagLocalStorageImple!
+    var todoLocalStorage: TodoLocalStorageImple!
+    var scheduleLocalStorage: ScheduleEventLocalStorageImple!
+    var fakeEnvStore: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {
         self.fileName = "tags"
@@ -42,8 +42,8 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
         try super.tearDownWithError()
     }
     
-    private func makeRepository() -> EventTagLocalRepositoryImple {
-        return .init(
+    func makeRepository() -> any EventTagRepository {
+        return EventTagLocalRepositoryImple(
             localStorage: self.localStorage,
             todoLocalStorage: self.todoLocalStorage,
             scheduleLocalStorage: self.scheduleLocalStorage,
@@ -177,7 +177,7 @@ extension EventTagLocalRepositoryImpleTests {
         XCTAssertEqual(ids, Set(customTags))
     }
     
-    private func stubTodoAndSchedule() async throws {
+    func stubTodoAndSchedule() async throws {
         func makeTodo(_ id: Int, with tag: String) -> TodoEvent {
             return TodoEvent.dummy(id)
                 |> \.eventTagId .~ .custom(tag)
@@ -221,7 +221,7 @@ extension EventTagLocalRepositoryImpleTests {
     
     
     // load tags
-    private func makeRepositoryWithStubSaveTags(_ tags: [CustomEventTag]) async throws -> EventTagLocalRepositoryImple {
+    private func makeRepositoryWithStubSaveTags(_ tags: [CustomEventTag]) async throws -> any EventTagRepository {
         try await self.localStorage.updateTags(tags)
         return self.makeRepository()
     }
