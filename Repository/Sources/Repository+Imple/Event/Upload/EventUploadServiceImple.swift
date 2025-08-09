@@ -47,31 +47,27 @@ public actor EventUploadServiceImple: EventUploadService {
         self.isUploadingFlag.updateIsUploading(isUploading)
     }
     private var uploadingTask: Task<Void, any Error>?
-    private var uploadingFailTasks: [EventUploadingTask] = []
 }
 
 
 extension EventUploadServiceImple {
     
-    public func append(_ task: EventUploadingTask) async throws {
-        self.uploadingFailTasks = self.uploadingFailTasks.filter { $0.uuid != task.uuid }
-        try await self.pendingQueueStorage.pushTask(task)
+    public func append(_ tasks: [EventUploadingTask]) async throws {
+        try await self.pendingQueueStorage.pushTasks(tasks)
         try await self.resume()
     }
     
     public func resume() async throws {
         guard !self.isUploadingFlag.value else { return }
         self.update(isUploading: true)
-        
-        try await self.rescheduleUploadFailedJobs()
-        
+                
         self.uploadingTask = Task { [weak self] in
             
             while !Task.isCancelled, let task = try await self?.pendingQueueStorage.popTask() {
                 do {
                     try await self?.uploadTask(task)
                 } catch {
-                    await self?.reserveReScheduleUploadFailedTask(task)
+                    await self?.reScheduleUploadFailedTask(task)
                 }
             }
             
@@ -85,17 +81,11 @@ extension EventUploadServiceImple {
         self.update(isUploading: false)
     }
     
-    public func rescheduleUploadFailedJobs() async throws {
-        guard !self.uploadingFailTasks.isEmpty else { return }
-        try await self.pendingQueueStorage.pushFailedTask(self.uploadingFailTasks)
-        self.uploadingFailTasks = []
-    }
-    
-    private func reserveReScheduleUploadFailedTask(_ task: EventUploadingTask) async {
+    private func reScheduleUploadFailedTask(_ task: EventUploadingTask) async {
         let reScheduleTask = task
             |> \.timestamp .~ Date().timeIntervalSince1970
             |> \.uploadFailCount +~ 1
-        self.uploadingFailTasks.append(reScheduleTask)
+        try? await self.pendingQueueStorage.pushTask(reScheduleTask)
     }
     
     private func uploadTask(_ task: EventUploadingTask) async throws {

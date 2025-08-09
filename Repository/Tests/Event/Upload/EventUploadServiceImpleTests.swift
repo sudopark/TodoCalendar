@@ -71,11 +71,14 @@ final class EventUploadServiceImpleTests: LocalTestable {
         }
     }
     
-    private func allPendingUploadTasks() async throws -> [EventUploadingTask] {
+    private func allPendingUploadTasks(withoutCountLimit: Bool = false) async throws -> [EventUploadingTask] {
         return try await self.sqliteService.async.run { db in
-            let query = EventUploadPendingQueueTable.selectAll()
-                .where { $0.uploadFailCount < 3 }
-                .orderBy(isAscending: true) { $0.timestamp }
+            
+            var query = EventUploadPendingQueueTable.selectAll()
+            if !withoutCountLimit {
+                query = query.where { $0.uploadFailCount < 3 }
+            }
+            query = query.orderBy(isAscending: true) { $0.timestamp }
             return try db.load(query)
         }
     }
@@ -215,7 +218,7 @@ extension EventUploadServiceImpleTests {
         }
     }
     
-    // 업로드 실패된 task 임시 저장했다 rescheduleUploadFailedJobs사에 다시 업로딩 큐에 저장
+    // 업로드 실패된 task 다시 업로딩 큐에 저장
     @Test func service_whenUploadFailTaskAndResheduleFailJob_appendPendingQueue() async throws {
         try await self.runTestWithOpenClose("upload_tc6") {
             // given
@@ -228,16 +231,14 @@ extension EventUploadServiceImpleTests {
             // when
             try await service.resume()
             try await service.waitUntilUploadingEnd()
-            
-            try await service.rescheduleUploadFailedJobs()
-            
+                        
             // then
-            let pendingTasks = try await self.allPendingUploadTasks()
+            let pendingTasks = try await self.allPendingUploadTasks(withoutCountLimit: true)
             #expect(pendingTasks.map { $0.uuid } == [
                 "tag"
             ])
             let tagTask = pendingTasks.first(where: { $0.uuid == "tag" })
-            #expect(tagTask?.uploadFailCount == 1)
+            #expect(tagTask?.uploadFailCount == 3)
             #expect(self.spyRemote.deleteOrUpdateIds == [
                 "todo", "schedule"
             ])
@@ -261,10 +262,8 @@ extension EventUploadServiceImpleTests {
             await service.pause()
             try await service.waitUntilUploadingEnd()
             
-            try await Task.sleep(for: .milliseconds(10))
-            try await service.rescheduleUploadFailedJobs()
-            
             // then
+            try await Task.sleep(for: .milliseconds(10))
             let pendingTasks = try await self.allPendingUploadTasks()
             #expect(pendingTasks.map { $0.uuid } == [
                 "schedule", "tag"
@@ -274,71 +273,6 @@ extension EventUploadServiceImpleTests {
             #expect(self.spyRemote.deleteOrUpdateIds == [
                 "todo"
             ])
-        }
-    }
-    
-    // 업로드 실패된 task 임시 저장했다 다음번 resume시에 마지막으로 다시 스케줄링
-    @Test func service_whenResumeUploading_reschedulePendingUploadFailedTask() async throws {
-        try await self.runTestWithOpenClose("upload_tc8") {
-            // given
-            let mocking = PassthroughSubject<CustomEventTag, Never>()
-            let service = try await self.makeService(with: [
-                .init(timestamp: 0, dataType: .todo, uuid: "todo", isRemovingTask: false),
-                .init(timestamp: 1, dataType: .eventTag, uuid: "tag", isRemovingTask: false),
-                .init(timestamp: 2, dataType: .schedule, uuid: "schedule", isRemovingTask: false)
-            ], editTagMocking: mocking)
-            
-            // when
-            try await service.resume()
-            try await Task.sleep(for: .milliseconds(10))
-            
-            await service.pause()
-            try await service.waitUntilUploadingEnd()
-            try await Task.sleep(for: .milliseconds(10))
-            
-            try await service.resume()
-            try await Task.sleep(for: .milliseconds(10))
-            mocking.send(.init(uuid: "tag", name: "name", colorHex: "hex"))
-            try await service.waitUntilUploadingEnd()
-            
-            // then
-            let pendingTasks = try await self.allPendingUploadTasks()
-            #expect(pendingTasks.isEmpty == true)
-            #expect(self.spyRemote.deleteOrUpdateIds == [
-                "todo", "schedule", "tag"
-            ])
-        }
-    }
-    
-    // task append시에 동일 데이터에 대한 task가 uploadingFailTasks에 저장되어있다면 삭제
-    @Test func service_whenAppendTaskAndSameDataTaskIsReservedReschedule_remove() async throws {
-        try await self.runTestWithOpenClose("upload_tc9") {
-            // given
-            let mocking = PassthroughSubject<CustomEventTag, Never>()
-            let service = try await self.makeService(with: [
-                .init(timestamp: 0, dataType: .eventTag, uuid: "tag", isRemovingTask: false)
-            ], editTagMocking: mocking)
-            
-            // when
-            try await service.resume()
-            try await Task.sleep(for: .milliseconds(10))
-            await service.pause()   // canceled task reserve reschedule
-            
-            try await Task.sleep(for: .milliseconds(10))
-            let newTask = EventUploadingTask(timestamp: 100, dataType: .eventTag, uuid: "tag", isRemovingTask: false)
-            try await service.append(newTask)   // append and task will resume
-            
-            try await Task.sleep(for: .milliseconds(10))
-            await service.pause()
-            
-            try await service.waitUntilUploadingEnd()
-            try await Task.sleep(for: .milliseconds(10))
-            try await service.rescheduleUploadFailedJobs()
-            
-            // then
-            let task = try await self.nextPendingUploadTask()
-            #expect(task?.uuid == "tag")
-            #expect(task?.uploadFailCount == 1) // 리스케줄리 취소되지 않았다면 uploadFailCount가 2 임
         }
     }
 }
