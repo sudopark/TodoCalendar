@@ -37,7 +37,7 @@ class ScheduleEventLocalRepositoryImpleTests: BaseLocalTests, PublisherWaitable 
         try super.tearDownWithError()
     }
     
-    private func makeRepository() -> ScheduleEventLocalRepositoryImple {
+    func makeRepository() -> any ScheduleEventRepository {
         return ScheduleEventLocalRepositoryImple(
             localStorage: self.localStorage,
             environmentStorage: self.spyEnvStorage
@@ -54,7 +54,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
                 TimeInterval(range.upperBound)*oneDay
     }
     
-    private var dummyMakeParams: ScheduleMakeParams {
+    var dummyMakeParams: ScheduleMakeParams {
         let option = EventRepeatingOptions.EveryDay()
         let repeating = EventRepeating(repeatingStartTime: 100.0, repeatOption: option)
             |> \.repeatingEndOption .~ .until(200.0)
@@ -117,9 +117,9 @@ extension ScheduleEventLocalRepositoryImpleTests {
 
 extension ScheduleEventLocalRepositoryImpleTests {
     
-    private func makeRepositoryWithStubSchedule(
+    func makeRepositoryWithStubSchedule(
         _ schedule: ScheduleEvent
-    ) async throws -> ScheduleEventLocalRepositoryImple {
+    ) async throws -> any ScheduleEventRepository {
         let repository = self.makeRepository()
         try await self.localStorage.saveScheduleEvent(schedule)
         return repository
@@ -164,7 +164,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
 
 extension ScheduleEventLocalRepositoryImpleTests {
     
-    private func makeDummySchedule(
+    func makeDummySchedule(
         id: String,
         time: TimeInterval,
         from: TimeInterval? = nil,
@@ -238,7 +238,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
 
 extension ScheduleEventLocalRepositoryImpleTests {
     
-    private var dummyRepeatingOrigin: ScheduleEvent {
+    var dummyRepeatingOrigin: ScheduleEvent {
         let option = EventRepeatingOptions.EveryDay()
         let repeating = EventRepeating(repeatingStartTime: 0, repeatOption: option)
         return ScheduleEvent(uuid: "repeating", name: "origin", time: .at(0))
