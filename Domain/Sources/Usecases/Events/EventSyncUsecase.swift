@@ -27,9 +27,14 @@ public protocol EventSyncUsecase: Sendable {
 public final class EventSyncUsecaseImple: EventSyncUsecase, @unchecked Sendable {
     
     private let syncRepository: any EventSyncRepository
+    private let eventSyncMediator: any EventSyncMediator
     
-    public init(syncRepository: any EventSyncRepository) {
+    public init(
+        syncRepository: any EventSyncRepository,
+        eventSyncMediator: any EventSyncMediator
+    ) {
         self.syncRepository = syncRepository
+        self.eventSyncMediator = eventSyncMediator
     }
     
     private enum Constant {
@@ -39,7 +44,7 @@ public final class EventSyncUsecaseImple: EventSyncUsecase, @unchecked Sendable 
         let isSyncing = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
-    private var syncTaskMap: [SyncDataType: Task<Void, Never>] = [:]
+    private var syncTaskMap: [SyncDataType: Task<Void, any Error>] = [:]
 }
 
 
@@ -51,6 +56,9 @@ extension EventSyncUsecaseImple {
         self.syncTaskMap[dataType] = nil
         
         let task = Task { [weak self] in
+            
+            try await self?.eventSyncMediator.waitUntilEventSyncAvailable()
+            
             self?.subject.isSyncing.send(true)
             logger.log(level: .debug, "\(dataType) sync start")
             do {
@@ -94,6 +102,8 @@ extension EventSyncUsecaseImple {
         _ dataType: SyncDataType,
         from startTimestamp: Int? = nil
     ) async throws {
+    
+        try await self.eventSyncMediator.waitUntilEventSyncAvailable()
         
         let firstPage: EventSyncResponse<T> = try await self.syncRepository.startSync(
             for: dataType, startFrom: startTimestamp, pageSize: Constant.pageSize
@@ -102,6 +112,9 @@ extension EventSyncUsecaseImple {
         var nextPageCursor = firstPage.nextPageCursor
         
         while let cursor = nextPageCursor {
+            
+            try await self.eventSyncMediator.waitUntilEventSyncAvailable()
+            
             let nextPage: EventSyncResponse<T> = try await self.syncRepository.continueSync(
                 for: dataType, cursor: cursor, pageSize: Constant.pageSize
             )
