@@ -173,6 +173,10 @@ extension NonLoginUsecaseFactoryImple {
             eventNotifyService: applicationBase.eventNotifyService
         )
     }
+    
+    func makeEventSyncUsecase() -> any EventSyncUsecase {
+        return NotNeedEventSyncUsecase()
+    }
 }
 
 
@@ -287,6 +291,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     let viewAppearanceStore: ApplicationViewAppearanceStoreImple
     let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
+    let eventUploadService: any EventUploadService
     private let applicationBase: ApplicationBase
     
     init(
@@ -311,6 +316,15 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         )
         self.temporaryUserDataMigrationUsecase = TemporaryUserDataMigrationUescaseImple(
             migrationRepository: migrationRepository
+        )
+        self.eventUploadService = EventUploadServiceImple(
+            pendingQueueStorage: EventUploadPendingQueueLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            eventTagRemote: EventTagRemoteImple(remote: applicationBase.remoteAPI),
+            eventTagLocalStorage: EventTagLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            todoRemote: TodoRemoteImple(remote: applicationBase.remoteAPI),
+            todoLocalStorage: TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            scheduleRemote: ScheduleEventRemoteImple(remote: applicationBase.remoteAPI),
+            scheduleLocalStorage: ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         )
     }
     
@@ -354,14 +368,19 @@ extension LoginUsecaseFactoryImple {
 
 extension LoginUsecaseFactoryImple {
     
+    private func makeTodoRepository() -> any TodoEventRepository {
+        let localRepository = TodoLocalRepositoryImple(
+            localStorage: TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        return TodoUploadDecorateRepositoryImple(
+            localRepository: localRepository,
+            eventUploadService: self.eventUploadService
+        )
+    }
+    
     func makeTodoEventUsecase() -> any TodoEventUsecase {
-        let cache = TodoLocalStorageImple(
-            sqliteService: applicationBase.commonSqliteService
-        )
-        let repository = TodoRemoteRepositoryImple(
-            remote: TodoRemoteImple(remote: applicationBase.remoteAPI),
-            cacheStorage: cache
-        )
+        let repository = self.makeTodoRepository()
         return TodoEventUsecaseImple(
             todoRepository: repository,
             sharedDataStore: applicationBase.sharedDataStore,
@@ -369,14 +388,19 @@ extension LoginUsecaseFactoryImple {
         )
     }
     
+    private func makeScheduleRepository() -> any ScheduleEventRepository {
+        let localRepository = ScheduleEventLocalRepositoryImple(
+            localStorage: ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        return ScheduleEventUploadDecorateRepositoryImple(
+            localRepository: localRepository,
+            eventUploadService: self.eventUploadService
+        )
+    }
+    
     func makeScheduleEventUsecase() -> any ScheduleEventUsecase {
-        let cache = ScheduleEventLocalStorageImple(
-            sqliteService: applicationBase.commonSqliteService
-        )
-        let repository = ScheduleEventRemoteRepositoryImple(
-            remote: ScheduleEventRemoteImple(remote: applicationBase.remoteAPI),
-            cacheStore: cache
-        )
+        let repository = self.makeScheduleRepository()
         return ScheduleEventUsecaseImple(
             scheduleRepository: repository,
             sharedDataStore: applicationBase.sharedDataStore,
@@ -384,23 +408,25 @@ extension LoginUsecaseFactoryImple {
         )
     }
     
-    func makeEventTagUsecase() -> any EventTagUsecase {
-        let cache = EventTagLocalStorageImple(
-            sqliteService: applicationBase.commonSqliteService
-        )
-        let todoCache = TodoLocalStorageImple(
-            sqliteService: applicationBase.commonSqliteService
-        )
-        let scheduleCache = ScheduleEventLocalStorageImple(
-            sqliteService: applicationBase.commonSqliteService
-        )
-        let repository = EventTagRemoteRepositoryImple(
-            remote: EventTagRemoteImple(remote: applicationBase.remoteAPI),
-            cacheStorage: cache,
-            todoCacheStorage: todoCache,
-            scheduleCacheStorage: scheduleCache,
+    private func makeEventTagRepository() -> any EventTagRepository {
+        let storage = EventTagLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let localRepository = EventTagLocalRepositoryImple(
+            localStorage: storage,
+            todoLocalStorage: todoLocal,
+            scheduleLocalStorage: scheduleLocal,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
+        return EventTagUploadDecorateRepositoryImple(
+            localRepository: localRepository,
+            eventUploadService: self.eventUploadService
+        )
+    }
+    
+    func makeEventTagUsecase() -> any EventTagUsecase {
+
+        let repository = self.makeEventTagRepository()
         return EventTagUsecaseImple(
             tagRepository: repository,
             todoEventusecase: self.makeTodoEventUsecase(),
@@ -453,6 +479,28 @@ extension LoginUsecaseFactoryImple {
             repository: repository, 
             sharedDataStore: applicationBase.sharedDataStore,
             eventNotifyService: applicationBase.eventNotifyService
+        )
+    }
+    
+    func makeEventSyncUsecase() -> any EventSyncUsecase {
+        let mediator = EventSyncMediatorImple(
+            eventUploadService: self.eventUploadService,
+            migrationUsecase: self.temporaryUserDataMigrationUsecase
+        )
+        let syncTimeLocal = EventSyncTimestampLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let eventTagLocal = EventTagLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let repository = EventSyncRepositoryImple(
+            remote: self.applicationBase.remoteAPI,
+            syncTimestampLocalStorage: syncTimeLocal,
+            eventTagLocalStorage: eventTagLocal,
+            todoLocalStorage: todoLocal,
+            scheduleLocalStorage: scheduleLocal
+        )
+        
+        return EventSyncUsecaseImple(
+            syncRepository: repository, eventSyncMediator: mediator
         )
     }
 }
