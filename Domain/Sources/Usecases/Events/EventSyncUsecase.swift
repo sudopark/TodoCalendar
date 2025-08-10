@@ -130,3 +130,17 @@ extension EventSyncUsecaseImple {
             .eraseToAnyPublisher()
     }
 }
+
+
+// MARK: - NotNeedEventSyncUsecase
+
+public final class NotNeedEventSyncUsecase: EventSyncUsecase, Sendable {
+    
+    public init() { }
+    
+    public func sync(_ dataType: SyncDataType) { }
+    
+    public var isSyncInProgress: AnyPublisher<Bool, Never> {
+        return Just(false).eraseToAnyPublisher()
+    }
+}
