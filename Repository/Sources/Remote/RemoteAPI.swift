@@ -102,6 +102,8 @@ extension RemoteAPIImple {
         parameters: [String : Any]
     ) async throws -> Data {
         
+        try Task.checkCancellation()
+        
         guard let path = self.environment.path(endpoint)
         else {
             throw RuntimeError("not support endpoint: \(endpoint)")
