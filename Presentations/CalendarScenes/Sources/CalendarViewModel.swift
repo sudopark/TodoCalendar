@@ -38,8 +38,9 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let migrationUsecase: any TemporaryUserDataMigrationUescase
     private let uiSettingUsecase: any UISettingUsecase
     private let googleCalendarUsecase: any GoogleCalendarUsecase
-    var router: (any CalendarViewRouting)?
+    private let eventUploadService: any EventUploadService
     private let eventSyncUsecase: any EventSyncUsecase
+    var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
     weak var listener: (any CalendarSceneListener)?
@@ -55,6 +56,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         migrationUsecase: any TemporaryUserDataMigrationUescase,
         uiSettingUsecase: any UISettingUsecase,
         googleCalendarUsecase: any GoogleCalendarUsecase,
+        eventUploadService: any EventUploadService,
         eventSyncUsecase: any EventSyncUsecase
     ) {
         self.calendarUsecase = calendarUsecase
@@ -67,6 +69,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.migrationUsecase = migrationUsecase
         self.uiSettingUsecase = uiSettingUsecase
         self.googleCalendarUsecase = googleCalendarUsecase
+        self.eventUploadService = eventUploadService
         self.eventSyncUsecase = eventSyncUsecase
         
         self.internalBind()
@@ -104,6 +107,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             })
             .store(in: &self.cancellables)
 
+        self.bindEventUploadService()
         self.bindRefreshEvents()
         self.bindFocusedMonthChanged()
     }
@@ -236,6 +240,24 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             self.googleCalendarUsecase.refreshEvents(in: $0)
         }
     }
+    
+    private func bindEventUploadService() {
+        
+        Publishers.Merge(
+            NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification).map { _ in true },
+            NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification).map { _ in false }
+        )
+        .sink(receiveValue: { [weak self] isActive in
+            Task { [weak self] in
+                if isActive {
+                    try? await self?.eventUploadService.resume()
+                } else {
+                    await self?.eventUploadService.pause()
+                }
+            }
+        })
+        .store(in: &self.cancellables)
+    }
 }
 
 
@@ -254,6 +276,9 @@ extension CalendarViewModelImple {
         Task { [weak self] in
             try? await self?.holidayUsecase.prepare()
             self?.bindRefreshHoliday()
+            
+            try? await self?.eventUploadService.resume()
+            self?.eventSyncUsecase.sync()
         }
         
         self.todoEventUsecase.refreshCurentTodoEvents()
@@ -263,8 +288,6 @@ extension CalendarViewModelImple {
         self.foremostEventusecase.refresh()
         
         self.bindUncompletedTodoRefresh()
-        
-        self.eventSyncUsecase.sync()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {

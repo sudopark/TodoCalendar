@@ -33,6 +33,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var spyGoogleCalednarUsecase: PrivateStubGoogleCalendarUsecase!
     private var spyListener: SpyListener!
     private var spyEventSyncUsecase: PrivateStubEventSyncUsecase!
+    private var spyEventUploadService: StubEventUploadService!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -48,6 +49,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyGoogleCalednarUsecase = .init()
         self.spyListener = .init()
         self.spyEventSyncUsecase = .init()
+        self.spyEventUploadService = .init()
     }
     
     override func tearDownWithError() throws {
@@ -65,6 +67,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyGoogleCalednarUsecase = nil
         self.spyListener = nil
         self.spyEventSyncUsecase = nil
+        self.spyEventUploadService = nil
     }
     
     private func makeViewModel(
@@ -85,6 +88,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             migrationUsecase: self.stubMigrationUsecase,
             uiSettingUsecase: self.stubUISettingUsecase,
             googleCalendarUsecase: self.spyGoogleCalednarUsecase,
+            eventUploadService: self.spyEventUploadService,
             eventSyncUsecase: self.spyEventSyncUsecase
         )
         viewModel.router = self.spyRouter
@@ -807,7 +811,7 @@ extension CalendarViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
     }
     
-    func testViewModel_whenPrepare_syncEvents() {
+    func testViewModel_whenPrepare_syncEvents() async throws {
         // given
         let viewModel = self.makeViewModel()
         
@@ -815,10 +819,11 @@ extension CalendarViewModelImpleTests {
         viewModel.prepare()
         
         // then
+        try await Task.sleep(for: .milliseconds(10))
         XCTAssertEqual(self.spyEventSyncUsecase.didSyncRequestedCount, 1)
     }
     
-    func testViewModel_whenEnterForeground_syncEvents() {
+    func testViewModel_whenEnterForeground_syncEvents() async throws {
         // given
         let viewModel = self.makeViewModel()
         viewModel.prepare()
@@ -827,7 +832,36 @@ extension CalendarViewModelImpleTests {
         NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
         
         // then
+        try await Task.sleep(for: .milliseconds(10))
         XCTAssertEqual(self.spyEventSyncUsecase.didSyncRequestedCount, 2)
+    }
+    
+    func testViewModel_whenPrepare_resumeEventUpload() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.prepare()
+        
+        // then
+        try await Task.sleep(for: .milliseconds(10))
+        XCTAssertEqual(self.spyEventUploadService.isResumeOrPauses, [true])
+    }
+    
+    func testViewModel_whenEnterBackgroundAndForeground_pauseAndResumeEventUploadService() async throws {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+        
+        // when
+        try await Task.sleep(for: .milliseconds(10))
+        NotificationCenter.default.post(Notification(name: UIApplication.didEnterBackgroundNotification))
+        
+        try await Task.sleep(for: .milliseconds(10))
+        NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+        
+        // then
+        XCTAssertEqual(self.spyEventUploadService.isResumeOrPauses, [true, false, true])
     }
     
     // 완료되지않은 할일 옵션이 off -> on 으로 변경된 경우 할일 조회

@@ -19,6 +19,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let accountUescase: any AccountUsecase
     let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     let viewAppearanceStore: ApplicationViewAppearanceStoreImple
+    let eventUploadService: any EventUploadService = NotNeedEventUploadService()
     private let applicationBase: ApplicationBase
     
     init(

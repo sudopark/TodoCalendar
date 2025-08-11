@@ -53,3 +53,19 @@ extension EventUploadService {
         }
     }
 }
+
+
+// MARK: - notNeed event upload service
+
+public final class NotNeedEventUploadService: EventUploadService {
+    
+    public init() { }
+    
+    public func append(_ tasks: [EventUploadingTask]) async throws { }
+    
+    public func resume() async throws { }
+    
+    public func pause() async { }
+    
+    public var isUploading: EventUploadingFlag { .init() }
+}
