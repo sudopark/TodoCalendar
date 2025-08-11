@@ -32,6 +32,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyGoogleCalednarUsecase: PrivateStubGoogleCalendarUsecase!
     private var spyListener: SpyListener!
+    private var spyEventSyncUsecase: PrivateStubEventSyncUsecase!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -46,6 +47,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubUISettingUsecase = .init()
         self.spyGoogleCalednarUsecase = .init()
         self.spyListener = .init()
+        self.spyEventSyncUsecase = .init()
     }
     
     override func tearDownWithError() throws {
@@ -62,6 +64,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubUISettingUsecase = nil
         self.spyGoogleCalednarUsecase = nil
         self.spyListener = nil
+        self.spyEventSyncUsecase = nil
     }
     
     private func makeViewModel(
@@ -81,7 +84,8 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventTagUsecase: self.spyEventTagUsecase,
             migrationUsecase: self.stubMigrationUsecase,
             uiSettingUsecase: self.stubUISettingUsecase,
-            googleCalendarUsecase: self.spyGoogleCalednarUsecase
+            googleCalendarUsecase: self.spyGoogleCalednarUsecase,
+            eventSyncUsecase: self.spyEventSyncUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -599,9 +603,11 @@ extension CalendarViewModelImpleTests {
         ])
     }
     
-    func testViewModel_whenEnterForeground_refreshTodoEvents() {
+    private func parameterizeTestRefreshTodo(
+        _ actionName: String, _ action: @escaping () -> Void
+    ) {
         // given
-        let expect = expectation(description: "포그라운드 진입시 조회중인 범위의 todo 이벤트 다시 조회")
+        let expect = expectation(description: "\(actionName) 시에 조회중인 범위의 todo 이벤트 다시 조회")
         expect.expectedFulfillmentCount = 2
         let viewModel = self.makeViewModelWithInitialSetup(
             .init(year: 2023, month: 10, day: 4, weekDay: 3)
@@ -611,9 +617,8 @@ extension CalendarViewModelImpleTests {
         let totalRange = self.range((2023, 01, 01), (2025, 01, 01))
         let source = self.spyTodoUsecase.todoEvents(in: totalRange)
         let todoLists = self.waitOutputs(expect, for: source) {
-            NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+            action()
         }
-        
         // then
         let todoIdLists = todoLists.map { ts in ts.map { $0.uuid } }
         XCTAssertEqual(todoIdLists, [
@@ -627,9 +632,28 @@ extension CalendarViewModelImpleTests {
         ])
     }
     
-    func testViewModel_whenEnterForeground_refreshScheduleEvents() {
+    func testViewModel_whenEnterForeground_refreshTodoEvents() {
         // given
-        let expect = expectation(description: "포그라운드 진입시 조회중인 범위의 schedule 이벤트 다시 조회")
+        // when + then
+        self.parameterizeTestRefreshTodo("포그라운드 복귀") {
+            NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+        }
+    }
+    
+    func testViewModel_whenDataSyncEnd_refreshTodoEvents() {
+        // given
+        // when + then
+        self.parameterizeTestRefreshTodo("event sync 완료") {
+            self.spyEventSyncUsecase.updateIsSync(true)
+            self.spyEventSyncUsecase.updateIsSync(false)
+        }
+    }
+    
+    private func parameterizeTestRefreshSchedule(
+        _ actionName: String, _ action: @escaping () -> Void
+    ) {
+        // given
+        let expect = expectation(description: "\(actionName)시에 조회중인 범위의 schedule 이벤트 다시 조회")
         expect.expectedFulfillmentCount = 2
         let viewModel = self.makeViewModelWithInitialSetup(
             .init(year: 2023, month: 10, day: 4, weekDay: 3)
@@ -639,7 +663,7 @@ extension CalendarViewModelImpleTests {
         let totalRange = self.range((2023, 01, 01), (2025, 01, 01))
         let source = self.spyScheduleUsecase.scheduleEvents(in: totalRange)
         let scheduleLists = self.waitOutputs(expect, for: source) {
-            NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+            action()
         }
         // then
         let scheduleIdLists = scheduleLists.map { ss in ss.map { $0.uuid } }
@@ -648,15 +672,34 @@ extension CalendarViewModelImpleTests {
                 "kst-month: 2023.01.01_00:00..<2024.01.01_00:00"
             ],
             [
-                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00", 
+                "kst-month: 2023.01.01_00:00..<2024.01.01_00:00",
                 "kst-month: 2023.01.01_00:00..<2024.01.01_00:00"
             ]
         ])
     }
     
-    func testViewModel_whenEnterForeground_refreshCurrentTodos() {
+    func testViewModel_whenEnterForeground_refreshScheduleEvents() {
         // given
-        let expect = expectation(description: "포그라운드 진입시 조회중인 범위의 current todo 이벤트 다시 조회")
+        // when + then
+        self.parameterizeTestRefreshSchedule("포그라운드 복귀") {
+            NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+        }
+    }
+    
+    func testViewModel_whenEventSyncEnd_refreshScheduleEvents() {
+        // given
+        // when + then
+        self.parameterizeTestRefreshSchedule("event sync 완료") {
+            self.spyEventSyncUsecase.updateIsSync(true)
+            self.spyEventSyncUsecase.updateIsSync(false)
+        }
+    }
+    
+    private func parameterizeTestRefreshCurrentTodo(
+        _ actionName: String, _ action: @escaping () -> Void
+    ) {
+        // given
+        let expect = expectation(description: "\(actionName) 시에 조회중인 범위의 current todo 이벤트 다시 조회")
         expect.expectedFulfillmentCount = 2
         self.spyTodoUsecase.stubCurrentTodos = [TodoEvent(uuid: "current", name: "some")]
         let viewModel = self.makeViewModelWithInitialSetup(
@@ -666,7 +709,7 @@ extension CalendarViewModelImpleTests {
         // when
         let source = self.spyTodoUsecase.currentTodoEvents
         let currentTodos = self.waitOutputs(expect, for: source) {
-            NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+            action()
         }
         
         // then
@@ -676,6 +719,22 @@ extension CalendarViewModelImpleTests {
         ])
     }
     
+    func testViewModel_whenEnterForeground_refreshCurrentTodos() {
+        // given
+        // when + then
+        self.parameterizeTestRefreshCurrentTodo("포그라운드 복귀") {
+            NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+        }
+    }
+    
+    func testViewModel_whenEventSyncEnd_refreshCurrentTodos() {
+        // given
+        // when + then
+        self.parameterizeTestRefreshCurrentTodo("event sync 완료") {
+            self.spyEventSyncUsecase.updateIsSync(true)
+            self.spyEventSyncUsecase.updateIsSync(false)
+        }
+    }
     
     func testViewModel_whenAfterMigration_refreshEvents() {
         // given
@@ -746,6 +805,29 @@ extension CalendarViewModelImpleTests {
         
         // then
         self.wait(for: [expect], timeout: self.timeout)
+    }
+    
+    func testViewModel_whenPrepare_syncEvents() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.prepare()
+        
+        // then
+        XCTAssertEqual(self.spyEventSyncUsecase.didSyncRequestedCount, 1)
+    }
+    
+    func testViewModel_whenEnterForeground_syncEvents() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+        
+        // when
+        NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
+        
+        // then
+        XCTAssertEqual(self.spyEventSyncUsecase.didSyncRequestedCount, 2)
     }
     
     // 완료되지않은 할일 옵션이 off -> on 으로 변경된 경우 할일 조회
@@ -951,6 +1033,19 @@ private extension CalendarViewModelImpleTests {
         
         override var migrationResult: AnyPublisher<Result<Void, any Error>, Never> {
             return self.migrationEndMocking
+                .eraseToAnyPublisher()
+        }
+    }
+    
+    private class PrivateStubEventSyncUsecase: StubEventSyncUsecase, @unchecked Sendable {
+        
+        private let isSyncing = CurrentValueSubject<Bool, Never>(false)
+        func updateIsSync(_ isSync: Bool) {
+            self.isSyncing.send(isSync)
+        }
+        
+        override var isSyncInProgress: AnyPublisher<Bool, Never> {
+            return isSyncing.removeDuplicates()
                 .eraseToAnyPublisher()
         }
     }
