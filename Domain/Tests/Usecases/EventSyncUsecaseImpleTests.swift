@@ -45,8 +45,7 @@ final class EventSyncUsecaseImpleTests: PublisherWaitable {
 
 extension EventSyncUsecaseImpleTests {
     
-    @Test("no need to sync case", arguments: [SyncDataType.eventTag, .todo, .schedule])
-    func usecase_sync_noNeedToSync(_ dataType: SyncDataType) async throws {
+    @Test func usecase_sync_noNeedToSync() async throws {
         // given
         let expect = self.expectConfirm("no need to sync")
         expect.count = 3
@@ -54,16 +53,17 @@ extension EventSyncUsecaseImpleTests {
         
         // when
         let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
-            usecase.sync(dataType)
+            usecase.sync()
         }
         
         // then
         #expect(syncs == [false, true, false])
-        #expect(self.spyRepository.syncPageCountMap[dataType] == nil)
+        #expect(self.spyRepository.syncPageCountMap[.eventTag] == nil)
+        #expect(self.spyRepository.syncPageCountMap[.todo] == nil)
+        #expect(self.spyRepository.syncPageCountMap[.schedule] == nil)
     }
     
-    @Test("sync - migration all", arguments: [SyncDataType.eventTag, .todo, .schedule])
-    func usecase_sync_migrationAll(_ dataType: SyncDataType) async throws {
+    @Test func usecase_sync_migrationAll() async throws {
         // given
         let expect = expectConfirm("migration all")
         expect.count = 3
@@ -71,16 +71,17 @@ extension EventSyncUsecaseImpleTests {
         
         // when
         let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
-            usecase.sync(dataType)
+            usecase.sync()
         }
         
         // then
         #expect(syncs == [false, true, false])
-        #expect(self.spyRepository.syncPageCountMap[dataType] == 3)
+        #expect(self.spyRepository.syncPageCountMap[.eventTag] == 3)
+        #expect(self.spyRepository.syncPageCountMap[.todo] == 3)
+        #expect(self.spyRepository.syncPageCountMap[.schedule] == 3)
     }
     
-    @Test("sync", arguments: [SyncDataType.eventTag, .todo, .schedule])
-    func usecase_sync_(_ dataType: SyncDataType) async throws {
+    @Test func usecase_sync_() async throws {
         // given
         let expect = expectConfirm("migration all")
         expect.count = 3
@@ -88,16 +89,17 @@ extension EventSyncUsecaseImpleTests {
         
         // when
         let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
-            usecase.sync(dataType)
+            usecase.sync()
         }
         
         // then
         #expect(syncs == [false, true, false])
-        #expect(self.spyRepository.syncPageCountMap[dataType] == 3)
+        #expect(self.spyRepository.syncPageCountMap[.eventTag] == 3)
+        #expect(self.spyRepository.syncPageCountMap[.todo] == 3)
+        #expect(self.spyRepository.syncPageCountMap[.schedule] == 3)
     }
     
-    @Test("sync fail", arguments: [SyncDataType.eventTag, .todo, .schedule])
-    func usecase_syncFail(_ dataType: SyncDataType) async throws {
+    @Test func usecase_syncFail() async throws {
         // given
         let expect = expectConfirm("migration all")
         expect.count = 3
@@ -105,7 +107,7 @@ extension EventSyncUsecaseImpleTests {
         
         // when
         let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
-            usecase.sync(dataType)
+            usecase.sync()
         }
         
         // then
@@ -120,7 +122,7 @@ extension EventSyncUsecaseImpleTests {
         
         // when
         let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
-            usecase.sync(.eventTag)
+            usecase.sync()
         }
         
         // then
@@ -135,7 +137,7 @@ extension EventSyncUsecaseImpleTests {
         
         // when
         let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
-            usecase.sync(.eventTag)
+            usecase.sync()
         }
         
         // then
@@ -151,7 +153,7 @@ extension EventSyncUsecaseImpleTests {
         
         // when
         let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
-            usecase.sync(.eventTag)
+            usecase.sync()
             
             await self.fakeEventUploadService.pause()
         }
