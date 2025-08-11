@@ -51,6 +51,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             migrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase,
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
+            eventUploadService: self.usecaseFactory.eventUploadService,
             eventSyncUsecase: self.usecaseFactory.makeEventSyncUsecase()
         )
         viewModel.listener = listener

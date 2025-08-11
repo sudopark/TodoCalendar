@@ -33,6 +33,7 @@ public protocol EventUsecaseFactory {
     func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase
     func makeForemostEventUsecase() -> any ForemostEventUsecase
     func makeEventSyncUsecase() -> any EventSyncUsecase
+    var eventUploadService: any EventUploadService { get }
 }
 
 public protocol SettingUsecaseFactory {
