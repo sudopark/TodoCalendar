@@ -16,11 +16,13 @@ open class StubEventSyncUsecase: EventSyncUsecase, @unchecked Sendable {
     public init() { }
     
     public var didSyncRequested: Bool = false
+    public var didSyncRequestedCount: Int = 0
     private let isSyncSubject = CurrentValueSubject<Bool, Never>(false)
     
     open func sync() {
         self.isSyncSubject.send(true)
         self.didSyncRequested = true
+        self.didSyncRequestedCount += 1
         self.isSyncSubject.send(false)
     }
     
