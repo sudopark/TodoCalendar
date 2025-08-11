@@ -15,7 +15,7 @@ import Extensions
 
 public protocol EventSyncUsecase: Sendable {
     
-    func sync(_ dataType: SyncDataType)
+    func sync()
     
     var isSyncInProgress: AnyPublisher<Bool, Never> { get }
 }
@@ -44,32 +44,38 @@ public final class EventSyncUsecaseImple: EventSyncUsecase, @unchecked Sendable 
         let isSyncing = CurrentValueSubject<Bool, Never>(false)
     }
     private let subject = Subject()
-    private var syncTaskMap: [SyncDataType: Task<Void, any Error>] = [:]
+    private var syncTask: Task<Void, any Error>?
 }
 
 
 extension EventSyncUsecaseImple {
     
-    public func sync(_ dataType: SyncDataType) {
+    public func sync() {
         
-        self.syncTaskMap[dataType]?.cancel()
-        self.syncTaskMap[dataType] = nil
+        self.syncTask?.cancel()
+        self.syncTask = nil
         
         let task = Task { [weak self] in
             
             try await self?.eventSyncMediator.waitUntilEventSyncAvailable()
             
             self?.subject.isSyncing.send(true)
-            logger.log(level: .debug, "\(dataType) sync start")
-            do {
-                try await self?.runSync(dataType)
-                logger.log(level: .debug, "\(dataType) sync end")
-            } catch let error {
-                logger.log(level: .error, "\(dataType) sync fail: \(error)")
+            logger.log(level: .debug, "event sync process start")
+            
+            let dataTypes: [SyncDataType] = [.eventTag, .todo, .schedule]
+            await dataTypes.asyncForEach { dataType in
+                do {
+                    try await self?.runSync(dataType)
+                    logger.log(level: .debug, "\(dataType) sync end")
+                } catch let error {
+                    logger.log(level: .error, "\(dataType) sync fail: \(error)")
+                }
             }
+            
+            logger.log(level: .debug, "event sync process end")
             self?.subject.isSyncing.send(false)
         }
-        self.syncTaskMap[dataType] = task
+        self.syncTask = task
     }
     
     private func runSync(_ dataType: SyncDataType) async throws {
@@ -138,7 +144,7 @@ public final class NotNeedEventSyncUsecase: EventSyncUsecase, Sendable {
     
     public init() { }
     
-    public func sync(_ dataType: SyncDataType) { }
+    public func sync() { }
     
     public var isSyncInProgress: AnyPublisher<Bool, Never> {
         return Just(false).eraseToAnyPublisher()
