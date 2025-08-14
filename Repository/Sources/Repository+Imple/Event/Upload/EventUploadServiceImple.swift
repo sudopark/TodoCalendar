@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 
 
 public actor EventUploadServiceImple: EventUploadService {
@@ -49,7 +50,6 @@ public actor EventUploadServiceImple: EventUploadService {
     
     private let isUploadingFlag = EventUploadingFlag()
     private func update(isUploading: Bool) {
-        // TODO: log..
         self.isUploadingFlag.updateIsUploading(isUploading)
     }
     private var uploadingTask: Task<Void, any Error>?
@@ -66,23 +66,28 @@ extension EventUploadServiceImple {
     public func resume() async throws {
         guard !self.isUploadingFlag.value else { return }
         self.update(isUploading: true)
+        logger.log(level: .debug, "resume uploading task")
                 
         self.uploadingTask = Task { [weak self] in
             
             while !Task.isCancelled, let task = try await self?.pendingQueueStorage.popTask() {
                 do {
+                    logger.log(level: .debug, "will upload task: \(task)")
                     try await self?.uploadTask(task)
                 } catch {
                     await self?.reScheduleUploadFailedTask(task)
+                    logger.log(level: .error, "upload event fail, reschedule task: \(task)")
                 }
             }
             
             await self?.update(isUploading: false)
+            logger.log(level: .debug, "uploading tasks end")
         }
     }
     
     public func pause() async {
         guard self.isUploadingFlag.value else { return }
+        logger.log(level: .debug, "pause uploading task")
         self.uploadingTask?.cancel()
         self.update(isUploading: false)
     }
