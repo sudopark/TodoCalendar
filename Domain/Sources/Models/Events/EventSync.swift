@@ -57,7 +57,7 @@ public struct EventSyncResponse<T: Sendable>: Sendable {
     public var updated: [T]?
     public var deletedIds: [String]?
     public var nextPageCursor: String?
-    public var newSyncTime: EventSyncTimestamp?
+    public var newSyncTime: Int?
     
     public init() { }
 }

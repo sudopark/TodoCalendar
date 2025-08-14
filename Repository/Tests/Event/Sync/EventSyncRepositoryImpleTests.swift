@@ -165,7 +165,7 @@ extension EventSyncRepositoryImpleTests {
         #expect(response.deletedIds == ["t1", "t2"])
         if isLast {
             #expect(response.nextPageCursor == nil)
-            #expect(response.newSyncTime == .init(.eventTag, 200))
+            #expect(response.newSyncTime == 200)
         } else {
             #expect(response.nextPageCursor == "next")
             #expect(response.newSyncTime == nil)
@@ -236,7 +236,7 @@ extension EventSyncRepositoryImpleTests {
         #expect(response.deletedIds == ["t1", "t2"])
         if isLast {
             #expect(response.nextPageCursor == nil)
-            #expect(response.newSyncTime == .init(.todo, 200))
+            #expect(response.newSyncTime == 200)
         } else {
             #expect(response.nextPageCursor == "next")
             #expect(response.newSyncTime == nil)
@@ -307,7 +307,7 @@ extension EventSyncRepositoryImpleTests {
         #expect(response.deletedIds == ["sc1", "sc2"])
         if isLast {
             #expect(response.nextPageCursor == nil)
-            #expect(response.newSyncTime == .init(.schedule, 200))
+            #expect(response.newSyncTime == 200)
         } else {
             #expect(response.nextPageCursor == "next")
             #expect(response.newSyncTime == nil)
@@ -546,11 +546,7 @@ private struct DummyResponse {
     
     private func syncTagResponse(isLast: Bool) -> String {
         let syncTime: String = !isLast ? "" : """
-        "newSyncTime": {
-            "userId": "some", 
-            "dataType": "EventTag", 
-            "timestamp": 200
-        },
+        "newSyncTime": 200,
         """
         let cursor: String = isLast ? "" : """
         "nextPageCursor": "next", 
@@ -574,11 +570,7 @@ private struct DummyResponse {
         
     private func syncTodoResponse(isLast: Bool) -> String {
         let syncTime: String = !isLast ? "" : """
-        "newSyncTime": {
-            "userId": "some", 
-            "dataType": "Todo", 
-            "timestamp": 200
-        },
+        "newSyncTime": 200,
         """
         let cursor: String = isLast ? "" : """
         "nextPageCursor": "next", 
@@ -602,11 +594,7 @@ private struct DummyResponse {
     
     private func syncScheduleResponse(isLast: Bool) -> String {
         let syncTime: String = !isLast ? "" : """
-        "newSyncTime": {
-            "userId": "some", 
-            "dataType": "Schedule", 
-            "timestamp": 200
-        },
+        "newSyncTime": 200,
         """
         let cursor: String = isLast ? "" : """
         "nextPageCursor": "next", 
