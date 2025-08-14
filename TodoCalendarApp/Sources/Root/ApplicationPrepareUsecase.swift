@@ -101,6 +101,7 @@ extension ApplicationPrepareUsecaseImple {
             $0 != ShareDataKeys.externalCalendarAccounts.rawValue
         }
         let closeResult = self.database.close()
+        try? await Task.sleep(for: .milliseconds(100))
         switch closeResult {
         case .success:
             try? await self.prepareDatabase(for: nil)
