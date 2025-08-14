@@ -63,7 +63,7 @@ struct EventSyncResponseMapper<T: Sendable>: Decodable {
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.response = .init()
-        response.newSyncTime = (try? container.decode(EventSyncTimeStampMapper.self, forKey: .newSyncTime))?.timestamp
+        response.newSyncTime = (try? container.decode(Int.self, forKey: .newSyncTime))
         response.nextPageCursor = try? container.decode(String.self, forKey: .nextPageCursor)
         switch T.self {
         case is CustomEventTag.Type:

@@ -98,7 +98,7 @@ extension EventSyncRepositoryImple {
         try await deleteRemoved(dataType, syncResponse.deletedIds)
         
         guard let timeStamp = syncResponse.newSyncTime else { return }
-        try await self.syncTimestampLocalStorage.updateLocalTimestamp(by: timeStamp)
+        try await self.syncTimestampLocalStorage.updateLocalTimestamp(by: .init(dataType, timeStamp))
     }
     
     private func updateCreatedOrUpdated<T>(
