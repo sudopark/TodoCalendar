@@ -53,13 +53,15 @@ extension TodoUploadDecorateRepositoryImple {
         let result = try await self.localRepository.completeTodo(eventId)
         
         if let next = result.nextRepeatingTodoEvent {
-            try await self.eventUploadService.append(
-                .init(dataType: .todo, uuid: next.uuid, isRemovingTask: false)
-            )
+            try await self.eventUploadService.append([
+                .init(dataType: .todo, uuid: next.uuid, isRemovingTask: false),
+                .init(dataType: .doneTodo, uuid: result.doneEvent.uuid, isRemovingTask: false)
+            ])
         } else {
-            try await self.eventUploadService.append(
-                .init(dataType: .todo, uuid: eventId, isRemovingTask: true)
-            )
+            try await self.eventUploadService.append([
+                .init(dataType: .todo, uuid: eventId, isRemovingTask: true),
+                .init(dataType: .doneTodo, uuid: result.doneEvent.uuid, isRemovingTask: false)
+            ])
         }
         return result
     }

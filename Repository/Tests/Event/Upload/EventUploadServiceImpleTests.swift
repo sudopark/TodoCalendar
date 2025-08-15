@@ -45,6 +45,8 @@ final class EventUploadServiceImpleTests: LocalTestable {
         try await todoLocal.updateTodoEvents([
             .init(uuid: "todo", name: "name")
         ])
+        let done = DoneTodoEvent(uuid: "done", name: "name", originEventId: "origin", doneTime: Date())
+        try await todoLocal.saveDoneTodoEvent(done)
         
         let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: self.sqliteService)
         try await scheduleLocal.updateScheduleEvents([
@@ -417,6 +419,22 @@ extension EventUploadServiceImpleTests {
             #expect(self.spyRemote.didRemoveEventDetailIds == ["detail"])
         }
     }
+    
+    @Test func service_updateDoneTodo() async throws {
+        try await self.runTestWithOpenClose("upload_tc_18_done") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(dataType: .doneTodo, uuid: "done", isRemovingTask: false)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didEditDoneTodoIds == ["done"])
+        }
+    }
 }
 
 private final class PrivateStubRemote: @unchecked Sendable {
@@ -433,6 +451,7 @@ private final class PrivateStubRemote: @unchecked Sendable {
     var didEditScheduleIds: [String] = []
     var didEditEventDetailIds: [String] = []
     var didRemoveEventDetailIds: [String] = []
+    var didEditDoneTodoIds: [String] = []
 }
 
 extension PrivateStubRemote: EventTagRemote {
@@ -477,6 +496,12 @@ extension PrivateStubRemote: TodoRemote {
         self.deleteOrUpdateIds.append(eventId)
         self.didRemoveTodoIds.append(eventId)
         return .init()
+    }
+    
+    func updateDoneTodo(_ doneTodo: DoneTodoEvent) async throws -> DoneTodoEvent {
+        self.deleteOrUpdateIds.append(doneTodo.uuid)
+        self.didEditDoneTodoIds.append(doneTodo.uuid)
+        return doneTodo
     }
     
     func makeTodoEvent(_ params: TodoMakeParams) async throws -> TodoEvent {

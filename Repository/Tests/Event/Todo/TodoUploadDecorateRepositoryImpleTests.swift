@@ -120,14 +120,21 @@ extension TodoUploadDecorateRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let _ = try await repository.completeTodo(origin.uuid)
+        let result = try await repository.completeTodo(origin.uuid)
         
         // then
-        XCTAssertEqual(self.spyEventUploadService.uploadTasks.count, 1)
-        let first = self.spyEventUploadService.uploadTasks.first
-        XCTAssertEqual(first?.uuid, "origin")
-        XCTAssertEqual(first?.dataType, .todo)
-        XCTAssertEqual(first?.isRemovingTask, true)
+        XCTAssertEqual(
+            self.spyEventUploadService.uploadTasks.map { $0.uuid },
+            ["origin", result.doneEvent.uuid]
+        )
+        XCTAssertEqual(
+            self.spyEventUploadService.uploadTasks.map { $0.dataType },
+            [.todo, .doneTodo]
+        )
+        XCTAssertEqual(
+            self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask },
+            [true, false]
+        )
     }
     
     func testRepository_whenCompletedTodoWithNextRepeating_appendUploadTask() async throws {
@@ -137,14 +144,21 @@ extension TodoUploadDecorateRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let _ = try await repository.completeTodo(origin.uuid)
+        let result = try await repository.completeTodo(origin.uuid)
         
         // then
-        XCTAssertEqual(self.spyEventUploadService.uploadTasks.count, 1)
-        let first = self.spyEventUploadService.uploadTasks.first
-        XCTAssertEqual(first?.uuid, "origin")
-        XCTAssertEqual(first?.dataType, .todo)
-        XCTAssertEqual(first?.isRemovingTask, false)
+        XCTAssertEqual(
+            self.spyEventUploadService.uploadTasks.map { $0.uuid },
+            ["origin", result.doneEvent.uuid]
+        )
+        XCTAssertEqual(
+            self.spyEventUploadService.uploadTasks.map { $0.dataType },
+            [.todo, .doneTodo]
+        )
+        XCTAssertEqual(
+            self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask },
+            [false, false]
+        )
     }
     
     func testRepository_whenReplaceRepeatingTodoAndNextExists_appendUploadTasks() async throws {
