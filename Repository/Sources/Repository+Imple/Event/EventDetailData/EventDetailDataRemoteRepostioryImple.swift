@@ -13,14 +13,14 @@ import AsyncFlatMap
 
 public final class EventDetailDataRemoteRepostioryImple: EventDetailDataRepository, Sendable {
     
-    private let remoteAPI: any RemoteAPI
+    private let remote: any EventDetailRemote
     private let cacheStorage: any EventDetailDataLocalStorage
     
     public init(
-        remoteAPI: any RemoteAPI,
+        remote: any EventDetailRemote,
         cacheStorage: any EventDetailDataLocalStorage
     ) {
-        self.remoteAPI = remoteAPI
+        self.remote = remote
         self.cacheStorage = cacheStorage
     }
 }
@@ -36,7 +36,7 @@ extension EventDetailDataRemoteRepostioryImple {
                 }
                 
                 do {
-                    let refreshed = try await self?.loadDetailFromRemote(id)
+                    let refreshed = try await self?.remote.loadDetail(id)
                     if let refreshed {
                         
                         try? await self?.cacheStorage.saveDetail(refreshed)
@@ -55,33 +55,14 @@ extension EventDetailDataRemoteRepostioryImple {
             .eraseToAnyPublisher()
     }
     
-    private func loadDetailFromRemote(_ id: String) async throws -> EventDetailData {
-        let endpoint: EventDetailEndpoints = .detail(eventId: id)
-        let mapper: EventDetailDataMapper = try await self.remoteAPI.request(
-            .get,
-            endpoint
-        )
-        return mapper.data
-    }
-    
     public func saveDetail(_ detail: EventDetailData) async throws -> EventDetailData {
-        let endpoint: EventDetailEndpoints = .detail(eventId: detail.eventId)
-        let payload = detail.asJson()
-        let mapper: EventDetailDataMapper = try await self.remoteAPI.request(
-            .put,
-            endpoint,
-            parameters: payload
-        )
-        try? await self.cacheStorage.saveDetail(mapper.data)
-        return mapper.data
+        let data = try await self.remote.saveDetail(detail)
+        try? await self.cacheStorage.saveDetail(data)
+        return data
     }
     
     public func removeDetail(_ id: String) async throws {
-        let endpoint: EventDetailEndpoints = .detail(eventId: id)
-        let _: RemoveTodoResultMapper = try await self.remoteAPI.request(
-            .delete,
-            endpoint
-        )
+        try await self.remote.removeDetail(id)
         try? await self.cacheStorage.removeDetail(id)
     }
 }

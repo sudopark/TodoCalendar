@@ -36,7 +36,9 @@ class EventDetailDataRemoteRepostioryImpleTests: BaseTestCase, PublisherWaitable
     }
     
     private func makeRepository() -> EventDetailDataRemoteRepostioryImple {
-        return .init(remoteAPI: self.stubRemote, cacheStorage: self.spyCache)
+        
+        let remote = EventDetailRemoteImple(remoteAPI: self.stubRemote)
+        return .init(remote: remote, cacheStorage: self.spyCache)
     }
 }
 
@@ -97,7 +99,7 @@ extension EventDetailDataRemoteRepostioryImpleTests {
         
         // when
         let loading = repository.loadDetail("some")
-        let error = self.waitError(expect, for: loading)
+        let error = self.waitError(expect, for: loading, timeout: 0.1)
         
         // then
         XCTAssertNotNil(error)
