@@ -51,6 +51,9 @@ final class EventUploadServiceImpleTests: LocalTestable {
             .init(uuid: "schedule", name: "name", time: .at(0))
         ])
         
+        let eventDetailLocal = EventDetailDataLocalStorageImple(sqliteService: self.sqliteService)
+        try await eventDetailLocal.saveDetail(.init("detail"))
+        
         return EventUploadServiceImple(
             pendingQueueStorage: pendingQueueStorage,
             eventTagRemote: self.spyRemote,
@@ -58,7 +61,9 @@ final class EventUploadServiceImpleTests: LocalTestable {
             todoRemote: self.spyRemote,
             todoLocalStorage: todoLocal,
             scheduleRemote: self.spyRemote,
-            scheduleLocalStorage: scheduleLocal
+            scheduleLocalStorage: scheduleLocal,
+            eventDetailRemote: self.spyRemote,
+            eventDetailLocalStorage: eventDetailLocal
         )
     }
     
@@ -380,6 +385,38 @@ extension EventUploadServiceImpleTests {
             #expect(self.spyRemote.didEditScheduleIds == ["schedule"])
         }
     }
+    
+    @Test func service_updateEventDetail() async throws {
+        try await self.runTestWithOpenClose("upload_tc16_detail") {
+            // given
+            let servie = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .eventDetail, uuid: "detail", isRemovingTask: false)
+            ])
+            
+            // when
+            try await servie.resume()
+            try await servie.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didEditEventDetailIds == ["detail"])
+        }
+    }
+    
+    @Test func service_deleteEventDetail() async throws {
+        try await self.runTestWithOpenClose("upload_tc_17_detail_remove") {
+            // given
+            let servie = try await self.makeService(with: [
+                .init(timestamp: 100, dataType: .eventDetail, uuid: "detail", isRemovingTask: true)
+            ])
+            
+            // when
+            try await servie.resume()
+            try await servie.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didRemoveEventDetailIds == ["detail"])
+        }
+    }
 }
 
 private final class PrivateStubRemote: @unchecked Sendable {
@@ -394,6 +431,8 @@ private final class PrivateStubRemote: @unchecked Sendable {
     var didEditTodoIds: [String] = []
     var didRemoveScheduleIds: [String] = []
     var didEditScheduleIds: [String] = []
+    var didEditEventDetailIds: [String] = []
+    var didRemoveEventDetailIds: [String] = []
 }
 
 extension PrivateStubRemote: EventTagRemote {
@@ -511,5 +550,23 @@ extension PrivateStubRemote: ScheduleEventRemote {
     
     func loadScheduleEvent(_ eventId: String) async throws -> ScheduleEvent {
         throw RuntimeError("failed")
+    }
+}
+
+extension PrivateStubRemote: EventDetailRemote {
+    
+    func loadDetail(_ id: String) async throws -> EventDetailData {
+        throw RuntimeError("failed")
+    }
+    
+    func saveDetail(_ detail: EventDetailData) async throws -> EventDetailData {
+        self.deleteOrUpdateIds.append(detail.eventId)
+        self.didEditEventDetailIds.append(detail.eventId)
+        return detail
+    }
+    
+    func removeDetail(_ id: String) async throws {
+        self.deleteOrUpdateIds.append(id)
+        self.didRemoveEventDetailIds.append(id)
     }
 }

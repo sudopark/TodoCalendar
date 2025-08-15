@@ -22,6 +22,8 @@ public actor EventUploadServiceImple: EventUploadService {
     private let todoLocalStorage: any TodoLocalStorage
     private let scheduleRemote: any ScheduleEventRemote
     private let scheduleLocalStorage: any ScheduleEventLocalStorage
+    private let eventDetailRemote: any EventDetailRemote
+    private let eventDetailLocalStorage: any EventDetailDataLocalStorage
     
     public init(
         pendingQueueStorage: any EventUploadPendingQueueLocalStorage,
@@ -30,7 +32,9 @@ public actor EventUploadServiceImple: EventUploadService {
         todoRemote: any TodoRemote,
         todoLocalStorage: any TodoLocalStorage,
         scheduleRemote: any ScheduleEventRemote,
-        scheduleLocalStorage: any ScheduleEventLocalStorage
+        scheduleLocalStorage: any ScheduleEventLocalStorage,
+        eventDetailRemote: any EventDetailRemote,
+        eventDetailLocalStorage: any EventDetailDataLocalStorage
     ) {
         self.pendingQueueStorage = pendingQueueStorage
         self.eventTagRemote = eventTagRemote
@@ -39,6 +43,8 @@ public actor EventUploadServiceImple: EventUploadService {
         self.todoLocalStorage = todoLocalStorage
         self.scheduleRemote = scheduleRemote
         self.scheduleLocalStorage = scheduleLocalStorage
+        self.eventDetailRemote = eventDetailRemote
+        self.eventDetailLocalStorage = eventDetailLocalStorage
     }
     
     private let isUploadingFlag = EventUploadingFlag()
@@ -108,6 +114,12 @@ extension EventUploadServiceImple {
             
         case .schedule:
             try await self.uploadScheduleEvent(task.uuid)
+            
+        case .eventDetail where task.isRemovingTask:
+            try? await self.eventDetailRemote.removeDetail(task.uuid)
+            
+        case .eventDetail:
+            try await self.uploadEventDetail(task.uuid)
         }
     }
     
@@ -143,6 +155,13 @@ extension EventUploadServiceImple {
             |> \.showTurn .~ schedule.showTurn
             |> \.repeatingTimeToExcludes .~ Array(schedule.repeatingTimeToExcludes)
         _ = try await self.scheduleRemote.updateScheduleEvent(eventId, params)
+    }
+    
+    private func uploadEventDetail(_ eventId: String) async throws {
+        guard let detail = try await self.eventDetailLocalStorage.loadDetail(eventId)
+        else { return }
+        
+        _ = try await self.eventDetailRemote.saveDetail(detail)
     }
 }
 
