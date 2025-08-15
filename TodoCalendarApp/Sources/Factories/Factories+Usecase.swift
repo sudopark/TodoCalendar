@@ -413,8 +413,9 @@ extension LoginUsecaseFactoryImple {
         let cache = EventDetailDataLocalStorageImple(
             sqliteService: applicationBase.commonSqliteService
         )
+        let remote = EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI)
         return EventDetailDataRemoteRepostioryImple(
-            remoteAPI: applicationBase.remoteAPI,
+            remote: remote,
             cacheStorage: cache
         )
     }
