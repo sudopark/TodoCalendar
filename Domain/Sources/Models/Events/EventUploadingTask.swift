@@ -16,6 +16,7 @@ public struct EventUploadingTask: Sendable {
         case todo
         case schedule
         case eventDetail
+        case doneTodo
     }
     
     public var timestamp: TimeInterval

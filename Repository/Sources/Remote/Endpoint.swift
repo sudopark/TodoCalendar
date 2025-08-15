@@ -60,6 +60,7 @@ public enum TodoAPIEndpoints: Endpoint {
     case todos
     case uncompleteds
     case currentTodo
+    case complete(String)
     case done(String)
     case dones
     case revertDone(String)
@@ -83,8 +84,11 @@ public enum TodoAPIEndpoints: Endpoint {
         case .currentTodo:
             return ""
             
-        case .done(let id):
+        case .complete(let id):
             return "todo/\(id)/complete"
+            
+        case .done(let id):
+            return "dones/\(id)"
             
         case .dones:
             return "dones"

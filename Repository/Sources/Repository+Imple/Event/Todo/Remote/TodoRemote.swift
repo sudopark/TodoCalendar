@@ -40,6 +40,8 @@ public protocol TodoRemote: Sendable {
     
     func loadUncompletedTodosFromRemote(_ now: Date) async throws -> [TodoEvent]
     
+    func updateDoneTodo(_ doneTodo: DoneTodoEvent) async throws -> DoneTodoEvent
+    
     func loadDoneTodoEvents(
         _ params: DoneTodoLoadPagingParams
     ) async throws -> [DoneTodoEvent]
@@ -96,7 +98,7 @@ extension TodoRemoteImple {
         nextTime: EventTime?
     ) async throws -> CompleteTodoResult {
         let payload = DoneTodoEventParams(origin, nextTime)
-        let endpoint = TodoAPIEndpoints.done(origin.uuid)
+        let endpoint = TodoAPIEndpoints.complete(origin.uuid)
         let mapper: CompleteTodoResultMapper = try await remote.request(
             .post,
             endpoint,
@@ -164,6 +166,21 @@ extension TodoRemoteImple {
             parameters: params
         )
         return mapper.map { $0.todo }
+    }
+    
+    public func updateDoneTodo(
+        _ doneTodo: DoneTodoEvent
+    ) async throws -> DoneTodoEvent {
+        let payload = DoneTodoPutParams(
+            originId: doneTodo.originEventId,
+            name: doneTodo.name,
+            doneTime: doneTodo.doneTime
+        )
+        let endpoint = TodoAPIEndpoints.done(doneTodo.uuid)
+        let mapper: DoneTodoEventMapper = try await self.remote.request(
+            .put, endpoint, parameters: payload.asJson()
+        )
+        return mapper.event
     }
     
     public func loadDoneTodoEvents(

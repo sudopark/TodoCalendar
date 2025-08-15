@@ -125,6 +125,12 @@ extension EventUploadServiceImple {
             
         case .eventDetail:
             try await self.uploadEventDetail(task.uuid)
+            
+        case .doneTodo where task.isRemovingTask:
+            break
+            
+        case .doneTodo:
+            try await self.uploadDoneTodo(task.uuid)
         }
     }
     
@@ -167,6 +173,11 @@ extension EventUploadServiceImple {
         else { return }
         
         _ = try await self.eventDetailRemote.saveDetail(detail)
+    }
+    
+    private func uploadDoneTodo(_ eventId: String) async throws {
+        let done = try await self.todoLocalStorage.loadDoneTodoEvent(doneEventId: eventId)
+        _ = try await self.todoRemote.updateDoneTodo(done)
     }
 }
 

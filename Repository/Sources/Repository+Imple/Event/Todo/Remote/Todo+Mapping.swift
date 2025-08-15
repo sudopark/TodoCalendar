@@ -86,6 +86,32 @@ struct DoneTodoEventParams {
     }
 }
 
+struct DoneTodoPutParams {
+    let originId: String
+    let name: String
+    let doneTime: Date
+    
+    var tagId: EventTagId?
+    var eventTime: EventTime?
+    var notificationOptions: [EventNotificationTimeOption] = []
+    
+    func asJson() -> [String: Any] {
+        typealias Keys = TodoCodingKeys
+        var json: [String: Any] = [
+            Keys.originEventId.rawValue: self.originId,
+            Keys.name.rawValue: self.name,
+            Keys.doneAt.rawValue: self.doneTime.timeIntervalSince1970
+        ]
+        json[Keys.eventTagId.rawValue] = self.tagId?.customTagId
+        json[Keys.time.rawValue] = self.eventTime.map { EventTimeMapper(time: $0) }.map { $0.asJson() }
+        json[Keys.notificationOptions.rawValue] = self.notificationOptions
+            .map { EventNotificationTimeOptionMapper(option: $0) }
+            .compactMap { try? $0.asJson() }
+        
+        return json
+    }
+}
+
 struct ReplaceRepeatingTodoEventParams {
     private let newParams: TodoMakeParams
     private let nextTime: EventTime?

@@ -1058,7 +1058,7 @@ private struct DummyResponse {
             ),
             .init(
                 method: .post,
-                endpoint: TodoAPIEndpoints.done("complete_fail"),
+                endpoint: TodoAPIEndpoints.complete("complete_fail"),
                 resultJsonString: .failure(RuntimeError("failed"))
             ),
             .init(
@@ -1128,6 +1128,11 @@ private struct DummyResponse {
                 method: .delete,
                 endpoint: TodoAPIEndpoints.dones,
                 resultJsonString: .success("{ \"status\": \"ok\" }")
+            ),
+            .init(
+                method: .put,
+                endpoint: TodoAPIEndpoints.done("done_id"),
+                resultJsonString: .success(self.dummyDoneTodoResponse)
             ),
             .init(
                 method: .post,
