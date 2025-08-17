@@ -19,6 +19,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let accountUescase: any AccountUsecase
     let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     let viewAppearanceStore: ApplicationViewAppearanceStoreImple
+    let eventSyncUsecase: any EventSyncUsecase
     let eventUploadService: any EventUploadService = NotNeedEventUploadService()
     private let applicationBase: ApplicationBase
     
@@ -33,6 +34,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.accountUescase = accountUescase
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.viewAppearanceStore = viewAppearanceStore
+        self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
     }
     
@@ -174,10 +176,6 @@ extension NonLoginUsecaseFactoryImple {
             eventNotifyService: applicationBase.eventNotifyService
         )
     }
-    
-    func makeEventSyncUsecase() -> any EventSyncUsecase {
-        return NotNeedEventSyncUsecase()
-    }
 }
 
 
@@ -292,6 +290,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     let viewAppearanceStore: ApplicationViewAppearanceStoreImple
     let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
+    let eventSyncUsecase: any EventSyncUsecase
     let eventUploadService: any EventUploadService
     private let applicationBase: ApplicationBase
     
@@ -318,17 +317,38 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         self.temporaryUserDataMigrationUsecase = TemporaryUserDataMigrationUescaseImple(
             migrationRepository: migrationRepository
         )
-        self.eventUploadService = EventUploadServiceImple(
+        
+        let tagLocal = EventTagLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        
+        let uploadService = EventUploadServiceImple(
             pendingQueueStorage: EventUploadPendingQueueLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
             eventTagRemote: EventTagRemoteImple(remote: applicationBase.remoteAPI),
-            eventTagLocalStorage: EventTagLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            eventTagLocalStorage: tagLocal,
             todoRemote: TodoRemoteImple(remote: applicationBase.remoteAPI),
-            todoLocalStorage: TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            todoLocalStorage: todoLocal,
             scheduleRemote: ScheduleEventRemoteImple(remote: applicationBase.remoteAPI),
-            scheduleLocalStorage: ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            scheduleLocalStorage: scheduleLocal,
             eventDetailRemote: EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI),
             eventDetailLocalStorage: EventDetailDataLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         )
+        
+        let mediator = EventSyncMediatorImple(
+            eventUploadService: uploadService, migrationUsecase: self.temporaryUserDataMigrationUsecase
+        )
+        let syncRepository = EventSyncRepositoryImple(
+            remote: applicationBase.remoteAPI,
+            syncTimestampLocalStorage: EventSyncTimestampLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            eventTagLocalStorage: tagLocal,
+            todoLocalStorage: todoLocal,
+            scheduleLocalStorage: scheduleLocal
+        )
+        self.eventSyncUsecase = EventSyncUsecaseImple(
+            syncRepository: syncRepository,
+            eventSyncMediator: mediator
+        )
+        self.eventUploadService = uploadService
     }
     
     var eventNotifyService: SharedEventNotifyService {

@@ -52,7 +52,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
             eventUploadService: self.usecaseFactory.eventUploadService,
-            eventSyncUsecase: self.usecaseFactory.makeEventSyncUsecase()
+            eventSyncUsecase: self.usecaseFactory.eventSyncUsecase
         )
         viewModel.listener = listener
         let viewController = CalendarViewController(

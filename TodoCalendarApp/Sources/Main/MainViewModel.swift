@@ -55,6 +55,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let eventTagUsecase: any EventTagUsecase
     private let eventNotifyService: SharedEventNotifyService
     private let googleCalendarUsecase: any GoogleCalendarUsecase
+    private let eventSyncUsecase: any EventSyncUsecase
     var router: (any MainRouting)?
     
     init(
@@ -63,7 +64,8 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         eventNotificationUsecase: any EventNotificationUsecase,
         eventTagUsecase: any EventTagUsecase,
         eventNotifyService: SharedEventNotifyService,
-        googleCalendarUsecase: any GoogleCalendarUsecase
+        googleCalendarUsecase: any GoogleCalendarUsecase,
+        eventSyncUsecase: any EventSyncUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
         self.temporaryUserDataMigrationUsecase = temporaryUserDataMigrationUsecase
@@ -71,6 +73,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.eventTagUsecase = eventTagUsecase
         self.eventNotifyService = eventNotifyService
         self.googleCalendarUsecase = googleCalendarUsecase
+        self.eventSyncUsecase = eventSyncUsecase
         
         self.internalBinding()
     }
@@ -237,18 +240,7 @@ extension MainViewModelImple {
     }
     
     var isLoadingCalendarEvents: AnyPublisher<Bool, Never> {
-        let transform: (RefreshingEvent) -> Bool = { event in
-            switch event {
-            case .refreshingTodo(let isLoading): return isLoading
-            case .refreshingSchedule(let isLoading): return isLoading
-            case .refreshForemostEvent(let isLoading): return isLoading
-            case .refreshingCurrentTodo(let isLoading): return isLoading
-            case .refreshingUncompletedTodo(let isLoading): return isLoading
-            }
-        }
-        let refreshingEvent: AnyPublisher<RefreshingEvent, Never> = self.eventNotifyService.event()
-        return refreshingEvent
-            .compactMap(transform)
+        return self.eventSyncUsecase.isSyncInProgress
             .eraseToAnyPublisher()
     }
 }
