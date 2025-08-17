@@ -325,7 +325,9 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             todoRemote: TodoRemoteImple(remote: applicationBase.remoteAPI),
             todoLocalStorage: TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
             scheduleRemote: ScheduleEventRemoteImple(remote: applicationBase.remoteAPI),
-            scheduleLocalStorage: ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+            scheduleLocalStorage: ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            eventDetailRemote: EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI),
+            eventDetailLocalStorage: EventDetailDataLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         )
     }
     
@@ -441,9 +443,10 @@ extension LoginUsecaseFactoryImple {
             sqliteService: applicationBase.commonSqliteService
         )
         let remote = EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI)
-        return EventDetailDataRemoteRepostioryImple(
+        return EventDetailUploadDecorateRepositoryImple(
             remote: remote,
-            cacheStorage: cache
+            cacheStorage: cache,
+            uploadService: self.eventUploadService
         )
     }
     
