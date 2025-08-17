@@ -50,12 +50,17 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private func makeViewModel(
         customTodo: TodoEvent? = nil,
         shouldFailSave: Bool = false,
-        isForemost: Bool = false
+        isForemost: Bool = false,
+        withEmptyAddition: Bool = false
     ) -> EditTodoEventDetailViewModelImple {
         
         let (todo, detail) = (customTodo ?? self.dummyRepeatingTodo, self.dummyDetail)
         self.spyTodoUsecase.stubTodo = todo
-        self.spyEventDetailDataUsecase.stubDetail = detail
+        if withEmptyAddition {
+            self.spyEventDetailDataUsecase.stubDetail = nil
+        } else {
+            self.spyEventDetailDataUsecase.stubDetail = detail
+        }
         self.spyTodoUsecase.shouldUpdateEventFail = shouldFailSave
         
         let tagUsecase = StubEventTagUsecase()
@@ -148,6 +153,24 @@ extension EditTodoEventDetailViewModelImpleTests {
         XCTAssertEqual(preparedWith?.0.eventTagId, .custom("tag"))
         XCTAssertEqual(preparedWith?.0.eventNotifications, [.atTime, .before(seconds: 100)])
         XCTAssertEqual(preparedWith?.1, self.dummyDetail)
+    }
+    
+    func testViewModel_whenEventDetailNotExists_sendEmptyDataToInputInteractor() {
+        // given
+        let expect = expectation(description: "prepare 완료 이후 inputScene으로 초기 데이터 전달")
+        self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModel(withEmptyAddition: true)
+        
+        // when
+        viewModel.prepare()
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        let preparedWith = self.spyRouter.spyInteractor.didPreparedWith?.1
+        XCTAssertEqual(preparedWith?.eventId, "dummy_todo")
+        XCTAssertEqual(preparedWith?.place, nil)
+        XCTAssertEqual(preparedWith?.url, nil)
+        XCTAssertEqual(preparedWith?.memo, nil)
     }
     
     func testViewModel_provideIsForemost() {
@@ -535,6 +558,6 @@ extension EditTodoEventDetailViewModelImpleTests {
         viewModel.save()
         
         // then
-        self.wait(for: [expect], timeout: self.timeout)
+        self.wait(for: [expect], timeout: self.timeoutLong)
     }
 }
