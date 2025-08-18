@@ -125,6 +125,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
         let id = self.todoId
         return self.eventDetailDataUsecase.loadDetail(id)
             .catch { _ in Just(.init(id)) }
+            .replaceEmpty(with: .init(id))
             .eraseToAnyPublisher()
     }
 

@@ -92,6 +92,9 @@ extension CalendarAPIAutenticatorTests {
         parameterizeTest(
             TodoAPIEndpoints.currentTodo, method: .get, expecthasToken: true
         )
+        parameterizeTest(
+            EventSyncEndPoints.check, method: .get, expecthasToken: true
+        )
     }
 }
 

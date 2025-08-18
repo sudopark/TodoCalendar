@@ -16,7 +16,7 @@ import Foundation
 // TodoEvent에 부가정보가 더 추가되는 경우 -> 일단 DoneTodoEvent에 고유 정보 + summary 개념의 정보들로만 만들고
 // 상세 정보는 TodoDetail에 있게, 상세 조회시에만 로드할수있도록 아니면 아예 분리해서 저장하던지
 
-public struct DoneTodoEvent {
+public struct DoneTodoEvent: Sendable {
     
     public let uuid: String
     public let originEventId: String

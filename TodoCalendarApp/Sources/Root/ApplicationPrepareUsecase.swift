@@ -87,11 +87,12 @@ extension ApplicationPrepareUsecaseImple {
             $0 != ShareDataKeys.accountInfo.rawValue
             && $0 != ShareDataKeys.externalCalendarAccounts.rawValue
         }
-        let closeResult = self.database.close()
-        switch closeResult {
-        case .success:
+        
+        do {
+            try await self.database.async.close()
+            try? await Task.sleep(for: .milliseconds(100))
             try? await self.prepareDatabase(for: auth.uid)
-        case .failure(let error):
+        } catch let error {
             logger.log(level: .critical, "signIn -> close db failed..: \(error)")
         }
     }
@@ -100,11 +101,12 @@ extension ApplicationPrepareUsecaseImple {
         self.sharedDataStore.clearAll {
             $0 != ShareDataKeys.externalCalendarAccounts.rawValue
         }
-        let closeResult = self.database.close()
-        switch closeResult {
-        case .success:
+        
+        do {
+            try await self.database.async.close()
+            try? await Task.sleep(for: .milliseconds(100))
             try? await self.prepareDatabase(for: nil)
-        case .failure(let error):
+        } catch let error {
             logger.log(level: .critical, "signOut -> close db failed..: \(error)")
         }
     }
@@ -125,15 +127,14 @@ extension ApplicationPrepareUsecaseImple {
     }
     
     private func prepareDatabase(for accountId: String?) async throws {
-        let database = self.database
         let dbPath = self.databasePathFinding(accountId)
-        let openResult = database.open(path: dbPath)
-        logger.log(level: .info, "db open result: \(openResult) -> path: \(dbPath)")
-        switch openResult {
-        case .success:
-            try await database.runMigration(upTo: self.dbVersion)
-            
-        case .failure(let error):
+        
+        do {
+            try await self.database.async.open(path: dbPath)
+            logger.log(level: .info, "db open -> path: \(dbPath)")
+            try await self.database.runMigration(upTo: self.dbVersion)
+        } catch {
+            logger.log(level: .critical, "db open fail -> path: \(dbPath)")
             throw error
         }
     }

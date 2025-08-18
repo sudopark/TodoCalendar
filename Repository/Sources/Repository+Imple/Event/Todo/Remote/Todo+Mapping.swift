@@ -86,6 +86,32 @@ struct DoneTodoEventParams {
     }
 }
 
+struct DoneTodoPutParams {
+    let originId: String
+    let name: String
+    let doneTime: Date
+    
+    var tagId: EventTagId?
+    var eventTime: EventTime?
+    var notificationOptions: [EventNotificationTimeOption] = []
+    
+    func asJson() -> [String: Any] {
+        typealias Keys = TodoCodingKeys
+        var json: [String: Any] = [
+            Keys.originEventId.rawValue: self.originId,
+            Keys.name.rawValue: self.name,
+            Keys.doneAt.rawValue: self.doneTime.timeIntervalSince1970
+        ]
+        json[Keys.eventTagId.rawValue] = self.tagId?.customTagId
+        json[Keys.time.rawValue] = self.eventTime.map { EventTimeMapper(time: $0) }.map { $0.asJson() }
+        json[Keys.notificationOptions.rawValue] = self.notificationOptions
+            .map { EventNotificationTimeOptionMapper(option: $0) }
+            .compactMap { try? $0.asJson() }
+        
+        return json
+    }
+}
+
 struct ReplaceRepeatingTodoEventParams {
     private let newParams: TodoMakeParams
     private let nextTime: EventTime?
@@ -250,7 +276,7 @@ struct RevertToggleTodoDoneParameter {
 }
 
 
-struct RevertToggleTodoDoneResult: Decodable {
+public struct RevertToggleTodoDoneResult: Decodable {
     let reverted: TodoEvent
     let deletedDoneTodoId: String?
     
@@ -263,7 +289,7 @@ struct RevertToggleTodoDoneResult: Decodable {
         case reverted
         case deletedDoneTodoId = "deleted_done_id"
     }
-    init(from decoder: any Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.reverted = try container.decode(TodoEventMapper.self, forKey: .reverted).todo
         self.deletedDoneTodoId = try? container.decode(String.self, forKey: .deletedDoneTodoId)

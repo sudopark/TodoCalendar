@@ -38,6 +38,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let migrationUsecase: any TemporaryUserDataMigrationUescase
     private let uiSettingUsecase: any UISettingUsecase
     private let googleCalendarUsecase: any GoogleCalendarUsecase
+    private let eventUploadService: any EventUploadService
+    private let eventSyncUsecase: any EventSyncUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
@@ -53,7 +55,9 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         eventTagUsecase: any EventTagUsecase,
         migrationUsecase: any TemporaryUserDataMigrationUescase,
         uiSettingUsecase: any UISettingUsecase,
-        googleCalendarUsecase: any GoogleCalendarUsecase
+        googleCalendarUsecase: any GoogleCalendarUsecase,
+        eventUploadService: any EventUploadService,
+        eventSyncUsecase: any EventSyncUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -65,6 +69,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.migrationUsecase = migrationUsecase
         self.uiSettingUsecase = uiSettingUsecase
         self.googleCalendarUsecase = googleCalendarUsecase
+        self.eventUploadService = eventUploadService
+        self.eventSyncUsecase = eventSyncUsecase
         
         self.internalBind()
     }
@@ -101,6 +107,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             })
             .store(in: &self.cancellables)
 
+        self.bindEventUploadService()
         self.bindRefreshEvents()
         self.bindFocusedMonthChanged()
     }
@@ -130,14 +137,23 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         let refreshAfterMigration = self.migrationUsecase.migrationResult
             .filter { $0.isSuccess }.map { _ in  }
         
-        Publishers.Merge(refreshAfterEnterForeground, refreshAfterMigration)
-            .withLatestFrom(totalViewingMonths) { $1 }
-            .compactMap { $0.checkedRange }
-            .sink(receiveValue: { [weak self] total in
-                self?.refreshEvents([total])
-                self?.todoEventUsecase.refreshCurentTodoEvents()
-            })
-            .store(in: &self.cancellables)
+        let refreshAfterSyncEnd = Publishers.Zip(
+            self.eventSyncUsecase.isSyncInProgress,
+            self.eventSyncUsecase.isSyncInProgress.dropFirst()
+        )
+        .filter { old, new in old && !new }
+        .map { _ in }
+        
+        Publishers.Merge3(
+            refreshAfterEnterForeground, refreshAfterMigration, refreshAfterSyncEnd
+        )
+        .withLatestFrom(totalViewingMonths) { $1 }
+        .compactMap { $0.checkedRange }
+        .sink(receiveValue: { [weak self] total in
+            self?.refreshEvents([total])
+            self?.todoEventUsecase.refreshCurentTodoEvents()
+        })
+        .store(in: &self.cancellables)
         
         let refreshAfterGoogleCalendarIntegrated = self.googleCalendarUsecase.integratedAccount
             .filter { $0 != nil }
@@ -146,6 +162,12 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             .compactMap { $0.checkedRange }
             .sink(receiveValue: { [weak self] total in
                 self?.googleCalendarUsecase.refreshEvents(in: total)
+            })
+            .store(in: &self.cancellables)
+        
+        refreshAfterEnterForeground
+            .sink(receiveValue: { [weak self] in
+                self?.eventSyncUsecase.sync()
             })
             .store(in: &self.cancellables)
     }
@@ -218,6 +240,24 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             self.googleCalendarUsecase.refreshEvents(in: $0)
         }
     }
+    
+    private func bindEventUploadService() {
+        
+        Publishers.Merge(
+            NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification).map { _ in true },
+            NotificationCenter.default.publisher(for: UIApplication.didEnterBackgroundNotification).map { _ in false }
+        )
+        .sink(receiveValue: { [weak self] isActive in
+            Task { [weak self] in
+                if isActive {
+                    try? await self?.eventUploadService.resume()
+                } else {
+                    await self?.eventUploadService.pause()
+                }
+            }
+        })
+        .store(in: &self.cancellables)
+    }
 }
 
 
@@ -236,6 +276,9 @@ extension CalendarViewModelImple {
         Task { [weak self] in
             try? await self?.holidayUsecase.prepare()
             self?.bindRefreshHoliday()
+            
+            try? await self?.eventUploadService.resume()
+            self?.eventSyncUsecase.sync()
         }
         
         self.todoEventUsecase.refreshCurentTodoEvents()

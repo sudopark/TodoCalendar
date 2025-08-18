@@ -60,6 +60,7 @@ public enum TodoAPIEndpoints: Endpoint {
     case todos
     case uncompleteds
     case currentTodo
+    case complete(String)
     case done(String)
     case dones
     case revertDone(String)
@@ -83,8 +84,11 @@ public enum TodoAPIEndpoints: Endpoint {
         case .currentTodo:
             return ""
             
-        case .done(let id):
+        case .complete(let id):
             return "todo/\(id)/complete"
+            
+        case .done(let id):
+            return "dones/\(id)"
             
         case .dones:
             return "dones"
@@ -210,6 +214,23 @@ enum FeedbackEndpoints: Endpoint {
     }
 }
 
+// MARK: - sync api
+
+enum EventSyncEndPoints: Endpoint {
+    
+    case check
+    case start
+    case `continue`
+    
+    var subPath: String {
+        switch self {
+        case .check: return "check"
+        case .start: return "start"
+        case .continue: return "continue"
+        }
+    }
+}
+
 // MARK: - google account endpoint
 
 enum GoogleAuthEndpoint: Endpoint {
@@ -271,7 +292,7 @@ public struct RemoteEnvironment: Sendable {
             
         case let holiday as HolidayAPIEndpoints:
             let prefix = "\(calendarAPIHost)/v1/holiday"
-            return appendSubpathIfNotEmpty(prefix, endpoint.subPath)
+            return appendSubpathIfNotEmpty(prefix, holiday.subPath)
             
         case let account as AccountAPIEndpoints:
             return "\(calendarAPIHost)/v1/accounts/\(account.subPath)"
@@ -306,6 +327,10 @@ public struct RemoteEnvironment: Sendable {
             
         case let feedback as FeedbackEndpoints:
             return appendSubpathIfNotEmpty(self.csAPI, feedback.subPath)
+            
+        case let sync as EventSyncEndPoints:
+            let prefix = "\(calendarAPIHost)/v1/sync"
+            return appendSubpathIfNotEmpty(prefix, sync.subPath)
             
         case let googleAuth as GoogleAuthEndpoint:
             return appendSubpathIfNotEmpty("https://oauth2.googleapis.com", googleAuth.subPath)

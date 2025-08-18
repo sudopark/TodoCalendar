@@ -40,8 +40,9 @@ class ScheduleEventRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
         customStubbing: ((SpyScheduleEventLocalStorage, StubRemoteAPI) -> Void)? = nil
     ) -> ScheduleEventRemoteRepositoryImple {
         customStubbing?(self.spyCache, self.stubRemote)
+        let remote = ScheduleEventRemoteImple(remote: self.stubRemote)
         return ScheduleEventRemoteRepositoryImple(
-            remote: self.stubRemote, cacheStore: self.spyCache
+            remote: remote, cacheStore: self.spyCache
         )
     }
     

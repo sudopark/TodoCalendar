@@ -13,6 +13,7 @@ private enum CodingKeys: String, CodingKey {
     case uuid
     case name
     case colorHex = "color_hex"
+    case skipCheckDuplicationName
 }
 
 struct CustomEventTagMapper: Decodable {
@@ -34,7 +35,8 @@ extension CustomEventTagMakeParams {
     func asJson() -> [String: Any] {
         return [
             CodingKeys.name.rawValue: self.name,
-            CodingKeys.colorHex.rawValue: self.colorHex
+            CodingKeys.colorHex.rawValue: self.colorHex,
+            CodingKeys.skipCheckDuplicationName.rawValue: self.skipCheckDuplicationName
         ]
     }
 }

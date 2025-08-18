@@ -157,7 +157,7 @@ public struct ReplaceRepeatingTodoEventResult {
 }
 
 
-public struct RemoveTodoResult {
+public struct RemoveTodoResult: Sendable {
     
     public var nextRepeatingTodo: TodoEvent?
     public init() { }

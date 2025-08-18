@@ -127,6 +127,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         let id = self.scheduleId
         return self.eventDetailDataUsecase.loadDetail(id)
             .catch { _ in Just(.init(id)) }
+            .replaceEmpty(with: .init(id))
             .eraseToAnyPublisher()
     }
     

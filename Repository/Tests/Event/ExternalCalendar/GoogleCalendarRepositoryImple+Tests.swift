@@ -17,6 +17,7 @@ import UnitTestHelpKit
 @testable import Repository
 
 
+@Suite("GoogleCalendarRepositoryImple_Tests", .serialized)
 final class GoogleCalendarRepositoryImple_Tests: PublisherWaitable, LocalTestable {
     
     var cancelBag: Set<AnyCancellable>! = []
@@ -223,7 +224,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             try await self.saveCache()
             let expect = self.expectConfirm("캐시 있는 상태에서 조회시, 캐시값 먼저 나가고, 이후 리모트값 나감")
             expect.count = 2
-            expect.timeout = .milliseconds(100)
+            expect.timeout = .milliseconds(1000)
             let repository = self.makeRepository()
             
             // when

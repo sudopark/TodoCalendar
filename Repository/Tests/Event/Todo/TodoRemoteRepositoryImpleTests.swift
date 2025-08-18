@@ -40,8 +40,9 @@ class TodoRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
         stubbing: ((SpyTodoLocalStorage, StubRemoteAPI) -> Void)? = nil
     ) -> TodoRemoteRepositoryImple {
         stubbing?(self.spyTodoCache, self.stubRemote)
+        let remote = TodoRemoteImple(remote: self.stubRemote)
         return TodoRemoteRepositoryImple(
-            remote: self.stubRemote, cacheStorage: self.spyTodoCache
+            remote: remote, cacheStorage: self.spyTodoCache
         )
     }
 }
@@ -103,13 +104,13 @@ extension TodoRemoteRepositoryImpleTests {
         let todo = try await repository.updateTodoEvent("repeating-todo", params)
         
         // then
-        self.assertTodo(todo)
-        XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, "new_uuid")
+        self.assertTodo(todo, uuid: "repeating-todo")
+        XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, "repeating-todo")
     }
     
-    private func assertTodo(_ todo: TodoEvent) {
+    private func assertTodo(_ todo: TodoEvent, uuid: String = "new_uuid") {
         let refTime = self.dummyResponse.refTime
-        XCTAssertEqual(todo.uuid, "new_uuid")
+        XCTAssertEqual(todo.uuid, uuid)
         XCTAssertEqual(todo.name, "todo_refreshed")
         XCTAssertEqual(todo.eventTagId, .custom("custom_id"))
         XCTAssertEqual(todo.time, .allDay(refTime+100..<refTime+200, secondsFromGMT: 300))
@@ -692,6 +693,7 @@ extension TodoRemoteRepositoryImpleTests {
 
 import Testing
 
+@Suite("TodoRemoteRepositoryImpleTestsV2", .serialized)
 class TodoRemoteRepositoryImpleTestsV2: PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>! = []
@@ -707,7 +709,8 @@ class TodoRemoteRepositoryImpleTestsV2: PublisherWaitable {
         stubbing: ((SpyTodoLocalStorage, StubRemoteAPI) -> Void)? = nil
     ) -> TodoRemoteRepositoryImple {
         stubbing?(self.spyTodoCache, self.stubRemote)
-        return TodoRemoteRepositoryImple(remote: self.stubRemote, cacheStorage: self.spyTodoCache)
+        let remote = TodoRemoteImple(remote: self.stubRemote)
+        return TodoRemoteRepositoryImple(remote: remote, cacheStorage: self.spyTodoCache)
     }
 }
 
@@ -823,10 +826,10 @@ private struct DummyResponse {
     
     let refTime = Date().timeIntervalSince1970
     
-    private var dummySingleTodoResponse: String {
+    private func dummySingleTodoResponse(_ uuid: String = "new_uuid") -> String {
         return """
         {
-            "uuid": "new_uuid",
+            "uuid": "\(uuid)",
             "name": "todo_refreshed",
             "create_timestamp": 100,
             "event_tag_id": "custom_id",
@@ -1004,17 +1007,17 @@ private struct DummyResponse {
             .init(
                 method: .get,
                 endpoint: TodoAPIEndpoints.todo("origin"),
-                resultJsonString: .success(self.dummySingleTodoResponse)
+                resultJsonString: .success(self.dummySingleTodoResponse("origin"))
             ),
             .init(
                 method: .get,
                 endpoint: TodoAPIEndpoints.todo("complete_fail"),
-                resultJsonString: .success(self.dummySingleTodoResponse)
+                resultJsonString: .success(self.dummySingleTodoResponse("complete_fail"))
             ),
             .init(
                 method: .get,
                 endpoint: TodoAPIEndpoints.todo("repeating-todo"),
-                resultJsonString: .success(self.dummySingleTodoResponse)
+                resultJsonString: .success(self.dummySingleTodoResponse("repeating-todo"))
             ),
             .init(
                 method: .get,
@@ -1029,33 +1032,33 @@ private struct DummyResponse {
             .init(
                 method:.post,
                 endpoint: TodoAPIEndpoints.make,
-                resultJsonString: .success(self.dummySingleTodoResponse)
+                resultJsonString: .success(self.dummySingleTodoResponse())
             ),
             .init(
                 method: .put,
                 endpoint: TodoAPIEndpoints.todo("new_uuid"),
-                resultJsonString: .success(self.dummySingleTodoResponse)
+                resultJsonString: .success(self.dummySingleTodoResponse())
             ),
             .init(
                 method: .patch,
                 endpoint: TodoAPIEndpoints.todo("repeating-todo"),
-                resultJsonString: .success(self.dummySingleTodoResponse)
+                resultJsonString: .success(self.dummySingleTodoResponse("repeating-todo"))
             ),
             .init(
                 method: .post,
-                endpoint: TodoAPIEndpoints.done("origin"),
+                endpoint: TodoAPIEndpoints.complete("origin"),
                 resultJsonString: .success(
                 """
                 {
                     "done": \(self.dummyDoneTodoResponse),
-                    "next_repeating": \(self.dummySingleTodoResponse)
+                    "next_repeating": \(self.dummySingleTodoResponse())
                 }
                 """
                 )
             ),
             .init(
                 method: .post,
-                endpoint: TodoAPIEndpoints.done("complete_fail"),
+                endpoint: TodoAPIEndpoints.complete("complete_fail"),
                 resultJsonString: .failure(RuntimeError("failed"))
             ),
             .init(
@@ -1064,8 +1067,8 @@ private struct DummyResponse {
                 resultJsonString: .success(
                 """
                 {
-                    "new_todo": \(self.dummySingleTodoResponse),
-                    "next_repeating": \(self.dummySingleTodoResponse)
+                    "new_todo": \(self.dummySingleTodoResponse()),
+                    "next_repeating": \(self.dummySingleTodoResponse())
                 }
                 """
                 )
@@ -1090,7 +1093,7 @@ private struct DummyResponse {
                 endpoint: TodoAPIEndpoints.currentTodo,
                 resultJsonString: .success(
                     """
-                    [ \(self.dummySingleTodoResponse) ]
+                    [ \(self.dummySingleTodoResponse()) ]
                     """
                 )
             ),
@@ -1099,7 +1102,7 @@ private struct DummyResponse {
                 endpoint: TodoAPIEndpoints.todos,
                 resultJsonString: .success(
                     """
-                    [ \(self.dummySingleTodoResponse) ]
+                    [ \(self.dummySingleTodoResponse()) ]
                     """
                 )
             ),
@@ -1127,26 +1130,31 @@ private struct DummyResponse {
                 resultJsonString: .success("{ \"status\": \"ok\" }")
             ),
             .init(
+                method: .put,
+                endpoint: TodoAPIEndpoints.done("done_id"),
+                resultJsonString: .success(self.dummyDoneTodoResponse)
+            ),
+            .init(
                 method: .post,
                 endpoint: TodoAPIEndpoints.revertDone("some"),
-                resultJsonString: .success(self.dummySingleTodoResponse)
+                resultJsonString: .success(self.dummySingleTodoResponse())
             ),
             .init(
                 method: .post,
                 endpoint: TodoAPIEndpoints.cancelDone,
                 resultJsonString: .success(
-                    "{ \"reverted\": \(self.dummySingleTodoResponse), \"deleted_done_id\": \"some_done\" }"
+                    "{ \"reverted\": \(self.dummySingleTodoResponse()), \"deleted_done_id\": \"some_done\" }"
                 )
             ),
             .init(
                 method: .get,
                 endpoint: TodoAPIEndpoints.todo("repeating"),
-                resultJsonString: .success(self.dummySingleTodoResponse)
+                resultJsonString: .success(self.dummySingleTodoResponse("repeating"))
             ),
             .init(
                 method: .patch,
                 endpoint: TodoAPIEndpoints.todo("repeating"),
-                resultJsonString: .success(self.dummySingleTodoResponse)
+                resultJsonString: .success(self.dummySingleTodoResponse(("repeating")))
             ),
             .init(
                 method: .get,

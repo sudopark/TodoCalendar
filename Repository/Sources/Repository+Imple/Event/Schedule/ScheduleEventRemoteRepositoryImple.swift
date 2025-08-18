@@ -17,11 +17,11 @@ import Extensions
 
 public final class ScheduleEventRemoteRepositoryImple: ScheduleEventRepository, Sendable {
     
-    private let remote: any RemoteAPI
+    private let remote: any ScheduleEventRemote
     private let cacheStore: any ScheduleEventLocalStorage
     
     public init(
-        remote: any RemoteAPI,
+        remote: any ScheduleEventRemote,
         cacheStore: any ScheduleEventLocalStorage
     ) {
         self.remote = remote
@@ -33,14 +33,8 @@ public final class ScheduleEventRemoteRepositoryImple: ScheduleEventRepository, 
 extension ScheduleEventRemoteRepositoryImple {
     
     public func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent {
-        let endpoint = ScheduleEventEndpoints.make
-        let payload = params.asJson()
-        let mapper: ScheduleEventMapper = try await self.remote.request(
-            .post,
-            endpoint,
-            parameters: payload
-        )
-        let event = mapper.event
+        
+        let event = try await remote.makeScheduleEvent(params)
         try? await self.cacheStore.saveScheduleEvent(event)
         return event
     }
@@ -49,14 +43,8 @@ extension ScheduleEventRemoteRepositoryImple {
         _ eventId: String,
         _ params: SchedulePutParams
     ) async throws -> ScheduleEvent {
-        let endpoint = ScheduleEventEndpoints.schedule(id: eventId)
-        let payload = params.asJson()
-        let mapper: ScheduleEventMapper = try await self.remote.request(
-            .put,
-            endpoint,
-            parameters: payload
-        )
-        let updated = mapper.event
+        
+        let updated = try await self.remote.updateScheduleEvent(eventId, params)
         try? await self.cacheStore.updateScheduleEvent(updated)
         return updated
     }
@@ -66,14 +54,8 @@ extension ScheduleEventRemoteRepositoryImple {
         at currentTime: EventTime,
         asNew params: ScheduleMakeParams
     ) async throws -> ExcludeRepeatingEventResult {
-        let payload = ExcludeScheduleEventTimeParams(params, currentTime).asJson()
-        let endpoint = ScheduleEventEndpoints.exclude(id: originEventId)
-        let mapper: ExcludeRepeatingEventResultMapper = try await self.remote.request(
-            .post,
-            endpoint,
-            parameters: payload
-        )
-        let result = mapper.result
+        
+        let result = try await self.remote.excludeRepeatingEvent(originEventId, at: currentTime, asNew: params)
         
         // updateCache
         try? await cacheStore.updateScheduleEvent(result.originEvent)
@@ -86,17 +68,8 @@ extension ScheduleEventRemoteRepositoryImple {
         fromTime: TimeInterval,
         _ params: SchedulePutParams
     ) async throws -> BranchNewRepeatingScheduleFromOriginResult {
-        let payload = BranchNewRepeatingScheduleFromOriginParams(
-            fromTime, params.asMakeParams()
-        ).asJson()
-        let endpoint = ScheduleEventEndpoints.branchRepeating(id: originEventId)
-        let mapper: BranchNewRepeatingScheduleFromOriginResultMapper = try await self.remote.request(
-            .post,
-            endpoint,
-            parameters: payload
-        )
         
-        let result = mapper.result
+        let result = try await self.remote.branchNewRepeatingEvent(originEventId, fromTime: fromTime, params)
         try? await cacheStore.updateScheduleEvent(result.reppatingEndOriginEvent)
         try? await cacheStore.saveScheduleEvent(result.newRepeatingEvent)
         return result
@@ -116,16 +89,8 @@ extension ScheduleEventRemoteRepositoryImple {
     private func removeRepeatingScheduleEventTime(
         _ eventId: String, _ time: EventTime
     ) async throws -> RemoveSheduleEventResult {
-        let endpoint = ScheduleEventEndpoints.exclude(id: eventId)
-        let payload: [String: Any] = [
-            "exclude_repeatings": time.customKey
-        ]
-        let mapper: ScheduleEventMapper = try await remote.request(
-            .patch,
-            endpoint,
-            parameters: payload
-        )
-        let updated = mapper.event
+        
+        let updated = try await self.remote.removeRepeatingScheduleEventTime(eventId, time)
         try? await self.cacheStore.updateScheduleEvent(updated)
         return RemoveSheduleEventResult() |> \.nextRepeatingEvnet .~ updated
     }
@@ -133,10 +98,8 @@ extension ScheduleEventRemoteRepositoryImple {
     private func removeScheduleEvent(
         _ eventId: String
     ) async throws -> RemoveSheduleEventResult {
-        let endpoint = ScheduleEventEndpoints.schedule(id: eventId)
-        let _: RemoveSheduleEventResultMapper = try await self.remote.request(
-            .delete, endpoint
-        )
+        
+        try await self.remote.removeScheduleEvent(eventId)
         try? await self.cacheStore.removeScheduleEvent(eventId)
         return .init()
     }
@@ -151,13 +114,7 @@ extension ScheduleEventRemoteRepositoryImple {
         return self.loadScheduleEventWithReplaceCache { [weak self] in
             return try await self?.cacheStore.loadScheduleEvents(in: range)
         } thenFromRemote: { [weak self] in
-            let payload: [String: Any] = ["lower": range.lowerBound, "upper": range.upperBound]
-            let mappers: [ScheduleEventMapper]? = try await self?.remote.request(
-                .get,
-                ScheduleEventEndpoints.schedules,
-                parameters: payload
-            )
-            return mappers?.map { $0.event }
+            return try await self?.remote.loadScheduleEvents(in: range)
         }
     }
     
@@ -169,19 +126,11 @@ extension ScheduleEventRemoteRepositoryImple {
             let cache = try await self?.cacheStore.loadScheduleEvent(eventId)
             return cache.map { [$0] }
         } thenFromRemote: { [weak self] in
-            let refreshed = try await self?.loadEvent(eventId)
+            let refreshed = try await self?.remote.loadScheduleEvent(eventId)
             return refreshed.map { [$0] }
         }
         .compactMap { $0.first }
         .eraseToAnyPublisher()
-    }
-    
-    private func loadEvent(_ eventId: String) async throws -> ScheduleEvent {
-        let endpoint = ScheduleEventEndpoints.schedule(id: eventId)
-        let mapper: ScheduleEventMapper = try await self.remote.request(
-            .get, endpoint
-        )
-        return mapper.event
     }
     
     private func loadScheduleEventWithReplaceCache(
