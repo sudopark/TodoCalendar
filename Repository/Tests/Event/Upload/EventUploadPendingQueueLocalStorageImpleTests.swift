@@ -23,7 +23,10 @@ final class EventUploadPendingQueueLocalStorageImpleTests: LocalTestable {
     let sqliteService: SQLiteService = .init()
     
     private func makeStorage() -> EventUploadPendingQueueLocalStorageImple {
-        return EventUploadPendingQueueLocalStorageImple(sqliteService: self.sqliteService)
+        return EventUploadPendingQueueLocalStorageImple(
+            maxFailCount: 3,
+            sqliteService: self.sqliteService
+        )
     }
 }
 

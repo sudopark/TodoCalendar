@@ -31,7 +31,10 @@ final class EventUploadServiceImpleTests: LocalTestable {
         self.spyRemote.editTagMocking = editTagMocking
         self.spyRemote.shouldFailEditTag = shouldFailEditTag
         
-        let pendingQueueStorage = EventUploadPendingQueueLocalStorageImple(sqliteService: self.sqliteService)
+        let pendingQueueStorage = EventUploadPendingQueueLocalStorageImple(
+            maxFailCount: 3,
+            sqliteService: self.sqliteService
+        )
         for try await task in tasks.async {
             try await pendingQueueStorage.pushTask(task)
         }

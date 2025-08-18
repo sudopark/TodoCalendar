@@ -28,8 +28,13 @@ extension EventUploadPendingQueueLocalStorage {
 
 public final class EventUploadPendingQueueLocalStorageImple: EventUploadPendingQueueLocalStorage {
     
+    private let maxFailCount: Int
     private let sqliteService: SQLiteService
-    public init(sqliteService: SQLiteService) {
+    public init(
+        maxFailCount: Int,
+        sqliteService: SQLiteService
+    ) {
+        self.maxFailCount = maxFailCount
         self.sqliteService = sqliteService
     }
     
@@ -39,9 +44,10 @@ public final class EventUploadPendingQueueLocalStorageImple: EventUploadPendingQ
 extension EventUploadPendingQueueLocalStorageImple {
     
     public func popTask() async throws -> EventUploadingTask? {
-        try await self.sqliteService.async.run { db in
+        let maxFailCount = self.maxFailCount
+        return try await self.sqliteService.async.run { db in
             let query = Queue.selectAll()
-                .where { $0.uploadFailCount < 3 }
+                .where { $0.uploadFailCount < maxFailCount }
                 .orderBy(isAscending: true) { $0.timestamp }
             guard let firstTask = try db.loadOne(Queue.self, query: query)
             else { return nil }

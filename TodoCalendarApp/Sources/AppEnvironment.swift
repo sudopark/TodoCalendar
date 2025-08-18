@@ -45,6 +45,8 @@ struct AppEnvironment {
     
     static let apiDefaultTimeoutSeconds: TimeInterval = 30
     
+    static let eventUploadMaxFailCount: Int = 10
+    
     static let googleCalendarService = GoogleCalendarService(scopes: [.readOnly])
     static var supportExternalCalendarServices: [ExternalCalendarService] {
         return [googleCalendarService]

@@ -323,7 +323,10 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         
         let uploadService = EventUploadServiceImple(
-            pendingQueueStorage: EventUploadPendingQueueLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
+            pendingQueueStorage: EventUploadPendingQueueLocalStorageImple(
+                maxFailCount: AppEnvironment.eventUploadMaxFailCount,
+                sqliteService: applicationBase.commonSqliteService
+            ),
             eventTagRemote: EventTagRemoteImple(remote: applicationBase.remoteAPI),
             eventTagLocalStorage: tagLocal,
             todoRemote: TodoRemoteImple(remote: applicationBase.remoteAPI),
