@@ -20,7 +20,17 @@ extension Project {
             name: name,
             platform: platform,
             iOSTargetVersion: iOSTargetVersion,
-            dependencies: dependencies
+            dependencies: dependencies,
+            signingConfigures: [
+                .debug(
+                    name: "Debug",
+                    settings: debugAppSigningSetting
+                ),
+                .release(
+                    name: "Release",
+                    settings: releaseAppSigningSetting
+                )
+            ]
         )
         return Project(
             name: name,
@@ -157,7 +167,8 @@ extension Project {
         name: String,
         platform: Platform,
         iOSTargetVersion: String,
-        dependencies: [TargetDependency]
+        dependencies: [TargetDependency],
+        signingConfigures: [ProjectDescription.Configuration]
     )
     -> [Target]
     {
@@ -211,8 +222,10 @@ extension Project {
             entitlements: Entitlements.file(path: "./TodoCalendarApp.entitlements"),
             dependencies: dependencies,
             settings: .settings(
-               base: .init().swiftVersion("6.0"),
-               configurations: []
+                base: .init().swiftVersion("6.0"),
+                configurations: signingConfigures + [
+                    
+                ]
             )
         )
         
@@ -241,6 +254,7 @@ extension Project {
         iOSTargetVersion: String,
         infoPlist: [String: Plist.Value] = [:],
         dependencies: [TargetDependency],
+        signingConfigures: [ProjectDescription.Configuration],
         withTest: Bool = true
     ) -> [Target] {
         
@@ -267,8 +281,10 @@ extension Project {
             entitlements: Entitlements.file(path: "./AppExtensions/\(extensionName)/\(targetName).entitlements"),
             dependencies: dependencies,
             settings: .settings(
-               base: .init().swiftVersion("6.0"),
-               configurations: []
+                base: .init().swiftVersion("6.0"),
+                configurations: signingConfigures + [
+                    
+                ]
             )
         )
         
