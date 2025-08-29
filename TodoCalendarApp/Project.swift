@@ -96,6 +96,16 @@ let project = Project.app(
                     target: "CalendarScenes",
                     path: .relativeToCurrentFile("../Presentations/CalendarScenes")
                 )
+            ],
+            signingConfigures: [
+                .debug(
+                    name: "Debug",
+                    settings: Project.debugWidgetSigningSetting
+                ),
+                .release(
+                    name: "Release",
+                    settings: Project.releaseWidgetSigningSetting
+                )
             ]
         )
     + Project.makeAppExtensionTargets(
@@ -134,6 +144,16 @@ let project = Project.app(
                 target: "Repository",
                 path: .relativeToCurrentFile("../Repository")
             ),
+        ],
+        signingConfigures: [
+            .debug(
+                name: "Debug",
+                settings: Project.debugAppIntentSigningSetting
+            ),
+            .release(
+                name: "Release",
+                settings: Project.releaseAppIntentSigningSetting
+            )
         ],
         withTest: false
     )
