@@ -396,7 +396,7 @@
 "widget.events.sample::aug3" = "8월 3일 목요일";
 "widget.events.sample::oct10" = "10월 10일 월요일";
 "widget.events.foremost" = "제일 중요한 이벤트";
-"widget.events.foremost::allFinished::message" = "모두 완료되었습니다!";
+"widget.events.foremost::allFinished::message" = "꼭 해야 할 일 추가";
 "widget.events.foremost::sample::message" = "우산챙기기! ⛱️";
 "widget.events.calendar" = "캘린더";
 "widget.events.today" = "TODAY";

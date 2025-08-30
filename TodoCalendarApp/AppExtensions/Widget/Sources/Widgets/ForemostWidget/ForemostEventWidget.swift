@@ -19,6 +19,24 @@ import CalendarScenes
 
 // MARK: - ForemostEventView
 
+struct InlineSizeForemostEventView: View {
+    
+    private let model: ForemostEventWidgetViewModel
+    init(model: ForemostEventWidgetViewModel) {
+        self.model = model
+    }
+    
+    var body: some View {
+        if let event = self.model.eventModel {
+            Text(event.name)
+                .widgetAccentable()
+        } else {
+            Text("widget.events.foremost::allFinished::message".localized())
+                .widgetAccentable()
+        }
+    }
+}
+
 struct SystemSizeForemostEventView: View {
     
     @Environment(\.colorScheme) var colorScheme
@@ -228,6 +246,8 @@ struct ForemostEventWidgetView: View {
     
     var body: some View {
         switch self.entry.result {
+        case .success(let model) where family == .accessoryInline:
+            InlineSizeForemostEventView(model: model)
         case .success(let model) where family == .systemSmall:
             SystemSizeForemostEventView(model: model, isSmallSize: true)
         case .success(let model):
@@ -249,7 +269,7 @@ struct ForemostEventWidget: Widget {
             ForemostEventWidgetView(entry: entry)
                 .containerBackground(.background, for: .widget)
         }
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.accessoryInline, .systemSmall, .systemMedium])
         .configurationDisplayName("widget.events.foremost".localized())
         .description("widget.common::explain".localized())
     }
@@ -267,6 +287,9 @@ struct ForemostEventWidget_PreviewProvider: PreviewProvider {
         let entry = ResultTimelineEntry(date: Date(), result: .success(sample))
 
         Group {
+            ForemostEventWidgetView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .accessoryInline))
+                .containerBackground(.background, for: .widget)
             ForemostEventWidgetView(entry: entry)
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
                 .containerBackground(.background, for: .widget)

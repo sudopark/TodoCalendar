@@ -397,7 +397,7 @@
 "widget.events.sample::aug3" = "THU, AUG 3";
 "widget.events.sample::oct10" = "MON, OCT 10";
 "widget.events.foremost" = "Foremost Event";
-"widget.events.foremost::allFinished::message" = "It's all finished!";
+"widget.events.foremost::allFinished::message" = "Add a can't-miss event.";
 "widget.events.foremost::sample::message" = "Take an umbrella! ⛱️";
 "widget.events.calendar" = "Calendar";
 "widget.events.today" = "TODAY";
