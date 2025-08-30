@@ -423,6 +423,7 @@
 "widget.weeks.sample::workout" = "🔥 운동";
 "widget.weeks.sample::launch" = "🚀 런칭";
 "widget.fail.message" = "일시적인 오류가 발생했습니다. 앱을 다시 실행해주세요.";
-"widget.next.noEvent" = "다음 이벤트가 없습니다.";
+"widget.next.noEvent" = "다음 일정 없음";
 "widget.next.sample" = "🔥 운동";
 "widget.next.title" = "다음 이벤트";
+"widget.next.rect_widget::title" = "오늘 다음 일정";
