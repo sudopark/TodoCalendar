@@ -68,6 +68,7 @@ struct NextEventRectangleWidgetView: View {
 }
 
 struct NextEventWidgetEntryView: View {
+    
     private let entry: ResultTimelineEntry<NextEventWidgetViewModel>
     
     @Environment(\.widgetFamily) var family: WidgetFamily

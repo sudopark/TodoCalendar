@@ -14,34 +14,10 @@ import Domain
 import Extensions
 import CalendarScenes
 
-struct ForemostEventWidgetViewModelWithSize {
-    
-    enum SupportSize {
-        case circular
-        case rectangular
-        case inline
-        case small
-        case medium
-        
-        init(_ family: WidgetFamily) {
-            switch family {
-            case .accessoryCircular: self = .circular
-            case .accessoryRectangular: self = .rectangular
-            case .accessoryInline: self = .inline
-            case .systemSmall: self = .small
-            case .systemMedium: self = .medium
-            default: self = .medium
-            }
-        }
-    }
-    
-    let model: ForemostEventWidgetViewModel
-    let size: SupportSize
-}
 
 struct ForemostEventWidgetTimelineProvider: TimelineProvider {
     
-    typealias Entry = ResultTimelineEntry<ForemostEventWidgetViewModelWithSize>
+    typealias Entry = ResultTimelineEntry<ForemostEventWidgetViewModel>
     init() { }
 }
 
@@ -49,8 +25,7 @@ extension ForemostEventWidgetTimelineProvider {
     
     func placeholder(in context: Context) -> Entry {
         let sample = ForemostEventWidgetViewModel.sample()
-        let model = ForemostEventWidgetViewModelWithSize(model: sample, size: .init(context.family))
-        return .init(date: Date(), result: .success(model))
+        return .init(date: Date(), result: .success(sample))
     }
     
     func getSnapshot(in context: Context, completion: @Sendable @escaping (Entry) -> Void) {
@@ -86,9 +61,8 @@ extension ForemostEventWidgetTimelineProvider {
             let now = Date()
             do {
                 let model = try await viewModelProvider.getViewModel(now)
-                let modelWithSize = ForemostEventWidgetViewModelWithSize(model: model, size: .init(family))
                 completion(
-                    .init(date: now, result: .success(modelWithSize))
+                    .init(date: now, result: .success(model))
                 )
             } catch {
                 completion(
