@@ -16,7 +16,7 @@ import CalendarScenes
 
 // MARK: - NextEventWidgetView
 
-struct NextEventWidgetView: View {
+struct NextEventWidgetInlineView: View {
     
     private let model: NextEventWidgetViewModel
     init(model: NextEventWidgetViewModel) {
@@ -32,16 +32,57 @@ struct NextEventWidgetView: View {
     }
 }
 
+struct NextEventRectangleWidgetView: View {
+    
+    private let model: NextEventWidgetViewModel
+    init(model: NextEventWidgetViewModel) {
+        self.model = model
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .center, spacing: 2) {
+                Image("small_icon")
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 24, height: 24)
+                
+                Text("widget.next.rect_widget::title".localized())
+                    .font(.footnote)
+            }
+            .foregroundStyle(.primary)
+            .opacity(0.8)
+            
+            VStack(alignment: .leading) {
+                if let time = model.timeText {
+                    Text(time)
+                        .font(.footnote)
+                }
+                
+                Text(model.eventTitle)
+                    .font(.callout)
+            }
+            .padding(.leading, 4)
+        }
+    }
+}
 
 struct NextEventWidgetEntryView: View {
     private let entry: ResultTimelineEntry<NextEventWidgetViewModel>
+    
+    @Environment(\.widgetFamily) var family: WidgetFamily
+    
     init(entry: ResultTimelineEntry<NextEventWidgetViewModel>) {
         self.entry = entry
     }
     var body: some View {
         switch self.entry.result {
+        case .success(let model) where family == .accessoryInline:
+            NextEventWidgetInlineView(model: model)
+            
         case .success(let model):
-            NextEventWidgetView(model: model)
+            NextEventRectangleWidgetView(model: model)
+            
         case .failure:
             VStack{ }
         }
@@ -58,7 +99,7 @@ struct NextEventWidget: Widget {
             NextEventWidgetEntryView(entry: entry)
                 .containerBackground(.background, for: .widget)
         }
-        .supportedFamilies([.accessoryInline])
+        .supportedFamilies([.accessoryInline, .accessoryRectangular])
         .configurationDisplayName("widget.next.title".localized())
         .description("widget.common::explain".localized())
     }
@@ -70,10 +111,15 @@ struct NextEventWidgetView_Provider: PreviewProvider {
     static var previews: some View {
         let model = NextEventWidgetViewModel.sample
         let entry = ResultTimelineEntry(date: Date(), result: .success(model))
-//        let entry: ResultTimelineEntry<NextEventWidgetViewModel> = ResultTimelineEntry(date: Date(), result: .failure(.init(error: RuntimeError("ss"))))
         
-        return NextEventWidgetEntryView(entry: entry)
-            .previewContext(WidgetPreviewContext(family: .accessoryInline))
-            .containerBackground(.background, for: .widget)
+        return Group {
+            NextEventWidgetEntryView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .accessoryInline))
+                .containerBackground(.background, for: .widget)
+            
+            NextEventWidgetEntryView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .accessoryRectangular))
+                .containerBackground(.background, for: .widget)
+        }
     }
 }
