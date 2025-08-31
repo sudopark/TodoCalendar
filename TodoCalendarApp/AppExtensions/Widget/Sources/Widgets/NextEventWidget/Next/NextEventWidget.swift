@@ -56,11 +56,15 @@ struct NextEventRectangleWidgetView: View {
             VStack(alignment: .leading) {
                 if let time = model.timeText {
                     Text(time)
-                        .font(.footnote)
+                        .font(.callout)
                 }
                 
-                Text(model.eventTitle)
-                    .font(.callout)
+                HStack {
+                    Text(model.eventTitle)
+                        .font(.body)
+                    
+                    Spacer()
+                }
             }
             .padding(.leading, 4)
         }
@@ -84,6 +88,9 @@ struct NextEventWidgetEntryView: View {
         case .success(let model):
             NextEventRectangleWidgetView(model: model)
             
+        case .failure(let error) where family == .accessoryRectangular:
+            FailView(errorModel: error)
+            
         case .failure:
             VStack{ }
         }
@@ -93,7 +100,7 @@ struct NextEventWidgetEntryView: View {
 
 struct NextEventWidget: Widget {
     
-    nonisolated static  let kind: String = "NextEventWidget"
+    nonisolated static let kind: String = "NextEventWidget"
     
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: Self.kind, provider: NextEventWidgetTimeLineProvider()) { entry in
