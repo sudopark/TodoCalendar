@@ -81,4 +81,11 @@ class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {
     ) async throws -> TodayNextEvent? {
         return self.stubNextEvent
     }
+    
+    var stubNextEvents: TodayNextEvents?
+    func fetchNextEvents(
+        _ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone
+    ) async throws -> TodayNextEvents {
+        return try self.stubNextEvents.unwrap()
+    }
 }

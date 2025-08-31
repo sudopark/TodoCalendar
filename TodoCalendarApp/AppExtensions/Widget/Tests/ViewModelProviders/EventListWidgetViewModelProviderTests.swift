@@ -531,6 +531,10 @@ extension EventListWidgetViewModelProviderTests {
         ) async throws -> TodayNextEvent? {
             return nil
         }
+        
+        func fetchNextEvents(_ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> TodayNextEvents {
+            return .init(nextEvents: [], customTags: [])
+        }
     }
     
     private func makeProviderWithStubUnsortedEvents() -> EventListWidgetViewModelProvider {
@@ -601,6 +605,10 @@ extension EventListWidgetViewModelProviderTests {
                 _ refTime: Date, within todayRange: Range<TimeInterval>, _ timeZone: TimeZone
             ) async throws -> TodayNextEvent? {
                 return nil
+            }
+            
+            func fetchNextEvents(_ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> TodayNextEvents {
+                return .init(nextEvents: [], customTags: [])
             }
         }
         
