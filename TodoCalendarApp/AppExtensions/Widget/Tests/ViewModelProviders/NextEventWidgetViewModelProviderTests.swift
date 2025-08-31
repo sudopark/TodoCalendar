@@ -119,3 +119,105 @@ extension NextEventWidgetViewModelProviderTests {
         }
     }
 }
+
+extension NextEventWidgetViewModelProviderTests {
+    
+    private func makeProvideWithEvents(
+        _ events: TodayNextEvents?
+    ) -> NextEventWidgetViewModelProvider {
+        
+        let eventFetchUsecase = StubCalendarEventsFetchUescase()
+        eventFetchUsecase.stubNextEvents = events ?? .init(nextEvents: [], customTags: [])
+        
+        let calendarSettingRepository = StubCalendarSettingRepository()
+        calendarSettingRepository.saveTimeZone(self.kst)
+        
+        let appSettingRepository = StubAppSettingRepository()
+        
+        return .init(
+            eventsFetchusecase: eventFetchUsecase,
+            appSettingRepository: appSettingRepository,
+            calednarSettingRepository: calendarSettingRepository
+        )
+    }
+    
+    @Test func provide_whenEmptyEvents() async throws {
+        // given
+        let provider = self.makeProvideWithEvents(nil)
+        
+        // when
+        let model = try await provider.getNextEventModels(for: Date(timeIntervalSince1970: 0))
+        
+        // then
+        #expect(model.models.isEmpty == true)
+    }
+    
+    private var nextEvents: TodayNextEvents {
+        let todos = (0..<10).map {
+            let todo = TodoEvent(uuid: "id:\($0)", name: "name:\($0)")
+            |> \.time .~ .period(1000..<2000)
+            return TodoCalendarEvent(todo, in: self.kst)
+        }
+        return .init(nextEvents: todos, customTags: [])
+    }
+    
+    @Test func provider_provideNextEvents() async throws {
+        // given
+        let provider = self.makeProvideWithEvents(self.nextEvents)
+        
+        // when
+        let model = try await provider.getNextEventModels(for: Date(timeIntervalSince1970: 0))
+        
+        // then
+        #expect(model.models.count == 3)
+    }
+    
+    private func currentAndNextEvent(_ secondTime: SecondNextEventTime?) -> TodayNextEvents {
+        let current = self.nextTodo.nextEvent
+        
+        guard let secondTime else {
+            return .init(nextEvents: [current], customTags: [])
+        }
+        
+        let secondTodo = TodoEvent(uuid: "second", name: "todo")
+            |> \.time .~ .period(secondTime.rawValue..<secondTime.rawValue+1000)
+        let second = TodoCalendarEvent(secondTodo, in: self.kst)
+        
+        return .init(nextEvents: [current, second], customTags: [])
+    }
+    
+    @Test("그 다음 이벤트 시간에 따라 다음 갱신시간 설정", arguments: [
+        SecondNextEventTime.gtThanFirstEndTime, .lsThenFirstEndTime, .lsThenFirstEndTimeAndBefore10minLsThanFirstStartTime
+    ])
+    func provider_whenProvideEvents_selectNextEventRefreshTime(
+        _ secondsNextEventTime: SecondNextEventTime?
+    ) async throws {
+        // given
+        let dummy = self.nextTodo
+        let events = self.currentAndNextEvent(secondsNextEventTime)
+        let provider = self.makeProvideWithEvents(events)
+        
+        // when
+        let model = try await provider.getNextEventModels(for: Date(timeIntervalSince1970: 0))
+        
+        // then
+        switch secondsNextEventTime {
+        case .gtThanFirstEndTime:
+            let firstEventEndDate = Date(timeIntervalSince1970: dummy.nextEvent.eventTime!.upperBoundWithFixed)
+            #expect(model.refreshAfter == firstEventEndDate)
+            
+        case .lsThenFirstEndTime:
+            let secondEventStartTimeBefore10Min = Date(
+                timeIntervalSince1970: SecondNextEventTime.lsThenFirstEndTime.rawValue-10*60
+            )
+            #expect(model.refreshAfter == secondEventStartTimeBefore10Min)
+            
+        case .lsThenFirstEndTimeAndBefore10minLsThanFirstStartTime:
+            let secondEventStartTime = Date(timeIntervalSince1970: dummy.nextEvent.eventTime!.lowerBoundWithFixed)
+            #expect(model.refreshAfter == secondEventStartTime)
+            
+        case .none:
+            #expect(model.refreshAfter == nil)
+        }
+    }
+}
