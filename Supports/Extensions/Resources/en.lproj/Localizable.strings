@@ -428,3 +428,4 @@
 "widget.next.sample" = "🔥 Workout";
 "widget.next.title" = "Next event";
 "widget.next.rect_widget::title" = "Today's next event.";
+"widget.next.title::remains" = "Today's next events.";
