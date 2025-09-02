@@ -150,6 +150,40 @@ extension ForemostEventUsecaseImpleTests {
         XCTAssertNotNil(failure)
     }
     
+    func testUsecase_whenUpdateMarking_updateStatus() {
+        // given
+        let expect = expectation(description: "foremost event 마킹중에 상태 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        
+        // when
+        let statuses = self.waitOutputs(expect, for: usecase.foremostEventMarkingStatus, timeout: 0.1) {
+            Task {
+                try await usecase.update(foremost: .init("some", true))
+            }
+        }
+        
+        // then
+        XCTAssertEqual(statuses, [.marking(evnetId: "some"), .idle])
+    }
+    
+    func testUsecase_whenUpdateMarkingFail_updateStatus() {
+        // given
+        let expect = expectation(description: "foremost event 마킹 실패시에도 상태 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase(withFail: true)
+        
+        // when
+        let statuses = self.waitOutputs(expect, for: usecase.foremostEventMarkingStatus, timeout: 0.1) {
+            Task {
+                try? await usecase.update(foremost: .init("some", true))
+            }
+        }
+        
+        // then
+        XCTAssertEqual(statuses, [.marking(evnetId: "some"), .idle])
+    }
+    
     // 삭제하고
     func testUsecase_removeForemost() async throws {
         // given
@@ -157,6 +191,23 @@ extension ForemostEventUsecaseImpleTests {
         
         // when + then
         try await usecase.remove()
+    }
+    
+    func testUsecase_whenRemoveForemost_updateStatus() {
+        // given
+        let expect = expectation(description: "foremost event 해제시에 상태 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase()
+        
+        // when
+        let statuses = self.waitOutputs(expect, for: usecase.foremostEventMarkingStatus, timeout: 0.1) {
+            Task {
+                try await usecase.remove()
+            }
+        }
+        
+        // then
+        XCTAssertEqual(statuses, [.unmarking, .idle])
     }
     
     // 삭제 실패
@@ -174,6 +225,23 @@ extension ForemostEventUsecaseImpleTests {
         
         // then
         XCTAssertNotNil(failure)
+    }
+    
+    func testUsecase_whenRemoveForemostFail_updateStatus() {
+        // given
+        let expect = expectation(description: "foremost event 해제 실패시에 상태 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase(withFail: true)
+        
+        // when
+        let statuses = self.waitOutputs(expect, for: usecase.foremostEventMarkingStatus, timeout: 0.1) {
+            Task {
+                try? await usecase.remove()
+            }
+        }
+        
+        // then
+        XCTAssertEqual(statuses, [.unmarking, .idle])
     }
     
     // 업데이트, 삭제 이후에도 이벤트 방출

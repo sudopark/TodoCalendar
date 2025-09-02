@@ -18,6 +18,7 @@ open class StubForemostEventUsecase: ForemostEventUsecase, @unchecked Sendable {
     
     private let initialForemostID: ForemostEventId?
     private let foremostEventSubject = CurrentValueSubject<(any ForemostMarkableEvent)?, Never>(nil)
+    private let foremostMarkingStatusSubject = CurrentValueSubject<ForemostMarkingStatus, Never>(.idle)
     public init(foremostId: ForemostEventId? = nil) {
         self.initialForemostID = foremostId
     }
@@ -28,16 +29,26 @@ open class StubForemostEventUsecase: ForemostEventUsecase, @unchecked Sendable {
     }
     
     open func update(foremost eventId: ForemostEventId) async throws {
+        self.foremostMarkingStatusSubject.send(.marking(evnetId: eventId.eventId))
         let event = self.makeDummyEvent(eventId)
         self.foremostEventSubject.send(event)
+        self.foremostMarkingStatusSubject.send(.idle)
     }
     
     open func remove() async throws {
+        self.foremostMarkingStatusSubject.send(.unmarking)
         self.foremostEventSubject.send(nil)
+        self.foremostMarkingStatusSubject.send(.idle)
     }
     
     open var foremostEvent: AnyPublisher<(any ForemostMarkableEvent)?, Never> {
         return self.foremostEventSubject
+            .eraseToAnyPublisher()
+    }
+    
+    open var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> {
+        return self.foremostMarkingStatusSubject
+            .removeDuplicates()
             .eraseToAnyPublisher()
     }
     
