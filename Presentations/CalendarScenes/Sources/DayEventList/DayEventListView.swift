@@ -28,6 +28,7 @@ final class DayEventListViewState: ObservableObject {
     @Published fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
     @Published fileprivate var dayModel: SelectedDayModel?
     @Published fileprivate var cellViewModels: [any EventCellViewModel] = []
+    @Published fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
     
     func bind(_ viewModel: any DayEventListViewModel, _ appearance: ViewAppearance) {
         
@@ -64,6 +65,15 @@ final class DayEventListViewState: ObservableObject {
             .sink(receiveValue: { [weak self, weak appearance] cellViewModels in
                 appearance?.withAnimationIfNeed {
                     self?.cellViewModels = cellViewModels
+                }
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.foremostEventMarkingStatus
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self, weak appearance] status in
+                appearance?.withAnimationIfNeed {
+                    self?.foremostEventMarkingStatus = status
                 }
             })
             .store(in: &self.cancellables)
@@ -213,7 +223,7 @@ struct DayEventListView: View {
     }
     
     private func foremostSectionView(_ foremost: any EventCellViewModel) -> some View {
-        ForemostEventView(viewModel: foremost)
+        ForemostEventView(viewModel: foremost, foremostEventMarkingStatus: $state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
                 self.isFocusInput = false
                 eventHandler.requestDoneTodo($0)
@@ -233,7 +243,7 @@ struct DayEventListView: View {
     }
     
     private func uncompletedTodosSectionView(_ models: [TodoEventCellViewModel]) -> some View {
-        UncompletedTodoView(models)
+        UncompletedTodoView(models, $state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
                 self.isFocusInput = false
                 eventHandler.requestDoneTodo($0)
@@ -299,7 +309,7 @@ struct DayEventListView: View {
         VStack(alignment: .leading, spacing: 6) {
             ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
                 
-                EventListCellView(cellViewModel: cellViewModel)
+                EventListCellView(cellViewModel: cellViewModel, foremostEventMarkingStatus: $state.foremostEventMarkingStatus)
                     .eventHandler(\.requestDoneTodo) {
                         self.isFocusInput = false
                         eventHandler.requestDoneTodo($0)
@@ -415,6 +425,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         state.cellViewModels = cells
         state.foremostModel = cells.randomElement()
         state.uncompletedTodos = self.dummyUncompleteds()
+        state.foremostEventMarkingStatus = .unmarking
         let eventHandler = DayEventListViewEventHandler()
         eventHandler.requestDoneTodo = { id in
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
@@ -553,7 +564,8 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         let googleEvent = GoogleCalendarEvent(google, in: TimeZone.current)
         let googleCell = GoogleCalendarEventCellViewModel(googleEvent, in: 0..<200, TimeZone.current, true)
         
-        let basicCells: [any EventCellViewModel] = currentTodoCells + scheduleCells + todoCells
+        let basicCells: [any EventCellViewModel] = currentTodoCells + scheduleCells
+//        + todoCells
         return basicCells + [holidayCell] + [googleCell!]
 //        .shuffled()
     }
