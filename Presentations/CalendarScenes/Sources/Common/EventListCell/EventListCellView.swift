@@ -46,6 +46,7 @@ struct EventListCellView: View {
     
     @EnvironmentObject private var pendingDoneState: PendingCompleteTodoState
     @EnvironmentObject private var appearance: ViewAppearance
+    @Binding private var foremostEventMarkingStatus: ForemostMarkingStatus
     
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestCancelDoneTodo: (String) -> Void = { _ in }
@@ -54,12 +55,17 @@ struct EventListCellView: View {
     
     private let cellViewModel: any EventCellViewModel
     private let isUncompletedTodo: Bool
+    private let isForemostEvent: Bool
     init(
         cellViewModel: any EventCellViewModel,
-        isUncompletedTodo: Bool = false
+        isUncompletedTodo: Bool = false,
+        isForemostEvent: Bool = false,
+        foremostEventMarkingStatus: Binding<ForemostMarkingStatus>
     ) {
         self.cellViewModel = cellViewModel
         self.isUncompletedTodo = isUncompletedTodo
+        self.isForemostEvent = isForemostEvent
+        self._foremostEventMarkingStatus = foremostEventMarkingStatus
     }
     
     var body: some View {
@@ -284,10 +290,24 @@ struct EventListCellView: View {
                 }
             }
             Spacer()
-            if let todoId = cellViewModel.todoEventId {
+            
+            if let eventId = cellViewModel.foremostableEventId, eventId == foremostEventMarkingStatus.markingEventId {
+                
+                foremostMarkingView
+                
+            } else if self.isForemostEvent, foremostEventMarkingStatus == .unmarking {
+                
+                foremostMarkingView
+            }
+            else if let todoId = cellViewModel.todoEventId {
                 todoDoneButton(todoId)
             }
         }
+    }
+    
+    private var foremostMarkingView: some View {
+        return LoadingCircleView(appearance.colorSet.accent.asColor, lineWidth: 1.5)
+            .frame(width: 24, height: 24)
     }
     
     private func todoDoneButton(_ todoId: String) -> some View {
@@ -334,5 +354,18 @@ extension View {
                 RoundedRectangle(cornerRadius: 5)
                     .fill(appearance.colorSet.bg1.asColor)
             )
+    }
+}
+
+private extension EventCellViewModel {
+    
+    var foremostableEventId: String? {
+        switch self {
+        case let todo as TodoEventCellViewModel:
+            return todo.eventIdentifier
+        case let schedule as ScheduleEventCellViewModel:
+            return schedule.eventIdWithoutTurn
+        default: return nil
+        }
     }
 }

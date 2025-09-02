@@ -18,14 +18,19 @@ struct ForemostEventView: View {
     
     private let viewModel: any EventCellViewModel
     @EnvironmentObject private var appearance: ViewAppearance
+    @Binding private var foremostEventMarkingStatus: ForemostMarkingStatus
     
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestCancelDoneTodo: (String) -> Void = { _ in }
     var requestShowDetail: (any EventCellViewModel) -> Void = { _ in }
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     
-    init(viewModel: any EventCellViewModel) {
+    init(
+        viewModel: any EventCellViewModel,
+        foremostEventMarkingStatus: Binding<ForemostMarkingStatus>
+    ) {
         self.viewModel = viewModel
+        self._foremostEventMarkingStatus = foremostEventMarkingStatus
     }
     
     var body: some View {
@@ -37,7 +42,11 @@ struct ForemostEventView: View {
                 )
                 .foregroundStyle(appearance.colorSet.text0.asColor)
             
-            EventListCellView(cellViewModel: viewModel)
+            EventListCellView(
+                cellViewModel: viewModel,
+                isForemostEvent: true,
+                foremostEventMarkingStatus: _foremostEventMarkingStatus
+            )
                 .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
                 .eventHandler(\.requestCancelDoneTodo, self.requestCancelDoneTodo)
                 .eventHandler(\.requestShowDetail, self.requestShowDetail)
