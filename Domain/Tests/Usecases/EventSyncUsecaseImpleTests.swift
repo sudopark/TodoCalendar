@@ -207,7 +207,7 @@ private final class StubEventSyncRepository: EventSyncRepository, @unchecked Sen
         
         let response: EventSyncResponse<T> = .init()
         if isLast {
-            return response |> \.newSyncTime .~ .init(dataType, 300)
+            return response |> \.newSyncTime .~ 300
         } else {
             return response |> \.nextPageCursor .~ "next"
         }
