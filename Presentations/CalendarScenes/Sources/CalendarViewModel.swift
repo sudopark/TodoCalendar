@@ -137,15 +137,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         let refreshAfterMigration = self.migrationUsecase.migrationResult
             .filter { $0.isSuccess }.map { _ in  }
         
-        let refreshAfterSyncEnd = Publishers.Zip(
-            self.eventSyncUsecase.isSyncInProgress,
-            self.eventSyncUsecase.isSyncInProgress.dropFirst()
-        )
-        .filter { old, new in old && !new }
-        .map { _ in }
-        
         Publishers.Merge3(
-            refreshAfterEnterForeground, refreshAfterMigration, refreshAfterSyncEnd
+            refreshAfterEnterForeground, refreshAfterMigration, self.eventSyncUsecase.syncEnd
         )
         .withLatestFrom(totalViewingMonths) { $1 }
         .compactMap { $0.checkedRange }
@@ -387,7 +380,10 @@ extension CalendarViewModelImple {
         let refreshWhenDateChanged = self.calendarUsecase.currentDay.removeDuplicates().dropFirst().map { _ in }
         
         let refreshWithFirst = Publishers
-            .Merge(refreshAfterEnterForeground, refreshWhenDateChanged)
+            .Merge3(
+                refreshAfterEnterForeground, refreshWhenDateChanged,
+                self.eventSyncUsecase.syncEnd
+            )
             .prepend(())
         
         Publishers.CombineLatest(
@@ -514,5 +510,18 @@ private extension Result {
     var isSuccess: Bool {
         guard case .success = self else { return false }
         return true
+    }
+}
+
+private extension EventSyncUsecase {
+    
+    var syncEnd: AnyPublisher<Void, Never> {
+        return Publishers.Zip(
+            self.isSyncInProgress,
+            self.isSyncInProgress.dropFirst()
+        )
+        .filter { old, new in old && !new }
+        .map { _ in }
+        .eraseToAnyPublisher()
     }
 }

@@ -811,6 +811,69 @@ extension CalendarViewModelImpleTests {
         self.wait(for: [expect], timeout: self.timeout)
     }
     
+    // 완료되지않은 할일 옵션이 off -> on 으로 변경된 경우 할일 조회
+    func testViewModel_whenShowUncompletedTodoOptionChangedToOn_refresh() {
+        // given
+        let expect = expectation(description: "완료되지않은 할일 노출 옵션이 off -> on으로 변경된경우 refresh")
+        let viewModel = self.makeViewModelWithShowUncompletedTodo(show: false)
+        viewModel.prepare()
+        
+        // when
+        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = {
+            expect.fulfill()
+        }
+        _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(
+            .init() |> \.showUncompletedTodos .~ true
+        )
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
+    
+    func testViewModel_whenEnterForegroundOrDateChaned_refresh() {
+        // given
+        let expect = expectation(description: "포그라운드 복귀하거나, 날짜 변경된 경우 refresh")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithShowUncompletedTodo(show: true)
+        viewModel.prepare()
+        
+        // when
+        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = {
+            expect.fulfill()
+        }
+        NotificationCenter.default.post(
+            Notification(name: UIApplication.willEnterForegroundNotification)
+        )
+        self.stubCalendarUsecase.makeFakeDayChanedEvent(
+            .init(year: 2023, month: 03, day: 04, weekDay: 3)
+        )
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
+    
+    func testViewModel_whenEventSyncEnd_refreshUncompletedTodo() {
+        // given
+        let expect = expectation(description: "이벤트 싱크 완료 이후에 완료되지 않은 할일 목록 갱신")
+        let viewModel = self.makeViewModelWithShowUncompletedTodo(show: true)
+        viewModel.prepare()
+        
+        // when
+        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = {
+            expect.fulfill()
+        }
+        self.spyEventSyncUsecase.updateIsSync(true)
+        self.spyEventSyncUsecase.updateIsSync(false)
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeout)
+    }
+}
+
+// MARK: - evnet sync and upload
+
+extension CalendarViewModelImpleTests {
+    
     func testViewModel_whenPrepare_syncEvents() async throws {
         // given
         let viewModel = self.makeViewModel()
@@ -862,47 +925,6 @@ extension CalendarViewModelImpleTests {
         
         // then
         XCTAssertEqual(self.spyEventUploadService.isResumeOrPauses, [true, false, true])
-    }
-    
-    // 완료되지않은 할일 옵션이 off -> on 으로 변경된 경우 할일 조회
-    func testViewModel_whenShowUncompletedTodoOptionChangedToOn_refresh() {
-        // given
-        let expect = expectation(description: "완료되지않은 할일 노출 옵션이 off -> on으로 변경된경우 refresh")
-        let viewModel = self.makeViewModelWithShowUncompletedTodo(show: false)
-        viewModel.prepare()
-        
-        // when
-        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = {
-            expect.fulfill()
-        }
-        _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(
-            .init() |> \.showUncompletedTodos .~ true
-        )
-        
-        // then
-        self.wait(for: [expect], timeout: self.timeout)
-    }
-    
-    func testViewModel_whenEnterForegroundOrDateChaned_refresh() {
-        // given
-        let expect = expectation(description: "포그라운드 복귀하거나, 날짜 변경된 경우 refresh")
-        expect.expectedFulfillmentCount = 2
-        let viewModel = self.makeViewModelWithShowUncompletedTodo(show: true)
-        viewModel.prepare()
-        
-        // when
-        self.spyTodoUsecase.didRefreshUncompletedTodoCalledCallback = {
-            expect.fulfill()
-        }
-        NotificationCenter.default.post(
-            Notification(name: UIApplication.willEnterForegroundNotification)
-        )
-        self.stubCalendarUsecase.makeFakeDayChanedEvent(
-            .init(year: 2023, month: 03, day: 04, weekDay: 3)
-        )
-        
-        // then
-        self.wait(for: [expect], timeout: self.timeout)
     }
 }
 
