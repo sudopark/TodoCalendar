@@ -47,6 +47,7 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         calendarAPIHost: "dummy_calendar_api_host",
         csAPI: "cs_channel_api"
     )
+    var didRequestedMethod: RemoteAPIMethod?
     var didRequestedPath: String?
     var didRequestedParams: [String: Any]?
     var didRequestedPaths: [String] = []
@@ -78,6 +79,7 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
         else {
             throw RuntimeError("invalid params")
         }
+        self.didRequestedMethod = method
         self.didRequestedPath = path
         self.didRequestedPaths.append(path)
         self.didRequestedParams = parameters

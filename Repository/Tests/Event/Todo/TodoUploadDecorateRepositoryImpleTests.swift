@@ -20,15 +20,18 @@ import UnitTestHelpKit
 final class TodoUploadDecorateRepositoryImpleTests: TodoLocalRepositoryImpleTests {
     
     private var spyEventUploadService: SpyEventUploadService!
+    private var stubRemote: StubRemoteAPI!
     
     override func setUpWithError() throws {
         try super.setUpWithError()
         self.spyEventUploadService = .init()
+        self.stubRemote = .init(responses: DummyResponse().responses)
     }
     
     override func tearDownWithError() throws {
         try super.tearDownWithError()
         self.spyEventUploadService = nil
+        self.stubRemote = nil
     }
     
     override func makeRepository() -> any TodoEventRepository {
@@ -37,6 +40,7 @@ final class TodoUploadDecorateRepositoryImpleTests: TodoLocalRepositoryImpleTest
             environmentStorage: self.spyEnvStorage
         )
         return TodoUploadDecorateRepositoryImple(
+            remote: TodoRemoteImple(remote: self.stubRemote),
             localRepository: localRepository,
             eventUploadService: self.spyEventUploadService
         )
@@ -243,5 +247,30 @@ extension TodoUploadDecorateRepositoryImpleTests {
         XCTAssertEqual(
             self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask }, [false, true]
         )
+    }
+    
+    func testRepository_removeDoneTodosWithRemote() async throws {
+        // given
+        let repository = try await self.makeRepositoryWithDoneEvents()
+        
+        // when
+        try await repository.removeDoneTodos(.all)
+        
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedMethod, .delete)
+        XCTAssertEqual(self.stubRemote.didRequestedPath?.contains("v1/todos/dones"), true)
+    }
+}
+
+private struct DummyResponse {
+    
+    var responses: [StubRemoteAPI.Response] {
+        return [
+            .init(
+                method: .delete,
+                endpoint: TodoAPIEndpoints.dones,
+                resultJsonString: .success("{ \"status\": \"ok\" }")
+            )
+        ]
     }
 }

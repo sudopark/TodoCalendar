@@ -395,11 +395,13 @@ extension LoginUsecaseFactoryImple {
 extension LoginUsecaseFactoryImple {
     
     private func makeTodoRepository() -> any TodoEventRepository {
+        let todoRemote = TodoRemoteImple(remote: self.applicationBase.remoteAPI)
         let localRepository = TodoLocalRepositoryImple(
             localStorage: TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService),
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         return TodoUploadDecorateRepositoryImple(
+            remote: todoRemote,
             localRepository: localRepository,
             eventUploadService: self.eventUploadService
         )
