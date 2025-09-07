@@ -127,7 +127,7 @@ extension EventUploadServiceImple {
             try await self.uploadEventDetail(task.uuid)
             
         case .doneTodo where task.isRemovingTask:
-            break
+            try await self.todoRemote.removeDoneTodo(task.uuid)
             
         case .doneTodo:
             try await self.uploadDoneTodo(task.uuid)
