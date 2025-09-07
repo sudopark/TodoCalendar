@@ -26,6 +26,7 @@ struct BaseWidgetBundle: WidgetBundle {
         TodayWidget()
         ForemostEventWidget()
         NextEventWidget()
+        NextRemainEventWidget()
     }
 }
 

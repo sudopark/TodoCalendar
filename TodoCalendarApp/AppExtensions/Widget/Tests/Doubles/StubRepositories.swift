@@ -60,4 +60,6 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
     func loadEventDetail(_ calendarId: String, _ timeZone: String, _ eventId: String) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         return Empty().eraseToAnyPublisher()
     }
+    
+    func resetCache() async throws { }
 }

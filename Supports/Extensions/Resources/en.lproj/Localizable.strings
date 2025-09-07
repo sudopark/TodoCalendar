@@ -397,7 +397,7 @@
 "widget.events.sample::aug3" = "THU, AUG 3";
 "widget.events.sample::oct10" = "MON, OCT 10";
 "widget.events.foremost" = "Foremost Event";
-"widget.events.foremost::allFinished::message" = "It's all finished!";
+"widget.events.foremost::allFinished::message" = "Add a can't-miss event.";
 "widget.events.foremost::sample::message" = "Take an umbrella! ⛱️";
 "widget.events.calendar" = "Calendar";
 "widget.events.today" = "TODAY";
@@ -424,6 +424,8 @@
 "widget.weeks.sample::workout" = "🔥 Workout";
 "widget.weeks.sample::launch" = "🚀 Launch";
 "widget.fail.message" = "A temporary error occurred.\nPlease try running the app again.";
-"widget.next.noEvent" = "There is no next event.";
+"widget.next.noEvent" = "No next event.";
 "widget.next.sample" = "🔥 Workout";
 "widget.next.title" = "Next event";
+"widget.next.rect_widget::title" = "Today's next event.";
+"widget.next.title::remains" = "Today's next events.";

@@ -396,7 +396,7 @@
 "widget.events.sample::aug3" = "8월 3일 목요일";
 "widget.events.sample::oct10" = "10월 10일 월요일";
 "widget.events.foremost" = "제일 중요한 이벤트";
-"widget.events.foremost::allFinished::message" = "모두 완료되었습니다!";
+"widget.events.foremost::allFinished::message" = "꼭 해야 할 일 추가";
 "widget.events.foremost::sample::message" = "우산챙기기! ⛱️";
 "widget.events.calendar" = "캘린더";
 "widget.events.today" = "TODAY";
@@ -423,6 +423,8 @@
 "widget.weeks.sample::workout" = "🔥 운동";
 "widget.weeks.sample::launch" = "🚀 런칭";
 "widget.fail.message" = "일시적인 오류가 발생했습니다. 앱을 다시 실행해주세요.";
-"widget.next.noEvent" = "다음 이벤트가 없습니다.";
+"widget.next.noEvent" = "다음 일정 없음";
 "widget.next.sample" = "🔥 운동";
 "widget.next.title" = "다음 이벤트";
+"widget.next.rect_widget::title" = "오늘 다음 일정";
+"widget.next.title::remains" = "오늘 남은 일정";

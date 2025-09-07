@@ -13,6 +13,17 @@ import Optics
 import Extensions
 
 
+public enum ForemostMarkingStatus: Sendable, Equatable {
+    case idle
+    case marking(evnetId: String)
+    case unmarking
+    
+    public var markingEventId: String? {
+        guard case .marking(let eventId) = self else { return nil }
+        return eventId
+    }
+}
+
 public protocol ForemostEventUsecase: Sendable {
     
     func refresh()
@@ -20,6 +31,7 @@ public protocol ForemostEventUsecase: Sendable {
     func remove() async throws
     
     var foremostEvent: AnyPublisher<(any ForemostMarkableEvent)?, Never> { get }
+    var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> { get }
 }
 
 public final class ForemostEventUsecaseImple: ForemostEventUsecase, @unchecked Sendable {
@@ -66,6 +78,8 @@ extension ForemostEventUsecaseImple {
     }
     
     public func update(foremost eventId: ForemostEventId) async throws {
+        self.updateMarkingStatus(.marking(evnetId: eventId.eventId))
+        defer { self.updateMarkingStatus(.idle) }
         let event = try await self.repository.updateForemostEvent(eventId)
         let eventId = ForemostEventId(event: event)
         self.updateForemostEventId(eventId)
@@ -73,8 +87,14 @@ extension ForemostEventUsecaseImple {
     }
     
     public func remove() async throws {
+        self.updateMarkingStatus(.unmarking)
+        defer { self.updateMarkingStatus(.idle) }
         try await self.repository.removeForemostEvent()
         self.updateForemostEventId(nil)
+    }
+    
+    private func updateMarkingStatus(_ newStatus: ForemostMarkingStatus) {
+        self.sharedDataStore.put(ForemostMarkingStatus.self, key: ShareDataKeys.foremostMarkingStatus.rawValue, newStatus)
     }
     
     private func updateForemostEventId(_ eventId: ForemostEventId?) {
@@ -123,6 +143,15 @@ extension ForemostEventUsecaseImple {
             .observe(ForemostEventId.self, key: ShareDataKeys.foremostEventId.rawValue)
             .map(selectSource)
             .switchToLatest()
+            .eraseToAnyPublisher()
+    }
+    
+    public var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> {
+        return self.sharedDataStore
+            .observe(
+                ForemostMarkingStatus.self, key: ShareDataKeys.foremostMarkingStatus.rawValue
+            )
+            .compactMap { $0 }
             .eraseToAnyPublisher()
     }
 }

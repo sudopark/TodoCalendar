@@ -307,6 +307,34 @@ extension CalendarEventFetchUsecaseImpleTests {
         // then
         XCTAssertNil(next)
     }
+    
+    func testUsecase_fetNextEvents() async throws {
+        // given
+        let refDate = Date(timeIntervalSince1970: 0)
+        let usecase = self.makeUsecaseWithStubNextEvents(refDate, hasNext: true, hasNextNext: true)
+        
+        // when
+        let range = refDate.timeIntervalSince1970..<refDate.add(days: 1)!.timeIntervalSince1970
+        let nexts = try await usecase.fetchNextEvents(refDate, withIn: range, self.kst)
+        
+        // then
+        XCTAssertEqual(nexts.nextEvents.count, 2)
+    }
+    
+    func testUsecase_whenFetchNextEvents_excludePastEventThanNow() async throws {
+        // given
+        let todayStart = Date(timeIntervalSince1970: 0)
+        let current = Date(timeIntervalSince1970: 20)
+        let usecase = self.makeUsecaseWithStubNextEvents(todayStart, hasNext: true, hasNextNext: true)
+        
+        // when
+        let range = todayStart.timeIntervalSince1970..<todayStart.add(days: 1)!.timeIntervalSince1970
+        let nexts = try await usecase.fetchNextEvents(current, withIn: range, self.kst
+        )
+        
+        // then
+        XCTAssertEqual(nexts.nextEvents.count, 1)
+    }
 }
 
 private final class PrivateStubTodoRepository: StubTodoEventRepository, @unchecked Sendable {

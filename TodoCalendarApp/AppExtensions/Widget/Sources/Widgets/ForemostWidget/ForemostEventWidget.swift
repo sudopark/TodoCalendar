@@ -19,6 +19,24 @@ import CalendarScenes
 
 // MARK: - ForemostEventView
 
+struct InlineSizeForemostEventView: View {
+    
+    private let model: ForemostEventWidgetViewModel
+    init(model: ForemostEventWidgetViewModel) {
+        self.model = model
+    }
+    
+    var body: some View {
+        if let event = self.model.eventModel {
+            Text(event.name)
+                .widgetAccentable()
+        } else {
+            Text("widget.events.foremost::allFinished::message".localized())
+                .widgetAccentable()
+        }
+    }
+}
+
 struct SystemSizeForemostEventView: View {
     
     @Environment(\.colorScheme) var colorScheme
@@ -216,19 +234,24 @@ struct SystemSizeForemostEventView: View {
 struct ForemostEventWidgetView: View {
     
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.widgetFamily) var family: WidgetFamily
     var colorSet: any ColorSet {
         return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
     }
     
-    private let entry: ResultTimelineEntry<ForemostEventWidgetViewModelWithSize>
-    init(entry: ResultTimelineEntry<ForemostEventWidgetViewModelWithSize>) {
+    private let entry: ResultTimelineEntry<ForemostEventWidgetViewModel>
+    init(entry: ResultTimelineEntry<ForemostEventWidgetViewModel>) {
         self.entry = entry
     }
     
     var body: some View {
         switch self.entry.result {
+        case .success(let model) where family == .accessoryInline:
+            InlineSizeForemostEventView(model: model)
+        case .success(let model) where family == .systemSmall:
+            SystemSizeForemostEventView(model: model, isSmallSize: true)
         case .success(let model):
-            SystemSizeForemostEventView(model: model.model, isSmallSize: model.size == .small)
+            SystemSizeForemostEventView(model: model, isSmallSize: false)
         case .failure(let error):
             FailView(errorModel: error)
         }
@@ -246,7 +269,7 @@ struct ForemostEventWidget: Widget {
             ForemostEventWidgetView(entry: entry)
                 .containerBackground(.background, for: .widget)
         }
-        .supportedFamilies([.systemSmall, .systemMedium])
+        .supportedFamilies([.accessoryInline, .systemSmall, .systemMedium])
         .configurationDisplayName("widget.events.foremost".localized())
         .description("widget.common::explain".localized())
     }
@@ -261,18 +284,16 @@ struct ForemostEventWidget_PreviewProvider: PreviewProvider {
         let sample = ForemostEventWidgetViewModel.sample()
 //            |> \.eventModel .~ nil
         
-        let smallModel = ForemostEventWidgetViewModelWithSize(model: sample, size: .small)
-        let smallEntry = ResultTimelineEntry(date: Date(), result: .success(smallModel))
-        
-        let mediumModel = ForemostEventWidgetViewModelWithSize(model: sample, size: .medium)
-        let mediumEntry = ResultTimelineEntry(date: Date(), result: .success(mediumModel))
-        
-        
+        let entry = ResultTimelineEntry(date: Date(), result: .success(sample))
+
         Group {
-            ForemostEventWidgetView(entry: smallEntry)
+            ForemostEventWidgetView(entry: entry)
+                .previewContext(WidgetPreviewContext(family: .accessoryInline))
+                .containerBackground(.background, for: .widget)
+            ForemostEventWidgetView(entry: entry)
                 .previewContext(WidgetPreviewContext(family: .systemSmall))
                 .containerBackground(.background, for: .widget)
-            ForemostEventWidgetView(entry: mediumEntry)
+            ForemostEventWidgetView(entry: entry)
                 .previewContext(WidgetPreviewContext(family: .systemMedium))
                 .containerBackground(.background, for: .widget)
         }

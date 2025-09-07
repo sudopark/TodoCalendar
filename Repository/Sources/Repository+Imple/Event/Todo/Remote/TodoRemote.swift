@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 import Domain
 import Extensions
 
@@ -47,6 +49,8 @@ public protocol TodoRemote: Sendable {
     ) async throws -> [DoneTodoEvent]
     
     func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws
+    
+    func removeDoneTodo(_ doneTodoId: String) async throws
     
     func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent
     
@@ -176,6 +180,9 @@ extension TodoRemoteImple {
             name: doneTodo.name,
             doneTime: doneTodo.doneTime
         )
+        |> \.tagId .~ doneTodo.eventTagId
+        |> \.eventTime .~ doneTodo.eventTime
+        |> \.notificationOptions .~ doneTodo.notificationOptions
         let endpoint = TodoAPIEndpoints.done(doneTodo.uuid)
         let mapper: DoneTodoEventMapper = try await self.remote.request(
             .put, endpoint, parameters: payload.asJson()
@@ -195,12 +202,20 @@ extension TodoRemoteImple {
         return events
     }
     
+    private typealias RemoveDoneTodoResultMapper = RemoveTodoResultMapper
+    
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
-        typealias RemoveDoneTodoResultMapper = RemoveTodoResultMapper
         let _: RemoveDoneTodoResultMapper = try await remote.request(
             .delete,
             TodoAPIEndpoints.dones,
             parameters: scope.asJson()
+        )
+    }
+    
+    public func removeDoneTodo(_ doneTodoId: String) async throws {
+        let _: RemoveDoneTodoResultMapper = try await remote.request(
+            .delete,
+            TodoAPIEndpoints.done(doneTodoId)
         )
     }
     

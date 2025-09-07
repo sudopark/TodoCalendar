@@ -31,13 +31,27 @@ struct CalendarEvents {
     }
     
     func findFirstFutureEvent(from time: TimeInterval, todayRange: Range<TimeInterval>) -> (any CalendarEvent)? {
-        return self.eventWithTimes.first { event in
-            guard !(event is HolidayCalendarEvent),
-                  let eventTime = event.eventTime,
-                  todayRange ~= eventTime.lowerBoundWithFixed
-            else { return false }
-            return eventTime.lowerBoundWithFixed > time
+        return self.eventWithTimes.first(where: {
+            self.isTodayNextEvent($0, time, todayRange)
+        })
+    }
+    
+    func findNextEvents(
+        from time: TimeInterval, todayRange: Range<TimeInterval>
+    ) -> [any CalendarEvent] {
+        return self.eventWithTimes.filter {
+            self.isTodayNextEvent($0, time, todayRange)
         }
+    }
+    
+    private func isTodayNextEvent(
+        _ event: any CalendarEvent, _ current: TimeInterval, _ todayRange: Range<TimeInterval>
+    ) -> Bool {
+        guard !(event is HolidayCalendarEvent),
+                let eventTime = event.eventTime,
+              todayRange ~= eventTime.lowerBoundWithFixed
+        else { return false }
+        return eventTime.lowerBoundWithFixed > current
     }
 }
 
@@ -52,6 +66,11 @@ struct TodayNextEvent {
     var andThenNextEventStartDate: Date?
 }
 
+struct TodayNextEvents {
+    let nextEvents: [any CalendarEvent]
+    let customTags: [CustomEventTag]
+}
+
 protocol CalendarEventFetchUsecase {
     
     func fetchEvents(
@@ -64,6 +83,10 @@ protocol CalendarEventFetchUsecase {
     func fetchNextEvent(
         _ refTime: Date, within todayRange: Range<TimeInterval>, _ timeZone: TimeZone
     ) async throws -> TodayNextEvent?
+    
+    func fetchNextEvents(
+        _ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone
+    ) async throws -> TodayNextEvents
 }
 
 
@@ -312,6 +335,22 @@ extension CalendarEventFetchUsecaseImple {
             |> \.andThenNextEventStartDate .~ secondFutureEvent?.eventTime.map {
                 Date(timeIntervalSince1970: $0.lowerBoundWithFixed)
             }
+    }
+    
+    func fetchNextEvents(
+        _ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone
+    ) async throws -> TodayNextEvents {
+        
+        let events = try await self.fetchEvents(in: todayRange, timeZone)
+        let todayEvents = events.findNextEvents(
+            from: refTime.timeIntervalSince1970, todayRange: todayRange
+        )
+        
+        let customTags = todayEvents
+            .compactMap { $0.eventTagId.customTagId }
+            .compactMap { events.customTagMap[$0] }
+        
+        return TodayNextEvents(nextEvents: todayEvents, customTags: customTags)
     }
 }
 

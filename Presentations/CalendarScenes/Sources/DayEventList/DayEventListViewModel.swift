@@ -63,6 +63,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> { get }
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> { get }
+    var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> { get }
 }
 
 
@@ -295,6 +296,10 @@ extension DayEventListViewModelImple {
         return cells
             .removeDuplicates(by: { $0.map { $0.customCompareKey } == $1.map { $0.customCompareKey } })
             .eraseToAnyPublisher()
+    }
+    
+    var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> {
+        return self.foremostEventUsecase.foremostEventMarkingStatus
     }
     
     private typealias CurrentAndEvents = ([any EventCellViewModel], [any EventCellViewModel])

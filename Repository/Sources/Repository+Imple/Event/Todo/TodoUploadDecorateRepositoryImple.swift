@@ -14,13 +14,16 @@ import Extensions
 
 public final class TodoUploadDecorateRepositoryImple: TodoEventRepository {
     
+    private let remote: any TodoRemote
     private let localRepository: TodoLocalRepositoryImple
     private let eventUploadService: any EventUploadService
     
     public init(
+        remote: any TodoRemote,
         localRepository: TodoLocalRepositoryImple,
         eventUploadService: any EventUploadService
     ) {
+        self.remote = remote
         self.localRepository = localRepository
         self.eventUploadService = eventUploadService
     }
@@ -139,14 +142,16 @@ extension TodoUploadDecorateRepositoryImple {
     }
  
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
+        try await remote.removeDoneTodos(scope)
         return try await self.localRepository.removeDoneTodos(scope)
     }
     
     public func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
         let revert = try await self.localRepository.revertDoneTodo(doneTodoId)
-        try await self.eventUploadService.append(
-            .init(dataType: .todo, uuid: revert.uuid, isRemovingTask: false)
-        )
+        try await self.eventUploadService.append([
+            .init(dataType: .todo, uuid: revert.uuid, isRemovingTask: false),
+            .init(dataType: .doneTodo, uuid: doneTodoId, isRemovingTask: true)
+        ])
         return revert
     }
     
