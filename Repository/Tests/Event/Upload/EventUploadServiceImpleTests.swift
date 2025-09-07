@@ -438,6 +438,22 @@ extension EventUploadServiceImpleTests {
             #expect(self.spyRemote.didEditDoneTodoIds == ["done"])
         }
     }
+    
+    @Test func service_removeDoneTodo() async throws {
+        try await self.runTestWithOpenClose("upload_tc_19_done") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(dataType: .doneTodo, uuid: "done", isRemovingTask: true)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didRemoveDoneTodoId == "done")
+        }
+    }
 }
 
 private final class PrivateStubRemote: @unchecked Sendable {
@@ -455,6 +471,7 @@ private final class PrivateStubRemote: @unchecked Sendable {
     var didEditEventDetailIds: [String] = []
     var didRemoveEventDetailIds: [String] = []
     var didEditDoneTodoIds: [String] = []
+    var didRemoveDoneTodoId: String?
 }
 
 extension PrivateStubRemote: EventTagRemote {
@@ -533,6 +550,10 @@ extension PrivateStubRemote: TodoRemote {
     func loadDoneTodoEvents(_ params: DoneTodoLoadPagingParams) async throws -> [DoneTodoEvent] { [] }
     
     func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws { }
+    
+    func removeDoneTodo(_ doneTodoId: String) async throws {
+        self.didRemoveDoneTodoId = doneTodoId
+    }
     
     func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
         throw RuntimeError("failed")

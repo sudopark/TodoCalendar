@@ -144,9 +144,10 @@ extension TodoUploadDecorateRepositoryImple {
     
     public func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
         let revert = try await self.localRepository.revertDoneTodo(doneTodoId)
-        try await self.eventUploadService.append(
-            .init(dataType: .todo, uuid: revert.uuid, isRemovingTask: false)
-        )
+        try await self.eventUploadService.append([
+            .init(dataType: .todo, uuid: revert.uuid, isRemovingTask: false),
+            .init(dataType: .doneTodo, uuid: doneTodoId, isRemovingTask: true)
+        ])
         return revert
     }
     

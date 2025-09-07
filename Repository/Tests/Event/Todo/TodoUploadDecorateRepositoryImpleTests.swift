@@ -235,13 +235,13 @@ extension TodoUploadDecorateRepositoryImpleTests {
         
         // then
         XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.uuid }, [todo.uuid]
+            self.spyEventUploadService.uploadTasks.map { $0.uuid }, [todo.uuid, "id:4"]
         )
         XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.dataType }, [.todo]
+            self.spyEventUploadService.uploadTasks.map { $0.dataType }, [.todo, .doneTodo]
         )
         XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask }, [false]
+            self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask }, [false, true]
         )
     }
 }
