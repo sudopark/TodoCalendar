@@ -7,6 +7,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 import Domain
 import Extensions
 
@@ -178,6 +180,9 @@ extension TodoRemoteImple {
             name: doneTodo.name,
             doneTime: doneTodo.doneTime
         )
+        |> \.tagId .~ doneTodo.eventTagId
+        |> \.eventTime .~ doneTodo.eventTime
+        |> \.notificationOptions .~ doneTodo.notificationOptions
         let endpoint = TodoAPIEndpoints.done(doneTodo.uuid)
         let mapper: DoneTodoEventMapper = try await self.remote.request(
             .put, endpoint, parameters: payload.asJson()
