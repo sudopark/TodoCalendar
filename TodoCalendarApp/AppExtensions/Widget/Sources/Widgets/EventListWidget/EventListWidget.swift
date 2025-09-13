@@ -94,10 +94,10 @@ struct EventListView: View {
         
         func singleText(_ text: EventTimeText) -> some View {
             return HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(text.text)
+                Text(text.singleLineAttrText())
                     .lineLimit(1)
                     .font(.system(size: 12))
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.4)
                     .foregroundColor(colorSet.text1.asColor)
             }
         }
@@ -105,17 +105,17 @@ struct EventListView: View {
         func doubleText(_ top: EventTimeText, _ bottom: EventTimeText) -> some View {
             return VStack(alignment: .center, spacing: 2) {
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
-                    Text(top.text)
+                    Text(top.singleLineAttrText())
                         .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                        .minimumScaleFactor(0.4)
                         .font(.system(size: 12))
                         .foregroundColor(colorSet.text1.asColor)
                 }
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                  
-                    Text(bottom.text)
+                    Text(bottom.singleLineAttrText())
                         .lineLimit(1)
-                        .minimumScaleFactor(0.7)
+                        .minimumScaleFactor(0.4)
                         .font(.system(size: 12))
                         .foregroundColor(colorSet.text1.asColor)
                 }

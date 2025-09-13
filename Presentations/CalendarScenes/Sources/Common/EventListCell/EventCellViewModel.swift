@@ -30,6 +30,10 @@ public struct EventTimeText: Equatable, Sendable {
         self.text = time.timeText(timeZone, isShort: isShort)
         self.pmOram = isShort ? time.isAmOrPmText(timeZone) : nil
     }
+    
+    public var singleLineText: String {
+        return self.pmOram.map { "\($0) \(text)" } ?? self.text
+    }
 }
 
 public enum EventPeriodText: Equatable, Sendable {

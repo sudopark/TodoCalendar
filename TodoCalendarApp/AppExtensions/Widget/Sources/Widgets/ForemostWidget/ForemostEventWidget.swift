@@ -154,19 +154,21 @@ struct SystemSizeForemostEventView: View {
         
         func singleText(_ text: EventTimeText) -> some View {
             return HStack(alignment: .firstTextBaseline, spacing: 2) {
-                Text(text.text)
+                Text(text.singleLineAttrText(fontSize: metric.timeInfoFontSize))
                     .lineLimit(1)
                     .font(.system(size: metric.timeInfoFontSize))
-                    .minimumScaleFactor(0.7)
+                    .minimumScaleFactor(0.4)
                     .foregroundColor(colorSet.text1.asColor)
             }
         }
         
         func doubleText(_ top: EventTimeText, _ bottom: EventTimeText) -> some View {
             let seperator = isTodo ? "-" : "~"
-            return Text("\(top.text)\(seperator)\(bottom.text)")
+            let topText = top.singleLineAttrText(fontSize: metric.timeInfoFontSize)
+            let bottomText = bottom.singleLineAttrText(fontSize: metric.timeInfoFontSize)
+            return Text("\(topText)\(seperator)\(bottomText)")
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .minimumScaleFactor(0.4)
                 .font(.system(size: metric.timeInfoFontSize))
                 .foregroundColor(colorSet.text1.asColor)
         }
