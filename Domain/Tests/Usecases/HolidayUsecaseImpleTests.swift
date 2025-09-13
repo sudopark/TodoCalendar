@@ -334,5 +334,10 @@ extension HolidayUsecaseImpleTests {
         func currentLocaleIdentifier() -> String {
             return "ko"
         }
+        
+        var is24Hour: Bool = true
+        func is24HourFormat() -> Bool {
+            return is24Hour
+        }
     }
 }

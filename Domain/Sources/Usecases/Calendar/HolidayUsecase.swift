@@ -36,6 +36,7 @@ public protocol HolidayUsecase {
 public protocol LocaleProvider {
     func currentRegionCode() -> String?
     func currentLocaleIdentifier() -> String
+    func is24HourFormat() -> Bool
 }
 
 extension Locale: LocaleProvider {
@@ -46,6 +47,11 @@ extension Locale: LocaleProvider {
     
     public func currentLocaleIdentifier() -> String {
         return Locale.current.identifier
+    }
+    
+    public func is24HourFormat() -> Bool {
+        let formatter = DateFormatter.dateFormat(fromTemplate: "j", options: 0, locale: .current)
+        return !(formatter?.contains("a") == true)
     }
 }
 
