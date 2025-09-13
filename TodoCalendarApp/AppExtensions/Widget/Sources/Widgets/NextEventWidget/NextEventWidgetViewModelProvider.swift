@@ -17,13 +17,13 @@ import CalendarScenes
 // MARK: - NextEventWidgetViewModel
 
 struct NextEventWidgetViewModel: Sendable {
-    let timeText: String?
+    let timeText: EventTimeText?
     let eventTitle: String
     var refreshAfter: Date?
     fileprivate var timeRawValue: EventTime?
     
     init(
-        timeText: String?, eventTitle: String, refreshAfter: Date? = nil
+        timeText: EventTimeText?, eventTitle: String, refreshAfter: Date? = nil
     ) {
         self.timeText = timeText
         self.eventTitle = eventTitle
@@ -37,7 +37,7 @@ struct NextEventWidgetViewModel: Sendable {
     }
     
     static var sample: Self {
-        return .init(timeText: "11:29", eventTitle: "widget.next.sample".localized())
+        return .init(timeText: .init(text: "11:29"), eventTitle: "widget.next.sample".localized())
     }
 }
 
@@ -54,9 +54,9 @@ struct NextEventListWidgetViewModel: Sendable {
     
     static var sample: Self {
         return .init(models: [
-            .init(timeText: "10:00", eventTitle: "widget.next.sample".localized()),
-            .init(timeText: "12:00", eventTitle: "widget.weeks.sample::lunch".localized()),
-            .init(timeText: "16:30", eventTitle: "widget.weeks.sample::call".localized())
+            .init(timeText: .init(text: "10:00"), eventTitle: "widget.next.sample".localized()),
+            .init(timeText: .init(text: "12:00"), eventTitle: "widget.weeks.sample::lunch".localized()),
+            .init(timeText: .init(text: "16:30"), eventTitle: "widget.weeks.sample::call".localized())
         ])
     }
 }
@@ -103,7 +103,7 @@ struct NextEventWidgetViewModelBuilder {
         case let todo as TodoCalendarEvent:
             guard let time = todo.eventTime else { throw RuntimeError("event time not exists") }
             return .init(
-                timeText: EventTimeText.fromLowerBound(time, timeZone, !is24Form).text,
+                timeText: EventTimeText.fromLowerBound(time, timeZone, !is24Form),
                 eventTitle: todo.name
             )
             |> \.timeRawValue .~ time
@@ -111,7 +111,7 @@ struct NextEventWidgetViewModelBuilder {
         case let schedule as ScheduleCalendarEvent:
             guard let time = schedule.eventTime else { throw RuntimeError("event time not exists") }
             return .init(
-                timeText: EventTimeText.fromLowerBound(time, timeZone, !is24Form).text,
+                timeText: EventTimeText.fromLowerBound(time, timeZone, !is24Form),
                 eventTitle: schedule.name
             )
             |> \.timeRawValue .~ time

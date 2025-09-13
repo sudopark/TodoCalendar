@@ -55,7 +55,7 @@ struct NextEventRectangleWidgetView: View {
             
             VStack(alignment: .leading) {
                 if let time = model.timeText {
-                    Text(time)
+                    Text(time.singleLineAttrText())
                         .font(.callout)
                 }
                 

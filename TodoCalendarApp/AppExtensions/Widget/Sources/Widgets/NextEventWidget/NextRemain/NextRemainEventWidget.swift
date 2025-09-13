@@ -38,12 +38,13 @@ struct NextRemainEventVListiew: View {
     private func rowView(_ model: NextEventWidgetViewModel) -> some View {
         HStack {
             if let time = model.timeText {
-                Text(time)
+                Text(time.singleLineAttrText())
                     .font(.callout)
+                    .minimumScaleFactor(0.4)
             }
             Text(model.eventTitle)
                 .font(.body)
-            
+                .minimumScaleFactor(0.4)
             Spacer()
         }
     }
