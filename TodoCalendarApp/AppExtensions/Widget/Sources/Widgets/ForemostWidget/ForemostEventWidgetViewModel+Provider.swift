@@ -43,15 +43,18 @@ final class ForemostEventWidgetViewModelProvider {
     private let eventFetchUsecase: any CalendarEventFetchUsecase
     private let calendarSettingRepository: any CalendarSettingRepository
     private let appSettingRepository: any AppSettingRepository
+    private let localeProvider: any LocaleProvider
     
     init(
         eventFetchUsecase: any CalendarEventFetchUsecase,
         calendarSettingRepository: any CalendarSettingRepository,
-        appSettingRepository: any AppSettingRepository
+        appSettingRepository: any AppSettingRepository,
+        localeProvider: any LocaleProvider
     ) {
         self.eventFetchUsecase = eventFetchUsecase
         self.calendarSettingRepository = calendarSettingRepository
         self.appSettingRepository = appSettingRepository
+        self.localeProvider = localeProvider
     }
 }
 
@@ -76,19 +79,20 @@ extension ForemostEventWidgetViewModelProvider {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let dayRange = try calendar.dayRange(refTime).unwrap()
         let eventAndTag = try await self.eventFetchUsecase.fetchForemostEvent()
+        let is24hourForm = self.localeProvider.is24HourFormat()
         var model: (any EventCellViewModel)? = {
             switch eventAndTag.foremostEvent {
             case let todo as TodoEvent:
                 let event = TodoCalendarEvent(todo, in: timeZone, isForemost: true)
                 return TodoEventCellViewModel(
-                    event, in: dayRange, timeZone, setting.is24hourForm
+                    event, in: dayRange, timeZone, is24hourForm
                 )
             case let schedule as ScheduleEvent:
                 let isPast = schedule.time.lowerBoundWithFixed < dayRange.lowerBound
                 guard !isPast else { return nil }
                 let event = ScheduleCalendarEvent.events(from: schedule, in: timeZone)[0]
                 return ScheduleEventCellViewModel(
-                    event, in: dayRange, timeZone: timeZone, setting.is24hourForm
+                    event, in: dayRange, timeZone: timeZone, is24hourForm
                 )
             default: return nil
             }

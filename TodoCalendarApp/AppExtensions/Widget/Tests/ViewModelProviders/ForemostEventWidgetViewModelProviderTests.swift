@@ -33,7 +33,8 @@ class ForemostEventWidgetViewModelProviderTests: XCTestCase {
         return .init(
             eventFetchUsecase: usecase,
             calendarSettingRepository: calendarSettingRepository,
-            appSettingRepository: appSettingRepository
+            appSettingRepository: appSettingRepository,
+            localeProvider: Locale.current
         )
     }
     

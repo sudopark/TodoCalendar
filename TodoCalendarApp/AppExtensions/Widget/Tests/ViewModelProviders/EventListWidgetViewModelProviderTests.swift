@@ -38,7 +38,8 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
             targetEventTagId: selectTagId,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
-            calendarSettingRepository: calendarSettingRepository
+            calendarSettingRepository: calendarSettingRepository,
+            localeProvider: Locale.current
         )
     }
 }
@@ -221,7 +222,8 @@ extension EventListWidgetViewModelProviderTests {
             targetEventTagId: .default,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
-            calendarSettingRepository: calendarSettingRepository
+            calendarSettingRepository: calendarSettingRepository,
+            localeProvider: Locale.current
         )
     }
     
@@ -456,7 +458,8 @@ extension EventListWidgetViewModelProviderTests {
             targetEventTagId: .default,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
-            calendarSettingRepository: calendarSettingRepository
+            calendarSettingRepository: calendarSettingRepository,
+            localeProvider: Locale.current
         )
     }
     
@@ -546,7 +549,8 @@ extension EventListWidgetViewModelProviderTests {
             targetEventTagId: .default,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
-            calendarSettingRepository: calendarSettingRepository
+            calendarSettingRepository: calendarSettingRepository,
+            localeProvider: Locale.current
         )
     }
     
@@ -619,7 +623,8 @@ extension EventListWidgetViewModelProviderTests {
             targetEventTagId: tagId,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
-            calendarSettingRepository: calendarSettingRepository
+            calendarSettingRepository: calendarSettingRepository,
+            localeProvider: Locale.current
         )
     }
     

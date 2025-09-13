@@ -141,17 +141,17 @@ struct NextEventWidgetViewModelBuilder {
 final class NextEventWidgetViewModelProvider {
     
     private let eventsFetchusecase: any CalendarEventFetchUsecase
-    private let appSettingRepository: any AppSettingRepository
     private let calednarSettingRepository: any CalendarSettingRepository
+    private let localeProvider: any LocaleProvider
     
     init(
         eventsFetchusecase: any CalendarEventFetchUsecase,
-        appSettingRepository: any AppSettingRepository,
-        calednarSettingRepository: any CalendarSettingRepository
+        calednarSettingRepository: any CalendarSettingRepository,
+        localeProvider: any LocaleProvider
     ) {
         self.eventsFetchusecase = eventsFetchusecase
-        self.appSettingRepository = appSettingRepository
         self.calednarSettingRepository = calednarSettingRepository
+        self.localeProvider = localeProvider
     }
 }
 
@@ -159,7 +159,6 @@ extension NextEventWidgetViewModelProvider {
     
     func getNextEventModel(for today: Date) async throws -> NextEventWidgetViewModel {
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
-        let setting = self.appSettingRepository.loadSavedViewAppearance()
         
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let todayRange = try calendar.dayRange(today).unwrap()
@@ -169,7 +168,7 @@ extension NextEventWidgetViewModelProvider {
         )
         let builder = NextEventWidgetViewModelBuilder(
             timeZone: timeZone, dayRange: todayRange,
-            is24Form: setting.calendar.is24hourForm
+            is24Form: self.localeProvider.is24HourFormat()
         )
         let model = try builder.build(event)
         return model
@@ -177,7 +176,6 @@ extension NextEventWidgetViewModelProvider {
     
     func getNextEventModels(for today: Date) async throws -> NextEventListWidgetViewModel {
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
-        let setting = self.appSettingRepository.loadSavedViewAppearance()
         
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let todayRange = try calendar.dayRange(today).unwrap()
@@ -187,7 +185,7 @@ extension NextEventWidgetViewModelProvider {
         )
         let builder = NextEventWidgetViewModelBuilder(
             timeZone: timeZone, dayRange: todayRange,
-            is24Form: setting.calendar.is24hourForm
+            is24Form: self.localeProvider.is24HourFormat()
         )
         let model = try builder.build(events)
         return model

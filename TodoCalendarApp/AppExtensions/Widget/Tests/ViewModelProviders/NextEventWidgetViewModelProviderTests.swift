@@ -35,8 +35,8 @@ class NextEventWidgetViewModelProviderTests: PublisherWaitable {
         
         return .init(
             eventsFetchusecase: eventFetchUsecase,
-            appSettingRepository: appSettingRepository,
-            calednarSettingRepository: calendarSettingRepository
+            calednarSettingRepository: calendarSettingRepository,
+            localeProvider: Locale.current
         )
     }
 }
@@ -74,7 +74,7 @@ extension NextEventWidgetViewModelProviderTests {
         let model = try await provider.getNextEventModel(for: Date(timeIntervalSince1970: 0))
         
         // then
-        #expect(model.timeText == "9:16")
+        #expect(model.timeText?.text == "9:16")
         #expect(model.eventTitle == "todo")
         #expect(model.refreshAfter == nil)
     }
@@ -136,8 +136,8 @@ extension NextEventWidgetViewModelProviderTests {
         
         return .init(
             eventsFetchusecase: eventFetchUsecase,
-            appSettingRepository: appSettingRepository,
-            calednarSettingRepository: calendarSettingRepository
+            calednarSettingRepository: calendarSettingRepository,
+            localeProvider: Locale.current
         )
     }
     

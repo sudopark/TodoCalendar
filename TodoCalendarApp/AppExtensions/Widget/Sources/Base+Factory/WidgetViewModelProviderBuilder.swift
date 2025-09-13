@@ -145,7 +145,8 @@ extension WidgetViewModelProviderBuilder {
             targetEventTagId: targetEventTagId,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
-            calendarSettingRepository: calendarSettingRepository
+            calendarSettingRepository: calendarSettingRepository,
+            localeProvider: Locale.current
         )
     }
 }
@@ -244,7 +245,8 @@ extension WidgetViewModelProviderBuilder {
         return ForemostEventWidgetViewModelProvider(
             eventFetchUsecase: eventFetchUsecase,
             calendarSettingRepository: calendarSettingRepository,
-            appSettingRepository: appSettingRepository
+            appSettingRepository: appSettingRepository,
+            localeProvider: Locale.current
         )
     }
 }
@@ -267,8 +269,8 @@ extension WidgetViewModelProviderBuilder {
         
         return NextEventWidgetViewModelProvider(
             eventsFetchusecase: eventFetchUsecase,
-            appSettingRepository: appSettingRepository,
-            calednarSettingRepository: calendarSettingRepository
+            calednarSettingRepository: calendarSettingRepository,
+            localeProvider: Locale.current
         )
     }
 }
