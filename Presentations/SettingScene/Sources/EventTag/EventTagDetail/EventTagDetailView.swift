@@ -17,19 +17,19 @@ import CommonPresentation
 
 // MARK: - EventTagDetailViewController
 
-final class EventTagDetailViewState: ObservableObject {
+@Observable final class EventTagDetailViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published fileprivate var suggestColorHexes: [String] = []
-    @Published fileprivate var newTagName: String = ""
-    @Published fileprivate var originalColorHex: String?
-    @Published fileprivate var selectedColorHex: String?
-    @Published fileprivate var isDeletable: Bool = false
-    @Published fileprivate var isNameChangable: Bool = false
-    @Published fileprivate var isSavable: Bool = false
-    @Published fileprivate var isProcessing: Bool = false
+    fileprivate var suggestColorHexes: [String] = []
+    fileprivate var newTagName: String = ""
+    fileprivate var originalColorHex: String?
+    fileprivate var selectedColorHex: String?
+    fileprivate var isDeletable: Bool = false
+    fileprivate var isNameChangable: Bool = false
+    fileprivate var isSavable: Bool = false
+    fileprivate var isProcessing: Bool = false
     
     func bind(_ viewModel: any EventTagDetailViewModel) {
         
@@ -71,36 +71,47 @@ final class EventTagDetailViewState: ObservableObject {
     }
 }
 
+final class EventTagDetailEventHandler: Observable {
+    
+    var nameEntered: (String) -> Void = { _ in }
+    var colorSelected: (String) -> Void = { _ in }
+    var saveChanges: () -> Void = { }
+    var deleteTag: () -> Void = { }
+    
+    func bind(_ viewModel: any EventTagDetailViewModel) {
+        self.nameEntered = viewModel.enterName(_:)
+        self.colorSelected = viewModel.selectColor(_:)
+        self.saveChanges = viewModel.save
+        self.deleteTag = viewModel.delete
+    }
+}
 
 // MARK: - EventTagDetailContainerView
 
 struct EventTagDetailContainerView: View {
     
-    @StateObject fileprivate var state: EventTagDetailViewState = .init()
+    @State private var state: EventTagDetailViewState = .init()
     private let viewAppearance: ViewAppearance
+    private let eventHandler: EventTagDetailEventHandler
     
     var stateBinding: (EventTagDetailViewState) -> Void = { _ in }
-    var nameEntered: (String) -> Void = { _ in }
-    var colorSelected: (String) -> Void = { _ in }
-    var requestSelectOtherColor: () -> Void = { }
-    var saveChanges: () -> Void = { }
-    var deleteTag: () -> Void = { }
     
-    init(viewAppearance: ViewAppearance) {
+    init(
+        viewAppearance: ViewAppearance,
+        eventHandler: EventTagDetailEventHandler
+    ) {
         self.viewAppearance = viewAppearance
+        self.eventHandler = eventHandler
     }
     
     var body: some View {
         return EventTagDetailView()
-            .eventHandler(\.nameEntered, self.nameEntered)
-            .eventHandler(\.colorSelected, self.colorSelected)
-            .eventHandler(\.saveChanges, self.saveChanges)
-            .eventHandler(\.deleteTag, self.deleteTag)
             .onAppear {
                 self.stateBinding(self.state)
             }
-            .environmentObject(state)
             .environmentObject(viewAppearance)
+            .environment(state)
+            .environment(eventHandler)
     }
 }
 
@@ -109,15 +120,11 @@ struct EventTagDetailContainerView: View {
 struct EventTagDetailView: View {
     
     @Environment(\.self) var environment
-    @EnvironmentObject private var state: EventTagDetailViewState
+    @Environment(EventTagDetailViewState.self) private var state
     @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(EventTagDetailEventHandler.self) private var eventHandler
     @FocusState private var isFocusInput: Bool
     @State private var selectedOtherColor: Color = .clear
-    
-    fileprivate var nameEntered: (String) -> Void = { _ in }
-    fileprivate var colorSelected: (String) -> Void = { _ in }
-    fileprivate var saveChanges: () -> Void = { }
-    fileprivate var deleteTag: () -> Void = { }
     
     private let suggestColorColums = [GridItem(.adaptive(minimum: 40))]
     
@@ -153,14 +160,17 @@ struct EventTagDetailView: View {
                     self.state.selectedColorHex?.asColor ?? .clear
                 )
             
+            @Bindable var state = self.state
             TextField(
                 "",
-                text: self.$state.newTagName,
+                text: $state.newTagName,
                 prompt: Text("eventTag.addNew::placeholder".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor),
                 axis: .vertical
             )
             .disabled(!self.state.isNameChangable)
-            .onReceive(self.state.$newTagName, perform: self.nameEntered)
+            .onChange(of: state.newTagName) { old, new in
+                self.eventHandler.nameEntered(new)
+            }
             .focused($isFocusInput)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
@@ -209,7 +219,7 @@ struct EventTagDetailView: View {
         let color = tagColorHex?.asColor ?? .clear
         return Button {
             guard let hex = tagColorHex else { return }
-            self.colorSelected(hex)
+            self.eventHandler.colorSelected(hex)
         } label: {
             ZStack {
                 Circle()
@@ -250,14 +260,13 @@ struct EventTagDetailView: View {
                 .labelsHidden()
                 .opacity(0.15)
         }
-        .onChange(of: self.selectedOtherColor) { newColor in
+        .onChange(of: self.selectedOtherColor) { old, newColor in
             guard let hex = newColor.hex(environment) else { return }
-            self.colorSelected(hex)
+            self.eventHandler.colorSelected(hex)
         }
     }
     
     private var buttonViews: some View {
-        
         return HStack {
             if self.state.isDeletable {
                 ConfirmButton(
@@ -265,14 +274,15 @@ struct EventTagDetailView: View {
                     textColor: self.appearance.colorSet.accentWarn.asColor,
                     backgroundColor: self.appearance.colorSet.secondaryBtnBackground.asColor
                 )
-                .eventHandler(\.onTap, self.deleteTag)
+                .eventHandler(\.onTap, self.eventHandler.deleteTag)
             }
             
+            @Bindable var state = self.state
             ConfirmButton(
                 title: "common.save".localized(),
-                isEnable: self.$state.isSavable
+                isEnable: $state.isSavable
             )
-            .eventHandler(\.onTap, self.saveChanges)
+            .eventHandler(\.onTap, self.eventHandler.saveChanges)
         }
     }
 }
@@ -296,17 +306,22 @@ struct EventTagDetailViewPreviewProvider: PreviewProvider {
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
         let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
-        let detailView = EventTagDetailView()
         let state = EventTagDetailViewState()
         state.selectedColorHex = "#ff0000"
         state.originalColorHex = "#ff0000"
         state.newTagName = "some name".localized()
         state.isDeletable = true
         state.isNameChangable = true
+        
+        let eventHandler = EventTagDetailEventHandler()
+        eventHandler.colorSelected = { new in state.selectedColorHex = new }
+        eventHandler.nameEntered = { new in state.isSavable = !new.isEmpty }
+        
+        let detailView = EventTagDetailView()
+        
         return detailView
-            .eventHandler(\.colorSelected) { state.selectedColorHex = $0 }
-            .eventHandler(\.nameEntered) { state.isSavable = !$0.isEmpty }
             .environmentObject(viewAppearance)
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandler)
     }
 }
