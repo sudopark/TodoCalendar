@@ -167,7 +167,7 @@ struct EventSettingView: View {
                 .listStyle(.plain)
                 .background(appearance.colorSet.bg0.asColor)
                 
-                FullScreenLoadingView(isLoading: $state.isConnectOrDisconnectingExternalService)
+                FullScreenLoadingView(isLoading: state.isConnectOrDisconnectingExternalService)
             }
             .navigationTitle("event_setting::title".localized())
             .toolbar {

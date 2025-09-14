@@ -14,13 +14,13 @@ public struct FullScreenLoadingView: View {
     
     @EnvironmentObject private var appearance: ViewAppearance
     private let message: String
-    @Binding var isLoading: Bool
+    var isLoading: Bool
     
     public init(
-        isLoading: Binding<Bool>,
+        isLoading: Bool,
         message: String? = nil
     ) {
-        self._isLoading = isLoading
+        self.isLoading = isLoading
         self.message = R.String.commonWaitMessage
     }
     

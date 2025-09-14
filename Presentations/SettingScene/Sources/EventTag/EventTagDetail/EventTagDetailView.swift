@@ -140,7 +140,7 @@ struct EventTagDetailView: View {
             }
             .padding()
             
-            FullScreenLoadingView(isLoading: $state.isProcessing)
+            FullScreenLoadingView(isLoading: state.isProcessing)
         }
         .background(appearance.colorSet.bg0.asColor)
     }
