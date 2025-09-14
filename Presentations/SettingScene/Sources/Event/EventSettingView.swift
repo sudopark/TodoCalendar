@@ -17,17 +17,17 @@ import CommonPresentation
 
 // MARK: - EventSettingViewState
 
-final class EventSettingViewState: ObservableObject {
+@Observable final class EventSettingViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var tagModel: BaseCalendarEventTagCellViewModel?
-    @Published var selectedEventNotificationTimeText: String?
-    @Published var selectedAllDayEventNotificationTimeText: String?
-    @Published var periodModel: SelectedPeriodModel = .init(.minute0)
-    @Published var externalCalendarServiceModels: [ExternalCalanserServiceModel] = []
-    @Published var isConnectOrDisconnectingExternalService: Bool = false
+    var tagModel: BaseCalendarEventTagCellViewModel?
+    var selectedEventNotificationTimeText: String?
+    var selectedAllDayEventNotificationTimeText: String?
+    var periodModel: SelectedPeriodModel = .init(.minute0)
+    var externalCalendarServiceModels: [ExternalCalanserServiceModel] = []
+    var isConnectOrDisconnectingExternalService: Bool = false
     
     func bind(_ viewModel: any EventSettingViewModel) {
         
@@ -81,7 +81,7 @@ final class EventSettingViewState: ObservableObject {
 
 // MARK: - EventSettingViewEventHandler
 
-final class EventSettingViewEventHandler: ObservableObject {
+final class EventSettingViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -100,7 +100,7 @@ final class EventSettingViewEventHandler: ObservableObject {
 
 struct EventSettingContainerView: View {
     
-    @StateObject private var state: EventSettingViewState = .init()
+    @State private var state: EventSettingViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: EventSettingViewEventHandler
     
@@ -121,9 +121,9 @@ struct EventSettingContainerView: View {
                 self.eventHandlers.onAppear()
             }
             .onWillAppear(eventHandlers.onWillAppear)
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -131,9 +131,9 @@ struct EventSettingContainerView: View {
 
 struct EventSettingView: View {
     
-    @EnvironmentObject private var state: EventSettingViewState
+    @Environment(EventSettingViewState.self) private var state
+    @Environment(EventSettingViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: EventSettingViewEventHandler
     
     let allPeriods: [SelectedPeriodModel] = [
         .init(.minute0), .init(.minute5), .init(.minute10), .init(.minute15),
@@ -269,7 +269,7 @@ struct EventSettingView: View {
             Spacer()
             
             Menu {
-                
+                @Bindable var state = self.state
                 Picker(selection: $state.periodModel) {
                     
                     ForEach(allPeriods, id: \.self) { model in
@@ -298,7 +298,10 @@ struct EventSettingView: View {
                 }
             }
         }
-        .onReceive(state.$periodModel.map { $0.period}, perform: eventHandlers.selectPeriod)
+        .onChange(of: state.periodModel) { old, new in
+            guard old.period != new.period else { return }
+            self.eventHandlers.selectPeriod(new.period)
+        }
     }
     
     private func externalCalendarSectionView(_ models: [ExternalCalanserServiceModel]) -> some View {
@@ -408,9 +411,9 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
             state.isConnectOrDisconnectingExternalService = true
         }
         let view = EventSettingView()
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
         return view
     }
 }
