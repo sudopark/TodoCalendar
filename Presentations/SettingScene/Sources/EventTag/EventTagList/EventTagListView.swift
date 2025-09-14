@@ -18,13 +18,13 @@ import CommonPresentation
 
 // MARK: - EventTagListViewController
 
-final class EventTagListViewState: ObservableObject {
+@Observable final class EventTagListViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var cellviewModels: [BaseCalendarEventTagCellViewModel] = []
-    @Published var externalCalendarTagSections: [ExternalCalendarEventTagListSectionModel] = []
+    var cellviewModels: [BaseCalendarEventTagCellViewModel] = []
+    var externalCalendarTagSections: [ExternalCalendarEventTagListSectionModel] = []
     
     func bind(_ viewModel: any EventTagListViewModel, _ appearance: ViewAppearance) {
         
@@ -52,16 +52,7 @@ final class EventTagListViewState: ObservableObject {
     }
 }
 
-
-// MARK: - EventTagListContainerView
-
-struct EventTagListContainerView: View {
-    
-    @StateObject fileprivate var state: EventTagListViewState = .init()
-    private let viewAppearance: ViewAppearance
-    private let hasNavigation: Bool
-    
-    var stateBinding: (EventTagListViewState) -> Void = { _ in }
+final class EventTagListEventHandlers: Observable {
     var onAppear: () -> Void = { }
     var addTag: () -> Void = { }
     var closeScene: () -> Void = { }
@@ -69,26 +60,46 @@ struct EventTagListContainerView: View {
     var showTagDetail: (EventTagId) -> Void = { _ in }
     var integrateService: (String) -> Void = { _ in }
     
+    func bind(_ viewModel: any EventTagListViewModel) {
+        self.onAppear = viewModel.reload
+        self.addTag = viewModel.addNewTag
+        self.closeScene = viewModel.close
+        self.toggleEventTagViewingIsOn = viewModel.toggleIsOn(_:)
+        self.showTagDetail = viewModel.showTagDetail(_:)
+        self.integrateService = viewModel.integrateCalendar(serviceId:)
+    }
+}
+
+
+// MARK: - EventTagListContainerView
+
+struct EventTagListContainerView: View {
+    
+    @State fileprivate var state: EventTagListViewState = .init()
+    private let viewAppearance: ViewAppearance
+    private let eventHandler: EventTagListEventHandlers
+    private let hasNavigation: Bool
+    
+    var stateBinding: (EventTagListViewState) -> Void = { _ in }
+    
     init(
         hasNavigation: Bool,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        eventHandler: EventTagListEventHandlers
     ) {
         self.hasNavigation = hasNavigation
         self.viewAppearance = viewAppearance
+        self.eventHandler = eventHandler
     }
     
     var body: some View {
         return EventTagListView(hasNavigation: hasNavigation)
-            .eventHandler(\.addTag, self.addTag)
-            .eventHandler(\.closeScene, self.closeScene)
-            .eventHandler(\.toggleEventTagViewingIsOn, self.toggleEventTagViewingIsOn)
-            .eventHandler(\.showTagDetail, self.showTagDetail)
-            .eventHandler(\.integrateService, self.integrateService)
             .onAppear {
                 self.stateBinding(self.state)
-                self.onAppear()
+                self.eventHandler.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandler)
             .environmentObject(viewAppearance)
     }
 }
@@ -97,15 +108,11 @@ struct EventTagListContainerView: View {
 
 struct EventTagListView: View {
     
-    @EnvironmentObject private var state: EventTagListViewState
+    @Environment(EventTagListViewState.self) private var state
+    @Environment(EventTagListEventHandlers.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
     
     private let hasNavigation: Bool
-    fileprivate var addTag: () -> Void = { }
-    fileprivate var closeScene: () -> Void = { }
-    fileprivate var toggleEventTagViewingIsOn: (EventTagId) -> Void = { _ in }
-    fileprivate var showTagDetail: (EventTagId) -> Void = { _ in }
-    fileprivate var integrateService: (String) -> Void = { _ in }
     
     init(hasNavigation: Bool) {
         self.hasNavigation = hasNavigation
@@ -138,7 +145,7 @@ struct EventTagListView: View {
                  
                     ToolbarItem(placement: .topBarLeading) {
                         NavigationBackButton {
-                            self.closeScene()
+                            self.eventHandlers.closeScene()
                         }
                     }
                     
@@ -150,7 +157,7 @@ struct EventTagListView: View {
                         HStack(spacing: 8) {
                             self.addButton
                             CloseButton()
-                                .eventHandler(\.onTap, self.closeScene)
+                                .eventHandler(\.onTap, self.eventHandlers.closeScene)
                         }
                     }
                 }
@@ -162,7 +169,7 @@ struct EventTagListView: View {
     
     private var addButton: some View {
         Button {
-            self.addTag()
+            self.eventHandlers.addTag()
         } label: {
             Image(systemName: "plus.circle.fill")
                 .symbolRenderingMode(.palette)
@@ -183,7 +190,7 @@ struct EventTagListView: View {
                 .animation(.easeIn, value: cellViewModel.isOn)
                 .onTapGesture {
                     self.appearance.impactIfNeed()
-                    self.toggleEventTagViewingIsOn(cellViewModel.id)
+                    self.eventHandlers.toggleEventTagViewingIsOn(cellViewModel.id)
                 }
             Text(cellViewModel.name)
                 .lineLimit(1)
@@ -191,7 +198,7 @@ struct EventTagListView: View {
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
             Spacer()
             Button {
-                self.showTagDetail(cellViewModel.id)
+                self.eventHandlers.showTagDetail(cellViewModel.id)
             } label: {
                 HStack {
                     RoundedRectangle(cornerRadius: 1).frame(width: 1)
@@ -228,7 +235,7 @@ struct EventTagListView: View {
     
     private func serviceIntegrateView(_ serviceId: String) -> some View {
         Button {
-            self.integrateService(serviceId)
+            self.eventHandlers.integrateService(serviceId)
         } label: {
             HStack {
                 Text("eventTag.externalCalendar::integrate_button".localized())
@@ -260,7 +267,7 @@ struct EventTagListView: View {
                 .animation(.easeIn, value: cellViewModel.isOn)
                 .onTapGesture {
                     self.appearance.impactIfNeed()
-                    self.toggleEventTagViewingIsOn(cellViewModel.id)
+                    self.eventHandlers.toggleEventTagViewingIsOn(cellViewModel.id)
                 }
             
             Text(cellViewModel.name)
@@ -334,38 +341,42 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
                 offIds: []
             )
         ]
+        
+        let eventHandler = EventTagListEventHandlers()
+        eventHandler.toggleEventTagViewingIsOn = { id in
+            if let index = state.cellviewModels.firstIndex(where: { $0.id == id }) {
+                
+                let newCells = state.cellviewModels |> ix(index) %~ {
+                    $0 |> \.isOn .~ !$0.isOn
+                }
+                state.cellviewModels = newCells
+            }
+            if let index = state.externalCalendarTagSections.first?.cellViewModels.firstIndex(where: { $0.id == id }) {
+                var newCells = state.externalCalendarTagSections.first?.cellViewModels ?? []
+                newCells[index].isOn.toggle()
+                let section = ExternalCalendarEventTagListSectionModel(
+                    serviceId: GoogleCalendarService.id,
+                    serviceTitle: "Google Calendar",
+                    cellViewModels: newCells,
+                    offIds: [newCells[index].id]
+                )
+                state.externalCalendarTagSections = [section]
+            }
+        }
+        eventHandler.integrateService = { _ in
+            state.externalCalendarTagSections = [
+                .init(
+                    serviceId: GoogleCalendarService.id,
+                    serviceTitle: "Google Calendar",
+                    cellViewModels: googles,
+                    offIds: []
+                )
+            ]
+        }
+        
         return EventTagListView(hasNavigation: true)
-            .eventHandler(\.toggleEventTagViewingIsOn) { id in
-                if let index = state.cellviewModels.firstIndex(where: { $0.id == id }) {
-                    
-                    let newCells = state.cellviewModels |> ix(index) %~ {
-                        $0 |> \.isOn .~ !$0.isOn
-                    }
-                    state.cellviewModels = newCells
-                }
-                if let index = state.externalCalendarTagSections.first?.cellViewModels.firstIndex(where: { $0.id == id }) {
-                    var newCells = state.externalCalendarTagSections.first?.cellViewModels ?? []
-                    newCells[index].isOn.toggle()
-                    let section = ExternalCalendarEventTagListSectionModel(
-                        serviceId: GoogleCalendarService.id,
-                        serviceTitle: "Google Calendar",
-                        cellViewModels: newCells,
-                        offIds: [newCells[index].id]
-                    )
-                    state.externalCalendarTagSections = [section]
-                }
-            }
-            .eventHandler(\.integrateService) { _ in
-                state.externalCalendarTagSections = [
-                    .init(
-                        serviceId: GoogleCalendarService.id,
-                        serviceTitle: "Google Calendar",
-                        cellViewModels: googles,
-                        offIds: []
-                    )
-                ]
-            }
             .environmentObject(viewAppearance)
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandler)
     }
 }
