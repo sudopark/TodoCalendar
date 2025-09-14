@@ -70,7 +70,11 @@ struct ForemostMarkableEventResponseMapper: Decodable {
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        let isTodo: Bool = try container.decode(Bool.self, forKey: .isTodo)
+        guard let isTodo = try? container.decode(Bool.self, forKey: .isTodo)
+        else {
+            self.event = nil
+            return
+        }
         if isTodo {
             let todo = try container.decodeIfPresent(TodoEventMapper.self, forKey: .event)
             self.event = todo?.todo

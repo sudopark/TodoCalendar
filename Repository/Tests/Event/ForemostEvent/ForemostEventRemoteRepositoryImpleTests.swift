@@ -34,9 +34,11 @@ class ForemostEventRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeRepository(
+        withoutForemostEventAtRemote: Bool = false,
         _ stubbing: ((StubForemostLocalStorage, StubRemoteAPI) -> Void)? = nil
     ) -> ForemostEventRemoteRepositoryImple {
-        let remote = StubRemoteAPI(responses: self.responses)
+        let dummyResponse = DummyResponse(withoutForemostEvent: withoutForemostEventAtRemote)
+        let remote = StubRemoteAPI(responses: dummyResponse.responses)
         self.spyStorage.stubForemost = TodoEvent(uuid: "todo", name: "cached")
         stubbing?(self.spyStorage, remote)
         return .init(remote: remote, cacheStorage: self.spyStorage)
@@ -64,6 +66,22 @@ extension ForemostEventRemoteRepositoryImpleTests {
         ])
         
         XCTAssertEqual((self.spyStorage.stubForemost as? TodoEvent)?.name, "refreshed")
+    }
+    
+    func testRepository_whenForemostEventNotExists_loadForemostEventResultIsNil() {
+        // given
+        let expect = expectation(description: "foremost event 존재 안하는 경우, remote 조회 결과는 nil")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository(withoutForemostEventAtRemote: true)
+        
+        // when
+        let load = repository.foremostEvent()
+        let events = self.waitOutputs(expect, for: load)
+        
+        // then
+        let ids = events.map { $0?.eventId }
+        XCTAssertEqual(ids, ["todo", nil])
+        XCTAssertNil(self.spyStorage.stubForemost)
     }
     
     // load foremost event: cache fail -> ignore
@@ -138,103 +156,117 @@ extension ForemostEventRemoteRepositoryImpleTests {
 
 private extension ForemostEventRemoteRepositoryImpleTests {
     
-    private var dummySingleTodoResponse: String {
-        return """
-        {
-            "uuid": "todo",
-            "name": "refreshed",
-            "event_tag_id": "custom_id",
-            "repeating": {
-                "start": 300,
-                "option": {
+    private  struct DummyResponse {
+        let withoutForemostEvent: Bool
+        init(withoutForemostEvent: Bool) {
+            self.withoutForemostEvent = withoutForemostEvent
+        }
+        
+        private var dummySingleTodoResponse: String {
+            return """
+            {
+                "uuid": "todo",
+                "name": "refreshed",
+                "event_tag_id": "custom_id",
+                "repeating": {
+                    "start": 300,
+                    "option": {
 
-                    "optionType": "every_week",
-                    "interval": 1,
-                    "dayOfWeek": [1],
-                    "timeZone": "Asia/Seoul"
-                }
-            },
-            "notification_options": [
-                {
-                    "type_text": "allDay9AMBefore",
-                    "before_seconds": 300
-                }
+                        "optionType": "every_week",
+                        "interval": 1,
+                        "dayOfWeek": [1],
+                        "timeZone": "Asia/Seoul"
+                    }
+                },
+                "notification_options": [
+                    {
+                        "type_text": "allDay9AMBefore",
+                        "before_seconds": 300
+                    }
+                ]
+            }
+            """
+        }
+        
+        private var dummySingleScheduleEvent: String {
+            return """
+            {
+                "uuid": "schedule",
+                "name": "refreshed",
+                "event_tag_id": "custom_id",
+                "event_time": {
+                    "time_type": "allday",
+                    "period_start": 0,
+                    "period_end": 100,
+                    "seconds_from_gmt": 300
+                },
+                "repeating": {
+                    "start": 300,
+                    "option": {
+
+                        "optionType": "every_week",
+                        "interval": 1,
+                        "dayOfWeek": [1],
+                        "timeZone": "Asia/Seoul"
+                    }
+                },
+                "notification_options": [
+                    {
+                        "type_text": "allDay9AMBefore",
+                        "before_seconds": 300
+                    }
+                ],
+                "show_turns": true
+            }
+            """
+        }
+        
+        private var noForemostEventResponse: String {
+            return """
+            {}
+            """
+        }
+        
+        private var foremostEventResponse: String {
+            return """
+            {
+                "event_id": "some",
+                "is_todo": true,
+                "event": \(self.dummySingleTodoResponse)
+            }
+            """
+        }
+        
+        private var updateForemostEventIdResponse: String {
+            return """
+            {
+                "event_id": "some",
+                "is_todo": false,
+                "event": \(self.dummySingleScheduleEvent)
+            }
+            """
+        }
+        
+        var responses: [StubRemoteAPI.Response] {
+            let getResponse = self.withoutForemostEvent ? self.noForemostEventResponse : self.foremostEventResponse
+            return [
+                .init(
+                    method: .get,
+                    endpoint: ForemostEventEndpoints.event,
+                    resultJsonString: .success(getResponse)
+                ),
+                .init(
+                    method: .put,
+                    endpoint: ForemostEventEndpoints.event,
+                    resultJsonString: .success(self.updateForemostEventIdResponse)
+                ),
+                .init(
+                    method: .delete,
+                    endpoint: ForemostEventEndpoints.event,
+                    resultJsonString: .success("{ \"status\": \"ok\" }")
+                )
             ]
         }
-        """
-    }
-    
-    private var dummySingleScheduleEvent: String {
-        return """
-        {
-            "uuid": "schedule",
-            "name": "refreshed",
-            "event_tag_id": "custom_id",
-            "event_time": {
-                "time_type": "allday",
-                "period_start": 0,
-                "period_end": 100,
-                "seconds_from_gmt": 300
-            },
-            "repeating": {
-                "start": 300,
-                "option": {
-
-                    "optionType": "every_week",
-                    "interval": 1,
-                    "dayOfWeek": [1],
-                    "timeZone": "Asia/Seoul"
-                }
-            },
-            "notification_options": [
-                {
-                    "type_text": "allDay9AMBefore",
-                    "before_seconds": 300
-                }
-            ],
-            "show_turns": true
-        }
-        """
-    }
-    
-    private var foremostEventResponse: String {
-        return """
-        {
-            "event_id": "some",
-            "is_todo": true,
-            "event": \(self.dummySingleTodoResponse)
-        }
-        """
-    }
-    
-    private var updateForemostEventIdResponse: String {
-        return """
-        {
-            "event_id": "some",
-            "is_todo": false,
-            "event": \(self.dummySingleScheduleEvent)
-        }
-        """
-    }
-    
-    private var responses: [StubRemoteAPI.Response] {
-        return [
-            .init(
-                method: .get,
-                endpoint: ForemostEventEndpoints.event,
-                resultJsonString: .success(self.foremostEventResponse)
-            ),
-            .init(
-                method: .put,
-                endpoint: ForemostEventEndpoints.event,
-                resultJsonString: .success(self.updateForemostEventIdResponse)
-            ),
-            .init(
-                method: .delete,
-                endpoint: ForemostEventEndpoints.event,
-                resultJsonString: .success("{ \"status\": \"ok\" }")
-            )
-        ]
     }
 }
 
