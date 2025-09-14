@@ -33,14 +33,14 @@ final class EventTagDetailViewController: UIHostingController<EventTagDetailCont
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         
+        let eventHandler = EventTagDetailEventHandler()
+        eventHandler.bind(viewModel)
+        
         let containerView = EventTagDetailContainerView(
-            viewAppearance: viewAppearance
+            viewAppearance: viewAppearance,
+            eventHandler: eventHandler
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel) })
-        .eventHandler(\.nameEntered, viewModel.enterName(_:))
-        .eventHandler(\.colorSelected, viewModel.selectColor(_:))
-        .eventHandler(\.saveChanges, viewModel.save)
-        .eventHandler(\.deleteTag, viewModel.delete)
         super.init(rootView: containerView)
     }
     
