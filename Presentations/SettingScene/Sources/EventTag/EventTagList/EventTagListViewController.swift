@@ -34,17 +34,16 @@ final class EventTagListViewController: UIHostingController<EventTagListContaine
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         
+        let eventHandler = EventTagListEventHandlers()
+        eventHandler.bind(viewModel)
+        
         let containerView = EventTagListContainerView(
             hasNavigation: hasNavigation,
-            viewAppearance: viewAppearance
+            viewAppearance: viewAppearance,
+            eventHandler: eventHandler
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel, viewAppearance) })
-        .eventHandler(\.onAppear, viewModel.reload)
-        .eventHandler(\.addTag, viewModel.addNewTag)
-        .eventHandler(\.closeScene, viewModel.close)
-        .eventHandler(\.toggleEventTagViewingIsOn, viewModel.toggleIsOn(_:))
-        .eventHandler(\.showTagDetail, viewModel.showTagDetail(_:))
-        .eventHandler(\.integrateService, viewModel.integrateCalendar(serviceId:))
+        
         super.init(rootView: containerView)
     }
     
