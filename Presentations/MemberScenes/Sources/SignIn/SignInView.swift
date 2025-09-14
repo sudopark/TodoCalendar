@@ -142,7 +142,7 @@ struct SignInView: View {
             .eventHandler(\.outsideTap, eventHandlers.close)
             
             
-            FullScreenLoadingView(isLoading: $state.isSigning)
+            FullScreenLoadingView(isLoading: state.isSigning)
         }
     }
     
