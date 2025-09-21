@@ -17,14 +17,14 @@ import CommonPresentation
 
 // MARK: - EventNotificationDefaultTimeOptionViewState
 
-final class EventNotificationDefaultTimeOptionViewState: ObservableObject {
+@Observable final class EventNotificationDefaultTimeOptionViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var isNeedNotificationPermission: Bool = false
-    @Published var options: [DefaultTimeOptionModel] = []
-    @Published var selectedOption: EventNotificationTimeOption? = nil
+    var isNeedNotificationPermission: Bool = false
+    var options: [DefaultTimeOptionModel] = []
+    var selectedOption: EventNotificationTimeOption? = nil
     
     func bind(_ viewModel: any EventNotificationDefaultTimeOptionViewModel) {
         
@@ -57,7 +57,7 @@ final class EventNotificationDefaultTimeOptionViewState: ObservableObject {
 
 // MARK: - EventNotificationDefaultTimeOptionViewEventHandler
 
-final class EventNotificationDefaultTimeOptionViewEventHandler: ObservableObject {
+final class EventNotificationDefaultTimeOptionViewEventHandler: Observable {
     
     // TODO: add handlers
     var viewOnAppear: () -> Void = { }
@@ -71,7 +71,7 @@ final class EventNotificationDefaultTimeOptionViewEventHandler: ObservableObject
 
 struct EventNotificationDefaultTimeOptionContainerView: View {
     
-    @StateObject private var state: EventNotificationDefaultTimeOptionViewState = .init()
+    @State private var state: EventNotificationDefaultTimeOptionViewState = .init()
     private let isForAllDay: Bool
     private let viewAppearance: ViewAppearance
     private let eventHandlers: EventNotificationDefaultTimeOptionViewEventHandler
@@ -94,9 +94,9 @@ struct EventNotificationDefaultTimeOptionContainerView: View {
                 self.stateBinding(self.state)
                 eventHandlers.viewOnAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -108,9 +108,9 @@ struct EventNotificationDefaultTimeOptionView: View {
     init(isForAllDay: Bool) {
         self.isForAllDay = isForAllDay
     }
-    @EnvironmentObject private var state: EventNotificationDefaultTimeOptionViewState
+    @Environment(EventNotificationDefaultTimeOptionViewState.self) private var state
+    @Environment(EventNotificationDefaultTimeOptionViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: EventNotificationDefaultTimeOptionViewEventHandler
     
     var body: some View {
         NavigationStack {
@@ -250,9 +250,9 @@ struct EventNotificationDefaultTimeOptionViewPreviewProvider: PreviewProvider {
         eventHandlers.requestPermission = { state.isNeedNotificationPermission.toggle() }
         
         let view = EventNotificationDefaultTimeOptionView(isForAllDay: false)
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
         return view
     }
 }
