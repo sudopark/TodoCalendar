@@ -20,22 +20,22 @@ import CommonPresentation
 
 // MARK: - GoogleCalendarEventDetailViewState
 
-final class GoogleCalendarEventDetailViewState: ObservableObject {
+@Observable final class GoogleCalendarEventDetailViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var hasDetailLink: Bool = false
-    @Published var eventColor: GoogleCalendarEventColorModel?
-    @Published var eventName: String?
-    @Published var timeText: SelectedTime?
-    @Published var repeatOptionText: String?
-    @Published var calendarModel: GoogleCalendarModel?
-    @Published var location: String?
-    @Published var descriptionHTMLText: String?
-    @Published var attachments: [AttachmentModel]?
-    @Published var attendees: AttendeeListViewModel?
-    @Published var conferenceData: ConferenceModel?
+    var hasDetailLink: Bool = false
+    var eventColor: GoogleCalendarEventColorModel?
+    var eventName: String?
+    var timeText: SelectedTime?
+    var repeatOptionText: String?
+    var calendarModel: GoogleCalendarModel?
+    var location: String?
+    var descriptionHTMLText: String?
+    var attachments: [AttachmentModel]?
+    var attendees: AttendeeListViewModel?
+    var conferenceData: ConferenceModel?
     
     func bind(_ viewModel: any GoogleCalendarEventDetailViewModel) {
         
@@ -123,7 +123,7 @@ final class GoogleCalendarEventDetailViewState: ObservableObject {
 
 // MARK: - GoogleCalendarEventDetailViewEventHandler
 
-final class GoogleCalendarEventDetailViewEventHandler: ObservableObject {
+final class GoogleCalendarEventDetailViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -151,7 +151,7 @@ final class GoogleCalendarEventDetailViewEventHandler: ObservableObject {
 
 struct GoogleCalendarEventDetailContainerView: View {
     
-    @StateObject private var state: GoogleCalendarEventDetailViewState = .init()
+    @State private var state: GoogleCalendarEventDetailViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: GoogleCalendarEventDetailViewEventHandler
     
@@ -171,9 +171,9 @@ struct GoogleCalendarEventDetailContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -181,9 +181,9 @@ struct GoogleCalendarEventDetailContainerView: View {
 
 struct GoogleCalendarEventDetailView: View {
     
-    @EnvironmentObject private var state: GoogleCalendarEventDetailViewState
+    @Environment(GoogleCalendarEventDetailViewState.self) private var state
+    @Environment(GoogleCalendarEventDetailViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: GoogleCalendarEventDetailViewEventHandler
     
     var body: some View {
         ZStack {
@@ -623,9 +623,9 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
         }
         
         let view = GoogleCalendarEventDetailView()
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
         return view
     }
 }
