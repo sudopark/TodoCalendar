@@ -16,14 +16,14 @@ import CommonPresentation
 
 // MARK: - CountrySelectViewState
 
-final class CountrySelectViewState: ObservableObject {
+@Observable final class CountrySelectViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
-    @Published var countries: [HolidaySupportCountry] = []
-    @Published var selectedCountryCode: String? = nil
-    @Published var isSavable: Bool = false
-    @Published var isSaving: Bool = false
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    var countries: [HolidaySupportCountry] = []
+    var selectedCountryCode: String? = nil
+    var isSavable: Bool = false
+    var isSaving: Bool = false
     
     func bind(_ viewModel: any CountrySelectViewModel) {
         
@@ -63,7 +63,7 @@ final class CountrySelectViewState: ObservableObject {
 
 // MARK: - CountrySelectViewEventHandler
 
-final class CountrySelectViewEventHandler: ObservableObject {
+final class CountrySelectViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -77,7 +77,7 @@ final class CountrySelectViewEventHandler: ObservableObject {
 
 struct CountrySelectContainerView: View {
     
-    @StateObject private var state: CountrySelectViewState = .init()
+    @State private var state: CountrySelectViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: CountrySelectViewEventHandler
     
@@ -97,9 +97,9 @@ struct CountrySelectContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -107,9 +107,9 @@ struct CountrySelectContainerView: View {
 
 struct CountrySelectView: View {
     
-    @EnvironmentObject private var state: CountrySelectViewState
+    @Environment(CountrySelectViewState.self) private var state
+    @Environment(CountrySelectViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: CountrySelectViewEventHandler
     
     var body: some View {
         NavigationStack {
@@ -211,9 +211,9 @@ struct CountrySelectViewPreviewProvider: PreviewProvider {
         state.isSaving = true
         
         let view = CountrySelectView()
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
         return view
     }
 }

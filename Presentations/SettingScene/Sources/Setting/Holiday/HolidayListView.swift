@@ -16,14 +16,14 @@ import CommonPresentation
 
 // MARK: - HolidayListViewState
 
-final class HolidayListViewState: ObservableObject {
+@Observable final class HolidayListViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var countryName: String = ""
-    @Published var holidays: [HolidayItemModel] = []
-    @Published var isRefreshing = false
+    var countryName: String = ""
+    var holidays: [HolidayItemModel] = []
+    var isRefreshing = false
     
     func bind(_ viewModel: any HolidayListViewModel) {
         
@@ -55,7 +55,7 @@ final class HolidayListViewState: ObservableObject {
 
 // MARK: - HolidayListViewEventHandler
 
-final class HolidayListViewEventHandler: ObservableObject {
+final class HolidayListViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
     var refresh: () -> Void = { }
@@ -75,7 +75,7 @@ final class HolidayListViewEventHandler: ObservableObject {
 
 struct HolidayListContainerView: View {
     
-    @StateObject private var state: HolidayListViewState = .init()
+    @State private var state: HolidayListViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: HolidayListViewEventHandler
     
@@ -95,9 +95,9 @@ struct HolidayListContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -105,9 +105,9 @@ struct HolidayListContainerView: View {
 
 struct HolidayListView: View {
     
-    @EnvironmentObject private var state: HolidayListViewState
+    @Environment(HolidayListViewState.self) private var state
+    @Environment(HolidayListViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: HolidayListViewEventHandler
     
     var body: some View {
         NavigationStack {
@@ -252,9 +252,9 @@ struct HolidayListViewPreviewProvider: PreviewProvider {
         }
         
         let view = HolidayListView()
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
         return view
     }
 }
