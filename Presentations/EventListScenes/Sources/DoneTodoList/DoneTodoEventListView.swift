@@ -19,14 +19,14 @@ import CommonPresentation
 
 // MARK: - DoneTodoEventListViewState
 
-final class DoneTodoEventListViewState: ObservableObject {
+@Observable final class DoneTodoEventListViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var isRemovingDoneTodos = false
-    @Published var sections: [DoneTodoListSectionModel] = []
-    @Published var pendingRevertDoneTodoIds: Set<String> = []
+    var isRemovingDoneTodos = false
+    var sections: [DoneTodoListSectionModel] = []
+    var pendingRevertDoneTodoIds: Set<String> = []
     
     func bind(_ viewModel: any DoneTodoEventListViewModel) {
         
@@ -52,7 +52,7 @@ final class DoneTodoEventListViewState: ObservableObject {
 
 // MARK: - DoneTodoEventListViewEventHandler
 
-final class DoneTodoEventListViewEventHandler: ObservableObject {
+final class DoneTodoEventListViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -78,7 +78,7 @@ final class DoneTodoEventListViewEventHandler: ObservableObject {
 
 struct DoneTodoEventListContainerView: View {
     
-    @StateObject private var state: DoneTodoEventListViewState = .init()
+    @State private var state: DoneTodoEventListViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: DoneTodoEventListViewEventHandler
     
@@ -98,9 +98,9 @@ struct DoneTodoEventListContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -108,9 +108,9 @@ struct DoneTodoEventListContainerView: View {
 
 struct DoneTodoEventListView: View {
     
-    @EnvironmentObject private var state: DoneTodoEventListViewState
+    @Environment(DoneTodoEventListViewState.self) private var state
+    @Environment(DoneTodoEventListViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: DoneTodoEventListViewEventHandler
         
     var body: some View {
         NavigationStack {
@@ -296,9 +296,9 @@ struct DoneTodoEventListViewPreviewProvider: PreviewProvider {
         }
         
         let view = DoneTodoEventListView()
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
         return view
     }
 }
