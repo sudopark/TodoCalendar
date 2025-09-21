@@ -11,16 +11,16 @@ import Domain
 import CommonPresentation
 
 
-final class EventListAppearanceSettingViewState: ObservableObject {
+@Observable final class EventListAppearanceSettingViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
-    @Published var sampleModel: EventListAppearanceSampleModel?
-    @Published var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(0)
-    @Published var showHolidayName: Bool = false
-    @Published var showLunarCalendarDate: Bool = false
-    @Published var is24hourTimeForm: Bool = false
-    @Published var showUncompletedTodos: Bool = true
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    var sampleModel: EventListAppearanceSampleModel?
+    var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(0)
+    var showHolidayName: Bool = false
+    var showLunarCalendarDate: Bool = false
+    var is24hourTimeForm: Bool = false
+    var showUncompletedTodos: Bool = true
     
     init(_ setting: EventListAppearanceSetting) {
         self.additionalFontSizeModel = .init(setting.eventTextAdditionalSize)
@@ -80,7 +80,7 @@ final class EventListAppearanceSettingViewState: ObservableObject {
 }
 
 
-final class EventListAppearanceSettingViewEventHandler: ObservableObject {
+final class EventListAppearanceSettingViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
     var increaseFontSize: () -> Void = { }
@@ -94,9 +94,9 @@ final class EventListAppearanceSettingViewEventHandler: ObservableObject {
 
 struct EventListAppearanceSettingView: View {
     
-    @StateObject private var state: EventListAppearanceSettingViewState
+    @State private var state: EventListAppearanceSettingViewState
+    @Environment(EventListAppearanceSettingViewEventHandler.self) private var eventHandler
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandler: EventListAppearanceSettingViewEventHandler
     
     var stateBinding: (EventListAppearanceSettingViewState) -> Void = { _ in }
     
@@ -113,16 +113,24 @@ struct EventListAppearanceSettingView: View {
             AppearanceRow("setting.appearance.event.fontSize".localized(), fontSizeSettingView)
             
             AppearanceRow("setting.appearance.event.show_holidayName".localized(), showHolidayNameView)
-                .onReceive(state.$showHolidayName, perform: eventHandler.toggleIsShowHolidayName)
+                .onChange(of: state.showHolidayName) { _, new in
+                    eventHandler.toggleIsShowHolidayName(new)
+                }
             
             AppearanceRow("setting.appearance.event.show_lunar".localized(), showLunarCalendarView)
-                .onReceive(state.$showLunarCalendarDate, perform: eventHandler.toggleShowLunarCalendarDate)
+                .onChange(of: state.showLunarCalendarDate) { _, new in
+                    eventHandler.toggleShowLunarCalendarDate(new)
+                }
             
             AppearanceRow("setting.appearance.event._24form".localized(), is24HourFormView)
-                .onReceive(state.$is24hourTimeForm, perform: eventHandler.toggleIs24HourFom)
+                .onChange(of: state.is24hourTimeForm) { _, new in
+                    eventHandler.toggleIs24HourFom(new)
+                }
             
             AppearanceRow("setting.appearance.event.sample::uncompleted_todo::toggle".localized(), showUncompletedTodoView)
-                .onReceive(state.$showUncompletedTodos, perform: eventHandler.toggleShowUncompletedTodo)
+                .onChange(of: state.showUncompletedTodos) { _, new in
+                    eventHandler.toggleShowUncompletedTodo(new)
+                }
             
         }
         .padding(.top, 20)
@@ -310,7 +318,7 @@ struct EventListAppearanceSettingPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let handler = EventListAppearanceSettingViewEventHandler()
         return EventListAppearanceSettingView(.init(setting.calendar))
+            .environment(handler)
             .environmentObject(viewAppearance)
-            .environmentObject(handler)
     }
 }

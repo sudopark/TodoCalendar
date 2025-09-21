@@ -55,14 +55,14 @@ struct AppearanceRow< Content: View>: View {
 }
 
 
-final class AppearanceSettingViewState: ObservableObject {
+@Observable final class AppearanceSettingViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var timeZoneName: String?
-    @Published var hapticOn: Bool = false
-    @Published var animationOn: Bool = false
+    var timeZoneName: String?
+    var hapticOn: Bool = false
+    var animationOn: Bool = false
     
     init(_ setting: CalendarAppearanceSettings) {
         self.hapticOn = setting.hapticEffectIsOn
@@ -97,7 +97,7 @@ final class AppearanceSettingViewState: ObservableObject {
     }
 }
 
-final class AppearanceSettingViewEventHandler: ObservableObject {
+final class AppearanceSettingViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
     var changeTimeZone: () -> Void = { }
@@ -146,10 +146,10 @@ struct AppearanceSettingContainerView: View {
             .eventHandler(\.eventListSettingStateBinding, eventListSettingStateBinding)
             .eventHandler(\.appearanceSettingStateBinding, appearanceSettingStateBinding)
             .environmentObject(viewAppearance)
-            .environmentObject(calendarSectionEventHandler)
-            .environmentObject(eventOnCalendarSectionEventHandler)
-            .environmentObject(appearanceSettingEventHandler)
-            .environmentObject(eventListSettingEventHandler)
+            .environment(calendarSectionEventHandler)
+            .environment(eventOnCalendarSectionEventHandler)
+            .environment(appearanceSettingEventHandler)
+            .environment(eventListSettingEventHandler)
     }
 }
 
@@ -158,12 +158,12 @@ struct AppearanceSettingContainerView: View {
 struct AppearanceSettingView: View {
     
     private let initialSetting: CalendarAppearanceSettings
-    @StateObject private var appearanceState: AppearanceSettingViewState
+    @State private var appearanceState: AppearanceSettingViewState
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler
-    @EnvironmentObject private var eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler
-    @EnvironmentObject private var eventListSettingEventHandler: EventListAppearanceSettingViewEventHandler
-    @EnvironmentObject private var appearanceSettingEventHandler: AppearanceSettingViewEventHandler
+    @Environment(CalendarSectionAppearanceSettingViewEventHandler.self) private var calendarSectionEventHandler
+    @Environment(EventOnCalendarViewEventHandler.self) private var eventOnCalendarSectionEventHandler
+    @Environment(EventListAppearanceSettingViewEventHandler.self) private var eventListSettingEventHandler
+    @Environment(AppearanceSettingViewEventHandler.self) private var appearanceSettingEventHandler
     
     fileprivate var calendarSectionStateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
     fileprivate var eventOnCalendarSectionStateBinding: (EventOnCalendarViewState) -> Void = { _ in }
@@ -246,10 +246,14 @@ struct AppearanceSettingView: View {
                 .onTapGesture(perform: appearanceSettingEventHandler.changeTimeZone)
             
             AppearanceRow("setting.haptic::name".localized(), hapticView())
-                .onReceive(appearanceState.$hapticOn, perform: appearanceSettingEventHandler.toggleHapticFeedback)
+                .onChange(of: appearanceState.hapticOn) { _, new in
+                    appearanceSettingEventHandler.toggleHapticFeedback(new)
+                }
             
             AppearanceRow("setting.minimize_animation::name".localized(), animationView())
-                .onReceive(appearanceState.$animationOn, perform: appearanceSettingEventHandler.toggleAnimationEffect)
+                .onChange(of: appearanceState.animationOn) { _, new in
+                    appearanceSettingEventHandler.toggleAnimationEffect(new)
+                }
         }
         .padding(.top, 20)
         .onAppear {

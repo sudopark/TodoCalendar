@@ -11,16 +11,16 @@ import Combine
 import CommonPresentation
 
 
-final class CalendarSectionAppearanceSettingViewState: ObservableObject {
+@Observable final class CalendarSectionAppearanceSettingViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
-    @Published var calendarModel: CalendarAppearanceModel = .init([], [])
-    @Published var accentDays: [AccentDays: Bool] = [:]
-    @Published var showUnderLine: Bool = false
-    @Published var selectedWeekDay: DayOfWeeks = .sunday
-    @Published var selectedColorTheme: ColorThemeModel = .init(.systemTheme)
-    private var didFirstCalendarModelUpdated = false
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    var calendarModel: CalendarAppearanceModel = .init([], [])
+    var accentDays: [AccentDays: Bool] = [:]
+    var showUnderLine: Bool = false
+    var selectedWeekDay: DayOfWeeks = .sunday
+    var selectedColorTheme: ColorThemeModel = .init(.systemTheme)
+    @ObservationIgnored private var didFirstCalendarModelUpdated = false
     
     init(_ setting: CalendarSectionAppearanceSetting) {
         self.accentDays = setting.accnetDayPolicy
@@ -77,7 +77,7 @@ final class CalendarSectionAppearanceSettingViewState: ObservableObject {
 }
 
 
-final class CalendarSectionAppearanceSettingViewEventHandler: ObservableObject {
+final class CalendarSectionAppearanceSettingViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
     var weekStartDaySelected: (DayOfWeeks) -> Void = { _ in }
@@ -90,11 +90,11 @@ final class CalendarSectionAppearanceSettingViewEventHandler: ObservableObject {
 
 struct CalendarAppearanceSampleView: View {
     
-    @Binding private var model: CalendarAppearanceModel
+    private let model: CalendarAppearanceModel
     @EnvironmentObject private var appearance: ViewAppearance
     
-    init(model: Binding<CalendarAppearanceModel>) {
-        self._model = model
+    init(model: CalendarAppearanceModel) {
+        self.model = model
     }
     
     var body: some View {
@@ -192,9 +192,9 @@ struct CalendarAppearanceSampleView: View {
 
 struct CalendarSectionAppearanceSettingView: View {
     
-    @StateObject private var state: CalendarSectionAppearanceSettingViewState
+    @State private var state: CalendarSectionAppearanceSettingViewState
+    @Environment(CalendarSectionAppearanceSettingViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: CalendarSectionAppearanceSettingViewEventHandler
     @Environment(\.colorScheme) var colorScheme
     
     var stateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
@@ -210,11 +210,13 @@ struct CalendarSectionAppearanceSettingView: View {
     var body: some View {
         
         VStack {
-            CalendarAppearanceSampleView(model: $state.calendarModel)
+            CalendarAppearanceSampleView(model: state.calendarModel)
             
             VStack(spacing: 8) {
                 AppearanceRow("setting.appearance.calendar.startDayOfWeek".localized(), pickerView)
-                    .onReceive(state.$selectedWeekDay, perform: eventHandlers.weekStartDaySelected)
+                    .onChange(of: state.selectedWeekDay) { _, new in
+                        eventHandlers.weekStartDaySelected(new)
+                    }
                 
                 AppearanceRow("setting.appearance.calendar.accentDay".localized(), HStack {
                     accentDayView(.holiday)
@@ -226,7 +228,9 @@ struct CalendarSectionAppearanceSettingView: View {
                     .onTapGesture(perform: eventHandlers.changeColorTheme)
                 
                 AppearanceRow("setting.appearance.calendar.underline".localized(),  showUnderlineView)
-                    .onReceive(state.$showUnderLine, perform: eventHandlers.toggleShowUnderline)
+                    .onChange(of: state.showUnderLine) { _, new in
+                        eventHandlers.toggleShowUnderline(new)
+                    }
             }
         }
         .padding(.top, 20)

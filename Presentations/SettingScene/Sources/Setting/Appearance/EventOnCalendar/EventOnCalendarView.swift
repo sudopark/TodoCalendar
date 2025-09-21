@@ -11,13 +11,13 @@ import Domain
 import CommonPresentation
 
 
-final class EventOnCalendarViewState: ObservableObject {
+@Observable final class EventOnCalendarViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
-    @Published var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(0)
-    @Published var isBold: Bool = false
-    @Published var isShowEventTagColor: Bool = false
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(0)
+    var isBold: Bool = false
+    var isShowEventTagColor: Bool = false
     
     init(_ setting: EventOnCalendarAppearanceSetting) {
         self.additionalFontSizeModel = .init(setting.eventOnCalenarTextAdditionalSize)
@@ -53,7 +53,7 @@ final class EventOnCalendarViewState: ObservableObject {
     }
 }
 
-final class EventOnCalendarViewEventHandler: ObservableObject {
+final class EventOnCalendarViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
     var increaseFontSize: () -> Void = { }
@@ -121,9 +121,9 @@ struct EventOnCalendarViewPreviewView: View {
 
 struct EventOnCalendarView: View {
     
-    @StateObject private var state: EventOnCalendarViewState
+    @State private var state: EventOnCalendarViewState
+    @Environment(EventOnCalendarViewEventHandler.self) private var eventHandler
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandler: EventOnCalendarViewEventHandler
     
     var stateBinding: (EventOnCalendarViewState) -> Void = { _ in }
     
@@ -139,10 +139,14 @@ struct EventOnCalendarView: View {
                 AppearanceRow("setting.appearance.event.fontSize".localized(), fontSizeSettingView)
                 
                 AppearanceRow("setting.appearance.event.boldText".localized(), boldTextView)
-                    .onReceive(state.$isBold, perform: eventHandler.toggleIsBold)
+                    .onChange(of: state.isBold) { _, new in
+                        eventHandler.toggleIsBold(new)
+                    }
                 
                 AppearanceRow("setting.appearance.event.eventColor".localized(), showEventTagColorView)
-                    .onReceive(state.$isShowEventTagColor, perform: eventHandler.toggleShowEventTagColor)
+                    .onChange(of: state.isShowEventTagColor) { _, new in
+                        eventHandler.toggleShowEventTagColor(new)
+                    }
             }
         }
         .padding(.top, 20)
@@ -227,7 +231,7 @@ struct EventOnCalendarViewPreviewProvider: PreviewProvider {
                 state.isBold = false
                 state.isShowEventTagColor = true
             }
+            .environment(eventHandler)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandler)
     }
 }
