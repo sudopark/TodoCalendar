@@ -168,12 +168,13 @@ struct EventOnCalendarView: View {
                 Button {
                     eventHandler.decreaseFontSize()
                 } label: {
-                    Text("-")
+                    Text(" - ")
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.text0.asColor)
                         .padding(.vertical, 2)
                         .padding(.leading, 8).padding(.trailing, 2)
                 }
+                .buttonStyle(.plain)
                 .disabled(!state.additionalFontSizeModel.isDescreasable)
                 
                 Divider()
@@ -182,12 +183,13 @@ struct EventOnCalendarView: View {
                 Button {
                     eventHandler.increaseFontSize()
                 } label: {
-                    Text("+")
+                    Text(" + ")
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.text0.asColor)
                         .padding(.vertical, 2)
                         .padding(.leading, 2).padding(.trailing, 8)
                 }
+                .buttonStyle(.plain)
                 .disabled(!state.additionalFontSizeModel.isIncreasable)
             }
             .background(
