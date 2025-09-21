@@ -17,15 +17,15 @@ import CommonPresentation
 
 // MARK: - FeedbackPostViewState
 
-final class FeedbackPostViewState: ObservableObject {
+@Observable final class FeedbackPostViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var isPosting: Bool = false
-    @Published var isPostable: Bool = false
-    @Published var inputContact: String = ""
-    @Published var inputMessage: String = ""
+    var isPosting: Bool = false
+    var isPostable: Bool = false
+    var inputContact: String = ""
+    var inputMessage: String = ""
     
     func bind(_ viewModel: any FeedbackPostViewModel) {
         
@@ -50,7 +50,7 @@ final class FeedbackPostViewState: ObservableObject {
 
 // MARK: - FeedbackPostViewEventHandler
 
-final class FeedbackPostViewEventHandler: ObservableObject {
+final class FeedbackPostViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -73,7 +73,7 @@ final class FeedbackPostViewEventHandler: ObservableObject {
 
 struct FeedbackPostContainerView: View {
     
-    @StateObject private var state: FeedbackPostViewState = .init()
+    @State private var state: FeedbackPostViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: FeedbackPostViewEventHandler
     
@@ -93,9 +93,9 @@ struct FeedbackPostContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -103,9 +103,9 @@ struct FeedbackPostContainerView: View {
 
 struct FeedbackPostView: View {
     
-    @EnvironmentObject private var state: FeedbackPostViewState
+    @Environment(FeedbackPostViewState.self) private var state
+    @Environment(FeedbackPostViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: FeedbackPostViewEventHandler
     
     private enum InputFields {
         case message
@@ -160,6 +160,7 @@ struct FeedbackPostView: View {
                     .padding(.leading, 4)
             }
             
+            @Bindable var state = self.state
             TextEditor(text: $state.inputMessage)
                 .focused($inputField, equals: .message)
                 .autocorrectionDisabled()
@@ -168,7 +169,9 @@ struct FeedbackPostView: View {
                 .foregroundStyle(appearance.colorSet.text0.asColor)
                 .scrollContentBackground(.hidden)
                 .frame(height: 200)
-                .onReceive(state.$inputMessage, perform: eventHandlers.enterMessage)
+                .onChange(of: state.inputMessage) { _ , new in
+                    eventHandlers.enterMessage(new)
+                }
         }
         .padding(4)
         .background(
@@ -181,7 +184,8 @@ struct FeedbackPostView: View {
     
     
     private var contactInput: some View {
-        TextField(
+        @Bindable var state = state
+        return TextField(
             "", text: $state.inputContact,
             prompt: Text("feedback::contact::placeholder".localized())
                         .font(appearance.fontSet.normal.asFont)
@@ -199,7 +203,9 @@ struct FeedbackPostView: View {
                         appearance.colorSet.bg2.asColor
                     )
             )
-            .onReceive(state.$inputContact, perform: eventHandlers.enterContact)
+            .onChange(of: state.inputContact) { _, new in
+                eventHandlers.enterContact(new)
+            }
     }
     
     private var clearButton: some View {
@@ -286,9 +292,9 @@ struct FeedbackPostViewPreviewProvider: PreviewProvider {
         }
         
         let view = FeedbackPostView()
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
         return view
     }
 }
