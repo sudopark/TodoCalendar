@@ -17,13 +17,13 @@ import CommonPresentation
 
 // MARK: - SignInViewState
 
-final class SignInViewState: ObservableObject {
+@Observable final class SignInViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var isSigning = false
-    @Published var supportOAuthServices: [any OAuth2ServiceProvider] = []
+    var isSigning = false
+    var supportOAuthServices: [any OAuth2ServiceProvider] = []
     
     func bind(_ viewModel: any SignInViewModel) {
         
@@ -43,7 +43,7 @@ final class SignInViewState: ObservableObject {
 
 // MARK: - SignInViewEventHandler
 
-final class SignInViewEventHandler: ObservableObject {
+final class SignInViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -62,7 +62,7 @@ final class SignInViewEventHandler: ObservableObject {
 
 struct SignInContainerView: View {
     
-    @StateObject private var state: SignInViewState = .init()
+    @State private var state: SignInViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: SignInViewEventHandler
     private let signInButtonProvider: any SignInButtonProvider
@@ -85,9 +85,9 @@ struct SignInContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -95,9 +95,9 @@ struct SignInContainerView: View {
 
 struct SignInView: View {
     
-    @EnvironmentObject private var state: SignInViewState
+    @Environment(SignInViewState.self) private var state
+    @Environment(SignInViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: SignInViewEventHandler
     private let signInButtonProvider: any SignInButtonProvider
     @State private var rotateDegree : CGFloat = 0
     
@@ -175,9 +175,9 @@ struct SignInViewPreviewProvider: PreviewProvider {
         eventHandlers.requestSignIn = { _ in state.isSigning.toggle() }
         
         let view = SignInView(signInButtonProvider: FakeSignInButtonProvider())
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
         return view
     }
 }
