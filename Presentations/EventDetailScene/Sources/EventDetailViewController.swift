@@ -42,32 +42,16 @@ final class EventDetailViewController: UIHostingController<EventDetailContainerV
         self.inputViewModel = inputViewModel
         self.viewAppearance = viewAppearance
         
+        let eventHandler = EventDetailViewEventHandlers()
         let containerView = EventDetailContainerView(
+            eventHandler: eventHandler,
             viewAppearance: viewAppearance
         )
-        .eventHandler(\.stateBinding, { $0.bind(viewModel, inputViewModel) })
-        .eventHandler(\.onAppear) {
-            inputViewModel.setup()
-            viewModel.prepare()
-        }
-        .eventHandler(\.nameEntered, inputViewModel.enter(name:))
-        .eventHandler(\.toggleIsTodo, viewModel.toggleIsTodo)
-        .eventHandler(\.selectStartTime, inputViewModel.selectStartTime(_:))
-        .eventHandler(\.selectEndTime, inputViewModel.selectEndtime(_:))
-        .eventHandler(\.removeTime,  inputViewModel.removeTime)
-        .eventHandler(\.removeEventEndTime, inputViewModel.removeEventEndTime)
-        .eventHandler(\.toggleIsAllDay, inputViewModel.toggleIsAllDay)
-        .eventHandler(\.selectRepeatOption, inputViewModel.selectRepeatOption)
-        .eventHandler(\.selectTag, inputViewModel.selectEventTag)
-        .eventHandler(\.selectNotificationOption, inputViewModel.selectNotificationTime)
-//        .eventHandler(\.selectPlace, TODO)
-        .eventHandler(\.enterUrl, inputViewModel.enter(url:))
-        .eventHandler(\.openURL, inputViewModel.openURL)
-        .eventHandler(\.enterMemo, inputViewModel.enter(memo:))
-        .eventHandler(\.save, viewModel.save)
-        .eventHandler(\.doMoreAction, viewModel.handleMoreAction(_:))
-        .eventHandler(\.showTodoEventGuide, viewModel.showTodoGuide)
-        .eventHandler(\.showForemostEventGuide, viewModel.showForemostEventGuide)
+        .eventHandler(\.stateBinding, { [weak eventHandler] state in
+            eventHandler?.bind(viewModel, inputViewModel, with: state)
+            state.bind(viewModel, inputViewModel)
+        })
+        
         super.init(rootView: containerView)
     }
     

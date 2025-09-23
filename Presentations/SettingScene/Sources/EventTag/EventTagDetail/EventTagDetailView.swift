@@ -277,10 +277,9 @@ struct EventTagDetailView: View {
                 .eventHandler(\.onTap, self.eventHandler.deleteTag)
             }
             
-            @Bindable var state = self.state
             ConfirmButton(
                 title: "common.save".localized(),
-                isEnable: $state.isSavable
+                isEnable: state.isSavable
             )
             .eventHandler(\.onTap, self.eventHandler.saveChanges)
         }

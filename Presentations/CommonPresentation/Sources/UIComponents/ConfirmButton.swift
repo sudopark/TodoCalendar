@@ -13,22 +13,22 @@ public struct ConfirmButton: View {
     private let title: String
     private let textColor: Color?
     private let backgroundColor: Color?
-    @Binding private var isEnable: Bool
-    @Binding private var isProcessing: Bool
+    private var isEnable: Bool
+    private var isProcessing: Bool
     
     @EnvironmentObject private var appearance: ViewAppearance
     public var onTap: () -> Void = { }
     
     public init(
         title: String, 
-        isEnable: Binding<Bool> = .constant(true),
-        isProcessing: Binding<Bool> = .constant(false),
+        isEnable: Bool = true,
+        isProcessing: Bool = false,
         textColor: Color? = nil,
         backgroundColor: Color? = nil
     ) {
         self.title = title
-        self._isEnable = isEnable
-        self._isProcessing = isProcessing
+        self.isEnable = isEnable
+        self.isProcessing = isProcessing
         self.textColor = textColor
         self.backgroundColor = backgroundColor
     }
