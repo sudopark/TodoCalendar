@@ -17,13 +17,13 @@ import CommonPresentation
 
 // MARK: - SelectEventTagViewController
 
-final class SelectEventTagViewState: ObservableObject {
+@Observable final class SelectEventTagViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var tags: [TagCellViewModel] = []
-    @Published var selectedTagId: EventTagId?
+    var tags: [TagCellViewModel] = []
+    var selectedTagId: EventTagId?
     
     func bind(_ viewModel: any SelectEventTagViewModel) {
         
@@ -48,7 +48,7 @@ final class SelectEventTagViewState: ObservableObject {
 }
 
 
-final class SelectEventTagViewEventHandler: ObservableObject {
+final class SelectEventTagViewEventHandler: Observable {
  
     var onAppear: () -> Void = { }
     var selectTag: (EventTagId) -> Void = { _ in }
@@ -70,7 +70,7 @@ final class SelectEventTagViewEventHandler: ObservableObject {
 
 struct SelectEventTagContainerView: View {
     
-    @StateObject private var state: SelectEventTagViewState = .init()
+    @State private var state: SelectEventTagViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: SelectEventTagViewEventHandler
     
@@ -90,9 +90,9 @@ struct SelectEventTagContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandler.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandler)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandler)
     }
 }
 
@@ -100,9 +100,9 @@ struct SelectEventTagContainerView: View {
 
 struct SelectEventTagView: View {
     
-    @EnvironmentObject private var state: SelectEventTagViewState
+    @Environment(SelectEventTagViewState.self) private var state
+    @Environment(SelectEventTagViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: SelectEventTagViewEventHandler
     
     var body: some View {
         NavigationStack {
@@ -233,9 +233,9 @@ struct SelectEventTagViewPreviewProvider: PreviewProvider {
         ]
         let eventHandler = SelectEventTagViewEventHandler()
         let view = SelectEventTagView()
+            .environment(state)
+            .environment(eventHandler)
             .environmentObject(viewAppearance)
-            .environmentObject(state)
-            .environmentObject(eventHandler)
         return view
     }
 }
