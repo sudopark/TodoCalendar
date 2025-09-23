@@ -139,7 +139,7 @@ struct DayEventListContainerView: View {
                 self.stateBinding(self.state)
             }
             .environmentObject(state)
-            .environmentObject(pendingDoneState)
+            .environment(pendingDoneState)
             .environmentObject(viewAppearance)
             .environmentObject(eventHandler)
     }
@@ -152,7 +152,7 @@ struct DayEventListView: View {
     @EnvironmentObject private var state: DayEventListViewState
     @EnvironmentObject private var appearance: ViewAppearance
     @EnvironmentObject private var eventHandler: DayEventListViewEventHandler
-    @EnvironmentObject private var pendingDoneState: PendingCompleteTodoState
+    @Environment(PendingCompleteTodoState.self) private var pendingDoneState
     @FocusState var isFocusInput: Bool
     
     var body: some View {
@@ -465,7 +465,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             .environmentObject(viewAppearance)
             .environmentObject(state)
             .environmentObject(eventHandler)
-            .environmentObject(PendingCompleteTodoState())
+            .environment(PendingCompleteTodoState())
         return containerView
     }
     
