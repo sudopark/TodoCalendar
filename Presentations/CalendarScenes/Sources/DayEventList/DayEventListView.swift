@@ -19,16 +19,16 @@ import CommonPresentation
 
 // MARK: - DayEventListViewController
 
-final class DayEventListViewState: ObservableObject {
+@Observable final class DayEventListViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published fileprivate var foremostModel: (any EventCellViewModel)?
-    @Published fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
-    @Published fileprivate var dayModel: SelectedDayModel?
-    @Published fileprivate var cellViewModels: [any EventCellViewModel] = []
-    @Published fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
+    fileprivate var foremostModel: (any EventCellViewModel)?
+    fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
+    fileprivate var dayModel: SelectedDayModel?
+    fileprivate var cellViewModels: [any EventCellViewModel] = []
+    fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
     
     func bind(_ viewModel: any DayEventListViewModel, _ appearance: ViewAppearance) {
         
@@ -81,7 +81,7 @@ final class DayEventListViewState: ObservableObject {
 }
 
 
-final class DayEventListViewEventHandler: ObservableObject {
+final class DayEventListViewEventHandler: Observable {
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestCancelDoneTodo: (String) -> Void = { _ in }
     var requestAddNewEventWhetherUsingTemplate: (Bool) -> Void = { _ in }
@@ -116,7 +116,7 @@ final class DayEventListViewEventHandler: ObservableObject {
 
 struct DayEventListContainerView: View {
     
-    @StateObject private var state: DayEventListViewState = .init()
+    @State private var state: DayEventListViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: DayEventListViewEventHandler
     private let pendingDoneState: PendingCompleteTodoState
@@ -138,10 +138,10 @@ struct DayEventListContainerView: View {
             .onAppear {
                 self.stateBinding(self.state)
             }
-            .environmentObject(state)
+            .environment(state)
             .environment(pendingDoneState)
+            .environment(eventHandler)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandler)
     }
 }
 
@@ -149,10 +149,10 @@ struct DayEventListContainerView: View {
 
 struct DayEventListView: View {
     
-    @EnvironmentObject private var state: DayEventListViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandler: DayEventListViewEventHandler
+    @Environment(DayEventListViewState.self) private var state
     @Environment(PendingCompleteTodoState.self) private var pendingDoneState
+    @Environment(DayEventListViewEventHandler.self) private var eventHandler
+    @EnvironmentObject private var appearance: ViewAppearance
     @FocusState var isFocusInput: Bool
     
     var body: some View {
@@ -334,7 +334,7 @@ struct DayEventListView: View {
 
 private struct QuickAddNewTodoView: View {
     
-    @EnvironmentObject private var state: DayEventListViewState
+    @Environment(DayEventListViewState.self) private var state
     @EnvironmentObject private var appearance: ViewAppearance
     
     @State private var newTodoName: String = ""
@@ -462,10 +462,10 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             }
         }
         let containerView = DayEventListView()
-            .environmentObject(viewAppearance)
-            .environmentObject(state)
-            .environmentObject(eventHandler)
+            .environment(state)
+            .environment(eventHandler)
             .environment(PendingCompleteTodoState())
+            .environmentObject(viewAppearance)
         return containerView
     }
     
