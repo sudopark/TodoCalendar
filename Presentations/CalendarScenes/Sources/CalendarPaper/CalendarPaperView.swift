@@ -9,9 +9,8 @@
 import SwiftUI
 import CommonPresentation
 
-@Observable final class CalenarPaperViewEventHandelr {
+final class CalenarPaperViewEventHandelr: Observable {
     
-    @ObservationIgnored
     var onAppear: () -> Void = { }
     
     func bind(_ viewModel: any CalendarPaperViewModel) {
