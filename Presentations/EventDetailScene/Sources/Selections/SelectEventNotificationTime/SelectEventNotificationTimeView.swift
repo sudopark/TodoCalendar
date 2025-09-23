@@ -17,16 +17,16 @@ import CommonPresentation
 
 // MARK: - SelectEventNotificationTimeViewState
 
-final class SelectEventNotificationTimeViewState: ObservableObject {
+@Observable final class SelectEventNotificationTimeViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var defaultTimeOptions: [NotificationTimeOptionModel] = []
-    @Published var customTimeOptions: [CustomTimeOptionModel] = []
-    @Published var selectedDefaultTimeOptions: [EventNotificationTimeOption] = []
-    @Published var suggestCustomOptionTime: Date = Date()
-    @Published var notificaitonPermissionDenied: Bool = false
+    var defaultTimeOptions: [NotificationTimeOptionModel] = []
+    var customTimeOptions: [CustomTimeOptionModel] = []
+    var selectedDefaultTimeOptions: [EventNotificationTimeOption] = []
+    var suggestCustomOptionTime: Date = Date()
+    var notificaitonPermissionDenied: Bool = false
     
     func isSelectedDefaultModel(_ option: EventNotificationTimeOption?) -> Bool {
         guard let option = option
@@ -76,7 +76,7 @@ final class SelectEventNotificationTimeViewState: ObservableObject {
 
 // MARK: - SelectEventNotificationTimeViewEventHandler
 
-final class SelectEventNotificationTimeViewEventHandler: ObservableObject {
+final class SelectEventNotificationTimeViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
     var toggleSelectDefaultOption: (EventNotificationTimeOption?) -> Void = { _ in }
@@ -91,7 +91,7 @@ final class SelectEventNotificationTimeViewEventHandler: ObservableObject {
 
 struct SelectEventNotificationTimeContainerView: View {
     
-    @StateObject private var state: SelectEventNotificationTimeViewState = .init()
+    @State private var state: SelectEventNotificationTimeViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: SelectEventNotificationTimeViewEventHandler
     
@@ -111,9 +111,9 @@ struct SelectEventNotificationTimeContainerView: View {
                 self.stateBinding(self.state)
                 eventHandlers.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -121,9 +121,9 @@ struct SelectEventNotificationTimeContainerView: View {
 
 struct SelectEventNotificationTimeView: View {
     
-    @EnvironmentObject private var state: SelectEventNotificationTimeViewState
+    @Environment(SelectEventNotificationTimeViewState.self) private var state
+    @Environment(SelectEventNotificationTimeViewEventHandler.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: SelectEventNotificationTimeViewEventHandler
     
     var body: some View {
         NavigationStack {
@@ -257,7 +257,7 @@ struct SelectEventNotificationTimeView: View {
     }
     
     private var addCustimOptionView: some View {
-        
+        @Bindable var state = self.state
         return HStack {
             DatePicker(
                 "",
@@ -367,9 +367,9 @@ struct SelectEventNotificationTimeViewPreviewProvider: PreviewProvider {
         }
         
         let view = SelectEventNotificationTimeView()
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
         return view
     }
 }

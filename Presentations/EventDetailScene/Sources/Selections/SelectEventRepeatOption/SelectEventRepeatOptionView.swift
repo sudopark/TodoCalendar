@@ -31,18 +31,18 @@ enum SelectEndOptionType: Int {
     }
 }
 
-final class SelectEventRepeatOptionViewState: ObservableObject {
+@Observable final class SelectEventRepeatOptionViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var optionList: [[SelectRepeatingOptionModel]] = []
-    @Published var selectedOptionId: String?
-    @Published var repeatStartTimeText: String?
-    @Published var selectedEndCountText: String = "10"
-    @Published var selectedEndDate: Date = Date()
-    @Published var selectEndOptionType: SelectEndOptionType = .never
-    @Published var isNoRepeatOption = false
+    var optionList: [[SelectRepeatingOptionModel]] = []
+    var selectedOptionId: String?
+    var repeatStartTimeText: String?
+    var selectedEndCountText: String = "10"
+    var selectedEndDate: Date = Date()
+    var selectEndOptionType: SelectEndOptionType = .never
+    var isNoRepeatOption = false
     let availableEndOptionTypee: [SelectEndOptionType] = [.after, .on, .never]
     
     func bind(_ viewModel: any SelectEventRepeatOptionViewModel) {
@@ -105,7 +105,7 @@ final class SelectEventRepeatOptionViewState: ObservableObject {
     }
 }
 
-final class SelectEventRepeatOptionViewEventHandlers: ObservableObject {
+final class SelectEventRepeatOptionViewEventHandlers: Observable {
     var onAppear: () -> Void = { }
     var close: () -> Void = { }
     var itemSelect: (String) -> Void = { _ in }
@@ -119,7 +119,7 @@ final class SelectEventRepeatOptionViewEventHandlers: ObservableObject {
 
 struct SelectEventRepeatOptionContainerView: View {
     
-    @StateObject private var state: SelectEventRepeatOptionViewState = .init()
+    @State private var state: SelectEventRepeatOptionViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: SelectEventRepeatOptionViewEventHandlers
     
@@ -139,9 +139,9 @@ struct SelectEventRepeatOptionContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandlers)
             .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
     }
 }
 
@@ -149,10 +149,9 @@ struct SelectEventRepeatOptionContainerView: View {
 
 struct SelectEventRepeatOptionView: View {
     
-    @EnvironmentObject private var state: SelectEventRepeatOptionViewState
+    @Environment(SelectEventRepeatOptionViewState.self) private var state
+    @Environment(SelectEventRepeatOptionViewEventHandlers.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
-    
-    @EnvironmentObject private var eventHandlers: SelectEventRepeatOptionViewEventHandlers
     @FocusState private var isEditing: Bool
     
     var body: some View {
@@ -329,9 +328,10 @@ struct SelectEventRepeatOptionView: View {
     }
     
     private var repeatEndTimeView: some View {
-        DatePicker(
+        @Bindable var state = self.state
+        return DatePicker(
             "",
-            selection: self.$state.selectedEndDate,
+            selection: $state.selectedEndDate,
             displayedComponents: [.date]
         )
         .invertColorIfNeed(appearance)
@@ -342,7 +342,8 @@ struct SelectEventRepeatOptionView: View {
     }
     
     private var repeatEndCountView: some View {
-        HStack {
+        @Bindable var state = self.state
+        return HStack {
             TextField("", text: $state.selectedEndCountText)
                 .keyboardType(.numberPad)
                 .focused($isEditing)
@@ -411,8 +412,8 @@ struct SelectEventRepeatOptionViewPreviewProvider: PreviewProvider {
             ]
         ]
         return view
+            .environment(state)
+            .environment(handler)
             .environmentObject(viewAppearance)
-            .environmentObject(state)
-            .environmentObject(handler)
     }
 }
