@@ -17,31 +17,31 @@ import CommonPresentation
 
 // MARK: - EventDetailViewState
 
-final class EventDetailViewState: ObservableObject {
+@Observable final class EventDetailViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var selectedTag: SelectedTag?
-    @Published var enterName: String = ""
-    @Published var eventDetailTypeModel: EventDetailTypeModel?
-    @Published var isSaving: Bool = false
-    @Published var isSavable: Bool = false
-    @Published var selectedTime: SelectedTime?
-    @Published var selectedRepeat: String?
-    @Published var selectedRepeatPeriod: String?
-    @Published var selectedNotificationTimeText: String?
-    @Published var isAllDay: Bool = false
-    @Published var availableMoreActions: [[EventDetailMoreAction]] = []
-    @Published var isForemost: Bool = false
+    var selectedTag: SelectedTag?
+    var enterName: String = ""
+    var eventDetailTypeModel: EventDetailTypeModel?
+    var isSaving: Bool = false
+    var isSavable: Bool = false
+    var selectedTime: SelectedTime?
+    var selectedRepeat: String?
+    var selectedRepeatPeriod: String?
+    var selectedNotificationTimeText: String?
+    var isAllDay: Bool = false
+    var availableMoreActions: [[EventDetailMoreAction]] = []
+    var isForemost: Bool = false
     
-    @Published var selectedStartDate: Date = Date()
-    @Published var selectedEndDate: Date = Date().addingTimeInterval(60)
-    var suggestEventEndTime: () -> Date? = { nil }
-    @Published var url: String = ""
-    @Published var isValidURLEntered: Bool = false
-    @Published var linkPreviewModel: LinkPreviewModel?
-    @Published var memo: String = ""
+    @ObservationIgnored var suggestEventEndTime: () -> Date? = { nil }
+    var selectedStartDate: Date = Date()
+    var selectedEndDate: Date = Date().addingTimeInterval(60)
+    var url: String = ""
+    var isValidURLEntered: Bool = false
+    var linkPreviewModel: LinkPreviewModel?
+    var memo: String = ""
     
     func bind(
         _ viewModel: any EventDetailViewModel,
@@ -168,15 +168,9 @@ final class EventDetailViewState: ObservableObject {
 }
 
 
-// MARK: - EventDetailContainerView
-
-struct EventDetailContainerView: View {
-    
-    @StateObject private var state: EventDetailViewState = .init()
-    private let viewAppearance: ViewAppearance
+final class EventDetailViewEventHandlers: Observable {
     
     var onAppear: () -> Void = { }
-    var stateBinding: (EventDetailViewState) -> Void = { _ in }
     var nameEntered: (String) -> Void = { _ in }
     var toggleIsTodo: () -> Void = { }
     var selectStartTime: ( Date) -> Void = { _ in }
@@ -196,35 +190,63 @@ struct EventDetailContainerView: View {
     var showTodoEventGuide: () -> Void = { }
     var showForemostEventGuide: () -> Void = { }
     
-    init(viewAppearance: ViewAppearance) {
+    func bind(
+        _ viewModel: any EventDetailViewModel,
+        _ inputViewModel: any EventDetailInputViewModel,
+        with state: EventDetailViewState
+    ) {
+        
+        self.onAppear = { [weak viewModel, weak inputViewModel] in
+            inputViewModel?.setup()
+            viewModel?.prepare()
+        }
+        self.nameEntered = inputViewModel.enter(name:)
+        self.toggleIsTodo = viewModel.toggleIsTodo
+        self.selectStartTime = inputViewModel.selectStartTime(_:)
+        self.selectEndTime = inputViewModel.selectEndtime(_:)
+        self.removeTime = inputViewModel.removeTime
+        self.removeEventEndTime = inputViewModel.removeEventEndTime
+        self.toggleIsAllDay = inputViewModel.toggleIsAllDay
+        self.selectRepeatOption = inputViewModel.selectRepeatOption
+        self.selectTag = inputViewModel.selectEventTag
+        self.selectNotificationOption = inputViewModel.selectNotificationTime
+//        self.selectPlace = TODO
+        self.enterUrl = inputViewModel.enter(url:)
+        self.openURL = inputViewModel.openURL
+        self.enterMemo = inputViewModel.enter(memo:)
+        self.save = viewModel.save
+        self.doMoreAction = viewModel.handleMoreAction(_:)
+        self.showTodoEventGuide = viewModel.showTodoGuide
+        self.showForemostEventGuide = viewModel.showForemostEventGuide
+    }
+}
+
+// MARK: - EventDetailContainerView
+
+struct EventDetailContainerView: View {
+    
+    @State private var state: EventDetailViewState = .init()
+    private let eventHandler: EventDetailViewEventHandlers
+    private let viewAppearance: ViewAppearance
+    
+    var stateBinding: (EventDetailViewState) -> Void = { _ in }
+    
+    init(
+        eventHandler: EventDetailViewEventHandlers,
+        viewAppearance: ViewAppearance
+    ) {
+        self.eventHandler = eventHandler
         self.viewAppearance = viewAppearance
     }
     
     var body: some View {
         return EventDetailView()
-            .eventHandler(\.nameEntered, nameEntered)
-            .eventHandler(\.toggleIsTodo, toggleIsTodo)
-            .eventHandler(\.selectStartTime, selectStartTime)
-            .eventHandler(\.selectEndTime, selectEndTime)
-            .eventHandler(\.removeTime, removeTime)
-            .eventHandler(\.removeEventEndTime, removeEventEndTime)
-            .eventHandler(\.toggleIsAllDay, toggleIsAllDay)
-            .eventHandler(\.selectRepeatOption, selectRepeatOption)
-            .eventHandler(\.selectNotificationOption, selectNotificationOption)
-            .eventHandler(\.selectTag, selectTag)
-            .eventHandler(\.selectPlace, selectPlace)
-            .eventHandler(\.enterUrl, enterUrl)
-            .eventHandler(\.openURL, openURL)
-            .eventHandler(\.enterMemo, enterMemo)
-            .eventHandler(\.save, save)
-            .eventHandler(\.doMoreAction, doMoreAction)
-            .eventHandler(\.showTodoEventGuide, showTodoEventGuide)
-            .eventHandler(\.showForemostEventGuide, showForemostEventGuide)
             .onAppear {
                 self.stateBinding(self.state)
-                self.onAppear()
+                self.eventHandler.onAppear()
             }
-            .environmentObject(state)
+            .environment(state)
+            .environment(eventHandler)
             .environmentObject(viewAppearance)
     }
 }
@@ -233,7 +255,8 @@ struct EventDetailContainerView: View {
 
 struct EventDetailView: View {
     
-    @EnvironmentObject private var state: EventDetailViewState
+    @Environment(EventDetailViewState.self) private var state
+    @Environment(EventDetailViewEventHandlers.self) private var eventHandlers
     @EnvironmentObject private var appearance: ViewAppearance
     private enum InputFields: String {
         case name
@@ -249,25 +272,6 @@ struct EventDetailView: View {
     }
     @State private var isTimeSelecting: TimeSelecting?
     
-    fileprivate var nameEntered: (String) -> Void = { _ in }
-    fileprivate var toggleIsTodo: () -> Void = { }
-    fileprivate var selectStartTime: ( Date) -> Void = { _ in }
-    fileprivate var selectEndTime: (Date) -> Void = { _ in }
-    fileprivate var removeTime: () -> Void = { }
-    fileprivate var removeEventEndTime: () -> Void = { }
-    fileprivate var toggleIsAllDay: () -> Void = { }
-    fileprivate var selectRepeatOption: () -> Void = { }
-    fileprivate var selectTag: () -> Void = { }
-    fileprivate var selectNotificationOption: () -> Void = { }
-    fileprivate var selectPlace: () -> Void = { }
-    fileprivate var enterUrl: (String) -> Void = { _ in }
-    fileprivate var openURL: () -> Void = { }
-    fileprivate var enterMemo: (String) -> Void = { _ in }
-    fileprivate var save: () -> Void = { }
-    var doMoreAction: (EventDetailMoreAction) -> Void = { _ in }
-    fileprivate var showTodoEventGuide: () -> Void = { }
-    fileprivate var showForemostEventGuide: () -> Void = { }
-
     private var selectedTagColor: Color {
         guard let tag = self.state.selectedTag else { return .clear }
         return self.appearance.color(tag.tagId).asColor
@@ -317,10 +321,10 @@ struct EventDetailView: View {
                 
                 BottomConfirmButton(
                     title: "common.save".localized(),
-                    isEnable: self.$state.isSavable,
-                    isProcessing: self.$state.isSaving
+                    isEnable: state.isSavable,
+                    isProcessing: state.isSaving
                 )
-                .eventHandler(\.onTap, self.save)
+                .eventHandler(\.onTap, eventHandlers.save)
             }
         }
         .allowsHitTesting(!state.isSaving)
@@ -337,7 +341,7 @@ struct EventDetailView: View {
                         Section {
                             ForEach(self.state.availableMoreActions[sectionIndex]) { action in
                                 Button(role: action.isRemove ? .destructive : nil) {
-                                    self.doMoreAction(action)
+                                    eventHandlers.doMoreAction(action)
                                 } label: {
                                     HStack {
                                         Text(action.text)
@@ -364,14 +368,17 @@ struct EventDetailView: View {
                 .fill(self.selectedTagColor)
                 .frame(width: 6)
             
+            @Bindable var state = self.state
             TextField(
                 "",
-                text: self.$state.enterName,
+                text: $state.enterName,
                 prompt: Text("eventDetail.edit::add_new_name::placeholder".localized())
                     .foregroundStyle(appearance.colorSet.placeHolder.asColor)
                             
             )
-            .onReceive(self.state.$enterName, perform: self.nameEntered)
+            .onChange(of: state.enterName) { _, new in
+                self.eventHandlers.nameEntered(new)
+            }
             .focused($isFocusInput, equals: .name)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
@@ -411,7 +418,7 @@ struct EventDetailView: View {
                 .font(self.appearance.fontSet.normal.asFont)
             
             Button {
-                self.showForemostEventGuide()
+                eventHandlers.showForemostEventGuide()
             } label: {
                 Image(systemName: "questionmark.circle")
                     .font(self.appearance.fontSet.normal.asFont)
@@ -432,7 +439,7 @@ struct EventDetailView: View {
                 .font(self.appearance.fontSet.normal.asFont)
             
             Button {
-                self.toggleIsTodo()
+                eventHandlers.toggleIsTodo()
             } label: {
                 Text(
                     model.selectType == .todo ? "common.yes".localized() : "common.no".localized()
@@ -463,7 +470,7 @@ struct EventDetailView: View {
 
             if model.showHelpButton {
                 Button {
-                    self.showTodoEventGuide()
+                    eventHandlers.showTodoEventGuide()
                 } label: {
                     Image(systemName: "questionmark.circle")
                         .font(self.appearance.fontSet.normal.asFont)
@@ -587,7 +594,7 @@ struct EventDetailView: View {
             ? self.appearance.colorSet.selectedDayText.asColor
             : self.appearance.colorSet.text2.asColor
         return Button {
-            self.toggleIsAllDay()
+            eventHandlers.toggleIsAllDay()
             
         } label: {
             Text("calendar::event_time::allday".localized())
@@ -646,18 +653,20 @@ struct EventDetailView: View {
 
     private func timePickerView(_ selecting: TimeSelecting) -> some View {
         return VStack {
+            @Bindable var state = self.state
             DatePicker(
                 "",
                 selection: selecting == .start
-                    ? self.$state.selectedStartDate : self.$state.selectedEndDate,
+                    ? $state.selectedStartDate : $state.selectedEndDate,
                 displayedComponents: self.state.isAllDay ? [.date] : [.date, .hourAndMinute]
             )
             .datePickerStyle(.compact)
-            .onReceive(selecting == .start ? self.state.$selectedStartDate : self.state.$selectedEndDate) { date in
+            .onChange(of: selecting == .start ? self.state.selectedStartDate : self.state.selectedEndDate) { _, new in
+                
                 if selecting == .start {
-                    self.selectStartTime(date)
+                    eventHandlers.selectStartTime(new)
                 } else {
-                    self.selectEndTime(date)
+                    eventHandlers.selectEndTime(new)
                 }
             }
             .labelsHidden()
@@ -674,7 +683,7 @@ struct EventDetailView: View {
     
     private var removeEventTimeView: some View {
         Button {
-            self.removeTime()
+            eventHandlers.removeTime()
             self.updateTimePickerShowing(nil)
         } label: {
             Text("eventDetail.edit::clearEventTime::button".localized())
@@ -688,7 +697,7 @@ struct EventDetailView: View {
     
     private var removeEndTimeView: some View {
         Button {
-            self.removeEventEndTime()
+            eventHandlers.removeEventEndTime()
         } label: {
             Text("eventDetail.edit::noEventTime::button".localized())
                 .padding(8)
@@ -725,7 +734,7 @@ struct EventDetailView: View {
                     )
                     .onTapGesture {
                         self.appearance.impactIfNeed()
-                        self.selectRepeatOption()
+                        eventHandlers.selectRepeatOption()
                     }
                 Spacer()
             }
@@ -761,7 +770,7 @@ struct EventDetailView: View {
             )
             .onTapGesture {
                 self.appearance.impactIfNeed()
-                self.selectTag()
+                eventHandlers.selectTag()
             }
             Spacer()
         }
@@ -794,7 +803,7 @@ struct EventDetailView: View {
                 )
                 .onTapGesture {
                     self.appearance.impactIfNeed()
-                    self.selectNotificationOption()
+                    eventHandlers.selectNotificationOption()
                 }
             Spacer()
         }
@@ -806,9 +815,10 @@ struct EventDetailView: View {
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
+            @Bindable var state = self.state
             TextField(
                 "",
-                text: self.$state.url,
+                text: $state.url,
                 prompt: Text("URL").foregroundStyle(appearance.colorSet.placeHolder.asColor)
             )
             .autocorrectionDisabled()
@@ -819,11 +829,13 @@ struct EventDetailView: View {
             .onSubmit {
                 self.isFocusInput = nil
             }
-            .onReceive(self.state.$url, perform: self.enterUrl)
+            .onChange(of: state.url) { _, new in
+                self.eventHandlers.enterUrl(new)
+            }
             
             if state.isValidURLEntered {
                 Button {
-                    self.openURL()
+                    eventHandlers.openURL()
                 } label: {
                     Image(systemName: "globe")
                         .font(.system(size: 16, weight: .light))
@@ -850,6 +862,7 @@ struct EventDetailView: View {
                         .padding(.top, 8)
                 }
              
+                @Bindable var state = self.state
                 TextEditor(text: $state.memo)
                     .focused(self.$isFocusInput, equals: .memo)
                     .autocorrectionDisabled()
@@ -863,7 +876,9 @@ struct EventDetailView: View {
                     .onSubmit {
                         self.isFocusInput = nil
                     }
-                    .onReceive(self.state.$memo, perform: self.enterMemo)
+                    .onChange(of: state.memo) { _, new in
+                        self.eventHandlers.enterMemo(new)
+                    }
             }
         }
     }
@@ -916,7 +931,7 @@ struct EventDetailView: View {
         }
         .zIndex(-1)
         .onTapGesture {
-            self.openURL()
+            eventHandlers.openURL()
         }
     }
 }
@@ -1035,10 +1050,12 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
 //        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
 //            state.isSaving = true
 //        }
+        let eventHandler = EventDetailViewEventHandlers()
+        eventHandler.toggleIsAllDay = { state.isAllDay.toggle() }
         let eventView = EventDetailView()
-            .eventHandler(\.toggleIsAllDay) { state.isAllDay.toggle() }
+            .environment(state)
+            .environment(eventHandler)
             .environmentObject(viewAppearance)
-            .environmentObject(state)
         return eventView
     }
 }
