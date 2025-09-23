@@ -17,8 +17,8 @@ import CommonPresentation
 struct ForemostEventView: View {
     
     private let viewModel: any EventCellViewModel
+    private let foremostEventMarkingStatus: ForemostMarkingStatus
     @EnvironmentObject private var appearance: ViewAppearance
-    @Binding private var foremostEventMarkingStatus: ForemostMarkingStatus
     
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestCancelDoneTodo: (String) -> Void = { _ in }
@@ -27,10 +27,10 @@ struct ForemostEventView: View {
     
     init(
         viewModel: any EventCellViewModel,
-        foremostEventMarkingStatus: Binding<ForemostMarkingStatus>
+        foremostEventMarkingStatus: ForemostMarkingStatus
     ) {
         self.viewModel = viewModel
-        self._foremostEventMarkingStatus = foremostEventMarkingStatus
+        self.foremostEventMarkingStatus = foremostEventMarkingStatus
     }
     
     var body: some View {
@@ -45,7 +45,7 @@ struct ForemostEventView: View {
             EventListCellView(
                 cellViewModel: viewModel,
                 isForemostEvent: true,
-                foremostEventMarkingStatus: _foremostEventMarkingStatus
+                foremostEventMarkingStatus: foremostEventMarkingStatus
             )
                 .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
                 .eventHandler(\.requestCancelDoneTodo, self.requestCancelDoneTodo)

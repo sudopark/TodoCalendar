@@ -46,7 +46,7 @@ struct EventListCellView: View {
     
     @EnvironmentObject private var pendingDoneState: PendingCompleteTodoState
     @EnvironmentObject private var appearance: ViewAppearance
-    @Binding private var foremostEventMarkingStatus: ForemostMarkingStatus
+    private let foremostEventMarkingStatus: ForemostMarkingStatus
     
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestCancelDoneTodo: (String) -> Void = { _ in }
@@ -60,12 +60,12 @@ struct EventListCellView: View {
         cellViewModel: any EventCellViewModel,
         isUncompletedTodo: Bool = false,
         isForemostEvent: Bool = false,
-        foremostEventMarkingStatus: Binding<ForemostMarkingStatus>
+        foremostEventMarkingStatus: ForemostMarkingStatus
     ) {
         self.cellViewModel = cellViewModel
         self.isUncompletedTodo = isUncompletedTodo
         self.isForemostEvent = isForemostEvent
-        self._foremostEventMarkingStatus = foremostEventMarkingStatus
+        self.foremostEventMarkingStatus = foremostEventMarkingStatus
     }
     
     var body: some View {

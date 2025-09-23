@@ -223,7 +223,7 @@ struct DayEventListView: View {
     }
     
     private func foremostSectionView(_ foremost: any EventCellViewModel) -> some View {
-        ForemostEventView(viewModel: foremost, foremostEventMarkingStatus: $state.foremostEventMarkingStatus)
+        ForemostEventView(viewModel: foremost, foremostEventMarkingStatus: state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
                 self.isFocusInput = false
                 eventHandler.requestDoneTodo($0)
@@ -243,7 +243,7 @@ struct DayEventListView: View {
     }
     
     private func uncompletedTodosSectionView(_ models: [TodoEventCellViewModel]) -> some View {
-        UncompletedTodoView(models, $state.foremostEventMarkingStatus)
+        UncompletedTodoView(models, state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
                 self.isFocusInput = false
                 eventHandler.requestDoneTodo($0)
@@ -309,7 +309,7 @@ struct DayEventListView: View {
         VStack(alignment: .leading, spacing: 6) {
             ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
                 
-                EventListCellView(cellViewModel: cellViewModel, foremostEventMarkingStatus: $state.foremostEventMarkingStatus)
+                EventListCellView(cellViewModel: cellViewModel, foremostEventMarkingStatus: state.foremostEventMarkingStatus)
                     .eventHandler(\.requestDoneTodo) {
                         self.isFocusInput = false
                         eventHandler.requestDoneTodo($0)
