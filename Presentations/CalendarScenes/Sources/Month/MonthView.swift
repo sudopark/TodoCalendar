@@ -92,7 +92,7 @@ struct MonthContainerView: View {
             }
             .environment(state)
             .environment(eventHandler)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -109,7 +109,7 @@ struct MonthView: View {
     
     @Environment(MonthViewState.self) private var state
     @Environment(MonthViewEventHandler.self) private var eventHandler
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         VStack(spacing: 0) {
@@ -149,7 +149,7 @@ struct MonthView: View {
                 WeekRowView(week: $0, expectSize)
                     .eventHandler(\.daySelected, eventHandler.daySelected)
                     .environment(state)
-                    .environmentObject(appearance)
+                    .environment(appearance)
             }
         }
     }
@@ -168,7 +168,7 @@ private struct WeekRowView: View {
     private var dayWidth: CGFloat { expectSize.width / 7 }
     
     @Environment(MonthViewState.self) private var state
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     @State private var eventStackModel: WeekEventStackViewModel = .init(linesStack: [], shouldMarkEventDays: false)
     

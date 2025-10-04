@@ -119,7 +119,7 @@ struct ManageAccountContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -129,7 +129,7 @@ struct ManageAccountView: View {
     
     @Environment(ManageAccountViewState.self) private var state
     @Environment(ManageAccountViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -310,7 +310,7 @@ struct ManageAccountViewPreviewProvider: PreviewProvider {
         let view = ManageAccountView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

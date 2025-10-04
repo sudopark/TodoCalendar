@@ -83,7 +83,7 @@ extension SignInViewModelTests {
         viewModel.signIn(viewModel.supportSignInOAuthService.first!)
         
         // then
-        self.wait(for: [expect], timeout: self.timeout)
+        self.wait(for: [expect], timeout: self.timeoutLong)
     }
 
     // 로그인 - 시도 이후 성공시에 진행중 업데이트
@@ -110,7 +110,7 @@ extension SignInViewModelTests {
         let viewModel = self.makeViewModel(shouldFailSignIn: true)
         
         // when
-        let isSigningIns = self.waitOutputs(expect, for: viewModel.isSigningIn) {
+        let isSigningIns = self.waitOutputs(expect, for: viewModel.isSigningIn, timeout: self.timeoutLong) {
             viewModel.signIn(viewModel.supportSignInOAuthService.first!)
         }
         

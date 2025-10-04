@@ -247,7 +247,7 @@ struct EventDetailContainerView: View {
             }
             .environment(state)
             .environment(eventHandler)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -257,7 +257,7 @@ struct EventDetailView: View {
     
     @Environment(EventDetailViewState.self) private var state
     @Environment(EventDetailViewEventHandlers.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance: ViewAppearance
     private enum InputFields: String {
         case name
         case url
@@ -1055,7 +1055,7 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
         let eventView = EventDetailView()
             .environment(state)
             .environment(eventHandler)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return eventView
     }
 }

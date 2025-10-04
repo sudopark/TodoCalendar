@@ -45,7 +45,7 @@ import CommonPresentation
 struct EventListCellView: View {
     
     @Environment(PendingCompleteTodoState.self) private var pendingDoneState
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     private let foremostEventMarkingStatus: ForemostMarkingStatus
     
     var requestDoneTodo: (String) -> Void = { _ in }

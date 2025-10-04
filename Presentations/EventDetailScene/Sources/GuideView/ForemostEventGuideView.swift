@@ -21,13 +21,13 @@ struct ForemostEventGuideView: View {
     var body: some View {
         ForemostEventGuideContentView()
             .eventHandler(\.onClose, onClose)
-            .environmentObject(appearance)
+            .environment(appearance)
     }
 }
 
 private struct ForemostEventGuideContentView: View {
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     var onClose: () -> Void = { }
     
     var body: some View {

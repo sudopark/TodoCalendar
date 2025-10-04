@@ -17,7 +17,7 @@ import CommonPresentation
 struct UncompletedTodoView: View {
     
     private let viewModels: [TodoEventCellViewModel]
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     private let foremostMarkingStatus: ForemostMarkingStatus
     
     var requestDoneTodo: (String) -> Void = { _ in }

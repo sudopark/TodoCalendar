@@ -43,7 +43,7 @@ struct CalenarPaperContainerView: View {
             eventListView: eventListView
         )
         .onAppear(perform: eventHandler.onAppear)
-        .environmentObject(viewAppearance)
+        .environment(viewAppearance)
         .environment(eventHandler)
     }
     
@@ -51,7 +51,7 @@ struct CalenarPaperContainerView: View {
         
         private let monthView: MonthContainerView
         private let eventListView: DayEventListContainerView
-        @EnvironmentObject private var appearance: ViewAppearance
+        @Environment(ViewAppearance.self) private var appearance
         @Environment(CalenarPaperViewEventHandelr.self) private var eventHandler
         
         @State private var keyboardHeightObserver = KeyboardHeightObserver()

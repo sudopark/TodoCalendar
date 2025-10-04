@@ -12,7 +12,7 @@ import Extensions
 
 public struct FullScreenLoadingView: View {
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     private let message: String
     var isLoading: Bool
     

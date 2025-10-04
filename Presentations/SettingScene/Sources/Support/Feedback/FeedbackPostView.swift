@@ -95,7 +95,7 @@ struct FeedbackPostContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -105,7 +105,7 @@ struct FeedbackPostView: View {
     
     @Environment(FeedbackPostViewState.self) private var state
     @Environment(FeedbackPostViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     private enum InputFields {
         case message
@@ -294,7 +294,7 @@ struct FeedbackPostViewPreviewProvider: PreviewProvider {
         let view = FeedbackPostView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

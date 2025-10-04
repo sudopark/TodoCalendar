@@ -141,7 +141,7 @@ struct DayEventListContainerView: View {
             .environment(state)
             .environment(pendingDoneState)
             .environment(eventHandler)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -152,7 +152,7 @@ struct DayEventListView: View {
     @Environment(DayEventListViewState.self) private var state
     @Environment(PendingCompleteTodoState.self) private var pendingDoneState
     @Environment(DayEventListViewEventHandler.self) private var eventHandler
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     @FocusState var isFocusInput: Bool
     
     var body: some View {
@@ -335,7 +335,7 @@ struct DayEventListView: View {
 private struct QuickAddNewTodoView: View {
     
     @Environment(DayEventListViewState.self) private var state
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     @State private var newTodoName: String = ""
     @FocusState.Binding var isFocusInput: Bool
@@ -465,7 +465,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             .environment(state)
             .environment(eventHandler)
             .environment(PendingCompleteTodoState())
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return containerView
     }
     

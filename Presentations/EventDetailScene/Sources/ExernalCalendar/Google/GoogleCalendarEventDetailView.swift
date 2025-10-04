@@ -173,7 +173,7 @@ struct GoogleCalendarEventDetailContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -183,7 +183,7 @@ struct GoogleCalendarEventDetailView: View {
     
     @Environment(GoogleCalendarEventDetailViewState.self) private var state
     @Environment(GoogleCalendarEventDetailViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         ZStack {
@@ -625,7 +625,7 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
         let view = GoogleCalendarEventDetailView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

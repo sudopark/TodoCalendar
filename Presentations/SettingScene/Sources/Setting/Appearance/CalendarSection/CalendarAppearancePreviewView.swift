@@ -91,7 +91,7 @@ final class CalendarSectionAppearanceSettingViewEventHandler: Observable {
 struct CalendarAppearanceSampleView: View {
     
     private let model: CalendarAppearanceModel
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     init(model: CalendarAppearanceModel) {
         self.model = model
@@ -194,7 +194,7 @@ struct CalendarSectionAppearanceSettingView: View {
     
     @State private var state: CalendarSectionAppearanceSettingViewState
     @Environment(CalendarSectionAppearanceSettingViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     @Environment(\.colorScheme) var colorScheme
     
     var stateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
@@ -345,7 +345,7 @@ private extension AccentDays {
 
 private struct SmallToggleStyle: ToggleStyle {
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     func makeBody(configuration: Configuration) -> some View {
         Image(systemName: configuration.isOn ? "checkmark.square" : "square")

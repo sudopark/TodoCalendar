@@ -94,7 +94,7 @@ struct ColorThemeSelectContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -104,7 +104,7 @@ struct ColorThemeSelectView: View {
     
     @Environment(ColorThemeSelectViewState.self) private var state
     @Environment(ColorThemeSelectViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     private let gridRow: [GridItem] = [
         .init(.flexible(minimum: 60, maximum: 100)),
@@ -180,7 +180,7 @@ struct ColorThemeSelectViewPreviewProvider: PreviewProvider {
         let view = ColorThemeSelectView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

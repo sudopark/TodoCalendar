@@ -73,7 +73,7 @@ struct SettingItemListContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -83,7 +83,7 @@ struct SettingItemListView: View {
     
     @Environment(SettingItemListViewState.self) private var state
     @Environment(SettingItemListViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -259,7 +259,7 @@ struct SettingItemListViewPreviewProvider: PreviewProvider {
         let view = SettingItemListView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

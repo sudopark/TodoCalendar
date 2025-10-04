@@ -64,7 +64,7 @@ final class EventOnCalendarViewEventHandler: Observable {
 
 struct EventOnCalendarViewPreviewView: View {
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         HStack {
@@ -123,7 +123,7 @@ struct EventOnCalendarView: View {
     
     @State private var state: EventOnCalendarViewState
     @Environment(EventOnCalendarViewEventHandler.self) private var eventHandler
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var stateBinding: (EventOnCalendarViewState) -> Void = { _ in }
     
@@ -234,6 +234,6 @@ struct EventOnCalendarViewPreviewProvider: PreviewProvider {
                 state.isShowEventTagColor = true
             }
             .environment(eventHandler)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }

@@ -19,7 +19,7 @@ struct AppearanceRow< Content: View>: View {
     private let title: String
     private let subTitle: String?
     private let content: Content
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     init(_ title: String, subTitle: String? = nil, _ content: Content) {
         self.title = title
@@ -145,7 +145,7 @@ struct AppearanceSettingContainerView: View {
             .eventHandler(\.eventOnCalendarSectionStateBinding, eventOnCalendarSectionStateBinding)
             .eventHandler(\.eventListSettingStateBinding, eventListSettingStateBinding)
             .eventHandler(\.appearanceSettingStateBinding, appearanceSettingStateBinding)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
             .environment(calendarSectionEventHandler)
             .environment(eventOnCalendarSectionEventHandler)
             .environment(appearanceSettingEventHandler)
@@ -159,7 +159,7 @@ struct AppearanceSettingView: View {
     
     private let initialSetting: CalendarAppearanceSettings
     @State private var appearanceState: AppearanceSettingViewState
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     @Environment(CalendarSectionAppearanceSettingViewEventHandler.self) private var calendarSectionEventHandler
     @Environment(EventOnCalendarViewEventHandler.self) private var eventOnCalendarSectionEventHandler
     @Environment(EventListAppearanceSettingViewEventHandler.self) private var eventListSettingEventHandler
@@ -265,7 +265,7 @@ struct AppearanceSettingView: View {
 
 struct PlainFormStyle: FormStyle {
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     func makeBody(configuration: Configuration) -> some View {
         return configuration.content
@@ -314,3 +314,4 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
         }
     }
 }
+

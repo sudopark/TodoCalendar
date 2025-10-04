@@ -12,7 +12,7 @@ import UIKit
 
 public struct HTMLAttributedTextView: UIViewRepresentable {
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     let attributeText: NSAttributedString
     let onLinkTap: ((URL) -> Void)?
     

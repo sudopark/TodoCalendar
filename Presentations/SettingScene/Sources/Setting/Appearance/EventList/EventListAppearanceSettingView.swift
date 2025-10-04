@@ -96,7 +96,7 @@ struct EventListAppearanceSettingView: View {
     
     @State private var state: EventListAppearanceSettingViewState
     @Environment(EventListAppearanceSettingViewEventHandler.self) private var eventHandler
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var stateBinding: (EventListAppearanceSettingViewState) -> Void = { _ in }
     
@@ -321,6 +321,6 @@ struct EventListAppearanceSettingPreviewProvider: PreviewProvider {
         let handler = EventListAppearanceSettingViewEventHandler()
         return EventListAppearanceSettingView(.init(setting.calendar))
             .environment(handler)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
