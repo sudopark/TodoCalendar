@@ -91,7 +91,7 @@ struct TimeZoneSelectContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -101,7 +101,7 @@ struct TimeZoneSelectView: View {
     
     @Environment(TimeZoneSelectViewState.self) private var state
     @Environment(TimeZoneSelectViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     @FocusState var searchDidFocused: Bool
     
     var body: some View {
@@ -241,7 +241,7 @@ struct TimeZoneSelectViewPreviewProvider: PreviewProvider {
         let view = TimeZoneSelectView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

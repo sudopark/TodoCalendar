@@ -100,7 +100,7 @@ struct DoneTodoEventListContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -110,7 +110,7 @@ struct DoneTodoEventListView: View {
     
     @Environment(DoneTodoEventListViewState.self) private var state
     @Environment(DoneTodoEventListViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
         
     var body: some View {
         NavigationStack {
@@ -298,7 +298,7 @@ struct DoneTodoEventListViewPreviewProvider: PreviewProvider {
         let view = DoneTodoEventListView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

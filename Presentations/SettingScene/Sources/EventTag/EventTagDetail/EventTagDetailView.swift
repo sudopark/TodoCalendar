@@ -109,7 +109,7 @@ struct EventTagDetailContainerView: View {
             .onAppear {
                 self.stateBinding(self.state)
             }
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
             .environment(state)
             .environment(eventHandler)
     }
@@ -121,7 +121,7 @@ struct EventTagDetailView: View {
     
     @Environment(\.self) var environment
     @Environment(EventTagDetailViewState.self) private var state
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     @Environment(EventTagDetailEventHandler.self) private var eventHandler
     @FocusState private var isFocusInput: Bool
     @State private var selectedOtherColor: Color = .clear
@@ -319,7 +319,7 @@ struct EventTagDetailViewPreviewProvider: PreviewProvider {
         let detailView = EventTagDetailView()
         
         return detailView
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
             .environment(state)
             .environment(eventHandler)
     }

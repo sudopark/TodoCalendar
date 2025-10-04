@@ -87,7 +87,7 @@ struct SignInContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -97,7 +97,7 @@ struct SignInView: View {
     
     @Environment(SignInViewState.self) private var state
     @Environment(SignInViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     private let signInButtonProvider: any SignInButtonProvider
     @State private var rotateDegree : CGFloat = 0
     
@@ -177,7 +177,7 @@ struct SignInViewPreviewProvider: PreviewProvider {
         let view = SignInView(signInButtonProvider: FakeSignInButtonProvider())
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

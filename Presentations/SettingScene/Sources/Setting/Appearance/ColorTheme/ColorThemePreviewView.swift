@@ -23,7 +23,7 @@ struct ColorThemePreviewView: View {
     private let model: ColorThemeModel
     private let metric: Metric
     private let colorSet: ColorSet
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     init(model: ColorThemeModel, metric: Metric, isSystemDark: Bool) {
         self.model = model
@@ -66,7 +66,7 @@ struct ColorThemePreviewView: View {
 struct ColorThemeItemView: View {
     
     private let model: ColorThemeModel
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     @Environment(\.colorScheme) var colorScheme
     
     init(model: ColorThemeModel) {

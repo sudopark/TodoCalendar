@@ -99,7 +99,7 @@ struct CountrySelectContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -109,7 +109,7 @@ struct CountrySelectView: View {
     
     @Environment(CountrySelectViewState.self) private var state
     @Environment(CountrySelectViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -213,7 +213,7 @@ struct CountrySelectViewPreviewProvider: PreviewProvider {
         let view = CountrySelectView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

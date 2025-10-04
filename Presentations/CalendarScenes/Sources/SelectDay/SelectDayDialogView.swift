@@ -12,10 +12,10 @@ import Domain
 import CommonPresentation
 
 
-final class SelectDayDialogViewState: ObservableObject {
+@Observable final class SelectDayDialogViewState {
     
-    @Published fileprivate var selectDate: Date = Date()
-    private var didBind = false
+    fileprivate var selectDate: Date = Date()
+    @ObservationIgnored private var didBind = false
     
     func bind(_ viewModel: any SelectDayDialogViewModel) {
         guard self.didBind == false else { return }
@@ -25,7 +25,7 @@ final class SelectDayDialogViewState: ObservableObject {
     }
 }
 
-final class SelectDayDialogEventHandler: ObservableObject {
+final class SelectDayDialogEventHandler: Observable {
     
     var daySelected: (Date) -> Void = { _ in }
     var confirmSelect: () -> Void = { }
@@ -37,7 +37,7 @@ final class SelectDayDialogEventHandler: ObservableObject {
 
 struct SelectDayDialogContainerView: View {
     
-    @StateObject private var state: SelectDayDialogViewState = .init()
+    @State private var state: SelectDayDialogViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: SelectDayDialogEventHandler
     
@@ -56,24 +56,25 @@ struct SelectDayDialogContainerView: View {
             .onAppear {
                 self.stateBinding(self.state)
             }
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandler)
+            .environment(state)
+            .environment(viewAppearance)
+            .environment(eventHandler)
     }
 }
 
 
 private struct SelectDayDialogView: View {
     
-    @EnvironmentObject private var state: SelectDayDialogViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandler: SelectDayDialogEventHandler
+    @Environment(SelectDayDialogViewState.self) private var state
+    @Environment(ViewAppearance.self) private var appearance
+    @Environment(SelectDayDialogEventHandler.self) private var eventHandler
     
     var body: some View {
         BottomSlideView {
             
             VStack(alignment: .leading, spacing: 10) {
                 
+                @Bindable var state = self.state
                 DatePicker("", selection: $state.selectDate, displayedComponents: .date)
                     .datePickerStyle(.graphical)
                     .onChange(of: state.selectDate, initial: false) { _, new in
@@ -106,9 +107,9 @@ struct SelectDayDialogView_Preview: PreviewProvider {
         let eventHandler = SelectDayDialogEventHandler()
         let state = SelectDayDialogViewState()
         let view = SelectDayDialogView()
-            .environmentObject(state)
-            .environmentObject(eventHandler)
-            .environmentObject(viewAppearance)
+            .environment(state)
+            .environment(eventHandler)
+            .environment(viewAppearance)
         return view
     }
 }

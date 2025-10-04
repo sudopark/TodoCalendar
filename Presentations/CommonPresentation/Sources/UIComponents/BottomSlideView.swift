@@ -13,7 +13,7 @@ public struct BottomSlideView<ContentView: View>: View {
     private let contentView: ContentView
     public var outsideTap: () -> Void = { }
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     public init(_ contentView: () -> ContentView) {
         self.contentView = contentView()

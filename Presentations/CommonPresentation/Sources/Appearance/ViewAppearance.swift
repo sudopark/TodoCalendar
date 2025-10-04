@@ -8,40 +8,40 @@
 import SwiftUI
 import Combine
 import Domain
+@preconcurrency import CombineExt
 
-
-public class ViewAppearance: ObservableObject {
+@Observable public class ViewAppearance: @unchecked Sendable {
     
-    public var colorSetKey: ColorSetKeys
-    @Published public var tagColors: EventTagColorSet
-    @Published public var colorSet: any ColorSet
-    @Published public var fontSet: any FontSet
-    @Published public var navigationBarId: String = UUID().uuidString
+    @ObservationIgnored public var colorSetKey: ColorSetKeys
+    public var tagColors: EventTagColorSet
+    public var colorSet: any ColorSet
+    public var fontSet: any FontSet
+    public var navigationBarId: String = UUID().uuidString
     public func forceReloadNavigationBar() {
         self.navigationBarId = UUID().uuidString
     }
     
     // calendar
-    @Published public var accnetDayPolicy: [AccentDays: Bool]
-    @Published public var showUnderLineOnEventDay: Bool
+    public var accnetDayPolicy: [AccentDays: Bool]
+    public var showUnderLineOnEventDay: Bool
     
     // event on calendar
-    @Published public var eventOnCalenarTextAdditionalSize: CGFloat
-    @Published public var eventOnCalendarIsBold: Bool
-    @Published public var eventOnCalendarShowEventTagColor: Bool
+    public var eventOnCalenarTextAdditionalSize: CGFloat
+    public var eventOnCalendarIsBold: Bool
+    public var eventOnCalendarShowEventTagColor: Bool
     
     // event list
-    @Published public var eventTextAdditionalSize: CGFloat
-    @Published public var showHoliday: Bool
-    @Published public var showLunarCalendarDate: Bool
-    @Published public var is24hourForm: Bool
+    public var eventTextAdditionalSize: CGFloat
+    public var showHoliday: Bool
+    public var showLunarCalendarDate: Bool
+    public var is24hourForm: Bool
     
     // general
-    @Published public var hapticEffectOff: Bool
-    @Published public var animationEffectOff: Bool
+    public var hapticEffectOff: Bool
+    public var animationEffectOff: Bool
     
     // event tag color
-    @Published public var allEventTagColorMap: [EventTagId: UIColor] = [:]
+    public var allEventTagColorMap: [EventTagId: UIColor] = [:]
     public func color(_ id: EventTagId?) -> UIColor {
         return allEventTagColorMap[id ?? .default] ??  allEventTagColorMap[.default] ?? .clear
     }
@@ -54,8 +54,8 @@ public class ViewAppearance: ObservableObject {
     
     
     // Google calendar color
-    @Published public var googleCalendarColor: GoogleCalendar.Colors?
-    @Published public var googleCalendarTagMap: [String: GoogleCalendar.Tag] = [:]
+    public var googleCalendarColor: GoogleCalendar.Colors?
+    public var googleCalendarTagMap: [String: GoogleCalendar.Tag] = [:]
     
     public func googleEventColor(
         _ colorId: String?, _ calendarId: String
@@ -182,11 +182,39 @@ extension ViewAppearance {
 extension ViewAppearance {
     
     public var didUpdated: AnyPublisher<(EventTagColorSet, any FontSet, any ColorSet), Never> {
-        return Publishers.CombineLatest3(
-            self.$tagColors,
-            self.$fontSet,
-            self.$colorSet
-        )
+        Publishers.Create { subscriber in
+            
+            final class IsCancelledFlag: @unchecked Sendable {
+                var flag = false
+            }
+            let isCancelled = IsCancelledFlag()
+            
+            @Sendable func track() {
+                guard isCancelled.flag == false else { return }
+                
+                Task { @MainActor in
+                    guard isCancelled.flag == false else { return }
+                    
+                    let current = withObservationTracking {
+                        return (self.tagColors, self.fontSet, self.colorSet)
+                    } onChange: {
+                        guard isCancelled.flag == false else { return }
+                        
+                        DispatchQueue.main.async {
+                            track()
+                        }
+                    }
+                    
+                    subscriber.send(current)
+                }
+            }
+            track()
+            
+            return AnyCancellable {
+                isCancelled.flag = true
+            }
+        }
+        .receive(on: RunLoop.main)
         .eraseToAnyPublisher()
     }
 }

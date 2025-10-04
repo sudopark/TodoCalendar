@@ -97,7 +97,7 @@ struct HolidayListContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -107,7 +107,7 @@ struct HolidayListView: View {
     
     @Environment(HolidayListViewState.self) private var state
     @Environment(HolidayListViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -254,7 +254,7 @@ struct HolidayListViewPreviewProvider: PreviewProvider {
         let view = HolidayListView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

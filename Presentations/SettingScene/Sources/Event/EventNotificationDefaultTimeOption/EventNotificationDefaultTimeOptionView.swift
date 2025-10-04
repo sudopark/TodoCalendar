@@ -96,7 +96,7 @@ struct EventNotificationDefaultTimeOptionContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -110,7 +110,7 @@ struct EventNotificationDefaultTimeOptionView: View {
     }
     @Environment(EventNotificationDefaultTimeOptionViewState.self) private var state
     @Environment(EventNotificationDefaultTimeOptionViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -252,7 +252,7 @@ struct EventNotificationDefaultTimeOptionViewPreviewProvider: PreviewProvider {
         let view = EventNotificationDefaultTimeOptionView(isForAllDay: false)
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

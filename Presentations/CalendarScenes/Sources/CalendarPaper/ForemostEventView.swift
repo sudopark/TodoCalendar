@@ -18,7 +18,7 @@ struct ForemostEventView: View {
     
     private let viewModel: any EventCellViewModel
     private let foremostEventMarkingStatus: ForemostMarkingStatus
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestCancelDoneTodo: (String) -> Void = { _ in }

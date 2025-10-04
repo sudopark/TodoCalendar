@@ -113,7 +113,7 @@ struct SelectEventNotificationTimeContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -123,7 +123,7 @@ struct SelectEventNotificationTimeView: View {
     
     @Environment(SelectEventNotificationTimeViewState.self) private var state
     @Environment(SelectEventNotificationTimeViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -369,7 +369,7 @@ struct SelectEventNotificationTimeViewPreviewProvider: PreviewProvider {
         let view = SelectEventNotificationTimeView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

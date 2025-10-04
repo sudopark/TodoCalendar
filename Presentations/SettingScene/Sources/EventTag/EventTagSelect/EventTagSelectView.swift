@@ -91,7 +91,7 @@ struct EventTagSelectContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -101,7 +101,7 @@ struct EventTagSelectView: View {
     
     @Environment(EventTagSelectViewState.self) private var state
     @Environment(EventTagSelectViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -197,7 +197,7 @@ struct EventTagSelectViewPreviewProvider: PreviewProvider {
         let view = EventTagSelectView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }

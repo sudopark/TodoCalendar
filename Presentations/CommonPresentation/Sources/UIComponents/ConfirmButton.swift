@@ -16,7 +16,7 @@ public struct ConfirmButton: View {
     private var isEnable: Bool
     private var isProcessing: Bool
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     public var onTap: () -> Void = { }
     
     public init(

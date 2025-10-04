@@ -10,7 +10,7 @@ import SwiftUI
 
 public struct CloseButton: View {
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     public var onTap: () -> Void = { }
     
     public init() { }

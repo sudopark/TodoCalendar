@@ -141,7 +141,7 @@ struct SelectEventRepeatOptionContainerView: View {
             }
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -151,7 +151,7 @@ struct SelectEventRepeatOptionView: View {
     
     @Environment(SelectEventRepeatOptionViewState.self) private var state
     @Environment(SelectEventRepeatOptionViewEventHandlers.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     @FocusState private var isEditing: Bool
     
     var body: some View {
@@ -414,6 +414,6 @@ struct SelectEventRepeatOptionViewPreviewProvider: PreviewProvider {
         return view
             .environment(state)
             .environment(handler)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }

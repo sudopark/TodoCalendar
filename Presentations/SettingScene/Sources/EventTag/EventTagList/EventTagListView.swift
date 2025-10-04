@@ -100,7 +100,7 @@ struct EventTagListContainerView: View {
             }
             .environment(state)
             .environment(eventHandler)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -110,7 +110,7 @@ struct EventTagListView: View {
     
     @Environment(EventTagListViewState.self) private var state
     @Environment(EventTagListEventHandlers.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     private let hasNavigation: Bool
     
@@ -375,7 +375,7 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
         }
         
         return EventTagListView(hasNavigation: true)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
             .environment(state)
             .environment(eventHandler)
     }

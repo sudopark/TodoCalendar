@@ -123,7 +123,7 @@ struct EventSettingContainerView: View {
             .onWillAppear(eventHandlers.onWillAppear)
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
     }
 }
 
@@ -133,7 +133,7 @@ struct EventSettingView: View {
     
     @Environment(EventSettingViewState.self) private var state
     @Environment(EventSettingViewEventHandler.self) private var eventHandlers
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     let allPeriods: [SelectedPeriodModel] = [
         .init(.minute0), .init(.minute5), .init(.minute10), .init(.minute15),
@@ -413,7 +413,7 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
         let view = EventSettingView()
             .environment(state)
             .environment(eventHandlers)
-            .environmentObject(viewAppearance)
+            .environment(viewAppearance)
         return view
     }
 }
