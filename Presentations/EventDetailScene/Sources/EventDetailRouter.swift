@@ -88,14 +88,14 @@ extension EventDetailRouter {
     func showTodoEventGuide() {
         Task { @MainActor in
             let vc = self.guideSceneBuilder.makeTodoEventGuide()
-            self.currentScene?.present(vc, animated: true)
+            self.showBottomSlide(vc)
         }
     }
     
     func showForemostEventGuide() {
         Task { @MainActor in
             let vc = self.guideSceneBuilder.makeForemostEventGuide()
-            self.currentScene?.present(vc, animated: true)
+            self.showBottomSlide(vc)
         }
     }
     
