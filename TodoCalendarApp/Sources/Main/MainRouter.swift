@@ -86,7 +86,7 @@ extension MainRouter {
             let dialog = self.calendarSceneBulder.makeSelectDialog(
                 current: current, self.currentScene?.interactor
             )
-            self.currentScene?.present(dialog, animated: true)
+            self.showBottomSlide(dialog)
         }
     }
 }
