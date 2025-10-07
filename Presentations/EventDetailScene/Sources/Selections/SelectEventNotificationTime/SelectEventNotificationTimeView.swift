@@ -142,7 +142,7 @@ struct SelectEventNotificationTimeView: View {
                     
                     // default options
                     Section {
-                        ForEach(state.defaultTimeOptions, id: \.compareKey) {
+                        ForEach(state.defaultTimeOptions) {
                             self.defaultOptionView($0)
                         }
                     }
@@ -324,11 +324,9 @@ struct SelectEventNotificationTimeView: View {
 }
 
 
-private extension NotificationTimeOptionModel {
+extension NotificationTimeOptionModel: Identifiable {
     
-    var compareKey: String {
-        return self.option.map { "\($0)" } ?? "nil"
-    }
+    var id: String { self.option.map { "\($0)" } ?? "nil" }
 }
 
 // MARK: - preview

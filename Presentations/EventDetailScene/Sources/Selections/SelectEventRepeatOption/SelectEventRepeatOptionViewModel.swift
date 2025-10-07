@@ -111,7 +111,7 @@ private enum SupportingOptions: Equatable {
     }
 }
 
-struct SelectRepeatingOptionModel: Equatable {
+struct SelectRepeatingOptionModel: Equatable, Identifiable {
     
     let id: String
     let text: String

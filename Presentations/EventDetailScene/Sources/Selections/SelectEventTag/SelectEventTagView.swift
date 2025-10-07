@@ -108,7 +108,7 @@ struct SelectEventTagView: View {
         NavigationStack {
             
             List {
-                ForEach(self.state.tags, id: \.compareKey) {
+                ForEach(self.state.tags) {
                     self.tagCellView($0)
                 }
                 .listRowSeparator(.hidden)
@@ -207,13 +207,6 @@ struct SelectEventTagView: View {
                     self.eventHandlers.moveToTagSeting()
                 }
         }
-    }
-}
-
-private extension TagCellViewModel {
-    
-    var compareKey: String {
-        return "id:\(id.hashValue)_\(name)"
     }
 }
 
