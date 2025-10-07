@@ -221,7 +221,7 @@ struct SelectEventRepeatOptionView: View {
     
     private func sectionView(_ section: [SelectRepeatingOptionModel]) -> some View {
         Section {
-            ForEach(section, id: \.compareKey) { option in
+            ForEach(section) { option in
                 HStack {
                     Text(option.text)
                         .font(self.appearance.fontSet.normal.asFont)
@@ -366,17 +366,10 @@ struct SelectEventRepeatOptionView: View {
     }
 }
 
-private extension SelectRepeatingOptionModel {
+extension Array where Element == SelectRepeatingOptionModel {
     
     var compareKey: String {
-        return "\(id)_\(text)_\(option?.compareHash ?? 0)"
-    }
-}
-
-private extension Array where Element == SelectRepeatingOptionModel {
-    
-    var compareKey: String {
-        return self.map { $0.compareKey }.joined(separator: "+")
+        return self.map { $0.id }.joined(separator: "+")
     }
 }
 
