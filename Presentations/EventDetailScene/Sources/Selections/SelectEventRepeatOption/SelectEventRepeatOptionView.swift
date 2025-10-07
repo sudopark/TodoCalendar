@@ -189,6 +189,9 @@ struct SelectEventRepeatOptionView: View {
                 }
             }
             .navigationTitle(R.String.EventDetail.Repeating.title)
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 CloseButton()
                     .eventHandler(\.onTap, self.eventHandlers.close)

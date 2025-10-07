@@ -167,6 +167,9 @@ struct ManageAccountView: View {
                 }
             }
             .navigationTitle("manage_account::title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
         }
             .id(appearance.navigationBarId)
     }

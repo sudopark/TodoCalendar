@@ -124,6 +124,9 @@ struct HolidayListView: View {
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("setting.holiday.title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton {

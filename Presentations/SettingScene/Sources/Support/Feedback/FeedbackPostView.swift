@@ -140,6 +140,9 @@ struct FeedbackPostView: View {
             .padding(.top, 20)
             .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("setting.feedback::name".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     CloseButton()
@@ -147,6 +150,7 @@ struct FeedbackPostView: View {
                 }
             }
         }
+        .id(appearance.navigationBarId)
     }
     
     private var messageInput: some View {

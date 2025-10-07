@@ -138,6 +138,9 @@ struct EventNotificationDefaultTimeOptionView: View {
                 ? "event_notification_setting::title::forAllDay".localized()
                 : "event_notification_setting::title::NotforAllDay".localized()
             )
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton(tapHandler: eventHandlers.close)

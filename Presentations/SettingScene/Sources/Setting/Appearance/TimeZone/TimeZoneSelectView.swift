@@ -134,6 +134,9 @@ struct TimeZoneSelectView: View {
             }
             .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("setting.timezone::title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton(tapHandler: eventHandlers.close)
