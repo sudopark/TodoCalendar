@@ -52,7 +52,7 @@ struct UncompletedTodoView: View {
                 }
             }
             
-            ForEach(self.viewModels, id: \.customCompareKey) { cvm in
+            ForEach(self.viewModels, id: \.eventIdentifier) { cvm in
                 
                 EventListCellView(cellViewModel: cvm, isUncompletedTodo: true, foremostEventMarkingStatus: foremostMarkingStatus)
                     .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
