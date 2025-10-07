@@ -115,9 +115,9 @@ struct DoneTodoEventListView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(state.sections, id: \.compareKey) { section in
+                ForEach(state.sections) { section in
                     Section {
-                        ForEach(section.cells, id: \.compareKey) { cell in
+                        ForEach(section.cells) { cell in
                             cellView(cell)
                         }
                     } header: {
@@ -236,22 +236,6 @@ struct DoneTodoEventListView: View {
                 guard !self.state.sections.isEmpty else { return }
                 self.eventHandlers.loadMoreList()
             }
-    }
-}
-
-
-extension DoneTodoCellViewModel {
-    
-    fileprivate var compareKey: String {
-        return "\(self.uuid),\(self.name),\(self.eventTimeText ?? "nil"),\(self.doneTimeText)"
-    }
-}
-
-extension DoneTodoListSectionModel {
-    
-    fileprivate var compareKey: String {
-        let cells = self.cells.map { $0.compareKey }.joined(separator: "_")
-        return "\(sectionTitle),\(sectionGroupTitle),\(self.shouldShowSectionGroupTitle),\(cells)"
     }
 }
 
