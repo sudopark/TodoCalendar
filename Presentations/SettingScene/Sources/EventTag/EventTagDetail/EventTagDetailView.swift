@@ -132,6 +132,9 @@ struct EventTagDetailView: View {
         ZStack {
             VStack(alignment: .leading) {
                 
+                Spacer()
+                    .frame(height: 32)
+                
                 self.nameInputView
                 
                 Text("Event color".localized())
