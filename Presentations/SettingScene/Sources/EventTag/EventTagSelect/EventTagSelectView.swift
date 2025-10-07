@@ -118,6 +118,7 @@ struct EventTagSelectView: View {
                 ForEach(state.cellViewModels) { cvm in
                     cellView(cvm)
                         .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                         .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
             }
@@ -161,7 +162,7 @@ struct EventTagSelectView: View {
             }
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(self.appearance.colorSet.bg1.asColor)
@@ -180,7 +181,7 @@ struct EventTagSelectViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultDark,
+            colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")

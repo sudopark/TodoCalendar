@@ -112,14 +112,17 @@ struct SelectEventTagView: View {
                     self.tagCellView($0)
                 }
                 .listRowSeparator(.hidden)
+                .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                 .listRowBackground(appearance.colorSet.bg0.asColor)
                 
                 self.addTagView
                     .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 20, leading: 20, bottom: 5, trailing: 20))
                     .listRowBackground(appearance.colorSet.bg0.asColor)
                 
                 self.seeAllEventTypesView
                     .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 0, leading: 20, bottom: 5, trailing: 20))
                     .listRowBackground(appearance.colorSet.bg0.asColor)
             }
             .listStyle(.plain)
@@ -156,7 +159,7 @@ struct SelectEventTagView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
         .padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
@@ -181,7 +184,7 @@ struct SelectEventTagView: View {
             
             Spacer()
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
         .padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
