@@ -40,7 +40,7 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
     
     @MainActor
     func makeEventTagListScene(
-        hasNavigation: Bool,
+        isRootNavigation: Bool,
         listener: (any EventTagListSceneListener)?
     ) -> any EventTagListScene {
         
@@ -50,13 +50,13 @@ extension EventTagListSceneBuilerImple: EventTagListSceneBuiler {
         )
         
         let viewController = EventTagListViewController(
-            hasNavigation: hasNavigation,
+            isRootNavigation: isRootNavigation,
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )
     
         let router = EventTagListRouter(
-            hasNavigation: hasNavigation,
+            isRootNavigation: isRootNavigation,
             eventSettingSceneBuilder: self.settingSceneBuilder,
             tagDetailSceneBuilder: self.tagDetailSceneBuilder
         )

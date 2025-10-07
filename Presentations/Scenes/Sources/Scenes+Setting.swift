@@ -67,7 +67,7 @@ public protocol EventTagListSceneBuiler: AnyObject {
     
     @MainActor
     func makeEventTagListScene(
-        hasNavigation: Bool,
+        isRootNavigation: Bool,
         listener: (any EventTagListSceneListener)?
     ) -> any EventTagListScene
 }

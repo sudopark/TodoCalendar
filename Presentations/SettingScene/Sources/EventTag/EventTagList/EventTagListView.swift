@@ -79,22 +79,22 @@ struct EventTagListContainerView: View {
     @State fileprivate var state: EventTagListViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: EventTagListEventHandlers
-    private let hasNavigation: Bool
+    private let isRootNavigation: Bool
     
     var stateBinding: (EventTagListViewState) -> Void = { _ in }
     
     init(
-        hasNavigation: Bool,
+        isRootNavigation: Bool,
         viewAppearance: ViewAppearance,
         eventHandler: EventTagListEventHandlers
     ) {
-        self.hasNavigation = hasNavigation
+        self.isRootNavigation = isRootNavigation
         self.viewAppearance = viewAppearance
         self.eventHandler = eventHandler
     }
     
     var body: some View {
-        return EventTagListView(hasNavigation: hasNavigation)
+        return EventTagListView(isRootNavigation: isRootNavigation)
             .onAppear {
                 self.stateBinding(self.state)
                 self.eventHandler.onAppear()
@@ -113,10 +113,10 @@ struct EventTagListView: View {
     @Environment(EventTagListEventHandlers.self) private var eventHandlers
     @Environment(ViewAppearance.self) private var appearance
     
-    private let hasNavigation: Bool
+    private let isRootNavigation: Bool
     
-    init(hasNavigation: Bool) {
-        self.hasNavigation = hasNavigation
+    init(isRootNavigation: Bool) {
+        self.isRootNavigation = isRootNavigation
     }
     
     var body: some View {
@@ -144,7 +144,7 @@ struct EventTagListView: View {
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
             .toolbar {
-                if self.hasNavigation {
+                if !self.isRootNavigation {
                  
                     ToolbarItem(placement: .topBarLeading) {
                         NavigationBackButton {
@@ -380,7 +380,7 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
             ]
         }
         
-        return EventTagListView(hasNavigation: true)
+        return EventTagListView(isRootNavigation: true)
             .environment(viewAppearance)
             .environment(state)
             .environment(eventHandler)
