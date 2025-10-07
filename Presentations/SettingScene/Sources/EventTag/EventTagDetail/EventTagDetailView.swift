@@ -124,7 +124,7 @@ struct EventTagDetailView: View {
     @Environment(ViewAppearance.self) private var appearance
     @Environment(EventTagDetailEventHandler.self) private var eventHandler
     @FocusState private var isFocusInput: Bool
-    @State private var selectedOtherColor: Color = .clear
+    @State private var selectedOtherColor: Color = .black
     
     private let suggestColorColums = [GridItem(.adaptive(minimum: 40))]
     
