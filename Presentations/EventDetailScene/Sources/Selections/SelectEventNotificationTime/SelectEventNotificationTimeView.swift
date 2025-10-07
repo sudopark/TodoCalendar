@@ -225,7 +225,7 @@ struct SelectEventNotificationTimeView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.vertical, 8).padding(.horizontal, 12)
+        .padding(.vertical, 12).padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
                 .fill(appearance.colorSet.bg1.asColor)
@@ -248,7 +248,7 @@ struct SelectEventNotificationTimeView: View {
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
         }
-        .padding(.vertical, 8).padding(.horizontal, 12)
+        .padding(.vertical, 12).padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
                 .fill(appearance.colorSet.bg1.asColor)

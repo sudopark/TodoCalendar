@@ -119,6 +119,7 @@ struct CountrySelectView: View {
                     countryView(country)
                 }
                 .listRowSeparator(.hidden)
+                .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                 .listRowBackground(appearance.colorSet.bg0.asColor)
             }
             .navigationTitle("setting.holiday.country.title".localized())
@@ -157,7 +158,7 @@ struct CountrySelectView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
         .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 8)

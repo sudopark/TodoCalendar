@@ -171,6 +171,7 @@ struct SelectEventRepeatOptionView: View {
                         self.sectionView($0)
                     }
                     .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                     .listRowBackground(appearance.colorSet.bg0.asColor)
                     
                     Spacer()
@@ -234,7 +235,7 @@ struct SelectEventRepeatOptionView: View {
                             .foregroundStyle(appearance.colorSet.text0.asColor)
                     }
                 }
-                .padding(.vertical, 8)
+                .padding(.vertical, 12)
                 .padding(.horizontal, 12)
                 .background {
                     RoundedRectangle(cornerRadius: 8)

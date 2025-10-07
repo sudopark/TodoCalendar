@@ -14,6 +14,7 @@ import Prelude
 import Optics
 import Domain
 import CommonPresentation
+import Extensions
 
 
 // MARK: - EventTagListViewController
@@ -126,6 +127,7 @@ struct EventTagListView: View {
                         self.cellView($0)
                     }
                 }
+                .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                 .listRowSeparator(.hidden)
                 .listRowBackground(appearance.colorSet.bg0.asColor)
                 
@@ -135,6 +137,7 @@ struct EventTagListView: View {
                     }
                     .padding(.top, 16)
                     .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                     .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
             }
