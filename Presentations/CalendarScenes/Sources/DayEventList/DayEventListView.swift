@@ -307,7 +307,7 @@ struct DayEventListView: View {
     
     private func eventListView() -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
+            ForEach(self.state.cellViewModels, id: \.eventIdentifier) { cellViewModel in
                 
                 EventListCellView(cellViewModel: cellViewModel, foremostEventMarkingStatus: state.foremostEventMarkingStatus)
                     .eventHandler(\.requestDoneTodo) {
