@@ -282,7 +282,7 @@ struct EventDetailView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(spacing: 25) {
-                        self.moreActionView
+                        Spacer(minLength: 5)
                         self.nameInputView
                         if state.isForemost {
                             self.foremostEventView
@@ -319,47 +319,11 @@ struct EventDetailView: View {
             VStack {
                 Spacer()
                 
-                BottomConfirmButton(
-                    title: "common.save".localized(),
-                    isEnable: state.isSavable,
-                    isProcessing: state.isSaving
-                )
-                .eventHandler(\.onTap, eventHandlers.save)
+                self.bottomButtons
             }
         }
         .allowsHitTesting(!state.isSaving)
         .background(appearance.colorSet.bg0.asColor)
-    }
-    
-    private var moreActionView: some View {
-        HStack {
-            Spacer()
-            
-            if !state.availableMoreActions.isEmpty {
-                Menu {
-                    ForEach(0..<self.state.availableMoreActions.count, id: \.self) { sectionIndex in
-                        Section {
-                            ForEach(self.state.availableMoreActions[sectionIndex]) { action in
-                                Button(role: action.isRemove ? .destructive : nil) {
-                                    eventHandlers.doMoreAction(action)
-                                } label: {
-                                    HStack {
-                                        Text(action.text)
-                                        Image(systemName: action.imageName)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                        .frame(width: 20, height: 20)
-                }
-            }
-        }
     }
     
     private var nameInputView: some View {
@@ -934,6 +898,55 @@ struct EventDetailView: View {
             eventHandlers.openURL()
         }
     }
+    
+    private var bottomButtons: some View {
+        HStack(spacing: 8) {
+            ConfirmButton(
+                title: "common.save".localized(),
+                isEnable: state.isSavable,
+                isProcessing: state.isSaving
+            )
+            .eventHandler(\.onTap, eventHandlers.save)
+            
+            if !state.availableMoreActions.isEmpty {
+                Menu {
+                    ForEach(0..<self.state.availableMoreActions.count, id: \.self) { sectionIndex in
+                        Section {
+                            ForEach(self.state.availableMoreActions[sectionIndex]) { action in
+                                Button(role: action.isRemove ? .destructive : nil) {
+                                    eventHandlers.doMoreAction(action)
+                                } label: {
+                                    HStack {
+                                        Text(action.text)
+                                        Image(systemName: action.imageName)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                label: {
+                    Image(systemName: "ellipsis")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                        .frame(width: 20, height: 20)
+                        .padding()
+                        .background {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
+                                .ignoresSafeArea(edges: .bottom)
+                        }
+                }
+            }
+        }
+        .padding()
+        .background(
+            Rectangle()
+                .fill(self.appearance.colorSet.dayBackground.asColor)
+                .ignoresSafeArea(edges: .bottom)
+        )
+    }
 }
 
 private extension SelectedTime {
@@ -1018,7 +1031,7 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultDark,
+            colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
