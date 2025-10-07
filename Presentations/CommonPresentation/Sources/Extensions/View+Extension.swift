@@ -87,3 +87,22 @@ struct UIViewLiftCycleHandler: UIViewControllerRepresentable {
         }
     }
 }
+
+
+// MARK: - view if modifier
+
+extension View {
+    
+    @ViewBuilder
+    public func `if`<Content: View>(
+        condition: @autoclosure () -> Bool,
+        _ transform: (Self) -> Content
+    ) -> some View {
+        if condition() {
+            transform(self)
+        } else {
+            self
+        }
+    }
+}
+
