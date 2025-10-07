@@ -27,7 +27,7 @@ final class EventTagListViewController: UIHostingController<EventTagListContaine
     private var cancellables: Set<AnyCancellable> = []
     
     init(
-        hasNavigation: Bool,
+        isRootNavigation: Bool,
         viewModel: any EventTagListViewModel,
         viewAppearance: ViewAppearance
     ) {
@@ -38,13 +38,18 @@ final class EventTagListViewController: UIHostingController<EventTagListContaine
         eventHandler.bind(viewModel)
         
         let containerView = EventTagListContainerView(
-            hasNavigation: hasNavigation,
+            isRootNavigation: isRootNavigation,
             viewAppearance: viewAppearance,
             eventHandler: eventHandler
         )
         .eventHandler(\.stateBinding, { $0.bind(viewModel, viewAppearance) })
         
         super.init(rootView: containerView)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.isHidden = true
     }
     
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {

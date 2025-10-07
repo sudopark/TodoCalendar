@@ -30,26 +30,26 @@ protocol EventTagListRouting: Routing, Sendable {
 
 final class EventTagListRouter: BaseRouterImple, EventTagListRouting, @unchecked Sendable { 
     
-    private let hasNavigation: Bool
+    private let isRootNavigation: Bool
     private let eventSettingSceneBuilder: any EventSettingSceneBuiler
     private let tagDetailSceneBuilder: any EventTagDetailSceneBuiler
     init(
-        hasNavigation: Bool,
+        isRootNavigation: Bool,
         eventSettingSceneBuilder: any EventSettingSceneBuiler,
         tagDetailSceneBuilder: any EventTagDetailSceneBuiler
     ) {
-        self.hasNavigation = hasNavigation
+        self.isRootNavigation = isRootNavigation
         self.eventSettingSceneBuilder = eventSettingSceneBuilder
         self.tagDetailSceneBuilder = tagDetailSceneBuilder
     }
     
     override func closeScene(animate: Bool, _ dismissed: (@Sendable () -> Void)?) {
         Task { @MainActor in
-            if let navigation = self.currentScene?.navigationController {
-                navigation.popViewController(animated: animate)
-                dismissed?()
-            } else {
+            if isRootNavigation {
                 self.currentScene?.dismiss(animated: animate, completion: dismissed)
+            } else {
+                self.currentScene?.navigationController?.popViewController(animated: animate)
+                dismissed?()
             }
         }
     }
@@ -91,13 +91,7 @@ extension EventTagListRouter {
         Task { @MainActor in
             let nextScene = self.eventSettingSceneBuilder.makeEventSettingScene()
         
-            if self.hasNavigation {
-                // navigation 있는 케이스: 이벤트 상세 - 태그 선택 - 모든 태그 보기
-                self.currentScene?.navigationController?.pushViewController(nextScene, animated: true)
-            } else {
-                // navigation 없는 케이스: 메인화면 - 이벤트 리스트 바로 진입
-                self.currentScene?.present(nextScene, animated: true)
-            }
+            self.currentScene?.navigationController?.pushViewController(nextScene, animated: true)
         }
     }
 }
