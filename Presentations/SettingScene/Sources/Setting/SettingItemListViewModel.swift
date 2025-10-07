@@ -68,7 +68,7 @@ struct SettingItemModel: SettingItemModelType {
 
 struct AccountSettingItemModel: SettingItemModelType {
     var compareKey: String {
-        return "\(self.isSignIn)-\(self.signInMethod ?? "")"
+        return "AccountSettingItemModel"
     }
     let signInMethod: String?
     let isSignIn: Bool
@@ -109,7 +109,6 @@ struct SuggestAppItemModel: SettingItemModelType {
 
 protocol SettingSectionModelType {
     var headerText: String? { get }
-    var compareKey: String { get }
     var items: [any SettingItemModelType] { get }
 }
 struct SettingSectionModel: SettingSectionModelType {
@@ -120,11 +119,6 @@ struct SettingSectionModel: SettingSectionModelType {
     init(headerText: String?, items: [any SettingItemModelType]) {
         self.headerText = headerText
         self.items = items
-    }
-    
-    var compareKey: String {
-        let items = self.items.map { $0.compareKey }.joined(separator: ",")
-        return "\((self.headerText ?? "default"))_\(items)"
     }
 }
 
@@ -292,7 +286,6 @@ extension SettingItemListViewModelImple {
         
         return self.accountUsecase.currentAccountInfo
             .map(transform)
-            .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey } })
             .eraseToAnyPublisher()
     }
 }

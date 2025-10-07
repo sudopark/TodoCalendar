@@ -67,13 +67,15 @@ private struct TimeText {
     }
 }
 
-struct DoneTodoCellViewModel {
+struct DoneTodoCellViewModel: Identifiable {
     let uuid: String
     let name: String
     let eventTimeText: String?
     fileprivate let doneTime: TimeText
     let doneTimeText: String
     fileprivate let doneTimeSectionText: String
+    
+    var id: String { self.uuid }
     
     init(_ event: DoneTodoEvent, _ timeZone: TimeZone, _ is24Form: Bool) {
         self.uuid = event.uuid
@@ -108,11 +110,13 @@ struct DoneTodoCellViewModel {
     }
 }
 
-struct DoneTodoListSectionModel {
+struct DoneTodoListSectionModel: Identifiable {
     let sectionTitle: String
     let sectionGroupTitle: String
     var cells: [DoneTodoCellViewModel] = []
     var shouldShowSectionGroupTitle: Bool = false
+    
+    var id: String { self.sectionTitle }
     
     fileprivate init(_ sectionTitle: String, _ cells: [DoneTodoCellViewModel]) {
         self.sectionTitle = sectionTitle

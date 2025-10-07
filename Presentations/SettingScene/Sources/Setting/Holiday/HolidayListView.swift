@@ -189,7 +189,7 @@ struct HolidayListView: View {
                 .font(self.appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text2.asColor)
             
-            ForEach(self.state.holidays, id: \.compareKey) { item in
+            ForEach(self.state.holidays) { item in
                 
                 HStack(spacing: 8) {
                     
@@ -222,9 +222,9 @@ struct HolidayListView: View {
     }
 }
 
-private extension HolidayItemModel {
+extension HolidayItemModel: Identifiable {
     
-    var compareKey: String {
+    var id: String {
         return "\(self.dateText)_\(self.name)"
     }
 }

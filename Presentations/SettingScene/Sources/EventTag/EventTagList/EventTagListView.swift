@@ -292,17 +292,6 @@ struct EventTagListView: View {
     }
 }
 
-private extension EventTagId {
-    var compareKey: String {
-        switch self {
-        case .holiday: return "holiday"
-        case .default: return "default"
-        case .custom(let id): return id
-        case .externalCalendar(let serviceId, let id): return "external::\(serviceId)::\(id)"
-        }
-    }
-}
-
 extension ExternalCalendarEventTagListSectionModel: Identifiable {
     
     var id: String { self.serviceId }
