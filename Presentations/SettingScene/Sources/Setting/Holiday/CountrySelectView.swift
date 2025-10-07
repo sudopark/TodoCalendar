@@ -122,6 +122,9 @@ struct CountrySelectView: View {
                 .listRowBackground(appearance.colorSet.bg0.asColor)
             }
             .navigationTitle("setting.holiday.country.title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
             .listRowSpacing(0)

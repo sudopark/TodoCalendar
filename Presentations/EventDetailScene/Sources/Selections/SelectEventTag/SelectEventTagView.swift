@@ -126,6 +126,9 @@ struct SelectEventTagView: View {
             .background(appearance.colorSet.bg0.asColor)
             
             .navigationTitle(R.String.EventTag.title)
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 CloseButton()
                     .eventHandler(\.onTap, eventHandlers.close)

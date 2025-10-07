@@ -135,6 +135,9 @@ struct DoneTodoEventListView: View {
             .navigationTitle(
                 Text("eventList::done_todos::title".localized())
             )
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     self.deleteButton

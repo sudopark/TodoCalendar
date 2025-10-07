@@ -202,6 +202,9 @@ struct AppearanceSettingView: View {
             .scrollContentBackground(.hidden)
             .background(self.appearance.colorSet.bg0.asColor)
             .navigationTitle("setting.appearance.title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton {

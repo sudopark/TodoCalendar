@@ -170,6 +170,9 @@ struct EventSettingView: View {
                 FullScreenLoadingView(isLoading: state.isConnectOrDisconnectingExternalService)
             }
             .navigationTitle("event_setting::title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton(tapHandler: eventHandlers.close)

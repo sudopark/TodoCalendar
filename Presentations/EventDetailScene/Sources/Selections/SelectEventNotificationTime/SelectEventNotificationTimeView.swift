@@ -196,6 +196,9 @@ struct SelectEventNotificationTimeView: View {
             }
             .background(appearance.colorSet.bg0.asColor)
             .navigationTitle(R.String.EventDetail.Notification.title)
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     CloseButton()
