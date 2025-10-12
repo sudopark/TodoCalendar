@@ -116,7 +116,7 @@ open class StubHolidayUsecase: HolidayUsecase {
             .eraseToAnyPublisher()
     }
     
-    public func holiday(_ uuid: String) -> AnyPublisher<Holiday?, Never> {
+    open func holiday(_ uuid: String) -> AnyPublisher<Holiday?, Never> {
         return self.holidays()
             .map { holidayMap in
                 return holidayMap
