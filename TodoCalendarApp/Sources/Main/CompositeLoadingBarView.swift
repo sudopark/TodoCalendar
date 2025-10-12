@@ -16,7 +16,7 @@ final class CompositeLoadingBarView: UIView {
     private enum Constant {
         static let animationDuration: CGFloat = 2.0
         static let animationStartDebouncing: CGFloat = 1.0
-        static let animtionTimeout: TimeInterval = 10.0
+        static let animtionTimeout: TimeInterval = 30.0
     }
     private let barLayer = CALayer()
     private var isLoadingCount = 0
@@ -60,7 +60,7 @@ extension CompositeLoadingBarView {
             self.startAnimationAfterDebounce()
             self.scheduleClearAnimation()
         } else if oldCount > 0 && newCount == 0 {
-            self.stopAnimation()
+//            self.stopAnimation()
         }
     }
     
