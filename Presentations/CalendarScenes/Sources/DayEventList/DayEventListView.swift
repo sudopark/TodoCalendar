@@ -557,7 +557,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         ]
         
         let holidayCell = HolidayEventCellViewModel(
-            HolidayCalendarEvent(.init(dateString: "2023-09-30", name: "추석"), in: TimeZone.current)!
+            HolidayCalendarEvent(.init(uuid: "hd", dateString: "2023-09-30", name: "추석"), in: TimeZone.current)!
         )
         
         let google = GoogleCalendar.Event("some", "cal", name: "google event", colorId: "colorId", time: .at(100))

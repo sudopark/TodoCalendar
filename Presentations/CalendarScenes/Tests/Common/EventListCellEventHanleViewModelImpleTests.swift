@@ -115,7 +115,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         let viewModel = self.makeViewModel()
         let timeZone = TimeZone(abbreviation: "KST")!
         let holiday = HolidayCalendarEvent(
-            .init(dateString: "2023-02-03", name: "dummy"), in: timeZone
+            .init(uuid: "id", dateString: "2023-02-03", name: "dummy"), in: timeZone
         )!
         
         // when

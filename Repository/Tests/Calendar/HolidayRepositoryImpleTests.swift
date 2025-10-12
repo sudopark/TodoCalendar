@@ -98,7 +98,7 @@ extension HolidayRepositoryImpleTests {
         
         // then
         XCTAssertEqual(holidays, [
-            .init(dateString: "2023-01-01", name: "새해")
+            .init(uuid: "hd2023", dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertNotNil(self.spyRemote.didRequestedPath)
     }
@@ -113,7 +113,7 @@ extension HolidayRepositoryImpleTests {
         
         // then
         XCTAssertEqual(holidays, [
-            .init(dateString: "2023-01-01", name: "새해")
+            .init(uuid: "hd2023", dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertNil(self.spyRemote.didRequestedPath)
     }
@@ -131,10 +131,10 @@ extension HolidayRepositoryImpleTests {
         
         // then
         XCTAssertEqual(holidaysKR, [
-            .init(dateString: "2023-01-01", name: "새해")
+            .init(uuid: "hd2023", dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertEqual(holidaysUS, [
-            .init(dateString: "2023-01-01", name: "New Year's Day")
+            .init(uuid: "hd2023_en", dateString: "2023-01-01", name: "New Year's Day")
         ])
     }
     
@@ -151,10 +151,10 @@ extension HolidayRepositoryImpleTests {
         
         // then
         XCTAssertEqual(holidays2023, [
-            .init(dateString: "2023-01-01", name: "새해")
+            .init(uuid: "hd2023", dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertEqual(holidays2022, [
-            .init(dateString: "2022-01-01", name: "새해")
+            .init(uuid: "hd2022", dateString: "2022-01-01", name: "새해")
         ])
     }
     
@@ -169,7 +169,7 @@ extension HolidayRepositoryImpleTests {
         
         // then
         XCTAssertEqual(holidays, [
-            .init(dateString: "2023-01-01", name: "새해")
+            .init(uuid: "hd2023", dateString: "2023-01-01", name: "새해")
         ])
         XCTAssertNotNil(self.spyRemote.didRequestedPath)
     }
@@ -210,6 +210,7 @@ extension HolidayRepositoryImpleTests {
                 {
                     "items": [
                       {
+                        "id": "hd2023",
                         "start": {
                             "date": "2023-01-01"
                         },
@@ -231,6 +232,7 @@ extension HolidayRepositoryImpleTests {
                 {
                     "items": [
                       {
+                        "id": "hd2022",
                         "start": {
                             "date": "2022-01-01"
                         },
@@ -252,6 +254,7 @@ extension HolidayRepositoryImpleTests {
                 {
                     "items": [
                       {
+                        "id": "hd2023_en",
                         "start": {
                             "date": "2023-01-01"
                         },

@@ -26,10 +26,16 @@ public struct HolidaySupportCountry: Sendable {
 
 public struct Holiday: Equatable, Sendable {
     
+    public let uuid: String
     public let dateString: String
     public let name: String
     
-    public init(dateString: String, name: String) {
+    public init(
+        uuid: String,
+        dateString: String,
+        name: String
+    ) {
+        self.uuid = uuid
         self.dateString = dateString
         self.name = name
     }

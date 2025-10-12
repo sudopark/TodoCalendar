@@ -157,6 +157,7 @@ extension HolidayRepositoryImple {
             case countryCode = "c_code"
             case year
             case locale
+            case uuid
             case dateString = "d_txt"
             case name
             
@@ -165,6 +166,7 @@ extension HolidayRepositoryImple {
                 case .countryCode: return .text([.notNull])
                 case .year: return .integer([.notNull])
                 case .locale: return .text([.notNull])
+                case .uuid: return .text([.notNull])
                 case .dateString: return .text([.notNull])
                 case .name: return .text([.notNull])
                 }
@@ -192,6 +194,7 @@ extension HolidayRepositoryImple {
                 self.year = try cursor.next().unwrap()
                 self.locale = try cursor.next().unwrap()
                 self.holiday = .init(
+                    uuid: try cursor.next().unwrap(),
                     dateString: try cursor.next().unwrap(),
                     name: try cursor.next().unwrap()
                 )
@@ -200,13 +203,14 @@ extension HolidayRepositoryImple {
         
         typealias ColumnType = Columns
         typealias EntityType = Entity
-        static var tableName: String { "Holidays_v2" }
+        static var tableName: String { "Holidays_v3" }
         
         static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
             switch column {
             case .countryCode: return entity.countryCode
             case .locale: return entity.locale
             case .year: return entity.year
+            case .uuid: return entity.holiday.uuid
             case .dateString: return entity.holiday.dateString
             case .name: return entity.holiday.name
             }
@@ -220,6 +224,7 @@ extension HolidayRepositoryImple {
     private struct HolidayDTO: Decodable {
         
         private enum CodingKeys: String, CodingKey {
+            case id
             case start
             case date
             case summary
@@ -234,6 +239,7 @@ extension HolidayRepositoryImple {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             let startContainer = try container.nestedContainer(keyedBy: CodingKeys.self, forKey: .start)
             self.init(holiday: .init(
+                uuid: try container.decode(String.self, forKey: .id),
                 dateString: try startContainer.decode(String.self, forKey: .date),
                 name: try container.decode(String.self, forKey: .summary))
             )

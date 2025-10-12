@@ -38,23 +38,23 @@ class CalendarUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         
         let holidayUsecase = StubHolidayUsecase(
             holidays: [2023: [
-                .init(dateString: "2023-01-01", name: "신정"),
-                .init(dateString: "2023-01-21", name: "설날"),
-                .init(dateString: "2023-01-22", name: "설날"),
-                .init(dateString: "2023-01-23", name: "설날"),
-                .init(dateString: "2023-01-24", name: "설날(대체)"),
-                .init(dateString: "2023-03-01", name: "삼일절"),
-                .init(dateString: "2023-05-05", name: "어린이날"),
-                .init(dateString: "2023-05-27", name: "부처님오신날"),
-                .init(dateString: "2023-06-06", name: "현충일"),
-                .init(dateString: "2023-08-15", name: "광복절"),
-                .init(dateString: "2023-09-28", name: "추석"),
-                .init(dateString: "2023-09-29", name: "추석"),
-                .init(dateString: "2023-09-30", name: "추석"),
-                .init(dateString: "2023-10-03", name: "개천절"),
-                .init(dateString: "2023-10-03", name: "개천절-중복"),
-                .init(dateString: "2023-10-09", name: "한글날"),
-                .init(dateString: "2023-12-25", name: "크리스마스")
+                .init(uuid: "id1", dateString: "2023-01-01", name: "신정"),
+                .init(uuid: "id2", dateString: "2023-01-21", name: "설날"),
+                .init(uuid: "id3", dateString: "2023-01-22", name: "설날"),
+                .init(uuid: "id4", dateString: "2023-01-23", name: "설날"),
+                .init(uuid: "id5", dateString: "2023-01-24", name: "설날(대체)"),
+                .init(uuid: "id6", dateString: "2023-03-01", name: "삼일절"),
+                .init(uuid: "id7", dateString: "2023-05-05", name: "어린이날"),
+                .init(uuid: "id8", dateString: "2023-05-27", name: "부처님오신날"),
+                .init(uuid: "id9", dateString: "2023-06-06", name: "현충일"),
+                .init(uuid: "id10", dateString: "2023-08-15", name: "광복절"),
+                .init(uuid: "id11", dateString: "2023-09-28", name: "추석"),
+                .init(uuid: "id12", dateString: "2023-09-29", name: "추석"),
+                .init(uuid: "id13", dateString: "2023-09-30", name: "추석"),
+                .init(uuid: "id14", dateString: "2023-10-03", name: "개천절"),
+                .init(uuid: "id15", dateString: "2023-10-03", name: "개천절-중복"),
+                .init(uuid: "id16", dateString: "2023-10-09", name: "한글날"),
+                .init(uuid: "id17", dateString: "2023-12-25", name: "크리스마스")
             ]]
         )
         
@@ -245,12 +245,12 @@ extension CalendarUsecaseImpleTests {
         let holidayExistDays = components?.weeks.flatMap { $0.days }
             .filter { !$0.holidays.isEmpty }
         XCTAssertEqual(holidayExistDays, [
-            .init(year: 2023, month: 09, day: 28, weekDay: 5) |> \.holidays .~ [.init(dateString: "2023-09-28", name: "추석")],
-            .init(year: 2023, month: 09, day: 29, weekDay: 6) |> \.holidays .~ [.init(dateString: "2023-09-29", name: "추석")],
-            .init(year: 2023, month: 09, day: 30, weekDay: 7) |> \.holidays .~ [.init(dateString: "2023-09-30", name: "추석")],
+            .init(year: 2023, month: 09, day: 28, weekDay: 5) |> \.holidays .~ [.init(uuid: "id11",  dateString: "2023-09-28", name: "추석")],
+            .init(year: 2023, month: 09, day: 29, weekDay: 6) |> \.holidays .~ [.init(uuid: "id12", dateString: "2023-09-29", name: "추석")],
+            .init(year: 2023, month: 09, day: 30, weekDay: 7) |> \.holidays .~ [.init(uuid: "id13", dateString: "2023-09-30", name: "추석")],
             .init(year: 2023, month: 10, day: 03, weekDay: 3) |> \.holidays .~ [
-                .init(dateString: "2023-10-03", name: "개천절"),
-                .init(dateString: "2023-10-03", name: "개천절-중복")
+                .init(uuid: "id14", dateString: "2023-10-03", name: "개천절"),
+                .init(uuid: "id15", dateString: "2023-10-03", name: "개천절-중복")
             ],
         ])
     }
