@@ -115,4 +115,14 @@ open class StubHolidayUsecase: HolidayUsecase {
             .switchToLatest()
             .eraseToAnyPublisher()
     }
+    
+    public func holiday(_ uuid: String) -> AnyPublisher<Holiday?, Never> {
+        return self.holidays()
+            .map { holidayMap in
+                return holidayMap
+                    .flatMap { $0.value }
+                    .first(where: { $0.uuid == uuid })
+            }
+            .eraseToAnyPublisher()
+    }
 }
