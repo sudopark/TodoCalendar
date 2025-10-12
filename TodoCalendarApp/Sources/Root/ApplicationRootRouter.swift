@@ -312,6 +312,12 @@ extension ApplicationRootRouter {
         )
     }
     
+    private func holidayEventDetailSceneBuilder() -> any HolidayEventDetailSceneBuiler {
+        return HolidayEventDetailSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory, viewAppearance: self.viewAppearanceStore.appearance
+        )
+    }
+    
     private func googleCalendarEventDetailBuilder() -> any GoogleCalendarEventDetailSceneBuiler {
         return GoogleCalendarEventDetailSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
@@ -323,6 +329,7 @@ extension ApplicationRootRouter {
         return EventDetailSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
+            holidayEventDetailSceneBuilder: self.holidayEventDetailSceneBuilder(),
             googleCalendarEventDetailSceneBuilder: self.googleCalendarEventDetailBuilder(),
             settingSceneBuilder: settingSceneBuilder()
         )

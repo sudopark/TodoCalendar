@@ -20,6 +20,7 @@ protocol EventListCellEventHanleRouting: Routing, Sendable {
         _ eventId: String,
         _ repeatingEventTargetTime: EventTime?
     )
+    func routeToHolidayEventDetail(_ uuid: String)
     func routeToGoogleEventDetail(
         calendarId: String, eventId: String
     )
@@ -62,6 +63,13 @@ extension EventListCellEventHanleRouter {
             let next = self.eventDetailSceneBuilder.makeScheduleEventDetailScene(
                 eventId, repeatingEventTargetTime, listener: self.eventDetailListener
             )
+            self.scene?.present(next, animated: true)
+        }
+    }
+    
+    func routeToHolidayEventDetail(_ uuid: String) {
+        Task { @MainActor in
+            let next = self.eventDetailSceneBuilder.makeHolidayEventDetailScene(uuid)
             self.scene?.present(next, animated: true)
         }
     }
