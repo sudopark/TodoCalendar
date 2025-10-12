@@ -181,7 +181,7 @@ extension MainViewController {
         
         headerAreaStackView.addArrangedSubview(compositeLoadingBarView)
         compositeLoadingBarView.autoLayout.active {
-            $0.heightAnchor.constraint(equalToConstant: 2)
+            $0.heightAnchor.constraint(equalToConstant: 3.2)
         }
         
         self.view.addSubview(calendarContainerView)
