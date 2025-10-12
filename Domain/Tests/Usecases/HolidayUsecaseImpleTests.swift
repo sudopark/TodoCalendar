@@ -167,7 +167,7 @@ extension HolidayUsecaseImpleTests {
         // then
         XCTAssertEqual(holidayss, [
             [:],
-            [ 2023: [.init(dateString: "2023", name: "kr")] ]
+            [ 2023: [.init(uuid: "id", dateString: "2023", name: "kr")] ]
         ])
     }
     
@@ -190,11 +190,11 @@ extension HolidayUsecaseImpleTests {
         XCTAssertEqual(holidayMaps, [
             [:],
             [
-                2023: [.init(dateString: "2023", name: "kr")]
+                2023: [.init(uuid: "id", dateString: "2023", name: "kr")]
             ],
             [
-                2022: [.init(dateString: "2022", name: "kr")],
-                2023: [.init(dateString: "2023", name: "kr")]
+                2022: [.init(uuid: "id", dateString: "2022", name: "kr")],
+                2023: [.init(uuid: "id", dateString: "2023", name: "kr")]
             ]
         ])
     }
@@ -224,11 +224,11 @@ extension HolidayUsecaseImpleTests {
         XCTAssertEqual(holidayMaps, [
             [:],
             
-            [2023: [.init(dateString: "2023", name: "kr")]],
+            [2023: [.init(uuid: "id", dateString: "2023", name: "kr")]],
             
-            [2023: [.init(dateString: "2023", name: "us")]],
+            [2023: [.init(uuid: "id", dateString: "2023", name: "us")]],
             
-            [2023: [.init(dateString: "2023", name: "kr")]],
+            [2023: [.init(uuid: "id", dateString: "2023", name: "kr")]],
         ])
     }
     
@@ -253,17 +253,17 @@ extension HolidayUsecaseImpleTests {
         XCTAssertEqual(holidayMap, [
             [:],
             [
-                2023: [.init(dateString: "2023", name: "kr")]
+                2023: [.init(uuid: "id", dateString: "2023", name: "kr")]
             ],
             
             [
-                2023: [.init(dateString: "2023", name: "kr")],
-                2022: [.init(dateString: "2022", name: "kr")]
+                2023: [.init(uuid: "id", dateString: "2023", name: "kr")],
+                2022: [.init(uuid: "id", dateString: "2022", name: "kr")]
             ],
             
             [
-                2023: [.init(dateString: "2023", name: "us")],
-                2022: [.init(dateString: "2022", name: "us")]
+                2023: [.init(uuid: "id", dateString: "2023", name: "us")],
+                2022: [.init(uuid: "id", dateString: "2022", name: "us")]
             ],
         ])
     }
@@ -287,8 +287,8 @@ extension HolidayUsecaseImpleTests {
         // then
         XCTAssertEqual(holidayMap, [
             [:],
-            [2023: [.init(dateString: "2023", name: "kr")]],
-            [2023: [.init(dateString: "2023", name: "kr-v2")]]
+            [2023: [.init(uuid: "id", dateString: "2023", name: "kr")]],
+            [2023: [.init(uuid: "id", dateString: "2023", name: "kr-v2")]]
         ])
     }
     

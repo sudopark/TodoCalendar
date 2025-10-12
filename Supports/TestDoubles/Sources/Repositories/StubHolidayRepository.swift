@@ -36,7 +36,7 @@ open class StubHolidayRepository: HolidayRepository {
     ) async throws -> [Holiday] {
         let name = self.holidayCachCleared ? "\(countryCode)-v2" : "\(countryCode)"
         return [
-            .init(dateString: "\(year)", name: name)
+            .init(uuid: "id", dateString: "\(year)", name: name)
         ]
     }
     
