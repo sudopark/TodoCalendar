@@ -22,12 +22,35 @@ import CommonPresentation
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
+    var name: String = ""
+    var dateText: String = ""
+    var countryModel: CountryModel?
+    
     func bind(_ viewModel: any HolidayEventDetailViewModel) {
         
         guard self.didBind == false else { return }
         self.didBind = true
         
-        // TODO: bind state
+        viewModel.holidayName
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] name in
+                self?.name = name
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.dateText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.dateText = text
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.countryModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.countryModel = model
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -40,7 +63,9 @@ final class HolidayEventDetailViewEventHandler: Observable {
     var close: () -> Void = { }
 
     func bind(_ viewModel: any HolidayEventDetailViewModel) {
-        // TODO: bind handlers
+        
+        self.onAppear = viewModel.refresh
+        self.close = viewModel.close
     }
 }
 
@@ -90,8 +115,18 @@ struct HolidayEventDetailView: View {
                 VStack(spacing: 25) {
                     Spacer(minLength: 5)
                     self.nameView
+                    
+                    VStack(spacing: 16) {
+                        if let model = self.state.countryModel {
+                            self.countryInfoView(model)
+                        }
+                        
+                        self.dateView
+                    }
+                    .padding(.top, 20)
                 }
             }
+            .padding(.horizontal, 12)
             
             VStack {
                 Spacer()
@@ -104,15 +139,48 @@ struct HolidayEventDetailView: View {
     }
     
     private var nameView: some View {
-        Text("holiday name")
+        HStack {
+            
+            RoundedRectangle(cornerRadius: 3)
+                .fill(appearance.tagColors.holiday.asColor)
+                .frame(width: 6)
+            
+            Text(self.state.name)
+                .font(appearance.fontSet.size(22, weight: .semibold).asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+            
+            Spacer()
+        }
     }
     
     private var dateView: some View {
-        Text("holiday date")
+        HStack(spacing: 16) {
+            Image(systemName: "calendar")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            
+            Text(self.state.dateText)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+            
+            Spacer()
+        }
     }
     
-    private var countryInfoView: some View {
-        Text("country info")
+    private func countryInfoView(_ model: CountryModel) -> some View {
+        HStack(spacing: 16) {
+            
+            RemoteImageView(model.thumbnailUrl)
+                .resize()
+                .scaledToFill()
+                .frame(width: 16, height: 16)
+            
+            Text(model.name)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+            
+            Spacer()
+        }
     }
 }
 
@@ -134,6 +202,13 @@ struct HolidayEventDetailViewPreviewProvider: PreviewProvider {
         )
         let state = HolidayEventDetailViewState()
         let eventHandlers = HolidayEventDetailViewEventHandler()
+        
+        state.name = "삼일절"
+        state.dateText = "2025년 3월 1일 금요일"
+        state.countryModel = .init(
+            thumbnailUrl: "https://flagcdn.com/w160/kr.jpg",
+            name: "대한민국"
+        )
         
         let view = HolidayEventDetailView()
             .environment(viewAppearance)
