@@ -60,6 +60,16 @@ public protocol GoogleCalendarEventDetailSceneInteractor: AnyObject { }
 public protocol GoogleCalendarEventDetailScene: Scene where Interactor == any GoogleCalendarEventDetailSceneInteractor
 { }
 
+// MARK: - HolidayEventDetailScene Interactable & Listenable
+
+public protocol HolidayEventDetailSceneInteractor: AnyObject { }
+//
+//public protocol HolidayEventDetailSceneListener: AnyObject { }
+
+// MARK: - HolidayEventDetailScene
+
+public protocol HolidayEventDetailScene: Scene where Interactor == any HolidayEventDetailSceneInteractor
+{ }
 
 // MARK: - EventDetailSceneBuilder
 
@@ -80,6 +90,11 @@ public protocol EventDetailSceneBuilder {
         _ repeatingEventTargetTime: EventTime?,
         listener: EventDetailSceneListener?
     ) -> any EventDetailScene
+    
+    @MainActor
+    func makeHolidayEventDetailScene(
+        _ uuid: String
+    ) -> any HolidayEventDetailScene
     
     @MainActor
     func makeGoogleCalendarDetailScene(

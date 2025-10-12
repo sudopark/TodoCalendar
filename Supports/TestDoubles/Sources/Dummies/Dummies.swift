@@ -50,9 +50,9 @@ extension CalendarComponent {
             [(9, 24), (9, 25), (9, 26), (9, 27), (9, 28), (9, 29), (9, 30)]
         ]
         let holidays: [Holiday] = [
-            .init(uuid: "hd1", dateString: "2023-09-28", name: "추석"),
-            .init(uuid: "hd2", dateString: "2023-09-29", name: "추석"),
-            .init(uuid: "hd3", dateString: "2023-09-30", name: "추석")
+            .init(uuid: "2023-09-28-추석", dateString: "2023-09-28", name: "추석"),
+            .init(uuid: "2023-09-29-추석", dateString: "2023-09-29", name: "추석"),
+            .init(uuid: "2023-09-30-추석", dateString: "2023-09-30", name: "추석")
         ]
         return dummy(2023, 9, weekAndDays)
             .applyHolidays(holidays)
@@ -67,7 +67,7 @@ extension CalendarComponent {
             [(8, 27), (8, 28), (8, 29), (8, 30), (8, 31), (9, 1), (9, 2)],
         ]
         let holidays: [Holiday] = [
-            .init(uuid: "hd4", dateString: "2023-08-15", name: "광복절")
+            .init(uuid: "2023-08-15-광복절", dateString: "2023-08-15", name: "광복절")
         ]
         return dummy(2023, 8, weekAndDays)
             .applyHolidays(holidays)

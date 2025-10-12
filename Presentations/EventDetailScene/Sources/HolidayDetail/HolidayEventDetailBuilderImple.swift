@@ -15,12 +15,12 @@ import CommonPresentation
 
 // MARK: - HolidayEventDetailSceneBuilerImple
 
-final class HolidayEventDetailSceneBuilerImple {
+public final class HolidayEventDetailSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     
-    init(
+    public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
@@ -33,7 +33,7 @@ final class HolidayEventDetailSceneBuilerImple {
 extension HolidayEventDetailSceneBuilerImple: HolidayEventDetailSceneBuiler {
     
     @MainActor
-    func makeHolidayEventDetailScene(uuid: String) -> any HolidayEventDetailScene {
+    public func makeHolidayEventDetailScene(uuid: String) -> any HolidayEventDetailScene {
         
         let viewModel = HolidayEventDetailViewModelImple(
             uuid: uuid,

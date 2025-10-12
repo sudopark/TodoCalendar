@@ -610,7 +610,7 @@ extension DayEventListViewModelImpleTests {
     
     private var dummyEvents: [any CalendarEvent] {
         let timeZone = TimeZone(abbreviation: "KST")!
-        let holiday = HolidayCalendarEvent(.init(uuid: "id", dateString: "2023-09-30", name: "holiday"), in: timeZone)!
+        let holiday = HolidayCalendarEvent(.init(uuid: "2023-09-30-holiday", dateString: "2023-09-30", name: "holiday"), in: timeZone)!
         let schedule4 = ScheduleEvent(uuid: "repeating-schedule", name: "repeating-schedule", time: .at(0)) |> \.nextRepeatingTimes .~ [.init(time: .at(self.todayRange.lowerBound + 1), turn: 4)]
             |> \.eventTagId .~ .custom("some")
         let scheduleWithRepeating = ScheduleCalendarEvent.events(from: schedule4, in: timeZone).last!
