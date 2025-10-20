@@ -132,7 +132,9 @@ extension Calendar {
         return dayStart.timeIntervalSince1970..<dayEnd.timeIntervalSince1970
     }
     
-    public func diffDays(_ lhs: Date, _ rhs: Date) -> Int {
-        return self.dateComponents([.day], from: lhs, to: rhs).day ?? 0
+    public func diffDays(_ lhs: Date, _ rhs: Date) -> Int? {
+        let fromDate = self.startOfDay(for: lhs)
+        let toDate = self.startOfDay(for: rhs)
+        return self.dateComponents([.day], from: fromDate, to: toDate).day
     }
 }
