@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 
 
 // MARK: - HolidaySupportCountry
@@ -44,5 +46,14 @@ public struct Holiday: Equatable, Sendable {
         let components = dateString.components(separatedBy: "-").compactMap { Int($0) }
         guard components.count == 3 else { return nil }
         return (components[0], components[1], components[2])
+    }
+    
+    public func date(at timeZone: TimeZone) -> Date? {
+        guard let components = self.dateComponents() else { return nil }
+        let dateComponents = DateComponents(
+            year: components.0, month: components.1, day: components.2
+        )
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        return calendar.date(from: dateComponents)
     }
 }

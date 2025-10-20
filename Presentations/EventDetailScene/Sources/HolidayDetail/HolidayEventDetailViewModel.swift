@@ -102,14 +102,6 @@ extension HolidayEventDetailViewModelImple {
     var dateText: AnyPublisher<String, Never> {
         guard let utc = TimeZone(secondsFromGMT: 0) else { return Empty().eraseToAnyPublisher() }
         
-        let asDate: (Holiday) -> Date? = { holiday in
-            guard let components = holiday.dateComponents(), let utc = TimeZone(secondsFromGMT: 0) else { return nil }
-            let dateComponents = DateComponents(
-                year: components.0, month: components.1, day: components.2
-            )
-            let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ utc
-            return calendar.date(from: dateComponents)
-        }
         let transform: (Date) -> String = { date in
             let formatter = DateFormatter()
                 |> \.timeZone .~ utc
@@ -117,7 +109,7 @@ extension HolidayEventDetailViewModelImple {
             return formatter.string(from: date)
         }
         return self.subject.holiday.compactMap { $0 }
-            .compactMap(asDate)
+            .compactMap { $0.date(at: utc) }
             .map(transform)
             .removeDuplicates()
             .eraseToAnyPublisher()
