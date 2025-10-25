@@ -98,6 +98,7 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     func startTimeDefaultDate(for now: Date) -> Date
     func endTimeDefaultDate(from startDate: Date) -> Date
     var selectedTime: AnyPublisher<SelectedTime?, Never> { get }
+    var selectedTimeDDay: AnyPublisher<String?, Never> { get }
     var repeatOption: AnyPublisher<String?, Never> { get }
     var repeatOptionPeriod: AnyPublisher<String?, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
@@ -114,6 +115,7 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let eventSettingUsecase: any EventSettingUsecase
     private let linkPreviewFetchUsecase: any LinkPreviewFetchUsecase
+    private let daysIntervalCountUescase: any DaysIntervalCountUsecase
     weak var routing: (any EventDetailInputRouting)?
     weak var listener: (any EventDetailInputListener)?
     
@@ -121,12 +123,14 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
         eventTagUsecase: any EventTagUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         eventSettingUsecase: any EventSettingUsecase,
-        linkPreviewFetchUsecase: any LinkPreviewFetchUsecase
+        linkPreviewFetchUsecase: any LinkPreviewFetchUsecase,
+        daysIntervalCountUescase: any DaysIntervalCountUsecase
     ) {
         self.eventTagUsecase = eventTagUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.eventSettingUsecase = eventSettingUsecase
         self.linkPreviewFetchUsecase = linkPreviewFetchUsecase
+        self.daysIntervalCountUescase = daysIntervalCountUescase
     }
     
     private struct BasicAndTimeZoneData {
@@ -471,6 +475,26 @@ extension EventDetailInputViewModelImple {
             .compactMap { $0 }
             .map { $0.basic.selectedTime }
             .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var selectedTimeDDay: AnyPublisher<String?, Never> {
+        let selectedTime: (BasicAndTimeZoneData) -> EventTime? = { basicAndTimeZone in
+            return basicAndTimeZone.basic.selectedTime?.eventTime(basicAndTimeZone.timeZone)
+        }
+        let countDays: (EventTime?) -> AnyPublisher<Int?, Never> = { [weak self] time in
+            guard let self = self, let time else { return Just(nil).eraseToAnyPublisher() }
+            return self.daysIntervalCountUescase.countDays(to: time).mapAsOptional()
+        }
+        let transform: (Int?) -> String? = { interval in
+            return interval.map { DDayText($0) }.map { $0.text }
+        }
+        return self.subject.basic.compactMap { $0 }
+            .map(selectedTime)
+            .map(countDays)
+            .switchToLatest()
+            .removeDuplicates()
+            .map(transform)
             .eraseToAnyPublisher()
     }
     

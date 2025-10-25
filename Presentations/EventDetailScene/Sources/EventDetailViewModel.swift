@@ -95,3 +95,19 @@ protocol EventDetailViewModel: Sendable, AnyObject {
     var isSaving: AnyPublisher<Bool, Never> { get }
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> { get }
 }
+
+
+struct DDayText {
+    
+    let text: String
+    init(_ interval: Int) {
+        switch interval {
+        case ..<0:
+            self.text = "D+\(abs(interval))"
+        case 0:
+            self.text = "D-Day"
+        default:
+            self.text = "D-\(interval)"
+        }
+    }
+}
