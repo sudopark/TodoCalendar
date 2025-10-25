@@ -49,7 +49,7 @@ import CommonPresentation
         viewModel.ddayText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
-                self?.dateText = text
+                self?.ddayText = text
             })
             .store(in: &self.cancellables)
         
