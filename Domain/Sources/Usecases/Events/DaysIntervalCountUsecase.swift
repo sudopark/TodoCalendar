@@ -18,6 +18,12 @@ public protocol DaysIntervalCountUsecase: Sendable {
     func countDays(to holiday: Holiday) -> AnyPublisher<Int, Never>
 }
 
+extension DaysIntervalCountUsecase {
+    
+    public func countDays(to date: Date) -> AnyPublisher<Int, Never> {
+        return self.countDays(to: .at(date.timeIntervalSince1970))
+    }
+}
 
 public final class DaysIntervalCountUsecaseImple: DaysIntervalCountUsecase, @unchecked Sendable {
     
