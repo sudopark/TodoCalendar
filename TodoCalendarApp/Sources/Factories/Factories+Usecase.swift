@@ -176,6 +176,19 @@ extension NonLoginUsecaseFactoryImple {
             eventNotifyService: applicationBase.eventNotifyService
         )
     }
+    
+    func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase {
+        let repository = CalendarSettingRepositoryImple(
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        let settingUsecase = CalendarSettingUsecaseImple(
+            settingRepository: repository,
+            shareDataStore: applicationBase.sharedDataStore
+        )
+        return DaysIntervalCountUsecaseImple(
+            calendarSettingUsecase: settingUsecase
+        )
+    }
 }
 
 
@@ -508,6 +521,19 @@ extension LoginUsecaseFactoryImple {
             repository: repository, 
             sharedDataStore: applicationBase.sharedDataStore,
             eventNotifyService: applicationBase.eventNotifyService
+        )
+    }
+    
+    func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase {
+        let repository = CalendarSettingRepositoryImple(
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        let settingUsecase = CalendarSettingUsecaseImple(
+            settingRepository: repository,
+            shareDataStore: applicationBase.sharedDataStore
+        )
+        return DaysIntervalCountUsecaseImple(
+            calendarSettingUsecase: settingUsecase
         )
     }
     
