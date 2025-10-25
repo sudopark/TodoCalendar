@@ -24,6 +24,7 @@ import CommonPresentation
     
     var name: String = ""
     var dateText: String = ""
+    var ddayText: String = ""
     var countryModel: CountryModel?
     
     func bind(_ viewModel: any HolidayEventDetailViewModel) {
@@ -39,6 +40,13 @@ import CommonPresentation
             .store(in: &self.cancellables)
         
         viewModel.dateText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.dateText = text
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.ddayText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.dateText = text
@@ -122,6 +130,8 @@ struct HolidayEventDetailView: View {
                         }
                         
                         self.dateView
+                        
+                        self.ddayView
                     }
                     .padding(.top, 20)
                 }
@@ -167,6 +177,20 @@ struct HolidayEventDetailView: View {
         }
     }
     
+    private var ddayView: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "sun.horizon.fill")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            
+            Text(state.ddayText)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                .font(self.appearance.fontSet.normal.asFont)
+                
+            Spacer()
+        }
+    }
+    
     private func countryInfoView(_ model: CountryModel) -> some View {
         HStack(spacing: 16) {
             
@@ -205,6 +229,7 @@ struct HolidayEventDetailViewPreviewProvider: PreviewProvider {
         
         state.name = "삼일절"
         state.dateText = "2025년 3월 1일 금요일"
+        state.ddayText = "D-Day"
         state.countryModel = .init(
             thumbnailUrl: "https://flagcdn.com/w160/kr.jpg",
             name: "대한민국"

@@ -25,7 +25,11 @@ final class HolidayEventDetailViewModelImpleTests: PublisherWaitable {
     private func makeViewModel() async throws -> HolidayEventDetailViewModelImple {
         let usecase = PrivateStubHolidayUsecase()
         try await usecase.prepare()
-        let viewModel = HolidayEventDetailViewModelImple(uuid: "some", holidayUsecase: usecase)
+        let viewModel = HolidayEventDetailViewModelImple(
+            uuid: "some",
+            holidayUsecase: usecase,
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+        )
         viewModel.router = self.spyRouter
         return viewModel
     }
@@ -59,6 +63,23 @@ extension HolidayEventDetailViewModelImpleTests {
         
         // then
         #expect(dateText == "03/01/2025 (Sat)")
+    }
+    
+    @Test func viewModel_provideDDayText() async throws {
+        // given
+        let expect = expectConfirm("d-day 정보 제공")
+        expect.count = 3
+        let viewModel = try await self.makeViewModel()
+        
+        // when
+        let days = try await self.outputs(expect, for: viewModel.ddayText) {
+            viewModel.refresh()
+        }
+        
+        // then
+        #expect(days == [
+            "D+4", "D-Day", "D-4"
+        ])
     }
     
     @Test func viewModel_provideCountryInfo() async throws {

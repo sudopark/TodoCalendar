@@ -32,6 +32,7 @@ protocol HolidayEventDetailViewModel: AnyObject, Sendable, HolidayEventDetailSce
     // presenter
     var holidayName: AnyPublisher<String, Never> { get }
     var dateText: AnyPublisher<String, Never> { get }
+    var ddayText: AnyPublisher<String, Never> { get }
     var countryModel: AnyPublisher<CountryModel, Never> { get }
 }
 
@@ -42,14 +43,17 @@ final class HolidayEventDetailViewModelImple: HolidayEventDetailViewModel, @unch
     
     private let uuid: String
     private let holidayUsecase: any HolidayUsecase
+    private let daysIntervalCountUsecase: any DaysIntervalCountUsecase
     var router: (any HolidayEventDetailRouting)?
     
     init(
         uuid: String,
-        holidayUsecase: any HolidayUsecase
+        holidayUsecase: any HolidayUsecase,
+        daysIntervalCountUsecase: any DaysIntervalCountUsecase
     ) {
         self.uuid = uuid
         self.holidayUsecase = holidayUsecase
+        self.daysIntervalCountUsecase = daysIntervalCountUsecase
     }
     
     
@@ -112,6 +116,19 @@ extension HolidayEventDetailViewModelImple {
             .compactMap { $0.date(at: utc) }
             .map(transform)
             .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var ddayText: AnyPublisher<String, Never> {
+        let transform: (Holiday) -> AnyPublisher<Int, Never> = { [weak self] holiday in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+            return self.daysIntervalCountUsecase.countDays(to: holiday)
+        }
+        return self.subject.holiday.compactMap { $0 }
+            .map(transform)
+            .switchToLatest()
+            .removeDuplicates()
+            .map { DDayText($0).text }
             .eraseToAnyPublisher()
     }
     
