@@ -28,6 +28,7 @@ import CommonPresentation
     var isSaving: Bool = false
     var isSavable: Bool = false
     var selectedTime: SelectedTime?
+    var ddayText: String?
     var selectedRepeat: String?
     var selectedRepeatPeriod: String?
     var selectedNotificationTimeText: String?
@@ -106,6 +107,13 @@ import CommonPresentation
             .sink(receiveValue: { [weak self] time in
                 self?.selectedTime = time
                 self?.isAllDay = time?.isAllDay ?? false
+            })
+            .store(in: &self.cancellables)
+        
+        inputViewModel.selectedTimeDDay
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.ddayText = text
             })
             .store(in: &self.cancellables)
         
@@ -574,6 +582,7 @@ struct EventDetailView: View {
     private var timeSelectView: some View {
         
         return VStack {
+            
             HStack(spacing: 16) {
                 Image(systemName: "clock")
                     .font(.system(size: 16, weight: .light))
@@ -588,6 +597,21 @@ struct EventDetailView: View {
             
             if let timeSelecting = self.isTimeSelecting {
                 self.timePickerView(timeSelecting)
+            }
+            
+            if self.isTimeSelecting == nil, let dday = state.ddayText {
+                HStack(spacing: 16) {
+                    Image(systemName: "sun.horizon.fill")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                    
+                    Text(dday)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                        .font(self.appearance.fontSet.normal.asFont)
+                        
+                    Spacer()
+                }
+                .padding(.top, 8)
             }
         }
     }
@@ -611,7 +635,9 @@ struct EventDetailView: View {
             
         default: break
         }
-        self.isTimeSelecting = selecting
+        appearance.withAnimationIfNeed {
+            self.isTimeSelecting = selecting
+        }
         self.isFocusInput = nil
     }
 
@@ -1044,6 +1070,7 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
             .init(Date().timeIntervalSince1970, .current),
             .init(Date().addingTimeInterval(+10).timeIntervalSince1970, .current)
         )
+        state.ddayText = "D-1"
         state.selectedRepeat = "some"
         state.availableMoreActions = [
             [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
