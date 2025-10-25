@@ -37,7 +37,8 @@ extension HolidayEventDetailSceneBuilerImple: HolidayEventDetailSceneBuiler {
         
         let viewModel = HolidayEventDetailViewModelImple(
             uuid: uuid,
-            holidayUsecase: self.usecaseFactory.makeHolidayUsecase()
+            holidayUsecase: self.usecaseFactory.makeHolidayUsecase(),
+            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase()
         )
         
         let viewController = HolidayEventDetailViewController(
