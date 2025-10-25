@@ -16,11 +16,11 @@ import CommonPresentation
 
 // MARK: - SettingItemListViewState
 
-final class SettingItemListViewState: ObservableObject {
+@Observable final class SettingItemListViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
-    @Published var sections: [any SettingSectionModelType] = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    var sections: [any SettingSectionModelType] = []
     
     func bind(_ viewModel: any SettingItemListViewModel) {
         
@@ -39,7 +39,7 @@ final class SettingItemListViewState: ObservableObject {
 
 // MARK: - SettingItemListViewEventHandler
 
-final class SettingItemListViewEventHandler: ObservableObject {
+final class SettingItemListViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
     var selectItem: (any SettingItemModelType) -> Void = { _ in }
@@ -51,7 +51,7 @@ final class SettingItemListViewEventHandler: ObservableObject {
 
 struct SettingItemListContainerView: View {
     
-    @StateObject private var state: SettingItemListViewState = .init()
+    @State private var state: SettingItemListViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: SettingItemListViewEventHandler
     
@@ -71,9 +71,9 @@ struct SettingItemListContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
     }
 }
 
@@ -81,9 +81,9 @@ struct SettingItemListContainerView: View {
 
 struct SettingItemListView: View {
     
-    @EnvironmentObject private var state: SettingItemListViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: SettingItemListViewEventHandler
+    @Environment(SettingItemListViewState.self) private var state
+    @Environment(SettingItemListViewEventHandler.self) private var eventHandlers
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -102,6 +102,9 @@ struct SettingItemListView: View {
                     .eventHandler(\.onTap, self.eventHandlers.close)
             }
             .navigationTitle("setting.title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
         }
         .id(appearance.navigationBarId)
     }
@@ -257,9 +260,9 @@ struct SettingItemListViewPreviewProvider: PreviewProvider {
         ]
         
         let view = SettingItemListView()
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
         return view
     }
 }

@@ -17,13 +17,13 @@ import CommonPresentation
 
 // MARK: - SelectEventTagViewController
 
-final class SelectEventTagViewState: ObservableObject {
+@Observable final class SelectEventTagViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var tags: [TagCellViewModel] = []
-    @Published var selectedTagId: EventTagId?
+    var tags: [TagCellViewModel] = []
+    var selectedTagId: EventTagId?
     
     func bind(_ viewModel: any SelectEventTagViewModel) {
         
@@ -48,7 +48,7 @@ final class SelectEventTagViewState: ObservableObject {
 }
 
 
-final class SelectEventTagViewEventHandler: ObservableObject {
+final class SelectEventTagViewEventHandler: Observable {
  
     var onAppear: () -> Void = { }
     var selectTag: (EventTagId) -> Void = { _ in }
@@ -70,7 +70,7 @@ final class SelectEventTagViewEventHandler: ObservableObject {
 
 struct SelectEventTagContainerView: View {
     
-    @StateObject private var state: SelectEventTagViewState = .init()
+    @State private var state: SelectEventTagViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: SelectEventTagViewEventHandler
     
@@ -90,9 +90,9 @@ struct SelectEventTagContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandler.onAppear()
             }
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandler)
+            .environment(state)
+            .environment(eventHandler)
+            .environment(viewAppearance)
     }
 }
 
@@ -100,32 +100,38 @@ struct SelectEventTagContainerView: View {
 
 struct SelectEventTagView: View {
     
-    @EnvironmentObject private var state: SelectEventTagViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: SelectEventTagViewEventHandler
+    @Environment(SelectEventTagViewState.self) private var state
+    @Environment(SelectEventTagViewEventHandler.self) private var eventHandlers
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
             
             List {
-                ForEach(self.state.tags, id: \.compareKey) {
+                ForEach(self.state.tags) {
                     self.tagCellView($0)
                 }
                 .listRowSeparator(.hidden)
+                .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                 .listRowBackground(appearance.colorSet.bg0.asColor)
                 
                 self.addTagView
                     .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 20, leading: 20, bottom: 5, trailing: 20))
                     .listRowBackground(appearance.colorSet.bg0.asColor)
                 
                 self.seeAllEventTypesView
                     .listRowSeparator(.hidden)
+                    .listRowInsets(.init(top: 0, leading: 20, bottom: 5, trailing: 20))
                     .listRowBackground(appearance.colorSet.bg0.asColor)
             }
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
             
             .navigationTitle(R.String.EventTag.title)
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 CloseButton()
                     .eventHandler(\.onTap, eventHandlers.close)
@@ -153,7 +159,7 @@ struct SelectEventTagView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
         .padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
@@ -178,7 +184,7 @@ struct SelectEventTagView: View {
             
             Spacer()
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
         .padding(.horizontal, 12)
         .background {
             RoundedRectangle(cornerRadius: 8)
@@ -204,13 +210,6 @@ struct SelectEventTagView: View {
     }
 }
 
-private extension TagCellViewModel {
-    
-    var compareKey: String {
-        return "id:\(id.hashValue)_\(name)"
-    }
-}
-
 
 // MARK: - preview
 
@@ -233,9 +232,9 @@ struct SelectEventTagViewPreviewProvider: PreviewProvider {
         ]
         let eventHandler = SelectEventTagViewEventHandler()
         let view = SelectEventTagView()
-            .environmentObject(viewAppearance)
-            .environmentObject(state)
-            .environmentObject(eventHandler)
+            .environment(state)
+            .environment(eventHandler)
+            .environment(viewAppearance)
         return view
     }
 }

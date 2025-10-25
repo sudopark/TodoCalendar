@@ -21,14 +21,14 @@ struct TodoEventGuideView: View {
     var body: some View {
         TodoEventGuideContentView()
             .eventHandler(\.onClose, onClose)
-            .environmentObject(self.appearance)
+            .environment(self.appearance)
     }
 }
 
 
 private struct TodoEventGuideContentView: View {
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     var onClose: () -> Void = { }
     
     var body: some View {

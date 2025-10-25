@@ -374,7 +374,7 @@ private final class PrivateEventsFetchUsecase: StubCalendarEventsFetchUescase {
     override func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
         let events = try await super.fetchEvents(in: range, timeZone)
         let eventsWithoutHoliday = events.eventWithTimes.filter { !($0 is HolidayCalendarEvent) }
-        let dummyHoliday = Holiday(dateString: "2024-06-19", name: "dummy_holiday")
+        let dummyHoliday = Holiday(uuid: "2024-06-19-dummy_holiday", dateString: "2024-06-19", name: "dummy_holiday")
         let holidayEvent = HolidayCalendarEvent(dummyHoliday, in: timeZone)!
         let newEvents = eventsWithoutHoliday + [holidayEvent]
         return events |> \.eventWithTimes .~ newEvents

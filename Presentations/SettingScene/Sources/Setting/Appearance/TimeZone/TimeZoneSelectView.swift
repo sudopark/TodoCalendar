@@ -19,15 +19,15 @@ import CommonPresentation
 
 // MARK: - TimeZoneSelectViewState
 
-final class TimeZoneSelectViewState: ObservableObject {
+@Observable final class TimeZoneSelectViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var searchKeyword: String = ""
-    @Published var systemTimeZone: TimeZoneModel?
-    @Published var timeZones: [TimeZoneModel] = []
-    @Published var selectedIdentifier: String?
+    var searchKeyword: String = ""
+    var systemTimeZone: TimeZoneModel?
+    var timeZones: [TimeZoneModel] = []
+    var selectedIdentifier: String?
     
     func bind(_ viewModel: any TimeZoneSelectViewModel) {
         
@@ -55,7 +55,7 @@ final class TimeZoneSelectViewState: ObservableObject {
 
 // MARK: - TimeZoneSelectViewEventHandler
 
-final class TimeZoneSelectViewEventHandler: ObservableObject {
+final class TimeZoneSelectViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -69,7 +69,7 @@ final class TimeZoneSelectViewEventHandler: ObservableObject {
 
 struct TimeZoneSelectContainerView: View {
     
-    @StateObject private var state: TimeZoneSelectViewState = .init()
+    @State private var state: TimeZoneSelectViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: TimeZoneSelectViewEventHandler
     
@@ -89,9 +89,9 @@ struct TimeZoneSelectContainerView: View {
                 self.stateBinding(self.state)
                 eventHandlers.onAppear()
             }
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
     }
 }
 
@@ -99,9 +99,9 @@ struct TimeZoneSelectContainerView: View {
 
 struct TimeZoneSelectView: View {
     
-    @EnvironmentObject private var state: TimeZoneSelectViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: TimeZoneSelectViewEventHandler
+    @Environment(TimeZoneSelectViewState.self) private var state
+    @Environment(TimeZoneSelectViewEventHandler.self) private var eventHandlers
+    @Environment(ViewAppearance.self) private var appearance
     @FocusState var searchDidFocused: Bool
     
     var body: some View {
@@ -134,6 +134,9 @@ struct TimeZoneSelectView: View {
             }
             .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("setting.timezone::title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton(tapHandler: eventHandlers.close)
@@ -149,6 +152,7 @@ struct TimeZoneSelectView: View {
                 .font(appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(appearance.colorSet.text1.asColor)
             
+            @Bindable var state = self.state
             TextField(text: $state.searchKeyword) {
                 Text("common.search".localized())
                     .font(appearance.fontSet.subNormal.asFont)
@@ -159,7 +163,7 @@ struct TimeZoneSelectView: View {
             .focused($searchDidFocused)
             .autocorrectionDisabled()
             .textInputAutocapitalization(.never)
-            .onReceive(state.$searchKeyword) { text in
+            .onChange(of: state.searchKeyword) { _, text in
                 eventHandlers.search(text)
             }
         }
@@ -238,9 +242,9 @@ struct TimeZoneSelectViewPreviewProvider: PreviewProvider {
         state.selectedIdentifier = "Asia/Seoul"
         
         let view = TimeZoneSelectView()
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
         return view
     }
 }

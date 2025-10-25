@@ -57,7 +57,7 @@ extension SelectEventTagRouter {
         Task { @MainActor in
             
             let next = self.settingSceneBuilder.makeEventTagListScene(
-                hasNavigation: true,
+                isRootNavigation: false,
                 listener: self.currentScene?.interactor
             )
             self.currentScene?.navigationController?.pushViewController(next, animated: true)

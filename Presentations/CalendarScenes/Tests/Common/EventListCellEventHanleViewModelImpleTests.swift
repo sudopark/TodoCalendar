@@ -110,12 +110,12 @@ extension EventListCellEventHanleViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didRouteToGoogleEventDetailWithId, "google")
     }
     
-    func testViewModel_whenSelectHolidayEvent_showNotSupportToast() {
+    func testViewModel_routeToHolidayEventDetail() {
         // given
         let viewModel = self.makeViewModel()
         let timeZone = TimeZone(abbreviation: "KST")!
         let holiday = HolidayCalendarEvent(
-            .init(dateString: "2023-02-03", name: "dummy"), in: timeZone
+            .init(uuid: "holiday", dateString: "2023-02-03", name: "dummy"), in: timeZone
         )!
         
         // when
@@ -123,7 +123,7 @@ extension EventListCellEventHanleViewModelImpleTests {
         viewModel.selectEvent(model)
         
         // then
-        XCTAssertEqual(self.spyRouter.didShowToastWithMessage, "eventDetail.notSupport::holiday".localized())
+        XCTAssertEqual(self.spyRouter.didRouteToHolidayEventDetailWithId, "holiday")
     }
 }
 
@@ -464,6 +464,11 @@ private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @u
     ) {
         self.didRouteToScheduleDetail = true
         self.didRouteToScheduleDetailWithTargetTime = repeatingEventTargetTime
+    }
+    
+    var didRouteToHolidayEventDetailWithId: String?
+    func routeToHolidayEventDetail(_ uuid: String) {
+        self.didRouteToHolidayEventDetailWithId = uuid
     }
     
     var didRouteToGoogleEventDetailWithId: String?

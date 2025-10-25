@@ -67,7 +67,8 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
             eventTagUsecase: tagUsecase,
             calendarSettingUsecase: settingUsecase,
             eventSettingUsecase: eventSettingUsecase,
-            linkPreviewFetchUsecase: StubLinkPreviewFetchUsecase()
+            linkPreviewFetchUsecase: StubLinkPreviewFetchUsecase(),
+            daysIntervalCountUescase: StubDaysIntervalCountUsecase()
         )
         viewModel.routing = self.spyRouter
         viewModel.listener = self.spyListener
@@ -515,6 +516,29 @@ extension EventDetailInputViewModelTests {
         XCTAssertEqual(times[safe: 2]??.startTimeText != nil, false)
         XCTAssertEqual(times[safe: 3]??.isSingleAllDay, true)
         XCTAssertEqual(times[safe: 3]??.startTimeText != nil, false)
+    }
+    
+    func testViewModel_whenSelectTime_countDDay() {
+        // given
+        let expect = expectation(description: "날짜 선택 여부에 따라 d-day count")
+        expect.expectedFulfillmentCount = 7
+        expect.assertForOverFulfill = false
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let days = self.waitOutputs(expect, for: viewModel.selectedTimeDDay) {
+            self.prepareViewModelWithOldData(viewModel)
+            viewModel.removeTime()
+            
+            viewModel.selectStartTime(Date())
+        }
+        
+        // then
+        XCTAssertEqual(days, [
+            "D+4", "D-Day", "D-4",
+            nil,
+            "D+4", "D-Day", "D-4",
+        ])
     }
     
     // 태그 선택

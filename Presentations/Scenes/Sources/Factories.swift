@@ -25,13 +25,14 @@ public protocol CalendarUsecaseFactory {
 }
 
 public protocol EventUsecaseFactory {
- 
+    
     func makeTodoEventUsecase() -> any TodoEventUsecase
     func makeScheduleEventUsecase() -> any ScheduleEventUsecase
     func makeEventTagUsecase() -> any EventTagUsecase
     func makeEventDetailDataUsecase() -> any EventDetailDataUsecase
     func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase
     func makeForemostEventUsecase() -> any ForemostEventUsecase
+    func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase
     var eventSyncUsecase: any EventSyncUsecase { get }
     var eventUploadService: any EventUploadService { get }
 }

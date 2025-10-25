@@ -17,16 +17,16 @@ import CommonPresentation
 
 // MARK: - ManageAccountViewState
 
-final class ManageAccountViewState: ObservableObject {
+@Observable final class ManageAccountViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var isMigrating = false
-    @Published var accountInfo: AccountInfoModel?
-    @Published var isSignOuts = false
-    @Published var isDeletingAccount = false
-    @Published var migrationNeedEventCount = 0
+    var isMigrating = false
+    var accountInfo: AccountInfoModel?
+    var isSignOuts = false
+    var isDeletingAccount = false
+    var migrationNeedEventCount = 0
     
     func bind(_ viewModel: any ManageAccountViewModel) {
         
@@ -73,7 +73,7 @@ final class ManageAccountViewState: ObservableObject {
 
 // MARK: - ManageAccountViewEventHandler
 
-final class ManageAccountViewEventHandler: ObservableObject {
+final class ManageAccountViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -97,7 +97,7 @@ final class ManageAccountViewEventHandler: ObservableObject {
 
 struct ManageAccountContainerView: View {
     
-    @StateObject private var state: ManageAccountViewState = .init()
+    @State private var state: ManageAccountViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: ManageAccountViewEventHandler
     
@@ -117,9 +117,9 @@ struct ManageAccountContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
     }
 }
 
@@ -127,9 +127,9 @@ struct ManageAccountContainerView: View {
 
 struct ManageAccountView: View {
     
-    @EnvironmentObject private var state: ManageAccountViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: ManageAccountViewEventHandler
+    @Environment(ManageAccountViewState.self) private var state
+    @Environment(ManageAccountViewEventHandler.self) private var eventHandlers
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -167,6 +167,9 @@ struct ManageAccountView: View {
                 }
             }
             .navigationTitle("manage_account::title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
         }
             .id(appearance.navigationBarId)
     }
@@ -308,9 +311,9 @@ struct ManageAccountViewPreviewProvider: PreviewProvider {
         }
         
         let view = ManageAccountView()
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
         return view
     }
 }

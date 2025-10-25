@@ -15,17 +15,20 @@ public final class EventDetailSceneBuilderImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let holidayEventDetailSceneBuilder: any HolidayEventDetailSceneBuiler
     private let googleCalendarEventDetailSceneBuilder: any GoogleCalendarEventDetailSceneBuiler
     private let settingSceneBuilder: any SettingSceneBuiler
     
     public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
+        holidayEventDetailSceneBuilder: any HolidayEventDetailSceneBuiler,
         googleCalendarEventDetailSceneBuilder: any GoogleCalendarEventDetailSceneBuiler,
         settingSceneBuilder: any SettingSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.holidayEventDetailSceneBuilder = holidayEventDetailSceneBuilder
         self.googleCalendarEventDetailSceneBuilder = googleCalendarEventDetailSceneBuilder
         self.settingSceneBuilder = settingSceneBuilder
     }
@@ -95,7 +98,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             eventSettingUsecase: self.usecaseFactory.makeEventSettingUsecase(),
-            linkPreviewFetchUsecase: self.usecaseFactory.makeLinkPreviewFetchUsecase()
+            linkPreviewFetchUsecase: self.usecaseFactory.makeLinkPreviewFetchUsecase(),
+            daysIntervalCountUescase: self.usecaseFactory.makeDaysIntervalCountUsecase()
         )
         
         let viewController = EventDetailViewController(
@@ -138,6 +142,11 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
         viewController.router = router
         
         return viewController
+    }
+    
+    @MainActor
+    public func makeHolidayEventDetailScene(_ uuid: String) -> any HolidayEventDetailScene {
+        return self.holidayEventDetailSceneBuilder.makeHolidayEventDetailScene(uuid: uuid)
     }
     
     @MainActor

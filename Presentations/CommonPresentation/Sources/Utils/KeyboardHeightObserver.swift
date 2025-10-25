@@ -41,13 +41,14 @@ extension Notification {
 
 
 @MainActor
-public final class KeyboardHeightObserver: ObservableObject {
+@Observable public final class KeyboardHeightObserver {
     
-    @Published public var showingKeyboardHeight: CGFloat = 0
+    public var showingKeyboardHeight: CGFloat = 0
     public var isVisible: Bool {
         return self.showingKeyboardHeight > 0
     }
     
+    @ObservationIgnored
     private var observing: Cancellable?
     
     public init() {

@@ -167,7 +167,7 @@ extension HolidayUsecaseImpleTests {
         // then
         XCTAssertEqual(holidayss, [
             [:],
-            [ 2023: [.init(dateString: "2023", name: "kr")] ]
+            [ 2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")] ]
         ])
     }
     
@@ -190,11 +190,11 @@ extension HolidayUsecaseImpleTests {
         XCTAssertEqual(holidayMaps, [
             [:],
             [
-                2023: [.init(dateString: "2023", name: "kr")]
+                2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]
             ],
             [
-                2022: [.init(dateString: "2022", name: "kr")],
-                2023: [.init(dateString: "2023", name: "kr")]
+                2022: [.init(uuid: "id-2022", dateString: "2022", name: "kr")],
+                2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]
             ]
         ])
     }
@@ -224,11 +224,11 @@ extension HolidayUsecaseImpleTests {
         XCTAssertEqual(holidayMaps, [
             [:],
             
-            [2023: [.init(dateString: "2023", name: "kr")]],
+            [2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]],
             
-            [2023: [.init(dateString: "2023", name: "us")]],
+            [2023: [.init(uuid: "id-2023", dateString: "2023", name: "us")]],
             
-            [2023: [.init(dateString: "2023", name: "kr")]],
+            [2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]],
         ])
     }
     
@@ -253,17 +253,17 @@ extension HolidayUsecaseImpleTests {
         XCTAssertEqual(holidayMap, [
             [:],
             [
-                2023: [.init(dateString: "2023", name: "kr")]
+                2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]
             ],
             
             [
-                2023: [.init(dateString: "2023", name: "kr")],
-                2022: [.init(dateString: "2022", name: "kr")]
+                2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")],
+                2022: [.init(uuid: "id-2022", dateString: "2022", name: "kr")]
             ],
             
             [
-                2023: [.init(dateString: "2023", name: "us")],
-                2022: [.init(dateString: "2022", name: "us")]
+                2023: [.init(uuid: "id-2023", dateString: "2023", name: "us")],
+                2022: [.init(uuid: "id-2022", dateString: "2022", name: "us")]
             ],
         ])
     }
@@ -287,8 +287,8 @@ extension HolidayUsecaseImpleTests {
         // then
         XCTAssertEqual(holidayMap, [
             [:],
-            [2023: [.init(dateString: "2023", name: "kr")]],
-            [2023: [.init(dateString: "2023", name: "kr-v2")]]
+            [2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]],
+            [2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr-v2")]]
         ])
     }
     
@@ -317,6 +317,30 @@ extension HolidayUsecaseImpleTests {
             XCTAssert(true)
         }
     }
+    
+    func testUsecase_provideHoliday() {
+        // given
+        let expect = expectation(description: "공휴일 정보 제공")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecase()
+        
+        // when
+        let source = usecase.holiday("id-2022")
+        let holidays = self.waitOutputs(expect, for: source) {
+            Task {
+                try await usecase.prepare()
+                
+                try await usecase.refreshHolidays(2023)
+                try await usecase.refreshHolidays(2022)
+            }
+        }
+        
+        // then
+        XCTAssertEqual(holidays, [
+            nil, nil,
+            .init(uuid: "id-2022", dateString: "2022", name: "kr")
+        ])
+    }
 }
 
 extension HolidayUsecaseImpleTests {
@@ -333,6 +357,11 @@ extension HolidayUsecaseImpleTests {
         
         func currentLocaleIdentifier() -> String {
             return "ko"
+        }
+        
+        var is24Hour: Bool = true
+        func is24HourFormat() -> Bool {
+            return is24Hour
         }
     }
 }

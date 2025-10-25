@@ -40,7 +40,8 @@ extension GoogleCalendarEventDetailSceneBuilerImple: GoogleCalendarEventDetailSc
         let viewModel = GoogleCalendarEventDetailViewModelImple(
             calenadrId: calendarId, eventId: eventId,
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
-            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase()
+            calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
+            daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase()
         )
         
         let viewController = GoogleCalendarEventDetailViewController(

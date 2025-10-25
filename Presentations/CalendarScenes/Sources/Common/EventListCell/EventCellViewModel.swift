@@ -30,6 +30,10 @@ public struct EventTimeText: Equatable, Sendable {
         self.text = time.timeText(timeZone, isShort: isShort)
         self.pmOram = isShort ? time.isAmOrPmText(timeZone) : nil
     }
+    
+    public var singleLineText: String {
+        return self.pmOram.map { "\($0) \(text)" } ?? self.text
+    }
 }
 
 public enum EventPeriodText: Equatable, Sendable {
@@ -149,7 +153,6 @@ public struct EventListMoreActionModel: Sendable, Equatable {
 
 // MARK: - EventCellViewModel
 public protocol EventCellViewModel: Sendable {
-    
     var eventIdentifier: String { get }
     var tagId: EventTagId { get }
     var name: String { get }
@@ -157,22 +160,9 @@ public protocol EventCellViewModel: Sendable {
     var periodDescription: String? { get set }
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
-    var customCompareKey: String { get }
     var moreActions: EventListMoreActionModel? { get }
 }
 
-extension EventCellViewModel {
-    
-    fileprivate func makeCustomCompareKey(_ additionalComponents: [String?]) -> String {
-        let baseComponents: [String?] = [
-            self.eventIdentifier, "\(self.tagId.hashValue)", self.name,
-            self.periodText?.customCompareKey, self.periodDescription,
-            "\(self.isForemost)"
-        ]
-        let components = baseComponents + additionalComponents
-        return components.map { $0 ?? "nil" }.joined(separator: ",")
-    }
-}
 
 // MARK: - Todo
 
@@ -183,7 +173,6 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
-    public var customCompareKey: String { self.makeCustomCompareKey(["todo"]) }
     public var eventTimeRawValue: EventTime?
     public var isRepeating: Bool = false
     public var isForemost: Bool = false
@@ -237,9 +226,6 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
         .init(text: R.String.calendarEventTimeTodo)
     )
     var periodDescription: String?
-    var customCompareKey: String {
-        self.makeCustomCompareKey(["pending-todo"])
-    }
     let isRepeating: Bool = false
     let isForemost: Bool = false
     
@@ -266,9 +252,6 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public var periodDescription: String?
     public let isRepeating: Bool
     public let isForemost: Bool
-    public var customCompareKey: String {
-        self.makeCustomCompareKey(["schedule", self.turn.map { "\($0)" }])
-    }
     var eventTimeRawValue: EventTime?
     
     public init(_ id: String, turn: Int? = nil, name: String, isRepeating: Bool = false) {
@@ -327,7 +310,6 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     public var periodDescription: String?
     public let isRepeating: Bool = false
     public let isForemost: Bool = false
-    public var customCompareKey: String { self.makeCustomCompareKey(["holidays"]) }
     
     public init(_ holiday: HolidayCalendarEvent) {
         self.eventIdentifier = holiday.eventId
@@ -355,9 +337,6 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     public let calendarId: String
     public let colorId: String?
     public let htmlLink: String?
-    public var customCompareKey: String {
-        self.makeCustomCompareKey(["google", self.colorId ?? "nil"])
-    }
     
     public init?(
         _ event: GoogleCalendarEvent,

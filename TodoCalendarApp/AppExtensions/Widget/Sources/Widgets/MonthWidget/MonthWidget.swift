@@ -189,7 +189,7 @@ struct MonthWidgetPreview_Provider: PreviewProvider {
             let days = pairs.enumerated().map { offset, pair -> CalendarComponent.Day in
                 var day =  CalendarComponent.Day(year: 2024, month: pair.0, day: pair.1, weekDay: offset+1)
                 if day.identifier == "2024-9-11" || day.identifier == "2024-9-12" || day.identifier == "2024-9-13" {
-                    day.holidays = [.init(dateString: day.identifier, name: "some")]
+                    day.holidays = [.init(uuid: "hd", dateString: day.identifier, name: "some")]
                 }
                 return day
             }

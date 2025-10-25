@@ -19,13 +19,13 @@ import CommonPresentation
 
 // MARK: - ColorThemeSelectViewState
 
-final class ColorThemeSelectViewState: ObservableObject {
+@Observable final class ColorThemeSelectViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published fileprivate var sampleModel: CalendarAppearanceModel = .init(.sunday)
-    @Published fileprivate var themeModels: [ColorThemeModel] = []
+    fileprivate var sampleModel: CalendarAppearanceModel = .init(.sunday)
+    fileprivate var themeModels: [ColorThemeModel] = []
     
     func bind(_ viewModel: any ColorThemeSelectViewModel) {
         
@@ -51,7 +51,7 @@ final class ColorThemeSelectViewState: ObservableObject {
 
 // MARK: - ColorThemeSelectViewEventHandler
 
-final class ColorThemeSelectViewEventHandler: ObservableObject {
+final class ColorThemeSelectViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -72,7 +72,7 @@ final class ColorThemeSelectViewEventHandler: ObservableObject {
 
 struct ColorThemeSelectContainerView: View {
     
-    @StateObject private var state: ColorThemeSelectViewState = .init()
+    @State private var state: ColorThemeSelectViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: ColorThemeSelectViewEventHandler
     
@@ -92,9 +92,9 @@ struct ColorThemeSelectContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
     }
 }
 
@@ -102,9 +102,9 @@ struct ColorThemeSelectContainerView: View {
 
 struct ColorThemeSelectView: View {
     
-    @EnvironmentObject private var state: ColorThemeSelectViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: ColorThemeSelectViewEventHandler
+    @Environment(ColorThemeSelectViewState.self) private var state
+    @Environment(ColorThemeSelectViewEventHandler.self) private var eventHandlers
+    @Environment(ViewAppearance.self) private var appearance
     
     private let gridRow: [GridItem] = [
         .init(.flexible(minimum: 60, maximum: 100)),
@@ -115,8 +115,7 @@ struct ColorThemeSelectView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                
-                CalendarAppearanceSampleView(model: self.$state.sampleModel)
+                CalendarAppearanceSampleView(model: state.sampleModel)
                     .padding(.vertical, 60)
                 
                 ScrollView {
@@ -142,6 +141,9 @@ struct ColorThemeSelectView: View {
             }
             .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("setting.appearance.calendar.colorTheme".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton {
@@ -179,9 +181,9 @@ struct ColorThemeSelectViewPreviewProvider: PreviewProvider {
         let eventHandlers = ColorThemeSelectViewEventHandler()
         
         let view = ColorThemeSelectView()
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
         return view
     }
 }

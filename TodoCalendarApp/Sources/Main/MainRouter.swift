@@ -64,10 +64,11 @@ extension MainRouter {
         Task { @MainActor in
             
             let eventSettingScene = self.settingSceneBuilder.makeEventTagListScene(
-                hasNavigation: false,
+                isRootNavigation: true,
                 listener: nil
             )
-            self.currentScene?.present(eventSettingScene, animated: true)
+            let navigationController = UINavigationController(rootViewController: eventSettingScene)
+            self.currentScene?.present(navigationController, animated: true)
         }
     }
     
@@ -86,7 +87,7 @@ extension MainRouter {
             let dialog = self.calendarSceneBulder.makeSelectDialog(
                 current: current, self.currentScene?.interactor
             )
-            self.currentScene?.present(dialog, animated: true)
+            self.showBottomSlide(dialog)
         }
     }
 }

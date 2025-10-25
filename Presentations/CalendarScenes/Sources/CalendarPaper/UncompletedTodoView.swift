@@ -17,8 +17,8 @@ import CommonPresentation
 struct UncompletedTodoView: View {
     
     private let viewModels: [TodoEventCellViewModel]
-    @EnvironmentObject private var appearance: ViewAppearance
-    @Binding private var foremostMarkingStatus: ForemostMarkingStatus
+    @Environment(ViewAppearance.self) private var appearance
+    private let foremostMarkingStatus: ForemostMarkingStatus
     
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestCancelDoneTodo: (String) -> Void = { _ in }
@@ -28,10 +28,10 @@ struct UncompletedTodoView: View {
     
     init(
         _ viewModels: [TodoEventCellViewModel],
-        _ foremostMarkingStatus: Binding<ForemostMarkingStatus>
+        _ foremostMarkingStatus: ForemostMarkingStatus
     ) {
         self.viewModels = viewModels
-        self._foremostMarkingStatus = foremostMarkingStatus
+        self.foremostMarkingStatus = foremostMarkingStatus
     }
     
     var body: some View {
@@ -52,9 +52,9 @@ struct UncompletedTodoView: View {
                 }
             }
             
-            ForEach(self.viewModels, id: \.customCompareKey) { cvm in
+            ForEach(self.viewModels, id: \.eventIdentifier) { cvm in
                 
-                EventListCellView(cellViewModel: cvm, isUncompletedTodo: true, foremostEventMarkingStatus: _foremostMarkingStatus)
+                EventListCellView(cellViewModel: cvm, isUncompletedTodo: true, foremostEventMarkingStatus: foremostMarkingStatus)
                     .eventHandler(\.requestDoneTodo, self.requestDoneTodo)
                     .eventHandler(\.requestCancelDoneTodo, self.requestCancelDoneTodo)
                     .eventHandler(\.requestShowDetail, self.requestShowDetail)

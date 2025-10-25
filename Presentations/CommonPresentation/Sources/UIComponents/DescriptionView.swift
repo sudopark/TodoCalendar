@@ -13,7 +13,7 @@ public struct DescriptionView: View {
     
     private let descriptions: [String]
     private let spacing: CGFloat
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     public init(descriptions: [String], spacing: CGFloat = 4) {
         self.descriptions = descriptions

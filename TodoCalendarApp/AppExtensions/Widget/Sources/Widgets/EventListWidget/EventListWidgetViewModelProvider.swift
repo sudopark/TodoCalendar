@@ -185,7 +185,7 @@ struct EventListWidgetViewModel {
         |> \.periodText .~ .singleText(.init(text: "12:00"))
         
         let holiday = HolidayEventCellViewModel(
-            .init(.init(dateString: "2023-10-10", name: "widget.weeks.sample::holiday".localized()), in: .current)!
+            .init(.init(uuid: "hd", dateString: "2023-10-10", name: "widget.weeks.sample::holiday".localized()), in: .current)!
         )
         
         let defaultTagColorSetting = DefaultEventTagColorSetting(
@@ -293,17 +293,20 @@ final class EventListWidgetViewModelProvider {
     private let eventsFetchUsecase: any CalendarEventFetchUsecase
     private let appSettingRepository: any AppSettingRepository
     private let calendarSettingRepository: any CalendarSettingRepository
+    private let localeProvider: any LocaleProvider
     
     init(
         targetEventTagId: EventTagId,
         eventsFetchUsecase: any CalendarEventFetchUsecase,
         appSettingRepository: any AppSettingRepository,
-        calendarSettingRepository: any CalendarSettingRepository
+        calendarSettingRepository: any CalendarSettingRepository,
+        localeProvider: any LocaleProvider
     ) {
         self.targetEventTagId = targetEventTagId
         self.eventsFetchUsecase = eventsFetchUsecase
         self.appSettingRepository = appSettingRepository
         self.calendarSettingRepository = calendarSettingRepository
+        self.localeProvider = localeProvider
     }
 }
 
@@ -318,7 +321,7 @@ extension EventListWidgetViewModelProvider {
         let setting = self.appSettingRepository.loadSavedViewAppearance()
         
         let dayEventLists = try await self.loadDayEventListModel(
-            refDate, timeZone, setting.calendar.is24hourForm
+            refDate, timeZone, localeProvider.is24HourFormat()
         )
         let pages = dayEventLists.0.pagination(widgetSize)
         return EventListWidgetViewModel(

@@ -17,11 +17,11 @@ import CommonPresentation
 
 // MARK: - state
 
-final class PendingCompleteTodoState: ObservableObject {
+@Observable final class PendingCompleteTodoState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
-    @Published var ids: Set<String> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    var ids: Set<String> = []
     
     func bind(_ viewModel: EventListCellEventHanleViewModel, _ appearance: ViewAppearance) {
         
@@ -44,9 +44,9 @@ final class PendingCompleteTodoState: ObservableObject {
 
 struct EventListCellView: View {
     
-    @EnvironmentObject private var pendingDoneState: PendingCompleteTodoState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @Binding private var foremostEventMarkingStatus: ForemostMarkingStatus
+    @Environment(PendingCompleteTodoState.self) private var pendingDoneState
+    @Environment(ViewAppearance.self) private var appearance
+    private let foremostEventMarkingStatus: ForemostMarkingStatus
     
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestCancelDoneTodo: (String) -> Void = { _ in }
@@ -60,12 +60,12 @@ struct EventListCellView: View {
         cellViewModel: any EventCellViewModel,
         isUncompletedTodo: Bool = false,
         isForemostEvent: Bool = false,
-        foremostEventMarkingStatus: Binding<ForemostMarkingStatus>
+        foremostEventMarkingStatus: ForemostMarkingStatus
     ) {
         self.cellViewModel = cellViewModel
         self.isUncompletedTodo = isUncompletedTodo
         self.isForemostEvent = isForemostEvent
-        self._foremostEventMarkingStatus = foremostEventMarkingStatus
+        self.foremostEventMarkingStatus = foremostEventMarkingStatus
     }
     
     var body: some View {

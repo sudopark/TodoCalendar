@@ -77,6 +77,7 @@ open class StubHolidayUsecase: HolidayUsecase {
         else { return }
         let holidays = (1...5).map { int -> Holiday in
             return Holiday(
+                uuid: "hd1",
                 dateString: "\(year)-0\(int)-0\(int)",
                 name: "holiday-\(int)-\(country.code)"
             )
@@ -92,6 +93,7 @@ open class StubHolidayUsecase: HolidayUsecase {
         else { return [] }
         let holidays = (1...5).map { int -> Holiday in
             return Holiday(
+                uuid: "hd2",
                 dateString: "\(year)-0\(int)-0\(int)",
                 name: "holiday-\(int)-\(country.code)"
             )
@@ -111,6 +113,16 @@ open class StubHolidayUsecase: HolidayUsecase {
                     .eraseToAnyPublisher()
             }
             .switchToLatest()
+            .eraseToAnyPublisher()
+    }
+    
+    open func holiday(_ uuid: String) -> AnyPublisher<Holiday?, Never> {
+        return self.holidays()
+            .map { holidayMap in
+                return holidayMap
+                    .flatMap { $0.value }
+                    .first(where: { $0.uuid == uuid })
+            }
             .eraseToAnyPublisher()
     }
 }

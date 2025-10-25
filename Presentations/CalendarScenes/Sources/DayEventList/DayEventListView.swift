@@ -19,16 +19,16 @@ import CommonPresentation
 
 // MARK: - DayEventListViewController
 
-final class DayEventListViewState: ObservableObject {
+@Observable final class DayEventListViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published fileprivate var foremostModel: (any EventCellViewModel)?
-    @Published fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
-    @Published fileprivate var dayModel: SelectedDayModel?
-    @Published fileprivate var cellViewModels: [any EventCellViewModel] = []
-    @Published fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
+    fileprivate var foremostModel: (any EventCellViewModel)?
+    fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
+    fileprivate var dayModel: SelectedDayModel?
+    fileprivate var cellViewModels: [any EventCellViewModel] = []
+    fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
     
     func bind(_ viewModel: any DayEventListViewModel, _ appearance: ViewAppearance) {
         
@@ -81,7 +81,7 @@ final class DayEventListViewState: ObservableObject {
 }
 
 
-final class DayEventListViewEventHandler: ObservableObject {
+final class DayEventListViewEventHandler: Observable {
     var requestDoneTodo: (String) -> Void = { _ in }
     var requestCancelDoneTodo: (String) -> Void = { _ in }
     var requestAddNewEventWhetherUsingTemplate: (Bool) -> Void = { _ in }
@@ -116,7 +116,7 @@ final class DayEventListViewEventHandler: ObservableObject {
 
 struct DayEventListContainerView: View {
     
-    @StateObject private var state: DayEventListViewState = .init()
+    @State private var state: DayEventListViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: DayEventListViewEventHandler
     private let pendingDoneState: PendingCompleteTodoState
@@ -138,10 +138,10 @@ struct DayEventListContainerView: View {
             .onAppear {
                 self.stateBinding(self.state)
             }
-            .environmentObject(state)
-            .environmentObject(pendingDoneState)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandler)
+            .environment(state)
+            .environment(pendingDoneState)
+            .environment(eventHandler)
+            .environment(viewAppearance)
     }
 }
 
@@ -149,10 +149,10 @@ struct DayEventListContainerView: View {
 
 struct DayEventListView: View {
     
-    @EnvironmentObject private var state: DayEventListViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandler: DayEventListViewEventHandler
-    @EnvironmentObject private var pendingDoneState: PendingCompleteTodoState
+    @Environment(DayEventListViewState.self) private var state
+    @Environment(PendingCompleteTodoState.self) private var pendingDoneState
+    @Environment(DayEventListViewEventHandler.self) private var eventHandler
+    @Environment(ViewAppearance.self) private var appearance
     @FocusState var isFocusInput: Bool
     
     var body: some View {
@@ -223,7 +223,7 @@ struct DayEventListView: View {
     }
     
     private func foremostSectionView(_ foremost: any EventCellViewModel) -> some View {
-        ForemostEventView(viewModel: foremost, foremostEventMarkingStatus: $state.foremostEventMarkingStatus)
+        ForemostEventView(viewModel: foremost, foremostEventMarkingStatus: state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
                 self.isFocusInput = false
                 eventHandler.requestDoneTodo($0)
@@ -243,7 +243,7 @@ struct DayEventListView: View {
     }
     
     private func uncompletedTodosSectionView(_ models: [TodoEventCellViewModel]) -> some View {
-        UncompletedTodoView(models, $state.foremostEventMarkingStatus)
+        UncompletedTodoView(models, state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
                 self.isFocusInput = false
                 eventHandler.requestDoneTodo($0)
@@ -307,9 +307,9 @@ struct DayEventListView: View {
     
     private func eventListView() -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            ForEach(self.state.cellViewModels, id: \.customCompareKey) { cellViewModel in
+            ForEach(self.state.cellViewModels, id: \.eventIdentifier) { cellViewModel in
                 
-                EventListCellView(cellViewModel: cellViewModel, foremostEventMarkingStatus: $state.foremostEventMarkingStatus)
+                EventListCellView(cellViewModel: cellViewModel, foremostEventMarkingStatus: state.foremostEventMarkingStatus)
                     .eventHandler(\.requestDoneTodo) {
                         self.isFocusInput = false
                         eventHandler.requestDoneTodo($0)
@@ -334,8 +334,8 @@ struct DayEventListView: View {
 
 private struct QuickAddNewTodoView: View {
     
-    @EnvironmentObject private var state: DayEventListViewState
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(DayEventListViewState.self) private var state
+    @Environment(ViewAppearance.self) private var appearance
     
     @State private var newTodoName: String = ""
     @FocusState.Binding var isFocusInput: Bool
@@ -462,10 +462,10 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             }
         }
         let containerView = DayEventListView()
-            .environmentObject(viewAppearance)
-            .environmentObject(state)
-            .environmentObject(eventHandler)
-            .environmentObject(PendingCompleteTodoState())
+            .environment(state)
+            .environment(eventHandler)
+            .environment(PendingCompleteTodoState())
+            .environment(viewAppearance)
         return containerView
     }
     
@@ -557,7 +557,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         ]
         
         let holidayCell = HolidayEventCellViewModel(
-            HolidayCalendarEvent(.init(dateString: "2023-09-30", name: "추석"), in: TimeZone.current)!
+            HolidayCalendarEvent(.init(uuid: "hd", dateString: "2023-09-30", name: "추석"), in: TimeZone.current)!
         )
         
         let google = GoogleCalendar.Event("some", "cal", name: "google event", colorId: "colorId", time: .at(100))

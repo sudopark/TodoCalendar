@@ -120,6 +120,8 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
     
     public weak var scene: (any Scene)?
     
+    private var bottomSlideTransitionManager: BottomSlideTransitionAnimationManager!
+    
     public init() { }
     
     open func showError(_ error: any Error) {
@@ -187,6 +189,25 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
             
             UIApplication.shared.open(url)
         }
+    }
+    
+    @MainActor
+    public func showBottomSlide(_ slide: UIViewController) {
+        slide.modalPresentationStyle = .custom
+        let manager = self.prepareBottomSlideTransition()
+        slide.transitioningDelegate = manager
+        slide.attachBottomSlideDismiss(interactor: manager.interactor)
+        self.scene?.present(slide, animated: true)
+    }
+    
+    @MainActor
+    private func prepareBottomSlideTransition() -> BottomSlideTransitionAnimationManager {
+        if let manager = self.bottomSlideTransitionManager {
+            return manager
+        }
+        let manager = BottomSlideTransitionAnimationManager()
+        self.bottomSlideTransitionManager = manager
+        return manager
     }
 }
 

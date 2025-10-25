@@ -19,12 +19,12 @@ import CommonPresentation
 
 // MARK: - EventTagSelectViewState
 
-final class EventTagSelectViewState: ObservableObject {
+@Observable final class EventTagSelectViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
-    @Published var cellViewModels: [BaseCalendarEventTagCellViewModel] = []
-    @Published var selectedId: EventTagId?
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    var cellViewModels: [BaseCalendarEventTagCellViewModel] = []
+    var selectedId: EventTagId?
     
     func bind(_ viewModel: any EventTagSelectViewModel) {
         
@@ -50,12 +50,18 @@ final class EventTagSelectViewState: ObservableObject {
 
 // MARK: - EventTagSelectViewEventHandler
 
-final class EventTagSelectViewEventHandler: ObservableObject {
+final class EventTagSelectViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
     var selectTag: (EventTagId) -> Void = { _ in }
     var onClose: () -> Void = { }
+    
+    func bind(_ viewModel: any EventTagSelectViewModel) {
+        self.onAppear = viewModel.loadList
+        self.selectTag = viewModel.select(_:)
+        self.onClose = viewModel.close
+    }
 }
 
 
@@ -63,7 +69,7 @@ final class EventTagSelectViewEventHandler: ObservableObject {
 
 struct EventTagSelectContainerView: View {
     
-    @StateObject private var state: EventTagSelectViewState = .init()
+    @State private var state: EventTagSelectViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: EventTagSelectViewEventHandler
     
@@ -83,9 +89,9 @@ struct EventTagSelectContainerView: View {
                 self.stateBinding(self.state)
                 eventHandlers.onAppear()
             }
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
     }
 }
 
@@ -93,9 +99,9 @@ struct EventTagSelectContainerView: View {
 
 struct EventTagSelectView: View {
     
-    @EnvironmentObject private var state: EventTagSelectViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: EventTagSelectViewEventHandler
+    @Environment(EventTagSelectViewState.self) private var state
+    @Environment(EventTagSelectViewEventHandler.self) private var eventHandlers
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         NavigationStack {
@@ -112,6 +118,7 @@ struct EventTagSelectView: View {
                 ForEach(state.cellViewModels) { cvm in
                     cellView(cvm)
                         .listRowSeparator(.hidden)
+                        .listRowInsets(.init(top: 5, leading: 20, bottom: 5, trailing: 20))
                         .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
             }
@@ -123,6 +130,9 @@ struct EventTagSelectView: View {
                 }
             }
             .navigationTitle("eventTag.default::title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
         }
             .id(appearance.navigationBarId)
     }
@@ -152,7 +162,7 @@ struct EventTagSelectView: View {
             }
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 8)
                 .fill(self.appearance.colorSet.bg1.asColor)
@@ -171,7 +181,7 @@ struct EventTagSelectViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultDark,
+            colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
@@ -189,9 +199,9 @@ struct EventTagSelectViewPreviewProvider: PreviewProvider {
         let eventHandlers = EventTagSelectViewEventHandler()
         
         let view = EventTagSelectView()
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(state)
+            .environment(eventHandlers)
+            .environment(viewAppearance)
         return view
     }
 }

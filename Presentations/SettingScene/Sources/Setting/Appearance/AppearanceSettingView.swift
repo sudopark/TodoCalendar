@@ -19,7 +19,7 @@ struct AppearanceRow< Content: View>: View {
     private let title: String
     private let subTitle: String?
     private let content: Content
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     init(_ title: String, subTitle: String? = nil, _ content: Content) {
         self.title = title
@@ -55,14 +55,14 @@ struct AppearanceRow< Content: View>: View {
 }
 
 
-final class AppearanceSettingViewState: ObservableObject {
+@Observable final class AppearanceSettingViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
-    @Published var timeZoneName: String?
-    @Published var hapticOn: Bool = false
-    @Published var animationOn: Bool = false
+    var timeZoneName: String?
+    var hapticOn: Bool = false
+    var animationOn: Bool = false
     
     init(_ setting: CalendarAppearanceSettings) {
         self.hapticOn = setting.hapticEffectIsOn
@@ -97,7 +97,7 @@ final class AppearanceSettingViewState: ObservableObject {
     }
 }
 
-final class AppearanceSettingViewEventHandler: ObservableObject {
+final class AppearanceSettingViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
     var changeTimeZone: () -> Void = { }
@@ -145,11 +145,11 @@ struct AppearanceSettingContainerView: View {
             .eventHandler(\.eventOnCalendarSectionStateBinding, eventOnCalendarSectionStateBinding)
             .eventHandler(\.eventListSettingStateBinding, eventListSettingStateBinding)
             .eventHandler(\.appearanceSettingStateBinding, appearanceSettingStateBinding)
-            .environmentObject(viewAppearance)
-            .environmentObject(calendarSectionEventHandler)
-            .environmentObject(eventOnCalendarSectionEventHandler)
-            .environmentObject(appearanceSettingEventHandler)
-            .environmentObject(eventListSettingEventHandler)
+            .environment(viewAppearance)
+            .environment(calendarSectionEventHandler)
+            .environment(eventOnCalendarSectionEventHandler)
+            .environment(appearanceSettingEventHandler)
+            .environment(eventListSettingEventHandler)
     }
 }
 
@@ -158,12 +158,12 @@ struct AppearanceSettingContainerView: View {
 struct AppearanceSettingView: View {
     
     private let initialSetting: CalendarAppearanceSettings
-    @StateObject private var appearanceState: AppearanceSettingViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var calendarSectionEventHandler: CalendarSectionAppearanceSettingViewEventHandler
-    @EnvironmentObject private var eventOnCalendarSectionEventHandler: EventOnCalendarViewEventHandler
-    @EnvironmentObject private var eventListSettingEventHandler: EventListAppearanceSettingViewEventHandler
-    @EnvironmentObject private var appearanceSettingEventHandler: AppearanceSettingViewEventHandler
+    @State private var appearanceState: AppearanceSettingViewState
+    @Environment(ViewAppearance.self) private var appearance
+    @Environment(CalendarSectionAppearanceSettingViewEventHandler.self) private var calendarSectionEventHandler
+    @Environment(EventOnCalendarViewEventHandler.self) private var eventOnCalendarSectionEventHandler
+    @Environment(EventListAppearanceSettingViewEventHandler.self) private var eventListSettingEventHandler
+    @Environment(AppearanceSettingViewEventHandler.self) private var appearanceSettingEventHandler
     
     fileprivate var calendarSectionStateBinding: (CalendarSectionAppearanceSettingViewState) -> Void = { _ in }
     fileprivate var eventOnCalendarSectionStateBinding: (EventOnCalendarViewState) -> Void = { _ in }
@@ -202,6 +202,9 @@ struct AppearanceSettingView: View {
             .scrollContentBackground(.hidden)
             .background(self.appearance.colorSet.bg0.asColor)
             .navigationTitle("setting.appearance.title".localized())
+            .if(condition: ProcessInfo.isAvailiOS26()) {
+                $0.toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     NavigationBackButton {
@@ -246,10 +249,14 @@ struct AppearanceSettingView: View {
                 .onTapGesture(perform: appearanceSettingEventHandler.changeTimeZone)
             
             AppearanceRow("setting.haptic::name".localized(), hapticView())
-                .onReceive(appearanceState.$hapticOn, perform: appearanceSettingEventHandler.toggleHapticFeedback)
+                .onChange(of: appearanceState.hapticOn) { _, new in
+                    appearanceSettingEventHandler.toggleHapticFeedback(new)
+                }
             
             AppearanceRow("setting.minimize_animation::name".localized(), animationView())
-                .onReceive(appearanceState.$animationOn, perform: appearanceSettingEventHandler.toggleAnimationEffect)
+                .onChange(of: appearanceState.animationOn) { _, new in
+                    appearanceSettingEventHandler.toggleAnimationEffect(new)
+                }
         }
         .padding(.top, 20)
         .onAppear {
@@ -261,7 +268,7 @@ struct AppearanceSettingView: View {
 
 struct PlainFormStyle: FormStyle {
     
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(ViewAppearance.self) private var appearance
     
     func makeBody(configuration: Configuration) -> some View {
         return configuration.content
@@ -310,3 +317,4 @@ struct AppearanceSettingViewPreviewProvider: PreviewProvider {
         }
     }
 }
+

@@ -12,18 +12,18 @@ import Optics
 import Domain
 import CommonPresentation
 
-final class MonthViewState: ObservableObject {
+@Observable final class MonthViewState {
     
-    @Published fileprivate var weekDays: [WeekDayModel] = []
-    @Published fileprivate var weeks: [WeekRowModel] = []
-    @Published fileprivate var selectedDay: String?
-    @Published fileprivate var today: String?
-    var eventStacks: (String) -> AnyPublisher<WeekEventStackViewModel, Never> = { _ in
+    fileprivate var weekDays: [WeekDayModel] = []
+    fileprivate var weeks: [WeekRowModel] = []
+    fileprivate var selectedDay: String?
+    fileprivate var today: String?
+    @ObservationIgnored var eventStacks: (String) -> AnyPublisher<WeekEventStackViewModel, Never> = { _ in
         Empty().eraseToAnyPublisher()
     }
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
     func bind(_ viewModel: any MonthViewModel) {
         guard self.didBind == false else { return }
@@ -61,7 +61,7 @@ final class MonthViewState: ObservableObject {
     }
 }
 
-final class MonthViewEventHandler: ObservableObject {
+final class MonthViewEventHandler: Observable {
     var daySelected: (DayCellViewModel) -> Void = { _ in }
     
     func bind(_ viewModel: any MonthViewModel) {
@@ -71,7 +71,7 @@ final class MonthViewEventHandler: ObservableObject {
 
 struct MonthContainerView: View {
     
-    @StateObject private var state: MonthViewState = .init()
+    @State private var state: MonthViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: MonthViewEventHandler
     
@@ -90,9 +90,9 @@ struct MonthContainerView: View {
             .onAppear {
                 self.stateBinding(self.state)
             }
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandler)
+            .environment(state)
+            .environment(eventHandler)
+            .environment(viewAppearance)
     }
 }
 
@@ -107,9 +107,9 @@ private enum Metric {
 
 struct MonthView: View {
     
-    @EnvironmentObject private var state: MonthViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandler: MonthViewEventHandler
+    @Environment(MonthViewState.self) private var state
+    @Environment(MonthViewEventHandler.self) private var eventHandler
+    @Environment(ViewAppearance.self) private var appearance
     
     var body: some View {
         VStack(spacing: 0) {
@@ -148,8 +148,8 @@ struct MonthView: View {
             ForEach(self.state.weeks, id: \.id) {
                 WeekRowView(week: $0, expectSize)
                     .eventHandler(\.daySelected, eventHandler.daySelected)
-                    .environmentObject(state)
-                    .environmentObject(appearance)
+                    .environment(state)
+                    .environment(appearance)
             }
         }
     }
@@ -167,8 +167,8 @@ private struct WeekRowView: View {
     private let expectSize: CGSize
     private var dayWidth: CGFloat { expectSize.width / 7 }
     
-    @EnvironmentObject private var state: MonthViewState
-    @EnvironmentObject private var appearance: ViewAppearance
+    @Environment(MonthViewState.self) private var state
+    @Environment(ViewAppearance.self) private var appearance
     
     @State private var eventStackModel: WeekEventStackViewModel = .init(linesStack: [], shouldMarkEventDays: false)
     

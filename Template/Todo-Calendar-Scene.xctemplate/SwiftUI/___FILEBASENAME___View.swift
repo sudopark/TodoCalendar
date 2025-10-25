@@ -11,10 +11,10 @@ import CommonPresentation
 
 // MARK: - ___VARIABLE_sceneName___ViewState
 
-final class ___VARIABLE_sceneName___ViewState: ObservableObject {
+@Observable final class ___VARIABLE_sceneName___ViewState {
     
-    private var didBind = false
-    private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
     
     func bind(_ viewModel: any ___VARIABLE_sceneName___ViewModel) {
         
@@ -27,7 +27,7 @@ final class ___VARIABLE_sceneName___ViewState: ObservableObject {
 
 // MARK: - ___VARIABLE_sceneName___ViewEventHandler
 
-final class ___VARIABLE_sceneName___ViewEventHandler: ObservableObject {
+final class ___VARIABLE_sceneName___ViewEventHandler: Observable {
     
     // TODO: add handlers
     var onAppear: () -> Void = { }
@@ -43,7 +43,7 @@ final class ___VARIABLE_sceneName___ViewEventHandler: ObservableObject {
 
 struct ___VARIABLE_sceneName___ContainerView: View {
     
-    @StateObject private var state: ___VARIABLE_sceneName___ViewState = .init()
+    @State private var state: ___VARIABLE_sceneName___ViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandlers: ___VARIABLE_sceneName___ViewEventHandler
     
@@ -63,9 +63,9 @@ struct ___VARIABLE_sceneName___ContainerView: View {
                 self.stateBinding(self.state)
                 self.eventHandlers.onAppear()
             }
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(viewAppearance)
+            .environment(state)
+            .environment(eventHandlers)
     }
 }
 
@@ -73,9 +73,9 @@ struct ___VARIABLE_sceneName___ContainerView: View {
 
 struct ___VARIABLE_sceneName___View: View {
     
-    @EnvironmentObject private var state: ___VARIABLE_sceneName___ViewState
-    @EnvironmentObject private var appearance: ViewAppearance
-    @EnvironmentObject private var eventHandlers: ___VARIABLE_sceneName___ViewEventHandler
+    @Environment(ViewAppearance.self) private var appearance
+    @Environment(___VARIABLE_sceneName___ViewState.self) private var state
+    @Environment(___VARIABLE_sceneName___ViewEventHandler.self) private var eventHandlers
     
     var body: some View {
         Text("___VARIABLE_sceneName___View")
@@ -102,9 +102,9 @@ struct ___VARIABLE_sceneName___ViewPreviewProvider: PreviewProvider {
         let eventHandlers = ___VARIABLE_sceneName___ViewEventHandler()
         
         let view = ___VARIABLE_sceneName___View()
-            .environmentObject(state)
-            .environmentObject(viewAppearance)
-            .environmentObject(eventHandlers)
+            .environment(viewAppearance)
+            .environment(state)
+            .environment(eventHandlers)
         return view
     }
 }

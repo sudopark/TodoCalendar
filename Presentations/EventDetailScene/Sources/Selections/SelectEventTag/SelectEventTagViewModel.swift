@@ -15,7 +15,7 @@ import Domain
 import Scenes
 
 
-struct TagCellViewModel: Equatable {
+struct TagCellViewModel: Equatable, Identifiable {
     let id: EventTagId
     let name: String
     let colorHex: String?

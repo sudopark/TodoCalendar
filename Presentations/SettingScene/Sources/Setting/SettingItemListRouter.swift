@@ -107,7 +107,7 @@ extension SettingItemListRouter {
     func routeToSignIn() {
         Task { @MainActor in
             let next = self.memberSceneBuilder.makeSignInScene()
-            self.currentScene?.present(next, animated: true)
+            self.showBottomSlide(next)
         }
     }
     

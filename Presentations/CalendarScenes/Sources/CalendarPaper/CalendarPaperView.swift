@@ -9,7 +9,7 @@
 import SwiftUI
 import CommonPresentation
 
-final class CalenarPaperViewEventHandelr: ObservableObject {
+final class CalenarPaperViewEventHandelr: Observable {
     
     var onAppear: () -> Void = { }
     
@@ -43,18 +43,18 @@ struct CalenarPaperContainerView: View {
             eventListView: eventListView
         )
         .onAppear(perform: eventHandler.onAppear)
-        .environmentObject(viewAppearance)
-        .environmentObject(eventHandler)
+        .environment(viewAppearance)
+        .environment(eventHandler)
     }
     
     struct PapgerView: View {
         
         private let monthView: MonthContainerView
         private let eventListView: DayEventListContainerView
-        @EnvironmentObject private var appearance: ViewAppearance
-        @EnvironmentObject private var eventHandler: CalenarPaperViewEventHandelr
+        @Environment(ViewAppearance.self) private var appearance
+        @Environment(CalenarPaperViewEventHandelr.self) private var eventHandler
         
-        @StateObject private var keyboardHeightObserver = KeyboardHeightObserver()
+        @State private var keyboardHeightObserver = KeyboardHeightObserver()
         
         init(
             monthView: MonthContainerView,

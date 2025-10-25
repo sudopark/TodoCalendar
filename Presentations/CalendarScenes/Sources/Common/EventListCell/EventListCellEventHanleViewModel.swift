@@ -84,8 +84,8 @@ extension EventListCellEventHanleViewModelImple {
                 calendarId: google.calendarId, eventId: google.eventIdentifier
             )
             
-        case is HolidayEventCellViewModel:
-            self.router?.showToast("eventDetail.notSupport::holiday".localized())
+        case let holiday as HolidayEventCellViewModel:
+            self.router?.routeToHolidayEventDetail(holiday.eventIdentifier)
             
         default: break
         }
