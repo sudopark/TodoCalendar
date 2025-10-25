@@ -129,6 +129,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var eventColorModel: AnyPublisher<GoogleCalendarEventColorModel, Never> { get }
     var eventName: AnyPublisher<String, Never> { get }
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
+    var ddayText: AnyPublisher<String, Never> { get }
     var repeatOPtion: AnyPublisher<String?, Never> { get }
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
@@ -148,18 +149,21 @@ final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailVi
     private let eventId: String
     private let googleCalendarUsecase: any GoogleCalendarUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
+    private let daysIntervalCountUsecase: any DaysIntervalCountUsecase
     var router: (any GoogleCalendarEventDetailRouting)?
     
     init(
         calenadrId: String,
         eventId: String,
         googleCalendarUsecase: any GoogleCalendarUsecase,
-        calendarSettingUsecase: any CalendarSettingUsecase
+        calendarSettingUsecase: any CalendarSettingUsecase,
+        daysIntervalCountUsecase: any DaysIntervalCountUsecase
     ) {
         self.calendarId = calenadrId
         self.eventId = eventId
         self.googleCalendarUsecase = googleCalendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
+        self.daysIntervalCountUsecase = daysIntervalCountUsecase
         
         self.internalBind()
     }
@@ -313,6 +317,34 @@ extension GoogleCalendarEventDetailViewModelImple {
         )
         .map(transform)
         .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+    
+    var ddayText: AnyPublisher<String, Never> {
+        typealias SupportTime = GoogleCalendar.EventOrigin.GoogleEventTime.SupportEventTimeElemnt
+        let asEventTime: (GoogleCalendar.EventOrigin, TimeZone) -> SupportTime?
+        asEventTime = { origin, timeZone in
+            return origin.start?.supportEventTimeElemnt(timeZone.identifier)
+        }
+        
+        let countDays: (SupportTime?) -> AnyPublisher<Int, Never> = { [weak self] time in
+            guard let self = self, let time else { return Empty().eraseToAnyPublisher() }
+            let start  = switch time {
+                case .period(let date): date
+                case .allDay(let date, _): date
+            }
+            return self.daysIntervalCountUsecase.countDays(to: start)
+        }
+        
+        return Publishers.CombineLatest(
+            self.subject.origin.compactMap { $0 },
+            self.subject.timeZone.compactMap { $0 }
+        )
+        .map(asEventTime)
+        .map(countDays)
+        .switchToLatest()
+        .removeDuplicates()
+        .map { DDayText($0).text }
         .eraseToAnyPublisher()
     }
     

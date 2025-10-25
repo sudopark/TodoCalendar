@@ -29,6 +29,7 @@ import CommonPresentation
     var eventColor: GoogleCalendarEventColorModel?
     var eventName: String?
     var timeText: SelectedTime?
+    var ddayText: String?
     var repeatOptionText: String?
     var calendarModel: GoogleCalendarModel?
     var location: String?
@@ -67,6 +68,13 @@ import CommonPresentation
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.timeText = text
+            })
+            .store(in: &self.cancellables)
+        
+        viewModel.ddayText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.ddayText = text
             })
             .store(in: &self.cancellables)
         
@@ -198,6 +206,9 @@ struct GoogleCalendarEventDetailView: View {
                     VStack(spacing: 12) {
                         if let time = self.state.timeText {
                             self.eventTimeView(time)
+                        }
+                        if let dday = self.state.ddayText {
+                            self.ddayView(dday)
                         }
                         if let repeatOption = self.state.repeatOptionText {
                             self.repeatOptionText(repeatOption)
@@ -342,6 +353,20 @@ struct GoogleCalendarEventDetailView: View {
                     .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
+        }
+    }
+    
+    private func ddayView(_ text: String) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: "sun.horizon.fill")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            
+            Text(text)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                .font(self.appearance.fontSet.normal.asFont)
+                
+            Spacer()
         }
     }
     
@@ -575,6 +600,7 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
         state.eventName = "google calendar event"
         state.hasDetailLink = true
         state.timeText = .period(.init(100, .current), .init(500, .current))
+        state.ddayText = "D+3"
         state.repeatOptionText = "반복 옵션 텍스트"
         state.location = "장소 텍스트"
         state.calendarModel = .init(

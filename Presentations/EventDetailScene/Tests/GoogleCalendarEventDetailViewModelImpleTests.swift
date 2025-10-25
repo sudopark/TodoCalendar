@@ -41,7 +41,8 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         let viewModel = GoogleCalendarEventDetailViewModelImple(
             calenadrId: "g:7", eventId: "id",
             googleCalendarUsecase: calendarUsecase,
-            calendarSettingUsecase: settingUsecase
+            calendarSettingUsecase: settingUsecase,
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -97,6 +98,23 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         default:
             Issue.record("기대한 갑싱 아님")
         }
+    }
+    
+    @Test func viewModel_provideDDayText() async throws {
+        // given
+        let expect = expectConfirm("d-day 정보 제공")
+        expect.count = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let days = try await self.outputs(expect, for: viewModel.ddayText) {
+            viewModel.refresh()
+        }
+        
+        // then
+        #expect(days == [
+            "D+4", "D-Day", "D-4"
+        ])
     }
     
     @Test func viewModel_provideCalendarModel() async throws {
