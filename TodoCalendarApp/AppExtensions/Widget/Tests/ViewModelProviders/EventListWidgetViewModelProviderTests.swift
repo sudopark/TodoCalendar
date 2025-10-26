@@ -19,7 +19,7 @@ import TestDoubles
 class EventListWidgetViewModelProviderTests: BaseTestCase {
         
     private func makeProvider(
-        selectTagId: EventTagId = .default,
+        selectTagIds: [EventTagId]? = nil,
         withCurrentTodo: Bool = true,
         withStartDateEvent: Bool = true,
         withoutAnyEventsIncludeHoliday: Bool = false
@@ -35,7 +35,7 @@ class EventListWidgetViewModelProviderTests: BaseTestCase {
         let appSettingRepository = StubAppSettingRepository()
         
         return .init(
-            targetEventTagId: selectTagId,
+            targetEventTagIds: selectTagIds,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -219,7 +219,7 @@ extension EventListWidgetViewModelProviderTests {
         let appSettingRepository = StubAppSettingRepository()
         
         return EventListWidgetViewModelProvider(
-            targetEventTagId: .default,
+            targetEventTagIds: nil,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -455,7 +455,7 @@ extension EventListWidgetViewModelProviderTests {
         let appSettingRepository = StubAppSettingRepository()
         
         return EventListWidgetViewModelProvider(
-            targetEventTagId: .default,
+            targetEventTagIds: nil,
             eventsFetchUsecase: usecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -546,7 +546,7 @@ extension EventListWidgetViewModelProviderTests {
         let calendarSettingRepository = StubCalendarSettingRepository()
         let appSettingRepository = StubAppSettingRepository()
         return .init(
-            targetEventTagId: .default,
+            targetEventTagIds: nil,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -581,7 +581,7 @@ extension EventListWidgetViewModelProviderTests {
 extension EventListWidgetViewModelProviderTests {
     
     private func makeProviderWithMultipleTagHasEvents(
-        select tagId: EventTagId
+        select tagIds: [EventTagId]?
     ) -> EventListWidgetViewModelProvider {
         
         final class EventsWithTagFetchUescase: CalendarEventFetchUsecase {
@@ -620,7 +620,7 @@ extension EventListWidgetViewModelProviderTests {
         let calendarSettingRepository = StubCalendarSettingRepository()
         let appSettingRepository = StubAppSettingRepository()
         return .init(
-            targetEventTagId: tagId,
+            targetEventTagIds: tagIds,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -630,12 +630,13 @@ extension EventListWidgetViewModelProviderTests {
     
     func testProvider_provideEventsWithFilteringByTag() async throws {
         // given
+        // 3배수: t3, 5배수: t5, 그 외: default
         func parameterizeTest(
-            _ target: EventTagId,
-            expectIds: [String]
+            _ targets: [EventTagId]?,
+            expectIds: [String]?
         ) async throws {
             // given
-            let provider = self.makeProviderWithMultipleTagHasEvents(select: target)
+            let provider = self.makeProviderWithMultipleTagHasEvents(select: targets)
             
             // when
             let vm = try await provider.getEventListViewModel(
@@ -649,8 +650,9 @@ extension EventListWidgetViewModelProviderTests {
         }
         
         // when + then
-        try await parameterizeTest(.custom("t3"), expectIds: ["0", "3", "6", "9"])
-        try await parameterizeTest(.custom("t5"), expectIds: ["5"])
-        try await parameterizeTest(.default, expectIds: (0..<10).map { "\($0)" })
+        try await parameterizeTest(nil, expectIds: (0..<10).map{ "\($0)" })
+        try await parameterizeTest([.custom("t3"), .custom("t5")], expectIds: ["0", "3", "5", "6", "9"])
+        try await parameterizeTest([.custom("t5")], expectIds: ["5"])
+        try await parameterizeTest([], expectIds: nil)
     }
 }
