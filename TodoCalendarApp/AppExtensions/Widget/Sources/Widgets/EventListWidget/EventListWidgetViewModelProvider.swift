@@ -289,20 +289,20 @@ struct EventListWidgetViewModel {
 
 final class EventListWidgetViewModelProvider {
     
-    private let targetEventTagId: EventTagId
+    private let targetEventTagIds: [EventTagId]?
     private let eventsFetchUsecase: any CalendarEventFetchUsecase
     private let appSettingRepository: any AppSettingRepository
     private let calendarSettingRepository: any CalendarSettingRepository
     private let localeProvider: any LocaleProvider
     
     init(
-        targetEventTagId: EventTagId,
+        targetEventTagIds: [EventTagId]?,
         eventsFetchUsecase: any CalendarEventFetchUsecase,
         appSettingRepository: any AppSettingRepository,
         calendarSettingRepository: any CalendarSettingRepository,
         localeProvider: any LocaleProvider
     ) {
-        self.targetEventTagId = targetEventTagId
+        self.targetEventTagIds = targetEventTagIds
         self.eventsFetchUsecase = eventsFetchUsecase
         self.appSettingRepository = appSettingRepository
         self.calendarSettingRepository = calendarSettingRepository
@@ -365,12 +365,14 @@ extension EventListWidgetViewModelProvider {
         in range: Range<TimeInterval>,
         _ timeZone: TimeZone
     ) async throws -> CalendarEvents {
-        let target = self.targetEventTagId
         let total = try await self.eventsFetchUsecase.fetchEvents(in: range, timeZone)
-        guard target != .default else { return total }
+        guard let selecteds = self.targetEventTagIds.map({ Set($0) })
+        else {
+            return total
+        }
         return total
-            |> \.currentTodos .~ total.currentTodos.filter { $0.eventTagId == target }
-            |> \.eventWithTimes .~ total.eventWithTimes.filter { $0.eventTagId == target }
+            |> \.currentTodos .~ total.currentTodos.filter { selecteds.contains($0.eventTagId) }
+            |> \.eventWithTimes .~ total.eventWithTimes.filter { selecteds.contains($0.eventTagId) }
     }
 }
 

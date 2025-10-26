@@ -231,9 +231,9 @@ struct EventListWidget: Widget {
     nonisolated static let kind: String = "EventList"
     
     var body: some WidgetConfiguration {
-        IntentConfiguration(
+        AppIntentConfiguration(
             kind: Self.kind,
-            intent: EventListTypeSelectIntent.self,
+            intent: EventTypeSelectIntent.self,
             provider: EventListWidgetTimeLineProvider()
         ) { entry in
             EventListWidgetView(entry: entry)

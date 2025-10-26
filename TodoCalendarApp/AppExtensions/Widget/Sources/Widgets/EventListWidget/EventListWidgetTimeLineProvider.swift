@@ -15,9 +15,9 @@ import Extensions
 import CalendarScenes
 
 
-struct EventListWidgetTimeLineProvider: IntentTimelineProvider {
+struct EventListWidgetTimeLineProvider: AppIntentTimelineProvider {
     
-    typealias Intent = EventListTypeSelectIntent
+    typealias Intent = EventTypeSelectIntent
     typealias Entry = ResultTimelineEntry<EventListWidgetViewModel>
     
     init() { }
@@ -34,86 +34,60 @@ extension EventListWidgetTimeLineProvider {
         return .init(date: Date(), result: .success(sample))
     }
     
-    func getSnapshot(
-        for configuration: EventListTypeSelectIntent,
-        in context: Context,
-        completion: @Sendable @escaping (ResultTimelineEntry<EventListWidgetViewModel>
-        ) -> Void) {
+    func snapshot(
+        for configuration: EventTypeSelectIntent,
+        in context: Context
+    ) async -> ResultTimelineEntry<EventListWidgetViewModel> {
         
         guard context.isPreview == false
         else {
-            let sample = self.placeholder(in: context)
-            completion(sample)
-            return
+            return self.placeholder(in: context)
         }
         
-        getEntry(configuration.eventType, context) { entry in
-            completion(entry)
-        }
+        return await self.loadEntry(configuration.eventTypes, context)
     }
     
-    func getTimeline(
-        for configuration: EventListTypeSelectIntent,
-        in context: Context,
-        completion: @Sendable @escaping (Timeline<ResultTimelineEntry<EventListWidgetViewModel>>) -> Void
-    ) {
+    func timeline(
+        for configuration: EventTypeSelectIntent, in context: Context
+    ) async -> Timeline<ResultTimelineEntry<EventListWidgetViewModel>> {
         
-        self.getEntry(configuration.eventType, context) { entry in
-            let timeline = Timeline(
-                entries: [entry], policy: .after(Date().nextUpdateTime)
-            )
-            completion(timeline)
-        }
+        let entry = await self.loadEntry(configuration.eventTypes, context)
+        return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
     }
     
-    private func getEntry(
-        _ selected: EvnetListType?,
-        _ context: Context,
-        _ completion: @Sendable @escaping (Entry) -> Void
-    ) {
+    private func loadEntry(
+        _ selected: [EventTypeEntity]?,
+        _ context: Context
+    ) async -> Entry {
         
-        let tagId = EventTagId(selected)
+        let tagIds = selected?.map { EventTagId($0) }
         let size = EventListWidgetSize(context.family)
-        Task {
-            let builder = WidgetViewModelProviderBuilder(base: .init())
-            let viewModelProvider = await builder.makeEventListViewModelProvider(targetEventTagId: tagId)
-            let now = Date()
-            do {
-                let model = try await viewModelProvider.getEventListViewModel(
-                    for: now,
-                    widgetSize: size
-                )
-                completion(
-                    .init(date: now, result: .success(model))
-                )
-            } catch {
-                completion(
-                    .init(date: now, result: .failure(.init(error: error)))
-                )
-            }
+        
+        let builder = WidgetViewModelProviderBuilder(base: .init())
+        let viewModelProvider = await builder.makeEventListViewModelProvider(targetEventTagIds: tagIds)
+        let now = Date()
+        do {
+            let model = try await viewModelProvider.getEventListViewModel(
+                for: now,
+                widgetSize: size
+            )
+            return .init(date: now, result: .success(model))
+            
+        } catch {
+            return .init(date: now, result: .failure(.init(error: error)))
         }
     }
 }
 
 extension EventTagId {
     
-    init(_ listType: EvnetListType?) {
-        switch listType?.identifier {
-        case "default": self = .default
-            
-        case _ where listType?.identifier?.starts(with: "external") == true:
-            guard let components = listType?.identifier?.components(separatedBy: "::"),
-                  components.count == 3
-            else {
-                self = .default
-                return
-            }
-            let serviceId = components[1]; let tagId = components[2]
-            self = .externalCalendar(serviceId: serviceId, id: tagId)
-            
-        case .some(let value): self = .custom(value)
-            
-        default: self = .default
+    init(_ entity: EventTypeEntity) {
+        if entity.isDefaultTag {
+            self = .default
+        } else if let serviceId = entity.externalServiceId {
+            self = .externalCalendar(serviceId: serviceId, id: entity.id)
+        } else {
+            self = .custom(entity.id)
         }
     }
 }

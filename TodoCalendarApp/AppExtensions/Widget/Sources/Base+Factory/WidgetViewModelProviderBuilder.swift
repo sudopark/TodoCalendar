@@ -122,7 +122,7 @@ extension WidgetViewModelProviderBuilder {
     
     func makeEventListViewModelProvider(
         shouldSkipCheckCacheReset: Bool = false,
-        targetEventTagId: EventTagId
+        targetEventTagIds: [EventTagId]?
     ) async -> EventListWidgetViewModelProvider {
         
         if !shouldSkipCheckCacheReset {
@@ -142,7 +142,7 @@ extension WidgetViewModelProviderBuilder {
         )
         
         return EventListWidgetViewModelProvider(
-            targetEventTagId: targetEventTagId,
+            targetEventTagIds: targetEventTagIds,
             eventsFetchUsecase: fetchUsecase,
             appSettingRepository: appSettingRepository,
             calendarSettingRepository: calendarSettingRepository,
@@ -287,7 +287,7 @@ extension WidgetViewModelProviderBuilder {
         
         let eventList = await self.makeEventListViewModelProvider(
             shouldSkipCheckCacheReset: true,
-            targetEventTagId: targetEventTagId
+            targetEventTagIds: [targetEventTagId]
         )
         
         let month = await self.makeMonthViewModelProvider(
@@ -324,7 +324,7 @@ extension WidgetViewModelProviderBuilder {
         
         let eventList = await self.makeEventListViewModelProvider(
             shouldSkipCheckCacheReset: true,
-            targetEventTagId: targetEventTagId
+            targetEventTagIds: [targetEventTagId]
         )
 
         let foremost = await self.makeForemostEventWidgetViewModelProvider()
