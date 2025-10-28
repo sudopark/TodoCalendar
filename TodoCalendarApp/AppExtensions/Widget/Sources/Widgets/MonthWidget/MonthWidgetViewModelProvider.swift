@@ -166,7 +166,7 @@ extension MonthWidgetViewModelProvider {
         _ range: Range<TimeInterval>,
         _ timeZone: TimeZone
     ) async -> Set<String> {
-        guard let events = try? await self.eventFetchUsecase.fetchEvents(in: range, timeZone)
+        guard let events = try? await self.eventFetchUsecase.fetchEvents(in: range, timeZone, withoutOffTagIds: true)
         else { return [] }
         
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone

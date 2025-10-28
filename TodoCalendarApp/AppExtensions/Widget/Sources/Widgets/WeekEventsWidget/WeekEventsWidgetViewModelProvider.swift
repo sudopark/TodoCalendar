@@ -222,7 +222,7 @@ extension WeekEventsWidgetViewModelProvider {
         let targetMonthDate = calenar.targetMonthRefDate(date, for: range)
         let targetMonth = calenar.component(.month, from: targetMonthDate)
         let weeks = try self.getWeeks(date, firstWeekDay, range, calenar)
-        let events = try await self.eventFetchUsecase.fetchEvents(in: weeks.range, timeZone)
+        let events = try await self.eventFetchUsecase.fetchEvents(in: weeks.range, timeZone, withoutOffTagIds: true)
         let targetDate = CalendarComponent.Day(date, calendar: calenar)
         
         return WeekEventsViewModel(
