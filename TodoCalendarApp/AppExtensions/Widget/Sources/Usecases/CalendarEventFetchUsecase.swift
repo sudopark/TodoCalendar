@@ -75,7 +75,8 @@ protocol CalendarEventFetchUsecase {
     
     func fetchEvents(
         in range: Range<TimeInterval>,
-        _ timeZone: TimeZone
+        _ timeZone: TimeZone,
+        withoutOffTagIds: Bool
     ) async throws -> CalendarEvents
     
     func fetchForemostEvent() async throws -> ForemostEvent
@@ -87,6 +88,16 @@ protocol CalendarEventFetchUsecase {
     func fetchNextEvents(
         _ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone
     ) async throws -> TodayNextEvents
+}
+
+extension CalendarEventFetchUsecase {
+    
+    func fetchEvents(
+        in range: Range<TimeInterval>,
+        _ timeZone: TimeZone
+    ) async throws -> CalendarEvents {
+        return try await self.fetchEvents(in: range, timeZone, withoutOffTagIds: false)
+    }
 }
 
 
@@ -160,7 +171,8 @@ extension CalendarEventFetchUsecaseImple {
     
     func fetchEvents(
         in range: Range<TimeInterval>,
-        _ timeZone: TimeZone
+        _ timeZone: TimeZone,
+        withoutOffTagIds: Bool
     ) async throws -> CalendarEvents {
         
         let customTagMap = try await self.allCustomEventTagMap()
@@ -186,6 +198,16 @@ extension CalendarEventFetchUsecaseImple {
         }
         
         events.eventWithTimes = eventsWithTime.sorted()
+        
+        if withoutOffTagIds {
+            let offIds = self.eventTagRepository.loadOffTags()
+            events.currentTodos = events.currentTodos.filter {
+                !offIds.contains($0.eventTagId)
+            }
+            events.eventWithTimes = events.eventWithTimes.filter {
+                !offIds.contains($0.eventTagId)
+            }
+        }
         
         return events
     }
@@ -318,7 +340,7 @@ extension CalendarEventFetchUsecaseImple {
         _ refTime: Date, within todayRange: Range<TimeInterval>, _ timeZone: TimeZone
     ) async throws -> TodayNextEvent? {
         
-        let events = try await self.fetchEvents(in: todayRange, timeZone)
+        let events = try await self.fetchEvents(in: todayRange, timeZone, withoutOffTagIds: true)
         
         guard let firstFutureEvent = events.findFirstFutureEvent(from: refTime.timeIntervalSince1970, todayRange: todayRange)
         else {
@@ -341,7 +363,7 @@ extension CalendarEventFetchUsecaseImple {
         _ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone
     ) async throws -> TodayNextEvents {
         
-        let events = try await self.fetchEvents(in: todayRange, timeZone)
+        let events = try await self.fetchEvents(in: todayRange, timeZone, withoutOffTagIds: true)
         let todayEvents = events.findNextEvents(
             from: refTime.timeIntervalSince1970, todayRange: todayRange
         )
