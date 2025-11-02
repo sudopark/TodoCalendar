@@ -71,11 +71,12 @@ struct NextEventWidgetViewModelBuilder {
     let is24Form: Bool
     
     func build(_ event: TodayNextEvent?) throws -> NextEventWidgetViewModel {
-        guard let event else {
+        guard let event,
+              var model = try self.convertToNextModel(event.nextEvent)
+        else {
             return .empty
         }
-        
-        var model = try self.convertToNextModel(event.nextEvent)
+
         model.refreshAfter = self.selectRefreshTime(model.timeRawValue, event.andThenNextEventStartDate)
         
         return model
@@ -97,28 +98,19 @@ struct NextEventWidgetViewModelBuilder {
         return .init(models: models, refreshAfter: refreshTime)
     }
     
-    private func convertToNextModel(_ event: any CalendarEvent) throws -> NextEventWidgetViewModel {
+    private func convertToNextModel(_ event: any CalendarEvent) throws -> NextEventWidgetViewModel? {
         
-        switch event {
-        case let todo as TodoCalendarEvent:
-            guard let time = todo.eventTime else { throw RuntimeError("event time not exists") }
-            return .init(
-                timeText: EventTimeText.fromLowerBound(time, timeZone, !is24Form),
-                eventTitle: todo.name
-            )
-            |> \.timeRawValue .~ time
-            
-        case let schedule as ScheduleCalendarEvent:
-            guard let time = schedule.eventTime else { throw RuntimeError("event time not exists") }
-            return .init(
-                timeText: EventTimeText.fromLowerBound(time, timeZone, !is24Form),
-                eventTitle: schedule.name
-            )
-            |> \.timeRawValue .~ time
-            
-        default:
-            throw RuntimeError("not support event type")
+        guard !(event is HolidayCalendarEvent) else { return nil }
+        
+        guard let time = event.eventTime else {
+            throw RuntimeError("event time not exists")
         }
+        
+        return .init(
+            timeText: EventTimeText.fromLowerBound(time, timeZone, !is24Form),
+            eventTitle: event.name
+        )
+        |> \.timeRawValue .~ time
     }
     
     private func selectRefreshTime(_ current: EventTime?, _ next: Date?) -> Date? {
