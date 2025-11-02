@@ -72,6 +72,9 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         #expect(identifiers == [
             [], integratedAccounts.map { $0.serviceIdentifier }
         ])
+        let accounts = accountMaps.flatMap { $0.values }
+        let withoutIntegrationTime = accounts.map { $0.intergrationTime }.reduce(true) { $0 && ($1 == nil) }
+        #expect(withoutIntegrationTime == true)
     }
     
     // integrate
@@ -86,6 +89,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         // then
         #expect(account.serviceIdentifier == service.identifier)
         #expect(account.email == "google@email.com")
+        #expect(account.intergrationTime != nil)
     }
     
     // not support servie integrate => error
