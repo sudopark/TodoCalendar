@@ -21,6 +21,7 @@ extension GoogleCalendar.Tag: @retroactive RowValueType {
         self.backgroundColorHex = cursor.next()
         self.foregroundColorHex = cursor.next()
         self.colorId = cursor.next()
+        self.isSelected = cursor.next()
     }
 }
 
@@ -33,6 +34,7 @@ struct GoogleCalendarEventTagTable: Table {
         case background
         case foreground
         case colorId = "color_id"
+        case isSelected = "is_selected"
         
         var dataType: ColumnDataType {
             switch self {
@@ -42,6 +44,7 @@ struct GoogleCalendarEventTagTable: Table {
             case .background: return .text([])
             case .foreground: return .text([])
             case .colorId: return .text([])
+            case .isSelected: return .integer([])
             }
         }
     }
@@ -58,6 +61,15 @@ struct GoogleCalendarEventTagTable: Table {
         case .background: return entity.backgroundColorHex
         case .foreground: return entity.foregroundColorHex
         case .colorId: return entity.colorId
+        case .isSelected: return entity.isSelected ?? false
+        }
+    }
+    
+    static func migrateStatement(for version: Int32) -> String? {
+        switch version {
+        case 2:
+            return Self.addColumnStatement(.isSelected)
+        default: return nil
         }
     }
 }
