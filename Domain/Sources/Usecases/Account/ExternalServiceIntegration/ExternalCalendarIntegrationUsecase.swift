@@ -88,6 +88,7 @@ extension ExternalCalendarIntegrationUsecaseImple {
         let account = try await self.externalServiceIntegrateRepository.save(
             credential, for: service
         )
+        |> \.intergrationTime .~ Date()
         self.sharedDataStore.update(AccountsMap.self, key: self.shareKey) { old in
             (old ?? [:]) |> key(service.identifier) .~ account
         }
