@@ -33,7 +33,7 @@ final class EventSyncRepositoryImpleTests: PublisherWaitable, LocalTestable {
     
     init() {
         self.syncTimestampLocalStorage = .init(sqliteService: self.sqliteService)
-        self.eventTagLocalStorage = .init(sqliteService: self.sqliteService)
+        self.eventTagLocalStorage = .init(sqliteService: self.sqliteService, environmentStorage: FakeEnvironmentStorage())
         self.todoLocalStorage = .init(sqliteService: self.sqliteService)
         self.scheduleLocalStorage = .init(sqliteService: self.sqliteService)
         

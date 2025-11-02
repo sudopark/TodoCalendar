@@ -9,6 +9,8 @@
 import XCTest
 import Combine
 import AsyncFlatMap
+import Prelude
+import Optics
 import Domain
 import Extensions
 import UnitTestHelpKit
@@ -23,20 +25,17 @@ class EventTagRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
     private var spyTodoCache: SpyTodoLocalStorage!
     private var spyScheduleCache: SpyScheduleEventLocalStorage!
     private var stubRemote: StubRemoteAPI!
-    private var fakeEnvStore: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyCache = .init()
         self.spyTodoCache = .init()
         self.spyScheduleCache = .init()
-        self.fakeEnvStore = .init()
         self.stubRemote = .init(responses: self.response)
     }
     
     override func tearDownWithError() throws {
         self.spyCache = nil
-        self.fakeEnvStore = nil
         self.stubRemote = nil
         self.cancelBag = nil
     }
@@ -46,8 +45,7 @@ class EventTagRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
             remote: EventTagRemoteImple(remote: self.stubRemote),
             cacheStorage: self.spyCache,
             todoCacheStorage: self.spyTodoCache,
-            scheduleCacheStorage: self.spyScheduleCache,
-            environmentStorage: self.fakeEnvStore
+            scheduleCacheStorage: self.spyScheduleCache
         )
     }
 }
@@ -341,5 +339,31 @@ private final class SpyLocalStorage: EventTagLocalStorage, @unchecked Sendable {
     var didRemoveAll: Bool?
     func removeAllTags() async throws {
         self.didRemoveAll = true
+    }
+    
+    private var offTagIdSet: Set<EventTagId> = []
+    func loadOffTags() -> Set<EventTagId> {
+        return offTagIdSet
+    }
+    
+    func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId> {
+        let newSet = self.offTagIdSet |> elem(tagId) .~ !offTagIdSet.contains(tagId)
+        self.offTagIdSet = newSet
+        return newSet
+    }
+    
+    func addOffIds(_ ids: [EventTagId]) -> Set<EventTagId> {
+        let newSet = self.offTagIdSet.union(ids)
+        self.offTagIdSet = newSet
+        return newSet
+    }
+    
+    func deleteOfftagId(_ tagId: String) {
+        self.offTagIdSet.remove(.custom(tagId))
+    }
+    
+    func resetExternalCalendarOffTagId(_ serviceId: String) {
+        let newSet = self.offTagIdSet.filter { $0.externalServiceId != serviceId }
+        self.offTagIdSet = newSet
     }
 }

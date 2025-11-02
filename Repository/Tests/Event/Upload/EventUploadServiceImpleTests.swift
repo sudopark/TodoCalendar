@@ -39,7 +39,7 @@ final class EventUploadServiceImpleTests: LocalTestable {
             try await pendingQueueStorage.pushTask(task)
         }
         
-        let tagLocal = EventTagLocalStorageImple(sqliteService: self.sqliteService)
+        let tagLocal = EventTagLocalStorageImple(sqliteService: self.sqliteService, environmentStorage: FakeEnvironmentStorage())
         try await tagLocal.updateTags([
             .init(uuid: "tag", name: "name", colorHex: "hex")
         ])

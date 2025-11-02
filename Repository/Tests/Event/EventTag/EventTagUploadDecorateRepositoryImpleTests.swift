@@ -35,8 +35,7 @@ final class EventTagUploadDecorateRepositoryImpleTests: EventTagLocalRepositoryI
         let localRepository = EventTagLocalRepositoryImple(
             localStorage: self.localStorage,
             todoLocalStorage: self.todoLocalStorage,
-            scheduleLocalStorage: self.scheduleLocalStorage,
-            environmentStorage: self.fakeEnvStore
+            scheduleLocalStorage: self.scheduleLocalStorage
         )
         return EventTagUploadDecorateRepositoryImple(
             localRepository: localRepository,

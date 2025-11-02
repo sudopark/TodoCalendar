@@ -22,20 +22,17 @@ public final class EventTagRemoteRepositoryImple: EventTagRepository, @unchecked
     private let cacheStorage: any EventTagLocalStorage
     private let todoCacheStorage: any TodoLocalStorage
     private let scheduleCacheStorage: any ScheduleEventLocalStorage
-    private let environmentStorage: any EnvironmentStorage
     
     public init(
         remote: any EventTagRemote,
         cacheStorage: any EventTagLocalStorage,
         todoCacheStorage: any TodoLocalStorage,
-        scheduleCacheStorage: any ScheduleEventLocalStorage,
-        environmentStorage: any EnvironmentStorage
+        scheduleCacheStorage: any ScheduleEventLocalStorage
     ) {
         self.remote = remote
         self.cacheStorage = cacheStorage
         self.todoCacheStorage = todoCacheStorage
         self.scheduleCacheStorage = scheduleCacheStorage
-        self.environmentStorage = environmentStorage
     }
 }
 
@@ -56,7 +53,7 @@ extension EventTagRemoteRepositoryImple {
     public func deleteTag(_ tagId: String) async throws {
         let result = try await self.remote.deleteTag(tagId)
         try? await self.cacheStorage.deleteTag(tagId)
-        self.deleteOfftagId(tagId)
+        self.cacheStorage.deleteOfftagId(tagId)
         return result
     }
     
@@ -125,36 +122,24 @@ extension EventTagRemoteRepositoryImple {
         let refreshedIdSet = (refreshed?.map { $0.uuid } ?? []) |> Set.init
         let onlyRemoved = cached?.filter { !refreshedIdSet.contains($0.uuid) }
         onlyRemoved?.forEach {
-            self.deleteOfftagId($0.uuid)
+            self.cacheStorage.deleteOfftagId($0.uuid)
         }
     }
     
-    private var offIds: String { "off_eventtagIds_on_calendar" }
-    
     public func loadOffTags() -> Set<EventTagId> {
-        let idStringValues: [String]? = self.environmentStorage.load(self.offIds)
-        let ids = idStringValues?.compactMap { EventTagId($0) }
-        return (ids ?? []) |> Set.init
+        return self.cacheStorage.loadOffTags()
     }
     
     public func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId> {
-        let oldOffIds = self.loadOffTags()
-        let newIds = oldOffIds |> elem(tagId) .~ !oldOffIds.contains(tagId)
-        let newIdStringValues = newIds.map { $0.stringValue }
-        self.environmentStorage.update(self.offIds, newIdStringValues)
-        return newIds
+        return self.cacheStorage.toggleTagIsOn(tagId)
     }
     
-    private func deleteOfftagId(_ tagId: String) {
-        let oldOffIds = self.loadOffTags()
-        let newIds = oldOffIds |> elem(.custom(tagId)) .~ false
-        let newIdStringValues = newIds.map { $0.stringValue }
-        self.environmentStorage.update(self.offIds, newIdStringValues)
+    public func addOffIds(_ ids: [EventTagId]) -> Set<EventTagId> {
+        return self.cacheStorage.addOffIds(ids)
     }
     
     public func resetExternalCalendarOffTagId(_ serviceId: String) {
-        let newIds = self.loadOffTags().filter { $0.externalServiceId != serviceId }
-        self.environmentStorage.update(self.offIds, newIds.map { $0.stringValue })
+        self.cacheStorage.resetExternalCalendarOffTagId(serviceId)
     }
 }
 

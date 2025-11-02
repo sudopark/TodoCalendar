@@ -8,6 +8,8 @@
 import Foundation
 @preconcurrency import SQLiteService
 import Domain
+import Prelude
+import Optics
 
 
 public protocol EventTagLocalStorage: Sendable {
@@ -19,6 +21,12 @@ public protocol EventTagLocalStorage: Sendable {
     func loadTags(in ids: [String]) async throws -> [CustomEventTag]
     func loadAllTags() async throws -> [CustomEventTag]
     func removeAllTags() async throws
+    
+    func loadOffTags() -> Set<EventTagId>
+    func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId>
+    func addOffIds(_ ids: [EventTagId]) -> Set<EventTagId>
+    func deleteOfftagId(_ tagId: String)
+    func resetExternalCalendarOffTagId(_ serviceId: String)
 }
 extension EventTagLocalStorage {
     
@@ -34,8 +42,13 @@ extension EventTagLocalStorage {
 public final class EventTagLocalStorageImple: EventTagLocalStorage {
     
     private let sqliteService: SQLiteService
-    public init(sqliteService: SQLiteService) {
+    private let environmentStorage: any EnvironmentStorage
+    public init(
+        sqliteService: SQLiteService,
+        environmentStorage: any EnvironmentStorage
+    ) {
         self.sqliteService = sqliteService
+        self.environmentStorage = environmentStorage
     }
     
     private typealias Tags = CustomEventTagTable
@@ -95,5 +108,71 @@ extension EventTagLocalStorageImple {
     
     public func removeAllTags() async throws {
         try await self.sqliteService.async.run { try $0.dropTable(Tags.self) } 
+    }
+}
+
+extension EventTagLocalStorageImple {
+    
+    private var offIds: String { "off_eventtagIds_on_calendar" }
+    
+    public func loadOffTags() -> Set<EventTagId> {
+        let idStringValues: [String]? = self.environmentStorage.load(self.offIds)
+        let ids = idStringValues?.compactMap { EventTagId($0) }
+        return (ids ?? []) |> Set.init
+    }
+    
+    public func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId> {
+        let oldOffIds = self.loadOffTags()
+        let newIds = oldOffIds |> elem(tagId) .~ !oldOffIds.contains(tagId)
+        let newIdStringValues = newIds.map { $0.stringValue }
+        self.environmentStorage.update(self.offIds, newIdStringValues)
+        return newIds
+    }
+    
+    public func addOffIds(_ ids: [EventTagId]) -> Set<EventTagId> {
+        let oldOffIds = self.loadOffTags()
+        let newIds = oldOffIds.union(ids)
+        let newIdStringValue = newIds.map { $0.stringValue }
+        self.environmentStorage.update(self.offIds, newIdStringValue)
+        return newIds
+    }
+    
+    public func deleteOfftagId(_ tagId: String) {
+        let oldOffIds = self.loadOffTags()
+        let newIds = oldOffIds |> elem(.custom(tagId)) .~ false
+        let newIdStringValues = newIds.map { $0.stringValue }
+        self.environmentStorage.update(self.offIds, newIdStringValues)
+    }
+    
+    public func resetExternalCalendarOffTagId(_ serviceId: String) {
+        let newIds = self.loadOffTags().filter { $0.externalServiceId != serviceId }
+        self.environmentStorage.update(self.offIds, newIds.map { $0.stringValue })
+    }
+}
+
+extension EventTagId {
+    
+    var stringValue: String {
+        switch self {
+        case .holiday: return "holiday"
+        case .default: return "default"
+        case .custom(let id): return id
+        case .externalCalendar(let serviceId, let id): return "external::\(serviceId)::\(id)"
+        }
+    }
+    
+    init?(_ stringValue: String) {
+        switch stringValue {
+        case "holiday": self = .holiday
+        case "default": self = .default
+        default:
+            if stringValue.starts(with: "external:") {
+                let compos = stringValue.components(separatedBy: "::")
+                guard compos.count == 3 else { return nil }
+                self = .externalCalendar(serviceId: compos[1], id: compos[2])
+            } else {
+                self = .custom(stringValue)
+            }
+        }
     }
 }

@@ -27,7 +27,10 @@ extension EventTypeSelectIntentFactory {
     func makeEventTagRepository() -> any EventTagRepository {
         
         let auth = self.base.authStore.loadCurrentAuth()
-        let localStorage = EventTagLocalStorageImple(sqliteService: base.commonSqliteService)
+        let localStorage = EventTagLocalStorageImple(
+            sqliteService: base.commonSqliteService,
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
         let todoLocalStorage = TodoLocalStorageImple(sqliteService: base.commonSqliteService)
         let scheduleLocalStorage = ScheduleEventLocalStorageImple(sqliteService: base.commonSqliteService)
         
@@ -39,15 +42,13 @@ extension EventTypeSelectIntentFactory {
                 remote: EventTagRemoteImple(remote: remote),
                 cacheStorage: localStorage,
                 todoCacheStorage: todoLocalStorage,
-                scheduleCacheStorage: scheduleLocalStorage,
-                environmentStorage: base.userDefaultEnvironmentStorage
+                scheduleCacheStorage: scheduleLocalStorage
             )
         } else {
             return EventTagLocalRepositoryImple(
                 localStorage: localStorage,
                 todoLocalStorage: todoLocalStorage,
-                scheduleLocalStorage: scheduleLocalStorage,
-                environmentStorage: base.userDefaultEnvironmentStorage
+                scheduleLocalStorage: scheduleLocalStorage
             )
         }
     }
