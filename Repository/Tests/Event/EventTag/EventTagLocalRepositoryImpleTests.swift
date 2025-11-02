@@ -27,13 +27,13 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
     override func setUpWithError() throws {
         self.fileName = "tags"
         try super.setUpWithError()
-        self.localStorage = .init(sqliteService: self.sqliteService)
+        self.fakeEnvStore = .init()
+        self.localStorage = .init(sqliteService: self.sqliteService, environmentStorage: self.fakeEnvStore)
         self.todoLocalStorage = .init(sqliteService: self.sqliteService)
         self.scheduleLocalStorage = .init(sqliteService: self.sqliteService)
         self.sqliteService.run { db in
             try db.createTableOrNot(CustomEventTagTable.self)
         }
-        self.fakeEnvStore = .init()
     }
     
     override func tearDownWithError() throws {
@@ -46,8 +46,7 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
         return EventTagLocalRepositoryImple(
             localStorage: self.localStorage,
             todoLocalStorage: self.todoLocalStorage,
-            scheduleLocalStorage: self.scheduleLocalStorage,
-            environmentStorage: self.fakeEnvStore
+            scheduleLocalStorage: self.scheduleLocalStorage
         )
     }
 }

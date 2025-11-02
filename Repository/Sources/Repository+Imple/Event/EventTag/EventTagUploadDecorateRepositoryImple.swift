@@ -88,6 +88,10 @@ extension EventTagUploadDecorateRepositoryImple {
         return self.localRepository.toggleTagIsOn(tagId)
     }
     
+    public func addOffIds(_ ids: [EventTagId]) -> Set<EventTagId> {
+        return self.localRepository.addOffIds(ids)
+    }
+    
     public func resetExternalCalendarOffTagId(_ serviceId: String) {
         self.localRepository.resetExternalCalendarOffTagId(serviceId)
     }

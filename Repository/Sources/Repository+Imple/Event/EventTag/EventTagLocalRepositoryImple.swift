@@ -19,18 +19,14 @@ public final class EventTagLocalRepositoryImple: EventTagRepository {
     private let localStorage: any EventTagLocalStorage
     private let todoLocalStorage: any TodoLocalStorage
     private let scheduleLocalStorage: any ScheduleEventLocalStorage
-    
-    private let environmentStorage: any EnvironmentStorage
     public init(
         localStorage: any EventTagLocalStorage,
         todoLocalStorage: any TodoLocalStorage,
-        scheduleLocalStorage: any ScheduleEventLocalStorage,
-        environmentStorage: any EnvironmentStorage
+        scheduleLocalStorage: any ScheduleEventLocalStorage
     ) {
         self.localStorage = localStorage
         self.todoLocalStorage = todoLocalStorage
         self.scheduleLocalStorage = scheduleLocalStorage
-        self.environmentStorage = environmentStorage
     }
 }
 
@@ -63,7 +59,7 @@ extension EventTagLocalRepositoryImple {
     
     public func deleteTag(_ tagId: String) async throws {
         try await self.localStorage.deleteTag(tagId)
-        self.deleteOfftagId(tagId)
+        self.localStorage.deleteOfftagId(tagId)
     }
     
     public func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult {
@@ -91,59 +87,19 @@ extension EventTagLocalRepositoryImple {
         .eraseToAnyPublisher()
     }
     
-    private var offIds: String { "off_eventtagIds_on_calendar" }
-    
     public func loadOffTags() -> Set<EventTagId> {
-        let idStringValues: [String]? = self.environmentStorage.load(self.offIds)
-        let ids = idStringValues?.compactMap { EventTagId($0) }
-        return (ids ?? []) |> Set.init
+        return self.localStorage.loadOffTags()
     }
     
     public func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId> {
-        let oldOffIds = self.loadOffTags()
-        let newIds = oldOffIds |> elem(tagId) .~ !oldOffIds.contains(tagId)
-        let newIdStringValues = newIds.map { $0.stringValue }
-        self.environmentStorage.update(self.offIds, newIdStringValues)
-        return newIds
+        return self.localStorage.toggleTagIsOn(tagId)
     }
     
-    private func deleteOfftagId(_ tagId: String) {
-        let oldOffIds = self.loadOffTags()
-        let newIds = oldOffIds |> elem(.custom(tagId)) .~ false
-        let newIdStringValues = newIds.map { $0.stringValue }
-        self.environmentStorage.update(self.offIds, newIdStringValues)
+    public func addOffIds(_ ids: [EventTagId]) -> Set<EventTagId> {
+        return self.localStorage.addOffIds(ids)
     }
     
     public func resetExternalCalendarOffTagId(_ serviceId: String) {
-        let newIds = self.loadOffTags().filter { $0.externalServiceId != serviceId }
-        self.environmentStorage.update(self.offIds, newIds.map { $0.stringValue })
-    }
-}
-
-
-extension EventTagId {
-    
-    var stringValue: String {
-        switch self {
-        case .holiday: return "holiday"
-        case .default: return "default"
-        case .custom(let id): return id
-        case .externalCalendar(let serviceId, let id): return "external::\(serviceId)::\(id)"
-        }
-    }
-    
-    init?(_ stringValue: String) {
-        switch stringValue {
-        case "holiday": self = .holiday
-        case "default": self = .default
-        default:
-            if stringValue.starts(with: "external:") {
-                let compos = stringValue.components(separatedBy: "::")
-                guard compos.count == 3 else { return nil }
-                self = .externalCalendar(serviceId: compos[1], id: compos[2])
-            } else {
-                self = .custom(stringValue)
-            }
-        }
+        self.localStorage.resetExternalCalendarOffTagId(serviceId)
     }
 }

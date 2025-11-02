@@ -29,6 +29,7 @@ public protocol EventTagUsecase: AnyObject, Sendable {
     var sharedEventTags: AnyPublisher<[EventTagId: any EventTag], Never> { get }
     
     func toggleEventTagIsOnCalendar(_ tagId: EventTagId)
+    func addEventTagOffIds(_ ids: [EventTagId])
     func offEventTagIdsOnCalendar() -> AnyPublisher<Set<EventTagId>, Never>
     func resetExternalCalendarOffTagId(_ serviceId: String)
 }
@@ -242,6 +243,15 @@ extension EventTagUsecaseImple {
     public func toggleEventTagIsOnCalendar(_ tagId: EventTagId) {
         let newSet = self.tagRepository.toggleTagIsOn(tagId)
         self.sharedDataStore.put(Set<EventTagId>.self, key: ShareDataKeys.offEventTagSet.rawValue, newSet)
+    }
+    
+    public func addEventTagOffIds(_ ids: [EventTagId]) {
+        let newSet = self.tagRepository.addOffIds(ids)
+        self.sharedDataStore.put(
+            Set<EventTagId>.self,
+            key: ShareDataKeys.offEventTagSet.rawValue,
+            newSet
+        )
     }
     
     public func offEventTagIdsOnCalendar() -> AnyPublisher<Set<EventTagId>, Never> {

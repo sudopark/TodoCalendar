@@ -504,4 +504,26 @@ extension EventTagUsecaseImpleTests {
             [.custom("id2"), .holiday]
         ])
     }
+    
+    func testUsecase_addOffTagIds() {
+        // given
+        let expect = expectation(description: "여러개의 offTagId 한번에 추가")
+        expect.expectedFulfillmentCount = 4
+        let usecase = self.makeUsecase()
+        
+        // when
+        let offIds = self.waitOutputs(expect, for: usecase.offEventTagIdsOnCalendar()) {
+            usecase.addEventTagOffIds([.custom("id1"), .custom("id2")])
+            usecase.toggleEventTagIsOnCalendar(.custom("id2"))
+            usecase.addEventTagOffIds([.custom("id3"), .holiday])
+        }
+        
+        // then
+        XCTAssertEqual(offIds, [
+            [],
+            [.custom("id1"), .custom("id2")],
+            [.custom("id1")],
+            [.custom("id1"), .custom("id3"), .holiday],
+        ])
+    }
 }

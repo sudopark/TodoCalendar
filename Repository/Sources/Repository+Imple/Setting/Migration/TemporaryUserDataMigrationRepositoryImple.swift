@@ -16,13 +16,16 @@ public final class TemporaryUserDataMigrationRepositoryImple: TemporaryUserDataM
     
     private let tempUserDBPath: String
     private let remoteAPI: any RemoteAPI
+    private let environmentStorage: any EnvironmentStorage
     
     public init(
         tempUserDBPath: String,
-        remoteAPI: any RemoteAPI
+        remoteAPI: any RemoteAPI,
+        environmentStorage: any EnvironmentStorage
     ) {
         self.tempUserDBPath = tempUserDBPath
         self.remoteAPI = remoteAPI
+        self.environmentStorage = environmentStorage
     }
 }
 
@@ -57,7 +60,9 @@ extension TemporaryUserDataMigrationRepositoryImple {
         let service = try await self.prepareTempDBsqliteService()
         defer { service.close() }
         
-        let storage = EventTagLocalStorageImple(sqliteService: service)
+        let storage = EventTagLocalStorageImple(
+            sqliteService: service, environmentStorage: self.environmentStorage
+        )
         let alltags = try await storage.loadAllTags()
         
         guard !alltags.isEmpty else { return }

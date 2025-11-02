@@ -112,15 +112,15 @@ extension NonLoginUsecaseFactoryImple {
     
     private func makeEventTagRepository() -> any EventTagRepository {
         let storage = EventTagLocalStorageImple(
-            sqliteService: applicationBase.commonSqliteService
+            sqliteService: applicationBase.commonSqliteService,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let repository = EventTagLocalRepositoryImple(
             localStorage: storage,
             todoLocalStorage: todoLocal,
-            scheduleLocalStorage: scheduleLocal,
-            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            scheduleLocalStorage: scheduleLocal
         )
         return repository
     }
@@ -325,13 +325,17 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         
         let migrationRepository = TemporaryUserDataMigrationRepositoryImple(
             tempUserDBPath: temporaryUserDataFilePath, 
-            remoteAPI: applicationBase.remoteAPI
+            remoteAPI: applicationBase.remoteAPI,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         self.temporaryUserDataMigrationUsecase = TemporaryUserDataMigrationUescaseImple(
             migrationRepository: migrationRepository
         )
         
-        let tagLocal = EventTagLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let tagLocal = EventTagLocalStorageImple(
+            sqliteService: applicationBase.commonSqliteService,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
         let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         
@@ -450,14 +454,16 @@ extension LoginUsecaseFactoryImple {
     }
     
     private func makeEventTagRepository() -> any EventTagRepository {
-        let storage = EventTagLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let storage = EventTagLocalStorageImple(
+            sqliteService: applicationBase.commonSqliteService,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
         let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let localRepository = EventTagLocalRepositoryImple(
             localStorage: storage,
             todoLocalStorage: todoLocal,
-            scheduleLocalStorage: scheduleLocal,
-            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            scheduleLocalStorage: scheduleLocal
         )
         return EventTagUploadDecorateRepositoryImple(
             localRepository: localRepository,
@@ -543,7 +549,10 @@ extension LoginUsecaseFactoryImple {
             migrationUsecase: self.temporaryUserDataMigrationUsecase
         )
         let syncTimeLocal = EventSyncTimestampLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
-        let eventTagLocal = EventTagLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let eventTagLocal = EventTagLocalStorageImple(
+            sqliteService: applicationBase.commonSqliteService,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
         let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let repository = EventSyncRepositoryImple(

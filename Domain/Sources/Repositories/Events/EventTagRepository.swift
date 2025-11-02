@@ -20,5 +20,6 @@ public protocol EventTagRepository: Sendable {
     
     func loadOffTags() -> Set<EventTagId>
     func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId>
+    func addOffIds(_ ids: [EventTagId]) -> Set<EventTagId>
     func resetExternalCalendarOffTagId(_ serviceId: String)
 }
