@@ -47,6 +47,9 @@ extension SQLiteService {
             case 1:
                 try self?.runMigrationVersion1to2(database)
                 
+            case 2:
+                try self?.runMigrationVersion2to3(database)
+                
             default:
                 break
             }
@@ -96,7 +99,19 @@ extension SQLiteService {
     func runMigrationVersion1to2(_ database: any DataBase) throws -> Void {
         do {
             try database.migrate(GoogleCalendarEventOriginTable.self, version: 1)
+            logger.log(level: .info, "migratiob version 1 -> 2, GoogleCalendarEventOriginTable finished")
         } catch {
+            logger.log(level: .error, "migration version 1 -> 2 faield.. will drop GoogleCalendarEventOriginTable")
+            try? database.dropTable(GoogleCalendarEventOriginTable.self)
+        }
+    }
+    
+    func runMigrationVersion2to3(_ database: any DataBase) throws -> Void {
+        do {
+            try database.migrate(GoogleCalendarEventTagTable.self, version: 2)
+            logger.log(level: .info, "migratiob version 2 -> 3, GoogleCalendarEventTagTable finished")
+        } catch {
+            logger.log(level: .error, "migration version 2 -> 3 faield.. will drop GoogleCalendarEventOriginTable")
             try? database.dropTable(GoogleCalendarEventOriginTable.self)
         }
     }

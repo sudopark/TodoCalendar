@@ -139,6 +139,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             #expect(tagLists.count == 2)
             let cached = tagLists.first
             #expect(cached?.first?.name == "old")
+            #expect(cached?.first?.isSelected == false)
             
             let refreshed = tagLists.last
             self.assertTagFromRemote(refreshed?.last)
@@ -178,6 +179,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(tag?.backgroundColorHex == "#fad165")
         #expect(tag?.foregroundColorHex == "#000000")
         #expect(tag?.colorId == "12")
+        #expect(tag?.isSelected == true)
     }
 }
 
