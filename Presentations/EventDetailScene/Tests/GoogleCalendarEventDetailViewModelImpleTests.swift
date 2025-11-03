@@ -160,7 +160,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         case "RRULE:FREQ=MONTHLY;INTERVAL=2": return "Every 2 Months"
         case "RRULE:FREQ=YEARLY": return "Every Year"
         case "RRULE:FREQ=YEARLY;INTERVAL=3": return "Every 3 Years"
-        case "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE": return "Every Week FRI,MON,THU,TUE,WED"
+        case "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE": return "Every Week MON,TUE,WED,THU,FRI"
         case "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20250816T145959Z;BYDAY=SA": return "Every Week SAT\nuntil Aug 16, 2025"
         case "RRULE:FREQ=DAILY;COUNT=3": return "Everyday\n3 time(s)"
         default: return ""
@@ -188,7 +188,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         let viewModel = self.makeViewModel(recurrence: recurrence)
         
         // when
-        let text = try await self.firstOutput(expect, for: viewModel.repeatOPtion) {
+        let text = try await self.firstOutput(expect, for: viewModel.repeatOption) {
             viewModel.refresh()
         }
         

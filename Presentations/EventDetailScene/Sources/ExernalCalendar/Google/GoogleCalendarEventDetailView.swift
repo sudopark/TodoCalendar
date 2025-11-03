@@ -78,7 +78,7 @@ import CommonPresentation
             })
             .store(in: &self.cancellables)
         
-        viewModel.repeatOPtion
+        viewModel.repeatOption
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] option in
                 self?.repeatOptionText = option
