@@ -130,7 +130,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var eventName: AnyPublisher<String, Never> { get }
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
     var ddayText: AnyPublisher<String, Never> { get }
-    var repeatOPtion: AnyPublisher<String?, Never> { get }
+    var repeatOption: AnyPublisher<String?, Never> { get }
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
     var conferenceModel: AnyPublisher<ConferenceModel?, Never> { get }
@@ -348,7 +348,7 @@ extension GoogleCalendarEventDetailViewModelImple {
         .eraseToAnyPublisher()
     }
     
-    var repeatOPtion: AnyPublisher<String?, Never> {
+    var repeatOption: AnyPublisher<String?, Never> {
         
         let transform: (GoogleCalendar.EventOrigin, TimeZone) -> String? = { origin, timeZone in
             guard let recurrence = origin.recurrence?.first,
@@ -510,12 +510,37 @@ private extension String {
     
     func appendDaysText(_ byDays: [RRule.ByDay]) -> String {
         guard !byDays.isEmpty else { return self }
-        let texts = byDays.map { $0.text() }.joined(separator: ",")
+        let texts = byDays
+            .sorted(by: RRule.ByDay.compareOrder(_:_:))
+            .map { $0.text() }.joined(separator: ",")
         return "\(self) \(texts)"
     }
 }
 
+private extension RRule.ByDay.WeekDay {
+    
+    var sortOrder: Int {
+        return switch self {
+        case .MO: 1
+        case .TU: 2
+        case .WE: 3
+        case .TH: 4
+        case .FR: 5
+        case .SA: 6
+        case .SU: 7
+        }
+    }
+}
+
 private extension RRule.ByDay {
+    
+    static func compareOrder(_ lhs: Self, _ rhs: Self) -> Bool {
+        if let l_ordinal = lhs.ordinal, let r_ordinal = rhs.ordinal {
+            return l_ordinal < r_ordinal
+        } else {
+            return lhs.weekDay.sortOrder < rhs.weekDay.sortOrder
+        }
+    }
     
     func text() -> String {
         switch self.ordinal {
