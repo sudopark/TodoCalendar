@@ -24,9 +24,12 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>! = []
     
-    private func updateAccountIntegrated(_ hasAccount: Bool) {
+    private func updateAccountIntegrated(_ hasAccount: Bool, isNew: Bool = false) {
         if hasAccount {
-            let account = ExternalServiceAccountinfo(service.identifier, email: "email")
+            var account = ExternalServiceAccountinfo(service.identifier, email: "email")
+            if isNew {
+                account.intergrationTime = Date()
+            }
             self.stubStore.put(
                 [String: ExternalServiceAccountinfo].self,
                 key: ShareDataKeys.externalCalendarAccounts.rawValue,
@@ -87,7 +90,7 @@ extension GoogleCalendarUsecaseImpleTests {
             }
             usecase.prepare()
             
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
         }
     }
     
@@ -102,7 +105,7 @@ extension GoogleCalendarUsecaseImpleTests {
             }
             usecase.prepare()
             
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
         }
     }
     
@@ -124,13 +127,13 @@ extension GoogleCalendarUsecaseImpleTests {
             }
             
             usecase.prepare()
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             self.updateAccountIntegrated(false)
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             self.updateAccountIntegrated(true)
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             return sender
         }
@@ -154,7 +157,7 @@ extension GoogleCalendarUsecaseImpleTests {
             
             self.updateAccountIntegrated(true)
             
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             self.updateAccountIntegrated(false)
         }
         
@@ -168,6 +171,33 @@ extension GoogleCalendarUsecaseImpleTests {
                 .externalCalendar(serviceId: GoogleCalendarService.id, id: "tag2")
             ],
             [],
+        ])
+    }
+    
+    @Test func usecaes_whenAfterIntegrate_loadCalendarTagAndSetInitialOffIds() async throws {
+        // given
+        let expect = expectConfirm("연동이 시작된 경우에만 태그 조회하고 selected != true인 태그는 offTagId에 추가")
+        expect.count = 3
+        let usecase = self.makeUsecase(hasAccount: true)
+        
+        // when
+        let offIds = try await self.outputs(expect, for: stubEventTagUsecae.offEventTagIdsOnCalendar()) {
+            
+            usecase.prepare()
+            try await Task.sleep(for: .milliseconds(100))
+            
+            self.updateAccountIntegrated(false)
+            try await Task.sleep(for: .milliseconds(100))
+            
+            self.updateAccountIntegrated(true, isNew: true)
+        }
+        
+        // then
+        let externalOffIds = offIds.map { os in os.filter { $0.externalServiceId != nil }}
+        #expect(externalOffIds == [
+            [],
+            [],
+            [.externalCalendar(serviceId: GoogleCalendarService.id, id: "tag2")]
         ])
     }
     
@@ -250,7 +280,7 @@ extension GoogleCalendarUsecaseImpleTests {
         let tagLists = try await self.outputs(expect, for: usecase.calendarTags) {
             usecase.prepare()
             
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             usecase.refreshGoogleCalendarEventTags()
         }
@@ -284,7 +314,7 @@ extension GoogleCalendarUsecaseImpleTests {
             
             usecase.prepare()
             
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             usecase.refreshGoogleCalendarEventTags()
                     
@@ -390,7 +420,7 @@ extension GoogleCalendarUsecaseImpleTests {
         // when
         let eventSource = usecase.events(in: 0..<100)
         let eventLists = try await self.outputs(expect, for: eventSource) {
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             usecase.refreshEvents(in: 0..<100)
         }
@@ -414,7 +444,7 @@ extension GoogleCalendarUsecaseImpleTests {
         // when
         let eventSource = usecase.events(in: 0..<100).filter { !$0.isEmpty }
         let eventLists = try await self.outputs(expect, for: eventSource) {
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             usecase.refreshEvents(in: 0..<10)
         }
@@ -433,7 +463,7 @@ extension GoogleCalendarUsecaseImpleTests {
         // when
         let eventSource = usecase.events(in: 3..<20)
         let eventLists = try await self.outputs(expect, for: eventSource) {
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             usecase.refreshEvents(in: 0..<10)
         }
@@ -464,7 +494,7 @@ extension GoogleCalendarUsecaseImpleTests {
         // when
         let eventSource = usecase.events(in: 3..<20)
         let eventList = try await self.outputs(expect, for: eventSource) {
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             usecase.refreshEvents(in: 0..<10)
         }
@@ -497,13 +527,13 @@ extension GoogleCalendarUsecaseImpleTests {
         // when
         let eventSource = usecase.events(in: 0..<20)
         let eventList = try await self.outputs(expect, for: eventSource) {
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             usecase.refreshEvents(in: 0..<10)
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             mocking.send(dummyEvents)
             
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             let eventsWithout2 = dummyEvents.filter { $0.eventId != "2-tag1"}
             mocking.send(eventsWithout2)
         }
@@ -539,7 +569,7 @@ extension GoogleCalendarUsecaseImpleTests {
         // when
         let eventSource = usecase.events(in: 0..<100)
         let eventLists = try await self.outputs(expect, for: eventSource) {
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(100))
             
             usecase.refreshEvents(in: 0..<100)
             
@@ -597,11 +627,11 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
         
         let defaultCalendar = [
             [
-                GoogleCalendar.Tag(id: "tag1", name: "tag1"),
+                GoogleCalendar.Tag(id: "tag1", name: "tag1") |> \.isSelected .~ true,
                 GoogleCalendar.Tag(id: "tag2", name: "tag2"),
             ],
             [
-                GoogleCalendar.Tag(id: "tag1", name: "tag1-new"),
+                GoogleCalendar.Tag(id: "tag1", name: "tag1-new") |> \.isSelected .~ true,
                 GoogleCalendar.Tag(id: "tag2", name: "tag2-new"),
             ]
         ]
