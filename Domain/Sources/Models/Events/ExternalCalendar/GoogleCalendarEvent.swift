@@ -143,6 +143,17 @@ extension GoogleCalendar {
             public var optional: Bool?
             public var responseStatus: String?
             
+            private enum CodingKeys: String, CodingKey {
+                case id
+                case email
+                case displayName
+                case organizer
+                case selfValue = "self"
+                case resource
+                case optional
+                case responseStatus
+            }
+            
             public var isAccepted: Bool {
                 return self.responseStatus == "accepted"
             }
