@@ -84,23 +84,55 @@ public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked
 
 extension GoogleCalendarUsecaseImple {
     
+    private struct AccountAndIsNew: Equatable {
+        let account: ExternalServiceAccountinfo
+        private var lastIntegrationTime: Date?
+        var isNew: Bool = false
+        
+        init(_ account: ExternalServiceAccountinfo) {
+            self.account = account
+            self.lastIntegrationTime = account.intergrationTime
+            self.isNew = account.intergrationTime != nil
+        }
+        
+        func update(_ new: ExternalServiceAccountinfo) -> AccountAndIsNew {
+            guard account.serviceIdentifier == new.serviceIdentifier,
+                  account.email == new.email
+            else {
+                return .init(new)
+            }
+            let isNewIntegrated = switch (account.intergrationTime, new.intergrationTime) {
+            case (.some(let oldtime), .some(let newTime)) where newTime > oldtime: true
+            case (.none, .some): true
+            default: false
+            }
+            return .init(new) |> \.isNew .~ isNewIntegrated
+        }
+    }
+    
     public func prepare() {
         
         self.clearCancelBag()
-        
         let serviceId = self.googleService.identifier
-        let hasAccount = self.sharedDataStore
+        
+        let asAccountWithCheckIsNew: (AccountAndIsNew?, ExternalServiceAccountinfo?) -> AccountAndIsNew? = { acc, account in
+            guard let account else { return nil }
+            return acc?.update(account) ?? AccountAndIsNew(account)
+        }
+        
+        let account = self.sharedDataStore
             .observe(
                 [String: ExternalServiceAccountinfo].self,
                 key: ShareDataKeys.externalCalendarAccounts.rawValue
             )
-            .map { $0?[serviceId] != nil }
+            .map { $0?[serviceId] }
+            .scan(nil, asAccountWithCheckIsNew)
         
-        hasAccount
+        account
             .removeDuplicates()
-            .sink(receiveValue: { [weak self] has in
-                if has {
-                    self?.refreshGoogleCalendarEventTags()
+            .sink(receiveValue: { [weak self] accountAndIsNew in
+                if let accountAndIsNew {
+                    self?.refreshEventTags(isFirstLoadAfterIntegrated: accountAndIsNew.isNew)
                 } else {
                     self?.clearGoogleCalendarEventTag()
                     self?.sharedDataStore.delete(
@@ -113,10 +145,19 @@ extension GoogleCalendarUsecaseImple {
     }
     
     public func refreshGoogleCalendarEventTags() {
+        self.refreshEventTags()
+    }
+    
+    public func refreshEventTags(isFirstLoadAfterIntegrated: Bool = false) {
         guard self.checkHasAccount() else { return }
         
         let updateTags: ([GoogleCalendar.Tag]) -> Void = { [weak self] tags in
             let tags = tags.filter { !$0.isHoliday }
+            
+            if isFirstLoadAfterIntegrated {
+                self?.setGoogleCalendarTagInitailOffTags(from: tags)
+            }
+            
             self?.sharedDataStore.put(
                 [GoogleCalendar.Tag].self,
                 key: ShareDataKeys.googleCalendarTags.rawValue,
@@ -133,6 +174,12 @@ extension GoogleCalendarUsecaseImple {
                 self?.appearanceStore.apply(colors: colors)
             })
             .store(in: &self.cancelBag)
+    }
+    
+    private func setGoogleCalendarTagInitailOffTags(from tags: [GoogleCalendar.Tag]) {
+        let offIds = tags.filter { $0.isSelected != true }.map { $0.tagId }
+        guard !offIds.isEmpty else { return }
+        self.eventTagUsecase.addEventTagOffIds(offIds)
     }
     
     private func clearGoogleCalendarEventTag() {
