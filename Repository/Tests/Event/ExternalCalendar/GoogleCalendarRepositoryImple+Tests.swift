@@ -352,7 +352,14 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(origin?.recurringEventId == "origin")
         #expect(origin?.sequence == 0)
         
-        #expect(origin?.attendees == nil)
+        #expect(origin?.attendees?.count == 1)
+        #expect(origin?.attendees?.first?.email == "user1@email.com")
+        #expect(origin?.attendees?.first?.organizer == true)
+        #expect(origin?.attendees?.first?.selfValue == true)
+        #expect(origin?.attendees?.first?.resource == true)
+        #expect(origin?.attendees?.first?.responseStatus == "accepted")
+        #expect(origin?.attendees?.first?.isAccepted == true)
+        
         #expect(origin?.hangoutLink == "https://meet.google.com/piw-hphe-juu")
         
         let conf = origin?.conferenceData
@@ -681,6 +688,15 @@ private struct DummyResponse {
         """
         return """
         {
+          "attendees": [
+            {
+              "email": "user1@email.com",
+              "organizer": true,
+              "self": true,
+              "responseStatus": "accepted",
+              "resource": true
+            }
+         ],
          "kind": "calendar#event",
          "etag": "\\"3489807262385694\\"",
          "id": "\(id)",
