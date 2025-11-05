@@ -99,3 +99,23 @@ extension Array where Element == String {
         return "\(leading)\(lastSeperator) \(last)"
     }
 }
+
+extension String {
+    
+    public var asHTMLAttributeText: AttributedString? {
+        return self.data(using: .utf8)
+            .flatMap { data in
+                return try? NSAttributedString(
+                    data: data,
+                    options: [
+                        .documentType: NSAttributedString.DocumentType.html,
+                        .characterEncoding: String.Encoding.utf8.rawValue
+                    ],
+                    documentAttributes: nil
+                )
+            }
+            .flatMap { str in
+                return try? AttributedString(str, including: \.uiKit)
+            }
+    }
+}
