@@ -33,7 +33,7 @@ import CommonPresentation
     var repeatOptionText: String?
     var calendarModel: GoogleCalendarModel?
     var location: String?
-    var descriptionHTMLText: String?
+    var descriptionHTMLText: AttributedString?
     var attachments: [AttachmentModel]?
     var attendees: AttendeeListViewModel?
     var conferenceData: ConferenceModel?
@@ -102,7 +102,7 @@ import CommonPresentation
         viewModel.descriptionHTMLText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
-                self?.descriptionHTMLText = text
+                self?.descriptionHTMLText = text?.asHTMLAttributeText
             })
             .store(in: &self.cancellables)
         
@@ -514,21 +514,30 @@ struct GoogleCalendarEventDetailView: View {
         }
     }
     
-    private func descriptionHTMLView(_ html: String) -> some View {
+    private func descriptionHTMLView(_ html: AttributedString) -> some View {
         return HStack(alignment: .top, spacing: 16) {
             
             Image(systemName: "doc.text")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
-            HTMLAttributedTextView(htmlText: html) { url in
-                self.eventHandlers.selectURL(url)
-            }
-            .frame(maxWidth: .infinity)
+            Text(self.styledHTML(html))
             
             Spacer()
         }
         .asAnyView()
+    }
+    
+    private func styledHTML(_ html: AttributedString) -> AttributedString {
+        var styled = html
+        styled.foregroundColor = appearance.colorSet.text1
+        styled.font = appearance.fontSet.subNormal
+        for run in styled.runs {
+            if run.link != nil {
+                styled[run.range].foregroundColor = appearance.colorSet.accent
+            }
+        }
+        return styled
     }
     
     private func attachmentsView(_ attachments: [AttachmentModel]) -> some View {
@@ -606,9 +615,11 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
         state.calendarModel = .init(
             calenarId: "some", name: "some@calendar.com"
         )
-        state.descriptionHTMLText = """
-        그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?<br><ol><li>목차1</li><li>목차2</li></ol><br><ul><li>목차3</li><li>목차4</li></ul><br><a href="https://www.google.com">링크다잉</a>
+        let text = """
+                그냥 텍스트<br><b>볼드</b><br>첨부파일도 있을거다잉<br>마크다운임?<br><ol><li>목차1</li><li>목차2</li></ol><br><ul><li>목차3</li><li>목차4</li></ul><br><a href="https://www.google.com">링크다잉</a>
         """
+//        let text = "plain text"
+        state.descriptionHTMLText = text.asHTMLAttributeText
         state.attachments = [
             .init(
                 id: "1VwH4QR5_vOrdbl94z3aKJfFt8PvE7F7I",
@@ -623,7 +634,7 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
                 iconLink: "https://drive-thirdparty.googleusercontent.com/16/type/image/png"
             )
         ]
-        let attendees = (0..<10).map { int -> AttendeeViewModelModel in
+        let attendees = (0..<2).map { int -> AttendeeViewModelModel in
             return AttendeeViewModelModel("id:\(int)", "name:\(int)")
                 |> \.isOrganizer .~ (int == 0)
                 |> \.isAccepted .~ (int < 4)
