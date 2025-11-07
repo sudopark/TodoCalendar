@@ -302,7 +302,7 @@ struct EventTagDetailViewPreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultDark,
+            colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
@@ -314,6 +314,16 @@ struct EventTagDetailViewPreviewProvider: PreviewProvider {
         state.newTagName = "some name".localized()
         state.isDeletable = true
         state.isNameChangable = true
+        state.suggestColorHexes = [
+            
+            "#F42D2D", "#F9316D", "#FF5722", "#FD838F", "#FFA02E", "#F6DC41", "#B75F17",
+            "#6800f2", "#9370DB", "#6A5ACD", "#4034AB", "#1E90FF", "#4682B4",
+            "#5F9EA0", "#4561DB", "#5e86d6", "#87CEEB", "#088CDA", "#AFEEEE",
+            "#036A73", "#3CB371",
+            "#06A192", "#41E6EC", "#72E985",
+            "#CCD0DC", "#828DA9", "#8DACF6",
+            
+        ]
         
         let eventHandler = EventTagDetailEventHandler()
         eventHandler.colorSelected = { new in state.selectedColorHex = new }
