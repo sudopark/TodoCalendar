@@ -77,6 +77,7 @@ extension NextEventWidgetViewModelProviderTests {
     private var nextGoogleCalendarEvent: TodayNextEvent {
         let google = GoogleCalendar.Event(
             "some", "cal", name: "google", colorId: nil,
+            location: "location",
             time: .period(1000..<2000)
         )
         let event = GoogleCalendarEvent(google, in: self.kst)
@@ -94,6 +95,7 @@ extension NextEventWidgetViewModelProviderTests {
         #expect(model.timeText?.text == "9:16")
         #expect(model.eventTitle == "todo")
         #expect(model.refreshAfter == nil)
+        #expect(model.locationText == nil)
     }
     
     @Test func provideNextEventIsSchedule() async throws {
@@ -107,6 +109,7 @@ extension NextEventWidgetViewModelProviderTests {
         #expect(model.timeText?.text == "9:16")
         #expect(model.eventTitle == "schedule")
         #expect(model.refreshAfter == nil)
+        #expect(model.locationText == nil)
     }
     
     @Test func provideNextEventIsGoogleCalendarEvent() async throws {
@@ -120,6 +123,7 @@ extension NextEventWidgetViewModelProviderTests {
         #expect(model.timeText?.text == "9:16")
         #expect(model.eventTitle == "google")
         #expect(model.refreshAfter == nil)
+        #expect(model.locationText == "location")
     }
     
     enum SecondNextEventTime: TimeInterval {
