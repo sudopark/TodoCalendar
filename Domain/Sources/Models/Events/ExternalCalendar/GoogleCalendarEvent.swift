@@ -224,6 +224,7 @@ extension GoogleCalendar {
         public let eventTime: EventTime
         public var htmlLink: String?
         public var status: EventStatus?
+        public var location: String?
         
         public var nextRepeatingTimes: [RepeatingTimes] = []
         public var repeatingTimeToExcludes: Set<String> = []
@@ -233,6 +234,7 @@ extension GoogleCalendar {
             name: String,
             colorId: String?,
             htmlLink: String? = nil,
+            location: String? = nil,
             time: EventTime
         ) {
             self.eventId = eventId
@@ -243,6 +245,7 @@ extension GoogleCalendar {
             self.name = name
             self.colorId = colorId
             self.htmlLink = htmlLink
+            self.location = location
             self.eventTime = time
         }
         
@@ -260,6 +263,8 @@ extension GoogleCalendar {
             let start = origin.start?.supportEventTimeElemnt(defaultTimeZone)
             let end = origin.end?.supportEventTimeElemnt(defaultTimeZone)
             self.status = origin.status
+            
+            self.location = origin.location
             
             switch (start, end) {
             case (.period(let st), .period(let et)):

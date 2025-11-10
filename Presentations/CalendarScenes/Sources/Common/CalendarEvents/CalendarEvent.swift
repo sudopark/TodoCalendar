@@ -57,6 +57,7 @@ public protocol CalendarEvent: Sendable {
     var eventTagId: EventTagId { get }
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
+    var locationText: String? { get }
     
     var compareKey: String { get }
 }
@@ -80,7 +81,7 @@ extension Array where Element == any CalendarEvent {
 extension CalendarEvent {
     
     public var compareKey: String {
-        return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)"
+        return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.locationText ?? "nil")"
     }
 }
 
@@ -97,6 +98,8 @@ public struct TodoCalendarEvent: CalendarEvent {
     public let isRepeating: Bool
     public var isForemost: Bool = false
     public var createdAt: TimeInterval?
+    // TODO: locationText 세팅 필요
+    public var locationText: String?
     
     public init(current todo: TodoEvent, isForemost: Bool) {
         self.eventId = todo.uuid
@@ -147,6 +150,8 @@ public struct ScheduleCalendarEvent: CalendarEvent {
     public var turn: Int = 0
     public let isRepeating: Bool
     public var isForemost: Bool = false
+    // TODO: locationText 세팅 필요
+    public var locationText: String?
     
     public static func events(
         from schedule: ScheduleEvent,
@@ -182,6 +187,7 @@ public struct HolidayCalendarEvent: CalendarEvent {
     public let eventTagId: EventTagId
     public let isRepeating: Bool = true
     public let isForemost: Bool = false
+    public var locationText: String?
     
     public init?(_ holiday: Holiday, in timeZone: TimeZone) {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
@@ -217,6 +223,7 @@ public struct GoogleCalendarEvent: CalendarEvent {
     public let htmlLink: String?
     public let isForemost: Bool
     public let isRepeating: Bool
+    public let locationText: String?
     
     public init(_ event: GoogleCalendar.Event, in timeZone: TimeZone) {
         self.eventId = event.eventId
@@ -241,10 +248,11 @@ public struct GoogleCalendarEvent: CalendarEvent {
         self.htmlLink = event.htmlLink
         self.isForemost = false
         self.isRepeating = false
+        self.locationText = event.location
     }
     
     public var compareKey: String {
-        return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.colorId ?? "nil")-\(self.htmlLink ?? "nil")"
+        return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.colorId ?? "nil")-\(self.htmlLink ?? "nil")-\(self.locationText ?? "nil")"
     }
 }
 

@@ -220,7 +220,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         }
     }
     
-    @Test func repository_loadEvents_witHCache() async throws {
+    @Test func repository_loadEvents_withCache() async throws {
         try await self.runTestWithOpenClose("test_google_event_2") {
             // given
             try await self.saveCache()
@@ -240,6 +240,9 @@ extension GoogleCalendarRepositoryImple_Tests {
             #expect(eventFromCache?.map { $0.name } == ["old"])
             #expect(eventFromCache?.map { $0.colorId } == ["color"])
             #expect(eventFromCache?.map { $0.htmlLink } == ["link"])
+            #expect(eventFromCache?.map { $0.location } == [
+                "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea"
+            ])
             
             let eventFromRemote = eventLists.last
             #expect(eventFromRemote?.map { $0.eventId } == [
@@ -306,6 +309,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(event?.eventId == "time_is_date")
         #expect(event?.calendarId == "c_id")
         #expect(event?.name == "하루죙일")
+        #expect(event?.location == "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea")
         
         let kst = TimeZone(identifier: "Asia/Seoul")!
         let start = "2025-04-11".asAllDayDate(kst)!
@@ -386,6 +390,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             |> \.end .~ end
             |> \.colorId .~ "color"
             |> \.htmlLink .~ "link"
+            |> \.location .~ "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea"
         let timeZone = "Asia/Seoul"
         let originEvent = GoogleCalendar.Event(origin, "c_id", timeZone)!
         let list = GoogleCalendar.EventOriginValueList()

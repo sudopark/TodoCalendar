@@ -19,11 +19,14 @@ import CalendarScenes
 struct NextEventWidgetViewModel: Sendable {
     let timeText: EventTimeText?
     let eventTitle: String
+    var locationText: String?
     var refreshAfter: Date?
     fileprivate var timeRawValue: EventTime?
     
     init(
-        timeText: EventTimeText?, eventTitle: String, refreshAfter: Date? = nil
+        timeText: EventTimeText?,
+        eventTitle: String,
+        refreshAfter: Date? = nil
     ) {
         self.timeText = timeText
         self.eventTitle = eventTitle
@@ -110,6 +113,7 @@ struct NextEventWidgetViewModelBuilder {
             timeText: EventTimeText.fromLowerBound(time, timeZone, !is24Form),
             eventTitle: event.name
         )
+        |> \.locationText .~ event.locationText
         |> \.timeRawValue .~ time
     }
     
