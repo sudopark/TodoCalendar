@@ -66,6 +66,24 @@ extension NextEventWidgetViewModelProviderTests {
         return .init(nextEvent: event, tag: nil)
     }
     
+    private var nextSchedule: TodayNextEvent {
+        let schedule = ScheduleEvent(
+            uuid: "schedule", name: "schedule", time: .period(1000..<2000)
+        )
+        let event = ScheduleCalendarEvent.events(from: schedule, in: self.kst).first!
+        return .init(nextEvent: event, tag: nil)
+    }
+    
+    private var nextGoogleCalendarEvent: TodayNextEvent {
+        let google = GoogleCalendar.Event(
+            "some", "cal", name: "google", colorId: nil,
+            location: "location",
+            time: .period(1000..<2000)
+        )
+        let event = GoogleCalendarEvent(google, in: self.kst)
+        return .init(nextEvent: event, tag: nil)
+    }
+    
     @Test func provideNextEventIsTodo() async throws {
         // given
         let provider = self.makeProvider(self.nextTodo)
@@ -77,8 +95,36 @@ extension NextEventWidgetViewModelProviderTests {
         #expect(model.timeText?.text == "9:16")
         #expect(model.eventTitle == "todo")
         #expect(model.refreshAfter == nil)
+        #expect(model.locationText == nil)
     }
     
+    @Test func provideNextEventIsSchedule() async throws {
+        // given
+        let provider = self.makeProvider(self.nextSchedule)
+        
+        // when
+        let model = try await provider.getNextEventModel(for: Date(timeIntervalSince1970: 0))
+        
+        // then
+        #expect(model.timeText?.text == "9:16")
+        #expect(model.eventTitle == "schedule")
+        #expect(model.refreshAfter == nil)
+        #expect(model.locationText == nil)
+    }
+    
+    @Test func provideNextEventIsGoogleCalendarEvent() async throws {
+        // given
+        let provider = self.makeProvider(self.nextGoogleCalendarEvent)
+        
+        // when
+        let model = try await provider.getNextEventModel(for: Date(timeIntervalSince1970: 0))
+        
+        // then
+        #expect(model.timeText?.text == "9:16")
+        #expect(model.eventTitle == "google")
+        #expect(model.refreshAfter == nil)
+        #expect(model.locationText == "location")
+    }
     
     enum SecondNextEventTime: TimeInterval {
         case gtThanFirstEndTime = 3000
@@ -131,9 +177,7 @@ extension NextEventWidgetViewModelProviderTests {
         
         let calendarSettingRepository = StubCalendarSettingRepository()
         calendarSettingRepository.saveTimeZone(self.kst)
-        
-        let appSettingRepository = StubAppSettingRepository()
-        
+  
         return .init(
             eventsFetchusecase: eventFetchUsecase,
             calednarSettingRepository: calendarSettingRepository,

@@ -55,7 +55,9 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
             CustomEventTag(uuid: "t1", name: "n1", colorHex: "some"),
             CustomEventTag(uuid: "t2", name: "n2", colorHex: "some"),
         ]
-        let tagStorage = EventTagLocalStorageImple(sqliteService: self.sqliteService)
+        let tagStorage = EventTagLocalStorageImple(
+            sqliteService: self.sqliteService, environmentStorage: FakeEnvironmentStorage()
+        )
         try await tagStorage.updateTags(tags)
         
         let todo1 = TodoEvent(uuid: "todo1", name: "todo1")
@@ -98,7 +100,8 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
     private func makeRepository(withoutData: Bool = false) async throws -> TemporaryUserDataMigrationRepositoryImple {
         let repository = TemporaryUserDataMigrationRepositoryImple(
             tempUserDBPath: self.testDBPath(),
-            remoteAPI: self.stubRemote
+            remoteAPI: self.stubRemote,
+            environmentStorage: FakeEnvironmentStorage()
         )
         if !withoutData {
             try await self.prepareDummyData()

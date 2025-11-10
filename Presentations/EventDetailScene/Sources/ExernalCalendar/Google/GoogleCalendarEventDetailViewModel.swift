@@ -30,8 +30,8 @@ struct AttendeeViewModelModel: Equatable {
     }
     
     init(_ attendee: GoogleCalendar.EventOrigin.Attendee) {
-        self.id = attendee.id
-        self.name = attendee.displayName ?? "eventDetail::gogoleEvent::attendee::unknown".localized()
+        self.id = attendee.identifier
+        self.name = attendee.displayNameOrEmail ?? "eventDetail::gogoleEvent::attendee::unknown".localized()
         self.isOrganizer = attendee.organizer ?? false
         self.isAccepted = attendee.isAccepted
     }
@@ -130,7 +130,7 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
     var eventName: AnyPublisher<String, Never> { get }
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
     var ddayText: AnyPublisher<String, Never> { get }
-    var repeatOPtion: AnyPublisher<String?, Never> { get }
+    var repeatOption: AnyPublisher<String?, Never> { get }
     var calendarModel: AnyPublisher<GoogleCalendarModel?, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
     var conferenceModel: AnyPublisher<ConferenceModel?, Never> { get }
@@ -348,7 +348,7 @@ extension GoogleCalendarEventDetailViewModelImple {
         .eraseToAnyPublisher()
     }
     
-    var repeatOPtion: AnyPublisher<String?, Never> {
+    var repeatOption: AnyPublisher<String?, Never> {
         
         let transform: (GoogleCalendar.EventOrigin, TimeZone) -> String? = { origin, timeZone in
             guard let recurrence = origin.recurrence?.first,
@@ -389,8 +389,10 @@ extension GoogleCalendarEventDetailViewModelImple {
         let sortAndPrefix: ([GoogleCalendar.EventOrigin.Attendee]?) -> (([GoogleCalendar.EventOrigin.Attendee], Int)?) = { attendees in
             guard let attendees else { return nil }
             
-            let sorted = attendees.sortAttendees()
-            return (Array(sorted.prefix(10)), attendees.count)
+            let sorted = attendees
+                .filter { $0.resource != true }
+                .sortAttendees()
+            return (Array(sorted.prefix(10)), sorted.count)
         }
         
         let transform: (([GoogleCalendar.EventOrigin.Attendee], Int)?) -> AttendeeListViewModel?
@@ -508,12 +510,37 @@ private extension String {
     
     func appendDaysText(_ byDays: [RRule.ByDay]) -> String {
         guard !byDays.isEmpty else { return self }
-        let texts = byDays.map { $0.text() }.joined(separator: ",")
+        let texts = byDays
+            .sorted(by: RRule.ByDay.compareOrder(_:_:))
+            .map { $0.text() }.joined(separator: ",")
         return "\(self) \(texts)"
     }
 }
 
+private extension RRule.ByDay.WeekDay {
+    
+    var sortOrder: Int {
+        return switch self {
+        case .MO: 1
+        case .TU: 2
+        case .WE: 3
+        case .TH: 4
+        case .FR: 5
+        case .SA: 6
+        case .SU: 7
+        }
+    }
+}
+
 private extension RRule.ByDay {
+    
+    static func compareOrder(_ lhs: Self, _ rhs: Self) -> Bool {
+        if let l_ordinal = lhs.ordinal, let r_ordinal = rhs.ordinal {
+            return l_ordinal < r_ordinal
+        } else {
+            return lhs.weekDay.sortOrder < rhs.weekDay.sortOrder
+        }
+    }
     
     func text() -> String {
         switch self.ordinal {
@@ -549,37 +576,25 @@ private extension Array where Element == GoogleCalendar.EventOrigin.Attendee {
         let organizer = self.first(where: { $0.organizer == true })
         let selfValue = self.first(where: { $0.selfValue == true })
         let notOrganizerOrSelfValue: (Element) -> Bool = {
-            return $0.id != nil && $0.id != organizer?.id && $0.id != selfValue?.id
+            return $0.identifier != organizer?.identifier
+                && $0.identifier != selfValue?.identifier
         }
         let attendees = self.filter(notOrganizerOrSelfValue)
         let accepts = attendees.filter { $0.isAccepted }
         let notAccepts = attendees.filter { !$0.isAccepted }
         
-        let prefix = organizer?.id != selfValue?.id ? [organizer, selfValue] : [organizer]
+        let prefix = organizer?.identifier != selfValue?.identifier ? [organizer, selfValue] : [organizer]
         return prefix.compactMap { $0 } + accepts + notAccepts
     }
+}
+
+private extension GoogleCalendar.EventOrigin.Attendee {
     
-    private func sortByOrganizer(_ lhs: Element, _ rhs: Element) -> Bool? {
-        switch (lhs.organizer == true, rhs.organizer == true) {
-        case (false, true): return false
-        case (true, false): return true
-        default: return nil
-        }
+    var identifier: String? {
+        return self.id ?? self.email
     }
     
-    private func sortBySelf(_ lhs: Element, _ rhs: Element) -> Bool? {
-        switch (lhs.selfValue == true, rhs.selfValue == true) {
-        case (false, true): return false
-        case (true, false): return true
-        default: return nil
-        }
-    }
-    
-    private func sortByAccpet(_ lhs: Element, _ rhs: Element) -> Bool {
-        switch (lhs.isAccepted, rhs.isAccepted) {
-        case (false, true): return false
-        case (true, false): return true
-        default: return (lhs.displayName ?? "") < (rhs.displayName ?? "")
-        }
+    var displayNameOrEmail: String? {
+        return self.displayName ?? self.email
     }
 }

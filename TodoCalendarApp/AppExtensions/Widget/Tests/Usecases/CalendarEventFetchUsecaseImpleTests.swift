@@ -190,6 +190,24 @@ extension CalendarEventFetchUsecaseImpleTests {
         ])
     }
     
+    // 이벤트 반환시 비활성화된 이벤트는 제외하지 않음
+    func testUsecase_whenFetchEvents_excludeOffEvents() async throws {
+        // given
+        let usecase = self.makeUsecase(withOffTags: [
+            .custom("t2")
+        ])
+        let range = self.dummyRange
+        
+        // when
+        let events = try await usecase.fetchEvents(in: range, kst, withoutOffTagIds: true)
+        
+        // then
+        let eventNames = events.eventWithTimes.map { $0.name }
+        XCTAssertEqual(eventNames, [
+            "삼일절", "todo_with_lowerbound_time"
+        ])
+    }
+    
     // 이벤트 반환시에 커스텀 이벤트 태그맵 정보 같이 반환
     func testUsecase_fetchEvents_withAllCustomTags() async throws {
         // given
@@ -237,6 +255,9 @@ extension CalendarEventFetchUsecaseImpleTests {
         
         let todo = TodoEvent(uuid: "first", name: "first-event")
             |> \.time .~ .at(refDate.timeIntervalSince1970 + 10)
+        let nextTodoWithExclude = TodoEvent(uuid: "next-but-exclude", name: "next-but-exclude")
+            |> \.time .~ .at(refDate.timeIntervalSince1970 + 20)
+            |> \.eventTagId .~ .custom("t1")
         let nextDayTodo = TodoEvent(uuid: "next-day", name: "next-day")
             |> \.time .~ .at(refDate.add(days: 1)!.timeIntervalSince1970)
         let schedule = ScheduleEvent(
@@ -244,7 +265,7 @@ extension CalendarEventFetchUsecaseImpleTests {
         )
         
         if hasNext {
-            self.stubTodoRepository.todoEventsMocking = [todo, nextDayTodo]
+            self.stubTodoRepository.todoEventsMocking = [todo, nextTodoWithExclude, nextDayTodo]
         } else {
             self.stubTodoRepository.todoEventsMocking = [nextDayTodo]
         }
@@ -254,7 +275,9 @@ extension CalendarEventFetchUsecaseImpleTests {
         } else {
             self.stubScheduleRepository.scheduleMocking = []
         }
-        return self.makeUsecase()
+        return self.makeUsecase(
+            withOffTags: [.custom("t1")]
+        )
     }
     
     func testUsecase_fetchNextEvent() async throws {

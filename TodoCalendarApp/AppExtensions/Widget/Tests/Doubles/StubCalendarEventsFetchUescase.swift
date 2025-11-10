@@ -21,7 +21,7 @@ class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {
     var withoutAnyEvents: Bool = false
     
     func fetchEvents(
-        in range: Range<TimeInterval>, _ timeZone: TimeZone
+        in range: Range<TimeInterval>, _ timeZone: TimeZone, withoutOffTagIds: Bool
     ) async throws -> CalendarEvents {
         
         var sender: CalendarEvents = .init()

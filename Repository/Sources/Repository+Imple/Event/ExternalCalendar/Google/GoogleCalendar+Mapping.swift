@@ -63,6 +63,7 @@ struct GoogleCalendarEventTagMapper: Decodable {
         case backgroundColor
         case foregroundColor
         case colorId
+        case isSelected = "selected"
     }
     
     init(from decoder: any Decoder) throws {
@@ -75,6 +76,7 @@ struct GoogleCalendarEventTagMapper: Decodable {
         |> \.backgroundColorHex .~ (try? container.decode(String.self, forKey: .backgroundColor))
         |> \.foregroundColorHex .~ (try? container.decode(String.self, forKey: .foregroundColor))
         |> \.colorId .~ (try? container.decode(String.self, forKey: .colorId))
+        |> \.isSelected .~ (try? container.decode(Bool.self, forKey: .isSelected))
     }
 }
 

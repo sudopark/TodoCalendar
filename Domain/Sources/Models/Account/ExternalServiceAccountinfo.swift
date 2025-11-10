@@ -13,6 +13,7 @@ public struct ExternalServiceAccountinfo: Sendable, Equatable {
     
     public let serviceIdentifier: String
     public var email: String?
+    public var intergrationTime: Date?
     public init(
         _ serviceIdentifier: String,
         email: String? = nil

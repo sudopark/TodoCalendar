@@ -183,7 +183,7 @@ extension EventListWidgetViewModelProviderTests {
             self.eventWithTimes = eventWithTimes
         }
         
-        override func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
+        override func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone, withoutOffTagIds: Bool) async throws -> CalendarEvents {
             return CalendarEvents()
                 |> \.currentTodos .~ self.currentTodos
                 |> \.eventWithTimes .~ self.eventWithTimes
@@ -442,7 +442,7 @@ extension EventListWidgetViewModelProviderTests {
             self.event = event
         }
         
-        override func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
+        override func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone, withoutOffTagIds: Bool) async throws -> CalendarEvents {
             return CalendarEvents()
                 |> \.eventWithTimes .~ [self.event]
         }
@@ -504,7 +504,7 @@ extension EventListWidgetViewModelProviderTests {
         init(refDate: Date) { self.refDate = refDate }
         
         func fetchEvents(
-            in range: Range<TimeInterval>, _ timeZone: TimeZone
+            in range: Range<TimeInterval>, _ timeZone: TimeZone, withoutOffTagIds: Bool
         ) async throws -> CalendarEvents {
             
             let refTime = self.refDate.timeIntervalSince1970
@@ -586,7 +586,9 @@ extension EventListWidgetViewModelProviderTests {
         
         final class EventsWithTagFetchUescase: CalendarEventFetchUsecase {
             
-            func fetchEvents(in range: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> CalendarEvents {
+            func fetchEvents(
+                in range: Range<TimeInterval>, _ timeZone: TimeZone, withoutOffTagIds: Bool
+            ) async throws -> CalendarEvents {
                 let kst = TimeZone(abbreviation: "KST")!
                 let currents = (0..<10).map { int -> TodoEvent in
                     let tagId: EventTagId = int % 3 == 0

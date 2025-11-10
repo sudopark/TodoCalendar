@@ -249,9 +249,10 @@ extension EventTagDetailViewModelImple {
     
     var suggestColorHexes: [String] {
         return [
-            "#F42D2D", "#F9316D", "#FD838F", "#4034AB", "#4561DB",
-            "#088CDA", "#41E6EC", "#06A192", "#036A73", "#72E985", "#F6DC41", "#FFA02E",
-            "#FF5722", "#B75F17", "#CCD0DC", "#828DA9", "#8DACF6",
+            "#F42D2D", "#F9316D", "#FF5722", "#FD838F", "#FFA02E", "#F6DC41", "#B75F17",
+            "#6800f2", "#9370DB", "#6A5ACD", "#4034AB", "#1E90FF", "#4682B4", "#5F9EA0",
+            "#4561DB", "#5e86d6", "#87CEEB", "#088CDA", "#AFEEEE", "#036A73", "#3CB371",
+            "#06A192", "#41E6EC", "#72E985", "#CCD0DC", "#828DA9", "#8DACF6",
         ]
     }
     

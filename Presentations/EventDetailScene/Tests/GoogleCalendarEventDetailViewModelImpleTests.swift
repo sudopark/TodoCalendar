@@ -25,7 +25,8 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
     
     private func makeViewModel(
         recurrence: String? = nil,
-        isCanceled: Bool = false
+        isCanceled: Bool = false,
+        customAttendees: [GoogleCalendar.EventOrigin.Attendee]? = nil
     ) -> GoogleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
@@ -33,6 +34,7 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         let calendarUsecase = PrivateStubGoogleCalendarUsecase()
         calendarUsecase.additionalStubbing = { stub in
             stub
+                |> \.attendees .~ (customAttendees ?? stub.attendees)
                 |> \.recurrence .~ (recurrence.map { [$0] })
                 |> \.status .~ (isCanceled ? .cancelled : .confirmed)
         }
@@ -158,7 +160,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         case "RRULE:FREQ=MONTHLY;INTERVAL=2": return "Every 2 Months"
         case "RRULE:FREQ=YEARLY": return "Every Year"
         case "RRULE:FREQ=YEARLY;INTERVAL=3": return "Every 3 Years"
-        case "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE": return "Every Week FRI,MON,THU,TUE,WED"
+        case "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE": return "Every Week MON,TUE,WED,THU,FRI"
         case "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20250816T145959Z;BYDAY=SA": return "Every Week SAT\nuntil Aug 16, 2025"
         case "RRULE:FREQ=DAILY;COUNT=3": return "Everyday\n3 time(s)"
         default: return ""
@@ -186,7 +188,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         let viewModel = self.makeViewModel(recurrence: recurrence)
         
         // when
-        let text = try await self.firstOutput(expect, for: viewModel.repeatOPtion) {
+        let text = try await self.firstOutput(expect, for: viewModel.repeatOption) {
             viewModel.refresh()
         }
         
@@ -252,6 +254,34 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
             true, false, true, true, true,
             true, true, true, true, true
         ])
+    }
+    
+    @Test func viewModel_provideAttendeeModelsWithEmailAndExcludeResource() async throws {
+        // given
+        let expect = expectConfirm("attendee 정보 제공 - id 없이 email만 있는 경우 + 리소스는 제외하고 제공")
+        let viewModel = self.makeViewModel(customAttendees: [
+            GoogleCalendar.EventOrigin.Attendee()
+                |> \.email .~ "organizer@email.com" |> \.organizer .~ true,
+            GoogleCalendar.EventOrigin.Attendee()
+                |> \.email .~ "me@email.com" |> \.selfValue .~ true,
+            GoogleCalendar.EventOrigin.Attendee()
+                |> \.email .~ "meetingRoom" |> \.resource .~ true
+        ])
+        
+        // when
+        let list = try await self.firstOutput(expect, for: viewModel.attendees) {
+            viewModel.refresh()
+        } ?? nil
+        
+        // then
+        #expect(list?.totalCounts == 2)
+        let ids = list?.attendees.map { $0.id }
+        #expect(ids == ["organizer@email.com", "me@email.com"])
+        let organizer = list?.attendees.first(where:  { $0.isOrganizer })
+        #expect(organizer?.isOrganizer == true)
+        #expect(organizer?.id == "organizer@email.com")
+        #expect(organizer?.name == "organizer@email.com")
+        #expect(organizer?.isAccepted == false)
     }
     
     @Test func viewModel_provideConferenceData() async throws {

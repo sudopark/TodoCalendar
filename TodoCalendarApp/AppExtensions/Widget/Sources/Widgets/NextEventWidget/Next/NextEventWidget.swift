@@ -8,6 +8,8 @@
 
 import WidgetKit
 import SwiftUI
+import Prelude
+import Optics
 import Domain
 import Extensions
 import CommonPresentation
@@ -56,6 +58,10 @@ struct NextEventRectangleWidgetView: View {
             VStack(alignment: .leading) {
                 if let time = model.timeText {
                     Text(time.singleLineAttrText())
+                        .font(.callout)
+                }
+                if let location = model.locationText {
+                    Text(location)
                         .font(.callout)
                 }
                 
@@ -118,6 +124,7 @@ struct NextEventWidgetView_Provider: PreviewProvider {
     
     static var previews: some View {
         let model = NextEventWidgetViewModel.sample
+            |> \.locationText .~ "회의실"
         let entry = ResultTimelineEntry(date: Date(), result: .success(model))
         
         return Group {

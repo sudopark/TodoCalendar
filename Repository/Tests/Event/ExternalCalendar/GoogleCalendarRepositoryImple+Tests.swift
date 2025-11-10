@@ -139,6 +139,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             #expect(tagLists.count == 2)
             let cached = tagLists.first
             #expect(cached?.first?.name == "old")
+            #expect(cached?.first?.isSelected == false)
             
             let refreshed = tagLists.last
             self.assertTagFromRemote(refreshed?.last)
@@ -178,6 +179,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(tag?.backgroundColorHex == "#fad165")
         #expect(tag?.foregroundColorHex == "#000000")
         #expect(tag?.colorId == "12")
+        #expect(tag?.isSelected == true)
     }
 }
 
@@ -218,7 +220,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         }
     }
     
-    @Test func repository_loadEvents_witHCache() async throws {
+    @Test func repository_loadEvents_withCache() async throws {
         try await self.runTestWithOpenClose("test_google_event_2") {
             // given
             try await self.saveCache()
@@ -238,6 +240,9 @@ extension GoogleCalendarRepositoryImple_Tests {
             #expect(eventFromCache?.map { $0.name } == ["old"])
             #expect(eventFromCache?.map { $0.colorId } == ["color"])
             #expect(eventFromCache?.map { $0.htmlLink } == ["link"])
+            #expect(eventFromCache?.map { $0.location } == [
+                "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea"
+            ])
             
             let eventFromRemote = eventLists.last
             #expect(eventFromRemote?.map { $0.eventId } == [
@@ -304,6 +309,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(event?.eventId == "time_is_date")
         #expect(event?.calendarId == "c_id")
         #expect(event?.name == "하루죙일")
+        #expect(event?.location == "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea")
         
         let kst = TimeZone(identifier: "Asia/Seoul")!
         let start = "2025-04-11".asAllDayDate(kst)!
@@ -350,7 +356,14 @@ extension GoogleCalendarRepositoryImple_Tests {
         #expect(origin?.recurringEventId == "origin")
         #expect(origin?.sequence == 0)
         
-        #expect(origin?.attendees == nil)
+        #expect(origin?.attendees?.count == 1)
+        #expect(origin?.attendees?.first?.email == "user1@email.com")
+        #expect(origin?.attendees?.first?.organizer == true)
+        #expect(origin?.attendees?.first?.selfValue == true)
+        #expect(origin?.attendees?.first?.resource == true)
+        #expect(origin?.attendees?.first?.responseStatus == "accepted")
+        #expect(origin?.attendees?.first?.isAccepted == true)
+        
         #expect(origin?.hangoutLink == "https://meet.google.com/piw-hphe-juu")
         
         let conf = origin?.conferenceData
@@ -377,6 +390,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             |> \.end .~ end
             |> \.colorId .~ "color"
             |> \.htmlLink .~ "link"
+            |> \.location .~ "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea"
         let timeZone = "Asia/Seoul"
         let originEvent = GoogleCalendar.Event(origin, "c_id", timeZone)!
         let list = GoogleCalendar.EventOriginValueList()
@@ -679,6 +693,15 @@ private struct DummyResponse {
         """
         return """
         {
+          "attendees": [
+            {
+              "email": "user1@email.com",
+              "organizer": true,
+              "self": true,
+              "responseStatus": "accepted",
+              "resource": true
+            }
+         ],
          "kind": "calendar#event",
          "etag": "\\"3489807262385694\\"",
          "id": "\(id)",

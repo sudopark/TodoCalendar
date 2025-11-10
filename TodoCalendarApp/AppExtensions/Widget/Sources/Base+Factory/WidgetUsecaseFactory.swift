@@ -89,12 +89,14 @@ extension WidgetUsecaseFactory {
         )
         let holidayFetchUsecase = holidayFetchUsecase ?? makeHolidaysFetchUsecase()
         
-        let eventTagStorage = EventTagLocalStorageImple(sqliteService: base.commonSqliteService)
+        let eventTagStorage = EventTagLocalStorageImple(
+            sqliteService: base.commonSqliteService,
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
         let eventTagRepository = EventTagLocalRepositoryImple(
             localStorage: eventTagStorage,
             todoLocalStorage: todoLocalStorage,
             scheduleLocalStorage: scheduleStorage,
-            environmentStorage: base.userDefaultEnvironmentStorage
         )
         
         let foremostEventLocalStorage = ForemostLocalStorageImple(
