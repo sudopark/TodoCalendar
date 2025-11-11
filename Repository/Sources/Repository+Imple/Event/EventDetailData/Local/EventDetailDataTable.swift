@@ -45,8 +45,8 @@ struct EventDetailDataTable: Table {
         case .memo: return entity.memo
         case .placeName: return entity.place?.placeName
         case .placeAddress: return entity.place?.addressText
-        case .placeLatitude: return entity.place?.coordinate.latttude
-        case .placeLongitude: return entity.place?.coordinate.longitude
+        case .placeLatitude: return entity.place?.coordinate?.latttude
+        case .placeLongitude: return entity.place?.coordinate?.longitude
         }
     }
 }
@@ -64,9 +64,12 @@ extension EventDetailData: RowValueType {
         let placeAddr: String? = cursor.next()
         let placeLatt: Double? = cursor.next()
         let placeLong: Double? = cursor.next()
-        guard let name = placeName, let lat = placeLatt, let long = placeLong
-        else { return }
-        self.place = .init(name, .init(lat, long))
+        guard let name = placeName else { return }
+        
+        self.place = .init(name)
+        if let latt = placeLatt, let long = placeLong {
+            self.place?.coordinate = .init(latt, long)
+        }
         self.place?.addressText = placeAddr
     }
 }
