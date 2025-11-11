@@ -67,8 +67,8 @@ extension EventDetailDataRemoteRepostioryImpleTests {
         
         let refreshed = details.last
         XCTAssertEqual(refreshed?.eventId, "some")
-        XCTAssertEqual(refreshed?.place?.coordinate.latttude, 100.1)
-        XCTAssertEqual(refreshed?.place?.coordinate.longitude, 300.3)
+        XCTAssertEqual(refreshed?.place?.coordinate?.latttude, 100.1)
+        XCTAssertEqual(refreshed?.place?.coordinate?.longitude, 300.3)
         XCTAssertEqual(refreshed?.place?.placeName, "place name")
         XCTAssertEqual(refreshed?.place?.addressText, "address")
         XCTAssertEqual(refreshed?.url, "some url")
