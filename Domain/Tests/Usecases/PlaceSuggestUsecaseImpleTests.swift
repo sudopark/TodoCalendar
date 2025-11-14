@@ -115,6 +115,8 @@ extension PlaceSuggestUsecaseImpleTests {
 
 private final class StubPlaceSuggestEngine: PlaceSuggestEngine {
     
+    func prepare() { }
+    
     var mocking: PassthroughSubject<[Place], Never>?
     func suggest(query: String) -> AnyPublisher<[Place], any Error> {
         
