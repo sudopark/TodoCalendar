@@ -152,7 +152,17 @@ extension EventDetailRouter {
         }
     }
     
-    func openMap(with name: String) {
-        // TODO:
+    func openMap(with query: String) {
+        Task { @MainActor in
+            guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
+            
+            if let appleMapURL = URL(string: "maps://?q=\(encodedQuery)"),
+               UIApplication.shared.canOpenURL(appleMapURL) {
+                
+                UIApplication.shared.open(appleMapURL)
+            } else {
+                self.showToast("eventDetail.place::not_applemap".localized())
+            }
+        }
     }
 }
