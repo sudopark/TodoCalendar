@@ -12,7 +12,7 @@ import Foundation
 
 public struct Place: Sendable, Equatable {
 
-    public struct Coordinate: Sendable, Equatable {
+    public struct Coordinate: Sendable, Equatable, Hashable {
         public let latttude: Double
         public let longitude: Double
         
