@@ -180,6 +180,10 @@
 "eventDetail.repeating::endoption_until" = "until %@";
 "eventDetail.repeating::endoption_times" = "%d time(s)";
 
+"eventDetail.place::placeholder" = "Location";
+"eventDetail.place::remove_button" = "Remove the location";
+"eventDetail.place::not_applemap" = "Apple Maps app is not installed.";
+
 "eventDetail.add_new_todo::message" = "A new to-do event has been added.";
 "eventDetail.add_new_schedule::message" = "A new schedule event has been added.";
 "eventDetail.scheduleEvent_removed::message" = "The schedule event has been removed.";
