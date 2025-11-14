@@ -257,6 +257,12 @@ extension NonLoginUsecaseFactoryImple {
             previewEngine: applicationBase.linkPreviewEngine
         )
     }
+    
+    func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase {
+        return PlaceSuggestUsecaseImple(
+            suggestEngine: MapKitBasePlaceSuggestEngineImple()
+        )
+    }
 }
 
 extension NonLoginUsecaseFactoryImple {
@@ -631,6 +637,12 @@ extension LoginUsecaseFactoryImple {
     func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
         return LinkPreviewFetchUsecaesImple(
             previewEngine: applicationBase.linkPreviewEngine
+        )
+    }
+    
+    func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase {
+        return PlaceSuggestUsecaseImple(
+            suggestEngine: MapKitBasePlaceSuggestEngineImple()
         )
     }
 }

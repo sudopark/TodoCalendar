@@ -99,7 +99,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             eventSettingUsecase: self.usecaseFactory.makeEventSettingUsecase(),
             linkPreviewFetchUsecase: self.usecaseFactory.makeLinkPreviewFetchUsecase(),
-            daysIntervalCountUescase: self.usecaseFactory.makeDaysIntervalCountUsecase()
+            daysIntervalCountUescase: self.usecaseFactory.makeDaysIntervalCountUsecase(),
+            placeSuggestUsecase: self.usecaseFactory.makePlaceSuggestUsecase()
         )
         
         let viewController = EventDetailViewController(

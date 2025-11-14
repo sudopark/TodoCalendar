@@ -151,4 +151,8 @@ extension EventDetailRouter {
             self.currentScene?.present(navigationController, animated: true)
         }
     }
+    
+    func openMap(with name: String) {
+        // TODO:
+    }
 }

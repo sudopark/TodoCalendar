@@ -54,6 +54,7 @@ public protocol NotificationUsecaseFactory {
 public protocol CommonUsecaseFactory {
     
     func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase
+    func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase
 }
 
 public protocol SupportUsecaseFactory {

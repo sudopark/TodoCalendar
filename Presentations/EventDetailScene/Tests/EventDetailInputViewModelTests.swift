@@ -68,7 +68,8 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
             calendarSettingUsecase: settingUsecase,
             eventSettingUsecase: eventSettingUsecase,
             linkPreviewFetchUsecase: StubLinkPreviewFetchUsecase(),
-            daysIntervalCountUescase: StubDaysIntervalCountUsecase()
+            daysIntervalCountUescase: StubDaysIntervalCountUsecase(),
+            placeSuggestUsecase: StubPlaceSuggestUsecase()
         )
         viewModel.routing = self.spyRouter
         viewModel.listener = self.spyListener
@@ -134,10 +135,14 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
 
 extension EventDetailInputViewModelTests {
     
-    private func prepareViewModelWithOldData(_ viewModel: EventDetailInputViewModelImple) {
+    private func prepareViewModelWithOldData(
+        _ viewModel: EventDetailInputViewModelImple,
+        initialPlace: Place? = nil
+    ) {
+        let addition = self.dummyPreviousAddition |> \.place .~ initialPlace
         viewModel.prepared(
             basic: self.dummyPreviousBasic,
-            additional: self.dummyPreviousAddition
+            additional: addition
         )
     }
     
@@ -671,6 +676,127 @@ extension EventDetailInputViewModelTests {
     }
 }
 
+// MARK: - test place input
+
+extension EventDetailInputViewModelTests {
+    
+    func testViewModel_whenPreviousPlaceInputExists_provideSelectedPlace() {
+        // given
+        let expect = expectation(description: "이전에 선택했던 장소 정보가 존재하는 경우 해당 값 제공")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let places = self.waitOutputs(expect, for: viewModel.selectedPlace) {
+            
+            self.prepareViewModelWithOldData(viewModel, initialPlace: .init("some"))
+        }
+        
+        // then
+        XCTAssertEqual(places, [
+            .customPlace("some")
+        ])
+    }
+    
+    // enter place name -> suggest + stop
+    func testViewModel_whenEnterPlaceName_suggestPlaces() {
+        // given
+        let expect = expectation(description: "enter place name -> suggest + stop")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let places = self.waitOutputs(expect, for: viewModel.suggestPlaces) {
+            
+            self.prepareViewModelWithOldData(viewModel)
+            
+            viewModel.enterPlaceName("9")
+            viewModel.enterPlaceName("4")
+            viewModel.enterPlaceName("")
+        }
+        
+        // then
+        let placeNames = places.map { ps in ps.map { $0.name }}
+        XCTAssertEqual(placeNames, [
+            [],
+            ["name: 9", "name: 19", "name: 29"],
+            ["name: 4", "name: 14", "name: 24"],
+            []
+        ])
+    }
+    
+    // enter place name -> select place is custom place
+    func testViewModel_whenEnterPlaceName_selectPlaceIsCustomPlace() {
+        // given
+        let expect = expectation(description: "enter place name -> select place is custom place")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let places = self.waitOutputs(expect, for: viewModel.selectedPlace) {
+            
+            self.prepareViewModelWithOldData(viewModel)
+            
+            viewModel.enterPlaceName("some")
+            viewModel.enterPlaceName("place")
+            viewModel.enterPlaceName("")
+        }
+        
+        // then
+        XCTAssertEqual(places, [
+            nil, .customPlace("some"), .customPlace("place"), nil
+        ])
+    }
+    
+    // select suggested landmark
+    func testViewModel_selectPlaceFromLandmarkAndRemove() {
+        // given
+        let expect = expectation(description: "select suggested landmark")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let places = self.waitOutputs(expect, for: viewModel.selectedPlace) {
+        
+            self.prepareViewModelWithOldData(viewModel)
+            
+            viewModel.enterPlaceName("some")
+            viewModel.selectLandmark(
+                .init(name: "select", coordinate: .init(100, 100))
+            )
+            // 실제로 장소 선택 이후 빈 입력 이벤트 나갈것임
+            viewModel.enterPlaceName("")
+            
+            viewModel.removePlace()
+        }
+        
+        // then
+        XCTAssertEqual(places, [
+            nil,
+            .customPlace("some"),
+            .landmark(.init(name: "select", coordinate: .init(100, 100))),
+            nil
+        ])
+    }
+    
+    // open map
+    func testViewModel_openMap() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.prepareViewModelWithOldData(viewModel)
+        
+        // when + then
+        viewModel.enterPlaceName("custom")
+        viewModel.openMap()
+        XCTAssertEqual(self.spyRouter.didOpenMapWithQuery, "custom")
+        
+        viewModel.selectLandmark(
+            .init(name: "mark", coordinate: .init(100, 100), address: "address")
+        )
+        viewModel.openMap()
+        XCTAssertEqual(self.spyRouter.didOpenMapWithQuery, "address")
+    }
+}
+
 
 extension EventDetailInputViewModelTests {
     
@@ -759,10 +885,18 @@ extension EventDetailInputViewModelTests {
         // enter url and memo
         XCTAssertEqual(self.spyListener.didUpdateAdditions.last?.url, "old_url")
         viewModel.enter(url: "new_url")
+        XCTAssertEqual(self.spyListener.didUpdateAdditions.last?.url, "new_url")
         
         XCTAssertEqual(self.spyListener.didUpdateAdditions.last?.memo, "old_memo")
         viewModel.enter(memo: "new_memo")
         XCTAssertEqual(self.spyListener.didUpdateAdditions.last?.memo, "new_memo")
+        
+        XCTAssertEqual(self.spyListener.didUpdateAdditions.last?.place, nil)
+        viewModel.enterPlaceName("some")
+        XCTAssertEqual(self.spyListener.didUpdateAdditions.last?.place, .init("some"))
+        
+        viewModel.selectLandmark(.init(name: "mark", coordinate: .init(10, 10)))
+        XCTAssertEqual(self.spyListener.didUpdateAdditions.last?.place, .init("mark", .init(10, 10)))
     }
 }
 
@@ -870,6 +1004,11 @@ private class SpyRouter: BaseSpyRouter, EventDetailInputRouting, @unchecked Send
     var didRouteToEventNotificationWithParams: (Bool, [EventNotificationTimeOption], DateComponents)?
     func routeToEventNotificationTimeSelect(isForAllDay: Bool, current selecteds: [EventNotificationTimeOption], eventTimeComponents: DateComponents, listener: (SelectEventNotificationTimeSceneListener)?) {
         self.didRouteToEventNotificationWithParams = (isForAllDay, selecteds, eventTimeComponents)
+    }
+    
+    var didOpenMapWithQuery: String?
+    func openMap(with query: String) {
+        self.didOpenMapWithQuery = query
     }
 }
 

@@ -49,6 +49,8 @@ protocol EventDetailInputRouting: Routing, Sendable, AnyObject {
         eventTimeComponents: DateComponents,
         listener: (any SelectEventNotificationTimeSceneListener)?
     )
+    
+    func openMap(with query: String)
 }
 
 
@@ -71,6 +73,29 @@ struct LinkPreviewModel {
     }
 }
 
+enum SelectedPlaceModel: Equatable {
+    
+    struct LandmarkModel: Identifiable, Equatable {
+        let name: String
+        let coordinate: Place.Coordinate
+        var address: String?
+        
+        var id: Place.Coordinate {
+            return coordinate
+        }
+    }
+    
+    case customPlace(String)
+    case landmark(LandmarkModel)
+    
+    var name: String {
+        switch self {
+        case .customPlace(let name): return name
+        case .landmark(let model): return model.name
+        }
+    }
+}
+
 // MARK: - EventDetailInputViewModel
 
 protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInteractor {
@@ -87,7 +112,10 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     func selectRepeatOption()
     func selectEventTag()
     func selectNotificationTime()
-    func selectPlace()
+    func enterPlaceName(_ name: String)
+    func selectLandmark(_ landmark: SelectedPlaceModel.LandmarkModel)
+    func removePlace()
+    func openMap()
     func enter(url: String)
     func enter(memo: String)
     func openURL()
@@ -102,7 +130,8 @@ protocol EventDetailInputViewModel: Sendable, AnyObject, EventDetailInputInterac
     var repeatOption: AnyPublisher<String?, Never> { get }
     var repeatOptionPeriod: AnyPublisher<String?, Never> { get }
     var selectedTag: AnyPublisher<SelectedTag, Never> { get }
-    var selectedPlace: AnyPublisher<Place?, Never> { get }
+    var suggestPlaces: AnyPublisher<[SelectedPlaceModel.LandmarkModel], Never> { get }
+    var selectedPlace: AnyPublisher<SelectedPlaceModel?, Never> { get }
     var selectedNotificationTimeText: AnyPublisher<String?, Never> { get }
     var isValidURLEntered: AnyPublisher<Bool, Never> { get }
     var linkPreview: AnyPublisher<LinkPreviewModel?, Never> { get }
@@ -116,6 +145,7 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
     private let eventSettingUsecase: any EventSettingUsecase
     private let linkPreviewFetchUsecase: any LinkPreviewFetchUsecase
     private let daysIntervalCountUescase: any DaysIntervalCountUsecase
+    private let placeSuggestUsecase: any PlaceSuggestUsecase
     weak var routing: (any EventDetailInputRouting)?
     weak var listener: (any EventDetailInputListener)?
     
@@ -124,13 +154,15 @@ final class EventDetailInputViewModelImple: EventDetailInputViewModel, @unchecke
         calendarSettingUsecase: any CalendarSettingUsecase,
         eventSettingUsecase: any EventSettingUsecase,
         linkPreviewFetchUsecase: any LinkPreviewFetchUsecase,
-        daysIntervalCountUescase: any DaysIntervalCountUsecase
+        daysIntervalCountUescase: any DaysIntervalCountUsecase,
+        placeSuggestUsecase: any PlaceSuggestUsecase
     ) {
         self.eventTagUsecase = eventTagUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.eventSettingUsecase = eventSettingUsecase
         self.linkPreviewFetchUsecase = linkPreviewFetchUsecase
         self.daysIntervalCountUescase = daysIntervalCountUescase
+        self.placeSuggestUsecase = placeSuggestUsecase
     }
     
     private struct BasicAndTimeZoneData {
@@ -186,6 +218,8 @@ extension EventDetailInputViewModelImple {
         self.subject.eventSetting.send(setting)
         
         self.bindLinkPreview()
+        
+        self.placeSuggestUsecase.prepare()
     }
     
     private func bindLinkPreview() {
@@ -382,8 +416,38 @@ extension EventDetailInputViewModelImple: SelectEventNotificationTimeSceneListen
 
 extension EventDetailInputViewModelImple {
     
-    func selectPlace() {
-        // TOOD: select place
+    func enterPlaceName(_ name: String) {
+        guard self.subject.additional.value?.place?.coordinate == nil else { return }
+        if name.isEmpty {
+            self.subject.mutateAdditionalIfPossible {
+                $0 |> \.place .~ nil
+            }
+            self.placeSuggestUsecase.stopSuggest()
+        } else {
+            self.subject.mutateAdditionalIfPossible {
+                $0 |> \.place .~ .init(name)
+            }
+            self.placeSuggestUsecase.starSuggest(name)
+        }
+    }
+    
+    func selectLandmark(_ landmark: SelectedPlaceModel.LandmarkModel) {
+        let place = Place(landmark.name, landmark.coordinate) |> \.addressText .~ landmark.address
+        self.subject.mutateAdditionalIfPossible {
+            $0 |> \.place .~ place
+        }
+    }
+    
+    func removePlace() {
+        self.subject.mutateAdditionalIfPossible {
+            $0 |> \.place .~ nil
+        }
+    }
+    
+    func openMap() {
+        guard let place = self.subject.additional.value?.place else { return }
+        let query = place.addressText ?? place.placeName
+        self.routing?.openMap(with: query)
     }
     
     func enter(url: String) {
@@ -561,8 +625,42 @@ extension EventDetailInputViewModelImple {
             .eraseToAnyPublisher()
     }
     
-    var selectedPlace: AnyPublisher<Place?, Never> {
-        return Just(nil).eraseToAnyPublisher()
+    var suggestPlaces: AnyPublisher<[SelectedPlaceModel.LandmarkModel], Never> {
+        
+        let transform: ([Place]) -> [SelectedPlaceModel.LandmarkModel] = { places in
+            return places.compactMap { place in
+                guard let coordinate = place.coordinate else { return nil }
+                return .init(name: place.placeName, coordinate: coordinate, address: place.addressText)
+            }
+        }
+        
+        return self.placeSuggestUsecase
+            .suggestPlaces
+            .map { Array($0.prefix(20)) }
+            .map(transform)
+            .eraseToAnyPublisher()
+    }
+    
+    var selectedPlace: AnyPublisher<SelectedPlaceModel?, Never> {
+        
+        let transform: (EventDetailData) -> SelectedPlaceModel? = { detail in
+            guard let place = detail.place, !place.placeName.isEmpty
+            else { return nil }
+            
+            if let coordinate = place.coordinate {
+                return .landmark(
+                    .init(name: place.placeName, coordinate: coordinate, address: place.addressText)
+                )
+            } else {
+                return .customPlace(place.placeName)
+            }
+        }
+        
+        return self.subject.additional
+            .compactMap { $0 }
+            .map(transform)
+            .removeDuplicates()
+            .eraseToAnyPublisher()
     }
 }
 
