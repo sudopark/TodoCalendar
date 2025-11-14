@@ -8,6 +8,7 @@
 
 import Foundation
 import MapKit
+import CoreLocation
 import Contacts
 import Combine
 import CombineExt
@@ -21,6 +22,7 @@ import AsyncFlatMap
 
 public protocol PlaceSuggestEngine: AnyObject {
     
+    func prepare()
     func suggest(query: String) -> AnyPublisher<[Place], any Error>
 }
 
@@ -29,16 +31,38 @@ private struct SubscriberHolder<Output, Failure: Error>: @unchecked Sendable {
     let subscriber: Publishers.Create<Output, Failure>.Subscriber
 }
 
-public final class MapKitBasePlaceSuggestEngineImple: PlaceSuggestEngine {
+public final class MapKitBasePlaceSuggestEngineImple: PlaceSuggestEngine,  @unchecked Sendable {
+    
+    private var currentRegionCapitalLocation: CLLocationCoordinate2D?
     
     public init() {}
     
+    public func prepare() {
+        guard let regionCode = Locale.current.region?.identifier,
+              let countryName = Locale.current.localizedString(forRegionCode: regionCode)
+        else { return }
+        
+        let geocoder = CLGeocoder()
+        let searchString = "\(countryName) capital"
+        geocoder.geocodeAddressString(searchString) { placemarks, error in
+            guard let location = placemarks?.first?.location else { return }
+            self.currentRegionCapitalLocation = location.coordinate
+        }
+    }
+    
     public func suggest(query: String) -> AnyPublisher<[Place], any Error> {
 
-        return Publishers.Create { subscriber in
+        return Publishers.Create { [weak self] subscriber in
             let holder = SubscriberHolder(subscriber: subscriber)
             let request = MKLocalSearch.Request()
             request.naturalLanguageQuery = query
+
+            if let capitalLocation = self?.currentRegionCapitalLocation {
+                request.region = .init(
+                    center: capitalLocation,
+                    span: .init(latitudeDelta: 0.1, longitudeDelta: 0.1)
+                )
+            }
             
             let search = MKLocalSearch(request: request)
             search.start { response, error in
@@ -98,6 +122,7 @@ private extension MKMapItem {
 
 public protocol PlaceSuggestUsecase: AnyObject, Sendable {
     
+    func prepare()
     func starSuggest(_ query: String)
     func stopSuggest()
     
@@ -126,6 +151,10 @@ public final class PlaceSuggestUsecaseImple: PlaceSuggestUsecase, @unchecked Sen
 }
 
 extension PlaceSuggestUsecaseImple {
+    
+    public func prepare() {
+        self.suggestEngine.prepare()
+    }
     
     public func starSuggest(_ query: String) {
         self.subject.query.send(query)
