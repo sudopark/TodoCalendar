@@ -111,11 +111,21 @@ actor CalendarEventsFetchCacheStore {
         var externalAccountMap: [String: ExternalServiceAccountinfo]?
         var googleCalendarColors: GoogleCalendar.Colors?
         var googleCalendarTags: [String: GoogleCalendar.Tag]?
+        var eventDetails: [String: EventDetailData] = [:]
     }
     
     private var storage = Storage()
     
     func update<T>(_ keyPath: WritableKeyPath<CalendarEventsFetchCacheStore.Storage, T>, _ newValue: T) {
+        self.storage[keyPath: keyPath] = newValue
+    }
+    
+    func update<T>(
+        _ keyPath: WritableKeyPath<CalendarEventsFetchCacheStore.Storage, T>,
+        mutate: (T) -> T
+    ) {
+        let oldValue = self.storage[keyPath: keyPath]
+        let newValue = mutate(oldValue)
         self.storage[keyPath: keyPath] = newValue
     }
     
@@ -144,6 +154,7 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase, @unchecke
     private let eventTagRepository: any EventTagRepository
     private let externalCalendarIntegrateRepository: any ExternalCalendarIntegrateRepository
     private let googleCalendarRepository: any GoogleCalendarRepository
+    private let eventDetailRepository: any EventDetailDataRepository
     private let cached: CalendarEventsFetchCacheStore
     
     init(
@@ -154,6 +165,7 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase, @unchecke
         eventTagRepository: any EventTagRepository,
         externalCalendarIntegrateRepository: any ExternalCalendarIntegrateRepository,
         googleCalendarRepository: any GoogleCalendarRepository,
+        eventDetailRepository: any EventDetailDataRepository,
         cached: CalendarEventsFetchCacheStore
     ) {
         self.todoRepository = todoRepository
@@ -163,6 +175,7 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase, @unchecke
         self.eventTagRepository = eventTagRepository
         self.externalCalendarIntegrateRepository = externalCalendarIntegrateRepository
         self.googleCalendarRepository = googleCalendarRepository
+        self.eventDetailRepository = eventDetailRepository
         self.cached = cached
     }
 }
@@ -316,6 +329,23 @@ extension CalendarEventFetchUsecaseImple {
         let calendarEvents = events.map { GoogleCalendarEvent($0, in: timeZone) }
         return calendarEvents
     }
+    
+    private func fetchLocationInfoIfNeed(_ event: any CalendarEvent) async throws -> Place? {
+        
+        guard let todoOrScheduleId = switch event {
+        case let todo as TodoCalendarEvent: todo.eventId
+        case let schedule as ScheduleCalendarEvent: schedule.eventIdWithoutTurn
+        default: nil
+        } else { return nil }
+        
+        if let cached = await self.cached.value(\.eventDetails)[todoOrScheduleId] {
+            return cached.place
+        }
+        
+        let detail = try await self.eventDetailRepository.loadDetail(todoOrScheduleId).values.first(where: { _ in true })
+        await self.cached.update(\.eventDetails) { old in old |> key(todoOrScheduleId) .~ detail }
+        return detail?.place
+    }
 }
 
 extension CalendarEventFetchUsecaseImple {
@@ -342,10 +372,13 @@ extension CalendarEventFetchUsecaseImple {
         
         let events = try await self.fetchEvents(in: todayRange, timeZone, withoutOffTagIds: true)
         
-        guard let firstFutureEvent = events.findFirstFutureEvent(from: refTime.timeIntervalSince1970, todayRange: todayRange)
+        guard var firstFutureEvent = events.findFirstFutureEvent(from: refTime.timeIntervalSince1970, todayRange: todayRange)
         else {
             return nil
         }
+        let place = try? await self.fetchLocationInfoIfNeed(firstFutureEvent)
+        firstFutureEvent.locationText = place?.placeName
+        
         let secondFutureEvent = firstFutureEvent.eventTime.flatMap {
             return events.findFirstFutureEvent(from: $0.lowerBoundWithFixed, todayRange: todayRange)
         }

@@ -57,7 +57,7 @@ public protocol CalendarEvent: Sendable {
     var eventTagId: EventTagId { get }
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
-    var locationText: String? { get }
+    var locationText: String? { get set }
     
     var compareKey: String { get }
 }
@@ -223,7 +223,7 @@ public struct GoogleCalendarEvent: CalendarEvent {
     public let htmlLink: String?
     public let isForemost: Bool
     public let isRepeating: Bool
-    public let locationText: String?
+    public var locationText: String?
     
     public init(_ event: GoogleCalendar.Event, in timeZone: TimeZone) {
         self.eventId = event.eventId

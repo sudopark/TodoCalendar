@@ -118,6 +118,12 @@ extension WidgetUsecaseFactory {
             cacheStorage: GoogleCalendarLocalStorageImple(sqliteService: base.commonSqliteService)
         )
         
+        let eventDetailRepository = EventDetailDataLocalRepostioryImple(
+            localStorage: EventDetailDataLocalStorageImple(
+                sqliteService: base.commonSqliteService
+            )
+        )
+        
         return CalendarEventFetchUsecaseImple(
             todoRepository: todoRepository,
             scheduleRepository: scheduleRepository,
@@ -126,6 +132,7 @@ extension WidgetUsecaseFactory {
             eventTagRepository: eventTagRepository,
             externalCalendarIntegrateRepository: externalCalendarRepository,
             googleCalendarRepository: googleCalendarRepository,
+            eventDetailRepository: eventDetailRepository,
             cached: FetchCacheStores.shared.events
         )
     }
