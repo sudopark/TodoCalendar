@@ -60,6 +60,7 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
             eventTagRepository: StubEventTagRepository(),
             externalCalendarIntegrateRepository: StubExternalCalendarRepository(isGoogleAccountIntegrated: false),
             googleCalendarRepository: StubGoogleCalendarRepository(),
+            eventDetailRepository: StubEventDetailRepository(),
             cached: .init()
         )
         

@@ -38,3 +38,6 @@ open class StubEventDetailDataUsecase: EventDetailDataUsecase, @unchecked Sendab
         
     }
 }
+
+
+public typealias StubEventDetailRepository = StubEventDetailDataUsecase
