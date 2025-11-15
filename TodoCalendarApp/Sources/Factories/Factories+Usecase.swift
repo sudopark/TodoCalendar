@@ -263,6 +263,10 @@ extension NonLoginUsecaseFactoryImple {
             suggestEngine: MapKitBasePlaceSuggestEngineImple()
         )
     }
+    
+    func deviceInfoFetchService() -> any DeviceInfoFetchService {
+        return DeviceInfoFetchServiceImple()
+    }
 }
 
 extension NonLoginUsecaseFactoryImple {
@@ -644,6 +648,10 @@ extension LoginUsecaseFactoryImple {
         return PlaceSuggestUsecaseImple(
             suggestEngine: MapKitBasePlaceSuggestEngineImple()
         )
+    }
+    
+    func deviceInfoFetchService() -> any DeviceInfoFetchService {
+        return DeviceInfoFetchServiceImple()
     }
 }
 

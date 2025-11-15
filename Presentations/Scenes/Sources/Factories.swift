@@ -55,6 +55,7 @@ public protocol CommonUsecaseFactory {
     
     func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase
     func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase
+    func deviceInfoFetchService() -> any DeviceInfoFetchService
 }
 
 public protocol SupportUsecaseFactory {

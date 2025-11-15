@@ -7,6 +7,8 @@
 
 import XCTest
 import Combine
+import Prelude
+import Optics
 import Domain
 import UnitTestHelpKit
 import TestDoubles
@@ -34,7 +36,8 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         let viewModel = SettingItemListViewModelImple(
             appId: "some",
             accountUsecase: accountUsecase,
-            uiSettingUsecase: StubUISettingUsecase()
+            uiSettingUsecase: StubUISettingUsecase(),
+            deviceInfoFetchService: StubDeviceInfoFetchService()
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -118,6 +121,7 @@ extension SettingItemListViewModelImpleTests {
         ])
         
         let appInfoSection = sections?[safe: 2]
+        XCTAssertEqual(appInfoSection is AppInfoSectionModel, true)
         let infoItemIds = appInfoSection?.items.compactMap { $0 as? SettingItemModel }.map { $0.itemId }
         XCTAssertEqual(infoItemIds, [
             .shareApp, .addReview, .sourceCode
@@ -340,5 +344,17 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
     var didOpenShareLink: Bool?
     func openShare(link path: String) {
         self.didOpenShareLink = true
+    }
+}
+
+
+private struct StubDeviceInfoFetchService: DeviceInfoFetchService {
+    
+    @MainActor
+    func fetchDeviceInfo() async -> DeviceInfo {
+        return DeviceInfo()
+            |> \.appVersion .~ "app"
+            |> \.osVersion .~ "os"
+            |> \.deviceModel .~ "model"
     }
 }

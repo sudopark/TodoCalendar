@@ -122,12 +122,19 @@ struct SettingSectionModel: SettingSectionModelType {
     }
 }
 
+struct AppInfoSectionModel: SettingSectionModelType {
+    let headerText: String?
+    var version: String?
+    let items: [any SettingItemModelType]
+}
+
 
 // MARK: - SettingItemListViewModel
 
 protocol SettingItemListViewModel: AnyObject, Sendable, SettingItemListSceneInteractor {
 
     // interactor
+    func prepare()
     func selectItem(_ model: any SettingItemModelType)
     func close()
     
@@ -143,21 +150,24 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
     private let appId: String
     private let accountUsecase: any AccountUsecase
     private let uiSettingUsecase: any UISettingUsecase
+    private let deviceInfoFetchService: any DeviceInfoFetchService
     var router: (any SettingItemListRouting)?
     
     init(
         appId: String,
         accountUsecase: any AccountUsecase,
-        uiSettingUsecase: any UISettingUsecase
+        uiSettingUsecase: any UISettingUsecase,
+        deviceInfoFetchService: any DeviceInfoFetchService
     ) {
         self.appId = appId
         self.accountUsecase = accountUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        self.deviceInfoFetchService = deviceInfoFetchService
     }
     
     
     private struct Subject {
-        let sections = CurrentValueSubject<[any SettingSectionModelType]?, Never>(nil)
+        let deviceInfo = CurrentValueSubject<DeviceInfo?, Never>(nil)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -180,6 +190,14 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
 // MARK: - SettingItemListViewModelImple Interactor
 
 extension SettingItemListViewModelImple {
+    
+    func prepare() {
+        Task { [weak self] in
+            let info = await self?.deviceInfoFetchService.fetchDeviceInfo()
+            self?.subject.deviceInfo.send(info)
+        }
+        .store(in: &self.cancellables)
+    }
     
     func selectItem(_ model: any SettingItemModelType) {
         switch model {
@@ -250,7 +268,7 @@ extension SettingItemListViewModelImple {
     
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
         
-        let transform: (AccountInfo?) -> [any SettingSectionModelType] = { account in
+        let transform: (AccountInfo?, DeviceInfo?) -> [any SettingSectionModelType] = { account, device in
             let baseSectionItems: [SettingItemModel] = [
                 .init(.appearance),
                 .init(.editEvent),
@@ -273,7 +291,11 @@ extension SettingItemListViewModelImple {
                 .init(.addReview),
                 .init(.sourceCode)
             ]
-            let appInfoSection = SettingSectionModel(headerText: "setting.section.app::name".localized(), items: appInfoSectionItems)
+            let appInfoSection = AppInfoSectionModel(
+                headerText: "setting.section.app::name".localized(),
+                version: device?.appVersion.map { "v\($0)"},
+                items: appInfoSectionItems
+            )
             
             let suggestItem = SuggestAppItemModel.readmind()
             let suggestSection = SettingSectionModel(headerText: "setting.section.suggest::name".localized(), items: [suggestItem])
@@ -284,7 +306,11 @@ extension SettingItemListViewModelImple {
             return sections
         }
         
-        return self.accountUsecase.currentAccountInfo
+        return Publishers
+            .CombineLatest(
+                self.accountUsecase.currentAccountInfo,
+                self.subject.deviceInfo
+            )
             .map(transform)
             .eraseToAnyPublisher()
     }
