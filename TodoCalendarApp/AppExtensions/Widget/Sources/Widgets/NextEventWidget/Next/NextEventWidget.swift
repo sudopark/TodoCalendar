@@ -56,18 +56,21 @@ struct NextEventRectangleWidgetView: View {
             .opacity(0.8)
             
             VStack(alignment: .leading) {
-                if let time = model.timeText {
-                    Text(time.singleLineAttrText())
-                        .font(.callout)
+                VStack(alignment: .leading) {
+                    if let time = model.timeText {
+                        Text(time.singleLineAttrText())
+                    }
+                    if let location = model.locationText {
+                        Text(location)
+                    }
                 }
-                if let location = model.locationText {
-                    Text(location)
-                        .font(.callout)
-                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
                 
                 HStack {
                     Text(model.eventTitle)
-                        .font(.body)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
                     
                     Spacer()
                 }
