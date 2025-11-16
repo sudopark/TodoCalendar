@@ -201,6 +201,24 @@ extension EventSettingViewModelImpleTests {
         ])
         XCTAssertEqual(self.spyRouter.didRouteToEventNotificationTimeForAllDays, [true, true, true])
     }
+    
+    func testViewModel_provideDefaultMapApp() {
+        // given
+        let expect = expectation(description: "기본 지도앱 정보 제공")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let maps = self.waitOutputs(expect, for: viewModel.defaultMapApp) {
+            viewModel.prepare()
+            
+            let params = EditEventSettingsParams() |> \.defaultMappApp .~ .apple
+            _ = try? self.stubSettingUsecase.changeEventSetting(params)
+        }
+        
+        // then
+        XCTAssertEqual(maps, [nil, .apple])
+    }
 }
 
 // MARK: - external calendar
@@ -300,5 +318,10 @@ private class SpyRouter: BaseSpyRouter, EventSettingRouting, @unchecked Sendable
     var didRouteToEventNotificationTimeForAllDays: [Bool] = []
     func routeToEventNotificationTime(forAllDay: Bool) {
         self.didRouteToEventNotificationTimeForAllDays.append(forAllDay)
+    }
+    
+    var didRouteToSelectDefaultMapApp: Bool?
+    func routeToSelectDefaultMapApp() {
+        self.didRouteToSelectDefaultMapApp = true
     }
 }

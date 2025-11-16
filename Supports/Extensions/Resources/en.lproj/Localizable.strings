@@ -306,6 +306,8 @@
 "event_setting::title" = "Event Settings";
 "event_setting::eventType" = "Event Type";
 "event_setting::eventPeriod" = "Event Period";
+"event_setting::defaultMapApp" = "Open the Maps app";
+"event_setting::defaultMapApp_select" = "Select";
 "event_notification_setting::title::forAllDay" = "All day";
 "event_notification_setting::title::NotforAllDay" = "Notification Time";
 "event_setting::external_calendar::title" = "External calendars";
