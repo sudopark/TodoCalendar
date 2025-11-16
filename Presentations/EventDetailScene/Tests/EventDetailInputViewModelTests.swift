@@ -50,7 +50,8 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeViewModel(
-        defaultEventPeriod: EventSettings.DefaultNewEventPeriod = .minute0
+        defaultEventPeriod: EventSettings.DefaultNewEventPeriod = .minute0,
+        defaultMappApp: SupportMapApps? = nil
     ) -> EventDetailInputViewModelImple {
         
         let tagUsecase = StubEventTagUsecase()
@@ -62,6 +63,7 @@ class EventDetailInputViewModelTests: BaseTestCase, PublisherWaitable {
         let eventSettingUsecase = StubEventSettingUsecase()
         eventSettingUsecase.stubSetting = .init()
         eventSettingUsecase.stubSetting?.defaultNewEventPeriod = defaultEventPeriod
+        eventSettingUsecase.stubSetting?.defaultMapApp = defaultMappApp
         
         let viewModel = EventDetailInputViewModelImple(
             eventTagUsecase: tagUsecase,
@@ -795,6 +797,31 @@ extension EventDetailInputViewModelTests {
         viewModel.openMap()
         XCTAssertEqual(self.spyRouter.didOpenMapWithQuery, "address")
     }
+    
+    func testViewModel_openMapApp_usingSelectedAppOrSelect() {
+        // given
+        func parameterizeTest(selected: SupportMapApps?) {
+            // given
+            let viewModel = self.makeViewModel(defaultMappApp: selected)
+            self.prepareViewModelWithOldData(viewModel)
+            
+            // when
+            viewModel.enterPlaceName("custom")
+            viewModel.openMap()
+            
+            // then
+            if let selected {
+                XCTAssertEqual(self.spyRouter.didOpenMapUsingMapApp, selected)
+            } else {
+                XCTAssertEqual(self.spyRouter.didOpenMapAfterSelectMapApps, [.apple, .google])
+            }
+        }
+        
+        // when + then
+        parameterizeTest(selected: .apple)
+        parameterizeTest(selected: .google)
+        parameterizeTest(selected: nil)
+    }
 }
 
 
@@ -1007,8 +1034,16 @@ private class SpyRouter: BaseSpyRouter, EventDetailInputRouting, @unchecked Send
     }
     
     var didOpenMapWithQuery: String?
-    func openMap(with query: String) {
+    var didOpenMapUsingMapApp: SupportMapApps?
+    func openMap(with query: String, using mapApp: SupportMapApps) {
         self.didOpenMapWithQuery = query
+        self.didOpenMapUsingMapApp = mapApp
+    }
+    
+    var didOpenMapAfterSelectMapApps: [SupportMapApps]?
+    func openMap(with query: String, afterSelect mapApps: [SupportMapApps]) {
+        self.didOpenMapWithQuery = query
+        self.didOpenMapAfterSelectMapApps = mapApps
     }
 }
 

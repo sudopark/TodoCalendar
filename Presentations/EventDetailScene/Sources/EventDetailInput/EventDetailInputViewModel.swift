@@ -50,7 +50,8 @@ protocol EventDetailInputRouting: Routing, Sendable, AnyObject {
         listener: (any SelectEventNotificationTimeSceneListener)?
     )
     
-    func openMap(with query: String)
+    func openMap(with query: String, using mapApp: SupportMapApps)
+    func openMap(with query: String, afterSelect mapApps: [SupportMapApps])
 }
 
 
@@ -447,7 +448,13 @@ extension EventDetailInputViewModelImple {
     func openMap() {
         guard let place = self.subject.additional.value?.place else { return }
         let query = place.addressText ?? place.placeName
-        self.routing?.openMap(with: query)
+        
+        if let defaultMapApp = self.eventSettingUsecase.loadEventSetting().defaultMapApp {
+         
+            self.routing?.openMap(with: query, using: defaultMapApp)
+        } else {
+            self.routing?.openMap(with: query, afterSelect: [.apple, .google])
+        }
     }
     
     func enter(url: String) {
