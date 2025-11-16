@@ -19,6 +19,7 @@ protocol EventSettingRouting: Routing, Sendable {
     
     func routeToSelectTag()
     func routeToEventNotificationTime(forAllDay: Bool)
+    func routeToSelectDefaultMapApp()
 }
 
 // MARK: - Router
@@ -27,12 +28,16 @@ final class EventSettingRouter: BaseRouterImple, EventSettingRouting, @unchecked
     
     private let eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
     private let eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
+    private let eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
+    
     init(
         eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler,
-        eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
+        eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler,
+        eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
     ) {
         self.eventTagSelectSceneBuilder = eventTagSelectSceneBuilder
         self.eventDefaultNotificationTimeSceneBuilder = eventDefaultNotificationTimeSceneBuilder
+        self.eventDefaultMapAppSceneBuilder = eventDefaultMapAppSceneBuilder
     }
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
@@ -60,6 +65,13 @@ extension EventSettingRouter {
     func routeToEventNotificationTime(forAllDay: Bool) {
         Task { @MainActor in
             let next = self.eventDefaultNotificationTimeSceneBuilder.makeEventNotificationDefaultTimeOptionScene(forAllDay: forAllDay)
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+    
+    func routeToSelectDefaultMapApp() {
+        Task { @MainActor in
+            let next = self.eventDefaultMapAppSceneBuilder.makeEventDefaultMapAppScene()
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }

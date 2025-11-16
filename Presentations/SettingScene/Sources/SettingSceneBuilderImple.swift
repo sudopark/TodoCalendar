@@ -137,12 +137,18 @@ extension SettingSceneBuilderImple {
             viewAppearance: self.viewAppearance
         )
         
+        let eventDefaultMapAppSceneBuilder = EventDefaultMapAppSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
         let eventSettingSceneBuilder = EventSettingSceneBuilerImple(
             supportExternalCalendarServices: self.supportExternalCalendarServices,
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             eventTagSelectSceneBuilder: eventTagSelectSceneBuilder,
-            eventDefaultNotificationTimeSceneBuilder: eventNotificationDefaultTimeOptionSceneBuilder
+            eventDefaultNotificationTimeSceneBuilder: eventNotificationDefaultTimeOptionSceneBuilder,
+            eventDefaultMapAppSceneBuilder: eventDefaultMapAppSceneBuilder
         )
         return eventSettingSceneBuilder
     }

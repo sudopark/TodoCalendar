@@ -305,6 +305,8 @@
 "event_setting::title" = "이벤트 설정";
 "event_setting::eventType" = "이벤트 종류";
 "event_setting::eventPeriod" = "이벤트 기간";
+"event_setting::defaultMapApp" = "지도 앱 열기";
+"event_setting::defaultMapApp_select" = "선택";
 "event_notification_setting::title::forAllDay" = "하루종일";
 "event_notification_setting::title::NotforAllDay" = "미리알림 시간";
 "event_setting::external_calendar::title" = "외부 캘린더";
