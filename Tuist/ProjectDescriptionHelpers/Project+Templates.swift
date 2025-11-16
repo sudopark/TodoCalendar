@@ -209,6 +209,7 @@ extension Project {
                         ]
                     ]
                 ],
+                "LSApplicationQueriesSchemes": ["comgooglemaps"],
                 "ITSAppUsesNonExemptEncryption": false,
                 "CFBundleDisplayName": "To-do Calendar",
                 "CFBundleShortVersionString": "\(self.appVersion)",

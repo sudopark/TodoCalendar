@@ -152,17 +152,20 @@ extension EventDetailRouter {
         }
     }
     
-    func openMap(with query: String) {
+    func openMap(with query: String, using mapApp: SupportMapApps) {
         Task { @MainActor in
-            guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return }
-            
-            if let appleMapURL = URL(string: "maps://?q=\(encodedQuery)"),
-               UIApplication.shared.canOpenURL(appleMapURL) {
-                
-                UIApplication.shared.open(appleMapURL)
+            guard let url = mapApp.appURL(with: query) else { return }
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
             } else {
-                self.showToast("eventDetail.place::not_applemap".localized())
+                self.showToast("eventDetail.place::no_map_app".localized())
             }
+        }
+    }
+    
+    func openMap(with query: String, afterSelect mapApps: [SupportMapApps]) {
+        Task { @MainActor in
+            
         }
     }
 }
