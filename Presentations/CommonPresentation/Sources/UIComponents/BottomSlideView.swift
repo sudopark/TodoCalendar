@@ -10,12 +10,17 @@ import SwiftUI
 
 public struct BottomSlideView<ContentView: View>: View {
     
+    private let customBackgroundColor: Color?
     private let contentView: ContentView
     public var outsideTap: () -> Void = { }
     
     @Environment(ViewAppearance.self) private var appearance
     
-    public init(_ contentView: () -> ContentView) {
+    public init(
+        backgroundColor: Color? = nil,
+        _ contentView: () -> ContentView
+    ) {
+        self.customBackgroundColor = backgroundColor
         self.contentView = contentView()
     }
     
@@ -33,7 +38,7 @@ public struct BottomSlideView<ContentView: View>: View {
             .padding()
             .background(
                 Rectangle()
-                    .fill(appearance.colorSet.bg0.asColor)
+                    .fill(customBackgroundColor ?? appearance.colorSet.bg0.asColor)
                     .clipShape(.rect(
                         topLeadingRadius: 10, topTrailingRadius: 10
                     ))
