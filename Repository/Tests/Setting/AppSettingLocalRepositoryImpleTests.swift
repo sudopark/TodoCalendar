@@ -6,6 +6,8 @@
 //
 
 import XCTest
+import Prelude
+import Optics
 import Domain
 import UnitTestHelpKit
 
@@ -38,5 +40,50 @@ extension AppSettingLocalRepositoryImpleTests {
             .holiday: false, .sunday: false, .saturday: false
         ])
         XCTAssertEqual(appearance.calendar.showUncompletedTodos, true)
+    }
+    
+    func testRepository_saveAndLoadEventSetting() {
+        // given
+        let repository = self.makeRepository()
+        
+        // when + then
+        let initial = repository.loadEventSetting()
+        XCTAssertEqual(
+            initial,
+            EventSettings()
+                |> \.defaultNewEventTagId .~ .default
+                |> \.defaultNewEventPeriod .~ .minute0
+                |> \.defaultMapApp .~ nil
+        )
+        
+        var params = EditEventSettingsParams() |> \.defaultNewEventTagId .~ .custom("some")
+        let tagUpdated = repository.changeEventSetting(params)
+        XCTAssertEqual(
+            tagUpdated,
+            EventSettings()
+                |> \.defaultNewEventTagId .~ .custom("some")
+                |> \.defaultNewEventPeriod .~ .minute0
+                |> \.defaultMapApp .~ nil
+        )
+        
+        params = EditEventSettingsParams() |> \.defaultNewEventPeriod .~ .hour1
+        let periodUpdated = repository.changeEventSetting(params)
+        XCTAssertEqual(
+            periodUpdated,
+            EventSettings()
+                |> \.defaultNewEventTagId .~ .custom("some")
+                |> \.defaultNewEventPeriod .~ .hour1
+                |> \.defaultMapApp .~ nil
+        )
+        
+        params = EditEventSettingsParams() |> \.defaultMappApp .~ .google
+        let mapAppUpdated = repository.changeEventSetting(params)
+        XCTAssertEqual(
+            mapAppUpdated,
+            EventSettings()
+                |> \.defaultNewEventTagId .~ .custom("some")
+                |> \.defaultNewEventPeriod .~ .hour1
+                |> \.defaultMapApp .~ .google
+        )
     }
 }
