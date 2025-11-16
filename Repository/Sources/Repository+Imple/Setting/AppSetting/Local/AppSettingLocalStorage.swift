@@ -220,6 +220,7 @@ extension AppSettingLocalStorage {
     // event setting
     private var defaultNewEventTagId: String { "default_new_event_tagId" }
     private var defaultNewEventPeriod: String { "default_new_event_period" }
+    private var defaultMapApp: String { "default_map_app" }
     
     func loadEventSetting(for userId: String?) -> EventSettings {
         let tagIdRaw: String? = self.environmentStorage.load(defaultNewEventTagId)
@@ -236,9 +237,12 @@ extension AppSettingLocalStorage {
             EventSettings.DefaultNewEventPeriod(rawValue: $0)
         } ?? .minute0
         
+        let defaultMapApp: String? = self.environmentStorage.load(defaultMapApp)
+        
         return EventSettings()
             |> \.defaultNewEventTagId .~ tagId
             |> \.defaultNewEventPeriod .~ period
+            |> \.defaultMapApp .~ defaultMapApp.flatMap { SupportMapApps(rawValue: $0) }
     }
     
     func saveEventSetting(_ newValue: EventSettings, for userId: String?) {
@@ -250,6 +254,11 @@ extension AppSettingLocalStorage {
             defaultNewEventPeriod,
             newValue.defaultNewEventPeriod.rawValue
         )
+        if let app = newValue.defaultMapApp {
+            self.environmentStorage.update(defaultMapApp, app.rawValue)
+        } else {
+            self.environmentStorage.remove(defaultMapApp)
+        }
     }
 }
 

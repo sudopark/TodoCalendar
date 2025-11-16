@@ -29,6 +29,7 @@ public struct EventSettings: Sendable, Equatable {
     
     public var defaultNewEventTagId: EventTagId = .default
     public var defaultNewEventPeriod: DefaultNewEventPeriod = .minute0
+    public var defaultMapApp: SupportMapApps?
     
     public init() { }
     
@@ -36,6 +37,7 @@ public struct EventSettings: Sendable, Equatable {
         let newSetting = self
             |> \.defaultNewEventTagId .~ (params.defaultNewEventTagId ?? self.defaultNewEventTagId)
             |> \.defaultNewEventPeriod .~ (params.defaultNewEventPeriod ??  self.defaultNewEventPeriod)
+            |> \.defaultMapApp .~ (params.defaultMappApp ?? self.defaultMapApp) 
         return newSetting
     }
 }
@@ -47,11 +49,13 @@ public struct EditEventSettingsParams: Sendable, Equatable {
     
     public var defaultNewEventTagId: EventTagId?
     public var defaultNewEventPeriod: EventSettings.DefaultNewEventPeriod?
+    public var defaultMappApp: SupportMapApps?
     
     public init() { }
     
     public var isValid: Bool {
         return self.defaultNewEventTagId != nil
             || self.defaultNewEventPeriod != nil
+            || self.defaultMappApp != nil
     }
 }
