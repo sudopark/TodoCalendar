@@ -129,11 +129,16 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             viewAppearance: self.viewAppearance
         )
         
+        let selectMapSceneBuilder = SelectMapAppDialogSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory, viewAppearance: self.viewAppearance
+        )
+        
         let router = EventDetailRouter(
             selectRepeatOptionSceneBuilder: selectOptionBuilder,
             selectEventTagSceneBuilder: selectTagSceneBuilder,
             selectNotificationTimeSceneBuilder: selectNotificationTimeSceneBuilder,
-            guideSceneBuilder: guideSceneBuilder
+            guideSceneBuilder: guideSceneBuilder,
+            selectMapSceneBuilder: selectMapSceneBuilder
         )
         router.inputViewModel = inputViewModel
         router.scene = viewController

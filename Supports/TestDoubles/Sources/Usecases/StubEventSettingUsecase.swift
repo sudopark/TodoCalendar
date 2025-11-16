@@ -38,6 +38,7 @@ open class StubEventSettingUsecase: EventSettingUsecase, @unchecked Sendable {
         let new = old
             |> \.defaultNewEventTagId .~ (params.defaultNewEventTagId ?? old.defaultNewEventTagId)
             |> \.defaultNewEventPeriod .~ (params.defaultNewEventPeriod ?? old.defaultNewEventPeriod)
+            |> \.defaultMapApp .~ (params.defaultMappApp ?? old.defaultMapApp)
         
         self.settingSubject.send(new)
         return new

@@ -183,6 +183,8 @@
 "eventDetail.place::placeholder" = "위치";
 "eventDetail.place::remove_button" = "위치 삭제";
 "eventDetail.place::no_map_app" = "선택한 지도앱이 설치되어있지 않습니다.";
+"eventDetail.place::select_map_app" = "지도 선택";
+"eventDetail.place::always_select_this_map" = "항상 이 앱으로 열기";
 
 "eventDetail.add_new_todo::message" = "신규 할일이 등록되었습니다.";
 "eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";
