@@ -137,6 +137,9 @@ extension TodoLocalRepositoryImpleTests {
         let yearSomeDay = EventRepeatingOptions.EveryYearSomeDay(kst, 12, 20)
             |> \.interval .~ 3
         await parameterizeTest(yearSomeDay)
+        
+        let lunarEveryYEar = EventRepeatingOptions.LunarCalendarEveryYear(kst, 4, 11)
+        await parameterizeTest(lunarEveryYEar)
     }
     
     func stubSaveTodo(

@@ -532,6 +532,46 @@ class EventRepeatEnumeratorTests_everyYear_someDay: BaseEventRepeatTimeEnumerato
     }
 }
 
+// MARK: - lunar calendar every year
+
+class EventRepeatEnumeratorTests_LunarCalendarEveryYear: BaseEventRepeatTimeEnumeratorTests {
+    
+    private func eventTimeAllDay(
+        _ year: Int, _ month: Int, _ day: Int
+    ) -> EventTime {
+        let kst = TimeZone(abbreviation: "KST")!
+        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ kst
+        let components = DateComponents(year: year, month: month, day: day)
+        let date = calendar.date(from: components)!
+        let start = calendar.startOfDay(for: date); let end = calendar.endOfDay(for: date)!
+        return .allDay(
+            start.timeIntervalSince1970..<end.timeIntervalSince1970,
+            secondsFromGMT: TimeInterval(kst.secondsFromGMT())
+        )
+    }
+    
+    func testEnumerator_nextLunarCalendarEveryYear() {
+        // given
+        let option = EventRepeatingOptions.LunarCalendarEveryYear(
+            TimeZone(abbreviation: "KST")!, 4, 11
+        )
+        let enumerator = self.makeEnumerator(option)
+        let start = eventTimeAllDay(1991, 5, 24)
+        let end = eventTimeAllDay(1994, 12, 31)
+        
+        // when
+        let nexts = enumerator.nextEventTimes(from: .init(time: start, turn: 0), until: end.lowerBoundWithFixed)
+        
+        
+        // then
+        XCTAssertEqual(nexts, [
+            .init(time: eventTimeAllDay(1992, 5, 13), turn: 1),
+            .init(time: eventTimeAllDay(1993, 5, 31), turn: 2),
+            .init(time: eventTimeAllDay(1994, 5, 21), turn: 3)
+        ])
+    }
+}
+
 // MARK: - enumerate until end
 
 class EventRepeatEnumeratorTests_EnumeratesUntilEnd: BaseEventRepeatTimeEnumeratorTests {

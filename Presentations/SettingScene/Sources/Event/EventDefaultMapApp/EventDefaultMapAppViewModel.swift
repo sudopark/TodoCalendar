@@ -62,7 +62,7 @@ extension EventDefaultMapAppViewModelImple {
         let params = EditEventSettingsParams() |> \.defaultMappApp .~ map
         do {
             _ = try self.eventSettingUsecase.changeEventSetting(params)
-        } catch let error {
+        } catch {
             self.router?.showToast("common.errorMessage".localized())
         }
     }

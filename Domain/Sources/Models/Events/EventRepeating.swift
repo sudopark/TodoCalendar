@@ -85,6 +85,18 @@ public enum EventRepeatingOptions {
             self.day = day
         }
     }
+    
+    public struct LunarCalendarEveryYear: EventRepeatingOption, Hashable {
+        public let timeZone: TimeZone
+        public let month: Int
+        public let day: Int
+        
+        public init(_ timeZone: TimeZone, _ month: Int, _ day: Int) {
+            self.timeZone = timeZone
+            self.month = month
+            self.day = day
+        }
+    }
 }
 
 public struct EventRepeating: Equatable, Sendable {

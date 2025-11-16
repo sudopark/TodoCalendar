@@ -86,6 +86,18 @@ struct EventRepeatingOptionCodableMapper: Codable {
             option.interval = try container.decode(Int.self, forKey: .interval)
             self = .init(option: option)
             
+        case "lunar_calendar_every_year":
+            guard let timeZone = timeZoneIdentifier.flatMap({ TimeZone(identifier: $0) })
+            else {
+                throw RuntimeError("invalid time zone value: \(timeZoneIdentifier ?? "")")
+            }
+            let option = EventRepeatingOptions.LunarCalendarEveryYear(
+                timeZone,
+                try container.decode(Int.self, forKey: .month),
+                try container.decode(Int.self, forKey: .day)
+            )
+            self = .init(option: option)
+            
         default: throw RuntimeError("not support option type")
         }
     }
@@ -123,6 +135,12 @@ struct EventRepeatingOptionCodableMapper: Codable {
             try container.encode(everyYear.month, forKey: .month)
             try container.encode(everyYear.day, forKey: .day)
             try container.encodeIfPresent(everyYear.timeZone.identifier, forKey: .timeZone)
+            
+        case let lunarEveryYear as EventRepeatingOptions.LunarCalendarEveryYear:
+            try container.encode("lunar_calendar_every_year", forKey: .optionType)
+            try container.encode(lunarEveryYear.month, forKey: .month)
+            try container.encode(lunarEveryYear.day, forKey: .day)
+            try container.encodeIfPresent(lunarEveryYear.timeZone.identifier, forKey: .timeZone)
             
         default: throw RuntimeError("not support option type")
         }
