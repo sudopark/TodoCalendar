@@ -26,6 +26,7 @@ import CommonPresentation
     var selectedEventNotificationTimeText: String?
     var selectedAllDayEventNotificationTimeText: String?
     var periodModel: SelectedPeriodModel = .init(.minute0)
+    var defaultMapApp: SupportMapApps?
     var externalCalendarServiceModels: [ExternalCalanserServiceModel] = []
     var isConnectOrDisconnectingExternalService: Bool = false
     
@@ -63,6 +64,13 @@ import CommonPresentation
             })
             .store(in: &self.cancellables)
         
+        viewModel.defaultMapApp
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] app in
+                self?.defaultMapApp = app
+            })
+            .store(in: &self.cancellables)
+        
         viewModel.integratedExternalCalendars
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
@@ -90,6 +98,7 @@ final class EventSettingViewEventHandler: Observable {
     var selectEventNotificationTime: () -> Void = { }
     var selectAllDayEventNotificationTime: () -> Void = { }
     var selectPeriod: (EventSettings.DefaultNewEventPeriod) -> Void = { _ in }
+    var selectDefaultMapApp: () -> Void = { }
     var connectExternalCalendar: (String) -> Void = { _ in }
     var disconnectExternalCalendar: (String) -> Void = { _ in }
     var close: () -> Void = { }
@@ -156,6 +165,9 @@ struct EventSettingView: View {
                             .onTapGesture(perform: eventHandlers.selectAllDayEventNotificationTime)
                         
                         rowView(periodView)
+                        
+                        rowView(defaultMapAppView)
+                            .onTapGesture(perform: eventHandlers.selectDefaultMapApp)
                         
                         if !self.state.externalCalendarServiceModels.isEmpty {
                             self.externalCalendarSectionView(state.externalCalendarServiceModels)
@@ -304,6 +316,25 @@ struct EventSettingView: View {
         .onChange(of: state.periodModel) { old, new in
             guard old.period != new.period else { return }
             self.eventHandlers.selectPeriod(new.period)
+        }
+    }
+    
+    private var defaultMapAppView: some View {
+        HStack {
+            Text("event_setting::defaultMapApp".localized())
+                .font(self.appearance.fontSet.normal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+            
+            Spacer()
+            
+            
+            Text(state.defaultMapApp?.name ?? "event_setting::defaultMapApp_select".localized())
+                .font(appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
+            
+            Image(systemName: "chevron.right")
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
         }
     }
     

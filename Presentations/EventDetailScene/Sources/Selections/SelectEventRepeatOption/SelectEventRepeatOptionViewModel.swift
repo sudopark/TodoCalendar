@@ -26,6 +26,7 @@ private enum SupportingOptions: Equatable {
     case everyMonthLastAllWeekDays
     case everyMonthSomeWeekDay(_ seq: Int, weekDay: DayOfWeeks)
     case everyMonthLastWeekDay(_ weekDay: DayOfWeeks)
+    case lunarCalendarEveryYear(_ month: Int, _ day: Int)
     
     init?(_ option: EventRepeatingOption) {
         switch option {
@@ -42,6 +43,9 @@ private enum SupportingOptions: Equatable {
             
         case let year as Options.EveryYearSomeDay where year.interval == 1:
             self = .everyYear(year.month, year.day)
+            
+        case let year as Options.LunarCalendarEveryYear:
+            self = .lunarCalendarEveryYear(year.month, year.day)
             
         default: return nil
         }
@@ -92,6 +96,7 @@ private enum SupportingOptions: Equatable {
                 EventRepeatingOptions.EveryMonth(timeZone: timeZone)
                     |> \.selection .~ .days([startDay]),
                 EventRepeatingOptions.EveryYearSomeDay(timeZone, month, startDay),
+                EventRepeatingOptions.LunarCalendarEveryYear(timeZone, month, startDay)
             ],
             [
                 EventRepeatingOptions.EveryMonth(timeZone: timeZone)
@@ -173,6 +178,15 @@ struct SelectRepeatingOptionModel: Equatable, Identifiable {
             } else {
                 let dateText = calendar.dateText(month, day)
                 self = .init("eventDetail.repeating.everyYearSomeDay:title".localized(with: dateText), option)
+            }
+            
+        case .lunarCalendarEveryYear(let month, let day):
+            if calendar.component(.month, from: startTime) == month
+                && calendar.component(.day, from: startTime) == day {
+                self = .init("eventDetail.repeating.lunarCalendar_everyYear:title".localized(), option)
+            } else {
+                let dateText = calendar.dateText(month, day)
+                self = .init("eventDetail.repeating.lunarCalendar_everyYearSomeDay:title".localized(with: dateText), option)
             }
             
         case .everyMonthLastAllWeekDays:

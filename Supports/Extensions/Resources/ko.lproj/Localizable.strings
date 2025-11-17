@@ -155,7 +155,9 @@
 "eventDetail.repeating.everyMonth:title" = "매달";
 "eventDetail.repeating.everyMonth_someDay:title" = "매달 %@일";
 "eventDetail.repeating.everyYear:title" = "매년";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "매년(음력)";
 "eventDetail.repeating.everyYearSomeDay:title" = "매년 %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "매년 음력 %@";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "매달의 마지막주의 모든일";
 "eventDetail.repeating.every1WeekOfEveryMonth::someday" = "매달 첫번째 %@";
 "eventDetail.repeating.every2WeekOfEveryMonth::someday" = "매달 두번째 %@";
@@ -179,6 +181,12 @@
 "eventDetail.repeating.everyNYears:title" = "매%d년";
 "eventDetail.repeating::endoption_until" = "%@ 까지";
 "eventDetail.repeating::endoption_times" = "%d번 반복";
+
+"eventDetail.place::placeholder" = "위치";
+"eventDetail.place::remove_button" = "위치 삭제";
+"eventDetail.place::no_map_app" = "선택한 지도앱이 설치되어있지 않습니다.";
+"eventDetail.place::select_map_app" = "지도 선택";
+"eventDetail.place::always_select_this_map" = "항상 이 앱으로 열기";
 
 "eventDetail.add_new_todo::message" = "신규 할일이 등록되었습니다.";
 "eventDetail.add_new_schedule::message" = "신규 일정이 등록되었습니다.";
@@ -299,6 +307,8 @@
 "event_setting::title" = "이벤트 설정";
 "event_setting::eventType" = "이벤트 종류";
 "event_setting::eventPeriod" = "이벤트 기간";
+"event_setting::defaultMapApp" = "지도 앱 열기";
+"event_setting::defaultMapApp_select" = "선택";
 "event_notification_setting::title::forAllDay" = "하루종일";
 "event_notification_setting::title::NotforAllDay" = "미리알림 시간";
 "event_setting::external_calendar::title" = "외부 캘린더";

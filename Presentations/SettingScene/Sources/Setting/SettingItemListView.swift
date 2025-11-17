@@ -44,6 +44,13 @@ final class SettingItemListViewEventHandler: Observable {
     var onAppear: () -> Void = { }
     var selectItem: (any SettingItemModelType) -> Void = { _ in }
     var close: () -> Void = { }
+    
+    func bind(_ viewModel: any SettingItemListViewModel) {
+        
+        self.onAppear = viewModel.prepare
+        self.selectItem = viewModel.selectItem
+        self.close = viewModel.close
+    }
 }
 
 
@@ -112,10 +119,21 @@ struct SettingItemListView: View {
     private func sectionView(_ section: any SettingSectionModelType) -> some View {
         VStack(alignment: .leading){
             if let headerText = section.headerText {
-                Text(headerText)
-                    .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
-                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                    .padding(.top, 8)
+                HStack(alignment: .bottom) {
+                    Text(headerText)
+                        .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                    
+                    if let appVersion = (section as? AppInfoSectionModel)?.version {
+                        
+                        Spacer()
+                        
+                        Text(appVersion)
+                            .font(self.appearance.fontSet.size(14, weight: .semibold).asFont)
+                            .foregroundStyle(self.appearance.colorSet.text2.asColor)
+                    }
+                }
+                .padding(.top, 8)
             }
             ForEach(section.items, id: \.compareKey) { item in
                 switch item {

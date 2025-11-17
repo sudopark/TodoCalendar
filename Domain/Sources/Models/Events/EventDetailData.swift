@@ -12,7 +12,7 @@ import Foundation
 
 public struct Place: Sendable, Equatable {
 
-    public struct Coordinate: Sendable, Equatable {
+    public struct Coordinate: Sendable, Equatable, Hashable {
         public let latttude: Double
         public let longitude: Double
         
@@ -23,10 +23,10 @@ public struct Place: Sendable, Equatable {
     }
     
     public let placeName: String
-    public let coordinate: Coordinate
+    public var coordinate: Coordinate?
     public var addressText: String?
     
-    public init(_ placeName: String, _ coordinate: Coordinate) {
+    public init(_ placeName: String, _ coordinate: Coordinate? = nil) {
         self.placeName = placeName
         self.coordinate = coordinate
     }

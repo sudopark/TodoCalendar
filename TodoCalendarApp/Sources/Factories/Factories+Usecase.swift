@@ -257,6 +257,16 @@ extension NonLoginUsecaseFactoryImple {
             previewEngine: applicationBase.linkPreviewEngine
         )
     }
+    
+    func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase {
+        return PlaceSuggestUsecaseImple(
+            suggestEngine: MapKitBasePlaceSuggestEngineImple()
+        )
+    }
+    
+    func deviceInfoFetchService() -> any DeviceInfoFetchService {
+        return DeviceInfoFetchServiceImple()
+    }
 }
 
 extension NonLoginUsecaseFactoryImple {
@@ -632,6 +642,16 @@ extension LoginUsecaseFactoryImple {
         return LinkPreviewFetchUsecaesImple(
             previewEngine: applicationBase.linkPreviewEngine
         )
+    }
+    
+    func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase {
+        return PlaceSuggestUsecaseImple(
+            suggestEngine: MapKitBasePlaceSuggestEngineImple()
+        )
+    }
+    
+    func deviceInfoFetchService() -> any DeviceInfoFetchService {
+        return DeviceInfoFetchServiceImple()
     }
 }
 

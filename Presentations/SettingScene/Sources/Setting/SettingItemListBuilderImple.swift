@@ -55,7 +55,8 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
         let viewModel = SettingItemListViewModelImple(
             appId: self.appId,
             accountUsecase: self.usecaseFactory.accountUescase,
-            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase()
+            uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
+            deviceInfoFetchService: self.usecaseFactory.deviceInfoFetchService()
         )
         
         let viewController = SettingItemListViewController(

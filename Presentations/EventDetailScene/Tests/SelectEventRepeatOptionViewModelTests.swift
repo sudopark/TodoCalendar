@@ -85,6 +85,7 @@ extension SelectEventRepeatOptionViewModelTests {
                 "eventDetail.repeating.everySomeWeek:title".localized(with: 4),
                 "eventDetail.repeating.everyMonth:title".localized(),
                 "eventDetail.repeating.everyYear:title".localized(),
+                "eventDetail.repeating.lunarCalendar_everyYear:title".localized()
             ],
             [
                 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title".localized(),

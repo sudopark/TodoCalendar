@@ -65,13 +65,18 @@ extension EventDetailData {
             CodingKeys.eventId.rawValue: self.eventId
         ]
         if let place = self.place {
-            var placeJson: [String: Any] = [
-                CodingKeys.placeName.rawValue: place.placeName,
-                CodingKeys.placeCoordinate.rawValue: [
-                    CodingKeys.placeLat.rawValue: place.coordinate.latttude,
-                    CodingKeys.placeLong.rawValue: place.coordinate.longitude,
+            let coordinateJson: [String: Any]? = if let coordinate = place.coordinate {
+                [
+                    CodingKeys.placeLat.rawValue: coordinate.latttude,
+                    CodingKeys.placeLong.rawValue: coordinate.longitude
                 ]
+            } else {
+                nil
+            }
+            var placeJson: [String: Any] = [
+                CodingKeys.placeName.rawValue: place.placeName
             ]
+            placeJson[CodingKeys.placeCoordinate.rawValue] = coordinateJson
             placeJson[CodingKeys.placeAddress.rawValue] = place.addressText
             sender[CodingKeys.place.rawValue] = placeJson
         }

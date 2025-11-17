@@ -35,7 +35,8 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
     private func makeUsecase(
         withOffTags: [EventTagId] = [],
         hasForemost: Bool = true,
-        isGoogleAccountIntegrated: Bool = false
+        isGoogleAccountIntegrated: Bool = false,
+        eventDetail: EventDetailData? = nil
     ) -> CalendarEventFetchUsecaseImple {
         
         let holidayFetchUsecase = StubHolidaysFetchUsecase()
@@ -54,6 +55,9 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
         let externalCalendarRepository = StubExternalCalendarRepository(isGoogleAccountIntegrated: isGoogleAccountIntegrated)
         let googleCalendarRepository = StubGoogleCalendarRepository()
         
+        let detailRepository = StubEventDetailRepository()
+        detailRepository.stubDetail = eventDetail
+        
         return CalendarEventFetchUsecaseImple(
             todoRepository: self.stubTodoRepository,
             scheduleRepository: self.stubScheduleRepository,
@@ -62,6 +66,7 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
             eventTagRepository: eventTagReopsitory,
             externalCalendarIntegrateRepository: externalCalendarRepository,
             googleCalendarRepository: googleCalendarRepository,
+            eventDetailRepository: detailRepository,
             cached: .init()
         )
     }
@@ -275,8 +280,12 @@ extension CalendarEventFetchUsecaseImpleTests {
         } else {
             self.stubScheduleRepository.scheduleMocking = []
         }
+        
+        let detail = EventDetailData("first")
+            |> \.place .~ .init("location")
         return self.makeUsecase(
-            withOffTags: [.custom("t1")]
+            withOffTags: [.custom("t1")],
+            eventDetail: detail
         )
     }
     
@@ -291,6 +300,7 @@ extension CalendarEventFetchUsecaseImpleTests {
         
         // then
         XCTAssertEqual(next?.nextEvent.name, "first-event")
+        XCTAssertEqual(next?.nextEvent.locationText, "location")
         XCTAssertEqual(
             next?.andThenNextEventStartDate,
             refDate.addingTimeInterval(30)

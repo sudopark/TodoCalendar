@@ -56,18 +56,21 @@ final class EventDetailRouter: BaseRouterImple, EventDetailRouting, EventDetailI
     private let selectEventTagSceneBuilder: any SelectEventTagSceneBuiler
     private let selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler
     private let guideSceneBuilder: any GuideSceneBuilder
+    private let selectMapSceneBuilder: any SelectMapAppDialogSceneBuiler
     weak var inputViewModel: (any EventDetailInputViewModel)?
     
     init(
         selectRepeatOptionSceneBuilder: any SelectEventRepeatOptionSceneBuiler,
         selectEventTagSceneBuilder: any SelectEventTagSceneBuiler,
         selectNotificationTimeSceneBuilder: any SelectEventNotificationTimeSceneBuiler,
-        guideSceneBuilder: any GuideSceneBuilder
+        guideSceneBuilder: any GuideSceneBuilder,
+        selectMapSceneBuilder: any SelectMapAppDialogSceneBuiler
     ) {
         self.selectRepeatOptionSceneBuilder = selectRepeatOptionSceneBuilder
         self.selectEventTagSceneBuilder = selectEventTagSceneBuilder
         self.selectNotificationTimeSceneBuilder = selectNotificationTimeSceneBuilder
         self.guideSceneBuilder = guideSceneBuilder
+        self.selectMapSceneBuilder = selectMapSceneBuilder
     }
 }
 
@@ -149,6 +152,24 @@ extension EventDetailRouter {
             
             let navigationController = UINavigationController(rootViewController: next)
             self.currentScene?.present(navigationController, animated: true)
+        }
+    }
+    
+    func openMap(with query: String, using mapApp: SupportMapApps) {
+        Task { @MainActor in
+            guard let url = mapApp.appURL(with: query) else { return }
+            if UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+            } else {
+                self.showToast("eventDetail.place::no_map_app".localized())
+            }
+        }
+    }
+    
+    func openMap(with query: String, afterSelect mapApps: [SupportMapApps]) {
+        Task { @MainActor in
+            let next = self.selectMapSceneBuilder.makeSelectMapAppDialogScene(query: query, supportMapApps: mapApps)
+            self.showBottomSlide(next)
         }
     }
 }

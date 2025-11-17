@@ -81,6 +81,7 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
     func selectTag()
     func selectEventNotificationTimeOption(forAllDay: Bool)
     func selectPeriod(_ newValue: EventSettings.DefaultNewEventPeriod)
+    func selectDefaultMapApp()
     func connectExternalCalendar(_ serviceIdentifier: String)
     func disconnectExternalCalendar(_ serviceIdentifier: String)
     func close()
@@ -90,6 +91,7 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
     var selectedEventNotificationTimeText: AnyPublisher<String, Never> { get }
     var selectedAllDayEventNotificationTimeText: AnyPublisher<String, Never> { get }
     var selectedPeriod: AnyPublisher<SelectedPeriodModel, Never> { get }
+    var defaultMapApp: AnyPublisher<SupportMapApps?, Never> { get }
     var integratedExternalCalendars: AnyPublisher<[ExternalCalanserServiceModel], Never> { get }
     var isConnectOrDisconnectExternalCalednar: AnyPublisher<Bool, Never> { get }
 }
@@ -181,6 +183,10 @@ extension EventSettingViewModelImple {
         } catch {
             self.router?.showError(error)
         }
+    }
+    
+    func selectDefaultMapApp() {
+        self.router?.routeToSelectDefaultMapApp()
     }
     
     func connectExternalCalendar(_ serviceIdentifier: String) {
@@ -281,6 +287,13 @@ extension EventSettingViewModelImple {
         return self.eventSettingUsecase.currentEventSetting
             .map { $0.defaultNewEventPeriod }
             .map { SelectedPeriodModel($0) }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+    
+    var defaultMapApp: AnyPublisher<SupportMapApps?, Never> {
+        return self.eventSettingUsecase.currentEventSetting
+            .map { $0.defaultMapApp }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

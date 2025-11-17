@@ -43,6 +43,9 @@ import CommonPresentation
     var isValidURLEntered: Bool = false
     var linkPreviewModel: LinkPreviewModel?
     var memo: String = ""
+    var suggestPlaces: [SelectedPlaceModel.LandmarkModel] = []
+    var enterPlaceName: String = ""
+    var selectedPlace: SelectedPlaceModel?
     
     func bind(
         _ viewModel: any EventDetailViewModel,
@@ -145,6 +148,20 @@ import CommonPresentation
             })
             .store(in: &self.cancellables)
         
+        inputViewModel.suggestPlaces
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] places in
+                self?.suggestPlaces = places
+            })
+            .store(in: &self.cancellables)
+        
+        inputViewModel.selectedPlace
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] place in
+                self?.selectedPlace = place
+            })
+            .store(in: &self.cancellables)
+        
         viewModel.isForemost
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isForemost in
@@ -189,7 +206,10 @@ final class EventDetailViewEventHandlers: Observable {
     var selectRepeatOption: () -> Void = { }
     var selectTag: () -> Void = { }
     var selectNotificationOption: () -> Void = { }
-    var selectPlace: () -> Void = { }
+    var selectPlace: (SelectedPlaceModel.LandmarkModel) -> Void = { _ in }
+    var removePlace: () -> Void = { }
+    var openMap: () -> Void = { }
+    var enterPlaceName: (String) -> Void = { _ in }
     var enterUrl: (String) -> Void = { _ in }
     var openURL: () -> Void = { }
     var enterMemo: (String) -> Void = { _ in }
@@ -218,7 +238,10 @@ final class EventDetailViewEventHandlers: Observable {
         self.selectRepeatOption = inputViewModel.selectRepeatOption
         self.selectTag = inputViewModel.selectEventTag
         self.selectNotificationOption = inputViewModel.selectNotificationTime
-//        self.selectPlace = TODO
+        self.selectPlace = inputViewModel.selectLandmark
+        self.removePlace = inputViewModel.removePlace
+        self.openMap = inputViewModel.openMap
+        self.enterPlaceName = inputViewModel.enterPlaceName(_:)
         self.enterUrl = inputViewModel.enter(url:)
         self.openURL = inputViewModel.openURL
         self.enterMemo = inputViewModel.enter(memo:)
@@ -268,6 +291,7 @@ struct EventDetailView: View {
     @Environment(ViewAppearance.self) private var appearance: ViewAppearance
     private enum InputFields: String {
         case name
+        case place
         case url
         case memo
         var id: String { "EventDetailView::InputFields::\(self.rawValue)" }
@@ -303,10 +327,25 @@ struct EventDetailView: View {
                         self.selectNotificationView
                         Spacer(minLength: 12)
                         VStack(spacing: 17) {
+                            VStack(spacing: 8) {
+                                self.enterPlaceView
+                                    .id(InputFields.place.id)
+                                
+                                if self.isFocusInput == .place,
+                                    !self.state.suggestPlaces.isEmpty {
+                                    self.placeLandmarkSuggestView
+                                }
+                            }
                             self.enterLinkView
                                 .id(InputFields.url.id)
                             self.enterMemoView
                                 .id(InputFields.memo.id)
+                        }
+                        if case let .landmark(model) = state.selectedPlace {
+                            LandmarkMapView(name: model.name, coordinate: model.coordinate)
+                                .frame(height: 120)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .onTapGesture { self.eventHandlers.openMap() }
                         }
                         if let model = state.linkPreviewModel {
                             self.linkPreview(model)
@@ -799,6 +838,126 @@ struct EventDetailView: View {
         }
     }
     
+    private var enterPlaceView: some View {
+        HStack(spacing: 16) {
+            Image(systemName: "location.circle")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+            
+            switch state.selectedPlace {
+            case .landmark(let landmark):
+                self.landmarkView(landmark)
+                
+            default:
+                self.placeCustomInputView
+            }
+            
+            Spacer()
+            
+            if state.selectedPlace != nil {
+                Button {
+                    self.eventHandlers.openMap()
+                } label: {
+                    Image(systemName: "map")
+                        .font(.system(size: 16, weight: .light))
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                }
+            }
+        }
+    }
+    
+    private func landmarkView(_ landmark: SelectedPlaceModel.LandmarkModel) -> some View {
+        
+        Menu {
+            Button(role: .destructive) {
+                self.eventHandlers.removePlace()
+            } label: {
+                HStack {
+                    Image(systemName: "xmark")
+                    Text("eventDetail.place::remove_button".localized())
+                }
+            }
+        } label: {
+            HStack {
+                VStack(alignment: .leading) {
+                    Text(landmark.name)
+                        .multilineTextAlignment(.leading)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                        .font(self.appearance.fontSet.size(14).asFont)
+                    
+                    if let address = landmark.address {
+                        Text(address)
+                            .multilineTextAlignment(.leading)
+                            .foregroundStyle(self.appearance.colorSet.text2.asColor)
+                            .font(self.appearance.fontSet.size(12).asFont)
+                    }
+                }
+                
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
+                    .font(self.appearance.fontSet.size(14).asFont)
+            }
+        }
+        
+    }
+    
+    private var placeCustomInputView: some View {
+        @Bindable var state = self.state
+        return TextField(
+            "",
+            text: $state.enterPlaceName,
+            prompt: Text("eventDetail.place::placeholder".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor)
+        )
+        .autocorrectionDisabled()
+        .textInputAutocapitalization(.never)
+        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+        .font(self.appearance.fontSet.size(14).asFont)
+        .focused(self.$isFocusInput, equals: .place)
+        .onSubmit { self.isFocusInput = nil }
+        .onChange(of: state.enterPlaceName) { old, new in
+            guard !(old.isEmpty && new.isEmpty) else { return }
+            self.eventHandlers.enterPlaceName(new)
+        }
+    }
+    
+    private var placeLandmarkSuggestView: some View {
+        ForEach(self.state.suggestPlaces) { landmark in
+            
+            HStack {
+                HStack {
+                    Image(systemName: "mappin.circle.fill")
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                        .font(self.appearance.fontSet.size(14).asFont)
+                    
+                    VStack(alignment: .leading) {
+                        Text(landmark.name)
+                            .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                            .font(self.appearance.fontSet.size(14).asFont)
+                        
+                        if let address = landmark.address {
+                            Text(address)
+                                .foregroundStyle(self.appearance.colorSet.text2.asColor)
+                                .font(self.appearance.fontSet.size(12).asFont)
+                        }
+                    }
+                }
+                .padding(.horizontal, 8).padding(.vertical, 4)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(self.appearance.colorSet.bg1.asColor)
+                )
+                .onTapGesture {
+                    self.isFocusInput = nil
+                    self.eventHandlers.selectPlace(landmark)
+                    self.state.enterPlaceName = ""
+                }
+                
+                Spacer()
+            }
+            .padding(.leading, 4)
+        }
+    }
+    
     private var enterLinkView: some View {
         HStack(spacing: 16) {
             Image(systemName: "link")
@@ -1092,6 +1251,27 @@ struct EventDetailViewPreviewProvider: PreviewProvider {
 //        }
         let eventHandler = EventDetailViewEventHandlers()
         eventHandler.toggleIsAllDay = { state.isAllDay.toggle() }
+        eventHandler.enterPlaceName = { name in
+            state.selectedPlace = .customPlace(name)
+        }
+        eventHandler.selectPlace = { mark in
+            state.selectedPlace = .landmark(mark)
+        }
+        eventHandler.removePlace = {
+            state.selectedPlace = nil
+        }
+        state.selectedPlace = .landmark(
+            .init(
+                name: "경북궁 긴 이름의 장소 이름이다잉 12 34  333 34",
+                coordinate: .init(0, 10),
+                address: "대한민국 종로 aodn 긴 이흠의 주소이다잉 12341234124 아아아 아아아우"
+            )
+        )
+        state.suggestPlaces = [
+            .init(name: "경북궁 긴 이름의 장소 이름이다잉 12 34 12 34 12 342 13 3 1233 234 32 333 34", coordinate: .init(37.579871, 126.977051), address: "대한민국 종로"),
+            .init(name: "경북궁2", coordinate: .init(37.579872, 126.977051), address: "대한민국 종로 aodn 긴 이흠의 주소이다잉 12341234124 아아아 아아아우")
+        ]
+        
         let eventView = EventDetailView()
             .environment(state)
             .environment(eventHandler)

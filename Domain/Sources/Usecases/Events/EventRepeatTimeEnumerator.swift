@@ -41,6 +41,9 @@ public final class EventRepeatTimeEnumerator: Sendable {
         case let everyYear as EventRepeatingOptions.EveryYearSomeDay:
             self.calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ everyYear.timeZone
             
+        case let everyYear as EventRepeatingOptions.LunarCalendarEveryYear:
+            self.calendar = Calendar(identifier: .chinese) |> \.timeZone .~ everyYear.timeZone
+            
         default: return nil
         }
     }
@@ -97,6 +100,8 @@ public final class EventRepeatTimeEnumerator: Sendable {
             nextDate = self.nextEventDate(everyYear, current)
         case let everyYear as EventRepeatingOptions.EveryYearSomeDay:
             nextDate = self.nextEventDate(everyYear, current)
+        case let lunarEveryYear as EventRepeatingOptions.LunarCalendarEveryYear:
+            nextDate = self.nextEventDate(lunarEveryYear, current)
         default: nextDate = nil
         }
         
@@ -225,6 +230,14 @@ extension EventRepeatTimeEnumerator {
     ) -> Date? {
         return self.calendar
             .date(byAdding: .year, value: everyYear.interval, to: current.date)
+    }
+    
+    private func nextEventDate(
+        _ everyYear: EventRepeatingOptions.LunarCalendarEveryYear,
+        _ current: Current
+    ) -> Date? {
+        return self.calendar
+            .date(byAdding: .year, value: 1, to: current.date)
     }
 }
 

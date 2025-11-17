@@ -99,7 +99,8 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             eventSettingUsecase: self.usecaseFactory.makeEventSettingUsecase(),
             linkPreviewFetchUsecase: self.usecaseFactory.makeLinkPreviewFetchUsecase(),
-            daysIntervalCountUescase: self.usecaseFactory.makeDaysIntervalCountUsecase()
+            daysIntervalCountUescase: self.usecaseFactory.makeDaysIntervalCountUsecase(),
+            placeSuggestUsecase: self.usecaseFactory.makePlaceSuggestUsecase()
         )
         
         let viewController = EventDetailViewController(
@@ -128,11 +129,16 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             viewAppearance: self.viewAppearance
         )
         
+        let selectMapSceneBuilder = SelectMapAppDialogSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory, viewAppearance: self.viewAppearance
+        )
+        
         let router = EventDetailRouter(
             selectRepeatOptionSceneBuilder: selectOptionBuilder,
             selectEventTagSceneBuilder: selectTagSceneBuilder,
             selectNotificationTimeSceneBuilder: selectNotificationTimeSceneBuilder,
-            guideSceneBuilder: guideSceneBuilder
+            guideSceneBuilder: guideSceneBuilder,
+            selectMapSceneBuilder: selectMapSceneBuilder
         )
         router.inputViewModel = inputViewModel
         router.scene = viewController
