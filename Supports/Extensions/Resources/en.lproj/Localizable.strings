@@ -155,7 +155,9 @@
 "eventDetail.repeating.everyMonth:title" = "Every Month";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ of every month.";
 "eventDetail.repeating.everyYear:title" = "Every Year";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Every year (lunar calendar)";
 "eventDetail.repeating.everyYearSomeDay:title" = "Every Year %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Lunar calednar every Year %@";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "All days of the last week of every month";
 "eventDetail.repeating.every1WeekOfEveryMonth::someday" = "The first %@ of every month";
 "eventDetail.repeating.every2WeekOfEveryMonth::someday" = "The second %@ of every month";
