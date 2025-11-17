@@ -155,7 +155,9 @@
 "eventDetail.repeating.everyMonth:title" = "매달";
 "eventDetail.repeating.everyMonth_someDay:title" = "매달 %@일";
 "eventDetail.repeating.everyYear:title" = "매년";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "매년(음력)";
 "eventDetail.repeating.everyYearSomeDay:title" = "매년 %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "매년 음력 %@";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "매달의 마지막주의 모든일";
 "eventDetail.repeating.every1WeekOfEveryMonth::someday" = "매달 첫번째 %@";
 "eventDetail.repeating.every2WeekOfEveryMonth::someday" = "매달 두번째 %@";
