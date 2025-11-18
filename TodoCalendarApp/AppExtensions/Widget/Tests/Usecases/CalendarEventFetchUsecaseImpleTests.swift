@@ -21,15 +21,18 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
     
     private var stubTodoRepository: PrivateStubTodoRepository!
     private var stubScheduleRepository: PrivateStubScheduleRepository!
+    private var stubGoogleCalendarRepository: StubGoogleCalendarRepository!
     
     override func setUpWithError() throws {
         self.stubTodoRepository = .init()
         self.stubScheduleRepository = .init()
+        self.stubGoogleCalendarRepository = .init()
     }
     
     override func tearDownWithError() throws {
         self.stubTodoRepository = nil
         self.stubScheduleRepository = nil
+        self.stubGoogleCalendarRepository = nil
     }
     
     private func makeUsecase(
@@ -53,7 +56,6 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
         foremostRepository.stubHasForemost = hasForemost
         
         let externalCalendarRepository = StubExternalCalendarRepository(isGoogleAccountIntegrated: isGoogleAccountIntegrated)
-        let googleCalendarRepository = StubGoogleCalendarRepository()
         
         let detailRepository = StubEventDetailRepository()
         detailRepository.stubDetail = eventDetail
@@ -65,7 +67,7 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
             holidayFetchUsecase: holidayFetchUsecase,
             eventTagRepository: eventTagReopsitory,
             externalCalendarIntegrateRepository: externalCalendarRepository,
-            googleCalendarRepository: googleCalendarRepository,
+            googleCalendarRepository: self.stubGoogleCalendarRepository,
             eventDetailRepository: detailRepository,
             cached: .init()
         )
@@ -289,6 +291,35 @@ extension CalendarEventFetchUsecaseImpleTests {
         )
     }
     
+    private enum NextEventSource {
+        case todo(TodoEvent, EventDetailData?)
+        case schedule(ScheduleEvent, EventDetailData?)
+        case google(GoogleCalendar.Event)
+    }
+    private func makeUsecase(with nextEvent: NextEventSource) -> CalendarEventFetchUsecaseImple {
+        
+        self.stubTodoRepository.todoEventsMocking = []
+        self.stubScheduleRepository.scheduleMocking = []
+        self.stubGoogleCalendarRepository.eventMocking = []
+        var detail: EventDetailData?
+        switch nextEvent {
+        case .todo(let todo, let data):
+            self.stubTodoRepository.todoEventsMocking = [todo]
+            detail = data
+        case .schedule(let schedule, let data):
+            self.stubScheduleRepository.scheduleMocking = [schedule]
+            detail = data
+        case .google(let google):
+            self.stubGoogleCalendarRepository.eventMocking = [google]
+        }
+        
+        return self.makeUsecase(
+            withOffTags: [.custom("t1")],
+            isGoogleAccountIntegrated: true,
+            eventDetail: detail
+        )
+    }
+    
     func testUsecase_fetchNextEvent() async throws {
         // given
         let refDate = Date(timeIntervalSince1970: 0)
@@ -305,6 +336,39 @@ extension CalendarEventFetchUsecaseImpleTests {
             next?.andThenNextEventStartDate,
             refDate.addingTimeInterval(30)
         )
+    }
+    
+    func testUsecase_whenFetchNextEvent_provideLocationTextByEventType() async throws {
+        // given
+        let refDate = Date(timeIntervalSince1970: 0)
+        func parameterizeTest(_ source: NextEventSource, expectLocation: String?) async throws {
+            // given
+            let usecase = self.makeUsecase(with: source)
+            
+            // when
+            let range = refDate.timeIntervalSince1970..<refDate.add(days: 1)!.timeIntervalSince1970
+            let next = try await usecase.fetchNextEvent(refDate, within: range, self.kst)
+            
+            // then
+            XCTAssertEqual(next != nil, true)
+            XCTAssertEqual(next?.nextEvent.locationText, expectLocation)
+        }
+        // when + then
+        var detail = EventDetailData("event") |> \.place .~ .init("todo place")
+        let todo = TodoEvent(uuid: "event", name: "name") |> \.time .~ .at(refDate.timeIntervalSince1970 + 10)
+        try await parameterizeTest(.todo(todo, nil), expectLocation: nil)
+        try await parameterizeTest(.todo(todo, detail), expectLocation: "todo place")
+        
+        let schedule = ScheduleEvent(uuid: "event", name: "name", time: .at(refDate.timeIntervalSince1970 + 10))
+        detail = detail |> \.place .~ .init("schedule place")
+        try await parameterizeTest(.schedule(schedule, nil), expectLocation: nil)
+        try await parameterizeTest(.schedule(schedule, detail), expectLocation: "schedule place")
+        
+        var google = GoogleCalendar.Event("e1", "", name: "", colorId: "", time: .at(refDate.timeIntervalSince1970 + 10))
+        try await parameterizeTest(.google(google), expectLocation: nil)
+        
+        google = google |> \.location .~ "google location"
+        try await parameterizeTest(.google(google), expectLocation: "google location")
     }
     
     func testUsecase_fetchNextEvent_withoutSecondNextEvent() async throws {

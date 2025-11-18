@@ -330,21 +330,31 @@ extension CalendarEventFetchUsecaseImple {
         return calendarEvents
     }
     
-    private func fetchLocationInfoIfNeed(_ event: any CalendarEvent) async throws -> Place? {
+    private func selectLocationText(_ event: any CalendarEvent) async throws -> String? {
         
-        guard let todoOrScheduleId = switch event {
-        case let todo as TodoCalendarEvent: todo.eventId
-        case let schedule as ScheduleCalendarEvent: schedule.eventIdWithoutTurn
-        default: nil
-        } else { return nil }
-        
-        if let cached = await self.cached.value(\.eventDetails)[todoOrScheduleId] {
-            return cached.place
+        func locationFromPlace(_ eventId: String) async throws -> Place? {
+            if let cached = await self.cached.value(\.eventDetails)[eventId] {
+                return cached.place
+            }
+            let detail = try await self.eventDetailRepository.loadDetail(eventId).values.first(where: { _ in true })
+            await self.cached.update(\.eventDetails) { old in
+                return old |> key(eventId) .~ detail
+            }
+            return detail?.place
         }
         
-        let detail = try await self.eventDetailRepository.loadDetail(todoOrScheduleId).values.first(where: { _ in true })
-        await self.cached.update(\.eventDetails) { old in old |> key(todoOrScheduleId) .~ detail }
-        return detail?.place
+        switch event {
+        case let todo as TodoCalendarEvent:
+            return try await locationFromPlace(todo.eventId)?.placeName
+            
+        case let schedule as ScheduleCalendarEvent:
+            return try await locationFromPlace(schedule.eventIdWithoutTurn)?.placeName
+            
+        case let google as GoogleCalendarEvent:
+            return google.locationText
+            
+        default: return nil
+        }
     }
 }
 
@@ -376,8 +386,7 @@ extension CalendarEventFetchUsecaseImple {
         else {
             return nil
         }
-        let place = try? await self.fetchLocationInfoIfNeed(firstFutureEvent)
-        firstFutureEvent.locationText = place?.placeName
+        firstFutureEvent.locationText = try? await self.selectLocationText(firstFutureEvent)
         
         let secondFutureEvent = firstFutureEvent.eventTime.flatMap {
             return events.findFirstFutureEvent(from: $0.lowerBoundWithFixed, todayRange: todayRange)

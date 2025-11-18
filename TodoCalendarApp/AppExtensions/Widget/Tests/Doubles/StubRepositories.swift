@@ -50,7 +50,11 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
         return Just(tags).mapAsAnyError().eraseToAnyPublisher()
     }
     
+    var eventMocking: [GoogleCalendar.Event]?
     func loadEvents(_ calendarId: String, in period: Range<TimeInterval>) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        if let eventMocking {
+            return Just(eventMocking).mapAsAnyError().eraseToAnyPublisher()
+        }
         let event = GoogleCalendar.Event(
             "e1", calendarId, name: "google", colorId: "e1", time: .period(period)
         )
