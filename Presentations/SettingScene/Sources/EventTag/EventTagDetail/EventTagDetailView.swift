@@ -130,22 +130,30 @@ struct EventTagDetailView: View {
     
     var body: some View {
         ZStack {
-            VStack(alignment: .leading) {
-                
+            ScrollView {
+             
+                VStack(alignment: .leading) {
+                    
+                    Spacer()
+                        .frame(height: 32)
+                    
+                    self.nameInputView
+                    
+                    Text("Event color".localized())
+                        .font(self.appearance.fontSet.normal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.text1.asColor)
+                        .padding(.top, 24)
+                    
+                    self.suggestColorView
+                    
+                    Spacer()
+                }
+                .padding()
+                .padding(.bottom, 40)
+            }
+            
+            VStack {
                 Spacer()
-                    .frame(height: 32)
-                
-                self.nameInputView
-                
-                Text("Event color".localized())
-                    .font(self.appearance.fontSet.normal.asFont)
-                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
-                    .padding(.top, 24)
-                
-                self.suggestColorView
-                
-                Spacer()
-                
                 self.buttonViews
             }
             .padding()
@@ -167,8 +175,7 @@ struct EventTagDetailView: View {
             TextField(
                 "",
                 text: $state.newTagName,
-                prompt: Text("eventTag.addNew::placeholder".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor),
-                axis: .vertical
+                prompt: Text("eventTag.addNew::placeholder".localized()).foregroundStyle(appearance.colorSet.placeHolder.asColor)
             )
             .disabled(!self.state.isNameChangable)
             .onChange(of: state.newTagName) { old, new in
@@ -185,6 +192,7 @@ struct EventTagDetailView: View {
             .onSubmit {
                 self.isFocusInput = false
             }
+            .submitLabel(.done)
         }
     }
     
