@@ -38,6 +38,11 @@ public enum EventRepeatingOptions {
         public init(_ timeZone: TimeZone) {
             self.timeZone = timeZone
         }
+        
+        public var isEveryWeekDays: Bool {
+            let day = Set(self.dayOfWeeks)
+            return day == [.monday, .tuesday, .wednesday, .thursday, .friday]
+        }
     }
     
     public struct EveryMonth: EventRepeatingOption, Hashable {
