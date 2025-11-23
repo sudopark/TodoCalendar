@@ -151,6 +151,7 @@
 "eventDetail.repeating.everyWeek:title" = "매주";
 "eventDetail.repeating.everyWeekSomeDay:title" = "매주 %@";
 "eventDetail.repeating.everySomeWeek:title" = "매%d주";
+"eventDetail.repeating.everyWeekDays:title" = "매 주중";
 "eventDetail.repeating.everySomeWeekSomeDay:title" = "매%d주 %@";
 "eventDetail.repeating.everyMonth:title" = "매달";
 "eventDetail.repeating.everyMonth_someDay:title" = "매달 %@일";
