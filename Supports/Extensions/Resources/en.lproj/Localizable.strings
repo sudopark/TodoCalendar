@@ -151,6 +151,7 @@
 "eventDetail.repeating.everyWeek:title" = "Every Week";
 "eventDetail.repeating.everyWeekSomeDay:title" = "Every %@";
 "eventDetail.repeating.everySomeWeek:title" = "Every %d Weeks";
+"eventDetail.repeating.everyWeekDays:title" = "Every Weekday";
 "eventDetail.repeating.everySomeWeekSomeDay:title" = "Every %d Weeks %@";
 "eventDetail.repeating.everyMonth:title" = "Every Month";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ of every month.";
