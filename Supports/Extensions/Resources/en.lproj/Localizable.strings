@@ -379,6 +379,8 @@
 
 "external_service.name::google" = "Google Calendar";
 "external_service.expired::message" = "%@ integration has expired. Please go to Settings and try again";
+"external_service::google::hidden_event" = "Hidden";
+"external_service::google::unknown_event" = "Unknown";
 
 
 // MARK: - widget

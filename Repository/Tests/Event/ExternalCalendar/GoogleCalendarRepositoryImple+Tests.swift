@@ -305,6 +305,31 @@ extension GoogleCalendarRepositoryImple_Tests {
         }
     }
     
+    @Test func repository_loadPrivateEvent() async throws {
+        try await self.runTestWithOpenClose("test_google_event_5") {
+            // given
+            let expect = self.expectConfirm("비공개 이벤트 조회")
+            expect.timeout = .milliseconds(100)
+            let repository = self.makeRepository()
+            
+            // when
+            let load = repository.loadEventDetail("c_id", "Asia/Seoul", "private_event")
+            let details = try await self.outputs(expect, for: load)
+            let refreshedCache = try await self.cacheStorage.loadEventDetail("private_event")
+            
+            // then
+            try #require(details.count == 1)
+            let remote = details.first
+            #expect(remote?.summary == nil)
+            #expect(remote?.summaryText == "external_service::google::hidden_event".localized())
+            #expect(remote?.visibility == .private)
+            
+            #expect(refreshedCache.summary == "")
+            #expect(refreshedCache.summaryText == "external_service::google::hidden_event".localized())
+            #expect(refreshedCache.visibility == .private)
+        }
+    }
+    
     private func assertEventTimeIsDate(_ event: GoogleCalendar.Event?) {
         #expect(event?.eventId == "time_is_date")
         #expect(event?.calendarId == "c_id")
@@ -446,6 +471,11 @@ private struct DummyResponse {
                 resultJsonString: .success(
                     self.dummyNewEvent("origin", isRepeatOrigin: true)
                 )
+            ),
+            .init(
+                method: .get,
+                endpoint: GoogleCalendarEndpoint.event(calendarId: "c_id", eventId: "private_event"),
+                resultJsonString: .success(self.privateEvent)
             )
         ]
     }
@@ -970,6 +1000,32 @@ private struct DummyResponse {
            "eventType": "default"
           }
          ]
+        }
+        """
+    }
+    
+    private var privateEvent: String {
+        return """
+        {
+          "creator": {
+            "email": "some@email.com"
+          },
+          "end": {
+            "dateTime": "2025-01-01T21:30:00-08:00",
+            "timeZone": "Asia/Seoul"
+          },
+          "etag": "\\"123123\\"",
+          "htmlLink": "https://www.google.com",
+          "iCalUID": "some@emai.com",
+          "id": "private_event",
+          "kind": "calendar#event",
+          "start": {
+            "dateTime": "2025-01-01T20:30:00-08:00",
+            "timeZone": "Asia/Seoul"
+          },
+          "status": "confirmed",
+          "updated": "2025-01-02T04:43:34.380Z",
+          "visibility": "private"
         }
         """
     }

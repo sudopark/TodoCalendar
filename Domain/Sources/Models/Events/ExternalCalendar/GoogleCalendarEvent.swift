@@ -74,7 +74,10 @@ extension GoogleCalendar {
     
     public struct EventOrigin: Decodable, Sendable {
         public let id: String
-        public let summary: String
+        public var summary: String?
+        public var summaryText: String {
+            return EventOrigin.summaryText(summary, visibility: visibility)
+        }
         public var htmlLink: String?
         public var description: String?
         public var location: String?
@@ -99,12 +102,26 @@ extension GoogleCalendar {
         public var eventType: String?
         
         public var status: EventStatus?
+        public var visibility: Visibility?
         
         public init(
-            id: String, summary: String
+            id: String, summary: String?
         ) {
             self.id = id
             self.summary = summary
+        }
+        
+        public static func summaryText(
+            _ summary: String?, visibility: Visibility?
+        ) -> String {
+            let summary = summary?.emptyAsNil()
+            if let summary {
+                return summary
+            } else if visibility == .private || visibility == .confidential {
+                return "external_service::google::hidden_event".localized()
+            } else {
+                return "external_service::google::unknown_event".localized()
+            }
         }
         
         public struct Creator: Codable, Sendable {
@@ -200,6 +217,13 @@ extension GoogleCalendar {
             
             public init() { }
         }
+        
+        public enum Visibility: String, Decodable, Sendable {
+            case `default`
+            case `public`
+            case `private`
+            case confidential
+        }
     }
     public struct EventOriginValueList: Decodable, Sendable {
         public var timeZone: String?
@@ -254,7 +278,8 @@ extension GoogleCalendar {
         ) {
             self.eventId = origin.id
             self.calendarId = calendarId
-            self.name = origin.summary
+            
+            self.name = origin.summaryText
             self.eventTagId = .externalCalendar(
                 serviceId: GoogleCalendarService.id, id: calendarId
             )
