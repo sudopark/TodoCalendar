@@ -282,7 +282,7 @@ extension GoogleCalendarEventDetailViewModelImple {
         
         return self.subject.origin
             .compactMap { $0 }
-            .map { $0.summary }
+            .map { $0.summaryText }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

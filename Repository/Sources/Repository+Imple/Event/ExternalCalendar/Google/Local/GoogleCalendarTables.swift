@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import SQLiteService
+import Extensions
 
 
 // MARK: - Colors
@@ -103,6 +104,7 @@ struct GoogleCalendarEventOriginTable: Table {
         case attachments
         case eventType
         case status
+        case visibility
         
         var dataType: ColumnDataType {
             switch self {
@@ -128,6 +130,7 @@ struct GoogleCalendarEventOriginTable: Table {
             case .attachments: return .text([])
             case .eventType: return .text([])
             case .status: return .text([])
+            case .visibility: return .text([])
             }
         }
     }
@@ -160,6 +163,8 @@ struct GoogleCalendarEventOriginTable: Table {
         switch version {
         case 1:
             return Self.addColumnStatement(.status)
+        case 3:
+            return Self.addColumnStatement(.visibility)
         default: return nil
         }
     }
@@ -172,7 +177,7 @@ struct GoogleCalendarEventOriginTable: Table {
         case .calendarId: return entity.calendarId
         case .defaultTimeZone: return entity.defaultTimeZone
         case .id: return entity.origin.id
-        case .summary: return entity.origin.summary
+        case .summary: return entity.origin.summary ?? ""
         case .htmlLink: return entity.origin.htmlLink
         case .description: return entity.origin.description
         case .location: return entity.origin.location
@@ -191,6 +196,7 @@ struct GoogleCalendarEventOriginTable: Table {
         case .attachments: return entity.origin.attachments?.asText()
         case .eventType: return entity.origin.eventType
         case .status: return entity.origin.status?.rawValue
+        case .visibility: return entity.origin.visibility?.rawValue
         }
     }
     
@@ -201,7 +207,7 @@ extension GoogleCalendar.EventOrigin {
     public init(_ cursor: CursorIterator) throws {
         self.init(
             id: try cursor.next().unwrap(),
-            summary: try cursor.next().unwrap()
+            summary: cursor.next()
         )
         self.htmlLink = cursor.next()
         self.description = cursor.next()
@@ -222,6 +228,8 @@ extension GoogleCalendar.EventOrigin {
         self.eventType = cursor.next()
         let statusText: String? = cursor.next()
         self.status = statusText.flatMap { .init(rawValue: $0) }
+        let visibilityText: String? = cursor.next()
+        self.visibility = visibilityText.flatMap { .init(rawValue: $0) }
     }
 }
 

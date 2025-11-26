@@ -112,18 +112,29 @@ extension GoogleCalendarLocalStorageImple {
     ) async throws -> [GoogleCalendar.Event] {
         let timeQuery = Times.overlapQuery(with: range)
         let eventQuery = Events
-            .selectSome { [$0.id, $0.summary, $0.colorId, $0.htmlLink, $0.location] }
+            .selectSome { [$0.id, $0.summary, $0.colorId, $0.htmlLink, $0.location, $0.visibility] }
             .where { $0.calendarId == calendarId }
         let query = eventQuery.innerJoin(with: timeQuery, on: { ($0.id, $1.eventId) })
         let mapping: (CursorIterator) throws -> GoogleCalendar.Event = { cursor in
+            
+            let eventId: String = try cursor.next().unwrap()
+            let summary: String? = cursor.next()
+            let colorId: String? = cursor.next()
+            let htmlLink: String? = cursor.next()
+            let location: String? = cursor.next()
+            let visibilityText: String? = cursor.next()
+            let time = try Times.Entity(cursor).eventTime.unwrap()
             return .init(
-                try cursor.next().unwrap(),
+                eventId,
                 calendarId,
-                name: try cursor.next().unwrap(),
-                colorId: cursor.next(),
-                htmlLink: cursor.next(),
-                location: cursor.next(),
-                time: try Times.Entity(cursor).eventTime.unwrap()
+                name: GoogleCalendar.EventOrigin.summaryText(
+                    summary,
+                    visibility: visibilityText.flatMap { .init(rawValue: $0) }
+                ),
+                colorId: colorId,
+                htmlLink: htmlLink,
+                location: location,
+                time: time
             )
         }
         return try await self.sqliteService.async.run { db in

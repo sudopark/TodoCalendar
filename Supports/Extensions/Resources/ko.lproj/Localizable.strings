@@ -379,6 +379,8 @@
 
 "external_service.name::google" = "구글 캘린더";
 "external_service.expired::message" = "%@ 연동이 만료되었습니다. 설정 화면으로 이동하여 다시 시도해주세요.";
+"external_service::google::hidden_event" = "숨겨진 일정";
+"external_service::google::unknown_event" = "알 수 없음";
 
 
 // MARK: - widget

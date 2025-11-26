@@ -67,6 +67,10 @@ extension String {
         let range = NSRange(location: 0, length: urlString.utf16.count)
         return regex.firstMatch(in: urlString, options: [], range: range) != nil
     }
+    
+    public func emptyAsNil() -> String? {
+        return self.isEmpty ? nil : self
+    }
 }
 
 

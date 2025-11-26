@@ -346,7 +346,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         
         // when
         let loading = repository.scheduleEvent("some")
-        let error = self.waitError(expect, for: loading)
+        let error = self.waitError(expect, for: loading, timeout: 0.1)
         
         // then
         XCTAssertNotNil(error)
