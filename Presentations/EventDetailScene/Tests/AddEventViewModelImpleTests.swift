@@ -384,6 +384,7 @@ extension AddEventViewModelImpleTests {
         let addition = EventDetailData("pending")
         |> \.url .~ "url"
         |> \.memo .~ "memo"
+        |> \.place .~ .init("place")
         
         viewModel.eventDetail(didInput: basic, additional: addition)
     }
@@ -471,6 +472,7 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(isSavings, [false, true, false])
         XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.memo, "memo")
         XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.url, "url")
+        XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.place, .init("place"))
     }
     
     func testViewModel_whenAfterSaveSchedule_saveDetailData() {
@@ -489,6 +491,7 @@ extension AddEventViewModelImpleTests {
         XCTAssertEqual(isSavings, [false, true, false])
         XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.memo, "memo")
         XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.url, "url")
+        XCTAssertEqual(self.spyEventDetailDataUsecase.savedDetail?.place, .init("place"))
     }
     
     func testViewModel_whenSaveEventDetailDataFail_ignore() {

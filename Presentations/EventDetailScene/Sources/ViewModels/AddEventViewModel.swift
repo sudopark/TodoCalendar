@@ -287,6 +287,7 @@ extension AddEventViewModelImple: EventDetailInputListener {
         let detail = EventDetailData(eventId)
             |> \.memo .~ addition.memo
             |> \.url .~ addition.url
+            |> \.place .~ addition.place
         let _ = try? await self.eventDetailDataUsecase.saveDetail(detail)
     }
 }
