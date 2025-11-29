@@ -65,4 +65,17 @@ final class SpyEventDetailListener: EventDetailSceneListener {
         self.didRequestCopyFromSchedule = (schedule, detail)
         self.didCopyCallback?()
     }
+    
+    var didTransformedCallback: (() -> Void)?
+    var didTodoTransformToSchedule: ScheduleEvent?
+    func eventDetail(transformTo schedule: ScheduleEvent) {
+        self.didTodoTransformToSchedule = schedule
+        self.didTransformedCallback?()
+    }
+    
+    var didSchduleTransformToTodo: TodoEvent?
+    func eventDetail(transformTo todo: TodoEvent) {
+        self.didSchduleTransformToTodo = todo
+        self.didTransformedCallback?()
+    }
 }

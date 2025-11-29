@@ -94,7 +94,14 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         return self.todosWithoutDone(self.stubTodoEventsInRange)
     }
     
+    public var didRemoveTodoId: String?
+    public var shouldFailRemoveTodo: Bool = false
     open func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
+        self.didRemoveTodoId = id
+        guard !self.shouldFailRemoveTodo
+        else {
+            throw RuntimeError("failed")
+        }
     }
     
     public var didHandleRemoveTodoIds: [String]?

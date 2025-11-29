@@ -19,6 +19,8 @@ public protocol EventDetailSceneListener: AnyObject {
     
     func eventDetail(copyFromTodo params: TodoMakeParams, detail: EventDetailData?)
     func eventDetail(copyFromSchedule schedule: ScheduleMakeParams, detail: EventDetailData?)
+    func eventDetail(transformTo schedule: ScheduleEvent)
+    func eventDetail(transformTo todo: TodoEvent)
 }
 
 public struct MakeEventParams: Sendable {

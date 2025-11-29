@@ -51,7 +51,10 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         customTodo: TodoEvent? = nil,
         shouldFailSave: Bool = false,
         isForemost: Bool = false,
-        withEmptyAddition: Bool = false
+        withEmptyAddition: Bool = false,
+        shouldFailToTransformToSchedule: Bool = false,
+        shouldFailToSaveDetail: Bool = false,
+        shouldFailToRemoveTodo: Bool = false
     ) -> EditTodoEventDetailViewModelImple {
         
         let (todo, detail) = (customTodo ?? self.dummyRepeatingTodo, self.dummyDetail)
@@ -61,7 +64,9 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         } else {
             self.spyEventDetailDataUsecase.stubDetail = detail
         }
+        self.spyEventDetailDataUsecase.shouldFailSaveDetail = shouldFailToSaveDetail
         self.spyTodoUsecase.shouldUpdateEventFail = shouldFailSave
+        self.spyTodoUsecase.shouldFailRemoveTodo = shouldFailToRemoveTodo
         
         let tagUsecase = StubEventTagUsecase()
         
@@ -73,11 +78,15 @@ class EditTodoEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
         )
         self.stubForemostEventUsecase.refresh()
         
+        let scheduleUsecase = StubScheduleEventUsecase()
+        scheduleUsecase.shouldFailMakeEvent = shouldFailToTransformToSchedule
+        
         let viewModel = EditTodoEventDetailViewModelImple(
             todoId: todo.uuid,
             todoUsecase: self.spyTodoUsecase,
             eventTagUsecase: tagUsecase,
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
+            scheduleEventUsecase: scheduleUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase
         )
@@ -231,14 +240,14 @@ extension EditTodoEventDetailViewModelImpleTests {
             self.makeViewModel(customTodo: todo),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)], 
-                [.toggleTo(isForemost: true), .copy]
+                [.toggleTo(isForemost: true), .copy, .transformToSchedule]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customTodo: todo, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: false), .copy]
+                [.toggleTo(isForemost: false), .copy, .transformToSchedule]
             ]
         )
         let todoNotRepeating = todo |> \.repeating .~ nil
@@ -246,7 +255,7 @@ extension EditTodoEventDetailViewModelImpleTests {
             self.makeViewModel(customTodo: todoNotRepeating),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: true), .copy]
+                [.toggleTo(isForemost: true), .copy, .transformToSchedule]
             ]
         )
     }
@@ -300,6 +309,128 @@ extension EditTodoEventDetailViewModelImpleTests {
         XCTAssertEqual(pair?.0.notificationOptions, self.dummyRepeatingTodo.notificationOptions)
         XCTAssertEqual(pair?.1, self.dummyDetail)
     }
+    
+    func testViewModel_transfromEventToSchedule() {
+        // given
+        let expect = expectation(description: "todo -> schedule로 변환")
+        let viewModel = self.makeViewModelWithPrepare()
+        self.spyListener.didTransformedCallback = { expect.fulfill() }
+        
+        // when
+        viewModel.handleMoreAction(.transformToSchedule)
+        self.wait(for: [expect], timeout: self.timeout)
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith?.title, "eventDetail.todoEvent::transform::schedule_title".localized())
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+        XCTAssertEqual(self.spyListener.didTodoTransformToSchedule != nil, true)
+        XCTAssertEqual(self.spyTodoUsecase.didRemoveTodoId, self.dummyRepeatingTodo.uuid)
+        XCTAssertNotNil(self.spyEventDetailDataUsecase.savedDetail)
+        XCTAssertNotEqual(self.spyEventDetailDataUsecase.savedDetail?.eventId, self.dummyRepeatingTodo.uuid)
+        XCTAssertEqual(self.spyEventDetailDataUsecase.didRemovedDetailId, self.dummyRepeatingTodo.uuid)
+    }
+    
+    // 전환중에는 로딩 표시
+    func testViewModel_whenTransformToSchedule_updateIsSaving() {
+        // given
+        let expect = expectation(description: "todo -> schedule 전환시에는 전환중임을 표시")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithPrepare()
+        
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
+            
+            viewModel.handleMoreAction(.transformToSchedule)
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+    }
+    
+    // 이름 없으면 에러
+    func testViewModel_whenTransformToScheduleWithoutName_showIsNeed() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare()
+        let detail = EventDetailBasicData()
+        viewModel.eventDetail(didInput: detail, additional: .init(self.dummyRepeatingTodo.uuid))
+        
+        // when
+        viewModel.handleMoreAction(.transformToSchedule)
+        
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowToastWithMessage,
+            "eventDetail.unavailto_transform_withoutName".localized()
+        )
+    }
+    
+    // 시간 없으면 에러
+    func testViewModel_whenTransformToScheduleWithoutTime_showIsNeed() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(todoStubbing: {
+            $0 |> \.time .~ nil
+        })
+        
+        // when
+        viewModel.handleMoreAction(.transformToSchedule)
+        
+        // then
+        XCTAssertEqual(
+            self.spyRouter.didShowToastWithMessage,
+            "eventDetail.todoEvent_unavailto_transform_withoutTime".localized()
+        )
+    }
+    
+    // schedule 변환 실패했으면 실패
+    func testViewModel_whenTransformScheduleFails_showError() {
+        // given
+        let expect = expectation(description: "schedule 변환 실패했으면 에러 노출 및 로딩중 표시 초기화")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithPrepare(
+            shouldFailToTransformToSchedule: true
+        )
+        
+        // when
+        let isSavings = self.waitOutputs(expect, for: viewModel.isSaving, timeout: 0.1) {
+            viewModel.handleMoreAction(.transformToSchedule)
+        }
+        
+        // then
+        XCTAssertEqual(isSavings, [false, true, false])
+        XCTAssertEqual(self.spyRouter.didShowError != nil, true)
+    }
+    
+    // 디테일 저장 실패했으면 무시
+    func testViewModel_whenTransformToSheduleAndFailToSaveDetail_ignore() {
+        // given
+        let expect = expectation(description: "schedule 전환시에 이벤트 상세 저장 실패해도 무시")
+        self.spyListener.didTransformedCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModelWithPrepare(
+            shouldFailToSaveDetail: true
+        )
+        
+        // when
+        viewModel.handleMoreAction(.transformToSchedule)
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeoutLong)
+    }
+    
+    // 전환하고 삭제 실패했어도 무시
+    func testViewModel_whenTransformToSheduleAndFailToRemoveTodo_ignore() {
+        // given
+        let expect = expectation(description: "schedule 전환시에 todo 삭제 실패해도 무시")
+        self.spyListener.didTransformedCallback = { expect.fulfill() }
+        let viewModel = self.makeViewModelWithPrepare(
+            shouldFailToRemoveTodo: true
+        )
+        
+        // when
+        viewModel.handleMoreAction(.transformToSchedule)
+        
+        // then
+        self.wait(for: [expect], timeout: self.timeoutLong)
+    }
 }
 
 
@@ -308,19 +439,29 @@ extension EditTodoEventDetailViewModelImpleTests {
 extension EditTodoEventDetailViewModelImpleTests {
     
     private func makeViewModelWithPrepare(
+        todoStubbing: ((TodoEvent) -> TodoEvent)? = nil,
         isNotRepeating: Bool = false,
-        shouldFailEdit: Bool = false
+        shouldFailEdit: Bool = false,
+        shouldFailToTransformToSchedule: Bool = false,
+        shouldFailToSaveDetail: Bool = false,
+        shouldFailToRemoveTodo: Bool = false
     ) -> EditTodoEventDetailViewModelImple {
         // given
         let expect = expectation(description: "wait prepared")
         expect.expectedFulfillmentCount = 3
         
-        let todo = if isNotRepeating {
+        var todo = if isNotRepeating {
             self.dummyRepeatingTodo |> \.repeating .~ nil
         } else {
             self.dummyRepeatingTodo
         }
-        let viewModel = self.makeViewModel(customTodo: todo, shouldFailSave: shouldFailEdit)
+        todo = todoStubbing?(todo) ?? todo
+        let viewModel = self.makeViewModel(
+            customTodo: todo, shouldFailSave: shouldFailEdit,
+            shouldFailToTransformToSchedule: shouldFailToTransformToSchedule,
+            shouldFailToSaveDetail: shouldFailToSaveDetail,
+            shouldFailToRemoveTodo: shouldFailToRemoveTodo
+        )
         
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isLoading) {
