@@ -1163,6 +1163,8 @@ extension EventDetailMoreAction: Identifiable {
         case .copy: return "copy"
         case .addToTemplate: return "addToTemplate"
         case .share: return "share"
+        case .transformToSchedule: return "transformToSchedule"
+        case .transformToTodo: return "transformToTodo"
         }
     }
     
@@ -1180,6 +1182,8 @@ extension EventDetailMoreAction: Identifiable {
         case .copy: return "calendar::event::more_action:copy:item_name".localized()
         case .addToTemplate: return "add to template".localized()
         case .share: return "share".localized()
+        case .transformToSchedule: return "calendar::event::more_action:transform_to::schedule".localized()
+        case .transformToTodo: return "calendar::event::more_action:transform_to::todo".localized()
         }
     }
     
@@ -1190,6 +1194,8 @@ extension EventDetailMoreAction: Identifiable {
         case .copy: return "doc.on.doc"
         case .addToTemplate: return "doc.plaintext"
         case .share: return "square.and.arrow.up"
+        case .transformToSchedule: return "arrow.left.arrow.right"
+        case .transformToTodo: return "arrow.left.arrow.right"
         }
     }
     

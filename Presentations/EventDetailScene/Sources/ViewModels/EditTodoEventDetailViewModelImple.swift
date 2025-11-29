@@ -20,6 +20,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
     private let todoUsecase: any TodoEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let eventDetailDataUsecase: any EventDetailDataUsecase
+    private let scheduleEventUsecase: any ScheduleEventUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     var router: (any EventDetailRouting)?
@@ -30,6 +31,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         todoUsecase: any TodoEventUsecase,
         eventTagUsecase: any EventTagUsecase,
         eventDetailDataUsecase: any EventDetailDataUsecase,
+        scheduleEventUsecase: any ScheduleEventUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         foremostEventUsecase: any ForemostEventUsecase
     ) {
@@ -37,6 +39,7 @@ final class EditTodoEventDetailViewModelImple: EventDetailViewModel, @unchecked 
         self.todoUsecase = todoUsecase
         self.eventTagUsecase = eventTagUsecase
         self.eventDetailDataUsecase = eventDetailDataUsecase
+        self.scheduleEventUsecase = scheduleEventUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.foremostEventUsecase = foremostEventUsecase
         
@@ -140,12 +143,17 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
         case .copy:
             self.copyEvent()
             
+        case .transformToSchedule:
+            self.transformToScheduleAfterConfirm()
+            
         case .addToTemplate:
             // TODO:
             break
         case .share:
             // TODO:
             break
+            
+        default: break
         }
     }
     
@@ -224,6 +232,79 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
             }
             .store(in: &self.cancellables)
         }
+    }
+    
+    private func transformToScheduleAfterConfirm() {
+        guard let basic = self.subject.basicData.value,
+              let name = basic.current.name
+        else {
+            self.router?.showToast("eventDetail.unavailto_transform_withoutName".localized())
+            return
+        }
+
+        guard let selectTime = basic.current.selectedTime,
+              let timeZone = self.subject.timeZone.value,
+              let time = selectTime.eventTime(timeZone)
+        else {
+            self.router?.showToast("eventDetail.todoEvent_unavailto_transform_withoutTime".localized())
+            return
+        }
+        
+        let info = ConfirmDialogInfo()
+            |> \.title .~ pure("eventDetail.todoEvent::transform::schedule_title".localized())
+            |> \.message .~ pure("eventDetail.todoEvent::transform::schedule_message".localized())
+            |> \.confirmed .~ {
+                [weak self] in self?.transformToSchedule(basic, name, time)
+            }
+            |> \.withCancel .~ true
+        self.router?.showConfirm(dialog: info)
+    }
+    
+    private func transformToSchedule(
+        _ basic: Subject.Basic, _ name: String, _ time: EventTime
+    )  {
+        
+        let params = ScheduleMakeParams()
+            |> \.name .~ pure(name)
+            |> \.time .~ pure(time)
+            |> \.eventTagId .~ pure(basic.current.eventTagId)
+            |> \.repeating .~ basic.current.eventRepeating?.repeating
+            |> \.notificationOptions .~ pure(basic.current.eventNotifications)
+        
+        let todoId = self.todoId
+                
+        Task { [weak self] in
+            guard let self = self else { return }
+            self.subject.isSaving.send(true)
+            do {
+                let newSchedule = try await self.scheduleEventUsecase.makeScheduleEvent(params)
+                
+                await replaceEventDetailToSchedule(todoId, newSchedule.uuid)
+                
+                try? await self.todoUsecase.removeTodo(todoId, onlyThisTime: false)
+                
+                self.subject.isSaving.send(false)
+                self.router?.closeScene(animate: true) {
+                    self.listener?.eventDetail(transformTo: newSchedule)
+                }
+            } catch {
+                self.subject.isSaving.send(false)
+                self.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+    
+    private func replaceEventDetailToSchedule(
+        _ todoId: String, _ scheduleId: String
+    ) async {
+        let addition = self.subject.additionalData.value?.current
+        let newDetail = EventDetailData(scheduleId)
+            |> \.place .~ addition?.place
+            |> \.memo .~ addition?.memo
+            |> \.url .~ addition?.url
+        _ = try? await self.eventDetailDataUsecase.saveDetail(newDetail)
+        try? await self.eventDetailDataUsecase.removeDetail(todoId)
     }
     
     func close() {
@@ -401,7 +482,7 @@ extension EditTodoEventDetailViewModelImple {
                 : [.remove(onlyThisEvent: false)]
             // TODO: share 기능 일단 비활성화
 //            return [removeActions, [.toggleTo(isForemost: !isForemost), .share]]
-            return [removeActions, [.toggleTo(isForemost: !isForemost), .copy]]
+            return [removeActions, [.toggleTo(isForemost: !isForemost), .copy, .transformToSchedule]]
         }
         return Publishers.CombineLatest(
             self.subject.basicData.compactMap{ $0?.origin },

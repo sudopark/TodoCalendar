@@ -279,6 +279,14 @@ extension EventListCellEventHanleViewModelImple {
             .init(selectedDate: Date(), makeSource: .scheduleWith(schedule, detail))
         )
     }
+    
+    func eventDetail(transformTo schedule: ScheduleEvent) {
+        // TODO:
+    }
+    
+    func eventDetail(transformTo todo: TodoEvent) {
+        // TODO:
+    }
 }
 
 extension EventListCellEventHanleViewModelImple {

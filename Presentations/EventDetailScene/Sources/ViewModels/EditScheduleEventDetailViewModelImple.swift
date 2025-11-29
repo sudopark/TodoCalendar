@@ -142,12 +142,17 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         case .copy:
             self.copyEvent()
             
+        case .transformToTodo:
+            break
+            
         case .addToTemplate:
             // TODO:
             break
         case .share:
             // TODO:
             break
+            
+        default: break
         }
     }
     

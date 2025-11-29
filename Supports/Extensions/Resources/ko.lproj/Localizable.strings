@@ -127,6 +127,8 @@
 "calendar::event::more_action:foremost:mark:item_name" = "제일 중요 이벤트 등록";
 "calendar::event::more_action:foremost:unmark:item_name" = "제일 중요 이벤트 해제";
 "calendar::event::more_action:copy:item_name" = "이벤트 복사";
+"calendar::event::more_action:transform_to::schedule" = "일정으로 전환";
+"calendar::event::more_action:transform_to::todo" = "할일으로 전환";
 "calendar::event::more_action:edit:item_name" = "수정";
 "calednar::event::add_new" = "새 이벤트 추가";
 "calednar::event::add_new:place_holder" = "새로운 할일을 등록하세요.";
@@ -232,6 +234,11 @@
 "eventDetail:isSaving:toast:message" = "변경사항 저장중입니다. 잠시 기다려 주세요.";
 "eventDetail:hasChanges:confirm:message" = "변경사항이 존재합니다. 이를 폐기할까요?";
 "eventDetail:hasChanges:confirm:continue" = "계속 수정하기";
+
+"eventDetail.unavailto_transform_withoutName" = "이벤트를 전환하려면 이름을 입력해 주세요.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "일정으로 전환하려면 시간 정보가 필요합니다.";
+"eventDetail.todoEvent::transform::schedule_title" = "전환";
+"eventDetail.todoEvent::transform::schedule_message" = "이 할일을 일정으로 전환할까요?";
 
 // MARK: - Google calendar event
 

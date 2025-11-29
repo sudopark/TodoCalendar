@@ -63,6 +63,7 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             todoUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
+            scheduleEventUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase()
         )

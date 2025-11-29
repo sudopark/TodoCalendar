@@ -16,8 +16,15 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase, @unchecked Sendable {
     public init() { }
     
     public var didMakeScheduleParams: ScheduleMakeParams?
+    public var shouldFailMakeEvent: Bool = false
     open func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent {
         self.didMakeScheduleParams = params
+        
+        guard !self.shouldFailMakeEvent
+        else{
+            throw RuntimeError("failed")
+        }
+        
         guard let newEvent = ScheduleEvent(params)
         else {
             throw RuntimeError("invalid parameters")
