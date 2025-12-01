@@ -275,7 +275,7 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
                 try? await self.scheduleUsecase.removeScheduleEvent(scheduleId, onlyThisTime: isRepeating ? originScheduleTime : nil)
                 
                 self.subject.isSaving.send(false)
-                self.router?.closeScene(animate: true) {
+                self.router?.closeScene(animate: false) {
                     self.listener?.eventDetail(transformTo: newTodo)
                 }
             } catch {

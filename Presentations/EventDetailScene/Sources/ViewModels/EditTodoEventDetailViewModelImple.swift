@@ -284,7 +284,7 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
                 try? await self.todoUsecase.removeTodo(todoId, onlyThisTime: false)
                 
                 self.subject.isSaving.send(false)
-                self.router?.closeScene(animate: true) {
+                self.router?.closeScene(animate: false) {
                     self.listener?.eventDetail(transformTo: newSchedule)
                 }
             } catch {
