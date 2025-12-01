@@ -281,11 +281,11 @@ extension EventListCellEventHanleViewModelImple {
     }
     
     func eventDetail(transformTo schedule: ScheduleEvent) {
-        // TODO:
+        self.router?.routeToScheduleEventDetail(schedule.uuid, nil)
     }
     
     func eventDetail(transformTo todo: TodoEvent) {
-        // TODO:
+        self.router?.routeToTodoEventDetail(todo.uuid)
     }
 }
 
