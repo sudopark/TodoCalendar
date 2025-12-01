@@ -239,6 +239,8 @@
 "eventDetail.todoEvent_unavailto_transform_withoutTime" = "일정으로 전환하려면 시간 정보가 필요합니다.";
 "eventDetail.todoEvent::transform::schedule_title" = "전환";
 "eventDetail.todoEvent::transform::schedule_message" = "이 할일을 일정으로 전환할까요?";
+"eventDetail.scheduleEvent::transform::todo" = "전환";
+"eventDetail.scheduleEvent::transform::todo_message" = "이 일정을 할일으로 전환할까요?";
 
 // MARK: - Google calendar event
 

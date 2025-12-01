@@ -239,6 +239,8 @@
 "eventDetail.todoEvent_unavailto_transform_withoutTime" = "Time information is required to convert to schedule.";
 "eventDetail.todoEvent::transform::schedule_title" = "Convert";
 "eventDetail.todoEvent::transform::schedule_message" = "Would you like to convert this to-do to a schedule?";
+"eventDetail.scheduleEvent::transform::todo" = "Convert";
+"eventDetail.scheduleEvent::transform::todo_message" = "Would you like to convert this schedule to a to-do?";
 
 
 // MARK: - Google calendar event

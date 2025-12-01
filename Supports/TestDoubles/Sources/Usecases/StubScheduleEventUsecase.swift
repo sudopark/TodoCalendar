@@ -52,7 +52,16 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase, @unchecked Sendable {
         return Just(self.stubScheduleEventsInRange).eraseToAnyPublisher()
     }
     
+    public var didRemoveScheduleId: String?
+    public var didRemoveScheduleOnlyThisTime: EventTime?
+    public var shouldFailRemoveSchedule: Bool = false
     open func removeScheduleEvent(_ eventId: String, onlyThisTime: EventTime?) async throws {
+        guard !self.shouldFailRemoveSchedule
+        else {
+            throw RuntimeError("failed")
+        }
+        self.didRemoveScheduleId = eventId
+        self.didRemoveScheduleOnlyThisTime = onlyThisTime
     }
     
     public var didHandleRemoveScheduleIds: [String]?
