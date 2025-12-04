@@ -86,17 +86,6 @@ extension FeedbackUsecaseImpleTests {
     }
 }
 
-private struct StubDeviceInfoFetchService: DeviceInfoFetchService {
-    
-    @MainActor
-    func fetchDeviceInfo() async -> DeviceInfo {
-        return DeviceInfo()
-            |> \.appVersion .~ "app"
-            |> \.osVersion .~ "os"
-            |> \.deviceModel .~ "model"
-    }
-}
-
 private class StubFeedbackRepository: FeedbackRepository, @unchecked Sendable {
     
     var didPostFeedbackWith: FeedbackMakeParams?
