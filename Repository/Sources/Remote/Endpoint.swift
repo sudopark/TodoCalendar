@@ -272,12 +272,15 @@ public struct RemoteEnvironment: Sendable {
     
     let calendarAPIHost: String
     private let csAPI: String
+    let deviceId: String
     public init(
         calendarAPIHost: String,
-        csAPI: String
+        csAPI: String,
+        deviceId: String
     ) {
         self.calendarAPIHost = calendarAPIHost
         self.csAPI = csAPI
+        self.deviceId = deviceId
     }
     
     func path(_ endpoint: any Endpoint) -> String? {

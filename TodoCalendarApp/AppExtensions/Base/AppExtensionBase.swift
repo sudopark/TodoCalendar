@@ -71,7 +71,8 @@ final class AppExtensionBase {
         let csAPi = secrets["cs_api"] as? String
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
-            csAPI: csAPi ?? "https://dummy.com"
+            csAPI: csAPi ?? "https://dummy.com",
+            deviceId: AppEnvironment.deviceId(self.userDefaultEnvironmentStorage)
         )
         return environment
     }()

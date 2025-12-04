@@ -7,7 +7,7 @@
 
 import Foundation
 import Domain
-
+import Repository
 
 struct AppEnvironment {
     
@@ -53,4 +53,14 @@ struct AppEnvironment {
     }
     
     static let dbVersion: Int32 = 4
+    
+    static func deviceId(_ storage: any EnvironmentStorage) -> String {
+        let installKey = "install_id"
+        if let installId: String = storage.load(installKey) {
+            return installId
+        }
+        let newId = UUID().uuidString
+        storage.update(installKey, newId)
+        return newId
+    }
 }
