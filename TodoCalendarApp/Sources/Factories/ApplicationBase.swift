@@ -50,7 +50,7 @@ final class ApplicationBase {
        return SwiftLinkPreview(cache: InMemoryCache())
     }()
     
-    private var remoteEnvironment: RemoteEnvironment = {
+    private lazy var remoteEnvironment: RemoteEnvironment = {
         
         func readSecret() -> [String: Any] {
             guard let path = Bundle.main.path(forResource: "secrets", ofType: "json"),
@@ -66,7 +66,8 @@ final class ApplicationBase {
         let csAPi = secrets["cs_api"] as? String
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
-            csAPI: csAPi ?? "https://dummy.com"
+            csAPI: csAPi ?? "https://dummy.com",
+            deviceId: AppEnvironment.deviceId(userDefaultEnvironmentStorage)
         )
         return environment
     }()

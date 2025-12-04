@@ -45,7 +45,8 @@ final class StubRemoteAPI: RemoteAPI, @unchecked Sendable {
     
     let environment: RemoteEnvironment = .init(
         calendarAPIHost: "dummy_calendar_api_host",
-        csAPI: "cs_channel_api"
+        csAPI: "cs_channel_api",
+        deviceId: "device_id"
     )
     var didRequestedMethod: RemoteAPIMethod?
     var didRequestedPath: String?
