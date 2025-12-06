@@ -13,11 +13,17 @@ import Extensions
 
 // MARK: - EventSyncUsecase
 
-public protocol EventSyncUsecase: Sendable {
+public protocol EventSyncUsecase: Sendable, AnyObject {
     
-    func sync()
+    func sync(_ completed: (@Sendable () -> Void)?)
+    func cancelSync()
     
     var isSyncInProgress: AnyPublisher<Bool, Never> { get }
+}
+
+extension EventSyncUsecase {
+    
+    public func sync() { self.sync(nil) }
 }
 
 
@@ -50,16 +56,16 @@ public final class EventSyncUsecaseImple: EventSyncUsecase, @unchecked Sendable 
 
 extension EventSyncUsecaseImple {
     
-    public func sync() {
+    public func sync(_ completed: (@Sendable () -> Void)?) {
         
-        self.syncTask?.cancel()
-        self.syncTask = nil
+        self.cancelSync()
         
         let task = Task { [weak self] in
             
+            self?.subject.isSyncing.send(true)
+            
             try await self?.eventSyncMediator.waitUntilEventSyncAvailable()
             
-            self?.subject.isSyncing.send(true)
             logger.log(level: .debug, "event sync process start")
             
             let dataTypes: [SyncDataType] = [.eventTag, .todo, .schedule]
@@ -74,8 +80,15 @@ extension EventSyncUsecaseImple {
             
             logger.log(level: .debug, "event sync process end")
             self?.subject.isSyncing.send(false)
+            completed?()
         }
         self.syncTask = task
+    }
+    
+    public func cancelSync() {
+        self.syncTask?.cancel()
+        self.syncTask = nil
+        self.subject.isSyncing.send(false)
     }
     
     private func runSync(_ dataType: SyncDataType) async throws {
@@ -133,6 +146,7 @@ extension EventSyncUsecaseImple {
     
     public var isSyncInProgress: AnyPublisher<Bool, Never> {
         return self.subject.isSyncing
+            .removeDuplicates()
             .eraseToAnyPublisher()
     }
 }
@@ -144,7 +158,11 @@ public final class NotNeedEventSyncUsecase: EventSyncUsecase, Sendable {
     
     public init() { }
     
-    public func sync() { }
+    public func sync(_ completed: (() -> Void)?) {
+        completed?()
+    }
+    
+    public func cancelSync() { }
     
     public var isSyncInProgress: AnyPublisher<Bool, Never> {
         return Just(false).eraseToAnyPublisher()

@@ -117,6 +117,7 @@ extension EventSyncUsecaseImpleTests {
     @Test func usecase_whenEventUploading_waitSync() async throws {
         // given
         let expect = expectConfirm("event uploading 중에는 sync 동작 대기")
+        expect.count = 2
         let usecase = self.makeUsecase(checkResult: .needToSync)
         try await self.fakeEventUploadService.resume()
         
@@ -126,12 +127,13 @@ extension EventSyncUsecaseImpleTests {
         }
         
         // then
-        #expect(syncs == [false])
+        #expect(syncs == [false, true])
     }
     
     @Test func usecase_whenTemporaryUserDataMigration_waitSync() async throws {
         // given
         let expect = expectConfirm("임시 유저데이터 마이그레이션 중에는 sync 동작 대기")
+        expect.count = 2
         let usecase = self.makeUsecase(checkResult: .needToSync)
         self.fakeMigrationUsecase.startMigration()
         
@@ -141,7 +143,7 @@ extension EventSyncUsecaseImpleTests {
         }
         
         // then
-        #expect(syncs == [false])
+        #expect(syncs == [false, true])
     }
     
     @Test func usecase_whenEventUploading_runSyncAfterUploadingEnd() async throws {
@@ -155,6 +157,41 @@ extension EventSyncUsecaseImpleTests {
         let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
             usecase.sync()
             
+            await self.fakeEventUploadService.pause()
+        }
+        
+        // then
+        #expect(syncs == [false, true, false])
+    }
+    
+    @Test func usecase_whenAfterSync_notify() async throws {
+        // given
+        let usecase = self.makeUsecase(checkResult: .needToSync)
+        
+        // when + then
+        try await confirmation("sync 종료 대기") { confirm in
+            
+            usecase.sync { confirm() }
+            
+            try await Task.sleep(for: .milliseconds(100))
+        }
+    }
+    
+    @Test func usecase_cancelSync() async throws {
+        // given
+        let expect = expectConfirm("sync cancel")
+        expect.count = 3; expect.timeout = .milliseconds(100)
+        let usecase = self.makeUsecase(checkResult: .needToSync)
+        try await self.fakeEventUploadService.resume()
+        
+        // when
+        let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
+            usecase.sync()
+            
+            try await Task.sleep(for: .milliseconds(50))
+            usecase.cancelSync()
+            
+            // should ignore
             await self.fakeEventUploadService.pause()
         }
         
