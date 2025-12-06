@@ -185,6 +185,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
     private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
+    private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
     private let applicationBase: ApplicationBase
     private var usecaseFactory: (any UsecaseFactory)!
     
@@ -192,11 +193,13 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
+        backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
         applicationBase: ApplicationBase
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
+        self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
         self.applicationBase = applicationBase
     }
     
@@ -287,6 +290,7 @@ extension ApplicationRootRouter {
                 applicationBase: applicationBase
             )
         }
+        self.backgroundEventSyncUsecase.change(factory: self.usecaseFactory)
     }
     
     @MainActor

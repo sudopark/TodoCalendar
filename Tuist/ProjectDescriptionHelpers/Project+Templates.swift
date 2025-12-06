@@ -213,7 +213,10 @@ extension Project {
                 "ITSAppUsesNonExemptEncryption": false,
                 "CFBundleDisplayName": "To-do Calendar",
                 "CFBundleShortVersionString": "\(self.appVersion)",
-                "CFBundleVersion": "\(self.buildNumber)"
+                "CFBundleVersion": "\(self.buildNumber)",
+                "BGTaskSchedulerPermittedIdentifiers": [
+                    "com.sudo.park.TodoCalendarApp.bgSync"
+                ]
             ]),
             sources: [
                 "Sources/**",
