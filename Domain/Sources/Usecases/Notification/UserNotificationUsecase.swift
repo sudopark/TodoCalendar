@@ -11,8 +11,7 @@ import Foundation
 
 public protocol UserNotificationUsecase: Sendable {
     
-    func register(_ userId: String, fcmToken: String) async throws
-    func unregister(_ userId: String) async throws
+    func register(fcmToken: String) async throws
 }
 
 
@@ -31,15 +30,11 @@ public final class UserNotificationUsecaseImple: UserNotificationUsecase {
 }
 
 extension UserNotificationUsecaseImple {
-        
-    public func register(_ userId: String, fcmToken: String) async throws {
+
+    public func register(fcmToken: String) async throws {
         let deviceInfo = await self.deviceInfoFetchService.fetchDeviceInfo()
         try await self.repository.register(
-            userId, fcmToken: fcmToken, deviceInfo: deviceInfo
+            fcmToken: fcmToken, deviceInfo: deviceInfo
         )
-    }
-    
-    public func unregister(_ userId: String) async throws {
-        try await self.repository.unregister(userId)
     }
 }

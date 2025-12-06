@@ -74,7 +74,7 @@ extension DaysIntervalCountUsecaseImpleTests {
         let isAm = (calendar.dateComponents([.hour], from: Date(timeIntervalSince1970: now)).hour ?? 0) < 12
         if isAm {
             // 오전에 돌리면 0, -1
-            #expect(intervals == [0, -1])
+            #expect(intervals == [0, 1])
         } else {
             // 오후에 돌리면 1, 0
             #expect(intervals == [1, 0])

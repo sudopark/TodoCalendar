@@ -31,18 +31,10 @@ extension UserNotificationUsecaseImpleTests {
         let usecase = self.makeUsecase()
         
         // when
-        try await usecase.register("userId", fcmToken: "token")
+        try await usecase.register(fcmToken: "token")
         
         // then
         #expect(self.spyRepository.didRegisterWithDeviceInfo?.deviceModel == "model")
-    }
-    
-    @Test func usecase_unregister() async throws {
-        // given
-        let usecase = self.makeUsecase()
-        
-        // when + then
-        try await usecase.unregister("userId")
     }
 }
 
@@ -51,10 +43,10 @@ private final class StubRepository: UserNotificationRepository, @unchecked Senda
     
     var didRegisterWithDeviceInfo: DeviceInfo?
     func register(
-        _ userId: String, fcmToken: String, deviceInfo: DeviceInfo
+        fcmToken: String, deviceInfo: DeviceInfo
     ) async throws {
         self.didRegisterWithDeviceInfo = deviceInfo
     }
     
-    func unregister(_ userId: String) async throws { }
+    func unregister() async throws { }
 }

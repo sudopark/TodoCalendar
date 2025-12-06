@@ -15,17 +15,21 @@ public final class AccountUsecaseImple: @unchecked Sendable {
     
     private let oauth2ServiceProvider: any OAuth2ServiceUsecaseProvider
     private let authRepository: any AuthRepository
+    private let userNotificationRepository: any UserNotificationRepository
     private let sharedStore: SharedDataStore
+    
     private var lastestUsedOAuthUsecase: (any OAuth2ServiceUsecase)?
     private let accountChangedEventSubject = PassthroughSubject<AccountChangedEvent, Never>()
     
     public init(
         oauth2ServiceProvider: any OAuth2ServiceUsecaseProvider,
         authRepository: any AuthRepository,
+        userNotificationRepository: any UserNotificationRepository,
         sharedStore: SharedDataStore
     ) {
         self.oauth2ServiceProvider = oauth2ServiceProvider
         self.authRepository = authRepository
+        self.userNotificationRepository = userNotificationRepository
         self.sharedStore = sharedStore
     }
 }
@@ -50,12 +54,14 @@ extension AccountUsecaseImple: AuthUsecase {
     }
     
     public func signOut() async throws {
+        try? await self.userNotificationRepository.unregister()
         try await self.authRepository.signOut()
         self.setupAccount(nil)
         self.accountChangedEventSubject.send(.signOut)
     }
     
     public func deleteAccount() async throws {
+        try? await self.userNotificationRepository.unregister()
         try await self.authRepository.deleteAccount()
         self.setupAccount(nil)
         self.accountChangedEventSubject.send(.signOut)

@@ -173,7 +173,7 @@ extension TemporaryUserDataMigrationUescaseImpleTests {
             let usecase = self.makeUsecase()
             
             // when
-            let isMigrating = self.waitOutputs(expect, for: usecase.isMigrating) {
+            let isMigrating = self.waitOutputs(expect, for: usecase.isMigrating, timeout: 0.1) {
                 usecase.startMigration()
             }
             
@@ -201,7 +201,7 @@ extension TemporaryUserDataMigrationUescaseImpleTests {
             let usecase = self.makeUsecase()
             
             // when
-            let counts = self.waitOutputs(expect, for: usecase.migrationNeedEventCount) {
+            let counts = self.waitOutputs(expect, for: usecase.migrationNeedEventCount, timeout: 0.1) {
                 usecase.checkIsNeedMigration()
                 
                 usecase.startMigration()

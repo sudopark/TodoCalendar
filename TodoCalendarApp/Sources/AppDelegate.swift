@@ -80,8 +80,8 @@ extension AppDelegate: @MainActor UNUserNotificationCenterDelegate, @MainActor M
         _ messaging: Messaging,
         didReceiveRegistrationToken fcmToken: String?
     ) {
-        // TODO: upload FCM token
-        
+        guard let fcmToken else { return }
+        self.applicationViewModel.handleReceiveFcmToken(fcmToken)
     }
     
     func userNotificationCenter(

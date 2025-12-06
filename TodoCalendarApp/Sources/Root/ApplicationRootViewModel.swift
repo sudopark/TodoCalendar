@@ -22,28 +22,36 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let accountUsecase: any AccountUsecase
     private let prepareUsecase: any ApplicationPrepareUsecase
     private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
+    private let userNotificationUsecase: any UserNotificationUsecase
     private let environmentStorage: any EnvironmentStorage
     var router: ApplicationRootRouter?
-    
-    private var cancellables: Set<AnyCancellable> = []
     
     init(
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
         prepareUsecase: any ApplicationPrepareUsecase,
         externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
+        userNotificationUsecase: any UserNotificationUsecase,
         environmentStorage: any EnvironmentStorage
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
         self.prepareUsecase = prepareUsecase
         self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
+        self.userNotificationUsecase = userNotificationUsecase
         self.environmentStorage = environmentStorage
         
         self.bindAccountStatusChanged()
         self.bindApplicationStatusChanged()
         self.bindExternalCalenarIntegratedStatus()
     }
+    
+    private struct Subject {
+        let fcmToken = CurrentValueSubject<String?, Never>(nil)
+        let isSignIn = CurrentValueSubject<Bool, Never>(false)
+    }
+    private let subject = Subject()
+    private var cancellables: Set<AnyCancellable> = []
 }
 
 
@@ -55,6 +63,8 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
         Task {
             let result = try await self.prepareUsecase.prepareLaunch()
             self.router?.setupInitialScene(result)
+            self.subject.isSignIn.send(result.latestLoginAcount != nil)
+            self.registerTokenIfNeed()
         }
     }
     
@@ -89,16 +99,19 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
     
     private func handleUserSignedIn(_ account: Account) {
         Task { [weak self] in
+            self?.subject.isSignIn.send(true)
             await self?.prepareUsecase.prepareSignedIn(account.auth)
             
             try? await Task.sleep(for: .milliseconds(100))
             self?.router?.changeRootSceneAfter(signIn: account.auth)
+            self?.registerTokenIfNeed()
         }
         .store(in: &self.cancellables)
     }
     
     private func handleUserSignedOut() {
         Task { [weak self] in
+            self?.subject.isSignIn.send(false)
             await self?.prepareUsecase.prepareSignedOut()
             
             try? await Task.sleep(for: .milliseconds(100))
@@ -179,3 +192,28 @@ extension ApplicationRootViewModelImple {
     }
 }
 
+// MARK: - fcm token
+
+extension ApplicationRootViewModelImple {
+    
+    func handleReceiveFcmToken(_ token: String) {
+        self.subject.fcmToken.send(token)
+        self.registerTokenIfNeed(with: token)
+    }
+    
+    private func registerTokenIfNeed(with token: String? = nil) {
+        guard let token = token ?? self.subject.fcmToken.value,
+              self.subject.isSignIn.value
+        else { return }
+        
+        Task { [weak self] in
+            do {
+                try await self?.userNotificationUsecase.register(fcmToken: token)
+                logger.log(level: .info, "register fcm token - \(token)")
+            } catch {
+                logger.log(level: .error, "register fcm token fail: \(error.localizedDescription)")
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+}

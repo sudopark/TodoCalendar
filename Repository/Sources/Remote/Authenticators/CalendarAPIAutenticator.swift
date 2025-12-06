@@ -40,6 +40,7 @@ extension CalendarAPIAutenticator {
         switch endpoint {
         case let account as AccountAPIEndpoints where account == .info:
             return false
+        case is UserAPIEndpoints: return true
         case is TodoAPIEndpoints: return true
         case is ScheduleEventEndpoints: return true
         case is ForemostEventEndpoints: return true
