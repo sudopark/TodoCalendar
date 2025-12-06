@@ -19,10 +19,15 @@ open class StubEventSyncUsecase: EventSyncUsecase, @unchecked Sendable {
     public var didSyncRequestedCount: Int = 0
     private let isSyncSubject = CurrentValueSubject<Bool, Never>(false)
     
-    open func sync() {
+    open func sync(_ completed: (@Sendable () -> Void)?) {
         self.isSyncSubject.send(true)
         self.didSyncRequested = true
         self.didSyncRequestedCount += 1
+        self.isSyncSubject.send(false)
+        completed?()
+    }
+    
+    open func cancelSync() {
         self.isSyncSubject.send(false)
     }
     
