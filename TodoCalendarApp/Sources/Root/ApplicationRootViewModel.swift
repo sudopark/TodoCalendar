@@ -23,6 +23,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let prepareUsecase: any ApplicationPrepareUsecase
     private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     private let userNotificationUsecase: any UserNotificationUsecase
+    private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
     private let environmentStorage: any EnvironmentStorage
     var router: ApplicationRootRouter?
     
@@ -32,6 +33,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         prepareUsecase: any ApplicationPrepareUsecase,
         externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
         userNotificationUsecase: any UserNotificationUsecase,
+        backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
         environmentStorage: any EnvironmentStorage
     ) {
         self.authUsecase = authUsecase
@@ -39,6 +41,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         self.prepareUsecase = prepareUsecase
         self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
         self.userNotificationUsecase = userNotificationUsecase
+        self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
         self.environmentStorage = environmentStorage
         
         self.bindAccountStatusChanged()
@@ -58,6 +61,10 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
 // MARK: - handle root routing
 
 extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
+    
+    func registerBackgroundTask() {
+        self.backgroundEventSyncUsecase.registerTask()
+    }
     
     func prepareInitialScene() {
         Task {
