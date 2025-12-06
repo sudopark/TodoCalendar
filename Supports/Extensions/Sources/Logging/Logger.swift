@@ -38,6 +38,7 @@ public final class Logger: @unchecked Sendable {
     public enum Label: String {
         case `default`
         case sql = "SQL"
+        case backgroundSync
     }
     
     public func prepare() {

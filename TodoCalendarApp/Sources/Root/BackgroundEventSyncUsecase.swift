@@ -50,23 +50,23 @@ extension BackgroundEventSyncUsecaseImple {
     
     private func handleBackgroundSync(_ task: BGAppRefreshTask) {
         
-        self.debugLog("will run sync")
+        logger.log(.backgroundSync, level: .debug, "background task start - will sync task")
         self.scheduleNextTask()
         
         guard let syncUsecase = self.usecaseFactory?.eventSyncUsecase
         else {
-            self.debugLog("syncUsecase not prepared")
+            logger.log(.backgroundSync, level: .error, "syncUsecase not prepared")
             task.setTaskCompleted(success: true)
             return
         }
         
         task.expirationHandler = { [weak syncUsecase] in
-            self.debugLog("sync job expired")
+            logger.log(.backgroundSync, level: .warning, "sync job expired")
             syncUsecase?.cancelSync()
         }
         
         syncUsecase.sync { [weak task] in
-            self.debugLog("sync job end")
+            logger.log(.backgroundSync, level: .debug, "sync job end")
             task?.setTaskCompleted(success: true)
         }
     }
@@ -79,15 +79,9 @@ extension BackgroundEventSyncUsecaseImple {
         BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: taskId)
         do {
             try BGTaskScheduler.shared.submit(request)
-            self.debugLog("schedule next task")
+            logger.log(.backgroundSync, level: .error, "schedule next task")
         } catch {
-            logger.log(level: .error, "TodoCalendar: fail to sumit new background refresh task: \(error.localizedDescription)")
+            logger.log(.backgroundSync, level: .error, "fail to sumit new background refresh task: \(error.localizedDescription)")
         }
-    }
-    
-    private func debugLog(_ message: String) {
-        #if DEBUG
-        NSLog("TodoCalendar-background sync: \(message)")
-        #endif
     }
 }
