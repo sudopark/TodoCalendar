@@ -12,6 +12,6 @@ import Foundation
 public protocol UserNotificationRepository: Sendable {
     
     
-    func register(_ userId: String, fcmToken: String, deviceInfo: DeviceInfo) async throws
-    func unregister(_ userId: String) async throws
+    func register(fcmToken: String, deviceInfo: DeviceInfo) async throws
+    func unregister() async throws
 }

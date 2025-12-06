@@ -53,7 +53,7 @@ public enum AccountAPIEndpoints: Endpoint {
 
 // MARK: - User
 
-enum UserAPIEndpoint: Endpoint {
+enum UserAPIEndpoints: Endpoint {
     case notification
     
     var subPath: String {
@@ -312,7 +312,7 @@ public struct RemoteEnvironment: Sendable {
         case let account as AccountAPIEndpoints:
             return "\(calendarAPIHost)/v1/accounts/\(account.subPath)"
             
-        case let user as UserAPIEndpoint:
+        case let user as UserAPIEndpoints:
             return "\(calendarAPIHost)/v1/user/\(user.subPath)"
             
         case let todo as TodoAPIEndpoints:
