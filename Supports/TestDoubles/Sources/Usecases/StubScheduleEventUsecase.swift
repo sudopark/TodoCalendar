@@ -16,8 +16,15 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase, @unchecked Sendable {
     public init() { }
     
     public var didMakeScheduleParams: ScheduleMakeParams?
+    public var shouldFailMakeEvent: Bool = false
     open func makeScheduleEvent(_ params: ScheduleMakeParams) async throws -> ScheduleEvent {
         self.didMakeScheduleParams = params
+        
+        guard !self.shouldFailMakeEvent
+        else{
+            throw RuntimeError("failed")
+        }
+        
         guard let newEvent = ScheduleEvent(params)
         else {
             throw RuntimeError("invalid parameters")
@@ -45,7 +52,16 @@ open class StubScheduleEventUsecase: ScheduleEventUsecase, @unchecked Sendable {
         return Just(self.stubScheduleEventsInRange).eraseToAnyPublisher()
     }
     
+    public var didRemoveScheduleId: String?
+    public var didRemoveScheduleOnlyThisTime: EventTime?
+    public var shouldFailRemoveSchedule: Bool = false
     open func removeScheduleEvent(_ eventId: String, onlyThisTime: EventTime?) async throws {
+        guard !self.shouldFailRemoveSchedule
+        else {
+            throw RuntimeError("failed")
+        }
+        self.didRemoveScheduleId = eventId
+        self.didRemoveScheduleOnlyThisTime = onlyThisTime
     }
     
     public var didHandleRemoveScheduleIds: [String]?

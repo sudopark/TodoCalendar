@@ -9,6 +9,9 @@ import UIKit
 import Domain
 import Extensions
 import FirebaseCore
+import FirebaseMessaging
+import UserNotifications
+
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -26,11 +29,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         if AppEnvironment.isTestBuild == false {
             FirebaseApp.configure()
+            Messaging.messaging().delegate = self
+            UNUserNotificationCenter.current().delegate = self
+            application.registerForRemoteNotifications()
         }
         
         let builder = ApplicationRootBuilder()
         self.applicationViewModel = builder.makeRootViewModel()
         self.applicationRouter = self.applicationViewModel.router
+        self.applicationViewModel.registerBackgroundTask()
         
         return true
     }
@@ -51,6 +58,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 
+// MARK: - handle open url
 
 extension AppDelegate {
     
@@ -61,5 +69,33 @@ extension AppDelegate {
     ) -> Bool {
         
         return self.applicationViewModel.handle(open: url)
+    }
+}
+
+
+// MARK: - handle notification
+
+extension AppDelegate: @MainActor UNUserNotificationCenterDelegate, @MainActor MessagingDelegate {
+    
+    func messaging(
+        _ messaging: Messaging,
+        didReceiveRegistrationToken fcmToken: String?
+    ) {
+        guard let fcmToken else { return }
+        self.applicationViewModel.handleReceiveFcmToken(fcmToken)
+    }
+    
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        willPresent notification: UNNotification
+    ) async -> UNNotificationPresentationOptions {
+        return [.banner]
+    }
+    
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse
+    ) async {
+        // TODO: handle notification tap
     }
 }

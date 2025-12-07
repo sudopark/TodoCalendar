@@ -17,7 +17,7 @@ import UnitTestHelpKit
 class RemoteAPIImpleTests {
     
     private func makeRemote() -> RemoteAPIImple {
-        let env = RemoteEnvironment(calendarAPIHost: "https://fake.com", csAPI: "some")
+        let env = RemoteEnvironment(calendarAPIHost: "https://fake.com", csAPI: "some", deviceId: "device_id")
         let session = FakeSession()
         return RemoteAPIImple(session: session, environment: env, interceptor: nil)
     }

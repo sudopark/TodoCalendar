@@ -18,13 +18,16 @@ import TestDoubles
 class AccountUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
+    private var spyUserNotificationRepository: SpyUserNotificationRepository!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
+        self.spyUserNotificationRepository = .init()
     }
     
     override func tearDownWithError() throws {
         self.cancelBag = nil
+        self.spyUserNotificationRepository = nil
     }
     
     private var dummyAuth: Auth {
@@ -34,7 +37,8 @@ class AccountUsecaseImpleTests: BaseTestCase, PublisherWaitable {
     private func makeUsecase(
         latestAccount: Account? = nil,
         shouldFailOAuth: Bool = false,
-        shouldFailSignIn: Bool = false
+        shouldFailSignIn: Bool = false,
+        shouldFailUnregisterUserNotification: Bool = false
     ) -> AccountUsecaseImple {
         
         let provider = FakeOAuthUsecaseProvider()
@@ -42,9 +46,12 @@ class AccountUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         let repository = StubAuthRepository(latest: latestAccount)
         repository.shouldFailSignIn = shouldFailSignIn
         
+        self.spyUserNotificationRepository.shouldFailUnregister = shouldFailUnregisterUserNotification
+        
         return .init(
             oauth2ServiceProvider: provider,
             authRepository: repository,
+            userNotificationRepository: self.spyUserNotificationRepository,
             sharedStore: SharedDataStore()
         )
     }
@@ -222,6 +229,19 @@ extension AccountUsecaseImpleTests {
         
         // then
         XCTAssert(true)
+        XCTAssertEqual(self.spyUserNotificationRepository.didUnregister, true)
+    }
+    
+    func testUsecase_whenSignOutAndUnregisterNotificationFail_ignore() async throws {
+        // given
+        let usecase = self.makeUsecase(shouldFailUnregisterUserNotification: true)
+        
+        // when
+        try await usecase.signOut()
+        
+        // then
+        XCTAssert(true)
+        XCTAssertEqual(self.spyUserNotificationRepository.didUnregister, true)
     }
     
     func testUsecase_whenAfterSignout_clearSharedAccountInfo() {
@@ -272,6 +292,19 @@ extension AccountUsecaseImpleTests {
         
         // then
         XCTAssert(true)
+        XCTAssertEqual(self.spyUserNotificationRepository.didUnregister, true)
+    }
+    
+    func testUsecase_whenDeleteAccountAndUnregisterNotificationFail_ignore() async throws {
+        // given
+        let usecase = self.makeUsecase(shouldFailUnregisterUserNotification: true)
+        
+        // when
+        try await usecase.deleteAccount()
+        
+        // then
+        XCTAssert(true)
+        XCTAssertEqual(self.spyUserNotificationRepository.didUnregister, true)
     }
     
     func testUsecase_whenAfterDeleteAccount_clearSharedAccountInfo() {
@@ -403,5 +436,19 @@ private class StubGoogleOAuth2Usecase: OAuth2ServiceUsecase, @unchecked Sendable
     
     func handle(open url: URL) -> Bool {
         return true
+    }
+}
+
+private final class SpyUserNotificationRepository: UserNotificationRepository, @unchecked Sendable {
+    
+    func register(fcmToken: String, deviceInfo: DeviceInfo) async throws {}
+    
+    var didUnregister: Bool?
+    var shouldFailUnregister: Bool = false
+    func unregister() async throws {
+        self.didUnregister = true
+        if self.shouldFailUnregister {
+            throw RuntimeError("failed")
+        }
     }
 }

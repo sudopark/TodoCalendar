@@ -67,7 +67,9 @@ struct EventDetailTypeModel: Equatable {
 
 enum EventDetailMoreAction: Equatable {
     case remove(onlyThisEvent: Bool)
-    case copy   // 이후 구현 예정
+    case copy
+    case transformToSchedule
+    case transformToTodo
     case addToTemplate  // 이후 구현 예정
     case toggleTo(isForemost: Bool)
     case share

@@ -127,6 +127,8 @@
 "calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";
 "calendar::event::more_action:foremost:unmark:item_name" = "Unmark as foremost";
 "calendar::event::more_action:copy:item_name" = "Copy event";
+"calendar::event::more_action:transform_to::schedule" = "Convert to schedule";
+"calendar::event::more_action:transform_to::todo" = "Convert to to-do";
 "calendar::event::more_action:edit:item_name" = "Edit";
 "calednar::event::add_new" = "Add a new event";
 "calednar::event::add_new:place_holder" = "Add a new to-do event quickly.";
@@ -151,6 +153,7 @@
 "eventDetail.repeating.everyWeek:title" = "Every Week";
 "eventDetail.repeating.everyWeekSomeDay:title" = "Every %@";
 "eventDetail.repeating.everySomeWeek:title" = "Every %d Weeks";
+"eventDetail.repeating.everyWeekDays:title" = "Every Weekday";
 "eventDetail.repeating.everySomeWeekSomeDay:title" = "Every %d Weeks %@";
 "eventDetail.repeating.everyMonth:title" = "Every Month";
 "eventDetail.repeating.everyMonth_someDay:title" = "%@ of every month.";
@@ -231,6 +234,13 @@
 "eventDetail:isSaving:toast:message" = "Saving changes. Please wait.";
 "eventDetail:hasChanges:confirm:message" = "There are changes. Do you want to discard them?";
 "eventDetail:hasChanges:confirm:continue" = "Keep editing";
+
+"eventDetail.unavailto_transform_withoutName" = "Please enter a name to convert events.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Time information is required to convert to schedule.";
+"eventDetail.todoEvent::transform::schedule_title" = "Convert";
+"eventDetail.todoEvent::transform::schedule_message" = "Would you like to convert this to-do to a schedule?";
+"eventDetail.scheduleEvent::transform::todo" = "Convert";
+"eventDetail.scheduleEvent::transform::todo_message" = "Would you like to convert this schedule to a to-do?";
 
 
 // MARK: - Google calendar event

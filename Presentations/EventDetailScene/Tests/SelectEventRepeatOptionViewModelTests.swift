@@ -24,7 +24,9 @@ class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {
     private var spyRouter: SpyRouter!
     private var timeZone: TimeZone { TimeZone(abbreviation: "KST")! }
     
-    private var defaultStartTime: Date { "2023-10-22 02:30:22".date() }
+    private var someSundayStartTime: Date { "2023-10-22 02:30:22".date() }
+    private var someMondayStartTime: Date { "2023-10-23 02:30:22".date() }
+    private var defaultStartTime: Date { self.someSundayStartTime }
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -39,13 +41,14 @@ class SelectEventRepeatOptionViewModelTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeViewModel(
-        previous: EventRepeating? = nil
+        previous: EventRepeating? = nil,
+        customSelectTime: Date? = nil
     ) -> SelectEventRepeatOptionViewModelImple {
         
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.selectTimeZone(self.timeZone)
         let viewModel = SelectEventRepeatOptionViewModelImple(
-            selectTime: self.defaultStartTime,
+            selectTime: customSelectTime ?? self.someSundayStartTime,
             previousSelected: previous,
             calendarSettingUsecase: settingUsecase
         )
@@ -167,6 +170,26 @@ extension SelectEventRepeatOptionViewModelTests {
         // then
         XCTAssertNotNil(id)
         XCTAssertEqual(id, options?.flatMap { $0 }.first(where: { $0.isNotRepeat })?.id)
+    }
+    
+    func testViewModel_whenPreviousSelectNotExistsAndSelectDateIsWeekDay_provideEveryWeekDay() {
+        // given
+        func parameterizeTest(start: Date, expectHas: Bool) {
+            // given
+            let viewModel = self.makeViewModel(previous: nil, customSelectTime: start)
+            
+            // when
+            let options = self.waitFirstNotEmptyOptionList(viewModel)
+            
+            // then
+            let everyWeekDayOption = options?.flatMap { $0 }
+                .compactMap { $0.option as? EventRepeatingOptions.EveryWeek }
+                .first(where: { $0.isEveryWeekDays })
+            XCTAssertEqual(everyWeekDayOption != nil, expectHas)
+        }
+        // when + then
+        parameterizeTest(start: someSundayStartTime, expectHas: false)
+        parameterizeTest(start: someMondayStartTime, expectHas: true)
     }
     
     // 이전 선텍값 있고 + 해당 옵션이 디폴트 선택 리스트에 있는 경우에 해당 옵션 선택한 상태로 제공

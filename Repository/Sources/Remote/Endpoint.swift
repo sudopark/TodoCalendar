@@ -51,6 +51,18 @@ public enum AccountAPIEndpoints: Endpoint {
     }
 }
 
+// MARK: - User
+
+enum UserAPIEndpoints: Endpoint {
+    case notification
+    
+    var subPath: String {
+        switch self {
+        case .notification: return "notification"
+        }
+    }
+}
+
 
 // MARK: - TodoAPIEndpoints
 
@@ -272,12 +284,15 @@ public struct RemoteEnvironment: Sendable {
     
     let calendarAPIHost: String
     private let csAPI: String
+    let deviceId: String
     public init(
         calendarAPIHost: String,
-        csAPI: String
+        csAPI: String,
+        deviceId: String
     ) {
         self.calendarAPIHost = calendarAPIHost
         self.csAPI = csAPI
+        self.deviceId = deviceId
     }
     
     func path(_ endpoint: any Endpoint) -> String? {
@@ -296,6 +311,9 @@ public struct RemoteEnvironment: Sendable {
             
         case let account as AccountAPIEndpoints:
             return "\(calendarAPIHost)/v1/accounts/\(account.subPath)"
+            
+        case let user as UserAPIEndpoints:
+            return "\(calendarAPIHost)/v1/user/\(user.subPath)"
             
         case let todo as TodoAPIEndpoints:
             let prefix = "\(calendarAPIHost)/v1/todos"

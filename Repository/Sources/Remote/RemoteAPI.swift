@@ -111,12 +111,14 @@ extension RemoteAPIImple {
         
         let shouldAdapt = self.interceptor?.shouldAdapt(endpoint) ?? false
         
+        let defHeader = self.defaultHeader()
+        let header = header.map { hd in hd.merging(defHeader) { $1 } } ?? defHeader
         let dataTask = self.session.request(
             path,
             method: method.asHttpMethod(),
             parameters: parameters,
             encoding: method.encoding(),
-            headers: header.map { HTTPHeaders($0) },
+            headers: HTTPHeaders(header),
             interceptor: shouldAdapt ? self.interceptor : nil
         )
         .validate()
@@ -137,6 +139,12 @@ extension RemoteAPIImple {
                 throw error
             }
         }
+    }
+    
+    private func defaultHeader() -> [String: String] {
+        return [
+            "device_id": self.environment.deviceId
+        ]
     }
 }
 

@@ -34,8 +34,9 @@ open class StubEventDetailDataUsecase: EventDetailDataUsecase, @unchecked Sendab
         return detail
     }
     
+    public var didRemovedDetailId: String?
     open func removeDetail(_ id: String) async throws {
-        
+        self.didRemovedDetailId = id
     }
 }
 

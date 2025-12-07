@@ -34,6 +34,13 @@ final class ApplicationRootBuilder {
             applicationBase, externalServiceRemotes, topViewControllerFinding
         )
         
+        let userNotificationUsecase = UserNotificationUsecaseImple(
+            repository: UserNotificationRepositoryImple(
+                remoteAPI: applicationBase.remoteAPI, sqliteService: applicationBase.commonSqliteService
+            ),
+            deviceInfoFetchService: DeviceInfoFetchServiceImple()
+        )
+        
         let prepareUsecase = ApplicationPrepareUsecaseImple(
             accountUsecase: accountUsecase,
             supportExternalServices: AppEnvironment.supportExternalCalendarServices,
@@ -45,11 +52,15 @@ final class ApplicationRootBuilder {
             dbVersion: AppEnvironment.dbVersion,
             database: applicationBase.commonSqliteService
         )
+        let backgroundEventSyncUsecase = BackgroundEventSyncUsecaseImple()
+        
         let rootViewModel = ApplicationRootViewModelImple(
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
             prepareUsecase: prepareUsecase,
             externalCalendarServiceUsecase: externalCalendarIntegrationUsecase,
+            userNotificationUsecase: userNotificationUsecase,
+            backgroundEventSyncUsecase: backgroundEventSyncUsecase,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         remote.attach(listener: rootViewModel)
@@ -60,6 +71,7 @@ final class ApplicationRootBuilder {
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
             externalCalenarIntegrationUsecase: externalCalendarIntegrationUsecase,
+            backgroundEventSyncUsecase: backgroundEventSyncUsecase,
             applicationBase: applicationBase
         )
         rootViewModel.router = rootRouter
@@ -82,9 +94,14 @@ final class ApplicationRootBuilder {
         let oauth2ServiceUsecaseProvider = OAuth2ServiceUsecaseProviderImple(
             topViewControllerFinding: topViewControllerFinding
         )
+        let userNotificationRepository = UserNotificationRepositoryImple(
+            remoteAPI: applicationBase.remoteAPI,
+            sqliteService: applicationBase.commonSqliteService
+        )
         return AccountUsecaseImple(
             oauth2ServiceProvider: oauth2ServiceUsecaseProvider,
             authRepository: authRepository,
+            userNotificationRepository: userNotificationRepository,
             sharedStore: applicationBase.sharedDataStore
         )
     }
