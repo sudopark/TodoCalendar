@@ -29,8 +29,9 @@ extension SQLiteService {
             let newVersion = try await self.async.migrate(
                 upto: version,
                 steps: self.runMigrationStep(),
-                finalized: { [weak self] version, _ in
+                finalized: { [weak self] version, database in
                     self?.logMigrationResult()(.success(version))
+                    try? self?.updateJournalModeIfNeed(database)
                 }
             )
         } catch {
@@ -63,9 +64,9 @@ extension SQLiteService {
         return { result in
             switch result {
             case .success(let newVersion):
-                logger.log(level: .info, "db migration finished to: \(newVersion)")
+                logger.log(.sql, level: .info, "db migration finished to: \(newVersion)")
             case .failure(let error):
-                logger.log(level: .error, "db migration failed, reason: \(error)")
+                logger.log(.sql, level: .error, "db migration failed, reason: \(error)")
                 
             }
         }
@@ -78,23 +79,23 @@ extension SQLiteService {
     func runMigrationVersion0To1(_ database: any DataBase) throws -> Void {
         do {
             try database.migrate(TodoEventTable.self, version: 0)
-            logger.log(level: .info, "migratiob version 0 -> 1, TodoEventTable finished")
+            logger.log(.sql, level: .info, "migratiob version 0 -> 1, TodoEventTable finished")
         } catch {
-            logger.log(level: .error, "migration version 0 -> 1 faield.. will drop TodoEventTable")
+            logger.log(.sql, level: .error, "migration version 0 -> 1 faield.. will drop TodoEventTable")
             try? database.dropTable(TodoEventTable.self)
         }
         do {
             try database.migrate(ScheduleEventTable.self, version: 0)
-            logger.log(level: .info, "migratiob version 0 -> 1, ScheduleEventTable finished")
+            logger.log(.sql, level: .info, "migratiob version 0 -> 1, ScheduleEventTable finished")
         } catch {
-            logger.log(level: .error, "migration version 0 -> 1 faield.. will drop ScheduleEventTable")
+            logger.log(.sql, level: .error, "migration version 0 -> 1 faield.. will drop ScheduleEventTable")
             try? database.dropTable(ScheduleEventTable.self)
         }
         do {
             try database.migrate(PendingDoneTodoEventTable.self, version: 0)
-            logger.log(level: .info, "migratiob version 0 -> 1, PendingDoneTodoEventTable finished")
+            logger.log(.sql, level: .info, "migratiob version 0 -> 1, PendingDoneTodoEventTable finished")
         } catch {
-            logger.log(level: .error, "migration version 0 -> 1 faield.. will drop PendingDoneTodoEventTable")
+            logger.log(.sql, level: .error, "migration version 0 -> 1 faield.. will drop PendingDoneTodoEventTable")
             try? database.dropTable(PendingDoneTodoEventTable.self)
         }
     }
@@ -102,9 +103,9 @@ extension SQLiteService {
     func runMigrationVersion1to2(_ database: any DataBase) throws -> Void {
         do {
             try database.migrate(GoogleCalendarEventOriginTable.self, version: 1)
-            logger.log(level: .info, "migratiob version 1 -> 2, GoogleCalendarEventOriginTable finished")
+            logger.log(.sql, level: .info, "migratiob version 1 -> 2, GoogleCalendarEventOriginTable finished")
         } catch {
-            logger.log(level: .error, "migration version 1 -> 2 faield.. will drop GoogleCalendarEventOriginTable")
+            logger.log(.sql, level: .error, "migration version 1 -> 2 faield.. will drop GoogleCalendarEventOriginTable")
             try? database.dropTable(GoogleCalendarEventOriginTable.self)
         }
     }
@@ -112,9 +113,9 @@ extension SQLiteService {
     func runMigrationVersion2to3(_ database: any DataBase) throws -> Void {
         do {
             try database.migrate(GoogleCalendarEventTagTable.self, version: 2)
-            logger.log(level: .info, "migratiob version 2 -> 3, GoogleCalendarEventTagTable finished")
+            logger.log(.sql, level: .info, "migratiob version 2 -> 3, GoogleCalendarEventTagTable finished")
         } catch {
-            logger.log(level: .error, "migration version 2 -> 3 faield.. will drop GoogleCalendarEventTagTable")
+            logger.log(.sql, level: .error, "migration version 2 -> 3 faield.. will drop GoogleCalendarEventTagTable")
             try? database.dropTable(GoogleCalendarEventTagTable.self)
         }
     }
@@ -122,10 +123,23 @@ extension SQLiteService {
     func runMigrationVersion3to4(_ database: any DataBase) throws -> Void {
         do {
             try database.migrate(GoogleCalendarEventOriginTable.self, version: 3)
-            logger.log(level: .info, "migratiob version 2 -> 3, GoogleCalendarEventOriginTable finished")
+            logger.log(.sql, level: .info, "migratiob version 2 -> 3, GoogleCalendarEventOriginTable finished")
         } catch {
-            logger.log(level: .error, "migration version 2 -> 3 faield.. will drop GoogleCalendarEventOriginTable")
+            logger.log(.sql, level: .error, "migration version 2 -> 3 faield.. will drop GoogleCalendarEventOriginTable")
             try? database.dropTable(GoogleCalendarEventOriginTable.self)
+        }
+    }
+    
+    private func updateJournalModeIfNeed(_ database: any DataBase) throws {
+        do {
+            let mode = (try database.journalMode()).uppercased()
+            logger.log(.sql, level: .info, "current journal mode: \(mode)")
+            guard mode != "WAL" else { return }
+            
+            try database.updateJournalMode("WAL")
+            logger.log(.sql, level: .info, "update journal mode to WAL")
+        } catch {
+            logger.log(.sql, level: .error, "fail to update journal mode")
         }
     }
 }
