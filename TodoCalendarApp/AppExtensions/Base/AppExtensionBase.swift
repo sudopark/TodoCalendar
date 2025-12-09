@@ -38,7 +38,6 @@ final class AppExtensionBase {
         let userId = self.authStore.loadCurrentAuth()?.uid
         let path = AppEnvironment.dbFilePath(for: userId)
         _ = service.open(path: path)
-        service.runMigration(upTo: AppEnvironment.dbVersion)
         return service
     }()
     
