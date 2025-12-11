@@ -139,10 +139,12 @@ extension WidgetUsecaseFactory {
     
     private func makeTodoRepositoryByUser() -> any TodoEventRepository {
         let auth = self.base.authStore.loadCurrentAuth()
-        let localStorage = TodoLocalStorageImple(
-            sqliteService: base.commonSqliteService
-        )
+        
         if let auth {
+            let localStorage = TodoLocalStorageImple(
+                sqliteService: base.writableSqliteService
+            )
+            
             let remote = base.remoteAPI
             let credential = APICredential(auth: auth)
             remote.setup(credential: credential)
@@ -151,6 +153,10 @@ extension WidgetUsecaseFactory {
                 cacheStorage: localStorage
             )
         } else {
+            let localStorage = TodoLocalStorageImple(
+                sqliteService: base.commonSqliteService
+            )
+            
             return TodoLocalRepositoryImple(
                 localStorage: localStorage,
                 environmentStorage: base.userDefaultEnvironmentStorage
