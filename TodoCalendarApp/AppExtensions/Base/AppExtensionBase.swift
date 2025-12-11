@@ -34,7 +34,15 @@ final class AppExtensionBase {
     }()
     
     lazy var commonSqliteService: SQLiteService = {
-        let service = SQLiteService()
+        let service = SQLiteService(openWithReadOnly: true)
+        let userId = self.authStore.loadCurrentAuth()?.uid
+        let path = AppEnvironment.dbFilePath(for: userId)
+        _ = service.open(path: path)
+        return service
+    }()
+    
+    lazy var writableSqliteService: SQLiteService = {
+        let service = SQLiteService(openWithReadOnly: false)
         let userId = self.authStore.loadCurrentAuth()?.uid
         let path = AppEnvironment.dbFilePath(for: userId)
         _ = service.open(path: path)
