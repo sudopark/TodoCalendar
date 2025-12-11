@@ -13,6 +13,7 @@ import Domain
 import Extensions
 import Repository
 
+@available(*, deprecated, message: "EventTypeSelectIntentFactory으로 변경됨")
 struct IntentReposiotryFactory {
     
     private let base: AppExtensionBase
@@ -65,9 +66,8 @@ extension IntentReposiotryFactory {
     }
     
     func makeGoogleCalendarRepository() -> any GoogleCalendarRepository {
-        return GoogleCalendarRepositoryImple(
-            remote: EmptyRemote(),
-            cacheStorage: GoogleCalendarLocalStorageImple(sqliteService: base.writableSqliteService)
+        return GoogleCalendarReadOnlyRepositoryImple(
+            localStorage: GoogleCalendarLocalStorageImple(sqliteService: base.writableSqliteService)
         )
     }
 }
