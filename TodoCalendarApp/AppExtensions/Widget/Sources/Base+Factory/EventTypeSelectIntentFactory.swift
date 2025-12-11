@@ -63,9 +63,8 @@ extension EventTypeSelectIntentFactory {
     }
     
     func makeGoogleCalendarRepository() -> any GoogleCalendarRepository {
-        return GoogleCalendarRepositoryImple(
-            remote: EmptyRemote(),
-            cacheStorage: GoogleCalendarLocalStorageImple(sqliteService: base.commonSqliteService)
+        return GoogleCalendarReadOnlyRepositoryImple(
+            localStorage: GoogleCalendarLocalStorageImple(sqliteService: base.commonSqliteService)
         )
     }
 }

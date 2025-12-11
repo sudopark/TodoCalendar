@@ -173,14 +173,3 @@ class DummyFirebaseAuthService: FirebaseAuthService {
         
     }
 }
-
-final class EmptyRemote: RemoteAPI {
- 
-    func request(_ method: RemoteAPIMethod, _ endpoint: any Endpoint, with header: [String : String]?, parameters: [String : Any]) async throws -> Data {
-        throw RuntimeError("not support")
-    }
-    
-    func attach(listener: any AutenticatorTokenRefreshListener) { }
-    
-    func setup(credential: APICredential?) { }
-}

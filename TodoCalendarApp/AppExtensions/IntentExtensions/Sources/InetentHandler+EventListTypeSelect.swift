@@ -10,6 +10,7 @@ import Intents
 import Domain
 import Extensions
 
+@available(*, deprecated, message: "EventTypeSelectIntent으로 변경됨")
 extension IntentHandler: EventListTypeSelectIntentHandling {
     
     func provideEventTypeOptionsCollection(
