@@ -47,6 +47,24 @@ extension BackgroundEventSyncUsecaseImple {
             }
             self?.handleBackgroundSync(refreshTask)
         }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.schduleInitialTaskIfNeed()
+        }
+    }
+    
+    private func schduleInitialTaskIfNeed() {
+        let taskId = self.taskId
+        BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: self.taskId)
+        do {
+            let newTask = BGAppRefreshTaskRequest(identifier: taskId)
+            newTask.earliestBeginDate = Date().addingTimeInterval(3600)
+            try BGTaskScheduler.shared.submit(newTask)
+            
+            logger.log(.backgroundSync, level: .debug, "submit iniital task")
+        } catch {
+            logger.log(.backgroundSync, level: .error, "fail to submit initial task: \(error.localizedDescription)")
+        }
     }
     
     private func handleBackgroundSync(_ task: BGAppRefreshTask) {
