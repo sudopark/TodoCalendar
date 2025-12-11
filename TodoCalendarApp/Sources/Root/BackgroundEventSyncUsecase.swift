@@ -8,6 +8,7 @@
 
 import Foundation
 @preconcurrency import BackgroundTasks
+import WidgetKit
 import Domain
 import Scenes
 import Extensions
@@ -66,7 +67,10 @@ extension BackgroundEventSyncUsecaseImple {
         }
         
         syncUsecase.sync { [weak task] in
-            logger.log(.backgroundSync, level: .debug, "sync job end")
+            logger.log(.backgroundSync, level: .debug, "sync job end, and will refresh widgets")
+            
+            WidgetCenter.shared.reloadAllTimelines()
+            
             task?.setTaskCompleted(success: true)
         }
     }
@@ -84,4 +88,5 @@ extension BackgroundEventSyncUsecaseImple {
             logger.log(.backgroundSync, level: .error, "fail to sumit new background refresh task: \(error.localizedDescription)")
         }
     }
+    
 }
