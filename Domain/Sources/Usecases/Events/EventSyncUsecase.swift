@@ -97,7 +97,6 @@ extension EventSyncUsecaseImple {
         await dataTypes.asyncForEach { dataType in
             do {
                 try await self.runSync(dataType)
-                logger.log(level: .debug, "\(dataType) sync end")
             } catch let error {
                 logger.log(level: .error, "\(dataType) sync fail: \(error)")
             }
@@ -110,8 +109,7 @@ extension EventSyncUsecaseImple {
     private func runSync(_ dataType: SyncDataType) async throws {
         let checkIsNeed = try await self.syncRepository.checkIsNeedSync(for: dataType)
         switch (checkIsNeed.result, dataType) {
-        case (.noNeedToSync, _):
-            logger.log(level: .debug, "\(dataType) no need to sync")
+        case (.noNeedToSync, _): break
         case (.migrationNeeds, .eventTag):
             try await self.startSync(CustomEventTag.self, dataType)
             

@@ -172,6 +172,7 @@ extension ApplicationRootViewModelImple {
     }
     
     private func handleDidEnterBackground() {
+        self.backgroundEventSyncUsecase.scheduleTask(withCancel: true)
         self.environmentStorage.update(
             EnvironmentKeys.needCheckResetWidgetCache.rawValue,
             true

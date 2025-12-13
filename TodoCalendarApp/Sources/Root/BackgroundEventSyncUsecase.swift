@@ -17,6 +17,7 @@ import Extensions
 protocol BackgroundEventSyncUsecase: Sendable {
     
     func change(factory: any UsecaseFactory)
+    func scheduleTask(withCancel: Bool)
     
     func registerTask()
 }
@@ -47,30 +48,29 @@ extension BackgroundEventSyncUsecaseImple {
             }
             self?.handleBackgroundSync(refreshTask)
         }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            self.schduleInitialTaskIfNeed()
-        }
     }
     
-    private func schduleInitialTaskIfNeed() {
-        let taskId = self.taskId
-        BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: self.taskId)
+    func scheduleTask(withCancel: Bool) {
+        
+        let request = BGAppRefreshTaskRequest(identifier: taskId)
+        request.earliestBeginDate = Date().addingTimeInterval(3600)
+        
+        if withCancel {
+            BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: taskId)
+        }
         do {
-            let newTask = BGAppRefreshTaskRequest(identifier: taskId)
-            newTask.earliestBeginDate = Date().addingTimeInterval(3600)
-            try BGTaskScheduler.shared.submit(newTask)
-            
-            logger.log(.backgroundSync, level: .debug, "submit iniital task")
+            try BGTaskScheduler.shared.submit(request)
+            logger.log(.backgroundSync, level: .debug, "submit task")
         } catch {
-            logger.log(.backgroundSync, level: .error, "fail to submit initial task: \(error.localizedDescription)")
+            logger.log(.backgroundSync, level: .error, "fail to sumit new background refresh task: \(error.localizedDescription)")
         }
     }
     
     private func handleBackgroundSync(_ task: BGAppRefreshTask) {
         
         logger.log(.backgroundSync, level: .debug, "background task start - will sync task")
-        self.scheduleNextTask()
+        
+        self.scheduleTask(withCancel: false)
         
         guard let syncUsecase = self.usecaseFactory?.eventSyncUsecase
         else {
@@ -92,19 +92,4 @@ extension BackgroundEventSyncUsecaseImple {
             task?.setTaskCompleted(success: true)
         }
     }
-    
-    private func scheduleNextTask() {
-        
-        let request = BGAppRefreshTaskRequest(identifier: taskId)
-        request.earliestBeginDate = Date().addingTimeInterval(3600)
-        
-        BGTaskScheduler.shared.cancel(taskRequestWithIdentifier: taskId)
-        do {
-            try BGTaskScheduler.shared.submit(request)
-            logger.log(.backgroundSync, level: .error, "schedule next task")
-        } catch {
-            logger.log(.backgroundSync, level: .error, "fail to sumit new background refresh task: \(error.localizedDescription)")
-        }
-    }
-    
 }
