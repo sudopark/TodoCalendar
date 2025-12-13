@@ -11,6 +11,9 @@ import Foundation
 
 public protocol EventSyncRepository: Sendable {
     
+    func clearSyncTimestamp() async throws
+    func loadLatestSyncDataTimestamp() async throws -> TimeInterval?
+    
     func checkIsNeedSync(
         for dataType: SyncDataType
     ) async throws -> EventSyncCheckRespose

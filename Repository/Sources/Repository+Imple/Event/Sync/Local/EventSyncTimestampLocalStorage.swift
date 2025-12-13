@@ -13,6 +13,8 @@ import Domain
 
 public protocol EventSyncTimestampLocalStorage: Sendable {
     
+    func clearSyncTimestamp() async throws
+    
     func loadLocalTimestamp(for dataType: SyncDataType) async throws -> EventSyncTimestamp?
     
     func updateLocalTimestamp(by serverTimestamp: EventSyncTimestamp) async throws
@@ -31,6 +33,12 @@ public final class EventSyncTimestampLocalStorageImple: EventSyncTimestampLocalS
 
 
 extension EventSyncTimestampLocalStorageImple {
+    
+    public func clearSyncTimestamp() async throws {
+        try await self.sqliteService.async.run { db in
+            try db.dropTable(SyncTimeStamp.self)
+        }
+    }
     
     public func loadLocalTimestamp(
         for dataType: SyncDataType

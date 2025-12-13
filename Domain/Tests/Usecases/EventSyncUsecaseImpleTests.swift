@@ -198,6 +198,24 @@ extension EventSyncUsecaseImpleTests {
         // then
         #expect(syncs == [false, true, false])
     }
+    
+    @Test func usecase_foreceSync() async throws {
+        // given
+        let expect = expectConfirm("force sync")
+        expect.count = 3
+        let usecase = self.makeUsecase(checkResult: .needToSync)
+        
+        // when
+        let syncs = try await self.outputs(expect, for: usecase.isSyncInProgress) {
+            usecase.forceSync()
+        }
+        
+        // then
+        #expect(syncs == [false, true, false])
+        #expect(self.spyRepository.syncPageCountMap[.eventTag] == 3)
+        #expect(self.spyRepository.syncPageCountMap[.todo] == 3)
+        #expect(self.spyRepository.syncPageCountMap[.schedule] == 3)
+    }
 }
 
 
@@ -206,6 +224,10 @@ private final class StubEventSyncRepository: EventSyncRepository, @unchecked Sen
     var shouldFail: Bool = false
     var checkResult: EventSyncCheckRespose.CheckResult?
     var syncPageCountMap: [SyncDataType: Int] = [:]
+    
+    func clearSyncTimestamp() async throws {
+        self.checkResult = .migrationNeeds
+    }
     
     func checkIsNeedSync(
         for dataType: SyncDataType
@@ -248,6 +270,10 @@ private final class StubEventSyncRepository: EventSyncRepository, @unchecked Sen
         } else {
             return response |> \.nextPageCursor .~ "next"
         }
+    }
+    
+    func loadLatestSyncDataTimestamp() async throws -> TimeInterval? {
+        return nil
     }
 }
 
