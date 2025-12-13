@@ -37,7 +37,7 @@
 "date_form::MMM_d_HH:mm" = "MMM d일 HH:mm";
 "date_form::MMM_d" = "MMM d일";
 "date_form::yyyy_MM_dd_E_" = "yyyy.MM.dd (E)";
-"date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd hh:mm";
+"date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd HH:mm";
 "date_form.yyyy" = "yyyy";
 "date_form.MMM_dd_E" = "MMM dd일 (E)";
 "date_form.HH:mm" = "HH:mm";
@@ -319,6 +319,13 @@
 "event_setting::eventPeriod" = "이벤트 기간";
 "event_setting::defaultMapApp" = "지도 앱 열기";
 "event_setting::defaultMapApp_select" = "선택";
+
+"event_setting::eventSync" = "이벤트 동기화";
+"event_setting::eventSync::readyToSync::description" = "백업된 유저 이벤트를 동기화 합니다.";
+"event_setting::eventSync::syncInProgress::description" = "백업된 유저 이벤트를 동기화 하고있습니다..";
+"event_setting::eventSync::lastTime" = "동기화된 최신 데이터 시간: %@";
+"event_setting::eventSync::force" = "강제 동기화";
+
 "event_notification_setting::title::forAllDay" = "하루종일";
 "event_notification_setting::title::NotforAllDay" = "미리알림 시간";
 "event_setting::external_calendar::title" = "외부 캘린더";

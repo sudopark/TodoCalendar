@@ -320,6 +320,13 @@
 "event_setting::eventPeriod" = "Event Period";
 "event_setting::defaultMapApp" = "Open the Maps app";
 "event_setting::defaultMapApp_select" = "Select";
+
+"event_setting::eventSync" = "Event Sync";
+"event_setting::eventSync::readyToSync::description" = "Synchronize backed up user events.";
+"event_setting::eventSync::syncInProgress::description" = "Synchronizing backed up user events..";
+"event_setting::eventSync::lastTime" = "Latest synchronized data time: %@";
+"event_setting::eventSync::force" = "Force Sync";
+
 "event_notification_setting::title::forAllDay" = "All day";
 "event_notification_setting::title::NotforAllDay" = "Notification Time";
 "event_setting::external_calendar::title" = "External calendars";

@@ -53,7 +53,10 @@ extension EventSettingSceneBuilerImple: EventSettingSceneBuiler {
             eventNotificationSettingUsecase: usecaseFactory.makeEventNotificationSettingUsecase(),
             eventTagUsecase: usecaseFactory.makeEventTagUsecase(),
             supportExternalCalendarServices: supportExternalCalendarServices,
-            externalCalendarServiceUsecase: usecaseFactory.externalCalenarIntegrationUsecase
+            externalCalendarServiceUsecase: usecaseFactory.externalCalenarIntegrationUsecase,
+            accountUsecase: usecaseFactory.accountUescase,
+            eventSyncUsecase: usecaseFactory.eventSyncUsecase,
+            calendarSettingUsecase: usecaseFactory.makeCalendarSettingUsecase()
         )
         
         let viewController = EventSettingViewController(

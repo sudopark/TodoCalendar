@@ -43,6 +43,7 @@ final class EventSettingViewController: UIHostingController<EventSettingContaine
         eventHandlers.selectAllDayEventNotificationTime = { viewModel.selectEventNotificationTimeOption(forAllDay: true) }
         eventHandlers.selectPeriod = viewModel.selectPeriod(_:)
         eventHandlers.selectDefaultMapApp = viewModel.selectDefaultMapApp
+        eventHandlers.forceSync = viewModel.forceSync
         eventHandlers.connectExternalCalendar = viewModel.connectExternalCalendar(_:)
         eventHandlers.disconnectExternalCalendar = viewModel.disconnectExternalCalendar(_:)
         
