@@ -10,6 +10,8 @@ import Foundation
 import Combine
 import Prelude
 import Optics
+import Extensions
+
 
 // MARK: - GoogleCalendarViewAppearanceStore
 
@@ -138,6 +140,8 @@ extension GoogleCalendarUsecaseImple {
                     self?.sharedDataStore.delete(
                         ShareDataKeys.googleCalendarEvents.rawValue
                     )
+                    
+                    logger.log(level: .critical, "will clear google calendar db")
                     self?.clearGoogleCalendarCache()
                 }
             })
