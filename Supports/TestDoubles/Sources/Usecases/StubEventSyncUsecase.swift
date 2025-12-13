@@ -41,7 +41,9 @@ open class StubEventSyncUsecase: EventSyncUsecase, @unchecked Sendable {
             .eraseToAnyPublisher()
     }
     
+    public var lastSyncTime: TimeInterval = 0
     open func loadLatestSyncDataTimestamp() async throws -> TimeInterval? {
-        return nil
+        self.lastSyncTime += 3600_000
+        return self.lastSyncTime
     }
 }

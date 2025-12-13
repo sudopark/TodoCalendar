@@ -40,6 +40,16 @@ struct SelectedPeriodModel: Hashable {
     }
 }
 
+enum EventSyncModel: Equatable {
+    case syncInProgress
+    case readToSync(lastSyncDataTime: String?)
+    
+    var isReadToSync: Bool {
+        guard case .readToSync = self else { return false }
+        return true
+    }
+}
+
 struct ExternalCalanserServiceModel: Hashable {
     
     enum IntegrateStatus: Hashable {
@@ -82,6 +92,7 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
     func selectEventNotificationTimeOption(forAllDay: Bool)
     func selectPeriod(_ newValue: EventSettings.DefaultNewEventPeriod)
     func selectDefaultMapApp()
+    func forceSync()
     func connectExternalCalendar(_ serviceIdentifier: String)
     func disconnectExternalCalendar(_ serviceIdentifier: String)
     func close()
@@ -92,6 +103,7 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
     var selectedAllDayEventNotificationTimeText: AnyPublisher<String, Never> { get }
     var selectedPeriod: AnyPublisher<SelectedPeriodModel, Never> { get }
     var defaultMapApp: AnyPublisher<SupportMapApps?, Never> { get }
+    var eventSyncModel: AnyPublisher<EventSyncModel?, Never> { get }
     var integratedExternalCalendars: AnyPublisher<[ExternalCalanserServiceModel], Never> { get }
     var isConnectOrDisconnectExternalCalednar: AnyPublisher<Bool, Never> { get }
 }
@@ -106,6 +118,9 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
     private let eventTagUsecase: any EventTagUsecase
     private let supportExternalCalendarServices: [any ExternalCalendarService]
     private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
+    private let accountUsecase: any AccountUsecase
+    private let eventSyncUsecase: any EventSyncUsecase
+    private let calendarSettingUsecase: any CalendarSettingUsecase
     var router: (any EventSettingRouting)?
     
     init(
@@ -113,13 +128,19 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
         eventNotificationSettingUsecase: any EventNotificationSettingUsecase,
         eventTagUsecase: any EventTagUsecase,
         supportExternalCalendarServices: [any ExternalCalendarService],
-        externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
+        externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
+        accountUsecase: any AccountUsecase,
+        eventSyncUsecase: any EventSyncUsecase,
+        calendarSettingUsecase: any CalendarSettingUsecase
     ) {
         self.eventSettingUsecase = eventSettingUsecase
         self.eventNotificationSettingUsecase = eventNotificationSettingUsecase
         self.eventTagUsecase = eventTagUsecase
         self.supportExternalCalendarServices = supportExternalCalendarServices
         self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
+        self.accountUsecase = accountUsecase
+        self.eventSyncUsecase = eventSyncUsecase
+        self.calendarSettingUsecase = calendarSettingUsecase
      
         self.internalBinding()
     }
@@ -187,6 +208,10 @@ extension EventSettingViewModelImple {
     
     func selectDefaultMapApp() {
         self.router?.routeToSelectDefaultMapApp()
+    }
+    
+    func forceSync() {
+        self.eventSyncUsecase.forceSync()
     }
     
     func connectExternalCalendar(_ serviceIdentifier: String) {
@@ -296,6 +321,39 @@ extension EventSettingViewModelImple {
             .map { $0.defaultMapApp }
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    var eventSyncModel: AnyPublisher<EventSyncModel?, Never> {
+        let transform: (Bool) -> AnyPublisher<EventSyncModel?, Never>? = { [weak self] isLogin in
+            if isLogin {
+                return self?.currentSyncModel.mapAsOptional()
+            } else {
+                return Just(nil).eraseToAnyPublisher()
+            }
+        }
+        return self.accountUsecase.currentAccountInfo
+            .map { $0 != nil }
+            .compactMap(transform)
+            .switchToLatest()
+            .eraseToAnyPublisher()
+    }
+    
+    private var currentSyncModel: AnyPublisher<EventSyncModel, Never> {
+        let transform: @Sendable (Bool, TimeZone) async throws -> EventSyncModel = { [weak self] isSync, timeZone in
+            
+            guard !isSync else { return EventSyncModel.syncInProgress }
+            let lastDate = try? await self?.eventSyncUsecase.loadLatestSyncDataTimestamp().map { Date(timeIntervalSince1970: $0/1000) }
+            return .readToSync(
+                lastSyncDataTime: lastDate?.text("date_form:yyyy.MM_dd_hh:mm".localized(), timeZone: timeZone)
+            )
+        }
+        return Publishers.CombineLatest(
+            self.eventSyncUsecase.isSyncInProgress,
+            self.calendarSettingUsecase.currentTimeZone
+        )
+        .flatMap(do: transform)
+        .removeDuplicates()
+        .eraseToAnyPublisher()
     }
     
     var integratedExternalCalendars: AnyPublisher<[ExternalCalanserServiceModel], Never> {
