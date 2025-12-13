@@ -68,9 +68,18 @@ extension CalendarUsecaseImple {
         for month: Int, of year: Int
     ) -> AnyPublisher<CalendarComponent, Never> {
         
+        let selectHolidays: ([Int: [Holiday]]) -> [Holiday] = { holidaysMap in
+            let holidaysGivenYear = holidaysMap[year] ?? []
+            switch month {
+            case 1: return (holidaysMap[year-1] ?? []) + holidaysGivenYear
+            case 12: return (holidaysMap[year + 1] ?? []) + holidaysGivenYear
+            default: return holidaysGivenYear
+            }
+        }
+        
         let baseComponents = self.baseCalendarComponents(year, month)
         let holidaysGivenYear = self.holidayUsecase.holidays()
-            .map { $0[year] ?? [] }
+            .map(selectHolidays)
         return Publishers.CombineLatest(baseComponents, holidaysGivenYear)
             .map { $0.update(holidays: $1)}
             .removeDuplicates()
