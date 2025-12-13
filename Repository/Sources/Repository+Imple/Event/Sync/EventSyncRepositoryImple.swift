@@ -37,6 +37,22 @@ public final class EventSyncRepositoryImple: EventSyncRepository {
 
 extension EventSyncRepositoryImple {
     
+    public func clearSyncTimestamp() async throws {
+        try await self.syncTimestampLocalStorage.clearSyncTimestamp()
+    }
+    
+    public func loadLatestSyncDataTimestamp() async throws -> TimeInterval? {
+        let timestamps = [
+            try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: .eventTag),
+            try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: .todo),
+            try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: .schedule)
+        ]
+        return timestamps
+            .compactMap { $0?.timeStampInt }
+            .map { TimeInterval($0) }
+            .max()
+    }
+    
     public func checkIsNeedSync(
         for dataType: SyncDataType
     ) async throws -> EventSyncCheckRespose {

@@ -27,6 +27,10 @@ open class StubEventSyncUsecase: EventSyncUsecase, @unchecked Sendable {
         completed?()
     }
     
+    open func forceSync() {
+        self.sync(nil)
+    }
+    
     open func cancelSync() {
         self.isSyncSubject.send(false)
     }
@@ -35,5 +39,9 @@ open class StubEventSyncUsecase: EventSyncUsecase, @unchecked Sendable {
         return self.isSyncSubject
             .removeDuplicates()
             .eraseToAnyPublisher()
+    }
+    
+    open func loadLatestSyncDataTimestamp() async throws -> TimeInterval? {
+        return nil
     }
 }

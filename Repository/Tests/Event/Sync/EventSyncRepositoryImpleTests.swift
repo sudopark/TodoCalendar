@@ -110,6 +110,56 @@ extension EventSyncRepositoryImpleTests {
             }
         }
     }
+    
+    @Test func repository_clearSyncTimestamp() async throws {
+        try await self.runTestWithOpenClose("clear_ts") {
+            // given
+            try await self.saveTimeStamp(.eventTag, 10)
+            try await self.saveTimeStamp(.schedule, 100)
+            try await self.saveTimeStamp(.todo, 1)
+            let repository = self.makeRepository()
+            
+            // when
+            try await repository.clearSyncTimestamp()
+            
+            // then
+            let tag_ts = try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: .eventTag)
+            let todo_ts = try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: .todo)
+            let schedule_ts = try await self.syncTimestampLocalStorage.loadLocalTimestamp(for: .schedule)
+            #expect(tag_ts == nil)
+            #expect(todo_ts == nil)
+            #expect(schedule_ts == nil)
+        }
+    }
+    
+    @Test func repository_loadLatestSyncDataTimestamp() async throws {
+        try await self.runTestWithOpenClose("load_ts") {
+            // given
+            try await self.saveTimeStamp(.eventTag, 10)
+            try await self.saveTimeStamp(.schedule, 100)
+            try await self.saveTimeStamp(.todo, 1)
+            let repository = self.makeRepository()
+            
+            // when
+            let ts = try await repository.loadLatestSyncDataTimestamp()
+            
+            // then
+            #expect(ts == 100)
+        }
+    }
+    
+    @Test func repository_whenSyncTimeStampNotExists_loadLatestSyncDataTimestamp() async throws {
+        try await self.runTestWithOpenClose("load_ts_not_exists") {
+            // given
+            let repository = self.makeRepository()
+            
+            // when
+            let ts = try await repository.loadLatestSyncDataTimestamp()
+            
+            // then
+            #expect(ts == nil)
+        }
+    }
 }
 
 // MARK: - sync tag
