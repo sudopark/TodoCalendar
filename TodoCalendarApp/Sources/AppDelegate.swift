@@ -37,7 +37,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let builder = ApplicationRootBuilder()
         self.applicationViewModel = builder.makeRootViewModel()
         self.applicationRouter = self.applicationViewModel.router
-        self.applicationViewModel.registerBackgroundTask()
         
         return true
     }

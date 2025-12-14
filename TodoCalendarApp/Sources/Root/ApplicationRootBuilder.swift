@@ -52,7 +52,6 @@ final class ApplicationRootBuilder {
             dbVersion: AppEnvironment.dbVersion,
             database: applicationBase.commonSqliteService
         )
-        let backgroundEventSyncUsecase = BackgroundEventSyncUsecaseImple()
         
         let rootViewModel = ApplicationRootViewModelImple(
             authUsecase: accountUsecase,
@@ -60,7 +59,6 @@ final class ApplicationRootBuilder {
             prepareUsecase: prepareUsecase,
             externalCalendarServiceUsecase: externalCalendarIntegrationUsecase,
             userNotificationUsecase: userNotificationUsecase,
-            backgroundEventSyncUsecase: backgroundEventSyncUsecase,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
         )
         remote.attach(listener: rootViewModel)
@@ -71,7 +69,6 @@ final class ApplicationRootBuilder {
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
             externalCalenarIntegrationUsecase: externalCalendarIntegrationUsecase,
-            backgroundEventSyncUsecase: backgroundEventSyncUsecase,
             applicationBase: applicationBase
         )
         rootViewModel.router = rootRouter
