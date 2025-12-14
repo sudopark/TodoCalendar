@@ -34,11 +34,18 @@ final class AppExtensionBase {
     }()
     
     lazy var commonSqliteService: SQLiteService = {
-        let service = SQLiteService()
+        let service = SQLiteService(openWithReadOnly: true)
         let userId = self.authStore.loadCurrentAuth()?.uid
         let path = AppEnvironment.dbFilePath(for: userId)
         _ = service.open(path: path)
-        service.runMigration(upTo: AppEnvironment.dbVersion)
+        return service
+    }()
+    
+    lazy var writableSqliteService: SQLiteService = {
+        let service = SQLiteService(openWithReadOnly: false)
+        let userId = self.authStore.loadCurrentAuth()?.uid
+        let path = AppEnvironment.dbFilePath(for: userId)
+        _ = service.open(path: path)
         return service
     }()
     
@@ -165,15 +172,4 @@ class DummyFirebaseAuthService: FirebaseAuthService {
     func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
         
     }
-}
-
-final class EmptyRemote: RemoteAPI {
- 
-    func request(_ method: RemoteAPIMethod, _ endpoint: any Endpoint, with header: [String : String]?, parameters: [String : Any]) async throws -> Data {
-        throw RuntimeError("not support")
-    }
-    
-    func attach(listener: any AutenticatorTokenRefreshListener) { }
-    
-    func setup(credential: APICredential?) { }
 }

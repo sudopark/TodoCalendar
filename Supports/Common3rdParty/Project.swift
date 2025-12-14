@@ -17,7 +17,7 @@ let project = Project.framework(
             url: "https://github.com/sudopark/publisher-async-bind.git", requirement: .upToNextMajor(from: "0.0.2")
         ),
         .remote(
-            url: "https://github.com/sudopark/SQLiteService.git", requirement:  .upToNextMajor(from:"0.2.0")
+            url: "https://github.com/sudopark/SQLiteService.git", requirement:  .upToNextMajor(from:"0.3.0")
         ),
         .remote(
             url: "https://github.com/CombineCommunity/CombineCocoa.git", requirement: .upToNextMajor(from: "0.4.1")

@@ -217,6 +217,8 @@ extension Project {
                 "BGTaskSchedulerPermittedIdentifiers": [
                     "com.sudo.park.TodoCalendarApp.bgSync"
                 ]
+//                ,
+//                "UIBackgroundModes": ["fetch"]
             ]),
             sources: [
                 "Sources/**",

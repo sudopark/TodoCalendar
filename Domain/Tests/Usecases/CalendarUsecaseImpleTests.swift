@@ -54,7 +54,9 @@ class CalendarUsecaseImpleTests: BaseTestCase, PublisherWaitable {
                 .init(uuid: "id14", dateString: "2023-10-03", name: "개천절"),
                 .init(uuid: "id15", dateString: "2023-10-03", name: "개천절-중복"),
                 .init(uuid: "id16", dateString: "2023-10-09", name: "한글날"),
-                .init(uuid: "id17", dateString: "2023-12-25", name: "크리스마스")
+                .init(uuid: "id17", dateString: "2023-12-25", name: "크리스마스"),
+                .init(uuid: "id19", dateString: "2023-12-31", name: "가짜 막일 공휴일"),
+                .init(uuid: "id18", dateString: "2024-01-01", name: "신정"),
             ]]
         )
         
@@ -252,6 +254,43 @@ extension CalendarUsecaseImpleTests {
                 .init(uuid: "id14", dateString: "2023-10-03", name: "개천절"),
                 .init(uuid: "id15", dateString: "2023-10-03", name: "개천절-중복")
             ],
+        ])
+    }
+    
+    func testUsecase_whenProvideDecemberComponents_provideNextYearHoliday() {
+        // given
+        let expect = expectation(description: "12월의 달력정보 제공시에 다음년도의 공휴일 정보 같이 제공")
+        let usecase = self.makeUsecaseWithStub()
+        
+        // when
+        let source = usecase.components(for: 12, of: 2023)
+        let components = self.waitFirstOutput(expect, for: source)
+        
+        // then
+        let holidayExistDays = components?.weeks.flatMap { $0.days }
+            .filter { !$0.holidays.isEmpty }.flatMap { $0.holidays }
+        XCTAssertEqual(holidayExistDays, [
+            .init(uuid: "id17", dateString: "2023-12-25", name: "크리스마스"),
+            .init(uuid: "id19", dateString: "2023-12-31", name: "가짜 막일 공휴일"),
+            .init(uuid: "id18", dateString: "2024-01-01", name: "신정"),
+        ])
+    }
+    
+    func testUsecase_whenProvideJanuraryComponents_providePreviousYearHoliday() {
+        // given
+        let expect = expectation(description: "1월의 달력 정보 제공시에 전년도의 공휴일 정보 같이 제공")
+        let usecase = self.makeUsecaseWithStub()
+        
+        // when
+        let source = usecase.components(for: 1, of: 2024)
+        let components = self.waitFirstOutput(expect, for: source)
+        
+        // then
+        let holidayExistDays = components?.weeks.flatMap { $0.days }
+            .filter { !$0.holidays.isEmpty }.flatMap { $0.holidays }
+        XCTAssertEqual(holidayExistDays, [
+            .init(uuid: "id19", dateString: "2023-12-31", name: "가짜 막일 공휴일"),
+            .init(uuid: "id18", dateString: "2024-01-01", name: "신정"),
         ])
     }
 }

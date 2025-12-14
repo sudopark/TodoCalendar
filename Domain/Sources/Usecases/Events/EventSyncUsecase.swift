@@ -17,8 +17,10 @@ public protocol EventSyncUsecase: Sendable, AnyObject {
     
     func sync(_ completed: (@Sendable () -> Void)?)
     func cancelSync()
+    func forceSync()
     
     var isSyncInProgress: AnyPublisher<Bool, Never> { get }
+    func loadLatestSyncDataTimestamp() async throws -> TimeInterval?
 }
 
 extension EventSyncUsecase {
@@ -61,25 +63,7 @@ extension EventSyncUsecaseImple {
         self.cancelSync()
         
         let task = Task { [weak self] in
-            
-            self?.subject.isSyncing.send(true)
-            
-            try await self?.eventSyncMediator.waitUntilEventSyncAvailable()
-            
-            logger.log(level: .debug, "event sync process start")
-            
-            let dataTypes: [SyncDataType] = [.eventTag, .todo, .schedule]
-            await dataTypes.asyncForEach { dataType in
-                do {
-                    try await self?.runSync(dataType)
-                    logger.log(level: .debug, "\(dataType) sync end")
-                } catch let error {
-                    logger.log(level: .error, "\(dataType) sync fail: \(error)")
-                }
-            }
-            
-            logger.log(level: .debug, "event sync process end")
-            self?.subject.isSyncing.send(false)
+            try await self?.runSyncTask()
             completed?()
         }
         self.syncTask = task
@@ -91,11 +75,41 @@ extension EventSyncUsecaseImple {
         self.subject.isSyncing.send(false)
     }
     
+    public func forceSync() {
+        
+        self.cancelSync()
+        
+        let task = Task { [weak self] in
+            try await self?.syncRepository.clearSyncTimestamp()
+            try await self?.runSyncTask()
+        }
+        self.syncTask = task
+    }
+    
+    private func runSyncTask() async throws {
+        self.subject.isSyncing.send(true)
+        
+        try await self.eventSyncMediator.waitUntilEventSyncAvailable()
+        
+        logger.log(level: .debug, "event sync process start")
+        
+        let dataTypes: [SyncDataType] = [.eventTag, .todo, .schedule]
+        await dataTypes.asyncForEach { dataType in
+            do {
+                try await self.runSync(dataType)
+            } catch let error {
+                logger.log(level: .error, "\(dataType) sync fail: \(error)")
+            }
+        }
+        
+        logger.log(level: .debug, "event sync process end")
+        self.subject.isSyncing.send(false)
+    }
+    
     private func runSync(_ dataType: SyncDataType) async throws {
         let checkIsNeed = try await self.syncRepository.checkIsNeedSync(for: dataType)
         switch (checkIsNeed.result, dataType) {
-        case (.noNeedToSync, _):
-            logger.log(level: .debug, "\(dataType) no need to sync")
+        case (.noNeedToSync, _): break
         case (.migrationNeeds, .eventTag):
             try await self.startSync(CustomEventTag.self, dataType)
             
@@ -149,6 +163,10 @@ extension EventSyncUsecaseImple {
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
+    
+    public func loadLatestSyncDataTimestamp() async throws -> TimeInterval? {
+        return try await self.syncRepository.loadLatestSyncDataTimestamp()
+    }
 }
 
 
@@ -164,7 +182,13 @@ public final class NotNeedEventSyncUsecase: EventSyncUsecase, Sendable {
     
     public func cancelSync() { }
     
+    public func forceSync() { }
+    
     public var isSyncInProgress: AnyPublisher<Bool, Never> {
         return Just(false).eraseToAnyPublisher()
+    }
+    
+    public func loadLatestSyncDataTimestamp() async throws -> TimeInterval? {
+        return nil
     }
 }

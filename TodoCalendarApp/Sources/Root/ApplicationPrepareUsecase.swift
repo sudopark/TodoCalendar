@@ -131,10 +131,10 @@ extension ApplicationPrepareUsecaseImple {
         
         do {
             try await self.database.async.open(path: dbPath)
-            logger.log(level: .info, "db open -> path: \(dbPath)")
+            logger.log(.sql, level: .info, "db open -> path: \(dbPath)")
             try await self.database.runMigration(upTo: self.dbVersion)
         } catch {
-            logger.log(level: .critical, "db open fail -> path: \(dbPath)")
+            logger.log(.sql, level: .critical, "db open fail -> path: \(dbPath)")
             throw error
         }
     }

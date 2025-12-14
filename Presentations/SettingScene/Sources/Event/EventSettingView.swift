@@ -27,6 +27,7 @@ import CommonPresentation
     var selectedAllDayEventNotificationTimeText: String?
     var periodModel: SelectedPeriodModel = .init(.minute0)
     var defaultMapApp: SupportMapApps?
+    var eventSyncModel: EventSyncModel?
     var externalCalendarServiceModels: [ExternalCalanserServiceModel] = []
     var isConnectOrDisconnectingExternalService: Bool = false
     
@@ -35,7 +36,6 @@ import CommonPresentation
         guard self.didBind == false else { return }
         self.didBind = true
         
-        // TODO: bind state
         viewModel.selectedTagModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
@@ -71,6 +71,13 @@ import CommonPresentation
             })
             .store(in: &self.cancellables)
         
+        viewModel.eventSyncModel
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] model in
+                self?.eventSyncModel = model
+            })
+            .store(in: &self.cancellables)
+        
         viewModel.integratedExternalCalendars
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] models in
@@ -99,6 +106,7 @@ final class EventSettingViewEventHandler: Observable {
     var selectAllDayEventNotificationTime: () -> Void = { }
     var selectPeriod: (EventSettings.DefaultNewEventPeriod) -> Void = { _ in }
     var selectDefaultMapApp: () -> Void = { }
+    var forceSync: () -> Void = { }
     var connectExternalCalendar: (String) -> Void = { _ in }
     var disconnectExternalCalendar: (String) -> Void = { _ in }
     var close: () -> Void = { }
@@ -168,6 +176,13 @@ struct EventSettingView: View {
                         
                         rowView(defaultMapAppView)
                             .onTapGesture(perform: eventHandlers.selectDefaultMapApp)
+                        if let model = state.eventSyncModel {
+                            rowView(eventSyncView(model))
+                                .onTapGesture {
+                                    guard model.isReadToSync else { return }
+                                    eventHandlers.forceSync()
+                                }
+                        }
                         
                         if !self.state.externalCalendarServiceModels.isEmpty {
                             self.externalCalendarSectionView(state.externalCalendarServiceModels)
@@ -338,6 +353,58 @@ struct EventSettingView: View {
         }
     }
     
+    private func eventSyncView(_ model: EventSyncModel) -> some View {
+        switch model {
+        case .syncInProgress:
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("event_setting::eventSync".localized())
+                        .font(self.appearance.fontSet.normal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                    
+                    Text("event_setting::eventSync::syncInProgress::description".localized())
+                        .font(appearance.fontSet.subSubNormal.asFont)
+                        .foregroundStyle(appearance.colorSet.text2.asColor)
+                }
+                
+                Spacer()
+                
+                LoadingCircleView(appearance.colorSet.accent.asColor, lineWidth: 2)
+                    .frame(width: 30, height: 30)
+            }
+            .asAnyView()
+        case .readToSync(let lastSyncDataTime):
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("event_setting::eventSync".localized())
+                        .font(self.appearance.fontSet.normal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                    
+                    Text("event_setting::eventSync::readyToSync::description".localized())
+                        .font(appearance.fontSet.subSubNormal.asFont)
+                        .foregroundStyle(appearance.colorSet.text2.asColor)
+                    
+                    if let lastSyncDataTime {
+                        Text("event_setting::eventSync::lastTime".localized(with: lastSyncDataTime))
+                            .font(appearance.fontSet.subSubNormal.asFont)
+                            .foregroundStyle(appearance.colorSet.text2.asColor)
+                    }
+                }
+                
+                Spacer()
+                
+                Text("event_setting::eventSync::force".localized())
+                    .font(appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(appearance.colorSet.text1.asColor)
+                
+                Image(systemName: "chevron.right")
+                    .font(self.appearance.fontSet.subNormal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
+            }
+            .asAnyView()
+        }
+    }
+    
     private func externalCalendarSectionView(_ models: [ExternalCalanserServiceModel]) -> some View {
         
         VStack(alignment: .leading) {
@@ -440,6 +507,8 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
 //                        .init("google", email: "some@email.com")
             )!
         ]
+        state.eventSyncModel = .readToSync(lastSyncDataTime: "2020.02.03 12:33")
+        state.eventSyncModel = .syncInProgress
         let eventHandlers = EventSettingViewEventHandler()
         eventHandlers.connectExternalCalendar = { _ in
             state.isConnectOrDisconnectingExternalService = true

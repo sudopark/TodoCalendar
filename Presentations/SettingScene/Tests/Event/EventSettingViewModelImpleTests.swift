@@ -40,11 +40,16 @@ class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
     }
     
     private func makeViewModel(
+        isLogin: Bool = true,
         accounts: [ExternalServiceAccountinfo] = []
     ) -> EventSettingViewModelImple {
         let tagUsecase = StubEventTagUsecase()
         let externalUsecase = StubExternalCalendarIntegrationUsecase(accounts)
         self.stubExternalCalednarUsecase = externalUsecase
+        
+        let calendarSettingUsecase = StubCalendarSettingUsecase()
+        calendarSettingUsecase.selectTimeZone(TimeZone(abbreviation: "KST")!)
+        
         let viewModel = EventSettingViewModelImple(
             eventSettingUsecase: self.stubSettingUsecase,
             eventNotificationSettingUsecase: self.stubEventNotificationSettingUsecase,
@@ -52,7 +57,10 @@ class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
             supportExternalCalendarServices: [
                 GoogleCalendarService(scopes: [.readOnly])
             ],
-            externalCalendarServiceUsecase: externalUsecase
+            externalCalendarServiceUsecase: externalUsecase,
+            accountUsecase: StubAccountUsecase(isLogin ? .init("some") : nil),
+            eventSyncUsecase: StubEventSyncUsecase(),
+            calendarSettingUsecase: calendarSettingUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -218,6 +226,50 @@ extension EventSettingViewModelImpleTests {
         
         // then
         XCTAssertEqual(maps, [nil, .apple])
+    }
+}
+
+// MARK: - event sync
+
+extension EventSettingViewModelImpleTests {
+    
+    // 로그아웃 - event sync model nil
+    func testViewModel_whenNotLogin_syncModelIsNil() {
+        // given
+        let expect = expectation(description: "로그아웃 - event sync model nil")
+        let viewModel = self.makeViewModel(isLogin: false)
+        
+        // when
+        let models = self.waitOutputs(expect, for: viewModel.eventSyncModel) {
+            viewModel.prepare()
+        }
+        
+        // then
+        XCTAssertEqual(models, [nil])
+    }
+    
+    // 로그인 - read to sync -> sync -> read to sync
+    func testViewModel_whenLogin_forceEventSync() {
+        // given
+        let expect = expectation(description: "로그인 - read to sync -> sync -> read to sync")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(isLogin: true)
+        
+        // when
+        let models = self.waitOutputs(expect, for: viewModel.eventSyncModel, timeout: 0.1) {
+            viewModel.prepare()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+                viewModel.forceSync()
+            }
+        }
+        
+        // then
+        XCTAssertEqual(models, [
+            .readToSync(lastSyncDataTime: "01/01/1970 10:00"),
+            .syncInProgress,
+            .readToSync(lastSyncDataTime: "01/01/1970 11:00")
+        ])
     }
 }
 
