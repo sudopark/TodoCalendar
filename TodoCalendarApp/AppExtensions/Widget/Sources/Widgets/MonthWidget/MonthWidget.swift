@@ -96,10 +96,6 @@ struct SingleMonthView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 2)
-                .fill(backgroundColor)
-        )
     }
     
     private func accentDayText(_ accent: AccentDays?) -> Color {
