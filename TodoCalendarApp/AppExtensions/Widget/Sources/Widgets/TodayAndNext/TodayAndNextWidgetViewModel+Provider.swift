@@ -24,6 +24,48 @@ struct TodayAndNextWidgetViewModel {
     let customTagMap: [String: any EventTag]
     var googleCalendarColors: GoogleCalendar.Colors = .init(calendars: [:], events: [:])
     var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
+    
+    static func sample() -> TodayAndNextWidgetViewModel {
+        let now = Date()
+        let calendar = Calendar(identifier: .gregorian)
+        let today = TodayAndNextWidgetViewModel.TodayModel(
+            weekOfDay: now.text("date_form.EEEE".localized()),
+            day: calendar.component(.day, from: now)
+        )
+        let runningEvent = ScheduleEventCellViewModel("running", name: "🏃‍♂️ \("widget.events.sample::running".localized())")
+            |> \.periodText .~ .singleText(.init(text: "8:00"))
+        
+        let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("widget.events.sample::luch".localized())")
+            |> \.periodText .~ .singleText(.init(text: "1:00"))
+        let todayEvents = [
+            TodayAndNextWidgetViewModel.EventModel(cvm: runningEvent),
+            TodayAndNextWidgetViewModel.EventModel(cvm: lunchEvent)
+        ]
+        
+        let tomorrow = TodayAndNextWidgetViewModel.DateModel(dateText: "tomorrow".localized())
+        let callTodoEvent = TodoEventCellViewModel("call", name: "📞 \("Call Sara".localized())")
+            |> \.periodText .~ .singleText(.init(text: "3:00"))
+        
+        let surfingEvent = ScheduleEventCellViewModel("surfing", name: "🏄‍♂️ \("widget.events.sample::surfing".localized())")
+            |> \.periodText .~ .singleText(.init(text: "calendar::event_time::allday".localized()))
+        
+        let meeting = ScheduleEventCellViewModel("meeting", name: "widget.events.sample::meeting".localized())
+        |> \.periodText .~ .singleText(.init(text: "10:00"))
+        let tomorrowEvents = [
+            TodayAndNextWidgetViewModel.EventModel(cvm: callTodoEvent),
+            TodayAndNextWidgetViewModel.EventModel(cvm: surfingEvent),
+            TodayAndNextWidgetViewModel.EventModel(cvm: meeting)
+        ]
+        
+        let defaultTagColorSetting = DefaultEventTagColorSetting(
+            holiday: "#D6236A", default: "#088CDA"
+        )
+        
+        let left = PageModel(rows: todayEvents)
+        let right = PageModel(rows: tomorrowEvents)
+        return .init(left: left, right: right, defaultTagColorSetting: defaultTagColorSetting, customTagMap: [:]
+        )
+    }
 }
 
 // MARK: - rows
