@@ -16,9 +16,10 @@ import UnitTestHelpKit
 import TestDoubles
 
 
+// MARK: - TodayAndNextWidgetViewModelBuilderTests
+
 final class TodayAndNextWidgetViewModelBuilderTests {
     
-    private let kst = TimeZone(abbreviation: "KST")!
     private let refDate = Date(timeIntervalSince1970: 0)
  
     private func makeBuilder() -> TodayAndNextWidgetViewModelBuilder {
@@ -30,41 +31,6 @@ final class TodayAndNextWidgetViewModelBuilderTests {
             max: 4.0, daysRangeSize: 10,
             kst, setting
         )
-    }
-    
-    private func makeCurrentTodo(_ size: Int) -> [TodoCalendarEvent] {
-        return (0..<size).map { int in
-            return TodoCalendarEvent(
-                current: TodoEvent.dummy(int) |> \.eventTagId .~ .custom("t:\(int)"),
-                isForemost: false
-            )
-            
-        }
-    }
-    
-    private func makeAllDayTodo(_ range: Range<Int>, offset: Int) -> [TodoCalendarEvent] {
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ kst
-        let day = calendar.addDays(offset, from: Date(timeIntervalSince1970: 0))!
-        let start = calendar.startOfDay(for: day); let end = calendar.endOfDay(for: day)!
-        let time = EventTime.allDay(start.timeIntervalSince1970..<end.timeIntervalSince1970, secondsFromGMT: TimeInterval(kst.secondsFromGMT()))
-        return range.map { int in
-            let todo = TodoEvent.dummy(int)
-                |> \.time .~ time
-                |> \.eventTagId .~ .custom("t:\(int)")
-            return TodoCalendarEvent(todo, in: kst)
-        }
-    }
-    
-    private func makeSchedule(_ range: Range<Int>, offset: Int) -> [ScheduleCalendarEvent] {
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ kst
-        let day = calendar.addDays(offset, from: Date(timeIntervalSince1970: 0))!
-        return range.map { int in
-            let schedule = ScheduleEvent(
-                uuid: "sc:\(int)", name: "sc:\(int)",
-                time: .at(day.timeIntervalSince1970 + TimeInterval(int))
-            )
-            return ScheduleCalendarEvent.events(from: schedule, in: kst).first!
-        }
     }
 }
 
@@ -90,7 +56,7 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_provideLeftPageWithCurrentTodo() {
         // given
         let builder = self.makeBuilder()
-        let currents = self.makeCurrentTodo(3)
+        let currents = makeCurrentTodo(3)
         let events = CalendarEvents() |> \.currentTodos .~ currents
         
         // when
@@ -112,7 +78,7 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_provideLeftPageWithCurrentTodoWithSummarized() throws {
         // given
         let builder = self.makeBuilder()
-        let currents = self.makeCurrentTodo(4)
+        let currents = makeCurrentTodo(4)
         let events = CalendarEvents() |> \.currentTodos .~ currents
         
         // when
@@ -137,7 +103,7 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_provideLeftPageWitTodayAlldayEvent() throws {
         // given
         let builder = self.makeBuilder()
-        let allDayEvent = self.makeAllDayTodo(0..<3, offset: 0)
+        let allDayEvent = makeAllDayTodo(0..<3, offset: 0)
         let events = CalendarEvents() |> \.eventWithTimes .~ allDayEvent
         
         // when
@@ -162,7 +128,7 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_provideLeftPageWithTodayAlldayEventWithSummarized() throws {
         // given
         let builder = self.makeBuilder()
-        let allDayEvent = self.makeAllDayTodo(0..<4, offset: 0)
+        let allDayEvent = makeAllDayTodo(0..<4, offset: 0)
         let events = CalendarEvents() |> \.eventWithTimes .~ allDayEvent
         
         // when
@@ -188,7 +154,7 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_provideLeftPageWith_todayRemainEvents() throws {
         // given
         let builder = self.makeBuilder()
-        let schedules = self.makeSchedule(-10..<2, offset: 0)
+        let schedules = makeSchedule(-10..<2, offset: 0)
         let events = CalendarEvents() |> \.eventWithTimes .~ schedules
         
         // when
@@ -213,7 +179,7 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_provideLeftPageWith_todayRemainEventsWithoutSummarized() throws {
         // given
         let builder = self.makeBuilder()
-        let schedules = self.makeSchedule(-10..<10, offset: 0)
+        let schedules = makeSchedule(-10..<10, offset: 0)
         let events = CalendarEvents() |> \.eventWithTimes .~ schedules
         
         // when
@@ -237,10 +203,10 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_provideLeftPage() throws {
         // given
         let builder = self.makeBuilder()
-        let alldayEvents: [any CalendarEvent] = self.makeAllDayTodo(1..<2, offset: 0)
-        let schedule: [any CalendarEvent] = self.makeSchedule(2..<3, offset: 0)
+        let alldayEvents: [any CalendarEvent] = makeAllDayTodo(1..<2, offset: 0)
+        let schedule: [any CalendarEvent] = makeSchedule(2..<3, offset: 0)
         let events = CalendarEvents()
-            |> \.currentTodos .~ self.makeCurrentTodo(1)
+            |> \.currentTodos .~ makeCurrentTodo(1)
             |> \.eventWithTimes .~ (alldayEvents+schedule)
         
         // when
@@ -253,8 +219,8 @@ extension TodayAndNextWidgetViewModelBuilderTests {
         let today = lefts[0] as? TodayAndNextWidgetViewModel.TodayModel
         #expect(today != nil)
         
-        #expect((lefts[1] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "name:0")
-        #expect((lefts[2] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "name:1")
+        #expect((lefts[1] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "current:0")
+        #expect((lefts[2] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "allday:1")
     }
 }
 
@@ -264,7 +230,7 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightWithTodayRemainEvents() throws {
         // given
         let builder = self.makeBuilder()
-        let remain = self.makeSchedule(0..<2+4, offset: 0)
+        let remain = makeSchedule(0..<2+4, offset: 0)
         let events = CalendarEvents() |> \.eventWithTimes .~ remain
         
         // when
@@ -286,7 +252,7 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightWithTodayRemainEventsWithSummarized() throws {
         // given
         let builder = self.makeBuilder()
-        let remain = self.makeSchedule(0..<2+5, offset: 0)
+        let remain = makeSchedule(0..<2+5, offset: 0)
         let events = CalendarEvents() |> \.eventWithTimes .~ remain
         
         // when
@@ -309,8 +275,8 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightWithTomorrowEvents() throws {
         // given
         let builder = self.makeBuilder()
-        let today = self.makeSchedule(0..<2, offset: 0)
-        let tommorrow = self.makeSchedule(10..<13, offset: 1)
+        let today = makeSchedule(0..<2, offset: 0)
+        let tommorrow = makeSchedule(10..<13, offset: 1)
         let events = CalendarEvents() |> \.eventWithTimes .~ (today + tommorrow)
         
         // when
@@ -332,8 +298,8 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightWithTomorrowEventsWithoutSummarized() throws {
         // given
         let builder = self.makeBuilder()
-        let today = self.makeSchedule(0..<2, offset: 0)
-        let tommorrow = self.makeSchedule(10..<20, offset: 1)
+        let today = makeSchedule(0..<2, offset: 0)
+        let tommorrow = makeSchedule(10..<20, offset: 1)
         let events = CalendarEvents() |> \.eventWithTimes .~ (today + tommorrow)
         
         // when
@@ -355,8 +321,8 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightWithTodayRemainAndTomorrow() throws {
         // given
         let builder = self.makeBuilder()
-        let remain = self.makeSchedule(0..<2+1, offset: 0)
-        let tomorrow = self.makeSchedule(10..<12, offset: 1)
+        let remain = makeSchedule(0..<2+1, offset: 0)
+        let tomorrow = makeSchedule(10..<12, offset: 1)
         let events = CalendarEvents() |> \.eventWithTimes .~ (remain + tomorrow)
         
         // when
@@ -376,8 +342,8 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightWithTodayRemainAndTomorrowWithoutSummarized() throws {
         // given
         let builder = self.makeBuilder()
-        let remain = self.makeSchedule(0..<2+1, offset: 0)
-        let tomorrow = self.makeSchedule(10..<20, offset: 1)
+        let remain = makeSchedule(0..<2+1, offset: 0)
+        let tomorrow = makeSchedule(10..<20, offset: 1)
         let events = CalendarEvents() |> \.eventWithTimes .~ (remain + tomorrow)
         
         // when
@@ -398,8 +364,8 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightWithTodayRemainAndWithoutTomorrowIfNoSpace() throws {
         // given
         let builder = self.makeBuilder()
-        let remain = self.makeSchedule(0..<2+4, offset: 0)
-        let tomorrow = self.makeSchedule(10..<20, offset: 1)
+        let remain = makeSchedule(0..<2+4, offset: 0)
+        let tomorrow = makeSchedule(10..<20, offset: 1)
         let events = CalendarEvents() |> \.eventWithTimes .~ (remain + tomorrow)
         
         // when
@@ -421,9 +387,9 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightTomorrowAndOtherDayEvent() throws {
         // given
         let builder = self.makeBuilder()
-        let today: [any CalendarEvent] = self.makeSchedule(0..<2, offset: 0)
-        let tomorrow: [any CalendarEvent] = self.makeSchedule(10..<11, offset: 1)
-        let otherDay: [any CalendarEvent] = self.makeSchedule(100..<101, offset: 2)
+        let today: [any CalendarEvent] = makeSchedule(0..<2, offset: 0)
+        let tomorrow: [any CalendarEvent] = makeSchedule(10..<11, offset: 1)
+        let otherDay: [any CalendarEvent] = makeSchedule(100..<101, offset: 2)
         let events = CalendarEvents() |> \.eventWithTimes .~ (today + tomorrow + otherDay)
         
         // when
@@ -443,9 +409,9 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightTomorrowAndOtherDayEventWithSummarized() throws {
         // given
         let builder = self.makeBuilder()
-        let today: [any CalendarEvent] = self.makeSchedule(0..<2, offset: 0)
-        let tomorrow: [any CalendarEvent] = self.makeSchedule(10..<11, offset: 1)
-        let otherDay: [any CalendarEvent] = self.makeSchedule(100..<104, offset: 2)
+        let today: [any CalendarEvent] = makeSchedule(0..<2, offset: 0)
+        let tomorrow: [any CalendarEvent] = makeSchedule(10..<11, offset: 1)
+        let otherDay: [any CalendarEvent] = makeSchedule(100..<104, offset: 2)
         let events = CalendarEvents() |> \.eventWithTimes .~ (today + tomorrow + otherDay)
         
         // when
@@ -467,7 +433,7 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_fillRightWithOtherDayEvents() throws {
         // given
         let builder = self.makeBuilder()
-        let events = CalendarEvents() |> \.eventWithTimes .~ self.makeSchedule(100..<103, offset: 2)
+        let events = CalendarEvents() |> \.eventWithTimes .~ makeSchedule(100..<103, offset: 2)
         
         // when
         let model = builder.build(refDate, events)
@@ -489,8 +455,8 @@ extension TodayAndNextWidgetViewModelBuilderTests {
     @Test func builder_provideTodayNextRefreshDate_wthoutAllDayEvent() {
         // given
         let builder = self.makeBuilder()
-        let allDay: [any CalendarEvent] = self.makeAllDayTodo(0..<1, offset: 0)
-        let today: [any CalendarEvent] = self.makeSchedule(1..<2, offset: 0)
+        let allDay: [any CalendarEvent] = makeAllDayTodo(0..<1, offset: 0)
+        let today: [any CalendarEvent] = makeSchedule(1..<2, offset: 0)
         let events = CalendarEvents() |> \.eventWithTimes .~ (allDay + today)
         
         // when
@@ -498,5 +464,140 @@ extension TodayAndNextWidgetViewModelBuilderTests {
         
         // then
         #expect(model.refreshAfter == 1)
+    }
+}
+
+
+// MARK: - TodayAndNextWidgetViewModelProviderTests
+
+struct TodayAndNextWidgetViewModelProviderTests {
+    
+    private func makeProvider(
+        targetTags: [EventTagId]? = nil,
+        excludeAllDay: Bool = false
+    ) -> TodayAndNextWidgetViewModelProvider {
+        
+        return TodayAndNextWidgetViewModelProvider(
+            targetEventTagIds: targetTags,
+            excludeAllDayEvents: excludeAllDay,
+            eventsFetchUsecase: PrivateStubCalendarEventsFetchUsecase(),
+            calendarSettingRepository: StubCalendarSettingRepository(),
+            appSettingRepository: StubAppSettingRepository(),
+            localeProvider: Locale.current
+        )
+    }
+}
+
+extension TodayAndNextWidgetViewModelProviderTests {
+    
+    @Test func provider_provideModel() async throws {
+        // given
+        let provider = self.makeProvider()
+        
+        // when
+        let model = try await provider.getViewModel(for: Date(timeIntervalSince1970: 0))
+        
+        // then
+        let rows = model.left.rows + model.right.rows
+        try #require(rows.count == 6)
+        #expect(rows[0] is TodayAndNextWidgetViewModel.TodayModel == true)
+        #expect((rows[1] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "allday:0")
+        #expect((rows[2] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "sc:10")
+        #expect((rows[3] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "sc:11")
+        #expect((rows[4] as? TodayAndNextWidgetViewModel.DateModel)?.dateText == "Tomorrow")
+        #expect((rows[5] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "allday:1")
+    }
+    
+    @Test func provider_provideWithTargetEvents() async throws {
+        // given
+        let provider = self.makeProvider(targetTags: [.custom("t:1")])
+        
+        // when
+        let model = try await provider.getViewModel(for: Date(timeIntervalSince1970: 0))
+        
+        // then
+        let rows = model.left.rows + model.right.rows
+        try #require(rows.count == 3)
+        
+        #expect(rows[0] is TodayAndNextWidgetViewModel.TodayModel == true)
+        #expect((rows[1] as? TodayAndNextWidgetViewModel.DateModel)?.dateText == "Tomorrow")
+        #expect((rows[2] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "allday:1")
+    }
+    
+    @Test func provider_provideWithExcludeAllDayEvents() async throws {
+        // given
+        let provider = self.makeProvider(excludeAllDay: true)
+        
+        // when
+        let model = try await provider.getViewModel(for: Date(timeIntervalSince1970: 0))
+        
+        // then
+        let rows = model.left.rows + model.right.rows
+        try #require(rows.count == 3)
+        
+        #expect(rows[0] is TodayAndNextWidgetViewModel.TodayModel == true)
+        #expect((rows[1] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "sc:10")
+        #expect((rows[2] as? TodayAndNextWidgetViewModel.EventModel)?.cvm.name == "sc:11")
+    }
+}
+
+// MARK: - doubles
+
+private func makeCurrentTodo(_ size: Int) -> [TodoCalendarEvent] {
+    return (0..<size).map { int in
+        return TodoCalendarEvent(
+            current: TodoEvent.dummy(int)
+                |> \.name .~ "current:\(int)"
+                |> \.eventTagId .~ .custom("t:\(int)"),
+            isForemost: false
+        )
+        
+    }
+}
+
+private let kst = TimeZone(abbreviation: "KST")!
+
+private func makeAllDayTodo(_ range: Range<Int>, offset: Int) -> [TodoCalendarEvent] {
+    let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ kst
+    let day = calendar.addDays(offset, from: Date(timeIntervalSince1970: 0))!
+    let start = calendar.startOfDay(for: day); let end = calendar.endOfDay(for: day)!
+    let time = EventTime.allDay(start.timeIntervalSince1970..<end.timeIntervalSince1970, secondsFromGMT: TimeInterval(kst.secondsFromGMT()))
+    return range.map { int in
+        let todo = TodoEvent.dummy(int)
+            |> \.name .~ "allday:\(int)"
+            |> \.time .~ time
+            |> \.eventTagId .~ .custom("t:\(int)")
+        return TodoCalendarEvent(todo, in: kst)
+    }
+}
+
+private func makeSchedule(_ range: Range<Int>, offset: Int) -> [ScheduleCalendarEvent] {
+    let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ kst
+    let day = calendar.addDays(offset, from: Date(timeIntervalSince1970: 0))!
+    return range.map { int in
+        let schedule = ScheduleEvent(
+            uuid: "sc:\(int)", name: "sc:\(int)",
+            time: .at(day.timeIntervalSince1970 + TimeInterval(int))
+        )
+        return ScheduleCalendarEvent.events(from: schedule, in: kst).first!
+    }
+}
+
+private final class PrivateStubCalendarEventsFetchUsecase: StubCalendarEventsFetchUescase {
+    
+    override func fetchEvents(
+        in range: Range<TimeInterval>,
+        _ timeZone: TimeZone,
+        withoutOffTagIds: Bool
+    ) async throws -> CalendarEvents {
+        
+        let todayAll: [any CalendarEvent] = makeAllDayTodo(0..<1, offset: 0)
+        let tomorrowAll: [any CalendarEvent] = makeAllDayTodo(1..<2, offset: 1)
+        
+        let schedules: [any CalendarEvent] = makeSchedule(10..<12, offset: 0)
+        
+        let events = CalendarEvents()
+            |> \.eventWithTimes .~ (todayAll + tomorrowAll + schedules)
+        return events
     }
 }
