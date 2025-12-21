@@ -67,5 +67,6 @@ struct TodoToggleIntent: AppIntent {
         WidgetCenter.shared.reloadTimelines(ofKind: NextRemainEventWidget.kind)
         WidgetCenter.shared.reloadTimelines(ofKind: EventAndMonthWidget.kind)
         WidgetCenter.shared.reloadTimelines(ofKind: EventAndForemostWidget.kind)
+        WidgetCenter.shared.reloadTimelines(ofKind: TodayAndNextWidget.kind)
     }
 }
