@@ -152,6 +152,44 @@ extension WidgetViewModelProviderBuilder {
 }
 
 
+// MARK: - TodayAnd
+
+extension WidgetViewModelProviderBuilder {
+    
+    func makeTodayAndNextWidgetViewModelProvider(
+        shouldSkipCheckCacheReset: Bool = false,
+        targetEventTagIds: [EventTagId]?,
+        excludeAllDayEvent: Bool
+    ) async -> TodayAndNextWidgetViewModelProvider {
+        
+        if !shouldSkipCheckCacheReset {
+            await self.checkShouldReset()
+        }
+        
+        let fetchUsecase = self.usecaseFactory.makeEventsFetchUsecase()
+        
+        let appSettingRepository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
+        
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        
+        return TodayAndNextWidgetViewModelProvider(
+            targetEventTagIds: targetEventTagIds,
+            excludeAllDayEvents: excludeAllDayEvent,
+            eventsFetchUsecase: fetchUsecase,
+            calendarSettingRepository: calendarSettingRepository,
+            appSettingRepository: appSettingRepository,
+            localeProvider: Locale.current
+        )
+    }
+}
+
+
 // MARK: - make today widget viewModel provider
 
 extension WidgetViewModelProviderBuilder {
