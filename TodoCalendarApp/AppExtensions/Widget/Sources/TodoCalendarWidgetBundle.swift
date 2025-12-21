@@ -23,6 +23,7 @@ struct BaseWidgetBundle: WidgetBundle {
     var body: some Widget {
         MonthWidget()
         EventListWidget()
+        TodayAndNextWidget()
         TodayWidget()
         ForemostEventWidget()
         NextEventWidget()

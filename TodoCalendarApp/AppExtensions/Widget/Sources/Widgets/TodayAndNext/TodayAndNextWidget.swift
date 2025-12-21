@@ -84,7 +84,7 @@ struct TodayAndNextWidgetView: View {
                 Spacer()
                 
                 Text(model.weekOfDay)
-                    .font(.system(size: 10))
+                    .font(.system(size: 12))
                     .foregroundStyle(colorSet.text0.asColor)
                 
                 HStack(alignment: .lastTextBaseline, spacing: 0) {
@@ -208,7 +208,7 @@ struct TodayAndNextWidgetView: View {
             
             if let todo {
                 TodoToggleButton(
-                    todo: todo, colorSet: colorSet, size: 10, customColor: color.asColor
+                    todo: todo, colorSet: colorSet, size: 12, customColor: color.asColor
                 )
             }
         }
@@ -255,14 +255,14 @@ struct TodayAndNextWidgetView: View {
             
             if let todo {
                 TodoToggleButton(
-                    todo: todo, colorSet: colorSet, size: 10, customColor: color.asColor
+                    todo: todo, colorSet: colorSet, size: 12, customColor: color.asColor
                 )
             }
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 2)
         .background(
-            RoundedRectangle(cornerRadius: 2)
+            RoundedRectangle(cornerRadius: 4)
                 .fill(
                     color.withAlphaComponent(0.2).asColor
                 )
@@ -308,7 +308,7 @@ struct TodayAndNextWidgetView: View {
         .padding(.horizontal, 4)
         .padding(.vertical, 2)
         .background(
-            RoundedRectangle(cornerRadius: 2)
+            RoundedRectangle(cornerRadius: 4)
                 .fill(
                     firstColor.withAlphaComponent(0.2).asColor
                 )
@@ -376,6 +376,7 @@ struct TodayAndNextWidget: Widget {
         ) { entry in
             
             TodayAndNextWidgetEntryView(entry: entry)
+                .containerBackground(.background, for: .widget)
         }
         .supportedFamilies([.systemMedium])
         .configurationDisplayName("widget.next.title::future".localized())
