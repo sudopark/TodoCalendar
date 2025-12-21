@@ -17,8 +17,8 @@ import CalendarScenes
 // MARK: - TodayAndNextWidgetViewModel
 
 struct TodayAndNextWidgetViewModel {
-    let left: PageModel
-    let right: PageModel
+    var left: PageModel
+    var right: PageModel
     var refreshAfter: TimeInterval?
     let defaultTagColorSetting: DefaultEventTagColorSetting
     let customTagMap: [String: any EventTag]
@@ -32,28 +32,38 @@ struct TodayAndNextWidgetViewModel {
             weekOfDay: now.text("date_form.EEEE".localized()),
             day: calendar.component(.day, from: now)
         )
-        let runningEvent = ScheduleEventCellViewModel("running", name: "🏃‍♂️ \("widget.events.sample::running".localized())")
-            |> \.periodText .~ .singleText(.init(text: "8:00"))
+        let check = TodoEventCellViewModel(
+            currentTodo: TodoCalendarEvent(
+                current: TodoEvent(uuid: "check", name: "widget.events.sample::check_mailbox".localized()), isForemost: false
+            )
+        )
+        let runningEvent = ScheduleEventCellViewModel("running", name: "\("widget.events.sample::running".localized())")
+            |> \.periodText .~ .doubleText(.init(text: "08:00"), .init(text: "10:00"))
         
-        let lunchEvent = ScheduleEventCellViewModel("lunch", name: "🍔 \("widget.events.sample::luch".localized())")
-            |> \.periodText .~ .singleText(.init(text: "1:00"))
         let todayEvents = [
-            TodayAndNextWidgetViewModel.EventModel(cvm: runningEvent),
-            TodayAndNextWidgetViewModel.EventModel(cvm: lunchEvent)
+            TodayAndNextWidgetViewModel.EventModel(cvm: check),
+            TodayAndNextWidgetViewModel.EventModel(cvm: runningEvent)
         ]
         
         let tomorrow = TodayAndNextWidgetViewModel.DateModel(dateText: "tomorrow".localized())
-        let callTodoEvent = TodoEventCellViewModel("call", name: "📞 \("Call Sara".localized())")
-            |> \.periodText .~ .singleText(.init(text: "3:00"))
         
-        let surfingEvent = ScheduleEventCellViewModel("surfing", name: "🏄‍♂️ \("widget.events.sample::surfing".localized())")
+        let movingEvent = ScheduleEventCellViewModel("moving", name: "widget.events.sample::moving".localized())
             |> \.periodText .~ .singleText(.init(text: "calendar::event_time::allday".localized()))
+            |> \.eventTimeRawValue .~ .allDay(0..<10, secondsFromGMT: 0)
+            |> \.tagId .~ .custom("moving")
         
+        let depositEvent = TodoEventCellViewModel("deposit", name: "widget.events.sample::deposit_remain".localized())
+            |> \.periodText .~ .singleText(.init(text: "11:00"))
+            |> \.tagId .~ .custom("moving")
+        
+        let lunchEvent = ScheduleEventCellViewModel("lunch", name: "widget.events.sample::luch_appointment".localized())
+            |> \.periodText .~ .singleText(.init(text: "13:00"))
         let meeting = ScheduleEventCellViewModel("meeting", name: "widget.events.sample::meeting".localized())
-        |> \.periodText .~ .singleText(.init(text: "10:00"))
+            |> \.periodText .~ .doubleText(.init(text: "16:00"), .init(text: "17:00"))
         let tomorrowEvents = [
-            TodayAndNextWidgetViewModel.EventModel(cvm: callTodoEvent),
-            TodayAndNextWidgetViewModel.EventModel(cvm: surfingEvent),
+            TodayAndNextWidgetViewModel.EventModel(cvm: movingEvent),
+            TodayAndNextWidgetViewModel.EventModel(cvm: depositEvent),
+            TodayAndNextWidgetViewModel.EventModel(cvm: lunchEvent),
             TodayAndNextWidgetViewModel.EventModel(cvm: meeting)
         ]
         
@@ -61,17 +71,24 @@ struct TodayAndNextWidgetViewModel {
             holiday: "#D6236A", default: "#088CDA"
         )
         
-        let left = PageModel(rows: todayEvents)
-        let right = PageModel(rows: tomorrowEvents)
-        return .init(left: left, right: right, defaultTagColorSetting: defaultTagColorSetting, customTagMap: [:]
+        let left = PageModel(rows: [today] + todayEvents)
+        let right = PageModel(rows: [tomorrow] + tomorrowEvents)
+        return .init(
+            left: left, right: right,
+            defaultTagColorSetting: defaultTagColorSetting,
+            customTagMap: [
+                "moving": CustomEventTag(name: "moving", colorHex: "#FFA02E")
+            ]
         )
     }
 }
 
 // MARK: - rows
 
-protocol TodayAndNextWidgetViewModelRow {
+protocol TodayAndNextWidgetViewModelRow: Identifiable {
+    associatedtype ID = String
     var rowWeight: Float { get }
+    var id: String { get }
 }
 
 extension TodayAndNextWidgetViewModel {
@@ -80,15 +97,17 @@ extension TodayAndNextWidgetViewModel {
         
         let weekOfDay: String
         let day: Int
-        var holidays: [String] = []
         var timeZonetext: String?
-        var hasHoliday: Bool { !self.holidays.isEmpty }
         let rowWeight: Float = 2.0
+        
+        var id: String { "\(self.day)" }
     }
     
     struct DateModel: TodayAndNextWidgetViewModelRow {
         let dateText: String
         let rowWeight: Float = 2/3
+        
+        var id: String { self.dateText }
     }
     
     struct EventModel: TodayAndNextWidgetViewModelRow {
@@ -101,6 +120,8 @@ extension TodayAndNextWidgetViewModel {
                 return self.cvm.isAlldayEvent ? 2/3 : 1
             }
         }
+        
+        var id: String { self.cvm.eventIdentifier }
     }
     
     struct MultipleEventsSummaryModel: TodayAndNextWidgetViewModelRow {
@@ -109,9 +130,12 @@ extension TodayAndNextWidgetViewModel {
         let todoCount: Int
         let rowWeight: Float = 2/3
         
+        let id: String
+        
         init(_ rows: [EventModel]) {
             
             let cvms = rows.map { $0.cvm }
+            self.id = UUID().uuidString
             
             self.tags = cvms.map { $0.tagId }
             self.todoCount = cvms.filter { $0 is TodoEventCellViewModel }.count
@@ -308,9 +332,6 @@ extension TodayAndNextWidgetViewModelBuilder {
         )
         if timeZone != TimeZone.current {
             todayModel.timeZonetext = timeZone.localizedName(for: .shortStandard, locale: .current)
-        }
-        if let holidays = todayEvents?.compactMap ({ $0 as? HolidayEventCellViewModel }) {
-            todayModel.holidays = holidays.map { $0.name }
         }
         return todayModel
     }

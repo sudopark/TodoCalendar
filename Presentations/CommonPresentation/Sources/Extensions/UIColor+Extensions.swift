@@ -57,6 +57,22 @@ extension UIColor {
         
         return nil
     }
+    
+    public var isLight: Bool {
+        var r: CGFloat = 0
+        var g: CGFloat = 0
+        var b: CGFloat = 0
+        var a: CGFloat = 0
+        
+        self.getRed(&r, green: &g, blue: &b, alpha: &a)
+        
+        // 표준 휘도 계산 공식 (Rec. 709)
+        // 인간의 눈은 초록색에 가장 민감하고 파란색에 가장 둔감합니다.
+        let luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        
+        // 휘도가 0.5보다 크면 밝은 색으로 판단
+        return luminance > 0.5
+    }
 }
 
 
