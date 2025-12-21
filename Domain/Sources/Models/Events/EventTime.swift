@@ -17,6 +17,11 @@ public enum EventTime: Comparable, Sendable, Hashable {
     case at(TimeInterval)
     case period(Range<TimeInterval>)
     case allDay(Range<TimeInterval>, secondsFromGMT: TimeInterval)
+    
+    public var isAllDay: Bool {
+        guard case .allDay = self else { return false }
+        return true
+    }
 
     public var lowerBoundWithFixed: TimeInterval {
         switch self {
