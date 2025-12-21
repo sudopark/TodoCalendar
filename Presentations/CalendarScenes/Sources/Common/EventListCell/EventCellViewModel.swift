@@ -180,6 +180,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     public var isRepeating: Bool = false
     public var isForemost: Bool = false
     public var isAlldayEvent: Bool = false
+    public var isCurrentTodo: Bool = false
     
     public init(_ id: String, name: String) {
         self.eventIdentifier = id
@@ -195,6 +196,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
         self.name = currentTodo.name
         self.periodText = .currentTodoText
         self.isForemost = currentTodo.isForemost
+        self.isCurrentTodo = true
     }
     
     public init?(
@@ -269,7 +271,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public let isRepeating: Bool
     public let isForemost: Bool
     public var isAlldayEvent: Bool { self.eventTimeRawValue?.isAllDay ?? false }
-    var eventTimeRawValue: EventTime?
+    public var eventTimeRawValue: EventTime?
     
     public init(_ id: String, turn: Int? = nil, name: String, isRepeating: Bool = false) {
         self.eventIdWithoutTurn = id

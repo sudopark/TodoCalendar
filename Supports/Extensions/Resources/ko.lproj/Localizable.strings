@@ -410,11 +410,16 @@
 "widget.events::name" = "이벤트";
 "widget.events.noEvents::message" = "이벤트가 없습니다.";
 "widget.events.currentTodos" = "지금 할일";
+"widget.events.sample::check_mailbox" = "우편함 확인";
+"widget.events.sample::example" = "공휴일";
 "widget.events.sample::running" = "러닝";
 "widget.events.sample::luch" = "점심";
+"widget.events.sample::luch_appointment" = "점심약속(늦으면 안됨)";
 "widget.events.sample::call" = "전화하기";
 "widget.events.sample::surfing" = "서핑";
+"widget.events.sample::moving" = "이삿날";
 "widget.events.sample::meeting" = "정기 미팅";
+"widget.events.sample::deposit_remain" = "잔금 입금하기";
 "widget.events.sample::recycle" = "재활용하기";
 "widget.events.sample::take_medicine" = "약먹기";
 "widget.events.sample::watering" = "화분 물주기";
@@ -458,3 +463,8 @@
 "widget.next.title" = "다음 이벤트";
 "widget.next.rect_widget::title" = "오늘 다음 일정";
 "widget.next.title::remains" = "오늘 남은 일정";
+"widget.next.title::future" = "남은 일정";
+"widget.next.title::more_events" = "그 외 %d개의 일정";
+"widget.next.title::more_events_with_todo" = "그 외 %1$d개의 할일과 %2$d개의 일정";
+"widget.next.no_events_today" = "오늘 이벤트 없음";
+"widget.next.no_events" = "가까운 시일 내\n예정된 이벤트 없음";
