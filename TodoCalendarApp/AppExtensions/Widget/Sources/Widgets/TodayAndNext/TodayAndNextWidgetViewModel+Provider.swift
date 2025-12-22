@@ -208,17 +208,30 @@ struct TodayAndNextWidgetViewModelBuilder {
         let notTodayEvents = eventsPerDay.filter { $0.offset != 0 }
         let rightPage = self.fillRightPage(remain, notTodayEvents)
         
-        let todayNextEventTime = todayEvents?.eventsThisDay
-            .compactMap { $0.eventTime }
-            .filter { !$0.isAllDay }
-            .first(where: { $0.lowerBoundWithFixed > now.timeIntervalSince1970 })
+        let todayNextEventTime = todayEvents.flatMap { self.selectRefreshTime($0.eventsThisDay, now: now) }
             
         return TodayAndNextWidgetViewModel(
             left: leftPage, right: rightPage,
-            refreshAfter: todayNextEventTime?.lowerBoundWithFixed,
+            refreshAfter: todayNextEventTime,
             defaultTagColorSetting: setting.defaultTagColor,
             customTagMap: events.customTagMap
         )
+    }
+    
+    private func selectRefreshTime(_ events: [any CalendarEvent], now: Date) -> TimeInterval? {
+        let times = events.compactMap { $0.eventTime }.filter { !$0.isAllDay }
+        guard let firstTimeIndex = times.firstIndex(where: { $0.lowerBoundWithFixed >= now.timeIntervalSince1970 })
+        else { return nil }
+        
+        let firstEventTime = times[firstTimeIndex]
+        let (firstStart, firstEnd) = (firstEventTime.lowerBoundWithFixed, firstEventTime.upperBoundWithFixed)
+        guard let nextEventTime = times[safe: firstTimeIndex+1],
+              firstEnd < nextEventTime.lowerBoundWithFixed
+        else {
+            return firstEnd
+        }
+        
+        return max(firstStart, nextEventTime.lowerBoundWithFixed-10*60)
     }
     
     private struct EventsPerDay {
