@@ -281,10 +281,11 @@ struct TodayAndNextWidgetView: View {
         }
         let firstColor = colors.first ?? defColors.defaultColor
         
-        let message = if model.todoCount > 0 {
-            "widget.next.title::more_events_with_todo".localized(with: model.todoCount, model.tags.count-model.todoCount)
-        } else {
-            "widget.next.title::more_events".localized(with: model.tags.count)
+        let message = switch (model.todoCount == 0, model.nonTodoEventCount == 0) {
+            case (true, true): ""
+            case (true, false): "widget.next.title::more_events".localized(with: model.nonTodoEventCount)
+            case (false, true): "widget.next.title::more_todos".localized(with: model.todoCount)
+            case (false, false): "widget.next.title::more_events_with_todo".localized(with: model.todoCount, model.nonTodoEventCount)
         }
         
         return HStack {

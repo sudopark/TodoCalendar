@@ -464,6 +464,7 @@
 "widget.next.rect_widget::title" = "오늘 다음 일정";
 "widget.next.title::remains" = "오늘 남은 일정";
 "widget.next.title::future" = "남은 일정";
+"widget.next.title::more_todos" = "그 외 %d개의 할일";
 "widget.next.title::more_events" = "그 외 %d개의 일정";
 "widget.next.title::more_events_with_todo" = "그 외 %1$d개의 할일과 %2$d개의 일정";
 "widget.next.no_events_today" = "오늘 이벤트 없음";

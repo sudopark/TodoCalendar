@@ -127,7 +127,9 @@ extension TodayAndNextWidgetViewModel {
     struct MultipleEventsSummaryModel: TodayAndNextWidgetViewModelRow {
         
         let tags: [EventTagId]
+        var totalCount: Int { self.tags.count }
         let todoCount: Int
+        var nonTodoEventCount: Int { totalCount - todoCount }
         let rowWeight: Float = 2/3
         
         let id: String
