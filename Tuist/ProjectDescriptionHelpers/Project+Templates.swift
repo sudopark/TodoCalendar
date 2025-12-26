@@ -207,6 +207,12 @@ extension Project {
                         "CFBundleURLSchemes": [
                             "\(googleReverseAppId)"
                         ]
+                    ],
+                    [
+                        "CFBundleURLName": "com.sudo.park.TodoCalendarApp",
+                        "CFBundleURLSchemes": [
+                            "tc.app"
+                        ]
                     ]
                 ],
                 "LSApplicationQueriesSchemes": ["comgooglemaps"],
