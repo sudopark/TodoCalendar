@@ -52,6 +52,27 @@ extension TodayAndNextWidgetViewModelBuilderTests {
         #expect(today?.day == 1)
     }
     
+    @Test func builder_provideUncompletedTodayTodo() throws {
+        // given
+        let builder = self.makeBuilder()
+        let todos = makeTodo(0..<20, offset: 0)
+        let alldayTodos = makeAllDayTodo(0..<9, offset: 0)
+        let events = CalendarEvents() |> \.eventWithTimes .~ (todos + alldayTodos)
+        
+        // when
+        let ref = Date(timeIntervalSince1970: 10)
+        let model = builder.build(ref, events)
+        
+        // then
+        let lefts = model.left.rows
+        try #require(lefts.count == 3)
+        #expect(lefts[0] is TodayAndNextWidgetViewModel.TodayModel)
+        let uncompletedModel = lefts[1] as? TodayAndNextWidgetViewModel.UncompletedTodayTodoSummaryModel
+        #expect(uncompletedModel?.firstTodoName == "todo:\(0)")
+        #expect(uncompletedModel?.andOtherTodosCount == 9)
+        #expect((lefts[2] as? TodayAndNextWidgetViewModel.MultipleEventsSummaryModel)?.todoCount == 9)
+    }
+    
     // fill left with current todo
     @Test func builder_provideLeftPageWithCurrentTodo() {
         // given
@@ -552,6 +573,20 @@ private func makeCurrentTodo(_ size: Int) -> [TodoCalendarEvent] {
             isForemost: false
         )
         
+    }
+}
+
+private func makeTodo(_ range: Range<Int>, offset: Int) -> [TodoCalendarEvent] {
+    let calender = Calendar(identifier: .gregorian) |> \.timeZone .~ kst
+    let day = calender.addDays(offset, from: Date(timeIntervalSince1970: 0))!
+    let dayStart = calender.startOfDay(for: day)
+    
+    return range.map { int in
+        let time = EventTime.at(day.timeIntervalSince1970 + TimeInterval(int))
+        let todo = TodoEvent.dummy(int)
+            |> \.name .~ "todo:\(int)"
+            |> \.time .~ time
+        return TodoCalendarEvent(todo, in: kst)
     }
 }
 

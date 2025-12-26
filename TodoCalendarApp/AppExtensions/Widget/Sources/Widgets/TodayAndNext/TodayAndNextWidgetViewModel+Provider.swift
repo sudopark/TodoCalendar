@@ -143,6 +143,22 @@ extension TodayAndNextWidgetViewModel {
             self.todoCount = cvms.filter { $0 is TodoEventCellViewModel }.count
         }
     }
+    
+    struct UncompletedTodayTodoSummaryModel: TodayAndNextWidgetViewModelRow {
+        
+        let firstTodoName: String
+        let andOtherTodosCount: Int
+        let id: String
+        
+        var rowWeight: Float { 2/3 }
+        
+        init?(_ todos: [TodoCalendarEvent]) {
+            guard !todos.isEmpty else { return nil }
+            self.id = UUID().uuidString
+            self.firstTodoName = todos[0].name
+            self.andOtherTodosCount = todos.count-1
+        }
+    }
 }
 
 // MARK: - page model
@@ -205,7 +221,12 @@ struct TodayAndNextWidgetViewModelBuilder {
             
         let eventsPerDay = self.gatherEvents(now, daysRangeSize, events: events)
         let todayEvents = eventsPerDay.first(where: { $0.offset == 0})
-        let (leftPage, remain) = self.fillLeftPage(now, todayEvents?.events ?? [], currents: currentTodos)
+        let (leftPage, remain) = self.fillLeftPage(
+            now,
+            uncompletedTodos: self.todayUncompletedTodo(now, events: events),
+            todayEvents: todayEvents?.events ?? [],
+            currents: currentTodos
+        )
         
         let notTodayEvents = eventsPerDay.filter { $0.offset != 0 }
         let rightPage = self.fillRightPage(remain, notTodayEvents)
@@ -301,6 +322,25 @@ struct TodayAndNextWidgetViewModelBuilder {
         
         return (0..<size+1).compactMap(gather(_:))
     }
+    
+    private func todayUncompletedTodo(
+        _ now: Date, events: CalendarEvents
+    ) -> [TodoCalendarEvent] {
+        guard let todayRange = calendar.dayRange(now) else { return [] }
+        let todoEvents = events.eventWithTimes
+            .filter { ev in
+                ev.eventTime?.isOverlap(with: todayRange, in: timeZone) ?? false
+            }
+            .compactMap { $0 as? TodoCalendarEvent }
+        let uncompleteds = todoEvents.filter { todo in
+            if let time = todo.eventTime, !time.isAllDay {
+                return time.lowerBoundWithFixed < now.timeIntervalSince1970
+            } else {
+                return false
+            }
+        }
+        return uncompleteds
+    }
 }
 
 // MARK: - fill left page
@@ -308,7 +348,10 @@ struct TodayAndNextWidgetViewModelBuilder {
 extension TodayAndNextWidgetViewModelBuilder {
     
     private func fillLeftPage(
-        _ now: Date, _ todayEvents: [any EventCellViewModel], currents: [TodoEventCellViewModel]
+        _ now: Date,
+        uncompletedTodos: [TodoCalendarEvent],
+        todayEvents: [any EventCellViewModel],
+        currents: [TodoEventCellViewModel]
     ) -> (
         left: TodayAndNextWidgetViewModel.PageModel,
         remain: [TodayAndNextWidgetViewModel.EventModel]
@@ -320,8 +363,15 @@ extension TodayAndNextWidgetViewModelBuilder {
         let todayModel = self.makeTodayModel(now, todayEvents)
         page.rows = [todayModel]
         
+        // 완료되지 않은 할일
+        if let uncompletedModel = TodayAndNextWidgetViewModel.UncompletedTodayTodoSummaryModel(uncompletedTodos) {
+            page.rows.append(uncompletedModel)
+        }
+        
+        
         // 지금 할일 or 오늘 하루종일에 해당하는 일정 주가
         var remainSpace = page.remainWeight(maxRowWeight)
+        // TODO: 공휴일도 표시하도록
         let notHolidayTodayEvents = todayEvents.filter { !($0 is HolidayEventCellViewModel) }
         let todayAlldayEvents = notHolidayTodayEvents.filter { $0.isAlldayEvent  }
         let currentOrAllDayEvents = self.makeCurrentOrTodayAllDayRows(currents, todayAlldayEvents, remainSpace)

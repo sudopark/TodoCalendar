@@ -59,6 +59,8 @@ struct TodayAndNextWidgetView: View {
                         eventView(event)
                     case let summary as TodayAndNextWidgetViewModel.MultipleEventsSummaryModel:
                         summaryView(summary)
+                    case let uncompleted as TodayAndNextWidgetViewModel.UncompletedTodayTodoSummaryModel:
+                        todayUncompletedTodoView(uncompleted)
                     default: EmptyView()
                     }
                 }
@@ -316,6 +318,46 @@ struct TodayAndNextWidgetView: View {
         )
     }
     
+    private func todayUncompletedTodoView(_ model: TodayAndNextWidgetViewModel.UncompletedTodayTodoSummaryModel) -> some View {
+        
+        let message = switch model.andOtherTodosCount {
+            case 0: "widget.next.title::uncompleted::todo".localized(with: model.firstTodoName)
+            default: "widget.next.title::uncompleted::todos".localized(with: model.firstTodoName, model.andOtherTodosCount)
+        }
+        let color = UIColor.red
+        return HStack(spacing: 4) {
+            
+            ZStack(alignment: .center) {
+                Circle().fill(color.asColor)
+                    .frame(width: 14, height: 14)
+                
+                Image(
+                    systemName: "exclamationmark.circle"
+                )
+                    .font(.system(size: 7))
+                    .foregroundStyle(
+                        colorSet.text0_inverted.asColor
+                    )
+            }
+            
+            Text(message)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .font(.system(size: 12))
+                .foregroundStyle(colorSet.text0.asColor)
+            
+            Spacer()
+        }
+        .padding(.vertical, 0)
+        .padding(.trailing, 4)
+        .background(
+            RoundedRectangle(cornerRadius: 7)
+                .fill(
+                    color.withAlphaComponent(0.2).asColor
+                )
+        )
+    }
+    
     private struct WeightedVLayout: Layout {
         var weights: [Float]
         
@@ -410,6 +452,15 @@ struct TodayAndNextWidgetView_Provider: PreviewProvider {
 //        today?.holidays = ["삼일절"]
 //        today?.timeZonetext = "UTC+9"
         model.left.rows[0] = today!
+        
+        // test uncompleted
+        let uncompleted = TodayAndNextWidgetViewModel.UncompletedTodayTodoSummaryModel(
+            [
+                TodoCalendarEvent(TodoEvent(uuid: "t1", name: "todo1") |> \.eventTagId .~ .default, in: .current),
+                TodoCalendarEvent(TodoEvent(uuid: "t2", name: "todo2") |> \.eventTagId .~ .default, in: .current)
+            ]
+        )
+        model.left.rows.insert(uncompleted!, at: 1)
         
         // test holiday
         let holiday = HolidayEventCellViewModel(
