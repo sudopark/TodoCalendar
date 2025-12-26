@@ -464,9 +464,11 @@
 "widget.next.title" = "Next event";
 "widget.next.rect_widget::title" = "Today's next event.";
 "widget.next.title::remains" = "Today's next events.";
-"widget.next.title::future" = "Next events";
+"widget.next.title::future" = "Today and What's Next";
 "widget.next.title::more_todos" = "%d more to-do";
 "widget.next.title::more_events" = "%d more schedules";
 "widget.next.title::more_events_with_todo" = "%1$d more to-do and %2$d more schedules";
+"widget.next.title::uncompleted::todo" = "%1$@ is not completed";
+"widget.next.title::uncompleted::todos" = "%1$@ and %2$d more uncompleted to-do";
 "widget.next.no_events_today" = "No events today";
 "widget.next.no_events" = "No upcoming events";
