@@ -234,3 +234,37 @@ private extension Error {
         }
     }
 }
+
+
+// MARK: - deep link
+
+public struct PendingDeepLink {
+    
+    public let fullURL: URL
+    public var host: String?
+    public var pendingPathComponents: [String]
+    public var queryParams: [String: String]
+    
+    public init?(_ fullURL: URL) {
+        self.fullURL = fullURL
+        guard let components = URLComponents(url: fullURL, resolvingAgainstBaseURL: true),
+              let host = components.host
+        else { return nil }
+        
+        self.host = host
+        self.pendingPathComponents = components.path.components(separatedBy: "/")
+            .filter{ !$0.isEmpty }
+        self.queryParams = components.queryItems?.reduce(into: [String: String]()) { acc, item in
+            acc[item.name] = item.value
+        } ?? [:]
+    }
+}
+
+extension PendingDeepLink {
+    
+    public mutating func removeFirstPath() -> String? {
+        guard !self.pendingPathComponents.isEmpty
+        else { return nil }
+        return self.pendingPathComponents.removeFirst()
+    }
+}

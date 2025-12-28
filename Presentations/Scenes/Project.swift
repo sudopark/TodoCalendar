@@ -1,7 +1,7 @@
 import ProjectDescriptionHelpers
 import ProjectDescription
 
-let project = Project.framework(
+let project = Project.frameworkWithTest(
     name: "Scenes",
     platform: .iOS,
     iOSTargetVersion: "17.0",
