@@ -17,6 +17,7 @@ public struct CalendarSceneBuilderImple {
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
     private let eventListSceneBuilder: any EventListSceneBuiler
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
+    public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     
     public init(
         usecaseFactory: any UsecaseFactory,
