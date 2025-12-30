@@ -186,18 +186,21 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     private let accountUsecase: any AccountUsecase
     private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let applicationBase: ApplicationBase
+    private let deepLinkHandler: ApplicationDeepLinkHandlerImple
     private var usecaseFactory: (any UsecaseFactory)!
     
     init(
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
-        applicationBase: ApplicationBase
+        applicationBase: ApplicationBase,
+        deepLinkHandler: ApplicationDeepLinkHandlerImple
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.applicationBase = applicationBase
+        self.deepLinkHandler = deepLinkHandler
     }
     
     func showError(_ error: any Error) {
@@ -217,7 +220,11 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     }
     
     func openSafari(_ path: String) {
-        // ignore
+        Task { @MainActor in
+            
+            guard let url = path.asURL() else { return }
+            UIApplication.shared.open(url)
+        }
     }
     
     func pop(animate: Bool) {
@@ -304,12 +311,14 @@ extension ApplicationRootRouter {
     }
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
-        return CalendarSceneBuilderImple(
+        let builder = CalendarSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
             eventDetailSceneBuilder: self.eventDetailSceneBuilder(),
             eventListSceneBuilder: self.eventListSceneBuilder()
         )
+        self.deepLinkHandler.attach(calendarHandler: builder.calendarDeepLinkHandler)
+        return builder
     }
     
     private func holidayEventDetailSceneBuilder() -> any HolidayEventDetailSceneBuiler {
@@ -337,7 +346,7 @@ extension ApplicationRootRouter {
     
     private func settingSceneBuilder() -> any SettingSceneBuiler {
         return SettingSceneBuilderImple(
-            appId: AppEnvironment.appId,
+            appstoreLinkPath: AppEnvironment.appstoreLinkPath,
             supportExternalCalendarServices: AppEnvironment.supportExternalCalendarServices,
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
