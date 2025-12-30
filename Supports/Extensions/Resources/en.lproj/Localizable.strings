@@ -24,6 +24,7 @@
 "common.send" = "Send";
 "common.done" = "Done";
 "common.errorMessage" = "A temporary error has occurred.\nPlease report if the problem persists.";
+"common.update" = "Update";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
@@ -472,3 +473,7 @@
 "widget.next.title::uncompleted::todos" = "%1$@ and %2$d more uncompleted to-do";
 "widget.next.no_events_today" = "No events today";
 "widget.next.no_events" = "No upcoming events";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "This link format is not supported.\nPlease update the app to the latest version.";

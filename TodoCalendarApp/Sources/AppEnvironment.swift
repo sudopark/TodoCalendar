@@ -14,9 +14,9 @@ struct AppEnvironment {
     static var useEmulator: Bool { false }
     
     static var isTestBuild: Bool {
-        #if DEBUG
+#if DEBUG
         return ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
-        #endif
+#endif
         return false
     }
     
@@ -33,6 +33,11 @@ struct AppEnvironment {
     }
     
     static var appId: String { "6639620385" }
+    static var appstoreLinkPath: String {
+        return "https://itunes.apple.com/app/id/\(self.appId)"
+    }
+    
+    static var appScheme: String { "tc.app" }
     
     static func dbFilePath(for userId: String?) -> String {
         let directory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: self.groupID)

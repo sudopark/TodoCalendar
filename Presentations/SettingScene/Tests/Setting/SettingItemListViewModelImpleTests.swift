@@ -34,7 +34,7 @@ class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private func makeViewModel(_ account: AccountInfo? = nil) -> SettingItemListViewModelImple {
         let accountUsecase = StubAccountUsecase(account)
         let viewModel = SettingItemListViewModelImple(
-            appId: "some",
+            appstoreLinkPath: "some",
             accountUsecase: accountUsecase,
             uiSettingUsecase: StubUISettingUsecase(),
             deviceInfoFetchService: StubDeviceInfoFetchService()
@@ -266,7 +266,7 @@ extension SettingItemListViewModelImpleTests {
         viewModel.selectItem(review)
         
         // then
-        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "https://itunes.apple.com/app/id/some")
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "some")
     }
     
     func testViewModel_showHelpPage() {

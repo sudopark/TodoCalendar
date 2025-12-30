@@ -238,9 +238,10 @@ private extension Error {
 
 // MARK: - deep link
 
-public struct PendingDeepLink {
+public struct PendingDeepLink: Sendable {
     
     public let fullURL: URL
+    public let scheme: String
     public var host: String?
     public var pendingPathComponents: [String]
     public var queryParams: [String: String]
@@ -248,9 +249,11 @@ public struct PendingDeepLink {
     public init?(_ fullURL: URL) {
         self.fullURL = fullURL
         guard let components = URLComponents(url: fullURL, resolvingAgainstBaseURL: true),
+              let scheme = components.scheme,
               let host = components.host
         else { return nil }
         
+        self.scheme = scheme
         self.host = host
         self.pendingPathComponents = components.path.components(separatedBy: "/")
             .filter{ !$0.isEmpty }
@@ -267,4 +270,17 @@ extension PendingDeepLink {
         else { return nil }
         return self.pendingPathComponents.removeFirst()
     }
+}
+
+
+// MARK: - DeepLinkHandler
+
+public enum DeepLinkHandleResult: Sendable {
+    case handle
+    case needUpdate
+}
+
+public protocol DeepLinkHandler: Sendable, AnyObject {
+    
+    func handleLink(_ link: PendingDeepLink) -> DeepLinkHandleResult
 }

@@ -24,6 +24,7 @@
 "common.send" = "보내기";
 "common.done" = "완료";
 "common.errorMessage" = "일시적인 오류가 발생했습니다.\n문제가 반복된다면 제보해주세요.";
+"common.update" = "업데이트";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
@@ -471,3 +472,7 @@
 "widget.next.title::uncompleted::todos" = "%@ 외 %d개의 미완료 할일";
 "widget.next.no_events_today" = "오늘 이벤트 없음";
 "widget.next.no_events" = "가까운 시일 내\n예정된 이벤트 없음";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "지원하지 않는 형식의 링크입니다.\n앱을 최신 버전으로 업데이트 해주세요.";
