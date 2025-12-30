@@ -230,6 +230,10 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     func pop(animate: Bool) {
         // ignore
     }
+    
+    func dismissPresented(animated: Bool, _ completed: (() -> Void)?) {
+        // ignore
+    }
 }
 
 

@@ -18,6 +18,7 @@ public struct CalendarSceneBuilderImple {
     private let eventListSceneBuilder: any EventListSceneBuiler
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
+    private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
     
     public init(
         usecaseFactory: any UsecaseFactory,
@@ -78,6 +79,9 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
         )
         handleViewModelBuilder.router.attach(viewController)
         self.pendingCompleteTodoState.bind(handleViewModelBuilder.viewModel, viewAppearance)
+        
+        self.calendarDeepLinkHandler.attach(eventHandler: self.eventDeepLinkHandler)
+        self.eventDeepLinkHandler.attach(router: handleViewModelBuilder.router)
         
         let paperSceneBuilder = CalendarPaperSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,

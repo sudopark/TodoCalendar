@@ -24,7 +24,7 @@ class EventListCellEventHanleViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyTodoUsecase: PrivateStubTodoEventUsecase!
     private var spySchedleUsecase: PrivateScheduleEventUsecase!
     private var spyForemostUsecase: PrivateForemostEventUsecase!
-    private var spyRouter: SpyRouter!
+    private var spyRouter: SpyEventListCellEventHanleRouter!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -447,7 +447,7 @@ extension EventListCellEventHanleViewModelImpleTests {
     }
 }
 
-private final class SpyRouter: BaseSpyRouter, EventListCellEventHanleRouting, @unchecked Sendable {
+final class SpyEventListCellEventHanleRouter: BaseSpyRouter, EventListCellEventHanleRouting, @unchecked Sendable {
     
     func attach(_ scene: any Scene) { }
     

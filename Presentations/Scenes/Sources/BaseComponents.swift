@@ -107,6 +107,7 @@ public protocol Routing: AnyObject {
     func showConfirm(dialog info: ConfirmDialogInfo)
     func showActionSheet(_ form: ActionSheetForm)
     func openSafari(_ path: String)
+    func dismissPresented(animated: Bool, _ completed: (@Sendable () -> Void)?)
 }
 
 extension Routing {
@@ -208,6 +209,22 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         let manager = BottomSlideTransitionAnimationManager()
         self.bottomSlideTransitionManager = manager
         return manager
+    }
+    
+    public func dismissPresented(
+        animated: Bool, _ completed: (@Sendable () -> Void)?
+    ) {
+        
+        Task { @MainActor in
+            
+            guard let presented = self.scene?.presentedViewController
+            else {
+                completed?()
+                return
+            }
+            
+            presented.dismiss(animated: animated, completion: completed)
+        }
     }
 }
 
