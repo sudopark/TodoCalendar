@@ -165,7 +165,8 @@ struct EventListView: View {
                 .minimumScaleFactor(0.7)
                 .font(.system(size: 13))
                 .foregroundStyle(colorSet.text0.asColor)
-            
+                .asLinkIfPossible(model.widgetURL)
+                
             Spacer()
             
             if let todo = model as? TodoEventCellViewModel {
@@ -175,18 +176,22 @@ struct EventListView: View {
     }
 }
 
-private struct TodoToggleButton: View {
+struct TodoToggleButton: View {
     let todo: TodoEventCellViewModel
     let colorSet: ColorSet
+    var size: CGFloat = 18
+    var customColor: Color?
     
     struct TodoToggleStyle: ToggleStyle {
         
         let colorSet: ColorSet
+        let size: CGFloat
+        var customColor: Color?
         
         func makeBody(configuration: Configuration) -> some View {
             Image(systemName: configuration.isOn ? "circle.inset.filled" : "circle")
-                .font(.system(size: 18))
-                .foregroundStyle(colorSet.accent.asColor)
+                .font(.system(size: self.size))
+                .foregroundStyle(customColor ?? colorSet.accent.asColor)
         }
     }
     
@@ -195,7 +200,7 @@ private struct TodoToggleButton: View {
             "", isOn: false,
             intent: TodoToggleIntent(id: todo.eventIdentifier, isForemost: false)
         )
-        .toggleStyle(TodoToggleStyle(colorSet: colorSet))
+        .toggleStyle(TodoToggleStyle(colorSet: colorSet, size: size, customColor: customColor))
     }
 }
 

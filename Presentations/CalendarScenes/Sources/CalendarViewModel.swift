@@ -329,10 +329,15 @@ extension CalendarViewModelImple {
             .store(in: &self.cancellables)
     }
     
-    func moveDay(_ day: CalendarDay) {
-        let totalMonths = self.makeTotalMonths(around: day.year, day.month)
-        self.changeChilds(totalMonths) { selectMontthInteractor in
-            selectMontthInteractor?.selectDay(day)
+    func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
+        
+        self.router?.dismissPresented(animated: true) { [weak self] in
+            guard let self = self else { return }
+            
+            let totalMonths = self.makeTotalMonths(around: day.year, day.month)
+            self.changeChilds(totalMonths) { selectMontthInteractor in
+                selectMontthInteractor?.selectDay(day)
+            }
         }
     }
     

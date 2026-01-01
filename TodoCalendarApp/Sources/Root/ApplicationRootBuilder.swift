@@ -53,10 +53,12 @@ final class ApplicationRootBuilder {
             database: applicationBase.commonSqliteService
         )
         
+        let deepLinkHandler = ApplicationDeepLinkHandlerImple()
         let rootViewModel = ApplicationRootViewModelImple(
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
             prepareUsecase: prepareUsecase,
+            deepLinkHandler: deepLinkHandler,
             externalCalendarServiceUsecase: externalCalendarIntegrationUsecase,
             userNotificationUsecase: userNotificationUsecase,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
@@ -69,9 +71,11 @@ final class ApplicationRootBuilder {
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
             externalCalenarIntegrationUsecase: externalCalendarIntegrationUsecase,
-            applicationBase: applicationBase
+            applicationBase: applicationBase,
+            deepLinkHandler: deepLinkHandler
         )
         rootViewModel.router = rootRouter
+        deepLinkHandler.appRouter = rootRouter
         
         return rootViewModel
     }

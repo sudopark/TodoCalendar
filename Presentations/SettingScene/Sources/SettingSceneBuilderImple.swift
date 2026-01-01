@@ -13,20 +13,20 @@ import CommonPresentation
 
 public final class SettingSceneBuilderImple: SettingSceneBuiler {
     
-    private let appId: String
+    private let appstoreLinkPath: String
     private let supportExternalCalendarServices: [any ExternalCalendarService]
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let memberSceneBuilder: any MemberSceneBuilder
     
     public init(
-        appId: String,
+        appstoreLinkPath: String,
         supportExternalCalendarServices: [any ExternalCalendarService],
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         memberSceneBuilder: any MemberSceneBuilder
     ) {
-        self.appId = appId
+        self.appstoreLinkPath = appstoreLinkPath
         self.supportExternalCalendarServices = supportExternalCalendarServices
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -114,7 +114,7 @@ extension SettingSceneBuilderImple {
         )
         
         let builder = SettingItemListSceneBuilerImple(
-            appId: self.appId,
+            appstoreLinkPath: self.appstoreLinkPath,
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             appearanceSceneBuilder: apperanceSceneBuilder,

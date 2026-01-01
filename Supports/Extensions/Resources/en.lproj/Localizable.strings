@@ -24,6 +24,7 @@
 "common.send" = "Send";
 "common.done" = "Done";
 "common.errorMessage" = "A temporary error has occurred.\nPlease report if the problem persists.";
+"common.update" = "Update";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
@@ -48,6 +49,7 @@
 "date_form.EEEE" = "EEEE";
 "date_form.EEE_MMM_d" = "EEE, MMM d";
 "date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Tomorrow";
  
 // MARK: - event
 
@@ -410,11 +412,16 @@
 "widget.events::name" = "Events";
 "widget.events.noEvents::message" = "There are no events.";
 "widget.events.currentTodos" = "Current To do list";
+"widget.events.sample::check_mailbox" = "Check mailbox";
+"widget.events.sample::example" = "Holiday";
 "widget.events.sample::running" = "Running";
 "widget.events.sample::luch" = "Lunch";
+"widget.events.sample::luch_appointment" = "Lunch appointment(can't be late)";
 "widget.events.sample::call" = "Call Sara";
 "widget.events.sample::surfing" = "Surfing";
+"widget.events.sample::moving" = "Moving day";
 "widget.events.sample::meeting" = "Daily meeting";
+"widget.events.sample::deposit_remain" = "Transfer the Final Balance";
 "widget.events.sample::recycle" = "Recycle";
 "widget.events.sample::take_medicine" = "Take medicine";
 "widget.events.sample::watering" = "Watering the flower pot";
@@ -458,3 +465,15 @@
 "widget.next.title" = "Next event";
 "widget.next.rect_widget::title" = "Today's next event.";
 "widget.next.title::remains" = "Today's next events.";
+"widget.next.title::future" = "Today and What's Next";
+"widget.next.title::more_todos" = "%d more to-do";
+"widget.next.title::more_events" = "%d more schedules";
+"widget.next.title::more_events_with_todo" = "%1$d more to-do and %2$d more schedules";
+"widget.next.title::uncompleted::todo" = "%1$@ is not completed";
+"widget.next.title::uncompleted::todos" = "%1$@ and %2$d more uncompleted to-do";
+"widget.next.no_events_today" = "No events today";
+"widget.next.no_events" = "No upcoming events";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "This link format is not supported.\nPlease update the app to the latest version.";

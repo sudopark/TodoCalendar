@@ -98,6 +98,9 @@ struct WeekEventsView: View {
                 ForEach(week.days, id: \.identifier) {
                     dayView($0)
                         .frame(height: daySize.height)
+                        .asLinkIfPossible(
+                            CalendarDay($0.year, $0.month, $0.day).link
+                        )
                 }
             }
             

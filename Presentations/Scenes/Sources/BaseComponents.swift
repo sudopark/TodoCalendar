@@ -107,6 +107,7 @@ public protocol Routing: AnyObject {
     func showConfirm(dialog info: ConfirmDialogInfo)
     func showActionSheet(_ form: ActionSheetForm)
     func openSafari(_ path: String)
+    func dismissPresented(animated: Bool, _ completed: (@Sendable () -> Void)?)
 }
 
 extension Routing {
@@ -209,6 +210,22 @@ open class BaseRouterImple: Routing, @unchecked Sendable {
         self.bottomSlideTransitionManager = manager
         return manager
     }
+    
+    public func dismissPresented(
+        animated: Bool, _ completed: (@Sendable () -> Void)?
+    ) {
+        
+        Task { @MainActor in
+            
+            guard let presented = self.scene?.presentedViewController
+            else {
+                completed?()
+                return
+            }
+            
+            presented.dismiss(animated: animated, completion: completed)
+        }
+    }
 }
 
 private extension ActionSheetForm.Action.Style {
@@ -233,4 +250,54 @@ private extension Error {
         default: return self.localizedDescription
         }
     }
+}
+
+
+// MARK: - deep link
+
+public struct PendingDeepLink: Sendable {
+    
+    public let fullURL: URL
+    public let scheme: String
+    public var host: String?
+    public var pendingPathComponents: [String]
+    public var queryParams: [String: String]
+    
+    public init?(_ fullURL: URL) {
+        self.fullURL = fullURL
+        guard let components = URLComponents(url: fullURL, resolvingAgainstBaseURL: true),
+              let scheme = components.scheme,
+              let host = components.host
+        else { return nil }
+        
+        self.scheme = scheme
+        self.host = host
+        self.pendingPathComponents = components.path.components(separatedBy: "/")
+            .filter{ !$0.isEmpty }
+        self.queryParams = components.queryItems?.reduce(into: [String: String]()) { acc, item in
+            acc[item.name] = item.value?.removingPercentEncoding
+        } ?? [:]
+    }
+}
+
+extension PendingDeepLink {
+    
+    public mutating func removeFirstPath() -> String? {
+        guard !self.pendingPathComponents.isEmpty
+        else { return nil }
+        return self.pendingPathComponents.removeFirst()
+    }
+}
+
+
+// MARK: - DeepLinkHandler
+
+public enum DeepLinkHandleResult: Sendable {
+    case handle
+    case needUpdate
+}
+
+public protocol DeepLinkHandler: Sendable, AnyObject {
+    
+    func handleLink(_ link: PendingDeepLink) -> DeepLinkHandleResult
 }

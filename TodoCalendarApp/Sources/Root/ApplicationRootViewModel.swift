@@ -21,6 +21,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
     private let prepareUsecase: any ApplicationPrepareUsecase
+    private let deepLinkHandler: ApplicationDeepLinkHandlerImple
     private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     private let userNotificationUsecase: any UserNotificationUsecase
     private let environmentStorage: any EnvironmentStorage
@@ -30,6 +31,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
         prepareUsecase: any ApplicationPrepareUsecase,
+        deepLinkHandler: ApplicationDeepLinkHandlerImple,
         externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
         userNotificationUsecase: any UserNotificationUsecase,
         environmentStorage: any EnvironmentStorage
@@ -37,6 +39,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
         self.prepareUsecase = prepareUsecase
+        self.deepLinkHandler = deepLinkHandler
         self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
         self.userNotificationUsecase = userNotificationUsecase
         self.environmentStorage = environmentStorage
@@ -189,6 +192,11 @@ extension ApplicationRootViewModelImple {
         if self.authUsecase.handleAuthenticationResultOrNot(open: url) {
             return true
         }
+        
+        if self.deepLinkHandler.handleLink(url) {
+            return true
+        }
+        
         return false
     }
 }

@@ -28,7 +28,7 @@ struct NextEventWidgetInlineView: View {
     var body: some View {
         VStack {
             Text(
-                model.timeText.map { "\($0) - \(model.eventTitle)" } ?? model.eventTitle
+                model.timeText.map { "\($0.singleLineText) - \(model.eventTitle)" } ?? model.eventTitle
             )
         }
     }
@@ -93,9 +93,11 @@ struct NextEventWidgetEntryView: View {
         switch self.entry.result {
         case .success(let model) where family == .accessoryInline:
             NextEventWidgetInlineView(model: model)
+                .widgetURL(model.eventLink)
             
         case .success(let model):
             NextEventRectangleWidgetView(model: model)
+                .widgetURL(model.eventLink)
             
         case .failure(let error) where family == .accessoryRectangular:
             FailView(errorModel: error)

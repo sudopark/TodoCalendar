@@ -17,6 +17,51 @@ public enum EventTime: Comparable, Sendable, Hashable {
     case at(TimeInterval)
     case period(Range<TimeInterval>)
     case allDay(Range<TimeInterval>, secondsFromGMT: TimeInterval)
+    
+    public init?(deepLink queryParams: [String: String]) {
+        
+        let at = queryParams["at"].flatMap { TimeInterval($0) }
+        let period_start = queryParams["start"].flatMap { TimeInterval($0) }
+        let period_end = queryParams["end"].flatMap { TimeInterval($0) }
+        let secondsFromGMT = queryParams["offset"].flatMap { TimeInterval($0) }
+        let isAllDay = queryParams["isAllDay"].map {  $0 == "true" ? true : false }
+        
+        if let at {
+            self = .at(at)
+        } else if let start = period_start, let end = period_end, isAllDay == true, let offset = secondsFromGMT {
+            self = .allDay(start..<end, secondsFromGMT: offset)
+        } else if let start = period_start, let end = period_end {
+            self = .period(start..<end)
+        } else {
+            return nil
+        }
+    }
+    
+    public var queryParams: [String: String] {
+        switch self {
+        case .at(let interval):
+            return ["at": "\(interval)"]
+            
+        case .period(let range):
+            return [
+                "start": "\(range.lowerBound)",
+                "end": "\(range.upperBound)"
+            ]
+            
+        case .allDay(let range, let secondsFromGMT):
+            return [
+                "start": "\(range.lowerBound)",
+                "end": "\(range.upperBound)",
+                "offset": "\(secondsFromGMT)",
+                "isAllDay": "true"
+            ]
+        }
+    }
+    
+    public var isAllDay: Bool {
+        guard case .allDay = self else { return false }
+        return true
+    }
 
     public var lowerBoundWithFixed: TimeInterval {
         switch self {

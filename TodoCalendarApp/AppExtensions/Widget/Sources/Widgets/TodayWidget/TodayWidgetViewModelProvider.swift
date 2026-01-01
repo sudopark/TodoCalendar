@@ -18,6 +18,7 @@ import CalendarScenes
 
 struct TodayWidgetViewModel {
     
+    let id: CalendarDay
     let weekDayText: String
     let day: Int
     var holidayName: String?
@@ -29,16 +30,23 @@ struct TodayWidgetViewModel {
     var totalEventCount: Int { self.todoEventCount + self.scheduleEventcount }
     
     init(
+        id: CalendarDay,
         weekDayText: String,
         day: Int,
         monthAndYearText: String
     ) {
+        self.id = id
         self.weekDayText = weekDayText
         self.day = day
         self.monthAndYearText = monthAndYearText
     }
     
     init(_ today: Date, _ calendar: Calendar) {
+        self.id = .init(
+            calendar.component(.year, from: today),
+            calendar.component(.month, from: today),
+            calendar.component(.day, from: today)
+        )
         let timeZone = calendar.timeZone
         self.weekDayText = today.text("date_form.EEEE".localized(), timeZone: timeZone).uppercased()
         self.day = calendar.component(.day, from: today)
@@ -60,6 +68,7 @@ struct TodayWidgetViewModel {
     
     static func sample() -> TodayWidgetViewModel {
         return .init(
+            id: .init(2024, 03, 14),
             weekDayText: "widget.events.today::sample::sunday".localized(),
             day: 14,
             monthAndYearText: "widget.events.today::sample::march2024".localized()

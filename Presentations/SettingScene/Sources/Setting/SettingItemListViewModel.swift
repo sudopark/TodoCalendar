@@ -147,19 +147,19 @@ protocol SettingItemListViewModel: AnyObject, Sendable, SettingItemListSceneInte
 
 final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked Sendable {
     
-    private let appId: String
+    private let appstoreLinkPath: String
     private let accountUsecase: any AccountUsecase
     private let uiSettingUsecase: any UISettingUsecase
     private let deviceInfoFetchService: any DeviceInfoFetchService
     var router: (any SettingItemListRouting)?
     
     init(
-        appId: String,
+        appstoreLinkPath: String,
         accountUsecase: any AccountUsecase,
         uiSettingUsecase: any UISettingUsecase,
         deviceInfoFetchService: any DeviceInfoFetchService
     ) {
-        self.appId = appId
+        self.appstoreLinkPath = appstoreLinkPath
         self.accountUsecase = accountUsecase
         self.uiSettingUsecase = uiSettingUsecase
         self.deviceInfoFetchService = deviceInfoFetchService
@@ -172,10 +172,6 @@ final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked 
     
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
-    
-    private var appstoreLinkPath: String {
-        return "https://itunes.apple.com/app/id/\(self.appId)"
-    }
     
     private var helpPath_ko: String {
         return "https://readmind.notion.site/To-do-Calendar-36cba0bdc84b44de9abdfd7d8721cd91"

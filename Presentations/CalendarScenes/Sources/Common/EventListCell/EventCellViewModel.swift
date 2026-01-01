@@ -41,6 +41,10 @@ public enum EventPeriodText: Equatable, Sendable {
     case singleText(_ text: EventTimeText)
     case doubleText(_ topText: EventTimeText, _ bottomText: EventTimeText)
     
+    static var currentTodoText: EventPeriodText {
+        return .singleText(.init(text: R.String.calendarEventTimeTodo))
+    }
+    
     public init(
         _ todo: TodoCalendarEvent,
         in todayRange: Range<TimeInterval>,
@@ -49,9 +53,7 @@ public enum EventPeriodText: Equatable, Sendable {
     ) {
         guard let time = todo.eventTime
         else {
-            self = .singleText(
-                .init(text: R.String.calendarEventTimeTodo)
-            )
+            self = .currentTodoText
             return
         }
         
@@ -161,6 +163,7 @@ public protocol EventCellViewModel: Sendable {
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
     var moreActions: EventListMoreActionModel? { get }
+    var isAlldayEvent: Bool { get }
 }
 
 
@@ -176,11 +179,24 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     public var eventTimeRawValue: EventTime?
     public var isRepeating: Bool = false
     public var isForemost: Bool = false
+    public var isAlldayEvent: Bool = false
+    public var isCurrentTodo: Bool = false
     
     public init(_ id: String, name: String) {
         self.eventIdentifier = id
         self.name = name
         self.tagId = .default
+    }
+    
+    public init(
+        currentTodo: TodoCalendarEvent
+    ) {
+        self.eventIdentifier = currentTodo.eventId
+        self.tagId = currentTodo.eventTagId
+        self.name = currentTodo.name
+        self.periodText = .currentTodoText
+        self.isForemost = currentTodo.isForemost
+        self.isCurrentTodo = true
     }
     
     public init?(
@@ -201,6 +217,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
         
         self.isRepeating = todo.isRepeating
         self.isForemost = todo.isForemost
+        self.isAlldayEvent = todo.eventTime?.isAllDay ?? false
     }
     
     public var moreActions: EventListMoreActionModel? {
@@ -228,6 +245,7 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     var periodDescription: String?
     let isRepeating: Bool = false
     let isForemost: Bool = false
+    let isAlldayEvent: Bool = false
     
     init(name: String, defaultTagId: String?) {
         self.eventIdentifier = "pending:\(UUID().uuidString)"
@@ -252,7 +270,8 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public var periodDescription: String?
     public let isRepeating: Bool
     public let isForemost: Bool
-    var eventTimeRawValue: EventTime?
+    public var isAlldayEvent: Bool { self.eventTimeRawValue?.isAllDay ?? false }
+    public var eventTimeRawValue: EventTime?
     
     public init(_ id: String, turn: Int? = nil, name: String, isRepeating: Bool = false) {
         self.eventIdWithoutTurn = id
@@ -310,6 +329,7 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
     public var periodDescription: String?
     public let isRepeating: Bool = false
     public let isForemost: Bool = false
+    public let isAlldayEvent: Bool = true
     
     public init(_ holiday: HolidayCalendarEvent) {
         self.eventIdentifier = holiday.eventId
@@ -337,6 +357,7 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     public let calendarId: String
     public let colorId: String?
     public let htmlLink: String?
+    public var isAlldayEvent: Bool = false
     
     public init?(
         _ event: GoogleCalendarEvent,
@@ -355,6 +376,7 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
         self.calendarId = event.calendarId
         self.colorId = event.colorId
         self.htmlLink = event.htmlLink
+        self.isAlldayEvent = event.eventTime?.isAllDay ?? false
     }
     
     public var moreActions: EventListMoreActionModel? {

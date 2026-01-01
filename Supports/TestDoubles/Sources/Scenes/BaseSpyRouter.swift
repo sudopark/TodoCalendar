@@ -60,4 +60,11 @@ open class BaseSpyRouter: Routing {
     public func openSafari(_ path: String) {
         self.didOpenSafariPath = path
     }
+    
+    public var didDismissPresented: Bool?
+    public func dismissPresented(animated: Bool, _ completed: (() -> Void)?) {
+        
+        self.didDismissPresented = true
+        completed?()
+    }
 }

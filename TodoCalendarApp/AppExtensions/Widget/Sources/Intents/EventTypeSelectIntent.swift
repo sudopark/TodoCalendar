@@ -133,3 +133,15 @@ struct EventTypeSelectIntent: WidgetConfigurationIntent {
     @Parameter(title: "Event Types", default: nil)
     var eventTypes: [EventTypeEntity]?
 }
+
+
+struct EventListComponentSelectIntent: WidgetConfigurationIntent {
+    
+    static let title: LocalizedStringResource = ""
+    
+    @Parameter(title: "Event Types", default: nil)
+    var eventTypes: [EventTypeEntity]?
+    
+    @Parameter(title: "Exclude all day event", default: false)
+    var excludeAllDayEvent: Bool
+}

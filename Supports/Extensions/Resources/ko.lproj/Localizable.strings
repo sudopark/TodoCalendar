@@ -24,6 +24,7 @@
 "common.send" = "보내기";
 "common.done" = "완료";
 "common.errorMessage" = "일시적인 오류가 발생했습니다.\n문제가 반복된다면 제보해주세요.";
+"common.update" = "업데이트";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
@@ -48,6 +49,7 @@
 "date_form.EEEE" = "EEEE";
 "date_form.EEE_MMM_d" = "EEE, MMM d일";
 "date_form.MMM_yyyy" = "yyyy MMM";
+"tomorrow" = "내일";
  
 // MARK: - event
 
@@ -409,11 +411,16 @@
 "widget.events::name" = "이벤트";
 "widget.events.noEvents::message" = "이벤트가 없습니다.";
 "widget.events.currentTodos" = "지금 할일";
+"widget.events.sample::check_mailbox" = "우편함 확인";
+"widget.events.sample::example" = "공휴일";
 "widget.events.sample::running" = "러닝";
 "widget.events.sample::luch" = "점심";
+"widget.events.sample::luch_appointment" = "점심약속(늦으면 안됨)";
 "widget.events.sample::call" = "전화하기";
 "widget.events.sample::surfing" = "서핑";
+"widget.events.sample::moving" = "이삿날";
 "widget.events.sample::meeting" = "정기 미팅";
+"widget.events.sample::deposit_remain" = "잔금 입금하기";
 "widget.events.sample::recycle" = "재활용하기";
 "widget.events.sample::take_medicine" = "약먹기";
 "widget.events.sample::watering" = "화분 물주기";
@@ -457,3 +464,15 @@
 "widget.next.title" = "다음 이벤트";
 "widget.next.rect_widget::title" = "오늘 다음 일정";
 "widget.next.title::remains" = "오늘 남은 일정";
+"widget.next.title::future" = "오늘 그리고 남은 일정";
+"widget.next.title::more_todos" = "그 외 %d개의 할일";
+"widget.next.title::more_events" = "그 외 %d개의 일정";
+"widget.next.title::more_events_with_todo" = "그 외 %1$d개의 할일과 %2$d개의 일정";
+"widget.next.title::uncompleted::todo" = "%@이 완료되지 않음";
+"widget.next.title::uncompleted::todos" = "%@ 외 %d개의 미완료 할일";
+"widget.next.no_events_today" = "오늘 이벤트 없음";
+"widget.next.no_events" = "가까운 시일 내\n예정된 이벤트 없음";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "지원하지 않는 형식의 링크입니다.\n앱을 최신 버전으로 업데이트 해주세요.";
