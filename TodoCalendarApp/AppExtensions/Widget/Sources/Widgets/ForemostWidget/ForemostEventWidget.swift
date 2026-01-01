@@ -29,6 +29,7 @@ struct InlineSizeForemostEventView: View {
     var body: some View {
         if let event = self.model.eventModel {
             Text(event.name)
+                .widgetURL(self.model.eventModel?.widgetURL)
                 .widgetAccentable()
         } else {
             Text("widget.events.foremost::allFinished::message".localized())
@@ -139,6 +140,7 @@ struct SystemSizeForemostEventView: View {
                 .minimumScaleFactor(0.7)
                 .font(.system(size: metric.eventNameFontSize, weight: .semibold))
                 .foregroundStyle(colorSet.text0.asColor)
+                .asLinkIfPossible(event.widgetURL)
             
             Spacer()
         }
