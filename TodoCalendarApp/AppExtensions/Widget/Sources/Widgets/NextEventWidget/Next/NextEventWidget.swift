@@ -28,7 +28,7 @@ struct NextEventWidgetInlineView: View {
     var body: some View {
         VStack {
             Text(
-                model.timeText.map { "\($0) - \(model.eventTitle)" } ?? model.eventTitle
+                model.timeText.map { "\($0.singleLineText) - \(model.eventTitle)" } ?? model.eventTitle
             )
         }
     }
