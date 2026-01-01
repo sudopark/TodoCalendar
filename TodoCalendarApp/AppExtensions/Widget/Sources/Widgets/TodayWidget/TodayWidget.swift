@@ -41,6 +41,7 @@ struct TodaySummaryView: View {
             }
             Spacer(minLength: 0)
         }
+        .asLinkIfPossible(model.id.link)
     }
     
     private func dayView(_ model: TodayWidgetViewModel) -> some View {
