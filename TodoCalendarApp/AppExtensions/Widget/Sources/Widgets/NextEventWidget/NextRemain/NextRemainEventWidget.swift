@@ -45,6 +45,7 @@ struct NextRemainEventVListiew: View {
             Text(model.eventTitle)
                 .font(.body)
                 .minimumScaleFactor(0.4)
+                .asLinkIfPossible(model.eventLink)
             Spacer()
         }
     }

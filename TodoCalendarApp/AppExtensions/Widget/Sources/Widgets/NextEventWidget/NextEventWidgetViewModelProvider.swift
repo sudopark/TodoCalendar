@@ -22,6 +22,7 @@ struct NextEventWidgetViewModel: Sendable {
     var locationText: String?
     var refreshAfter: Date?
     fileprivate var timeRawValue: EventTime?
+    var eventLink: URL?
     
     init(
         timeText: EventTimeText?,
@@ -109,12 +110,27 @@ struct NextEventWidgetViewModelBuilder {
             throw RuntimeError("event time not exists")
         }
         
+        let link: EventDeepLinkBuilder? = switch event {
+        case let todo as TodoCalendarEvent:
+                .todo(id: todo.eventId)
+        case let schedule as ScheduleCalendarEvent:
+            schedule.eventTime.flatMap {
+                EventDeepLinkBuilder.schedule(id: schedule.eventIdWithoutTurn, time: $0)
+            }
+        case let holiday as HolidayCalendarEvent:
+                .holiday(id: holiday.eventId)
+        case let google as GoogleCalendarEvent:
+                .google(id: google.eventId, calendarId: google.calendarId)
+        default: nil
+        }
+        
         return .init(
             timeText: EventTimeText.fromLowerBound(time, timeZone, !is24Form),
             eventTitle: event.name
         )
         |> \.locationText .~ event.locationText
         |> \.timeRawValue .~ time
+        |> \.eventLink .~ link?.build()
     }
     
     private func selectRefreshTime(_ current: EventTime?, _ next: Date?) -> Date? {

@@ -125,6 +125,7 @@ struct TodayAndNextWidgetView: View {
             return singleLineEventView(
                 color: color, name: todo.name, todo: todo
             )
+            .asLinkIfPossible(model.cvm.widgetURL)
             .asAnyView()
             
         case let todo as TodoEventCellViewModel:
@@ -133,12 +134,14 @@ struct TodayAndNextWidgetView: View {
                 time: todo.periodText?.asSingleLineText(isTodo: true),
                 todo: todo
             )
+            .asLinkIfPossible(model.cvm.widgetURL)
             .asAnyView()
             
         case let schedule as ScheduleEventCellViewModel where schedule.isAlldayEvent:
             return singleLineEventView(
                 color: color, name: schedule.name
             )
+            .asLinkIfPossible(model.cvm.widgetURL)
             .asAnyView()
             
         case let schedule as ScheduleEventCellViewModel:
@@ -147,12 +150,14 @@ struct TodayAndNextWidgetView: View {
                 name: schedule.name,
                 time: schedule.periodText?.asSingleLineText(isTodo: false)
             )
+            .asLinkIfPossible(model.cvm.widgetURL)
             .asAnyView()
             
         case let holiday as HolidayEventCellViewModel:
             return singleLineEventView(
                 color: defColors.holiday, name: holiday.name, isHoliday: true
             )
+            .asLinkIfPossible(model.cvm.widgetURL)
             .asAnyView()
             
         case let google as GoogleCalendarEventCellViewModel:
@@ -166,11 +171,13 @@ struct TodayAndNextWidgetView: View {
                 return singleLineEventView(
                     color: googleColor, name: google.name
                 )
+                .asLinkIfPossible(model.cvm.widgetURL)
                 .asAnyView()
             } else {
                 return doubleLineEventView(
                     color: googleColor, name: google.name, time: google.periodText?.asSingleLineText(isTodo: false)
                 )
+                .asLinkIfPossible(model.cvm.widgetURL)
                 .asAnyView()
             }
             
