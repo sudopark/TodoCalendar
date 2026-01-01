@@ -54,8 +54,10 @@ extension TodayAndNextWidgetTimeLineProvider {
         )
         switch entry.result {
         case .success(let model):
-            let refreshDate = model.refreshAfter.map { Date(timeIntervalSince1970: $0) } ?? Date().nextUpdateTime
-            return Timeline(entries: [entry], policy: .after(refreshDate))
+            let defNextTime = Date().nextUpdateTime
+            let refreshDate = model.refreshAfter.map { Date(timeIntervalSince1970: $0) } ?? defNextTime
+            let minRefreshTime = min(defNextTime, refreshDate)
+            return Timeline(entries: [entry], policy: .after(minRefreshTime))
             
         case .failure:
             return Timeline(entries: [entry], policy: .after(Date().nextUpdateTime))
