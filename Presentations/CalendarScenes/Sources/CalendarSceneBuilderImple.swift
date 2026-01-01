@@ -80,6 +80,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
         handleViewModelBuilder.router.attach(viewController)
         self.pendingCompleteTodoState.bind(handleViewModelBuilder.viewModel, viewAppearance)
         
+        self.calendarDeepLinkHandler.attach(calendarInteractor: viewModel)
         self.calendarDeepLinkHandler.attach(eventHandler: self.eventDeepLinkHandler)
         self.eventDeepLinkHandler.attach(router: handleViewModelBuilder.router)
         
