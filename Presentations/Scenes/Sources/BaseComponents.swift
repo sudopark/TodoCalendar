@@ -275,7 +275,7 @@ public struct PendingDeepLink: Sendable {
         self.pendingPathComponents = components.path.components(separatedBy: "/")
             .filter{ !$0.isEmpty }
         self.queryParams = components.queryItems?.reduce(into: [String: String]()) { acc, item in
-            acc[item.name] = item.value
+            acc[item.name] = item.value?.removingPercentEncoding
         } ?? [:]
     }
 }

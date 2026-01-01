@@ -30,6 +30,14 @@ extension View {
         default: return self.asAnyView()
         }
     }
+    
+    public func asLinkIfPossible(_ url: URL?) -> some View {
+        if let url {
+            return Link(destination: url) { self }.asAnyView()
+        } else {
+            return self.asAnyView()
+        }
+    }
 }
 
 
