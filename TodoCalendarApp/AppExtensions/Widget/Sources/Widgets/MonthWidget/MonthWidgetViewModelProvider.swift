@@ -17,6 +17,7 @@ import CalendarScenes
 // MARK: - MonthWidgetViewModel
 
 struct MonthWidgetViewModel {
+    let anchorDay: CalendarDay
     let monthName: String
     let dayOfWeeksModels: [WeekDayModel]
     let weeks: [WeekRowModel]
@@ -42,6 +43,11 @@ struct MonthWidgetViewModel {
         self.monthName = formatter.string(from: date)
         
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+        self.anchorDay = .init(
+            calendar.component(.year, from: date),
+            calendar.component(.month, from: date),
+            calendar.component(.day, from: date)
+        )
         guard let first = component.weeks.first?.days.first,
               let start = calendar.dateBySetting(from: date, mutating: {
                   $0.year = first.year; $0.month = first.month; $0.day = first.day

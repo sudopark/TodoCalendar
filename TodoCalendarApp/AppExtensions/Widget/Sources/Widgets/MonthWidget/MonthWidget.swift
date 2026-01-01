@@ -49,6 +49,7 @@ struct SingleMonthView: View {
                 }
             }
         }
+        .asLinkIfPossible(model.anchorDay.link)
     }
     
     private func dayOfWeekLabel(_ model: WeekDayModel) -> some View {
