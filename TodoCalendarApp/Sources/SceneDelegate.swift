@@ -24,6 +24,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         app?.applicationRouter?.window = window
         
         app?.applicationViewModel.prepareInitialScene()
+        
+        guard let url = connectionOptions.urlContexts.first?.url else { return }
+        _ = app?.applicationViewModel.handle(open: url)
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
@@ -54,5 +57,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // to restore the scene back to its current state.
     }
     
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        
+        guard let url = URLContexts.first?.url else { return }
+        let app = UIApplication.shared.delegate as? AppDelegate
+        _ = app?.applicationViewModel.handle(open: url)
+    }
 }
 
