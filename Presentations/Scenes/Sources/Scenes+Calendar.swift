@@ -14,7 +14,14 @@ import Domain
 public protocol CalendarSceneInteractor: Sendable, AnyObject {
     
     func moveFocusToToday()
-    func moveDay(_ day: CalendarDay)
+    func moveDay(_ day: CalendarDay, withClearPresented: Bool)
+}
+
+extension CalendarSceneInteractor {
+    
+    public func moveDay(_ day: CalendarDay) {
+        self.moveDay(day, withClearPresented: false)
+    }
 }
 
 public protocol CalendarSceneListener: Sendable, AnyObject {

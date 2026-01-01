@@ -350,7 +350,7 @@ extension MainViewModelImpleTests {
         }
         
         var didRequestMoveDay: CalendarDay?
-        func moveDay(_ day: CalendarDay) {
+        func moveDay(_ day: CalendarDay, withClearPresented: Bool) {
             self.didRequestMoveDay = day
         }
     }
