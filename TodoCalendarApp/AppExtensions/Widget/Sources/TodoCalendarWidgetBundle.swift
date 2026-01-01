@@ -21,9 +21,9 @@ struct TodoCalendarWidgetBundle: WidgetBundle {
 struct BaseWidgetBundle: WidgetBundle {
     
     var body: some Widget {
+        TodayAndNextWidget()
         MonthWidget()
         EventListWidget()
-        TodayAndNextWidget()
         TodayWidget()
         ForemostEventWidget()
         NextEventWidget()
