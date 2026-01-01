@@ -11,9 +11,14 @@ import Domain
 import CalendarScenes
 
 
-extension EventCellViewModel {
+enum EventDeepLinkBuilder {
+    case todo(id: String)
+    case schedule(id: String, time: EventTime)
+    case holiday(id: String)
+    case google(id: String, calendarId: String)
     
-    var widgetURL: URL? {
+    func build() -> URL? {
+        
         func make(_ path: String, queries: [String: String]) -> URL? {
             let fullPath = "\(AppEnvironment.appScheme)://calendar/event/\(path)"
             var components = URLComponents(string: fullPath)
@@ -22,28 +27,43 @@ extension EventCellViewModel {
             }
             return components?.url
         }
+        
+        switch self {
+        case .todo(let id):
+            return make("todo", queries: ["event_id": id])
+            
+        case .schedule(let id, let time):
+            let params = time.queryParams.merging(["event_id": id ]) { $1 }
+            return make("schedule", queries: params)
+            
+        case .holiday(let id):
+            return make("holiday", queries: ["event_id": id])
+            
+        case .google(let id, let calendarId):
+            return make("google", queries: ["event_id": id, "calendar_id": calendarId])
+        }
+    }
+}
+
+
+extension EventCellViewModel {
+    
+    var widgetURL: URL? {
+        
         switch self {
         case let todo as TodoEventCellViewModel:
-            return make("todo", queries: [
-                "event_id": todo.eventIdentifier
-            ])
+            return EventDeepLinkBuilder.todo(id: todo.eventIdentifier).build()
             
         case let schedule as ScheduleEventCellViewModel:
-            let params = schedule.eventTimeRawValue?.queryParams.merging([
-                "event_id": schedule.eventIdWithoutTurn
-            ]) { $1 }
-            return params.flatMap { make("schedule", queries: $0) }
+            return schedule.eventTimeRawValue.flatMap {
+                EventDeepLinkBuilder.schedule(id: schedule.eventIdWithoutTurn, time: $0).build()
+            }
             
         case let holiday as HolidayEventCellViewModel:
-            return make("holiday", queries: [
-                "event_id": holiday.eventIdentifier
-            ])
+            return EventDeepLinkBuilder.holiday(id: holiday.eventIdentifier).build()
             
         case let google as GoogleCalendarEventCellViewModel:
-            return make("google", queries: [
-                "event_id": google.eventIdentifier,
-                "calendar_id": google.calendarId
-            ])
+            return EventDeepLinkBuilder.google(id: google.eventIdentifier, calendarId: google.calendarId).build()
             
         default: return nil
         }

@@ -93,9 +93,11 @@ struct NextEventWidgetEntryView: View {
         switch self.entry.result {
         case .success(let model) where family == .accessoryInline:
             NextEventWidgetInlineView(model: model)
+                .widgetURL(model.eventLink)
             
         case .success(let model):
             NextEventRectangleWidgetView(model: model)
+                .widgetURL(model.eventLink)
             
         case .failure(let error) where family == .accessoryRectangular:
             FailView(errorModel: error)

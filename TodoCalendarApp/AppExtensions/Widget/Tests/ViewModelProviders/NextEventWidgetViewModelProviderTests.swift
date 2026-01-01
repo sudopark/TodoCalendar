@@ -56,6 +56,7 @@ extension NextEventWidgetViewModelProviderTests {
         #expect(model.timeText == nil)
         #expect(model.eventTitle == "widget.next.noEvent".localized())
         #expect(model.refreshAfter == nil)
+        #expect(model.eventLink == nil)
     }
     
     // 다음 이벤트가 todo인 경우
@@ -96,6 +97,7 @@ extension NextEventWidgetViewModelProviderTests {
         #expect(model.eventTitle == "todo")
         #expect(model.refreshAfter == nil)
         #expect(model.locationText == nil)
+        #expect(model.eventLink?.pathComponents == ["/", "event", "todo"])
     }
     
     @Test func provideNextEventIsSchedule() async throws {
@@ -110,6 +112,7 @@ extension NextEventWidgetViewModelProviderTests {
         #expect(model.eventTitle == "schedule")
         #expect(model.refreshAfter == nil)
         #expect(model.locationText == nil)
+        #expect(model.eventLink?.pathComponents == ["/", "event", "schedule"])
     }
     
     @Test func provideNextEventIsGoogleCalendarEvent() async throws {
@@ -124,6 +127,7 @@ extension NextEventWidgetViewModelProviderTests {
         #expect(model.eventTitle == "google")
         #expect(model.refreshAfter == nil)
         #expect(model.locationText == "location")
+        #expect(model.eventLink?.pathComponents == ["/", "event", "google"])
     }
     
     enum SecondNextEventTime: TimeInterval {
