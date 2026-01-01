@@ -165,7 +165,8 @@ struct EventListView: View {
                 .minimumScaleFactor(0.7)
                 .font(.system(size: 13))
                 .foregroundStyle(colorSet.text0.asColor)
-            
+                .asLinkIfPossible(model.widgetURL)
+                
             Spacer()
             
             if let todo = model as? TodoEventCellViewModel {
