@@ -49,6 +49,7 @@ final class ApplicationRootBuilder {
                 storage: .init(environmentStorage: applicationBase.userDefaultEnvironmentStorage)
             ),
             sharedDataStore: applicationBase.sharedDataStore,
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage,
             dbVersion: AppEnvironment.dbVersion,
             database: applicationBase.commonSqliteService
         )
@@ -60,8 +61,7 @@ final class ApplicationRootBuilder {
             prepareUsecase: prepareUsecase,
             deepLinkHandler: deepLinkHandler,
             externalCalendarServiceUsecase: externalCalendarIntegrationUsecase,
-            userNotificationUsecase: userNotificationUsecase,
-            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            userNotificationUsecase: userNotificationUsecase
         )
         remote.attach(listener: rootViewModel)
         externalServiceRemotes.values.forEach {

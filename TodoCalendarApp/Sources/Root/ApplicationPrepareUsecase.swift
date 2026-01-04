@@ -25,6 +25,7 @@ struct ApplicationPrepareResult {
 protocol ApplicationPrepareUsecase {
     
     func prepareLaunch() async throws -> ApplicationPrepareResult
+    func prepareEnterBackground()
     func prepareSignedIn(_ auth: Auth) async
     func prepareSignedOut() async
     func prepareExternalCalendarIntegrated(_ serviceId: String)
@@ -39,6 +40,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let latestAppSettingRepository: any AppSettingRepository
     private let sharedDataStore: SharedDataStore
+    private let environmentStorage: any EnvironmentStorage
     private let dbVersion: Int32
     private let database: SQLiteService
     private let databasePathFinding: (String?) -> String
@@ -51,6 +53,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         latestAppSettingRepository: any AppSettingRepository,
         sharedDataStore: SharedDataStore,
+        environmentStorage: any EnvironmentStorage,
         dbVersion: Int32,
         database: SQLiteService,
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
@@ -60,6 +63,7 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.latestAppSettingRepository = latestAppSettingRepository
         self.sharedDataStore = sharedDataStore
+        self.environmentStorage = environmentStorage
         self.dbVersion = dbVersion
         self.database = database
         self.databasePathFinding = databasePathFinding
@@ -80,6 +84,20 @@ extension ApplicationPrepareUsecaseImple {
             latestLoginAcount: latestLoginAccount,
             appearnceSetings: appearance
         )
+    }
+    
+    func prepareEnterBackground() {
+        
+        let syncResult = self.database.run { db in
+            try db.execute("PRAGMA wal_checkpoint(PASSIVE);")
+        }
+        logger.log(.sql, level: .info, "run db sync result: \(syncResult)")
+        
+        self.environmentStorage.update(
+            EnvironmentKeys.needCheckResetWidgetCache.rawValue,
+            true
+        )
+        self.environmentStorage.synchronize()
     }
     
     func prepareSignedIn(_ auth: Auth) async {
