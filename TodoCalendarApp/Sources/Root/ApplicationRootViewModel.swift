@@ -24,7 +24,6 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let deepLinkHandler: ApplicationDeepLinkHandlerImple
     private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     private let userNotificationUsecase: any UserNotificationUsecase
-    private let environmentStorage: any EnvironmentStorage
     var router: ApplicationRootRouter?
     
     init(
@@ -33,8 +32,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         prepareUsecase: any ApplicationPrepareUsecase,
         deepLinkHandler: ApplicationDeepLinkHandlerImple,
         externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
-        userNotificationUsecase: any UserNotificationUsecase,
-        environmentStorage: any EnvironmentStorage
+        userNotificationUsecase: any UserNotificationUsecase
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
@@ -42,7 +40,6 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         self.deepLinkHandler = deepLinkHandler
         self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
         self.userNotificationUsecase = userNotificationUsecase
-        self.environmentStorage = environmentStorage
         
         self.bindAccountStatusChanged()
         self.bindApplicationStatusChanged()
@@ -168,12 +165,8 @@ extension ApplicationRootViewModelImple {
     }
     
     private func handleDidEnterBackground() {
+        self.prepareUsecase.prepareEnterBackground()
 //        self.backgroundEventSyncUsecase.scheduleTask(withCancel: true)
-        self.environmentStorage.update(
-            EnvironmentKeys.needCheckResetWidgetCache.rawValue,
-            true
-        )
-        self.environmentStorage.synchronize()
         WidgetCenter.shared.reloadAllTimelines()
     }
 }
