@@ -46,6 +46,12 @@ public enum AccentDays: Sendable {
     case sunday
 }
 
+public enum RowHeightOnCalendar: Int, Sendable {
+    case small = -1
+    case medium = 0
+    case large
+}
+
 public struct CalendarAppearanceSettings: Equatable, Sendable {
     
     public let colorSetKey: ColorSetKeys
@@ -54,6 +60,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
     // calendar
     public var accnetDayPolicy: [AccentDays: Bool] = [:]
     public var showUnderLineOnEventDay: Bool = false
+    public var rowHeight: RowHeightOnCalendar = .medium
     
     // event on calendar
     public var eventOnCalenarTextAdditionalSize: CGFloat = 0
@@ -87,6 +94,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
         )
         newSetting.accnetDayPolicy = (params.accnetDayPolicy ?? self.accnetDayPolicy)
         newSetting.showUnderLineOnEventDay = (params.showUnderLineOnEventDay ?? self.showUnderLineOnEventDay)
+        newSetting.rowHeight = (params.rowHeight ?? self.rowHeight)
         newSetting.eventOnCalenarTextAdditionalSize = (params.eventOnCalenarTextAdditionalSize ?? self.eventOnCalenarTextAdditionalSize)
         newSetting.eventOnCalendarIsBold = (params.eventOnCalendarIsBold ?? self.eventOnCalendarIsBold)
         newSetting.eventOnCalendarShowEventTagColor = (params.eventOnCalendarShowEventTagColor ?? self.eventOnCalendarShowEventTagColor)
@@ -154,6 +162,7 @@ public struct EditCalendarAppearanceSettingParams {
     
     public var accnetDayPolicy: [AccentDays: Bool]?
     public var showUnderLineOnEventDay: Bool?
+    public var rowHeight: RowHeightOnCalendar?
     
     // event on calendar
     public var eventOnCalenarTextAdditionalSize: CGFloat?
@@ -190,6 +199,7 @@ public struct EditCalendarAppearanceSettingParams {
     private var isValidCalendarValues: Bool {
         return self.accnetDayPolicy != nil
             || self.showUnderLineOnEventDay != nil
+            || self.rowHeight != nil
     }
     
     private var isValidEventOnCalendarValues: Bool {
