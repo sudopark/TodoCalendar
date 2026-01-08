@@ -24,6 +24,7 @@ import Domain
     // calendar
     public var accnetDayPolicy: [AccentDays: Bool]
     public var showUnderLineOnEventDay: Bool
+    public var rowHeightOnCalendar: CGFloat = RowHeightOnCalendar.medium.cgValue
     
     // event on calendar
     public var eventOnCalenarTextAdditionalSize: CGFloat
@@ -98,6 +99,7 @@ import Domain
         
         self.accnetDayPolicy = calendar.accnetDayPolicy
         self.showUnderLineOnEventDay = calendar.showUnderLineOnEventDay
+        self.rowHeightOnCalendar = calendar.rowHeight.cgValue
         
         self.eventOnCalenarTextAdditionalSize = calendar.eventOnCalenarTextAdditionalSize
         self.eventOnCalendarIsBold = calendar.eventOnCalendarIsBold
@@ -240,6 +242,17 @@ extension FontSetKeys {
     public func convert() -> any FontSet {
         switch self {
         case .systemDefault: return SystemDefaultFontSet()
+        }
+    }
+}
+
+extension RowHeightOnCalendar {
+    
+    public var cgValue: CGFloat {
+        switch self {
+        case .small: return 45
+        case .medium: return 75
+        case .large: return 125
         }
     }
 }
