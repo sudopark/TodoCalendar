@@ -98,8 +98,6 @@ struct MonthContainerView: View {
 
 
 private enum Metric {
-    static let dayMinHeight: CGFloat = 80
-    static let dayMaxHeight: CGFloat = 100
     static let eventRowHeightWithSpacing: CGFloat = 12
     static let eventTopMargin: CGFloat = 24
     static let eventInterspacing: CGFloat = 2
@@ -142,7 +140,7 @@ struct MonthView: View {
     private func gridWeeksView() -> some View {
         let expectSize = CGSize(
             width: UIScreen.main.bounds.width - 16,
-            height: 75
+            height: appearance.rowHeightOnCalendar
         )
         return VStack(spacing: 0) {
             ForEach(self.state.weeks, id: \.id) {
