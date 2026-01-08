@@ -39,7 +39,25 @@ extension AppSettingLocalRepositoryImpleTests {
         XCTAssertEqual(appearance.calendar.accnetDayPolicy, [
             .holiday: false, .sunday: false, .saturday: false
         ])
+        XCTAssertEqual(appearance.calendar.rowHeight, .medium)
         XCTAssertEqual(appearance.calendar.showUncompletedTodos, true)
+    }
+    
+    func testRepository_updateCalendarSetting() throws {
+        // given
+        let repository = self.makeRepository()
+        let settingBeforeUpdate = repository.loadSavedViewAppearance().calendar
+        
+        // when
+        let params = EditCalendarAppearanceSettingParams()
+            |> \.rowHeight .~ .large
+        let changed = try repository.changeCalendarAppearanceSetting(params)
+        let settingAfterUpdate = repository.loadSavedViewAppearance().calendar
+        
+        // then
+        XCTAssertEqual(settingBeforeUpdate.rowHeight, .medium)
+        XCTAssertEqual(changed.rowHeight, .large)
+        XCTAssertEqual(settingAfterUpdate.rowHeight, .large)
     }
     
     func testRepository_saveAndLoadEventSetting() {

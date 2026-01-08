@@ -42,6 +42,7 @@ extension AppSettingLocalStorage {
     private var accentDay_saturdayKey: String { "accent_saturday" }
     private var accentDay_sunday: String { "accent_sunday" }
     private var showUnderLineOnEventDayKey: String { "show_underline_eventday" }
+    private var rowHeightKey: String { "calendar_row_height" }
     
     // event on calendar
     private var eventOnCalendarAdditionalFontSize: String { "event_on_calendar_additional_font_size" }
@@ -91,6 +92,8 @@ extension AppSettingLocalStorage {
         let accentSaturday: Bool? = self.environmentStorage.load(accentDay_saturdayKey)
         let accentSunday: Bool? = self.environmentStorage.load(accentDay_sunday)
         let isShowUnderline: Bool? = self.environmentStorage.load(showUnderLineOnEventDayKey)
+        let calendarRowHeightInt: Int? = self.environmentStorage.load(rowHeightKey)
+        let calendarRowHeight = calendarRowHeightInt.flatMap { RowHeightOnCalendar(rawValue: $0) } ?? .medium
         calendar = calendar
             |> \.accnetDayPolicy .~ [
                 .sunday: accentSunday ?? false,
@@ -98,7 +101,7 @@ extension AppSettingLocalStorage {
                 .holiday: accentHoliday ?? false
             ]
             |> \.showUnderLineOnEventDay .~ (isShowUnderline ?? true)
-        
+            |> \.rowHeight .~ calendarRowHeight
         
         // event on calednar
         let eventOnCalendarAdditionalFont: Int =
@@ -152,6 +155,10 @@ extension AppSettingLocalStorage {
         )
         self.environmentStorage.update(
             showUnderLineOnEventDayKey, newValue.showUnderLineOnEventDay
+        )
+        self.environmentStorage.update(
+            rowHeightKey,
+            newValue.rowHeight.rawValue
         )
         
         // event on calendar
