@@ -125,6 +125,18 @@ extension WeekEventStackBuilderTests {
             eventInThisWeek.eventId,
             eventContainThisWeek.eventId
         ])
+        
+        // 9 ~ 15
+        let eventIdsPerDay = stack.eventsPerDay.map { es in es.map { $0.eventId } }
+        XCTAssertEqual(eventIdsPerDay, [
+           [ eventContainThisWeek.eventId, eventLeftJoinThisWeek.eventId, ],    // 9
+           [ eventContainThisWeek.eventId, eventInThisWeek.eventId, eventLeftJoinThisWeek.eventId ], // 10,
+           [ eventContainThisWeek.eventId, eventInThisWeek.eventId],   // 11
+           [ eventContainThisWeek.eventId, eventInThisWeek.eventId],  // 12
+           [ eventContainThisWeek.eventId, eventRightJoinThisWeek.eventId],  // 13
+           [ eventContainThisWeek.eventId, eventRightJoinThisWeek.eventId ],      // 14
+           [ eventContainThisWeek.eventId, eventRightJoinThisWeek.eventId ]   // 15
+        ])
     }
     
     // 한주를 전체 채울수있도록 이벤드들을 조합해서 스택을 쌓음

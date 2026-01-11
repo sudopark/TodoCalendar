@@ -69,6 +69,7 @@ public struct EventOnWeek: Equatable {
 public struct WeekEventStack {
     
     public let eventStacks: [[EventOnWeek]]
+    public let eventsPerDay: [[any CalendarEvent]]
 }
 
 
@@ -86,7 +87,7 @@ extension WeekEventStackBuilder {
     
     public func build(_ week: CalendarComponent.Week, events: [any CalendarEvent]) -> WeekEventStack {
         guard let weekRange = self.calendar.weekRange(week)
-        else { return .init(eventStacks: []) }
+        else { return .init(eventStacks: [], eventsPerDay: []) }
         
         let eventsOnThisWeek = events
             .compactMap { EventOnWeek($0, on: weekRange, with: self.calendar) }
@@ -108,8 +109,14 @@ extension WeekEventStackBuilder {
         let stacks = self.stack(remains: eventsOnThisWeek, stacks: [])
             .sorted(by: sorting)
         
-        return .init(eventStacks: stacks)
-
+        let eventsPerDay = (1...7).map { day in
+            eventsOnThisWeek.filter { $0.daysSequence.contains(day) }.map { $0.event }
+        }
+        
+        return .init(
+            eventStacks: stacks,
+            eventsPerDay: eventsPerDay
+        )
     }
     
     private func stack(
