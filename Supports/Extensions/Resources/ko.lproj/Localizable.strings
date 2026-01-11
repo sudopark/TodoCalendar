@@ -352,6 +352,10 @@
 "setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";
 "setting.appearance.event.edit::name_old" = "이벤트 수정";
 "setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";
+"setting.appearance.day_row_height" = "에빈트에 표시되는 정보의 양";
+"setting.appearance.day_row_height::small::text" = "최소한";
+"setting.appearance.day_row_height::medium::text" = "보통";
+"setting.appearance.day_row_height::large::text" = "자세히";
 "setting.appearance.event.fontSize" = "이벤트 글자 크기";
 "setting.appearance.event.show_holidayName" = "공휴일 표시";
 "setting.appearance.event.show_lunar" = "음력 표시";

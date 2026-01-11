@@ -255,11 +255,6 @@ extension CalendarSectionAppearanceSettingView {
             Picker(selection: $state.selectedWeekDay) {
                 ForEach(selectWeekDaySource, id: \.self) { day in
                     HStack {
-                        if day == state.selectedWeekDay {
-                            Image(systemName: "checkmark")
-                                .font(appearance.fontSet.normal.asFont)
-                                .foregroundStyle(appearance.colorSet.text0.asColor)
-                        }
                         Text(day.text)
                             .font(appearance.fontSet.normal.asFont)
                             .foregroundStyle(appearance.colorSet.text0.asColor)
