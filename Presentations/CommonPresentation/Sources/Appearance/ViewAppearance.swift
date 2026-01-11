@@ -255,7 +255,7 @@ extension RowHeightOnCalendar {
         switch self {
         case .small: return 45
         case .medium: return 75
-        case .large: return 125
+        case .large: return 75
         }
     }
 }

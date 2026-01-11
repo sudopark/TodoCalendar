@@ -103,6 +103,13 @@ struct EventOnCalendarViewPreviewView: View {
                                     .default, offColor: { $0.text1 }).asColor
                             )
                             .frame(width: 4, height: 4)
+                        
+                        Circle()
+                            .fill(
+                                appearance.colorOnCalendar(
+                                    .default, offColor: { $0.text1 }).asColor
+                            )
+                            .frame(width: 4, height: 4)
                             
                     }
                     .frame(width: 52, alignment: .center)
@@ -132,17 +139,37 @@ struct EventOnCalendarViewPreviewView: View {
                             .frame(width: 3, height: 12)
                             .padding(.leading, 1)
                         
-                        Text("setting.appearance.event.sample::sometime".localized())
+                        Text("setting.appearance.event.sample::first".localized())
                             .font(appearance.eventTextFontOnCalendar().asFont)
                             .foregroundStyle(appearance.colorSet.eventText.asColor)
                             .lineLimit(1)
                     }
                     .frame(width: 52, alignment: .leading)
+                    
+                    // ev3
+                    if appearance.rowHeightOnCalendar == .medium {
+                        Text("+1")
+                            .font(appearance.fontSet.size(8).asFont)
+                            .foregroundStyle(appearance.colorSet.eventText.asColor)
+                    } else {
+                        HStack(spacing: 2) {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(appearance.colorOnCalendar(.default).asColor)
+                                .frame(width: 3, height: 12)
+                                .padding(.leading, 1)
+                            
+                            Text("setting.appearance.event.sample::second".localized())
+                                .font(appearance.eventTextFontOnCalendar().asFont)
+                                .foregroundStyle(appearance.colorSet.eventText.asColor)
+                                .lineLimit(1)
+                        }
+                        .frame(width: 52, alignment: .leading)
+                    }
                 }
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 6)
-            .frame(height: appearance.rowHeightOnCalendar.cgValue)
+//            .frame(height: appearance.rowHeightOnCalendar.cgValue)
             .background(
                 RoundedRectangle(cornerRadius: 10)
                     .fill(self.appearance.colorSet.dayBackground.asColor)
@@ -295,7 +322,7 @@ struct EventOnCalendarViewPreviewProvider: PreviewProvider {
         let tag = DefaultEventTagColorSetting(holiday: "#FF0000", default: "#ff00ff")
         var setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
         setting.calendar.eventOnCalendarShowEventTagColor = true
-        setting.calendar.rowHeight = .small
+        setting.calendar.rowHeight = .large
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         viewAppearance.updateEventColorMap(by: [
             DefaultEventTag.default("#ff00ff"),

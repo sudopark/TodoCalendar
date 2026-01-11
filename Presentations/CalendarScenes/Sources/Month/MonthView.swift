@@ -329,13 +329,22 @@ private struct WeekRowView: View {
         let maxDrawableEventRowCount = drawableRowCount - 1
         guard maxDrawableEventRowCount > 0 else { return EmptyView().asAnyView() }
         
-        let size = min(maxDrawableEventRowCount, self.eventStackModel.linesStack.count)
-        let moreEvents = eventStackModel.eventMores(with: size)
+        let size = if appearance.rowHeightOnCalendar == .large {
+            self.eventStackModel.linesStack.count
+        } else {
+            min(maxDrawableEventRowCount, self.eventStackModel.linesStack.count)
+        }
+        let bottomView: some View = if appearance.rowHeightOnCalendar == .large {
+            Spacer().frame(height: maxDrawableEventRowCount < eventStackModel.linesStack.count ? 10 : 0).asAnyView()
+        } else{
+            eventMoreViews(eventStackModel.eventMores(with: size)).asAnyView()
+        }
+        
         return VStack(alignment: .leading, spacing: 2) {
             ForEach(0..<size, id: \.self) {
                 return eventRowView(self.eventStackModel.linesStack[$0])
             }
-            eventMoreViews(moreEvents)
+            bottomView
         }
         .padding(.top, Metric.eventTopMargin)
         .asAnyView()
