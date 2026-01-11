@@ -353,6 +353,10 @@
 "setting.appearance.calendar.underline" = "Underline on event days";
 "setting.appearance.event.edit::name_old" = "Edit Event";
 "setting.appearance.event.edit::name" = "Event settings and external calendars";
+"setting.appearance.day_row_height" = "Event detail display level";
+"setting.appearance.day_row_height::small::text" = "Minimal";
+"setting.appearance.day_row_height::medium::text" = "Medium";
+"setting.appearance.day_row_height::large::text" = "Detailed";
 "setting.appearance.event.fontSize" = "Event text font size";
 "setting.appearance.event.show_holidayName" = "Show holiday name";
 "setting.appearance.event.show_lunar" = "Lunar calendar";

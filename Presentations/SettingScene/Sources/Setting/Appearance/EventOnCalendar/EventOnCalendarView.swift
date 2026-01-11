@@ -15,21 +15,32 @@ import CommonPresentation
     
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
+    @ObservationIgnored let allRowHeights: [RowHeightOnCalendarViewModel] = [
+        .init(.small), .init(.medium), .init(.large)
+    ]
     var additionalFontSizeModel: EventTextAdditionalSizeModel = .init(0)
     var isBold: Bool = false
     var isShowEventTagColor: Bool = false
+    var selectedRowHeight: RowHeightOnCalendarViewModel = .init(.medium)
     
     init(_ setting: EventOnCalendarAppearanceSetting) {
         self.additionalFontSizeModel = .init(setting.eventOnCalenarTextAdditionalSize)
         self.isBold = setting.eventOnCalendarIsBold
         self.isShowEventTagColor = setting.eventOnCalendarShowEventTagColor
+        self.selectedRowHeight = .init(setting.weekRowHeight)
     }
     
     func bind(_ viewModel: any EventOnCalendarViewModel) {
         guard self.didBind == false else { return }
         self.didBind = true
         
-        // TODO: bind
+        viewModel.rowHeight
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] height in
+                self?.selectedRowHeight = height
+            })
+            .store(in: &self.cancellables)
+        
         viewModel.textIncreasedSizeText
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
@@ -56,6 +67,7 @@ import CommonPresentation
 final class EventOnCalendarViewEventHandler: Observable {
     
     var onAppear: () -> Void = { }
+    var selectHeight: (RowHeightOnCalendar) -> Void = { _ in }
     var increaseFontSize: () -> Void = { }
     var decreaseFontSize: () -> Void = { }
     var toggleIsBold: (Bool) -> Void = { _ in }
@@ -69,42 +81,68 @@ struct EventOnCalendarViewPreviewView: View {
     var body: some View {
         HStack {
             Spacer()
+            
             VStack {
                 Text("16")
                     .font(appearance.fontSet.day.asFont)
                     .foregroundStyle(appearance.colorSet.weekDayText.asColor)
-                HStack(spacing: 2) {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(appearance.colorOnCalendar(.holiday).asColor)
-                        .frame(width: 3, height: 12)
-                        .padding(.leading, 1)
-                    
-                    Text("calendar::event_time::allday".localized())
-                        .font(appearance.eventTextFontOnCalendar().asFont)
-                        .foregroundStyle(appearance.colorSet.eventText.asColor)
-                        .lineLimit(1)
-                }
-                .frame(width: 52, alignment: .leading)
-                .background(
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(appearance.colorOnCalendar(.holiday).asColor)
-                )
                 
-                HStack(spacing: 2) {
-                    RoundedRectangle(cornerRadius: 12)
-                        .fill(appearance.colorOnCalendar(.default).asColor)
-                        .frame(width: 3, height: 12)
-                        .padding(.leading, 1)
+                if appearance.rowHeightOnCalendar == RowHeightOnCalendar.small {
                     
-                    Text("setting.appearance.event.sample::sometime".localized())
-                        .font(appearance.eventTextFontOnCalendar().asFont)
-                        .foregroundStyle(appearance.colorSet.eventText.asColor)
-                        .lineLimit(1)
+                    HStack(spacing: 2) {
+                        Circle()
+                            .fill(
+                                appearance.colorOnCalendar(
+                                    .holiday, offColor: { $0.text1 }).asColor
+                            )
+                            .frame(width: 4, height: 4)
+                        
+                        Circle()
+                            .fill(
+                                appearance.colorOnCalendar(
+                                    .default, offColor: { $0.text1 }).asColor
+                            )
+                            .frame(width: 4, height: 4)
+                            
+                    }
+                    .frame(width: 52, alignment: .center)
+                } else {
+                    // ev1
+                    HStack(spacing: 2) {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(appearance.colorOnCalendar(.holiday).asColor)
+                            .frame(width: 3, height: 12)
+                            .padding(.leading, 1)
+                        
+                        Text("calendar::event_time::allday".localized())
+                            .font(appearance.eventTextFontOnCalendar().asFont)
+                            .foregroundStyle(appearance.colorSet.eventText.asColor)
+                            .lineLimit(1)
+                    }
+                    .frame(width: 52, alignment: .leading)
+                    .background(
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(appearance.colorOnCalendar(.holiday).asColor)
+                    )
+                    
+                    // ev2
+                    HStack(spacing: 2) {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(appearance.colorOnCalendar(.default).asColor)
+                            .frame(width: 3, height: 12)
+                            .padding(.leading, 1)
+                        
+                        Text("setting.appearance.event.sample::sometime".localized())
+                            .font(appearance.eventTextFontOnCalendar().asFont)
+                            .foregroundStyle(appearance.colorSet.eventText.asColor)
+                            .lineLimit(1)
+                    }
+                    .frame(width: 52, alignment: .leading)
                 }
-                .frame(width: 52, alignment: .leading)
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 6)
+            .frame(height: appearance.rowHeightOnCalendar.cgValue)
             .background(
                 RoundedRectangle(cornerRadius: 10)
                     .fill(self.appearance.colorSet.dayBackground.asColor)
@@ -113,6 +151,7 @@ struct EventOnCalendarViewPreviewView: View {
                         radius: 10
                     )
             )
+            
             Spacer()
         }
         .padding(.bottom, 18)
@@ -136,6 +175,12 @@ struct EventOnCalendarView: View {
             EventOnCalendarViewPreviewView()
             
             VStack(spacing: 8) {
+                
+                AppearanceRow("setting.appearance.day_row_height".localized(), rowHeightSelectView)
+                    .onChange(of: state.selectedRowHeight) { _, new in
+                        eventHandler.selectHeight(new.height)
+                    }
+                
                 AppearanceRow("setting.appearance.event.fontSize".localized(), fontSizeSettingView)
                 
                 AppearanceRow("setting.appearance.event.boldText".localized(), boldTextView)
@@ -153,6 +198,32 @@ struct EventOnCalendarView: View {
         .onAppear {
             self.stateBinding(self.state)
             self.eventHandler.onAppear()
+        }
+    }
+    
+    private var rowHeightSelectView: some View {
+        Menu {
+            Picker(selection: $state.selectedRowHeight) {
+                ForEach(state.allRowHeights, id: \.self) { height in
+                    HStack {
+                        Text(height.text)
+                            .font(appearance.fontSet.normal.asFont)
+                            .foregroundStyle(appearance.colorSet.text0.asColor)
+                    }
+                }
+            } label: {
+                EmptyView()
+            }
+        } label: {
+            HStack(spacing: 4) {
+                Text(state.selectedRowHeight.text)
+                    .font(self.appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
+                
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(self.appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text2.asColor)
+            }
         }
     }
     
@@ -221,12 +292,24 @@ struct EventOnCalendarViewPreviewProvider: PreviewProvider {
             colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
-        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
-        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let tag = DefaultEventTagColorSetting(holiday: "#FF0000", default: "#ff00ff")
+        var setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        setting.calendar.eventOnCalendarShowEventTagColor = true
+        setting.calendar.rowHeight = .small
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
+        viewAppearance.updateEventColorMap(by: [
+            DefaultEventTag.default("#ff00ff"),
+            DefaultEventTag.holiday("#ff0000")
+        ])
         viewAppearance.eventOnCalenarTextAdditionalSize = -2
         
         let eventHandler = EventOnCalendarViewEventHandler()
+        eventHandler.toggleIsBold = { bold in
+            viewAppearance.eventOnCalendarIsBold = bold
+        }
+        eventHandler.toggleShowEventTagColor = { color in
+            viewAppearance.eventOnCalendarShowEventTagColor = color
+        }
         return EventOnCalendarView(.init(setting.calendar))
             .eventHandler(\.stateBinding) { state in
                 state.additionalFontSizeModel = .init(0)
