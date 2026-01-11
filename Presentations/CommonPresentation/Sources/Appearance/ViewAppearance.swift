@@ -24,7 +24,7 @@ import Domain
     // calendar
     public var accnetDayPolicy: [AccentDays: Bool]
     public var showUnderLineOnEventDay: Bool
-    public var rowHeightOnCalendar: CGFloat = RowHeightOnCalendar.medium.cgValue
+    public var rowHeightOnCalendar: RowHeightOnCalendar = RowHeightOnCalendar.medium
     
     // event on calendar
     public var eventOnCalenarTextAdditionalSize: CGFloat
@@ -47,9 +47,11 @@ import Domain
         return allEventTagColorMap[id ?? .default] ??  allEventTagColorMap[.default] ?? .clear
     }
     
-    public func colorOnCalendar(_ id: EventTagId?) -> UIColor {
+    public func colorOnCalendar(
+        _ id: EventTagId?, offColor: (ColorSet) -> UIColor = { _ in .clear }
+    ) -> UIColor {
         guard self.eventOnCalendarShowEventTagColor
-        else { return .clear }
+        else { return offColor(colorSet) }
         return self.color(id)
     }
     
@@ -78,7 +80,8 @@ import Domain
     }
     
     public func googleEventColorOnCalendar(
-        _ colorId: String?, _ calendarId: String
+        _ colorId: String?, _ calendarId: String,
+        offColor: (ColorSet) -> UIColor = { _ in .clear }
     ) -> UIColor {
         guard self.eventOnCalendarShowEventTagColor
         else { return .clear }
@@ -99,7 +102,7 @@ import Domain
         
         self.accnetDayPolicy = calendar.accnetDayPolicy
         self.showUnderLineOnEventDay = calendar.showUnderLineOnEventDay
-        self.rowHeightOnCalendar = calendar.rowHeight.cgValue
+        self.rowHeightOnCalendar = calendar.rowHeight
         
         self.eventOnCalenarTextAdditionalSize = calendar.eventOnCalenarTextAdditionalSize
         self.eventOnCalendarIsBold = calendar.eventOnCalendarIsBold
