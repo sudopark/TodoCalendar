@@ -51,6 +51,7 @@ final class AppearanceSettingViewController: UIHostingController<AppearanceSetti
         calendarSectionEventHandler.toggleShowUnderline = calendarSectionViewModel.toggleIsShowUnderLineOnEventDay(_:)
         
         let eventOnCalendarEventHandler = EventOnCalendarViewEventHandler()
+        eventOnCalendarEventHandler.selectHeight = eventOnCalednarSectionViewModel.selectRowHeightOnCalendar(_:)
         eventOnCalendarEventHandler.increaseFontSize = eventOnCalednarSectionViewModel.increaseTextSize
         eventOnCalendarEventHandler.decreaseFontSize = eventOnCalednarSectionViewModel.decreaseTextSize
         eventOnCalendarEventHandler.toggleIsBold = eventOnCalednarSectionViewModel.toggleBoldText(_:)
