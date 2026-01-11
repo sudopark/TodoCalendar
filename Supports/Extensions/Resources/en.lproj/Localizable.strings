@@ -356,7 +356,7 @@
 "setting.appearance.day_row_height" = "Event detail display level";
 "setting.appearance.day_row_height::small::text" = "Minimal";
 "setting.appearance.day_row_height::medium::text" = "Medium";
-"setting.appearance.day_row_height::large::text" = "Detailed";
+"setting.appearance.day_row_height::large::text" = "Full";
 "setting.appearance.event.fontSize" = "Event text font size";
 "setting.appearance.event.show_holidayName" = "Show holiday name";
 "setting.appearance.event.show_lunar" = "Lunar calendar";
@@ -364,7 +364,8 @@
 "setting.appearance.event.sample::name" = "🥗 Event name";
 "setting.appearance.event.sample::description" = "description";
 "setting.appearance.event.sample::christmas" = "Christmas";
-"setting.appearance.event.sample::sometime" = "Some time";
+"setting.appearance.event.sample::first" = "first event";
+"setting.appearance.event.sample::second" = "second event";
 "setting.appearance.event.sample::uncompleted_todo::toggle" = "Show uncompleted To-do";
 "setting.appearance.widget::title" = "Widget theme";
 "setting.appearance.widget::useSystemTheme::title" = "Use system theme";

@@ -355,7 +355,7 @@
 "setting.appearance.day_row_height" = "에빈트에 표시되는 정보의 양";
 "setting.appearance.day_row_height::small::text" = "최소한";
 "setting.appearance.day_row_height::medium::text" = "보통";
-"setting.appearance.day_row_height::large::text" = "자세히";
+"setting.appearance.day_row_height::large::text" = "모두";
 "setting.appearance.event.fontSize" = "이벤트 글자 크기";
 "setting.appearance.event.show_holidayName" = "공휴일 표시";
 "setting.appearance.event.show_lunar" = "음력 표시";
@@ -363,7 +363,8 @@
 "setting.appearance.event.sample::name" = "🥗 이벤트 이름";
 "setting.appearance.event.sample::description" = "설명";
 "setting.appearance.event.sample::christmas" = "크리스마스";
-"setting.appearance.event.sample::sometime" = "특정시간";
+"setting.appearance.event.sample::first" = "첫번째 이벤트";
+"setting.appearance.event.sample::second" = "두번째 이벤트";
 "setting.appearance.event.sample::uncompleted_todo::toggle" = "완료되지 않은 할일 보기";
 "setting.appearance.widget::title" = "위젯 테마";
 "setting.appearance.widget::useSystemTheme::title" = "시스템 테마";
