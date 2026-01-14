@@ -222,7 +222,7 @@ struct TodayAndNextWidgetView: View {
             
             if let todo {
                 TodoToggleButton(
-                    todo: todo, colorSet: colorSet, size: 12, customColor: color.asColor
+                    todo: todo, colorSet: colorSet, size: 16, customColor: color.asColor
                 )
             }
         }
@@ -269,14 +269,14 @@ struct TodayAndNextWidgetView: View {
             
             if let todo {
                 TodoToggleButton(
-                    todo: todo, colorSet: colorSet, size: 12, customColor: color.asColor
+                    todo: todo, colorSet: colorSet, size: 16, customColor: color.asColor
                 )
             }
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 2)
         .background(
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: 6)
                 .fill(
                     color.withAlphaComponent(0.2).asColor
                 )
