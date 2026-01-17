@@ -310,63 +310,58 @@ struct EventDetailView: View {
     }
     
     var body: some View {
-        ZStack {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: 25) {
-                        Spacer(minLength: 5)
-                        self.nameInputView
-                        if state.isForemost {
-                            self.foremostEventView
-                        }
-                        self.eventDetailTypeView
-                        self.timeSelectView
-                        self.selectRepeatView
-                        Spacer(minLength: 12)
-                        self.selectTagView
-                        self.selectNotificationView
-                        Spacer(minLength: 12)
-                        VStack(spacing: 17) {
-                            VStack(spacing: 8) {
-                                self.enterPlaceView
-                                    .id(InputFields.place.id)
-                                
-                                if self.isFocusInput == .place,
-                                    !self.state.suggestPlaces.isEmpty {
-                                    self.placeLandmarkSuggestView
-                                }
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: 25) {
+                    Spacer(minLength: 5)
+                    self.nameInputView
+                    if state.isForemost {
+                        self.foremostEventView
+                    }
+                    self.eventDetailTypeView
+                    self.timeSelectView
+                    self.selectRepeatView
+                    Spacer(minLength: 12)
+                    self.selectTagView
+                    self.selectNotificationView
+                    Spacer(minLength: 12)
+                    VStack(spacing: 17) {
+                        VStack(spacing: 8) {
+                            self.enterPlaceView
+                                .id(InputFields.place.id)
+                            
+                            if self.isFocusInput == .place,
+                                !self.state.suggestPlaces.isEmpty {
+                                self.placeLandmarkSuggestView
                             }
-                            self.enterLinkView
-                                .id(InputFields.url.id)
-                            self.enterMemoView
-                                .id(InputFields.memo.id)
                         }
-                        if case let .landmark(model) = state.selectedPlace {
-                            LandmarkMapView(name: model.name, coordinate: model.coordinate)
-                                .frame(height: 120)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                .onTapGesture { self.eventHandlers.openMap() }
-                        }
-                        if let model = state.linkPreviewModel {
-                            self.linkPreview(model)
-                        }
+                        self.enterLinkView
+                            .id(InputFields.url.id)
+                        self.enterMemoView
+                            .id(InputFields.memo.id)
                     }
-                    .padding(.top, 20)
-                    .padding(.horizontal, 12)
-                    .padding(.bottom, 120)
-                }
-                .onChange(of: isFocusInput) { _, new in
-                    guard let id = new?.id else { return }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-                        withAnimation { proxy.scrollTo(id, anchor: .center) }
+                    if case let .landmark(model) = state.selectedPlace {
+                        LandmarkMapView(name: model.name, coordinate: model.coordinate)
+                            .frame(height: 120)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .onTapGesture { self.eventHandlers.openMap() }
+                    }
+                    if let model = state.linkPreviewModel {
+                        self.linkPreview(model)
                     }
                 }
+                .padding(.top, 20)
+                .padding(.horizontal, 12)
+                .padding(.bottom, 120)
             }
-            
-            VStack {
-                Spacer()
-                
+            .safeAreaInset(edge: .bottom) {
                 self.bottomButtons
+            }
+            .onChange(of: isFocusInput) { _, new in
+                guard let id = new?.id else { return }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    withAnimation { proxy.scrollTo(id, anchor: .center) }
+                }
             }
         }
         .allowsHitTesting(!state.isSaving)
@@ -1008,7 +1003,7 @@ struct EventDetailView: View {
                         .foregroundStyle(appearance.colorSet.placeHolder.asColor)
                         .font(self.appearance.fontSet.size(14).asFont)
                         .padding(.leading, 4)
-                        .padding(.top, 8)
+                        .padding(.top, 10)
                 }
              
                 @Bindable var state = self.state
@@ -1020,7 +1015,7 @@ struct EventDetailView: View {
                     .font(self.appearance.fontSet.size(14).asFont)
                     .textInputAutocapitalization(.never)
                     .scrollContentBackground(.hidden)
-                    .frame(minHeight: 34, maxHeight: 100)
+                    .frame(minHeight: 34)
                     .padding(.leading, 0)
                     .onSubmit {
                         self.isFocusInput = nil
@@ -1120,8 +1115,24 @@ struct EventDetailView: View {
                         .background {
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
-                                .ignoresSafeArea(edges: .bottom)
                         }
+                }
+            }
+            
+            if self.isFocusInput != nil {
+                Button {
+                    self.isFocusInput = nil
+                } label: {
+                    Image(systemName: "keyboard.chevron.compact.down")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
+                        .frame(width: 20, height: 20)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(appearance.colorSet.secondaryBtnBackground.asColor)
+                        )
                 }
             }
         }
@@ -1129,7 +1140,6 @@ struct EventDetailView: View {
         .background(
             Rectangle()
                 .fill(self.appearance.colorSet.dayBackground.asColor)
-                .ignoresSafeArea(edges: .bottom)
         )
     }
 }
