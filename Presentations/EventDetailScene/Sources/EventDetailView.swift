@@ -331,7 +331,8 @@ struct EventDetailView: View {
                                 .id(InputFields.place.id)
                             
                             if self.isFocusInput == .place,
-                                !self.state.suggestPlaces.isEmpty {
+                                !self.state.suggestPlaces.isEmpty,
+                                !self.state.enterPlaceName.isEmpty {
                                 self.placeLandmarkSuggestView
                             }
                         }
