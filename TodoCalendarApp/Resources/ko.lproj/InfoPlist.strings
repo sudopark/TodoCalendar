@@ -1,0 +1,2 @@
+"NSLocalNetworkUsageDescription": "Network usage required for debugging purposes";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "현재 위치 기반 날씨정보를 얻어오기 위해 권한이 필요합니다.";
