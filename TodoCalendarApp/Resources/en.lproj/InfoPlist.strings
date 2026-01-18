@@ -1,0 +1,2 @@
+"NSLocalNetworkUsageDescription": "Network usage required for debugging purposes";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "Permission is required to obtain weather information based on your current location.";

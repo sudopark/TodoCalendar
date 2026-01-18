@@ -183,6 +183,7 @@ extension Project {
                 "UILaunchStoryboardName": "LaunchScreen",
                 "ENABLE_TESTS": .boolean(true),
                 "NSLocalNetworkUsageDescription": "Network usage required for debugging purposes",
+                "NSLocationAlwaysAndWhenInUseUsageDescription": "Permission is required to obtain weather information based on your current location.",
                 "NSBonjourServices": [
                     "_pulse._tcp"
                 ],
