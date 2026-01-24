@@ -120,7 +120,7 @@ extension TemporaryUserDataMigrationRepositoryImple {
         let service = try await self.prepareTempDBsqliteService()
         defer { service.close() }
         
-        let storage = EventDetailDataLocalStorageImple(sqliteService: service)
+        let storage = EventDetailDataLocalStorageImple<EventDetailDataTable>(sqliteService: service)
         let details = try await storage.loadAll()
         
         guard !details.isEmpty else { return }
@@ -152,6 +152,19 @@ extension TemporaryUserDataMigrationRepositoryImple {
             endpoint,
             parameters: payload.asJson()
         )
+        
+        let detailStorage = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(sqliteService: service)
+        let details = try await detailStorage.loadAll()
+        if !details.isEmpty {
+            
+            let detailEndpoint = MigrationEndpoints.doneTodoDetails
+            let payload = BatchEventDetailPayload(details: details)
+            let _ : BatchWriteResult = try await self.remoteAPI.request(
+                .post,
+                detailEndpoint,
+                parameters: payload.asJson()
+            )
+        }
         
         try? await storage.removeAllDoneEvents()
     }
