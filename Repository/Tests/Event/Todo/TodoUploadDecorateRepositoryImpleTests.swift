@@ -94,11 +94,16 @@ extension TodoUploadDecorateRepositoryImpleTests {
         let _ = try await repository.removeTodo(todo.uuid, onlyThisTime: false)
         
         // then
-        XCTAssertEqual(self.spyEventUploadService.uploadTasks.count, 1)
+        XCTAssertEqual(self.spyEventUploadService.uploadTasks.count, 2)
         let first = self.spyEventUploadService.uploadTasks.first
         XCTAssertEqual(first?.uuid, "some")
         XCTAssertEqual(first?.dataType, .todo)
         XCTAssertEqual(first?.isRemovingTask, true)
+        
+        let last = self.spyEventUploadService.uploadTasks.last
+        XCTAssertEqual(last?.uuid, "some")
+        XCTAssertEqual(last?.dataType, .eventDetail)
+        XCTAssertEqual(last?.isRemovingTask, true)
     }
     
     func testRepository_whenRemoveRepeatingTodoOnlyThisTime_appendUploadTask() async throws {
@@ -129,15 +134,15 @@ extension TodoUploadDecorateRepositoryImpleTests {
         // then
         XCTAssertEqual(
             self.spyEventUploadService.uploadTasks.map { $0.uuid },
-            ["origin", result.doneEvent.uuid]
+            ["origin", result.doneEvent.uuid, result.doneTodoEventDetail?.eventId, "origin"]
         )
         XCTAssertEqual(
             self.spyEventUploadService.uploadTasks.map { $0.dataType },
-            [.todo, .doneTodo]
+            [.todo, .doneTodo, .doneTodoDetail, .eventDetail]
         )
         XCTAssertEqual(
             self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask },
-            [true, false]
+            [true, false, false, true]
         )
     }
     
@@ -153,15 +158,15 @@ extension TodoUploadDecorateRepositoryImpleTests {
         // then
         XCTAssertEqual(
             self.spyEventUploadService.uploadTasks.map { $0.uuid },
-            ["origin", result.doneEvent.uuid]
+            ["origin", result.doneEvent.uuid, result.doneTodoEventDetail?.eventId]
         )
         XCTAssertEqual(
             self.spyEventUploadService.uploadTasks.map { $0.dataType },
-            [.todo, .doneTodo]
+            [.todo, .doneTodo, .doneTodoDetail]
         )
         XCTAssertEqual(
             self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask },
-            [false, false]
+            [false, false, false]
         )
     }
     
@@ -235,17 +240,18 @@ extension TodoUploadDecorateRepositoryImpleTests {
         let repository = try await self.makeRepositoryWithDoneEvents()
         
         // when
-        let todo = try await repository.revertDoneTodo("id:4")
+        let result = try await repository.revertDoneTodo("id:4")
         
         // then
+        let todo = result.revertTodo
         XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.uuid }, [todo.uuid, "id:4"]
+            self.spyEventUploadService.uploadTasks.map { $0.uuid }, [todo.uuid, "id:4", todo.uuid]
         )
         XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.dataType }, [.todo, .doneTodo]
+            self.spyEventUploadService.uploadTasks.map { $0.dataType }, [.todo, .doneTodo, .eventDetail]
         )
         XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask }, [false, true]
+            self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask }, [false, true, false]
         )
     }
     
@@ -258,7 +264,7 @@ extension TodoUploadDecorateRepositoryImpleTests {
         
         // then
         XCTAssertEqual(self.stubRemote.didRequestedMethod, .delete)
-        XCTAssertEqual(self.stubRemote.didRequestedPath?.contains("v1/todos/dones"), true)
+        XCTAssertEqual(self.stubRemote.didRequestedPath?.contains("v2/todos/dones"), true)
     }
 }
 
