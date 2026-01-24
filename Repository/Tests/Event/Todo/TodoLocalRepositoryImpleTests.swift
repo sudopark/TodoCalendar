@@ -13,6 +13,7 @@ import Domain
 import Extensions
 import AsyncFlatMap
 import UnitTestHelpKit
+import SQLiteService
 
 @testable import Repository
 
@@ -146,9 +147,14 @@ extension TodoLocalRepositoryImpleTests {
         _ todos: [TodoEvent]
     ) {
         let expect = expectation(description: "wait-save")
+        typealias Detail = EventDetailDataTable
         
+        let details = todos.map { EventDetailData($0.uuid) }
         let saving: AsyncFlatMapPublisher<Void, Error, Void> = Publishers.create {
-            return try await self.localStorage.updateTodoEvents(todos)
+            try await self.localStorage.updateTodoEvents(todos)
+            try await self.sqliteService.async.run { db in
+                try db.insert(Detail.self, entities: details)
+            }
         }
         let _ = self.waitFirstOutput(expect, for: saving, timeout: 1)
     }
@@ -278,6 +284,10 @@ extension TodoLocalRepositoryImpleTests {
     ) async throws -> any TodoEventRepository {
         let repository = self.makeRepository()
         try await self.localStorage.saveTodoEvent(todo)
+        let detail = EventDetailData(todo.uuid)
+        try await self.sqliteService.async.run { db in
+            try db.insertOne(EventDetailDataTable.self, entity: detail, shouldReplace: true)
+        }
         return repository
     }
  
@@ -291,6 +301,9 @@ extension TodoLocalRepositoryImpleTests {
         
         // then
         XCTAssertNil(result.nextRepeatingTodo)
+        
+        let detail = try await self.eventDetail(todo.uuid)
+        XCTAssertNil(detail)
     }
     
     func testRepository_removeTodo_withNextRepeating() async throws {
@@ -303,6 +316,9 @@ extension TodoLocalRepositoryImpleTests {
         
         // then
         XCTAssertNotNil(result.nextRepeatingTodo)
+        
+        let detail = try await self.eventDetail(todo.uuid)
+        XCTAssertNotNil(detail)
     }
     
     func testRepository_removeRepeatingTodo() async throws {
@@ -403,6 +419,14 @@ extension TodoLocalRepositoryImpleTests {
 
 extension TodoLocalRepositoryImpleTests {
     
+    private func eventDetail(_ id: String) async throws -> EventDetailData? {
+        typealias Detail = EventDetailDataTable
+        return try await self.sqliteService.async.run { db in
+            let query = Detail.selectAll { $0.uuid == id }
+            return try db.loadOne(Detail.self, query: query)
+        }
+    }
+    
     // complete current todo -> no next event
     func testRepository_completeCurrentTodo() async {
         // given
@@ -417,6 +441,11 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(result?.doneEvent.originEventId, "origin")
         XCTAssertNil(result?.nextRepeatingTodoEvent)
         XCTAssertEqual(result?.doneEvent.notificationOptions, [.allDay9AMBefore(seconds: 100)])
+        
+        XCTAssertNotNil(result?.doneTodoEventDetail)
+        XCTAssertEqual(result?.doneTodoEventDetail?.eventId, result?.doneEvent.uuid)
+        let detail = try? await eventDetail(origin.uuid)
+        XCTAssertNil(detail)
     }
     
     // complete not repeating todo -> no next event
@@ -432,6 +461,11 @@ extension TodoLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(result?.doneEvent.originEventId, "origin")
         XCTAssertNil(result?.nextRepeatingTodoEvent)
+        
+        XCTAssertNotNil(result?.doneTodoEventDetail)
+        XCTAssertEqual(result?.doneTodoEventDetail?.eventId, result?.doneEvent.uuid)
+        let detail = try? await eventDetail(origin.uuid)
+        XCTAssertNil(detail)
     }
     
     // complete repeating todo -> has next evnet
@@ -448,6 +482,11 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(result?.doneEvent.originEventId, "origin")
         XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(100.0 + 3600*24))
         XCTAssertEqual(result?.nextRepeatingTodoEvent?.creatTimeStamp, 100)
+        
+        XCTAssertNotNil(result?.doneTodoEventDetail)
+        XCTAssertEqual(result?.doneTodoEventDetail?.eventId, result?.doneEvent.uuid)
+        let detail = try? await eventDetail(origin.uuid)
+        XCTAssertNil(detail)
     }
     
     // complete reapting todo + next event time is over end time -> no next event
@@ -679,6 +718,10 @@ extension TodoLocalRepositoryImpleTests {
             )
         }
         try await self.localStorage.updateDoneTodos(dones)
+        let details = dones.map { EventDetailData($0.uuid) }
+        try await self.sqliteService.async.run { db in
+            try db.insert(DoneTodoEventDetailTable.self, entities: details)
+        }
         return self.makeRepository()
     }
     
@@ -712,6 +755,13 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(page5.isEmpty, true)
     }
     
+    private func doneTodoEventDetails() async throws -> [EventDetailData] {
+        return try await self.sqliteService.async.run { db in
+            let query = DoneTodoEventDetailTable.selectAll()
+            return try db.load(DoneTodoEventDetailTable.self, query: query)
+        }
+    }
+    
     // remove done todo past than 3
     func testRepository_removeDoneTodosPastThan3() async throws {
         // given
@@ -729,6 +779,12 @@ extension TodoLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(donesBeforeRemove.map { $0.uuid }, (0..<10).reversed().map { "id:\($0)"})
         XCTAssertEqual(donesAfterRemove.map { $0.uuid }, (3..<10).reversed().map { "id:\($0)"})
+        
+        let doneDetails = try await doneTodoEventDetails()
+        XCTAssertEqual(
+            doneDetails.map { $0.eventId }.sorted(),
+            (3..<10).map { "id:\($0)"}
+        )
     }
     
     // remove all done todo
@@ -748,6 +804,9 @@ extension TodoLocalRepositoryImpleTests {
         // then
         XCTAssertEqual(donesBeforeRemove.map { $0.uuid }, (0..<10).reversed().map { "id:\($0)"})
         XCTAssertEqual(donesAfterRemove.map { $0.uuid }, [])
+        
+        let details = try await self.doneTodoEventDetails()
+        XCTAssertEqual(details.isEmpty, true)
     }
     
     // revert done todo
@@ -759,12 +818,13 @@ extension TodoLocalRepositoryImpleTests {
         )
         
         // when
-        let todo = try await repository.revertDoneTodo("id:4")
+        let result = try await repository.revertDoneTodo("id:4")
         let donesAfterRevert = try await repository.loadDoneTodoEvents(
             .init(cursorAfter: nil, size: 20)
         )
         
         // then
+        let todo = result.revertTodo
         XCTAssertNotEqual(todo.uuid, "origin-4")
         XCTAssertNotNil(todo.creatTimeStamp)
         XCTAssertEqual(
@@ -775,6 +835,12 @@ extension TodoLocalRepositoryImpleTests {
             donesAfterRevert.map { $0.uuid },
             (0..<10).filter { $0 != 4 }.reversed().map { "id:\($0)"}
         )
+        
+        let doneDetail = try await self.doneTodoEventDetails()
+            .first(where: { $0.eventId == "id:4" })
+        XCTAssertNil(doneDetail)
+        let eventDetail = try await self.eventDetail(todo.uuid)
+        XCTAssertNotNil(eventDetail)
     }
 }
 

@@ -145,12 +145,12 @@ extension TodoEventUsecaseImple {
     }
     
     public func revertCompleteTodo(_ doneId: String) async throws -> TodoEvent {
-        let reverted = try await self.todoRepository.revertDoneTodo(doneId)
+        let result = try await self.todoRepository.revertDoneTodo(doneId)
         let todoKey = ShareDataKeys.todos.rawValue
         self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
-            ($0 ?? [:]) |> key(reverted.uuid) .~ reverted
+            ($0 ?? [:]) |> key(result.revertTodo.uuid) .~ result.revertTodo
         }
-        return reverted
+        return result.revertTodo
     }
     
     public func removeTodo(_ id: String, onlyThisTime: Bool) async throws {

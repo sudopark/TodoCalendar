@@ -18,14 +18,12 @@ public protocol EventDetailDataLocalStorage: Sendable {
     func removeAll() async throws
 }
 
-public final class EventDetailDataLocalStorageImple: EventDetailDataLocalStorage {
+public final class EventDetailDataLocalStorageImple<Detail: DetailTable>: EventDetailDataLocalStorage {
     
     private let sqliteService: SQLiteService
     public init(sqliteService: SQLiteService) {
         self.sqliteService = sqliteService
     }
-    
-    private typealias Detail = EventDetailDataTable
 }
 
 

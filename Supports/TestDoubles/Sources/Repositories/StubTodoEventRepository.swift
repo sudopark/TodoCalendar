@@ -119,8 +119,9 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub, @unchecked Se
         
     }
     
-    open func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
-        return .init(uuid: "reverted", name: "reverted")
+    open func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult {
+        let revert = TodoEvent(uuid: "reverted", name: "reverted")
+        return .init(revertTodo: revert)
     }
     
     open func toggleTodo(_ todoId: String) async throws -> TodoToggleResult? {
