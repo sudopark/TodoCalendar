@@ -316,7 +316,7 @@ public struct RemoteEnvironment: Sendable {
             return "\(calendarAPIHost)/v1/user/\(user.subPath)"
             
         case let todo as TodoAPIEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/todos"
+            let prefix = "\(calendarAPIHost)/v2/todos"
             return appendSubpathIfNotEmpty(prefix, todo.subPath)
             
         case let schedule as ScheduleEventEndpoints:

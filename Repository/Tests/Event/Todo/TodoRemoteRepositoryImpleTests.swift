@@ -154,6 +154,9 @@ extension TodoRemoteRepositoryImpleTests {
         let origin = params["origin"] as? [String: Any]
         XCTAssertNotNil(nextTime)
         XCTAssertNotNil(origin)
+        
+        XCTAssertNotNil(result?.doneTodoEventDetail)
+        XCTAssertNil(self.spyTodoCache.didRemoveTodoDetailId)
     }
     
     // complete 이후에 기존 todo 제거 + 신규 이벤트 저장 + 다음 이벤트 저장
@@ -224,6 +227,7 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertNotNil(result)
         XCTAssertNil(result?.nextRepeatingTodo)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "repeating-todo")
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoDetailId, "repeating-todo")
     }
     
     // 반복 이벤트 이번만 삭제시 다음 이벤트 있으면 이벤트 시간 다음으로 업데이트
@@ -239,6 +243,7 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertNotNil(result?.nextRepeatingTodo)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, nil)
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, result?.nextRepeatingTodo?.uuid)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoDetailId, nil)
     }
     
     // 반복 이벤트 이번만 삭제시 다음 이벤트 없으면 그냥 삭제만
@@ -555,6 +560,7 @@ extension TodoRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(self.stubRemote.didRequestedParams?["past_than"] as? Double, 3)
         XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoCursor, 3)
+        XCTAssertEqual(self.spyTodoCache.didRemoveDoneTodoDetails != nil, true)
     }
     
     func testReposiotry_removeAllDoneTodoEvents() async throws {
@@ -567,6 +573,7 @@ extension TodoRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(self.stubRemote.didRequestedParams?["past_than"] as? Double, nil)
         XCTAssertEqual(self.spyTodoCache.didRemoveAllDoneEvents, true)
+        XCTAssertEqual(self.spyTodoCache.didRemoveAllDoneTodoDetails, true)
     }
     
     // revert done todo
@@ -575,11 +582,13 @@ extension TodoRemoteRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let reverted = try await repository.revertDoneTodo("some")
+        let result = try await repository.revertDoneTodo("some")
         
         // then
+        let reverted = result.revertTodo
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, reverted.uuid)
         XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoIds, ["some"])
+        XCTAssertEqual(self.spyTodoCache.didSaveTodoDetail?.eventId, "revert")
     }
     
     // revert 할꺼면 done = "some" 이여야하고
@@ -963,6 +972,12 @@ private struct DummyResponse {
         """
     }
     
+    private func dummyDetail(_ id: String) -> String {
+        return """
+        { "eventId": "\(id)" }
+        """
+    }
+    
     private var dummyNoRepeatingTodoResponse: String {
         return """
         {
@@ -998,6 +1013,15 @@ private struct DummyResponse {
                     "timeZone": "Asia/Seoul"
                 }
             }
+        }
+        """
+    }
+    
+    private var dummyRevertTodoResponse: String {
+        return """
+        {
+            "todo": \(self.dummySingleTodoResponse("revret")), 
+            "detail": \(self.dummyDetail("revert"))
         }
         """
     }
@@ -1051,6 +1075,7 @@ private struct DummyResponse {
                 """
                 {
                     "done": \(self.dummyDoneTodoResponse),
+                    "done_detail": \(self.dummyDetail("done_id")),
                     "next_repeating": \(self.dummySingleTodoResponse())
                 }
                 """
@@ -1137,7 +1162,7 @@ private struct DummyResponse {
             .init(
                 method: .post,
                 endpoint: TodoAPIEndpoints.revertDone("some"),
-                resultJsonString: .success(self.dummySingleTodoResponse())
+                resultJsonString: .success(self.dummyRevertTodoResponse)
             ),
             .init(
                 method: .post,
@@ -1336,8 +1361,9 @@ class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     }
     
     var didRemovedDoneTodoCursor: TimeInterval?
-    func removeDoneTodos(pastThan cursor: TimeInterval) async throws {
+    func removeDoneTodos(pastThan cursor: TimeInterval) async throws -> [String] {
         self.didRemovedDoneTodoCursor = cursor
+        return ["some"]
     }
     
     var didUpdatedDoneTodos: [DoneTodoEvent]?
@@ -1377,5 +1403,37 @@ class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
             return TodoEvent(uuid: "todo:\(int)", name: "cached_todo:\(int)")
         }
         return todos
+    }
+    
+    var didSaveTodoDetail: EventDetailData?
+    func saveTodoDetail(_ detail: EventDetailData) async throws {
+        self.didSaveTodoDetail = detail
+    }
+    
+    func saveDoneTodoDetail(_ detail: EventDetailData) async throws {
+        
+    }
+    
+    func copyTodoDetail(_ originId: String, to doneEventId: String) async throws -> EventDetailData? {
+        return nil
+    }
+    
+    var didRemoveTodoDetailId: String?
+    func removeTodoDetail(_ originId: String) async throws {
+        self.didRemoveTodoDetailId = originId
+    }
+    
+    func copyDoneTodoDetail(_ doneId: String, to revertTodoId: String) async throws -> EventDetailData? {
+        return nil
+    }
+    
+    var didRemoveAllDoneTodoDetails: Bool?
+    func removeAllDoneTodoDetail() async throws {
+        self.didRemoveAllDoneTodoDetails = true
+    }
+    
+    var didRemoveDoneTodoDetails: [String]?
+    func removeDoneTodoDetails(_ ids: [String]) async throws {
+        self.didRemoveDoneTodoDetails = ids
     }
 }
