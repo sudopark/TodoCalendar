@@ -23,7 +23,7 @@ final class EventDetailUploadDecorateRepositoryImpleTests: PublisherWaitable, Lo
     var cancelBag: Set<AnyCancellable>! = []
     let sqliteService: SQLiteService = .init()
     let spyEventUploadService: SpyEventUploadService = .init()
-    var spyLocalStorage: EventDetailDataLocalStorageImple!
+    var spyLocalStorage: EventDetailDataLocalStorageImple<EventDetailDataTable>!
     
     private func makeRepository(
         shouldLoadFail: Bool = false
@@ -34,7 +34,7 @@ final class EventDetailUploadDecorateRepositoryImpleTests: PublisherWaitable, Lo
         
         let remote = EventDetailRemoteImple(remoteAPI: remoteAPI)
         
-        let local = EventDetailDataLocalStorageImple(sqliteService: self.sqliteService)
+        let local = EventDetailDataLocalStorageImple<EventDetailDataTable>(sqliteService: self.sqliteService)
         let detail = EventDetailData("dummy")
             |> \.memo .~ "memo"
         try await local.saveDetail(detail)

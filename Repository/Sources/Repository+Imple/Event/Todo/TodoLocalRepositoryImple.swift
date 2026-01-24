@@ -67,7 +67,16 @@ extension TodoLocalRepositoryImple {
         
         let nextTodo = try? await self.replaceTodoNextEventTimeIfIsRepeating(origin)
         
-        return .init(doneEvent: doneEvent, nextRepeatingTodoEvent: nextTodo)
+        let result = CompleteTodoResult(
+            doneEvent: doneEvent,
+            nextRepeatingTodoEvent: nextTodo
+        )
+        let doneTodoDetail = try? await self.localStorage.copyTodoDetail(eventId, to: doneEvent.uuid)
+        
+        if nextTodo == nil {
+            try? await localStorage.removeTodoDetail(eventId)
+        }
+        return result |> \.doneTodoEventDetail .~ doneTodoDetail
     }
     
     public func replaceRepeatingTodo(current eventId: String, to newParams: TodoMakeParams) async throws -> ReplaceRepeatingTodoEventResult {
@@ -118,6 +127,9 @@ extension TodoLocalRepositoryImple {
             ? try? await self.replaceTodoNextEventTimeIfIsRepeating(origin)
             : nil
         
+        if next == nil {
+            try? await self.localStorage.removeTodoDetail(eventId)
+        }
         return RemoveTodoResult() |> \.nextRepeatingTodo .~ next
     }
 }
@@ -179,13 +191,17 @@ extension TodoLocalRepositoryImple {
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
         switch scope {
         case .all:
-            return try await self.localStorage.removeAllDoneEvents()
+            try await self.localStorage.removeAllDoneEvents()
+            try? await self.localStorage.removeAllDoneTodoDetail()
+            
         case .pastThan(let time):
-            return try await localStorage.removeDoneTodos(pastThan: time)
+            let ids = try await localStorage.removeDoneTodos(pastThan: time)
+            guard !ids.isEmpty else { return }
+            try? await self.localStorage.removeDoneTodoDetails(ids)
         }
     }
     
-    public func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
+    public func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult {
         let done = try await self.localStorage.loadDoneTodoEvent(doneEventId: doneTodoId)
         let params = TodoMakeParams()
             |> \.name .~ done.name
@@ -198,7 +214,10 @@ extension TodoLocalRepositoryImple {
         }
         try await self.localStorage.saveTodoEvent(revertTodo)
         try await self.localStorage.removeDoneTodo([doneTodoId])
-        return revertTodo
+        let detail = try? await self.localStorage.copyDoneTodoDetail(doneTodoId, to: revertTodo.uuid)
+        try? await self.localStorage.removeDoneTodoDetails([doneTodoId])
+        
+        return .init(revertTodo: revertTodo, detail: detail)
     }
     
     public func toggleTodo(

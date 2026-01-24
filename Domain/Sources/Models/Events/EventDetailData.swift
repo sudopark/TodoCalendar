@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 
 
 // MARK: - EventDetail
@@ -41,5 +43,12 @@ public struct EventDetailData: Sendable, Equatable {
     
     public init(_ eventId: String) {
         self.eventId = eventId
+    }
+    
+    public func copy(_ newEventId: String) -> EventDetailData {
+        return .init(newEventId)
+            |> \.place .~ place
+            |> \.url .~ url
+            |> \.memo .~ memo
     }
 }
