@@ -176,10 +176,12 @@ enum EventTagEndpoints: Endpoint {
 
 enum EventDetailEndpoints: Endpoint {
     case detail(eventId: String)
+    case doneTodoDetail(eventId: String)
     
     var subPath: String {
         switch self {
         case .detail(let eventId): return "\(eventId)"
+        case .doneTodoDetail(let eventId): return "done/\(eventId)"
         }
     }
 }
