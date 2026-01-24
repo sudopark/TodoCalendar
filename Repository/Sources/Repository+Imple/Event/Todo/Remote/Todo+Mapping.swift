@@ -148,6 +148,25 @@ struct TodoEventMapper: Decodable {
     }
 }
 
+struct RevertTodoResultMapper: Decodable {
+    
+    private enum CodingKeys: String, CodingKey {
+        case todo
+        case detail
+    }
+    
+    let result: RevertTodoResult
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        let todoMapper = try container.decode(TodoEventMapper.self, forKey: .todo)
+        let detailMapper = try? container.decode(EventDetailDataMapper.self, forKey: .detail)
+        self.result = .init(
+            revertTodo: todoMapper.todo, detail: detailMapper?.data
+        )
+    }
+}
+
 struct DoneTodoEventMapper: Decodable {
     
     let event: DoneTodoEvent
@@ -173,6 +192,7 @@ struct CompleteTodoResultMapper: Decodable {
     
     private enum CodingKeys: String, CodingKey {
         case done
+        case doneEventDetail = "done_detail"
         case nextRepeating = "next_repeating"
     }
     
@@ -180,10 +200,12 @@ struct CompleteTodoResultMapper: Decodable {
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        let detail = try? container.decode(EventDetailDataMapper.self, forKey: .doneEventDetail)
         self.result = .init(
             doneEvent: try container.decode(DoneTodoEventMapper.self, forKey: .done).event,
             nextRepeatingTodoEvent: try? container.decode(TodoEventMapper.self, forKey: .nextRepeating).todo
         )
+        |> \.doneTodoEventDetail .~ detail?.data
     }
 }
 

@@ -52,7 +52,7 @@ public protocol TodoRemote: Sendable {
     
     func removeDoneTodo(_ doneTodoId: String) async throws
     
-    func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent
+    func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult
     
     func cancelDoneTodo(
         _ origin: TodoEvent,
@@ -219,12 +219,12 @@ extension TodoRemoteImple {
         )
     }
     
-    public func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
-        let mapper: TodoEventMapper = try await self.remote.request(
+    public func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult {
+        let mapper: RevertTodoResultMapper = try await self.remote.request(
             .post,
             TodoAPIEndpoints.revertDone(doneTodoId)
         )
-        return mapper.todo
+        return mapper.result
     }
     
     public func cancelDoneTodo(
