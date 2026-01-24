@@ -37,12 +37,20 @@ public protocol TodoLocalStorage: Sendable {
     func removeTodosWith(tagId: String) async throws -> [String]
     func loadDoneTodos(after cursor: TimeInterval?, size: Int) async throws -> [DoneTodoEvent]
     func loadDoneTodoEvent(doneEventId: String) async throws -> DoneTodoEvent
-    func removeDoneTodos(pastThan cursor: TimeInterval) async throws
+    func removeDoneTodos(pastThan cursor: TimeInterval) async throws -> [String]
     func removeDoneTodo(_ doneTodoEventIds: [String]) async throws
     func updateDoneTodos(_ dones: [DoneTodoEvent]) async throws
     func todoToggleState(_ id: String) async throws -> TodoTogglingState
     func updateTodoToggleState(_ id: String, _ params: TodoToggleStateUpdateParamas) async throws
     func loadUncompletedTodos(_ now: Date) async throws -> [TodoEvent]
+    
+    func saveTodoDetail(_ detail: EventDetailData) async throws
+    func saveDoneTodoDetail(_ detail: EventDetailData) async throws
+    func copyTodoDetail(_ originId: String, to doneEventId: String) async throws -> EventDetailData?
+    func removeTodoDetail(_ originId: String) async throws
+    func copyDoneTodoDetail(_ doneId: String, to revertTodoId: String) async throws -> EventDetailData?
+    func removeAllDoneTodoDetail() async throws
+    func removeDoneTodoDetails(_ ids: [String]) async throws
 }
 
 public final class TodoLocalStorageImple: TodoLocalStorage, Sendable {
@@ -265,7 +273,7 @@ extension TodoLocalStorageImple {
         }
     }
     
-    public func removeDoneTodos(pastThan cursor: TimeInterval) async throws {
+    public func removeDoneTodos(pastThan cursor: TimeInterval) async throws -> [String] {
         let dones = try await self.sqliteService.async.run { db in
             let query = Dones.selectAll { $0.doneTime < cursor }
             return try db.load(query, mapping: { try DoneTodoEvent($0) })
@@ -279,6 +287,7 @@ extension TodoLocalStorageImple {
             let query = Times.delete().where { $0.eventId.in(ids) }
             try db.delete(Times.self, query: query)
         }
+        return ids
     }
     
     public func removeDoneTodo(_ doneTodoEventIds: [String]) async throws {
@@ -386,5 +395,78 @@ extension TodoLocalStorageImple {
         let timeQuery = Times.selectAll { $0.timeUpperInterval < now.timeIntervalSince1970 }
         let todoQuery = Todo.selectAll()
         return try await self.loadTodoEvents(timeQuery, todoQuery)
+    }
+}
+
+extension TodoLocalStorageImple {
+    
+    private typealias Detail = EventDetailDataTable
+    private typealias DoneDetail = DoneTodoEventDetailTable
+    
+    public func saveTodoDetail(_ detail: EventDetailData) async throws {
+        try await self.sqliteService.async.run { db in
+            try db.insertOne(Detail.self, entity: detail, shouldReplace: true)
+        }
+    }
+    
+    public func saveDoneTodoDetail(_ detail: EventDetailData) async throws {
+        try await self.sqliteService.async.run { db in
+            try db.insertOne(DoneDetail.self, entity: detail, shouldReplace: true)
+        }
+    }
+    
+    public func copyTodoDetail(
+        _ originId: String, to doneEventId: String
+    ) async throws -> EventDetailData? {
+        let origin = try await self.sqliteService.async.run { db in
+            let query = Detail.selectAll { $0.uuid == originId }
+            return try db.loadOne(Detail.self, query: query)
+        }
+        guard let origin else { return nil }
+        
+        let copyDetail = origin.copy(doneEventId)
+        try? await self.sqliteService.async.run { db in
+            try db.insertOne(DoneDetail.self, entity: copyDetail, shouldReplace: true)
+        }
+        try? await self.removeTodoDetail(originId)
+        return copyDetail
+    }
+    
+    public func removeTodoDetail(_ originId: String) async throws {
+        try await self.sqliteService.async.run { db in
+            let query = Detail.delete().where { $0.uuid == originId }
+            try db.delete(Detail.self, query: query)
+        }
+    }
+    
+    public func copyDoneTodoDetail(
+        _ doneId: String, to revertTodoId: String
+    ) async throws -> EventDetailData? {
+        let doneDetail = try await self.sqliteService.async.run { db in
+            let query = DoneDetail.selectAll { $0.uuid == doneId }
+            return try db.loadOne(DoneDetail.self, query: query)
+        }
+        
+        guard let doneDetail else { return nil }
+        
+        let revert = doneDetail.copy(revertTodoId)
+        try await self.sqliteService.async.run { db in
+            try db.insertOne(Detail.self, entity: revert, shouldReplace: true)
+        }
+        try? await self.removeDoneTodoDetails([doneId])
+        return revert
+    }
+    
+    public func removeAllDoneTodoDetail() async throws {
+        try await self.sqliteService.async.run { db in
+            try db.dropTable(DoneDetail.self)
+        }
+    }
+    
+    public func removeDoneTodoDetails(_ ids: [String]) async throws {
+        try await self.sqliteService.async.run { db in
+            let query = DoneDetail.delete().where { $0.uuid.in(ids) }
+            try db.delete(DoneDetail.self, query: query)
+        }
     }
 }
