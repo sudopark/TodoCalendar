@@ -206,6 +206,7 @@ enum MigrationEndpoints: Endpoint {
     case schedules
     case eventDetails
     case doneTodos
+    case doneTodoDetails
     
     var subPath: String {
         switch self {
@@ -214,6 +215,7 @@ enum MigrationEndpoints: Endpoint {
         case .schedules: return "schedules"
         case .eventDetails: return "event_details"
         case .doneTodos: return "todos/done"
+        case .doneTodoDetails: return "todos/done/details"
         }
     }
 }
