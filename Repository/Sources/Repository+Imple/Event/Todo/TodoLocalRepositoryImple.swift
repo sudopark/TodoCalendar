@@ -87,6 +87,10 @@ extension TodoLocalRepositoryImple {
         let newTodo = try await self.makeTodoEvent(newParams)
         let nextTodo = try? await self.replaceTodoNextEventTimeIfIsRepeating(origin)
         
+        if nextTodo == nil {
+            try? await self.localStorage.removeTodoDetail(eventId)
+        }
+        
         return ReplaceRepeatingTodoEventResult(newTodoEvent: newTodo)
             |> \.nextRepeatingTodoEvent .~ nextTodo
     }
