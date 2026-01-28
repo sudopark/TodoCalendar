@@ -84,7 +84,10 @@ extension TodoUploadDecorateRepositoryImple {
             )
         } else {
             try await self.eventUploadService.append(
-                .init(dataType: .todo, uuid: eventId, isRemovingTask: true)
+                [
+                    .init(dataType: .todo, uuid: eventId, isRemovingTask: true),
+                    .init(dataType: .eventDetail, uuid: eventId, isRemovingTask: true)
+                ]
             )
         }
         
