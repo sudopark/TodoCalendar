@@ -91,6 +91,8 @@ extension TodoRemoteRepositoryImple {
         try? await cacheStorage.saveTodoEvent(result.newTodoEvent)
         if let next = result.nextRepeatingTodoEvent {
             try await cacheStorage.updateTodoEvent(next)
+        } else {
+            try? await cacheStorage.removeTodoDetail(eventId)
         }
         return result
     }

@@ -208,6 +208,21 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "origin")
         XCTAssertEqual(self.spyTodoCache.didSavedTodoEvent != nil, true)
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent != nil, true)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoDetailId, nil)
+    }
+    
+    func testRepository_whenAfterReplaceNotRepeatingTodo_updateCache() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let _ = try? await repository.replaceRepeatingTodo(current: "origin-without-repeating", to: .init())
+        
+        // then
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "origin-without-repeating")
+        XCTAssertEqual(self.spyTodoCache.didSavedTodoEvent != nil, true)
+        XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent != nil, false)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoDetailId, "origin-without-repeating")
     }
 }
 
@@ -835,7 +850,26 @@ private struct DummyResponse {
     
     let refTime = Date().timeIntervalSince1970
     
-    private func dummySingleTodoResponse(_ uuid: String = "new_uuid") -> String {
+    private func dummySingleTodoResponse(
+        _ uuid: String = "new_uuid",
+        isRepeating: Bool = true
+    ) -> String {
+        
+        let repeatingBlock = !isRepeating ? "" :
+        """
+        "repeating": {
+            "start": 300,
+            "end": \(refTime+3600*24*100),
+            "option": {
+
+                "optionType": "every_week",
+                "interval": 1,
+                "dayOfWeek": [1],
+                "timeZone": "Asia/Seoul"
+            }
+        },
+        """
+        
         return """
         {
             "uuid": "\(uuid)",
@@ -848,17 +882,7 @@ private struct DummyResponse {
                 "period_end": \(refTime+200),
                 "seconds_from_gmt": 300
             },
-            "repeating": {
-                "start": 300,
-                "end": \(refTime+3600*24*100),
-                "option": {
-
-                    "optionType": "every_week",
-                    "interval": 1,
-                    "dayOfWeek": [1],
-                    "timeZone": "Asia/Seoul"
-                }
-            },
+            \(repeatingBlock)
             "notification_options": [
                 {
                     "type_text": "allDay9AMBefore",
@@ -1035,6 +1059,11 @@ private struct DummyResponse {
             ),
             .init(
                 method: .get,
+                endpoint: TodoAPIEndpoints.todo("origin-without-repeating"),
+                resultJsonString: .success(self.dummySingleTodoResponse("origin-without-repeating", isRepeating: false))
+            ),
+            .init(
+                method: .get,
                 endpoint: TodoAPIEndpoints.todo("complete_fail"),
                 resultJsonString: .success(self.dummySingleTodoResponse("complete_fail"))
             ),
@@ -1094,6 +1123,17 @@ private struct DummyResponse {
                 {
                     "new_todo": \(self.dummySingleTodoResponse()),
                     "next_repeating": \(self.dummySingleTodoResponse())
+                }
+                """
+                )
+            ),
+            .init(
+                method: .post,
+                endpoint: TodoAPIEndpoints.replaceRepeating("origin-without-repeating"),
+                resultJsonString: .success(
+                """
+                {
+                    "new_todo": \(self.dummySingleTodoResponse())
                 }
                 """
                 )
