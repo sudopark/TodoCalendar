@@ -559,6 +559,9 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(result?.nextRepeatingTodoEvent?.creatTimeStamp, 100)
         let updated = todos?.first(where: { $0.uuid == origin.uuid })
         XCTAssertEqual(updated?.time, .at(100.0+24*3600))
+        
+        let detail = try? await self.eventDetail("origin")
+        XCTAssertNotNil(detail)
     }
     
     // replace repeating todo -> without next todo
@@ -580,6 +583,9 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertNil(result?.nextRepeatingTodoEvent)
         let updated = todos?.first(where: { $0.uuid == origin.uuid })
         XCTAssertNil(updated)
+        
+        let detail = try? await self.eventDetail("origin")
+        XCTAssertNil(detail)
     }
 }
 
