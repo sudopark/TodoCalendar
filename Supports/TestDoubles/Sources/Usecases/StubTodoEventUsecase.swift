@@ -54,11 +54,18 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         else {
             throw RuntimeError("invalid argument")
         }
-        let todo = TodoEvent(uuid: eventId, name: name)
-            |> \.time .~ params.time
-            |> \.repeating .~ params.repeating
-            |> \.eventTagId .~ params.eventTagId
-        return todo
+        if params.repeatingUpdateScope == .onlyThisTime {
+            let todo = TodoEvent(uuid: "new_event_id", name: name)
+                |> \.time .~ params.time
+                |> \.eventTagId .~ params.eventTagId
+            return todo
+        } else {
+            let todo = TodoEvent(uuid: eventId, name: name)
+                |> \.time .~ params.time
+                |> \.repeating .~ params.repeating
+                |> \.eventTagId .~ params.eventTagId
+            return todo
+        }
     }
     
     public var shouldFailCompleteTodo: Bool = false
