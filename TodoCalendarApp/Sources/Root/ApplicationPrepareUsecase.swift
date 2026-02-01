@@ -151,6 +151,7 @@ extension ApplicationPrepareUsecaseImple {
             try await self.database.async.open(path: dbPath)
             logger.log(.sql, level: .info, "db open -> path: \(dbPath)")
             try await self.database.runMigration(upTo: self.dbVersion)
+            try await self.database.prepareTables()
         } catch {
             logger.log(.sql, level: .critical, "db open fail -> path: \(dbPath)")
             throw error

@@ -151,7 +151,7 @@ extension HolidayRepositoryImple {
         try await self.sqliteService.async.run { try $0.dropTable(HolidayTable.self) }
     }
     
-    private struct HolidayTable: Table {
+    struct HolidayTable: Table {
         
         enum Columns: String, TableColumn {
             case countryCode = "c_code"

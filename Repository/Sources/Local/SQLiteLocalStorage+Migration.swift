@@ -143,3 +143,30 @@ extension SQLiteService {
         }
     }
 }
+
+extension SQLiteService {
+    
+    public func prepareTables() async throws {
+        
+        try await self.async.run { db in
+            
+            try? db.createTableOrNot(KeyValueTable.self)
+            try? db.createTableOrNot(HolidayRepositoryImple.HolidayTable.self)
+            try? db.createTableOrNot(EventTimeTable.self)
+            try? db.createTableOrNot(EventDetailDataTable.self)
+            try? db.createTableOrNot(CustomEventTagTable.self)
+            try? db.createTableOrNot(GoogleCalendarEventTagTable.self)
+            try? db.createTableOrNot(GoogleCalendarColorsTable.self)
+            try? db.createTableOrNot(GoogleCalendarEventOriginTable.self)
+            try? db.createTableOrNot(ScheduleEventTable.self)
+            try? db.createTableOrNot(EventSyncTimestampTable.self)
+            try? db.createTableOrNot(DoneTodoEventTable.self)
+            try? db.createTableOrNot(PendingDoneTodoEventTable.self)
+            try? db.createTableOrNot(TodoEventTable.self)
+            try? db.createTableOrNot(TodoToggleStateTable.self)
+            try? db.createTableOrNot(EventUploadPendingQueueTable.self)
+            try? db.createTableOrNot(EventNotificationIdTable.self)
+            
+        }
+    }
+}
