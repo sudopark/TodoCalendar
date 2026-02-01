@@ -192,7 +192,14 @@ struct TodayAndNextWidgetView: View {
         todo: TodoEventCellViewModel? = nil
     ) -> some View {
         
-        HStack(spacing: 4) {
+        let invertColor: UIColor = switch (color.isLight, colorScheme == .light) {
+        case (true, true): colorSet.text0
+        case (true, false): colorSet.text0_inverted
+        case (false, false): colorSet.text0
+        case (false, true): colorSet.text0_inverted
+        }
+        
+        return HStack(spacing: 4) {
             
             ZStack(alignment: .center) {
                 Circle().fill(color.asColor)
@@ -202,9 +209,7 @@ struct TodayAndNextWidgetView: View {
                     systemName: isHoliday ? "star.fill" : todo == nil ? "calendar" : "flag.fill"
                 )
                     .font(.system(size: 7))
-                    .foregroundStyle(
-                        color.isLight ? colorSet.text0.asColor : colorSet.text0_inverted.asColor
-                    )
+                    .foregroundStyle(invertColor.asColor)
             }
             
             Text(name)
