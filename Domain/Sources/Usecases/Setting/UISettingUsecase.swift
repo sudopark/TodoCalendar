@@ -38,5 +38,9 @@ public protocol UISettingUsecase: Sendable {
         _ params: EditDefaultEventTagColorParams
     ) async throws -> DefaultEventTagColorSetting
     
+    func changeWidgetAppearanceSetting(
+        _ params: EditWidgetAppearanceSettingParams
+    ) throws -> WidgetAppearanceSettings
+    
     var currentCalendarUISeting: AnyPublisher<CalendarAppearanceSettings, Never> { get }
 }

@@ -101,17 +101,36 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
     }
 }
 
+public struct WidgetAppearanceSettings: Sendable, Equatable {
+    
+    public enum Background: Equatable, Sendable, Codable {
+        case system
+        case custom(hex: String)
+    }
+    
+    public var background: Background = .system
+    public init() { }
+    
+    public func update(_ params: EditWidgetAppearanceSettingParams) -> WidgetAppearanceSettings {
+        return WidgetAppearanceSettings()
+            |> \.background .~ (params.background ?? self.background)
+    }
+}
+
 public struct AppearanceSettings: Sendable {
     
     public var calendar: CalendarAppearanceSettings
     public var defaultTagColor: DefaultEventTagColorSetting
+    public var widget: WidgetAppearanceSettings
     
     public init(
         calendar: CalendarAppearanceSettings,
-        defaultTagColor: DefaultEventTagColorSetting
+        defaultTagColor: DefaultEventTagColorSetting,
+        widget: WidgetAppearanceSettings = .init()
     ) {
         self.calendar = calendar
         self.defaultTagColor = defaultTagColor
+        self.widget = widget
     }
 }
 
@@ -190,5 +209,16 @@ public struct EditCalendarAppearanceSettingParams {
     private var isValidGeneralValues: Bool {
         return self.hapticEffectIsOn != nil
             || self.animationEffectIsOn != nil
+    }
+}
+
+public struct EditWidgetAppearanceSettingParams {
+    
+    public var background: WidgetAppearanceSettings.Background?
+    
+    public init() { }
+    
+    public var isValid: Bool {
+        return self.background != nil
     }
 }

@@ -175,6 +175,18 @@ extension AppSettingUsecaseImpleTests {
         // then
         XCTAssertNotNil(setting)
     }
+    
+    func testUsecase_changeWidgetAppearnaceSetting() throws {
+        // given
+        let usecase = self.makeUsecase()
+        
+        // when
+        let params = EditWidgetAppearanceSettingParams() |> \.background .~ .custom(hex: "custom")
+        let newValue = try usecase.changeWidgetAppearanceSetting(params)
+        
+        // then
+        XCTAssertEqual(newValue.background, .custom(hex: "custom"))
+    }
 }
 
 

@@ -40,6 +40,27 @@ extension AppSettingLocalRepositoryImpleTests {
             .holiday: false, .sunday: false, .saturday: false
         ])
         XCTAssertEqual(appearance.calendar.showUncompletedTodos, true)
+        XCTAssertEqual(appearance.widget.background, .system)
+    }
+    
+    func testRepository_saveAndLoadWidgetAppearanceSetting() {
+        // given
+        let repository = self.makeRepository()
+        
+        // when + then
+        let initial = repository.loadWidgetAppearanceSetting()
+        XCTAssertEqual(
+            initial,
+            WidgetAppearanceSettings() |> \.background .~ .system
+        )
+        
+        var params = EditWidgetAppearanceSettingParams()
+        params.background = .custom(hex: "custom")
+        let updated = repository.updateWidgetAppearance(params)
+        XCTAssertEqual(
+            updated,
+            WidgetAppearanceSettings() |> \.background .~ .custom(hex: "custom")
+        )
     }
     
     func testRepository_saveAndLoadEventSetting() {
