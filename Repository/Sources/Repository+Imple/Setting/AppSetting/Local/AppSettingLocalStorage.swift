@@ -55,6 +55,9 @@ extension AppSettingLocalStorage {
     private var is24HourForm: String { "is_24_hourForm" }
     private var hideUncompletedTodos: String { "hide_uncompleted_todos" }
     
+    // widget
+    private var widgetBackgroundKey: String { "widget_background" }
+    
     // general
     private var hapticEffectIsOff: String { "haptic_effect_off" }
     private var animationEffectIsOn: String { "animation_effect_on" }
@@ -63,10 +66,12 @@ extension AppSettingLocalStorage {
         
         let calendar = self.loadCalendarAppearanceSetting(for: userId)
         let defaultTagColors = self.loadDefaultTagColorSetting(for: userId)
+        let widget = self.loadWidgetAppearanceSetting(for: userId)
         
         return AppearanceSettings(
            calendar: calendar,
-           defaultTagColor: defaultTagColors
+           defaultTagColor: defaultTagColors,
+           widget: widget
         )
     }
     
@@ -74,6 +79,7 @@ extension AppSettingLocalStorage {
         
         self.updateDefaultEventTagColors(newValue.defaultTagColor, for: userId)
         self.updateCalendarAppearanceSetting(newValue.calendar, for: userId)
+        self.updateWidgetAppearanceSetting(newValue.widget, for: userId)
     }
     
     func loadCalendarAppearanceSetting(for userId: String?) -> CalendarAppearanceSettings {
@@ -209,6 +215,21 @@ extension AppSettingLocalStorage {
         self.environmentStorage.update(
             self.defaultTagColorKey |> self.keyWithUserId(userId),
             newValue.default
+        )
+    }
+    
+    func loadWidgetAppearanceSetting(for userId: String?) -> WidgetAppearanceSettings {
+        let background: WidgetAppearanceSettings.Background? = self.environmentStorage.load(widgetBackgroundKey)
+        return WidgetAppearanceSettings()
+            |> \.background .~ (background ?? .system)
+    }
+    
+    func updateWidgetAppearanceSetting(
+        _ newValue: WidgetAppearanceSettings, for userId: String?
+    ) {
+        self.environmentStorage.update(
+            self.widgetBackgroundKey,
+            newValue.background
         )
     }
 }

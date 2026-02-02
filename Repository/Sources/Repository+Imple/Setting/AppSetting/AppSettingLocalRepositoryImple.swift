@@ -75,3 +75,21 @@ extension AppSettingLocalRepositoryImple {
         return newSetting
     }
 }
+
+// MARK: - widget setting
+
+extension AppSettingLocalRepositoryImple {
+    
+    public func loadWidgetAppearanceSetting() -> WidgetAppearanceSettings {
+        return self.storage.loadWidgetAppearanceSetting(for: nil)
+    }
+    
+    public func updateWidgetAppearance(
+        _ params: EditWidgetAppearanceSettingParams
+    ) -> WidgetAppearanceSettings {
+        let old = self.storage.loadWidgetAppearanceSetting(for: nil)
+        let new = old.update(params)
+        self.storage.updateWidgetAppearanceSetting(new, for: nil)
+        return new
+    }
+}

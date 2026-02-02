@@ -64,4 +64,16 @@ open class StubAppSettingRepository: AppSettingRepository, @unchecked Sendable {
         |> \.defaultNewEventPeriod .~ (params.defaultNewEventPeriod ?? old.defaultNewEventPeriod)
         return newSetting
     }
+    
+    open func loadWidgetAppearanceSetting() -> WidgetAppearanceSettings {
+        return self.loadSavedViewAppearance().widget
+    }
+    
+    open func updateWidgetAppearance(_ params: EditWidgetAppearanceSettingParams) -> WidgetAppearanceSettings {
+        let old = self.loadWidgetAppearanceSetting()
+        let new = old.update(params)
+        let appearance = self.loadSavedViewAppearance() |> \.widget .~ new
+        stubAppearanceSetting = appearance
+        return new
+    }
 }

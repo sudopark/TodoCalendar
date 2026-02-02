@@ -68,6 +68,16 @@ open class StubUISettingUsecase: UISettingUsecase, @unchecked Sendable {
         return newSetting.defaultTagColor
     }
     
+    public func changeWidgetAppearanceSetting(_ params: EditWidgetAppearanceSettingParams) throws -> WidgetAppearanceSettings {
+        let old = self.readSetting()
+        let new = old.widget.update(params)
+        let newSetting = old |> \.widget .~ new
+        self.didChangeAppearanceSetting = newSetting
+        self.stubAppearanceSetting = newSetting
+        self.settingSubject.send(newSetting)
+        return newSetting.widget
+    }
+    
     public var currentCalendarUISeting: AnyPublisher<CalendarAppearanceSettings, Never> {
         return self.settingSubject
             .compactMap { $0?.calendar }

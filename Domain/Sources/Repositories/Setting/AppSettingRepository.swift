@@ -24,4 +24,9 @@ public protocol AppSettingRepository: Sendable {
     
     func loadEventSetting() -> EventSettings
     func changeEventSetting(_ params: EditEventSettingsParams) -> EventSettings
+    
+    func loadWidgetAppearanceSetting() -> WidgetAppearanceSettings
+    func updateWidgetAppearance(
+        _ params: EditWidgetAppearanceSettingParams
+    ) -> WidgetAppearanceSettings
 }

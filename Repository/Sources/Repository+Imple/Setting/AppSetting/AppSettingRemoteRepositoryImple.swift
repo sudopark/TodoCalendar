@@ -95,3 +95,22 @@ extension AppSettingRemoteRepositoryImple {
         return new
     }
 }
+
+
+// MARK: - widget setting
+
+extension AppSettingRemoteRepositoryImple {
+    
+    public func loadWidgetAppearanceSetting() -> WidgetAppearanceSettings {
+        return self.storage.loadWidgetAppearanceSetting(for: self.userId)
+    }
+    
+    public func updateWidgetAppearance(
+        _ params: EditWidgetAppearanceSettingParams
+    ) -> WidgetAppearanceSettings {
+        let old = self.storage.loadWidgetAppearanceSetting(for: self.userId)
+        let new = old.update(params)
+        self.storage.updateWidgetAppearanceSetting(new, for: self.userId)
+        return new
+    }
+}

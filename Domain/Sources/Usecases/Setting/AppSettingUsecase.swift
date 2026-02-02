@@ -98,6 +98,18 @@ extension AppSettingUsecaseImple: UISettingUsecase {
         return newSetting
     }
     
+    public func changeWidgetAppearanceSetting(
+        _ params: EditWidgetAppearanceSettingParams
+    ) throws -> WidgetAppearanceSettings {
+        guard params.isValid
+        else {
+            throw RuntimeError("invalid edit widget appearance params")
+        }
+        
+        let newSetting =  self.appSettingRepository.updateWidgetAppearance(params)
+        return newSetting
+    }
+    
     public var currentCalendarUISeting: AnyPublisher<CalendarAppearanceSettings, Never> {
         return self.sharedDataStore
             .observe(CalendarAppearanceSettings.self, key: self.calednarSettingKey)
