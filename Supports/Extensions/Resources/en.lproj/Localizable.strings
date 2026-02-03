@@ -362,6 +362,11 @@
 "setting.appearance.event.sample::christmas" = "Christmas";
 "setting.appearance.event.sample::sometime" = "Some time";
 "setting.appearance.event.sample::uncompleted_todo::toggle" = "Show uncompleted To-do";
+"setting.appearance.widget::title" = "Widget theme";
+"setting.appearance.widget::useSystemTheme::title" = "Use system theme";
+"setting.appearance.widget::useSystemTheme::background" = "Widget background color";
+"setting.appearance.widget::useCustomTheme::title" = "Select custom color";
+"setting.appearance.widget::sample::eventName" = "Widget Event";
 "setting.appearance.event.boldText" = "Bold text";
 "setting.appearance.event.eventColor" = "Event color";
 "setting.timezone::title" = "TimeZone";
