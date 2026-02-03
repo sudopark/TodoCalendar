@@ -361,6 +361,11 @@
 "setting.appearance.event.sample::christmas" = "크리스마스";
 "setting.appearance.event.sample::sometime" = "특정시간";
 "setting.appearance.event.sample::uncompleted_todo::toggle" = "완료되지 않은 할일 보기";
+"setting.appearance.widget::title" = "위젯 테마";
+"setting.appearance.widget::useSystemTheme::title" = "시스템 테마";
+"setting.appearance.widget::useSystemTheme::background" = "위젯 배경 색";
+"setting.appearance.widget::useCustomTheme::title" = "커스텀 색상 선택";
+"setting.appearance.widget::sample::eventName" = "위젯 이벤트";
 "setting.appearance.event.boldText" = "텍스트 볼드처리";
 "setting.appearance.event.eventColor" = "이벤트 색상";
 "setting.timezone::title" = "타임존";

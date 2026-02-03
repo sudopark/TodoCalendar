@@ -103,7 +103,7 @@ public struct CalendarAppearanceSettings: Equatable, Sendable {
 
 public struct WidgetAppearanceSettings: Sendable, Equatable {
     
-    public enum Background: Equatable, Sendable, Codable {
+    public enum Background: Hashable, Sendable, Codable {
         case system
         case custom(hex: String)
     }
