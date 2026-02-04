@@ -52,7 +52,7 @@ struct OneWeekEventsWidget: Widget {
         StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.weeks(count: 1))) { entry in
             
             WeekEventsWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemMedium])
         .configurationDisplayName("widget.weeks.thisWeek".localized())
@@ -70,7 +70,7 @@ struct TwoWeekEventsWidget: Widget {
         StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.weeks(count: 2))) { entry in
             
             WeekEventsWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemMedium])
         .configurationDisplayName("widget.weeks.twoWeek".localized())
@@ -88,7 +88,7 @@ struct ThreeWeekEventsWidget: Widget {
         StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.weeks(count: 3))) { entry in
             
             WeekEventsWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemLarge])
         .configurationDisplayName("widget.weeks.threeWeek".localized())
@@ -106,7 +106,7 @@ struct FourWeekEventsWidget: Widget {
         StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.weeks(count: 4))) { entry in
             
             WeekEventsWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemLarge])
         .configurationDisplayName("widget.weeks.fourWeek".localized())
@@ -124,7 +124,7 @@ struct LastMonthEventsWidget: Widget {
         StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.wholeMonth(.previous))) { entry in
             
             WeekEventsWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemLarge])
         .configurationDisplayName("widget.weeks.lastMonth".localized())
@@ -142,7 +142,7 @@ struct CurrentMonthEventsWidget: Widget {
         StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.wholeMonth(.current))) { entry in
             
             WeekEventsWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemLarge])
         .configurationDisplayName("widget.weeks.thisMonth".localized())
@@ -160,7 +160,7 @@ struct NextMonthEventsWidget: Widget {
         StaticConfiguration(kind: self.kind, provider: WeekEventsWidgetTimelineProvider(.wholeMonth(.next))) { entry in
             
             WeekEventsWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemLarge])
         .configurationDisplayName("widget.weeks.nextMonth".localized())

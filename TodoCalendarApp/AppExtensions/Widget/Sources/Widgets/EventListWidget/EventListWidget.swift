@@ -22,7 +22,7 @@ struct EventListView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return model.widgetSetting.background.colorSet(colorScheme == .light)
     }
     
     private let model: EventListWidgetViewModel
@@ -209,9 +209,6 @@ struct TodoToggleButton: View {
 struct EventListWidgetView: View {
     
     @Environment(\.colorScheme) var colorScheme
-    var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
-    }
     
     private let entry: ResultTimelineEntry<EventListWidgetViewModel>
     init(entry: ResultTimelineEntry<EventListWidgetViewModel>) {
@@ -242,7 +239,7 @@ struct EventListWidget: Widget {
             provider: EventListWidgetTimeLineProvider()
         ) { entry in
             EventListWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
         .configurationDisplayName("widget.events::name".localized())

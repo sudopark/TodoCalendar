@@ -74,6 +74,11 @@ extension WidgetViewModelProviderBuilder {
     ) async -> MonthWidgetViewModelProvider {
         await self.checkShouldReset()
         
+        let appSettingRepository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
         let calendarSettingRepository = calendarSettingRepository ?? CalendarSettingRepositoryImple(
             environmentStorage: base.userDefaultEnvironmentStorage
         )
@@ -97,6 +102,7 @@ extension WidgetViewModelProviderBuilder {
         return MonthWidgetViewModelProvider(
             calendarUsecase: calendarUsecase,
             settingRepository: calendarSettingRepository,
+            appSettingRepository: appSettingRepository,
             holidayFetchUsecase: holidaysFetchUsecase,
             eventFetchUsecase: eventsFetchUsecase
         )
@@ -203,9 +209,15 @@ extension WidgetViewModelProviderBuilder {
         let calendarSettingRepository = CalendarSettingRepositoryImple(
             environmentStorage: base.userDefaultEnvironmentStorage
         )
+        let appSettingRepository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
         
         return TodayWidgetViewModelProvider(
             eventsFetchusecase: fetchUsecase,
+            appSettingRepository: appSettingRepository,
             calednarSettingRepository: calendarSettingRepository
         )
     }

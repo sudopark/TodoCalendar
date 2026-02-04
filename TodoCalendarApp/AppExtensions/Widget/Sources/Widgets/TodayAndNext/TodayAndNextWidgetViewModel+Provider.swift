@@ -24,6 +24,7 @@ struct TodayAndNextWidgetViewModel {
     let customTagMap: [String: any EventTag]
     var googleCalendarColors: GoogleCalendar.Colors = .init(calendars: [:], events: [:])
     var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
+    var widgetSetting = WidgetAppearanceSettings()
     
     static func sample() -> TodayAndNextWidgetViewModel {
         let now = Date()
@@ -521,6 +522,7 @@ extension TodayAndNextWidgetViewModelProvider {
         return model
             |> \.googleCalendarColors .~ (events.googleCalendarColors ?? .init(calendars: [:], events: [:]))
             |> \.googleCalendarTags .~ events.googleCalendarTags
+            |> \.widgetSetting .~ setting.widget
     }
     
     private func loadEvnets(

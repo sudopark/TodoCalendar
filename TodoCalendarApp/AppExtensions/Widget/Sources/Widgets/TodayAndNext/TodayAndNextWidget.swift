@@ -22,7 +22,7 @@ struct TodayAndNextWidgetView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return model.widgetSetting.background.colorSet(colorScheme == .light)
     }
     
     private let model: TodayAndNextWidgetViewModel
@@ -431,7 +431,7 @@ struct TodayAndNextWidget: Widget {
         ) { entry in
             
             TodayAndNextWidgetEntryView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemMedium])
         .configurationDisplayName("widget.next.title::future".localized())

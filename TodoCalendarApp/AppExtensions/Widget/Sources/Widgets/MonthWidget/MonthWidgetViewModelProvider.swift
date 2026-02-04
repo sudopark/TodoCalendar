@@ -23,6 +23,7 @@ struct MonthWidgetViewModel {
     let weeks: [WeekRowModel]
     var todayIdentifier: String?
     var hasEventDaysIdentifiers: Set<String> = []
+    var widgetSetting = WidgetAppearanceSettings()
     
     fileprivate var eventRange: Range<TimeInterval>?
     
@@ -118,17 +119,20 @@ final class MonthWidgetViewModelProvider {
     
     private let calendarUsecase: any CalendarUsecase
     private let settingRepository: any CalendarSettingRepository
+    private let appSettingRepository: any AppSettingRepository
     private let holidayFetchUsecase: any HolidaysFetchUsecase
     private let eventFetchUsecase: any CalendarEventFetchUsecase
     
     init(
         calendarUsecase: any CalendarUsecase,
         settingRepository: any CalendarSettingRepository,
+        appSettingRepository: any AppSettingRepository,
         holidayFetchUsecase: any HolidaysFetchUsecase,
         eventFetchUsecase: any CalendarEventFetchUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.settingRepository = settingRepository
+        self.appSettingRepository = appSettingRepository
         self.holidayFetchUsecase = holidayFetchUsecase
         self.eventFetchUsecase = eventFetchUsecase
     }
@@ -138,13 +142,14 @@ extension MonthWidgetViewModelProvider {
     
     func getMonthViewModel(_ now: Date) async throws -> MonthWidgetViewModel {
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
+        let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
         var model = try await self.currentMonthModel(now, timeZone)
         if let ranges = model.eventRange {
             model.hasEventDaysIdentifiers = await self.loadEventExistsDayIdentifiers(
                 ranges, timeZone
             )
         }
-        return model
+        return model |> \.widgetSetting .~ setting
     }
     
     private func currentMonthModel(_ now: Date, _ timeZone: TimeZone) async throws -> MonthWidgetViewModel {

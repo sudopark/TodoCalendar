@@ -20,7 +20,7 @@ struct SingleMonthView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return model.widgetSetting.background.colorSet(colorScheme == .light)
     }
     
     private let model: MonthWidgetViewModel
@@ -114,10 +114,7 @@ struct SingleMonthView: View {
 struct MonthWidgetView: View {
     
     @Environment(\.colorScheme) var colorScheme
-    var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
-    }
-    
+
     private let entry: ResultTimelineEntry<MonthWidgetViewModel>
     init(entry: ResultTimelineEntry<MonthWidgetViewModel>) {
         self.entry = entry
@@ -143,7 +140,7 @@ struct MonthWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: self.kind, provider: MonthWidgetTimelineProvider()) { entry in
             MonthWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemSmall])
         .configurationDisplayName("widget.events.calendar".localized())

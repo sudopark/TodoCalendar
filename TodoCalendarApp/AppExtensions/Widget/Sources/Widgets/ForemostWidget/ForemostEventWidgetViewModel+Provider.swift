@@ -21,6 +21,7 @@ struct ForemostEventWidgetViewModel {
     var eventModel: (any EventCellViewModel)?
     let defaultTagColorSetting: DefaultEventTagColorSetting
     var tag: CustomEventTag?
+    var widgetSetting = WidgetAppearanceSettings()
     
     static func sample() -> ForemostEventWidgetViewModel {
         
@@ -69,6 +70,7 @@ extension ForemostEventWidgetViewModelProvider {
             defaultTagColorSetting: setting.defaultTagColor,
             tag: eventModel.1
         )
+        |> \.widgetSetting .~ setting.widget
     }
     
     private func loadForemostEventModel(

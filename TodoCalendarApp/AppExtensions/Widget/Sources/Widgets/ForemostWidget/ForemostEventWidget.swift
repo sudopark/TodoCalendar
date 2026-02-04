@@ -42,7 +42,7 @@ struct SystemSizeForemostEventView: View {
     
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return model.widgetSetting.background.colorSet(colorScheme == .light)
     }
     
     private struct Metric {
@@ -271,7 +271,7 @@ struct ForemostEventWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: ForemostEventWidget.kind, provider: ForemostEventWidgetTimelineProvider()) { entry in
             ForemostEventWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.accessoryInline, .systemSmall, .systemMedium])
         .configurationDisplayName("widget.events.foremost".localized())

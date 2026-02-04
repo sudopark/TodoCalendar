@@ -51,7 +51,7 @@ struct DoubleMonthWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: DoubleMonthWidgetTimlineProvider()) { entry in
             DoubleMonthWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemMedium])
         .configurationDisplayName("widget.doubleMonth::name".localized())
