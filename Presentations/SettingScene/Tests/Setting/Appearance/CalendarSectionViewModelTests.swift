@@ -255,6 +255,17 @@ extension CalendarSectionViewModelTests {
         // then
         XCTAssertEqual(self.spyRouter.didRouteToSelectColorTheme, true)
     }
+    
+    func testViewModel_routeToChangeWidgetTheme() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.changeWidgetTheme()
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToChangeWidgetTheme, true)
+    }
 }
 
 
@@ -263,5 +274,10 @@ private class SpyRouter: BaseSpyRouter, CalendarSectionRouting, @unchecked Senda
     var didRouteToSelectColorTheme: Bool?
     func routeToSelectColorTheme() {
         self.didRouteToSelectColorTheme = true
+    }
+    
+    var didRouteToChangeWidgetTheme: Bool?
+    func routeToChangeWidgetTheme(_ setting: WidgetAppearanceSettings) {
+        self.didRouteToChangeWidgetTheme = true
     }
 }

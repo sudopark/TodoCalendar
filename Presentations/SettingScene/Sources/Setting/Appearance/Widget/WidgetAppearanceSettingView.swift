@@ -33,6 +33,7 @@ import CommonPresentation
                 case .system:
                     self?.isSystemTheme = true
                 case .custom(let hex):
+                    self?.isSystemTheme = false
                     self?.customBackground = UIColor.from(hex: hex)?.asColor
                 }
             })

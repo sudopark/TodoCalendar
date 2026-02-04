@@ -26,7 +26,7 @@ protocol WidgetAppearanceSettingViewModel: AnyObject, Sendable, WidgetAppearance
 final class WidgetAppearanceSettingViewModelImple: WidgetAppearanceSettingViewModel, @unchecked Sendable {
     
     private let uiSettingUsecase: any UISettingUsecase
-    weak var router: (any WidgetAppearanceSettingRouting)?
+    var router: (any WidgetAppearanceSettingRouting)?
     
     init(
         setting: WidgetAppearanceSettings,
