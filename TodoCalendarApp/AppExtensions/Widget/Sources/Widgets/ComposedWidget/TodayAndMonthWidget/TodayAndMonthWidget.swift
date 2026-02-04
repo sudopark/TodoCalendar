@@ -19,9 +19,6 @@ import CalendarScenes
 struct TodayAndMonthWidgetView: View {
     
     @Environment(\.colorScheme) var colorScheme
-    var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
-    }
     
     private let entry: ResultTimelineEntry<TodayAndMonthWidgetViewModel>
     init(entry: ResultTimelineEntry<TodayAndMonthWidgetViewModel>) {
@@ -51,7 +48,7 @@ struct TodayAndMonthWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: TodayAndMonthWidgetTimelineProvider()) { entry in
             TodayAndMonthWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemMedium])
         .configurationDisplayName("widget.todayAndMonth::name".localized())

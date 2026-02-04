@@ -63,6 +63,7 @@ extension ForemostEventWidgetTimelineProvider {
                 let model = try await viewModelProvider.getViewModel(now)
                 completion(
                     .init(date: now, result: .success(model))
+                        |> \.background .~ model.widgetSetting.background
                 )
             } catch {
                 completion(

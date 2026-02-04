@@ -28,6 +28,7 @@ struct TodayWidgetViewModel {
     var todoEventCount: Int = 0
     var scheduleEventcount: Int = 0
     var totalEventCount: Int { self.todoEventCount + self.scheduleEventcount }
+    var widgetSetting = WidgetAppearanceSettings()
     
     init(
         id: CalendarDay,
@@ -82,13 +83,16 @@ struct TodayWidgetViewModel {
 final class TodayWidgetViewModelProvider {
     
     private let eventsFetchusecase: any CalendarEventFetchUsecase
+    private let appSettingRepository: any AppSettingRepository
     private let calednarSettingRepository: any CalendarSettingRepository
     
     init(
         eventsFetchusecase: any CalendarEventFetchUsecase,
+        appSettingRepository: any AppSettingRepository,
         calednarSettingRepository: any CalendarSettingRepository
     ) {
         self.eventsFetchusecase = eventsFetchusecase
+        self.appSettingRepository = appSettingRepository
         self.calednarSettingRepository = calednarSettingRepository
     }
 }
@@ -98,12 +102,14 @@ extension TodayWidgetViewModelProvider {
     
     func getTodayViewModel(for today: Date) async throws -> TodayWidgetViewModel {
         
+        let setting = self.appSettingRepository.loadWidgetAppearanceSetting()
         let timeZone = self.calednarSettingRepository.loadUserSelectedTImeZone() ?? .current
         let calednar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let todayRange = try calednar.dayRange(today).unwrap()
         let events = try await self.todayEvents(todayRange, timeZone)
         return TodayWidgetViewModel(today, calednar)
             .updated(events: events)
+            |> \.widgetSetting .~ setting
     }
     
     private func todayEvents(

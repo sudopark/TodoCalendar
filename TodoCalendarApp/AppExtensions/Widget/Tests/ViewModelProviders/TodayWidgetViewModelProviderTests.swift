@@ -35,6 +35,7 @@ class TodayWidgetViewModelProviderTests: BaseTestCase {
         
         return TodayWidgetViewModelProvider(
             eventsFetchusecase: fetchUsecase,
+            appSettingRepository: StubAppSettingRepository(),
             calednarSettingRepository: repository
         )
     }

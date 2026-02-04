@@ -21,9 +21,6 @@ import CalendarScenes
 struct EventAndForemostWidgetView: View {
     
     @Environment(\.colorScheme) var colorScheme
-    var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
-    }
     
     private let entry: ResultTimelineEntry<EventAndForemostWidgetViewModel>
     init(entry: ResultTimelineEntry<EventAndForemostWidgetViewModel>) {
@@ -54,7 +51,7 @@ struct EventAndForemostWidget: Widget {
         StaticConfiguration(kind: EventAndForemostWidget.kind, provider: EventAndForemostWidgetViewTimelineProvider()) { entry in
             
             EventAndForemostWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemMedium])
         .configurationDisplayName("widget.eventAndForesmot::name".localized())

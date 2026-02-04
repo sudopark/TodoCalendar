@@ -154,6 +154,7 @@ struct EventListWidgetViewModel {
     let customTagMap: [String: any EventTag]
     var googleCalendarColors: GoogleCalendar.Colors = .init(calendars: [:], events: [:])
     var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
+    var widgetSetting: WidgetAppearanceSettings = .init()
     
     static func sample(size: EventListWidgetSize) -> EventListWidgetViewModel {
         
@@ -331,6 +332,7 @@ extension EventListWidgetViewModelProvider {
         )
         |> \.googleCalendarColors .~ (dayEventLists.1.googleCalendarColors ?? .init(calendars: [:], events: [:]))
         |> \.googleCalendarTags .~ dayEventLists.1.googleCalendarTags
+        |> \.widgetSetting .~ setting.widget
     }
    
     private func loadDayEventListModel(

@@ -21,7 +21,7 @@ import CalendarScenes
 struct TodaySummaryView: View {
     @Environment(\.colorScheme) var colorScheme
     var colorSet: any ColorSet {
-        return colorScheme == .light ? DefaultLightColorSet() : DefaultDarkColorSet()
+        return model.widgetSetting.background.colorSet(colorScheme == .light)
     }
     
     private let model: TodayWidgetViewModel
@@ -140,7 +140,7 @@ struct TodayWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: TodayWidgetTimelineProvider()) { entry in
             TodayWidgetView(entry: entry)
-                .containerBackground(.background, for: .widget)
+                .containerBackground(entry.backgroundShape, for: .widget)
         }
         .supportedFamilies([.systemSmall])
         .configurationDisplayName("widget.events.today".localized())

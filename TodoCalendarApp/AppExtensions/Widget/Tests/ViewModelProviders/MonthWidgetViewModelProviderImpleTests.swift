@@ -67,6 +67,7 @@ class MonthWidgetViewModelProviderImpleTests: BaseTestCase {
         return MonthWidgetViewModelProvider(
             calendarUsecase: calendarUsecase,
             settingRepository: settingRepository,
+            appSettingRepository: StubAppSettingRepository(),
             holidayFetchUsecase: holidaysFetchUSecase,
             eventFetchUsecase: eventsFetchUsecase
         )

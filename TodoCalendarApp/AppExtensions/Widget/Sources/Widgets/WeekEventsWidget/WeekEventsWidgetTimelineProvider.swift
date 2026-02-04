@@ -67,6 +67,7 @@ struct WeekEventsWidgetTimelineProvider: TimelineProvider {
                 let model = try await viewModelProvider.getWeekEventsModel(from: now, range: range)
                 completion(
                     .init(date: now, result: .success(model))
+                        |> \.background .~ model.widgetSetting.background
                 )
             } catch {
                 completion(

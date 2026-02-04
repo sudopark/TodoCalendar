@@ -78,6 +78,7 @@ extension TodayAndNextWidgetTimeLineProvider {
         do {
             let model = try await viewModelProvider.getViewModel(for: now)
             return .init(date: now, result: .success(model))
+                |> \.background .~ model.widgetSetting.background
         } catch {
             return .init(date: now, result: .failure(.init(error: error)))
         }

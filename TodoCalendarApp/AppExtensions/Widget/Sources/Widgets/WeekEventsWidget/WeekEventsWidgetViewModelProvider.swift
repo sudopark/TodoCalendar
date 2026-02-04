@@ -57,6 +57,7 @@ struct WeekEventsViewModel {
     let tagMap: [String: CustomEventTag]
     var googleCalendarColor: GoogleCalendar.Colors?
     var googleCalendarTags: [String: GoogleCalendar.Tag]
+    let widgetSetting: WidgetAppearanceSettings
     
     init(
         range: WeekEventsRange,
@@ -68,7 +69,8 @@ struct WeekEventsViewModel {
         defaultTagColorSetting: DefaultEventTagColorSetting,
         tagMap: [String: CustomEventTag],
         googleCalendarColor: GoogleCalendar.Colors? = nil,
-        googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
+        googleCalendarTags: [String: GoogleCalendar.Tag] = [:],
+        widgetSetting: WidgetAppearanceSettings
     ) {
         self.range = range
         self.targetMonthText = targetMonthText
@@ -80,6 +82,7 @@ struct WeekEventsViewModel {
         self.tagMap = tagMap
         self.googleCalendarColor = googleCalendarColor
         self.googleCalendarTags = googleCalendarTags
+        self.widgetSetting = widgetSetting
     }
     
     static func sample(_ range: WeekEventsRange) -> WeekEventsViewModel {
@@ -104,7 +107,8 @@ struct WeekEventsViewModel {
             weeks: sliced,
             eventStackModelMap: wholeModel.eventStackModelMap,
             defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA"),
-            tagMap: [:]
+            tagMap: [:],
+            widgetSetting: .init()
         )
     }
     
@@ -184,7 +188,8 @@ struct WeekEventsViewModel {
             weeks: rowModels,
             eventStackModelMap: eventStacks,
             defaultTagColorSetting: .init(holiday: "#D6236A", default: "#088CDA"),
-            tagMap: [:]
+            tagMap: [:],
+            widgetSetting: .init()
         )
     }
 }
@@ -217,7 +222,8 @@ extension WeekEventsWidgetViewModelProvider {
         
         let timeZone = self.settingRepository.loadUserSelectedTImeZone() ?? .current
         let firstWeekDay = self.settingRepository.firstWeekDay() ?? .sunday
-        let defaultTagColorSetting = self.appSettingRepository.loadSavedViewAppearance().defaultTagColor
+        let appearSetting = self.appSettingRepository.loadSavedViewAppearance()
+        let defaultTagColorSetting = appearSetting.defaultTagColor
         let calenar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let targetMonthDate = calenar.targetMonthRefDate(date, for: range)
         let targetMonth = calenar.component(.month, from: targetMonthDate)
@@ -235,7 +241,8 @@ extension WeekEventsWidgetViewModelProvider {
             defaultTagColorSetting: defaultTagColorSetting,
             tagMap: events.customTagMap,
             googleCalendarColor: events.googleCalendarColors,
-            googleCalendarTags: events.googleCalendarTags
+            googleCalendarTags: events.googleCalendarTags,
+            widgetSetting: appearSetting.widget
         )
     }
     

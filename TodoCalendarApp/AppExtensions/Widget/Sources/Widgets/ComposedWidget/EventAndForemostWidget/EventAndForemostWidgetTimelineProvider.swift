@@ -99,7 +99,10 @@ struct EventAndForemostWidgetViewTimelineProvider: TimelineProvider {
             let now = Date()
             do {
                 let model = try await viewModelProvider.getViewModel(now)
-                completion(.init(date: now, result: .success(model)))
+                completion(
+                    .init(date: now, result: .success(model))
+                    |> \.background .~ model.event.widgetSetting.background
+                )
             } catch {
                 completion(.init(date: now, result: .failure(.init(error: error))))
             }
