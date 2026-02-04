@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -24,13 +25,16 @@ protocol AppearanceSettingRouting: Routing, Sendable {
 final class AppearanceSettingRouter: BaseRouterImple, AppearanceSettingRouting, CalendarSectionRouting, EventListAppearnaceSettingViewRouting, EventOnCalendarViewRouting, @unchecked Sendable {
     
     private let colorThemeSelectSceneBuiler: any ColorThemeSelectSceneBuiler
+    private let widgetSettingSceneBuilder: any WidgetAppearanceSettingSceneBuilder
     private let timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler
     
     init(
         colorThemeSelectSceneBuiler: any ColorThemeSelectSceneBuiler,
+        widgetSettingSceneBuilder: any WidgetAppearanceSettingSceneBuilder,
         timeZoneSelectBuilder: any TimeZoneSelectSceneBuiler
     ) {
         self.colorThemeSelectSceneBuiler = colorThemeSelectSceneBuiler
+        self.widgetSettingSceneBuilder = widgetSettingSceneBuilder
         self.timeZoneSelectBuilder = timeZoneSelectBuilder
     }
     
@@ -53,6 +57,13 @@ extension AppearanceSettingRouter {
     func routeToSelectColorTheme() {
         Task { @MainActor in
             let next = self.colorThemeSelectSceneBuiler.makeColorThemeSelectScene()
+            self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+    
+    func routeToChangeWidgetTheme(_ setting: WidgetAppearanceSettings) {
+        Task { @MainActor in
+            let next = self.widgetSettingSceneBuilder.makeWidgetAppearanceSettingScene(setting: setting)
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }

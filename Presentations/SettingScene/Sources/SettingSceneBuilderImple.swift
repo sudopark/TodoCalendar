@@ -83,6 +83,11 @@ extension SettingSceneBuilderImple {
             viewAppearance: self.viewAppearance
         )
         
+        let widgetSettingSceneBuilder = WidgetAppearanceSettingSceneBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        
         let timeZoneSelectSceneBuilder = TimeZoneSelectSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
@@ -92,6 +97,7 @@ extension SettingSceneBuilderImple {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             colorThemeSelectSceneBuiler: colorThemeSelectSceneBuilder,
+            widgetSettingSceneBuilder: widgetSettingSceneBuilder,
             timeZoneSelectSceneBuilder: timeZoneSelectSceneBuilder
         )
         
