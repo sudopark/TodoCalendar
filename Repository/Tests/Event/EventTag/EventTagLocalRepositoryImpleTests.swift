@@ -22,6 +22,7 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
     var localStorage: EventTagLocalStorageImple!
     var todoLocalStorage: TodoLocalStorageImple!
     var scheduleLocalStorage: ScheduleEventLocalStorageImple!
+    var detailLocalStorage: EventDetailDataLocalStorageImple<EventDetailDataTable>!
     var fakeEnvStore: FakeEnvironmentStorage!
     
     override func setUpWithError() throws {
@@ -31,6 +32,7 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
         self.localStorage = .init(sqliteService: self.sqliteService, environmentStorage: self.fakeEnvStore)
         self.todoLocalStorage = .init(sqliteService: self.sqliteService)
         self.scheduleLocalStorage = .init(sqliteService: self.sqliteService)
+        self.detailLocalStorage = .init(sqliteService: self.sqliteService)
         self.sqliteService.run { db in
             try db.createTableOrNot(CustomEventTagTable.self)
         }
@@ -46,7 +48,8 @@ class EventTagLocalRepositoryImpleTests: BaseLocalTests {
         return EventTagLocalRepositoryImple(
             localStorage: self.localStorage,
             todoLocalStorage: self.todoLocalStorage,
-            scheduleLocalStorage: self.scheduleLocalStorage
+            scheduleLocalStorage: self.scheduleLocalStorage,
+            eventDetailLocalStorage: self.detailLocalStorage
         )
     }
 }
@@ -193,6 +196,15 @@ extension EventTagLocalRepositoryImpleTests {
         try await self.todoLocalStorage.updateTodoEvents(todoWithTag1 + todoWithTag2)
         try await self.scheduleLocalStorage.updateScheduleEvents(scheduleWithTag1 + scheduleWithTag2)
         
+        let todoWithTag1Details = todoWithTag1.map { EventDetailData($0.uuid) }
+        let todoWithTag2Details = todoWithTag2.map { EventDetailData($0.uuid) }
+        let scheduleWithTag1Details = scheduleWithTag1.map { EventDetailData($0.uuid) }
+        let scheduleWithTag2Details = scheduleWithTag2.map { EventDetailData($0.uuid) }
+        let details = todoWithTag1Details + todoWithTag2Details + scheduleWithTag1Details + scheduleWithTag2Details
+        await details.asyncForEach {
+            try? await self.detailLocalStorage.saveDetail($0)
+        }
+        
         let tag1 = CustomEventTag(uuid: "t1", name: "t1", colorHex: "some")
         let tag2 = CustomEventTag(uuid: "t2", name: "t2", colorHex: "some")
         try await self.localStorage.updateTags([tag1, tag2])
@@ -213,6 +225,11 @@ extension EventTagLocalRepositoryImpleTests {
         let allSchedules = try await self.scheduleLocalStorage.loadAllEvents()
         XCTAssertEqual(allTodos.map { $0.uuid }, (3..<7).map { "id:\($0)" })
         XCTAssertEqual(allSchedules.map { $0.uuid }, (3..<7).map { "sc:\($0)" })
+        
+        let details = try await self.detailLocalStorage.loadAll()
+        let ids = Set(details.map { $0.eventId })
+        XCTAssertEqual(ids.intersection(result.todoIds).isEmpty, true)
+        XCTAssertEqual(ids.intersection(result.scheduleIds).isEmpty, true)
     }
 }
 
