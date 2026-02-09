@@ -22,17 +22,20 @@ public final class EventTagRemoteRepositoryImple: EventTagRepository, @unchecked
     private let cacheStorage: any EventTagLocalStorage
     private let todoCacheStorage: any TodoLocalStorage
     private let scheduleCacheStorage: any ScheduleEventLocalStorage
+    private let eventDetailCacheStorage: any EventDetailDataLocalStorage
     
     public init(
         remote: any EventTagRemote,
         cacheStorage: any EventTagLocalStorage,
         todoCacheStorage: any TodoLocalStorage,
-        scheduleCacheStorage: any ScheduleEventLocalStorage
+        scheduleCacheStorage: any ScheduleEventLocalStorage,
+        eventDetailCacheStorage: any EventDetailDataLocalStorage
     ) {
         self.remote = remote
         self.cacheStorage = cacheStorage
         self.todoCacheStorage = todoCacheStorage
         self.scheduleCacheStorage = scheduleCacheStorage
+        self.eventDetailCacheStorage = eventDetailCacheStorage
     }
 }
 
@@ -64,6 +67,8 @@ extension EventTagRemoteRepositoryImple {
         try? await self.cacheStorage.deleteTag(tagId)
         try? await self.todoCacheStorage.removeTodos(result.todoIds)
         try? await self.scheduleCacheStorage.removeScheduleEvents(result.scheduleIds)
+        let ids = result.todoIds + result.scheduleIds
+        try? await self.eventDetailCacheStorage.removeDetails(ids: ids)
         return result
     }
     
