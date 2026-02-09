@@ -157,6 +157,7 @@ enum EventTagEndpoints: Endpoint {
     case make
     case tag(id: String)
     case tagAndEvents(id: String)
+    case tagWithEvents(id: String)
     case tags
     case allTags
     
@@ -164,7 +165,8 @@ enum EventTagEndpoints: Endpoint {
         switch self {
         case .make: return "tag"
         case .tag(let id): return "tag/\(id)"
-        case .tagAndEvents(id: let id): return "tag_and_events/\(id)"
+        case .tagAndEvents(let id): return "tag_and_events/\(id)"
+        case .tagWithEvents(let id): return "tag_with_events/\(id)"
         case .tags: return ""
         case .allTags: return "all"
         }

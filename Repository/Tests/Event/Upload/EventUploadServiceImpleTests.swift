@@ -521,6 +521,7 @@ extension PrivateStubRemote: EventTagRemote {
     func makeTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag { return .init(uuid: "", name: "", colorHex: "") }
     
     func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult { return .init(todoIds: [], scheduleIds: []) }
+    func deleteTagWithEvents(_ tagId: String, todos: [String], schedules: [String]) async throws { }
     func loadAllEventTags() async throws -> [CustomEventTag] {[] }
     func loadCustomTags(_ ids: [String]) async throws -> [CustomEventTag] { [] }
 }
