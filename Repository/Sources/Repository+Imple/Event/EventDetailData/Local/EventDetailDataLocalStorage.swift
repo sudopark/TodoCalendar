@@ -16,6 +16,7 @@ public protocol EventDetailDataLocalStorage: Sendable {
     func saveDetail(_ detail: EventDetailData) async throws
     func removeDetail(_ id: String) async throws
     func removeAll() async throws
+    func removeDetails(ids: [String]) async throws
 }
 
 public final class EventDetailDataLocalStorageImple<Detail: DetailTable>: EventDetailDataLocalStorage {
@@ -56,5 +57,12 @@ extension EventDetailDataLocalStorageImple {
     
     public func removeAll() async throws {
         try await self.sqliteService.async.run { try $0.dropTable(Detail.self) }
+    }
+    
+    public func removeDetails(ids: [String]) async throws {
+        try await self.sqliteService.async.run { db in
+            let query = Detail.delete().where { $0.uuid.in(ids) }
+            try db.delete(Detail.self, query: query)
+        }
     }
 }
