@@ -332,7 +332,7 @@ public struct RemoteEnvironment: Sendable {
             return appendSubpathIfNotEmpty(prefix, foremost.subPath)
             
         case let eventTag as EventTagEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/tags"
+            let prefix = "\(calendarAPIHost)/v2/tags"
             return appendSubpathIfNotEmpty(prefix, eventTag.subPath)
             
         case let detail as EventDetailEndpoints:
