@@ -37,6 +37,8 @@ extension IntentReposiotryFactory {
         let todoLocalStorage = TodoLocalStorageImple(sqliteService: sqliteService)
         let scheduleLocalStorage = ScheduleEventLocalStorageImple(sqliteService: sqliteService)
         
+        let eventDetailLocalStorage = EventDetailDataLocalStorageImple<EventDetailDataTable>(sqliteService: sqliteService)
+        
         if let auth {
             let remote = base.remoteAPI
             let credential = APICredential(auth: auth)
@@ -45,13 +47,15 @@ extension IntentReposiotryFactory {
                 remote: EventTagRemoteImple(remote: remote),
                 cacheStorage: localStorage,
                 todoCacheStorage: todoLocalStorage,
-                scheduleCacheStorage: scheduleLocalStorage
+                scheduleCacheStorage: scheduleLocalStorage,
+                eventDetailCacheStorage: eventDetailLocalStorage
             )
         } else {
             return EventTagLocalRepositoryImple(
                 localStorage: localStorage,
                 todoLocalStorage: todoLocalStorage,
-                scheduleLocalStorage: scheduleLocalStorage
+                scheduleLocalStorage: scheduleLocalStorage,
+                eventDetailLocalStorage: eventDetailLocalStorage
             )
         }
     }

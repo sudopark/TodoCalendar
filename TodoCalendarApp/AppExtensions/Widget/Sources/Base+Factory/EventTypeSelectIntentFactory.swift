@@ -34,6 +34,8 @@ extension EventTypeSelectIntentFactory {
         let todoLocalStorage = TodoLocalStorageImple(sqliteService: base.commonSqliteService)
         let scheduleLocalStorage = ScheduleEventLocalStorageImple(sqliteService: base.commonSqliteService)
         
+        let eventDetailLocalStorage = EventDetailDataLocalStorageImple<EventDetailDataTable>(sqliteService: base.commonSqliteService)
+        
         if let auth {
             let remote = base.remoteAPI
             let credential = APICredential(auth: auth)
@@ -42,13 +44,15 @@ extension EventTypeSelectIntentFactory {
                 remote: EventTagRemoteImple(remote: remote),
                 cacheStorage: localStorage,
                 todoCacheStorage: todoLocalStorage,
-                scheduleCacheStorage: scheduleLocalStorage
+                scheduleCacheStorage: scheduleLocalStorage,
+                eventDetailCacheStorage: eventDetailLocalStorage
             )
         } else {
             return EventTagLocalRepositoryImple(
                 localStorage: localStorage,
                 todoLocalStorage: todoLocalStorage,
-                scheduleLocalStorage: scheduleLocalStorage
+                scheduleLocalStorage: scheduleLocalStorage,
+                eventDetailLocalStorage: eventDetailLocalStorage
             )
         }
     }
