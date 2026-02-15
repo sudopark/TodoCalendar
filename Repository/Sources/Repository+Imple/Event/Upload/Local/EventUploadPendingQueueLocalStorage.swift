@@ -45,14 +45,16 @@ extension EventUploadPendingQueueLocalStorageImple {
     
     public func popTask() async throws -> EventUploadingTask? {
         let maxFailCount = self.maxFailCount
-        return try await self.sqliteService.async.run { db in
+        return try await self.sqliteService.async.run { db -> EventUploadingTask? in
             let query = Queue.selectAll()
                 .where { $0.uploadFailCount < maxFailCount }
                 .orderBy(isAscending: true) { $0.timestamp }
             guard let firstTask = try db.loadOne(Queue.self, query: query)
             else { return nil }
             
-            let deleteQuery = Queue.delete().where { $0.uuid == firstTask.uuid }
+            let deleteQuery = Queue.delete()
+                .where { $0.uuid == firstTask.uuid }
+                .where { $0.dataType == firstTask.dataType.rawValue }
             try db.delete(Queue.self, query: deleteQuery)
             return firstTask
         }
