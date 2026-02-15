@@ -94,7 +94,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 01, of: 2023)
+        let source = usecase.components(for: 01, of: 2023).dropFirst()
         let components = self.waitFirstOutput(expect, for: source)
         
         // then
@@ -113,7 +113,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 02, of: 2023)
+        let source = usecase.components(for: 02, of: 2023).dropFirst()
         let components = self.waitFirstOutput(expect, for: source)
         
         // then
@@ -132,7 +132,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 04, of: 2023)
+        let source = usecase.components(for: 04, of: 2023).dropFirst()
         let components = self.waitFirstOutput(expect, for: source)
         
         // then
@@ -152,7 +152,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 05, of: 2023)
+        let source = usecase.components(for: 05, of: 2023).dropFirst()
         let components = self.waitFirstOutput(expect, for: source)
         
         // then
@@ -171,7 +171,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 05, of: 2023)
+        let source = usecase.components(for: 05, of: 2023).dropFirst()
         let components = self.waitFirstOutput(expect, for: source.dropFirst()) {
             self.changeWeekFirstDay(.monday)
         }
@@ -192,7 +192,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 12, of: 2023)
+        let source = usecase.components(for: 12, of: 2023).dropFirst()
         let components = self.waitFirstOutput(expect, for: source.dropFirst()) {
             self.changeWeekFirstDay(.monday)
         }
@@ -213,7 +213,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 12, of: 2023)
+        let source = usecase.components(for: 12, of: 2023).dropFirst()
         let components = self.waitFirstOutput(expect, for: source.dropFirst()) {
             self.changeWeekFirstDay(.saturday)
         }
@@ -238,7 +238,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 09, of: 2023)
+        let source = usecase.components(for: 09, of: 2023).dropFirst()
         let components = self.waitFirstOutput(expect, for: source.dropFirst()) {
             self.changeWeekFirstDay(.saturday)
         }
@@ -263,7 +263,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 12, of: 2023)
+        let source = usecase.components(for: 12, of: 2023).dropFirst()
         let components = self.waitFirstOutput(expect, for: source)
         
         // then
@@ -282,7 +282,7 @@ extension CalendarUsecaseImpleTests {
         let usecase = self.makeUsecaseWithStub()
         
         // when
-        let source = usecase.components(for: 1, of: 2024)
+        let source = usecase.components(for: 1, of: 2024).dropFirst()
         let components = self.waitFirstOutput(expect, for: source)
         
         // then
