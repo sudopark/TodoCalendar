@@ -326,7 +326,7 @@ public struct RemoteEnvironment: Sendable {
             return appendSubpathIfNotEmpty(prefix, todo.subPath)
             
         case let schedule as ScheduleEventEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/schedules"
+            let prefix = "\(calendarAPIHost)/v2/schedules"
             return appendSubpathIfNotEmpty(prefix, schedule.subPath)
             
         case let foremost as ForemostEventEndpoints:
