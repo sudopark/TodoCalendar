@@ -87,9 +87,10 @@ extension ScheduleEventUploadDecorateRepositoryImple {
                 .init(dataType: .schedule, uuid: next.uuid, isRemovingTask: false)
             )
         } else {
-            try await self.eventUploadService.append(
-                .init(dataType: .schedule, uuid: eventId, isRemovingTask: true)
-            )
+            try await self.eventUploadService.append([
+                .init(dataType: .schedule, uuid: eventId, isRemovingTask: true),
+                .init(dataType: .eventDetail, uuid: eventId, isRemovingTask: true)
+            ])
         }
         return result
     }

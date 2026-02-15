@@ -101,6 +101,7 @@ extension ScheduleEventRemoteRepositoryImple {
         
         try await self.remote.removeScheduleEvent(eventId)
         try? await self.cacheStore.removeScheduleEvent(eventId)
+        try? await self.cacheStore.removeScheduleDetail(eventId)
         return .init()
     }
 }

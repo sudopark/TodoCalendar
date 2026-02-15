@@ -179,6 +179,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         XCTAssertEqual(result.nextRepeatingEvnet?.uuid, "origin")
         XCTAssertEqual(result.nextRepeatingEvnet?.repeatingTimeToExcludes, ["100"])
         XCTAssertEqual(self.spyCache.didUpdateEvents?.first?.uuid, "origin")
+        XCTAssertEqual(self.spyCache.didRemoveScheduleDetailId, nil)
     }
     
     func testRepository_removeEvent() async throws {
@@ -192,6 +193,7 @@ extension ScheduleEventRemoteRepositoryImpleTests {
         XCTAssertNotNil(result)
         XCTAssertNil(result.nextRepeatingEvnet)
         XCTAssertEqual(self.spyCache.didRemoveIds, ["origin"])
+        XCTAssertEqual(self.spyCache.didRemoveScheduleDetailId, "origin")
     }
 }
 
@@ -540,5 +542,10 @@ class SpyScheduleEventLocalStorage: ScheduleEventLocalStorage, @unchecked Sendab
     func removeSchedulesWith(tagId: String) async throws -> [String] {
         self.didRemoveScheduleWithTagId = tagId
         return ["some:schedule"]
+    }
+    
+    var didRemoveScheduleDetailId: String?
+    func removeScheduleDetail(_ eventId: String) async throws {
+        self.didRemoveScheduleDetailId = eventId
     }
 }

@@ -96,13 +96,13 @@ extension ScheduleEventUploadDecorateRepositoryImpleTests {
         
         // then
         XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.uuid }, [schedule.uuid]
+            self.spyEventUploadService.uploadTasks.map { $0.uuid }, [schedule.uuid, schedule.uuid]
         )
         XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.dataType }, [.schedule]
+            self.spyEventUploadService.uploadTasks.map { $0.dataType }, [.schedule, .eventDetail]
         )
         XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask }, [true]
+            self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask }, [true, true]
         )
     }
     
