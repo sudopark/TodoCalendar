@@ -161,6 +161,7 @@ extension SQLiteService {
             try? db.createTableOrNot(ScheduleEventTable.self)
             try? db.createTableOrNot(EventSyncTimestampTable.self)
             try? db.createTableOrNot(DoneTodoEventTable.self)
+            try? db.createTableOrNot(DoneTodoEventDetailTable.self)
             try? db.createTableOrNot(PendingDoneTodoEventTable.self)
             try? db.createTableOrNot(TodoEventTable.self)
             try? db.createTableOrNot(TodoToggleStateTable.self)
