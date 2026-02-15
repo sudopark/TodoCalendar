@@ -428,7 +428,6 @@ extension TodoLocalStorageImple {
         try? await self.sqliteService.async.run { db in
             try db.insertOne(DoneDetail.self, entity: copyDetail, shouldReplace: true)
         }
-        try? await self.removeTodoDetail(originId)
         return copyDetail
     }
     
