@@ -126,4 +126,28 @@ extension EventUploadPendingQueueLocalStorageImpleTests {
             #expect(ids == ["id:0", "id:1", "id:2", "id:3", "id:4"])
         }
     }
+    
+    @Test func storage_pushTaskWithSameUuidButDifferentDataType() async throws {
+        try await self.runTestWithOpenClose("pending-5") {
+            // given
+            let storage = self.makeStorage()
+            let todoTask = EventUploadingTask(dataType: .todo, uuid: "todo", isRemovingTask: false)
+            try await storage.pushTask(todoTask)
+            try await Task.sleep(for: .milliseconds(10))
+            let detailTask = EventUploadingTask(dataType: .eventDetail, uuid: "todo", isRemovingTask: false)
+            try await storage.pushTask(detailTask)
+            
+            // when
+            var popTasks: [EventUploadingTask?] = []
+            while let task = try await storage.popTask() {
+                popTasks.append(task)
+            }
+            
+            // then
+            let ids = popTasks.map { $0?.uuid }
+            #expect(ids == ["todo", "todo"])
+            let types = popTasks.map { $0?.dataType }
+            #expect(types == [.todo, .eventDetail])
+        }
+    }
 }
