@@ -117,10 +117,14 @@ extension NonLoginUsecaseFactoryImple {
         )
         let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let detailLocal = EventDetailDataLocalStorageImple<EventDetailDataTable>(
+            sqliteService: applicationBase.commonSqliteService
+        )
         let repository = EventTagLocalRepositoryImple(
             localStorage: storage,
             todoLocalStorage: todoLocal,
-            scheduleLocalStorage: scheduleLocal
+            scheduleLocalStorage: scheduleLocal,
+            eventDetailLocalStorage: detailLocal
         )
         return repository
     }
@@ -135,7 +139,7 @@ extension NonLoginUsecaseFactoryImple {
     }
     
     func makeEventDetailDataUsecase() -> any EventDetailDataUsecase {
-        let storage = EventDetailDataLocalStorageImple(
+        let storage = EventDetailDataLocalStorageImple<EventDetailDataTable>(
             sqliteService: applicationBase.commonSqliteService
         )
         return EventDetailDataLocalRepostioryImple(
@@ -361,7 +365,9 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             scheduleRemote: ScheduleEventRemoteImple(remote: applicationBase.remoteAPI),
             scheduleLocalStorage: scheduleLocal,
             eventDetailRemote: EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI),
-            eventDetailLocalStorage: EventDetailDataLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+            eventDetailLocalStorage: EventDetailDataLocalStorageImple<EventDetailDataTable>(sqliteService: applicationBase.commonSqliteService),
+            doneTodoDetailRemote: EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI, isDoneTodoDetail: true),
+            doneTodoDetailLocalStorage: EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(sqliteService: applicationBase.commonSqliteService)
         )
         
         let mediator = EventSyncMediatorImple(
@@ -470,14 +476,18 @@ extension LoginUsecaseFactoryImple {
         )
         let todoLocal = TodoLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
         let scheduleLocal = ScheduleEventLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let detailLocal = EventDetailDataLocalStorageImple<EventDetailDataTable>(sqliteService: applicationBase.commonSqliteService)
         let localRepository = EventTagLocalRepositoryImple(
             localStorage: storage,
             todoLocalStorage: todoLocal,
-            scheduleLocalStorage: scheduleLocal
+            scheduleLocalStorage: scheduleLocal,
+            eventDetailLocalStorage: detailLocal
         )
+        let remote = EventTagRemoteImple(remote: applicationBase.remoteAPI)
         return EventTagUploadDecorateRepositoryImple(
             localRepository: localRepository,
-            eventUploadService: self.eventUploadService
+            eventUploadService: self.eventUploadService,
+            remote: remote
         )
     }
     
@@ -493,7 +503,7 @@ extension LoginUsecaseFactoryImple {
     }
     
     func makeEventDetailDataUsecase() -> any EventDetailDataUsecase {
-        let cache = EventDetailDataLocalStorageImple(
+        let cache = EventDetailDataLocalStorageImple<EventDetailDataTable>(
             sqliteService: applicationBase.commonSqliteService
         )
         let remote = EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI)
