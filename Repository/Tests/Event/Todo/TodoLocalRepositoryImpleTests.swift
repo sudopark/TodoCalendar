@@ -486,7 +486,7 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertNotNil(result?.doneTodoEventDetail)
         XCTAssertEqual(result?.doneTodoEventDetail?.eventId, result?.doneEvent.uuid)
         let detail = try? await eventDetail(origin.uuid)
-        XCTAssertNil(detail)
+        XCTAssertNotNil(detail)
     }
     
     // complete reapting todo + next event time is over end time -> no next event
