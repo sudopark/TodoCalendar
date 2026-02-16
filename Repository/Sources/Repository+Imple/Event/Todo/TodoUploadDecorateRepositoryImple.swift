@@ -135,6 +135,10 @@ extension TodoUploadDecorateRepositoryImple {
         return self.localRepository.loadTodoEvents(in: range)
     }
     
+    public func loadDoneTodoEvent(_ uuid: String) -> AnyPublisher<DoneTodoEvent, any Error> {
+        return self.localRepository.loadDoneTodoEvent(uuid)
+    }
+    
     public func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
         return self.localRepository.todoEvent(id)
     }

@@ -115,6 +115,10 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub, @unchecked Se
         return []
     }
     
+    open func loadDoneTodoEvent(_ uuid: String) -> AnyPublisher<DoneTodoEvent, any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
+    
     open func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
         
     }

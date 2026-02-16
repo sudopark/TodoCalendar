@@ -564,6 +564,37 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertNotNil(failed)
     }
     
+    // load done todo
+    func testRepository_whenLoadDoneTodo_loadCacheAndRemote() {
+        // given
+        let expect = expectation(description: "load done todo")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository()
+        
+        // when
+        let loading = repository.loadDoneTodoEvent("done_id")
+        let todos = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(todos.count, 2)
+    }
+    
+    // load todo when done load remote failed + faild
+    func testRepository_whenLoadDoneTodosAndLoadFromRemoteFail_shouldFail() {
+        // given
+        let expect = expectation(description: "load todo when load remote failed + faild")
+        let repository = self.makeRepository { _, remote in
+            remote.shouldFailRequest = true
+        }
+        
+        // when
+        let loading = repository.loadDoneTodoEvent("done_id")
+        let error = self.waitError(expect, for: loading, timeout: 0.1)
+        
+        // then
+        XCTAssertNotNil(error)
+    }
+    
     // remvoe done todos
     func testRepository_removeDoneTodosWithRange() async throws {
         // given
@@ -1188,6 +1219,11 @@ private struct DummyResponse {
                     [ \(self.dummyDoneTodoResponse) ]
                     """
                 )
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.done("done_id"),
+                resultJsonString: .success(self.dummyDoneTodoResponse)
             ),
             .init(
                 method: .delete,

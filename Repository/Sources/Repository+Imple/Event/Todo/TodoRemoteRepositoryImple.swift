@@ -275,6 +275,37 @@ extension TodoRemoteRepositoryImple {
         return events
     }
     
+    public func loadDoneTodoEvent(_ uuid: String) -> AnyPublisher<DoneTodoEvent, any Error> {
+        
+        let (cache, remote) = (self.cacheStorage, self.remote)
+        
+        return AnyPublisher<DoneTodoEvent, any Error>.create { subscriber in
+            
+            let task = Task {
+                let cached = try? await cache.loadDoneTodoEvent(doneEventId: uuid)
+                if let cached {
+                    subscriber.send(cached)
+                }
+                
+                do {
+                    let refreshed = try await remote.loadDoneTodo(uuid)
+                    
+                    try? await cache.updateDoneTodos([refreshed])
+                    
+                    subscriber.send(refreshed)
+                    subscriber.send(completion: .finished)
+                    
+                } catch {
+                    subscriber.send(completion: .failure(error))
+                }
+            }
+            
+            return AnyCancellable { task.cancel() }
+        }
+        .compactMap { $0 }
+        .eraseToAnyPublisher()
+    }
+    
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
         try await self.remote.removeDoneTodos(scope)
         switch scope {

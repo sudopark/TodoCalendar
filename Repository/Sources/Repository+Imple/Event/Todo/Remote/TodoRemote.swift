@@ -54,6 +54,8 @@ public protocol TodoRemote: Sendable {
     
     func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult
     
+    func loadDoneTodo(_ doneTodoId: String) async throws -> DoneTodoEvent
+    
     func cancelDoneTodo(
         _ origin: TodoEvent,
         _ doneTodoId: String?
@@ -200,6 +202,14 @@ extension TodoRemoteImple {
         )
         let events = mappers.map { $0.event }
         return events
+    }
+    
+    public func loadDoneTodo(_ doneTodoId: String) async throws -> DoneTodoEvent {
+        let mapper: DoneTodoEventMapper = try await self.remote.request(
+            .get,
+            TodoAPIEndpoints.done(doneTodoId)
+        )
+        return mapper.event
     }
     
     private typealias RemoveDoneTodoResultMapper = RemoveTodoResultMapper

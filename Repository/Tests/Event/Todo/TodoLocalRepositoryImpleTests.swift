@@ -761,6 +761,19 @@ extension TodoLocalRepositoryImpleTests {
         XCTAssertEqual(page5.isEmpty, true)
     }
     
+    func testRepository_loadDoneTodo() async throws {
+        // given
+        let repository = try await self.makeRepositoryWithDoneEvents()
+        let expect = expectation(description: "완료 할일 조회")
+        
+        // when
+        let load = repository.loadDoneTodoEvent("id:3")
+        let events = self.waitOutputs(expect, for: load, timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(events.count, 1)
+    }
+    
     private func doneTodoEventDetails() async throws -> [EventDetailData] {
         return try await self.sqliteService.async.run { db in
             let query = DoneTodoEventDetailTable.selectAll()

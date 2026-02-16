@@ -563,6 +563,10 @@ extension PrivateStubRemote: TodoRemote {
     
     func loadTodos(in range: Range<TimeInterval>) async throws -> [TodoEvent] { [] }
     
+    func loadDoneTodo(_ doneTodoId: String) async throws -> DoneTodoEvent {
+        throw RuntimeError("failed")
+    }
+    
     func loadTodo(_ id: String) async throws -> TodoEvent {
         throw RuntimeError("failed")
     }

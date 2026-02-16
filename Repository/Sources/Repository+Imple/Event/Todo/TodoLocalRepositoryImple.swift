@@ -224,6 +224,16 @@ extension TodoLocalRepositoryImple {
         return .init(revertTodo: revertTodo, detail: detail)
     }
     
+    public func loadDoneTodoEvent(
+        _ uuid: String
+    ) -> AnyPublisher<DoneTodoEvent, any Error> {
+        
+        return Publishers.create { [weak self] in
+            return try await self?.localStorage.loadDoneTodoEvent(doneEventId: uuid)
+        }
+        .eraseToAnyPublisher()
+    }
+    
     public func toggleTodo(
         _ todoId: String
     ) async throws -> TodoToggleResult? {

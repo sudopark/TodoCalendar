@@ -26,5 +26,6 @@ public protocol TodoEventRepository: AnyObject, Sendable {
     func loadDoneTodoEvents(_ params: DoneTodoLoadPagingParams) async throws -> [DoneTodoEvent]
     func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws
     func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult
+    func loadDoneTodoEvent(_ uuid: String) -> AnyPublisher<DoneTodoEvent, any Error>
     func toggleTodo(_ todoId: String) async throws -> TodoToggleResult?
 }
