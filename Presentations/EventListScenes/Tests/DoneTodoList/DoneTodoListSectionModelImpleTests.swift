@@ -264,6 +264,17 @@ extension DoneTodoListSectionModelImpleTests {
         XCTAssertEqual(cellLists.last?.contains(where: { $0.uuid == "did:4" }), false)
     }
     
+    func testViewModel_routeToDoneTodoDetail() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.selectDoneTodo("some")
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToDoneTodoDetail, "some")
+    }
+    
     func testViewModel_cancelRevertingTodo() {
         // given
         let expect = expectation(description: "cancel reverting todo")
@@ -356,5 +367,10 @@ private final class SpyRouter: BaseSpyRouter, DoneTodoEventListRouting, @uncheck
     func showSelectRemoveDoneTodoRangePicker(_ selected: @escaping (RemoveDoneTodoRange) -> Void) {
         self.didShowSelectRemoveDoneTodoRangePicker = true
         selected(.olderThan3Months)
+    }
+    
+    var didRouteToDoneTodoDetail: String?
+    func routeToDoneTodoDetail(_ eventId: String) {
+        self.didRouteToDoneTodoDetail = eventId
     }
 }

@@ -59,6 +59,7 @@ final class DoneTodoEventListViewEventHandler: Observable {
     var close: () -> Void = { }
     var loadMoreList: () -> Void = { }
     var revertDoneTodo: (String) -> Void = { _ in }
+    var selectDoneTodo: (String) -> Void = { _ in }
     var cancelRevertDoneTodo: (String) -> Void = { _ in }
     var removeDoneTodos: () -> Void = { }
 
@@ -68,6 +69,7 @@ final class DoneTodoEventListViewEventHandler: Observable {
         self.close = viewModel.close
         self.loadMoreList = viewModel.loadMoreList
         self.revertDoneTodo = viewModel.revertDoneTodo(_:)
+        self.selectDoneTodo = viewModel.selectDoneTodo(_:)
         self.cancelRevertDoneTodo = viewModel.cancelRevertDoneTodo(_:)
         self.removeDoneTodos = viewModel.removeDoneTodos
     }
@@ -189,6 +191,9 @@ struct DoneTodoEventListView: View {
                 }
             }
             .padding(.bottom, 4)
+            .onTapGesture {
+                self.eventHandlers.selectDoneTodo(cell.uuid)
+            }
         }
         .listRowBackground(appearance.colorSet.bg0.asColor)
     }
@@ -212,6 +217,7 @@ struct DoneTodoEventListView: View {
             )
             .foregroundStyle(appearance.colorSet.accent.asColor)
         }
+        .buttonStyle(.plain)
     }
     
     private var deleteButton: some View {

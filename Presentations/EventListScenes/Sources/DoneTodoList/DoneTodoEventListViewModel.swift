@@ -200,6 +200,7 @@ protocol DoneTodoEventListViewModel: AnyObject, Sendable, DoneTodoEventListScene
     func loadList()
     func loadMoreList()
     func revertDoneTodo(_ uuid: String)
+    func selectDoneTodo(_ uuid: String)
     func cancelRevertDoneTodo(_ uuid: String)
     func removeDoneTodos()
     func close()
@@ -277,6 +278,10 @@ extension DoneTodoEventListViewModelImple {
                 self?.router?.showError(error)
             }
         }
+    }
+    
+    func selectDoneTodo(_ uuid: String) {
+        self.router?.routeToDoneTodoDetail(uuid)
     }
     
     private func insertAndUpdateReverted(_ uuid: String) {

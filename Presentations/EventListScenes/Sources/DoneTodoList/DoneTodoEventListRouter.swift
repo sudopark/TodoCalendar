@@ -20,6 +20,8 @@ protocol DoneTodoEventListRouting: Routing, Sendable {
     func showSelectRemoveDoneTodoRangePicker(
         _ selected: @Sendable @escaping (RemoveDoneTodoRange) -> Void
     )
+    
+    func routeToDoneTodoDetail(_ eventId: String)
 }
 
 // MARK: - Router
@@ -61,6 +63,10 @@ extension DoneTodoEventListRouter {
             )
             self.currentScene?.present(actionSheet, animated: true)
         }
+    }
+    
+    func routeToDoneTodoDetail(_ eventId: String) {
+        // TODO: route
     }
 }
 
