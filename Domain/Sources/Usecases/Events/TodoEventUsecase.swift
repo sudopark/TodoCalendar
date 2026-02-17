@@ -28,6 +28,7 @@ public protocol TodoEventUsecase {
     func refreshTodoEvents(in period: Range<TimeInterval>)
     func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never>
     func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error>
+    func doneTodoEvent(_ id: String) -> AnyPublisher<DoneTodoEvent, any Error>
     func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws
     
     func refreshUncompletedTodos()
@@ -264,6 +265,10 @@ extension TodoEventUsecaseImple {
         return self.todoRepository.todoEvent(id)
             .handleEvents(receiveOutput: updateStore)
             .eraseToAnyPublisher()
+    }
+    
+    public func doneTodoEvent(_ id: String) -> AnyPublisher<DoneTodoEvent, any Error> {
+        return self.todoRepository.loadDoneTodoEvent(id)
     }
 }
 

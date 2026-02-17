@@ -39,6 +39,7 @@
 "date_form::MMM_d" = "MMM d";
 "date_form::yyyy_MM_dd_E_" = "MM/dd/yyyy (E)";
 "date_form:yyyy.MM_dd_hh:mm" = "MM/dd/yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "MM/dd/yyyy h:mm a";
 "date_form.yyyy" = "yyyy";
 "date_form.MMM_dd_E" = "MMM dd (E)";
 "date_form.HH:mm" = "HH:mm";
