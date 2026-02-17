@@ -79,8 +79,13 @@ open class StubTodoEventUsecase: TodoEventUsecase {
         return DoneTodoEvent(TodoEvent(uuid: eventId, name: "some"))
     }
     
+    public var shouldFailRevert: Bool = false
     open func revertCompleteTodo(_ doneId: String) async throws -> TodoEvent {
-        throw RuntimeError("not implemented")
+        guard !self.shouldFailRevert
+        else {
+            throw RuntimeError("failed")
+        }
+        return .init(uuid: "some", name: "name")
     }
     
     open func refreshCurentTodoEvents() {
@@ -129,6 +134,17 @@ open class StubTodoEventUsecase: TodoEventUsecase {
             return Empty().eraseToAnyPublisher()
         }
         return Just(todo)
+            .mapNever()
+            .eraseToAnyPublisher()
+    }
+    
+    public var stubDoneTodo: DoneTodoEvent?
+    open func doneTodoEvent(_ id: String) -> AnyPublisher<DoneTodoEvent, any Error> {
+        guard let done = self.stubDoneTodo
+        else {
+            return Fail(error: RuntimeError("not exists")).eraseToAnyPublisher()
+        }
+        return Just(done)
             .mapNever()
             .eraseToAnyPublisher()
     }

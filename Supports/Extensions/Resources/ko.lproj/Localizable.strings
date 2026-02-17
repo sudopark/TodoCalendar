@@ -39,6 +39,7 @@
 "date_form::MMM_d" = "MMM d일";
 "date_form::yyyy_MM_dd_E_" = "yyyy.MM.dd (E)";
 "date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd HH:mm";
+"date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd h:mm a";
 "date_form.yyyy" = "yyyy";
 "date_form.MMM_dd_E" = "MMM dd일 (E)";
 "date_form.HH:mm" = "HH:mm";
