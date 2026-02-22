@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
@@ -52,7 +53,8 @@ final class DoneTodoDetailViewModelImpleTests: PublisherWaitable {
             doneDetailUsecase: detailUsecase,
             eventTagUsecase: tagUsecase,
             calendarSettingUsecase: calendarUsecase,
-            uiSettingUsecase: uiSettingUsecase
+            uiSettingUsecase: uiSettingUsecase,
+            eventSettingUsecase: StubEventSettingUsecase()
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -264,6 +266,8 @@ private final class PrivateStubEventDetailUsecase: StubEventDetailDataUsecase, @
 
 private final class SpyRouter: BaseSpyRouter, DoneTodoDetailRouting, @unchecked Sendable {
     
+    func openMap(with query: String, using mapApp: SupportMapApps) { }
+    func openMap(with query: String, afterSelect mapApps: [SupportMapApps]) { }
 }
 
 private final class SpyListener: DoneTodoDetailSceneListener {

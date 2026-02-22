@@ -245,6 +245,8 @@
 "eventDetail.scheduleEvent::transform::todo" = "전환";
 "eventDetail.scheduleEvent::transform::todo_message" = "이 일정을 할일으로 전환할까요?";
 
+"eventDetail::revert" = "완료 취소";
+
 // MARK: - Google calendar event
 
 "eventDetail::gogoleEvent::viewOnCalendar" = "구글 캘린더에서 보기";
