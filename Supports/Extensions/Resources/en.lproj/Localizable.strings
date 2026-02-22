@@ -245,6 +245,7 @@
 "eventDetail.scheduleEvent::transform::todo" = "Convert";
 "eventDetail.scheduleEvent::transform::todo_message" = "Would you like to convert this schedule to a to-do?";
 
+"eventDetail::revert" = "Undo completion";
 
 // MARK: - Google calendar event
 

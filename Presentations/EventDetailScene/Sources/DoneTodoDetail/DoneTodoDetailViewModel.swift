@@ -27,6 +27,8 @@ protocol DoneTodoDetailViewModel: AnyObject, Sendable, DoneTodoDetailSceneIntera
 
     // interactor
     func prepare()
+    func openMap()
+    func openWeb()
     func revert()
     
     // presenter
@@ -51,6 +53,7 @@ final class DoneTodoDetailViewModelImple: DoneTodoDetailViewModel, @unchecked Se
     private let eventTagUsecase: any EventTagUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
+    private let eventSettingUsecase: any EventSettingUsecase
     var router: (any DoneTodoDetailRouting)?
     var listener: (any DoneTodoDetailSceneListener)?
     
@@ -60,7 +63,8 @@ final class DoneTodoDetailViewModelImple: DoneTodoDetailViewModel, @unchecked Se
         doneDetailUsecase: any EventDetailDataUsecase,
         eventTagUsecase: any EventTagUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        uiSettingUsecase: any UISettingUsecase
+        uiSettingUsecase: any UISettingUsecase,
+        eventSettingUsecase: any EventSettingUsecase
     ) {
         self.uuid = uuid
         self.todoEventUsecase = todoEventUsecase
@@ -68,6 +72,7 @@ final class DoneTodoDetailViewModelImple: DoneTodoDetailViewModel, @unchecked Se
         self.eventTagUsecase = eventTagUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        self.eventSettingUsecase = eventSettingUsecase
     }
     
     
@@ -101,6 +106,25 @@ extension DoneTodoDetailViewModelImple {
                 self?.subject.doneTodoDetail.send(detail)
             })
             .store(in: &self.cancellables)
+    }
+    
+    func openMap() {
+        guard let place = self.subject.doneTodoDetail.value?.place
+        else { return }
+        
+        let query = place.addressText ?? place.placeName
+        if let defaultMapApp = self.eventSettingUsecase.loadEventSetting().defaultMapApp {
+            
+            self.router?.openMap(with: query, using: defaultMapApp)
+        } else {
+            self.router?.openMap(with: query, afterSelect: [.apple, .google])
+        }
+    }
+    
+    func openWeb() {
+        guard let url = self.subject.doneTodoDetail.value?.url, !url.isEmpty
+        else { return }
+        self.router?.openSafari(url)
     }
     
     func revert() {
