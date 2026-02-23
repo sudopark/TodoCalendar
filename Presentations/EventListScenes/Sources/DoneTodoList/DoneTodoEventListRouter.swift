@@ -28,6 +28,11 @@ protocol DoneTodoEventListRouting: Routing, Sendable {
 
 final class DoneTodoEventListRouter: BaseRouterImple, DoneTodoEventListRouting, @unchecked Sendable {
     
+    private let eventDetailSceneBuilder: any EventDetailSceneBuilder
+    init(eventDetailSceneBuilder: any EventDetailSceneBuilder) {
+        self.eventDetailSceneBuilder = eventDetailSceneBuilder
+    }
+    
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
         Task { @MainActor in
             self.currentScene?.dismiss(animated: true)
@@ -66,7 +71,13 @@ extension DoneTodoEventListRouter {
     }
     
     func routeToDoneTodoDetail(_ eventId: String) {
-        // TODO: route
+        Task { @MainActor in
+            let next = self.eventDetailSceneBuilder.makeDoneTodoDetailScene(
+                eventId,
+                self.currentScene?.interactor
+            )
+            self.currentScene?.present(next, animated: true)
+        }
     }
 }
 

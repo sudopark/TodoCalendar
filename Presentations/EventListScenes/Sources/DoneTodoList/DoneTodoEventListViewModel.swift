@@ -284,6 +284,10 @@ extension DoneTodoEventListViewModelImple {
         self.router?.routeToDoneTodoDetail(uuid)
     }
     
+    func doneTodoDetail(revert doneTodoId: String, to todo: TodoEvent) {
+        self.insertAndUpdateReverted(doneTodoId)
+    }
+    
     private func insertAndUpdateReverted(_ uuid: String) {
         let newSet = self.subject.revertedIdSet.value <> [uuid]
         self.subject.revertedIdSet.send(newSet)

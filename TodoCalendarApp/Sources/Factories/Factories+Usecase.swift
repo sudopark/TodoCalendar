@@ -147,6 +147,15 @@ extension NonLoginUsecaseFactoryImple {
         )
     }
     
+    func makeDoneTodoDetailDataUsecase() -> any EventDetailDataUsecase {
+        let storage = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(
+            sqliteService: applicationBase.commonSqliteService
+        )
+        return EventDetailDataLocalRepostioryImple(
+            localStorage: storage
+        )
+    }
+    
     func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase {
         let storage = TodoLocalStorageImple(
             sqliteService: applicationBase.commonSqliteService
@@ -507,6 +516,21 @@ extension LoginUsecaseFactoryImple {
             sqliteService: applicationBase.commonSqliteService
         )
         let remote = EventDetailRemoteImple(remoteAPI: applicationBase.remoteAPI)
+        return EventDetailUploadDecorateRepositoryImple(
+            remote: remote,
+            cacheStorage: cache,
+            uploadService: self.eventUploadService
+        )
+    }
+    
+    func makeDoneTodoDetailDataUsecase() -> any EventDetailDataUsecase {
+        let cache = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(
+            sqliteService: applicationBase.commonSqliteService
+        )
+        let remote = EventDetailRemoteImple(
+            remoteAPI: applicationBase.remoteAPI,
+            isDoneTodoDetail: true
+        )
         return EventDetailUploadDecorateRepositoryImple(
             remote: remote,
             cacheStorage: cache,

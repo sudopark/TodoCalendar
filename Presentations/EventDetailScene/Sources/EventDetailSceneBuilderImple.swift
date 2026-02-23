@@ -165,4 +165,23 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             calendarId: calendarId, eventId: eventId
         )
     }
+    
+    @MainActor
+    public func makeDoneTodoDetailScene(
+        _ doneTodoId: String,
+        _ listener: (any DoneTodoDetailSceneListener)?
+    ) -> any DoneTodoDetailScene {
+        let mapScenenBuilder = SelectMapAppDialogSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance
+        )
+        let builder = DoneTodoDetailSceneBuilerImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearance,
+            selectMapSceneBuilder: mapScenenBuilder
+        )
+        
+        return builder.makeDoneTodoDetailScene(uuid: doneTodoId, listener: listener)
+    }
+    
 }

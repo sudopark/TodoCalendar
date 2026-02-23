@@ -30,6 +30,7 @@ public protocol EventUsecaseFactory {
     func makeScheduleEventUsecase() -> any ScheduleEventUsecase
     func makeEventTagUsecase() -> any EventTagUsecase
     func makeEventDetailDataUsecase() -> any EventDetailDataUsecase
+    func makeDoneTodoDetailDataUsecase() -> any EventDetailDataUsecase
     func makeDoneTodoPagingUsecase() -> any DoneTodoEventsPagingUsecase
     func makeForemostEventUsecase() -> any ForemostEventUsecase
     func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase

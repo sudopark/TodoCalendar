@@ -19,13 +19,16 @@ final class DoneTodoDetailSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let selectMapSceneBuilder: any SelectMapAppDialogSceneBuiler
     
     init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        selectMapSceneBuilder: any SelectMapAppDialogSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.selectMapSceneBuilder = selectMapSceneBuilder
     }
 }
 
@@ -41,10 +44,11 @@ extension DoneTodoDetailSceneBuilerImple: DoneTodoDetailSceneBuiler {
         let viewModel = DoneTodoDetailViewModelImple(
             uuid: uuid,
             todoEventUsecase: usecaseFactory.makeTodoEventUsecase(),
-            doneDetailUsecase: usecaseFactory.makeEventDetailDataUsecase(),
+            doneDetailUsecase: usecaseFactory.makeDoneTodoDetailDataUsecase(),
             eventTagUsecase: usecaseFactory.makeEventTagUsecase(),
             calendarSettingUsecase: usecaseFactory.makeCalendarSettingUsecase(),
-            uiSettingUsecase: usecaseFactory.makeUISettingUsecase()
+            uiSettingUsecase: usecaseFactory.makeUISettingUsecase(),
+            eventSettingUsecase: usecaseFactory.makeEventSettingUsecase()
         )
         viewModel.listener = listener
         
@@ -54,6 +58,7 @@ extension DoneTodoDetailSceneBuilerImple: DoneTodoDetailSceneBuiler {
         )
     
         let router = DoneTodoDetailRouter(
+            selectMapSceneBuilder: self.selectMapSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router
