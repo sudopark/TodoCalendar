@@ -372,7 +372,8 @@ extension ApplicationRootRouter {
     private func eventListSceneBuilder() -> any EventListSceneBuiler {
         return EventListSceneBuilerImple(
             usecaseFactory: self.usecaseFactory, 
-            viewAppearance: self.viewAppearanceStore.appearance
+            viewAppearance: self.viewAppearanceStore.appearance,
+            eventDetailSceneBuilder: self.eventDetailSceneBuilder()
         )
     }
 }

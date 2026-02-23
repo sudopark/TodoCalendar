@@ -46,7 +46,22 @@ final class DoneTodoDetailViewController: UIHostingController<DoneTodoDetailCont
         super.init(rootView: containerView)
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.bind()
+    }
+    
     @MainActor required dynamic init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func bind() {
+        
+        self.viewModel.isReverting
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] isReverting in
+                self?.isModalInPresentation = isReverting
+            })
+            .store(in: &self.cancellables)
     }
 }

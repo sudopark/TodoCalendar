@@ -13,21 +13,6 @@ import Domain
 import Scenes
 
 
-// MARK: - DoneTodoDetailScene Interactable & Listenable
-
-protocol DoneTodoDetailSceneInteractor: AnyObject { }
-//
-public protocol DoneTodoDetailSceneListener: AnyObject {
-    
-    func doneTodoDetail(revert doneTodoId: String, to todo: TodoEvent)
-}
-
-// MARK: - DoneTodoDetailScene
-
-protocol DoneTodoDetailScene: Scene where Interactor == any DoneTodoDetailSceneInteractor
-{ }
-
-
 // MARK: - Builder + DependencyInjector Extension
 
 protocol DoneTodoDetailSceneBuiler: AnyObject {
