@@ -21,6 +21,9 @@ import CommonPresentation
     @ObservationIgnored var eventStacks: (String) -> AnyPublisher<WeekEventStackViewModel, Never> = { _ in
         Empty().eraseToAnyPublisher()
     }
+    @ObservationIgnored var eventsPerDay: (String) -> AnyPublisher<[[any CalendarEvent]], Never> = { _ in
+        Empty().eraseToAnyPublisher()
+    }
     
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
@@ -30,6 +33,7 @@ import CommonPresentation
         self.didBind = true
         
         self.eventStacks = viewModel.eventStack(at:)
+        self.eventsPerDay = viewModel.eventsPerDay(at:)
         
         viewModel.weekDays
             .receive(on: RunLoop.main)
@@ -98,8 +102,6 @@ struct MonthContainerView: View {
 
 
 private enum Metric {
-    static let dayMinHeight: CGFloat = 80
-    static let dayMaxHeight: CGFloat = 100
     static let eventRowHeightWithSpacing: CGFloat = 12
     static let eventTopMargin: CGFloat = 24
     static let eventInterspacing: CGFloat = 2
@@ -125,11 +127,12 @@ struct MonthView: View {
     }
     
     private var headerView: some View {
+        let grid: [GridItem] = Array(repeating: .init(.flexible(minimum: 30), spacing: 0), count: 7)
         let textColor: (WeekDayModel) -> Color = {
             let accent: AccentDays? = $0.isSunday ? .sunday : $0.isSaturday ? .saturday : nil
             return appearance.accentCalendarDayColor(accent).asColor
         }
-        return HStack {
+        return LazyVGrid(columns: grid) {
             ForEach(self.state.weekDays, id: \.identifier) { weekDay in
                 Text(weekDay.symbol)
                     .font(self.appearance.fontSet.weekday.asFont)
@@ -142,7 +145,7 @@ struct MonthView: View {
     private func gridWeeksView() -> some View {
         let expectSize = CGSize(
             width: UIScreen.main.bounds.width - 16,
-            height: 75
+            height: appearance.rowHeightOnCalendar.cgValue
         )
         return VStack(spacing: 0) {
             ForEach(self.state.weeks, id: \.id) {
@@ -171,6 +174,7 @@ private struct WeekRowView: View {
     @Environment(ViewAppearance.self) private var appearance
     
     @State private var eventStackModel: WeekEventStackViewModel = .init(linesStack: [], shouldMarkEventDays: false)
+    @State private var eventsPerDays: [[any CalendarEvent]] = []
     
     fileprivate var daySelected: (DayCellViewModel) -> Void = { _ in }
     
@@ -187,7 +191,14 @@ private struct WeekRowView: View {
             HStack(spacing: 0) {
                 ForEach(week.days, id: \.identifier) { dayView($0) }
             }
-            eventStackView()
+            if appearance.rowHeightOnCalendar == .small {
+                eventDotPerDaysView()
+            } else {
+                eventStackView()
+            }
+        }
+        .onReceive(state.eventsPerDay(week.id).receive(on: RunLoop.main)) {
+            self.eventsPerDays = $0
         }
         .onReceive(state.eventStacks(week.id).receive(on: RunLoop.main)) {
             self.eventStackModel = $0
@@ -249,6 +260,68 @@ private struct WeekRowView: View {
         }
     }
     
+    
+    private func eventDotPerDaysView() -> some View {
+        let grid: [GridItem] = Array(repeating: .init(.flexible(minimum: 30), spacing: 0), count: 7)
+        return LazyVGrid(columns: grid) {
+            ForEach(0..<7, id: \.self) { seq in
+                let day = week.days[safe: seq]
+                return eventDotsView(day, eventsPerDays[safe: seq] ?? [])
+            }
+        }
+        .padding(.top, Metric.eventTopMargin*2)
+        .frame(height: 4, alignment: .center)
+    }
+    private func eventDotsView(
+        _ day: DayCellViewModel?,
+        _ events: [any CalendarEvent]
+    ) -> some View {
+        
+        guard !events.isEmpty
+        else {
+            return Spacer()
+                .asAnyView()
+        }
+        
+        let selectColor: (any CalendarEvent) -> Color = { event in
+            switch event {
+            case let google as GoogleCalendarEvent:
+                return self.appearance.googleEventColorOnCalendar(google.colorId, google.calendarId, offColor: { $0.text1 })
+                    .asColor
+            default:
+                return self.appearance.colorOnCalendar(event.eventTagId, offColor: { $0.text1 }).asColor
+            }
+        }
+        let availables: Int = Int(floor((dayWidth-15)/6))
+        
+        let prefix = events.prefix(availables)
+        
+        func moreView(_ count: Int) -> some View {
+            let textColor: Color = if state.selectedDay == day?.identifier {
+                appearance.colorSet.eventTextSelected.asColor
+            } else {
+                appearance.colorSet.eventText.asColor
+            }
+            return Text("+\(count)")
+                .font(appearance.fontSet.size(8).asFont)
+                .foregroundStyle(textColor)
+        }
+
+        return HStack(spacing: 2) {
+            
+            ForEach(0..<prefix.count, id: \.self) { index in
+                Circle()
+                    .fill(selectColor(prefix[index]))
+                    .frame(width: 4, height: 4)
+            }
+            if prefix.count < events.count {
+                moreView(events.count-prefix.count)
+            }
+        }
+        .clipped()
+        .asAnyView()
+    }
+    
     private func eventStackView() -> some View {
         
         let totalHeight = self.expectSize.height - Metric.eventTopMargin
@@ -256,13 +329,22 @@ private struct WeekRowView: View {
         let maxDrawableEventRowCount = drawableRowCount - 1
         guard maxDrawableEventRowCount > 0 else { return EmptyView().asAnyView() }
         
-        let size = min(maxDrawableEventRowCount, self.eventStackModel.linesStack.count)
-        let moreEvents = eventStackModel.eventMores(with: size)
+        let size = if appearance.rowHeightOnCalendar == .large {
+            self.eventStackModel.linesStack.count
+        } else {
+            min(maxDrawableEventRowCount, self.eventStackModel.linesStack.count)
+        }
+        let bottomView: some View = if appearance.rowHeightOnCalendar == .large {
+            Spacer().frame(height: maxDrawableEventRowCount < eventStackModel.linesStack.count ? 10 : 0).asAnyView()
+        } else{
+            eventMoreViews(eventStackModel.eventMores(with: size)).asAnyView()
+        }
+        
         return VStack(alignment: .leading, spacing: 2) {
             ForEach(0..<size, id: \.self) {
                 return eventRowView(self.eventStackModel.linesStack[$0])
             }
-            eventMoreViews(moreEvents)
+            bottomView
         }
         .padding(.top, Metric.eventTopMargin)
         .asAnyView()
@@ -396,6 +478,14 @@ final class DummyMonthViewModel: MonthViewModel, @unchecked Sendable {
         return Just(models).eraseToAnyPublisher()
     }
     
+    func eventsPerDay(at weekId: String) -> AnyPublisher<[[any CalendarEvent]], Never> {
+        let evs = (0..<1).map { DummyCalendarEvent("id:\($0)", "name:\($0)") }
+        return Just(
+            [evs, evs, evs, evs, evs, evs, evs]
+        )
+        .eraseToAnyPublisher()
+    }
+    
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never> {
         if weekId == "id:0" {
             let event1_5 = EventOnWeek(0..<1, [1, 2, 3, 4, 5], (1...5), ["2023-9-1", "2023-9-2", "2023-9-3", "2023-9-4", "2023-9-5"], DummyCalendarEvent("t1_5", "ev:1_5"))
@@ -463,6 +553,7 @@ struct MonthViewPreviewProvider: PreviewProvider {
             DefaultEventTag.default("#ff00ff"),
             DefaultEventTag.holiday("#ff0000")
         ])
+        viewAppearance.rowHeightOnCalendar = .small
         let eventHandler = MonthViewEventHandler()
         eventHandler.daySelected = viewModel.select(_:)
         let containerView = MonthContainerView(viewAppearance: viewAppearance, eventHandler: eventHandler)

@@ -418,8 +418,9 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
         Task { [weak self] in
             
             do {
-                let _ = try await self?.scheduleUsecase.updateScheduleEvent(scheduleId, params)
-                let _ = try? await self?.eventDetailDataUsecase.saveDetail(addition)
+                let updatedSchedule = try await self?.scheduleUsecase.updateScheduleEvent(scheduleId, params)
+                let copyAddition = updatedSchedule.map { addition.copy($0.uuid) } ?? addition
+                let _ = try? await self?.eventDetailDataUsecase.saveDetail(copyAddition)
                 
                 self?.router?.showToast("eventDetail.scheduleEvent_saved::message".localized())
                 self?.router?.closeScene(animate: true, nil)

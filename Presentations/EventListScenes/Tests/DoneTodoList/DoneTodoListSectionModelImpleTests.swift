@@ -264,6 +264,36 @@ extension DoneTodoListSectionModelImpleTests {
         XCTAssertEqual(cellLists.last?.contains(where: { $0.uuid == "did:4" }), false)
     }
     
+    func testViewModel_whenAfterRevertTodoFromDetail_updateList() {
+        // given
+        let expect = expectation(description: "상세 화면에서 done todo revert 된 경우 리스트 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let sections = self.waitOutputs(expect, for: viewModel.sectionModels) {
+            viewModel.loadList()
+            viewModel.doneTodoDetail(revert: "did:4", to: .dummy())
+        }
+        
+        // then
+        let cellLists = sections.flatMap { ss in ss.map { $0.cells } }
+        XCTAssertEqual(cellLists.count, 2)
+        XCTAssertEqual(cellLists.first?.contains(where: { $0.uuid == "did:4" }), true)
+        XCTAssertEqual(cellLists.last?.contains(where: { $0.uuid == "did:4" }), false)
+    }
+    
+    func testViewModel_routeToDoneTodoDetail() {
+        // given
+        let viewModel = self.makeViewModel()
+        
+        // when
+        viewModel.selectDoneTodo("some")
+        
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToDoneTodoDetail, "some")
+    }
+    
     func testViewModel_cancelRevertingTodo() {
         // given
         let expect = expectation(description: "cancel reverting todo")
@@ -356,5 +386,10 @@ private final class SpyRouter: BaseSpyRouter, DoneTodoEventListRouting, @uncheck
     func showSelectRemoveDoneTodoRangePicker(_ selected: @escaping (RemoveDoneTodoRange) -> Void) {
         self.didShowSelectRemoveDoneTodoRangePicker = true
         selected(.olderThan3Months)
+    }
+    
+    var didRouteToDoneTodoDetail: String?
+    func routeToDoneTodoDetail(_ eventId: String) {
+        self.didRouteToDoneTodoDetail = eventId
     }
 }

@@ -115,12 +115,17 @@ open class StubTodoEventRepository: TodoEventRepository, BaseStub, @unchecked Se
         return []
     }
     
+    open func loadDoneTodoEvent(_ uuid: String) -> AnyPublisher<DoneTodoEvent, any Error> {
+        return Empty().eraseToAnyPublisher()
+    }
+    
     open func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
         
     }
     
-    open func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
-        return .init(uuid: "reverted", name: "reverted")
+    open func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult {
+        let revert = TodoEvent(uuid: "reverted", name: "reverted")
+        return .init(revertTodo: revert)
     }
     
     open func toggleTodo(_ todoId: String) async throws -> TodoToggleResult? {

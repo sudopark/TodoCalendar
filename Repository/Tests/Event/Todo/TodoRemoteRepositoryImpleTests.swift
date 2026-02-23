@@ -154,6 +154,9 @@ extension TodoRemoteRepositoryImpleTests {
         let origin = params["origin"] as? [String: Any]
         XCTAssertNotNil(nextTime)
         XCTAssertNotNil(origin)
+        
+        XCTAssertNotNil(result?.doneTodoEventDetail)
+        XCTAssertNil(self.spyTodoCache.didRemoveTodoDetailId)
     }
     
     // complete 이후에 기존 todo 제거 + 신규 이벤트 저장 + 다음 이벤트 저장
@@ -205,6 +208,21 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "origin")
         XCTAssertEqual(self.spyTodoCache.didSavedTodoEvent != nil, true)
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent != nil, true)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoDetailId, nil)
+    }
+    
+    func testRepository_whenAfterReplaceNotRepeatingTodo_updateCache() async {
+        // given
+        let repository = self.makeRepository()
+        
+        // when
+        let _ = try? await repository.replaceRepeatingTodo(current: "origin-without-repeating", to: .init())
+        
+        // then
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "origin-without-repeating")
+        XCTAssertEqual(self.spyTodoCache.didSavedTodoEvent != nil, true)
+        XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent != nil, false)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoDetailId, "origin-without-repeating")
     }
 }
 
@@ -224,6 +242,7 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertNotNil(result)
         XCTAssertNil(result?.nextRepeatingTodo)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, "repeating-todo")
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoDetailId, "repeating-todo")
     }
     
     // 반복 이벤트 이번만 삭제시 다음 이벤트 있으면 이벤트 시간 다음으로 업데이트
@@ -239,6 +258,7 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertNotNil(result?.nextRepeatingTodo)
         XCTAssertEqual(self.spyTodoCache.didRemoveTodoId, nil)
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, result?.nextRepeatingTodo?.uuid)
+        XCTAssertEqual(self.spyTodoCache.didRemoveTodoDetailId, nil)
     }
     
     // 반복 이벤트 이번만 삭제시 다음 이벤트 없으면 그냥 삭제만
@@ -544,6 +564,37 @@ extension TodoRemoteRepositoryImpleTests {
         XCTAssertNotNil(failed)
     }
     
+    // load done todo
+    func testRepository_whenLoadDoneTodo_loadCacheAndRemote() {
+        // given
+        let expect = expectation(description: "load done todo")
+        expect.expectedFulfillmentCount = 2
+        let repository = self.makeRepository()
+        
+        // when
+        let loading = repository.loadDoneTodoEvent("done_id")
+        let todos = self.waitOutputs(expect, for: loading, timeout: 0.1)
+        
+        // then
+        XCTAssertEqual(todos.count, 2)
+    }
+    
+    // load todo when done load remote failed + faild
+    func testRepository_whenLoadDoneTodosAndLoadFromRemoteFail_shouldFail() {
+        // given
+        let expect = expectation(description: "load todo when load remote failed + faild")
+        let repository = self.makeRepository { _, remote in
+            remote.shouldFailRequest = true
+        }
+        
+        // when
+        let loading = repository.loadDoneTodoEvent("done_id")
+        let error = self.waitError(expect, for: loading, timeout: 0.1)
+        
+        // then
+        XCTAssertNotNil(error)
+    }
+    
     // remvoe done todos
     func testRepository_removeDoneTodosWithRange() async throws {
         // given
@@ -555,6 +606,7 @@ extension TodoRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(self.stubRemote.didRequestedParams?["past_than"] as? Double, 3)
         XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoCursor, 3)
+        XCTAssertEqual(self.spyTodoCache.didRemoveDoneTodoDetails != nil, true)
     }
     
     func testReposiotry_removeAllDoneTodoEvents() async throws {
@@ -567,6 +619,7 @@ extension TodoRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(self.stubRemote.didRequestedParams?["past_than"] as? Double, nil)
         XCTAssertEqual(self.spyTodoCache.didRemoveAllDoneEvents, true)
+        XCTAssertEqual(self.spyTodoCache.didRemoveAllDoneTodoDetails, true)
     }
     
     // revert done todo
@@ -575,11 +628,13 @@ extension TodoRemoteRepositoryImpleTests {
         let repository = self.makeRepository()
         
         // when
-        let reverted = try await repository.revertDoneTodo("some")
+        let result = try await repository.revertDoneTodo("some")
         
         // then
+        let reverted = result.revertTodo
         XCTAssertEqual(self.spyTodoCache.didUpdatedTodoEvent?.uuid, reverted.uuid)
         XCTAssertEqual(self.spyTodoCache.didRemovedDoneTodoIds, ["some"])
+        XCTAssertEqual(self.spyTodoCache.didSaveTodoDetail?.eventId, "revert")
     }
     
     // revert 할꺼면 done = "some" 이여야하고
@@ -826,7 +881,26 @@ private struct DummyResponse {
     
     let refTime = Date().timeIntervalSince1970
     
-    private func dummySingleTodoResponse(_ uuid: String = "new_uuid") -> String {
+    private func dummySingleTodoResponse(
+        _ uuid: String = "new_uuid",
+        isRepeating: Bool = true
+    ) -> String {
+        
+        let repeatingBlock = !isRepeating ? "" :
+        """
+        "repeating": {
+            "start": 300,
+            "end": \(refTime+3600*24*100),
+            "option": {
+
+                "optionType": "every_week",
+                "interval": 1,
+                "dayOfWeek": [1],
+                "timeZone": "Asia/Seoul"
+            }
+        },
+        """
+        
         return """
         {
             "uuid": "\(uuid)",
@@ -839,17 +913,7 @@ private struct DummyResponse {
                 "period_end": \(refTime+200),
                 "seconds_from_gmt": 300
             },
-            "repeating": {
-                "start": 300,
-                "end": \(refTime+3600*24*100),
-                "option": {
-
-                    "optionType": "every_week",
-                    "interval": 1,
-                    "dayOfWeek": [1],
-                    "timeZone": "Asia/Seoul"
-                }
-            },
+            \(repeatingBlock)
             "notification_options": [
                 {
                     "type_text": "allDay9AMBefore",
@@ -963,6 +1027,12 @@ private struct DummyResponse {
         """
     }
     
+    private func dummyDetail(_ id: String) -> String {
+        return """
+        { "eventId": "\(id)" }
+        """
+    }
+    
     private var dummyNoRepeatingTodoResponse: String {
         return """
         {
@@ -1002,12 +1072,26 @@ private struct DummyResponse {
         """
     }
     
+    private var dummyRevertTodoResponse: String {
+        return """
+        {
+            "todo": \(self.dummySingleTodoResponse("revret")), 
+            "detail": \(self.dummyDetail("revert"))
+        }
+        """
+    }
+    
     var reponses: [StubRemoteAPI.Response] {
         return [
             .init(
                 method: .get,
                 endpoint: TodoAPIEndpoints.todo("origin"),
                 resultJsonString: .success(self.dummySingleTodoResponse("origin"))
+            ),
+            .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.todo("origin-without-repeating"),
+                resultJsonString: .success(self.dummySingleTodoResponse("origin-without-repeating", isRepeating: false))
             ),
             .init(
                 method: .get,
@@ -1051,6 +1135,7 @@ private struct DummyResponse {
                 """
                 {
                     "done": \(self.dummyDoneTodoResponse),
+                    "done_detail": \(self.dummyDetail("done_id")),
                     "next_repeating": \(self.dummySingleTodoResponse())
                 }
                 """
@@ -1069,6 +1154,17 @@ private struct DummyResponse {
                 {
                     "new_todo": \(self.dummySingleTodoResponse()),
                     "next_repeating": \(self.dummySingleTodoResponse())
+                }
+                """
+                )
+            ),
+            .init(
+                method: .post,
+                endpoint: TodoAPIEndpoints.replaceRepeating("origin-without-repeating"),
+                resultJsonString: .success(
+                """
+                {
+                    "new_todo": \(self.dummySingleTodoResponse())
                 }
                 """
                 )
@@ -1125,6 +1221,11 @@ private struct DummyResponse {
                 )
             ),
             .init(
+                method: .get,
+                endpoint: TodoAPIEndpoints.done("done_id"),
+                resultJsonString: .success(self.dummyDoneTodoResponse)
+            ),
+            .init(
                 method: .delete,
                 endpoint: TodoAPIEndpoints.dones,
                 resultJsonString: .success("{ \"status\": \"ok\" }")
@@ -1137,7 +1238,7 @@ private struct DummyResponse {
             .init(
                 method: .post,
                 endpoint: TodoAPIEndpoints.revertDone("some"),
-                resultJsonString: .success(self.dummySingleTodoResponse())
+                resultJsonString: .success(self.dummyRevertTodoResponse)
             ),
             .init(
                 method: .post,
@@ -1336,8 +1437,9 @@ class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
     }
     
     var didRemovedDoneTodoCursor: TimeInterval?
-    func removeDoneTodos(pastThan cursor: TimeInterval) async throws {
+    func removeDoneTodos(pastThan cursor: TimeInterval) async throws -> [String] {
         self.didRemovedDoneTodoCursor = cursor
+        return ["some"]
     }
     
     var didUpdatedDoneTodos: [DoneTodoEvent]?
@@ -1377,5 +1479,37 @@ class SpyTodoLocalStorage: TodoLocalStorage, @unchecked Sendable {
             return TodoEvent(uuid: "todo:\(int)", name: "cached_todo:\(int)")
         }
         return todos
+    }
+    
+    var didSaveTodoDetail: EventDetailData?
+    func saveTodoDetail(_ detail: EventDetailData) async throws {
+        self.didSaveTodoDetail = detail
+    }
+    
+    func saveDoneTodoDetail(_ detail: EventDetailData) async throws {
+        
+    }
+    
+    func copyTodoDetail(_ originId: String, to doneEventId: String) async throws -> EventDetailData? {
+        return nil
+    }
+    
+    var didRemoveTodoDetailId: String?
+    func removeTodoDetail(_ originId: String) async throws {
+        self.didRemoveTodoDetailId = originId
+    }
+    
+    func copyDoneTodoDetail(_ doneId: String, to revertTodoId: String) async throws -> EventDetailData? {
+        return nil
+    }
+    
+    var didRemoveAllDoneTodoDetails: Bool?
+    func removeAllDoneTodoDetail() async throws {
+        self.didRemoveAllDoneTodoDetails = true
+    }
+    
+    var didRemoveDoneTodoDetails: [String]?
+    func removeDoneTodoDetails(_ ids: [String]) async throws {
+        self.didRemoveDoneTodoDetails = ids
     }
 }

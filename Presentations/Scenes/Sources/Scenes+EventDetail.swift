@@ -73,6 +73,21 @@ public protocol HolidayEventDetailSceneInteractor: AnyObject { }
 public protocol HolidayEventDetailScene: Scene where Interactor == any HolidayEventDetailSceneInteractor
 { }
 
+// MARK: - DoneTodoDetailScene Interactable & Listenable
+
+public protocol DoneTodoDetailSceneInteractor: AnyObject { }
+//
+public protocol DoneTodoDetailSceneListener: AnyObject {
+    
+    func doneTodoDetail(revert doneTodoId: String, to todo: TodoEvent)
+}
+
+// MARK: - DoneTodoDetailScene
+
+public protocol DoneTodoDetailScene: Scene where Interactor == any DoneTodoDetailSceneInteractor
+{ }
+
+
 // MARK: - EventDetailSceneBuilder
 
 public protocol EventDetailSceneBuilder {
@@ -102,4 +117,10 @@ public protocol EventDetailSceneBuilder {
     func makeGoogleCalendarDetailScene(
         calendarId: String, eventId: String
     ) -> any GoogleCalendarEventDetailScene
+    
+    @MainActor
+    func makeDoneTodoDetailScene(
+        _ doneTodoId: String,
+        _ listener: (any DoneTodoDetailSceneListener)?
+    ) -> any DoneTodoDetailScene
 }

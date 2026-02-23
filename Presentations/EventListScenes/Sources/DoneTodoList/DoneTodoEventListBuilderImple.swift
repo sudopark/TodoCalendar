@@ -20,13 +20,16 @@ final class DoneTodoEventListSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
+    private let eventDetailSceneBuilder: any EventDetailSceneBuilder
     
     init(
         usecaseFactory: any UsecaseFactory,
-        viewAppearance: ViewAppearance
+        viewAppearance: ViewAppearance,
+        eventDetailSceneBuilder: any EventDetailSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
+        self.eventDetailSceneBuilder = eventDetailSceneBuilder
     }
 }
 
@@ -49,6 +52,7 @@ extension DoneTodoEventListSceneBuilerImple: DoneTodoEventListSceneBuiler {
         )
     
         let router = DoneTodoEventListRouter(
+            eventDetailSceneBuilder: self.eventDetailSceneBuilder
         )
         router.scene = viewController
         viewModel.router = router

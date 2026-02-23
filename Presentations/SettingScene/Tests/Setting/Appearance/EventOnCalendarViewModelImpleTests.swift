@@ -35,7 +35,8 @@ class EventOnCalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         return .init(
             eventOnCalenarTextAdditionalSize: 3,
             eventOnCalendarIsBold: false,
-            eventOnCalendarShowEventTagColor: true
+            eventOnCalendarShowEventTagColor: true,
+            weekRowHeight: .medium
         )
     }
     
@@ -92,6 +93,18 @@ extension EventOnCalendarViewModelImpleTests {
         
         // then
         XCTAssertEqual(isShow, true)
+    }
+    
+    func testViewModel_whenPrepare_provideLatestRowHeight() {
+        // given
+        let expect = expectation(description: "prepare시에 마지막에 저장된 설정 로드 - row height: medium")
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let height = self.waitFirstOutput(expect, for: viewModel.rowHeight)
+        
+        // then
+        XCTAssertEqual(height?.height, .medium)
     }
     
     // font size 증가하다 끝까지(+7 max)
@@ -196,5 +209,21 @@ extension EventOnCalendarViewModelImpleTests {
         XCTAssertEqual(isShows, [true, false])
         let setting = self.spyUISettingUsecase.loadSavedAppearanceSetting().calendar
         XCTAssertEqual(setting.eventOnCalendarShowEventTagColor, false)
+    }
+    
+    func testViewModel_updateRowHeight() {
+        // given
+        let expect = expectation(description: "rowHeight 업데이트")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel()
+        
+        // when
+        let heights = self.waitOutputs(expect, for: viewModel.rowHeight) {
+            viewModel.selectRowHeightOnCalendar(.large)
+            viewModel.selectRowHeightOnCalendar(.small)
+        }
+        
+        // then
+        XCTAssertEqual(heights.map { $0.height }, [.medium, .large, .small])
     }
 }

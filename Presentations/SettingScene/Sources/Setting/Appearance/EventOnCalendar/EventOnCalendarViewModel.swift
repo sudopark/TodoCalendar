@@ -17,21 +17,25 @@ struct EventOnCalendarAppearanceSetting {
     let eventOnCalenarTextAdditionalSize: CGFloat
     let eventOnCalendarIsBold: Bool
     let eventOnCalendarShowEventTagColor: Bool
+    let weekRowHeight: RowHeightOnCalendar
     
     init(
         eventOnCalenarTextAdditionalSize: CGFloat,
         eventOnCalendarIsBold: Bool, 
-        eventOnCalendarShowEventTagColor: Bool
+        eventOnCalendarShowEventTagColor: Bool,
+        weekRowHeight: RowHeightOnCalendar
     ) {
         self.eventOnCalenarTextAdditionalSize = eventOnCalenarTextAdditionalSize
         self.eventOnCalendarIsBold = eventOnCalendarIsBold
         self.eventOnCalendarShowEventTagColor = eventOnCalendarShowEventTagColor
+        self.weekRowHeight = weekRowHeight
     }
     
     init(_ setting: CalendarAppearanceSettings) {
         self.eventOnCalenarTextAdditionalSize = setting.eventOnCalenarTextAdditionalSize
         self.eventOnCalendarIsBold = setting.eventOnCalendarIsBold
         self.eventOnCalendarShowEventTagColor = setting.eventOnCalendarShowEventTagColor
+        self.weekRowHeight = setting.rowHeight
     }
 }
 
@@ -46,13 +50,38 @@ struct EventTextAdditionalSizeModel: Equatable {
     }
 }
 
+struct RowHeightOnCalendarViewModel: Identifiable, Hashable {
+    let height: RowHeightOnCalendar
+    let text: String
+    
+    var id: RowHeightOnCalendar { self.height }
+    
+    init(_ height: RowHeightOnCalendar) {
+        self.height = height
+        switch height {
+        case .small:
+            self.text = "setting.appearance.day_row_height::small::text".localized()
+        case .medium:
+            self.text = "setting.appearance.day_row_height::medium::text".localized()
+        case .large:
+            self.text = "setting.appearance.day_row_height::large::text".localized()
+        }
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(height)
+    }
+}
+
 protocol EventOnCalendarViewModel: AnyObject, Sendable {
     
+    func selectRowHeightOnCalendar(_ height: RowHeightOnCalendar)
     func increaseTextSize()
     func decreaseTextSize()
     func toggleBoldText(_ isOn: Bool)
     func toggleShowEventTagColor(_ isOn: Bool)
     
+    var rowHeight: AnyPublisher<RowHeightOnCalendarViewModel, Never> { get }
     var textIncreasedSizeText: AnyPublisher<EventTextAdditionalSizeModel, Never> { get }
     var isBoldTextOnCalendar: AnyPublisher<Bool, Never> { get }
     var showEvnetTagColor: AnyPublisher<Bool, Never> { get }
@@ -83,6 +112,16 @@ final class EventOnCalendarViewModelImple: EventOnCalendarViewModel, @unchecked 
 }
 
 extension EventOnCalendarViewModelImple {
+    
+    func selectRowHeightOnCalendar(_ height: RowHeightOnCalendar) {
+        guard let setting = self.subject.setting.value,
+              setting.weekRowHeight != height
+        else { return }
+        
+        let params = EditCalendarAppearanceSettingParams()
+            |> \.rowHeight .~ height
+        self.updateSetting(params)
+    }
     
     func increaseTextSize() {
         guard let setting = self.subject.setting.value,
@@ -129,6 +168,15 @@ extension EventOnCalendarViewModelImple {
 }
 
 extension EventOnCalendarViewModelImple {
+    
+    var rowHeight: AnyPublisher<RowHeightOnCalendarViewModel, Never> {
+        
+        return self.subject.setting
+            .compactMap { $0?.weekRowHeight }
+            .map { RowHeightOnCalendarViewModel($0) }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     var textIncreasedSizeText: AnyPublisher<EventTextAdditionalSizeModel, Never> {
         let transform: (CGFloat) -> EventTextAdditionalSizeModel = { size in

@@ -25,6 +25,8 @@ public actor EventUploadServiceImple: EventUploadService {
     private let scheduleLocalStorage: any ScheduleEventLocalStorage
     private let eventDetailRemote: any EventDetailRemote
     private let eventDetailLocalStorage: any EventDetailDataLocalStorage
+    private let doneTodoDetailRemote: any EventDetailRemote
+    private let doneTodoDetailLocalStorage: any EventDetailDataLocalStorage
     
     public init(
         pendingQueueStorage: any EventUploadPendingQueueLocalStorage,
@@ -35,7 +37,9 @@ public actor EventUploadServiceImple: EventUploadService {
         scheduleRemote: any ScheduleEventRemote,
         scheduleLocalStorage: any ScheduleEventLocalStorage,
         eventDetailRemote: any EventDetailRemote,
-        eventDetailLocalStorage: any EventDetailDataLocalStorage
+        eventDetailLocalStorage: any EventDetailDataLocalStorage,
+        doneTodoDetailRemote: any EventDetailRemote,
+        doneTodoDetailLocalStorage: any EventDetailDataLocalStorage
     ) {
         self.pendingQueueStorage = pendingQueueStorage
         self.eventTagRemote = eventTagRemote
@@ -46,6 +50,8 @@ public actor EventUploadServiceImple: EventUploadService {
         self.scheduleLocalStorage = scheduleLocalStorage
         self.eventDetailRemote = eventDetailRemote
         self.eventDetailLocalStorage = eventDetailLocalStorage
+        self.doneTodoDetailRemote = doneTodoDetailRemote
+        self.doneTodoDetailLocalStorage = doneTodoDetailLocalStorage
     }
     
     private let isUploadingFlag = EventUploadingFlag()
@@ -131,6 +137,11 @@ extension EventUploadServiceImple {
             
         case .doneTodo:
             try await self.uploadDoneTodo(task.uuid)
+            
+        case .doneTodoDetail where task.isRemovingTask == false:
+            try await self.uploadDoneTodoEventDetail(task.uuid)
+            
+        default: break
         }
     }
     
@@ -178,6 +189,13 @@ extension EventUploadServiceImple {
     private func uploadDoneTodo(_ eventId: String) async throws {
         let done = try await self.todoLocalStorage.loadDoneTodoEvent(doneEventId: eventId)
         _ = try await self.todoRemote.updateDoneTodo(done)
+    }
+    
+    private func uploadDoneTodoEventDetail(_ eventId: String) async throws {
+        guard let detail = try await self.doneTodoDetailLocalStorage.loadDetail(eventId)
+        else { return }
+        
+        _ = try await self.doneTodoDetailRemote.saveDetail(detail)
     }
 }
 

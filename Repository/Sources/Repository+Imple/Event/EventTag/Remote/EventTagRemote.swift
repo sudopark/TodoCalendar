@@ -16,6 +16,7 @@ public protocol EventTagRemote: Sendable {
     func editTag(_ tagId: String, _ params: CustomEventTagEditParams) async throws -> CustomEventTag
     func deleteTag(_ tagId: String) async throws
     func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult
+    func deleteTagWithEvents(_ tagId: String, todos: [String], schedules: [String]) async throws
     func loadAllEventTags() async throws -> [CustomEventTag]
     func loadCustomTags(_ ids: [String]) async throws -> [CustomEventTag]
 }
@@ -68,6 +69,20 @@ extension EventTagRemoteImple {
             .delete, endpoint
         )
         return mapper.result
+    }
+    
+    public func deleteTagWithEvents(
+        _ tagId: String,
+        todos: [String],
+        schedules: [String]
+    ) async throws {
+        let endpoint = EventTagEndpoints.tagWithEvents(id: tagId)
+        let params: [String: Any] = [
+            "todos": todos,
+            "schedules": schedules
+        ]
+        let _: RemoveEventTagResult = try await self.remote.request(
+            .delete, endpoint, parameters: params)
     }
     
     public func loadAllEventTags() async throws -> [CustomEventTag] {

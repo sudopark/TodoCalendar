@@ -60,10 +60,17 @@ extension TodoRemoteRepositoryImple {
         
         // update cache
         try? await cacheStorage.removeTodo(eventId)
+        
         try? await cacheStorage.saveDoneTodoEvent(result.doneEvent)
+        if let doneDetail = result.doneTodoEventDetail {
+            try? await cacheStorage.saveDoneTodoDetail(doneDetail)
+        }
         if let next = result.nextRepeatingTodoEvent {
             try? await cacheStorage.updateTodoEvent(next)
+        } else {
+            try? await cacheStorage.removeTodoDetail(eventId)
         }
+        
         return result
     }
     
@@ -84,6 +91,8 @@ extension TodoRemoteRepositoryImple {
         try? await cacheStorage.saveTodoEvent(result.newTodoEvent)
         if let next = result.nextRepeatingTodoEvent {
             try await cacheStorage.updateTodoEvent(next)
+        } else {
+            try? await cacheStorage.removeTodoDetail(eventId)
         }
         return result
     }
@@ -114,11 +123,17 @@ extension TodoRemoteRepositoryImple {
 extension TodoRemoteRepositoryImple {
     
     public func removeTodo(_ eventId: String, onlyThisTime: Bool) async throws -> RemoveTodoResult {
-        if onlyThisTime {
-            return try await self.replaceCurrentTodoToNext(eventId)
+        let result = if onlyThisTime {
+            try await self.replaceCurrentTodoToNext(eventId)
         } else {
-            return try await self.removeTodo(eventId: eventId)
+            try await self.removeTodo(eventId: eventId)
         }
+        
+        if result.nextRepeatingTodo == nil {
+            try? await self.cacheStorage.removeTodoDetail(eventId)
+        }
+        
+        return result
     }
     
     private func replaceCurrentTodoToNext(_ eventid: String) async throws -> RemoveTodoResult {
@@ -260,19 +275,61 @@ extension TodoRemoteRepositoryImple {
         return events
     }
     
+    public func loadDoneTodoEvent(_ uuid: String) -> AnyPublisher<DoneTodoEvent, any Error> {
+        
+        let (cache, remote) = (self.cacheStorage, self.remote)
+        
+        return AnyPublisher<DoneTodoEvent, any Error>.create { subscriber in
+            
+            let task = Task {
+                let cached = try? await cache.loadDoneTodoEvent(doneEventId: uuid)
+                if let cached {
+                    subscriber.send(cached)
+                }
+                
+                do {
+                    let refreshed = try await remote.loadDoneTodo(uuid)
+                    
+                    try? await cache.updateDoneTodos([refreshed])
+                    
+                    subscriber.send(refreshed)
+                    subscriber.send(completion: .finished)
+                    
+                } catch {
+                    subscriber.send(completion: .failure(error))
+                }
+            }
+            
+            return AnyCancellable { task.cancel() }
+        }
+        .compactMap { $0 }
+        .eraseToAnyPublisher()
+    }
+    
     public func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws {
         try await self.remote.removeDoneTodos(scope)
         switch scope {
-        case .all: try await self.cacheStorage.removeAllDoneEvents()
-        case .pastThan(let time): try await self.cacheStorage.removeDoneTodos(pastThan: time)
+        case .all:
+            try await self.cacheStorage.removeAllDoneEvents()
+            try? await self.cacheStorage.removeAllDoneTodoDetail()
+            
+        case .pastThan(let time):
+            let ids = try await self.cacheStorage.removeDoneTodos(pastThan: time)
+            guard !ids.isEmpty else { return }
+            try? await self.cacheStorage.removeDoneTodoDetails(ids)
         }
     }
     
-    public func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
-        let todo = try await self.remote.revertDoneTodo(doneTodoId)
+    public func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult {
+        let result = try await self.remote.revertDoneTodo(doneTodoId)
         try await self.cacheStorage.removeDoneTodo([doneTodoId])
-        try await self.cacheStorage.updateTodoEvent(todo)
-        return todo
+        try? await self.cacheStorage.removeDoneTodoDetails([doneTodoId])
+        
+        try await self.cacheStorage.updateTodoEvent(result.revertTodo)
+        if let detail = result.revertTodoDetail {
+            try? await self.cacheStorage.saveTodoDetail(detail)
+        }
+        return result
     }
     
     public func toggleTodo(_ todoId: String) async throws -> TodoToggleResult? {

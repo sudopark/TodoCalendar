@@ -21,7 +21,7 @@ class EventDetailDataRemoteRepostioryImpleTests: BaseTestCase, PublisherWaitable
     
     var cancelBag: Set<AnyCancellable>!
     private var stubRemote: StubRemoteAPI!
-    private var spyCache: SpyCache!
+    private var spyCache: SpyEventDetailCache!
     
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -45,7 +45,7 @@ class EventDetailDataRemoteRepostioryImpleTests: BaseTestCase, PublisherWaitable
 extension EventDetailDataRemoteRepostioryImpleTests {
     
     private func makeRepositoryWithStubbing(
-        _ stubbing: (StubRemoteAPI, SpyCache) -> Void = { _, _ in }
+        _ stubbing: (StubRemoteAPI, SpyEventDetailCache) -> Void = { _, _ in }
     ) -> EventDetailDataRemoteRepostioryImple {
         stubbing(self.stubRemote, self.spyCache)
         return self.makeRepository()
@@ -172,7 +172,7 @@ extension EventDetailDataRemoteRepostioryImpleTests {
     }
 }
 
-private class SpyCache: EventDetailDataLocalStorage, @unchecked Sendable {
+class SpyEventDetailCache: EventDetailDataLocalStorage, @unchecked Sendable {
     
     func loadAll() async throws -> [EventDetailData] {
         return []
@@ -202,5 +202,10 @@ private class SpyCache: EventDetailDataLocalStorage, @unchecked Sendable {
     var didRemoveAll: Bool?
     func removeAll() async throws {
         self.didRemoveAll = true
+    }
+    
+    var didRemoveDetailsIn: [String]?
+    func removeDetails(ids: [String]) async throws {
+        self.didRemoveDetailsIn = ids
     }
 }

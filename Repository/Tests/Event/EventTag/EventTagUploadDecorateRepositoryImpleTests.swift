@@ -20,26 +20,31 @@ import UnitTestHelpKit
 final class EventTagUploadDecorateRepositoryImpleTests: EventTagLocalRepositoryImpleTests {
     
     private var spyEventUploadService: SpyEventUploadService!
+    private var stubRemote: StubRemoteAPI!
     
     override func setUpWithError() throws {
         try super.setUpWithError()
         self.spyEventUploadService = .init()
+        self.stubRemote = .init(responses: self.response)
     }
     
     override func tearDownWithError() throws {
         try super.tearDownWithError()
         self.spyEventUploadService = nil
+        self.stubRemote = nil
     }
     
     override func makeRepository() -> any EventTagRepository {
         let localRepository = EventTagLocalRepositoryImple(
             localStorage: self.localStorage,
             todoLocalStorage: self.todoLocalStorage,
-            scheduleLocalStorage: self.scheduleLocalStorage
+            scheduleLocalStorage: self.scheduleLocalStorage,
+            eventDetailLocalStorage: self.detailLocalStorage
         )
         return EventTagUploadDecorateRepositoryImple(
             localRepository: localRepository,
-            eventUploadService: self.spyEventUploadService
+            eventUploadService: self.spyEventUploadService,
+            remote: EventTagRemoteImple(remote: self.stubRemote)
         )
     }
 }
@@ -97,7 +102,7 @@ extension EventTagUploadDecorateRepositoryImpleTests {
         XCTAssertEqual(task?.isRemovingTask, true)
     }
     
-    func testRepository_whenRemoveTagWithEvents_appendUploadTasks() async throws {
+    func testRepository_whenRemoveTagWithEvents_removeLocalAndRemote() async throws {
         // given
         try await self.stubTodoAndSchedule()
         let repository = self.makeRepository()
@@ -106,19 +111,23 @@ extension EventTagUploadDecorateRepositoryImpleTests {
         let result = try await repository.deleteTagWithAllEvents("t1")
         
         // then
-        let totalCount = 1 + result.todoIds.count + result.scheduleIds.count
-        XCTAssertEqual(self.spyEventUploadService.uploadTasks.count, totalCount)
-        XCTAssertEqual(
-            self.spyEventUploadService.uploadTasks.map { $0.isRemovingTask }, Array(repeating: true, count: totalCount)
-        )
-        
-        let tagTasks = self.spyEventUploadService.uploadTasks.filter { $0.dataType == .eventTag }
-        XCTAssertEqual(tagTasks.map { $0.uuid }, ["t1"])
-        
-        let todoTasks = self.spyEventUploadService.uploadTasks.filter({ $0.dataType == .todo })
-        XCTAssertEqual(todoTasks.map { $0.uuid }, result.todoIds)
-        
-        let scheduleTasks = self.spyEventUploadService.uploadTasks.filter({ $0.dataType == .schedule })
-        XCTAssertEqual(scheduleTasks.map { $0.uuid }, result.scheduleIds)
+        XCTAssertEqual(self.stubRemote.didRequestedPath, "dummy_calendar_api_host/v2/tags/tag_with_events/t1")
+        let params = self.stubRemote.didRequestedParams ?? [:]
+        XCTAssertEqual(params["todos"] as? [String], result.todoIds)
+        XCTAssertEqual(params["schedules"] as? [String], result.scheduleIds)
+    }
+}
+
+
+private extension EventTagUploadDecorateRepositoryImpleTests {
+    
+    private var response: [StubRemoteAPI.Response] {
+        return [
+            .init(
+                method: .delete,
+                endpoint: EventTagEndpoints.tagWithEvents(id: "t1"),
+                resultJsonString: .success("{ \"status\": \"ok\"}")
+            ),
+        ]
     }
 }

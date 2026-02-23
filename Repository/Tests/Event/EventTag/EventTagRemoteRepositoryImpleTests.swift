@@ -24,6 +24,7 @@ class EventTagRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
     private var spyCache: SpyLocalStorage!
     private var spyTodoCache: SpyTodoLocalStorage!
     private var spyScheduleCache: SpyScheduleEventLocalStorage!
+    private var spyEventDetailCache: SpyEventDetailCache!
     private var stubRemote: StubRemoteAPI!
     
     override func setUpWithError() throws {
@@ -31,11 +32,15 @@ class EventTagRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
         self.spyCache = .init()
         self.spyTodoCache = .init()
         self.spyScheduleCache = .init()
+        self.spyEventDetailCache = .init()
         self.stubRemote = .init(responses: self.response)
     }
     
     override func tearDownWithError() throws {
         self.spyCache = nil
+        self.spyTodoCache = nil
+        self.spyScheduleCache = nil
+        self.spyEventDetailCache = nil
         self.stubRemote = nil
         self.cancelBag = nil
     }
@@ -45,7 +50,8 @@ class EventTagRemoteRepositoryImpleTests: BaseTestCase, PublisherWaitable {
             remote: EventTagRemoteImple(remote: self.stubRemote),
             cacheStorage: self.spyCache,
             todoCacheStorage: self.spyTodoCache,
-            scheduleCacheStorage: self.spyScheduleCache
+            scheduleCacheStorage: self.spyScheduleCache,
+            eventDetailCacheStorage: self.spyEventDetailCache
         )
     }
 }
@@ -110,6 +116,7 @@ extension EventTagRemoteRepositoryImpleTests {
         XCTAssertEqual(self.spyCache.didDeleteTagIds, ["t1"])
         XCTAssertEqual(self.spyTodoCache.didRemovedTodoIds, result.todoIds)
         XCTAssertEqual(self.spyScheduleCache.didRemoveIds, result.scheduleIds)
+        XCTAssertEqual(self.spyEventDetailCache.didRemoveDetailsIn, result.todoIds + result.scheduleIds)
     }
 }
 

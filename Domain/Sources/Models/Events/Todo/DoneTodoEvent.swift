@@ -48,6 +48,7 @@ public struct DoneTodoEvent: Sendable {
 public struct CompleteTodoResult {
     
     public let doneEvent: DoneTodoEvent
+    public var doneTodoEventDetail: EventDetailData?
     public var nextRepeatingTodoEvent: TodoEvent?
     
     public init(doneEvent: DoneTodoEvent, nextRepeatingTodoEvent: TodoEvent? = nil) {
@@ -56,6 +57,20 @@ public struct CompleteTodoResult {
     }
 }
 
+
+public struct RevertTodoResult {
+    
+    public let revertTodo: TodoEvent
+    public var revertTodoDetail: EventDetailData?
+    
+    public init(
+        revertTodo todo: TodoEvent,
+        detail todoDetail: EventDetailData? = nil
+    ) {
+        self.revertTodo = todo
+        self.revertTodoDetail = todoDetail
+    }
+}
 
 public struct DoneTodoLoadPagingParams: Sendable {
     public let cursorAfter: TimeInterval?

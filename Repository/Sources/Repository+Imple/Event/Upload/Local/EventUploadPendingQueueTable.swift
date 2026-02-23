@@ -27,7 +27,7 @@ struct EventUploadPendingQueueTable: Table {
             switch self {
             case .timestamp: return .real([.notNull])
             case .dataType: return .text([.notNull])
-            case .uuid: return .text([.unique, .notNull])
+            case .uuid: return .text([.notNull])
             case .isRemove: return .integer([.default(0), .notNull])
             case .uploadFailCount: return .integer([.default(0), .notNull])
             }
@@ -37,6 +37,53 @@ struct EventUploadPendingQueueTable: Table {
     typealias ColumnType = Colunms
     typealias EntityType = EventUploadingTask
     static var tableName: String { "event_upload_pending_queue" }
+    
+    static func scalar(_ entity: EntityType, for column: Colunms) -> (any ScalarType)? {
+        switch column {
+        case .timestamp: return entity.timestamp
+        case .dataType: return entity.dataType.rawValue
+        case .uuid: return entity.uuid
+        case .isRemove: return entity.isRemovingTask
+        case .uploadFailCount: return entity.uploadFailCount
+        }
+    }
+    
+    static func migrateStatement(for version: Int32) -> String? {
+        switch version {
+        case 4:
+            return Self.modfiyColumns(
+                tempTable: EventUploadPendingQueueTableV4TempTable.tableName,
+                to: Colunms.allCases.map { $0.rawValue },
+                from: Colunms.allCases.map { $0.rawValue }
+            )
+        default: return nil
+        }
+    }
+}
+
+struct EventUploadPendingQueueTableV4TempTable: Table {
+    
+    enum Colunms: String, TableColumn {
+        case timestamp
+        case dataType = "data_type"
+        case uuid
+        case isRemove = "is_remove"
+        case uploadFailCount = "upload_fail_count"
+        
+        var dataType: ColumnDataType {
+            switch self {
+            case .timestamp: return .real([.notNull])
+            case .dataType: return .text([.notNull])
+            case .uuid: return .text([.notNull])
+            case .isRemove: return .integer([.default(0), .notNull])
+            case .uploadFailCount: return .integer([.default(0), .notNull])
+            }
+        }
+    }
+    
+    typealias ColumnType = Colunms
+    typealias EntityType = EventUploadingTask
+    static var tableName: String { "event_upload_pending_queue_v4" }
     
     static func scalar(_ entity: EntityType, for column: Colunms) -> (any ScalarType)? {
         switch column {

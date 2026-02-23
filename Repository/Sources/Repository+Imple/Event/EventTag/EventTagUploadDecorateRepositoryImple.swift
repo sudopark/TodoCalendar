@@ -17,12 +17,15 @@ public final class EventTagUploadDecorateRepositoryImple: EventTagRepository {
     
     private let localRepository: EventTagLocalRepositoryImple
     private let eventUploadService: any EventUploadService
+    private let remote: any EventTagRemote
     public init(
         localRepository: EventTagLocalRepositoryImple,
-        eventUploadService: any EventUploadService
+        eventUploadService: any EventUploadService,
+        remote: any EventTagRemote
     ) {
         self.localRepository = localRepository
         self.eventUploadService = eventUploadService
+        self.remote = remote
     }
 }
 
@@ -58,14 +61,7 @@ extension EventTagUploadDecorateRepositoryImple {
     ) async throws -> RemoveCustomEventTagWithEventsResult {
         try await self.localRepository.deleteTag(tagId)
         let result = try await self.localRepository.deleteTagWithAllEvents(tagId)
-        
-        let tasks: [EventUploadingTask] = [
-            .init(dataType: .eventTag, uuid: tagId, isRemovingTask: true)
-        ]
-        + result.todoIds.map { .init(dataType: .todo, uuid: $0, isRemovingTask: true) }
-        + result.scheduleIds.map { .init(dataType: .schedule, uuid: $0, isRemovingTask: true) }
-        try await self.eventUploadService.append(tasks)
-        
+        try await remote.deleteTagWithEvents(tagId, todos: result.todoIds, schedules: result.scheduleIds)
         return result
     }
 }

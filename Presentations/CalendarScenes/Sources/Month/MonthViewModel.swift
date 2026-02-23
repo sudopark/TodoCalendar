@@ -168,6 +168,7 @@ protocol MonthViewModel: AnyObject, Sendable, MonthSceneInteractor {
     var currentSelectDayIdentifier: AnyPublisher<String, Never> { get }
     var todayIdentifier: AnyPublisher<String, Never> { get }
     func eventStack(at weekId: String) -> AnyPublisher<WeekEventStackViewModel, Never>
+    func eventsPerDay(at weekId: String) -> AnyPublisher<[[any CalendarEvent]], Never>
 }
 
 // MARK: - MonthViewModelImple
@@ -422,6 +423,13 @@ extension MonthViewModelImple {
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
+    }
+    
+    func eventsPerDay(at weekId: String) -> AnyPublisher<[[any CalendarEvent]], Never> {
+        return self.subject.eventStackMap
+            .compactMap { $0[weekId] }
+            .map { $0.eventsPerDay }
+            .eraseToAnyPublisher()
     }
     
     private func eventStackElements(at weekId: String) -> AnyPublisher<[[EventOnWeek]], Never> {

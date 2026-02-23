@@ -437,6 +437,18 @@ extension MonthViewModelImpleTests {
         XCTAssertEqual(week4EventDaysSequences, [
             [(3...7)]
         ])
+        let week4EventsPerDay = try await viewModel.eventsPerDay(at: week4?.id ?? "")
+            .firstValue(with: self.timeoutMillis) ?? []
+        let week4EventsPerDayIds = week4EventsPerDay.map { es in es.map { $0.eventId } }
+        XCTAssertEqual(week4EventsPerDayIds, [
+            [],
+            [],
+            ["schedule_event_repeating-5"],
+            ["schedule_event_repeating-5"],
+            ["schedule_event_repeating-5"],
+            ["schedule_event_repeating-5"],
+            ["schedule_event_repeating-5"]
+        ])
 
         // assert week5
         let week5 = weeks?[safe: 4]

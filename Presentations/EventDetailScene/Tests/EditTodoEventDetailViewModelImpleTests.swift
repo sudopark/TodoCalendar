@@ -637,6 +637,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.eventId, "new_event_id")
         XCTAssertEqual(savedDetail?.memo, "new_memo")
         XCTAssertEqual(savedDetail?.url, "new_url")
     }
@@ -682,6 +683,7 @@ extension EditTodoEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.eventId, self.dummyRepeatingTodo.uuid)
         XCTAssertEqual(savedDetail?.memo, "new_memo")
         XCTAssertEqual(savedDetail?.url, "new_url")
     }

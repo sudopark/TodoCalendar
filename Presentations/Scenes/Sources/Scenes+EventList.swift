@@ -12,7 +12,7 @@ import Domain
 
 // MARK: - DoneTodoEventListScene Interactable & Listenable
 
-public protocol DoneTodoEventListSceneInteractor: AnyObject { }
+public protocol DoneTodoEventListSceneInteractor: AnyObject, DoneTodoDetailSceneListener { }
 //
 //public protocol DoneTodoEventListSceneListener: AnyObject { }
 

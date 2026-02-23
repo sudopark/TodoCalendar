@@ -56,8 +56,11 @@ final class EventUploadServiceImpleTests: LocalTestable {
             .init(uuid: "schedule", name: "name", time: .at(0))
         ])
         
-        let eventDetailLocal = EventDetailDataLocalStorageImple(sqliteService: self.sqliteService)
+        let eventDetailLocal = EventDetailDataLocalStorageImple<EventDetailDataTable>(sqliteService: self.sqliteService)
         try await eventDetailLocal.saveDetail(.init("detail"))
+        
+        let doneDetailLocal = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(sqliteService: self.sqliteService)
+        try await doneDetailLocal.saveDetail(.init("done"))
         
         return EventUploadServiceImple(
             pendingQueueStorage: pendingQueueStorage,
@@ -68,7 +71,9 @@ final class EventUploadServiceImpleTests: LocalTestable {
             scheduleRemote: self.spyRemote,
             scheduleLocalStorage: scheduleLocal,
             eventDetailRemote: self.spyRemote,
-            eventDetailLocalStorage: eventDetailLocal
+            eventDetailLocalStorage: eventDetailLocal,
+            doneTodoDetailRemote: self.spyRemote,
+            doneTodoDetailLocalStorage: doneDetailLocal
         )
     }
     
@@ -454,6 +459,22 @@ extension EventUploadServiceImpleTests {
             #expect(self.spyRemote.didRemoveDoneTodoId == "done")
         }
     }
+    
+    @Test func service_uploadDoneTodoDetail() async throws {
+        try await self.runTestWithOpenClose("upload_tc_20_done") {
+            // given
+            let service = try await self.makeService(with: [
+                .init(dataType: .doneTodoDetail, uuid: "done", isRemovingTask: false)
+            ])
+            
+            // when
+            try await service.resume()
+            try await service.waitUntilUploadingEnd()
+            
+            // then
+            #expect(self.spyRemote.didEditEventDetailIds == ["done"])
+        }
+    }
 }
 
 private final class PrivateStubRemote: @unchecked Sendable {
@@ -500,6 +521,7 @@ extension PrivateStubRemote: EventTagRemote {
     func makeTag(_ params: CustomEventTagMakeParams) async throws -> CustomEventTag { return .init(uuid: "", name: "", colorHex: "") }
     
     func deleteTagWithAllEvents(_ tagId: String) async throws -> RemoveCustomEventTagWithEventsResult { return .init(todoIds: [], scheduleIds: []) }
+    func deleteTagWithEvents(_ tagId: String, todos: [String], schedules: [String]) async throws { }
     func loadAllEventTags() async throws -> [CustomEventTag] {[] }
     func loadCustomTags(_ ids: [String]) async throws -> [CustomEventTag] { [] }
 }
@@ -541,6 +563,10 @@ extension PrivateStubRemote: TodoRemote {
     
     func loadTodos(in range: Range<TimeInterval>) async throws -> [TodoEvent] { [] }
     
+    func loadDoneTodo(_ doneTodoId: String) async throws -> DoneTodoEvent {
+        throw RuntimeError("failed")
+    }
+    
     func loadTodo(_ id: String) async throws -> TodoEvent {
         throw RuntimeError("failed")
     }
@@ -555,7 +581,7 @@ extension PrivateStubRemote: TodoRemote {
         self.didRemoveDoneTodoId = doneTodoId
     }
     
-    func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
+    func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult {
         throw RuntimeError("failed")
     }
     

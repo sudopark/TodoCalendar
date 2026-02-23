@@ -58,12 +58,17 @@ extension TodoUploadDecorateRepositoryImple {
         if let next = result.nextRepeatingTodoEvent {
             try await self.eventUploadService.append([
                 .init(dataType: .todo, uuid: next.uuid, isRemovingTask: false),
-                .init(dataType: .doneTodo, uuid: result.doneEvent.uuid, isRemovingTask: false)
+                .init(dataType: .doneTodo, uuid: result.doneEvent.uuid, isRemovingTask: false),
+                
+                .init(dataType: .doneTodoDetail, uuid: result.doneEvent.uuid, isRemovingTask: false)
             ])
         } else {
             try await self.eventUploadService.append([
                 .init(dataType: .todo, uuid: eventId, isRemovingTask: true),
-                .init(dataType: .doneTodo, uuid: result.doneEvent.uuid, isRemovingTask: false)
+                .init(dataType: .doneTodo, uuid: result.doneEvent.uuid, isRemovingTask: false),
+                
+                .init(dataType: .doneTodoDetail, uuid: result.doneEvent.uuid, isRemovingTask: false),
+                .init(dataType: .eventDetail, uuid: eventId, isRemovingTask: true),
             ])
         }
         return result
@@ -79,7 +84,10 @@ extension TodoUploadDecorateRepositoryImple {
             )
         } else {
             try await self.eventUploadService.append(
-                .init(dataType: .todo, uuid: eventId, isRemovingTask: true)
+                [
+                    .init(dataType: .todo, uuid: eventId, isRemovingTask: true),
+                    .init(dataType: .eventDetail, uuid: eventId, isRemovingTask: true)
+                ]
             )
         }
         
@@ -100,9 +108,10 @@ extension TodoUploadDecorateRepositoryImple {
                 .init(dataType: .todo, uuid: next.uuid, isRemovingTask: false)
             )
         } else {
-            try await self.eventUploadService.append(
-                .init(dataType: .todo, uuid: eventId, isRemovingTask: true)
-            )
+            try await self.eventUploadService.append([
+                .init(dataType: .todo, uuid: eventId, isRemovingTask: true),
+                .init(dataType: .eventDetail, uuid: eventId, isRemovingTask: true)
+            ])
         }
         return result
     }
@@ -126,6 +135,10 @@ extension TodoUploadDecorateRepositoryImple {
         return self.localRepository.loadTodoEvents(in: range)
     }
     
+    public func loadDoneTodoEvent(_ uuid: String) -> AnyPublisher<DoneTodoEvent, any Error> {
+        return self.localRepository.loadDoneTodoEvent(uuid)
+    }
+    
     public func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
         return self.localRepository.todoEvent(id)
     }
@@ -146,13 +159,17 @@ extension TodoUploadDecorateRepositoryImple {
         return try await self.localRepository.removeDoneTodos(scope)
     }
     
-    public func revertDoneTodo(_ doneTodoId: String) async throws -> TodoEvent {
-        let revert = try await self.localRepository.revertDoneTodo(doneTodoId)
-        try await self.eventUploadService.append([
-            .init(dataType: .todo, uuid: revert.uuid, isRemovingTask: false),
-            .init(dataType: .doneTodo, uuid: doneTodoId, isRemovingTask: true)
-        ])
-        return revert
+    public func revertDoneTodo(_ doneTodoId: String) async throws -> RevertTodoResult {
+        let result = try await self.localRepository.revertDoneTodo(doneTodoId)
+        let tasks: [EventUploadingTask?] = [
+            .init(dataType: .todo, uuid: result.revertTodo.uuid, isRemovingTask: false),
+            .init(dataType: .doneTodo, uuid: doneTodoId, isRemovingTask: true),
+            result.revertTodoDetail.map {
+                .init(dataType: .eventDetail, uuid: $0.eventId, isRemovingTask: false)
+            },
+        ]
+        try await self.eventUploadService.append(tasks.compactMap { $0 })
+        return result
     }
     
     public func toggleTodo(_ todoId: String) async throws -> TodoToggleResult? {

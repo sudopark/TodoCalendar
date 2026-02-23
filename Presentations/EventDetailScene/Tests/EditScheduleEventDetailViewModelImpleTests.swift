@@ -20,7 +20,7 @@ import TestDoubles
 class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
-    private var spyScheduleUsecase: StubScheduleEventUsecase!
+    private var spyScheduleUsecase: PrivateStubScheduleEventUsecase!
     private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
     private var spyRouter: SpyEventDetailRouter!
@@ -698,6 +698,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.eventId, "exclude_event")
         XCTAssertEqual(savedDetail?.memo, "new_memo")
         XCTAssertEqual(savedDetail?.url, "new_url")
     }
@@ -747,6 +748,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.eventId, "exclude_event")
         XCTAssertEqual(savedDetail?.memo, "new_memo")
         XCTAssertEqual(savedDetail?.url, "new_url")
     }
@@ -792,6 +794,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.eventId, "branched_event")
         XCTAssertEqual(savedDetail?.memo, "new_memo")
         XCTAssertEqual(savedDetail?.url, "new_url")
     }
@@ -837,6 +840,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.eventId, "branched_event")
         XCTAssertEqual(savedDetail?.memo, "new_memo")
         XCTAssertEqual(savedDetail?.url, "new_url")
     }
@@ -885,6 +889,7 @@ extension EditScheduleEventDetailViewModelImpleTests {
         XCTAssertEqual(updateParams?.notificationOptions, [.atTime])
         
         let savedDetail = self.spyEventDetailDataUsecase.savedDetail
+        XCTAssertEqual(savedDetail?.eventId, "dummy_schedule")
         XCTAssertEqual(savedDetail?.memo, "new_memo")
         XCTAssertEqual(savedDetail?.url, "new_url")
     }
@@ -953,5 +958,25 @@ extension EditScheduleEventDetailViewModelImpleTests {
         
         // then
         self.wait(for: [expect], timeout: 0.1)
+    }
+}
+
+private final class PrivateStubScheduleEventUsecase: StubScheduleEventUsecase, @unchecked Sendable {
+    
+    override func updateScheduleEvent(_ eventId: String, _ params: SchedulePutParams) async throws -> ScheduleEvent {
+        let result = try await super.updateScheduleEvent(eventId, params)
+        
+        let replaceId: (String) -> ScheduleEvent = {
+            return ScheduleEvent(uuid: $0, name: params.name ?? result.name, time: params.time ?? result.time)
+        }
+        
+        switch params.repeatingUpdateScope {
+        case .all, .none:
+            return replaceId(eventId)
+        case .fromNow:
+            return replaceId("branched_event")
+        case .onlyThisTime:
+            return replaceId("exclude_event")
+        }
     }
 }

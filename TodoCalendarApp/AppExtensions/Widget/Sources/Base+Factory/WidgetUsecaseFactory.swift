@@ -93,10 +93,14 @@ extension WidgetUsecaseFactory {
             sqliteService: base.commonSqliteService,
             environmentStorage: base.userDefaultEnvironmentStorage
         )
+        let eventDetailLocalStorage = EventDetailDataLocalStorageImple<EventDetailDataTable>(
+            sqliteService: base.commonSqliteService
+        )
         let eventTagRepository = EventTagLocalRepositoryImple(
             localStorage: eventTagStorage,
             todoLocalStorage: todoLocalStorage,
             scheduleLocalStorage: scheduleStorage,
+            eventDetailLocalStorage: eventDetailLocalStorage
         )
         
         let foremostEventLocalStorage = ForemostLocalStorageImple(
@@ -118,9 +122,7 @@ extension WidgetUsecaseFactory {
         )
         
         let eventDetailRepository = EventDetailDataLocalRepostioryImple(
-            localStorage: EventDetailDataLocalStorageImple(
-                sqliteService: base.commonSqliteService
-            )
+            localStorage: eventDetailLocalStorage
         )
         
         return CalendarEventFetchUsecaseImple(

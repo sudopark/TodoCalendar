@@ -85,6 +85,10 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
                 self.appearance.showUnderLineOnEventDay = newSetting.showUnderLineOnEventDay
             }
             
+            if self.appearance.rowHeightOnCalendar != newSetting.rowHeight {
+                self.appearance.rowHeightOnCalendar = newSetting.rowHeight
+            }
+            
             // evnet on calendar
             if self.appearance.eventOnCalenarTextAdditionalSize != newSetting.eventOnCalenarTextAdditionalSize {
                 self.appearance.eventOnCalenarTextAdditionalSize = newSetting.eventOnCalenarTextAdditionalSize
@@ -368,7 +372,8 @@ extension ApplicationRootRouter {
     private func eventListSceneBuilder() -> any EventListSceneBuiler {
         return EventListSceneBuilerImple(
             usecaseFactory: self.usecaseFactory, 
-            viewAppearance: self.viewAppearanceStore.appearance
+            viewAppearance: self.viewAppearanceStore.appearance,
+            eventDetailSceneBuilder: self.eventDetailSceneBuilder()
         )
     }
 }

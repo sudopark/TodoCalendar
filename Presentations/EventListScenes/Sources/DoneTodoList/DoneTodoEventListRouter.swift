@@ -20,11 +20,18 @@ protocol DoneTodoEventListRouting: Routing, Sendable {
     func showSelectRemoveDoneTodoRangePicker(
         _ selected: @Sendable @escaping (RemoveDoneTodoRange) -> Void
     )
+    
+    func routeToDoneTodoDetail(_ eventId: String)
 }
 
 // MARK: - Router
 
 final class DoneTodoEventListRouter: BaseRouterImple, DoneTodoEventListRouting, @unchecked Sendable {
+    
+    private let eventDetailSceneBuilder: any EventDetailSceneBuilder
+    init(eventDetailSceneBuilder: any EventDetailSceneBuilder) {
+        self.eventDetailSceneBuilder = eventDetailSceneBuilder
+    }
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
         Task { @MainActor in
@@ -60,6 +67,16 @@ extension DoneTodoEventListRouter {
                 UIAlertAction(title: "common.cancel".localized(), style: .cancel)
             )
             self.currentScene?.present(actionSheet, animated: true)
+        }
+    }
+    
+    func routeToDoneTodoDetail(_ eventId: String) {
+        Task { @MainActor in
+            let next = self.eventDetailSceneBuilder.makeDoneTodoDetailScene(
+                eventId,
+                self.currentScene?.interactor
+            )
+            self.currentScene?.present(next, animated: true)
         }
     }
 }

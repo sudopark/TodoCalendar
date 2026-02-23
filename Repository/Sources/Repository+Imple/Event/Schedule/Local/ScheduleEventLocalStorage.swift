@@ -22,6 +22,8 @@ public protocol ScheduleEventLocalStorage: Sendable {
     func removeScheduleEvents(_ eventIds: [String]) async throws
     func removeAll() async throws
     func removeSchedulesWith(tagId: String) async throws -> [String]
+    
+    func removeScheduleDetail(_ eventId: String) async throws
 }
 
 extension ScheduleEventLocalStorage {
@@ -146,6 +148,17 @@ extension ScheduleEventLocalStorageImple {
     }
 }
 
+extension ScheduleEventLocalStorageImple {
+    
+    private typealias Detail = EventDetailDataTable
+    
+    public func removeScheduleDetail(_ eventId: String) async throws {
+        try await self.sqliteService.async.run { db in
+            let query = Detail.delete().where { $0.uuid == eventId }
+            try db.delete(Detail.self, query: query)
+        }
+    }
+}
 
 private extension ScheduleEvent {
     

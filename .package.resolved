@@ -222,8 +222,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/sudopark/SQLiteService.git",
       "state" : {
-        "revision" : "0c3c7b769e34501bbd2c57634f73f0ee9299dc2d",
-        "version" : "0.3.1"
+        "revision" : "d52bb1b4427f642b6802479345b10a5d982deb53",
+        "version" : "0.3.2"
       }
     },
     {

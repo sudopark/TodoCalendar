@@ -28,6 +28,7 @@ public protocol TodoEventUsecase {
     func refreshTodoEvents(in period: Range<TimeInterval>)
     func todoEvents(in period: Range<TimeInterval>) -> AnyPublisher<[TodoEvent], Never>
     func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error>
+    func doneTodoEvent(_ id: String) -> AnyPublisher<DoneTodoEvent, any Error>
     func removeDoneTodos(_ scope: RemoveDoneTodoScope) async throws
     
     func refreshUncompletedTodos()
@@ -145,12 +146,12 @@ extension TodoEventUsecaseImple {
     }
     
     public func revertCompleteTodo(_ doneId: String) async throws -> TodoEvent {
-        let reverted = try await self.todoRepository.revertDoneTodo(doneId)
+        let result = try await self.todoRepository.revertDoneTodo(doneId)
         let todoKey = ShareDataKeys.todos.rawValue
         self.sharedDataStore.update([String: TodoEvent].self, key: todoKey) {
-            ($0 ?? [:]) |> key(reverted.uuid) .~ reverted
+            ($0 ?? [:]) |> key(result.revertTodo.uuid) .~ result.revertTodo
         }
-        return reverted
+        return result.revertTodo
     }
     
     public func removeTodo(_ id: String, onlyThisTime: Bool) async throws {
@@ -264,6 +265,10 @@ extension TodoEventUsecaseImple {
         return self.todoRepository.todoEvent(id)
             .handleEvents(receiveOutput: updateStore)
             .eraseToAnyPublisher()
+    }
+    
+    public func doneTodoEvent(_ id: String) -> AnyPublisher<DoneTodoEvent, any Error> {
+        return self.todoRepository.loadDoneTodoEvent(id)
     }
 }
 

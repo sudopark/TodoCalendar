@@ -392,8 +392,10 @@ extension EditTodoEventDetailViewModelImple: EventDetailInputListener {
         Task { [weak self] in
             
             do {
-                let _ = try await self?.todoUsecase.updateTodoEvent(todoId, params)
-                let _ = try? await self?.eventDetailDataUsecase.saveDetail(addition)
+                let updatedTodo = try await self?.todoUsecase.updateTodoEvent(todoId, params)
+                
+                let copyAddition = updatedTodo.map { addition.copy($0.uuid) } ?? addition
+                let _ = try? await self?.eventDetailDataUsecase.saveDetail(copyAddition)
                 
                 self?.router?.showToast("eventDetail.todoEvent_saved::message".localized())
                 self?.router?.closeScene(animate: true, nil)

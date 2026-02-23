@@ -93,8 +93,12 @@ class TemporaryUserDataMigrationRepositoryImpleTests: BaseLocalTests {
         let detail1 = EventDetailData("todo1")
             |> \.memo .~ "memo"
             |> \.place .~ .init("place", .init(200, 300))
-        let detailStorage = EventDetailDataLocalStorageImple(sqliteService: self.sqliteService)
+        let detailStorage = EventDetailDataLocalStorageImple<EventDetailDataTable>(sqliteService: self.sqliteService)
         try await detailStorage.saveDetail(detail1)
+        
+        let doneTodoDetail1 = EventDetailData(done1.uuid)
+        let doneTodoDetailStorage = EventDetailDataLocalStorageImple<DoneTodoEventDetailTable>(sqliteService: self.sqliteService)
+        try await doneTodoDetailStorage.saveDetail(doneTodoDetail1)
     }
     
     private func makeRepository(withoutData: Bool = false) async throws -> TemporaryUserDataMigrationRepositoryImple {
@@ -185,8 +189,11 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         try await repository.migrateDoneEvents()
         
         // then
-        let doneIds = self.stubRemote.didRequestedParams?.keys.sorted().map { $0 }
-        XCTAssertEqual(doneIds, ["d1", "d2"])
+        let paths = self.stubRemote.didRequestedPaths
+        XCTAssertEqual(paths, [
+            "dummy_calendar_api_host/v1/migration/todos/done",
+            "dummy_calendar_api_host/v1/migration/todos/done/details"
+        ])
     }
     
     func testReposiotry_clearTempUserData() async throws {
@@ -268,7 +275,12 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
                 method: .post,
                 endpoint: MigrationEndpoints.doneTodos,
                 resultJsonString: .success(self.okReponse)
-            )
+            ),
+            .init(
+                method: .post,
+                endpoint: MigrationEndpoints.doneTodoDetails,
+                resultJsonString: .success(self.okReponse)
+            ),
         ]
     }
 }

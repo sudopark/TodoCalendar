@@ -39,6 +39,7 @@
 "date_form::MMM_d" = "MMM d일";
 "date_form::yyyy_MM_dd_E_" = "yyyy.MM.dd (E)";
 "date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd HH:mm";
+"date_form:yyyy.MM_dd_hh:mm" = "yyyy.MM.dd h:mm a";
 "date_form.yyyy" = "yyyy";
 "date_form.MMM_dd_E" = "MMM dd일 (E)";
 "date_form.HH:mm" = "HH:mm";
@@ -244,6 +245,8 @@
 "eventDetail.scheduleEvent::transform::todo" = "전환";
 "eventDetail.scheduleEvent::transform::todo_message" = "이 일정을 할일으로 전환할까요?";
 
+"eventDetail::revert" = "완료 취소";
+
 // MARK: - Google calendar event
 
 "eventDetail::gogoleEvent::viewOnCalendar" = "구글 캘린더에서 보기";
@@ -352,6 +355,10 @@
 "setting.appearance.calendar.underline" = "이벤트있는 날에 밑줄표시";
 "setting.appearance.event.edit::name_old" = "이벤트 수정";
 "setting.appearance.event.edit::name" = "이벤트 설정 및 외부 캘린더";
+"setting.appearance.day_row_height" = "에빈트에 표시되는 정보의 양";
+"setting.appearance.day_row_height::small::text" = "최소한";
+"setting.appearance.day_row_height::medium::text" = "보통";
+"setting.appearance.day_row_height::large::text" = "모두";
 "setting.appearance.event.fontSize" = "이벤트 글자 크기";
 "setting.appearance.event.show_holidayName" = "공휴일 표시";
 "setting.appearance.event.show_lunar" = "음력 표시";
@@ -359,7 +366,8 @@
 "setting.appearance.event.sample::name" = "🥗 이벤트 이름";
 "setting.appearance.event.sample::description" = "설명";
 "setting.appearance.event.sample::christmas" = "크리스마스";
-"setting.appearance.event.sample::sometime" = "특정시간";
+"setting.appearance.event.sample::first" = "첫번째 이벤트";
+"setting.appearance.event.sample::second" = "두번째 이벤트";
 "setting.appearance.event.sample::uncompleted_todo::toggle" = "완료되지 않은 할일 보기";
 "setting.appearance.widget::title" = "위젯 테마";
 "setting.appearance.widget::useSystemTheme::title" = "시스템 테마";

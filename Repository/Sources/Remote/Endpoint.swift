@@ -157,6 +157,7 @@ enum EventTagEndpoints: Endpoint {
     case make
     case tag(id: String)
     case tagAndEvents(id: String)
+    case tagWithEvents(id: String)
     case tags
     case allTags
     
@@ -164,7 +165,8 @@ enum EventTagEndpoints: Endpoint {
         switch self {
         case .make: return "tag"
         case .tag(let id): return "tag/\(id)"
-        case .tagAndEvents(id: let id): return "tag_and_events/\(id)"
+        case .tagAndEvents(let id): return "tag_and_events/\(id)"
+        case .tagWithEvents(let id): return "tag_with_events/\(id)"
         case .tags: return ""
         case .allTags: return "all"
         }
@@ -176,10 +178,12 @@ enum EventTagEndpoints: Endpoint {
 
 enum EventDetailEndpoints: Endpoint {
     case detail(eventId: String)
+    case doneTodoDetail(eventId: String)
     
     var subPath: String {
         switch self {
         case .detail(let eventId): return "\(eventId)"
+        case .doneTodoDetail(let eventId): return "done/\(eventId)"
         }
     }
 }
@@ -204,6 +208,7 @@ enum MigrationEndpoints: Endpoint {
     case schedules
     case eventDetails
     case doneTodos
+    case doneTodoDetails
     
     var subPath: String {
         switch self {
@@ -212,6 +217,7 @@ enum MigrationEndpoints: Endpoint {
         case .schedules: return "schedules"
         case .eventDetails: return "event_details"
         case .doneTodos: return "todos/done"
+        case .doneTodoDetails: return "todos/done/details"
         }
     }
 }
@@ -316,11 +322,11 @@ public struct RemoteEnvironment: Sendable {
             return "\(calendarAPIHost)/v1/user/\(user.subPath)"
             
         case let todo as TodoAPIEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/todos"
+            let prefix = "\(calendarAPIHost)/v2/todos"
             return appendSubpathIfNotEmpty(prefix, todo.subPath)
             
         case let schedule as ScheduleEventEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/schedules"
+            let prefix = "\(calendarAPIHost)/v2/schedules"
             return appendSubpathIfNotEmpty(prefix, schedule.subPath)
             
         case let foremost as ForemostEventEndpoints:
@@ -328,7 +334,7 @@ public struct RemoteEnvironment: Sendable {
             return appendSubpathIfNotEmpty(prefix, foremost.subPath)
             
         case let eventTag as EventTagEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/tags"
+            let prefix = "\(calendarAPIHost)/v2/tags"
             return appendSubpathIfNotEmpty(prefix, eventTag.subPath)
             
         case let detail as EventDetailEndpoints:

@@ -90,6 +90,7 @@ extension ScheduleEventLocalRepositoryImple {
         try await self.localStorage.removeScheduleEvent(eventId)
         
         guard let onlyThisTime else {
+            try? await self.localStorage.removeScheduleDetail(eventId)
             return RemoveSheduleEventResult()
         }
         

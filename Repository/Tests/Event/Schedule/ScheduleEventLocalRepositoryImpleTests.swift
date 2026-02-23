@@ -12,6 +12,7 @@ import Optics
 import Domain
 import AsyncFlatMap
 import UnitTestHelpKit
+import SQLiteService
 
 @testable import Repository
 
@@ -117,12 +118,25 @@ extension ScheduleEventLocalRepositoryImpleTests {
 
 extension ScheduleEventLocalRepositoryImpleTests {
     
+    typealias Detail = EventDetailDataTable
+    
     func makeRepositoryWithStubSchedule(
         _ schedule: ScheduleEvent
     ) async throws -> any ScheduleEventRepository {
         let repository = self.makeRepository()
         try await self.localStorage.saveScheduleEvent(schedule)
+        let detail = EventDetailData(schedule.eventId)
+        try await self.sqliteService.async.run { db in
+            try db.insertOne(Detail.self, entity: detail, shouldReplace: false)
+        }
         return repository
+    }
+    
+    private func scheduleDetail(_ id: String) async throws -> EventDetailData? {
+        return try await self.sqliteService.async.run { db in
+            let query = Detail.selectAll { $0.uuid == id }
+            return try db.loadOne(Detail.self, query: query)
+        }
     }
  
     func testReposiotry_removeSchedule_withoutNextRepeating() async throws {
@@ -135,6 +149,8 @@ extension ScheduleEventLocalRepositoryImpleTests {
         
         // then
         XCTAssertNil(result.nextRepeatingEvnet)
+        let detail = try? await scheduleDetail("some")
+        XCTAssertNil(detail)
     }
     
     func testRepository_removeSchedule_withNextRepeating() async throws {
@@ -147,9 +163,11 @@ extension ScheduleEventLocalRepositoryImpleTests {
         
         // then
         XCTAssertNotNil(result.nextRepeatingEvnet)
+        let detail = try? await scheduleDetail("some")
+        XCTAssertNotNil(detail)
     }
     
-    func testRepository_removeRepeatingTodo() async throws {
+    func testRepository_removeRepeatingSchedule() async throws {
         // given
         let schedule = self.makeDummySchedule(id: "some", time: 0, from: 0)
         let repository = try await self.makeRepositoryWithStubSchedule(schedule)
@@ -159,6 +177,8 @@ extension ScheduleEventLocalRepositoryImpleTests {
         
         // then
         XCTAssertNil(result.nextRepeatingEvnet)
+        let detail = try? await scheduleDetail("some")
+        XCTAssertNil(detail)
     }
 }
 
