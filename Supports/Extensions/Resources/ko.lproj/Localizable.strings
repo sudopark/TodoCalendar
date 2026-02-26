@@ -131,7 +131,7 @@
 "calendar::event::more_action:foremost:unmark:item_name" = "제일 중요 이벤트 해제";
 "calendar::event::more_action:copy:item_name" = "이벤트 복사";
 "calendar::event::more_action:transform_to::schedule" = "일정으로 전환";
-"calendar::event::more_action:transform_to::todo" = "할일으로 전환";
+"calendar::event::more_action:transform_to::todo" = "할일로 전환";
 "calendar::event::more_action:edit:item_name" = "수정";
 "calednar::event::add_new" = "새 이벤트 추가";
 "calednar::event::add_new:place_holder" = "새로운 할일을 등록하세요.";
@@ -223,7 +223,7 @@
 "eventDetail.notSupport::holiday" = "공휴일은 정보 수정 기능을 지원하지 않습니다.";
 
 "eventDetail:todo:guide:message1" = "할일 이벤트는 해야할 일을 나타냅니다.";
-"eventDetail:todo:guide:message2" = "달력에 특정 시간(혹은 기간)과 함께 표시되는 일반 일정과는 달리 할일 이벤트는 완료 여부를 체트할 수 있는 기능을 제공합니다.";
+"eventDetail:todo:guide:message2" = "달력에 특정 시간(혹은 기간)과 함께 표시되는 일반 일정과는 달리 할일 이벤트는 완료 여부를 체크할 수 있는 기능을 제공합니다.";
 "eventDetail:todo:guide:message3" = "지정된 시간 정보가 없이도 할일 이벤트를 등록할 수 있습니다. 당장은 아니지만 빠른시일내에 처리해야하는 작업을 기록하는 케이스를 예로 들 수 있습니다.";
 "eventDetail:todo:guide:process:message" = "할일 이벤트는 일반 일정과 달리 반복옵션이 켜진 경우에 다음과 같이 동작합니다.";
 "eventDetail:todo:guide:process:bullet1" = "현재 혹은 아직 완료하지않은 과거의 반복 할일 이벤트가 달력에 노출됩니다.";
@@ -243,7 +243,7 @@
 "eventDetail.todoEvent::transform::schedule_title" = "전환";
 "eventDetail.todoEvent::transform::schedule_message" = "이 할일을 일정으로 전환할까요?";
 "eventDetail.scheduleEvent::transform::todo" = "전환";
-"eventDetail.scheduleEvent::transform::todo_message" = "이 일정을 할일으로 전환할까요?";
+"eventDetail.scheduleEvent::transform::todo_message" = "이 일정을 할일로 전환할까요?";
 
 "eventDetail::revert" = "완료 취소";
 
@@ -255,7 +255,7 @@
 "eventDetail::gogoleEvent::attendee::unknown" = "알수없음";
 "eventDetail::gogoleEvent::attendees" = "참석자 (%d명)";
 "eventDetail::gogoleEvent::attendees::organizer" = "주최자";
-"eventDetail::gogoleEvent::conference::accessCode" = "어세스 코드";
+"eventDetail::gogoleEvent::conference::accessCode" = "액세스 코드";
 "eventDetail::gogoleEvent::conference::meetingCode" = "미팅코드";
 "eventDetail::gogoleEvent::conference::passCode" = "패스코드";
 "eventDetail::gogoleEvent::conference::password" = "비밀번호";
@@ -379,8 +379,8 @@
 "setting.timezone::title" = "타임존";
 "setting.timezone::systemTimeZone::name" = "시스템 타임존";
 "setting.timezone::systemTime::name" = "시스템 시간";
-"setting.haptic::name" = "햅티 피드백";
-"setting.minimize_animation::name" = "에니메이션 효과 최소화";
+"setting.haptic::name" = "햅틱 피드백";
+"setting.minimize_animation::name" = "애니메이션 효과 최소화";
 "setting.holiday.title" = "공휴일";
 "setting.holiday.item::name" = "공휴일 설정";
 "setting.holiday.list::sectionTitle" = "공휴일";

@@ -9,7 +9,7 @@
 
 // MARK: - common
 "common::and" = " and";
-"common::wait:message" = "Wait please..";
+"common::wait:message" = "Please wait...";
 "common::back" = "Back";
 "common.remove" = "Remove";
 "common.confirm" = "Confirm";
@@ -98,8 +98,8 @@
 "event_notification_setting::option_title::before_hours" = "%d hour(s) before the event";
 "event_notification_setting::option_title::before_days" = "%d day(s) before the event";
 "event_notification_setting::option_title::before_weeks" = "%d week(s) before the event";
-"event_notification_setting::option_title::allday_9am_before_days" = "At 9:00 AM %d day(s) ago";
-"event_notification_setting::option_title::allday_9am_before_weeks" = "At 9:00 AM %d week(s) ago";
+"event_notification_setting::option_title::allday_9am_before_days" = "At 9:00 AM, %d day(s) before";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "At 9:00 AM, %d week(s) before";
 "event_notification_setting::need_permission_message" = "To use the event notification feature, you need the notification permission.\nGo to the System App Settings and allow notifications.";
 "event_notification_setting::need_permission::go_setting" = "Go to settings";
 "event_notification_setting::need_permission_title" = "Info";
@@ -114,17 +114,17 @@
 "calendar::event_time::todo" = "Todo";
 "calendar::event_time::allday" = "All day";
 "calendar::event_time::allday::with" = "%@ all day";
-"calendar::event_time::period:some_days" = "%ddays";
-"calendar::event_time::period:some_minutes" = "%dminutes";
-"calendar::event_time::period:some_hours" = "%dhours";
-"calendar::event_time::period:some_days:some_hours" = "%ddays %dhours";
+"calendar::event_time::period:some_days" = "%d days";
+"calendar::event_time::period:some_minutes" = "%d minutes";
+"calendar::event_time::period:some_hours" = "%d hours";
+"calendar::event_time::period:some_days:some_hours" = "%d days %d hours";
 "calendar::event::more_action::remove:title" = "Remove Event";
 "calendar::event::more_action::foremost_event:title" = "Foremost event";
 "calendar::event::more_action::remove_only_thistime:message" = "Do you want to delete only this event from all repeating events?";
 "calendar::event::more_action::remove:message" = "Do you want to remove this event?";
 "calendar::event::more_action::mark_as_foremost" = "Do you want to mark this event as your most important event?";
 "calendar::event::more_action::unmark_as_foremost" = "Do you want to unmark this event as your most important event?";
-"calendar::event::more_action::mark_as_foremost::unavail" = "Repeating schedule event cannot be marked as the most important events.";
+"calendar::event::more_action::mark_as_foremost::unavail" = "A repeating schedule event cannot be marked as the most important event.";
 "calendar::event::more_action:remove_only_thistime:item_name" = "Remove only this event";
 "calendar::event::more_action:remove:item_name" = "Remove event";
 "calendar::event::more_action:foremost:mark:item_name" = "Mark as foremost";
@@ -152,7 +152,7 @@
 "eventDetail.repeating.notRepeating::title" = "No repeats";
 "eventDetail.repeating.starttime:form" = "MMM d, yyyy";
 "eventDetail.repeating.starttime:title" = "Repeat start time";
-"eventDetail.repeating.everyDay:title" = "Everyday";
+"eventDetail.repeating.everyDay:title" = "Every day";
 "eventDetail.repeating.everyWeek:title" = "Every Week";
 "eventDetail.repeating.everyWeekSomeDay:title" = "Every %@";
 "eventDetail.repeating.everySomeWeek:title" = "Every %d Weeks";
@@ -163,22 +163,22 @@
 "eventDetail.repeating.everyYear:title" = "Every Year";
 "eventDetail.repeating.lunarCalendar_everyYear:title" = "Every year (lunar calendar)";
 "eventDetail.repeating.everyYearSomeDay:title" = "Every Year %@";
-"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Lunar calednar every Year %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Every year %@ (lunar calendar)";
 "eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "All days of the last week of every month";
 "eventDetail.repeating.every1WeekOfEveryMonth::someday" = "The first %@ of every month";
 "eventDetail.repeating.every2WeekOfEveryMonth::someday" = "The second %@ of every month";
 "eventDetail.repeating.every3WeekOfEveryMonth::someday" = "The third %@ of every month";
 "eventDetail.repeating.every4WeekOfEveryMonth::someday" = "The fourth %@ of every month";
 "eventDetail.repeating.every5WeekOfEveryMonth::someday" = "The fifth %@ of every month";
-"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "The Sixth %@ of every month";
-"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "The Seventh %@ of every month";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "The sixth %@ of every month";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "The seventh %@ of every month";
 "eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "The last %@ of every month";
 "eventDetail.repeating.endtime::title" = "Repeat Ends";
 "eventDetail.repeating.endtime::option::never" = "Never";
 "eventDetail.repeating.endtime::option::on" = "On";
 "eventDetail.repeating.endtime::option::after" = "After";
 "eventDetail.repeating.endtime::option::after_occurrences" = "occurrences";
-"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "The repeat end time must be in the future than the start time.\n(Repeat start date: %@)";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "The repeat end time must be later than the start time.\n(Repeat start date: %@)";
 "eventDetail.repeating::period_endcount" = "Starting %@ %d times";
 
 "eventDetail.repeating.everyNDays:title" = "Every %d Days";
@@ -230,7 +230,7 @@
 "eventDetail:todo:guide:process:bullet2" = "When a to-do event is completed, the event is added to the list of completed events and the next repeat event is newly added on the calendar.";
 "eventDetail:todo:guide:process:bullet3" = "If there is no next repetition due to the repetition end time, the repeat to-do event ends.";
 "eventDetail:foremost:guide:message1" = "Mark an event as foremost to emphasize that it is the most important event.\nThe foremost event is always visible in the calendar and supports a separate widget.";
-"eventDetail:foremost:guide:supports:message" = "The following are the types of events you can register for as your foremost event:";
+"eventDetail:foremost:guide:supports:message" = "The following event types can be set as the foremost event:";
 "eventDetail:foremost:guide:supports:todo" = "To-do event";
 "eventDetail:foremost:guide:supports:notRepeating_schedule" = "Non-repeating scheduled events";
 
@@ -238,8 +238,8 @@
 "eventDetail:hasChanges:confirm:message" = "There are changes. Do you want to discard them?";
 "eventDetail:hasChanges:confirm:continue" = "Keep editing";
 
-"eventDetail.unavailto_transform_withoutName" = "Please enter a name to convert events.";
-"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Time information is required to convert to schedule.";
+"eventDetail.unavailto_transform_withoutName" = "Please enter a name to convert the event.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Time information is required to convert to a schedule.";
 "eventDetail.todoEvent::transform::schedule_title" = "Convert";
 "eventDetail.todoEvent::transform::schedule_message" = "Would you like to convert this to-do to a schedule?";
 "eventDetail.scheduleEvent::transform::todo" = "Convert";
@@ -256,7 +256,7 @@
 "eventDetail::gogoleEvent::attendees" = "Attendees (%d people)";
 "eventDetail::gogoleEvent::attendees::organizer" = "Organizer";
 "eventDetail::gogoleEvent::conference::accessCode" = "Access Code";
-"eventDetail::gogoleEvent::conference::meetingCode" = "Metting Code";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Meeting Code";
 "eventDetail::gogoleEvent::conference::passCode" = "Pass Code";
 "eventDetail::gogoleEvent::conference::password" = "Password";
 "eventDetail::gogoleEvent::copy::message" = "Copied to clipboard.";
@@ -306,16 +306,16 @@
 "manage_account::email" = "Email";
 "manage_account::last_signedIn_at" = "Last login time";
 "manage_account::migration::title" = "Migrate temporary user data";
-"manage_account::migration::description" = "All events created before logging in (%d event(s)) are being migrated to the logged in account.\nEvents that are attributed to a user can be accessed regardless of the device.";
+"manage_account::migration::description" = "All events created before logging in (%d event(s)) are being migrated to your account.\nEvents linked to your account can be accessed from any device.";
 "manage_account::migration_finished::message" = "Migration is complete!";
 "manage_account::signout_button::title" = "Logout";
 "manage_account::sign_out::confirm::title" = "Logout";
 "manage_account::sign_out::confirm::message" = "Do you want to log out of your current account?";
 "manage_account::delete_account_button::title" = "Delete Account";
 "manage_account::delete_account_button::confirm:message" = "Are you sure you want to delete your account?";
-"manage_account::delete_account_button::description" = "After requesting account deletion, your account will be deleted.\Once deleted, account information cannot be recovered.";
+"manage_account::delete_account_button::description" = "After requesting account deletion, your account will be deleted.\nOnce deleted, account information cannot be recovered.";
 "signIn::title" = "Login";
-"signIn:description" = "Backup your event list and sync it across other iOS devices\n(Supported platforms will be expanded.)";
+"signIn:description" = "Back up your event list and sync it across other iOS devices\n(Supported platforms will be expanded.)";
 
 
 // MARK: - setting
@@ -327,7 +327,7 @@
 
 "event_setting::eventSync" = "Event Sync";
 "event_setting::eventSync::readyToSync::description" = "Synchronize backed up user events.";
-"event_setting::eventSync::syncInProgress::description" = "Synchronizing backed up user events..";
+"event_setting::eventSync::syncInProgress::description" = "Synchronizing backed up user events...";
 "event_setting::eventSync::lastTime" = "Latest synchronized data time: %@";
 "event_setting::eventSync::force" = "Force Sync";
 
@@ -409,14 +409,14 @@
 // MARK: - external service
 
 "external_service.name::google" = "Google Calendar";
-"external_service.expired::message" = "%@ integration has expired. Please go to Settings and try again";
+"external_service.expired::message" = "%@ integration has expired. Please go to Settings and try again.";
 "external_service::google::hidden_event" = "Hidden";
 "external_service::google::unknown_event" = "Unknown";
 
 
 // MARK: - widget
 
-"widget.common::explain" = "Check out our upcoming events.";
+"widget.common::explain" = "View your upcoming events.";
 "widget.doubleMonth::name" = "Calendar + Calendar";
 "widget.eventAndMonth::name" = "Events + Calendar";
 "widget.todayAndMonth::name" = "TODAY + Calendar";
@@ -428,7 +428,7 @@
 "widget.events.sample::example" = "Holiday";
 "widget.events.sample::running" = "Running";
 "widget.events.sample::luch" = "Lunch";
-"widget.events.sample::luch_appointment" = "Lunch appointment(can't be late)";
+"widget.events.sample::luch_appointment" = "Lunch appointment (can't be late)";
 "widget.events.sample::call" = "Call Sara";
 "widget.events.sample::surfing" = "Surfing";
 "widget.events.sample::moving" = "Moving day";
