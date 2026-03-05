@@ -104,14 +104,16 @@ extension TodoLocalRepositoryImple {
         let enumerator = EventRepeatTimeEnumerator(
             repeating.repeatOption, endOption: repeating.repeatingEndOption)
         guard let nextEventTime = enumerator?.nextEventTime(
-            from: .init(time: time, turn: 0),
+            from: .init(time: time, turn: origin.repeatingTurn ?? 1),
             until: repeating.repeatingEndOption?.endTime
         )
         else {
             throw RuntimeError(key: ClientErrorKeys.repeatingIsEnd.rawValue, "repeaitng end")
         }
-        
-        let nextTodo = origin |> \.time .~ nextEventTime.time
+
+        let nextTodo = origin
+            |> \.time .~ nextEventTime.time
+            |> \.repeatingTurn .~ nextEventTime.turn
         try await self.localStorage.updateTodoEvent(nextTodo)
         return nextTodo
     }

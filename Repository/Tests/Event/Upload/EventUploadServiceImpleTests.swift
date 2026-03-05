@@ -551,11 +551,11 @@ extension PrivateStubRemote: TodoRemote {
     }
     
     
-    func completeTodo(origin: TodoEvent, nextTime: EventTime?) async throws -> CompleteTodoResult {
+    func completeTodo(origin: TodoEvent, nextTime: EventTime?, nextTurn: Int?) async throws -> CompleteTodoResult {
         throw RuntimeError("failed")
     }
-    
-    func replaceRepeatingTodo(origin: TodoEvent, to newParams: TodoMakeParams, nextTime: EventTime?) async throws -> ReplaceRepeatingTodoEventResult {
+
+    func replaceRepeatingTodo(origin: TodoEvent, to newParams: TodoMakeParams, nextTime: EventTime?, nextTurn: Int?) async throws -> ReplaceRepeatingTodoEventResult {
         throw RuntimeError("failed")
     }
     
