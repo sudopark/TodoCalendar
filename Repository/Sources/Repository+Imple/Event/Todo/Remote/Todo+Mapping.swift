@@ -19,7 +19,8 @@ enum TodoCodingKeys: String, CodingKey {
     case time = "event_time"
     case repeating
     case notificationOptions = "notification_options"
-    
+    case repeatingTurn = "repeating_turn"
+
     // done
     case originEventId = "origin_event_id"
     case doneAt = "done_at"
@@ -47,7 +48,7 @@ extension TodoMakeParams {
 }
 
 extension TodoEditParams {
-    
+
     func asJson() -> [String: Any] {
         var sender = [String: Any]()
         sender[Key.name.rawValue] = self.name
@@ -61,6 +62,7 @@ extension TodoEditParams {
                 .map { EventNotificationTimeOptionMapper(option: $0) }
                 .map { try? $0.asJson() }
         }
+        sender[Key.repeatingTurn.rawValue] = self.repeatingTurn
         return sender
     }
 }
@@ -68,21 +70,24 @@ extension TodoEditParams {
 struct DoneTodoEventParams {
     private let origin: TodoEvent
     private let nextTime: EventTime?
-    
-    init(_ origin: TodoEvent, _ nextTime: EventTime?) {
+    private let nextTurn: Int?
+
+    init(_ origin: TodoEvent, _ nextTime: EventTime?, _ nextTurn: Int?) {
         self.origin = origin
         self.nextTime = nextTime
+        self.nextTurn = nextTurn
     }
-    
+
     func asJson() -> [String: Any] {
         let params = TodoMakeParams()
             |> \.name .~ self.origin.name
             |> \.eventTagId .~ self.origin.eventTagId
             |> \.time .~ self.origin.time
             |> \.notificationOptions .~ pure(self.origin.notificationOptions)
-        
+
         return ["origin": params.asJson() ]
             |> key("next_event_time") .~ self.nextTime.map { EventTimeMapper(time: $0).asJson() }
+            |> key("next_repeating_turn") .~ self.nextTurn
     }
 }
 
@@ -115,16 +120,19 @@ struct DoneTodoPutParams {
 struct ReplaceRepeatingTodoEventParams {
     private let newParams: TodoMakeParams
     private let nextTime: EventTime?
-    
-    init(_ newParams: TodoMakeParams, _ nextTime: EventTime?) {
+    private let nextTurn: Int?
+
+    init(_ newParams: TodoMakeParams, _ nextTime: EventTime?, _ nextTurn: Int?) {
         self.newParams = newParams
         self.nextTime = nextTime
+        self.nextTurn = nextTurn
     }
-    
+
     func asJson() -> [String: Any] {
         let payload: [String: Any] = ["new": self.newParams.asJson()]
         return payload
-        |> key("origin_next_event_time") .~ self.nextTime.map { EventTimeMapper(time: $0).asJson() }
+            |> key("origin_next_event_time") .~ self.nextTime.map { EventTimeMapper(time: $0).asJson() }
+            |> key("next_repeating_turn") .~ self.nextTurn
     }
 }
 
@@ -144,6 +152,7 @@ struct TodoEventMapper: Decodable {
         todo.time = try? container.decode(EventTimeMapper.self, forKey: .time).time
         todo.repeating = try? container.decode(EventRepeatingMapper.self, forKey: .repeating).repeating
         todo.notificationOptions = (try? container.decode([EventNotificationTimeOptionMapper].self, forKey: .notificationOptions).map { $0.option }) ?? []
+        todo.repeatingTurn = try? container.decode(Int.self, forKey: .repeatingTurn)
         self.todo = todo
     }
 }

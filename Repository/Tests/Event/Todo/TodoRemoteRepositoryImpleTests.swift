@@ -839,7 +839,8 @@ extension TodoRemoteRepositoryImpleTestsV2 {
         // then
         let params = self.stubRemote.didRequestedParams ?? [:]
         let timeParams = params["event_time"] as? [String: Any]
-        #expect(params.count == 1)
+        #expect(params["event_time"] as? [String: Any] != nil)
+        #expect(params["repeating_turn"] as? Int != nil)
         #expect(timeParams != nil)
         #expect(next != nil)
     }

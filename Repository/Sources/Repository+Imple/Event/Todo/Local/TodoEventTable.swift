@@ -23,7 +23,8 @@ struct TodoEventTable: Table {
         case repeatingEnd = "repeating_end"
         case notificationOptions = "notification_options"
         case repeatingEndCount = "repeating_count"
-        
+        case repeatingTurn = "repeating_turn"
+
         var dataType: ColumnDataType {
             switch self {
             case .uuid: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
@@ -35,6 +36,7 @@ struct TodoEventTable: Table {
             case .repeatingEnd: return .real([])
             case .notificationOptions: return .text([])
             case .repeatingEndCount: return .integer([])
+            case .repeatingTurn: return .integer([])
             }
         }
     }
@@ -47,6 +49,8 @@ struct TodoEventTable: Table {
         switch version {
         case 0:
             return Self.addColumnStatement(.repeatingEndCount)
+        case 5:
+            return Self.addColumnStatement(.repeatingTurn)
         default: return nil
         }
     }
@@ -71,6 +75,8 @@ struct TodoEventTable: Table {
             return data.flatMap { String(data: $0, encoding: .utf8) }
         case .repeatingEndCount:
             return entity.repeating?.repeatingEndOption?.endCount
+        case .repeatingTurn:
+            return entity.repeatingTurn
         }
     }
     
@@ -90,7 +96,8 @@ extension TodoEvent: RowValueType {
         let end: Double? = cursor.next()
         let notificationOptionText: String? = cursor.next()
         let endCount: Int? = cursor.next()
-        
+        let repeatingTurn: Int? = cursor.next()
+
         let notificationOpionMappers = notificationOptionText?.data(using: .utf8)
             .flatMap {
                 try? JSONDecoder().decode([EventNotificationTimeOptionMapper].self, from: $0)
@@ -114,6 +121,7 @@ extension TodoEvent: RowValueType {
         } else if let endCount {
             self.repeating?.repeatingEndOption = .count(endCount)
         }
+        self.repeatingTurn = repeatingTurn
     }
 }
 
