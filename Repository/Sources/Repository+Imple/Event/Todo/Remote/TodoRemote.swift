@@ -23,13 +23,15 @@ public protocol TodoRemote: Sendable {
     
     func completeTodo(
         origin: TodoEvent,
-        nextTime: EventTime?
+        nextTime: EventTime?,
+        nextTurn: Int?
     ) async throws -> CompleteTodoResult
-    
+
     func replaceRepeatingTodo(
         origin: TodoEvent,
         to newParams: TodoMakeParams,
-        nextTime: EventTime?
+        nextTime: EventTime?,
+        nextTurn: Int?
     ) async throws -> ReplaceRepeatingTodoEventResult
     
     func removeTodo(eventId: String) async throws -> RemoveTodoResult
@@ -101,9 +103,10 @@ extension TodoRemoteImple {
     
     public func completeTodo(
         origin: TodoEvent,
-        nextTime: EventTime?
+        nextTime: EventTime?,
+        nextTurn: Int?
     ) async throws -> CompleteTodoResult {
-        let payload = DoneTodoEventParams(origin, nextTime)
+        let payload = DoneTodoEventParams(origin, nextTime, nextTurn)
         let endpoint = TodoAPIEndpoints.complete(origin.uuid)
         let mapper: CompleteTodoResultMapper = try await remote.request(
             .post,
@@ -112,13 +115,14 @@ extension TodoRemoteImple {
         )
         return mapper.result
     }
-    
+
     public func replaceRepeatingTodo(
         origin: TodoEvent,
         to newParams: TodoMakeParams,
-        nextTime: EventTime?
+        nextTime: EventTime?,
+        nextTurn: Int?
     ) async throws -> ReplaceRepeatingTodoEventResult {
-        let payload = ReplaceRepeatingTodoEventParams(newParams, nextTime)
+        let payload = ReplaceRepeatingTodoEventParams(newParams, nextTime, nextTurn)
         let endpoint = TodoAPIEndpoints.replaceRepeating(origin.uuid)
         let mapper: ReplaceRepeatingTodoEventResultMapper = try await remote.request(
             .post,

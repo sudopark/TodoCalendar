@@ -919,13 +919,90 @@ extension TimeInterval {
     }
 }
 
+// MARK: - count-based repeating end
+
+extension TodoLocalRepositoryImpleTests {
+
+    private func makeDummyTodoWithCountEnd(
+        id: String,
+        time: TimeInterval,
+        from: TimeInterval,
+        endCount: Int,
+        repeatingTurn: Int? = nil
+    ) -> TodoEvent {
+        let repeating = EventRepeating(
+            repeatingStartTime: from,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        )
+        |> \.repeatingEndOption .~ .count(endCount)
+        return TodoEvent(uuid: id, name: "name:\(id)")
+            |> \.time .~ .at(time)
+            |> \.repeating .~ repeating
+            |> \.repeatingTurn .~ repeatingTurn
+            |> \.creatTimeStamp .~ 100
+    }
+
+    // complete repeating todo with count end -> has next event when turn not exceeded
+    func testRepository_completeRepeatingTodoWithCountEnd_whenTurnNotExceeded() async {
+        // given
+        // repeatingTurn == nil means first occurrence (turn 1)
+        let origin = self.makeDummyTodoWithCountEnd(id: "origin", time: 100, from: 100, endCount: 2)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+
+        // when
+        let result = try? await repository.completeTodo(origin.uuid)
+
+        // then
+        XCTAssertNotNil(result?.nextRepeatingTodoEvent)
+        XCTAssertEqual(result?.nextRepeatingTodoEvent?.repeatingTurn, 2)
+        XCTAssertEqual(result?.nextRepeatingTodoEvent?.time, .at(100.0 + 3600*24))
+    }
+
+    // complete repeating todo with count end -> no next event when count exceeded
+    func testRepository_completeRepeatingTodoWithCountEnd_whenCountExceeded() async {
+        // given
+        let origin = self.makeDummyTodoWithCountEnd(id: "origin", time: 100, from: 100, endCount: 2, repeatingTurn: 2)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+
+        // when
+        let result = try? await repository.completeTodo(origin.uuid)
+
+        // then
+        XCTAssertNil(result?.nextRepeatingTodoEvent)
+    }
+
+    // repeatingTurn increments on each advance
+    func testRepository_repeatingTurnIncrementsOnEachAdvance() async {
+        // given
+        // repeatingTurn == nil means first occurrence (turn 1)
+        let origin = self.makeDummyTodoWithCountEnd(id: "origin", time: 100, from: 100, endCount: 3)
+        self.stubSaveTodo([origin])
+        let repository = self.makeRepository()
+
+        // when - first complete (turn 1 → turn 2)
+        let result1 = try? await repository.completeTodo(origin.uuid)
+
+        // then
+        XCTAssertEqual(result1?.nextRepeatingTodoEvent?.repeatingTurn, 2)
+
+        // when - second complete (turn 2 → turn 3)
+        let result2 = try? await repository.completeTodo(origin.uuid)
+
+        // then
+        XCTAssertEqual(result2?.nextRepeatingTodoEvent?.repeatingTurn, 3)
+    }
+}
+
+
 private extension TodoToggleResult {
-    
+
     var completed: DoneTodoEvent? {
         guard case .completed(let done) = self else { return nil }
         return done
     }
-    
+
     var reverted: TodoEvent? {
         guard case .reverted(let todo) = self else { return nil }
         return todo
