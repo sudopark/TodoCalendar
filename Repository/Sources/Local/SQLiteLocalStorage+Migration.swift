@@ -57,6 +57,9 @@ extension SQLiteService {
             case 4:
                 try? self?.runMigrationVersion4to5(database)
                 
+            case 5:
+                try? self?.runMigrationVersion5to6(database)
+                
             default:
                 break
             }
@@ -141,6 +144,17 @@ extension SQLiteService {
         } catch {
             logger.log(.sql, level: .error, "migration version 4 -> 5 faield.. will drop EventUploadPendingQueueTable")
             try? database.dropTable(EventUploadPendingQueueTable.self)
+        }
+    }
+    
+    func runMigrationVersion5to6(_ database: any DataBase) throws {
+        do {
+            try database.createTableOrNot(TodoEventTable.self)
+            try database.migrate(TodoEventTable.self, version: 5)
+            logger.log(.sql, level: .info, "migratiob version 5 -> 6, TodoEventTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 5 -> 6 faield.. will drop TodoEventTable")
+            try? database.dropTable(TodoEventTable.self)
         }
     }
     
