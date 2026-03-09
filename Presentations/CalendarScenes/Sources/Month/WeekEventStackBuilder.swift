@@ -9,6 +9,7 @@ import Foundation
 import Domain
 import Prelude
 import Optics
+import CommonPresentation
 
 
 // MARK: - EventOnWeek + WeekEventStack
@@ -21,7 +22,7 @@ public struct EventOnWeek: Equatable {
     public let daysSequence: ClosedRange<Int>
     public let daysIdentifiers: [String]
     public var eventId: String { self.event.eventId }
-    public var eventTagId: EventTagId { self.event.eventTagId }
+    public var colorSource: any EventTagColorSource { self.event.colorSource }
     public var hasPeriod: Bool { self.event.eventTimeOnCalendar?.isPeriod == true }
     public var isHoliday: Bool { self.event is HolidayCalendarEvent }
     
