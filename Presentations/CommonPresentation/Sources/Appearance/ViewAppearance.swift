@@ -44,7 +44,11 @@ import Domain
     // event tag color
     public var allEventTagColorMap: [EventTagId: UIColor] = [:]
     public func color(_ id: EventTagId?) -> UIColor {
-        return allEventTagColorMap[id ?? .default] ??  allEventTagColorMap[.default] ?? .clear
+        switch id ?? .default {
+        case .holiday: return allEventTagColorMap[.holiday] ?? tagColors.holiday
+        case .default: return allEventTagColorMap[.default] ?? tagColors.defaultColor
+        default: return allEventTagColorMap[id ?? .default] ?? allEventTagColorMap[.default] ?? tagColors.defaultColor
+        }
     }
     
     public func colorOnCalendar(
