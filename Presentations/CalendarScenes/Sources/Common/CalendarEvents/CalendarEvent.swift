@@ -50,7 +50,7 @@ public enum EventTimeOnCalendar: Hashable, Sendable {
 // MARK: - CalendarEvent
 
 public protocol CalendarEvent: Sendable {
-    
+
     var eventId: String { get }
     var name: String { get }
     var eventTime: EventTime? { get }
@@ -59,7 +59,8 @@ public protocol CalendarEvent: Sendable {
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
     var locationText: String? { get set }
-    
+    var colorSource: any EventTagColorSource { get }
+
     var compareKey: String { get }
 }
 
