@@ -190,9 +190,11 @@ struct EventTagListView: View {
     private func cellView(_ cellViewModel: BaseCalendarEventTagCellViewModel) -> some View {
         
         HStack {
-            Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
-                .foregroundStyle(appearance.color(cellViewModel.id).asColor)
-                .font(.title3)
+            EventTagColorView(cellViewModel.id) { color in
+                Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
+                    .foregroundStyle(color)
+                    .font(.title3)
+            }
                 .animation(.easeIn, value: cellViewModel.isOn)
                 .onTapGesture {
                     self.appearance.impactIfNeed()
@@ -258,18 +260,19 @@ struct EventTagListView: View {
     }
 
     private func externalCellView(_ cellViewModel: ExternalCalendarEventTagCellViewModel) -> some View {
-        
-        func calenadrColor() -> UIColor? {
-            return cellViewModel.backgroundColor.flatMap { UIColor.from(hex: $0) }
-            ?? cellViewModel.colorId
-                .flatMap{ appearance.googleCalendarColor?.calendars[$0]?.backgroudHex }
-                .flatMap { UIColor.from(hex: $0) }
-        }
-        
+        let colorSource: any EventTagColorSource = {
+            if case .externalCalendar(_, let calendarId) = cellViewModel.id {
+                return GoogleCalendarEventColorSource(calendarId: calendarId, colorId: nil)
+            }
+            return cellViewModel.id
+        }()
+
         return HStack {
-            Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
-                .foregroundStyle( calenadrColor()?.asColor ?? .clear )
-                .font(.title3)
+            EventTagColorView(colorSource) { color in
+                Image(systemName: cellViewModel.isOn ? "checkmark.circle.fill" : "checkmark.circle")
+                    .foregroundStyle(color)
+                    .font(.title3)
+            }
                 .animation(.easeIn, value: cellViewModel.isOn)
                 .onTapGesture {
                     self.appearance.impactIfNeed()
