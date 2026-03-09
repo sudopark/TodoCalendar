@@ -151,7 +151,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
     private func expectRecurrenceText(_ recurrence: String?) -> String? {
         switch recurrence {
         case .none: return nil
-        case "RRULE:FREQ=DAILY": return "Everyday"
+        case "RRULE:FREQ=DAILY": return "Every day"
         case "RRULE:FREQ=DAILY;INTERVAL=5": return "Every 5 Days"
         case "RRULE:FREQ=WEEKLY;BYDAY=TU": return "Every Week TUE"
         case "RRULE:FREQ=WEEKLY;INTERVAL=3;BYDAY=TU": return "Every 3 Weeks TUE"
@@ -162,7 +162,7 @@ extension GoogleCalendarEventDetailViewModelImpleTests {
         case "RRULE:FREQ=YEARLY;INTERVAL=3": return "Every 3 Years"
         case "RRULE:FREQ=WEEKLY;BYDAY=FR,MO,TH,TU,WE": return "Every Week MON,TUE,WED,THU,FRI"
         case "RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20250816T145959Z;BYDAY=SA": return "Every Week SAT\nuntil Aug 16, 2025"
-        case "RRULE:FREQ=DAILY;COUNT=3": return "Everyday\n3 time(s)"
+        case "RRULE:FREQ=DAILY;COUNT=3": return "Every day\n3 time(s)"
         default: return ""
         }
     }
