@@ -235,25 +235,24 @@ extension ColorSet {
 private extension WeekEventsViewModel {
     
     func lineColor(_ line: EventOnWeek) -> Color {
-        switch line.eventTagId {
-        case .default:
-            return UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear
-            
-        case .holiday:
-            return UIColor.from(hex: self.defaultTagColorSetting.holiday)?.asColor ?? .clear
-            
-        case .custom(let id):
-            return self.tagMap[id]?.colorHex
-                .flatMap { UIColor.from(hex: $0) }?.asColor
-            ?? UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear
-            
-        case .externalCalendar(let serviceId, _) where serviceId == GoogleCalendarService.id:
+        if let google = line.colorSource as? GoogleCalendarEventColorSource {
             let appearance = ViewAppearance(
                 google: self.googleCalendarColor ?? .init(calendars: [:], events: [:]),
                 self.googleCalendarTags
             )
-            let google = line.event as? GoogleCalendarEvent
-            return google.flatMap { appearance.googleEventColor($0.colorId, $0.calendarId) }?.asColor ?? .clear
+            return appearance.googleEventColor(google.colorId, google.calendarId).asColor
+        }
+        switch line.colorSource as? EventTagId {
+        case .default:
+            return UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear
+
+        case .holiday:
+            return UIColor.from(hex: self.defaultTagColorSetting.holiday)?.asColor ?? .clear
+
+        case .custom(let id):
+            return self.tagMap[id]?.colorHex
+                .flatMap { UIColor.from(hex: $0) }?.asColor
+            ?? UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear
             
         default:
             return .clear
