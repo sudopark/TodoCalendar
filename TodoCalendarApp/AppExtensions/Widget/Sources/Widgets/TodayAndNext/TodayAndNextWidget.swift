@@ -116,7 +116,7 @@ struct TodayAndNextWidgetView: View {
     }
     
     private func eventView(_ model: TodayAndNextWidgetViewModel.EventModel) -> some View {
-        let color = model.cvm.tagId.customTagId
+        let color = (model.cvm.colorSource as? EventTagId)?.customTagId
             .flatMap { self.model.customTagMap[$0]?.colorHex }
             .flatMap { UIColor.from(hex: $0) }
         ?? defColors.defaultColor
@@ -165,7 +165,10 @@ struct TodayAndNextWidgetView: View {
                 google: self.model.googleCalendarColors,
                 self.model.googleCalendarTags
             )
-            let googleColor = appearance.googleEventColor(google.colorId, google.calendarId)
+            let googleColor = appearance.googleEventColor(
+                (google.colorSource as? GoogleCalendarEventColorSource)?.colorId,
+                google.calendarId
+            )
             
             if google.isAlldayEvent {
                 return singleLineEventView(

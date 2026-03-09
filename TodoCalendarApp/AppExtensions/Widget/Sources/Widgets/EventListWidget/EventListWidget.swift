@@ -132,21 +132,20 @@ struct EventListView: View {
     private func tagLineView(_ cvm: any EventCellViewModel) -> some View {
         let defColors = EventTagColorSet(model.defaultTagColorSetting)
         let color = {
-            switch cvm.tagId {
+            if let google = cvm.colorSource as? GoogleCalendarEventColorSource {
+                let appearance = ViewAppearance(
+                    google: model.googleCalendarColors,
+                    model.googleCalendarTags
+                )
+                return appearance.googleEventColor(google.colorId, google.calendarId)
+            }
+            switch cvm.colorSource as? EventTagId {
             case .holiday:
                 return defColors.holiday
             case .default:
                 return defColors.defaultColor
             case .custom(let id):
                 return self.model.customTagMap[id]?.colorHex.flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor
-            case .externalCalendar(let serviceId, _) where serviceId == GoogleCalendarService.id:
-                let appearance = ViewAppearance(
-                    google: model.googleCalendarColors,
-                    model.googleCalendarTags
-                )
-                let google = cvm as? GoogleCalendarEventCellViewModel
-                return google.flatMap { appearance.googleEventColor($0.colorId, $0.calendarId) } ?? .clear
-                
             default:
                 return defColors.defaultColor
             }
