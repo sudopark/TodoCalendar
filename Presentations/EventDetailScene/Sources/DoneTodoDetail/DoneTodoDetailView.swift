@@ -189,9 +189,11 @@ struct DoneTodoDetailView: View {
     
     private var nameView: some View {
         HStack {
-            RoundedRectangle(cornerRadius: 3)
-                .fill(tagColor)
-                .frame(width: 6)
+            EventTagColorView(state.tag?.tagId ?? .default) { color in
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(color)
+                    .frame(width: 6)
+            }
             
             Text(state.name ?? "-")
                 .font(appearance.fontSet.size(22, weight: .semibold).asFont)
@@ -307,20 +309,18 @@ struct DoneTodoDetailView: View {
         }
     }
     
-    private var tagColor: Color {
-        return appearance.color(state.tag?.tagId ?? .default).asColor
-    }
-    
     private var eventTagView: some View {
         HStack(spacing: 16) {
             Image(systemName: "calendar")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(appearance.colorSet.text1.asColor)
-            
+
             HStack {
-                Circle()
-                    .frame(width: 6, height: 6)
-                    .foregroundStyle(self.tagColor)
+                EventTagColorView(state.tag?.tagId ?? .default) { color in
+                    Circle()
+                        .frame(width: 6, height: 6)
+                        .foregroundStyle(color)
+                }
                 
                 Text(self.state.tag?.name ?? "eventTag.defaults.default::name".localized())
                     .font(self.appearance.fontSet.subNormal.asFont)
