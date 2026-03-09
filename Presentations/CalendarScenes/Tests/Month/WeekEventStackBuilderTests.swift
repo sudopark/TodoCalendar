@@ -10,6 +10,7 @@ import Domain
 import Prelude
 import Optics
 import UnitTestHelpKit
+import CommonPresentation
 
 @testable import CalendarScenes
 
@@ -228,5 +229,45 @@ extension WeekEventStackBuilderTests {
             ["12...12+23.0"],
             ["12...12+30.0"]
         ])
+    }
+}
+
+// MARK: - test EventOnWeek colorSource
+
+extension WeekEventStackBuilderTests {
+
+    private func dummyGoogleEvent(on days: ClosedRange<Int>, calendarId: String, colorId: String?) -> any CalendarEvent {
+        let daysRange = days.lowerBound...days.upperBound
+        let start = self.calendar.date(from: .init(year: 2023, month: 7, day: daysRange.lowerBound))!
+            |> self.calendar.startOfDay(for:)
+        let end = self.calendar.date(from: .init(year: 2023, month: 7, day: daysRange.upperBound))!
+            |> { self.calendar.endOfDay(for: $0)! }
+        let timeStamps = start.timeIntervalSince1970..<end.timeIntervalSince1970
+        let event = GoogleCalendar.Event(
+            "\(daysRange)", calendarId,
+            name: "google",
+            colorId: colorId,
+            time: .period(timeStamps)
+        )
+        return GoogleCalendarEvent(event, in: TimeZone(abbreviation: "KST")!)
+    }
+
+    func testEventOnWeek_whenGoogleCalendarEvent_colorSourceIsGoogleCalendarEventColorSource() {
+        // given
+        let builder = self.makeBuilder()
+        let calendarId = "cal-1"
+        let colorId = "color-1"
+        let googleEvent = self.dummyGoogleEvent(on: 10...12, calendarId: calendarId, colorId: colorId)
+
+        // when
+        let stack = builder.build(self.dummyWeek, events: [googleEvent])
+
+        // then
+        let eventOnWeek = stack.eventStacks.first?.first
+        let colorSource = eventOnWeek?.colorSource
+        let googleColorSource = colorSource as? GoogleCalendarEventColorSource
+        XCTAssertNotNil(googleColorSource)
+        XCTAssertEqual(googleColorSource?.calendarId, calendarId)
+        XCTAssertEqual(googleColorSource?.colorId, colorId)
     }
 }
