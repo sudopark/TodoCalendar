@@ -10,6 +10,7 @@ import Domain
 import Extensions
 import Prelude
 import Optics
+import CommonPresentation
 
 // MARK: - EventPeriodText
 
@@ -156,7 +157,7 @@ public struct EventListMoreActionModel: Sendable, Equatable {
 // MARK: - EventCellViewModel
 public protocol EventCellViewModel: Sendable {
     var eventIdentifier: String { get }
-    var tagId: EventTagId { get }
+    var colorSource: any EventTagColorSource { get }
     var name: String { get }
     var periodText: EventPeriodText? { get set }
     var periodDescription: String? { get set }
@@ -170,9 +171,9 @@ public protocol EventCellViewModel: Sendable {
 // MARK: - Todo
 
 public struct TodoEventCellViewModel: EventCellViewModel {
-    
+
     public let eventIdentifier: String
-    public var tagId: EventTagId
+    public var colorSource: any EventTagColorSource
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
@@ -181,24 +182,24 @@ public struct TodoEventCellViewModel: EventCellViewModel {
     public var isForemost: Bool = false
     public var isAlldayEvent: Bool = false
     public var isCurrentTodo: Bool = false
-    
+
     public init(_ id: String, name: String) {
         self.eventIdentifier = id
         self.name = name
-        self.tagId = .default
+        self.colorSource = EventTagId.default
     }
-    
+
     public init(
         currentTodo: TodoCalendarEvent
     ) {
         self.eventIdentifier = currentTodo.eventId
-        self.tagId = currentTodo.eventTagId
+        self.colorSource = currentTodo.eventTagId
         self.name = currentTodo.name
         self.periodText = .currentTodoText
         self.isForemost = currentTodo.isForemost
         self.isCurrentTodo = true
     }
-    
+
     public init?(
         _ todo: TodoCalendarEvent,
         in todayRange: Range<TimeInterval>,
@@ -207,7 +208,7 @@ public struct TodoEventCellViewModel: EventCellViewModel {
         forceShowEventDateDurationText: Bool = false
     ) {
         self.eventIdentifier = todo.eventId
-        self.tagId = todo.eventTagId
+        self.colorSource = todo.eventTagId
         self.name = todo.name
         self.periodText = EventPeriodText(todo, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.periodDescription = todo.eventTime?.durationText(
@@ -235,9 +236,9 @@ public struct TodoEventCellViewModel: EventCellViewModel {
 }
 
 struct PendingTodoEventCellViewModel: EventCellViewModel {
-    
+
     let eventIdentifier: String
-    var tagId: EventTagId
+    var colorSource: any EventTagColorSource
     let name: String
     var periodText: EventPeriodText? = .singleText(
         .init(text: R.String.calendarEventTimeTodo)
@@ -246,13 +247,13 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
     let isRepeating: Bool = false
     let isForemost: Bool = false
     let isAlldayEvent: Bool = false
-    
+
     init(name: String, defaultTagId: String?) {
         self.eventIdentifier = "pending:\(UUID().uuidString)"
         self.name = name
-        self.tagId = defaultTagId.map { .custom($0) } ?? .default
+        self.colorSource = defaultTagId.map { EventTagId.custom($0) } ?? EventTagId.default
     }
-    
+
     // TOOD: make custom compare key
     var moreActions: EventListMoreActionModel? { nil }
 }
@@ -260,11 +261,11 @@ struct PendingTodoEventCellViewModel: EventCellViewModel {
 // MARK: - Schedule
 
 public struct ScheduleEventCellViewModel: EventCellViewModel {
-    
+
     public let eventIdWithoutTurn: String
     public let eventIdentifier: String
     public let turn: Int?
-    public var tagId: EventTagId
+    public var colorSource: any EventTagColorSource
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
@@ -272,17 +273,17 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
     public let isForemost: Bool
     public var isAlldayEvent: Bool { self.eventTimeRawValue?.isAllDay ?? false }
     public var eventTimeRawValue: EventTime?
-    
+
     public init(_ id: String, turn: Int? = nil, name: String, isRepeating: Bool = false) {
         self.eventIdWithoutTurn = id
         self.eventIdentifier = "\(id)_\(turn ?? 0)"
         self.turn = turn
         self.name = name
-        self.tagId = .default
+        self.colorSource = EventTagId.default
         self.isRepeating = isRepeating
         self.isForemost = false
     }
-    
+
     public init?(
         _ schedule: ScheduleCalendarEvent,
         in todayRange: Range<TimeInterval>,
@@ -295,7 +296,7 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
         self.eventIdentifier = schedule.eventId
         self.eventIdWithoutTurn = schedule.eventIdWithoutTurn
         self.turn = schedule.turn
-        self.tagId = schedule.eventTagId
+        self.colorSource = schedule.eventTagId
         self.name = schedule.name
         self.periodText = periodText
         self.periodDescription = schedule.eventTime?.durationText(
@@ -321,44 +322,43 @@ public struct ScheduleEventCellViewModel: EventCellViewModel {
 
 // MARK: - Holiday
 public struct HolidayEventCellViewModel: EventCellViewModel {
-    
+
     public let eventIdentifier: String
-    public var tagId: EventTagId
+    public var colorSource: any EventTagColorSource
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
     public let isRepeating: Bool = false
     public let isForemost: Bool = false
     public let isAlldayEvent: Bool = true
-    
+
     public init(_ holiday: HolidayCalendarEvent) {
         self.eventIdentifier = holiday.eventId
         self.name = holiday.name
         self.periodText = .singleText(
             .init(text: R.String.calendarEventTimeAllday)
         )
-        self.tagId = .holiday
+        self.colorSource = EventTagId.holiday
     }
-    
+
     public var moreActions: EventListMoreActionModel? { nil }
 }
 
 
 // MARK: - GoogleCalendarEvent
 public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
-    
+
     public let eventIdentifier: String
-    public let tagId: EventTagId
+    public var colorSource: any EventTagColorSource
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
     public let isRepeating: Bool = false
     public var isForemost: Bool = false
     public let calendarId: String
-    public let colorId: String?
     public let htmlLink: String?
     public var isAlldayEvent: Bool = false
-    
+
     public init?(
         _ event: GoogleCalendarEvent,
         in todayRange: Range<TimeInterval>,
@@ -368,17 +368,16 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     ) {
         guard let time = event.eventTime else { return nil }
         self.eventIdentifier = event.eventId
-        self.tagId = event.eventTagId
+        self.colorSource = GoogleCalendarEventColorSource(calendarId: event.calendarId, colorId: event.colorId)
         self.name = event.name
         self.periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.periodDescription = event.eventTime?.durationText(timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText)
         self.isForemost = event.isForemost
         self.calendarId = event.calendarId
-        self.colorId = event.colorId
         self.htmlLink = event.htmlLink
         self.isAlldayEvent = event.eventTime?.isAllDay ?? false
     }
-    
+
     public var moreActions: EventListMoreActionModel? {
         guard let link = self.htmlLink else { return nil }
         return .init(

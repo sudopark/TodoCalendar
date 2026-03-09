@@ -14,6 +14,7 @@ import Scenes
 import Extensions
 import UnitTestHelpKit
 import TestDoubles
+import CommonPresentation
 
 @testable import CalendarScenes
 
@@ -599,6 +600,35 @@ extension DayEventListViewModelImpleTests {
         // when + then
         parameterizeTest("some")
         parameterizeTest(nil)
+    }
+
+    func testEventCellViewModel_colorSource_generalEventReturnsEventTagId() {
+        // given
+        let todo = TodoEvent(uuid: "t1", name: "todo") |> \.eventTagId .~ .custom("tag1")
+        let todoEvent = TodoCalendarEvent(todo, in: TimeZone.current)
+        guard let cvm = TodoEventCellViewModel(todoEvent, in: self.todayRange, TimeZone.current, true) else {
+            XCTFail("failed to make cvm"); return
+        }
+
+        // when
+        let source = cvm.colorSource
+
+        // then
+        XCTAssertEqual(source as? EventTagId, .custom("tag1"))
+    }
+
+    func testEventCellViewModel_colorSource_googleCalendarEventReturnsGoogleColorSource() {
+        // given
+        let cvm = GoogleCalendarEventCellViewModel.dummy()
+
+        // when
+        let source = cvm.colorSource
+
+        // then
+        let googleSource = source as? GoogleCalendarEventColorSource
+        XCTAssertNotNil(googleSource)
+        XCTAssertEqual(googleSource?.calendarId, "calendar")
+        XCTAssertEqual(googleSource?.colorId, "id")
     }
 }
 

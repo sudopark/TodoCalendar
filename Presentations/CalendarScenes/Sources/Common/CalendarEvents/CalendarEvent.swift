@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import CommonPresentation
 
 
 public enum EventTimeOnCalendar: Hashable, Sendable {
@@ -79,10 +80,12 @@ extension Array where Element == any CalendarEvent {
 }
 
 extension CalendarEvent {
-    
+
     public var compareKey: String {
         return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.locationText ?? "nil")"
     }
+
+    public var colorSource: any EventTagColorSource { eventTagId }
 }
 
 
@@ -251,6 +254,10 @@ public struct GoogleCalendarEvent: CalendarEvent {
         self.locationText = event.location
     }
     
+    public var colorSource: any EventTagColorSource {
+        GoogleCalendarEventColorSource(calendarId: calendarId, colorId: colorId)
+    }
+
     public var compareKey: String {
         return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.colorId ?? "nil")-\(self.htmlLink ?? "nil")-\(self.locationText ?? "nil")"
     }
