@@ -17,22 +17,24 @@ import UnitTestHelpKit
 
 
 final class ExternalCalendarIntegrationUsecaseImpleTests: PublisherWaitable {
-    
+
     var cancelBag: Set<AnyCancellable>! = []
-    
+    fileprivate let spyConnectionPool = SpyExternalCalendarDBConnectionPool()
+
     private func makeUsecase(
         startWithIntegrated accounts: [ExternalServiceAccountinfo] = [],
         withWait subject: PassthroughSubject<Void, Never>? = nil
     ) -> ExternalCalendarIntegrationUsecaseImple {
-        
+
         let serviceProvider = FakeOauth2ServiceProvider()
         serviceProvider.authenticationWaitMocking = subject
         let repository = StubExternalCalendarIntegrateRepository(accounts)
         let store = SharedDataStore()
-        
+
         return ExternalCalendarIntegrationUsecaseImple(
             oauth2ServiceProvider: serviceProvider,
             externalServiceIntegrateRepository: repository,
+            dbConnectionPool: spyConnectionPool,
             sharedDataStore: store
         )
     }
@@ -196,6 +198,47 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         #expect(handled == false)
     }
     
+    // prepareIntegratedAccounts 시에 이미 연동된 서비스 DB open
+    @Test func usecase_whenPrepareAccounts_openDBForIntegratedServices() async throws {
+        // given
+        let account = ExternalServiceAccountinfo("google", email: "email")
+        let usecase = self.makeUsecase(startWithIntegrated: [account])
+
+        // when
+        try await usecase.prepareIntegratedAccounts()
+
+        // then
+        #expect(spyConnectionPool.didOpenedServiceIds == ["google"])
+    }
+
+    // integrate 시에 DB open
+    @Test func usecase_whenIntegrate_openDB() async throws {
+        // given
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let usecase = self.makeUsecase()
+
+        // when
+        _ = try await usecase.integrate(external: service)
+
+        // then
+        #expect(spyConnectionPool.didOpenedServiceIds == [service.identifier])
+    }
+
+    // stopIntegrate 시에 DB close
+    @Test func usecase_whenStopIntegrate_closeDB() async throws {
+        // given
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let account = ExternalServiceAccountinfo(service.identifier, email: "some")
+        let usecase = self.makeUsecase(startWithIntegrated: [account])
+        try await usecase.prepareIntegratedAccounts()
+
+        // when
+        try await usecase.stopIntegrate(external: service)
+
+        // then
+        #expect(spyConnectionPool.didClosedServiceIds == [service.identifier])
+    }
+
     @Test func usecase_whenServiceIntegrationStatusChanged_notify() async throws {
         // given
         let service = GoogleCalendarService(scopes: [.readOnly])
@@ -215,6 +258,21 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         let isIntegrated = statues.map { $0.isIntegrated }
         #expect(services == [service.identifier, service.identifier])
         #expect(isIntegrated == [true, false])
+    }
+}
+
+
+private final class SpyExternalCalendarDBConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {
+
+    var didOpenedServiceIds: [String] = []
+    var didClosedServiceIds: [String] = []
+
+    func open(serviceId: String) async throws {
+        self.didOpenedServiceIds.append(serviceId)
+    }
+
+    func close(serviceId: String) async throws {
+        self.didClosedServiceIds.append(serviceId)
     }
 }
 
