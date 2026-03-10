@@ -7,19 +7,18 @@
 //
 
 import Foundation
+import Domain
 import SQLiteService
 import Extensions
 
 
-public protocol ExternalCalendarDBConnectionPool: Sendable {
-    
-    func open(serviceId: String) async throws
-    func close(serviceId: String) async throws
+public protocol ExternalCalendarSQLiteConnectionPool: ExternalCalendarDBConnectionPool {
+
     func connection(serviceId: String) async throws -> SQLiteService
 }
 
 
-public actor ExternalCalendarDBConnectionPoolImple: ExternalCalendarDBConnectionPool {
+public actor ExternalCalendarSQLiteConnectionPoolImple: ExternalCalendarSQLiteConnectionPool {
     
     private final class DBConnection {
         var connectionCount: Int
@@ -37,7 +36,7 @@ public actor ExternalCalendarDBConnectionPoolImple: ExternalCalendarDBConnection
     }
 }
 
-extension ExternalCalendarDBConnectionPoolImple {
+extension ExternalCalendarSQLiteConnectionPoolImple {
     
     private var errorKey: String { "externalCalendarDBConnectionFail" }
     

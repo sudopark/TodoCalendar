@@ -1,5 +1,5 @@
 //
-//  ExternalCalendarDBConnectionPoolImpleTests.swift
+//  ExternalCalendarSQLiteConnectionPoolImpleTests.swift
 //  RepositoryTests
 //
 //  Created by sudo.park on 3/10/26.
@@ -14,8 +14,8 @@ import UnitTestHelpKit
 @testable import Repository
 
 
-@Suite("ExternalCalendarDBConnectionPoolImpleTests", .serialized)
-final class ExternalCalendarDBConnectionPoolImpleTests {
+@Suite("ExternalCalendarSQLiteConnectionPoolImpleTests", .serialized)
+final class ExternalCalendarSQLiteConnectionPoolImpleTests {
 
     private let serviceId1 = "google"
     private let serviceId2 = "apple"
@@ -27,7 +27,7 @@ final class ExternalCalendarDBConnectionPoolImpleTests {
             .path
     }
 
-    private func makePool() -> ExternalCalendarDBConnectionPoolImple {
+    private func makePool() -> ExternalCalendarSQLiteConnectionPoolImple {
         return .init(dbPathMap: [
             serviceId1: testDBPath(name: "pool_service1"),
             serviceId2: testDBPath(name: "pool_service2")
@@ -48,7 +48,7 @@ final class ExternalCalendarDBConnectionPoolImpleTests {
 }
 
 
-extension ExternalCalendarDBConnectionPoolImpleTests {
+extension ExternalCalendarSQLiteConnectionPoolImpleTests {
 
     // open 이후 connection 획득 + 실제 DB 작업 성공
     @Test func open_and_connection_success() async throws {
