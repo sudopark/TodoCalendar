@@ -49,6 +49,7 @@ public final class ExternalCalendarIntegrationUsecaseImple: ExternalCalendarInte
     
     private let oauth2ServiceProvider: any ExternalCalendarOAuthUsecaseProvider
     private let externalServiceIntegrateRepository: any ExternalCalendarIntegrateRepository
+    private let dbConnectionPool: any ExternalCalendarDBConnectionPool
     private let sharedDataStore: SharedDataStore
     private var lastestUsedOAuthUsecase: (any OAuth2ServiceUsecase)?
     
@@ -57,10 +58,12 @@ public final class ExternalCalendarIntegrationUsecaseImple: ExternalCalendarInte
     public init(
         oauth2ServiceProvider: any ExternalCalendarOAuthUsecaseProvider,
         externalServiceIntegrateRepository: any ExternalCalendarIntegrateRepository,
+        dbConnectionPool: any ExternalCalendarDBConnectionPool,
         sharedDataStore: SharedDataStore
     ) {
         self.oauth2ServiceProvider = oauth2ServiceProvider
         self.externalServiceIntegrateRepository = externalServiceIntegrateRepository
+        self.dbConnectionPool = dbConnectionPool
         self.sharedDataStore = sharedDataStore
     }
 }
@@ -76,6 +79,9 @@ extension ExternalCalendarIntegrationUsecaseImple {
             AccountsMap.self, key: self.shareKey,
             accounts.asDictionary { $0.serviceIdentifier }
         )
+        await accounts.asyncForEach { account in
+            try? await self.dbConnectionPool.open(serviceId: account.serviceIdentifier)
+        }
     }
     
     public func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
@@ -89,6 +95,7 @@ extension ExternalCalendarIntegrationUsecaseImple {
             credential, for: service
         )
         |> \.intergrationTime .~ Date()
+        try? await self.dbConnectionPool.open(serviceId: service.identifier)
         self.sharedDataStore.update(AccountsMap.self, key: self.shareKey) { old in
             (old ?? [:]) |> key(service.identifier) .~ account
         }
@@ -103,6 +110,7 @@ extension ExternalCalendarIntegrationUsecaseImple {
         try await self.externalServiceIntegrateRepository.removeAccount(
             for: service.identifier
         )
+        try? await self.dbConnectionPool.close(serviceId: service.identifier)
         self.sharedDataStore.update(AccountsMap.self, key: self.shareKey) { old in
             (old ?? [:]) |> key(service.identifier) .~ nil
         }
