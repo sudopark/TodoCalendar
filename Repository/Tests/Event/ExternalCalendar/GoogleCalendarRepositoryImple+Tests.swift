@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import SQLiteService
 import UnitTestHelpKit
 
@@ -24,10 +25,11 @@ final class GoogleCalendarRepositoryImple_Tests: PublisherWaitable, LocalTestabl
     let sqliteService: SQLiteService = .init()
     let cacheStorage: GoogleCalendarLocalStorageImple
     private let stubRemote: StubRemoteAPI
-    
+
     init() {
         self.stubRemote = .init(responses: DummyResponse().reponse)
-        self.cacheStorage = .init(sqliteService: self.sqliteService)
+        let pool = StubExternalCalendarSQLiteConnectionPool(self.sqliteService)
+        self.cacheStorage = .init(connectionPool: pool)
     }
     
     private func makeRepository() -> GoogleCalendarRepositoryImple {
@@ -430,6 +432,41 @@ extension GoogleCalendarRepositoryImple_Tests {
         try await self.cacheStorage.updateEvents("c_id", list, [event])
     }
 }
+
+extension GoogleCalendarRepositoryImple_Tests {
+
+    @Test func storage_whenConnectionNotAvailable_throwsError() async throws {
+        // given
+        let failingPool = FailingExternalCalendarSQLiteConnectionPool()
+        let storage = GoogleCalendarLocalStorageImple(connectionPool: failingPool)
+
+        // when + then
+        await #expect(throws: (any Error).self) {
+            _ = try await storage.loadColors()
+        }
+    }
+}
+
+
+private final class StubExternalCalendarSQLiteConnectionPool: ExternalCalendarSQLiteConnectionPool, @unchecked Sendable {
+
+    private let service: SQLiteService
+    init(_ service: SQLiteService) { self.service = service }
+
+    func open(serviceId: String) async throws {}
+    func close(serviceId: String) async throws {}
+    func connection(serviceId: String) async throws -> SQLiteService { return service }
+}
+
+private final class FailingExternalCalendarSQLiteConnectionPool: ExternalCalendarSQLiteConnectionPool, @unchecked Sendable {
+
+    func open(serviceId: String) async throws {}
+    func close(serviceId: String) async throws {}
+    func connection(serviceId: String) async throws -> SQLiteService {
+        throw RuntimeError("no connection available")
+    }
+}
+
 
 private struct DummyResponse {
     
