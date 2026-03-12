@@ -49,6 +49,17 @@ final class AppExtensionBase {
         return service
     }()
     
+    lazy var externalCalendarDBConnectionPool: AppExtensionExternalCalendarDBConnectionPool = {
+        guard let path = AppEnvironment.externalCalendarDBPaths()[GoogleCalendarService.id]
+        else {
+            fatalError()
+        }
+        let service = SQLiteService(openWithReadOnly: true)
+        _ = service.open(path: path)
+        let pool = AppExtensionExternalCalendarDBConnectionPool(sqliteService: service)
+        return pool
+    }()
+    
     lazy var firebaseAuthService: any FirebaseAuthService = {
         if AppEnvironment.isTestBuild {
             return DummyFirebaseAuthService()
@@ -171,5 +182,18 @@ class DummyFirebaseAuthService: FirebaseAuthService {
     
     func refreshToken(_ resultHandler: @escaping (Result<AuthRefreshResult, Error>) -> Void) {
         
+    }
+}
+
+
+actor AppExtensionExternalCalendarDBConnectionPool: ExternalCalendarDBConnectionPool {
+    
+    private let sqliteService: SQLiteService
+    init(sqliteService: SQLiteService) {
+        self.sqliteService = sqliteService
+    }
+    
+    func connection(serviceId: String) async throws -> SQLiteService {
+        return self.sqliteService
     }
 }

@@ -46,6 +46,12 @@ final class ApplicationBase {
         return service
     }()
     
+    lazy var externalCalendarDBConnectionPool: ExternalCalendarSQLiteConnectionPoolImple = {
+        return ExternalCalendarSQLiteConnectionPoolImple(
+            dbPathMap: AppEnvironment.externalCalendarDBPaths()
+        )
+    }()
+    
     let linkPreviewEngine: SwiftLinkPreview = {
        return SwiftLinkPreview(cache: InMemoryCache())
     }()

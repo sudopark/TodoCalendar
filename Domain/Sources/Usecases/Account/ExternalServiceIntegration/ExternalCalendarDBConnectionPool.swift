@@ -9,7 +9,7 @@
 import Foundation
 
 
-public protocol ExternalCalendarDBConnectionPool: Sendable {
+public protocol ExternalCalendarDBConnectionControl: Sendable {
 
     func open(serviceId: String) async throws
     func close(serviceId: String) async throws

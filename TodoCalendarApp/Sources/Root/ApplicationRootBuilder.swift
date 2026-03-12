@@ -123,6 +123,7 @@ final class ApplicationRootBuilder {
         return ExternalCalendarIntegrationUsecaseImple(
             oauth2ServiceProvider: externalServiceOAuth2ServiceUsecaseProvider,
             externalServiceIntegrateRepository: integrationRepository,
+            dbConnectionController: applicationBase.externalCalendarDBConnectionPool,
             sharedDataStore: applicationBase.sharedDataStore
         )
     }

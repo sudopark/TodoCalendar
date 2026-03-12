@@ -70,8 +70,11 @@ extension IntentReposiotryFactory {
     }
     
     func makeGoogleCalendarRepository() -> any GoogleCalendarRepository {
+        let storage = GoogleCalendarLocalStorageImple(
+            connectionPool: base.externalCalendarDBConnectionPool
+        )
         return GoogleCalendarReadOnlyRepositoryImple(
-            localStorage: GoogleCalendarLocalStorageImple(sqliteService: base.writableSqliteService)
+            localStorage: storage
         )
     }
 }

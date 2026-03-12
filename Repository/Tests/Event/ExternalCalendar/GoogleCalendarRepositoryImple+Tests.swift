@@ -448,20 +448,16 @@ extension GoogleCalendarRepositoryImple_Tests {
 }
 
 
-private final class StubExternalCalendarSQLiteConnectionPool: ExternalCalendarSQLiteConnectionPool, @unchecked Sendable {
+private final class StubExternalCalendarSQLiteConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {
 
     private let service: SQLiteService
     init(_ service: SQLiteService) { self.service = service }
 
-    func open(serviceId: String) async throws {}
-    func close(serviceId: String) async throws {}
     func connection(serviceId: String) async throws -> SQLiteService { return service }
 }
 
-private final class FailingExternalCalendarSQLiteConnectionPool: ExternalCalendarSQLiteConnectionPool, @unchecked Sendable {
+private final class FailingExternalCalendarSQLiteConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {
 
-    func open(serviceId: String) async throws {}
-    func close(serviceId: String) async throws {}
     func connection(serviceId: String) async throws -> SQLiteService {
         throw RuntimeError("no connection available")
     }

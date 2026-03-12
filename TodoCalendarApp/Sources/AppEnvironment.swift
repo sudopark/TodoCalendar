@@ -40,8 +40,21 @@ struct AppEnvironment {
     static var appScheme: String { "tc.app" }
     
     static func dbFilePath(for userId: String?) -> String {
-        let directory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: self.groupID)
         let fileName = userId.map { "\(self.dbFileName)_\($0)" } ?? self.dbFileName
+        return self.dbPath(fileName: fileName)
+    }
+    
+    static func externalCalendarDBPaths() -> [String: String] {
+        let googlePath = self.dbPath(
+            fileName: "\(GoogleCalendarService.id)_calendar"
+        )
+        return [
+            GoogleCalendarService.id: googlePath
+        ]
+    }
+    
+    private static func dbPath(fileName: String) -> String {
+        let directory = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: self.groupID)
         let dbUrl = directory?.appending(path: "\(fileName).db")
         return dbUrl?.path() ?? ""
     }
