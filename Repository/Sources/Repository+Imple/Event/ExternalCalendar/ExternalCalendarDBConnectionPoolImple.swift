@@ -12,13 +12,13 @@ import SQLiteService
 import Extensions
 
 
-public protocol ExternalCalendarSQLiteConnectionPool: ExternalCalendarDBConnectionPool {
+public protocol ExternalCalendarDBConnectionPool: Sendable {
 
     func connection(serviceId: String) async throws -> SQLiteService
 }
 
 
-public actor ExternalCalendarSQLiteConnectionPoolImple: ExternalCalendarSQLiteConnectionPool {
+public actor ExternalCalendarSQLiteConnectionPoolImple: ExternalCalendarDBConnectionControl, ExternalCalendarDBConnectionPool {
     
     private final class DBConnection {
         var connectionCount: Int
