@@ -36,12 +36,22 @@ public protocol GoogleCalendarLocalStorage: Sendable {
 
 
 public final class GoogleCalendarLocalStorageImple: GoogleCalendarLocalStorage {
-    
-    private let sqliteService: SQLiteService
-    public init(sqliteService: SQLiteService) {
-        self.sqliteService = sqliteService
+
+    private let connectionPool: any ExternalCalendarSQLiteConnectionPool
+    private let serviceId: String
+
+    public init(
+        connectionPool: any ExternalCalendarSQLiteConnectionPool,
+        serviceId: String = GoogleCalendarService.id
+    ) {
+        self.connectionPool = connectionPool
+        self.serviceId = serviceId
     }
-    
+
+    private func connection() async throws -> SQLiteService {
+        return try await connectionPool.connection(serviceId: serviceId)
+    }
+
     private typealias Colors = GoogleCalendarColorsTable
     private typealias Calendars = GoogleCalendarEventTagTable
 }
@@ -50,7 +60,8 @@ public final class GoogleCalendarLocalStorageImple: GoogleCalendarLocalStorage {
 extension GoogleCalendarLocalStorageImple {
     
     public func loadColors() async throws -> GoogleCalendar.Colors? {
-        let entities = try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        let entities = try await connection.async.run { db in
             let query = Colors.selectAll()
             return try db.load(Colors.self, query: query)
         }
@@ -79,21 +90,24 @@ extension GoogleCalendarLocalStorageImple {
             arr + [.init(event: color.key, color.value)]
         }
         let entities = calendars + events
-        try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        try await connection.async.run { db in
             try db.dropTable(Colors.self)
             try db.insert(Colors.self, entities: entities)
         }
     }
     
     public func loadCalendarList() async throws -> [GoogleCalendar.Tag] {
-        return try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        return try await connection.async.run { db in
             let query = Calendars.selectAll()
             return try db.load(query)
         }
     }
-    
+
     public func updateCalendarList(_ calendars: [GoogleCalendar.Tag]) async throws {
-        try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        try await connection.async.run { db in
             try db.dropTable(Calendars.self)
             try db.insert(Calendars.self, entities: calendars)
         }
@@ -137,7 +151,8 @@ extension GoogleCalendarLocalStorageImple {
                 time: time
             )
         }
-        return try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        return try await connection.async.run { db in
             try db.createTableOrNot(Events.self)
             return try db.load(query, mapping: mapping)
         }
@@ -146,11 +161,12 @@ extension GoogleCalendarLocalStorageImple {
     public func removeEvents(
         _ ids: [String]
     ) async throws {
-        try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        try await connection.async.run { db in
             let query = Events.delete().where { $0.id.in(ids) }
             try db.delete(Events.self, query: query)
         }
-        try await self.sqliteService.async.run { db in
+        try await connection.async.run { db in
             let query = Times.delete().where { $0.eventId.in(ids) }
             try db.delete(Times.self, query: query)
         }
@@ -161,7 +177,8 @@ extension GoogleCalendarLocalStorageImple {
         _ eventList: GoogleCalendar.EventOriginValueList,
         _ events: [GoogleCalendar.Event]
     ) async throws {
-        try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        try await connection.async.run { db in
             let entities = eventList.items.map {
                 Events.Entity(calendarId, eventList.timeZone, $0)
             }
@@ -178,7 +195,8 @@ extension GoogleCalendarLocalStorageImple {
         _ eventId: String
     ) async throws -> GoogleCalendar.EventOrigin {
         let query = Events.selectAll { $0.id == eventId }
-        let entity = try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        let entity = try await connection.async.run { db in
             return try db.loadOne(Events.self, query: query)
         }
         return try entity.unwrap().origin
@@ -189,7 +207,8 @@ extension GoogleCalendarLocalStorageImple {
         _ defaultTimeZone: String?,
         _ origin: GoogleCalendar.EventOrigin
     ) async throws {
-        try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        try await connection.async.run { db in
             let entity = Events.Entity(calendarId, defaultTimeZone, origin)
             try db.insert(Events.self, entities: [entity])
             
@@ -202,8 +221,8 @@ extension GoogleCalendarLocalStorageImple {
     }
     
     public func resetAll() async throws {
-
-        try await self.sqliteService.async.run { db in
+        let connection = try await self.connection()
+        try await connection.async.run { db in
             try db.dropTable(Colors.self)
             try db.dropTable(Calendars.self)
             try db.dropTable(Events.self)
