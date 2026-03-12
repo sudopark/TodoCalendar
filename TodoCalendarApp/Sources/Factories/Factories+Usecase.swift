@@ -298,7 +298,7 @@ extension NonLoginUsecaseFactoryImple {
     
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
         let cacheStorage = GoogleCalendarLocalStorageImple(
-            sqliteService: self.applicationBase.commonSqliteService
+            connectionPool: applicationBase.externalCalendarDBConnectionPool
         )
         let repository = GoogleCalendarRepositoryImple(
             remote: self.applicationBase.googleCalendarRemoteAPI,
@@ -706,7 +706,7 @@ extension LoginUsecaseFactoryImple {
     
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
         let cacheStorage = GoogleCalendarLocalStorageImple(
-            sqliteService: self.applicationBase.commonSqliteService
+            connectionPool: applicationBase.externalCalendarDBConnectionPool
         )
         let repository = GoogleCalendarRepositoryImple(
             remote: self.applicationBase.googleCalendarRemoteAPI,

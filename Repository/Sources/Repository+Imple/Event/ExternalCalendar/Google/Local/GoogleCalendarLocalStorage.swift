@@ -37,11 +37,11 @@ public protocol GoogleCalendarLocalStorage: Sendable {
 
 public final class GoogleCalendarLocalStorageImple: GoogleCalendarLocalStorage {
 
-    private let connectionPool: any ExternalCalendarSQLiteConnectionPool
+    private let connectionPool: any ExternalCalendarDBConnectionPool
     private let serviceId: String
 
     public init(
-        connectionPool: any ExternalCalendarSQLiteConnectionPool,
+        connectionPool: any ExternalCalendarDBConnectionPool,
         serviceId: String = GoogleCalendarService.id
     ) {
         self.connectionPool = connectionPool

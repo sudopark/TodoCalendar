@@ -19,7 +19,7 @@ import UnitTestHelpKit
 final class ExternalCalendarIntegrationUsecaseImpleTests: PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>! = []
-    fileprivate let spyConnectionPool = SpyExternalCalendarDBConnectionPool()
+    fileprivate let spyConnectionController = SpyExternalCalendarDBConnectionController()
 
     private func makeUsecase(
         startWithIntegrated accounts: [ExternalServiceAccountinfo] = [],
@@ -34,7 +34,7 @@ final class ExternalCalendarIntegrationUsecaseImpleTests: PublisherWaitable {
         return ExternalCalendarIntegrationUsecaseImple(
             oauth2ServiceProvider: serviceProvider,
             externalServiceIntegrateRepository: repository,
-            dbConnectionPool: spyConnectionPool,
+            dbConnectionController: spyConnectionController,
             sharedDataStore: store
         )
     }
@@ -208,7 +208,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         try await usecase.prepareIntegratedAccounts()
 
         // then
-        #expect(spyConnectionPool.didOpenedServiceIds == ["google"])
+        #expect(spyConnectionController.didOpenedServiceIds == ["google"])
     }
 
     // integrate 시에 DB open
@@ -221,7 +221,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         _ = try await usecase.integrate(external: service)
 
         // then
-        #expect(spyConnectionPool.didOpenedServiceIds == [service.identifier])
+        #expect(spyConnectionController.didOpenedServiceIds == [service.identifier])
     }
 
     // stopIntegrate 시에 DB close
@@ -236,7 +236,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         try await usecase.stopIntegrate(external: service)
 
         // then
-        #expect(spyConnectionPool.didClosedServiceIds == [service.identifier])
+        #expect(spyConnectionController.didClosedServiceIds == [service.identifier])
     }
 
     @Test func usecase_whenServiceIntegrationStatusChanged_notify() async throws {
@@ -262,7 +262,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
 }
 
 
-private final class SpyExternalCalendarDBConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {
+private final class SpyExternalCalendarDBConnectionController: ExternalCalendarDBConnectionControl, @unchecked Sendable {
 
     var didOpenedServiceIds: [String] = []
     var didClosedServiceIds: [String] = []
