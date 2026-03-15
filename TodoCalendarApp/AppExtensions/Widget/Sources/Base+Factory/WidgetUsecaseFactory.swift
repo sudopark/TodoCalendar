@@ -117,10 +117,9 @@ extension WidgetUsecaseFactory {
             removeAPIPerService: [:],
             keyChainStore: base.keyChainStorage
         )
-        let googleCalendarRepository = GoogleCalendarReadOnlyRepositoryImple(
-            localStorage: GoogleCalendarLocalStorageImple(
-                connectionPool: base.externalCalendarDBConnectionPool
-            )
+        let googleCalendarRepository = GoogleCalendarAggregatedRepositoryImple(
+            connectionPool: base.externalCalendarDBConnectionPool,
+            accountRepository: externalCalendarRepository
         )
         
         let eventDetailRepository = EventDetailDataLocalRepostioryImple(
