@@ -225,6 +225,41 @@ Adjust `expect.count` and `expect.timeout` before passing to `outputs()` when mu
 
 ---
 
+## Test Organization
+
+### Group by Situation, Not by Method
+
+Tests are grouped by **situation (given context)** rather than by the method or function being tested. Each group covers a distinct scenario, and within each group the test name describes the observable **behavior** being verified.
+
+```swift
+// MARK: - 마이그레이션 정상 수행
+extension AppDataMigrationImpleTests {
+    @Test func migration_movesAllDataToGoogleDB() ...
+    @Test func migration_whenWriteFails_completesWithoutThrowing() ...
+    @Test func migration_cleansUpOldDataAfterCompletion() ...
+    @Test func migration_doesNotRunAgainAfterCompletion() ...
+}
+
+// MARK: - 마이그레이션 실패
+extension AppDataMigrationImpleTests {
+    @Test func migration_whenReadFails_throwsError() ...
+}
+
+// MARK: - 데이터 없는 엣지 케이스
+extension AppDataMigrationImpleTests {
+    @Test func migration_whenNoData_completesSuccessfully() ...
+    @Test func migration_whenNoColors_migratesTagsAndEvents() ...
+}
+```
+
+### Test Observable Behavior, Not Implementation Details
+
+- **Assert on public interface only**: return values, thrown errors, emitted publisher values, and externally visible state changes (e.g., data written to DB, records deleted).
+- **Avoid asserting on private state**: private flags, internal counters, or intermediate values that are not observable through the public API. If a flag flip matters, verify it through its downstream effect (e.g., "migration doesn't run again" is verified by observing that data count doesn't change — not by checking that a flag is `true`).
+- **Avoid duplicating private keys or implementation details in tests**: if a key, constant, or intermediate value is private to the SUT, do not replicate it in the test file. Restructure the test to observe the behavior that the private value controls.
+
+---
+
 ## Test Support Modules
 
 | Module | Contents |
