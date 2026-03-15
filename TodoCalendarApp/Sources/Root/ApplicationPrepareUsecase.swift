@@ -41,12 +41,12 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
     private let latestAppSettingRepository: any AppSettingRepository
     private let sharedDataStore: SharedDataStore
     private let environmentStorage: any EnvironmentStorage
-    private let dbVersion: Int32
     private let database: SQLiteService
+    private let appDataMigration: AppDataMigrationImple
     private let databasePathFinding: (String?) -> String
 
     private var cancelBag: Set<AnyCancellable> = []
-    
+
     init(
         accountUsecase: any AccountUsecase,
         supportExternalServices: [any ExternalCalendarService],
@@ -54,8 +54,8 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         latestAppSettingRepository: any AppSettingRepository,
         sharedDataStore: SharedDataStore,
         environmentStorage: any EnvironmentStorage,
-        dbVersion: Int32,
         database: SQLiteService,
+        appDataMigration: AppDataMigrationImple,
         databasePathFinding: @escaping (String?) -> String = { AppEnvironment.dbFilePath(for: $0) }
     ) {
         self.accountUsecase = accountUsecase
@@ -64,8 +64,8 @@ final class ApplicationPrepareUsecaseImple: ApplicationPrepareUsecase {
         self.latestAppSettingRepository = latestAppSettingRepository
         self.sharedDataStore = sharedDataStore
         self.environmentStorage = environmentStorage
-        self.dbVersion = dbVersion
         self.database = database
+        self.appDataMigration = appDataMigration
         self.databasePathFinding = databasePathFinding
     }
 }
@@ -76,10 +76,15 @@ extension ApplicationPrepareUsecaseImple {
     func prepareLaunch() async throws -> ApplicationPrepareResult {
         let latestLoginAccount = try await self.accountUsecase.prepareLastSignInAccount()
         let appearance = try await self.prepareLatestAppearanceSeting()
-        
+
         try? await self.prepareDatabase(for: latestLoginAccount?.auth.uid)
-        
+
         try? await self.externalCalenarIntegrationUsecase.prepareIntegratedAccounts()
+
+        if let accountId = latestLoginAccount?.auth.uid {
+            await self.appDataMigration.migrateGoogleCalendarDataIfNeeded(accountId: accountId)
+        }
+
         return .init(
             latestLoginAcount: latestLoginAccount,
             appearnceSetings: appearance
@@ -150,8 +155,8 @@ extension ApplicationPrepareUsecaseImple {
         do {
             try await self.database.async.open(path: dbPath)
             logger.log(.sql, level: .info, "db open -> path: \(dbPath)")
-            try await self.database.runMigration(upTo: self.dbVersion)
-            try await self.database.prepareTables()
+            try await self.appDataMigration.runDBMigration()
+            try await self.appDataMigration.prepareTables()
         } catch {
             logger.log(.sql, level: .critical, "db open fail -> path: \(dbPath)")
             throw error

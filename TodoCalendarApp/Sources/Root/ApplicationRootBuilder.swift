@@ -41,6 +41,12 @@ final class ApplicationRootBuilder {
             deviceInfoFetchService: DeviceInfoFetchServiceImple()
         )
         
+        let appDataMigration = AppDataMigrationImple(
+            mainDB: applicationBase.commonSqliteService,
+            googleCalendarDBPool: applicationBase.externalCalendarDBConnectionPool,
+            migrationFlagStorage: applicationBase.userDefaultEnvironmentStorage,
+            dbVersion: AppEnvironment.dbVersion
+        )
         let prepareUsecase = ApplicationPrepareUsecaseImple(
             accountUsecase: accountUsecase,
             supportExternalServices: AppEnvironment.supportExternalCalendarServices,
@@ -50,8 +56,8 @@ final class ApplicationRootBuilder {
             ),
             sharedDataStore: applicationBase.sharedDataStore,
             environmentStorage: applicationBase.userDefaultEnvironmentStorage,
-            dbVersion: AppEnvironment.dbVersion,
-            database: applicationBase.commonSqliteService
+            database: applicationBase.commonSqliteService,
+            appDataMigration: appDataMigration
         )
         
         let deepLinkHandler = ApplicationDeepLinkHandlerImple()
