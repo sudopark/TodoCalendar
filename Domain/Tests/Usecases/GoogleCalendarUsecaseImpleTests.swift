@@ -60,7 +60,7 @@ final class GoogleCalendarUsecaseImpleTests: PublisherWaitable {
         self.updateAccountIntegrated(hasAccount)
         return .init(
             googleService: GoogleCalendarService(scopes: [.readOnly]),
-            repository: repository,
+            repositoryBuilder: PrivateStubRepositoryBuilder(repository),
             eventTagUsecase: self.stubEventTagUsecae,
             appearanceStore: self.spyViewAppearanceStore,
             sharedDataStore: self.stubStore
@@ -605,6 +605,20 @@ extension GoogleCalendarUsecaseImpleTests {
         #expect(hasAccounts == [false, true, false])
     }
 }
+
+private final class PrivateStubRepositoryBuilder: GoogleCalendarRepositoryBuilder, @unchecked Sendable {
+
+    private let repository: PrivateStubRepository
+
+    init(_ repository: PrivateStubRepository) {
+        self.repository = repository
+    }
+
+    func build(for accountId: String) -> any GoogleCalendarRepository {
+        return self.repository
+    }
+}
+
 
 private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked Sendable {
     
