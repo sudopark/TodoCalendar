@@ -12,12 +12,12 @@ import SQLiteService
 
 
 public protocol GoogleCalendarLocalStorage: Sendable {
- 
+
     func loadColors() async throws -> GoogleCalendar.Colors?
     func updateColors(_ colors: GoogleCalendar.Colors) async throws
     func loadCalendarList() async throws -> [GoogleCalendar.Tag]
     func updateCalendarList(_ calendars: [GoogleCalendar.Tag]) async throws
-    
+
     func loadEvents(_ calendarId: String, _ range: Range<TimeInterval>) async throws -> [GoogleCalendar.Event]
     func removeEvents(_ ids: [String]) async throws
     func updateEvents(
@@ -39,13 +39,16 @@ public final class GoogleCalendarLocalStorageImple: GoogleCalendarLocalStorage {
 
     private let connectionPool: any ExternalCalendarDBConnectionPool
     private let serviceId: String
+    private let accountId: String
 
     public init(
         connectionPool: any ExternalCalendarDBConnectionPool,
-        serviceId: String = GoogleCalendarService.id
+        serviceId: String = GoogleCalendarService.id,
+        accountId: String
     ) {
         self.connectionPool = connectionPool
         self.serviceId = serviceId
+        self.accountId = accountId
     }
 
     private func connection() async throws -> SQLiteService {
@@ -58,22 +61,23 @@ public final class GoogleCalendarLocalStorageImple: GoogleCalendarLocalStorage {
 
 
 extension GoogleCalendarLocalStorageImple {
-    
+
     public func loadColors() async throws -> GoogleCalendar.Colors? {
         let connection = try await self.connection()
         let entities = try await connection.async.run { db in
-            let query = Colors.selectAll()
+            try db.createTableOrNot(Colors.self)
+            let query = Colors.selectAll { $0.accountId == self.accountId }
             return try db.load(Colors.self, query: query)
         }
         guard !entities.isEmpty else { return nil }
-        
+
         let calendars = entities.filter { $0.colorType == "calendar" }
             .reduce(into: [String: GoogleCalendar.Colors.ColorSet]()) { acc, entity in
                 acc[entity.colorKey] = GoogleCalendar.Colors.ColorSet(
                     foregroundHex: entity.foreground, backgroudHex: entity.background
                 )
             }
-        let events = entities.filter { $0.colorKey == "event" }
+        let events = entities.filter { $0.colorType == "event" }
             .reduce(into: [String: GoogleCalendar.Colors.ColorSet]()) { acc, entity in
                 acc[entity.colorKey] = GoogleCalendar.Colors.ColorSet(
                     foregroundHex: entity.foreground, backgroudHex: entity.background
@@ -81,35 +85,44 @@ extension GoogleCalendarLocalStorageImple {
             }
         return .init(calendars: calendars, events: events)
     }
-    
+
     public func updateColors(_ colors: GoogleCalendar.Colors) async throws {
+        let accountId = self.accountId
         let calendars = colors.calendars.reduce([Colors.Entity]()) { arr, color in
-            arr + [.init(calendar: color.key, color.value)]
+            arr + [.init(accountId: accountId, calendar: color.key, color.value)]
         }
         let events = colors.events.reduce([Colors.Entity]()) { arr, color in
-            arr + [.init(event: color.key, color.value)]
+            arr + [.init(accountId: accountId, event: color.key, color.value)]
         }
         let entities = calendars + events
         let connection = try await self.connection()
         try await connection.async.run { db in
-            try db.dropTable(Colors.self)
+            try db.createTableOrNot(Colors.self)
+            let deleteQuery = Colors.delete().where { $0.accountId == accountId }
+            try db.delete(Colors.self, query: deleteQuery)
             try db.insert(Colors.self, entities: entities)
         }
     }
-    
+
     public func loadCalendarList() async throws -> [GoogleCalendar.Tag] {
         let connection = try await self.connection()
-        return try await connection.async.run { db in
-            let query = Calendars.selectAll()
+        let entities: [Calendars.Entity] = try await connection.async.run { db in
+            try db.createTableOrNot(Calendars.self)
+            let query = Calendars.selectAll { $0.accountId == self.accountId }
             return try db.load(query)
         }
+        return entities.map { $0.tag }
     }
 
     public func updateCalendarList(_ calendars: [GoogleCalendar.Tag]) async throws {
+        let accountId = self.accountId
+        let entities = calendars.map { Calendars.Entity(accountId: accountId, $0) }
         let connection = try await self.connection()
         try await connection.async.run { db in
-            try db.dropTable(Calendars.self)
-            try db.insert(Calendars.self, entities: calendars)
+            try db.createTableOrNot(Calendars.self)
+            let deleteQuery = Calendars.delete().where { $0.accountId == accountId }
+            try db.delete(Calendars.self, query: deleteQuery)
+            try db.insert(Calendars.self, entities: entities)
         }
     }
 }
@@ -117,20 +130,20 @@ extension GoogleCalendarLocalStorageImple {
 // MARK: - events
 
 extension GoogleCalendarLocalStorageImple {
-    
+
     private typealias Events = GoogleCalendarEventOriginTable
     private typealias Times = EventTimeTable
-    
+
     public func loadEvents(
         _ calendarId: String, _ range: Range<TimeInterval>
     ) async throws -> [GoogleCalendar.Event] {
+        let accountId = self.accountId
         let timeQuery = Times.overlapQuery(with: range)
         let eventQuery = Events
             .selectSome { [$0.id, $0.summary, $0.colorId, $0.htmlLink, $0.location, $0.visibility] }
-            .where { $0.calendarId == calendarId }
+            .where { $0.accountId == accountId && $0.calendarId == calendarId }
         let query = eventQuery.innerJoin(with: timeQuery, on: { ($0.id, $1.eventId) })
         let mapping: (CursorIterator) throws -> GoogleCalendar.Event = { cursor in
-            
             let eventId: String = try cursor.next().unwrap()
             let summary: String? = cursor.next()
             let colorId: String? = cursor.next()
@@ -154,16 +167,16 @@ extension GoogleCalendarLocalStorageImple {
         let connection = try await self.connection()
         return try await connection.async.run { db in
             try db.createTableOrNot(Events.self)
+            try db.createTableOrNot(Times.self)
             return try db.load(query, mapping: mapping)
         }
     }
-    
-    public func removeEvents(
-        _ ids: [String]
-    ) async throws {
+
+    public func removeEvents(_ ids: [String]) async throws {
+        let accountId = self.accountId
         let connection = try await self.connection()
         try await connection.async.run { db in
-            let query = Events.delete().where { $0.id.in(ids) }
+            let query = Events.delete().where { $0.accountId == accountId && $0.id.in(ids) }
             try db.delete(Events.self, query: query)
         }
         try await connection.async.run { db in
@@ -171,61 +184,83 @@ extension GoogleCalendarLocalStorageImple {
             try db.delete(Times.self, query: query)
         }
     }
-    
+
     public func updateEvents(
         _ calendarId: String,
         _ eventList: GoogleCalendar.EventOriginValueList,
         _ events: [GoogleCalendar.Event]
     ) async throws {
+        let accountId = self.accountId
         let connection = try await self.connection()
         try await connection.async.run { db in
+            try db.createTableOrNot(Events.self)
+            try db.createTableOrNot(Times.self)
             let entities = eventList.items.map {
-                Events.Entity(calendarId, eventList.timeZone, $0)
+                Events.Entity(accountId: accountId, calendarId, eventList.timeZone, $0)
             }
             try db.insert(Events.self, entities: entities)
-            
+
             let times = events.map {
                 Times.Entity($0.eventId, $0.eventTime, nil)
             }
             try db.insert(Times.self, entities: times)
         }
     }
-    
-    public func loadEventDetail(
-        _ eventId: String
-    ) async throws -> GoogleCalendar.EventOrigin {
-        let query = Events.selectAll { $0.id == eventId }
+
+    public func loadEventDetail(_ eventId: String) async throws -> GoogleCalendar.EventOrigin {
+        let accountId = self.accountId
+        let query = Events.selectAll { $0.accountId == accountId && $0.id == eventId }
         let connection = try await self.connection()
         let entity = try await connection.async.run { db in
             return try db.loadOne(Events.self, query: query)
         }
         return try entity.unwrap().origin
     }
-    
+
     public func updateEventDetail(
         _ calendarId: String,
         _ defaultTimeZone: String?,
         _ origin: GoogleCalendar.EventOrigin
     ) async throws {
+        let accountId = self.accountId
         let connection = try await self.connection()
         try await connection.async.run { db in
-            let entity = Events.Entity(calendarId, defaultTimeZone, origin)
+            try db.createTableOrNot(Events.self)
+            try db.createTableOrNot(Times.self)
+            let entity = Events.Entity(accountId: accountId, calendarId, defaultTimeZone, origin)
             try db.insert(Events.self, entities: [entity])
-            
+
             if let event = GoogleCalendar.Event(origin, calendarId, defaultTimeZone) {
-             
                 let timeEntity = Times.Entity(event.eventId, event.eventTime, nil)
                 try db.insert(Times.self, entities: [timeEntity])
             }
         }
     }
-    
+
     public func resetAll() async throws {
+        let accountId = self.accountId
         let connection = try await self.connection()
+
+        let eventIds = try await connection.async.run { db -> [String] in
+            guard (try? db.createTableOrNot(Events.self)) != nil else { return [] }
+            let query = Events.selectSome { [$0.id] }.where { $0.accountId == accountId }
+            return (try? db.load(query, mapping: { cursor in
+                let id: String = try cursor.next().unwrap()
+                return id
+            })) ?? []
+        }
+
         try await connection.async.run { db in
-            try db.dropTable(Colors.self)
-            try db.dropTable(Calendars.self)
-            try db.dropTable(Events.self)
+            if !eventIds.isEmpty {
+                let timesDelete = Times.delete().where { $0.eventId.in(eventIds) }
+                try db.delete(Times.self, query: timesDelete)
+            }
+            let eventsDelete = Events.delete().where { $0.accountId == accountId }
+            try db.delete(Events.self, query: eventsDelete)
+            let colorsDelete = Colors.delete().where { $0.accountId == accountId }
+            try db.delete(Colors.self, query: colorsDelete)
+            let tagsDelete = Calendars.delete().where { $0.accountId == accountId }
+            try db.delete(Calendars.self, query: tagsDelete)
         }
     }
 }
