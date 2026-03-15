@@ -9,6 +9,7 @@
 import Foundation
 import Domain
 import SQLiteService
+import Extensions
 
 
 public final class AppDataMigrationImple: @unchecked Sendable {
@@ -31,11 +32,141 @@ public final class AppDataMigrationImple: @unchecked Sendable {
     }
 
     public func runDBMigration() async throws {
-        try await mainDB.runMigration(upTo: dbVersion)
+        do {
+            let _ = try await mainDB.async.migrate(
+                upto: dbVersion,
+                steps: { [weak self] version, database in
+                    switch version {
+                    case 0: try self?.runMigrationVersion0To1(database)
+                    case 1: try self?.runMigrationVersion1to2(database)
+                    case 2: try self?.runMigrationVersion2to3(database)
+                    case 3: try self?.runMigrationVersion3to4(database)
+                    case 4: try? self?.runMigrationVersion4to5(database)
+                    case 5: try? self?.runMigrationVersion5to6(database)
+                    default: break
+                    }
+                },
+                finalized: { [weak self] version, database in
+                    logger.log(.sql, level: .info, "db migration finished to: \(version)")
+                    try? self?.updateJournalModeIfNeed(database)
+                }
+            )
+        } catch {
+            logger.log(.sql, level: .error, "db migration failed, reason: \(error)")
+        }
     }
 
     public func prepareTables() async throws {
-        try await mainDB.prepareTables()
+        try await mainDB.async.run { db in
+            try? db.createTableOrNot(KeyValueTable.self)
+            try? db.createTableOrNot(HolidayRepositoryImple.HolidayTable.self)
+            try? db.createTableOrNot(EventTimeTable.self)
+            try? db.createTableOrNot(EventDetailDataTable.self)
+            try? db.createTableOrNot(CustomEventTagTable.self)
+            try? db.createTableOrNot(ScheduleEventTable.self)
+            try? db.createTableOrNot(EventSyncTimestampTable.self)
+            try? db.createTableOrNot(DoneTodoEventTable.self)
+            try? db.createTableOrNot(DoneTodoEventDetailTable.self)
+            try? db.createTableOrNot(PendingDoneTodoEventTable.self)
+            try? db.createTableOrNot(TodoEventTable.self)
+            try? db.createTableOrNot(TodoToggleStateTable.self)
+            try? db.createTableOrNot(EventUploadPendingQueueTable.self)
+            try? db.createTableOrNot(EventNotificationIdTable.self)
+        }
+    }
+}
+
+
+// MARK: - DB Migration steps
+
+extension AppDataMigrationImple {
+
+    private func runMigrationVersion0To1(_ database: any DataBase) throws {
+        do {
+            try database.migrate(TodoEventTable.self, version: 0)
+            logger.log(.sql, level: .info, "migration version 0 -> 1, TodoEventTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 0 -> 1 failed.. will drop TodoEventTable")
+            try? database.dropTable(TodoEventTable.self)
+        }
+        do {
+            try database.migrate(ScheduleEventTable.self, version: 0)
+            logger.log(.sql, level: .info, "migration version 0 -> 1, ScheduleEventTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 0 -> 1 failed.. will drop ScheduleEventTable")
+            try? database.dropTable(ScheduleEventTable.self)
+        }
+        do {
+            try database.migrate(PendingDoneTodoEventTable.self, version: 0)
+            logger.log(.sql, level: .info, "migration version 0 -> 1, PendingDoneTodoEventTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 0 -> 1 failed.. will drop PendingDoneTodoEventTable")
+            try? database.dropTable(PendingDoneTodoEventTable.self)
+        }
+    }
+
+    private func runMigrationVersion1to2(_ database: any DataBase) throws {
+        do {
+            try database.migrate(OldGoogleCalendarEventOriginTable.self, version: 1)
+            logger.log(.sql, level: .info, "migration version 1 -> 2, OldGoogleCalendarEventOriginTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 1 -> 2 failed.. will drop OldGoogleCalendarEventOriginTable")
+            try? database.dropTable(OldGoogleCalendarEventOriginTable.self)
+        }
+    }
+
+    private func runMigrationVersion2to3(_ database: any DataBase) throws {
+        do {
+            try database.migrate(OldGoogleCalendarEventTagTable.self, version: 2)
+            logger.log(.sql, level: .info, "migration version 2 -> 3, OldGoogleCalendarEventTagTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 2 -> 3 failed.. will drop OldGoogleCalendarEventTagTable")
+            try? database.dropTable(OldGoogleCalendarEventTagTable.self)
+        }
+    }
+
+    private func runMigrationVersion3to4(_ database: any DataBase) throws {
+        do {
+            try database.migrate(OldGoogleCalendarEventOriginTable.self, version: 3)
+            logger.log(.sql, level: .info, "migration version 3 -> 4, OldGoogleCalendarEventOriginTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 3 -> 4 failed.. will drop OldGoogleCalendarEventOriginTable")
+            try? database.dropTable(OldGoogleCalendarEventOriginTable.self)
+        }
+    }
+
+    private func runMigrationVersion4to5(_ database: any DataBase) throws {
+        do {
+            try database.createTableOrNot(EventUploadPendingQueueTableV4TempTable.self)
+            try database.migrate(EventUploadPendingQueueTable.self, version: 4)
+            logger.log(.sql, level: .info, "migration version 4 -> 5, EventUploadPendingQueueTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 4 -> 5 failed.. will drop EventUploadPendingQueueTable")
+            try? database.dropTable(EventUploadPendingQueueTable.self)
+        }
+    }
+
+    private func runMigrationVersion5to6(_ database: any DataBase) throws {
+        do {
+            try database.createTableOrNot(TodoEventTable.self)
+            try database.migrate(TodoEventTable.self, version: 5)
+            logger.log(.sql, level: .info, "migration version 5 -> 6, TodoEventTable finished")
+        } catch {
+            logger.log(.sql, level: .error, "migration version 5 -> 6 failed.. will drop TodoEventTable")
+            try? database.dropTable(TodoEventTable.self)
+        }
+    }
+
+    private func updateJournalModeIfNeed(_ database: any DataBase) throws {
+        do {
+            let mode = (try database.journalMode()).uppercased()
+            logger.log(.sql, level: .info, "current journal mode: \(mode)")
+            guard mode != "WAL" else { return }
+            try database.updateJournalMode("WAL")
+            logger.log(.sql, level: .info, "update journal mode to WAL")
+        } catch {
+            logger.log(.sql, level: .error, "fail to update journal mode")
+        }
     }
 }
 
