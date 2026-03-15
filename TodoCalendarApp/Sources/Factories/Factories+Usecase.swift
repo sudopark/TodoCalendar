@@ -295,18 +295,15 @@ extension NonLoginUsecaseFactoryImple {
 }
 
 extension NonLoginUsecaseFactoryImple {
-    
+
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
-        let cacheStorage = GoogleCalendarLocalStorageImple(
-            connectionPool: applicationBase.externalCalendarDBConnectionPool
-        )
-        let repository = GoogleCalendarRepositoryImple(
+        let builder = GoogleCalendarRepositoryBuilderImple(
             remote: self.applicationBase.googleCalendarRemoteAPI,
-            cacheStorage: cacheStorage
+            connectionPool: self.applicationBase.externalCalendarDBConnectionPool
         )
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
-            repository: repository,
+            repositoryBuilder: builder,
             eventTagUsecase: self.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
@@ -703,21 +700,43 @@ extension LoginUsecaseFactoryImple {
 
 
 extension LoginUsecaseFactoryImple {
-    
+
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
-        let cacheStorage = GoogleCalendarLocalStorageImple(
-            connectionPool: applicationBase.externalCalendarDBConnectionPool
-        )
-        let repository = GoogleCalendarRepositoryImple(
+        let builder = GoogleCalendarRepositoryBuilderImple(
             remote: self.applicationBase.googleCalendarRemoteAPI,
-            cacheStorage: cacheStorage
+            connectionPool: self.applicationBase.externalCalendarDBConnectionPool
         )
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
-            repository: repository,
+            repositoryBuilder: builder,
             eventTagUsecase: self.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
+        )
+    }
+}
+
+
+// MARK: - GoogleCalendarRepositoryBuilderImple
+
+private struct GoogleCalendarRepositoryBuilderImple: GoogleCalendarRepositoryBuilder {
+
+    private let remote: any RemoteAPI
+    private let connectionPool: any ExternalCalendarDBConnectionPool
+
+    init(remote: any RemoteAPI, connectionPool: any ExternalCalendarDBConnectionPool) {
+        self.remote = remote
+        self.connectionPool = connectionPool
+    }
+
+    func build(for accountId: String) -> any GoogleCalendarRepository {
+        let cacheStorage = GoogleCalendarLocalStorageImple(
+            connectionPool: self.connectionPool,
+            accountId: accountId
+        )
+        return GoogleCalendarRepositoryImple(
+            remote: self.remote,
+            cacheStorage: cacheStorage
         )
     }
 }

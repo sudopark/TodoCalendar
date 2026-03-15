@@ -9,6 +9,12 @@
 import Foundation
 import Combine
 
+public protocol GoogleCalendarRepositoryBuilder: Sendable {
+
+    func build(for accountId: String) -> any GoogleCalendarRepository
+}
+
+
 public protocol GoogleCalendarRepository: Sendable {
     
     func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error>
