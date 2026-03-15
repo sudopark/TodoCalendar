@@ -12,16 +12,16 @@ import SQLiteService
 import Extensions
 
 
-// MARK: - Colors
+// MARK: - Old Colors (공통DB 레거시 테이블)
 
-struct GoogleCalendarColorsTable: Table {
-    
+struct OldGoogleCalendarColorsTable: Table {
+
     enum Columns: String, TableColumn {
         case colorType = "color_type"
         case colorKey = "color_key"
         case background
         case foreground
-        
+
         var dataType: ColumnDataType {
             switch self {
             case .colorType: return .text([.notNull])
@@ -31,27 +31,27 @@ struct GoogleCalendarColorsTable: Table {
             }
         }
     }
-    
+
     struct Entity: RowValueType {
         let colorType: String
         let colorKey: String
         let background: String
         let foreground: String
-        
+
         init(calendar key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
             self.colorType = "calendar"
             self.colorKey = key
             self.background = colorSet.backgroudHex
             self.foreground = colorSet.foregroundHex
         }
-        
+
         init(event key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
             self.colorType = "event"
             self.colorKey = key
             self.background = colorSet.backgroudHex
             self.foreground = colorSet.foregroundHex
         }
-        
+
         init(_ cursor: CursorIterator) throws {
             self.colorType = try cursor.next().unwrap()
             self.colorKey = try cursor.next().unwrap()
@@ -59,13 +59,11 @@ struct GoogleCalendarColorsTable: Table {
             self.foreground = try cursor.next().unwrap()
         }
     }
-    
+
     typealias EntityType = Entity
-    
     typealias ColumnType = Columns
-    
     static let tableName: String = "google_calendar_colors"
-    
+
     static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
         switch column {
         case .colorType: return entity.colorType
@@ -77,9 +75,79 @@ struct GoogleCalendarColorsTable: Table {
 }
 
 
-// MARK: - event
+// MARK: - Colors (google_calendar.db 신규 테이블, accountId 포함)
 
-struct GoogleCalendarEventOriginTable: Table {
+struct GoogleCalendarColorsTable: Table {
+
+    enum Columns: String, TableColumn {
+        case accountId = "account_id"
+        case colorType = "color_type"
+        case colorKey = "color_key"
+        case background
+        case foreground
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .accountId: return .text([.notNull])
+            case .colorType: return .text([.notNull])
+            case .colorKey: return .text([.notNull])
+            case .background: return .text([.notNull])
+            case .foreground: return .text([.notNull])
+            }
+        }
+    }
+
+    struct Entity: RowValueType {
+        let accountId: String
+        let colorType: String
+        let colorKey: String
+        let background: String
+        let foreground: String
+
+        init(accountId: String, calendar key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
+            self.accountId = accountId
+            self.colorType = "calendar"
+            self.colorKey = key
+            self.background = colorSet.backgroudHex
+            self.foreground = colorSet.foregroundHex
+        }
+
+        init(accountId: String, event key: String, _ colorSet: GoogleCalendar.Colors.ColorSet) {
+            self.accountId = accountId
+            self.colorType = "event"
+            self.colorKey = key
+            self.background = colorSet.backgroudHex
+            self.foreground = colorSet.foregroundHex
+        }
+
+        init(_ cursor: CursorIterator) throws {
+            self.accountId = try cursor.next().unwrap()
+            self.colorType = try cursor.next().unwrap()
+            self.colorKey = try cursor.next().unwrap()
+            self.background = try cursor.next().unwrap()
+            self.foreground = try cursor.next().unwrap()
+        }
+    }
+
+    typealias EntityType = Entity
+    typealias ColumnType = Columns
+    static let tableName: String = "google_calendar_colors"
+
+    static func scalar(_ entity: Entity, for column: Columns) -> (any ScalarType)? {
+        switch column {
+        case .accountId: return entity.accountId
+        case .colorType: return entity.colorType
+        case .colorKey: return entity.colorKey
+        case .background: return entity.background
+        case .foreground: return entity.foreground
+        }
+    }
+}
+
+
+// MARK: - Old event (공통DB 레거시 테이블)
+
+struct OldGoogleCalendarEventOriginTable: Table {
     
     enum Columns: String, TableColumn {
         case calendarId
@@ -201,6 +269,129 @@ struct GoogleCalendarEventOriginTable: Table {
     }
     
 }
+
+// MARK: - event (google_calendar.db 신규 테이블, accountId 포함)
+
+struct GoogleCalendarEventOriginTable: Table {
+
+    enum Columns: String, TableColumn {
+        case accountId = "account_id"
+        case calendarId
+        case defaultTimeZone
+        case id
+        case summary
+        case htmlLink
+        case description
+        case location
+        case colorId
+        case creator
+        case organizer
+        case start
+        case end
+        case endTimeUnspecified
+        case recurrence
+        case recurringEventId
+        case sequence
+        case attendees
+        case hangoutLink
+        case conferenceData
+        case attachments
+        case eventType
+        case status
+        case visibility
+
+        var dataType: ColumnDataType {
+            switch self {
+            case .accountId: return .text([.notNull])
+            case .calendarId: return .text([.notNull])
+            case .defaultTimeZone: return .text([])
+            case .id: return .text([.primaryKey(autoIncrement: false), .unique, .notNull])
+            case .summary: return .text([.notNull])
+            case .htmlLink: return .text([])
+            case .description: return .text([])
+            case .location: return .text([])
+            case .colorId: return .text([])
+            case .creator: return .text([])
+            case .organizer: return .text([])
+            case .start: return .text([])
+            case .end: return .text([])
+            case .endTimeUnspecified: return .integer([.default(0)])
+            case .recurrence: return .text([])
+            case .recurringEventId: return .text([])
+            case .sequence: return .integer([])
+            case .attendees: return .text([])
+            case .hangoutLink: return .text([])
+            case .conferenceData: return .text([])
+            case .attachments: return .text([])
+            case .eventType: return .text([])
+            case .status: return .text([])
+            case .visibility: return .text([])
+            }
+        }
+    }
+
+    struct Entity: RowValueType {
+        let accountId: String
+        let calendarId: String
+        let defaultTimeZone: String?
+        let origin: GoogleCalendar.EventOrigin
+
+        init(
+            accountId: String,
+            _ calendarId: String,
+            _ defaultTimeZone: String?,
+            _ origin: GoogleCalendar.EventOrigin
+        ) {
+            self.accountId = accountId
+            self.calendarId = calendarId
+            self.defaultTimeZone = defaultTimeZone
+            self.origin = origin
+        }
+
+        init(_ cursor: CursorIterator) throws {
+            self.accountId = try cursor.next().unwrap()
+            self.calendarId = try cursor.next().unwrap()
+            self.defaultTimeZone = cursor.next()
+            self.origin = try GoogleCalendar.EventOrigin(cursor)
+        }
+    }
+
+    typealias ColumnType = Columns
+    typealias EntityType = Entity
+    static let tableName: String = "google_calendar_event_origin"
+
+    static func scalar(
+        _ entity: Entity, for column: Columns
+    ) -> (any ScalarType)? {
+        switch column {
+        case .accountId: return entity.accountId
+        case .calendarId: return entity.calendarId
+        case .defaultTimeZone: return entity.defaultTimeZone
+        case .id: return entity.origin.id
+        case .summary: return entity.origin.summary ?? ""
+        case .htmlLink: return entity.origin.htmlLink
+        case .description: return entity.origin.description
+        case .location: return entity.origin.location
+        case .colorId: return entity.origin.colorId
+        case .creator: return entity.origin.creator?.asText()
+        case .organizer: return entity.origin.organizer?.asText()
+        case .start: return entity.origin.start?.asText()
+        case .end: return entity.origin.end?.asText()
+        case .endTimeUnspecified: return entity.origin.endTimeUnspecified
+        case .recurrence: return entity.origin.recurrence?.asText()
+        case .recurringEventId: return entity.origin.recurringEventId
+        case .sequence: return entity.origin.sequence
+        case .attendees: return entity.origin.attendees?.asText()
+        case .hangoutLink: return entity.origin.hangoutLink
+        case .conferenceData: return entity.origin.conferenceData?.asText()
+        case .attachments: return entity.origin.attachments?.asText()
+        case .eventType: return entity.origin.eventType
+        case .status: return entity.origin.status?.rawValue
+        case .visibility: return entity.origin.visibility?.rawValue
+        }
+    }
+}
+
 
 extension GoogleCalendar.EventOrigin {
  

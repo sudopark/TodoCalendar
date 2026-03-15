@@ -29,7 +29,7 @@ final class GoogleCalendarRepositoryImple_Tests: PublisherWaitable, LocalTestabl
     init() {
         self.stubRemote = .init(responses: DummyResponse().reponse)
         let pool = StubExternalCalendarSQLiteConnectionPool(self.sqliteService)
-        self.cacheStorage = .init(connectionPool: pool)
+        self.cacheStorage = .init(connectionPool: pool, accountId: "test@google.com")
     }
     
     private func makeRepository() -> GoogleCalendarRepositoryImple {
@@ -199,7 +199,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         try await self.runTestWithOpenClose("test_google_event_1") {
             // given
             let expect = self.expectConfirm("캐시 없는 상태에서 remote에서 이벤트 조회 -> 주어진 기간내 자동으로 페이징")
-            expect.count = 1
+            expect.count = 2
             expect.timeout = .milliseconds(100)
             let repository = self.makeRepository()
             
@@ -208,10 +208,8 @@ extension GoogleCalendarRepositoryImple_Tests {
             let eventLists = try await self.outputs(expect, for: load)
             
             // then
-            try #require(eventLists.count == 1)
-            
             let eventFromCache = eventLists.first
-            #expect(eventFromCache?.isEmpty != true)
+            #expect(eventFromCache?.isEmpty == true)
             
             let eventFromRemote = eventLists.last
             let ids = eventFromRemote?.map { $0.eventId }
@@ -438,7 +436,7 @@ extension GoogleCalendarRepositoryImple_Tests {
     @Test func storage_whenConnectionNotAvailable_throwsError() async throws {
         // given
         let failingPool = FailingExternalCalendarSQLiteConnectionPool()
-        let storage = GoogleCalendarLocalStorageImple(connectionPool: failingPool)
+        let storage = GoogleCalendarLocalStorageImple(connectionPool: failingPool, accountId: "test@google.com")
 
         // when + then
         await #expect(throws: (any Error).self) {

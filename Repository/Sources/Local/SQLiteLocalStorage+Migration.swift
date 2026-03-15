@@ -108,31 +108,31 @@ extension SQLiteService {
     
     func runMigrationVersion1to2(_ database: any DataBase) throws -> Void {
         do {
-            try database.migrate(GoogleCalendarEventOriginTable.self, version: 1)
-            logger.log(.sql, level: .info, "migratiob version 1 -> 2, GoogleCalendarEventOriginTable finished")
+            try database.migrate(OldGoogleCalendarEventOriginTable.self, version: 1)
+            logger.log(.sql, level: .info, "migratiob version 1 -> 2, OldGoogleCalendarEventOriginTable finished")
         } catch {
-            logger.log(.sql, level: .error, "migration version 1 -> 2 faield.. will drop GoogleCalendarEventOriginTable")
-            try? database.dropTable(GoogleCalendarEventOriginTable.self)
+            logger.log(.sql, level: .error, "migration version 1 -> 2 faield.. will drop OldGoogleCalendarEventOriginTable")
+            try? database.dropTable(OldGoogleCalendarEventOriginTable.self)
         }
     }
-    
+
     func runMigrationVersion2to3(_ database: any DataBase) throws -> Void {
         do {
-            try database.migrate(GoogleCalendarEventTagTable.self, version: 2)
-            logger.log(.sql, level: .info, "migratiob version 2 -> 3, GoogleCalendarEventTagTable finished")
+            try database.migrate(OldGoogleCalendarEventTagTable.self, version: 2)
+            logger.log(.sql, level: .info, "migratiob version 2 -> 3, OldGoogleCalendarEventTagTable finished")
         } catch {
-            logger.log(.sql, level: .error, "migration version 2 -> 3 faield.. will drop GoogleCalendarEventTagTable")
-            try? database.dropTable(GoogleCalendarEventTagTable.self)
+            logger.log(.sql, level: .error, "migration version 2 -> 3 faield.. will drop OldGoogleCalendarEventTagTable")
+            try? database.dropTable(OldGoogleCalendarEventTagTable.self)
         }
     }
-    
+
     func runMigrationVersion3to4(_ database: any DataBase) throws -> Void {
         do {
-            try database.migrate(GoogleCalendarEventOriginTable.self, version: 3)
-            logger.log(.sql, level: .info, "migratiob version 3 -> 4, GoogleCalendarEventOriginTable finished")
+            try database.migrate(OldGoogleCalendarEventOriginTable.self, version: 3)
+            logger.log(.sql, level: .info, "migratiob version 3 -> 4, OldGoogleCalendarEventOriginTable finished")
         } catch {
-            logger.log(.sql, level: .error, "migration version 3 -> 4 faield.. will drop GoogleCalendarEventOriginTable")
-            try? database.dropTable(GoogleCalendarEventOriginTable.self)
+            logger.log(.sql, level: .error, "migration version 3 -> 4 faield.. will drop OldGoogleCalendarEventOriginTable")
+            try? database.dropTable(OldGoogleCalendarEventOriginTable.self)
         }
     }
     
@@ -183,9 +183,6 @@ extension SQLiteService {
             try? db.createTableOrNot(EventTimeTable.self)
             try? db.createTableOrNot(EventDetailDataTable.self)
             try? db.createTableOrNot(CustomEventTagTable.self)
-            try? db.createTableOrNot(GoogleCalendarEventTagTable.self)
-            try? db.createTableOrNot(GoogleCalendarColorsTable.self)
-            try? db.createTableOrNot(GoogleCalendarEventOriginTable.self)
             try? db.createTableOrNot(ScheduleEventTable.self)
             try? db.createTableOrNot(EventSyncTimestampTable.self)
             try? db.createTableOrNot(DoneTodoEventTable.self)
