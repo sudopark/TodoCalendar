@@ -15,23 +15,22 @@ import Extensions
 
 public final class GoogleCalendarAggregatedRepositoryImple: GoogleCalendarRepository {
 
-    private let connectionPool: any ExternalCalendarDBConnectionPool
+    private let storage: any GoogleCalendarLocalStorage
     private let accountRepository: any ExternalCalendarIntegrateRepository
 
     public init(
         connectionPool: any ExternalCalendarDBConnectionPool,
         accountRepository: any ExternalCalendarIntegrateRepository
     ) {
-        self.connectionPool = connectionPool
+        self.storage = GoogleCalendarLocalStorageImple(connectionPool: connectionPool)
         self.accountRepository = accountRepository
     }
 
-    private func makeStorages() async throws -> [any GoogleCalendarLocalStorage] {
+    private func googleAccountEmails() async throws -> [String] {
         let accounts = try await accountRepository.loadIntegratedAccounts()
         return accounts
             .filter { $0.serviceIdentifier == GoogleCalendarService.id }
             .compactMap { $0.email }
-            .map { GoogleCalendarLocalStorageImple(connectionPool: connectionPool, accountId: $0) }
     }
 }
 
@@ -40,11 +39,12 @@ extension GoogleCalendarAggregatedRepositoryImple {
 
     public func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
         return self.load {
-            let storages = try await self.makeStorages()
-            var merged = GoogleCalendar.Colors(calendars: [:], events: [:])
-            for storage in storages {
-                guard let colors = try await storage.loadColors() else { continue }
+            let emails = try await self.googleAccountEmails()
+            var merged = GoogleCalendar.Colors(ownerId: "", calendars: [:], events: [:])
+            for email in emails {
+                guard let colors = try await self.storage.loadColors(accountId: email) else { continue }
                 merged = GoogleCalendar.Colors(
+                    ownerId: "",
                     calendars: merged.calendars.merging(colors.calendars) { $1 },
                     events: merged.events.merging(colors.events) { $1 }
                 )
@@ -55,10 +55,10 @@ extension GoogleCalendarAggregatedRepositoryImple {
 
     public func loadCalendarTags() -> AnyPublisher<[GoogleCalendar.Tag], any Error> {
         return self.load {
-            let storages = try await self.makeStorages()
+            let emails = try await self.googleAccountEmails()
             var allTags: [GoogleCalendar.Tag] = []
-            for storage in storages {
-                allTags += try await storage.loadCalendarList()
+            for email in emails {
+                allTags += try await self.storage.loadCalendarList(accountId: email)
             }
             return allTags
         }
@@ -69,10 +69,10 @@ extension GoogleCalendarAggregatedRepositoryImple {
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
         return self.load {
-            let storages = try await self.makeStorages()
+            let emails = try await self.googleAccountEmails()
             var allEvents: [GoogleCalendar.Event] = []
-            for storage in storages {
-                allEvents += try await storage.loadEvents(calendarId, period)
+            for email in emails {
+                allEvents += try await self.storage.loadEvents(calendarId, period, accountId: email)
             }
             return allEvents
         }
@@ -82,9 +82,9 @@ extension GoogleCalendarAggregatedRepositoryImple {
         _ calendarId: String, _ timeZone: String, _ eventId: String
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         return self.load {
-            let storages = try await self.makeStorages()
-            for storage in storages {
-                if let detail = try? await storage.loadEventDetail(eventId) {
+            let emails = try await self.googleAccountEmails()
+            for email in emails {
+                if let detail = try? await self.storage.loadEventDetail(eventId, accountId: email) {
                     return detail
                 }
             }

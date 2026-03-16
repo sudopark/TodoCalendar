@@ -730,13 +730,11 @@ private struct GoogleCalendarRepositoryBuilderImple: GoogleCalendarRepositoryBui
     }
 
     func build(for accountId: String) -> any GoogleCalendarRepository {
-        let cacheStorage = GoogleCalendarLocalStorageImple(
-            connectionPool: self.connectionPool,
-            accountId: accountId
-        )
+        let cacheStorage = GoogleCalendarLocalStorageImple(connectionPool: self.connectionPool)
         return GoogleCalendarRepositoryImple(
             remote: self.remote,
-            cacheStorage: cacheStorage
+            cacheStorage: cacheStorage,
+            accountId: accountId
         )
     }
 }

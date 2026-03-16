@@ -54,8 +54,8 @@ final class GoogleCalendarAggregatedRepositoryImpleTests: PublisherWaitable {
         )
     }
 
-    private func localStorage(accountEmail: String, pool: any ExternalCalendarDBConnectionPool) -> GoogleCalendarLocalStorageImple {
-        GoogleCalendarLocalStorageImple(connectionPool: pool, accountId: accountEmail)
+    private func localStorage(pool: any ExternalCalendarDBConnectionPool) -> GoogleCalendarLocalStorageImple {
+        GoogleCalendarLocalStorageImple(connectionPool: pool)
     }
 }
 
@@ -124,12 +124,13 @@ extension GoogleCalendarAggregatedRepositoryImpleTests {
         let pool = try await makePool()
         defer { Task { try? await pool.close(serviceId: googleServiceId) } }
 
-        let storage = localStorage(accountEmail: account1, pool: pool)
+        let storage = localStorage(pool: pool)
         let colors = GoogleCalendar.Colors(
+            ownerId: account1,
             calendars: ["c1": .init(foregroundHex: "f1", backgroudHex: "b1")],
             events: ["e1": .init(foregroundHex: "f2", backgroudHex: "b2")]
         )
-        try await storage.updateColors(colors)
+        try await storage.updateColors(colors, accountId: account1)
 
         let repo = makeRepository(accountEmails: [account1], pool: pool)
         let loaded = try await repo.loadColors().values.first(where: { _ in true })
@@ -143,11 +144,11 @@ extension GoogleCalendarAggregatedRepositoryImpleTests {
         let pool = try await makePool()
         defer { Task { try? await pool.close(serviceId: googleServiceId) } }
 
-        let storage = localStorage(accountEmail: account1, pool: pool)
+        let storage = localStorage(pool: pool)
         try await storage.updateCalendarList([
             .init(id: "tag1", name: "Tag 1"),
             .init(id: "tag2", name: "Tag 2")
-        ])
+        ], accountId: account1)
 
         let repo = makeRepository(accountEmails: [account1], pool: pool)
         let tags = try await repo.loadCalendarTags().values.first(where: { _ in true })
@@ -160,9 +161,9 @@ extension GoogleCalendarAggregatedRepositoryImpleTests {
         let pool = try await makePool()
         defer { Task { try? await pool.close(serviceId: googleServiceId) } }
 
-        let storage = localStorage(accountEmail: account1, pool: pool)
+        let storage = localStorage(pool: pool)
         let origin = GoogleCalendar.EventOrigin(id: "event1", summary: "Some Event")
-        try await storage.updateEventDetail("cal1", "Asia/Seoul", origin)
+        try await storage.updateEventDetail("cal1", "Asia/Seoul", origin, accountId: account1)
 
         let repo = makeRepository(accountEmails: [account1], pool: pool)
         let detail = try await repo.loadEventDetail("cal1", "Asia/Seoul", "event1").values.first(where: { _ in true })
@@ -181,14 +182,17 @@ extension GoogleCalendarAggregatedRepositoryImpleTests {
         let pool = try await makePool()
         defer { Task { try? await pool.close(serviceId: googleServiceId) } }
 
-        try await localStorage(accountEmail: account1, pool: pool).updateColors(.init(
+        let storage = localStorage(pool: pool)
+        try await storage.updateColors(.init(
+            ownerId: account1,
             calendars: ["c1": .init(foregroundHex: "f1", backgroudHex: "b1")],
             events: [:]
-        ))
-        try await localStorage(accountEmail: account2, pool: pool).updateColors(.init(
+        ), accountId: account1)
+        try await storage.updateColors(.init(
+            ownerId: account2,
             calendars: ["c2": .init(foregroundHex: "f2", backgroudHex: "b2")],
             events: ["e1": .init(foregroundHex: "f3", backgroudHex: "b3")]
-        ))
+        ), accountId: account2)
 
         let repo = makeRepository(accountEmails: [account1, account2], pool: pool)
         let colors = try await repo.loadColors().values.first(where: { _ in true })
@@ -202,13 +206,14 @@ extension GoogleCalendarAggregatedRepositoryImpleTests {
         let pool = try await makePool()
         defer { Task { try? await pool.close(serviceId: googleServiceId) } }
 
-        try await localStorage(accountEmail: account1, pool: pool).updateCalendarList([
+        let storage = localStorage(pool: pool)
+        try await storage.updateCalendarList([
             .init(id: "tag1", name: "Tag 1")
-        ])
-        try await localStorage(accountEmail: account2, pool: pool).updateCalendarList([
+        ], accountId: account1)
+        try await storage.updateCalendarList([
             .init(id: "tag2", name: "Tag 2"),
             .init(id: "tag3", name: "Tag 3")
-        ])
+        ], accountId: account2)
 
         let repo = makeRepository(accountEmails: [account1, account2], pool: pool)
         let tags = try await repo.loadCalendarTags().values.first(where: { _ in true })
@@ -223,7 +228,7 @@ extension GoogleCalendarAggregatedRepositoryImpleTests {
 
         // account2에만 event2 저장
         let origin = GoogleCalendar.EventOrigin(id: "event2", summary: "Event in account2")
-        try await localStorage(accountEmail: account2, pool: pool).updateEventDetail("cal1", "Asia/Seoul", origin)
+        try await localStorage(pool: pool).updateEventDetail("cal1", "Asia/Seoul", origin, accountId: account2)
 
         let repo = makeRepository(accountEmails: [account1, account2], pool: pool)
         let detail = try await repo.loadEventDetail("cal1", "Asia/Seoul", "event2").values.first(where: { _ in true })

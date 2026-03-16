@@ -13,25 +13,27 @@ import SQLiteService
 
 public protocol GoogleCalendarLocalStorage: Sendable {
 
-    func loadColors() async throws -> GoogleCalendar.Colors?
-    func updateColors(_ colors: GoogleCalendar.Colors) async throws
-    func loadCalendarList() async throws -> [GoogleCalendar.Tag]
-    func updateCalendarList(_ calendars: [GoogleCalendar.Tag]) async throws
+    func loadColors(accountId: String) async throws -> GoogleCalendar.Colors?
+    func updateColors(_ colors: GoogleCalendar.Colors, accountId: String) async throws
+    func loadCalendarList(accountId: String) async throws -> [GoogleCalendar.Tag]
+    func updateCalendarList(_ calendars: [GoogleCalendar.Tag], accountId: String) async throws
 
-    func loadEvents(_ calendarId: String, _ range: Range<TimeInterval>) async throws -> [GoogleCalendar.Event]
-    func removeEvents(_ ids: [String]) async throws
+    func loadEvents(_ calendarId: String, _ range: Range<TimeInterval>, accountId: String) async throws -> [GoogleCalendar.Event]
+    func removeEvents(_ ids: [String], accountId: String) async throws
     func updateEvents(
         _ calendarId: String,
         _ eventList: GoogleCalendar.EventOriginValueList,
-        _ events: [GoogleCalendar.Event]
+        _ events: [GoogleCalendar.Event],
+        accountId: String
     ) async throws
-    func loadEventDetail(_ eventId: String) async throws -> GoogleCalendar.EventOrigin
+    func loadEventDetail(_ eventId: String, accountId: String) async throws -> GoogleCalendar.EventOrigin
     func updateEventDetail(
         _ calendarId: String,
         _ defaultTimeZone: String?,
-        _ origin: GoogleCalendar.EventOrigin
+        _ origin: GoogleCalendar.EventOrigin,
+        accountId: String
     ) async throws
-    func resetAll() async throws
+    func resetAll(accountId: String) async throws
 }
 
 
@@ -39,16 +41,13 @@ public final class GoogleCalendarLocalStorageImple: GoogleCalendarLocalStorage {
 
     private let connectionPool: any ExternalCalendarDBConnectionPool
     private let serviceId: String
-    private let accountId: String
 
     public init(
         connectionPool: any ExternalCalendarDBConnectionPool,
-        serviceId: String = GoogleCalendarService.id,
-        accountId: String
+        serviceId: String = GoogleCalendarService.id
     ) {
         self.connectionPool = connectionPool
         self.serviceId = serviceId
-        self.accountId = accountId
     }
 
     private func connection() async throws -> SQLiteService {
@@ -62,11 +61,11 @@ public final class GoogleCalendarLocalStorageImple: GoogleCalendarLocalStorage {
 
 extension GoogleCalendarLocalStorageImple {
 
-    public func loadColors() async throws -> GoogleCalendar.Colors? {
+    public func loadColors(accountId: String) async throws -> GoogleCalendar.Colors? {
         let connection = try await self.connection()
         let entities = try await connection.async.run { db in
             try db.createTableOrNot(Colors.self)
-            let query = Colors.selectAll { $0.accountId == self.accountId }
+            let query = Colors.selectAll { $0.accountId == accountId }
             return try db.load(Colors.self, query: query)
         }
         guard !entities.isEmpty else { return nil }
@@ -83,11 +82,10 @@ extension GoogleCalendarLocalStorageImple {
                     foregroundHex: entity.foreground, backgroudHex: entity.background
                 )
             }
-        return .init(calendars: calendars, events: events)
+        return .init(ownerId: accountId, calendars: calendars, events: events)
     }
 
-    public func updateColors(_ colors: GoogleCalendar.Colors) async throws {
-        let accountId = self.accountId
+    public func updateColors(_ colors: GoogleCalendar.Colors, accountId: String) async throws {
         let calendars = colors.calendars.reduce([Colors.Entity]()) { arr, color in
             arr + [.init(accountId: accountId, calendar: color.key, color.value)]
         }
@@ -104,18 +102,17 @@ extension GoogleCalendarLocalStorageImple {
         }
     }
 
-    public func loadCalendarList() async throws -> [GoogleCalendar.Tag] {
+    public func loadCalendarList(accountId: String) async throws -> [GoogleCalendar.Tag] {
         let connection = try await self.connection()
         let entities: [Calendars.Entity] = try await connection.async.run { db in
             try db.createTableOrNot(Calendars.self)
-            let query = Calendars.selectAll { $0.accountId == self.accountId }
+            let query = Calendars.selectAll { $0.accountId == accountId }
             return try db.load(query)
         }
         return entities.map { $0.tag }
     }
 
-    public func updateCalendarList(_ calendars: [GoogleCalendar.Tag]) async throws {
-        let accountId = self.accountId
+    public func updateCalendarList(_ calendars: [GoogleCalendar.Tag], accountId: String) async throws {
         let entities = calendars.map { Calendars.Entity(accountId: accountId, $0) }
         let connection = try await self.connection()
         try await connection.async.run { db in
@@ -135,9 +132,8 @@ extension GoogleCalendarLocalStorageImple {
     private typealias Times = EventTimeTable
 
     public func loadEvents(
-        _ calendarId: String, _ range: Range<TimeInterval>
+        _ calendarId: String, _ range: Range<TimeInterval>, accountId: String
     ) async throws -> [GoogleCalendar.Event] {
-        let accountId = self.accountId
         let timeQuery = Times.overlapQuery(with: range)
         let eventQuery = Events
             .selectSome { [$0.id, $0.summary, $0.colorId, $0.htmlLink, $0.location, $0.visibility] }
@@ -172,8 +168,7 @@ extension GoogleCalendarLocalStorageImple {
         }
     }
 
-    public func removeEvents(_ ids: [String]) async throws {
-        let accountId = self.accountId
+    public func removeEvents(_ ids: [String], accountId: String) async throws {
         let connection = try await self.connection()
         try await connection.async.run { db in
             let query = Events.delete().where { $0.accountId == accountId && $0.id.in(ids) }
@@ -188,9 +183,9 @@ extension GoogleCalendarLocalStorageImple {
     public func updateEvents(
         _ calendarId: String,
         _ eventList: GoogleCalendar.EventOriginValueList,
-        _ events: [GoogleCalendar.Event]
+        _ events: [GoogleCalendar.Event],
+        accountId: String
     ) async throws {
-        let accountId = self.accountId
         let connection = try await self.connection()
         try await connection.async.run { db in
             try db.createTableOrNot(Events.self)
@@ -207,8 +202,7 @@ extension GoogleCalendarLocalStorageImple {
         }
     }
 
-    public func loadEventDetail(_ eventId: String) async throws -> GoogleCalendar.EventOrigin {
-        let accountId = self.accountId
+    public func loadEventDetail(_ eventId: String, accountId: String) async throws -> GoogleCalendar.EventOrigin {
         let query = Events.selectAll { $0.accountId == accountId && $0.id == eventId }
         let connection = try await self.connection()
         let entity = try await connection.async.run { db in
@@ -220,9 +214,9 @@ extension GoogleCalendarLocalStorageImple {
     public func updateEventDetail(
         _ calendarId: String,
         _ defaultTimeZone: String?,
-        _ origin: GoogleCalendar.EventOrigin
+        _ origin: GoogleCalendar.EventOrigin,
+        accountId: String
     ) async throws {
-        let accountId = self.accountId
         let connection = try await self.connection()
         try await connection.async.run { db in
             try db.createTableOrNot(Events.self)
@@ -237,8 +231,7 @@ extension GoogleCalendarLocalStorageImple {
         }
     }
 
-    public func resetAll() async throws {
-        let accountId = self.accountId
+    public func resetAll(accountId: String) async throws {
         let connection = try await self.connection()
 
         let eventIds = try await connection.async.run { db -> [String] in

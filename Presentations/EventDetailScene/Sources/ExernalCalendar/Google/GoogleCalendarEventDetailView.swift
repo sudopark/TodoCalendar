@@ -597,6 +597,7 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
             setting: setting, isSystemDarkTheme: false
         )
         let colors = GoogleCalendar.Colors(
+            ownerId: "preview@google.com",
             calendars: [
                 "colorId": .init(foregroundHex: "#ff0000", backgroudHex: "#ff00ff")
             ],
