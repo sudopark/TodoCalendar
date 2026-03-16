@@ -53,7 +53,7 @@ public protocol APICredentialStore {
 
 // MARK: - refresh listener
 
-public protocol AutenticatorTokenRefreshListener: AnyObject {
+public protocol AutenticatorTokenRefreshListener: AnyObject, Sendable {
     
     func oauthAutenticator(
         _ authenticator: (any APIAuthenticator)?, didRefresh credential: APICredential

@@ -114,7 +114,7 @@ extension WidgetUsecaseFactory {
         
         let externalCalendarRepository = ExternalCalendarIntegrateRepositoryImple(
             supportServices: AppEnvironment.supportExternalCalendarServices,
-            removeAPIPerService: [:],
+            remotePool: NopExternalCalendarAccountRemotePool(),
             keyChainStore: base.keyChainStorage
         )
         let googleCalendarRepository = GoogleCalendarAggregatedRepositoryImple(

@@ -152,7 +152,7 @@ struct EventListWidgetViewModel {
     var pages: [PageModel]
     let defaultTagColorSetting: DefaultEventTagColorSetting
     let customTagMap: [String: any EventTag]
-    var googleCalendarColors: GoogleCalendar.Colors = .init(calendars: [:], events: [:])
+    var googleCalendarColors: GoogleCalendar.Colors = .init(ownerId: "", calendars: [:], events: [:])
     var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
     var widgetSetting: WidgetAppearanceSettings = .init()
     
@@ -330,7 +330,7 @@ extension EventListWidgetViewModelProvider {
             defaultTagColorSetting: setting.defaultTagColor,
             customTagMap: dayEventLists.1.customTagMap
         )
-        |> \.googleCalendarColors .~ (dayEventLists.1.googleCalendarColors ?? .init(calendars: [:], events: [:]))
+        |> \.googleCalendarColors .~ (dayEventLists.1.googleCalendarColors ?? .init(ownerId: "", calendars: [:], events: [:]))
         |> \.googleCalendarTags .~ dayEventLists.1.googleCalendarTags
         |> \.widgetSetting .~ setting.widget
     }

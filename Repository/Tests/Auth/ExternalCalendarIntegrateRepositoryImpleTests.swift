@@ -16,133 +16,125 @@ import UnitTestHelpKit
 @testable import Repository
 
 struct ExternalCalendarIntegrateRepositoryImpleTests {
-    
+
     private let services: [any ExternalCalendarService] = [
         GoogleCalendarService(scopes: [.readOnly])
     ]
-    private let spyRemotes: [String: SpyRemote] = [
-        GoogleCalendarService(scopes: [.readOnly]).identifier: SpyRemote()
-    ]
+    private let spyPool = SpyRemotePool()
     private let spyKeyChain = SpyKeyChainStorage()
-    
+
     private func makeReposiotry(
         _ accounts: [(ExternalServiceAccountinfo, APICredential)] = []
     ) -> ExternalCalendarIntegrateRepositoryImple {
-        
+
         accounts.forEach { pair in
-            let key = pair.0.serviceIdentifier
-            self.spyKeyChain.update("\(key)-account", ExternalServiceAccountMapper(account: pair.0))
-            self.spyKeyChain.update("\(key)-credential", APICredentialMapper(credential: pair.1))
+            let serviceId = pair.0.serviceIdentifier
+            let accountId = pair.0.email ?? ""
+            var accountIds: [String] = spyKeyChain.load("\(serviceId)-accounts") ?? []
+            accountIds.append(accountId)
+            spyKeyChain.update("\(serviceId)-accounts", accountIds)
+            spyKeyChain.update("\(serviceId)-\(accountId)-account", ExternalServiceAccountMapper(account: pair.0))
+            spyKeyChain.update("\(serviceId)-\(accountId)-credential", APICredentialMapper(credential: pair.1))
         }
-        
-        return .init(supportServices: self.services, removeAPIPerService: self.spyRemotes, keyChainStore: self.spyKeyChain)
+
+        return .init(supportServices: self.services, remotePool: self.spyPool, keyChainStore: self.spyKeyChain)
     }
-    
+
     private let googleService: GoogleCalendarService = .init(scopes: [.readOnly])
-    
+
     private var dummyGoogleAccount: ExternalServiceAccountinfo {
         return .init(googleService.identifier, email: "old-email")
     }
-    
+
     private var googleCredential: APICredential {
         return .init(accessToken: "old-google-access")
     }
 }
 
 extension ExternalCalendarIntegrateRepositoryImpleTests {
-    
-    // load accounts
+
+    // load accounts — pool에 credential 세팅
     @Test func repository_loadAccounts() async throws {
         // given
         let repository = self.makeReposiotry([(self.dummyGoogleAccount, self.googleCredential)])
-        
+
         // when
         let accounts = try await repository.loadIntegratedAccounts()
-        let credentialMap = self.spyRemotes.compactMapValues { $0.credential?.accessToken }
-        
+
         // then
         #expect(accounts.count == 1)
         #expect(accounts.first?.email == "old-email")
-        #expect(credentialMap == [
-            googleService.identifier: "old-google-access"
-        ])
+        let setupToken = spyPool.setupCredentials["\(googleService.identifier)-old-email"]
+        #expect(setupToken == "old-google-access")
     }
-    
-    // save credentail
+
+    // save credential — pool setup + keychain 저장
     @Test func repository_saveCredential() async throws {
         // given
         let repository = self.makeReposiotry()
         let accountsBeforeSave = try await repository.loadIntegratedAccounts()
-        let credentialBeforeSave: APICredentialMapper? = self.spyKeyChain.load("\(googleService.identifier)-credential")
-        let remoteCredentialMapBeforeSave = self.spyRemotes.compactMapValues { $0.credential?.accessToken }
-        
+
         // when
         let googleCredential = GoogleOAuth2Credential(
             idToken: "id", accessToken: "access", refreshToken: "ref"
         ) |> \.email .~ "google"
         let saved = try await repository.save(googleCredential, for: self.googleService)
-        let remoteCredentialMapAfterSave = self.spyRemotes.compactMapValues { $0.credential?.accessToken }
-        
+
         let accountsAfterSave = try await repository.loadIntegratedAccounts()
-        let credentialAfterSave: APICredentialMapper? = self.spyKeyChain.load("\(googleService.identifier)-credential")
-        
+        let storedCredential: APICredentialMapper? = spyKeyChain.load("\(googleService.identifier)-google-credential")
+        let accountIds: [String]? = spyKeyChain.load("\(googleService.identifier)-accounts")
+
         // then
-        #expect(accountsBeforeSave.isEmpty == true)
+        #expect(accountsBeforeSave.isEmpty)
         #expect(saved.email == "google")
         #expect(accountsAfterSave.map { $0.email } == ["google"])
-        
-        #expect(credentialBeforeSave == nil)
-        #expect(credentialAfterSave?.credential.accessToken == "access")
-        #expect(credentialAfterSave?.credential.refreshToken == "ref")
-        
-        #expect(remoteCredentialMapBeforeSave == [:])
-        #expect(remoteCredentialMapAfterSave == [
-            googleService.identifier: "access"
-        ])
+        #expect(storedCredential?.credential.accessToken == "access")
+        #expect(storedCredential?.credential.refreshToken == "ref")
+        #expect(accountIds == ["google"])
+        #expect(spyPool.setupCredentials["\(googleService.identifier)-google"] == "access")
     }
-    
-    // remove account
+
+    // remove account — pool remove + keychain 삭제
     @Test func repository_removeAccount() async throws {
         // given
-        let repository = self.makeReposiotry([
-            (self.dummyGoogleAccount, self.googleCredential)
-        ])
+        let repository = self.makeReposiotry([(self.dummyGoogleAccount, self.googleCredential)])
         let accountsBeforeSave = try await repository.loadIntegratedAccounts()
-        let credentialBeforeSave: APICredentialMapper? = self.spyKeyChain.load("\(googleService.identifier)-credential")
-        let remoteCredentialMapBeforeSave = self.spyRemotes.compactMapValues { $0.credential?.accessToken }
-        
+
         // when
         try await repository.removeAccount(for: googleService.identifier)
-        let remoteCredentialMapAfterSave = self.spyRemotes.compactMapValues { $0.credential?.accessToken }
-        
+
         let accountsAfterSave = try await repository.loadIntegratedAccounts()
-        let credentialAfterSave: APICredentialMapper? = self.spyKeyChain.load("\(googleService.identifier)-credential")
-        
+        let storedCredential: APICredentialMapper? = spyKeyChain.load("\(googleService.identifier)-old-email-credential")
+        let accountIds: [String]? = spyKeyChain.load("\(googleService.identifier)-accounts")
+
         // then
         #expect(accountsBeforeSave.map { $0.email } == ["old-email"])
-        #expect(accountsAfterSave.map { $0.email } == [])
-        
-        #expect(credentialBeforeSave?.credential.accessToken == "old-google-access")
-        #expect(credentialAfterSave == nil)
-        
-        #expect(remoteCredentialMapBeforeSave == [
-            googleService.identifier: "old-google-access"
-        ])
-        #expect(remoteCredentialMapAfterSave == [:])
+        #expect(accountsAfterSave.isEmpty)
+        #expect(storedCredential == nil)
+        #expect(accountIds == nil)
+        #expect(spyPool.removedKeys.contains("\(googleService.identifier)-old-email"))
     }
 }
 
 
-private final class SpyRemote: RemoteAPI, @unchecked Sendable {
-    
-    func request(_ method: RemoteAPIMethod, _ endpoint: any Endpoint, with header: [String : String]?, parameters: [String : Any]) async throws -> Data {
-        throw RuntimeError("failed")
+// MARK: - Spy
+
+private final class SpyRemotePool: ExternalCalendarAccountRemotePool, @unchecked Sendable {
+
+    var setupCredentials: [String: String] = [:]
+    var removedKeys: Set<String> = []
+
+    func attach(listener: any AutenticatorTokenRefreshListener) async { }
+
+    func setup(for serviceId: String, accountId: String, credential: APICredential) async {
+        setupCredentials["\(serviceId)-\(accountId)"] = credential.accessToken
     }
-    
-    var credential: APICredential?
-    func setup(credential: APICredential?) {
-        self.credential = credential
+
+    func remove(for serviceId: String, accountId: String) async {
+        removedKeys.insert("\(serviceId)-\(accountId)")
     }
-    
-    func attach(listener: any AutenticatorTokenRefreshListener) { }
+
+    func remote(for serviceId: String, accountId: String) async throws -> any RemoteAPI {
+        throw RuntimeError("not implemented")
+    }
 }

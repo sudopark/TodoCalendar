@@ -27,11 +27,8 @@ final class ApplicationRootBuilder {
             applicationBase, remote, topViewControllerFinding
         )
         
-        let externalServiceRemotes = [
-            AppEnvironment.googleCalendarService.identifier: applicationBase.googleCalendarRemoteAPI
-        ]
         let externalCalendarIntegrationUsecase = self.makeExternalCalendarIntegrationUsecase(
-            applicationBase, externalServiceRemotes, topViewControllerFinding
+            applicationBase, topViewControllerFinding
         )
         
         let userNotificationUsecase = UserNotificationUsecaseImple(
@@ -70,9 +67,7 @@ final class ApplicationRootBuilder {
             userNotificationUsecase: userNotificationUsecase
         )
         remote.attach(listener: rootViewModel)
-        externalServiceRemotes.values.forEach {
-            $0.attach(listener: rootViewModel)
-        }
+        Task { await applicationBase.externalCalendarAccountRemotePool.attach(listener: rootViewModel) }
         let rootRouter = ApplicationRootRouter(
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
@@ -115,12 +110,11 @@ final class ApplicationRootBuilder {
     
     private func makeExternalCalendarIntegrationUsecase(
         _ applicationBase: ApplicationBase,
-        _ remotes: [String: any RemoteAPI],
         _ topViewControllerFinding: @escaping () -> UIViewController?
     ) -> some ExternalCalendarIntegrationUsecase {
         let integrationRepository = ExternalCalendarIntegrateRepositoryImple(
             supportServices: AppEnvironment.supportExternalCalendarServices,
-            removeAPIPerService: remotes,
+            remotePool: applicationBase.externalCalendarAccountRemotePool,
             keyChainStore: applicationBase.keyChainStorage
         )
         let externalServiceOAuth2ServiceUsecaseProvider = ExternalCalendarOAuthUsecaseProviderImple(
