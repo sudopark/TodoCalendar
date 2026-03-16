@@ -237,7 +237,7 @@ private extension WeekEventsViewModel {
     func lineColor(_ line: EventOnWeek) -> Color {
         if let google = line.colorSource as? GoogleCalendarEventColorSource {
             let appearance = ViewAppearance(
-                google: self.googleCalendarColor ?? .init(calendars: [:], events: [:]),
+                google: self.googleCalendarColor ?? .init(ownerId: "", calendars: [:], events: [:]),
                 self.googleCalendarTags
             )
             return appearance.googleEventColor(google.colorId, google.calendarId).asColor

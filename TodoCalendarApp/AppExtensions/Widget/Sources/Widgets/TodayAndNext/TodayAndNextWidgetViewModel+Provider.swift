@@ -22,7 +22,7 @@ struct TodayAndNextWidgetViewModel {
     var refreshAfter: TimeInterval?
     let defaultTagColorSetting: DefaultEventTagColorSetting
     let customTagMap: [String: any EventTag]
-    var googleCalendarColors: GoogleCalendar.Colors = .init(calendars: [:], events: [:])
+    var googleCalendarColors: GoogleCalendar.Colors = .init(ownerId: "", calendars: [:], events: [:])
     var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
     var widgetSetting = WidgetAppearanceSettings()
     
@@ -520,7 +520,7 @@ extension TodayAndNextWidgetViewModelProvider {
         let model = builder.build(refDate, events)
         
         return model
-            |> \.googleCalendarColors .~ (events.googleCalendarColors ?? .init(calendars: [:], events: [:]))
+            |> \.googleCalendarColors .~ (events.googleCalendarColors ?? .init(ownerId: "", calendars: [:], events: [:]))
             |> \.googleCalendarTags .~ events.googleCalendarTags
             |> \.widgetSetting .~ setting.widget
     }

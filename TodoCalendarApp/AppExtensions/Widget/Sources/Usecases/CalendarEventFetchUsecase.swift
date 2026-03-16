@@ -252,7 +252,7 @@ extension CalendarEventFetchUsecaseImple {
             return cached
         }
         let colors = try await self.googleCalendarRepository.loadColors()
-            .values.first(where: { _ in true }) ?? .init(calendars: [:], events: [:])
+            .values.first(where: { _ in true }) ?? .init(ownerId: "", calendars: [:], events: [:])
         await self.cached.update(\.googleCalendarColors, colors)
         return colors
     }

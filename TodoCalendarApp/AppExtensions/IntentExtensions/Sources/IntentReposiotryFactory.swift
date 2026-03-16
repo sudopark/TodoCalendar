@@ -64,7 +64,7 @@ extension IntentReposiotryFactory {
         
         return ExternalCalendarIntegrateRepositoryImple(
             supportServices: AppEnvironment.supportExternalCalendarServices,
-            removeAPIPerService: [:],
+            remotePool: NopExternalCalendarAccountRemotePool(),
             keyChainStore: self.base.keyChainStorage
         )
     }

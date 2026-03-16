@@ -298,7 +298,7 @@ extension NonLoginUsecaseFactoryImple {
 
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
         let builder = GoogleCalendarRepositoryBuilderImple(
-            remote: self.applicationBase.googleCalendarRemoteAPI,
+            remoteFactory: self.applicationBase.externalCalendarRemoteFactory,
             connectionPool: self.applicationBase.externalCalendarDBConnectionPool
         )
         return GoogleCalendarUsecaseImple(
@@ -703,7 +703,7 @@ extension LoginUsecaseFactoryImple {
 
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
         let builder = GoogleCalendarRepositoryBuilderImple(
-            remote: self.applicationBase.googleCalendarRemoteAPI,
+            remoteFactory: self.applicationBase.externalCalendarRemoteFactory,
             connectionPool: self.applicationBase.externalCalendarDBConnectionPool
         )
         return GoogleCalendarUsecaseImple(
@@ -721,18 +721,21 @@ extension LoginUsecaseFactoryImple {
 
 private struct GoogleCalendarRepositoryBuilderImple: GoogleCalendarRepositoryBuilder {
 
-    private let remote: any RemoteAPI
+    private let remoteFactory: any ExternalCalendarRemoteFactory
     private let connectionPool: any ExternalCalendarDBConnectionPool
 
-    init(remote: any RemoteAPI, connectionPool: any ExternalCalendarDBConnectionPool) {
-        self.remote = remote
+    init(remoteFactory: any ExternalCalendarRemoteFactory, connectionPool: any ExternalCalendarDBConnectionPool) {
+        self.remoteFactory = remoteFactory
         self.connectionPool = connectionPool
     }
 
     func build(for accountId: String) -> any GoogleCalendarRepository {
+        guard let remote = remoteFactory.make(serviceId: GoogleCalendarService.id, accountId: accountId) else {
+            preconditionFailure("ExternalCalendarRemoteFactory must support GoogleCalendarService")
+        }
         let cacheStorage = GoogleCalendarLocalStorageImple(connectionPool: self.connectionPool)
         return GoogleCalendarRepositoryImple(
-            remote: self.remote,
+            remote: remote,
             cacheStorage: cacheStorage,
             accountId: accountId
         )
