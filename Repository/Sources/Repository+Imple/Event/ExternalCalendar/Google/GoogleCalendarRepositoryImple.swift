@@ -17,15 +17,19 @@ import Extensions
 
 
 public final class GoogleCalendarRepositoryImple: GoogleCalendarRepository, @unchecked Sendable {
-    
+
     private let remote: any RemoteAPI
     private let cacheStorage: any GoogleCalendarLocalStorage
+    private let accountId: String
+
     public init(
         remote: any RemoteAPI,
-        cacheStorage: any GoogleCalendarLocalStorage
+        cacheStorage: any GoogleCalendarLocalStorage,
+        accountId: String
     ) {
         self.remote = remote
         self.cacheStorage = cacheStorage
+        self.accountId = accountId
     }
 }
 
@@ -37,12 +41,13 @@ extension GoogleCalendarRepositoryImple {
     public func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
         
         return self.load { [weak self] in
-            return try? await self?.cacheStorage.loadColors()
+            guard let self else { return nil }
+            return try? await self.cacheStorage.loadColors(accountId: self.accountId)
         } thenFromRemote: { [weak self] in
             return try await self?.loadColorsFromRemote()
         } withRefreshCache: { _, refreshed in
             guard let refreshed else { return }
-            try? await self.cacheStorage.updateColors(refreshed)
+            try? await self.cacheStorage.updateColors(refreshed, accountId: self.accountId)
         }
     }
     
@@ -51,18 +56,19 @@ extension GoogleCalendarRepositoryImple {
         let jsonData = try await self.remote.request(
             .get, endpoint, with: [:], parameters: [:]
         )
-        let mapper = try GoogleCalendarColorsMapper(decode: jsonData)
+        let mapper = try GoogleCalendarColorsMapper(decode: jsonData, ownerId: self.accountId)
         return mapper.colors
     }
     
     public func loadCalendarTags() -> AnyPublisher<[GoogleCalendar.Tag], any Error> {
         return self.load { [weak self] in
-            return try? await self?.cacheStorage.loadCalendarList()
+            guard let self else { return nil }
+            return try? await self.cacheStorage.loadCalendarList(accountId: self.accountId)
         } thenFromRemote: { [weak self] in
             return try await self?.loadCalendarTagsFromRemote()
         } withRefreshCache: { _, refreshed in
             guard let refreshed else { return }
-            try? await self.cacheStorage.updateCalendarList(refreshed)
+            try? await self.cacheStorage.updateCalendarList(refreshed, accountId: self.accountId)
         }
     }
     
@@ -85,25 +91,26 @@ extension GoogleCalendarRepositoryImple {
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
         
+        let accountId = self.accountId
         return AnyPublisher<[GoogleCalendar.Event]?, any Error>.create { @Sendable [weak self] subscriber in
             let task = Task {
-                let cached = try? await self?.cacheStorage.loadEvents(calendarId, period)
+                let cached = try? await self?.cacheStorage.loadEvents(calendarId, period, accountId: accountId)
                 if let cached {
                     subscriber.send(cached)
                 }
-                
+
                 do {
                     let refreshedList = try await self?.loadEventOriginListFromRemote(calendarId, in: period)
-                    
+
                     let events = refreshedList?.items.compactMap {
                         return GoogleCalendar.Event($0, calendarId, refreshedList?.timeZone)
                     }
                     if let cached {
-                        try? await self?.cacheStorage.removeEvents(cached.map { $0.eventId })
+                        try? await self?.cacheStorage.removeEvents(cached.map { $0.eventId }, accountId: accountId)
                     }
                     if let refreshedList, let events {
                         try? await self?.cacheStorage.updateEvents(
-                            calendarId, refreshedList, events
+                            calendarId, refreshedList, events, accountId: accountId
                         )
                     }
                     subscriber.send(events)
@@ -124,12 +131,13 @@ extension GoogleCalendarRepositoryImple {
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         
         return self.load { [weak self] in
-            return try await self?.cacheStorage.loadEventDetail(eventId)
+            guard let self else { return nil }
+            return try? await self.cacheStorage.loadEventDetail(eventId, accountId: self.accountId)
         } thenFromRemote: { [weak self] in
             return try await self?.loadEventDetailFromRemoteWithRecurrenceIfNeed(calendarId, eventId, at: timeZone)
         } withRefreshCache: { _, refreshed in
             guard let refreshed else { return }
-            try? await self.cacheStorage.updateEventDetail(calendarId, timeZone, refreshed)
+            try? await self.cacheStorage.updateEventDetail(calendarId, timeZone, refreshed, accountId: self.accountId)
         }
         .compactMap { $0 }
         .eraseToAnyPublisher()
@@ -217,7 +225,7 @@ extension GoogleCalendarRepositoryImple {
 extension GoogleCalendarRepositoryImple {
     
     public func resetCache() async throws {
-        try await self.cacheStorage.resetAll()
+        try await self.cacheStorage.resetAll(accountId: self.accountId)
     }
 }
 

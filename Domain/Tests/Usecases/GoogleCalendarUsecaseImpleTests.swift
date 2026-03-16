@@ -630,10 +630,12 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
     ) {
         self.stubColors = [
             .init(
+                ownerId: "account@google.com",
                 calendars: ["0": .init(foregroundHex: "f0", backgroudHex: "b0")],
                 events: ["1": .init(foregroundHex: "f1", backgroudHex: "b1")]
             ),
             .init(
+                ownerId: "account@google.com",
                 calendars: ["0": .init(foregroundHex: "new-f0", backgroudHex: "new-b0")],
                 events: ["1": .init(foregroundHex: "new-f1", backgroudHex: "new-b1")]
             )

@@ -26,14 +26,14 @@ struct GoogleCalendarColorsMapper {
     
     let colors: GoogleCalendar.Colors
     
-    init(decode data: Data) throws {
+    init(decode data: Data, ownerId: String) throws {
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         else {
             throw RuntimeError("invalid form of json")
         }
         let calendarJson = json[CodingKeys.calendar.rawValue] as? [String: Any] ?? [:]
         let eventJson = json[CodingKeys.event.rawValue] as? [String: Any] ?? [:]
-        
+
         let decodeColorSet: (Any) -> GoogleCalendar.Colors.ColorSet? = { any in
             guard let subDict = any as? [String: Any],
                   let background = subDict[CodingKeys.background.rawValue] as? String,
@@ -41,8 +41,9 @@ struct GoogleCalendarColorsMapper {
             else { return nil }
             return .init(foregroundHex: foreground, backgroudHex: background)
         }
-        
+
         self.colors = .init(
+            ownerId: ownerId,
             calendars: calendarJson.compactMapValues(decodeColorSet),
             events: eventJson.compactMapValues(decodeColorSet)
         )

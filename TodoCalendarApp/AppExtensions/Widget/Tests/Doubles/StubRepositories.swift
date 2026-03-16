@@ -38,7 +38,7 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
     func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
         let colorSet = GoogleCalendar.Colors.ColorSet(foregroundHex: "for", backgroudHex: "back")
         let colors = GoogleCalendar.Colors(
-            calendars: ["c1": colorSet], events: ["e1": colorSet]
+            ownerId: "stub@google.com", calendars: ["c1": colorSet], events: ["e1": colorSet]
         )
         return Just(colors).mapAsAnyError().eraseToAnyPublisher()
     }
