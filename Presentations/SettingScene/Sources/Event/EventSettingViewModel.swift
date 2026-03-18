@@ -51,30 +51,28 @@ enum EventSyncModel: Equatable {
 }
 
 struct ExternalCalanserServiceModel: Hashable {
-    
+
     enum IntegrateStatus: Hashable {
-        case integrated(accountName: String?)
+        case integrated(accountId: String)
         case notIntegrated
     }
-    
+
     let serviceId: String
     let serviceName: String
     let serviceIconName: String
     let status: IntegrateStatus
-    
+
     init?(
         _ service: any ExternalCalendarService,
-        with account: ExternalServiceAccountinfo?
+        accountId: String?
     ) {
         self.serviceId = service.identifier
-        
+
         switch service {
         case is GoogleCalendarService:
             self.serviceName = "event_setting::external_calendar::google::serviceName".localized()
             self.serviceIconName = "google_calendar_icon"
-            self.status = account
-                .map { IntegrateStatus.integrated(accountName: $0.email) }
-                ?? .notIntegrated
+            self.status = accountId.map { IntegrateStatus.integrated(accountId: $0) } ?? .notIntegrated
         default:
             return nil
         }
@@ -94,7 +92,7 @@ protocol EventSettingViewModel: AnyObject, Sendable, EventSettingSceneInteractor
     func selectDefaultMapApp()
     func forceSync()
     func connectExternalCalendar(_ serviceIdentifier: String)
-    func disconnectExternalCalendar(_ serviceIdentifier: String)
+    func disconnectExternalCalendar(_ serviceIdentifier: String, accountId: String)
     func close()
     
     // presenter
@@ -152,12 +150,12 @@ final class EventSettingViewModelImple: EventSettingViewModel, @unchecked Sendab
         let allDayEventNotificationTimeOption = CurrentValueSubject<EventNotificationTimeOption??, Never>(nil)
         let isConnectOrDisconnectExternalCalednar = CurrentValueSubject<Bool, Never>(false)
     }
-    
+
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
-    
+
     private func internalBinding() {
-        
+
         self.eventSettingUsecase.currentEventSetting
             .sink(receiveValue: { [weak self] setting in
                 self?.subject.setting.send(setting)
@@ -235,21 +233,21 @@ extension EventSettingViewModelImple {
         .store(in: &self.cancellables)
     }
     
-    func disconnectExternalCalendar(_ serviceIdentifier: String) {
+    func disconnectExternalCalendar(_ serviceIdentifier: String, accountId: String) {
         guard !self.subject.isConnectOrDisconnectExternalCalednar.value,
               let service = self.supportExternalCalendarServices.first(where: { $0.identifier == serviceIdentifier })
         else { return }
-        
+
         self.subject.isConnectOrDisconnectExternalCalednar.send(true)
         Task { [weak self] in
-            
+
             do {
-                try await self?.externalCalendarServiceUsecase.stopIntegrate(external: service)
+                try await self?.externalCalendarServiceUsecase.stopIntegrate(external: service, accountId: accountId)
                 self?.router?.showToast(
                     "event_setting::external_calendar::stop::message".localized()
                 )
                 self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
-                
+
             } catch {
                 self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
                 self?.router?.showError(error)
@@ -360,12 +358,12 @@ extension EventSettingViewModelImple {
         
         let supporServices = self.supportExternalCalendarServices
         
-        let transform: ([String: ExternalServiceAccountinfo]) -> [ExternalCalanserServiceModel] = { accounts in
-            
-            return supporServices.compactMap { service in
-                return ExternalCalanserServiceModel(
-                    service, with: accounts[service.identifier]
-                )
+        let transform: ([String: [ExternalServiceAccountinfo]]) -> [ExternalCalanserServiceModel] = { accounts in
+            return supporServices.flatMap { service -> [ExternalCalanserServiceModel] in
+                let integrated = (accounts[service.identifier] ?? [])
+                    .compactMap { ExternalCalanserServiceModel(service, accountId: $0.email) }
+                let notIntegrated = [ExternalCalanserServiceModel(service, accountId: nil)].compactMap { $0 }
+                return integrated + notIntegrated
             }
         }
         
