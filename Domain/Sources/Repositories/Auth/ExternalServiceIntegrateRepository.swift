@@ -18,5 +18,5 @@ public protocol ExternalCalendarIntegrateRepository: Sendable {
         for service: any ExternalCalendarService
     ) async throws -> ExternalServiceAccountinfo
     
-    func removeAccount(for serviceIdentifier: String) async throws
+    func removeAccount(for serviceIdentifier: String, accountId: String) async throws
 }

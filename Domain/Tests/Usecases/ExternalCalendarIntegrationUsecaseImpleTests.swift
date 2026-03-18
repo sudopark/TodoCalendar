@@ -74,7 +74,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         #expect(identifiers == [
             [], integratedAccounts.map { $0.serviceIdentifier }
         ])
-        let accounts = accountMaps.flatMap { $0.values }
+        let accounts = accountMaps.flatMap { $0.values }.flatMap { $0 }
         let withoutIntegrationTime = accounts.map { $0.intergrationTime }.reduce(true) { $0 && ($1 == nil) }
         #expect(withoutIntegrationTime == true)
     }
@@ -139,8 +139,8 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         try await usecase.prepareIntegratedAccounts()
         
         // when
-        let result: Void? = try await usecase.stopIntegrate(external: service)
-        
+        let result: Void? = try await usecase.stopIntegrate(external: service, accountId: "some")
+
         // then
         #expect(result != nil)
     }
@@ -157,7 +157,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         
         // when
         let accountMaps = try await self.outputs(confirm, for: usecase.integratedServiceAccounts) {
-            try await usecase.stopIntegrate(external: service)
+            try await usecase.stopIntegrate(external: service, accountId: "some")
         }
         
         // then
@@ -233,7 +233,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         try await usecase.prepareIntegratedAccounts()
 
         // when
-        try await usecase.stopIntegrate(external: service)
+        try await usecase.stopIntegrate(external: service, accountId: "some")
 
         // then
         #expect(spyConnectionController.didClosedServiceIds == [service.identifier])
@@ -250,7 +250,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         let statues = try await self.outputs(expect, for: usecase.integrationStatusChanged) {
             
             _ = try await usecase.integrate(external: service)
-            try await usecase.stopIntegrate(external: service)
+            try await usecase.stopIntegrate(external: service, accountId: "google@email.com")
         }
         
         // then
@@ -346,7 +346,7 @@ private final class StubExternalCalendarIntegrateRepository: ExternalCalendarInt
         }
     }
     
-    func removeAccount(for serviceIdentifier: String) async throws {
+    func removeAccount(for serviceIdentifier: String, accountId: String) async throws {
         self.accountMap[serviceIdentifier] = nil
     }
 }

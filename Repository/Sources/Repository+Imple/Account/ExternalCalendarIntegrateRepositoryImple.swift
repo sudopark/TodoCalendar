@@ -107,14 +107,11 @@ extension ExternalCalendarIntegrateRepositoryImple {
         }
     }
 
-    public func removeAccount(for serviceIdentifier: String) async throws {
-        let accountIds = loadAccountIds(for: serviceIdentifier)
-        for accountId in accountIds {
-            self.credentialStore.removeCredential(for: serviceIdentifier, accountId: accountId)
-            await remotePool.remove(for: serviceIdentifier, accountId: accountId)
-            self.keyChainStore.remove(accountKey(serviceIdentifier, accountId))
-        }
-        self.keyChainStore.remove(accountListKey(serviceIdentifier))
+    public func removeAccount(for serviceIdentifier: String, accountId: String) async throws {
+        self.credentialStore.removeCredential(for: serviceIdentifier, accountId: accountId)
+        await remotePool.remove(for: serviceIdentifier, accountId: accountId)
+        self.keyChainStore.remove(accountKey(serviceIdentifier, accountId))
+        removeAccountId(accountId, for: serviceIdentifier)
     }
 }
 

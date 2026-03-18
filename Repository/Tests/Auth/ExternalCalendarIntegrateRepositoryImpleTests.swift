@@ -101,7 +101,7 @@ extension ExternalCalendarIntegrateRepositoryImpleTests {
         let accountsBeforeSave = try await repository.loadIntegratedAccounts()
 
         // when
-        try await repository.removeAccount(for: googleService.identifier)
+        try await repository.removeAccount(for: googleService.identifier, accountId: "old-email")
 
         let accountsAfterSave = try await repository.loadIntegratedAccounts()
         let storedCredential: APICredentialMapper? = spyKeyChain.load("\(googleService.identifier)-old-email-credential")

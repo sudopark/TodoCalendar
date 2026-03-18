@@ -30,7 +30,7 @@ final class StubExternalCalendarRepository: ExternalCalendarIntegrateRepository,
         throw RuntimeError("not support")
     }
     
-    func removeAccount(for serviceIdentifier: String) async throws { }
+    func removeAccount(for serviceIdentifier: String, accountId: String) async throws { }
 }
 
 final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked Sendable {

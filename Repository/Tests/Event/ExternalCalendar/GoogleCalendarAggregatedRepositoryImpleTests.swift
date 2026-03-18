@@ -256,5 +256,5 @@ private final class StubExternalCalendarIntegrateRepository: ExternalCalendarInt
         throw RuntimeError("not supported")
     }
 
-    func removeAccount(for serviceIdentifier: String) async throws { }
+    func removeAccount(for serviceIdentifier: String, accountId: String) async throws { }
 }
