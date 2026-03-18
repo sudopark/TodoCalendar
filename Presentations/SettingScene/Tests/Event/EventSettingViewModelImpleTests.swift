@@ -291,7 +291,8 @@ extension EventSettingViewModelImpleTests {
         
         // then
         XCTAssertEqual(models, [
-            ExternalCalanserServiceModel(service, with: account)!
+            ExternalCalanserServiceModel(service, accountId: account.email)!,
+            ExternalCalanserServiceModel(service, accountId: nil)!
         ])
     }
     
@@ -325,7 +326,7 @@ extension EventSettingViewModelImpleTests {
         
         // when
         let isConnectings = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar, timeout: 0.1) {
-            viewModel.disconnectExternalCalendar(service.identifier)
+            viewModel.disconnectExternalCalendar(service.identifier, accountId: account.email!)
         }
         
         // then
@@ -340,22 +341,66 @@ extension EventSettingViewModelImpleTests {
         expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel()
         let service = GoogleCalendarService(scopes: [.readOnly])
-        
+
         // when
         let modelLists = self.waitOutputs(expect, for: viewModel.integratedExternalCalendars, timeout: 0.5) {
-            
+
             viewModel.connectExternalCalendar(service.identifier)
-            
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                viewModel.disconnectExternalCalendar(service.identifier)
+                viewModel.disconnectExternalCalendar(service.identifier, accountId: "email")
             }
         }
-        
+
         // then
         XCTAssertEqual(modelLists, [
-            [.init(service, with: nil)!],
-            [.init(service, with: .init(service.identifier, email: "email"))!],
-            [.init(service, with: nil)!]
+            [.init(service, accountId: nil)!],
+            [.init(service, accountId: "email")!, .init(service, accountId: nil)!],
+            [.init(service, accountId: nil)!]
+        ])
+    }
+
+    // 다중 계정 연동 시 계정별 row + notIntegrated row 제공
+    func testViewModel_whenMultipleAccountsIntegrated_provideRowsPerAccount() {
+        // given
+        let expect = expectation(description: "다중 계정 연동 시 계정별 row + notIntegrated row 제공")
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let account1 = ExternalServiceAccountinfo(service.identifier, email: "email1")
+        let account2 = ExternalServiceAccountinfo(service.identifier, email: "email2")
+        let viewModel = self.makeViewModel(accounts: [account1, account2])
+
+        // when
+        let models = self.waitFirstOutput(expect, for: viewModel.integratedExternalCalendars) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(models, [
+            .init(service, accountId: "email1")!,
+            .init(service, accountId: "email2")!,
+            .init(service, accountId: nil)!
+        ])
+    }
+
+    // 다중 계정 중 하나만 해제 시 나머지 계정 유지
+    func testViewModel_whenDisconnectOneOfMultipleAccounts_remainingAccountsStay() {
+        // given
+        let expect = expectation(description: "다중 계정 중 하나만 해제 시 나머지 계정 유지")
+        expect.expectedFulfillmentCount = 2
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let account1 = ExternalServiceAccountinfo(service.identifier, email: "email1")
+        let account2 = ExternalServiceAccountinfo(service.identifier, email: "email2")
+        let viewModel = self.makeViewModel(accounts: [account1, account2])
+
+        // when
+        let modelLists = self.waitOutputs(expect, for: viewModel.integratedExternalCalendars, timeout: 0.1) {
+            viewModel.disconnectExternalCalendar(service.identifier, accountId: "email1")
+        }
+
+        // then
+        XCTAssertEqual(modelLists.last, [
+            .init(service, accountId: "email2")!,
+            .init(service, accountId: nil)!
         ])
     }
 }
