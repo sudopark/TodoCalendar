@@ -1,5 +1,5 @@
 //
-//  GoogleCalendarAggregatedRepositoryImple.swift
+//  GoogleCalendarLocalAggregatedRepositoryImple.swift
 //  Repository
 //
 //  Created by sudo.park on 12/12/25.
@@ -13,7 +13,7 @@ import Domain
 import Extensions
 
 
-public final class GoogleCalendarAggregatedRepositoryImple: GoogleCalendarRepository {
+public final class GoogleCalendarLocalAggregatedRepositoryImple: GoogleCalendarRepository {
 
     private let storage: any GoogleCalendarLocalStorage
     private let accountRepository: any ExternalCalendarIntegrateRepository
@@ -35,7 +35,7 @@ public final class GoogleCalendarAggregatedRepositoryImple: GoogleCalendarReposi
 }
 
 
-extension GoogleCalendarAggregatedRepositoryImple {
+extension GoogleCalendarLocalAggregatedRepositoryImple {
 
     public func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
         return self.load {

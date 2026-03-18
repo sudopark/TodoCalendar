@@ -1,5 +1,5 @@
 //
-//  GoogleCalendarAggregatedRepositoryImpleTests.swift
+//  GoogleCalendarLocalAggregatedRepositoryImpleTests.swift
 //  RepositoryTests
 //
 //  Created by sudo.park on 3/15/26.
@@ -15,8 +15,8 @@ import UnitTestHelpKit
 @testable import Repository
 
 
-@Suite("GoogleCalendarAggregatedRepositoryImpleTests", .serialized)
-final class GoogleCalendarAggregatedRepositoryImpleTests: PublisherWaitable {
+@Suite("GoogleCalendarLocalAggregatedRepositoryImpleTests", .serialized)
+final class GoogleCalendarLocalAggregatedRepositoryImpleTests: PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>! = []
 
@@ -46,9 +46,9 @@ final class GoogleCalendarAggregatedRepositoryImpleTests: PublisherWaitable {
     private func makeRepository(
         accountEmails: [String],
         pool: any ExternalCalendarDBConnectionPool
-    ) -> GoogleCalendarAggregatedRepositoryImple {
+    ) -> GoogleCalendarLocalAggregatedRepositoryImple {
         let accountRepo = StubExternalCalendarIntegrateRepository(emails: accountEmails)
-        return GoogleCalendarAggregatedRepositoryImple(
+        return GoogleCalendarLocalAggregatedRepositoryImple(
             connectionPool: pool,
             accountRepository: accountRepo
         )
@@ -62,7 +62,7 @@ final class GoogleCalendarAggregatedRepositoryImpleTests: PublisherWaitable {
 
 // MARK: - 연동 계정 없음
 
-extension GoogleCalendarAggregatedRepositoryImpleTests {
+extension GoogleCalendarLocalAggregatedRepositoryImpleTests {
 
     @Test func loadColors_whenNoAccount_returnsEmpty() async throws {
         defer { cleanup() }
@@ -117,7 +117,7 @@ extension GoogleCalendarAggregatedRepositoryImpleTests {
 
 // MARK: - 단일 계정
 
-extension GoogleCalendarAggregatedRepositoryImpleTests {
+extension GoogleCalendarLocalAggregatedRepositoryImpleTests {
 
     @Test func loadColors_withSingleAccount_returnsAccountColors() async throws {
         defer { cleanup() }
@@ -175,7 +175,7 @@ extension GoogleCalendarAggregatedRepositoryImpleTests {
 
 // MARK: - 복수 계정 집계
 
-extension GoogleCalendarAggregatedRepositoryImpleTests {
+extension GoogleCalendarLocalAggregatedRepositoryImpleTests {
 
     @Test func loadColors_withMultipleAccounts_mergesColors() async throws {
         defer { cleanup() }

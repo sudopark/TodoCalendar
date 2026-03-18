@@ -70,7 +70,7 @@ extension IntentReposiotryFactory {
     }
     
     func makeGoogleCalendarRepository() -> any GoogleCalendarRepository {
-        return GoogleCalendarAggregatedRepositoryImple(
+        return GoogleCalendarLocalAggregatedRepositoryImple(
             connectionPool: base.externalCalendarDBConnectionPool,
             accountRepository: makeExternalCalendarAcountRepository()
         )
