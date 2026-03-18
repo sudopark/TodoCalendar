@@ -34,11 +34,11 @@ public protocol ExternalCalendarIntegrationUsecase: Sendable {
         
     func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo
     
-    func stopIntegrate(external service: any ExternalCalendarService) async throws
-    
+    func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws
+
     func handleAuthenticationResultOrNot(open url: URL) -> Bool
-    
-    var integratedServiceAccounts: AnyPublisher<[String: ExternalServiceAccountinfo], Never> { get }
+
+    var integratedServiceAccounts: AnyPublisher<[String: [ExternalServiceAccountinfo]], Never> { get }
     var integrationStatusChanged: AnyPublisher<ExternalCalendarIntegrationStatus, Never> { get }
 }
 
@@ -71,19 +71,19 @@ public final class ExternalCalendarIntegrationUsecaseImple: ExternalCalendarInte
 extension ExternalCalendarIntegrationUsecaseImple {
     
     private var shareKey: String { ShareDataKeys.externalCalendarAccounts.rawValue }
-    private typealias AccountsMap = [String: ExternalServiceAccountinfo]
-    
+    private typealias AccountsMap = [String: [ExternalServiceAccountinfo]]
+
     public func prepareIntegratedAccounts() async throws {
         let accounts = try await self.externalServiceIntegrateRepository.loadIntegratedAccounts()
-        self.sharedDataStore.put(
-            AccountsMap.self, key: self.shareKey,
-            accounts.asDictionary { $0.serviceIdentifier }
-        )
+        let accountsMap = accounts.reduce(into: AccountsMap()) { map, account in
+            map[account.serviceIdentifier, default: []].append(account)
+        }
+        self.sharedDataStore.put(AccountsMap.self, key: self.shareKey, accountsMap)
         await accounts.asyncForEach { account in
             try? await self.dbConnectionController.open(serviceId: account.serviceIdentifier)
         }
     }
-    
+
     public func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
         guard let usecase = self.oauth2ServiceProvider.usecase(for: service)
         else {
@@ -91,13 +91,17 @@ extension ExternalCalendarIntegrationUsecaseImple {
         }
         self.lastestUsedOAuthUsecase = usecase; defer { self.lastestUsedOAuthUsecase = nil }
         let credential = try await usecase.requestAuthentication()
-        let account = try await self.externalServiceIntegrateRepository.save(
-            credential, for: service
-        )
-        |> \.intergrationTime .~ Date()
-        try? await self.dbConnectionController.open(serviceId: service.identifier)
+        let account = try await self.externalServiceIntegrateRepository.save(credential, for: service)
+            |> \.intergrationTime .~ Date()
+        let isFirstAccount = (self.sharedDataStore.value(AccountsMap.self, key: self.shareKey)?[service.identifier] ?? []).isEmpty
+        if isFirstAccount {
+            try? await self.dbConnectionController.open(serviceId: service.identifier)
+        }
         self.sharedDataStore.update(AccountsMap.self, key: self.shareKey) { old in
-            (old ?? [:]) |> key(service.identifier) .~ account
+            var map = old ?? [:]
+            map[service.identifier, default: []].removeAll { $0.email == account.email }
+            map[service.identifier, default: []].append(account)
+            return map
         }
         self.integrationStatusChangedSubject.send(
             .init(serviceId: service.identifier, account: account)
@@ -105,28 +109,32 @@ extension ExternalCalendarIntegrationUsecaseImple {
         return account
     }
 
-    public func stopIntegrate(external service: any ExternalCalendarService) async throws {
-        
+    public func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws {
         try await self.externalServiceIntegrateRepository.removeAccount(
-            for: service.identifier
+            for: service.identifier, accountId: accountId
         )
-        try? await self.dbConnectionController.close(serviceId: service.identifier)
         self.sharedDataStore.update(AccountsMap.self, key: self.shareKey) { old in
-            (old ?? [:]) |> key(service.identifier) .~ nil
+            var map = old ?? [:]
+            map[service.identifier]?.removeAll { $0.email == accountId }
+            return map
+        }
+        let remaining = self.sharedDataStore.value(AccountsMap.self, key: self.shareKey)?[service.identifier] ?? []
+        if remaining.isEmpty {
+            try? await self.dbConnectionController.close(serviceId: service.identifier)
         }
         self.integrationStatusChangedSubject.send(
             .init(serviceId: service.identifier, account: nil)
         )
     }
-    
+
     public func handleAuthenticationResultOrNot(open url: URL) -> Bool {
         if self.lastestUsedOAuthUsecase?.handle(open: url) == true {
             return true
         }
         return false
     }
-    
-    public var integratedServiceAccounts: AnyPublisher<[String : ExternalServiceAccountinfo], Never> {
+
+    public var integratedServiceAccounts: AnyPublisher<[String: [ExternalServiceAccountinfo]], Never> {
         return self.sharedDataStore.observe(AccountsMap.self, key: self.shareKey)
             .map { $0 ?? [:] }
             .eraseToAnyPublisher()
