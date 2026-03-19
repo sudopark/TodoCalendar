@@ -97,7 +97,12 @@ open class StubEventTagUsecase: EventTagUsecase, @unchecked Sendable {
         let newSet = self.offIds.value.union(ids)
         self.offIds.send(newSet)
     }
-    
+
+    public func removeEventTagOffIds(_ ids: [EventTagId]) {
+        let removeSet = ids |> Set.init
+        self.offIds.send(self.offIds.value.filter { !removeSet.contains($0) })
+    }
+
     public func resetExternalCalendarOffTagId(_ serviceId: String) {
         let newSet = offIds.value.filter { $0.externalServiceId != serviceId }
         self.offIds.send(newSet)

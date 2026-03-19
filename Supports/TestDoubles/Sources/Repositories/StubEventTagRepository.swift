@@ -78,7 +78,12 @@ open class StubEventTagRepository: EventTagRepository, @unchecked Sendable {
         self.offTagIdSet = newSet
         return newSet
     }
-    
+
+    public func removeOffIds(_ ids: [EventTagId]) {
+        let removeSet = ids |> Set.init
+        self.offTagIdSet = self.offTagIdSet.filter { !removeSet.contains($0) }
+    }
+
     public func resetExternalCalendarOffTagId(_ serviceId: String) {
         let newSet = self.offTagIdSet.filter { $0.externalServiceId != serviceId }
         self.offTagIdSet = newSet
