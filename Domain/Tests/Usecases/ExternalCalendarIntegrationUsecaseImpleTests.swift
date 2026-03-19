@@ -255,9 +255,46 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         
         // then
         let services = statues.map { $0.serviceId }
-        let isIntegrated = statues.map { $0.isIntegrated }
         #expect(services == [service.identifier, service.identifier])
-        #expect(isIntegrated == [true, false])
+        if case .integrated(_, let account) = statues[0] {
+            #expect(account.email == "google@email.com")
+        } else {
+            Issue.record("첫번째 상태는 integrated 이어야 함")
+        }
+        if case .disconnected(_, let accountId) = statues[1] {
+            #expect(accountId == "google@email.com")
+        } else {
+            Issue.record("두번째 상태는 disconnected 이어야 함")
+        }
+    }
+
+    @Test func usecase_currentIntegratedAccounts() async throws {
+        // given
+        let account = ExternalServiceAccountinfo("google", email: "email")
+        let usecase = self.makeUsecase(startWithIntegrated: [account])
+        try await usecase.prepareIntegratedAccounts()
+
+        // when
+        let accounts = usecase.currentIntegratedAccounts()
+
+        // then
+        #expect(accounts.count == 1)
+        #expect(accounts.first?.email == "email")
+    }
+
+    @Test func usecase_currentIntegratedAccountsForService() async throws {
+        // given
+        let google = ExternalServiceAccountinfo("google", email: "google@email.com")
+        let other = ExternalServiceAccountinfo("other", email: "other@email.com")
+        let usecase = self.makeUsecase(startWithIntegrated: [google, other])
+        try await usecase.prepareIntegratedAccounts()
+
+        // when
+        let accounts = usecase.currentIntegratedAccounts(for: "google")
+
+        // then
+        #expect(accounts.count == 1)
+        #expect(accounts.first?.email == "google@email.com")
     }
 }
 

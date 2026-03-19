@@ -14,14 +14,15 @@ import Extensions
 
 // MARK: - ExternalCalendarIntegrationStatus
 
-public struct ExternalCalendarIntegrationStatus: Sendable {
-    public let serviceId: String
-    public let account: ExternalServiceAccountinfo?
-    public var isIntegrated: Bool { self.account != nil }
-    
-    public init(serviceId: String, account: ExternalServiceAccountinfo?) {
-        self.serviceId = serviceId
-        self.account = account
+public enum ExternalCalendarIntegrationStatus: Sendable {
+    case integrated(serviceId: String, account: ExternalServiceAccountinfo)
+    case disconnected(serviceId: String, accountId: String)
+
+    public var serviceId: String {
+        switch self {
+        case .integrated(let serviceId, _): return serviceId
+        case .disconnected(let serviceId, _): return serviceId
+        }
     }
 }
 
@@ -40,6 +41,21 @@ public protocol ExternalCalendarIntegrationUsecase: Sendable {
 
     var integratedServiceAccounts: AnyPublisher<[String: [ExternalServiceAccountinfo]], Never> { get }
     var integrationStatusChanged: AnyPublisher<ExternalCalendarIntegrationStatus, Never> { get }
+    
+    func currentIntegratedAccounts() -> [ExternalServiceAccountinfo]
+}
+
+extension ExternalCalendarIntegrationUsecase {
+    
+    public func integrationStatusChanged(for serviceId: String) -> AnyPublisher<ExternalCalendarIntegrationStatus, Never> {
+        return self.integrationStatusChanged
+            .filter { $0.serviceId == serviceId }
+            .eraseToAnyPublisher()
+    }
+    
+    public func currentIntegratedAccounts(for serviceId: String) -> [ExternalServiceAccountinfo] {
+        return self.currentIntegratedAccounts().filter { $0.serviceIdentifier == serviceId }
+    }
 }
 
 
@@ -104,7 +120,7 @@ extension ExternalCalendarIntegrationUsecaseImple {
             return map
         }
         self.integrationStatusChangedSubject.send(
-            .init(serviceId: service.identifier, account: account)
+            .integrated(serviceId: service.identifier, account: account)
         )
         return account
     }
@@ -123,7 +139,7 @@ extension ExternalCalendarIntegrationUsecaseImple {
             try? await self.dbConnectionController.close(serviceId: service.identifier)
         }
         self.integrationStatusChangedSubject.send(
-            .init(serviceId: service.identifier, account: nil)
+            .disconnected(serviceId: service.identifier, accountId: accountId)
         )
     }
 
@@ -143,5 +159,10 @@ extension ExternalCalendarIntegrationUsecaseImple {
     public var integrationStatusChanged: AnyPublisher<ExternalCalendarIntegrationStatus, Never> {
         return self.integrationStatusChangedSubject
             .eraseToAnyPublisher()
+    }
+    
+    public func currentIntegratedAccounts() -> [ExternalServiceAccountinfo] {
+        let accountMap = self.sharedDataStore.value(AccountsMap.self, key: self.shareKey) ?? [:]
+        return accountMap.values.flatMap { $0 }
     }
 }
