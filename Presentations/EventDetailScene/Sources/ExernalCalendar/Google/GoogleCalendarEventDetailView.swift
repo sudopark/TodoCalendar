@@ -605,7 +605,7 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
                 "colorId": .init(foregroundHex: "#ff0000", backgroudHex: "#ff00ff")
             ]
         )
-        viewAppearance.googleCalendarColor = colors
+        viewAppearance.googleCalendarColors[colors.ownerId] = colors
         let state = GoogleCalendarEventDetailViewState()
         state.eventName = "google calendar event"
         state.hasDetailLink = true

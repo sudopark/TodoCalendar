@@ -15,10 +15,12 @@ import Extensions
 // MARK: - GoogleCalendarViewAppearanceStore
 
 public protocol GoogleCalendarViewAppearanceStore: Sendable {
-    
-    func apply(colors: GoogleCalendar.Colors)
-    func apply(googleCalendarTags: [GoogleCalendar.Tag])
-    func clearGoogleCalendarColors()
+
+    func applyColors(_ colors: GoogleCalendar.Colors, for accountId: String)
+    func clearColors(for accountId: String)
+
+    func applyCalendarTags(_ tags: [GoogleCalendar.Tag], for accountId: String)
+    func clearCalendarTags(for accountId: String)
 }
 
 
