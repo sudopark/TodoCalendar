@@ -55,4 +55,8 @@ open class StubExternalCalendarIntegrationUsecase: ExternalCalendarIntegrationUs
     public var integrationStatusChanged: AnyPublisher<ExternalCalendarIntegrationStatus, Never> {
         return Empty().eraseToAnyPublisher()
     }
+
+    public func currentIntegratedAccounts() -> [ExternalServiceAccountinfo] {
+        return self.fakeAccountMapSubject.value.values.flatMap { $0 }
+    }
 }
