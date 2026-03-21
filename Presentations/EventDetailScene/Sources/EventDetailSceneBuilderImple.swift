@@ -159,10 +159,10 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
     
     @MainActor
     public func makeGoogleCalendarDetailScene(
-        calendarId: String, eventId: String
+        calendarId: String, accountId: String, eventId: String
     ) -> any GoogleCalendarEventDetailScene {
         return self.googleCalendarEventDetailSceneBuilder.makeGoogleCalendarEventDetailScene(
-            calendarId: calendarId, eventId: eventId
+            calendarId: calendarId, accountId: accountId, eventId: eventId
         )
     }
     

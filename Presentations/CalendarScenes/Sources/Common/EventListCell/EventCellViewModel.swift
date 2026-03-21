@@ -356,6 +356,7 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
     public let isRepeating: Bool = false
     public var isForemost: Bool = false
     public let calendarId: String
+    public let accountId: String
     public let htmlLink: String?
     public var isAlldayEvent: Bool = false
 
@@ -374,6 +375,7 @@ public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
         self.periodDescription = event.eventTime?.durationText(timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText)
         self.isForemost = event.isForemost
         self.calendarId = event.calendarId
+        self.accountId = event.accountId
         self.htmlLink = event.htmlLink
         self.isAlldayEvent = event.eventTime?.isAllDay ?? false
     }

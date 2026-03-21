@@ -473,7 +473,7 @@ final class SpyEventListCellEventHanleRouter: BaseSpyRouter, EventListCellEventH
     
     var didRouteToGoogleEventDetailWithId: String?
     func routeToGoogleEventDetail(
-        calendarId: String, eventId: String
+        calendarId: String, accountId: String, eventId: String
     ) {
         self.didRouteToGoogleEventDetailWithId = eventId
     }

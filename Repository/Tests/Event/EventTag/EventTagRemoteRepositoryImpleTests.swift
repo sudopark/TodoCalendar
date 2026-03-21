@@ -364,7 +364,12 @@ private final class SpyLocalStorage: EventTagLocalStorage, @unchecked Sendable {
         self.offTagIdSet = newSet
         return newSet
     }
-    
+
+    func removeOffIds(_ ids: [EventTagId]) {
+        let removeSet = Set(ids)
+        self.offTagIdSet = self.offTagIdSet.filter { !removeSet.contains($0) }
+    }
+
     func deleteOfftagId(_ tagId: String) {
         self.offTagIdSet.remove(.custom(tagId))
     }

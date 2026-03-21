@@ -216,9 +216,10 @@ public struct HolidayCalendarEvent: CalendarEvent {
 }
 
 public struct GoogleCalendarEvent: CalendarEvent {
-    
+
     public let eventId: String
     public let calendarId: String
+    public let accountId: String
     public let name: String
     public let eventTime: EventTime?
     public let eventTimeOnCalendar: EventTimeOnCalendar?
@@ -232,6 +233,7 @@ public struct GoogleCalendarEvent: CalendarEvent {
     public init(_ event: GoogleCalendar.Event, in timeZone: TimeZone) {
         self.eventId = event.eventId
         self.calendarId = event.calendarId
+        self.accountId = event.accountId
         self.name = event.name
         self.eventTime = event.eventTime
         switch event.eventTime {

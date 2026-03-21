@@ -41,7 +41,7 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         calendarUsecase.refreshGoogleCalendarEventTags()
         
         let viewModel = GoogleCalendarEventDetailViewModelImple(
-            calenadrId: "g:7", eventId: "id",
+            calenadrId: "g:7", accountId: "", eventId: "id",
             googleCalendarUsecase: calendarUsecase,
             calendarSettingUsecase: settingUsecase,
             daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
@@ -368,7 +368,7 @@ private final class PrivateStubGoogleCalendarUsecase: StubGoogleCalendarUsecase,
     var additionalStubbing: ((GoogleCalendar.EventOrigin) -> GoogleCalendar.EventOrigin)?
     
     override func eventDetail(
-        _ calendarId: String, _ eventId: String, at timeZone: TimeZone
+        _ calendarId: String, _ eventId: String, accountId: String, at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
      
         let start = GoogleCalendar.EventOrigin.GoogleEventTime()
