@@ -49,7 +49,7 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     
     public var stubDetail: GoogleCalendar.EventOrigin?
     open func eventDetail(
-        _ calendarId: String, _ eventId: String, at timeZone: TimeZone
+        _ calendarId: String, _ eventId: String, accountId: String, at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
         guard let detail = self.stubDetail
         else {

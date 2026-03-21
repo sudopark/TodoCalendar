@@ -77,7 +77,7 @@ extension GoogleCalendarRepositoryImple {
         let mapper: GoogleCalendarEventTagListMapper = try await self.remote.request(
             .get, endpoint
         )
-        return mapper.calendars
+        return mapper.calendars.map { $0 |> \.ownerId .~ self.accountId }
     }
 }
 

@@ -115,7 +115,7 @@ public protocol EventDetailSceneBuilder {
     
     @MainActor
     func makeGoogleCalendarDetailScene(
-        calendarId: String, eventId: String
+        calendarId: String, accountId: String, eventId: String
     ) -> any GoogleCalendarEventDetailScene
     
     @MainActor

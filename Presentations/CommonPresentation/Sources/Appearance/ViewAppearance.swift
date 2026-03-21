@@ -63,32 +63,20 @@ import Domain
     // Google calendar color
     public var googleCalendarColors: [String: GoogleCalendar.Colors] = [:]
     public private(set) var googleCalendarTagMap: [String: GoogleCalendar.Tag] = [:]
-    private var calendarIdToAccountId: [String: String] = [:]
 
     public func applyCalendarTags(_ tags: [GoogleCalendar.Tag], for accountId: String) {
-        let oldIds = calendarIdToAccountId.filter { $0.value == accountId }.map(\.key)
-        oldIds.forEach {
-            googleCalendarTagMap.removeValue(forKey: $0)
-            calendarIdToAccountId.removeValue(forKey: $0)
-        }
-        tags.forEach {
-            googleCalendarTagMap[$0.id] = $0
-            calendarIdToAccountId[$0.id] = accountId
-        }
+        googleCalendarTagMap = googleCalendarTagMap.filter { $0.value.ownerId != accountId }
+        tags.forEach { googleCalendarTagMap[$0.id] = $0 }
     }
 
     public func clearCalendarTags(for accountId: String) {
-        let idsToRemove = calendarIdToAccountId.filter { $0.value == accountId }.map(\.key)
-        idsToRemove.forEach {
-            googleCalendarTagMap.removeValue(forKey: $0)
-            calendarIdToAccountId.removeValue(forKey: $0)
-        }
+        googleCalendarTagMap = googleCalendarTagMap.filter { $0.value.ownerId != accountId }
     }
 
     public func googleEventColor(
         _ colorId: String?, _ calendarId: String
     ) -> UIColor {
-        let accountId = calendarIdToAccountId[calendarId]
+        let accountId = googleCalendarTagMap[calendarId]?.ownerId
         if let colorId {
             if let accountId {
                 return googleCalendarColors[accountId]?.events[colorId]

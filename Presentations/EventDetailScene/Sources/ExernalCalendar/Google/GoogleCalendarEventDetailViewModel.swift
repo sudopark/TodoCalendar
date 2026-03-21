@@ -144,27 +144,30 @@ protocol GoogleCalendarEventDetailViewModel: AnyObject, Sendable, GoogleCalendar
 // MARK: - GoogleCalendarEventDetailViewModelImple
 
 final class GoogleCalendarEventDetailViewModelImple: GoogleCalendarEventDetailViewModel, @unchecked Sendable {
-    
+
     private let calendarId: String
+    private let accountId: String
     private let eventId: String
     private let googleCalendarUsecase: any GoogleCalendarUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let daysIntervalCountUsecase: any DaysIntervalCountUsecase
     var router: (any GoogleCalendarEventDetailRouting)?
-    
+
     init(
         calenadrId: String,
+        accountId: String,
         eventId: String,
         googleCalendarUsecase: any GoogleCalendarUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         daysIntervalCountUsecase: any DaysIntervalCountUsecase
     ) {
         self.calendarId = calenadrId
+        self.accountId = accountId
         self.eventId = eventId
         self.googleCalendarUsecase = googleCalendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.daysIntervalCountUsecase = daysIntervalCountUsecase
-        
+
         self.internalBind()
     }
     
@@ -206,7 +209,7 @@ extension GoogleCalendarEventDetailViewModelImple {
         let currentTimeZone = self.subject.timeZone.compactMap { $0 }.first()
         let eventOrigin = currentTimeZone.flatMap { [weak self] timeZone -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> in
             guard let self = self else { return Empty().eraseToAnyPublisher() }
-            return self.googleCalendarUsecase.eventDetail(self.calendarId, self.eventId, at: timeZone).eraseToAnyPublisher()
+            return self.googleCalendarUsecase.eventDetail(self.calendarId, self.eventId, accountId: self.accountId, at: timeZone).eraseToAnyPublisher()
         }
         eventOrigin
             .sink(receiveValue: { [weak self] event in
