@@ -23,11 +23,13 @@ open class StubGoogleCalendarUsecase: GoogleCalendarUsecase, @unchecked Sendable
     }
     
     private let tagsSubject = CurrentValueSubject<[GoogleCalendar.Tag]?, Never>(nil)
+    public var stubCalendarTags: [GoogleCalendar.Tag]?
     open func refreshGoogleCalendarEventTags() {
-        let tags = (0..<10).map { int -> GoogleCalendar.Tag in
+        let tags = self.stubCalendarTags ?? (0..<10).map { int -> GoogleCalendar.Tag in
             return .init(id: "g:\(int)", name: "g:\(int)")
                 |> \.colorId .~ "color"
                 |> \.backgroundColorHex .~ "hex"
+                |> \.ownerId .~ "user@gmail.com"
         }
         self.tagsSubject.send(tags)
     }
