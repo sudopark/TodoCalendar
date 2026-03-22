@@ -62,7 +62,7 @@ import Domain
     
     // Google calendar color
     public var googleCalendarColors: [String: GoogleCalendar.Colors] = [:]
-    public private(set) var googleCalendarTagMap: [String: GoogleCalendar.Tag] = [:]
+    public var googleCalendarTagMap: [String: GoogleCalendar.Tag] = [:]
 
     public func applyCalendarTags(_ tags: [GoogleCalendar.Tag], for accountId: String) {
         googleCalendarTagMap = googleCalendarTagMap.filter { $0.value.ownerId != accountId }
