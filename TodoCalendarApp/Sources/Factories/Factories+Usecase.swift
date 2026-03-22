@@ -297,13 +297,14 @@ extension NonLoginUsecaseFactoryImple {
 extension NonLoginUsecaseFactoryImple {
 
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
-        let builder = GoogleCalendarRepositoryBuilderImple(
+        let pool = GoogleCalendarRepositoryPoolImple(
             remoteFactory: self.applicationBase.externalCalendarRemoteFactory,
             connectionPool: self.applicationBase.externalCalendarDBConnectionPool
         )
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
-            repositoryBuilder: builder,
+            integrationUsecase: self.externalCalenarIntegrationUsecase,
+            repositoryPool: pool,
             eventTagUsecase: self.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
@@ -702,13 +703,14 @@ extension LoginUsecaseFactoryImple {
 extension LoginUsecaseFactoryImple {
 
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
-        let builder = GoogleCalendarRepositoryBuilderImple(
+        let pool = GoogleCalendarRepositoryPoolImple(
             remoteFactory: self.applicationBase.externalCalendarRemoteFactory,
             connectionPool: self.applicationBase.externalCalendarDBConnectionPool
         )
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
-            repositoryBuilder: builder,
+            integrationUsecase: self.externalCalenarIntegrationUsecase,
+            repositoryPool: pool,
             eventTagUsecase: self.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
@@ -717,27 +719,42 @@ extension LoginUsecaseFactoryImple {
 }
 
 
-// MARK: - GoogleCalendarRepositoryBuilderImple
+// MARK: - GoogleCalendarRepositoryPoolImple
 
-private struct GoogleCalendarRepositoryBuilderImple: GoogleCalendarRepositoryBuilder {
+private final class GoogleCalendarRepositoryPoolImple: GoogleCalendarRepositoryPool, @unchecked Sendable {
 
     private let remoteFactory: any ExternalCalendarRemoteFactory
     private let connectionPool: any ExternalCalendarDBConnectionPool
+    private var pool: [String: any GoogleCalendarRepository] = [:]
+    private let lock = NSLock()
 
     init(remoteFactory: any ExternalCalendarRemoteFactory, connectionPool: any ExternalCalendarDBConnectionPool) {
         self.remoteFactory = remoteFactory
         self.connectionPool = connectionPool
     }
 
-    func build(for accountId: String) -> any GoogleCalendarRepository {
+    func repository(for accountId: String) -> any GoogleCalendarRepository {
+        lock.lock()
+        defer { lock.unlock() }
+        if let existing = pool[accountId] {
+            return existing
+        }
         guard let remote = remoteFactory.make(serviceId: GoogleCalendarService.id, accountId: accountId) else {
             preconditionFailure("ExternalCalendarRemoteFactory must support GoogleCalendarService")
         }
         let cacheStorage = GoogleCalendarLocalStorageImple(connectionPool: self.connectionPool)
-        return GoogleCalendarRepositoryImple(
+        let repository = GoogleCalendarRepositoryImple(
             remote: remote,
             cacheStorage: cacheStorage,
             accountId: accountId
         )
+        pool[accountId] = repository
+        return repository
+    }
+
+    func removeRepository(for accountId: String) {
+        lock.lock()
+        defer { lock.unlock() }
+        pool.removeValue(forKey: accountId)
     }
 }

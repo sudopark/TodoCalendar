@@ -148,16 +148,6 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         })
         .store(in: &self.cancellables)
         
-        let refreshAfterGoogleCalendarIntegrated = self.googleCalendarUsecase.integratedAccount
-            .filter { $0 != nil }
-        refreshAfterGoogleCalendarIntegrated
-            .withLatestFrom(totalViewingMonths) { $1 }
-            .compactMap { $0.checkedRange }
-            .sink(receiveValue: { [weak self] total in
-                self?.googleCalendarUsecase.refreshEvents(in: total)
-            })
-            .store(in: &self.cancellables)
-        
         refreshAfterEnterForeground
             .sink(receiveValue: { [weak self] in
                 self?.eventSyncUsecase.sync()
