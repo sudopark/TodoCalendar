@@ -9,9 +9,10 @@
 import Foundation
 import Combine
 
-public protocol GoogleCalendarRepositoryBuilder: Sendable {
+public protocol GoogleCalendarRepositoryPool: Sendable {
 
-    func build(for accountId: String) -> any GoogleCalendarRepository
+    func repository(for accountId: String) -> any GoogleCalendarRepository
+    func removeRepository(for accountId: String)
 }
 
 

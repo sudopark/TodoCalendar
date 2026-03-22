@@ -39,14 +39,14 @@ public final class GoogleCalendarRepositoryImple: GoogleCalendarRepository, @unc
 extension GoogleCalendarRepositoryImple {
     
     public func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
-        
         return self.load { [weak self] in
             guard let self else { return nil }
             return try? await self.cacheStorage.loadColors(accountId: self.accountId)
         } thenFromRemote: { [weak self] in
-            return try await self?.loadColorsFromRemote()
-        } withRefreshCache: { _, refreshed in
-            guard let refreshed else { return }
+            guard let self else { return nil }
+            return try await self.loadColorsFromRemote()
+        } withRefreshCache: { [weak self] _, refreshed in
+            guard let self, let refreshed else { return }
             try? await self.cacheStorage.updateColors(refreshed, accountId: self.accountId)
         }
     }
@@ -65,9 +65,10 @@ extension GoogleCalendarRepositoryImple {
             guard let self else { return nil }
             return try? await self.cacheStorage.loadCalendarList(accountId: self.accountId)
         } thenFromRemote: { [weak self] in
-            return try await self?.loadCalendarTagsFromRemote()
-        } withRefreshCache: { _, refreshed in
-            guard let refreshed else { return }
+            guard let self else { return nil }
+            return try await self.loadCalendarTagsFromRemote()
+        } withRefreshCache: { [weak self] _, refreshed in
+            guard let self, let refreshed else { return }
             try? await self.cacheStorage.updateCalendarList(refreshed, accountId: self.accountId)
         }
     }
@@ -91,31 +92,29 @@ extension GoogleCalendarRepositoryImple {
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
         
-        let accountId = self.accountId
         return AnyPublisher<[GoogleCalendar.Event]?, any Error>.create { @Sendable [weak self] subscriber in
-            let task = Task {
-                let cached = try? await self?.cacheStorage.loadEvents(calendarId, period, accountId: accountId)
+            let task = Task { [weak self] in
+                guard let self else { return }
+                let cached = try? await self.cacheStorage.loadEvents(calendarId, period, accountId: self.accountId)
                 if let cached {
                     subscriber.send(cached)
                 }
 
                 do {
-                    let refreshedList = try await self?.loadEventOriginListFromRemote(calendarId, in: period)
+                    let refreshedList = try await self.loadEventOriginListFromRemote(calendarId, in: period)
 
-                    let events = refreshedList?.items.compactMap {
-                        return GoogleCalendar.Event($0, calendarId, refreshedList?.timeZone)
+                    let events = refreshedList.items.compactMap {
+                        return GoogleCalendar.Event($0, calendarId, refreshedList.timeZone)
                     }
                     if let cached {
-                        try? await self?.cacheStorage.removeEvents(cached.map { $0.eventId }, accountId: accountId)
+                        try? await self.cacheStorage.removeEvents(cached.map { $0.eventId }, accountId: self.accountId)
                     }
-                    if let refreshedList, let events {
-                        try? await self?.cacheStorage.updateEvents(
-                            calendarId, refreshedList, events, accountId: accountId
-                        )
-                    }
+                    try? await self.cacheStorage.updateEvents(
+                        calendarId, refreshedList, events, accountId: self.accountId
+                    )
                     subscriber.send(events)
                     subscriber.send(completion: .finished)
-                    
+
                 } catch {
                     subscriber.send(completion: .failure(error))
                 }
@@ -134,9 +133,10 @@ extension GoogleCalendarRepositoryImple {
             guard let self else { return nil }
             return try? await self.cacheStorage.loadEventDetail(eventId, accountId: self.accountId)
         } thenFromRemote: { [weak self] in
-            return try await self?.loadEventDetailFromRemoteWithRecurrenceIfNeed(calendarId, eventId, at: timeZone)
-        } withRefreshCache: { _, refreshed in
-            guard let refreshed else { return }
+            guard let self else { return nil }
+            return try await self.loadEventDetailFromRemoteWithRecurrenceIfNeed(calendarId, eventId, at: timeZone)
+        } withRefreshCache: { [weak self] _, refreshed in
+            guard let self, let refreshed else { return }
             try? await self.cacheStorage.updateEventDetail(calendarId, timeZone, refreshed, accountId: self.accountId)
         }
         .compactMap { $0 }
