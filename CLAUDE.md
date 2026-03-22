@@ -268,3 +268,43 @@ for service in services {
 }
 ```
 
+---
+
+## 6. Scene 스펙
+
+화면(Scene) 단위 작업의 상세 스펙은 [`docs/scene-spec.md`](docs/scene-spec.md)를 참조.
+
+### 핵심 요약
+
+**Scene 구성 파일** (6개, SwiftUI 사용 시):
+
+```
+XXXScene+Builder.swift    — Scene/Interactor/Listener/Builder 프로토콜
+XXXViewModel.swift        — VM 프로토콜 + Imple (Subject struct로 상태 관리)
+XXXViewController.swift   — UIHostingController 래퍼
+XXXRouter.swift           — BaseRouterImple 상속, 화면 전환 담당
+XXXBuilderImple.swift     — 의존성 조립 (UsecaseFactory + ViewAppearance 주입)
+XXXView.swift             — ViewState + ViewEventHandler + ContainerView + View
+```
+
+**SwiftUI 통합 구조**:
+
+```mermaid
+graph LR
+    VM[ViewModel] -->|Publisher| VS[ViewState]
+    VM -->|메서드| EH[EventHandler]
+    VS -->|@Environment| V[View]
+    EH -->|@Environment| V
+    VC[ViewController] --> CV[ContainerView] --> V
+```
+
+- `ViewState`/`ViewEventHandler`가 ViewModel과 View 사이를 중개하여 직접 참조를 끊음
+
+**Scene 간 통신 (3가지)**:
+
+| 방향 | 메커니즘 | 용도 |
+|---|---|---|
+| 간접 공유 | SharedDataStore (Usecase 경유) | 같은 데이터를 구독하는 독립 Scene 간 |
+| Parent → Child | Interactor | 부모가 자식에게 명령 |
+| Child → Parent | Listener (weak) | 자식이 부모에게 이벤트 전달 |
+
