@@ -279,11 +279,19 @@ struct EventTagListView: View {
                     self.eventHandlers.toggleEventTagViewingIsOn(cellViewModel.id)
                 }
             
-            Text(cellViewModel.name)
-                .lineLimit(1)
-                .font(self.appearance.fontSet.normal.asFont)
-                .foregroundStyle(self.appearance.colorSet.text0.asColor)
-            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(cellViewModel.name)
+                    .lineLimit(1)
+                    .font(self.appearance.fontSet.normal.asFont)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                if let email = cellViewModel.accountEmail, !email.isEmpty {
+                    Text(email)
+                        .lineLimit(1)
+                        .font(self.appearance.fontSet.subNormal.asFont)
+                        .foregroundStyle(self.appearance.colorSet.text2.asColor)
+                }
+            }
+
             Spacer()
         }
         .padding(.horizontal, 12)
@@ -327,7 +335,8 @@ struct EventTagListViewPreviewProvider: PreviewProvider {
             ExternalCalendarEventTag(
                 tagId: .externalCalendar(serviceId: GoogleCalendarService.id, id: "g:\($0)"),
                 name: "name:\($0)",
-                colorHex: "some"
+                colorHex: "some",
+                ownerId: $0 < 3 ? "alice@gmail.com" : "bob@gmail.com"
             )
         }
         .map { ExternalCalendarEventTagCellViewModel($0) }

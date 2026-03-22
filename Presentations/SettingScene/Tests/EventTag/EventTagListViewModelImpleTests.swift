@@ -33,7 +33,8 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     private func makeViewModel(
         shouldLoadFail: Bool = false,
-        isGoogleCalendarIntegrated: Bool = false
+        isGoogleCalendarIntegrated: Bool = false,
+        stubGoogleCalendarTags: [GoogleCalendar.Tag]? = nil
     ) -> EventTagListViewModelImple {
         let usecase = StubEventTagUsecase()
         if shouldLoadFail {
@@ -48,6 +49,7 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         if isGoogleCalendarIntegrated {
             googleUsecae.updateHasAccount(.init(GoogleCalendarService.id))
         }
+        googleUsecae.stubCalendarTags = stubGoogleCalendarTags
         let viewModel = EventTagListViewModelImple(
             tagUsecase: usecase,
             googleCalendarUsecase: googleUsecae
@@ -105,6 +107,59 @@ extension EventTagListViewModelImpleTests {
         let first = sections?.first
         XCTAssertEqual(first?.serviceId, GoogleCalendarService.id)
         XCTAssertEqual(first?.cellViewModels.count, 10)
+    }
+
+    func testViewModel_provideExternalCalendarTags_withAccountEmail() {
+        // given
+        let expect = expectation(description: "외부 캘린더 목록에 accountEmail 포함")
+        let viewModel = self.makeViewModel(isGoogleCalendarIntegrated: true)
+
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
+            viewModel.reload()
+        }
+
+        // then
+        let emails = sections?.first?.cellViewModels.map { $0.accountEmail }
+        XCTAssertEqual(emails?.count, 10)
+        emails?.forEach {
+            XCTAssertNotNil($0)
+        }
+    }
+
+    func testViewModel_whenMultipleGoogleAccountsIntegrated_provideTagsWithEachAccountEmail() {
+        // given
+        let expect = expectation(description: "여러 구글 계정의 캘린더 태그가 각 계정 이메일과 함께 제공")
+        let account1Tags: [GoogleCalendar.Tag] = (0..<3).map { int in
+            var tag = GoogleCalendar.Tag(id: "a1:\(int)", name: "cal-a1:\(int)")
+            tag.ownerId = "alice@gmail.com"
+            tag.backgroundColorHex = "hex"
+            return tag
+        }
+        let account2Tags: [GoogleCalendar.Tag] = (0..<2).map { int in
+            var tag = GoogleCalendar.Tag(id: "a2:\(int)", name: "cal-a2:\(int)")
+            tag.ownerId = "bob@gmail.com"
+            tag.backgroundColorHex = "hex"
+            return tag
+        }
+        let allTags = account1Tags + account2Tags
+        let viewModel = self.makeViewModel(
+            isGoogleCalendarIntegrated: true,
+            stubGoogleCalendarTags: allTags
+        )
+
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
+            viewModel.reload()
+        }
+
+        // then
+        let cells = sections?.first?.cellViewModels
+        XCTAssertEqual(cells?.count, 5)
+        let aliceCells = cells?.filter { $0.accountEmail == "alice@gmail.com" }
+        let bobCells = cells?.filter { $0.accountEmail == "bob@gmail.com" }
+        XCTAssertEqual(aliceCells?.count, 3)
+        XCTAssertEqual(bobCells?.count, 2)
     }
     
     private func makeViewModelWithInitialListLoaded() -> EventTagListViewModelImple {

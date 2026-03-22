@@ -123,22 +123,26 @@ public struct ExternalCalendarEventTag: EventTag {
     public let colorHex: String?
     public var foregroundColorHex: String?
     public var colorId: String?
-    
+    public var ownerId: String?
+
     public init(
         tagId: EventTagId,
         name: String,
-        colorHex: String
+        colorHex: String,
+        ownerId: String? = nil
     ) {
         self.tagId = tagId
         self.name = name
         self.colorHex = colorHex
+        self.ownerId = ownerId
     }
-    
+
     public init(_ tag: GoogleCalendar.Tag) {
         self.tagId = tag.tagId
         self.name = tag.name
         self.colorHex = tag.colorHex
         self.foregroundColorHex = tag.foregroundColorHex
         self.colorId = tag.colorId
+        self.ownerId = tag.ownerId
     }
 }
