@@ -248,7 +248,6 @@ struct EventListWidget: Widget {
 
 extension ViewAppearance {
 
-    // TODO: [#508] 위젯은 현재 단일 계정만 지원. 다중 계정 지원 시 accountId별로 분리 필요
     convenience init(google colors: GoogleCalendar.Colors, _ tags: [String: GoogleCalendar.Tag]) {
         self.init(
             setting: .init(
@@ -256,8 +255,8 @@ extension ViewAppearance {
                 defaultTagColor: .default),
             isSystemDarkTheme: false
         )
-        // 임시: 위젯은 단일 계정이므로 빈 문자열 키로 저장. accountId 없이 scan-all 폴백 동작
-        self.googleCalendarColors[""] = colors
+        let ownerIds = Set(tags.values.map { $0.ownerId })
+        ownerIds.forEach { self.googleCalendarColors[$0] = colors }
         self.googleCalendarTagMap.merge(tags) { $1 }
     }
 }

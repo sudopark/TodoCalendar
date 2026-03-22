@@ -128,7 +128,6 @@ extension MainViewModelImple {
             self.calendarSceneInteractor = self.router?.attachCalendar()
         }
         self.refreshViewAppearanceSettings()
-        // TODO: google calendar 연동 여부에 따라 color 조회
         self.temporaryUserDataMigrationUsecase.checkIsNeedMigration()
         
         self.eventNotificationUsecase.runSyncEventNotification()
