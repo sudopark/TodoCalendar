@@ -71,6 +71,7 @@ struct AppEnvironment {
     }
     
     static let dbVersion: Int32 = 6
+    static let googleCalendarDBVersion: Int32 = 0
     
     static func deviceId(_ storage: any EnvironmentStorage) -> String {
         let installKey = "install_id"

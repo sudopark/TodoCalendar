@@ -169,8 +169,8 @@ extension AppDataMigrationImpleTests {
         #expect(times.count == 2)
     }
 
-    // google_calendar.db 쓰기에 실패하더라도 완료되어야 함
-    @Test func migration_whenWriteFails_completesWithoutThrowing() async throws {
+    // google_calendar DB 연결이 없으면 마이그레이션을 건너뛰고 flag도 설정하지 않음
+    @Test func migration_whenNoConnection_skipsAndDoesNotSetFlag() async throws {
         defer { cleanup() }
         let mainDB = try await openMainDB()
         defer { Task { try? await mainDB.async.close() } }
@@ -180,9 +180,13 @@ extension AppDataMigrationImpleTests {
         let _ = try await insertOldEventOrigins(mainDB)
 
         let failingPool = FailingExternalCalendarSQLiteConnectionPool()
-        let migration = makeMigration(mainDB: mainDB, pool: failingPool)
+        let flagStorage = FakeEnvironmentStorage()
+        let migration = makeMigration(mainDB: mainDB, pool: failingPool, flagStorage: flagStorage)
 
         await migration.migrateGoogleCalendarDataIfNeeded(accountId: accountId)
+
+        let flag: Bool? = flagStorage.load("google_calendar_migrated")
+        #expect(flag != true)
     }
 
     // 마이그레이션 이후 mainDB의 구 테이블 및 이벤트 타임 레코드 삭제
@@ -349,6 +353,7 @@ extension AppDataMigrationImpleTests {
 // MARK: - Test Doubles
 
 private final class FailingExternalCalendarSQLiteConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {
+    func hasConnection(serviceId: String) async -> Bool { return false }
     func connection(serviceId: String) async throws -> SQLiteService {
         throw RuntimeError("no connection available")
     }

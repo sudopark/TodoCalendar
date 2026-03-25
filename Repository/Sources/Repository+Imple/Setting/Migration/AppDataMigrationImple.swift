@@ -183,6 +183,12 @@ extension AppDataMigrationImple {
         let key = googleCalendarMigrationFlagKey
         guard migrationFlagStorage.load(key) != true else { return }
 
+        guard await googleCalendarDBPool.hasConnection(serviceId: GoogleCalendarService.id)
+        else {
+            logger.log(.sql, level: .info, "skip google calendar migration - DB not open")
+            return
+        }
+
         if let (colors, tags, origins) = try? await readFromMainDB() {
             let eventIds = origins.map { $0.origin.id }
             let times = (try? await readEventTimes(eventIds: eventIds)) ?? []

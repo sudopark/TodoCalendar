@@ -187,12 +187,14 @@ class DummyFirebaseAuthService: FirebaseAuthService {
 
 
 actor AppExtensionExternalCalendarDBConnectionPool: ExternalCalendarDBConnectionPool {
-    
+
     private let sqliteService: SQLiteService
     init(sqliteService: SQLiteService) {
         self.sqliteService = sqliteService
     }
-    
+
+    func hasConnection(serviceId: String) -> Bool { return true }
+
     func connection(serviceId: String) async throws -> SQLiteService {
         return self.sqliteService
     }
