@@ -454,11 +454,13 @@ private final class StubExternalCalendarSQLiteConnectionPool: ExternalCalendarDB
     private let service: SQLiteService
     init(_ service: SQLiteService) { self.service = service }
 
+    func hasConnection(serviceId: String) async -> Bool { return true }
     func connection(serviceId: String) async throws -> SQLiteService { return service }
 }
 
 private final class FailingExternalCalendarSQLiteConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {
 
+    func hasConnection(serviceId: String) async -> Bool { return false }
     func connection(serviceId: String) async throws -> SQLiteService {
         throw RuntimeError("no connection available")
     }

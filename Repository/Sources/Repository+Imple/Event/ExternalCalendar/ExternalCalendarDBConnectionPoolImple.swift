@@ -14,6 +14,7 @@ import Extensions
 
 public protocol ExternalCalendarDBConnectionPool: Sendable {
 
+    func hasConnection(serviceId: String) async -> Bool
     func connection(serviceId: String) async throws -> SQLiteService
 }
 
@@ -30,9 +31,14 @@ public actor ExternalCalendarSQLiteConnectionPoolImple: ExternalCalendarDBConnec
     }
     
     private let dbPathMap: [String: String]
+    private let onFirstOpen: (@Sendable (SQLiteService) async throws -> Void)?
     private var connectionPool: [String: DBConnection] = [:]
-    public init(dbPathMap: [String : String]) {
+    public init(
+        dbPathMap: [String : String],
+        onFirstOpen: (@Sendable (SQLiteService) async throws -> Void)? = nil
+    ) {
         self.dbPathMap = dbPathMap
+        self.onFirstOpen = onFirstOpen
     }
 }
 
@@ -56,6 +62,7 @@ extension ExternalCalendarSQLiteConnectionPoolImple {
         
         let service = SQLiteService()
         try await service.async.open(path: path)
+        try? await self.onFirstOpen?(service)
         let newConnection = DBConnection(sqliteService: service)
         self.connectionPool[serviceId] = newConnection
     }
@@ -70,6 +77,10 @@ extension ExternalCalendarSQLiteConnectionPoolImple {
         self.connectionPool.removeValue(forKey: serviceId)
     }
     
+    public func hasConnection(serviceId: String) -> Bool {
+        return self.connectionPool[serviceId] != nil
+    }
+
     public func connection(serviceId: String) async throws -> SQLiteService {
         guard let connection = self.connectionPool[serviceId]
         else {
