@@ -33,11 +33,11 @@ extension EventNotificationSettingUsecaseImpleTests {
         
         // then
         XCTAssertEqual(options, [
-            .allDay9AM,
-            .allDay12AM,
-            .allDay9AMBefore(seconds: 3600.0*24),
-            .allDay9AMBefore(seconds: 3600.0*24*2),
-            .allDay9AMBefore(seconds: 3600.0*24*7)
+            EventNotificationTimeOption.allDay9AM,
+            EventNotificationTimeOption.allDay12AM,
+            EventNotificationTimeOption.allDay9AMBefore(seconds: 3600.0*24),
+            EventNotificationTimeOption.allDay9AMBefore(seconds: 3600.0*24*2),
+            EventNotificationTimeOption.allDay9AMBefore(seconds: 3600.0*24*7)
         ])
     }
     
@@ -50,17 +50,17 @@ extension EventNotificationSettingUsecaseImpleTests {
         
         // then
         XCTAssertEqual(options, [
-            .atTime,
-            .before(seconds: 60.0),
-            .before(seconds: 60.0*5),
-            .before(seconds: 60.0*10),
-            .before(seconds: 60.0*15),
-            .before(seconds: 60.0*30),
-            .before(seconds: 60.0*60),
-            .before(seconds: 60.0*120),
-            .before(seconds: 3600.0*24),
-            .before(seconds: 3600.0*24*2),
-            .before(seconds: 3600.0*24*7)
+            EventNotificationTimeOption.atTime,
+            EventNotificationTimeOption.before(seconds: 60.0),
+            EventNotificationTimeOption.before(seconds: 60.0*5),
+            EventNotificationTimeOption.before(seconds: 60.0*10),
+            EventNotificationTimeOption.before(seconds: 60.0*15),
+            EventNotificationTimeOption.before(seconds: 60.0*30),
+            EventNotificationTimeOption.before(seconds: 60.0*60),
+            EventNotificationTimeOption.before(seconds: 60.0*120),
+            EventNotificationTimeOption.before(seconds: 3600.0*24),
+            EventNotificationTimeOption.before(seconds: 3600.0*24*2),
+            EventNotificationTimeOption.before(seconds: 3600.0*24*7)
         ])
     }
     

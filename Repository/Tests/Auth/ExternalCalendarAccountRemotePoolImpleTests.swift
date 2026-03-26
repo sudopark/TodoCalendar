@@ -35,132 +35,132 @@ final class ExternalCalendarAccountRemotePoolImpleTests {
 extension ExternalCalendarAccountRemotePoolImpleTests {
 
     // setup 후 remote 획득 성공
-    @Test func setup_then_remote_returns_created_instance() async throws {
+    @Test func setup_then_remote_returns_created_instance() throws {
         // given
         let (pool, _) = makePool()
 
         // when
-        await pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
+        pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
 
         // then
-        let remote = try await pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
+        let remote = try pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
         #expect(remote?.credential?.accessToken == "t1")
     }
 
     // setup 없이 remote 접근 시 throw
-    @Test func remote_without_setup_throws() async {
+    @Test func remote_without_setup_throws() {
         // given
         let (pool, _) = makePool()
 
         // when / then
-        await #expect(throws: (any Error).self) {
-            _ = try await pool.remote(for: serviceId, accountId: accountId1)
+        #expect(throws: (any Error).self) {
+            _ = try pool.remote(for: serviceId, accountId: accountId1)
         }
     }
 
     // setup 2회 호출 시 factory는 1번만, credential은 갱신
-    @Test func setup_twice_reuses_existing_remote_and_updates_credential() async throws {
+    @Test func setup_twice_reuses_existing_remote_and_updates_credential() throws {
         // given
         let (pool, factory) = makePool()
 
         // when
-        await pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
-        await pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t2"))
+        pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
+        pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t2"))
 
         // then
         #expect(factory.makeCallCount == 1)
-        let remote = try await pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
+        let remote = try pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
         #expect(remote?.credential?.accessToken == "t2")
     }
 
     // remove 후 remote 접근 시 throw
-    @Test func after_remove_remote_throws() async {
+    @Test func after_remove_remote_throws() {
         // given
         let (pool, _) = makePool()
-        await pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
+        pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
 
         // when
-        await pool.remove(for: serviceId, accountId: accountId1)
+        pool.remove(for: serviceId, accountId: accountId1)
 
         // then
-        await #expect(throws: (any Error).self) {
-            _ = try await pool.remote(for: serviceId, accountId: accountId1)
+        #expect(throws: (any Error).self) {
+            _ = try pool.remote(for: serviceId, accountId: accountId1)
         }
     }
 
     // remove 시 credential nil로 정리
-    @Test func remove_clears_credential_on_remote() async throws {
+    @Test func remove_clears_credential_on_remote() throws {
         // given
         let (pool, _) = makePool()
-        await pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
-        let remote = try await pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
+        pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
+        let remote = try pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
 
         // when
-        await pool.remove(for: serviceId, accountId: accountId1)
+        pool.remove(for: serviceId, accountId: accountId1)
 
         // then
         #expect(remote?.credential == nil)
     }
 
     // accountId별 독립 관리
-    @Test func manages_remotes_per_accountId_independently() async throws {
+    @Test func manages_remotes_per_accountId_independently() throws {
         // given
         let (pool, _) = makePool()
-        await pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
-        await pool.setup(for: serviceId, accountId: accountId2, credential: credential(token: "t2"))
+        pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
+        pool.setup(for: serviceId, accountId: accountId2, credential: credential(token: "t2"))
 
         // when
-        await pool.remove(for: serviceId, accountId: accountId1)
+        pool.remove(for: serviceId, accountId: accountId1)
 
         // then
-        await #expect(throws: (any Error).self) {
-            _ = try await pool.remote(for: serviceId, accountId: accountId1)
+        #expect(throws: (any Error).self) {
+            _ = try pool.remote(for: serviceId, accountId: accountId1)
         }
-        let remote2 = try await pool.remote(for: serviceId, accountId: accountId2) as? SpyRemote
+        let remote2 = try pool.remote(for: serviceId, accountId: accountId2) as? SpyRemote
         #expect(remote2?.credential?.accessToken == "t2")
     }
 
     // attach 후 setup 시 새 remote에 listener 자동 부착
-    @Test func new_remote_gets_listener_after_attach() async throws {
+    @Test func new_remote_gets_listener_after_attach() throws {
         // given
         let (pool, _) = makePool()
         let listener = SpyListener()
-        await pool.attach(listener: listener)
+        pool.attach(listener: listener)
 
         // when
-        await pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
+        pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
 
         // then
-        let remote = try await pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
+        let remote = try pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
         #expect(remote?.attachedListener != nil)
     }
 
     // attach 시 기존 remote에도 listener 즉시 부착
-    @Test func existing_remotes_get_listener_on_attach() async throws {
+    @Test func existing_remotes_get_listener_on_attach() throws {
         // given
         let (pool, _) = makePool()
-        await pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
+        pool.setup(for: serviceId, accountId: accountId1, credential: credential(token: "t1"))
 
         // when
         let listener = SpyListener()
-        await pool.attach(listener: listener)
+        pool.attach(listener: listener)
 
         // then
-        let remote = try await pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
+        let remote = try pool.remote(for: serviceId, accountId: accountId1) as? SpyRemote
         #expect(remote?.attachedListener != nil)
     }
 
     // 지원하지 않는 serviceId는 무시
-    @Test func setup_with_unsupported_serviceId_is_ignored() async {
+    @Test func setup_with_unsupported_serviceId_is_ignored() {
         // given
         let (pool, _) = makePool()
 
         // when
-        await pool.setup(for: "unsupported", accountId: accountId1, credential: credential(token: "t1"))
+        pool.setup(for: "unsupported", accountId: accountId1, credential: credential(token: "t1"))
 
         // then
-        await #expect(throws: (any Error).self) {
-            _ = try await pool.remote(for: "unsupported", accountId: accountId1)
+        #expect(throws: (any Error).self) {
+            _ = try pool.remote(for: "unsupported", accountId: accountId1)
         }
     }
 }

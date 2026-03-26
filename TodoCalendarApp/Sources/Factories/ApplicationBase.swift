@@ -138,22 +138,19 @@ final class ApplicationBase {
         return plist?["CLIENT_ID"] as? String ?? "dummy_id"
     }
 
-    lazy var externalCalendarRemoteFactory: any ExternalCalendarRemoteFactory = {
-        return ApplicationGoogleRemoteFactory(
+    lazy var externalCalendarAccountRemotePool: ExternalCalendarAccountRemotePoolImple = {
+        let factory = ApplicationGoogleRemoteFactory(
             googleClientId: self.readGoogleClientId(),
             session: self.remoteSession,
             environment: self.remoteEnvironment,
             keyChainStore: self.keyChainStorage
         )
-    }()
-
-    lazy var externalCalendarAccountRemotePool: ExternalCalendarAccountRemotePoolImple = {
-        return ExternalCalendarAccountRemotePoolImple(factory: self.externalCalendarRemoteFactory)
+        return ExternalCalendarAccountRemotePoolImple(factory: factory)
     }()
 
     lazy var googleCalendarRepositoryPool: GoogleCalendarRepositoryPoolImple = {
         return GoogleCalendarRepositoryPoolImple(
-            remoteFactory: self.externalCalendarRemoteFactory,
+            accountRemotePool: self.externalCalendarAccountRemotePool,
             connectionPool: self.externalCalendarDBConnectionPool
         )
     }()
