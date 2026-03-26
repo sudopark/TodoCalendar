@@ -83,6 +83,7 @@ TodoCalendarApp → Presentations → Scenes / CommonPresentation → Domain ←
 |---|---|
 | `TodoCalendarApp/AppEnvironment.swift` | DB version, App Group ID, 외부 캘린더 서비스 목록 |
 | `TodoCalendarApp/Sources/Root/ApplicationRootBuilder.swift` | 앱 시작 시 모든 Repository/Usecase/Factory 조립 |
+| `TodoCalendarApp/Sources/Factories/ApplicationBase.swift` | Pool/Factory 인스턴스 생성 (다중 계정 인프라 포함) |
 | `Tuist/ProjectDescriptionHelpers/Project+Templates.swift` | `Project.app()` / `Project.framework()` 팩토리 헬퍼 |
 
 ---
@@ -192,10 +193,89 @@ let values = try await outputs(expect, for: somePublisher) { triggerAction() }
 - `.custom(String)` — 사용자 생성 태그
 - `.externalCalendar(serviceId, calendarId)` — 구글 캘린더 등 외부 서비스
 
+**EventTagColorSource** — 태그 색상 결정 프로토콜:
+- `EventTagId` → default/holiday/custom 태그 색상
+- `GoogleCalendarEventColorSource` → calendarId + 이벤트별 colorId로 구글 캘린더 색상 결정
+- UI에서 `EventTagColorView`가 타입 기반 디스패치로 색상을 렌더링
+
 **보이기/숨기기**:
 - 커스텀 태그는 생성 후 기본 보임.
 - 외부 캘린더(구글 등)는 연동 시 기본 숨김 — 사용자가 명시적으로 활성화.
 - 숨겨진 태그 ID 목록은 `offEventTagIdsOnCalendar`로 관리.
+
+### 외부 캘린더 다중 계정 아키텍처
+
+앱은 구글 캘린더 등 외부 서비스의 **다중 계정 동시 연동**을 지원한다.
+
+**핵심 Pool 패턴** — 계정별(accountId) 리소스를 독립적으로 관리:
+
+| Pool | 역할 | 위치 |
+|---|---|---|
+| `ExternalCalendarDBConnectionPool` | 서비스별 SQLite DB 연결 (참조 카운팅, lazy open) | Domain (protocol) → Repository (impl) |
+| `GoogleCalendarRepositoryPool` | accountId별 Repository 캐싱 + lazy 생성 | Domain (protocol) → App (impl) |
+| `ExternalCalendarAccountRemotePool` | accountId별 Remote API 클라이언트 + 토큰 갱신 | Repository |
+
+**데이터 집계**:
+- `GoogleCalendarLocalAggregatedRepositoryImple`: 모든 연동 계정의 이벤트/태그/색상을 투명하게 합산하여 반환
+- `GoogleCalendarViewAppearanceStore`: 계정별 색상/태그를 UI에 반영
+
+**DB 구조**:
+- 메인 DB (`todo_calendar.db`): 앱 자체 데이터. `AppEnvironment.dbVersion`으로 마이그레이션 관리.
+- 외부 캘린더 DB (`google_calendar.db`): 계정별 테이블에 `accountId` 컬럼 포함. `googleCalendarDBVersion`으로 별도 관리.
+- `AppDataMigrationImple`: 단일 계정 → 다중 계정 1회성 마이그레이션 (플래그 기반 멱등성)
+
+**계정 연동/해제 플로우**:
+
+```mermaid
+flowchart TD
+    subgraph "계정 연동 (integrate)"
+        A[사용자: 구글 계정 연동 요청] --> B[OAuth 인증 플로우]
+        B --> C[Credential 저장]
+        C --> D[ExternalCalendarAccountRemotePool\n— Remote API 클라이언트 생성]
+        D --> E[ExternalCalendarDBConnectionPool\n— DB 연결 open 참조카운트 +1]
+        E --> F{첫 번째 open?}
+        F -->|Yes| G[onFirstOpen: 테이블 생성 + 마이그레이션]
+        F -->|No| H[기존 연결 재사용]
+        G --> I[AppDataMigrationImple\n— 레거시 데이터 마이그레이션 1회]
+        I --> J[Integration 상태 broadcast\n— .integrated]
+        H --> J
+        J --> K[GoogleCalendarUsecase\n— 색상/태그/이벤트 refresh]
+        K --> L[SharedDataStore 업데이트\n→ UI 자동 반영]
+    end
+
+    subgraph "계정 해제 (stopIntegrate)"
+        M[사용자: 구글 계정 해제 요청] --> N[Credential 삭제]
+        N --> O[ExternalCalendarAccountRemotePool\n— Remote API 클라이언트 제거]
+        O --> P[ExternalCalendarDBConnectionPool\n— DB 연결 close 참조카운트 -1]
+        P --> Q{참조카운트 = 0?}
+        Q -->|Yes| R[DB 연결 실제 종료]
+        Q -->|No| S[다른 계정이 사용 중 → 유지]
+        R --> T[Integration 상태 broadcast\n— .disconnected]
+        S --> T
+        T --> U[GoogleCalendarUsecase\n— 해당 계정 캐시 제거]
+        U --> V[SharedDataStore 업데이트\n→ UI 자동 반영]
+    end
+
+    subgraph "앱 시작 시 (prepareIntegratedAccounts)"
+        W[앱 실행] --> X[저장된 Credential 로드]
+        X --> Y[계정별 Remote/DB 설정]
+        Y --> Z[GoogleCalendarUsecase\n— 전체 계정 refresh]
+        Z --> AA[SharedDataStore → UI]
+    end
+```
+
+**주요 파일**:
+
+| 파일 | 역할 |
+|---|---|
+| `Domain/.../ExternalCalendarIntegrationUsecase.swift` | 계정 연동 상태 관리 + reactive 상태 브로드캐스트 |
+| `Domain/.../GoogleCalendarUsecase.swift` | 계정별 이벤트/색상/태그 로드 (repositoryPool 사용) |
+| `Repository/.../ExternalCalendarDBConnectionPoolImple.swift` | 참조 카운팅 DB 연결 관리 |
+| `Repository/.../ExternalCalendarAccountRemotePool.swift` | 계정별 Remote API + 토큰 갱신 |
+| `Repository/.../GoogleCalendarLocalAggregatedRepositoryImple.swift` | 다중 계정 데이터 집계 |
+| `Repository/.../AppDataMigrationImple.swift` | 단일→다중 계정 DB 마이그레이션 |
+| `TodoCalendarApp/.../ApplicationBase.swift` | Pool/Factory 인스턴스 생성 |
+| `TodoCalendarApp/.../ApplicationRootBuilder.swift` | 전체 의존성 조립 |
 
 ### ForemostEvent (강조 이벤트)
 
@@ -211,10 +291,15 @@ let values = try await outputs(expect, for: somePublisher) { triggerAction() }
 
 ### DB 마이그레이션
 
+**메인 DB** (`todo_calendar.db`):
 1. `AppEnvironment.dbVersion` 증가
 2. 해당 `Table` 타입의 `migrateStatement(for version:)`에 case 추가
+— 두 가지를 반드시 함께 변경해야 마이그레이션이 실행됨.
 
-두 가지를 반드시 함께 변경해야 마이그레이션이 실행됨.
+**외부 캘린더 DB** (`google_calendar.db`):
+1. `AppEnvironment.googleCalendarDBVersion` 증가
+2. 외부 캘린더 테이블의 `migrateStatement(for version:)`에 case 추가
+— DB 연결은 `ExternalCalendarDBConnectionPool`이 관리하며, `onFirstOpen` 시 테이블 생성 + 마이그레이션 실행.
 
 ---
 
