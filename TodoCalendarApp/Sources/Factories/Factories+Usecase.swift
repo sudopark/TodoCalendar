@@ -297,14 +297,10 @@ extension NonLoginUsecaseFactoryImple {
 extension NonLoginUsecaseFactoryImple {
 
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
-        let pool = GoogleCalendarRepositoryPoolImple(
-            remoteFactory: self.applicationBase.externalCalendarRemoteFactory,
-            connectionPool: self.applicationBase.externalCalendarDBConnectionPool
-        )
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
             integrationUsecase: self.externalCalenarIntegrationUsecase,
-            repositoryPool: pool,
+            repositoryPool: self.applicationBase.googleCalendarRepositoryPool,
             eventTagUsecase: self.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
@@ -703,14 +699,10 @@ extension LoginUsecaseFactoryImple {
 extension LoginUsecaseFactoryImple {
 
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
-        let pool = GoogleCalendarRepositoryPoolImple(
-            remoteFactory: self.applicationBase.externalCalendarRemoteFactory,
-            connectionPool: self.applicationBase.externalCalendarDBConnectionPool
-        )
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
             integrationUsecase: self.externalCalenarIntegrationUsecase,
-            repositoryPool: pool,
+            repositoryPool: self.applicationBase.googleCalendarRepositoryPool,
             eventTagUsecase: self.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
@@ -721,7 +713,7 @@ extension LoginUsecaseFactoryImple {
 
 // MARK: - GoogleCalendarRepositoryPoolImple
 
-private final class GoogleCalendarRepositoryPoolImple: GoogleCalendarRepositoryPool, @unchecked Sendable {
+final class GoogleCalendarRepositoryPoolImple: GoogleCalendarRepositoryPool, @unchecked Sendable {
 
     private let remoteFactory: any ExternalCalendarRemoteFactory
     private let connectionPool: any ExternalCalendarDBConnectionPool
