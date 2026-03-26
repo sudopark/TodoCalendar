@@ -109,10 +109,7 @@ extension ExternalCalendarIntegrationUsecaseImple {
         let credential = try await usecase.requestAuthentication()
         let account = try await self.externalServiceIntegrateRepository.save(credential, for: service)
             |> \.intergrationTime .~ Date()
-        let isFirstAccount = (self.sharedDataStore.value(AccountsMap.self, key: self.shareKey)?[service.identifier] ?? []).isEmpty
-        if isFirstAccount {
-            try? await self.dbConnectionController.open(serviceId: service.identifier)
-        }
+        try? await self.dbConnectionController.open(serviceId: service.identifier)
         self.sharedDataStore.update(AccountsMap.self, key: self.shareKey) { old in
             var map = old ?? [:]
             map[service.identifier, default: []].removeAll { $0.email == account.email }
@@ -134,10 +131,7 @@ extension ExternalCalendarIntegrationUsecaseImple {
             map[service.identifier]?.removeAll { $0.email == accountId }
             return map
         }
-        let remaining = self.sharedDataStore.value(AccountsMap.self, key: self.shareKey)?[service.identifier] ?? []
-        if remaining.isEmpty {
-            try? await self.dbConnectionController.close(serviceId: service.identifier)
-        }
+        try? await self.dbConnectionController.close(serviceId: service.identifier)
         self.integrationStatusChangedSubject.send(
             .disconnected(serviceId: service.identifier, accountId: accountId)
         )

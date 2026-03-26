@@ -71,7 +71,7 @@ extension GoogleCalendarUsecaseImpleTests {
         let usecase = makeUsecase(accounts: ["account@google.com"])
 
         try await confirmation("계정 연동 상태에서 prepare 시 색상/태그 로드", expectedCount: 2) { confirm in
-            spyViewAppearanceStore.didUpdatecColors = { _ in confirm() }
+            spyViewAppearanceStore.didUpdateColors = { _ in confirm() }
             spyViewAppearanceStore.didUpdateTags = { confirm() }
             usecase.prepare()
             try await Task.sleep(for: .milliseconds(100))
@@ -85,7 +85,7 @@ extension GoogleCalendarUsecaseImpleTests {
             "계정 미연동 상태에서 prepare 시 색상/태그 미로드",
             expectedCount: 0
         ) { confirm in
-            spyViewAppearanceStore.didUpdatecColors = { _ in confirm() }
+            spyViewAppearanceStore.didUpdateColors = { _ in confirm() }
             spyViewAppearanceStore.didUpdateTags = { confirm() }
             usecase.prepare()
             try await Task.sleep(for: .milliseconds(100))
@@ -99,7 +99,7 @@ extension GoogleCalendarUsecaseImpleTests {
         usecase.prepare()
 
         var colorUpdateCount = 0
-        spyViewAppearanceStore.didUpdatecColors = { _ in colorUpdateCount += 1 }
+        spyViewAppearanceStore.didUpdateColors = { _ in colorUpdateCount += 1 }
 
         updateAccount(email: "new@google.com", integrated: true, isNew: true)
         try await Task.sleep(for: .milliseconds(100))
@@ -119,7 +119,7 @@ extension GoogleCalendarUsecaseImpleTests {
         usecase.prepare()
 
         try await confirmation("새 계정 연동 시 색상/태그 로드", expectedCount: 2) { confirm in
-            spyViewAppearanceStore.didUpdatecColors = { _ in confirm() }
+            spyViewAppearanceStore.didUpdateColors = { _ in confirm() }
             spyViewAppearanceStore.didUpdateTags = { confirm() }
             self.updateAccount(email: "new@google.com", integrated: true, isNew: true)
             try await Task.sleep(for: .milliseconds(100))
@@ -620,10 +620,10 @@ private final class SpyGoogleCalendarViewAppearanceStore: GoogleCalendarViewAppe
     var color: GoogleCalendar.Colors?
     var tagMaps: [String: GoogleCalendar.Tag] = [:]
 
-    var didUpdatecColors: ((GoogleCalendar.Colors?) -> Void)?
+    var didUpdateColors: ((GoogleCalendar.Colors?) -> Void)?
     func applyColors(_ colors: GoogleCalendar.Colors, for accountId: String) {
         color = colors
-        didUpdatecColors?(colors)
+        didUpdateColors?(colors)
     }
 
     var didClearColor: (() -> Void)?
