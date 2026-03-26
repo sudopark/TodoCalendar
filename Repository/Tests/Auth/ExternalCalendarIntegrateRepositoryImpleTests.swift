@@ -94,6 +94,52 @@ extension ExternalCalendarIntegrateRepositoryImpleTests {
         #expect(spyPool.setupCredentials["\(googleService.identifier)-google"] == "access")
     }
 
+    // old key로 저장된 계정이 loadIntegratedAccounts 시 마이그레이션되어 정상 로드
+    @Test func repository_whenOldKeyAccountExists_migrateAndLoad() async throws {
+        // given
+        let serviceId = googleService.identifier
+        let oldAccountKey = "\(serviceId)-account"
+        let oldCredentialKey = "\(serviceId)-credential"
+        let account = ExternalServiceAccountMapper(account: dummyGoogleAccount)
+        let credential = APICredentialMapper(credential: googleCredential)
+        spyKeyChain.update(oldAccountKey, account)
+        spyKeyChain.update(oldCredentialKey, credential)
+        let repository = ExternalCalendarIntegrateRepositoryImple(
+            supportServices: services, remotePool: spyPool, keyChainStore: spyKeyChain
+        )
+
+        // when
+        let accounts = try await repository.loadIntegratedAccounts()
+
+        // then
+        #expect(accounts.count == 1)
+        #expect(accounts.first?.email == "old-email")
+        // old key 삭제됨
+        let oldAccount: ExternalServiceAccountMapper? = spyKeyChain.load(oldAccountKey)
+        let oldCred: APICredentialMapper? = spyKeyChain.load(oldCredentialKey)
+        #expect(oldAccount == nil)
+        #expect(oldCred == nil)
+        // new key에 저장됨
+        let newAccount: ExternalServiceAccountMapper? = spyKeyChain.load("\(serviceId)-old-email-account")
+        let newCred: APICredentialMapper? = spyKeyChain.load("\(serviceId)-old-email-credential")
+        let accountIds: [String]? = spyKeyChain.load("\(serviceId)-accounts")
+        #expect(newAccount?.account.email == "old-email")
+        #expect(newCred?.credential.accessToken == "old-google-access")
+        #expect(accountIds == ["old-email"])
+    }
+
+    // old key가 없으면 마이그레이션 없이 정상 동작
+    @Test func repository_whenNoOldKey_loadNormally() async throws {
+        // given
+        let repository = self.makeReposiotry()
+
+        // when
+        let accounts = try await repository.loadIntegratedAccounts()
+
+        // then
+        #expect(accounts.isEmpty)
+    }
+
     // remove account — pool remove + keychain 삭제
     @Test func repository_removeAccount() async throws {
         // given
