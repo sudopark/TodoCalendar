@@ -170,17 +170,17 @@ private final class SpyRemotePool: ExternalCalendarAccountRemotePool, @unchecked
     var setupCredentials: [String: String] = [:]
     var removedKeys: Set<String> = []
 
-    func attach(listener: any AutenticatorTokenRefreshListener) async { }
+    func attach(listener: any AutenticatorTokenRefreshListener) { }
 
-    func setup(for serviceId: String, accountId: String, credential: APICredential) async {
+    func setup(for serviceId: String, accountId: String, credential: APICredential) {
         setupCredentials["\(serviceId)-\(accountId)"] = credential.accessToken
     }
 
-    func remove(for serviceId: String, accountId: String) async {
+    func remove(for serviceId: String, accountId: String) {
         removedKeys.insert("\(serviceId)-\(accountId)")
     }
 
-    func remote(for serviceId: String, accountId: String) async throws -> any RemoteAPI {
+    func remote(for serviceId: String, accountId: String) throws -> any RemoteAPI {
         throw RuntimeError("not implemented")
     }
 }

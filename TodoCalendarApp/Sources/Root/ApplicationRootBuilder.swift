@@ -67,7 +67,7 @@ final class ApplicationRootBuilder {
             userNotificationUsecase: userNotificationUsecase
         )
         remote.attach(listener: rootViewModel)
-        Task { await applicationBase.externalCalendarAccountRemotePool.attach(listener: rootViewModel) }
+        applicationBase.externalCalendarAccountRemotePool.attach(listener: rootViewModel)
         let rootRouter = ApplicationRootRouter(
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,

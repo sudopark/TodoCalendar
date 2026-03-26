@@ -506,7 +506,7 @@ private final class PrivateStubRepositoryPool: GoogleCalendarRepositoryPool, @un
     }
 
     func removeRepository(for accountId: String) {
-        repos.removeValue(forKey: accountId)
+        repos[accountId] = nil
     }
 }
 

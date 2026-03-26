@@ -95,11 +95,11 @@ extension ExternalCalendarIntegrateRepositoryImple {
             }
         }
 
-        await accounts.asyncForEach { account in
+        accounts.forEach { account in
             guard let accountId = account.email,
                   let credential = credentialStore.loadCredential(for: account.serviceIdentifier, accountId: accountId)
             else { return }
-            await remotePool.setup(for: account.serviceIdentifier, accountId: accountId, credential: credential)
+            remotePool.setup(for: account.serviceIdentifier, accountId: accountId, credential: credential)
         }
 
         return accounts
@@ -114,7 +114,7 @@ extension ExternalCalendarIntegrateRepositoryImple {
             let apiCredential = APICredential(google: google)
             let accountId = google.email ?? ""
             self.credentialStore.saveCredential(for: service.identifier, accountId: accountId, apiCredential)
-            await remotePool.setup(for: service.identifier, accountId: accountId, credential: apiCredential)
+            remotePool.setup(for: service.identifier, accountId: accountId, credential: apiCredential)
 
             let account = ExternalServiceAccountinfo(
                 service.identifier, email: google.email
@@ -131,7 +131,7 @@ extension ExternalCalendarIntegrateRepositoryImple {
 
     public func removeAccount(for serviceIdentifier: String, accountId: String) async throws {
         self.credentialStore.removeCredential(for: serviceIdentifier, accountId: accountId)
-        await remotePool.remove(for: serviceIdentifier, accountId: accountId)
+        remotePool.remove(for: serviceIdentifier, accountId: accountId)
         self.keyChainStore.remove(accountKey(serviceIdentifier, accountId))
         removeAccountId(accountId, for: serviceIdentifier)
     }
