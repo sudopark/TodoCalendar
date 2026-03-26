@@ -65,7 +65,29 @@ extension ExternalCalendarIntegrateRepositoryImple {
         }
     }
 
+    private func migrateOldKeychainAccountsIfNeeded() {
+        supportServices.forEach { service in
+            let serviceId = service.identifier
+            let oldAccountKey = "\(serviceId)-account"
+            guard let mapper: ExternalServiceAccountMapper = keyChainStore.load(oldAccountKey)
+            else { return }
+
+            let accountId = mapper.account.email ?? ""
+            keyChainStore.update(accountKey(serviceId, accountId), mapper)
+
+            let oldCredentialKey = "\(serviceId)-credential"
+            if let credentialMapper: APICredentialMapper = keyChainStore.load(oldCredentialKey) {
+                credentialStore.saveCredential(for: serviceId, accountId: accountId, credentialMapper.credential)
+                keyChainStore.remove(oldCredentialKey)
+            }
+
+            saveAccountId(accountId, for: serviceId)
+            keyChainStore.remove(oldAccountKey)
+        }
+    }
+
     public func loadIntegratedAccounts() async throws -> [ExternalServiceAccountinfo] {
+        migrateOldKeychainAccountsIfNeeded()
         let accounts = supportServices.flatMap { service in
             loadAccountIds(for: service.identifier).compactMap { accountId -> ExternalServiceAccountinfo? in
                 let mapper: ExternalServiceAccountMapper? = keyChainStore.load(accountKey(service.identifier, accountId))
