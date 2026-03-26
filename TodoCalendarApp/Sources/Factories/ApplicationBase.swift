@@ -150,6 +150,13 @@ final class ApplicationBase {
     lazy var externalCalendarAccountRemotePool: ExternalCalendarAccountRemotePoolImple = {
         return ExternalCalendarAccountRemotePoolImple(factory: self.externalCalendarRemoteFactory)
     }()
+
+    lazy var googleCalendarRepositoryPool: GoogleCalendarRepositoryPoolImple = {
+        return GoogleCalendarRepositoryPoolImple(
+            remoteFactory: self.externalCalendarRemoteFactory,
+            connectionPool: self.externalCalendarDBConnectionPool
+        )
+    }()
 }
 
 
