@@ -37,7 +37,7 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
         }
         let googles = (0..<4).map { int in
             return GoogleCalendar.Event(
-                "g:\(int)", "google", name: "g", colorId: "color", time: .at(0)
+                "g:\(int)", "google", accountId: "stub@gmail.com", name: "g", colorId: "color", time: .at(0)
             )
             |> \.eventTagId .~ .externalCalendar(serviceId: GoogleCalendarService.id, id: "google")
             |> \.status .~ (int == 3 ? .cancelled : .confirmed)
@@ -87,7 +87,7 @@ extension CalendarEventListhUsecaseImpleTests {
     
     @Test func googleCalendarEvent_whenTimeIsAllDay_eventTimeOnCalendarUpperboundIsMinus1Second() {
         // given
-        let event = GoogleCalendar.Event("id", "calendar", name: "name", colorId: "color", time: .allDay(0..<100, secondsFromGMT: 0))
+        let event = GoogleCalendar.Event("id", "calendar", accountId: "stub@gmail.com", name: "name", colorId: "color", time: .allDay(0..<100, secondsFromGMT: 0))
         
         // when
         let calendarEvent = GoogleCalendarEvent(event, in: TimeZone(abbreviation: "UTC")!)

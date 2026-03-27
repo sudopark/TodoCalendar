@@ -154,6 +154,7 @@ extension GoogleCalendarLocalStorageImple {
             return .init(
                 eventId,
                 calendarId,
+                accountId: accountId,
                 name: GoogleCalendar.EventOrigin.summaryText(
                     summary,
                     visibility: visibilityText.flatMap { .init(rawValue: $0) }
@@ -228,7 +229,7 @@ extension GoogleCalendarLocalStorageImple {
             let entity = Events.Entity(accountId: accountId, calendarId, defaultTimeZone, origin)
             try db.insert(Events.self, entities: [entity])
 
-            if let event = GoogleCalendar.Event(origin, calendarId, defaultTimeZone) {
+            if let event = GoogleCalendar.Event(origin, calendarId, accountId: accountId, defaultTimeZone) {
                 let timeEntity = Times.Entity(event.eventId, event.eventTime, nil)
                 try db.insert(Times.self, entities: [timeEntity])
             }

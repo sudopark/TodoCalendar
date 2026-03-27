@@ -77,7 +77,8 @@ extension NextEventWidgetViewModelProviderTests {
     
     private var nextGoogleCalendarEvent: TodayNextEvent {
         let google = GoogleCalendar.Event(
-            "some", "cal", name: "google", colorId: nil,
+            "some", "cal", accountId: "stub@gmail.com",
+            name: "google", colorId: nil,
             location: "location",
             time: .period(1000..<2000)
         )

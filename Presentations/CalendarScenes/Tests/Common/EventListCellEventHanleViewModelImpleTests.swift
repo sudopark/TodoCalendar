@@ -561,7 +561,8 @@ extension GoogleCalendarEventCellViewModel {
     
     static func dummy(_ link: String? = "link") -> GoogleCalendarEventCellViewModel {
         let google = GoogleCalendar.Event(
-            "google", "calendar", name: "name",
+            "google", "calendar", accountId: "stub@gmail.com",
+            name: "name",
             colorId: "id", htmlLink: link,
             time: .at(1)
         )

@@ -659,7 +659,7 @@ extension DayEventListViewModelImpleTests {
             isRepeating: false
         ) |> \.turn .~ 1
         let google = GoogleCalendar.Event(
-            "google", "calendarId", name: "google", colorId: "color", time: .at(self.todayRange.lowerBound + 200)
+            "google", "calendarId", accountId: "stub@gmail.com", name: "google", colorId: "color", time: .at(self.todayRange.lowerBound + 200)
         )
         let googleEvent = GoogleCalendarEvent(google, in: timeZone)
         return [

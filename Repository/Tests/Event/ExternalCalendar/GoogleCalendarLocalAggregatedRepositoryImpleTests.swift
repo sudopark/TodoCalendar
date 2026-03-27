@@ -8,6 +8,8 @@
 
 import Testing
 import Combine
+import Prelude
+import Optics
 import Domain
 import Extensions
 import UnitTestHelpKit
@@ -156,6 +158,25 @@ extension GoogleCalendarLocalAggregatedRepositoryImpleTests {
         #expect(tags?.map(\.id).sorted() == ["tag1", "tag2"])
     }
 
+    @Test func loadEvents_withSingleAccount_returnsEventsWithAccountId() async throws {
+        defer { cleanup() }
+        let pool = try await makePool()
+        defer { Task { try? await pool.close(serviceId: googleServiceId) } }
+
+        let storage = localStorage(pool: pool)
+        let event = GoogleCalendar.Event("ev1", "cal1", accountId: account1, name: "event", colorId: nil, time: .at(50))
+        let origin = GoogleCalendar.EventOrigin(id: "ev1", summary: "event")
+        let list = GoogleCalendar.EventOriginValueList() |> \.items .~ [origin]
+        try await storage.updateEvents("cal1", list, [event], accountId: account1)
+
+        let repo = makeRepository(accountEmails: [account1], pool: pool)
+        let events = try await repo.loadEvents("cal1", in: 0..<100).values.first(where: { _ in true })
+
+        #expect(events?.count == 1)
+        #expect(events?.first?.eventId == "ev1")
+        #expect(events?.first?.accountId == account1)
+    }
+
     @Test func loadEventDetail_withSingleAccount_returnsDetail() async throws {
         defer { cleanup() }
         let pool = try await makePool()
@@ -219,6 +240,34 @@ extension GoogleCalendarLocalAggregatedRepositoryImpleTests {
         let tags = try await repo.loadCalendarTags().values.first(where: { _ in true })
 
         #expect(tags?.map(\.id).sorted() == ["tag1", "tag2", "tag3"])
+    }
+
+    @Test func loadEvents_withMultipleAccounts_returnsEventsWithCorrectAccountId() async throws {
+        defer { cleanup() }
+        let pool = try await makePool()
+        defer { Task { try? await pool.close(serviceId: googleServiceId) } }
+
+        let storage = localStorage(pool: pool)
+        // account1에 이벤트 저장
+        let event1 = GoogleCalendar.Event("ev1", "cal1", accountId: account1, name: "e1", colorId: nil, time: .at(50))
+        let origin1 = GoogleCalendar.EventOrigin(id: "ev1", summary: "e1")
+        let list1 = GoogleCalendar.EventOriginValueList() |> \.items .~ [origin1]
+        try await storage.updateEvents("cal1", list1, [event1], accountId: account1)
+        // account2에 이벤트 저장
+        let event2 = GoogleCalendar.Event("ev2", "cal1", accountId: account2, name: "e2", colorId: nil, time: .at(60))
+        let origin2 = GoogleCalendar.EventOrigin(id: "ev2", summary: "e2")
+        let list2 = GoogleCalendar.EventOriginValueList() |> \.items .~ [origin2]
+        try await storage.updateEvents("cal1", list2, [event2], accountId: account2)
+
+        let repo = makeRepository(accountEmails: [account1, account2], pool: pool)
+        let events = try await repo.loadEvents("cal1", in: 0..<100).values.first(where: { _ in true })
+
+        let sorted = events?.sorted(by: { $0.eventId < $1.eventId })
+        #expect(sorted?.count == 2)
+        #expect(sorted?[0].eventId == "ev1")
+        #expect(sorted?[0].accountId == account1)
+        #expect(sorted?[1].eventId == "ev2")
+        #expect(sorted?[1].accountId == account2)
     }
 
     @Test func loadEventDetail_withMultipleAccounts_findsAcrossAccounts() async throws {

@@ -219,6 +219,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             #expect(ids == [
                 "time_is_date", "out_of_period", "time_is_dateTime", "second_page_event"
             ])
+            #expect(eventFromRemote?.allSatisfy { $0.accountId == self.testAccountId } == true)
             self.assertEventTimeIsDate(eventFromRemote?.first)
         }
     }
@@ -246,11 +247,13 @@ extension GoogleCalendarRepositoryImple_Tests {
             #expect(eventFromCache?.map { $0.location } == [
                 "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea"
             ])
-            
+            #expect(eventFromCache?.allSatisfy { $0.accountId == self.testAccountId } == true)
+
             let eventFromRemote = eventLists.last
             #expect(eventFromRemote?.map { $0.eventId } == [
                 "time_is_date", "out_of_period", "time_is_dateTime", "second_page_event"
             ])
+            #expect(eventFromRemote?.allSatisfy { $0.accountId == self.testAccountId } == true)
             let name = eventFromRemote?.first(where: { $0.eventId == "time_is_date" })?.name
             #expect(name == "하루죙일")
         }
@@ -420,7 +423,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             |> \.htmlLink .~ "link"
             |> \.location .~ "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea"
         let timeZone = "Asia/Seoul"
-        let originEvent = GoogleCalendar.Event(origin, "c_id", timeZone)!
+        let originEvent = GoogleCalendar.Event(origin, "c_id", accountId: self.testAccountId, timeZone)!
         let list = GoogleCalendar.EventOriginValueList()
             |> \.timeZone .~ timeZone
             |> \.items .~ [origin]

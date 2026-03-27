@@ -56,7 +56,7 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
             return Just(eventMocking).mapAsAnyError().eraseToAnyPublisher()
         }
         let event = GoogleCalendar.Event(
-            "e1", calendarId, name: "google", colorId: "e1", time: .period(period)
+            "e1", calendarId, accountId: "stub@gmail.com", name: "google", colorId: "e1", time: .period(period)
         )
         return Just([event]).mapAsAnyError().eraseToAnyPublisher()
     }

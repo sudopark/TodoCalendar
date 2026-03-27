@@ -245,7 +245,7 @@ extension GoogleCalendar {
     public struct Event: Sendable {
         public let eventId: String
         public let calendarId: String
-        public var accountId: String = ""
+        public let accountId: String
         public let name: String
         public var eventTagId: EventTagId?
         public var colorId: String?
@@ -259,6 +259,7 @@ extension GoogleCalendar {
         
         public init(
             _ eventId: String, _ calendarId: String,
+            accountId: String,
             name: String,
             colorId: String?,
             htmlLink: String? = nil,
@@ -267,6 +268,7 @@ extension GoogleCalendar {
         ) {
             self.eventId = eventId
             self.calendarId = calendarId
+            self.accountId = accountId
             self.eventTagId = .externalCalendar(
                 serviceId: GoogleCalendarService.id, id: calendarId
             )
@@ -278,10 +280,11 @@ extension GoogleCalendar {
         }
         
         public init?(
-            _ origin: EventOrigin, _ calendarId: String, _ defaultTimeZone: String?
+            _ origin: EventOrigin, _ calendarId: String, accountId: String, _ defaultTimeZone: String?
         ) {
             self.eventId = origin.id
             self.calendarId = calendarId
+            self.accountId = accountId
             
             self.name = origin.summaryText
             self.eventTagId = .externalCalendar(

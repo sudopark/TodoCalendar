@@ -33,8 +33,7 @@ struct EventCellViewModelWidgetURL_Tests {
     }
     
     func makeGoogleModel() -> GoogleCalendarEventCellViewModel {
-        var google = GoogleCalendar.Event("event", "calendar", name: "some", colorId: nil, time: .at(100))
-        google.accountId = "test@gmail.com"
+        let google = GoogleCalendar.Event("event", "calendar", accountId: "test@gmail.com", name: "some", colorId: nil, time: .at(100))
         let event = GoogleCalendarEvent(google, in: .current)
         return .init(event, in: 0..<10, .current, true)!
     }
