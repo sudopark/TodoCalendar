@@ -340,7 +340,7 @@ extension GoogleCalendarUsecaseImpleTests {
         usecase.prepare()
 
         let dummyEvents = (0..<5).map { i -> GoogleCalendar.Event in
-            .init("\(i)-tag1", "tag1", name: "event", colorId: "c", time: .period(0..<10))
+            .init("\(i)-tag1", "tag1", accountId: "stub@gmail.com", name: "event", colorId: "c", time: .period(0..<10))
         }
 
         let eventLists = try await outputs(expect, for: usecase.events(in: 0..<20)) {
@@ -460,7 +460,7 @@ extension GoogleCalendarUsecaseImpleTests {
     }
 
     @Test func convertEventRawValue_whenTimeIsAllDay_convertsToEvent() {
-        let event = GoogleCalendar.Event(dummyAllDayEventOrigin, "calendar_id", "Asia/Seoul")
+        let event = GoogleCalendar.Event(dummyAllDayEventOrigin, "calendar_id", accountId: "stub@gmail.com", "Asia/Seoul")
 
         #expect(event?.eventId == "id")
         #expect(event?.name == "summary")
@@ -473,7 +473,7 @@ extension GoogleCalendarUsecaseImpleTests {
     }
 
     @Test func convertEventRawValue_whenTimeIsPeriod_convertsToEvent() {
-        let event = GoogleCalendar.Event(dummyPeriodEventOrigin, "calendar_id", "Asia/Seoul")
+        let event = GoogleCalendar.Event(dummyPeriodEventOrigin, "calendar_id", accountId: "stub@gmail.com", "Asia/Seoul")
 
         #expect(event?.eventId == "id")
         #expect(event?.name == "summary")
@@ -597,6 +597,7 @@ private final class PrivateStubRepository: GoogleCalendarRepository, @unchecked 
         let events = (0..<10).map { i -> GoogleCalendar.Event in
             .init(
                 "event:\(i)-\(calendarId)", calendarId,
+                accountId: "stub@gmail.com",
                 name: "some name", colorId: "color",
                 time: .period(period.lowerBound..<period.lowerBound + TimeInterval(i + 1))
             )

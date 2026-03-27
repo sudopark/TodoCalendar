@@ -245,6 +245,7 @@ extension WeekEventStackBuilderTests {
         let timeStamps = start.timeIntervalSince1970..<end.timeIntervalSince1970
         let event = GoogleCalendar.Event(
             "\(daysRange)", calendarId,
+            accountId: "stub@gmail.com",
             name: "google",
             colorId: colorId,
             time: .period(timeStamps)

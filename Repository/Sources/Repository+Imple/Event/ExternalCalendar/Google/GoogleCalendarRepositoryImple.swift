@@ -104,7 +104,7 @@ extension GoogleCalendarRepositoryImple {
                     let refreshedList = try await self.loadEventOriginListFromRemote(calendarId, in: period)
 
                     let events = refreshedList.items.compactMap {
-                        return GoogleCalendar.Event($0, calendarId, refreshedList.timeZone)
+                        return GoogleCalendar.Event($0, calendarId, accountId: self.accountId, refreshedList.timeZone)
                     }
                     if let cached {
                         try? await self.cacheStorage.removeEvents(cached.map { $0.eventId }, accountId: self.accountId)

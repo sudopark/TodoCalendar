@@ -264,7 +264,6 @@ extension GoogleCalendarUsecaseImple {
     ) {
         let repository = self.repositoryPool.repository(for: accountId)
         let updateEvents: ([GoogleCalendar.Event]) -> Void = { [weak self] refreshed in
-            let eventsWithAccount = refreshed.map { $0 |> \.accountId .~ accountId }
             self?.sharedDataStore.update(
                 [String: GoogleCalendar.Event].self,
                 key: ShareDataKeys.googleCalendarEvents.rawValue
@@ -272,12 +271,12 @@ extension GoogleCalendarUsecaseImple {
                 let cachedInRange = (old ?? [:]).filter {
                     $0.value.eventTime.isRoughlyOverlap(with: period)
                 }
-                let newMap = eventsWithAccount.asDictionary { $0.eventId }
+                let newMap = refreshed.asDictionary { $0.eventId }
                 let removed = cachedInRange.filter {
                     $0.value.calendarId == calendarId && newMap[$0.key] == nil
                 }
                 let eventWithoutRemoved = (old ?? [:]).filter { removed[$0.key] == nil }
-                return eventsWithAccount.reduce(into: eventWithoutRemoved) { $0[$1.eventId] = $1 }
+                return refreshed.reduce(into: eventWithoutRemoved) { $0[$1.eventId] = $1 }
             }
         }
 

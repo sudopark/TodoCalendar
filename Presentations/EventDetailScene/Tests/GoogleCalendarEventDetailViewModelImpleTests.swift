@@ -41,7 +41,7 @@ final class GoogleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         calendarUsecase.refreshGoogleCalendarEventTags()
         
         let viewModel = GoogleCalendarEventDetailViewModelImple(
-            calenadrId: "g:7", accountId: "", eventId: "id",
+            calenadrId: "g:7", accountId: "stub@gmail.com", eventId: "id",
             googleCalendarUsecase: calendarUsecase,
             calendarSettingUsecase: settingUsecase,
             daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
