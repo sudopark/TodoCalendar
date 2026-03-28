@@ -1,14 +1,5 @@
 # CLAUDE.md
 
-## 0. 단축어
-
-| 사용자 말 | Claude 동작 |
-|---|---|
-| **커밋해줘** | 변경된 파일 전체를 `git add` → 커밋 메시지 작성 → `git commit` → 결과 출력 |
-| **방금 작업한것만 골라서 커밋해줘** | 현재 대화에서 Claude가 수정한 파일만 선별해 `git add` → 커밋 메시지 작성 → `git commit` → 결과 출력 |
-
----
-
 ## 1. 절대 규칙
 
 - **파일을 수정하기 전에 반드시 먼저 읽어라.** 추측으로 수정하지 말 것.
@@ -136,19 +127,6 @@ xcodebuild test \
 - `mock*`: 생성 후 동적 변경이 필요한 경우.
 - 호출 기록 변수: `did<Action>...` 형태. (`didRouteToSetting`, `didRemoveTodoId`) `callCount` / `wasCalled` 사용 금지.
 
-**Publisher 검증 — `PublisherWaitable`**
-
-```swift
-// XCTest
-let values = waitOutputs(expect, for: vm.somePublisher) { vm.triggerAction() }
-XCTAssertEqual(values, [expected])
-
-// Swift Testing
-let expect = expectConfirm("emits")
-let values = try await outputs(expect, for: somePublisher) { triggerAction() }
-#expect(values == [expected])
-```
-
 ---
 
 ## 4. 도메인 컨텍스트
@@ -219,63 +197,8 @@ let values = try await outputs(expect, for: somePublisher) { triggerAction() }
 - `GoogleCalendarLocalAggregatedRepositoryImple`: 모든 연동 계정의 이벤트/태그/색상을 투명하게 합산하여 반환
 - `GoogleCalendarViewAppearanceStore`: 계정별 색상/태그를 UI에 반영
 
-**DB 구조**:
-- 메인 DB (`todo_calendar.db`): 앱 자체 데이터. `AppEnvironment.dbVersion`으로 마이그레이션 관리.
-- 외부 캘린더 DB (`google_calendar.db`): 계정별 테이블에 `accountId` 컬럼 포함. `googleCalendarDBVersion`으로 별도 관리.
-- `AppDataMigrationImple`: 단일 계정 → 다중 계정 1회성 마이그레이션 (플래그 기반 멱등성)
-
-**계정 연동/해제 플로우**:
-
-```mermaid
-flowchart TD
-    subgraph "계정 연동 (integrate)"
-        A[사용자: 구글 계정 연동 요청] --> B[OAuth 인증 플로우]
-        B --> C[Credential 저장]
-        C --> D[ExternalCalendarAccountRemotePool\n— Remote API 클라이언트 생성]
-        D --> E[ExternalCalendarDBConnectionPool\n— DB 연결 open 참조카운트 +1]
-        E --> F{첫 번째 open?}
-        F -->|Yes| G[onFirstOpen: 테이블 생성 + 마이그레이션]
-        F -->|No| H[기존 연결 재사용]
-        G --> I[AppDataMigrationImple\n— 레거시 데이터 마이그레이션 1회]
-        I --> J[Integration 상태 broadcast\n— .integrated]
-        H --> J
-        J --> K[GoogleCalendarUsecase\n— 색상/태그/이벤트 refresh]
-        K --> L[SharedDataStore 업데이트\n→ UI 자동 반영]
-    end
-
-    subgraph "계정 해제 (stopIntegrate)"
-        M[사용자: 구글 계정 해제 요청] --> N[Credential 삭제]
-        N --> O[ExternalCalendarAccountRemotePool\n— Remote API 클라이언트 제거]
-        O --> P[ExternalCalendarDBConnectionPool\n— DB 연결 close 참조카운트 -1]
-        P --> Q{참조카운트 = 0?}
-        Q -->|Yes| R[DB 연결 실제 종료]
-        Q -->|No| S[다른 계정이 사용 중 → 유지]
-        R --> T[Integration 상태 broadcast\n— .disconnected]
-        S --> T
-        T --> U[GoogleCalendarUsecase\n— 해당 계정 캐시 제거]
-        U --> V[SharedDataStore 업데이트\n→ UI 자동 반영]
-    end
-
-    subgraph "앱 시작 시 (prepareIntegratedAccounts)"
-        W[앱 실행] --> X[저장된 Credential 로드]
-        X --> Y[계정별 Remote/DB 설정]
-        Y --> Z[GoogleCalendarUsecase\n— 전체 계정 refresh]
-        Z --> AA[SharedDataStore → UI]
-    end
-```
-
-**주요 파일**:
-
-| 파일 | 역할 |
-|---|---|
-| `Domain/.../ExternalCalendarIntegrationUsecase.swift` | 계정 연동 상태 관리 + reactive 상태 브로드캐스트 |
-| `Domain/.../GoogleCalendarUsecase.swift` | 계정별 이벤트/색상/태그 로드 (repositoryPool 사용) |
-| `Repository/.../ExternalCalendarDBConnectionPoolImple.swift` | 참조 카운팅 DB 연결 관리 |
-| `Repository/.../ExternalCalendarAccountRemotePool.swift` | 계정별 Remote API + 토큰 갱신 |
-| `Repository/.../GoogleCalendarLocalAggregatedRepositoryImple.swift` | 다중 계정 데이터 집계 |
-| `Repository/.../AppDataMigrationImple.swift` | 단일→다중 계정 DB 마이그레이션 |
-| `TodoCalendarApp/.../ApplicationBase.swift` | Pool/Factory 인스턴스 생성 |
-| `TodoCalendarApp/.../ApplicationRootBuilder.swift` | 전체 의존성 조립 |
+> DB 구조 상세는 [`Repository/CLAUDE.md`](Repository/CLAUDE.md)의 "외부 캘린더 DB 구조" 섹션 참조.
+> 계정 연동/해제 플로우 상세는 [`Domain/CLAUDE.md`](Domain/CLAUDE.md)의 "외부 캘린더 계정 연동/해제 플로우" 섹션 참조.
 
 ### ForemostEvent (강조 이벤트)
 
@@ -305,6 +228,8 @@ flowchart TD
 
 ## 5. 코딩 컨벤션
 
+코딩 스타일, 설계 원칙, 개발 철학의 상세는 [`docs/coding-style-and-philosophy.md`](docs/coding-style-and-philosophy.md)를 참조.
+
 ### 네이밍
 
 | 개념 | 패턴 |
@@ -333,26 +258,6 @@ flowchart TD
 ```
 [#508] GoogleCalendarRepositoryPool 도입 및 테스트 추가
 docs: 테스트 조직화 원칙 추가
-```
-
-### 코드 스타일
-
-- **Higher-order functions 우선**: imperative loop 대신 `map` / `flatMap` / `compactMap` / `forEach` 사용.
-- **Query/Command 분리**: 읽기 연산(map/flatMap/compactMap)을 먼저 완성한 뒤, 사이드이팩트(forEach/asyncForEach)를 별도로 실행.
-
-```swift
-// Good
-let accounts = services.flatMap { $0.accountIds }.compactMap { makeAccount($0) }  // query
-await accounts.asyncForEach { await setup($0) }                                    // command
-
-// Bad
-var accounts: [Account] = []
-for service in services {
-    for id in service.accountIds {
-        accounts.append(makeAccount(id))  // query + command 혼재
-        await setup(id)
-    }
-}
 ```
 
 ---
