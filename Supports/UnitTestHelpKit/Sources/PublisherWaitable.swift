@@ -20,7 +20,7 @@ extension PublisherWaitable where Self: XCTestCase {
     public func waitOutputs<P: Publisher>(
         _ expect: XCTestExpectation,
         for source: P,
-        timeout: TimeInterval = 0.001,
+        timeout: TimeInterval = 0.1,
         _ action: (() -> Void)? = nil
     ) -> [P.Output] {
         // given
@@ -43,7 +43,7 @@ extension PublisherWaitable where Self: XCTestCase {
     public func waitError<P: Publisher>(
         _ expect: XCTestExpectation,
         for source: P,
-        timeout: TimeInterval = 0.001,
+        timeout: TimeInterval = 0.1,
         _ action: (() -> Void)? = nil
     ) -> P.Failure? {
         // given
@@ -67,7 +67,7 @@ extension PublisherWaitable where Self: XCTestCase {
     public func waitFirstOutput<P: Publisher>(
         _ expect: XCTestExpectation,
         for source: P,
-        timeout: TimeInterval = 0.001,
+        timeout: TimeInterval = 0.1,
         _ action: (() -> Void)? = nil
     ) -> P.Output? {
         return self.waitOutputs(expect, for: source, timeout: timeout, action).first

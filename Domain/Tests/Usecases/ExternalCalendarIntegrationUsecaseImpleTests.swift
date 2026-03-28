@@ -161,10 +161,10 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         }
         
         // then
-        let identifiers = accountMaps.map { $0.keys }.map { $0.sorted() }
-        #expect(identifiers == [
-            [service.identifier], []
-        ])
+        let accountCounts = accountMaps.map { map in
+            map[service.identifier]?.count ?? 0
+        }
+        #expect(accountCounts == [1, 0])
     }
     
     @Test func usecase_handleAuthenticationResult() async throws {

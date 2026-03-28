@@ -443,20 +443,21 @@ extension EventTagUsecaseImpleTests {
     func testUsecase_provideAllTagsWithDefaults() {
         // given
         let expect = expectation(description: "모든 태그 제공시에 디폴트 태그값 같이 제공")
-        expect.expectedFulfillmentCount = 2
+        expect.expectedFulfillmentCount = 3
         let usecase = self.makeUsecaseWithPrepareDefaultTags()
-        
+
         // when
         let tagLists = self.waitOutputs(expect, for: usecase.sharedEventTags) {
             usecase.prepare()
         }
-        
+
         // then
         let idLists = tagLists.map { $0.keys }.map { Set($0) }
         XCTAssertEqual(
             idLists, [
                 [],
                 [.default, .holiday],
+                [.default, .holiday, .custom("tag-t1"), .custom("tag-s2"), .custom("tag-t3")],
             ]
         )
     }

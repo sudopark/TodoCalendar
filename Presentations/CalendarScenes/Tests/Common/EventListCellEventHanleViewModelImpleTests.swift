@@ -353,6 +353,7 @@ extension EventListCellEventHanleViewModelImpleTests {
     func testViewModel_skipRepeatingTodo() {
         // given
         let expect = expectation(description: "다음차수로 todo skip")
+        expect.expectedFulfillmentCount = 2
         let dummyId = "some"
         let viewModel = self.makeViewModel()
         let todo = TodoEventCellViewModel(dummyId, name: "origin")

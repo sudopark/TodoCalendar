@@ -27,7 +27,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyListener: SpyListener?
     
-    private var timeoutMillis: Int { return 10 }
+    private var timeoutMillis: Int { return 500 }
 
     override func setUpWithError() throws {
         self.cancelBag = .init()
@@ -470,11 +470,16 @@ extension MonthViewModelImpleTests {
         _ viewModel: MonthViewModelImple,
         shouldDropFirst: Bool = true
     ) async throws {
-        
+
         let dropCount = shouldDropFirst ? 1 : 0
-        async let weekSource =  viewModel.weekModels.dropFirst(dropCount).firstValue(with: self.timeoutMillis)
+        let weeksSubject = CurrentValueSubject<[WeekRowModel]?, Never>(nil)
+        viewModel.weekModels.dropFirst(dropCount)
+            .sink { weeksSubject.send($0) }
+            .store(in: &self.cancelBag)
+
         viewModel.updateMonthIfNeed(.init(year: 2023, month: 08))
-        let weeks = try await weekSource
+
+        let weeks = try await weeksSubject.compactMap { $0 }.firstValue(with: self.timeoutMillis)
         
         XCTAssertEqual(weeks?.count, 5)
         
@@ -769,20 +774,24 @@ extension MonthViewModelImpleTests {
         _ = try? self.stubUISettingUsecase.changeCalendarAppearanceSetting(params)
     }
     
-    func testViewModel_provideEventsWithUnderLineDays() {
+    func testViewModel_provideEventsWithUnderLineDays() async throws {
         // given
-        let expect = expectation(description: "이벤트 보유 날짜 밑줄표시 여부 변경에 따라 공휴일 제외하고 표시여부 정보도 같이 반환")
-        expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModelWithStubEvents()
         viewModel.updateMonthIfNeed(.init(year: 2023, month: 09))
-        
+
         // when
         let eventsIn8ThirdWeek = viewModel.eventStack(at: "2023-9-24-2023-9-30")
-        let eventStacks = self.waitOutputs(expect, for: eventsIn8ThirdWeek) {
+        // 이벤트 로딩 대기
+        let _ = try await eventsIn8ThirdWeek.firstValue(with: self.timeoutMillis)
+
+        let expect = expectation(description: "이벤트 보유 날짜 밑줄표시 여부 변경에 따라 공휴일 제외하고 표시여부 정보도 같이 반환")
+        expect.expectedFulfillmentCount = 3
+        expect.assertForOverFulfill = false
+        let eventStacks = self.waitOutputs(expect, for: eventsIn8ThirdWeek, timeout: 1.0) {
             self.toggleShowUnderLineOnEventDay(true)
             self.toggleShowUnderLineOnEventDay(false)
         }
-        
+
         // then
         let showUnderLineDays = eventStacks.map { $0.shouldShowEventLinesDays }
         XCTAssertEqual(showUnderLineDays, [

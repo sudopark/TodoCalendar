@@ -37,16 +37,16 @@ extension PlaceSuggestUsecaseImpleTests {
         let expect = expectConfirm("검색어에 따라 결과 반환하다 중지")
         expect.count = 4; expect.timeout = .seconds(1)
         let usecase = self.makeUsecase()
-        
+
         // when
         let placeLists = try await self.outputs(expect, for: usecase.suggestPlaces) {
-            
+
             usecase.starSuggest("q1")
-            try await Task.sleep(for: .milliseconds(10))
-            
+            try await Task.sleep(for: .milliseconds(50))
+
             usecase.starSuggest("q12")
-            try await Task.sleep(for: .milliseconds(10))
-            
+            try await Task.sleep(for: .milliseconds(50))
+
             usecase.stopSuggest()
         }
         
@@ -61,16 +61,16 @@ extension PlaceSuggestUsecaseImpleTests {
         let expect = expectConfirm("중간에 에러 발생해도 무시하고 계속 결과 반환")
         expect.count = 3; expect.timeout = .seconds(1)
         let usecase = self.makeUsecase()
-        
+
         // when
         let placeLists = try await self.outputs(expect, for: usecase.suggestPlaces) {
-            
+
             usecase.starSuggest("q1")
-            try await Task.sleep(for: .milliseconds(10))
-            
+            try await Task.sleep(for: .milliseconds(50))
+
             usecase.starSuggest("error")
-            try await Task.sleep(for: .milliseconds(10))
-            
+            try await Task.sleep(for: .milliseconds(50))
+
             usecase.starSuggest("q12")
         }
         
@@ -91,15 +91,15 @@ extension PlaceSuggestUsecaseImpleTests {
         let placeLists = try await self.outputs(expect, for: usecase.suggestPlaces) {
             
             usecase.starSuggest("q1")
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(50))
             mocking.send([.init("q1")])
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(50))
             
             usecase.starSuggest("late")
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(50))
             
             usecase.stopSuggest()
-            try await Task.sleep(for: .milliseconds(10))
+            try await Task.sleep(for: .milliseconds(50))
             
             mocking.send([.init("late")])
         }

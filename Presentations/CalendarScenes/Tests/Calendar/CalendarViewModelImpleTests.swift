@@ -916,8 +916,9 @@ extension CalendarViewModelImpleTests {
         
         try await Task.sleep(for: .milliseconds(10))
         NotificationCenter.default.post(Notification(name: UIApplication.willEnterForegroundNotification))
-        
+
         // then
+        try await Task.sleep(for: .milliseconds(10))
         XCTAssertEqual(self.spyEventUploadService.isResumeOrPauses, [true, false, true])
     }
 }

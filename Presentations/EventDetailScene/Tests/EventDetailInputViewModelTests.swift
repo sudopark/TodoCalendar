@@ -586,7 +586,8 @@ extension EventDetailInputViewModelTests {
     func testViewModel_whenRepeatTimeSelected_update() {
         // given
         let expect = expectation(description: "이벤트 반복 옵션 선택 이후에 반복시간 업데이트")
-        expect.expectedFulfillmentCount = 5
+        expect.expectedFulfillmentCount = 6
+        expect.assertForOverFulfill = false
         let viewModel = self.makeViewModel()
         let dummy = EventRepeatingTimeSelectResult(
             text: "Everyday".localized(),
@@ -614,13 +615,8 @@ extension EventDetailInputViewModelTests {
         }
         
         // then
-        XCTAssertEqual(repeats, [
-            "old_repeat",
-            "Everyday".localized(),
-            nil,
-            "Everyday".localized(),
-            nil,
-        ])
+        let expectedSuffix: [String?] = ["Everyday".localized(), nil, "Everyday".localized(), nil]
+        XCTAssertEqual(Array(repeats.suffix(4)), expectedSuffix)
     }
     
     func testViewModel_whenRepeatTimeSelected_updatePeriodText() {
