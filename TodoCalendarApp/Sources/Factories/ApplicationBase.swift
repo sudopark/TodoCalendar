@@ -46,6 +46,27 @@ final class ApplicationBase {
         return service
     }()
     
+    lazy var externalCalendarDBConnectionPool: ExternalCalendarSQLiteConnectionPoolImple = {
+        let dbVersion = AppEnvironment.googleCalendarDBVersion
+        return ExternalCalendarSQLiteConnectionPoolImple(
+            dbPathMap: AppEnvironment.externalCalendarDBPaths(),
+            onFirstOpen: { service in
+                let _ = try await service.async.migrate(
+                    upto: dbVersion,
+                    steps: { version, database in
+                        switch version {
+                        default: break
+                        }
+                    },
+                    finalized: { version, database in
+                        logger.log(.sql, level: .info, "google calendar db migration finished to: \(version)")
+                        try? database.updateJournalMode("WAL")
+                    }
+                )
+            }
+        )
+    }()
+    
     let linkPreviewEngine: SwiftLinkPreview = {
        return SwiftLinkPreview(cache: InMemoryCache())
     }()
@@ -108,38 +129,79 @@ final class ApplicationBase {
         )
     }()
     
-    lazy var googleCalendarRemoteAPI: RemoteAPIImple = {
-        
-        func readClientId() -> String {
-            let plist = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist")
-                .map { URL(fileURLWithPath: $0) }
-                .flatMap { try? Data(contentsOf: $0) }
-                .flatMap {
-                    try? PropertyListSerialization.propertyList(from: $0, format: nil)
-                }
-                .flatMap { $0 as? [String: Any] }
-            return plist?["CLIENT_ID"] as? String ?? "dummy_id"
-        }
-        let environment = self.remoteEnvironment
-        let googleAPICredentialStore = GoogleAPICredentialStoreImple(
-            serviceIdentifier: AppEnvironment.googleCalendarService.identifier,
+    private func readGoogleClientId() -> String {
+        let plist = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist")
+            .map { URL(fileURLWithPath: $0) }
+            .flatMap { try? Data(contentsOf: $0) }
+            .flatMap { try? PropertyListSerialization.propertyList(from: $0, format: nil) }
+            .flatMap { $0 as? [String: Any] }
+        return plist?["CLIENT_ID"] as? String ?? "dummy_id"
+    }
+
+    lazy var externalCalendarAccountRemotePool: ExternalCalendarAccountRemotePoolImple = {
+        let factory = ApplicationGoogleRemoteFactory(
+            googleClientId: self.readGoogleClientId(),
+            session: self.remoteSession,
+            environment: self.remoteEnvironment,
             keyChainStore: self.keyChainStorage
         )
+        return ExternalCalendarAccountRemotePoolImple(factory: factory)
+    }()
+
+    lazy var googleCalendarRepositoryPool: GoogleCalendarRepositoryPoolImple = {
+        return GoogleCalendarRepositoryPoolImple(
+            accountRemotePool: self.externalCalendarAccountRemotePool,
+            connectionPool: self.externalCalendarDBConnectionPool
+        )
+    }()
+}
+
+
+// MARK: - ApplicationGoogleRemoteFactory
+
+private final class ApplicationGoogleRemoteFactory: ExternalCalendarRemoteFactory, @unchecked Sendable {
+
+    private let googleClientId: String
+    private let session: Session
+    private let environment: RemoteEnvironment
+    private let keyChainStore: any KeyChainStorage
+
+    init(
+        googleClientId: String,
+        session: Session,
+        environment: RemoteEnvironment,
+        keyChainStore: any KeyChainStorage
+    ) {
+        self.googleClientId = googleClientId
+        self.session = session
+        self.environment = environment
+        self.keyChainStore = keyChainStore
+    }
+
+    func make(serviceId: String, accountId: String) -> (any RemoteAPI)? {
+        guard serviceId == GoogleCalendarService.id else { return nil }
+        let credentialStore = GoogleAPICredentialStoreImple(
+            serviceIdentifier: serviceId,
+            accountId: accountId,
+            keyChainStore: keyChainStore
+        )
         let authenticator = GoogleAPIAuthenticator(
-            googleClientId: readClientId(),
-            credentialStore: googleAPICredentialStore
+            googleClientId: googleClientId,
+            credentialStore: credentialStore
         )
         let interceptor = AuthenticationInterceptorProxy(authenticator: authenticator)
         let remote = RemoteAPIImple(
-            session: self.remoteSession,
+            session: session,
             environment: environment,
             interceptor: interceptor
         )
         authenticator.remoteAPI = remote
         return remote
-    }()
+    }
 }
 
+
+// MARK: -
 
 struct DeviceInfoFetchServiceImple: DeviceInfoFetchService {
     

@@ -10,69 +10,75 @@ import Foundation
 import Combine
 import Prelude
 import Optics
+import Extensions
 
 // MARK: - GoogleCalendarViewAppearanceStore
 
 public protocol GoogleCalendarViewAppearanceStore: Sendable {
-    
-    func apply(colors: GoogleCalendar.Colors)
-    func apply(googleCalendarTags: [GoogleCalendar.Tag])
-    func clearGoogleCalendarColors()
+
+    func applyColors(_ colors: GoogleCalendar.Colors, for accountId: String)
+    func clearColors(for accountId: String)
+
+    func applyCalendarTags(_ tags: [GoogleCalendar.Tag], for accountId: String)
+    func clearCalendarTags(for accountId: String)
 }
 
 
 // MARK: - GoogleCalendarUsecase
 
 public protocol GoogleCalendarUsecase: Sendable {
-    
+
     func prepare()
-    
+
     // calendar
     func refreshGoogleCalendarEventTags()
-    
+
     var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> { get }
-    
+
     // events
     func refreshEvents(in period: Range<TimeInterval>)
-    
+
     func events(
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[GoogleCalendar.Event], Never>
-    
+
     func eventDetail(
         _ calendarId: String,
         _ eventId: String,
+        accountId: String,
         at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error>
-    
-    var integratedAccount: AnyPublisher<ExternalServiceAccountinfo?, Never> { get }
 }
 
 
 public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked Sendable {
-    
+
     private let googleService: GoogleCalendarService
-    private let repository: any GoogleCalendarRepository
+    private let integrationUsecase: any ExternalCalendarIntegrationUsecase
+    private let repositoryPool: any GoogleCalendarRepositoryPool
     private let eventTagUsecase: any EventTagUsecase
     private let appearanceStore: any GoogleCalendarViewAppearanceStore
     private let sharedDataStore: SharedDataStore
-    
+
     public init(
         googleService: GoogleCalendarService,
-        repository: any GoogleCalendarRepository,
+        integrationUsecase: any ExternalCalendarIntegrationUsecase,
+        repositoryPool: any GoogleCalendarRepositoryPool,
         eventTagUsecase: any EventTagUsecase,
         appearanceStore: any GoogleCalendarViewAppearanceStore,
         sharedDataStore: SharedDataStore
     ) {
         self.googleService = googleService
-        self.repository = repository
+        self.integrationUsecase = integrationUsecase
+        self.repositoryPool = repositoryPool
         self.eventTagUsecase = eventTagUsecase
         self.appearanceStore = appearanceStore
         self.sharedDataStore = sharedDataStore
     }
-    
+
     private var cancelBag: Set<AnyCancellable> = []
     private var refreshEventBag: Set<AnyCancellable> = []
+
     private func clearCancelBag() {
         self.cancelBag.forEach { $0.cancel() }
         self.cancelBag = []
@@ -83,138 +89,145 @@ public final class GoogleCalendarUsecaseImple: GoogleCalendarUsecase, @unchecked
 // MARK: - color and tags
 
 extension GoogleCalendarUsecaseImple {
-    
-    private struct AccountAndIsNew: Equatable {
-        let account: ExternalServiceAccountinfo
-        private var lastIntegrationTime: Date?
-        var isNew: Bool = false
-        
-        init(_ account: ExternalServiceAccountinfo) {
-            self.account = account
-            self.lastIntegrationTime = account.intergrationTime
-            self.isNew = account.intergrationTime != nil
-        }
-        
-        func update(_ new: ExternalServiceAccountinfo) -> AccountAndIsNew {
-            guard account.serviceIdentifier == new.serviceIdentifier,
-                  account.email == new.email
-            else {
-                return .init(new)
-            }
-            let isNewIntegrated = switch (account.intergrationTime, new.intergrationTime) {
-            case (.some(let oldtime), .some(let newTime)) where newTime > oldtime: true
-            case (.none, .some): true
-            default: false
-            }
-            return .init(new) |> \.isNew .~ isNewIntegrated
-        }
-    }
-    
+
     public func prepare() {
-        
-        self.clearCancelBag()
-        let serviceId = self.googleService.identifier
-        
-        let asAccountWithCheckIsNew: (AccountAndIsNew?, ExternalServiceAccountinfo?) -> AccountAndIsNew? = { acc, account in
-            guard let account else { return nil }
-            return acc?.update(account) ?? AccountAndIsNew(account)
-        }
-        
-        let account = self.sharedDataStore
-            .observe(
-                [String: ExternalServiceAccountinfo].self,
-                key: ShareDataKeys.externalCalendarAccounts.rawValue
-            )
-            .map { $0?[serviceId] }
-            .scan(nil, asAccountWithCheckIsNew)
-        
-        account
-            .removeDuplicates()
-            .sink(receiveValue: { [weak self] accountAndIsNew in
-                if let accountAndIsNew {
-                    self?.refreshEventTags(isFirstLoadAfterIntegrated: accountAndIsNew.isNew)
-                } else {
-                    self?.clearGoogleCalendarEventTag()
-                    self?.sharedDataStore.delete(
-                        ShareDataKeys.googleCalendarEvents.rawValue
-                    )
-                    self?.clearGoogleCalendarCache()
+        clearCancelBag()
+
+        self.refreshCurrentAccountGoogleCalendarInfos()
+
+        integrationUsecase.integrationStatusChanged(for: googleService.identifier)
+            .sink { [weak self] status in
+                guard let self else { return }
+                switch status {
+                case .integrated(_, let account):
+                    guard let email = account.email else { return }
+                    self.refreshColors(email)
+                    self.refreshCalendarTags(email, isNew: true)
+
+                case .disconnected(_, let email):
+                    self.clearAccountCache(email)
                 }
-            })
-            .store(in: &self.cancelBag)
-    }
-    
-    public func refreshGoogleCalendarEventTags() {
-        self.refreshEventTags()
-    }
-    
-    public func refreshEventTags(isFirstLoadAfterIntegrated: Bool = false) {
-        guard self.checkHasAccount() else { return }
-        
-        let updateTags: ([GoogleCalendar.Tag]) -> Void = { [weak self] tags in
-            let tags = tags.filter { !$0.isHoliday }
-            
-            if isFirstLoadAfterIntegrated {
-                self?.setGoogleCalendarTagInitailOffTags(from: tags)
             }
-            
-            self?.sharedDataStore.put(
-                [GoogleCalendar.Tag].self,
-                key: ShareDataKeys.googleCalendarTags.rawValue,
-                tags
-            )
-            self?.appearanceStore.apply(googleCalendarTags: tags)
-        }
-        self.repository.loadCalendarTags()
-            .sink(receiveValue: updateTags)
-            .store(in: &self.cancelBag)
-        
-        self.repository.loadColors()
-            .sink(receiveValue: { [weak self] colors in
-                self?.appearanceStore.apply(colors: colors)
-            })
-            .store(in: &self.cancelBag)
+            .store(in: &cancelBag)
     }
-    
+
+    public func refreshGoogleCalendarEventTags() {
+        self.refreshCurrentAccountGoogleCalendarInfos()
+    }
+
+    private func refreshCurrentAccountGoogleCalendarInfos() {
+        let accounts = self.integrationUsecase.currentIntegratedAccounts(for: googleService.identifier)
+        guard !accounts.isEmpty else { return }
+
+        accounts.forEach { account in
+            if let email = account.email {
+                self.refreshColors(email)
+                self.refreshCalendarTags(email)
+            }
+        }
+    }
+
+    private func refreshColors(_ accountId: String) {
+        let repository = repositoryPool.repository(for: accountId)
+        repository.loadColors()
+            .catch { _ in Empty() }
+            .sink { [weak self] colors in
+                self?.appearanceStore.applyColors(colors, for: accountId)
+            }
+            .store(in: &cancelBag)
+    }
+
+    private func refreshCalendarTags(_ accountId: String, isNew: Bool = false) {
+        let repository = repositoryPool.repository(for: accountId)
+        repository.loadCalendarTags()
+            .catch { _ in Empty() }
+            .sink { [weak self] tags in
+                guard let self else { return }
+                let incoming = tags.filter { !$0.isHoliday }
+                if isNew {
+                    self.setGoogleCalendarTagInitailOffTags(from: incoming)
+                }
+                self.sharedDataStore.update(
+                    [String: [GoogleCalendar.Tag]].self,
+                    key: ShareDataKeys.googleCalendarTags.rawValue
+                ) { existing in
+                    (existing ?? [:]) |> key(accountId) .~ incoming
+                }
+                self.appearanceStore.applyCalendarTags(incoming, for: accountId)
+            }
+            .store(in: &cancelBag)
+    }
+
+    private func clearAccountCache(_ accountId: String) {
+        let accountTags = sharedDataStore.value(
+            [String: [GoogleCalendar.Tag]].self,
+            key: ShareDataKeys.googleCalendarTags.rawValue
+        )?[accountId] ?? []
+        let calendarIds = accountTags.map(\.id) |> Set.init
+
+        appearanceStore.clearColors(for: accountId)
+        appearanceStore.clearCalendarTags(for: accountId)
+
+        sharedDataStore.update(
+            [String: [GoogleCalendar.Tag]].self,
+            key: ShareDataKeys.googleCalendarTags.rawValue
+        ) { existing in
+            (existing ?? [:]) |> key(accountId) .~ nil
+        }
+
+        sharedDataStore.update(
+            [String: GoogleCalendar.Event].self,
+            key: ShareDataKeys.googleCalendarEvents.rawValue
+        ) { existing in
+            (existing ?? [:]).filter { !calendarIds.contains($0.value.calendarId) }
+        }
+
+        eventTagUsecase.removeEventTagOffIds(accountTags.map(\.tagId))
+
+        Task {
+            try? await repositoryPool.repository(for: accountId).resetCache()
+            repositoryPool.removeRepository(for: accountId)
+        }
+    }
+
     private func setGoogleCalendarTagInitailOffTags(from tags: [GoogleCalendar.Tag]) {
         let offIds = tags.filter { $0.isSelected != true }.map { $0.tagId }
         guard !offIds.isEmpty else { return }
-        self.eventTagUsecase.addEventTagOffIds(offIds)
+        eventTagUsecase.addEventTagOffIds(offIds)
     }
-    
-    private func clearGoogleCalendarEventTag() {
-        self.sharedDataStore.delete(ShareDataKeys.googleCalendarTags.rawValue)
-        self.appearanceStore.clearGoogleCalendarColors()
-        self.eventTagUsecase.resetExternalCalendarOffTagId(self.googleService.identifier)
-    }
-    
-    private func clearGoogleCalendarCache() {
-        Task {
-            try await self.repository.resetCache()
-        }
-    }
-    
+
     public var calendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
-        return self.sharedDataStore.observe(
-            [GoogleCalendar.Tag].self, key: ShareDataKeys.googleCalendarTags.rawValue
+        return sharedDataStore.observe(
+            [String: [GoogleCalendar.Tag]].self, key: ShareDataKeys.googleCalendarTags.rawValue
         )
-        .map { $0 ?? [] }
+        .map { $0?.values.flatMap { $0 } ?? [] }
         .eraseToAnyPublisher()
     }
-    
-    private var activeCalendarTags: AnyPublisher<[GoogleCalendar.Tag], Never> {
-        
-        let transform: ([GoogleCalendar.Tag], Set<EventTagId>) -> [GoogleCalendar.Tag]
-        transform = { totalTags, offIds in
-            return totalTags.filter { !offIds.contains($0.tagId) }
+
+    private func activeCalendars() -> (String) -> AnyPublisher<[GoogleCalendar.Tag], Never> {
+        return { [weak self] accountId in
+            guard let self = self else { return Empty().eraseToAnyPublisher() }
+
+            let calendarForAccount = self.sharedDataStore
+                .observe(
+                    [String: [GoogleCalendar.Tag]].self,
+                    key: ShareDataKeys.googleCalendarTags.rawValue
+                )
+                .map { $0?[accountId] ?? [] }
+                .removeDuplicates()
+
+            let filterActive: ([GoogleCalendar.Tag], Set<EventTagId>) -> [GoogleCalendar.Tag]
+            filterActive = { total, offIds in
+                return total.filter { !offIds.contains($0.tagId) }
+            }
+
+            return Publishers.CombineLatest(
+                calendarForAccount,
+                eventTagUsecase.offEventTagIdsOnCalendar()
+            )
+            .map(filterActive)
+            .eraseToAnyPublisher()
         }
-        return Publishers.CombineLatest(
-            self.calendarTags,
-            self.eventTagUsecase.offEventTagIdsOnCalendar()
-        )
-        .map(transform)
-        .removeDuplicates()
-        .eraseToAnyPublisher()
     }
 }
 
@@ -222,38 +235,35 @@ extension GoogleCalendarUsecaseImple {
 // MARK: - events
 
 extension GoogleCalendarUsecaseImple {
-    
+
     private func cancelRefresh() {
-        self.refreshEventBag.forEach { $0.cancel() }
-        self.refreshEventBag = []
+        refreshEventBag.forEach { $0.cancel() }
+        refreshEventBag = []
     }
-    
-    private func checkHasAccount() -> Bool {
-        let accounts = self.sharedDataStore.value([String: ExternalServiceAccountinfo].self, key: ShareDataKeys.externalCalendarAccounts.rawValue)
-        return accounts?[self.googleService.identifier] != nil
-    }
-    
+
     public func refreshEvents(in period: Range<TimeInterval>) {
-        guard self.checkHasAccount() else { return }
-        
         self.cancelRefresh()
-        
-        self.activeCalendarTags
-            .sink(receiveValue: { [weak self] calednars in
+
+        let accounts = self.integrationUsecase.currentAndNewIntegratedGoogleAccounts()
+        let activeCalendarTagPerAccount = accounts
+            .compactMap { $0.email }
+            .flatMap(self.activeCalendars())
+
+        activeCalendarTagPerAccount
+            .sink(receiveValue: { [weak self] calendars in
                 guard let self = self else { return }
-                calednars.forEach {
-                    self.refreshEvents($0.id, in: period)
+                calendars.forEach { calendar in
+                    self.refreshEvents(calendar.id, accountId: calendar.ownerId, in: period)
                 }
             })
             .store(in: &self.refreshEventBag)
     }
-    
+
     private func refreshEvents(
-        _ calendarId: String, in period: Range<TimeInterval>
+        _ calendarId: String, accountId: String, in period: Range<TimeInterval>
     ) {
-       
+        let repository = self.repositoryPool.repository(for: accountId)
         let updateEvents: ([GoogleCalendar.Event]) -> Void = { [weak self] refreshed in
-            
             self?.sharedDataStore.update(
                 [String: GoogleCalendar.Event].self,
                 key: ShareDataKeys.googleCalendarEvents.rawValue
@@ -269,17 +279,17 @@ extension GoogleCalendarUsecaseImple {
                 return refreshed.reduce(into: eventWithoutRemoved) { $0[$1.eventId] = $1 }
             }
         }
-        
-        self.repository.loadEvents(calendarId, in: period)
+
+        repository.loadEvents(calendarId, in: period)
             .sink(receiveValue: updateEvents)
             .store(in: &self.refreshEventBag)
     }
-    
+
     public func events(
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[GoogleCalendar.Event], Never> {
         let shareKey = ShareDataKeys.googleCalendarEvents.rawValue
-        
+
         let filterInRange: ([GoogleCalendar.Event]) -> [GoogleCalendar.Event] = { events in
             return events.filter { event in
                 return event.eventTime.isRoughlyOverlap(with: period)
@@ -291,40 +301,45 @@ extension GoogleCalendarUsecaseImple {
             .map(filterInRange)
             .eraseToAnyPublisher()
     }
-    
+
     public func eventDetail(
         _ calendarId: String,
         _ eventId: String,
+        accountId: String,
         at timeZone: TimeZone
     ) -> AnyPublisher<GoogleCalendar.EventOrigin, any Error> {
-        
-        return self.repository.loadEventDetail(
-            calendarId, timeZone.identifier, eventId
-        )
+        return self.repositoryPool.repository(for: accountId)
+            .loadEventDetail(calendarId, timeZone.identifier, eventId)
     }
 }
-
-
-// MARK: - account
-
-extension GoogleCalendarUsecaseImple {
-    
-    public var integratedAccount: AnyPublisher<ExternalServiceAccountinfo?, Never> {
-        let serviceId = self.googleService.identifier
-        return self.sharedDataStore.observe(
-            [String: ExternalServiceAccountinfo].self,
-            key: ShareDataKeys.externalCalendarAccounts.rawValue
-        )
-        .map { $0?[serviceId] }
-        .removeDuplicates()
-        .eraseToAnyPublisher()
-    }
-}
-
 
 public extension GoogleCalendar.Tag {
-    
+
     var isHoliday: Bool {
         return id.hasSuffix("holiday@group.v.calendar.google.com")
+    }
+}
+
+
+private extension ExternalCalendarIntegrationUsecase {
+
+    func currentAndNewIntegratedGoogleAccounts() -> AnyPublisher<ExternalServiceAccountinfo, Never> {
+
+        let googleServiceId = GoogleCalendarService.id
+        let currents = self.integratedServiceAccounts
+            .map { $0[googleServiceId] ?? [] }
+            .flatMap { $0.publisher }
+        let newIntegrated = self.integrationStatusChanged
+            .compactMap { status in
+                switch status {
+                case .integrated(let serviceId, let account) where serviceId == googleServiceId:
+                    return account
+                default: return nil
+                }
+            }
+
+        return Publishers.Merge(currents, newIntegrated)
+            .removeAllDuplicates()
+            .eraseToAnyPublisher()
     }
 }

@@ -22,7 +22,7 @@ struct TodayAndNextWidgetViewModel {
     var refreshAfter: TimeInterval?
     let defaultTagColorSetting: DefaultEventTagColorSetting
     let customTagMap: [String: any EventTag]
-    var googleCalendarColors: GoogleCalendar.Colors = .init(calendars: [:], events: [:])
+    var googleCalendarColors: GoogleCalendar.Colors = .init(ownerId: "", calendars: [:], events: [:])
     var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
     var widgetSetting = WidgetAppearanceSettings()
     
@@ -51,11 +51,11 @@ struct TodayAndNextWidgetViewModel {
         let movingEvent = ScheduleEventCellViewModel("moving", name: "widget.events.sample::moving".localized())
             |> \.periodText .~ .singleText(.init(text: "calendar::event_time::allday".localized()))
             |> \.eventTimeRawValue .~ .allDay(0..<10, secondsFromGMT: 0)
-            |> \.tagId .~ .custom("moving")
-        
+            |> \.colorSource .~ EventTagId.custom("moving")
+
         let depositEvent = TodoEventCellViewModel("deposit", name: "widget.events.sample::deposit_remain".localized())
             |> \.periodText .~ .singleText(.init(text: "11:00"))
-            |> \.tagId .~ .custom("moving")
+            |> \.colorSource .~ EventTagId.custom("moving")
         
         let lunchEvent = ScheduleEventCellViewModel("lunch", name: "widget.events.sample::luch_appointment".localized())
             |> \.periodText .~ .singleText(.init(text: "13:00"))
@@ -140,7 +140,7 @@ extension TodayAndNextWidgetViewModel {
             let cvms = rows.map { $0.cvm }
             self.id = UUID().uuidString
             
-            self.tags = cvms.map { $0.tagId }
+            self.tags = cvms.map { ($0.colorSource as? EventTagId) ?? .default }
             self.todoCount = cvms.filter { $0 is TodoEventCellViewModel }.count
         }
     }
@@ -520,7 +520,7 @@ extension TodayAndNextWidgetViewModelProvider {
         let model = builder.build(refDate, events)
         
         return model
-            |> \.googleCalendarColors .~ (events.googleCalendarColors ?? .init(calendars: [:], events: [:]))
+            |> \.googleCalendarColors .~ (events.googleCalendarColors ?? .init(ownerId: "", calendars: [:], events: [:]))
             |> \.googleCalendarTags .~ events.googleCalendarTags
             |> \.widgetSetting .~ setting.widget
     }

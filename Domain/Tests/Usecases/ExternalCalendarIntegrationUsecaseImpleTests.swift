@@ -17,22 +17,24 @@ import UnitTestHelpKit
 
 
 final class ExternalCalendarIntegrationUsecaseImpleTests: PublisherWaitable {
-    
+
     var cancelBag: Set<AnyCancellable>! = []
-    
+    fileprivate let spyConnectionController = SpyExternalCalendarDBConnectionController()
+
     private func makeUsecase(
         startWithIntegrated accounts: [ExternalServiceAccountinfo] = [],
         withWait subject: PassthroughSubject<Void, Never>? = nil
     ) -> ExternalCalendarIntegrationUsecaseImple {
-        
+
         let serviceProvider = FakeOauth2ServiceProvider()
         serviceProvider.authenticationWaitMocking = subject
         let repository = StubExternalCalendarIntegrateRepository(accounts)
         let store = SharedDataStore()
-        
+
         return ExternalCalendarIntegrationUsecaseImple(
             oauth2ServiceProvider: serviceProvider,
             externalServiceIntegrateRepository: repository,
+            dbConnectionController: spyConnectionController,
             sharedDataStore: store
         )
     }
@@ -72,7 +74,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         #expect(identifiers == [
             [], integratedAccounts.map { $0.serviceIdentifier }
         ])
-        let accounts = accountMaps.flatMap { $0.values }
+        let accounts = accountMaps.flatMap { $0.values }.flatMap { $0 }
         let withoutIntegrationTime = accounts.map { $0.intergrationTime }.reduce(true) { $0 && ($1 == nil) }
         #expect(withoutIntegrationTime == true)
     }
@@ -137,8 +139,8 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         try await usecase.prepareIntegratedAccounts()
         
         // when
-        let result: Void? = try await usecase.stopIntegrate(external: service)
-        
+        let result: Void? = try await usecase.stopIntegrate(external: service, accountId: "some")
+
         // then
         #expect(result != nil)
     }
@@ -155,7 +157,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         
         // when
         let accountMaps = try await self.outputs(confirm, for: usecase.integratedServiceAccounts) {
-            try await usecase.stopIntegrate(external: service)
+            try await usecase.stopIntegrate(external: service, accountId: "some")
         }
         
         // then
@@ -196,6 +198,47 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         #expect(handled == false)
     }
     
+    // prepareIntegratedAccounts 시에 이미 연동된 서비스 DB open
+    @Test func usecase_whenPrepareAccounts_openDBForIntegratedServices() async throws {
+        // given
+        let account = ExternalServiceAccountinfo("google", email: "email")
+        let usecase = self.makeUsecase(startWithIntegrated: [account])
+
+        // when
+        try await usecase.prepareIntegratedAccounts()
+
+        // then
+        #expect(spyConnectionController.didOpenedServiceIds == ["google"])
+    }
+
+    // integrate 시에 DB open
+    @Test func usecase_whenIntegrate_openDB() async throws {
+        // given
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let usecase = self.makeUsecase()
+
+        // when
+        _ = try await usecase.integrate(external: service)
+
+        // then
+        #expect(spyConnectionController.didOpenedServiceIds == [service.identifier])
+    }
+
+    // stopIntegrate 시에 DB close
+    @Test func usecase_whenStopIntegrate_closeDB() async throws {
+        // given
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let account = ExternalServiceAccountinfo(service.identifier, email: "some")
+        let usecase = self.makeUsecase(startWithIntegrated: [account])
+        try await usecase.prepareIntegratedAccounts()
+
+        // when
+        try await usecase.stopIntegrate(external: service, accountId: "some")
+
+        // then
+        #expect(spyConnectionController.didClosedServiceIds == [service.identifier])
+    }
+
     @Test func usecase_whenServiceIntegrationStatusChanged_notify() async throws {
         // given
         let service = GoogleCalendarService(scopes: [.readOnly])
@@ -207,14 +250,66 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         let statues = try await self.outputs(expect, for: usecase.integrationStatusChanged) {
             
             _ = try await usecase.integrate(external: service)
-            try await usecase.stopIntegrate(external: service)
+            try await usecase.stopIntegrate(external: service, accountId: "google@email.com")
         }
         
         // then
         let services = statues.map { $0.serviceId }
-        let isIntegrated = statues.map { $0.isIntegrated }
         #expect(services == [service.identifier, service.identifier])
-        #expect(isIntegrated == [true, false])
+        if case .integrated(_, let account) = statues[0] {
+            #expect(account.email == "google@email.com")
+        } else {
+            Issue.record("첫번째 상태는 integrated 이어야 함")
+        }
+        if case .disconnected(_, let accountId) = statues[1] {
+            #expect(accountId == "google@email.com")
+        } else {
+            Issue.record("두번째 상태는 disconnected 이어야 함")
+        }
+    }
+
+    @Test func usecase_currentIntegratedAccounts() async throws {
+        // given
+        let account = ExternalServiceAccountinfo("google", email: "email")
+        let usecase = self.makeUsecase(startWithIntegrated: [account])
+        try await usecase.prepareIntegratedAccounts()
+
+        // when
+        let accounts = usecase.currentIntegratedAccounts()
+
+        // then
+        #expect(accounts.count == 1)
+        #expect(accounts.first?.email == "email")
+    }
+
+    @Test func usecase_currentIntegratedAccountsForService() async throws {
+        // given
+        let google = ExternalServiceAccountinfo("google", email: "google@email.com")
+        let other = ExternalServiceAccountinfo("other", email: "other@email.com")
+        let usecase = self.makeUsecase(startWithIntegrated: [google, other])
+        try await usecase.prepareIntegratedAccounts()
+
+        // when
+        let accounts = usecase.currentIntegratedAccounts(for: "google")
+
+        // then
+        #expect(accounts.count == 1)
+        #expect(accounts.first?.email == "google@email.com")
+    }
+}
+
+
+private final class SpyExternalCalendarDBConnectionController: ExternalCalendarDBConnectionControl, @unchecked Sendable {
+
+    var didOpenedServiceIds: [String] = []
+    var didClosedServiceIds: [String] = []
+
+    func open(serviceId: String) async throws {
+        self.didOpenedServiceIds.append(serviceId)
+    }
+
+    func close(serviceId: String) async throws {
+        self.didClosedServiceIds.append(serviceId)
     }
 }
 
@@ -288,7 +383,7 @@ private final class StubExternalCalendarIntegrateRepository: ExternalCalendarInt
         }
     }
     
-    func removeAccount(for serviceIdentifier: String) async throws {
+    func removeAccount(for serviceIdentifier: String, accountId: String) async throws {
         self.accountMap[serviceIdentifier] = nil
     }
 }

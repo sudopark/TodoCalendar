@@ -44,7 +44,11 @@ import Domain
     // event tag color
     public var allEventTagColorMap: [EventTagId: UIColor] = [:]
     public func color(_ id: EventTagId?) -> UIColor {
-        return allEventTagColorMap[id ?? .default] ??  allEventTagColorMap[.default] ?? .clear
+        switch id ?? .default {
+        case .holiday: return allEventTagColorMap[.holiday] ?? tagColors.holiday
+        case .default: return allEventTagColorMap[.default] ?? tagColors.defaultColor
+        default: return allEventTagColorMap[id ?? .default] ?? allEventTagColorMap[.default] ?? tagColors.defaultColor
+        }
     }
     
     public func colorOnCalendar(
@@ -57,23 +61,43 @@ import Domain
     
     
     // Google calendar color
-    public var googleCalendarColor: GoogleCalendar.Colors?
+    public var googleCalendarColors: [String: GoogleCalendar.Colors] = [:]
     public var googleCalendarTagMap: [String: GoogleCalendar.Tag] = [:]
-    
+
+    public func applyCalendarTags(_ tags: [GoogleCalendar.Tag], for accountId: String) {
+        googleCalendarTagMap = googleCalendarTagMap.filter { $0.value.ownerId != accountId }
+        tags.forEach { googleCalendarTagMap[$0.id] = $0 }
+    }
+
+    public func clearCalendarTags(for accountId: String) {
+        googleCalendarTagMap = googleCalendarTagMap.filter { $0.value.ownerId != accountId }
+    }
+
     public func googleEventColor(
         _ colorId: String?, _ calendarId: String
     ) -> UIColor {
-        
+        let accountId = googleCalendarTagMap[calendarId]?.ownerId
         if let colorId {
-            return self.googleCalendarColor?.events[colorId]
-                .flatMap { UIColor.from(hex: $0.backgroudHex) } ?? .clear
+            if let accountId {
+                return googleCalendarColors[accountId]?.events[colorId]
+                    .flatMap { UIColor.from(hex: $0.backgroudHex) } ?? .clear
+            } else {
+                // accountId를 특정할 수 없는 경우 전체 계정 순회 (위젯 등 레거시 경로)
+                return googleCalendarColors.values.lazy
+                    .compactMap { $0.events[colorId] }
+                    .first
+                    .flatMap { UIColor.from(hex: $0.backgroudHex) } ?? .clear
+            }
         } else {
-            let colorOnCalendar = self.googleCalendarTagMap[calendarId]
-                .flatMap { $0.backgroundColorHex }
-                .flatMap { UIColor.from(hex: $0) }
-            let colorOnPalette = self.googleCalendarTagMap[calendarId]
-                .flatMap { $0.colorId }
-                .flatMap { self.googleCalendarColor?.calendars[$0] }
+            let tag = googleCalendarTagMap[calendarId]
+            let colorOnCalendar = tag?.backgroundColorHex.flatMap { UIColor.from(hex: $0) }
+            let colorOnPalette = tag?.colorId
+                .flatMap { paletteId in
+                    if let accountId {
+                        return googleCalendarColors[accountId]?.calendars[paletteId]
+                    }
+                    return googleCalendarColors.values.lazy.compactMap { $0.calendars[paletteId] }.first
+                }
                 .flatMap { UIColor.from(hex: $0.backgroudHex) }
             return colorOnCalendar ?? colorOnPalette ?? .clear
         }

@@ -364,7 +364,7 @@ extension CalendarEventFetchUsecaseImpleTests {
         try await parameterizeTest(.schedule(schedule, nil), expectLocation: nil)
         try await parameterizeTest(.schedule(schedule, detail), expectLocation: "schedule place")
         
-        var google = GoogleCalendar.Event("e1", "", name: "", colorId: "", time: .at(refDate.timeIntervalSince1970 + 10))
+        var google = GoogleCalendar.Event("e1", "", accountId: "stub@gmail.com", name: "", colorId: "", time: .at(refDate.timeIntervalSince1970 + 10))
         try await parameterizeTest(.google(google), expectLocation: nil)
         
         google = google |> \.location .~ "google location"

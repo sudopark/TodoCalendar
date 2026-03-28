@@ -13,41 +13,50 @@ import Extensions
 
 
 open class StubExternalCalendarIntegrationUsecase: ExternalCalendarIntegrationUsecase, @unchecked Sendable {
-    
-    private let fakeAccountMapSubject = CurrentValueSubject<[String: ExternalServiceAccountinfo], Never>([:])
-    
+
+    private let fakeAccountMapSubject = CurrentValueSubject<[String: [ExternalServiceAccountinfo]], Never>([:])
+
     public init(_ accounts: [ExternalServiceAccountinfo]) {
-        self.fakeAccountMapSubject.send(
-            accounts.asDictionary { $0.serviceIdentifier }
-        )
+        let map = accounts.reduce(into: [String: [ExternalServiceAccountinfo]]()) { map, account in
+            map[account.serviceIdentifier, default: []].append(account)
+        }
+        self.fakeAccountMapSubject.send(map)
     }
-    
+
     open func prepareIntegratedAccounts() async throws { }
-    
+
     open func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
         let account = ExternalServiceAccountinfo(service.identifier, email: "email")
         var map = self.fakeAccountMapSubject.value
-        map[account.serviceIdentifier] = account
+        map[service.identifier, default: []].removeAll { $0.email == account.email }
+        map[service.identifier, default: []].append(account)
         self.fakeAccountMapSubject.send(map)
         return account
     }
-    
-    open func stopIntegrate(external service: any ExternalCalendarService) async throws {
+
+    open func stopIntegrate(external service: any ExternalCalendarService, accountId: String) async throws {
         var map = self.fakeAccountMapSubject.value
-        map[service.identifier] = nil
+        map[service.identifier]?.removeAll { $0.email == accountId }
+        if map[service.identifier]?.isEmpty == true {
+            map[service.identifier] = nil
+        }
         self.fakeAccountMapSubject.send(map)
     }
-    
+
     open func handleAuthenticationResultOrNot(open url: URL) -> Bool {
         return url.absoluteString.starts(with: "https://google.com")
     }
-    
-    open var integratedServiceAccounts: AnyPublisher<[String : ExternalServiceAccountinfo], Never> {
+
+    open var integratedServiceAccounts: AnyPublisher<[String: [ExternalServiceAccountinfo]], Never> {
         return self.fakeAccountMapSubject
             .eraseToAnyPublisher()
     }
-    
+
     public var integrationStatusChanged: AnyPublisher<ExternalCalendarIntegrationStatus, Never> {
         return Empty().eraseToAnyPublisher()
+    }
+
+    public func currentIntegratedAccounts() -> [ExternalServiceAccountinfo] {
+        return self.fakeAccountMapSubject.value.values.flatMap { $0 }
     }
 }

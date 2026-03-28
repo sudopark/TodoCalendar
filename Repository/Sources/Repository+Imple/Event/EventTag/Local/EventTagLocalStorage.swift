@@ -25,6 +25,7 @@ public protocol EventTagLocalStorage: Sendable {
     func loadOffTags() -> Set<EventTagId>
     func toggleTagIsOn(_ tagId: EventTagId) -> Set<EventTagId>
     func addOffIds(_ ids: [EventTagId]) -> Set<EventTagId>
+    func removeOffIds(_ ids: [EventTagId])
     func deleteOfftagId(_ tagId: String)
     func resetExternalCalendarOffTagId(_ serviceId: String)
 }
@@ -135,6 +136,12 @@ extension EventTagLocalStorageImple {
         let newIdStringValue = newIds.map { $0.stringValue }
         self.environmentStorage.update(self.offIds, newIdStringValue)
         return newIds
+    }
+
+    public func removeOffIds(_ ids: [EventTagId]) {
+        let removeSet = ids |> Set.init
+        let newIds = self.loadOffTags().filter { !removeSet.contains($0) }
+        self.environmentStorage.update(self.offIds, newIds.map { $0.stringValue })
     }
     
     public func deleteOfftagId(_ tagId: String) {

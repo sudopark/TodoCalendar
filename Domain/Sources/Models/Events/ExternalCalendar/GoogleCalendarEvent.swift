@@ -21,21 +21,23 @@ public struct GoogleCalendar { }
 extension GoogleCalendar {
     
     public struct Colors: Equatable, Sendable {
-        
+
         public struct ColorSet: Equatable, Sendable {
             public let foregroundHex: String
             public let backgroudHex: String
-            
+
             public init(foregroundHex: String, backgroudHex: String) {
                 self.foregroundHex = foregroundHex
                 self.backgroudHex = backgroudHex
             }
         }
-        
+
+        public let ownerId: String
         public let calendars: [String: ColorSet]
         public let events: [String: ColorSet]
-        
-        public init(calendars: [String : ColorSet], events: [String : ColorSet]) {
+
+        public init(ownerId: String, calendars: [String : ColorSet], events: [String : ColorSet]) {
+            self.ownerId = ownerId
             self.calendars = calendars
             self.events = events
         }
@@ -48,9 +50,10 @@ extension GoogleCalendar {
 extension GoogleCalendar {
     
     public struct Tag: EventTag {
-        
+
         public let tagId: EventTagId
         public let id: String
+        public var ownerId: String = ""
         public let name: String
         public var description: String?
         public var backgroundColorHex: String?
@@ -58,7 +61,7 @@ extension GoogleCalendar {
         public var colorId: String?
         public var colorHex: String? { backgroundColorHex }
         public var isSelected: Bool?
-        
+
         public init(id: String, name: String) {
             self.id = id
             self.tagId = .externalCalendar(serviceId: GoogleCalendarService.id, id: id)
@@ -242,6 +245,7 @@ extension GoogleCalendar {
     public struct Event: Sendable {
         public let eventId: String
         public let calendarId: String
+        public let accountId: String
         public let name: String
         public var eventTagId: EventTagId?
         public var colorId: String?
@@ -255,6 +259,7 @@ extension GoogleCalendar {
         
         public init(
             _ eventId: String, _ calendarId: String,
+            accountId: String,
             name: String,
             colorId: String?,
             htmlLink: String? = nil,
@@ -263,6 +268,7 @@ extension GoogleCalendar {
         ) {
             self.eventId = eventId
             self.calendarId = calendarId
+            self.accountId = accountId
             self.eventTagId = .externalCalendar(
                 serviceId: GoogleCalendarService.id, id: calendarId
             )
@@ -274,10 +280,11 @@ extension GoogleCalendar {
         }
         
         public init?(
-            _ origin: EventOrigin, _ calendarId: String, _ defaultTimeZone: String?
+            _ origin: EventOrigin, _ calendarId: String, accountId: String, _ defaultTimeZone: String?
         ) {
             self.eventId = origin.id
             self.calendarId = calendarId
+            self.accountId = accountId
             
             self.name = origin.summaryText
             self.eventTagId = .externalCalendar(

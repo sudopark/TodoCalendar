@@ -142,7 +142,11 @@ extension EventTagRemoteRepositoryImple {
     public func addOffIds(_ ids: [EventTagId]) -> Set<EventTagId> {
         return self.cacheStorage.addOffIds(ids)
     }
-    
+
+    public func removeOffIds(_ ids: [EventTagId]) {
+        self.cacheStorage.removeOffIds(ids)
+    }
+
     public func resetExternalCalendarOffTagId(_ serviceId: String) {
         self.cacheStorage.resetExternalCalendarOffTagId(serviceId)
     }

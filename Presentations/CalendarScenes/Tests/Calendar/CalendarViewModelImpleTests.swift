@@ -560,16 +560,10 @@ extension CalendarViewModelImpleTests {
         // 전체 범위 => 8~다음년도1월, 신규 => 2024년
         viewModel.focusChanged(from: 2, to: 0)
         
-        // 연동 완료
-        self.spyGoogleCalednarUsecase.updateHasAccount(
-            .init(GoogleCalendarService.id, email: "some")
-        )
-        
         // then
         XCTAssertEqual(self.spyGoogleCalednarUsecase.didRefreshedPeriod, [
             "2023.01.01_00:00..<2024.01.01_00:00",
-            "2024.01.01_00:00..<2025.01.01_00:00",
-            "2023.01.01_00:00..<2025.01.01_00:00"
+            "2024.01.01_00:00..<2025.01.01_00:00"
         ])
     }
     

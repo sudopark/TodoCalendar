@@ -30,7 +30,7 @@ final class StubExternalCalendarRepository: ExternalCalendarIntegrateRepository,
         throw RuntimeError("not support")
     }
     
-    func removeAccount(for serviceIdentifier: String) async throws { }
+    func removeAccount(for serviceIdentifier: String, accountId: String) async throws { }
 }
 
 final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked Sendable {
@@ -38,7 +38,7 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
     func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
         let colorSet = GoogleCalendar.Colors.ColorSet(foregroundHex: "for", backgroudHex: "back")
         let colors = GoogleCalendar.Colors(
-            calendars: ["c1": colorSet], events: ["e1": colorSet]
+            ownerId: "stub@google.com", calendars: ["c1": colorSet], events: ["e1": colorSet]
         )
         return Just(colors).mapAsAnyError().eraseToAnyPublisher()
     }
@@ -56,7 +56,7 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
             return Just(eventMocking).mapAsAnyError().eraseToAnyPublisher()
         }
         let event = GoogleCalendar.Event(
-            "e1", calendarId, name: "google", colorId: "e1", time: .period(period)
+            "e1", calendarId, accountId: "stub@gmail.com", name: "google", colorId: "e1", time: .period(period)
         )
         return Just([event]).mapAsAnyError().eraseToAnyPublisher()
     }

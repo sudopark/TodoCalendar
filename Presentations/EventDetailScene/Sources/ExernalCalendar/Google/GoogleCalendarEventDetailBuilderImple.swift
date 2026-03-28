@@ -34,11 +34,11 @@ extension GoogleCalendarEventDetailSceneBuilerImple: GoogleCalendarEventDetailSc
     
     @MainActor
     public func makeGoogleCalendarEventDetailScene(
-        calendarId: String, eventId: String
+        calendarId: String, accountId: String, eventId: String
     ) -> any GoogleCalendarEventDetailScene {
-        
+
         let viewModel = GoogleCalendarEventDetailViewModelImple(
-            calenadrId: calendarId, eventId: eventId,
+            calenadrId: calendarId, accountId: accountId, eventId: eventId,
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
             daysIntervalCountUsecase: self.usecaseFactory.makeDaysIntervalCountUsecase()

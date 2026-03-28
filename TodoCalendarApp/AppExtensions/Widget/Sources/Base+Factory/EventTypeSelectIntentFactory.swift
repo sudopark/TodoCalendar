@@ -61,14 +61,15 @@ extension EventTypeSelectIntentFactory {
         
         return ExternalCalendarIntegrateRepositoryImple(
             supportServices: AppEnvironment.supportExternalCalendarServices,
-            removeAPIPerService: [:],
+            remotePool: NopExternalCalendarAccountRemotePool(),
             keyChainStore: self.base.keyChainStorage
         )
     }
     
     func makeGoogleCalendarRepository() -> any GoogleCalendarRepository {
-        return GoogleCalendarReadOnlyRepositoryImple(
-            localStorage: GoogleCalendarLocalStorageImple(sqliteService: base.commonSqliteService)
+        return GoogleCalendarLocalAggregatedRepositoryImple(
+            connectionPool: base.externalCalendarDBConnectionPool,
+            accountRepository: makeExternalCalendarAcountRepository()
         )
     }
 }

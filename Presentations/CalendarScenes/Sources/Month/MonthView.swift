@@ -284,10 +284,9 @@ private struct WeekRowView: View {
         }
         
         let selectColor: (any CalendarEvent) -> Color = { event in
-            switch event {
-            case let google as GoogleCalendarEvent:
-                return self.appearance.googleEventColorOnCalendar(google.colorId, google.calendarId, offColor: { $0.text1 })
-                    .asColor
+            switch event.colorSource {
+            case let google as GoogleCalendarEventColorSource:
+                return self.appearance.googleEventColorOnCalendar(google.colorId, google.calendarId, offColor: { $0.text1 }).asColor
             default:
                 return self.appearance.colorOnCalendar(event.eventTagId, offColor: { $0.text1 }).asColor
             }
@@ -363,13 +362,11 @@ private struct WeekRowView: View {
         let offsetX = CGFloat(line.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
         let width = CGFloat(line.daysSequence.count) * dayWidth - Metric.eventInterspacing
         let lineColor = {
-            switch line.event {
-            case let google as GoogleCalendarEvent:
-                return self.appearance.googleEventColorOnCalendar(
-                    google.colorId, google.calendarId
-                ).asColor
+            switch line.colorSource {
+            case let google as GoogleCalendarEventColorSource:
+                return self.appearance.googleEventColorOnCalendar(google.colorId, google.calendarId).asColor
             default:
-                return self.appearance.colorOnCalendar(line.eventTagId).asColor
+                return self.appearance.colorOnCalendar(line.event.eventTagId).asColor
             }
         }()
         let background: some View = {

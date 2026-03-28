@@ -85,8 +85,8 @@ extension EventDeepLinkHandlerImple {
                 guard let eventId = pending.queryParams["event_id"],
                       let calendarId = pending.queryParams["calendar_id"] else
                 { return }
-                
-                self?.router?.routeToGoogleEventDetail(calendarId: calendarId, eventId: eventId)
+                let accountId = pending.queryParams["account_id"] ?? ""
+                self?.router?.routeToGoogleEventDetail(calendarId: calendarId, accountId: accountId, eventId: eventId)
             }
         }
     }

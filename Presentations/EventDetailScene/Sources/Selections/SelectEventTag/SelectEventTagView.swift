@@ -143,9 +143,11 @@ struct SelectEventTagView: View {
     private func tagCellView(_ tag: TagCellViewModel) -> some View {
         HStack(spacing: 12) {
             
-            Circle()
-                .frame(width: 8, height: 8)
-                .foregroundStyle(appearance.color(tag.id).asColor)
+            EventTagColorView(tag.id) { color in
+                Circle()
+                    .frame(width: 8, height: 8)
+                    .foregroundStyle(color)
+            }
             
             Text(tag.name)
                 .font(self.appearance.fontSet.normal.asFont)

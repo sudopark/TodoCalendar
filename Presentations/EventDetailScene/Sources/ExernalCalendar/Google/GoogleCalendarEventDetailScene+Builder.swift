@@ -18,6 +18,6 @@ public protocol GoogleCalendarEventDetailSceneBuiler: AnyObject {
     
     @MainActor
     func makeGoogleCalendarEventDetailScene(
-        calendarId: String, eventId: String
+        calendarId: String, accountId: String, eventId: String
     ) -> any GoogleCalendarEventDetailScene
 }

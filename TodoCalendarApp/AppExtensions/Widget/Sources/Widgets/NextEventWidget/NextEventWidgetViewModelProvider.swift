@@ -114,13 +114,13 @@ struct NextEventWidgetViewModelBuilder {
         case let todo as TodoCalendarEvent:
                 .todo(id: todo.eventId)
         case let schedule as ScheduleCalendarEvent:
-            schedule.eventTime.flatMap {
+            schedule.eventTime.map {
                 EventDeepLinkBuilder.schedule(id: schedule.eventIdWithoutTurn, time: $0)
             }
         case let holiday as HolidayCalendarEvent:
                 .holiday(id: holiday.eventId)
         case let google as GoogleCalendarEvent:
-                .google(id: google.eventId, calendarId: google.calendarId)
+                .google(id: google.eventId, calendarId: google.calendarId, accountId: google.accountId)
         default: nil
         }
         

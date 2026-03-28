@@ -145,8 +145,8 @@ extension EventListWidgetViewModelProviderTests {
         
         // then
         let eventModels = viewModel.pages.flatMap { $0.sections }.flatMap { $0.events }
-        let colors = eventModels.map { $0.tagId }
-        XCTAssertEqual(colors, [
+        let tagIds = eventModels.compactMap { $0.colorSource as? EventTagId }
+        XCTAssertEqual(tagIds, [
             .default,   // current todo
             .default,   // start date todo,
             .holiday,   // last date

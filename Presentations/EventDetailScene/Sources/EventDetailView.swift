@@ -304,10 +304,6 @@ struct EventDetailView: View {
     }
     @State private var isTimeSelecting: TimeSelecting?
     
-    private var selectedTagColor: Color {
-        guard let tag = self.state.selectedTag else { return .clear }
-        return self.appearance.color(tag.tagId).asColor
-    }
     
     var body: some View {
         ScrollViewReader { proxy in
@@ -371,9 +367,11 @@ struct EventDetailView: View {
     
     private var nameInputView: some View {
         HStack {
-            RoundedRectangle(cornerRadius: 3)
-                .fill(self.selectedTagColor)
-                .frame(width: 6)
+            EventTagColorView(self.state.selectedTag?.tagId ?? .default) { color in
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(color)
+                    .frame(width: 6)
+            }
             
             @Bindable var state = self.state
             TextField(
@@ -780,9 +778,11 @@ struct EventDetailView: View {
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
             HStack {
-                Circle()
-                    .frame(width: 4, height: 4)
-                    .foregroundStyle(self.selectedTagColor)
+                EventTagColorView(self.state.selectedTag?.tagId ?? .default) { color in
+                    Circle()
+                        .frame(width: 4, height: 4)
+                        .foregroundStyle(color)
+                }
                 
                 Text(self.state.selectedTag?.name ?? "")
                     .font(self.appearance.fontSet.subNormal.asFont)

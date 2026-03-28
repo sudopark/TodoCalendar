@@ -184,7 +184,8 @@ struct SystemSizeForemostEventView: View {
     
     private func tagLineView() -> some View {
         let defColors = EventTagColorSet(model.defaultTagColorSetting)
-        let color = switch model.eventModel?.tagId {
+        let tagId = model.eventModel?.colorSource as? EventTagId
+        let color = switch tagId {
         case .holiday: defColors.holiday
         case .default: defColors.defaultColor
         case .custom: model.tag?.colorHex.flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor

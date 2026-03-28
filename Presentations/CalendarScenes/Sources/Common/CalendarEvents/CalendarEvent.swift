@@ -10,6 +10,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import CommonPresentation
 
 
 public enum EventTimeOnCalendar: Hashable, Sendable {
@@ -49,7 +50,7 @@ public enum EventTimeOnCalendar: Hashable, Sendable {
 // MARK: - CalendarEvent
 
 public protocol CalendarEvent: Sendable {
-    
+
     var eventId: String { get }
     var name: String { get }
     var eventTime: EventTime? { get }
@@ -58,7 +59,8 @@ public protocol CalendarEvent: Sendable {
     var isForemost: Bool { get }
     var isRepeating: Bool { get }
     var locationText: String? { get set }
-    
+    var colorSource: any EventTagColorSource { get }
+
     var compareKey: String { get }
 }
 
@@ -79,10 +81,12 @@ extension Array where Element == any CalendarEvent {
 }
 
 extension CalendarEvent {
-    
+
     public var compareKey: String {
         return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.locationText ?? "nil")"
     }
+
+    public var colorSource: any EventTagColorSource { eventTagId }
 }
 
 
@@ -212,9 +216,10 @@ public struct HolidayCalendarEvent: CalendarEvent {
 }
 
 public struct GoogleCalendarEvent: CalendarEvent {
-    
+
     public let eventId: String
     public let calendarId: String
+    public let accountId: String
     public let name: String
     public let eventTime: EventTime?
     public let eventTimeOnCalendar: EventTimeOnCalendar?
@@ -228,6 +233,7 @@ public struct GoogleCalendarEvent: CalendarEvent {
     public init(_ event: GoogleCalendar.Event, in timeZone: TimeZone) {
         self.eventId = event.eventId
         self.calendarId = event.calendarId
+        self.accountId = event.accountId
         self.name = event.name
         self.eventTime = event.eventTime
         switch event.eventTime {
@@ -251,6 +257,10 @@ public struct GoogleCalendarEvent: CalendarEvent {
         self.locationText = event.location
     }
     
+    public var colorSource: any EventTagColorSource {
+        GoogleCalendarEventColorSource(calendarId: calendarId, colorId: colorId)
+    }
+
     public var compareKey: String {
         return "\(String(describing: Self.self))-\(eventId)-\(name)-\(eventTime?.hashValue ?? -1)-\(eventTimeOnCalendar?.hashValue ?? -1)-\(eventTagId.hashValue)-\(self.isForemost)-\(self.colorId ?? "nil")-\(self.htmlLink ?? "nil")-\(self.locationText ?? "nil")"
     }

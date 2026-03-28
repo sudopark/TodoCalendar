@@ -45,7 +45,7 @@ final class EventSettingViewController: UIHostingController<EventSettingContaine
         eventHandlers.selectDefaultMapApp = viewModel.selectDefaultMapApp
         eventHandlers.forceSync = viewModel.forceSync
         eventHandlers.connectExternalCalendar = viewModel.connectExternalCalendar(_:)
-        eventHandlers.disconnectExternalCalendar = viewModel.disconnectExternalCalendar(_:)
+        eventHandlers.disconnectExternalCalendar = viewModel.disconnectExternalCalendar(_:accountId:)
         
         let containerView = EventSettingContainerView(
             viewAppearance: viewAppearance,

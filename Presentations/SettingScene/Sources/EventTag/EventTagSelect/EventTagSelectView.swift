@@ -140,9 +140,11 @@ struct EventTagSelectView: View {
     private func cellView(_ cellViewModel: BaseCalendarEventTagCellViewModel) -> some View {
         HStack(spacing: 12) {
             
-            Circle()
-                .fill(appearance.color(cellViewModel.id).asColor)
-                .frame(width: 8, height: 8)
+            EventTagColorView(cellViewModel.id) { color in
+                Circle()
+                    .fill(color)
+                    .frame(width: 8, height: 8)
+            }
             
             Text(cellViewModel.name)
                 .font(appearance.fontSet.normal.asFont)

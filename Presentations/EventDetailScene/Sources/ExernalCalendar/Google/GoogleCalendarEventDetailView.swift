@@ -259,17 +259,17 @@ struct GoogleCalendarEventDetailView: View {
         }
     }
     
-    private var selectedTagColor: Color {
-        guard let model = self.state.eventColor else { return .clear }
-        return self.appearance.googleEventColor(model.colorId, model.calendarId).asColor
-    }
-    
     private var nameView: some View {
         HStack {
-            
-            RoundedRectangle(cornerRadius: 3)
-                .fill(self.selectedTagColor)
-                .frame(width: 6)
+
+            let colorSource: any EventTagColorSource = self.state.eventColor.map {
+                GoogleCalendarEventColorSource(calendarId: $0.calendarId, colorId: $0.colorId)
+            } ?? EventTagId.default
+            EventTagColorView(colorSource) { color in
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(color)
+                    .frame(width: 6)
+            }
             
             Text(self.state.eventName ?? "")
                 .font(appearance.fontSet.size(22, weight: .semibold).asFont)
@@ -597,6 +597,7 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
             setting: setting, isSystemDarkTheme: false
         )
         let colors = GoogleCalendar.Colors(
+            ownerId: "preview@google.com",
             calendars: [
                 "colorId": .init(foregroundHex: "#ff0000", backgroudHex: "#ff00ff")
             ],
@@ -604,7 +605,7 @@ struct GoogleCalendarEventDetailViewPreviewProvider: PreviewProvider {
                 "colorId": .init(foregroundHex: "#ff0000", backgroudHex: "#ff00ff")
             ]
         )
-        viewAppearance.googleCalendarColor = colors
+        viewAppearance.googleCalendarColors[colors.ownerId] = colors
         let state = GoogleCalendarEventDetailViewState()
         state.eventName = "google calendar event"
         state.hasDetailLink = true

@@ -88,9 +88,10 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
         self.externalCalendarServiceUsecase.integrationStatusChanged
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] status in
-                if status.account != nil {
+                switch status {
+                case .integrated:
                     self?.prepareUsecase.prepareExternalCalendarIntegrated(status.serviceId)
-                } else {
+                case .disconnected:
                     self?.prepareUsecase.prepareExternalCalendarStopIntegrated(status.serviceId)
                 }
             })

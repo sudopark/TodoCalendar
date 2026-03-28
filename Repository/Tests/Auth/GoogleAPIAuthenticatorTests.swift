@@ -26,6 +26,7 @@ struct GoogleAPIAuthenticatorTests {
         self.spyRemote = .init(responses: Self.response)
         self.spyCredentialStore = .init(
             serviceIdentifier: "google",
+            accountId: "test@gmail.com",
             keyChainStore: FakeKeyChainStore()
         )
     }

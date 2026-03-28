@@ -11,6 +11,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Extensions
 import SQLiteService
 import UnitTestHelpKit
 
@@ -24,16 +25,19 @@ final class GoogleCalendarRepositoryImple_Tests: PublisherWaitable, LocalTestabl
     let sqliteService: SQLiteService = .init()
     let cacheStorage: GoogleCalendarLocalStorageImple
     private let stubRemote: StubRemoteAPI
-    
+    private let testAccountId = "test@google.com"
+
     init() {
         self.stubRemote = .init(responses: DummyResponse().reponse)
-        self.cacheStorage = .init(sqliteService: self.sqliteService)
+        let pool = StubExternalCalendarSQLiteConnectionPool(self.sqliteService)
+        self.cacheStorage = .init(connectionPool: pool)
     }
-    
+
     private func makeRepository() -> GoogleCalendarRepositoryImple {
         return .init(
             remote: self.stubRemote,
-            cacheStorage: self.cacheStorage
+            cacheStorage: self.cacheStorage,
+            accountId: self.testAccountId
         )
     }
 }
@@ -64,9 +68,9 @@ extension GoogleCalendarRepositoryImple_Tests {
             let repository = self.makeRepository()
             
             // when
-            let cacheBeforeLoad = try await self.cacheStorage.loadColors()
+            let cacheBeforeLoad = try await self.cacheStorage.loadColors(accountId: self.testAccountId)
             let _ = try await self.outputs(expect, for: repository.loadColors())
-            let cachedAfterLoad = try await self.cacheStorage.loadColors()
+            let cachedAfterLoad = try await self.cacheStorage.loadColors(accountId: self.testAccountId)
             
             // then
             #expect(cacheBeforeLoad == nil)
@@ -94,10 +98,11 @@ extension GoogleCalendarRepositoryImple_Tests {
     
     private func stubColorCache() async throws {
         let color = GoogleCalendar.Colors(
+            ownerId: testAccountId,
             calendars: ["1": .init(foregroundHex: "fore", backgroudHex: "back")],
             events: [:]
         )
-        try await self.cacheStorage.updateColors(color)
+        try await self.cacheStorage.updateColors(color, accountId: self.testAccountId)
     }
 }
 
@@ -159,7 +164,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             
             // then
             let tagFromRemote = tagList.last?.last
-            let refreshedCached = try await self.cacheStorage.loadCalendarList().last
+            let refreshedCached = try await self.cacheStorage.loadCalendarList(accountId: self.testAccountId).last
             self.assertTagFromRemote(tagFromRemote)
             self.assertTagFromRemote(refreshedCached)
         }
@@ -169,7 +174,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         let calendars: [GoogleCalendar.Tag] = [
             .init(id: "old", name: "old")
         ]
-        try await self.cacheStorage.updateCalendarList(calendars)
+        try await self.cacheStorage.updateCalendarList(calendars, accountId: self.testAccountId)
     }
     
     private func assertTagFromRemote(_ tag: GoogleCalendar.Tag?) {
@@ -197,7 +202,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         try await self.runTestWithOpenClose("test_google_event_1") {
             // given
             let expect = self.expectConfirm("캐시 없는 상태에서 remote에서 이벤트 조회 -> 주어진 기간내 자동으로 페이징")
-            expect.count = 1
+            expect.count = 2
             expect.timeout = .milliseconds(100)
             let repository = self.makeRepository()
             
@@ -206,16 +211,15 @@ extension GoogleCalendarRepositoryImple_Tests {
             let eventLists = try await self.outputs(expect, for: load)
             
             // then
-            try #require(eventLists.count == 1)
-            
             let eventFromCache = eventLists.first
-            #expect(eventFromCache?.isEmpty != true)
+            #expect(eventFromCache?.isEmpty == true)
             
             let eventFromRemote = eventLists.last
             let ids = eventFromRemote?.map { $0.eventId }
             #expect(ids == [
                 "time_is_date", "out_of_period", "time_is_dateTime", "second_page_event"
             ])
+            #expect(eventFromRemote?.allSatisfy { $0.accountId == self.testAccountId } == true)
             self.assertEventTimeIsDate(eventFromRemote?.first)
         }
     }
@@ -243,11 +247,13 @@ extension GoogleCalendarRepositoryImple_Tests {
             #expect(eventFromCache?.map { $0.location } == [
                 "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea"
             ])
-            
+            #expect(eventFromCache?.allSatisfy { $0.accountId == self.testAccountId } == true)
+
             let eventFromRemote = eventLists.last
             #expect(eventFromRemote?.map { $0.eventId } == [
                 "time_is_date", "out_of_period", "time_is_dateTime", "second_page_event"
             ])
+            #expect(eventFromRemote?.allSatisfy { $0.accountId == self.testAccountId } == true)
             let name = eventFromRemote?.first(where: { $0.eventId == "time_is_date" })?.name
             #expect(name == "하루죙일")
         }
@@ -268,7 +274,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             let eventLists = try await self.outputs(expect, for: load)
             try #require(eventLists.count == 2)
             
-            let eventsFromCache = try await self.cacheStorage.loadEvents("c_id", self.range)
+            let eventsFromCache = try await self.cacheStorage.loadEvents("c_id", self.range, accountId: self.testAccountId)
             
             // then
             let ids = eventsFromCache.map { $0.eventId }
@@ -292,7 +298,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             // when
             let load = repository.loadEventDetail("c_id", "Asia/Seoul", "time_is_date")
             let details = try await self.outputs(expect, for: load)
-            let refreshedCache = try await self.cacheStorage.loadEventDetail("time_is_date")
+            let refreshedCache = try await self.cacheStorage.loadEventDetail("time_is_date", accountId: self.testAccountId)
             
             // then
             try #require(details.count == 2)
@@ -315,7 +321,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             // when
             let load = repository.loadEventDetail("c_id", "Asia/Seoul", "private_event")
             let details = try await self.outputs(expect, for: load)
-            let refreshedCache = try await self.cacheStorage.loadEventDetail("private_event")
+            let refreshedCache = try await self.cacheStorage.loadEventDetail("private_event", accountId: self.testAccountId)
             
             // then
             try #require(details.count == 1)
@@ -417,7 +423,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             |> \.htmlLink .~ "link"
             |> \.location .~ "Hangang Kukdong Apartments, 38-6 Toseong-ro, Songpa District, Seoul, South Korea"
         let timeZone = "Asia/Seoul"
-        let originEvent = GoogleCalendar.Event(origin, "c_id", timeZone)!
+        let originEvent = GoogleCalendar.Event(origin, "c_id", accountId: self.testAccountId, timeZone)!
         let list = GoogleCalendar.EventOriginValueList()
             |> \.timeZone .~ timeZone
             |> \.items .~ [origin]
@@ -427,9 +433,42 @@ extension GoogleCalendarRepositoryImple_Tests {
     
     private func saveCache() async throws {
         let (list, event) = self.dummyOldEventListsAndEvents
-        try await self.cacheStorage.updateEvents("c_id", list, [event])
+        try await self.cacheStorage.updateEvents("c_id", list, [event], accountId: self.testAccountId)
     }
 }
+
+extension GoogleCalendarRepositoryImple_Tests {
+
+    @Test func storage_whenConnectionNotAvailable_throwsError() async throws {
+        // given
+        let failingPool = FailingExternalCalendarSQLiteConnectionPool()
+        let storage = GoogleCalendarLocalStorageImple(connectionPool: failingPool)
+
+        // when + then
+        await #expect(throws: (any Error).self) {
+            _ = try await storage.loadColors(accountId: "test@google.com")
+        }
+    }
+}
+
+
+private final class StubExternalCalendarSQLiteConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {
+
+    private let service: SQLiteService
+    init(_ service: SQLiteService) { self.service = service }
+
+    func hasConnection(serviceId: String) async -> Bool { return true }
+    func connection(serviceId: String) async throws -> SQLiteService { return service }
+}
+
+private final class FailingExternalCalendarSQLiteConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {
+
+    func hasConnection(serviceId: String) async -> Bool { return false }
+    func connection(serviceId: String) async throws -> SQLiteService {
+        throw RuntimeError("no connection available")
+    }
+}
+
 
 private struct DummyResponse {
     

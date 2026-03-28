@@ -69,23 +69,17 @@ struct EventListCellView: View {
     }
     
     var body: some View {
-        let tagLineColor = {
-            switch self.cellViewModel {
-            case let google as GoogleCalendarEventCellViewModel:
-                return self.appearance.googleEventColor(google.colorId, google.calendarId).asColor
-            default:
-                return self.appearance.color(cellViewModel.tagId).asColor
-            }
-        }()
         return HStack(spacing: 8) {
             // left
             self.eventLeftView(cellViewModel)
                 .frame(width: 52)
-                
+
             // tag line
-            RoundedRectangle(cornerRadius: 3)
-                .fill(tagLineColor)
-                .frame(width: 6)
+            EventTagColorView(cellViewModel.colorSource) { color in
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(color)
+                    .frame(width: 6)
+            }
             
             // right
             self.eventRightView(cellViewModel)

@@ -21,7 +21,7 @@ import SQLiteService
 // MARK: - ApplicationViewAppearanceStore
 
 final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked Sendable {
-    
+
     let appearance: ViewAppearance
     @MainActor weak var window: UIWindow?
     
@@ -153,24 +153,31 @@ final class ApplicationViewAppearanceStoreImple: ViewAppearanceStore, @unchecked
 }
 
 extension ApplicationViewAppearanceStoreImple: GoogleCalendarViewAppearanceStore {
-    
-    func apply(colors: GoogleCalendar.Colors) {
+
+    func applyColors(_ colors: GoogleCalendar.Colors, for accountId: String) {
         Task { @MainActor in
-            self.appearance.googleCalendarColor = colors
+            self.appearance.googleCalendarColors[accountId] = colors
         }
     }
-    
-    func apply(googleCalendarTags: [GoogleCalendar.Tag]) {
+
+    func clearColors(for accountId: String) {
         Task { @MainActor in
-            self.appearance.googleCalendarTagMap = googleCalendarTags.asDictionary{ $0.id }
+            self.appearance.googleCalendarColors[accountId] = nil
         }
     }
-    
-    func clearGoogleCalendarColors() {
+
+    func applyCalendarTags(_ tags: [GoogleCalendar.Tag], for accountId: String) {
         Task { @MainActor in
-            self.appearance.googleCalendarColor = nil
+            self.appearance.applyCalendarTags(tags, for: accountId)
         }
     }
+
+    func clearCalendarTags(for accountId: String) {
+        Task { @MainActor in
+            self.appearance.clearCalendarTags(for: accountId)
+        }
+    }
+
 }
 
 // MARK: - ApplicationRootRouter

@@ -108,7 +108,7 @@ final class EventSettingViewEventHandler: Observable {
     var selectDefaultMapApp: () -> Void = { }
     var forceSync: () -> Void = { }
     var connectExternalCalendar: (String) -> Void = { _ in }
-    var disconnectExternalCalendar: (String) -> Void = { _ in }
+    var disconnectExternalCalendar: (String, String) -> Void = { _, _ in }
     var close: () -> Void = { }
 }
 
@@ -441,9 +441,9 @@ struct EventSettingView: View {
             Spacer()
             
             switch model.status {
-            case .integrated:
+            case .integrated(let accountId):
                Button {
-                   eventHandlers.disconnectExternalCalendar(model.serviceId)
+                   eventHandlers.disconnectExternalCalendar(model.serviceId, accountId)
                 } label: {
                     Text("event_setting::external_calendar::stop".localized())
                         .font(appearance.fontSet.subNormal.asFont)
@@ -467,8 +467,8 @@ struct EventSettingView: View {
 private extension ExternalCalanserServiceModel {
     
     var accountName: String? {
-        guard case .integrated(let accountName) = self.status else { return nil }
-        return accountName
+        guard case .integrated(let accountId) = self.status else { return nil }
+        return accountId
     }
     
     var compareKey: String {
@@ -503,8 +503,7 @@ struct EventSettingViewPreviewProvider: PreviewProvider {
         state.externalCalendarServiceModels = [
             ExternalCalanserServiceModel(
                 GoogleCalendarService(scopes: [.readOnly]),
-                with: nil
-//                        .init("google", email: "some@email.com")
+                accountId: nil
             )!
         ]
         state.eventSyncModel = .readToSync(lastSyncDataTime: "2020.02.03 12:33")
