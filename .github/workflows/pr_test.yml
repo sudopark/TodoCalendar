@@ -106,13 +106,10 @@ jobs:
       - name: Select Xcode 16.0
         run: sudo xcode-select -s /Applications/Xcode_16.0.app
 
-      - name: Install mise
-        uses: jdx/mise-action@v2
-
       - name: Setup Tuist
         run: |
-          mise install tuist@3.36.1
-          mise use -g tuist@3.36.1
+          curl -Ls https://install.tuist.io | bash
+          echo "3.36.1" > .tuist-version
           tuist version
 
       - name: Setup dummy config
