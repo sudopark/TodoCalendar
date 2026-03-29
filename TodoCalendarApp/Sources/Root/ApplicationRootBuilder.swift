@@ -57,6 +57,7 @@ final class ApplicationRootBuilder {
             appDataMigration: appDataMigration
         )
         
+        let backgroundEventSyncUsecase = BackgroundEventSyncUsecaseImple()
         let deepLinkHandler = ApplicationDeepLinkHandlerImple()
         let rootViewModel = ApplicationRootViewModelImple(
             authUsecase: accountUsecase,
@@ -64,7 +65,8 @@ final class ApplicationRootBuilder {
             prepareUsecase: prepareUsecase,
             deepLinkHandler: deepLinkHandler,
             externalCalendarServiceUsecase: externalCalendarIntegrationUsecase,
-            userNotificationUsecase: userNotificationUsecase
+            userNotificationUsecase: userNotificationUsecase,
+            backgroundEventSyncUsecase: backgroundEventSyncUsecase
         )
         remote.attach(listener: rootViewModel)
         applicationBase.externalCalendarAccountRemotePool.attach(listener: rootViewModel)
@@ -72,6 +74,7 @@ final class ApplicationRootBuilder {
             authUsecase: accountUsecase,
             accountUsecase: accountUsecase,
             externalCalenarIntegrationUsecase: externalCalendarIntegrationUsecase,
+            backgroundEventSyncUsecase: backgroundEventSyncUsecase,
             applicationBase: applicationBase,
             deepLinkHandler: deepLinkHandler
         )
