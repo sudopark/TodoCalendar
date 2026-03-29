@@ -33,8 +33,7 @@ jobs:
         run: |
           FILES="${{ steps.changed.outputs.files }}"
 
-          ALL_SCHEMES='["Domain","Repository","CalendarScenes","EventDetailScene","EventListScenes","SettingScene","MemberScenes","TodoCalendarApp","TodoCalendarAppWidget"]'
-          PRESENTATION_SCHEMES='["CalendarScenes","EventDetailScene","EventListScenes","SettingScene","MemberScenes","TodoCalendarApp"]'
+          ALL_SCHEMES="Domain Repository CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes TodoCalendarApp TodoCalendarAppWidget"
 
           run_all=false
           schemes=()
@@ -87,24 +86,20 @@ jobs:
             schemes+=("Repository")
           fi
 
-          # 중복 제거 + JSON 배열로 변환
+          # 중복 제거 + 공백 구분 문자열로 변환
           if [ ${#schemes[@]} -eq 0 ]; then
-            echo "schemes=[]" >> "$GITHUB_OUTPUT"
+            echo "schemes=" >> "$GITHUB_OUTPUT"
             echo "Detected: no test-relevant changes"
           else
-            unique=$(printf '%s\n' "${schemes[@]}" | sort -u | jq -R . | jq -s -c .)
+            unique=$(printf '%s\n' "${schemes[@]}" | sort -u | tr '\n' ' ' | sed 's/ $//')
             echo "schemes=${unique}" >> "$GITHUB_OUTPUT"
             echo "Detected schemes: ${unique}"
           fi
 
   test:
     needs: detect-changes
-    if: needs.detect-changes.outputs.schemes != '[]'
+    if: needs.detect-changes.outputs.schemes != ''
     runs-on: macos-15
-    strategy:
-      fail-fast: false
-      matrix:
-        scheme: ${{ fromJSON(needs.detect-changes.outputs.schemes) }}
     steps:
       - uses: actions/checkout@v5
 
@@ -126,6 +121,6 @@ jobs:
           tuist fetch
           tuist generate --no-open
 
-      - name: Run tests — ${{ matrix.scheme }}
+      - name: Run tests
         run: |
-          ./scripts/run-all-tests.sh "${{ matrix.scheme }}"
+          ./scripts/run-all-tests.sh ${{ needs.detect-changes.outputs.schemes }}
