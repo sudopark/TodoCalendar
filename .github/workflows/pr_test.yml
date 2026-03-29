@@ -1,0 +1,131 @@
+name: Test
+
+on:
+  pull_request:
+    branches: ['**']
+
+concurrency:
+  group: test-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      schemes: ${{ steps.map.outputs.schemes }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        run: |
+          FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+          echo "Changed files:"
+          echo "$FILES"
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$FILES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Map changes to test schemes
+        id: map
+        run: |
+          FILES="${{ steps.changed.outputs.files }}"
+
+          ALL_SCHEMES='["Domain","Repository","CalendarScenes","EventDetailScene","EventListScenes","SettingScene","MemberScenes","TodoCalendarApp","TodoCalendarAppWidget"]'
+          PRESENTATION_SCHEMES='["CalendarScenes","EventDetailScene","EventListScenes","SettingScene","MemberScenes","TodoCalendarApp"]'
+
+          run_all=false
+          schemes=()
+
+          # 전체 테스트가 필요한 변경
+          if echo "$FILES" | grep -qE "^(Domain/Sources/|Supports/Extensions/Sources/|Supports/UnitTestHelpKit/|Supports/TestDoubles/|Supports/Common3rdParty/|scripts/|Tuist/|\.github/)"; then
+            run_all=true
+          fi
+
+          if [ "$run_all" = true ]; then
+            echo "schemes=${ALL_SCHEMES}" >> "$GITHUB_OUTPUT"
+            echo "Detected: run all schemes"
+            exit 0
+          fi
+
+          # 개별 매핑
+          if echo "$FILES" | grep -q "^Repository/Sources/"; then
+            schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget")
+          fi
+          if echo "$FILES" | grep -qE "^Presentations/(CommonPresentation|Scenes)/"; then
+            schemes+=("CalendarScenes" "EventDetailScene" "EventListScenes" "SettingScene" "MemberScenes" "TodoCalendarApp")
+          fi
+          if echo "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
+            schemes+=("CalendarScenes" "TodoCalendarAppWidget")
+          fi
+          if echo "$FILES" | grep -q "^Presentations/EventDetailScene/"; then
+            schemes+=("EventDetailScene")
+          fi
+          if echo "$FILES" | grep -q "^Presentations/EventListScenes/"; then
+            schemes+=("EventListScenes")
+          fi
+          if echo "$FILES" | grep -q "^Presentations/SettingScene/"; then
+            schemes+=("SettingScene")
+          fi
+          if echo "$FILES" | grep -q "^Presentations/MemberScenes/"; then
+            schemes+=("MemberScenes")
+          fi
+          if echo "$FILES" | grep -qE "^TodoCalendarApp/(Sources|Tests)/"; then
+            schemes+=("TodoCalendarApp")
+          fi
+          if echo "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; then
+            schemes+=("TodoCalendarAppWidget")
+          fi
+
+          # 테스트 파일만 변경된 경우 해당 모듈 테스트 실행
+          if echo "$FILES" | grep -q "^Domain/Tests/"; then
+            schemes+=("Domain")
+          fi
+          if echo "$FILES" | grep -q "^Repository/Tests/"; then
+            schemes+=("Repository")
+          fi
+
+          # 중복 제거 + JSON 배열로 변환
+          if [ ${#schemes[@]} -eq 0 ]; then
+            echo "schemes=[]" >> "$GITHUB_OUTPUT"
+            echo "Detected: no test-relevant changes"
+          else
+            unique=$(printf '%s\n' "${schemes[@]}" | sort -u | jq -R . | jq -s -c .)
+            echo "schemes=${unique}" >> "$GITHUB_OUTPUT"
+            echo "Detected schemes: ${unique}"
+          fi
+
+  test:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.schemes != '[]'
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        scheme: ${{ fromJSON(needs.detect-changes.outputs.schemes) }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install mise
+        uses: jdx/mise-action@v2
+
+      - name: Setup Tuist
+        run: |
+          mise install tuist@3.36.1
+          mise use -g tuist@3.36.1
+          tuist version
+
+      - name: Setup dummy config
+        run: |
+          cd install && bash install.sh
+
+      - name: Generate project
+        run: |
+          tuist fetch
+          tuist generate --no-open
+
+      - name: Run tests — ${{ matrix.scheme }}
+        run: |
+          ./scripts/run-all-tests.sh "${{ matrix.scheme }}"
