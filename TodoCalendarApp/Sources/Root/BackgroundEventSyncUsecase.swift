@@ -8,6 +8,7 @@
 
 import Foundation
 @preconcurrency import BackgroundTasks
+@preconcurrency import UIKit
 import WidgetKit
 import Domain
 import Scenes
@@ -26,11 +27,13 @@ protocol BackgroundEventSyncUsecase: Sendable {
 final class BackgroundEventSyncUsecaseImple: BackgroundEventSyncUsecase, @unchecked Sendable {
 
     var usecaseFactory: (any UsecaseFactory)?
-    private let taskId = "com.sudo.park.TodoCalendarApp.bgSync"
+    private let refreshTaskId = "com.sudo.park.TodoCalendarApp.bgSync"
 
     init() {}
 }
 
+
+// MARK: - register & schedule
 
 extension BackgroundEventSyncUsecaseImple {
 
@@ -40,7 +43,7 @@ extension BackgroundEventSyncUsecaseImple {
 
     func registerTask() {
 
-        BGTaskScheduler.shared.register(forTaskWithIdentifier: taskId, using: nil) { [weak self] task in
+        BGTaskScheduler.shared.register(forTaskWithIdentifier: refreshTaskId, using: nil) { [weak self] task in
             guard let refreshTask = task as? BGAppRefreshTask
             else {
                 task.setTaskCompleted(success: false)
@@ -48,45 +51,58 @@ extension BackgroundEventSyncUsecaseImple {
             }
             self?.handleBackgroundSync(refreshTask)
         }
+
     }
 
     func scheduleTask() {
-
-        let request = BGAppRefreshTaskRequest(identifier: taskId)
+        let request = BGAppRefreshTaskRequest(identifier: refreshTaskId)
         request.earliestBeginDate = Date().addingTimeInterval(15 * 60)
         do {
             try BGTaskScheduler.shared.submit(request)
-            logger.log(.backgroundSync, level: .debug, "submit task")
+            logger.log(.backgroundSync, level: .debug, "submit refresh task")
         } catch {
-            logger.log(.backgroundSync, level: .error, "fail to sumit new background refresh task: \(error.localizedDescription)")
+            logger.log(.backgroundSync, level: .error, "fail to submit refresh task: \(error.localizedDescription)")
         }
     }
+}
 
-    private func handleBackgroundSync(_ task: BGAppRefreshTask) {
 
-        logger.log(.backgroundSync, level: .debug, "background task start - will sync task")
+// MARK: - handle sync
 
-        guard self.usecaseFactory?.eventSyncUsecase != nil
-        else {
-            logger.log(.backgroundSync, level: .error, "syncUsecase not prepared")
-            self.scheduleTask()
-            task.setTaskCompleted(success: true)
-            return
-        }
+extension BackgroundEventSyncUsecaseImple {
+
+    private func handleBackgroundSync(_ task: BGTask) {
+
+        logger.log(.backgroundSync, level: .debug, "background task start - \(type(of: task))")
+
+        let bgTaskId = UIApplication.shared.beginBackgroundTask(expirationHandler: nil)
+
+        let syncUsecase = self.usecaseFactory?.eventSyncUsecase
 
         task.expirationHandler = { [weak self] in
             logger.log(.backgroundSync, level: .warning, "sync job expired")
             self?.scheduleTask()
-            self?.usecaseFactory?.eventSyncUsecase.cancelSync()
+            syncUsecase?.cancelSync()
+            UIApplication.shared.endBackgroundTask(bgTaskId)
         }
 
-        self.usecaseFactory?.eventSyncUsecase.sync { [weak self, weak task] in
+        self.runSync { [weak self, weak task] in
+            self?.scheduleTask()
+            task?.setTaskCompleted(success: true)
+            UIApplication.shared.endBackgroundTask(bgTaskId)
+        }
+    }
+
+    private func runSync(completion: (@Sendable() -> Void)? = nil) {
+
+        let syncUsecase = self.usecaseFactory?.eventSyncUsecase
+
+        syncUsecase?.sync { [weak self] in
             logger.log(.backgroundSync, level: .debug, "sync job end, and will refresh widgets")
 
             WidgetCenter.shared.reloadAllTimelines()
 
-            self?.scheduleTask()
-            task?.setTaskCompleted(success: true)
+            completion?()
         }
     }
 }
