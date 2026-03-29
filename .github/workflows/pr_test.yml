@@ -99,18 +99,9 @@ jobs:
   test:
     needs: detect-changes
     if: needs.detect-changes.outputs.schemes != ''
-    runs-on: macos-14
+    runs-on: Maggie-m1
     steps:
       - uses: actions/checkout@v5
-
-      - name: Select Xcode 16.1
-        run: sudo xcode-select -s /Applications/Xcode_16.1.app
-
-      - name: Setup Tuist 3.42.2
-        run: |
-          curl -L https://github.com/tuist/tuist/releases/download/3.42.2/tuist.zip -o /tmp/tuist.zip
-          unzip -o /tmp/tuist.zip -d /usr/local/bin/
-          tuist version
 
       - name: Setup dummy config
         run: |
