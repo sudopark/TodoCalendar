@@ -14,7 +14,7 @@ WORKSPACE="TodoCalendar.xcworkspace"
 
 # CI 환경에서는 이름 기반, 로컬에서는 UDID 기반 시뮬레이터 지정
 if [ "${CI}" = "true" ]; then
-  DESTINATION="${DESTINATION:-platform=iOS Simulator,name=iPhone 16,OS=18.0}"
+  DESTINATION="${DESTINATION:-platform=iOS Simulator,name=iPhone 16,OS=18.1}"
 else
   SIMULATOR_UDID="76C24428-6AA8-461F-AE91-E748F8D2769E"  # iPhone 16, iOS 18.0
   DESTINATION="${DESTINATION:-platform=iOS Simulator,id=${SIMULATOR_UDID}}"
