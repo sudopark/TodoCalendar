@@ -103,6 +103,9 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Select Xcode 16.0
+        run: sudo xcode-select -s /Applications/Xcode_16.0.app
+
       - name: Install mise
         uses: jdx/mise-action@v2
 
