@@ -222,9 +222,8 @@ extension Project {
                 "CFBundleVersion": "\(self.buildNumber)",
                 "BGTaskSchedulerPermittedIdentifiers": [
                     "com.sudo.park.TodoCalendarApp.bgSync"
-                ]
-//                ,
-//                "UIBackgroundModes": ["fetch"]
+                ],
+                "UIBackgroundModes": ["fetch"]
             ]),
             sources: [
                 "Sources/**",

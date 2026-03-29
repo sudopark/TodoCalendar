@@ -24,15 +24,17 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let deepLinkHandler: ApplicationDeepLinkHandlerImple
     private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     private let userNotificationUsecase: any UserNotificationUsecase
+    private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
     var router: ApplicationRootRouter?
-    
+
     init(
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
         prepareUsecase: any ApplicationPrepareUsecase,
         deepLinkHandler: ApplicationDeepLinkHandlerImple,
         externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
-        userNotificationUsecase: any UserNotificationUsecase
+        userNotificationUsecase: any UserNotificationUsecase,
+        backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
@@ -40,6 +42,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         self.deepLinkHandler = deepLinkHandler
         self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
         self.userNotificationUsecase = userNotificationUsecase
+        self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
         
         self.bindAccountStatusChanged()
         self.bindApplicationStatusChanged()
@@ -58,7 +61,11 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
 // MARK: - handle root routing
 
 extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
-    
+
+    func registerBackgroundTask() {
+        self.backgroundEventSyncUsecase.registerTask()
+    }
+
     func prepareInitialScene() {
         Task {
             let result = try await self.prepareUsecase.prepareLaunch()
@@ -167,7 +174,7 @@ extension ApplicationRootViewModelImple {
     
     private func handleDidEnterBackground() {
         self.prepareUsecase.prepareEnterBackground()
-//        self.backgroundEventSyncUsecase.scheduleTask(withCancel: true)
+        self.backgroundEventSyncUsecase.scheduleTask()
         WidgetCenter.shared.reloadAllTimelines()
     }
 }
