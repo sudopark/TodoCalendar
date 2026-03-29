@@ -106,10 +106,10 @@ jobs:
       - name: Select Xcode 16.0
         run: sudo xcode-select -s /Applications/Xcode_16.0.app
 
-      - name: Setup Tuist
+      - name: Setup Tuist 3.36.1
         run: |
-          curl -Ls https://install.tuist.io | bash
-          echo "3.36.1" > .tuist-version
+          curl -L https://github.com/tuist/tuist/releases/download/3.36.1/tuist.zip -o /tmp/tuist.zip
+          unzip -o /tmp/tuist.zip -d /usr/local/bin/
           tuist version
 
       - name: Setup dummy config
