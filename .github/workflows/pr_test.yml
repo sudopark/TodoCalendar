@@ -102,18 +102,19 @@ jobs:
     runs-on: Maggie-m1
     steps:
       - uses: actions/checkout@v5
+        with:
+          clean: false
 
       - name: Setup dummy config
         run: |
           cd install && bash install.sh
 
-      - name: Tuist fetch
+      - name: Generate project
         run: |
-          tuist clean
-          tuist fetch
-
-      - name: Tuist generate
-        run: |
+          if [ ! -d "Tuist/Dependencies" ] || [ -z "$(ls -A Tuist/Dependencies 2>/dev/null)" ]; then
+            echo "Dependencies not found, fetching..."
+            tuist fetch
+          fi
           tuist generate --no-open
 
       - name: Run tests
