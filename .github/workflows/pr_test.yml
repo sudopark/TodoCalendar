@@ -107,17 +107,13 @@ jobs:
         run: |
           cd install && bash install.sh
 
-      - name: Debug environment
+      - name: Tuist fetch
         run: |
-          echo "PWD: $(pwd)"
-          echo "Tuist: $(which tuist) — $(tuist version)"
-          echo "Xcode: $(xcode-select -p)"
-          echo "Swift: $(swift --version | head -1)"
-          ls -la Tuist/ProjectDescriptionHelpers/InfoPlist_Secrets.swift || echo "InfoPlist_Secrets.swift NOT FOUND"
-
-      - name: Generate project
-        run: |
+          tuist clean
           tuist fetch
+
+      - name: Tuist generate
+        run: |
           tuist generate --no-open
 
       - name: Run tests
