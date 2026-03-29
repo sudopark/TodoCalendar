@@ -62,6 +62,17 @@ public struct AppleOAuth2Credential: OAuth2Credential {
     }
 }
 
+// MARK: - AppleCalendarCredential
+
+public struct AppleCalendarCredential: OAuth2Credential {
+
+    public let accountId: String
+
+    public init(accountId: String) {
+        self.accountId = accountId
+    }
+}
+
 public struct GoogleOAuth2Credential: OAuth2Credential {
     
     public let idToken: String
