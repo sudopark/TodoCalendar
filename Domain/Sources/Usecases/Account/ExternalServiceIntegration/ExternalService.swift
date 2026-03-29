@@ -47,6 +47,18 @@ public final class ExternalCalendarOAuthUsecaseProviderImple: ExternalCalendarOA
 }
 
 
+// MARK: - AppleCalendarService
+
+public struct AppleCalendarService: ExternalCalendarService {
+
+    public let identifier: String = AppleCalendarService.id
+
+    public static var id: String { "apple" }
+
+    public init() {}
+}
+
+
 // MARK: - GoogleCalendarService
 
 public struct GoogleCalendarService: ExternalCalendarService {
