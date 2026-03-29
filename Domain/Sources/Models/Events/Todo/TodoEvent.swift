@@ -11,6 +11,7 @@ import Optics
 
 
 // MARK: - Todo Evnet
+// CI test: dummy change
 
 public struct TodoEvent: Sendable, Equatable {
     
