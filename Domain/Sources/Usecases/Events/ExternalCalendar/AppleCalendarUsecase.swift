@@ -105,20 +105,11 @@ extension AppleCalendarUsecaseImple {
             [AppleCalendar.Tag].self,
             key: ShareDataKeys.appleCalendarTags.rawValue
         ) ?? []
-        let calendarIds = tags.map(\.id) |> Set.init
 
         appearanceStore.clearCalendarTags()
-
         sharedDataStore.delete(ShareDataKeys.appleCalendarTags.rawValue)
-        sharedDataStore.update(
-            [String: AppleCalendar.Event].self,
-            key: ShareDataKeys.appleCalendarEvents.rawValue
-        ) { existing in
-            (existing ?? [:]).filter { !calendarIds.contains($0.value.calendarId) }
-        }
-
+        sharedDataStore.delete(ShareDataKeys.appleCalendarEvents.rawValue)
         eventTagUsecase.removeEventTagOffIds(tags.map(\.tagId))
-
         Task { try? await repository.resetCache() }
     }
 }
@@ -133,20 +124,23 @@ extension AppleCalendarUsecaseImple {
     }
 
     private func refreshCalendarTags(isNew: Bool) {
-        Task { [weak self] in
-            guard let self else { return }
-            guard let tags = try? await self.repository.loadCalendarTags() else { return }
-            if isNew {
-                self.setInitialOffTagIds(from: tags)
-            }
-            self.sharedDataStore.put(
-                [AppleCalendar.Tag].self,
-                key: ShareDataKeys.appleCalendarTags.rawValue,
-                tags
+        repository.loadCalendarTags()
+            .sink(
+                receiveCompletion: { _ in },
+                receiveValue: { [weak self] tags in
+                    guard let self else { return }
+                    if isNew {
+                        self.setInitialOffTagIds(from: tags)
+                    }
+                    self.sharedDataStore.put(
+                        [AppleCalendar.Tag].self,
+                        key: ShareDataKeys.appleCalendarTags.rawValue,
+                        tags
+                    )
+                    self.appearanceStore.applyCalendarTags(tags)
+                }
             )
-            self.appearanceStore.applyCalendarTags(tags)
-        }
-        .store(in: &cancelBag)
+            .store(in: &cancelBag)
     }
 
     private func setInitialOffTagIds(from tags: [AppleCalendar.Tag]) {
@@ -175,42 +169,31 @@ extension AppleCalendarUsecaseImple {
         refreshEventBag.forEach { $0.cancel() }
         refreshEventBag = []
 
-        Task { [weak self] in
-            guard let self else { return }
-            let timeZone = self.sharedDataStore.value(
-                TimeZone.self,
-                key: ShareDataKeys.timeZone.rawValue
-            ) ?? .current
-            guard let events = try? await self.repository.loadEvents(
-                in: period, timeZone: timeZone
-            ) else { return }
-            self.sharedDataStore.put(
-                [String: AppleCalendar.Event].self,
-                key: ShareDataKeys.appleCalendarEvents.rawValue,
-                events.asDictionary { $0.eventId }
+        repository.loadEvents(in: period)
+            .sink(
+                receiveCompletion: { _ in },
+                receiveValue: { [weak self] events in self?.updateStoredEvents(events, in: period) }
             )
+            .store(in: &refreshEventBag)
+    }
+
+    private func updateStoredEvents(_ refreshed: [AppleCalendar.Event], in period: Range<TimeInterval>) {
+        sharedDataStore.update(
+            [String: AppleCalendar.Event].self,
+            key: ShareDataKeys.appleCalendarEvents.rawValue
+        ) { old in
+            let cachedInRange = (old ?? [:]).filter { $0.value.eventTime.isRoughlyOverlap(with: period) }
+            let newMap = refreshed.asDictionary { $0.eventId }
+            let removed = cachedInRange.filter { newMap[$0.key] == nil }
+            let eventsWithoutRemoved = (old ?? [:]).filter { removed[$0.key] == nil }
+            return refreshed.reduce(into: eventsWithoutRemoved) { $0[$1.eventId] = $1 }
         }
-        .store(in: &refreshEventBag)
     }
 
     public func events(in period: Range<TimeInterval>) -> AnyPublisher<[AppleCalendar.Event], Never> {
-        sharedDataStore.observe(
-            [String: AppleCalendar.Event].self,
-            key: ShareDataKeys.appleCalendarEvents.rawValue
-        )
-        .map { dict in
-            (dict?.values.map { $0 } ?? []).filter { $0.eventTime.isRoughlyOverlap(with: period) }
-        }
-        .eraseToAnyPublisher()
-    }
-}
-
-
-// MARK: - Task store helper
-
-private extension Task where Success == Void, Failure == Never {
-    func store(in bag: inout Set<AnyCancellable>) {
-        let cancellable = AnyCancellable { self.cancel() }
-        bag.insert(cancellable)
+        let shareKey = ShareDataKeys.appleCalendarEvents.rawValue
+        return sharedDataStore.observe([String: AppleCalendar.Event].self, key: shareKey)
+            .map { dict in (dict ?? [:]).values.filter { $0.eventTime.isRoughlyOverlap(with: period) } }
+            .eraseToAnyPublisher()
     }
 }
