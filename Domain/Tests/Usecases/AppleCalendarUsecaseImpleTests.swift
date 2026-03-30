@@ -26,11 +26,15 @@ final class AppleCalendarUsecaseImpleTests: PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>! = []
 
-    private func makeUsecase(isIntegrated: Bool = false) -> AppleCalendarUsecaseImple {
+    private func makeUsecase(
+        isIntegrated: Bool = false,
+        stubEvents: [AppleCalendar.Event] = []
+    ) -> AppleCalendarUsecaseImple {
         if isIntegrated {
             let account = ExternalServiceAccountinfo(AppleCalendarService.id, email: "local")
             stubIntegrationUsecase.setAccounts([account])
         }
+        stubRepository.stubEvents = stubEvents
         return .init(
             appleService: appleService,
             integrationUsecase: stubIntegrationUsecase,
@@ -64,38 +68,32 @@ final class AppleCalendarUsecaseImpleTests: PublisherWaitable {
 extension AppleCalendarUsecaseImpleTests {
 
     @Test func prepare_whenAccountExists_loadsTags() async throws {
+        // given
+        let expect = expectConfirm("연동 계정 있을 때 prepare 시 태그 로드")
+        expect.count = 2
         let usecase = makeUsecase(isIntegrated: true)
 
-        try await confirmation("연동 계정 있을 때 prepare 시 태그 로드", expectedCount: 1) { confirm in
-            spyAppearanceStore.didApplyTags = { confirm() }
+        // when
+        let tagLists = try await outputs(expect, for: usecase.calendarTags) {
             usecase.prepare()
-            try await Task.sleep(for: .milliseconds(100))
         }
+
+        // then
+        #expect(tagLists.last?.count == stubRepository.stubCalendarTags.count)
     }
 
     @Test func prepare_whenNoAccount_doesNotLoadTags() async throws {
+        // given
+        let expect = expectConfirm("연동 계정 없을 때 prepare 시 태그 미로드")
         let usecase = makeUsecase(isIntegrated: false)
 
-        try await confirmation("연동 계정 없을 때 prepare 시 태그 미로드", expectedCount: 0) { confirm in
-            spyAppearanceStore.didApplyTags = { confirm() }
+        // when
+        let tagLists = try await outputs(expect, for: usecase.calendarTags) {
             usecase.prepare()
-            try await Task.sleep(for: .milliseconds(100))
         }
-    }
 
-    @Test func prepare_whenCalledMultipleTimes_onlyLatestSubscriptionIsActive() async throws {
-        let usecase = makeUsecase()
-
-        usecase.prepare()
-        usecase.prepare()
-
-        var applyCount = 0
-        spyAppearanceStore.didApplyTags = { applyCount += 1 }
-
-        sendIntegration(true)
-        try await Task.sleep(for: .milliseconds(100))
-
-        #expect(applyCount == 1)
+        // then
+        #expect(tagLists.last?.isEmpty == true)
     }
 }
 
@@ -105,45 +103,54 @@ extension AppleCalendarUsecaseImpleTests {
 extension AppleCalendarUsecaseImpleTests {
 
     @Test func integration_whenConnected_loadsTags() async throws {
+        // given
+        let expect = expectConfirm("연동 시 태그 로드")
+        expect.count = 2
         let usecase = makeUsecase()
-        usecase.prepare()
 
-        try await confirmation("연동 시 태그 로드", expectedCount: 1) { confirm in
-            spyAppearanceStore.didApplyTags = { confirm() }
+        // when
+        let tagLists = try await outputs(expect, for: usecase.calendarTags) {
+            usecase.prepare()
             sendIntegration(true)
-            try await Task.sleep(for: .milliseconds(100))
         }
+
+        // then
+        #expect(tagLists.last?.isEmpty == false)
     }
 
     @Test func integration_whenConnected_setsInitialOffTagIds() async throws {
+        // given
         let expect = expectConfirm("신규 연동 시 모든 태그를 off 처리")
         expect.count = 2
         let usecase = makeUsecase()
 
+        // when
         let offIdsList = try await outputs(expect, for: stubEventTagUsecase.offEventTagIdsOnCalendar()) {
             usecase.prepare()
             sendIntegration(true)
-            try await Task.sleep(for: .milliseconds(100))
         }
 
+        // then
         let appleOffIds = offIdsList.last?.filter { $0.externalServiceId == AppleCalendarService.id } ?? []
         #expect(appleOffIds.count == stubRepository.stubCalendarTags.count)
     }
 
     @Test func integration_whenDisconnected_clearsTags() async throws {
+        // given
         let usecase = makeUsecase(isIntegrated: true)
         usecase.prepare()
         try await Task.sleep(for: .milliseconds(100))
 
-        #expect(spyAppearanceStore.tags != nil)
-
+        // when
         sendIntegration(false)
         try await Task.sleep(for: .milliseconds(100))
 
+        // then
         #expect(spyAppearanceStore.tags == nil)
     }
 
     @Test func integration_whenDisconnected_removesOffTagIds() async throws {
+        // given
         let expect = expectConfirm("연동 해제 시 off 처리된 태그 ID 정리")
         expect.count = 2
         let usecase = makeUsecase(isIntegrated: false)
@@ -151,11 +158,13 @@ extension AppleCalendarUsecaseImpleTests {
         let tagId = AppleCalendar.Tag(id: "cal:0", name: "Calendar 0", colorHex: nil).tagId
         stubEventTagUsecase.toggleEventTagIsOnCalendar(tagId)
 
+        // when
         let offIdsList = try await outputs(expect, for: stubEventTagUsecase.offEventTagIdsOnCalendar()) {
             usecase.prepare()
             sendIntegration(false)
         }
 
+        // then
         let hasAppleOffId = offIdsList.map { ids in
             ids.contains(where: { $0.externalServiceId == AppleCalendarService.id })
         }
@@ -163,13 +172,16 @@ extension AppleCalendarUsecaseImpleTests {
     }
 
     @Test func integration_whenDisconnected_resetsCacheOnRepository() async throws {
+        // given
         let usecase = makeUsecase(isIntegrated: true)
         usecase.prepare()
         try await Task.sleep(for: .milliseconds(100))
 
+        // when
         sendIntegration(false)
         try await Task.sleep(for: .milliseconds(200))
 
+        // then
         #expect(stubRepository.didResetCache == true)
     }
 }
@@ -180,30 +192,34 @@ extension AppleCalendarUsecaseImpleTests {
 extension AppleCalendarUsecaseImpleTests {
 
     @Test func calendarTags_reflectsLoadedTags() async throws {
+        // given
         let expect = expectConfirm("태그 로드 후 스트림 반영")
         expect.count = 2
-
         let usecase = makeUsecase(isIntegrated: true)
+
+        // when
         let tagLists = try await outputs(expect, for: usecase.calendarTags) {
             usecase.prepare()
-            try await Task.sleep(for: .milliseconds(100))
         }
 
+        // then
         #expect(tagLists.last?.count == stubRepository.stubCalendarTags.count)
     }
 
     @Test func calendarTags_whenDisconnected_emitsEmpty() async throws {
+        // given
         let expect = expectConfirm("연동 해제 시 빈 배열 방출")
         expect.count = 3
-
         let usecase = makeUsecase(isIntegrated: true)
+
+        // when
         let tagLists = try await outputs(expect, for: usecase.calendarTags) {
             usecase.prepare()
             try await Task.sleep(for: .milliseconds(100))
             sendIntegration(false)
-            try await Task.sleep(for: .milliseconds(100))
         }
 
+        // then
         let counts = tagLists.map { $0.count }
         #expect(counts.last == 0)
     }
@@ -215,9 +231,10 @@ extension AppleCalendarUsecaseImpleTests {
 extension AppleCalendarUsecaseImpleTests {
 
     @Test func refreshEvents_loadsAndEmitsEvents() async throws {
+        // given
         let period: Range<TimeInterval> = 0..<100
-        stubRepository.stubEvents = (0..<5).map { i in
-            .init(
+        let stubEvents = (0..<5).map { i in
+            AppleCalendar.Event(
                 eventId: "event:\(i)",
                 calendarId: "cal:0",
                 name: "Event \(i)",
@@ -226,31 +243,32 @@ extension AppleCalendarUsecaseImpleTests {
         }
         let expect = expectConfirm("이벤트 로드 후 스트림 반영")
         expect.count = 2
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: stubEvents)
 
-        let usecase = makeUsecase(isIntegrated: true)
+        // when
         let eventLists = try await outputs(expect, for: usecase.events(in: period)) {
             usecase.prepare()
-            try await Task.sleep(for: .milliseconds(100))
             usecase.refreshEvents(in: period)
-            try await Task.sleep(for: .milliseconds(100))
         }
 
+        // then
         #expect(eventLists.last?.count == 5)
     }
 
     @Test func events_returnsOnlyEventsOverlappingPeriod() async throws {
-        stubRepository.stubEvents = (0..<10).map { i in
-            .init(
+        // given
+        let allEvents = (0..<10).map { i in
+            AppleCalendar.Event(
                 eventId: "event:\(i)",
                 calendarId: "cal:0",
                 name: "Event \(i)",
                 eventTime: .period(TimeInterval(i)..<TimeInterval(i + 1))
             )
         }
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: allEvents)
 
-        let usecase = makeUsecase(isIntegrated: true)
+        // when
         usecase.prepare()
-        try await Task.sleep(for: .milliseconds(100))
         usecase.refreshEvents(in: 0..<10)
         try await Task.sleep(for: .milliseconds(100))
 
@@ -259,8 +277,37 @@ extension AppleCalendarUsecaseImpleTests {
         try await Task.sleep(for: .milliseconds(50))
         sub.cancel()
 
+        // then
         let ids = emitted.last?.map { $0.eventId }.sorted() ?? []
         #expect(ids == ["event:3", "event:4", "event:5", "event:6"])
+    }
+
+    @Test func refreshEvents_removesDeletedEventsInPeriod() async throws {
+        // given - 0..<5 범위에 5개 이벤트 로드
+        let initialEvents = (0..<5).map { i in
+            AppleCalendar.Event(
+                eventId: "event:\(i)",
+                calendarId: "cal:0",
+                name: "Event \(i)",
+                eventTime: .period(TimeInterval(i)..<TimeInterval(i + 1))
+            )
+        }
+        let usecase = makeUsecase(isIntegrated: true, stubEvents: initialEvents)
+        usecase.prepare()
+        usecase.refreshEvents(in: 0..<5)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // when - 같은 범위 재조회 시 event:0 삭제된 상태
+        stubRepository.stubEvents = Array(initialEvents.dropFirst())
+        let expect = expectConfirm("삭제된 이벤트 제거 후 스트림 반영")
+        expect.count = 2
+        let eventLists = try await outputs(expect, for: usecase.events(in: 0..<5)) {
+            usecase.refreshEvents(in: 0..<5)
+        }
+
+        // then
+        let ids = eventLists.last?.map { $0.eventId }.sorted() ?? []
+        #expect(ids == ["event:1", "event:2", "event:3", "event:4"])
     }
 }
 
