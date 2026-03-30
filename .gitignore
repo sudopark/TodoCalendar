@@ -74,4 +74,5 @@ TodoCalendarApp/Resources/secrets.json
 Tuist/ProjectDescriptionHelpers/InfoPlist_Secrets.swift
 
 ### Plans ###
-plans/.worktrees/
+plans/
+.worktrees/

@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 import Domain
 
 
@@ -27,16 +28,19 @@ open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Send
     public var stubCalendarTags: [AppleCalendar.Tag] = (0..<3).map {
         .init(id: "cal:\($0)", name: "Calendar \($0)", colorHex: nil)
     }
-    open func loadCalendarTags() async throws -> [AppleCalendar.Tag] {
-        return stubCalendarTags
+    open func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error> {
+        return Just(stubCalendarTags)
+            .setFailureType(to: (any Error).self)
+            .eraseToAnyPublisher()
     }
 
     public var stubEvents: [AppleCalendar.Event] = []
     open func loadEvents(
-        in period: Range<TimeInterval>,
-        timeZone: TimeZone
-    ) async throws -> [AppleCalendar.Event] {
-        return stubEvents
+        in period: Range<TimeInterval>
+    ) -> AnyPublisher<[AppleCalendar.Event], any Error> {
+        return Just(stubEvents)
+            .setFailureType(to: (any Error).self)
+            .eraseToAnyPublisher()
     }
 
     public var didResetCache = false
