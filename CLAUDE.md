@@ -120,7 +120,60 @@ xcodebuild test \
 **구조**
 - 테스트는 **상황(given context) 기준**으로 그룹화. 메서드 기준 아님.
 - 각 테스트는 observable한 **동작(behavior)** 을 검증. 내부 구현 상태(private flag 등) 검증 금지.
-- `// given / when / then` 주석으로 구조 명시.
+- `// given / when / then` 주석으로 구조 명시. 모든 테스트 메서드에 반드시 포함할 것.
+
+```swift
+// ✅ 올바른 예시
+func test_whenLoadList_shouldUpdateSections() {
+    // given
+    let expect = expectation(description: "리스트 로드시 섹션 업데이트")
+    let viewModel = self.makeViewModel()
+
+    // when
+    let sections = self.waitOutputs(expect, for: viewModel.sectionModels) {
+        viewModel.loadList()
+    }
+
+    // then
+    XCTAssertEqual(sections.count, 2)
+}
+
+// ❌ 잘못된 예시 — 주석 없이 바로 작성
+func test_whenLoadList_shouldUpdateSections() {
+    let expect = expectation(description: "리스트 로드시 섹션 업데이트")
+    let viewModel = self.makeViewModel()
+    let sections = self.waitOutputs(expect, for: viewModel.sectionModels) {
+        viewModel.loadList()
+    }
+    XCTAssertEqual(sections.count, 2)
+}
+```
+
+**스터빙 원칙**
+- 협업 객체의 스터빙은 개별 테스트 시작 전에 완료되어야 한다. `makeViewModel()` 등 SUT 생성 함수에서 보편적인 성공 응답을 기본 스터빙으로 세팅할 것.
+- 에러 케이스나 응답을 변경해야 하는 경우, `makeViewModel(shouldFail:)` 처럼 파라미터로 분기하거나 `makeViewModelWith...()` 헬퍼 함수를 활용한다.
+
+```swift
+// ✅ 기본 스터빙: 보편적 성공 응답으로 세팅
+private func makeViewModel(
+    shouldFailSignIn: Bool = false
+) -> SignInViewModelImple {
+    let authUsecase = StubAuthUsecase()
+    authUsecase.shouldFailSignIn = shouldFailSignIn
+    let viewModel = SignInViewModelImple(authUsecase: authUsecase)
+    viewModel.router = self.spyRouter
+    return viewModel
+}
+
+// ✅ 특수한 사전 조건이 필요한 경우 별도 헬퍼로 분리
+private func makeViewModelWithInitialListLoaded(
+    shouldFailDoneTodo: Bool = false
+) -> DayEventListViewModelImple {
+    let viewModel = self.makeViewModel(shouldFailDoneTodo: shouldFailDoneTodo)
+    // ... 초기 리스트 로딩 완료까지 대기
+    return viewModel
+}
+```
 
 **Test Double 네이밍**
 - `stub*`: 생성 시점에 설정 고정. 테스트 중 변경 없음.
