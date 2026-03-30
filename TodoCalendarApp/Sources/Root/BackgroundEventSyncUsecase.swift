@@ -56,13 +56,24 @@ extension BackgroundEventSyncUsecaseImple {
 
     func scheduleTask() {
         let request = BGAppRefreshTaskRequest(identifier: refreshTaskId)
-        request.earliestBeginDate = Date().addingTimeInterval(15 * 60)
+        request.earliestBeginDate = Self.nextScheduleDate()
         do {
             try BGTaskScheduler.shared.submit(request)
             logger.log(.backgroundSync, level: .debug, "submit refresh task")
         } catch {
             logger.log(.backgroundSync, level: .error, "fail to submit refresh task: \(error.localizedDescription)")
         }
+    }
+
+    private static func nextScheduleDate() -> Date {
+        let now = Date()
+        let calendar = Calendar.current
+        let nextHour = calendar.nextDate(
+            after: now,
+            matching: DateComponents(minute: 0, second: 0),
+            matchingPolicy: .nextTime
+        ) ?? now.addingTimeInterval(60 * 60)
+        return nextHour.addingTimeInterval(-5 * 60)
     }
 }
 
