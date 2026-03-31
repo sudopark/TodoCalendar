@@ -1245,10 +1245,44 @@ App Group ID (`group.com.sudo.park.todocalendar`)를 통한 공유 저장소:
 
 ### 10.1 인증 방식
 
-| 방식 | 설명 |
-|---|---|
-| 오프라인 (비로그인) | 로컬 DB만 사용. 모든 핵심 기능 사용 가능 |
-| 구글 로그인 | OAuth2 → Firebase Auth → 서버 동기화 활성화 |
+| 방식 | 프로토콜 | 설명 |
+|---|---|---|
+| 오프라인 (비로그인) | — | 로컬 DB만 사용. 모든 핵심 기능 사용 가능 |
+| 구글 로그인 | `GoogleOAuth2ServiceProvider` | OAuth2 → Firebase Auth → 서버 동기화 활성화 |
+| 애플 로그인 | `AppleOAuth2ServiceProvider` | Apple Sign In → Firebase Auth → 서버 동기화 활성화 |
+
+**OAuth2 자격증명 모델**
+
+| 제공자 | 자격증명 | 주요 필드 |
+|---|---|---|
+| Google | `GoogleOAuth2Credential` | idToken, accessToken, refreshToken, accessTokenExpirationDate, email |
+| Apple | `AppleOAuth2Credential` | provider(`"apple.com"`), idToken, nonce |
+
+**인증 플로우 상세**
+
+```
+사용자 → SignInView → OAuth2ServiceUsecase.requestAuthentication()
+                          ↓
+                   [Google: Firebase Google Sign-In SDK / Apple: ASAuthorizationController]
+                          ↓
+                   OAuth2Credential 반환
+                          ↓
+                   AuthRepository.signIn(credential)
+                          ↓
+                   Firebase Auth 인증 → Auth(uid, idToken, refreshToken) 획득
+                          ↓
+                   서버 API로 AccountInfo 로드
+                          ↓
+                   Auth + AccountInfo → Keychain 저장 (AuthStore)
+                          ↓
+                   RemoteAPI에 credential 설정
+                          ↓
+                   Account(auth + info) 반환
+```
+
+**Google 추가 스코프**: Google Calendar 연동 시 추가 OAuth2 스코프 요청 가능 (`GoogleOAuth2ServiceProvider.scopes`)
+
+**URL 핸들링**: Google OAuth는 앱 복귀 시 `handle(open url:)` 호출 필요. Apple은 URL 핸들링 불필요.
 
 ### 10.2 계정 상태 전환
 
@@ -1258,30 +1292,82 @@ App Group ID (`group.com.sudo.park.todocalendar`)를 통한 공유 저장소:
     └──로그아웃/삭제──────┘
 ```
 
-**로그인 시**:
-1. OAuth2 자격증명 획득
-2. Firebase Auth 인증
-3. FCM 토큰 등록
-4. SharedDataStore에 계정 정보 저장
-5. UseCase Factory 전환 (NonLogin → Login)
-6. 서버 동기화 시작
+**로그인 시** (`AccountUsecaseImple.signIn` → `ApplicationRootViewModel.handleUserSignedIn`):
+1. OAuth2 자격증명 획득 (Google/Apple)
+2. Firebase Auth 인증 → uid + 토큰 획득
+3. 서버에서 AccountInfo 로드 → Keychain 저장
+4. SharedDataStore에 AccountInfo 저장
+5. `AccountChangedEvent.signedIn` 이벤트 발행
+6. `ApplicationPrepareUsecase.prepareSignedIn(auth)`:
+   - SharedDataStore 초기화 (accountInfo, externalCalendarAccounts 키는 유지)
+   - 비로그인 DB close → 100ms 대기
+   - 사용자별 DB open (`todocal_<uid>.db`)
+7. `ApplicationRootRouter.changeUsecaseFactroy(auth)`:
+   - `LoginUsecaseFactoryImple` 생성 (Remote + Upload 인프라 포함)
+   - `backgroundEventSyncUsecase.change(factory:)` 호출
+   - `refreshRoot()` → 전체 UI 계층 재구성
+8. FCM 토큰 등록
+9. 서버 동기화 시작
 
-**로그아웃 시**:
-1. FCM 토큰 해제
-2. Auth 삭제
-3. SharedDataStore 초기화
-4. UseCase Factory 전환 (Login → NonLogin)
+**로그아웃 시** (`AccountUsecaseImple.signOut` → `ApplicationRootViewModel.handleUserSignedOut`):
+1. 사용자 알림 등록 해제
+2. Firebase signOut + Keychain에서 Auth/AccountInfo 삭제
+3. RemoteAPI credential 해제
+4. SharedDataStore 초기화 (externalCalendarAccounts 키만 유지)
+5. `AccountChangedEvent.signOut` 이벤트 발행
+6. `ApplicationPrepareUsecase.prepareSignedOut()`:
+   - 사용자 DB close → 100ms 대기
+   - 비로그인 DB open (`todocal.db` — uid 없음)
+7. `NonLoginUsecaseFactoryImple`로 전환 → UI 재구성
 
-**계정 삭제 시**: 로그아웃과 동일 + 서버 데이터 삭제
+**계정 삭제 시** (`AccountUsecaseImple.deleteAccount`):
+- 로그아웃과 동일 + 서버에 `DELETE /account` API 호출 → 서버 데이터 삭제
+- Firebase 계정 삭제
+
+**UsecaseFactory 전환 영향 범위**
+
+| 영역 | NonLogin (비로그인) | Login (로그인) |
+|---|---|---|
+| Todo Repository | `TodoLocalRepositoryImple` | `TodoUploadDecorateRepositoryImple` (Local + 오프라인 큐) |
+| Schedule Repository | Local only | `ScheduleEventUploadDecorateRepositoryImple` |
+| EventTag Repository | Local only | `EventTagUploadDecorateRepositoryImple` |
+| EventDetail Repository | Local only | `EventDetailUploadDecorateRepositoryImple` |
+| ForemostEvent Repository | Local only | `ForemostEventRemoteRepositoryImple` |
+| AppSetting Repository | `AppSettingLocalRepositoryImple` | `AppSettingRemoteRepositoryImple` (userId 기반) |
+| EventSync Usecase | `NotNeedEventSyncUsecase` (no-op) | `EventSyncUsecaseImple` (실제 동기화) |
+| EventUpload Service | `NotNeedEventUploadService` (no-op) | `EventUploadServiceImple` (오프라인 큐) |
+| 데이터 마이그레이션 | `NotNeedTemporaryUserDataMigrationUescaseImple` | `TemporaryUserDataMigrationUescaseImple` |
+
+**DB 분리 정책**
+
+| 상태 | DB 경로 | 설명 |
+|---|---|---|
+| 비로그인 | `todocal.db` | 공용 로컬 DB |
+| 로그인 (uid: abc123) | `todocal_abc123.db` | 사용자별 격리 DB |
+| 외부 캘린더 | `google_calendar.db` | 서비스별 별도 DB (ExternalCalendarDBConnectionPool) |
 
 ### 10.3 데이터 마이그레이션
 
-로그인 전 로컬에 쌓인 데이터를 클라우드로 업로드.
+로그인 전 로컬에 쌓인 데이터를 클라우드로 업로드. `TemporaryUserDataMigrationUescaseImple`이 담당.
 
-- 마이그레이션 대상: 이벤트 태그, 할일, 일정, 이벤트 상세, 완료 할일
-- 마이그레이션 필요 건수 표시
-- 순차 처리: 태그 → 할일 → 일정 → 상세 → 완료 할일
-- 완료 후 로컬 임시 데이터 정리
+**마이그레이션 대상 및 순서**:
+1. 이벤트 태그 (EventTag) — 태그가 이벤트에 선행해야 참조 무결
+2. 할일 (TodoEvent)
+3. 일정 (ScheduleEvent)
+4. 이벤트 상세 (EventDetailData)
+5. 완료 할일 (DoneTodoEvent)
+
+**UI 상태 Publishers**:
+- `isNeedMigration: AnyPublisher<Bool, Never>` — 마이그레이션 필요 여부
+- `migrationNeedEventCount: AnyPublisher<Int, Never>` — 마이그레이션 필요 건수 (ManageAccount 화면에 표시)
+- `isMigrating: AnyPublisher<Bool, Never>` — 진행 중 로딩 표시
+- `migrationResult: AnyPublisher<Result<Void, Error>, Never>` — 완료/실패 결과
+
+**동기화와의 조율**: `EventSyncMediator`가 마이그레이션 진행 중에는 서버 동기화를 대기시킴 (`isTemporaryUserDataMigration` 플래그 확인).
+
+**마이그레이션 소스 경로**: `LoginUsecaseFactoryImple` 생성 시 `temporaryUserDataFilePath`로 비로그인 DB 경로 전달 → 해당 DB에서 데이터 읽기.
+
+**앱 재시작 시 복원**: 마이그레이션이 중간에 중단되면 다음 앱 실행 시 `ManageAccountViewModel.prepare()`에서 다시 체크하여 재시도 유도.
 
 ---
 
@@ -1290,136 +1376,317 @@ App Group ID (`group.com.sudo.park.todocalendar`)를 통한 공유 저장소:
 ### 11.1 오프라인 우선 아키텍처
 
 ```
-[사용자 액션] → LocalRepository (즉시 저장)
+[사용자 액션] → LocalRepository (즉시 저장 → UI 즉시 반영)
                     ↓
-              UploadDecorateRepository (오프라인 큐에 추가)
+              UploadDecorateRepository (로컬 저장 + 오프라인 큐에 태스크 추가)
                     ↓
-              EventUploadService (백그라운드 업로드)
+              EventUploadServiceImple (Actor, 큐에서 pop → 업로드 시도)
                     ↓
               RemoteRepository (서버 전송)
 ```
 
-- 비로그인: `LocalRepository`만 사용
-- 로그인: `UploadDecorateRepository`가 로컬 저장 + 오프라인 큐 관리
+- 비로그인: `LocalRepository`만 사용. Remote/Upload 계층 없음.
+- 로그인: `UploadDecorateRepository`가 로컬 저장과 동시에 업로드 큐에 태스크 추가.
+
+**Decorator별 큐잉 동작**
+
+| Decorator | 생성 시 큐 | 수정 시 큐 | 삭제 시 큐 |
+|---|---|---|---|
+| `TodoUploadDecorateRepositoryImple` | `.todo` | `.todo` | `.todo(remove)` + `.eventDetail(remove)` |
+| Todo 완료 시 | — | `.todo` + `.doneTodo` + `.doneTodoDetail` | — |
+| `ScheduleEventUploadDecorateRepositoryImple` | `.schedule` | `.schedule` | `.schedule(remove)` + `.eventDetail(remove)` |
+| `EventTagUploadDecorateRepositoryImple` | `.eventTag` | `.eventTag` | `.eventTag(remove)` |
+| `EventDetailUploadDecorateRepositoryImple` | `.eventDetail` | `.eventDetail` | `.eventDetail(remove)` |
 
 ### 11.2 서버 동기화
 
 | 항목 | 내용 |
 |---|---|
-| 동기화 대상 | EventTag, TodoEvent, ScheduleEvent |
-| 페이지 크기 | 30건/요청 |
-| 방식 | 타임스탬프 기반 증분 동기화 |
-| 페이지네이션 | 커서 기반 |
+| 동기화 대상 | `EventTag`, `TodoEvent`, `ScheduleEvent` (3가지 `SyncDataType`) |
+| 페이지 크기 | 30건/요청 (`pageSize` 상수) |
+| 방식 | 타임스탬프 기반 증분 동기화 (밀리초 단위 정수) |
+| 페이지네이션 | 커서 기반 (서버가 `nextPageCursor` 반환) |
+| 타임스탬프 저장 | `SyncTimestamp` SQLite 테이블 (data_type별 독립 관리) |
 
-**동기화 체크 응답**
-| 응답 | 동작 |
+**API 엔드포인트**
+
+| 단계 | 메서드 | 경로 | 파라미터 |
+|---|---|---|---|
+| 체크 | GET | `/v1/sync/check` | `dataType`, `timestamp` (optional) |
+| 시작 | GET | `/v1/sync/start` | `dataType`, `timestamp` (optional), `size` (30) |
+| 계속 | GET | `/v1/sync/continue` | `dataType`, `cursor`, `size` |
+
+**동기화 체크 응답** (`EventSyncCheckRespose`)
+
+| 응답 (`CheckResult`) | 동작 |
 |---|---|
-| `.noNeedToSync` | 건너뛰기 |
-| `.needToSync` | 타임스탬프부터 증분 동기화 |
-| `.migrationNeeds` | 처음부터 전체 동기화 |
+| `.noNeedToSync` | 해당 데이터 타입 건너뛰기 |
+| `.needToSync` | 서버가 반환한 `startTimestamp`부터 증분 동기화 |
+| `.migrationNeeds` | 타임스탬프 무시, 처음부터 전체 동기화 |
+
+**동기화 응답 구조** (`EventSyncResponse<T>`)
+
+```swift
+struct EventSyncResponse<T: Sendable> {
+    var created: [T]?        // 새로 생성된 항목
+    var updated: [T]?        // 수정된 항목
+    var deletedIds: [String]? // 삭제된 항목 ID
+    var nextPageCursor: String? // 다음 페이지 커서 (nil이면 마지막 페이지)
+    var newSyncTime: Int?    // 다음 체크에 사용할 타임스탬프
+}
+```
+
+**동기화 실행 순서** (`EventSyncUsecaseImple.runSyncTask`):
+1. `EventSyncMediator.waitUntilEventSyncAvailable()` — 업로드 큐 비움 + 마이그레이션 대기
+2. EventTag 동기화 (check → start → continue 루프)
+3. Todo 동기화
+4. Schedule 동기화
+5. 각 타입은 독립적으로 에러 처리 (한 타입 실패해도 나머지 계속)
+
+**충돌 해결 전략**: **서버 우선 (Last-Write-Wins)**
+- 클라이언트는 충돌 감지 없음 (엔티티에 버전 번호 없음)
+- 동기화 응답의 `created`/`updated` 항목이 로컬을 덮어씀 (`updateCreatedOrUpdated()`)
+- `EventSyncMediator`가 업로드 완료 후 동기화를 시작하여 순서 보장: 로컬 변경 → 서버 전송 → 서버 상태 pull
 
 ### 11.3 오프라인 큐
 
-- 변경사항(생성/수정/삭제)을 SQLite 큐에 저장
-- 백그라운드에서 자동 업로드 시도
-- 최대 **10회** 재시도 (`AppEnvironment.eventUploadMaxFailCount`)
-- 실패 시 다음 동기화 사이클에서 재시도
+**저장소**: `event_upload_pending_queue` SQLite 테이블
+
+| 컬럼 | 타입 | 설명 |
+|---|---|---|
+| `timestamp` | REAL | 큐잉 시각 (FIFO 정렬 기준) |
+| `data_type` | TEXT | 데이터 타입 (eventTag/todo/schedule/eventDetail/doneTodo/doneTodoDetail) |
+| `uuid` | TEXT | 엔티티 ID |
+| `is_remove` | INTEGER | 0: 생성/수정, 1: 삭제 |
+| `upload_fail_count` | INTEGER | 재시도 횟수 (기본 0) |
+
+- 복합 PK: `(uuid, data_type)` → 같은 엔티티의 중복 큐잉 시 upsert
+- 정렬: `timestamp` 오름차순 (FIFO)
+
+**처리 흐름** (`EventUploadServiceImple` — Swift Actor):
+1. `append(tasks)` → SQLite 큐에 upsert → `resume()` 호출
+2. `resume()`:
+   - `isUploading = true`
+   - `popTask()`: `upload_fail_count < maxFailCount`인 가장 오래된 태스크 pop
+   - `uploadTask()`: Remote API 호출
+   - 성공 → 큐에서 삭제
+   - 실패 → `upload_fail_count + 1`로 재큐잉 (타임스탬프 갱신)
+   - 큐가 빌 때까지 반복
+   - `isUploading = false`
+3. `pause()`: 현재 배치 취소
+
+**재시도 정책**:
+- 최대 재시도: **10회** (`AppEnvironment.eventUploadMaxFailCount`)
+- 재시도 간격: 즉시 (큐에서 다시 pop될 때). 별도 지수 백오프 없음.
+- 10회 초과 시: 큐에 남아있으나 pop 대상에서 제외. 다음 동기화 사이클이나 강제 동기화로 처리.
+
+**업로드 엔드포인트**
+
+| 데이터 타입 | 생성/수정 | 삭제 |
+|---|---|---|
+| EventTag | `PUT /v2/tags/{tagId}` | `DELETE /v2/tags/{tagId}` |
+| Todo | `POST/PUT /v2/todos/{todoId}` | `DELETE /v2/todos/{todoId}` |
+| Schedule | `PUT /v2/schedules/{eventId}` | `DELETE /v2/schedules/{eventId}` |
+| EventDetail | `POST /v1/event_details/{eventId}` | `DELETE /v1/event_details/{eventId}` |
 
 ### 11.4 백그라운드 동기화
 
-- `BGAppRefreshTask` (식별자: `com.sudo.park.TodoCalendarApp.bgSync`)
-- 매시간 스케줄링
-- 동기화 완료 후 위젯 자동 갱신
-- 타임아웃 시 다음 사이클로 재스케줄링
+`BackgroundEventSyncUsecaseImple`이 iOS 백그라운드 작업을 관리.
+
+**등록** (`registerTask()`):
+- 식별자: `"com.sudo.park.TodoCalendarApp.bgSync"`
+- 타입: `BGAppRefreshTask`
+- 시점: `AppDelegate.application(didFinishLaunchingWithOptions:)`에서 호출
+
+**스케줄링** (`scheduleTask()`):
+- `BGAppRefreshTaskRequest` 생성
+- `earliestBeginDate`: 다음 정시 55분 전 (≈ 매시간 1회)
+
+**실행** (`handleBackgroundSync(task)`):
+1. `UIApplication.beginBackgroundTask()` → 확장 실행 시간 확보
+2. `expirationHandler` 설정 → 타임아웃 시 다음 사이클로 재스케줄링
+3. `runSync()` → `eventSyncUsecase.sync()` 실행
+4. 동기화 완료 → `WidgetCenter.shared.reloadAllTimelines()` (위젯 갱신)
+5. 태스크 완료 마킹 + 다음 스케줄 등록
+
+**시스템 제약**:
+- iOS가 실행 빈도를 앱 사용 패턴에 따라 자동 조절 (빈도 보장 없음)
+- 배터리 저전력 모드 시 실행 연기 가능
+- 네트워크 상태는 별도 체크하지 않음 (Alamofire가 네트워크 에러 반환 시 업로드 실패 → 재시도)
 
 ### 11.5 강제 동기화
 
-- 타임스탬프 초기화 → 전체 재동기화
+- `EventSyncUsecase.forceSync()`: 모든 `SyncDataType`의 타임스탬프 초기화 (`clearSyncTimestamp()`) → 전체 재동기화
 - 설정 화면에서 수동 트리거 가능
+- 동기화 진행 상태: `isSyncInProgress: AnyPublisher<Bool, Never>`로 UI에 표시
 
 ---
 
 ## 12. 설정
 
+모든 설정은 `EnvironmentStorage` (UserDefaults 래퍼)에 저장되며, Usecase가 SharedDataStore에 publish하여 구독 중인 모든 화면에 실시간 반영된다.
+
 ### 12.1 캘린더 외형 설정
 
-| 설정 | 옵션 | 기본값 |
-|---|---|---|
-| 첫째 요일 | 일~토 | 일요일 |
-| 이벤트 있는 날 밑줄 | on/off | — |
-| 행 높이 | 소/중/대 | — |
-| 캘린더 내 이벤트 텍스트 크기 | 추가 크기 조절 | 0 |
-| 캘린더 내 이벤트 볼드 | on/off | — |
-| 캘린더 내 태그 색상 표시 | on/off | — |
-| 이벤트 목록 텍스트 크기 | 추가 크기 조절 | 0 |
-| 공휴일 표시 | on/off | — |
-| 음력 날짜 표시 | on/off | — |
-| 12/24시간 표시 | 12h/24h | 디바이스 설정 |
-| 미완료 할일 상단 표시 | on/off | — |
-| 햅틱 피드백 | on/off | — |
-| 애니메이션 효과 | on/off | — |
+`CalendarAppearanceSettings` — UserDefaults 키별 저장.
+
+| 설정 | UserDefaults 키 | 옵션 | 기본값 |
+|---|---|---|---|
+| 첫째 요일 | Repository (SQLite) | 일~토 | `.sunday` |
+| 이벤트 있는 날 밑줄 | `show_underline_eventday` | on/off | `true` |
+| 행 높이 | `calendar_row_height` | 소/중/대 | `.medium` (rawValue: 0) |
+| 캘린더 내 이벤트 텍스트 크기 | `event_on_calendar_additional_font_size` | CGFloat 조절 | `0` |
+| 캘린더 내 이벤트 볼드 | `bold_text_event_on_calendar` | on/off | `false` |
+| 캘린더 내 태그 색상 표시 | `not_show_event_tag_color_on_calendar` | on/off | `false` (반전 키: 표시=true) |
+| 이벤트 목록 텍스트 크기 | `event_additiona_font_size` | CGFloat 조절 | `0` |
+| 공휴일 이름 표시 | `show_holiday_name_on_eventList` | on/off | `false` |
+| 음력 날짜 표시 | `show_lunar_calendar_date` | on/off | `false` |
+| 12/24시간 표시 | `is_24_hourForm` | 12h/24h | `true` (24시간) |
+| 미완료 할일 상단 표시 | `hide_uncompleted_todos` | on/off | `false` (반전 키: 표시=true) |
+| 햅틱 피드백 | `haptic_effect_off` | on/off | `false` (반전 키: 켜짐=false) |
+| 애니메이션 효과 | `animation_effect_on` | on/off | `false` |
+| 공휴일 강조 (색상) | `accent_holiday` | on/off | `false` |
+| 토요일 강조 (색상) | `accent_saturday` | on/off | `false` |
+| 일요일 강조 (색상) | `accent_sunday` | on/off | `false` |
+
+**실시간 반영 흐름**:
+```
+사용자 변경 → AppSettingUsecase.changeCalendarAppearanceSetting()
+    → EnvironmentStorage(UserDefaults) 저장
+    → SharedDataStore.put(CalendarAppearanceSettings)
+    → CalendarViewModel 등 구독자가 Combine으로 수신 → UI 즉시 갱신
+```
+
+**영향받는 화면 매트릭스**
+
+| 설정 변경 | 캘린더 그리드 | 이벤트 목록 | 위젯 |
+|---|---|---|---|
+| 첫째 요일 | ✅ 그리드 재구성 | — | ✅ 주/월 위젯 |
+| 행 높이 | ✅ 셀 높이 + "+N" 재계산 | — | — |
+| 이벤트 텍스트 크기/볼드 | ✅ 이벤트 바 폰트 | — | — |
+| 태그 색상 표시 | ✅ 색상 바 표시/숨김 | — | — |
+| 목록 텍스트 크기 | — | ✅ 셀 폰트 | — |
+| 공휴일 표시 | ✅ 공휴일 강조 | ✅ 날짜 정보 섹션 | ✅ |
+| 음력 표시 | — | ✅ 날짜 정보 섹션 | — |
+| 미완료 할일 | — | ✅ 섹션 표시/숨김 | — |
+| 컬러 테마 | ✅ 전체 | ✅ 전체 | ✅ 전체 |
 
 ### 12.2 이벤트 기본값 설정
 
-| 설정 | 옵션 |
-|---|---|
-| 기본 이벤트 길이 | 0분/5분/10분/15분/30분/45분/1시간/2시간/하루종일 |
-| 기본 태그 | 태그 선택 |
-| 기본 알림 (시간 이벤트) | 알림 시간 옵션 선택 |
-| 기본 알림 (하루종일) | 알림 시간 옵션 선택 |
-| 기본 지도 앱 | Apple Maps / Google Maps / Naver / Kakao |
+`EventSettings` — UserDefaults 키별 저장.
+
+| 설정 | UserDefaults 키 | 옵션 | 기본값 |
+|---|---|---|---|
+| 기본 이벤트 길이 | `default_new_event_period` | 0분/5분/10분/15분/30분/45분/1시간/2시간/하루종일 | `.minute0` |
+| 기본 태그 | `default_new_event_tagId` | 태그 선택 | `.default` |
+| 기본 알림 (시간 이벤트) | 별도 저장 | 알림 시간 옵션 선택 | — |
+| 기본 알림 (하루종일) | 별도 저장 | 알림 시간 옵션 선택 | — |
+| 기본 지도 앱 | `default_map_app` | Apple Maps / Google Maps / Naver / Kakao | `nil` (선택 안 함) |
+
+이벤트 생성 화면 진입 시 `EventSettings`에서 기본값을 읽어 초기 필드를 채움.
 
 ### 12.3 공휴일 설정
 
 - 국가 선택 (디바이스 지역 코드 기반 자동 선택)
-- 연도별 공휴일 lazy 로딩
-- 캐시: `[countryCode][year][holidays]` 중첩 구조
-- 12월 → 다음해, 1월 → 전년도 공휴일도 함께 로드
+- 연도별 공휴일 lazy 로딩 (요청 시점에 API 호출 → 캐시)
+- 캐시: `[countryCode][year][holidays]` 중첩 구조 (SharedDataStore `holidays` 키)
+- 12월 → 다음해, 1월 → 전년도 공휴일도 함께 로드 (캘린더 3개월 윈도우 대응)
+- 국가 변경 시 기존 캐시 초기화 → 새 국가 공휴일 재로드
 
 ### 12.4 타임존 설정
 
-- 기본: 시스템 타임존
-- 전체 타임존 목록에서 선택
-- 하루종일 이벤트는 타임존에 따라 시간 조정
+- 기본: `TimeZone.current` (시스템 타임존)
+- 전체 타임존 목록에서 선택 (Repository에 SQLite 저장)
+- SharedDataStore `timeZone` 키로 전파
+- 하루종일 이벤트는 타임존에 따라 `Range<TimeInterval>.shiftting()` 적용:
+  ```
+  원본(이벤트 타임존) → UTC로 변환 → 대상 타임존으로 변환
+  ```
+- D-Day 계산, 이벤트 목록 정렬, 알림 fire date 모두 현재 설정 타임존 기준
 
 ### 12.5 컬러 테마
 
-사용 가능: systemTheme, defaultLight, defaultDark
+사용 가능 (`color_set` 키): `systemTheme` (시스템 따라감), `defaultLight`, `defaultDark`
+
+테마 변경 시 `ViewAppearance` 전체가 갱신 → 모든 화면 즉시 반영.
 
 ### 12.6 기본 태그 색상
 
-- 기본(default) 태그 색상: hex 값으로 설정
-- 공휴일(holiday) 태그 색상: hex 값으로 설정
+| 태그 | UserDefaults 키 | 기본값 |
+|---|---|---|
+| 기본(default) 태그 | `default_tag_color` | `"#088CDA"` (파란색) |
+| 공휴일(holiday) 태그 | `holiday_tag_color` | `"#D6236A"` (분홍색) |
+
+색상 변경 시 SharedDataStore `defaultEventTagColor` 키로 전파 → 캘린더, 이벤트 목록, 위젯 모두 반영.
 
 ---
 
 ## 13. 공유 상태 관리 (SharedDataStore)
 
-모든 Usecase가 하나의 SharedDataStore 싱글톤을 통해 상태를 공유. Combine 기반 실시간 전파.
+모든 Usecase가 하나의 `SharedDataStore` 싱글톤을 통해 상태를 공유. Combine 기반 실시간 전파.
 
-### 13.1 주요 키
+### 13.1 구현 상세
+
+```swift
+public final class SharedDataStore: @unchecked Sendable {
+    private let lock = NSRecursiveLock()
+    private var memorizedDataSubjects: [String: CurrentValueSubject<Any?, Never>] = [:]
+    private let serialEventQeueu: DispatchQueue?
+}
+```
+
+**스레드 안전성**:
+- `NSRecursiveLock`으로 모든 `memorizedDataSubjects` 접근 보호
+- 모든 public 메서드에서 `lock.lock(); defer { lock.unlock() }` 패턴
+- `@unchecked Sendable` — 수동 스레드 안전 보장
+
+**메모리 관리**:
+- Subject는 키별 lazy 생성: 첫 `observe()` 또는 `put()` 시 `CurrentValueSubject` 생성
+- 한번 생성된 Subject는 영구 유지 (구독자 수와 무관)
+- `clearAll(filter:)`: 조건에 맞는 키의 Subject 값을 nil로 설정 (Subject 자체는 유지)
+
+**Combine API**:
+
+| 메서드 | 동작 |
+|---|---|
+| `observe<V>(type, key)` → `AnyPublisher<V?, Never>` | 현재 값 즉시 방출 + 변경 시 push. Optional serial queue 전달. |
+| `put<V>(type, key, value)` | Subject에 값 설정 (즉시 구독자에게 전파) |
+| `update<V>(type, key, mutating:)` | 현재 값을 읽어 변환 후 put (atomic update) |
+| `value<V>(type, key)` → `V?` | 동기적 현재 값 읽기 |
+| `clearAll(filter:)` | 조건부 전체 초기화 |
+
+### 13.2 주요 키
 
 | 키 | 타입 | 관리 주체 |
 |---|---|---|
-| `accountInfo` | AccountInfo? | AccountUsecase |
-| `todos` | [String: TodoEvent] | TodoEventUsecase |
-| `uncompletedTodos` | [TodoEvent] | TodoEventUsecase |
-| `schedules` | MemorizedEventsContainer | ScheduleEventUsecase |
-| `tags` | [EventTagId: EventTag] | EventTagUsecase |
-| `offEventTagSet` | Set\<EventTagId\> | EventTagUsecase |
-| `defaultEventTagColor` | DefaultEventTagColorSetting | EventTagUsecase |
-| `foremostEventId` | ForemostEventId | ForemostEventUsecase |
-| `googleCalendarTags` | [String: [Tag]] | GoogleCalendarUsecase |
-| `googleCalendarEvents` | [String: Event] | GoogleCalendarUsecase |
-| `externalCalendarAccounts` | [String: [AccountInfo]] | ExternalCalendarIntegrationUsecase |
-| `calendarAppearance` | CalendarAppearanceSettings | UISettingUsecase |
-| `eventSetting` | EventSettings | EventSettingUsecase |
-| `timeZone` | TimeZone | CalendarSettingUsecase |
-| `firstWeekDay` | DayOfWeeks | CalendarSettingUsecase |
-| `currentCountry` | HolidaySupportCountry | HolidayUsecase |
-| `holidays` | [Int: [Holiday]] | HolidayUsecase |
+| `accountInfo` | `AccountInfo?` | AccountUsecase |
+| `todos` | `[String: TodoEvent]` | TodoEventUsecase |
+| `uncompletedTodos` | `[TodoEvent]` | TodoEventUsecase |
+| `schedules` | `MemorizedEventsContainer<ScheduleEvent>` | ScheduleEventUsecase |
+| `tags` | `[EventTagId: any EventTag]` | EventTagUsecase |
+| `offEventTagSet` | `Set<EventTagId>` | EventTagUsecase |
+| `defaultEventTagColor` | `[EventTagId: String]` | EventTagUsecase |
+| `foremostEventId` | `ForemostEventId` | ForemostEventUsecase |
+| `foremostMarkingStatus` | `ForemostMarkingStatus` | ForemostEventUsecase |
+| `googleCalendarTags` | `[String: [GoogleCalendar.Tag]]` | GoogleCalendarUsecase |
+| `googleCalendarEvents` | `[String: GoogleCalendar.Event]` | GoogleCalendarUsecase |
+| `externalCalendarAccounts` | `[String: [ExternalServiceAccountinfo]]` | ExternalCalendarIntegrationUsecase |
+| `calendarAppearance` | `CalendarAppearanceSettings` | UISettingUsecase |
+| `eventSetting` | `EventSettings` | EventSettingUsecase |
+| `timeZone` | `TimeZone` | CalendarSettingUsecase |
+| `firstWeekDay` | `DayOfWeeks` | CalendarSettingUsecase |
+| `currentCountry` | `String` | HolidayUsecase |
+| `availableCountries` | `[String]` | HolidayUsecase |
+| `holidays` | `[Int: [Holiday]]` | HolidayUsecase |
 
-### 13.2 화면 간 통신
+**로그인/로그아웃 시 초기화 범위**:
+
+| 전환 | 초기화 범위 | 유지 키 |
+|---|---|---|
+| 로그인 | 대부분 초기화 | `accountInfo`, `externalCalendarAccounts` |
+| 로그아웃 | 전체 초기화 | `externalCalendarAccounts` |
+
+### 13.3 화면 간 통신
 
 | 방향 | 메커니즘 | 용도 |
 |---|---|---|
@@ -1427,27 +1694,97 @@ App Group ID (`group.com.sudo.park.todocalendar`)를 통한 공유 저장소:
 | Parent → Child | Interactor | 부모가 자식에게 명령 |
 | Child → Parent | Listener (weak) | 자식이 부모에게 이벤트 전달 |
 
+**간접 공유 예시**: 이벤트 상세 화면에서 할일 완료 → `TodoEventUsecase`가 SharedDataStore의 `todos` 업데이트 → 캘린더 그리드, 이벤트 목록, 위젯이 각각 독립적으로 변경 수신.
+
 ---
 
 ## 14. 딥링크
 
-| 항목 | 내용 |
+### 14.1 URL 스펙
+
+| 항목 | 값 |
 |---|---|
-| 스킴 | `tc.app://` |
+| 스킴 | `tc.app` (`AppEnvironment.appScheme`) |
 | 호스트 | `calendar` |
 | 처리 | `ApplicationDeepLinkHandlerImple` |
 
-- 앱 실행 시 / 위젯 탭 시 딥링크 수신
-- Calendar 화면 미초기화 시 대기 큐에 보관
-- 미지원 링크 → 앱 업데이트 안내 (`.needUpdate`)
+**지원 딥링크 형식**
+
+| 용도 | URL 패턴 | 쿼리 파라미터 |
+|---|---|---|
+| 날짜 이동 | `tc.app://calendar/?select=YYYY_MM_DD` | `select`: `year_month_day` 형식 |
+| 이벤트 상세 | `tc.app://calendar/event/?id=<eventId>&type=<eventType>` | `id`, `type` |
+
+### 14.2 딥링크 처리 구조
+
+```
+URL 수신 (앱 실행 / 위젯 탭)
+    ↓
+PendingDeepLink 파싱:
+    - URLComponents로 scheme, host, path, queryItems 추출
+    - pathComponents: "/" 기준 분할
+    - queryParams: percent-decoding 적용
+    ↓
+ApplicationDeepLinkHandlerImple:
+    - scheme == "tc.app" 확인
+    - host별 라우팅:
+        └── "calendar" → CalendarDeepLinkHandlerImple
+            ├── path에 "event" → EventDeepLinkHandlerImple
+            └── path 없음 → handleMoveDate() (날짜 이동)
+    ↓
+미지원 링크 → .needUpdate → 앱 업데이트 안내 다이얼로그
+```
+
+**Pending 링크 처리**:
+- 대상 핸들러가 아직 초기화되지 않은 경우 `pendingCalendarLink`에 보관
+- 핸들러 초기화 시 `attach()` 호출 → 보관된 링크 즉시 처리
 
 ---
 
 ## 15. 피드백
 
-- 연락처 이메일 (선택)
-- 피드백 메시지
-- 디바이스 정보 자동 수집 (OS 버전, 앱 버전, 디바이스 모델, Mac 실행 여부)
+### 15.1 입력 데이터
+
+| 필드 | 필수 | 설명 |
+|---|---|---|
+| 연락처 이메일 | 선택 | 사용자 입력 |
+| 피드백 메시지 | 필수 | 사용자 입력 |
+
+### 15.2 자동 수집 데이터
+
+| 필드 | 소스 |
+|---|---|
+| userId | 현재 로그인 사용자 ID (비로그인 시 `"null"`) |
+| osVersion | `UIDevice` (예: `"18.3.1"`) |
+| appVersion | `Bundle.main` (예: `"1.0.0"`) |
+| deviceModel | `UIDevice` (예: `"iPhone 15"`) |
+| isIOSAppOnMac | `ProcessInfo` Mac Catalyst 여부 |
+
+### 15.3 전송 방식
+
+`FeedbackRepositoryImple` → `FeedbackEndpoints.post` (서버 API)
+
+**페이로드 형식**: Slack Incoming Webhook JSON
+
+```json
+{
+  "attachments": [{
+    "fallback": "incomming cs from: <email>",
+    "pretext": "incomming cs from: <email>",
+    "color": "good",
+    "fields": [
+      { "title": "message", "value": "사용자 메시지" },
+      { "title": "user id", "value": "abc123" },
+      { "title": "os version", "value": "18.3.1" },
+      { "title": "app version", "value": "1.0.0" },
+      { "title": "device model", "value": "iPhone 15" },
+      { "title": "is ios app on Mac?", "value": "false" }
+    ]
+  }]
+}
+```
+
+피드백 전송은 async/await 기반. Usecase에서 DeviceInfo 수집 → FeedbackMakeParams 조립 → Repository 전송.
 
 ---
 
@@ -1475,33 +1812,137 @@ App Group ID (`group.com.sudo.park.todocalendar`)를 통한 공유 저장소:
 
 `DaysIntervalCountUsecase` — 이벤트/공휴일까지 남은 일수를 실시간 계산.
 
-- 매초 업데이트 (타이머 기반)
-- 타임존 인지
-- 공휴일 상세 화면에서 사용
+### 17.1 계산 공식
+
+```
+1. 현재 시각(Date)과 대상 시각(Date)을 Gregorian Calendar로 가져옴
+2. Calendar의 timeZone을 현재 설정 타임존으로 설정
+3. 양쪽 모두 startOfDay()로 00:00:00 정규화
+4. dateComponents([.day], from:to:).day → 일수 차이 (Int)
+```
+
+**예시**:
+- 현재: 2025-03-31 14:30 → 정규화: 2025-03-31 00:00
+- 대상: 2025-04-05 09:15 → 정규화: 2025-04-05 00:00
+- 결과: **5일** (양수 = 미래, 음수 = 과거)
+
+### 17.2 타임존 처리
+
+- `Calendar(identifier: .gregorian)`에 `CalendarSettingUsecase.currentTimeZone` 적용
+- 사용자가 타임존을 변경하면 D-Day 값도 즉시 재계산
+- 하루종일 이벤트의 경우 `Range<TimeInterval>.shiftting(secondsFromGMT:to:)` 변환 후 대상 날짜 결정
+
+**하루종일 이벤트 타임존 변환**:
+```
+원본 범위 (이벤트 타임존) → +secondsFromGMT → UTC 범위 → -targetTimeZone.secondsFromGMT → 대상 타임존 범위
+```
+
+### 17.3 실시간 업데이트
+
+- 1초 간격 타이머 (`secondTicks`) + 타임존 변경 Publisher를 `CombineLatest`
+- `removeDuplicates()`: 일수가 실제로 변경될 때만 UI 갱신
+- 사용 화면: 공휴일 상세, 이벤트 상세 등
 
 ---
 
 ## 18. DB 마이그레이션
 
-### 메인 DB (`todo_calendar.db`)
-1. `AppEnvironment.dbVersion` 증가 (현재 v6)
-2. 해당 Table 타입의 `migrateStatement(for version:)`에 case 추가
+### 18.1 메인 DB (`todo_calendar.db`)
 
-### 외부 캘린더 DB (`google_calendar.db`)
-1. `AppEnvironment.googleCalendarDBVersion` 증가 (현재 v0)
-2. 외부 캘린더 테이블의 `migrateStatement(for version:)`에 case 추가
-3. DB 연결은 `ExternalCalendarDBConnectionPool`이 관리 (참조 카운팅, lazy open)
+**현재 버전**: `AppEnvironment.dbVersion = 6`
+
+**마이그레이션 메커니즘** (`SQLiteService`):
+1. 앱 시작 시 `AppDataMigrationImple.runDBMigration()` 호출
+2. `mainDB.async.migrate(upto: dbVersion, steps:finalized:)`
+3. SQLite `user_version` pragma로 현재 버전 확인
+4. 현재 → 목표까지 1단계씩 순차 실행
+5. 각 단계에서 `Table.migrateStatement(for: version)` → SQL 실행
+6. 성공 시 `user_version` 증가
+7. 최종 단계 후 `finalized` 콜백 (WAL 모드 설정)
+
+**버전별 변경 이력**
+
+| 버전 | 변경 내용 | 영향 테이블 | SQL |
+|---|---|---|---|
+| 0→1 | 반복 종료 횟수 컬럼 추가 | `TodoEvents`, `Schedules`, `PendingDoneTodoEvent` | `ALTER TABLE ... ADD COLUMN repeating_count INTEGER` |
+| 1→2 | 구글 캘린더 이벤트 상태 컬럼 | `google_calendar_event_origin` (레거시) | `ALTER TABLE ... ADD COLUMN status TEXT` |
+| 2→3 | 구글 캘린더 태그 선택 컬럼 | `google_calendar_list` (레거시) | `ALTER TABLE ... ADD COLUMN is_selected INTEGER` |
+| 3→4 | 구글 캘린더 이벤트 가시성 컬럼 | `google_calendar_event_origin` (레거시) | `ALTER TABLE ... ADD COLUMN visibility TEXT` |
+| 4→5 | 업로드 큐 테이블 재구성 | `event_upload_pending_queue` | 임시 테이블 생성 → 데이터 이동 → 원본 삭제 → 이름 변경 |
+| 5→6 | 할일 반복 회차 컬럼 추가 | `TodoEvents` | `ALTER TABLE ... ADD COLUMN repeating_turn INTEGER` |
+
+**전체 테이블 목록** (`prepareTables()` 순서):
+
+1. `KeyValueTable`
+2. `HolidayTable`
+3. `EventTimeTable`
+4. `EventDetailDataTable`
+5. `CustomEventTagTable`
+6. `ScheduleEventTable`
+7. `EventSyncTimestampTable`
+8. `DoneTodoEventTable`
+9. `DoneTodoEventDetailTable`
+10. `PendingDoneTodoEventTable`
+11. `TodoEventTable`
+12. `TodoToggleStateTable`
+13. `EventUploadPendingQueueTable`
+14. `EventNotificationIdTable`
+
+### 18.2 실패 처리 전략
+
+**테이블별 개별 try-catch**:
+- 각 테이블 마이그레이션이 독립적으로 에러 처리
+- 마이그레이션 실패 시 → 해당 테이블 drop → 다음 앱 실행의 `prepareTables()`에서 재생성 (데이터 손실 감수)
+
+**버전별 에러 강도**:
+
+| 버전 | 에러 처리 | 이유 |
+|---|---|---|
+| 0→1, 1→2, 2→3, 3→4 | `try` (hard fail) | 핵심 스키마 변경 |
+| 4→5, 5→6 | `try?` (soft fail) | 큐 재구성/부가 컬럼, 실패해도 앱 동작에 큰 영향 없음 |
+
+**전체 실패 시**: 최상위 try-catch에서 에러 로깅만 수행, 앱 크래시 방지.
+
+### 18.3 외부 캘린더 DB (`google_calendar.db`)
+
+**현재 버전**: `AppEnvironment.googleCalendarDBVersion = 0`
+
+- DB 연결은 `ExternalCalendarDBConnectionPool`이 관리 (참조 카운팅, lazy open)
+- `onFirstOpen` 시 테이블 생성 + 마이그레이션 실행
+- 현재 v0이므로 마이그레이션 없음 (모든 테이블이 최신 스키마로 생성)
+
+**테이블**: `GoogleCalendarColorsTable`, `GoogleCalendarEventOriginTable`, `GoogleCalendarEventTagTable` — 모두 `account_id` 컬럼으로 다중 계정 지원.
+
+### 18.4 레거시 데이터 이관
+
+구글 캘린더 데이터가 메인 DB(레거시 테이블)에서 별도 DB로 이동하는 일회성 마이그레이션:
+- 플래그: `"google_calendar_migrated"` (한번 실행 후 스킵)
+- DB Pool 연결이 없으면 스킵 (플래그 미설정 → 다음에 재시도)
+- 읽기/쓰기 실패 시 soft fail (`try?`) → 플래그는 설정하여 재시도 방지
+
+### 18.5 새 마이그레이션 추가 절차
+
+1. `AppEnvironment.dbVersion` (또는 `googleCalendarDBVersion`) 증가
+2. 해당 `Table` 타입의 `migrateStatement(for version:)`에 새 case 추가
+3. `AppDataMigrationImple.runDBMigration()`의 switch에 새 version case 추가
+4. 두 곳을 반드시 함께 변경해야 마이그레이션이 실행됨
 
 ---
 
 ## 19. 주요 외부 의존성
 
-| 라이브러리 | 용도 |
-|---|---|
-| Alamofire | HTTP 클라이언트 |
-| Combine | 반응형 스트림 (메인) |
-| RxSwift | 반응형 스트림 (일부) |
-| PreludeSwift | 함수형 프로그래밍 연산자 (렌즈, `\|>`, `.~`) |
-| SQLiteService | SQLite 래퍼 |
-| FirebaseMessaging | 푸시 알림 |
-| AppAuth | Google OAuth2 |
+| 라이브러리 | 버전 | 용도 | 빌드 타입 |
+|---|---|---|---|
+| Alamofire | 5.7.1 | HTTP 클라이언트 (Remote API) | dynamic framework |
+| Kingfisher | 7.10.0 | 이미지 캐싱 & 다운로드 | dynamic framework |
+| swift-prelude | main | 함수형 프로그래밍 연산자 (`\|>`, `.~` 렌즈) | dynamic framework |
+| swift-async-algorithms | 0.1.0 | Async sequence 연산 | dynamic framework |
+| publisher-async-bind | 0.0.2 | Combine ↔ async/await 브릿지 | dynamic framework |
+| SQLiteService | 0.2.0 | SQLite DB 래퍼 (Table 프로토콜, 마이그레이션) | dynamic framework |
+| CombineCocoa | 0.4.1 | UIKit + Combine 확장 | dynamic framework |
+| Pulse | 4.0.3 | 네트워크 로깅 & 디버깅 | dynamic framework |
+| Firebase (Messaging) | — | 푸시 알림 (FCM 토큰 등록/해제) | — |
+| AppAuth | — | Google OAuth2 인증 플로우 | — |
+| Combine | 시스템 | 반응형 스트림 (메인 상태 관리) | 시스템 프레임워크 |
+
+**의존성 관리**: Tuist v3 + SPM. `Tuist/Dependencies.swift`에서 모든 외부 패키지 선언. 모두 dynamic framework로 컴파일.
