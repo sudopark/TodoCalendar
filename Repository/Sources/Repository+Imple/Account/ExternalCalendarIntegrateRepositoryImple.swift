@@ -124,6 +124,15 @@ extension ExternalCalendarIntegrateRepositoryImple {
             saveAccountId(accountId, for: service.identifier)
             return account
 
+        case is AppleCalendarCredential:
+            // Apple Calendar: OAuth 토큰 없음, Remote pool setup 불필요
+            let accountId = AppleCalendarService.localAccountId
+            let account = ExternalServiceAccountinfo(service.identifier, email: accountId)
+            let mapper = ExternalServiceAccountMapper(account: account)
+            self.keyChainStore.update(accountKey(service.identifier, accountId), mapper)
+            saveAccountId(accountId, for: service.identifier)
+            return account
+
         default:
             throw RuntimeError("not support credential type")
         }
