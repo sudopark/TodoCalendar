@@ -18,7 +18,8 @@ import UnitTestHelpKit
 struct ExternalCalendarIntegrateRepositoryImpleTests {
 
     private let services: [any ExternalCalendarService] = [
-        GoogleCalendarService(scopes: [.readOnly])
+        GoogleCalendarService(scopes: [.readOnly]),
+        AppleCalendarService()
     ]
     private let spyPool = SpyRemotePool()
     private let spyKeyChain = SpyKeyChainStorage()
@@ -138,6 +139,32 @@ extension ExternalCalendarIntegrateRepositoryImpleTests {
 
         // then
         #expect(accounts.isEmpty)
+    }
+
+    // save Apple Calendar credential — remote pool setup 없이 keychain만 저장
+    @Test func repository_saveAppleCalendarCredential() async throws {
+        // given
+        let repository = self.makeReposiotry()
+        let appleService = AppleCalendarService()
+        let accountsBeforeSave = try await repository.loadIntegratedAccounts()
+
+        // when
+        let saved = try await repository.save(AppleCalendarCredential(), for: appleService)
+
+        let accountsAfterSave = try await repository.loadIntegratedAccounts()
+        let accountIds: [String]? = spyKeyChain.load("\(appleService.identifier)-accounts")
+
+        // then
+        let localAccountId = AppleCalendarService.localAccountId
+        #expect(accountsBeforeSave.isEmpty)
+        #expect(saved.email == localAccountId)
+        #expect(accountsAfterSave.map { $0.email } == [localAccountId])
+        #expect(accountIds == [localAccountId])
+        // API credential 저장 없음
+        let storedCredential: APICredentialMapper? = spyKeyChain.load("\(appleService.identifier)-\(localAccountId)-credential")
+        #expect(storedCredential == nil)
+        // remote pool setup 없음
+        #expect(spyPool.setupCredentials["\(appleService.identifier)-\(localAccountId)"] == nil)
     }
 
     // remove account — pool remove + keychain 삭제
