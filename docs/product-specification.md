@@ -1,6 +1,6 @@
 # TodoCalendar 제품 기획서
 
-> 코드베이스 기반 기능/정책 명세. 최종 갱신: 2026-04-01
+> 코드베이스 기반 기능/정책 명세. 최종 갱신: 2026-04-01 (Phase 3~5 상세 추가)
 >
 > 각 섹션의 상세 스펙은 `spec/` 하위 파일을 참조.
 
@@ -145,6 +145,8 @@
 
 ## 5. 이벤트 태그
 
+> **상세 스펙**: [spec/tags-foremost-notifications.md](spec/tags-foremost-notifications.md) — 태그 CRUD 상세, 색상 결정 체계, 보이기/숨기기 영향 매트릭스, 자동 새로고침
+
 | 태그 유형 | 식별자 | 기본 상태 |
 |---|---|---|
 | 기본 (default) | `.default` | 시스템 |
@@ -153,55 +155,65 @@
 | 외부 캘린더 | `.externalCalendar(serviceId, id)` | 연동 시 숨김 |
 
 - 커스텀 태그: 이름 + 색상(hex)으로 생성/수정/삭제
-- 태그 삭제 시 관련 이벤트 일괄 삭제 옵션
-- 캘린더에서 태그별 보이기/숨기기 토글 (`offEventTagIdsOnCalendar`)
-- 색상: default/holiday는 설정값, custom은 태그 자체, 구글은 `GoogleCalendarEventColorSource`
+- 태그 삭제 시 관련 이벤트 일괄 삭제 옵션 (cascade)
+- 캘린더에서 태그별 보이기/숨기기 토글 (`offEventTagIdsOnCalendar`, 역논리)
+- 색상: default/holiday는 설정값, custom은 태그 자체, 구글은 `GoogleCalendarEventColorSource`, Apple은 `AppleCalendarEventColorSource`
 
 ---
 
 ## 6. 강조 이벤트 (Foremost Event)
+
+> **상세 스펙**: [spec/tags-foremost-notifications.md](spec/tags-foremost-notifications.md) — 상태 전이, Publisher 체인, 위젯 연동, 엣지 케이스, API 엔드포인트
 
 사용자가 가장 중요한 이벤트 **1개**를 지정.
 
 - `ForemostEventId`: eventId + isTodo 플래그로 식별
 - 캘린더 일별 목록 상단 고정 표시
 - 위젯에서 강조 노출 (`ForemostEventWidget`)
-- 지정/해제 시 상태: idle → marking/unmarking → idle
+- 지정/해제 시 상태: idle → marking/unmarking → idle (defer로 복원 보장)
 - 위젯에서 할일 완료 토글 가능 (`TodoToggleIntent`)
+- 이벤트 삭제 시 graceful degradation (nil 반환)
 
 ---
 
 ## 7. 알림
 
+> **상세 스펙**: [spec/tags-foremost-notifications.md](spec/tags-foremost-notifications.md) — fire date 계산, 타임존 처리, 반복 이벤트 알림, 라이프사이클, ID 관리, FCM 푸시
+
 ### 알림 시간 옵션
 
-| 시간 이벤트 | 하루종일 이벤트 |
+| 시간 이벤트 (11개) | 하루종일 이벤트 (5개) |
 |---|---|
-| 정시, 1분~168시간 전 | 당일 9시/12시, 1~7일 전 9시 |
+| 정시, 1분/5분/10분/15분/30분/1시간/2시간/1일/2일/7일 전 | 당일 9시/12시, 1일/2일/7일 전 9시 |
 
 커스텀: `DateComponents`로 자유 지정
 
 ### 알림 정책
 
 - 이벤트당 **복수** 알림 설정 가능
-- 기본 알림: 시간/하루종일 별도 설정
-- 로컬 알림 범위: 향후 365일, 반복 이벤트는 각 인스턴스마다
-- 이벤트 변경 시: 기존 알림 제거 → 새 알림 등록
-- FCM 푸시: 로그인 시 토큰 등록
+- 기본 알림: 시간/하루종일 별도 설정 (UserDefaults 저장)
+- 로컬 알림 범위: 향후 365일, 반복 이벤트는 각 인스턴스마다 개별 생성
+- 이벤트 변경 시: 기존 알림 전부 취소 → 새 알림 등록 (DB에 eventId ↔ notificationId 매핑)
+- FCM 푸시: 로그인 시 토큰 등록 (PUT /notification), 중복 등록 방지
 
 ---
 
 ## 8. 구글 캘린더 연동
 
+> **상세 스펙**: [spec/google-calendar.md](spec/google-calendar.md) — OAuth 상세, 다중 계정 Pool 아키텍처, 연동/해제 플로우, DB 스키마, 캐시 전략, 에러 처리
+
 - **읽기 전용**, 다중 계정 동시 지원, Google OAuth2
-- 연동: OAuth → 자격증명 저장 → DB 연결(참조 카운팅) → 색상/캘린더/이벤트 동기화
+- 연동: OAuth → 자격증명 저장(Keychain) → DB 연결(참조 카운팅) → 색상/캘린더/이벤트 동기화
 - 해제: 자격증명 삭제 → DB 해제 → SharedDataStore 정리 → 태그 off 정리
 - 캘린더별 보이기/숨기기 (기본 숨김, 사용자 활성화)
 - 이벤트 상세: 참석자, 회의 링크, 첨부파일, 상태(확정/미정/취소) — "구글에서 편집" 링크
+- 토큰 자동 갱신 (Alamofire AuthenticationInterceptor), 갱신 실패 시 재인증
 
 ---
 
 ## 9. 위젯 (18종)
+
+> **상세 스펙**: [spec/widgets.md](spec/widgets.md) — 위젯별 사이즈 매트릭스, Timeline 갱신 정책, Intent 파라미터, 데이터 소스, App Group 공유, 딥링크 URL, 캐시 메커니즘
 
 | 분류 | 위젯 |
 |---|---|
@@ -209,11 +221,11 @@
 | 주/월 (7) | 1~4주, 이번달/지난달/다음달 |
 | 조합 (4) | TodayAndMonth, EventAndMonth, EventAndForemost, DoubleMonth |
 
-- `TodoToggleIntent`: 위젯에서 할일 완료 토글
-- `EventTypeSelectIntent`: 위젯 필터링
-- 딥링크: 위젯 탭 → `tc.app://` 스킴으로 앱 이동
-- 자동 갱신: 백그라운드 진입 시 `WidgetCenter.reloadAllTimelines()`
-- 위젯 외형: 배경 `.system` 또는 `.custom(hex)`
+- `TodoToggleIntent`: 위젯에서 할일 완료 토글 (SQLite 직접 쓰기 + 캐시 리셋)
+- `EventTypeSelectIntent`: 태그 기반 위젯 필터링 (커스텀+구글 태그 지원)
+- 딥링크: 위젯 탭 → `tc.app://calendar/event/{type}?event_id=...`
+- Timeline 갱신: 다음 날 00:00 또는 1시간 후 (가까운 쪽), 앱 백그라운드 시 전체 리로드
+- 위젯 외형: 배경 `.system` 또는 `.custom(hex)` (밝기 기반 ColorSet 자동 전환)
 
 ---
 
@@ -311,3 +323,6 @@
 | [spec/sync.md](spec/sync.md) | 동기화 — 오프라인 큐, API, 충돌 해결, 백그라운드 |
 | [spec/settings.md](spec/settings.md) | 설정 — UserDefaults 키, 기본값, 화면 매트릭스 |
 | [spec/infrastructure.md](spec/infrastructure.md) | 인프라 — SharedDataStore, 딥링크, 피드백, D-Day, DB 마이그레이션 |
+| [spec/tags-foremost-notifications.md](spec/tags-foremost-notifications.md) | 태그 + 강조 이벤트 + 알림 — CRUD, 색상 체계, 상태 전이, fire date, 라이프사이클 |
+| [spec/google-calendar.md](spec/google-calendar.md) | 구글 캘린더 — OAuth, 다중 계정 Pool, 연동/해제 플로우, DB 스키마 |
+| [spec/widgets.md](spec/widgets.md) | 위젯 (18종) — 사이즈 매트릭스, Intent, Timeline, App Group, 딥링크 |
