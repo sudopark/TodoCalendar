@@ -14,7 +14,7 @@
 | Phase 2: Integration Usecase 확장 | `features/563-phase2-integration` | ✅ 완료 (PR #566) |
 | Phase 3: Repository — EventKit + DB 캐시 | `features/563-phase3-repository` | ✅ 완료 |
 | Phase 4: AppEnvironment & DB 설정 | `features/563-phase4-app-env` | ✅ 완료 |
-| Phase 5: Presentation — 이벤트 표시 & 색상 | `features/563-phase5-...` | ⬜ 예정 |
+| Phase 5: Presentation — 이벤트 표시 & 색상 | `features/563-phase5-presentation` | ✅ 완료 (PR #569) |
 | Phase 6: Settings UI | `features/563-phase6-...` | ⬜ 예정 |
 | Phase 7: Factory / Assembly | `features/563-phase7-...` | ⬜ 예정 |
 | Phase 8: 이벤트 상세 (후속) | — | ⬜ 예정 |
@@ -65,13 +65,15 @@
 
 ---
 
-## Phase 5 할 일 — Presentation
+## Phase 5 완료 내역 — Presentation
 
-- [ ] **5-1.** `AppleCalendarEventColorSource` 추가
-- [ ] **5-2.** `EventTagColorView` 업데이트
-- [ ] **5-3.** `ViewAppearance` 업데이트 — `appleCalendarTagMap`, `AppleCalendarViewAppearanceStore` 구현
-- [ ] **5-4.** `AppleCalendarEvent: CalendarEvent` 추가
-- [ ] **5-5.** `CalendarEventListhUsecase` 업데이트 — Apple Calendar 이벤트 merge
+- [x] **5-1.** `AppleCalendarEventColorSource` 추가
+- [x] **5-2.** `EventTagColorView` 업데이트
+- [x] **5-3.** `ViewAppearance` 업데이트 — `appleCalendarTagMap`, `AppleCalendarViewAppearanceStore` 구현
+- [x] **5-4.** `AppleCalendarEvent: CalendarEvent` 추가
+- [x] **5-5.** `CalendarEventListhUsecase` 업데이트 — Apple Calendar 이벤트 merge
+- [x] **5-6.** `ExternalCalendarUsecaseFactory.makeAppleCalendarUsecase()` + 팩토리 구현 (NonLogin/Login)
+- [x] **5-7.** `ApplicationViewAppearanceStoreImple`: `AppleCalendarViewAppearanceStore` 준수
 
 ---
 
