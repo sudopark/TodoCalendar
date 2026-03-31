@@ -35,3 +35,17 @@ public struct GoogleCalendarEventColorSource: EventTagColorSource {
         self.colorId = colorId
     }
 }
+
+
+// MARK: - Apple Calendar event color source
+
+/// Apple Calendar 이벤트 전용 색상 소스.
+/// calendarId로 ViewAppearance의 appleCalendarTagMap을 룩업하여 색상 결정.
+public struct AppleCalendarEventColorSource: EventTagColorSource {
+
+    public let calendarId: String
+
+    public init(calendarId: String) {
+        self.calendarId = calendarId
+    }
+}

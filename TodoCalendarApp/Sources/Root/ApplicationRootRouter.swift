@@ -180,6 +180,22 @@ extension ApplicationViewAppearanceStoreImple: GoogleCalendarViewAppearanceStore
 
 }
 
+extension ApplicationViewAppearanceStoreImple: AppleCalendarViewAppearanceStore {
+
+    func applyCalendarTags(_ tags: [AppleCalendar.Tag]) {
+        Task { @MainActor in
+            self.appearance.applyCalendarTags(tags)
+        }
+    }
+
+    func clearCalendarTags() {
+        Task { @MainActor in
+            self.appearance.clearCalendarTags()
+        }
+    }
+}
+
+
 // MARK: - ApplicationRootRouter
 
 protocol ApplicationRouting: Routing {
