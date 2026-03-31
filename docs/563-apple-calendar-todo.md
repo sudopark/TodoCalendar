@@ -12,8 +12,8 @@
 |---|---|---|
 | Phase 1: Domain 모델 & 프로토콜 | `feature/563-apple-calendar` | ✅ 완료 (PR #564 머지) |
 | Phase 2: Integration Usecase 확장 | `features/563-phase2-integration` | ✅ 완료 (PR #566) |
-| Phase 3: Repository — EventKit + DB 캐시 | `features/563-phase3-...` | ⬜ 예정 |
-| Phase 4: AppEnvironment & DB 설정 | `features/563-phase4-...` | ⬜ 예정 |
+| Phase 3: Repository — EventKit + DB 캐시 | `features/563-phase3-repository` | ✅ 완료 |
+| Phase 4: AppEnvironment & DB 설정 | `features/563-phase4-app-env` | ✅ 완료 |
 | Phase 5: Presentation — 이벤트 표시 & 색상 | `features/563-phase5-...` | ⬜ 예정 |
 | Phase 6: Settings UI | `features/563-phase6-...` | ⬜ 예정 |
 | Phase 7: Factory / Assembly | `features/563-phase7-...` | ⬜ 예정 |
@@ -47,29 +47,21 @@
 
 ---
 
-## Phase 3 할 일 — Repository (EventKit + DB 캐시)
+## Phase 3 완료 내역
 
-- [ ] **3-1.** `AppleCalendarRepositoryImple`
-  - `EKEventStore` 기반, `requestAccess()` / `checkAccessStatus()` / `loadCalendarTags()` / `loadEvents(in:)` / `resetCache()`
-- [ ] **3-2.** `AppleCalendar+Mapping.swift`
-  - `EKCalendar` → `AppleCalendar.Tag`, `EKEvent` → `AppleCalendar.Event`
-  - CGColor → hex 변환, allDay/period EventTime 변환
-- [ ] **3-3.** DB 캐시 레이어
-  - `AppleCalendarTables.swift` (Tag 테이블, Event 테이블, EventTime 테이블)
-  - `AppleCalendarLocalStorage.swift` (save/load)
-- [ ] **3-4.** `AppleCalendarLocalAggregatedRepositoryImple` (위젯용 read-only)
-  - 권한 해제 시 빈 배열 반환
-- [ ] **3-5.** 테스트: Mapping, LocalStorage, LocalAggregated, RepositoryImple
+- [x] **3-1.** `AppleCalendarRepositoryImple` — `EKEventStoreWrapper` 기반, 캐시→refresh Publisher 방식
+- [x] **3-2.** `AppleCalendar+EventKit.swift` — `EKCalendar`→Tag, `EKEvent`→Event 매핑, CGColor→hex
+- [x] **3-3.** DB 캐시 레이어 — `AppleCalendarTables.swift`, `AppleCalendarLocalStorage.swift`
+- [x] **3-4.** `AppleCalendarLocalAggregatedRepositoryImple` (위젯용 read-only, 권한 해제 시 빈 배열)
+- [x] **3-5.** 테스트: Mapping, LocalStorage, LocalAggregated, RepositoryImple
 
 ---
 
-## Phase 4 할 일 — AppEnvironment & DB 설정
+## Phase 4 완료 내역
 
-- [ ] **4-1.** `AppEnvironment.swift` 수정
-  - `appleCalendarService`, `supportExternalCalendarServices`, `appleCalendarDBVersion`, DB path 추가
-- [ ] **4-2.** `ApplicationBase.swift` 수정
-  - Apple Calendar DB onFirstOpen 처리, `appleCalendarRepository` lazy 프로퍼티
-- [ ] **4-3.** `Info.plist` — `NSCalendarsFullAccessUsageDescription` 추가
+- [x] **4-1.** `AppEnvironment.swift` — `appleCalendarService`, `appleCalendarDBVersion`, DB path 추가
+- [x] **4-2.** `ApplicationBase.swift` — `appleCalendarPermissionChecker`, `appleCalendarRepository` lazy 프로퍼티 추가
+- [x] **4-3.** `Info.plist` — `NSCalendarsFullAccessUsageDescription` 추가
 
 ---
 
