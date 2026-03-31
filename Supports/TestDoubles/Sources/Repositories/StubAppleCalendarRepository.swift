@@ -15,16 +15,6 @@ open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Send
 
     public init() { }
 
-    public var stubAccessStatus: Bool = true
-    open func checkAccessStatus() -> Bool {
-        return stubAccessStatus
-    }
-
-    public var stubRequestAccess: Bool = true
-    open func requestAccess() async throws -> Bool {
-        return stubRequestAccess
-    }
-
     public var stubCalendarTags: [AppleCalendar.Tag] = (0..<3).map {
         .init(id: "cal:\($0)", name: "Calendar \($0)", colorHex: nil)
     }

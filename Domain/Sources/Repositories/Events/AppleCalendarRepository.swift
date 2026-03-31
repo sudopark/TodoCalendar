@@ -12,17 +12,16 @@ import Combine
 
 // MARK: - AppleCalendarPermissionChecker
 
-/// 권한 확인 전용 — 위젯 등 경량 컨텍스트에서 사용
+/// 권한 확인/요청 — 위젯 등 경량 컨텍스트에서도 사용
 public protocol AppleCalendarPermissionChecker: Sendable {
+    func requestAccess() async throws -> Bool
     func checkAccessStatus() -> Bool
 }
 
 
 // MARK: - AppleCalendarRepository
 
-public protocol AppleCalendarRepository: AppleCalendarPermissionChecker, Sendable {
-
-    func requestAccess() async throws -> Bool
+public protocol AppleCalendarRepository: Sendable {
 
     // 캐시 데이터를 먼저 방출 → 이어 EventKit에서 refresh한 데이터 방출 후 완료
     func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error>
