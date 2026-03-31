@@ -25,7 +25,9 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
     private let eventTagUsecase = StubEventTagUsecase()
     private let uiSettingUsecase = StubUISettingUsecase()
     
-    private func makeUsecase() async throws -> CalendarEventListhUsecaseImple {
+    private func makeUsecase(
+        appleEvents: [AppleCalendar.Event] = []
+    ) async throws -> CalendarEventListhUsecaseImple {
         let todos = (0..<3).map { int in
             return TodoEvent(uuid: "todo:\(int)", name: "todo")
                 |> \.time .~ .at(0)
@@ -56,22 +58,26 @@ final class CalendarEventListhUsecaseImpleTests: PublisherWaitable {
         todoUsecase.stubTodoEventsInRange = todos
         todoUsecase.stubCurrentTodoEvents = currentTodos
         todoUsecase.stubUncompletedTodos = uncompletedTodos
-        
+
         let scheduleUsecase = StubScheduleEventUsecase()
         scheduleUsecase.stubScheduleEventsInRange = schedules
-        
+
         let googleUsecase = StubGoogleCalendarUsecase()
         googleUsecase.stubEvents = googles
-        
+
+        let appleUsecase = StubAppleCalendarUsecase()
+        appleUsecase.stubEvents = appleEvents
+
         let calendarSettingUsecase = StubCalendarSettingUsecase()
         calendarSettingUsecase.prepare()
-        
+
         _ = try await self.uiSettingUsecase.refreshAppearanceSetting()
-        
+
         return .init(
             todoUsecase: todoUsecase,
             scheduleUsecase: scheduleUsecase,
             googleCalendarUsecase: googleUsecase,
+            appleCalendarUsecase: appleUsecase,
             foremostEventUsecase: self.foremostUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
             eventTagUsecase: self.eventTagUsecase,
@@ -145,6 +151,28 @@ extension CalendarEventListhUsecaseImpleTests {
         ])
     }
     
+    @Test func usecase_includeAppleCalendarEvents() async throws {
+        // given
+        let expect = expectConfirm("Apple Calendar 이벤트도 포함하여 제공")
+        let appleEvents = (0..<2).map { int in
+            AppleCalendar.Event(
+                eventId: "a:\(int)",
+                calendarId: "apple-cal",
+                name: "apple-event",
+                eventTime: .at(0)
+            )
+        }
+        let usecase = try await self.makeUsecase(appleEvents: appleEvents)
+
+        // when
+        let eventSource = usecase.calendarEvents(in: 0..<10)
+        let events = try await self.firstOutput(expect, for: eventSource)
+
+        // then
+        let appleEventIds = events?.compactMap { $0 as? AppleCalendarEvent }.map { $0.eventId }
+        #expect(appleEventIds == (0..<2).map { "a:\($0)" })
+    }
+
     @Test func usecase_whenOffTagIdUpdated_updateCalendarList() async throws {
         // given
         let expect = expectConfirm("비활성화된 태그 이벤트는 제외")

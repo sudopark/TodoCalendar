@@ -306,6 +306,17 @@ extension NonLoginUsecaseFactoryImple {
             sharedDataStore: self.applicationBase.sharedDataStore
         )
     }
+
+    func makeAppleCalendarUsecase() -> any AppleCalendarUsecase {
+        return AppleCalendarUsecaseImple(
+            appleService: AppEnvironment.appleCalendarService,
+            integrationUsecase: self.externalCalenarIntegrationUsecase,
+            repository: self.applicationBase.appleCalendarRepository,
+            eventTagUsecase: self.makeEventTagUsecase(),
+            appearanceStore: self.viewAppearanceStore,
+            sharedDataStore: self.applicationBase.sharedDataStore
+        )
+    }
 }
 
 
@@ -703,6 +714,17 @@ extension LoginUsecaseFactoryImple {
             googleService: AppEnvironment.googleCalendarService,
             integrationUsecase: self.externalCalenarIntegrationUsecase,
             repositoryPool: self.applicationBase.googleCalendarRepositoryPool,
+            eventTagUsecase: self.makeEventTagUsecase(),
+            appearanceStore: self.viewAppearanceStore,
+            sharedDataStore: self.applicationBase.sharedDataStore
+        )
+    }
+
+    func makeAppleCalendarUsecase() -> any AppleCalendarUsecase {
+        return AppleCalendarUsecaseImple(
+            appleService: AppEnvironment.appleCalendarService,
+            integrationUsecase: self.externalCalenarIntegrationUsecase,
+            repository: self.applicationBase.appleCalendarRepository,
             eventTagUsecase: self.makeEventTagUsecase(),
             appearanceStore: self.viewAppearanceStore,
             sharedDataStore: self.applicationBase.sharedDataStore
