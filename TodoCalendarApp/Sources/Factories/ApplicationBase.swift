@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import EventKit
 import Prelude
 import Optics
 import Domain
@@ -47,19 +48,19 @@ final class ApplicationBase {
     }()
     
     lazy var externalCalendarDBConnectionPool: ExternalCalendarSQLiteConnectionPoolImple = {
-        let dbVersion = AppEnvironment.googleCalendarDBVersion
         return ExternalCalendarSQLiteConnectionPoolImple(
             dbPathMap: AppEnvironment.externalCalendarDBPaths(),
             onFirstOpen: { service in
+                let googleDBVersion = AppEnvironment.googleCalendarDBVersion
                 let _ = try await service.async.migrate(
-                    upto: dbVersion,
+                    upto: googleDBVersion,
                     steps: { version, database in
                         switch version {
                         default: break
                         }
                     },
                     finalized: { version, database in
-                        logger.log(.sql, level: .info, "google calendar db migration finished to: \(version)")
+                        logger.log(.sql, level: .info, "external calendar db migration finished to: \(version)")
                         try? database.updateJournalMode("WAL")
                     }
                 )
@@ -152,6 +153,24 @@ final class ApplicationBase {
         return GoogleCalendarRepositoryPoolImple(
             accountRemotePool: self.externalCalendarAccountRemotePool,
             connectionPool: self.externalCalendarDBConnectionPool
+        )
+    }()
+
+    private lazy var ekEventStoreWrapper: EKEventStoreWrapper = {
+        return EKEventStoreWrapper()
+    }()
+
+    lazy var appleCalendarPermissionChecker: AppleCalendarPermissionCheckerImple = {
+        return AppleCalendarPermissionCheckerImple(storeAccessor: self.ekEventStoreWrapper)
+    }()
+
+    lazy var appleCalendarRepository: AppleCalendarRepositoryImple = {
+        let cacheStorage = AppleCalendarLocalStorageImple(
+            connectionPool: self.externalCalendarDBConnectionPool
+        )
+        return AppleCalendarRepositoryImple(
+            storeAccessor: self.ekEventStoreWrapper,
+            cacheStorage: cacheStorage
         )
     }()
 }
