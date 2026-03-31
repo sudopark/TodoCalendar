@@ -67,6 +67,7 @@ class MonthViewModelImpleTests: BaseTestCase, PublisherWaitable {
             todoUsecase: self.stubTodoUsecase,
             scheduleUsecase: self.stubScheduleUsecase,
             googleCalendarUsecase: StubGoogleCalendarUsecase(),
+            appleCalendarUsecase: StubAppleCalendarUsecase(),
             foremostEventUsecase: self.stubForemostEventUsecase,
             calendarSettingUsecase: self.stubSettingUsecase,
             eventTagUsecase: self.stubTagUsecase,

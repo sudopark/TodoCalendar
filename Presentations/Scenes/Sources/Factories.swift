@@ -65,8 +65,9 @@ public protocol SupportUsecaseFactory {
 }
 
 public protocol ExternalCalendarUsecaseFactory {
-    
+
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase
+    func makeAppleCalendarUsecase() -> any AppleCalendarUsecase
 }
 
 public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory {
