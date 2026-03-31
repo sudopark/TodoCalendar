@@ -139,17 +139,17 @@ extension AppleCalendarRepositoryImpleTests {
 }
 
 
-// MARK: - checkAccessStatus, requestAccess
+// MARK: - AppleCalendarPermissionCheckerImple
 
 extension AppleCalendarRepositoryImpleTests {
 
     @Test func checkAccessStatus_reflectsStubValue() async throws {
         // given
-        let repo = makeRepository()
         stubAccessor.isAuthorized = false
+        let checker = AppleCalendarPermissionCheckerImple(storeAccessor: stubAccessor)
 
         // when
-        let result = repo.checkAccessStatus()
+        let result = checker.checkAccessStatus()
 
         // then
         #expect(result == false)
@@ -157,11 +157,11 @@ extension AppleCalendarRepositoryImpleTests {
 
     @Test func requestAccess_returnsStubValue() async throws {
         // given
-        let repo = makeRepository()
         stubAccessor.requestGranted = true
+        let checker = AppleCalendarPermissionCheckerImple(storeAccessor: stubAccessor)
 
         // when
-        let result = try await repo.requestAccess()
+        let result = try await checker.requestAccess()
 
         // then
         #expect(result == true)
