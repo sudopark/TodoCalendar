@@ -12,7 +12,7 @@ import CombineExt
 import Domain
 
 
-public final class AppleCalendarRepositoryImple: AppleCalendarRepository, AppleCalendarPermissionChecker, @unchecked Sendable {
+public final class AppleCalendarRepositoryImple: AppleCalendarRepository, @unchecked Sendable {
 
     private let storeAccessor: any AppleCalendarStoreAccessor
     private let cacheStorage: any AppleCalendarLocalStorage
@@ -23,20 +23,6 @@ public final class AppleCalendarRepositoryImple: AppleCalendarRepository, AppleC
     ) {
         self.storeAccessor = storeAccessor
         self.cacheStorage = cacheStorage
-    }
-}
-
-
-// MARK: - AppleCalendarPermissionChecker
-
-extension AppleCalendarRepositoryImple {
-
-    public func requestAccess() async throws -> Bool {
-        return try await storeAccessor.requestFullAccessToEvents()
-    }
-
-    public func checkAccessStatus() -> Bool {
-        return storeAccessor.checkAuthorizationStatus()
     }
 }
 
