@@ -266,6 +266,34 @@ public struct GoogleCalendarEvent: CalendarEvent {
     }
 }
 
+public struct AppleCalendarEvent: CalendarEvent {
+
+    public let eventId: String
+    public let calendarId: String
+    public let name: String
+    public let eventTime: EventTime?
+    public let eventTimeOnCalendar: EventTimeOnCalendar?
+    public let eventTagId: EventTagId
+    public let isForemost: Bool = false
+    public let isRepeating: Bool = false
+    public var locationText: String?
+
+    public init(_ event: AppleCalendar.Event, in timeZone: TimeZone) {
+        self.eventId = event.eventId
+        self.calendarId = event.calendarId
+        self.name = event.name
+        self.eventTime = event.eventTime
+        self.eventTimeOnCalendar = EventTimeOnCalendar(event.eventTime, timeZone: timeZone)
+        self.eventTagId = event.eventTagId
+        self.locationText = event.location
+    }
+
+    public var colorSource: any EventTagColorSource {
+        AppleCalendarEventColorSource(calendarId: calendarId)
+    }
+}
+
+
 extension Publisher where Output: Sequence, Failure == Never {
     
     public func filterTagActivated(

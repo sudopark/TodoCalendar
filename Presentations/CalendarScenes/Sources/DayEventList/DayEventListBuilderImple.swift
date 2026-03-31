@@ -46,6 +46,7 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             todoUsecase: todoEventUsecase,
             scheduleUsecase: self.usecaseFactory.makeScheduleEventUsecase(),
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
+            appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
             foremostEventUsecase: foremostEventUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),

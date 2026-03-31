@@ -27,33 +27,35 @@ protocol CalendarEventListhUsecase: Sendable {
 
 
 final class CalendarEventListhUsecaseImple: CalendarEventListhUsecase, @unchecked Sendable {
-    
+
     private let todoUsecase: any TodoEventUsecase
     private let scheduleUsecase: any ScheduleEventUsecase
     private let googleCalendarUsecase: any GoogleCalendarUsecase
+    private let appleCalendarUsecase: any AppleCalendarUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let eventTagUsecase: any EventTagUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let uiSettingUsecase: any UISettingUsecase
-    
+
     init(
         todoUsecase: any TodoEventUsecase,
         scheduleUsecase: any ScheduleEventUsecase,
         googleCalendarUsecase: any GoogleCalendarUsecase,
+        appleCalendarUsecase: any AppleCalendarUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         eventTagUsecase: any EventTagUsecase,
-        
         uiSettingUsecase: any UISettingUsecase
     ) {
         self.todoUsecase = todoUsecase
         self.scheduleUsecase = scheduleUsecase
         self.googleCalendarUsecase = googleCalendarUsecase
+        self.appleCalendarUsecase = appleCalendarUsecase
         self.foremostEventUsecase = foremostEventUsecase
         self.eventTagUsecase = eventTagUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.uiSettingUsecase = uiSettingUsecase
-        
+
         self.internalBind()
     }
     
@@ -96,7 +98,7 @@ extension CalendarEventListhUsecaseImple {
         let transform: (
             CalendarEventTuple, ForemostEventId?, TimeZone
         ) -> [any CalendarEvent] = { events, foremostId, timeZone in
-            let (todos, schedules, googles) = events
+            let (todos, schedules, googles, apples) = events
             let todoEvents = todos.compactMap {
                 TodoCalendarEvent($0, in: timeZone, isForemost: foremostId?.eventId == $0.uuid)
             }
@@ -104,38 +106,45 @@ extension CalendarEventListhUsecaseImple {
                 ScheduleCalendarEvent.events(from: $0, in: timeZone, foremostId: foremostId?.eventId)
             }
             let googleEvents = googles.map { GoogleCalendarEvent($0, in: timeZone) }
-            return todoEvents + scheduleEvents + googleEvents
+            let appleEvents = apples.map { AppleCalendarEvent($0, in: timeZone) }
+            return todoEvents + scheduleEvents + googleEvents + appleEvents
         }
-        
+
         return Publishers.CombineLatest3(
             self.activeCalendarEventTuple(in: range),
             foremost,
             self.subject.timeZone.compactMap { $0 }
         )
         .map(transform)
-        .removeDuplicates(by:  { $0.map{ $0.compareKey } == $1.map{ $0.compareKey }})
+        .removeDuplicates(by: { $0.map { $0.compareKey } == $1.map { $0.compareKey } })
         .eraseToAnyPublisher()
     }
-    
-    private typealias CalendarEventTuple = ([TodoEvent], [ScheduleEvent], [GoogleCalendar.Event])
+
+    private typealias CalendarEventTuple = ([TodoEvent], [ScheduleEvent], [GoogleCalendar.Event], [AppleCalendar.Event])
     private func activeCalendarEventTuple(
         in range: Range<TimeInterval>
     ) -> AnyPublisher<CalendarEventTuple, Never> {
-        
+
         let transform: (CalendarEventTuple, Set<EventTagId>) -> CalendarEventTuple = { tuple, offIds in
             let todos = tuple.0.filter { offIds.notContains($0.eventTagId) }
             let schedules = tuple.1.filter { offIds.notContains($0.eventTagId) }
             let googles = tuple.2.filter { offIds.notContains($0.eventTagId) }
-            return (todos, schedules, googles)
+            let apples = tuple.3.filter { offIds.notContains($0.eventTagId) }
+            return (todos, schedules, googles, apples)
         }
-        
-        return Publishers.CombineLatest4(
+
+        let rawTuplePublisher = Publishers.CombineLatest4(
             self.todoUsecase.todoEvents(in: range),
             self.scheduleUsecase.scheduleEvents(in: range),
             self.googleCalendarUsecase.eventsWithoutCanceled(in: range),
+            self.appleCalendarUsecase.events(in: range)
+        )
+        .map { ($0, $1, $2, $3) }
+
+        return Publishers.CombineLatest(
+            rawTuplePublisher,
             self.subject.offTagIds
         )
-        .map { (($0, $1, $2), $3) }
         .map(transform)
         .eraseToAnyPublisher()
     }

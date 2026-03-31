@@ -36,6 +36,8 @@ public struct EventTagColorView<Content: View>: View {
         switch source {
         case let google as GoogleCalendarEventColorSource:
             return appearance.googleEventColor(google.colorId, google.calendarId)
+        case let apple as AppleCalendarEventColorSource:
+            return appearance.appleCalendarColor(apple.calendarId)
         case let tagId as EventTagId:
             return appearance.color(tagId)
         default:

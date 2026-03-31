@@ -82,6 +82,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             todoUsecase: self.stubTodoUsecase,
             scheduleUsecase: self.stubScheduleUsecase,
             googleCalendarUsecase: StubGoogleCalendarUsecase(),
+            appleCalendarUsecase: StubAppleCalendarUsecase(),
             foremostEventUsecase: self.stubForemostEventUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
             eventTagUsecase: self.stubTagUsecase,
