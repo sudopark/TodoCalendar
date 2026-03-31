@@ -111,7 +111,7 @@ extension AppleCalendarUsecaseImpleTests {
         // when
         let tagLists = try await outputs(expect, for: usecase.calendarTags) {
             usecase.prepare()
-            sendIntegration(true)
+            self.sendIntegration(true)
         }
 
         // then
@@ -127,7 +127,7 @@ extension AppleCalendarUsecaseImpleTests {
         // when
         let offIdsList = try await outputs(expect, for: stubEventTagUsecase.offEventTagIdsOnCalendar()) {
             usecase.prepare()
-            sendIntegration(true)
+            self.sendIntegration(true)
         }
 
         // then
@@ -161,7 +161,7 @@ extension AppleCalendarUsecaseImpleTests {
         // when
         let offIdsList = try await outputs(expect, for: stubEventTagUsecase.offEventTagIdsOnCalendar()) {
             usecase.prepare()
-            sendIntegration(false)
+            self.sendIntegration(false)
         }
 
         // then
@@ -216,7 +216,7 @@ extension AppleCalendarUsecaseImpleTests {
         let tagLists = try await outputs(expect, for: usecase.calendarTags) {
             usecase.prepare()
             try await Task.sleep(for: .milliseconds(100))
-            sendIntegration(false)
+            self.sendIntegration(false)
         }
 
         // then

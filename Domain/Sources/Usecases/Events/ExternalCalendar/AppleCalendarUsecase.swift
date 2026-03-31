@@ -101,15 +101,10 @@ extension AppleCalendarUsecaseImple {
     }
 
     private func clearCache() {
-        let tags = sharedDataStore.value(
-            [AppleCalendar.Tag].self,
-            key: ShareDataKeys.appleCalendarTags.rawValue
-        ) ?? []
-
         appearanceStore.clearCalendarTags()
         sharedDataStore.delete(ShareDataKeys.appleCalendarTags.rawValue)
         sharedDataStore.delete(ShareDataKeys.appleCalendarEvents.rawValue)
-        eventTagUsecase.removeEventTagOffIds(tags.map(\.tagId))
+        eventTagUsecase.resetExternalCalendarOffTagId(appleService.identifier)
         Task { try? await repository.resetCache() }
     }
 }
