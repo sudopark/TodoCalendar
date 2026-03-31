@@ -19,6 +19,8 @@
 			</array>
 		</dict>
 	</dict>
+    <key>NSCalendarsFullAccessUsageDescription</key>
+    <string>캘린더 이벤트를 표시하고 Apple Calendar와 연동하기 위해 캘린더 접근 권한이 필요합니다.</string>
     <key>NSLocalNetworkUsageDescription</key>
     <string>Network usage required for debugging purposes </string>
     <key>NSBonjourServices</key>
