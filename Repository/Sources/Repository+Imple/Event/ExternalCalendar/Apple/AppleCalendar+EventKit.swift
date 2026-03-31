@@ -22,6 +22,26 @@ public protocol AppleCalendarStoreAccessor: Sendable {
 }
 
 
+// MARK: - AppleCalendarPermissionCheckerImple
+
+public final class AppleCalendarPermissionCheckerImple: AppleCalendarPermissionChecker, @unchecked Sendable {
+
+    private let storeAccessor: any AppleCalendarStoreAccessor
+
+    public init(storeAccessor: any AppleCalendarStoreAccessor) {
+        self.storeAccessor = storeAccessor
+    }
+
+    public func requestAccess() async throws -> Bool {
+        return try await storeAccessor.requestFullAccessToEvents()
+    }
+
+    public func checkAccessStatus() -> Bool {
+        return storeAccessor.checkAuthorizationStatus()
+    }
+}
+
+
 // MARK: - EKEventStoreWrapper
 
 public final class EKEventStoreWrapper: AppleCalendarStoreAccessor, @unchecked Sendable {

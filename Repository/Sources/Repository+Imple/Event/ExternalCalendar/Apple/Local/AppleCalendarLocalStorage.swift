@@ -102,22 +102,17 @@ extension AppleCalendarLocalStorageImple {
 
     public func loadEvents(in period: Range<TimeInterval>) async throws -> [AppleCalendar.Event] {
         let timeQuery = Times.overlapQuery(with: period)
-        let eventQuery = Events
-            .selectSome { [$0.eventId, $0.calendarId, $0.name, $0.location] }
-        let query = eventQuery.innerJoin(with: timeQuery, on: { ($0.eventId, $1.eventId) })
+        let query = Events.selectAll().innerJoin(with: timeQuery, on: { ($0.eventId, $1.eventId) })
 
         let mapping: (CursorIterator) throws -> AppleCalendar.Event = { cursor in
-            let eventId: String = try cursor.next().unwrap()
-            let calendarId: String = try cursor.next().unwrap()
-            let name: String = try cursor.next().unwrap()
-            let location: String? = cursor.next()
+            let event = try Events.Entity(cursor)
             let time = try Times.Entity(cursor).eventTime.unwrap()
             return AppleCalendar.Event(
-                eventId: eventId,
-                calendarId: calendarId,
-                name: name,
+                eventId: event.eventId,
+                calendarId: event.calendarId,
+                name: event.name,
                 eventTime: time,
-                location: location
+                location: event.location
             )
         }
 
@@ -132,12 +127,9 @@ extension AppleCalendarLocalStorageImple {
     public func resetAll() async throws {
         let connection = try await self.connection()
         try await connection.async.run { db in
-            try db.createTableOrNot(Events.self)
-            try db.createTableOrNot(Times.self)
-            try db.createTableOrNot(Tags.self)
-            try db.delete(Times.self, query: Times.delete())
-            try db.delete(Events.self, query: Events.delete())
-            try db.delete(Tags.self, query: Tags.delete())
+            try? db.delete(Times.self, query: Times.delete())
+            try? db.delete(Events.self, query: Events.delete())
+            try? db.delete(Tags.self, query: Tags.delete())
         }
     }
 }
