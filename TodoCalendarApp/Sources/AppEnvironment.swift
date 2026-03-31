@@ -45,11 +45,11 @@ struct AppEnvironment {
     }
     
     static func externalCalendarDBPaths() -> [String: String] {
-        let googlePath = self.dbPath(
-            fileName: "\(GoogleCalendarService.id)_calendar"
-        )
+        let googlePath = self.dbPath(fileName: "\(GoogleCalendarService.id)_calendar")
+        let applePath = self.dbPath(fileName: "\(AppleCalendarService.id)_calendar")
         return [
-            GoogleCalendarService.id: googlePath
+            GoogleCalendarService.id: googlePath,
+            AppleCalendarService.id: applePath
         ]
     }
     
@@ -66,12 +66,14 @@ struct AppEnvironment {
     static let eventUploadMaxFailCount: Int = 10
     
     static let googleCalendarService = GoogleCalendarService(scopes: [.readOnly])
+    static let appleCalendarService = AppleCalendarService()
     static var supportExternalCalendarServices: [ExternalCalendarService] {
-        return [googleCalendarService]
+        return [googleCalendarService, appleCalendarService]
     }
-    
+
     static let dbVersion: Int32 = 6
     static let googleCalendarDBVersion: Int32 = 0
+    static let appleCalendarDBVersion: Int32 = 0
     
     static func deviceId(_ storage: any EnvironmentStorage) -> String {
         let installKey = "install_id"
