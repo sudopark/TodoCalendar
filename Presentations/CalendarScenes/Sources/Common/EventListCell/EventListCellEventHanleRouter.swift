@@ -24,6 +24,7 @@ protocol EventListCellEventHanleRouting: Routing, Sendable {
     func routeToGoogleEventDetail(
         calendarId: String, accountId: String, eventId: String
     )
+    func routeToAppleCalendarEventDetail(calendarId: String, eventId: String)
     func routeToEditGoogleEvent(_ htmlLink: String)
     func routeToMakeNewEvent(_ withParams: MakeEventParams)
 }
@@ -87,6 +88,15 @@ extension EventListCellEventHanleRouter {
         }
     }
     
+    func routeToAppleCalendarEventDetail(calendarId: String, eventId: String) {
+        Task { @MainActor in
+            let next = self.eventDetailSceneBuilder.makeAppleCalendarEventDetailScene(
+                calendarId: calendarId, eventId: eventId
+            )
+            self.scene?.present(next, animated: true)
+        }
+    }
+
     func routeToEditGoogleEvent(_ htmlLink: String) {
         self.openSafari(htmlLink)
     }
