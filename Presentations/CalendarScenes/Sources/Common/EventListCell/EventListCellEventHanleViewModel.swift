@@ -83,7 +83,12 @@ extension EventListCellEventHanleViewModelImple {
             self.router?.routeToGoogleEventDetail(
                 calendarId: google.calendarId, accountId: google.accountId, eventId: google.eventIdentifier
             )
-            
+
+        case let apple as AppleCalendarEventCellViewModel:
+            self.router?.routeToAppleCalendarEventDetail(
+                calendarId: apple.calendarId, eventId: apple.eventIdentifier
+            )
+
         case let holiday as HolidayEventCellViewModel:
             self.router?.routeToHolidayEventDetail(holiday.eventIdentifier)
             
