@@ -68,12 +68,12 @@ struct ExternalCalanserServiceModel: Hashable {
     ) {
         self.serviceId = service.identifier
 
-        switch service {
-        case is GoogleCalendarService:
+        switch service.identifier {
+        case GoogleCalendarService.id:
             self.serviceName = "event_setting::external_calendar::google::serviceName".localized()
             self.serviceIconName = "google_calendar_icon"
             self.status = accountId.map { IntegrateStatus.integrated(accountId: $0) } ?? .notIntegrated
-        case is AppleCalendarService:
+        case AppleCalendarService.id:
             self.serviceName = "event_setting::external_calendar::apple::serviceName".localized()
             self.serviceIconName = "apple_calendar_icon"
             self.status = accountId.map { IntegrateStatus.integrated(accountId: $0) } ?? .notIntegrated
@@ -366,7 +366,7 @@ extension EventSettingViewModelImple {
             return supporServices.flatMap { service -> [ExternalCalanserServiceModel] in
                 let integrated = (accounts[service.identifier] ?? [])
                     .compactMap { ExternalCalanserServiceModel(service, accountId: $0.email) }
-                let isSingleAccountService = service is AppleCalendarService
+                let isSingleAccountService = service.isSingleAccountService
                 if isSingleAccountService && !integrated.isEmpty {
                     return integrated
                 }

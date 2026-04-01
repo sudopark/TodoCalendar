@@ -12,8 +12,9 @@ import UIKit
 // MARK: - ExternalCalendarService
 
 public protocol ExternalCalendarService: Sendable {
-    
+
     var identifier: String { get }
+    var isSingleAccountService: Bool { get }
 }
 
 
@@ -61,6 +62,7 @@ public final class ExternalCalendarOAuthUsecaseProviderImple: ExternalCalendarOA
 public struct AppleCalendarService: ExternalCalendarService {
 
     public let identifier: String = AppleCalendarService.id
+    public let isSingleAccountService: Bool = true
 
     public static var id: String { "apple" }
     /// Apple Calendar은 OAuth 계정이 없으므로 기기 로컬 계정을 나타내는 고정 ID
@@ -79,6 +81,7 @@ public struct GoogleCalendarService: ExternalCalendarService {
     }
     
     public let identifier: String = GoogleCalendarService.id
+    public let isSingleAccountService: Bool = false
     public let scopes: [Scope]
     
     public static var id: String {
