@@ -34,7 +34,9 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private func makeViewModel(
         shouldLoadFail: Bool = false,
         isGoogleCalendarIntegrated: Bool = false,
-        stubGoogleCalendarTags: [GoogleCalendar.Tag]? = nil
+        stubGoogleCalendarTags: [GoogleCalendar.Tag]? = nil,
+        isAppleCalendarIntegrated: Bool = false,
+        stubAppleCalendarTags: [AppleCalendar.Tag]? = nil
     ) -> EventTagListViewModelImple {
         let usecase = StubEventTagUsecase()
         if shouldLoadFail {
@@ -50,9 +52,18 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             googleUsecae.updateHasAccount(.init(GoogleCalendarService.id))
         }
         googleUsecae.stubCalendarTags = stubGoogleCalendarTags
+
+        var appleCalendarUsecase: StubAppleCalendarUsecase?
+        if isAppleCalendarIntegrated {
+            let stub = StubAppleCalendarUsecase()
+            stub.stubCalendarTags = stubAppleCalendarTags
+            appleCalendarUsecase = stub
+        }
+
         let viewModel = EventTagListViewModelImple(
             tagUsecase: usecase,
-            googleCalendarUsecase: googleUsecae
+            googleCalendarUsecase: googleUsecae,
+            appleCalendarUsecase: appleCalendarUsecase
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -245,6 +256,87 @@ extension EventTagListViewModelImpleTests {
             [.externalCalendar(serviceId: GoogleCalendarService.id, id: "g:2"), .externalCalendar(serviceId: GoogleCalendarService.id, id: "g:3")],
             [.externalCalendar(serviceId: GoogleCalendarService.id, id: "g:3")]
         ])
+    }
+
+    // Apple Calendar 태그 섹션 제공
+    func testViewModel_provideAppleCalendarTags() {
+        // given
+        let expect = expectation(description: "Apple Calendar 태그 섹션 제공")
+        let viewModel = self.makeViewModel(
+            isGoogleCalendarIntegrated: true,
+            isAppleCalendarIntegrated: true
+        )
+
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
+            viewModel.reload()
+        }
+
+        // then
+        XCTAssertEqual(sections?.count, 2)
+        let appleSection = sections?.first(where: { $0.serviceId == AppleCalendarService.id })
+        XCTAssertNotNil(appleSection)
+        XCTAssertEqual(appleSection?.cellViewModels.count, 5)
+    }
+
+    // Apple Calendar 태그 토글
+    func testViewModel_whenToggleAppleCalendarTag_updateList() {
+        // given
+        let expect = expectation(description: "wait initial list")
+        expect.assertForOverFulfill = false
+        let viewModel = self.makeViewModel(
+            isGoogleCalendarIntegrated: true,
+            isAppleCalendarIntegrated: true
+        )
+        let _ = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
+            viewModel.reload()
+        }
+
+        let expect2 = expectation(description: "Apple Calendar 태그 토글 시 리스트 업데이트")
+        expect2.expectedFulfillmentCount = 3
+        expect2.assertForOverFulfill = false
+
+        // when
+        let sectionLists = self.waitOutputs(expect2, for: viewModel.externalCalendarSections) {
+            viewModel.toggleIsOn(
+                .externalCalendar(serviceId: AppleCalendarService.id, id: "a:1")
+            )
+            viewModel.toggleIsOn(
+                .externalCalendar(serviceId: AppleCalendarService.id, id: "a:2")
+            )
+            viewModel.toggleIsOn(
+                .externalCalendar(serviceId: AppleCalendarService.id, id: "a:1")
+            )
+        }
+
+        // then
+        let lastAppleSection = sectionLists.last
+            .flatMap { $0.first(where: { $0.serviceId == AppleCalendarService.id }) }
+        let offTagIds = lastAppleSection?.cellViewModels
+            .filter { !$0.isOn }
+            .map { $0.id }
+        XCTAssertEqual(offTagIds, [
+            .externalCalendar(serviceId: AppleCalendarService.id, id: "a:2")
+        ])
+    }
+
+    // Apple Calendar 미연동 시 섹션 미노출
+    func testViewModel_whenAppleCalendarNotIntegrated_noAppleSection() {
+        // given
+        let expect = expectation(description: "Apple Calendar 미연동 시 섹션 미노출")
+        let viewModel = self.makeViewModel(
+            isGoogleCalendarIntegrated: true,
+            isAppleCalendarIntegrated: false
+        )
+
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
+            viewModel.reload()
+        }
+
+        // then
+        let appleSection = sections?.first(where: { $0.serviceId == AppleCalendarService.id })
+        XCTAssertNil(appleSection)
     }
 }
 
