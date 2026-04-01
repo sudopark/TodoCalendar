@@ -20,7 +20,12 @@ open class StubAppleCalendarUsecase: AppleCalendarUsecase, @unchecked Sendable {
         didPrepared = true
     }
 
-    open func refreshCalendarTags() { }
+    open func refreshCalendarTags() {
+        let tags = self.stubCalendarTags ?? (0..<5).map { int -> AppleCalendar.Tag in
+            return .init(id: "a:\(int)", name: "a:\(int)", colorHex: "hex")
+        }
+        self.tagsSubject.send(tags)
+    }
 
     open func refreshEvents(in period: Range<TimeInterval>) { }
 

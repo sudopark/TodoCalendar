@@ -145,4 +145,10 @@ public struct ExternalCalendarEventTag: EventTag {
         self.colorId = tag.colorId
         self.ownerId = tag.ownerId
     }
+
+    public init(_ tag: AppleCalendar.Tag) {
+        self.tagId = tag.tagId
+        self.name = tag.name
+        self.colorHex = tag.colorHex
+    }
 }
