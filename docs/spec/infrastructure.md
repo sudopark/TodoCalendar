@@ -309,3 +309,105 @@ ApplicationDeepLinkHandlerImple:
 | Combine | 시스템 | 반응형 스트림 (메인 상태 관리) | 시스템 프레임워크 |
 
 **의존성 관리**: Tuist v3 + SPM. `Tuist/Dependencies.swift`에서 모든 외부 패키지 선언. 모두 dynamic framework로 컴파일.
+
+---
+
+## 상태 전이 다이어그램
+
+### SharedDataStore 동시성 모델
+
+```mermaid
+flowchart TD
+    subgraph "스레드 안전 보장"
+        Lock["NSRecursiveLock"]
+        Dict["내부 Dictionary\n[String: Any]"]
+    end
+
+    subgraph "쓰기 패턴"
+        Put["put(type, key, value)\n전체 교체"]
+        Update["update(type, key, mutator)\n변환 함수 적용"]
+        Delete["delete(key)\n키 제거"]
+    end
+
+    subgraph "읽기 패턴"
+        Observe["observe(type, key)\n→ AnyPublisher\n(CurrentValueSubject)"]
+        Value["value(type, key)\n→ 현재 스냅샷"]
+    end
+
+    Put -->|Lock 획득| Dict
+    Update -->|Lock 획득| Dict
+    Delete -->|Lock 획득| Dict
+
+    Dict -->|값 변경 시| Subject["Subject.send(newValue)"]
+    Subject --> Observe
+
+    Value -->|Lock 획득| Dict
+```
+
+### 딥링크 처리 플로우
+
+```mermaid
+flowchart TD
+    Start([URL 수신\ntc.app://...]) --> Q1{앱 초기화\n완료?}
+
+    Q1 -->|아니오| Queue["대기 큐에 보관\n(pendingDeepLink)"]
+    Queue --> Init[앱 초기화 완료 시\n큐에서 꺼내 처리]
+    Init --> Parse
+
+    Q1 -->|예| Parse{URL 파싱}
+
+    Parse -->|"calendar/?select=YYYY_MM_DD"| MoveCal[캘린더 날짜 이동]
+    Parse -->|"calendar/event/todo"| TodoDetail[할일 상세 화면]
+    Parse -->|"calendar/event/schedule"| SchedDetail[일정 상세 화면]
+    Parse -->|"calendar/event/holiday"| HolidayDetail[공휴일 상세 화면]
+    Parse -->|"calendar/event/google"| GoogleDetail[구글 이벤트 상세 화면]
+    Parse -->|파싱 실패| Ignore[무시]
+```
+
+---
+
+## 엣지 케이스
+
+### D-Day 계산과 타임존
+
+```
+상황: KST(+9) 기준 이벤트 날짜 = 4/15
+현재: 4/13 23:00 KST (= 4/13 14:00 UTC)
+
+D-Day 계산:
+  daysIntervalCountUsecase.countDays(from: now, to: eventDate)
+  → Calendar(timeZone: 설정 타임존).dateComponents([.day], ...)
+  → KST 기준: 4/13 → 4/15 = D-2
+
+타임존 변경 (PST -8):
+  같은 절대 시각, PST 기준: 4/13 06:00
+  → PST 기준: 4/13 → 4/15 = D-2 (같은 결과)
+
+하루종일 이벤트의 경우:
+  이벤트가 KST 4/15로 저장되었으나,
+  PST 기준으로는 4/14~4/15에 걸침.
+  D-Day는 "이벤트 시작 날짜"(원본 타임존) 기준으로 계산.
+```
+
+### SharedDataStore — 로그인/로그아웃 시 조건부 초기화
+
+```
+상황: 로그인 → 로그아웃
+
+초기화 대상:
+  ✓ todos: [:] (전체 초기화)
+  ✓ schedules: .init() (빈 컨테이너)
+  ✓ uncompletedTodos: []
+  ✓ tags: [:] (커스텀 태그)
+  ✓ foremostEventId: nil
+  ✓ googleCalendarEvents/Tags: 초기화
+
+유지 대상:
+  ✓ offEventTagIds: 유지 (태그 가시성은 계정 독립)
+  ✓ timeZone: 유지
+  ✓ defaultEventTagColor: 유지
+  ✓ holidays: 유지 (공휴일은 계정 독립)
+
+이유: 설정/외형 관련 데이터는 계정 전환에도 유지.
+     이벤트/태그 데이터만 초기화하여 새 계정의 데이터로 교체.
+```

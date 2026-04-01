@@ -98,3 +98,67 @@
 | 공휴일(holiday) 태그 | `holiday_tag_color` | `"#D6236A"` (분홍색) |
 
 색상 변경 시 SharedDataStore `defaultEventTagColor` 키로 전파 → 캘린더, 이벤트 목록, 위젯 모두 반영.
+
+---
+
+## 결정 트리 & 상태 전이
+
+### 설정 변경 → 영향받는 화면 매트릭스
+
+```mermaid
+flowchart TD
+    Start([설정 변경]) --> Type{설정 종류?}
+
+    Type -->|캘린더 외형| CalApp["영향 범위:\n✓ 캘린더 그리드 (행 높이, 요일 시작)\n✓ 일별 이벤트 목록 (텍스트 크기, 볼드)\n✓ 위젯 (외형 연동 시)\n경로: SharedDataStore → ViewAppearance"]
+
+    Type -->|컬러 테마| Theme["영향 범위:\n✓ 전체 화면 (ViewAppearance 교체)\n✓ 위젯 (배경 .system일 때)\n경로: UserDefaults → ViewAppearance"]
+
+    Type -->|타임존| TZ["영향 범위:\n✓ 이벤트 시간 표시 전체\n✓ 하루종일 이벤트 overlap 판정\n✓ D-Day 계산\n✓ 알림 fire date\n✓ 위젯 시간 표시\n경로: SharedDataStore → 전파"]
+
+    Type -->|기본 알림| Notif["영향 범위:\n✓ 이벤트 생성 화면 (초기값)\n✗ 기존 이벤트에는 영향 없음\n경로: UserDefaults → EventSettings"]
+
+    Type -->|기본 태그 색상| TagColor["영향 범위:\n✓ 캘린더 색상 바\n✓ 이벤트 목록 색상\n✓ 위젯 색상\n경로: SharedDataStore → ViewAppearance"]
+
+    Type -->|공휴일 국가| Holiday["영향 범위:\n✓ 캘린더 공휴일 표시\n✓ 이벤트 목록 공휴일\n경로: 캐시 초기화 → API 재요청"]
+
+    Type -->|기본 이벤트 길이| Period["영향 범위:\n✓ 이벤트 생성 화면 (기간 초기값)\n✗ 기존 이벤트에는 영향 없음"]
+```
+
+---
+
+## 엣지 케이스
+
+### 타임존 변경 시 이벤트 시간 표시
+
+```
+상황: KST(+9) → PST(-8) 전환
+
+하루종일 이벤트 "3/15 하루종일" (KST 기준 저장):
+  저장: .allDay(3/15 00:00..<3/16 00:00, secondsFromGMT: +32400)
+
+KST에서 표시: 3/15 하루종일
+PST에서 표시:
+  shiftting(+32400, to: PST(-8))
+  → UTC: 3/15 09:00..<3/16 09:00
+  → PST: 3/14 17:00..<3/15 17:00 (시작이 3/14)
+  → 캘린더에서 3/14~3/15 양일에 걸쳐 표시
+
+의미: 타임존 변경 시 하루종일 이벤트의
+     캘린더 표시 위치가 달라질 수 있음.
+```
+
+### 공휴일 국가 변경 시 캐시
+
+```
+상황: 한국 → 미국으로 국가 변경
+
+처리:
+  1. 기존 공휴일 캐시 전체 초기화
+  2. SharedDataStore[holidays] = [:]
+  3. 현재 보이는 3개월에 대해 미국 공휴일 API 요청
+  4. 응답 수신 → 캐시에 저장 → 캘린더 갱신
+
+주의: 국가 변경 즉시 캘린더에서 한국 공휴일이 사라짐.
+     미국 공휴일은 API 응답 후에 표시.
+     네트워크 지연 시 잠시 공휴일 없는 상태 가능.
+```
