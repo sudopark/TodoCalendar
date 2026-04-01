@@ -121,11 +121,15 @@ extension WidgetUsecaseFactory {
             connectionPool: base.externalCalendarDBConnectionPool,
             accountRepository: externalCalendarRepository
         )
-        
+        let appleCalendarRepository = AppleCalendarLocalAggregatedRepositoryImple(
+            connectionPool: base.externalCalendarDBConnectionPool,
+            permissionChecker: base.appleCalendarPermissionChecker
+        )
+
         let eventDetailRepository = EventDetailDataLocalRepostioryImple(
             localStorage: eventDetailLocalStorage
         )
-        
+
         return CalendarEventFetchUsecaseImple(
             todoRepository: todoRepository,
             scheduleRepository: scheduleRepository,
@@ -134,6 +138,7 @@ extension WidgetUsecaseFactory {
             eventTagRepository: eventTagRepository,
             externalCalendarIntegrateRepository: externalCalendarRepository,
             googleCalendarRepository: googleCalendarRepository,
+            appleCalendarRepository: appleCalendarRepository,
             eventDetailRepository: eventDetailRepository,
             cached: FetchCacheStores.shared.events
         )
