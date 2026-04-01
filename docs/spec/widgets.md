@@ -395,3 +395,184 @@ WidgetViewModelProviderBuilder.checkShouldReset()
 | 앱 백그라운드 진입 | `WidgetCenter.shared.reloadAllTimelines()` |
 | Timeline `.after()` | 시스템이 다음 업데이트 시간에 자동 갱신 |
 | 이벤트 CRUD (메인 앱) | 앱 → UserDefaults 플래그 → 위젯 갱신 |
+
+---
+
+## 상태 전이 다이어그램
+
+### TodoToggleIntent 동작 시퀀스
+
+```mermaid
+sequenceDiagram
+    participant W as 위젯 UI
+    participant Intent as TodoToggleIntent
+    participant Base as AppExtensionBase
+    participant DB as SQLite (writable)
+    participant Cache as FetchCacheStores
+    participant WC as WidgetCenter
+
+    W->>Intent: 완료 버튼 탭\n(todoId, isForemost)
+    Intent->>Base: AppExtensionBase() 생성
+    Base->>DB: writableSqliteService\n(openWithReadOnly: false)
+
+    alt 인증된 상태
+        Intent->>DB: TodoRemoteRepositoryImple\n.toggleTodo(todoId)
+    else 비인증 상태
+        Intent->>DB: TodoLocalRepositoryImple\n.toggleTodo(todoId)
+    end
+
+    DB-->>Intent: TodoToggleResult\n(.completed / .reverted)
+
+    alt isForemost == true
+        Intent->>Cache: needCheckResetWidgetCache = true
+    end
+    alt 현재 할일 토글
+        Intent->>Cache: needCheckResetCurrentTodo = true
+    end
+
+    Intent->>WC: reloadAllTimelines()
+    WC-->>W: 위젯 재렌더링
+```
+
+### Timeline 갱신 결정 플로우
+
+```mermaid
+flowchart TD
+    Start([Timeline 요청]) --> Check[checkShouldReset()]
+    Check --> Q1{needCheckResetWidgetCache?}
+    Q1 -->|true| FullReset[전체 캐시 리셋\nFetchCacheStores.reset()]
+    Q1 -->|false| Q2{needCheckResetCurrentTodo?}
+    Q2 -->|true| TodoReset[현재 할일 캐시만 리셋]
+    Q2 -->|false| UseCache[기존 캐시 사용]
+
+    FullReset --> Load
+    TodoReset --> Load
+    UseCache --> Load
+
+    Load[DB에서 데이터 로드\n+ ViewModel 구성] --> Entry[TimelineEntry 생성]
+
+    Entry --> Policy{다음 갱신 시점 계산}
+    Policy -->|"자정까지 < 1시간"| Midnight[".after(다음날 00:00)"]
+    Policy -->|"자정까지 >= 1시간"| OneHour[".after(현재 + 1시간)"]
+
+    Midnight --> Timeline([Timeline 반환])
+    OneHour --> Timeline
+```
+
+### 위젯 배경 색상 결정 트리
+
+```mermaid
+flowchart TD
+    Start([위젯 배경 렌더링]) --> BG{background 설정?}
+
+    BG -->|.system| System["SwiftUI .background\n(OS 테마 따름)"]
+
+    BG -->|".custom(hex)"| Parse{hex 파싱 성공?}
+    Parse -->|실패| System
+    Parse -->|성공| Detect{UIColor.isLight?}
+
+    Detect -->|밝은 색| Light["DefaultLightColorSet\n(어두운 텍스트/아이콘)"]
+    Detect -->|어두운 색| Dark["DefaultDarkColorSet\n(밝은 텍스트/아이콘)"]
+
+    Light --> Render["gradient + shadow 적용\n.containerBackground()"]
+    Dark --> Render
+```
+
+---
+
+## 결정 트리
+
+### 딥링크 URL 구성 결정 트리
+
+```mermaid
+flowchart TD
+    Start([위젯 이벤트 탭]) --> Type{이벤트 타입?}
+
+    Type -->|TodoEvent| TodoURL["tc.app://calendar/event/todo\n?event_id={uuid}"]
+    Type -->|ScheduleEvent| SchedURL["tc.app://calendar/event/schedule\n?event_id={uuid}&start={t}&end={t}\n(&is_all_day=true)"]
+    Type -->|Holiday| HolidayURL["tc.app://calendar/event/holiday\n?event_id={uuid}"]
+    Type -->|GoogleCalendarEvent| GoogleURL["tc.app://calendar/event/google\n?event_id={id}\n&calendar_id={calId}\n&account_id={email}"]
+    Type -->|날짜 셀 탭| DayURL["tc.app://calendar\n?select={yyyy}_{MM}_{dd}"]
+```
+
+---
+
+## 엣지 케이스
+
+### 위젯에서 TodoToggle 후 메인 앱과의 동기화
+
+```
+상황: 위젯에서 반복 할일 완료 토글
+
+위젯 프로세스:
+  1. writableSqliteService로 DB 직접 수정
+  2. 다음 반복 인스턴스 생성 (DB에 직접 쓰기)
+  3. needCheckResetWidgetCache = true (UserDefaults)
+  4. reloadAllTimelines()
+
+메인 앱 프로세스 (다음 foreground 진입 시):
+  1. SharedDataStore에는 아직 이전 상태
+  2. refreshTodoEvents() 호출 → DB에서 최신 상태 로드
+  3. SharedDataStore 갱신 → UI 업데이트
+
+주의: 위젯과 메인 앱은 별도 프로세스.
+     위젯의 DB 쓰기가 메인 앱의 SharedDataStore에
+     즉시 반영되지 않음. 앱 foreground 시 동기화.
+```
+
+### Timeline 갱신 빈도 제한
+
+```
+상황: 매분 갱신이 필요한 카운트다운 위젯
+
+iOS 제한:
+  - WidgetKit은 시스템이 Timeline 갱신 빈도를 제어
+  - .after(Date()) 설정해도 실제 갱신은 시스템 판단
+  - 배터리 절약 모드에서 더 드물게 갱신
+  - 일반적으로 15분~30분 간격 보장
+
+현재 정책:
+  - nextUpdateTime = min(자정, 현재+1시간)
+  - → 실질적으로 1시간 간격 또는 날짜 변경 시 갱신
+  - D-Day 카운트다운의 "1초 타이머"는 메인 앱에서만 동작
+  - 위젯에서는 시간 단위까지만 표시
+
+의미: 위젯은 실시간 업데이트가 아닌 "스냅샷" 방식.
+     정확한 분/초 단위 정보는 앱을 열어야 확인 가능.
+```
+
+### EventTypeSelectIntent — 태그 삭제 후 위젯 설정
+
+```
+상황: 위젯에서 "업무" 태그를 필터로 선택 → 이후 "업무" 태그 삭제
+
+결과:
+  1. Intent의 eventTypes에 삭제된 태그 ID가 남아있음
+  2. 다음 Timeline 갱신 시 해당 태그 ID로 필터링 시도
+  3. DB에 태그 없음 → 해당 태그의 이벤트 없음
+  4. → 위젯에 해당 태그 이벤트 미표시 (자연스럽게 필터링)
+
+복구:
+  사용자가 위젯 편집 → 태그 재선택 필요
+  삭제된 태그는 선택 목록에서 자동 제외
+```
+
+### 다중 계정 구글 캘린더 위젯 표시
+
+```
+상황: user1과 user2 두 계정 연동, 둘 다 "primary" 캘린더 활성
+
+위젯 데이터 로드:
+  GoogleCalendarLocalAggregatedRepositoryImple.loadEvents()
+  → 두 계정의 모든 이벤트 합산
+
+위젯 딥링크:
+  user1 이벤트: tc.app://calendar/event/google?event_id=abc&account_id=user1@gmail.com
+  user2 이벤트: tc.app://calendar/event/google?event_id=xyz&account_id=user2@gmail.com
+  → account_id로 어느 계정의 이벤트인지 구분
+
+색상 결정:
+  GoogleCalendarEventColorSource(calendarId, colorId)
+  → GoogleCalendarViewAppearanceStore에서 계정별 색상 맵 조회
+  → 올바른 계정의 색상 반환
+```
