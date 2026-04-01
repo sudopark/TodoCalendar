@@ -22,26 +22,30 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
     private var stubTodoRepository: PrivateStubTodoRepository!
     private var stubScheduleRepository: PrivateStubScheduleRepository!
     private var stubGoogleCalendarRepository: StubGoogleCalendarRepository!
-    
+    private var stubAppleCalendarRepository: PrivateStubAppleCalendarRepository!
+
     override func setUpWithError() throws {
         self.stubTodoRepository = .init()
         self.stubScheduleRepository = .init()
         self.stubGoogleCalendarRepository = .init()
+        self.stubAppleCalendarRepository = .init()
     }
-    
+
     override func tearDownWithError() throws {
         self.stubTodoRepository = nil
         self.stubScheduleRepository = nil
         self.stubGoogleCalendarRepository = nil
+        self.stubAppleCalendarRepository = nil
     }
     
     private func makeUsecase(
         withOffTags: [EventTagId] = [],
         hasForemost: Bool = true,
         isGoogleAccountIntegrated: Bool = false,
+        isAppleCalendarIntegrated: Bool = false,
         eventDetail: EventDetailData? = nil
     ) -> CalendarEventFetchUsecaseImple {
-        
+
         let holidayFetchUsecase = StubHolidaysFetchUsecase()
         let eventTagReopsitory = StubEventTagRepository()
         eventTagReopsitory.allTagsStubbing = [
@@ -54,12 +58,15 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
         }
         let foremostRepository = PrivateStubForemostEventRepository()
         foremostRepository.stubHasForemost = hasForemost
-        
-        let externalCalendarRepository = StubExternalCalendarRepository(isGoogleAccountIntegrated: isGoogleAccountIntegrated)
-        
+
+        let externalCalendarRepository = StubExternalCalendarRepository(
+            isGoogleAccountIntegrated: isGoogleAccountIntegrated,
+            isAppleCalendarIntegrated: isAppleCalendarIntegrated
+        )
+
         let detailRepository = StubEventDetailRepository()
         detailRepository.stubDetail = eventDetail
-        
+
         return CalendarEventFetchUsecaseImple(
             todoRepository: self.stubTodoRepository,
             scheduleRepository: self.stubScheduleRepository,
@@ -68,6 +75,7 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
             eventTagRepository: eventTagReopsitory,
             externalCalendarIntegrateRepository: externalCalendarRepository,
             googleCalendarRepository: self.stubGoogleCalendarRepository,
+            appleCalendarRepository: self.stubAppleCalendarRepository,
             eventDetailRepository: detailRepository,
             cached: .init()
         )
@@ -124,8 +132,38 @@ extension CalendarEventFetchUsecaseImpleTests {
         
         XCTAssertEqual(events.googleCalendarTags.isEmpty, true)
         XCTAssertEqual(events.googleCalendarColors, nil)
+        XCTAssertEqual(events.appleCalendarTags.isEmpty, true)
     }
-    
+
+    func testUsecase_whenAppleCalendarIntegrated_provideAppleCalendarEvents() async throws {
+        // given
+        let usecase = self.makeUsecase(isAppleCalendarIntegrated: true)
+        let range = self.dummyRange
+
+        // when
+        let events = try await usecase.fetchEvents(in: range, kst)
+
+        // then
+        let appleEvents = events.eventWithTimes.compactMap { $0 as? AppleCalendarEvent }
+        XCTAssertEqual(appleEvents.count, 1)
+        XCTAssertEqual(appleEvents.first?.name, "apple")
+        XCTAssertEqual(events.appleCalendarTags.count, 2)
+    }
+
+    func testUsecase_whenAppleCalendarNotIntegrated_notProvideAppleCalendarEvents() async throws {
+        // given
+        let usecase = self.makeUsecase(isAppleCalendarIntegrated: false)
+        let range = self.dummyRange
+
+        // when
+        let events = try await usecase.fetchEvents(in: range, kst)
+
+        // then
+        let appleEvents = events.eventWithTimes.compactMap { $0 as? AppleCalendarEvent }
+        XCTAssertEqual(appleEvents.isEmpty, true)
+        XCTAssertEqual(events.appleCalendarTags.isEmpty, true)
+    }
+
     func testUsecase_whenGoogleCalendarIntegrated_provideGoogleCalendarEvents() async throws {
         // given
         let usecase = self.makeUsecase(isGoogleAccountIntegrated: true)
