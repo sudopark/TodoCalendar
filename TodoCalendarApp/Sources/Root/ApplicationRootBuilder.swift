@@ -122,7 +122,8 @@ final class ApplicationRootBuilder {
             appleCalendarPermissionChecker: applicationBase.appleCalendarPermissionChecker
         )
         let externalServiceOAuth2ServiceUsecaseProvider = ExternalCalendarOAuthUsecaseProviderImple(
-            topViewControllerFinding: topViewControllerFinding
+            topViewControllerFinding: topViewControllerFinding,
+            appleCalendarPermissionChecker: applicationBase.appleCalendarPermissionChecker
         )
         return ExternalCalendarIntegrationUsecaseImple(
             oauth2ServiceProvider: externalServiceOAuth2ServiceUsecaseProvider,

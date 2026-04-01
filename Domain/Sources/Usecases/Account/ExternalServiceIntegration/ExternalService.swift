@@ -28,11 +28,11 @@ public protocol ExternalCalendarOAuthUsecaseProvider: Sendable {
 public final class ExternalCalendarOAuthUsecaseProviderImple: ExternalCalendarOAuthUsecaseProvider, @unchecked Sendable {
 
     private let topViewControllerFinding: () -> UIViewController?
-    private let appleCalendarPermissionChecker: (any AppleCalendarPermissionChecker)?
+    private let appleCalendarPermissionChecker: any AppleCalendarPermissionChecker
 
     public init(
         topViewControllerFinding: @escaping () -> UIViewController?,
-        appleCalendarPermissionChecker: (any AppleCalendarPermissionChecker)? = nil
+        appleCalendarPermissionChecker: any AppleCalendarPermissionChecker
     ) {
         self.topViewControllerFinding = topViewControllerFinding
         self.appleCalendarPermissionChecker = appleCalendarPermissionChecker
@@ -47,8 +47,7 @@ public final class ExternalCalendarOAuthUsecaseProviderImple: ExternalCalendarOA
             )
 
         case is AppleCalendarService:
-            guard let checker = appleCalendarPermissionChecker else { return nil }
-            return AppleCalendarOAuth2ServiceUsecaseImple(permissionChecker: checker)
+            return AppleCalendarOAuth2ServiceUsecaseImple(permissionChecker: appleCalendarPermissionChecker)
 
         default:
             return nil
