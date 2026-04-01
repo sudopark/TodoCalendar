@@ -13,18 +13,15 @@ import Domain
 
 
 /// 위젯용 read-only Apple Calendar Repository.
-/// DB 캐시에서만 읽으며, 조회 전 권한 상태를 확인한다.
+/// DB 캐시에서만 읽는다.
 public final class AppleCalendarLocalAggregatedRepositoryImple: AppleCalendarRepository {
 
     private let storage: any AppleCalendarLocalStorage
-    private let permissionChecker: any AppleCalendarPermissionChecker
 
     public init(
-        connectionPool: any ExternalCalendarDBConnectionPool,
-        permissionChecker: any AppleCalendarPermissionChecker
+        connectionPool: any ExternalCalendarDBConnectionPool
     ) {
         self.storage = AppleCalendarLocalStorageImple(connectionPool: connectionPool)
-        self.permissionChecker = permissionChecker
     }
 }
 
@@ -35,8 +32,7 @@ extension AppleCalendarLocalAggregatedRepositoryImple {
 
     public func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error> {
         return load { [weak self] in
-            guard let self, self.permissionChecker.checkAccessStatus() else { return [] }
-            return try await self.storage.loadCalendarTags()
+            return try await self?.storage.loadCalendarTags() ?? []
         }
     }
 
@@ -44,8 +40,7 @@ extension AppleCalendarLocalAggregatedRepositoryImple {
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[AppleCalendar.Event], any Error> {
         return load { [weak self] in
-            guard let self, self.permissionChecker.checkAccessStatus() else { return [] }
-            return try await self.storage.loadEvents(in: period)
+            return try await self?.storage.loadEvents(in: period) ?? []
         }
     }
 

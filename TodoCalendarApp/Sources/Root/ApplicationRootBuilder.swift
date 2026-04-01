@@ -118,7 +118,8 @@ final class ApplicationRootBuilder {
         let integrationRepository = ExternalCalendarIntegrateRepositoryImple(
             supportServices: AppEnvironment.supportExternalCalendarServices,
             remotePool: applicationBase.externalCalendarAccountRemotePool,
-            keyChainStore: applicationBase.keyChainStorage
+            keyChainStore: applicationBase.keyChainStorage,
+            appleCalendarPermissionChecker: applicationBase.appleCalendarPermissionChecker
         )
         let externalServiceOAuth2ServiceUsecaseProvider = ExternalCalendarOAuthUsecaseProviderImple(
             topViewControllerFinding: topViewControllerFinding

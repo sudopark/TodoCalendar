@@ -25,7 +25,9 @@ struct ExternalCalendarIntegrateRepositoryImpleTests {
     private let spyKeyChain = SpyKeyChainStorage()
 
     private func makeReposiotry(
-        _ accounts: [(ExternalServiceAccountinfo, APICredential)] = []
+        _ accounts: [(ExternalServiceAccountinfo, APICredential)] = [],
+        appleAccountOnly: [ExternalServiceAccountinfo] = [],
+        applePermissionGranted: Bool = true
     ) -> ExternalCalendarIntegrateRepositoryImple {
 
         accounts.forEach { pair in
@@ -38,10 +40,26 @@ struct ExternalCalendarIntegrateRepositoryImpleTests {
             spyKeyChain.update("\(serviceId)-\(accountId)-credential", APICredentialMapper(credential: pair.1))
         }
 
-        return .init(supportServices: self.services, remotePool: self.spyPool, keyChainStore: self.spyKeyChain)
+        appleAccountOnly.forEach { account in
+            let serviceId = account.serviceIdentifier
+            let accountId = account.email ?? ""
+            var accountIds: [String] = spyKeyChain.load("\(serviceId)-accounts") ?? []
+            accountIds.append(accountId)
+            spyKeyChain.update("\(serviceId)-accounts", accountIds)
+            spyKeyChain.update("\(serviceId)-\(accountId)-account", ExternalServiceAccountMapper(account: account))
+        }
+
+        let permissionChecker = StubAppleCalendarPermissionChecker(isGranted: applePermissionGranted)
+        return .init(
+            supportServices: self.services,
+            remotePool: self.spyPool,
+            keyChainStore: self.spyKeyChain,
+            appleCalendarPermissionChecker: permissionChecker
+        )
     }
 
     private let googleService: GoogleCalendarService = .init(scopes: [.readOnly])
+    private let appleService: AppleCalendarService = .init()
 
     private var dummyGoogleAccount: ExternalServiceAccountinfo {
         return .init(googleService.identifier, email: "old-email")
@@ -49,6 +67,25 @@ struct ExternalCalendarIntegrateRepositoryImpleTests {
 
     private var googleCredential: APICredential {
         return .init(accessToken: "old-google-access")
+    }
+
+    private var dummyAppleAccount: ExternalServiceAccountinfo {
+        return .init(appleService.identifier, email: AppleCalendarService.localAccountId)
+    }
+
+    private func makeReposiotryWithOldKeyData(
+        oldAccount: ExternalServiceAccountinfo,
+        oldCredential: APICredential
+    ) -> ExternalCalendarIntegrateRepositoryImple {
+        let serviceId = oldAccount.serviceIdentifier
+        spyKeyChain.update("\(serviceId)-account", ExternalServiceAccountMapper(account: oldAccount))
+        spyKeyChain.update("\(serviceId)-credential", APICredentialMapper(credential: oldCredential))
+        return .init(
+            supportServices: services,
+            remotePool: spyPool,
+            keyChainStore: spyKeyChain,
+            appleCalendarPermissionChecker: StubAppleCalendarPermissionChecker()
+        )
     }
 }
 
@@ -101,12 +138,9 @@ extension ExternalCalendarIntegrateRepositoryImpleTests {
         let serviceId = googleService.identifier
         let oldAccountKey = "\(serviceId)-account"
         let oldCredentialKey = "\(serviceId)-credential"
-        let account = ExternalServiceAccountMapper(account: dummyGoogleAccount)
-        let credential = APICredentialMapper(credential: googleCredential)
-        spyKeyChain.update(oldAccountKey, account)
-        spyKeyChain.update(oldCredentialKey, credential)
-        let repository = ExternalCalendarIntegrateRepositoryImple(
-            supportServices: services, remotePool: spyPool, keyChainStore: spyKeyChain
+        let repository = self.makeReposiotryWithOldKeyData(
+            oldAccount: dummyGoogleAccount,
+            oldCredential: googleCredential
         )
 
         // when
@@ -190,7 +224,91 @@ extension ExternalCalendarIntegrateRepositoryImpleTests {
 }
 
 
+// MARK: - Apple Calendar permission check
+
+extension ExternalCalendarIntegrateRepositoryImpleTests {
+
+    // 애플 캘린더 계정이 있고 권한이 있으면 로드된 계정에 포함
+    @Test func repository_whenAppleAccountHasPermission_includeInAccounts() async throws {
+        // given
+        let repository = self.makeReposiotry(
+            appleAccountOnly: [dummyAppleAccount],
+            applePermissionGranted: true
+        )
+
+        // when
+        let accounts = try await repository.loadIntegratedAccounts()
+
+        // then
+        let localAccountId = AppleCalendarService.localAccountId
+        #expect(accounts.map { $0.email }.contains(localAccountId))
+        // keychain 데이터 유지
+        let accountIds: [String]? = spyKeyChain.load("\(appleService.identifier)-accounts")
+        #expect(accountIds == [localAccountId])
+    }
+
+    // 애플 캘린더 계정이 있지만 권한이 없으면 로드 결과에서 제외
+    @Test func repository_whenAppleAccountHasNoPermission_excludeFromAccounts() async throws {
+        // given
+        let repository = self.makeReposiotry(
+            appleAccountOnly: [dummyAppleAccount],
+            applePermissionGranted: false
+        )
+
+        // when
+        let accounts = try await repository.loadIntegratedAccounts()
+
+        // then
+        let localAccountId = AppleCalendarService.localAccountId
+        #expect(!accounts.map { $0.email }.contains(localAccountId))
+    }
+
+    // 애플 캘린더 권한이 없으면 저장된 계정 정보도 삭제
+    @Test func repository_whenAppleAccountHasNoPermission_removeKeychainData() async throws {
+        // given
+        let localAccountId = AppleCalendarService.localAccountId
+        let repository = self.makeReposiotry(
+            appleAccountOnly: [dummyAppleAccount],
+            applePermissionGranted: false
+        )
+
+        // when
+        _ = try await repository.loadIntegratedAccounts()
+
+        // then — 계정 목록 키와 계정 정보 키 모두 삭제됨
+        let accountIds: [String]? = spyKeyChain.load("\(appleService.identifier)-accounts")
+        let accountMapper: ExternalServiceAccountMapper? = spyKeyChain.load(
+            "\(appleService.identifier)-\(localAccountId)-account"
+        )
+        #expect(accountIds == nil)
+        #expect(accountMapper == nil)
+    }
+
+    // 구글 계정은 애플 권한 여부와 무관하게 정상 로드
+    @Test func repository_googleAccount_notAffectedByApplePermission() async throws {
+        // given
+        let repository = self.makeReposiotry(
+            [(dummyGoogleAccount, googleCredential)],
+            applePermissionGranted: false
+        )
+
+        // when
+        let accounts = try await repository.loadIntegratedAccounts()
+
+        // then
+        #expect(accounts.map { $0.email }.contains("old-email"))
+    }
+}
+
+
 // MARK: - Spy
+
+private final class StubAppleCalendarPermissionChecker: AppleCalendarPermissionChecker, @unchecked Sendable {
+    var isGranted: Bool
+    init(isGranted: Bool = true) { self.isGranted = isGranted }
+    func requestAccess() async throws -> Bool { isGranted }
+    func checkAccessStatus() -> Bool { isGranted }
+}
 
 private final class SpyRemotePool: ExternalCalendarAccountRemotePool, @unchecked Sendable {
 
