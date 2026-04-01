@@ -4,6 +4,128 @@
 
 ---
 
+## 상태 전이 다이어그램
+
+### 태그 삭제 cascade 플로우
+
+```mermaid
+flowchart TD
+    Start([태그 삭제 요청]) --> Q1{삭제 옵션?}
+
+    Q1 -->|"태그만 삭제"| TagOnly[태그 레코드 삭제\n+ offTagIds에서 제거]
+    TagOnly --> Orphan["이벤트의 tagId 참조 남음 (orphan)\n→ 색상은 기본값으로 폴백"]
+
+    Q1 -->|"이벤트 포함 삭제"| Cascade
+
+    subgraph Cascade ["Cascade 삭제"]
+        C1[태그 레코드 삭제] --> C2[todoLocalStorage\n.removeTodosWith(tagId)]
+        C1 --> C3[scheduleLocalStorage\n.removeSchedulesWith(tagId)]
+        C2 --> C4[삭제된 todoIds 반환]
+        C3 --> C5[삭제된 scheduleIds 반환]
+        C4 --> C6[eventDetailLocalStorage\n.removeDetails(ids)]
+        C5 --> C6
+    end
+
+    Cascade --> Notify
+
+    subgraph Notify ["SharedDataStore 정리"]
+        N1["todoUsecase.handleRemovedTodos(todoIds)"]
+        N2["scheduleUsecase.handleRemovedSchedules(scheduleIds)"]
+        N3["알림 취소\n(이벤트 삭제로 자동 감지)"]
+    end
+
+    Notify --> Check{삭제된 이벤트 중\n강조 이벤트 있음?}
+    Check -->|예| Stale["foremostEventId stale 상태\n→ UI에서 nil로 graceful 처리"]
+    Check -->|아니오| Done([완료])
+```
+
+### 강조 이벤트 상태 전이
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle: 앱 시작\nrefresh()
+
+    state Idle {
+        [*] --> NoForemost: foremostEventId == nil
+        [*] --> HasForemost: foremostEventId != nil
+    }
+
+    Idle --> Marking: update(foremost)\nisForemost = true
+    Marking --> Idle: 성공/실패\ndefer로 idle 복원
+
+    Idle --> Unmarking: remove()\nisForemost = false
+    Unmarking --> Idle: 성공/실패\ndefer로 idle 복원
+
+    HasForemost --> HasForemost: update(다른 이벤트)\n자동 교체
+    HasForemost --> StaleRef: 강조 이벤트 외부 삭제/완료
+
+    state StaleRef {
+        note right of StaleRef
+            foremostEventId는 남아있으나
+            참조 이벤트 nil
+            → UI에서 강조 섹션 미표시
+        end note
+    }
+```
+
+### 알림 라이프사이클 플로우
+
+```mermaid
+sequenceDiagram
+    participant App as 앱 시작
+    participant Sync as EventNotificationUsecase
+    participant Todo as TodoEventUsecase
+    participant Sched as ScheduleEventUsecase
+    participant DB as NotificationIdTable
+    participant NC as UNNotificationCenter
+
+    App->>Sync: runSyncEventNotification()
+
+    par 할일 스트림 구독
+        Sync->>Todo: todoEvents(in: now...+365일)
+        Todo-->>Sync: [TodoEvent] 스트림
+    and 일정 스트림 구독
+        Sync->>Sched: scheduleEvents(in: now...+365일)
+        Sched-->>Sync: [ScheduleEvent] 스트림
+    end
+
+    Note over Sync: .scan으로 added/modified/removed 분류
+
+    Sync->>DB: removeAllSavedNotificationId(변경+삭제 이벤트)
+    DB-->>Sync: 기존 notificationIds
+    Sync->>NC: removePendingNotificationRequests(ids)
+
+    loop 각 변경/추가 이벤트
+        Sync->>Sync: notificationOptions → SingleEventNotificationMakeParams[]
+        Note over Sync: 과거 fire date는 건너뜀
+        Sync->>NC: add(UNNotificationRequest)
+    end
+
+    Sync->>DB: batchSaveNotificationId(eventId → [notifIds])
+```
+
+### 색상 결정 결정 트리
+
+```mermaid
+flowchart TD
+    Start([EventTagColorSource]) --> Type{소스 타입?}
+
+    Type -->|EventTagId| TagType{EventTagId 케이스?}
+    TagType -->|".default"| DefColor["DefaultEventTagColorSetting\n기본: #088CDA (파랑)"]
+    TagType -->|".holiday"| HolColor["DefaultEventTagColorSetting\n기본: #D6236A (분홍)"]
+    TagType -->|".custom(id)"| CusColor["CustomEventTag.colorHex\n태그에 저장된 색상"]
+
+    Type -->|GoogleCalendarEventColorSource| GQ{이벤트에\ncolorId 있음?}
+    GQ -->|있음| GEvent["이벤트 색상 맵에서\ncolorId로 조회"]
+    GQ -->|없음| GCal["해당 캘린더의\nbackgroundColorHex"]
+
+    Type -->|AppleCalendarEventColorSource| Apple["appleCalendarTagMap에서\ncalendarId로 조회"]
+
+    Type -->|기타| Clear["UIColor.clear\n(폴백)"]
+```
+
+---
+
 ## 1. 이벤트 태그
 
 ### 1.1 태그 모델
@@ -492,3 +614,134 @@ ScheduleEvent (매월 반복, notificationOptions: [.atTime])
 ### 태그 ↔ 강조 이벤트
 - 강조 이벤트의 색상은 해당 이벤트의 태그 색상으로 결정
 - 태그 숨김 처리해도 강조 이벤트는 항상 표시 (태그 필터와 독립)
+
+---
+
+## 5. 추가 엣지 케이스
+
+### 5.1 태그 삭제(태그만) 후 이벤트 색상
+
+```
+상황: 커스텀 태그 "업무" (#FF0000) 삭제 (태그만, 이벤트 유지)
+이벤트 "회의"의 eventTagId = .custom("업무태그ID")
+
+결과:
+  1. CustomEventTag 레코드 삭제
+  2. 이벤트의 eventTagId는 .custom("업무태그ID") 그대로 유지 (orphan)
+  3. EventTagColorView에서 해당 tagId 조회 → CustomEventTag 없음
+  4. → 색상 폴백: UIColor.clear 또는 기본 색상
+
+의미: 태그만 삭제하면 이벤트에 "유령 태그" 참조가 남음.
+     사용자가 해당 이벤트를 수정하여 다른 태그를 할당하면 해소됨.
+```
+
+### 5.2 태그 숨김 + 강조 이벤트의 독립성
+
+```
+상황: "업무" 태그를 캘린더에서 숨김 (offTagIds에 추가)
+     "업무" 태그의 할일이 강조 이벤트로 지정됨
+
+결과:
+  캘린더 일별 목록:
+    - 이벤트 목록 섹션: "업무" 태그 이벤트 필터링 → 미표시
+    - 강조 이벤트 섹션: 태그 필터와 독립 → 정상 표시 ✓
+
+  위젯:
+    - ForemostEventWidget: 강조 이벤트 정상 표시
+    - EventListWidget: 숨겨진 태그 이벤트 필터링 → 미표시
+
+의미: 강조 이벤트는 태그 가시성 설정에 영향받지 않음.
+     같은 이벤트가 "강조 섹션에서는 보이고, 이벤트 목록에서는 안 보임".
+```
+
+### 5.3 반복 일정이 강조 이벤트일 때 — 제외와 분기
+
+```
+상황: 매주 월요일 일정(uuid=A)이 강조 이벤트
+동작: .onlyThisTime(3/17)으로 수정 → 새 이벤트 B 생성
+
+결과:
+  foremostEventId = {eventId: A, isTodo: false}
+  원본 A: excludes += {3/17}. UUID 불변 → 강조 상태 유지 ✓
+  새 이벤트 B: 단독 이벤트. 강조 아님.
+
+  위젯 표시:
+    다음 미래 인스턴스 = A의 다음 반복 (3/24)
+    3/17은 B이지만 B는 강조 아님 → 위젯에 미표시
+
+동작: .fromNow(4/7)으로 분기 → A 종료 + 새 이벤트 C 생성
+
+결과:
+  A: until(4/6)으로 종료. UUID 불변 → 강조 상태 유지
+  C: 새 UUID. 강조 아님.
+
+  위젯 표시:
+    A의 마지막 미래 인스턴스 표시
+    A 종료 후 → foremostEvent가 nil 반환 (A에서 미래 인스턴스 없음)
+    → 강조 위젯 빈 상태 표시
+
+의미: 분기 후 새 시리즈(C)는 자동으로 강조가 되지 않음.
+     사용자가 C를 새로 강조 지정해야 함.
+```
+
+### 5.4 알림 — 이벤트 시간 변경 시 전량 재생성
+
+```
+상황: 할일 "회의" (알림: 정시 + 30분 전), time = 3/15 14:00
+동작: 시간을 3/16 10:00으로 변경
+
+알림 처리:
+  1. scan이 "modified" 감지
+  2. 기존 알림 2개 취소 (DB에서 eventId → [notifId1, notifId2] 조회)
+  3. 새 fire date 계산:
+     - 정시: 3/16 10:00
+     - 30분 전: 3/16 09:30
+  4. 새 UNNotificationRequest 2개 생성 + 스케줄
+  5. DB: eventId → [newNotifId1, newNotifId2]
+
+주의: 이름만 변경해도 동일 프로세스 실행.
+     알림 내용(title)이 달라지므로 전량 재생성 필요.
+```
+
+### 5.5 알림 — 반복 일정의 인스턴스별 알림 수
+
+```
+상황: 매일 반복 일정, 알림 2개 (정시 + 1시간 전)
+스케줄링 범위: 365일
+
+알림 수 계산:
+  365 인스턴스 × 2 옵션 = 730개 알림 요청
+
+iOS 64개 제한:
+  UNNotificationCenter는 64개만 pending 유지
+  → 가장 가까운 fire date 기준 64개 유지
+  → 약 32일분의 알림만 실제 스케줄됨
+  → 33일 이후의 알림은 iOS가 자동 무시
+
+앱에서의 완화:
+  매번 scan 변경 시 전체 재스케줄하므로,
+  가까운 알림이 fire된 후 다음 scan에서 새 알림이 채워짐.
+  → 실질적으로 "슬라이딩 윈도우" 효과.
+  단, scan 트리거 빈도에 의존하므로 보장은 아님.
+```
+
+### 5.6 알림 — 하루종일 이벤트의 타임존 변경
+
+```
+상황: KST(+9)에서 하루종일 이벤트 생성 → 알림: 당일 9시
+     사용자가 미국 PST(-8)로 이동
+
+알림 fire date:
+  UNCalendarNotificationTrigger(dateMatching: {year:2026, month:4, day:15, hour:9})
+  → 시스템 Calendar가 현재 타임존 기준으로 매칭
+  → PST에서는 PST 4/15 09:00에 알림 fire
+
+이벤트 표시:
+  allDay 이벤트의 overlap 판정은 저장된 secondsFromGMT 기준
+  → KST 4/15 하루종일 = PST에서 4/14 오후~4/15 오후로 표시
+
+불일치:
+  알림은 PST 4/15 09:00에 오지만,
+  이벤트는 PST 기준 4/14 오후에 시작.
+  → 알림이 이벤트 "다음 날" 오전에 오는 것처럼 보일 수 있음.
+```
