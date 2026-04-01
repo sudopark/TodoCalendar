@@ -445,6 +445,37 @@ extension EventSettingViewModelImpleTests {
             ExternalCalanserServiceModel(AppleCalendarService(), accountId: nil)!
         ])
     }
+
+    // 구글+애플 동시 연동 후 애플만 해제
+    func testViewModel_whenGoogleAndAppleConnected_disconnectApple() {
+        // given
+        let expect = expectation(description: "구글+애플 동시 연동 후 애플만 해제")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        let googleService = GoogleCalendarService(scopes: [.readOnly])
+
+        // when
+        let modelLists = self.waitOutputs(expect, for: viewModel.integratedExternalCalendars, timeout: 1.0) {
+            viewModel.connectExternalCalendar(googleService.identifier)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                viewModel.connectExternalCalendar(AppleCalendarService.id)
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                viewModel.disconnectExternalCalendar(AppleCalendarService.id, accountId: "email")
+            }
+        }
+
+        // then
+        let last = modelLists.last
+        let googleModels = last?.filter { $0.serviceId == GoogleCalendarService.id }
+        let appleModels = last?.filter { $0.serviceId == AppleCalendarService.id }
+        XCTAssertEqual(googleModels?.count, 2)
+        XCTAssertEqual(googleModels?.first?.status, .integrated(accountId: "email"))
+        XCTAssertEqual(appleModels?.count, 1)
+        XCTAssertEqual(appleModels?.first?.status, .notIntegrated)
+    }
 }
 
 private class SpyRouter: BaseSpyRouter, EventSettingRouting, @unchecked Sendable {
