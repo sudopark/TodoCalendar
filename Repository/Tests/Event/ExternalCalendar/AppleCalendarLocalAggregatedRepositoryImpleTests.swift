@@ -42,14 +42,9 @@ final class AppleCalendarLocalAggregatedRepositoryImpleTests: PublisherWaitable,
     }
 
     private func makeRepository(
-        isPermissionGranted: Bool,
         pool: any ExternalCalendarDBConnectionPool
     ) -> AppleCalendarLocalAggregatedRepositoryImple {
-        let checker = StubAppleCalendarPermissionChecker(isGranted: isPermissionGranted)
-        return AppleCalendarLocalAggregatedRepositoryImple(
-            connectionPool: pool,
-            permissionChecker: checker
-        )
+        return AppleCalendarLocalAggregatedRepositoryImple(connectionPool: pool)
     }
 
     private func localStorage(pool: any ExternalCalendarDBConnectionPool) -> AppleCalendarLocalStorageImple {
@@ -58,56 +53,11 @@ final class AppleCalendarLocalAggregatedRepositoryImpleTests: PublisherWaitable,
 }
 
 
-// MARK: - 권한 없는 경우
+// MARK: - 캐시 조회
 
 extension AppleCalendarLocalAggregatedRepositoryImpleTests {
 
-    @Test func tags_whenPermissionDenied_returnsEmpty() async throws {
-        defer { cleanup() }
-        let pool = try await makePool()
-        defer { Task { try? await pool.close(serviceId: AppleCalendarService.id) } }
-
-        // given
-        let storage = localStorage(pool: pool)
-        let tags: [AppleCalendar.Tag] = [.init(id: "cal-1", name: "Calendar", colorHex: nil)]
-        try await storage.saveCalendarTags(tags)
-        let repo = makeRepository(isPermissionGranted: false, pool: pool)
-
-        // when
-        let loaded = try await repo.loadCalendarTags().values.first(where: { _ in true })
-
-        // then
-        #expect(loaded?.isEmpty == true)
-    }
-
-    @Test func events_whenPermissionDenied_returnsEmpty() async throws {
-        defer { cleanup() }
-        let pool = try await makePool()
-        defer { Task { try? await pool.close(serviceId: AppleCalendarService.id) } }
-
-        // given
-        let period: Range<TimeInterval> = 0..<1000
-        let storage = localStorage(pool: pool)
-        let events: [AppleCalendar.Event] = [
-            .init(eventId: "e-1", calendarId: "cal-1", name: "Event", eventTime: .period(0..<500))
-        ]
-        try await storage.saveEvents(events, in: period)
-        let repo = makeRepository(isPermissionGranted: false, pool: pool)
-
-        // when
-        let loaded = try await repo.loadEvents(in: period).values.first(where: { _ in true })
-
-        // then
-        #expect(loaded?.isEmpty == true)
-    }
-}
-
-
-// MARK: - 권한 있는 경우
-
-extension AppleCalendarLocalAggregatedRepositoryImpleTests {
-
-    @Test func tags_whenPermissionGranted_returnsCachedTags() async throws {
+    @Test func tags_returnsCachedTags() async throws {
         defer { cleanup() }
         let pool = try await makePool()
         defer { Task { try? await pool.close(serviceId: AppleCalendarService.id) } }
@@ -119,7 +69,7 @@ extension AppleCalendarLocalAggregatedRepositoryImpleTests {
             .init(id: "cal-2", name: "Personal", colorHex: nil)
         ]
         try await storage.saveCalendarTags(tags)
-        let repo = makeRepository(isPermissionGranted: true, pool: pool)
+        let repo = makeRepository(pool: pool)
 
         // when
         let loaded = try await repo.loadCalendarTags().values.first(where: { _ in true })
@@ -128,7 +78,7 @@ extension AppleCalendarLocalAggregatedRepositoryImpleTests {
         #expect(loaded?.count == 2)
     }
 
-    @Test func events_whenPermissionGranted_returnsCachedEvents() async throws {
+    @Test func events_returnsCachedEvents() async throws {
         defer { cleanup() }
         let pool = try await makePool()
         defer { Task { try? await pool.close(serviceId: AppleCalendarService.id) } }
@@ -141,7 +91,7 @@ extension AppleCalendarLocalAggregatedRepositoryImpleTests {
             .init(eventId: "e-2", calendarId: "cal-2", name: "Lunch", eventTime: .period(400..<600))
         ]
         try await storage.saveEvents(events, in: period)
-        let repo = makeRepository(isPermissionGranted: true, pool: pool)
+        let repo = makeRepository(pool: pool)
 
         // when
         let loaded = try await repo.loadEvents(in: period).values.first(where: { _ in true })
@@ -152,11 +102,3 @@ extension AppleCalendarLocalAggregatedRepositoryImpleTests {
 }
 
 
-// MARK: - Helpers
-
-private final class StubAppleCalendarPermissionChecker: AppleCalendarPermissionChecker, @unchecked Sendable {
-    private let isGranted: Bool
-    init(isGranted: Bool) { self.isGranted = isGranted }
-    func requestAccess() async throws -> Bool { isGranted }
-    func checkAccessStatus() -> Bool { isGranted }
-}

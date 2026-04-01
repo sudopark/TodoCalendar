@@ -78,6 +78,11 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
 }
 
 final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchecked Sendable {
+    
+    func loadEvent(id: String) -> AnyPublisher<Domain.AppleCalendar.Event?, Never> {
+        return Empty().eraseToAnyPublisher()
+    }
+    
 
     func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error> {
         let tags: [AppleCalendar.Tag] = [
