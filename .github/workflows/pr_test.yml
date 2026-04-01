@@ -44,12 +44,13 @@ jobs:
           fi
 
           if [ "$run_all" = true ]; then
-            echo "schemes=${ALL_SCHEMES}" >> "$GITHUB_OUTPUT"
+            # contains() 오탐 방지를 위해 양쪽 공백 padding
+            echo "schemes= ${ALL_SCHEMES} " >> "$GITHUB_OUTPUT"
             echo "Detected: run all schemes"
             exit 0
           fi
 
-          # 개별 매핑
+          # 개별 매핑 (의존 타겟 포함)
           if echo "$FILES" | grep -q "^Repository/Sources/"; then
             schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget")
           fi
@@ -57,19 +58,19 @@ jobs:
             schemes+=("CalendarScenes" "EventDetailScene" "EventListScenes" "SettingScene" "MemberScenes" "TodoCalendarApp")
           fi
           if echo "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
-            schemes+=("CalendarScenes" "TodoCalendarAppWidget")
+            schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
           fi
           if echo "$FILES" | grep -q "^Presentations/EventDetailScene/"; then
-            schemes+=("EventDetailScene")
+            schemes+=("EventDetailScene" "TodoCalendarApp")
           fi
           if echo "$FILES" | grep -q "^Presentations/EventListScenes/"; then
-            schemes+=("EventListScenes")
+            schemes+=("EventListScenes" "TodoCalendarApp")
           fi
           if echo "$FILES" | grep -q "^Presentations/SettingScene/"; then
-            schemes+=("SettingScene")
+            schemes+=("SettingScene" "TodoCalendarApp")
           fi
           if echo "$FILES" | grep -q "^Presentations/MemberScenes/"; then
-            schemes+=("MemberScenes")
+            schemes+=("MemberScenes" "TodoCalendarApp")
           fi
           if echo "$FILES" | grep -qE "^TodoCalendarApp/(Sources|Tests)/"; then
             schemes+=("TodoCalendarApp")
@@ -86,13 +87,13 @@ jobs:
             schemes+=("Repository")
           fi
 
-          # 중복 제거 + 공백 구분 문자열로 변환
+          # 중복 제거 + 양쪽 공백 padding (contains 오탐 방지)
           if [ ${#schemes[@]} -eq 0 ]; then
             echo "schemes=" >> "$GITHUB_OUTPUT"
             echo "Detected: no test-relevant changes"
           else
             unique=$(printf '%s\n' "${schemes[@]}" | sort -u | tr '\n' ' ' | sed 's/ $//')
-            echo "schemes=${unique}" >> "$GITHUB_OUTPUT"
+            echo "schemes= ${unique} " >> "$GITHUB_OUTPUT"
             echo "Detected schemes: ${unique}"
           fi
 
@@ -116,6 +117,38 @@ jobs:
         run: |
           tuist generate --no-open
 
-      - name: Run tests
-        run: |
-          ./scripts/run-all-tests.sh ${{ needs.detect-changes.outputs.schemes }}
+      - name: Test Domain
+        if: contains(needs.detect-changes.outputs.schemes, ' Domain ')
+        run: ./scripts/run-all-tests.sh Domain
+
+      - name: Test Repository
+        if: contains(needs.detect-changes.outputs.schemes, ' Repository ')
+        run: ./scripts/run-all-tests.sh Repository
+
+      - name: Test CalendarScenes
+        if: contains(needs.detect-changes.outputs.schemes, ' CalendarScenes ')
+        run: ./scripts/run-all-tests.sh CalendarScenes
+
+      - name: Test EventDetailScene
+        if: contains(needs.detect-changes.outputs.schemes, ' EventDetailScene ')
+        run: ./scripts/run-all-tests.sh EventDetailScene
+
+      - name: Test EventListScenes
+        if: contains(needs.detect-changes.outputs.schemes, ' EventListScenes ')
+        run: ./scripts/run-all-tests.sh EventListScenes
+
+      - name: Test SettingScene
+        if: contains(needs.detect-changes.outputs.schemes, ' SettingScene ')
+        run: ./scripts/run-all-tests.sh SettingScene
+
+      - name: Test MemberScenes
+        if: contains(needs.detect-changes.outputs.schemes, ' MemberScenes ')
+        run: ./scripts/run-all-tests.sh MemberScenes
+
+      - name: Test TodoCalendarApp
+        if: contains(needs.detect-changes.outputs.schemes, ' TodoCalendarApp ')
+        run: ./scripts/run-all-tests.sh TodoCalendarApp
+
+      - name: Test TodoCalendarAppWidget
+        if: contains(needs.detect-changes.outputs.schemes, ' TodoCalendarAppWidget ')
+        run: ./scripts/run-all-tests.sh TodoCalendarAppWidget

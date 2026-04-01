@@ -59,27 +59,30 @@ for scheme in "${SCHEMES[@]}"; do
   echo " [$((${#PASSED[@]} + ${#FAILED[@]} + 1))/${TOTAL}] Testing: ${scheme}"
   echo "----------------------------------------"
 
-  OUTPUT=$(xcodebuild test \
+  TMPFILE=$(mktemp)
+  # process substitution으로 xcodebuild exit code를 파이프 없이 직접 캡처
+  xcodebuild test \
     -workspace "${WORKSPACE}" \
     -scheme "${scheme}" \
     -destination "${DESTINATION}" \
     -testLanguage en \
     -testRegion en_US \
-    -quiet \
-    2>&1)
+    > >(tee "$TMPFILE" | xcpretty) 2>&1
   EXIT_CODE=$?
+  OUTPUT=$(cat "$TMPFILE")
+  rm -f "$TMPFILE"
 
-  # -quiet 모드에서 exit code 65가 나와도 실제 테스트 실패가 없으면 통과로 처리
   HAS_REAL_FAILURE=$(echo "$OUTPUT" | grep -c "with [1-9][0-9]* failure" || true)
   SWIFT_TESTING_FAILED=$(echo "$OUTPUT" | grep -c "suites failed" || true)
+  HAS_BUILD_FAILURE=$(echo "$OUTPUT" | grep -c "BUILD FAILED\|xcodebuild: error:" || true)
 
-  if [ $EXIT_CODE -eq 0 ] || ([ $HAS_REAL_FAILURE -eq 0 ] && [ $SWIFT_TESTING_FAILED -eq 0 ]); then
+  if [ $EXIT_CODE -eq 0 ] || ([ $HAS_REAL_FAILURE -eq 0 ] && [ $SWIFT_TESTING_FAILED -eq 0 ] && [ $HAS_BUILD_FAILURE -eq 0 ]); then
     PASSED+=("${scheme}")
     echo "  -> PASSED"
   else
     FAILED+=("${scheme}")
     echo "  -> FAILED"
-    echo "$OUTPUT" | grep -E "(error:|suites failed)" | head -5
+    echo "$OUTPUT" | grep -E "(error:|BUILD FAILED|suites failed)" | head -5
   fi
   echo ""
 done
