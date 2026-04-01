@@ -71,6 +71,21 @@ extension AppleCalendarRepositoryImple {
         .eraseToAnyPublisher()
     }
 
+    public func loadEvent(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
+        return AnyPublisher<AppleCalendar.Event?, Never>.create { [weak self] subscriber in
+            let task = Task { [weak self] in
+                guard let self else { return }
+                let cached = try? await self.cacheStorage.loadEvent(id: id)
+                subscriber.send(cached)
+                let refreshed = self.storeAccessor.loadEvent(id: id)
+                subscriber.send(refreshed)
+                subscriber.send(completion: .finished)
+            }
+            return AnyCancellable { task.cancel() }
+        }
+        .eraseToAnyPublisher()
+    }
+
     public func resetCache() async throws {
         try await cacheStorage.resetAll()
     }

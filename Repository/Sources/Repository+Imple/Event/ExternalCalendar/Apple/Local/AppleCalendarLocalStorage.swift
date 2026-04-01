@@ -18,6 +18,7 @@ public protocol AppleCalendarLocalStorage: Sendable {
     func loadCalendarTags() async throws -> [AppleCalendar.Tag]
     func saveEvents(_ events: [AppleCalendar.Event], in period: Range<TimeInterval>) async throws
     func loadEvents(in period: Range<TimeInterval>) async throws -> [AppleCalendar.Event]
+    func loadEvent(id: String) async throws -> AppleCalendar.Event?
     func resetAll() async throws
 }
 
@@ -121,6 +122,31 @@ extension AppleCalendarLocalStorageImple {
             try db.createTableOrNot(Events.self)
             try db.createTableOrNot(Times.self)
             return try db.load(query, mapping: mapping)
+        }
+    }
+
+    public func loadEvent(id: String) async throws -> AppleCalendar.Event? {
+        let query = Events
+            .selectAll()
+            .innerJoin(with: Times.selectAll { $0.eventId == id }, on: { ($0.eventId, $1.eventId) })
+
+        let mapping: (CursorIterator) throws -> AppleCalendar.Event = { cursor in
+            let event = try Events.Entity(cursor)
+            let time = try Times.Entity(cursor).eventTime.unwrap()
+            return AppleCalendar.Event(
+                eventId: event.eventId,
+                calendarId: event.calendarId,
+                name: event.name,
+                eventTime: time,
+                location: event.location
+            )
+        }
+
+        let connection = try await self.connection()
+        return try await connection.async.run { db in
+            try db.createTableOrNot(Events.self)
+            try db.createTableOrNot(Times.self)
+            return try db.load(query, mapping: mapping).first
         }
     }
 

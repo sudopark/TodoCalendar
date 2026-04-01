@@ -33,6 +33,11 @@ open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Send
             .eraseToAnyPublisher()
     }
 
+    open func loadEvent(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
+        return Just(stubEvents.first(where: { $0.eventId == id }))
+            .eraseToAnyPublisher()
+    }
+
     public var didResetCache = false
     open func resetCache() async throws {
         didResetCache = true
