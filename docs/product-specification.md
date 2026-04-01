@@ -15,8 +15,6 @@
 | UI | SwiftUI + UIKit 하이브리드 |
 | 빌드 | Tuist v3, Swift 6.0 |
 | App Scheme | `tc.app://` |
-| App Store ID | `6639620385` |
-| App Group | `group.sudo.park.todo-calendar` |
 
 **핵심 가치**: 캘린더와 할일을 하나의 앱에서 통합 관리. 로그인 없이도 모든 핵심 기능 사용 가능하며, 로그인 시 클라우드 동기화 제공.
 
