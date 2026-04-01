@@ -150,3 +150,141 @@ struct EventSyncResponse<T: Sendable> {
 - `EventSyncUsecase.forceSync()`: 모든 `SyncDataType`의 타임스탬프 초기화 (`clearSyncTimestamp()`) → 전체 재동기화
 - 설정 화면에서 수동 트리거 가능
 - 동기화 진행 상태: `isSyncInProgress: AnyPublisher<Bool, Never>`로 UI에 표시
+
+---
+
+## 상태 전이 다이어그램
+
+### 오프라인 큐 → 업로드 플로우
+
+```mermaid
+flowchart TD
+    Start([이벤트 CRUD]) --> Local[로컬 DB 즉시 저장]
+    Local --> Queue[오프라인 큐에 추가\nEventUploadService]
+
+    Queue --> Pop[큐에서 pop\nFIFO 순서]
+    Pop --> Upload{서버 업로드}
+
+    Upload -->|성공| Remove[큐에서 제거]
+    Remove --> Next{큐에 더 있음?}
+    Next -->|예| Pop
+    Next -->|아니오| Idle([대기])
+
+    Upload -->|실패| Retry{재시도 횟수 < 10?}
+    Retry -->|예| Requeue[큐에 다시 추가\n(즉시 재시도)]
+    Requeue --> Pop
+    Retry -->|아니오| Skip[큐에 남아있으나\npop 대상에서 제외]
+    Skip --> Next
+```
+
+### 서버 동기화 (Pull) 플로우
+
+```mermaid
+sequenceDiagram
+    participant Sync as EventSyncUsecase
+    participant Repo as SyncRepository
+    participant API as Server API
+    participant SDS as SharedDataStore
+
+    Sync->>Sync: 각 SyncDataType별 반복
+
+    loop EventTag, Todo, Schedule
+        Sync->>Repo: loadLatestSyncTimestamp(type)
+        Repo-->>Sync: lastSync: TimeInterval?
+
+        Sync->>API: GET /sync/{type}?after={lastSync}&limit=30
+        API-->>Sync: SyncResult {created, updated, deletedIds}
+
+        alt 데이터 있음
+            Sync->>Repo: 로컬 DB에 upsert (created + updated)
+            Sync->>Repo: 로컬 DB에서 삭제 (deletedIds)
+            Sync->>SDS: SharedDataStore 갱신
+            Sync->>Repo: saveSyncTimestamp(type, latestTime)
+        end
+
+        Note over Sync: 30건 미만이면 완료,\n30건이면 다음 페이지 요청
+    end
+```
+
+### 백그라운드 동기화 상태 전이
+
+```mermaid
+stateDiagram-v2
+    [*] --> Registered: registerTask()\n(앱 시작 시)
+
+    Registered --> Scheduled: scheduleTask()\n(매시간 55분)
+
+    Scheduled --> Running: iOS가 실행\n(시스템 판단)
+    Running --> SyncComplete: runSync() 성공
+    Running --> Timeout: expirationHandler\n(시간 초과)
+
+    SyncComplete --> WidgetReload: reloadAllTimelines()
+    WidgetReload --> Scheduled: 다음 스케줄 등록
+
+    Timeout --> Scheduled: 다음 사이클로\n재스케줄링
+```
+
+---
+
+## 엣지 케이스
+
+### 충돌 해결 — 서버 우선 (Last-Write-Wins)
+
+```
+상황: 오프라인에서 할일 수정 → 서버에서 같은 할일 삭제됨
+
+타임라인:
+  T1: 오프라인 — 할일 "회의" 시간 변경 → 오프라인 큐에 추가
+  T2: 다른 기기 — 같은 할일 삭제 → 서버에 반영
+  T3: 네트워크 복구
+
+오프라인 큐 업로드 (Push):
+  PUT /todos/{id} → 서버가 이미 삭제된 이벤트에 대해 처리
+  → 서버 구현에 따라: 재생성 또는 에러 반환
+
+서버 동기화 (Pull):
+  GET /sync/todos?after={T1}
+  → deletedIds에 해당 할일 포함
+  → 로컬 DB에서 삭제
+
+최종 결과: 서버 상태(삭제됨)가 우선.
+          오프라인 수정은 무시됨.
+```
+
+### 오프라인 큐 — 10회 실패 후 처리
+
+```
+상황: 서버 장애로 업로드 계속 실패
+
+진행:
+  시도 1~10: 실패 → 큐에 다시 추가 → 즉시 재시도
+  시도 11: failCount > maxFailCount(10)
+    → pop 대상에서 제외
+    → 큐에는 남아있음
+
+복구 방법:
+  1. 다음 앱 실행 시 동기화 사이클에서 재처리
+  2. 사용자가 설정 → "강제 동기화" 실행
+     → clearSyncTimestamp() → 전체 재동기화
+     → 오프라인 큐도 다시 처리
+
+주의: 지수 백오프 없음. 즉시 재시도로 인해
+     서버 장애 시 빠르게 10회 소진 가능.
+```
+
+### 동기화와 마이그레이션의 조율
+
+```
+상황: 로그인 직후 마이그레이션과 동기화가 동시 시작
+
+EventSyncMediator 조율:
+  1. 마이그레이션 시작: isTemporaryUserDataMigration = true
+  2. EventSyncUsecase.sync() 호출 시:
+     → Mediator 확인 → 마이그레이션 중 → 동기화 대기
+  3. 마이그레이션 완료: isTemporaryUserDataMigration = false
+  4. 대기 중이던 동기화 실행 시작
+
+이유: 마이그레이션이 서버에 데이터를 업로드하는 중에
+     동기화가 "서버에 데이터 없음"으로 판단하여
+     로컬 데이터를 삭제하는 것을 방지.
+```

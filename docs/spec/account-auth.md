@@ -129,3 +129,117 @@
 **마이그레이션 소스 경로**: `LoginUsecaseFactoryImple` 생성 시 `temporaryUserDataFilePath`로 비로그인 DB 경로 전달 → 해당 DB에서 데이터 읽기.
 
 **앱 재시작 시 복원**: 마이그레이션이 중간에 중단되면 다음 앱 실행 시 `ManageAccountViewModel.prepare()`에서 다시 체크하여 재시도 유도.
+
+---
+
+## 상태 전이 다이어그램
+
+### 로그인/로그아웃 Factory 전환
+
+```mermaid
+stateDiagram-v2
+    [*] --> NonLogin: 앱 시작 (비로그인)
+
+    state NonLogin {
+        note right of NonLogin
+            DB: todocal.db
+            Repository: Local only
+            Sync: no-op
+            Upload: no-op
+        end note
+    }
+
+    state Login {
+        note right of Login
+            DB: todocal_{uid}.db
+            Repository: Upload Decorator
+            Sync: EventSyncUsecaseImple
+            Upload: EventUploadServiceImple
+        end note
+    }
+
+    NonLogin --> Login: OAuth 성공\nFactory 교체\nDB 전환
+    Login --> NonLogin: 로그아웃\nFactory 역전환\nSharedDataStore 초기화
+    Login --> [*]: 계정 삭제\nDB 삭제 + 서버 데이터 삭제
+```
+
+### 데이터 마이그레이션 플로우
+
+```mermaid
+sequenceDiagram
+    participant User as 사용자
+    participant VM as ManageAccountVM
+    participant Mig as MigrationUsecase
+    participant Med as EventSyncMediator
+    participant Local as 비로그인 DB
+    participant Remote as 서버 API
+
+    User->>VM: 마이그레이션 시작
+    VM->>Mig: startMigration()
+    Mig->>Med: isTemporaryUserDataMigration = true
+    Note over Med: 서버 동기화 대기
+
+    loop 마이그레이션 순서
+        Mig->>Local: 1. EventTag 로드
+        Local-->>Mig: [CustomEventTag]
+        Mig->>Remote: PUT /tags (일괄 업로드)
+
+        Mig->>Local: 2. TodoEvent 로드
+        Mig->>Remote: PUT /todos
+
+        Mig->>Local: 3. ScheduleEvent 로드
+        Mig->>Remote: PUT /schedules
+
+        Mig->>Local: 4. EventDetailData 로드
+        Mig->>Remote: POST /event_details
+
+        Mig->>Local: 5. DoneTodoEvent 로드
+        Mig->>Remote: PUT /done_todos
+    end
+
+    Mig->>Med: isTemporaryUserDataMigration = false
+    Note over Med: 서버 동기화 재개
+    Mig-->>VM: migrationResult(.success)
+```
+
+---
+
+## 엣지 케이스
+
+### Factory 전환 시 SharedDataStore 상태
+
+```
+상황: 비로그인 상태에서 로그인 성공
+
+전환 과정:
+  1. OAuth 완료 → uid 획득
+  2. LoginUsecaseFactory 생성 (todocal_{uid}.db)
+  3. SharedDataStore 초기화:
+     - todos: [:] (비로그인 할일 제거)
+     - schedules: MemorizedEventsContainer() (빈 컨테이너)
+     - tags: [:] (비로그인 태그 제거)
+     - uncompletedTodos: []
+  4. 새 DB에서 데이터 로드 → SharedDataStore 채움
+
+주의: 비로그인 데이터는 SharedDataStore에서 즉시 사라짐.
+     마이그레이션하지 않으면 비로그인 DB에만 남아있음.
+     사용자가 마이그레이션 안내를 무시하면 데이터 접근 불가.
+```
+
+### 마이그레이션 중단 후 재시도
+
+```
+상황: 마이그레이션 중 네트워크 끊김 (3. ScheduleEvent 업로드 중)
+
+결과:
+  1. 태그, 할일: 서버에 이미 업로드 완료 ✓
+  2. 일정: 일부만 업로드 → 에러 반환
+  3. 이벤트 상세, 완료 할일: 미처리
+
+재시도 시:
+  - 다음 앱 실행 시 ManageAccountVM.prepare()에서 체크
+  - isNeedMigration == true → 사용자에게 재시도 안내
+  - 전체 마이그레이션 다시 실행
+  - 이미 업로드된 태그/할일: 서버가 upsert → 중복 없음
+  - 일정: 일부 중복 가능성 → 서버 upsert로 처리
+```
