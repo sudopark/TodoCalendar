@@ -13,17 +13,26 @@ import Extensions
 
 
 final class StubExternalCalendarRepository: ExternalCalendarIntegrateRepository, @unchecked Sendable {
-    
+
     private let isGoogleAccountIntegrated: Bool
-    init(isGoogleAccountIntegrated: Bool) {
+    private let isAppleCalendarIntegrated: Bool
+    init(
+        isGoogleAccountIntegrated: Bool = false,
+        isAppleCalendarIntegrated: Bool = false
+    ) {
         self.isGoogleAccountIntegrated = isGoogleAccountIntegrated
+        self.isAppleCalendarIntegrated = isAppleCalendarIntegrated
     }
-    
+
     func loadIntegratedAccounts() async throws -> [ExternalServiceAccountinfo] {
-        let account = ExternalServiceAccountinfo(
-            GoogleCalendarService.id, email: "some"
-        )
-        return isGoogleAccountIntegrated ? [account] : []
+        var accounts: [ExternalServiceAccountinfo] = []
+        if isGoogleAccountIntegrated {
+            accounts.append(.init(GoogleCalendarService.id, email: "some"))
+        }
+        if isAppleCalendarIntegrated {
+            accounts.append(.init(AppleCalendarService.id, email: "local"))
+        }
+        return accounts
     }
     
     func save(_ credential: any OAuth2Credential, for service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
@@ -65,5 +74,29 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
         return Empty().eraseToAnyPublisher()
     }
     
+    func resetCache() async throws { }
+}
+
+final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchecked Sendable {
+
+    func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error> {
+        let tags: [AppleCalendar.Tag] = [
+            .init(id: "a:1", name: "Work", colorHex: "#FF0000"),
+            .init(id: "a:2", name: "Personal", colorHex: "#00FF00")
+        ]
+        return Just(tags).mapAsAnyError().eraseToAnyPublisher()
+    }
+
+    var eventMocking: [AppleCalendar.Event]?
+    func loadEvents(in period: Range<TimeInterval>) -> AnyPublisher<[AppleCalendar.Event], any Error> {
+        if let eventMocking {
+            return Just(eventMocking).mapAsAnyError().eraseToAnyPublisher()
+        }
+        let event = AppleCalendar.Event(
+            eventId: "ae1", calendarId: "a:1", name: "apple", eventTime: .period(period)
+        )
+        return Just([event]).mapAsAnyError().eraseToAnyPublisher()
+    }
+
     func resetCache() async throws { }
 }
