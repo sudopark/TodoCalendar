@@ -43,4 +43,8 @@ open class StubAppleCalendarUsecase: AppleCalendarUsecase, @unchecked Sendable {
     open func events(in period: Range<TimeInterval>) -> AnyPublisher<[AppleCalendar.Event], Never> {
         Just(stubEvents).eraseToAnyPublisher()
     }
+
+    open func event(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
+        Just(stubEvents.first(where: { $0.eventId == id })).eraseToAnyPublisher()
+    }
 }

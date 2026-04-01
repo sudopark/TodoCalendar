@@ -19,6 +19,7 @@ public protocol AppleCalendarStoreAccessor: Sendable {
     func checkAuthorizationStatus() -> Bool
     func loadCalendarTags() -> [AppleCalendar.Tag]
     func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event]
+    func loadEvent(id: String) -> AppleCalendar.Event?
 }
 
 
@@ -70,6 +71,10 @@ public final class EKEventStoreWrapper: AppleCalendarStoreAccessor, @unchecked S
         let end = Date(timeIntervalSince1970: period.upperBound)
         let predicate = store.predicateForEvents(withStart: start, end: end, calendars: calendars)
         return store.events(matching: predicate).compactMap { $0.asAppleCalendarEvent() }
+    }
+
+    public func loadEvent(id: String) -> AppleCalendar.Event? {
+        return store.event(withIdentifier: id)?.asAppleCalendarEvent()
     }
 }
 

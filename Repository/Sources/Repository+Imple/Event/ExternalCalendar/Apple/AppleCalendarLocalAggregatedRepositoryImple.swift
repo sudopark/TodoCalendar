@@ -49,6 +49,10 @@ extension AppleCalendarLocalAggregatedRepositoryImple {
         }
     }
 
+    public func loadEvent(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
+        return Just(nil).eraseToAnyPublisher()
+    }
+
     public func resetCache() async throws { }
 
     private func load<T: Sendable>(
