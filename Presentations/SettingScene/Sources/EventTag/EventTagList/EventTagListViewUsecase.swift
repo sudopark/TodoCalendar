@@ -77,11 +77,11 @@ final class EventTagListViewUsecase {
 
     private let tagUsecase: any EventTagUsecase
     private let googleCalendarUsecase: any GoogleCalendarUsecase
-    private let appleCalendarUsecase: (any AppleCalendarUsecase)?
+    private let appleCalendarUsecase: any AppleCalendarUsecase
     init(
         tagUsecase: any EventTagUsecase,
         googleCalendarUsecase: any GoogleCalendarUsecase,
-        appleCalendarUsecase: (any AppleCalendarUsecase)? = nil
+        appleCalendarUsecase: any AppleCalendarUsecase
     ) {
         self.tagUsecase = tagUsecase
         self.googleCalendarUsecase = googleCalendarUsecase
@@ -112,7 +112,7 @@ extension EventTagListViewUsecase {
     
     func reloadExternalCalendarIfNeed() {
         self.googleCalendarUsecase.refreshGoogleCalendarEventTags()
-        self.appleCalendarUsecase?.refreshCalendarTags()
+        self.appleCalendarUsecase.refreshCalendarTags()
     }
 }
 
@@ -151,8 +151,6 @@ extension EventTagListViewUsecase {
         let transform: ([ExternalCalendarEventTagCellViewModel], [ExternalCalendarEventTagCellViewModel], Set<EventTagId>) -> [ExternalCalendarEventTagListSectionModel]
         transform = { googles, apples, offIds in
 
-            var sections: [ExternalCalendarEventTagListSectionModel] = []
-
             let googleSection = ExternalCalendarEventTagListSectionModel(
                 serviceId: GoogleCalendarService.id,
                 serviceTitle: "event_setting::external_calendar::google::serviceName".localized(),
@@ -160,20 +158,16 @@ extension EventTagListViewUsecase {
                 cellViewModels: googles,
                 offIds: offIds
             )
-            sections.append(googleSection)
 
-            if !apples.isEmpty {
-                let appleSection = ExternalCalendarEventTagListSectionModel(
-                    serviceId: AppleCalendarService.id,
-                    serviceTitle: "event_setting::external_calendar::apple::serviceName".localized(),
-                    icon: "apple_calendar_icon",
-                    cellViewModels: apples,
-                    offIds: offIds
-                )
-                sections.append(appleSection)
-            }
+            let appleSection = ExternalCalendarEventTagListSectionModel(
+                serviceId: AppleCalendarService.id,
+                serviceTitle: "event_setting::external_calendar::apple::serviceName".localized(),
+                icon: "apple_calendar_icon",
+                cellViewModels: apples,
+                offIds: offIds
+            )
 
-            return sections
+            return [googleSection, appleSection]
         }
 
         return Publishers.CombineLatest3(
@@ -201,17 +195,13 @@ extension EventTagListViewUsecase {
 
     private var appleCalendarTags: AnyPublisher<[ExternalCalendarEventTagCellViewModel], Never> {
 
-        guard let usecase = self.appleCalendarUsecase else {
-            return Just([]).eraseToAnyPublisher()
-        }
-
         let transform: ([AppleCalendar.Tag]) -> [ExternalCalendarEventTagCellViewModel] = { tags in
             return tags
                 .map { ExternalCalendarEventTag($0) }
                 .map { ExternalCalendarEventTagCellViewModel($0) }
         }
 
-        return usecase.calendarTags
+        return self.appleCalendarUsecase.calendarTags
             .map(transform)
             .eraseToAnyPublisher()
     }

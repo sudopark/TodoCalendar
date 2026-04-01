@@ -35,7 +35,6 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         shouldLoadFail: Bool = false,
         isGoogleCalendarIntegrated: Bool = false,
         stubGoogleCalendarTags: [GoogleCalendar.Tag]? = nil,
-        isAppleCalendarIntegrated: Bool = false,
         stubAppleCalendarTags: [AppleCalendar.Tag]? = nil
     ) -> EventTagListViewModelImple {
         let usecase = StubEventTagUsecase()
@@ -53,12 +52,8 @@ class EventTagListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         }
         googleUsecae.stubCalendarTags = stubGoogleCalendarTags
 
-        var appleCalendarUsecase: StubAppleCalendarUsecase?
-        if isAppleCalendarIntegrated {
-            let stub = StubAppleCalendarUsecase()
-            stub.stubCalendarTags = stubAppleCalendarTags
-            appleCalendarUsecase = stub
-        }
+        let appleCalendarUsecase = StubAppleCalendarUsecase()
+        appleCalendarUsecase.stubCalendarTags = stubAppleCalendarTags
 
         let viewModel = EventTagListViewModelImple(
             tagUsecase: usecase,
@@ -107,17 +102,18 @@ extension EventTagListViewModelImpleTests {
         // given
         let expect = expectation(description: "외부 캘린더 목록 제공")
         let viewModel = self.makeViewModel(isGoogleCalendarIntegrated: true)
-        
+
         // when
         let sections = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
             viewModel.reload()
         }
-        
+
         // then
-        XCTAssertEqual(sections?.count, 1)
-        let first = sections?.first
-        XCTAssertEqual(first?.serviceId, GoogleCalendarService.id)
-        XCTAssertEqual(first?.cellViewModels.count, 10)
+        XCTAssertEqual(sections?.count, 2)
+        let googleSection = sections?.first(where: { $0.serviceId == GoogleCalendarService.id })
+        XCTAssertEqual(googleSection?.cellViewModels.count, 10)
+        let appleSection = sections?.first(where: { $0.serviceId == AppleCalendarService.id })
+        XCTAssertNotNil(appleSection)
     }
 
     func testViewModel_provideExternalCalendarTags_withAccountEmail() {
@@ -262,10 +258,7 @@ extension EventTagListViewModelImpleTests {
     func testViewModel_provideAppleCalendarTags() {
         // given
         let expect = expectation(description: "Apple Calendar 태그 섹션 제공")
-        let viewModel = self.makeViewModel(
-            isGoogleCalendarIntegrated: true,
-            isAppleCalendarIntegrated: true
-        )
+        let viewModel = self.makeViewModel(isGoogleCalendarIntegrated: true)
 
         // when
         let sections = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
@@ -284,10 +277,7 @@ extension EventTagListViewModelImpleTests {
         // given
         let expect = expectation(description: "wait initial list")
         expect.assertForOverFulfill = false
-        let viewModel = self.makeViewModel(
-            isGoogleCalendarIntegrated: true,
-            isAppleCalendarIntegrated: true
-        )
+        let viewModel = self.makeViewModel(isGoogleCalendarIntegrated: true)
         let _ = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
             viewModel.reload()
         }
@@ -318,25 +308,6 @@ extension EventTagListViewModelImpleTests {
         XCTAssertEqual(offTagIds, [
             .externalCalendar(serviceId: AppleCalendarService.id, id: "a:2")
         ])
-    }
-
-    // Apple Calendar 미연동 시 섹션 미노출
-    func testViewModel_whenAppleCalendarNotIntegrated_noAppleSection() {
-        // given
-        let expect = expectation(description: "Apple Calendar 미연동 시 섹션 미노출")
-        let viewModel = self.makeViewModel(
-            isGoogleCalendarIntegrated: true,
-            isAppleCalendarIntegrated: false
-        )
-
-        // when
-        let sections = self.waitFirstOutput(expect, for: viewModel.externalCalendarSections) {
-            viewModel.reload()
-        }
-
-        // then
-        let appleSection = sections?.first(where: { $0.serviceId == AppleCalendarService.id })
-        XCTAssertNil(appleSection)
     }
 }
 
