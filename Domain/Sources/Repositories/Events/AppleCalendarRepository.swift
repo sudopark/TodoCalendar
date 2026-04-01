@@ -30,5 +30,7 @@ public protocol AppleCalendarRepository: Sendable {
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[AppleCalendar.Event], any Error>
 
+    func loadEvent(id: String) -> AnyPublisher<AppleCalendar.Event?, Never>
+
     func resetCache() async throws
 }

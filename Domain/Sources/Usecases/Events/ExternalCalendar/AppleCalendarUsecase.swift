@@ -31,6 +31,7 @@ public protocol AppleCalendarUsecase: Sendable {
 
     var calendarTags: AnyPublisher<[AppleCalendar.Tag], Never> { get }
     func events(in period: Range<TimeInterval>) -> AnyPublisher<[AppleCalendar.Event], Never>
+    func event(id: String) -> AnyPublisher<AppleCalendar.Event?, Never>
 }
 
 
@@ -190,5 +191,9 @@ extension AppleCalendarUsecaseImple {
         return sharedDataStore.observe([String: AppleCalendar.Event].self, key: shareKey)
             .map { dict in (dict ?? [:]).values.filter { $0.eventTime.isRoughlyOverlap(with: period) } }
             .eraseToAnyPublisher()
+    }
+
+    public func event(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
+        return self.repository.loadEvent(id: id)
     }
 }
