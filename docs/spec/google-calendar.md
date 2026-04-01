@@ -465,3 +465,225 @@ GoogleCalendarViewAppearanceStore protocol
 - `AppEnvironment.googleCalendarDBVersion`으로 스키마 버전 관리
 - `onFirstOpen` 콜백에서 테이블 생성 + 마이그레이션 실행
 - 단일 계정 → 다중 계정 마이그레이션: `AppDataMigrationImple` (1회성, 플래그 기반 멱등성)
+
+---
+
+## 상태 전이 다이어그램
+
+### OAuth 토큰 갱신 상태 전이
+
+```mermaid
+stateDiagram-v2
+    [*] --> Valid: 인증 완료\n(accessToken + refreshToken)
+
+    Valid --> Expired: 서버 401 응답\n(토큰 만료)
+
+    state "토큰 갱신" as Refreshing {
+        [*] --> RequestRefresh: POST /token\n(refreshToken 사용)
+        RequestRefresh --> RefreshSuccess: 새 accessToken 발급
+        RequestRefresh --> RefreshFail: refreshToken 무효\n또는 네트워크 오류
+    }
+
+    Expired --> Refreshing: AuthenticationInterceptor\n자동 재시도
+
+    RefreshSuccess --> Valid: credential 업데이트\n원래 요청 재시도
+    RefreshFail --> InvalidAuth: credential 삭제\n재인증 필요
+
+    InvalidAuth --> [*]: 사용자에게\n재인증 요청
+```
+
+### DB Connection Pool 참조 카운팅
+
+```mermaid
+stateDiagram-v2
+    [*] --> Empty: Pool 초기화
+
+    Empty --> Connected: open(serviceId)\ncount: 0 → 1
+
+    state Connected {
+        [*] --> Single: connectionCount = 1
+        Single --> Multi: open(같은 serviceId)\ncount += 1
+        Multi --> Multi: open/close\ncount 변동
+        Multi --> Single: close\ncount → 1
+    }
+
+    Connected --> Closing: close\ncount → 0
+    Closing --> Empty: SQLiteService.close()\npool 항목 제거
+
+    note right of Connected
+        onFirstOpen:
+        테이블 생성 + 마이그레이션
+        (최초 1회만 실행)
+    end note
+```
+
+### 계정 연동/해제 시퀀스
+
+```mermaid
+sequenceDiagram
+    participant U as 사용자
+    participant Usecase as IntegrationUsecase
+    participant OAuth as GoogleOAuth2
+    participant Store as KeyChain
+    participant Pool as DBConnectionPool
+    participant GCal as GoogleCalendarUsecase
+    participant SDS as SharedDataStore
+
+    Note over U,SDS: === 연동 ===
+    U->>Usecase: integrate(google)
+    Usecase->>OAuth: requestAuthentication()
+    OAuth-->>Usecase: credential (accessToken, refreshToken, email)
+    Usecase->>Store: save(credential)
+    Usecase->>Pool: open("google")
+    Pool->>Pool: connectionCount += 1
+    Usecase->>SDS: externalCalendarAccounts += account
+    Usecase-->>GCal: .integrated 이벤트
+    GCal->>GCal: refreshColors(email)
+    GCal->>GCal: refreshCalendarTags(email)
+
+    Note over U,SDS: === 해제 ===
+    U->>Usecase: stopIntegrate(google, email)
+    Usecase->>Store: removeAccount(email)
+    Usecase->>SDS: externalCalendarAccounts -= account
+    Usecase->>Pool: close("google")
+    Pool->>Pool: connectionCount -= 1
+    Usecase-->>GCal: .disconnected 이벤트
+    GCal->>GCal: clearAccountCache(email)
+    GCal->>SDS: 색상/태그/이벤트 제거
+```
+
+---
+
+## 결정 트리
+
+### API 에러 처리 결정 트리
+
+```mermaid
+flowchart TD
+    Start([API 요청 실패]) --> Status{HTTP 상태 코드?}
+
+    Status -->|401| Refresh[AuthenticationInterceptor\n토큰 갱신 시도]
+    Refresh --> RefreshResult{갱신 성공?}
+    RefreshResult -->|성공| Retry[새 토큰으로\n원래 요청 재시도]
+    RefreshResult -->|실패| RemoveCred[credential 삭제\n→ 재인증 필요]
+
+    Status -->|"429 (Rate Limit)"| Fail429[즉시 실패\n재시도 없음]
+    Status -->|"500 (Server Error)"| Fail500[즉시 실패\n재시도 없음]
+    Status -->|네트워크 오류| FailNet[즉시 실패\n캐시 데이터는 유지]
+
+    Status -->|200~299| Parse{응답 파싱 성공?}
+    Parse -->|성공| Success([데이터 반환])
+    Parse -->|실패| FailParse[ServerErrorModel로\n디코딩 시도 → 에러]
+
+    note right of Fail429
+        현재 제한사항:
+        - 429/500 재시도 없음
+        - 지수 백오프 없음
+    end note
+```
+
+### 캐시 전략 결정 트리
+
+```mermaid
+flowchart TD
+    Start([데이터 요청]) --> Cache{로컬 캐시\n존재?}
+
+    Cache -->|있음| EmitCache[캐시 데이터 즉시 emit\n→ UI 빠른 표시]
+    Cache -->|없음| Remote
+
+    EmitCache --> Remote[리모트 API 호출]
+
+    Remote --> RemoteResult{리모트 성공?}
+    RemoteResult -->|성공| Update[캐시 갱신\n+ 새 데이터 emit]
+    RemoteResult -->|실패| Q1{캐시 이미 emit?}
+    Q1 -->|예| Silent["에러 무시 (캐시 유지)\n또는 에러 emit"]
+    Q1 -->|아니오| Error[에러 전파]
+```
+
+---
+
+## 엣지 케이스
+
+### RRULE 표시 vs 앱 반복 모델
+
+```
+상황: 구글 캘린더에서 "RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;UNTIL=20261231T235959Z"
+
+앱에서의 처리:
+  1. RRULE 문자열은 DB에 raw로 저장
+  2. 이벤트 상세 화면에서 RRULE을 텍스트로 파싱하여 표시
+     → "매주 월, 수, 금 반복 (2026.12.31까지)"
+  3. 앱의 EventRepeatingOption(EveryWeek 등)으로 변환하지 않음
+  4. → 구글 이벤트는 앱 내에서 반복 수정 불가 (읽기 전용)
+
+RRuleParser 지원 범위:
+  ✓ FREQ (DAILY/WEEKLY/MONTHLY/YEARLY)
+  ✓ INTERVAL, BYDAY (서수 포함), UNTIL, COUNT
+  ✗ BYMONTH, BYMONTHDAY, BYYEARDAY → 무시됨
+  → "매월 15일 반복" 같은 RRULE은 BYMONTHDAY가 필요하므로
+    반복 표시가 불완전할 수 있음
+```
+
+### 다중 계정 — 같은 캘린더 ID 충돌
+
+```
+상황: user1@gmail.com과 user2@gmail.com이 모두 "primary" 캘린더 사용
+
+DB 저장:
+  google_calendar_event_origin 테이블:
+    - account_id = "user1@gmail.com", calendar_id = "primary", event_id = "abc"
+    - account_id = "user2@gmail.com", calendar_id = "primary", event_id = "xyz"
+
+조회:
+  GoogleCalendarLocalAggregatedRepositoryImple.loadEvents("primary", period)
+    → 모든 계정의 "primary" 이벤트를 합산 반환
+    → 두 계정의 이벤트가 섞여서 표시
+
+이벤트 상세:
+  loadEventDetail(eventId: "abc")
+    → 모든 계정을 순회하며 검색
+    → user1에서 발견 → 반환
+
+의미: calendar_id가 같아도 account_id로 구분됨.
+     UI에서는 합산되어 하나의 "primary" 캘린더 이벤트처럼 보임.
+```
+
+### 토큰 갱신 중 동시 요청
+
+```
+상황: 401 응답 후 토큰 갱신 중에 다른 API 요청 발생
+
+Alamofire AuthenticationInterceptor 동작:
+  1. 첫 번째 요청: 401 → 갱신 시작
+  2. 두 번째 요청: Bearer 토큰 적용 시도
+     → AuthenticationInterceptor가 갱신 진행 중임을 감지
+     → 두 번째 요청 대기 (suspend)
+  3. 갱신 완료: 새 토큰으로 두 요청 모두 재시도
+
+의미: Alamofire의 AuthenticationInterceptor가 자동으로
+     동시 요청의 직렬화를 처리. 토큰 갱신은 1회만 수행.
+```
+
+### 계정 해제 시 캐시 정리 범위
+
+```
+상황: user1@gmail.com 연동 해제
+
+정리 범위:
+  1. KeyChain: credential 삭제
+  2. SharedDataStore:
+     - googleCalendarTags[user1] 제거
+     - googleCalendarEvents에서 user1의 이벤트 필터링
+  3. ViewAppearance:
+     - 색상 맵에서 user1 제거
+  4. offEventTagIds:
+     - user1 관련 외부 캘린더 태그 off 상태 정리
+  5. DB Connection Pool:
+     - connectionCount -= 1
+     - 다른 계정이 없으면 (count=0) DB 연결 종료
+  6. Repository Pool:
+     - user1의 Repository 인스턴스 제거
+
+주의: DB 데이터 자체는 삭제하지 않음.
+     DB 파일은 남아있으며, 같은 계정 재연동 시 재사용.
+```
