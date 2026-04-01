@@ -4,6 +4,94 @@
 
 ---
 
+## 상태 전이 다이어그램
+
+### 할일 전체 생명주기
+
+```mermaid
+stateDiagram-v2
+    [*] --> Active: makeTodoEvent
+
+    state Active {
+        [*] --> Current: time == nil
+        [*] --> Scheduled: time != nil
+        [*] --> Overdue: time != nil && upperBound <= now
+
+        Current --> Scheduled: 수정 (시간 추가)
+        Scheduled --> Current: 수정 (시간 제거)
+        Scheduled --> Overdue: 시간 경과
+    }
+
+    Active --> Completed: completeTodo
+    Completed --> Active: revertCompleteTodo
+
+    Active --> [*]: removeTodo (전체)
+    Active --> Active: 수정 (.all)\n건너뛰기\n삭제 (이번만, 다음 있음)
+
+    note right of Completed
+        DoneTodoEvent 생성
+        원본 TodoEvent 삭제
+    end note
+```
+
+### 반복 할일 완료 플로우
+
+```mermaid
+stateDiagram-v2
+    state "반복 할일 (turn=N)" as RepTodo
+    state "다음 반복 계산" as CalcNext
+    state fork_state <<fork>>
+    state "DoneTodoEvent 생성" as Done
+    state "새 할일 (turn=N+1)" as NextTodo
+    state "시리즈 종료" as End
+
+    RepTodo --> fork_state: completeTodo
+    fork_state --> Done: 항상
+    fork_state --> CalcNext: 반복 설정 있음
+
+    CalcNext --> NextTodo: 다음 회차 유효\n(turn <= count, time <= until)
+    CalcNext --> End: 종료 조건 도달\n(turn > count 또는 time > until)
+
+    NextTodo --> [*]: SharedDataStore.todos에 추가\n미완료 판정 실행
+
+    note right of Done
+        원본 정보 복사:
+        name, eventTagId,
+        eventTime, notificationOptions
+    end note
+```
+
+### 수정 범위별 상태 전이
+
+```mermaid
+stateDiagram-v2
+    state "반복 할일 A\n(turn=3, 매주 월)" as OrigA
+
+    state ".all (전체 수정)" as EditAll {
+        state "할일 A 직접 수정\n(turn 유지)" as AllResult
+    }
+
+    state ".onlyThisTime (이번만)" as EditThis {
+        state "할일 A → turn=4\n(다음 회차로 전진)" as ThisOrig
+        state "새 할일 B 생성\n(단독, 반복 없음)" as ThisNew
+    }
+
+    OrigA --> EditAll: .all
+    OrigA --> EditThis: .onlyThisTime
+
+    EditAll --> AllResult
+    EditThis --> ThisOrig
+    EditThis --> ThisNew
+
+    note right of ThisNew
+        새 UUID 발급
+        수정 내용 반영
+        원본 반복 설정 없음
+    end note
+```
+
+---
+
 ## 1. 데이터 구조
 
 | 속성 | 타입 | 설명 | 기본값 |
@@ -120,6 +208,43 @@ After:
 | doneTodoEventDetail | 원본 이벤트 상세 데이터 (장소, URL, 메모) 복사본 |
 | nextRepeatingTodoEvent | 반복인 경우 다음 회차 TodoEvent, 아니면 nil |
 
+### 완료 처리 시퀀스 (반복 할일)
+
+```mermaid
+sequenceDiagram
+    participant U as Usecase
+    participant R as Repository
+    participant E as Enumerator
+    participant S as SharedDataStore
+
+    U->>R: completeTodo(eventId)
+    R->>R: loadTodoEvent(eventId)
+    R->>R: removeTodo(eventId) from DB
+    R->>R: DoneTodoEvent(origin) 생성
+
+    alt 반복 설정 있음
+        R->>E: nextEventTime(from: turn N)
+        alt 다음 회차 유효
+            E-->>R: RepeatingTimes(time, turn=N+1)
+            R->>R: origin.time = next, turn = N+1
+            R->>R: updateTodoEvent(origin) in DB
+        else 종료 조건 도달
+            E-->>R: nil
+            R->>R: removeTodoDetail(eventId)
+        end
+    end
+
+    R-->>U: CompleteTodoResult
+    U->>S: todos[originId] = nil (제거)
+
+    alt nextRepeatingTodoEvent 존재
+        U->>S: todos[originId] = nextTodo
+    end
+
+    U->>S: uncompletedTodos에서 제거
+    U->>U: updateUncompletedTodoList(nextTodo)
+```
+
 ---
 
 ## 5. 할일 완료 취소 (되돌리기)
@@ -147,6 +272,29 @@ After:
 
 - 삭제 시 미완료 할일 목록에서도 제거
 - `onlyThisTime=true`로 다음 회차가 생기면 → 새 회차에 대해 미완료 판정
+
+### 삭제 플로우
+
+```mermaid
+flowchart TD
+    Start([removeTodo 호출]) --> Q1{onlyThisTime?}
+
+    Q1 -->|false| Del[이벤트 + 상세 데이터 완전 삭제]
+    Del --> Clean[SharedDataStore에서 제거\n미완료 목록에서 제거]
+    Clean --> Done([완료])
+
+    Q1 -->|true| Q2{반복 설정 있음?}
+    Q2 -->|없음| Del
+
+    Q2 -->|있음| Calc[다음 반복 시간 계산\nEventRepeatTimeEnumerator]
+    Calc --> Q3{다음 회차 유효?}
+
+    Q3 -->|유효| Advance[현재 → 다음 회차로 교체\ntime 전진, turn +1]
+    Advance --> UpdateStore[SharedDataStore.todos 교체\n미완료 판정 실행]
+    UpdateStore --> Done
+
+    Q3 -->|종료 조건 도달| Del
+```
 
 ---
 
@@ -260,3 +408,156 @@ turn 4 → 종료         (count 3회 모두 소비)
 | `refreshingCurrentTodo(Bool)` | 현재 할일 로딩 시작/완료 |
 | `refreshingTodo(Bool)` | 기간별 할일 로딩 시작/완료 |
 | `refreshingUncompletedTodo(Bool)` | 미완료 할일 로딩 시작/완료 |
+
+---
+
+## 12. 결정 트리
+
+### 건너뛰기 결정 트리
+
+```mermaid
+flowchart TD
+    Start([skipRepeatingTodo 호출]) --> Q1{반복 설정 있음?}
+
+    Q1 -->|없음| Err1[에러: notARepeatingEvent]
+    Q1 -->|있음| Q2{SkipTodoParams?}
+
+    Q2 -->|.next| Calc[EventRepeatTimeEnumerator\n다음 시간 계산]
+    Calc --> Q3{다음 회차 유효?}
+    Q3 -->|유효| Skip[time = next\nturn += 1]
+    Q3 -->|종료 조건 도달| Err2[에러: repeatingIsEnd]
+
+    Skip --> Q4{새 time의 upperBound\nvs 현재 시각?}
+    Q4 -->|"<= now (과거/현재)"| AddUncompleted[미완료 목록에 추가]
+    Q4 -->|"> now (미래)"| RemoveUncompleted[미완료 목록에서 제거]
+
+    Q2 -->|".until(EventTime)"| Patch[updateTodoEvent 경유\ntime을 지정 시간으로 변경]
+    Patch --> Q4
+```
+
+### 수정 방식 결정 트리
+
+```mermaid
+flowchart TD
+    Start([updateTodoEvent 호출]) --> Q1{EditMethod?}
+
+    Q1 -->|.put| ValPut{name 비어있지 않음?}
+    ValPut -->|예| ApplyPut[모든 필드 새 값으로 대체]
+    ValPut -->|아니오| ErrPut[에러: invalid parameter]
+
+    Q1 -->|.patch| ValPatch{name/tagId/time/repeating/\nnotification 중 1개 이상?}
+    ValPatch -->|예| ApplyPatch[제공된 필드만 변경\n나머지 유지]
+    ValPatch -->|아니오| ErrPatch[에러: invalid parameter]
+
+    ApplyPut --> Q2{repeatingUpdateScope?}
+    ApplyPatch --> Q2
+
+    Q2 -->|nil 또는 .all| Direct[원본 직접 수정\n이벤트 1개 유지]
+    Q2 -->|.onlyThisTime| Replace[새 할일 생성 +\n원본 다음 turn으로 전진]
+
+    Direct --> Update[SharedDataStore 갱신\n미완료 판정]
+    Replace --> Update
+```
+
+---
+
+## 13. 엣지 케이스
+
+### 13.1 반복 종료 직전 건너뛰기
+
+```
+상황: count=3 반복 할일, 현재 turn=3 (마지막 회차)
+동작: 건너뛰기(.next) 시도
+
+결과:
+  turn 3 → 건너뛰기 시도
+  Enumerator: turn=4 계산 → 4 > 3 → nil 반환
+  → 에러: repeatingIsEnd
+
+의미: 마지막 회차는 건너뛸 수 없음. 완료하거나 삭제만 가능.
+```
+
+### 13.2 시간 nil ↔ 유 전환과 미완료 상태
+
+```
+상황: "장보기" (time=nil, 현재 할일)
+동작 1: 수정 — time = 어제 15:00으로 설정
+결과 1: 미완료 목록에 추가 (기한 초과)
+
+동작 2: 다시 수정 — time = nil로 변경
+결과 2: 미완료 목록에서 제거 (현재 할일은 미완료 아님)
+
+동작 3: 수정 — time = 내일 15:00으로 설정
+결과 3: 미완료 목록에 추가되지 않음 (미래 예정)
+```
+
+### 13.3 반복 할일 완료 후 즉시 미완료 진입
+
+```
+상황: 매일 반복 할일 "운동" (3일간 방치, 현재 turn=5, time=3일 전)
+동작: completeTodo
+
+결과:
+  1. DoneTodoEvent 생성 (turn=5, time=3일 전)
+  2. 다음 인스턴스: turn=6, time=2일 전
+  3. 2일 전 < now → 즉시 미완료 목록에 추가
+
+의미: 밀린 반복 할일을 완료해도, 이미 지나간 다음 인스턴스가
+      바로 미완료로 나타남. 사용자는 하나씩 완료하거나
+      건너뛰기(.until)로 원하는 미래 시점까지 점프 가능.
+```
+
+### 13.4 이번만 수정(.onlyThisTime) + 반복 종료 직전
+
+```
+상황: count=3 반복 할일, 현재 turn=3 (마지막 회차)
+동작: .onlyThisTime으로 이름 변경
+
+결과:
+  1. 새 할일 B 생성 (수정 내용, 단독, 반복 없음)
+  2. 원본 A: 다음 회차 계산 → turn=4 > count=3 → 종료
+  3. 원본 A: 다음 반복 없음 → 상세 데이터 삭제
+  4. SharedDataStore: todos[A] = nil (제거), todos[B] = newTodo
+
+최종 상태: 새 할일 B만 남음, 원본 시리즈는 소멸
+```
+
+### 13.5 완료 취소(되돌리기) 후 상태 복원 범위
+
+```
+상황: 반복 할일 "운동" turn=3 완료 → DoneTodo 생성, 다음 인스턴스 turn=4 생성
+동작: revertCompleteTodo(doneId)
+
+결과:
+  1. DoneTodoEvent 삭제
+  2. 원본 TodoEvent 복원 (turn=3 시점의 상태)
+  3. 이벤트 상세 데이터(장소/URL/메모)도 복원
+  4. todos에 추가, 미완료 판정 실행
+
+주의: 완료 시 생성된 다음 인스턴스(turn=4)는
+      되돌리기로 자동 제거되지 않음.
+      → turn=3(복원)과 turn=4(이미 생성)가 공존 가능.
+      실제 코드에서는 Repository가 원본 ID로 교체하므로
+      같은 ID의 할일은 최신 상태로 덮어씀.
+```
+
+### 13.6 위젯 TodoToggle과 반복 할일
+
+```
+상황: 위젯에서 반복 할일 완료 토글
+동작: TodoToggleIntent → completeTodo 또는 revertCompleteTodo
+
+완료 시:
+  - SQLite 직접 쓰기 (앱 프로세스 외부)
+  - 다음 반복 인스턴스 생성
+  - 위젯 캐시 리셋 + Timeline 갱신
+
+되돌리기 시:
+  - DoneTodoEvent 삭제 + 원본 복원
+  - 위젯 캐시 리셋
+
+isToggledCurrentTodo 판정:
+  - 완료된 할일의 eventTime == nil → 현재 할일 토글
+  - 되돌린 할일의 time == nil → 현재 할일 토글
+  → 위젯에서 현재 할일 섹션 갱신 여부 결정에 사용
+```
