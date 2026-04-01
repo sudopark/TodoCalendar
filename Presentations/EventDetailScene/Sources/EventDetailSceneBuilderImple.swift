@@ -17,19 +17,22 @@ public final class EventDetailSceneBuilderImple {
     private let viewAppearance: ViewAppearance
     private let holidayEventDetailSceneBuilder: any HolidayEventDetailSceneBuiler
     private let googleCalendarEventDetailSceneBuilder: any GoogleCalendarEventDetailSceneBuiler
+    private let appleCalendarEventDetailSceneBuilder: any AppleCalendarEventDetailSceneBuilder
     private let settingSceneBuilder: any SettingSceneBuiler
-    
+
     public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         holidayEventDetailSceneBuilder: any HolidayEventDetailSceneBuiler,
         googleCalendarEventDetailSceneBuilder: any GoogleCalendarEventDetailSceneBuiler,
+        appleCalendarEventDetailSceneBuilder: any AppleCalendarEventDetailSceneBuilder,
         settingSceneBuilder: any SettingSceneBuiler
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.holidayEventDetailSceneBuilder = holidayEventDetailSceneBuilder
         self.googleCalendarEventDetailSceneBuilder = googleCalendarEventDetailSceneBuilder
+        self.appleCalendarEventDetailSceneBuilder = appleCalendarEventDetailSceneBuilder
         self.settingSceneBuilder = settingSceneBuilder
     }
 }
@@ -163,6 +166,15 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
     ) -> any GoogleCalendarEventDetailScene {
         return self.googleCalendarEventDetailSceneBuilder.makeGoogleCalendarEventDetailScene(
             calendarId: calendarId, accountId: accountId, eventId: eventId
+        )
+    }
+
+    @MainActor
+    public func makeAppleCalendarEventDetailScene(
+        calendarId: String, eventId: String
+    ) -> any AppleCalendarEventDetailScene {
+        return self.appleCalendarEventDetailSceneBuilder.makeAppleCalendarEventDetailScene(
+            calendarId: calendarId, eventId: eventId
         )
     }
     

@@ -88,6 +88,16 @@ public protocol DoneTodoDetailScene: Scene where Interactor == any DoneTodoDetai
 { }
 
 
+// MARK: - AppleCalendarEventDetailScene Interactable & Listenable
+
+public protocol AppleCalendarEventDetailSceneInteractor: AnyObject { }
+
+// MARK: - AppleCalendarEventDetailScene
+
+public protocol AppleCalendarEventDetailScene: Scene where Interactor == any AppleCalendarEventDetailSceneInteractor
+{ }
+
+
 // MARK: - EventDetailSceneBuilder
 
 public protocol EventDetailSceneBuilder {
@@ -117,7 +127,12 @@ public protocol EventDetailSceneBuilder {
     func makeGoogleCalendarDetailScene(
         calendarId: String, accountId: String, eventId: String
     ) -> any GoogleCalendarEventDetailScene
-    
+
+    @MainActor
+    func makeAppleCalendarEventDetailScene(
+        calendarId: String, eventId: String
+    ) -> any AppleCalendarEventDetailScene
+
     @MainActor
     func makeDoneTodoDetailScene(
         _ doneTodoId: String,
