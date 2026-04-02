@@ -108,6 +108,12 @@ jobs:
         run: |
           cd install && bash install.sh
 
+      - name: Setup mise and tuist
+        run: |
+          eval "$(mise activate bash)"
+          mise install tuist
+          echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
+
       - name: Install dependencies
         run: |
           tuist install
