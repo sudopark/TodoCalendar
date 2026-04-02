@@ -114,6 +114,12 @@ jobs:
           mise install tuist
           echo "$HOME/.local/share/mise/shims" >> $GITHUB_PATH
 
+      - name: Debug tuist version
+        run: |
+          echo "PATH=$PATH"
+          which tuist
+          tuist version
+
       - name: Install dependencies
         run: |
           tuist install

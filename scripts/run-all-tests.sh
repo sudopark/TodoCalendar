@@ -78,15 +78,15 @@ for scheme in "${SCHEMES[@]}"; do
   if [ $HAS_BUILD_FAILURE -gt 0 ]; then
     FAILED+=("${scheme}")
     echo "  -> FAILED (build error)"
-    echo "$OUTPUT" | grep -E "(error:|BUILD FAILED)" | head -10
+    echo "$OUTPUT" | grep -E "(error:|BUILD FAILED)" | head -30
   elif [ $HAS_REAL_FAILURE -gt 0 ] || [ $SWIFT_TESTING_FAILED -gt 0 ]; then
     FAILED+=("${scheme}")
     echo "  -> FAILED (test failure)"
-    echo "$OUTPUT" | grep -E "(error:|suites failed|with [0-9]+ failure)" | head -10
+    echo "$OUTPUT" | grep -E "(error:|suites failed|with [0-9]+ failure)" | head -30
   elif [ $EXIT_CODE -ne 0 ]; then
     FAILED+=("${scheme}")
     echo "  -> FAILED (exit code: ${EXIT_CODE})"
-    echo "$OUTPUT" | grep -E "(error:|BUILD FAILED)" | head -10
+    echo "$OUTPUT" | grep -E "(error:|BUILD FAILED|Multiple commands|duplicate output)" | head -30
   else
     PASSED+=("${scheme}")
     echo "  -> PASSED"
