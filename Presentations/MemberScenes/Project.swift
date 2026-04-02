@@ -3,7 +3,6 @@ import ProjectDescription
 
 let project = Project.frameworkWithTest(
     name: "MemberScenes",
-    platform: .iOS,
     iOSTargetVersion: "17.0",
     dependencies: [
         .project(target: "Common3rdParty",
@@ -15,7 +14,6 @@ let project = Project.frameworkWithTest(
         .project(target: "Extensions",
                  path: .relativeToCurrentFile("../../Supports/Extensions")),
         .project(target: "Scenes",
-                                         path: .relativeToCurrentFile("../../Presentations/Scenes"))
+                 path: .relativeToCurrentFile("../../Presentations/Scenes"))
     ]
 )
-

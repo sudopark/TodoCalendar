@@ -68,6 +68,7 @@ Derived/
 
 ### Tuist managed dependencies ###
 Tuist/Dependencies
+Tuist/.build
 Tuist/TodoCalendarApp/Derived/
 TodoCalendarApp/Resources/GoogleService-Info.plist
 TodoCalendarApp/Resources/secrets.json

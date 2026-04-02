@@ -3,7 +3,6 @@ import ProjectDescription
 
 let project = Project.frameworkWithTest(
     name: "Scenes",
-    platform: .iOS,
     iOSTargetVersion: "17.0",
     dependencies: [
         .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),

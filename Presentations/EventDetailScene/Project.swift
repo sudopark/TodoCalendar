@@ -2,7 +2,6 @@ import ProjectDescriptionHelpers
 import ProjectDescription
 
 let project = Project.frameworkWithTest(name: "EventDetailScene",
-                                        platform: .iOS,
                                         iOSTargetVersion: "17.0",
                                         dependencies: [
                                             .project(target: "Common3rdParty",
@@ -16,5 +15,3 @@ let project = Project.frameworkWithTest(name: "EventDetailScene",
                                             .project(target: "Scenes",
                                                      path: .relativeToCurrentFile("../../Presentations/Scenes"))
                                         ])
-
-

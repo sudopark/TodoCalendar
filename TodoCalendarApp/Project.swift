@@ -3,7 +3,6 @@ import ProjectDescription
 
 let project = Project.app(
     name: "TodoCalendarApp",
-    platform: .iOS,
     iOSTargetVersion: "17.0",
     dependencies: [
         .target(
@@ -61,7 +60,6 @@ let project = Project.app(
         Project.makeAppExtensionTargets(
             appName: "TodoCalendarApp",
             extensionName: "Widget",
-            platform: .iOS,
             iOSTargetVersion: "17.0",
             infoPlist: [
                 "NSExtension": .dictionary([
@@ -111,7 +109,6 @@ let project = Project.app(
     + Project.makeAppExtensionTargets(
         appName: "TodoCalendarApp",
         extensionName: "IntentExtensions",
-        platform: .iOS,
         iOSTargetVersion: "17.0",
         infoPlist: [
             "INIntentsSupported": .array([.string("EventListTypeSelect")]),
@@ -158,4 +155,3 @@ let project = Project.app(
         withTest: false
     )
 )
-

@@ -7,18 +7,16 @@ import ProjectDescription
 
 extension Project {
     static let organizationName = "com.sudo.park"
-    
+
     /// Helper function to create the Project for this ExampleApp
     public static func app(
         name: String,
-        platform: Platform,
         iOSTargetVersion: String,
         dependencies: [TargetDependency] = [],
         extensionTargets: [Target] = []
     ) -> Project {
         let targets = makeAppTargets(
             name: name,
-            platform: platform,
             iOSTargetVersion: iOSTargetVersion,
             dependencies: dependencies,
             signingConfigures: [
@@ -42,18 +40,15 @@ extension Project {
             targets: targets + extensionTargets
         )
     }
-    
+
     public static func frameworkWithTest(
         name: String,
-        packages: [Package] = [],
-        platform: Platform,
         iOSTargetVersion: String,
         resources: ResourceFileElements? = nil,
         dependencies: [TargetDependency] = []
     ) -> Project {
         let targets = makeFrameworkTargetsWithTest(
             name: name,
-            platform: platform,
             iOSTargetVersion: iOSTargetVersion,
             resources: resources,
             dependencies: dependencies
@@ -61,15 +56,12 @@ extension Project {
         return Project(
             name: name,
             organizationName: organizationName,
-            packages: packages,
             targets: targets
         )
     }
-    
+
     public static func framework(
         name: String,
-        packages: [Package] = [],
-        platform: Platform,
         iOSTargetVersion: String,
         withSourceFile: Bool = true,
         dependencies: [TargetDependency] = [],
@@ -77,65 +69,67 @@ extension Project {
     ) -> Project {
         let targets = makeFrameworkTargets(
             name: name,
-            platform: platform,
             iOSTargetVersion: iOSTargetVersion,
             withSourceFile: withSourceFile,
             dependencies: dependencies,
             customSetting: customSetting
         )
-        return Project(name: name,
-                       organizationName: organizationName,
-                       packages: packages,
-                       targets: targets)
+        return Project(
+            name: name,
+            organizationName: organizationName,
+            targets: targets
+        )
     }
-    
+
     // MARK: - Private
-    
+
     /// Helper function to create a framework target and an associated unit test target
     private static func makeFrameworkTargetsWithTest(
         name: String,
-        platform: Platform,
         iOSTargetVersion: String,
         resources: ResourceFileElements? = nil,
         dependencies: [TargetDependency] = []
     )
     -> [Target]
     {
-        let sources = Target(name: name,
-                             platform: platform,
-                             product: .framework,
-                             bundleId: "\(organizationName).\(name)",
-                             deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
-                             infoPlist: .default,
-                             sources: ["Sources/**"],
-                             resources: resources,
-                             headers: Headers.headers(public: "\(name).h"),
-                             dependencies: dependencies,
-                             settings: .settings(
-                                base: .init().swiftVersion("6.0"),
-                                configurations: []
-                             )
+        let sources = Target.target(
+            name: name,
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "\(organizationName).\(name)",
+            deploymentTargets: .iOS(iOSTargetVersion),
+            infoPlist: .default,
+            sources: ["Sources/**"],
+            resources: resources,
+            dependencies: dependencies,
+            settings: .settings(
+                base: .init().swiftVersion("6.0")
+            )
         )
-        let tests = Target(name: "\(name)Tests",
-                           platform: platform,
-                           product: .unitTests,
-                           bundleId: "\(organizationName).\(name)Tests",
-                           deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
-                           infoPlist: .default,
-                           sources: ["Tests/**"],
-                           resources: [],
-                           dependencies: [
-                            .target(name: name),
-                            .project(target: "UnitTestHelpKit", path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
-                            .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
-                            .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
-                           ])
+        let tests = Target.target(
+            name: "\(name)Tests",
+            destinations: .iOS,
+            product: .unitTests,
+            bundleId: "\(organizationName).\(name)Tests",
+            deploymentTargets: .iOS(iOSTargetVersion),
+            infoPlist: .default,
+            sources: ["Tests/**"],
+            resources: [],
+            dependencies: [
+                .target(name: name),
+                .project(target: "UnitTestHelpKit", path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
+                .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
+                .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
+            ],
+            settings: .settings(
+                base: .init().swiftVersion("6.0")
+            )
+        )
         return [sources, tests]
     }
-    
+
     private static func makeFrameworkTargets(
         name: String,
-        platform: Platform,
         iOSTargetVersion: String,
         withSourceFile: Bool,
         dependencies: [TargetDependency] = [],
@@ -144,41 +138,39 @@ extension Project {
     -> [Target]
     {
         let settingDict = customSetting.swiftVersion("6.0")
-        let sources = Target(name: name,
-                             platform: platform,
-                             product: .framework,
-                             bundleId: "\(organizationName).\(name)",
-                             deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
-                             infoPlist: .default,
-                             sources: withSourceFile ? ["Sources/**"] : [],
-                             resources: [],
-                             headers: Headers.headers(public: "\(name).h"),
-                             dependencies: dependencies,
-                             settings: .settings(
-                                base: settingDict,
-                                configurations: []
-                             )
+        let sources = Target.target(
+            name: name,
+            destinations: .iOS,
+            product: .framework,
+            bundleId: "\(organizationName).\(name)",
+            deploymentTargets: .iOS(iOSTargetVersion),
+            infoPlist: .default,
+            sources: withSourceFile ? ["Sources/**"] : [],
+            resources: [],
+            dependencies: dependencies,
+            settings: .settings(
+                base: settingDict,
+                configurations: []
+            )
         )
         return [sources]
     }
-    
+
     /// Helper function to create the application target and the unit test target.
     private static func makeAppTargets(
         name: String,
-        platform: Platform,
         iOSTargetVersion: String,
         dependencies: [TargetDependency],
         signingConfigures: [ProjectDescription.Configuration]
     )
     -> [Target]
     {
-        let platform: Platform = platform
-        let mainTarget = Target(
+        let mainTarget = Target.target(
             name: name,
-            platform: platform,
+            destinations: .iOS,
             product: .app,
             bundleId: "\(organizationName).\(name)",
-            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+            deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .extendingDefault(with: [
                 "UILaunchStoryboardName": "LaunchScreen",
                 "ENABLE_TESTS": .boolean(true),
@@ -234,18 +226,16 @@ extension Project {
             dependencies: dependencies,
             settings: .settings(
                 base: .init().swiftVersion("6.0"),
-                configurations: signingConfigures + [
-                    
-                ]
+                configurations: signingConfigures
             )
         )
-        
-        let testTarget = Target(
+
+        let testTarget = Target.target(
             name: "\(name)Tests",
-            platform: platform,
+            destinations: .iOS,
             product: .unitTests,
             bundleId: "\(organizationName).\(name)",
-            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+            deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .default,
             sources: ["\(name)Tests/**"],
             dependencies: [
@@ -254,29 +244,31 @@ extension Project {
                         .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
                 .project(target: "TestDoubles", path: .relativeToCurrentFile("../../Supports/TestDoubles")),
                 .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
-            ])
+            ],
+            settings: .settings(
+                base: .init().swiftVersion("6.0")
+            ))
         return [mainTarget, testTarget]
     }
-    
+
     public static func makeAppExtensionTargets(
         appName: String,
         extensionName: String,
-        platform: Platform,
         iOSTargetVersion: String,
         infoPlist: [String: Plist.Value] = [:],
         dependencies: [TargetDependency],
         signingConfigures: [ProjectDescription.Configuration],
         withTest: Bool = true
     ) -> [Target] {
-        
+
         let targetName = "\(appName)\(extensionName)"
-        
-        let target = Target(
+
+        let target = Target.target(
             name: targetName,
-            platform: platform,
+            destinations: .iOS,
             product: .appExtension,
             bundleId: "\(organizationName).\(appName).\(extensionName)",
-            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+            deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .extendingDefault(with: infoPlist),
             sources: [
                 "AppExtensions/Base/**",
@@ -293,20 +285,18 @@ extension Project {
             dependencies: dependencies,
             settings: .settings(
                 base: .init().swiftVersion("6.0"),
-                configurations: signingConfigures + [
-                    
-                ]
+                configurations: signingConfigures
             )
         )
-        
+
         guard withTest else { return [target] }
-        
-        let testTarget = Target(
+
+        let testTarget = Target.target(
             name: "\(targetName)Tests",
-            platform: platform,
+            destinations: .iOS,
             product: .unitTests,
             bundleId: "\(organizationName).\(appName).\(extensionName)Tests",
-            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: [.iphone]),
+            deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .default,
             sources: [
                 "AppExtensions/Base/**",
@@ -318,7 +308,7 @@ extension Project {
             dependencies: [
                 .target(name: appName),
                 .project(
-                    target: "UnitTestHelpKit", 
+                    target: "UnitTestHelpKit",
                     path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")
                 ),
                 .project(
@@ -329,9 +319,12 @@ extension Project {
                     target: "Common3rdParty",
                     path: .relativeToCurrentFile("../../Supports/Common3rdParty")
                 )
-            ]
+            ],
+            settings: .settings(
+                base: .init().swiftVersion("6.0")
+            )
         )
-        
+
         return [target, testTarget]
     }
 }

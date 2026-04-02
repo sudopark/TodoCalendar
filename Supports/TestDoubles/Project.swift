@@ -2,7 +2,6 @@ import ProjectDescriptionHelpers
 import ProjectDescription
 
 let project = Project.framework(name: "TestDoubles",
-                                platform: .iOS,
                                 iOSTargetVersion: "17.0",
                                 dependencies: [
                                     .project(target: "Common3rdParty",
@@ -15,6 +14,5 @@ let project = Project.framework(name: "TestDoubles",
                                              path: .relativeToCurrentFile("../../Presentations/Scenes")),
                                     .project(target: "UnitTestHelpKit",
                                              path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")),
-                                    .sdk(name: "XCTest", type: .framework)
+                                    .xctest
                                 ])
-
