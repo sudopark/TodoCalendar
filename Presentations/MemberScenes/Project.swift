@@ -3,7 +3,7 @@ import ProjectDescription
 
 let project = Project.frameworkWithTest(
     name: "MemberScenes",
-    platform: .iOS,
+    destinations: [.iPhone],
     iOSTargetVersion: "17.0",
     dependencies: [
         .project(target: "Common3rdParty",
