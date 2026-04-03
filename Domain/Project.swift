@@ -2,7 +2,7 @@ import ProjectDescriptionHelpers
 import ProjectDescription
 
 let project = Project.frameworkWithTest(name: "Domain",
-                                        platform: .iOS,
+                                        destinations: [.iPhone],
                                         iOSTargetVersion: "17.0",
                                         dependencies: [
                                             .project(target: "Common3rdParty", path: .relativeToCurrentFile("../Supports/Common3rdParty")),

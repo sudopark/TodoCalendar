@@ -2,7 +2,7 @@ import ProjectDescriptionHelpers
 import ProjectDescription
 
 let project = Project.frameworkWithTest(name: "CalendarScenes",
-                                        platform: .iOS,
+                                        destinations: [.iPhone],
                                         iOSTargetVersion: "17.0",
                                         dependencies: [
                                             .project(target: "Common3rdParty",
