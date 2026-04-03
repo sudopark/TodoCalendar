@@ -177,4 +177,6 @@ extension AppleCalendarEventDetailViewModelImpleTests {
     }
 }
 
-private final class SpyRouter: BaseSpyRouter, AppleCalendarEventDetailRouting, @unchecked Sendable { }
+private final class SpyRouter: BaseSpyRouter, AppleCalendarEventDetailRouting, @unchecked Sendable {
+    func routeToAppleCalendarApp(at interval: TimeInterval) { }
+}
