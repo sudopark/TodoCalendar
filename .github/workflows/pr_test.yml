@@ -110,6 +110,11 @@ jobs:
         run: |
           cd install && bash install.sh
 
+      - name: Install toolchain (tuist via mise)
+        run: |
+          mise install
+          echo "$(mise where tuist)" >> "$GITHUB_PATH"
+
       - name: Cache SPM packages
         uses: actions/cache@v4
         with:
