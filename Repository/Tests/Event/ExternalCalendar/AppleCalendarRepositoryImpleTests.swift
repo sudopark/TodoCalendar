@@ -221,6 +221,7 @@ private final class StubAppleCalendarStoreAccessor: AppleCalendarStoreAccessor, 
     func checkAuthorizationStatus() -> Bool { isAuthorized }
     func loadCalendarTags() -> [AppleCalendar.Tag] { stubTags }
     func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event] { stubEvents }
+    func loadEvent(id: String) -> AppleCalendar.Event? { stubEvents.first(where: { $0.eventId == id }) }
 }
 
 private final class StubConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {

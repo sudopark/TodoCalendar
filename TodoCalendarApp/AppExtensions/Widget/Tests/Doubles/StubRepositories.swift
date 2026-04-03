@@ -98,5 +98,9 @@ final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchec
         return Just([event]).mapAsAnyError().eraseToAnyPublisher()
     }
 
+    func loadEvent(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
+        return Just(nil).eraseToAnyPublisher()
+    }
+
     func resetCache() async throws { }
 }

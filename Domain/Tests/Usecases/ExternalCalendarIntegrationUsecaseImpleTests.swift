@@ -99,6 +99,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         // given
         struct DummyService: ExternalCalendarService {
             let identifier: String = "not_support"
+            let isSingleAccountService: Bool = false
         }
         let usecase = self.makeUsecase()
         
