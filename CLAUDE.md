@@ -54,8 +54,9 @@ TodoCalendar/
 │   │   └── Widget/             — Widget target (18종 위젯)
 │   └── Resources/
 ├── Tuist/                      — 프로젝트 생성 설정
-│   ├── ProjectDescriptionHelpers/
-│   └── Dependencies.swift      — 모든 SPM 의존성
+│   └── ProjectDescriptionHelpers/
+├── Package.swift               — SPM 의존성 (Tuist 4, #if TUIST PackageSettings)
+├── Tuist.swift                 — Tuist 설정 파일
 ├── docs/                       — 아키텍처 문서 (한국어)
 └── Template/                   — Xcode Scene 템플릿
 ```
@@ -85,12 +86,14 @@ TodoCalendarApp → Presentations → Scenes / CommonPresentation → Domain ←
 
 ```bash
 ./install/install.sh   # 더미 config 파일 복사 (최초 1회)
-tuist fetch            # SPM 의존성 resolve
+tuist install          # SPM 의존성 resolve (Package.swift 기반)
 tuist generate --no-open
 open TodoCalendar.xcworkspace
 ```
 
-파일을 추가하거나 삭제한 경우 `tuist generate --no-open` 재실행 필요.
+- 파일을 추가하거나 삭제한 경우 `tuist generate --no-open` 재실행 필요.
+- SPM 의존성 변경 시 `tuist install` → `tuist generate --no-open` 순서로 재실행.
+- Tuist 버전은 `mise.toml`로 관리됨 (`mise install`로 설치).
 
 ### 테스트 실행
 

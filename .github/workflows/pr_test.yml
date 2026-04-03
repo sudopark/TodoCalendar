@@ -39,7 +39,7 @@ jobs:
           schemes=()
 
           # 전체 테스트가 필요한 변경
-          if echo "$FILES" | grep -qE "^(Domain/Sources/|Supports/Extensions/Sources/|Supports/UnitTestHelpKit/|Supports/TestDoubles/|Supports/Common3rdParty/|scripts/|Tuist/|\.github/)"; then
+          if echo "$FILES" | grep -qE "^(Domain/Sources/|Supports/Extensions/Sources/|Supports/UnitTestHelpKit/|Supports/TestDoubles/|Supports/Common3rdParty/|scripts/|Tuist/|Package\.swift|\.github/)"; then
             run_all=true
           fi
 
@@ -101,6 +101,8 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.schemes != ''
     runs-on: Maggie-m1
+    env:
+      DESTINATION: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
     steps:
       - uses: actions/checkout@v5
 
@@ -108,47 +110,108 @@ jobs:
         run: |
           cd install && bash install.sh
 
-      - name: Copy dependencies from local project
-        run: |
-          LOCAL_PROJECT="/Users/sudo.park/Documents/codebase/TodoCalendar"
-          cp -R "${LOCAL_PROJECT}/Tuist/Dependencies" Tuist/Dependencies
+      - name: Cache SPM packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            Tuist/.build
+            ~/Library/Caches/tuist
+          key: spm-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            spm-
+
+      - name: Install dependencies
+        run: tuist install
 
       - name: Generate project
-        run: |
-          tuist generate --no-open
+        run: tuist generate --no-open
 
       - name: Test Domain
         if: contains(needs.detect-changes.outputs.schemes, ' Domain ')
-        run: ./scripts/run-all-tests.sh Domain
+        run: |
+          xcodebuild clean test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme Domain \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
 
       - name: Test Repository
         if: contains(needs.detect-changes.outputs.schemes, ' Repository ')
-        run: ./scripts/run-all-tests.sh Repository
+        run: |
+          xcodebuild clean test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme Repository \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
 
       - name: Test CalendarScenes
         if: contains(needs.detect-changes.outputs.schemes, ' CalendarScenes ')
-        run: ./scripts/run-all-tests.sh CalendarScenes
+        run: |
+          xcodebuild clean test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme CalendarScenes \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
 
       - name: Test EventDetailScene
         if: contains(needs.detect-changes.outputs.schemes, ' EventDetailScene ')
-        run: ./scripts/run-all-tests.sh EventDetailScene
+        run: |
+          xcodebuild clean test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme EventDetailScene \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
 
       - name: Test EventListScenes
         if: contains(needs.detect-changes.outputs.schemes, ' EventListScenes ')
-        run: ./scripts/run-all-tests.sh EventListScenes
+        run: |
+          xcodebuild clean test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme EventListScenes \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
 
       - name: Test SettingScene
         if: contains(needs.detect-changes.outputs.schemes, ' SettingScene ')
-        run: ./scripts/run-all-tests.sh SettingScene
+        run: |
+          xcodebuild clean test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme SettingScene \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
 
       - name: Test MemberScenes
         if: contains(needs.detect-changes.outputs.schemes, ' MemberScenes ')
-        run: ./scripts/run-all-tests.sh MemberScenes
+        run: |
+          xcodebuild clean test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme MemberScenes \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
 
       - name: Test TodoCalendarApp
         if: contains(needs.detect-changes.outputs.schemes, ' TodoCalendarApp ')
-        run: ./scripts/run-all-tests.sh TodoCalendarApp
+        run: |
+          xcodebuild clean test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme TodoCalendarApp \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
 
       - name: Test TodoCalendarAppWidget
         if: contains(needs.detect-changes.outputs.schemes, ' TodoCalendarAppWidget ')
-        run: ./scripts/run-all-tests.sh TodoCalendarAppWidget
+        run: |
+          xcodebuild clean test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme TodoCalendarAppWidget \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
