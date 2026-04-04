@@ -143,16 +143,16 @@ extension AppleCalendarRepositoryImpleTests {
 
 extension AppleCalendarRepositoryImpleTests {
 
-    @Test func checkAccessStatus_reflectsStubValue() async throws {
+    @Test func checkAuthorizationStatus_reflectsStubValue() async throws {
         // given
         stubAccessor.isAuthorized = false
         let checker = AppleCalendarPermissionCheckerImple(storeAccessor: stubAccessor)
 
         // when
-        let result = checker.checkAccessStatus()
+        let result = checker.checkAuthorizationStatus()
 
         // then
-        #expect(result == false)
+        #expect(result == .denied)
     }
 
     @Test func requestAccess_returnsStubValue() async throws {
@@ -218,7 +218,7 @@ private final class StubAppleCalendarStoreAccessor: AppleCalendarStoreAccessor, 
     }
 
     func requestFullAccessToEvents() async throws -> Bool { requestGranted }
-    func checkAuthorizationStatus() -> Bool { isAuthorized }
+    func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus { isAuthorized ? .fullAccess : .denied }
     func loadCalendarTags() -> [AppleCalendar.Tag] { stubTags }
     func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event] { stubEvents }
     func loadEvent(id: String) -> AppleCalendar.Event? { stubEvents.first { $0.eventId == id } }
