@@ -55,9 +55,10 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
     private let eventTagUsecase: any EventTagUsecase
     private let eventNotifyService: SharedEventNotifyService
     private let googleCalendarUsecase: any GoogleCalendarUsecase
+    private let appleCalendarUsecase: any AppleCalendarUsecase
     private let eventSyncUsecase: any EventSyncUsecase
     var router: (any MainRouting)?
-    
+
     init(
         uiSettingUsecase: any UISettingUsecase,
         temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase,
@@ -65,6 +66,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         eventTagUsecase: any EventTagUsecase,
         eventNotifyService: SharedEventNotifyService,
         googleCalendarUsecase: any GoogleCalendarUsecase,
+        appleCalendarUsecase: any AppleCalendarUsecase,
         eventSyncUsecase: any EventSyncUsecase
     ) {
         self.uiSettingUsecase = uiSettingUsecase
@@ -73,6 +75,7 @@ final class MainViewModelImple: MainViewModel, @unchecked Sendable {
         self.eventTagUsecase = eventTagUsecase
         self.eventNotifyService = eventNotifyService
         self.googleCalendarUsecase = googleCalendarUsecase
+        self.appleCalendarUsecase = appleCalendarUsecase
         self.eventSyncUsecase = eventSyncUsecase
         
         self.internalBinding()
@@ -133,6 +136,7 @@ extension MainViewModelImple {
         self.eventNotificationUsecase.runSyncEventNotification()
         self.bindEventTagColorMap()
         self.googleCalendarUsecase.prepare()
+        self.appleCalendarUsecase.prepare()
     }
     
     private func refreshViewAppearanceSettings() {

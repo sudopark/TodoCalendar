@@ -47,6 +47,7 @@ extension MainSceneBuilerImple: MainSceneBuiler {
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             eventNotifyService: self.usecaseFactory.eventNotifyService,
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
+            appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
             eventSyncUsecase: self.usecaseFactory.eventSyncUsecase
         )
         
