@@ -311,8 +311,14 @@ private func makeViewModelWithInitialListLoaded(
 [#이슈번호] 변경 내용 요약
 ```
 
+- **동작 변화 중심으로 작성**: "무엇을 수정했나(파일/클래스 목록)"가 아니라 "동작이 어떻게 달라졌나"를 한눈에 파악할 수 있게 작성.
+
 예시:
 ```
+❌ [#563] AppleCalendarOAuth2ServiceUsecaseImple 로직 변경 및 테스트 추가
+✅ [#563] AppleCalendar 권한 상태별 분기 체크 도입
+   — fullAccess → 바로 성공, denied/restricted → 즉시 throw, notDetermined → 시스템 요청 후 재확인
+
 [#508] GoogleCalendarRepositoryPool 도입 및 테스트 추가
 docs: 테스트 조직화 원칙 추가
 ```
