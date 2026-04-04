@@ -24,9 +24,10 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubEventTagUsecase: StubEventTagUsecase!
     private var stubEventNotifyService: SharedEventNotifyService!
     private var spyGoogleCalendarUsecase: StubGoogleCalendarUsecase!
+    private var spyAppleCalendarUsecase: StubAppleCalendarUsecase!
     private var stubSyncUsecase: StubEventSyncUsecase!
     var cancelBag: Set<AnyCancellable>!
-    
+
     override func setUpWithError() throws {
         self.spyRouter = .init()
         self.spyUISettingUsecase = .init()
@@ -35,11 +36,12 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubEventTagUsecase = .init()
         self.stubEventNotifyService = .init(notifyQueue: nil)
         self.spyGoogleCalendarUsecase = .init()
+        self.spyAppleCalendarUsecase = .init()
         self.stubSyncUsecase = .init()
         self.cancelBag = .init()
         self.timeout = 0.01
     }
-    
+
     override func tearDownWithError() throws {
         self.spyRouter = nil
         self.spyUISettingUsecase = nil
@@ -48,10 +50,11 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubEventTagUsecase = nil
         self.stubEventNotifyService = nil
         self.spyGoogleCalendarUsecase = nil
+        self.spyAppleCalendarUsecase = nil
         self.stubSyncUsecase = nil
         self.cancelBag = nil
     }
-    
+
     private func makeViewModel(
         shouldFailMigration: Bool = false
     ) -> MainViewModelImple {
@@ -64,6 +67,7 @@ class MainViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventTagUsecase: self.stubEventTagUsecase,
             eventNotifyService: self.stubEventNotifyService,
             googleCalendarUsecase: self.spyGoogleCalendarUsecase,
+            appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventSyncUsecase: self.stubSyncUsecase
         )
         viewModel.router = self.spyRouter
@@ -86,6 +90,7 @@ extension MainViewModelImpleTests {
             eventTagUsecase: self.stubEventTagUsecase,
             eventNotifyService: self.stubEventNotifyService,
             googleCalendarUsecase: self.spyGoogleCalendarUsecase,
+            appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventSyncUsecase: self.stubSyncUsecase
         )
         viewModel.router = self.spyRouter
@@ -133,12 +138,23 @@ extension MainViewModelImpleTests {
     func testViewModel_whenPrepare_prepareGoogleCalendar() {
         // given
         let viewModel = self.makeViewModelWithoutPrepare()
-        
+
         // when
         viewModel.prepare()
-        
+
         // then
         XCTAssertEqual(self.spyGoogleCalendarUsecase.didPrepared, true)
+    }
+
+    func testViewModel_whenPrepare_prepareAppleCalendar() {
+        // given
+        let viewModel = self.makeViewModelWithoutPrepare()
+
+        // when
+        viewModel.prepare()
+
+        // then
+        XCTAssertEqual(self.spyAppleCalendarUsecase.didPrepared, true)
     }
     
     func testViewModel_whenFocusChanged_updateCurrentMonth() {
