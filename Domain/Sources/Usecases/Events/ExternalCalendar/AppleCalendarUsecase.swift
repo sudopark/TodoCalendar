@@ -165,6 +165,9 @@ extension AppleCalendarUsecaseImple {
         refreshEventBag.forEach { $0.cancel() }
         refreshEventBag = []
 
+        let accounts = integrationUsecase.currentIntegratedAccounts(for: appleService.identifier)
+        guard !accounts.isEmpty else { return }
+
         repository.loadEvents(in: period)
             .sink(
                 receiveCompletion: { _ in },
