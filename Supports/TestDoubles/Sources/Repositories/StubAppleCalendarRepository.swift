@@ -25,9 +25,11 @@ open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Send
     }
 
     public var stubEvents: [AppleCalendar.Event] = []
+    public var didLoadEvents = false
     open func loadEvents(
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[AppleCalendar.Event], any Error> {
+        didLoadEvents = true
         return Just(stubEvents)
             .setFailureType(to: (any Error).self)
             .eraseToAnyPublisher()

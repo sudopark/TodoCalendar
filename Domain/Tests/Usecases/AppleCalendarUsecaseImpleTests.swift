@@ -45,6 +45,17 @@ final class AppleCalendarUsecaseImpleTests: PublisherWaitable {
         )
     }
 
+    private func makeStubEvents(count: Int) -> [AppleCalendar.Event] {
+        return (0..<count).map { i in
+            AppleCalendar.Event(
+                eventId: "event:\(i)",
+                calendarId: "cal:0",
+                name: "Event \(i)",
+                eventTime: .period(TimeInterval(i)..<TimeInterval(i + 1))
+            )
+        }
+    }
+
     private func sendIntegration(_ connected: Bool) {
         let serviceId = AppleCalendarService.id
         if connected {
@@ -233,14 +244,7 @@ extension AppleCalendarUsecaseImpleTests {
     @Test func refreshEvents_loadsAndEmitsEvents() async throws {
         // given
         let period: Range<TimeInterval> = 0..<100
-        let stubEvents = (0..<5).map { i in
-            AppleCalendar.Event(
-                eventId: "event:\(i)",
-                calendarId: "cal:0",
-                name: "Event \(i)",
-                eventTime: .period(TimeInterval(i)..<TimeInterval(i + 1))
-            )
-        }
+        let stubEvents = makeStubEvents(count: 5)
         let expect = expectConfirm("이벤트 로드 후 스트림 반영")
         expect.count = 2
         let usecase = makeUsecase(isIntegrated: true, stubEvents: stubEvents)
@@ -257,14 +261,7 @@ extension AppleCalendarUsecaseImpleTests {
 
     @Test func events_returnsOnlyEventsOverlappingPeriod() async throws {
         // given
-        let allEvents = (0..<10).map { i in
-            AppleCalendar.Event(
-                eventId: "event:\(i)",
-                calendarId: "cal:0",
-                name: "Event \(i)",
-                eventTime: .period(TimeInterval(i)..<TimeInterval(i + 1))
-            )
-        }
+        let allEvents = makeStubEvents(count: 10)
         let usecase = makeUsecase(isIntegrated: true, stubEvents: allEvents)
 
         // when
@@ -282,16 +279,23 @@ extension AppleCalendarUsecaseImpleTests {
         #expect(ids == ["event:3", "event:4", "event:5", "event:6"])
     }
 
+    @Test func refreshEvents_whenNotIntegrated_doesNotLoadEvents() async throws {
+        // given
+        let period: Range<TimeInterval> = 0..<100
+        let usecase = makeUsecase(isIntegrated: false, stubEvents: makeStubEvents(count: 5))
+        usecase.prepare()
+
+        // when
+        usecase.refreshEvents(in: period)
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(stubRepository.didLoadEvents == false)
+    }
+
     @Test func refreshEvents_removesDeletedEventsInPeriod() async throws {
         // given - 0..<5 범위에 5개 이벤트 로드
-        let initialEvents = (0..<5).map { i in
-            AppleCalendar.Event(
-                eventId: "event:\(i)",
-                calendarId: "cal:0",
-                name: "Event \(i)",
-                eventTime: .period(TimeInterval(i)..<TimeInterval(i + 1))
-            )
-        }
+        let initialEvents = makeStubEvents(count: 5)
         let usecase = makeUsecase(isIntegrated: true, stubEvents: initialEvents)
         usecase.prepare()
         usecase.refreshEvents(in: 0..<5)
