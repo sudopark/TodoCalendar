@@ -38,6 +38,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let migrationUsecase: any TemporaryUserDataMigrationUescase
     private let uiSettingUsecase: any UISettingUsecase
     private let googleCalendarUsecase: any GoogleCalendarUsecase
+    private let appleCalendarUsecase: any AppleCalendarUsecase
     private let eventUploadService: any EventUploadService
     private let eventSyncUsecase: any EventSyncUsecase
     var router: (any CalendarViewRouting)?
@@ -56,6 +57,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         migrationUsecase: any TemporaryUserDataMigrationUescase,
         uiSettingUsecase: any UISettingUsecase,
         googleCalendarUsecase: any GoogleCalendarUsecase,
+        appleCalendarUsecase: any AppleCalendarUsecase,
         eventUploadService: any EventUploadService,
         eventSyncUsecase: any EventSyncUsecase
     ) {
@@ -69,6 +71,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.migrationUsecase = migrationUsecase
         self.uiSettingUsecase = uiSettingUsecase
         self.googleCalendarUsecase = googleCalendarUsecase
+        self.appleCalendarUsecase = appleCalendarUsecase
         self.eventUploadService = eventUploadService
         self.eventSyncUsecase = eventSyncUsecase
         
@@ -221,6 +224,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
             self.scheduleEventUsecase.refreshScheduleEvents(in: $0)
             self.todoEventUsecase.refreshTodoEvents(in: $0)
             self.googleCalendarUsecase.refreshEvents(in: $0)
+            self.appleCalendarUsecase.refreshEvents(in: $0)
         }
     }
     
