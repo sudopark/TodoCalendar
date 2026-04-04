@@ -16,7 +16,7 @@ import Domain
 /// EKEventStore 추상화 프로토콜 — 테스트 가능성을 위해 분리
 public protocol AppleCalendarStoreAccessor: Sendable {
     func requestFullAccessToEvents() async throws -> Bool
-    func checkAuthorizationStatus() -> Bool
+    func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus
     func loadCalendarTags() -> [AppleCalendar.Tag]
     func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event]
     func loadEvent(id: String) -> AppleCalendar.Event?
@@ -37,7 +37,7 @@ public final class AppleCalendarPermissionCheckerImple: AppleCalendarPermissionC
         return try await storeAccessor.requestFullAccessToEvents()
     }
 
-    public func checkAccessStatus() -> Bool {
+    public func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus {
         return storeAccessor.checkAuthorizationStatus()
     }
 }
@@ -57,8 +57,15 @@ public final class EKEventStoreWrapper: AppleCalendarStoreAccessor, @unchecked S
         return try await store.requestFullAccessToEvents()
     }
 
-    public func checkAuthorizationStatus() -> Bool {
-        return EKEventStore.authorizationStatus(for: .event) == .fullAccess
+    public func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus {
+        switch EKEventStore.authorizationStatus(for: .event) {
+        case .notDetermined: return .notDetermined
+        case .restricted:    return .restricted
+        case .denied:        return .denied
+        case .fullAccess:    return .fullAccess
+        case .writeOnly:     return .writeOnly
+        @unknown default:    return .denied
+        }
     }
 
     public func loadCalendarTags() -> [AppleCalendar.Tag] {

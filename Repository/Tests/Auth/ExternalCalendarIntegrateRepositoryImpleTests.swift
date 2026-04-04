@@ -307,7 +307,7 @@ private final class StubAppleCalendarPermissionChecker: AppleCalendarPermissionC
     var isGranted: Bool
     init(isGranted: Bool = true) { self.isGranted = isGranted }
     func requestAccess() async throws -> Bool { isGranted }
-    func checkAccessStatus() -> Bool { isGranted }
+    func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus { isGranted ? .fullAccess : .denied }
 }
 
 private final class SpyRemotePool: ExternalCalendarAccountRemotePool, @unchecked Sendable {

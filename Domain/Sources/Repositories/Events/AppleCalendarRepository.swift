@@ -10,15 +10,6 @@ import Foundation
 import Combine
 
 
-// MARK: - AppleCalendarPermissionChecker
-
-/// 권한 확인/요청 — 위젯 등 경량 컨텍스트에서도 사용
-public protocol AppleCalendarPermissionChecker: Sendable {
-    func requestAccess() async throws -> Bool
-    func checkAccessStatus() -> Bool
-}
-
-
 // MARK: - AppleCalendarRepository
 
 public protocol AppleCalendarRepository: Sendable {

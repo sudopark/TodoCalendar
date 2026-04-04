@@ -17,9 +17,11 @@ import UnitTestHelpKit
 final class AppleCalendarOAuth2ServiceUsecaseImpleTests {
 
     private func makeUsecase(
+        authorizationStatus: AppleCalendarAuthorizationStatus = .notDetermined,
         shouldGrantAccess: Bool = true
     ) -> AppleCalendarOAuth2ServiceUsecaseImple {
         let checker = StubAppleCalendarPermissionChecker()
+        checker.stubAuthorizationStatus = authorizationStatus
         checker.stubRequestAccess = shouldGrantAccess
         return AppleCalendarOAuth2ServiceUsecaseImple(permissionChecker: checker)
     }
@@ -28,9 +30,9 @@ final class AppleCalendarOAuth2ServiceUsecaseImpleTests {
 
 extension AppleCalendarOAuth2ServiceUsecaseImpleTests {
 
-    @Test func usecase_whenAccessGranted_returnCredential() async throws {
+    @Test func usecase_whenAlreadyFullAccess_returnCredentialWithoutRequest() async throws {
         // given
-        let usecase = self.makeUsecase(shouldGrantAccess: true)
+        let usecase = self.makeUsecase(authorizationStatus: .fullAccess)
 
         // when
         let credential = try await usecase.requestAuthentication()
@@ -39,15 +41,87 @@ extension AppleCalendarOAuth2ServiceUsecaseImpleTests {
         #expect(credential is AppleCalendarCredential)
     }
 
-    @Test func usecase_whenAccessDenied_throwError() async {
+    @Test func usecase_whenStatusIsDenied_throwDeniedError() async {
         // given
-        let usecase = self.makeUsecase(shouldGrantAccess: false)
+        let usecase = self.makeUsecase(authorizationStatus: .denied)
 
         // when
-        let credential = try? await usecase.requestAuthentication()
+        var caughtError: AppleCalendarPermissionFailReason?
+        do {
+            _ = try await usecase.requestAuthentication()
+        } catch let error as AppleCalendarPermissionFailReason {
+            caughtError = error
+        } catch { }
 
         // then
-        #expect(credential == nil)
+        #expect(caughtError == .denied)
+    }
+
+    @Test func usecase_whenStatusIsRestricted_throwRestrictedError() async {
+        // given
+        let usecase = self.makeUsecase(authorizationStatus: .restricted)
+
+        // when
+        var caughtError: AppleCalendarPermissionFailReason?
+        do {
+            _ = try await usecase.requestAuthentication()
+        } catch let error as AppleCalendarPermissionFailReason {
+            caughtError = error
+        } catch { }
+
+        // then
+        #expect(caughtError == .restricted)
+    }
+
+    @Test func usecase_whenNotDetermined_andGranted_returnCredential() async throws {
+        // given
+        let usecase = self.makeUsecase(authorizationStatus: .notDetermined, shouldGrantAccess: true)
+
+        // when
+        let credential = try await usecase.requestAuthentication()
+
+        // then
+        #expect(credential is AppleCalendarCredential)
+    }
+
+    @Test func usecase_whenNotDetermined_andDenied_throwDeniedError() async {
+        // given
+        let checker = StubAppleCalendarPermissionChecker()
+        checker.stubAuthorizationStatus = .notDetermined
+        checker.stubRequestAccess = false
+        checker.stubStatusAfterRequest = .denied
+        let usecase = AppleCalendarOAuth2ServiceUsecaseImple(permissionChecker: checker)
+
+        // when
+        var caughtError: AppleCalendarPermissionFailReason?
+        do {
+            _ = try await usecase.requestAuthentication()
+        } catch let error as AppleCalendarPermissionFailReason {
+            caughtError = error
+        } catch { }
+
+        // then
+        #expect(caughtError == .denied)
+    }
+
+    @Test func usecase_whenWriteOnly_andUpgradeFails_throwWriteOnlyError() async {
+        // given
+        let checker = StubAppleCalendarPermissionChecker()
+        checker.stubAuthorizationStatus = .writeOnly
+        checker.stubRequestAccess = false
+        checker.stubStatusAfterRequest = .writeOnly
+        let usecase = AppleCalendarOAuth2ServiceUsecaseImple(permissionChecker: checker)
+
+        // when
+        var caughtError: AppleCalendarPermissionFailReason?
+        do {
+            _ = try await usecase.requestAuthentication()
+        } catch let error as AppleCalendarPermissionFailReason {
+            caughtError = error
+        } catch { }
+
+        // then
+        #expect(caughtError == .writeOnly)
     }
 
     @Test func usecase_handleOpenURL_alwaysReturnFalse() {
@@ -68,8 +142,18 @@ extension AppleCalendarOAuth2ServiceUsecaseImpleTests {
 
 private final class StubAppleCalendarPermissionChecker: AppleCalendarPermissionChecker, @unchecked Sendable {
 
+    var stubAuthorizationStatus: AppleCalendarAuthorizationStatus = .notDetermined
+    var stubStatusAfterRequest: AppleCalendarAuthorizationStatus? = nil
     var stubRequestAccess: Bool = true
-    func requestAccess() async throws -> Bool { stubRequestAccess }
 
-    func checkAccessStatus() -> Bool { stubRequestAccess }
+    func requestAccess() async throws -> Bool {
+        if let afterStatus = stubStatusAfterRequest {
+            stubAuthorizationStatus = afterStatus
+        }
+        return stubRequestAccess
+    }
+
+    func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus {
+        stubAuthorizationStatus
+    }
 }

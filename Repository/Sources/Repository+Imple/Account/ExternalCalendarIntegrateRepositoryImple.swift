@@ -115,7 +115,7 @@ extension ExternalCalendarIntegrateRepositoryImple {
         guard account.serviceIdentifier == AppleCalendarService.id
         else { return true }
         
-        let hasPermission = self.appleCalendarPermissionChecker.checkAccessStatus()
+        let hasPermission = self.appleCalendarPermissionChecker.isAuthorized()
         if !hasPermission, let email = account.email {
             self.removingAccountAction(account.serviceIdentifier, accountId: email)
          }
