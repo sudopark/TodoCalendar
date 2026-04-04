@@ -41,10 +41,18 @@ class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     private func makeViewModel(
         isLogin: Bool = true,
-        accounts: [ExternalServiceAccountinfo] = []
+        accounts: [ExternalServiceAccountinfo] = [],
+        integrateError: (any Error)? = nil
     ) -> EventSettingViewModelImple {
         let tagUsecase = StubEventTagUsecase()
-        let externalUsecase = StubExternalCalendarIntegrationUsecase(accounts)
+        let externalUsecase: StubExternalCalendarIntegrationUsecase
+        if let integrateError {
+            let errorStub = StubExternalCalendarIntegrationUsecaseWithError(accounts)
+            errorStub.stubIntegrateError = integrateError
+            externalUsecase = errorStub
+        } else {
+            externalUsecase = StubExternalCalendarIntegrationUsecase(accounts)
+        }
         self.stubExternalCalednarUsecase = externalUsecase
         
         let calendarSettingUsecase = StubCalendarSettingUsecase()
@@ -446,6 +454,60 @@ extension EventSettingViewModelImpleTests {
         ])
     }
 
+    // Apple Calendar 권한 거부 시 설정 이동 confirm dialog 노출
+    func testViewModel_whenAppleCalendarPermissionDenied_showConfirmDialogWithSettingsOption() {
+        // given
+        let expect = expectation(description: "권한 거부 시 설정 이동 confirm dialog 노출")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(integrateError: AppleCalendarPermissionFailReason.denied)
+        self.spyRouter.shouldConfirmNotCancel = true
+
+        // when
+        let _ = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar, timeout: 0.5) {
+            viewModel.connectExternalCalendar(AppleCalendarService.id)
+        }
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
+    }
+
+    // Apple Calendar 기기 제한 시 지원 불가 dialog 노출
+    func testViewModel_whenAppleCalendarPermissionRestricted_showInformationalDialog() {
+        // given
+        let expect = expectation(description: "기기 제한 시 지원 불가 dialog 노출")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(integrateError: AppleCalendarPermissionFailReason.restricted)
+
+        // when
+        let _ = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar, timeout: 0.5) {
+            viewModel.connectExternalCalendar(AppleCalendarService.id)
+        }
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith?.withCancel, false)
+        XCTAssertNil(self.spyRouter.didOpenSystemSetting)
+    }
+
+    // Apple Calendar writeOnly 시 설정 이동 confirm dialog 노출
+    func testViewModel_whenAppleCalendarPermissionWriteOnly_showConfirmDialogWithSettingsOption() {
+        // given
+        let expect = expectation(description: "writeOnly 시 설정 이동 confirm dialog 노출")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(integrateError: AppleCalendarPermissionFailReason.writeOnly)
+        self.spyRouter.shouldConfirmNotCancel = true
+
+        // when
+        let _ = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar, timeout: 0.5) {
+            viewModel.connectExternalCalendar(AppleCalendarService.id)
+        }
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
+    }
+
     // 구글+애플 동시 연동 후 애플만 해제
     func testViewModel_whenGoogleAndAppleConnected_disconnectApple() {
         // given
@@ -478,20 +540,36 @@ extension EventSettingViewModelImpleTests {
     }
 }
 
+private final class StubExternalCalendarIntegrationUsecaseWithError: StubExternalCalendarIntegrationUsecase {
+
+    var stubIntegrateError: (any Error)?
+
+    override func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
+        if let error = stubIntegrateError { throw error }
+        return try await super.integrate(external: service)
+    }
+}
+
+
 private class SpyRouter: BaseSpyRouter, EventSettingRouting, @unchecked Sendable {
-    
+
     var didRouteToSelectTag: Bool?
     func routeToSelectTag() {
         self.didRouteToSelectTag = true
     }
-    
+
     var didRouteToEventNotificationTimeForAllDays: [Bool] = []
     func routeToEventNotificationTime(forAllDay: Bool) {
         self.didRouteToEventNotificationTimeForAllDays.append(forAllDay)
     }
-    
+
     var didRouteToSelectDefaultMapApp: Bool?
     func routeToSelectDefaultMapApp() {
         self.didRouteToSelectDefaultMapApp = true
+    }
+
+    var didOpenSystemSetting: Bool?
+    func openSystemSetting() {
+        self.didOpenSystemSetting = true
     }
 }
