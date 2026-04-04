@@ -31,6 +31,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubMigrationUsecase: PrivateStubMigrationUsecase!
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyGoogleCalednarUsecase: PrivateStubGoogleCalendarUsecase!
+    private var spyAppleCalendarUsecase: PrivateStubAppleCalendarUsecase!
     private var spyListener: SpyListener!
     private var spyEventSyncUsecase: PrivateStubEventSyncUsecase!
     private var spyEventUploadService: StubEventUploadService!
@@ -47,11 +48,12 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubMigrationUsecase = .init()
         self.stubUISettingUsecase = .init()
         self.spyGoogleCalednarUsecase = .init()
+        self.spyAppleCalendarUsecase = PrivateStubAppleCalendarUsecase()
         self.spyListener = .init()
         self.spyEventSyncUsecase = .init()
         self.spyEventUploadService = .init()
     }
-    
+
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.stubCalendarUsecase = nil
@@ -65,6 +67,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubMigrationUsecase = nil
         self.stubUISettingUsecase = nil
         self.spyGoogleCalednarUsecase = nil
+        self.spyAppleCalendarUsecase = nil
         self.spyListener = nil
         self.spyEventSyncUsecase = nil
         self.spyEventUploadService = nil
@@ -88,6 +91,7 @@ class CalendarViewModelImpleTests: BaseTestCase, PublisherWaitable {
             migrationUsecase: self.stubMigrationUsecase,
             uiSettingUsecase: self.stubUISettingUsecase,
             googleCalendarUsecase: self.spyGoogleCalednarUsecase,
+            appleCalendarUsecase: self.spyAppleCalendarUsecase,
             eventUploadService: self.spyEventUploadService,
             eventSyncUsecase: self.spyEventSyncUsecase
         )
@@ -550,18 +554,37 @@ extension CalendarViewModelImpleTests {
         // when
         // 전체 범위 => 8~11월, 신규 x
         viewModel.focusChanged(from: 1, to: 0)
-        
+
         // 전체범위 변동 없음 => 8~11
         viewModel.focusChanged(from: 0, to: 1)
-        
+
         // 전체 범위 => 8~12월, 신규 x
         viewModel.focusChanged(from: 1, to: 2)
-        
+
         // 전체 범위 => 8~다음년도1월, 신규 => 2024년
         viewModel.focusChanged(from: 2, to: 0)
-        
+
         // then
         XCTAssertEqual(self.spyGoogleCalednarUsecase.didRefreshedPeriod, [
+            "2023.01.01_00:00..<2024.01.01_00:00",
+            "2024.01.01_00:00..<2025.01.01_00:00"
+        ])
+    }
+
+    func testViewModel_whenAfterFocusChanged_refreshAppleCalendarEvents() {
+        // given
+        let viewModel = self.makeViewModelWithInitialSetup(
+            .init(year: 2023, month: 10, day: 04, weekDay: 3)
+        )
+
+        // when - 새 연도 범위 진입
+        viewModel.focusChanged(from: 1, to: 0)
+        viewModel.focusChanged(from: 0, to: 1)
+        viewModel.focusChanged(from: 1, to: 2)
+        viewModel.focusChanged(from: 2, to: 0)
+
+        // then - Apple Calendar도 동일하게 갱신됨
+        XCTAssertEqual(self.spyAppleCalendarUsecase.didRefreshedPeriod, [
             "2023.01.01_00:00..<2024.01.01_00:00",
             "2024.01.01_00:00..<2025.01.01_00:00"
         ])
@@ -1078,6 +1101,24 @@ private extension CalendarViewModelImpleTests {
         }
     }
     
+    final class PrivateStubAppleCalendarUsecase: StubAppleCalendarUsecase, @unchecked Sendable {
+
+        var didRefreshedPeriod: [String] = []
+        override func refreshEvents(in period: Range<TimeInterval>) {
+            let dateText: (Date) -> String = {
+                let formatter = DateFormatter()
+                    |> \.dateFormat .~ "yyyy.MM.dd_HH:mm"
+                    |> \.timeZone .~ TimeZone(abbreviation: "KST")
+                return formatter.string(from: $0)
+            }
+
+            let start = period.lowerBound |> Date.init(timeIntervalSince1970:) |> dateText
+            let end = period.upperBound |> Date.init(timeIntervalSince1970:) |> dateText
+            let periodText = "\(start)..<\(end)"
+            self.didRefreshedPeriod.append(periodText)
+        }
+    }
+
     private class PrivateStubMigrationUsecase: StubTemporaryUserDataMigrationUescase, @unchecked Sendable {
         
         let migrationEndMocking = PassthroughSubject<Result<Void, any Error>, Never>()
