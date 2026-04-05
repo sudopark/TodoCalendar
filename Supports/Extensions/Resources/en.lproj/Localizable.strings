@@ -262,6 +262,10 @@
 "eventDetail::gogoleEvent::copy::message" = "Copied to clipboard.";
 "eventDetail::gogoleEvent::canceled::message" = "This event has been cancelled.";
 
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "View in Apple Calendar";
+"eventDetail::appleCalendarEvent::calendar::event" = "Apple Calendar Event";
+
 // MARK: - event tag
 
 "eventTag.title" = "Event Type";
@@ -340,6 +344,9 @@
 "event_setting::external_calendar::stop" = "Disconnect";
 "event_setting::external_calendar::stop::message" = "The external calendar connection has been disconnected.";
 "event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
+"event_setting::apple_calendar::permission_denied::message" = "Calendar access has been denied. Please enable it in Settings to use Apple Calendar.";
+"event_setting::apple_calendar::restricted::message" = "Calendar access is restricted on this device.";
 "setting.title" = "Settings";
 "setting.appearance.title" = "Appearance";
 "setting.appearance.calendar.samplemonth::march" = "MARCH";
