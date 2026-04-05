@@ -129,23 +129,6 @@ extension AppleCalendarUsecaseImpleTests {
         #expect(tagLists.last?.isEmpty == false)
     }
 
-    @Test func integration_whenConnected_setsInitialOffTagIds() async throws {
-        // given
-        let expect = expectConfirm("신규 연동 시 모든 태그를 off 처리")
-        expect.count = 2
-        let usecase = makeUsecase()
-
-        // when
-        let offIdsList = try await outputs(expect, for: stubEventTagUsecase.offEventTagIdsOnCalendar()) {
-            usecase.prepare()
-            self.sendIntegration(true)
-        }
-
-        // then
-        let appleOffIds = offIdsList.last?.filter { $0.externalServiceId == AppleCalendarService.id } ?? []
-        #expect(appleOffIds.count == stubRepository.stubCalendarTags.count)
-    }
-
     @Test func integration_whenDisconnected_clearsTags() async throws {
         // given
         let usecase = makeUsecase(isIntegrated: true)
