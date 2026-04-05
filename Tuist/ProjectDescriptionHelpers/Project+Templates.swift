@@ -229,7 +229,9 @@ extension Project {
             entitlements: Entitlements.file(path: "./TodoCalendarApp.entitlements"),
             dependencies: dependencies,
             settings: .settings(
-                base: .init().swiftVersion("6.0"),
+                base: .init()
+                    .swiftVersion("6.0")
+                    .otherLinkerFlags(["-ObjC"]),
                 configurations: signingConfigures + [
 
                 ]
