@@ -63,12 +63,16 @@ struct AppleCalendarEventTable: Table {
         let calendarId: String
         let name: String
         let location: String?
+        let url: String?
+        let notes: String?
 
         init(_ event: AppleCalendar.Event) {
             self.eventId = event.eventId
             self.calendarId = event.calendarId
             self.name = event.name
             self.location = event.location
+            self.url = event.url
+            self.notes = event.notes
         }
 
         init(_ cursor: CursorIterator) throws {
@@ -76,6 +80,8 @@ struct AppleCalendarEventTable: Table {
             self.calendarId = try cursor.next().unwrap()
             self.name = try cursor.next().unwrap()
             self.location = cursor.next()
+            self.url = cursor.next()
+            self.notes = cursor.next()
         }
     }
 
@@ -84,6 +90,8 @@ struct AppleCalendarEventTable: Table {
         case calendarId = "calendar_id"
         case name
         case location
+        case url
+        case notes
 
         var dataType: ColumnDataType {
             switch self {
@@ -91,6 +99,8 @@ struct AppleCalendarEventTable: Table {
             case .calendarId: return .text([.notNull])
             case .name: return .text([.notNull])
             case .location: return .text([])
+            case .url: return .text([])
+            case .notes: return .text([])
             }
         }
     }
@@ -105,6 +115,9 @@ struct AppleCalendarEventTable: Table {
         case .calendarId: return entity.calendarId
         case .name: return entity.name
         case .location: return entity.location
+        case .url: return entity.url
+        case .notes: return entity.notes
         }
     }
+
 }

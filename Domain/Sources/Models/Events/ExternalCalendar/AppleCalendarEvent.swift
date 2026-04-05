@@ -47,13 +47,17 @@ extension AppleCalendar {
         public let eventTagId: EventTagId
         public let eventTime: EventTime
         public let location: String?
+        public let url: String?
+        public let notes: String?
 
         public init(
             eventId: String,
             calendarId: String,
             name: String,
             eventTime: EventTime,
-            location: String? = nil
+            location: String? = nil,
+            url: String? = nil,
+            notes: String? = nil
         ) {
             self.eventId = eventId
             self.calendarId = calendarId
@@ -61,6 +65,8 @@ extension AppleCalendar {
             self.eventTagId = .externalCalendar(serviceId: AppleCalendarService.id, id: calendarId)
             self.eventTime = eventTime
             self.location = location
+            self.url = url
+            self.notes = notes
         }
     }
 }
