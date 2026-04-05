@@ -312,6 +312,25 @@ extension AppleCalendarUsecaseImpleTests {
         #expect(stubRepository.didLoadEvents == false)
     }
 
+    @Test func refreshEvents_whenIntegratedAfterRefreshCall_loadsEventsAutomatically() async throws {
+        // given
+        let period: Range<TimeInterval> = 0..<100
+        let stubEvents = makeStubEvents(count: 3)
+        let expect = expectConfirm("연동 후 자동으로 이벤트 로드")
+        expect.count = 2
+        let usecase = makeUsecase(isIntegrated: false, stubEvents: stubEvents)
+        usecase.prepare()
+
+        // when
+        let eventLists = try await outputs(expect, for: usecase.events(in: period)) {
+            usecase.refreshEvents(in: period)
+            self.sendIntegration(true)
+        }
+
+        // then
+        #expect(eventLists.last?.count == 3)
+    }
+
     @Test func refreshEvents_removesDeletedEventsInPeriod() async throws {
         // given - 0..<5 범위에 5개 이벤트 로드
         let initialEvents = makeStubEvents(count: 5)

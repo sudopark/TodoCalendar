@@ -157,14 +157,14 @@ extension AppleCalendarUsecaseImple {
         refreshEventBag.forEach { $0.cancel() }
         refreshEventBag = []
 
-        let accounts = integrationUsecase.currentIntegratedAccounts(for: appleService.identifier)
-        guard !accounts.isEmpty else { return }
-
-        repository.loadEvents(in: period)
-            .sink(
-                receiveCompletion: { _ in },
-                receiveValue: { [weak self] events in self?.updateStoredEvents(events, in: period) }
-            )
+        integrationUsecase.currentOrNewIntegratedAccount(for: appleService.identifier)
+            .flatMap { [weak self] _ -> AnyPublisher<[AppleCalendar.Event], Never> in
+                guard let self else { return Empty().eraseToAnyPublisher() }
+                return self.repository.loadEvents(in: period)
+                    .replaceError(with: [])
+                    .eraseToAnyPublisher()
+            }
+            .sink { [weak self] events in self?.updateStoredEvents(events, in: period) }
             .store(in: &refreshEventBag)
     }
 
