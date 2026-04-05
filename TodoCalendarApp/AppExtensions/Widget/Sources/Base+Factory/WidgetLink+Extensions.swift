@@ -16,7 +16,8 @@ enum EventDeepLinkBuilder {
     case schedule(id: String, time: EventTime)
     case holiday(id: String)
     case google(id: String, calendarId: String, accountId: String)
-    
+    case apple(id: String, calendarId: String)
+
     func build() -> URL? {
         
         func make(_ path: String, queries: [String: String]) -> URL? {
@@ -41,6 +42,9 @@ enum EventDeepLinkBuilder {
             
         case .google(let id, let calendarId, let accountId):
             return make("google", queries: ["event_id": id, "calendar_id": calendarId, "account_id": accountId])
+
+        case .apple(let id, let calendarId):
+            return make("apple", queries: ["event_id": id, "calendar_id": calendarId])
         }
     }
 }
@@ -64,7 +68,10 @@ extension EventCellViewModel {
             
         case let google as GoogleCalendarEventCellViewModel:
             return EventDeepLinkBuilder.google(id: google.eventIdentifier, calendarId: google.calendarId, accountId: google.accountId).build()
-            
+
+        case let apple as AppleCalendarEventCellViewModel:
+            return EventDeepLinkBuilder.apple(id: apple.eventIdentifier, calendarId: apple.calendarId).build()
+
         default: return nil
         }
     }
