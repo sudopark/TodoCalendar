@@ -57,6 +57,7 @@ struct WeekEventsViewModel {
     let tagMap: [String: CustomEventTag]
     var googleCalendarColor: GoogleCalendar.Colors?
     var googleCalendarTags: [String: GoogleCalendar.Tag]
+    var appleCalendarTags: [String: AppleCalendar.Tag]
     let widgetSetting: WidgetAppearanceSettings
     
     init(
@@ -70,6 +71,7 @@ struct WeekEventsViewModel {
         tagMap: [String: CustomEventTag],
         googleCalendarColor: GoogleCalendar.Colors? = nil,
         googleCalendarTags: [String: GoogleCalendar.Tag] = [:],
+        appleCalendarTags: [String: AppleCalendar.Tag] = [:],
         widgetSetting: WidgetAppearanceSettings
     ) {
         self.range = range
@@ -82,6 +84,7 @@ struct WeekEventsViewModel {
         self.tagMap = tagMap
         self.googleCalendarColor = googleCalendarColor
         self.googleCalendarTags = googleCalendarTags
+        self.appleCalendarTags = appleCalendarTags
         self.widgetSetting = widgetSetting
     }
     
@@ -242,6 +245,7 @@ extension WeekEventsWidgetViewModelProvider {
             tagMap: events.customTagMap,
             googleCalendarColor: events.googleCalendarColors,
             googleCalendarTags: events.googleCalendarTags,
+            appleCalendarTags: events.appleCalendarTags,
             widgetSetting: appearSetting.widget
         )
     }

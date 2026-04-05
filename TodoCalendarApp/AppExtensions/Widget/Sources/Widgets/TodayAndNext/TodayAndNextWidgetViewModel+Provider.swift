@@ -24,6 +24,7 @@ struct TodayAndNextWidgetViewModel {
     let customTagMap: [String: any EventTag]
     var googleCalendarColors: GoogleCalendar.Colors = .init(ownerId: "", calendars: [:], events: [:])
     var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
+    var appleCalendarTags: [String: AppleCalendar.Tag] = [:]
     var widgetSetting = WidgetAppearanceSettings()
     
     static func sample() -> TodayAndNextWidgetViewModel {
@@ -313,7 +314,12 @@ struct TodayAndNextWidgetViewModelBuilder {
                     return GoogleCalendarEventCellViewModel(
                         google, in: daysrange, timeZone, is24Form
                     )
-                    
+
+                case let apple as AppleCalendarEvent:
+                    return AppleCalendarEventCellViewModel(
+                        apple, in: daysrange, timeZone, is24Form
+                    )
+
                 default: return nil
                 }
             }
@@ -522,6 +528,7 @@ extension TodayAndNextWidgetViewModelProvider {
         return model
             |> \.googleCalendarColors .~ (events.googleCalendarColors ?? .init(ownerId: "", calendars: [:], events: [:]))
             |> \.googleCalendarTags .~ events.googleCalendarTags
+            |> \.appleCalendarTags .~ events.appleCalendarTags
             |> \.widgetSetting .~ setting.widget
     }
     
