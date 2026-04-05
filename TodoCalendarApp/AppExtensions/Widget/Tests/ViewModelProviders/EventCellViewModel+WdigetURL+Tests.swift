@@ -40,8 +40,20 @@ struct EventCellViewModelWidgetURL_Tests {
 
     func makeAppleModel() -> AppleCalendarEventCellViewModel {
         let apple = AppleCalendar.Event(
-            eventId: "apple-event", calendarId: "apple-calendar",
+            eventId: "apple-event", originalEventId: "apple-event",
+            calendarId: "apple-calendar",
             name: "some", eventTime: .at(100), location: nil
+        )
+        let event = AppleCalendarEvent(apple, in: .current)
+        return .init(event, in: 0..<10, .current, true)!
+    }
+
+    func makeRepeatingAppleModel() -> AppleCalendarEventCellViewModel {
+        let apple = AppleCalendar.Event(
+            eventId: "ABC123#occ:1712345678", originalEventId: "ABC123",
+            calendarId: "apple-calendar",
+            name: "repeating", eventTime: .at(100), isRepeating: true,
+            location: nil
         )
         let event = AppleCalendarEvent(apple, in: .current)
         return .init(event, in: 0..<10, .current, true)!
@@ -131,6 +143,20 @@ extension EventCellViewModelWidgetURL_Tests {
         #expect(link?.pendingPathComponents == ["event", "apple"])
         #expect(link?.queryParams.count == 2)
         #expect(link?.queryParams["event_id"] == "apple-event")
+        #expect(link?.queryParams["calendar_id"] == "apple-calendar")
+    }
+
+    @Test func repeatingAppleCellViewModel_widgetURL_compositeIdRoundtrip() {
+        // given
+        let apple = self.makeRepeatingAppleModel()
+
+        // when
+        let url = apple.widgetURL
+
+        // then
+        let link = url.flatMap { PendingDeepLink($0) }
+        #expect(link?.pendingPathComponents == ["event", "apple"])
+        #expect(link?.queryParams["event_id"] == "ABC123#occ:1712345678")
         #expect(link?.queryParams["calendar_id"] == "apple-calendar")
     }
 }
