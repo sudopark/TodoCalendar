@@ -27,12 +27,12 @@ protocol EventSettingRouting: Routing, Sendable {
 
 final class EventSettingRouter: BaseRouterImple, EventSettingRouting, @unchecked Sendable {
     
-    private let eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
+    private let eventTagSelectSceneBuilder: any EventDefaultTagSelectSceneBuiler
     private let eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
     private let eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
     
     init(
-        eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler,
+        eventTagSelectSceneBuilder: any EventDefaultTagSelectSceneBuiler,
         eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler,
         eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
     ) {
@@ -58,7 +58,7 @@ extension EventSettingRouter {
     // TODO: router implememnts
     func routeToSelectTag() {
         Task { @MainActor in
-            let next = self.eventTagSelectSceneBuilder.makeEventTagSelectScene()
+            let next = self.eventTagSelectSceneBuilder.makeEventDefaultTagSelectScene()
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }

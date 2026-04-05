@@ -1,6 +1,6 @@
 //
 //  
-//  EventTagSelectViewModel.swift
+//  EventDefaultTagSelectViewModel.swift
 //  SettingScene
 //
 //  Created by sudo.park on 1/1/24.
@@ -16,9 +16,9 @@ import Domain
 import Scenes
 
 
-// MARK: - EventTagSelectViewModel
+// MARK: - EventDefaultTagSelectViewModel
 
-protocol EventTagSelectViewModel: AnyObject, Sendable, EventTagSelectSceneInteractor {
+protocol EventDefaultTagSelectViewModel: AnyObject, Sendable, EventDefaultTagSelectSceneInteractor {
 
     // interactor
     func loadList()
@@ -31,13 +31,13 @@ protocol EventTagSelectViewModel: AnyObject, Sendable, EventTagSelectSceneIntera
 }
 
 
-// MARK: - EventTagSelectViewModelImple
+// MARK: - EventDefaultTagSelectViewModelImple
 
-final class EventTagSelectViewModelImple: EventTagSelectViewModel, @unchecked Sendable {
+final class EventDefaultTagSelectViewModelImple: EventDefaultTagSelectViewModel, @unchecked Sendable {
     
     private let tagListUsecase: EventTagListViewUsecase
     private let settingUsecase: any EventSettingUsecase
-    var router: (any EventTagSelectRouting)?
+    var router: (any EventDefaultTagSelectRouting)?
     
     init(
         tagUsecase: any EventTagUsecase,
@@ -63,9 +63,9 @@ final class EventTagSelectViewModelImple: EventTagSelectViewModel, @unchecked Se
 }
 
 
-// MARK: - EventTagSelectViewModelImple Interactor
+// MARK: - EventDefaultTagSelectViewModelImple Interactor
 
-extension EventTagSelectViewModelImple {
+extension EventDefaultTagSelectViewModelImple {
  
     func loadList() {
         self.tagListUsecase.reload()
@@ -95,9 +95,9 @@ extension EventTagSelectViewModelImple {
 }
 
 
-// MARK: - EventTagSelectViewModelImple Presenter
+// MARK: - EventDefaultTagSelectViewModelImple Presenter
 
-extension EventTagSelectViewModelImple {
+extension EventDefaultTagSelectViewModelImple {
     
     var cellViewModels: AnyPublisher<[BaseCalendarEventTagCellViewModel], Never> {
         let excludeHoliday: ([BaseCalendarEventTagCellViewModel]) -> [BaseCalendarEventTagCellViewModel] = { cvms in

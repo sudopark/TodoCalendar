@@ -1,6 +1,6 @@
 //
 //  
-//  EventTagSelectBuilderImple.swift
+//  EventDefaultTagSelectBuilderImple.swift
 //  SettingScene
 //
 //  Created by sudo.park on 1/1/24.
@@ -13,9 +13,9 @@ import Scenes
 import CommonPresentation
 
 
-// MARK: - EventTagSelectSceneBuilerImple
+// MARK: - EventDefaultTagSelectSceneBuilerImple
 
-final class EventTagSelectSceneBuilerImple {
+final class EventDefaultTagSelectSceneBuilerImple {
     
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
@@ -30,24 +30,24 @@ final class EventTagSelectSceneBuilerImple {
 }
 
 
-extension EventTagSelectSceneBuilerImple: EventTagSelectSceneBuiler {
+extension EventDefaultTagSelectSceneBuilerImple: EventDefaultTagSelectSceneBuiler {
     
     @MainActor
-    func makeEventTagSelectScene() -> any EventTagSelectScene {
+    func makeEventDefaultTagSelectScene() -> any EventDefaultTagSelectScene {
         
-        let viewModel = EventTagSelectViewModelImple(
+        let viewModel = EventDefaultTagSelectViewModelImple(
             tagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             eventSettingUsecase: self.usecaseFactory.makeEventSettingUsecase(),
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
             appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase()
         )
         
-        let viewController = EventTagSelectViewController(
+        let viewController = EventDefaultTagSelectViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )
     
-        let router = EventTagSelectRouter(
+        let router = EventDefaultTagSelectRouter(
         )
         router.scene = viewController
         viewModel.router = router

@@ -51,7 +51,7 @@ graph TD
         WidgetAppearance[WidgetAppearanceSetting]
         TimeZoneSelect[TimeZoneSelect]
         EventSetting[EventSetting]
-        EventTagSelect[EventTagSelect]
+        EventDefaultTagSelect[EventDefaultTagSelect]
         NotificationDefault[EventNotificationDefaultTimeOption]
         DefaultMapApp[EventDefaultMapApp]
         EventTagList[EventTagList]
@@ -134,7 +134,7 @@ graph TD
     AppearanceSetting --> WidgetAppearance
     AppearanceSetting --> TimeZoneSelect
 
-    EventSetting --> EventTagSelect
+    EventSetting --> EventDefaultTagSelect
     EventSetting --> NotificationDefault
     EventSetting --> DefaultMapApp
     EventSetting ==> External_Settings

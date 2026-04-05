@@ -21,7 +21,7 @@ final class EventSettingSceneBuilerImple {
     private let supportExternalCalendarServices: [any ExternalCalendarService]
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
-    private let eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
+    private let eventTagSelectSceneBuilder: any EventDefaultTagSelectSceneBuiler
     private let eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
     private let eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
     
@@ -29,7 +29,7 @@ final class EventSettingSceneBuilerImple {
         supportExternalCalendarServices: [any ExternalCalendarService],
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
-        eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler,
+        eventTagSelectSceneBuilder: any EventDefaultTagSelectSceneBuiler,
         eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler,
         eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
     ) {

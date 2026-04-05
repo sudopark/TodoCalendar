@@ -1,6 +1,6 @@
 //
 //  
-//  EventTagSelectRouter.swift
+//  EventDefaultTagSelectRouter.swift
 //  SettingScene
 //
 //  Created by sudo.park on 1/1/24.
@@ -15,11 +15,11 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol EventTagSelectRouting: Routing, Sendable { }
+protocol EventDefaultTagSelectRouting: Routing, Sendable { }
 
 // MARK: - Router
 
-final class EventTagSelectRouter: BaseRouterImple, EventTagSelectRouting, @unchecked Sendable {
+final class EventDefaultTagSelectRouter: BaseRouterImple, EventDefaultTagSelectRouting, @unchecked Sendable {
     
     override func closeScene(animate: Bool, _ dismissed: (() -> Void)?) {
         Task { @MainActor in
@@ -29,10 +29,10 @@ final class EventTagSelectRouter: BaseRouterImple, EventTagSelectRouting, @unche
 }
 
 
-extension EventTagSelectRouter {
+extension EventDefaultTagSelectRouter {
     
-    private var currentScene: (any EventTagSelectScene)? {
-        self.scene as? (any EventTagSelectScene)
+    private var currentScene: (any EventDefaultTagSelectScene)? {
+        self.scene as? (any EventDefaultTagSelectScene)
     }
     
     // TODO: router implememnts

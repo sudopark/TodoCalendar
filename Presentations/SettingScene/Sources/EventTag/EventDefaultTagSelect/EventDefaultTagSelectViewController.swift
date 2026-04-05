@@ -1,6 +1,6 @@
 //
 //  
-//  EventTagSelectViewController.swift
+//  EventDefaultTagSelectViewController.swift
 //  SettingScene
 //
 //  Created by sudo.park on 1/1/24.
@@ -15,29 +15,29 @@ import Scenes
 import CommonPresentation
 
 
-// MARK: - EventTagSelectViewController
+// MARK: - EventDefaultTagSelectViewController
 
-final class EventTagSelectViewController: UIHostingController<EventTagSelectContainerView>, EventTagSelectScene {
+final class EventDefaultTagSelectViewController: UIHostingController<EventDefaultTagSelectContainerView>, EventDefaultTagSelectScene {
     
-    private let viewModel: any EventTagSelectViewModel
+    private let viewModel: any EventDefaultTagSelectViewModel
     private let viewAppearance: ViewAppearance
     
     @MainActor
-    var interactor: (any EventTagSelectSceneInteractor)? { self.viewModel }
+    var interactor: (any EventDefaultTagSelectSceneInteractor)? { self.viewModel }
     
     private var cancellables: Set<AnyCancellable> = []
     
     init(
-        viewModel: any EventTagSelectViewModel,
+        viewModel: any EventDefaultTagSelectViewModel,
         viewAppearance: ViewAppearance
     ) {
         self.viewModel = viewModel
         self.viewAppearance = viewAppearance
         
-        let eventHandlers = EventTagSelectViewEventHandler()
+        let eventHandlers = EventDefaultTagSelectViewEventHandler()
         eventHandlers.bind(viewModel)
         
-        let containerView = EventTagSelectContainerView(
+        let containerView = EventDefaultTagSelectContainerView(
             viewAppearance: viewAppearance,
             eventHandlers: eventHandlers
         )

@@ -133,7 +133,7 @@ extension SettingSceneBuilderImple {
     }
     
     private func eventSettingSceneBuilder() -> EventSettingSceneBuilerImple {
-        let eventTagSelectSceneBuilder = EventTagSelectSceneBuilerImple(
+        let eventTagSelectSceneBuilder = EventDefaultTagSelectSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
         )

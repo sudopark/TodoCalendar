@@ -1,5 +1,5 @@
 //
-//  EventTagSelectViewModelimlpeTests.swift
+//  EventDefaultTagSelectViewModelImpleTests.swift
 //  SettingSceneTests
 //
 //  Created by sudo.park on 1/1/24.
@@ -17,7 +17,7 @@ import TestDoubles
 @testable import SettingScene
 
 
-class EventTagSelectViewModelimlpeTests: BaseTestCase, PublisherWaitable {
+class EventDefaultTagSelectViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
@@ -35,7 +35,7 @@ class EventTagSelectViewModelimlpeTests: BaseTestCase, PublisherWaitable {
         self.spySettingUsecase = nil
     }
     
-    func makeViewModel() -> EventTagSelectViewModelImple {
+    func makeViewModel() -> EventDefaultTagSelectViewModelImple {
         
         let tags: [any EventTag] = (0..<10).map {
             return CustomEventTag(uuid: "id:\($0)", name: "name:\($0)", colorHex: "")
@@ -43,7 +43,7 @@ class EventTagSelectViewModelimlpeTests: BaseTestCase, PublisherWaitable {
         let tagUsecase = StubEventTagUsecase()
         tagUsecase.allTagsLoadResult = .success(tags)
         
-        let viewModel = EventTagSelectViewModelImple(
+        let viewModel = EventDefaultTagSelectViewModelImple(
             tagUsecase: tagUsecase,
             eventSettingUsecase: self.spySettingUsecase,
             googleCalendarUsecase: StubGoogleCalendarUsecase(),
@@ -54,7 +54,7 @@ class EventTagSelectViewModelimlpeTests: BaseTestCase, PublisherWaitable {
     }
 }
 
-extension EventTagSelectViewModelimlpeTests {
+extension EventDefaultTagSelectViewModelImpleTests {
     
     // 리스트 로드
     func testViewModel_provideTagList() {
@@ -94,7 +94,7 @@ extension EventTagSelectViewModelimlpeTests {
 }
 
 
-private class SpyRouter: BaseSpyRouter, EventTagSelectRouting, @unchecked Sendable {
+private class SpyRouter: BaseSpyRouter, EventDefaultTagSelectRouting, @unchecked Sendable {
     
     
 }
