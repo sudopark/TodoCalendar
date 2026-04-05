@@ -34,29 +34,67 @@ jobs:
           FILES="${{ steps.changed.outputs.files }}"
 
           ALL_SCHEMES="Domain Repository CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes TodoCalendarApp TodoCalendarAppWidget"
+          ALL_PRESENTATION="CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes"
 
-          run_all=false
           schemes=()
 
-          # 전체 테스트가 필요한 변경
-          if echo "$FILES" | grep -qE "^(Domain/Sources/|Supports/Extensions/Sources/|Supports/UnitTestHelpKit/|Supports/TestDoubles/|Supports/Common3rdParty/|scripts/|Tuist/|Package\.swift|\.github/)"; then
-            run_all=true
-          fi
-
-          if [ "$run_all" = true ]; then
-            # contains() 오탐 방지를 위해 양쪽 공백 padding
+          # === 프로젝트 구조/의존성 변경 → 전체 테스트 ===
+          if echo "$FILES" | grep -qE "^(Package\.swift|Package\.resolved|Tuist/|Tuist\.swift|mise\.toml)"; then
             echo "schemes= ${ALL_SCHEMES} " >> "$GITHUB_OUTPUT"
-            echo "Detected: run all schemes"
+            echo "Detected: project structure changed → run all"
             exit 0
           fi
 
-          # 개별 매핑 (의존 타겟 포함)
+          # === Supports 레이어 ===
+          # Common3rdParty: 모든 모듈의 기반
+          if echo "$FILES" | grep -q "^Supports/Common3rdParty/"; then
+            schemes+=($ALL_SCHEMES)
+          fi
+
+          # Extensions/Sources: Domain 이상 모든 모듈이 의존
+          if echo "$FILES" | grep -q "^Supports/Extensions/Sources/"; then
+            schemes+=($ALL_SCHEMES)
+          fi
+
+          # UnitTestHelpKit: 테스트 인프라 → 모든 테스트 스킴
+          if echo "$FILES" | grep -q "^Supports/UnitTestHelpKit/Sources/"; then
+            schemes+=($ALL_SCHEMES)
+          fi
+
+          # TestDoubles: Domain/Scenes 스텁 → Repository + Presentation + App 테스트
+          # (Domain 테스트는 TestDoubles를 사용하지 않음)
+          if echo "$FILES" | grep -q "^Supports/TestDoubles/Sources/"; then
+            schemes+=("Repository" $ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget")
+          fi
+
+          # === Domain 레이어 ===
+          # Domain/Sources: Repository + 모든 Presentation + App + Widget이 의존
+          if echo "$FILES" | grep -q "^Domain/Sources/"; then
+            schemes+=($ALL_SCHEMES)
+          fi
+          if echo "$FILES" | grep -q "^Domain/Tests/"; then
+            schemes+=("Domain")
+          fi
+
+          # === Repository 레이어 ===
           if echo "$FILES" | grep -q "^Repository/Sources/"; then
             schemes+=("Repository" "TodoCalendarApp" "TodoCalendarAppWidget")
           fi
-          if echo "$FILES" | grep -qE "^Presentations/(CommonPresentation|Scenes)/"; then
-            schemes+=("CalendarScenes" "EventDetailScene" "EventListScenes" "SettingScene" "MemberScenes" "TodoCalendarApp")
+          if echo "$FILES" | grep -q "^Repository/Tests/"; then
+            schemes+=("Repository")
           fi
+
+          # === Presentation 공통 ===
+          # CommonPresentation: 모든 Presentation Scene + App + Widget이 의존
+          if echo "$FILES" | grep -q "^Presentations/CommonPresentation/"; then
+            schemes+=($ALL_PRESENTATION "TodoCalendarApp" "TodoCalendarAppWidget")
+          fi
+          # Scenes: 모든 Presentation Scene + App이 의존 (Widget은 미의존)
+          if echo "$FILES" | grep -q "^Presentations/Scenes/"; then
+            schemes+=($ALL_PRESENTATION "TodoCalendarApp")
+          fi
+
+          # === Presentation 개별 Scene ===
           if echo "$FILES" | grep -q "^Presentations/CalendarScenes/"; then
             schemes+=("CalendarScenes" "TodoCalendarApp" "TodoCalendarAppWidget")
           fi
@@ -72,6 +110,8 @@ jobs:
           if echo "$FILES" | grep -q "^Presentations/MemberScenes/"; then
             schemes+=("MemberScenes" "TodoCalendarApp")
           fi
+
+          # === App 타겟 ===
           if echo "$FILES" | grep -qE "^TodoCalendarApp/(Sources|Tests)/"; then
             schemes+=("TodoCalendarApp")
           fi
@@ -79,13 +119,7 @@ jobs:
             schemes+=("TodoCalendarAppWidget")
           fi
 
-          # 테스트 파일만 변경된 경우 해당 모듈 테스트 실행
-          if echo "$FILES" | grep -q "^Domain/Tests/"; then
-            schemes+=("Domain")
-          fi
-          if echo "$FILES" | grep -q "^Repository/Tests/"; then
-            schemes+=("Repository")
-          fi
+          # .github/, scripts/, docs/ 등 → 코드 빌드에 영향 없으므로 테스트 불필요
 
           # 중복 제거 + 양쪽 공백 padding (contains 오탐 방지)
           if [ ${#schemes[@]} -eq 0 ]; then
