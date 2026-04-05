@@ -206,20 +206,20 @@ extension CalendarEventFetchUsecaseImple {
         events.customTagMap = customTagMap
         
         if await self.checkGoogleCalendarIntegrated() {
-            events.googleCalendarColors = try await self.googleCalendarColors()
-            let tags = try await self.googleCalendarTags()
-            events.googleCalendarTags = tags
-
-            let allTagIds = Array(tags.keys)
-            let googleEvents = try await self.googleCalendarEvents(allTagIds, in: range, timeZone)
-            eventsWithTime += googleEvents
+            events.googleCalendarColors = try? await self.googleCalendarColors()
+            if let tags = try? await self.googleCalendarTags() {
+                events.googleCalendarTags = tags
+                let allTagIds = Array(tags.keys)
+                let googleEvents = (try? await self.googleCalendarEvents(allTagIds, in: range, timeZone)) ?? []
+                eventsWithTime += googleEvents
+            }
         }
 
         if await self.checkAppleCalendarIntegrated() {
-            let tags = try await self.appleCalendarTags()
-            events.appleCalendarTags = tags
-
-            let appleEvents = try await self.appleCalendarEvents(in: range, timeZone)
+            if let tags = try? await self.appleCalendarTags() {
+                events.appleCalendarTags = tags
+            }
+            let appleEvents = (try? await self.appleCalendarEvents(in: range, timeZone)) ?? []
             eventsWithTime += appleEvents
         }
 
