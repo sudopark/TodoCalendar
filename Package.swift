@@ -26,6 +26,21 @@ let packageSettings = PackageSettings(
         "KeychainSwift": .framework,
         "CombineExt": .framework,
         "SwiftLinkPreview": .framework,
+        // Firebase/Google 전이 의존성 — static 중복 링킹 방지
+        "FBLPromises": .framework,
+        "Promises": .framework,
+        "GoogleDataTransport": .framework,
+        "GTMSessionFetcherCore": .framework,
+        "GTMAppAuth": .framework,
+        "AppAuthCore": .framework,
+        "GoogleUtilities-AppDelegateSwizzler": .framework,
+        "GoogleUtilities-Environment": .framework,
+        "GoogleUtilities-Logger": .framework,
+        "GoogleUtilities-MethodSwizzler": .framework,
+        "GoogleUtilities-NSData": .framework,
+        "GoogleUtilities-Network": .framework,
+        "GoogleUtilities-Reachability": .framework,
+        "GoogleUtilities-UserDefaults": .framework,
     ]
 )
 #endif
