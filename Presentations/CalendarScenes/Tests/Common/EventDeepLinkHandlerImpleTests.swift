@@ -113,6 +113,24 @@ extension EventDeepLinkHandlerImpleTests {
         #expect(self.spyRouter.didRouteToGoogleEventDetailWithId == "event_id")
     }
     
+    // handle apple calendar link
+    @Test func handler_handleAppleCalendarEventLink() {
+        // given
+        let handler = self.makeHandler()
+        let link = self.makeLink("apple", [
+            "event_id": "apple_event_id",
+            "calendar_id": "apple_calendar_id"
+        ])
+
+        // when
+        let result = handler.handleLink(link)
+
+        // then
+        #expect(result == .handle)
+        #expect(self.spyRouter.didDismissPresented == true)
+        #expect(self.spyRouter.didRouteToAppleCalendarEventDetailWithId == "apple_event_id")
+    }
+
     // handle link after ready
     @Test func handler_handleLink_afterIsReady() {
         // given

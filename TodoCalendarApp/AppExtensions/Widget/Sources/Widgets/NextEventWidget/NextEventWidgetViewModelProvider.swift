@@ -121,6 +121,8 @@ struct NextEventWidgetViewModelBuilder {
                 .holiday(id: holiday.eventId)
         case let google as GoogleCalendarEvent:
                 .google(id: google.eventId, calendarId: google.calendarId, accountId: google.accountId)
+        case let apple as AppleCalendarEvent:
+                .apple(id: apple.eventId, calendarId: apple.calendarId)
         default: nil
         }
         

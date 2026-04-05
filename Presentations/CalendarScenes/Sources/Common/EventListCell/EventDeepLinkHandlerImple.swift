@@ -27,6 +27,7 @@ final class EventDeepLinkHandlerImple: EventDeepLinkHandler, @unchecked Sendable
         case schedule
         case holiday
         case google
+        case apple
     }
     
     private var pendingPathAndLink: (SupportPath, PendingDeepLink)?
@@ -87,6 +88,12 @@ extension EventDeepLinkHandlerImple {
                 { return }
                 let accountId = pending.queryParams["account_id"] ?? ""
                 self?.router?.routeToGoogleEventDetail(calendarId: calendarId, accountId: accountId, eventId: eventId)
+
+            case .apple:
+                guard let eventId = pending.queryParams["event_id"],
+                      let calendarId = pending.queryParams["calendar_id"] else
+                { return }
+                self?.router?.routeToAppleCalendarEventDetail(calendarId: calendarId, eventId: eventId)
             }
         }
     }
