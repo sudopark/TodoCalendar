@@ -86,7 +86,7 @@ extension AppleCalendarUsecaseImple {
                 guard let self else { return }
                 switch status {
                 case .integrated:
-                    self.refreshCalendarTags(isNew: true)
+                    self.loadAndApplyCalendarTags()
 
                 case .disconnected:
                     self.clearCache()
@@ -98,7 +98,7 @@ extension AppleCalendarUsecaseImple {
     private func refreshIfAlreadyIntegrated() {
         let accounts = integrationUsecase.currentIntegratedAccounts(for: appleService.identifier)
         guard !accounts.isEmpty else { return }
-        refreshCalendarTags(isNew: false)
+        loadAndApplyCalendarTags()
     }
 
     private func clearCache() {
@@ -118,18 +118,15 @@ extension AppleCalendarUsecaseImple {
     public func refreshCalendarTags() {
         let accounts = integrationUsecase.currentIntegratedAccounts(for: appleService.identifier)
         guard !accounts.isEmpty else { return }
-        refreshCalendarTags(isNew: false)
+        loadAndApplyCalendarTags()
     }
 
-    private func refreshCalendarTags(isNew: Bool) {
+    private func loadAndApplyCalendarTags() {
         repository.loadCalendarTags()
             .sink(
                 receiveCompletion: { _ in },
                 receiveValue: { [weak self] tags in
                     guard let self else { return }
-                    if isNew {
-                        self.setInitialOffTagIds(from: tags)
-                    }
                     self.sharedDataStore.put(
                         [AppleCalendar.Tag].self,
                         key: ShareDataKeys.appleCalendarTags.rawValue,
@@ -139,13 +136,6 @@ extension AppleCalendarUsecaseImple {
                 }
             )
             .store(in: &cancelBag)
-    }
-
-    private func setInitialOffTagIds(from tags: [AppleCalendar.Tag]) {
-        // Apple Calendar은 연동 시 기본 숨김 (외부 캘린더 공통 정책)
-        let offIds = tags.map(\.tagId)
-        guard !offIds.isEmpty else { return }
-        eventTagUsecase.addEventTagOffIds(offIds)
     }
 
     public var calendarTags: AnyPublisher<[AppleCalendar.Tag], Never> {
