@@ -25,6 +25,7 @@
 "common.done" = "완료";
 "common.errorMessage" = "일시적인 오류가 발생했습니다.\n문제가 반복된다면 제보해주세요.";
 "common.update" = "업데이트";
+"common.go_to_settings" = "설정으로 이동";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";

@@ -25,6 +25,7 @@
 "common.done" = "Done";
 "common.errorMessage" = "A temporary error has occurred.\nPlease report if the problem persists.";
 "common.update" = "Update";
+"common.go_to_settings" = "Go to Settings";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
