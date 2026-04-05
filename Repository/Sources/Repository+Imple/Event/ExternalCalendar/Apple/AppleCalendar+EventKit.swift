@@ -120,7 +120,9 @@ private extension EKEvent {
             calendarId: calendarId,
             name: title ?? "",
             eventTime: eventTime,
-            location: location
+            location: location,
+            url: url?.absoluteString,
+            notes: notes
         )
     }
 

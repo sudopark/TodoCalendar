@@ -23,6 +23,8 @@ import CommonPresentation
     var timeText: SelectedTime?
     var ddayText: String = ""
     var location: String?
+    var url: String?
+    var notes: String?
     var tagModel: AppleCalendarTagModel?
 
     func bind(_ viewModel: any AppleCalendarEventDetailViewModel) {
@@ -58,6 +60,20 @@ import CommonPresentation
             })
             .store(in: &self.cancellables)
 
+        viewModel.url
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.url = text
+            })
+            .store(in: &self.cancellables)
+
+        viewModel.notes
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.notes = text
+            })
+            .store(in: &self.cancellables)
+
         viewModel.tagModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
@@ -74,11 +90,13 @@ final class AppleCalendarEventDetailViewEventHandler: Observable {
 
     var onAppear: () -> Void = { }
     var openInAppleCalendar: () -> Void = { }
+    var openURL: (String) -> Void = { _ in }
     var close: () -> Void = { }
 
     func bind(_ viewModel: any AppleCalendarEventDetailViewModel) {
         self.onAppear = viewModel.refresh
         self.openInAppleCalendar = viewModel.openInAppleCalendar
+        self.openURL = viewModel.openURL(_:)
         self.close = viewModel.close
     }
 }
@@ -140,6 +158,14 @@ struct AppleCalendarEventDetailView: View {
 
                         if let location = self.state.location {
                             self.locationView(location)
+                        }
+
+                        if let url = self.state.url {
+                            self.urlView(url)
+                        }
+
+                        if let notes = self.state.notes {
+                            self.notesView(notes)
                         }
 
                         if let tagModel = self.state.tagModel {
@@ -266,6 +292,37 @@ struct AppleCalendarEventDetailView: View {
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
 
             Text(location)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+
+            Spacer()
+        }
+    }
+
+    private func urlView(_ urlString: String) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: "link")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+
+            Text(urlString)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.accent.asColor)
+                .onTapGesture {
+                    self.eventHandlers.openURL(urlString)
+                }
+
+            Spacer()
+        }
+    }
+
+    private func notesView(_ notes: String) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            Image(systemName: "doc.text")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+
+            Text(notes)
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
 

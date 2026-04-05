@@ -29,6 +29,7 @@ protocol AppleCalendarEventDetailViewModel: AnyObject, Sendable, AppleCalendarEv
     // interactor
     func refresh()
     func openInAppleCalendar()
+    func openURL(_ urlString: String)
     func close()
 
     // presenter
@@ -36,6 +37,8 @@ protocol AppleCalendarEventDetailViewModel: AnyObject, Sendable, AppleCalendarEv
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
     var ddayText: AnyPublisher<String, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
+    var url: AnyPublisher<String?, Never> { get }
+    var notes: AnyPublisher<String?, Never> { get }
     var tagModel: AnyPublisher<AppleCalendarTagModel?, Never> { get }
 }
 
@@ -114,6 +117,10 @@ extension AppleCalendarEventDetailViewModelImple {
         self.router?.routeToAppleCalendarApp(at: startInterval)
     }
 
+    func openURL(_ urlString: String) {
+        self.router?.openURL(urlString)
+    }
+
     func close() {
         self.router?.closeScene()
     }
@@ -165,6 +172,22 @@ extension AppleCalendarEventDetailViewModelImple {
         return self.subject.event
             .compactMap { $0 }
             .map { $0.location }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var url: AnyPublisher<String?, Never> {
+        return self.subject.event
+            .compactMap { $0 }
+            .map { $0.url }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var notes: AnyPublisher<String?, Never> {
+        return self.subject.event
+            .compactMap { $0 }
+            .map { $0.notes }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

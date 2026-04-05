@@ -113,7 +113,9 @@ extension AppleCalendarLocalStorageImple {
                 calendarId: event.calendarId,
                 name: event.name,
                 eventTime: time,
-                location: event.location
+                location: event.location,
+                url: event.url,
+                notes: event.notes
             )
         }
 
@@ -138,7 +140,9 @@ extension AppleCalendarLocalStorageImple {
                 calendarId: event.calendarId,
                 name: event.name,
                 eventTime: time,
-                location: event.location
+                location: event.location,
+                url: event.url,
+                notes: event.notes
             )
         }
 

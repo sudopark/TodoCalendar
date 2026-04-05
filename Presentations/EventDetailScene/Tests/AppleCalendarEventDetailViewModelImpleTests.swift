@@ -59,6 +59,33 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         return viewModel
     }
 
+    private func makeViewModelWithURLAndNotes() -> AppleCalendarEventDetailViewModelImple {
+        let settingUsecase = StubCalendarSettingUsecase()
+        settingUsecase.prepare()
+        let appleUsecase = StubAppleCalendarUsecase()
+        appleUsecase.stubCalendarTags = [.init(id: stubCalendarId, name: "Work", colorHex: nil)]
+        appleUsecase.refreshCalendarTags()
+        appleUsecase.stubEvents = [
+            AppleCalendar.Event(
+                eventId: stubEventId,
+                calendarId: stubCalendarId,
+                name: "Meeting",
+                eventTime: .at(Date().timeIntervalSince1970),
+                url: "https://example.com",
+                notes: "Meeting notes"
+            )
+        ]
+        let viewModel = AppleCalendarEventDetailViewModelImple(
+            calendarId: stubCalendarId,
+            eventId: stubEventId,
+            appleCalendarUsecase: appleUsecase,
+            calendarSettingUsecase: settingUsecase,
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+        )
+        viewModel.router = self.spyRouter
+        return viewModel
+    }
+
     private func makeViewModelWithNoLocation() -> AppleCalendarEventDetailViewModelImple {
         let settingUsecase = StubCalendarSettingUsecase()
         settingUsecase.prepare()
@@ -165,6 +192,36 @@ extension AppleCalendarEventDetailViewModelImpleTests {
         #expect(locationValue == nil)
     }
 
+    @Test func viewModel_provideURL() async throws {
+        // given
+        let expect = expectConfirm("URL 정보 제공")
+        let viewModel = self.makeViewModelWithURLAndNotes()
+
+        // when
+        let url = try await self.firstOutput(expect, for: viewModel.url) {
+            viewModel.refresh()
+        }
+
+        // then
+        let urlValue = try #require(url)
+        #expect(urlValue == "https://example.com")
+    }
+
+    @Test func viewModel_provideNotes() async throws {
+        // given
+        let expect = expectConfirm("메모 정보 제공")
+        let viewModel = self.makeViewModelWithURLAndNotes()
+
+        // when
+        let notes = try await self.firstOutput(expect, for: viewModel.notes) {
+            viewModel.refresh()
+        }
+
+        // then
+        let notesValue = try #require(notes)
+        #expect(notesValue == "Meeting notes")
+    }
+
     @Test func viewModel_close() {
         // given
         let viewModel = self.makeViewModel()
@@ -179,4 +236,5 @@ extension AppleCalendarEventDetailViewModelImpleTests {
 
 private final class SpyRouter: BaseSpyRouter, AppleCalendarEventDetailRouting, @unchecked Sendable {
     func routeToAppleCalendarApp(at interval: TimeInterval) { }
+    func openURL(_ urlString: String) { }
 }
