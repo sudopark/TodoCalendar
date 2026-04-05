@@ -10,6 +10,7 @@ import Foundation
 import Combine
 import CombineExt
 import Domain
+import Extensions
 
 
 public final class AppleCalendarRepositoryImple: AppleCalendarRepository, @unchecked Sendable {
@@ -37,9 +38,12 @@ extension AppleCalendarRepositoryImple {
                 guard let self else { return }
                 let cached = try? await self.cacheStorage.loadCalendarTags()
                 if let cached, !cached.isEmpty {
+                    logger.log(.appleCalendar, level: .debug, "tags from cache", with: ["count": cached.count])
                     subscriber.send(cached)
                 }
                 let refreshed = self.storeAccessor.loadCalendarTags()
+                let names = refreshed.map { $0.name }
+                logger.log(.appleCalendar, level: .info, "tags refreshed from EventKit", with: ["count": refreshed.count, "names": names.joined(separator: ", ")])
                 try? await self.cacheStorage.saveCalendarTags(refreshed)
                 subscriber.send(refreshed)
                 subscriber.send(completion: .finished)
@@ -58,9 +62,11 @@ extension AppleCalendarRepositoryImple {
                 guard let self else { return }
                 let cached = try? await self.cacheStorage.loadEvents(in: period)
                 if let cached, !cached.isEmpty {
+                    logger.log(.appleCalendar, level: .debug, "events from cache", with: ["count": cached.count, "period": self.periodDescription(period)])
                     subscriber.send(cached)
                 }
                 let refreshed = self.storeAccessor.loadEvents(in: period)
+                logger.log(.appleCalendar, level: .info, "events refreshed from EventKit", with: ["count": refreshed.count, "period": self.periodDescription(period)])
                 try? await self.cacheStorage.saveEvents(refreshed, in: period)
                 subscriber.send(refreshed)
                 subscriber.send(completion: .finished)
@@ -78,6 +84,7 @@ extension AppleCalendarRepositoryImple {
                 let cached = try? await self.cacheStorage.loadEvent(id: id)
                 subscriber.send(cached)
                 let refreshed = self.storeAccessor.loadEvent(id: id)
+                logger.log(.appleCalendar, level: .info, "event loaded from EventKit", with: ["id": id, "found": refreshed != nil])
                 subscriber.send(refreshed)
                 subscriber.send(completion: .finished)
             }
@@ -87,6 +94,15 @@ extension AppleCalendarRepositoryImple {
     }
 
     public func resetCache() async throws {
+        logger.log(.appleCalendar, level: .info, "cache reset")
         try await cacheStorage.resetAll()
+    }
+
+    private func periodDescription(_ period: Range<TimeInterval>) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        let start = formatter.string(from: Date(timeIntervalSince1970: period.lowerBound))
+        let end = formatter.string(from: Date(timeIntervalSince1970: period.upperBound))
+        return "\(start) ~ \(end)"
     }
 }

@@ -39,6 +39,7 @@ public final class Logger: @unchecked Sendable {
         case `default`
         case sql = "SQL"
         case backgroundSync
+        case appleCalendar
     }
     
     public func prepare() {
