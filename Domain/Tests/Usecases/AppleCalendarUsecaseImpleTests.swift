@@ -237,6 +237,42 @@ extension AppleCalendarUsecaseImpleTests {
 }
 
 
+// MARK: - refreshCalendarTags()
+
+extension AppleCalendarUsecaseImpleTests {
+
+    @Test func refreshCalendarTags_whenNotIntegrated_doesNotUpdateTags() async throws {
+        // given
+        let usecase = makeUsecase(isIntegrated: false)
+        usecase.prepare()
+
+        // when
+        usecase.refreshCalendarTags()
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then
+        #expect(spyAppearanceStore.tags == nil)
+    }
+
+    @Test func refreshCalendarTags_whenIntegrated_updatesTags() async throws {
+        // given
+        let expect = expectConfirm("연동 시 refreshCalendarTags가 태그 반영")
+        expect.count = 3
+        let usecase = makeUsecase(isIntegrated: true)
+
+        // when
+        let tagLists = try await outputs(expect, for: usecase.calendarTags) {
+            usecase.prepare()
+            usecase.refreshCalendarTags()
+        }
+
+        // then
+        #expect(tagLists.last?.count == stubRepository.stubCalendarTags.count)
+        #expect(spyAppearanceStore.tags?.isEmpty == false)
+    }
+}
+
+
 // MARK: - refreshEvents()
 
 extension AppleCalendarUsecaseImpleTests {
