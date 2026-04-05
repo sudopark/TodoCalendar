@@ -131,10 +131,10 @@ extension ExternalCalendarIntegrationUsecaseImple {
             map[service.identifier]?.removeAll { $0.email == accountId }
             return map
         }
-        try? await self.dbConnectionController.close(serviceId: service.identifier)
         self.integrationStatusChangedSubject.send(
             .disconnected(serviceId: service.identifier, accountId: accountId)
         )
+        try? await self.dbConnectionController.close(serviceId: service.identifier)
     }
 
     public func handleAuthenticationResultOrNot(open url: URL) -> Bool {
