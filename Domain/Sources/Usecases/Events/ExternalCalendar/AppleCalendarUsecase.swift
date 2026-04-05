@@ -116,6 +116,8 @@ extension AppleCalendarUsecaseImple {
 extension AppleCalendarUsecaseImple {
 
     public func refreshCalendarTags() {
+        let accounts = integrationUsecase.currentIntegratedAccounts(for: appleService.identifier)
+        guard !accounts.isEmpty else { return }
         refreshCalendarTags(isNew: false)
     }
 
