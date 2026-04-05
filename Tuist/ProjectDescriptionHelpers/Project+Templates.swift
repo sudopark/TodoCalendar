@@ -218,7 +218,8 @@ extension Project {
                 "BGTaskSchedulerPermittedIdentifiers": [
                     "com.sudo.park.TodoCalendarApp.bgSync"
                 ],
-                "UIBackgroundModes": ["fetch"]
+                "UIBackgroundModes": ["fetch"],
+                "NSCalendarsFullAccessUsageDescription": "Calendar access is required to display events and sync with Apple Calendar."
             ]),
             sources: [
                 "Sources/**",
