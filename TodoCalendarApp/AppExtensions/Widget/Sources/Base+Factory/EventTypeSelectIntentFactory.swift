@@ -73,4 +73,10 @@ extension EventTypeSelectIntentFactory {
             accountRepository: makeExternalCalendarAcountRepository()
         )
     }
+
+    func makeAppleCalendarRepository() -> any AppleCalendarRepository {
+        return AppleCalendarLocalAggregatedRepositoryImple(
+            connectionPool: base.externalCalendarDBConnectionPool
+        )
+    }
 }
