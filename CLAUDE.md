@@ -123,7 +123,7 @@ xcodebuild test \
 
 **구조**
 - 테스트는 **상황(given context) 기준**으로 그룹화. 메서드 기준 아님.
-- 각 테스트는 observable한 **동작(behavior)** 을 검증. 내부 구현 상태(private flag 등) 검증 금지.
+- 각 테스트는 observable한 **동작(behavior)** 을 검증. 내부 구현 상태(private flag 등) 검증 금지. stub의 호출 추적 변수(`didCallXxx`) 대신 실제 사이드이펙트(예: store 상태 변경, 스트림 방출값)로 검증할 것.
 - `// given / when / then` 주석으로 구조 명시. 모든 테스트 메서드에 반드시 포함할 것.
 
 ```swift
