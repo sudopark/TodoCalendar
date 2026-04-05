@@ -139,6 +139,10 @@ struct EventListView: View {
                 )
                 return appearance.googleEventColor(google.colorId, google.calendarId)
             }
+            if let apple = cvm.colorSource as? AppleCalendarEventColorSource {
+                return model.appleCalendarTags[apple.calendarId]?.colorHex
+                    .flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor
+            }
             switch cvm.colorSource as? EventTagId {
             case .holiday:
                 return defColors.holiday

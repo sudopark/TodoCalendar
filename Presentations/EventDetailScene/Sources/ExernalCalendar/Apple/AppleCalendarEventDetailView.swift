@@ -177,8 +177,11 @@ struct AppleCalendarEventDetailView: View {
 
     private var nameView: some View {
         HStack {
+            let calendarColor: Color = self.state.tagModel
+                .map { appearance.appleCalendarColor($0.calendarId).asColor }
+                ?? appearance.colorSet.accent.asColor
             RoundedRectangle(cornerRadius: 3)
-                .fill(appearance.colorSet.accent.asColor)
+                .fill(calendarColor)
                 .frame(width: 6)
 
             Text(self.state.eventName)
