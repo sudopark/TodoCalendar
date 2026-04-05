@@ -43,6 +43,8 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
         hasForemost: Bool = true,
         isGoogleAccountIntegrated: Bool = false,
         isAppleCalendarIntegrated: Bool = false,
+        shouldFailGoogleCalendar: Bool = false,
+        shouldFailAppleCalendar: Bool = false,
         eventDetail: EventDetailData? = nil
     ) -> CalendarEventFetchUsecaseImple {
 
@@ -63,6 +65,9 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
             isGoogleAccountIntegrated: isGoogleAccountIntegrated,
             isAppleCalendarIntegrated: isAppleCalendarIntegrated
         )
+
+        self.stubGoogleCalendarRepository.shouldFail = shouldFailGoogleCalendar
+        self.stubAppleCalendarRepository.shouldFail = shouldFailAppleCalendar
 
         let detailRepository = StubEventDetailRepository()
         detailRepository.stubDetail = eventDetail
@@ -201,6 +206,43 @@ extension CalendarEventFetchUsecaseImpleTests {
         XCTAssertEqual(events.googleCalendarColors?.calendars.count, 1)
     }
     
+    // 애플캘린더 조회 실패 시에도 나머지 이벤트는 정상 반환
+    func testUsecase_whenAppleCalendarFailed_stillReturnOtherEvents() async throws {
+        // given
+        let usecase = self.makeUsecase(
+            isAppleCalendarIntegrated: true,
+            shouldFailAppleCalendar: true
+        )
+        let range = self.dummyRange
+
+        // when
+        let events = try await usecase.fetchEvents(in: range, kst)
+
+        // then
+        XCTAssertEqual(events.currentTodos.count, 1)
+        XCTAssertEqual(events.eventWithTimes.count, 3)
+        XCTAssertEqual(events.appleCalendarTags.isEmpty, true)
+    }
+
+    // 구글캘린더 조회 실패 시에도 나머지 이벤트는 정상 반환
+    func testUsecase_whenGoogleCalendarFailed_stillReturnOtherEvents() async throws {
+        // given
+        let usecase = self.makeUsecase(
+            isGoogleAccountIntegrated: true,
+            shouldFailGoogleCalendar: true
+        )
+        let range = self.dummyRange
+
+        // when
+        let events = try await usecase.fetchEvents(in: range, kst)
+
+        // then
+        XCTAssertEqual(events.currentTodos.count, 1)
+        XCTAssertEqual(events.eventWithTimes.count, 3)
+        XCTAssertEqual(events.googleCalendarTags.isEmpty, true)
+        XCTAssertNil(events.googleCalendarColors)
+    }
+
     // 해당시간에 해당하는 이벤트 정보 반환시에 시간순 정렬
     func testUsecase_whenFetchEvents_sortByTime() async throws {
         // given

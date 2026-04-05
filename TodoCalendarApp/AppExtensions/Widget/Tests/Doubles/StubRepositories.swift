@@ -43,24 +43,35 @@ final class StubExternalCalendarRepository: ExternalCalendarIntegrateRepository,
 }
 
 final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked Sendable {
-    
+
+    var shouldFail: Bool = false
+
     func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
         let colorSet = GoogleCalendar.Colors.ColorSet(foregroundHex: "for", backgroudHex: "back")
         let colors = GoogleCalendar.Colors(
             ownerId: "stub@google.com", calendars: ["c1": colorSet], events: ["e1": colorSet]
         )
         return Just(colors).mapAsAnyError().eraseToAnyPublisher()
     }
-    
+
     func loadCalendarTags() -> AnyPublisher<[GoogleCalendar.Tag], any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
         let tags: [GoogleCalendar.Tag] = [
             .init(id: "c1", name: "c1"), .init(id: "c2", name: "c2")
         ]
         return Just(tags).mapAsAnyError().eraseToAnyPublisher()
     }
-    
+
     var eventMocking: [GoogleCalendar.Event]?
     func loadEvents(_ calendarId: String, in period: Range<TimeInterval>) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
         if let eventMocking {
             return Just(eventMocking).mapAsAnyError().eraseToAnyPublisher()
         }
@@ -78,13 +89,13 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
 }
 
 final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchecked Sendable {
-    
-    func loadEvent(id: String) -> AnyPublisher<Domain.AppleCalendar.Event?, Never> {
-        return Empty().eraseToAnyPublisher()
-    }
-    
+
+    var shouldFail: Bool = false
 
     func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
         let tags: [AppleCalendar.Tag] = [
             .init(id: "a:1", name: "Work", colorHex: "#FF0000"),
             .init(id: "a:2", name: "Personal", colorHex: "#00FF00")
@@ -94,6 +105,9 @@ final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchec
 
     var eventMocking: [AppleCalendar.Event]?
     func loadEvents(in period: Range<TimeInterval>) -> AnyPublisher<[AppleCalendar.Event], any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
         if let eventMocking {
             return Just(eventMocking).mapAsAnyError().eraseToAnyPublisher()
         }
