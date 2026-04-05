@@ -112,7 +112,7 @@ final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchec
             return Just(eventMocking).mapAsAnyError().eraseToAnyPublisher()
         }
         let event = AppleCalendar.Event(
-            eventId: "ae1", calendarId: "a:1", name: "apple", eventTime: .period(period)
+            eventId: "ae1", originalEventId: "ae1", calendarId: "a:1", name: "apple", eventTime: .period(period)
         )
         return Just([event]).mapAsAnyError().eraseToAnyPublisher()
     }

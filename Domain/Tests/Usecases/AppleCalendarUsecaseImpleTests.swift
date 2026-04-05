@@ -49,6 +49,7 @@ final class AppleCalendarUsecaseImpleTests: PublisherWaitable {
         return (0..<count).map { i in
             AppleCalendar.Event(
                 eventId: "event:\(i)",
+                originalEventId: "event:\(i)",
                 calendarId: "cal:0",
                 name: "Event \(i)",
                 eventTime: .period(TimeInterval(i)..<TimeInterval(i + 1))

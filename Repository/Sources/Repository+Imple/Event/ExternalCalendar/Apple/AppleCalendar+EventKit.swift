@@ -115,11 +115,18 @@ private extension EKEvent {
 
         guard let eventTime else { return nil }
 
+        let isRepeating = hasRecurrenceRules
+        let compositeId: String = isRepeating
+            ? "\(eventId)#occ:\(Int(occurrenceDate.timeIntervalSince1970))"
+            : eventId
+
         return AppleCalendar.Event(
-            eventId: eventId,
+            eventId: compositeId,
+            originalEventId: eventId,
             calendarId: calendarId,
             name: title ?? "",
             eventTime: eventTime,
+            isRepeating: isRepeating,
             location: location,
             url: url?.absoluteString,
             notes: notes

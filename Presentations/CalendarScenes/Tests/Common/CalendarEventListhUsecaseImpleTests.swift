@@ -157,6 +157,7 @@ extension CalendarEventListhUsecaseImpleTests {
         let appleEvents = (0..<2).map { int in
             AppleCalendar.Event(
                 eventId: "a:\(int)",
+                originalEventId: "a:\(int)",
                 calendarId: "apple-cal",
                 name: "apple-event",
                 eventTime: .at(0)
