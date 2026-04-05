@@ -130,6 +130,8 @@ struct AppleCalendarEventDetailView: View {
                     Spacer(minLength: 5)
                     self.nameView
 
+                    self.eventTypeView
+
                     VStack(spacing: 16) {
                         if let timeText = self.state.timeText {
                             self.timeView(timeText)
@@ -156,6 +158,21 @@ struct AppleCalendarEventDetailView: View {
             }
         }
         .background(appearance.colorSet.bg0.asColor)
+    }
+
+    private var eventTypeView: some View {
+        HStack(spacing: 6) {
+            Image("apple_calendar_icon")
+                .resizable()
+                .scaledToFill()
+                .frame(width: 25, height: 25)
+
+            Text("eventDetail::appleCalendarEvent::calendar::event".localized())
+                .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                .font(self.appearance.fontSet.normal.asFont)
+
+            Spacer()
+        }
     }
 
     private var nameView: some View {
