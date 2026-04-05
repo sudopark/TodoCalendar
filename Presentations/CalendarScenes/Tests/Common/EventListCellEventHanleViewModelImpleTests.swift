@@ -596,6 +596,7 @@ extension AppleCalendarEventCellViewModel {
     static func dummy() -> AppleCalendarEventCellViewModel {
         let appleEvent = AppleCalendar.Event(
             eventId: "apple-event",
+            originalEventId: "apple-event",
             calendarId: "apple-calendar",
             name: "Apple Event",
             eventTime: .at(1),

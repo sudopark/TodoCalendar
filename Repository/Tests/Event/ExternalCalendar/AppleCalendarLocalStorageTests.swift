@@ -40,6 +40,7 @@ final class AppleCalendarLocalStorageTests: PublisherWaitable, LocalTestable {
         return [
             .init(
                 eventId: "event-1",
+                originalEventId: "event-1",
                 calendarId: "cal-1",
                 name: "Event 1",
                 eventTime: .period(period.lowerBound..<mid),
@@ -47,6 +48,7 @@ final class AppleCalendarLocalStorageTests: PublisherWaitable, LocalTestable {
             ),
             .init(
                 eventId: "event-2",
+                originalEventId: "event-2",
                 calendarId: "cal-2",
                 name: "Event 2",
                 eventTime: .allDay(mid..<period.upperBound, secondsFromGMT: 32400),
@@ -126,6 +128,7 @@ extension AppleCalendarLocalStorageTests {
             let oldEvents = self.dummyEvents(for: period)
             let newEvent = AppleCalendar.Event(
                 eventId: "event-new",
+                originalEventId: "event-new",
                 calendarId: "cal-1",
                 name: "New Event",
                 eventTime: .period(100..<900),
@@ -151,12 +154,14 @@ extension AppleCalendarLocalStorageTests {
             let events = [
                 AppleCalendar.Event(
                     eventId: "event-a",
+                    originalEventId: "event-a",
                     calendarId: "cal-1",
                     name: "A",
                     eventTime: .period(0..<500)
                 ),
                 AppleCalendar.Event(
                     eventId: "event-b",
+                    originalEventId: "event-b",
                     calendarId: "cal-1",
                     name: "B",
                     eventTime: .period(1500..<2000)

@@ -354,7 +354,7 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
     public let name: String
     public var periodText: EventPeriodText?
     public var periodDescription: String?
-    public let isRepeating: Bool = false
+    public let isRepeating: Bool
     public var isForemost: Bool = false
     public let calendarId: String
     public var isAlldayEvent: Bool = false
@@ -370,6 +370,7 @@ public struct AppleCalendarEventCellViewModel: EventCellViewModel {
         self.eventIdentifier = event.eventId
         self.colorSource = AppleCalendarEventColorSource(calendarId: event.calendarId)
         self.name = event.name
+        self.isRepeating = event.isRepeating
         self.periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
         self.periodDescription = event.eventTime?.durationText(timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText)
         self.calendarId = event.calendarId

@@ -115,6 +115,7 @@ extension AppleCalendarRepositoryImpleTests {
             let storage = AppleCalendarLocalStorageImple(connectionPool: pool)
             let cachedEvent = AppleCalendar.Event(
                 eventId: "cached-event",
+                originalEventId: "cached-event",
                 calendarId: "cal-1",
                 name: "Cached",
                 eventTime: .period(100..<500)
@@ -181,6 +182,7 @@ extension AppleCalendarRepositoryImpleTests {
             let storage = AppleCalendarLocalStorageImple(connectionPool: pool)
             let event = AppleCalendar.Event(
                 eventId: "e-1",
+                originalEventId: "e-1",
                 calendarId: "cal-1",
                 name: "Event",
                 eventTime: .period(0..<500)
@@ -214,7 +216,7 @@ private final class StubAppleCalendarStoreAccessor: AppleCalendarStoreAccessor, 
         .init(id: "store-cal-\($0)", name: "Store Calendar \($0)", colorHex: nil)
     }
     var stubEvents: [AppleCalendar.Event] = (0..<2).map {
-        .init(eventId: "store-event-\($0)", calendarId: "store-cal-0", name: "Store Event \($0)", eventTime: .period(100..<500))
+        .init(eventId: "store-event-\($0)", originalEventId: "store-event-\($0)", calendarId: "store-cal-0", name: "Store Event \($0)", eventTime: .period(100..<500))
     }
 
     func requestFullAccessToEvents() async throws -> Bool { requestGranted }

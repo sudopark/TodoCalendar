@@ -42,28 +42,34 @@ extension AppleCalendar {
     public struct Event: Sendable {
 
         public let eventId: String
+        public let originalEventId: String
         public let calendarId: String
         public let name: String
         public let eventTagId: EventTagId
         public let eventTime: EventTime
+        public let isRepeating: Bool
         public let location: String?
         public let url: String?
         public let notes: String?
 
         public init(
             eventId: String,
+            originalEventId: String,
             calendarId: String,
             name: String,
             eventTime: EventTime,
+            isRepeating: Bool = false,
             location: String? = nil,
             url: String? = nil,
             notes: String? = nil
         ) {
             self.eventId = eventId
+            self.originalEventId = originalEventId
             self.calendarId = calendarId
             self.name = name
             self.eventTagId = .externalCalendar(serviceId: AppleCalendarService.id, id: calendarId)
             self.eventTime = eventTime
+            self.isRepeating = isRepeating
             self.location = location
             self.url = url
             self.notes = notes

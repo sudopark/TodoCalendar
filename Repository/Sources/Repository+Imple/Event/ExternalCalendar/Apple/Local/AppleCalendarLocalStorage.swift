@@ -110,9 +110,11 @@ extension AppleCalendarLocalStorageImple {
             let time = try Times.Entity(cursor).eventTime.unwrap()
             return AppleCalendar.Event(
                 eventId: event.eventId,
+                originalEventId: event.originalEventId,
                 calendarId: event.calendarId,
                 name: event.name,
                 eventTime: time,
+                isRepeating: event.isRepeating,
                 location: event.location,
                 url: event.url,
                 notes: event.notes
@@ -137,9 +139,11 @@ extension AppleCalendarLocalStorageImple {
             let time = try Times.Entity(cursor).eventTime.unwrap()
             return AppleCalendar.Event(
                 eventId: event.eventId,
+                originalEventId: event.originalEventId,
                 calendarId: event.calendarId,
                 name: event.name,
                 eventTime: time,
+                isRepeating: event.isRepeating,
                 location: event.location,
                 url: event.url,
                 notes: event.notes

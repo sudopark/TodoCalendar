@@ -275,7 +275,7 @@ public struct AppleCalendarEvent: CalendarEvent {
     public let eventTimeOnCalendar: EventTimeOnCalendar?
     public let eventTagId: EventTagId
     public let isForemost: Bool = false
-    public let isRepeating: Bool = false
+    public let isRepeating: Bool
     public var locationText: String?
 
     public init(_ event: AppleCalendar.Event, in timeZone: TimeZone) {
@@ -285,6 +285,7 @@ public struct AppleCalendarEvent: CalendarEvent {
         self.eventTime = event.eventTime
         self.eventTimeOnCalendar = EventTimeOnCalendar(event.eventTime, timeZone: timeZone)
         self.eventTagId = event.eventTagId
+        self.isRepeating = event.isRepeating
         self.locationText = event.location
     }
 

@@ -686,6 +686,7 @@ extension DayEventListViewModelImpleTests {
         let appleEvent = AppleCalendarEvent(
             AppleCalendar.Event(
                 eventId: "apple-1",
+                originalEventId: "apple-1",
                 calendarId: "cal-1",
                 name: "Apple Event",
                 eventTime: .at(self.todayRange.lowerBound + 50),

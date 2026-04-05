@@ -41,6 +41,7 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         appleUsecase.stubEvents = [
             AppleCalendar.Event(
                 eventId: stubEventId,
+                originalEventId: stubEventId,
                 calendarId: stubCalendarId,
                 name: "Team Meeting",
                 eventTime: .period(start.timeIntervalSince1970..<end.timeIntervalSince1970),
@@ -68,6 +69,7 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         appleUsecase.stubEvents = [
             AppleCalendar.Event(
                 eventId: stubEventId,
+                originalEventId: stubEventId,
                 calendarId: stubCalendarId,
                 name: "Meeting",
                 eventTime: .at(Date().timeIntervalSince1970),
@@ -95,6 +97,7 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
         appleUsecase.stubEvents = [
             AppleCalendar.Event(
                 eventId: stubEventId,
+                originalEventId: stubEventId,
                 calendarId: stubCalendarId,
                 name: "Meeting",
                 eventTime: .at(Date().timeIntervalSince1970),

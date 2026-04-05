@@ -83,9 +83,27 @@ extension AppleCalendarRepositoryImple {
                 guard let self else { return }
                 let cached = try? await self.cacheStorage.loadEvent(id: id)
                 subscriber.send(cached)
-                let refreshed = self.storeAccessor.loadEvent(id: id)
-                logger.log(.appleCalendar, level: .info, "event loaded from EventKit", with: ["id": id, "found": refreshed != nil])
-                subscriber.send(refreshed)
+
+                let originalId = cached?.originalEventId ?? id
+                let master = self.storeAccessor.loadEvent(id: originalId)
+                logger.log(.appleCalendar, level: .info, "event loaded from EventKit", with: ["id": id, "found": master != nil])
+
+                if let cached, let master {
+                    let merged = AppleCalendar.Event(
+                        eventId: cached.eventId,
+                        originalEventId: cached.originalEventId,
+                        calendarId: cached.calendarId,
+                        name: master.name,
+                        eventTime: cached.eventTime,
+                        isRepeating: cached.isRepeating,
+                        location: master.location,
+                        url: master.url,
+                        notes: master.notes
+                    )
+                    subscriber.send(merged)
+                } else {
+                    subscriber.send(master)
+                }
                 subscriber.send(completion: .finished)
             }
             return AnyCancellable { task.cancel() }
