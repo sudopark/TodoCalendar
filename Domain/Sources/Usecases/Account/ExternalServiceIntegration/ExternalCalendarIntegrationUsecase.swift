@@ -56,6 +56,23 @@ extension ExternalCalendarIntegrationUsecase {
     public func currentIntegratedAccounts(for serviceId: String) -> [ExternalServiceAccountinfo] {
         return self.currentIntegratedAccounts().filter { $0.serviceIdentifier == serviceId }
     }
+
+    public func currentOrNewIntegratedAccount(
+        for serviceId: String
+    ) -> AnyPublisher<ExternalServiceAccountinfo, Never> {
+        let currents = Just(self.currentIntegratedAccounts(for: serviceId))
+            .flatMap { $0.publisher }
+        let newIntegrated = self.integrationStatusChanged
+            .compactMap { status -> ExternalServiceAccountinfo? in
+                switch status {
+                case .integrated(let sid, let account) where sid == serviceId:
+                    return account
+                default: return nil
+                }
+            }
+        return currents.append(newIntegrated)
+            .eraseToAnyPublisher()
+    }
 }
 
 

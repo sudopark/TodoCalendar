@@ -312,6 +312,41 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         #expect(account.email == AppleCalendarService.localAccountId)
     }
 
+    @Test func currentOrNewIntegratedAccount_whenAlreadyIntegrated_emitsCurrentThenStops() async throws {
+        // given
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let account = ExternalServiceAccountinfo(service.identifier, email: "google@email.com")
+        let usecase = self.makeUsecase(startWithIntegrated: [account])
+        try await usecase.prepareIntegratedAccounts()
+
+        // when
+        var emitted: [ExternalServiceAccountinfo] = []
+        let sub = usecase.currentOrNewIntegratedAccount(for: service.identifier)
+            .sink { emitted.append($0) }
+        try await Task.sleep(for: .milliseconds(100))
+        sub.cancel()
+
+        // then — 현재 연동 계정 1회만 방출, 중복 없음
+        #expect(emitted.count == 1)
+        #expect(emitted.first?.email == "google@email.com")
+    }
+
+    @Test func currentOrNewIntegratedAccount_whenNewIntegration_emitsOnceWithoutDuplicate() async throws {
+        // given
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let usecase = self.makeUsecase()
+        let expect = self.expectConfirm("신규 연동 시 계정 1회만 방출")
+
+        // when
+        let accounts = try await self.outputs(expect, for: usecase.currentOrNewIntegratedAccount(for: service.identifier)) {
+            _ = try await usecase.integrate(external: service)
+        }
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 신규 연동 계정 1회만 방출, integratedServiceAccounts 업데이트에 의한 중복 없음
+        #expect(accounts.count == 1)
+        #expect(accounts.first?.email == "google@email.com")
+    }
 }
 
 
