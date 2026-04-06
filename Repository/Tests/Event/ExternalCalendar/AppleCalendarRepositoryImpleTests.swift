@@ -113,14 +113,14 @@ extension AppleCalendarRepositoryImpleTests {
             let period: Range<TimeInterval> = 0..<1000
             let pool = StubConnectionPool(self.sqliteService)
             let storage = AppleCalendarLocalStorageImple(connectionPool: pool)
-            let cachedEvent = AppleCalendar.Event(
+            let cachedEvent = AppleCalendar.EventOrigin(
                 eventId: "cached-event",
                 originalEventId: "cached-event",
                 calendarId: "cal-1",
                 name: "Cached",
                 eventTime: .period(100..<500)
             )
-            try await storage.saveEvents([cachedEvent], in: period)
+            try await storage.saveEventOrigins([cachedEvent], in: period)
             let repo = AppleCalendarRepositoryImple(
                 storeAccessor: self.stubAccessor,
                 cacheStorage: storage
@@ -180,7 +180,7 @@ extension AppleCalendarRepositoryImpleTests {
             let period: Range<TimeInterval> = 0..<1000
             let pool = StubConnectionPool(self.sqliteService)
             let storage = AppleCalendarLocalStorageImple(connectionPool: pool)
-            let event = AppleCalendar.Event(
+            let event = AppleCalendar.EventOrigin(
                 eventId: "e-1",
                 originalEventId: "e-1",
                 calendarId: "cal-1",
@@ -188,7 +188,7 @@ extension AppleCalendarRepositoryImpleTests {
                 eventTime: .period(0..<500)
             )
             try await storage.saveCalendarTags([.init(id: "cal-1", name: "Cal", colorHex: nil)])
-            try await storage.saveEvents([event], in: period)
+            try await storage.saveEventOrigins([event], in: period)
             let repo = AppleCalendarRepositoryImple(
                 storeAccessor: self.stubAccessor,
                 cacheStorage: storage
@@ -225,8 +225,8 @@ private final class StubAppleCalendarStoreAccessor: AppleCalendarStoreAccessor, 
     func requestFullAccessToEvents() async throws -> Bool { requestGranted }
     func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus { isAuthorized ? .fullAccess : .denied }
     func loadCalendarTags() -> [AppleCalendar.Tag] { stubTags }
-    func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event] {
-        stubOrigins.map { $0.asEvent() }
+    func loadEventOrigins(in period: Range<TimeInterval>) -> [AppleCalendar.EventOrigin] {
+        stubOrigins
     }
     func loadEventOrigin(id: String) -> AppleCalendar.EventOrigin? {
         stubOrigins.first { $0.eventId == id }

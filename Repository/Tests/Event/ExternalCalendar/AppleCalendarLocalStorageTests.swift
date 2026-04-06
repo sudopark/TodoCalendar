@@ -35,26 +35,29 @@ final class AppleCalendarLocalStorageTests: PublisherWaitable, LocalTestable {
         ]
     }
 
-    private func dummyEvents(for period: Range<TimeInterval>) -> [AppleCalendar.Event] {
+    private func dummyOrigins(for period: Range<TimeInterval>) -> [AppleCalendar.EventOrigin] {
         let mid = (period.lowerBound + period.upperBound) / 2
-        return [
-            .init(
-                eventId: "event-1",
-                originalEventId: "event-1",
-                calendarId: "cal-1",
-                name: "Event 1",
-                eventTime: .period(period.lowerBound..<mid),
-                location: "Seoul"
-            ),
-            .init(
-                eventId: "event-2",
-                originalEventId: "event-2",
-                calendarId: "cal-2",
-                name: "Event 2",
-                eventTime: .allDay(mid..<period.upperBound, secondsFromGMT: 32400),
-                location: nil
-            )
-        ]
+        var origin1 = AppleCalendar.EventOrigin(
+            eventId: "event-1", originalEventId: "event-1",
+            calendarId: "cal-1", name: "Event 1",
+            eventTime: .period(period.lowerBound..<mid)
+        )
+        origin1.location = "Seoul"
+        origin1.recurrenceRules = ["RRULE:FREQ=WEEKLY;INTERVAL=1"]
+        origin1.url = "https://example.com"
+        origin1.notes = "some notes"
+
+        var origin2 = AppleCalendar.EventOrigin(
+            eventId: "event-2", originalEventId: "event-2",
+            calendarId: "cal-2", name: "Event 2",
+            eventTime: .allDay(mid..<period.upperBound, secondsFromGMT: 32400)
+        )
+        var attendee = AppleCalendar.Attendee(name: "Alice", email: "alice@example.com")
+        attendee.isOrganizer = true
+        attendee.status = .accepted
+        origin2.attendees = [attendee]
+
+        return [origin1, origin2]
     }
 }
 
@@ -99,44 +102,88 @@ extension AppleCalendarLocalStorageTests {
 }
 
 
-// MARK: - event 저장 / 로드
+// MARK: - EventOrigin 저장 / 로드
 
 extension AppleCalendarLocalStorageTests {
 
-    @Test func events_saveAndLoad() async throws {
+    @Test func saveOrigins_thenLoadEvents_returnsLightweight() async throws {
         try await runTestWithOpenClose("apple_events_1") { [self] in
             // given
             let storage = self.makeStorage()
             let period: Range<TimeInterval> = 0..<1000
-            let events = self.dummyEvents(for: period)
+            let origins = self.dummyOrigins(for: period)
 
             // when
-            try await storage.saveEvents(events, in: period)
+            try await storage.saveEventOrigins(origins, in: period)
             let loaded = try await storage.loadEvents(in: period)
 
             // then
-            #expect(loaded.count == events.count)
-            #expect(Set(loaded.map(\.eventId)) == Set(events.map(\.eventId)))
+            #expect(loaded.count == origins.count)
+            #expect(Set(loaded.map(\.eventId)) == Set(origins.map(\.eventId)))
+            // location은 포함
+            #expect(loaded.first(where: { $0.eventId == "event-1" })?.location == "Seoul")
+            // recurrenceRules/attendees/url/notes는 Event에 없음
         }
     }
 
-    @Test func events_save_replacesOverlappingEvents() async throws {
+    @Test func saveOrigins_thenLoadEventOrigin_returnsFullData() async throws {
         try await runTestWithOpenClose("apple_events_2") { [self] in
             // given
             let storage = self.makeStorage()
             let period: Range<TimeInterval> = 0..<1000
-            let oldEvents = self.dummyEvents(for: period)
-            let newEvent = AppleCalendar.Event(
-                eventId: "event-new",
-                originalEventId: "event-new",
-                calendarId: "cal-1",
-                name: "New Event",
-                eventTime: .period(100..<900)
-            )
+            let origins = self.dummyOrigins(for: period)
+            try await storage.saveEventOrigins(origins, in: period)
 
             // when
-            try await storage.saveEvents(oldEvents, in: period)
-            try await storage.saveEvents([newEvent], in: period)
+            let loaded = try await storage.loadEventOrigin(id: "event-1")
+
+            // then
+            let result = try #require(loaded)
+            #expect(result.eventId == "event-1")
+            #expect(result.location == "Seoul")
+            #expect(result.recurrenceRules == ["RRULE:FREQ=WEEKLY;INTERVAL=1"])
+            #expect(result.url == "https://example.com")
+            #expect(result.notes == "some notes")
+        }
+    }
+
+    @Test func saveOrigins_thenLoadEventOrigin_withAttendees() async throws {
+        try await runTestWithOpenClose("apple_events_3") { [self] in
+            // given
+            let storage = self.makeStorage()
+            let period: Range<TimeInterval> = 0..<1000
+            let origins = self.dummyOrigins(for: period)
+            try await storage.saveEventOrigins(origins, in: period)
+
+            // when
+            let loaded = try await storage.loadEventOrigin(id: "event-2")
+
+            // then
+            let result = try #require(loaded)
+            #expect(result.attendees.count == 1)
+            #expect(result.attendees.first?.name == "Alice")
+            #expect(result.attendees.first?.email == "alice@example.com")
+            #expect(result.attendees.first?.isOrganizer == true)
+            #expect(result.attendees.first?.status == .accepted)
+        }
+    }
+
+    @Test func saveOrigins_replacesOverlappingEvents() async throws {
+        try await runTestWithOpenClose("apple_events_4") { [self] in
+            // given
+            let storage = self.makeStorage()
+            let period: Range<TimeInterval> = 0..<1000
+            let oldOrigins = self.dummyOrigins(for: period)
+            var newOrigin = AppleCalendar.EventOrigin(
+                eventId: "event-new", originalEventId: "event-new",
+                calendarId: "cal-1", name: "New Event",
+                eventTime: .period(100..<900)
+            )
+            newOrigin.url = "https://new.com"
+
+            // when
+            try await storage.saveEventOrigins(oldOrigins, in: period)
+            try await storage.saveEventOrigins([newOrigin], in: period)
             let loaded = try await storage.loadEvents(in: period)
 
             // then
@@ -145,28 +192,35 @@ extension AppleCalendarLocalStorageTests {
         }
     }
 
-    @Test func events_loadByPeriod_returnsOnlyOverlapping() async throws {
-        try await runTestWithOpenClose("apple_events_3") { [self] in
+    @Test func loadEventOrigin_whenNotExist_returnsNil() async throws {
+        try await runTestWithOpenClose("apple_events_5") { [self] in
+            // given
+            let storage = self.makeStorage()
+
+            // when
+            let loaded = try await storage.loadEventOrigin(id: "nonexistent")
+
+            // then
+            #expect(loaded == nil)
+        }
+    }
+
+    @Test func loadEvents_returnsOnlyOverlappingPeriod() async throws {
+        try await runTestWithOpenClose("apple_events_6") { [self] in
             // given
             let storage = self.makeStorage()
             let saveRange: Range<TimeInterval> = 0..<2000
-            let events = [
-                AppleCalendar.Event(
-                    eventId: "event-a",
-                    originalEventId: "event-a",
-                    calendarId: "cal-1",
-                    name: "A",
-                    eventTime: .period(0..<500)
-                ),
-                AppleCalendar.Event(
-                    eventId: "event-b",
-                    originalEventId: "event-b",
-                    calendarId: "cal-1",
-                    name: "B",
-                    eventTime: .period(1500..<2000)
-                )
-            ]
-            try await storage.saveEvents(events, in: saveRange)
+            var originA = AppleCalendar.EventOrigin(
+                eventId: "event-a", originalEventId: "event-a",
+                calendarId: "cal-1", name: "A",
+                eventTime: .period(0..<500)
+            )
+            var originB = AppleCalendar.EventOrigin(
+                eventId: "event-b", originalEventId: "event-b",
+                calendarId: "cal-1", name: "B",
+                eventTime: .period(1500..<2000)
+            )
+            try await storage.saveEventOrigins([originA, originB], in: saveRange)
 
             // when
             let loaded = try await storage.loadEvents(in: 0..<600)
@@ -189,7 +243,7 @@ extension AppleCalendarLocalStorageTests {
             let storage = self.makeStorage()
             let period: Range<TimeInterval> = 0..<1000
             try await storage.saveCalendarTags(self.dummyTags())
-            try await storage.saveEvents(self.dummyEvents(for: period), in: period)
+            try await storage.saveEventOrigins(self.dummyOrigins(for: period), in: period)
 
             // when
             try await storage.resetAll()

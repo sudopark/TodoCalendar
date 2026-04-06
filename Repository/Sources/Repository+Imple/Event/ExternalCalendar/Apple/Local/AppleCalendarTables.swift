@@ -65,18 +65,22 @@ struct AppleCalendarEventTable: Table {
         let name: String
         let isRepeating: Bool
         let location: String?
+        let recurrenceRules: [String]
+        let attendees: [AppleCalendar.Attendee]
         let url: String?
         let notes: String?
 
-        init(_ event: AppleCalendar.Event) {
-            self.eventId = event.eventId
-            self.originalEventId = event.originalEventId
-            self.calendarId = event.calendarId
-            self.name = event.name
-            self.isRepeating = event.isRepeating
-            self.location = event.location
-            self.url = nil
-            self.notes = nil
+        init(_ origin: AppleCalendar.EventOrigin) {
+            self.eventId = origin.eventId
+            self.originalEventId = origin.originalEventId
+            self.calendarId = origin.calendarId
+            self.name = origin.name
+            self.isRepeating = origin.isRepeating
+            self.location = origin.location
+            self.recurrenceRules = origin.recurrenceRules
+            self.attendees = origin.attendees
+            self.url = origin.url
+            self.notes = origin.notes
         }
 
         init(_ cursor: CursorIterator) throws {
@@ -86,8 +90,52 @@ struct AppleCalendarEventTable: Table {
             self.name = try cursor.next().unwrap()
             self.isRepeating = (try? cursor.next().unwrap()) ?? false
             self.location = cursor.next()
+            self.recurrenceRules = Self.decodeRules(cursor.next())
+            self.attendees = Self.decodeAttendees(cursor.next())
             self.url = cursor.next()
             self.notes = cursor.next()
+        }
+
+        func asEventOrigin(eventTime: EventTime) -> AppleCalendar.EventOrigin {
+            var origin = AppleCalendar.EventOrigin(
+                eventId: eventId,
+                originalEventId: originalEventId,
+                calendarId: calendarId,
+                name: name,
+                eventTime: eventTime
+            )
+            origin.isRepeating = isRepeating
+            origin.location = location
+            origin.recurrenceRules = recurrenceRules
+            origin.attendees = attendees
+            origin.url = url
+            origin.notes = notes
+            return origin
+        }
+
+        private static func decodeRules(_ json: String?) -> [String] {
+            guard let json,
+                  let data = json.data(using: .utf8),
+                  let rules = try? JSONDecoder().decode([String].self, from: data)
+            else { return [] }
+            return rules
+        }
+
+        private static func decodeAttendees(_ json: String?) -> [AppleCalendar.Attendee] {
+            guard let json,
+                  let data = json.data(using: .utf8),
+                  let dicts = try? JSONDecoder().decode([[String: String]].self, from: data)
+            else { return [] }
+            return dicts.map { dict in
+                var attendee = AppleCalendar.Attendee(
+                    name: dict["name"],
+                    email: dict["email"]
+                )
+                attendee.isOrganizer = dict["isOrganizer"] == "true"
+                attendee.isCurrentUser = dict["isCurrentUser"] == "true"
+                attendee.status = AppleCalendar.Attendee.Status(rawValue: dict["status"] ?? "") ?? .unknown
+                return attendee
+            }
         }
     }
 
@@ -98,6 +146,8 @@ struct AppleCalendarEventTable: Table {
         case name
         case isRepeating = "is_repeating"
         case location
+        case recurrenceRules = "recurrence_rules"
+        case attendees
         case url
         case notes
 
@@ -109,6 +159,8 @@ struct AppleCalendarEventTable: Table {
             case .name: return .text([.notNull])
             case .isRepeating: return .integer([])
             case .location: return .text([])
+            case .recurrenceRules: return .text([])
+            case .attendees: return .text([])
             case .url: return .text([])
             case .notes: return .text([])
             }
@@ -127,9 +179,32 @@ struct AppleCalendarEventTable: Table {
         case .name: return entity.name
         case .isRepeating: return entity.isRepeating ? 1 : 0
         case .location: return entity.location
+        case .recurrenceRules: return encodeRules(entity.recurrenceRules)
+        case .attendees: return encodeAttendees(entity.attendees)
         case .url: return entity.url
         case .notes: return entity.notes
         }
     }
 
+    private static func encodeRules(_ rules: [String]) -> String? {
+        guard !rules.isEmpty,
+              let data = try? JSONEncoder().encode(rules)
+        else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private static func encodeAttendees(_ attendees: [AppleCalendar.Attendee]) -> String? {
+        guard !attendees.isEmpty else { return nil }
+        let dicts = attendees.map { attendee -> [String: String] in
+            var dict: [String: String] = [:]
+            if let name = attendee.name { dict["name"] = name }
+            if let email = attendee.email { dict["email"] = email }
+            dict["isOrganizer"] = attendee.isOrganizer ? "true" : "false"
+            dict["isCurrentUser"] = attendee.isCurrentUser ? "true" : "false"
+            dict["status"] = attendee.status.rawValue
+            return dict
+        }
+        guard let data = try? JSONEncoder().encode(dicts) else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
 }
