@@ -689,8 +689,7 @@ extension DayEventListViewModelImpleTests {
                 originalEventId: "apple-1",
                 calendarId: "cal-1",
                 name: "Apple Event",
-                eventTime: .at(self.todayRange.lowerBound + 50),
-                location: nil
+                eventTime: .at(self.todayRange.lowerBound + 50)
             ),
             in: timeZone
         )

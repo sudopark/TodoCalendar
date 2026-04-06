@@ -75,8 +75,8 @@ struct AppleCalendarEventTable: Table {
             self.name = event.name
             self.isRepeating = event.isRepeating
             self.location = event.location
-            self.url = event.url
-            self.notes = event.notes
+            self.url = nil
+            self.notes = nil
         }
 
         init(_ cursor: CursorIterator) throws {

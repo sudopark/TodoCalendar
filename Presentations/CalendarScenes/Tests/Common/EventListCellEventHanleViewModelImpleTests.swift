@@ -599,8 +599,7 @@ extension AppleCalendarEventCellViewModel {
             originalEventId: "apple-event",
             calendarId: "apple-calendar",
             name: "Apple Event",
-            eventTime: .at(1),
-            location: nil
+            eventTime: .at(1)
         )
         let calendarEvent = AppleCalendarEvent(appleEvent, in: TimeZone.current)
         return AppleCalendarEventCellViewModel(

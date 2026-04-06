@@ -38,16 +38,15 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
 
         let start = Date(timeIntervalSince1970: 1748059200) // 2025-05-24 12:00 UTC
         let end = Date(timeIntervalSince1970: 1748145600)   // 2025-05-25 12:00 UTC
-        appleUsecase.stubEvents = [
-            AppleCalendar.Event(
-                eventId: stubEventId,
-                originalEventId: stubEventId,
-                calendarId: stubCalendarId,
-                name: "Team Meeting",
-                eventTime: .period(start.timeIntervalSince1970..<end.timeIntervalSince1970),
-                location: "Conference Room A"
-            )
-        ]
+        var stubEvent = AppleCalendar.Event(
+            eventId: stubEventId,
+            originalEventId: stubEventId,
+            calendarId: stubCalendarId,
+            name: "Team Meeting",
+            eventTime: .period(start.timeIntervalSince1970..<end.timeIntervalSince1970)
+        )
+        stubEvent.location = "Conference Room A"
+        appleUsecase.stubEvents = [stubEvent]
 
         let viewModel = AppleCalendarEventDetailViewModelImple(
             calendarId: stubCalendarId,
@@ -72,9 +71,7 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
                 originalEventId: stubEventId,
                 calendarId: stubCalendarId,
                 name: "Meeting",
-                eventTime: .at(Date().timeIntervalSince1970),
-                url: "https://example.com",
-                notes: "Meeting notes"
+                eventTime: .at(Date().timeIntervalSince1970)
             )
         ]
         let viewModel = AppleCalendarEventDetailViewModelImple(
@@ -100,8 +97,7 @@ final class AppleCalendarEventDetailViewModelImpleTests: PublisherWaitable {
                 originalEventId: stubEventId,
                 calendarId: stubCalendarId,
                 name: "Meeting",
-                eventTime: .at(Date().timeIntervalSince1970),
-                location: nil
+                eventTime: .at(Date().timeIntervalSince1970)
             )
         ]
         let viewModel = AppleCalendarEventDetailViewModelImple(

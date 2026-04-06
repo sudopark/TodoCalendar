@@ -131,8 +131,7 @@ extension AppleCalendarLocalStorageTests {
                 originalEventId: "event-new",
                 calendarId: "cal-1",
                 name: "New Event",
-                eventTime: .period(100..<900),
-                location: nil
+                eventTime: .period(100..<900)
             )
 
             // when

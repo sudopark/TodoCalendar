@@ -120,17 +120,16 @@ private extension EKEvent {
             ? "\(eventId)#occ:\(Int(occurrenceDate.timeIntervalSince1970))"
             : eventId
 
-        return AppleCalendar.Event(
+        var event = AppleCalendar.Event(
             eventId: compositeId,
             originalEventId: eventId,
             calendarId: calendarId,
             name: title ?? "",
-            eventTime: eventTime,
-            isRepeating: isRepeating,
-            location: location,
-            url: url?.absoluteString,
-            notes: notes
+            eventTime: eventTime
         )
+        event.isRepeating = isRepeating
+        event.location = location
+        return event
     }
 
     private func makeAllDayEventTime() -> EventTime? {

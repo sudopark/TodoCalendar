@@ -89,17 +89,15 @@ extension AppleCalendarRepositoryImple {
                 logger.log(.appleCalendar, level: .info, "event loaded from EventKit", with: ["id": id, "found": master != nil])
 
                 if let cached, let master {
-                    let merged = AppleCalendar.Event(
+                    var merged = AppleCalendar.Event(
                         eventId: cached.eventId,
                         originalEventId: cached.originalEventId,
                         calendarId: cached.calendarId,
                         name: master.name,
-                        eventTime: cached.eventTime,
-                        isRepeating: cached.isRepeating,
-                        location: master.location,
-                        url: master.url,
-                        notes: master.notes
+                        eventTime: cached.eventTime
                     )
+                    merged.isRepeating = cached.isRepeating
+                    merged.location = master.location
                     subscriber.send(merged)
                 } else {
                     subscriber.send(master)
