@@ -106,19 +106,18 @@ extension AppleCalendarLocalStorageImple {
         let query = Events.selectAll().innerJoin(with: timeQuery, on: { ($0.eventId, $1.eventId) })
 
         let mapping: (CursorIterator) throws -> AppleCalendar.Event = { cursor in
-            let event = try Events.Entity(cursor)
+            let entity = try Events.Entity(cursor)
             let time = try Times.Entity(cursor).eventTime.unwrap()
-            return AppleCalendar.Event(
-                eventId: event.eventId,
-                originalEventId: event.originalEventId,
-                calendarId: event.calendarId,
-                name: event.name,
-                eventTime: time,
-                isRepeating: event.isRepeating,
-                location: event.location,
-                url: event.url,
-                notes: event.notes
+            var event = AppleCalendar.Event(
+                eventId: entity.eventId,
+                originalEventId: entity.originalEventId,
+                calendarId: entity.calendarId,
+                name: entity.name,
+                eventTime: time
             )
+            event.isRepeating = entity.isRepeating
+            event.location = entity.location
+            return event
         }
 
         let connection = try await self.connection()
@@ -135,19 +134,18 @@ extension AppleCalendarLocalStorageImple {
             .innerJoin(with: Times.selectAll { $0.eventId == id }, on: { ($0.eventId, $1.eventId) })
 
         let mapping: (CursorIterator) throws -> AppleCalendar.Event = { cursor in
-            let event = try Events.Entity(cursor)
+            let entity = try Events.Entity(cursor)
             let time = try Times.Entity(cursor).eventTime.unwrap()
-            return AppleCalendar.Event(
-                eventId: event.eventId,
-                originalEventId: event.originalEventId,
-                calendarId: event.calendarId,
-                name: event.name,
-                eventTime: time,
-                isRepeating: event.isRepeating,
-                location: event.location,
-                url: event.url,
-                notes: event.notes
+            var event = AppleCalendar.Event(
+                eventId: entity.eventId,
+                originalEventId: entity.originalEventId,
+                calendarId: entity.calendarId,
+                name: entity.name,
+                eventTime: time
             )
+            event.isRepeating = entity.isRepeating
+            event.location = entity.location
+            return event
         }
 
         let connection = try await self.connection()

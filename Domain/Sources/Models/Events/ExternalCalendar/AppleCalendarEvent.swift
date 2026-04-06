@@ -44,24 +44,18 @@ extension AppleCalendar {
         public let eventId: String
         public let originalEventId: String
         public let calendarId: String
-        public let name: String
+        public var name: String
         public let eventTagId: EventTagId
         public let eventTime: EventTime
-        public let isRepeating: Bool
-        public let location: String?
-        public let url: String?
-        public let notes: String?
+        public var isRepeating: Bool = false
+        public var location: String?
 
         public init(
             eventId: String,
             originalEventId: String,
             calendarId: String,
             name: String,
-            eventTime: EventTime,
-            isRepeating: Bool = false,
-            location: String? = nil,
-            url: String? = nil,
-            notes: String? = nil
+            eventTime: EventTime
         ) {
             self.eventId = eventId
             self.originalEventId = originalEventId
@@ -69,10 +63,80 @@ extension AppleCalendar {
             self.name = name
             self.eventTagId = .externalCalendar(serviceId: AppleCalendarService.id, id: calendarId)
             self.eventTime = eventTime
-            self.isRepeating = isRepeating
-            self.location = location
-            self.url = url
-            self.notes = notes
+        }
+    }
+}
+
+
+// MARK: - Attendee
+
+extension AppleCalendar {
+
+    public struct Attendee: Sendable, Equatable {
+
+        public enum Status: String, Sendable, Equatable {
+            case unknown, pending, accepted, declined, tentative
+        }
+
+        public var name: String?
+        public var email: String?
+        public var isOrganizer: Bool = false
+        public var isCurrentUser: Bool = false
+        public var status: Status = .unknown
+
+        public init(name: String? = nil, email: String? = nil) {
+            self.name = name
+            self.email = email
+        }
+    }
+}
+
+
+// MARK: - EventOrigin
+
+extension AppleCalendar {
+
+    public struct EventOrigin: Sendable {
+
+        public let eventId: String
+        public let originalEventId: String
+        public let calendarId: String
+        public var name: String
+        public let eventTagId: EventTagId
+        public let eventTime: EventTime
+        public var isRepeating: Bool = false
+        public var location: String?
+        public var recurrenceRules: [String] = []
+        public var attendees: [Attendee] = []
+        public var url: String?
+        public var notes: String?
+
+        public init(
+            eventId: String,
+            originalEventId: String,
+            calendarId: String,
+            name: String,
+            eventTime: EventTime
+        ) {
+            self.eventId = eventId
+            self.originalEventId = originalEventId
+            self.calendarId = calendarId
+            self.name = name
+            self.eventTagId = .externalCalendar(serviceId: AppleCalendarService.id, id: calendarId)
+            self.eventTime = eventTime
+        }
+
+        public func asEvent() -> Event {
+            var event = Event(
+                eventId: eventId,
+                originalEventId: originalEventId,
+                calendarId: calendarId,
+                name: name,
+                eventTime: eventTime
+            )
+            event.isRepeating = isRepeating
+            event.location = location
+            return event
         }
     }
 }

@@ -42,19 +42,19 @@ struct EventCellViewModelWidgetURL_Tests {
         let apple = AppleCalendar.Event(
             eventId: "apple-event", originalEventId: "apple-event",
             calendarId: "apple-calendar",
-            name: "some", eventTime: .at(100), location: nil
+            name: "some", eventTime: .at(100)
         )
         let event = AppleCalendarEvent(apple, in: .current)
         return .init(event, in: 0..<10, .current, true)!
     }
 
     func makeRepeatingAppleModel() -> AppleCalendarEventCellViewModel {
-        let apple = AppleCalendar.Event(
+        var apple = AppleCalendar.Event(
             eventId: "ABC123#occ:1712345678", originalEventId: "ABC123",
             calendarId: "apple-calendar",
-            name: "repeating", eventTime: .at(100), isRepeating: true,
-            location: nil
+            name: "repeating", eventTime: .at(100)
         )
+        apple.isRepeating = true
         let event = AppleCalendarEvent(apple, in: .current)
         return .init(event, in: 0..<10, .current, true)!
     }
