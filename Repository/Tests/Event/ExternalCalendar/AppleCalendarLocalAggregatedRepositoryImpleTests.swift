@@ -86,11 +86,12 @@ extension AppleCalendarLocalAggregatedRepositoryImpleTests {
         // given
         let period: Range<TimeInterval> = 0..<1000
         let storage = localStorage(pool: pool)
-        let events: [AppleCalendar.Event] = [
+        let origins: [AppleCalendar.EventOrigin] = [
             .init(eventId: "e-1", originalEventId: "e-1", calendarId: "cal-1", name: "Meeting", eventTime: .period(100..<300)),
             .init(eventId: "e-2", originalEventId: "e-2", calendarId: "cal-2", name: "Lunch", eventTime: .period(400..<600))
         ]
-        try await storage.saveEvents(events, in: period)
+        try await storage.saveEventOrigins(origins, in: period)
+
         let repo = makeRepository(pool: pool)
 
         // when

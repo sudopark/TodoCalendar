@@ -18,7 +18,7 @@ public protocol AppleCalendarStoreAccessor: Sendable {
     func requestFullAccessToEvents() async throws -> Bool
     func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus
     func loadCalendarTags() -> [AppleCalendar.Tag]
-    func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event]
+    func loadEventOrigins(in period: Range<TimeInterval>) -> [AppleCalendar.EventOrigin]
     func loadEventOrigin(id: String) -> AppleCalendar.EventOrigin?
 }
 
@@ -72,12 +72,12 @@ public final class EKEventStoreWrapper: AppleCalendarStoreAccessor, @unchecked S
         return store.calendars(for: .event).map { $0.asAppleCalendarTag() }
     }
 
-    public func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event] {
+    public func loadEventOrigins(in period: Range<TimeInterval>) -> [AppleCalendar.EventOrigin] {
         let calendars = store.calendars(for: .event)
         let start = Date(timeIntervalSince1970: period.lowerBound)
         let end = Date(timeIntervalSince1970: period.upperBound)
         let predicate = store.predicateForEvents(withStart: start, end: end, calendars: calendars)
-        return store.events(matching: predicate).compactMap { $0.asAppleCalendarEvent() }
+        return store.events(matching: predicate).compactMap { $0.asAppleCalendarEventOrigin() }
     }
 
     public func loadEventOrigin(id: String) -> AppleCalendar.EventOrigin? {

@@ -65,10 +65,10 @@ extension AppleCalendarRepositoryImple {
                     logger.log(.appleCalendar, level: .debug, "events from cache", with: ["count": cached.count, "period": self.periodDescription(period)])
                     subscriber.send(cached)
                 }
-                let refreshed = self.storeAccessor.loadEvents(in: period)
+                let refreshed = self.storeAccessor.loadEventOrigins(in: period)
                 logger.log(.appleCalendar, level: .info, "events refreshed from EventKit", with: ["count": refreshed.count, "period": self.periodDescription(period)])
-                try? await self.cacheStorage.saveEvents(refreshed, in: period)
-                subscriber.send(refreshed)
+                try? await self.cacheStorage.saveEventOrigins(refreshed, in: period)
+                subscriber.send(refreshed.map { $0.asEvent() })
                 subscriber.send(completion: .finished)
             }
             return AnyCancellable { task.cancel() }
@@ -81,36 +81,15 @@ extension AppleCalendarRepositoryImple {
         return AnyPublisher<AppleCalendar.EventOrigin?, Never>.create { [weak self] subscriber in
             let task = Task { [weak self] in
                 guard let self else { return }
-                let cachedEvent = try? await self.cacheStorage.loadEvent(id: id)
-                let cachedOrigin = cachedEvent.map { event -> AppleCalendar.EventOrigin in
-                    var origin = AppleCalendar.EventOrigin(
-                        eventId: event.eventId,
-                        originalEventId: event.originalEventId,
-                        calendarId: event.calendarId,
-                        name: event.name,
-                        eventTime: event.eventTime
-                    )
-                    origin.isRepeating = event.isRepeating
-                    origin.location = event.location
-                    return origin
-                }
-                subscriber.send(cachedOrigin)
+                let cached = try? await self.cacheStorage.loadEventOrigin(id: id)
+                subscriber.send(cached)
 
-                let originalId = cachedEvent?.originalEventId ?? id
+                let originalId = cached?.originalEventId ?? id
                 let master = self.storeAccessor.loadEventOrigin(id: originalId)
                 logger.log(.appleCalendar, level: .info, "event loaded from EventKit", with: ["id": id, "found": master != nil])
 
-                if let cachedOrigin, let master {
-                    var merged = AppleCalendar.EventOrigin(
-                        eventId: cachedOrigin.eventId,
-                        originalEventId: cachedOrigin.originalEventId,
-                        calendarId: cachedOrigin.calendarId,
-                        name: master.name,
-                        eventTime: cachedOrigin.eventTime
-                    )
-                    merged.isRepeating = cachedOrigin.isRepeating
-                    merged.location = master.location
-                    subscriber.send(merged)
+                if let cached, let master {
+                    subscriber.send(Self.mergeOrigin(cached: cached, master: master))
                 } else {
                     subscriber.send(master)
                 }
@@ -119,6 +98,20 @@ extension AppleCalendarRepositoryImple {
             return AnyCancellable { task.cancel() }
         }
         .eraseToAnyPublisher()
+    }
+
+    private static func mergeOrigin(
+        cached: AppleCalendar.EventOrigin,
+        master: AppleCalendar.EventOrigin
+    ) -> AppleCalendar.EventOrigin {
+        var merged = cached
+        merged.name = master.name
+        merged.location = master.location
+        merged.recurrenceRules = master.recurrenceRules
+        merged.attendees = master.attendees
+        merged.url = master.url
+        merged.notes = master.notes
+        return merged
     }
 
     public func resetCache() async throws {
