@@ -44,7 +44,17 @@ open class StubAppleCalendarUsecase: AppleCalendarUsecase, @unchecked Sendable {
         Just(stubEvents).eraseToAnyPublisher()
     }
 
-    open func event(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
-        Just(stubEvents.first(where: { $0.eventId == id })).eraseToAnyPublisher()
+    public var stubEventOrigin: AppleCalendar.EventOrigin?
+    open func eventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never> {
+        if let stubEventOrigin {
+            return Just(stubEventOrigin).eraseToAnyPublisher()
+        }
+        let origin = stubEvents.first(where: { $0.eventId == id }).map { event in
+            AppleCalendar.EventOrigin(
+                eventId: event.eventId, originalEventId: event.originalEventId,
+                calendarId: event.calendarId, name: event.name, eventTime: event.eventTime
+            )
+        }
+        return Just(origin).eraseToAnyPublisher()
     }
 }

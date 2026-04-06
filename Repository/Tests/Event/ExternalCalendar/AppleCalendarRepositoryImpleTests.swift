@@ -215,15 +215,22 @@ private final class StubAppleCalendarStoreAccessor: AppleCalendarStoreAccessor, 
     var stubTags: [AppleCalendar.Tag] = (0..<3).map {
         .init(id: "store-cal-\($0)", name: "Store Calendar \($0)", colorHex: nil)
     }
-    var stubEvents: [AppleCalendar.Event] = (0..<2).map {
-        .init(eventId: "store-event-\($0)", originalEventId: "store-event-\($0)", calendarId: "store-cal-0", name: "Store Event \($0)", eventTime: .period(100..<500))
+    var stubOrigins: [AppleCalendar.EventOrigin] = (0..<2).map {
+        AppleCalendar.EventOrigin(
+            eventId: "store-event-\($0)", originalEventId: "store-event-\($0)",
+            calendarId: "store-cal-0", name: "Store Event \($0)", eventTime: .period(100..<500)
+        )
     }
 
     func requestFullAccessToEvents() async throws -> Bool { requestGranted }
     func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus { isAuthorized ? .fullAccess : .denied }
     func loadCalendarTags() -> [AppleCalendar.Tag] { stubTags }
-    func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event] { stubEvents }
-    func loadEvent(id: String) -> AppleCalendar.Event? { stubEvents.first { $0.eventId == id } }
+    func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event] {
+        stubOrigins.map { $0.asEvent() }
+    }
+    func loadEventOrigin(id: String) -> AppleCalendar.EventOrigin? {
+        stubOrigins.first { $0.eventId == id }
+    }
 }
 
 private final class StubConnectionPool: ExternalCalendarDBConnectionPool, @unchecked Sendable {

@@ -31,7 +31,7 @@ public protocol AppleCalendarUsecase: Sendable {
 
     var calendarTags: AnyPublisher<[AppleCalendar.Tag], Never> { get }
     func events(in period: Range<TimeInterval>) -> AnyPublisher<[AppleCalendar.Event], Never>
-    func event(id: String) -> AnyPublisher<AppleCalendar.Event?, Never>
+    func eventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never>
 }
 
 
@@ -188,7 +188,7 @@ extension AppleCalendarUsecaseImple {
             .eraseToAnyPublisher()
     }
 
-    public func event(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
-        return self.repository.loadEvent(id: id)
+    public func eventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never> {
+        return self.repository.loadEventOrigin(id: id)
     }
 }

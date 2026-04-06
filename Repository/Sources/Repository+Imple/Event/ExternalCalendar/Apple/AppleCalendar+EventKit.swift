@@ -19,7 +19,7 @@ public protocol AppleCalendarStoreAccessor: Sendable {
     func checkAuthorizationStatus() -> AppleCalendarAuthorizationStatus
     func loadCalendarTags() -> [AppleCalendar.Tag]
     func loadEvents(in period: Range<TimeInterval>) -> [AppleCalendar.Event]
-    func loadEvent(id: String) -> AppleCalendar.Event?
+    func loadEventOrigin(id: String) -> AppleCalendar.EventOrigin?
 }
 
 
@@ -80,8 +80,8 @@ public final class EKEventStoreWrapper: AppleCalendarStoreAccessor, @unchecked S
         return store.events(matching: predicate).compactMap { $0.asAppleCalendarEvent() }
     }
 
-    public func loadEvent(id: String) -> AppleCalendar.Event? {
-        return store.event(withIdentifier: id)?.asAppleCalendarEvent()
+    public func loadEventOrigin(id: String) -> AppleCalendar.EventOrigin? {
+        return store.event(withIdentifier: id)?.asAppleCalendarEventOrigin()
     }
 }
 
@@ -100,7 +100,7 @@ private extension EKCalendar {
 }
 
 
-// MARK: - EKEvent → AppleCalendar.Event
+// MARK: - EKEvent → AppleCalendar models
 
 private extension EKEvent {
 
@@ -130,6 +130,36 @@ private extension EKEvent {
         event.isRepeating = isRepeating
         event.location = location
         return event
+    }
+
+    func asAppleCalendarEventOrigin() -> AppleCalendar.EventOrigin? {
+        guard let eventId = eventIdentifier,
+              let calendarId = calendar?.calendarIdentifier
+        else { return nil }
+
+        let eventTime = isAllDay
+            ? makeAllDayEventTime()
+            : makePeriodEventTime()
+
+        guard let eventTime else { return nil }
+
+        let isRepeating = hasRecurrenceRules
+        let compositeId: String = isRepeating
+            ? "\(eventId)#occ:\(Int(occurrenceDate.timeIntervalSince1970))"
+            : eventId
+
+        var origin = AppleCalendar.EventOrigin(
+            eventId: compositeId,
+            originalEventId: eventId,
+            calendarId: calendarId,
+            name: title ?? "",
+            eventTime: eventTime
+        )
+        origin.isRepeating = isRepeating
+        origin.location = location
+        origin.url = url?.absoluteString
+        origin.notes = notes
+        return origin
     }
 
     private func makeAllDayEventTime() -> EventTime? {
