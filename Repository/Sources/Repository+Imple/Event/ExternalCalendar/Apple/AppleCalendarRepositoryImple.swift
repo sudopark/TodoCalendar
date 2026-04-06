@@ -77,26 +77,38 @@ extension AppleCalendarRepositoryImple {
         .eraseToAnyPublisher()
     }
 
-    public func loadEvent(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
-        return AnyPublisher<AppleCalendar.Event?, Never>.create { [weak self] subscriber in
+    public func loadEventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never> {
+        return AnyPublisher<AppleCalendar.EventOrigin?, Never>.create { [weak self] subscriber in
             let task = Task { [weak self] in
                 guard let self else { return }
-                let cached = try? await self.cacheStorage.loadEvent(id: id)
-                subscriber.send(cached)
+                let cachedEvent = try? await self.cacheStorage.loadEvent(id: id)
+                let cachedOrigin = cachedEvent.map { event -> AppleCalendar.EventOrigin in
+                    var origin = AppleCalendar.EventOrigin(
+                        eventId: event.eventId,
+                        originalEventId: event.originalEventId,
+                        calendarId: event.calendarId,
+                        name: event.name,
+                        eventTime: event.eventTime
+                    )
+                    origin.isRepeating = event.isRepeating
+                    origin.location = event.location
+                    return origin
+                }
+                subscriber.send(cachedOrigin)
 
-                let originalId = cached?.originalEventId ?? id
-                let master = self.storeAccessor.loadEvent(id: originalId)
+                let originalId = cachedEvent?.originalEventId ?? id
+                let master = self.storeAccessor.loadEventOrigin(id: originalId)
                 logger.log(.appleCalendar, level: .info, "event loaded from EventKit", with: ["id": id, "found": master != nil])
 
-                if let cached, let master {
-                    var merged = AppleCalendar.Event(
-                        eventId: cached.eventId,
-                        originalEventId: cached.originalEventId,
-                        calendarId: cached.calendarId,
+                if let cachedOrigin, let master {
+                    var merged = AppleCalendar.EventOrigin(
+                        eventId: cachedOrigin.eventId,
+                        originalEventId: cachedOrigin.originalEventId,
+                        calendarId: cachedOrigin.calendarId,
                         name: master.name,
-                        eventTime: cached.eventTime
+                        eventTime: cachedOrigin.eventTime
                     )
-                    merged.isRepeating = cached.isRepeating
+                    merged.isRepeating = cachedOrigin.isRepeating
                     merged.location = master.location
                     subscriber.send(merged)
                 } else {

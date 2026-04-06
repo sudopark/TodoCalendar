@@ -35,9 +35,18 @@ open class StubAppleCalendarRepository: AppleCalendarRepository, @unchecked Send
             .eraseToAnyPublisher()
     }
 
-    open func loadEvent(id: String) -> AnyPublisher<AppleCalendar.Event?, Never> {
-        return Just(stubEvents.first(where: { $0.eventId == id }))
-            .eraseToAnyPublisher()
+    public var stubEventOrigin: AppleCalendar.EventOrigin?
+    open func loadEventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never> {
+        if let stubEventOrigin {
+            return Just(stubEventOrigin).eraseToAnyPublisher()
+        }
+        let origin = stubEvents.first(where: { $0.eventId == id }).map { event in
+            AppleCalendar.EventOrigin(
+                eventId: event.eventId, originalEventId: event.originalEventId,
+                calendarId: event.calendarId, name: event.name, eventTime: event.eventTime
+            )
+        }
+        return Just(origin).eraseToAnyPublisher()
     }
 
     public var didResetCache = false

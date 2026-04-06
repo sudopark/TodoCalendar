@@ -72,7 +72,7 @@ final class AppleCalendarEventDetailViewModelImple: AppleCalendarEventDetailView
 
     private struct Subject {
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
-        let event = CurrentValueSubject<AppleCalendar.Event?, Never>(nil)
+        let event = CurrentValueSubject<AppleCalendar.EventOrigin?, Never>(nil)
         let calendarTag = CurrentValueSubject<AppleCalendar.Tag?, Never>(nil)
     }
 
@@ -103,17 +103,17 @@ final class AppleCalendarEventDetailViewModelImple: AppleCalendarEventDetailView
 extension AppleCalendarEventDetailViewModelImple {
 
     func refresh() {
-        self.appleCalendarUsecase.event(id: self.eventId)
+        self.appleCalendarUsecase.eventOrigin(id: self.eventId)
             .compactMap { $0 }
-            .sink { [weak self] event in
-                self?.subject.event.send(event)
+            .sink { [weak self] origin in
+                self?.subject.event.send(origin)
             }
             .store(in: &self.cancellables)
     }
 
     func openInAppleCalendar() {
-        guard let event = self.subject.event.value else { return }
-        let startInterval = event.eventTime.lowerBoundWithFixed
+        guard let origin = self.subject.event.value else { return }
+        let startInterval = origin.eventTime.lowerBoundWithFixed
         self.router?.routeToAppleCalendarApp(at: startInterval)
     }
 
@@ -152,7 +152,7 @@ extension AppleCalendarEventDetailViewModelImple {
     }
 
     var ddayText: AnyPublisher<String, Never> {
-        let countDays: (AppleCalendar.Event, TimeZone) -> AnyPublisher<Int, Never> = { [weak self] event, _ in
+        let countDays: (AppleCalendar.EventOrigin, TimeZone) -> AnyPublisher<Int, Never> = { [weak self] event, _ in
             guard let self else { return Empty().eraseToAnyPublisher() }
             return self.daysIntervalCountUsecase.countDays(to: event.eventTime)
         }

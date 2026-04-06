@@ -21,7 +21,7 @@ public protocol AppleCalendarRepository: Sendable {
         in period: Range<TimeInterval>
     ) -> AnyPublisher<[AppleCalendar.Event], any Error>
 
-    func loadEvent(id: String) -> AnyPublisher<AppleCalendar.Event?, Never>
+    func loadEventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never>
 
     func resetCache() async throws
 }
