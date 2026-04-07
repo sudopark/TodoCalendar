@@ -36,9 +36,11 @@ protocol AppleCalendarEventDetailViewModel: AnyObject, Sendable, AppleCalendarEv
     var eventName: AnyPublisher<String, Never> { get }
     var timeText: AnyPublisher<SelectedTime?, Never> { get }
     var ddayText: AnyPublisher<String, Never> { get }
+    var repeatText: AnyPublisher<String?, Never> { get }
     var location: AnyPublisher<String?, Never> { get }
     var url: AnyPublisher<String?, Never> { get }
     var notes: AnyPublisher<String?, Never> { get }
+    var attendees: AnyPublisher<[AppleCalendar.Attendee], Never> { get }
     var tagModel: AnyPublisher<AppleCalendarTagModel?, Never> { get }
 }
 
@@ -176,10 +178,28 @@ extension AppleCalendarEventDetailViewModelImple {
             .eraseToAnyPublisher()
     }
 
+    var repeatText: AnyPublisher<String?, Never> {
+        return Publishers.CombineLatest(
+            self.subject.event.compactMap { $0 },
+            self.subject.timeZone.compactMap { $0 }
+        )
+        .map { event, timeZone -> String? in
+            guard let rruleString = event.recurrenceRules.first,
+                  let rrule = RRuleParser.parse(rruleString) else { return nil }
+            let frequencyText = rrule.frequencyText()
+            if let endText = rrule.endOptionText(timeZone) {
+                return "\(frequencyText) \(endText)"
+            }
+            return frequencyText
+        }
+        .removeDuplicates()
+        .eraseToAnyPublisher()
+    }
+
     var url: AnyPublisher<String?, Never> {
         return self.subject.event
             .compactMap { $0 }
-            .map { $0.url }
+            .map { $0.url.flatMap { $0.isEmpty ? nil : $0 } }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
@@ -188,6 +208,14 @@ extension AppleCalendarEventDetailViewModelImple {
         return self.subject.event
             .compactMap { $0 }
             .map { $0.notes }
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    var attendees: AnyPublisher<[AppleCalendar.Attendee], Never> {
+        return self.subject.event
+            .compactMap { $0 }
+            .map { $0.attendees }
             .removeDuplicates()
             .eraseToAnyPublisher()
     }

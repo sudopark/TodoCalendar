@@ -22,9 +22,11 @@ import CommonPresentation
     var eventName: String = ""
     var timeText: SelectedTime?
     var ddayText: String = ""
+    var repeatText: String?
     var location: String?
     var url: String?
     var notes: String?
+    var attendees: [AppleCalendar.Attendee] = []
     var tagModel: AppleCalendarTagModel?
 
     func bind(_ viewModel: any AppleCalendarEventDetailViewModel) {
@@ -53,6 +55,13 @@ import CommonPresentation
             })
             .store(in: &self.cancellables)
 
+        viewModel.repeatText
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] text in
+                self?.repeatText = text
+            })
+            .store(in: &self.cancellables)
+
         viewModel.location
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
@@ -71,6 +80,13 @@ import CommonPresentation
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] text in
                 self?.notes = text
+            })
+            .store(in: &self.cancellables)
+
+        viewModel.attendees
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] list in
+                self?.attendees = list
             })
             .store(in: &self.cancellables)
 
@@ -156,8 +172,16 @@ struct AppleCalendarEventDetailView: View {
                         }
                         self.ddayView
 
+                        if let repeatText = self.state.repeatText {
+                            self.repeatView(repeatText)
+                        }
+
                         if let location = self.state.location {
                             self.locationView(location)
+                        }
+
+                        if !self.state.attendees.isEmpty {
+                            self.attendeesView(self.state.attendees)
                         }
 
                         if let url = self.state.url {
@@ -283,6 +307,75 @@ struct AppleCalendarEventDetailView: View {
 
             Spacer()
         }
+    }
+
+    private func repeatView(_ repeatText: String) -> some View {
+        HStack(spacing: 16) {
+            Image(systemName: "repeat")
+                .font(.system(size: 16, weight: .light))
+                .foregroundStyle(self.appearance.colorSet.text1.asColor)
+
+            Text(repeatText)
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+
+            Spacer()
+        }
+    }
+
+    private func attendeesView(_ attendees: [AppleCalendar.Attendee]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 16) {
+                Image(systemName: "person.2")
+                    .font(.system(size: 16, weight: .light))
+                    .foregroundStyle(self.appearance.colorSet.text1.asColor)
+
+                Text("eventDetail::appleCalendarEvent::attendees".localized(with: attendees.count))
+                    .font(appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+
+                Spacer()
+            }
+
+            ForEach(Array(attendees.enumerated()), id: \.offset) { _, attendee in
+                self.attendeeView(attendee)
+            }
+        }
+    }
+
+    private func attendeeView(_ attendee: AppleCalendar.Attendee) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: attendee.status == .accepted ? "checkmark.circle.fill" : "circle")
+                .font(.system(size: 14))
+                .foregroundStyle(attendee.status == .accepted
+                    ? appearance.colorSet.accent.asColor
+                    : appearance.colorSet.text1.asColor)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(attendee.name ?? attendee.email ?? "")
+                    .font(appearance.fontSet.normal.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+
+                if let email = attendee.email, attendee.name != nil {
+                    Text(email)
+                        .font(appearance.fontSet.size(13).asFont)
+                        .foregroundStyle(appearance.colorSet.text1.asColor)
+                }
+            }
+
+            if attendee.isOrganizer {
+                Text("eventDetail::appleCalendarEvent::attendees::organizer".localized())
+                    .font(appearance.fontSet.size(12).asFont)
+                    .foregroundStyle(appearance.colorSet.text1.asColor)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(appearance.colorSet.bg1.asColor)
+                    .clipShape(Capsule())
+            }
+
+            Spacer()
+        }
+        .padding(.leading, 32)
     }
 
     private func locationView(_ location: String) -> some View {

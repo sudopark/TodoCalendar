@@ -266,6 +266,8 @@
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "애플 캘린더에서 보기";
 "eventDetail::appleCalendarEvent::calendar::event" = "애플 캘린더 이벤트";
+"eventDetail::appleCalendarEvent::attendees" = "참석자 (%d명)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "주최자";
 
 // MARK: - event tag
 
