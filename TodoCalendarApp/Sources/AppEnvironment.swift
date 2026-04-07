@@ -46,7 +46,7 @@ struct AppEnvironment {
     
     static func externalCalendarDBPaths() -> [String: String] {
         let googlePath = self.dbPath(fileName: "\(GoogleCalendarService.id)_calendar")
-        let applePath = self.dbPath(fileName: "\(AppleCalendarService.id)_calendar")
+        let applePath = self.dbPath(fileName: "\(AppleCalendarService.id)__calendar")
         return [
             GoogleCalendarService.id: googlePath,
             AppleCalendarService.id: applePath
