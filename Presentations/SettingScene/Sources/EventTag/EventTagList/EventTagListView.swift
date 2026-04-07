@@ -261,10 +261,14 @@ struct EventTagListView: View {
 
     private func externalCellView(_ cellViewModel: ExternalCalendarEventTagCellViewModel) -> some View {
         let colorSource: any EventTagColorSource = {
-            if case .externalCalendar(_, let calendarId) = cellViewModel.id {
+            switch cellViewModel.id {
+            case .externalCalendar(AppleCalendarService.id, let calendarId):
+                return AppleCalendarEventColorSource(calendarId: calendarId)
+            case .externalCalendar(_, let calendarId):
                 return GoogleCalendarEventColorSource(calendarId: calendarId, colorId: nil)
+            default:
+                return cellViewModel.id
             }
-            return cellViewModel.id
         }()
 
         return HStack {

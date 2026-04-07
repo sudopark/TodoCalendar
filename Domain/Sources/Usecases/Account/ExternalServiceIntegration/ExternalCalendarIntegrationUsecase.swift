@@ -56,6 +56,23 @@ extension ExternalCalendarIntegrationUsecase {
     public func currentIntegratedAccounts(for serviceId: String) -> [ExternalServiceAccountinfo] {
         return self.currentIntegratedAccounts().filter { $0.serviceIdentifier == serviceId }
     }
+
+    public func currentOrNewIntegratedAccount(
+        for serviceId: String
+    ) -> AnyPublisher<ExternalServiceAccountinfo, Never> {
+        let currents = Just(self.currentIntegratedAccounts(for: serviceId))
+            .flatMap { $0.publisher }
+        let newIntegrated = self.integrationStatusChanged
+            .compactMap { status -> ExternalServiceAccountinfo? in
+                switch status {
+                case .integrated(let sid, let account) where sid == serviceId:
+                    return account
+                default: return nil
+                }
+            }
+        return currents.append(newIntegrated)
+            .eraseToAnyPublisher()
+    }
 }
 
 
@@ -131,10 +148,10 @@ extension ExternalCalendarIntegrationUsecaseImple {
             map[service.identifier]?.removeAll { $0.email == accountId }
             return map
         }
-        try? await self.dbConnectionController.close(serviceId: service.identifier)
         self.integrationStatusChangedSubject.send(
             .disconnected(serviceId: service.identifier, accountId: accountId)
         )
+        try? await self.dbConnectionController.close(serviceId: service.identifier)
     }
 
     public func handleAuthenticationResultOrNot(open url: URL) -> Bool {

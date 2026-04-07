@@ -277,17 +277,16 @@ extension AddEventViewModelImpleTests {
         // given
         let expect = expectation(description: "todo의 경우 이름만 입력하면 저장 가능해짐")
         expect.expectedFulfillmentCount = 2
-        let viewModel = self.makeViewModel()
-        
+        let viewModel = self.makeViewModelWithPrepare()
+
         // when
         let isSavables = self.waitOutputs(expect, for: viewModel.isSavable) {
-            viewModel.prepare()
             viewModel.toggleIsTodo()
             self.enter(viewModel) {
                 $0 |> \.name .~ "some"
             }
         }
-        
+
         // then
         XCTAssertEqual(isSavables, [false, true])
     }
@@ -323,17 +322,16 @@ extension AddEventViewModelImpleTests {
         // given
         let expect = expectation(description: "todo의 경우 이름만 입력하면 변경되었다 판단")
         expect.expectedFulfillmentCount = 2
-        let viewModel = self.makeViewModel()
-        
+        let viewModel = self.makeViewModelWithPrepare()
+
         // when
         let isSavables = self.waitOutputs(expect, for: viewModel.hasChanges) {
-            viewModel.prepare()
             viewModel.toggleIsTodo()
             self.enter(viewModel) {
                 $0 |> \.name .~ "some"
             }
         }
-        
+
         // then
         XCTAssertEqual(isSavables, [false, true])
     }
@@ -389,15 +387,17 @@ extension AddEventViewModelImpleTests {
         viewModel.eventDetail(didInput: basic, additional: addition)
     }
     
-    private func makeViewModelWithPrepare() -> AddEventViewModelImple {
+    private func makeViewModelWithPrepare(
+        shouldFailSaveDetailData: Bool = false
+    ) -> AddEventViewModelImple {
         let expect = expectation(description: "wait")
-        let viewModel = self.makeViewModel()
-        
+        let viewModel = self.makeViewModel(shouldFailSaveDetailData: shouldFailSaveDetailData)
+
         self.spyRouter.spyInteractor.didPreparedCallback = { expect.fulfill() }
-        
+
         viewModel.prepare()
         self.wait(for: [expect], timeout: self.timeout)
-        
+
         return viewModel
     }
     
@@ -498,13 +498,12 @@ extension AddEventViewModelImpleTests {
         // given
         let expect = expectation(description: "todo 저장 완료 이후에 event detail data 저장 실패해도 무시")
         expect.expectedFulfillmentCount = 3
-        let viewModel = self.makeViewModel(shouldFailSaveDetailData: true)
+        let viewModel = self.makeViewModelWithPrepare(shouldFailSaveDetailData: true)
         // when
         let isSavings = self.waitOutputs(expect, for: viewModel.isSaving) {
-            viewModel.prepare()
             viewModel.toggleIsTodo()
             self.enterAllInfo(viewModel)
-            
+
             viewModel.save()
         }
         

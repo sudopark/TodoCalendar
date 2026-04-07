@@ -180,6 +180,22 @@ extension ApplicationViewAppearanceStoreImple: GoogleCalendarViewAppearanceStore
 
 }
 
+extension ApplicationViewAppearanceStoreImple: AppleCalendarViewAppearanceStore {
+
+    func applyCalendarTags(_ tags: [AppleCalendar.Tag]) {
+        Task { @MainActor in
+            self.appearance.applyCalendarTags(tags)
+        }
+    }
+
+    func clearCalendarTags() {
+        Task { @MainActor in
+            self.appearance.clearCalendarTags()
+        }
+    }
+}
+
+
 // MARK: - ApplicationRootRouter
 
 protocol ApplicationRouting: Routing {
@@ -196,20 +212,23 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
     private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
+    private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
     private let applicationBase: ApplicationBase
     private let deepLinkHandler: ApplicationDeepLinkHandlerImple
     private var usecaseFactory: (any UsecaseFactory)!
-    
+
     init(
         authUsecase: any AuthUsecase,
         accountUsecase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
+        backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
         applicationBase: ApplicationBase,
         deepLinkHandler: ApplicationDeepLinkHandlerImple
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
+        self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
         self.applicationBase = applicationBase
         self.deepLinkHandler = deepLinkHandler
     }
@@ -309,6 +328,7 @@ extension ApplicationRootRouter {
                 applicationBase: applicationBase
             )
         }
+        self.backgroundEventSyncUsecase.change(factory: self.usecaseFactory)
     }
     
     @MainActor
@@ -348,13 +368,21 @@ extension ApplicationRootRouter {
             viewAppearance: self.viewAppearanceStore.appearance
         )
     }
-    
+
+    private func appleCalendarEventDetailBuilder() -> any AppleCalendarEventDetailSceneBuilder {
+        return AppleCalendarEventDetailSceneBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance
+        )
+    }
+
     private func eventDetailSceneBuilder() -> any EventDetailSceneBuilder {
         return EventDetailSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
             holidayEventDetailSceneBuilder: self.holidayEventDetailSceneBuilder(),
             googleCalendarEventDetailSceneBuilder: self.googleCalendarEventDetailBuilder(),
+            appleCalendarEventDetailSceneBuilder: self.appleCalendarEventDetailBuilder(),
             settingSceneBuilder: settingSceneBuilder()
         )
     }

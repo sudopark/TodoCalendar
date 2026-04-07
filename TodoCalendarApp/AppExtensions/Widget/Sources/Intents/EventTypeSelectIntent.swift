@@ -76,9 +76,10 @@ struct EventTypeQuery: EntityQuery, @unchecked Sendable {
         let baseTags = try await tagRepository.loadAllCustomTags()
             .values.first(where: { _ in true })?
             .map { Tags.custom($0) } ?? []
-        let externalTags = try await self.loadOnGoogleCalendarTags()
-        
-        return [.defaultTag] + baseTags + externalTags
+        let googleTags = (try? await self.loadOnGoogleCalendarTags()) ?? []
+        let appleTags = (try? await self.loadOnAppleCalendarTags()) ?? []
+
+        return [.defaultTag] + baseTags + googleTags + appleTags
     }
     
     private func asEntity(_ tag: Tags) -> EventTypeEntity {
@@ -96,9 +97,30 @@ struct EventTypeQuery: EntityQuery, @unchecked Sendable {
             return EventTypeEntity(id: tag.id, name: tag.name)
             |> \.externalServiceId .~ serviceId
             |> \.externalServiceName .~ "external_service.name::google".localized()
+
+        case .apple(let serviceId, let tag):
+            return EventTypeEntity(id: tag.id, name: tag.name)
+            |> \.externalServiceId .~ serviceId
+            |> \.externalServiceName .~ "event_setting::external_calendar::apple::serviceName".localized()
         }
     }
     
+    private func loadOnAppleCalendarTags() async throws -> [Tags] {
+
+        let externalCalendarRepository = factory.makeExternalCalendarAcountRepository()
+        let appleRepository = factory.makeAppleCalendarRepository()
+
+        let serviceId = AppleCalendarService.id
+        let externalAccounts = try await externalCalendarRepository.loadIntegratedAccounts()
+            .asDictionary { $0.serviceIdentifier }
+        guard externalAccounts[serviceId] != nil else { return [] }
+
+        let tags = try await appleRepository.loadCalendarTags()
+            .values.first(where: { _ in true })?
+            .map { Tags.apple(serviceId, $0) }
+        return tags ?? []
+    }
+
     private func loadOnGoogleCalendarTags() async throws -> [Tags] {
         
         let externalCalendarRepository = factory.makeExternalCalendarAcountRepository()
@@ -120,6 +142,7 @@ private enum Tags {
     case defaultTag
     case custom(CustomEventTag)
     case google(String, GoogleCalendar.Tag)
+    case apple(String, AppleCalendar.Tag)
 }
 
 

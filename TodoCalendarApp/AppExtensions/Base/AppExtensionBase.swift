@@ -50,14 +50,18 @@ final class AppExtensionBase {
     }()
     
     lazy var externalCalendarDBConnectionPool: AppExtensionExternalCalendarDBConnectionPool = {
-        guard let path = AppEnvironment.externalCalendarDBPaths()[GoogleCalendarService.id]
-        else {
-            fatalError()
+        let dbPaths = AppEnvironment.externalCalendarDBPaths()
+        var services: [String: SQLiteService] = [:]
+        for (serviceId, path) in dbPaths {
+            let service = SQLiteService(openWithReadOnly: true)
+            _ = service.open(path: path)
+            services[serviceId] = service
         }
-        let service = SQLiteService(openWithReadOnly: true)
-        _ = service.open(path: path)
-        let pool = AppExtensionExternalCalendarDBConnectionPool(sqliteService: service)
-        return pool
+        return AppExtensionExternalCalendarDBConnectionPool(services: services)
+    }()
+
+    lazy var appleCalendarPermissionChecker: AppleCalendarPermissionCheckerImple = {
+        return AppleCalendarPermissionCheckerImple(storeAccessor: EKEventStoreWrapper())
     }()
     
     lazy var firebaseAuthService: any FirebaseAuthService = {
@@ -188,14 +192,19 @@ class DummyFirebaseAuthService: FirebaseAuthService {
 
 actor AppExtensionExternalCalendarDBConnectionPool: ExternalCalendarDBConnectionPool {
 
-    private let sqliteService: SQLiteService
-    init(sqliteService: SQLiteService) {
-        self.sqliteService = sqliteService
+    private let services: [String: SQLiteService]
+    init(services: [String: SQLiteService]) {
+        self.services = services
     }
 
-    func hasConnection(serviceId: String) -> Bool { return true }
+    func hasConnection(serviceId: String) -> Bool {
+        return self.services[serviceId] != nil
+    }
 
     func connection(serviceId: String) async throws -> SQLiteService {
-        return self.sqliteService
+        guard let service = self.services[serviceId] else {
+            throw RuntimeError("no db connection for service: \(serviceId)")
+        }
+        return service
     }
 }

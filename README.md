@@ -21,12 +21,17 @@ To-do Calendar는 할일 목록을 관리할 수 있는 달력 앱 입니다.
    
 2. clone 받은 프로젝트 디렉토리로 이동하여 [./install/install.sh](./install/install.sh)를 실행해주세요. 프로젝트 빌드를 위해 필요한 더미 파일들이 필요한 위치로 이동됩니다.
 
-3. [Tuist](https://docs.tuist.io/guides/quick-start/install-tuist)를 설치합니다. v3 버전이 필요합니다.
-   
-4. 다음을 실행하여 dependency를 fetch하고 Xcode project를 생성하세요
+3. [mise](https://mise.jdx.dev/)를 설치하고, 프로젝트 루트에서 Tuist를 설치합니다.
    
    ```bash
-   tuist fetch
+   brew install mise
+   mise install      # mise.toml에 정의된 tuist 버전 자동 설치
+   ```
+   
+4. 다음을 실행하여 dependency를 설치하고 Xcode project를 생성하세요
+   
+   ```bash
+   tuist install
    tuist generate --no-open
    ```
    

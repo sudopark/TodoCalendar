@@ -52,7 +52,7 @@ SettingScene/
 │   │   ├── EventSettingRouter.swift
 │   │   ├── EventSettingView.swift
 │   │   │
-│   │   ├── EventTagSelect/                   — 기본 태그 선택
+│   │   ├── EventDefaultTagSelect/                   — 기본 태그 선택
 │   │   ├── EventNotificationDefaultTimeOption/ — 기본 알림 시간
 │   │   └── EventDefaultMapApp/                — 기본 지도 앱
 │   │
@@ -85,7 +85,7 @@ graph TD
     AS -->|push| WA[WidgetAppearance<br/>위젯 외형]
     AS -->|push| TZ[TimeZoneSelect<br/>타임존]
 
-    ES -->|push| ETS[EventTagSelect<br/>기본 태그]
+    ES -->|push| ETS[EventDefaultTagSelect<br/>기본 태그]
     ES -->|push| ENT[NotificationTimeOption<br/>기본 알림 시간]
     ES -->|push| EMA[EventDefaultMapApp<br/>기본 지도 앱]
 
@@ -124,7 +124,7 @@ graph TD
 
 | 항목 | 설명 |
 |---|---|
-| 기본 태그 | EventTagSelect로 선택 |
+| 기본 태그 | EventDefaultTagSelect로 선택 |
 | 기본 알림 시간 | 일반 이벤트 / 하루종일 이벤트 각각 설정 |
 | 기본 지도 앱 | EventDefaultMapApp으로 선택 |
 
@@ -195,7 +195,7 @@ graph TD
     ASB -->|하위| WAB[WidgetAppearanceBuilder]
     ASB -->|하위| TZB[TimeZoneSelectBuilder]
 
-    ESB -->|하위| ETSB[EventTagSelectBuilder]
+    ESB -->|하위| ETSB[EventDefaultTagSelectBuilder]
     ESB -->|하위| ENTB[NotificationTimeBuilder]
     ESB -->|하위| EMAB[EventDefaultMapAppBuilder]
 

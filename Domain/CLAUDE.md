@@ -174,6 +174,55 @@ self.eventNotifyService.event<RefreshingEvent>()
 
 ---
 
+## 외부 캘린더 계정 연동/해제 플로우
+
+```mermaid
+flowchart TD
+    subgraph "계정 연동 (integrate)"
+        A[사용자: 구글 계정 연동 요청] --> B[OAuth 인증 플로우]
+        B --> C[Credential 저장]
+        C --> D[ExternalCalendarAccountRemotePool\n— Remote API 클라이언트 생성]
+        D --> E[ExternalCalendarDBConnectionPool\n— DB 연결 open 참조카운트 +1]
+        E --> F{첫 번째 open?}
+        F -->|Yes| G[onFirstOpen: 테이블 생성 + 마이그레이션]
+        F -->|No| H[기존 연결 재사용]
+        G --> I[AppDataMigrationImple\n— 레거시 데이터 마이그레이션 1회]
+        I --> J[Integration 상태 broadcast\n— .integrated]
+        H --> J
+        J --> K[GoogleCalendarUsecase\n— 색상/태그/이벤트 refresh]
+        K --> L[SharedDataStore 업데이트\n→ UI 자동 반영]
+    end
+
+    subgraph "계정 해제 (stopIntegrate)"
+        M[사용자: 구글 계정 해제 요청] --> N[Credential 삭제]
+        N --> O[ExternalCalendarAccountRemotePool\n— Remote API 클라이언트 제거]
+        O --> P[ExternalCalendarDBConnectionPool\n— DB 연결 close 참조카운트 -1]
+        P --> Q{참조카운트 = 0?}
+        Q -->|Yes| R[DB 연결 실제 종료]
+        Q -->|No| S[다른 계정이 사용 중 → 유지]
+        R --> T[Integration 상태 broadcast\n— .disconnected]
+        S --> T
+        T --> U[GoogleCalendarUsecase\n— 해당 계정 캐시 제거]
+        U --> V[SharedDataStore 업데이트\n→ UI 자동 반영]
+    end
+
+    subgraph "앱 시작 시 (prepareIntegratedAccounts)"
+        W[앱 실행] --> X[저장된 Credential 로드]
+        X --> Y[계정별 Remote/DB 설정]
+        Y --> Z[GoogleCalendarUsecase\n— 전체 계정 refresh]
+        Z --> AA[SharedDataStore → UI]
+    end
+```
+
+**주요 파일**:
+
+| 파일 | 역할 |
+|---|---|
+| `ExternalCalendarIntegrationUsecase.swift` | 계정 연동 상태 관리 + reactive 상태 브로드캐스트 |
+| `GoogleCalendarUsecase.swift` | 계정별 이벤트/색상/태그 로드 (repositoryPool 사용) |
+
+---
+
 ## 서브도메인별 주요 Usecase 한눈에 보기
 
 | 서브도메인 | Usecase | 역할 |

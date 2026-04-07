@@ -102,12 +102,24 @@ extension EventListCellEventHanleViewModelImpleTests {
         // given
         let viewModel = self.makeViewModel()
         let model = GoogleCalendarEventCellViewModel.dummy()
-        
+
         // when
         viewModel.selectEvent(model)
-        
+
         // then
         XCTAssertEqual(self.spyRouter.didRouteToGoogleEventDetailWithId, "google")
+    }
+
+    func testViewModel_whenSelectAppleCalendarEvent_routeToDetail() {
+        // given
+        let viewModel = self.makeViewModel()
+        let model = AppleCalendarEventCellViewModel.dummy()
+
+        // when
+        viewModel.selectEvent(model)
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAppleCalendarEventDetailWithId, "apple-event")
     }
     
     func testViewModel_routeToHolidayEventDetail() {
@@ -353,6 +365,7 @@ extension EventListCellEventHanleViewModelImpleTests {
     func testViewModel_skipRepeatingTodo() {
         // given
         let expect = expectation(description: "다음차수로 todo skip")
+        expect.expectedFulfillmentCount = 2
         let dummyId = "some"
         let viewModel = self.makeViewModel()
         let todo = TodoEventCellViewModel(dummyId, name: "origin")
@@ -482,6 +495,11 @@ final class SpyEventListCellEventHanleRouter: BaseSpyRouter, EventListCellEventH
     func routeToEditGoogleEvent(_ link: String) {
         self.didRouteToEditGoogleEventWithLink = link
     }
+
+    var didRouteToAppleCalendarEventDetailWithId: String?
+    func routeToAppleCalendarEventDetail(calendarId: String, eventId: String) {
+        self.didRouteToAppleCalendarEventDetailWithId = eventId
+    }
     
     var didRouteToMakeNewEventWithParams: MakeEventParams?
     func routeToMakeNewEvent(_ withParams: MakeEventParams) {
@@ -558,7 +576,7 @@ private extension DoneTodoResult {
 }
 
 extension GoogleCalendarEventCellViewModel {
-    
+
     static func dummy(_ link: String? = "link") -> GoogleCalendarEventCellViewModel {
         let google = GoogleCalendar.Event(
             "google", "calendar", accountId: "stub@gmail.com",
@@ -569,6 +587,23 @@ extension GoogleCalendarEventCellViewModel {
         let googleEvent = GoogleCalendarEvent(google, in: TimeZone.current)
         return GoogleCalendarEventCellViewModel(
             googleEvent, in: 0..<10, TimeZone.current, true
+        )!
+    }
+}
+
+extension AppleCalendarEventCellViewModel {
+
+    static func dummy() -> AppleCalendarEventCellViewModel {
+        let appleEvent = AppleCalendar.Event(
+            eventId: "apple-event",
+            originalEventId: "apple-event",
+            calendarId: "apple-calendar",
+            name: "Apple Event",
+            eventTime: .at(1)
+        )
+        let calendarEvent = AppleCalendarEvent(appleEvent, in: TimeZone.current)
+        return AppleCalendarEventCellViewModel(
+            calendarEvent, in: 0..<10, TimeZone.current, true
         )!
     }
 }

@@ -88,11 +88,11 @@ extension EventSyncUsecaseImple {
     
     private func runSyncTask() async throws {
         self.subject.isSyncing.send(true)
-        
+
         try await self.eventSyncMediator.waitUntilEventSyncAvailable()
-        
+
         logger.log(level: .debug, "event sync process start")
-        
+
         let dataTypes: [SyncDataType] = [.eventTag, .todo, .schedule]
         await dataTypes.asyncForEach { dataType in
             do {
@@ -101,7 +101,7 @@ extension EventSyncUsecaseImple {
                 logger.log(level: .error, "\(dataType) sync fail: \(error)")
             }
         }
-        
+
         logger.log(level: .debug, "event sync process end")
         self.subject.isSyncing.send(false)
     }

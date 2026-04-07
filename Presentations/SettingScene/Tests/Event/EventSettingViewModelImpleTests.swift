@@ -41,10 +41,18 @@ class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
     
     private func makeViewModel(
         isLogin: Bool = true,
-        accounts: [ExternalServiceAccountinfo] = []
+        accounts: [ExternalServiceAccountinfo] = [],
+        integrateError: (any Error)? = nil
     ) -> EventSettingViewModelImple {
         let tagUsecase = StubEventTagUsecase()
-        let externalUsecase = StubExternalCalendarIntegrationUsecase(accounts)
+        let externalUsecase: StubExternalCalendarIntegrationUsecase
+        if let integrateError {
+            let errorStub = StubExternalCalendarIntegrationUsecaseWithError(accounts)
+            errorStub.stubIntegrateError = integrateError
+            externalUsecase = errorStub
+        } else {
+            externalUsecase = StubExternalCalendarIntegrationUsecase(accounts)
+        }
         self.stubExternalCalednarUsecase = externalUsecase
         
         let calendarSettingUsecase = StubCalendarSettingUsecase()
@@ -55,7 +63,8 @@ class EventSettingViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventNotificationSettingUsecase: self.stubEventNotificationSettingUsecase,
             eventTagUsecase: tagUsecase,
             supportExternalCalendarServices: [
-                GoogleCalendarService(scopes: [.readOnly])
+                GoogleCalendarService(scopes: [.readOnly]),
+                AppleCalendarService()
             ],
             externalCalendarServiceUsecase: externalUsecase,
             accountUsecase: StubAccountUsecase(isLogin ? .init("some") : nil),
@@ -290,9 +299,11 @@ extension EventSettingViewModelImpleTests {
         }
         
         // then
+        let appleService = AppleCalendarService()
         XCTAssertEqual(models, [
             ExternalCalanserServiceModel(service, accountId: account.email)!,
-            ExternalCalanserServiceModel(service, accountId: nil)!
+            ExternalCalanserServiceModel(service, accountId: nil)!,
+            ExternalCalanserServiceModel(appleService, accountId: nil)!
         ])
     }
     
@@ -353,10 +364,11 @@ extension EventSettingViewModelImpleTests {
         }
 
         // then
+        let appleNotIntegrated = ExternalCalanserServiceModel(AppleCalendarService(), accountId: nil)!
         XCTAssertEqual(modelLists, [
-            [.init(service, accountId: nil)!],
-            [.init(service, accountId: "email")!, .init(service, accountId: nil)!],
-            [.init(service, accountId: nil)!]
+            [.init(service, accountId: nil)!, appleNotIntegrated],
+            [.init(service, accountId: "email")!, .init(service, accountId: nil)!, appleNotIntegrated],
+            [.init(service, accountId: nil)!, appleNotIntegrated]
         ])
     }
 
@@ -378,8 +390,45 @@ extension EventSettingViewModelImpleTests {
         XCTAssertEqual(models, [
             .init(service, accountId: "email1")!,
             .init(service, accountId: "email2")!,
-            .init(service, accountId: nil)!
+            .init(service, accountId: nil)!,
+            ExternalCalanserServiceModel(AppleCalendarService(), accountId: nil)!
         ])
+    }
+
+    // Apple Calendar 서비스 모델도 함께 제공
+    func testViewModel_provideAppleCalendarServiceModel() {
+        // given
+        let expect = expectation(description: "Apple Calendar 서비스 모델 제공")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let models = self.waitFirstOutput(expect, for: viewModel.integratedExternalCalendars) {
+            viewModel.prepare()
+        }
+
+        // then
+        let appleModels = models?.filter { $0.serviceId == AppleCalendarService.id }
+        XCTAssertEqual(appleModels?.count, 1)
+        XCTAssertEqual(appleModels?.first?.status, .notIntegrated)
+        XCTAssertEqual(appleModels?.first?.serviceName, "event_setting::external_calendar::apple::serviceName".localized())
+    }
+
+    // Apple Calendar 연동 시 서비스 모델 업데이트
+    func testViewModel_whenAppleCalendarConnected_updateServiceModel() {
+        // given
+        let expect = expectation(description: "Apple Calendar 연동 시 서비스 모델 업데이트")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+
+        // when
+        let modelLists = self.waitOutputs(expect, for: viewModel.integratedExternalCalendars, timeout: 0.5) {
+            viewModel.connectExternalCalendar(AppleCalendarService.id)
+        }
+
+        // then
+        let lastAppleModels = modelLists.last?.filter { $0.serviceId == AppleCalendarService.id }
+        XCTAssertEqual(lastAppleModels?.count, 1)
+        XCTAssertEqual(lastAppleModels?.first?.status, .integrated(accountId: "email"))
     }
 
     // 다중 계정 중 하나만 해제 시 나머지 계정 유지
@@ -400,25 +449,127 @@ extension EventSettingViewModelImpleTests {
         // then
         XCTAssertEqual(modelLists.last, [
             .init(service, accountId: "email2")!,
-            .init(service, accountId: nil)!
+            .init(service, accountId: nil)!,
+            ExternalCalanserServiceModel(AppleCalendarService(), accountId: nil)!
         ])
+    }
+
+    // Apple Calendar 권한 거부 시 설정 이동 confirm dialog 노출
+    func testViewModel_whenAppleCalendarPermissionDenied_showConfirmDialogWithSettingsOption() {
+        // given
+        let expect = expectation(description: "권한 거부 시 설정 이동 confirm dialog 노출")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(integrateError: AppleCalendarPermissionFailReason.denied)
+        self.spyRouter.shouldConfirmNotCancel = true
+
+        // when
+        let _ = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar, timeout: 0.5) {
+            viewModel.connectExternalCalendar(AppleCalendarService.id)
+        }
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
+    }
+
+    // Apple Calendar 기기 제한 시 지원 불가 dialog 노출
+    func testViewModel_whenAppleCalendarPermissionRestricted_showInformationalDialog() {
+        // given
+        let expect = expectation(description: "기기 제한 시 지원 불가 dialog 노출")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(integrateError: AppleCalendarPermissionFailReason.restricted)
+
+        // when
+        let _ = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar, timeout: 0.5) {
+            viewModel.connectExternalCalendar(AppleCalendarService.id)
+        }
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.spyRouter.didShowConfirmWith?.withCancel, false)
+        XCTAssertNil(self.spyRouter.didOpenSystemSetting)
+    }
+
+    // Apple Calendar writeOnly 시 설정 이동 confirm dialog 노출
+    func testViewModel_whenAppleCalendarPermissionWriteOnly_showConfirmDialogWithSettingsOption() {
+        // given
+        let expect = expectation(description: "writeOnly 시 설정 이동 confirm dialog 노출")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModel(integrateError: AppleCalendarPermissionFailReason.writeOnly)
+        self.spyRouter.shouldConfirmNotCancel = true
+
+        // when
+        let _ = self.waitOutputs(expect, for: viewModel.isConnectOrDisconnectExternalCalednar, timeout: 0.5) {
+            viewModel.connectExternalCalendar(AppleCalendarService.id)
+        }
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.spyRouter.didOpenSystemSetting, true)
+    }
+
+    // 구글+애플 동시 연동 후 애플만 해제
+    func testViewModel_whenGoogleAndAppleConnected_disconnectApple() {
+        // given
+        let expect = expectation(description: "구글+애플 동시 연동 후 애플만 해제")
+        expect.expectedFulfillmentCount = 4
+        let viewModel = self.makeViewModel()
+        let googleService = GoogleCalendarService(scopes: [.readOnly])
+
+        // when
+        let modelLists = self.waitOutputs(expect, for: viewModel.integratedExternalCalendars, timeout: 1.0) {
+            viewModel.connectExternalCalendar(googleService.identifier)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                viewModel.connectExternalCalendar(AppleCalendarService.id)
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                viewModel.disconnectExternalCalendar(AppleCalendarService.id, accountId: "email")
+            }
+        }
+
+        // then
+        let last = modelLists.last
+        let googleModels = last?.filter { $0.serviceId == GoogleCalendarService.id }
+        let appleModels = last?.filter { $0.serviceId == AppleCalendarService.id }
+        XCTAssertEqual(googleModels?.count, 2)
+        XCTAssertEqual(googleModels?.first?.status, .integrated(accountId: "email"))
+        XCTAssertEqual(appleModels?.count, 1)
+        XCTAssertEqual(appleModels?.first?.status, .notIntegrated)
     }
 }
 
+private final class StubExternalCalendarIntegrationUsecaseWithError: StubExternalCalendarIntegrationUsecase {
+
+    var stubIntegrateError: (any Error)?
+
+    override func integrate(external service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
+        if let error = stubIntegrateError { throw error }
+        return try await super.integrate(external: service)
+    }
+}
+
+
 private class SpyRouter: BaseSpyRouter, EventSettingRouting, @unchecked Sendable {
-    
+
     var didRouteToSelectTag: Bool?
     func routeToSelectTag() {
         self.didRouteToSelectTag = true
     }
-    
+
     var didRouteToEventNotificationTimeForAllDays: [Bool] = []
     func routeToEventNotificationTime(forAllDay: Bool) {
         self.didRouteToEventNotificationTimeForAllDays.append(forAllDay)
     }
-    
+
     var didRouteToSelectDefaultMapApp: Bool?
     func routeToSelectDefaultMapApp() {
         self.didRouteToSelectDefaultMapApp = true
+    }
+
+    var didOpenSystemSetting: Bool?
+    func openSystemSetting() {
+        self.didOpenSystemSetting = true
     }
 }

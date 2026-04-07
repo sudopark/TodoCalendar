@@ -490,6 +490,7 @@ extension TodoEventUsecaseImpleTests {
     func testUsecase_whenAfterRevertTodo_updateSharedDataStore() {
         // given
         let expect = expectation(description: "완료 todo revert 이후에 공유 스토어에 todo 업데이트")
+        expect.expectedFulfillmentCount = 2
         let usecase = self.makeUsecase()
         
         // when

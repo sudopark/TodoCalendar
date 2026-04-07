@@ -25,6 +25,7 @@
 "common.done" = "완료";
 "common.errorMessage" = "일시적인 오류가 발생했습니다.\n문제가 반복된다면 제보해주세요.";
 "common.update" = "업데이트";
+"common.go_to_settings" = "설정으로 이동";
 
 // MARK: - date form
 "date_form::HH:mm" = "HH:mm";
@@ -262,6 +263,12 @@
 "eventDetail::gogoleEvent::copy::message" = "클립보드에 복사되었습니다.";
 "eventDetail::gogoleEvent::canceled::message" = "취소된 일정입니다.";
 
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "애플 캘린더에서 보기";
+"eventDetail::appleCalendarEvent::calendar::event" = "애플 캘린더 이벤트";
+"eventDetail::appleCalendarEvent::attendees" = "참석자 (%d명)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "주최자";
+
 // MARK: - event tag
 
 "eventTag.title" = "이벤트 종류";
@@ -340,6 +347,9 @@
 "event_setting::external_calendar::stop" = "연동 해제";
 "event_setting::external_calendar::stop::message" = "외부 캘린더 연동이 해제되었습니다.";
 "event_setting::external_calendar::google::serviceName" = "구글 캘린더";
+"event_setting::external_calendar::apple::serviceName" = "애플 캘린더";
+"event_setting::apple_calendar::permission_denied::message" = "캘린더 접근이 거부되었습니다. 애플 캘린더를 사용하려면 설정에서 권한을 허용해주세요.";
+"event_setting::apple_calendar::restricted::message" = "이 기기에서 캘린더 접근이 제한되어 있습니다.";
 "setting.title" = "설정";
 "setting.appearance.title" = "외관";
 "setting.appearance.calendar.samplemonth::march" = "3월";

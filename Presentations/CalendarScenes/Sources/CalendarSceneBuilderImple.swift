@@ -53,6 +53,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             migrationUsecase: self.usecaseFactory.temporaryUserDataMigrationUsecase,
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
+            appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
             eventUploadService: self.usecaseFactory.eventUploadService,
             eventSyncUsecase: self.usecaseFactory.eventSyncUsecase
         )

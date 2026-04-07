@@ -186,6 +186,22 @@ sequenceDiagram
 
 ---
 
+## 외부 캘린더 DB 구조
+
+- 메인 DB (`todo_calendar.db`): 앱 자체 데이터. `AppEnvironment.dbVersion`으로 마이그레이션 관리.
+- 외부 캘린더 DB (`google_calendar.db`): 계정별 테이블에 `accountId` 컬럼 포함. `AppEnvironment.googleCalendarDBVersion`으로 별도 관리.
+- `AppDataMigrationImple`: 단일 계정 → 다중 계정 1회성 마이그레이션 (플래그 기반 멱등성)
+- DB 연결은 `ExternalCalendarDBConnectionPool`이 관리하며, `onFirstOpen` 시 테이블 생성 + 마이그레이션 실행.
+
+| 파일 | 역할 |
+|---|---|
+| `ExternalCalendarDBConnectionPoolImple.swift` | 참조 카운팅 DB 연결 관리 |
+| `ExternalCalendarAccountRemotePool.swift` | 계정별 Remote API + 토큰 갱신 |
+| `GoogleCalendarLocalAggregatedRepositoryImple.swift` | 다중 계정 데이터 집계 |
+| `AppDataMigrationImple.swift` | 단일→다중 계정 DB 마이그레이션 |
+
+---
+
 ## 테스트
 
 ### 테스트 인프라 (`Tests/Common/`)

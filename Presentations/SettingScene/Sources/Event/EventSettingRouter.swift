@@ -15,23 +15,24 @@ import CommonPresentation
 
 // MARK: - Routing
 
-protocol EventSettingRouting: Routing, Sendable { 
-    
+protocol EventSettingRouting: Routing, Sendable {
+
     func routeToSelectTag()
     func routeToEventNotificationTime(forAllDay: Bool)
     func routeToSelectDefaultMapApp()
+    func openSystemSetting()
 }
 
 // MARK: - Router
 
 final class EventSettingRouter: BaseRouterImple, EventSettingRouting, @unchecked Sendable {
     
-    private let eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler
+    private let eventTagSelectSceneBuilder: any EventDefaultTagSelectSceneBuiler
     private let eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler
     private let eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
     
     init(
-        eventTagSelectSceneBuilder: any EventTagSelectSceneBuiler,
+        eventTagSelectSceneBuilder: any EventDefaultTagSelectSceneBuiler,
         eventDefaultNotificationTimeSceneBuilder: any EventNotificationDefaultTimeOptionSceneBuiler,
         eventDefaultMapAppSceneBuilder: any EventDefaultMapAppSceneBuiler
     ) {
@@ -57,7 +58,7 @@ extension EventSettingRouter {
     // TODO: router implememnts
     func routeToSelectTag() {
         Task { @MainActor in
-            let next = self.eventTagSelectSceneBuilder.makeEventTagSelectScene()
+            let next = self.eventTagSelectSceneBuilder.makeEventDefaultTagSelectScene()
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
         }
     }
@@ -73,6 +74,13 @@ extension EventSettingRouter {
         Task { @MainActor in
             let next = self.eventDefaultMapAppSceneBuilder.makeEventDefaultMapAppScene()
             self.currentScene?.navigationController?.pushViewController(next, animated: true)
+        }
+    }
+
+    func openSystemSetting() {
+        Task { @MainActor in
+            guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+            UIApplication.shared.open(url)
         }
     }
 }

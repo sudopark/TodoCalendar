@@ -19,16 +19,19 @@ public final class ExternalCalendarIntegrateRepositoryImple: ExternalCalendarInt
     private let remotePool: any ExternalCalendarAccountRemotePool
     private let keyChainStore: any KeyChainStorage
     private let credentialStore: IntegratedAPICredentialStore
+    private let appleCalendarPermissionChecker: any AppleCalendarPermissionChecker
 
     public init(
         supportServices: [any ExternalCalendarService],
         remotePool: any ExternalCalendarAccountRemotePool,
-        keyChainStore: any KeyChainStorage
+        keyChainStore: any KeyChainStorage,
+        appleCalendarPermissionChecker: any AppleCalendarPermissionChecker
     ) {
         self.supportServices = supportServices
         self.remotePool = remotePool
         self.keyChainStore = keyChainStore
         self.credentialStore = .init(keyChainStore: keyChainStore)
+        self.appleCalendarPermissionChecker = appleCalendarPermissionChecker
     }
 }
 
@@ -55,7 +58,7 @@ extension ExternalCalendarIntegrateRepositoryImple {
         self.keyChainStore.update(accountListKey(serviceId), ids)
     }
 
-    private func removeAccountId(_ accountId: String, for serviceId: String) {
+    private func remove(_ accountId: String, fromServiceList serviceId: String) {
         var ids = loadAccountIds(for: serviceId)
         ids.removeAll { $0 == accountId }
         if ids.isEmpty {
@@ -94,15 +97,29 @@ extension ExternalCalendarIntegrateRepositoryImple {
                 return mapper?.account
             }
         }
-
-        accounts.forEach { account in
+        
+        let activeAccounts = accounts.filter(self.checkIsNotExpired(_:))
+        
+        activeAccounts.forEach { account in
             guard let accountId = account.email,
                   let credential = credentialStore.loadCredential(for: account.serviceIdentifier, accountId: accountId)
             else { return }
             remotePool.setup(for: account.serviceIdentifier, accountId: accountId, credential: credential)
         }
 
-        return accounts
+        return activeAccounts
+    }
+    
+    private func checkIsNotExpired(_ account: ExternalServiceAccountinfo) -> Bool {
+        
+        guard account.serviceIdentifier == AppleCalendarService.id
+        else { return true }
+        
+        let hasPermission = self.appleCalendarPermissionChecker.isAuthorized()
+        if !hasPermission, let email = account.email {
+            self.removingAccountAction(account.serviceIdentifier, accountId: email)
+         }
+        return hasPermission
     }
 
     public func save(
@@ -124,16 +141,29 @@ extension ExternalCalendarIntegrateRepositoryImple {
             saveAccountId(accountId, for: service.identifier)
             return account
 
+        case is AppleCalendarCredential:
+            // Apple Calendar: OAuth 토큰 없음, Remote pool setup 불필요
+            let accountId = AppleCalendarService.localAccountId
+            let account = ExternalServiceAccountinfo(service.identifier, email: accountId)
+            let mapper = ExternalServiceAccountMapper(account: account)
+            self.keyChainStore.update(accountKey(service.identifier, accountId), mapper)
+            saveAccountId(accountId, for: service.identifier)
+            return account
+
         default:
             throw RuntimeError("not support credential type")
         }
     }
 
     public func removeAccount(for serviceIdentifier: String, accountId: String) async throws {
+        self.removingAccountAction(serviceIdentifier, accountId: accountId)
+    }
+    
+    private func removingAccountAction(_ serviceIdentifier: String, accountId: String) {
         self.credentialStore.removeCredential(for: serviceIdentifier, accountId: accountId)
         remotePool.remove(for: serviceIdentifier, accountId: accountId)
         self.keyChainStore.remove(accountKey(serviceIdentifier, accountId))
-        removeAccountId(accountId, for: serviceIdentifier)
+        self.remove(accountId, fromServiceList: serviceIdentifier)
     }
 }
 

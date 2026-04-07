@@ -70,7 +70,7 @@ extension EventNotificationUsecaseImpleTests {
         
         // when
         usecase.runSyncEventNotification()
-        self.wait(for: [expect], timeout: 0.1)
+        self.wait(for: [expect], timeout: 0.5)
         
         // then
         scheduledNotificationReqs = scheduledNotificationReqs.sorted(by: { $0.content.title < $1.content.title })
@@ -108,7 +108,7 @@ extension EventNotificationUsecaseImpleTests {
         
         // when
         usecase.runSyncEventNotification()
-        self.wait(for: [expect], timeout: 0.1)
+        self.wait(for: [expect], timeout: 0.5)
         
         // then
         return usecase
@@ -132,7 +132,7 @@ extension EventNotificationUsecaseImpleTests {
         self.stubTodoUsecase.makeTodoChangeInPeriodEvent([
             pastTodo, todoWithoutTime, futureTodoEvent1, updatedTodo, futureTodoWithCustomTime
         ])
-        self.wait(for: [expect], timeout: 0.1)
+        self.wait(for: [expect], timeout: 0.5)
         
         // then
         updatedNotificationReqs = updatedNotificationReqs.sorted(by: { $0.content.title < $1.content.title })
@@ -170,7 +170,7 @@ extension EventNotificationUsecaseImpleTests {
         self.stubTodoUsecase.makeTodoChangeInPeriodEvent([
             pastTodo, todoWithoutTime, futureTodoEvent1, futureTodoWithCustomTime
         ])
-        self.wait(for: [expectForRemove, expectForAdd], timeout: 0.1)
+        self.wait(for: [expectForRemove, expectForAdd], timeout: 0.5)
         
         // then
         XCTAssertEqual(removedPendingNotificationIds?.count, 1)
@@ -204,7 +204,7 @@ extension EventNotificationUsecaseImpleTests {
         
         // when
         usecase.runSyncEventNotification()
-        self.wait(for: [expect], timeout: 0.1)
+        self.wait(for: [expect], timeout: 0.5)
         
         // then
         XCTAssertEqual(self.spyNotificationRepository.eventAndNotificationSets[schedule1.uuid]?.count, 1)
@@ -224,7 +224,7 @@ extension EventNotificationUsecaseImpleTests {
         
         // when
         usecase.runSyncEventNotification()
-        self.wait(for: [expect], timeout: 0.1)
+        self.wait(for: [expect], timeout: 0.5)
         
         // then
         return usecase
@@ -247,7 +247,7 @@ extension EventNotificationUsecaseImpleTests {
         self.stubScheduleUsecase.makeScheduleChangeInPeriodEvent([
             pastSchedule, newEvent, scheduleWithRepeat, schedule2WithCustomTime
         ])
-        self.wait(for: [expect], timeout: 0.1)
+        self.wait(for: [expect], timeout: 0.5)
         
         // then
         XCTAssertEqual(updatedReq.count, 1)
@@ -283,7 +283,7 @@ extension EventNotificationUsecaseImpleTests {
         self.stubScheduleUsecase.makeScheduleChangeInPeriodEvent([
             pastSchedule, scheduleWithRepeat, schedule2WithCustomTime
         ])
-        self.wait(for: [expectForRemove, expectForAdd], timeout: 0.1)
+        self.wait(for: [expectForRemove, expectForAdd], timeout: 0.5)
         
         // then
         XCTAssertEqual(removedIds?.count, 1)

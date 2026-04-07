@@ -23,7 +23,8 @@ struct CalendarEvents {
     var customTagMap: [String: CustomEventTag]
     var googleCalendarColors: GoogleCalendar.Colors?
     var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
-    
+    var appleCalendarTags: [String: AppleCalendar.Tag] = [:]
+
     init() {
         self.currentTodos = []
         self.eventWithTimes = []
@@ -111,6 +112,7 @@ actor CalendarEventsFetchCacheStore {
         var externalAccountMap: [String: ExternalServiceAccountinfo]?
         var googleCalendarColors: GoogleCalendar.Colors?
         var googleCalendarTags: [String: GoogleCalendar.Tag]?
+        var appleCalendarTags: [String: AppleCalendar.Tag]?
         var eventDetails: [String: EventDetailData] = [:]
     }
     
@@ -154,9 +156,10 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase, @unchecke
     private let eventTagRepository: any EventTagRepository
     private let externalCalendarIntegrateRepository: any ExternalCalendarIntegrateRepository
     private let googleCalendarRepository: any GoogleCalendarRepository
+    private let appleCalendarRepository: any AppleCalendarRepository
     private let eventDetailRepository: any EventDetailDataRepository
     private let cached: CalendarEventsFetchCacheStore
-    
+
     init(
         todoRepository: any TodoEventRepository,
         scheduleRepository: any ScheduleEventRepository,
@@ -165,6 +168,7 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase, @unchecke
         eventTagRepository: any EventTagRepository,
         externalCalendarIntegrateRepository: any ExternalCalendarIntegrateRepository,
         googleCalendarRepository: any GoogleCalendarRepository,
+        appleCalendarRepository: any AppleCalendarRepository,
         eventDetailRepository: any EventDetailDataRepository,
         cached: CalendarEventsFetchCacheStore
     ) {
@@ -175,6 +179,7 @@ final class CalendarEventFetchUsecaseImple: CalendarEventFetchUsecase, @unchecke
         self.eventTagRepository = eventTagRepository
         self.externalCalendarIntegrateRepository = externalCalendarIntegrateRepository
         self.googleCalendarRepository = googleCalendarRepository
+        self.appleCalendarRepository = appleCalendarRepository
         self.eventDetailRepository = eventDetailRepository
         self.cached = cached
     }
@@ -201,15 +206,23 @@ extension CalendarEventFetchUsecaseImple {
         events.customTagMap = customTagMap
         
         if await self.checkGoogleCalendarIntegrated() {
-            events.googleCalendarColors = try await self.googleCalendarColors()
-            let tags = try await self.googleCalendarTags()
-            events.googleCalendarTags = tags
-            
-            let allTagIds = Array(tags.keys)
-            let googleEvents = try await self.googleCalendarEvents(allTagIds, in: range, timeZone)
-            eventsWithTime += googleEvents
+            events.googleCalendarColors = try? await self.googleCalendarColors()
+            if let tags = try? await self.googleCalendarTags() {
+                events.googleCalendarTags = tags
+                let allTagIds = Array(tags.keys)
+                let googleEvents = (try? await self.googleCalendarEvents(allTagIds, in: range, timeZone)) ?? []
+                eventsWithTime += googleEvents
+            }
         }
-        
+
+        if await self.checkAppleCalendarIntegrated() {
+            if let tags = try? await self.appleCalendarTags() {
+                events.appleCalendarTags = tags
+            }
+            let appleEvents = (try? await self.appleCalendarEvents(in: range, timeZone)) ?? []
+            eventsWithTime += appleEvents
+        }
+
         events.eventWithTimes = eventsWithTime.sorted()
         
         if withoutOffTagIds {
@@ -321,13 +334,44 @@ extension CalendarEventFetchUsecaseImple {
         _ timeZone: TimeZone
     ) async throws -> [GoogleCalendarEvent] {
         let events = try await calendarIds.async.reduce(into: [GoogleCalendar.Event]()) { [weak self] acc, id in
-            
+
             let list = try await self?.googleCalendarRepository.loadEvents(id, in: range)
                 .values.first(where: { _ in true }) ?? []
             acc += list
         }
         let calendarEvents = events.map { GoogleCalendarEvent($0, in: timeZone) }
         return calendarEvents
+    }
+
+    private func checkAppleCalendarIntegrated() async -> Bool {
+        let serviceId = AppleCalendarService.id
+        if let cached = await self.cached.value(\.externalAccountMap) {
+            return cached[serviceId] != nil
+        }
+        let accounts = (try? await self.externalCalendarIntegrateRepository.loadIntegratedAccounts()) ?? []
+        let accountMap = accounts.asDictionary { $0.serviceIdentifier }
+        await self.cached.update(\.externalAccountMap, accountMap)
+        return accountMap[serviceId] != nil
+    }
+
+    private func appleCalendarTags() async throws -> [String: AppleCalendar.Tag] {
+        if let cached = await self.cached.value(\.appleCalendarTags) {
+            return cached
+        }
+        let tags = try await self.appleCalendarRepository.loadCalendarTags()
+            .values.first(where: { _ in true }) ?? []
+        let tagMap = tags.asDictionary { $0.id }
+        await self.cached.update(\.appleCalendarTags, tagMap)
+        return tagMap
+    }
+
+    private func appleCalendarEvents(
+        in range: Range<TimeInterval>,
+        _ timeZone: TimeZone
+    ) async throws -> [AppleCalendarEvent] {
+        let events = try await self.appleCalendarRepository.loadEvents(in: range)
+            .values.first(where: { _ in true }) ?? []
+        return events.map { AppleCalendarEvent($0, in: timeZone) }
     }
     
     private func selectLocationText(_ event: any CalendarEvent) async throws -> String? {
@@ -352,7 +396,10 @@ extension CalendarEventFetchUsecaseImple {
             
         case let google as GoogleCalendarEvent:
             return google.locationText
-            
+
+        case let apple as AppleCalendarEvent:
+            return apple.locationText
+
         default: return nil
         }
     }

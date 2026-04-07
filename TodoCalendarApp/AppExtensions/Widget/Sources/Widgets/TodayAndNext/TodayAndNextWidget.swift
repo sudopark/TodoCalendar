@@ -169,7 +169,7 @@ struct TodayAndNextWidgetView: View {
                 (google.colorSource as? GoogleCalendarEventColorSource)?.colorId,
                 google.calendarId
             )
-            
+
             if google.isAlldayEvent {
                 return singleLineEventView(
                     color: googleColor, name: google.name
@@ -183,7 +183,23 @@ struct TodayAndNextWidgetView: View {
                 .asLinkIfPossible(model.cvm.widgetURL)
                 .asAnyView()
             }
-            
+
+        case let apple as AppleCalendarEventCellViewModel:
+            let appleColor = self.model.appleCalendarTags[apple.calendarId]?.colorHex
+                .flatMap { UIColor.from(hex: $0) } ?? defColors.defaultColor
+            if apple.isAlldayEvent {
+                return singleLineEventView(color: appleColor, name: apple.name)
+                    .asLinkIfPossible(model.cvm.widgetURL)
+                    .asAnyView()
+            } else {
+                return doubleLineEventView(
+                    color: appleColor, name: apple.name,
+                    time: apple.periodText?.asSingleLineText(isTodo: false)
+                )
+                .asLinkIfPossible(model.cvm.widgetURL)
+                .asAnyView()
+            }
+
         default: return EmptyView().asAnyView()
         }
     }

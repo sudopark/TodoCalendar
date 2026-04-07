@@ -82,6 +82,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             todoUsecase: self.stubTodoUsecase,
             scheduleUsecase: self.stubScheduleUsecase,
             googleCalendarUsecase: StubGoogleCalendarUsecase(),
+            appleCalendarUsecase: StubAppleCalendarUsecase(),
             foremostEventUsecase: self.stubForemostEventUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
             eventTagUsecase: self.stubTagUsecase,
@@ -677,6 +678,32 @@ extension DayEventListViewModelImpleTests {
         ]
     }
     
+    func testViewModel_whenAppleCalendarEventExists_showInList() {
+        // given
+        let expect = expectation(description: "Apple Calendar 이벤트가 셀 목록에 표시됨")
+        let viewModel = self.makeViewModel()
+        let timeZone = TimeZone(abbreviation: "KST")!
+        let appleEvent = AppleCalendarEvent(
+            AppleCalendar.Event(
+                eventId: "apple-1",
+                originalEventId: "apple-1",
+                calendarId: "cal-1",
+                name: "Apple Event",
+                eventTime: .at(self.todayRange.lowerBound + 50)
+            ),
+            in: timeZone
+        )
+
+        // when
+        let source = viewModel.cellViewModels.filter { !$0.isEmpty }
+        let cvms = self.waitFirstOutput(expect, for: source, timeout: 0.1) {
+            viewModel.selectedDayChanaged(self.dummyCurrentDay, and: [appleEvent])
+        }
+
+        // then
+        XCTAssertNotNil(cvms?.first(where: { $0 is AppleCalendarEventCellViewModel }))
+    }
+
     // 선택된 날짜에 해당하는 이벤트 리스트 제공 + 이경우에 current todo 정보도 같이 제공
     func testViewModel_provideEventListThatDayWithCurrentTodo() {
         // given

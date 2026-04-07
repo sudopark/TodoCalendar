@@ -244,7 +244,7 @@ extension GoogleCalendarUsecaseImple {
     public func refreshEvents(in period: Range<TimeInterval>) {
         self.cancelRefresh()
 
-        let accounts = self.integrationUsecase.currentAndNewIntegratedGoogleAccounts()
+        let accounts = self.integrationUsecase.currentOrNewIntegratedAccount(for: googleService.identifier)
         let activeCalendarTagPerAccount = accounts
             .compactMap { $0.email }
             .flatMap(self.activeCalendars())
@@ -321,25 +321,3 @@ public extension GoogleCalendar.Tag {
 }
 
 
-private extension ExternalCalendarIntegrationUsecase {
-
-    func currentAndNewIntegratedGoogleAccounts() -> AnyPublisher<ExternalServiceAccountinfo, Never> {
-
-        let googleServiceId = GoogleCalendarService.id
-        let currents = self.integratedServiceAccounts
-            .map { $0[googleServiceId] ?? [] }
-            .flatMap { $0.publisher }
-        let newIntegrated = self.integrationStatusChanged
-            .compactMap { status in
-                switch status {
-                case .integrated(let serviceId, let account) where serviceId == googleServiceId:
-                    return account
-                default: return nil
-                }
-            }
-
-        return Publishers.Merge(currents, newIntegrated)
-            .removeAllDuplicates()
-            .eraseToAnyPublisher()
-    }
-}

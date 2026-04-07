@@ -99,6 +99,7 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         // given
         struct DummyService: ExternalCalendarService {
             let identifier: String = "not_support"
+            let isSingleAccountService: Bool = false
         }
         let usecase = self.makeUsecase()
         
@@ -161,10 +162,10 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         }
         
         // then
-        let identifiers = accountMaps.map { $0.keys }.map { $0.sorted() }
-        #expect(identifiers == [
-            [service.identifier], []
-        ])
+        let accountCounts = accountMaps.map { map in
+            map[service.identifier]?.count ?? 0
+        }
+        #expect(accountCounts == [1, 0])
     }
     
     @Test func usecase_handleAuthenticationResult() async throws {
@@ -296,6 +297,56 @@ extension ExternalCalendarIntegrationUsecaseImpleTests {
         #expect(accounts.count == 1)
         #expect(accounts.first?.email == "google@email.com")
     }
+
+    // Apple Calendar integrate 성공
+    @Test func usecase_integrateAppleCalendar_succeed() async throws {
+        // given
+        let usecase = self.makeUsecase()
+
+        // when
+        let service = AppleCalendarService()
+        let account = try await usecase.integrate(external: service)
+
+        // then
+        #expect(account.serviceIdentifier == service.identifier)
+        #expect(account.email == AppleCalendarService.localAccountId)
+    }
+
+    @Test func currentOrNewIntegratedAccount_whenAlreadyIntegrated_emitsCurrentThenStops() async throws {
+        // given
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let account = ExternalServiceAccountinfo(service.identifier, email: "google@email.com")
+        let usecase = self.makeUsecase(startWithIntegrated: [account])
+        try await usecase.prepareIntegratedAccounts()
+
+        // when
+        var emitted: [ExternalServiceAccountinfo] = []
+        let sub = usecase.currentOrNewIntegratedAccount(for: service.identifier)
+            .sink { emitted.append($0) }
+        try await Task.sleep(for: .milliseconds(100))
+        sub.cancel()
+
+        // then — 현재 연동 계정 1회만 방출, 중복 없음
+        #expect(emitted.count == 1)
+        #expect(emitted.first?.email == "google@email.com")
+    }
+
+    @Test func currentOrNewIntegratedAccount_whenNewIntegration_emitsOnceWithoutDuplicate() async throws {
+        // given
+        let service = GoogleCalendarService(scopes: [.readOnly])
+        let usecase = self.makeUsecase()
+        let expect = self.expectConfirm("신규 연동 시 계정 1회만 방출")
+
+        // when
+        let accounts = try await self.outputs(expect, for: usecase.currentOrNewIntegratedAccount(for: service.identifier)) {
+            _ = try await usecase.integrate(external: service)
+        }
+        try await Task.sleep(for: .milliseconds(100))
+
+        // then — 신규 연동 계정 1회만 방출, integratedServiceAccounts 업데이트에 의한 중복 없음
+        #expect(accounts.count == 1)
+        #expect(accounts.first?.email == "google@email.com")
+    }
 }
 
 
@@ -341,33 +392,43 @@ private final class StubGoogleOAuth2ServiceUsecase: OAuth2ServiceUsecase, @unche
 }
 
 private final class FakeOauth2ServiceProvider: ExternalCalendarOAuthUsecaseProvider, @unchecked Sendable {
-    
+
     var authenticationWaitMocking: PassthroughSubject<Void, Never>?
-    
+
     func usecase(for service: any ExternalCalendarService) -> (any OAuth2ServiceUsecase)? {
         switch service {
         case is GoogleCalendarService:
             return StubGoogleOAuth2ServiceUsecase()
                 |> \.authenticationWaitMocking .~ authenticationWaitMocking
-            
+
+        case is AppleCalendarService:
+            return StubAppleCalendarOAuth2ServiceUsecase()
+
         default: return nil
         }
     }
 }
 
 
+private final class StubAppleCalendarOAuth2ServiceUsecase: OAuth2ServiceUsecase, @unchecked Sendable {
+    typealias CredentialType = AppleCalendarCredential
+    func requestAuthentication() async throws -> AppleCalendarCredential { .init() }
+    func handle(open url: URL) -> Bool { false }
+}
+
+
 private final class StubExternalCalendarIntegrateRepository: ExternalCalendarIntegrateRepository, @unchecked Sendable {
-    
+
     private var accountMap: [String: ExternalServiceAccountinfo] = [:]
-    
+
     init(_ accounts: [ExternalServiceAccountinfo]) {
         self.accountMap = accounts.asDictionary { $0.serviceIdentifier }
     }
-    
+
     func loadIntegratedAccounts() async throws -> [ExternalServiceAccountinfo] {
         return Array(self.accountMap.values)
     }
-    
+
     func save(
         _ credential: any OAuth2Credential,
         for service: any ExternalCalendarService
@@ -377,12 +438,17 @@ private final class StubExternalCalendarIntegrateRepository: ExternalCalendarInt
             let account = ExternalServiceAccountinfo(service.identifier, email: google.email)
             self.accountMap[service.identifier] = account
             return account
-            
+
+        case is AppleCalendarCredential:
+            let account = ExternalServiceAccountinfo(service.identifier, email: AppleCalendarService.localAccountId)
+            self.accountMap[service.identifier] = account
+            return account
+
         default:
             throw RuntimeError("failed")
         }
     }
-    
+
     func removeAccount(for serviceIdentifier: String, accountId: String) async throws {
         self.accountMap[serviceIdentifier] = nil
     }

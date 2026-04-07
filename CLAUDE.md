@@ -1,14 +1,5 @@
 # CLAUDE.md
 
-## 0. 단축어
-
-| 사용자 말 | Claude 동작 |
-|---|---|
-| **커밋해줘** | 변경된 파일 전체를 `git add` → 커밋 메시지 작성 → `git commit` → 결과 출력 |
-| **방금 작업한것만 골라서 커밋해줘** | 현재 대화에서 Claude가 수정한 파일만 선별해 `git add` → 커밋 메시지 작성 → `git commit` → 결과 출력 |
-
----
-
 ## 1. 절대 규칙
 
 - **파일을 수정하기 전에 반드시 먼저 읽어라.** 추측으로 수정하지 말 것.
@@ -16,6 +7,7 @@
 - **Query와 Command를 분리하라.** 읽기(query)와 쓰기/사이드이팩트(command)를 한 흐름에 섞지 말 것.
 - **코드 수정 시 TDD 워크플로우를 따른다.** 테스트 작성 → 실패 확인 → 구현 → 통과 확인.
 - **child CLAUDE.md가 있는 프레임워크의 코드를 수정한 경우**, 스펙이 변경될 수 있으면 해당 child CLAUDE.md를 다시 분석하여 반영한다.
+- **객체를 변경한 경우**, 이를 참조하는 다른 객체들을 탐색하여 변경사항에 영향이 없는지 확인한다 (빌드 및 테스트 모두).
 
 ---
 
@@ -63,8 +55,9 @@ TodoCalendar/
 │   │   └── Widget/             — Widget target (18종 위젯)
 │   └── Resources/
 ├── Tuist/                      — 프로젝트 생성 설정
-│   ├── ProjectDescriptionHelpers/
-│   └── Dependencies.swift      — 모든 SPM 의존성
+│   └── ProjectDescriptionHelpers/
+├── Package.swift               — SPM 의존성 (Tuist 4, #if TUIST PackageSettings)
+├── Tuist.swift                 — Tuist 설정 파일
 ├── docs/                       — 아키텍처 문서 (한국어)
 └── Template/                   — Xcode Scene 템플릿
 ```
@@ -94,12 +87,14 @@ TodoCalendarApp → Presentations → Scenes / CommonPresentation → Domain ←
 
 ```bash
 ./install/install.sh   # 더미 config 파일 복사 (최초 1회)
-tuist fetch            # SPM 의존성 resolve
+tuist install          # SPM 의존성 resolve (Package.swift 기반)
 tuist generate --no-open
 open TodoCalendar.xcworkspace
 ```
 
-파일을 추가하거나 삭제한 경우 `tuist generate --no-open` 재실행 필요.
+- 파일을 추가하거나 삭제한 경우 `tuist generate --no-open` 재실행 필요.
+- SPM 의존성 변경 시 `tuist install` → `tuist generate --no-open` 순서로 재실행.
+- Tuist 버전은 `mise.toml`로 관리됨 (`mise install`로 설치).
 
 ### 테스트 실행
 
@@ -128,26 +123,66 @@ xcodebuild test \
 
 **구조**
 - 테스트는 **상황(given context) 기준**으로 그룹화. 메서드 기준 아님.
-- 각 테스트는 observable한 **동작(behavior)** 을 검증. 내부 구현 상태(private flag 등) 검증 금지.
-- `// given / when / then` 주석으로 구조 명시.
+- 각 테스트는 observable한 **동작(behavior)** 을 검증. 내부 구현 상태(private flag 등) 검증 금지. stub의 호출 추적 변수(`didCallXxx`) 대신 실제 사이드이펙트(예: store 상태 변경, 스트림 방출값)로 검증할 것.
+- `// given / when / then` 주석으로 구조 명시. 모든 테스트 메서드에 반드시 포함할 것.
+
+```swift
+// ✅ 올바른 예시
+func test_whenLoadList_shouldUpdateSections() {
+    // given
+    let expect = expectation(description: "리스트 로드시 섹션 업데이트")
+    let viewModel = self.makeViewModel()
+
+    // when
+    let sections = self.waitOutputs(expect, for: viewModel.sectionModels) {
+        viewModel.loadList()
+    }
+
+    // then
+    XCTAssertEqual(sections.count, 2)
+}
+
+// ❌ 잘못된 예시 — 주석 없이 바로 작성
+func test_whenLoadList_shouldUpdateSections() {
+    let expect = expectation(description: "리스트 로드시 섹션 업데이트")
+    let viewModel = self.makeViewModel()
+    let sections = self.waitOutputs(expect, for: viewModel.sectionModels) {
+        viewModel.loadList()
+    }
+    XCTAssertEqual(sections.count, 2)
+}
+```
+
+**스터빙 원칙**
+- 협업 객체의 스터빙은 개별 테스트 시작 전에 완료되어야 한다. `makeViewModel()` 등 SUT 생성 함수에서 보편적인 성공 응답을 기본 스터빙으로 세팅할 것.
+- 에러 케이스나 응답을 변경해야 하는 경우, `makeViewModel(shouldFail:)` 처럼 파라미터로 분기하거나 `makeViewModelWith...()` 헬퍼 함수를 활용한다.
+
+```swift
+// ✅ 기본 스터빙: 보편적 성공 응답으로 세팅
+private func makeViewModel(
+    shouldFailSignIn: Bool = false
+) -> SignInViewModelImple {
+    let authUsecase = StubAuthUsecase()
+    authUsecase.shouldFailSignIn = shouldFailSignIn
+    let viewModel = SignInViewModelImple(authUsecase: authUsecase)
+    viewModel.router = self.spyRouter
+    return viewModel
+}
+
+// ✅ 특수한 사전 조건이 필요한 경우 별도 헬퍼로 분리
+private func makeViewModelWithInitialListLoaded(
+    shouldFailDoneTodo: Bool = false
+) -> DayEventListViewModelImple {
+    let viewModel = self.makeViewModel(shouldFailDoneTodo: shouldFailDoneTodo)
+    // ... 초기 리스트 로딩 완료까지 대기
+    return viewModel
+}
+```
 
 **Test Double 네이밍**
 - `stub*`: 생성 시점에 설정 고정. 테스트 중 변경 없음.
 - `mock*`: 생성 후 동적 변경이 필요한 경우.
 - 호출 기록 변수: `did<Action>...` 형태. (`didRouteToSetting`, `didRemoveTodoId`) `callCount` / `wasCalled` 사용 금지.
-
-**Publisher 검증 — `PublisherWaitable`**
-
-```swift
-// XCTest
-let values = waitOutputs(expect, for: vm.somePublisher) { vm.triggerAction() }
-XCTAssertEqual(values, [expected])
-
-// Swift Testing
-let expect = expectConfirm("emits")
-let values = try await outputs(expect, for: somePublisher) { triggerAction() }
-#expect(values == [expected])
-```
 
 ---
 
@@ -219,63 +254,8 @@ let values = try await outputs(expect, for: somePublisher) { triggerAction() }
 - `GoogleCalendarLocalAggregatedRepositoryImple`: 모든 연동 계정의 이벤트/태그/색상을 투명하게 합산하여 반환
 - `GoogleCalendarViewAppearanceStore`: 계정별 색상/태그를 UI에 반영
 
-**DB 구조**:
-- 메인 DB (`todo_calendar.db`): 앱 자체 데이터. `AppEnvironment.dbVersion`으로 마이그레이션 관리.
-- 외부 캘린더 DB (`google_calendar.db`): 계정별 테이블에 `accountId` 컬럼 포함. `googleCalendarDBVersion`으로 별도 관리.
-- `AppDataMigrationImple`: 단일 계정 → 다중 계정 1회성 마이그레이션 (플래그 기반 멱등성)
-
-**계정 연동/해제 플로우**:
-
-```mermaid
-flowchart TD
-    subgraph "계정 연동 (integrate)"
-        A[사용자: 구글 계정 연동 요청] --> B[OAuth 인증 플로우]
-        B --> C[Credential 저장]
-        C --> D[ExternalCalendarAccountRemotePool\n— Remote API 클라이언트 생성]
-        D --> E[ExternalCalendarDBConnectionPool\n— DB 연결 open 참조카운트 +1]
-        E --> F{첫 번째 open?}
-        F -->|Yes| G[onFirstOpen: 테이블 생성 + 마이그레이션]
-        F -->|No| H[기존 연결 재사용]
-        G --> I[AppDataMigrationImple\n— 레거시 데이터 마이그레이션 1회]
-        I --> J[Integration 상태 broadcast\n— .integrated]
-        H --> J
-        J --> K[GoogleCalendarUsecase\n— 색상/태그/이벤트 refresh]
-        K --> L[SharedDataStore 업데이트\n→ UI 자동 반영]
-    end
-
-    subgraph "계정 해제 (stopIntegrate)"
-        M[사용자: 구글 계정 해제 요청] --> N[Credential 삭제]
-        N --> O[ExternalCalendarAccountRemotePool\n— Remote API 클라이언트 제거]
-        O --> P[ExternalCalendarDBConnectionPool\n— DB 연결 close 참조카운트 -1]
-        P --> Q{참조카운트 = 0?}
-        Q -->|Yes| R[DB 연결 실제 종료]
-        Q -->|No| S[다른 계정이 사용 중 → 유지]
-        R --> T[Integration 상태 broadcast\n— .disconnected]
-        S --> T
-        T --> U[GoogleCalendarUsecase\n— 해당 계정 캐시 제거]
-        U --> V[SharedDataStore 업데이트\n→ UI 자동 반영]
-    end
-
-    subgraph "앱 시작 시 (prepareIntegratedAccounts)"
-        W[앱 실행] --> X[저장된 Credential 로드]
-        X --> Y[계정별 Remote/DB 설정]
-        Y --> Z[GoogleCalendarUsecase\n— 전체 계정 refresh]
-        Z --> AA[SharedDataStore → UI]
-    end
-```
-
-**주요 파일**:
-
-| 파일 | 역할 |
-|---|---|
-| `Domain/.../ExternalCalendarIntegrationUsecase.swift` | 계정 연동 상태 관리 + reactive 상태 브로드캐스트 |
-| `Domain/.../GoogleCalendarUsecase.swift` | 계정별 이벤트/색상/태그 로드 (repositoryPool 사용) |
-| `Repository/.../ExternalCalendarDBConnectionPoolImple.swift` | 참조 카운팅 DB 연결 관리 |
-| `Repository/.../ExternalCalendarAccountRemotePool.swift` | 계정별 Remote API + 토큰 갱신 |
-| `Repository/.../GoogleCalendarLocalAggregatedRepositoryImple.swift` | 다중 계정 데이터 집계 |
-| `Repository/.../AppDataMigrationImple.swift` | 단일→다중 계정 DB 마이그레이션 |
-| `TodoCalendarApp/.../ApplicationBase.swift` | Pool/Factory 인스턴스 생성 |
-| `TodoCalendarApp/.../ApplicationRootBuilder.swift` | 전체 의존성 조립 |
+> DB 구조 상세는 [`Repository/CLAUDE.md`](Repository/CLAUDE.md)의 "외부 캘린더 DB 구조" 섹션 참조.
+> 계정 연동/해제 플로우 상세는 [`Domain/CLAUDE.md`](Domain/CLAUDE.md)의 "외부 캘린더 계정 연동/해제 플로우" 섹션 참조.
 
 ### ForemostEvent (강조 이벤트)
 
@@ -305,6 +285,8 @@ flowchart TD
 
 ## 5. 코딩 컨벤션
 
+코딩 스타일, 설계 원칙, 개발 철학의 상세는 [`docs/coding-style-and-philosophy.md`](docs/coding-style-and-philosophy.md)를 참조.
+
 ### 네이밍
 
 | 개념 | 패턴 |
@@ -329,30 +311,16 @@ flowchart TD
 [#이슈번호] 변경 내용 요약
 ```
 
+- **동작 변화 중심으로 작성**: "무엇을 수정했나(파일/클래스 목록)"가 아니라 "동작이 어떻게 달라졌나"를 한눈에 파악할 수 있게 작성.
+
 예시:
 ```
+❌ [#563] AppleCalendarOAuth2ServiceUsecaseImple 로직 변경 및 테스트 추가
+✅ [#563] AppleCalendar 권한 상태별 분기 체크 도입
+   — fullAccess → 바로 성공, denied/restricted → 즉시 throw, notDetermined → 시스템 요청 후 재확인
+
 [#508] GoogleCalendarRepositoryPool 도입 및 테스트 추가
 docs: 테스트 조직화 원칙 추가
-```
-
-### 코드 스타일
-
-- **Higher-order functions 우선**: imperative loop 대신 `map` / `flatMap` / `compactMap` / `forEach` 사용.
-- **Query/Command 분리**: 읽기 연산(map/flatMap/compactMap)을 먼저 완성한 뒤, 사이드이팩트(forEach/asyncForEach)를 별도로 실행.
-
-```swift
-// Good
-let accounts = services.flatMap { $0.accountIds }.compactMap { makeAccount($0) }  // query
-await accounts.asyncForEach { await setup($0) }                                    // command
-
-// Bad
-var accounts: [Account] = []
-for service in services {
-    for id in service.accountIds {
-        accounts.append(makeAccount(id))  // query + command 혼재
-        await setup(id)
-    }
-}
 ```
 
 ---

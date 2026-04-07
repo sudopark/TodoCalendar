@@ -111,6 +111,31 @@ import Domain
         else { return .clear }
         return googleEventColor(colorId, calendarId)
     }
+
+    // Apple Calendar color
+    public var appleCalendarTagMap: [String: AppleCalendar.Tag] = [:]
+
+    public func applyCalendarTags(_ tags: [AppleCalendar.Tag]) {
+        appleCalendarTagMap = tags.reduce(into: [:]) { $0[$1.id] = $1 }
+    }
+
+    public func clearCalendarTags() {
+        appleCalendarTagMap = [:]
+    }
+
+    public func appleCalendarColor(_ calendarId: String) -> UIColor {
+        let tag = appleCalendarTagMap[calendarId]
+        return tag?.colorHex.flatMap { UIColor.from(hex: $0) } ?? .clear
+    }
+
+    public func appleCalendarColorOnCalendar(
+        _ calendarId: String,
+        offColor: (ColorSet) -> UIColor = { _ in .clear }
+    ) -> UIColor {
+        guard self.eventOnCalendarShowEventTagColor
+        else { return offColor(colorSet) }
+        return appleCalendarColor(calendarId)
+    }
     
     public init(setting: AppearanceSettings, isSystemDarkTheme: Bool) {
         
@@ -247,6 +272,11 @@ extension ViewAppearance {
         .eraseToAnyPublisher()
     }
 }
+
+// MARK: - AppleCalendarViewAppearanceStore
+
+extension ViewAppearance: AppleCalendarViewAppearanceStore { }
+
 
 extension ColorSetKeys {
     

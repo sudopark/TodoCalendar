@@ -345,6 +345,42 @@ public struct HolidayEventCellViewModel: EventCellViewModel {
 }
 
 
+// MARK: - AppleCalendarEvent
+
+public struct AppleCalendarEventCellViewModel: EventCellViewModel {
+
+    public let eventIdentifier: String
+    public var colorSource: any EventTagColorSource
+    public let name: String
+    public var periodText: EventPeriodText?
+    public var periodDescription: String?
+    public let isRepeating: Bool
+    public var isForemost: Bool = false
+    public let calendarId: String
+    public var isAlldayEvent: Bool = false
+
+    public init?(
+        _ event: AppleCalendarEvent,
+        in todayRange: Range<TimeInterval>,
+        _ timeZone: TimeZone,
+        _ is24hourForm: Bool,
+        forceShowEventDateDurationText: Bool = false
+    ) {
+        guard let time = event.eventTime else { return nil }
+        self.eventIdentifier = event.eventId
+        self.colorSource = AppleCalendarEventColorSource(calendarId: event.calendarId)
+        self.name = event.name
+        self.isRepeating = event.isRepeating
+        self.periodText = EventPeriodText(schedule: time, in: todayRange, timeZone: timeZone, is24hourForm: is24hourForm)
+        self.periodDescription = event.eventTime?.durationText(timeZone, forceShowEventDateDurationText: forceShowEventDateDurationText)
+        self.calendarId = event.calendarId
+        self.isAlldayEvent = event.eventTime?.isAllDay ?? false
+    }
+
+    public var moreActions: EventListMoreActionModel? { nil }
+}
+
+
 // MARK: - GoogleCalendarEvent
 public struct GoogleCalendarEventCellViewModel: EventCellViewModel {
 

@@ -81,22 +81,27 @@ extension ColorThemeSelectViewModelImpleTests {
         XCTAssertEqual(models.map { $0.isSelected }, [false, true, false])
     }
     
-    func testViewModel_whenSelectTheme_updateSelectedModel() {
+    func testViewModel_whenSelectTheme_updateSelectedModel() async throws {
         // given
-        let expect = expectation(description: "선택테마 업데이트시에, 선택된값 반영하여 선택가능 테마 모델 업데이트")
-        expect.expectedFulfillmentCount = 3
         let viewModel = self.makeViewModel()
         viewModel.prepare()
-        
+
         // when
-        let models = self.waitOutputs(expect, for: viewModel.colorThemeModels, timeout: 0.1) {
-            
-            viewModel.selectTheme(.init(.systemTheme))
-            viewModel.selectTheme(.init(.defaultDark))
-        }
-        
+        var selectedKeys: [[ColorSetKeys]] = []
+        viewModel.colorThemeModels
+            .sink { models in
+                let keys = models.filter { $0.isSelected }.map { $0.key }
+                selectedKeys.append(keys)
+            }
+            .store(in: &self.cancelBag)
+
+        try await Task.sleep(for: .milliseconds(50))
+        viewModel.selectTheme(.init(.systemTheme))
+        try await Task.sleep(for: .milliseconds(50))
+        viewModel.selectTheme(.init(.defaultDark))
+        try await Task.sleep(for: .milliseconds(50))
+
         // then
-        let selectedKeys = models.map { ms in ms.filter { $0.isSelected }.map { $0.key } }
         XCTAssertEqual(selectedKeys, [
             [.defaultLight], [.systemTheme], [.defaultDark]
         ])

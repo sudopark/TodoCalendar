@@ -468,7 +468,14 @@ private extension ExternalCalanserServiceModel {
     
     var accountName: String? {
         guard case .integrated(let accountId) = self.status else { return nil }
-        return accountId
+        switch self.serviceId {
+        case AppleCalendarService.id:
+            return nil
+        case GoogleCalendarService.id:
+            return accountId
+        default:
+            return accountId
+        }
     }
     
     var compareKey: String {

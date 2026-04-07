@@ -104,6 +104,8 @@ struct EventListWidgetViewModel {
                             return HolidayEventCellViewModel(holiday)
                         case let google as GoogleCalendarEvent:
                             return GoogleCalendarEventCellViewModel(google, in: dayRange, timeZone, is24Form)
+                        case let apple as AppleCalendarEvent:
+                            return AppleCalendarEventCellViewModel(apple, in: dayRange, timeZone, is24Form)
                         default: return nil
                         }
                     }
@@ -154,6 +156,7 @@ struct EventListWidgetViewModel {
     let customTagMap: [String: any EventTag]
     var googleCalendarColors: GoogleCalendar.Colors = .init(ownerId: "", calendars: [:], events: [:])
     var googleCalendarTags: [String: GoogleCalendar.Tag] = [:]
+    var appleCalendarTags: [String: AppleCalendar.Tag] = [:]
     var widgetSetting: WidgetAppearanceSettings = .init()
     
     static func sample(size: EventListWidgetSize) -> EventListWidgetViewModel {
@@ -332,6 +335,7 @@ extension EventListWidgetViewModelProvider {
         )
         |> \.googleCalendarColors .~ (dayEventLists.1.googleCalendarColors ?? .init(ownerId: "", calendars: [:], events: [:]))
         |> \.googleCalendarTags .~ dayEventLists.1.googleCalendarTags
+        |> \.appleCalendarTags .~ dayEventLists.1.appleCalendarTags
         |> \.widgetSetting .~ setting.widget
     }
    

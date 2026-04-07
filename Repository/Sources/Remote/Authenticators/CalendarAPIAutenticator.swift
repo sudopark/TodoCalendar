@@ -13,7 +13,7 @@ import Alamofire
 import Domain
 import Extensions
 
-public final class CalendarAPIAutenticator: APIAuthenticator {
+public final class CalendarAPIAutenticator: APIAuthenticator, @unchecked Sendable {
     
     public typealias Credential = APICredential
     

@@ -242,6 +242,11 @@ private extension WeekEventsViewModel {
             )
             return appearance.googleEventColor(google.colorId, google.calendarId).asColor
         }
+        if let apple = line.colorSource as? AppleCalendarEventColorSource {
+            return self.appleCalendarTags[apple.calendarId]?.colorHex
+                .flatMap { UIColor.from(hex: $0) }?.asColor
+                ?? UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear
+        }
         switch line.colorSource as? EventTagId {
         case .default:
             return UIColor.from(hex: self.defaultTagColorSetting.default)?.asColor ?? .clear

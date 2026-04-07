@@ -68,10 +68,14 @@ struct ExternalCalanserServiceModel: Hashable {
     ) {
         self.serviceId = service.identifier
 
-        switch service {
-        case is GoogleCalendarService:
+        switch service.identifier {
+        case GoogleCalendarService.id:
             self.serviceName = "event_setting::external_calendar::google::serviceName".localized()
             self.serviceIconName = "google_calendar_icon"
+            self.status = accountId.map { IntegrateStatus.integrated(accountId: $0) } ?? .notIntegrated
+        case AppleCalendarService.id:
+            self.serviceName = "event_setting::external_calendar::apple::serviceName".localized()
+            self.serviceIconName = "apple_calendar_icon"
             self.status = accountId.map { IntegrateStatus.integrated(accountId: $0) } ?? .notIntegrated
         default:
             return nil
@@ -225,6 +229,9 @@ extension EventSettingViewModelImple {
                 self?.router?.showToast(
                     "event_setting::external_calendar::start::message".localized()
                 )
+            } catch let reason as AppleCalendarPermissionFailReason {
+                self?.handleAppleCalendarPermissionFail(reason)
+                self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
             } catch {
                 self?.subject.isConnectOrDisconnectExternalCalednar.send(false)
                 self?.router?.showError(error)
@@ -233,6 +240,23 @@ extension EventSettingViewModelImple {
         .store(in: &self.cancellables)
     }
     
+    private func handleAppleCalendarPermissionFail(_ reason: AppleCalendarPermissionFailReason) {
+        switch reason {
+        case .denied, .writeOnly:
+            let info = ConfirmDialogInfo()
+                |> \.message .~ pure("event_setting::apple_calendar::permission_denied::message".localized())
+                |> \.confirmText .~ "common.go_to_settings".localized()
+                |> \.confirmed .~ { [weak self] in self?.router?.openSystemSetting() }
+                |> \.withCancel .~ true
+            router?.showConfirm(dialog: info)
+        case .restricted:
+            let info = ConfirmDialogInfo()
+                |> \.message .~ pure("event_setting::apple_calendar::restricted::message".localized())
+                |> \.withCancel .~ false
+            router?.showConfirm(dialog: info)
+        }
+    }
+
     func disconnectExternalCalendar(_ serviceIdentifier: String, accountId: String) {
         guard !self.subject.isConnectOrDisconnectExternalCalednar.value,
               let service = self.supportExternalCalendarServices.first(where: { $0.identifier == serviceIdentifier })
@@ -362,6 +386,10 @@ extension EventSettingViewModelImple {
             return supporServices.flatMap { service -> [ExternalCalanserServiceModel] in
                 let integrated = (accounts[service.identifier] ?? [])
                     .compactMap { ExternalCalanserServiceModel(service, accountId: $0.email) }
+                let isSingleAccountService = service.isSingleAccountService
+                if isSingleAccountService && !integrated.isEmpty {
+                    return integrated
+                }
                 let notIntegrated = [ExternalCalanserServiceModel(service, accountId: nil)].compactMap { $0 }
                 return integrated + notIntegrated
             }

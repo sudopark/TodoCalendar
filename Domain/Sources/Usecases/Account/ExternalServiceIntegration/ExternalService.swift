@@ -12,38 +12,62 @@ import UIKit
 // MARK: - ExternalCalendarService
 
 public protocol ExternalCalendarService: Sendable {
-    
+
     var identifier: String { get }
+    var isSingleAccountService: Bool { get }
 }
 
 
 // MARK: - usecase provider
 
 public protocol ExternalCalendarOAuthUsecaseProvider: Sendable {
-    
+
     func usecase(for service: any ExternalCalendarService) -> (any OAuth2ServiceUsecase)?
 }
 
 public final class ExternalCalendarOAuthUsecaseProviderImple: ExternalCalendarOAuthUsecaseProvider, @unchecked Sendable {
-    
+
     private let topViewControllerFinding: () -> UIViewController?
-    public init(topViewControllerFinding: @escaping () -> UIViewController?) {
+    private let appleCalendarPermissionChecker: any AppleCalendarPermissionChecker
+
+    public init(
+        topViewControllerFinding: @escaping () -> UIViewController?,
+        appleCalendarPermissionChecker: any AppleCalendarPermissionChecker
+    ) {
         self.topViewControllerFinding = topViewControllerFinding
+        self.appleCalendarPermissionChecker = appleCalendarPermissionChecker
     }
-    
+
     public func usecase(for service: any ExternalCalendarService) -> (any OAuth2ServiceUsecase)? {
-        
         switch service {
         case let google as GoogleCalendarService:
             return GoogleOAuth2ServiceUsecaseImple(
                 additionalScope: google.scopes.map { $0.rawValue },
                 topViewControllerFinding: self.topViewControllerFinding
             )
-            
+
+        case is AppleCalendarService:
+            return AppleCalendarOAuth2ServiceUsecaseImple(permissionChecker: appleCalendarPermissionChecker)
+
         default:
             return nil
         }
     }
+}
+
+
+// MARK: - AppleCalendarService
+
+public struct AppleCalendarService: ExternalCalendarService {
+
+    public let identifier: String = AppleCalendarService.id
+    public let isSingleAccountService: Bool = true
+
+    public static var id: String { "apple" }
+    /// Apple Calendar은 OAuth 계정이 없으므로 기기 로컬 계정을 나타내는 고정 ID
+    public static var localAccountId: String { "device" }
+
+    public init() {}
 }
 
 
@@ -56,6 +80,7 @@ public struct GoogleCalendarService: ExternalCalendarService {
     }
     
     public let identifier: String = GoogleCalendarService.id
+    public let isSingleAccountService: Bool = false
     public let scopes: [Scope]
     
     public static var id: String {

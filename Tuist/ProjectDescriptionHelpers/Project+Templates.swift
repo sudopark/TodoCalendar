@@ -7,18 +7,18 @@ import ProjectDescription
 
 extension Project {
     static let organizationName = "com.sudo.park"
-    
+
     /// Helper function to create the Project for this ExampleApp
     public static func app(
         name: String,
-        platform: Platform,
+        destinations: Destinations,
         iOSTargetVersion: String,
         dependencies: [TargetDependency] = [],
         extensionTargets: [Target] = []
     ) -> Project {
         let targets = makeAppTargets(
             name: name,
-            platform: platform,
+            destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
             dependencies: dependencies,
             signingConfigures: [
@@ -42,18 +42,17 @@ extension Project {
             targets: targets + extensionTargets
         )
     }
-    
+
     public static func frameworkWithTest(
         name: String,
-        packages: [Package] = [],
-        platform: Platform,
+        destinations: Destinations,
         iOSTargetVersion: String,
         resources: ResourceFileElements? = nil,
         dependencies: [TargetDependency] = []
     ) -> Project {
         let targets = makeFrameworkTargetsWithTest(
             name: name,
-            platform: platform,
+            destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
             resources: resources,
             dependencies: dependencies
@@ -61,15 +60,13 @@ extension Project {
         return Project(
             name: name,
             organizationName: organizationName,
-            packages: packages,
             targets: targets
         )
     }
-    
+
     public static func framework(
         name: String,
-        packages: [Package] = [],
-        platform: Platform,
+        destinations: Destinations,
         iOSTargetVersion: String,
         withSourceFile: Bool = true,
         dependencies: [TargetDependency] = [],
@@ -77,7 +74,7 @@ extension Project {
     ) -> Project {
         let targets = makeFrameworkTargets(
             name: name,
-            platform: platform,
+            destinations: destinations,
             iOSTargetVersion: iOSTargetVersion,
             withSourceFile: withSourceFile,
             dependencies: dependencies,
@@ -85,27 +82,26 @@ extension Project {
         )
         return Project(name: name,
                        organizationName: organizationName,
-                       packages: packages,
                        targets: targets)
     }
-    
+
     // MARK: - Private
-    
+
     /// Helper function to create a framework target and an associated unit test target
     private static func makeFrameworkTargetsWithTest(
         name: String,
-        platform: Platform,
+        destinations: Destinations,
         iOSTargetVersion: String,
         resources: ResourceFileElements? = nil,
         dependencies: [TargetDependency] = []
     )
     -> [Target]
     {
-        let sources = Target(name: name,
-                             platform: platform,
+        let sources = Target.target(name: name,
+                             destinations: destinations,
                              product: .framework,
                              bundleId: "\(organizationName).\(name)",
-                             deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+                             deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
                              sources: ["Sources/**"],
                              resources: resources,
@@ -116,11 +112,11 @@ extension Project {
                                 configurations: []
                              )
         )
-        let tests = Target(name: "\(name)Tests",
-                           platform: platform,
+        let tests = Target.target(name: "\(name)Tests",
+                           destinations: destinations,
                            product: .unitTests,
                            bundleId: "\(organizationName).\(name)Tests",
-                           deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+                           deploymentTargets: .iOS(iOSTargetVersion),
                            infoPlist: .default,
                            sources: ["Tests/**"],
                            resources: [],
@@ -132,10 +128,10 @@ extension Project {
                            ])
         return [sources, tests]
     }
-    
+
     private static func makeFrameworkTargets(
         name: String,
-        platform: Platform,
+        destinations: Destinations,
         iOSTargetVersion: String,
         withSourceFile: Bool,
         dependencies: [TargetDependency] = [],
@@ -144,11 +140,11 @@ extension Project {
     -> [Target]
     {
         let settingDict = customSetting.swiftVersion("6.0")
-        let sources = Target(name: name,
-                             platform: platform,
+        let sources = Target.target(name: name,
+                             destinations: destinations,
                              product: .framework,
                              bundleId: "\(organizationName).\(name)",
-                             deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+                             deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
                              sources: withSourceFile ? ["Sources/**"] : [],
                              resources: [],
@@ -161,24 +157,23 @@ extension Project {
         )
         return [sources]
     }
-    
+
     /// Helper function to create the application target and the unit test target.
     private static func makeAppTargets(
         name: String,
-        platform: Platform,
+        destinations: Destinations,
         iOSTargetVersion: String,
         dependencies: [TargetDependency],
         signingConfigures: [ProjectDescription.Configuration]
     )
     -> [Target]
     {
-        let platform: Platform = platform
-        let mainTarget = Target(
+        let mainTarget = Target.target(
             name: name,
-            platform: platform,
+            destinations: destinations,
             product: .app,
             bundleId: "\(organizationName).\(name)",
-            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+            deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .extendingDefault(with: [
                 "UILaunchStoryboardName": "LaunchScreen",
                 "ENABLE_TESTS": .boolean(true),
@@ -222,9 +217,9 @@ extension Project {
                 "CFBundleVersion": "\(self.buildNumber)",
                 "BGTaskSchedulerPermittedIdentifiers": [
                     "com.sudo.park.TodoCalendarApp.bgSync"
-                ]
-//                ,
-//                "UIBackgroundModes": ["fetch"]
+                ],
+                "UIBackgroundModes": ["fetch"],
+                "NSCalendarsFullAccessUsageDescription": "Calendar access is required to display events and sync with Apple Calendar."
             ]),
             sources: [
                 "Sources/**",
@@ -234,19 +229,21 @@ extension Project {
             entitlements: Entitlements.file(path: "./TodoCalendarApp.entitlements"),
             dependencies: dependencies,
             settings: .settings(
-                base: .init().swiftVersion("6.0"),
+                base: .init()
+                    .swiftVersion("6.0")
+                    .otherLinkerFlags(["-ObjC"]),
                 configurations: signingConfigures + [
-                    
+
                 ]
             )
         )
-        
-        let testTarget = Target(
+
+        let testTarget = Target.target(
             name: "\(name)Tests",
-            platform: platform,
+            destinations: destinations,
             product: .unitTests,
             bundleId: "\(organizationName).\(name)",
-            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+            deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .default,
             sources: ["\(name)Tests/**"],
             dependencies: [
@@ -258,26 +255,26 @@ extension Project {
             ])
         return [mainTarget, testTarget]
     }
-    
+
     public static func makeAppExtensionTargets(
         appName: String,
         extensionName: String,
-        platform: Platform,
+        destinations: Destinations,
         iOSTargetVersion: String,
         infoPlist: [String: Plist.Value] = [:],
         dependencies: [TargetDependency],
         signingConfigures: [ProjectDescription.Configuration],
         withTest: Bool = true
     ) -> [Target] {
-        
+
         let targetName = "\(appName)\(extensionName)"
-        
-        let target = Target(
+
+        let target = Target.target(
             name: targetName,
-            platform: platform,
+            destinations: destinations,
             product: .appExtension,
             bundleId: "\(organizationName).\(appName).\(extensionName)",
-            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: .iphone),
+            deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .extendingDefault(with: infoPlist),
             sources: [
                 "AppExtensions/Base/**",
@@ -295,19 +292,19 @@ extension Project {
             settings: .settings(
                 base: .init().swiftVersion("6.0"),
                 configurations: signingConfigures + [
-                    
+
                 ]
             )
         )
-        
+
         guard withTest else { return [target] }
-        
-        let testTarget = Target(
+
+        let testTarget = Target.target(
             name: "\(targetName)Tests",
-            platform: platform,
+            destinations: destinations,
             product: .unitTests,
             bundleId: "\(organizationName).\(appName).\(extensionName)Tests",
-            deploymentTarget: .iOS(targetVersion: iOSTargetVersion, devices: [.iphone]),
+            deploymentTargets: .iOS(iOSTargetVersion),
             infoPlist: .default,
             sources: [
                 "AppExtensions/Base/**",
@@ -319,7 +316,7 @@ extension Project {
             dependencies: [
                 .target(name: appName),
                 .project(
-                    target: "UnitTestHelpKit", 
+                    target: "UnitTestHelpKit",
                     path: .relativeToCurrentFile("../../Supports/UnitTestHelpKit")
                 ),
                 .project(
@@ -332,7 +329,7 @@ extension Project {
                 )
             ]
         )
-        
+
         return [target, testTarget]
     }
 }

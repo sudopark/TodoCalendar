@@ -100,7 +100,7 @@ private struct DummyEndpoint: Endpoint {
     let subPath: String = "some"
 }
 
-private final class DummyAPIAuthenticator: APIAuthenticator {
+private final class DummyAPIAuthenticator: APIAuthenticator, @unchecked Sendable {
     
     func apply(_ credential: APICredential, to urlRequest: inout URLRequest) { }
     

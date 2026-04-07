@@ -287,6 +287,8 @@ private struct WeekRowView: View {
             switch event.colorSource {
             case let google as GoogleCalendarEventColorSource:
                 return self.appearance.googleEventColorOnCalendar(google.colorId, google.calendarId, offColor: { $0.text1 }).asColor
+            case let apple as AppleCalendarEventColorSource:
+                return self.appearance.appleCalendarColorOnCalendar(apple.calendarId, offColor: { $0.text1 }).asColor
             default:
                 return self.appearance.colorOnCalendar(event.eventTagId, offColor: { $0.text1 }).asColor
             }
@@ -365,6 +367,8 @@ private struct WeekRowView: View {
             switch line.colorSource {
             case let google as GoogleCalendarEventColorSource:
                 return self.appearance.googleEventColorOnCalendar(google.colorId, google.calendarId).asColor
+            case let apple as AppleCalendarEventColorSource:
+                return self.appearance.appleCalendarColorOnCalendar(apple.calendarId).asColor
             default:
                 return self.appearance.colorOnCalendar(line.event.eventTagId).asColor
             }

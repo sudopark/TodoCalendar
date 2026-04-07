@@ -13,17 +13,26 @@ import Extensions
 
 
 final class StubExternalCalendarRepository: ExternalCalendarIntegrateRepository, @unchecked Sendable {
-    
+
     private let isGoogleAccountIntegrated: Bool
-    init(isGoogleAccountIntegrated: Bool) {
+    private let isAppleCalendarIntegrated: Bool
+    init(
+        isGoogleAccountIntegrated: Bool = false,
+        isAppleCalendarIntegrated: Bool = false
+    ) {
         self.isGoogleAccountIntegrated = isGoogleAccountIntegrated
+        self.isAppleCalendarIntegrated = isAppleCalendarIntegrated
     }
-    
+
     func loadIntegratedAccounts() async throws -> [ExternalServiceAccountinfo] {
-        let account = ExternalServiceAccountinfo(
-            GoogleCalendarService.id, email: "some"
-        )
-        return isGoogleAccountIntegrated ? [account] : []
+        var accounts: [ExternalServiceAccountinfo] = []
+        if isGoogleAccountIntegrated {
+            accounts.append(.init(GoogleCalendarService.id, email: "some"))
+        }
+        if isAppleCalendarIntegrated {
+            accounts.append(.init(AppleCalendarService.id, email: "local"))
+        }
+        return accounts
     }
     
     func save(_ credential: any OAuth2Credential, for service: any ExternalCalendarService) async throws -> ExternalServiceAccountinfo {
@@ -34,24 +43,35 @@ final class StubExternalCalendarRepository: ExternalCalendarIntegrateRepository,
 }
 
 final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked Sendable {
-    
+
+    var shouldFail: Bool = false
+
     func loadColors() -> AnyPublisher<GoogleCalendar.Colors, any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
         let colorSet = GoogleCalendar.Colors.ColorSet(foregroundHex: "for", backgroudHex: "back")
         let colors = GoogleCalendar.Colors(
             ownerId: "stub@google.com", calendars: ["c1": colorSet], events: ["e1": colorSet]
         )
         return Just(colors).mapAsAnyError().eraseToAnyPublisher()
     }
-    
+
     func loadCalendarTags() -> AnyPublisher<[GoogleCalendar.Tag], any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
         let tags: [GoogleCalendar.Tag] = [
             .init(id: "c1", name: "c1"), .init(id: "c2", name: "c2")
         ]
         return Just(tags).mapAsAnyError().eraseToAnyPublisher()
     }
-    
+
     var eventMocking: [GoogleCalendar.Event]?
     func loadEvents(_ calendarId: String, in period: Range<TimeInterval>) -> AnyPublisher<[GoogleCalendar.Event], any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
         if let eventMocking {
             return Just(eventMocking).mapAsAnyError().eraseToAnyPublisher()
         }
@@ -65,5 +85,41 @@ final class StubGoogleCalendarRepository: GoogleCalendarRepository, @unchecked S
         return Empty().eraseToAnyPublisher()
     }
     
+    func resetCache() async throws { }
+}
+
+final class PrivateStubAppleCalendarRepository: AppleCalendarRepository, @unchecked Sendable {
+
+    var shouldFail: Bool = false
+
+    func loadCalendarTags() -> AnyPublisher<[AppleCalendar.Tag], any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
+        let tags: [AppleCalendar.Tag] = [
+            .init(id: "a:1", name: "Work", colorHex: "#FF0000"),
+            .init(id: "a:2", name: "Personal", colorHex: "#00FF00")
+        ]
+        return Just(tags).mapAsAnyError().eraseToAnyPublisher()
+    }
+
+    var eventMocking: [AppleCalendar.Event]?
+    func loadEvents(in period: Range<TimeInterval>) -> AnyPublisher<[AppleCalendar.Event], any Error> {
+        guard !shouldFail else {
+            return Fail(error: RuntimeError("read db cannot write")).eraseToAnyPublisher()
+        }
+        if let eventMocking {
+            return Just(eventMocking).mapAsAnyError().eraseToAnyPublisher()
+        }
+        let event = AppleCalendar.Event(
+            eventId: "ae1", originalEventId: "ae1", calendarId: "a:1", name: "apple", eventTime: .period(period)
+        )
+        return Just([event]).mapAsAnyError().eraseToAnyPublisher()
+    }
+
+    func loadEventOrigin(id: String) -> AnyPublisher<AppleCalendar.EventOrigin?, Never> {
+        return Just(nil).eraseToAnyPublisher()
+    }
+
     func resetCache() async throws { }
 }

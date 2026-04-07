@@ -46,11 +46,13 @@ final class EventTagListViewModelImple: EventTagListViewModel, @unchecked Sendab
     
     init(
         tagUsecase: any EventTagUsecase,
-        googleCalendarUsecase: any GoogleCalendarUsecase
+        googleCalendarUsecase: any GoogleCalendarUsecase,
+        appleCalendarUsecase: any AppleCalendarUsecase
     ) {
         self.eventTagListUsecase = .init(
             tagUsecase: tagUsecase,
-            googleCalendarUsecase: googleCalendarUsecase
+            googleCalendarUsecase: googleCalendarUsecase,
+            appleCalendarUsecase: appleCalendarUsecase
         )
         self.tagUsecase = tagUsecase
         
