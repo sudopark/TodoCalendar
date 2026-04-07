@@ -157,6 +157,8 @@ private extension EKEvent {
         )
         origin.isRepeating = isRepeating
         origin.location = location
+        origin.recurrenceRules = recurrenceRules?.compactMap { $0.toRRuleString() } ?? []
+        origin.attendees = attendees?.compactMap { $0.asAppleCalendarAttendee() } ?? []
         origin.url = url?.absoluteString
         origin.notes = notes
         return origin
@@ -174,6 +176,36 @@ private extension EKEvent {
     private func makePeriodEventTime() -> EventTime? {
         guard let start = startDate, let end = endDate else { return nil }
         return .period(start.timeIntervalSince1970..<end.timeIntervalSince1970)
+    }
+}
+
+
+// MARK: - EKParticipant → AppleCalendar.Attendee
+
+private extension EKParticipant {
+
+    func asAppleCalendarAttendee() -> AppleCalendar.Attendee? {
+        var attendee = AppleCalendar.Attendee(
+            name: name,
+            email: url.absoluteString.hasPrefix("mailto:") ? String(url.absoluteString.dropFirst(7)) : nil
+        )
+        attendee.isOrganizer = participantRole == .chair
+        attendee.isCurrentUser = isCurrentUser
+        attendee.status = participantStatus.asAttendeeStatus
+        return attendee
+    }
+}
+
+private extension EKParticipantStatus {
+
+    var asAttendeeStatus: AppleCalendar.Attendee.Status {
+        switch self {
+        case .accepted:   return .accepted
+        case .declined:   return .declined
+        case .tentative:  return .tentative
+        case .pending:    return .pending
+        default:          return .unknown
+        }
     }
 }
 
