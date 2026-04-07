@@ -67,6 +67,7 @@ graph.dot
 Derived/
 
 ### Tuist managed dependencies ###
+.build/
 Tuist/Dependencies
 Tuist/TodoCalendarApp/Derived/
 TodoCalendarApp/Resources/GoogleService-Info.plist
