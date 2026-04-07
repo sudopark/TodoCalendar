@@ -266,6 +266,8 @@
 // MARK: - Apple calendar event
 "eventDetail::appleCalendarEvent::viewOnCalendar" = "View in Apple Calendar";
 "eventDetail::appleCalendarEvent::calendar::event" = "Apple Calendar Event";
+"eventDetail::appleCalendarEvent::attendees" = "Attendees (%d people)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organizer";
 
 // MARK: - event tag
 
