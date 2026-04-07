@@ -355,6 +355,38 @@ extension AppleCalendarUsecaseImpleTests {
 }
 
 
+// MARK: - eventOrigin
+
+extension AppleCalendarUsecaseImpleTests {
+
+    @Test func eventOrigin_returnsOriginFromRepository() async throws {
+        // given
+        let expect = expectConfirm("이벤트 오리진 반환")
+        var origin = AppleCalendar.EventOrigin(
+            eventId: "event:0", originalEventId: "event:0",
+            calendarId: "cal:0", name: "Test", eventTime: .at(100)
+        )
+        origin.recurrenceRules = ["RRULE:FREQ=DAILY;INTERVAL=1"]
+        origin.attendees = [.init(name: "Alice", email: "alice@test.com")]
+        origin.url = "https://example.com"
+        origin.notes = "some notes"
+        stubRepository.stubEventOrigin = origin
+        let usecase = makeUsecase(isIntegrated: true)
+
+        // when
+        let result = try await firstOutput(expect, for: usecase.eventOrigin(id: "event:0"))
+
+        // then
+        let loaded = try #require(result)
+        #expect(loaded?.eventId == "event:0")
+        #expect(loaded?.recurrenceRules == ["RRULE:FREQ=DAILY;INTERVAL=1"])
+        #expect(loaded?.attendees.first?.name == "Alice")
+        #expect(loaded?.url == "https://example.com")
+        #expect(loaded?.notes == "some notes")
+    }
+}
+
+
 // MARK: - Stubs
 
 private final class PrivateStubIntegrationUsecase: ExternalCalendarIntegrationUsecase, @unchecked Sendable {
