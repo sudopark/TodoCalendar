@@ -349,12 +349,16 @@ private class SpyRouter: BaseSpyRouter, SettingItemListRouting, @unchecked Senda
 
 
 private struct StubDeviceInfoFetchService: DeviceInfoFetchService {
-    
+
     @MainActor
     func fetchDeviceInfo() async -> DeviceInfo {
         return DeviceInfo()
             |> \.appVersion .~ "app"
             |> \.osVersion .~ "os"
             |> \.deviceModel .~ "model"
+    }
+
+    func fetchAppVersion() -> String? {
+        return "1.0.0"
     }
 }
