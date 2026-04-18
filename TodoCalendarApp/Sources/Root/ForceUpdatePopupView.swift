@@ -35,32 +35,52 @@ struct ForceUpdatePopupView: View {
         }
     }
 
+    @ViewBuilder
     private var popupContent: some View {
-        VStack(spacing: 20) {
-            Text(titleText)
+        switch requirement {
+        case .forceRequired:
+            forceRequiredContent
+        case .recommended:
+            recommendedContent
+        }
+    }
+
+    private var forceRequiredContent: some View {
+        popupCard {
+            Text("force_update.title".localized())
                 .font(appearance.fontSet.bigBold.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
                 .multilineTextAlignment(.center)
 
-            Text(messageText)
+            Text("force_update.message".localized())
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text1.asColor)
                 .multilineTextAlignment(.center)
 
-            actionButtons
+            ConfirmButton(
+                title: "common.update".localized(),
+                textColor: appearance.colorSet.primaryBtnText.asColor,
+                backgroundColor: appearance.colorSet.primaryBtnBackground.asColor
+            )
+            .eventHandler(\.onTap) {
+                self.onUpdate()
+            }
         }
-        .padding(24)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
-        )
     }
 
-    @ViewBuilder
-    private var actionButtons: some View {
-        HStack(spacing: 12) {
-            
-            if self.requirement == .recommended {
+    private var recommendedContent: some View {
+        popupCard {
+            Text("recommend_update.title".localized())
+                .font(appearance.fontSet.bigBold.asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+                .multilineTextAlignment(.center)
+
+            Text("recommend_update.message".localized())
+                .font(appearance.fontSet.normal.asFont)
+                .foregroundStyle(appearance.colorSet.text1.asColor)
+                .multilineTextAlignment(.center)
+
+            HStack(spacing: 12) {
                 ConfirmButton(
                     title: "common.close".localized(),
                     textColor: appearance.colorSet.secondaryBtnText.asColor,
@@ -69,17 +89,30 @@ struct ForceUpdatePopupView: View {
                 .eventHandler(\.onTap) {
                     self.closePopup { self.onClose?() }
                 }
-            }
-            
-            ConfirmButton(
-                title: "common.update".localized(),
-                textColor: appearance.colorSet.primaryBtnText.asColor,
-                backgroundColor: appearance.colorSet.primaryBtnBackground.asColor
-            )
-            .eventHandler(\.onTap) {
-                self.closePopup { self.onUpdate() }
+
+                ConfirmButton(
+                    title: "common.update".localized(),
+                    textColor: appearance.colorSet.primaryBtnText.asColor,
+                    backgroundColor: appearance.colorSet.primaryBtnBackground.asColor
+                )
+                .eventHandler(\.onTap) {
+                    self.closePopup { self.onUpdate() }
+                }
             }
         }
+    }
+
+    private func popupCard<Content: View>(
+        @ViewBuilder _ content: () -> Content
+    ) -> some View {
+        VStack(spacing: 20) {
+            content()
+        }
+        .padding(24)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(appearance.colorSet.bg0.asColor)
+        )
     }
 
     private func closePopup(_ handler: @escaping () -> Void) {
@@ -87,24 +120,6 @@ struct ForceUpdatePopupView: View {
         backgroundShown = false
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
             handler()
-        }
-    }
-
-    private var titleText: String {
-        switch requirement {
-        case .forceRequired:
-            return "force_update.title".localized()
-        case .recommended:
-            return "recommend_update.title".localized()
-        }
-    }
-
-    private var messageText: String {
-        switch requirement {
-        case .forceRequired:
-            return "force_update.message".localized()
-        case .recommended:
-            return "recommend_update.message".localized()
         }
     }
 }

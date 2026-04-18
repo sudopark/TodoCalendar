@@ -197,7 +197,7 @@ extension ApplicationRootViewModelImple {
         self.appUpdateCheckUsecase.updateRequirement
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] requirement in
-                self?.router?.showForceUpdatePopup(requirement)
+                self?.router?.showUpdatePopup(requirement)
             })
             .store(in: &self.cancellables)
     }
