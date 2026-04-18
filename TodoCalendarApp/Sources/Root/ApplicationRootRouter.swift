@@ -203,7 +203,7 @@ protocol ApplicationRouting: Routing {
 
     func setupInitialScene(_ prepareResult: ApplicationPrepareResult)
     func changeRootSceneAfter(signIn auth: Auth?)
-    func showForceUpdatePopup(_ requirement: AppUpdateRequirement)
+    func showUpdatePopup(_ requirement: AppUpdateRequirement)
 }
 
 final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
@@ -309,7 +309,7 @@ extension ApplicationRootRouter {
         }
     }
 
-    func showForceUpdatePopup(_ requirement: AppUpdateRequirement) {
+    func showUpdatePopup(_ requirement: AppUpdateRequirement) {
         Task { @MainActor in
             guard self.updatePopupViewController == nil else { return }
             guard let topViewController = self.window.rootViewController?.topPresentedViewController()
