@@ -248,6 +248,10 @@ struct DeviceInfoFetchServiceImple: DeviceInfoFetchService {
             return "\($0)(\(buildNumber ?? "0"))"
         }
     }
+
+    func fetchAppVersion() -> String? {
+        return self.markettingVersion()
+    }
     
     @MainActor
     private func osVersion() -> String {

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import Domain
 import Extensions
 import Scenes
@@ -199,15 +200,17 @@ extension ApplicationViewAppearanceStoreImple: AppleCalendarViewAppearanceStore 
 // MARK: - ApplicationRootRouter
 
 protocol ApplicationRouting: Routing {
-    
+
     func setupInitialScene(_ prepareResult: ApplicationPrepareResult)
     func changeRootSceneAfter(signIn auth: Auth?)
+    func showForceUpdatePopup(_ requirement: AppUpdateRequirement)
 }
 
 final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     
     
     @MainActor var window: UIWindow!
+    @MainActor private weak var updatePopupViewController: UIViewController?
     var viewAppearanceStore: ApplicationViewAppearanceStoreImple!
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
@@ -300,9 +303,41 @@ extension ApplicationRootRouter {
         Task { @MainActor in
             guard let topViewController = self.window.rootViewController?.topPresentedViewController()
             else { return }
-            
+
             let alertController = info.asAlertViewController()
             topViewController.present(alertController, animated: true)
+        }
+    }
+
+    func showForceUpdatePopup(_ requirement: AppUpdateRequirement) {
+        Task { @MainActor in
+            guard self.updatePopupViewController == nil else { return }
+            guard let topViewController = self.window.rootViewController?.topPresentedViewController()
+            else { return }
+
+            let onUpdate: () -> Void = {
+                if let url = URL(string: AppEnvironment.appstoreLinkPath) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            let onClose: (() -> Void)? = requirement == .recommended ? { [weak self] in
+                self?.updatePopupViewController?.dismiss(animated: false)
+                self?.updatePopupViewController = nil
+            } : nil
+
+            let view = ForceUpdatePopupView(
+                requirement: requirement,
+                onUpdate: onUpdate,
+                onClose: onClose
+            )
+            .environment(self.viewAppearanceStore.appearance)
+            let hostingVC = UIHostingController(rootView: view)
+            hostingVC.modalPresentationStyle = .overFullScreen
+            hostingVC.isModalInPresentation = true
+            hostingVC.view.backgroundColor = .clear
+
+            self.updatePopupViewController = hostingVC
+            topViewController.present(hostingVC, animated: false)
         }
     }
     
