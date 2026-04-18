@@ -14,12 +14,18 @@ import Optics
 
 
 struct StubDeviceInfoFetchService: DeviceInfoFetchService {
-    
+
+    var stubAppVersion: String? = "1.0.0"
+
     @MainActor
     func fetchDeviceInfo() async -> DeviceInfo {
         return DeviceInfo()
             |> \.appVersion .~ "app"
             |> \.osVersion .~ "os"
             |> \.deviceModel .~ "model"
+    }
+
+    func fetchAppVersion() -> String? {
+        return self.stubAppVersion
     }
 }

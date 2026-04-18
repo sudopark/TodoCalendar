@@ -20,6 +20,7 @@ public protocol FeedbackUsecase: Sendable {
 public protocol DeviceInfoFetchService: Sendable {
     @MainActor
     func fetchDeviceInfo() async -> DeviceInfo
+    func fetchAppVersion() -> String?
 }
 
 public final class FeedbackUsecaseImple: FeedbackUsecase, @unchecked Sendable {
