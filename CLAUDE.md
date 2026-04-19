@@ -203,6 +203,15 @@ xcodebuild test \
 
 주요 키: `todos`, `schedules`, `tags`, `googleCalendarEvents`, `googleCalendarTags`, `foremostEventId`
 
+### 앱 버전 체크 (강제 / 권장 업데이트)
+
+원격 JSON(`app-config/update-info.json`, GitHub raw로 서빙)에서 최소 지원 버전을 받아 현재 앱 버전과 비교해 두 단계 업데이트 요구를 판정:
+
+- **`forceRequired`** — 강제 업데이트 모달. `isModalInPresentation = true`로 dismiss 차단, App Store 이동만 가능.
+- **`recommended`** — 권장 업데이트 팝업. 나중에/업데이트 선택 가능.
+
+`AppUpdateCheckUsecase`가 앱 시작 + 포그라운드 복귀 시점에 체크 트리거. 버전 비교는 자리수 zero-padding 후 `.numeric` 옵션. 세부 스펙은 [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md) 참조.
+
 ### DB 마이그레이션
 
 **메인 DB** (`todo_calendar.db`):

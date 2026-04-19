@@ -308,6 +308,48 @@
 
 ---
 
+## 20. 버전 호환성 / 업데이트 체크
+
+> **상세 스펙**: [spec/infrastructure.md §7](spec/infrastructure.md) — 판정 알고리즘, 버전 비교, 팝업 연출, 트리거 시점
+
+서버 API 브레이킹 체인지나 치명적 결함 발견 시 구버전 사용자를 새 버전으로 유도하고, 가벼운 안내는 "권장" 수준으로 내리는 채널.
+
+### 20.1 구성
+
+- **원격 설정 소스**: `app-config/update-info.json` — GitHub raw URL로 서빙 (앱 재배포 없이 조건만 갱신)
+  ```json
+  {
+    "force_update_version": "2.0.0",
+    "recommend_update_version": "1.9.0"
+  }
+  ```
+- **체크 트리거**: 앱 시작 + 포그라운드 복귀 (`willEnterForegroundNotification`)
+- **판정 결과** (`AppUpdateRequirement` 이넘):
+  - `forceRequired` — 현재 버전이 `force_update_version` 미만
+  - `recommended` — force는 통과했지만 `recommend_update_version` 미만
+  - "업데이트 불필요"는 방출 없음 (정상 상태는 nil)
+
+### 20.2 버전 비교
+
+`major.minor.patch` 포맷을 자리수별 zero-padding 후 `.numeric` 옵션으로 비교 — `1.10 > 1.9`, `2.0 == 2.0.0` 모두 정확. semver pre-release(`1.0-beta`) 표기는 비대응.
+
+### 20.3 UI 동작
+
+| 요구 | 팝업 | 닫기 | dismiss 스와이프 | "업데이트" 동작 |
+|---|---|---|---|---|
+| forceRequired | `UpdatePopupView` (`.forceRequired`) | 버튼 없음 | 차단 (`isModalInPresentation=true`) | App Store 이동, 팝업 유지 |
+| recommended | `UpdatePopupView` (`.recommended`) | "나중에" 버튼 | 차단 (force와 동일 설정) | App Store 이동 + 팝업 닫힘 |
+
+- 루트 레벨 팝업: `ApplicationRootRouter.showUpdatePopup(_:)`이 `UIHostingController`를 `overFullScreen`으로 present.
+- 중복 노출 방지: Router가 현재 팝업 VC 참조(`updatePopupViewController`)를 보관하고 nil일 때만 새로 present.
+
+### 20.4 한계 / 후속 과제
+
+- `.recommended`는 포그라운드 복귀마다 재노출됨. "나중에" 선택 후 일정 기간 억제 정책은 미구현 (필요 시 마지막 dismiss 시점 로컬 저장).
+- 버전 비교는 순수 숫자 포맷만 가정. semver pre-release는 별도 대응 필요.
+
+---
+
 ## 상세 스펙 파일 목록
 
 | 파일 | 내용 |

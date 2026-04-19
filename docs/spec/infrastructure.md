@@ -312,6 +312,98 @@ ApplicationDeepLinkHandlerImple:
 
 ---
 
+## 7. 앱 버전 체크 (강제 / 권장 업데이트)
+
+서버 API 브레이킹 체인지나 치명적 결함 발생 시 구버전 사용자를 새 버전으로 유도하는 통로. 가벼운 안내는 같은 채널로 "권장" 수준으로 내린다.
+
+### 7.1 원격 설정
+
+**위치**: `app-config/update-info.json` (저장소 루트의 `app-config/` 디렉토리)
+**서빙**: `https://raw.githubusercontent.com/sudopark/TodoCalendar/develop/app-config/update-info.json` (GitHub raw URL)
+**포맷**:
+```json
+{
+  "force_update_version": "2.0.0",
+  "recommend_update_version": "1.9.0"
+}
+```
+
+- 두 필드 모두 선택적. null이면 해당 등급 비활성.
+- 디코딩은 Repository 레이어의 `AppUpdateInfoMapper`가 담당. Domain 모델 `AppUpdateInfo`는 Decodable 채택하지 않음.
+
+### 7.2 판정 알고리즘
+
+`AppUpdateRequirement.init?(current:appUpdateInfo:)`:
+
+```
+1. forceUpdateVersion 존재 + current < forceVersion → .forceRequired (우선)
+2. recommendUpdateVersion 존재 + current < recommendVersion → .recommended
+3. 그 외 → nil (정상, 업데이트 불필요)
+```
+
+**버전 비교** (`String.isVersionLessThan`):
+
+1. 양쪽 문자열을 `.`로 split
+2. 짧은 쪽을 `"0"`으로 zero-padding (`2.0` → `2.0.0`)
+3. 다시 `.`로 join한 뒤 `compare(_:options: .numeric)` 호출
+4. `.orderedAscending` 반환 시 current가 더 낮음
+
+이로써:
+- `1.10 > 1.9` 정확히 판정 (numeric 옵션)
+- `2.0 == 2.0.0` 동일 취급 (zero-padding)
+- `major.minor.patch` 순수 숫자 포맷만 가정 — `1.0-beta` 같은 semver pre-release는 미대응
+
+### 7.3 체크 트리거
+
+`AppUpdateCheckUsecase.checkUpdateIsNeed()` 호출 시점:
+
+| 시점 | 트리거 지점 |
+|---|---|
+| 앱 시작 | `ApplicationRootViewModelImple.setupInitialScene`의 초기 바인딩 경로 |
+| 포그라운드 복귀 | `UIApplication.willEnterForegroundNotification` 구독 |
+
+`updateRequirement` Publisher가 `forceRequired` / `recommended`를 방출하면 `ApplicationRootViewModelImple.bindUpdateRequirement`의 sink가 `router?.showUpdatePopup(requirement)`를 호출.
+
+### 7.4 팝업 동작
+
+`ApplicationRootRouter.showUpdatePopup(_:)` — 루트 레벨 `UIHostingController`를 `overFullScreen`으로 present.
+
+- 중복 노출 방지: 현재 팝업 VC 참조(`updatePopupViewController`, `weak`)를 보관하고 nil일 때만 새로 present.
+- `isModalInPresentation = true` — **force/recommended 모두** 스와이프 dismiss 차단.
+- 배경은 clear(딤은 SwiftUI 내부), 전환 애니메이션은 present `animated: false` + SwiftUI opacity 페이드(0.25s)로 통일.
+
+**View (`UpdatePopupView`/`ForceUpdatePopupView`) 구조**:
+- `switch requirement`로 `forceRequiredContent` / `recommendedContent` 서브뷰 분기.
+- 공통 카드 컨테이너는 `popupCard` 헬퍼로 추출. 배경은 `appearance.colorSet.bg0`.
+
+| 요구 | 버튼 | "업데이트" 탭 시 |
+|---|---|---|
+| forceRequired | "업데이트"만 | App Store 이동. **팝업 유지** (`closePopup` 호출 안 함 → opacity 1 유지) |
+| recommended | "나중에" + "업데이트" | App Store 이동 + `closePopup`으로 페이드아웃. "나중에"는 Router의 `onClose`가 host VC `dismiss`. |
+
+### 7.5 관련 파일
+
+| 레이어 | 파일 |
+|---|---|
+| Domain Model | `Domain/Sources/Models/AppUpdateInfo.swift` |
+| Domain Repo | `Domain/Sources/Repositories/AppRepository.swift` |
+| Domain Usecase | `Domain/Sources/Usecases/Support/AppUpdateCheckUsecase.swift` |
+| Repository Impl | `Repository/Sources/Repository+Imple/Support/AppRemoteRepositoryImple.swift` |
+| Mapper | `Repository/Sources/Repository+Imple/Support/AppUpdateInfo+Mapping.swift` |
+| Endpoint | `Repository/Sources/Remote/Endpoint.swift` (`AppEndpoints.updateInfo`) |
+| Root View | `TodoCalendarApp/Sources/Root/ForceUpdatePopupView.swift` |
+| Root Router | `TodoCalendarApp/Sources/Root/ApplicationRootRouter.swift`의 `showUpdatePopup` |
+| Root VM | `TodoCalendarApp/Sources/Root/ApplicationRootViewModel.swift`의 `bindUpdateRequirement` + `handleWillEnterForeground` |
+| 원격 설정 | `app-config/update-info.json` |
+
+### 7.6 한계 / 후속 과제
+
+- **recommended 재노출 억제 없음**: 포그라운드 복귀마다 같은 조건이면 매번 팝업이 뜬다. "나중에" 선택 후 일정 기간 억제하려면 마지막 dismiss 시점을 로컬(UserDefaults 등)에 저장하고 `checkUpdateIsNeed`에서 참조하는 정책이 필요.
+- **semver pre-release 미대응**: `1.0-beta`, `2.0.0-rc.1` 같은 접미사는 현재 비교 로직이 예측 불가 동작. 필요 시 `isVersionLessThan`에 pre-release 파싱 추가.
+- **원격 실패 시 조용한 무효화**: `AppUpdateCheckUsecaseImple.loadUpdateInfoWithoutError`가 에러를 nil로 삼켜 JSON 디코딩 실패·네트워크 오류가 운영 지표에 드러나지 않음. 로그/텔레메트리 추가 검토 여지.
+
+---
+
 ## 상태 전이 다이어그램
 
 ### SharedDataStore 동시성 모델
