@@ -7,6 +7,8 @@
 
 import ProjectDescription
 
+// CI trigger: #617 전체 스킴 테스트 검증용 (병합 대상 아님)
+
 
 extension Project {
     
