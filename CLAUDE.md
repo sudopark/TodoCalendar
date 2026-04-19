@@ -8,6 +8,7 @@
 - **코드 수정 시 TDD 워크플로우를 따른다.** 테스트 작성 → 실패 확인 → 구현 → 통과 확인.
 - **child CLAUDE.md가 있는 프레임워크의 코드를 수정한 경우**, 스펙이 변경될 수 있으면 해당 child CLAUDE.md를 다시 분석하여 반영한다.
 - **객체를 변경한 경우**, 이를 참조하는 다른 객체들을 탐색하여 변경사항에 영향이 없는지 확인한다 (빌드 및 테스트 모두).
+- **`.claude/rules/*.md`의 규칙은 해당 path 파일을 건드릴 때 자동 로드된다.** 로드된 rules의 조항을 구현 결정 시점에 적극 invoke할 것 — 저장만 돼 있다고 반영되는 건 아님.
 
 ---
 
@@ -115,74 +116,7 @@ xcodebuild test \
 
 주요 테스트 스킴: `Domain`, `Repository`, `CalendarScenes`, `EventDetailScene`, `EventListScenes`, `SettingScene`, `MemberScenes`
 
-### 테스트 작성 원칙
-
-**프레임워크 선택**
-- XCTest: `BaseTestCase` (from `UnitTestHelpKit`) 상속
-- Swift Testing: `@Test` / `#expect`, `PublisherWaitable` 직접 채택 (XCTestCase 불필요)
-
-**구조**
-- 테스트는 **상황(given context) 기준**으로 그룹화. 메서드 기준 아님.
-- 각 테스트는 observable한 **동작(behavior)** 을 검증. 내부 구현 상태(private flag 등) 검증 금지. stub의 호출 추적 변수(`didCallXxx`) 대신 실제 사이드이펙트(예: store 상태 변경, 스트림 방출값)로 검증할 것.
-- `// given / when / then` 주석으로 구조 명시. 모든 테스트 메서드에 반드시 포함할 것.
-
-```swift
-// ✅ 올바른 예시
-func test_whenLoadList_shouldUpdateSections() {
-    // given
-    let expect = expectation(description: "리스트 로드시 섹션 업데이트")
-    let viewModel = self.makeViewModel()
-
-    // when
-    let sections = self.waitOutputs(expect, for: viewModel.sectionModels) {
-        viewModel.loadList()
-    }
-
-    // then
-    XCTAssertEqual(sections.count, 2)
-}
-
-// ❌ 잘못된 예시 — 주석 없이 바로 작성
-func test_whenLoadList_shouldUpdateSections() {
-    let expect = expectation(description: "리스트 로드시 섹션 업데이트")
-    let viewModel = self.makeViewModel()
-    let sections = self.waitOutputs(expect, for: viewModel.sectionModels) {
-        viewModel.loadList()
-    }
-    XCTAssertEqual(sections.count, 2)
-}
-```
-
-**스터빙 원칙**
-- 협업 객체의 스터빙은 개별 테스트 시작 전에 완료되어야 한다. `makeViewModel()` 등 SUT 생성 함수에서 보편적인 성공 응답을 기본 스터빙으로 세팅할 것.
-- 에러 케이스나 응답을 변경해야 하는 경우, `makeViewModel(shouldFail:)` 처럼 파라미터로 분기하거나 `makeViewModelWith...()` 헬퍼 함수를 활용한다.
-
-```swift
-// ✅ 기본 스터빙: 보편적 성공 응답으로 세팅
-private func makeViewModel(
-    shouldFailSignIn: Bool = false
-) -> SignInViewModelImple {
-    let authUsecase = StubAuthUsecase()
-    authUsecase.shouldFailSignIn = shouldFailSignIn
-    let viewModel = SignInViewModelImple(authUsecase: authUsecase)
-    viewModel.router = self.spyRouter
-    return viewModel
-}
-
-// ✅ 특수한 사전 조건이 필요한 경우 별도 헬퍼로 분리
-private func makeViewModelWithInitialListLoaded(
-    shouldFailDoneTodo: Bool = false
-) -> DayEventListViewModelImple {
-    let viewModel = self.makeViewModel(shouldFailDoneTodo: shouldFailDoneTodo)
-    // ... 초기 리스트 로딩 완료까지 대기
-    return viewModel
-}
-```
-
-**Test Double 네이밍**
-- `stub*`: 생성 시점에 설정 고정. 테스트 중 변경 없음.
-- `mock*`: 생성 후 동적 변경이 필요한 경우.
-- 호출 기록 변수: `did<Action>...` 형태. (`didRouteToSetting`, `didRemoveTodoId`) `callCount` / `wasCalled` 사용 금지.
+> 테스트 작성 원칙(프레임워크, 테스트 더블, 스터빙, 조직화 등)은 [`.claude/rules/testability.md`](.claude/rules/testability.md)로 관리. 해당 path 자동 로드.
 
 ---
 
@@ -327,39 +261,6 @@ docs: 테스트 조직화 원칙 추가
 
 ## 6. Scene 스펙
 
-화면(Scene) 단위 작업의 상세 스펙은 [`docs/scene-spec.md`](docs/scene-spec.md)를 참조.
-
-### 핵심 요약
-
-**Scene 구성 파일** (6개, SwiftUI 사용 시):
-
-```
-XXXScene+Builder.swift    — Scene/Interactor/Listener/Builder 프로토콜
-XXXViewModel.swift        — VM 프로토콜 + Imple (Subject struct로 상태 관리)
-XXXViewController.swift   — UIHostingController 래퍼
-XXXRouter.swift           — BaseRouterImple 상속, 화면 전환 담당
-XXXBuilderImple.swift     — 의존성 조립 (UsecaseFactory + ViewAppearance 주입)
-XXXView.swift             — ViewState + ViewEventHandler + ContainerView + View
-```
-
-**SwiftUI 통합 구조**:
-
-```mermaid
-graph LR
-    VM[ViewModel] -->|Publisher| VS[ViewState]
-    VM -->|메서드| EH[EventHandler]
-    VS -->|@Environment| V[View]
-    EH -->|@Environment| V
-    VC[ViewController] --> CV[ContainerView] --> V
-```
-
-- `ViewState`/`ViewEventHandler`가 ViewModel과 View 사이를 중개하여 직접 참조를 끊음
-
-**Scene 간 통신 (3가지)**:
-
-| 방향 | 메커니즘 | 용도 |
-|---|---|---|
-| 간접 공유 | SharedDataStore (Usecase 경유) | 같은 데이터를 구독하는 독립 Scene 간 |
-| Parent → Child | Interactor | 부모가 자식에게 명령 |
-| Child → Parent | Listener (weak) | 자식이 부모에게 이벤트 전달 |
+- 화면(Scene) 단위 작업의 상세 스펙: [`docs/scene-spec.md`](docs/scene-spec.md) (6파일 구성, 생성 순서, SwiftUI 통합 템플릿, Scene 간 통신)
+- 구현 시 지킬 규칙(MUST/MUST NOT): [`.claude/rules/presentations-rules.md`](.claude/rules/presentations-rules.md) (ViewAppearance, 공용 컴포넌트, SwiftUI DI, ViewModel 책임 경계, Listener weak, 모듈 경계)
 
