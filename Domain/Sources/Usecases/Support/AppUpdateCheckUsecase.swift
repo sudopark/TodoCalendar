@@ -15,6 +15,7 @@ import Extensions
 public protocol AppUpdateCheckUsecase: Sendable {
     func checkUpdateIsNeed()
     var updateRequirement: AnyPublisher<AppUpdateRequirement, Never> { get }
+    var isUpdateAvailable: AnyPublisher<Bool, Never> { get }
 }
 
 
@@ -23,14 +24,16 @@ public protocol AppUpdateCheckUsecase: Sendable {
 public final class AppUpdateCheckUsecaseImple: AppUpdateCheckUsecase, @unchecked Sendable {
 
     private let appRepository: any AppRepository
+    private let currentAppVersion: String?
 
     public init(
         appRepository: any AppRepository,
         deviceInfoFetchService: any DeviceInfoFetchService
     ) {
         self.appRepository = appRepository
+        self.currentAppVersion = deviceInfoFetchService.fetchAppVersion()
 
-        guard let appVersion = deviceInfoFetchService.fetchAppVersion()
+        guard let appVersion = self.currentAppVersion
         else { return }
         self.bindCheckTrigger(appVersion)
     }
@@ -38,6 +41,7 @@ public final class AppUpdateCheckUsecaseImple: AppUpdateCheckUsecase, @unchecked
     private struct Subject {
         let checkTrigger = PassthroughSubject<Void, Never>()
         let appUpdateRequirement = PassthroughSubject<AppUpdateRequirement, Never>()
+        let currentUpdateInfo = CurrentValueSubject<AppUpdateInfo?, Never>(nil)
     }
     private let subject = Subject()
     private var cancellables: Set<AnyCancellable> = []
@@ -57,6 +61,9 @@ extension AppUpdateCheckUsecaseImple {
             .flatMapLatest { [weak self] in
                 return self?.loadUpdateInfoWithoutError() ?? Empty().eraseToAnyPublisher()
             }
+            .handleEvents(receiveOutput: { [weak self] info in
+                self?.subject.currentUpdateInfo.send(info)
+            })
             .compactMap { [weak self] info in
                 return self?.checkAppVersion(currentAppVersion, updateInfo: info)
             }
@@ -87,6 +94,18 @@ extension AppUpdateCheckUsecaseImple {
 
     public var updateRequirement: AnyPublisher<AppUpdateRequirement, Never> {
         return self.subject.appUpdateRequirement
+            .eraseToAnyPublisher()
+    }
+
+    public var isUpdateAvailable: AnyPublisher<Bool, Never> {
+        let currentAppVersion = self.currentAppVersion
+        return self.subject.currentUpdateInfo
+            .map { info -> Bool in
+                guard let current = currentAppVersion,
+                      let latest = info?.latestVersion
+                else { return false }
+                return current.isVersionLessThan(latest)
+            }
             .eraseToAnyPublisher()
     }
 }
