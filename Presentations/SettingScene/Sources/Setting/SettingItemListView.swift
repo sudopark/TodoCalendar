@@ -40,16 +40,18 @@ import CommonPresentation
 // MARK: - SettingItemListViewEventHandler
 
 final class SettingItemListViewEventHandler: Observable {
-    
+
     var onAppear: () -> Void = { }
     var selectItem: (any SettingItemModelType) -> Void = { _ in }
     var close: () -> Void = { }
-    
+    var openAppUpdate: () -> Void = { }
+
     func bind(_ viewModel: any SettingItemListViewModel) {
-        
+
         self.onAppear = viewModel.prepare
         self.selectItem = viewModel.selectItem
         self.close = viewModel.close
+        self.openAppUpdate = viewModel.openAppUpdate
     }
 }
 
@@ -124,13 +126,18 @@ struct SettingItemListView: View {
                         .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
                         .foregroundStyle(self.appearance.colorSet.text0.asColor)
                     
-                    if let appVersion = (section as? AppInfoSectionModel)?.version {
-                        
+                    if let appInfoSection = section as? AppInfoSectionModel,
+                       let appVersion = appInfoSection.version {
+
                         Spacer()
-                        
+
                         Text(appVersion)
                             .font(self.appearance.fontSet.size(14, weight: .semibold).asFont)
                             .foregroundStyle(self.appearance.colorSet.text2.asColor)
+
+                        if appInfoSection.isUpdateAvailable {
+                            self.updateBadge
+                        }
                     }
                 }
                 .padding(.top, 8)
@@ -152,6 +159,25 @@ struct SettingItemListView: View {
     
     private var itemFont: Font {
         return self.appearance.fontSet.subNormal.asFont
+    }
+
+    private var updateBadge: some View {
+        HStack(spacing: 2) {
+            Text("new")
+                .font(self.appearance.fontSet.size(12, weight: .semibold).asFont)
+            Image(systemName: "chevron.right")
+                .font(self.appearance.fontSet.size(10, weight: .semibold).asFont)
+        }
+        .foregroundStyle(self.appearance.colorSet.primaryBtnText.asColor)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(self.appearance.colorSet.primaryBtnBackground.asColor)
+        )
+        .onTapGesture {
+            self.eventHandlers.openAppUpdate()
+        }
     }
     
     private func normalItemView(_ item: SettingItemModel) -> some View {
@@ -271,11 +297,37 @@ struct SettingItemListViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = SettingItemListViewState()
         let eventHandlers = SettingItemListViewEventHandler()
-        state.sections = [
-            SettingSectionModel(headerText: "section", items: [
-                AccountSettingItemModel(.init("some"))
-            ])
-        ]
+        let baseSection = SettingSectionModel(
+            headerText: nil,
+            items: [
+                SettingItemModel(.appearance),
+                SettingItemModel(.editEvent),
+                SettingItemModel(.holidaySetting),
+                AccountSettingItemModel(nil)
+            ]
+        )
+        let supportSection = SettingSectionModel(
+            headerText: "setting.section.support::name".localized(),
+            items: [
+                SettingItemModel(.feedback),
+                SettingItemModel(.help)
+            ]
+        )
+        let appInfoSection = AppInfoSectionModel(
+            headerText: "setting.section.app::name".localized(),
+            version: "v2.9.2",
+            isUpdateAvailable: true,
+            items: [
+                SettingItemModel(.shareApp),
+                SettingItemModel(.addReview),
+                SettingItemModel(.sourceCode)
+            ]
+        )
+        let suggestSection = SettingSectionModel(
+            headerText: "setting.section.suggest::name".localized(),
+            items: [SuggestAppItemModel.readmind()]
+        )
+        state.sections = [baseSection, supportSection, appInfoSection, suggestSection]
         
         let view = SettingItemListView()
             .environment(state)

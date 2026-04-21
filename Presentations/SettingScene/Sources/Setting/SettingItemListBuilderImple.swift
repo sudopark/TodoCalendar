@@ -56,7 +56,8 @@ extension SettingItemListSceneBuilerImple: SettingItemListSceneBuiler {
             appstoreLinkPath: self.appstoreLinkPath,
             accountUsecase: self.usecaseFactory.accountUescase,
             uiSettingUsecase: self.usecaseFactory.makeUISettingUsecase(),
-            deviceInfoFetchService: self.usecaseFactory.deviceInfoFetchService()
+            deviceInfoFetchService: self.usecaseFactory.deviceInfoFetchService(),
+            appUpdateCheckUsecase: self.usecaseFactory.appUpdateCheckUsecase
         )
         
         let viewController = SettingItemListViewController(
