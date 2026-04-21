@@ -324,11 +324,14 @@ ApplicationDeepLinkHandlerImple:
 ```json
 {
   "force_update_version": "2.0.0",
-  "recommend_update_version": "1.9.0"
+  "recommend_update_version": "1.9.0",
+  "latest_version": "2.1.0"
 }
 ```
 
-- 두 필드 모두 선택적. null이면 해당 등급 비활성.
+- 세 필드 모두 선택적. null이면 해당 판정 비활성.
+- `force_update_version` / `recommend_update_version` — 업데이트 **강제·권장 하한선**. 팝업 트리거용.
+- `latest_version` — **스토어에 올라간 최신 배포 버전**. 설정 화면의 "업데이트 가능" 안내(비강제) 판정용.
 - 디코딩은 Repository 레이어의 `AppUpdateInfoMapper`가 담당. Domain 모델 `AppUpdateInfo`는 Decodable 채택하지 않음.
 
 ### 7.2 판정 알고리즘
@@ -353,6 +356,20 @@ ApplicationDeepLinkHandlerImple:
 - `2.0 == 2.0.0` 동일 취급 (zero-padding)
 - `major.minor.patch` 순수 숫자 포맷만 가정 — `1.0-beta` 같은 semver pre-release는 미대응
 
+#### 7.2.1 업데이트 가능 여부 판정 (`isUpdateAvailable`)
+
+`AppUpdateCheckUsecase.isUpdateAvailable: AnyPublisher<Bool, Never>` — 설정 화면의 비강제 안내용 판정:
+
+```
+1. latest_version이 없으면 → false
+2. current < latest_version → true
+3. 그 외 → false
+```
+
+`force_update_version` / `recommend_update_version`과 **독립**으로 판정. 두 축은 "업데이트 강제·권장 하한선"을 표현하고, `latest_version`은 "스토어에 올라간 최신 배포 버전"을 표현하는 서로 다른 축이다. 세 값이 동시에 존재해도 각자 독립적으로 평가된다.
+
+내부 구현: `AppUpdateCheckUsecaseImple.Subject.currentUpdateInfo: CurrentValueSubject<AppUpdateInfo?, Never>`에 `loadUpdateInfo` 결과를 사이드이펙트로 저장하고, 여기서 `map`으로 파생. `String.isVersionLessThan` extension은 force/recommended 판정과 공유.
+
 ### 7.3 체크 트리거
 
 `AppUpdateCheckUsecase.checkUpdateIsNeed()` 호출 시점:
@@ -363,6 +380,8 @@ ApplicationDeepLinkHandlerImple:
 | 포그라운드 복귀 | `UIApplication.willEnterForegroundNotification` 구독 |
 
 `updateRequirement` Publisher가 `forceRequired` / `recommended`를 방출하면 `ApplicationRootViewModelImple.bindUpdateRequirement`의 sink가 `router?.showUpdatePopup(requirement)`를 호출.
+
+설정 화면(`SettingItemListViewModelImple`)은 `isUpdateAvailable`을 **구독만** 하고 `checkUpdateIsNeed()`를 호출하지 않는다. 앱 시작·포그라운드 복귀에서 이미 트리거되며, `currentUpdateInfo` CurrentValueSubject가 마지막 값을 보관해 Setting 진입 즉시 현재값을 받을 수 있다. Setting에서 추가 트리거하면 force/recommended 팝업이 설정 화면 위로 겹쳐 뜰 여지가 있어 기존 팝업 흐름 간섭을 피하기 위한 정책.
 
 ### 7.4 팝업 동작
 
@@ -394,6 +413,8 @@ ApplicationDeepLinkHandlerImple:
 | Root View | `TodoCalendarApp/Sources/Root/ForceUpdatePopupView.swift` |
 | Root Router | `TodoCalendarApp/Sources/Root/ApplicationRootRouter.swift`의 `showUpdatePopup` |
 | Root VM | `TodoCalendarApp/Sources/Root/ApplicationRootViewModel.swift`의 `bindUpdateRequirement` + `handleWillEnterForeground` |
+| Setting VM | `Presentations/SettingScene/Sources/Setting/SettingItemListViewModel.swift`의 `isUpdateAvailable` 구독 + `openAppUpdate()` |
+| Factory | `Presentations/Scenes/Sources/Factories.swift` `SupportUsecaseFactory.appUpdateCheckUsecase` (단일 인스턴스 공유 계약) |
 | 원격 설정 | `app-config/update-info.json` |
 
 ### 7.6 한계 / 후속 과제
