@@ -14,26 +14,29 @@ import Scenes
 // MARK: - NonLoginUsecaseFactoryImple
 
 struct NonLoginUsecaseFactoryImple: UsecaseFactory {
-    
+
     let authUsecase: any AuthUsecase
     let accountUescase: any AccountUsecase
     let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     let viewAppearanceStore: ApplicationViewAppearanceStoreImple
     let eventSyncUsecase: any EventSyncUsecase
     let eventUploadService: any EventUploadService = NotNeedEventUploadService()
+    let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     private let applicationBase: ApplicationBase
-    
+
     init(
         authUsecase: any AuthUsecase,
         accountUescase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         viewAppearanceStore: ApplicationViewAppearanceStoreImple,
+        appUpdateCheckUsecase: any AppUpdateCheckUsecase,
         applicationBase: ApplicationBase
     ) {
         self.authUsecase = authUsecase
         self.accountUescase = accountUescase
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.viewAppearanceStore = viewAppearanceStore
+        self.appUpdateCheckUsecase = appUpdateCheckUsecase
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
     }
@@ -324,7 +327,7 @@ extension NonLoginUsecaseFactoryImple {
 
 
 struct LoginUsecaseFactoryImple: UsecaseFactory {
-    
+
     let userId: String
     let authUsecase: any AuthUsecase
     let accountUescase: any AccountUsecase
@@ -333,14 +336,16 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let temporaryUserDataMigrationUsecase: any TemporaryUserDataMigrationUescase
     let eventSyncUsecase: any EventSyncUsecase
     let eventUploadService: any EventUploadService
+    let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     private let applicationBase: ApplicationBase
-    
+
     init(
         userId: String,
         authUsecase: any AuthUsecase,
         accountUescase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         viewAppearanceStore: ApplicationViewAppearanceStoreImple,
+        appUpdateCheckUsecase: any AppUpdateCheckUsecase,
         temporaryUserDataFilePath: String,
         applicationBase: ApplicationBase
     ) {
@@ -349,8 +354,9 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         self.accountUescase = accountUescase
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.viewAppearanceStore = viewAppearanceStore
+        self.appUpdateCheckUsecase = appUpdateCheckUsecase
         self.applicationBase = applicationBase
-        
+
         let migrationRepository = TemporaryUserDataMigrationRepositoryImple(
             tempUserDBPath: temporaryUserDataFilePath, 
             remoteAPI: applicationBase.remoteAPI,
