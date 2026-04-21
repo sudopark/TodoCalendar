@@ -45,6 +45,7 @@ extension AppRemoteRepositoryImpleTests {
         // then
         XCTAssertEqual(info.forceUpdateVersion, "3.0.0")
         XCTAssertEqual(info.recommendUpdateVersion, "2.5.0")
+        XCTAssertEqual(info.latestVersion, "2.8.0")
     }
 
     func test_whenFetchFails_throwError() async {
@@ -68,7 +69,8 @@ private struct DummyResponse {
         return """
         {
             "force_update_version": "3.0.0",
-            "recommend_update_version": "2.5.0"
+            "recommend_update_version": "2.5.0",
+            "latest_version": "2.8.0"
         }
         """
     }

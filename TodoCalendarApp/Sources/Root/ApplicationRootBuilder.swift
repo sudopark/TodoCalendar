@@ -83,7 +83,8 @@ final class ApplicationRootBuilder {
             externalCalenarIntegrationUsecase: externalCalendarIntegrationUsecase,
             backgroundEventSyncUsecase: backgroundEventSyncUsecase,
             applicationBase: applicationBase,
-            deepLinkHandler: deepLinkHandler
+            deepLinkHandler: deepLinkHandler,
+            appUpdateCheckUsecase: appUpdateCheckUsecase
         )
         rootViewModel.router = rootRouter
         deepLinkHandler.appRouter = rootRouter

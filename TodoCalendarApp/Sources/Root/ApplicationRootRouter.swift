@@ -218,6 +218,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
     private let applicationBase: ApplicationBase
     private let deepLinkHandler: ApplicationDeepLinkHandlerImple
+    private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     private var usecaseFactory: (any UsecaseFactory)!
 
     init(
@@ -226,7 +227,8 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
         applicationBase: ApplicationBase,
-        deepLinkHandler: ApplicationDeepLinkHandlerImple
+        deepLinkHandler: ApplicationDeepLinkHandlerImple,
+        appUpdateCheckUsecase: any AppUpdateCheckUsecase
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
@@ -234,6 +236,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
         self.applicationBase = applicationBase
         self.deepLinkHandler = deepLinkHandler
+        self.appUpdateCheckUsecase = appUpdateCheckUsecase
     }
     
     func showError(_ error: any Error) {
@@ -351,6 +354,7 @@ extension ApplicationRootRouter {
                 accountUescase: self.accountUsecase,
                 externalCalenarIntegrationUsecase: self.externalCalenarIntegrationUsecase,
                 viewAppearanceStore: self.viewAppearanceStore,
+                appUpdateCheckUsecase: self.appUpdateCheckUsecase,
                 temporaryUserDataFilePath: AppEnvironment.dbFilePath(for: nil),
                 applicationBase: self.applicationBase
             )
@@ -360,6 +364,7 @@ extension ApplicationRootRouter {
                 accountUescase: self.accountUsecase,
                 externalCalenarIntegrationUsecase: self.externalCalenarIntegrationUsecase,
                 viewAppearanceStore: self.viewAppearanceStore,
+                appUpdateCheckUsecase: self.appUpdateCheckUsecase,
                 applicationBase: applicationBase
             )
         }
