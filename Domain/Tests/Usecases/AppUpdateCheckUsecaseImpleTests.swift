@@ -185,11 +185,13 @@ class AppUpdateCheckUsecaseImpleTests: BaseTestCase, PublisherWaitable {
         currentAppVersion: String = "2.0.0",
         forceVersion: String? = nil,
         recommendVersion: String? = nil,
+        latestVersion: String? = nil,
         shouldFail: Bool = false
     ) -> AppUpdateCheckUsecaseImple {
         let stubRepository = StubAppRepository(
             forceVersion: forceVersion,
             recommendVersion: recommendVersion,
+            latestVersion: latestVersion,
             shouldFail: shouldFail
         )
         var stubDeviceInfo = StubDeviceInfoFetchService()
@@ -335,21 +337,137 @@ extension AppUpdateCheckUsecaseImpleTests {
 }
 
 
+// MARK: - isUpdateAvailable 판정 (latest_version 단독 축)
+
+extension AppUpdateCheckUsecaseImpleTests {
+
+    func test_whenLatestVersionHigherThanCurrent_isUpdateAvailableIsTrue() {
+        // given
+        let expect = expectation(description: "최신 버전이 높으면 true")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase(
+            currentAppVersion: "1.0.0",
+            latestVersion: "1.1.0"
+        )
+
+        // when
+        let values = self.waitOutputs(expect, for: usecase.isUpdateAvailable, timeout: 1.0) {
+            usecase.checkUpdateIsNeed()
+        }
+
+        // then
+        XCTAssertEqual(values, [false, true])
+    }
+
+    func test_whenLatestVersionEqualsCurrent_isUpdateAvailableIsFalse() {
+        // given
+        let expect = expectation(description: "동일하면 false")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase(
+            currentAppVersion: "2.0.0",
+            latestVersion: "2.0.0"
+        )
+
+        // when
+        let values = self.waitOutputs(expect, for: usecase.isUpdateAvailable, timeout: 1.0) {
+            usecase.checkUpdateIsNeed()
+        }
+
+        // then
+        XCTAssertEqual(values, [false, false])
+    }
+
+    func test_whenLatestVersionLowerThanCurrent_isUpdateAvailableIsFalse() {
+        // given
+        let expect = expectation(description: "최신 버전이 낮으면 false")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase(
+            currentAppVersion: "3.0.0",
+            latestVersion: "2.9.0"
+        )
+
+        // when
+        let values = self.waitOutputs(expect, for: usecase.isUpdateAvailable, timeout: 1.0) {
+            usecase.checkUpdateIsNeed()
+        }
+
+        // then
+        XCTAssertEqual(values, [false, false])
+    }
+
+    func test_whenLatestVersionMissing_isUpdateAvailableIsFalse() {
+        // given
+        let expect = expectation(description: "latest nil이면 false")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase(
+            currentAppVersion: "1.0.0",
+            forceVersion: "2.0.0",
+            recommendVersion: "1.5.0",
+            latestVersion: nil
+        )
+
+        // when
+        let values = self.waitOutputs(expect, for: usecase.isUpdateAvailable, timeout: 1.0) {
+            usecase.checkUpdateIsNeed()
+        }
+
+        // then
+        XCTAssertEqual(values, [false, false])
+    }
+
+    func test_whenForceAppliesButLatestAlsoHigher_isUpdateAvailableIsTrueIndependently() {
+        // given
+        let expect = expectation(description: "force와 독립적으로 latest 기준 판정")
+        expect.expectedFulfillmentCount = 2
+        let usecase = self.makeUsecase(
+            currentAppVersion: "1.0.0",
+            forceVersion: "2.0.0",
+            latestVersion: "2.0.0"
+        )
+
+        // when
+        let values = self.waitOutputs(expect, for: usecase.isUpdateAvailable, timeout: 1.0) {
+            usecase.checkUpdateIsNeed()
+        }
+
+        // then
+        XCTAssertEqual(values, [false, true])
+    }
+
+    func test_whenLoadFails_isUpdateAvailableStaysFalse() {
+        // given
+        let expect = expectation(description: "로드 실패 시 false 유지")
+        let usecase = self.makeUsecase(shouldFail: true)
+
+        // when
+        let values = self.waitOutputs(expect, for: usecase.isUpdateAvailable, timeout: 1.0) {
+            usecase.checkUpdateIsNeed()
+        }
+
+        // then
+        XCTAssertEqual(values, [false])
+    }
+}
+
+
 // MARK: - Stubs
 
 private class StubAppRepository: AppRepository, @unchecked Sendable {
 
     private let forceVersion: String?
     private let recommendVersion: String?
+    private let latestVersion: String?
     private let shouldFail: Bool
 
     init(
         forceVersion: String? = nil,
         recommendVersion: String? = nil,
+        latestVersion: String? = nil,
         shouldFail: Bool = false
     ) {
         self.forceVersion = forceVersion
         self.recommendVersion = recommendVersion
+        self.latestVersion = latestVersion
         self.shouldFail = shouldFail
     }
 
@@ -358,6 +476,7 @@ private class StubAppRepository: AppRepository, @unchecked Sendable {
         var info = AppUpdateInfo()
         info.forceUpdateVersion = self.forceVersion
         info.recommendUpdateVersion = self.recommendVersion
+        info.latestVersion = self.latestVersion
         return info
     }
 }

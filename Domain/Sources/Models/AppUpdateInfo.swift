@@ -8,7 +8,7 @@ import Foundation
 public struct AppUpdateInfo: Sendable {
     public var forceUpdateVersion: String?
     public var recommendUpdateVersion: String?
-
+    public var latestVersion: String?
     public init() { }
 }
 
