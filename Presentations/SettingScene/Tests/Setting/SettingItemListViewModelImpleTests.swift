@@ -17,29 +17,51 @@ import TestDoubles
 
 
 class SettingItemListViewModelImpleTests: BaseTestCase, PublisherWaitable {
-    
+
     var cancelBag: Set<AnyCancellable>!
     private var spyRouter: SpyRouter!
-    
+    private var stubAppUpdateCheckUsecase: StubAppUpdateCheckUsecase!
+
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.spyRouter = .init()
+        self.stubAppUpdateCheckUsecase = StubAppUpdateCheckUsecase()
     }
-    
+
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.spyRouter = nil
+        self.stubAppUpdateCheckUsecase = nil
     }
-    
-    private func makeViewModel(_ account: AccountInfo? = nil) -> SettingItemListViewModelImple {
+
+    private func makeViewModel(
+        _ account: AccountInfo? = nil,
+        isUpdateAvailable: Bool = false
+    ) -> SettingItemListViewModelImple {
+        self.stubAppUpdateCheckUsecase.isUpdateAvailableSubject.send(isUpdateAvailable)
         let accountUsecase = StubAccountUsecase(account)
         let viewModel = SettingItemListViewModelImple(
             appstoreLinkPath: "some",
             accountUsecase: accountUsecase,
             uiSettingUsecase: StubUISettingUsecase(),
-            deviceInfoFetchService: StubDeviceInfoFetchService()
+            deviceInfoFetchService: StubDeviceInfoFetchService(),
+            appUpdateCheckUsecase: self.stubAppUpdateCheckUsecase
         )
         viewModel.router = self.spyRouter
+        return viewModel
+    }
+
+    private func makeViewModelWithInitialLoaded(
+        isUpdateAvailable: Bool = false
+    ) -> SettingItemListViewModelImple {
+        let expect = expectation(description: "wait initial section models")
+        expect.assertForOverFulfill = false
+        let viewModel = self.makeViewModel(isUpdateAvailable: isUpdateAvailable)
+
+        let _ = self.waitFirstOutput(expect, for: viewModel.sectionModels) {
+            viewModel.prepare()
+        }
+
         return viewModel
     }
 }
@@ -360,5 +382,93 @@ private struct StubDeviceInfoFetchService: DeviceInfoFetchService {
 
     func fetchAppVersion() -> String? {
         return "1.0.0"
+    }
+}
+
+private final class StubAppUpdateCheckUsecase: AppUpdateCheckUsecase, @unchecked Sendable {
+
+    let isUpdateAvailableSubject = CurrentValueSubject<Bool, Never>(false)
+    let updateRequirementSubject = PassthroughSubject<AppUpdateRequirement, Never>()
+    var didCheckUpdateIsNeed: Bool = false
+
+    func checkUpdateIsNeed() {
+        self.didCheckUpdateIsNeed = true
+    }
+
+    var updateRequirement: AnyPublisher<AppUpdateRequirement, Never> {
+        return self.updateRequirementSubject.eraseToAnyPublisher()
+    }
+
+    var isUpdateAvailable: AnyPublisher<Bool, Never> {
+        return self.isUpdateAvailableSubject.eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - AppInfoSectionModel의 isUpdateAvailable 반영
+
+extension SettingItemListViewModelImpleTests {
+
+    func test_whenIsUpdateAvailableFalse_appInfoSectionReflectsFalse() {
+        // given
+        let expect = expectation(description: "false 반영")
+        let viewModel = self.makeViewModelWithInitialLoaded(isUpdateAvailable: false)
+
+        // when
+        let sections = self.waitFirstOutput(expect, for: viewModel.sectionModels)
+
+        // then
+        let appInfo = sections?.compactMap { $0 as? AppInfoSectionModel }.first
+        XCTAssertEqual(appInfo?.isUpdateAvailable, false)
+    }
+
+    func test_whenIsUpdateAvailableChangesToTrue_appInfoSectionReflectsTrue() {
+        // given
+        let expect = expectation(description: "true로 변경 시 반영")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModelWithInitialLoaded(isUpdateAvailable: false)
+
+        // when
+        let sectionsList = self.waitOutputs(expect, for: viewModel.sectionModels) {
+            self.stubAppUpdateCheckUsecase.isUpdateAvailableSubject.send(true)
+        }
+
+        // then — 마지막 방출에서 true
+        let lastAppInfo = sectionsList.last?.compactMap { $0 as? AppInfoSectionModel }.first
+        XCTAssertEqual(lastAppInfo?.isUpdateAvailable, true)
+    }
+}
+
+
+// MARK: - openAppUpdate 동작
+
+extension SettingItemListViewModelImpleTests {
+
+    func test_openAppUpdate_invokesOpenSafariWithAppstoreLinkPath() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.openAppUpdate()
+
+        // then
+        XCTAssertEqual(self.spyRouter.didOpenSafariPath, "some")
+    }
+}
+
+
+// MARK: - 체크 트리거 호출 안함 정책
+
+extension SettingItemListViewModelImpleTests {
+
+    func test_prepare_doesNotTriggerCheckUpdate() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when
+        viewModel.prepare()
+
+        // then — Setting 화면은 구독만, checkUpdateIsNeed 호출 안 함
+        XCTAssertFalse(self.stubAppUpdateCheckUsecase.didCheckUpdateIsNeed)
     }
 }

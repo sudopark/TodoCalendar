@@ -125,6 +125,7 @@ struct SettingSectionModel: SettingSectionModelType {
 struct AppInfoSectionModel: SettingSectionModelType {
     let headerText: String?
     var version: String?
+    var isUpdateAvailable: Bool = false
     let items: [any SettingItemModelType]
 }
 
@@ -136,8 +137,9 @@ protocol SettingItemListViewModel: AnyObject, Sendable, SettingItemListSceneInte
     // interactor
     func prepare()
     func selectItem(_ model: any SettingItemModelType)
+    func openAppUpdate()
     func close()
-    
+
     // presenter
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> { get }
 }
@@ -146,23 +148,26 @@ protocol SettingItemListViewModel: AnyObject, Sendable, SettingItemListSceneInte
 // MARK: - SettingItemListViewModelImple
 
 final class SettingItemListViewModelImple: SettingItemListViewModel, @unchecked Sendable {
-    
+
     private let appstoreLinkPath: String
     private let accountUsecase: any AccountUsecase
     private let uiSettingUsecase: any UISettingUsecase
     private let deviceInfoFetchService: any DeviceInfoFetchService
+    private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     var router: (any SettingItemListRouting)?
-    
+
     init(
         appstoreLinkPath: String,
         accountUsecase: any AccountUsecase,
         uiSettingUsecase: any UISettingUsecase,
-        deviceInfoFetchService: any DeviceInfoFetchService
+        deviceInfoFetchService: any DeviceInfoFetchService,
+        appUpdateCheckUsecase: any AppUpdateCheckUsecase
     ) {
         self.appstoreLinkPath = appstoreLinkPath
         self.accountUsecase = accountUsecase
         self.uiSettingUsecase = uiSettingUsecase
         self.deviceInfoFetchService = deviceInfoFetchService
+        self.appUpdateCheckUsecase = appUpdateCheckUsecase
     }
     
     
@@ -207,6 +212,10 @@ extension SettingItemListViewModelImple {
         }
     }
     
+    func openAppUpdate() {
+        self.router?.openSafari(self.appstoreLinkPath)
+    }
+
     func close() {
         self.router?.closeScene()
     }
@@ -263,8 +272,8 @@ extension SettingItemListViewModelImple {
 extension SettingItemListViewModelImple {
     
     var sectionModels: AnyPublisher<[any SettingSectionModelType], Never> {
-        
-        let transform: (AccountInfo?, DeviceInfo?) -> [any SettingSectionModelType] = { account, device in
+
+        let transform: (AccountInfo?, DeviceInfo?, Bool) -> [any SettingSectionModelType] = { account, device, isUpdateAvailable in
             let baseSectionItems: [SettingItemModel] = [
                 .init(.appearance),
                 .init(.editEvent),
@@ -272,16 +281,16 @@ extension SettingItemListViewModelImple {
             ]
             let accountItem = AccountSettingItemModel(account)
             let baseSection = SettingSectionModel(
-                headerText: nil, 
+                headerText: nil,
                 items: baseSectionItems + [accountItem]
             )
-            
+
             let supportSectionItems: [SettingItemModel] = [
                 .init(.feedback),
                 .init(.help)
             ]
             let supportSection = SettingSectionModel(headerText: "setting.section.support::name".localized(), items: supportSectionItems)
-            
+
             let appInfoSectionItems: [SettingItemModel] = [
                 .init(.shareApp),
                 .init(.addReview),
@@ -290,22 +299,24 @@ extension SettingItemListViewModelImple {
             let appInfoSection = AppInfoSectionModel(
                 headerText: "setting.section.app::name".localized(),
                 version: device?.appVersion.map { "v\($0)"},
+                isUpdateAvailable: isUpdateAvailable,
                 items: appInfoSectionItems
             )
-            
+
             let suggestItem = SuggestAppItemModel.readmind()
             let suggestSection = SettingSectionModel(headerText: "setting.section.suggest::name".localized(), items: [suggestItem])
-            
+
             let sections: [any SettingSectionModelType] = [
                 baseSection, supportSection, appInfoSection, suggestSection
             ]
             return sections
         }
-        
+
         return Publishers
-            .CombineLatest(
+            .CombineLatest3(
                 self.accountUsecase.currentAccountInfo,
-                self.subject.deviceInfo
+                self.subject.deviceInfo,
+                self.appUpdateCheckUsecase.isUpdateAvailable
             )
             .map(transform)
             .eraseToAnyPublisher()
