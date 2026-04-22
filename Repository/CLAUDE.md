@@ -42,7 +42,7 @@ Repository/
 │       ├── Calendar/                  — 캘린더 설정, 공휴일 API
 │       ├── Notification/              — 이벤트 알림
 │       ├── Setting/                   — 앱 설정 (Local/Remote)
-│       └── Support/                   — 피드백
+│       └── Support/                   — 피드백, 앱 업데이트 체크
 │
 └── Tests/
     ├── Common/                        — BaseLocalTests, LocalTestable

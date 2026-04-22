@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import Domain
 import Extensions
 import Scenes
@@ -199,15 +200,17 @@ extension ApplicationViewAppearanceStoreImple: AppleCalendarViewAppearanceStore 
 // MARK: - ApplicationRootRouter
 
 protocol ApplicationRouting: Routing {
-    
+
     func setupInitialScene(_ prepareResult: ApplicationPrepareResult)
     func changeRootSceneAfter(signIn auth: Auth?)
+    func showUpdatePopup(_ requirement: AppUpdateRequirement)
 }
 
 final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     
     
     @MainActor var window: UIWindow!
+    @MainActor private weak var updatePopupViewController: UIViewController?
     var viewAppearanceStore: ApplicationViewAppearanceStoreImple!
     private let authUsecase: any AuthUsecase
     private let accountUsecase: any AccountUsecase
@@ -215,6 +218,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
     private let applicationBase: ApplicationBase
     private let deepLinkHandler: ApplicationDeepLinkHandlerImple
+    private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     private var usecaseFactory: (any UsecaseFactory)!
 
     init(
@@ -223,7 +227,8 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
         applicationBase: ApplicationBase,
-        deepLinkHandler: ApplicationDeepLinkHandlerImple
+        deepLinkHandler: ApplicationDeepLinkHandlerImple,
+        appUpdateCheckUsecase: any AppUpdateCheckUsecase
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
@@ -231,6 +236,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
         self.applicationBase = applicationBase
         self.deepLinkHandler = deepLinkHandler
+        self.appUpdateCheckUsecase = appUpdateCheckUsecase
     }
     
     func showError(_ error: any Error) {
@@ -300,9 +306,41 @@ extension ApplicationRootRouter {
         Task { @MainActor in
             guard let topViewController = self.window.rootViewController?.topPresentedViewController()
             else { return }
-            
+
             let alertController = info.asAlertViewController()
             topViewController.present(alertController, animated: true)
+        }
+    }
+
+    func showUpdatePopup(_ requirement: AppUpdateRequirement) {
+        Task { @MainActor in
+            guard self.updatePopupViewController == nil else { return }
+            guard let topViewController = self.window.rootViewController?.topPresentedViewController()
+            else { return }
+
+            let onUpdate: () -> Void = {
+                if let url = URL(string: AppEnvironment.appstoreLinkPath) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            let onClose: (() -> Void)? = requirement == .recommended ? { [weak self] in
+                self?.updatePopupViewController?.dismiss(animated: false)
+                self?.updatePopupViewController = nil
+            } : nil
+
+            let view = ForceUpdatePopupView(
+                requirement: requirement,
+                onUpdate: onUpdate,
+                onClose: onClose
+            )
+            .environment(self.viewAppearanceStore.appearance)
+            let hostingVC = UIHostingController(rootView: view)
+            hostingVC.modalPresentationStyle = .overFullScreen
+            hostingVC.isModalInPresentation = true
+            hostingVC.view.backgroundColor = .clear
+
+            self.updatePopupViewController = hostingVC
+            topViewController.present(hostingVC, animated: false)
         }
     }
     
@@ -316,6 +354,7 @@ extension ApplicationRootRouter {
                 accountUescase: self.accountUsecase,
                 externalCalenarIntegrationUsecase: self.externalCalenarIntegrationUsecase,
                 viewAppearanceStore: self.viewAppearanceStore,
+                appUpdateCheckUsecase: self.appUpdateCheckUsecase,
                 temporaryUserDataFilePath: AppEnvironment.dbFilePath(for: nil),
                 applicationBase: self.applicationBase
             )
@@ -325,6 +364,7 @@ extension ApplicationRootRouter {
                 accountUescase: self.accountUsecase,
                 externalCalenarIntegrationUsecase: self.externalCalenarIntegrationUsecase,
                 viewAppearanceStore: self.viewAppearanceStore,
+                appUpdateCheckUsecase: self.appUpdateCheckUsecase,
                 applicationBase: applicationBase
             )
         }

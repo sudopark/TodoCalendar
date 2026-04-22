@@ -249,6 +249,20 @@ enum EventSyncEndPoints: Endpoint {
     }
 }
 
+// MARK: - App
+
+public enum AppEndpoints: Endpoint {
+    case updateInfo
+
+    public var subPath: String {
+        switch self {
+        case .updateInfo:
+            return "update-info.json"
+        }
+    }
+}
+
+
 // MARK: - google account endpoint
 
 enum GoogleAuthEndpoint: Endpoint {
@@ -362,7 +376,11 @@ public struct RemoteEnvironment: Sendable {
         case let googleCalendar as GoogleCalendarEndpoint:
             let prefix = "https://www.googleapis.com/calendar/v3"
             return appendSubpathIfNotEmpty(prefix, googleCalendar.subPath)
-            
+
+        case let app as AppEndpoints:
+            let prefix = "https://raw.githubusercontent.com/sudopark/TodoCalendar/develop/app-config"
+            return appendSubpathIfNotEmpty(prefix, app.subPath)
+
         default: return nil
         }
     }

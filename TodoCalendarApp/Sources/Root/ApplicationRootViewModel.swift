@@ -25,6 +25,7 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
     private let externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase
     private let userNotificationUsecase: any UserNotificationUsecase
     private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
+    private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     var router: ApplicationRootRouter?
 
     init(
@@ -34,7 +35,8 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         deepLinkHandler: ApplicationDeepLinkHandlerImple,
         externalCalendarServiceUsecase: any ExternalCalendarIntegrationUsecase,
         userNotificationUsecase: any UserNotificationUsecase,
-        backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
+        backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
+        appUpdateCheckUsecase: any AppUpdateCheckUsecase
     ) {
         self.authUsecase = authUsecase
         self.accountUsecase = accountUsecase
@@ -43,10 +45,12 @@ final class ApplicationRootViewModelImple: @unchecked Sendable {
         self.externalCalendarServiceUsecase = externalCalendarServiceUsecase
         self.userNotificationUsecase = userNotificationUsecase
         self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
-        
+        self.appUpdateCheckUsecase = appUpdateCheckUsecase
+
         self.bindAccountStatusChanged()
         self.bindApplicationStatusChanged()
         self.bindExternalCalenarIntegratedStatus()
+        self.bindUpdateRequirement()
     }
     
     private struct Subject {
@@ -72,6 +76,7 @@ extension ApplicationRootViewModelImple: AutenticatorTokenRefreshListener {
             self.router?.setupInitialScene(result)
             self.subject.isSignIn.send(result.latestLoginAcount != nil)
             self.registerTokenIfNeed()
+            self.appUpdateCheckUsecase.checkUpdateIsNeed()
         }
     }
     
@@ -170,12 +175,31 @@ extension ApplicationRootViewModelImple {
                 self?.handleDidEnterBackground()
             })
             .store(in: &self.cancellables)
+
+        NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)
+            .sink(receiveValue: { [weak self] _ in
+                self?.handleWillEnterForeground()
+            })
+            .store(in: &self.cancellables)
     }
     
     private func handleDidEnterBackground() {
         self.prepareUsecase.prepareEnterBackground()
         self.backgroundEventSyncUsecase.scheduleTask()
         WidgetCenter.shared.reloadAllTimelines()
+    }
+
+    private func handleWillEnterForeground() {
+        self.appUpdateCheckUsecase.checkUpdateIsNeed()
+    }
+
+    private func bindUpdateRequirement() {
+        self.appUpdateCheckUsecase.updateRequirement
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] requirement in
+                self?.router?.showUpdatePopup(requirement)
+            })
+            .store(in: &self.cancellables)
     }
 }
 

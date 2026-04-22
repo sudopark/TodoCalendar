@@ -60,8 +60,9 @@ public protocol CommonUsecaseFactory {
 }
 
 public protocol SupportUsecaseFactory {
-    
+
     func makeFeedbackUsecase() -> any FeedbackUsecase
+    var appUpdateCheckUsecase: any AppUpdateCheckUsecase { get }
 }
 
 public protocol ExternalCalendarUsecaseFactory {

@@ -23,15 +23,17 @@ Domain/Sources/
 │   │   ├── EventUploadingTask.swift
 │   │   └── ForemostEvent.swift
 │   ├── Notifications/  — EventNotification, EventNotificationTimeOption
-│   └── Settings/       — AppearanceSettings, EventSettings, FeedbackPostMessage
-├── Repositories/       — Repository 프로토콜 (구현 없음, 15개)
+│   ├── Settings/       — AppearanceSettings, EventSettings, FeedbackPostMessage
+│   └── AppUpdateInfo.swift — AppUpdateInfo, AppUpdateRequirement (강제/권장 업데이트 판정)
+├── Repositories/       — Repository 프로토콜 (구현 없음, 16개)
 │   ├── Auth/           — AuthRepository, ExternalServiceIntegrateRepository
 │   ├── Calendar/       — CalendarSettingRepository, HolidayRepository
 │   ├── Events/         — TodoEventRepository, ScheduleEventRepository, EventTagRepository,
 │   │                     ForemostEventRepository, GoogleCalendarRepository, EventDetailDataRepository,
 │   │                     EventSyncRepository
 │   ├── Notification/   — EventNotificationRepository
-│   └── Setting/        — AppSettingRepository, FeedbackRepository, TemporaryUserDataMigrationRepository
+│   ├── Setting/        — AppSettingRepository, FeedbackRepository, TemporaryUserDataMigrationRepository
+│   └── AppRepository.swift — 앱 메타 정보 (업데이트 체크 JSON 조회)
 ├── Usecases/           — Usecase 구현
 │   ├── Account/
 │   │   ├── ExternalServiceIntegration/  — ExternalCalendarIntegrationUsecase (protocol + Imple)
@@ -48,7 +50,7 @@ Domain/Sources/
 │   │   └── MemorizedEventsContainer.swift
 │   ├── Notification/   — EventNotificationUsecase, NotificationPermissionUsecase, UserNotificationUsecase
 │   ├── Setting/        — UISettingUsecase, AppSettingUsecase, EventSettingUsecase, EventNotificationSettingUsecase
-│   └── Support/        — FeedbackUsecase
+│   └── Support/        — FeedbackUsecase, AppUpdateCheckUsecase
 └── Utils/
     ├── SharedDataStore.swift
     ├── SharedEventNotifyService.swift
@@ -254,3 +256,4 @@ flowchart TD
 | Common | `LinkPreviewFetchUsecase` | 링크 미리보기 메타데이터 |
 | Common | `PlaceSuggestUsecase` | 장소 자동완성 |
 | Support | `FeedbackUsecase` | 사용자 피드백 제출 |
+| Support | `AppUpdateCheckUsecase` | 앱 버전과 서버 최소 지원 버전을 비교해 강제/권장 업데이트 요구 수준 판정 |

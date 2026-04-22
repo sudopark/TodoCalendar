@@ -499,3 +499,10 @@
 // MARK: - link
 
 "deeplink::invalid_link_message" = "This link format is not supported.\nPlease update the app to the latest version.";
+
+// MARK: - force update
+
+"force_update.title" = "Update Required";
+"force_update.message" = "A new version is available.\nPlease update to continue using the app.";
+"recommend_update.title" = "Update Recommended";
+"recommend_update.message" = "A new version is available.\nWe recommend updating for a better experience.";

@@ -135,6 +135,9 @@ jobs:
     needs: detect-changes
     if: needs.detect-changes.outputs.schemes != ''
     runs-on: Maggie-m1
+    defaults:
+      run:
+        shell: bash -eo pipefail {0}
     env:
       DESTINATION: 'platform=iOS Simulator,name=iPhone 16,OS=18.1'
     steps:
@@ -165,12 +168,19 @@ jobs:
       - name: Generate project
         run: tuist generate --no-open
 
+      - name: Reset DerivedData
+        run: |
+          set -euo pipefail
+          rm -rf ./DerivedData
+
       - name: Test Domain
         if: contains(needs.detect-changes.outputs.schemes, ' Domain ')
         run: |
-          xcodebuild clean test \
+          set -euo pipefail
+          xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme Domain \
+            -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
             | xcpretty
@@ -178,9 +188,11 @@ jobs:
       - name: Test Repository
         if: contains(needs.detect-changes.outputs.schemes, ' Repository ')
         run: |
-          xcodebuild clean test \
+          set -euo pipefail
+          xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme Repository \
+            -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
             | xcpretty
@@ -188,9 +200,11 @@ jobs:
       - name: Test CalendarScenes
         if: contains(needs.detect-changes.outputs.schemes, ' CalendarScenes ')
         run: |
-          xcodebuild clean test \
+          set -euo pipefail
+          xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme CalendarScenes \
+            -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
             | xcpretty
@@ -198,9 +212,11 @@ jobs:
       - name: Test EventDetailScene
         if: contains(needs.detect-changes.outputs.schemes, ' EventDetailScene ')
         run: |
-          xcodebuild clean test \
+          set -euo pipefail
+          xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme EventDetailScene \
+            -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
             | xcpretty
@@ -208,9 +224,11 @@ jobs:
       - name: Test EventListScenes
         if: contains(needs.detect-changes.outputs.schemes, ' EventListScenes ')
         run: |
-          xcodebuild clean test \
+          set -euo pipefail
+          xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme EventListScenes \
+            -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
             | xcpretty
@@ -218,9 +236,11 @@ jobs:
       - name: Test SettingScene
         if: contains(needs.detect-changes.outputs.schemes, ' SettingScene ')
         run: |
-          xcodebuild clean test \
+          set -euo pipefail
+          xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme SettingScene \
+            -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
             | xcpretty
@@ -228,9 +248,11 @@ jobs:
       - name: Test MemberScenes
         if: contains(needs.detect-changes.outputs.schemes, ' MemberScenes ')
         run: |
-          xcodebuild clean test \
+          set -euo pipefail
+          xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme MemberScenes \
+            -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
             | xcpretty
@@ -238,9 +260,11 @@ jobs:
       - name: Test TodoCalendarApp
         if: contains(needs.detect-changes.outputs.schemes, ' TodoCalendarApp ')
         run: |
-          xcodebuild clean test \
+          set -euo pipefail
+          xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme TodoCalendarApp \
+            -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
             | xcpretty
@@ -248,9 +272,11 @@ jobs:
       - name: Test TodoCalendarAppWidget
         if: contains(needs.detect-changes.outputs.schemes, ' TodoCalendarAppWidget ')
         run: |
-          xcodebuild clean test \
+          set -euo pipefail
+          xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme TodoCalendarAppWidget \
+            -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \
             | xcpretty
