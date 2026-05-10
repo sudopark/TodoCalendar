@@ -326,48 +326,48 @@ public struct RemoteEnvironment: Sendable {
             return "https://gist.githubusercontent.com/sudopark/\(endpoint.subPath)"
             
         case let holiday as HolidayAPIEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/holiday"
+            let prefix = "\(calendarAPIHost)/v2/holiday"
             return appendSubpathIfNotEmpty(prefix, holiday.subPath)
-            
+
         case let account as AccountAPIEndpoints:
-            return "\(calendarAPIHost)/v1/accounts/\(account.subPath)"
-            
+            return "\(calendarAPIHost)/v2/accounts/\(account.subPath)"
+
         case let user as UserAPIEndpoints:
-            return "\(calendarAPIHost)/v1/user/\(user.subPath)"
-            
+            return "\(calendarAPIHost)/v2/user/\(user.subPath)"
+
         case let todo as TodoAPIEndpoints:
             let prefix = "\(calendarAPIHost)/v2/todos"
             return appendSubpathIfNotEmpty(prefix, todo.subPath)
-            
+
         case let schedule as ScheduleEventEndpoints:
             let prefix = "\(calendarAPIHost)/v2/schedules"
             return appendSubpathIfNotEmpty(prefix, schedule.subPath)
-            
+
         case let foremost as ForemostEventEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/foremost"
+            let prefix = "\(calendarAPIHost)/v2/foremost"
             return appendSubpathIfNotEmpty(prefix, foremost.subPath)
-            
+
         case let eventTag as EventTagEndpoints:
             let prefix = "\(calendarAPIHost)/v2/tags"
             return appendSubpathIfNotEmpty(prefix, eventTag.subPath)
-            
+
         case let detail as EventDetailEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/event_details"
+            let prefix = "\(calendarAPIHost)/v2/event_details"
             return appendSubpathIfNotEmpty(prefix, detail.subPath)
-            
+
         case let setting as AppSettingEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/setting"
+            let prefix = "\(calendarAPIHost)/v2/setting"
             return appendSubpathIfNotEmpty(prefix, setting.subPath)
-            
+
         case let migration as MigrationEndpoints:
-            let prefix = "\(calendarAPIHost)/v1/migration"
+            let prefix = "\(calendarAPIHost)/v2/migration"
             return appendSubpathIfNotEmpty(prefix, migration.subPath)
-            
+
         case let feedback as FeedbackEndpoints:
             return appendSubpathIfNotEmpty(self.csAPI, feedback.subPath)
-            
+
         case let sync as EventSyncEndPoints:
-            let prefix = "\(calendarAPIHost)/v1/sync"
+            let prefix = "\(calendarAPIHost)/v2/sync"
             return appendSubpathIfNotEmpty(prefix, sync.subPath)
             
         case let googleAuth as GoogleAuthEndpoint:

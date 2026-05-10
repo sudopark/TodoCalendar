@@ -72,7 +72,7 @@ extension UserNotificationRepositoryImpleTests {
             )
             
             // then
-            #expect(self.stubRemote.didRequestedPath == "dummy_calendar_api_host/v1/user/notification")
+            #expect(self.stubRemote.didRequestedPath == "dummy_calendar_api_host/v2/user/notification")
             let params = self.stubRemote.didRequestedParams ?? [:]
             #expect(params["fcm_token"] as? String == "token")
             #expect(params["device_model"] as? String == "model")
