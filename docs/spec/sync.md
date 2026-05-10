@@ -43,9 +43,9 @@
 
 | 단계 | 메서드 | 경로 | 파라미터 |
 |---|---|---|---|
-| 체크 | GET | `/v1/sync/check` | `dataType`, `timestamp` (optional) |
-| 시작 | GET | `/v1/sync/start` | `dataType`, `timestamp` (optional), `size` (30) |
-| 계속 | GET | `/v1/sync/continue` | `dataType`, `cursor`, `size` |
+| 체크 | GET | `/v2/sync/check` | `dataType`, `timestamp` (optional) |
+| 시작 | GET | `/v2/sync/start` | `dataType`, `timestamp` (optional), `size` (30) |
+| 계속 | GET | `/v2/sync/continue` | `dataType`, `cursor`, `size` |
 
 **동기화 체크 응답** (`EventSyncCheckRespose`)
 
@@ -118,7 +118,7 @@ struct EventSyncResponse<T: Sendable> {
 | EventTag | `PUT /v2/tags/{tagId}` | `DELETE /v2/tags/{tagId}` |
 | Todo | `POST/PUT /v2/todos/{todoId}` | `DELETE /v2/todos/{todoId}` |
 | Schedule | `PUT /v2/schedules/{eventId}` | `DELETE /v2/schedules/{eventId}` |
-| EventDetail | `POST /v1/event_details/{eventId}` | `DELETE /v1/event_details/{eventId}` |
+| EventDetail | `POST /v2/event_details/{eventId}` | `DELETE /v2/event_details/{eventId}` |
 
 ### 4. 백그라운드 동기화
 
