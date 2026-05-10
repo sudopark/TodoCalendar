@@ -191,8 +191,8 @@ extension TemporaryUserDataMigrationRepositoryImpleTests {
         // then
         let paths = self.stubRemote.didRequestedPaths
         XCTAssertEqual(paths, [
-            "dummy_calendar_api_host/v1/migration/todos/done",
-            "dummy_calendar_api_host/v1/migration/todos/done/details"
+            "dummy_calendar_api_host/v2/migration/todos/done",
+            "dummy_calendar_api_host/v2/migration/todos/done/details"
         ])
     }
     
