@@ -94,7 +94,8 @@ final class AppExtensionBase {
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
             csAPI: csAPi ?? "https://dummy.com",
-            deviceId: AppEnvironment.deviceId(self.userDefaultEnvironmentStorage)
+            deviceId: AppEnvironment.deviceId(self.userDefaultEnvironmentStorage),
+            acceptLanguage: { AcceptLanguage.headerValue(from: Locale.preferredLanguages) }
         )
         return environment
     }()

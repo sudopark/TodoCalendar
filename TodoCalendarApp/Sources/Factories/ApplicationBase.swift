@@ -89,7 +89,8 @@ final class ApplicationBase {
         let environment = RemoteEnvironment(
             calendarAPIHost: host ?? "https://dummy.com",
             csAPI: csAPi ?? "https://dummy.com",
-            deviceId: AppEnvironment.deviceId(userDefaultEnvironmentStorage)
+            deviceId: AppEnvironment.deviceId(userDefaultEnvironmentStorage),
+            acceptLanguage: { AcceptLanguage.headerValue(from: Locale.preferredLanguages) }
         )
         return environment
     }()
