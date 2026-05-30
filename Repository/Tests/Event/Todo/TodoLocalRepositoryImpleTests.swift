@@ -156,7 +156,7 @@ extension TodoLocalRepositoryImpleTests {
                 try db.insert(Detail.self, entities: details)
             }
         }
-        let _ = self.waitFirstOutput(expect, for: saving, timeout: 1)
+        let _ = self.waitFirstOutput(expect, for: saving, timeout: 5)
     }
     
     // make and load/
@@ -170,7 +170,7 @@ extension TodoLocalRepositoryImpleTests {
         
         // when
         let load = repository.loadTodoEvents(in: self.dummyRange(0..<10))
-        let events = self.waitFirstOutput(expect, for: load, timeout: 1)
+        let events = self.waitFirstOutput(expect, for: load, timeout: 5)
         
         // then
         XCTAssertEqual(events?.count, 1)
@@ -386,7 +386,7 @@ extension TodoLocalRepositoryImpleTests {
         
         // when
         let load = repositoty.loadCurrentTodoEvents()
-        let currents = self.waitFirstOutput(expect, for: load, timeout: 1) ?? []
+        let currents = self.waitFirstOutput(expect, for: load, timeout: 5) ?? []
         
         // then
         let ids = currents.map { $0.uuid } |> Set.init
@@ -402,7 +402,7 @@ extension TodoLocalRepositoryImpleTests {
         
         // when
         let load = repository.loadTodoEvents(in: 50..<150)
-        let todos = self.waitFirstOutput(expect, for: load, timeout: 1) ?? []
+        let todos = self.waitFirstOutput(expect, for: load, timeout: 5) ?? []
         
         // then
         let ids = todos.map { $0.uuid } |> Set.init

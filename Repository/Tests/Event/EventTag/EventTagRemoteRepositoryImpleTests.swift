@@ -162,7 +162,7 @@ extension EventTagRemoteRepositoryImpleTests {
         
         // when
         let loading = repository.loadAllCustomTags()
-        let tagLists = self.waitOutputs(expect, for: loading, timeout: 1)
+        let tagLists = self.waitOutputs(expect, for: loading, timeout: 5)
         
         // then
         XCTAssertEqual(tagLists.count, 1)

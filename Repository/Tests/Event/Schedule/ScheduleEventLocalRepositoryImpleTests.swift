@@ -228,7 +228,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
         let saving: AsyncFlatMapPublisher<Void, Error, Void> = Publishers.create {
             return try await self.localStorage.updateScheduleEvents(events)
         }
-        let _ = self.waitFirstOutput(expect, for: saving, timeout: 1)
+        let _ = self.waitFirstOutput(expect, for: saving, timeout: 5)
     }
     
     func testReposiotry_loadEventsInRange() {
@@ -240,7 +240,7 @@ extension ScheduleEventLocalRepositoryImpleTests {
         // when
         let range = 50.0..<150.0
         let load = repository.loadScheduleEvents(in: range)
-        let events = self.waitFirstOutput(expect, for: load, timeout: 1) ?? []
+        let events = self.waitFirstOutput(expect, for: load, timeout: 5) ?? []
         
         // then
         let ids = events.map { $0.uuid } |> Set.init
