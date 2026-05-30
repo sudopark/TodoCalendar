@@ -19,7 +19,8 @@ struct RemoteEnvironmentPathTests {
     private let env = RemoteEnvironment(
         calendarAPIHost: "https://api.example.com",
         csAPI: "https://cs.example.com",
-        deviceId: "device_id"
+        deviceId: "device_id",
+        acceptLanguage: { "en" }
     )
 }
 
