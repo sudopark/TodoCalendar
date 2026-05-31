@@ -120,15 +120,17 @@ extension AICommandUsecaseImple {
             return self.loadJobWithFilterError(jobId).eraseToAnyPublisher()
         }
         .switchToLatest()
+        .share(replay: 1)
         
-        return refreshJob
-            .first(where: { $0.isFinish })
-            .timeout(
-                .milliseconds(self.pollingPolicy.totalTimeoutMsInt),
-                scheduler: DispatchQueue.main,
-                customError: { RuntimeError(key: "timeout", "process command timeout") }
-            )
-            .eraseToAnyPublisher()
+        let timeout = refreshJob.notFinishJobTimeout(
+            self.pollingPolicy.totalTimeoutMsInt
+        )
+        return Publishers.Merge(
+            refreshJob,
+            timeout
+        )
+        .prefixWithInclude(firstMatch: { $0.isFinish })
+        .eraseToAnyPublisher()
     }
     
     private func loadJobWithFilterError(_ jobId: String) -> AnyPublisher<AIJob, any Error> {
@@ -160,5 +162,22 @@ extension AICommandUsecaseImple {
             .publish(every: self.pollingPolicy.checkInterval, on: RunLoop.main, in: .common)
             .autoconnect()
             .map { _ in }
+    }
+}
+
+private extension Publisher where Output == AIJob, Failure == any Error {
+    
+    func notFinishJobTimeout(_ intervalMs: Int) -> some Publisher<Output, Failure> {
+        
+        return self
+            .first(where: { $0.isFinish })
+            .timeout(
+                .milliseconds(intervalMs),
+                scheduler: DispatchQueue.main,
+                customError: { RuntimeError(key: "timeout", "process command timeout") }
+            )
+            .flatMap { _ in
+                return Empty<AIJob, any Error>().eraseToAnyPublisher()
+            }
     }
 }
