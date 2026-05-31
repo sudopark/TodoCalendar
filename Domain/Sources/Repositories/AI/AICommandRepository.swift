@@ -23,5 +23,9 @@ public protocol AICommandRepository: AnyObject, Sendable {
     
     func loadJob(_ jobId: String) async throws -> AIJob
     
+    func updateProcessingAICommand(_ cmd: ProcessingAICommand) async throws
+    func loadProcessingAICommand() async throws -> ProcessingAICommand?
+    func clearProcessingAICommand() async throws
+    
     func loadUsage() async throws -> AIAgentUsage
 }
