@@ -9,6 +9,20 @@
 import Foundation
 
 
+// MARK: - process command
+
+public struct ProcessingAICommand: Sendable {
+    
+    public let jobId: String
+    public let isConfirmJob: Bool
+    
+    init(jobId: String, isConfirmJob: Bool) {
+        self.jobId = jobId
+        self.isConfirmJob = isConfirmJob
+    }
+}
+
+
 // MARK: - AIJob
 
 public struct AIJob: Sendable {
@@ -27,6 +41,8 @@ public struct AIJob: Sendable {
     }
     
     public let jobId: String
+    // TODO: 서버 스펙에 command 추가 필요 + confirm job도 parent의 command 정보 포함되어야함
+    public var command: String?
     public var status: Status?
     public var mode: Mode?
     public var result: AIJobResult?
