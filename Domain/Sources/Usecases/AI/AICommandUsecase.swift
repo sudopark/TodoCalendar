@@ -18,6 +18,8 @@ public protocol AICommandUsecase: AnyObject, Sendable {
     func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error>
     
     func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error>
+    
+    func restoreCommandifNeed() -> AnyPublisher<AIJob, any Error>
 
     func handleJobFinishNotification(_ jobId: String)
 }
@@ -69,6 +71,9 @@ public final class AICommandUsecaseImple: AICommandUsecase, @unchecked Sendable 
     }
 }
 
+
+// MARK: - process command
+
 extension AICommandUsecaseImple {
     
     public func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
@@ -76,7 +81,11 @@ extension AICommandUsecaseImple {
         let timeZone = self.currentIANATimeZone(); let repository = self.repository
 
         let makeJob: some Publisher<String, any Error> = Publishers.create(do: {
-            return try await repository.processCommand(commandText, timeZone: timeZone)
+            let jobId = try await repository.processCommand(commandText, timeZone: timeZone)
+            try? await repository.updateProcessingAICommand(
+                .init(jobId: jobId, isConfirmJob: false)
+            )
+            return jobId
         })
         
         let waitJobUntilFinish = makeJob.flatMap { [weak self] jobId in
@@ -84,6 +93,7 @@ extension AICommandUsecaseImple {
         }
         
         return waitJobUntilFinish
+            .handleClearProcessingCommand(repository)
             .eraseToAnyPublisher()
     }
     
@@ -92,7 +102,11 @@ extension AICommandUsecaseImple {
         let timeZone = self.currentIANATimeZone(); let repository = self.repository
 
         let makeConfirmJob: some Publisher<String, any Error> = Publishers.create(do: {
-            return try await repository.processConfirmCommand(action, timeZone: timeZone)
+            let jobId = try await repository.processConfirmCommand(action, timeZone: timeZone)
+            try? await repository.updateProcessingAICommand(
+                .init(jobId: jobId, isConfirmJob: true)
+            )
+            return jobId
         })
         
         let waitUntilFinish = makeConfirmJob.flatMap { [weak self] jobId in
@@ -100,6 +114,7 @@ extension AICommandUsecaseImple {
         }
         
         return waitUntilFinish
+            .handleClearProcessingCommand(repository)
             .eraseToAnyPublisher()
     }
     
@@ -151,6 +166,36 @@ extension AICommandUsecaseImple {
 }
 
 
+// MARK: - restore command
+
+extension AICommandUsecaseImple {
+    
+    public func restoreCommandifNeed() -> AnyPublisher<AIJob, any Error> {
+        
+        let processingCmd = self.loadProcessingCommand()
+        
+        let restorePolling = processingCmd.flatMap { [weak self] cmd in
+            guard let self, let cmd
+            else {
+                return Empty<AIJob, any Error>().eraseToAnyPublisher()
+            }
+            
+            return self.checkJob(cmd.jobId)
+        }
+        
+        return restorePolling
+            .handleClearProcessingCommand(repository)
+            .eraseToAnyPublisher()
+    }
+    
+    private func loadProcessingCommand() -> some Publisher<ProcessingAICommand?, any Error> {
+        let repository = self.repository
+        return Publishers.create(do: {
+            return try await repository.loadProcessingAICommand()
+        })
+    }
+}
+
 extension AICommandUsecaseImple {
     
     private func currentIANATimeZone() -> String {
@@ -179,5 +224,25 @@ private extension Publisher where Output == AIJob, Failure == any Error {
             .flatMap { _ in
                 return Empty<AIJob, any Error>().eraseToAnyPublisher()
             }
+    }
+    
+    func handleClearProcessingCommand(
+        _ repository: AICommandRepository
+    ) -> some Publisher<AIJob, Failure> {
+        
+        let handleOutput: (AIJob) -> Void = { job in
+            guard job.isFinish else { return }
+            Task { try await repository.clearProcessingAICommand() }
+        }
+        
+        let handleError: (Subscribers.Completion<any Error>) -> Void = { completion in
+            guard case .failure = completion else { return }
+            Task { try await repository.clearProcessingAICommand() }
+        }
+        
+        return self.handleEvents(
+            receiveOutput: handleOutput,
+            receiveCompletion: handleError
+        )
     }
 }
