@@ -64,7 +64,8 @@ extension AICommandUsecaseImpleTests {
     @Test(arguments: [AIJob.dummyDoneJob, .dummyFailJob, .dummyConfirmJob])
     func usecase_processCommand(_ finalJob: AIJob) async throws {
         // given
-        let expect = expectConfirm("커맨드 처리 정상케이스 동선: 작업 생성, 대기 이후 결과 반환 - \(String(describing: finalJob.status))")
+        let expect = expectConfirm("커맨드 처리 정상케이스 동선: 진행상태 모두 방출 후 완료 - \(String(describing: finalJob.status))")
+        expect.count = 5
         expect.timeout = .seconds(5)
         let usecase = self.makeUsecase(customStubLoadJobs: [
             .dummyPendingJob, .dummyPendingJob,
@@ -74,25 +75,29 @@ extension AICommandUsecaseImpleTests {
         
         // when
         let processing = usecase.processCommand("cmd")
-        let job = try await self.firstOutput(expect, for: processing)
+        let jobs = try await self.outputs(expect, for: processing)
         
         // then
-        #expect(job?.isFinish == true)
-        #expect(job?.status == finalJob.status)
+        let statuses = jobs.map { $0.status }
+        #expect(statuses == [.pending, .pending, .running, .running, finalJob.status])
+        #expect(jobs.last?.isFinish == true)
     }
 
     @Test func usecase_whenProcessCommand_checkIsFinishWithPolling() async throws {
         // given
-        let expect = expectConfirm("커맨드 처리시 주기적으로 작업상태 폴링해서 완료 여부 판단")
+        let expect = expectConfirm("커맨드 처리시 폴링으로 작업 진행상태 모두 방출 후 완료")
+        expect.count = 4
         expect.timeout = .seconds(5)
         let usecase = self.makeUsecase()
         
         // when
         let processing = usecase.processCommand("cmd")
-        let job = try await self.firstOutput(expect, for: processing)
+        let jobs = try await self.outputs(expect, for: processing)
         
         // then
-        #expect(job?.isFinish == true)
+        let statuses = jobs.map { $0.status }
+        #expect(statuses == [.pending, .running, .running, .done])
+        #expect(jobs.last?.isFinish == true)
     }
     
     // 커맨드 처리시 fcm 메세지 받으면 작업상태 확인해서 완료 정보 반환
@@ -109,7 +114,7 @@ extension AICommandUsecaseImpleTests {
         
         // when
         let processing = usecase.processCommand("cmd")
-        let job = try await self.firstOutput(expect, for: processing) {
+        let jobs = try await self.outputs(expect, for: processing) {
             
             try await Task.sleep(for: .milliseconds(10))
             self.stubRepository.loadJobMocking = .dummyConfirmJob
@@ -118,13 +123,15 @@ extension AICommandUsecaseImpleTests {
         }
         
         // then
-        #expect(job?.isFinish == true)
+        #expect(jobs.last?.isFinish == true)
+        #expect(jobs.last?.status == .confirm)
     }
     
     // 커맨드 처리시 에러 발생해도 폴링 유지
     @Test func usecase_whenProcessCommand_ignoreErrorDuringLoad() async throws {
         // given
-        let expect = expectConfirm("커맨드 처리시 에러 발생해도 폴링 유지")
+        let expect = expectConfirm("커맨드 처리시 에러는 건너뛰고 성공 응답만 진행상태로 방출")
+        expect.count = 3
         expect.timeout = .seconds(5)
         let usecase = self.makeUsecase(
             customStubLoadJobAsResult: [
@@ -138,10 +145,12 @@ extension AICommandUsecaseImpleTests {
         
         // when
         let processing = usecase.processCommand("cmd")
-        let job = try await self.firstOutput(expect, for: processing)
+        let jobs = try await self.outputs(expect, for: processing)
         
         // then
-        #expect(job?.isFinish == true)
+        let statuses = jobs.map { $0.status }
+        #expect(statuses == [.pending, .running, .done])
+        #expect(jobs.last?.isFinish == true)
     }
     
     // 커맨드 처리시 forbidden, notFound 에러 수신시 폴링 중지
@@ -208,7 +217,8 @@ extension AICommandUsecaseImpleTests {
     @Test(arguments: [AIJob.dummyDoneJob, .dummyFailJob, .dummyConfirmJob])
     func usecase_processConfirmCommand(_ finalJob: AIJob) async throws {
         // given
-        let expect = expectConfirm("컨펌 커맨드 처리 정상케이스 동선: 작업 생성, 대기 이후 결과 반환 - \(String(describing: finalJob.status))")
+        let expect = expectConfirm("컨펌 커맨드 처리 정상케이스 동선: 진행상태 모두 방출 후 완료 - \(String(describing: finalJob.status))")
+        expect.count = 5
         expect.timeout = .seconds(5)
         let usecase = self.makeUsecase(customStubLoadJobs: [
             .dummyPendingJob, .dummyPendingJob,
@@ -218,25 +228,29 @@ extension AICommandUsecaseImpleTests {
 
         // when
         let processing = usecase.processConfirmCommand(.init())
-        let job = try await self.firstOutput(expect, for: processing)
+        let jobs = try await self.outputs(expect, for: processing)
 
         // then
-        #expect(job?.isFinish == true)
-        #expect(job?.status == finalJob.status)
+        let statuses = jobs.map { $0.status }
+        #expect(statuses == [.pending, .pending, .running, .running, finalJob.status])
+        #expect(jobs.last?.isFinish == true)
     }
 
     @Test func usecase_whenProcessConfirmCommand_checkIsFinishWithPolling() async throws {
         // given
-        let expect = expectConfirm("컨펌 커맨드 처리시 주기적으로 작업상태 폴링해서 완료 여부 판단")
+        let expect = expectConfirm("컨펌 커맨드 처리시 폴링으로 작업 진행상태 모두 방출 후 완료")
+        expect.count = 4
         expect.timeout = .seconds(5)
         let usecase = self.makeUsecase()
 
         // when
         let processing = usecase.processConfirmCommand(.init())
-        let job = try await self.firstOutput(expect, for: processing)
+        let jobs = try await self.outputs(expect, for: processing)
 
         // then
-        #expect(job?.isFinish == true)
+        let statuses = jobs.map { $0.status }
+        #expect(statuses == [.pending, .running, .running, .done])
+        #expect(jobs.last?.isFinish == true)
     }
 
     // 컨펌 커맨드 처리시 fcm 메세지 받으면 작업상태 확인해서 완료 정보 반환
@@ -253,7 +267,7 @@ extension AICommandUsecaseImpleTests {
 
         // when
         let processing = usecase.processConfirmCommand(.init())
-        let job = try await self.firstOutput(expect, for: processing) {
+        let jobs = try await self.outputs(expect, for: processing) {
 
             try await Task.sleep(for: .milliseconds(10))
             self.stubRepository.loadJobMocking = .dummyDoneJob
@@ -262,13 +276,15 @@ extension AICommandUsecaseImpleTests {
         }
 
         // then
-        #expect(job?.isFinish == true)
+        #expect(jobs.last?.isFinish == true)
+        #expect(jobs.last?.status == .done)
     }
 
     // 컨펌 커맨드 처리시 에러 발생해도 폴링 유지
     @Test func usecase_whenProcessConfirmCommand_ignoreErrorDuringLoad() async throws {
         // given
-        let expect = expectConfirm("컨펌 커맨드 처리시 에러 발생해도 폴링 유지")
+        let expect = expectConfirm("컨펌 커맨드 처리시 에러는 건너뛰고 성공 응답만 진행상태로 방출")
+        expect.count = 3
         expect.timeout = .seconds(5)
         let usecase = self.makeUsecase(
             customStubLoadJobAsResult: [
@@ -282,10 +298,12 @@ extension AICommandUsecaseImpleTests {
 
         // when
         let processing = usecase.processConfirmCommand(.init())
-        let job = try await self.firstOutput(expect, for: processing)
+        let jobs = try await self.outputs(expect, for: processing)
 
         // then
-        #expect(job?.isFinish == true)
+        let statuses = jobs.map { $0.status }
+        #expect(statuses == [.pending, .running, .done])
+        #expect(jobs.last?.isFinish == true)
     }
 
     // 컨펌 커맨드 처리시 forbidden, notFound 에러 수신시 폴링 중지

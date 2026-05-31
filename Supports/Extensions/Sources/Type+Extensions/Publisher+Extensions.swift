@@ -57,3 +57,32 @@ extension Publisher where Failure == Never {
             .eraseToAnyPublisher()
     }
 }
+
+extension Publisher {
+    
+    public func prefixWithInclude(firstMatch condition: @Sendable @escaping (Output) -> Bool) -> some Publisher<Output, Failure> {
+        
+        typealias OutputAndIsUpperBound = (Output, Bool)
+        
+        let outpusWithDuplicateLastOne = self.flatMap(maxPublishers: .max(1)) { output in
+            
+            if !condition(output) {
+                return Just(OutputAndIsUpperBound(output, false))
+                    .setFailureType(to: Failure.self)
+                    .eraseToAnyPublisher()
+            } else {
+                return [
+                    OutputAndIsUpperBound(output, false),
+                    OutputAndIsUpperBound(output, true)
+                ]
+                .publisher
+                .setFailureType(to: Failure.self)
+                .eraseToAnyPublisher()
+            }
+        }
+        
+        return outpusWithDuplicateLastOne
+            .prefix(while: { !$0.1 })
+            .map { $0.0 }
+    }
+}
