@@ -263,6 +263,25 @@ public enum AppEndpoints: Endpoint {
 }
 
 
+// MARK: - AI
+
+enum AIAPIEndpoints: Endpoint {
+    case command
+    case confirmCommand
+    case job(id: String)
+    case usage
+
+    var subPath: String {
+        switch self {
+        case .command: return "command"
+        case .confirmCommand: return "command/confirm"
+        case .job(let id): return "jobs/\(id)"
+        case .usage: return "usage"
+        }
+    }
+}
+
+
 // MARK: - google account endpoint
 
 enum GoogleAuthEndpoint: Endpoint {
@@ -383,6 +402,10 @@ public struct RemoteEnvironment: Sendable {
         case let app as AppEndpoints:
             let prefix = "https://raw.githubusercontent.com/sudopark/TodoCalendar/develop/app-config"
             return appendSubpathIfNotEmpty(prefix, app.subPath)
+
+        case let ai as AIAPIEndpoints:
+            let prefix = "\(calendarAPIHost)/v1/ai"
+            return appendSubpathIfNotEmpty(prefix, ai.subPath)
 
         default: return nil
         }
