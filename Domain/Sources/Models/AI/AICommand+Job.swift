@@ -16,7 +16,7 @@ public struct ProcessingAICommand: Sendable {
     public let jobId: String
     public let isConfirmJob: Bool
     
-    init(jobId: String, isConfirmJob: Bool) {
+    public init(jobId: String, isConfirmJob: Bool) {
         self.jobId = jobId
         self.isConfirmJob = isConfirmJob
     }
