@@ -129,16 +129,19 @@ public protocol PlaceSuggestUsecase: AnyObject, Sendable {
     var suggestPlaces: AnyPublisher<[Place], Never> { get }
 }
 
-public final class PlaceSuggestUsecaseImple: PlaceSuggestUsecase, @unchecked Sendable {
-    
+public final class PlaceSuggestUsecaseImple<Scheduler: Combine.Scheduler>: PlaceSuggestUsecase, @unchecked Sendable {
+
     private let suggestEngine: any PlaceSuggestEngine
-    private let throttleTime: RunLoop.SchedulerTimeType.Stride
+    private let throttleTime: Scheduler.SchedulerTimeType.Stride
+    private let scheduler: Scheduler
     public init(
         suggestEngine: any PlaceSuggestEngine,
-        throttleTime: RunLoop.SchedulerTimeType.Stride = .milliseconds(1200)
+        throttleTime: Scheduler.SchedulerTimeType.Stride = .milliseconds(1200),
+        scheduler: Scheduler
     ) {
         self.suggestEngine = suggestEngine
         self.throttleTime = throttleTime
+        self.scheduler = scheduler
         self.bindSuggest()
     }
     
@@ -176,7 +179,7 @@ extension PlaceSuggestUsecaseImple {
         }
         
         self.subject.query
-            .throttle(for: self.throttleTime, scheduler: RunLoop.main, latest: true)
+            .throttle(for: self.throttleTime, scheduler: self.scheduler, latest: true)
             .compactMap(suggestOrNot)
             .switchToLatest()
             .sink(receiveValue: { [weak self] places in

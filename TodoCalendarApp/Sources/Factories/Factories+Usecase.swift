@@ -276,7 +276,8 @@ extension NonLoginUsecaseFactoryImple {
     
     func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase {
         return PlaceSuggestUsecaseImple(
-            suggestEngine: MapKitBasePlaceSuggestEngineImple()
+            suggestEngine: MapKitBasePlaceSuggestEngineImple(),
+            scheduler: RunLoop.main
         )
     }
     
@@ -691,7 +692,8 @@ extension LoginUsecaseFactoryImple {
     
     func makePlaceSuggestUsecase() -> any PlaceSuggestUsecase {
         return PlaceSuggestUsecaseImple(
-            suggestEngine: MapKitBasePlaceSuggestEngineImple()
+            suggestEngine: MapKitBasePlaceSuggestEngineImple(),
+            scheduler: RunLoop.main
         )
     }
     
