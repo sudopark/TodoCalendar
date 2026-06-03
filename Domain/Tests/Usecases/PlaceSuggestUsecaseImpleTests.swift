@@ -20,12 +20,13 @@ class PlaceSuggestUsecaseImpleTests: PublisherWaitable {
     
     private func makeUsecase(
         mocking: PassthroughSubject<[Place], Never>? = nil
-    ) -> PlaceSuggestUsecaseImple {
+    ) -> PlaceSuggestUsecaseImple<ImmediateScheduler> {
         let suggestEngine = StubPlaceSuggestEngine()
         suggestEngine.mocking = mocking
         return .init(
             suggestEngine: suggestEngine,
-            throttleTime: .milliseconds(0)
+            throttleTime: .milliseconds(0),
+            scheduler: .shared
         )
     }
 }
