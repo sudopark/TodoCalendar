@@ -189,31 +189,38 @@ extension TemporaryUserDataMigrationUescaseImpleTests {
     // migration end -> update event count
     func testUsecase_whenAfterMigration_updateMigrationNeedCounts() {
         // given
-        func parameterizeTest(whenSuccess: Bool, expectCounts: [Int]) {
+        func parameterizeTest(whenSuccess: Bool, expectCountsAfterMigration: [Int]) {
             // given
             self.stubRepository = .init()
             self.stubRepository.stubMigrationTargetEventCountLoadResult = .success(100)
             if !whenSuccess {
                 self.stubRepository.stubMigrateScheduleResult = .failure(RuntimeError("failed"))
             }
-            let expect = expectation(description: "마이그레이션 이후 마이그레이션 필요 이벤트 카운트 업데이트")
-            expect.expectedFulfillmentCount = 3
             let usecase = self.makeUsecase()
-            
-            // when
-            let counts = self.waitOutputs(expect, for: usecase.migrationNeedEventCount, timeout: 0.1) {
+
+            // when - check가 100 방출할 때까지 기다려 startMigration과의 stub count race 제거
+            let checkExpect = expectation(description: "마이그레이션 필요 이벤트 카운트 조회")
+            checkExpect.expectedFulfillmentCount = 2
+            checkExpect.assertForOverFulfill = false
+            let checkedCounts = self.waitOutputs(checkExpect, for: usecase.migrationNeedEventCount) {
                 usecase.checkIsNeedMigration()
-                
+            }
+            XCTAssertEqual(checkedCounts, [0, 100])
+
+            // when - 마이그레이션 수행 후 카운트 갱신
+            let migrationExpect = expectation(description: "마이그레이션 이후 마이그레이션 필요 이벤트 카운트 업데이트")
+            migrationExpect.expectedFulfillmentCount = expectCountsAfterMigration.count
+            let counts = self.waitOutputs(migrationExpect, for: usecase.migrationNeedEventCount) {
                 usecase.startMigration()
             }
-            
+
             // then
-            XCTAssertEqual(counts, expectCounts)
+            XCTAssertEqual(counts, expectCountsAfterMigration)
         }
-        
+
         // when + then
-        parameterizeTest(whenSuccess: true, expectCounts: [0, 100, 0])
-        parameterizeTest(whenSuccess: false, expectCounts: [0, 100, 90])
+        parameterizeTest(whenSuccess: true, expectCountsAfterMigration: [100, 0])
+        parameterizeTest(whenSuccess: false, expectCountsAfterMigration: [100, 90])
     }
 }
 
