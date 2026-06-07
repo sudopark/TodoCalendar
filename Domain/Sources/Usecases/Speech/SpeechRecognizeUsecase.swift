@@ -89,6 +89,7 @@ extension SpeechRecognizeUsecaseImple {
             guard status == .authorized else {
                 session.send(completion: .failure(SpeechRecognizeFailReason.notAuthorized))
                 self.isListening = false
+                self.resetSessionStream()
                 return
             }
             self.bindService()
@@ -98,6 +99,7 @@ extension SpeechRecognizeUsecaseImple {
             } catch {
                 session.send(completion: .failure(error))
                 self.isListening = false
+                self.resetSessionStream()
             }
         }
     }
@@ -117,6 +119,7 @@ extension SpeechRecognizeUsecaseImple {
                 guard let self, self.isListening else { return }
                 self.isListening = false
                 self.currentSession?.send(completion: .failure(error))
+                self.resetSessionStream()
             }, receiveValue: { [weak self] fragment in
                 self?.handle(fragment)
             })
@@ -178,6 +181,13 @@ extension SpeechRecognizeUsecaseImple {
     private func teardownSession() {
         self.isListening = false
         self.teardownSessionResources()
+    }
+
+    // 에러로 끝난 세션은 Combine 상 terminal이라, sessionSubject의 현재값을
+    // fresh placeholder로 교체해 다음 구독자가 옛 실패를 재생받지 않게 한다.
+    private func resetSessionStream() {
+        self.currentSession = nil
+        self.sessionSubject.send(.init())
     }
 
     private func teardownSessionResources() {
