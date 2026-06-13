@@ -109,6 +109,28 @@ extension AICommandRepositoryImpleTests {
 }
 
 
+// MARK: - rejectConfirmCommand
+
+extension AICommandRepositoryImpleTests {
+
+    func testRepository_rejectConfirmCommand_postsConfirmToken() async throws {
+        // given
+        let repository = self.makeRepository()
+        var action = AIConfirmCommandAction()
+        action.tool = "createTodo"
+        action.confirmToken = "token-123"
+
+        // when
+        try await repository.rejectConfirmCommand(action)
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedMethod, .post)
+        XCTAssertEqual(self.stubRemote.didRequestedPath?.contains("command/reject"), true)
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["confirm_token"] as? String, "token-123")
+    }
+}
+
+
 // MARK: - loadJob
 
 extension AICommandRepositoryImpleTests {
@@ -298,6 +320,11 @@ private struct DummyResponse {
                 method: .post,
                 endpoint: AIAPIEndpoints.confirmCommand,
                 resultJsonString: .success(self.confirmJobIdJson)
+            ),
+            .init(
+                method: .post,
+                endpoint: AIAPIEndpoints.rejectCommand,
+                resultJsonString: .success(#"{ "ok": true }"#)
             ),
             .init(
                 method: .get,

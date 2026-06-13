@@ -388,6 +388,26 @@ extension AICommandUsecaseImpleTests {
     }
 }
 
+// MARK: - rejectConfirmCommand
+
+extension AICommandUsecaseImpleTests {
+
+    @Test func usecase_rejectConfirmCommand_delegatesToRepositoryFireAndForget() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        var action = AIConfirmCommandAction()
+        action.confirmToken = "reject-token"
+
+        // when
+        usecase.rejectConfirmCommand(action)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.stubRepository.didRejectConfirmActionToken == "reject-token")
+    }
+}
+
+
 // MARK: - restore
 
 extension AICommandUsecaseImpleTests {

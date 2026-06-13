@@ -18,7 +18,9 @@ public protocol AICommandUsecase: AnyObject, Sendable {
     func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error>
     
     func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error>
-    
+
+    func rejectConfirmCommand(_ action: AIConfirmCommandAction)
+
     func restoreCommandifNeed() -> AnyPublisher<AIJob, any Error>
 
     func handleJobFinishNotification(_ jobId: String)
@@ -118,6 +120,12 @@ extension AICommandUsecaseImple {
             .eraseToAnyPublisher()
     }
     
+    public func rejectConfirmCommand(_ action: AIConfirmCommandAction) {
+        let repository = self.repository
+        // 서버 거부 API(Functions#243)는 미구현 — 준비 전까지 fire-and-forget.
+        Task { try? await repository.rejectConfirmCommand(action) }
+    }
+
     public func handleJobFinishNotification(_ jobId: String) {
         self.subject.jobFinishEvent.send(jobId)
     }

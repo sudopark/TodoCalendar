@@ -33,8 +33,13 @@ class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
         }
         return "some_job"
     }
-    
-    
+
+    var didRejectConfirmActionToken: String?
+    func rejectConfirmCommand(_ action: AIConfirmCommandAction) async throws {
+        self.didRejectConfirmActionToken = action.confirmToken
+    }
+
+
     var stubLoadJobs: [Result<AIJob, any Error>] = []
     var loadJobMocking: Result<AIJob, any Error>?
     func loadJob(_ jobId: String) async throws -> AIJob {
