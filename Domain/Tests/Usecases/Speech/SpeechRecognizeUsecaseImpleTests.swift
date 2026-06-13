@@ -274,6 +274,73 @@ extension SpeechRecognizeUsecaseImpleTests {
 }
 
 
+// MARK: - 실시간 인식 텍스트
+
+extension SpeechRecognizeUsecaseImpleTests {
+
+    @Test func usecase_whileRecognizing_emitsPartialTextInRealtime() async throws {
+        // given
+        let expect = expectConfirm("부분 인식 텍스트 실시간 방출")
+        expect.count = 3
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let texts = try await self.outputs(expect, for: usecase.recognizingText) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(60))
+            service.emit(.init(text: "오늘", isFinal: false))
+            service.emit(.init(text: "오늘 회의", isFinal: false))
+            try await Task.sleep(for: .milliseconds(40))
+        }
+
+        // then
+        #expect(texts == ["", "오늘", "오늘 회의"])
+    }
+
+    @Test func usecase_whenFinishListening_emitsCurrentTextAsResult() async throws {
+        // given
+        let (usecase, service) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(60))
+            service.emit(.init(text: "회의 잡아줘", isFinal: false))
+            try await Task.sleep(for: .milliseconds(20))
+            usecase.finishListening()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(let text) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(text == "회의 잡아줘")
+    }
+
+    @Test func usecase_whenFinishListeningWithoutSpeech_emitsEmptyText() async throws {
+        // given
+        let (usecase, _) = self.makeUsecase()
+
+        // when
+        let captured = try await self.captureResult(for: usecase) {
+            usecase.startListening()
+            try await Task.sleep(for: .milliseconds(60))
+            usecase.finishListening()
+        }
+
+        // then
+        let result = try #require(captured)
+        guard case .success(let text) = result else {
+            Issue.record("성공 결과가 아님")
+            return
+        }
+        #expect(text == "")
+    }
+}
+
+
 // MARK: - test doubles
 
 private final class ResultBox: @unchecked Sendable {
