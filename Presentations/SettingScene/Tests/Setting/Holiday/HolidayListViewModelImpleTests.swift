@@ -148,12 +148,79 @@ extension HolidayListViewModelImpleTests {
     func testViewModel_routeToCountrySelect() {
         // given
         let viewModel = self.makeViewModelWithStubHoliday()
-        
+
         // when
         viewModel.selectCountry()
-        
+
         // then
         XCTAssertEqual(self.spyRouter.didRouteToCountrySelect, true)
+    }
+}
+
+
+// MARK: - hidden holiday
+
+extension HolidayListViewModelImpleTests {
+
+    // 숨긴 공휴일 이름 목록을 정렬해서 제공
+    func testViewModel_provideHiddenHolidayNames_sorted() {
+        // given
+        let expect = expectation(description: "숨긴 공휴일 이름 목록 정렬 제공")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithStubHoliday()
+
+        // when
+        let nameLists = self.waitOutputs(expect, for: viewModel.hiddenHolidayNames) {
+            Task {
+                try await self.stubHolidayUsecase.hideHoliday("추석")
+                try await self.stubHolidayUsecase.hideHoliday("설날")
+            }
+        }
+
+        // then
+        XCTAssertEqual(nameLists, [[], ["추석"], ["설날", "추석"]])
+    }
+
+    // 숨긴 공휴일 탭하면 복원 요청되어 목록에서 제거
+    func testViewModel_whenShowHoliday_restoreAndRemoveFromHiddenList() {
+        // given
+        let expect = expectation(description: "숨김 해제 시 목록에서 제거")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithStubHoliday()
+
+        // when
+        let nameLists = self.waitOutputs(expect, for: viewModel.hiddenHolidayNames) {
+            Task {
+                try await self.stubHolidayUsecase.hideHoliday("추석")
+                viewModel.showHoliday("추석")
+            }
+        }
+
+        // then
+        XCTAssertEqual(nameLists, [[], ["추석"], []])
+    }
+
+    // 숨김 처리하면 공휴일 목록(안 숨김)에서 빠지고, 해제하면 다시 추가됨
+    func testViewModel_whenHideAndShowHoliday_reflectedInHolidayList() {
+        // given
+        let expect = expectation(description: "숨김/해제가 공휴일 목록에 반영")
+        expect.expectedFulfillmentCount = 3
+        let viewModel = self.makeViewModelWithStubHoliday()
+        let targetName = "holiday-1-KST"
+
+        // when
+        let holidayLists = self.waitOutputs(expect, for: viewModel.currentYearHolidays) {
+            Task {
+                try await self.stubHolidayUsecase.hideHoliday(targetName)
+                viewModel.showHoliday(targetName)
+            }
+        }
+
+        // then
+        let containsTarget = holidayLists.map { items in
+            items.contains { $0.name == targetName }
+        }
+        XCTAssertEqual(containsTarget, [true, false, true])
     }
 }
 

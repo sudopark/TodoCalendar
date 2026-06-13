@@ -403,6 +403,8 @@
 "setting.holiday.hide::button" = "숨기기";
 "setting.holiday.hide::confirm::title" = "공휴일 숨기기";
 "setting.holiday.hide::confirm::message" = "이 공휴일을 매년 숨길까요?\n설정 > 공휴일에서 다시 표시할 수 있어요.";
+"setting.holiday.hidden::sectionTitle" = "숨긴 공휴일";
+"setting.holiday.show::button" = "표시";
 "setting.feedback::name" = "피드백";
 "setting.help::name" = "도움말";
 "setting.share::name" = "앱 공유";
