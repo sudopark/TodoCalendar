@@ -12,6 +12,7 @@ import CoreLocation
 import Contacts
 import Combine
 import CombineExt
+import CombineSchedulers
 import Prelude
 import Optics
 import Extensions
@@ -132,13 +133,16 @@ public protocol PlaceSuggestUsecase: AnyObject, Sendable {
 public final class PlaceSuggestUsecaseImple: PlaceSuggestUsecase, @unchecked Sendable {
     
     private let suggestEngine: any PlaceSuggestEngine
-    private let throttleTime: RunLoop.SchedulerTimeType.Stride
+    private let throttleTime: DispatchQueue.SchedulerTimeType.Stride
+    private let scheduler: AnySchedulerOf<DispatchQueue>
     public init(
         suggestEngine: any PlaceSuggestEngine,
-        throttleTime: RunLoop.SchedulerTimeType.Stride = .milliseconds(1200)
+        throttleTime: DispatchQueue.SchedulerTimeType.Stride = .milliseconds(1200),
+        scheduler: AnySchedulerOf<DispatchQueue> = .main
     ) {
         self.suggestEngine = suggestEngine
         self.throttleTime = throttleTime
+        self.scheduler = scheduler
         self.bindSuggest()
     }
     
@@ -176,7 +180,7 @@ extension PlaceSuggestUsecaseImple {
         }
         
         self.subject.query
-            .throttle(for: self.throttleTime, scheduler: RunLoop.main, latest: true)
+            .throttle(for: self.throttleTime, scheduler: self.scheduler, latest: true)
             .compactMap(suggestOrNot)
             .switchToLatest()
             .sink(receiveValue: { [weak self] places in

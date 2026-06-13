@@ -25,7 +25,8 @@ class PlaceSuggestUsecaseImpleTests: PublisherWaitable {
         suggestEngine.mocking = mocking
         return .init(
             suggestEngine: suggestEngine,
-            throttleTime: .milliseconds(0)
+            throttleTime: .milliseconds(0),
+            scheduler: .immediate
         )
     }
 }
