@@ -29,6 +29,10 @@ public protocol HolidayUsecase {
     func loadHolidays(_ year: Int) async throws -> [Holiday]
     func holidays() -> AnyPublisher<[Int: [Holiday]], Never>
     func holiday(_ uuid: String) -> AnyPublisher<Holiday?, Never>
+
+    func hideHoliday(_ name: String) async throws
+    func showHoliday(_ name: String) async throws
+    func hiddenHolidayNames() -> AnyPublisher<Set<String>, Never>
 }
 
 
@@ -76,6 +80,7 @@ public final class HolidayUsecaseImple: HolidayUsecase {
     }
     
     private typealias Holidays = [String: [Int: [Holiday]]]
+    private typealias HiddenHolidayNames = [String: Set<String>]
 }
 
 
@@ -89,7 +94,8 @@ extension HolidayUsecaseImple {
         else {
             return
         }
-        
+
+        await self.refreshHiddenHolidayNames(country)
         self.dataStore.put(
             HolidaySupportCountry.self,
             key: ShareDataKeys.currentCountry.rawValue,
@@ -132,7 +138,8 @@ extension HolidayUsecaseImple {
         
         let years = self.currentPreparedHolidayYears()
         await self.refreshHolidays(for: country, years: years)
-        
+
+        await self.refreshHiddenHolidayNames(country)
         self.dataStore.put(
             HolidaySupportCountry.self,
             key: ShareDataKeys.currentCountry.rawValue,
@@ -218,9 +225,11 @@ extension HolidayUsecaseImple {
         }
         
         let locale = self.localeProvider.currentLocaleIdentifier()
-        return try await self.holidayRepository.loadHolidays(
+        let holidays = try await self.holidayRepository.loadHolidays(
             year, currentCountry.code, locale
         )
+        let hiddenNames = try await self.holidayRepository.fetchHolidayHiddenNames(currentCountry.code)
+        return holidays.filter { !hiddenNames.contains($0.name) }
     }
     
     public func holidays() -> AnyPublisher<[Int: [Holiday]], Never> {
@@ -231,13 +240,20 @@ extension HolidayUsecaseImple {
             guard let country else {
                 return Just([:]).eraseToAnyPublisher()
             }
-            return self.dataStore
+            let countryHolidays = self.dataStore
                 .observe(Holidays.self, key: ShareDataKeys.holidays.rawValue)
                 .compactMap { $0 }
                 .map { $0[country.code] ?? [:] }
+            let hiddenNames = self.hiddenNamesPublisher(for: country)
+            return Publishers.CombineLatest(countryHolidays, hiddenNames)
+                .map { yearMap, hidden in
+                    yearMap.mapValues { holidays in
+                        holidays.filter { !hidden.contains($0.name) }
+                    }
+                }
                 .eraseToAnyPublisher()
         }
-        
+
         return self.currentSelectedCountry
             .compactMap(asCountryHoliday)
             .switchToLatest()
@@ -246,13 +262,69 @@ extension HolidayUsecaseImple {
     }
     
     public func holiday(_ uuid: String) -> AnyPublisher<Holiday?, Never> {
-        
+
         let selectHoliday: ([Int: [Holiday]]) -> Holiday? = { holidaysMap in
             return holidaysMap.flatMap { $0.value }
                 .first(where: { $0.uuid == uuid })
         }
         return self.holidays()
             .map(selectHoliday)
+            .eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - hide/show holiday
+
+extension HolidayUsecaseImple {
+
+    public func hideHoliday(_ name: String) async throws {
+        try await self.updateHolidayHidden(name, isHidden: true)
+    }
+
+    public func showHoliday(_ name: String) async throws {
+        try await self.updateHolidayHidden(name, isHidden: false)
+    }
+
+    private func updateHolidayHidden(_ name: String, isHidden: Bool) async throws {
+        guard let country = self.dataStore.value(HolidaySupportCountry.self, key: ShareDataKeys.currentCountry.rawValue)
+        else {
+            throw RuntimeError("current country not prepared")
+        }
+
+        let updated = try await self.holidayRepository.updateHolidayHidden(name, isHidden, for: country.code)
+
+        self.dataStore.update(HiddenHolidayNames.self, key: ShareDataKeys.hiddenHolidayNames.rawValue) {
+            ($0 ?? [:]) |> key(country.code) .~ updated
+        }
+    }
+
+    private func refreshHiddenHolidayNames(_ country: HolidaySupportCountry) async {
+        guard let names = try? await self.holidayRepository.fetchHolidayHiddenNames(country.code)
+        else { return }
+
+        self.dataStore.update(HiddenHolidayNames.self, key: ShareDataKeys.hiddenHolidayNames.rawValue) {
+            ($0 ?? [:]) |> key(country.code) .~ names
+        }
+    }
+
+    public func hiddenHolidayNames() -> AnyPublisher<Set<String>, Never> {
+        return self.currentSelectedCountry
+            .compactMap { [weak self] country in
+                self?.hiddenNamesPublisher(for: country)
+            }
+            .switchToLatest()
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    fileprivate func hiddenNamesPublisher(
+        for country: HolidaySupportCountry?
+    ) -> AnyPublisher<Set<String>, Never> {
+        guard let country else { return Just([]).eraseToAnyPublisher() }
+        return self.dataStore
+            .observe(HiddenHolidayNames.self, key: ShareDataKeys.hiddenHolidayNames.rawValue)
+            .map { ($0 ?? [:])[country.code] ?? [] }
             .eraseToAnyPublisher()
     }
 }

@@ -102,15 +102,23 @@ open class StubHolidayUsecase: HolidayUsecase {
     }
     
     open func holidays() -> AnyPublisher<[Int : [Holiday]], Never> {
-        
+
         return self.currentSelectedCountry
             .map { country in
                 guard let country
                 else {
                     return Just([Int:[Holiday]]()).eraseToAnyPublisher()
                 }
-                return self.holidaysSubject.compactMap { $0?[country.code] }
-                    .eraseToAnyPublisher()
+                return Publishers.CombineLatest(
+                    self.holidaysSubject.compactMap { $0?[country.code] },
+                    self.hiddenHolidayNamesSubject
+                )
+                .map { yearMap, hidden in
+                    yearMap.mapValues { holidays in
+                        holidays.filter { !hidden.contains($0.name) }
+                    }
+                }
+                .eraseToAnyPublisher()
             }
             .switchToLatest()
             .eraseToAnyPublisher()
@@ -123,6 +131,26 @@ open class StubHolidayUsecase: HolidayUsecase {
                     .flatMap { $0.value }
                     .first(where: { $0.uuid == uuid })
             }
+            .eraseToAnyPublisher()
+    }
+
+    public let hiddenHolidayNamesSubject = CurrentValueSubject<Set<String>, Never>([])
+
+    open func hideHoliday(_ name: String) async throws {
+        self.hiddenHolidayNamesSubject.send(
+            self.hiddenHolidayNamesSubject.value.union([name])
+        )
+    }
+
+    open func showHoliday(_ name: String) async throws {
+        self.hiddenHolidayNamesSubject.send(
+            self.hiddenHolidayNamesSubject.value.subtracting([name])
+        )
+    }
+
+    open func hiddenHolidayNames() -> AnyPublisher<Set<String>, Never> {
+        return self.hiddenHolidayNamesSubject
+            .removeDuplicates()
             .eraseToAnyPublisher()
     }
 }
