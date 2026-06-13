@@ -18,4 +18,11 @@ public protocol HolidayRepository {
         _ year: Int, _ countryCode: String, _ locale: String
     ) async throws -> [Holiday]
     func clearHolidayCache() async throws
+
+    func fetchHolidayHiddenNames(_ countryCode: String) async throws -> Set<String>
+
+    @discardableResult
+    func updateHolidayHidden(
+        _ name: String, _ isHidden: Bool, for countryCode: String
+    ) async throws -> Set<String>
 }

@@ -176,8 +176,48 @@ extension HolidayRepositoryImpleTests {
 }
 
 
+// MARK: - test hidden holiday names
+
 extension HolidayRepositoryImpleTests {
-    
+
+    // 숨김 처리/해제한 이름을 저장하고 다시 조회
+    func testRepository_updateAndFetchHiddenHolidayNames() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let before = try await repository.fetchHolidayHiddenNames("KR")
+        try await repository.updateHolidayHidden("추석 연휴", true, for: "KR")
+        let afterHide = try await repository.fetchHolidayHiddenNames("KR")
+        try await repository.updateHolidayHidden("추석 연휴", false, for: "KR")
+        let afterShow = try await repository.fetchHolidayHiddenNames("KR")
+
+        // then
+        XCTAssertEqual(before, [])
+        XCTAssertEqual(afterHide, ["추석 연휴"])
+        XCTAssertEqual(afterShow, [])
+    }
+
+    // 숨김 이름은 국가별로 구분
+    func testRepository_hiddenHolidayNames_byCountry() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        try await repository.updateHolidayHidden("추석 연휴", true, for: "KR")
+        try await repository.updateHolidayHidden("Christmas Day", true, for: "US")
+        let kr = try await repository.fetchHolidayHiddenNames("KR")
+        let us = try await repository.fetchHolidayHiddenNames("US")
+
+        // then
+        XCTAssertEqual(kr, ["추석 연휴"])
+        XCTAssertEqual(us, ["Christmas Day"])
+    }
+}
+
+
+extension HolidayRepositoryImpleTests {
+
     private var responses: [StubRemoteAPI.Response] {
         return [
             .init(
