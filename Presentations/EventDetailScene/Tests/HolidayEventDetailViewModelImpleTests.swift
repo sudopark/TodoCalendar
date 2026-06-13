@@ -99,6 +99,57 @@ extension HolidayEventDetailViewModelImpleTests {
     }
 }
 
+// MARK: - test hide holiday
+
+extension HolidayEventDetailViewModelImpleTests {
+
+    private func makeViewModelWithUsecase() async throws -> (HolidayEventDetailViewModelImple, PrivateStubHolidayUsecase) {
+        let usecase = PrivateStubHolidayUsecase()
+        try await usecase.prepare()
+        let viewModel = HolidayEventDetailViewModelImple(
+            uuid: "some",
+            holidayUsecase: usecase,
+            daysIntervalCountUsecase: StubDaysIntervalCountUsecase()
+        )
+        viewModel.router = self.spyRouter
+        return (viewModel, usecase)
+    }
+
+    // 숨기기 확인 시 현재 공휴일 이름으로 숨김 요청하고 화면을 닫음
+    @Test func viewModel_whenHideHolidayConfirmed_requestHideAndCloseScene() async throws {
+        // given
+        let (viewModel, usecase) = try await self.makeViewModelWithUsecase()
+        viewModel.refresh()
+
+        // when: 닫힘 콜백으로 비동기 숨김 완료를 결정적으로 대기
+        await withCheckedContinuation { continuation in
+            self.spyRouter.didCloseCallback = { continuation.resume() }
+            viewModel.hideHoliday()
+        }
+
+        // then
+        #expect(self.spyRouter.didShowConfirmWith != nil)
+        #expect(self.spyRouter.didClosed == true)
+        #expect(usecase.hiddenHolidayNamesSubject.value == ["삼일절"])
+    }
+
+    // 숨기기 취소 시 숨김 요청도 닫기도 하지 않음
+    @Test func viewModel_whenHideHolidayCanceled_doNothing() async throws {
+        // given
+        let (viewModel, usecase) = try await self.makeViewModelWithUsecase()
+        self.spyRouter.shouldConfirmNotCancel = false
+        viewModel.refresh()
+
+        // when
+        viewModel.hideHoliday()
+
+        // then
+        #expect(self.spyRouter.didShowConfirmWith != nil)
+        #expect(self.spyRouter.didClosed != true)
+        #expect(usecase.hiddenHolidayNamesSubject.value.isEmpty)
+    }
+}
+
 private final class PrivateStubHolidayUsecase: StubHolidayUsecase {
     
     override func holiday(_ uuid: String) -> AnyPublisher<Holiday?, Never> {

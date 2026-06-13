@@ -14,6 +14,7 @@ import Prelude
 import Optics
 import Domain
 import Scenes
+import Extensions
 
 
 struct CountryModel: Equatable {
@@ -28,7 +29,8 @@ protocol HolidayEventDetailViewModel: AnyObject, Sendable, HolidayEventDetailSce
     // interactor
     func refresh()
     func close()
-    
+    func hideHoliday()
+
     // presenter
     var holidayName: AnyPublisher<String, Never> { get }
     var dateText: AnyPublisher<String, Never> { get }
@@ -88,6 +90,32 @@ extension HolidayEventDetailViewModelImple {
     
     func close() {
         self.router?.closeScene()
+    }
+
+    func hideHoliday() {
+        guard let holiday = self.subject.holiday.value else { return }
+
+        let confirmed: () -> Void = { [weak self] in
+            self?.hideHolidayConfirmed(holiday.name)
+        }
+        let info = ConfirmDialogInfo()
+            |> \.title .~ pure("setting.holiday.hide::confirm::title".localized())
+            |> \.message .~ pure("setting.holiday.hide::confirm::message".localized())
+            |> \.confirmText .~ "setting.holiday.hide::button".localized()
+            |> \.confirmed .~ pure(confirmed)
+            |> \.withCancel .~ true
+        self.router?.showConfirm(dialog: info)
+    }
+
+    private func hideHolidayConfirmed(_ name: String) {
+        Task { [weak self] in
+            do {
+                try await self?.holidayUsecase.hideHoliday(name)
+                self?.router?.closeScene()
+            } catch {
+                self?.router?.showError(error)
+            }
+        }
     }
 }
 

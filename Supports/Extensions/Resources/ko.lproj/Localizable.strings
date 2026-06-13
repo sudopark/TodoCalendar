@@ -400,6 +400,9 @@
 "setting.holiday.country.changeConfirm::title" = "국가 변경";
 "setting.holiday.country.changeConfirm::message" = "달력에 적용될 국가를 변경하시겠습니까?";
 "setting.holiday.country.changed::message" = "국가가 변경되었습니다.";
+"setting.holiday.hide::button" = "숨기기";
+"setting.holiday.hide::confirm::title" = "공휴일 숨기기";
+"setting.holiday.hide::confirm::message" = "이 공휴일을 매년 숨길까요?\n설정 > 공휴일에서 다시 표시할 수 있어요.";
 "setting.feedback::name" = "피드백";
 "setting.help::name" = "도움말";
 "setting.share::name" = "앱 공유";
