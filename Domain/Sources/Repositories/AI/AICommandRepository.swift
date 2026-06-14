@@ -20,7 +20,9 @@ public protocol AICommandRepository: AnyObject, Sendable {
         _ action: AIConfirmCommandAction,
         timeZone: String
     ) async throws -> String
-    
+
+    func rejectConfirmCommand(_ action: AIConfirmCommandAction) async throws
+
     func loadJob(_ jobId: String) async throws -> AIJob
     
     func updateProcessingAICommand(_ cmd: ProcessingAICommand) async throws

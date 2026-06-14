@@ -33,6 +33,7 @@ public struct AIJob: Sendable {
         case done = "DONE"
         case confirm = "CONFIRM"
         case failed = "FAILED"
+        case rejected = "REJECTED"
     }
     
     public enum Mode: String, Sendable {
@@ -53,6 +54,7 @@ public struct AIJob: Sendable {
         return self.status == .done
             || self.status == .confirm
             || self.status == .failed
+            || self.status == .rejected
     }
     
     public init(jobId: String) {
@@ -100,7 +102,8 @@ public struct AIConfirmCommandAction: Sendable {
     public var tool: String?
     public var args: Data?
     public var confirmToken: String?
-    
+    public var parentJobId: String?
+
     public init() { }
 }
 
