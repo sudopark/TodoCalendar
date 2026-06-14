@@ -16,8 +16,10 @@ public protocol SpeechRecognizeUsecase: Sendable {
 
     func startListening()
     func stopListening()
- 
+    func finishListening()
+
     var recognizeResult: AnyPublisher<Result<String, any Error>, Never> { get }
+    var recognizingText: AnyPublisher<String, Never> { get }
     var isRecognizingWithLevel: AnyPublisher<Float?, Never> { get }
 }
 
@@ -43,9 +45,10 @@ public final class SpeechRecognizeUsecaseImple: SpeechRecognizeUsecase, @uncheck
     private struct Subject {
         let isRecognizing = CurrentValueSubject<Bool, Never>(false)
         let result = PassthroughSubject<Result<String, any Error>, Never>()
+        let recognizingText = CurrentValueSubject<String, Never>("")
     }
     private let subject = Subject()
-    private var serviceBinding: AnyCancellable?
+    private var serviceBinding = Set<AnyCancellable>()
 }
 
 extension SpeechRecognizeUsecaseImple {
@@ -62,7 +65,7 @@ extension SpeechRecognizeUsecaseImple {
                 self.subject.isRecognizing.send(true)
                 
             } catch {
-                self.serviceBinding?.cancel()
+                self.serviceBinding = []
                 self.subject.isRecognizing.send(false)
                 self.subject.result.send(.failure(error))
             }
@@ -71,7 +74,7 @@ extension SpeechRecognizeUsecaseImple {
     
     public func stopListening() {
         self.service.stop()
-        self.serviceBinding?.cancel()
+        self.serviceBinding = []
         self.subject.isRecognizing.send(false)
     }
     
@@ -87,8 +90,10 @@ extension SpeechRecognizeUsecaseImple {
             }
         }
         
-        self.serviceBinding?.cancel()
-        self.serviceBinding = Publishers.CombineLatest(
+        self.subject.recognizingText.send("")
+        self.serviceBinding = []
+
+        Publishers.CombineLatest(
             self.service.recognized.mapAsOptional().prepend(nil),
             self.silenceTimeout.mapAsAnyError().mapAsOptional().prepend(nil)
         )
@@ -98,6 +103,17 @@ extension SpeechRecognizeUsecaseImple {
             receiveCompletion: self.handleCompletion(),
             receiveValue: self.handleRecognized()
         )
+        .store(in: &self.serviceBinding)
+
+        self.service.recognized
+            .map { $0.text }
+            .sink(
+                receiveCompletion: { _ in },
+                receiveValue: { [weak self] text in
+                    self?.subject.recognizingText.send(text)
+                }
+            )
+            .store(in: &self.serviceBinding)
     }
     
     private enum RecognizeResult {
@@ -149,7 +165,20 @@ extension SpeechRecognizeUsecaseImple {
         return self.subject.result
             .eraseToAnyPublisher()
     }
-    
+
+    public var recognizingText: AnyPublisher<String, Never> {
+        return self.subject.recognizingText
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
+
+    public func finishListening() {
+        guard self.subject.isRecognizing.value else { return }
+        let text = self.subject.recognizingText.value
+        self.stopListening()
+        self.subject.result.send(.success(text))
+    }
+
     public var isRecognizingWithLevel: AnyPublisher<Float?, Never> {
         let service = self.service
         return self.subject.isRecognizing
