@@ -124,6 +124,7 @@ struct AIConfirmCommandActionMapper {
         self.action = AIConfirmCommandAction()
             |> \.tool .~ (json["tool"] as? String)
             |> \.confirmToken .~ (json["confirmToken"] as? String)
+            |> \.parentJobId .~ (json["parentJobId"] as? String)
             |> \.args .~ argsData
     }
 }

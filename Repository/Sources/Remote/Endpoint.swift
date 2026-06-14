@@ -268,6 +268,7 @@ public enum AppEndpoints: Endpoint {
 enum AIAPIEndpoints: Endpoint {
     case command
     case confirmCommand
+    case rejectCommand
     case job(id: String)
     case usage
 
@@ -275,6 +276,7 @@ enum AIAPIEndpoints: Endpoint {
         switch self {
         case .command: return "command"
         case .confirmCommand: return "command/confirm"
+        case .rejectCommand: return "command/reject"
         case .job(let id): return "jobs/\(id)"
         case .usage: return "usage"
         }
