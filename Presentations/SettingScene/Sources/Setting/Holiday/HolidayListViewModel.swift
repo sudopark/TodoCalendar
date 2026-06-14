@@ -39,12 +39,14 @@ protocol HolidayListViewModel: AnyObject, Sendable, HolidayListSceneInteractor {
     func prepare()
     func refresh()
     func selectCountry()
+    func showHoliday(_ name: String)
     func close()
-    
+
     // presenter
     var isRefresingHolidays: AnyPublisher<Bool, Never> { get }
     var currentCountryName: AnyPublisher<String, Never> { get }
     var currentYearHolidays: AnyPublisher<[HolidayItemModel], Never> { get }
+    var hiddenHolidayNames: AnyPublisher<[String], Never> { get }
 }
 
 
@@ -118,7 +120,18 @@ extension HolidayListViewModelImple {
     func selectCountry() {
         self.router?.routeToSelectCountry()
     }
-    
+
+    func showHoliday(_ name: String) {
+        Task { [weak self] in
+            do {
+                try await self?.holidayUsecase.showHoliday(name)
+            } catch {
+                self?.router?.showError(error)
+            }
+        }
+        .store(in: &self.cancellables)
+    }
+
     func close() {
         self.router?.closeScene()
     }
@@ -160,6 +173,13 @@ extension HolidayListViewModelImple {
             .flatMap(selectHolidayFromYear)
             .map(sortItems)
             .map(asItemModel)
+            .eraseToAnyPublisher()
+    }
+
+    var hiddenHolidayNames: AnyPublisher<[String], Never> {
+        return self.holidayUsecase.hiddenHolidayNames()
+            .map { $0.sorted() }
+            .removeDuplicates()
             .eraseToAnyPublisher()
     }
 }

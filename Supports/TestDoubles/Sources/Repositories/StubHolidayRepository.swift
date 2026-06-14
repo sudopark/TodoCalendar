@@ -44,4 +44,20 @@ open class StubHolidayRepository: HolidayRepository {
     open func clearHolidayCache() async throws {
         self.holidayCachCleared = true
     }
+
+    public var hiddenHolidayNameMap: [String: Set<String>] = [:]
+
+    open func fetchHolidayHiddenNames(_ countryCode: String) async throws -> Set<String> {
+        return self.hiddenHolidayNameMap[countryCode] ?? []
+    }
+
+    @discardableResult
+    open func updateHolidayHidden(
+        _ name: String, _ isHidden: Bool, for countryCode: String
+    ) async throws -> Set<String> {
+        let current = self.hiddenHolidayNameMap[countryCode] ?? []
+        let updated = isHidden ? current.union([name]) : current.subtracting([name])
+        self.hiddenHolidayNameMap[countryCode] = updated
+        return updated
+    }
 }

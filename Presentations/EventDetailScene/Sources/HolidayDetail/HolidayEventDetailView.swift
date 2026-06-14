@@ -12,6 +12,7 @@
 import SwiftUI
 import Combine
 import Domain
+import Extensions
 import CommonPresentation
 
 
@@ -65,15 +66,16 @@ import CommonPresentation
 // MARK: - HolidayEventDetailViewEventHandler
 
 final class HolidayEventDetailViewEventHandler: Observable {
-    
-    // TODO: add handlers
+
     var onAppear: () -> Void = { }
     var close: () -> Void = { }
+    var hideHoliday: () -> Void = { }
 
     func bind(_ viewModel: any HolidayEventDetailViewModel) {
-        
+
         self.onAppear = viewModel.refresh
         self.close = viewModel.close
+        self.hideHoliday = viewModel.hideHoliday
     }
 }
 
@@ -117,35 +119,64 @@ struct HolidayEventDetailView: View {
     @Environment(HolidayEventDetailViewEventHandler.self) private var eventHandlers
     
     var body: some View {
-        ZStack {
-            ScrollView {
-             
-                VStack(spacing: 25) {
-                    Spacer(minLength: 5)
-                    self.nameView
-                    
-                    VStack(spacing: 16) {
-                        if let model = self.state.countryModel {
-                            self.countryInfoView(model)
-                        }
-                        
-                        self.dateView
-                        
-                        self.ddayView
+        ScrollView {
+
+            VStack(spacing: 25) {
+                Spacer(minLength: 5)
+                self.nameView
+
+                VStack(spacing: 16) {
+                    if let model = self.state.countryModel {
+                        self.countryInfoView(model)
                     }
-                    .padding(.top, 20)
+
+                    self.dateView
+
+                    self.ddayView
                 }
+                .padding(.top, 20)
             }
-            .padding(.horizontal, 12)
-            
-            VStack {
-                Spacer()
-                
-                BottomConfirmButton(title: "Close")
-            }
-            
         }
+        .padding(.horizontal, 12)
         .background(appearance.colorSet.bg0.asColor)
+        .safeAreaInset(edge: .bottom) {
+            self.bottomButtons
+        }
+    }
+
+    private var bottomButtons: some View {
+        HStack(spacing: 8) {
+            ConfirmButton(title: "common.close".localized())
+                .eventHandler(\.onTap, self.eventHandlers.close)
+
+            Menu {
+                Button(role: .destructive) {
+                    self.eventHandlers.hideHoliday()
+                } label: {
+                    Label(
+                        "setting.holiday.hide::button".localized(),
+                        systemImage: "eye.slash"
+                    )
+                }
+            } label: {
+                Image(systemName: "ellipsis")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
+                    .frame(width: 20, height: 20)
+                    .padding()
+                    .background {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
+                    }
+            }
+        }
+        .padding()
+        .background(
+            Rectangle()
+                .fill(self.appearance.colorSet.dayBackground.asColor)
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
     
     private var nameView: some View {

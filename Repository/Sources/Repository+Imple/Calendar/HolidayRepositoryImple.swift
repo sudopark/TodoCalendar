@@ -6,6 +6,8 @@
 //
 
 import Foundation
+import Prelude
+import Optics
 import Domain
 import Extensions
 import SQLiteService
@@ -28,6 +30,7 @@ public final class HolidayRepositoryImple: HolidayRepository {
     }
     
     private var selectedCountryKey: String { "user_holiday_country_v2" }
+    private var hiddenHolidayNamesKey: String { "holiday_hidden_names_v1" }
 }
 
 
@@ -149,6 +152,25 @@ extension HolidayRepositoryImple {
     
     public func clearHolidayCache() async throws {
         try await self.sqliteService.async.run { try $0.dropTable(HolidayTable.self) }
+    }
+
+    public func fetchHolidayHiddenNames(_ countryCode: String) async throws -> Set<String> {
+        let map: [String: [String]]? = self.localEnvironmentStorage.load(self.hiddenHolidayNamesKey)
+        return Set(map?[countryCode] ?? [])
+    }
+
+    @discardableResult
+    public func updateHolidayHidden(
+        _ name: String, _ isHidden: Bool, for countryCode: String
+    ) async throws -> Set<String> {
+        let map: [String: [String]] = self.localEnvironmentStorage.load(self.hiddenHolidayNamesKey) ?? [:]
+        let current = Set(map[countryCode] ?? [])
+        let updated = isHidden ? current.union([name]) : current.subtracting([name])
+        self.localEnvironmentStorage.update(
+            self.hiddenHolidayNamesKey,
+            map |> key(countryCode) .~ Array(updated)
+        )
+        return updated
     }
     
     struct HolidayTable: Table {

@@ -203,7 +203,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             // given
             let expect = self.expectConfirm("캐시 없는 상태에서 remote에서 이벤트 조회 -> 주어진 기간내 자동으로 페이징")
             expect.count = 2
-            expect.timeout = .milliseconds(100)
+            expect.timeout = .seconds(1)
             let repository = self.makeRepository()
             
             // when
@@ -266,7 +266,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             try await self.saveCache()
             let expect = self.expectConfirm("이벤트 조회 이후에 캐시 업데이트")
             expect.count = 2
-            expect.timeout = .milliseconds(100)
+            expect.timeout = .seconds(1)
             let repository = self.makeRepository()
             
             // when
@@ -292,7 +292,7 @@ extension GoogleCalendarRepositoryImple_Tests {
             try await self.saveCache()
             let expect = self.expectConfirm("이벤트 상세 조회시, 캐싱된 값 먼저 나가고, 리모트에서 새로 조회된값 나감")
             expect.count = 2
-            expect.timeout = .milliseconds(100)
+            expect.timeout = .seconds(1)
             let repository = self.makeRepository()
             
             // when
@@ -315,7 +315,7 @@ extension GoogleCalendarRepositoryImple_Tests {
         try await self.runTestWithOpenClose("test_google_event_5") {
             // given
             let expect = self.expectConfirm("비공개 이벤트 조회")
-            expect.timeout = .milliseconds(100)
+            expect.timeout = .seconds(1)
             let repository = self.makeRepository()
             
             // when

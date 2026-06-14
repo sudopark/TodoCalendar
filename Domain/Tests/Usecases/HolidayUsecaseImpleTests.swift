@@ -343,8 +343,124 @@ extension HolidayUsecaseImpleTests {
     }
 }
 
+// MARK: - test hide/show holiday
+
 extension HolidayUsecaseImpleTests {
-    
+
+    // 숨김 처리한 이름의 공휴일은 holidays()에서 제외
+    func testUsecase_whenHideHoliday_excludeFromHolidays() {
+        // given
+        let expect = expectation(description: "공휴일 숨김 처리하면 holidays에서 제외됨")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
+
+        // when
+        let holidayMaps = self.waitOutputs(expect, for: usecase.holidays()) {
+            Task {
+                try await usecase.prepare()
+                try await usecase.refreshHolidays(2023)
+                try await usecase.hideHoliday("kr")
+            }
+        }
+
+        // then
+        XCTAssertEqual(holidayMaps, [
+            [:],
+            [2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]],
+            [2023: []]
+        ])
+    }
+
+    // 숨김 해제하면 다시 포함됨
+    func testUsecase_whenShowHiddenHoliday_includeAgain() {
+        // given
+        let expect = expectation(description: "숨김 해제하면 holidays에 다시 포함됨")
+        expect.expectedFulfillmentCount = 4
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
+
+        // when
+        let holidayMaps = self.waitOutputs(expect, for: usecase.holidays()) {
+            Task {
+                try await usecase.prepare()
+                try await usecase.refreshHolidays(2023)
+                try await usecase.hideHoliday("kr")
+                try await usecase.showHoliday("kr")
+            }
+        }
+
+        // then
+        XCTAssertEqual(holidayMaps, [
+            [:],
+            [2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]],
+            [2023: []],
+            [2023: [.init(uuid: "id-2023", dateString: "2023", name: "kr")]]
+        ])
+    }
+
+    // 이전에 숨긴 공휴일은 prepare 직후부터 제외 (디바이스 영속 + 매년 숨김)
+    func testUsecase_whenPrepareWithPersistedHiddenNames_filterFromStart() {
+        // given
+        let expect = expectation(description: "이전에 숨긴 공휴일은 prepare 직후부터 제외")
+        expect.expectedFulfillmentCount = 2
+        self.stubRepository.hiddenHolidayNameMap = ["kr": ["kr"]]
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
+
+        // when
+        let holidayMaps = self.waitOutputs(expect, for: usecase.holidays()) {
+            Task {
+                try await usecase.prepare()
+                try await usecase.refreshHolidays(2023)
+            }
+        }
+
+        // then
+        XCTAssertEqual(holidayMaps, [
+            [:],
+            [2023: []]
+        ])
+    }
+
+    // hiddenHolidayNames 퍼블리셔가 숨김/해제를 반영
+    func testUsecase_provideHiddenHolidayNames() {
+        // given
+        let expect = expectation(description: "숨긴 공휴일 이름 목록 제공")
+        expect.expectedFulfillmentCount = 3
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
+
+        // when
+        let nameSets = self.waitOutputs(expect, for: usecase.hiddenHolidayNames()) {
+            Task {
+                try await usecase.prepare()
+                try await usecase.hideHoliday("추석")
+                try await usecase.hideHoliday("설날")
+            }
+        }
+
+        // then
+        XCTAssertEqual(nameSets, [
+            [],
+            ["추석"],
+            ["추석", "설날"]
+        ])
+    }
+
+    // loadHolidays(위젯 경로)도 숨김 제외
+    func testUsecase_loadHolidays_excludeHidden() async throws {
+        // given
+        self.stubRepository.hiddenHolidayNameMap = ["kr": ["kr"]]
+        let usecase = self.makeUsecase(latestSelectedCountryCode: "kr")
+        try await usecase.prepare()
+
+        // when
+        let holidays = try await usecase.loadHolidays(2023)
+
+        // then
+        XCTAssertEqual(holidays, [])
+    }
+}
+
+extension HolidayUsecaseImpleTests {
+
     private class StubLocalProvider: LocaleProvider {
         private let code: String?
         init(code: String?) {

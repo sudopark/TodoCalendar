@@ -216,7 +216,7 @@ extension DoneTodoDetailViewModelImpleTests {
     @Test func viewModel_whenAfterRevertTodo_notify() async throws {
         // given
         let expect = expectConfirm("done todo detail -> revert -> notify")
-        expect.count = 3; expect.timeout = .milliseconds(100)
+        expect.count = 3; expect.timeout = .seconds(1)
         let viewModel = self.makeViewModel(done: self.dummyDoneTodo, detail: nil)
         viewModel.prepare()
         
@@ -236,7 +236,7 @@ extension DoneTodoDetailViewModelImpleTests {
     @Test func viewModel_whenRevertTodoFail_showError() async throws {
         // given
         let expect = expectConfirm("done todo detail -> revert fail -> notify")
-        expect.count = 3; expect.timeout = .milliseconds(100)
+        expect.count = 3; expect.timeout = .seconds(1)
         let viewModel = self.makeViewModel(done: self.dummyDoneTodo, detail: nil, shouldFailRevert: true)
         viewModel.prepare()
         

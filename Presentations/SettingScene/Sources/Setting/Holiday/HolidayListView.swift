@@ -23,31 +23,39 @@ import CommonPresentation
     
     var countryName: String = ""
     var holidays: [HolidayItemModel] = []
+    var hiddenHolidayNames: [String] = []
     var isRefreshing = false
-    
+
     func bind(_ viewModel: any HolidayListViewModel) {
-        
+
         guard self.didBind == false else { return }
         self.didBind = true
-        
+
         viewModel.isRefresingHolidays
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] isRefreshing in
                 self?.isRefreshing = isRefreshing
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.currentCountryName
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] name in
                 self?.countryName = name
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.currentYearHolidays
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] items in
                 self?.holidays = items
+            })
+            .store(in: &self.cancellables)
+
+        viewModel.hiddenHolidayNames
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] names in
+                self?.hiddenHolidayNames = names
             })
             .store(in: &self.cancellables)
     }
@@ -60,12 +68,14 @@ final class HolidayListViewEventHandler: Observable {
     var onAppear: () -> Void = { }
     var refresh: () -> Void = { }
     var selectCountry: () -> Void = { }
+    var showHoliday: (String) -> Void = { _ in }
     var close: () -> Void = { }
-    
+
     func bind(_ viewModel: any HolidayListViewModel) {
         self.onAppear = viewModel.prepare
         self.selectCountry = viewModel.selectCountry
         self.refresh = viewModel.refresh
+        self.showHoliday = viewModel.showHoliday
         self.close = viewModel.close
     }
 }
@@ -120,6 +130,12 @@ struct HolidayListView: View {
                 holidayListSectionView
                     .listRowSeparator(.hidden)
                     .listRowBackground(appearance.colorSet.bg0.asColor)
+
+                if !self.state.hiddenHolidayNames.isEmpty {
+                    hiddenHolidaySectionView
+                        .listRowSeparator(.hidden)
+                        .listRowBackground(appearance.colorSet.bg0.asColor)
+                }
             }
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
@@ -217,6 +233,42 @@ struct HolidayListView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .fill(self.appearance.colorSet.bg1.asColor)
                 )
+            }
+        }
+    }
+
+    private var hiddenHolidaySectionView: some View {
+
+        VStack(alignment: .leading) {
+            Text("setting.holiday.hidden::sectionTitle".localized())
+                .font(self.appearance.fontSet.subNormal.asFont)
+                .foregroundStyle(self.appearance.colorSet.text2.asColor)
+
+            ForEach(self.state.hiddenHolidayNames, id: \.self) { name in
+
+                HStack(spacing: 8) {
+
+                    Text(name)
+                        .minimumScaleFactor(0.7)
+                        .font(self.appearance.fontSet.size(16).asFont)
+                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
+
+                    Spacer()
+
+                    Text("setting.holiday.show::button".localized())
+                        .font(self.appearance.fontSet.size(14).asFont)
+                        .foregroundStyle(self.appearance.colorSet.accent.asColor)
+                }
+                .padding(.vertical, 8)
+                .padding(.horizontal, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(self.appearance.colorSet.bg1.asColor)
+                )
+                .onTapGesture {
+                    self.appearance.impactIfNeed()
+                    self.eventHandlers.showHoliday(name)
+                }
             }
         }
     }

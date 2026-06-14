@@ -400,6 +400,11 @@
 "setting.holiday.country.changeConfirm::title" = "Change country";
 "setting.holiday.country.changeConfirm::message" = "Do you want to change the country of your calendar?";
 "setting.holiday.country.changed::message" = "The country has changed.";
+"setting.holiday.hide::button" = "Hide";
+"setting.holiday.hide::confirm::title" = "Hide holiday";
+"setting.holiday.hide::confirm::message" = "Hide this holiday every year?\nYou can show it again in Settings > Holiday.";
+"setting.holiday.hidden::sectionTitle" = "Hidden Holidays";
+"setting.holiday.show::button" = "Show";
 "setting.feedback::name" = "Feedback";
 "setting.help::name" = "Help";
 "setting.share::name" = "Share App";
