@@ -106,6 +106,21 @@ extension AICommandRepositoryImpleTests {
         let argsParam = params?["args"] as? [String: Any]
         XCTAssertEqual(argsParam?["schedule_id"] as? String, "abc")
     }
+
+    func testRepository_rejectConfirmCommand_postsParentJobId() async throws {
+        // given
+        let repository = self.makeRepository()
+        let action = AIConfirmCommandAction()
+            |> \.parentJobId .~ "parent-123"
+
+        // when
+        try await repository.rejectConfirmCommand(action)
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedMethod, .post)
+        XCTAssertEqual(self.stubRemote.didRequestedPath?.contains("command/reject"), true)
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["job_id"] as? String, "parent-123")
+    }
 }
 
 
@@ -298,6 +313,11 @@ private struct DummyResponse {
                 method: .post,
                 endpoint: AIAPIEndpoints.confirmCommand,
                 resultJsonString: .success(self.confirmJobIdJson)
+            ),
+            .init(
+                method: .post,
+                endpoint: AIAPIEndpoints.rejectCommand,
+                resultJsonString: .success(#"{ "ok": true }"#)
             ),
             .init(
                 method: .get,

@@ -57,6 +57,26 @@ final class AICommandUsecaseImpleTests: PublisherWaitable {
 }
 
 
+// MARK: - rejectConfirmCommand
+
+extension AICommandUsecaseImpleTests {
+
+    @Test func usecase_rejectConfirmCommand_delegatesToRepositoryFireAndForget() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        var action = AIConfirmCommandAction()
+        action.parentJobId = "parent-job"
+
+        // when
+        usecase.rejectConfirmCommand(action)
+        try await Task.sleep(for: .milliseconds(50))
+
+        // then
+        #expect(self.stubRepository.didRejectParentJobId == "parent-job")
+    }
+}
+
+
 // MARK: - process commmand
 
 extension AICommandUsecaseImpleTests {
