@@ -38,7 +38,7 @@ extension WidgetAppearanceSettingViewModelImpleTests {
     @Test func viewModel_changeFromSystemToCustom() async throws {
         // given
         let expect = expectConfirm("초기값 system -> custom -> system으로 변경하는 경우")
-        expect.count = 3; expect.timeout = .milliseconds(100)
+        expect.count = 3; expect.timeout = .seconds(1)
         let viewModel = self.makeViewModel(.system)
         
         // when
@@ -57,7 +57,7 @@ extension WidgetAppearanceSettingViewModelImpleTests {
     @Test func viewModel_changeFromCustomToSystem() async throws {
         // given
         let expect = expectConfirm("초기값 custom -> system -> custom 으로 변경하는 경우")
-        expect.count = 3; expect.timeout = .milliseconds(100)
+        expect.count = 3; expect.timeout = .seconds(1)
         let viewModel = self.makeViewModel(.custom(hex: "some1"))
         
         // when

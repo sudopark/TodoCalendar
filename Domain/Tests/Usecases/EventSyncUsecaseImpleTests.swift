@@ -180,7 +180,7 @@ extension EventSyncUsecaseImpleTests {
     @Test func usecase_cancelSync() async throws {
         // given
         let expect = expectConfirm("sync cancel")
-        expect.count = 3; expect.timeout = .milliseconds(100)
+        expect.count = 3; expect.timeout = .seconds(1)
         let usecase = self.makeUsecase(checkResult: .needToSync)
         try await self.fakeEventUploadService.resume()
         

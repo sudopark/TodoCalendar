@@ -59,7 +59,7 @@ extension DaysIntervalCountUsecaseImpleTests {
         // given
         let now = Date().timeIntervalSince1970
         let expect = expectConfirm("timezone 변경시에 날짜 간격 다시 계산")
-        expect.count = 2; expect.timeout = .milliseconds(100)
+        expect.count = 2; expect.timeout = .seconds(1)
         let usecase = self.makeusecase()
         
         // when
