@@ -33,8 +33,8 @@ jobs:
         run: |
           FILES="${{ steps.changed.outputs.files }}"
 
-          ALL_SCHEMES="Domain Repository CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes TodoCalendarApp TodoCalendarAppWidget"
-          ALL_PRESENTATION="CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes"
+          ALL_SCHEMES="Domain Repository CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
+          ALL_PRESENTATION="CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
 
           schemes=()
 
@@ -109,6 +109,9 @@ jobs:
           fi
           if echo "$FILES" | grep -q "^Presentations/MemberScenes/"; then
             schemes+=("MemberScenes" "TodoCalendarApp")
+          fi
+          if echo "$FILES" | grep -q "^Presentations/AIAgentScene/"; then
+            schemes+=("AIAgentScene")
           fi
 
           # === App 타겟 ===
@@ -252,6 +255,18 @@ jobs:
           xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme MemberScenes \
+            -derivedDataPath ./DerivedData \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
+
+      - name: Test AIAgentScene
+        if: contains(needs.detect-changes.outputs.schemes, ' AIAgentScene ')
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme AIAgentScene \
             -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \

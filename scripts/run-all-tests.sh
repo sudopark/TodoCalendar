@@ -28,6 +28,7 @@ ALL_SCHEMES=(
   "EventListScenes"
   "SettingScene"
   "MemberScenes"
+  "AIAgentScene"
   "TodoCalendarApp"
   "TodoCalendarAppWidget"
 )

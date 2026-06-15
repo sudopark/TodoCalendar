@@ -83,6 +83,31 @@ struct XxxContainerView: View {
 - `@EnvironmentObject` — 레거시. `@Environment(Type.self)` 사용
 - ContainerView 외부에서 ViewState 만들어 `init(viewState:)` 주입 ❌
 
+### 조건부 표시 child view는 분기 시점에 생성
+
+stage·상태로 분기되어 보여지는 child view는 부모에서 **미리 만들어 넘기지 말 것.** 분기(`switch`) 시점에 생성해, 그 뷰가 나타날 때 ViewState 바인딩(`onAppear`)도 시작한다.
+
+부모 View는 ViewModel을 직접 참조하면 안 되므로(§4), vm·eventHandler를 보유한 **builder/provider를 init property로 주입**받아 분기 시점에 `make...View()`를 호출한다.
+
+```swift
+// builder가 vm·eventHandler 보유, View는 builder만 주입받음
+struct XxxStageViewBuilder {
+    @MainActor func makeInputView() -> some View {
+        XxxInputContainerView(viewAppearance:, eventHandlers:)
+            .eventHandler(\.stateBinding, { $0.bind(inputViewModel) })
+    }
+}
+// 부모 View body
+switch state.stage {
+case .input:   builder.makeInputView()   // ← 이 시점에 생성 + 바인딩
+case .command: builder.makeCommandView()
+}
+```
+
+선례: `SignInButtonProvider`, `AIAgentStageViewBuilder`.
+
+**Why:** 안 보이는 stage의 뷰·구독을 upfront로 띄우면 불필요한 바인딩/리소스. 분기 시점 생성으로 lazy 보장 + 코드상 "이 뷰는 이 stage에서만 산다"가 드러난다.
+
 ## 5. ViewModel 책임 경계
 
 ### Navigation은 Router 경유
