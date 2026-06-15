@@ -169,6 +169,7 @@ private extension AIAgentInputStageView {
             TextField("aiAgent::input::placeholder".localized(), text: self.$keyboardText, axis: .vertical)
                 .font(appearance.fontSet.normal.asFont)
                 .foregroundStyle(appearance.colorSet.text0.asColor)
+                .lineLimit(3...6)
                 .padding(12)
                 .background(
                     RoundedRectangle(cornerRadius: 10)
@@ -283,7 +284,7 @@ struct AIAgentInputStageViewPreviewProvider: PreviewProvider {
         recognizing: String = ""
     ) -> some View {
         let setting = AppearanceSettings(
-            calendar: .init(colorSetKey: .defaultDark, fontSetKey: .systemDefault),
+            calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
             defaultTagColor: .init(holiday: "#ff0000", default: "#ff00ff")
         )
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
