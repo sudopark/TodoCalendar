@@ -1,5 +1,5 @@
 //
-//  AIAgentUsecaseImpleTests.swift
+//  AIAgentOrchestrationUsecaseImpleTests.swift
 //  Domain
 //
 //  Created by sudo.park on 6/14/26.
@@ -17,23 +17,23 @@ import Extensions
 @testable import Domain
 
 
-class AIAgentUsecaseImpleTests: PublisherWaitable {
+class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>! = []
     private var stubCommand: StubAICommandUsecase!
     private var stubUsage: StubAIAgentUsageUsecase!
 
-    private func makeUsecase(shouldFail: Bool = false) -> AIAgentUsecaseImple {
+    private func makeUsecase(shouldFail: Bool = false) -> AIAgentOrchestrationUsecaseImple {
         self.stubCommand = .init()
         self.stubCommand.shouldFail = shouldFail
         self.stubUsage = .init()
-        return AIAgentUsecaseImple(
+        return AIAgentOrchestrationUsecaseImple(
             commandUsecase: self.stubCommand,
             usageUsecase: self.stubUsage
         )
     }
 
-    private func makeUsecaseWithCommandJob(_ job: AIJob) -> AIAgentUsecaseImple {
+    private func makeUsecaseWithCommandJob(_ job: AIJob) -> AIAgentOrchestrationUsecaseImple {
         let usecase = self.makeUsecase()
         self.stubCommand.stubCommandJob = job
         return usecase
@@ -43,8 +43,9 @@ class AIAgentUsecaseImpleTests: PublisherWaitable {
         token: String = "tk-1",
         command: String = "내일 회의 잡아줘",
         confirmedBy job: AIJob? = nil
-    ) -> AIAgentUsecaseImple {
+    ) -> AIAgentOrchestrationUsecaseImple {
         var confirm = AIJobResult.ConfirmResult()
+        confirm.text = "정말 삭제할까요?"
         confirm.action = AIConfirmCommandAction()
             |> \.confirmToken .~ token
             |> \.parentJobId .~ "parent-job"
@@ -89,16 +90,17 @@ class AIAgentUsecaseImpleTests: PublisherWaitable {
 
 // MARK: - 초기 상태 / usage
 
-extension AIAgentUsecaseImpleTests {
+extension AIAgentOrchestrationUsecaseImpleTests {
 
-    @Test func usecase_initialState_isIdle() async throws {
+    @Test func usecase_initially_emitsNothingUntilStateDetermined() async throws {
         // given
-        let expect = expectConfirm("초기 상태 idle")
         let usecase = self.makeUsecase()
-        // when
-        let state = try await self.firstOutput(expect, for: usecase.state)
-        // then
-        #expect(state.map(self.stateName) == "idle")
+        var emitted: [AIAgentState] = []
+        // when — 구독만, 아무 동작 없음 (state 미확정 = 복원 중 같은 상황)
+        let cancellable = usecase.state.sink { emitted.append($0) }
+        // then — 확정 전이라 방출하지 않는다
+        #expect(emitted.isEmpty)
+        cancellable.cancel()
     }
 
     @Test func usecase_loadUsage_refreshesUsageUsecase() async throws {
@@ -128,12 +130,12 @@ extension AIAgentUsecaseImpleTests {
 
 // MARK: - 처리 시작 & 결과 분기
 
-extension AIAgentUsecaseImpleTests {
+extension AIAgentOrchestrationUsecaseImpleTests {
 
     @Test func usecase_sendCommand_entersProcessingThenDone() async throws {
         // given
         let expect = expectConfirm("커맨드 전송 → processing → done")
-        expect.count = 3
+        expect.count = 2
         var done = AIJobResult.DoneResult()
         done.text = "할 일 추가 완료"
         let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
@@ -141,8 +143,8 @@ extension AIAgentUsecaseImpleTests {
         let states = try await self.outputs(expect, for: usecase.state) {
             usecase.sendCommand("회의 잡아줘")
         }
-        // then
-        #expect(states.map(self.stateName) == ["idle", "processing", "done"])
+        // then — 초기 idle 방출 없이 processing부터
+        #expect(states.map(self.stateName) == ["processing", "done"])
         guard case .done(let message) = try #require(states.last) else { Issue.record("done 아님"); return }
         #expect(message == "할 일 추가 완료")
     }
@@ -150,20 +152,25 @@ extension AIAgentUsecaseImpleTests {
     @Test func usecase_sendCommand_empty_isIgnored() async throws {
         // given
         let expect = expectConfirm("공백 커맨드 무시")
-        let usecase = self.makeUsecase()
-        // when
-        let state = try await self.firstOutput(expect, for: usecase.state) {
+        expect.count = 2
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        // when — 공백은 무시되고 유효 커맨드만 처리 (공백이 방출을 만들지 않음)
+        let states = try await self.outputs(expect, for: usecase.state) {
             usecase.sendCommand("   ")
+            usecase.sendCommand("회의")
         }
-        // then
-        #expect(state.map(self.stateName) == "idle")
+        // then — 공백 무시라 processing부터 시작
+        #expect(states.map(self.stateName) == ["processing", "done"])
     }
 
     @Test func usecase_whenResultConfirm_entersConfirmWithCommand() async throws {
         // given
         let expect = expectConfirm("결과 confirm → confirm 상태")
-        expect.count = 3
+        expect.count = 2
         var confirm = AIJobResult.ConfirmResult()
+        confirm.text = "정말 삭제할까요?"
         confirm.action = AIConfirmCommandAction() |> \.confirmToken .~ "tk-1"
         let usecase = self.makeUsecaseWithCommandJob(
             self.dummyJob(.confirm(confirm), command: "내일 회의 잡아줘")
@@ -173,15 +180,16 @@ extension AIAgentUsecaseImpleTests {
             usecase.sendCommand("내일 회의 잡아줘")
         }
         // then
-        guard case .confirm(let command, let action) = try #require(states.last) else { Issue.record("confirm 아님"); return }
+        guard case .confirm(let command, let message, let action) = try #require(states.last) else { Issue.record("confirm 아님"); return }
         #expect(command == "내일 회의 잡아줘")
+        #expect(message == "정말 삭제할까요?")
         #expect(action.confirmToken == "tk-1")
     }
 
     @Test func usecase_whenResultFailed_entersFailed() async throws {
         // given
         let expect = expectConfirm("결과 failed → failed 상태")
-        expect.count = 3
+        expect.count = 2
         var fail = AIJobResult.FailResult()
         fail.reason = "이해하지 못했어요"
         let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.failed(fail)))
@@ -197,7 +205,7 @@ extension AIAgentUsecaseImpleTests {
     @Test func usecase_whenProcessingFails_entersFailed() async throws {
         // given
         let expect = expectConfirm("처리 에러 → failed")
-        expect.count = 3
+        expect.count = 2
         let usecase = self.makeUsecase(shouldFail: true)
         // when
         let states = try await self.outputs(expect, for: usecase.state) {
@@ -211,7 +219,7 @@ extension AIAgentUsecaseImpleTests {
 
 // MARK: - confirm / decline
 
-extension AIAgentUsecaseImpleTests {
+extension AIAgentOrchestrationUsecaseImpleTests {
 
     @Test func usecase_confirm_processesConfirmJobToDone() async throws {
         // given
@@ -248,7 +256,7 @@ extension AIAgentUsecaseImpleTests {
 
 // MARK: - 초기화 / 복원
 
-extension AIAgentUsecaseImpleTests {
+extension AIAgentOrchestrationUsecaseImpleTests {
 
     @Test func usecase_reset_returnsToIdle() async throws {
         // given
@@ -270,21 +278,20 @@ extension AIAgentUsecaseImpleTests {
     @Test func usecase_restoreIfNeeded_attachesToInflightCommandAndEmitsResult() async throws {
         // given — 세션 종료 후 영속된 job이 done으로 끝나 있음 (서버 완료 + push 후 복귀)
         let expect = expectConfirm("복원 → 영속 in-flight job 결과 수신")
-        expect.count = 2
         var done = AIJobResult.DoneResult()
         done.text = "완료"
         let usecase = self.makeUsecase()
         self.stubCommand.stubRestoreJob = self.dummyJob(.done(done))
         // when
-        let states = try await self.outputs(expect, for: usecase.state) {
+        let state = try await self.firstOutput(expect, for: usecase.state) {
             usecase.restoreIfNeeded()
         }
-        // then
-        #expect(states.map(self.stateName) == ["idle", "done"])
+        // then — 복원된 job 결과만 방출 (idle 프리픽스 없음)
+        #expect(state.map(self.stateName) == "done")
     }
 
     @Test func usecase_restoreIfNeeded_whenNoInflightCommand_staysIdle() async throws {
-        // given — 영속 job 없음 (restoreCommandifNeed → 무방출)
+        // given — 영속 job 없음 (restoreCommandifNeed → nil 응답)
         let expect = expectConfirm("복원할 게 없으면 idle 유지")
         let usecase = self.makeUsecase()
         // when
@@ -298,18 +305,17 @@ extension AIAgentUsecaseImpleTests {
     @Test func usecase_restoreIfNeeded_whenRejectedJob_staysIdleNotConfirm() async throws {
         // given — 이미 거부된 job (status=REJECTED, result.type=CONFIRM 보존) 복원
         let expect = expectConfirm("REJECTED 복원 → confirm 재노출 금지, idle")
-        expect.count = 2
         var confirm = AIJobResult.ConfirmResult()
         confirm.action = AIConfirmCommandAction() |> \.confirmToken .~ "tk-1"
         let rejectedJob = self.dummyJob(.confirm(confirm), status: .rejected)
         let usecase = self.makeUsecase()
         self.stubCommand.stubRestoreJob = rejectedJob
         // when
-        let states = try await self.outputs(expect, for: usecase.state) {
+        let state = try await self.firstOutput(expect, for: usecase.state) {
             usecase.restoreIfNeeded()
         }
         // then — status 우선 판정으로 confirm 아닌 idle
-        #expect(states.map(self.stateName) == ["idle", "idle"])
+        #expect(state.map(self.stateName) == "idle")
     }
 }
 
@@ -333,8 +339,13 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     func rejectConfirmCommand(_ action: AIConfirmCommandAction) {
         self.didRejectParentJobId = action.parentJobId
     }
-    func restoreCommandifNeed() -> AnyPublisher<AIJob, any Error> {
-        return self.jobPublisher(self.stubRestoreJob)
+    func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
+        if self.shouldFail {
+            return Fail(error: RuntimeError("stub fail")).eraseToAnyPublisher()
+        }
+        return Just(self.stubRestoreJob)
+            .setFailureType(to: (any Error).self)
+            .eraseToAnyPublisher()
     }
     func handleJobFinishNotification(_ jobId: String) { }
 

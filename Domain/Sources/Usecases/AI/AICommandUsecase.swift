@@ -21,7 +21,7 @@ public protocol AICommandUsecase: AnyObject, Sendable {
 
     func rejectConfirmCommand(_ action: AIConfirmCommandAction)
 
-    func restoreCommandifNeed() -> AnyPublisher<AIJob, any Error>
+    func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error>
 
     func handleJobFinishNotification(_ jobId: String)
 }
@@ -178,21 +178,24 @@ extension AICommandUsecaseImple {
 
 extension AICommandUsecaseImple {
     
-    public func restoreCommandifNeed() -> AnyPublisher<AIJob, any Error> {
-        
+    public func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
+
         let processingCmd = self.loadProcessingCommand()
-        
-        let restorePolling = processingCmd.flatMap { [weak self] cmd in
-            guard let self, let cmd
-            else {
-                return Empty<AIJob, any Error>().eraseToAnyPublisher()
+
+        return processingCmd
+            .flatMap { [weak self] cmd -> AnyPublisher<AIJob?, any Error> in
+                guard let self, let cmd
+                else {
+                    return Just<AIJob?>(nil)
+                        .setFailureType(to: (any Error).self)
+                        .eraseToAnyPublisher()
+                }
+
+                return self.checkJob(cmd.jobId)
+                    .handleClearProcessingCommand(self.repository)
+                    .map { Optional($0) }
+                    .eraseToAnyPublisher()
             }
-            
-            return self.checkJob(cmd.jobId)
-        }
-        
-        return restorePolling
-            .handleClearProcessingCommand(repository)
             .eraseToAnyPublisher()
     }
     

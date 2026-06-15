@@ -412,19 +412,19 @@ extension AICommandUsecaseImpleTests {
 
 extension AICommandUsecaseImpleTests {
     
-    // 커맨드 복원: 복원할 커맨드 없음
+    // 커맨드 복원: 복원할 커맨드 없으면 nil 방출
     @Test func usecase_restoreCommand_notExists() async throws {
         // given
         let expect = expectConfirm("커맨드 복원: 복원할 커맨드 없음")
-        expect.count = 0
         let usecase = self.makeUsecase()
-        
+
         // when
         let restore = usecase.restoreCommandifNeed()
-        let job = try await self.firstOutput(expect, for: restore)
-        
-        // then
-        #expect(job == nil)
+        let jobs = try await self.outputs(expect, for: restore)
+
+        // then — 복원할 게 없으면 nil 하나 명시적으로 방출
+        #expect(jobs.count == 1)
+        #expect(jobs.first! == nil)
     }
     
     private func makeUsecaseWithProcessingCmd(isConfirm: Bool) async throws -> AICommandUsecaseImple {
@@ -458,7 +458,7 @@ extension AICommandUsecaseImpleTests {
         let jobs = try await self.outputs(expect, for: restore)
         
         // then
-        let statuses = jobs.map { $0.status }
+        let statuses = jobs.compactMap { $0?.status }
         #expect(statuses == [.running, .done])
         
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()
@@ -478,7 +478,7 @@ extension AICommandUsecaseImpleTests {
         let jobs = try await self.outputs(expect, for: restore)
         
         // then
-        let statuses = jobs.map { $0.status }
+        let statuses = jobs.compactMap { $0?.status }
         #expect(statuses == [.running, .done])
         
         let processingCmd = try await self.stubRepository.loadProcessingAICommand()

@@ -1,5 +1,5 @@
 //
-//  AIAgentUsecase.swift
+//  AIAgentOrchestrationUsecase.swift
 //  Domain
 //
 //  Created by sudo.park on 6/14/26.
@@ -11,9 +11,9 @@ import Combine
 import Extensions
 
 
-// MARK: - AIAgentUsecase
+// MARK: - AIAgentOrchestrationUsecase
 
-public protocol AIAgentUsecase: AnyObject, Sendable {
+public protocol AIAgentOrchestrationUsecase: AnyObject, Sendable {
 
     var state: AnyPublisher<AIAgentState, Never> { get }
     var usage: AnyPublisher<AIAgentUsage, Never> { get }
@@ -28,9 +28,9 @@ public protocol AIAgentUsecase: AnyObject, Sendable {
 }
 
 
-// MARK: - AIAgentUsecaseImple
+// MARK: - AIAgentOrchestrationUsecaseImple
 
-public final class AIAgentUsecaseImple: AIAgentUsecase, @unchecked Sendable {
+public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase, @unchecked Sendable {
 
     private let commandUsecase: any AICommandUsecase
     private let usageUsecase: any AIAgentUsageUsecase
@@ -44,7 +44,7 @@ public final class AIAgentUsecaseImple: AIAgentUsecase, @unchecked Sendable {
     }
 
     private struct Subject {
-        let state = CurrentValueSubject<AIAgentState, Never>(.idle)
+        let state = CurrentValueSubject<AIAgentState?, Never>(nil)
     }
     private let subject = Subject()
     private var commandCancellable: AnyCancellable?
@@ -66,7 +66,6 @@ public final class AIAgentUsecaseImple: AIAgentUsecase, @unchecked Sendable {
 
     private func handleJobResult(_ job: AIJob) {
         guard job.isFinish else { return }
-        // REJECTED는 result.type=CONFIRM이 남아도 status 우선 — confirm 재노출 금지 (복원 시 미동의=초기화)
         if job.status == .rejected {
             self.subject.state.send(.idle)
             return
@@ -80,7 +79,9 @@ public final class AIAgentUsecaseImple: AIAgentUsecase, @unchecked Sendable {
                 self.subject.state.send(.failed(reason: confirm.text))
                 return
             }
-            self.subject.state.send(.confirm(command: job.command ?? "", action: action))
+            self.subject.state.send(
+                .confirm(command: job.command ?? "", message: confirm.text, action: action)
+            )
         case .failed(let fail):
             self.subject.state.send(.failed(reason: fail.reason))
         }
@@ -90,7 +91,7 @@ public final class AIAgentUsecaseImple: AIAgentUsecase, @unchecked Sendable {
 
 // MARK: - actions
 
-extension AIAgentUsecaseImple {
+extension AIAgentOrchestrationUsecaseImple {
 
     public func sendCommand(_ text: String) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -100,14 +101,14 @@ extension AIAgentUsecaseImple {
     }
 
     public func confirm() {
-        guard case .confirm(let command, let action) = self.subject.state.value
+        guard case .confirm(let command, _, let action) = self.subject.state.value ?? .idle
         else { return }
         self.subject.state.send(.processing(command: command))
         self.startProcessing(self.commandUsecase.processConfirmCommand(action))
     }
 
     public func decline() {
-        if case .confirm(_, let action) = self.subject.state.value {
+        if case .confirm(_, _, let action) = self.subject.state.value ?? .idle {
             self.commandUsecase.rejectConfirmCommand(action)
         }
         self.reset()
@@ -120,9 +121,23 @@ extension AIAgentUsecaseImple {
     }
 
     public func restoreIfNeeded() {
-        // 세션 종료 후 복귀 — 영속된 in-flight job에 재연결 (결과는 handleJobResult로 매핑).
-        // 영속 job이 없으면 restoreCommandifNeed가 무방출 → idle 유지.
-        self.startProcessing(self.commandUsecase.restoreCommandifNeed())
+        self.commandCancellable?.cancel()
+        self.commandCancellable = self.commandUsecase.restoreCommandifNeed()
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    if case .failure = completion {
+                        self?.subject.state.send(.failed(reason: nil))
+                    }
+                },
+                receiveValue: { [weak self] job in
+                    guard let self else { return }
+                    if let job {
+                        self.handleJobResult(job)
+                    } else {
+                        self.subject.state.send(.idle)
+                    }
+                }
+            )
     }
 
     public func loadUsage() {
@@ -133,10 +148,10 @@ extension AIAgentUsecaseImple {
 
 // MARK: - outputs
 
-extension AIAgentUsecaseImple {
+extension AIAgentOrchestrationUsecaseImple {
 
     public var state: AnyPublisher<AIAgentState, Never> {
-        return self.subject.state.eraseToAnyPublisher()
+        return self.subject.state.compactMap { $0 }.eraseToAnyPublisher()
     }
 
     public var usage: AnyPublisher<AIAgentUsage, Never> {
