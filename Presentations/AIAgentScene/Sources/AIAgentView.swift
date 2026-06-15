@@ -153,3 +153,90 @@ struct AIAgentView: View {
         .transition(.opacity)
     }
 }
+
+
+// MARK: - preview
+
+private final class PreviewInputViewModel: AIAgentInputViewModel, @unchecked Sendable {
+
+    private let state: AIAgentInputState
+    private let recognizing: String
+
+    init(_ state: AIAgentInputState, recognizing: String = "") {
+        self.state = state
+        self.recognizing = recognizing
+    }
+
+    func startInput() { }
+    func stopInput() { }
+    func finishVoiceInput() { }
+    func switchToKeyboard() { }
+    func switchToVoice() { }
+    func submit(_ text: String) { }
+    func openSystemSetting() { }
+
+    var inputState: AnyPublisher<AIAgentInputState, Never> { Just(self.state).eraseToAnyPublisher() }
+    var recognizingText: AnyPublisher<String, Never> { Just(self.recognizing).eraseToAnyPublisher() }
+    var inputLevel: AnyPublisher<Float?, Never> { Just(0.4).eraseToAnyPublisher() }
+}
+
+private final class PreviewCommandViewModel: AIAgentCommandViewModel, @unchecked Sendable {
+
+    private let state: AIAgentCommandState?
+
+    init(_ state: AIAgentCommandState?) {
+        self.state = state
+    }
+
+    func sendCommand(_ text: String) { }
+    func confirm() { }
+    func decline() { }
+    func restart() { }
+    func close() { }
+
+    var commandState: AnyPublisher<AIAgentCommandState?, Never> { Just(self.state).eraseToAnyPublisher() }
+}
+
+struct AIAgentViewPreviewProvider: PreviewProvider {
+
+    static func makeView(
+        stage: AIAgentStageKind?,
+        input: AIAgentInputState = .voice,
+        recognizing: String = "",
+        command: AIAgentCommandState? = nil
+    ) -> some View {
+        let setting = AppearanceSettings(
+            calendar: .init(colorSetKey: .defaultDark, fontSetKey: .systemDefault),
+            defaultTagColor: .init(holiday: "#ff0000", default: "#ff00ff")
+        )
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
+        let builder = AIAgentStageViewBuilder(
+            viewAppearance: viewAppearance,
+            inputViewModel: PreviewInputViewModel(input, recognizing: recognizing),
+            commandViewModel: PreviewCommandViewModel(command),
+            inputEventHandlers: AIAgentInputViewEventHandler(),
+            commandEventHandlers: AIAgentCommandViewEventHandler()
+        )
+        let state = AIAgentViewState()
+        state.stage = stage
+
+        return AIAgentView(stageViewBuilder: builder)
+            .environment(viewAppearance)
+            .environment(state)
+    }
+
+    static var previews: some View {
+        Group {
+            makeView(stage: nil)
+                .previewDisplayName("waiting")
+            makeView(stage: .input, input: .voice, recognizing: "내일 오후 3시 회의")
+                .previewDisplayName("input-voice")
+            makeView(stage: .command, command: .processing(command: "내일 오후 3시 회의"))
+                .previewDisplayName("command-processing")
+            makeView(stage: .command, command: .done(message: "일정을 추가했어요"))
+                .previewDisplayName("command-done")
+            makeView(stage: .command, command: .failed(reason: "네트워크 오류가 발생했어요"))
+                .previewDisplayName("command-failed")
+        }
+    }
+}
