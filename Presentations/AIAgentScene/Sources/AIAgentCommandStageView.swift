@@ -89,18 +89,22 @@ struct AIAgentCommandStageView: View {
     @Environment(AIAgentCommandViewEventHandler.self) private var eventHandlers
 
     var body: some View {
-        switch self.state.commandState {
-        case .processing(let command):
-            self.processingView(command: command)
-        case .confirm(let command, let message):
-            self.confirmView(command: command, message: message)
-        case .done(let message):
-            self.doneView(message: message)
-        case .failed(let reason):
-            self.failedView(reason: reason)
-        case .none:
-            EmptyView()
+        Group {
+            switch self.state.commandState {
+            case .processing(let command):
+                self.processingView(command: command)
+            case .confirm(let command, let message):
+                self.confirmView(command: command, message: message)
+            case .done(let message):
+                self.doneView(message: message)
+            case .failed(let reason):
+                self.failedView(reason: reason)
+            case .none:
+                EmptyView()
+            }
         }
+        .transition(.opacity)
+        .animation(.easeInOut(duration: 0.35), value: self.state.commandState)
     }
 }
 
@@ -116,8 +120,8 @@ private extension AIAgentCommandStageView {
                 .foregroundStyle(appearance.colorSet.text0.asColor)
                 .multilineTextAlignment(.center)
 
-            ProgressView()
-                .tint(appearance.colorSet.primaryBtnBackground.asColor)
+            TypingDotsView(color: appearance.colorSet.primaryBtnBackground.asColor)
+                .frame(height: 12)
 
             Text("aiAgent::processing".localized())
                 .font(appearance.fontSet.subNormal.asFont)
@@ -162,7 +166,7 @@ private extension AIAgentCommandStageView {
         VStack(spacing: 16) {
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 40))
-                .foregroundStyle(appearance.colorSet.primaryBtnBackground.asColor)
+                .foregroundStyle(appearance.colorSet.accent.asColor)
 
             Text(message?.isEmpty == false ? message! : "aiAgent::done::default".localized())
                 .font(appearance.fontSet.normal.asFont)
@@ -172,6 +176,12 @@ private extension AIAgentCommandStageView {
             ConfirmButton(title: "common.close".localized())
                 .eventHandler(\.onTap, eventHandlers.close)
         }
+        .padding(20)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(appearance.colorSet.accent.withAlphaComponent(0.12).asColor)
+        )
     }
 }
 
@@ -184,7 +194,7 @@ private extension AIAgentCommandStageView {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 36))
-                .foregroundStyle(appearance.colorSet.text1.asColor)
+                .foregroundStyle(appearance.colorSet.accentWarn.asColor)
 
             Text(reason?.isEmpty == false ? reason! : "aiAgent::failed::default".localized())
                 .font(appearance.fontSet.normal.asFont)
@@ -203,6 +213,41 @@ private extension AIAgentCommandStageView {
                     .eventHandler(\.onTap, eventHandlers.restart)
             }
         }
+        .padding(20)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(appearance.colorSet.accentWarn.withAlphaComponent(0.12).asColor)
+        )
+    }
+}
+
+
+// MARK: - TypingDotsView
+
+struct TypingDotsView: View {
+
+    let color: Color
+
+    @State private var animating = false
+
+    var body: some View {
+        HStack(spacing: 7) {
+            ForEach(0..<3, id: \.self) { index in
+                Circle()
+                    .fill(self.color)
+                    .frame(width: 9, height: 9)
+                    .opacity(self.animating ? 1.0 : 0.3)
+                    .scaleEffect(self.animating ? 1.0 : 0.7)
+                    .animation(
+                        .easeInOut(duration: 0.6)
+                            .repeatForever()
+                            .delay(Double(index) * 0.2),
+                        value: self.animating
+                    )
+            }
+        }
+        .onAppear { self.animating = true }
     }
 }
 
@@ -234,6 +279,7 @@ struct AIAgentCommandStageViewPreviewProvider: PreviewProvider {
             makeView(.confirm(command: "일정 삭제", message: "정말 삭제할까요?")).previewDisplayName("confirm")
             makeView(.done(message: "일정을 추가했어요")).previewDisplayName("done")
             makeView(.failed(reason: "네트워크 오류가 발생했어요")).previewDisplayName("failed")
+            TypingDotsView(color: .blue).padding().previewDisplayName("TypingDots")
         }
     }
 }
