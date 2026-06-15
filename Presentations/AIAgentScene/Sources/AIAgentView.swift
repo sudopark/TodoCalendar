@@ -123,24 +123,33 @@ struct AIAgentView: View {
             backgroundColor: appearance.colorSet.bg0.withAlphaComponent(0.95).asColor
         ) {
             VStack(spacing: 16) {
+                self.usageHeaderArea
                 self.stageView
             }
             .padding(.vertical, 8)
-            .animation(.easeInOut(duration: 0.2), value: self.state.stage)
+            .animation(.easeInOut(duration: 0.35), value: self.state.stage)
         }
     }
 
+    // 상단 usage 헤더 자리. 실제 표시(progress/텍스트)는 후속 작업에서 주입.
     @ViewBuilder
+    private var usageHeaderArea: some View {
+        EmptyView()
+    }
+
     private var stageView: some View {
-        switch self.state.stage {
-        case .none:
-            ProgressView()
-                .tint(appearance.colorSet.primaryBtnBackground.asColor)
-                .frame(minHeight: 80)
-        case .input:
-            self.stageViewBuilder.makeInputStageView()
-        case .command:
-            self.stageViewBuilder.makeCommandStageView()
+        Group {
+            switch self.state.stage {
+            case .none:
+                TypingDotsView(color: appearance.colorSet.primaryBtnBackground.asColor)
+                    .frame(height: 12)
+                    .frame(minHeight: 80)
+            case .input:
+                self.stageViewBuilder.makeInputStageView()
+            case .command:
+                self.stageViewBuilder.makeCommandStageView()
+            }
         }
+        .transition(.opacity)
     }
 }
