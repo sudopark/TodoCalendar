@@ -8,6 +8,10 @@
 - **TDD 워크플로우.** 테스트 → 실패 확인 → 구현 → 통과.
 - **child CLAUDE.md가 있는 프레임워크 코드를 수정한 경우** 해당 child CLAUDE.md 재분석.
 - **객체 변경 시** 참조하는 다른 객체 영향도 확인 (빌드 + 테스트).
+- **짝지어진 두 위치는 함께 갱신.** 한쪽만 바꾸면 무효가 되는 쌍은 추가/변경 시 대응처도 반드시 확인:
+  - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case
+  - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
+  - init 시그니처 ↔ 콜사이트
 - **`.claude/rules/*.md`는 path 매칭 시 자동 로드** — 로드된 조항을 구현 결정 시점에 적극 invoke.
 
 ---
@@ -22,7 +26,7 @@ Repository/              — Local(SQLite) + Remote(Alamofire) impls
 Presentations/
 ├── Scenes/              — 공유 Scene/Builder 프로토콜, UsecaseFactory 프로토콜
 ├── CommonPresentation/  — 공용 UI, ViewAppearance
-├── CalendarScenes / EventDetailScene / EventListScenes / MemberScenes / SettingScene
+├── CalendarScenes / EventDetailScene / EventListScenes / MemberScenes / SettingScene / AIAgentScene
 Supports/                — Extensions, Common3rdParty, UnitTestHelpKit, TestDoubles
 TodoCalendarApp/         — App target + AppExtensions(Widget 18종, IntentExtensions)
 Tuist/                   — ProjectDescriptionHelpers
@@ -55,7 +59,7 @@ tuist install                 # SPM 의존성 resolve
 tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 ```
 
-테스트는 `./scripts/run-all-tests.sh [scheme...]`. 주요 스킴: `Domain`, `Repository`, `CalendarScenes`, `EventDetailScene`, `EventListScenes`, `SettingScene`, `MemberScenes`.
+테스트는 `./scripts/run-all-tests.sh [scheme...]`. 주요 스킴: `Domain`, `Repository`, `CalendarScenes`, `EventDetailScene`, `EventListScenes`, `SettingScene`, `MemberScenes`, `AIAgentScene`.
 
 > 테스트 작성 원칙: [`.claude/rules/testability.md`](.claude/rules/testability.md) (path 매칭 자동 로드)
 
