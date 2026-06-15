@@ -511,3 +511,20 @@
 "force_update.message" = "새로운 버전이 출시되었습니다.\n앱을 사용하려면 업데이트가 필요합니다.";
 "recommend_update.title" = "업데이트 권장";
 "recommend_update.message" = "새로운 버전이 출시되었습니다.\n더 나은 경험을 위해 업데이트를 권장합니다.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "듣고 있어요…";
+"aiAgent::keyboard" = "키보드";
+"aiAgent::voice" = "음성";
+"aiAgent::send" = "전송";
+"aiAgent::input::placeholder" = "무엇을 도와줄까요?";
+"aiAgent::permission::title" = "마이크·음성 인식 권한이 필요해요";
+"aiAgent::permission::message" = "설정에서 권한을 허용하거나 키보드로 입력할 수 있어요";
+"aiAgent::permission::keyboard" = "키보드로 입력";
+"aiAgent::permission::setting" = "설정 이동";
+"aiAgent::processing" = "처리하고 있어요…";
+"aiAgent::done::default" = "완료했어요";
+"aiAgent::failed::default" = "처리하지 못했어요";
+"aiAgent::retry" = "다시";

@@ -511,3 +511,20 @@
 "force_update.message" = "A new version is available.\nPlease update to continue using the app.";
 "recommend_update.title" = "Update Recommended";
 "recommend_update.message" = "A new version is available.\nWe recommend updating for a better experience.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Listening…";
+"aiAgent::keyboard" = "Keyboard";
+"aiAgent::voice" = "Voice";
+"aiAgent::send" = "Send";
+"aiAgent::input::placeholder" = "How can I help?";
+"aiAgent::permission::title" = "Microphone & speech access needed";
+"aiAgent::permission::message" = "Allow access in Settings, or type instead";
+"aiAgent::permission::keyboard" = "Type instead";
+"aiAgent::permission::setting" = "Open Settings";
+"aiAgent::processing" = "Working on it…";
+"aiAgent::done::default" = "Done";
+"aiAgent::failed::default" = "Couldn't complete that";
+"aiAgent::retry" = "Retry";
