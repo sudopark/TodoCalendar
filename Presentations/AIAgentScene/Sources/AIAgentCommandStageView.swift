@@ -258,7 +258,7 @@ struct AIAgentCommandStageViewPreviewProvider: PreviewProvider {
 
     static func makeView(_ commandState: AIAgentCommandState?) -> some View {
         let setting = AppearanceSettings(
-            calendar: .init(colorSetKey: .defaultDark, fontSetKey: .systemDefault),
+            calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
             defaultTagColor: .init(holiday: "#ff0000", default: "#ff00ff")
         )
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)

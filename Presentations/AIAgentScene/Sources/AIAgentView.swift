@@ -157,86 +157,87 @@ struct AIAgentView: View {
 
 // MARK: - preview
 
-private final class PreviewInputViewModel: AIAgentInputViewModel, @unchecked Sendable {
-
-    private let state: AIAgentInputState
-    private let recognizing: String
-
-    init(_ state: AIAgentInputState, recognizing: String = "") {
-        self.state = state
-        self.recognizing = recognizing
-    }
-
-    func startInput() { }
-    func stopInput() { }
-    func finishVoiceInput() { }
-    func switchToKeyboard() { }
-    func switchToVoice() { }
-    func submit(_ text: String) { }
-    func openSystemSetting() { }
-
-    var inputState: AnyPublisher<AIAgentInputState, Never> { Just(self.state).eraseToAnyPublisher() }
-    var recognizingText: AnyPublisher<String, Never> { Just(self.recognizing).eraseToAnyPublisher() }
-    var inputLevel: AnyPublisher<Float?, Never> { Just(0.4).eraseToAnyPublisher() }
-}
-
-private final class PreviewCommandViewModel: AIAgentCommandViewModel, @unchecked Sendable {
-
-    private let state: AIAgentCommandState?
-
-    init(_ state: AIAgentCommandState?) {
-        self.state = state
-    }
-
-    func sendCommand(_ text: String) { }
-    func confirm() { }
-    func decline() { }
-    func restart() { }
-    func close() { }
-
-    var commandState: AnyPublisher<AIAgentCommandState?, Never> { Just(self.state).eraseToAnyPublisher() }
-}
-
 struct AIAgentViewPreviewProvider: PreviewProvider {
 
-    static func makeView(
-        stage: AIAgentStageKind?,
-        input: AIAgentInputState = .voice,
-        recognizing: String = "",
-        command: AIAgentCommandState? = nil
-    ) -> some View {
+    private static func makeAppearance() -> ViewAppearance {
         let setting = AppearanceSettings(
-            calendar: .init(colorSetKey: .defaultDark, fontSetKey: .systemDefault),
+            calendar: .init(colorSetKey: .defaultLight, fontSetKey: .systemDefault),
             defaultTagColor: .init(holiday: "#ff0000", default: "#ff00ff")
         )
-        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
-        let builder = AIAgentStageViewBuilder(
-            viewAppearance: viewAppearance,
-            inputViewModel: PreviewInputViewModel(input, recognizing: recognizing),
-            commandViewModel: PreviewCommandViewModel(command),
-            inputEventHandlers: AIAgentInputViewEventHandler(),
-            commandEventHandlers: AIAgentCommandViewEventHandler()
-        )
-        let state = AIAgentViewState()
-        state.stage = stage
+        return ViewAppearance(setting: setting, isSystemDarkTheme: false)
+    }
 
-        return AIAgentView(stageViewBuilder: builder)
+    private static func sheet<Content: View>(
+        _ viewAppearance: ViewAppearance,
+        @ViewBuilder _ content: () -> Content
+    ) -> some View {
+        BottomSlideView(
+            backgroundColor: viewAppearance.colorSet.bg0.withAlphaComponent(0.95).asColor
+        ) {
+            VStack(spacing: 16) {
+                content()
+            }
+            .padding(.vertical, 8)
+        }
+        .environment(viewAppearance)
+    }
+
+    private static func inputStage(
+        _ viewAppearance: ViewAppearance,
+        _ inputState: AIAgentInputState,
+        recognizing: String = ""
+    ) -> some View {
+        let state = AIAgentInputViewState()
+        state.inputState = inputState
+        state.recognizingText = recognizing
+        state.inputLevel = 0.4
+        return AIAgentInputStageView()
             .environment(viewAppearance)
             .environment(state)
+            .environment(AIAgentInputViewEventHandler())
+    }
+
+    private static func commandStage(
+        _ viewAppearance: ViewAppearance,
+        _ commandState: AIAgentCommandState
+    ) -> some View {
+        let state = AIAgentCommandViewState()
+        state.commandState = commandState
+        return AIAgentCommandStageView()
+            .environment(viewAppearance)
+            .environment(state)
+            .environment(AIAgentCommandViewEventHandler())
     }
 
     static var previews: some View {
-        Group {
-            makeView(stage: nil)
-                .previewDisplayName("waiting")
-            makeView(stage: .input, input: .voice, recognizing: "내일 오후 3시 회의")
-                .previewDisplayName("input-voice")
-            makeView(stage: .command, command: .processing(command: "내일 오후 3시 회의"))
-                .previewDisplayName("command-processing")
-            makeView(stage: .command, command: .done(message: "일정을 추가했어요"))
-                .previewDisplayName("command-done")
-            makeView(stage: .command, command: .failed(reason: "네트워크 오류가 발생했어요"))
-                .previewDisplayName("command-failed")
+        let appearance = self.makeAppearance()
+        return Group {
+            self.sheet(appearance) {
+                TypingDotsView(color: appearance.colorSet.primaryBtnBackground.asColor)
+                    .frame(height: 12)
+                    .frame(minHeight: 80)
+            }
+            .previewDisplayName("waiting")
+
+            self.sheet(appearance) {
+                self.inputStage(appearance, .voice, recognizing: "내일 오후 3시 회의")
+            }
+            .previewDisplayName("input-voice")
+
+            self.sheet(appearance) {
+                self.commandStage(appearance, .processing(command: "내일 오후 3시 회의"))
+            }
+            .previewDisplayName("command-processing")
+
+            self.sheet(appearance) {
+                self.commandStage(appearance, .done(message: "일정을 추가했어요"))
+            }
+            .previewDisplayName("command-done")
+
+            self.sheet(appearance) {
+                self.commandStage(appearance, .failed(reason: "네트워크 오류가 발생했어요"))
+            }
+            .previewDisplayName("command-failed")
         }
     }
 }
