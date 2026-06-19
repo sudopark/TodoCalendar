@@ -10,6 +10,6 @@ import ProjectDescription
 
 extension Project {
     
-    public static let appVersion = "2.9.4"
+    public static let appVersion = "2.9.5"
     public static let buildNumber = "1"
 }
