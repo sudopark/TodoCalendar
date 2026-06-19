@@ -25,7 +25,7 @@ struct ExternalCalendarIntegrateRepositoryImpleTests {
     private let spyKeyChain = SpyKeyChainStorage()
 
     private func makeReposiotry(
-        _ accounts: [(ExternalServiceAccountinfo, APICredential)] = [],
+        _ accounts: [(ExternalServiceAccountinfo, APICredential?)] = [],
         appleAccountOnly: [ExternalServiceAccountinfo] = [],
         applePermissionGranted: Bool = true
     ) -> ExternalCalendarIntegrateRepositoryImple {
@@ -37,7 +37,9 @@ struct ExternalCalendarIntegrateRepositoryImpleTests {
             accountIds.append(accountId)
             spyKeyChain.update("\(serviceId)-accounts", accountIds)
             spyKeyChain.update("\(serviceId)-\(accountId)-account", ExternalServiceAccountMapper(account: pair.0))
-            spyKeyChain.update("\(serviceId)-\(accountId)-credential", APICredentialMapper(credential: pair.1))
+            if let credential = pair.1 {
+                spyKeyChain.update("\(serviceId)-\(accountId)-credential", APICredentialMapper(credential: credential))
+            }
         }
 
         appleAccountOnly.forEach { account in
@@ -63,6 +65,10 @@ struct ExternalCalendarIntegrateRepositoryImpleTests {
 
     private var dummyGoogleAccount: ExternalServiceAccountinfo {
         return .init(googleService.identifier, email: "old-email")
+    }
+    
+    private var dummyNoCredentialAccount: ExternalServiceAccountinfo {
+        return .init(googleService.identifier, email: "no-credential")
     }
 
     private var googleCredential: APICredential {
@@ -300,6 +306,47 @@ extension ExternalCalendarIntegrateRepositoryImpleTests {
     }
 }
 
+// MARK: - load accounts with credential
+
+extension ExternalCalendarIntegrateRepositoryImpleTests {
+    
+    // 연동된 외부 캘린더 로드 중 credentail이 무효한 경우 제외하고 로드 + remote setup
+    @Test func repository_whenLoadIntegratedAccount_filterIsNotExpired() async throws {
+        // given
+        let repository = self.makeReposiotry(
+            [
+                (dummyGoogleAccount, googleCredential),
+                (dummyNoCredentialAccount, nil),
+                (dummyAppleAccount, nil)
+            ]
+        )
+        
+        // when
+        let accounts = try await repository.loadIntegratedAccounts()
+        
+        // then
+        #expect(accounts.map { $0.email } == ["old-email", AppleCalendarService.localAccountId])
+    }
+    
+    @Test func repository_whenAfterLoadIntegratedAccount_setupRemoteCredentialIfNeed() async throws {
+        // given
+        let repository = self.makeReposiotry(
+            [
+                (dummyGoogleAccount, googleCredential),
+                (dummyNoCredentialAccount, nil),
+                (dummyAppleAccount, nil)
+            ]
+        )
+        
+        // when
+        let _ = try await repository.loadIntegratedAccounts()
+        
+        // then
+        #expect(spyPool.setupCredentials == [
+            "\(googleService.identifier)-old-email": "old-google-access"
+        ])
+    }
+}
 
 // MARK: - Spy
 

@@ -98,26 +98,58 @@ extension ExternalCalendarIntegrateRepositoryImple {
             }
         }
         
-        let activeAccounts = accounts.filter(self.checkIsNotExpired(_:))
+        let activeAccountAndCredentials = accounts
+            .compactMap(self.checkActiveAccountInfo(_:))
         
-        activeAccounts.forEach { account in
-            guard let accountId = account.email,
-                  let credential = credentialStore.loadCredential(for: account.serviceIdentifier, accountId: accountId)
-            else { return }
-            remotePool.setup(for: account.serviceIdentifier, accountId: accountId, credential: credential)
+        activeAccountAndCredentials.forEach { info in
+            guard case .api(let credential) = info.credential else { return }
+            self.remotePool.setup(
+                for: info.account.serviceIdentifier,
+                accountId: info.accountId,
+                credential: credential
+            )
         }
 
-        return activeAccounts
+        return activeAccountAndCredentials.map { $0.account }
     }
     
-    private func checkIsNotExpired(_ account: ExternalServiceAccountinfo) -> Bool {
+    struct ActiveAccountInfo {
+        enum Credential {
+            case api(APICredential)
+            case apple
+        }
+        let accountId: String
+        let account: ExternalServiceAccountinfo
+        let credential: Credential
+    }
+    private func checkActiveAccountInfo(_ account: ExternalServiceAccountinfo) -> ActiveAccountInfo? {
+        guard let accountId = account.email else { return nil }
         
-        guard account.serviceIdentifier == AppleCalendarService.id
-        else { return true }
+        switch account.serviceIdentifier {
+        case AppleCalendarService.id:
+            guard self.checkAppleCalendarIsNotExpired(accountId)
+            else { return nil }
+            return .init(
+                accountId: accountId, account: account, credential: .apple
+            )
+            
+        default:
+            guard let credential = credentialStore.loadCredential(for: account.serviceIdentifier, accountId: accountId)
+            else { return nil }
+            
+            return .init(
+                accountId: accountId, account: account, credential: .api(credential)
+            )
+        }
+    }
+    
+    private func checkAppleCalendarIsNotExpired(
+        _ accountId: String
+    ) -> Bool {
         
         let hasPermission = self.appleCalendarPermissionChecker.isAuthorized()
-        if !hasPermission, let email = account.email {
-            self.removingAccountAction(account.serviceIdentifier, accountId: email)
+        if !hasPermission {
+            self.removingAccountAction(AppleCalendarService.id, accountId: accountId)
          }
         return hasPermission
     }
