@@ -528,3 +528,5 @@
 "aiAgent::done::default" = "Done";
 "aiAgent::failed::default" = "Couldn't complete that";
 "aiAgent::retry" = "Retry";
+"aiAgent::needSignIn::title" = "Sign in required";
+"aiAgent::needSignIn::message" = "Sign in to use AI quick input.";

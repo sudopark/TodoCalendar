@@ -397,6 +397,8 @@ extension ApplicationRootRouter {
             viewAppearance: self.viewAppearanceStore.appearance,
             eventDetailSceneBuilder: self.eventDetailSceneBuilder(),
             eventListSceneBuilder: self.eventListSceneBuilder(),
+            accountUsecase: self.accountUsecase,
+            memberSceneBuilder: self.memberSceneBuilder(),
             aiAgentSceneBuilder: aiAgentSceneBuilder
         )
         self.deepLinkHandler.attach(calendarHandler: builder.calendarDeepLinkHandler)
