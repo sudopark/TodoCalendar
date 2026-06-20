@@ -57,35 +57,43 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func makeEventByTemplate()
     func showDoneTodoList()
     func refreshUncompletedTodoEvents()
-    
+    func enterVoiceInput()
+
     // presenter
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> { get }
     var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> { get }
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> { get }
     var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> { get }
+    var aiAgentEntryMode: AnyPublisher<AIAgentEntryMode, Never> { get }
 }
 
 
 // MARK: - DayEventListViewModelImple
 
 final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendable {
-    
+
     private let calendarUsecase: any CalendarUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let eventListUsecase: any CalendarEventListhUsecase
     private let todoEventUsecase: any TodoEventUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let uiSettingUsecase: any UISettingUsecase
+    private let aiAgentSceneBuilder: (any AIAgentSceneBuilder)?
     var router: (any DayEventListRouting)?
-    
+
+    private var aiAgentInteractor: (any AIAgentSceneInteractor)?
+    private var didAttachAgent = false
+    private let aiAgentEntryModeSubject = CurrentValueSubject<AIAgentEntryMode, Never>(.none)
+
     init(
         calendarUsecase: any CalendarUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
         eventListUsecase: any CalendarEventListhUsecase,
         todoEventUsecase: any TodoEventUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
-        uiSettingUsecase: any UISettingUsecase
+        uiSettingUsecase: any UISettingUsecase,
+        aiAgentSceneBuilder: (any AIAgentSceneBuilder)? = nil
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -93,7 +101,8 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.todoEventUsecase = todoEventUsecase
         self.foremostEventUsecase = foremostEventUsecase
         self.uiSettingUsecase = uiSettingUsecase
-        
+        self.aiAgentSceneBuilder = aiAgentSceneBuilder
+
         self.internalBind()
     }
     
@@ -122,7 +131,16 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
 // MARK: - DayEventListViewModelImple Interactor
 
 extension DayEventListViewModelImple {
-    
+
+    @MainActor
+    private func attachAIAgentIfNeeded() {
+        guard !self.didAttachAgent else { return }
+        self.didAttachAgent = true
+        guard let comp = self.aiAgentSceneBuilder?.makeInlineComponent(listener: self) else { return }
+        self.aiAgentInteractor = comp.interactor
+        self.aiAgentInteractor?.prepare()
+    }
+
     func selectedDayChanaged(
         _ newDay: CurrentSelectDayModel,
         and eventThatDay: [any CalendarEvent]
@@ -130,6 +148,9 @@ extension DayEventListViewModelImple {
         self.subject.currentDayAndEventLists.send(
             .init(currentDay: newDay, events: eventThatDay)
         )
+        Task { @MainActor [weak self] in
+            self?.attachAIAgentIfNeeded()
+        }
     }
     
     func addNewTodoQuickly(withName: String) {
@@ -187,9 +208,13 @@ extension DayEventListViewModelImple {
     func showDoneTodoList() {
         self.router?.showDoneTodoList()
     }
-    
+
     func refreshUncompletedTodoEvents() {
         self.todoEventUsecase.refreshUncompletedTodos()
+    }
+
+    func enterVoiceInput() {
+        self.aiAgentInteractor?.enterVoiceInput()
     }
 }
 
@@ -299,6 +324,12 @@ extension DayEventListViewModelImple {
     var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> {
         return self.foremostEventUsecase.foremostEventMarkingStatus
     }
+
+    var aiAgentEntryMode: AnyPublisher<AIAgentEntryMode, Never> {
+        return self.aiAgentEntryModeSubject
+            .removeDuplicates()
+            .eraseToAnyPublisher()
+    }
     
     private typealias CurrentAndEvents = ([any EventCellViewModel], [any EventCellViewModel])
     
@@ -356,6 +387,22 @@ extension DayEventListViewModelImple {
         .eraseToAnyPublisher()
     }
 }
+
+// MARK: - DayEventListViewModelImple AIAgentSceneListener
+
+extension DayEventListViewModelImple: AIAgentSceneListener {
+
+    func aiAgent(didChangeMode mode: AIAgentEntryMode) {
+        self.aiAgentEntryModeSubject.send(mode)
+    }
+
+    func aiAgent(didUpdateVoiceLevel level: Float) { /* Phase 2 */ }
+    func aiAgent(didUpdateRecognizingText text: String) { /* Phase 2 */ }
+    func aiAgentDidRequestKeyboardEntryAvailable() { /* Phase 2 */ }
+}
+
+
+// MARK: - private helpers
 
 private extension EventTime {
     

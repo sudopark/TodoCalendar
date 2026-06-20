@@ -13,6 +13,7 @@ import Combine
 import Prelude
 import Optics
 import Domain
+import Scenes
 import Extensions
 import CommonPresentation
 
@@ -29,7 +30,8 @@ import CommonPresentation
     fileprivate var dayModel: SelectedDayModel?
     fileprivate var cellViewModels: [any EventCellViewModel] = []
     fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
-    
+    fileprivate var aiAgentEntryMode: AIAgentEntryMode = .none
+
     func bind(_ viewModel: any DayEventListViewModel, _ appearance: ViewAppearance) {
         
         guard self.didBind == false else { return }
@@ -77,6 +79,13 @@ import CommonPresentation
                 }
             })
             .store(in: &self.cancellables)
+
+        viewModel.aiAgentEntryMode
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] mode in
+                self?.aiAgentEntryMode = mode
+            })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -91,7 +100,8 @@ final class DayEventListViewEventHandler: Observable {
     var showDoneTodoList: () -> Void = { }
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     var refreshUncompletedTodos: () -> Void = { }
-    
+    var enterVoiceInput: () -> Void = { }
+
     func bind(
         _ viewModel: any DayEventListViewModel,
         _ eventListCellEventHandleViewModel: any EventListCellEventHanleViewModel
@@ -108,6 +118,7 @@ final class DayEventListViewEventHandler: Observable {
         self.showDoneTodoList = viewModel.showDoneTodoList
         self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
         self.refreshUncompletedTodos = viewModel.refreshUncompletedTodoEvents
+        self.enterVoiceInput = viewModel.enterVoiceInput
     }
 }
 
@@ -175,10 +186,14 @@ struct DayEventListView: View {
                 // 이벤트 리스트
                 self.eventListView()
                 
-                QuickAddNewTodoView(isFocusInput: $isFocusInput)
-                    .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
-                    .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
-                
+                HStack(spacing: 8) {
+                    QuickAddNewTodoView(isFocusInput: $isFocusInput)
+                        .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
+                        .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
+
+                    aiAgentEntryButton()
+                }
+
                 addNewButton()
             }
         }
@@ -189,6 +204,24 @@ struct DayEventListView: View {
         .background(self.appearance.colorSet.bg0.asColor)
     }
     
+    private func aiAgentEntryButton() -> some View {
+        let isIdle = self.state.aiAgentEntryMode == .idle
+        return Button {
+            self.isFocusInput = false
+            self.eventHandler.enterVoiceInput()
+        } label: {
+            Circle()
+                .fill(self.appearance.colorSet.primaryBtnBackground.asColor)
+                .frame(width: 44, height: 44)
+                .overlay(
+                    Image(systemName: "sparkles")
+                        .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
+                )
+        }
+        .opacity(isIdle ? 1.0 : 0.3)
+        .disabled(!isIdle)
+    }
+
     private func addNewButton() -> some View {
         return HStack {
             Button {
