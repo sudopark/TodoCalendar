@@ -95,7 +95,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             eventListUsecase: eventListUsecase,
             todoEventUsecase: self.stubTodoUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
-            uiSettingUsecase: self.stubUISettingUsecase
+            uiSettingUsecase: self.stubUISettingUsecase,
+            aiAgentSceneBuilder: StubAIAgentSceneBuilder()
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -1019,6 +1020,42 @@ extension DayEventListViewModelImpleTests {
         func showDoneTodoList() {
             self.didShowDoneTodoList = true
         }
+    }
+}
+
+// MARK: - AI agent entry mode
+
+extension DayEventListViewModelImpleTests {
+
+    func testViewModel_whenAgentNotifiesIdleMode_emitsIdleEntryMode() {
+        // given
+        let expect = expectation(description: "idle entry mode 방출")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let mode = self.waitFirstOutput(expect, for: viewModel.aiAgentEntryMode.dropFirst()) {
+            viewModel.aiAgent(didChangeMode: .idle)
+        }
+
+        // then
+        XCTAssertEqual(mode, .idle)
+    }
+}
+
+// MARK: - Test doubles
+
+private final class SpyAIAgentSceneInteractor: AIAgentSceneInteractor {
+    func prepare() { }
+    func enterVoiceInput() { }
+    func enterKeyboardInput() { }
+    func stopInput() { }
+    func submit(_ text: String) { }
+}
+
+private final class StubAIAgentSceneBuilder: AIAgentSceneBuilder {
+    @MainActor
+    func makeInlineComponent(listener: any AIAgentSceneListener) -> AIAgentInlineComponent {
+        return AIAgentInlineComponent(interactor: SpyAIAgentSceneInteractor())
     }
 }
 

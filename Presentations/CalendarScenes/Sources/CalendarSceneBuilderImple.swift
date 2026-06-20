@@ -11,27 +11,30 @@ import Scenes
 import CommonPresentation
 
 public struct CalendarSceneBuilderImple {
-        
+
     private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
     private let eventListSceneBuilder: any EventListSceneBuiler
+    private let aiAgentSceneBuilder: (any AIAgentSceneBuilder)?
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
-    
+
     public init(
         usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance,
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
-        eventListSceneBuilder: any EventListSceneBuiler
+        eventListSceneBuilder: any EventListSceneBuiler,
+        aiAgentSceneBuilder: (any AIAgentSceneBuilder)? = nil
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
+        self.aiAgentSceneBuilder = aiAgentSceneBuilder
     }
-    
+
     private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
 }
 
@@ -71,7 +74,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
-            eventListSceneBuilder: self.eventListSceneBuilder
+            eventListSceneBuilder: self.eventListSceneBuilder,
+            aiAgentSceneBuilder: self.aiAgentSceneBuilder
         )
         
         let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(
