@@ -32,18 +32,14 @@ public final class AIAgentBuilderImple {
 extension AIAgentBuilderImple: AIAgentSceneBuilder {
 
     @MainActor
-    public func makeAIAgentScene() -> any AIAgentScene {
-        let viewModel = AIAgentViewModelImple(
+    public func makeInlineComponent(listener: any AIAgentSceneListener) -> AIAgentInlineComponent {
+        let coordinator = AIAgentCoordinatorViewModelImple(
             orchestrationUsecase: self.orchestrationUsecase,
             speechRecognizeUsecase: self.speechRecognizeUsecase
         )
-        let viewController = AIAgentViewController(
-            viewModel: viewModel,
-            viewAppearance: self.viewAppearance
-        )
+        coordinator.listener = listener
         let router = AIAgentRouter()
-        router.scene = viewController
-        viewModel.router = router
-        return viewController
+        coordinator.router = router
+        return AIAgentInlineComponent(interactor: coordinator)
     }
 }
