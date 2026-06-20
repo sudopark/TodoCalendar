@@ -299,6 +299,36 @@ extension NonLoginUsecaseFactoryImple {
 
 extension NonLoginUsecaseFactoryImple {
 
+    func makeAIAgentOrchestrationUsecase() -> any AIAgentOrchestrationUsecase {
+        let localStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let repository = AICommandRepositoryImple(
+            remote: applicationBase.remoteAPI,
+            localStorage: localStorage
+        )
+        let commandUsecase = AICommandUsecaseImple(
+            repository: repository,
+            calendarSettingUsecase: self.makeCalendarSettingUsecase()
+        )
+        let usageUsecase = AIAgentUsageUsecaseImple(
+            repository: repository,
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+        return AIAgentOrchestrationUsecaseImple(
+            commandUsecase: commandUsecase,
+            usageUsecase: usageUsecase
+        )
+    }
+
+    func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
+        return SpeechRecognizeUsecaseImple(
+            service: SpeechRecognizeServiceImple(),
+            permissionChecker: SpeechRecognizePermissionCheckerImple()
+        )
+    }
+}
+
+extension NonLoginUsecaseFactoryImple {
+
     func makeGoogleCalendarUsecase() -> any GoogleCalendarUsecase {
         return GoogleCalendarUsecaseImple(
             googleService: AppEnvironment.googleCalendarService,
@@ -712,6 +742,36 @@ extension LoginUsecaseFactoryImple {
     }
 }
 
+
+extension LoginUsecaseFactoryImple {
+
+    func makeAIAgentOrchestrationUsecase() -> any AIAgentOrchestrationUsecase {
+        let localStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let repository = AICommandRepositoryImple(
+            remote: applicationBase.remoteAPI,
+            localStorage: localStorage
+        )
+        let commandUsecase = AICommandUsecaseImple(
+            repository: repository,
+            calendarSettingUsecase: self.makeCalendarSettingUsecase()
+        )
+        let usageUsecase = AIAgentUsageUsecaseImple(
+            repository: repository,
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+        return AIAgentOrchestrationUsecaseImple(
+            commandUsecase: commandUsecase,
+            usageUsecase: usageUsecase
+        )
+    }
+
+    func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
+        return SpeechRecognizeUsecaseImple(
+            service: SpeechRecognizeServiceImple(),
+            permissionChecker: SpeechRecognizePermissionCheckerImple()
+        )
+    }
+}
 
 extension LoginUsecaseFactoryImple {
 
