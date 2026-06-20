@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import Domain
 import Scenes
 import CommonPresentation
 
@@ -20,6 +21,8 @@ final class DayEventListSceneBuilerImple {
     private let viewAppearance: ViewAppearance
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
     private let eventListSceneBuilder: any EventListSceneBuiler
+    private let accountUsecase: any AccountUsecase
+    private let memberSceneBuilder: any MemberSceneBuilder
     private let aiAgentSceneBuilder: (any AIAgentSceneBuilder)?
 
     init(
@@ -27,12 +30,16 @@ final class DayEventListSceneBuilerImple {
         viewAppearance: ViewAppearance,
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
         eventListSceneBuilder: any EventListSceneBuiler,
+        accountUsecase: any AccountUsecase,
+        memberSceneBuilder: any MemberSceneBuilder,
         aiAgentSceneBuilder: (any AIAgentSceneBuilder)? = nil
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
+        self.accountUsecase = accountUsecase
+        self.memberSceneBuilder = memberSceneBuilder
         self.aiAgentSceneBuilder = aiAgentSceneBuilder
     }
 }
@@ -62,11 +69,13 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             todoEventUsecase: todoEventUsecase,
             foremostEventUsecase: foremostEventUsecase,
             uiSettingUsecase: uiSettingUsecase,
+            accountUsecase: self.accountUsecase,
             aiAgentSceneBuilder: self.aiAgentSceneBuilder
         )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
-            eventListSceneBuilder: self.eventListSceneBuilder
+            eventListSceneBuilder: self.eventListSceneBuilder,
+            memberSceneBuilder: self.memberSceneBuilder
         )
         viewModel.router = router
         return .init(viewModel: viewModel, router: router)

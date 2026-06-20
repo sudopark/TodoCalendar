@@ -79,6 +79,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let todoEventUsecase: any TodoEventUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
     private let uiSettingUsecase: any UISettingUsecase
+    private let accountUsecase: any AccountUsecase
     private let aiAgentSceneBuilder: (any AIAgentSceneBuilder)?
     var router: (any DayEventListRouting)?
 
@@ -93,6 +94,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         todoEventUsecase: any TodoEventUsecase,
         foremostEventUsecase: any ForemostEventUsecase,
         uiSettingUsecase: any UISettingUsecase,
+        accountUsecase: any AccountUsecase,
         aiAgentSceneBuilder: (any AIAgentSceneBuilder)? = nil
     ) {
         self.calendarUsecase = calendarUsecase
@@ -101,6 +103,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.todoEventUsecase = todoEventUsecase
         self.foremostEventUsecase = foremostEventUsecase
         self.uiSettingUsecase = uiSettingUsecase
+        self.accountUsecase = accountUsecase
         self.aiAgentSceneBuilder = aiAgentSceneBuilder
 
         self.internalBind()
@@ -116,6 +119,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let currentDayAndEventLists = CurrentValueSubject<CurrentDayAndEventLists?, Never>(nil)
         let tagMaps = CurrentValueSubject<[String: any EventTag], Never>([:])
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
+        let isSignedIn = CurrentValueSubject<Bool, Never>(false)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -123,7 +127,12 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let cvmCombineScheduler = DispatchQueue(label: "serial-combine")
     
     private func internalBind() {
-        
+        self.accountUsecase.currentAccountInfo
+            .map { $0 != nil }
+            .sink { [weak self] signedIn in
+                self?.subject.isSignedIn.send(signedIn)
+            }
+            .store(in: &self.cancellables)
     }
 }
 
@@ -214,7 +223,19 @@ extension DayEventListViewModelImple {
     }
 
     func enterVoiceInput() {
+        guard self.subject.isSignedIn.value else {
+            self.confirmSignInForAIAgent()
+            return
+        }
         self.aiAgentInteractor?.enterVoiceInput()
+    }
+
+    private func confirmSignInForAIAgent() {
+        let info = ConfirmDialogInfo()
+            |> \.title .~ "aiAgent::needSignIn::title".localized()
+            |> \.message .~ "aiAgent::needSignIn::message".localized()
+            |> \.confirmed .~ { [weak self] in self?.router?.routeToSignIn() }
+        self.router?.showConfirm(dialog: info)
     }
 }
 

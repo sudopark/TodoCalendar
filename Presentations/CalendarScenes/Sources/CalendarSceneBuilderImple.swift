@@ -16,6 +16,8 @@ public struct CalendarSceneBuilderImple {
     private let viewAppearance: ViewAppearance
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
     private let eventListSceneBuilder: any EventListSceneBuiler
+    private let accountUsecase: any AccountUsecase
+    private let memberSceneBuilder: any MemberSceneBuilder
     private let aiAgentSceneBuilder: (any AIAgentSceneBuilder)?
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
@@ -26,12 +28,16 @@ public struct CalendarSceneBuilderImple {
         viewAppearance: ViewAppearance,
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
         eventListSceneBuilder: any EventListSceneBuiler,
+        accountUsecase: any AccountUsecase,
+        memberSceneBuilder: any MemberSceneBuilder,
         aiAgentSceneBuilder: (any AIAgentSceneBuilder)? = nil
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
+        self.accountUsecase = accountUsecase
+        self.memberSceneBuilder = memberSceneBuilder
         self.aiAgentSceneBuilder = aiAgentSceneBuilder
     }
 
@@ -75,6 +81,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             viewAppearance: self.viewAppearance,
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
+            accountUsecase: self.accountUsecase,
+            memberSceneBuilder: self.memberSceneBuilder,
             aiAgentSceneBuilder: self.aiAgentSceneBuilder
         )
         

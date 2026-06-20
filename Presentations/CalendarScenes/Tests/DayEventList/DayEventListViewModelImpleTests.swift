@@ -48,12 +48,15 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.spyRouter = nil
     }
     
+    private var stubAIAgentSceneBuilder: StubAIAgentSceneBuilder!
+
     // 9-10일: current-todo-1, current-todo-2, todo-with-time, not-repeating-schedule, repeating-schedule(turn 4)
     // 9-11일: current-todo-1, current-todo-2
     private func makeViewModel(
         foremostEventId: ForemostEventId? = nil,
         shouldFailDoneTodo: Bool = false,
-        shouldFailMakeTodo: Bool = false
+        shouldFailMakeTodo: Bool = false,
+        isSignedIn: Bool = true
     ) -> DayEventListViewModelImple {
         let currentTodos: [TodoEvent] = [
             .init(uuid: "current-todo-1", name: "current-todo-1") |> \.creatTimeStamp .~ 100,
@@ -89,6 +92,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             uiSettingUsecase: self.stubUISettingUsecase
         )
         
+        let account: AccountInfo? = isSignedIn ? AccountInfo("uid") : nil
+        self.stubAIAgentSceneBuilder = StubAIAgentSceneBuilder()
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: StubCalendarUsecase(),
             calendarSettingUsecase: calendarSettingUsecase,
@@ -96,7 +101,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             todoEventUsecase: self.stubTodoUsecase,
             foremostEventUsecase: self.stubForemostEventUsecase,
             uiSettingUsecase: self.stubUISettingUsecase,
-            aiAgentSceneBuilder: StubAIAgentSceneBuilder()
+            accountUsecase: StubAccountUsecase(account),
+            aiAgentSceneBuilder: self.stubAIAgentSceneBuilder
         )
         viewModel.router = self.spyRouter
         return viewModel
@@ -1000,25 +1006,30 @@ extension DayEventListViewModelImpleTests {
 }
 
 extension DayEventListViewModelImpleTests {
-    
+
     private class SpyRouter: BaseSpyRouter, DayEventListRouting, @unchecked Sendable {
-        
+
         var didRouteToMakeNewEventWithParams: MakeEventParams?
         func routeToMakeNewEvent(_ withParams: MakeEventParams) {
             self.didRouteToMakeNewEventWithParams = withParams
         }
-        
+
         func routeToMakeNewEvent() {
-            
+
         }
-        
+
         func routeToSelectTemplateForMakeEvent() {
-            
+
         }
-        
+
         var didShowDoneTodoList: Bool?
         func showDoneTodoList() {
             self.didShowDoneTodoList = true
+        }
+
+        var didRouteToSignIn: Bool?
+        func routeToSignIn() {
+            self.didRouteToSignIn = true
         }
     }
 }
@@ -1040,22 +1051,69 @@ extension DayEventListViewModelImpleTests {
         // then
         XCTAssertEqual(mode, .idle)
     }
+
+    // 미로그인: 진입 시 confirm 팝업, AI interactor로 위임 안 함
+    func testViewModel_whenNotSignedIn_enterVoiceInput_showsSignInConfirm() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: false)
+        self.spyRouter.shouldConfirmNotCancel = false
+
+        // when
+        viewModel.enterVoiceInput()
+
+        // then
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertNil(self.stubAIAgentSceneBuilder.spyInteractor.didEnterVoiceInput)
+    }
+
+    // 미로그인: confirm 확인 콜백 → SignIn 라우팅
+    func testViewModel_whenNotSignedIn_confirmSignIn_routesToSignIn() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: false)
+
+        // when
+        // shouldConfirmNotCancel is true by default — showConfirm auto-calls confirmed?()
+        viewModel.enterVoiceInput()
+
+        // then (confirmed?() was already called by SpyRouter.showConfirm)
+        XCTAssertEqual(self.spyRouter.didRouteToSignIn, true)
+    }
+
+    // 로그인: confirm 없이 AI interactor로 위임
+    func testViewModel_whenSignedIn_enterVoiceInput_forwardsToInteractor() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        viewModel.selectedDayChanaged(self.september10th(), and: [])
+        // Wait for the MainActor Task (attachAIAgentIfNeeded) to run
+        let attachExpect = expectation(description: "wait for attach")
+        DispatchQueue.main.async { attachExpect.fulfill() }
+        self.wait(for: [attachExpect], timeout: 0.1)
+
+        // when
+        viewModel.enterVoiceInput()
+
+        // then
+        XCTAssertNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(self.stubAIAgentSceneBuilder.spyInteractor.didEnterVoiceInput, true)
+    }
 }
 
 // MARK: - Test doubles
 
 private final class SpyAIAgentSceneInteractor: AIAgentSceneInteractor {
     func prepare() { }
-    func enterVoiceInput() { }
+    var didEnterVoiceInput: Bool?
+    func enterVoiceInput() { self.didEnterVoiceInput = true }
     func enterKeyboardInput() { }
     func stopInput() { }
     func submit(_ text: String) { }
 }
 
 private final class StubAIAgentSceneBuilder: AIAgentSceneBuilder {
+    let spyInteractor = SpyAIAgentSceneInteractor()
     @MainActor
     func makeInlineComponent(listener: any AIAgentSceneListener) -> AIAgentInlineComponent {
-        return AIAgentInlineComponent(interactor: SpyAIAgentSceneInteractor())
+        return AIAgentInlineComponent(interactor: self.spyInteractor)
     }
 }
 
