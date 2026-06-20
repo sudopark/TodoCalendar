@@ -71,7 +71,13 @@ public protocol ExternalCalendarUsecaseFactory {
     func makeAppleCalendarUsecase() -> any AppleCalendarUsecase
 }
 
-public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory {
-    
+public protocol AIAgentUsecaseFactory {
+
+    func makeAIAgentOrchestrationUsecase() -> any AIAgentOrchestrationUsecase
+    func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase
+}
+
+public protocol UsecaseFactory: AccountUsecaseFactory, CalendarUsecaseFactory, EventUsecaseFactory, NotificationUsecaseFactory, SettingUsecaseFactory, CommonUsecaseFactory, SupportUsecaseFactory, ExternalCalendarUsecaseFactory, AIAgentUsecaseFactory {
+
     var eventNotifyService: SharedEventNotifyService { get }
 }
