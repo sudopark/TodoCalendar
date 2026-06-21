@@ -1098,15 +1098,98 @@ extension DayEventListViewModelImpleTests {
     }
 }
 
+// MARK: - AI Agent Inline Input Tests
+
+extension DayEventListViewModelImpleTests {
+
+    func testViewModel_voiceLevel_publisher_emits_when_listener_called() {
+        // given
+        let expect = expectation(description: "voiceLevel 방출")
+        expect.expectedFulfillmentCount = 2
+        let viewModel = self.makeViewModel()
+
+        // when
+        let emitted = self.waitOutputs(expect, for: viewModel.voiceLevel.dropFirst()) {
+            viewModel.aiAgent(didUpdateVoiceLevel: 0.5)
+            viewModel.aiAgent(didUpdateVoiceLevel: 0.9)
+        }
+
+        // then
+        XCTAssertEqual(emitted, [0.5, 0.9])
+    }
+
+    func testViewModel_recognizingText_publisher_emits_when_listener_called() {
+        // given
+        let expect = expectation(description: "recognizingText 방출")
+        let viewModel = self.makeViewModel()
+
+        // when
+        let text = self.waitFirstOutput(expect, for: viewModel.recognizingText.dropFirst(), timeout: 0.1) {
+            viewModel.aiAgent(didUpdateRecognizingText: "안녕하세요")
+        }
+
+        // then
+        XCTAssertEqual(text, "안녕하세요")
+    }
+
+    func testViewModel_enterKeyboardInput_delegates_to_interactor() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        viewModel.selectedDayChanaged(self.september10th(), and: [])
+        let attachExpect = expectation(description: "wait for attach")
+        DispatchQueue.main.async { attachExpect.fulfill() }
+        self.wait(for: [attachExpect], timeout: 0.1)
+
+        // when
+        viewModel.enterKeyboardInput()
+
+        // then
+        XCTAssertEqual(self.stubAIAgentSceneBuilder.spyInteractor.didEnterKeyboardInputCalled, true)
+    }
+
+    func testViewModel_stopAIAgentInput_delegates_to_interactor() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        viewModel.selectedDayChanaged(self.september10th(), and: [])
+        let attachExpect = expectation(description: "wait for attach")
+        DispatchQueue.main.async { attachExpect.fulfill() }
+        self.wait(for: [attachExpect], timeout: 0.1)
+
+        // when
+        viewModel.stopAIAgentInput()
+
+        // then
+        XCTAssertEqual(self.stubAIAgentSceneBuilder.spyInteractor.didStopInputCalled, true)
+    }
+
+    func testViewModel_submitAIAgent_delegates_to_interactor() {
+        // given
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        viewModel.selectedDayChanaged(self.september10th(), and: [])
+        let attachExpect = expectation(description: "wait for attach")
+        DispatchQueue.main.async { attachExpect.fulfill() }
+        self.wait(for: [attachExpect], timeout: 0.1)
+
+        // when
+        viewModel.submitAIAgent("hello world")
+
+        // then
+        XCTAssertEqual(self.stubAIAgentSceneBuilder.spyInteractor.didSubmitText, "hello world")
+    }
+}
+
 // MARK: - Test doubles
 
 private final class SpyAIAgentSceneInteractor: AIAgentSceneInteractor {
     func prepare() { }
     var didEnterVoiceInput: Bool?
     func enterVoiceInput() { self.didEnterVoiceInput = true }
-    func enterKeyboardInput() { }
-    func stopInput() { }
-    func submit(_ text: String) { }
+    var didEnterKeyboardInputCalled: Bool = false
+    func enterKeyboardInput() { self.didEnterKeyboardInputCalled = true }
+    var didStopInputCalled: Bool = false
+    func stopInput() { self.didStopInputCalled = true }
+    var didSubmitText: String?
+    func submit(_ text: String) { self.didSubmitText = text }
 }
 
 private final class StubAIAgentSceneBuilder: AIAgentSceneBuilder {

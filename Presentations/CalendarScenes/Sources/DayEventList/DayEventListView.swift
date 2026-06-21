@@ -30,7 +30,9 @@ import CommonPresentation
     fileprivate var dayModel: SelectedDayModel?
     fileprivate var cellViewModels: [any EventCellViewModel] = []
     fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
-    fileprivate var aiAgentEntryMode: AIAgentEntryMode = .none
+    var aiAgentEntryMode: AIAgentEntryMode = .none
+    var recognizingText: String = ""
+    var voiceLevel: Float = 0
 
     func bind(_ viewModel: any DayEventListViewModel, _ appearance: ViewAppearance) {
         
@@ -86,6 +88,16 @@ import CommonPresentation
                 self?.aiAgentEntryMode = mode
             })
             .store(in: &self.cancellables)
+
+        viewModel.recognizingText
+            .receive(on: RunLoop.main)
+            .sink { [weak self] text in self?.recognizingText = text }
+            .store(in: &self.cancellables)
+
+        viewModel.voiceLevel
+            .receive(on: RunLoop.main)
+            .sink { [weak self] level in self?.voiceLevel = level }
+            .store(in: &self.cancellables)
     }
 }
 
@@ -101,6 +113,9 @@ final class DayEventListViewEventHandler: Observable {
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     var refreshUncompletedTodos: () -> Void = { }
     var enterVoiceInput: () -> Void = { }
+    var enterKeyboardInput: () -> Void = { }
+    var stopAIAgentInput: () -> Void = { }
+    var submitAIAgent: (String) -> Void = { _ in }
 
     func bind(
         _ viewModel: any DayEventListViewModel,
@@ -119,6 +134,9 @@ final class DayEventListViewEventHandler: Observable {
         self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
         self.refreshUncompletedTodos = viewModel.refreshUncompletedTodoEvents
         self.enterVoiceInput = viewModel.enterVoiceInput
+        self.enterKeyboardInput = { [weak viewModel] in viewModel?.enterKeyboardInput() }
+        self.stopAIAgentInput = { [weak viewModel] in viewModel?.stopAIAgentInput() }
+        self.submitAIAgent = { [weak viewModel] text in viewModel?.submitAIAgent(text) }
     }
 }
 
@@ -186,12 +204,17 @@ struct DayEventListView: View {
                 // 이벤트 리스트
                 self.eventListView()
                 
-                HStack(spacing: 8) {
-                    QuickAddNewTodoView(isFocusInput: $isFocusInput)
-                        .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
-                        .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
+                switch self.state.aiAgentEntryMode {
+                case .voice, .keyboard:
+                    AIAgentInlineInputView()
+                default:
+                    HStack(spacing: 8) {
+                        QuickAddNewTodoView(isFocusInput: $isFocusInput)
+                            .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
+                            .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
 
-                    aiAgentEntryButton()
+                        aiAgentEntryButton()
+                    }
                 }
 
                 addNewButton()

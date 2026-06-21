@@ -59,6 +59,10 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func refreshUncompletedTodoEvents()
     func enterVoiceInput()
 
+    func enterKeyboardInput()
+    func stopAIAgentInput()
+    func submitAIAgent(_ text: String)
+
     // presenter
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> { get }
     var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> { get }
@@ -66,6 +70,8 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> { get }
     var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> { get }
     var aiAgentEntryMode: AnyPublisher<AIAgentEntryMode, Never> { get }
+    var recognizingText: AnyPublisher<String, Never> { get }
+    var voiceLevel: AnyPublisher<Float, Never> { get }
 }
 
 
@@ -120,6 +126,8 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let tagMaps = CurrentValueSubject<[String: any EventTag], Never>([:])
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
+        let recognizingText = CurrentValueSubject<String, Never>("")
+        let voiceLevel = CurrentValueSubject<Float, Never>(0)
     }
     
     private var cancellables: Set<AnyCancellable> = []
@@ -228,6 +236,18 @@ extension DayEventListViewModelImple {
             return
         }
         self.aiAgentInteractor?.enterVoiceInput()
+    }
+
+    func enterKeyboardInput() {
+        self.aiAgentInteractor?.enterKeyboardInput()
+    }
+
+    func stopAIAgentInput() {
+        self.aiAgentInteractor?.stopInput()
+    }
+
+    func submitAIAgent(_ text: String) {
+        self.aiAgentInteractor?.submit(text)
     }
 
     private func confirmSignInForAIAgent() {
@@ -351,6 +371,14 @@ extension DayEventListViewModelImple {
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
+
+    var recognizingText: AnyPublisher<String, Never> {
+        return self.subject.recognizingText.eraseToAnyPublisher()
+    }
+
+    var voiceLevel: AnyPublisher<Float, Never> {
+        return self.subject.voiceLevel.eraseToAnyPublisher()
+    }
     
     private typealias CurrentAndEvents = ([any EventCellViewModel], [any EventCellViewModel])
     
@@ -417,9 +445,17 @@ extension DayEventListViewModelImple: AIAgentSceneListener {
         self.aiAgentEntryModeSubject.send(mode)
     }
 
-    func aiAgent(didUpdateVoiceLevel level: Float) { /* Phase 2 */ }
-    func aiAgent(didUpdateRecognizingText text: String) { /* Phase 2 */ }
-    func aiAgentDidRequestKeyboardEntryAvailable() { /* Phase 2 */ }
+    func aiAgent(didUpdateVoiceLevel level: Float) {
+        self.subject.voiceLevel.send(level)
+    }
+
+    func aiAgent(didUpdateRecognizingText text: String) {
+        self.subject.recognizingText.send(text)
+    }
+
+    func aiAgentDidRequestKeyboardEntryAvailable() {
+        // keyboard 전환은 coordinator가 .keyboard mode 통지로 처리됨
+    }
 }
 
 
