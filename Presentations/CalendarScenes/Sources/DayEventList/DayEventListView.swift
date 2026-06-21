@@ -229,6 +229,10 @@ struct DayEventListView: View {
     
     private func aiAgentEntryButton() -> some View {
         let isIdle = self.state.aiAgentEntryMode == .idle
+        let commandBadge: AIAgentCommandBadge? = {
+            if case .command(let badge) = self.state.aiAgentEntryMode { return badge }
+            return nil
+        }()
         return Button {
             self.isFocusInput = false
             self.eventHandler.enterVoiceInput()
@@ -243,6 +247,35 @@ struct DayEventListView: View {
         }
         .opacity(isIdle ? 1.0 : 0.3)
         .disabled(!isIdle)
+        .overlay(alignment: .topTrailing) {
+            if let badge = commandBadge {
+                aiAgentCommandBadge(badge)
+                    .opacity(1.0)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func aiAgentCommandBadge(_ badge: AIAgentCommandBadge) -> some View {
+        let (bgColor, iconName): (UIColor, String) = {
+            switch badge {
+            case .processing:  return (appearance.colorSet.accentInfo, "ellipsis")
+            case .needConfirm: return (appearance.colorSet.accentWarn, "exclamationmark")
+            case .done:        return (appearance.colorSet.accent, "checkmark")
+            case .failed:      return (appearance.colorSet.negativeBtnBackground, "xmark")
+            }
+        }()
+        Circle()
+            .fill(bgColor.asColor)
+            .frame(width: 16, height: 16)
+            .overlay(
+                Image(systemName: iconName)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 8, height: 8)
+                    .foregroundColor(appearance.colorSet.primaryBtnText.asColor)
+            )
+            .offset(x: 2, y: -2)
     }
 
     private func addNewButton() -> some View {
@@ -488,7 +521,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 // 완료처리 실패하게 하던지
                 withAnimation {
 //                    state.requestDoneTodoIds = []
-                    
+
                     // 혹은 완료처리 성공 이후 셀 목록 업데이트 시뮬레이션
                     let newCells = state.cellViewModels.filter { $0.todoEventId != id }
                     state.cellViewModels = newCells
@@ -498,16 +531,16 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         eventHandler.addNewTodoQuickly = { name in
             let pending = PendingTodoEventCellViewModel(name: name, defaultTagId: nil)
             let index = state.cellViewModels.firstIndex(where: { !$0.name.starts(with: "current todo") })!
-            
+
             withAnimation {
                 state.cellViewModels.insert(pending, at: index)
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     if let index = state.cellViewModels.firstIndex(where: { $0.eventIdentifier == pending.eventIdentifier }) {
                         withAnimation {
                             // 삭제하여 실패했을때 가정
 //                                state.cellViewModels.remove(at: index)
-                            
+
                             // 추가하여 성공했을때 가정
                             let newCell = TodoEventCellViewModel("new-current-todo", name: name)
                                 |> \.periodText .~ .singleText(.init(text: "Todo".localized()))
@@ -522,7 +555,36 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             .environment(eventHandler)
             .environment(PendingCompleteTodoState())
             .environment(viewAppearance)
-        return containerView
+            .previewDisplayName("idle (default)")
+
+        return Group {
+            containerView
+            makeCommandBadgePreview(.processing, modeName: "processing")
+            makeCommandBadgePreview(.needConfirm, modeName: "needConfirm")
+            makeCommandBadgePreview(.done, modeName: "done")
+            makeCommandBadgePreview(.failed, modeName: "failed")
+        }
+    }
+
+    static func makeCommandBadgePreview(_ badge: AIAgentCommandBadge, modeName: String) -> some View {
+        let calendar = CalendarAppearanceSettings(
+            colorSetKey: .defaultDark,
+            fontSetKey: .systemDefault
+        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
+        let state = DayEventListViewState()
+        state.dayModel = .init(dateText: "2020년 9월 15일(금)", lunarDateText: "6월 4일")
+        state.cellViewModels = []
+        state.aiAgentEntryMode = .command(badge)
+        let eventHandler = DayEventListViewEventHandler()
+        return DayEventListView()
+            .environment(state)
+            .environment(eventHandler)
+            .environment(PendingCompleteTodoState())
+            .environment(viewAppearance)
+            .previewDisplayName("badge: \(modeName)")
     }
     
     private static func dummyUncompleteds() -> [TodoEventCellViewModel] {
