@@ -38,7 +38,7 @@ final class AIAgentCoordinatorViewModelImpleTests: PublisherWaitable {
 
     private func makeCoordinator(
         initialState: AIAgentState? = nil
-    ) -> (AIAgentCoordinatorViewModelImple, StubAIAgentOrchestrationUsecase) {
+    ) -> (AIAgentCoordinatorViewModelImple, StubAIAgentOrchestrationUsecase, StubSpeechRecognizeUsecase) {
         let stubOrchestration = StubAIAgentOrchestrationUsecase()
         if let initialState {
             stubOrchestration.stateSubject.send(initialState)
@@ -48,7 +48,7 @@ final class AIAgentCoordinatorViewModelImpleTests: PublisherWaitable {
             orchestrationUsecase: stubOrchestration,
             speechRecognizeUsecase: stubSpeech
         )
-        return (coordinator, stubOrchestration)
+        return (coordinator, stubOrchestration, stubSpeech)
     }
 }
 
@@ -60,7 +60,7 @@ extension AIAgentCoordinatorViewModelImpleTests {
     @Test func coordinator_whenOrchestratorIdle_notifiesIdleMode() {
         // given
         let spy = SpyAIAgentSceneListener()
-        let (coordinator, _) = self.makeCoordinator(initialState: .idle)
+        let (coordinator, _, _) = self.makeCoordinator(initialState: .idle)
         coordinator.listener = spy
         // when
         coordinator.prepare()
@@ -71,7 +71,7 @@ extension AIAgentCoordinatorViewModelImpleTests {
     @Test func coordinator_whenProcessing_notifiesProcessingBadge() {
         // given
         let spy = SpyAIAgentSceneListener()
-        let (coordinator, _) = self.makeCoordinator(initialState: .processing(command: "내일 회의"))
+        let (coordinator, _, _) = self.makeCoordinator(initialState: .processing(command: "내일 회의"))
         coordinator.listener = spy
         // when
         coordinator.prepare()
@@ -82,7 +82,7 @@ extension AIAgentCoordinatorViewModelImpleTests {
     @Test func coordinator_whenConfirm_notifiesNeedConfirmBadge() {
         // given
         let spy = SpyAIAgentSceneListener()
-        let (coordinator, _) = self.makeCoordinator(
+        let (coordinator, _, _) = self.makeCoordinator(
             initialState: .confirm(command: "삭제", message: "정말?", action: AIConfirmCommandAction())
         )
         coordinator.listener = spy
@@ -95,7 +95,7 @@ extension AIAgentCoordinatorViewModelImpleTests {
     @Test func coordinator_whenDone_notifiesDoneBadge() {
         // given
         let spy = SpyAIAgentSceneListener()
-        let (coordinator, _) = self.makeCoordinator(initialState: .done(message: "완료"))
+        let (coordinator, _, _) = self.makeCoordinator(initialState: .done(message: "완료"))
         coordinator.listener = spy
         // when
         coordinator.prepare()
@@ -106,7 +106,7 @@ extension AIAgentCoordinatorViewModelImpleTests {
     @Test func coordinator_whenFailed_notifiesFailedBadge() {
         // given
         let spy = SpyAIAgentSceneListener()
-        let (coordinator, _) = self.makeCoordinator(initialState: .failed(reason: "오류"))
+        let (coordinator, _, _) = self.makeCoordinator(initialState: .failed(reason: "오류"))
         coordinator.listener = spy
         // when
         coordinator.prepare()
@@ -117,7 +117,7 @@ extension AIAgentCoordinatorViewModelImpleTests {
     @Test func coordinator_whenStateChangesAfterPrepare_notifiesUpdatedMode() {
         // given
         let spy = SpyAIAgentSceneListener()
-        let (coordinator, stubOrchestration) = self.makeCoordinator(initialState: .idle)
+        let (coordinator, stubOrchestration, _) = self.makeCoordinator(initialState: .idle)
         coordinator.listener = spy
         coordinator.prepare()
         // when
@@ -130,7 +130,7 @@ extension AIAgentCoordinatorViewModelImpleTests {
     @Test func coordinator_beforeStateDetermined_doesNotNotify() {
         // given
         let spy = SpyAIAgentSceneListener()
-        let (coordinator, _) = self.makeCoordinator(initialState: nil)
+        let (coordinator, _, _) = self.makeCoordinator(initialState: nil)
         coordinator.listener = spy
         // when — orchestrator state 미확정 (nil)
         coordinator.prepare()
@@ -146,7 +146,7 @@ extension AIAgentCoordinatorViewModelImpleTests {
 
     @Test func coordinator_prepare_callsRestoreIfNeeded() {
         // given
-        let (coordinator, stubOrchestration) = self.makeCoordinator()
+        let (coordinator, stubOrchestration, _) = self.makeCoordinator()
         // when
         coordinator.prepare()
         // then
@@ -155,7 +155,7 @@ extension AIAgentCoordinatorViewModelImpleTests {
 
     @Test func coordinator_prepare_callsLoadUsage() {
         // given
-        let (coordinator, stubOrchestration) = self.makeCoordinator()
+        let (coordinator, stubOrchestration, _) = self.makeCoordinator()
         // when
         coordinator.prepare()
         // then
@@ -170,10 +170,147 @@ extension AIAgentCoordinatorViewModelImpleTests {
 
     @Test func coordinator_submit_delegatesToOrchestrationUsecase() {
         // given
-        let (coordinator, stubOrchestration) = self.makeCoordinator()
+        let (coordinator, stubOrchestration, _) = self.makeCoordinator()
         // when
         coordinator.submit("내일 회의 잡아줘")
         // then
         #expect(stubOrchestration.didSendCommand == "내일 회의 잡아줘")
+    }
+}
+
+
+// MARK: - voice/keyboard input
+
+extension AIAgentCoordinatorViewModelImpleTests {
+
+    @Test func coordinator_enterVoiceInput_startsSpeechAndNotifiesVoiceMode() {
+        // given
+        let spy = SpyAIAgentSceneListener()
+        let (coordinator, _, stubSpeech) = self.makeCoordinator(initialState: .idle)
+        coordinator.listener = spy
+        coordinator.prepare()
+        let modeCountBeforeVoice = spy.didChangedModes.count
+        // when
+        coordinator.enterVoiceInput()
+        // then — speech started + .voice mode appended after prepare modes
+        #expect(stubSpeech.didStartListening == true)
+        let modesAfterEnter = Array(spy.didChangedModes.dropFirst(modeCountBeforeVoice))
+        #expect(modesAfterEnter.contains(.voice))
+    }
+
+    @Test func coordinator_recognizingText_forwardsToListener() {
+        // given
+        let spy = SpyAIAgentSceneListener()
+        let (coordinator, _, stubSpeech) = self.makeCoordinator(initialState: .idle)
+        coordinator.listener = spy
+        coordinator.prepare()
+        coordinator.enterVoiceInput()
+        // when — Combine subjects are synchronous: send fires sink inline
+        stubSpeech.recognizingTextSubject.send("오늘 회의")
+        // then
+        #expect(spy.didRecognizingTexts.contains("오늘 회의"))
+    }
+
+    @Test func coordinator_inputLevel_forwardsToListener() {
+        // given
+        let spy = SpyAIAgentSceneListener()
+        let (coordinator, _, stubSpeech) = self.makeCoordinator(initialState: .idle)
+        coordinator.listener = spy
+        coordinator.prepare()
+        coordinator.enterVoiceInput()
+        // when
+        stubSpeech.levelSubject.send(0.75)
+        // then
+        #expect(spy.didVoiceLevels.contains(0.75))
+    }
+
+    @Test func coordinator_recognizeSuccess_sendsCommandToOrchestration() {
+        // given
+        let (coordinator, stubOrchestration, stubSpeech) = self.makeCoordinator(initialState: .idle)
+        coordinator.listener = SpyAIAgentSceneListener()
+        coordinator.prepare()
+        coordinator.enterVoiceInput()
+        // when
+        stubSpeech.recognizeResultSubject.send(.success("내일 회의"))
+        // then
+        #expect(stubOrchestration.didSendCommand == "내일 회의")
+    }
+
+    @Test func coordinator_permissionDenied_notifiesKeyboardAvailableAndSwitchesToKeyboard() {
+        // given
+        let spy = SpyAIAgentSceneListener()
+        let (coordinator, _, stubSpeech) = self.makeCoordinator(initialState: .idle)
+        coordinator.listener = spy
+        coordinator.prepare()
+        coordinator.enterVoiceInput()
+        // when — permission denied error arrives
+        let authError = SpeechRecognizeAuthError(micNotAvail: .denied)
+        stubSpeech.recognizeResultSubject.send(.failure(authError))
+        // then
+        #expect(spy.didRequestedKeyboardAvailable == true)
+        #expect(spy.didChangedModes.contains(.keyboard))
+    }
+
+    @Test func coordinator_enterKeyboardInput_stopsSpeechAndNotifiesKeyboardMode() {
+        // given
+        let spy = SpyAIAgentSceneListener()
+        let (coordinator, _, stubSpeech) = self.makeCoordinator(initialState: .idle)
+        coordinator.listener = spy
+        coordinator.prepare()
+        coordinator.enterVoiceInput()
+        let modeCountBeforeKeyboard = spy.didChangedModes.count
+        // when
+        coordinator.enterKeyboardInput()
+        // then
+        #expect(stubSpeech.didStopListening == true)
+        let modesAfterKeyboard = Array(spy.didChangedModes.dropFirst(modeCountBeforeKeyboard))
+        #expect(modesAfterKeyboard.contains(.keyboard))
+    }
+
+    @Test func coordinator_stopInput_stopsSpeechAndNotifiesIdleMode() {
+        // given
+        let spy = SpyAIAgentSceneListener()
+        let (coordinator, _, stubSpeech) = self.makeCoordinator(initialState: .idle)
+        coordinator.listener = spy
+        coordinator.prepare()
+        coordinator.enterVoiceInput()
+        let modeCountBeforeStop = spy.didChangedModes.count
+        // when
+        coordinator.stopInput()
+        // then
+        #expect(stubSpeech.didStopListening == true)
+        let modesAfterStop = Array(spy.didChangedModes.dropFirst(modeCountBeforeStop))
+        #expect(modesAfterStop.contains(.idle))
+    }
+
+    @Test func coordinator_voiceInputThenOrchestrationProcessing_notifiesProcessingMode() {
+        // given — orchestrator idle, enter voice
+        let spy = SpyAIAgentSceneListener()
+        let (coordinator, stubOrchestration, _) = self.makeCoordinator(initialState: .idle)
+        coordinator.listener = spy
+        coordinator.prepare()
+        coordinator.enterVoiceInput()
+        // when — orchestrator transitions to .processing
+        stubOrchestration.stateSubject.send(.processing(command: "일정 추가"))
+        // then — regardless of inputMode, orchestrator state takes priority
+        #expect(spy.didChangedModes.last == .command(.processing))
+    }
+
+    @Test func coordinator_voiceRecognizeSuccess_sendsCommandAndTransitionsDirectlyToProcessing() {
+        // given — voice 입력 중 상태
+        let spy = SpyAIAgentSceneListener()
+        let (coordinator, stubOrchestration, stubSpeech) = self.makeCoordinator(initialState: .idle)
+        coordinator.listener = spy
+        coordinator.prepare()
+        coordinator.enterVoiceInput()
+        let modeCountBeforeSuccess = spy.didChangedModes.count
+        // when — speech recognize 성공 결과 방출 (stub이 sendCommand 시 .processing 방출)
+        stubSpeech.recognizeResultSubject.send(.success("내일 회의"))
+        // then (a) — sendCommand에 텍스트가 기록됨
+        #expect(stubOrchestration.didSendCommand == "내일 회의")
+        // then (b) — success 방출 이후 통지된 모드에 .idle 없고 마지막은 .command(.processing)
+        let modesAfterSuccess = Array(spy.didChangedModes.dropFirst(modeCountBeforeSuccess))
+        #expect(!modesAfterSuccess.contains(.idle))
+        #expect(modesAfterSuccess.last == .command(.processing))
     }
 }
