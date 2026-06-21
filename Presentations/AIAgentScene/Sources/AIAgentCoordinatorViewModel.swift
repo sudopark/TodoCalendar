@@ -45,11 +45,18 @@ public final class AIAgentCoordinatorViewModelImple: AIAgentCoordinatorViewModel
     private var inputMode: InputMode = .idle
     private var latestState: AIAgentState?
     private var cancellables = Set<AnyCancellable>()
+    private var isCommandSheetShown = false
 
     private lazy var inputViewModel: AIAgentInputViewModelImple = {
         let vm = AIAgentInputViewModelImple(speechRecognizeUsecase: self.speechRecognizeUsecase)
         vm.listener = self
         self.bindInputViewModel(vm)
+        return vm
+    }()
+
+    private lazy var commandViewModel: AIAgentCommandViewModelImple = {
+        let vm = AIAgentCommandViewModelImple(orchestrationUsecase: self.orchestrationUsecase)
+        vm.listener = self
         return vm
     }()
 
@@ -88,10 +95,24 @@ extension AIAgentCoordinatorViewModelImple {
             .sink(receiveValue: { [weak self] state in
                 self?.latestState = state
                 self?.resolveAndNotifyMode()
+                self?.handleCommandSheet(for: state)
             })
             .store(in: &self.cancellables)
         self.orchestrationUsecase.restoreIfNeeded()
         self.orchestrationUsecase.loadUsage()
+    }
+
+    private func handleCommandSheet(for state: AIAgentState) {
+        switch state {
+        case .processing, .confirm, .done, .failed:
+            guard !isCommandSheetShown else { return }
+            router?.showCommandSheet(commandViewModel)
+            isCommandSheetShown = true
+        case .idle:
+            guard isCommandSheetShown else { return }
+            router?.dismissCommandSheet()
+            isCommandSheetShown = false
+        }
     }
 
     private func handlePermissionDenied() {
@@ -150,6 +171,16 @@ extension AIAgentCoordinatorViewModelImple {
 
     public func submit(_ text: String) {
         self.orchestrationUsecase.sendCommand(text)
+    }
+}
+
+
+// MARK: - AIAgentCommandViewModelListener
+
+extension AIAgentCoordinatorViewModelImple: AIAgentCommandViewModelListener {
+
+    func aiAgentCommandRequestClose() {
+        self.orchestrationUsecase.reset()
     }
 }
 

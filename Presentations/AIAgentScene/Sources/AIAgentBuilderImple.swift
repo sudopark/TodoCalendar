@@ -38,7 +38,7 @@ extension AIAgentBuilderImple: AIAgentSceneBuilder {
             speechRecognizeUsecase: self.speechRecognizeUsecase
         )
         coordinator.listener = listener
-        let router = AIAgentRouter()
+        let router = AIAgentRouter(viewAppearance: self.viewAppearance)
         coordinator.router = router
         return AIAgentInlineComponent(interactor: coordinator)
     }

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftUI
 import Scenes
 import CommonPresentation
 
@@ -15,12 +16,22 @@ import CommonPresentation
 
 protocol AIAgentRouting: Routing, Sendable {
     func openSystemSetting()
+    func showCommandSheet(_ viewModel: any AIAgentCommandViewModel)
+    func dismissCommandSheet()
 }
 
 
 // MARK: - AIAgentRouter
 
-final class AIAgentRouter: BaseRouterImple, AIAgentRouting, @unchecked Sendable { }
+final class AIAgentRouter: BaseRouterImple, AIAgentRouting, @unchecked Sendable {
+
+    private let viewAppearance: ViewAppearance
+
+    init(viewAppearance: ViewAppearance) {
+        self.viewAppearance = viewAppearance
+        super.init()
+    }
+}
 
 extension AIAgentRouter {
 
@@ -31,5 +42,24 @@ extension AIAgentRouter {
             else { return }
             UIApplication.shared.open(url)
         }
+    }
+
+    func showCommandSheet(_ viewModel: any AIAgentCommandViewModel) {
+        Task { @MainActor in
+            let eventHandlers = AIAgentCommandViewEventHandler()
+            eventHandlers.bind(viewModel)
+            var containerView = AIAgentCommandStageContainerView(
+                viewAppearance: self.viewAppearance,
+                eventHandlers: eventHandlers
+            )
+            containerView.stateBinding = { $0.bind(viewModel) }
+            let vc = UIHostingController(rootView: containerView)
+            vc.view.backgroundColor = .clear
+            self.showBottomSlide(vc)
+        }
+    }
+
+    func dismissCommandSheet() {
+        self.dismissPresented(animated: true, nil)
     }
 }
