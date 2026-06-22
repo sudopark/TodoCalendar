@@ -55,7 +55,7 @@ extension AIAgentCommandViewModelImpleTests {
     func test_sendCommand_delegatesToUsecase() {
         let viewModel = self.makeViewModel()
         viewModel.sendCommand("회의")
-        XCTAssertEqual(self.stubAgent.didSendCommand, "회의")
+        XCTAssertEqual(self.stubAgent.didSubmit, "회의")
     }
 
     func test_confirm_delegatesToUsecase() {
