@@ -41,6 +41,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
     private let appleCalendarUsecase: any AppleCalendarUsecase
     private let eventUploadService: any EventUploadService
     private let eventSyncUsecase: any EventSyncUsecase
+    private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     var router: (any CalendarViewRouting)?
     private var calendarPaperInteractors: [any CalendarPaperSceneInteractor]?
     // TODO: calendarVC load 이후 바로 prepare를 할것이기때문에 라이프사이클상 listener는 setter 주입이 아니라 생성시에 받아야 할수도있음
@@ -59,7 +60,8 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         googleCalendarUsecase: any GoogleCalendarUsecase,
         appleCalendarUsecase: any AppleCalendarUsecase,
         eventUploadService: any EventUploadService,
-        eventSyncUsecase: any EventSyncUsecase
+        eventSyncUsecase: any EventSyncUsecase,
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -74,6 +76,7 @@ final class CalendarViewModelImple: CalendarViewModel, @unchecked Sendable {
         self.appleCalendarUsecase = appleCalendarUsecase
         self.eventUploadService = eventUploadService
         self.eventSyncUsecase = eventSyncUsecase
+        self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
         
         self.internalBind()
     }
@@ -275,6 +278,8 @@ extension CalendarViewModelImple {
         self.foremostEventusecase.refresh()
         
         self.bindUncompletedTodoRefresh()
+        
+        self.aiAgentOrchestrationUsecase.prepare()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {

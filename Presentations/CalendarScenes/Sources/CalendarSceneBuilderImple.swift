@@ -18,7 +18,6 @@ public struct CalendarSceneBuilderImple {
     private let eventListSceneBuilder: any EventListSceneBuiler
     private let accountUsecase: any AccountUsecase
     private let memberSceneBuilder: any MemberSceneBuilder
-    private let aiAgentSceneBuilder: (any AIAgentSceneBuilder)?
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
@@ -29,8 +28,7 @@ public struct CalendarSceneBuilderImple {
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
         eventListSceneBuilder: any EventListSceneBuiler,
         accountUsecase: any AccountUsecase,
-        memberSceneBuilder: any MemberSceneBuilder,
-        aiAgentSceneBuilder: (any AIAgentSceneBuilder)? = nil
+        memberSceneBuilder: any MemberSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -38,19 +36,18 @@ public struct CalendarSceneBuilderImple {
         self.eventListSceneBuilder = eventListSceneBuilder
         self.accountUsecase = accountUsecase
         self.memberSceneBuilder = memberSceneBuilder
-        self.aiAgentSceneBuilder = aiAgentSceneBuilder
     }
 
     private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
 }
 
 extension CalendarSceneBuilderImple: CalendarSceneBuilder {
-    
+
     @MainActor
     public func makeCalendarScene(
         listener: (any CalendarSceneListener)?
     ) -> any CalendarScene {
-        
+
         let viewModel = CalendarViewModelImple(
             calendarUsecase: self.usecaseFactory.makeCalendarUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
@@ -64,14 +61,15 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             googleCalendarUsecase: self.usecaseFactory.makeGoogleCalendarUsecase(),
             appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
             eventUploadService: self.usecaseFactory.eventUploadService,
-            eventSyncUsecase: self.usecaseFactory.eventSyncUsecase
+            eventSyncUsecase: self.usecaseFactory.eventSyncUsecase,
+            aiAgentOrchestrationUsecase: self.usecaseFactory.makeAIAgentOrchestrationUsecase()
         )
         viewModel.listener = listener
         let viewController = CalendarViewController(
             viewModel: viewModel,
             viewAppearance: self.viewAppearance
         )
-        
+
         let monthSceneBuilder = MonthSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance
@@ -82,21 +80,20 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
             accountUsecase: self.accountUsecase,
-            memberSceneBuilder: self.memberSceneBuilder,
-            aiAgentSceneBuilder: self.aiAgentSceneBuilder
+            memberSceneBuilder: self.memberSceneBuilder
         )
-        
+
         let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(
             usecaseFactory: self.usecaseFactory,
             eventDetailSceneBuilder: self.eventDetailSceneBuilder
         )
         handleViewModelBuilder.router.attach(viewController)
         self.pendingCompleteTodoState.bind(handleViewModelBuilder.viewModel, viewAppearance)
-        
+
         self.calendarDeepLinkHandler.attach(calendarInteractor: viewModel)
         self.calendarDeepLinkHandler.attach(eventHandler: self.eventDeepLinkHandler)
         self.eventDeepLinkHandler.attach(router: handleViewModelBuilder.router)
-        
+
         let paperSceneBuilder = CalendarPaperSceneBuilerImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearance,
@@ -108,20 +105,20 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
         let router = CalendarViewRouterImple(paperSceneBuilder)
         router.scene = viewController
         viewModel.router = router
-        
+
         return viewController
     }
 }
 
 
 extension CalendarSceneBuilderImple {
-    
+
     @MainActor
     public func makeSelectDialog(
         current: CalendarDay,
         _ listener: (any SelectDayDialogSceneListener)?
     ) -> any SelectDayDialogScene {
-    
+
         let viewModel = SelectDayDialogViewModelImple(
             currentDay: current,
             calendarUsecase: usecaseFactory.makeCalendarUsecase()
@@ -133,7 +130,7 @@ extension CalendarSceneBuilderImple {
         router.scene = viewController
         viewModel.router = router
         viewModel.listener = listener
-        
+
         return viewController
     }
 }
