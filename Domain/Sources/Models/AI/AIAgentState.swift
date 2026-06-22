@@ -9,11 +9,20 @@
 import Foundation
 
 
+// MARK: - AIAgentInputMethod
+
+public enum AIAgentInputMethod: Sendable, Equatable {
+    case voice
+    case keyboard
+}
+
+
 // MARK: - AIAgentState
 
 public enum AIAgentState: Sendable {
 
     case idle                                                       // command 없음 (초기/리셋)
+    case listening(AIAgentInputMethod)                              // 입력 대기 (voice/keyboard)
     case processing(command: String)                                // 서버 처리 중
     case confirm(command: String, message: String?, action: AIConfirmCommandAction)   // 확인 필요
     case done(message: String?)                                     // 완료
