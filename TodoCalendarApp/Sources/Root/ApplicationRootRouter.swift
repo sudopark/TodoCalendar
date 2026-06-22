@@ -387,19 +387,13 @@ extension ApplicationRootRouter {
     }
     
     private func calendarSceneBulder() -> any CalendarSceneBuilder {
-        let aiAgentSceneBuilder = AIAgentBuilderImple(
-            orchestrationUsecase: self.usecaseFactory.makeAIAgentOrchestrationUsecase(),
-            speechRecognizeUsecase: self.usecaseFactory.makeSpeechRecognizeUsecase(),
-            viewAppearance: self.viewAppearanceStore.appearance
-        )
         let builder = CalendarSceneBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance,
             eventDetailSceneBuilder: self.eventDetailSceneBuilder(),
             eventListSceneBuilder: self.eventListSceneBuilder(),
             accountUsecase: self.accountUsecase,
-            memberSceneBuilder: self.memberSceneBuilder(),
-            aiAgentSceneBuilder: aiAgentSceneBuilder
+            memberSceneBuilder: self.memberSceneBuilder()
         )
         self.deepLinkHandler.attach(calendarHandler: builder.calendarDeepLinkHandler)
         return builder
