@@ -22,20 +22,29 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
     var cancelBag: Set<AnyCancellable>! = []
     private var stubCommand: StubAICommandUsecase!
     private var stubUsage: StubAIAgentUsageUsecase!
+    private var stubSpeech: StubSpeechRecognizeUsecase!
 
     private func makeUsecase(shouldFail: Bool = false) -> AIAgentOrchestrationUsecaseImple {
         self.stubCommand = .init()
         self.stubCommand.shouldFail = shouldFail
         self.stubUsage = .init()
+        self.stubSpeech = .init()
         return AIAgentOrchestrationUsecaseImple(
             commandUsecase: self.stubCommand,
-            usageUsecase: self.stubUsage
+            usageUsecase: self.stubUsage,
+            speechRecognizeUsecase: self.stubSpeech
         )
     }
 
     private func makeUsecaseWithCommandJob(_ job: AIJob) -> AIAgentOrchestrationUsecaseImple {
         let usecase = self.makeUsecase()
         self.stubCommand.stubCommandJob = job
+        return usecase
+    }
+
+    private func makeUsecaseInIdle() -> AIAgentOrchestrationUsecaseImple {
+        let usecase = self.makeUsecase()
+        usecase.reset()
         return usecase
     }
 
@@ -53,7 +62,7 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
             self.dummyJob(.confirm(confirm), command: command)
         )
         self.stubCommand.stubConfirmJob = job
-        usecase.sendCommand(command)
+        try? usecase.submit(command)
         return usecase
     }
 
@@ -79,6 +88,9 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
     private func stateName(_ state: AIAgentState) -> String {
         switch state {
         case .idle: return "idle"
+        case .listening(.voice): return "listening.voice"
+        case .listening(.keyboard): return "listening.keyboard"
+        case .listening: return "listening"
         case .processing: return "processing"
         case .confirm: return "confirm"
         case .done: return "done"
@@ -132,37 +144,57 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
 extension AIAgentOrchestrationUsecaseImpleTests {
 
-    @Test func usecase_sendCommand_entersProcessingThenDone() async throws {
+    @Test func usecase_submit_entersProcessingThenDone() async throws {
         // given
         let expect = expectConfirm("커맨드 전송 → processing → done")
         expect.count = 2
         var done = AIJobResult.DoneResult()
         done.text = "할 일 추가 완료"
         let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        usecase.reset()
         // when
-        let states = try await self.outputs(expect, for: usecase.state) {
-            usecase.sendCommand("회의 잡아줘")
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            try? usecase.submit("회의 잡아줘")
         }
-        // then — 초기 idle 방출 없이 processing부터
+        // then — processing → done
         #expect(states.map(self.stateName) == ["processing", "done"])
         guard case .done(let message) = try #require(states.last) else { Issue.record("done 아님"); return }
         #expect(message == "할 일 추가 완료")
     }
 
-    @Test func usecase_sendCommand_empty_isIgnored() async throws {
+    @Test func usecase_submit_empty_throws() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        // when - then — 공백 입력은 throw
+        #expect(throws: (any Error).self) {
+            try usecase.submit("   ")
+        }
+    }
+
+    @Test func usecase_submit_empty_doesNotProcessCommand() async throws {
         // given
         let expect = expectConfirm("공백 커맨드 무시")
         expect.count = 2
         var done = AIJobResult.DoneResult()
         done.text = "완료"
         let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
-        // when — 공백은 무시되고 유효 커맨드만 처리 (공백이 방출을 만들지 않음)
-        let states = try await self.outputs(expect, for: usecase.state) {
-            usecase.sendCommand("   ")
-            usecase.sendCommand("회의")
+        usecase.reset()
+        // when — 공백은 throw되고 유효 커맨드만 처리
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            try? usecase.submit("   ")
+            try? usecase.submit("회의")
         }
         // then — 공백 무시라 processing부터 시작
         #expect(states.map(self.stateName) == ["processing", "done"])
+    }
+
+    @Test func usecase_submit_whenNotIdle_throws() throws {
+        // given — 이미 confirm 처리 중
+        let usecase = self.makeUsecaseInConfirm()
+        // when - then — idle이 아니면 throw(거부)
+        #expect(throws: (any Error).self) {
+            try usecase.submit("새 명령")
+        }
     }
 
     @Test func usecase_whenResultConfirm_entersConfirmWithCommand() async throws {
@@ -175,9 +207,10 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         let usecase = self.makeUsecaseWithCommandJob(
             self.dummyJob(.confirm(confirm), command: "내일 회의 잡아줘")
         )
+        usecase.reset()
         // when
-        let states = try await self.outputs(expect, for: usecase.state) {
-            usecase.sendCommand("내일 회의 잡아줘")
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            try? usecase.submit("내일 회의 잡아줘")
         }
         // then
         guard case .confirm(let command, let message, let action) = try #require(states.last) else { Issue.record("confirm 아님"); return }
@@ -193,9 +226,10 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         var fail = AIJobResult.FailResult()
         fail.reason = "이해하지 못했어요"
         let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.failed(fail)))
+        usecase.reset()
         // when
-        let states = try await self.outputs(expect, for: usecase.state) {
-            usecase.sendCommand("뭐라고")
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            try? usecase.submit("뭐라고")
         }
         // then
         guard case .failed(let reason) = try #require(states.last) else { Issue.record("failed 아님"); return }
@@ -207,9 +241,10 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         let expect = expectConfirm("처리 에러 → failed")
         expect.count = 2
         let usecase = self.makeUsecase(shouldFail: true)
+        usecase.reset()
         // when
-        let states = try await self.outputs(expect, for: usecase.state) {
-            usecase.sendCommand("회의")
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            try? usecase.submit("회의")
         }
         // then
         #expect(states.map(self.stateName).last == "failed")
@@ -265,7 +300,8 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         var done = AIJobResult.DoneResult()
         done.text = "완료"
         let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
-        usecase.sendCommand("회의")
+        usecase.reset()
+        try? usecase.submit("회의")
         try await Task.sleep(for: .milliseconds(30))
         // when
         let states = try await self.outputs(expect, for: usecase.state) {
@@ -329,8 +365,11 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     var stubRestoreJob: AIJob?
     var shouldFail: Bool = false
     var didRejectParentJobId: String?
+    var didProcessCommand: String?
+    var didRestore: Bool = false
 
     func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
+        self.didProcessCommand = commandText
         return self.jobPublisher(self.stubCommandJob)
     }
     func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error> {
@@ -340,6 +379,7 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
         self.didRejectParentJobId = action.parentJobId
     }
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
+        self.didRestore = true
         if self.shouldFail {
             return Fail(error: RuntimeError("stub fail")).eraseToAnyPublisher()
         }
@@ -367,5 +407,227 @@ private final class StubAIAgentUsageUsecase: AIAgentUsageUsecase, @unchecked Sen
     func loadUsage() async throws -> AIAgentUsage { throw RuntimeError("not imple") }
     var currentUsage: AnyPublisher<AIAgentUsage, Never> {
         return self.usageSubject.compactMap { $0 }.eraseToAnyPublisher()
+    }
+}
+
+private final class StubSpeechRecognizeUsecase: SpeechRecognizeUsecase, @unchecked Sendable {
+
+    let recognizeResultSubject = PassthroughSubject<Result<String, any Error>, Never>()
+    let recognizingTextSubject = CurrentValueSubject<String, Never>("")
+    let levelSubject = CurrentValueSubject<Float?, Never>(nil)
+
+    private(set) var didStartListening = false
+    private(set) var didStopListening = false
+    private(set) var didFinishListening = false
+    private(set) var startListeningCount = 0
+
+    func startListening() { self.didStartListening = true; self.startListeningCount += 1 }
+    func stopListening() { self.didStopListening = true }
+    func finishListening() { self.didFinishListening = true }
+
+    var recognizeResult: AnyPublisher<Result<String, any Error>, Never> {
+        self.recognizeResultSubject.eraseToAnyPublisher()
+    }
+    var recognizingText: AnyPublisher<String, Never> {
+        self.recognizingTextSubject.eraseToAnyPublisher()
+    }
+    var isRecognizingWithLevel: AnyPublisher<Float?, Never> {
+        self.levelSubject.eraseToAnyPublisher()
+    }
+}
+
+
+// MARK: - 입력 제어 / listening 상태
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    // 입력 모드 → state.listening(.voice) + speech 시작
+    @Test func usecase_enterVoiceInput_emitsListeningVoiceAndStartsSpeech() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let expect = expectConfirm("listening(.voice)")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.enterVoiceInput()
+        }
+        // then
+        #expect(self.stubSpeech.didStartListening == true)
+        if case .listening(.voice) = state {} else {
+            Issue.record("expected listening(.voice), got \(String(describing: state))")
+        }
+    }
+
+    // recognizingText passthrough
+    @Test func usecase_whileListening_forwardsRecognizingText() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("recognizing text")
+        // when
+        let text = try await self.firstOutput(expect, for: usecase.recognizingText) {
+            self.stubSpeech.recognizingTextSubject.send("오늘 회의")
+        }
+        // then
+        #expect(text == "오늘 회의")
+    }
+
+    // 인식 성공 → idle → processing(command 보존)
+    @Test func usecase_recognizeSuccess_sendsCommandAndProcessingState() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("processing")
+        expect.count = 2
+        // when
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            self.stubSpeech.recognizeResultSubject.send(.success("내일 회의"))
+        }
+        // then — listening → idle → processing
+        #expect(self.stubCommand.didProcessCommand == "내일 회의")
+        if case .processing(let c) = states.last {
+            #expect(c == "내일 회의")
+        } else {
+            Issue.record("expected processing, got \(String(describing: states.last))")
+        }
+    }
+
+    // 권한 거부 → state.idle (inputError 없음)
+    @Test func usecase_permissionDenied_stateBecomesIdle() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("idle on permission denied")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            self.stubSpeech.recognizeResultSubject.send(
+                .failure(SpeechRecognizeAuthError(micNotAvail: .denied))
+            )
+        }
+        // then
+        if case .idle = state {} else {
+            Issue.record("expected idle, got \(String(describing: state))")
+        }
+    }
+
+    // 일반 인식 실패 → state.idle
+    @Test func usecase_recognizeFailed_stateBecomesIdle() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("idle on recognize fail")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            self.stubSpeech.recognizeResultSubject.send(.failure(RuntimeError("speech fail")))
+        }
+        // then
+        if case .idle = state {} else {
+            Issue.record("expected idle, got \(String(describing: state))")
+        }
+    }
+
+    // stopInput → idle, speech stop
+    @Test func usecase_stopInput_stopsSpeechAndIdle() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("idle after stop")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.stopInput()
+        }
+        // then
+        #expect(self.stubSpeech.didStopListening == true)
+        if case .idle = state {} else {
+            Issue.record("expected idle, got \(String(describing: state))")
+        }
+    }
+
+    // enterKeyboardInput → listening(.keyboard)
+    @Test func usecase_enterKeyboardInput_emitsListeningKeyboard() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        let expect = expectConfirm("listening(.keyboard)")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.enterKeyboardInput()
+        }
+        // then
+        if case .listening(.keyboard) = state {} else {
+            Issue.record("expected listening(.keyboard), got \(String(describing: state))")
+        }
+    }
+
+    // finishVoiceInput → idle 전송 후 speech.finishListening
+    @Test func usecase_finishVoiceInput_sendsIdleThenFinishesSpeech() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("idle after finishVoiceInput")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.finishVoiceInput()
+        }
+        // then
+        #expect(self.stubSpeech.didFinishListening == true)
+        if case .idle = state {} else {
+            Issue.record("expected idle, got \(String(describing: state))")
+        }
+    }
+
+    // submit 빈 → throw, command 미전송
+    @Test func usecase_submitEmpty_throwsAndDoesNotProcessCommand() throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+        // when - then
+        #expect(throws: (any Error).self) {
+            try usecase.submit("")
+        }
+        #expect(self.stubCommand.didProcessCommand == nil)
+    }
+
+    // prepare → restore + loadUsage
+    @Test func usecase_prepare_restoresAndLoadsUsage() async throws {
+        // given
+        let usecase = self.makeUsecase()
+        // when
+        usecase.prepare()
+        // then
+        #expect(self.stubCommand.didRestore == true)
+        #expect(self.stubUsage.didRefresh == true)
+    }
+}
+
+
+// MARK: - 키보드 → 음성 전환
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    // 키보드 입력 상태에서 enterVoiceInput → listening(.voice)로 전환
+    @Test func usecase_enterVoiceInput_fromKeyboard_switchesToVoice() async throws {
+        // given — reset() 후 enterKeyboardInput()으로 .listening(.keyboard) 진입
+        let usecase = self.makeUsecase()
+        usecase.reset()
+        usecase.enterKeyboardInput()
+        let expect = expectConfirm("keyboard → voice")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.enterVoiceInput()
+        }
+        // then — .listening(.voice) 전환 + speech 시작
+        #expect(self.stubSpeech.didStartListening == true)
+        if case .listening(.voice) = state {} else {
+            Issue.record("expected listening(.voice), got \(String(describing: state))")
+        }
+    }
+
+    // 이미 .listening(.voice) 상태에서 enterVoiceInput → no-op, speech 재시작 없음
+    @Test func usecase_enterVoiceInput_alreadyVoice_isNoOp() async throws {
+        // given — idle에서 enterVoiceInput으로 .listening(.voice)
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        // when — 이미 voice-listening 상태에서 재호출
+        usecase.enterVoiceInput()
+        // then — startListening은 첫 번째 한 번만 (두 번째 호출은 no-op)
+        #expect(self.stubSpeech.startListeningCount == 1)
     }
 }
