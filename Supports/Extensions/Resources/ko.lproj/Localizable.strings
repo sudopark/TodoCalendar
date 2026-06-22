@@ -530,3 +530,5 @@
 "aiAgent::retry" = "다시";
 "aiAgent::needSignIn::title" = "로그인이 필요해요";
 "aiAgent::needSignIn::message" = "AI 빠른 입력은 로그인 후 이용할 수 있어요.";
+"aiAgent::keyboard::stop" = "중지";
+"aiAgent::keyboard::send" = "전송";

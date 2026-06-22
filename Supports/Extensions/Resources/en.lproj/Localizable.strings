@@ -530,3 +530,5 @@
 "aiAgent::retry" = "Retry";
 "aiAgent::needSignIn::title" = "Sign in required";
 "aiAgent::needSignIn::message" = "Sign in to use AI quick input.";
+"aiAgent::keyboard::stop" = "Stop";
+"aiAgent::keyboard::send" = "Send";

@@ -1,5 +1,5 @@
 //
-//  
+//
 //  DayEventListViewModel.swift
 //  CalendarScenes
 //
@@ -20,26 +20,26 @@ struct SelectedDayModel: Equatable {
     let dateText: String
     var holidayName: String?
     let lunarDateText: String
-    
+
     init(dateText: String, lunarDateText: String) {
         self.dateText = dateText
         self.lunarDateText = lunarDateText
     }
-    
+
     init(_ timeZone: TimeZone, currentModel: CurrentSelectDayModel) {
         let date = Date(timeIntervalSince1970: currentModel.range.lowerBound)
-        
+
         let formatter = DateFormatter() |> \.timeZone .~ timeZone
         formatter.dateFormat = "date_form::yyyy_MM_dd_E_".localized()
         self.dateText = formatter.string(from: date)
-        
-        let lunarFormatter = DateFormatter() 
+
+        let lunarFormatter = DateFormatter()
             |> \.timeZone .~ timeZone
             |> \.calendar .~ Calendar(identifier: .chinese)
-        
+
         lunarFormatter.dateFormat = "date_form::MM_dd".localized()
         self.lunarDateText = "🌕 \(lunarFormatter.string(from: date))"
-        
+
         self.holidayName = currentModel.holidays.isEmpty
             ? nil
             : currentModel.holidays.map { $0.name }.joined(separator: "\n")
@@ -58,6 +58,11 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func showDoneTodoList()
     func refreshUncompletedTodoEvents()
     func enterVoiceInput()
+    func finishVoiceInput()
+
+    func enterKeyboardInput()
+    func stopAIAgentInput()
+    func submitAIAgent(_ text: String)
 
     // presenter
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> { get }
@@ -65,7 +70,9 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     var selectedDay: AnyPublisher<SelectedDayModel, Never> { get }
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> { get }
     var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> { get }
-    var aiAgentEntryMode: AnyPublisher<AIAgentEntryMode, Never> { get }
+    var aiAgentState: AnyPublisher<AIAgentState, Never> { get }
+    var recognizingText: AnyPublisher<String, Never> { get }
+    var voiceLevel: AnyPublisher<Float, Never> { get }
 }
 
 
@@ -80,12 +87,8 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let foremostEventUsecase: any ForemostEventUsecase
     private let uiSettingUsecase: any UISettingUsecase
     private let accountUsecase: any AccountUsecase
-    private let aiAgentSceneBuilder: (any AIAgentSceneBuilder)?
+    private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     var router: (any DayEventListRouting)?
-
-    private var aiAgentInteractor: (any AIAgentSceneInteractor)?
-    private var didAttachAgent = false
-    private let aiAgentEntryModeSubject = CurrentValueSubject<AIAgentEntryMode, Never>(.none)
 
     init(
         calendarUsecase: any CalendarUsecase,
@@ -95,7 +98,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         foremostEventUsecase: any ForemostEventUsecase,
         uiSettingUsecase: any UISettingUsecase,
         accountUsecase: any AccountUsecase,
-        aiAgentSceneBuilder: (any AIAgentSceneBuilder)? = nil
+        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     ) {
         self.calendarUsecase = calendarUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
@@ -104,28 +107,28 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         self.foremostEventUsecase = foremostEventUsecase
         self.uiSettingUsecase = uiSettingUsecase
         self.accountUsecase = accountUsecase
-        self.aiAgentSceneBuilder = aiAgentSceneBuilder
+        self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
 
         self.internalBind()
     }
-    
-    
+
+
     private struct CurrentDayAndEventLists {
         let currentDay: CurrentSelectDayModel
         let events: [any CalendarEvent]
     }
-    
+
     private struct Subject {
         let currentDayAndEventLists = CurrentValueSubject<CurrentDayAndEventLists?, Never>(nil)
         let tagMaps = CurrentValueSubject<[String: any EventTag], Never>([:])
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
     }
-    
+
     private var cancellables: Set<AnyCancellable> = []
     private let subject = Subject()
     private let cvmCombineScheduler = DispatchQueue(label: "serial-combine")
-    
+
     private func internalBind() {
         self.accountUsecase.currentAccountInfo
             .map { $0 != nil }
@@ -133,6 +136,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
                 self?.subject.isSignedIn.send(signedIn)
             }
             .store(in: &self.cancellables)
+
     }
 }
 
@@ -141,15 +145,6 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
 
 extension DayEventListViewModelImple {
 
-    @MainActor
-    private func attachAIAgentIfNeeded() {
-        guard !self.didAttachAgent else { return }
-        self.didAttachAgent = true
-        guard let comp = self.aiAgentSceneBuilder?.makeInlineComponent(listener: self) else { return }
-        self.aiAgentInteractor = comp.interactor
-        self.aiAgentInteractor?.prepare()
-    }
-
     func selectedDayChanaged(
         _ newDay: CurrentSelectDayModel,
         and eventThatDay: [any CalendarEvent]
@@ -157,17 +152,14 @@ extension DayEventListViewModelImple {
         self.subject.currentDayAndEventLists.send(
             .init(currentDay: newDay, events: eventThatDay)
         )
-        Task { @MainActor [weak self] in
-            self?.attachAIAgentIfNeeded()
-        }
     }
-    
+
     func addNewTodoQuickly(withName: String) {
         let newPendingTodo = PendingTodoEventCellViewModel(
             name: withName, defaultTagId: nil
         )
         self.updatePendingTodos { $0 + [newPendingTodo] }
-        
+
         let params = TodoMakeParams() |> \.name .~ withName
         Task { [weak self] in
             do {
@@ -181,7 +173,7 @@ extension DayEventListViewModelImple {
         }
         .store(in: &self.cancellables)
     }
-    
+
     private func updatePendingTodos(
         _ mutating: ([PendingTodoEventCellViewModel]) -> [PendingTodoEventCellViewModel]
     ) {
@@ -189,7 +181,7 @@ extension DayEventListViewModelImple {
         let new = mutating(old)
         self.subject.pendingTodoEvents.send(new)
     }
-    
+
     func makeTodoEvent(with givenName: String) {
         guard let selectDate = self.currentDate else { return }
         let params = MakeEventParams(
@@ -197,23 +189,23 @@ extension DayEventListViewModelImple {
         )
         self.router?.routeToMakeNewEvent(params)
     }
-    
+
     func makeEvent() {
         guard let selectDate = self.currentDate else { return }
         let params = MakeEventParams(selectedDate: selectDate, makeSource: .schedule())
         self.router?.routeToMakeNewEvent(params)
     }
-    
+
     func makeEventByTemplate() {
         self.router?.routeToSelectTemplateForMakeEvent()
     }
-    
+
     private var currentDate: Date? {
         guard let current = self.subject.currentDayAndEventLists.value?.currentDay
         else { return nil }
         return Date(timeIntervalSince1970: current.range.lowerBound)
     }
-    
+
     func showDoneTodoList() {
         self.router?.showDoneTodoList()
     }
@@ -227,7 +219,28 @@ extension DayEventListViewModelImple {
             self.confirmSignInForAIAgent()
             return
         }
-        self.aiAgentInteractor?.enterVoiceInput()
+        self.aiAgentOrchestrationUsecase.enterVoiceInput()
+    }
+
+    func finishVoiceInput() {
+        self.aiAgentOrchestrationUsecase.finishVoiceInput()
+    }
+
+    func enterKeyboardInput() {
+        self.aiAgentOrchestrationUsecase.enterKeyboardInput()
+        self.router?.routeToAIKeyboardInput()
+    }
+
+    func stopAIAgentInput() {
+        self.aiAgentOrchestrationUsecase.stopInput()
+    }
+
+    func submitAIAgent(_ text: String) {
+        do {
+            try self.aiAgentOrchestrationUsecase.submit(text)
+        } catch {
+            self.router?.showError(error)
+        }
     }
 
     private func confirmSignInForAIAgent() {
@@ -243,18 +256,18 @@ extension DayEventListViewModelImple {
 // MARK: - DayEventListViewModelImple Presenter
 
 extension DayEventListViewModelImple {
-    
+
     var foremostEventModel: AnyPublisher<
         (any EventCellViewModel)?, Never
     > {
-        
+
         let asCellViewModel: (
             (any ForemostMarkableEvent)?, CalendarComponent.Day, TimeZone, Bool
         ) -> (any EventCellViewModel)?
         asCellViewModel = { event, today, timeZone, is24Form in
             guard let todayRange = today.dayRange(timeZone)
             else { return nil }
-            
+
             switch event {
             case let todo as TodoEvent:
                 let calendarEvent = TodoCalendarEvent(todo, in: timeZone, isForemost: true)
@@ -262,7 +275,7 @@ extension DayEventListViewModelImple {
                     calendarEvent, in: todayRange, timeZone, is24Form,
                     forceShowEventDateDurationText: true
                 )
-                
+
             case let schedule as ScheduleEvent:
                 let calendarEvent = ScheduleCalendarEvent.events(
                     from: schedule, in: timeZone,
@@ -288,7 +301,7 @@ extension DayEventListViewModelImple {
         return foremostModel
             .eraseToAnyPublisher()
     }
-    
+
     var uncompletedTodoEventModels: AnyPublisher<[TodoEventCellViewModel], Never> {
         let asCellViewModels: (
             [TodoCalendarEvent], CalendarComponent.Day, TimeZone, Bool
@@ -310,7 +323,7 @@ extension DayEventListViewModelImple {
         .compactMap(asCellViewModels)
         .eraseToAnyPublisher()
     }
-    
+
     var selectedDay: AnyPublisher<SelectedDayModel, Never> {
         let transform: (TimeZone, CurrentSelectDayModel) -> SelectedDayModel?
         transform = { timeZone, currentDay in
@@ -324,59 +337,65 @@ extension DayEventListViewModelImple {
         .removeDuplicates()
         .eraseToAnyPublisher()
     }
-    
+
     var cellViewModels: AnyPublisher<[any EventCellViewModel], Never> {
-        
+
         let combineEvents: (CurrentAndEvents, [PendingTodoEventCellViewModel]) -> [any EventCellViewModel]
         combineEvents = { pair, pending in
             return pair.0 + pending + pair.1
         }
-        
+
         let cells = Publishers.CombineLatest(
             self.currentAndEventCellViewModels.receive(on: self.cvmCombineScheduler),
             self.subject.pendingTodoEvents.receive(on: self.cvmCombineScheduler)
         )
         .map(combineEvents)
-        
+
         return cells
             .eraseToAnyPublisher()
     }
-    
+
     var foremostEventMarkingStatus: AnyPublisher<ForemostMarkingStatus, Never> {
         return self.foremostEventUsecase.foremostEventMarkingStatus
     }
 
-    var aiAgentEntryMode: AnyPublisher<AIAgentEntryMode, Never> {
-        return self.aiAgentEntryModeSubject
-            .removeDuplicates()
-            .eraseToAnyPublisher()
+    var aiAgentState: AnyPublisher<AIAgentState, Never> {
+        return self.aiAgentOrchestrationUsecase.state
     }
-    
+
+    var recognizingText: AnyPublisher<String, Never> {
+        return self.aiAgentOrchestrationUsecase.recognizingText
+    }
+
+    var voiceLevel: AnyPublisher<Float, Never> {
+        return self.aiAgentOrchestrationUsecase.voiceLevel
+    }
+
     private typealias CurrentAndEvents = ([any EventCellViewModel], [any EventCellViewModel])
-    
+
     private var currentAndEventCellViewModels: AnyPublisher<CurrentAndEvents, Never> {
         let asCellViewModel: (
             CurrentDayAndEventLists, TimeZone, [TodoCalendarEvent], Bool
         ) -> CurrentAndEvents
         asCellViewModel = { dayAndEvents, timeZone, currentTodos, is24HourForm in
-            
+
             let range = dayAndEvents.currentDay.range
             let currentTodoCells = currentTodos
                 .sortedByCreateTime()
                 .compactMap { TodoEventCellViewModel($0, in: range, timeZone, is24HourForm) }
-            
+
             let eventCellsWithTime = dayAndEvents.events
                 .sortedByEventTime()
                 .compactMap { event -> (any EventCellViewModel)? in
                     switch event {
                     case let todo as TodoCalendarEvent:
                         return TodoEventCellViewModel(todo, in: range, timeZone, is24HourForm)
-                        
+
                     case let schedule as ScheduleCalendarEvent:
                         return ScheduleEventCellViewModel(schedule, in: range, timeZone: timeZone, is24HourForm)
                     case let holiday as HolidayCalendarEvent:
                         return HolidayEventCellViewModel(holiday)
-                        
+
                     case let google as GoogleCalendarEvent:
                         return GoogleCalendarEventCellViewModel(google, in: range, timeZone, is24HourForm)
 
@@ -386,17 +405,17 @@ extension DayEventListViewModelImple {
                     default: return nil
                 }
             }
-            
+
             return (currentTodoCells, eventCellsWithTime)
         }
-        
+
         let filterForemost: (CurrentAndEvents) -> CurrentAndEvents = { pair in
             return (
                 pair.0.filter { !$0.isForemost },
                 pair.1.filter { !$0.isForemost }
             )
         }
-        
+
         return Publishers.CombineLatest4(
             self.subject.currentDayAndEventLists.compactMap { $0 },
             self.calendarSettingUsecase.currentTimeZone,
@@ -409,32 +428,19 @@ extension DayEventListViewModelImple {
     }
 }
 
-// MARK: - DayEventListViewModelImple AIAgentSceneListener
-
-extension DayEventListViewModelImple: AIAgentSceneListener {
-
-    func aiAgent(didChangeMode mode: AIAgentEntryMode) {
-        self.aiAgentEntryModeSubject.send(mode)
-    }
-
-    func aiAgent(didUpdateVoiceLevel level: Float) { /* Phase 2 */ }
-    func aiAgent(didUpdateRecognizingText text: String) { /* Phase 2 */ }
-    func aiAgentDidRequestKeyboardEntryAvailable() { /* Phase 2 */ }
-}
-
 
 // MARK: - private helpers
 
 private extension EventTime {
-    
+
     func durationText(_ timeZone: TimeZone) -> String? {
-        
+
         switch self {
         case .period(let range):
             let formatter = DateFormatter() |> \.timeZone .~ timeZone
             formatter.dateFormat = R.String.dateFormMMMDHHMm
             return "\(range.rangeText(formatter))(\(range.totalPeriodText()))"
-            
+
         case .allDay(let range, let secondsFrom):
             let formatter = DateFormatter() |> \.timeZone .~ timeZone
             formatter.dateFormat = R.String.dateFormMMMD
@@ -443,26 +449,26 @@ private extension EventTime {
             let totalPeriodText = days > 0 ? R.String.calendarEventTimePeriodSomeDays(days+1) : nil
             let rangeText = shifttingRange.rangeText(formatter)
             return totalPeriodText.map { "\(rangeText)(\($0))"}
-            
+
         default: return nil
         }
     }
 }
 
 private extension Range where Bound == TimeInterval {
-    
+
     func rangeText(_ formatter: DateFormatter) -> String {
         let start = formatter.string(from: Date(timeIntervalSince1970: self.lowerBound))
         let end = formatter.string(from: Date(timeIntervalSince1970: self.upperBound))
         return "\(start) ~ \(end)"
     }
-    
+
     func totalPeriodText() -> String {
         let length = Int(self.upperBound - self.lowerBound)
         let days = length / (24 * 3600)
         let hours = length % (24 * 3600) / 3600
         let minutes = length % 3600 / 60
-        
+
         switch (days, hours, minutes) {
         case let (d, h, m) where d == 0 && h == 0:
             return R.String.calendarEventTimePeriodSomeMinutes(m)

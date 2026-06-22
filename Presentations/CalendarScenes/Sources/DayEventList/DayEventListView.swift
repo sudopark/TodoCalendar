@@ -1,5 +1,5 @@
 //
-//  
+//
 //  DayEventListView.swift
 //  CalendarScenes
 //
@@ -21,22 +21,34 @@ import CommonPresentation
 // MARK: - DayEventListViewController
 
 @Observable final class DayEventListViewState {
-    
+
     @ObservationIgnored private var didBind = false
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
-    
+
     fileprivate var foremostModel: (any EventCellViewModel)?
     fileprivate var uncompletedTodos: [TodoEventCellViewModel] = []
     fileprivate var dayModel: SelectedDayModel?
     fileprivate var cellViewModels: [any EventCellViewModel] = []
     fileprivate var foremostEventMarkingStatus: ForemostMarkingStatus = .idle
-    fileprivate var aiAgentEntryMode: AIAgentEntryMode = .none
+    fileprivate var aiAgentState: AIAgentState = .idle
+    fileprivate var recognizingText: String = ""
+    fileprivate var voiceLevel: Float = 0
+
+    fileprivate var isListening: Bool {
+        if case .listening = aiAgentState { return true }
+        return false
+    }
+
+    fileprivate var isAIIdle: Bool {
+        if case .idle = aiAgentState { return true }
+        return false
+    }
 
     func bind(_ viewModel: any DayEventListViewModel, _ appearance: ViewAppearance) {
-        
+
         guard self.didBind == false else { return }
         self.didBind = true
-        
+
         viewModel.foremostEventModel
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self, weak appearance] model in
@@ -45,7 +57,7 @@ import CommonPresentation
                 }
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.uncompletedTodoEventModels
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self, weak appearance] models in
@@ -54,14 +66,14 @@ import CommonPresentation
                 }
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.selectedDay
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] model in
                 self?.dayModel = model
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.cellViewModels
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self, weak appearance] cellViewModels in
@@ -70,7 +82,7 @@ import CommonPresentation
                 }
             })
             .store(in: &self.cancellables)
-        
+
         viewModel.foremostEventMarkingStatus
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self, weak appearance] status in
@@ -80,11 +92,21 @@ import CommonPresentation
             })
             .store(in: &self.cancellables)
 
-        viewModel.aiAgentEntryMode
+        viewModel.aiAgentState
             .receive(on: RunLoop.main)
-            .sink(receiveValue: { [weak self] mode in
-                self?.aiAgentEntryMode = mode
+            .sink(receiveValue: { [weak self] state in
+                self?.aiAgentState = state
             })
+            .store(in: &self.cancellables)
+
+        viewModel.recognizingText
+            .receive(on: RunLoop.main)
+            .sink { [weak self] text in self?.recognizingText = text }
+            .store(in: &self.cancellables)
+
+        viewModel.voiceLevel
+            .receive(on: RunLoop.main)
+            .sink { [weak self] level in self?.voiceLevel = level }
             .store(in: &self.cancellables)
     }
 }
@@ -101,6 +123,10 @@ final class DayEventListViewEventHandler: Observable {
     var handleMoreAction: (any EventCellViewModel, EventListMoreAction) -> Void = { _, _ in }
     var refreshUncompletedTodos: () -> Void = { }
     var enterVoiceInput: () -> Void = { }
+    var finishVoiceInput: () -> Void = { }
+    var enterKeyboardInput: () -> Void = { }
+    var stopAIAgentInput: () -> Void = { }
+    var submitAIAgent: (String) -> Void = { _ in }
 
     func bind(
         _ viewModel: any DayEventListViewModel,
@@ -119,6 +145,10 @@ final class DayEventListViewEventHandler: Observable {
         self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
         self.refreshUncompletedTodos = viewModel.refreshUncompletedTodoEvents
         self.enterVoiceInput = viewModel.enterVoiceInput
+        self.finishVoiceInput = { [weak viewModel] in viewModel?.finishVoiceInput() }
+        self.enterKeyboardInput = { [weak viewModel] in viewModel?.enterKeyboardInput() }
+        self.stopAIAgentInput = { [weak viewModel] in viewModel?.stopAIAgentInput() }
+        self.submitAIAgent = { [weak viewModel] text in viewModel?.submitAIAgent(text) }
     }
 }
 
@@ -126,14 +156,14 @@ final class DayEventListViewEventHandler: Observable {
 // MARK: - DayEventListContainerView
 
 struct DayEventListContainerView: View {
-    
+
     @State private var state: DayEventListViewState = .init()
     private let viewAppearance: ViewAppearance
     private let eventHandler: DayEventListViewEventHandler
     private let pendingDoneState: PendingCompleteTodoState
-    
+
     var stateBinding: (DayEventListViewState) -> Void = { _ in }
-    
+
     init(
         viewAppearance: ViewAppearance,
         eventHandler: DayEventListViewEventHandler,
@@ -143,7 +173,7 @@ struct DayEventListContainerView: View {
         self.eventHandler = eventHandler
         self.pendingDoneState = pendingDoneState
     }
-    
+
     var body: some View {
         return DayEventListView()
             .onAppear {
@@ -159,39 +189,42 @@ struct DayEventListContainerView: View {
 // MARK: - DayEventListView
 
 struct DayEventListView: View {
-    
+
     @Environment(DayEventListViewState.self) private var state
     @Environment(PendingCompleteTodoState.self) private var pendingDoneState
     @Environment(DayEventListViewEventHandler.self) private var eventHandler
     @Environment(ViewAppearance.self) private var appearance
     @FocusState var isFocusInput: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-         
+
             if let foremost = self.state.foremostModel {
                 self.foremostSectionView(foremost)
             }
-            
+
             if !self.state.uncompletedTodos.isEmpty {
                 self.uncompletedTodosSectionView(self.state.uncompletedTodos)
             }
-         
+
             // 날짜 및 이벤트 목록
             VStack(alignment: .leading, spacing: 6) {
-                
+
                 // 상단 날짜 표시 헤더
                 self.dateInfoView()
-                
+
                 // 이벤트 리스트
                 self.eventListView()
-                
-                HStack(spacing: 8) {
-                    QuickAddNewTodoView(isFocusInput: $isFocusInput)
-                        .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
-                        .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
 
-                    aiAgentEntryButton()
+                if self.state.isListening {
+                    AIAgentInlineInputView()
+                } else {
+                    HStack(spacing: 8) {
+                        QuickAddNewTodoView(isFocusInput: $isFocusInput)
+                            .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
+                            .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
+                        aiAgentEntryButton()
+                    }
                 }
 
                 addNewButton()
@@ -203,9 +236,9 @@ struct DayEventListView: View {
         .padding()
         .background(self.appearance.colorSet.bg0.asColor)
     }
-    
+
     private func aiAgentEntryButton() -> some View {
-        let isIdle = self.state.aiAgentEntryMode == .idle
+        let isIdle = self.state.isAIIdle
         return Button {
             self.isFocusInput = false
             self.eventHandler.enterVoiceInput()
@@ -242,7 +275,7 @@ struct DayEventListView: View {
                 .frame(maxWidth: .infinity)
                 .backgroundAsRoundedRectForEventList(self.appearance)
             }
-            
+
             // TODO: 템플릿 추가버튼 임시 비활성화
 //            Button {
 //                self.eventHandler.requestAddNewEventWhetherUsingTemplate(true)
@@ -254,7 +287,7 @@ struct DayEventListView: View {
 //            }
         }
     }
-    
+
     private func foremostSectionView(_ foremost: any EventCellViewModel) -> some View {
         ForemostEventView(viewModel: foremost, foremostEventMarkingStatus: state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
@@ -274,7 +307,7 @@ struct DayEventListView: View {
                 eventHandler.handleMoreAction($0, $1)
             }
     }
-    
+
     private func uncompletedTodosSectionView(_ models: [TodoEventCellViewModel]) -> some View {
         UncompletedTodoView(models, state.foremostEventMarkingStatus)
             .eventHandler(\.requestDoneTodo) {
@@ -299,24 +332,24 @@ struct DayEventListView: View {
                 eventHandler.refreshUncompletedTodos()
             }
     }
-    
+
     private func dateInfoView() -> some View {
         VStack(alignment: .leading) {
-            
+
             if let holidayName = self.state.dayModel?.holidayName, self.appearance.showHoliday {
                 Text(holidayName)
                     .font(appearance.eventSubNormalTextFontOnList().asFont)
                     .foregroundStyle(appearance.colorSet.holidayOrWeekEndWithAccent.asColor)
             }
-            
+
             // 상단 날짜표시 헤더 - 날짜 및 음력 표시
             HStack {
-                
+
                 Text(self.state.dayModel?.dateText ?? "")
                     .font(self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont)
                     .foregroundColor(self.appearance.colorSet.text0.asColor)
-                    
-                
+
+
                 if self.appearance.showLunarCalendarDate {
                     Text(self.state.dayModel?.lunarDateText ?? "")
                         .font(
@@ -324,9 +357,9 @@ struct DayEventListView: View {
                         )
                         .foregroundColor(self.appearance.colorSet.text2.asColor)
                 }
-                
+
                 Spacer()
-                
+
                 Button {
                     self.isFocusInput = false
                     self.eventHandler.showDoneTodoList()
@@ -337,11 +370,11 @@ struct DayEventListView: View {
             .padding(.bottom, 3)
         }
     }
-    
+
     private func eventListView() -> some View {
         VStack(alignment: .leading, spacing: 6) {
             ForEach(self.state.cellViewModels, id: \.eventIdentifier) { cellViewModel in
-                
+
                 EventListCellView(cellViewModel: cellViewModel, foremostEventMarkingStatus: state.foremostEventMarkingStatus)
                     .eventHandler(\.requestDoneTodo) {
                         self.isFocusInput = false
@@ -366,25 +399,25 @@ struct DayEventListView: View {
 }
 
 private struct QuickAddNewTodoView: View {
-    
+
     @Environment(DayEventListViewState.self) private var state
     @Environment(ViewAppearance.self) private var appearance
-    
+
     @State private var newTodoName: String = ""
     @FocusState.Binding var isFocusInput: Bool
     private var isEntering: Bool { !self.newTodoName.isEmpty }
-    
+
     private func resetStates() {
         self.newTodoName = ""
         self.isFocusInput = false
     }
-    
+
     fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
     fileprivate var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
-    
+
     var body: some View {
         HStack(spacing: 8) {
-            
+
             Text(R.String.calendarEventTimeTodo)
                 .minimumScaleFactor(0.7)
                 .font(
@@ -392,11 +425,11 @@ private struct QuickAddNewTodoView: View {
                 )
                 .foregroundColor(self.appearance.colorSet.text0.asColor)
                 .frame(width: 52)
-            
+
             RoundedRectangle(cornerRadius: 3)
                 .fill(self.appearance.tagColors.defaultColor.asColor)
                 .frame(width: 6)
-            
+
             HStack(spacing: 8) {
                 TextField(
                     "",
@@ -415,7 +448,7 @@ private struct QuickAddNewTodoView: View {
                     self.resetStates()
                 }
                 .submitLabel(.done)
-                
+
                 if !self.newTodoName.isEmpty {
                     Button {
                         let newName = self.newTodoName
@@ -465,7 +498,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 // 완료처리 실패하게 하던지
                 withAnimation {
 //                    state.requestDoneTodoIds = []
-                    
+
                     // 혹은 완료처리 성공 이후 셀 목록 업데이트 시뮬레이션
                     let newCells = state.cellViewModels.filter { $0.todoEventId != id }
                     state.cellViewModels = newCells
@@ -475,16 +508,16 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
         eventHandler.addNewTodoQuickly = { name in
             let pending = PendingTodoEventCellViewModel(name: name, defaultTagId: nil)
             let index = state.cellViewModels.firstIndex(where: { !$0.name.starts(with: "current todo") })!
-            
+
             withAnimation {
                 state.cellViewModels.insert(pending, at: index)
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     if let index = state.cellViewModels.firstIndex(where: { $0.eventIdentifier == pending.eventIdentifier }) {
                         withAnimation {
                             // 삭제하여 실패했을때 가정
 //                                state.cellViewModels.remove(at: index)
-                            
+
                             // 추가하여 성공했을때 가정
                             let newCell = TodoEventCellViewModel("new-current-todo", name: name)
                                 |> \.periodText .~ .singleText(.init(text: "Todo".localized()))
@@ -501,7 +534,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
             .environment(viewAppearance)
         return containerView
     }
-    
+
     private static func dummyUncompleteds() -> [TodoEventCellViewModel] {
         return [
             .init("uncompleted-todo1", name: "uncompleted - todo1")
@@ -517,7 +550,7 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)",
         ]
     }
-    
+
     private static func makeDummyCells() -> [any EventCellViewModel] {
         let currentTodoCells: [TodoEventCellViewModel] = [
             .init("current-todo1", name: "current todo 1")
@@ -588,18 +621,89 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
                 )
                 |> \.periodDescription .~ "Sep 7 00:00 ~ Sep 10 23:59(3days 23hours)"
         ]
-        
+
         let holidayCell = HolidayEventCellViewModel(
             HolidayCalendarEvent(.init(uuid: "hd", dateString: "2023-09-30", name: "추석"), in: TimeZone.current)!
         )
-        
+
         let google = GoogleCalendar.Event("some", "cal", accountId: "preview@gmail.com", name: "google event", colorId: "colorId", time: .at(100))
         let googleEvent = GoogleCalendarEvent(google, in: TimeZone.current)
         let googleCell = GoogleCalendarEventCellViewModel(googleEvent, in: 0..<200, TimeZone.current, true)
-        
+
         let basicCells: [any EventCellViewModel] = currentTodoCells + scheduleCells
 //        + todoCells
         return basicCells + [holidayCell] + [googleCell!]
 //        .shuffled()
+    }
+}
+
+
+// MARK: - AIAgentInlineInputView (inline component, only shown when listening)
+
+private struct AIAgentInlineInputView: View {
+
+    @Environment(DayEventListViewState.self) private var state: DayEventListViewState
+    @Environment(DayEventListViewEventHandler.self) private var eventHandler: DayEventListViewEventHandler
+    @Environment(ViewAppearance.self) private var appearance: ViewAppearance
+
+    var body: some View {
+        voiceModeView()
+    }
+
+    private func voiceModeView() -> some View {
+        HStack(spacing: 8) {
+
+            Button {
+                self.eventHandler.enterKeyboardInput()
+            } label: {
+                Image(systemName: "keyboard")
+                    .foregroundColor(self.appearance.colorSet.text0.asColor)
+            }
+            .frame(width: 52)
+
+            RoundedRectangle(cornerRadius: 3)
+                .fill(self.appearance.tagColors.defaultColor.asColor)
+                .frame(width: 6)
+
+            VoiceWaveformView(
+                level: self.state.voiceLevel,
+                tintColor: self.appearance.colorSet.text1.asColor
+            )
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+
+            HStack(spacing: 4) {
+                Button {
+                    self.eventHandler.stopAIAgentInput()
+                } label: {
+                    Circle()
+                        .fill(
+                            appearance.colorSet.secondaryBtnBackground.asColor
+                        )
+                        .overlay(
+                            Image(systemName: "square")
+                                .foregroundColor(self.appearance.colorSet.secondaryBtnText.asColor)
+                                .padding(8)
+                        )
+                }
+
+                Button {
+                    self.eventHandler.finishVoiceInput()
+                } label: {
+                    Circle()
+                        .fill(
+                            appearance.colorSet.primaryBtnBackground.asColor
+                        )
+                        .overlay(
+                            Image(systemName: "arrow.up")
+                                .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
+                                .padding(8)
+                        )
+                }
+            }
+        }
+        .padding(.vertical, 8).padding(.horizontal, 8)
+        .frame(height: 50)
+        .backgroundAsRoundedRectForEventList(appearance)
     }
 }

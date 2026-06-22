@@ -1,5 +1,5 @@
 //
-//  
+//
 //  DayEventListRouter.swift
 //  CalendarScenes
 //
@@ -22,6 +22,7 @@ protocol DayEventListRouting: Routing, Sendable {
     func routeToSelectTemplateForMakeEvent()
     func showDoneTodoList()
     func routeToSignIn()
+    func routeToAIKeyboardInput()
 }
 
 // MARK: - Router
@@ -31,35 +32,41 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
     private let eventDetailSceneBuilder: any EventDetailSceneBuilder
     private let eventListSceneBuilder: any EventListSceneBuiler
     private let memberSceneBuilder: any MemberSceneBuilder
+    private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
+    private let viewAppearance: ViewAppearance
 
     init(
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
         eventListSceneBuilder: any EventListSceneBuiler,
-        memberSceneBuilder: any MemberSceneBuilder
+        memberSceneBuilder: any MemberSceneBuilder,
+        aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
+        viewAppearance: ViewAppearance
     ) {
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
+        self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
+        self.viewAppearance = viewAppearance
     }
 }
 
 
 extension DayEventListRouter {
-    
+
     // TODO: router implememnts
-    
+
     func routeToMakeNewEvent(_ withParams: MakeEventParams) {
         Task { @MainActor in
-            
+
             let next = self.eventDetailSceneBuilder.makeNewEventScene(withParams)
             self.scene?.present(next, animated: true)
         }
     }
-    
+
     func routeToSelectTemplateForMakeEvent() {
         // TODO: route to tempplate select scene
     }
-    
+
     func showDoneTodoList() {
         Task { @MainActor in
             let next = self.eventListSceneBuilder.makeDoneTodoEventListScene()
@@ -70,6 +77,13 @@ extension DayEventListRouter {
     func routeToSignIn() {
         Task { @MainActor in
             let next = self.memberSceneBuilder.makeSignInScene()
+            self.showBottomSlide(next)
+        }
+    }
+
+    func routeToAIKeyboardInput() {
+        Task { @MainActor in
+            let next = self.aiKeyboardInputSceneBuilder.makeScene()
             self.showBottomSlide(next)
         }
     }

@@ -1,5 +1,5 @@
 //
-//  
+//
 //  DayEventListBuilderImple.swift
 //  CalendarScenes
 //
@@ -23,7 +23,6 @@ final class DayEventListSceneBuilerImple {
     private let eventListSceneBuilder: any EventListSceneBuiler
     private let accountUsecase: any AccountUsecase
     private let memberSceneBuilder: any MemberSceneBuilder
-    private let aiAgentSceneBuilder: (any AIAgentSceneBuilder)?
 
     init(
         usecaseFactory: any UsecaseFactory,
@@ -31,8 +30,7 @@ final class DayEventListSceneBuilerImple {
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
         eventListSceneBuilder: any EventListSceneBuiler,
         accountUsecase: any AccountUsecase,
-        memberSceneBuilder: any MemberSceneBuilder,
-        aiAgentSceneBuilder: (any AIAgentSceneBuilder)? = nil
+        memberSceneBuilder: any MemberSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -40,13 +38,12 @@ final class DayEventListSceneBuilerImple {
         self.eventListSceneBuilder = eventListSceneBuilder
         self.accountUsecase = accountUsecase
         self.memberSceneBuilder = memberSceneBuilder
-        self.aiAgentSceneBuilder = aiAgentSceneBuilder
     }
 }
 
 
 extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
-    
+
     func makeSceneComponent() -> DayEventListSceneComponent {
         let calendarSettingUsecase = self.usecaseFactory.makeCalendarSettingUsecase()
         let todoEventUsecase = self.usecaseFactory.makeTodoEventUsecase()
@@ -62,6 +59,7 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             uiSettingUsecase: uiSettingUsecase
         )
+        let aiAgentOrchestrationUsecase = self.usecaseFactory.makeAIAgentOrchestrationUsecase()
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: usecaseFactory.makeCalendarUsecase(),
             calendarSettingUsecase: calendarSettingUsecase,
@@ -70,12 +68,18 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             foremostEventUsecase: foremostEventUsecase,
             uiSettingUsecase: uiSettingUsecase,
             accountUsecase: self.accountUsecase,
-            aiAgentSceneBuilder: self.aiAgentSceneBuilder
+            aiAgentOrchestrationUsecase: aiAgentOrchestrationUsecase
+        )
+        let aiKeyboardInputSceneBuilder = AIAgentKeyboardInputBuilderImple(
+            aiAgentOrchestrationUsecase: aiAgentOrchestrationUsecase,
+            viewAppearance: self.viewAppearance
         )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
-            memberSceneBuilder: self.memberSceneBuilder
+            memberSceneBuilder: self.memberSceneBuilder,
+            aiKeyboardInputSceneBuilder: aiKeyboardInputSceneBuilder,
+            viewAppearance: self.viewAppearance
         )
         viewModel.router = router
         return .init(viewModel: viewModel, router: router)
