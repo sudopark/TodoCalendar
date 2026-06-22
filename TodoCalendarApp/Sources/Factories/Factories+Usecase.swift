@@ -22,6 +22,7 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
     let eventSyncUsecase: any EventSyncUsecase
     let eventUploadService: any EventUploadService = NotNeedEventUploadService()
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
+    let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let applicationBase: ApplicationBase
 
     init(
@@ -39,6 +40,36 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
         self.eventSyncUsecase = NotNeedEventSyncUsecase()
         self.applicationBase = applicationBase
+
+        let aiLocalStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let aiRepository = AICommandRepositoryImple(
+            remote: applicationBase.remoteAPI,
+            localStorage: aiLocalStorage
+        )
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        let calendarSettingUsecase = CalendarSettingUsecaseImple(
+            settingRepository: calendarSettingRepository,
+            shareDataStore: applicationBase.sharedDataStore
+        )
+        let aiCommandUsecase = AICommandUsecaseImple(
+            repository: aiRepository,
+            calendarSettingUsecase: calendarSettingUsecase
+        )
+        let aiUsageUsecase = AIAgentUsageUsecaseImple(
+            repository: aiRepository,
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+        let speech = SpeechRecognizeUsecaseImple(
+            service: SpeechRecognizeServiceImple(),
+            permissionChecker: SpeechRecognizePermissionCheckerImple()
+        )
+        self.aiAgentOrchestrationUsecase = AIAgentOrchestrationUsecaseImple(
+            commandUsecase: aiCommandUsecase,
+            usageUsecase: aiUsageUsecase,
+            speechRecognizeUsecase: speech
+        )
     }
     
     var eventNotifyService: SharedEventNotifyService {
@@ -300,23 +331,7 @@ extension NonLoginUsecaseFactoryImple {
 extension NonLoginUsecaseFactoryImple {
 
     func makeAIAgentOrchestrationUsecase() -> any AIAgentOrchestrationUsecase {
-        let localStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
-        let repository = AICommandRepositoryImple(
-            remote: applicationBase.remoteAPI,
-            localStorage: localStorage
-        )
-        let commandUsecase = AICommandUsecaseImple(
-            repository: repository,
-            calendarSettingUsecase: self.makeCalendarSettingUsecase()
-        )
-        let usageUsecase = AIAgentUsageUsecaseImple(
-            repository: repository,
-            sharedDataStore: applicationBase.sharedDataStore
-        )
-        return AIAgentOrchestrationUsecaseImple(
-            commandUsecase: commandUsecase,
-            usageUsecase: usageUsecase
-        )
+        return self.aiAgentOrchestrationUsecase
     }
 
     func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
@@ -367,6 +382,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let eventSyncUsecase: any EventSyncUsecase
     let eventUploadService: any EventUploadService
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
+    let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     private let applicationBase: ApplicationBase
 
     init(
@@ -435,15 +451,45 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             eventSyncMediator: mediator
         )
         self.eventUploadService = uploadService
+
+        let aiLocalStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
+        let aiRepository = AICommandRepositoryImple(
+            remote: applicationBase.remoteAPI,
+            localStorage: aiLocalStorage
+        )
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: applicationBase.userDefaultEnvironmentStorage
+        )
+        let calendarSettingUsecase = CalendarSettingUsecaseImple(
+            settingRepository: calendarSettingRepository,
+            shareDataStore: applicationBase.sharedDataStore
+        )
+        let aiCommandUsecase = AICommandUsecaseImple(
+            repository: aiRepository,
+            calendarSettingUsecase: calendarSettingUsecase
+        )
+        let aiUsageUsecase = AIAgentUsageUsecaseImple(
+            repository: aiRepository,
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+        let speech = SpeechRecognizeUsecaseImple(
+            service: SpeechRecognizeServiceImple(),
+            permissionChecker: SpeechRecognizePermissionCheckerImple()
+        )
+        self.aiAgentOrchestrationUsecase = AIAgentOrchestrationUsecaseImple(
+            commandUsecase: aiCommandUsecase,
+            usageUsecase: aiUsageUsecase,
+            speechRecognizeUsecase: speech
+        )
     }
-    
+
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
     }
 }
 
 extension LoginUsecaseFactoryImple {
-    
+
     func makeCalendarSettingUsecase() -> any CalendarSettingUsecase {
         let settingRepository = CalendarSettingRepositoryImple(
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
@@ -746,23 +792,7 @@ extension LoginUsecaseFactoryImple {
 extension LoginUsecaseFactoryImple {
 
     func makeAIAgentOrchestrationUsecase() -> any AIAgentOrchestrationUsecase {
-        let localStorage = AICommandLocalStorageImple(sqliteService: applicationBase.commonSqliteService)
-        let repository = AICommandRepositoryImple(
-            remote: applicationBase.remoteAPI,
-            localStorage: localStorage
-        )
-        let commandUsecase = AICommandUsecaseImple(
-            repository: repository,
-            calendarSettingUsecase: self.makeCalendarSettingUsecase()
-        )
-        let usageUsecase = AIAgentUsageUsecaseImple(
-            repository: repository,
-            sharedDataStore: applicationBase.sharedDataStore
-        )
-        return AIAgentOrchestrationUsecaseImple(
-            commandUsecase: commandUsecase,
-            usageUsecase: usageUsecase
-        )
+        return self.aiAgentOrchestrationUsecase
     }
 
     func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
