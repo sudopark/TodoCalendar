@@ -60,7 +60,7 @@ final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Se
 extension AIAgentCommandViewModelImple {
 
     func sendCommand(_ text: String) {
-        self.orchestrationUsecase.sendCommand(text)
+        try? self.orchestrationUsecase.submit(text)
     }
 
     func confirm() {
@@ -90,6 +90,8 @@ extension AIAgentCommandViewModelImple {
             .map { state in
                 switch state {
                 case .idle:
+                    return nil
+                case .listening:
                     return nil
                 case .processing(let command):
                     return .processing(command: command)
