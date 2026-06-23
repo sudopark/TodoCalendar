@@ -63,6 +63,8 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func enterKeyboardInput()
     func stopAIAgentInput()
     func submitAIAgent(_ text: String)
+    func handleAIEntryButtonTap()
+    func attachListener(_ listener: any DayEventListSceneListener)
 
     // presenter
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> { get }
@@ -89,6 +91,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
     private let accountUsecase: any AccountUsecase
     private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
     var router: (any DayEventListRouting)?
+    private weak var listener: (any DayEventListSceneListener)?
 
     init(
         calendarUsecase: any CalendarUsecase,
@@ -123,6 +126,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let tagMaps = CurrentValueSubject<[String: any EventTag], Never>([:])
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
+        let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
     }
 
     private var cancellables: Set<AnyCancellable> = []
@@ -137,6 +141,13 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
             }
             .store(in: &self.cancellables)
 
+        // command phase 자동 시트 표시는 단일 인스턴스인 CalendarViewModel이 담당.
+        // 여기선 진입 버튼 분기에 쓸 현재 상태만 미러링한다.
+        self.aiAgentOrchestrationUsecase.state
+            .sink { [weak self] state in
+                self?.subject.aiAgentState.send(state)
+            }
+            .store(in: &self.cancellables)
     }
 }
 
@@ -240,6 +251,26 @@ extension DayEventListViewModelImple {
             try self.aiAgentOrchestrationUsecase.submit(text)
         } catch {
             self.router?.showError(error)
+        }
+    }
+
+    func attachListener(_ listener: any DayEventListSceneListener) {
+        self.listener = listener
+    }
+
+    func handleAIEntryButtonTap() {
+        let state = self.subject.aiAgentState.value ?? .idle
+        if Self.isCommandPhase(state) {
+            self.listener?.dayEventListDidRequestShowAICommand()
+        } else {
+            self.enterVoiceInput()
+        }
+    }
+
+    private static func isCommandPhase(_ state: AIAgentState) -> Bool {
+        switch state {
+        case .processing, .confirm, .done, .failed: return true
+        case .idle, .listening: return false
         }
     }
 

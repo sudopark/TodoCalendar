@@ -962,6 +962,49 @@ extension CalendarViewModelImpleTests {
     }
 }
 
+
+// MARK: - AI command 결과 시트 자동 present (단일 인스턴스 책임)
+
+extension CalendarViewModelImpleTests {
+
+    func testViewModel_whenAIEntersCommandPhase_routesToAICommand() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+
+        // when
+        self.stubOrchestration.stateSubject.send(.idle)
+        self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+    }
+
+    func testViewModel_whenStayInCommandPhase_routesOnlyOncePerEntry() {
+        // given
+        let viewModel = self.makeViewModel()
+        viewModel.prepare()
+
+        // when — command phase 진입 후 같은 phase 내 전이
+        self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
+        self.stubOrchestration.stateSubject.send(.done(message: "완료"))
+
+        // then — 진입 edge에서만 1회
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+    }
+
+    func testViewModel_whenDayEventListRequestsShowCommand_routesToAICommand() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when — 하위 DayEventList 진입 버튼 재진입을 위임받음
+        viewModel.calendarPaperDidRequestShowAICommand()
+
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)
+    }
+}
+
 private extension CalendarViewModelImpleTests {
     
     class SpyRouter: BaseSpyRouter, CalendarViewRouting, @unchecked Sendable {
@@ -978,6 +1021,11 @@ private extension CalendarViewModelImpleTests {
         var didChangedFocusIndex: Int?
         func changeFocus(at index: Int) {
             self.didChangedFocusIndex = index
+        }
+
+        var didRouteToAICommandCount: Int = 0
+        func routeToAICommand() {
+            self.didRouteToAICommandCount += 1
         }
     }
     
@@ -1007,6 +1055,7 @@ private extension CalendarViewModelImpleTests {
         }
         
         func monthScene(didChange currentSelectedDay: CurrentSelectDayModel, and eventsThatDay: [any CalendarEvent]) { }
+        func dayEventListDidRequestShowAICommand() { }
     }
     
     final class SpyListener: CalendarSceneListener, @unchecked Sendable {
