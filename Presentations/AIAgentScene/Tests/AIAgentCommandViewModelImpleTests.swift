@@ -18,23 +18,23 @@ class AIAgentCommandViewModelImpleTests: BaseTestCase, PublisherWaitable {
 
     var cancelBag: Set<AnyCancellable>!
     private var stubAgent: StubAIAgentOrchestrationUsecase!
-    private var spyListener: SpyAIAgentCommandListener!
+    private var spyRouter: SpyAIAgentRouter!
 
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.stubAgent = .init()
-        self.spyListener = .init()
+        self.spyRouter = .init()
     }
 
     override func tearDownWithError() throws {
         self.cancelBag = nil
         self.stubAgent = nil
-        self.spyListener = nil
+        self.spyRouter = nil
     }
 
     private func makeViewModel() -> AIAgentCommandViewModelImple {
         let viewModel = AIAgentCommandViewModelImple(orchestrationUsecase: self.stubAgent)
-        viewModel.listener = self.spyListener
+        viewModel.router = self.spyRouter
         return viewModel
     }
 
@@ -48,7 +48,7 @@ class AIAgentCommandViewModelImpleTests: BaseTestCase, PublisherWaitable {
 }
 
 
-// MARK: - 위임
+// MARK: - 시트 액션과 orchestration 위임
 
 extension AIAgentCommandViewModelImpleTests {
 
@@ -58,28 +58,45 @@ extension AIAgentCommandViewModelImpleTests {
         XCTAssertEqual(self.stubAgent.didSubmit, "회의")
     }
 
-    func test_confirm_delegatesToUsecase() {
+    func test_confirm_delegatesAndKeepsSceneOpen() {
+        // given
         let viewModel = self.makeViewModel()
+        // when
         viewModel.confirm()
+        // then
         XCTAssertEqual(self.stubAgent.didConfirm, true)
+        XCTAssertNil(self.spyRouter.didClosed)   // confirm은 시트 유지(처리 계속)
     }
 
-    func test_decline_delegatesToUsecase() {
+    func test_decline_declinesAndClosesScene() {
+        // given
         let viewModel = self.makeViewModel()
+        // when
         viewModel.decline()
+        // then
         XCTAssertEqual(self.stubAgent.didDecline, true)
+        XCTAssertEqual(self.spyRouter.didClosed, true)
     }
 
-    func test_restart_resetsUsecase() {
+    func test_cancel_resetsAndClosesScene() {
+        // given
         let viewModel = self.makeViewModel()
-        viewModel.restart()
-        XCTAssertEqual(self.stubAgent.didReset, true)
+        // when
+        viewModel.cancel()
+        // then
+        XCTAssertEqual(self.stubAgent.didReset, true)   // reset → 서버 cancel API
+        XCTAssertEqual(self.spyRouter.didClosed, true)
     }
 
-    func test_close_requestsCloseToListener() {
+    func test_close_keepsStateAndClosesScene() {
+        // given
         let viewModel = self.makeViewModel()
+        // when
         viewModel.close()
-        XCTAssertEqual(self.spyListener.didRequestClose, true)
+        // then — 상태 보존(orchestration 안 건드림), 시트만 닫음
+        XCTAssertFalse(self.stubAgent.didReset)
+        XCTAssertFalse(self.stubAgent.didDecline)
+        XCTAssertEqual(self.spyRouter.didClosed, true)
     }
 }
 
