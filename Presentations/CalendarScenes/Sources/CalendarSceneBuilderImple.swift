@@ -18,6 +18,7 @@ public struct CalendarSceneBuilderImple {
     private let eventListSceneBuilder: any EventListSceneBuiler
     private let accountUsecase: any AccountUsecase
     private let memberSceneBuilder: any MemberSceneBuilder
+    private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
@@ -28,7 +29,8 @@ public struct CalendarSceneBuilderImple {
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
         eventListSceneBuilder: any EventListSceneBuiler,
         accountUsecase: any AccountUsecase,
-        memberSceneBuilder: any MemberSceneBuilder
+        memberSceneBuilder: any MemberSceneBuilder,
+        aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -36,6 +38,7 @@ public struct CalendarSceneBuilderImple {
         self.eventListSceneBuilder = eventListSceneBuilder
         self.accountUsecase = accountUsecase
         self.memberSceneBuilder = memberSceneBuilder
+        self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
     }
 
     private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
@@ -80,7 +83,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
             accountUsecase: self.accountUsecase,
-            memberSceneBuilder: self.memberSceneBuilder
+            memberSceneBuilder: self.memberSceneBuilder,
+            aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder
         )
 
         let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(
