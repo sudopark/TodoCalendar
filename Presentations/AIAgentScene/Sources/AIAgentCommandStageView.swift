@@ -40,13 +40,13 @@ final class AIAgentCommandViewEventHandler: Observable {
 
     var confirm: () -> Void = { }
     var decline: () -> Void = { }
-    var restart: () -> Void = { }
+    var cancel: () -> Void = { }
     var close: () -> Void = { }
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
         self.confirm = viewModel.confirm
         self.decline = viewModel.decline
-        self.restart = viewModel.restart
+        self.cancel = viewModel.cancel
         self.close = viewModel.close
     }
 }
@@ -210,7 +210,7 @@ private extension AIAgentCommandStageView {
                 .eventHandler(\.onTap, eventHandlers.close)
 
                 ConfirmButton(title: "aiAgent::retry".localized())
-                    .eventHandler(\.onTap, eventHandlers.restart)
+                    .eventHandler(\.onTap, eventHandlers.cancel)
             }
         }
         .padding(20)
