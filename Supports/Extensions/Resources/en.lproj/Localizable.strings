@@ -532,3 +532,4 @@
 "aiAgent::needSignIn::message" = "Sign in to use AI quick input.";
 "aiAgent::keyboard::stop" = "Stop";
 "aiAgent::keyboard::send" = "Send";
+"aiAgent::stop" = "Stop";
