@@ -40,6 +40,11 @@ class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
         self.didRejectParentJobId = action.parentJobId
     }
 
+    var didCancelJobId: String?
+    func cancelCommand(_ jobId: String) async throws {
+        self.didCancelJobId = jobId
+    }
+
     var stubLoadJobs: [Result<AIJob, any Error>] = []
     var loadJobMocking: Result<AIJob, any Error>?
     func loadJob(_ jobId: String) async throws -> AIJob {

@@ -269,6 +269,7 @@ enum AIAPIEndpoints: Endpoint {
     case command
     case confirmCommand
     case rejectCommand
+    case cancelCommand
     case job(id: String)
     case usage
 
@@ -277,6 +278,7 @@ enum AIAPIEndpoints: Endpoint {
         case .command: return "command"
         case .confirmCommand: return "command/confirm"
         case .rejectCommand: return "command/reject"
+        case .cancelCommand: return "command/cancel"
         case .job(let id): return "jobs/\(id)"
         case .usage: return "usage"
         }

@@ -121,6 +121,19 @@ extension AICommandRepositoryImpleTests {
         XCTAssertEqual(self.stubRemote.didRequestedPath?.contains("command/reject"), true)
         XCTAssertEqual(self.stubRemote.didRequestedParams?["job_id"] as? String, "parent-123")
     }
+
+    func testRepository_cancelCommand_postsJobIdToCancelEndpoint() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        try await repository.cancelCommand("job-123")
+
+        // then
+        XCTAssertEqual(self.stubRemote.didRequestedMethod, .post)
+        XCTAssertEqual(self.stubRemote.didRequestedPath?.contains("command/cancel"), true)
+        XCTAssertEqual(self.stubRemote.didRequestedParams?["job_id"] as? String, "job-123")
+    }
 }
 
 
@@ -318,6 +331,11 @@ private struct DummyResponse {
                 method: .post,
                 endpoint: AIAPIEndpoints.rejectCommand,
                 resultJsonString: .success(#"{ "ok": true }"#)
+            ),
+            .init(
+                method: .post,
+                endpoint: AIAPIEndpoints.cancelCommand,
+                resultJsonString: .success("{}")
             ),
             .init(
                 method: .get,

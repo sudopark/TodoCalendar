@@ -60,6 +60,12 @@ extension AICommandRepositoryImple {
         _ = try await self.requestJson(.post, AIAPIEndpoints.rejectCommand, parameters: body)
     }
 
+    public func cancelCommand(_ jobId: String) async throws {
+        var body: [String: Any] = [:]
+        body["job_id"] = jobId
+        _ = try await self.requestJson(.post, AIAPIEndpoints.cancelCommand, parameters: body)
+    }
+
     public func loadJob(_ jobId: String) async throws -> AIJob {
         let json = try await self.requestJson(.get, AIAPIEndpoints.job(id: jobId))
         return try AIJobMapper(json: json).job
