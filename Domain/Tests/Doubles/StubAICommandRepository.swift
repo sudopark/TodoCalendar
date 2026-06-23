@@ -67,17 +67,21 @@ class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
         }
     }
     
+    var stubProcessingCommand: ProcessingAICommand?
+    var didClearProcessing: Bool = false
     private var processingCmd: ProcessingAICommand?
     func updateProcessingAICommand(_ cmd: ProcessingAICommand) async throws {
         self.processingCmd = cmd
     }
-    
+
     func loadProcessingAICommand() async throws -> ProcessingAICommand? {
-        return self.processingCmd
+        return self.stubProcessingCommand ?? self.processingCmd
     }
-    
+
     func clearProcessingAICommand() async throws {
+        self.didClearProcessing = true
         self.processingCmd = nil
+        self.stubProcessingCommand = nil
     }
     
     func loadUsage() async throws -> AIAgentUsage {
