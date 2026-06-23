@@ -356,6 +356,47 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 }
 
 
+// MARK: - reset은 진행 중 command를 중지한다
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test func usecase_reset_cancelsOngoingCommandAndGoesIdle() async throws {
+        // given
+        let expect = expectConfirm("reset → cancel + idle")
+        expect.count = 2
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        usecase.reset()
+        try? usecase.submit("회의")
+        try await Task.sleep(for: .milliseconds(30))
+        // when
+        let states = try await self.outputs(expect, for: usecase.state) {
+            usecase.reset()
+        }
+        // then
+        #expect(states.last.map(self.stateName) == "idle")
+        #expect(self.stubCommand.didCancelJobId == "job-1")
+    }
+
+    @Test func usecase_decline_rejectsButDoesNotCancelOngoing() async throws {
+        // given — confirm 상태
+        let expect = expectConfirm("decline → reject 호출, cancel은 없다")
+        expect.count = 2
+        let usecase = self.makeUsecaseInConfirm(token: "reject-tk")
+        try await Task.sleep(for: .milliseconds(30))
+        // when
+        let states = try await self.outputs(expect, for: usecase.state) {
+            usecase.decline()
+        }
+        // then — reject은 가되 cancel(중지) API는 안 나간다
+        #expect(states.last.map(self.stateName) == "idle")
+        #expect(self.stubCommand.didRejectParentJobId == "parent-job")
+        #expect(self.stubCommand.didCancelJobId == nil)  // decline은 cancelOngoing 호출 안 함
+    }
+}
+
+
 // MARK: - test doubles
 
 private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable {
@@ -367,6 +408,7 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     var didRejectParentJobId: String?
     var didProcessCommand: String?
     var didRestore: Bool = false
+    var didCancelJobId: String?
 
     func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
         self.didProcessCommand = commandText
@@ -377,6 +419,9 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     }
     func rejectConfirmCommand(_ action: AIConfirmCommandAction) {
         self.didRejectParentJobId = action.parentJobId
+    }
+    func cancelOngoingCommand(_ jobId: String) {
+        self.didCancelJobId = jobId
     }
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error> {
         self.didRestore = true
