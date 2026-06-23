@@ -28,7 +28,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubTagUsecase: StubEventTagUsecase!
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyRouter: SpyRouter!
-    
+    private var spyListener: SpyListener!
+
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.stubTodoUsecase = .init()
@@ -36,6 +37,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTagUsecase = .init()
         self.stubUISettingUsecase = .init()
         self.spyRouter = .init()
+        self.spyListener = .init()
         self.stubOrchestrationUsecase = .init()
     }
 
@@ -47,6 +49,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTagUsecase = nil
         self.stubUISettingUsecase = nil
         self.spyRouter = nil
+        self.spyListener = nil
         self.stubOrchestrationUsecase = nil
     }
 
@@ -106,6 +109,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             aiAgentOrchestrationUsecase: self.stubOrchestrationUsecase
         )
         viewModel.router = self.spyRouter
+        viewModel.attachListener(self.spyListener)
         return viewModel
     }
     
@@ -1038,6 +1042,13 @@ extension DayEventListViewModelImpleTests {
             self.didRouteToAIKeyboardInput = true
         }
     }
+
+    private final class SpyListener: DayEventListSceneListener, @unchecked Sendable {
+        var didRequestShowAICommand: Bool?
+        func dayEventListDidRequestShowAICommand() {
+            self.didRequestShowAICommand = true
+        }
+    }
 }
 
 // MARK: - AI agent entry mode
@@ -1177,6 +1188,33 @@ extension DayEventListViewModelImpleTests {
         XCTAssertEqual(self.stubOrchestrationUsecase.didSubmit, "hello world")
     }
 
+}
+
+// MARK: - AI command 진입 버튼 분기
+// (command phase 자동 시트 present는 단일 CalendarViewModel 책임으로 이관 → CalendarViewModelImpleTests)
+
+extension DayEventListViewModelImpleTests {
+
+    func test_entryButtonTap_whenCommandPhase_requestsShowCommandViaListener() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.stubOrchestrationUsecase.stateSubject.send(.done(message: "완료"))
+        // when — 닫았다가 버튼 재탭
+        viewModel.handleAIEntryButtonTap()
+        // then — 직접 present하지 않고 listener로 상위에 위임
+        XCTAssertEqual(self.spyListener.didRequestShowAICommand, true)
+        XCTAssertNil(self.stubOrchestrationUsecase.didEnterVoiceInput)   // voice 아님
+    }
+
+    func test_entryButtonTap_whenIdle_entersVoice() {
+        // given — 로그인 상태
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        self.stubOrchestrationUsecase.stateSubject.send(.idle)
+        // when
+        viewModel.handleAIEntryButtonTap()
+        // then
+        XCTAssertEqual(self.stubOrchestrationUsecase.didEnterVoiceInput, true)
+    }
 }
 
 private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
