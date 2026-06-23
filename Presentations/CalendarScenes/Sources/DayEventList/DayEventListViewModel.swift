@@ -63,6 +63,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func enterKeyboardInput()
     func stopAIAgentInput()
     func submitAIAgent(_ text: String)
+    func handleAIEntryButtonTap()
 
     // presenter
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> { get }
@@ -123,6 +124,7 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
         let tagMaps = CurrentValueSubject<[String: any EventTag], Never>([:])
         let pendingTodoEvents = CurrentValueSubject<[PendingTodoEventCellViewModel], Never>([])
         let isSignedIn = CurrentValueSubject<Bool, Never>(false)
+        let aiAgentState = CurrentValueSubject<AIAgentState?, Never>(nil)
     }
 
     private var cancellables: Set<AnyCancellable> = []
@@ -137,6 +139,17 @@ final class DayEventListViewModelImple: DayEventListViewModel, @unchecked Sendab
             }
             .store(in: &self.cancellables)
 
+        self.aiAgentOrchestrationUsecase.state
+            .handleEvents(receiveOutput: { [weak self] state in
+                self?.subject.aiAgentState.send(state)
+            })
+            .map { Self.isCommandPhase($0) }
+            .removeDuplicates()
+            .filter { $0 }
+            .sink { [weak self] _ in
+                self?.router?.routeToAICommand()
+            }
+            .store(in: &self.cancellables)
     }
 }
 
@@ -240,6 +253,22 @@ extension DayEventListViewModelImple {
             try self.aiAgentOrchestrationUsecase.submit(text)
         } catch {
             self.router?.showError(error)
+        }
+    }
+
+    func handleAIEntryButtonTap() {
+        let state = self.subject.aiAgentState.value ?? .idle
+        if Self.isCommandPhase(state) {
+            self.router?.routeToAICommand()
+        } else {
+            self.enterVoiceInput()
+        }
+    }
+
+    private static func isCommandPhase(_ state: AIAgentState) -> Bool {
+        switch state {
+        case .processing, .confirm, .done, .failed: return true
+        case .idle, .listening: return false
         }
     }
 

@@ -127,6 +127,7 @@ final class DayEventListViewEventHandler: Observable {
     var enterKeyboardInput: () -> Void = { }
     var stopAIAgentInput: () -> Void = { }
     var submitAIAgent: (String) -> Void = { _ in }
+    var handleAIEntryButtonTap: () -> Void = { }
 
     func bind(
         _ viewModel: any DayEventListViewModel,
@@ -149,6 +150,7 @@ final class DayEventListViewEventHandler: Observable {
         self.enterKeyboardInput = { [weak viewModel] in viewModel?.enterKeyboardInput() }
         self.stopAIAgentInput = { [weak viewModel] in viewModel?.stopAIAgentInput() }
         self.submitAIAgent = { [weak viewModel] text in viewModel?.submitAIAgent(text) }
+        self.handleAIEntryButtonTap = { [weak viewModel] in viewModel?.handleAIEntryButtonTap() }
     }
 }
 
@@ -238,10 +240,9 @@ struct DayEventListView: View {
     }
 
     private func aiAgentEntryButton() -> some View {
-        let isIdle = self.state.isAIIdle
         return Button {
             self.isFocusInput = false
-            self.eventHandler.enterVoiceInput()
+            self.eventHandler.handleAIEntryButtonTap()
         } label: {
             Circle()
                 .fill(self.appearance.colorSet.primaryBtnBackground.asColor)
@@ -251,8 +252,6 @@ struct DayEventListView: View {
                         .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
                 )
         }
-        .opacity(isIdle ? 1.0 : 0.3)
-        .disabled(!isIdle)
     }
 
     private func addNewButton() -> some View {

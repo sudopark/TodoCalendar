@@ -1037,6 +1037,11 @@ extension DayEventListViewModelImpleTests {
         func routeToAIKeyboardInput() {
             self.didRouteToAIKeyboardInput = true
         }
+
+        var didRouteToAICommand: Bool?
+        func routeToAICommand() {
+            self.didRouteToAICommand = true
+        }
     }
 }
 
@@ -1177,6 +1182,54 @@ extension DayEventListViewModelImpleTests {
         XCTAssertEqual(self.stubOrchestrationUsecase.didSubmit, "hello world")
     }
 
+}
+
+// MARK: - AI command 결과 시트 자동 present (진입 edge 1회)
+
+extension DayEventListViewModelImpleTests {
+
+    func test_whenStateEntersProcessing_routesToAICommand() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        self.stubOrchestrationUsecase.stateSubject.send(.idle)
+        self.stubOrchestrationUsecase.stateSubject.send(.processing(command: "회의"))
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAICommand, true)
+    }
+
+    func test_whenStayInCommandPhase_routesOnlyOnce() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.stubOrchestrationUsecase.stateSubject.send(.processing(command: "회의"))
+        self.spyRouter.didRouteToAICommand = nil
+        // when — 같은 command phase 내 전이
+        self.stubOrchestrationUsecase.stateSubject.send(.done(message: "완료"))
+        // then — 재present 안 함(edge 아님)
+        XCTAssertNil(self.spyRouter.didRouteToAICommand)
+    }
+
+    func test_entryButtonTap_whenCommandPhase_reopensCommandSheet() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.stubOrchestrationUsecase.stateSubject.send(.done(message: "완료"))
+        self.spyRouter.didRouteToAICommand = nil   // 자동 present 후 리셋
+        // when — 닫았다가 버튼 재탭
+        viewModel.handleAIEntryButtonTap()
+        // then
+        XCTAssertEqual(self.spyRouter.didRouteToAICommand, true)
+        XCTAssertNil(self.stubOrchestrationUsecase.didEnterVoiceInput)   // voice 아님
+    }
+
+    func test_entryButtonTap_whenIdle_entersVoice() {
+        // given — 로그인 상태
+        let viewModel = self.makeViewModel(isSignedIn: true)
+        self.stubOrchestrationUsecase.stateSubject.send(.idle)
+        // when
+        viewModel.handleAIEntryButtonTap()
+        // then
+        XCTAssertEqual(self.stubOrchestrationUsecase.didEnterVoiceInput, true)
+    }
 }
 
 private final class PrivateStubTodoEventUsecase: StubTodoEventUsecase {
