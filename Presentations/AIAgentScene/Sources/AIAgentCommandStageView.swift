@@ -126,6 +126,22 @@ private extension AIAgentCommandStageView {
             Text("aiAgent::processing".localized())
                 .font(appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(appearance.colorSet.text1.asColor)
+
+            HStack(spacing: 12) {
+                ConfirmButton(
+                    title: "common.close".localized(),
+                    textColor: appearance.colorSet.secondaryBtnText.asColor,
+                    backgroundColor: appearance.colorSet.secondaryBtnBackground.asColor
+                )
+                .eventHandler(\.onTap, eventHandlers.close)
+
+                ConfirmButton(
+                    title: "aiAgent::stop".localized(),
+                    textColor: appearance.colorSet.negativeBtnText.asColor,
+                    backgroundColor: appearance.colorSet.negativeBtnBackground.asColor
+                )
+                .eventHandler(\.onTap, eventHandlers.cancel)
+            }
         }
     }
 }
@@ -201,17 +217,8 @@ private extension AIAgentCommandStageView {
                 .foregroundStyle(appearance.colorSet.text0.asColor)
                 .multilineTextAlignment(.center)
 
-            HStack(spacing: 12) {
-                ConfirmButton(
-                    title: "common.close".localized(),
-                    textColor: appearance.colorSet.secondaryBtnText.asColor,
-                    backgroundColor: appearance.colorSet.secondaryBtnBackground.asColor
-                )
+            ConfirmButton(title: "common.close".localized())
                 .eventHandler(\.onTap, eventHandlers.close)
-
-                ConfirmButton(title: "aiAgent::retry".localized())
-                    .eventHandler(\.onTap, eventHandlers.cancel)
-            }
         }
         .padding(20)
         .frame(maxWidth: .infinity)
