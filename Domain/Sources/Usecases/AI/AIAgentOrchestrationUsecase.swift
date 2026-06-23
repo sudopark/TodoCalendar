@@ -224,12 +224,15 @@ extension AIAgentOrchestrationUsecaseImple {
         if case .confirm(_, _, let action) = self.subject.state.value ?? .idle {
             self.commandUsecase.rejectConfirmCommand(action)
         }
-        self.reset()
+        self.commandCancellable?.cancel()
+        self.commandCancellable = nil
+        self.subject.state.send(.idle)
     }
 
     public func reset() {
         self.commandCancellable?.cancel()
         self.commandCancellable = nil
+        self.commandUsecase.cancelOngoingCommand()   // 진행 중 작업 서버 중지(fire-and-forget)
         self.subject.state.send(.idle)
     }
 

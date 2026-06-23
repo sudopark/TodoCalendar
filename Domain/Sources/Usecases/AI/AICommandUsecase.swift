@@ -21,6 +21,8 @@ public protocol AICommandUsecase: AnyObject, Sendable {
 
     func rejectConfirmCommand(_ action: AIConfirmCommandAction)
 
+    func cancelOngoingCommand()
+
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error>
 
     func handleJobFinishNotification(_ jobId: String)
@@ -124,6 +126,18 @@ extension AICommandUsecaseImple {
         let repository = self.repository
         // 서버 거부 API(Functions#243) 미구현 — 준비 전까지 fire-and-forget.
         Task { try? await repository.rejectConfirmCommand(action) }
+    }
+
+    public func cancelOngoingCommand() {
+        let repository = self.repository
+        // 진행 중 command의 jobId를 읽어 서버 중지 요청. fire-and-forget —
+        // 클라는 GET /jobs/:id 재폴링으로 CANCELED를 받는다(서버 #250).
+        Task {
+            guard let processing = try? await repository.loadProcessingAICommand()
+            else { return }
+            try? await repository.cancelCommand(processing.jobId)
+            try? await repository.clearProcessingAICommand()
+        }
     }
 
     public func handleJobFinishNotification(_ jobId: String) {

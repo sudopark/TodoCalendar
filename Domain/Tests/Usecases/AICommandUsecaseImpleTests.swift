@@ -408,6 +408,35 @@ extension AICommandUsecaseImpleTests {
     }
 }
 
+// MARK: - 진행 중 command 중지
+
+extension AICommandUsecaseImpleTests {
+
+    @Test func usecase_cancelOngoingCommand_cancelsPersistedJobAndClears() async throws {
+        // given — 진행 중 command가 저장돼 있음
+        self.stubRepository.stubProcessingCommand = .init(jobId: "job-9", isConfirmJob: false)
+        let usecase = self.makeUsecase()
+        // when
+        usecase.cancelOngoingCommand()
+        try await Task.sleep(nanoseconds: 50_000_000)   // fire-and-forget Task 완료 대기
+        // then
+        #expect(self.stubRepository.didCancelJobId == "job-9")
+        #expect(self.stubRepository.didClearProcessing == true)
+    }
+
+    @Test func usecase_cancelOngoingCommand_whenNoProcessing_doesNothing() async throws {
+        // given — 진행 중 command 없음
+        self.stubRepository.stubProcessingCommand = nil
+        let usecase = self.makeUsecase()
+        // when
+        usecase.cancelOngoingCommand()
+        try await Task.sleep(nanoseconds: 50_000_000)
+        // then
+        #expect(self.stubRepository.didCancelJobId == nil)
+    }
+}
+
+
 // MARK: - restore
 
 extension AICommandUsecaseImpleTests {
