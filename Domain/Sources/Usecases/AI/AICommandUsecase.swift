@@ -21,6 +21,8 @@ public protocol AICommandUsecase: AnyObject, Sendable {
 
     func rejectConfirmCommand(_ action: AIConfirmCommandAction)
 
+    func cancelOngoingCommand(_ jobId: String)
+
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error>
 
     func handleJobFinishNotification(_ jobId: String)
@@ -90,15 +92,16 @@ extension AICommandUsecaseImple {
             return jobId
         })
         
-        let waitJobUntilFinish = makeJob.flatMap { [weak self] jobId in
-            return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
-        }
-        
+        let waitJobUntilFinish = makeJob
+            .flatMap { [weak self] jobId in
+                return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
+            }
+
         return waitJobUntilFinish
             .handleClearProcessingCommand(repository)
             .eraseToAnyPublisher()
     }
-    
+
     public func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error> {
 
         let timeZone = self.currentIANATimeZone(); let repository = self.repository
@@ -110,11 +113,12 @@ extension AICommandUsecaseImple {
             )
             return jobId
         })
-        
-        let waitUntilFinish = makeConfirmJob.flatMap { [weak self] jobId in
-            return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
-        }
-        
+
+        let waitUntilFinish = makeConfirmJob
+            .flatMap { [weak self] jobId in
+                return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
+            }
+
         return waitUntilFinish
             .handleClearProcessingCommand(repository)
             .eraseToAnyPublisher()
@@ -124,6 +128,15 @@ extension AICommandUsecaseImple {
         let repository = self.repository
         // 서버 거부 API(Functions#243) 미구현 — 준비 전까지 fire-and-forget.
         Task { try? await repository.rejectConfirmCommand(action) }
+    }
+
+    public func cancelOngoingCommand(_ jobId: String) {
+        // fire-and-forget — 클라는 GET /jobs/:id 재폴링으로 CANCELED를 받는다(서버 #250).
+        let repository = self.repository
+        Task {
+            try? await repository.cancelCommand(jobId)
+            try? await repository.clearProcessingAICommand()
+        }
     }
 
     public func handleJobFinishNotification(_ jobId: String) {

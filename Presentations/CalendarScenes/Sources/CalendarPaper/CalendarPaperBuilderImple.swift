@@ -59,7 +59,8 @@ extension CalendarPaperSceneBuilerImple: CalendarPaperSceneBuiler {
         )
         viewModel.listener = listener
         monthComponents.viewModel.attachListener(viewModel)
-        
+        eventListComponents.viewModel.attachListener(viewModel)
+
         let viewController = CalendarPaperViewController(
             viewModel: viewModel,
             monthViewModel: monthComponents.viewModel,

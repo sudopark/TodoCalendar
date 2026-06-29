@@ -14,14 +14,18 @@ import Scenes
 // MARK: - DayEventListScene Interactable & Listenable
 
 protocol DayEventListSceneInteractor: AnyObject {
-    
+
     func selectedDayChanaged(
         _ newDay: CurrentSelectDayModel,
         and eventThatDay: [any CalendarEvent]
     )
 }
-//
-//public protocol DayEventListSceneListener: AnyObject { }
+
+protocol DayEventListSceneListener: AnyObject {
+
+    // 진입 버튼 재진입 등 command 결과 시트 표시 요청을 상위(단일 Calendar)로 위임
+    func dayEventListDidRequestShowAICommand()
+}
 
 // MARK: - DayEventListScene
 

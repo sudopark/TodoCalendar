@@ -21,13 +21,6 @@ public enum AIAgentCommandState: Equatable, Sendable {
 }
 
 
-// MARK: - AIAgentCommandViewModelListener
-
-protocol AIAgentCommandViewModelListener: AnyObject {
-    func aiAgentCommandRequestClose()
-}
-
-
 // MARK: - AIAgentCommandViewModel
 
 public protocol AIAgentCommandViewModel: AnyObject, Sendable {
@@ -35,7 +28,7 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
     func sendCommand(_ text: String)
     func confirm()
     func decline()
-    func restart()
+    func cancel()
     func close()
 
     var commandState: AnyPublisher<AIAgentCommandState?, Never> { get }
@@ -47,7 +40,7 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
 final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Sendable {
 
     private let orchestrationUsecase: any AIAgentOrchestrationUsecase
-    weak var listener: (any AIAgentCommandViewModelListener)?
+    var router: (any AIAgentRouting)?
 
     init(orchestrationUsecase: any AIAgentOrchestrationUsecase) {
         self.orchestrationUsecase = orchestrationUsecase
@@ -63,20 +56,22 @@ extension AIAgentCommandViewModelImple {
         try? self.orchestrationUsecase.submit(text)
     }
 
-    func confirm() {
+    func confirm() {                       // 처리 계속 — 시트 유지
         self.orchestrationUsecase.confirm()
     }
 
-    func decline() {
+    func decline() {                       // confirm 거부 → reject + idle
         self.orchestrationUsecase.decline()
+        self.router?.closeScene()
     }
 
-    func restart() {
+    func cancel() {                        // 진행 중 중지 → reset(서버 cancel API) + idle
         self.orchestrationUsecase.reset()
+        self.router?.closeScene()
     }
 
-    func close() {
-        self.listener?.aiAgentCommandRequestClose()
+    func close() {                         // 숨김 — 상태 보존, 재진입 가능
+        self.router?.closeScene()
     }
 }
 

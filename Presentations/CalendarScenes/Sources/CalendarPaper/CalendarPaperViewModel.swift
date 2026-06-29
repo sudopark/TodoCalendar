@@ -80,6 +80,10 @@ extension CalendarPaperViewModelImple {
         self.eventListInteractor.selectedDayChanaged(currentSelectedDay, and: eventsThatDay)
         self.listener?.calendarPaper(on: self.currentMonth, didChange: currentSelectedDay)
     }
+
+    func dayEventListDidRequestShowAICommand() {
+        self.listener?.calendarPaperDidRequestShowAICommand()
+    }
 }
 
 

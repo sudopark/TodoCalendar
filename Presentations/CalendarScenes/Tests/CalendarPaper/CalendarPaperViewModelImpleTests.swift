@@ -67,6 +67,17 @@ extension CalendarPaperViewModelImpleTests {
         XCTAssertEqual(self.spyMonthInteractor.updatedMonths, months)
     }
     
+    func testViewModel_whenDayEventListRequestsShowAICommand_relaysToListener() {
+        // given
+        let viewModel = self.makeViewModel()
+
+        // when — 하위 DayEventList의 요청을 상위로 중계
+        viewModel.dayEventListDidRequestShowAICommand()
+
+        // then
+        XCTAssertEqual(self.spyListner.didRequestShowAICommand, true)
+    }
+
     func testViewModel_whenCurrentSelectedDayUpdates_notify() {
         // given
         let viewModel = self.makeViewModel()
@@ -165,10 +176,15 @@ extension CalendarPaperViewModelImpleTests {
     }
     
     private final class SpyCalendarPaperSceneListener: CalendarPaperSceneListener {
-        
+
         var didChangeSelectedDay: [(CalendarMonth, CurrentSelectDayModel)] = []
         func calendarPaper(on month: CalendarMonth, didChange selectedDay: CurrentSelectDayModel) {
             self.didChangeSelectedDay.append((month, selectedDay))
+        }
+
+        var didRequestShowAICommand: Bool?
+        func calendarPaperDidRequestShowAICommand() {
+            self.didRequestShowAICommand = true
         }
     }
 }

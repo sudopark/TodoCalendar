@@ -18,6 +18,16 @@ import Extensions
 import CommonPresentation
 
 
+// MARK: - AICommandBadge
+
+private enum AICommandBadge {
+    case processing
+    case needConfirm
+    case done
+    case failed
+}
+
+
 // MARK: - DayEventListViewController
 
 @Observable final class DayEventListViewState {
@@ -42,6 +52,16 @@ import CommonPresentation
     fileprivate var isAIIdle: Bool {
         if case .idle = aiAgentState { return true }
         return false
+    }
+
+    fileprivate var aiCommandBadge: AICommandBadge? {
+        switch self.aiAgentState {
+        case .processing: return .processing
+        case .confirm: return .needConfirm
+        case .done: return .done
+        case .failed: return .failed
+        case .idle, .listening: return nil
+        }
     }
 
     func bind(_ viewModel: any DayEventListViewModel, _ appearance: ViewAppearance) {
@@ -127,6 +147,7 @@ final class DayEventListViewEventHandler: Observable {
     var enterKeyboardInput: () -> Void = { }
     var stopAIAgentInput: () -> Void = { }
     var submitAIAgent: (String) -> Void = { _ in }
+    var handleAIEntryButtonTap: () -> Void = { }
 
     func bind(
         _ viewModel: any DayEventListViewModel,
@@ -145,10 +166,11 @@ final class DayEventListViewEventHandler: Observable {
         self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
         self.refreshUncompletedTodos = viewModel.refreshUncompletedTodoEvents
         self.enterVoiceInput = viewModel.enterVoiceInput
-        self.finishVoiceInput = { [weak viewModel] in viewModel?.finishVoiceInput() }
-        self.enterKeyboardInput = { [weak viewModel] in viewModel?.enterKeyboardInput() }
-        self.stopAIAgentInput = { [weak viewModel] in viewModel?.stopAIAgentInput() }
-        self.submitAIAgent = { [weak viewModel] text in viewModel?.submitAIAgent(text) }
+        self.finishVoiceInput = viewModel.finishVoiceInput
+        self.enterKeyboardInput = viewModel.enterKeyboardInput
+        self.stopAIAgentInput = viewModel.stopAIAgentInput
+        self.submitAIAgent = viewModel.submitAIAgent(_:)
+        self.handleAIEntryButtonTap = viewModel.handleAIEntryButtonTap
     }
 }
 
@@ -238,10 +260,9 @@ struct DayEventListView: View {
     }
 
     private func aiAgentEntryButton() -> some View {
-        let isIdle = self.state.isAIIdle
         return Button {
             self.isFocusInput = false
-            self.eventHandler.enterVoiceInput()
+            self.eventHandler.handleAIEntryButtonTap()
         } label: {
             Circle()
                 .fill(self.appearance.colorSet.primaryBtnBackground.asColor)
@@ -250,9 +271,37 @@ struct DayEventListView: View {
                     Image(systemName: "sparkles")
                         .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
                 )
+                .overlay(alignment: .topTrailing) {
+                    if let badge = self.state.aiCommandBadge {
+                        self.badgeView(badge)
+                    }
+                }
         }
-        .opacity(isIdle ? 1.0 : 0.3)
-        .disabled(!isIdle)
+    }
+
+    @ViewBuilder
+    private func badgeView(_ badge: AICommandBadge) -> some View {
+        switch badge {
+        case .processing:
+            Circle()
+                .fill(self.appearance.colorSet.accent.asColor)
+                .frame(width: 12, height: 12)
+                .offset(x: 4, y: -4)
+        case .needConfirm:
+            badgeCircle("questionmark", self.appearance.colorSet.primaryBtnBackground.asColor)
+        case .done:
+            badgeCircle("checkmark", self.appearance.colorSet.accent.asColor)
+        case .failed:
+            badgeCircle("exclamationmark", self.appearance.colorSet.accentWarn.asColor)
+        }
+    }
+
+    private func badgeCircle(_ name: String, _ color: Color) -> some View {
+        Image(systemName: "\(name).circle.fill")
+            .font(.system(size: 16))
+            .foregroundStyle(color)
+            .background(Circle().fill(self.appearance.colorSet.bg0.asColor))
+            .offset(x: 4, y: -4)
     }
 
     private func addNewButton() -> some View {
@@ -634,6 +683,58 @@ struct DayEventListViewPreviewProvider: PreviewProvider {
 //        + todoCells
         return basicCells + [holidayCell] + [googleCell!]
 //        .shuffled()
+    }
+}
+
+
+// MARK: - AI Command Badge Preview
+
+struct DayEventListBadgePreviewProvider: PreviewProvider {
+
+    static var previews: some View {
+        let calendar = CalendarAppearanceSettings(
+            colorSetKey: .defaultDark,
+            fontSetKey: .systemDefault
+        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
+        let eventHandler = DayEventListViewEventHandler()
+
+        func makeView(state: DayEventListViewState, label: String) -> some View {
+            DayEventListView()
+                .environment(state)
+                .environment(eventHandler)
+                .environment(PendingCompleteTodoState())
+                .environment(viewAppearance)
+                .previewDisplayName(label)
+        }
+
+        let processingState = DayEventListViewState()
+        processingState.aiAgentState = .processing(command: "내일 오전 9시 회의 추가")
+
+        let confirmState = DayEventListViewState()
+        confirmState.aiAgentState = .confirm(
+            command: "내일 오전 9시 회의 추가",
+            message: "확인이 필요합니다",
+            action: AIConfirmCommandAction()
+        )
+
+        let doneState = DayEventListViewState()
+        doneState.aiAgentState = .done(message: "이벤트가 추가됐어요")
+
+        let failedState = DayEventListViewState()
+        failedState.aiAgentState = .failed(reason: "처리 실패")
+
+        let idleState = DayEventListViewState()
+
+        return Group {
+            makeView(state: processingState, label: "Badge - processing")
+            makeView(state: confirmState, label: "Badge - confirm")
+            makeView(state: doneState, label: "Badge - done")
+            makeView(state: failedState, label: "Badge - failed")
+            makeView(state: idleState, label: "Badge - idle (no badge)")
+        }
     }
 }
 

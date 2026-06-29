@@ -40,6 +40,11 @@ class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
         self.didRejectParentJobId = action.parentJobId
     }
 
+    var didCancelJobId: String?
+    func cancelCommand(_ jobId: String) async throws {
+        self.didCancelJobId = jobId
+    }
+
     var stubLoadJobs: [Result<AIJob, any Error>] = []
     var loadJobMocking: Result<AIJob, any Error>?
     func loadJob(_ jobId: String) async throws -> AIJob {
@@ -62,17 +67,21 @@ class BaseStubAICommandRepository: AICommandRepository, @unchecked Sendable {
         }
     }
     
+    var stubProcessingCommand: ProcessingAICommand?
+    var didClearProcessing: Bool = false
     private var processingCmd: ProcessingAICommand?
     func updateProcessingAICommand(_ cmd: ProcessingAICommand) async throws {
         self.processingCmd = cmd
     }
-    
+
     func loadProcessingAICommand() async throws -> ProcessingAICommand? {
-        return self.processingCmd
+        return self.stubProcessingCommand ?? self.processingCmd
     }
-    
+
     func clearProcessingAICommand() async throws {
+        self.didClearProcessing = true
         self.processingCmd = nil
+        self.stubProcessingCommand = nil
     }
     
     func loadUsage() async throws -> AIAgentUsage {

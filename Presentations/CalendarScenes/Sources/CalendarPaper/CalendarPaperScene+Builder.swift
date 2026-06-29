@@ -14,18 +14,19 @@ import Domain
 
 // MARK: - CalendarPaperScene Interactable & Listenable
 
-protocol CalendarPaperSceneInteractor: Sendable, AnyObject, MonthSceneListener {
-    
+protocol CalendarPaperSceneInteractor: Sendable, AnyObject, MonthSceneListener, DayEventListSceneListener {
+
     func updateMonthIfNeed(_ newMonth: CalendarMonth)
     func selectToday()
     func selectDay(_ day: CalendarDay)
 }
 //
 protocol CalendarPaperSceneListener: AnyObject {
-    
+
     func calendarPaper(
         on month: CalendarMonth, didChange selectedDay: CurrentSelectDayModel
     )
+    func calendarPaperDidRequestShowAICommand()
 }
 
 // MARK: - CalendarPaperScene
