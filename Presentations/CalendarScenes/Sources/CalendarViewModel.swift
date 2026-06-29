@@ -278,8 +278,9 @@ extension CalendarViewModelImple {
         self.foremostEventusecase.refresh()
         
         self.bindUncompletedTodoRefresh()
-        
+
         self.aiAgentOrchestrationUsecase.prepare()
+        self.bindShowAICommandResultIfNeed()
     }
     
     private func prepareInitialMonths(around today: CalendarComponent.Day) {
@@ -403,11 +404,39 @@ extension CalendarViewModelImple {
 }
 
 extension CalendarViewModelImple: CalendarPaperSceneListener {
-    
+
     func calendarPaper(on month: CalendarMonth, didChange selectedDay: CurrentSelectDayModel) {
         let newMap = self.subject.selectedDayPerMonths.value
             |> key(month) .~ selectedDay
         self.subject.selectedDayPerMonths.send(newMap)
+    }
+
+    func calendarPaperDidRequestShowAICommand() {
+        self.router?.routeToAICommand()
+    }
+}
+
+
+// MARK: - AI command 결과 시트 자동 표시
+
+extension CalendarViewModelImple {
+
+    private func bindShowAICommandResultIfNeed() {
+        self.aiAgentOrchestrationUsecase.state
+            .map { Self.isAICommandPhase($0) }
+            .removeDuplicates()
+            .filter { $0 }
+            .sink { [weak self] _ in
+                self?.router?.routeToAICommand()
+            }
+            .store(in: &self.cancellables)
+    }
+
+    private static func isAICommandPhase(_ state: AIAgentState) -> Bool {
+        switch state {
+        case .processing, .confirm, .done, .failed: return true
+        case .idle, .listening: return false
+        }
     }
 }
 

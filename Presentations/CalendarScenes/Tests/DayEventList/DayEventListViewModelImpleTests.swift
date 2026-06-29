@@ -28,7 +28,8 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
     private var stubTagUsecase: StubEventTagUsecase!
     private var stubUISettingUsecase: StubUISettingUsecase!
     private var spyRouter: SpyRouter!
-    
+    private var spyListener: SpyListener!
+
     override func setUpWithError() throws {
         self.cancelBag = .init()
         self.stubTodoUsecase = .init()
@@ -36,6 +37,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTagUsecase = .init()
         self.stubUISettingUsecase = .init()
         self.spyRouter = .init()
+        self.spyListener = .init()
         self.stubOrchestrationUsecase = .init()
     }
 
@@ -47,6 +49,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
         self.stubTagUsecase = nil
         self.stubUISettingUsecase = nil
         self.spyRouter = nil
+        self.spyListener = nil
         self.stubOrchestrationUsecase = nil
     }
 
@@ -106,6 +109,7 @@ class DayEventListViewModelImpleTests: BaseTestCase, PublisherWaitable {
             aiAgentOrchestrationUsecase: self.stubOrchestrationUsecase
         )
         viewModel.router = self.spyRouter
+        viewModel.attachListener(self.spyListener)
         return viewModel
     }
     
@@ -1037,10 +1041,12 @@ extension DayEventListViewModelImpleTests {
         func routeToAIKeyboardInput() {
             self.didRouteToAIKeyboardInput = true
         }
+    }
 
-        var didRouteToAICommand: Bool?
-        func routeToAICommand() {
-            self.didRouteToAICommand = true
+    private final class SpyListener: DayEventListSceneListener, @unchecked Sendable {
+        var didRequestShowAICommand: Bool?
+        func dayEventListDidRequestShowAICommand() {
+            self.didRequestShowAICommand = true
         }
     }
 }
@@ -1184,40 +1190,19 @@ extension DayEventListViewModelImpleTests {
 
 }
 
-// MARK: - AI command 결과 시트 자동 present (진입 edge 1회)
+// MARK: - AI command 진입 버튼 분기
+// (command phase 자동 시트 present는 단일 CalendarViewModel 책임으로 이관 → CalendarViewModelImpleTests)
 
 extension DayEventListViewModelImpleTests {
 
-    func test_whenStateEntersProcessing_routesToAICommand() {
-        // given
-        let viewModel = self.makeViewModel()
-        // when
-        self.stubOrchestrationUsecase.stateSubject.send(.idle)
-        self.stubOrchestrationUsecase.stateSubject.send(.processing(command: "회의"))
-        // then
-        XCTAssertEqual(self.spyRouter.didRouteToAICommand, true)
-    }
-
-    func test_whenStayInCommandPhase_routesOnlyOnce() {
-        // given
-        let viewModel = self.makeViewModel()
-        self.stubOrchestrationUsecase.stateSubject.send(.processing(command: "회의"))
-        self.spyRouter.didRouteToAICommand = nil
-        // when — 같은 command phase 내 전이
-        self.stubOrchestrationUsecase.stateSubject.send(.done(message: "완료"))
-        // then — 재present 안 함(edge 아님)
-        XCTAssertNil(self.spyRouter.didRouteToAICommand)
-    }
-
-    func test_entryButtonTap_whenCommandPhase_reopensCommandSheet() {
+    func test_entryButtonTap_whenCommandPhase_requestsShowCommandViaListener() {
         // given
         let viewModel = self.makeViewModel()
         self.stubOrchestrationUsecase.stateSubject.send(.done(message: "완료"))
-        self.spyRouter.didRouteToAICommand = nil   // 자동 present 후 리셋
         // when — 닫았다가 버튼 재탭
         viewModel.handleAIEntryButtonTap()
-        // then
-        XCTAssertEqual(self.spyRouter.didRouteToAICommand, true)
+        // then — 직접 present하지 않고 listener로 상위에 위임
+        XCTAssertEqual(self.spyListener.didRequestShowAICommand, true)
         XCTAssertNil(self.stubOrchestrationUsecase.didEnterVoiceInput)   // voice 아님
     }
 

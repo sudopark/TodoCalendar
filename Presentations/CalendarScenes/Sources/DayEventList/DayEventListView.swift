@@ -166,11 +166,11 @@ final class DayEventListViewEventHandler: Observable {
         self.handleMoreAction = eventListCellEventHandleViewModel.handleMoreAction(_:_:)
         self.refreshUncompletedTodos = viewModel.refreshUncompletedTodoEvents
         self.enterVoiceInput = viewModel.enterVoiceInput
-        self.finishVoiceInput = { [weak viewModel] in viewModel?.finishVoiceInput() }
-        self.enterKeyboardInput = { [weak viewModel] in viewModel?.enterKeyboardInput() }
-        self.stopAIAgentInput = { [weak viewModel] in viewModel?.stopAIAgentInput() }
-        self.submitAIAgent = { [weak viewModel] text in viewModel?.submitAIAgent(text) }
-        self.handleAIEntryButtonTap = { [weak viewModel] in viewModel?.handleAIEntryButtonTap() }
+        self.finishVoiceInput = viewModel.finishVoiceInput
+        self.enterKeyboardInput = viewModel.enterKeyboardInput
+        self.stopAIAgentInput = viewModel.stopAIAgentInput
+        self.submitAIAgent = viewModel.submitAIAgent(_:)
+        self.handleAIEntryButtonTap = viewModel.handleAIEntryButtonTap
     }
 }
 

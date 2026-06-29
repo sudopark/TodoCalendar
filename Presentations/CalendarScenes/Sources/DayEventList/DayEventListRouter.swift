@@ -23,7 +23,6 @@ protocol DayEventListRouting: Routing, Sendable {
     func showDoneTodoList()
     func routeToSignIn()
     func routeToAIKeyboardInput()
-    func routeToAICommand()
 }
 
 // MARK: - Router
@@ -34,24 +33,19 @@ final class DayEventListRouter: BaseRouterImple, DayEventListRouting, @unchecked
     private let eventListSceneBuilder: any EventListSceneBuiler
     private let memberSceneBuilder: any MemberSceneBuilder
     private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
-    private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
     private let viewAppearance: ViewAppearance
-
-    private weak var presentedAICommandScene: (any Scene)?
 
     init(
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
         eventListSceneBuilder: any EventListSceneBuiler,
         memberSceneBuilder: any MemberSceneBuilder,
         aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder,
-        aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
         viewAppearance: ViewAppearance
     ) {
         self.eventDetailSceneBuilder = eventDetailSceneBuilder
         self.eventListSceneBuilder = eventListSceneBuilder
         self.memberSceneBuilder = memberSceneBuilder
         self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
-        self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
         self.viewAppearance = viewAppearance
     }
 }
@@ -90,15 +84,6 @@ extension DayEventListRouter {
     func routeToAIKeyboardInput() {
         Task { @MainActor in
             let next = self.aiKeyboardInputSceneBuilder.makeScene()
-            self.showBottomSlide(next)
-        }
-    }
-
-    func routeToAICommand() {
-        Task { @MainActor in
-            guard self.presentedAICommandScene == nil else { return }
-            let next = self.aiAgentCommandSceneBuilder.makeCommandScene()
-            self.presentedAICommandScene = next
             self.showBottomSlide(next)
         }
     }

@@ -83,8 +83,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
             accountUsecase: self.accountUsecase,
-            memberSceneBuilder: self.memberSceneBuilder,
-            aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder
+            memberSceneBuilder: self.memberSceneBuilder
         )
 
         let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(
@@ -106,7 +105,10 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             eventListCellEventHanleViewModelBuilder: handleViewModelBuilder,
             pendingCompleteTodoState: pendingCompleteTodoState
         )
-        let router = CalendarViewRouterImple(paperSceneBuilder)
+        let router = CalendarViewRouterImple(
+            paperSceneBuilder,
+            aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder
+        )
         router.scene = viewController
         viewModel.router = router
 
