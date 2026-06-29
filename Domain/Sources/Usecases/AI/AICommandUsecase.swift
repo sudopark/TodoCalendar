@@ -21,7 +21,7 @@ public protocol AICommandUsecase: AnyObject, Sendable {
 
     func rejectConfirmCommand(_ action: AIConfirmCommandAction)
 
-    func cancelOngoingCommand()
+    func cancelOngoingCommand(_ jobId: String)
 
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error>
 
@@ -62,8 +62,6 @@ public final class AICommandUsecaseImple: AICommandUsecase, @unchecked Sendable 
     private struct Subject {
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let jobFinishEvent = PassthroughSubject<String, Never>()
-        // 진행 중 command의 jobId를 메모리에 보관 — cancel 시 repository 재조회 없이 사용
-        let processingJobId = CurrentValueSubject<String?, Never>(nil)
     }
     private let subject = Subject()
     private var cancelBag = Set<AnyCancellable>()
@@ -95,9 +93,6 @@ extension AICommandUsecaseImple {
         })
         
         let waitJobUntilFinish = makeJob
-            .handleEvents(receiveOutput: { [weak self] jobId in
-                self?.subject.processingJobId.send(jobId)
-            })
             .flatMap { [weak self] jobId in
                 return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
             }
@@ -118,11 +113,8 @@ extension AICommandUsecaseImple {
             )
             return jobId
         })
-        
+
         let waitUntilFinish = makeConfirmJob
-            .handleEvents(receiveOutput: { [weak self] jobId in
-                self?.subject.processingJobId.send(jobId)
-            })
             .flatMap { [weak self] jobId in
                 return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
             }
@@ -138,11 +130,8 @@ extension AICommandUsecaseImple {
         Task { try? await repository.rejectConfirmCommand(action) }
     }
 
-    public func cancelOngoingCommand() {
-        // 메모리에 보관 중인 진행 command의 jobId를 읽어 서버 중지 요청 — repository 재조회 불필요.
+    public func cancelOngoingCommand(_ jobId: String) {
         // fire-and-forget — 클라는 GET /jobs/:id 재폴링으로 CANCELED를 받는다(서버 #250).
-        guard let jobId = self.subject.processingJobId.value else { return }
-        self.subject.processingJobId.send(nil)
         let repository = self.repository
         Task {
             try? await repository.cancelCommand(jobId)
@@ -215,7 +204,6 @@ extension AICommandUsecaseImple {
                         .eraseToAnyPublisher()
                 }
 
-                self.subject.processingJobId.send(cmd.jobId)
                 return self.checkJob(cmd.jobId)
                     .handleClearProcessingCommand(self.repository)
                     .map { Optional($0) }

@@ -412,31 +412,15 @@ extension AICommandUsecaseImpleTests {
 
 extension AICommandUsecaseImpleTests {
 
-    @Test func usecase_cancelOngoingCommand_cancelsInMemoryJobWithoutReloading() async throws {
-        // given — command 처리를 시작해 jobId를 메모리에 보관, persisted store는 비워둠
-        self.stubRepository.stubProcessingCommand = nil
+    @Test func usecase_cancelOngoingCommand_delegatesJobCancellationAndClear() async throws {
+        // given
         let usecase = self.makeUsecase()
-        usecase.processCommand("cmd")
-            .sink(receiveCompletion: { _ in }, receiveValue: { _ in })
-            .store(in: &self.cancelBag)
-        try await Task.sleep(nanoseconds: 50_000_000)   // makeJob async → 메모리 jobId 세팅 대기
         // when
-        usecase.cancelOngoingCommand()
-        try await Task.sleep(nanoseconds: 50_000_000)   // fire-and-forget Task 완료 대기
-        // then — 메모리에 보관된 jobId를 repository 재조회 없이 중지
+        usecase.cancelOngoingCommand("some_job")
+        try await Task.sleep(nanoseconds: 50_000_000)
+        // then — 전달받은 jobId로 repository cancel + clear 위임
         #expect(self.stubRepository.didCancelJobId == "some_job")
         #expect(self.stubRepository.didClearProcessing == true)
-    }
-
-    @Test func usecase_cancelOngoingCommand_whenNoInMemoryJob_doesNothing() async throws {
-        // given — persisted store엔 있지만 진행을 시작한 적 없음(메모리 비어있음)
-        self.stubRepository.stubProcessingCommand = .init(jobId: "job-9", isConfirmJob: false)
-        let usecase = self.makeUsecase()
-        // when
-        usecase.cancelOngoingCommand()
-        try await Task.sleep(nanoseconds: 50_000_000)
-        // then — persisted를 재조회하지 않으므로 중지 호출 없음
-        #expect(self.stubRepository.didCancelJobId == nil)
     }
 }
 

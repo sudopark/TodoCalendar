@@ -62,6 +62,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
     private let subject = Subject()
     private var commandCancellable: AnyCancellable?
     private var voiceInputBindings = Set<AnyCancellable>()
+    private var currentProcessingJobId: String?
 
     private func startProcessing(_ jobPublisher: AnyPublisher<AIJob, any Error>) {
         self.commandCancellable?.cancel()
@@ -73,6 +74,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
                     }
                 },
                 receiveValue: { [weak self] job in
+                    self?.currentProcessingJobId = job.jobId
                     self?.handleJobResult(job)
                 }
             )
@@ -226,13 +228,18 @@ extension AIAgentOrchestrationUsecaseImple {
         }
         self.commandCancellable?.cancel()
         self.commandCancellable = nil
+        self.currentProcessingJobId = nil
         self.subject.state.send(.idle)
     }
 
     public func reset() {
+        let jobId = self.currentProcessingJobId
         self.commandCancellable?.cancel()
         self.commandCancellable = nil
-        self.commandUsecase.cancelOngoingCommand()   // 진행 중 작업 서버 중지(fire-and-forget)
+        self.currentProcessingJobId = nil
+        if let jobId {
+            self.commandUsecase.cancelOngoingCommand(jobId)
+        }
         self.subject.state.send(.idle)
     }
 
@@ -248,6 +255,7 @@ extension AIAgentOrchestrationUsecaseImple {
                 receiveValue: { [weak self] job in
                     guard let self else { return }
                     if let job {
+                        self.currentProcessingJobId = job.jobId
                         self.handleJobResult(job)
                     } else {
                         self.subject.state.send(.idle)
