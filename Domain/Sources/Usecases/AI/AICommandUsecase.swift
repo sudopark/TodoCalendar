@@ -62,6 +62,8 @@ public final class AICommandUsecaseImple: AICommandUsecase, @unchecked Sendable 
     private struct Subject {
         let timeZone = CurrentValueSubject<TimeZone?, Never>(nil)
         let jobFinishEvent = PassthroughSubject<String, Never>()
+        // 진행 중 command의 jobId를 메모리에 보관 — cancel 시 repository 재조회 없이 사용
+        let processingJobId = CurrentValueSubject<String?, Never>(nil)
     }
     private let subject = Subject()
     private var cancelBag = Set<AnyCancellable>()
@@ -92,15 +94,19 @@ extension AICommandUsecaseImple {
             return jobId
         })
         
-        let waitJobUntilFinish = makeJob.flatMap { [weak self] jobId in
-            return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
-        }
-        
+        let waitJobUntilFinish = makeJob
+            .handleEvents(receiveOutput: { [weak self] jobId in
+                self?.subject.processingJobId.send(jobId)
+            })
+            .flatMap { [weak self] jobId in
+                return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
+            }
+
         return waitJobUntilFinish
             .handleClearProcessingCommand(repository)
             .eraseToAnyPublisher()
     }
-    
+
     public func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error> {
 
         let timeZone = self.currentIANATimeZone(); let repository = self.repository
@@ -113,10 +119,14 @@ extension AICommandUsecaseImple {
             return jobId
         })
         
-        let waitUntilFinish = makeConfirmJob.flatMap { [weak self] jobId in
-            return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
-        }
-        
+        let waitUntilFinish = makeConfirmJob
+            .handleEvents(receiveOutput: { [weak self] jobId in
+                self?.subject.processingJobId.send(jobId)
+            })
+            .flatMap { [weak self] jobId in
+                return self?.checkJob(jobId) ?? Empty().eraseToAnyPublisher()
+            }
+
         return waitUntilFinish
             .handleClearProcessingCommand(repository)
             .eraseToAnyPublisher()
@@ -129,13 +139,13 @@ extension AICommandUsecaseImple {
     }
 
     public func cancelOngoingCommand() {
+        // 메모리에 보관 중인 진행 command의 jobId를 읽어 서버 중지 요청 — repository 재조회 불필요.
+        // fire-and-forget — 클라는 GET /jobs/:id 재폴링으로 CANCELED를 받는다(서버 #250).
+        guard let jobId = self.subject.processingJobId.value else { return }
+        self.subject.processingJobId.send(nil)
         let repository = self.repository
-        // 진행 중 command의 jobId를 읽어 서버 중지 요청. fire-and-forget —
-        // 클라는 GET /jobs/:id 재폴링으로 CANCELED를 받는다(서버 #250).
         Task {
-            guard let processing = try? await repository.loadProcessingAICommand()
-            else { return }
-            try? await repository.cancelCommand(processing.jobId)
+            try? await repository.cancelCommand(jobId)
             try? await repository.clearProcessingAICommand()
         }
     }
@@ -205,6 +215,7 @@ extension AICommandUsecaseImple {
                         .eraseToAnyPublisher()
                 }
 
+                self.subject.processingJobId.send(cmd.jobId)
                 return self.checkJob(cmd.jobId)
                     .handleClearProcessingCommand(self.repository)
                     .map { Optional($0) }
