@@ -20,7 +20,7 @@ import CommonPresentation
 
 // MARK: - AICommandBadge
 
-private enum AICommandBadge {
+private enum AICommandBadge: Equatable {
     case processing
     case needConfirm
     case done
@@ -241,12 +241,10 @@ struct DayEventListView: View {
                 if self.state.isListening {
                     AIAgentInlineInputView()
                 } else {
-                    HStack(spacing: 8) {
-                        QuickAddNewTodoView(isFocusInput: $isFocusInput)
-                            .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
-                            .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
-                        aiAgentEntryButton()
-                    }
+                    QuickAddNewTodoView(isFocusInput: $isFocusInput)
+                        .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
+                        .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
+                        .eventHandler(\.handleAIEntryButtonTap, eventHandler.handleAIEntryButtonTap)
                 }
 
                 addNewButton()
@@ -257,51 +255,6 @@ struct DayEventListView: View {
         }
         .padding()
         .background(self.appearance.colorSet.bg0.asColor)
-    }
-
-    private func aiAgentEntryButton() -> some View {
-        return Button {
-            self.isFocusInput = false
-            self.eventHandler.handleAIEntryButtonTap()
-        } label: {
-            Circle()
-                .fill(self.appearance.colorSet.primaryBtnBackground.asColor)
-                .frame(width: 44, height: 44)
-                .overlay(
-                    Image(systemName: "sparkles")
-                        .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
-                )
-                .overlay(alignment: .topTrailing) {
-                    if let badge = self.state.aiCommandBadge {
-                        self.badgeView(badge)
-                    }
-                }
-        }
-    }
-
-    @ViewBuilder
-    private func badgeView(_ badge: AICommandBadge) -> some View {
-        switch badge {
-        case .processing:
-            Circle()
-                .fill(self.appearance.colorSet.accent.asColor)
-                .frame(width: 12, height: 12)
-                .offset(x: 4, y: -4)
-        case .needConfirm:
-            badgeCircle("questionmark", self.appearance.colorSet.primaryBtnBackground.asColor)
-        case .done:
-            badgeCircle("checkmark", self.appearance.colorSet.accent.asColor)
-        case .failed:
-            badgeCircle("exclamationmark", self.appearance.colorSet.accentWarn.asColor)
-        }
-    }
-
-    private func badgeCircle(_ name: String, _ color: Color) -> some View {
-        Image(systemName: "\(name).circle.fill")
-            .font(.system(size: 16))
-            .foregroundStyle(color)
-            .background(Circle().fill(self.appearance.colorSet.bg0.asColor))
-            .offset(x: 4, y: -4)
     }
 
     private func addNewButton() -> some View {
@@ -463,8 +416,21 @@ private struct QuickAddNewTodoView: View {
 
     fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
     fileprivate var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
+    fileprivate var handleAIEntryButtonTap: () -> Void = { }
 
     var body: some View {
+        HStack(spacing: 8) {
+            quickAddField()
+                .opacity(self.isEntering ? 1.0 : 0.5)
+
+            aiAgentEntryButton()
+        }
+        .padding(.vertical, 4).padding(.horizontal, 8)
+        .frame(height: 50)
+        .backgroundAsRoundedRectForEventList(self.appearance)
+    }
+
+    private func quickAddField() -> some View {
         HStack(spacing: 8) {
 
             Text(R.String.calendarEventTimeTodo)
@@ -511,12 +477,132 @@ private struct QuickAddNewTodoView: View {
                 }
             }
         }
-        .opacity(self.isEntering ? 1.0 : 0.5)
-        .padding(.vertical, 4).padding(.horizontal, 8)
-        .frame(height: 50)
-        .backgroundAsRoundedRectForEventList(self.appearance)
+    }
+
+    private func aiAgentEntryButton() -> some View {
+        return Button {
+            self.isFocusInput = false
+            self.handleAIEntryButtonTap()
+        } label: {
+            Circle()
+                .fill(self.appearance.colorSet.primaryBtnBackground.asColor)
+                .frame(width: 40, height: 40)
+                .overlay { self.entryButtonIcon() }
+                .overlay(alignment: .topTrailing) {
+                    if let badge = self.state.aiCommandBadge, badge != .processing {
+                        self.badgeView(badge)
+                    }
+                }
+        }
+    }
+
+    @ViewBuilder
+    private func entryButtonIcon() -> some View {
+        if self.state.aiCommandBadge == .processing {
+            ProgressView()
+                .progressViewStyle(.circular)
+                .controlSize(.small)
+                .tint(self.appearance.colorSet.primaryBtnText.asColor)
+        } else {
+            Image(systemName: "sparkles")
+                .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
+        }
+    }
+
+    private func badgeView(_ badge: AICommandBadge) -> some View {
+        let style = self.badgeStyle(badge)
+        return Image(systemName: style.symbol)
+            .font(.system(size: 11, weight: .heavy))
+            .foregroundColor(style.color)
+            .frame(width: 18, height: 18)
+            .background(Circle().fill(self.appearance.colorSet.bg0.asColor))
+            .overlay(Circle().stroke(style.color, lineWidth: 1.5))
+            .offset(x: 5, y: -5)
+    }
+
+    private func badgeStyle(_ badge: AICommandBadge) -> (symbol: String, color: Color) {
+        switch badge {
+        case .processing, .needConfirm:
+            return ("questionmark", self.appearance.colorSet.accentInfo.asColor)
+        case .done:
+            return ("checkmark", self.appearance.colorSet.accent.asColor)
+        case .failed:
+            return ("exclamationmark", self.appearance.colorSet.accentWarn.asColor)
+        }
     }
 }
+
+
+// MARK: - AIAgentInlineInputView (inline component, only shown when listening)
+
+private struct AIAgentInlineInputView: View {
+
+    @Environment(DayEventListViewState.self) private var state: DayEventListViewState
+    @Environment(DayEventListViewEventHandler.self) private var eventHandler: DayEventListViewEventHandler
+    @Environment(ViewAppearance.self) private var appearance: ViewAppearance
+
+    var body: some View {
+        voiceModeView()
+    }
+
+    private func voiceModeView() -> some View {
+        HStack(spacing: 8) {
+
+            Button {
+                self.eventHandler.enterKeyboardInput()
+            } label: {
+                Image(systemName: "keyboard")
+                    .foregroundColor(self.appearance.colorSet.text0.asColor)
+            }
+            .frame(width: 52)
+
+            RoundedRectangle(cornerRadius: 3)
+                .fill(self.appearance.tagColors.defaultColor.asColor)
+                .frame(width: 6)
+
+            VoiceWaveformView(
+                level: self.state.voiceLevel,
+                tintColor: self.appearance.colorSet.text1.asColor
+            )
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+
+            HStack(spacing: 4) {
+                Button {
+                    self.eventHandler.stopAIAgentInput()
+                } label: {
+                    Circle()
+                        .fill(
+                            appearance.colorSet.secondaryBtnBackground.asColor
+                        )
+                        .overlay(
+                            Image(systemName: "square")
+                                .foregroundColor(self.appearance.colorSet.secondaryBtnText.asColor)
+                                .padding(8)
+                        )
+                }
+
+                Button {
+                    self.eventHandler.finishVoiceInput()
+                } label: {
+                    Circle()
+                        .fill(
+                            appearance.colorSet.primaryBtnBackground.asColor
+                        )
+                        .overlay(
+                            Image(systemName: "arrow.up")
+                                .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
+                                .padding(8)
+                        )
+                }
+            }
+        }
+        .padding(.vertical, 8).padding(.horizontal, 8)
+        .frame(height: 50)
+        .backgroundAsRoundedRectForEventList(appearance)
+    }
+}
+
 
 // MARK: - preview
 
@@ -693,7 +779,7 @@ struct DayEventListBadgePreviewProvider: PreviewProvider {
 
     static var previews: some View {
         let calendar = CalendarAppearanceSettings(
-            colorSetKey: .defaultDark,
+            colorSetKey: .defaultLight,
             fontSetKey: .systemDefault
         )
         let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
@@ -739,72 +825,31 @@ struct DayEventListBadgePreviewProvider: PreviewProvider {
 }
 
 
-// MARK: - AIAgentInlineInputView (inline component, only shown when listening)
+// MARK: - AIAgentInlineInputView Preview (listening state)
 
-private struct AIAgentInlineInputView: View {
+struct DayEventListInlineInputPreviewProvider: PreviewProvider {
 
-    @Environment(DayEventListViewState.self) private var state: DayEventListViewState
-    @Environment(DayEventListViewEventHandler.self) private var eventHandler: DayEventListViewEventHandler
-    @Environment(ViewAppearance.self) private var appearance: ViewAppearance
+    static var previews: some View {
+        let calendar = CalendarAppearanceSettings(
+            colorSetKey: .defaultLight,
+            fontSetKey: .systemDefault
+        )
+        let tag = DefaultEventTagColorSetting(holiday: "#ff0000", default: "#ff00ff")
+        let setting = AppearanceSettings(calendar: calendar, defaultTagColor: tag)
+        let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
+        let eventHandler = DayEventListViewEventHandler()
 
-    var body: some View {
-        voiceModeView()
-    }
+        let listeningState = DayEventListViewState()
+        listeningState.dayModel = .init(dateText: "2020년 9월 15일(금)", lunarDateText: "6월 4일")
+        listeningState.aiAgentState = .listening(.voice)
+        listeningState.voiceLevel = 0.4
+        listeningState.recognizingText = "내일 오전 9시 회의 추가"
 
-    private func voiceModeView() -> some View {
-        HStack(spacing: 8) {
-
-            Button {
-                self.eventHandler.enterKeyboardInput()
-            } label: {
-                Image(systemName: "keyboard")
-                    .foregroundColor(self.appearance.colorSet.text0.asColor)
-            }
-            .frame(width: 52)
-
-            RoundedRectangle(cornerRadius: 3)
-                .fill(self.appearance.tagColors.defaultColor.asColor)
-                .frame(width: 6)
-
-            VoiceWaveformView(
-                level: self.state.voiceLevel,
-                tintColor: self.appearance.colorSet.text1.asColor
-            )
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-
-            HStack(spacing: 4) {
-                Button {
-                    self.eventHandler.stopAIAgentInput()
-                } label: {
-                    Circle()
-                        .fill(
-                            appearance.colorSet.secondaryBtnBackground.asColor
-                        )
-                        .overlay(
-                            Image(systemName: "square")
-                                .foregroundColor(self.appearance.colorSet.secondaryBtnText.asColor)
-                                .padding(8)
-                        )
-                }
-
-                Button {
-                    self.eventHandler.finishVoiceInput()
-                } label: {
-                    Circle()
-                        .fill(
-                            appearance.colorSet.primaryBtnBackground.asColor
-                        )
-                        .overlay(
-                            Image(systemName: "arrow.up")
-                                .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
-                                .padding(8)
-                        )
-                }
-            }
-        }
-        .padding(.vertical, 8).padding(.horizontal, 8)
-        .frame(height: 50)
-        .backgroundAsRoundedRectForEventList(appearance)
+        return DayEventListView()
+            .environment(listeningState)
+            .environment(eventHandler)
+            .environment(PendingCompleteTodoState())
+            .environment(viewAppearance)
+            .previewDisplayName("Inline input - listening")
     }
 }
