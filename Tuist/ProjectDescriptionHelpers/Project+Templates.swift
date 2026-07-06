@@ -219,7 +219,9 @@ extension Project {
                     "com.sudo.park.TodoCalendarApp.bgSync"
                 ],
                 "UIBackgroundModes": ["fetch"],
-                "NSCalendarsFullAccessUsageDescription": "Calendar access is required to display events and sync with Apple Calendar."
+                "NSCalendarsFullAccessUsageDescription": "Calendar access is required to display events and sync with Apple Calendar.",
+                "NSMicrophoneUsageDescription": "Microphone access is required to enter events and to-dos by voice.",
+                "NSSpeechRecognitionUsageDescription": "Speech recognition is required to convert your voice into events and to-dos."
             ]),
             sources: [
                 "Sources/**",
