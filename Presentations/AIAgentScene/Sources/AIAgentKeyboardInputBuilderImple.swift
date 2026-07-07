@@ -1,6 +1,6 @@
 //
 //  AIAgentKeyboardInputBuilderImple.swift
-//  CalendarScenes
+//  AIAgentScene
 //
 
 import UIKit
@@ -11,23 +11,23 @@ import CommonPresentation
 
 // MARK: - AIAgentKeyboardInputBuilderImple
 
-final class AIAgentKeyboardInputBuilderImple: AIAgentKeyboardInputSceneBuilder {
+public final class AIAgentKeyboardInputBuilderImple: AIAgentKeyboardInputSceneBuilder {
 
-    private let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    private let usecaseFactory: any UsecaseFactory
     private let viewAppearance: ViewAppearance
 
-    init(
-        aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase,
+    public init(
+        usecaseFactory: any UsecaseFactory,
         viewAppearance: ViewAppearance
     ) {
-        self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
+        self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
     }
 
     @MainActor
-    func makeScene() -> any AIAgentKeyboardInputScene {
+    public func makeKeyboardInputScene() -> any AIAgentKeyboardInputScene {
         let viewModel = AIAgentKeyboardInputViewModelImple(
-            aiAgentOrchestrationUsecase: self.aiAgentOrchestrationUsecase
+            aiAgentOrchestrationUsecase: self.usecaseFactory.makeAIAgentOrchestrationUsecase()
         )
         let viewController = AIAgentKeyboardInputViewController(
             viewModel: viewModel,

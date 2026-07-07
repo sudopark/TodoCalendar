@@ -83,7 +83,7 @@ extension DayEventListRouter {
 
     func routeToAIKeyboardInput() {
         Task { @MainActor in
-            let next = self.aiKeyboardInputSceneBuilder.makeScene()
+            let next = self.aiKeyboardInputSceneBuilder.makeKeyboardInputScene()
             self.showBottomSlide(next)
         }
     }

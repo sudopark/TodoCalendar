@@ -19,6 +19,7 @@ public struct CalendarSceneBuilderImple {
     private let accountUsecase: any AccountUsecase
     private let memberSceneBuilder: any MemberSceneBuilder
     private let aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
+    private let aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
     private let pendingCompleteTodoState: PendingCompleteTodoState = .init()
     public let calendarDeepLinkHandler = CalendarDeepLinkHandlerImple()
     private let eventDeepLinkHandler = EventDeepLinkHandlerImple()
@@ -30,7 +31,8 @@ public struct CalendarSceneBuilderImple {
         eventListSceneBuilder: any EventListSceneBuiler,
         accountUsecase: any AccountUsecase,
         memberSceneBuilder: any MemberSceneBuilder,
-        aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder
+        aiAgentCommandSceneBuilder: any AIAgentCommandSceneBuilder,
+        aiAgentKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -39,6 +41,7 @@ public struct CalendarSceneBuilderImple {
         self.accountUsecase = accountUsecase
         self.memberSceneBuilder = memberSceneBuilder
         self.aiAgentCommandSceneBuilder = aiAgentCommandSceneBuilder
+        self.aiAgentKeyboardInputSceneBuilder = aiAgentKeyboardInputSceneBuilder
     }
 
     private var eventListCellEventHanleViewModelBuilder: (any EventListCellEventHanleViewModelBuilder)?
@@ -83,7 +86,8 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
             accountUsecase: self.accountUsecase,
-            memberSceneBuilder: self.memberSceneBuilder
+            memberSceneBuilder: self.memberSceneBuilder,
+            aiKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder
         )
 
         let handleViewModelBuilder = EventListCellEventHanleViewModelBuilderImple(
