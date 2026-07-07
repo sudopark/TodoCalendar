@@ -23,6 +23,7 @@ final class DayEventListSceneBuilerImple {
     private let eventListSceneBuilder: any EventListSceneBuiler
     private let accountUsecase: any AccountUsecase
     private let memberSceneBuilder: any MemberSceneBuilder
+    private let aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
 
     init(
         usecaseFactory: any UsecaseFactory,
@@ -30,7 +31,8 @@ final class DayEventListSceneBuilerImple {
         eventDetailSceneBuilder: any EventDetailSceneBuilder,
         eventListSceneBuilder: any EventListSceneBuiler,
         accountUsecase: any AccountUsecase,
-        memberSceneBuilder: any MemberSceneBuilder
+        memberSceneBuilder: any MemberSceneBuilder,
+        aiKeyboardInputSceneBuilder: any AIAgentKeyboardInputSceneBuilder
     ) {
         self.usecaseFactory = usecaseFactory
         self.viewAppearance = viewAppearance
@@ -38,6 +40,7 @@ final class DayEventListSceneBuilerImple {
         self.eventListSceneBuilder = eventListSceneBuilder
         self.accountUsecase = accountUsecase
         self.memberSceneBuilder = memberSceneBuilder
+        self.aiKeyboardInputSceneBuilder = aiKeyboardInputSceneBuilder
     }
 }
 
@@ -59,7 +62,6 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             eventTagUsecase: self.usecaseFactory.makeEventTagUsecase(),
             uiSettingUsecase: uiSettingUsecase
         )
-        let aiAgentOrchestrationUsecase = self.usecaseFactory.makeAIAgentOrchestrationUsecase()
         let viewModel = DayEventListViewModelImple(
             calendarUsecase: usecaseFactory.makeCalendarUsecase(),
             calendarSettingUsecase: calendarSettingUsecase,
@@ -68,17 +70,13 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             foremostEventUsecase: foremostEventUsecase,
             uiSettingUsecase: uiSettingUsecase,
             accountUsecase: self.accountUsecase,
-            aiAgentOrchestrationUsecase: aiAgentOrchestrationUsecase
-        )
-        let aiKeyboardInputSceneBuilder = AIAgentKeyboardInputBuilderImple(
-            aiAgentOrchestrationUsecase: aiAgentOrchestrationUsecase,
-            viewAppearance: self.viewAppearance
+            aiAgentOrchestrationUsecase: self.usecaseFactory.makeAIAgentOrchestrationUsecase()
         )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,
             eventListSceneBuilder: self.eventListSceneBuilder,
             memberSceneBuilder: self.memberSceneBuilder,
-            aiKeyboardInputSceneBuilder: aiKeyboardInputSceneBuilder,
+            aiKeyboardInputSceneBuilder: self.aiKeyboardInputSceneBuilder,
             viewAppearance: self.viewAppearance
         )
         viewModel.router = router

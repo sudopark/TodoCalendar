@@ -24,3 +24,22 @@ public protocol AIAgentCommandSceneBuilder: AnyObject {
     @MainActor
     func makeCommandScene() -> any AIAgentCommandScene
 }
+
+
+// MARK: - AIAgentKeyboardInputScene Interactable & Listenable
+
+public protocol AIAgentKeyboardInputSceneInteractor: AnyObject { }
+
+
+// MARK: - AIAgentKeyboardInputScene
+
+public protocol AIAgentKeyboardInputScene: Scene where Interactor == any AIAgentKeyboardInputSceneInteractor { }
+
+
+// MARK: - Builder
+
+public protocol AIAgentKeyboardInputSceneBuilder: AnyObject {
+
+    @MainActor
+    func makeKeyboardInputScene() -> any AIAgentKeyboardInputScene
+}

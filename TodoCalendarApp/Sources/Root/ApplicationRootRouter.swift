@@ -394,7 +394,8 @@ extension ApplicationRootRouter {
             eventListSceneBuilder: self.eventListSceneBuilder(),
             accountUsecase: self.accountUsecase,
             memberSceneBuilder: self.memberSceneBuilder(),
-            aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder()
+            aiAgentCommandSceneBuilder: self.aiAgentCommandSceneBuilder(),
+            aiAgentKeyboardInputSceneBuilder: self.aiAgentKeyboardInputSceneBuilder()
         )
         self.deepLinkHandler.attach(calendarHandler: builder.calendarDeepLinkHandler)
         return builder
@@ -450,6 +451,13 @@ extension ApplicationRootRouter {
 
     private func aiAgentCommandSceneBuilder() -> any AIAgentCommandSceneBuilder {
         return AIAgentCommandBuilderImple(
+            usecaseFactory: self.usecaseFactory,
+            viewAppearance: self.viewAppearanceStore.appearance
+        )
+    }
+
+    private func aiAgentKeyboardInputSceneBuilder() -> any AIAgentKeyboardInputSceneBuilder {
+        return AIAgentKeyboardInputBuilderImple(
             usecaseFactory: self.usecaseFactory,
             viewAppearance: self.viewAppearanceStore.appearance
         )
