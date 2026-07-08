@@ -13,6 +13,7 @@ import Domain
 protocol AIAgentKeyboardInputViewModel: AnyObject, Sendable {
     func send(_ text: String)
     func stop()
+    func close()
     func dismissByGesture()
 }
 
@@ -39,6 +40,11 @@ final class AIAgentKeyboardInputViewModelImple: AIAgentKeyboardInputViewModel, @
 
     func stop() {
         self.aiAgentOrchestrationUsecase.stopInput()
+        self.router?.closeScene()
+    }
+
+    // 시트만 닫음 — 음성 입력 복귀는 View의 onDisappear(dismissByGesture)가 처리
+    func close() {
         self.router?.closeScene()
     }
 
