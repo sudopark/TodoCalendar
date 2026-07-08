@@ -525,7 +525,7 @@
 "aiAgent::permission::keyboard" = "Type instead";
 "aiAgent::permission::setting" = "Open Settings";
 "aiAgent::state::processing" = "Processing";
-"aiAgent::state::confirm" = "Confirm";
+"aiAgent::state::confirm" = "Confirmation needed";
 "aiAgent::state::done" = "Done";
 "aiAgent::state::failed" = "Failed";
 "aiAgent::done::default" = "Done";
