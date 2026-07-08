@@ -64,6 +64,7 @@ protocol DayEventListViewModel: AnyObject, Sendable, DayEventListSceneInteractor
     func stopAIAgentInput()
     func submitAIAgent(_ text: String)
     func handleAIEntryButtonTap()
+    func showAIGuide()
     func attachListener(_ listener: any DayEventListSceneListener)
 
     // presenter
@@ -265,6 +266,10 @@ extension DayEventListViewModelImple {
         } else {
             self.enterVoiceInput()
         }
+    }
+
+    func showAIGuide() {
+        self.router?.routeToAIGuide()
     }
 
     private static func isCommandPhase(_ state: AIAgentState) -> Bool {
