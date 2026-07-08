@@ -78,14 +78,35 @@ extension AIAgentCommandViewModelImpleTests {
         XCTAssertEqual(self.spyRouter.didClosed, true)
     }
 
-    func test_cancel_resetsAndClosesScene() {
+    func test_cancel_showsStopConfirmDialog() {
         // given
         let viewModel = self.makeViewModel()
+        // when
+        viewModel.cancel()
+        // then — 즉시 중지하지 않고 확인 팝업부터 노출
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+    }
+
+    func test_cancel_whenConfirmed_resetsAndClosesScene() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.spyRouter.shouldConfirmNotCancel = true   // 팝업에서 '중지' 선택
         // when
         viewModel.cancel()
         // then
         XCTAssertEqual(self.stubAgent.didReset, true)   // reset → 서버 cancel API
         XCTAssertEqual(self.spyRouter.didClosed, true)
+    }
+
+    func test_cancel_whenDialogDismissed_doesNotResetNorClose() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.spyRouter.shouldConfirmNotCancel = false   // 팝업에서 '취소' 선택
+        // when
+        viewModel.cancel()
+        // then — 확인 안 하면 중지 안 되고 시트도 유지
+        XCTAssertFalse(self.stubAgent.didReset)
+        XCTAssertNil(self.spyRouter.didClosed)
     }
 
     func test_close_keepsStateAndClosesScene() {
