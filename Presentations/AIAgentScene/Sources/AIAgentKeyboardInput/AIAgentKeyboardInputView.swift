@@ -91,16 +91,9 @@ private struct AIAgentKeyboardInputView: View {
         BottomSlideView {
             
             VStack(alignment: .leading, spacing: 16) {
-                HStack(alignment: .center) {
-                    Text("aiAgent::keyboard::title".localized())
-                        .font(appearance.fontSet.bigBold.asFont)
-                        .foregroundStyle(appearance.colorSet.text0.asColor)
-
-                    Spacer()
-
-                    self.closeButton
+                AIAgentSheetHeader(title: "aiAgent::title".localized()) {
+                    self.eventHandler.close()
                 }
-                .padding(.top, 12)
 
                 TextField(
                     "", text: $state.text,
@@ -151,26 +144,6 @@ private struct AIAgentKeyboardInputView: View {
         .onDisappear {
             // 전송/중지가 아니라 그냥 닫은(드래그·닫기 버튼) 경우 → 음성 입력으로 복귀
             if !state.actionTaken { self.eventHandler.dismissByGesture() }
-        }
-    }
-
-    // 우상단 닫기 — actionTaken을 건드리지 않아 onDisappear가 음성 입력 복귀를 태움.
-    // 리퀴드 글래스는 iOS 26 전용이라 #available로 분기, 하위 버전은 공용 CloseButton.
-    @ViewBuilder
-    private var closeButton: some View {
-        if #available(iOS 26.0, *) {
-            Button {
-                self.eventHandler.close()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-                    .frame(width: 32, height: 32)
-            }
-            .glassEffect(.regular.interactive(), in: .circle)
-        } else {
-            CloseButton()
-                .eventHandler(\.onTap, self.eventHandler.close)
         }
     }
 }
