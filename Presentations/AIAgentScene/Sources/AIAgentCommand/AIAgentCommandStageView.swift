@@ -151,15 +151,22 @@ private extension AIAgentCommandStageView {
         }
     }
 
-    // 내가 보낸 말풍선(우측, accentAI). 매우 긴 커맨드는 maxHeight 내부 스크롤로 시트 높이 제한
-    func userMessageBubble(_ command: String) -> some View {
+}
+
+
+// MARK: - chat bubbles
+
+private extension AIAgentCommandStageView {
+
+    // 내가 보낸 말풍선(우측, accentAI). 긴 커맨드는 maxHeight 내부 스크롤로 시트 높이 제한
+    func userMessageBubble(_ text: String) -> some View {
         HStack(spacing: 0) {
             Spacer(minLength: 40)
 
             ScrollView(.vertical, showsIndicators: false) {
-                Text(command)
+                Text(text)
                     .font(appearance.fontSet.size(16).asFont)
-                    .foregroundStyle(appearance.colorSet.primaryBtnText.asColor)
+                    .foregroundStyle(appearance.colorSet.aiUserBubbleText.asColor)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .frame(maxHeight: 200)
@@ -167,16 +174,17 @@ private extension AIAgentCommandStageView {
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
             .background(
+                // 내 메시지 — 다크 배경 + 밝은 글씨. 전용 토큰으로 테마별 대비 자동 유지
                 RoundedRectangle(cornerRadius: 18)
-                    .fill(appearance.colorSet.accentAI.asColor)
+                    .fill(appearance.colorSet.aiUserBubbleBackground.asColor)
             )
         }
     }
 
-    // 상대(AI) 처리중 말풍선(좌측) — 타이핑 인디케이터
-    var assistantTypingBubble: some View {
+    // 상대(AI) 말풍선(좌측, bg1) 공통 컨테이너
+    func assistantBubble<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         HStack(spacing: 0) {
-            TypingIndicator(color: appearance.colorSet.text1.asColor)
+            content()
                 .padding(.horizontal, 16)
                 .padding(.vertical, 14)
                 .background(
@@ -187,6 +195,22 @@ private extension AIAgentCommandStageView {
             Spacer(minLength: 40)
         }
     }
+
+    // 처리중 타이핑 말풍선
+    var assistantTypingBubble: some View {
+        self.assistantBubble {
+            TypingIndicator(color: appearance.colorSet.text1.asColor)
+        }
+    }
+
+    // AI 응답 메시지 말풍선
+    func assistantMessageBubble(_ text: String) -> some View {
+        self.assistantBubble {
+            Text(text)
+                .font(appearance.fontSet.size(16).asFont)
+                .foregroundStyle(appearance.colorSet.text0.asColor)
+        }
+    }
 }
 
 
@@ -195,10 +219,13 @@ private extension AIAgentCommandStageView {
 private extension AIAgentCommandStageView {
 
     func confirmView(command: String, message: String?) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(message?.isEmpty == false ? message! : command)
-                .font(appearance.fontSet.normal.asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
+        VStack(alignment: .leading, spacing: 12) {
+
+            // 채팅 형식 — 유저 지시(우측) + AI 확인 메시지(좌측)
+            self.userMessageBubble(command)
+            if let message, message.isEmpty == false {
+                self.assistantMessageBubble(message)
+            }
 
             HStack(spacing: 12) {
                 ConfirmButton(
@@ -215,6 +242,7 @@ private extension AIAgentCommandStageView {
                 )
                 .eventHandler(\.onTap, eventHandlers.confirm)
             }
+            .padding(.top, 4)
         }
     }
 }
