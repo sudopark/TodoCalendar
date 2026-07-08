@@ -89,22 +89,24 @@ struct AIAgentCommandStageView: View {
     @Environment(AIAgentCommandViewEventHandler.self) private var eventHandlers
 
     var body: some View {
-        Group {
-            switch self.state.commandState {
-            case .processing(let command):
-                self.processingView(command: command)
-            case .confirm(let command, let message):
-                self.confirmView(command: command, message: message)
-            case .done(let message):
-                self.doneView(message: message)
-            case .failed(let reason):
-                self.failedView(reason: reason)
-            case .none:
-                EmptyView()
+        BottomSlideView {
+            Group {
+                switch self.state.commandState {
+                case .processing(let command):
+                    self.processingView(command: command)
+                case .confirm(let command, let message):
+                    self.confirmView(command: command, message: message)
+                case .done(let message):
+                    self.doneView(message: message)
+                case .failed(let reason):
+                    self.failedView(reason: reason)
+                case .none:
+                    EmptyView()
+                }
             }
+            .transition(.opacity)
+            .animation(.easeInOut(duration: 0.35), value: self.state.commandState)
         }
-        .transition(.opacity)
-        .animation(.easeInOut(duration: 0.35), value: self.state.commandState)
     }
 }
 
