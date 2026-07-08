@@ -537,3 +537,5 @@
 "aiAgent::keyboard::stop" = "Stop";
 "aiAgent::keyboard::send" = "Send";
 "aiAgent::stop" = "Stop";
+"aiAgent::stop::confirm::title" = "Stop processing?";
+"aiAgent::stop::confirm::message" = "Stopping discards the task in progress, and it can't be resumed.";

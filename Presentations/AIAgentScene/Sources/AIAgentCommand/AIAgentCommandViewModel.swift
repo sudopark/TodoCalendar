@@ -8,7 +8,11 @@
 
 import Foundation
 import Combine
+import Prelude
+import Optics
 import Domain
+import Extensions
+import Scenes
 
 
 // MARK: - AIAgentCommandState
@@ -65,9 +69,16 @@ extension AIAgentCommandViewModelImple {
         self.router?.closeScene()
     }
 
-    func cancel() {                        // 진행 중 중지 → reset(서버 cancel API) + idle
-        self.orchestrationUsecase.reset()
-        self.router?.closeScene()
+    func cancel() {                        // 진행 중 중지 → 확인 팝업. 확인 시에만 실제 중지
+        let info = ConfirmDialogInfo()
+            |> \.title .~ "aiAgent::stop::confirm::title".localized()
+            |> \.message .~ "aiAgent::stop::confirm::message".localized()
+            |> \.confirmText .~ "aiAgent::stop".localized()
+            |> \.confirmed .~ { [weak self] in
+                self?.orchestrationUsecase.reset()   // 서버 cancel API + idle, 재시작 불가
+                self?.router?.closeScene()
+            }
+        self.router?.showConfirm(dialog: info)
     }
 
     func close() {                         // 숨김 — 상태 보존, 재진입 가능
