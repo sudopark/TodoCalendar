@@ -1041,6 +1041,11 @@ extension DayEventListViewModelImpleTests {
         func routeToAIKeyboardInput() {
             self.didRouteToAIKeyboardInput = true
         }
+
+        var didRouteToAIGuide: Bool?
+        func routeToAIGuide() {
+            self.didRouteToAIGuide = true
+        }
     }
 
     private final class SpyListener: DayEventListSceneListener, @unchecked Sendable {

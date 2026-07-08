@@ -23,6 +23,7 @@ protocol DayEventListRouting: Routing, Sendable {
     func showDoneTodoList()
     func routeToSignIn()
     func routeToAIKeyboardInput()
+    func routeToAIGuide()
 }
 
 // MARK: - Router
@@ -86,5 +87,9 @@ extension DayEventListRouter {
             let next = self.aiKeyboardInputSceneBuilder.makeKeyboardInputScene()
             self.showBottomSlide(next)
         }
+    }
+
+    // TODO: AI 사용 안내 설명(팝업/바텀시트) 표시 — 진입점만 배선. 콘텐츠는 후속.
+    func routeToAIGuide() {
     }
 }

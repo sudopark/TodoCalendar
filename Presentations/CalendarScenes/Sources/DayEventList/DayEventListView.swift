@@ -10,6 +10,7 @@
 
 import SwiftUI
 import Combine
+import AudioToolbox
 import Prelude
 import Optics
 import Domain
@@ -148,6 +149,7 @@ final class DayEventListViewEventHandler: Observable {
     var stopAIAgentInput: () -> Void = { }
     var submitAIAgent: (String) -> Void = { _ in }
     var handleAIEntryButtonTap: () -> Void = { }
+    var showAIGuide: () -> Void = { }
 
     func bind(
         _ viewModel: any DayEventListViewModel,
@@ -171,6 +173,7 @@ final class DayEventListViewEventHandler: Observable {
         self.stopAIAgentInput = viewModel.stopAIAgentInput
         self.submitAIAgent = viewModel.submitAIAgent(_:)
         self.handleAIEntryButtonTap = viewModel.handleAIEntryButtonTap
+        self.showAIGuide = viewModel.showAIGuide
     }
 }
 
@@ -238,16 +241,13 @@ struct DayEventListView: View {
                 // 이벤트 리스트
                 self.eventListView()
 
-                if self.state.isListening {
-                    AIAgentInlineInputView()
-                } else {
+                VStack(alignment: .leading, spacing: 6) {
                     QuickAddNewTodoView(isFocusInput: $isFocusInput)
                         .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
                         .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
-                        .eventHandler(\.handleAIEntryButtonTap, eventHandler.handleAIEntryButtonTap)
+                    addNewButton()
                 }
-
-                addNewButton()
+                .animation(.easeInOut(duration: 0.3), value: self.state.isListening)
             }
         }
         .onTapGesture {
@@ -255,6 +255,11 @@ struct DayEventListView: View {
         }
         .padding()
         .background(self.appearance.colorSet.bg0.asColor)
+        .onChange(of: self.state.isListening) { _, listening in
+            // listening on/off 전환에 반대되는 세기의 햅틱 + 녹음 시작/종료 시스템 사운드.
+            self.appearance.impactIfNeed(listening ? .medium : .soft)
+            AudioServicesPlaySystemSound(listening ? 1113 : 1114)
+        }
     }
 
     private func addNewButton() -> some View {
@@ -403,6 +408,7 @@ struct DayEventListView: View {
 private struct QuickAddNewTodoView: View {
 
     @Environment(DayEventListViewState.self) private var state
+    @Environment(DayEventListViewEventHandler.self) private var eventHandler
     @Environment(ViewAppearance.self) private var appearance
 
     @State private var newTodoName: String = ""
@@ -416,80 +422,229 @@ private struct QuickAddNewTodoView: View {
 
     fileprivate var addNewTodoQuickly: (String) -> Void = { _ in }
     fileprivate var makeNewTodoWithGivenNameAndDetails: (String) -> Void = { _ in }
-    fileprivate var handleAIEntryButtonTap: () -> Void = { }
+
+    // 입력 전 todo 필드만 흐리게. AI 진입 버튼은 딤 대상 아님.
+    private var inputDimOpacity: Double {
+        (self.state.isListening || self.isEntering) ? 1.0 : 0.5
+    }
 
     var body: some View {
-        HStack(spacing: 8) {
-            quickAddField()
-                .opacity(self.isEntering ? 1.0 : 0.5)
-
-            aiAgentEntryButton()
-        }
-        .padding(.vertical, 4).padding(.horizontal, 8)
-        .frame(height: 50)
-        .backgroundAsRoundedRectForEventList(self.appearance)
+        quickAddField()
+            .padding(.vertical, 4).padding(.horizontal, 8)
+            .frame(height: 50)
+            .backgroundAsRoundedRectForEventList(self.appearance)
+            .overlay {
+                if self.state.isListening {
+                    NeonListeningBorder(cornerRadius: 5)
+                        .transition(.opacity)
+                }
+            }
     }
 
     private func quickAddField() -> some View {
         HStack(spacing: 8) {
 
+            self.leadingLabel()
+                .frame(width: 52)
+                .opacity(self.inputDimOpacity)
+
+            if self.state.isListening {
+                self.listeningContent()
+            } else {
+                self.defaultContent()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func leadingLabel() -> some View {
+        if self.state.isListening {
+            // pill + 테두리로 "누르면 설명" affordance. 탭 시 안내 표시.
+            Button {
+                self.eventHandler.showAIGuide()
+            } label: {
+                HStack(alignment: .center, spacing: 3) {
+                    Text("AI")
+                        .font(
+                            self.appearance.fontSet.size(12, weight: .bold).asFont
+                        )
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 13, weight: .semibold))
+                }
+                .minimumScaleFactor(0.7)
+                .foregroundColor(self.appearance.colorSet.text0.asColor)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(self.appearance.colorSet.accentAI.withAlphaComponent(0.15).asColor)
+                )
+                .overlay(
+                    Capsule()
+                        .strokeBorder(self.appearance.colorSet.accentAI.asColor.opacity(0.6), lineWidth: 1)
+                )
+            }
+        } else {
             Text(R.String.calendarEventTimeTodo)
                 .minimumScaleFactor(0.7)
                 .font(
                     self.appearance.fontSet.size(15+appearance.eventTextAdditionalSize, weight: .regular).asFont
                 )
                 .foregroundColor(self.appearance.colorSet.text0.asColor)
-                .frame(width: 52)
+        }
+    }
 
-            RoundedRectangle(cornerRadius: 3)
-                .fill(self.appearance.tagColors.defaultColor.asColor)
-                .frame(width: 6)
-
+    // 평소: 색상바 + todo 직접 입력 + AI 음성 진입 버튼
+    private func defaultContent() -> some View {
+        HStack(spacing: 8) {
             HStack(spacing: 8) {
-                TextField(
-                    "",
-                    text: $newTodoName,
-                    prompt: Text(
-                        R.String.calednarEventAddNewPlaceHolder
-                    ).foregroundStyle(appearance.colorSet.placeHolder.asColor)
-                )
-                .focused($isFocusInput, equals: true)
-                .autocorrectionDisabled()
-                .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                .textInputAutocapitalization(.never)
-                .onSubmit {
-                    guard !self.newTodoName.isEmpty else { return }
-                    self.addNewTodoQuickly(self.newTodoName)
-                    self.resetStates()
-                }
-                .submitLabel(.done)
+                RoundedRectangle(cornerRadius: 3)
+                    .fill(self.appearance.tagColors.defaultColor.asColor)
+                    .frame(width: 6)
 
-                if !self.newTodoName.isEmpty {
-                    Button {
-                        let newName = self.newTodoName
-                        self.resetStates()
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                            self.makeNewTodoWithGivenNameAndDetails(newName)
-                        }
-                    } label: {
-                        Image(systemName: "info.circle")
+                self.todoInputField()
+            }
+            .opacity(self.inputDimOpacity)
+
+            AIAgentEntryButton(badge: self.state.aiCommandBadge) {
+                self.isFocusInput = false
+                self.eventHandler.handleAIEntryButtonTap()
+            }
+        }
+    }
+
+    // listening: WAVE + 키보드 전환 + 중지 + 전송
+    private func listeningContent() -> some View {
+        HStack(spacing: 8) {
+            VoiceWaveformView(
+                level: self.state.voiceLevel,
+                tintColor: self.appearance.colorSet.text1.asColor
+            )
+            .frame(maxWidth: .infinity)
+
+            self.circleControlButton(icon: "keyboard", isPrimary: false) {
+                self.eventHandler.enterKeyboardInput()
+            }
+            self.circleControlButton(icon: "stop.fill", isPrimary: false) {
+                self.eventHandler.stopAIAgentInput()
+            }
+            self.circleControlButton(icon: "arrow.up", isPrimary: true) {
+                self.eventHandler.finishVoiceInput()
+            }
+        }
+    }
+
+    private func circleControlButton(
+        icon: String,
+        isPrimary: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Circle()
+                .fill(
+                    isPrimary
+                    ? self.appearance.colorSet.accentAI.asColor
+                    : self.appearance.colorSet.secondaryBtnBackground.asColor
+                )
+                .frame(width: 36, height: 36)
+                .overlay(
+                    Image(systemName: icon)
+                        .foregroundColor(
+                            isPrimary
+                            ? self.appearance.colorSet.primaryBtnText.asColor
+                            : self.appearance.colorSet.secondaryBtnText.asColor
+                        )
+                )
+        }
+    }
+
+    private func todoInputField() -> some View {
+        HStack(spacing: 8) {
+            TextField(
+                "",
+                text: $newTodoName,
+                prompt: Text(
+                    R.String.calednarEventAddNewPlaceHolder
+                ).foregroundStyle(appearance.colorSet.placeHolder.asColor)
+            )
+            .focused($isFocusInput, equals: true)
+            .autocorrectionDisabled()
+            .foregroundStyle(self.appearance.colorSet.text0.asColor)
+            .textInputAutocapitalization(.never)
+            .onSubmit {
+                guard !self.newTodoName.isEmpty else { return }
+                self.addNewTodoQuickly(self.newTodoName)
+                self.resetStates()
+            }
+            .submitLabel(.done)
+
+            if !self.newTodoName.isEmpty {
+                Button {
+                    let newName = self.newTodoName
+                    self.resetStates()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                        self.makeNewTodoWithGivenNameAndDetails(newName)
                     }
+                } label: {
+                    Image(systemName: "info.circle")
                 }
             }
         }
     }
 
-    private func aiAgentEntryButton() -> some View {
-        return Button {
-            self.isFocusInput = false
-            self.handleAIEntryButtonTap()
+}
+
+
+// MARK: - NeonListeningBorder
+
+// listening 중 입력창을 감싸는 네온 그라데이션 테두리. Siri 입력처럼 색이 흐른다.
+private struct NeonListeningBorder: View {
+
+    let cornerRadius: CGFloat
+
+    private var neonColors: [Color] {
+        [0xbd93f9, 0xff79c6, 0x8be9fd, 0x6272a4, 0xbd93f9]
+            .map { UIColor(rgb: $0).asColor }
+    }
+
+    var body: some View {
+        TimelineView(.animation) { context in
+            let t = context.date.timeIntervalSinceReferenceDate
+            let angle = Angle.degrees((t * 70).truncatingRemainder(dividingBy: 360))
+            RoundedRectangle(cornerRadius: self.cornerRadius)
+                .strokeBorder(
+                    AngularGradient(
+                        gradient: Gradient(colors: self.neonColors),
+                        center: .center,
+                        angle: angle
+                    ),
+                    lineWidth: 2
+                )
+                .shadow(color: UIColor(rgb: 0xbd93f9).asColor.opacity(0.5), radius: 4)
+        }
+    }
+}
+
+
+// MARK: - AIAgentEntryButton
+
+private struct AIAgentEntryButton: View {
+
+    @Environment(ViewAppearance.self) private var appearance
+
+    let badge: AICommandBadge?
+    var onTap: () -> Void = { }
+
+    var body: some View {
+        Button {
+            self.onTap()
         } label: {
             Circle()
-                .fill(self.appearance.colorSet.primaryBtnBackground.asColor)
-                .frame(width: 40, height: 40)
+                .fill(self.appearance.colorSet.accentAI.asColor)
+                .frame(width: 36, height: 36)
                 .overlay { self.entryButtonIcon() }
                 .overlay(alignment: .topTrailing) {
-                    if let badge = self.state.aiCommandBadge, badge != .processing {
+                    if let badge = self.badge, badge != .processing {
                         self.badgeView(badge)
                     }
                 }
@@ -498,11 +653,9 @@ private struct QuickAddNewTodoView: View {
 
     @ViewBuilder
     private func entryButtonIcon() -> some View {
-        if self.state.aiCommandBadge == .processing {
-            ProgressView()
-                .progressViewStyle(.circular)
-                .controlSize(.small)
-                .tint(self.appearance.colorSet.primaryBtnText.asColor)
+        if self.badge == .processing {
+            LoadingCircleView(self.appearance.colorSet.primaryBtnText.asColor, lineWidth: 2)
+                .frame(width: 18, height: 18)
         } else {
             Image(systemName: "sparkles")
                 .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
@@ -529,77 +682,6 @@ private struct QuickAddNewTodoView: View {
         case .failed:
             return ("exclamationmark", self.appearance.colorSet.accentWarn.asColor)
         }
-    }
-}
-
-
-// MARK: - AIAgentInlineInputView (inline component, only shown when listening)
-
-private struct AIAgentInlineInputView: View {
-
-    @Environment(DayEventListViewState.self) private var state: DayEventListViewState
-    @Environment(DayEventListViewEventHandler.self) private var eventHandler: DayEventListViewEventHandler
-    @Environment(ViewAppearance.self) private var appearance: ViewAppearance
-
-    var body: some View {
-        voiceModeView()
-    }
-
-    private func voiceModeView() -> some View {
-        HStack(spacing: 8) {
-
-            Button {
-                self.eventHandler.enterKeyboardInput()
-            } label: {
-                Image(systemName: "keyboard")
-                    .foregroundColor(self.appearance.colorSet.text0.asColor)
-            }
-            .frame(width: 52)
-
-            RoundedRectangle(cornerRadius: 3)
-                .fill(self.appearance.tagColors.defaultColor.asColor)
-                .frame(width: 6)
-
-            VoiceWaveformView(
-                level: self.state.voiceLevel,
-                tintColor: self.appearance.colorSet.text1.asColor
-            )
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-
-            HStack(spacing: 4) {
-                Button {
-                    self.eventHandler.stopAIAgentInput()
-                } label: {
-                    Circle()
-                        .fill(
-                            appearance.colorSet.secondaryBtnBackground.asColor
-                        )
-                        .overlay(
-                            Image(systemName: "square")
-                                .foregroundColor(self.appearance.colorSet.secondaryBtnText.asColor)
-                                .padding(8)
-                        )
-                }
-
-                Button {
-                    self.eventHandler.finishVoiceInput()
-                } label: {
-                    Circle()
-                        .fill(
-                            appearance.colorSet.primaryBtnBackground.asColor
-                        )
-                        .overlay(
-                            Image(systemName: "arrow.up")
-                                .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
-                                .padding(8)
-                        )
-                }
-            }
-        }
-        .padding(.vertical, 8).padding(.horizontal, 8)
-        .frame(height: 50)
-        .backgroundAsRoundedRectForEventList(appearance)
     }
 }
 
@@ -842,7 +924,7 @@ struct DayEventListInlineInputPreviewProvider: PreviewProvider {
         let listeningState = DayEventListViewState()
         listeningState.dayModel = .init(dateText: "2020년 9월 15일(금)", lunarDateText: "6월 4일")
         listeningState.aiAgentState = .listening(.voice)
-        listeningState.voiceLevel = 0.4
+        listeningState.voiceLevel = 0.0
         listeningState.recognizingText = "내일 오전 9시 회의 추가"
 
         return DayEventListView()
