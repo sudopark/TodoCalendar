@@ -62,7 +62,8 @@ public protocol ColorSet: Sendable {
     var accent: UIColor { get }
     var accentInfo: UIColor { get }
     var accentWarn: UIColor { get }
-    
+    var accentAI: UIColor { get }
+
     // line + background
     var line: UIColor { get }
     var bg0: UIColor { get }
@@ -107,8 +108,8 @@ public struct DefaultLightColorSet: ColorSet {
     public let accent: UIColor = .systemBlue
     public let accentInfo: UIColor = UIColor(rgb: 0xff7417)
     public let accentWarn: UIColor = UIColor(rgb: 0xea4444)
-    
-    
+    public let accentAI: UIColor = UIColor(rgb: 0x6272a4)
+
     // line + background
     public let line: UIColor = UIColor.black.withAlphaComponent(0.2)
     public let bg0: UIColor = .white
@@ -155,8 +156,8 @@ public struct DefaultDarkColorSet: ColorSet {
     public let accent: UIColor = .systemBlue
     public let accentInfo: UIColor = UIColor(rgb: 0xff7417)
     public let accentWarn: UIColor = UIColor(rgb: 0xea4444)
-    
-    
+    public let accentAI: UIColor = UIColor(rgb: 0x6272a4)
+
     // line + background
     public let line: UIColor = UIColor.white.withAlphaComponent(0.2)
     public let bg0: UIColor = UIColor(rgb: 0x18181a)
