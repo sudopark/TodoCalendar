@@ -88,8 +88,20 @@ private struct AIAgentKeyboardInputView: View {
 
         BottomSlideView {
             
-            VStack(spacing: 16) {
-                TextField("", text: $state.text, axis: .vertical)
+            VStack(alignment: .leading, spacing: 16) {
+                Text("aiAgent::keyboard::title".localized())
+                    .font(appearance.fontSet.bigBold.asFont)
+                    .foregroundStyle(appearance.colorSet.text0.asColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 12)
+
+                TextField(
+                    "", text: $state.text,
+                    prompt: Text("aiAgent::input::placeholder".localized())
+                        .font(appearance.fontSet.size(16, weight: .regular).asFont)
+                        .foregroundStyle(appearance.colorSet.placeHolder.asColor),
+                    axis: .vertical
+                )
                     .lineLimit(3...8)
                     .focused($isFocused)
                     .autocorrectionDisabled()
@@ -103,30 +115,27 @@ private struct AIAgentKeyboardInputView: View {
                     )
 
                 HStack(spacing: 12) {
-                    
+
+                    // 중지 → stopInput + 초기화. content 폭만 차지(hug)해 send가 나머지를 채움
+                    ConfirmButton(
+                        title: "aiAgent::keyboard::stop".localized(),
+                        textColor: appearance.colorSet.secondaryBtnText.asColor,
+                        backgroundColor: appearance.colorSet.secondaryBtnBackground.asColor
+                    )
+                    .eventHandler(\.onTap) {
+                        state.actionTaken = true
+                        self.eventHandler.stop()
+                    }
+                    .fixedSize(horizontal: true, vertical: false)
+
                     ConfirmButton(
                         title: "aiAgent::keyboard::send".localized(),
-                        isEnable: !self.trimmedText.isEmpty
+                        isEnable: !self.trimmedText.isEmpty,
+                        backgroundColor: appearance.colorSet.accentAI.asColor
                     )
                     .eventHandler(\.onTap) {
                         state.actionTaken = true
                         self.eventHandler.send(self.trimmedText)
-                    }
-                    
-                    // 중지 (빨강) → stopInput + 초기화
-                    Button {
-                        state.actionTaken = true
-                        self.eventHandler.stop()
-                    } label: {
-                        Text("aiAgent::keyboard::stop".localized())
-                            .font(appearance.fontSet.size(15, weight: .medium).asFont)
-                            .foregroundColor(appearance.colorSet.secondaryBtnText.asColor)
-                            .frame(height: 50)
-                            .padding(.horizontal, 16)
-                            .background(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(appearance.colorSet.secondaryBtnBackground.asColor)
-                            )
                     }
                 }
             }
