@@ -49,6 +49,7 @@ extension CalendarAPIAutenticator {
         case is AppSettingEndpoints: return true
         case is MigrationEndpoints: return true
         case is EventSyncEndPoints: return true
+        case is AIAPIEndpoints: return true
         default: return false
         }
     }
