@@ -30,6 +30,8 @@ ConfirmButton(
 
 기타: `BottomConfirmButton`, `BottomSlideView`, `CloseButton`, `DescriptionView` 등. `import CommonPresentation` 누락 주의.
 
+새 UI 요소 작성 전 `ls Presentations/CommonPresentation/Sources/`로 전체 인벤토리를 확인한다 — 위 나열이 전부가 아니다.
+
 ## 3. Scene 구조 (6파일)
 
 ```
@@ -174,3 +176,19 @@ private struct Subject {
 다른 모듈에서 참조 필요한 신규 Scene 프로토콜은 위 파일에 추가. 모듈 내부 전용은 해당 모듈 `XxxScene+Builder.swift`.
 
 **Why:** 모듈 간 결합을 끊어 빌드 시간·순환 의존을 관리. 공유 인터페이스만 노출해 구현 디테일 숨김.
+
+## 8. 룩앤필 — 메트릭·그림자·모션
+
+### 메트릭 토큰
+
+corner radius·spacing에 숫자 하드코딩 ❌ → `Metric` 상수 ✅ (CommonPresentation 소속, 테마 무관 고정값이라 ViewAppearance 주입 아님):
+
+- `Metric.Radius.{chip|regular|large|sheet}` = 4 / 8 / 12 / 16 — 칩·뱃지 / 카드·버튼 / 큰 카드·팝업 / 바텀시트·모달
+- `Metric.Spacing.{xsmall|small|regular|large|xlarge}` = 4 / 8 / 12 / 16 / 20
+- **신규·수정 코드부터 강제. 기존 뷰 일괄 마이그레이션 금지** — 손대는 기회에 가장 가까운 대표값으로 스냅해 전환 (미세 시각 변화 허용).
+- 대표값에 없는 값이 필요하면 임의 숫자를 박지 말고 유저와 협의해 토큰을 추가한다.
+
+### 그림자·모션
+
+- **그림자 지양** — 앱은 플랫 톤. 예외는 설정 미리보기류의 시각 강조뿐.
+- **모션 절제** — 상태 전환에 필요한 최소한(easeInOut 계열)만. 장식적 애니메이션 금지.
