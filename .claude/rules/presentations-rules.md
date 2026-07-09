@@ -45,6 +45,12 @@ XXXView.swift             — ViewState + ViewEventHandler + ContainerView + Vie
 
 세부 템플릿·생성 순서·UsecaseFactory: `docs/scene-spec.md`.
 
+### Scene 폴더 조직
+
+- Scene 개수와 무관하게 **한 Scene = 한 폴더** — 프레임워크에 Scene이 하나뿐이어도 `Sources/<SceneName>/` 폴더를 만들고 시작한다. 화면군이 생기면 화면군 폴더 밑에 Scene 폴더 중첩 (예: SettingScene의 `EventTag/EventTagDetail/`).
+- 기존 플랫 배치(예: AIAgentScene)는 일괄 이동 금지 — 그 프레임워크에 Scene을 추가하는 기회에 함께 폴더화.
+- `Tests/`는 `Sources/`와 같은 트리로 미러링 (testability.md §8).
+
 ## 4. SwiftUI 의존 주입
 
 ContainerView + `@Environment` 패턴. **ViewModel을 View에 직접 참조시키지 말 것.**
