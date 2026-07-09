@@ -5,6 +5,7 @@ let project = Project.frameworkWithTest(
     name: "MemberScenes",
     destinations: [.iPhone],
     iOSTargetVersion: "17.0",
+    snapshotTests: true,
     dependencies: [
         .project(target: "Common3rdParty",
                  path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
