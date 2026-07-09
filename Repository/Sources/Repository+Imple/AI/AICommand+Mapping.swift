@@ -19,6 +19,7 @@ extension AIConfirmCommandAction {
 
     func asJson(timeZone: String) -> [String: Any] {
         var json: [String: Any] = [:]
+        json["parent_job_id"] = self.parentJobId
         json["tool"] = self.tool
         json["confirm_token"] = self.confirmToken
         json["timezone"] = timeZone
@@ -52,19 +53,19 @@ struct AIJobMapper {
     let job: AIJob
 
     init(json: [String: Any]) throws {
-        guard let jobId = json["jobId"] as? String
+        guard let jobId = json["job_id"] as? String
         else { throw RuntimeError("invalid AIJob response") }
 
         let resultJson = json["result"] as? [String: Any]
         let result = resultJson.flatMap { try? AIJobResultMapper(json: $0).result }
 
         self.job = AIJob(jobId: jobId)
-            |> \.command .~ (json["commandText"] as? String)
+            |> \.command .~ (json["command_text"] as? String)
             |> \.status .~ (json["status"] as? String).flatMap { AIJob.Status(rawValue: $0) }
             |> \.mode .~ (json["mode"] as? String).flatMap { AIJob.Mode(rawValue: $0) }
             |> \.result .~ result
-            |> \.createAt .~ AICommandDateParser.parse(json["createdAt"])
-            |> \.updatedAt .~ AICommandDateParser.parse(json["updatedAt"])
+            |> \.createAt .~ AICommandDateParser.parse(json["created_at"])
+            |> \.updatedAt .~ AICommandDateParser.parse(json["updated_at"])
     }
 }
 

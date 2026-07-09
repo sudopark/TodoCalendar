@@ -90,6 +90,7 @@ extension AICommandRepositoryImpleTests {
         let action = AIConfirmCommandAction()
             |> \.tool .~ "delete_schedule"
             |> \.confirmToken .~ "tok"
+            |> \.parentJobId .~ "parent-xyz"
             |> \.args .~ args
 
         // when
@@ -102,6 +103,7 @@ extension AICommandRepositoryImpleTests {
         let params = self.stubRemote.didRequestedParams
         XCTAssertEqual(params?["tool"] as? String, "delete_schedule")
         XCTAssertEqual(params?["confirm_token"] as? String, "tok")
+        XCTAssertEqual(params?["parent_job_id"] as? String, "parent-xyz")
         XCTAssertEqual(params?["timezone"] as? String, "Asia/Seoul")
         let argsParam = params?["args"] as? [String: Any]
         XCTAssertEqual(argsParam?["schedule_id"] as? String, "abc")
@@ -376,12 +378,12 @@ private struct DummyResponse {
     private var doneJobJson: String {
         return """
         {
-            "jobId": "done_job",
-            "commandText": "내일 오후 3시",
+            "job_id": "done_job",
+            "command_text": "내일 오후 3시",
             "status": "DONE",
             "mode": "command",
-            "createdAt": "2026-06-01T10:00:00.000Z",
-            "updatedAt": "2026-06-01T10:00:05.000Z",
+            "created_at": "2026-06-01T10:00:00.000Z",
+            "updated_at": "2026-06-01T10:00:05.000Z",
             "result": {
                 "type": "DONE",
                 "text": "일정 등록했어요",
@@ -396,7 +398,7 @@ private struct DummyResponse {
     private var confirmJobJson: String {
         return """
         {
-            "jobId": "confirm_job",
+            "job_id": "confirm_job",
             "status": "CONFIRM",
             "mode": "command",
             "result": {
@@ -416,7 +418,7 @@ private struct DummyResponse {
     private var failedJobJson: String {
         return """
         {
-            "jobId": "failed_job",
+            "job_id": "failed_job",
             "status": "FAILED",
             "mode": "command",
             "result": {
@@ -432,7 +434,7 @@ private struct DummyResponse {
     private var runningJobJson: String {
         return """
         {
-            "jobId": "running_job",
+            "job_id": "running_job",
             "status": "RUNNING",
             "mode": "command"
         }
