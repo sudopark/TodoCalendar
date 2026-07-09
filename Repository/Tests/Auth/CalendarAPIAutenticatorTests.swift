@@ -95,6 +95,25 @@ extension CalendarAPIAutenticatorTests {
         parameterizeTest(
             EventSyncEndPoints.check, method: .get, expecthasToken: true
         )
+        // 회귀: AI Front API도 인증 토큰이 붙어야 한다 (whitelist 누락 수정)
+        parameterizeTest(
+            AIAPIEndpoints.command, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.confirmCommand, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.rejectCommand, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.cancelCommand, method: .post, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.job(id: "job-1"), method: .get, expecthasToken: true
+        )
+        parameterizeTest(
+            AIAPIEndpoints.usage, method: .get, expecthasToken: true
+        )
     }
 }
 
