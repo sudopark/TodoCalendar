@@ -87,7 +87,7 @@ final class SettingSceneCatalogSnapshots: XCTestCase {
             }
             state.selectedCountryCode = "code:3"
             state.isSavable = true
-            state.isSaving = true
+            state.isSaving = false
 
             return CountrySelectView()
                 .environment(state)

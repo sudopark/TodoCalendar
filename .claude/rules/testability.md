@@ -192,12 +192,13 @@ extension AppDataMigrationImpleTests {
 |---|---|
 | `UnitTestHelpKit` | `BaseTestCase`, `PublisherWaitable`, `BaseStub`, `TestError` |
 | `TestDoubles` | 공유 Stub repositories / stub usecases |
+| `SnapshotTestHelpKit` | `captureSnapshotPair`·`SnapshotTheme`·`catalogSnapshotDirectory` — 스냅샷 캡처 (snapshot-check 스킬) |
 
 ---
 
 ## 8. 테스트 파일 배치·네이밍
 
-- 테스트 소스는 각 프레임워크의 `Tests/` 밑 — Tuist 팩토리가 테스트 타겟 소스를 `Tests/**`로 고정한다. **`Domain/DomainTests/`는 폐기된 폴더 — 새 테스트 금지, `Domain/Tests/` 사용.**
+- 테스트 소스는 각 프레임워크의 `Tests/` 밑 — Tuist 팩토리가 테스트 타겟 소스를 `Tests/**`로 고정한다. **예외: 스냅샷 캡처 스위트**는 프레임워크 최상위 `Snapshots/`에 배치 (팩토리 `snapshotTests` 옵션의 소스가 `Snapshots/**` — 상세는 snapshot-check 스킬). **`Domain/DomainTests/`는 폐기된 폴더 — 새 테스트 금지, `Domain/Tests/` 사용.**
 - `Tests/`는 `Sources/`의 폴더 구조를 미러링한다 (예: `Sources/Usecases/…` → `Tests/Usecases/…`).
 - 구현체 테스트 파일명은 대상 타입명 + `Tests`: `XxxImpleTests.swift` (예: `EventTagDetailViewModelImpleTests.swift`).
 - 테스트 더블은 해당 프레임워크 `Tests/Doubles/`에. 여러 프레임워크가 공유하면 `TestDoubles` 모듈에 (§7).

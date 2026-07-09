@@ -34,6 +34,7 @@ xcodebuild test -workspace TodoCalendar.xcworkspace \
 ```
 
 - 기기·OS 오버라이드: 유저 지정 시 `-destination`의 name/OS만 교체 (`xcrun simctl list devices available`로 가용 확인).
+- 기본 시뮬레이터가 없으면 생성: `xcrun simctl create 'iPhone 17 - snapshot_ref' 'iPhone 17' iOS26.2`.
 - **CI·run-all-tests.sh에 Snapshots 스킴을 등재하지 않는다** — 로컬 전용이 설계다 (CLAUDE.md 스킴 짝 규칙의 의도된 예외).
 
 ## 4. 확인·대조
@@ -44,12 +45,12 @@ xcodebuild test -workspace TodoCalendar.xcworkspace \
 
 ## 5. 재검증 — 캡처 대상 수정 시
 
-구현 중 수정한 뷰(또는 그 뷰가 쓰는 공용 컴포넌트·토큰)에 캡처 테스트가 이미 있으면(`grep -rl "<ViewName>" Presentations/*/Snapshots/`) 해당 `<Name>Snapshots` 스킴을 §3대로 재실행한다.
+구현 중 수정한 뷰(또는 그 뷰가 쓰는 공용 컴포넌트·토큰)에 캡처 테스트가 이미 있으면(`grep -rl "<ViewName>" Presentations/*/Snapshots/`) 해당 `<Name>Snapshots` 스킴을 §3대로 재실행한다. 단 **검증 스위트만 대상** — grep 히트가 `catalogSnapshotDirectory()`를 쓰는 카탈로그 스위트뿐이면 재검증 대상이 아니다 (카탈로그는 gitignored 경로에만 기록해 아래 git 비교가 성립하지 않는다).
 
 - 검증 이미지가 커밋돼 있으므로 **git이 비교기다**: 실행 후 `git status --short -- '*__Snapshots__*'`로 png 변화를 확인한다.
 - **변화 없음** → 외형 무영향. 그대로 진행.
 - **변화 있음 + 이번 수정이 그 뷰의 외형 변경을 의도함** → 갱신 png를 Read로 열어 의도한 변화가 맞는지 확인 후, 구현 커밋에 함께 포함(재기록).
-- **변화 있음 + 외형 변경 의도 없었음** → 이상 신호. 커밋하지 말 것 — 변경 전(`git show HEAD:<png>`)·후 이미지를 비교해 원인을 추론(공용 컴포넌트 파급, ColorSet/Metric 토큰 변경, 레이아웃 부수효과 등)하고 **유저에게 보고** 후 판단을 기다린다. png는 `git restore`로 원복해 둔다.
+- **변화 있음 + 외형 변경 의도 없었음** → 이상 신호. 커밋하지 말 것 — 변경 전(`git show HEAD:<png 경로> > /tmp/old.png` 후 Read)·후 이미지를 비교해 원인을 추론(공용 컴포넌트 파급, ColorSet/Metric 토큰 변경, 레이아웃 부수효과 등)하고 **유저에게 보고** 후 판단을 기다린다. png는 `git restore`로 원복해 둔다.
 
 ## 6. 커밋 정책
 
