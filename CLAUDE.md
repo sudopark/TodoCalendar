@@ -11,7 +11,7 @@
 - **짝지어진 두 위치는 함께 갱신.** 한쪽만 바꾸면 무효가 되는 쌍은 추가/변경 시 대응처도 반드시 확인:
   - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case
   - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
-  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬·CLAUDE.md 스킴 목록 — 상세는 add-framework 스킬)
+  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬·CLAUDE.md 스킴 목록 — 상세는 add-framework 스킬. 단 `<Name>Snapshots` 스킴은 의도된 예외 — 로컬 전용, snapshot-check 스킬)
   - init 시그니처 ↔ 콜사이트
 - **`.claude/rules/*.md`는 path 매칭 시 자동 로드** — 로드된 조항을 구현 결정 시점에 적극 invoke.
 
