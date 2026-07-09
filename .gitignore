@@ -81,3 +81,6 @@ plans/
 ### Superpowers docs ###
 docs/superpowers/
 .superpowers/
+
+### Snapshot testing ###
+snapshot-catalog/
