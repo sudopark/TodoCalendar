@@ -49,4 +49,4 @@ description: Use when doing UI design work in this project — 새 화면·컴�
 ## 5. 검증
 
 - 기본: 빌드 가능 상태까지 만들고, 실제 화면 확인은 유저 육안(시뮬레이터/기기) — 피드백 핑퐁으로 보완한다
-- 스냅샷 대조 스킬이 생기면(#659 리스트업 13번) 그 경로로 기계 검증을 추가한다
+- 기계 검증: snapshot-check 스킬로 대표 케이스 스냅샷(라이트·다크 pair)을 떠 스펙과 대조한다. 외부 설명용 화면 촬영은 app-catalog 스킬.
