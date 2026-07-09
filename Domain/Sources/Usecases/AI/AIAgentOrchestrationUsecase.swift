@@ -194,7 +194,7 @@ extension AIAgentOrchestrationUsecaseImple {
         guard !trimmed.isEmpty else {
             throw RuntimeError(key: "AIAgent.emptyCommand", "command text is empty")
         }
-        guard self.isIdle else {
+        guard self.canSubmit else {
             throw RuntimeError(key: "AIAgent.busy", "already processing a command")
         }
         self.subject.state.send(.processing(command: trimmed))
@@ -204,6 +204,15 @@ extension AIAgentOrchestrationUsecaseImple {
     private var isIdle: Bool {
         switch self.subject.state.value {
         case .none, .idle: return true
+        default: return false
+        }
+    }
+
+    // submit은 입력 대기(idle) + 음성/키보드 입력 중(listening)에서 허용.
+    // 키보드 입력은 .listening(.keyboard) 상태로 send하므로 idle-only면 씹힌다.
+    private var canSubmit: Bool {
+        switch self.subject.state.value {
+        case .none, .idle, .listening: return true
         default: return false
         }
     }
