@@ -889,10 +889,10 @@ struct DayEventListBadgePreviewProvider: PreviewProvider {
         )
 
         let doneState = DayEventListViewState()
-        doneState.aiAgentState = .done(message: "이벤트가 추가됐어요")
+        doneState.aiAgentState = .done(command: "회의 추가", message: "이벤트가 추가됐어요")
 
         let failedState = DayEventListViewState()
-        failedState.aiAgentState = .failed(reason: "처리 실패")
+        failedState.aiAgentState = .failed(command: "회의 추가", reason: "처리 실패")
 
         let idleState = DayEventListViewState()
 

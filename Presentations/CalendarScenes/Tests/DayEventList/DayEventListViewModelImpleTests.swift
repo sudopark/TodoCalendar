@@ -1203,7 +1203,7 @@ extension DayEventListViewModelImpleTests {
     func test_entryButtonTap_whenCommandPhase_requestsShowCommandViaListener() {
         // given
         let viewModel = self.makeViewModel()
-        self.stubOrchestrationUsecase.stateSubject.send(.done(message: "완료"))
+        self.stubOrchestrationUsecase.stateSubject.send(.done(command: "회의", message: "완료"))
         // when — 닫았다가 버튼 재탭
         viewModel.handleAIEntryButtonTap()
         // then — 직접 present하지 않고 listener로 상위에 위임

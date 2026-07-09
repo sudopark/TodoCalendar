@@ -109,6 +109,16 @@ extension AIAgentCommandViewModelImpleTests {
         XCTAssertNil(self.spyRouter.didClosed)
     }
 
+    func test_acknowledge_resetsAndClosesScene() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.acknowledge()
+        // then — 팝업 없이 바로 reset(idle) + 닫기
+        XCTAssertEqual(self.stubAgent.didReset, true)
+        XCTAssertEqual(self.spyRouter.didClosed, true)
+    }
+
     func test_close_keepsStateAndClosesScene() {
         // given
         let viewModel = self.makeViewModel()
@@ -152,8 +162,8 @@ extension AIAgentCommandViewModelImpleTests {
     func test_whenOrchestratorDone_commandStateIsDone() {
         let viewModel = self.makeViewModel()
         let command = self.observeCommand(viewModel)
-        self.stubAgent.stateSubject.send(.done(message: "완료"))
-        XCTAssertEqual(command(), .done(message: "완료"))
+        self.stubAgent.stateSubject.send(.done(command: "회의 추가", message: "완료"))
+        XCTAssertEqual(command(), .done(command: "회의 추가", message: "완료"))
     }
 
     func test_beforeOrchestratorDetermined_emitsNothing() {

@@ -526,8 +526,8 @@
 "aiAgent::permission::setting" = "설정 이동";
 "aiAgent::state::processing" = "처리 중";
 "aiAgent::state::confirm" = "확인 필요";
-"aiAgent::state::done" = "완료";
-"aiAgent::state::failed" = "실패";
+"aiAgent::state::done" = "작업 완료";
+"aiAgent::state::failed" = "작업 실패";
 "aiAgent::done::default" = "완료했어요";
 "aiAgent::failed::default" = "처리하지 못했어요";
 "aiAgent::retry" = "다시";

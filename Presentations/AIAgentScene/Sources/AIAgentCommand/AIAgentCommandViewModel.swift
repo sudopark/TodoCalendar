@@ -20,8 +20,8 @@ import Scenes
 public enum AIAgentCommandState: Equatable, Sendable {
     case processing(command: String)
     case confirm(command: String, message: String?)
-    case done(message: String?)
-    case failed(reason: String?)
+    case done(command: String, message: String?)
+    case failed(command: String, reason: String?)
 }
 
 
@@ -33,6 +33,7 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
     func confirm()
     func decline()
     func cancel()
+    func acknowledge()
     func close()
 
     var commandState: AnyPublisher<AIAgentCommandState?, Never> { get }
@@ -81,6 +82,11 @@ extension AIAgentCommandViewModelImple {
         self.router?.showConfirm(dialog: info)
     }
 
+    func acknowledge() {                   // done/failed 확인 → reset(idle) + 닫기 (팝업 없음)
+        self.orchestrationUsecase.reset()
+        self.router?.closeScene()
+    }
+
     func close() {                         // 숨김 — 상태 보존, 재진입 가능
         self.router?.closeScene()
     }
@@ -103,10 +109,10 @@ extension AIAgentCommandViewModelImple {
                     return .processing(command: command)
                 case .confirm(let command, let message, _):
                     return .confirm(command: command, message: message)
-                case .done(let message):
-                    return .done(message: message)
-                case .failed(let reason):
-                    return .failed(reason: reason)
+                case .done(let command, let message):
+                    return .done(command: command, message: message)
+                case .failed(let command, let reason):
+                    return .failed(command: command, reason: reason)
                 }
             }
             .eraseToAnyPublisher()
