@@ -5,6 +5,7 @@ let project = Project.framework(
     name: "CommonPresentation",
     destinations: [.iPhone],
     iOSTargetVersion: "17.0",
+    snapshotTests: true,
     dependencies: [
         .project(target: "Common3rdParty", path: .relativeToCurrentFile("../../Supports/Common3rdParty")),
         .project(target: "Domain", path: .relativeToCurrentFile("../../Domain")),
