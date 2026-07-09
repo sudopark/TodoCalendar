@@ -188,13 +188,32 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         #expect(states.map(self.stateName) == ["processing", "done"])
     }
 
-    @Test func usecase_submit_whenNotIdle_throws() throws {
-        // given — 이미 confirm 처리 중
+    @Test func usecase_submit_whileConfirming_throws() throws {
+        // given — 이미 confirm 처리 중 (진짜 busy 상태)
         let usecase = self.makeUsecaseInConfirm()
-        // when - then — idle이 아니면 throw(거부)
+        // when - then — 처리 중이면 throw(거부)
         #expect(throws: (any Error).self) {
             try usecase.submit("새 명령")
         }
+    }
+
+    // 회귀: 키보드 입력(listening) 상태에서 submit이 busy로 씹히던 버그
+    @Test func usecase_submit_whileKeyboardListening_entersProcessing() async throws {
+        // given — 키보드 입력 진입해 .listening(.keyboard)
+        let expect = expectConfirm("listening 상태 submit → processing → done")
+        expect.count = 2
+        var done = AIJobResult.DoneResult()
+        done.text = "완료"
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.done(done)))
+        usecase.reset()
+        usecase.enterKeyboardInput()
+        // when
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            try? usecase.submit("회의 잡아줘")
+        }
+        // then — busy 거부 없이 processing부터 시작
+        #expect(states.map(self.stateName) == ["processing", "done"])
+        #expect(self.stubCommand.didProcessCommand == "회의 잡아줘")
     }
 
     @Test func usecase_whenResultConfirm_entersConfirmWithCommand() async throws {
