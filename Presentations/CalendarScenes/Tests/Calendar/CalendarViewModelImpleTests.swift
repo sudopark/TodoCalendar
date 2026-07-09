@@ -987,7 +987,7 @@ extension CalendarViewModelImpleTests {
 
         // when — command phase 진입 후 같은 phase 내 전이
         self.stubOrchestration.stateSubject.send(.processing(command: "회의"))
-        self.stubOrchestration.stateSubject.send(.done(message: "완료"))
+        self.stubOrchestration.stateSubject.send(.done(command: "회의", message: "완료"))
 
         // then — 진입 edge에서만 1회
         XCTAssertEqual(self.spyRouter.didRouteToAICommandCount, 1)

@@ -70,7 +70,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
             .sink(
                 receiveCompletion: { [weak self] completion in
                     if case .failure = completion {
-                        self?.subject.state.send(.failed(reason: nil))
+                        self?.subject.state.send(.failed(command: self?.currentCommand ?? "", reason: nil))
                     }
                 },
                 receiveValue: { [weak self] job in
@@ -89,17 +89,17 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
         guard let result = job.result else { return }
         switch result {
         case .done(let done):
-            self.subject.state.send(.done(message: done.text))
+            self.subject.state.send(.done(command: job.command ?? "", message: done.text))
         case .confirm(let confirm):
             guard let action = confirm.action else {
-                self.subject.state.send(.failed(reason: confirm.text))
+                self.subject.state.send(.failed(command: job.command ?? "", reason: confirm.text))
                 return
             }
             self.subject.state.send(
                 .confirm(command: job.command ?? "", message: confirm.text, action: action)
             )
         case .failed(let fail):
-            self.subject.state.send(.failed(reason: fail.reason))
+            self.subject.state.send(.failed(command: job.command ?? "", reason: fail.reason))
         }
     }
 }
@@ -208,6 +208,15 @@ extension AIAgentOrchestrationUsecaseImple {
         }
     }
 
+    // 현재 진행 중인 command (실패 상태에 원본 지시를 실어주기 위함)
+    private var currentCommand: String {
+        switch self.subject.state.value {
+        case .processing(let command): return command
+        case .confirm(let command, _, _): return command
+        default: return ""
+        }
+    }
+
     private var canEnterVoiceInput: Bool {
         switch self.subject.state.value {
         case .none, .idle, .listening(.keyboard): return true
@@ -249,7 +258,7 @@ extension AIAgentOrchestrationUsecaseImple {
             .sink(
                 receiveCompletion: { [weak self] completion in
                     if case .failure = completion {
-                        self?.subject.state.send(.failed(reason: nil))
+                        self?.subject.state.send(.failed(command: self?.currentCommand ?? "", reason: nil))
                     }
                 },
                 receiveValue: { [weak self] job in

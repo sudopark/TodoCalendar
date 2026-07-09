@@ -25,6 +25,6 @@ public enum AIAgentState: Sendable {
     case listening(AIAgentInputMethod)                              // 입력 대기 (voice/keyboard)
     case processing(command: String)                                // 서버 처리 중
     case confirm(command: String, message: String?, action: AIConfirmCommandAction)   // 확인 필요
-    case done(message: String?)                                     // 완료
-    case failed(reason: String?)                                    // 실패
+    case done(command: String, message: String?)                    // 완료
+    case failed(command: String, reason: String?)                   // 실패
 }

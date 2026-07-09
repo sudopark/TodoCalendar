@@ -41,12 +41,14 @@ final class AIAgentCommandViewEventHandler: Observable {
     var confirm: () -> Void = { }
     var decline: () -> Void = { }
     var cancel: () -> Void = { }
+    var acknowledge: () -> Void = { }
     var close: () -> Void = { }
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
         self.confirm = viewModel.confirm
         self.decline = viewModel.decline
         self.cancel = viewModel.cancel
+        self.acknowledge = viewModel.acknowledge
         self.close = viewModel.close
     }
 }
@@ -112,10 +114,10 @@ struct AIAgentCommandStageView: View {
                         self.processingView(command: command)
                     case .confirm(let command, let message):
                         self.confirmView(command: command, message: message)
-                    case .done(let message):
-                        self.doneView(message: message)
-                    case .failed(let reason):
-                        self.failedView(reason: reason)
+                    case .done(let command, let message):
+                        self.doneView(command: command, message: message)
+                    case .failed(let command, let reason):
+                        self.failedView(command: command, reason: reason)
                     case .none:
                         EmptyView()
                     }
@@ -252,15 +254,33 @@ private extension AIAgentCommandStageView {
 
 private extension AIAgentCommandStageView {
 
-    func doneView(message: String?) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 40))
-                .foregroundStyle(appearance.colorSet.accent.asColor)
+    func doneView(command: String, message: String?) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
 
-            Text(message?.isEmpty == false ? message! : "aiAgent::done::default".localized())
-                .font(appearance.fontSet.normal.asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
+            // 채팅 형식 — 유저 지시(우측) + AI 완료 메시지(좌측, 체크 아이콘 말풍선 안)
+            if command.isEmpty == false {
+                self.userMessageBubble(command)
+            }
+
+            self.assistantBubble {
+                HStack(alignment: .center, spacing: 8) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(appearance.colorSet.accent.asColor)
+
+                    Text(message?.isEmpty == false ? message! : "aiAgent::done::default".localized())
+                        .font(appearance.fontSet.size(16).asFont)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
+                }
+            }
+
+            // 완료를 명시적으로 확인 → reset(idle) 후 닫힘
+            ConfirmButton(
+                title: "common.confirm".localized(),
+                backgroundColor: appearance.colorSet.accentAI.asColor
+            )
+            .eventHandler(\.onTap, eventHandlers.acknowledge)
+            .padding(.top, 4)
         }
     }
 }
@@ -270,15 +290,33 @@ private extension AIAgentCommandStageView {
 
 private extension AIAgentCommandStageView {
 
-    func failedView(reason: String?) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 36))
-                .foregroundStyle(appearance.colorSet.accentWarn.asColor)
+    func failedView(command: String, reason: String?) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
 
-            Text(reason?.isEmpty == false ? reason! : "aiAgent::failed::default".localized())
-                .font(appearance.fontSet.normal.asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
+            // 채팅 형식 — 유저 지시(우측, 있을 때만) + AI 실패 메시지(좌측, 경고 아이콘 말풍선 안)
+            if command.isEmpty == false {
+                self.userMessageBubble(command)
+            }
+
+            self.assistantBubble {
+                HStack(alignment: .center, spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 20))
+                        .foregroundStyle(appearance.colorSet.accentWarn.asColor)
+
+                    Text(reason?.isEmpty == false ? reason! : "aiAgent::failed::default".localized())
+                        .font(appearance.fontSet.size(16).asFont)
+                        .foregroundStyle(appearance.colorSet.text0.asColor)
+                }
+            }
+
+            // 실패를 확인 → reset(idle) 후 닫힘
+            ConfirmButton(
+                title: "common.confirm".localized(),
+                backgroundColor: appearance.colorSet.accentAI.asColor
+            )
+            .eventHandler(\.onTap, eventHandlers.acknowledge)
+            .padding(.top, 4)
         }
     }
 }
@@ -338,8 +376,8 @@ struct AIAgentCommandStageViewPreviewProvider: PreviewProvider {
             makeView(.processing(command: "내일 회의 추가")).previewDisplayName("processing")
             makeView(.processing(command: String(repeating: "다음 주 월요일 오전 10시에 강남역 스타벅스에서 디자인 리뷰 미팅 잡아주고, 참석자로 지훈이랑 수민이 추가해줘. ", count: 4))).previewDisplayName("processing-long")
             makeView(.confirm(command: "일정 삭제", message: "정말 삭제할까요?")).previewDisplayName("confirm")
-            makeView(.done(message: "일정을 추가했어요")).previewDisplayName("done")
-            makeView(.failed(reason: "네트워크 오류가 발생했어요")).previewDisplayName("failed")
+            makeView(.done(command: "내일 회의 추가", message: "일정을 추가했어요")).previewDisplayName("done")
+            makeView(.failed(command: "내일 회의 추가", reason: "네트워크 오류가 발생했어요")).previewDisplayName("failed")
         }
     }
 }

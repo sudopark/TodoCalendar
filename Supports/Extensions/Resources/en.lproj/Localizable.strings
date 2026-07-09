@@ -526,8 +526,8 @@
 "aiAgent::permission::setting" = "Open Settings";
 "aiAgent::state::processing" = "Processing";
 "aiAgent::state::confirm" = "Confirmation needed";
-"aiAgent::state::done" = "Done";
-"aiAgent::state::failed" = "Failed";
+"aiAgent::state::done" = "Task complete";
+"aiAgent::state::failed" = "Task failed";
 "aiAgent::done::default" = "Done";
 "aiAgent::failed::default" = "Couldn't complete that";
 "aiAgent::retry" = "Retry";

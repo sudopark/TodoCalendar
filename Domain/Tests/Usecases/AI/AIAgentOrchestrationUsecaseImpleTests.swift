@@ -158,7 +158,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         }
         // then — processing → done
         #expect(states.map(self.stateName) == ["processing", "done"])
-        guard case .done(let message) = try #require(states.last) else { Issue.record("done 아님"); return }
+        guard case .done(_, let message) = try #require(states.last) else { Issue.record("done 아님"); return }
         #expect(message == "할 일 추가 완료")
     }
 
@@ -232,7 +232,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             try? usecase.submit("뭐라고")
         }
         // then
-        guard case .failed(let reason) = try #require(states.last) else { Issue.record("failed 아님"); return }
+        guard case .failed(_, let reason) = try #require(states.last) else { Issue.record("failed 아님"); return }
         #expect(reason == "이해하지 못했어요")
     }
 
