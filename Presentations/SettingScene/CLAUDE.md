@@ -204,6 +204,17 @@ graph TD
 
 ---
 
+## 프레임워크 내부 공용 컴포넌트
+
+전용 공용 폴더 없이 기능 하위폴더끼리 교차 참조 중 — 새 공용 뷰 추가 시 rules §2 배치 규칙(전용 폴더) 따를 것.
+
+| 컴포넌트 | 위치 | 역할 | 사용처 |
+|---|---|---|---|
+| `CalendarAppearanceSampleView` | `Setting/Appearance/CalendarSection/CalendarAppearancePreviewView.swift` | 설정 미리보기용 미니 월간 캘린더 샘플 | CalendarAppearancePreviewView, ColorThemeSelectView |
+| `ColorThemePreviewView` / `ColorThemeItemView` | `Setting/Appearance/ColorTheme/ColorThemePreviewView.swift` | 색 테마 미리보기 / 선택 아이템 셀 | ColorTheme 내부 + CalendarAppearancePreviewView |
+
+---
+
 ## 외부 의존성
 
 | 방향 | 대상 | 용도 |

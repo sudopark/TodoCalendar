@@ -189,6 +189,16 @@ graph LR
 
 ---
 
+## 프레임워크 스코프 컴포넌트 (`Sources/Common/`)
+
+| 컴포넌트 | 역할 | 사용처 |
+|---|---|---|
+| `EventListCellView` (`Common/EventListCell/`) | 모든 이벤트(할일/일정/휴일/구글)를 렌더링하는 이벤트 셀 공용 뷰 — 완료 처리·상세 이동·more 액션 콜백 포함. 동반 UI 모델 `EventCellViewModel` 프로토콜도 공유 | DayEventListView, ForemostEventView, UncompletedTodoView |
+
+주의: `ForemostEventView`·`UncompletedTodoView`는 `CalendarPaper/` 폴더에 있으나 실제 소비는 `DayEventList/` — 배치·사용처 불일치 알려짐 (#659 리스트업 16번 메모).
+
+---
+
 ## 외부 의존성
 
 | 방향 | 대상 | 용도 |

@@ -17,20 +17,38 @@ paths:
 
 ## 2. 공용 컴포넌트 재사용
 
-`CommonPresentation`의 공용 컴포넌트를 먼저 찾아 재사용. 커스텀 `Button { ... } label: { ... }` 블록 작성 금지.
+새 UI 요소 작성 전 아래 카탈로그를 먼저 확인하고 재사용. 커스텀 `Button { ... } label: { ... }` 블록 작성 금지.
 
-```swift
-ConfirmButton(
-    title: "common.update".localized(),
-    textColor: appearance.colorSet.primaryBtnText.asColor,
-    backgroundColor: appearance.colorSet.primaryBtnBackground.asColor
-)
-.eventHandler(\.onTap) { ... }
-```
+### CommonPresentation 컴포넌트 카탈로그
 
-기타: `BottomConfirmButton`, `BottomSlideView`, `CloseButton`, `DescriptionView` 등. `import CommonPresentation` 누락 주의.
+전부 `CommonPresentation/Sources/UIComponents/` 소속. `import CommonPresentation` 누락 주의.
 
-새 UI 요소 작성 전 `ls Presentations/CommonPresentation/Sources/`로 전체 인벤토리를 확인한다 — 위 나열이 전부가 아니다.
+| 컴포넌트 | 역할 | 이벤트 연결 |
+|---|---|---|
+| `ConfirmButton` | 표준 액션 버튼 — isEnable·isProcessing(로딩) 내장, 색 nil→appearance 폴백 | `.eventHandler(\.onTap)` |
+| `BottomConfirmButton` | 화면 하단 고정 ConfirmButton 래퍼 (패딩+배경+safe-area) | `.eventHandler(\.onTap)` |
+| `BottomSlideView` | 바텀시트 컨테이너 — 딤 영역 탭 닫기, 제네릭 content | `.eventHandler(\.outsideTap)` |
+| `SheetHeaderView` | 시트 상단 헤더 — 타이틀+닫기, iOS26 리퀴드 글래스 분기 | `.eventHandler(\.onClose)` |
+| `CloseButton` | `xmark.circle.fill` 닫기 버튼 | `.eventHandler(\.onTap)` |
+| `NavigationBackButton` | chevron 커스텀 뒤로가기 | `init(tapHandler:)` 클로저 |
+| `DescriptionView` | 불릿(•) 안내문 목록 | 없음 (표시 전용) |
+| `ColorSelectView` | 그라데이션 링 + 숨김 ColorPicker 색상 선택 도트 | `.eventHandler(\.colorSelected)` |
+| `EventTagColorView` | 태그/외부캘린더 색 해석 전담 — content 클로저에 Color 전달 | render-prop `content: (Color) -> View` |
+| `FullScreenLoadingView` | 반투명 로딩 오버레이 (스피너+메시지) | 없음 |
+| `LoadingCircleView` | 회전 스피너 프리미티브 (ConfirmButton·FullScreenLoading이 재사용) | 없음 |
+| `RemoteImageView` | Kingfisher 원격 이미지 — 다운샘플·캐시 | 체이닝 modifier (`resize` 등) |
+| `VoiceWaveformView` | 음성 입력 레벨 파형 바 | 없음 |
+| `LandmarkMapView` | 단일 마커 지도 (비인터랙티브) | 없음 |
+| `SignInButtonProvider` | OAuth 로그인 버튼 팩토리 (프로토콜 — §4 custom provider 선례) | init property 주입 |
+
+- 이벤트 연결 주류는 `.eventHandler(\.키패스)` (기본값 있는 var 클로저) — 신규 컴포넌트도 이 패턴으로. 표의 예외(init 클로저·render-prop·체이닝)는 기존 API 존중.
+- 카탈로그가 낡았을 수 있다 — `ls Presentations/CommonPresentation/Sources/UIComponents/`로 실물 확인. 표에 없는 파일을 발견하면 이 표를 갱신한다.
+
+### 프레임워크 스코프 컴포넌트
+
+- 한 프레임워크 안에서 2곳 이상이 공유하는 뷰는 전용 폴더에 격리: `Sources/Common/`(CalendarScenes 선례) 또는 `Sources/Components/`. Scene 폴더 안에 두지 말 것 — 배치와 사용처가 어긋난다.
+- 프레임워크 스코프 컴포넌트는 **해당 프레임워크 child CLAUDE.md에 기록**한다. 새 화면 작업 전 child CLAUDE.md의 컴포넌트 목록도 확인.
+- 유사 구현이 여러 프레임워크에서 반복되면 CommonPresentation 승격을 유저와 협의 (선례: AIAgentSheetHeader → SheetHeaderView).
 
 ## 3. Scene 구조 (6파일)
 
