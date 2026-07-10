@@ -38,4 +38,4 @@ git commit --fixup <원본 커밋 sha>
 GIT_SEQUENCE_EDITOR=true git rebase -i --autosquash <base>   # 대화형 rebase 불가 환경의 우회 — 에디터 없이 autosquash 배치만 적용
 ```
 
-푸시·PR 공개 이후의 반영은 반대로 별도 커밋 — 리뷰어가 반영분을 추적할 수 있어야 한다.
+푸시·PR 공개 이후의 반영(review 스킬 리뷰 반영 포함)은 반대로 별도 커밋 — 리뷰어가 반영분을 추적할 수 있어야 한다.

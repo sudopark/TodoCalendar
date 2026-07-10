@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Use when creating or merging a pull request in this project — PR 본문 작성, 브랜치 구성, 머지·머지 후 정리 시점. 본문 서사(문제→접근→남은 과제), rebase 머지 원칙, 머지 후 브랜치 정리(워크트리 제약 우회 포함)를 다룬다. Triggers on "PR 올리자", "PR 만들어", "머지하자", "브랜치 정리해". Does NOT trigger on PR 코드 리뷰 수행(별도 스킬 또는 유저 직접), 커밋 메시지 작성(commit 스킬), 이슈 작성(issue 스킬).
+description: Use when creating or merging a pull request in this project — PR 본문 작성, 브랜치 구성, 머지·머지 후 정리 시점. 본문 서사(문제→접근→남은 과제), rebase 머지 원칙, 머지 후 브랜치 정리(워크트리 제약 우회 포함)를 다룬다. Triggers on "PR 올리자", "PR 만들어", "머지하자", "브랜치 정리해". Does NOT trigger on PR 코드 리뷰 수행(review 스킬 또는 유저 직접), 커밋 메시지 작성(commit 스킬), 이슈 작성(issue 스킬).
 ---
 
 # PR — 생성·머지·정리
@@ -18,7 +18,7 @@ description: Use when creating or merging a pull request in this project — PR 
 - 여러 커밋을 엮은 전체 작업의 서사: **문제 → 접근 → 남은 과제**. 개별 커밋은 그 서사의 단위. 파일 목록 나열 금지.
 - "남은 과제"에 이번 PR에서 의도적으로 뺀 것·파생 후속을 명시한다 — 후속 작업의 킥오프가 이 항목을 읽는다.
 
-리뷰 수행은 이 스킬 밖이다 — 별도 리뷰 스킬 또는 유저가 직접 한다.
+리뷰 수행은 이 스킬 밖이다 — 공개된 PR에 대해 유저가 지시할 때만 review 스킬로 (유저 직접 리뷰도 가능).
 
 ## 머지·정리
 
