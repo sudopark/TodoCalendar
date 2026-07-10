@@ -231,28 +231,7 @@ struct DoneTodoDetailView: View {
     private func timeView(_ time: SelectedTime?) -> some View {
         
         func timeLabelView(_ timeText: SelectTimeText, _ position: TimeSelecting) -> some View {
-            
-            let textColor: Color = appearance.colorSet.text0.asColor
-            
-            return VStack(alignment: .leading) {
-                
-                if let year = timeText.year {
-                    Text(year)
-                        .font(self.appearance.fontSet.size(14).asFont)
-                        .foregroundStyle(textColor)
-                }
-                
-                Text(timeText.day)
-                    .lineLimit(1)
-                    .font(self.appearance.fontSet.size(14).asFont)
-                    .foregroundStyle(textColor)
-                
-                if let time = timeText.time {
-                    Text(time)
-                        .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
-                        .foregroundStyle(textColor)
-                }
-            }
+            EventTimeTextView(timeText)
         }
         
         func emptyLabelView(_ position: TimeSelecting) -> some View {
@@ -377,26 +356,7 @@ struct DoneTodoDetailView: View {
     }
     
     private func landmarkView(_ landmark: SelectedPlaceModel.LandmarkModel) -> some View {
-        
-        HStack {
-            VStack(alignment: .leading) {
-                Text(landmark.name)
-                    .multilineTextAlignment(.leading)
-                    .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                    .font(self.appearance.fontSet.size(14).asFont)
-                
-                if let address = landmark.address {
-                    Text(address)
-                        .multilineTextAlignment(.leading)
-                        .foregroundStyle(self.appearance.colorSet.text2.asColor)
-                        .font(self.appearance.fontSet.size(12).asFont)
-                }
-            }
-            
-            Image(systemName: "xmark.circle.fill")
-                .foregroundStyle(self.appearance.colorSet.text2.asColor)
-                .font(self.appearance.fontSet.size(14).asFont)
-        }
+        LandmarkLabelView(landmark)
     }
     
     private func customPlaceView(_ name: String) -> some View {

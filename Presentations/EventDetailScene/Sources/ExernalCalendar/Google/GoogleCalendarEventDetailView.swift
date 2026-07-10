@@ -336,24 +336,7 @@ struct GoogleCalendarEventDetailView: View {
     }
     
     private func timeView(_ time: SelectTimeText) -> some View {
-        VStack(alignment: .leading) {
-            if let year = time.year {
-                Text(year)
-                    .font(appearance.fontSet.size(14).asFont)
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-            }
-            
-            Text(time.day)
-                .lineLimit(1)
-                .font(self.appearance.fontSet.size(14).asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
-            
-            if let timeValue = time.time {
-                Text(timeValue)
-                    .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-            }
-        }
+        EventTimeTextView(time)
     }
     
     private func ddayView(_ text: String) -> some View {

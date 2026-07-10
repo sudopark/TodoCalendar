@@ -490,38 +490,17 @@ struct EventDetailView: View {
     private func selectedTimeView() -> some View {
         
         func timeView(_ timeText: SelectTimeText, _ position: TimeSelecting, isInvalid: Bool) -> some View {
-            
+
             let isSelecting = self.isTimeSelecting == position
             let textColor: Color = !isSelecting
                 ? appearance.colorSet.text0.asColor
                 : appearance.colorSet.text1.asColor
-            
-            return VStack(alignment: .leading) {
-                
-                if let year = timeText.year {
-                    Text(year)
-                        .strikethrough(isInvalid)
-                        .font(self.appearance.fontSet.size(14).asFont)
-                        .foregroundStyle(textColor)
+
+            return EventTimeTextView(timeText, textColor: textColor, isStrikethrough: isInvalid)
+                .onTapGesture {
+                    self.appearance.impactIfNeed()
+                    self.updateTimePickerShowing(position)
                 }
-                
-                Text(timeText.day)
-                    .lineLimit(1)
-                    .strikethrough(isInvalid)
-                    .font(self.appearance.fontSet.size(14).asFont)
-                    .foregroundStyle(textColor)
-                
-                if let time = timeText.time {
-                    Text(time)
-                        .strikethrough(isInvalid)
-                        .font(self.appearance.fontSet.size(16, weight: .semibold).asFont)
-                        .foregroundStyle(textColor)
-                }
-            }
-            .onTapGesture {
-                self.appearance.impactIfNeed()
-                self.updateTimePickerShowing(position)
-            }
         }
         
         func emptyLabelView(_ position: TimeSelecting) -> some View {
@@ -874,27 +853,9 @@ struct EventDetailView: View {
                 }
             }
         } label: {
-            HStack {
-                VStack(alignment: .leading) {
-                    Text(landmark.name)
-                        .multilineTextAlignment(.leading)
-                        .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                        .font(self.appearance.fontSet.size(14).asFont)
-                    
-                    if let address = landmark.address {
-                        Text(address)
-                            .multilineTextAlignment(.leading)
-                            .foregroundStyle(self.appearance.colorSet.text2.asColor)
-                            .font(self.appearance.fontSet.size(12).asFont)
-                    }
-                }
-                
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(self.appearance.colorSet.text2.asColor)
-                    .font(self.appearance.fontSet.size(14).asFont)
-            }
+            LandmarkLabelView(landmark)
         }
-        
+
     }
     
     private var placeCustomInputView: some View {

@@ -278,21 +278,7 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private func timeTextView(_ text: SelectTimeText) -> some View {
-        VStack(alignment: .leading) {
-            if let year = text.year {
-                Text(year)
-                    .font(appearance.fontSet.size(14).asFont)
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-            }
-            Text(text.day)
-                .font(appearance.fontSet.size(14).asFont)
-                .foregroundStyle(appearance.colorSet.text0.asColor)
-            if let time = text.time {
-                Text(time)
-                    .font(appearance.fontSet.size(16, weight: .semibold).asFont)
-                    .foregroundStyle(appearance.colorSet.text0.asColor)
-            }
-        }
+        EventTimeTextView(text, dayLineLimit: nil)
     }
 
     private var ddayView: some View {
