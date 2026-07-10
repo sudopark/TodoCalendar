@@ -25,6 +25,10 @@ EventDetailScene/
 │   │   ├── EventDetailInputViewModel.swift    — 이름/시간/태그/알림/장소/URL/메모
 │   │   └── SelectMapApp/                      — 지도 앱 선택 다이얼로그
 │   │
+│   ├── Components/                            — 프레임워크 스코프 공용 뷰
+│   │   ├── EventTimeTextView.swift            — 시간 텍스트 라벨 (연/일/시각)
+│   │   └── LandmarkLabelView.swift            — 장소 라벨 (이름+주소+xmark)
+│   │
 │   ├── Models/                                — 데이터 모델
 │   │   ├── EventDetailBasicData.swift
 │   │   ├── EventDetailData.swift
@@ -196,6 +200,17 @@ graph TD
     Select -->|fromNow| S2[이후 반복 분기]
     Select -->|기본| S3[전체 시리즈 수정]
 ```
+
+---
+
+## 프레임워크 스코프 컴포넌트 (`Sources/Components/`)
+
+| 컴포넌트 | 역할 | 사용처 |
+|---|---|---|
+| `EventTimeTextView` | `SelectTimeText`(연/일/시각) 라벨. `textColor`(selecting 하이라이트)·`isStrikethrough`(invalid)·`dayLineLimit` 파라미터로 화면별 변형 흡수 | EventDetailView, GoogleCalendarEventDetailView, AppleCalendarEventDetailView, DoneTodoDetailView |
+| `LandmarkLabelView` | 장소 라벨 (이름+주소+xmark 아이콘). EventDetailView는 Menu(삭제 액션)로 감싸 사용 | EventDetailView, DoneTodoDetailView |
+
+`GuideView/`의 가이드 오버레이 2종(ForemostEventGuideView·TodoEventGuideView)은 컴포넌트 패밀리로 별도 그룹.
 
 ---
 
