@@ -104,9 +104,10 @@ struct AIAgentCommandStageView: View {
     var body: some View {
         BottomSlideView {
             VStack(alignment: .leading, spacing: 16) {
-                AIAgentSheetHeader(title: self.headerTitle) {
-                    self.eventHandlers.close()
-                }
+                SheetHeaderView(title: self.headerTitle)
+                    .eventHandler(\.onClose) {
+                        self.eventHandlers.close()
+                    }
 
                 Group {
                     switch self.state.commandState {

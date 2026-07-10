@@ -1,29 +1,29 @@
 //
-//  AIAgentSheetHeader.swift
-//  AIAgentScene
+//  SheetHeaderView.swift
+//  CommonPresentation
+//
+//  Created by sudo.park on 7/10/26.
+//  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
 import SwiftUI
-import Extensions
-import CommonPresentation
 
 
-// MARK: - AIAgentSheetHeader
+// MARK: - SheetHeaderView
 
-// AI 입력·명령 시트 공통 상단 헤더: 타이틀(좌) + 리퀴드 글래스 닫기(우).
-// 두 시트(KeyboardInput·CommandStage)의 룩앤핏을 한 곳에서 통일.
-struct AIAgentSheetHeader: View {
+// 시트 공통 상단 헤더: 타이틀(좌) + 닫기(우). 시트들의 룩앤핏을 한 곳에서 통일.
+public struct SheetHeaderView: View {
 
     @Environment(ViewAppearance.self) private var appearance
     private let title: String
-    private let onClose: () -> Void
 
-    init(title: String, onClose: @escaping () -> Void) {
+    public var onClose: () -> Void = { }
+
+    public init(title: String) {
         self.title = title
-        self.onClose = onClose
     }
 
-    var body: some View {
+    public var body: some View {
         HStack(alignment: .center) {
             Text(self.title)
                 .font(appearance.fontSet.bigBold.asFont)
@@ -36,7 +36,7 @@ struct AIAgentSheetHeader: View {
         .padding(.top, 12)
     }
 
-    // 리퀴드 글래스는 iOS 26 전용이라 #available로 분기, 하위 버전은 공용 CloseButton.
+    // 리퀴드 글래스는 iOS 26 전용이라 #available로 분기, 하위 버전은 CloseButton.
     @ViewBuilder
     private var closeButton: some View {
         if #available(iOS 26.0, *) {
