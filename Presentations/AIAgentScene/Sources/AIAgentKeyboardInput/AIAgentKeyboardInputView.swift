@@ -91,9 +91,10 @@ private struct AIAgentKeyboardInputView: View {
         BottomSlideView {
             
             VStack(alignment: .leading, spacing: 16) {
-                AIAgentSheetHeader(title: "aiAgent::title".localized()) {
-                    self.eventHandler.close()
-                }
+                SheetHeaderView(title: "aiAgent::title".localized())
+                    .eventHandler(\.onClose) {
+                        self.eventHandler.close()
+                    }
 
                 TextField(
                     "", text: $state.text,

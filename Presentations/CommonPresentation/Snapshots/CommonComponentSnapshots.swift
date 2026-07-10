@@ -45,4 +45,13 @@ final class CommonComponentSnapshots: XCTestCase {
             .environment(self.makeAppearance(theme))
         }
     }
+
+    @MainActor
+    func test_sheetHeader() {
+        captureSnapshotPair(named: "sheetHeader", layout: .fixed(width: 400, height: 80)) { theme in
+            SheetHeaderView(title: "Sheet Title")
+                .padding(.horizontal)
+                .environment(self.makeAppearance(theme))
+        }
+    }
 }
