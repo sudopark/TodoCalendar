@@ -65,7 +65,7 @@ public struct ConfirmButton: View {
         .padding()
         .frame(height: 50)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(
                     self.colorForBackground
                         .opacity(self.isEnable ? 1.0 : 0.5)
