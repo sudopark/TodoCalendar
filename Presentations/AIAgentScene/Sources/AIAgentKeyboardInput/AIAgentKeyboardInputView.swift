@@ -111,7 +111,7 @@ private struct AIAgentKeyboardInputView: View {
                     .font(appearance.fontSet.size(16, weight: .regular).asFont)
                     .padding(Metric.Spacing.regular)
                     .background(
-                        RoundedRectangle(cornerRadius: 5)
+                        RoundedRectangle(cornerRadius: Metric.Radius.chip)
                             .fill(appearance.colorSet.bg1.asColor)
                     )
 

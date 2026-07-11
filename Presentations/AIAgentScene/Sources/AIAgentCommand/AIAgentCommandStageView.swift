@@ -174,11 +174,11 @@ private extension AIAgentCommandStageView {
             }
             .frame(maxHeight: 200)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
+            .padding(.horizontal, Metric.Spacing.large)
+            .padding(.vertical, Metric.Spacing.regular)
             .background(
                 // 내 메시지 — 다크 배경 + 밝은 글씨. 전용 토큰으로 테마별 대비 자동 유지
-                RoundedRectangle(cornerRadius: 18)
+                RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                     .fill(appearance.colorSet.aiUserBubbleBackground.asColor)
             )
         }
@@ -189,9 +189,9 @@ private extension AIAgentCommandStageView {
         HStack(spacing: 0) {
             content()
                 .padding(.horizontal, Metric.Spacing.large)
-                .padding(.vertical, 14)
+                .padding(.vertical, Metric.Spacing.large)
                 .background(
-                    RoundedRectangle(cornerRadius: 18)
+                    RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                         .fill(appearance.colorSet.bg1.asColor)
                 )
 
@@ -332,7 +332,7 @@ private struct TypingIndicator: View {
     @State private var animating = false
 
     var body: some View {
-        HStack(spacing: 5) {
+        HStack(spacing: Metric.Spacing.xsmall) {
             ForEach(0..<3, id: \.self) { index in
                 Circle()
                     .fill(self.color)
