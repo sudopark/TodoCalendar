@@ -30,9 +30,9 @@ public struct FullScreenLoadingView: View {
                 self.messageLabel
                 self.loadingView
             }
-            .padding(20)
+            .padding(Metric.Spacing.xlarge)
             .background(Color.black.opacity(0.8))
-            .cornerRadius(16)
+            .cornerRadius(Metric.Radius.sheet)
         } else {
             EmptyView()
         }
