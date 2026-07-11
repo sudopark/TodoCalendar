@@ -25,10 +25,14 @@ public enum Metric {
     }
 
     public enum Spacing {
+        /// 밀착 텍스트·아이콘 간격
+        public static let xxsmall: CGFloat = 2
         public static let xsmall: CGFloat = 4
         public static let small: CGFloat = 8
         public static let regular: CGFloat = 12
         public static let large: CGFloat = 16
         public static let xlarge: CGFloat = 20
+        /// 계층 들여쓰기 (leading)
+        public static let indent: CGFloat = 32
     }
 }
