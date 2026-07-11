@@ -208,7 +208,7 @@ private struct Subject {
 corner radius·spacing에 숫자 하드코딩 ❌ → `Metric` 상수 ✅ (CommonPresentation 소속, 테마 무관 고정값이라 ViewAppearance 주입 아님):
 
 - `Metric.Radius.{chip|regular|large|sheet}` = 4 / 8 / 12 / 16 — 칩·뱃지 / 카드·버튼 / 큰 카드·팝업 / 바텀시트·모달
-- `Metric.Spacing.{xsmall|small|regular|large|xlarge}` = 4 / 8 / 12 / 16 / 20
+- `Metric.Spacing.{xxsmall|xsmall|small|regular|large|xlarge|indent}` = 2 / 4 / 8 / 12 / 16 / 20 / 32 — `indent`는 계층 들여쓰기(leading) 전용
 - **신규·수정 코드부터 강제. 기존 뷰 일괄 마이그레이션 금지** — 손대는 기회에 가장 가까운 대표값으로 스냅해 전환 (미세 시각 변화 허용).
 - 대표값에 없는 값이 필요하면 임의 숫자를 박지 말고 유저와 협의해 토큰을 추가한다.
 
