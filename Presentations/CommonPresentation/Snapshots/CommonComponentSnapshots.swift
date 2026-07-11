@@ -54,4 +54,33 @@ final class CommonComponentSnapshots: XCTestCase {
                 .environment(self.makeAppearance(theme))
         }
     }
+
+    @MainActor
+    func test_confirmButton() {
+        captureSnapshotPair(named: "confirmButton", layout: .fixed(width: 400, height: 80)) { theme in
+            ConfirmButton(title: "Confirm")
+                .padding()
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
+    func test_fullScreenLoadingView() {
+        captureSnapshotPair(named: "fullScreenLoadingView", layout: .fullScreen) { theme in
+            FullScreenLoadingView(isLoading: true)
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
+    func test_descriptionView() {
+        captureSnapshotPair(named: "descriptionView", layout: .component) { theme in
+            DescriptionView(descriptions: [
+                "First tip description",
+                "Second tip description with longer text to wrap"
+            ])
+            .padding()
+            .environment(self.makeAppearance(theme))
+        }
+    }
 }
