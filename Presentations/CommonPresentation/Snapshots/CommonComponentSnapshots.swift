@@ -67,20 +67,26 @@ final class CommonComponentSnapshots: XCTestCase {
     @MainActor
     func test_fullScreenLoadingView() {
         captureSnapshotPair(named: "fullScreenLoadingView", layout: .fullScreen) { theme in
-            FullScreenLoadingView(isLoading: true)
-                .environment(self.makeAppearance(theme))
+            let appearance = self.makeAppearance(theme)
+            return ZStack {
+                appearance.colorSet.bg1.asColor.ignoresSafeArea()
+                FullScreenLoadingView(isLoading: true)
+            }
+            .environment(appearance)
         }
     }
 
     @MainActor
     func test_descriptionView() {
-        captureSnapshotPair(named: "descriptionView", layout: .component) { theme in
-            DescriptionView(descriptions: [
+        captureSnapshotPair(named: "descriptionView", layout: .fixed(width: 360, height: 120)) { theme in
+            let appearance = self.makeAppearance(theme)
+            return DescriptionView(descriptions: [
                 "First tip description",
                 "Second tip description with longer text to wrap"
             ])
             .padding()
-            .environment(self.makeAppearance(theme))
+            .background(appearance.colorSet.bg0.asColor)
+            .environment(appearance)
         }
     }
 }
