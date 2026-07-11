@@ -103,7 +103,7 @@ struct AIAgentCommandStageView: View {
 
     var body: some View {
         BottomSlideView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.large) {
                 SheetHeaderView(title: self.headerTitle)
                     .eventHandler(\.onClose) {
                         self.eventHandlers.close()
@@ -137,7 +137,7 @@ struct AIAgentCommandStageView: View {
 private extension AIAgentCommandStageView {
 
     func processingView(command: String) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
 
             // 채팅 형식 — 유저 지시(우측 말풍선) + AI 처리중(좌측 타이핑 말풍선)
             self.userMessageBubble(command)
@@ -150,7 +150,7 @@ private extension AIAgentCommandStageView {
                 backgroundColor: appearance.colorSet.secondaryBtnBackground.asColor
             )
             .eventHandler(\.onTap, eventHandlers.cancel)
-            .padding(.top, 4)
+            .padding(.top, Metric.Spacing.xsmall)
         }
     }
 
@@ -188,7 +188,7 @@ private extension AIAgentCommandStageView {
     func assistantBubble<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         HStack(spacing: 0) {
             content()
-                .padding(.horizontal, 16)
+                .padding(.horizontal, Metric.Spacing.large)
                 .padding(.vertical, 14)
                 .background(
                     RoundedRectangle(cornerRadius: 18)
@@ -222,7 +222,7 @@ private extension AIAgentCommandStageView {
 private extension AIAgentCommandStageView {
 
     func confirmView(command: String, message: String?) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
 
             // 채팅 형식 — 유저 지시(우측) + AI 확인 메시지(좌측)
             self.userMessageBubble(command)
@@ -230,7 +230,7 @@ private extension AIAgentCommandStageView {
                 self.assistantMessageBubble(message)
             }
 
-            HStack(spacing: 12) {
+            HStack(spacing: Metric.Spacing.regular) {
                 ConfirmButton(
                     title: "common.cancel".localized(),
                     textColor: appearance.colorSet.secondaryBtnText.asColor,
@@ -245,7 +245,7 @@ private extension AIAgentCommandStageView {
                 )
                 .eventHandler(\.onTap, eventHandlers.confirm)
             }
-            .padding(.top, 4)
+            .padding(.top, Metric.Spacing.xsmall)
         }
     }
 }
@@ -256,7 +256,7 @@ private extension AIAgentCommandStageView {
 private extension AIAgentCommandStageView {
 
     func doneView(command: String, message: String?) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
 
             // 채팅 형식 — 유저 지시(우측) + AI 완료 메시지(좌측, 체크 아이콘 말풍선 안)
             if command.isEmpty == false {
@@ -264,7 +264,7 @@ private extension AIAgentCommandStageView {
             }
 
             self.assistantBubble {
-                HStack(alignment: .center, spacing: 8) {
+                HStack(alignment: .center, spacing: Metric.Spacing.small) {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 20))
                         .foregroundStyle(appearance.colorSet.accent.asColor)
@@ -281,7 +281,7 @@ private extension AIAgentCommandStageView {
                 backgroundColor: appearance.colorSet.accentAI.asColor
             )
             .eventHandler(\.onTap, eventHandlers.acknowledge)
-            .padding(.top, 4)
+            .padding(.top, Metric.Spacing.xsmall)
         }
     }
 }
@@ -292,7 +292,7 @@ private extension AIAgentCommandStageView {
 private extension AIAgentCommandStageView {
 
     func failedView(command: String, reason: String?) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
 
             // 채팅 형식 — 유저 지시(우측, 있을 때만) + AI 실패 메시지(좌측, 경고 아이콘 말풍선 안)
             if command.isEmpty == false {
@@ -300,7 +300,7 @@ private extension AIAgentCommandStageView {
             }
 
             self.assistantBubble {
-                HStack(alignment: .center, spacing: 8) {
+                HStack(alignment: .center, spacing: Metric.Spacing.small) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .font(.system(size: 20))
                         .foregroundStyle(appearance.colorSet.accentWarn.asColor)
@@ -317,7 +317,7 @@ private extension AIAgentCommandStageView {
                 backgroundColor: appearance.colorSet.accentAI.asColor
             )
             .eventHandler(\.onTap, eventHandlers.acknowledge)
-            .padding(.top, 4)
+            .padding(.top, Metric.Spacing.xsmall)
         }
     }
 }

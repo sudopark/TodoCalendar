@@ -89,8 +89,8 @@ private struct AIAgentKeyboardInputView: View {
         @Bindable var state = self.state
 
         BottomSlideView {
-            
-            VStack(alignment: .leading, spacing: 16) {
+
+            VStack(alignment: .leading, spacing: Metric.Spacing.large) {
                 SheetHeaderView(title: "aiAgent::title".localized())
                     .eventHandler(\.onClose) {
                         self.eventHandler.close()
@@ -109,13 +109,13 @@ private struct AIAgentKeyboardInputView: View {
                     .textInputAutocapitalization(.never)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
                     .font(appearance.fontSet.size(16, weight: .regular).asFont)
-                    .padding(12)
+                    .padding(Metric.Spacing.regular)
                     .background(
                         RoundedRectangle(cornerRadius: 5)
                             .fill(appearance.colorSet.bg1.asColor)
                     )
 
-                HStack(spacing: 12) {
+                HStack(spacing: Metric.Spacing.regular) {
 
                     // 중지 → stopInput + 초기화. content 폭만 차지(hug)해 send가 나머지를 채움
                     ConfirmButton(
