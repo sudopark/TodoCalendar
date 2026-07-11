@@ -50,4 +50,40 @@ final class AIAgentSceneSnapshots: XCTestCase {
                 .environment(self.makeAppearance(theme))
         }
     }
+
+    @MainActor
+    func test_commandProcessing() {
+        captureSnapshotPair(named: "commandProcessing", layout: .fullScreen) { theme in
+            let state = AIAgentCommandViewState()
+            state.commandState = .processing(command: "일정 삭제")
+            return AIAgentCommandStageView()
+                .environment(state)
+                .environment(AIAgentCommandViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
+    func test_commandDone() {
+        captureSnapshotPair(named: "commandDone", layout: .fullScreen) { theme in
+            let state = AIAgentCommandViewState()
+            state.commandState = .done(command: "일정 삭제", message: "삭제를 완료했어요")
+            return AIAgentCommandStageView()
+                .environment(state)
+                .environment(AIAgentCommandViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
+    func test_commandFailed() {
+        captureSnapshotPair(named: "commandFailed", layout: .fullScreen) { theme in
+            let state = AIAgentCommandViewState()
+            state.commandState = .failed(command: "일정 삭제", reason: "네트워크 오류가 발생했어요")
+            return AIAgentCommandStageView()
+                .environment(state)
+                .environment(AIAgentCommandViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
 }
