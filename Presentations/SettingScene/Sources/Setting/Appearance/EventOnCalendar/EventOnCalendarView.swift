@@ -168,10 +168,10 @@ struct EventOnCalendarViewPreviewView: View {
                 }
             }
             .padding(.vertical, spacing: .regular)
-            .padding(.horizontal, 6)
+            .padding(.horizontal, spacing: .small)
 //            .frame(height: appearance.rowHeightOnCalendar.cgValue)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: Metric.Radius.large)
                     .fill(self.appearance.colorSet.dayBackground.asColor)
                     .shadow(
                         color: appearance.colorSet.text0.withAlphaComponent(0.4).asColor,
@@ -181,7 +181,7 @@ struct EventOnCalendarViewPreviewView: View {
             
             Spacer()
         }
-        .padding(.bottom, 18)
+        .padding(.bottom, spacing: .xlarge)
     }
 }
 

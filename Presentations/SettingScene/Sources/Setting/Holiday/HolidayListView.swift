@@ -212,7 +212,7 @@ struct HolidayListView: View {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(self.appearance.tagColors.holiday.asColor)
                         .frame(width: 4)
-                        .padding(.vertical, 5)
+                        .padding(.vertical, spacing: .xsmall)
                     
                     VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                         Text(item.name)

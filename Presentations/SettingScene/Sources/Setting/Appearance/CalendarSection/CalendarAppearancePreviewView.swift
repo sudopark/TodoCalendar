@@ -125,9 +125,9 @@ struct CalendarAppearanceSampleView: View {
                 }
             }
             .padding(.vertical, spacing: .regular)
-            .padding(.horizontal, 14)
+            .padding(.horizontal, spacing: .large)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: Metric.Radius.large)
                     .fill(self.appearance.colorSet.dayBackground.asColor)
                     .shadow(
                         color: appearance.colorSet.text0.withAlphaComponent(0.4).asColor,
@@ -136,7 +136,7 @@ struct CalendarAppearanceSampleView: View {
             )
             Spacer()
         }
-        .padding(.bottom, 18)
+        .padding(.bottom, spacing: .xlarge)
     }
     
     private func dayTextView(_ day: CalendarAppearanceModel.DayModel?) -> some View {

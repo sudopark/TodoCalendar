@@ -249,7 +249,7 @@ struct SettingItemListView: View {
             RemoteImageView(item.imagePath, targetSize: .init(width: 100, height: 100))
                 .resize()
                 .frame(width: 32, height: 32)
-                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .clipShape(RoundedRectangle(cornerRadius: Metric.Radius.regular))
             
             VStack(alignment: .leading) {
                 Text(item.name)

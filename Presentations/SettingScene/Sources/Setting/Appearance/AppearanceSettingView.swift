@@ -46,7 +46,7 @@ struct AppearanceRow< Content: View>: View {
             content
         }
         .padding(.horizontal, spacing: .large)
-        .padding(.vertical, 10)
+        .padding(.vertical, spacing: .regular)
         .background(
             RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(appearance.colorSet.bg1.asColor)

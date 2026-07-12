@@ -141,7 +141,7 @@ struct EventListAppearanceSettingView: View {
     }
     
     private var eventListSampleView: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.small) {
             
             VStack(alignment: .leading) {
                 
@@ -157,7 +157,7 @@ struct EventListAppearanceSettingView: View {
                             self.appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont
                         )
                         .foregroundColor(self.appearance.colorSet.text0.asColor)
-                        .padding(.bottom, 3)
+                        .padding(.bottom, spacing: .xsmall)
                     
                     if let lunarDate = state.sampleModel?.lunarDateText {
                         Text(lunarDate)
@@ -165,7 +165,7 @@ struct EventListAppearanceSettingView: View {
                                 self.appearance.fontSet.size(20+appearance.eventTextAdditionalSize, weight: .semibold).asFont
                             )
                             .foregroundColor(self.appearance.colorSet.text2.asColor)
-                            .padding(.bottom, 3)
+                            .padding(.bottom, spacing: .xsmall)
                     }
                     
                     Spacer()
@@ -198,7 +198,7 @@ struct EventListAppearanceSettingView: View {
             }
             .padding(.vertical, spacing: .xsmall).padding(.horizontal, 8)
             .background(
-                RoundedRectangle(cornerRadius: 5)
+                RoundedRectangle(cornerRadius: Metric.Radius.chip)
                     .fill(appearance.colorSet.bg1.asColor)
             )
         }
