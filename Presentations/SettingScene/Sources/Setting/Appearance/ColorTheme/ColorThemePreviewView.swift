@@ -90,7 +90,7 @@ struct ColorThemeItemView: View {
                     ? appearance.colorSet.primaryBtnText.asColor
                     : appearance.colorSet.weekDayText.asColor
                 )
-                .padding(6)
+                .padding(spacing: .small)
                 .background(
                     RoundedRectangle(cornerRadius: Metric.Radius.chip)
                         .fill(

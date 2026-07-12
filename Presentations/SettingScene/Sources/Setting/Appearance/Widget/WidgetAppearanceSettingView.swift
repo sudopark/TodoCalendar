@@ -224,8 +224,8 @@ struct WidgetAppearanceSampleView: View {
                     .foregroundStyle(colorSet.accent.asColor)
             }
             .padding(.vertical, spacing: .regular)
-            .padding(.horizontal, 14)
-            .background(backgroundShape, in: RoundedRectangle(cornerRadius: 10))
+            .padding(.horizontal, spacing: .large)
+            .background(backgroundShape, in: RoundedRectangle(cornerRadius: Metric.Radius.large))
             
             Spacer()
             
