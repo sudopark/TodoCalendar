@@ -14,18 +14,18 @@ import CommonPresentation
 
 struct ColorThemePreviewView: View {
     
-    struct Metric {
+    struct Layout {
         let fontSize: CGFloat
         let circleSize: CGFloat
         let circlePadding: CGFloat
     }
     
     private let model: ColorThemeModel
-    private let metric: Metric
+    private let metric: Layout
     private let colorSet: ColorSet
     @Environment(ViewAppearance.self) private var appearance
     
-    init(model: ColorThemeModel, metric: Metric, isSystemDark: Bool) {
+    init(model: ColorThemeModel, metric: Layout, isSystemDark: Bool) {
         self.model = model
         self.metric = metric
         self.colorSet = model.key.convert(isSystemDarkTheme: isSystemDark)
