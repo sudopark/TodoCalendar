@@ -210,8 +210,9 @@ corner radius·spacing에 숫자 하드코딩 ❌ → `Metric` 상수 ✅ (Commo
 - `Metric.Radius.{chip|regular|large|sheet}` = 4 / 8 / 12 / 16 — 칩·뱃지 / 카드·버튼 / 큰 카드·팝업 / 바텀시트·모달
 - `Metric.Spacing.{xxsmall|xsmall|small|regular|large|xlarge|indent}` = 2 / 4 / 8 / 12 / 16 / 20 / 32 — `indent`는 계층 들여쓰기(leading) 전용
 - **padding은 토큰 오버로드로**: `.padding(.top, spacing: .regular)` / `.padding(spacing: .xlarge)` (`View.padding(_:spacing:)`, `Metric.SpacingToken`) — 시스템 `.padding`에 숫자·CGFloat 직접 전달 금지. `Metric.Spacing` 상수는 stack `spacing:` 파라미터처럼 CGFloat가 필요한 자리에만.
-- **신규·수정 코드부터 강제. 기존 뷰 일괄 마이그레이션 금지** — 손대는 기회에 가장 가까운 대표값으로 스냅해 전환 (미세 시각 변화 허용).
-- 대표값에 없는 값이 필요하면 임의 숫자를 박지 말고 유저와 협의해 토큰을 추가한다.
+- **Presentations 6개 프레임워크는 #674로 토큰 마이그레이션 완료** (CommonPresentation·AIAgentScene·MemberScenes·EventDetailScene·SettingScene·CalendarScenes·EventListScenes). 신규·수정 코드는 숫자 하드코딩 없이 처음부터 토큰으로. 미완: `TodoCalendarApp/**`(위젯·앱 타겟) — 스냅샷 게이트 불가라 후속.
+- **제외값 정책 (토큰화 안 함)**: 값 `0`(간격 없음)·`1`·소수(`0.5` 등)·radius `≤3`(장식 프리미티브)·대표값과 차이 `>2`(토큰 격자 밖, 예: 24·40·120)은 숫자 그대로 둔다. 그 밖의 값은 ±2 이내 가장 가까운 대표값으로 스냅 (미세 시각 변화 허용).
+- 대표값에 없는데 격자 안(±2)도 아닌 값이 반복 등장하면 임의 숫자를 박지 말고 유저와 협의해 토큰을 추가한다.
 
 ### 그림자·모션
 
