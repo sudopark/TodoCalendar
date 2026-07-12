@@ -34,8 +34,8 @@ struct ForemostEventView: View {
     }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            
+        VStack(alignment: .leading, spacing: Metric.Spacing.small) {
+
             Text(R.String.calendarForemosteventTitle)
                 .font(
                     appearance.fontSet.size(22+appearance.eventTextAdditionalSize, weight: .semibold).asFont

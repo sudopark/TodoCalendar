@@ -345,7 +345,7 @@ extension View {
         
         return self
             .background(
-                RoundedRectangle(cornerRadius: 5)
+                RoundedRectangle(cornerRadius: Metric.Radius.chip)
                     .fill(appearance.colorSet.bg1.asColor)
             )
     }
