@@ -241,7 +241,7 @@ private struct WeekRowView: View {
                 .font(self.appearance.fontSet.day.asFont)
                 .foregroundColor(textColor)
                 .frame(maxWidth: .infinity)
-                .padding(.top, 4)
+                .padding(.top, spacing: .xsmall)
             if showUnderLine {
                 Divider()
                     .background(lineColor)
@@ -308,8 +308,8 @@ private struct WeekRowView: View {
                 .foregroundStyle(textColor)
         }
 
-        return HStack(spacing: 2) {
-            
+        return HStack(spacing: Metric.Spacing.xxsmall) {
+
             ForEach(0..<prefix.count, id: \.self) { index in
                 Circle()
                     .fill(selectColor(prefix[index]))
@@ -341,7 +341,7 @@ private struct WeekRowView: View {
             eventMoreViews(eventStackModel.eventMores(with: size)).asAnyView()
         }
         
-        return VStack(alignment: .leading, spacing: 2) {
+        return VStack(alignment: .leading, spacing: Metric.Spacing.xxsmall) {
             ForEach(0..<size, id: \.self) {
                 return eventRowView(self.eventStackModel.linesStack[$0])
             }
@@ -388,8 +388,8 @@ private struct WeekRowView: View {
             ? self.appearance.colorSet.eventTextSelected.asColor
             : self.appearance.colorSet.eventText.asColor
         }()
-        return HStack(spacing: 2) {
-             RoundedRectangle(cornerRadius: 12)
+        return HStack(spacing: Metric.Spacing.xxsmall) {
+             RoundedRectangle(cornerRadius: Metric.Radius.large)
                  .fill(lineColor)
                  .frame(width: 3, height: 12)
                  .padding(.leading, 1)
@@ -423,7 +423,7 @@ private struct WeekRowView: View {
                     .frame(width: dayWidth)
                     .offset(x: offsetX($0))
             }
-            .padding(.top, 2)
+            .padding(.top, spacing: .xxsmall)
         }
     }
 }

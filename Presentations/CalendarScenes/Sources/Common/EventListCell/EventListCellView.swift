@@ -69,7 +69,7 @@ struct EventListCellView: View {
     }
     
     var body: some View {
-        return HStack(spacing: 8) {
+        return HStack(spacing: Metric.Spacing.small) {
             // left
             self.eventLeftView(cellViewModel)
                 .frame(width: 52)
@@ -84,7 +84,7 @@ struct EventListCellView: View {
             // right
             self.eventRightView(cellViewModel)
         }
-        .padding(.vertical, 4).padding(.horizontal, 8)
+        .padding(.vertical, spacing: .xsmall).padding(.horizontal, spacing: .small)
         .frame(idealHeight: 50)
         .backgroundAsRoundedRectForEventList(self.appearance)
         .onTapGesture {
@@ -210,7 +210,7 @@ struct EventListCellView: View {
         
         func singleText(_ text: EventTimeText) -> some View {
             return VStack(alignment: .center) {
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                HStack(alignment: .firstTextBaseline, spacing: Metric.Spacing.xxsmall) {
                     Text(text.text)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -226,8 +226,8 @@ struct EventListCellView: View {
             }
         }
         func doubleText(_ top: EventTimeText, _ bottom: EventTimeText) -> some View {
-            return VStack(alignment: .center, spacing: 2) {
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
+            return VStack(alignment: .center, spacing: Metric.Spacing.xxsmall) {
+                HStack(alignment: .firstTextBaseline, spacing: Metric.Spacing.xxsmall) {
                     Text(top.text)
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
@@ -238,8 +238,8 @@ struct EventListCellView: View {
                         pmOrAmView(amPm)
                     }
                 }
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                 
+                HStack(alignment: .firstTextBaseline, spacing: Metric.Spacing.xxsmall) {
+
                     Text(bottom.text)
                         .minimumScaleFactor(0.7)
                         .font(self.appearance.fontSet.size(14+appearance.eventTextAdditionalSize).asFont)
@@ -265,8 +265,8 @@ struct EventListCellView: View {
         let nameColor = self.isUncompletedTodo
             ? self.appearance.colorSet.uncompletedTodo
             : self.appearance.colorSet.text0
-        return HStack(alignment: .center, spacing: 8) {
-            VStack(alignment: .leading, spacing: 4) {
+        return HStack(alignment: .center, spacing: Metric.Spacing.small) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                 Text(cellViewModel.name)
                     .minimumScaleFactor(0.7)
                     .font(
