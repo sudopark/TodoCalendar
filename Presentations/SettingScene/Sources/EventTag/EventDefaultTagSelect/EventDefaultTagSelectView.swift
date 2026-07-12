@@ -113,7 +113,7 @@ struct EventDefaultTagSelectView: View {
                     .foregroundStyle(appearance.colorSet.text2.asColor)
                     .listRowSeparator(.hidden)
                     .listRowBackground(appearance.colorSet.bg0.asColor)
-                    .padding(.bottom, 16)
+                    .padding(.bottom, spacing: .large)
                 
                 ForEach(state.cellViewModels) { cvm in
                     cellView(cvm)
@@ -138,7 +138,7 @@ struct EventDefaultTagSelectView: View {
     }
     
     private func cellView(_ cellViewModel: BaseCalendarEventTagCellViewModel) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Metric.Spacing.regular) {
             
             EventTagColorView(cellViewModel.id) { color in
                 Circle()
@@ -163,10 +163,10 @@ struct EventDefaultTagSelectView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 12)
+        .padding(.horizontal, spacing: .regular)
+        .padding(.vertical, spacing: .regular)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {

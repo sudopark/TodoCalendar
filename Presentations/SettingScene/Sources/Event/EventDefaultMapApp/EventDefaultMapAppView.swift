@@ -103,7 +103,7 @@ struct EventDefaultMapAppView: View {
                         .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
             }
-            .padding(.top, 20)
+            .padding(.top, spacing: .xlarge)
             .listStyle(.plain)
             .background(appearance.colorSet.bg0.asColor)
             .toolbar {
@@ -120,7 +120,7 @@ struct EventDefaultMapAppView: View {
     }
     
     private func mapView(_ model: SupportMapAppModel) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Metric.Spacing.regular) {
             Image(model.map.iconName)
                 .resizable()
                 .scaledToFit()
@@ -138,10 +138,10 @@ struct EventDefaultMapAppView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 12)
+        .padding(.horizontal, spacing: .regular)
+        .padding(.vertical, spacing: .regular)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {

@@ -140,7 +140,7 @@ struct SettingItemListView: View {
                         }
                     }
                 }
-                .padding(.top, 8)
+                .padding(.top, spacing: .small)
             }
             ForEach(section.items, id: \.compareKey) { item in
                 switch item {
@@ -162,17 +162,17 @@ struct SettingItemListView: View {
     }
 
     private var updateBadge: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: Metric.Spacing.xxsmall) {
             Text("new")
                 .font(self.appearance.fontSet.size(12, weight: .semibold).asFont)
             Image(systemName: "chevron.right")
                 .font(self.appearance.fontSet.size(10, weight: .semibold).asFont)
         }
         .foregroundStyle(self.appearance.colorSet.primaryBtnText.asColor)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .padding(.horizontal, spacing: .small)
+        .padding(.vertical, spacing: .xsmall)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.primaryBtnBackground.asColor)
         )
         .onTapGesture {
@@ -197,17 +197,17 @@ struct SettingItemListView: View {
                 .font(self.appearance.fontSet.size(8).asFont)
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 16)
+        .padding(.horizontal, spacing: .large)
+        .padding(.vertical, spacing: .large)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {
             self.eventHandlers.selectItem(item)
         }
     }
-    
+
     private func accountItemView(_ item: AccountSettingItemModel) -> some View{
         HStack {
             Image(systemName: item.iconName)
@@ -232,10 +232,10 @@ struct SettingItemListView: View {
                 .font(self.appearance.fontSet.size(8).asFont)
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 16)
+        .padding(.horizontal, spacing: .large)
+        .padding(.vertical, spacing: .large)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {
@@ -243,9 +243,9 @@ struct SettingItemListView: View {
             self.eventHandlers.selectItem(item)
         }
     }
-    
+
     private func suggestAppItemView(_ item: SuggestAppItemModel) -> some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Metric.Spacing.regular) {
             RemoteImageView(item.imagePath, targetSize: .init(width: 100, height: 100))
                 .resize()
                 .frame(width: 32, height: 32)
@@ -269,10 +269,10 @@ struct SettingItemListView: View {
                 .font(self.appearance.fontSet.size(8).asFont)
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.horizontal, spacing: .large)
+        .padding(.vertical, spacing: .regular)
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
         .onTapGesture {

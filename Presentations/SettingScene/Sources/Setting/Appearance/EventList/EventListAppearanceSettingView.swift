@@ -108,7 +108,7 @@ struct EventListAppearanceSettingView: View {
         VStack {
             
             eventListSampleView
-                .padding(.bottom, 12)
+                .padding(.bottom, spacing: .regular)
             
             AppearanceRow("setting.appearance.event.fontSize".localized(), fontSizeSettingView)
             
@@ -133,7 +133,7 @@ struct EventListAppearanceSettingView: View {
                 }
             
         }
-        .padding(.top, 20)
+        .padding(.top, spacing: .xlarge)
         .onAppear {
             self.stateBinding(self.state)
             self.eventHandler.onAppear()
@@ -172,17 +172,17 @@ struct EventListAppearanceSettingView: View {
                 }
             }
             
-            HStack(spacing: 8) {
+            HStack(spacing: Metric.Spacing.small) {
                 eventSampleTimeView
                 .frame(width: 52)
-                
+
                 RoundedRectangle(cornerRadius: 3)
                     .fill(appearance.tagColors.defaultColor.asColor)
                     .frame(width: 6)
                     .frame(maxHeight: 50)
-                
-                HStack(alignment: .center, spacing: 8) {
-                    VStack(alignment: .leading, spacing: 4) {
+
+                HStack(alignment: .center, spacing: Metric.Spacing.small) {
+                    VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                         Text("setting.appearance.event.sample::name".localized())
                             .minimumScaleFactor(0.7)
                             .font(self.appearance.eventTextFontOnList().asFont)
@@ -196,7 +196,7 @@ struct EventListAppearanceSettingView: View {
                     Spacer()
                 }
             }
-            .padding(.vertical, 4).padding(.horizontal, 8)
+            .padding(.vertical, spacing: .xsmall).padding(.horizontal, 8)
             .background(
                 RoundedRectangle(cornerRadius: 5)
                     .fill(appearance.colorSet.bg1.asColor)
@@ -222,16 +222,16 @@ struct EventListAppearanceSettingView: View {
                 .foregroundStyle(appearance.colorSet.text0.asColor)
         }()
         
-        return VStack(alignment: .center, spacing: 2) {
+        return VStack(alignment: .center, spacing: Metric.Spacing.xxsmall) {
             if state.sampleModel?.is24HourForm == true {
                 timeView("13:00")
                 timeView("14:00")
             } else {
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                HStack(alignment: .firstTextBaseline, spacing: Metric.Spacing.xsmall) {
                     timeView("1:00")
                     pmView
                 }
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                HStack(alignment: .firstTextBaseline, spacing: Metric.Spacing.xsmall) {
                     timeView("2:00")
                     
                     pmView
@@ -241,22 +241,22 @@ struct EventListAppearanceSettingView: View {
     }
     
     private var fontSizeSettingView: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Metric.Spacing.small) {
             
             Text(state.additionalFontSizeModel.sizeText)
                 .font(appearance.fontSet.size(12).asFont)
                 .foregroundStyle(appearance.colorSet.text2.asColor)
             
-            HStack(spacing: 2) {
-                
+            HStack(spacing: Metric.Spacing.xxsmall) {
+
                 Button {
                     eventHandler.decreaseFontSize()
                 } label: {
                     Text(" - ")
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.text0.asColor)
-                        .padding(.vertical, 2)
-                        .padding(.leading, 8).padding(.trailing, 2)
+                        .padding(.vertical, spacing: .xxsmall)
+                        .padding(.leading, spacing: .small).padding(.trailing, 2)
                 }
                 .buttonStyle(.plain)
                 .disabled(!state.additionalFontSizeModel.isDescreasable)
@@ -270,14 +270,14 @@ struct EventListAppearanceSettingView: View {
                     Text(" + ")
                         .font(appearance.fontSet.normal.asFont)
                         .foregroundStyle(appearance.colorSet.text0.asColor)
-                        .padding(.vertical, 2)
-                        .padding(.leading, 2).padding(.trailing, 8)
+                        .padding(.vertical, spacing: .xxsmall)
+                        .padding(.leading, spacing: .xxsmall).padding(.trailing, 8)
                 }
                 .buttonStyle(.plain)
                 .disabled(!state.additionalFontSizeModel.isIncreasable)
             }
             .background(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: Metric.Radius.regular)
                     .fill(appearance.colorSet.dayBackground.asColor)
             )
         }
