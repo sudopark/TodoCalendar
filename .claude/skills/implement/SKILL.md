@@ -12,7 +12,8 @@ description: Use when writing or modifying code in this project — 구현 착�
 **플랜 파일 유무로 흐름만 갈리고 절차는 동일하다:**
 
 - **플랜 있음** → superpowers executing-plans/subagent-driven-development가 태스크 순서를 이끈다. 각 태스크에 아래 절차를 적용한다.
-- **플랜 없음** (핑퐁·즉흥 수정) → superpowers TDD + 이 스킬만으로 진행한다. 플랜 단계만 빠질 뿐, rules 확인 → 패턴 파악 → 구현 → 완료 판정은 동일하게 탄다.
+- **플랜 없음** (즉흥 수정) → superpowers TDD + 이 스킬만으로 진행한다. 플랜 단계만 빠질 뿐, rules 확인 → 패턴 파악 → 구현 → 완료 판정은 동일하게 탄다.
+- **페어 프로그래밍 모드** (유저가 명시 선언한 세션) → 턴 규칙·TDD 수준·커밋 시점은 pair-programming 스킬이 이끈다. 이 스킬은 프로젝트 종속 규칙(rules·tuist generate·짝지어진 두 위치·콜사이트 grep) 공급자로만 동작한다.
 
 시작할 때:
 

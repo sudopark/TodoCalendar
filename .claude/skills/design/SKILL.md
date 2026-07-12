@@ -41,7 +41,7 @@ description: Use when doing UI design work in this project — 새 화면·컴�
 
 ## 4. 구현 연결 — 규모별 분기
 
-- **작은 UI 수정** (컴포넌트 1~2개, 기존 화면 내 변경) → 확정 스펙을 갖고 바로 구현 (implement 스킬 경로, 핑퐁)
+- **작은 UI 수정** (컴포넌트 1~2개, 기존 화면 내 변경) → 확정 스펙을 갖고 바로 구현 (implement 스킬 경로, 즉흥 수정)
 - **화면 단위 이상** (새 Scene, 여러 화면에 걸친 변경) → 이슈 따서 kickoff 경유 — 확정 디자인 스펙이 이슈 본문과 플랜의 입력이 된다
 
 어느 쪽이든 구현은 presentations-rules(토큰 강제·컴포넌트 재사용·Scene 6파일 구조)를 따른다.
