@@ -280,7 +280,7 @@ struct GoogleCalendarEventDetailView: View {
     }
     
     private var eventTypeView: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Metric.Spacing.small) {
             Image("google_calendar_icon")
                 .resizable()
                 .scaledToFill()
@@ -400,7 +400,7 @@ struct GoogleCalendarEventDetailView: View {
             }
 
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.small) {
                 ForEach(model.entries) { entry in
                     HStack {
                         VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
@@ -528,7 +528,7 @@ struct GoogleCalendarEventDetailView: View {
     private func attachmentsView(_ attachments: [AttachmentModel]) -> some View {
         return ForEach(attachments) { attach in
             HStack {
-                HStack(spacing: 6) {
+                HStack(spacing: Metric.Spacing.small) {
                     if let iconPath = attach.iconLink {
                         RemoteImageView(iconPath)
                             .resize()
@@ -542,7 +542,7 @@ struct GoogleCalendarEventDetailView: View {
                         .foregroundStyle(appearance.colorSet.text0.asColor)
                         .font(appearance.fontSet.subNormal.asFont)
                 }
-                .padding(6)
+                .padding(spacing: .small)
                 .cornerRadius(Metric.Radius.chip)
                 .overlay(
                     RoundedRectangle(cornerRadius: Metric.Radius.chip)

@@ -321,7 +321,7 @@ struct EventDetailView: View {
                     self.selectTagView
                     self.selectNotificationView
                     Spacer(minLength: 12)
-                    VStack(spacing: 17) {
+                    VStack(spacing: Metric.Spacing.large) {
                         VStack(spacing: Metric.Spacing.small) {
                             self.enterPlaceView
                                 .id(InputFields.place.id)
@@ -413,7 +413,7 @@ struct EventDetailView: View {
     }
     
     private var foremostEventView: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Metric.Spacing.small) {
             Image(systemName: "exclamationmark.circle.fill")
                 .font(.system(size: 16, weight: .light))
                 .foregroundColor(self.appearance.colorSet.accentWarn.asColor)
@@ -453,7 +453,7 @@ struct EventDetailView: View {
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .padding(spacing: .small)
                 .background(
-                    RoundedRectangle(cornerRadius: 14)
+                    RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                         .fill(self.appearance.colorSet.bg1.asColor)
                 )
             }
@@ -464,7 +464,7 @@ struct EventDetailView: View {
     }
     
     private func todoEventTypeView(_ model: EventDetailTypeModel) -> some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Metric.Spacing.small) {
             Image(systemName: "flag.fill")
                 .font(.system(size: 16, weight: .light))
                 .foregroundColor(self.appearance.colorSet.text0.asColor)
@@ -727,7 +727,7 @@ struct EventDetailView: View {
                     )
                     .padding(spacing: .small)
                     .background(
-                        RoundedRectangle(cornerRadius: 14)
+                        RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                             .fill(
                                 self.state.selectedRepeat == nil
                                 ? .clear
@@ -769,7 +769,7 @@ struct EventDetailView: View {
             }
             .padding(spacing: .small)
             .background(
-                RoundedRectangle(cornerRadius: 14)
+                RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                     .fill(self.appearance.colorSet.bg1.asColor)
             )
             .onTapGesture {
@@ -798,7 +798,7 @@ struct EventDetailView: View {
                 )
                 .padding(spacing: .small)
                 .background(
-                    RoundedRectangle(cornerRadius: 14)
+                    RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                         .fill(
                             self.state.selectedNotificationTimeText == nil
                             ? .clear
@@ -965,7 +965,7 @@ struct EventDetailView: View {
                         .foregroundStyle(appearance.colorSet.placeHolder.asColor)
                         .font(self.appearance.fontSet.size(14).asFont)
                         .padding(.leading, spacing: .xsmall)
-                        .padding(.top, 10)
+                        .padding(.top, spacing: .regular)
                 }
              
                 @Bindable var state = self.state
@@ -1015,7 +1015,7 @@ struct EventDetailView: View {
                 Spacer()
             }
             .padding(.horizontal, spacing: .regular)
-            .padding(.vertical, 10)
+            .padding(.vertical, spacing: .regular)
             .background(appearance.colorSet.bg1.asColor)
         }
         .background(appearance.colorSet.bg2.asColor)
