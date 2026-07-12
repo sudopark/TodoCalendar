@@ -101,7 +101,7 @@ struct MonthContainerView: View {
 }
 
 
-private enum Metric {
+private enum Layout {
     static let eventRowHeightWithSpacing: CGFloat = 12
     static let eventTopMargin: CGFloat = 24
     static let eventInterspacing: CGFloat = 2
@@ -269,7 +269,7 @@ private struct WeekRowView: View {
                 return eventDotsView(day, eventsPerDays[safe: seq] ?? [])
             }
         }
-        .padding(.top, Metric.eventTopMargin*2)
+        .padding(.top, Layout.eventTopMargin*2)
         .frame(height: 4, alignment: .center)
     }
     private func eventDotsView(
@@ -324,9 +324,9 @@ private struct WeekRowView: View {
     }
     
     private func eventStackView() -> some View {
-        
-        let totalHeight = self.expectSize.height - Metric.eventTopMargin
-        let drawableRowCount = Int(totalHeight / Metric.eventRowHeightWithSpacing)
+
+        let totalHeight = self.expectSize.height - Layout.eventTopMargin
+        let drawableRowCount = Int(totalHeight / Layout.eventRowHeightWithSpacing)
         let maxDrawableEventRowCount = drawableRowCount - 1
         guard maxDrawableEventRowCount > 0 else { return EmptyView().asAnyView() }
         
@@ -347,7 +347,7 @@ private struct WeekRowView: View {
             }
             bottomView
         }
-        .padding(.top, Metric.eventTopMargin)
+        .padding(.top, Layout.eventTopMargin)
         .asAnyView()
     }
     
@@ -361,8 +361,8 @@ private struct WeekRowView: View {
     }
     
     private func eventLineView(_ line: EventOnWeek) -> some View {
-        let offsetX = CGFloat(line.daysSequence.lowerBound-1) * dayWidth + Metric.eventInterspacing
-        let width = CGFloat(line.daysSequence.count) * dayWidth - Metric.eventInterspacing
+        let offsetX = CGFloat(line.daysSequence.lowerBound-1) * dayWidth + Layout.eventInterspacing
+        let width = CGFloat(line.daysSequence.count) * dayWidth - Layout.eventInterspacing
         let lineColor = {
             switch line.colorSource {
             case let google as GoogleCalendarEventColorSource:
