@@ -211,7 +211,7 @@ struct AppleCalendarEventDetailView: View {
     }
 
     private var eventTypeView: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: Metric.Spacing.small) {
             Image("apple_calendar_icon")
                 .resizable()
                 .scaledToFill()
@@ -353,7 +353,7 @@ struct AppleCalendarEventDetailView: View {
                 Text("eventDetail::appleCalendarEvent::attendees::organizer".localized())
                     .font(appearance.fontSet.size(12).asFont)
                     .foregroundStyle(appearance.colorSet.text1.asColor)
-                    .padding(.horizontal, 6)
+                    .padding(.horizontal, spacing: .small)
                     .padding(.vertical, spacing: .xxsmall)
                     .background(appearance.colorSet.bg1.asColor)
                     .clipShape(Capsule())

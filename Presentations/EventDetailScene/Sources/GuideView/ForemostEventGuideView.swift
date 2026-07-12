@@ -48,7 +48,7 @@ private struct ForemostEventGuideContentView: View {
                         .foregroundStyle(appearance.colorSet.text1.asColor)
                         .padding(.top, spacing: .xlarge)
                         
-                        VStack(alignment: .leading, spacing: 10) {
+                        VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
                             VStack(alignment: .leading, spacing: Metric.Spacing.xlarge) {
                                 Text("eventDetail:foremost:guide:message1".localized())
                                 Text("eventDetail:foremost:guide:supports:message".localized())

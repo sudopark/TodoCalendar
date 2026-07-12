@@ -174,7 +174,7 @@ struct SelectEventTagView: View {
     }
     
     private var addTagView: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: Metric.Spacing.regular) {
             Image(systemName: "plus")
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(.system(size: 12))

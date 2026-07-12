@@ -45,7 +45,7 @@ private struct TodoEventGuideContentView: View {
                         .foregroundStyle(appearance.colorSet.text1.asColor)
                         .padding(.top, spacing: .xlarge)
                         
-                        VStack(alignment: .leading, spacing: 10) {
+                        VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
                             VStack(alignment: .leading, spacing: Metric.Spacing.xlarge) {
                                 Text("eventDetail:todo:guide:message1".localized())
                                 Text("eventDetail:todo:guide:message2".localized())
