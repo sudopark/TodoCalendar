@@ -215,7 +215,7 @@ struct SelectEventRepeatOptionView: View {
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 
             }
-            .padding(.top, 20)
+            .padding(.top, spacing: .xlarge)
         }
     }
     
@@ -227,7 +227,7 @@ struct SelectEventRepeatOptionView: View {
                         .font(self.appearance.fontSet.normal.asFont)
                         .foregroundStyle(self.appearance.colorSet.text0.asColor)
                         .lineLimit(1)
-                    
+
                     Spacer()
                     if self.state.selectedOptionId == option.id {
                         Image(systemName: "checkmark")
@@ -235,10 +235,10 @@ struct SelectEventRepeatOptionView: View {
                             .foregroundStyle(appearance.colorSet.text0.asColor)
                     }
                 }
-                .padding(.vertical, 12)
-                .padding(.horizontal, 12)
+                .padding(.vertical, spacing: .regular)
+                .padding(.horizontal, spacing: .regular)
                 .background {
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: Metric.Radius.regular)
                         .fill(self.appearance.colorSet.bg1.asColor)
                 }
                 .onTapGesture {
@@ -321,8 +321,8 @@ struct SelectEventRepeatOptionView: View {
                     repeatEndCountView
                 }
             }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 16)
+                .padding(.horizontal, spacing: .large)
+                .padding(.vertical, spacing: .large)
         }
         .padding(.top, 0)
         .background(appearance.colorSet.bg2.asColor)
