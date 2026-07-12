@@ -187,7 +187,7 @@ private struct FakeSignInButtonProvider: SignInButtonProvider {
     func button(_ provider: OAuth2ServiceProvider, _ action: @escaping () -> Void) -> any View {
         return Text("fake button")
             .frame(maxWidth: .infinity)
-            .padding(8)
+            .padding(spacing: .small)
             .background(
                 RoundedRectangle(cornerRadius: 10).fill(.red)
             )
