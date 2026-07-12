@@ -35,4 +35,28 @@ public enum Metric {
         /// 계층 들여쓰기 (leading)
         public static let indent: CGFloat = 32
     }
+
+    /// padding 전용 정규화 토큰 — View.padding(_:spacing:)이 대표값만 받도록 강제한다.
+    /// 값은 Spacing 상수를 단일 소스로 참조 (Spacing 상수는 stack spacing: 등 CGFloat 자리에 계속 사용).
+    public enum SpacingToken {
+        case xxsmall
+        case xsmall
+        case small
+        case regular
+        case large
+        case xlarge
+        case indent
+
+        public var value: CGFloat {
+            switch self {
+            case .xxsmall: return Spacing.xxsmall
+            case .xsmall: return Spacing.xsmall
+            case .small: return Spacing.small
+            case .regular: return Spacing.regular
+            case .large: return Spacing.large
+            case .xlarge: return Spacing.xlarge
+            case .indent: return Spacing.indent
+            }
+        }
+    }
 }
