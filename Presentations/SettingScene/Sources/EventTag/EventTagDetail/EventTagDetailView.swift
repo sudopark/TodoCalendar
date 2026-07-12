@@ -164,7 +164,7 @@ struct EventTagDetailView: View {
     }
     
     private var nameInputView: some View {
-        return HStack(spacing: 16) {
+        return HStack(spacing: Metric.Spacing.large) {
             Circle()
                 .frame(width: 15, height: 15)
                 .foregroundStyle(
@@ -198,7 +198,7 @@ struct EventTagDetailView: View {
     
     private var suggestColorView: some View {
         VStack {
-            LazyVGrid(columns: self.suggestColorColums, spacing: 20) {
+            LazyVGrid(columns: self.suggestColorColums, spacing: Metric.Spacing.xlarge) {
                 Section {
                     ForEach(self.state.suggestColorHexes, id: \.self) { hex in
                         self.circleView(hex)
@@ -216,10 +216,10 @@ struct EventTagDetailView: View {
                 }
             }
         }
-        .padding(.vertical, 20)
-        .padding(.horizontal, 12)
+        .padding(.vertical, spacing: .xlarge)
+        .padding(.horizontal, spacing: .regular)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                 .fill(self.appearance.colorSet.bg1.asColor)
         )
     }

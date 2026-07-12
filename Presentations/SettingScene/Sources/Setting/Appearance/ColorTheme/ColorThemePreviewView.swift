@@ -53,7 +53,7 @@ struct ColorThemePreviewView: View {
             }
         }
         .background(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(colorSet.bg0.asColor)
                 .shadow(
                     color: appearance.colorSet.text0.withAlphaComponent(0.1).asColor,
@@ -74,7 +74,7 @@ struct ColorThemeItemView: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: Metric.Spacing.xlarge) {
             
             ColorThemePreviewView(
                 model: model,
@@ -92,7 +92,7 @@ struct ColorThemeItemView: View {
                 )
                 .padding(6)
                 .background(
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: Metric.Radius.chip)
                         .fill(
                             model.isSelected 
                             ? appearance.colorSet.primaryBtnBackground.asColor

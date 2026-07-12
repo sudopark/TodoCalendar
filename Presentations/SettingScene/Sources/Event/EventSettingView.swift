@@ -188,8 +188,8 @@ struct EventSettingView: View {
                             self.externalCalendarSectionView(state.externalCalendarServiceModels)
                         }
                     }
-                    .padding(.top, 20)
-                    .padding(.horizontal, 16)
+                    .padding(.top, spacing: .xlarge)
+                    .padding(.horizontal, spacing: .large)
                 }
                 .listStyle(.plain)
                 .background(appearance.colorSet.bg0.asColor)
@@ -211,10 +211,10 @@ struct EventSettingView: View {
     
     private func rowView(_ content: some View) -> some View {
         content
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            .padding(.horizontal, spacing: .large)
+            .padding(.vertical, spacing: .regular)
             .background(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: Metric.Radius.regular)
                     .fill(appearance.colorSet.bg1.asColor)
             )
             .listRowSeparator(.hidden)
@@ -317,7 +317,7 @@ struct EventSettingView: View {
                 } label: { EmptyView() }
                 
             } label: {
-                HStack(spacing: 4) {
+                HStack(spacing: Metric.Spacing.xsmall) {
                     Text(state.periodModel.text)
                         .font(appearance.fontSet.subNormal.asFont)
                         .foregroundStyle(appearance.colorSet.text1.asColor)
@@ -357,7 +357,7 @@ struct EventSettingView: View {
         switch model {
         case .syncInProgress:
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                     Text("event_setting::eventSync".localized())
                         .font(self.appearance.fontSet.normal.asFont)
                         .foregroundStyle(self.appearance.colorSet.text0.asColor)
@@ -375,7 +375,7 @@ struct EventSettingView: View {
             .asAnyView()
         case .readToSync(let lastSyncDataTime):
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                     Text("event_setting::eventSync".localized())
                         .font(self.appearance.fontSet.normal.asFont)
                         .foregroundStyle(self.appearance.colorSet.text0.asColor)
@@ -416,9 +416,9 @@ struct EventSettingView: View {
                 rowView(externalCalendarRowView(model))
             }
         }
-        .padding(.top, 20)
+        .padding(.top, spacing: .xlarge)
     }
-    
+
     private func externalCalendarRowView(_ model: ExternalCalanserServiceModel) -> some View {
         return HStack {
             Image(model.serviceIconName)

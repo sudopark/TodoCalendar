@@ -115,13 +115,13 @@ struct FeedbackPostView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                
+            VStack(alignment: .leading, spacing: Metric.Spacing.large) {
+
                 Text("feedback::guide:message".localized())
                     .font(appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
-                
-                VStack(alignment: .leading, spacing: 8) {
+
+                VStack(alignment: .leading, spacing: Metric.Spacing.small) {
                     messageInput
                     contactInput
                 }
@@ -137,7 +137,7 @@ struct FeedbackPostView: View {
                 self.inputField = nil
             }
             .padding()
-            .padding(.top, 20)
+            .padding(.top, spacing: .xlarge)
             .background(appearance.colorSet.bg0.asColor)
             .navigationTitle("setting.feedback::name".localized())
             .if(condition: ProcessInfo.isAvailiOS26()) {
@@ -160,8 +160,8 @@ struct FeedbackPostView: View {
                 Text("feedback::enterMessage::placeholder".localized())
                     .font(appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.placeHolder.asColor)
-                    .padding(.top, 8)
-                    .padding(.leading, 4)
+                    .padding(.top, spacing: .small)
+                    .padding(.leading, spacing: .xsmall)
             }
             
             @Bindable var state = self.state
@@ -177,9 +177,9 @@ struct FeedbackPostView: View {
                     eventHandlers.enterMessage(new)
                 }
         }
-        .padding(4)
+        .padding(spacing: .xsmall)
         .background(
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: Metric.Radius.chip)
                 .fill(
                     appearance.colorSet.bg2.asColor
                 )
@@ -200,9 +200,9 @@ struct FeedbackPostView: View {
             .textInputAutocapitalization(.never)
             .font(appearance.fontSet.normal.asFont)
             .foregroundStyle(appearance.colorSet.text0.asColor)
-            .padding(.vertical, 12).padding(.horizontal, 8)
+            .padding(.vertical, spacing: .regular).padding(.horizontal, spacing: .small)
             .background(
-                RoundedRectangle(cornerRadius: 4)
+                RoundedRectangle(cornerRadius: Metric.Radius.chip)
                     .fill(
                         appearance.colorSet.bg2.asColor
                     )
@@ -224,7 +224,7 @@ struct FeedbackPostView: View {
                 .padding()
                 .frame(height: 50)
                 .background(
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: Metric.Radius.chip)
                         .fill(
                             appearance.colorSet.secondaryBtnBackground.asColor
                         )
@@ -232,11 +232,11 @@ struct FeedbackPostView: View {
         }
         .disabled(state.isPosting)
     }
-    
+
     private var isPostDisabled: Bool {
         return !self.state.isPostable || self.state.isPosting
     }
-    
+
     private var sendButton: some View {
         Button {
             appearance.impactIfNeed(.light)
@@ -244,7 +244,7 @@ struct FeedbackPostView: View {
             eventHandlers.post()
         } label: {
             HStack(alignment: .center) {
-                
+
                 if state.isPosting {
                     LoadingCircleView(appearance.colorSet.primaryBtnText.asColor)
                         .frame(width: 32, height: 32)
@@ -259,7 +259,7 @@ struct FeedbackPostView: View {
             .font(appearance.fontSet.size(16).asFont)
             .foregroundStyle(appearance.colorSet.primaryBtnText.asColor)
             .background(
-                RoundedRectangle(cornerRadius: 4)
+                RoundedRectangle(cornerRadius: Metric.Radius.chip)
                     .fill(
                         appearance.colorSet.primaryBtnBackground.asColor
                             .opacity(state.isPostable ? 1 : 0.5)

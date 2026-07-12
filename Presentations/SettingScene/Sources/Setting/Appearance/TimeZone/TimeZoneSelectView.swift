@@ -167,17 +167,17 @@ struct TimeZoneSelectView: View {
                 eventHandlers.search(text)
             }
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 12)
+        .padding(.vertical, spacing: .regular)
+        .padding(.horizontal, spacing: .regular)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: Metric.Radius.large)
                 .fill(appearance.colorSet.bg1.asColor)
         )
     }
     
     private func timezoneView(_ model: TimeZoneModel) -> some View {
         HStack {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                 Text(model.title)
                     .font(appearance.fontSet.normal.asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
