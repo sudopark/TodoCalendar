@@ -233,7 +233,7 @@ struct DayEventListView: View {
             }
 
             // 날짜 및 이벤트 목록
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.small) {
 
                 // 상단 날짜 표시 헤더
                 self.dateInfoView()
@@ -241,7 +241,7 @@ struct DayEventListView: View {
                 // 이벤트 리스트
                 self.eventListView()
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: Metric.Spacing.small) {
                     QuickAddNewTodoView(isFocusInput: $isFocusInput)
                         .eventHandler(\.addNewTodoQuickly, eventHandler.addNewTodoQuickly)
                         .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
@@ -374,12 +374,12 @@ struct DayEventListView: View {
                     Image(systemName: "checklist.checked")
                 }
             }
-            .padding(.bottom, 3)
+            .padding(.bottom, spacing: .xsmall)
         }
     }
 
     private func eventListView() -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.small) {
             ForEach(self.state.cellViewModels, id: \.eventIdentifier) { cellViewModel in
 
                 EventListCellView(cellViewModel: cellViewModel, foremostEventMarkingStatus: state.foremostEventMarkingStatus)

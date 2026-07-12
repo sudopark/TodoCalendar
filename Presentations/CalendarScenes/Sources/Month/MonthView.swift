@@ -250,7 +250,7 @@ private struct WeekRowView: View {
             Spacer(minLength: expectSize.height-17)
         }
         .background(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: Metric.Radius.large)
                 .fill(backgroundColor)
         )
         .opacity(opacity)
