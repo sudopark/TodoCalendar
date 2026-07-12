@@ -222,7 +222,7 @@ struct DayEventListView: View {
     @FocusState var isFocusInput: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.large) {
 
             if let foremost = self.state.foremostModel {
                 self.foremostSectionView(foremost)
@@ -277,7 +277,7 @@ struct DayEventListView: View {
                         .foregroundColor(self.appearance.colorSet.text0.asColor)
                     Spacer()
                 }
-                .padding(.leading, 16)
+                .padding(.leading, spacing: .large)
                 .frame(height: 50)
                 .frame(maxWidth: .infinity)
                 .backgroundAsRoundedRectForEventList(self.appearance)
@@ -430,7 +430,7 @@ private struct QuickAddNewTodoView: View {
 
     var body: some View {
         quickAddField()
-            .padding(.vertical, 4).padding(.horizontal, 8)
+            .padding(.vertical, spacing: .xsmall).padding(.horizontal, spacing: .small)
             .frame(height: 50)
             .backgroundAsRoundedRectForEventList(self.appearance)
             .overlay {
@@ -442,7 +442,7 @@ private struct QuickAddNewTodoView: View {
     }
 
     private func quickAddField() -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Metric.Spacing.small) {
 
             self.leadingLabel()
                 .frame(width: 52)
@@ -496,8 +496,8 @@ private struct QuickAddNewTodoView: View {
 
     // 평소: 색상바 + todo 직접 입력 + AI 음성 진입 버튼
     private func defaultContent() -> some View {
-        HStack(spacing: 8) {
-            HStack(spacing: 8) {
+        HStack(spacing: Metric.Spacing.small) {
+            HStack(spacing: Metric.Spacing.small) {
                 RoundedRectangle(cornerRadius: 3)
                     .fill(self.appearance.tagColors.defaultColor.asColor)
                     .frame(width: 6)
@@ -559,7 +559,7 @@ private struct QuickAddNewTodoView: View {
     }
 
     private func todoInputField() -> some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Metric.Spacing.small) {
             TextField(
                 "",
                 text: $newTodoName,
