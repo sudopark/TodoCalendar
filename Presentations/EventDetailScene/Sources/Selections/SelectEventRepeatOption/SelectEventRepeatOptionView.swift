@@ -177,6 +177,7 @@ struct SelectEventRepeatOptionView: View {
                     Spacer()
                         .frame(height: 80)
                         .listRowSeparator(.hidden)
+                        .listRowBackground(appearance.colorSet.bg0.asColor)
                 }
                 .listSectionSpacing(0)
                 .listStyle(.plain)
