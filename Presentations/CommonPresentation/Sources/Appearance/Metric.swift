@@ -24,39 +24,39 @@ public enum Metric {
         public static let sheet: CGFloat = 16
     }
 
-    public enum Spacing {
-        /// 밀착 텍스트·아이콘 간격
-        public static let xxsmall: CGFloat = 2
-        public static let xsmall: CGFloat = 4
-        public static let small: CGFloat = 8
-        public static let regular: CGFloat = 12
-        public static let large: CGFloat = 16
-        public static let xlarge: CGFloat = 20
-        /// 계층 들여쓰기 (leading)
-        public static let indent: CGFloat = 32
-    }
-
-    /// padding 전용 정규화 토큰 — View.padding(_:spacing:)이 대표값만 받도록 강제한다.
-    /// 값은 Spacing 상수를 단일 소스로 참조 (Spacing 상수는 stack spacing: 등 CGFloat 자리에 계속 사용).
+    /// spacing 정규화 토큰 — 값의 단일 소스. View.padding(_:spacing:)이 대표값만 받도록 강제한다.
     public enum SpacingToken {
+        /// 밀착 텍스트·아이콘 간격
         case xxsmall
         case xsmall
         case small
         case regular
         case large
         case xlarge
+        /// 계층 들여쓰기 (leading)
         case indent
 
         public var value: CGFloat {
             switch self {
-            case .xxsmall: return Spacing.xxsmall
-            case .xsmall: return Spacing.xsmall
-            case .small: return Spacing.small
-            case .regular: return Spacing.regular
-            case .large: return Spacing.large
-            case .xlarge: return Spacing.xlarge
-            case .indent: return Spacing.indent
+            case .xxsmall: return 2
+            case .xsmall: return 4
+            case .small: return 8
+            case .regular: return 12
+            case .large: return 16
+            case .xlarge: return 20
+            case .indent: return 32
             }
         }
+    }
+
+    /// SpacingToken 값의 CGFloat 파생 상수 — stack spacing: 파라미터 등 CGFloat 자리 전용
+    public enum Spacing {
+        public static let xxsmall: CGFloat = SpacingToken.xxsmall.value
+        public static let xsmall: CGFloat = SpacingToken.xsmall.value
+        public static let small: CGFloat = SpacingToken.small.value
+        public static let regular: CGFloat = SpacingToken.regular.value
+        public static let large: CGFloat = SpacingToken.large.value
+        public static let xlarge: CGFloat = SpacingToken.xlarge.value
+        public static let indent: CGFloat = SpacingToken.indent.value
     }
 }
