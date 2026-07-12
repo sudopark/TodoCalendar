@@ -150,7 +150,7 @@ private extension AIAgentCommandStageView {
                 backgroundColor: appearance.colorSet.secondaryBtnBackground.asColor
             )
             .eventHandler(\.onTap, eventHandlers.cancel)
-            .padding(.top, Metric.Spacing.xsmall)
+            .padding(.top, spacing: .xsmall)
         }
     }
 
@@ -174,8 +174,8 @@ private extension AIAgentCommandStageView {
             }
             .frame(maxHeight: 200)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.horizontal, Metric.Spacing.large)
-            .padding(.vertical, Metric.Spacing.regular)
+            .padding(.horizontal, spacing: .large)
+            .padding(.vertical, spacing: .regular)
             .background(
                 // 내 메시지 — 다크 배경 + 밝은 글씨. 전용 토큰으로 테마별 대비 자동 유지
                 RoundedRectangle(cornerRadius: Metric.Radius.sheet)
@@ -188,8 +188,8 @@ private extension AIAgentCommandStageView {
     func assistantBubble<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
         HStack(spacing: 0) {
             content()
-                .padding(.horizontal, Metric.Spacing.large)
-                .padding(.vertical, Metric.Spacing.large)
+                .padding(.horizontal, spacing: .large)
+                .padding(.vertical, spacing: .large)
                 .background(
                     RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                         .fill(appearance.colorSet.bg1.asColor)
@@ -245,7 +245,7 @@ private extension AIAgentCommandStageView {
                 )
                 .eventHandler(\.onTap, eventHandlers.confirm)
             }
-            .padding(.top, Metric.Spacing.xsmall)
+            .padding(.top, spacing: .xsmall)
         }
     }
 }
@@ -281,7 +281,7 @@ private extension AIAgentCommandStageView {
                 backgroundColor: appearance.colorSet.accentAI.asColor
             )
             .eventHandler(\.onTap, eventHandlers.acknowledge)
-            .padding(.top, Metric.Spacing.xsmall)
+            .padding(.top, spacing: .xsmall)
         }
     }
 }
@@ -317,7 +317,7 @@ private extension AIAgentCommandStageView {
                 backgroundColor: appearance.colorSet.accentAI.asColor
             )
             .eventHandler(\.onTap, eventHandlers.acknowledge)
-            .padding(.top, Metric.Spacing.xsmall)
+            .padding(.top, spacing: .xsmall)
         }
     }
 }

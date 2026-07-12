@@ -109,7 +109,7 @@ private struct AIAgentKeyboardInputView: View {
                     .textInputAutocapitalization(.never)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
                     .font(appearance.fontSet.size(16, weight: .regular).asFont)
-                    .padding(Metric.Spacing.regular)
+                    .padding(spacing: .regular)
                     .background(
                         RoundedRectangle(cornerRadius: Metric.Radius.chip)
                             .fill(appearance.colorSet.bg1.asColor)

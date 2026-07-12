@@ -30,7 +30,7 @@ public struct FullScreenLoadingView: View {
                 self.messageLabel
                 self.loadingView
             }
-            .padding(Metric.Spacing.xlarge)
+            .padding(spacing: .xlarge)
             .background(Color.black.opacity(0.8))
             .cornerRadius(Metric.Radius.sheet)
         } else {
