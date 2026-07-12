@@ -322,7 +322,7 @@ struct EventDetailView: View {
                     self.selectNotificationView
                     Spacer(minLength: 12)
                     VStack(spacing: 17) {
-                        VStack(spacing: 8) {
+                        VStack(spacing: Metric.Spacing.small) {
                             self.enterPlaceView
                                 .id(InputFields.place.id)
                             
@@ -347,8 +347,8 @@ struct EventDetailView: View {
                         self.linkPreview(model)
                     }
                 }
-                .padding(.top, 20)
-                .padding(.horizontal, 12)
+                .padding(.top, spacing: .xlarge)
+                .padding(.horizontal, spacing: .regular)
                 .padding(.bottom, 120)
             }
             .safeAreaInset(edge: .bottom) {
@@ -451,13 +451,13 @@ struct EventDetailView: View {
                 )
                 .font(appearance.fontSet.subNormal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                .padding(8)
+                .padding(spacing: .small)
                 .background(
                     RoundedRectangle(cornerRadius: 14)
                         .fill(self.appearance.colorSet.bg1.asColor)
                 )
             }
-            .padding(.leading, 12)
+            .padding(.leading, spacing: .regular)
             
             Spacer()
         }
@@ -516,16 +516,16 @@ struct EventDetailView: View {
         let isInvalid = self.state.selectedTime?.isValid == false
         switch self.state.selectedTime {
         case .none:
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 emptyLabelView(.start)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 emptyLabelView(.end)
             }
             .asAnyView()
-            
+
         case .at(let time):
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 timeView(time, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -533,25 +533,25 @@ struct EventDetailView: View {
             }
             .asAnyView()
         case .period(let from, let to):
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 timeView(from, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 timeView(to, .end, isInvalid: isInvalid)
             }
             .asAnyView()
-            
+
         case .singleAllDay(let time):
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 timeView(time, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
                 emptyLabelView(.end)
             }
             .asAnyView()
-            
+
         case .alldayPeriod(let from, let to):
-            return HStack(spacing: 16) {
+            return HStack(spacing: Metric.Spacing.large) {
                 timeView(from, .start, isInvalid: isInvalid)
                 Image(systemName: "chevron.right")
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -565,11 +565,11 @@ struct EventDetailView: View {
         
         func backGroundView() -> some View {
             if self.state.isAllDay {
-                return RoundedRectangle(cornerRadius: 16)
+                return RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                     .fill(self.appearance.colorSet.selectedDayBackground.asColor)
                     .asAnyView()
             } else {
-                return RoundedRectangle(cornerRadius: 16)
+                return RoundedRectangle(cornerRadius: Metric.Radius.sheet)
                     .stroke(self.appearance.colorSet.text2.asColor, lineWidth: 1)
                     .asAnyView()
             }
@@ -583,8 +583,8 @@ struct EventDetailView: View {
         } label: {
             Text("calendar::event_time::allday".localized())
                 .foregroundStyle(textColor)
-                .padding(.vertical, 8)
-                .padding(.horizontal, 16)
+                .padding(.vertical, spacing: .small)
+                .padding(.horizontal, spacing: .large)
         }
         .background(
             backGroundView()
@@ -592,27 +592,27 @@ struct EventDetailView: View {
     }
     
     private var timeSelectView: some View {
-        
+
         return VStack {
-            
-            HStack(spacing: 16) {
+
+            HStack(spacing: Metric.Spacing.large) {
                 Image(systemName: "clock")
                     .font(.system(size: 16, weight: .light))
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
-                
+
                 selectedTimeView()
-                
+
                 Spacer()
-                
+
                 toggleAllDayView
             }
-            
+
             if let timeSelecting = self.isTimeSelecting {
                 self.timePickerView(timeSelecting)
             }
-            
+
             if self.isTimeSelecting == nil, let dday = state.ddayText {
-                HStack(spacing: 16) {
+                HStack(spacing: Metric.Spacing.large) {
                     Image(systemName: "sun.horizon.fill")
                         .font(.system(size: 16, weight: .light))
                         .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -620,10 +620,10 @@ struct EventDetailView: View {
                     Text(dday)
                         .foregroundStyle(self.appearance.colorSet.text0.asColor)
                         .font(self.appearance.fontSet.normal.asFont)
-                        
+
                     Spacer()
                 }
-                .padding(.top, 8)
+                .padding(.top, spacing: .small)
             }
         }
     }
@@ -702,18 +702,18 @@ struct EventDetailView: View {
             eventHandlers.removeEventEndTime()
         } label: {
             Text("eventDetail.edit::noEventTime::button".localized())
-                .padding(8)
+                .padding(spacing: .small)
                 .background(
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: Metric.Radius.chip)
                         .stroke(lineWidth: 1)
                 )
         }
     }
     
     private var selectRepeatView: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            
-            HStack(spacing: 16) {
+        VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
+
+            HStack(spacing: Metric.Spacing.large) {
                 Image(systemName: "arrow.clockwise")
                     .font(.system(size: 16, weight: .light))
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -725,7 +725,7 @@ struct EventDetailView: View {
                         ? self.appearance.colorSet.text2.asColor
                         : self.appearance.colorSet.text0.asColor
                     )
-                    .padding(8)
+                    .padding(spacing: .small)
                     .background(
                         RoundedRectangle(cornerRadius: 14)
                             .fill(
@@ -745,13 +745,13 @@ struct EventDetailView: View {
                 Text(period)
                     .font(self.appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(self.appearance.colorSet.text2.asColor)
-                    .padding(.leading, 32)
+                    .padding(.leading, spacing: .indent)
             }
         }
     }
     
     private var selectTagView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "calendar")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -762,12 +762,12 @@ struct EventDetailView: View {
                         .frame(width: 4, height: 4)
                         .foregroundStyle(color)
                 }
-                
+
                 Text(self.state.selectedTag?.name ?? "")
                     .font(self.appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
             }
-            .padding(8)
+            .padding(spacing: .small)
             .background(
                 RoundedRectangle(cornerRadius: 14)
                     .fill(self.appearance.colorSet.bg1.asColor)
@@ -781,13 +781,13 @@ struct EventDetailView: View {
     }
     
     private var selectNotificationView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "bell.fill")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
             Text(
-                self.state.selectedNotificationTimeText 
+                self.state.selectedNotificationTimeText
                 ?? "event_notification_setting::option_title::no_notification".localized()
             )
                 .font(self.appearance.fontSet.subNormal.asFont)
@@ -796,7 +796,7 @@ struct EventDetailView: View {
                     ? self.appearance.colorSet.text2.asColor
                     : self.appearance.colorSet.text0.asColor
                 )
-                .padding(8)
+                .padding(spacing: .small)
                 .background(
                     RoundedRectangle(cornerRadius: 14)
                         .fill(
@@ -814,7 +814,7 @@ struct EventDetailView: View {
     }
     
     private var enterPlaceView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "location.circle")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -898,9 +898,9 @@ struct EventDetailView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 8).padding(.vertical, 4)
+                .padding(.horizontal, spacing: .small).padding(.vertical, spacing: .xsmall)
                 .background(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: Metric.Radius.regular)
                         .fill(self.appearance.colorSet.bg1.asColor)
                 )
                 .onTapGesture {
@@ -908,15 +908,15 @@ struct EventDetailView: View {
                     self.eventHandlers.selectPlace(landmark)
                     self.state.enterPlaceName = ""
                 }
-                
+
                 Spacer()
             }
-            .padding(.leading, 4)
+            .padding(.leading, spacing: .xsmall)
         }
     }
     
     private var enterLinkView: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "link")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -952,19 +952,19 @@ struct EventDetailView: View {
     }
     
     private var enterMemoView: some View {
-        HStack(alignment: .top, spacing: 16) {
+        HStack(alignment: .top, spacing: Metric.Spacing.large) {
             Image(systemName: "doc.text")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
-                .padding(.top, 8)
-            
+                .padding(.top, spacing: .small)
+
             ZStack(alignment: .topLeading) {
-                
+
                 if state.memo.isEmpty {
                     Text("eventDetail.edit::memo".localized())
                         .foregroundStyle(appearance.colorSet.placeHolder.asColor)
                         .font(self.appearance.fontSet.size(14).asFont)
-                        .padding(.leading, 4)
+                        .padding(.leading, spacing: .xsmall)
                         .padding(.top, 10)
                 }
              
@@ -999,7 +999,7 @@ struct EventDetailView: View {
                     .clipped()
             }
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                     Text(model.title)
                         .lineLimit(1)
                         .font(appearance.fontSet.normal.asFont)
@@ -1014,20 +1014,20 @@ struct EventDetailView: View {
                 }
                 Spacer()
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, spacing: .regular)
             .padding(.vertical, 10)
             .background(appearance.colorSet.bg1.asColor)
         }
         .background(appearance.colorSet.bg2.asColor)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .clipShape(RoundedRectangle(cornerRadius: Metric.Radius.regular))
         .overlay(alignment: .topLeading) {
             if model.imageUrl != nil {
                 Text("eventDetail.edit::urlPreview".localized())
                     .font(appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(appearance.colorSet.text0.asColor)
-                    .padding(4)
+                    .padding(spacing: .xsmall)
                     .background(
-                        RoundedRectangle(cornerRadius: 4)
+                        RoundedRectangle(cornerRadius: Metric.Radius.chip)
                             .fill(
                                 appearance.colorSet.bg0.withAlphaComponent(0.5).asColor
                             )
@@ -1042,7 +1042,7 @@ struct EventDetailView: View {
     }
     
     private var bottomButtons: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: Metric.Spacing.small) {
             ConfirmButton(
                 title: "common.save".localized(),
                 isEnable: state.isSavable,
@@ -1075,7 +1075,7 @@ struct EventDetailView: View {
                         .frame(width: 20, height: 20)
                         .padding()
                         .background {
-                            RoundedRectangle(cornerRadius: 8)
+                            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                                 .fill(self.appearance.colorSet.secondaryBtnBackground.asColor)
                         }
                 }
@@ -1092,7 +1092,7 @@ struct EventDetailView: View {
                         .frame(width: 20, height: 20)
                         .padding()
                         .background(
-                            RoundedRectangle(cornerRadius: 8)
+                            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                                 .fill(appearance.colorSet.secondaryBtnBackground.asColor)
                         )
                 }

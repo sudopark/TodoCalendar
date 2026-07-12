@@ -199,11 +199,11 @@ struct GoogleCalendarEventDetailView: View {
             ScrollView {
                 VStack(spacing: 25) {
                     self.nameView
-                        .padding(.top, 20)
-                    
+                        .padding(.top, spacing: .xlarge)
+
                     self.eventTypeView
-                    
-                    VStack(spacing: 12) {
+
+                    VStack(spacing: Metric.Spacing.regular) {
                         if let time = self.state.timeText {
                             self.eventTimeView(time)
                         }
@@ -227,7 +227,7 @@ struct GoogleCalendarEventDetailView: View {
                     }
                     
                     if let description = state.descriptionHTMLText {
-                        VStack(spacing: 8) {
+                        VStack(spacing: Metric.Spacing.small) {
                             self.descriptionHTMLView(description)
                             self.attachmentsView(state.attachments ?? [])
                         }
@@ -238,8 +238,8 @@ struct GoogleCalendarEventDetailView: View {
                     }
                 }
             }
-            .padding(.top, 20)
-            .padding(.horizontal, 12)
+            .padding(.top, spacing: .xlarge)
+            .padding(.horizontal, spacing: .regular)
             .padding(.bottom, 120)
             
             VStack {
@@ -295,14 +295,14 @@ struct GoogleCalendarEventDetailView: View {
     }
     
     private func eventTimeView(_ time: SelectedTime) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "clock")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
             switch time {
             case .period(let start, let end):
-                HStack(spacing: 16) {
+                HStack(spacing: Metric.Spacing.large) {
                     timeView(start)
                     Image(systemName: "chevron.right")
                         .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -311,14 +311,14 @@ struct GoogleCalendarEventDetailView: View {
                 .asAnyView()
                 
             case .singleAllDay(let day):
-                HStack(spacing: 16) {
+                HStack(spacing: Metric.Spacing.large) {
                     timeView(day)
                     Spacer()
                 }
                 .asAnyView()
                 
             case .alldayPeriod(let start, let end):
-                HStack(spacing: 16) {
+                HStack(spacing: Metric.Spacing.large) {
                     timeView(start)
                     Image(systemName: "chevron.right")
                         .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -340,7 +340,7 @@ struct GoogleCalendarEventDetailView: View {
     }
     
     private func ddayView(_ text: String) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "sun.horizon.fill")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -362,11 +362,11 @@ struct GoogleCalendarEventDetailView: View {
             
             Spacer()
         }
-        .padding(.leading, 32)
+        .padding(.leading, spacing: .indent)
     }
-    
+
     private func locationView(_ location: String) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "map")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -383,9 +383,9 @@ struct GoogleCalendarEventDetailView: View {
     }
     
     private func conferenceView(_ model: ConferenceModel) -> some View {
-        return VStack(spacing: 8) {
-         
-            HStack(spacing: 16) {
+        return VStack(spacing: Metric.Spacing.small) {
+
+            HStack(spacing: Metric.Spacing.large) {
                 RemoteImageView(model.iconURL)
                     .resize()
                     .scaledToFill()
@@ -398,11 +398,12 @@ struct GoogleCalendarEventDetailView: View {
                 
                 Spacer()
             }
-            
+
+
             VStack(alignment: .leading, spacing: 6) {
                 ForEach(model.entries) { entry in
                     HStack {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                             Text(entry.uri)
                                 .foregroundStyle(appearance.colorSet.primaryBtnBackground.asColor)
                                 .font(appearance.fontSet.subNormal.asFont)
@@ -426,14 +427,14 @@ struct GoogleCalendarEventDetailView: View {
                         Spacer()
                     }
                 }
-                .padding(.leading, 32)
+                .padding(.leading, spacing: .indent)
             }
         }
     }
-    
+
     private func attendeesView(_ list: AttendeeListViewModel) -> some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
+        VStack(spacing: Metric.Spacing.small) {
+            HStack(spacing: Metric.Spacing.small) {
                 Image(systemName: "person.2")
                     .font(.system(size: 16, weight: .light))
                     .foregroundStyle(self.appearance.colorSet.text1.asColor)
@@ -444,12 +445,13 @@ struct GoogleCalendarEventDetailView: View {
                 
                 Spacer()
             }
-            
-            VStack(spacing: 4) {
+
+
+            VStack(spacing: Metric.Spacing.xsmall) {
                 ForEach(list.attendees) {
                     attendeeView($0)
                 }
-                .padding(.leading, 32)
+                .padding(.leading, spacing: .indent)
             }
         }
     }
@@ -478,12 +480,12 @@ struct GoogleCalendarEventDetailView: View {
     }
     
     private func calendarView(_ model: GoogleCalendarModel) -> some View {
-        HStack(spacing: 16) {
+        HStack(spacing: Metric.Spacing.large) {
             Image(systemName: "calendar")
                 .font(.system(size: 16, weight: .light))
                 .foregroundStyle(self.appearance.colorSet.text1.asColor)
             
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                 Text("eventDetail::gogoleEvent::calendar".localized())
                     .font(appearance.fontSet.subNormal.asFont)
                     .foregroundStyle(appearance.colorSet.text1.asColor)
@@ -498,7 +500,7 @@ struct GoogleCalendarEventDetailView: View {
     }
     
     private func descriptionHTMLView(_ html: AttributedString) -> some View {
-        return HStack(alignment: .top, spacing: 16) {
+        return HStack(alignment: .top, spacing: Metric.Spacing.large) {
             
             Image(systemName: "doc.text")
                 .font(.system(size: 16, weight: .light))
@@ -541,18 +543,19 @@ struct GoogleCalendarEventDetailView: View {
                         .font(appearance.fontSet.subNormal.asFont)
                 }
                 .padding(6)
-                .cornerRadius(4)
+                .cornerRadius(Metric.Radius.chip)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: Metric.Radius.chip)
                         .stroke(appearance.colorSet.line.asColor, lineWidth: 0.5)
                 )
                 .onTapGesture {
                     eventHandlers.selectAttachment(attach)
                 }
-                
+
+
                 Spacer()
             }
-            .padding(.leading, 32)
+            .padding(.leading, spacing: .indent)
         }
     }
 }

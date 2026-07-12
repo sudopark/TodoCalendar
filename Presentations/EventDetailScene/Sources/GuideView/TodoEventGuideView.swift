@@ -33,9 +33,9 @@ private struct TodoEventGuideContentView: View {
     
     var body: some View {
         BottomSlideView {
-            VStack(spacing: 16) {
+            VStack(spacing: Metric.Spacing.large) {
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: Metric.Spacing.xlarge) {
                         
                         HStack {
                             Image(systemName: "flag.fill")
@@ -43,20 +43,20 @@ private struct TodoEventGuideContentView: View {
                         }
                         .font(appearance.fontSet.bigBold.asFont)
                         .foregroundStyle(appearance.colorSet.text1.asColor)
-                        .padding(.top, 20)
+                        .padding(.top, spacing: .xlarge)
                         
                         VStack(alignment: .leading, spacing: 10) {
-                            VStack(alignment: .leading, spacing: 20) {
+                            VStack(alignment: .leading, spacing: Metric.Spacing.xlarge) {
                                 Text("eventDetail:todo:guide:message1".localized())
                                 Text("eventDetail:todo:guide:message2".localized())
                                 Text("eventDetail:todo:guide:message3".localized())
-                                
+
                                 Text("eventDetail:todo:guide:process:message".localized())
                             }
                             .font(appearance.fontSet.normal.asFont)
                             .foregroundStyle(appearance.colorSet.text1.asColor)
-                            
-                            VStack(alignment: .leading, spacing: 4) {
+
+                            VStack(alignment: .leading, spacing: Metric.Spacing.xsmall) {
                                 bulletView("eventDetail:todo:guide:process:bullet1".localized())
                                 bulletView("eventDetail:todo:guide:process:bullet2".localized())
                                 bulletView("eventDetail:todo:guide:process:bullet3".localized())

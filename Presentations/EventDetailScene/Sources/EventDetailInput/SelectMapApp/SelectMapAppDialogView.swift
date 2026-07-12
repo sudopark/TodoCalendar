@@ -105,12 +105,12 @@ struct SelectMapAppDialogView: View {
     var body: some View {
         BottomSlideView(backgroundColor: appearance.colorSet.bg0.withAlphaComponent(0.9).asColor) {
             
-            VStack(spacing: 16) {
-                
+            VStack(spacing: Metric.Spacing.large) {
+
                 Text("eventDetail.place::select_map_app".localized())
                     .font(appearance.fontSet.subNormalWithBold.asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
-                    .padding(.top, 12)
+                    .padding(.top, spacing: .regular)
                 
                 LazyVGrid(columns: gridRow) {
                     ForEach(state.supportMapApps, id: \.self) { app in
@@ -121,11 +121,11 @@ struct SelectMapAppDialogView: View {
                 RoundedRectangle(cornerRadius: 1)
                     .fill(appearance.colorSet.line.asColor)
                     .frame(height: 1)
-                    .padding(.top, 20)
+                    .padding(.top, spacing: .xlarge)
                 
                 toggleSelectThisMapView
-                    .padding(.top, 8)
-                    .padding(.bottom, 12)
+                    .padding(.top, spacing: .small)
+                    .padding(.bottom, spacing: .regular)
                 
                 ConfirmButton(
                     title: "common.close".localized(),

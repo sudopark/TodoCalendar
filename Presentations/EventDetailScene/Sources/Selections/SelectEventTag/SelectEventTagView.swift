@@ -141,19 +141,19 @@ struct SelectEventTagView: View {
     }
     
     private func tagCellView(_ tag: TagCellViewModel) -> some View {
-        HStack(spacing: 12) {
-            
+        HStack(spacing: Metric.Spacing.regular) {
+
             EventTagColorView(tag.id) { color in
                 Circle()
                     .frame(width: 8, height: 8)
                     .foregroundStyle(color)
             }
-            
+
             Text(tag.name)
                 .font(self.appearance.fontSet.normal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .lineLimit(1)
-            
+
             Spacer()
             if self.state.selectedTagId == tag.id {
                 Image(systemName: "checkmark")
@@ -161,10 +161,10 @@ struct SelectEventTagView: View {
                     .foregroundStyle(appearance.colorSet.text0.asColor)
             }
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 12)
+        .padding(.vertical, spacing: .regular)
+        .padding(.horizontal, spacing: .regular)
         .background {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {
@@ -178,18 +178,18 @@ struct SelectEventTagView: View {
             Image(systemName: "plus")
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .font(.system(size: 12))
-            
+
             Text(R.String.EventTag.addNewPlaceholder)
                 .font(self.appearance.fontSet.normal.asFont)
                 .foregroundStyle(self.appearance.colorSet.text0.asColor)
                 .lineLimit(1)
-            
+
             Spacer()
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 12)
+        .padding(.vertical, spacing: .regular)
+        .padding(.horizontal, spacing: .regular)
         .background {
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: Metric.Radius.regular)
                 .fill(self.appearance.colorSet.bg1.asColor)
         }
         .onTapGesture {
