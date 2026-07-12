@@ -195,7 +195,7 @@ struct ManageAccountView: View {
 
     private func migrationView(_ count: Int) -> some View {
         HStack {
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: Metric.Spacing.small) {
                 Text("manage_account::migration::title".localized())
                     .font(self.appearance.fontSet.normal.asFont)
                     .foregroundStyle(self.appearance.colorSet.text0.asColor)
