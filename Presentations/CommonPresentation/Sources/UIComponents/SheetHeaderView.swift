@@ -33,7 +33,7 @@ public struct SheetHeaderView: View {
 
             self.closeButton
         }
-        .padding(.top, Metric.Spacing.regular)
+        .padding(.top, spacing: .regular)
     }
 
     // 리퀴드 글래스는 iOS 26 전용이라 #available로 분기, 하위 버전은 CloseButton.
