@@ -3,15 +3,12 @@
 ## 1. 절대 규칙
 
 - **수정 전 파일 먼저 read.** 추측 수정 금지.
-- **파일 추가/삭제 시 `tuist generate` 재실행.**
 - **Query/Command 분리.** 읽기와 사이드이펙트를 한 흐름에 섞지 말 것.
-- **TDD 워크플로우.** 테스트 → 실패 확인 → 구현 → 통과.
-- **child CLAUDE.md가 있는 프레임워크 코드를 수정한 경우** 해당 child CLAUDE.md 재분석.
-- **객체 변경 시** 참조하는 다른 객체 영향도 확인 (빌드 + 테스트).
+- **객체 변경 시** 참조하는 다른 객체 영향도 확인 (빌드 + 테스트) — 절차는 implement 스킬의 impact-check가 기계화.
 - **짝지어진 두 위치는 함께 갱신.** 한쪽만 바꾸면 무효가 되는 쌍은 추가/변경 시 대응처도 반드시 확인:
   - `AppEnvironment.dbVersion` ↔ `Table.migrateStatement(for:)` case
   - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
-  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬·CLAUDE.md 스킴 목록 — 상세는 add-framework 스킬. 단 `<Name>Snapshots` 스킴은 의도된 예외 — 로컬 전용, snapshot-check 스킬)
+  - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots` 스킴은 의도된 예외 — 로컬 전용, snapshot-check 스킬)
   - init 시그니처 ↔ 콜사이트
 - **`.claude/rules/*.md`는 path 매칭 시 자동 로드** — 로드된 조항을 구현 결정 시점에 적극 invoke.
 
@@ -45,14 +42,14 @@ Presentation 모듈끼리 직접 import 금지. `Scenes` 프레임워크의 공�
 
 | 파일 | 역할 |
 |---|---|
-| `TodoCalendarApp/AppEnvironment.swift` | DB version, App Group ID, 외부 캘린더 서비스 목록 |
+| `TodoCalendarApp/Sources/AppEnvironment.swift` | DB version, App Group ID, 외부 캘린더 서비스 목록 |
 | `TodoCalendarApp/Sources/Root/ApplicationRootBuilder.swift` | 앱 시작 시 모든 Repository/Usecase/Factory 조립 |
 | `TodoCalendarApp/Sources/Factories/ApplicationBase.swift` | Pool/Factory 인스턴스 생성 (다중 계정 인프라 포함) |
 | `Tuist/ProjectDescriptionHelpers/Project+Templates.swift` | `Project.app()` / `Project.framework()` 팩토리 헬퍼 |
 
 ---
 
-## 3. 빌드 / 테스트
+## 3. 워크플로우 — 상황별 하네스
 
 ```bash
 ./install/install.sh          # 더미 config 복사 (최초 1회)
@@ -60,7 +57,21 @@ tuist install                 # SPM 의존성 resolve
 tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 ```
 
-테스트는 `./scripts/run-all-tests.sh [scheme...]`. 주요 스킴: `Domain`, `Repository`, `CalendarScenes`, `EventDetailScene`, `EventListScenes`, `SettingScene`, `MemberScenes`, `AIAgentScene`.
+상황이 오면 대응 하네스를 invoke한다 (스킬 자동 트리거의 보강 인덱스):
+
+| 상황 | 하네스 |
+|---|---|
+| 이슈 기반 작업 착수 | kickoff 스킬 |
+| 페어 프로그래밍 선언 | pair-programming 스킬 |
+| 구현 계획 작성 | plan 스킬 (superpowers writing-plans 컴패니언) |
+| 코드 작성·수정 | implement 스킬 (superpowers 코딩 절차 컴패니언) |
+| 파일·프레임워크 추가 | add-file / add-framework 스킬 |
+| 테스트 실행 | run-tests 스킬 (스킴 목록 정본) |
+| UI 디자인 | design 스킬 |
+| 스냅샷 검증·화면 카탈로그 | snapshot-check / app-catalog 스킬 |
+| 코드 분석 (로직·추적·관계·영향도) | analyze 스킬 → code-analyzer subagent |
+| 커밋 / PR / 이슈 | commit / pr / issue 스킬 |
+| 공개 PR 에이전트 리뷰 | review 스킬 → code-reviewer subagent |
 
 > 테스트 작성 원칙: [`.claude/rules/testability.md`](.claude/rules/testability.md) (path 매칭 자동 로드)
 
@@ -117,6 +128,8 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 
 모든 Usecase가 공유하는 Combine 기반 싱글톤. 키: `todos`, `schedules`, `tags`, `googleCalendarEvents`, `googleCalendarTags`, `foremostEventId`.
 
+> 키 상세·구독 패턴: [`Domain/CLAUDE.md`](Domain/CLAUDE.md)
+
 ### 앱 버전 체크
 
 원격 JSON(`app-config/update-info.json`, GitHub raw)에서 최소 지원 버전을 받아 `forceRequired`(강제, dismiss 차단) / `recommended`(권장 팝업) 판정. `AppUpdateCheckUsecase`가 앱 시작 + 포그라운드 복귀 시 트리거. 세부: [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md).
@@ -124,6 +137,8 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 ### DB 마이그레이션
 
 `AppEnvironment.dbVersion` 증가 + 해당 `Table.migrateStatement(for:)`에 case 추가. 둘 다 변경해야 실행됨. 외부 캘린더 DB는 `googleCalendarDBVersion` + `ExternalCalendarDBConnectionPool`이 `onFirstOpen` 시 마이그레이션 실행.
+
+> 마이그레이션 작성 예제: [`Repository/CLAUDE.md`](Repository/CLAUDE.md)
 
 ---
 
