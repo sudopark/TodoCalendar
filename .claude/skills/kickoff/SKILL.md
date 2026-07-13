@@ -89,7 +89,7 @@ argument-hint: "[issue-number]"
 
 ### A-3. 계획 작성으로 전환
 
-superpowers의 writing-plans 스킬을 invoke해 구현 계획을 작성한다. 스펙 브리프가 그 입력이다. kickoff 안에서 계획 방법론을 중복 구현하지 않는다.
+프로젝트 `plan` 스킬을 invoke해 구현 계획을 작성한다 (`plan`은 superpowers writing-plans 위에 프로젝트 종속 요구 — 자족성·커밋 시퀀스·모델 티어 — 를 얹는 컴패니언이다). 스펙 브리프가 그 입력이다. kickoff 안에서 계획 방법론을 중복 구현하지 않는다.
 
 ### A-4. 플랜을 이슈에 기록
 
