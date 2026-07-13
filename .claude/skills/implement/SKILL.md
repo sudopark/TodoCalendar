@@ -18,6 +18,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 시작할 때:
 
 - 변경 대상 경로에 걸리는 `.claude/rules/*.md` 조항을 확인하고, 구현 결정 시점에 해당 조항을 적극 invoke한다.
+- child CLAUDE.md가 있는 프레임워크(Domain·Repository·각 Presentation 등)를 수정할 땐 해당 child CLAUDE.md를 확인하고, 수정 후 그 규칙과 어긋남이 없는지 재점검한다.
 - 동종 컴포넌트를 grep해 구조 패턴(상태관리·합성·추상화 수준)을 파악하고 그 패턴을 따른다. 요구사항만 보고 즉흥 구현하지 않는다.
 - 서브에이전트에 구현을 dispatch할 땐 프롬프트에 적용 rules 조항·대상 테스트 스킴·따라야 할 구조 패턴을 명시한다.
 

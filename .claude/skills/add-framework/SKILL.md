@@ -30,7 +30,7 @@ description: Use when creating a new framework (module) in this project — 신�
 - `scripts/run-all-tests.sh` — `ALL_SCHEMES` 배열
 - `.claude/skills/implement/scripts/impact-check.sh` — `ALL_SCHEMES`/`ALL_PRESENTATION` 상수 + 경로→스킴 매핑 블록 + **이 프레임워크에 의존하는 상위 레이어(Domain 등) 블록에 새 스킴 파급 추가** + `impact-check.test.sh`의 배열·assertion 갱신
 - `.claude/skills/run-tests/SKILL.md` — 스킴 목록과 개수 문구
-- `CLAUDE.md` — §2 모듈 구조·§3 주요 스킴 목록
+- `CLAUDE.md` — §2 모듈 구조 (스킴 목록은 run-tests 스킬이 정본 — 위 항목이 커버)
 
 ## 4. 문서·rules
 
