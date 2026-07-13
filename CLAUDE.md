@@ -11,6 +11,7 @@
   - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots` 스킴은 의도된 예외 — 로컬 전용, snapshot-check 스킬)
   - init 시그니처 ↔ 콜사이트
 - **`.claude/rules/*.md`는 path 매칭 시 자동 로드** — 로드된 조항을 구현 결정 시점에 적극 invoke.
+- **외운 지식 말고 이 문서를 보고 판단할 것.** (도메인 경계·용어는 [`docs/domain-context-map.md`](docs/domain-context-map.md) 정본 기준)
 
 ---
 
@@ -78,6 +79,10 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 ---
 
 ## 4. 도메인 컨텍스트
+
+> **전략 지도 (DDD) — 대화·작업의 공통 언어 베이스.** 단일 도메인 + 8개 서브도메인. 경계·용어는 여기 맞춘다. 정본·오해나는용어집: [`docs/domain-context-map.md`](docs/domain-context-map.md).
+>
+> 🟥 Core: **Event**(Todo/Schedule·반복·완료·태깅·강조), **Calendar**(시간프레임·공휴일) · 🟧 Supporting: **External Calendar**(Google/Apple 다중계정), **Account/Auth**, **AI Agent**(command→Event 변경, Core 승격 유력), **Notification** · 🟩 Generic: **Settings**, **Support**(업데이트·피드백·STT 등)
 
 ### 핵심 이벤트 모델
 
