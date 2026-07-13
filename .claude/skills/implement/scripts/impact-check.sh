@@ -91,11 +91,13 @@ if printf '%s\n' "$FILES" | grep -q "^TodoCalendarApp/AppExtensions/Widget/"; th
 fi
 
 # ---- tuist generate (테스트보다 선행 액션 — 첫 섹션으로 출력) ----
-# tuist 재생성은 소스 멤버십(.swift) 추가/삭제/이동에만 필요 — 비소스(.md·png·.claude·scripts 등)는 무관
+# tuist 재생성 필요: (1) .swift 소스 멤버십 추가/삭제/이동(ADRC), (2) 매니페스트(Project/Workspace/Package/Tuist) 변경(수정 포함).
+# 비소스(.md·png·.claude·scripts 등) 추가는 무관.
 echo "## tuist generate"
 ADRC_SWIFT=$(printf '%s\n' "$CHANGES" | awk -F'\t' 'substr($1,1,1) ~ /[ADRC]/ {for (i=2; i<=NF; i++) print $i}' | grep '\.swift$')
-if [ -n "$ADRC_SWIFT" ]; then
-  echo "필요 — .swift 파일 추가/삭제/이동 감지"
+MANIFEST=$(printf '%s\n' "$FILES" | grep -E '(^|/)(Project|Workspace)\.swift$|^(Package\.(swift|resolved)|Tuist\.swift)$|^Tuist/')
+if [ -n "$ADRC_SWIFT" ] || [ -n "$MANIFEST" ]; then
+  echo "필요 — .swift 추가/삭제/이동 또는 매니페스트 변경 감지"
 else
   echo "불필요"
 fi

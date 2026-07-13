@@ -46,6 +46,9 @@ assert_contains "삭제 → 필요" "필요" "$(tuist_for 'D\tDomain/Sources/Old
 assert_contains "이동(R) → 필요" "필요" "$(tuist_for 'R100\tDomain/Sources/Old.swift\tDomain/Sources/New.swift')"
 assert_eq "비소스 추가(A) → 불필요" "불필요" "$(tuist_for 'A\tdocs/spec/new.md')"
 assert_eq "비소스 추가(.claude) → 불필요" "불필요" "$(tuist_for 'A\t.claude/skills/foo/SKILL.md')"
+assert_contains "Project.swift 수정(M) → 필요" "필요" "$(tuist_for 'M\tPresentations/SettingScene/Project.swift')"
+assert_contains "Tuist helper 수정(M) → 필요" "필요" "$(tuist_for 'M\tTuist/ProjectDescriptionHelpers/Project+Templates.swift')"
+assert_contains "Package.swift 수정(M) → 필요" "필요" "$(tuist_for 'M\tPackage.swift')"
 
 # --- 짝 위치 경고 (stdin 모드는 파일 존재 기반 경고만) ---
 assert_contains "pr_test.yml 변경 → 3곳 동기화 경고" "impact-check.sh" "$(pairs_for 'M\t.github/workflows/pr_test.yml')"
