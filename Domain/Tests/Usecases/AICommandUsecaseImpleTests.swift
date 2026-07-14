@@ -523,6 +523,34 @@ extension AICommandUsecaseImpleTests {
         #expect(processingCmd == nil)
     }
     
+    // restore 대상 processing command를 세팅하고, 폴링 tick(3초)으로는 절대 도달 못 하는 usecase.
+    // 이 안에서 완료 job이 방출되면 폴링이 아니라 즉시 조회가 낸 것이다.
+    private func makeUsecaseWithRestoredJob(_ job: AIJob) -> AICommandUsecaseImple {
+        let usecase = self.makeUsecase(
+            customPollingPolicy: .init(checkInterval: 3, totalTimeout: 10)
+        )
+        self.stubRepository.stubProcessingCommand = ProcessingAICommand(
+            jobId: job.jobId, isConfirmJob: false
+        )
+        self.stubRepository.loadJobMocking = .success(job)
+        return usecase
+    }
+
+    // 커맨드 복원: 폴링 차수를 기다리지 않고 즉시 job을 조회한다
+    @Test func usecase_restore_checkJobImmediately() async throws {
+        // given
+        // checkInterval(3초)보다 훨씬 짧은 타임아웃 — 폴링으로는 절대 도달 못 함
+        let expect = expectConfirm("폴링 tick 전에 완료 job 방출")
+        expect.timeout = .milliseconds(500)
+        let usecase = self.makeUsecaseWithRestoredJob(.dummyDoneJob)
+
+        // when
+        let job = try await self.firstOutput(expect, for: usecase.restoreCommandifNeed())
+
+        // then
+        #expect(job??.status == .done)
+    }
+
     private func makeUsecaseWithFinishProcessCmd(
         isFail: Bool = false,
         isConfirm: Bool = false
