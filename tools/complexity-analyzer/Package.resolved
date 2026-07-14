@@ -1,0 +1,42 @@
+{
+  "originHash" : "7fc8fb7499fd9cf23fa212c7025c2ef6dc6758beeea2ef6831552bd38f03d56d",
+  "pins" : [
+    {
+      "identity" : "indexstore-db",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/indexstore-db.git",
+      "state" : {
+        "branch" : "release/6.3",
+        "revision" : "003ac41513ba291f10ff1a0147ae68588914668d"
+      }
+    },
+    {
+      "identity" : "swift-argument-parser",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-argument-parser.git",
+      "state" : {
+        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
+        "version" : "1.8.2"
+      }
+    },
+    {
+      "identity" : "swift-lmdb",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-lmdb.git",
+      "state" : {
+        "branch" : "release/6.3",
+        "revision" : "1ad9a2d80b6fcde498c2242f509bd1be7d667ff8"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-syntax.git",
+      "state" : {
+        "revision" : "79e4b74a295b6eb74a8b585e3a39d29e70c1dbd1",
+        "version" : "603.0.2"
+      }
+    }
+  ],
+  "version" : 3
+}
