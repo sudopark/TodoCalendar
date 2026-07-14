@@ -31,18 +31,19 @@ private final class MethodCollector: SyntaxVisitor {
         super.init(viewMode: .sourceAccurate)
     }
 
-    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { push(node.name.text) }
+    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
     override func visitPost(_ node: ClassDeclSyntax) { typeStack.removeLast() }
 
-    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind { push(node.name.text) }
+    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
     override func visitPost(_ node: StructDeclSyntax) { typeStack.removeLast() }
 
-    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind { push(node.name.text) }
+    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
     override func visitPost(_ node: EnumDeclSyntax) { typeStack.removeLast() }
 
-    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind { push(node.name.text) }
+    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
     override func visitPost(_ node: ActorDeclSyntax) { typeStack.removeLast() }
 
+    // extension은 타입 선언이 아니므로 타입 단위를 새로 내지 않고, enclosing type 추적만.
     override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
         push(node.extendedType.trimmedDescription)
     }
@@ -61,6 +62,22 @@ private final class MethodCollector: SyntaxVisitor {
                 measurements: .init(internalComplexity: score)
             )
         )
+        return .visitChildren
+    }
+
+    /// 명목 타입 선언(class/struct/enum/actor): 타입 단위 방출 + enclosing 추적.
+    private func enterType(_ nameToken: TokenSyntax) -> SyntaxVisitorContinueKind {
+        let line = converter.location(for: nameToken.positionAfterSkippingLeadingTrivia).line
+        units.append(
+            AnalyzedUnit(
+                kind: .type,
+                name: nameToken.text,
+                enclosingType: typeStack.last,
+                file: file,
+                line: line
+            )
+        )
+        typeStack.append(nameToken.text)
         return .visitChildren
     }
 
