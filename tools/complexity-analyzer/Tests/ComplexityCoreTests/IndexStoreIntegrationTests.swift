@@ -34,8 +34,24 @@ struct IndexStoreIntegrationTests {
             libIndexStorePath: Self.libIndexStore
         )
 
-        // 연결·질의가 크래시 없이 돌면 스모크 성공. (값은 인덱스 상태 의존이라 단정 안 함)
+        // TodoEvent는 저장소에서 다수 참조되는 실존 타입 → cross-file 해소가 실동작하면 > 0.
+        // (0이면 "조용히 0" 회귀 신호. 정확한 수치는 인덱스 상태 의존이라 하한만 단정)
         let count = FanIn(index: provider).count(forTypeNamed: "TodoEvent")
-        #expect(count >= 0)
+        #expect(count > 0)
+    }
+
+    @Test("빈/없는 index store는 명시 throw (silent-0 방지)")
+    func emptyOrMissingStoreThrows() throws {
+        // 없는 경로
+        #expect(throws: IndexStoreError.self) {
+            try IndexStoreDBProvider.assertPopulated(storePath: NSTemporaryDirectory() + "nope-" + UUID().uuidString)
+        }
+        // 존재하지만 빈 디렉토리
+        let empty = NSTemporaryDirectory() + "empty-" + UUID().uuidString
+        try FileManager.default.createDirectory(atPath: empty, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(atPath: empty) }
+        #expect(throws: IndexStoreError.self) {
+            try IndexStoreDBProvider.assertPopulated(storePath: empty)
+        }
     }
 }

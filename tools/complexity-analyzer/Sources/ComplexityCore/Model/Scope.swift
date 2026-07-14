@@ -16,7 +16,9 @@ public enum Scope: Equatable {
         case .whole:
             return true
         case .file(let path):
-            return unit.file == path || unit.file.hasSuffix(path)
+            // 경로 구분자 경계를 강제 — "StubTodoEventRepository.swift" 가
+            // "TodoEventRepository.swift" 로 오매칭되는 것을 막는다.
+            return unit.file == path || unit.file.hasSuffix("/" + path)
         case .type(let name):
             return (unit.kind == .type && unit.name == name)
                 || (unit.kind == .method && unit.enclosingType == name)
