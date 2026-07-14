@@ -25,7 +25,7 @@ public final class AIAgentCommandBuilderImple: AIAgentCommandSceneBuilder {
     @MainActor
     public func makeCommandScene() -> any AIAgentCommandScene {
         let viewModel = AIAgentCommandViewModelImple(
-            orchestrationUsecase: self.usecaseFactory.makeAIAgentOrchestrationUsecase()
+            orchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase
         )
         let viewController = AIAgentCommandViewController(
             viewModel: viewModel,

@@ -73,7 +73,7 @@ public protocol ExternalCalendarUsecaseFactory {
 
 public protocol AIAgentUsecaseFactory {
 
-    func makeAIAgentOrchestrationUsecase() -> any AIAgentOrchestrationUsecase
+    var aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase { get }
     func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase
 }
 

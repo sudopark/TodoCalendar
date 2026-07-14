@@ -27,7 +27,7 @@ public final class AIAgentKeyboardInputBuilderImple: AIAgentKeyboardInputSceneBu
     @MainActor
     public func makeKeyboardInputScene() -> any AIAgentKeyboardInputScene {
         let viewModel = AIAgentKeyboardInputViewModelImple(
-            aiAgentOrchestrationUsecase: self.usecaseFactory.makeAIAgentOrchestrationUsecase()
+            aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase
         )
         let viewController = AIAgentKeyboardInputViewController(
             viewModel: viewModel,
