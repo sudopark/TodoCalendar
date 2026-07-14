@@ -89,13 +89,18 @@ extension AppDelegate: @MainActor UNUserNotificationCenterDelegate, @MainActor M
         _ center: UNUserNotificationCenter,
         willPresent notification: UNNotification
     ) async -> UNNotificationPresentationOptions {
+        self.applicationViewModel.handleReceivePushNotification(
+            userInfo: notification.request.content.userInfo
+        )
         return [.banner]
     }
-    
+
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
-        // TODO: handle notification tap
+        self.applicationViewModel.handleReceivePushNotification(
+            userInfo: response.notification.request.content.userInfo
+        )
     }
 }
