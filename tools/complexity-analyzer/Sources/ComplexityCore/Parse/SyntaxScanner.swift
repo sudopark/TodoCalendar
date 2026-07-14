@@ -105,8 +105,24 @@ private final class ComplexityCounter: SyntaxVisitor {
         return counter.total
     }
 
-    override func visit(_ node: IfExprSyntax) -> SyntaxVisitorContinueKind { enterNesting() }
-    override func visitPost(_ node: IfExprSyntax) { depth -= 1 }
+    override func visit(_ node: IfExprSyntax) -> SyntaxVisitorContinueKind {
+        // else-if는 SwiftSyntax상 부모 IfExpr의 elseBody로 표현되지만 실제론 형제 분기다.
+        // 진짜 중첩처럼 depth를 올리면 사다리가 삼각수로 폭증하므로, 사슬 base 깊이에서
+        // 평평하게 +1만 하고 depth는 올리지 않는다.
+        if isElseIf(node) {
+            total += 1 + max(depth - 1, 0)
+            return .visitChildren
+        }
+        return enterNesting()
+    }
+    override func visitPost(_ node: IfExprSyntax) {
+        if isElseIf(node) { return }
+        depth -= 1
+    }
+
+    private func isElseIf(_ node: IfExprSyntax) -> Bool {
+        node.parent?.is(IfExprSyntax.self) == true
+    }
 
     override func visit(_ node: ForStmtSyntax) -> SyntaxVisitorContinueKind { enterNesting() }
     override func visitPost(_ node: ForStmtSyntax) { depth -= 1 }
