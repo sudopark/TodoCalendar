@@ -217,6 +217,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
     private let accountUsecase: any AccountUsecase
     private let externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase
     private let backgroundEventSyncUsecase: any BackgroundEventSyncUsecase
+    private let aiJobRefreshUsecase: any AIJobRefreshUsecase
     private let applicationBase: ApplicationBase
     private let deepLinkHandler: ApplicationDeepLinkHandlerImple
     private let appUpdateCheckUsecase: any AppUpdateCheckUsecase
@@ -227,6 +228,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         accountUsecase: any AccountUsecase,
         externalCalenarIntegrationUsecase: any ExternalCalendarIntegrationUsecase,
         backgroundEventSyncUsecase: any BackgroundEventSyncUsecase,
+        aiJobRefreshUsecase: any AIJobRefreshUsecase,
         applicationBase: ApplicationBase,
         deepLinkHandler: ApplicationDeepLinkHandlerImple,
         appUpdateCheckUsecase: any AppUpdateCheckUsecase
@@ -235,6 +237,7 @@ final class ApplicationRootRouter: ApplicationRouting, @unchecked Sendable {
         self.accountUsecase = accountUsecase
         self.externalCalenarIntegrationUsecase = externalCalenarIntegrationUsecase
         self.backgroundEventSyncUsecase = backgroundEventSyncUsecase
+        self.aiJobRefreshUsecase = aiJobRefreshUsecase
         self.applicationBase = applicationBase
         self.deepLinkHandler = deepLinkHandler
         self.appUpdateCheckUsecase = appUpdateCheckUsecase
@@ -370,6 +373,7 @@ extension ApplicationRootRouter {
             )
         }
         self.backgroundEventSyncUsecase.change(factory: self.usecaseFactory)
+        self.aiJobRefreshUsecase.change(factory: self.usecaseFactory)
     }
     
     @MainActor

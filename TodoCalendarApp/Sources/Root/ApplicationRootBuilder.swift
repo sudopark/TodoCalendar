@@ -64,6 +64,7 @@ final class ApplicationRootBuilder {
         )
 
         let backgroundEventSyncUsecase = BackgroundEventSyncUsecaseImple()
+        let aiJobRefreshUsecase = AIJobRefreshUsecaseImple()
         let deepLinkHandler = ApplicationDeepLinkHandlerImple()
         let rootViewModel = ApplicationRootViewModelImple(
             authUsecase: accountUsecase,
@@ -73,6 +74,7 @@ final class ApplicationRootBuilder {
             externalCalendarServiceUsecase: externalCalendarIntegrationUsecase,
             userNotificationUsecase: userNotificationUsecase,
             backgroundEventSyncUsecase: backgroundEventSyncUsecase,
+            aiJobRefreshUsecase: aiJobRefreshUsecase,
             appUpdateCheckUsecase: appUpdateCheckUsecase
         )
         remote.attach(listener: rootViewModel)
@@ -82,6 +84,7 @@ final class ApplicationRootBuilder {
             accountUsecase: accountUsecase,
             externalCalenarIntegrationUsecase: externalCalendarIntegrationUsecase,
             backgroundEventSyncUsecase: backgroundEventSyncUsecase,
+            aiJobRefreshUsecase: aiJobRefreshUsecase,
             applicationBase: applicationBase,
             deepLinkHandler: deepLinkHandler,
             appUpdateCheckUsecase: appUpdateCheckUsecase
