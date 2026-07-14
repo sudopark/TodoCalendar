@@ -33,6 +33,9 @@ public protocol AIAgentOrchestrationUsecase: AnyObject, Sendable {
     func reset()
     func restoreIfNeeded()
     func loadUsage()
+
+    func handleJobStatusChanged(_ jobId: String)
+    func refreshProcessingJobIfNeeded()
 }
 
 
@@ -284,6 +287,21 @@ extension AIAgentOrchestrationUsecaseImple {
 
     public func loadUsage() {
         self.usageUsecase.refresh()
+    }
+
+    // 푸시가 특정 job을 지목해 도착. 추적 중인 job일 때만 즉시 조회.
+    // 콜드 스타트(구독 없음)는 CalendarViewModel.prepare() → restoreIfNeeded()가 커버한다.
+    public func handleJobStatusChanged(_ jobId: String) {
+        guard self.currentProcessingJobId == jobId else { return }
+        self.commandUsecase.refreshJobStatus(jobId)
+    }
+
+    // 포그라운드 복귀 — 백그라운드에서 폴링 Timer가 멈춘 공백을 메운다.
+    public func refreshProcessingJobIfNeeded() {
+        guard case .processing = self.subject.state.value,
+              let jobId = self.currentProcessingJobId
+        else { return }
+        self.commandUsecase.refreshJobStatus(jobId)
     }
 }
 
