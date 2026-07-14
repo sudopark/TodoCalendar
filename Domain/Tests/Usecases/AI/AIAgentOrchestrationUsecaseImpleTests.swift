@@ -66,6 +66,12 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
         return usecase
     }
 
+    private func makeUsecaseWithRestoredJob(_ job: AIJob) -> AIAgentOrchestrationUsecaseImple {
+        let usecase = self.makeUsecase()
+        self.stubCommand.stubRestoreJob = job
+        return usecase
+    }
+
     private func dummyJob(
         _ result: AIJobResult,
         command: String? = "회의 잡아줘",
@@ -693,5 +699,27 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         usecase.enterVoiceInput()
         // then — startListening은 첫 번째 한 번만 (두 번째 호출은 no-op)
         #expect(self.stubSpeech.startListeningCount == 1)
+    }
+}
+
+
+// MARK: - 중지된 job이 남아있는 채로 재시작한 경우 (방어)
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test("restore가 읽은 job이 CANCELED면 폴링을 더 돌지 않고 idle로 종결한다")
+    func usecase_whenRestoredJobIsCanceled_backToIdle() async throws {
+        // given
+        let expect = expectConfirm("CANCELED 잔여 job 복원 시 idle 방출")
+        let job = AIJob(jobId: "some_job") |> \.status .~ AIJob.Status.canceled
+        let usecase = self.makeUsecaseWithRestoredJob(job)
+
+        // when
+        let states = try await self.outputs(expect, for: usecase.state) {
+            usecase.restoreIfNeeded()
+        }
+
+        // then
+        #expect(states.map(self.stateName) == ["idle"])
     }
 }
