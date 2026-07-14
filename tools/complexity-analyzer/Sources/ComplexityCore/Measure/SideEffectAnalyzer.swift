@@ -69,6 +69,14 @@ private final class SideEffectCollector: SyntaxVisitor {
 
     private(set) var sites: [Syntax] = []
 
+    // 중첩 함수·local 타입은 각자 독립 unit으로 따로 측정되므로, 바깥 메소드 스코프에
+    // 새어들지 않게 하위로 내려가지 않는다 (클로저는 연산자 컨텍스트용이라 계속 순회).
+    override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+
     /// stored-property/Subject 대입: `self.x = ...`, `subject.value = ...`
     ///
     /// `Parser.parse`는 operator folding을 하지 않아 대입이 `InfixOperatorExpr`가 아니라
