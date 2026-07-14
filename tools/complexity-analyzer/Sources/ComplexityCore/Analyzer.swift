@@ -19,9 +19,15 @@ public struct Analyzer {
         let units = files.flatMap { file -> [AnalyzedUnit] in
             guard let source = try? String(contentsOfFile: file, encoding: .utf8) else { return [] }
             return scanner.scan(source: source, file: file).map { unit in
-                guard unit.kind == .type else { return unit }
                 var withFanIn = unit
-                withFanIn.measurements.fanIn = fanIn.count(forTypeNamed: unit.name)
+                switch unit.kind {
+                case .type:
+                    withFanIn.measurements.fanIn =
+                        fanIn.directCount(name: unit.name, file: file, line: unit.line)
+                case .method:
+                    withFanIn.measurements.fanInByHop =
+                        fanIn.byHop(name: unit.name, file: file, line: unit.line, maxHop: 2)
+                }
                 return withFanIn
             }
         }

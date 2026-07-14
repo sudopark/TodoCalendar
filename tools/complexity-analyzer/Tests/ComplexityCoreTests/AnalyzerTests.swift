@@ -11,20 +11,30 @@ struct AnalyzerTests {
         for (name, source) in files {
             try source.write(toFile: dir + "/" + name, atomically: true, encoding: .utf8)
         }
-        return dir
+        // 열거자는 realpath(/var→/private/var)로 경로를 내므로, stub 키·검증 경로도
+        // 같은 realpath로 맞춘다. (URL.resolvingSymlinksInPath는 반대로 /private를 떼어 불일치)
+        return dir.withCString { cPath in
+            guard let resolved = realpath(cPath, nil) else { return dir }
+            defer { free(resolved) }
+            return String(cString: resolved)
+        }
     }
 
-    @Test("타입엔 fan-in, 메소드엔 내부 복잡도가 실린다")
+    @Test("타입엔 direct fan-in, 메소드엔 per-hop fan-in이 실린다")
     func measuresAttached() throws {
         let dir = try writeTempDir(["Sample.swift": "struct Sample { func go() { if a { if b {} } } }"])
         let stub = StubIndexProvider()
-        stub.usrsByName["Sample"] = ["u1"]
-        stub.refCountByUSR = ["u1": 4]
+        // 타입 Sample은 1번째 줄, 메소드 go도 1번째 줄
+        stub.usrByLocation["Sample@\(dir)/Sample.swift:1"] = "uSample"
+        stub.usrByLocation["go@\(dir)/Sample.swift:1"] = "uGo"
+        stub.referencesByUSR["uSample"] = Array(repeating: .init(callerUSRs: []), count: 4)
+        stub.referencesByUSR["uGo"] = [.init(callerUSRs: [])]
 
         let units = try Analyzer(index: stub).analyze(sourceRoot: dir, scope: .whole)
 
         #expect(units.first { $0.kind == .type }?.measurements.fanIn == 4)
         #expect(units.first { $0.kind == .method }?.measurements.internalComplexity == 3)
+        #expect(units.first { $0.kind == .method }?.measurements.fanInByHop == [1, 0, 0])
     }
 
     @Test("type scope는 그 타입과 소속 메소드만 남긴다")
@@ -42,14 +52,17 @@ struct AnalyzerTests {
     func jsonContainsMeasures() throws {
         let dir = try writeTempDir(["S.swift": "struct S { func f() { if a {} } }"])
         let stub = StubIndexProvider()
-        stub.usrsByName["S"] = ["u"]
-        stub.refCountByUSR = ["u": 2]
+        stub.usrByLocation["S@\(dir)/S.swift:1"] = "u"
+        stub.referencesByUSR["u"] = [.init(callerUSRs: []), .init(callerUSRs: [])]
+        stub.usrByLocation["f@\(dir)/S.swift:1"] = "uf"
+        stub.referencesByUSR["uf"] = [.init(callerUSRs: [])]
 
         let units = try Analyzer(index: stub).analyze(sourceRoot: dir, scope: .whole)
         let json = try JSONReporter().string(for: units)
 
         #expect(json.contains("\"fanIn\""))
         #expect(json.contains("\"internalComplexity\""))
+        #expect(json.contains("\"fanInByHop\""))
     }
 
     @Test("메소드 단위에 CQS·Combine 측정이 실려 JSON에 나온다")
