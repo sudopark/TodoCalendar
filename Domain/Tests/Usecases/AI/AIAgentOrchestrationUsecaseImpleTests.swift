@@ -457,7 +457,10 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
             .setFailureType(to: (any Error).self)
             .eraseToAnyPublisher()
     }
-    func handleJobFinishNotification(_ jobId: String) { }
+    var didRefreshJobStatusWith: String?
+    func refreshJobStatus(_ jobId: String) {
+        self.didRefreshJobStatusWith = jobId
+    }
 
     private func jobPublisher(_ job: AIJob?) -> AnyPublisher<AIJob, any Error> {
         if self.shouldFail {
@@ -721,5 +724,77 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 
         // then
         #expect(states.map(self.stateName) == ["idle"])
+    }
+}
+
+
+// MARK: - 외부 트리거로 즉시 조회
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test("추적 중인 job의 상태 변경 푸시를 받으면 즉시 조회를 트리거한다")
+    func usecase_whenPushReceivedForCurrentJob_triggerImmediateCheck() async throws {
+        // given
+        let expect = expectConfirm("processing 진입")
+        let usecase = self.makeUsecaseWithCommandJob(
+            AIJob(jobId: "some_job") |> \.status .~ AIJob.Status.running
+        )
+        let _ = try await self.firstOutput(expect, for: usecase.state) {
+            try? usecase.submit("명령")
+        }
+
+        // when
+        usecase.handleJobStatusChanged("some_job")
+
+        // then
+        #expect(self.stubCommand.didRefreshJobStatusWith == "some_job")
+    }
+
+    @Test("추적 중이 아닌 job의 푸시는 무시한다")
+    func usecase_whenPushReceivedForOtherJob_ignore() async throws {
+        // given
+        let expect = expectConfirm("processing 진입")
+        let usecase = self.makeUsecaseWithCommandJob(
+            AIJob(jobId: "some_job") |> \.status .~ AIJob.Status.running
+        )
+        let _ = try await self.firstOutput(expect, for: usecase.state) {
+            try? usecase.submit("명령")
+        }
+
+        // when
+        usecase.handleJobStatusChanged("other_job")
+
+        // then
+        #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+    }
+
+    @Test("처리 중인 job이 없으면 포그라운드 복귀 새로고침은 아무것도 하지 않는다")
+    func usecase_whenNoProcessingJob_foregroundRefreshDoesNothing() async throws {
+        // given
+        let usecase = self.makeUsecaseInIdle()
+
+        // when
+        usecase.refreshProcessingJobIfNeeded()
+
+        // then
+        #expect(self.stubCommand.didRefreshJobStatusWith == nil)
+    }
+
+    @Test("처리 중인 job이 있으면 포그라운드 복귀 시 즉시 조회를 트리거한다")
+    func usecase_whenProcessingJobExists_foregroundRefreshTriggersCheck() async throws {
+        // given
+        let expect = expectConfirm("processing 진입")
+        let usecase = self.makeUsecaseWithCommandJob(
+            AIJob(jobId: "some_job") |> \.status .~ AIJob.Status.running
+        )
+        let _ = try await self.firstOutput(expect, for: usecase.state) {
+            try? usecase.submit("명령")
+        }
+
+        // when
+        usecase.refreshProcessingJobIfNeeded()
+
+        // then
+        #expect(self.stubCommand.didRefreshJobStatusWith == "some_job")
     }
 }

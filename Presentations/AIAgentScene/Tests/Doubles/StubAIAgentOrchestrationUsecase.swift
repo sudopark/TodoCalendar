@@ -48,6 +48,16 @@ final class StubAIAgentOrchestrationUsecase: AIAgentOrchestrationUsecase, @unche
     func restoreIfNeeded() { self.didRestore = true }
     func loadUsage() { self.didLoadUsage = true }
 
+    private(set) var didHandleJobStatusChangedWith: String?
+    func handleJobStatusChanged(_ jobId: String) {
+        self.didHandleJobStatusChangedWith = jobId
+    }
+
+    private(set) var didRefreshProcessingJob = false
+    func refreshProcessingJobIfNeeded() {
+        self.didRefreshProcessingJob = true
+    }
+
     var state: AnyPublisher<AIAgentState, Never> {
         self.stateSubject.compactMap { $0 }.eraseToAnyPublisher()
     }
