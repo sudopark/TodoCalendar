@@ -74,8 +74,11 @@ private final class MethodCollector: SyntaxVisitor {
 
     /// 반환 타입이 non-Void면 query (값·Publisher). Void/무반환 = command.
     private func returnsNonVoid(_ clause: ReturnClauseSyntax?) -> Bool {
-        guard let desc = clause?.type.trimmedDescription else { return false }
-        return desc != "Void" && desc != "()"
+        guard let type = clause?.type else { return false }
+        // 빈 튜플 `()` / `( )` = Void
+        if let tuple = type.as(TupleTypeSyntax.self), tuple.elements.isEmpty { return false }
+        let name = type.trimmedDescription.replacingOccurrences(of: " ", with: "")
+        return name != "Void" && name != "Swift.Void" && name != "()"
     }
 
     /// 명목 타입 선언(class/struct/enum/actor): 타입 단위 방출 + enclosing 추적.

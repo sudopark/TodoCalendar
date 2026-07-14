@@ -33,4 +33,19 @@ struct CQSTests {
     func localVarNotSideEffect() {
         #expect(method("struct S { func f() -> Int { var n = 0; n = 1; return n } }").cqsViolations == 0)
     }
+
+    @Test("중첩 함수 안 side-effect는 바깥 메소드로 새지 않는다")
+    func nestedFunctionScopeIsolated() {
+        // outer는 `return 0`뿐인 순수 query — inner의 self.x=1이 새어들면 안 됨.
+        let outer = SyntaxScanner()
+            .scan(source: "struct S { func outer() -> Int { func inner() { self.x = 1 }; return 0 } }", file: "T.swift")
+            .first { $0.name == "outer" }
+        #expect(outer?.measurements.cqsViolations == 0)
+    }
+
+    @Test("Swift.Void·공백 빈 튜플 반환은 command = nil")
+    func voidVariantsAreCommand() {
+        #expect(method("struct S { func f() -> Swift.Void { self.x = 1 } }").cqsViolations == nil)
+        #expect(method("struct S { func f() -> ( ) { self.x = 1 } }").cqsViolations == nil)
+    }
 }
