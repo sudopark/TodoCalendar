@@ -145,14 +145,18 @@ extension AICommandUsecaseImple {
         self.subject.jobFinishEvent.send(jobId)
     }
     
-    private func checkJob(_ jobId: String) -> AnyPublisher<AIJob, any Error> {
-        
+    private func checkJob(
+        _ jobId: String,
+        immediateCheck: Bool = false
+    ) -> AnyPublisher<AIJob, any Error> {
+
         let refreshWithPolling = self.polling()
         let refreshAfterPushReceive = self.subject.jobFinishEvent
             .filter { $0 == jobId }
             .map { _ in }
-        
+
         let refreshTrigger = Publishers.Merge(refreshWithPolling, refreshAfterPushReceive)
+            .prepend(immediateCheck ? [()] : [])
         let refreshJob = refreshTrigger.map { [weak self] in
             guard let self = self else { return Empty<AIJob, any Error>().eraseToAnyPublisher() }
             return self.loadJobWithFilterError(jobId).eraseToAnyPublisher()
@@ -206,7 +210,7 @@ extension AICommandUsecaseImple {
                         .eraseToAnyPublisher()
                 }
 
-                return self.checkJob(cmd.jobId)
+                return self.checkJob(cmd.jobId, immediateCheck: true)
                     .handleClearProcessingCommand(self.repository)
                     .map { Optional($0) }
                     .eraseToAnyPublisher()
