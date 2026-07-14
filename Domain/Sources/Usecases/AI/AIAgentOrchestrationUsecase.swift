@@ -82,7 +82,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
 
     private func handleJobResult(_ job: AIJob) {
         guard job.isFinish else { return }
-        if job.status == .rejected {
+        if job.status == .rejected || job.status == .canceled {
             self.subject.state.send(.idle)
             return
         }

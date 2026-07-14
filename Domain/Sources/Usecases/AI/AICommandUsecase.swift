@@ -131,7 +131,9 @@ extension AICommandUsecaseImple {
     }
 
     public func cancelOngoingCommand(_ jobId: String) {
-        // fire-and-forget — 클라는 GET /jobs/:id 재폴링으로 CANCELED를 받는다(서버 #250).
+        // fire-and-forget — 호출 시점에 orchestration이 이미 구독을 끊고 idle로 보냈다.
+        // 서버의 CANCELED 통보를 클라가 소비하는 경로는 없다 (clear 전에 앱이 죽어
+        // 잔여 레코드가 restore되는 경우만 예외 — AIJob.Status.canceled가 이를 방어한다).
         let repository = self.repository
         Task {
             try? await repository.cancelCommand(jobId)
