@@ -51,7 +51,10 @@ private final class MethodCollector: SyntaxVisitor {
 
     override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
         let line = converter.location(for: node.name.positionAfterSkippingLeadingTrivia).line
-        let score = node.body.map { ComplexityCounter.score(of: $0) } ?? 0
+        let internalC = node.body.map { ComplexityCounter.score(of: $0) } ?? 0
+        let query = returnsNonVoid(node.signature.returnClause)
+        let effects = node.body.map { SideEffectAnalyzer.analyze(body: $0, isQuery: query) }
+            ?? .zero
         units.append(
             AnalyzedUnit(
                 kind: .method,
@@ -59,10 +62,20 @@ private final class MethodCollector: SyntaxVisitor {
                 enclosingType: typeStack.last,
                 file: file,
                 line: line,
-                measurements: .init(internalComplexity: score)
+                measurements: .init(
+                    internalComplexity: internalC,
+                    cqsViolations: query ? effects.cqsViolations : nil,
+                    combineRoleMix: effects.combineRoleMix
+                )
             )
         )
         return .visitChildren
+    }
+
+    /// 반환 타입이 non-Void면 query (값·Publisher). Void/무반환 = command.
+    private func returnsNonVoid(_ clause: ReturnClauseSyntax?) -> Bool {
+        guard let desc = clause?.type.trimmedDescription else { return false }
+        return desc != "Void" && desc != "()"
     }
 
     /// 명목 타입 선언(class/struct/enum/actor): 타입 단위 방출 + enclosing 추적.

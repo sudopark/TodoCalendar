@@ -4,10 +4,19 @@ import Foundation
 public struct Measurements: Equatable, Sendable, Encodable {
     public var internalComplexity: Int?
     public var fanIn: Int?
+    public var cqsViolations: Int?
+    public var combineRoleMix: Int?
 
-    public init(internalComplexity: Int? = nil, fanIn: Int? = nil) {
+    public init(
+        internalComplexity: Int? = nil,
+        fanIn: Int? = nil,
+        cqsViolations: Int? = nil,
+        combineRoleMix: Int? = nil
+    ) {
         self.internalComplexity = internalComplexity
         self.fanIn = fanIn
+        self.cqsViolations = cqsViolations
+        self.combineRoleMix = combineRoleMix
     }
 }
 
