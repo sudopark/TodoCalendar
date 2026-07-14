@@ -12,6 +12,7 @@ public struct SyntaxScanner {
         let converter = SourceLocationConverter(fileName: file, tree: tree)
         let collector = MethodCollector(file: file, converter: converter)
         collector.walk(tree)
+        collector.finalize()
         return collector.units
     }
 }
@@ -24,6 +25,18 @@ private final class MethodCollector: SyntaxVisitor {
     let converter: SourceLocationConverter
     private(set) var units: [AnalyzedUnit] = []
     private var typeStack: [String] = []
+
+    /// 정규화 타입 이름(enclosing 체인 + 이름) → 소속 메소드 측정 누적.
+    private var rollupByQualified: [String: (internal: Int, cqs: Int, combine: Int)] = [:]
+    /// 정규화 타입 이름 → units 배열 내 그 타입 유닛 인덱스(post-walk 패치용).
+    private var typeUnitIndexByQualified: [String: Int] = [:]
+    /// 정규화 타입 이름 → public/open 멤버 수.
+    private var publicSurfaceByQualified: [String: Int] = [:]
+
+    private var currentQualified: String { typeStack.joined(separator: ".") }
+    private func qualified(_ name: String) -> String {
+        (typeStack + [name]).joined(separator: ".")
+    }
 
     init(file: String, converter: SourceLocationConverter) {
         self.file = file
@@ -69,7 +82,44 @@ private final class MethodCollector: SyntaxVisitor {
                 )
             )
         )
+
+        var acc = rollupByQualified[currentQualified] ?? (0, 0, 0)
+        acc.internal += internalC
+        acc.cqs += effects.cqsViolations
+        acc.combine += effects.combineRoleMix
+        rollupByQualified[currentQualified] = acc
+
+        if isPublicOrOpen(node.modifiers) { addSurface(1) }
+
         return .visitChildren
+    }
+
+    /// 타입 멤버 프로퍼티(로컬 var 제외)의 public/open 표면적 카운트.
+    override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
+        if node.parent?.is(MemberBlockItemSyntax.self) == true, isPublicOrOpen(node.modifiers) {
+            addSurface(node.bindings.count)
+        }
+        return .visitChildren
+    }
+
+    private func isPublicOrOpen(_ modifiers: DeclModifierListSyntax) -> Bool {
+        modifiers.contains { $0.name.text == "public" || $0.name.text == "open" }
+    }
+
+    private func addSurface(_ n: Int) {
+        publicSurfaceByQualified[currentQualified, default: 0] += n
+    }
+
+    /// post-walk: 정규화 타입별 누적을 타입 유닛에 패치.
+    func finalize() {
+        for (qualified, index) in typeUnitIndexByQualified {
+            if let roll = rollupByQualified[qualified] {
+                units[index].measurements.rolledUpInternalComplexity = roll.internal
+                units[index].measurements.rolledUpCqsViolations = roll.cqs
+                units[index].measurements.rolledUpCombineRoleMix = roll.combine
+            }
+            units[index].measurements.publicSurface = publicSurfaceByQualified[qualified] ?? 0
+        }
     }
 
     /// 반환 타입이 non-Void면 query (값·Publisher). Void/무반환 = command.
@@ -84,6 +134,7 @@ private final class MethodCollector: SyntaxVisitor {
     /// 명목 타입 선언(class/struct/enum/actor): 타입 단위 방출 + enclosing 추적.
     private func enterType(_ nameToken: TokenSyntax) -> SyntaxVisitorContinueKind {
         let line = converter.location(for: nameToken.positionAfterSkippingLeadingTrivia).line
+        typeUnitIndexByQualified[qualified(nameToken.text)] = units.count
         units.append(
             AnalyzedUnit(
                 kind: .type,
