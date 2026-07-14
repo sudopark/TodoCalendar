@@ -1,16 +1,31 @@
 import Foundation
-import SwiftSyntax
-import SwiftParser
-import IndexStoreDB
 
-/// 페이즈 1 walking skeleton — 파이프라인 골격만.
-/// 실제 측정(내부 복잡도·fan-in)은 Task 2~4에서 채운다.
+/// 페이즈 1 오케스트레이션 — 파일 스캔 → 측정(내부 복잡도·fan-in) → scope 필터.
+/// 총점·가중 합성은 후속 페이즈(5).
 public struct Analyzer {
 
-    public init() {}
+    private let index: any IndexProviding
+    private let scanner: SyntaxScanner
 
-    /// 부트스트랩: SwiftSyntax·IndexStoreDB가 링크되고 파이프라인이 도는지만 증명한다.
-    public func run(sourceRoot: String, indexStorePath: String, scope: String) -> String {
-        return "ok"
+    public init(index: any IndexProviding, scanner: SyntaxScanner = SyntaxScanner()) {
+        self.index = index
+        self.scanner = scanner
+    }
+
+    public func analyze(sourceRoot: String, scope: Scope) throws -> [AnalyzedUnit] {
+        let files = SwiftFileEnumerator.files(under: sourceRoot, scope: scope)
+        let fanIn = FanIn(index: index)
+
+        let units = files.flatMap { file -> [AnalyzedUnit] in
+            guard let source = try? String(contentsOfFile: file, encoding: .utf8) else { return [] }
+            return scanner.scan(source: source, file: file).map { unit in
+                guard unit.kind == .type else { return unit }
+                var withFanIn = unit
+                withFanIn.measurements.fanIn = fanIn.count(forTypeNamed: unit.name)
+                return withFanIn
+            }
+        }
+
+        return units.filter { scope.includes($0) }
     }
 }
