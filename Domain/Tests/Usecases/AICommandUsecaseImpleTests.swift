@@ -142,7 +142,7 @@ extension AICommandUsecaseImpleTests {
             try await Task.sleep(for: .milliseconds(10))
             self.stubRepository.loadJobMocking = .success(.dummyConfirmJob)
             
-            usecase.handleJobFinishNotification("some_job")
+            usecase.refreshJobStatus("some_job")
         }
         
         // then
@@ -308,7 +308,7 @@ extension AICommandUsecaseImpleTests {
             try await Task.sleep(for: .milliseconds(10))
             self.stubRepository.loadJobMocking = .success(.dummyDoneJob)
 
-            usecase.handleJobFinishNotification("some_job")
+            usecase.refreshJobStatus("some_job")
         }
 
         // then

@@ -25,7 +25,7 @@ public protocol AICommandUsecase: AnyObject, Sendable {
 
     func restoreCommandifNeed() -> AnyPublisher<AIJob?, any Error>
 
-    func handleJobFinishNotification(_ jobId: String)
+    func refreshJobStatus(_ jobId: String)
 }
 
 
@@ -141,7 +141,7 @@ extension AICommandUsecaseImple {
         }
     }
 
-    public func handleJobFinishNotification(_ jobId: String) {
+    public func refreshJobStatus(_ jobId: String) {
         self.subject.jobFinishEvent.send(jobId)
     }
     
