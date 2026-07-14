@@ -1,3 +1,4 @@
+import Foundation
 import ArgumentParser
 import ComplexityCore
 
@@ -18,12 +19,20 @@ struct ComplexityAnalyzerCLI: AsyncParsableCommand {
     @Option(name: .customLong("scope"), help: "분석 범위 (whole | file:<경로> | type:<이름>)")
     var scope: String = "whole"
 
+    @Option(name: .customLong("lib-index-store"), help: "libIndexStore.dylib 경로")
+    var libIndexStore: String =
+        "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libIndexStore.dylib"
+
     func run() async throws {
-        let output = Analyzer().run(
-            sourceRoot: sourceRoot,
-            indexStorePath: indexStorePath,
-            scope: scope
+        let index = try IndexStoreDBProvider(
+            storePath: indexStorePath,
+            databasePath: NSTemporaryDirectory() + "cx-idx-" + UUID().uuidString,
+            libIndexStorePath: libIndexStore
         )
-        print(output)
+        let units = try Analyzer(index: index).analyze(
+            sourceRoot: sourceRoot,
+            scope: Scope.parse(scope)
+        )
+        print(try JSONReporter().string(for: units))
     }
 }
