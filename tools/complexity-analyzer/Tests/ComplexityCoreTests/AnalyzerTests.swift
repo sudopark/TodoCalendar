@@ -11,8 +11,8 @@ struct AnalyzerTests {
         for (name, source) in files {
             try source.write(toFile: dir + "/" + name, atomically: true, encoding: .utf8)
         }
-        // 열거자는 realpath(/var→/private/var)로 경로를 내므로, stub 키·검증 경로도
-        // 같은 realpath로 맞춘다. (URL.resolvingSymlinksInPath는 반대로 /private를 떼어 불일치)
+        // realpath로 해소한 sourceRoot를 넘겨, 열거자가 내는 파일 경로 접두와 stub 키·검증 경로를
+        // 일치시킨다. (URL.resolvingSymlinksInPath는 /private를 떼는 반대 정규화라 불일치)
         return dir.withCString { cPath in
             guard let resolved = realpath(cPath, nil) else { return dir }
             defer { free(resolved) }
@@ -96,6 +96,20 @@ struct AnalyzerTests {
         #expect(json.contains("\"internalCoupling\""))
         #expect(json.contains("\"maxCallChainDepth\""))
         #expect(json.contains("\"rolledUpInternalComplexity\""))
+    }
+
+    @Test("cross-file extension 멤버가 원본 타입 롤업·표면적에 합산된다")
+    func crossFileExtensionAggregated() throws {
+        let dir = try writeTempDir([
+            "A.swift": "struct S { var x = 0; public func a() { self.x = 1 } }",
+            "B.swift": "extension S { public func b() { if q { if r {} } } }",
+        ])
+        let units = try Analyzer(index: StubIndexProvider()).analyze(sourceRoot: dir, scope: .whole)
+        let s = units.first { $0.kind == .type && $0.name == "S" }?.measurements
+        // a: internal 0, b: if{ if{} } = 3 → 다른 파일 extension까지 롤업 3
+        #expect(s?.rolledUpInternalComplexity == 3)
+        // public a(A.swift) + public b(B.swift) = 2
+        #expect(s?.publicSurface == 2)
     }
 
     @Test("Scope 파싱")

@@ -61,6 +61,18 @@ struct CohesionScanTests {
         #expect(m?.maxCallChainDepth == 3)     // a→b→c
     }
 
+    @Test("willSet/didSet observer만 있는 property는 stored로 응집에 쓰인다")
+    func observedPropertyIsStored() {
+        let src = """
+        struct S {
+            var x: Int = 0 { didSet {} }
+            func a() { self.x = 1 }
+            func b() { print(x) }
+        }
+        """
+        #expect(measure(src, name: "S")?.lcom == 1)
+    }
+
     @Test("computed property는 stored 아님 — 응집 연결에 안 쓰임")
     func computedNotStored() {
         // a·b가 computed c만 참조하면 stored 공유 없음 → 두 요소.

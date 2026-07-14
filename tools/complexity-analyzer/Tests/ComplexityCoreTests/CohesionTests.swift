@@ -36,6 +36,27 @@ struct CohesionTests {
         #expect(CohesionAnalyzer.metrics(methods: []).lcom == 0)
     }
 
+    @Test("독립 3그룹은 3요소")
+    func threeComponents() {
+        let methods = [
+            MethodNode(name: "a", referencedProps: ["x"], calledMethods: []),
+            MethodNode(name: "b", referencedProps: ["y"], calledMethods: []),
+            MethodNode(name: "c", referencedProps: ["z"], calledMethods: []),
+        ]
+        #expect(CohesionAnalyzer.metrics(methods: methods).lcom == 3)
+    }
+
+    @Test("분기된 경로 중 최장을 고른다")
+    func chainDepthPicksLongestBranch() {
+        let methods = [
+            MethodNode(name: "a", referencedProps: [], calledMethods: ["b", "c"]),
+            MethodNode(name: "b", referencedProps: [], calledMethods: []),      // a→b = 2
+            MethodNode(name: "c", referencedProps: [], calledMethods: ["d"]),
+            MethodNode(name: "d", referencedProps: [], calledMethods: []),      // a→c→d = 3
+        ]
+        #expect(CohesionAnalyzer.metrics(methods: methods).maxCallChainDepth == 3)
+    }
+
     @Test("내부 호출 결합 = 타입 내부 메소드 호출 간선 수")
     func internalCouplingCountsEdges() {
         let methods = [
