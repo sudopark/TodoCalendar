@@ -32,6 +32,10 @@ private final class MethodCollector: SyntaxVisitor {
     private var typeUnitIndexByQualified: [String: Int] = [:]
     /// 정규화 타입 이름 → public/open 멤버 수.
     private var publicSurfaceByQualified: [String: Int] = [:]
+    /// 정규화 타입 이름 → stored property 이름들.
+    private var storedPropsByQualified: [String: Set<String>] = [:]
+    /// 정규화 타입 이름 → (메소드 이름, 참조 식별자 후보, 호출 후보) 목록.
+    private var methodGraphByQualified: [String: [(name: String, uses: Set<String>, calls: Set<String>)]] = [:]
 
     private var currentQualified: String { typeStack.joined(separator: ".") }
     private func qualified(_ name: String) -> String {
@@ -91,15 +95,37 @@ private final class MethodCollector: SyntaxVisitor {
 
         if isPublicOrOpen(node.modifiers) { addSurface(1) }
 
+        let uses = node.body.map { MemberUseCollector.collect(from: $0) } ?? (uses: [], calls: [])
+        methodGraphByQualified[currentQualified, default: []].append(
+            (name: node.name.text, uses: uses.uses, calls: uses.calls)
+        )
+
         return .visitChildren
     }
 
-    /// 타입 멤버 프로퍼티(로컬 var 제외)의 public/open 표면적 카운트.
+    /// 타입 멤버 프로퍼티(로컬 var 제외): 표면적 카운트 + stored property 등록.
     override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
-        if node.parent?.is(MemberBlockItemSyntax.self) == true, isPublicOrOpen(node.modifiers) {
-            addSurface(node.bindings.count)
+        guard node.parent?.is(MemberBlockItemSyntax.self) == true else { return .visitChildren }
+        if isPublicOrOpen(node.modifiers) { addSurface(node.bindings.count) }
+        for binding in node.bindings where isStored(binding) {
+            if let name = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text {
+                storedPropsByQualified[currentQualified, default: []].insert(name)
+            }
         }
         return .visitChildren
+    }
+
+    /// stored(저장) 프로퍼티인가 — accessor 없음 또는 willSet/didSet만.
+    private func isStored(_ binding: PatternBindingSyntax) -> Bool {
+        guard let accessor = binding.accessorBlock else { return true }
+        switch accessor.accessors {
+        case .accessors(let list):
+            return list.allSatisfy {
+                $0.accessorSpecifier.text == "willSet" || $0.accessorSpecifier.text == "didSet"
+            }
+        case .getter:
+            return false // `var x: Int { ... }` computed
+        }
     }
 
     private func isPublicOrOpen(_ modifiers: DeclModifierListSyntax) -> Bool {
@@ -119,6 +145,21 @@ private final class MethodCollector: SyntaxVisitor {
                 units[index].measurements.rolledUpCombineRoleMix = roll.combine
             }
             units[index].measurements.publicSurface = publicSurfaceByQualified[qualified] ?? 0
+
+            let stored = storedPropsByQualified[qualified] ?? []
+            let raw = methodGraphByQualified[qualified] ?? []
+            let methodNames = Set(raw.map { $0.name })
+            let nodes = raw.map { m in
+                MethodNode(
+                    name: m.name,
+                    referencedProps: m.uses.intersection(stored),
+                    calledMethods: m.calls.intersection(methodNames)
+                )
+            }
+            let cohesion = CohesionAnalyzer.metrics(methods: nodes)
+            units[index].measurements.lcom = cohesion.lcom
+            units[index].measurements.internalCoupling = cohesion.internalCoupling
+            units[index].measurements.maxCallChainDepth = cohesion.maxCallChainDepth
         }
     }
 
@@ -216,5 +257,50 @@ private final class ComplexityCounter: SyntaxVisitor {
         total += 1 + depth
         depth += 1
         return .visitChildren
+    }
+}
+
+// MARK: - 메소드 본문의 멤버 사용 수집 (프로퍼티 참조 후보 · 메소드 호출 후보)
+
+private final class MemberUseCollector: SyntaxVisitor {
+
+    private(set) var uses: Set<String> = []   // 프로퍼티 참조 후보(식별자)
+    private(set) var calls: Set<String> = []  // 메소드 호출 후보
+
+    static func collect(from body: CodeBlockSyntax) -> (uses: Set<String>, calls: Set<String>) {
+        let c = MemberUseCollector(viewMode: .sourceAccurate)
+        c.walk(body)
+        return (c.uses, c.calls)
+    }
+
+    // 중첩 함수·local 타입은 별도 unit — 이 메소드 사용에 섞지 않는다(클로저는 유지: 캡처가 이 메소드 결합).
+    override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind { .skipChildren }
+
+    override func visit(_ node: FunctionCallExprSyntax) -> SyntaxVisitorContinueKind {
+        if let member = node.calledExpression.as(MemberAccessExprSyntax.self) {
+            if isSelfBase(member.base) { calls.insert(member.declName.baseName.text) }
+        } else if let ref = node.calledExpression.as(DeclReferenceExprSyntax.self) {
+            calls.insert(ref.baseName.text)
+        }
+        return .visitChildren
+    }
+
+    override func visit(_ node: MemberAccessExprSyntax) -> SyntaxVisitorContinueKind {
+        if isSelfBase(node.base) { uses.insert(node.declName.baseName.text) }
+        return .visitChildren
+    }
+
+    override func visit(_ node: DeclReferenceExprSyntax) -> SyntaxVisitorContinueKind {
+        uses.insert(node.baseName.text) // 암묵 self 프로퍼티(`x`)까지 후보로. 교집합에서 stored만 남음.
+        return .visitChildren
+    }
+
+    private func isSelfBase(_ base: ExprSyntax?) -> Bool {
+        guard let base else { return false }
+        return base.as(DeclReferenceExprSyntax.self)?.baseName.text == "self"
     }
 }

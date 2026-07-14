@@ -7,7 +7,7 @@ struct ComplexityAnalyzerCLI: AsyncParsableCommand {
 
     static let configuration = CommandConfiguration(
         commandName: "complexity-analyzer",
-        abstract: "TodoCalendar 구조 복잡도 분석기 (메소드: 내부복잡도·CQS·Combine 역할혼합 / 타입: fan-in)"
+        abstract: "TodoCalendar 구조 복잡도 분석기 (메소드: 내부복잡도·CQS·Combine 역할혼합·fan-in / 타입: 응집·표면적·롤업·fan-in)"
     )
 
     @Option(name: .customLong("source-root"), help: "분석할 소스 루트 경로")

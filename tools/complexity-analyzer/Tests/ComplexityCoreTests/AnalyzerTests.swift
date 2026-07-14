@@ -79,6 +79,25 @@ struct AnalyzerTests {
         #expect(json.contains("\"combineRoleMix\""))
     }
 
+    @Test("객체 측정(응집·표면적·롤업)이 JSON에 나온다")
+    func objectMeasuresInJSON() throws {
+        let dir = try writeTempDir([
+            "S.swift": "struct S { var x = 0; public func a() { self.x = 1 }; func b() { print(x) } }"
+        ])
+        let units = try Analyzer(index: StubIndexProvider()).analyze(sourceRoot: dir, scope: .whole)
+        let type = units.first { $0.kind == .type }
+        #expect(type?.measurements.lcom == 1)
+        #expect(type?.measurements.publicSurface == 1)
+        #expect(type?.measurements.rolledUpInternalComplexity == 0)
+
+        let json = try JSONReporter().string(for: units)
+        #expect(json.contains("\"lcom\""))
+        #expect(json.contains("\"publicSurface\""))
+        #expect(json.contains("\"internalCoupling\""))
+        #expect(json.contains("\"maxCallChainDepth\""))
+        #expect(json.contains("\"rolledUpInternalComplexity\""))
+    }
+
     @Test("Scope 파싱")
     func scopeParsing() {
         #expect(Scope.parse("whole") == .whole)
