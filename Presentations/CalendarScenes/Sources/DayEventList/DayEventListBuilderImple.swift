@@ -70,7 +70,7 @@ extension DayEventListSceneBuilerImple: DayEventListSceneBuiler {
             foremostEventUsecase: foremostEventUsecase,
             uiSettingUsecase: uiSettingUsecase,
             accountUsecase: self.accountUsecase,
-            aiAgentOrchestrationUsecase: self.usecaseFactory.makeAIAgentOrchestrationUsecase()
+            aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase
         )
         let router = DayEventListRouter(
             eventDetailSceneBuilder: self.eventDetailSceneBuilder,

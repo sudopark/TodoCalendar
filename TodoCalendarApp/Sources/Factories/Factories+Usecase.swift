@@ -330,10 +330,6 @@ extension NonLoginUsecaseFactoryImple {
 
 extension NonLoginUsecaseFactoryImple {
 
-    func makeAIAgentOrchestrationUsecase() -> any AIAgentOrchestrationUsecase {
-        return self.aiAgentOrchestrationUsecase
-    }
-
     func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
         return SpeechRecognizeUsecaseImple(
             service: SpeechRecognizeServiceImple(),
@@ -790,10 +786,6 @@ extension LoginUsecaseFactoryImple {
 
 
 extension LoginUsecaseFactoryImple {
-
-    func makeAIAgentOrchestrationUsecase() -> any AIAgentOrchestrationUsecase {
-        return self.aiAgentOrchestrationUsecase
-    }
 
     func makeSpeechRecognizeUsecase() -> any SpeechRecognizeUsecase {
         return SpeechRecognizeUsecaseImple(
