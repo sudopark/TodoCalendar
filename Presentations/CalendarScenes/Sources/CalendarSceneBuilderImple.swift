@@ -68,7 +68,7 @@ extension CalendarSceneBuilderImple: CalendarSceneBuilder {
             appleCalendarUsecase: self.usecaseFactory.makeAppleCalendarUsecase(),
             eventUploadService: self.usecaseFactory.eventUploadService,
             eventSyncUsecase: self.usecaseFactory.eventSyncUsecase,
-            aiAgentOrchestrationUsecase: self.usecaseFactory.makeAIAgentOrchestrationUsecase()
+            aiAgentOrchestrationUsecase: self.usecaseFactory.aiAgentOrchestrationUsecase
         )
         viewModel.listener = listener
         let viewController = CalendarViewController(
