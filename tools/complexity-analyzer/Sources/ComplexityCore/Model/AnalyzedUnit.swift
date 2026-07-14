@@ -11,6 +11,9 @@ public struct Measurements: Equatable, Sendable, Encodable {
     public var rolledUpCqsViolations: Int?
     public var rolledUpCombineRoleMix: Int?
     public var publicSurface: Int?
+    public var lcom: Int?
+    public var internalCoupling: Int?
+    public var maxCallChainDepth: Int?
 
     public init(
         internalComplexity: Int? = nil,
@@ -21,7 +24,10 @@ public struct Measurements: Equatable, Sendable, Encodable {
         rolledUpInternalComplexity: Int? = nil,
         rolledUpCqsViolations: Int? = nil,
         rolledUpCombineRoleMix: Int? = nil,
-        publicSurface: Int? = nil
+        publicSurface: Int? = nil,
+        lcom: Int? = nil,
+        internalCoupling: Int? = nil,
+        maxCallChainDepth: Int? = nil
     ) {
         self.internalComplexity = internalComplexity
         self.fanIn = fanIn
@@ -32,6 +38,9 @@ public struct Measurements: Equatable, Sendable, Encodable {
         self.rolledUpCqsViolations = rolledUpCqsViolations
         self.rolledUpCombineRoleMix = rolledUpCombineRoleMix
         self.publicSurface = publicSurface
+        self.lcom = lcom
+        self.internalCoupling = internalCoupling
+        self.maxCallChainDepth = maxCallChainDepth
     }
 }
 
