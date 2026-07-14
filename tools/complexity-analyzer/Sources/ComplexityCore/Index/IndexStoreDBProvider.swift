@@ -60,23 +60,33 @@ public struct IndexStoreDBProvider: IndexProviding {
         guard hasUnits else { throw IndexStoreError.storeEmpty(storePath) }
     }
 
-    // 알려진 한계 (→ 페이즈 3에서 해소): 타입을 bare name으로 전역 조회한다.
-    // 동명이인 타입(예: SQLite 테이블마다 있는 Entity/Columns)이 한 이름으로 합산된다.
-    // 정확한 식별은 USR 또는 enclosing 체인 기반 정규화가 필요.
-    public func typeUSRs(named name: String) -> [String] {
-        var usrs: Set<String> = []
+    /// `(name, file, line)`에 정의된 심볼의 정확한 USR.
+    /// 이름으로 canonical occurrence를 순회하다 정의 role + 위치(파일·라인) 일치를 찾으면 그 USR.
+    public func definitionUSR(named name: String, file: String, line: Int) -> String? {
+        let targetPath = Self.resolvedPath(file)
+        var found: String?
         index.forEachCanonicalSymbolOccurrence(byName: name) { occurrence in
-            let kind = occurrence.symbol.kind
-            let isNominalType = kind == .class || kind == .struct || kind == .enum || kind == .protocol
-            if occurrence.roles.contains(.definition), isNominalType {
-                usrs.insert(occurrence.symbol.usr)
-            }
-            return true
+            guard occurrence.roles.contains(.definition) else { return true }
+            guard occurrence.location.line == line else { return true }
+            guard Self.resolvedPath(occurrence.location.path) == targetPath else { return true }
+            found = occurrence.symbol.usr
+            return false // 찾았으니 순회 중단
         }
-        return Array(usrs)
+        return found
     }
 
-    public func referenceCount(ofUSR usr: String) -> Int {
-        index.occurrences(ofUSR: usr, roles: .reference).count
+    /// 이 USR을 참조하는 지점들 — 각 지점의 caller(calledBy/containedBy) USR 포함.
+    public func references(toUSR usr: String) -> [ReferenceSite] {
+        index.occurrences(ofUSR: usr, roles: .reference).map { occurrence in
+            let callers = occurrence.relations
+                .filter { $0.roles.contains(.calledBy) || $0.roles.contains(.containedBy) }
+                .map { $0.symbol.usr }
+            return ReferenceSite(callerUSRs: callers)
+        }
+    }
+
+    /// 경로 비교 정규화 — /private 심볼릭·상대 표기 차이를 흡수.
+    private static func resolvedPath(_ path: String) -> String {
+        URL(fileURLWithPath: path).resolvingSymlinksInPath().path
     }
 }

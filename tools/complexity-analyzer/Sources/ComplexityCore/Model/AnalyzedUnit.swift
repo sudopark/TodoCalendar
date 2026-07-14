@@ -6,17 +6,20 @@ public struct Measurements: Equatable, Sendable, Encodable {
     public var fanIn: Int?
     public var cqsViolations: Int?
     public var combineRoleMix: Int?
+    public var fanInByHop: [Int]?
 
     public init(
         internalComplexity: Int? = nil,
         fanIn: Int? = nil,
         cqsViolations: Int? = nil,
-        combineRoleMix: Int? = nil
+        combineRoleMix: Int? = nil,
+        fanInByHop: [Int]? = nil
     ) {
         self.internalComplexity = internalComplexity
         self.fanIn = fanIn
         self.cqsViolations = cqsViolations
         self.combineRoleMix = combineRoleMix
+        self.fanInByHop = fanInByHop
     }
 }
 
