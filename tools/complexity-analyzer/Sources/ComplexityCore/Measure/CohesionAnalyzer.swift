@@ -3,26 +3,26 @@
 /// - internalCoupling: 타입 내부 메소드 호출 간선 수(과밀 — 결합).
 /// - maxCallChainDepth: 내부 호출 그래프의 최장 경로 메소드 수(과밀 — 체인 깊이).
 
-public struct MethodNode: Equatable {
-    public let name: String
-    public let referencedProps: Set<String>
-    public let calledMethods: Set<String> // 이미 타입 내부 메소드로 교집합된 이름
-    public init(name: String, referencedProps: Set<String>, calledMethods: Set<String>) {
+struct MethodNode: Equatable {
+    let name: String
+    let referencedProps: Set<String>
+    let calledMethods: Set<String> // 이미 타입 내부 메소드로 교집합된 이름
+    init(name: String, referencedProps: Set<String>, calledMethods: Set<String>) {
         self.name = name
         self.referencedProps = referencedProps
         self.calledMethods = calledMethods
     }
 }
 
-public enum CohesionAnalyzer {
+enum CohesionAnalyzer {
 
-    public struct Metrics: Equatable {
-        public var lcom: Int
-        public var internalCoupling: Int
-        public var maxCallChainDepth: Int
+    struct Metrics: Equatable {
+        var lcom: Int
+        var internalCoupling: Int
+        var maxCallChainDepth: Int
     }
 
-    public static func metrics(methods: [MethodNode]) -> Metrics {
+    static func metrics(methods: [MethodNode]) -> Metrics {
         let names = Set(methods.map { $0.name })
         // 타입 내부로 한정된 인접(호출) 그래프.
         let adjacency = Dictionary(
@@ -66,19 +66,23 @@ public enum CohesionAnalyzer {
         return Set(methods.indices.map { find($0) }).count
     }
 
-    /// 내부 호출 그래프의 가장 긴 경로(메소드 수). 방문 가드로 사이클에서도 유한.
+    /// 내부 호출 그래프의 가장 긴 경로(메소드 수). 노드별 memo로 O(V+E) —
+    /// dense 그래프에서 simple-path 전수 탐색이 지수 폭발하는 것을 막는다.
+    /// 사이클은 `onStack` back-edge에서 0으로 끊어 유한(DAG면 정확, 순환 그래프는 근사).
     private static func maxChainDepth(names: Set<String>, adjacency: [String: Set<String>]) -> Int {
-        var best = 0
-        for start in names {
-            best = max(best, dfsDepth(start, adjacency, visiting: []))
-        }
-        return best
-    }
+        var memo: [String: Int] = [:]
+        var onStack: Set<String> = []
 
-    private static func dfsDepth(_ node: String, _ adjacency: [String: Set<String>], visiting: Set<String>) -> Int {
-        guard !visiting.contains(node) else { return 0 } // 사이클 차단
-        let next = visiting.union([node])
-        let deeper = (adjacency[node] ?? []).map { dfsDepth($0, adjacency, visiting: next) }.max() ?? 0
-        return 1 + deeper
+        func depth(_ node: String) -> Int {
+            if let cached = memo[node] { return cached }
+            guard !onStack.contains(node) else { return 0 } // 사이클 back-edge
+            onStack.insert(node)
+            let deeper = (adjacency[node] ?? []).map { depth($0) }.max() ?? 0
+            onStack.remove(node)
+            let result = 1 + deeper
+            memo[node] = result
+            return result
+        }
+        return names.map { depth($0) }.max() ?? 0
     }
 }

@@ -16,9 +16,16 @@ public struct Analyzer {
         let files = SwiftFileEnumerator.files(under: sourceRoot, scope: scope)
         let fanIn = FanIn(index: index)
 
-        let units = files.flatMap { file -> [AnalyzedUnit] in
-            guard let source = try? String(contentsOfFile: file, encoding: .utf8) else { return [] }
-            return scanner.scan(source: source, file: file).map { unit in
+        // 파일별 유닛(fan-in 부착) + 정규화 타입별 facts 수집. 객체 측정은 facts를 파일 간
+        // 병합한 뒤 whole-scope에서 계산해야 cross-file extension이 원본 타입에 재조립된다.
+        var units: [AnalyzedUnit] = []
+        var factsByQualified: [String: TypeFacts] = [:]
+
+        for file in files {
+            guard let source = try? String(contentsOfFile: file, encoding: .utf8) else { continue }
+            let (fileUnits, fileFacts) = scanner.unitsAndFacts(source: source, file: file)
+
+            units += fileUnits.map { unit in
                 var withFanIn = unit
                 switch unit.kind {
                 case .type:
@@ -30,8 +37,14 @@ public struct Analyzer {
                 }
                 return withFanIn
             }
+
+            for (qualified, facts) in fileFacts {
+                factsByQualified[qualified] =
+                    factsByQualified[qualified].map { TypeFacts.merged($0, facts) } ?? facts
+            }
         }
 
-        return units.filter { scope.includes($0) }
+        let patched = ObjectMetricsAggregator.patched(units: units, factsByQualified: factsByQualified)
+        return patched.filter { scope.includes($0) }
     }
 }

@@ -40,6 +40,19 @@ struct FanInHopTests {
         #expect(hops == [2, 3, 1])
     }
 
+    @Test("한 홉에 서로 다른 caller들의 참조가 합산된다")
+    func sumsDistinctCallers() {
+        let stub = StubIndexProvider()
+        stub.usrByLocation[loc("m", "F.swift", 1)] = "m"
+        // m 참조 1건이 서로 다른 caller c1·c2를 가리킴
+        stub.referencesByUSR["m"] = [.init(callerUSRs: ["c1", "c2"])]
+        // c1 참조 2건, c2 참조 3건 → hop1 = 5 (두 frontier USR 합산)
+        stub.referencesByUSR["c1"] = [.init(callerUSRs: []), .init(callerUSRs: [])]
+        stub.referencesByUSR["c2"] = [.init(callerUSRs: []), .init(callerUSRs: []), .init(callerUSRs: [])]
+
+        #expect(FanIn(index: stub).byHop(name: "m", file: "F.swift", line: 1, maxHop: 2) == [1, 5, 0])
+    }
+
     @Test("caller 없으면 남은 홉은 0으로 채운다")
     func zeroFillsWhenFrontierExhausted() {
         let stub = StubIndexProvider()

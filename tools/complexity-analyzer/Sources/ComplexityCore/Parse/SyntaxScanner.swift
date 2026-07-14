@@ -7,13 +7,19 @@ public struct SyntaxScanner {
 
     public init() {}
 
+    /// 단일 소스 편의 — 유닛 + 객체 측정 패치까지. (같은 소스 안 extension은 정규화 이름으로 병합)
     public func scan(source: String, file: String) -> [AnalyzedUnit] {
+        let (units, facts) = unitsAndFacts(source: source, file: file)
+        return ObjectMetricsAggregator.patched(units: units, factsByQualified: facts)
+    }
+
+    /// 유닛(객체 측정 미패치) + 정규화 타입별 raw facts. cross-file 집계는 Analyzer가 facts를 병합해 수행.
+    func unitsAndFacts(source: String, file: String) -> (units: [AnalyzedUnit], facts: [String: TypeFacts]) {
         let tree = Parser.parse(source: source)
         let converter = SourceLocationConverter(fileName: file, tree: tree)
         let collector = MethodCollector(file: file, converter: converter)
         collector.walk(tree)
-        collector.finalize()
-        return collector.units
+        return (collector.units, collector.factsByQualified)
     }
 }
 
@@ -24,18 +30,9 @@ private final class MethodCollector: SyntaxVisitor {
     let file: String
     let converter: SourceLocationConverter
     private(set) var units: [AnalyzedUnit] = []
+    /// 정규화 타입 이름(enclosing 체인 + 이름) → 이 파일의 raw 객체 facts. 파일 간 병합은 Analyzer.
+    private(set) var factsByQualified: [String: TypeFacts] = [:]
     private var typeStack: [String] = []
-
-    /// 정규화 타입 이름(enclosing 체인 + 이름) → 소속 메소드 측정 누적.
-    private var rollupByQualified: [String: (internal: Int, cqs: Int, combine: Int)] = [:]
-    /// 정규화 타입 이름 → units 배열 내 그 타입 유닛 인덱스(post-walk 패치용).
-    private var typeUnitIndexByQualified: [String: Int] = [:]
-    /// 정규화 타입 이름 → public/open 멤버 수.
-    private var publicSurfaceByQualified: [String: Int] = [:]
-    /// 정규화 타입 이름 → stored property 이름들.
-    private var storedPropsByQualified: [String: Set<String>] = [:]
-    /// 정규화 타입 이름 → (메소드 이름, 참조 식별자 후보, 호출 후보) 목록.
-    private var methodGraphByQualified: [String: [(name: String, uses: Set<String>, calls: Set<String>)]] = [:]
 
     private var currentQualified: String { typeStack.joined(separator: ".") }
     private func qualified(_ name: String) -> String {
@@ -87,18 +84,15 @@ private final class MethodCollector: SyntaxVisitor {
             )
         )
 
-        var acc = rollupByQualified[currentQualified] ?? (0, 0, 0)
-        acc.internal += internalC
-        acc.cqs += effects.cqsViolations
-        acc.combine += effects.combineRoleMix
-        rollupByQualified[currentQualified] = acc
-
-        if isPublicOrOpen(node.modifiers) { addSurface(1) }
-
         let uses = node.body.map { MemberUseCollector.collect(from: $0) } ?? (uses: [], calls: [])
-        methodGraphByQualified[currentQualified, default: []].append(
-            (name: node.name.text, uses: uses.uses, calls: uses.calls)
-        )
+        let isPublic = isPublicOrOpen(node.modifiers)
+        withFacts(currentQualified) {
+            $0.rollupInternal += internalC
+            $0.rollupCqs += effects.cqsViolations
+            $0.rollupCombine += effects.combineRoleMix
+            $0.methods.append(.init(name: node.name.text, uses: uses.uses, calls: uses.calls))
+            if isPublic { $0.publicSurface += 1 }
+        }
 
         return .visitChildren
     }
@@ -106,12 +100,27 @@ private final class MethodCollector: SyntaxVisitor {
     /// 타입 멤버 프로퍼티(로컬 var 제외): 표면적 카운트 + stored property 등록.
     override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
         guard node.parent?.is(MemberBlockItemSyntax.self) == true else { return .visitChildren }
-        if isPublicOrOpen(node.modifiers) { addSurface(node.bindings.count) }
-        for binding in node.bindings where isStored(binding) {
-            if let name = binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text {
-                storedPropsByQualified[currentQualified, default: []].insert(name)
-            }
+        let stored = node.bindings.compactMap { binding -> String? in
+            guard isStored(binding) else { return nil }
+            return binding.pattern.as(IdentifierPatternSyntax.self)?.identifier.text
         }
+        let isPublic = isPublicOrOpen(node.modifiers)
+        let bindingCount = node.bindings.count
+        withFacts(currentQualified) {
+            if isPublic { $0.publicSurface += bindingCount }
+            $0.storedProps.formUnion(stored)
+        }
+        return .visitChildren
+    }
+
+    /// init·subscript도 public 노출 표면적. (enum case는 v1 제외)
+    override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
+        if isPublicOrOpen(node.modifiers) { withFacts(currentQualified) { $0.publicSurface += 1 } }
+        return .visitChildren
+    }
+
+    override func visit(_ node: SubscriptDeclSyntax) -> SyntaxVisitorContinueKind {
+        if isPublicOrOpen(node.modifiers) { withFacts(currentQualified) { $0.publicSurface += 1 } }
         return .visitChildren
     }
 
@@ -132,35 +141,11 @@ private final class MethodCollector: SyntaxVisitor {
         modifiers.contains { $0.name.text == "public" || $0.name.text == "open" }
     }
 
-    private func addSurface(_ n: Int) {
-        publicSurfaceByQualified[currentQualified, default: 0] += n
-    }
-
-    /// post-walk: 정규화 타입별 누적을 타입 유닛에 패치.
-    func finalize() {
-        for (qualified, index) in typeUnitIndexByQualified {
-            if let roll = rollupByQualified[qualified] {
-                units[index].measurements.rolledUpInternalComplexity = roll.internal
-                units[index].measurements.rolledUpCqsViolations = roll.cqs
-                units[index].measurements.rolledUpCombineRoleMix = roll.combine
-            }
-            units[index].measurements.publicSurface = publicSurfaceByQualified[qualified] ?? 0
-
-            let stored = storedPropsByQualified[qualified] ?? []
-            let raw = methodGraphByQualified[qualified] ?? []
-            let methodNames = Set(raw.map { $0.name })
-            let nodes = raw.map { m in
-                MethodNode(
-                    name: m.name,
-                    referencedProps: m.uses.intersection(stored),
-                    calledMethods: m.calls.intersection(methodNames)
-                )
-            }
-            let cohesion = CohesionAnalyzer.metrics(methods: nodes)
-            units[index].measurements.lcom = cohesion.lcom
-            units[index].measurements.internalCoupling = cohesion.internalCoupling
-            units[index].measurements.maxCallChainDepth = cohesion.maxCallChainDepth
-        }
+    /// 정규화 이름의 facts를 in-place 갱신.
+    private func withFacts(_ qualified: String, _ mutate: (inout TypeFacts) -> Void) {
+        var facts = factsByQualified[qualified] ?? TypeFacts()
+        mutate(&facts)
+        factsByQualified[qualified] = facts
     }
 
     /// 반환 타입이 non-Void면 query (값·Publisher). Void/무반환 = command.
@@ -175,7 +160,7 @@ private final class MethodCollector: SyntaxVisitor {
     /// 명목 타입 선언(class/struct/enum/actor): 타입 단위 방출 + enclosing 추적.
     private func enterType(_ nameToken: TokenSyntax) -> SyntaxVisitorContinueKind {
         let line = converter.location(for: nameToken.positionAfterSkippingLeadingTrivia).line
-        typeUnitIndexByQualified[qualified(nameToken.text)] = units.count
+        withFacts(qualified(nameToken.text)) { $0.primary = .init(file: file, line: line, name: nameToken.text) }
         units.append(
             AnalyzedUnit(
                 kind: .type,

@@ -30,6 +30,18 @@ struct RollupTests {
         #expect(m?.rolledUpCombineRoleMix == 1)
     }
 
+    @Test("command의 self-write은 롤업 cqs에 안 섞인다(query 위반만 합산)")
+    func commandWriteNotInRollupCqs() {
+        // c: command(self.x=1) → cqs 0. q: query 위반 1. 롤업 cqs = 1.
+        let src = """
+        struct S {
+            func c() { self.x = 1 }
+            func q() -> Int { self.y = 1; return y }
+        }
+        """
+        #expect(type(src, name: "S")?.rolledUpCqsViolations == 1)
+    }
+
     @Test("한 파일 내 extension 메소드도 원본 타입으로 롤업")
     func rollsUpExtensionMethods() {
         let src = "struct S { func f() { if a {} } }\nextension S { func g() { if a { if b {} } } }"
