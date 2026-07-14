@@ -34,6 +34,7 @@ public struct AIJob: Sendable {
         case confirm = "CONFIRM"
         case failed = "FAILED"
         case rejected = "REJECTED"
+        case canceled = "CANCELED"
     }
     
     public enum Mode: String, Sendable {
@@ -55,6 +56,7 @@ public struct AIJob: Sendable {
             || self.status == .confirm
             || self.status == .failed
             || self.status == .rejected
+            || self.status == .canceled
     }
     
     public init(jobId: String) {
