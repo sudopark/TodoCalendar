@@ -41,7 +41,9 @@ struct InternalComplexityTests {
             source: "struct S { func m() { if x {} } }",
             file: "T.swift"
         )
-        #expect(units.first?.enclosingType == "S")
-        #expect(units.first?.name == "m")
+        let method = units.first { $0.kind == .method }
+        #expect(method?.enclosingType == "S")
+        #expect(method?.name == "m")
+        #expect(units.contains { $0.kind == .type && $0.name == "S" })
     }
 }
