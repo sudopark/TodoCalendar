@@ -107,6 +107,12 @@ struct AIJobResultMapper {
                 |> \.mutations .~ mutations
             )
 
+        case "CANCELED":
+            self.result = .canceled(
+                AIJobResult.CanceledResult()
+                |> \.mutations .~ mutations
+            )
+
         default:
             self.result = nil
         }

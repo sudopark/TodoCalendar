@@ -71,6 +71,7 @@ public enum AIJobResult: Sendable {
     case done(DoneResult)
     case confirm(ConfirmResult)
     case failed(FailResult)
+    case canceled(CanceledResult)
 }
 
 extension AIJobResult {
@@ -95,7 +96,13 @@ extension AIJobResult {
         public var reason: String?
         public var mutations: [AIJobDataMutation] = []
         public var errorCode: ServerErrorModel.ErrorCode?
-        
+
+        public init() { }
+    }
+
+    public struct CanceledResult: Sendable {
+        public var mutations: [AIJobDataMutation] = []
+
         public init() { }
     }
 }

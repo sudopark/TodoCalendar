@@ -103,6 +103,8 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
             )
         case .failed(let fail):
             self.subject.state.send(.failed(command: job.command ?? "", reason: fail.reason))
+        case .canceled:
+            self.subject.state.send(.idle)
         }
     }
 }
