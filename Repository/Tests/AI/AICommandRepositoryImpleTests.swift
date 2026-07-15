@@ -214,6 +214,22 @@ extension AICommandRepositoryImpleTests {
         XCTAssertFalse(job.isFinish)
         XCTAssertNil(job.result)
     }
+
+    func testRepository_loadJob_canceled_parsesMutations() async throws {
+        // given
+        let repository = self.makeRepository()
+
+        // when
+        let job = try await repository.loadJob("canceled_job")
+
+        // then — CANCELED result의 mutation이 파싱된다
+        XCTAssertEqual(job.status, .canceled)
+        guard case .canceled(let result) = job.result else {
+            XCTFail("expect canceled result"); return
+        }
+        XCTAssertEqual(result.mutations.map { $0.dataType }, [.todo])
+        XCTAssertEqual(result.mutations.map { $0.operation }, [.created])
+    }
 }
 
 
@@ -361,6 +377,11 @@ private struct DummyResponse {
             ),
             .init(
                 method: .get,
+                endpoint: AIAPIEndpoints.job(id: "canceled_job"),
+                resultJsonString: .success(self.canceledJobJson)
+            ),
+            .init(
+                method: .get,
                 endpoint: AIAPIEndpoints.usage,
                 resultJsonString: .success(self.usageJson)
             )
@@ -437,6 +458,23 @@ private struct DummyResponse {
             "job_id": "running_job",
             "status": "RUNNING",
             "mode": "command"
+        }
+        """
+    }
+
+    private var canceledJobJson: String {
+        return """
+        {
+            "job_id": "canceled_job",
+            "status": "CANCELED",
+            "mode": "command",
+            "result": {
+                "type": "CANCELED",
+                "text": "중지했어요",
+                "mutations": [
+                    { "dataType": "todo", "op": "created" }
+                ]
+            }
         }
         """
     }

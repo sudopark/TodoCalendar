@@ -88,6 +88,7 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
         case .done: return .done
         case .confirm: return .confirm
         case .failed: return .failed
+        case .canceled: return .canceled
         }
     }
 
