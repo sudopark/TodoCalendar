@@ -12,6 +12,7 @@ import Combine
 import Prelude
 import Optics
 import UnitTestHelpKit
+import TestDoubles
 import Extensions
 
 @testable import Domain
@@ -23,16 +24,19 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
     private var stubCommand: StubAICommandUsecase!
     private var stubUsage: StubAIAgentUsageUsecase!
     private var stubSpeech: StubSpeechRecognizeUsecase!
+    private var stubSync: StubEventSyncUsecase!
 
     private func makeUsecase(shouldFail: Bool = false) -> AIAgentOrchestrationUsecaseImple {
         self.stubCommand = .init()
         self.stubCommand.shouldFail = shouldFail
         self.stubUsage = .init()
         self.stubSpeech = .init()
+        self.stubSync = .init()
         return AIAgentOrchestrationUsecaseImple(
             commandUsecase: self.stubCommand,
             usageUsecase: self.stubUsage,
-            speechRecognizeUsecase: self.stubSpeech
+            speechRecognizeUsecase: self.stubSpeech,
+            eventSyncUsecase: self.stubSync
         )
     }
 
@@ -90,6 +94,21 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
         case .failed: return .failed
         case .canceled: return .canceled
         }
+    }
+
+    private func mutation(
+        _ type: AIJobDataMutation.DataType,
+        _ op: AIJobDataMutation.Operation = .created
+    ) -> AIJobDataMutation {
+        return AIJobDataMutation(dataType: type, operation: op)
+    }
+
+    private func doneResult(with mutations: [AIJobDataMutation]) -> AIJobResult {
+        return .done(
+            AIJobResult.DoneResult()
+            |> \.text .~ "완료"
+            |> \.mutations .~ mutations
+        )
     }
 
     private func stateName(_ state: AIAgentState) -> String {
@@ -419,6 +438,141 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         #expect(states.last.map(self.stateName) == "idle")
         #expect(self.stubCommand.didRejectParentJobId == "parent-job")
         #expect(self.stubCommand.didCancelJobId == nil)  // decline은 cancelOngoing 호출 안 함
+    }
+}
+
+
+// MARK: - job 종료 시 mutation 기반 event sync 트리거
+
+// submit은 동기 흐름(Just 방출 → handleJobResult 즉시 실행)이라 submit 반환 시점에
+// sync 트리거 판정이 끝나 있다. 별도 대기 없이 stubSync 호출을 관찰한다.
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test("done 결과에 todo mutation이 있으면 sync를 1회 트리거한다")
+    func usecase_whenDoneWithTodoMutation_triggersSyncOnce() async throws {
+        // given
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(self.doneResult(with: [self.mutation(.todo)]))
+        )
+        // when
+        try? usecase.submit("할 일 추가해줘")
+        // then
+        #expect(self.stubSync.didSyncRequested == true)
+        #expect(self.stubSync.didSyncRequestedCount == 1)
+    }
+
+    @Test(
+        "schedule/tag mutation도 sync를 트리거한다",
+        arguments: [AIJobDataMutation.DataType.schedule, .tag]
+    )
+    func usecase_whenDoneWithSyncTargetMutation_triggersSync(
+        _ type: AIJobDataMutation.DataType
+    ) async throws {
+        // given
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(self.doneResult(with: [self.mutation(type)]))
+        )
+        // when
+        try? usecase.submit("명령")
+        // then
+        #expect(self.stubSync.didSyncRequested == true)
+    }
+
+    @Test("sync 대상·비대상 mutation이 섞여 있으면 sync를 트리거한다")
+    func usecase_whenMixedMutation_triggersSync() async throws {
+        // given — 한 액션이 done+todo 여러 mutation을 낼 수 있음 (예: complete → [{todo,updated},{done,created}])
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(self.doneResult(with: [
+                self.mutation(.doneTodo), self.mutation(.todo, .updated)
+            ]))
+        )
+        // when
+        try? usecase.submit("완료 처리해줘")
+        // then
+        #expect(self.stubSync.didSyncRequested == true)
+    }
+
+    @Test("done/event_detail mutation만 있으면 sync를 트리거하지 않는다")
+    func usecase_whenDoneWithNonSyncMutationOnly_doesNotTriggerSync() async throws {
+        // given
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(self.doneResult(with: [
+                self.mutation(.doneTodo), self.mutation(.eventDetail, .updated)
+            ]))
+        )
+        // when
+        try? usecase.submit("완료 처리해줘")
+        // then
+        #expect(self.stubSync.didSyncRequested == false)
+    }
+
+    @Test("mutation이 비어있으면 sync를 트리거하지 않는다 (조회 전용 커맨드)")
+    func usecase_whenNoMutation_doesNotTriggerSync() async throws {
+        // given
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(self.doneResult(with: [])))
+        // when
+        try? usecase.submit("오늘 일정 뭐 있어?")
+        // then
+        #expect(self.stubSync.didSyncRequested == false)
+    }
+
+    @Test("confirm 결과에 sync 대상 mutation이 있으면 sync를 트리거한다")
+    func usecase_whenConfirmWithSyncTargetMutation_triggersSync() async throws {
+        // given
+        var confirm = AIJobResult.ConfirmResult()
+        confirm.text = "정말 삭제할까요?"
+        confirm.action = AIConfirmCommandAction() |> \.confirmToken .~ "tk-1"
+        confirm.mutations = [self.mutation(.schedule, .deleted)]
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(.confirm(confirm), command: "일정 삭제해줘")
+        )
+        // when
+        try? usecase.submit("일정 삭제해줘")
+        // then
+        #expect(self.stubSync.didSyncRequested == true)
+    }
+
+    @Test("failed 결과에 sync 대상 mutation이 있으면 sync를 트리거한다")
+    func usecase_whenFailedWithSyncTargetMutation_triggersSync() async throws {
+        // given
+        var fail = AIJobResult.FailResult()
+        fail.reason = "일부만 처리됨"
+        fail.mutations = [self.mutation(.todo)]
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.failed(fail)))
+        // when
+        try? usecase.submit("여러 개 추가해줘")
+        // then
+        #expect(self.stubSync.didSyncRequested == true)
+    }
+
+    @Test("canceled 결과의 커밋된 mutation도 sync를 트리거한다")
+    func usecase_whenCanceledWithMutation_triggersSync() async throws {
+        // given
+        let canceled = AIJobResult.canceled(
+            AIJobResult.CanceledResult() |> \.mutations .~ [self.mutation(.todo)]
+        )
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(canceled, status: .canceled)
+        )
+        // when
+        try? usecase.submit("추가하다 중지")
+        // then
+        #expect(self.stubSync.didSyncRequested == true)
+    }
+
+    @Test("rejected 결과(직전 confirm의 커밋된 mutation)도 sync를 트리거한다")
+    func usecase_whenRejectedWithPriorMutation_triggersSync() async throws {
+        // given — REJECTED는 result에 직전 CONFIRM 객체가 남고, 그 mutations는 confirm 이전 커밋분
+        var confirm = AIJobResult.ConfirmResult()
+        confirm.action = AIConfirmCommandAction() |> \.confirmToken .~ "tk-1"
+        confirm.mutations = [self.mutation(.schedule, .updated)]
+        let usecase = self.makeUsecaseWithCommandJob(
+            self.dummyJob(.confirm(confirm), status: .rejected)
+        )
+        // when
+        try? usecase.submit("여러 작업 후 거부")
+        // then
+        #expect(self.stubSync.didSyncRequested == true)
     }
 }
 

@@ -134,9 +134,36 @@ public struct AIJobDataMutation: Sendable {
     
     public let dataType: DataType
     public let operation: Operation
-    
+
     public init(dataType: DataType, operation: Operation) {
         self.dataType = dataType
         self.operation = operation
+    }
+}
+
+
+// MARK: - mutation event-sync 판정
+
+extension AIJobResult {
+
+    public var mutations: [AIJobDataMutation] {
+        switch self {
+        case .done(let result): return result.mutations
+        case .confirm(let result): return result.mutations
+        case .failed(let result): return result.mutations
+        case .canceled(let result): return result.mutations
+        }
+    }
+}
+
+extension AIJobDataMutation.DataType {
+
+    // 델타 event sync(eventTag/todo/schedule)로 커버되는 dataType.
+    // done은 동반 todo mutation으로 반영, event_detail은 상세화면 on-demand 로드라 제외.
+    public var requiresEventSync: Bool {
+        switch self {
+        case .todo, .schedule, .tag: return true
+        case .doneTodo, .eventDetail: return false
+        }
     }
 }
