@@ -57,6 +57,9 @@ private final class MethodCollector: SyntaxVisitor {
     override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
     override func visitPost(_ node: ActorDeclSyntax) { typeStack.removeLast() }
 
+    override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
+    override func visitPost(_ node: ProtocolDeclSyntax) { typeStack.removeLast() }
+
     // extension은 타입 선언이 아니므로 타입 단위를 새로 내지 않고, enclosing type 추적만.
     override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
         push(node.extendedType.trimmedDescription)
