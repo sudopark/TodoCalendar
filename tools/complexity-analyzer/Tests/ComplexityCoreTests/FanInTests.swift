@@ -7,6 +7,8 @@ final class StubIndexProvider: IndexProviding {
     var usrByLocation: [String: String] = [:]
     /// usr → 그 usr을 참조하는 지점들
     var referencesByUSR: [String: [ReferenceSite]] = [:]
+    /// usr → 그 심볼을 감싸는 타입 usr
+    var enclosingByUSR: [String: String] = [:]
     private(set) var queriedUSRs: [String] = []
 
     func definitionUSR(named name: String, file: String, line: Int) -> String? {
@@ -16,6 +18,10 @@ final class StubIndexProvider: IndexProviding {
     func references(toUSR usr: String) -> [ReferenceSite] {
         queriedUSRs.append(usr)
         return referencesByUSR[usr] ?? []
+    }
+
+    func enclosingTypeUSR(of usr: String) -> String? {
+        enclosingByUSR[usr]
     }
 }
 

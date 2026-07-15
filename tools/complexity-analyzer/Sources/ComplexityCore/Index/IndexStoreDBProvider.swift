@@ -85,6 +85,36 @@ public struct IndexStoreDBProvider: IndexProviding {
         }
     }
 
+    /// 심볼을 감싸는 최근접 명목 타입 USR. childOf 관계를 타고 올라가며 판정.
+    /// - 부모가 struct/class/enum/protocol → 그 USR
+    /// - 부모가 extension → 확장 대상 명목 타입으로 해소(extension USR은 타입 USR이 아님)
+    /// - 부모가 중첩 함수 등 → 한 단계 더 위로 (깊이 상한 8)
+    public func enclosingTypeUSR(of usr: String) -> String? {
+        resolveEnclosingType(of: usr, depth: 0)
+    }
+
+    private func resolveEnclosingType(of usr: String, depth: Int) -> String? {
+        guard depth < 8 else { return nil }
+        guard let def = index.occurrences(ofUSR: usr, roles: .definition).first else { return nil }
+        if Self.isNominalType(def.symbol.kind) { return usr }
+        guard let parent = def.relations.first(where: { $0.roles.contains(.childOf) })?.symbol
+        else { return nil }
+        if Self.isNominalType(parent.kind) { return parent.usr }
+        if parent.kind == .extension {
+            return index.occurrences(relatedToUSR: parent.usr, roles: .all)
+                .first { Self.isNominalType($0.symbol.kind) }?.symbol.usr
+        }
+        return resolveEnclosingType(of: parent.usr, depth: depth + 1)
+    }
+
+    /// index가 명목 타입으로 인덱싱하는 kind (actor는 .class로 들어옴).
+    private static func isNominalType(_ kind: IndexSymbolKind) -> Bool {
+        switch kind {
+        case .struct, .class, .enum, .protocol: return true
+        default: return false
+        }
+    }
+
     /// 경로 비교 정규화 — /private 심볼릭·상대 표기 차이를 흡수.
     private static func resolvedPath(_ path: String) -> String {
         URL(fileURLWithPath: path).resolvingSymlinksInPath().path
