@@ -110,6 +110,8 @@ struct TypeDependencyGraph {
         let sizeOf: [String: Int]
     }
 
+    // force unwrap은 Tarjan 불변식상 안전: 외부 루프가 nodes 전체를 방문하고, 도달 가능한
+    // 노드는 재귀 진입 시 반드시 indexOf/lowlink가 먼저 채워진다.
     private func computeSCC() -> SCCResult {
         var indexOf: [String: Int] = [:]
         var lowlink: [String: Int] = [:]

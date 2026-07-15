@@ -101,10 +101,24 @@ public struct IndexStoreDBProvider: IndexProviding {
         else { return nil }
         if Self.isNominalType(parent.kind) { return parent.usr }
         if parent.kind == .extension {
-            return index.occurrences(relatedToUSR: parent.usr, roles: .all)
-                .first { Self.isNominalType($0.symbol.kind) }?.symbol.usr
+            // extension USR과 관련된 occurrence엔 확장 대상 타입(extendedBy)뿐 아니라
+            // 그 extension 본문의 중첩 명목 타입(childOf)도 섞인다. 둘 다 nominal이라
+            // kind만으로 고르면 중첩 타입을 오인할 수 있으므로 extendedBy role로 가른다.
+            let candidates = index.occurrences(relatedToUSR: parent.usr, roles: .all)
+                .map { (isExtendedBy: $0.roles.contains(.extendedBy),
+                        isNominal: Self.isNominalType($0.symbol.kind),
+                        usr: $0.symbol.usr) }
+            return Self.pickExtendedType(candidates)
         }
         return resolveEnclosingType(of: parent.usr, depth: depth + 1)
+    }
+
+    /// extension 관련 occurrence 후보 중 확장 대상 명목 타입만 고른다(중첩 멤버 타입 제외).
+    /// occurrence 반환 순서 보장이 없으므로 role로 확정 — 순서 무관하게 결정적.
+    static func pickExtendedType(
+        _ candidates: [(isExtendedBy: Bool, isNominal: Bool, usr: String)]
+    ) -> String? {
+        candidates.first { $0.isExtendedBy && $0.isNominal }?.usr
     }
 
     /// index가 명목 타입으로 인덱싱하는 kind (actor는 .class로 들어옴).
