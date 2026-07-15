@@ -1,15 +1,21 @@
 import Foundation
 
-/// 페이즈 1 오케스트레이션 — 파일 스캔 → 측정(내부 복잡도·fan-in) → scope 필터.
-/// 총점·가중 합성은 후속 페이즈(5).
+/// 오케스트레이션 — 파일 스캔 → 측정(내부 복잡도·fan-in·객체·협업그래프) → scope 필터 → 채점.
+/// 총점·가중 합성은 Scorer(페이즈 5).
 public struct Analyzer {
 
     private let index: any IndexProviding
     private let scanner: SyntaxScanner
+    private let config: ScoringConfig
 
-    public init(index: any IndexProviding, scanner: SyntaxScanner = SyntaxScanner()) {
+    public init(
+        index: any IndexProviding,
+        scanner: SyntaxScanner = SyntaxScanner(),
+        config: ScoringConfig = .default
+    ) {
         self.index = index
         self.scanner = scanner
+        self.config = config
     }
 
     public func analyze(sourceRoot: String, scope: Scope) throws -> [AnalyzedUnit] {
@@ -47,6 +53,7 @@ public struct Analyzer {
         let objectPatched = ObjectMetricsAggregator.patched(units: units, factsByQualified: factsByQualified)
         // 협업 그래프는 whole-scope에서 빌드(엣지가 scope 경계를 넘나듦) → 부착 후 필터.
         let graphPatched = TypeGraphAggregator.patched(units: objectPatched, index: index, maxBlastHop: 2)
-        return graphPatched.filter { scope.includes($0) }
+        // 점수는 per-unit pure라 scope 필터 후 부착(드롭될 유닛은 채점 안 함).
+        return Scorer(config: config).scored(graphPatched.filter { scope.includes($0) })
     }
 }

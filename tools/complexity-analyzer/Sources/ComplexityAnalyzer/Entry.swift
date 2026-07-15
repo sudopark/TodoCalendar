@@ -23,13 +23,23 @@ struct ComplexityAnalyzerCLI: AsyncParsableCommand {
     var libIndexStore: String =
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libIndexStore.dylib"
 
+    @Option(name: .customLong("config"), help: "스코어링 config JSON 경로 (생략 시 기본 가중치)")
+    var configPath: String?
+
     func run() async throws {
         let index = try IndexStoreDBProvider(
             storePath: indexStorePath,
             databasePath: NSTemporaryDirectory() + "cx-idx-" + UUID().uuidString,
             libIndexStorePath: libIndexStore
         )
-        let units = try Analyzer(index: index).analyze(
+        let config: ScoringConfig
+        if let configPath {
+            let data = try Data(contentsOf: URL(fileURLWithPath: configPath))
+            config = try JSONDecoder().decode(ScoringConfig.self, from: data)
+        } else {
+            config = .default
+        }
+        let units = try Analyzer(index: index, config: config).analyze(
             sourceRoot: sourceRoot,
             scope: Scope.parse(scope)
         )
