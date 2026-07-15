@@ -69,6 +69,7 @@ public struct AnalyzedUnit: Equatable, Sendable, Encodable {
     public let file: String
     public let line: Int
     public var measurements: Measurements
+    public var score: Score?
 
     public init(
         kind: Kind,
@@ -76,7 +77,8 @@ public struct AnalyzedUnit: Equatable, Sendable, Encodable {
         enclosingType: String?,
         file: String,
         line: Int,
-        measurements: Measurements = .init()
+        measurements: Measurements = .init(),
+        score: Score? = nil
     ) {
         self.kind = kind
         self.name = name
@@ -84,5 +86,6 @@ public struct AnalyzedUnit: Equatable, Sendable, Encodable {
         self.file = file
         self.line = line
         self.measurements = measurements
+        self.score = score
     }
 }
