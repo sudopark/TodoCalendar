@@ -46,15 +46,18 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
     private let commandUsecase: any AICommandUsecase
     private let usageUsecase: any AIAgentUsageUsecase
     private let speechRecognizeUsecase: any SpeechRecognizeUsecase
+    private let eventSyncUsecase: any EventSyncUsecase
 
     public init(
         commandUsecase: any AICommandUsecase,
         usageUsecase: any AIAgentUsageUsecase,
-        speechRecognizeUsecase: any SpeechRecognizeUsecase
+        speechRecognizeUsecase: any SpeechRecognizeUsecase,
+        eventSyncUsecase: any EventSyncUsecase
     ) {
         self.commandUsecase = commandUsecase
         self.usageUsecase = usageUsecase
         self.speechRecognizeUsecase = speechRecognizeUsecase
+        self.eventSyncUsecase = eventSyncUsecase
     }
 
     private struct Subject {
@@ -85,6 +88,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
 
     private func handleJobResult(_ job: AIJob) {
         guard job.isFinish else { return }
+        self.triggerEventSyncIfNeeded(job.result)
         if job.status == .rejected || job.status == .canceled {
             self.subject.state.send(.idle)
             return
@@ -106,6 +110,15 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
         case .canceled:
             self.subject.state.send(.idle)
         }
+    }
+
+    // job이 데이터를 바꿨으면(sync 대상 mutation) 델타 sync 1회.
+    // 실제 재조회는 sync→syncEnd→CalendarViewModel.refreshEvents 체인이 처리.
+    private func triggerEventSyncIfNeeded(_ result: AIJobResult?) {
+        guard let result,
+              result.mutations.contains(where: { $0.dataType.requiresEventSync })
+        else { return }
+        self.eventSyncUsecase.sync()
     }
 }
 

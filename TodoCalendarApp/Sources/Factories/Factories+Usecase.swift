@@ -68,10 +68,11 @@ struct NonLoginUsecaseFactoryImple: UsecaseFactory {
         self.aiAgentOrchestrationUsecase = AIAgentOrchestrationUsecaseImple(
             commandUsecase: aiCommandUsecase,
             usageUsecase: aiUsageUsecase,
-            speechRecognizeUsecase: speech
+            speechRecognizeUsecase: speech,
+            eventSyncUsecase: self.eventSyncUsecase
         )
     }
-    
+
     var eventNotifyService: SharedEventNotifyService {
         return self.applicationBase.eventNotifyService
     }
@@ -475,7 +476,8 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
         self.aiAgentOrchestrationUsecase = AIAgentOrchestrationUsecaseImple(
             commandUsecase: aiCommandUsecase,
             usageUsecase: aiUsageUsecase,
-            speechRecognizeUsecase: speech
+            speechRecognizeUsecase: speech,
+            eventSyncUsecase: self.eventSyncUsecase
         )
     }
 
