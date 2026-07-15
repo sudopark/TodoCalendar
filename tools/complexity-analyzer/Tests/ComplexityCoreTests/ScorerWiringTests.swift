@@ -23,6 +23,16 @@ struct ScorerWiringTests {
         #expect(type?.measurements.publicSurface != nil)
     }
 
+    @Test("non-default config가 점수를 실제로 바꾼다 (--config 계약)")
+    func customConfigChangesScore() {
+        let m = Measurements(publicSurface: 10)
+        let base = Scorer(config: .default).scoreType(m).breakdown["publicSurface"]!
+        var c = ScoringConfig.default
+        c.publicSurface = .init(cap: c.publicSurface.cap, weight: c.publicSurface.weight * 2)
+        let doubled = Scorer(config: c).scoreType(m).breakdown["publicSurface"]!
+        #expect(doubled == base * 2)
+    }
+
     @Test("JSON 출력에 score.total이 포함")
     func jsonIncludesScore() throws {
         let unit = AnalyzedUnit(kind: .type, name: "A", enclosingType: nil, file: "F.swift", line: 1,

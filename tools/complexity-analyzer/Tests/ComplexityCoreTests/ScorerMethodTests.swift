@@ -50,4 +50,22 @@ struct ScorerMethodTests {
         // 0.5 + 3.0 + 0(roleMix) + 0(fanIn) = 3.5
         #expect(sc.total == 3.5)
     }
+
+    @Test("cap ≤ 0이면 축적형 기여 0 (--config 방어)")
+    func nonPositiveCapIsZero() {
+        var c = config()
+        c.internalComplexity = .init(cap: 0, weight: 1.0)
+        #expect(Scorer(config: c).scoreMethod(.init(internalComplexity: 50)).breakdown["internalComplexity"] == 0)
+        c.internalComplexity = .init(cap: -5, weight: 1.0)
+        #expect(Scorer(config: c).scoreMethod(.init(internalComplexity: 50)).breakdown["internalComplexity"] == 0)
+    }
+
+    @Test("hopWeights가 hop 배열보다 짧으면 꼬리 hop은 truncate (--config로 짧게 준 경우)")
+    func hopWeightsShorterTruncates() {
+        var c = config()
+        c.methodFanIn = .init(cap: 100, weight: 1.0)
+        c.hopWeights = [1.0]  // hop1·2 가중 없음
+        // fanInByHop [10,20,5] → 10*1 = 10 (hop1·2 탈락) / cap 100 = 0.1
+        #expect(Scorer(config: c).scoreMethod(.init(fanInByHop: [10, 20, 5])).breakdown["fanIn"] == 0.1)
+    }
 }
