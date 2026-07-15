@@ -14,6 +14,10 @@ public struct Measurements: Equatable, Sendable, Encodable {
     public var lcom: Int?
     public var internalCoupling: Int?
     public var maxCallChainDepth: Int?
+    public var fanOut: Int?
+    public var dependencyCycleSize: Int?
+    public var collaborationChainDepth: Int?
+    public var blastRadiusByHop: [Int]?
 
     public init(
         internalComplexity: Int? = nil,
@@ -27,7 +31,11 @@ public struct Measurements: Equatable, Sendable, Encodable {
         publicSurface: Int? = nil,
         lcom: Int? = nil,
         internalCoupling: Int? = nil,
-        maxCallChainDepth: Int? = nil
+        maxCallChainDepth: Int? = nil,
+        fanOut: Int? = nil,
+        dependencyCycleSize: Int? = nil,
+        collaborationChainDepth: Int? = nil,
+        blastRadiusByHop: [Int]? = nil
     ) {
         self.internalComplexity = internalComplexity
         self.fanIn = fanIn
@@ -41,6 +49,10 @@ public struct Measurements: Equatable, Sendable, Encodable {
         self.lcom = lcom
         self.internalCoupling = internalCoupling
         self.maxCallChainDepth = maxCallChainDepth
+        self.fanOut = fanOut
+        self.dependencyCycleSize = dependencyCycleSize
+        self.collaborationChainDepth = collaborationChainDepth
+        self.blastRadiusByHop = blastRadiusByHop
     }
 }
 

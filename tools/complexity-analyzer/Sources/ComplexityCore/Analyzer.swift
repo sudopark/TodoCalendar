@@ -44,7 +44,9 @@ public struct Analyzer {
             }
         }
 
-        let patched = ObjectMetricsAggregator.patched(units: units, factsByQualified: factsByQualified)
-        return patched.filter { scope.includes($0) }
+        let objectPatched = ObjectMetricsAggregator.patched(units: units, factsByQualified: factsByQualified)
+        // 협업 그래프는 whole-scope에서 빌드(엣지가 scope 경계를 넘나듦) → 부착 후 필터.
+        let graphPatched = TypeGraphAggregator.patched(units: objectPatched, index: index, maxBlastHop: 2)
+        return graphPatched.filter { scope.includes($0) }
     }
 }

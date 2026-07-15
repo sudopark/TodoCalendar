@@ -112,6 +112,43 @@ struct AnalyzerTests {
         #expect(s?.publicSurface == 2)
     }
 
+    @Test("협업 그래프 측정이 타입 유닛에 실린다")
+    func graphMeasuresAttached() throws {
+        // 타입 A(line1)·B(line2). A의 메소드 mA가 B 참조 → 엣지 A→B.
+        let dir = try writeTempDir(["G.swift": "struct A { func mA() {} }\nstruct B {}"])
+        let stub = StubIndexProvider()
+        stub.usrByLocation["A@\(dir)/G.swift:1"] = "uA"
+        stub.usrByLocation["B@\(dir)/G.swift:2"] = "uB"
+        stub.referencesByUSR["uB"] = [.init(callerUSRs: ["umA"])]
+        stub.enclosingByUSR["umA"] = "uA"
+
+        let units = try Analyzer(index: stub).analyze(sourceRoot: dir, scope: .whole)
+        let a = units.first { $0.kind == .type && $0.name == "A" }?.measurements
+        let b = units.first { $0.kind == .type && $0.name == "B" }?.measurements
+        #expect(a?.fanOut == 1)
+        #expect(a?.collaborationChainDepth == 2)
+        #expect(b?.fanOut == 0)
+        #expect(b?.blastRadiusByHop == [1, 0, 0])
+        #expect(b?.dependencyCycleSize == 1)
+    }
+
+    @Test("협업 그래프 측정 키가 JSON에 나온다")
+    func graphMeasuresInJSON() throws {
+        let dir = try writeTempDir(["G.swift": "struct A { func mA() {} }\nstruct B {}"])
+        let stub = StubIndexProvider()
+        stub.usrByLocation["A@\(dir)/G.swift:1"] = "uA"
+        stub.usrByLocation["B@\(dir)/G.swift:2"] = "uB"
+        stub.referencesByUSR["uB"] = [.init(callerUSRs: ["umA"])]
+        stub.enclosingByUSR["umA"] = "uA"
+
+        let units = try Analyzer(index: stub).analyze(sourceRoot: dir, scope: .whole)
+        let json = try JSONReporter().string(for: units)
+        #expect(json.contains("\"fanOut\""))
+        #expect(json.contains("\"dependencyCycleSize\""))
+        #expect(json.contains("\"collaborationChainDepth\""))
+        #expect(json.contains("\"blastRadiusByHop\""))
+    }
+
     @Test("Scope 파싱")
     func scopeParsing() {
         #expect(Scope.parse("whole") == .whole)
