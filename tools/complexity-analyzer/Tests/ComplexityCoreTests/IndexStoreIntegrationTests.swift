@@ -63,6 +63,34 @@ struct IndexStoreIntegrationTests {
         #expect(provider.references(toUSR: usr).count > 0)
     }
 
+    @Test("실 index에서 caller USR을 enclosing 타입으로 해소")
+    func enclosingTypeResolves() throws {
+        guard let storePath = Self.indexStorePath,
+              FileManager.default.fileExists(atPath: Self.libIndexStore)
+        else { return }
+
+        let source = Self.repoRoot + "/Domain/Sources/Models/Events/Todo/TodoEvent.swift"
+        guard let content = try? String(contentsOfFile: source, encoding: .utf8),
+              let todoEvent = SyntaxScanner().scan(source: content, file: source)
+                .first(where: { $0.kind == .type && $0.name == "TodoEvent" })
+        else { return }
+
+        let provider = try IndexStoreDBProvider(
+            storePath: storePath,
+            databasePath: NSTemporaryDirectory() + "cx-idx-" + UUID().uuidString,
+            libIndexStorePath: Self.libIndexStore
+        )
+        // 워크트리 mismatch면 USR nil → 스모크 불가로 skip (bare-name 아닌 path-specific USR).
+        guard let usr = provider.definitionUSR(named: "TodoEvent", file: source, line: todoEvent.line)
+        else { return }
+
+        // TodoEvent를 참조하는 caller가 있고, 그 caller는 어떤 타입에 속한다.
+        let callers = provider.references(toUSR: usr).flatMap { $0.callerUSRs }
+        guard let firstCaller = callers.first else { return }
+        // caller의 enclosing 타입이 실 index에서 해소되면 non-nil (childOf/extension 경로 실동작 증명).
+        #expect(provider.enclosingTypeUSR(of: firstCaller) != nil)
+    }
+
     @Test("빈/없는 index store는 명시 throw (silent-0 방지)")
     func emptyOrMissingStoreThrows() throws {
         // 없는 경로

@@ -13,4 +13,7 @@ public protocol IndexProviding {
     func definitionUSR(named name: String, file: String, line: Int) -> String?
     /// 이 USR을 참조하는 지점들. 각 지점은 자신을 감싸는 caller USR을 함께 담는다.
     func references(toUSR usr: String) -> [ReferenceSite]
+    /// 이 심볼(메소드/프로퍼티/생성자 등)을 감싸는 최근접 명목 타입(struct/class/enum/protocol)의 USR.
+    /// extension 멤버는 확장 대상 타입으로 해소. enclosing 타입이 없으면 nil.
+    func enclosingTypeUSR(of usr: String) -> String?
 }
