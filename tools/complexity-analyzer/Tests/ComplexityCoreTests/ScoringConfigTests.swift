@@ -34,4 +34,21 @@ struct ScoringConfigTests {
         let decoded = try JSONDecoder().decode(ScoringConfig.self, from: data)
         #expect(decoded == original)
     }
+
+    @Test("부분 JSON은 준 필드만 override, 나머지는 기본값")
+    func partialOverride() throws {
+        let json = "{\"rollupAlpha\": 0.9, \"internalComplexity\": {\"cap\": 99, \"weight\": 2.0}}"
+        let c = try JSONDecoder().decode(ScoringConfig.self, from: Data(json.utf8))
+        #expect(c.rollupAlpha == 0.9)
+        #expect(c.internalComplexity == .init(cap: 99, weight: 2.0))
+        // 안 준 필드는 기본값 유지
+        #expect(c.dependencyCycleSize == ScoringConfig.default.dependencyCycleSize)
+        #expect(c.hopWeights == ScoringConfig.default.hopWeights)
+    }
+
+    @Test("빈 JSON 객체는 전부 기본값")
+    func emptyJsonIsAllDefault() throws {
+        let c = try JSONDecoder().decode(ScoringConfig.self, from: Data("{}".utf8))
+        #expect(c == ScoringConfig.default)
+    }
 }

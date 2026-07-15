@@ -81,6 +81,38 @@ public struct ScoringConfig: Equatable, Sendable, Codable {
         self.rollupAlpha = rollupAlpha
     }
 
+    // MARK: - 부분 override 디코딩
+
+    /// `--config` JSON은 일부 필드만 줘도 된다 — 없는 축은 `.default`로 fallback.
+    /// all-or-nothing을 피해 "가중치 하나만 튜닝"을 허용하고, 축 추가 시 기존 JSON이 깨지지 않게 한다.
+    public init(from decoder: any Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = ScoringConfig.default
+        func acc(_ k: CodingKeys, _ fallback: AccumulativeParam) throws -> AccumulativeParam {
+            try c.decodeIfPresent(AccumulativeParam.self, forKey: k) ?? fallback
+        }
+        func pat(_ k: CodingKeys, _ fallback: PathologyParam) throws -> PathologyParam {
+            try c.decodeIfPresent(PathologyParam.self, forKey: k) ?? fallback
+        }
+        self.internalComplexity = try acc(.internalComplexity, d.internalComplexity)
+        self.methodFanIn = try acc(.methodFanIn, d.methodFanIn)
+        self.cqsViolations = try pat(.cqsViolations, d.cqsViolations)
+        self.combineRoleMix = try pat(.combineRoleMix, d.combineRoleMix)
+        self.publicSurface = try acc(.publicSurface, d.publicSurface)
+        self.internalCoupling = try acc(.internalCoupling, d.internalCoupling)
+        self.maxCallChainDepth = try acc(.maxCallChainDepth, d.maxCallChainDepth)
+        self.lcom = try pat(.lcom, d.lcom)
+        self.fanOut = try acc(.fanOut, d.fanOut)
+        self.collaborationChainDepth = try acc(.collaborationChainDepth, d.collaborationChainDepth)
+        self.blastRadius = try acc(.blastRadius, d.blastRadius)
+        self.dependencyCycleSize = try pat(.dependencyCycleSize, d.dependencyCycleSize)
+        self.rolledUpInternalComplexity = try acc(.rolledUpInternalComplexity, d.rolledUpInternalComplexity)
+        self.rolledUpCqsViolations = try pat(.rolledUpCqsViolations, d.rolledUpCqsViolations)
+        self.rolledUpCombineRoleMix = try pat(.rolledUpCombineRoleMix, d.rolledUpCombineRoleMix)
+        self.hopWeights = try c.decodeIfPresent([Double].self, forKey: .hopWeights) ?? d.hopWeights
+        self.rollupAlpha = try c.decodeIfPresent(Double.self, forKey: .rollupAlpha) ?? d.rollupAlpha
+    }
+
     /// reasoned default — 전형적 Swift 코드 기준 "이 값에서 완전히 나쁨"을 cap으로,
     /// 병리형은 축적형 최대 기여를 압도하는 penalty로. 실측 튜닝 전 출발점.
     public static let `default` = ScoringConfig(

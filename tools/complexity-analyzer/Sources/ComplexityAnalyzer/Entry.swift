@@ -23,7 +23,7 @@ struct ComplexityAnalyzerCLI: AsyncParsableCommand {
     var libIndexStore: String =
         "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/libIndexStore.dylib"
 
-    @Option(name: .customLong("config"), help: "스코어링 config JSON 경로 (생략 시 기본 가중치)")
+    @Option(name: .customLong("config"), help: "스코어링 config JSON 경로 (생략 시 기본 가중치, 일부 필드만 줘도 나머지는 기본값)")
     var configPath: String?
 
     func run() async throws {
