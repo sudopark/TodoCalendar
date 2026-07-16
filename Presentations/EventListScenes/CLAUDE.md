@@ -6,25 +6,6 @@
 
 ---
 
-## 폴더 구조
-
-```
-EventListScenes/
-├── Sources/
-│   ├── EventListSceneBuilderImple.swift        — 프레임워크 진입점
-│   └── DoneTodoList/
-│       ├── DoneTodoEventListScene+Builder.swift
-│       ├── DoneTodoEventListBuilderImple.swift
-│       ├── DoneTodoEventListViewController.swift  — UIHostingController
-│       ├── DoneTodoEventListViewModel.swift       — 목록/페이지네이션/되돌리기/삭제
-│       ├── DoneTodoEventListView.swift            — SwiftUI 목록 UI
-│       └── DoneTodoEventListRouter.swift          — 상세/삭제 범위 선택 라우팅
-│
-└── Tests/
-```
-
----
-
 ## Scene 상세
 
 ### DoneTodoEventList

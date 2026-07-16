@@ -6,51 +6,6 @@
 
 ---
 
-## 폴더 구조
-
-```
-EventDetailScene/
-├── Sources/
-│   ├── EventDetailViewController.swift        — UIHostingController (메인 상세 화면)
-│   ├── EventDetailRouter.swift                — 모달 Scene 라우팅 허브
-│   ├── EventDetailSceneBuilderImple.swift      — 전체 Scene 조립
-│   ├── EventDetailViewModel.swift             — 기본 프로토콜 + 데이터 모델
-│   │
-│   ├── ViewModels/                            — 메인 ViewModel 3종
-│   │   ├── AddEventViewModel.swift            — 새 이벤트 생성
-│   │   ├── EditTodoEventDetailViewModelImple.swift    — 기존 Todo 편집
-│   │   └── EditScheduleEventDetailViewModelImple.swift — 기존 Schedule 편집
-│   │
-│   ├── EventDetailInput/                      — 입력 폼 로직 (공유)
-│   │   ├── EventDetailInputViewModel.swift    — 이름/시간/태그/알림/장소/URL/메모
-│   │   └── SelectMapApp/                      — 지도 앱 선택 다이얼로그
-│   │
-│   ├── Components/                            — 프레임워크 스코프 공용 뷰
-│   │   ├── EventTimeTextView.swift            — 시간 텍스트 라벨 (연/일/시각)
-│   │   └── LandmarkLabelView.swift            — 장소 라벨 (이름+주소+xmark)
-│   │
-│   ├── Models/                                — 데이터 모델
-│   │   ├── EventDetailBasicData.swift
-│   │   ├── EventDetailData.swift
-│   │   ├── OriginalAndCurrent.swift           — 변경 추적 래퍼
-│   │   └── SelectedTime.swift
-│   │
-│   ├── Selections/                            — 선택 모달 Scene들
-│   │   ├── SelectEventRepeatOption/           — 반복 옵션 선택
-│   │   ├── SelectEventTag/                    — 태그 선택 (+ 태그 생성/목록)
-│   │   └── SelectEventNotificationTime/       — 알림 시간 선택
-│   │
-│   ├── HolidayDetail/                         — 공휴일 상세 (읽기 전용)
-│   ├── ExernalCalendar/Google/                — 구글 캘린더 이벤트 상세
-│   ├── DoneTodoDetail/                        — 완료 Todo 상세 + 되돌리기
-│   │
-│   └── GuideView/                             — 가이드 팝업 (TodoEvent, ForemostEvent)
-│
-└── Tests/
-```
-
----
-
 ## Scene 구성
 
 ### Scene 계층도

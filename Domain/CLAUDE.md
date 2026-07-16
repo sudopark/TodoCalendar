@@ -3,62 +3,6 @@
 앱의 모든 **비즈니스 모델**, **Repository 프로토콜**, **Usecase 구현**이 위치하는 프레임워크.
 Repository 구현체는 여기 없고 프로토콜만 정의한다. 구현은 `Repository/` 프레임워크에 있다.
 
-## 폴더 구조
-
-```
-Domain/Sources/
-├── Models/
-│   ├── Account/        — OAuth2, Auth+Account, ExternalServiceAccountinfo
-│   ├── Calendar/       — CalendarComponent, CalendarMonth, Holiday, Times
-│   ├── Common/         — ClientErrorKeys, LinkPreview, ServerErrorModel, SupportMapApp
-│   ├── Events/
-│   │   ├── ExternalCalendar/  — GoogleCalendar.Event/Tag/Colors
-│   │   ├── Repeating/  — EventRepeating, EventRepeatingOption (6종)
-│   │   ├── Schedule/   — ScheduleEvent, RepeatingTimes
-│   │   ├── Todo/       — TodoEvent, DoneTodoEvent
-│   │   ├── EventTag.swift          — EventTagId enum + EventTag 프로토콜
-│   │   ├── EventTime.swift         — at/period/allDay 3가지 시간 표현
-│   │   ├── EventDetailData.swift
-│   │   ├── EventSync.swift
-│   │   ├── EventUploadingTask.swift
-│   │   └── ForemostEvent.swift
-│   ├── Notifications/  — EventNotification, EventNotificationTimeOption
-│   ├── Settings/       — AppearanceSettings, EventSettings, FeedbackPostMessage
-│   └── AppUpdateInfo.swift — AppUpdateInfo, AppUpdateRequirement (강제/권장 업데이트 판정)
-├── Repositories/       — Repository 프로토콜 (구현 없음, 16개)
-│   ├── Auth/           — AuthRepository, ExternalServiceIntegrateRepository
-│   ├── Calendar/       — CalendarSettingRepository, HolidayRepository
-│   ├── Events/         — TodoEventRepository, ScheduleEventRepository, EventTagRepository,
-│   │                     ForemostEventRepository, GoogleCalendarRepository, EventDetailDataRepository,
-│   │                     EventSyncRepository
-│   ├── Notification/   — EventNotificationRepository
-│   ├── Setting/        — AppSettingRepository, FeedbackRepository, TemporaryUserDataMigrationRepository
-│   └── AppRepository.swift — 앱 메타 정보 (업데이트 체크 JSON 조회)
-├── Usecases/           — Usecase 구현
-│   ├── Account/
-│   │   ├── ExternalServiceIntegration/  — ExternalCalendarIntegrationUsecase (protocol + Imple)
-│   │   ├── OAuth2/     — OAuth2ServiceUsecase, Apple/Google OAuth2 Imple
-│   │   ├── AuthUsecase, AccountUsecase, AccountUsecaseImple
-│   ├── Calendar/       — CalendarUsecase, CalendarSettingUsecase, HolidayUsecase
-│   ├── Common/         — PagingUsecase, LinkPreviewFetchUsecase, PlaceSuggestUsecase
-│   ├── Events/
-│   │   ├── ExternalCalendar/  — GoogleCalendarUsecase (protocol + Imple)
-│   │   ├── TodoEventUsecase, ScheduleEventUsecase, EventTagUsecase
-│   │   ├── ForemostEventUsecase, EventSyncUsecase
-│   │   ├── DaysIntervalCountUsecase, DoneTodoEventsPagingUsecase
-│   │   ├── EventDetailDataUsecase (typealias)
-│   │   └── MemorizedEventsContainer.swift
-│   ├── Notification/   — EventNotificationUsecase, NotificationPermissionUsecase, UserNotificationUsecase
-│   ├── Setting/        — UISettingUsecase, AppSettingUsecase, EventSettingUsecase, EventNotificationSettingUsecase
-│   └── Support/        — FeedbackUsecase, AppUpdateCheckUsecase
-└── Utils/
-    ├── SharedDataStore.swift
-    ├── SharedEventNotifyService.swift
-    ├── EventRepeatTimeEnumerator.swift
-    ├── FeatureFlag.swift
-    └── RRuleParser.swift
-```
-
 ## Usecase 작성 규칙
 
 ### 서브도메인 분리 기준
@@ -85,29 +29,7 @@ public typealias EventDetailDataUsecase = EventDetailDataRepository
 모든 Usecase가 공유하는 중앙 상태 저장소. Combine 기반으로 변화가 즉시 전파된다.
 `Domain/Sources/Utils/SharedDataStore.swift`
 
-### 주요 키 (ShareDataKeys)
-
-| 키 | 타입 | 담당 Usecase |
-|---|---|---|
-| `accountInfo` | `AccountInfo` | AccountUsecase |
-| `todos` | `[String: TodoEvent]` | TodoEventUsecase |
-| `uncompletedTodos` | `[TodoEvent]` | TodoEventUsecase |
-| `schedules` | `MemorizedEventsContainer<ScheduleEvent>` | ScheduleEventUsecase |
-| `tags` | `[EventTagId: any EventTag]` | EventTagUsecase |
-| `offEventTagSet` | `Set<EventTagId>` | EventTagUsecase |
-| `defaultEventTagColor` | `[EventTagId: String]` | EventTagUsecase |
-| `foremostEventId` | `ForemostEventId` | ForemostEventUsecase |
-| `foremostMarkingStatus` | `ForemostMarkingStatus` | ForemostEventUsecase |
-| `googleCalendarTags` | `[String: [GoogleCalendar.Tag]]` | GoogleCalendarUsecase |
-| `googleCalendarEvents` | `[String: GoogleCalendar.Event]` | GoogleCalendarUsecase |
-| `externalCalendarAccounts` | `[String: [ExternalServiceAccountinfo]]` | ExternalCalendarIntegrationUsecase |
-| `calendarAppearance` | `CalendarAppearanceSettings` | UISettingUsecase |
-| `eventSetting` | `EventSettings` | EventSettingUsecase |
-| `timeZone` | `TimeZone` | CalendarSettingUsecase |
-| `firstWeekDay` | `DayOfWeeks` | CalendarSettingUsecase |
-| `currentCountry` | `String` | HolidayUsecase |
-| `availableCountries` | `[String]` | HolidayUsecase |
-| `holidays` | `[Int: [Holiday]]` | HolidayUsecase |
+키 목록은 `Domain/Sources/Utils/SharedDataStore.swift`의 `ShareDataKeys` enum 참조.
 
 ### 사용 패턴
 
@@ -176,6 +98,17 @@ self.eventNotifyService.event<RefreshingEvent>()
 
 ---
 
+## 반복 이벤트 turn 규칙
+
+반복 이벤트 회차 추적. 없으면 count 기반 종료가 깨지는 핵심 불변식. 상세·엣지케이스는 [`docs/spec/repeating-events.md`](../docs/spec/repeating-events.md).
+
+- turn은 1부터. `EventRepeatTimeEnumerator.nextEventTime`은 항상 `from.turn + 1` 반환.
+- `TodoEvent.repeatingTurn`: 현재 회차 (`nil` = turn 1). 완료·수정·삭제·스킵마다 다음 turn으로 갱신. 없으면 `.count(n)` 종료가 동작 안 함.
+- 다음 반복 계산 시 starting turn은 `origin.repeatingTurn ?? 1` (Local·Remote 동일).
+- `ScheduleEvent` 수정 범위: `.onlyThisTime`(현재 회차만 + 원본 제외) / `.fromNow`(현재부터 새 시리즈 분기) / 기본(전체 시리즈).
+
+---
+
 ## 외부 캘린더 계정 연동/해제 플로우
 
 ```mermaid
@@ -222,38 +155,3 @@ flowchart TD
 |---|---|
 | `ExternalCalendarIntegrationUsecase.swift` | 계정 연동 상태 관리 + reactive 상태 브로드캐스트 |
 | `GoogleCalendarUsecase.swift` | 계정별 이벤트/색상/태그 로드 (repositoryPool 사용) |
-
----
-
-## 서브도메인별 주요 Usecase 한눈에 보기
-
-| 서브도메인 | Usecase | 역할 |
-|---|---|---|
-| Account | `AuthUsecase` | 로그인/로그아웃 |
-| Account | `AccountUsecase` | 사용자 계정 정보 관리 |
-| Account | `ExternalCalendarIntegrationUsecase` | 구글 계정 연동/해제 |
-| Account | `OAuth2ServiceUsecase` | OAuth2 요청/응답 (Apple/Google Imple) |
-| Events | `TodoEventUsecase` | Todo CRUD, 완료/되돌리기/스킵 |
-| Events | `ScheduleEventUsecase` | 일정 CRUD, 반복 수정/제외/분기 |
-| Events | `EventTagUsecase` | 태그 관리, On/Off 토글 |
-| Events | `ForemostEventUsecase` | 강조 이벤트 1개 관리 |
-| Events | `GoogleCalendarUsecase` | 구글 캘린더 태그·이벤트 로드 |
-| Events | `EventDetailDataUsecase` | 이벤트 상세(메모·위치) — typealias |
-| Events | `EventSyncUsecase` | 서버 동기화 |
-| Events | `DaysIntervalCountUsecase` | 날짜 간 일수 계산 |
-| Events | `DoneTodoEventsPagingUsecase` | 완료된 Todo 페이징 조회 |
-| Calendar | `CalendarUsecase` | 월별 캘린더 컴포넌트 계산 |
-| Calendar | `CalendarSettingUsecase` | 첫 요일, 타임존 설정 |
-| Calendar | `HolidayUsecase` | 공휴일 로드 |
-| Notification | `EventNotificationUsecase` | 로컬 알림 동기화 |
-| Notification | `NotificationPermissionUsecase` | 알림 권한 요청/확인 |
-| Notification | `UserNotificationUsecase` | 사용자 알림 수신/전달 |
-| Setting | `UISettingUsecase` | 앱 외관 설정 |
-| Setting | `AppSettingUsecase` | 일반 앱 설정 |
-| Setting | `EventSettingUsecase` | 이벤트 동작 설정 |
-| Setting | `EventNotificationSettingUsecase` | 이벤트별 알림 기본값 |
-| Common | `PagingUsecase` | 범용 페이징 로직 |
-| Common | `LinkPreviewFetchUsecase` | 링크 미리보기 메타데이터 |
-| Common | `PlaceSuggestUsecase` | 장소 자동완성 |
-| Support | `FeedbackUsecase` | 사용자 피드백 제출 |
-| Support | `AppUpdateCheckUsecase` | 앱 버전과 서버 최소 지원 버전을 비교해 강제/권장 업데이트 요구 수준 판정 |

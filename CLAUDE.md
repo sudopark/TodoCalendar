@@ -17,20 +17,6 @@
 
 ## 2. 아키텍처
 
-### 폴더 구조
-
-```
-Domain/                  — Models, Repository protocols, Usecase impls
-Repository/              — Local(SQLite) + Remote(Alamofire) impls
-Presentations/
-├── Scenes/              — 공유 Scene/Builder 프로토콜, UsecaseFactory 프로토콜
-├── CommonPresentation/  — 공용 UI, ViewAppearance
-├── CalendarScenes / EventDetailScene / EventListScenes / MemberScenes / SettingScene / AIAgentScene
-Supports/                — Extensions, Common3rdParty, UnitTestHelpKit, TestDoubles
-TodoCalendarApp/         — App target + AppExtensions(Widget 18종, IntentExtensions)
-Tuist/                   — ProjectDescriptionHelpers
-```
-
 ### 의존성 방향
 
 ```
@@ -85,66 +71,18 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 >
 > 🟥 Core: **Event**(Todo/Schedule·반복·완료·태깅·강조), **Calendar**(시간프레임·공휴일) · 🟧 Supporting: **External Calendar**(Google/Apple 다중계정), **Account/Auth**, **AI Agent**(command→Event 변경, Core 승격 유력), **Notification** · 🟩 Generic: **Settings**, **Support**(업데이트·피드백·STT 등)
 
-### 핵심 이벤트 모델
+세부 도메인 규칙은 CLAUDE.md에 중복하지 않는다. 각 정본을 읽고 판단할 것 (`Domain/CLAUDE.md`·`Repository/CLAUDE.md`는 해당 경로 작업 시 자동 로드):
 
-| 타입 | 시간 | 완료 | 반복 |
-|---|---|---|---|
-| `TodoEvent` | 선택 | DoneTodo 생성 | turn 추적으로 count 기반 종료 |
-| `ScheduleEvent` | 필수 (period/allDay/at) | 삭제만 | RepeatingTimes 배열 사전 계산 |
-
-**EventTime**: `.at` (순간) / `.period` (기간) / `.allDay(_, secondsFromGMT:)` (타임존 오프셋 별도).
-
-### 반복 이벤트
-
-**옵션**: EveryDay / EveryWeek(요일) / EveryMonth(일자 또는 "첫 번째 화요일") / EveryYear / EveryYearSomeDay / LunarCalendarEveryYear
-
-**종료**: `.until(TimeInterval)` / `.count(Int)` (`endCount=3` → turn 1·2·3 유효, 4부터 종료)
-
-**turn 규칙** (`EventRepeatTimeEnumerator`):
-- turn은 1부터 시작. `nextEventTime`은 항상 `from.turn + 1` 반환.
-- `TodoEvent.repeatingTurn`: 현재 회차 (`nil` = turn 1). 완료·수정·삭제·스킵마다 다음 turn으로 업데이트. 없으면 count 기반 종료가 동작 안 함.
-- 다음 반복 계산 시 `origin.repeatingTurn ?? 1`을 starting turn으로 (Local·Remote 동일).
-
-**ScheduleEvent 수정 범위**: `.onlyThisTime` (현재 회차만 + 원본에서 제외) / `.fromNow` (현재부터 새 시리즈 분기) / 기본 (전체 시리즈).
-
-### 이벤트 태그
-
-**EventTagId**: `.default` / `.holiday` (시스템) / `.custom(String)` / `.externalCalendar(serviceId, calendarId)`
-
-**EventTagColorSource** 프로토콜로 색상 결정. `EventTagId` → 시스템/커스텀, `GoogleCalendarEventColorSource` → 구글(calendarId + colorId). UI는 `EventTagColorView`가 타입 디스패치.
-
-**보이기/숨기기**: 커스텀은 기본 보임, 외부 캘린더는 기본 숨김. 숨김 ID는 `offEventTagIdsOnCalendar`.
-
-### 외부 캘린더 다중 계정
-
-구글 캘린더 등 다중 계정 동시 연동. accountId별 리소스를 Pool로 관리:
-- `ExternalCalendarDBConnectionPool` — DB 연결 (참조 카운팅, lazy)
-- `GoogleCalendarRepositoryPool` — Repository 캐싱
-- `ExternalCalendarAccountRemotePool` — Remote 클라이언트 + 토큰 갱신
-
-데이터는 `GoogleCalendarLocalAggregatedRepositoryImple`이 모든 계정 합산 반환.
-
-> 상세: DB 구조는 [`Repository/CLAUDE.md`](Repository/CLAUDE.md), 계정 연동/해제 플로우는 [`Domain/CLAUDE.md`](Domain/CLAUDE.md).
-
-### ForemostEvent
-
-사용자 지정 강조 이벤트 1개 (위젯·홈화면). `ForemostEventId` = eventId + isTodo. 위젯에서 `TodoToggleIntent`로 직접 완료 가능.
-
-### SharedDataStore
-
-모든 Usecase가 공유하는 Combine 기반 싱글톤. 키: `todos`, `schedules`, `tags`, `googleCalendarEvents`, `googleCalendarTags`, `foremostEventId`.
-
-> 키 상세·구독 패턴: [`Domain/CLAUDE.md`](Domain/CLAUDE.md)
-
-### 앱 버전 체크
-
-원격 JSON(`app-config/update-info.json`, GitHub raw)에서 최소 지원 버전을 받아 `forceRequired`(강제, dismiss 차단) / `recommended`(권장 팝업) 판정. `AppUpdateCheckUsecase`가 앱 시작 + 포그라운드 복귀 시 트리거. 세부: [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md).
-
-### DB 마이그레이션
-
-`AppEnvironment.dbVersion` 증가 + 해당 `Table.migrateStatement(for:)`에 case 추가. 둘 다 변경해야 실행됨. 외부 캘린더 DB는 `googleCalendarDBVersion` + `ExternalCalendarDBConnectionPool`이 `onFirstOpen` 시 마이그레이션 실행.
-
-> 마이그레이션 작성 예제: [`Repository/CLAUDE.md`](Repository/CLAUDE.md)
+| 주제 | 정본 |
+|---|---|
+| 이벤트 모델·EventTime·완료 | [`docs/spec/todo-event.md`](docs/spec/todo-event.md), [`schedule-event.md`](docs/spec/schedule-event.md) |
+| 반복 이벤트·turn 규칙·수정 범위 | [`docs/spec/repeating-events.md`](docs/spec/repeating-events.md) |
+| 이벤트 태그·색상·보이기숨기기 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
+| 외부 캘린더 다중 계정·Pool | [`Domain/CLAUDE.md`](Domain/CLAUDE.md), [`Repository/CLAUDE.md`](Repository/CLAUDE.md), [`docs/spec/google-calendar.md`](docs/spec/google-calendar.md) |
+| ForemostEvent | [`docs/spec/tags-foremost-notifications.md`](docs/spec/tags-foremost-notifications.md) |
+| SharedDataStore 키·구독 | [`Domain/CLAUDE.md`](Domain/CLAUDE.md) |
+| 앱 버전 체크 | [`docs/spec/infrastructure.md §7`](docs/spec/infrastructure.md) |
+| DB 마이그레이션 | §1 짝규칙 (`dbVersion` ↔ `migrateStatement`) + [`Repository/CLAUDE.md`](Repository/CLAUDE.md) |
 
 ---
 

@@ -6,34 +6,6 @@
 
 ---
 
-## 폴더 구조
-
-```
-MemberScenes/
-├── Sources/
-│   ├── MemberSceneBuilderImple.swift           — 프레임워크 진입점
-│   │
-│   ├── SignIn/                                — OAuth2 로그인
-│   │   ├── SignInScene+Builder.swift
-│   │   ├── SignInBuilderImple.swift
-│   │   ├── SignInViewModel.swift
-│   │   ├── SignInViewController.swift          — UIHostingController
-│   │   ├── SignInRouter.swift
-│   │   └── SignInView.swift
-│   │
-│   └── ManageAccount/                         — 계정 관리
-│       ├── ManageAccountScene+Builder.swift
-│       ├── ManageAccountBuilderImple.swift
-│       ├── ManageAccountViewModel.swift
-│       ├── ManageAccountViewController.swift   — UIHostingController
-│       ├── ManageAccountRouter.swift
-│       └── ManageAccountView.swift
-│
-└── Tests/
-```
-
----
-
 ## Scene 구성
 
 ### 화면 플로우

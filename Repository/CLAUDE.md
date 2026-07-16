@@ -6,52 +6,6 @@
 
 ---
 
-## 폴더 구조
-
-```
-Repository/
-├── Sources/
-│   ├── Local/                          — DB 인프라 (SQLite, Keychain, UserDefaults)
-│   │   ├── SQLiteLocalStorage+Migration.swift  — 전체 마이그레이션 오케스트레이터
-│   │   ├── EnvironmentStorage.swift    — UserDefaults 기반 앱 설정 저장
-│   │   ├── KeyChainStorage.swift       — Keychain 인증 정보 저장
-│   │   └── KeyValueTable.swift         — 범용 key-value 테이블
-│   │
-│   ├── Remote/                         — API 클라이언트 인프라
-│   │   ├── RemoteAPI.swift             — Alamofire 세션 래퍼 (프로토콜 + 구현)
-│   │   ├── Endpoint.swift              — Enum 기반 API 엔드포인트 정의
-│   │   ├── Authenticators/             — OAuth 토큰 리프레시 (Google, Calendar)
-│   │   └── Credential+AuthStore/       — 멀티 계정 인증 정보 저장소
-│   │
-│   ├── Extensions/                     — 매핑 유틸리티
-│   │
-│   └── Repository+Imple/              — Domain Repository 구현체 (핵심)
-│       ├── Event/
-│       │   ├── Todo/                   — TodoEvent CRUD
-│       │   │   ├── Local/              — Table, LocalStorage
-│       │   │   └── Remote/             — Remote 프로토콜, Mapping
-│       │   ├── Schedule/              — ScheduleEvent CRUD
-│       │   ├── EventTag/              — 커스텀·외부 태그
-│       │   ├── EventDetailData/       — 이벤트 상세 메타데이터
-│       │   ├── ForemostEvent/         — 강조 이벤트
-│       │   ├── ExternalCalendar/      — Google Calendar 연동
-│       │   ├── Upload/                — 오프라인 싱크 큐 (EventUploadService)
-│       │   ├── Sync/                  — 동기화 타임스탬프
-│       │   └── Common/               — EventTime/Repeating 매핑 공유
-│       ├── Account/                   — 로그인/로그아웃, 외부 캘린더 연동
-│       ├── Calendar/                  — 캘린더 설정, 공휴일 API
-│       ├── Notification/              — 이벤트 알림
-│       ├── Setting/                   — 앱 설정 (Local/Remote)
-│       └── Support/                   — 피드백, 앱 업데이트 체크
-│
-└── Tests/
-    ├── Common/                        — BaseLocalTests, LocalTestable
-    ├── Doubles/                       — StubRemoteAPI, FakeEnvironmentStorage
-    └── (엔티티별 테스트 파일)
-```
-
----
-
 ## 핵심 아키텍처: 3-Layer 패턴
 
 각 주요 엔티티(Todo, Schedule, EventTag 등)는 3개의 Repository 구현체를 가진다.

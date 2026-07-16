@@ -4,17 +4,6 @@
 
 AI 어시스턴트 진입 시트들. 키보드 입력 시트(AIAgentKeyboardInput)와 명령 처리 결과 시트(AIAgentCommand)로 구성. 진입점(마이크·AI 버튼)은 CalendarScenes 쪽이 소유하고, 이 프레임워크는 시트 Scene만 담당한다.
 
-## 폴더 구조
-
-```
-AIAgentScene/
-├── Sources/
-│   ├── AIAgentKeyboardInput/    — 텍스트 입력 시트 (BottomSlideView + TextField + 중지/전송)
-│   └── AIAgentCommand/          — 명령 처리 상태 시트 (processing/confirm/done/failed 스테이지)
-├── Tests/
-└── Snapshots/                   — 스냅샷 캡처 스위트 (로컬 전용, snapshot-check 스킬)
-```
-
 플랫 Scene 배치 (Scene 폴더화는 rules §3 — 새 Scene 추가하는 기회에 함께).
 
 ## Scene 상세
