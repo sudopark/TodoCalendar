@@ -10,6 +10,9 @@
   - CI `pr_test.yml` — `detect-changes`의 scheme 매핑(grep) ↔ `test` job의 `Test <scheme>` 실행 step (둘 중 하나만 추가하면 감지만 되고 실행 안 됨)
   - 신규 테스트 스킴 ↔ 스킴 목록 하드코딩 전부 (`pr_test.yml` 3곳·`scripts/run-all-tests.sh`·`impact-check.sh`+테스트·`run-tests` 스킬 — 상세는 add-framework 스킬. 단 `<Name>Snapshots` 스킴은 의도된 예외 — 로컬 전용, snapshot-check 스킬)
   - init 시그니처 ↔ 콜사이트
+- **스킬 종료·유저 교정은 레코드로 남긴다** (#690 flywheel 측정 신호):
+  - 발동한 스킬의 절차가 끝나면: `python3 .claude/hooks/log-record.py skill_end --name <스킬> --compliance full|partial [--deviation "조항::사유"]` — 조항을 의도적으로 이행 안 했으면 partial + 이탈 조항·사유 필수.
+  - 유저가 작업 결과·방식을 교정하면 그 자리에서: `python3 .claude/hooks/log-record.py correction --skills <귀속 스킬(쉼표 구분)> --summary "교정 요지" --gist "발화 요지"` — 발동 중이던 스킬이 없으면 `--skills` 생략.
 - **`.claude/rules/*.md`는 path 매칭 시 자동 로드** — 로드된 조항을 구현 결정 시점에 적극 invoke.
 - **외운 지식 말고 이 문서를 보고 판단할 것.** (도메인 경계·용어는 [`docs/domain-context-map.md`](docs/domain-context-map.md) 정본 기준)
 
