@@ -39,25 +39,40 @@ public enum IndexStoreLocator {
         }
 
         let samples = sampleTypeUnits(sourceRoot: sourceRoot, limit: 12)
-        // 최신순으로 열어보며, 잘 해소되면(임계 이상) 즉시 채택. 최선만 백업으로 유지.
-        let goodEnough = max(1, samples.count * 3 / 5)
-        var best: (provider: IndexStoreDBProvider, resolved: Int)?
-        for store in candidates {
-            guard let provider = try? IndexStoreDBProvider(
+        // 후보를 전부 열어 샘플 해소 수가 최대인 것을 채택 — 부분 stale(예: 7/12) 최신 후보를
+        // 완전 해소(12/12) 후보보다 먼저 채택하던 갭을 없앤다. workspace 필터로 후보가 적어 감당 가능.
+        let providers = candidates.compactMap { store -> IndexStoreDBProvider? in
+            try? IndexStoreDBProvider(
                 storePath: store,
                 databasePath: NSTemporaryDirectory() + "cx-locate-" + UUID().uuidString,
                 libIndexStorePath: libIndexStorePath
-            ) else { continue }
-            let resolved = samples.filter {
+            )
+        }
+        let best = pickBest(providers) { provider in
+            samples.filter {
                 provider.definitionUSR(named: $0.name, file: $0.file, line: $0.line) != nil
             }.count
-            if resolved >= goodEnough { return provider }              // 충분 → 즉시 채택
-            if resolved > (best?.resolved ?? 0) { best = (provider, resolved) }
         }
-        guard let best, best.resolved > 0 else {
+        guard let best else {
             throw IndexStoreLocatorError.noResolvingStore(sourceRoot: sourceRoot, tried: candidates.count)
         }
-        return best.provider
+        return best
+    }
+
+    /// 해소 수가 최대인 후보 선택(0이면 제외). 실 index 없이 선택 로직을 검증하도록 프로브를 클로저로 주입.
+    static func pickBest<T>(_ candidates: [T], resolvedCount: (T) -> Int) -> T? {
+        var best: (item: T, resolved: Int)?
+        for candidate in candidates {
+            let resolved = resolvedCount(candidate)
+            if resolved > (best?.resolved ?? 0) { best = (candidate, resolved) }
+        }
+        guard let best, best.resolved > 0 else { return nil }
+        return best.item
+    }
+
+    /// 심볼릭·/private·`..` 차이를 흡수한 경로 정규화 (workspace 등가 비교용).
+    private static func normalized(_ path: String) -> String {
+        URL(fileURLWithPath: path).resolvingSymlinksInPath().path
     }
 
     // MARK: - DerivedData 열거
@@ -70,7 +85,12 @@ public enum IndexStoreLocator {
             let ddPath = root + "/" + dir
             let store = ddPath + "/Index.noindex/DataStore"
             guard (try? IndexStoreDBProvider.assertPopulated(storePath: store)) != nil else { return nil }
-            if let workspace, self.workspace(ofDerivedData: ddPath) != workspace { return nil }
+            if let workspace {
+                // 심볼릭·/private 차이를 흡수해 비교 — 한쪽만 정규화하면 워크트리 매핑이 조용히 깨진다.
+                guard let ddWorkspace = self.workspace(ofDerivedData: ddPath),
+                      normalized(ddWorkspace) == normalized(workspace)
+                else { return nil }
+            }
             let mtime = (try? FileManager.default.attributesOfItem(atPath: store)[.modificationDate] as? Date) ?? nil
             return (store, mtime ?? .distantPast)
         }

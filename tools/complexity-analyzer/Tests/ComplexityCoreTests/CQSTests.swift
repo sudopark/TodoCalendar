@@ -61,6 +61,14 @@ struct CQSTests {
         #expect(method("struct S { func load() -> Int { service.fetch { self.x = $0 }; return 0 } }").cqsViolations == 0)
     }
 
+    @Test("동기 forEach 안 self 대입은 CQS 위반 (지연 클로저와 구분)")
+    func synchronousForEachCounted() {
+        // forEach는 즉시 실행 → 동기 side-effect. escaping/반환 클로저와 달리 집계.
+        #expect(method("struct S { func f() -> Int { arr.forEach { self.x = 1 }; return 0 } }").cqsViolations == 1)
+        // 단 forEach가 sink(allowed) 안이면 바깥 컨텍스트가 이겨 위반 아님.
+        #expect(method("struct S { func f() -> P { pub.sink { self.arr.forEach { self.x = 1 } } } }").cqsViolations == 0)
+    }
+
     @Test("중첩 함수 안 side-effect는 바깥 메소드로 새지 않는다")
     func nestedFunctionScopeIsolated() {
         // outer는 `return 0`뿐인 순수 query — inner의 self.x=1이 새어들면 안 됨.
