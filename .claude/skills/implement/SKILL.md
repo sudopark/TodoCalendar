@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Use when writing or modifying code in this project — 구현 착수, 플랜 실행, 버그 수정, 리팩토링 등 코드 diff를 만들기 시작하는 모든 시점. 플랜 파일 유무와 무관하게 적용. superpowers 코딩 절차(test-driven-development·executing-plans·subagent-driven-development)를 대체하지 않는 컴패니언 — 프로젝트 종속 절차(변경 경로→테스트 스킴 계산, tuist generate 시점, 짝지어진 두 위치, rules·구조 패턴 확인, 리팩터 게이트, 완료 판정)를 주입한다. Triggers on "구현하자", "플랜 실행하자", "고치자", "리팩토링하자" 등 코드 수정이 시작될 때 — superpowers 코딩 스킬과 함께 invoke. Does NOT trigger on 코드 조회·분석·설계 논의만 할 때.
+description: Use when writing or modifying code in this project — 구현 착수, 플랜 실행, 버그 수정, 리팩토링 등 코드 diff를 만들기 시작하는 모든 시점. 직접 수정이든 서브에이전트 dispatch 구현이든 무관 — 코드는 서브에이전트가 만지고 메인 세션은 브리프만 쓰는 경우에도 첫 dispatch 전에 invoke한다. 플랜 파일 유무와 무관하게 적용. superpowers 코딩 절차(test-driven-development·executing-plans·subagent-driven-development)를 대체하지 않는 컴패니언 — 프로젝트 종속 절차(변경 경로→테스트 스킴 계산, tuist generate 시점, 짝지어진 두 위치, rules·구조 패턴 확인, 리팩터 게이트, 완료 판정)를 주입한다. Triggers on "구현하자", "플랜 실행하자", "고치자", "리팩토링하자", "서브에이전트 시켜서 구현하자" 등 코드 수정이 시작될 때 — superpowers 코딩 스킬과 함께 invoke. Does NOT trigger on 코드 조회·분석·설계 논의만 할 때.
 ---
 
 # Implement — TodoCalendar 구현 컴패니언
@@ -14,13 +14,16 @@ description: Use when writing or modifying code in this project — 구현 착�
 - **플랜 있음** → superpowers executing-plans/subagent-driven-development가 태스크 순서를 이끈다. 각 태스크에 아래 절차를 적용한다.
 - **플랜 없음** (즉흥 수정) → superpowers TDD + 이 스킬만으로 진행한다. 플랜 단계만 빠질 뿐, rules 확인 → 패턴 파악 → 구현 → 완료 판정은 동일하게 탄다.
 - **페어 프로그래밍 모드** (유저가 명시 선언한 세션) → 턴 규칙·TDD 수준·커밋 시점은 pair-programming 스킬이 이끈다. 이 스킬은 프로젝트 종속 규칙(rules·tuist generate·짝지어진 두 위치·콜사이트 grep) 공급자로만 동작한다.
+- **서브에이전트 dispatch 구현** (subagent-driven-development·병렬 dispatch 등) → 서브에이전트는 이 스킬을 스스로 invoke하지 못한다. dispatch하는 메인 세션이 첫 브리프 작성 전에 이 스킬을 invoke하고, 아래 절차를 브리프로 승계시킨다. "내가 직접 코드를 안 만지니 해당 없음"은 성립하지 않는다 — 코드 diff가 시작되는 주체가 누구든 발동한다. 갭 보고 루프(rules·플랜)의 유저 반문은 메인 세션이 중계한다 — 브리프에 "갭 발견 시 추측으로 채우지 말고 보고 후 중단"을 명시한다.
 
 시작할 때:
 
+- **베이스 브랜치** — 브랜치 지정 지시가 없으면 최신 develop을 pull(`git pull origin develop`)한 뒤 거기서 `features/` 브랜치를 딴다. 이미 지정된 작업 브랜치에 있으면 유지.
 - 변경 대상 경로에 걸리는 `.claude/rules/*.md` 조항을 확인하고, 구현 결정 시점에 해당 조항을 적극 invoke한다.
 - child CLAUDE.md가 있는 프레임워크(Domain·Repository·각 Presentation 등)를 수정할 땐 해당 child CLAUDE.md를 확인하고, 수정 후 그 규칙과 어긋남이 없는지 재점검한다.
 - 동종 컴포넌트를 grep해 구조 패턴(상태관리·합성·추상화 수준)을 파악하고 그 패턴을 따른다. 요구사항만 보고 즉흥 구현하지 않는다.
 - 서브에이전트에 구현을 dispatch할 땐 프롬프트에 적용 rules 조항·대상 테스트 스킴·따라야 할 구조 패턴을 명시한다.
+- (선택) 기존 타입을 수정하는 작업이면 복잡도 baseline을 측정해둔다 — 아래 "복잡도 측정" 참조. 생략 조건에 걸리면 그냥 건너뛴다.
 
 ## 구현 중
 
@@ -72,6 +75,20 @@ superpowers TDD의 REFACTOR 단계를 이 게이트로 수행한다. **아래 �
 ```
 
 **경계:** 리팩터 중 동작 추가 금지(두 모자), 테스트 그린 유지. 이 게이트는 세션 내 절차일 뿐 커밋 단위에 대응시키지 않는다 — 커밋은 리팩터 반영이 끝난 결과를 논리 단위로 묶는다.
+
+### 복잡도 측정 — 선택 참고 신호 (강제 아님)
+
+기존 타입 수정 작업이면 before/after 측정으로 리팩터 판단을 정량 보강할 수 있다:
+
+```bash
+cd tools/complexity-analyzer
+./.build/release/complexity-analyzer --source-root ../../<모듈> --scope "type:<대상타입>"
+```
+
+- **수정 전**(착수 시점) 대상 타입 측정 → baseline 기록. **수정 후** 태스크의 리팩터가 정리된 시점에 1회 재측정 → 총점·축별 변화를 스멜 스캔·종료 판정의 참고로 쓴다. 매 GREEN마다 돌리지 않는다.
+- 분석기는 빌드가 남긴 index를 읽는다 — 재측정은 반드시 테스트(빌드) 통과 후. 런당 ~15초.
+- **생략 조건** (하나라도 해당하면 측정 없이 진행 — 세워두고 기다리는 상황을 만들지 않는다): 신설 타입(비교 대상 없음) / 사소한 변경 / release 바이너리 미빌드·스테일(재빌드는 수 분) / index 부재·에러.
+- 점수는 참고 신호일 뿐 게이트 기준이 아니다 — 종료 판정은 여전히 Simple Design 4규칙.
 
 ## 완료 판정 — 커밋 전
 
