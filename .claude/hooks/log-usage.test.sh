@@ -74,6 +74,19 @@ BEFORE=$(wc -l < "$LOG" | tr -d ' ')
 run_hook '{"hook_event_name":"PostToolUse","session_id":"s1","cwd":"/proj","tool_name":"Read","tool_input":{"file_path":"/foo"}}'
 assert_eq "무관 툴 미기록" "$BEFORE" "$(wc -l < "$LOG" | tr -d ' ')"
 
+# --- 운영: prompt 처리 시 로그 디렉토리 700 강제 ---
+chmod 755 "$TMP_DIR"
+run_hook '{"hook_event_name":"UserPromptSubmit","session_id":"s1","cwd":"/proj","prompt":"권한 확인"}'
+assert_eq "로그 디렉토리 700" "700" "$(stat -f "%Lp" "$TMP_DIR")"
+
+# --- 운영: 7일 지난 세션 state prune, 최신은 보존 ---
+STALE="$TMP_DIR/.sessions/stale-session.json"
+printf '{"instruction":"old"}' > "$STALE"
+touch -t "$(date -v-8d +%Y%m%d%H%M)" "$STALE"
+run_hook '{"hook_event_name":"UserPromptSubmit","session_id":"s1","cwd":"/proj","prompt":"prune 트리거"}'
+assert_eq "8일 지난 state 제거" "0" "$(ls "$TMP_DIR/.sessions" | grep -c stale-session)"
+assert_eq "최신 state 보존" "1" "$(ls "$TMP_DIR/.sessions" | grep -c '^s1.json$')"
+
 # --- fail-open: 깨진 입력에도 exit 0 ---
 printf 'not-json' | python3 log-usage.py
 assert_eq "fail-open exit 0 (깨진 JSON)" "0" "$?"

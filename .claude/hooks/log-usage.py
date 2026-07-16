@@ -9,11 +9,13 @@ import json
 import os
 import re
 import sys
+import time
 from datetime import datetime, timezone
 
 LOG_DIR = os.environ.get("USAGE_LOG_DIR") or os.path.expanduser("~/.claude/usage-log")
 PROMPT_LIMIT = 500
 DETAIL_LIMIT = 200
+SESSION_STATE_TTL_DAYS = 7
 
 
 def now_iso():
@@ -38,6 +40,25 @@ def append_record(record):
     os.makedirs(LOG_DIR, exist_ok=True)
     with open(log_path(), "a", encoding="utf-8") as f:
         f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
+def enforce_dir_permission():
+    try:
+        os.chmod(LOG_DIR, 0o700)
+    except OSError:
+        pass
+
+
+def prune_stale_sessions():
+    sessions_dir = os.path.join(LOG_DIR, ".sessions")
+    cutoff = time.time() - SESSION_STATE_TTL_DAYS * 86400
+    try:
+        for entry in os.listdir(sessions_dir):
+            path = os.path.join(sessions_dir, entry)
+            if os.path.getmtime(path) < cutoff:
+                os.remove(path)
+    except OSError:
+        pass
 
 
 def save_instruction(session_id, prompt):
@@ -82,6 +103,9 @@ def handle_prompt(data):
         skill_record["via"] = "slash"
         skill_record["instruction"] = snippet
         append_record(skill_record)
+
+    enforce_dir_permission()
+    prune_stale_sessions()
 
 
 def handle_tool(data):
