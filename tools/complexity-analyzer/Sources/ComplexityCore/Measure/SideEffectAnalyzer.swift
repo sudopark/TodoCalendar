@@ -16,6 +16,9 @@ enum SideEffectAnalyzer {
     /// side-effect 허용 연산자 — 여기 클로저는 위반 아님 (side-effect의 올바른 자리).
     private static let allowedOperators: Set<String> =
         ["sink", "handleEvents", "do"]
+    /// 동기 고차함수 — 클로저가 즉시 실행되므로 지연(deferred)이 아니다. 투명하게 통과시켜
+    /// 바깥 컨텍스트(본문·pure·allowed)가 분류하게 한다. `arr.forEach { self.x = ... }`는 동기 변이.
+    private static let synchronousOperators: Set<String> = ["forEach"]
 
     static func analyze(body: CodeBlockSyntax, isQuery: Bool) -> Result {
         let collector = SideEffectCollector(viewMode: .sourceAccurate)
@@ -44,17 +47,23 @@ enum SideEffectAnalyzer {
     private enum OperatorKind { case pure, allowed, none, deferred }
 
     /// site에서 body까지 부모를 거슬러 올라가며 판정. 인식된 연산자 클로저를 만나면 그 종류,
-    /// 인식 못 한 클로저를 하나라도 통과하면 deferred, 어떤 클로저도 안 거치면 none(본문 직접).
+    /// 동기 고차함수(forEach)는 투명 통과, 인식 못 한 클로저를 통과하면 deferred,
+    /// 어떤 클로저도 안 거치면 none(본문 직접).
     private static func nearestOperator(from site: Syntax, stopAt body: Syntax) -> OperatorKind {
         var current = site.parent
         var passedUnrecognizedClosure = false
         while let node = current, node != body {
             if let closure = node.as(ClosureExprSyntax.self) {
-                if let name = operatorName(wrapping: closure) {
+                let name = operatorName(wrapping: closure)
+                if let name {
                     if pureOperators.contains(name) { return .pure }
                     if allowedOperators.contains(name) { return .allowed }
+                    if synchronousOperators.contains(name) {
+                        current = node.parent   // 동기 → 투명 통과(바깥 컨텍스트가 분류)
+                        continue
+                    }
                 }
-                // 반환 클로저·escaping 콜백·forEach 등 인식 못 한 클로저 → 지연 실행 후보
+                // 반환 클로저·escaping 콜백 등 인식 못 한 클로저 → 지연 실행
                 passedUnrecognizedClosure = true
             }
             current = node.parent

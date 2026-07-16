@@ -72,6 +72,30 @@ struct IndexStoreLocatorTests {
         #expect(Set(stores) == [older, newer])
     }
 
+    @Test("pickBest — 해소 수 최대 후보 채택, 전부 0이면 nil")
+    func pickBestMaxResolved() {
+        let counts = ["a": 3, "b": 7, "c": 5]
+        #expect(IndexStoreLocator.pickBest(["a", "b", "c"]) { counts[$0]! } == "b")
+        #expect(IndexStoreLocator.pickBest(["a", "c"]) { counts[$0]! } == "c")
+        #expect(IndexStoreLocator.pickBest(["x", "y"]) { _ in 0 } == nil)   // 전부 0 → nil
+        #expect(IndexStoreLocator.pickBest([String]()) { _ in 1 } == nil)   // 빈 후보 → nil
+    }
+
+    @Test("workspace 비교는 심볼릭/경로 표기 차이를 정규화해 매칭")
+    func workspaceMatchNormalizesSymlink() throws {
+        let ddRoot = try makeTempDir()
+        defer { try? FileManager.default.removeItem(atPath: ddRoot) }
+        let realWs = ddRoot + "/repo/App.xcworkspace"
+        try FileManager.default.createDirectory(atPath: realWs, withIntermediateDirectories: true)
+        let mine = try makeDerivedData(ddRoot, name: "Proj-a", workspace: realWs)
+        // repo를 가리키는 심볼릭 링크 → 심볼릭 경유 경로로 조회해도 매칭돼야
+        try FileManager.default.createSymbolicLink(atPath: ddRoot + "/link", withDestinationPath: ddRoot + "/repo")
+        let viaLink = ddRoot + "/link/App.xcworkspace"
+
+        let stores = IndexStoreLocator.populatedDataStores(under: ddRoot, matchingWorkspace: viaLink)
+        #expect(stores == [mine])
+    }
+
     @Test("populated 아닌(units 빈) DerivedData는 제외")
     func excludesEmptyStore() throws {
         let ddRoot = try makeTempDir()
