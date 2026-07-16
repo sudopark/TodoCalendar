@@ -25,3 +25,4 @@ description: Use when creating or merging a pull request in this project — PR 
 - 머지는 `gh pr merge --rebase`, squash 금지 — 단계별 커밋이 develop에 보존돼야 회귀 분석 시 변경 의도를 추적할 수 있다.
 - 머지 후 브랜치(로컬·리모트) 정리 여부를 유저에게 확인한다.
 - 브랜치가 워크트리에 체크아웃돼 있으면 삭제가 거부된다 — 그 워크트리에서 임시 브랜치를 만들어 이동(`git switch -c <임시-브랜치>`)한 뒤 대상 브랜치를 삭제한다.
+- 머지 후 `python3 .claude/scripts/aggregate-usage.py` 실행 — 출력(⚠️ 줄)이 있으면 해당 스킬의 정비를 유저에게 제안한다 (수락 시 improve-skill 스킬). 무출력이면 조용히 넘어간다 (#690 flywheel).
