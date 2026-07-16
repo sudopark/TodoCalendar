@@ -34,13 +34,29 @@ public struct Scorer {
             "publicSurface": accum(Double(m.publicSurface ?? 0), config.publicSurface),
             "internalCoupling": accum(Double(m.internalCoupling ?? 0), config.internalCoupling),
             "maxCallChainDepth": accum(Double(m.maxCallChainDepth ?? 0), config.maxCallChainDepth),
-            "lcom": flag(m.lcom, config.lcom),
+            "lcom": lcomScore(m),
             // 협업
             "fanOut": accum(Double(m.fanOut ?? 0), config.fanOut),
             "collaborationChainDepth": accum(Double(m.collaborationChainDepth ?? 0), config.collaborationChainDepth),
             "blastRadius": accum(hopWeighted(m.blastRadiusByHop), config.blastRadius),
-            "dependencyCycleSize": flag(m.dependencyCycleSize, config.dependencyCycleSize),
+            "cycle": cyclePenalty(m),
         ])
+    }
+
+    /// LCOM 등급화 — 응집(lcom=1)은 0, (lcom-1)을 soft-cap해 쪼개질수록 커진다.
+    /// flat flag는 lcom=2(경미)와 lcom=8(심각)을 같게 벌해 facade를 과탐 → 크기로 등급화.
+    private func lcomScore(_ m: Measurements) -> Double {
+        guard let lcom = m.lcom, lcom > 1 else { return 0 }
+        return accum(Double(lcom - 1), config.lcom)
+    }
+
+    /// 순환 penalty 등급화 — 크기 soft-cap(값 클러스터 포함) + 순환 내 참조 타입당 병리 가중.
+    /// 값 타입만인 순환은 참조 수 0이라 경미하게, class/actor 낀 순환은 크게 벌한다.
+    private func cyclePenalty(_ m: Measurements) -> Double {
+        guard (m.dependencyCycleSize ?? 1) > 1 else { return 0 }
+        let sizeCost = accum(Double(m.dependencyCycleSize ?? 0), config.cycleSize)
+        let referenceCost = config.cycleReferenceTypePenalty * Double(m.cycleReferenceTypeCount ?? 0)
+        return sizeCost + referenceCost
     }
 
     // MARK: - dispatch

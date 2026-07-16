@@ -28,4 +28,31 @@ struct ProtocolUnitTests {
         #expect(s?.enclosingType == nil)
         #expect(s?.measurements.rolledUpInternalComplexity == 1)
     }
+
+    @Test("타입 유닛에 선언 종류가 실린다")
+    func typeDeclKindCaptured() {
+        let us = units("protocol P { func f() }\nstruct S {}\nenum E { case a }\nclass C {}")
+        func kind(_ n: String) -> AnalyzedUnit.TypeDeclKind? {
+            us.first { $0.kind == .type && $0.name == n }?.typeDeclKind
+        }
+        #expect(kind("P") == .protocol)
+        #expect(kind("S") == .struct)
+        #expect(kind("E") == .enum)
+        #expect(kind("C") == .class)
+    }
+
+    @Test("protocol·enum은 LCOM 비적용(nil), struct/class는 적용")
+    func lcomExcludedForProtocolAndEnum() {
+        // 각 타입에 서로 안 엮이는 메소드 2개 → struct/class면 LCOM>1로 잡히지만
+        // protocol·enum은 nil이어야(과탐 제외).
+        let body = "func a() { print(x) }\n  func b() { print(y) }"
+        func lcom(_ decl: String) -> Int? {
+            SyntaxScanner().scan(source: "\(decl) T { \(body) }", file: "T.swift")
+                .first { $0.kind == .type && $0.name == "T" }?.measurements.lcom
+        }
+        #expect(lcom("struct") != nil)
+        #expect(lcom("class") != nil)
+        #expect(lcom("enum") == nil)
+        #expect(lcom("protocol") == nil)
+    }
 }

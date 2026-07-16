@@ -45,19 +45,19 @@ private final class MethodCollector: SyntaxVisitor {
         super.init(viewMode: .sourceAccurate)
     }
 
-    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
+    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name, .class) }
     override func visitPost(_ node: ClassDeclSyntax) { typeStack.removeLast() }
 
-    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
+    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name, .struct) }
     override func visitPost(_ node: StructDeclSyntax) { typeStack.removeLast() }
 
-    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
+    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name, .enum) }
     override func visitPost(_ node: EnumDeclSyntax) { typeStack.removeLast() }
 
-    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
+    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name, .actor) }
     override func visitPost(_ node: ActorDeclSyntax) { typeStack.removeLast() }
 
-    override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name) }
+    override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { enterType(node.name, .protocol) }
     override func visitPost(_ node: ProtocolDeclSyntax) { typeStack.removeLast() }
 
     // extension은 타입 선언이 아니므로 타입 단위를 새로 내지 않고, enclosing type 추적만.
@@ -160,8 +160,8 @@ private final class MethodCollector: SyntaxVisitor {
         return name != "Void" && name != "Swift.Void" && name != "()"
     }
 
-    /// 명목 타입 선언(class/struct/enum/actor): 타입 단위 방출 + enclosing 추적.
-    private func enterType(_ nameToken: TokenSyntax) -> SyntaxVisitorContinueKind {
+    /// 명목 타입 선언(class/struct/enum/actor/protocol): 타입 단위 방출 + enclosing 추적.
+    private func enterType(_ nameToken: TokenSyntax, _ declKind: AnalyzedUnit.TypeDeclKind) -> SyntaxVisitorContinueKind {
         let line = converter.location(for: nameToken.positionAfterSkippingLeadingTrivia).line
         withFacts(qualified(nameToken.text)) { $0.primary = .init(file: file, line: line, name: nameToken.text) }
         units.append(
@@ -170,7 +170,8 @@ private final class MethodCollector: SyntaxVisitor {
                 name: nameToken.text,
                 enclosingType: typeStack.last,
                 file: file,
-                line: line
+                line: line,
+                typeDeclKind: declKind
             )
         )
         typeStack.append(nameToken.text)

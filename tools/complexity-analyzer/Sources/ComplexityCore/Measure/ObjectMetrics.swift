@@ -67,7 +67,11 @@ enum ObjectMetricsAggregator {
             result[index].measurements.rolledUpCqsViolations = facts.rollupCqs
             result[index].measurements.rolledUpCombineRoleMix = facts.rollupCombine
             result[index].measurements.publicSurface = facts.publicSurface
-            result[index].measurements.lcom = cohesion.lcom
+            // LCOM(응집도)은 구현체 메소드가 상태를 공유하는지의 지표 — protocol(구현 없음)·enum(case별
+            // 분기라 구조적으로 낮음)엔 비적용. 이 둘엔 lcom을 남기지 않아(nil) 과탐을 막는다.
+            if result[index].measuresCohesion {
+                result[index].measurements.lcom = cohesion.lcom
+            }
             result[index].measurements.internalCoupling = cohesion.internalCoupling
             result[index].measurements.maxCallChainDepth = cohesion.maxCallChainDepth
         }

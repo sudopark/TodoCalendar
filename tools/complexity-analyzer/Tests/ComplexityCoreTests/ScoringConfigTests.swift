@@ -9,7 +9,8 @@ struct ScoringConfigTests {
     func defaultDefinesAxes() {
         let c = ScoringConfig.default
         #expect(c.internalComplexity.cap > 0)
-        #expect(c.dependencyCycleSize.penalty > 0)
+        #expect(c.cycleReferenceTypePenalty > 0)
+        #expect(c.cycleSize.cap > 0)
         #expect(c.hopWeights.count == 3)
         #expect(c.rollupAlpha > 0)
     }
@@ -21,10 +22,10 @@ struct ScoringConfigTests {
         #expect(w[1] < w[2])
     }
 
-    @Test("병리형은 축적형보다 큰 가중 — cycle penalty > publicSurface weight")
+    @Test("병리형은 축적형보다 큰 가중 — 참조 순환 penalty > publicSurface weight")
     func pathologyOutweighsAccumulative() {
         let c = ScoringConfig.default
-        #expect(c.dependencyCycleSize.penalty > c.publicSurface.weight)
+        #expect(c.cycleReferenceTypePenalty > c.publicSurface.weight)
     }
 
     @Test("JSON encode→decode 라운드트립이 기본값과 동일 (--config 계약)")
@@ -42,7 +43,8 @@ struct ScoringConfigTests {
         #expect(c.rollupAlpha == 0.9)
         #expect(c.internalComplexity == .init(cap: 99, weight: 2.0))
         // 안 준 필드는 기본값 유지
-        #expect(c.dependencyCycleSize == ScoringConfig.default.dependencyCycleSize)
+        #expect(c.cycleSize == ScoringConfig.default.cycleSize)
+        #expect(c.cycleReferenceTypePenalty == ScoringConfig.default.cycleReferenceTypePenalty)
         #expect(c.hopWeights == ScoringConfig.default.hopWeights)
     }
 

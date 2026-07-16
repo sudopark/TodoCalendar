@@ -9,10 +9,13 @@ final class StubIndexProvider: IndexProviding {
     var referencesByUSR: [String: [ReferenceSite]] = [:]
     /// usr → 그 심볼을 감싸는 타입 usr
     var enclosingByUSR: [String: String] = [:]
+    /// true면 usrByLocation에 없는 정의도 합성 USR로 해소 — 그래프를 안 보는 테스트가
+    /// stale 가드(타입 해소 0개 → throw)에 안 걸리게 opt-in.
+    var resolveAllTypes = false
     private(set) var queriedUSRs: [String] = []
 
     func definitionUSR(named name: String, file: String, line: Int) -> String? {
-        usrByLocation["\(name)@\(file):\(line)"]
+        usrByLocation["\(name)@\(file):\(line)"] ?? (resolveAllTypes ? "usr:\(name):\(line)" : nil)
     }
 
     func references(toUSR usr: String) -> [ReferenceSite] {
