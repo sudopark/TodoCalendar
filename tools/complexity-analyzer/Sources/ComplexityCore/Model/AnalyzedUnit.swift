@@ -18,6 +18,9 @@ public struct Measurements: Equatable, Sendable, Encodable {
     public var dependencyCycleSize: Int?
     public var collaborationChainDepth: Int?
     public var blastRadiusByHop: [Int]?
+    /// 이 타입이 속한 순환(SCC) 안의 참조 타입(class/actor) 수. 순환이 아니면 nil.
+    /// 값 타입만인 순환(=데이터 클러스터, 경미)과 참조 타입 낀 순환(=병리)을 가른다.
+    public var cycleReferenceTypeCount: Int?
 
     public init(
         internalComplexity: Int? = nil,
@@ -35,7 +38,8 @@ public struct Measurements: Equatable, Sendable, Encodable {
         fanOut: Int? = nil,
         dependencyCycleSize: Int? = nil,
         collaborationChainDepth: Int? = nil,
-        blastRadiusByHop: [Int]? = nil
+        blastRadiusByHop: [Int]? = nil,
+        cycleReferenceTypeCount: Int? = nil
     ) {
         self.internalComplexity = internalComplexity
         self.fanIn = fanIn
@@ -53,6 +57,7 @@ public struct Measurements: Equatable, Sendable, Encodable {
         self.dependencyCycleSize = dependencyCycleSize
         self.collaborationChainDepth = collaborationChainDepth
         self.blastRadiusByHop = blastRadiusByHop
+        self.cycleReferenceTypeCount = cycleReferenceTypeCount
     }
 }
 
@@ -63,11 +68,18 @@ public struct AnalyzedUnit: Equatable, Sendable, Encodable {
         case type
     }
 
+    /// 타입 유닛의 선언 종류. 채점 적용성 분기에 쓴다(예: protocol·enum은 LCOM 비적용).
+    public enum TypeDeclKind: String, Sendable, Encodable {
+        case `struct`, `class`, `enum`, `protocol`, `actor`
+    }
+
     public let kind: Kind
     public let name: String
     public let enclosingType: String?
     public let file: String
     public let line: Int
+    /// `.type` 유닛에만 존재. `.method`는 nil.
+    public let typeDeclKind: TypeDeclKind?
     public var measurements: Measurements
     public var score: Score?
 
@@ -77,6 +89,7 @@ public struct AnalyzedUnit: Equatable, Sendable, Encodable {
         enclosingType: String?,
         file: String,
         line: Int,
+        typeDeclKind: TypeDeclKind? = nil,
         measurements: Measurements = .init(),
         score: Score? = nil
     ) {
@@ -85,7 +98,17 @@ public struct AnalyzedUnit: Equatable, Sendable, Encodable {
         self.enclosingType = enclosingType
         self.file = file
         self.line = line
+        self.typeDeclKind = typeDeclKind
         self.measurements = measurements
         self.score = score
+    }
+
+    /// LCOM(구현체 응집도) 측정이 적용되는 타입인가. protocol(구현 없음)·enum(case별 분기라
+    /// 구조적으로 낮음)은 비적용 — 과탐 방지. struct/class/actor는 적용.
+    var measuresCohesion: Bool {
+        switch typeDeclKind {
+        case .protocol, .enum: return false
+        default: return true
+        }
     }
 }

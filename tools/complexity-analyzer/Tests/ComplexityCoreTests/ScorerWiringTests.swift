@@ -14,7 +14,7 @@ struct ScorerWiringTests {
         let file = dir + "/Sample.swift"
         try "struct Sample { func run() { if true { print(1) } } }".write(toFile: file, atomically: true, encoding: .utf8)
 
-        let units = try Analyzer(index: EmptyIndex()).analyze(sourceRoot: dir, scope: .whole)
+        let units = try Analyzer(index: ResolvingIndex()).analyze(sourceRoot: dir, scope: .whole)
         #expect(!units.isEmpty)
         // 모든 유닛에 score 부착
         #expect(units.allSatisfy { $0.score != nil })
@@ -44,9 +44,9 @@ struct ScorerWiringTests {
     }
 }
 
-/// 실 index 없이 배선만 검증 — 참조 질의는 전부 빈 결과.
-private struct EmptyIndex: IndexProviding {
-    func definitionUSR(named name: String, file: String, line: Int) -> String? { nil }
+/// 실 index 없이 배선만 검증 — 타입은 해소되게(stale 가드 회피) 하되 참조는 빈 결과.
+private struct ResolvingIndex: IndexProviding {
+    func definitionUSR(named name: String, file: String, line: Int) -> String? { "usr:\(name)" }
     func references(toUSR usr: String) -> [ReferenceSite] { [] }
     func enclosingTypeUSR(of usr: String) -> String? { nil }
 }

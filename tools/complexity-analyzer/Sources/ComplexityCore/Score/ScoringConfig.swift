@@ -27,12 +27,15 @@ public struct ScoringConfig: Equatable, Sendable, Codable {
     public var publicSurface: AccumulativeParam
     public var internalCoupling: AccumulativeParam
     public var maxCallChainDepth: AccumulativeParam
-    public var lcom: PathologyParam
+    public var lcom: AccumulativeParam  // 등급화: (lcom-1) soft-cap. 응집(1)=0
     // 협업
     public var fanOut: AccumulativeParam
     public var collaborationChainDepth: AccumulativeParam
     public var blastRadius: AccumulativeParam
-    public var dependencyCycleSize: PathologyParam
+    /// 순환 크기 자체(값 클러스터 포함)의 경미 가중 — soft-cap.
+    public var cycleSize: AccumulativeParam
+    /// 순환 안 참조 타입(class/actor) 1개당 병리 가중. 값 타입만인 순환은 0이라 경미하게 남는다.
+    public var cycleReferenceTypePenalty: Double
     // 롤업 (× rollupAlpha)
     public var rolledUpInternalComplexity: AccumulativeParam
     public var rolledUpCqsViolations: PathologyParam
@@ -51,11 +54,12 @@ public struct ScoringConfig: Equatable, Sendable, Codable {
         publicSurface: AccumulativeParam,
         internalCoupling: AccumulativeParam,
         maxCallChainDepth: AccumulativeParam,
-        lcom: PathologyParam,
+        lcom: AccumulativeParam,
         fanOut: AccumulativeParam,
         collaborationChainDepth: AccumulativeParam,
         blastRadius: AccumulativeParam,
-        dependencyCycleSize: PathologyParam,
+        cycleSize: AccumulativeParam,
+        cycleReferenceTypePenalty: Double,
         rolledUpInternalComplexity: AccumulativeParam,
         rolledUpCqsViolations: PathologyParam,
         rolledUpCombineRoleMix: PathologyParam,
@@ -73,7 +77,8 @@ public struct ScoringConfig: Equatable, Sendable, Codable {
         self.fanOut = fanOut
         self.collaborationChainDepth = collaborationChainDepth
         self.blastRadius = blastRadius
-        self.dependencyCycleSize = dependencyCycleSize
+        self.cycleSize = cycleSize
+        self.cycleReferenceTypePenalty = cycleReferenceTypePenalty
         self.rolledUpInternalComplexity = rolledUpInternalComplexity
         self.rolledUpCqsViolations = rolledUpCqsViolations
         self.rolledUpCombineRoleMix = rolledUpCombineRoleMix
@@ -101,11 +106,12 @@ public struct ScoringConfig: Equatable, Sendable, Codable {
         self.publicSurface = try acc(.publicSurface, d.publicSurface)
         self.internalCoupling = try acc(.internalCoupling, d.internalCoupling)
         self.maxCallChainDepth = try acc(.maxCallChainDepth, d.maxCallChainDepth)
-        self.lcom = try pat(.lcom, d.lcom)
+        self.lcom = try acc(.lcom, d.lcom)
         self.fanOut = try acc(.fanOut, d.fanOut)
         self.collaborationChainDepth = try acc(.collaborationChainDepth, d.collaborationChainDepth)
         self.blastRadius = try acc(.blastRadius, d.blastRadius)
-        self.dependencyCycleSize = try pat(.dependencyCycleSize, d.dependencyCycleSize)
+        self.cycleSize = try acc(.cycleSize, d.cycleSize)
+        self.cycleReferenceTypePenalty = try c.decodeIfPresent(Double.self, forKey: .cycleReferenceTypePenalty) ?? d.cycleReferenceTypePenalty
         self.rolledUpInternalComplexity = try acc(.rolledUpInternalComplexity, d.rolledUpInternalComplexity)
         self.rolledUpCqsViolations = try pat(.rolledUpCqsViolations, d.rolledUpCqsViolations)
         self.rolledUpCombineRoleMix = try pat(.rolledUpCombineRoleMix, d.rolledUpCombineRoleMix)
@@ -123,11 +129,12 @@ public struct ScoringConfig: Equatable, Sendable, Codable {
         publicSurface: .init(cap: 20, weight: 0.5),
         internalCoupling: .init(cap: 30, weight: 0.6),
         maxCallChainDepth: .init(cap: 6, weight: 0.5),
-        lcom: .init(threshold: 1, penalty: 4.0),
+        lcom: .init(cap: 6, weight: 1.5),
         fanOut: .init(cap: 20, weight: 0.7),
         collaborationChainDepth: .init(cap: 8, weight: 0.6),
         blastRadius: .init(cap: 60, weight: 0.8),
-        dependencyCycleSize: .init(threshold: 1, penalty: 5.0),
+        cycleSize: .init(cap: 12, weight: 1.0),
+        cycleReferenceTypePenalty: 2.0,
         rolledUpInternalComplexity: .init(cap: 80, weight: 1.0),
         rolledUpCqsViolations: .init(threshold: 0, penalty: 3.0),
         rolledUpCombineRoleMix: .init(threshold: 0, penalty: 2.0),

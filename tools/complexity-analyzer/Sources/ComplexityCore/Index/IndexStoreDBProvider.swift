@@ -5,6 +5,7 @@ import IndexStoreDB
 public enum IndexStoreError: Error, CustomStringConvertible {
     case storeMissing(String)
     case storeEmpty(String)
+    case staleOrMismatched(typeUnitCount: Int)
 
     public var description: String {
         switch self {
@@ -12,6 +13,8 @@ public enum IndexStoreError: Error, CustomStringConvertible {
             return "index store 경로가 없음: \(path) — 대상 프로젝트를 빌드했는지 확인."
         case .storeEmpty(let path):
             return "index store에 unit 레코드가 없음: \(path) — 빌드가 인덱스를 생성하지 않았거나 경로가 잘못됨. (fan-in이 조용히 0으로 나오는 것을 방지)"
+        case .staleOrMismatched(let count):
+            return "index store가 현재 소스와 불일치 — 타입 \(count)개 중 USR 해소 0개. 대상을 (재)빌드한 뒤 다시 실행. (협업 측정이 조용히 전부 nil로 나가는 것을 방지)"
         }
     }
 }

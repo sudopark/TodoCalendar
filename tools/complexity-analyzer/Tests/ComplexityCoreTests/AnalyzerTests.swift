@@ -40,8 +40,9 @@ struct AnalyzerTests {
     @Test("type scope는 그 타입과 소속 메소드만 남긴다")
     func typeScopeFilters() throws {
         let dir = try writeTempDir(["Two.swift": "struct A { func x() {} }\nstruct B { func y() {} }"])
+        let stub = StubIndexProvider(); stub.resolveAllTypes = true
 
-        let units = try Analyzer(index: StubIndexProvider()).analyze(sourceRoot: dir, scope: .type("A"))
+        let units = try Analyzer(index: stub).analyze(sourceRoot: dir, scope: .type("A"))
 
         #expect(units.contains { $0.kind == .type && $0.name == "A" })
         #expect(units.allSatisfy { $0.name == "A" || $0.enclosingType == "A" })
@@ -68,8 +69,9 @@ struct AnalyzerTests {
     @Test("메소드 단위에 CQS·Combine 측정이 실려 JSON에 나온다")
     func methodMeasuresInJSON() throws {
         let dir = try writeTempDir(["S.swift": "struct S { func f() -> Int { self.x = 1; return x } }"])
+        let stub = StubIndexProvider(); stub.resolveAllTypes = true
 
-        let units = try Analyzer(index: StubIndexProvider()).analyze(sourceRoot: dir, scope: .whole)
+        let units = try Analyzer(index: stub).analyze(sourceRoot: dir, scope: .whole)
         let method = units.first { $0.kind == .method }
         #expect(method?.measurements.cqsViolations == 1)
         #expect(method?.measurements.combineRoleMix == 0)
@@ -84,7 +86,8 @@ struct AnalyzerTests {
         let dir = try writeTempDir([
             "S.swift": "struct S { var x = 0; public func a() { self.x = 1 }; func b() { print(x) } }"
         ])
-        let units = try Analyzer(index: StubIndexProvider()).analyze(sourceRoot: dir, scope: .whole)
+        let stub = StubIndexProvider(); stub.resolveAllTypes = true
+        let units = try Analyzer(index: stub).analyze(sourceRoot: dir, scope: .whole)
         let type = units.first { $0.kind == .type }
         #expect(type?.measurements.lcom == 1)
         #expect(type?.measurements.publicSurface == 1)
@@ -104,7 +107,8 @@ struct AnalyzerTests {
             "A.swift": "struct S { var x = 0; public func a() { self.x = 1 } }",
             "B.swift": "extension S { public func b() { if q { if r {} } } }",
         ])
-        let units = try Analyzer(index: StubIndexProvider()).analyze(sourceRoot: dir, scope: .whole)
+        let stub = StubIndexProvider(); stub.resolveAllTypes = true
+        let units = try Analyzer(index: stub).analyze(sourceRoot: dir, scope: .whole)
         let s = units.first { $0.kind == .type && $0.name == "S" }?.measurements
         // a: internal 0, b: if{ if{} } = 3 → 다른 파일 extension까지 롤업 3
         #expect(s?.rolledUpInternalComplexity == 3)
@@ -147,6 +151,21 @@ struct AnalyzerTests {
         #expect(json.contains("\"dependencyCycleSize\""))
         #expect(json.contains("\"collaborationChainDepth\""))
         #expect(json.contains("\"blastRadiusByHop\""))
+    }
+
+    @Test("테스트 더블·프리뷰 더미 타입은 분석에서 제외")
+    func excludesTestDoubleTypes() throws {
+        let dir = try writeTempDir([
+            "M.swift": "struct Real { func a() {} }\nstruct DummyReal { func a() {} }\nfinal class FakeVM { func b() {} }"
+        ])
+        let stub = StubIndexProvider(); stub.resolveAllTypes = true
+        let units = try Analyzer(index: stub).analyze(sourceRoot: dir, scope: .whole)
+        let typeNames = Set(units.filter { $0.kind == .type }.map { $0.name })
+        #expect(typeNames.contains("Real"))
+        #expect(!typeNames.contains("DummyReal"))
+        #expect(!typeNames.contains("FakeVM"))
+        // 더미의 메서드도 빠짐
+        #expect(!units.contains { $0.enclosingType == "DummyReal" })
     }
 
     @Test("Scope 파싱")

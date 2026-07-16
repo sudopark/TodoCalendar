@@ -50,6 +50,14 @@ struct TypeDependencyGraph {
         return result
     }
 
+    /// 각 SCC의 멤버 노드 목록. 순환 구성(참조 타입 수 등)을 상류에서 집계하는 데 쓴다.
+    func stronglyConnectedComponents() -> [[String]] {
+        let scc = computeSCC()
+        var groups: [Int: [String]] = [:]
+        for node in nodes { groups[scc.idOf[node]!, default: []].append(node) }
+        return Array(groups.values)
+    }
+
     // MARK: - blast radius (역방향 per-hop 전이 의존자, 홉별 새 노드만)
 
     private func blastByHop(of node: String, maxHop: Int) -> [Int] {

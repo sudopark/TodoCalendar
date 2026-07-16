@@ -50,9 +50,19 @@ public struct Analyzer {
             }
         }
 
+        // 테스트 더블·프리뷰 더미(Dummy/Fake/Stub/Spy/Mock)는 측정 대상 아님 — 그래프 빌드 전 제외.
+        // 파일 경로로 못 거른 production 파일 내 프리뷰 더미까지 타입명으로 잡는다.
+        units.removeAll {
+            SwiftFileEnumerator.isTestDoubleName($0.name)
+                || ($0.enclosingType.map(SwiftFileEnumerator.isTestDoubleName) ?? false)
+        }
+        factsByQualified = factsByQualified.filter { qualified, _ in
+            !qualified.split(separator: ".").contains { SwiftFileEnumerator.isTestDoubleName(String($0)) }
+        }
+
         let objectPatched = ObjectMetricsAggregator.patched(units: units, factsByQualified: factsByQualified)
         // 협업 그래프는 whole-scope에서 빌드(엣지가 scope 경계를 넘나듦) → 부착 후 필터.
-        let graphPatched = TypeGraphAggregator.patched(units: objectPatched, index: index, maxBlastHop: 2)
+        let graphPatched = try TypeGraphAggregator.patched(units: objectPatched, index: index, maxBlastHop: 2)
         // 점수는 per-unit pure라 scope 필터 후 부착(드롭될 유닛은 채점 안 함).
         return Scorer(config: config).scored(graphPatched.filter { scope.includes($0) })
     }
