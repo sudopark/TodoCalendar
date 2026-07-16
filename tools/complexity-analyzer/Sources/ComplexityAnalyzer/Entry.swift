@@ -13,8 +13,8 @@ struct ComplexityAnalyzerCLI: AsyncParsableCommand {
     @Option(name: .customLong("source-root"), help: "분석할 소스 루트 경로")
     var sourceRoot: String
 
-    @Option(name: .customLong("index-store-path"), help: "IndexStore DataStore 경로")
-    var indexStorePath: String
+    @Option(name: .customLong("index-store-path"), help: "IndexStore DataStore 경로 (생략 시 현재 워크트리 빌드의 index를 자동 탐색)")
+    var indexStorePath: String?
 
     @Option(name: .customLong("scope"), help: "분석 범위 (whole | file:<경로> | type:<이름>)")
     var scope: String = "whole"
@@ -27,11 +27,18 @@ struct ComplexityAnalyzerCLI: AsyncParsableCommand {
     var configPath: String?
 
     func run() async throws {
-        let index = try IndexStoreDBProvider(
-            storePath: indexStorePath,
-            databasePath: NSTemporaryDirectory() + "cx-idx-" + UUID().uuidString,
-            libIndexStorePath: libIndexStore
-        )
+        // 경로 지정 시 그 store를 열고, 미지정 시 현재 워크트리 소스를 해소하는 index를
+        // 자동 탐색(clean 빌드 불필요). 탐색은 채택한 provider를 그대로 재사용한다.
+        let index: IndexStoreDBProvider
+        if let indexStorePath {
+            index = try IndexStoreDBProvider(
+                storePath: indexStorePath,
+                databasePath: NSTemporaryDirectory() + "cx-idx-" + UUID().uuidString,
+                libIndexStorePath: libIndexStore
+            )
+        } else {
+            index = try IndexStoreLocator.locate(sourceRoot: sourceRoot, libIndexStorePath: libIndexStore)
+        }
         let config: ScoringConfig
         if let configPath {
             let data = try Data(contentsOf: URL(fileURLWithPath: configPath))
