@@ -63,3 +63,15 @@ diff 성격·규모에 맞춰 관점 세트를 고른다. 기본 후보 (고정 
 
 - `mcp__github-reviewer__create_pull_request_review`(bot 계정)로 **해당 코드 라인에 인라인 코멘트** — 한 코멘트에 몰아쓰지 않는다. `commit_id`는 full SHA (short SHA는 422).
 - 게시 후 대화로 요약 보고. 반영은 유저 지시 시 **별도 커밋** — PR 공개 후라 리뷰어가 반영분을 추적할 수 있어야 한다 (fixup 흡수 금지).
+
+## 6. 누수 태깅 (#690 채점 4축)
+
+게시 직후, 컨트롤러 검증을 통과한 finding마다 "축1~3 중 어디서 잡혔어야 했나"를 판정해 기록한다 (축 정의 정본은 implement 스킬 §채점 4축 좌표계):
+
+```bash
+python3 .claude/hooks/log-record.py axis_leak --missed-axis <1|2|3> --finding "<한 줄 요약>" --pr <PR번호>
+```
+
+- 판정 기준: 결함이 **TC가 명세를 못 담음**(누락 케이스·false positive test)이면 축1 / **TC가 있는데도 동작 오류가 통과**면 축2 / **구현 구조·효율·역할 분배**면 축3.
+- 축1~3 어디서도 잡을 수 없는 종류(기획 홀·요구사항 자체의 결함)는 태깅하지 않는다 — 관문 누수가 아니다.
+- 집계·임계 판정은 aggregate-usage.py가 축별로 수행하고 pr 스킬 머지 단계에서 출력된다 — 초과 시 해당 축 관문(implement 스킬) 정비를 제안. 정비 반영 후 소비 마킹은 `improvement --name axis:<n>`.
