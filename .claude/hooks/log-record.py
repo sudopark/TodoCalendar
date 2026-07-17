@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""에이전트 발동형 레코드 기록기 — skill_end(준수 자가 기록)·correction(유저 교정)·improvement(정비 마킹).
+"""에이전트 발동형 레코드 기록기 — skill_end(준수 자가 기록)·correction(유저 교정)·improvement(정비 마킹)·axis_leak(채점 축 누수).
 
 훅이 아니라 에이전트가 CLI로 직접 호출한다 (CLAUDE.md §1 공통 조항, #690).
 사용법 오류는 exit 2 (호출자가 재시도), 그 외 오류는 fail-open exit 0.
@@ -56,22 +56,29 @@ def build_record(args):
             usage_error("correction엔 --summary 필수")
         skills = [s.strip() for s in args.skills.split(",") if s.strip()]
         record.update({"skills": skills, "summary": args.summary, "gist": args.gist or ""})
-    else:  # improvement
+    elif args.event == "improvement":
         if not args.name:
             usage_error("improvement엔 --name 필수")
         record["name"] = args.name
+    else:  # axis_leak
+        if args.missed_axis is None or not args.finding:
+            usage_error("axis_leak엔 --missed-axis·--finding 필수")
+        record.update({"missed_axis": args.missed_axis, "finding": args.finding, "pr": args.pr or ""})
     return record
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("event", choices=["skill_end", "correction", "improvement"])
+    parser.add_argument("event", choices=["skill_end", "correction", "improvement", "axis_leak"])
     parser.add_argument("--name", help="대상 스킬명 (skill_end·improvement)")
     parser.add_argument("--compliance", choices=["full", "partial"])
     parser.add_argument("--deviation", action="append", default=[], help="'조항::사유' 형식, 반복 가능")
     parser.add_argument("--skills", default="", help="쉼표 구분 귀속 스킬 (correction)")
     parser.add_argument("--summary", help="교정 요지 (correction)")
     parser.add_argument("--gist", help="유저 발화 요지 (correction)")
+    parser.add_argument("--missed-axis", type=int, choices=[1, 2, 3], help="놓쳤어야 할 채점 축 (axis_leak)")
+    parser.add_argument("--finding", help="누수 한 줄 요약 (axis_leak)")
+    parser.add_argument("--pr", help="관련 PR 번호 (axis_leak, 생략 가능)")
     parser.add_argument("--session", help="session_id override — 생략 시 CLAUDE_CODE_SESSION_ID env")
     args = parser.parse_args()
     append_record(build_record(args))

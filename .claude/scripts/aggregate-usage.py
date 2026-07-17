@@ -5,6 +5,7 @@
   ts는 ISO8601 문자열 사전순 비교 — 타임존 혼재 시 근사치.
 - 발동/종료는 count 기반 (세션 조인 없음 — 단순성 우선).
 - (미귀속) 버킷은 --all 진단 표에만 노출 — 스킬이 아니라 정비(improvement 마킹) 소비 경로가 없어 임계 판정에서 제외.
+- axis_leak 이벤트는 missed_axis(1/2/3)별로 별도 집계하며, improvement name이 합성 버킷 "axis:<n>" 형식이면 그 ts 이후만 신선 처리(소비 마킹) — 스킬 stats와 섞지 않는다.
 - exit 0 고정: 게이트가 아니라 제안이다. 임계는 usage-thresholds.json.
 """
 import argparse
@@ -45,6 +46,7 @@ def improvement_marks(records):
 def aggregate(records):
     marks = improvement_marks(records)
     stats = {}
+    axis_stats = {1: 0, 2: 0, 3: 0}
 
     def stat(name):
         return stats.setdefault(name, {"invocations": 0, "ends": 0, "full": 0, "partial": 0, "corrections": 0})
@@ -68,7 +70,11 @@ def aggregate(records):
             for name in record.get("skills") or [UNATTRIBUTED]:
                 if is_fresh(name, record):
                     stat(name)["corrections"] += 1
-    return stats
+        elif event == "axis_leak":
+            axis = record.get("missed_axis")
+            if axis in (1, 2, 3) and is_fresh(f"axis:{axis}", record):
+                axis_stats[axis] += 1
+    return stats, axis_stats
 
 
 def missing_rate(entry):
@@ -77,7 +83,7 @@ def missing_rate(entry):
     return max(0.0, 1.0 - entry["ends"] / entry["invocations"])
 
 
-def violations(stats, thresholds):
+def violations(stats, axis_stats, thresholds):
     lines = []
     for name, entry in sorted(stats.items()):
         if name == UNATTRIBUTED:
@@ -93,10 +99,17 @@ def violations(stats, thresholds):
                     f"⚠️ {name} — 종료 레코드 누락률 {rate:.0%} "
                     f"(발동 {entry['invocations']}·종료 {entry['ends']}, 임계 {thresholds['missing_rate']:.0%})"
                 )
+    for axis in (1, 2, 3):
+        count = axis_stats[axis]
+        if count >= thresholds["axis_leak_count"]:
+            lines.append(
+                f"⚠️ 축{axis} 누수 {count}건 (임계 {thresholds['axis_leak_count']}) — "
+                f"implement 스킬 축{axis} 관문 정비 검토 (소비 마킹 버킷 axis:{axis})"
+            )
     return lines
 
 
-def full_table(stats):
+def full_table(stats, axis_stats):
     header = f"{'스킬':<24} {'발동':>4} {'종료':>4} {'full':>5} {'partial':>7} {'correction':>10}"
     lines = [header]
     for name, entry in sorted(stats.items()):
@@ -104,6 +117,8 @@ def full_table(stats):
             f"{name:<24} {entry['invocations']:>4} {entry['ends']:>4} "
             f"{entry['full']:>5} {entry['partial']:>7} {entry['corrections']:>10}"
         )
+    if any(axis_stats.values()):
+        lines.append(f"축별 누수 — 축1 {axis_stats[1]} · 축2 {axis_stats[2]} · 축3 {axis_stats[3]}")
     return lines
 
 
@@ -115,8 +130,8 @@ def main():
     with open(CONFIG_PATH, encoding="utf-8") as f:
         thresholds = json.load(f)
 
-    stats = aggregate(load_records())
-    lines = full_table(stats) if args.all else violations(stats, thresholds)
+    stats, axis_stats = aggregate(load_records())
+    lines = full_table(stats, axis_stats) if args.all else violations(stats, axis_stats, thresholds)
     if lines:
         print("\n".join(lines))
 
