@@ -66,6 +66,27 @@ assert_eq "improvement 이름" "kickoff" "$(field "$(last_line)" name)"
 python3 log-record.py skill_end --name plan --compliance full --session "arg-session"
 assert_eq "--session 우선" "arg-session" "$(field "$(last_line)" session_id)"
 
+# --- axis_leak 정상 기록 ---
+python3 log-record.py axis_leak --missed-axis 3 --finding "RED 단계에서 반복 종료조건 케이스 누락"
+assert_eq "axis_leak 이벤트" "axis_leak" "$(field "$(last_line)" event)"
+assert_eq "axis_leak missed_axis" "3" "$(field "$(last_line)" missed_axis)"
+assert_eq "axis_leak finding" "RED 단계에서 반복 종료조건 케이스 누락" "$(field "$(last_line)" finding)"
+assert_eq "axis_leak pr 생략 시 빈 문자열" "" "$(field "$(last_line)" pr)"
+
+# --- axis_leak --pr 포함 ---
+python3 log-record.py axis_leak --missed-axis 1 --finding "명세 표현 누락" --pr 705
+assert_eq "axis_leak pr 기록" "705" "$(field "$(last_line)" pr)"
+
+# --- axis_leak --finding 누락 → exit 2 + 미기록 ---
+BEFORE_AXIS=$(wc -l < "$LOG" | tr -d ' ')
+python3 log-record.py axis_leak --missed-axis 2 2>/dev/null
+assert_eq "axis_leak finding 누락 exit 2" "2" "$?"
+assert_eq "axis_leak finding 누락 미기록" "$BEFORE_AXIS" "$(wc -l < "$LOG" | tr -d ' ')"
+
+# --- axis_leak --missed-axis 범위 밖(4) → argparse 거부 exit 2 ---
+python3 log-record.py axis_leak --missed-axis 4 --finding "범위밖" 2>/dev/null
+assert_eq "axis_leak missed-axis 범위밖 exit 2" "2" "$?"
+
 echo "---"
 echo "PASS: $PASS / FAIL: $FAIL"
 [ "$FAIL" -eq 0 ]
