@@ -861,6 +861,50 @@ extension AIAgentOrchestrationUsecaseImpleTests {
 }
 
 
+// MARK: - 음성 → 키보드 전환
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    // 회귀: 음성 입력(.listening(.voice)) 중 키보드 전환이 guard isIdle에 씹혀
+    // stopListening·상태 전환이 안 되던 버그. → .listening(.keyboard)로 정식 전환돼야 한다.
+    @Test func usecase_enterKeyboardInput_fromVoice_switchesToKeyboardAndStopsSpeech() async throws {
+        // given — 음성 입력 중 (.listening(.voice))
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()
+        let expect = expectConfirm("voice → keyboard")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.enterKeyboardInput()
+        }
+        // then — .listening(.keyboard) 전환 + speech 정식 종료
+        #expect(self.stubSpeech.didStopListening == true)
+        if case .listening(.keyboard) = state {} else {
+            Issue.record("expected listening(.keyboard), got \(String(describing: state))")
+        }
+    }
+
+    // 회귀: 음성→키보드 전환 후 키보드 닫기(dismissByGesture=enterVoiceInput)로
+    // 음성 복귀가 안 되던 버그. 전환이 no-op이라 상태가 .listening(.voice)로 stale하면
+    // canEnterVoiceInput 가드에 막혀 재시작이 씹혔다.
+    @Test func usecase_voiceToKeyboardThenBackToVoice_restartsSpeech() async throws {
+        // given — 음성 입력 → 키보드 전환
+        let usecase = self.makeUsecaseInIdle()
+        usecase.enterVoiceInput()          // .listening(.voice), startListening 1회
+        usecase.enterKeyboardInput()       // .listening(.keyboard), stopListening
+        let expect = expectConfirm("keyboard 닫기 → voice 복귀")
+        // when — 키보드 시트 닫힘(dismissByGesture) → enterVoiceInput
+        let state = try await self.firstOutput(expect, for: usecase.state.dropFirst()) {
+            usecase.enterVoiceInput()
+        }
+        // then — .listening(.voice) 복귀 + speech 재시작 (2번째 start)
+        #expect(self.stubSpeech.startListeningCount == 2)
+        if case .listening(.voice) = state {} else {
+            Issue.record("expected listening(.voice), got \(String(describing: state))")
+        }
+    }
+}
+
+
 // MARK: - 중지된 job이 남아있는 채로 재시작한 경우 (방어)
 
 extension AIAgentOrchestrationUsecaseImpleTests {

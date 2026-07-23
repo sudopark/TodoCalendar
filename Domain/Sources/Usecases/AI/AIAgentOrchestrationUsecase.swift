@@ -151,7 +151,7 @@ extension AIAgentOrchestrationUsecaseImple {
     }
 
     public func enterKeyboardInput() {
-        guard self.isIdle else { return }
+        guard self.canEnterKeyboardInput else { return }
         self.speechRecognizeUsecase.stopListening()
         self.subject.state.send(.listening(.keyboard))
     }
@@ -219,9 +219,12 @@ extension AIAgentOrchestrationUsecaseImple {
         self.startProcessing(self.commandUsecase.processCommand(trimmed))
     }
 
-    private var isIdle: Bool {
+    // 키보드 입력은 idle뿐 아니라 음성/키보드 입력 중(listening)에서도 진입 가능.
+    // 음성 → 키보드 전환 시 stopListening + .listening(.keyboard) 정식 전환이 돼야
+    // 닫기 복귀(enterVoiceInput)가 canEnterVoiceInput 가드를 통과한다.
+    private var canEnterKeyboardInput: Bool {
         switch self.subject.state.value {
-        case .none, .idle: return true
+        case .none, .idle, .listening: return true
         default: return false
         }
     }
