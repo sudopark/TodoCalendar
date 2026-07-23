@@ -58,7 +58,7 @@ extension SpeechRecognizeServiceImple {
 
     private func configureAudioSession() throws {
         let audioSession = AVAudioSession.sharedInstance()
-        try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+        try audioSession.setCategory(.record, mode: .measurement)
         try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
     }
 
