@@ -45,8 +45,11 @@ private enum AICommandBadge: Equatable {
     fileprivate var recognizingText: String = ""
     fileprivate var voiceLevel: Float = 0
 
-    fileprivate var isListening: Bool {
-        if case .listening = aiAgentState { return true }
+    // 음성 리스닝 UI(파형·네온 테두리·AI pill)는 음성 입력일 때만 켠다.
+    // 키보드 입력(.listening(.keyboard)) 중엔 뒤 배경을 평소 상태로 둬야
+    // 키보드 시트가 닫힐 때 파형 잔상이 노출되지 않는다.
+    fileprivate var isVoiceListening: Bool {
+        if case .listening(.voice) = aiAgentState { return true }
         return false
     }
 
@@ -247,7 +250,7 @@ struct DayEventListView: View {
                         .eventHandler(\.makeNewTodoWithGivenNameAndDetails, eventHandler.makeNewTodoWithGivenNameAndDetails)
                     addNewButton()
                 }
-                .animation(.easeInOut(duration: 0.3), value: self.state.isListening)
+                .animation(.easeInOut(duration: 0.3), value: self.state.isVoiceListening)
             }
         }
         .onTapGesture {
@@ -255,7 +258,7 @@ struct DayEventListView: View {
         }
         .padding()
         .background(self.appearance.colorSet.bg0.asColor)
-        .onChange(of: self.state.isListening) { _, listening in
+        .onChange(of: self.state.isVoiceListening) { _, listening in
             // listening on/off 전환에 반대되는 세기의 햅틱 + 녹음 시작/종료 시스템 사운드.
             self.appearance.impactIfNeed(listening ? .medium : .soft)
             AudioServicesPlaySystemSound(listening ? 1113 : 1114)
@@ -425,7 +428,7 @@ private struct QuickAddNewTodoView: View {
 
     // 입력 전 todo 필드만 흐리게. AI 진입 버튼은 딤 대상 아님.
     private var inputDimOpacity: Double {
-        (self.state.isListening || self.isEntering) ? 1.0 : 0.5
+        (self.state.isVoiceListening || self.isEntering) ? 1.0 : 0.5
     }
 
     var body: some View {
@@ -434,7 +437,7 @@ private struct QuickAddNewTodoView: View {
             .frame(height: 50)
             .backgroundAsRoundedRectForEventList(self.appearance)
             .overlay {
-                if self.state.isListening {
+                if self.state.isVoiceListening {
                     NeonListeningBorder(cornerRadius: 5)
                         .transition(.opacity)
                 }
@@ -448,7 +451,7 @@ private struct QuickAddNewTodoView: View {
                 .frame(width: 52)
                 .opacity(self.inputDimOpacity)
 
-            if self.state.isListening {
+            if self.state.isVoiceListening {
                 self.listeningContent()
             } else {
                 self.defaultContent()
@@ -458,7 +461,7 @@ private struct QuickAddNewTodoView: View {
 
     @ViewBuilder
     private func leadingLabel() -> some View {
-        if self.state.isListening {
+        if self.state.isVoiceListening {
             // pill + 테두리로 "누르면 설명" affordance. 탭 시 안내 표시.
             Button {
                 self.eventHandler.showAIGuide()
