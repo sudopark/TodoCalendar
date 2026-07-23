@@ -657,8 +657,12 @@ private struct AIAgentEntryButton: View {
     @ViewBuilder
     private func entryButtonIcon() -> some View {
         if self.badge == .processing {
+            // 부모(인라인 바)가 키보드 avoidance로 위치를 바꿀 때, LoadingCircleView의
+            // repeatForever 애니가 그 위치 변화까지 보간해 인디케이터가 "떨어지듯" 움직인다.
+            // geometryGroup으로 부모 geometry 변화를 격리해 편승을 끊는다.
             LoadingCircleView(self.appearance.colorSet.primaryBtnText.asColor, lineWidth: 2)
                 .frame(width: 18, height: 18)
+                .geometryGroup()
         } else {
             Image(systemName: "sparkles")
                 .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
