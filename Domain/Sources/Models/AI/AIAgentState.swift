@@ -26,5 +26,5 @@ public enum AIAgentState: Sendable {
     case processing(command: String)                                // 서버 처리 중
     case confirm(command: String, message: String?, action: AIConfirmCommandAction)   // 확인 필요
     case done(command: String, message: String?)                    // 완료
-    case failed(command: String, reason: String?)                   // 실패
+    case failed(command: String, reason: String?, errorCode: ServerErrorModel.ErrorCode?)   // 실패
 }

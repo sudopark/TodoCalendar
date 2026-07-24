@@ -111,7 +111,7 @@ extension AIAgentCommandViewModelImple {
                     return .confirm(command: command, message: message)
                 case .done(let command, let message):
                     return .done(command: command, message: message)
-                case .failed(let command, let reason):
+                case .failed(let command, let reason, _):
                     return .failed(command: command, reason: reason)
                 }
             }

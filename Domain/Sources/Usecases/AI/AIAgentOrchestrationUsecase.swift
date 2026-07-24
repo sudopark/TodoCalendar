@@ -76,7 +76,7 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
             .sink(
                 receiveCompletion: { [weak self] completion in
                     if case .failure = completion {
-                        self?.subject.state.send(.failed(command: self?.currentCommand ?? "", reason: nil))
+                        self?.subject.state.send(.failed(command: self?.currentCommand ?? "", reason: nil, errorCode: nil))
                     }
                 },
                 receiveValue: { [weak self] job in
@@ -99,14 +99,14 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
             self.subject.state.send(.done(command: job.command ?? "", message: done.text))
         case .confirm(let confirm):
             guard let action = confirm.action else {
-                self.subject.state.send(.failed(command: job.command ?? "", reason: confirm.text))
+                self.subject.state.send(.failed(command: job.command ?? "", reason: confirm.text, errorCode: nil))
                 return
             }
             self.subject.state.send(
                 .confirm(command: job.command ?? "", message: confirm.text, action: action)
             )
         case .failed(let fail):
-            self.subject.state.send(.failed(command: job.command ?? "", reason: fail.reason))
+            self.subject.state.send(.failed(command: job.command ?? "", reason: fail.reason, errorCode: fail.errorCode))
         case .canceled:
             self.subject.state.send(.idle)
         }
@@ -285,7 +285,7 @@ extension AIAgentOrchestrationUsecaseImple {
             .sink(
                 receiveCompletion: { [weak self] completion in
                     if case .failure = completion {
-                        self?.subject.state.send(.failed(command: self?.currentCommand ?? "", reason: nil))
+                        self?.subject.state.send(.failed(command: self?.currentCommand ?? "", reason: nil, errorCode: nil))
                     }
                 },
                 receiveValue: { [weak self] job in

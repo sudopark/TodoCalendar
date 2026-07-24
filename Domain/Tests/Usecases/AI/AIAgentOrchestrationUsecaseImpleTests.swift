@@ -277,8 +277,27 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             try? usecase.submit("뭐라고")
         }
         // then
-        guard case .failed(_, let reason) = try #require(states.last) else { Issue.record("failed 아님"); return }
+        guard case .failed(_, let reason, _) = try #require(states.last) else { Issue.record("failed 아님"); return }
         #expect(reason == "이해하지 못했어요")
+    }
+
+    @Test func usecase_whenResultFailedWithDailyLimit_carriesErrorCode() async throws {
+        // given
+        let expect = expectConfirm("한도 초과 failed → errorCode 전달")
+        expect.count = 2
+        var fail = AIJobResult.FailResult()
+        fail.reason = "오늘 사용량을 모두 썼어요"
+        fail.errorCode = .dailyLimitExceeded
+        let usecase = self.makeUsecaseWithCommandJob(self.dummyJob(.failed(fail)))
+        usecase.reset()
+        // when
+        let states = try await self.outputs(expect, for: usecase.state.dropFirst()) {
+            try? usecase.submit("회의 잡아줘")
+        }
+        // then
+        guard case .failed(_, let reason, let errorCode) = try #require(states.last) else { Issue.record("failed 아님"); return }
+        #expect(reason == "오늘 사용량을 모두 썼어요")
+        #expect(errorCode == .dailyLimitExceeded)
     }
 
     @Test func usecase_whenProcessingFails_entersFailed() async throws {
