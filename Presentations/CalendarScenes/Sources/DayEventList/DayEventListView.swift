@@ -520,7 +520,9 @@ private struct QuickAddNewTodoView: View {
     private func listeningContent() -> some View {
         HStack(spacing: 8) {
             VoiceWaveformView(
-                level: self.state.voiceLevel,
+                // raw voiceLevel은 실기기 마이크 dynamic range가 좁아 변동이 작다.
+                // sqrt로 파형을 시각 증폭한다 (표현 관심사라 도메인 아닌 여기서).
+                level: sqrt(self.state.voiceLevel),
                 tintColor: self.appearance.colorSet.text1.asColor
             )
             .frame(maxWidth: .infinity)
