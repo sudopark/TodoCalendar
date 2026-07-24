@@ -79,7 +79,19 @@ final class AIAgentSceneSnapshots: XCTestCase {
     func test_commandFailed() {
         captureSnapshotPair(named: "commandFailed", layout: .fullScreen) { theme in
             let state = AIAgentCommandViewState()
-            state.commandState = .failed(command: "일정 삭제", reason: "네트워크 오류가 발생했어요")
+            state.commandState = .failed(command: "일정 삭제", reason: "네트워크 오류가 발생했어요", errorCode: nil)
+            return AIAgentCommandStageView()
+                .environment(state)
+                .environment(AIAgentCommandViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
+    func test_commandFailedDailyLimit() {
+        captureSnapshotPair(named: "commandFailedDailyLimit", layout: .fullScreen) { theme in
+            let state = AIAgentCommandViewState()
+            state.commandState = .failed(command: "일정 삭제", reason: "오늘 사용량을 모두 썼어요. 내일 다시 시도해 주세요.", errorCode: .dailyLimitExceeded)
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())

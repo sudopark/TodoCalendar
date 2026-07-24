@@ -21,7 +21,7 @@ public enum AIAgentCommandState: Equatable, Sendable {
     case processing(command: String)
     case confirm(command: String, message: String?)
     case done(command: String, message: String?)
-    case failed(command: String, reason: String?)
+    case failed(command: String, reason: String?, errorCode: ServerErrorModel.ErrorCode?)
 }
 
 
@@ -111,8 +111,8 @@ extension AIAgentCommandViewModelImple {
                     return .confirm(command: command, message: message)
                 case .done(let command, let message):
                     return .done(command: command, message: message)
-                case .failed(let command, let reason, _):
-                    return .failed(command: command, reason: reason)
+                case .failed(let command, let reason, let errorCode):
+                    return .failed(command: command, reason: reason, errorCode: errorCode)
                 }
             }
             .eraseToAnyPublisher()

@@ -166,6 +166,18 @@ extension AIAgentCommandViewModelImpleTests {
         XCTAssertEqual(command(), .done(command: "회의 추가", message: "완료"))
     }
 
+    func test_whenOrchestratorFailed_commandStateCarriesErrorCode() {
+        // given
+        let viewModel = self.makeViewModel()
+        let command = self.observeCommand(viewModel)
+        // when
+        self.stubAgent.stateSubject.send(
+            .failed(command: "회의", reason: "오늘 사용량을 모두 썼어요", errorCode: .dailyLimitExceeded)
+        )
+        // then
+        XCTAssertEqual(command(), .failed(command: "회의", reason: "오늘 사용량을 모두 썼어요", errorCode: .dailyLimitExceeded))
+    }
+
     func test_beforeOrchestratorDetermined_emitsNothing() {
         let viewModel = self.makeViewModel()
         var emitted: [AIAgentCommandState?] = []

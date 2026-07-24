@@ -117,8 +117,8 @@ struct AIAgentCommandStageView: View {
                         self.confirmView(command: command, message: message)
                     case .done(let command, let message):
                         self.doneView(command: command, message: message)
-                    case .failed(let command, let reason):
-                        self.failedView(command: command, reason: reason)
+                    case .failed(let command, let reason, let errorCode):
+                        self.failedView(command: command, reason: reason, errorCode: errorCode)
                     case .none:
                         EmptyView()
                     }
@@ -291,17 +291,18 @@ private extension AIAgentCommandStageView {
 
 private extension AIAgentCommandStageView {
 
-    func failedView(command: String, reason: String?) -> some View {
+    func failedView(command: String, reason: String?, errorCode: ServerErrorModel.ErrorCode?) -> some View {
         VStack(alignment: .leading, spacing: Metric.Spacing.regular) {
 
-            // 채팅 형식 — 유저 지시(우측, 있을 때만) + AI 실패 메시지(좌측, 경고 아이콘 말풍선 안)
+            // 채팅 형식 — 유저 지시(우측, 있을 때만) + AI 실패 메시지(좌측, 아이콘 말풍선 안)
             if command.isEmpty == false {
                 self.userMessageBubble(command)
             }
 
             self.assistantBubble {
                 HStack(alignment: .center, spacing: Metric.Spacing.small) {
-                    Image(systemName: "exclamationmark.triangle.fill")
+                    // 한도 초과는 모래시계로 구분 — "내일 리셋까지 대기" 의미. 문구는 서버 reason 그대로
+                    Image(systemName: errorCode == .dailyLimitExceeded ? "hourglass.circle.fill" : "exclamationmark.triangle.fill")
                         .font(.system(size: 20))
                         .foregroundStyle(appearance.colorSet.accentWarn.asColor)
 
@@ -378,7 +379,8 @@ struct AIAgentCommandStageViewPreviewProvider: PreviewProvider {
             makeView(.processing(command: String(repeating: "다음 주 월요일 오전 10시에 강남역 스타벅스에서 디자인 리뷰 미팅 잡아주고, 참석자로 지훈이랑 수민이 추가해줘. ", count: 4))).previewDisplayName("processing-long")
             makeView(.confirm(command: "일정 삭제", message: "정말 삭제할까요?")).previewDisplayName("confirm")
             makeView(.done(command: "내일 회의 추가", message: "일정을 추가했어요")).previewDisplayName("done")
-            makeView(.failed(command: "내일 회의 추가", reason: "네트워크 오류가 발생했어요")).previewDisplayName("failed")
+            makeView(.failed(command: "내일 회의 추가", reason: "네트워크 오류가 발생했어요", errorCode: nil)).previewDisplayName("failed")
+            makeView(.failed(command: "내일 회의 추가", reason: "오늘 사용량을 모두 썼어요. 내일 다시 시도해 주세요.", errorCode: .dailyLimitExceeded)).previewDisplayName("failed-dailyLimit")
         }
     }
 }
