@@ -134,6 +134,7 @@ extension SpeechRecognizeServiceImple {
         }
         let rms = sqrt(sumSquares / Float(frameLength))
         let dbfs = 20 * log10(max(rms, .leastNonzeroMagnitude))
+        // raw normalized(0~1). 파형 시각 증폭은 presentation, 무음 판정(silence)은 이 값 기준.
         let level = max(0, min(1, (dbfs - self.noiseFloor) / -self.noiseFloor))
         self.subject.voiceLevel.send(level)
     }

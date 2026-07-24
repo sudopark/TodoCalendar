@@ -31,15 +31,18 @@ public final class SpeechRecognizeUsecaseImple: SpeechRecognizeUsecase, @uncheck
     private let service: any SpeechRecognizeService
     private let permissionChecker: any SpeechRecognizePermissionChecker
     private let autoStopAfterSilence: TimeInterval
+    private let silenceThreshold: Float
 
     public init(
         service: any SpeechRecognizeService,
         permissionChecker: any SpeechRecognizePermissionChecker,
-        autoStopAfterSilence: TimeInterval = 3
+        autoStopAfterSilence: TimeInterval = 3,
+        silenceThreshold: Float = 0.1
     ) {
         self.service = service
         self.permissionChecker = permissionChecker
         self.autoStopAfterSilence = autoStopAfterSilence
+        self.silenceThreshold = silenceThreshold
     }
 
     private struct Subject {
@@ -141,8 +144,9 @@ extension SpeechRecognizeUsecaseImple {
     
     private var silenceTimeout: AnyPublisher<Void, Never> {
         let interval = Int(self.autoStopAfterSilence * 1000)
+        let threshold = self.silenceThreshold
         return self.service.voiceLevel
-            .map { $0 == 0 }
+            .map { $0 < threshold }
             .removeDuplicates()
             .map { isSilence in
                 guard isSilence
