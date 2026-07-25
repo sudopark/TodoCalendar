@@ -23,7 +23,8 @@ import CommonPresentation
 
 private enum AICommandBadge: Equatable {
     case processing
-    case needConfirm
+    case needConfirm(expireTime: Date?)
+    case expired
     case done
     case failed
 }
@@ -58,10 +59,11 @@ private enum AICommandBadge: Equatable {
         return false
     }
 
+    // 만료 여부는 여기서 파생하지 않는다 — needConfirm(expireTime)을 그대로 실어 AIAgentEntryButton이 렌더 시점(TimelineView)에 파생.
     fileprivate var aiCommandBadge: AICommandBadge? {
         switch self.aiAgentState {
         case .processing: return .processing
-        case .confirm: return .needConfirm
+        case .confirm(_, _, _, let expireTime): return .needConfirm(expireTime: expireTime)
         case .done: return .done
         case .failed: return .failed
         case .idle, .listening: return nil
@@ -640,20 +642,64 @@ private struct AIAgentEntryButton: View {
     let badge: AICommandBadge?
     var onTap: () -> Void = { }
 
+    // needConfirm(expireTime)일 때만 그 만료 시각에 재렌더 — 그 외엔 최초 1회 렌더로 충분(값 변화 없음)
+    private var confirmExpireSchedule: [Date] {
+        if case .needConfirm(let expireTime) = self.badge, let expireTime {
+            return [expireTime]
+        }
+        return []
+    }
+
     var body: some View {
-        Button {
-            self.onTap()
-        } label: {
+        TimelineView(.explicit(self.confirmExpireSchedule)) { context in
+            let displayBadge = self.displayBadge(at: context.date)
+            Button {
+                self.onTap()
+            } label: {
+                self.buttonShape(displayBadge)
+                    .overlay(alignment: .topTrailing) {
+                        if let displayBadge, displayBadge != .processing {
+                            self.badgeView(displayBadge)
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.2), value: displayBadge)
+            }
+        }
+    }
+
+    // needConfirm(expireTime)이고 만료 시각이 과거면 .expired로 파생 — 상태가 아니라 렌더 시점 값.
+    private func displayBadge(at date: Date) -> AICommandBadge? {
+        guard case .needConfirm(let expireTime) = self.badge, let expireTime, date >= expireTime
+        else { return self.badge }
+        return .expired
+    }
+
+    // confirm 대기 중 + 만료 전 + 만료 시각을 알 때만 원형 → 카운트다운 캡슐로 확장.
+    // 만료(.expired)됐거나 만료 시각 불명(exp 파싱 실패)이면 카운트다운 없이 기존 원형 유지.
+    @ViewBuilder
+    private func buttonShape(_ displayBadge: AICommandBadge?) -> some View {
+        if case .needConfirm(let expireTime) = displayBadge, let expireTime {
+            self.countdownCapsule(expireTime)
+        } else {
             Circle()
                 .fill(self.appearance.colorSet.accentAI.asColor)
                 .frame(width: 36, height: 36)
                 .overlay { self.entryButtonIcon() }
-                .overlay(alignment: .topTrailing) {
-                    if let badge = self.badge, badge != .processing {
-                        self.badgeView(badge)
-                    }
-                }
         }
+    }
+
+    private func countdownCapsule(_ expireTime: Date) -> some View {
+        HStack(spacing: Metric.Spacing.xsmall) {
+            Image(systemName: "sparkles")
+                .font(.system(size: 13))
+            Text(timerInterval: Date()...max(Date(), expireTime), countsDown: true)
+                .font(self.appearance.fontSet.size(14, weight: .bold).asFont)
+                .monospacedDigit()
+        }
+        .foregroundColor(self.appearance.colorSet.primaryBtnText.asColor)
+        .padding(.horizontal, spacing: .regular)
+        .frame(height: 36)
+        .background(Capsule().fill(self.appearance.colorSet.accentAI.asColor))
     }
 
     @ViewBuilder
@@ -688,7 +734,7 @@ private struct AIAgentEntryButton: View {
             return ("questionmark", self.appearance.colorSet.accentInfo.asColor)
         case .done:
             return ("checkmark", self.appearance.colorSet.accent.asColor)
-        case .failed:
+        case .expired, .failed:
             return ("exclamationmark", self.appearance.colorSet.accentWarn.asColor)
         }
     }
@@ -894,7 +940,8 @@ struct DayEventListBadgePreviewProvider: PreviewProvider {
         confirmState.aiAgentState = .confirm(
             command: "내일 오전 9시 회의 추가",
             message: "확인이 필요합니다",
-            action: AIConfirmCommandAction()
+            action: AIConfirmCommandAction(),
+            expireTime: Date().addingTimeInterval(4 * 60 + 30)
         )
 
         let doneState = DayEventListViewState()
