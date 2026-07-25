@@ -188,3 +188,67 @@ extension AIAgentCommandViewModelImpleTests {
         XCTAssertTrue(emitted.isEmpty)
     }
 }
+
+
+// MARK: - usage 노출·갱신
+
+extension AIAgentCommandViewModelImpleTests {
+
+    func test_prepare_refreshUsage() {
+        // given
+        let viewModel = self.makeViewModel()
+        // when
+        viewModel.prepare()
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsage, true)
+    }
+
+    func test_usage_emitsCurrentUsage() {
+        // given
+        let viewModel = self.makeViewModel()
+        self.stubAgent.usageSubject.send(.init(input: 100, output: 200, limit: 5000))
+        var usage: AIAgentUsage?
+        // when
+        viewModel.usage
+            .sink(receiveValue: { usage = $0 })
+            .store(in: &self.cancelBag)
+        // then — CurrentValueSubject replay라 동기 방출
+        XCTAssertEqual(usage?.inputTokens, 100)
+        XCTAssertEqual(usage?.outputTokens, 200)
+        XCTAssertEqual(usage?.dailyLimit, 5000)
+    }
+
+    // done/failed = 서버 토큰 차감이 끝난 시점 → usage 재갱신
+    func test_commandState_whenDone_refreshUsage() {
+        // given
+        let viewModel = self.makeViewModel()
+        let observe = self.observeCommand(viewModel)
+        // when
+        self.stubAgent.stateSubject.send(.done(command: "회의", message: nil))
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsage, true)
+        _ = observe
+    }
+
+    func test_commandState_whenFailed_refreshUsage() {
+        // given
+        let viewModel = self.makeViewModel()
+        let observe = self.observeCommand(viewModel)
+        // when
+        self.stubAgent.stateSubject.send(.failed(command: "회의", reason: nil, errorCode: nil))
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsage, true)
+        _ = observe
+    }
+
+    func test_commandState_whenProcessing_notRefreshUsage() {
+        // given
+        let viewModel = self.makeViewModel()
+        let observe = self.observeCommand(viewModel)
+        // when
+        self.stubAgent.stateSubject.send(.processing(command: "회의"))
+        // then
+        XCTAssertEqual(self.stubAgent.didLoadUsage, false)
+        _ = observe
+    }
+}

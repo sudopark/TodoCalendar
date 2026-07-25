@@ -47,6 +47,7 @@ final class AIAgentSceneSnapshots: XCTestCase {
                 command: "일정 삭제", message: "정말 삭제할까요?",
                 expireTime: Date().addingTimeInterval(4 * 60 + 30)
             )
+            state.usage = .init(input: 1234, output: 0, limit: 5000)
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())
@@ -62,6 +63,7 @@ final class AIAgentSceneSnapshots: XCTestCase {
                 command: "일정 삭제", message: "정말 삭제할까요?",
                 expireTime: Date().addingTimeInterval(-10)
             )
+            state.usage = .init(input: 1234, output: 0, limit: 5000)
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())
@@ -74,6 +76,7 @@ final class AIAgentSceneSnapshots: XCTestCase {
         captureSnapshotPair(named: "commandProcessing", layout: .fullScreen) { theme in
             let state = AIAgentCommandViewState()
             state.commandState = .processing(command: "일정 삭제")
+            state.usage = .init(input: 1234, output: 0, limit: 5000)
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())
@@ -86,6 +89,7 @@ final class AIAgentSceneSnapshots: XCTestCase {
         captureSnapshotPair(named: "commandDone", layout: .fullScreen) { theme in
             let state = AIAgentCommandViewState()
             state.commandState = .done(command: "일정 삭제", message: "삭제를 완료했어요")
+            state.usage = .init(input: 1234, output: 0, limit: 5000)
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())
@@ -98,6 +102,7 @@ final class AIAgentSceneSnapshots: XCTestCase {
         captureSnapshotPair(named: "commandFailed", layout: .fullScreen) { theme in
             let state = AIAgentCommandViewState()
             state.commandState = .failed(command: "일정 삭제", reason: "네트워크 오류가 발생했어요", errorCode: nil)
+            state.usage = .init(input: 1234, output: 0, limit: 5000)
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())
@@ -110,6 +115,7 @@ final class AIAgentSceneSnapshots: XCTestCase {
         captureSnapshotPair(named: "commandFailedDailyLimit", layout: .fullScreen) { theme in
             let state = AIAgentCommandViewState()
             state.commandState = .failed(command: "일정 삭제", reason: "오늘 사용량을 모두 썼어요. 내일 다시 시도해 주세요.", errorCode: .dailyLimitExceeded)
+            state.usage = .init(input: 5000, output: 0, limit: 5000)
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())
