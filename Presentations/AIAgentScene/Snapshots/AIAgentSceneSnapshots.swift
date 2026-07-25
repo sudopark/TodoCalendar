@@ -55,6 +55,21 @@ final class AIAgentSceneSnapshots: XCTestCase {
     }
 
     @MainActor
+    func test_commandConfirmExpired() {
+        captureSnapshotPair(named: "commandConfirmExpired", layout: .fullScreen) { theme in
+            let state = AIAgentCommandViewState()
+            state.commandState = .confirm(
+                command: "일정 삭제", message: "정말 삭제할까요?",
+                expireTime: Date().addingTimeInterval(-10)
+            )
+            return AIAgentCommandStageView()
+                .environment(state)
+                .environment(AIAgentCommandViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    @MainActor
     func test_commandProcessing() {
         captureSnapshotPair(named: "commandProcessing", layout: .fullScreen) { theme in
             let state = AIAgentCommandViewState()
