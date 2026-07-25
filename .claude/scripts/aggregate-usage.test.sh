@@ -21,7 +21,10 @@ cat > "$FIXTURE" << 'JSONL'
 {"ts":"2026-01-01T09:20:00+09:00","event":"skill","session_id":"s2","name":"implement"}
 {"ts":"2026-01-01T09:30:00+09:00","event":"skill","session_id":"s2","name":"implement"}
 {"ts":"2026-01-01T09:40:00+09:00","event":"skill","session_id":"s3","name":"implement"}
+{"ts":"2026-01-01T09:41:00+09:00","event":"skill","session_id":"s6","name":"implement"}
+{"ts":"2026-01-01T09:42:00+09:00","event":"skill","session_id":"s7","name":"implement"}
 {"ts":"2026-01-01T09:45:00+09:00","event":"skill_end","session_id":"s1","name":"implement","compliance":"full","deviations":[]}
+{"ts":"2026-01-01T09:47:00+09:00","event":"skill_end","session_id":"s1","name":"implement","compliance":"full","deviations":[]}
 {"ts":"2026-01-01T09:50:00+09:00","event":"skill_end","session_id":"s2","name":"implement","compliance":"full","deviations":[]}
 {"ts":"2026-01-01T10:00:00+09:00","event":"skill","session_id":"s1","name":"pr"}
 {"ts":"2026-01-01T10:01:00+09:00","event":"correction","session_id":"s1","skills":["pr"],"summary":"c1","gist":""}
@@ -48,9 +51,11 @@ JSONL
 
 OUT=$(python3 aggregate-usage.py)
 
-# implement: 발동 5·종료 2 → 누락률 60% ≥ 50% (min 5 충족) → 초과
+# implement: 발동 레코드 7·종료 레코드 3이지만 세션 dedupe → 발동 5(s1·s2·s3·s6·s7)·종료 2(s1·s2)
+#            → 누락률 60% ≥ 50% (min 5 충족) → 초과
 assert_contains "누락률 초과 검출" "implement" "$OUT"
 assert_contains "누락률 수치" "60%" "$OUT"
+assert_contains "세션 단위 dedupe 카운트" "발동 5·종료 2" "$OUT"
 # pr: correction 3건 ≥ 3 → 초과
 assert_contains "correction 임계 검출" "pr — correction 3건" "$OUT"
 # commit: partial 3건 ≥ 3 → 초과 (발동 1이라 누락률 판정은 제외돼야 함)
