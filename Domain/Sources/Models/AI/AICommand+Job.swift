@@ -167,3 +167,32 @@ extension AIJobDataMutation.DataType {
         }
     }
 }
+
+
+// MARK: - confirm token expiry
+
+extension AIConfirmCommandAction {
+
+    // confirmToken(JWT) payload의 exp claim — 만료 UI 판정용이라 서명 검증은 하지 않는다
+    public var tokenExpireTime: Date? {
+        guard let token = self.confirmToken else { return nil }
+        let segments = token.components(separatedBy: ".")
+        guard segments.count == 3,
+              let payload = self.decodeBase64URL(segments[1]),
+              let json = try? JSONSerialization.jsonObject(with: payload) as? [String: Any],
+              let exp = json["exp"] as? TimeInterval
+        else { return nil }
+        return Date(timeIntervalSince1970: exp)
+    }
+
+    private func decodeBase64URL(_ text: String) -> Data? {
+        var base64 = text
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        let remainder = base64.count % 4
+        if remainder > 0 {
+            base64 += String(repeating: "=", count: 4 - remainder)
+        }
+        return Data(base64Encoded: base64)
+    }
+}
