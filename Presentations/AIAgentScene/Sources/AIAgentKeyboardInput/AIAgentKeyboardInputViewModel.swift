@@ -11,10 +11,13 @@ import Domain
 // MARK: - AIAgentKeyboardInputViewModel
 
 protocol AIAgentKeyboardInputViewModel: AnyObject, Sendable {
+    func prepare()
     func send(_ text: String)
     func stop()
     func close()
     func dismissByGesture()
+
+    var usage: AnyPublisher<AIAgentUsage, Never> { get }
 }
 
 
@@ -27,6 +30,11 @@ final class AIAgentKeyboardInputViewModelImple: AIAgentKeyboardInputViewModel, @
 
     init(aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase) {
         self.aiAgentOrchestrationUsecase = aiAgentOrchestrationUsecase
+    }
+
+    // 시트 진입 시 usage 최신화 — 갱신 트리거는 presentation 소유 (#713)
+    func prepare() {
+        self.aiAgentOrchestrationUsecase.loadUsage()
     }
 
     func send(_ text: String) {
@@ -50,5 +58,15 @@ final class AIAgentKeyboardInputViewModelImple: AIAgentKeyboardInputViewModel, @
 
     func dismissByGesture() {
         self.aiAgentOrchestrationUsecase.enterVoiceInput()
+    }
+}
+
+
+// MARK: - outputs
+
+extension AIAgentKeyboardInputViewModelImple {
+
+    var usage: AnyPublisher<AIAgentUsage, Never> {
+        return self.aiAgentOrchestrationUsecase.usage
     }
 }
