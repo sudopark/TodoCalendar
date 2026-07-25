@@ -15,4 +15,8 @@ AI 어시스턴트 진입 시트들. 키보드 입력 시트(AIAgentKeyboardInpu
 
 ## 프레임워크 스코프 컴포넌트
 
-현재 없음. 시트 헤더는 CommonPresentation `SheetHeaderView` 사용 (원래 이 프레임워크의 AIAgentSheetHeader였다가 #659에서 승격). 내부 공용 뷰가 다시 생기면 `Sources/Components/`에 두고 여기 기록할 것 (rules §2).
+| 컴포넌트 | 역할 |
+|---|---|
+| `Components/AIAgentUsageGaugeView` | 사용량/일일 한도 미니 게이지 (두 시트 공유, #713). `dailyLimit > 0`일 때만 렌더하는 건 호출측 책임 |
+
+시트 헤더는 CommonPresentation `SheetHeaderView` 사용 (원래 이 프레임워크의 AIAgentSheetHeader였다가 #659에서 승격).
