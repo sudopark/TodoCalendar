@@ -14,11 +14,18 @@ import CommonPresentation
 @Observable final class AIAgentKeyboardInputViewState {
     fileprivate var text: String = ""
     fileprivate var actionTaken: Bool = false
+    var usage: AIAgentUsage?
     @ObservationIgnored private var didBind = false
+    @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
 
     func bind(_ viewModel: any AIAgentKeyboardInputViewModel) {
         guard self.didBind == false else { return }
         self.didBind = true
+
+        viewModel.usage
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.usage = $0 })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -27,12 +34,14 @@ import CommonPresentation
 
 final class AIAgentKeyboardInputEventHandler: Observable {
 
+    var prepare: () -> Void = { }
     var send: (String) -> Void = { _ in }
     var stop: () -> Void = { }
     var close: () -> Void = { }
     var dismissByGesture: () -> Void = { }
 
     func bind(_ viewModel: any AIAgentKeyboardInputViewModel) {
+        self.prepare = viewModel.prepare
         self.send = viewModel.send(_:)
         self.stop = viewModel.stop
         self.close = viewModel.close
@@ -63,6 +72,7 @@ struct AIAgentKeyboardInputContainerView: View {
         AIAgentKeyboardInputView()
             .onAppear {
                 self.stateBinding(self.state)
+                self.eventHandler.prepare()
             }
             .environment(state)
             .environment(eventHandler)
@@ -95,6 +105,10 @@ private struct AIAgentKeyboardInputView: View {
                     .eventHandler(\.onClose) {
                         self.eventHandler.close()
                     }
+
+                if let usage = state.usage, usage.dailyLimit > 0 {
+                    AIAgentUsageGaugeView(usage: usage)
+                }
 
                 TextField(
                     "", text: $state.text,
@@ -168,6 +182,7 @@ struct AIAgentKeyboardInputViewPreviewProvider: PreviewProvider {
 
         let typedState = AIAgentKeyboardInputViewState()
         typedState.text = "내일 오전 9시 회의 추가"
+        typedState.usage = .init(input: 1234, output: 0, limit: 5000)
 
         return Group {
             AIAgentKeyboardInputView()
