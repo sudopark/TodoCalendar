@@ -6,7 +6,7 @@
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
-import XCTest
+import Testing
 import Combine
 import Domain
 import UnitTestHelpKit
@@ -14,20 +14,10 @@ import UnitTestHelpKit
 @testable import AIAgentScene
 
 
-class AIAgentKeyboardInputViewModelImpleTests: BaseTestCase, PublisherWaitable {
+final class AIAgentKeyboardInputViewModelImpleTests: PublisherWaitable {
 
-    var cancelBag: Set<AnyCancellable>!
-    private var stubAgent: StubAIAgentOrchestrationUsecase!
-
-    override func setUpWithError() throws {
-        self.cancelBag = .init()
-        self.stubAgent = .init()
-    }
-
-    override func tearDownWithError() throws {
-        self.cancelBag = nil
-        self.stubAgent = nil
-    }
+    var cancelBag: Set<AnyCancellable>! = .init()
+    private let stubAgent: StubAIAgentOrchestrationUsecase = .init()
 
     private func makeViewModel() -> AIAgentKeyboardInputViewModelImple {
         return AIAgentKeyboardInputViewModelImple(
@@ -41,27 +31,25 @@ class AIAgentKeyboardInputViewModelImpleTests: BaseTestCase, PublisherWaitable {
 
 extension AIAgentKeyboardInputViewModelImpleTests {
 
-    func test_prepare_refreshUsage() {
+    @Test func viewModel_whenPrepare_refreshUsage() {
         // given
         let viewModel = self.makeViewModel()
         // when
         viewModel.prepare()
         // then
-        XCTAssertEqual(self.stubAgent.didLoadUsage, true)
+        #expect(self.stubAgent.didLoadUsage == true)
     }
 
-    func test_usage_emitsCurrentUsage() {
+    @Test func viewModel_usage_emitsCurrentUsage() async throws {
         // given
+        let expect = expectConfirm("현재 usage 방출")
         let viewModel = self.makeViewModel()
         self.stubAgent.usageSubject.send(.init(input: 100, output: 200, limit: 5000))
-        var usage: AIAgentUsage?
         // when
-        viewModel.usage
-            .sink(receiveValue: { usage = $0 })
-            .store(in: &self.cancelBag)
-        // then — CurrentValueSubject replay라 동기 방출
-        XCTAssertEqual(usage?.inputTokens, 100)
-        XCTAssertEqual(usage?.outputTokens, 200)
-        XCTAssertEqual(usage?.dailyLimit, 5000)
+        let usage = try await self.firstOutput(expect, for: viewModel.usage)
+        // then
+        #expect(usage?.inputTokens == 100)
+        #expect(usage?.outputTokens == 200)
+        #expect(usage?.dailyLimit == 5000)
     }
 }

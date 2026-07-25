@@ -24,14 +24,7 @@ struct AIAgentUsageGaugeView: View {
         self.usage = usage
     }
 
-    private var usedTokens: Int { self.usage.inputTokens + self.usage.outputTokens }
-
-    private var usedRatio: Double {
-        guard self.usage.dailyLimit > 0 else { return 0 }
-        return min(Double(self.usedTokens) / Double(self.usage.dailyLimit), 1.0)
-    }
-
-    private var isNearLimit: Bool { self.usedRatio >= Self.warnThreshold }
+    private var isNearLimit: Bool { self.usage.usedRatio >= Self.warnThreshold }
 
     private var fillColor: Color {
         self.isNearLimit
@@ -47,13 +40,13 @@ struct AIAgentUsageGaugeView: View {
                         .fill(self.appearance.colorSet.bg1.asColor)
                     Capsule()
                         .fill(self.fillColor)
-                        .frame(width: proxy.size.width * self.usedRatio)
+                        .frame(width: proxy.size.width * self.usage.usedRatio)
                 }
             }
             .frame(height: 6)
 
             Text("aiAgent::usage".localized(
-                with: self.usedTokens.formatted(), self.usage.dailyLimit.formatted()
+                with: self.usage.usedTokens.formatted(), self.usage.dailyLimit.formatted()
             ))
             .font(self.appearance.fontSet.size(12).asFont)
             .foregroundStyle(
