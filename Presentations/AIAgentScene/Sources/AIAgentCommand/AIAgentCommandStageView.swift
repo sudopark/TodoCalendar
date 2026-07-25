@@ -128,8 +128,11 @@ struct AIAgentCommandStageView: View {
     var body: some View {
         BottomSlideView {
             TimelineView(.explicit(self.confirmExpireSchedule)) { context in
+                // 디스플레이 링크 없는 정적 렌더(스냅샷 캡처)에선 TimelineView가 미래 스케줄 시각을
+                // context.date로 줄 수 있어 벽시계로 클램프 — 온스크린에선 현재를 앞서지 않아 no-op
+                let now = min(context.date, Date())
                 VStack(alignment: .leading, spacing: Metric.Spacing.large) {
-                    SheetHeaderView(title: self.headerTitle(at: context.date))
+                    SheetHeaderView(title: self.headerTitle(at: now))
                         .eventHandler(\.onClose) {
                             self.eventHandlers.close()
                         }
@@ -143,7 +146,7 @@ struct AIAgentCommandStageView: View {
                         case .processing(let command):
                             self.processingView(command: command)
                         case .confirm(let command, let message, let expireTime):
-                            if let expireTime, context.date >= expireTime {
+                            if let expireTime, now >= expireTime {
                                 self.confirmExpiredView(command: command, message: message)
                             } else {
                                 self.confirmView(command: command, message: message, expireTime: expireTime)
