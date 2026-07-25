@@ -21,6 +21,7 @@ import CommonPresentation
     @ObservationIgnored private var cancellables: Set<AnyCancellable> = []
 
     var commandState: AIAgentCommandState?
+    var usage: AIAgentUsage?
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
         guard self.didBind == false else { return }
@@ -30,6 +31,11 @@ import CommonPresentation
             .receive(on: RunLoop.main)
             .sink(receiveValue: { [weak self] in self?.commandState = $0 })
             .store(in: &self.cancellables)
+
+        viewModel.usage
+            .receive(on: RunLoop.main)
+            .sink(receiveValue: { [weak self] in self?.usage = $0 })
+            .store(in: &self.cancellables)
     }
 }
 
@@ -38,6 +44,7 @@ import CommonPresentation
 
 final class AIAgentCommandViewEventHandler: Observable {
 
+    var prepare: () -> Void = { }
     var confirm: () -> Void = { }
     var decline: () -> Void = { }
     var cancel: () -> Void = { }
@@ -45,6 +52,7 @@ final class AIAgentCommandViewEventHandler: Observable {
     var close: () -> Void = { }
 
     func bind(_ viewModel: any AIAgentCommandViewModel) {
+        self.prepare = viewModel.prepare
         self.confirm = viewModel.confirm
         self.decline = viewModel.decline
         self.cancel = viewModel.cancel
@@ -74,7 +82,10 @@ struct AIAgentCommandStageContainerView: View {
 
     var body: some View {
         return AIAgentCommandStageView()
-            .onAppear { self.stateBinding(self.state) }
+            .onAppear {
+                self.stateBinding(self.state)
+                self.eventHandlers.prepare()
+            }
             .environment(self.viewAppearance)
             .environment(self.state)
             .environment(self.eventHandlers)
@@ -122,6 +133,10 @@ struct AIAgentCommandStageView: View {
                         .eventHandler(\.onClose) {
                             self.eventHandlers.close()
                         }
+
+                    if let usage = state.usage, usage.dailyLimit > 0 {
+                        AIAgentUsageGaugeView(usage: usage)
+                    }
 
                     Group {
                         switch self.state.commandState {
@@ -436,6 +451,7 @@ struct AIAgentCommandStageViewPreviewProvider: PreviewProvider {
         let viewAppearance = ViewAppearance(setting: setting, isSystemDarkTheme: false)
         let state = AIAgentCommandViewState()
         state.commandState = commandState
+        state.usage = .init(input: 1234, output: 0, limit: 5000)
         let eventHandlers = AIAgentCommandViewEventHandler()
 
         return AIAgentCommandStageView()

@@ -29,6 +29,7 @@ public enum AIAgentCommandState: Equatable, Sendable {
 
 public protocol AIAgentCommandViewModel: AnyObject, Sendable {
 
+    func prepare()
     func sendCommand(_ text: String)
     func confirm()
     func decline()
@@ -37,6 +38,7 @@ public protocol AIAgentCommandViewModel: AnyObject, Sendable {
     func close()
 
     var commandState: AnyPublisher<AIAgentCommandState?, Never> { get }
+    var usage: AnyPublisher<AIAgentUsage, Never> { get }
 }
 
 
@@ -56,6 +58,11 @@ final class AIAgentCommandViewModelImple: AIAgentCommandViewModel, @unchecked Se
 // MARK: - actions
 
 extension AIAgentCommandViewModelImple {
+
+    // 시트 진입 시 usage 최신화 — 갱신 트리거는 presentation 소유 (#713)
+    func prepare() {
+        self.orchestrationUsecase.loadUsage()
+    }
 
     func sendCommand(_ text: String) {
         try? self.orchestrationUsecase.submit(text)
@@ -99,6 +106,15 @@ extension AIAgentCommandViewModelImple {
 
     var commandState: AnyPublisher<AIAgentCommandState?, Never> {
         return self.orchestrationUsecase.state
+            .handleEvents(receiveOutput: { [weak self] state in
+                // done/failed = 서버 토큰 차감 완료 시점 → 게이지 최신화
+                switch state {
+                case .done, .failed:
+                    self?.orchestrationUsecase.loadUsage()
+                case .idle, .listening, .processing, .confirm:
+                    break
+                }
+            })
             .map { state in
                 switch state {
                 case .idle:
@@ -116,5 +132,9 @@ extension AIAgentCommandViewModelImple {
                 }
             }
             .eraseToAnyPublisher()
+    }
+
+    var usage: AnyPublisher<AIAgentUsage, Never> {
+        return self.orchestrationUsecase.usage
     }
 }
