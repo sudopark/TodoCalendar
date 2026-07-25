@@ -43,7 +43,10 @@ final class AIAgentSceneSnapshots: XCTestCase {
     func test_commandConfirm() {
         captureSnapshotPair(named: "commandConfirm", layout: .fullScreen) { theme in
             let state = AIAgentCommandViewState()
-            state.commandState = .confirm(command: "일정 삭제", message: "정말 삭제할까요?")
+            state.commandState = .confirm(
+                command: "일정 삭제", message: "정말 삭제할까요?",
+                expireTime: Date().addingTimeInterval(4 * 60 + 30)
+            )
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())

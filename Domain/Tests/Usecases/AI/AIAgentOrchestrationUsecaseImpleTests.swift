@@ -123,6 +123,19 @@ class AIAgentOrchestrationUsecaseImpleTests: PublisherWaitable {
         case .failed: return "failed"
         }
     }
+
+    // exp claim만 담은 JWT 형태 토큰 (base64url, 패딩 제거)
+    private func makeToken(expOffset: TimeInterval) -> String {
+        let exp = Date().addingTimeInterval(expOffset).timeIntervalSince1970
+        let encode: ([String: Any]) -> String = { dict in
+            let data = try! JSONSerialization.data(withJSONObject: dict)
+            return data.base64EncodedString()
+                .replacingOccurrences(of: "+", with: "-")
+                .replacingOccurrences(of: "/", with: "_")
+                .replacingOccurrences(of: "=", with: "")
+        }
+        return "\(encode(["alg": "HS256"])).\(encode(["exp": exp])).sig"
+    }
 }
 
 
@@ -258,7 +271,7 @@ extension AIAgentOrchestrationUsecaseImpleTests {
             try? usecase.submit("내일 회의 잡아줘")
         }
         // then
-        guard case .confirm(let command, let message, let action) = try #require(states.last) else { Issue.record("confirm 아님"); return }
+        guard case .confirm(let command, let message, let action, _) = try #require(states.last) else { Issue.record("confirm 아님"); return }
         #expect(command == "내일 회의 잡아줘")
         #expect(message == "정말 삭제할까요?")
         #expect(action.confirmToken == "tk-1")
@@ -349,6 +362,104 @@ extension AIAgentOrchestrationUsecaseImpleTests {
         // then
         #expect(states.last.map(self.stateName) == "idle")
         #expect(self.stubCommand.didRejectParentJobId == "parent-job")
+    }
+}
+
+
+// MARK: - confirm 만료
+
+extension AIAgentOrchestrationUsecaseImpleTests {
+
+    @Test func usecase_whenConfirmJob_expireTimeFromTokenExp() async throws {
+        // given
+        let expect = expectConfirm("confirm 상태에 token exp 기반 만료 시각 탑재")
+        let usecase = self.makeUsecaseInConfirm(token: self.makeToken(expOffset: 100))
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state)
+        // then
+        guard case .confirm(_, _, _, let expireTime?) = state
+        else { Issue.record("confirm 상태 아님 또는 expireTime 없음"); return }
+        #expect(abs(expireTime.timeIntervalSinceNow - 100) < 2)
+    }
+
+    // 축1: usecase_whenTokenExpNotParsable_confirmWithoutExpireTime ⇢ exp 파싱 실패 시 만료 처리 없이 confirm 유지
+    @Test func usecase_whenTokenExpNotParsable_confirmWithoutExpireTime() async throws {
+        // given — "tk-1"은 JWT 형태가 아니라 exp 파싱 불가
+        let expect = expectConfirm("exp 파싱 실패 시 만료 시각 불명(nil) confirm")
+        let usecase = self.makeUsecaseInConfirm(token: "tk-1")
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state)
+        // then
+        guard case .confirm(_, _, _, let expireTime) = state
+        else { Issue.record("confirm 상태 아님"); return }
+        #expect(expireTime == nil)
+    }
+
+    // 축1: usecase_confirmWithoutExpireTime_processesNormally ⇢ 만료 시각 불명일 땐 confirm() 호출 시 만료 차단 없이 정상 진행
+    @Test func usecase_confirmWithoutExpireTime_processesNormally() async throws {
+        // given — exp 파싱 실패로 expireTime nil인 confirm 상태
+        let expect = expectConfirm("confirm 진입")
+        let usecase = self.makeUsecaseInConfirm(token: "tk-1")
+        _ = try await self.firstOutput(expect, for: usecase.state)
+        // when
+        usecase.confirm()
+        // then — 만료 검증 없이 그대로 진행
+        #expect(self.stubCommand.didProcessConfirmToken == "tk-1")
+    }
+
+    // 축1: usecase_whenConfirmJobAlreadyExpired_emitsConfirmWithPastExpireTime ⇢ restore 등으로 exp가 이미 지난 confirm job도 상태 전이 없이 .confirm(과거 expireTime)으로 방출된다 — 만료는 UI/소비자가 파생
+    @Test func usecase_whenConfirmJobAlreadyExpired_emitsConfirmWithPastExpireTime() async throws {
+        // given — restore 등으로 exp가 이미 지난 confirm job 수신
+        let expect = expectConfirm("이미 만료된 토큰이어도 .confirm 방출 + 과거 expireTime")
+        let usecase = self.makeUsecaseInConfirm(token: self.makeToken(expOffset: -10))
+        // when
+        let state = try await self.firstOutput(expect, for: usecase.state)
+        // then
+        guard case .confirm(_, _, _, let expireTime?) = state
+        else { Issue.record("confirm 상태 아님 또는 expireTime 없음"); return }
+        #expect(expireTime < Date())
+    }
+
+    // 축1: usecase_confirmWhenExpirePassed_doesNotProcess ⇢ expireTime이 과거인 confirm 상태에서 confirm() 호출은 처리하지 않고 상태도 유지
+    @Test func usecase_confirmWhenExpirePassed_doesNotProcess() async throws {
+        // given
+        let expect = expectConfirm("만료 exp의 confirm 상태")
+        let usecase = self.makeUsecaseInConfirm(token: self.makeToken(expOffset: -10))
+        _ = try await self.firstOutput(expect, for: usecase.state)
+        // when
+        usecase.confirm()
+        // then — 처리 호출 없음 + 상태는 여전히 confirm(전이 없음). CurrentValueSubject라 재구독하면 현재값 replay
+        #expect(self.stubCommand.didProcessConfirmToken == nil)
+        let expectAfter = expectConfirm("confirm() 이후에도 상태는 그대로 confirm")
+        let stateAfter = try await self.firstOutput(expectAfter, for: usecase.state)
+        #expect(stateAfter.map(self.stateName) == "confirm")
+    }
+
+    // 축1: usecase_declineWhenExpirePassed_rejectsAndBecomesIdle ⇢ 만료된 confirm이라도 decline은 기존 reject + idle 경로 그대로 성립
+    @Test func usecase_declineWhenExpirePassed_rejectsAndBecomesIdle() async throws {
+        // given
+        let expect = expectConfirm("만료 confirm 닫기 = reject + idle")
+        expect.count = 2
+        let usecase = self.makeUsecaseInConfirm(token: self.makeToken(expOffset: -10))
+        // when
+        let states = try await self.outputs(expect, for: usecase.state) {
+            usecase.decline()
+        }
+        // then
+        #expect(states.map { self.stateName($0) } == ["confirm", "idle"])
+        #expect(self.stubCommand.didRejectParentJobId == "parent-job")
+    }
+
+    // 축1: usecase_handleJobStatusChanged_whenConfirmExpired_skipsRefresh ⇢ 만료된 confirm 상태에서 푸시가 와도 즉시 조회를 스킵한다(로컬 종료)
+    @Test func usecase_handleJobStatusChanged_whenConfirmExpired_skipsRefresh() async throws {
+        // given
+        let expect = expectConfirm("만료 confirm 상태 진입")
+        let usecase = self.makeUsecaseInConfirm(token: self.makeToken(expOffset: -10))
+        _ = try await self.firstOutput(expect, for: usecase.state)
+        // when
+        usecase.handleJobStatusChanged("job-1")
+        // then
+        #expect(self.stubCommand.didRefreshJobStatusWith == nil)
     }
 }
 
@@ -608,12 +719,14 @@ private final class StubAICommandUsecase: AICommandUsecase, @unchecked Sendable 
     var didProcessCommand: String?
     var didRestore: Bool = false
     var didCancelJobId: String?
+    var didProcessConfirmToken: String?
 
     func processCommand(_ commandText: String) -> AnyPublisher<AIJob, any Error> {
         self.didProcessCommand = commandText
         return self.jobPublisher(self.stubCommandJob)
     }
     func processConfirmCommand(_ action: AIConfirmCommandAction) -> AnyPublisher<AIJob, any Error> {
+        self.didProcessConfirmToken = action.confirmToken
         return self.jobPublisher(self.stubConfirmJob)
     }
     func rejectConfirmCommand(_ action: AIConfirmCommandAction) {

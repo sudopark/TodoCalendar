@@ -153,10 +153,11 @@ extension AIAgentCommandViewModelImpleTests {
     func test_whenOrchestratorConfirm_commandStateCarriesMessage() {
         let viewModel = self.makeViewModel()
         let command = self.observeCommand(viewModel)
+        let expireTime = Date().addingTimeInterval(300)
         self.stubAgent.stateSubject.send(
-            .confirm(command: "삭제", message: "정말?", action: AIConfirmCommandAction())
+            .confirm(command: "삭제", message: "정말?", action: AIConfirmCommandAction(), expireTime: expireTime)
         )
-        XCTAssertEqual(command(), .confirm(command: "삭제", message: "정말?"))
+        XCTAssertEqual(command(), .confirm(command: "삭제", message: "정말?", expireTime: expireTime))
     }
 
     func test_whenOrchestratorDone_commandStateIsDone() {

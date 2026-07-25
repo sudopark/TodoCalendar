@@ -102,8 +102,12 @@ public final class AIAgentOrchestrationUsecaseImple: AIAgentOrchestrationUsecase
                 self.subject.state.send(.failed(command: job.command ?? "", reason: confirm.text, errorCode: nil))
                 return
             }
+            // 과거 exp도 그대로 방출 — 만료 여부는 소비자가 expireTime을 현재 시각과 비교해 파생한다.
             self.subject.state.send(
-                .confirm(command: job.command ?? "", message: confirm.text, action: action)
+                .confirm(
+                    command: job.command ?? "", message: confirm.text,
+                    action: action, expireTime: action.tokenExpireTime
+                )
             )
         case .failed(let fail):
             self.subject.state.send(.failed(command: job.command ?? "", reason: fail.reason, errorCode: fail.errorCode))
@@ -242,7 +246,7 @@ extension AIAgentOrchestrationUsecaseImple {
     private var currentCommand: String {
         switch self.subject.state.value {
         case .processing(let command): return command
-        case .confirm(let command, _, _): return command
+        case .confirm(let command, _, _, _): return command
         default: return ""
         }
     }
@@ -255,15 +259,20 @@ extension AIAgentOrchestrationUsecaseImple {
     }
 
     public func confirm() {
-        guard case .confirm(let command, _, let action) = self.subject.state.value ?? .idle
+        guard case .confirm(let command, _, let action, let expireTime) = self.subject.state.value ?? .idle
         else { return }
+        // expireTime nil(만료 시각 불명)이면 만료 검증 없이 그대로 진행. 과거면 차단만 — 상태 전이는 없다.
+        if let expireTime, expireTime <= Date() { return }
         self.subject.state.send(.processing(command: command))
         self.startProcessing(self.commandUsecase.processConfirmCommand(action))
     }
 
     public func decline() {
-        if case .confirm(_, _, let action) = self.subject.state.value ?? .idle {
+        switch self.subject.state.value ?? .idle {
+        case .confirm(_, _, let action, _):
             self.commandUsecase.rejectConfirmCommand(action)
+        default:
+            break
         }
         self.commandCancellable?.cancel()
         self.commandCancellable = nil
@@ -311,6 +320,12 @@ extension AIAgentOrchestrationUsecaseImple {
     // 콜드 스타트(구독 없음)는 CalendarViewModel.prepare() → restoreIfNeeded()가 커버한다.
     public func handleJobStatusChanged(_ jobId: String) {
         guard self.currentProcessingJobId == jobId else { return }
+        // 만료된 confirm job은 더 조회하지 않는다 — 로컬 종료(추적 해제)로 push 즉시 조회 대상에서 뺀다.
+        if case .confirm(_, _, _, let expireTime) = self.subject.state.value ?? .idle,
+           let expireTime, expireTime <= Date() {
+            self.currentProcessingJobId = nil
+            return
+        }
         self.commandUsecase.refreshJobStatus(jobId)
     }
 
