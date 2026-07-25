@@ -12,10 +12,10 @@ production 코드는 테스트 때문에 훼손하지 않는다.
 
 ## 1. 테스트 프레임워크
 
-두 프레임워크를 상황에 따라 사용한다.
+**새로 만드는 테스트 파일은 Swift Testing으로 작성한다. XCTest 신규 파일 금지.**
 
-- **XCTest** — 기존 테스트 대다수. `UnitTestHelpKit.BaseTestCase` 상속. `setUpWithError` / `tearDownWithError` + `func testXxx_...()` 패턴.
-- **Swift Testing** (신규) — `XCTestCase` 상속 없이 `PublisherWaitable` 직접 채택. `@Test` + `#expect` 매크로.
+- **Swift Testing** (신규 파일 기본값) — `XCTestCase` 상속 없이 `PublisherWaitable` 직접 채택. `@Test` + `#expect` 매크로.
+- **XCTest** (레거시 유지보수 전용) — 기존 테스트 대다수. `UnitTestHelpKit.BaseTestCase` 상속. `setUpWithError` / `tearDownWithError` + `func testXxx_...()` 패턴. **기존 XCTest 파일에 케이스를 추가할 때만** 그 파일의 스타일을 따른다 — 한 파일에 두 프레임워크 혼재 금지.
 
 ```swift
 // Swift Testing 예시
