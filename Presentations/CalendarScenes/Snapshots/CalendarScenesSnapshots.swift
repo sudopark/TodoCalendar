@@ -121,6 +121,42 @@ final class CalendarScenesSnapshots: XCTestCase {
         }
     }
 
+    // AI 진입 버튼이 confirm 대기 중 원형 → 카운트다운 캡슐로 확장되는 케이스.
+    @MainActor
+    func test_dayEventList_aiConfirmCountdown() {
+        captureSnapshotPair(named: "dayEventList_aiConfirmCountdown", layout: .fixed(width: 393, height: 780)) { theme in
+            let cells = self.makeDummyCells()
+            let dayModel = SelectedDayModel(dateText: "2026년 7월 12일(일)", lunarDateText: "5월 28일")
+                |> \.holidayName .~ "테스트 공휴일"
+
+            let viewModel = FakeDayEventListViewModel(
+                dayModel: dayModel,
+                foremostModel: cells.first,
+                uncompletedModels: self.makeDummyUncompleteds(),
+                cellModels: cells,
+                aiAgentState: .confirm(
+                    command: "삭제",
+                    message: nil,
+                    action: AIConfirmCommandAction(),
+                    expireTime: Date().addingTimeInterval(4 * 60 + 30)
+                )
+            )
+            let appearance = self.makeAppearance(theme)
+            appearance.showHoliday = true
+            appearance.showLunarCalendarDate = true
+
+            let state = DayEventListViewState()
+            state.bind(viewModel, appearance)
+            RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+
+            return DayEventListView()
+                .environment(state)
+                .environment(PendingCompleteTodoState())
+                .environment(DayEventListViewEventHandler())
+                .environment(appearance)
+        }
+    }
+
     private func makeDummyCells() -> [any EventCellViewModel] {
         let currentTodoCells: [TodoEventCellViewModel] = [
             .init("current-todo1", name: "current todo 1")
@@ -163,17 +199,20 @@ private final class FakeDayEventListViewModel: DayEventListViewModel, @unchecked
     private let foremostModel: (any EventCellViewModel)?
     private let uncompletedModels: [TodoEventCellViewModel]
     private let cellModels: [any EventCellViewModel]
+    private let stubAIAgentState: AIAgentState
 
     init(
         dayModel: SelectedDayModel,
         foremostModel: (any EventCellViewModel)?,
         uncompletedModels: [TodoEventCellViewModel],
-        cellModels: [any EventCellViewModel]
+        cellModels: [any EventCellViewModel],
+        aiAgentState: AIAgentState = .idle
     ) {
         self.dayModel = dayModel
         self.foremostModel = foremostModel
         self.uncompletedModels = uncompletedModels
         self.cellModels = cellModels
+        self.stubAIAgentState = aiAgentState
     }
 
     var foremostEventModel: AnyPublisher<(any EventCellViewModel)?, Never> {
@@ -192,7 +231,7 @@ private final class FakeDayEventListViewModel: DayEventListViewModel, @unchecked
         Just(.idle).eraseToAnyPublisher()
     }
     var aiAgentState: AnyPublisher<AIAgentState, Never> {
-        Just(.idle).eraseToAnyPublisher()
+        Just(self.stubAIAgentState).eraseToAnyPublisher()
     }
     var recognizingText: AnyPublisher<String, Never> {
         Just("").eraseToAnyPublisher()
