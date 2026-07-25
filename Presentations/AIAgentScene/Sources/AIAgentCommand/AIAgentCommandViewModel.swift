@@ -19,7 +19,7 @@ import Scenes
 
 public enum AIAgentCommandState: Equatable, Sendable {
     case processing(command: String)
-    case confirm(command: String, message: String?)
+    case confirm(command: String, message: String?, expireTime: Date?)  // 만료 여부는 expireTime을 현재 시각과 비교해 소비자(뷰)가 파생
     case done(command: String, message: String?)
     case failed(command: String, reason: String?, errorCode: ServerErrorModel.ErrorCode?)
 }
@@ -107,8 +107,8 @@ extension AIAgentCommandViewModelImple {
                     return nil
                 case .processing(let command):
                     return .processing(command: command)
-                case .confirm(let command, let message, _):
-                    return .confirm(command: command, message: message)
+                case .confirm(let command, let message, _, let expireTime):
+                    return .confirm(command: command, message: message, expireTime: expireTime)
                 case .done(let command, let message):
                     return .done(command: command, message: message)
                 case .failed(let command, let reason, let errorCode):
