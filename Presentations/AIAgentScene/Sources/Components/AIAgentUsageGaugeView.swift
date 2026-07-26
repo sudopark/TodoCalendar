@@ -46,7 +46,7 @@ struct AIAgentUsageGaugeView: View {
             .frame(height: 6)
 
             Text("aiAgent::usage".localized(
-                with: self.usage.usedTokens.formatted(), self.usage.dailyLimit.formatted()
+                with: self.usage.usedCredits.formatted(), self.usage.dailyLimit.formatted()
             ))
             .font(self.appearance.fontSet.size(12).asFont)
             .foregroundStyle(
