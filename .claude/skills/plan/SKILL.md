@@ -47,3 +47,7 @@ writing-plans 기본 구조(Goal/Architecture/Global Constraints/태스크)에 �
 ## 실행 중 갭
 
 플랜이 커버 못 하는 상황을 실행자가 만나면 implement 스킬의 **플랜 갭 보고 루프**를 탄다 (추측 금지·유저 반문·후속 정리). 이 스킬의 책임은 그 상황이 안 생기게 계획 단계에서 커버를 극대화하는 것까지다.
+
+## 종료 기록 — skill_end (#715)
+
+플랜 파일이 저장·승인돼 절차가 끝나면 skill_end를 기록한다 (명령·compliance 규칙은 CLAUDE.md §1). 이때 동반 발동한 superpowers:writing-plans도 같은 시점에 함께 기록한다 — 플러그인 스킬은 자체 종료 조항이 없어 여기가 기록 주체다.
