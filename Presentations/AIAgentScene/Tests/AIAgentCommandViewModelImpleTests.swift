@@ -218,7 +218,7 @@ extension AIAgentCommandViewModelImpleTests {
         XCTAssertEqual(usage?.dailyLimit, 5000)
     }
 
-    // done/failed = 서버 토큰 차감이 끝난 시점 → usage 재갱신
+    // done/failed = 서버 크레딧 차감이 끝난 시점 → usage 재갱신
     func test_commandState_whenDone_refreshUsage() {
         // given
         let viewModel = self.makeViewModel()
