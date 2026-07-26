@@ -107,7 +107,7 @@ extension AIAgentCommandViewModelImple {
     var commandState: AnyPublisher<AIAgentCommandState?, Never> {
         return self.orchestrationUsecase.state
             .handleEvents(receiveOutput: { [weak self] state in
-                // done/failed = 서버 토큰 차감 완료 시점 → 게이지 최신화
+                // done/failed = 서버 크레딧 차감 완료 시점 → 게이지 최신화
                 switch state {
                 case .done, .failed:
                     self?.orchestrationUsecase.loadUsage()
