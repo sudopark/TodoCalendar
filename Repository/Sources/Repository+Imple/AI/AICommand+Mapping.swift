@@ -172,6 +172,8 @@ struct AIAgentUsageMapper {
 
         self.usage = AIAgentUsage(input: input, output: output, limit: limit)
             |> \.date .~ (json["date"] as? String)
+            |> \.creditsUsed .~ (json["credits_used"] as? Int)
+            |> \.resetsAt .~ AICommandDateParser.parse(json["resets_at"])
             |> \.updatedAt .~ AICommandDateParser.parse(json["updated_at"])
     }
 }

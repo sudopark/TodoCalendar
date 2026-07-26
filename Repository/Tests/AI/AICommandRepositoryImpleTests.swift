@@ -41,6 +41,11 @@ class AICommandRepositoryImpleTests: BaseLocalTests {
             localStorage: localStorage
         )
     }
+
+    private func makeRepositoryWithLegacyUsageResponse() -> AICommandRepositoryImple {
+        self.stubRemote = .init(responses: DummyResponse(usesLegacyUsage: true).responses)
+        return self.makeRepository()
+    }
 }
 
 
@@ -250,6 +255,21 @@ extension AICommandRepositoryImpleTests {
         XCTAssertEqual(usage.outputTokens, 320)
         XCTAssertEqual(usage.dailyLimit, 5000)
         XCTAssertNotNil(usage.updatedAt)
+        XCTAssertEqual(usage.creditsUsed, 1400)
+        XCTAssertEqual(usage.resetsAt?.timeIntervalSince1970, 1780358400)
+    }
+
+    func testRepository_whenUsageResponseHasNoCreditFields_creditFieldsAreNil() async throws {
+        // given
+        let repository = self.makeRepositoryWithLegacyUsageResponse()
+
+        // when
+        let usage = try await repository.loadUsage()
+
+        // then
+        XCTAssertNil(usage.creditsUsed)
+        XCTAssertNil(usage.resetsAt)
+        XCTAssertEqual(usage.dailyLimit, 5000)
     }
 }
 
@@ -333,6 +353,8 @@ import Optics
 
 private struct DummyResponse {
 
+    var usesLegacyUsage: Bool = false
+
     var responses: [StubRemoteAPI.Response] {
         return [
             .init(
@@ -383,7 +405,9 @@ private struct DummyResponse {
             .init(
                 method: .get,
                 endpoint: AIAPIEndpoints.usage,
-                resultJsonString: .success(self.usageJson)
+                resultJsonString: .success(
+                    self.usesLegacyUsage ? self.legacyUsageJson : self.usageJson
+                )
             )
         ]
     }
@@ -480,6 +504,21 @@ private struct DummyResponse {
     }
 
     private var usageJson: String {
+        return """
+        {
+            "date": "2026-06-01",
+            "input_tokens": 1250,
+            "output_tokens": 320,
+            "daily_limit": 5000,
+            "credits_used": 1400,
+            "resets_at": "2026-06-02T00:00:00.000Z",
+            "updated_at": "2026-06-01T10:00:00.000Z"
+        }
+        """
+    }
+
+    // 서버 미배포 구간 응답 — credits_used·resets_at 없음
+    private var legacyUsageJson: String {
         return """
         {
             "date": "2026-06-01",
