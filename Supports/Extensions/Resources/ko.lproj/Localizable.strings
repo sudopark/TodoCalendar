@@ -539,6 +539,11 @@
 "aiAgent::keyboard::send" = "전송";
 "aiAgent::stop" = "중지";
 "aiAgent::usage" = "%@ / %@ 크레딧";
+"aiAgent::plan::free" = "무료";
+"aiAgent::plan::standard" = "스탠다드";
+"aiAgent::plan::lifetime" = "평생";
+"aiAgent::usage::topupRemaining" = "추가 크레딧 %@ 남음";
+"aiAgent::usage::planChangeScheduled" = "%1$@부터 %2$@ 플랜으로 바뀌어요";
 "aiAgent::stop::confirm::title" = "처리를 중지할까요?";
 "aiAgent::stop::confirm::message" = "중지하면 진행 중인 작업이 사라지고 다시 시작할 수 없어요.";
 "aiAgent::confirm::countdown" = "안에 승인해 주세요";
