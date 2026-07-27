@@ -8,6 +8,8 @@
 
 import XCTest
 import SwiftUI
+import Prelude
+import Optics
 import Domain
 import CommonPresentation
 import SnapshotTestHelpKit
@@ -90,6 +92,26 @@ final class AIAgentSceneSnapshots: XCTestCase {
             let state = AIAgentCommandViewState()
             state.commandState = .done(command: "일정 삭제", message: "삭제를 완료했어요")
             state.usage = .init(input: 1234, output: 0, limit: 5000)
+            return AIAgentCommandStageView()
+                .environment(state)
+                .environment(AIAgentCommandViewEventHandler())
+                .environment(self.makeAppearance(theme))
+        }
+    }
+
+    // 플랜 칩 + top-up 잔량 + 하향 예약이 전부 노출된 상태 (#720)
+    @MainActor
+    func test_commandDoneWithPlanInfo() {
+        captureSnapshotPair(named: "commandDoneWithPlanInfo", layout: .fullScreen) { theme in
+            let state = AIAgentCommandViewState()
+            state.commandState = .done(command: "일정 추가", message: "추가했어요")
+            state.usage = AIAgentUsage(input: 1234, output: 0, limit: 20000)
+                |> \.creditsUsed .~ 1234
+                |> \.plan .~ .standard
+                |> \.topupRemaining .~ 12300
+                |> \.scheduledPlanChange .~ .init(
+                    planId: .free, effectiveAt: Date(timeIntervalSince1970: 1787702400)
+                )
             return AIAgentCommandStageView()
                 .environment(state)
                 .environment(AIAgentCommandViewEventHandler())
