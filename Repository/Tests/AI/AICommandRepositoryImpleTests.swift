@@ -46,6 +46,11 @@ class AICommandRepositoryImpleTests: BaseLocalTests {
         self.stubRemote = .init(responses: DummyResponse(usesLegacyUsage: true).responses)
         return self.makeRepository()
     }
+
+    private func makeRepositoryWithUnknownPlanResponse() -> AICommandRepositoryImple {
+        self.stubRemote = .init(responses: DummyResponse(usesUnknownPlan: true).responses)
+        return self.makeRepository()
+    }
 }
 
 
@@ -257,6 +262,12 @@ extension AICommandRepositoryImpleTests {
         XCTAssertNotNil(usage.updatedAt)
         XCTAssertEqual(usage.creditsUsed, 1400)
         XCTAssertEqual(usage.resetsAt?.timeIntervalSince1970, 1780358400)
+        XCTAssertEqual(usage.plan, .standard)
+        XCTAssertEqual(usage.topupRemaining, 12300)
+        XCTAssertEqual(usage.scheduledPlanChange?.planId, .free)
+        XCTAssertEqual(
+            usage.scheduledPlanChange?.effectiveAt.timeIntervalSince1970, 1787702400
+        )
     }
 
     func testRepository_whenUsageResponseHasNoCreditFields_creditFieldsAreNil() async throws {
@@ -270,6 +281,25 @@ extension AICommandRepositoryImpleTests {
         XCTAssertNil(usage.creditsUsed)
         XCTAssertNil(usage.resetsAt)
         XCTAssertEqual(usage.dailyLimit, 5000)
+        XCTAssertNil(usage.plan)
+        XCTAssertNil(usage.scheduledPlanChange)
+        XCTAssertNil(usage.topupRemaining)
+    }
+
+    // 모르는 플랜 id는 파싱 실패로 두고 나머지 필드는 살린다 — 칩만 안 뜨고 게이지는 정상
+    // (같은 픽스처가 scheduled_change: null 도 함께 담는다)
+    func testRepository_whenPlanIdIsUnknown_planIsNilButOtherFieldsRemain() async throws {
+        // given
+        let repository = self.makeRepositoryWithUnknownPlanResponse()
+
+        // when
+        let usage = try await repository.loadUsage()
+
+        // then
+        XCTAssertNil(usage.plan)
+        XCTAssertEqual(usage.topupRemaining, 500)
+        XCTAssertEqual(usage.creditsUsed, 1400)
+        XCTAssertNil(usage.scheduledPlanChange)
     }
 }
 
@@ -354,6 +384,7 @@ import Optics
 private struct DummyResponse {
 
     var usesLegacyUsage: Bool = false
+    var usesUnknownPlan: Bool = false
 
     var responses: [StubRemoteAPI.Response] {
         return [
@@ -405,11 +436,15 @@ private struct DummyResponse {
             .init(
                 method: .get,
                 endpoint: AIAPIEndpoints.usage,
-                resultJsonString: .success(
-                    self.usesLegacyUsage ? self.legacyUsageJson : self.usageJson
-                )
+                resultJsonString: .success(self.usageResponseJson)
             )
         ]
+    }
+
+    private var usageResponseJson: String {
+        if self.usesLegacyUsage { return self.legacyUsageJson }
+        if self.usesUnknownPlan { return self.unknownPlanUsageJson }
+        return self.usageJson
     }
 
     private var commandJobIdJson: String {
@@ -512,7 +547,15 @@ private struct DummyResponse {
             "daily_limit": 5000,
             "credits_used": 1400,
             "resets_at": "2026-06-02T00:00:00.000Z",
-            "updated_at": "2026-06-01T10:00:00.000Z"
+            "updated_at": "2026-06-01T10:00:00.000Z",
+            "plan": {
+                "id": "standard",
+                "scheduled_change": {
+                    "plan_id": "free",
+                    "effective_at": "2026-08-26T00:00:00.000Z"
+                }
+            },
+            "topup_remaining": 12300
         }
         """
     }
@@ -526,6 +569,21 @@ private struct DummyResponse {
             "output_tokens": 320,
             "daily_limit": 5000,
             "updated_at": "2026-06-01T10:00:00.000Z"
+        }
+        """
+    }
+
+    // 서버가 앱이 모르는 플랜 id를 내려주는 경우 (플랜 추가 배포 시점 차)
+    private var unknownPlanUsageJson: String {
+        return """
+        {
+            "date": "2026-06-01",
+            "input_tokens": 1250,
+            "output_tokens": 320,
+            "daily_limit": 5000,
+            "credits_used": 1400,
+            "plan": { "id": "enterprise", "scheduled_change": null },
+            "topup_remaining": 500
         }
         """
     }
