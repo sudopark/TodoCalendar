@@ -323,6 +323,26 @@ extension WidgetViewModelProviderBuilder {
             localeProvider: Locale.current
         )
     }
+
+    func makeDDayWidgetViewModelProvider() async -> DDayWidgetViewModelProvider {
+        await self.checkShouldReset()
+
+        let appSettingRepository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+        let eventFetchUsecase = self.usecaseFactory.makeEventsFetchUsecase()
+
+        return DDayWidgetViewModelProvider(
+            eventFetchUsecase: eventFetchUsecase,
+            calendarSettingRepository: calendarSettingRepository,
+            appSettingRepository: appSettingRepository
+        )
+    }
 }
 
 // MARK: - composed

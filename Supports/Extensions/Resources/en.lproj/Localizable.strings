@@ -501,6 +501,10 @@
 "widget.next.no_events_today" = "No events today";
 "widget.next.no_events" = "No upcoming events";
 
+"widget.dday::name" = "D-Day";
+"widget.dday::noTarget" = "Select an event";
+"widget.dday.sample::title" = "Workshop";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "This link format is not supported.\nPlease update the app to the latest version.";
