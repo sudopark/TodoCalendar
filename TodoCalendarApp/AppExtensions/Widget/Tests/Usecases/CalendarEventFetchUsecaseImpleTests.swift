@@ -514,7 +514,88 @@ extension CalendarEventFetchUsecaseImpleTests {
     }
 }
 
+
+// MARK: - D-day 대상 조회
+
+extension CalendarEventFetchUsecaseImpleTests {
+
+    func testUsecase_fetchDDayTarget_whenNotRepeating_returnsOriginTime() async throws {
+        // given
+        self.stubScheduleRepository.stubEvent = ScheduleEvent(
+            uuid: "s1", name: "워크숍", time: .at(1000)
+        )
+        let usecase = self.makeUsecase()
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(eventId: "s1", isTodo: false), after: Date(timeIntervalSince1970: 0)
+        )
+
+        // then
+        XCTAssertEqual(target?.name, "워크숍")
+        XCTAssertEqual(target?.time, .at(1000))
+    }
+
+    func testUsecase_fetchDDayTarget_whenEventNotExists_returnsNil() async throws {
+        // given
+        let usecase = self.makeUsecase()
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(eventId: "not-exists", isTodo: false), after: Date(timeIntervalSince1970: 0)
+        )
+
+        // then
+        XCTAssertNil(target)
+    }
+
+    func testUsecase_fetchDDayTarget_whenTodoHasNoTime_returnsNil() async throws {
+        // given
+        self.stubTodoRepository.singleTodoMocking = TodoEvent(uuid: "t1", name: "언젠가")
+        let usecase = self.makeUsecase()
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(eventId: "t1", isTodo: true), after: Date(timeIntervalSince1970: 0)
+        )
+
+        // then
+        XCTAssertNil(target)
+    }
+
+    func testUsecase_fetchDDayTarget_whenRepeating_returnsNextTurnTime() async throws {
+        // given
+        let day: TimeInterval = 3600 * 24
+        let repeating = EventRepeating(
+            repeatingStartTime: 0, repeatOption: EventRepeatingOptions.EveryDay()
+        )
+        self.stubScheduleRepository.stubEvent = ScheduleEvent(
+            uuid: "s2", name: "스탠드업", time: .period(0..<3600)
+        )
+        |> \.repeating .~ repeating
+        let usecase = self.makeUsecase()
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(eventId: "s2", isTodo: false), after: Date(timeIntervalSince1970: day * 3)
+        )
+
+        // then
+        XCTAssertEqual(target?.time, .period(day * 3..<day * 3 + 3600))
+    }
+}
+
 private final class PrivateStubTodoRepository: StubTodoEventRepository, @unchecked Sendable {
+
+    var singleTodoMocking: TodoEvent?
+
+    override func todoEvent(_ id: String) -> AnyPublisher<TodoEvent, any Error> {
+        guard let mocking = self.singleTodoMocking, mocking.uuid == id
+        else {
+            return Empty().eraseToAnyPublisher()
+        }
+        return Just(mocking).mapAsAnyError().eraseToAnyPublisher()
+    }
     
     override func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error> {
         

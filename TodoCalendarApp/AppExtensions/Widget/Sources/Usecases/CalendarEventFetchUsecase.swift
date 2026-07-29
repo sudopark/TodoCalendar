@@ -72,6 +72,17 @@ struct TodayNextEvents {
     let customTags: [CustomEventTag]
 }
 
+struct DDayTargetEventId: Sendable, Hashable {
+    let eventId: String
+    let isTodo: Bool
+}
+
+struct DDayTargetEvent: Sendable {
+    let targetId: DDayTargetEventId
+    let name: String
+    let time: EventTime
+}
+
 protocol CalendarEventFetchUsecase {
     
     func fetchEvents(
@@ -89,6 +100,10 @@ protocol CalendarEventFetchUsecase {
     func fetchNextEvents(
         _ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone
     ) async throws -> TodayNextEvents
+
+    func fetchDDayTargetEvent(
+        _ target: DDayTargetEventId, after refTime: Date
+    ) async throws -> DDayTargetEvent?
 }
 
 extension CalendarEventFetchUsecase {
@@ -465,8 +480,88 @@ extension CalendarEventFetchUsecaseImple {
     }
 }
 
+// MARK: - D-day 대상 조회
+
+extension CalendarEventFetchUsecaseImple {
+
+    func fetchDDayTargetEvent(
+        _ target: DDayTargetEventId, after refTime: Date
+    ) async throws -> DDayTargetEvent? {
+
+        return target.isTodo
+            ? try await self.fetchDDayTargetTodo(target, after: refTime)
+            : try await self.fetchDDayTargetSchedule(target, after: refTime)
+    }
+
+    private func fetchDDayTargetTodo(
+        _ target: DDayTargetEventId, after refTime: Date
+    ) async throws -> DDayTargetEvent? {
+
+        guard let todo = try? await self.todoRepository.todoEvent(target.eventId)
+            .values.first(where: { _ in true }),
+              let time = todo.time
+        else { return nil }
+
+        guard let nextTime = Self.resolveTargetTime(
+            time: time,
+            repeating: todo.repeating,
+            startTurn: todo.repeatingTurn ?? 1,
+            excludeTimeKeys: [],
+            after: refTime
+        )
+        else { return nil }
+
+        return DDayTargetEvent(targetId: target, name: todo.name, time: nextTime)
+    }
+
+    private func fetchDDayTargetSchedule(
+        _ target: DDayTargetEventId, after refTime: Date
+    ) async throws -> DDayTargetEvent? {
+
+        guard let schedule = try? await self.scheduleRepository.scheduleEvent(target.eventId)
+            .values.first(where: { _ in true })
+        else { return nil }
+
+        guard let nextTime = Self.resolveTargetTime(
+            time: schedule.time,
+            repeating: schedule.repeating,
+            startTurn: 1,
+            excludeTimeKeys: schedule.repeatingTimeToExcludes,
+            after: refTime
+        )
+        else { return nil }
+
+        return DDayTargetEvent(targetId: target, name: schedule.name, time: nextTime)
+    }
+
+    private static func resolveTargetTime(
+        time: EventTime,
+        repeating: EventRepeating?,
+        startTurn: Int,
+        excludeTimeKeys: Set<String>,
+        after refTime: Date
+    ) -> EventTime? {
+
+        guard let repeating else { return time }
+
+        guard let enumerator = EventRepeatTimeEnumerator(
+            repeating.repeatOption,
+            endOption: repeating.repeatingEndOption,
+            without: excludeTimeKeys
+        )
+        else { return time }
+
+        return enumerator.nextEventTime(
+            after: refTime.timeIntervalSince1970,
+            from: .init(time: time, turn: startTurn),
+            until: repeating.repeatingEndOption?.endTime
+        )?.time
+    }
+}
+
+
 private extension Array where Element == CalendarEvent {
-    
+
     func sorted() -> Array {
         return self.sorted(by: { lhs, rhs in
             switch (lhs.eventTime?.lowerBoundWithFixed, rhs.eventTime?.lowerBoundWithFixed) {

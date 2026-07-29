@@ -88,4 +88,14 @@ class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {
     ) async throws -> TodayNextEvents {
         return try self.stubNextEvents.unwrap()
     }
+
+    var stubDDayTarget: DDayTargetEvent?
+    var didRequestDDayTarget: DDayTargetEventId?
+
+    func fetchDDayTargetEvent(
+        _ target: DDayTargetEventId, after refTime: Date
+    ) async throws -> DDayTargetEvent? {
+        self.didRequestDDayTarget = target
+        return self.stubDDayTarget
+    }
 }
