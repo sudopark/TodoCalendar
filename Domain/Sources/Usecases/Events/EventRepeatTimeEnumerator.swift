@@ -144,6 +144,32 @@ public final class EventRepeatTimeEnumerator: Sendable {
     }
 }
 
+// MARK: - 기준 시각 이후 첫 회차
+
+extension EventRepeatTimeEnumerator {
+
+    private static var maxAdvanceCount: Int { 3650 }
+
+    public func nextEventTime(
+        after refTime: TimeInterval,
+        from origin: RepeatingTimes,
+        until endTime: TimeInterval?
+    ) -> RepeatingTimes? {
+
+        var current = origin
+        var advanced = 0
+        while current.time.upperBoundWithFixed < refTime {
+            guard advanced < Self.maxAdvanceCount,
+                  let next = self.nextEventTime(from: current, until: endTime)
+            else { return nil }
+            current = next
+            advanced += 1
+        }
+        return current
+    }
+}
+
+
 // MARK: - next date by repeating options
 
 extension EventRepeatTimeEnumerator {
