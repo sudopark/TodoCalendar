@@ -64,8 +64,8 @@ struct AIJobMapper {
             |> \.status .~ (json["status"] as? String).flatMap { AIJob.Status(rawValue: $0) }
             |> \.mode .~ (json["mode"] as? String).flatMap { AIJob.Mode(rawValue: $0) }
             |> \.result .~ result
-            |> \.createAt .~ AICommandDateParser.parse(json["created_at"])
-            |> \.updatedAt .~ AICommandDateParser.parse(json["updated_at"])
+            |> \.createAt .~ RemoteDateParser.parse(json["created_at"])
+            |> \.updatedAt .~ RemoteDateParser.parse(json["updated_at"])
     }
 }
 
@@ -177,8 +177,8 @@ struct AIAgentUsageMapper {
         self.usage = AIAgentUsage(input: input, output: output, limit: limit)
             |> \.date .~ (json["date"] as? String)
             |> \.creditsUsed .~ (json["credits_used"] as? Int)
-            |> \.resetsAt .~ AICommandDateParser.parse(json["resets_at"])
-            |> \.updatedAt .~ AICommandDateParser.parse(json["updated_at"])
+            |> \.resetsAt .~ RemoteDateParser.parse(json["resets_at"])
+            |> \.updatedAt .~ RemoteDateParser.parse(json["updated_at"])
             // 앱이 모르는 플랜 id 는 nil — 신규 플랜이 서버에 먼저 배포돼도 나머지 필드는 살린다
             |> \.plan .~ (planJson?["id"] as? String).flatMap { BillingPlanId(rawValue: $0) }
             |> \.scheduledPlanChange .~ scheduledChange
@@ -196,25 +196,12 @@ struct AIAgentScheduledPlanChangeMapper {
     init(json: [String: Any]) {
         let planId = (json["plan_id"] as? String)
             .flatMap { BillingPlanId(rawValue: $0) }
-        let effectiveAt = AICommandDateParser.parse(json["effective_at"])
+        let effectiveAt = RemoteDateParser.parse(json["effective_at"])
         guard let planId, let effectiveAt
         else {
             self.change = nil
             return
         }
         self.change = .init(planId: planId, effectiveAt: effectiveAt)
-    }
-}
-
-
-// MARK: - date parser
-
-enum AICommandDateParser {
-
-    static func parse(_ value: Any?) -> Date? {
-        guard let iso = value as? String else { return nil }
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return formatter.date(from: iso)
     }
 }
