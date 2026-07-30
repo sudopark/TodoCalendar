@@ -2,6 +2,7 @@
 
 앱의 모든 **비즈니스 모델**, **Repository 프로토콜**, **Usecase 구현**이 위치하는 프레임워크.
 Repository 구현체는 여기 없고 프로토콜만 정의한다. 구현은 `Repository/` 프레임워크에 있다.
+플랫폼·서드파티 SDK와 결합하는 service 구현체도 여기 없다 — 프로토콜만 남기고 구현은 `Services/*` 프레임워크에 있다 (#639, 분할 축은 add-framework 스킬 §1).
 
 ## Usecase 작성 규칙
 

@@ -9,7 +9,7 @@
 ### 1.1 Clean Architecture — 단방향 의존성
 
 ```
-App → Presentations → Scenes/CommonPresentation → Domain ← Repository
+App → Presentations → Scenes/CommonPresentation → Domain ← Repository · Services
 ```
 
 - **Domain 레이어**는 순수 비즈니스 로직만. 외부 프레임워크 의존 금지 (Foundation, Combine만 허용).

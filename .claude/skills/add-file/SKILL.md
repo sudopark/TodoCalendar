@@ -13,6 +13,7 @@ description: Use when adding new source or test files to an existing framework i
 |---|---|---|
 | Domain 모델 | `Domain/Sources/Models/<서브도메인>/` | 서브도메인 분리 기준: `Domain/CLAUDE.md` |
 | Usecase | `Domain/Sources/Usecases/<서브도메인>/` | bypass만 하면 typealias (`Domain/CLAUDE.md`) |
+| Service 구현체 (플랫폼·서드파티 SDK 결합) | `Services/<프레임워크>/Sources/` | 프로토콜은 Domain에 두고 구현만 — 소속 프레임워크 축은 add-framework 스킬 §1 |
 | Repository 프로토콜 | `Domain/Sources/Repositories/<서브도메인>/` | |
 | Repository 구현 | `Repository/Sources/Repository+Imple/<서브도메인>/` | 3-Layer 패턴: `Repository/CLAUDE.md`. JSON 매핑은 같은 폴더 `Xxx+Mapping.swift` (repository-rules §2) |
 | 새 Scene (6파일) | 해당 Scene 프레임워크 | 템플릿·생성 순서·체크리스트: `docs/scene-spec.md`. 폴더 위치: presentations-rules §3 |
