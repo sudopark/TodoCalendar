@@ -5,23 +5,7 @@ import PackageDescription
 import ProjectDescription
 
 let packageSettings = PackageSettings(
-    productTypes: [
-        "Alamofire": .framework,
-        "Kingfisher": .framework,
-        "Prelude": .framework,
-        "Optics": .framework,
-        "Pulse": .framework,
-        "PulseUI": .framework,
-        "CombineCocoa": .framework,
-        "AsyncAlgorithms": .framework,
-        "AsyncFlatMap": .framework,
-        "SQLiteService": .framework,
-        "Toaster": .framework,
-        "KeychainSwift": .framework,
-        "CombineExt": .framework,
-        "SwiftLinkPreview": .framework,
-        "SnapshotTesting": .framework,
-    ]
+    productTypes: [:]
 )
 #endif
 
