@@ -23,7 +23,7 @@
 ### 의존성 방향
 
 ```
-TodoCalendarApp → Presentations → Scenes / CommonPresentation → Domain ← Repository
+TodoCalendarApp → Presentations → Scenes / CommonPresentation → Domain ← Repository · Services
 ```
 
 Presentation 모듈끼리 직접 import 금지. `Scenes` 프레임워크의 공유 프로토콜로만 참조.

@@ -23,6 +23,7 @@ fi
 ALL_SCHEMES=(
   "Domain"
   "Repository"
+  "AuthService"
   "CalendarScenes"
   "EventDetailScene"
   "EventListScenes"

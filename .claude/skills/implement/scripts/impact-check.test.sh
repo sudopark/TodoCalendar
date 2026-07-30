@@ -20,13 +20,19 @@ assert_contains() { # desc pattern actual
   if printf '%s' "$3" | grep -q "$2"; then PASS=$((PASS+1)); else FAIL=$((FAIL+1)); echo "FAIL: $1"; echo "  pattern [$2] not in: [$3]"; fi
 }
 
-ALL="AIAgentScene CalendarScenes Domain EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppWidget"
+ALL="AIAgentScene AuthService CalendarScenes Domain EventDetailScene EventListScenes MemberScenes Repository SettingScene TodoCalendarApp TodoCalendarAppWidget"
 
 # --- 스킴 매핑 (pr_test.yml detect-changes 미러) ---
 assert_eq "Domain/Sources → 전체" "$ALL" "$(schemes_for 'M\tDomain/Sources/Events/TodoEvent.swift')"
 assert_eq "Domain/Tests → Domain만" "Domain" "$(schemes_for 'M\tDomain/Tests/FooTests.swift')"
 assert_eq "Repository/Sources → Repo+App+Widget" "Repository TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tRepository/Sources/Todo/TodoLocalRepositoryImple.swift')"
 assert_eq "Repository/Tests → Repository만" "Repository" "$(schemes_for 'M\tRepository/Tests/FooTests.swift')"
+assert_eq "Services/AuthService/Sources → AuthService+App" "AuthService TodoCalendarApp" "$(schemes_for 'M\tServices/AuthService/Sources/Foo.swift')"
+assert_eq "Services/AuthService/Tests → AuthService만" "AuthService" "$(schemes_for 'M\tServices/AuthService/Tests/FooTests.swift')"
+assert_eq "Services/FirstPartyServices → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/FirstPartyServices/Sources/Foo.swift')"
+assert_eq "Services/SpeechService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/SpeechService/Sources/Foo.swift')"
+assert_eq "Services/PlaceService → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/PlaceService/Sources/Foo.swift')"
+assert_eq "Services/ExternalServices → App(테스트 스킴 없음)" "TodoCalendarApp" "$(schemes_for 'M\tServices/ExternalServices/Sources/Foo.swift')"
 assert_eq "AIAgentScene → 단독" "AIAgentScene" "$(schemes_for 'M\tPresentations/AIAgentScene/Sources/Foo.swift')"
 assert_eq "CalendarScenes → +App+Widget" "CalendarScenes TodoCalendarApp TodoCalendarAppWidget" "$(schemes_for 'M\tPresentations/CalendarScenes/Sources/Foo.swift')"
 assert_eq "EventDetailScene → +App" "EventDetailScene TodoCalendarApp" "$(schemes_for 'M\tPresentations/EventDetailScene/Sources/Foo.swift')"

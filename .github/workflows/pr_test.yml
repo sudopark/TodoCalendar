@@ -33,7 +33,7 @@ jobs:
         run: |
           FILES="${{ steps.changed.outputs.files }}"
 
-          ALL_SCHEMES="Domain Repository CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
+          ALL_SCHEMES="Domain Repository AuthService CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene TodoCalendarApp TodoCalendarAppWidget"
           ALL_PRESENTATION="CalendarScenes EventDetailScene EventListScenes SettingScene MemberScenes AIAgentScene"
 
           schemes=()
@@ -82,6 +82,17 @@ jobs:
           fi
           if echo "$FILES" | grep -q "^Repository/Tests/"; then
             schemes+=("Repository")
+          fi
+
+          # === Services 레이어 ===
+          if echo "$FILES" | grep -q "^Services/AuthService/Sources/"; then
+            schemes+=("AuthService" "TodoCalendarApp")
+          fi
+          if echo "$FILES" | grep -q "^Services/AuthService/Tests/"; then
+            schemes+=("AuthService")
+          fi
+          if echo "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices)/"; then
+            schemes+=("TodoCalendarApp")
           fi
 
           # === Presentation 공통 ===
@@ -195,6 +206,18 @@ jobs:
           xcodebuild test \
             -workspace TodoCalendar.xcworkspace \
             -scheme Repository \
+            -derivedDataPath ./DerivedData \
+            -destination "$DESTINATION" \
+            -testLanguage en -testRegion en_US \
+            | xcpretty
+
+      - name: Test AuthService
+        if: contains(needs.detect-changes.outputs.schemes, ' AuthService ')
+        run: |
+          set -euo pipefail
+          xcodebuild test \
+            -workspace TodoCalendar.xcworkspace \
+            -scheme AuthService \
             -derivedDataPath ./DerivedData \
             -destination "$DESTINATION" \
             -testLanguage en -testRegion en_US \

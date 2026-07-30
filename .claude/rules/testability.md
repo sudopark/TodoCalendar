@@ -4,6 +4,7 @@ paths:
   - "Domain/**"
   - "Repository/**"
   - "Presentations/**"
+  - "Services/**"
 ---
 
 # 테스트 작성 규칙

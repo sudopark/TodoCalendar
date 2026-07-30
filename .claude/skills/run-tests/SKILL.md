@@ -22,14 +22,14 @@ DESTINATION='platform=iOS Simulator,name=iPhone 16,OS=18.1' ./scripts/run-all-te
 
 ## Available Schemes
 
-`Domain` / `Repository` / `CalendarScenes` / `EventDetailScene` / `EventListScenes` / `SettingScene` / `MemberScenes` / `AIAgentScene` / `TodoCalendarApp` / `TodoCalendarAppWidget`
+`Domain` / `Repository` / `AuthService` / `CalendarScenes` / `EventDetailScene` / `EventListScenes` / `SettingScene` / `MemberScenes` / `AIAgentScene` / `TodoCalendarApp` / `TodoCalendarAppWidget`
 
 이 목록이 문서 쪽 스킴 목록의 **정본**이다 (CLAUDE.md §3에서 이관). 신규 스킴 등록 절차는 add-framework 스킬.
 
 ## Instructions
 
 1. 프로젝트 루트(`/Users/sudo.park/Documents/codebase/TodoCalendar`)에서 실행
-2. 인자 없이 실행하면 10개 스킴 전체 순차 실행
+2. 인자 없이 실행하면 11개 스킴 전체 순차 실행
 3. 실패 시 `FAILED` 스킴 목록과 상위 에러 라인 출력
 4. 빌드 실패(`BUILD FAILED`)도 FAILED로 판정됨
 
