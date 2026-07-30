@@ -25,6 +25,5 @@ let project = Project.framework(
         .external(name: "KeychainSwift"),
         .external(name: "CombineExt"),
         .external(name: "SwiftLinkPreview")
-    ],
-    customSetting: .init().otherLinkerFlags(["-ObjC"])
+    ]
 )

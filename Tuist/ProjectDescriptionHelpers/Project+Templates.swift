@@ -139,7 +139,7 @@ extension Project {
     {
         let sources = Target.target(name: name,
                              destinations: destinations,
-                             product: .framework,
+                             product: .staticFramework,
                              bundleId: "\(organizationName).\(name)",
                              deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
@@ -182,7 +182,7 @@ extension Project {
         let settingDict = customSetting.swiftVersion("6.0")
         let sources = Target.target(name: name,
                              destinations: destinations,
-                             product: .framework,
+                             product: .staticFramework,
                              bundleId: "\(organizationName).\(name)",
                              deploymentTargets: .iOS(iOSTargetVersion),
                              infoPlist: .default,
@@ -332,7 +332,9 @@ extension Project {
             entitlements: Entitlements.file(path: "./AppExtensions/\(extensionName)/\(targetName).entitlements"),
             dependencies: dependencies,
             settings: .settings(
-                base: .init().swiftVersion("6.0"),
+                base: .init()
+                    .swiftVersion("6.0")
+                    .otherLinkerFlags(["-ObjC"]),
                 configurations: signingConfigures + [
 
                 ]
