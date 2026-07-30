@@ -12,6 +12,7 @@ import SpeechService
 import PlaceService
 import ExternalServices
 import Repository
+import StoreKitService
 import Scenes
 
 // MARK: - NonLoginUsecaseFactoryImple
@@ -384,6 +385,7 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
     let eventUploadService: any EventUploadService
     let appUpdateCheckUsecase: any AppUpdateCheckUsecase
     let aiAgentOrchestrationUsecase: any AIAgentOrchestrationUsecase
+    let billingUsecase: any BillingUsecase
     private let applicationBase: ApplicationBase
 
     init(
@@ -483,6 +485,15 @@ struct LoginUsecaseFactoryImple: UsecaseFactory {
             speechRecognizeUsecase: speech,
             eventSyncUsecase: self.eventSyncUsecase
         )
+
+        let billingUsecase = BillingUsecaseImple(
+            repository: BillingRepositoryImple(remote: applicationBase.remoteAPI),
+            appStoreService: AppStoreBillingServiceImple(),
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+        // 앱 밖 갱신·환불·승인대기 통과와 미반영 트랜잭션은 이 리스너로만 들어온다
+        billingUsecase.startObservingTransactions()
+        self.billingUsecase = billingUsecase
     }
 
     var eventNotifyService: SharedEventNotifyService {

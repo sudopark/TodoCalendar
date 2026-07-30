@@ -79,6 +79,10 @@ let project = Project.app(
         .project(
             target: "ExternalServices",
             path: .relativeToCurrentFile("../Services/ExternalServices")
+        ),
+        .project(
+            target: "StoreKitService",
+            path: .relativeToCurrentFile("../Services/StoreKitService")
         )
       ],
     extensionTargets:

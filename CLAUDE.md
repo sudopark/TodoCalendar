@@ -71,9 +71,9 @@ tuist generate --no-open      # 파일 추가/삭제 후 재실행 필수
 
 ## 4. 도메인 컨텍스트
 
-> **전략 지도 (DDD) — 대화·작업의 공통 언어 베이스.** 단일 도메인 + 8개 서브도메인. 경계·용어는 여기 맞춘다. 정본·오해나는용어집: [`docs/domain-context-map.md`](docs/domain-context-map.md).
+> **전략 지도 (DDD) — 대화·작업의 공통 언어 베이스.** 단일 도메인 + 9개 서브도메인. 경계·용어는 여기 맞춘다. 정본·오해나는용어집: [`docs/domain-context-map.md`](docs/domain-context-map.md).
 >
-> 🟥 Core: **Event**(Todo/Schedule·반복·완료·태깅·강조), **Calendar**(시간프레임·공휴일) · 🟧 Supporting: **External Calendar**(Google/Apple 다중계정), **Account/Auth**, **AI Agent**(command→Event 변경, Core 승격 유력), **Notification** · 🟩 Generic: **Settings**, **Support**(업데이트·피드백·STT 등)
+> 🟥 Core: **Event**(Todo/Schedule·반복·완료·태깅·강조), **Calendar**(시간프레임·공휴일) · 🟧 Supporting: **External Calendar**(Google/Apple 다중계정), **Account/Auth**, **AI Agent**(command→Event 변경, Core 승격 유력), **Notification**, **Billing**(플랜·top-up·StoreKit 구매. AI 하위 아닌 독립) · 🟩 Generic: **Settings**, **Support**(업데이트·피드백·STT 등)
 
 세부 도메인 규칙은 CLAUDE.md에 중복하지 않는다. 각 정본을 읽고 판단할 것 (`Domain/CLAUDE.md`·`Repository/CLAUDE.md`는 해당 경로 작업 시 자동 로드):
 

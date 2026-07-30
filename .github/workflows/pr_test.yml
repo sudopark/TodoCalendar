@@ -91,7 +91,7 @@ jobs:
           if echo "$FILES" | grep -q "^Services/AuthService/Tests/"; then
             schemes+=("AuthService")
           fi
-          if echo "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices)/"; then
+          if echo "$FILES" | grep -qE "^Services/(FirstPartyServices|SpeechService|PlaceService|ExternalServices|StoreKitService)/"; then
             schemes+=("TodoCalendarApp")
           fi
 
