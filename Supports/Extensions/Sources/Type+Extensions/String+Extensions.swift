@@ -10,26 +10,17 @@ import Foundation
 
 // MARK: - localizing
 
-extension Bundle {
-    
-    private final class Resource { }
-    
-    static var thisBundle: Bundle {
-        return Bundle(for: Resource.self)
-    }
-}
-
 public enum R {
     public typealias String = ExtensionsStrings
 }
 
 extension String {
-    
+
     public func localized() -> String {
-        
+
         return NSLocalizedString(
-            self, 
-            bundle: Bundle.thisBundle, 
+            self,
+            bundle: Bundle.module,
             comment: ""
         )
     }
