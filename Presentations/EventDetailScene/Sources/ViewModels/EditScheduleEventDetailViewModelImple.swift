@@ -24,6 +24,7 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
     private let todoEventUsecase: any TodoEventUsecase
     private let calendarSettingUsecase: any CalendarSettingUsecase
     private let foremostEventUsecase: any ForemostEventUsecase
+    private let ddayCandidateUsecase: any DDayCandidateUsecase
     var router: (any EventDetailRouting)?
     weak var listener: EventDetailSceneListener?
     
@@ -35,7 +36,8 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
         eventDetailDataUsecase: any EventDetailDataUsecase,
         todoEventUsecase: any TodoEventUsecase,
         calendarSettingUsecase: any CalendarSettingUsecase,
-        foremostEventUsecase: any ForemostEventUsecase
+        foremostEventUsecase: any ForemostEventUsecase,
+        ddayCandidateUsecase: any DDayCandidateUsecase
     ) {
         self.scheduleId = scheduleId
         self.repeatingEventTargetTime = repeatingEventTargetTime
@@ -45,7 +47,8 @@ final class EditScheduleEventDetailViewModelImple: EventDetailViewModel, @unchec
         self.todoEventUsecase = todoEventUsecase
         self.calendarSettingUsecase = calendarSettingUsecase
         self.foremostEventUsecase = foremostEventUsecase
-        
+        self.ddayCandidateUsecase = ddayCandidateUsecase
+
         self.internalBinding()
     }
     
@@ -88,7 +91,8 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
     func prepare() {
         
         self.subject.isLoading.send(true)
-        
+        self.ddayCandidateUsecase.refresh()
+
         let handlePrepared: (EventDetailBasicData, EventDetailData) -> Void = { [weak self] basic, addition in
             self?.subject.basicData.send(
                 .init(origin: basic)
@@ -141,7 +145,10 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             
         case .toggleTo(let isForemost):
             self.toggleForemostAfterConfirm(toForemost: isForemost)
-            
+
+        case .toggleDDayCandidate(let isRegistered):
+            self.toggleDDayCandidateAfterConfirm(isRegistered: isRegistered)
+
         case .copy:
             self.copyEvent()
             
@@ -228,7 +235,39 @@ extension EditScheduleEventDetailViewModelImple: EventDetailInputListener {
             .store(in: &self.cancellables)
         }
     }
-    
+
+    private func toggleDDayCandidateAfterConfirm(isRegistered: Bool) {
+
+        let message = isRegistered
+            ? "calendar::event::more_action:dday_candidate:unregister:message".localized()
+            : "calendar::event::more_action:dday_candidate:register:message".localized()
+        let info = ConfirmDialogInfo()
+            |> \.title .~ "calendar::event::more_action:dday_candidate:title".localized()
+            |> \.message .~ pure(message)
+            |> \.confirmText .~ R.String.Common.confirm
+            |> \.confirmed .~ pure(self.toggleDDayCandidate(isRegistered))
+            |> \.withCancel .~ true
+            |> \.cancelText .~ R.String.Common.cancel
+        self.router?.showConfirm(dialog: info)
+    }
+
+    private func toggleDDayCandidate(_ isRegistered: Bool) -> () -> Void {
+        let candidate = self.currentCandidate
+        return { [weak self] in
+            guard let usecase = self?.ddayCandidateUsecase else { return }
+            isRegistered ? usecase.remove(candidate) : usecase.append(candidate)
+        }
+    }
+
+    /// 상세가 열린 회차가 곧 등록 대상이다 — 반복이면 그 회차, 아니면 원본.
+    private var currentCandidate: DDayCandidate {
+        return DDayCandidate(
+            scheduleId: self.scheduleId,
+            targetTime: self.repeatingEventTargetTime,
+            isRepeating: self.subject.basicData.value?.origin.isRepeatingEvent ?? false
+        )
+    }
+
     private func transformToTodoAfterConfirm() {
         
         guard let basic = self.subject.basicData.value,
@@ -503,9 +542,17 @@ extension EditScheduleEventDetailViewModelImple {
     
     var moreActions: AnyPublisher<[[EventDetailMoreAction]], Never> {
         let scheduleId = self.scheduleId
-        let transform: (EventDetailBasicData, (any ForemostMarkableEvent)?) -> [[EventDetailMoreAction]] = { basic, foremostEvent in
-            let isRepeating = basic.selectedTime != nil && basic.eventRepeating != nil
+        let targetTime = self.repeatingEventTargetTime
+        let transform: (
+            EventDetailBasicData, (any ForemostMarkableEvent)?, [DDayCandidate]
+        ) -> [[EventDetailMoreAction]] = { basic, foremostEvent, candidates in
+            let isRepeating = basic.isRepeatingEvent
             let isForemost = foremostEvent?.eventId == scheduleId
+            let isDDayCandidate = candidates.contains(
+                DDayCandidate(
+                    scheduleId: scheduleId, targetTime: targetTime, isRepeating: isRepeating
+                )
+            )
             let removeActions: [EventDetailMoreAction] = isRepeating
                 ? [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)]
                 : [.remove(onlyThisEvent: false)]
@@ -513,13 +560,19 @@ extension EditScheduleEventDetailViewModelImple {
             let otherActions: [EventDetailMoreAction] = isRepeating
 //                ? [.share]
 //                : [.toggleTo(isForemost: !isForemost), .share]
-                ? [.copy, .transformToTodo]
-                : [.toggleTo(isForemost: !isForemost), .copy, .transformToTodo]
+                ? [.toggleDDayCandidate(isRegistered: isDDayCandidate), .copy, .transformToTodo]
+                : [
+                    .toggleTo(isForemost: !isForemost),
+                    .toggleDDayCandidate(isRegistered: isDDayCandidate),
+                    .copy,
+                    .transformToTodo
+                ]
             return [removeActions, otherActions]
         }
-        return Publishers.CombineLatest(
+        return Publishers.CombineLatest3(
             self.subject.basicData.compactMap { $0?.origin },
-            self.foremostEventUsecase.foremostEvent
+            self.foremostEventUsecase.foremostEvent,
+            self.ddayCandidateUsecase.candidates
         )
         .map(transform)
         .removeDuplicates()
@@ -528,7 +581,11 @@ extension EditScheduleEventDetailViewModelImple {
 }
 
 private extension EventDetailBasicData {
-    
+
+    var isRepeatingEvent: Bool {
+        return self.selectedTime != nil && self.eventRepeating != nil
+    }
+
     init(
         _ schedule: ScheduleEvent,
         _ repeatingEventTargetTime: EventTime?,
@@ -563,5 +620,21 @@ private extension ScheduleMakeParams {
         self.eventTagId = basic.eventTagId
         self.repeating = basic.eventRepeating?.repeating
         self.notificationOptions = basic.eventNotifications
+    }
+}
+
+
+private extension DDayCandidate {
+
+    /// 회차 키는 **반복 일정일 때만** 싣는다.
+    ///
+    /// 진입점(`EventListCellEventHanleViewModel.selectEvent`)이 비반복 일정에도 셀의 시각을
+    /// 그대로 넘겨서 `repeatingEventTargetTime`은 비반복에도 채워져 있다. 이걸 그대로 회차 키로
+    /// 쓰면 위젯이 반복 회차로 해석해(`fetchDDayTargetSchedule`) 조회에 실패하고 후보가 사라진다.
+    init(scheduleId: String, targetTime: EventTime?, isRepeating: Bool) {
+        self.init(
+            scheduleId: scheduleId,
+            turnKey: isRepeating ? targetTime?.customKey : nil
+        )
     }
 }

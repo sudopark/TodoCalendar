@@ -72,6 +72,7 @@ enum EventDetailMoreAction: Equatable {
     case transformToTodo
     case addToTemplate  // 이후 구현 예정
     case toggleTo(isForemost: Bool)
+    case toggleDDayCandidate(isRegistered: Bool)
     case share
 }
 

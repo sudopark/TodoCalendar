@@ -23,6 +23,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
     private var spyScheduleUsecase: PrivateStubScheduleEventUsecase!
     private var spyEventDetailDataUsecase: StubEventDetailDataUsecase!
     private var stubForemostEventUsecase: StubForemostEventUsecase!
+    private var stubDDayCandidateUsecase: PrivateStubDDayCandidateUsecase!
     private var spyRouter: SpyEventDetailRouter!
     private var spyListener: SpyEventDetailListener!
     
@@ -39,6 +40,7 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         self.spyScheduleUsecase = nil
         self.spyEventDetailDataUsecase = nil
         self.stubForemostEventUsecase = nil
+        self.stubDDayCandidateUsecase = nil
         self.spyRouter = nil
         self.spyListener = nil
     }
@@ -54,9 +56,10 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         isForemost: Bool = false,
         shouldFailToTransformToTodo: Bool = false,
         shouldFailToSaveDetail: Bool = false,
-        shouldFailToRemoveSchedule: Bool = false
+        shouldFailToRemoveSchedule: Bool = false,
+        registeredCandidates: [DDayCandidate] = []
     ) -> EditScheduleEventDetailViewModelImple {
-        
+
         let (schedule, detail) = (customSchedule ?? self.dummyRepeatingSchedule, self.dummyDetail)
         self.spyScheduleUsecase.stubEvent = schedule
         self.spyEventDetailDataUsecase.stubDetail = detail
@@ -76,7 +79,9 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
         
         let todoUsecase = StubTodoEventUsecase()
         todoUsecase.shouldFailMakeTodo = shouldFailToTransformToTodo
-        
+
+        self.stubDDayCandidateUsecase = .init(registeredCandidates)
+
         let viewModel = EditScheduleEventDetailViewModelImple(
             scheduleId: schedule.uuid,
             repeatingEventTargetTime: repeatingEventTargetTime,
@@ -85,7 +90,8 @@ class EditScheduleEventDetailViewModelImpleTests: BaseTestCase, PublisherWaitabl
             eventDetailDataUsecase: self.spyEventDetailDataUsecase,
             todoEventUsecase: todoUsecase,
             calendarSettingUsecase: calendarSettingUsecase,
-            foremostEventUsecase: self.stubForemostEventUsecase
+            foremostEventUsecase: self.stubForemostEventUsecase,
+            ddayCandidateUsecase: self.stubDDayCandidateUsecase
         )
         viewModel.router = self.spyRouter
         viewModel.listener = self.spyListener
@@ -233,33 +239,156 @@ extension EditScheduleEventDetailViewModelImpleTests {
             self.makeViewModel(customSchedule: schedule),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.copy, .transformToTodo]
+                [.toggleDDayCandidate(isRegistered: false), .copy, .transformToTodo]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: schedule, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: true), .remove(onlyThisEvent: false)],
-                [.copy, .transformToTodo]
+                [.toggleDDayCandidate(isRegistered: false), .copy, .transformToTodo]
             ]
         )
         let scheduleNotRepeating = schedule |> \.repeating .~ nil
         parameterizeTest(
             self.makeViewModel(customSchedule: scheduleNotRepeating),
             expect: [
-                [.remove(onlyThisEvent: false)], 
-                [.toggleTo(isForemost: true), .copy, .transformToTodo]
+                [.remove(onlyThisEvent: false)],
+                [
+                    .toggleTo(isForemost: true),
+                    .toggleDDayCandidate(isRegistered: false),
+                    .copy,
+                    .transformToTodo
+                ]
             ]
         )
         parameterizeTest(
             self.makeViewModel(customSchedule: scheduleNotRepeating, isForemost: true),
             expect: [
                 [.remove(onlyThisEvent: false)],
-                [.toggleTo(isForemost: false), .copy, .transformToTodo]
+                [
+                    .toggleTo(isForemost: false),
+                    .toggleDDayCandidate(isRegistered: false),
+                    .copy,
+                    .transformToTodo
+                ]
             ]
         )
     }
-    
+
+    func testViewModel_whenRepeatingSchedule_provideDDayCandidateAction() {
+        // given
+        let expect = expectation(description: "반복 일정에도 후보 액션이 제공된다")
+        let viewModel = self.makeViewModel(customSchedule: self.dummyRepeatingSchedule)
+
+        // when
+        let actions = self.waitFirstOutput(expect, for: viewModel.moreActions) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(
+            actions?.flatMap { $0 }.contains(.toggleDDayCandidate(isRegistered: false)), true
+        )
+    }
+
+    func testViewModel_whenAlreadyRegistered_provideUnregisterAction() {
+        // given
+        let expect = expectation(description: "등록된 회차면 해제 액션")
+        let targetTime = EventTime.at(300)
+        let viewModel = self.makeViewModel(
+            customSchedule: self.dummyRepeatingSchedule,
+            repeatingEventTargetTime: targetTime,
+            registeredCandidates: [
+                .init(scheduleId: "dummy_schedule", turnKey: targetTime.customKey)
+            ]
+        )
+
+        // when
+        let actions = self.waitFirstOutput(expect, for: viewModel.moreActions) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(
+            actions?.flatMap { $0 }.contains(.toggleDDayCandidate(isRegistered: true)), true
+        )
+    }
+
+    func testViewModel_whenToggleDDayCandidate_registerOpenedTurn() {
+        // given
+        let targetTime = EventTime.at(300)
+        let viewModel = self.makeViewModelWithPrepare(
+            repeatingEventTargetTime: targetTime
+        )
+
+        // when
+        viewModel.handleMoreAction(.toggleDDayCandidate(isRegistered: false))
+
+        // then: BaseSpyRouter가 shouldConfirmNotCancel 기본값(true)으로 confirmed를 즉시 호출한다
+        XCTAssertNotNil(self.spyRouter.didShowConfirmWith)
+        XCTAssertEqual(
+            self.stubDDayCandidateUsecase.currentCandidates,
+            [.init(scheduleId: "dummy_schedule", turnKey: targetTime.customKey)]
+        )
+    }
+
+    func testViewModel_whenToggleDDayCandidateOff_unregister() {
+        // given
+        let targetTime = EventTime.at(300)
+        let candidate = DDayCandidate(
+            scheduleId: "dummy_schedule", turnKey: targetTime.customKey
+        )
+        let viewModel = self.makeViewModelWithPrepare(
+            repeatingEventTargetTime: targetTime,
+            registeredCandidates: [candidate]
+        )
+
+        // when
+        viewModel.handleMoreAction(.toggleDDayCandidate(isRegistered: true))
+
+        // then
+        XCTAssertEqual(self.stubDDayCandidateUsecase.currentCandidates, [])
+    }
+
+    // 진입점이 비반복 일정에도 셀 시각을 넘기므로, 회차 키가 섞이면 위젯 조회가 실패한다
+    func testViewModel_whenNotRepeatingSchedule_registerWithoutTurnKey() {
+        // given
+        let viewModel = self.makeViewModelWithPrepare(
+            isNotRepeating: true,
+            repeatingEventTargetTime: .at(300)
+        )
+
+        // when
+        viewModel.handleMoreAction(.toggleDDayCandidate(isRegistered: false))
+
+        // then
+        XCTAssertEqual(
+            self.stubDDayCandidateUsecase.currentCandidates,
+            [.init(scheduleId: "dummy_schedule", turnKey: nil)]
+        )
+    }
+
+    func testViewModel_whenNotRepeatingAndRegistered_provideUnregisterAction() {
+        // given
+        let expect = expectation(description: "비반복 일정도 등록 상태가 라벨에 반영된다")
+        let viewModel = self.makeViewModel(
+            customSchedule: self.dummyRepeatingSchedule |> \.repeating .~ nil,
+            repeatingEventTargetTime: .at(300),
+            registeredCandidates: [.init(scheduleId: "dummy_schedule", turnKey: nil)]
+        )
+
+        // when
+        let actions = self.waitFirstOutput(expect, for: viewModel.moreActions) {
+            viewModel.prepare()
+        }
+
+        // then
+        XCTAssertEqual(
+            actions?.flatMap { $0 }.contains(.toggleDDayCandidate(isRegistered: true)), true
+        )
+    }
+
     func testViewModel_whenAfterRemoveSchedule_closeScene() {
         // given
         let expect = expectation(description: "Schedule 삭제 이후에 화면 닫음")
@@ -452,7 +581,8 @@ extension EditScheduleEventDetailViewModelImpleTests {
         repeatingEventTargetTime: EventTime? = nil,
         shouldFailToTransformToTodo: Bool = false,
         shouldFailToSaveDetail: Bool = false,
-        shouldFailToRemoveSchedule: Bool = false
+        shouldFailToRemoveSchedule: Bool = false,
+        registeredCandidates: [DDayCandidate] = []
     ) -> EditScheduleEventDetailViewModelImple {
         // given
         let expect = expectation(description: "wait prepared")
@@ -469,9 +599,10 @@ extension EditScheduleEventDetailViewModelImpleTests {
             shouldFailSave: shouldFailEdit,
             shouldFailToTransformToTodo: shouldFailToTransformToTodo,
             shouldFailToSaveDetail: shouldFailToSaveDetail,
-            shouldFailToRemoveSchedule: shouldFailToRemoveSchedule
+            shouldFailToRemoveSchedule: shouldFailToRemoveSchedule,
+            registeredCandidates: registeredCandidates
         )
-        
+
         // when
         let _ = self.waitOutputs(expect, for: viewModel.isLoading) {
             viewModel.prepare()
@@ -959,6 +1090,32 @@ extension EditScheduleEventDetailViewModelImpleTests {
         // then
         self.wait(for: [expect], timeout: 0.1)
     }
+}
+
+private final class PrivateStubDDayCandidateUsecase: DDayCandidateUsecase, @unchecked Sendable {
+
+    private let subject: CurrentValueSubject<[DDayCandidate], Never>
+
+    init(_ candidates: [DDayCandidate] = []) {
+        self.subject = .init(candidates)
+    }
+
+    func refresh() { }
+
+    func append(_ candidate: DDayCandidate) {
+        self.subject.send(self.subject.value + [candidate])
+    }
+
+    func remove(_ candidate: DDayCandidate) {
+        self.subject.send(self.subject.value.filter { $0 != candidate })
+    }
+
+    var candidates: AnyPublisher<[DDayCandidate], Never> {
+        return self.subject.eraseToAnyPublisher()
+    }
+
+    /// 테스트 케이스가 직접 검사하는 raw 기록 — 검증은 케이스 책임(stub은 기록만).
+    var currentCandidates: [DDayCandidate] { self.subject.value }
 }
 
 private final class PrivateStubScheduleEventUsecase: StubScheduleEventUsecase, @unchecked Sendable {
