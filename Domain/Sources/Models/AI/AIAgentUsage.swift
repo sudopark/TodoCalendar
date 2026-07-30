@@ -21,9 +21,9 @@ public struct AIAgentUsage: Sendable {
     public var resetsAt: Date?
     public var updatedAt: Date?
     // 서버가 내려준 플랜. 미배포 응답·미지 id 는 nil
-    public var plan: Plan?
+    public var plan: BillingPlanId?
     // 하향 예약 — 다음 차수부터 적용될 플랜 변경
-    public var scheduledPlanChange: ScheduledPlanChange?
+    public var scheduledPlanChange: BillingUserPlan.ScheduledChange?
     // top-up 잔량. daily_limit 과 합산되지 않는 별도 풀
     public var topupRemaining: Int?
 
@@ -35,22 +35,6 @@ public struct AIAgentUsage: Sendable {
         self.dailyLimit = limit
     }
 
-    public enum Plan: String, Sendable {
-        case free
-        case standard
-        case lifetime
-    }
-
-    public struct ScheduledPlanChange: Sendable {
-
-        public let planId: Plan
-        public let effectiveAt: Date
-
-        public init(planId: Plan, effectiveAt: Date) {
-            self.planId = planId
-            self.effectiveAt = effectiveAt
-        }
-    }
 }
 
 

@@ -82,7 +82,7 @@ struct AIAgentUsageGaugeView: View {
 
 private extension AIAgentUsageGaugeView {
 
-    func planChipView(_ plan: AIAgentUsage.Plan) -> some View {
+    func planChipView(_ plan: BillingPlanId) -> some View {
         Text(plan.name)
             .font(self.appearance.fontSet.size(10, weight: .semibold).asFont)
             .foregroundStyle(
@@ -104,7 +104,7 @@ private extension AIAgentUsageGaugeView {
 
 }
 
-private extension AIAgentUsage.Plan {
+private extension BillingPlanId {
 
     var name: String {
         switch self {
@@ -120,7 +120,7 @@ private extension AIAgentUsage.Plan {
 
 private extension AIAgentUsageGaugeView {
 
-    func scheduledChangeView(_ change: AIAgentUsage.ScheduledPlanChange) -> some View {
+    func scheduledChangeView(_ change: BillingUserPlan.ScheduledChange) -> some View {
         HStack(alignment: .top, spacing: Metric.Spacing.xxsmall) {
             Image(systemName: "info.circle")
             Text("aiAgent::usage::planChangeScheduled".localized(
