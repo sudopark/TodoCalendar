@@ -538,8 +538,16 @@ extension EventListWidgetViewModelProviderTests {
         func fetchNextEvents(_ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> TodayNextEvents {
             return .init(nextEvents: [], customTags: [])
         }
+
+        func fetchDDayTargetEvent(_ target: DDayTargetEventId) async throws -> DDayTargetEvent? {
+            return nil
+        }
+
+        func fetchScheduleRepeatingTurns(_ scheduleId: String, in range: Range<TimeInterval>, limit: Int) async throws -> [RepeatingTimes] {
+            return []
+        }
     }
-    
+
     private func makeProviderWithStubUnsortedEvents() -> EventListWidgetViewModelProvider {
         
         let fetchUsecase = UnSortedStubEventsFetchUsecase(refDate: self.refDate)
@@ -616,8 +624,16 @@ extension EventListWidgetViewModelProviderTests {
             func fetchNextEvents(_ refTime: Date, withIn todayRange: Range<TimeInterval>, _ timeZone: TimeZone) async throws -> TodayNextEvents {
                 return .init(nextEvents: [], customTags: [])
             }
+
+            func fetchDDayTargetEvent(_ target: DDayTargetEventId) async throws -> DDayTargetEvent? {
+                return nil
+            }
+
+            func fetchScheduleRepeatingTurns(_ scheduleId: String, in range: Range<TimeInterval>, limit: Int) async throws -> [RepeatingTimes] {
+                return []
+            }
         }
-        
+
         let fetchUsecase = EventsWithTagFetchUescase()
         let calendarSettingRepository = StubCalendarSettingRepository()
         let appSettingRepository = StubAppSettingRepository()

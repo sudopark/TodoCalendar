@@ -85,6 +85,18 @@ class CalendarEventFetchUsecaseImpleTests: BaseTestCase {
             cached: .init()
         )
     }
+
+    private func makeUsecaseWithStubSchedule(
+        _ schedule: ScheduleEvent
+    ) -> CalendarEventFetchUsecaseImple {
+        self.stubScheduleRepository.stubEvent = schedule
+        return self.makeUsecase()
+    }
+
+    private func makeUsecaseWithoutStubSchedule() -> CalendarEventFetchUsecaseImple {
+        self.stubScheduleRepository.stubEvent = nil
+        return self.makeUsecase()
+    }
 }
 
 
@@ -514,6 +526,227 @@ extension CalendarEventFetchUsecaseImpleTests {
     }
 }
 
+
+// MARK: - D-day 대상 조회
+
+extension CalendarEventFetchUsecaseImpleTests {
+
+    private var repeatEveryDay: EventRepeating {
+        return EventRepeating(
+            repeatingStartTime: 0,
+            repeatOption: EventRepeatingOptions.EveryDay()
+        )
+    }
+
+    func testUsecase_fetchDDayTarget_whenNotRepeating_returnsOriginTime() async throws {
+        // given
+        let usecase = self.makeUsecaseWithStubSchedule(
+            ScheduleEvent(uuid: "s1", name: "워크숍", time: .at(1000))
+        )
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(kind: .schedule, rawId: "s1")
+        )
+
+        // then
+        XCTAssertEqual(target?.name, "워크숍")
+        XCTAssertEqual(target?.time, .at(1000))
+        XCTAssertEqual(target?.isRepeating, false)
+    }
+
+    func testUsecase_fetchDDayTarget_whenScheduleNotExists_returnsNil() async throws {
+        // given
+        let usecase = self.makeUsecaseWithoutStubSchedule()
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(kind: .schedule, rawId: "not-exists")
+        )
+
+        // then
+        XCTAssertNil(target)
+    }
+
+    func testUsecase_fetchDDayTarget_whenRepeatingWithTurnKey_returnsThatTurnTime() async throws {
+        // given: 매일 반복, origin = .at(0) → 4회차 = .at(3일)
+        let fourthTurnTime = EventTime.at(3 * 24 * 3600)
+        let usecase = self.makeUsecaseWithStubSchedule(
+            ScheduleEvent(uuid: "s1", name: "운동", time: .at(0))
+                |> \.repeating .~ self.repeatEveryDay
+        )
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(kind: .schedule, rawId: "s1", turnKey: fourthTurnTime.customKey)
+        )
+
+        // then
+        XCTAssertEqual(target?.time, fourthTurnTime)
+        XCTAssertEqual(target?.isRepeating, true)
+    }
+
+    func testUsecase_fetchDDayTarget_whenTurnKeyIsExcluded_returnsNil() async throws {
+        // given
+        let excluded = EventTime.at(3 * 24 * 3600)
+        let usecase = self.makeUsecaseWithStubSchedule(
+            ScheduleEvent(uuid: "s1", name: "운동", time: .at(0))
+                |> \.repeating .~ self.repeatEveryDay
+                |> \.repeatingTimeToExcludes .~ [excluded.customKey]
+        )
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(kind: .schedule, rawId: "s1", turnKey: excluded.customKey)
+        )
+
+        // then
+        XCTAssertNil(target)
+    }
+
+    func testUsecase_fetchDDayTarget_whenTurnKeyIsPastRepeatEnd_returnsNil() async throws {
+        // given: 2일 뒤까지만 반복 → 10일 뒤 회차는 존재하지 않는다
+        let usecase = self.makeUsecaseWithStubSchedule(
+            ScheduleEvent(uuid: "s1", name: "운동", time: .at(0))
+                |> \.repeating .~ (
+                    self.repeatEveryDay |> \.repeatingEndOption .~ .until(2 * 24 * 3600)
+                )
+        )
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(kind: .schedule, rawId: "s1", turnKey: EventTime.at(10 * 24 * 3600).customKey)
+        )
+
+        // then
+        XCTAssertNil(target)
+    }
+
+    func testUsecase_fetchDDayTarget_whenNoTurnLandsOnTurnKey_returnsNil() async throws {
+        // given: 매일 반복이라 어떤 회차도 3일+100초에 오지 않는다 (원본 시각이 밀린 상황)
+        let usecase = self.makeUsecaseWithStubSchedule(
+            ScheduleEvent(uuid: "s1", name: "운동", time: .at(0))
+                |> \.repeating .~ self.repeatEveryDay
+        )
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(kind: .schedule, rawId: "s1", turnKey: EventTime.at(3 * 24 * 3600 + 100).customKey)
+        )
+
+        // then
+        XCTAssertNil(target)
+    }
+
+    func testUsecase_fetchDDayTarget_whenTurnKeyIsBeforeOrigin_returnsNil() async throws {
+        // given: origin이 목표 시각보다 뒤 — 전진 열거로는 닿을 수 없다
+        let usecase = self.makeUsecaseWithStubSchedule(
+            ScheduleEvent(uuid: "s1", name: "운동", time: .at(10 * 24 * 3600))
+                |> \.repeating .~ self.repeatEveryDay
+        )
+
+        // when
+        let target = try await usecase.fetchDDayTargetEvent(
+            .init(kind: .schedule, rawId: "s1", turnKey: EventTime.at(0).customKey)
+        )
+
+        // then
+        XCTAssertNil(target)
+    }
+
+    func testUsecase_fetchScheduleRepeatingTurns_listsTurnsInRange() async throws {
+        // given: 매일 반복, origin = .at(0)
+        let usecase = self.makeUsecaseWithStubSchedule(
+            ScheduleEvent(uuid: "s1", name: "운동", time: .at(0))
+                |> \.repeating .~ self.repeatEveryDay
+        )
+
+        // when
+        let turns = try await usecase.fetchScheduleRepeatingTurns(
+            "s1", in: 0..<(5 * 24 * 3600), limit: 50
+        )
+
+        // then: origin(1회차) + 2~5회차
+        XCTAssertEqual(turns.count, 5)
+        XCTAssertEqual(turns.first?.turn, 1)
+        XCTAssertEqual(turns.first?.time, .at(0))
+    }
+
+    func testUsecase_fetchScheduleRepeatingTurns_respectsLimit() async throws {
+        // given
+        let usecase = self.makeUsecaseWithStubSchedule(
+            ScheduleEvent(uuid: "s1", name: "운동", time: .at(0))
+                |> \.repeating .~ self.repeatEveryDay
+        )
+
+        // when
+        let turns = try await usecase.fetchScheduleRepeatingTurns(
+            "s1", in: 0..<(100 * 24 * 3600), limit: 3
+        )
+
+        // then
+        XCTAssertEqual(turns.count, 3)
+    }
+
+    func testUsecase_fetchScheduleRepeatingTurns_whenNotRepeating_returnsEmpty() async throws {
+        // given
+        let usecase = self.makeUsecaseWithStubSchedule(
+            ScheduleEvent(uuid: "s1", name: "워크숍", time: .at(0))
+        )
+
+        // when
+        let turns = try await usecase.fetchScheduleRepeatingTurns(
+            "s1", in: 0..<(5 * 24 * 3600), limit: 50
+        )
+
+        // then
+        XCTAssertEqual(turns.isEmpty, true)
+    }
+}
+
+
+// MARK: - D-day 대상 키
+
+extension CalendarEventFetchUsecaseImpleTests {
+
+    func testHolidayTargetKey_roundTrip() {
+        // given
+        let key = HolidayTargetKey(
+            countryCode: "KR", dateString: "2027-03-01", name: "삼일절"
+        )
+
+        // when
+        let restored = HolidayTargetKey(rawId: key.rawId)
+
+        // then
+        XCTAssertEqual(restored?.countryCode, "KR")
+        XCTAssertEqual(restored?.dateString, "2027-03-01")
+        XCTAssertEqual(restored?.name, "삼일절")
+        XCTAssertEqual(restored?.year, 2027)
+    }
+
+    func testHolidayTargetKey_whenNameContainsSeparator_keepsWholeName() {
+        // given
+        let key = HolidayTargetKey(
+            countryCode: "KR", dateString: "2027-03-01", name: "어떤::공휴일"
+        )
+
+        // when
+        let restored = HolidayTargetKey(rawId: key.rawId)
+
+        // then
+        XCTAssertEqual(restored?.name, "어떤::공휴일")
+    }
+
+    func testHolidayTargetKey_whenSegmentsInsufficient_returnsNil() {
+        // given + when
+        let restored = HolidayTargetKey(rawId: "KR::2027-03-01")
+
+        // then
+        XCTAssertNil(restored)
+    }
+}
+
 private final class PrivateStubTodoRepository: StubTodoEventRepository, @unchecked Sendable {
     
     override func loadCurrentTodoEvents() -> AnyPublisher<[TodoEvent], any Error> {
@@ -571,13 +804,18 @@ private final class PrivateStubForemostEventRepository: StubForemostEventReposit
 }
 
 private final class StubHolidaysFetchUsecase: HolidaysFetchUsecase {
-    
+
     func reset() async throws { }
-    
+
     func holidaysGivenYears(
         _ range: Range<TimeInterval>, timeZone: TimeZone
     ) async throws -> [Holiday] {
         let holiday = Holiday(uuid: "id", dateString: "2024-03-01", name: "삼일절")
         return [holiday]
+    }
+
+    var stubCountryCode: String? = "KR"
+    func currentCountryCode() async -> String? {
+        return self.stubCountryCode
     }
 }

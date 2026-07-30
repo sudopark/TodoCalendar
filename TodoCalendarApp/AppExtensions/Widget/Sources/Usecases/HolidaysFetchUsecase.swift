@@ -22,6 +22,9 @@ protocol HolidaysFetchUsecase {
         _ range: Range<TimeInterval>,
         timeZone: TimeZone
     ) async throws -> [Holiday]
+
+    /// 현재 선택된 공휴일 국가 코드. 공휴일 D-day 대상 키의 국가 세그먼트에 쓴다.
+    func currentCountryCode() async -> String?
 }
 
 
@@ -77,5 +80,12 @@ extension HolidaysFetchUsecaseImple {
         }
         let holidaysInNextYear = try await holidays(yearAtUpperBound)
         return holidaysInThisYear + holidaysInNextYear
+    }
+
+    func currentCountryCode() async -> String? {
+        try? await self.holidayUsecase.prepare()
+        let country = await self.holidayUsecase.currentSelectedCountry
+            .values.first(where: { _ in true })
+        return country??.code
     }
 }

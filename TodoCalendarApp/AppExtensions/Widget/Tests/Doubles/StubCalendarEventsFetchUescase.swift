@@ -88,4 +88,18 @@ class StubCalendarEventsFetchUescase: CalendarEventFetchUsecase {
     ) async throws -> TodayNextEvents {
         return try self.stubNextEvents.unwrap()
     }
+
+    var stubDDayTarget: DDayTargetEvent?
+    func fetchDDayTargetEvent(
+        _ target: DDayTargetEventId
+    ) async throws -> DDayTargetEvent? {
+        return self.stubDDayTarget
+    }
+
+    var stubRepeatingTurns: [RepeatingTimes] = []
+    func fetchScheduleRepeatingTurns(
+        _ scheduleId: String, in range: Range<TimeInterval>, limit: Int
+    ) async throws -> [RepeatingTimes] {
+        return self.stubRepeatingTurns
+    }
 }
