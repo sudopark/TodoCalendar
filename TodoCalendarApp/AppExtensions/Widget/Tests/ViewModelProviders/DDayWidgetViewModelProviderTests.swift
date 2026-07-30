@@ -39,10 +39,12 @@ struct DDayWidgetViewModelProviderTests {
     }
 
     private func makeTarget(
-        time: EventTime, repeatOption: (any EventRepeatingOption)? = nil
+        time: EventTime,
+        repeatOption: (any EventRepeatingOption)? = nil,
+        targetId: DDayTargetEventId = .init(kind: .schedule, rawId: "s1")
     ) -> DDayTargetEvent {
         return DDayTargetEvent(
-            targetId: .init(kind: .schedule, rawId: "s1"),
+            targetId: targetId,
             name: "워크숍",
             time: time,
             repeatOption: repeatOption,
@@ -249,5 +251,66 @@ extension DDayWidgetViewModelProviderTests {
 
         // then
         #expect(model.ddayText == "–")
+    }
+}
+
+
+// MARK: - 탭 링크
+
+extension DDayWidgetViewModelProviderTests {
+
+    @Test("일정은 해당 회차 상세 링크를 낸다")
+    func getDDayModel_whenSchedule_linksToScheduleDetail() async throws {
+        // given
+        let now = Date(timeIntervalSince1970: 0)
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(time: .at(14 * 24 * 3600))
+        )
+
+        // when
+        let model = try await provider.getDDayModel(
+            for: now, target: .init(kind: .schedule, rawId: "s1")
+        )
+
+        // then
+        let link = try #require(model.link)
+        #expect(link.absoluteString.contains("calendar/event/schedule") == true)
+        #expect(link.absoluteString.contains("event_id=s1") == true)
+    }
+
+    @Test("공휴일은 해당 날짜 선택 링크를 낸다")
+    func getDDayModel_whenHoliday_linksToCalendarDay() async throws {
+        // given: UTC 기준 1970-01-15 00:00 = 14일 * 86400
+        let now = Date(timeIntervalSince1970: 0)
+        let dayStart: TimeInterval = 14 * 24 * 3600
+        let holidayId = DDayTargetEventId(
+            kind: .holiday, rawId: "KR::1970-01-15::테스트공휴일"
+        )
+        let provider = self.makeProvider(
+            stubTarget: self.makeTarget(
+                time: .period(dayStart..<(dayStart + 24 * 3600 - 1)),
+                targetId: holidayId
+            )
+        )
+
+        // when
+        let model = try await provider.getDDayModel(for: now, target: holidayId)
+
+        // then
+        let link = try #require(model.link)
+        #expect(link.absoluteString.contains("select=1970_01_15") == true)
+    }
+
+    @Test("대상이 지정되지 않으면 링크가 없다")
+    func getDDayModel_whenTargetIsNil_hasNoLink() async throws {
+        // given
+        let now = Date(timeIntervalSince1970: 0)
+        let provider = self.makeProvider(stubTarget: nil)
+
+        // when
+        let model = try await provider.getDDayModel(for: now, target: nil)
+
+        // then
+        #expect(model.link == nil)
     }
 }

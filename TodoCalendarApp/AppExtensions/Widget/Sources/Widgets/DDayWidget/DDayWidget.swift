@@ -157,9 +157,11 @@ struct DDayWidgetEntryView: View {
         switch self.entry.result {
         case .success(let model) where family == .systemMedium:
             DDayMediumWidgetView(model: model)
+                .widgetURL(model.link)
 
         case .success(let model):
             DDaySmallWidgetView(model: model)
+                .widgetURL(model.link)
 
         case .failure(let error):
             FailView(errorModel: error)

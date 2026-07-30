@@ -24,6 +24,7 @@ struct DDayWidgetViewModel: Sendable {
     let timeText: String
     let repeatText: String
     var refreshAfter: Date?
+    var link: URL?
     var widgetSetting: WidgetAppearanceSettings = .init()
 
     var isRepeating: Bool {
@@ -109,7 +110,32 @@ extension DDayWidgetViewModelProvider {
             repeatText: self.repeatText(event, timeZone)
         )
         |> \.refreshAfter .~ refreshAfter
+        |> \.link .~ self.link(for: event, in: timeZone)
         |> \.widgetSetting .~ setting
+    }
+
+    /// 일정은 그 회차 상세로, 공휴일은 해당 날짜 선택으로 보낸다.
+    /// 공휴일 상세는 Holiday.uuid를 요구하는데 위젯엔 그 값이 없다 — 상세에 날짜·이름·D-day뿐이라
+    /// 날짜 선택으로 보내도 정보 손실이 없다.
+    private func link(for event: DDayTargetEvent, in timeZone: TimeZone) -> URL? {
+        switch event.targetId.kind {
+        case .schedule:
+            return EventDeepLinkBuilder
+                .schedule(id: event.targetId.rawId, time: event.time)
+                .build()
+
+        case .holiday:
+            let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
+            let date = Date(
+                timeIntervalSince1970: event.time.rangeWithShifttingifNeed(on: timeZone).lowerBound
+            )
+            let components = calendar.dateComponents([.year, .month, .day], from: date)
+            guard let year = components.year,
+                  let month = components.month,
+                  let day = components.day
+            else { return nil }
+            return CalendarDay(year, month, day).link
+        }
     }
 
     private func repeatText(_ event: DDayTargetEvent, _ timeZone: TimeZone) -> String {
