@@ -180,22 +180,22 @@ struct AIAgentUsageMapper {
             |> \.resetsAt .~ AICommandDateParser.parse(json["resets_at"])
             |> \.updatedAt .~ AICommandDateParser.parse(json["updated_at"])
             // 앱이 모르는 플랜 id 는 nil — 신규 플랜이 서버에 먼저 배포돼도 나머지 필드는 살린다
-            |> \.plan .~ (planJson?["id"] as? String).flatMap { AIAgentUsage.Plan(rawValue: $0) }
+            |> \.plan .~ (planJson?["id"] as? String).flatMap { BillingPlanId(rawValue: $0) }
             |> \.scheduledPlanChange .~ scheduledChange
             |> \.topupRemaining .~ (json["topup_remaining"] as? Int)
     }
 }
 
 
-// MARK: - response: AIAgentUsage.ScheduledPlanChange
+// MARK: - response: BillingUserPlan.ScheduledChange
 
 struct AIAgentScheduledPlanChangeMapper {
 
-    let change: AIAgentUsage.ScheduledPlanChange?
+    let change: BillingUserPlan.ScheduledChange?
 
     init(json: [String: Any]) {
         let planId = (json["plan_id"] as? String)
-            .flatMap { AIAgentUsage.Plan(rawValue: $0) }
+            .flatMap { BillingPlanId(rawValue: $0) }
         let effectiveAt = AICommandDateParser.parse(json["effective_at"])
         guard let planId, let effectiveAt
         else {

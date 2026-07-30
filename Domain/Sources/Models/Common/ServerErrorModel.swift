@@ -34,6 +34,10 @@ public struct ServerErrorModel: Error, @unchecked Sendable, Decodable {
         case unexpectedConfirmRequired = "UnexpectedConfirmRequired"
         case agentLoopThrow = "AgentLoopThrow"
         case agentError = "AgentError"
+        case invalidTransaction = "InvalidTransaction"
+        case unknownProduct = "UnknownProduct"
+        case topupRequiresPaidPlan = "TopupRequiresPaidPlan"
+        case planChangeNotAllowed = "PlanChangeNotAllowed"
     }
     
     public var code: ErrorCode?
