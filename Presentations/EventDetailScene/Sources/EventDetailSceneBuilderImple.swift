@@ -88,12 +88,13 @@ extension EventDetailSceneBuilderImple: EventDetailSceneBuilder {
             eventDetailDataUsecase: self.usecaseFactory.makeEventDetailDataUsecase(),
             todoEventUsecase: self.usecaseFactory.makeTodoEventUsecase(),
             calendarSettingUsecase: self.usecaseFactory.makeCalendarSettingUsecase(),
-            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase()
+            foremostEventUsecase: self.usecaseFactory.makeForemostEventUsecase(),
+            ddayCandidateUsecase: self.usecaseFactory.makeDDayCandidateUsecase()
         )
         viewModel.listener = listener
         return self.makeEventDetailScene(viewModel)
     }
-    
+
     @MainActor
     private func makeEventDetailScene(
         _ viewModel: any EventDetailViewModel

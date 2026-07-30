@@ -228,7 +228,16 @@ extension NonLoginUsecaseFactoryImple {
             eventNotifyService: applicationBase.eventNotifyService
         )
     }
-    
+
+    func makeDDayCandidateUsecase() -> any DDayCandidateUsecase {
+        return DDayCandidateUsecaseImple(
+            repository: DDayCandidateLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+    }
+
     func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase {
         let repository = CalendarSettingRepositoryImple(
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
@@ -668,12 +677,22 @@ extension LoginUsecaseFactoryImple {
             cacheStorage: cache
         )
         return ForemostEventUsecaseImple(
-            repository: repository, 
+            repository: repository,
             sharedDataStore: applicationBase.sharedDataStore,
             eventNotifyService: applicationBase.eventNotifyService
         )
     }
-    
+
+    /// 후보는 로컬(App Group) 전용이라 로그인 여부와 무관하게 같은 조립이다.
+    func makeDDayCandidateUsecase() -> any DDayCandidateUsecase {
+        return DDayCandidateUsecaseImple(
+            repository: DDayCandidateLocalRepositoryImple(
+                environmentStorage: applicationBase.userDefaultEnvironmentStorage
+            ),
+            sharedDataStore: applicationBase.sharedDataStore
+        )
+    }
+
     func makeDaysIntervalCountUsecase() -> any DaysIntervalCountUsecase {
         let repository = CalendarSettingRepositoryImple(
             environmentStorage: applicationBase.userDefaultEnvironmentStorage
