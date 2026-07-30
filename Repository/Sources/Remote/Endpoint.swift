@@ -286,6 +286,23 @@ enum AIAPIEndpoints: Endpoint {
 }
 
 
+// MARK: - Billing
+
+enum BillingAPIEndpoints: Endpoint {
+    case plans
+    case topups
+    case purchases
+
+    var subPath: String {
+        switch self {
+        case .plans: return "plans"
+        case .topups: return "topups"
+        case .purchases: return "purchases"
+        }
+    }
+}
+
+
 // MARK: - google account endpoint
 
 enum GoogleAuthEndpoint: Endpoint {
@@ -410,6 +427,10 @@ public struct RemoteEnvironment: Sendable {
         case let ai as AIAPIEndpoints:
             let prefix = "\(calendarAPIHost)/v1/ai"
             return appendSubpathIfNotEmpty(prefix, ai.subPath)
+
+        case let billing as BillingAPIEndpoints:
+            let prefix = "\(calendarAPIHost)/v1/billing"
+            return appendSubpathIfNotEmpty(prefix, billing.subPath)
 
         default: return nil
         }

@@ -67,4 +67,11 @@ extension RemoteEnvironmentPathTests {
         // then
         #expect(path == "https://api.example.com/v2/sync/check")
     }
+
+    @Test func path_billingEndpoint_returnsV1BillingURL() {
+        // when
+        let path = self.env.path(BillingAPIEndpoints.purchases)
+        // then
+        #expect(path == "https://api.example.com/v1/billing/purchases")
+    }
 }
