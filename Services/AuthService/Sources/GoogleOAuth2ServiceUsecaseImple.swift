@@ -1,6 +1,6 @@
 //
 //  GoogleOAuth2ServiceUsecaseImple.swift
-//  Domain
+//  AuthService
 //
 //  Created by sudo.park on 2/12/24.
 //  Copyright © 2024 com.sudo.park. All rights reserved.
@@ -12,6 +12,7 @@ import Optics
 import FirebaseCore
 import FirebaseAuth
 @preconcurrency import GoogleSignIn
+import Domain
 import Extensions
 
 

@@ -1,12 +1,13 @@
 //
 //  AppleOAuth2ServiceUsecaseImple.swift
-//  Domain
+//  AuthService
 //
 //  Created by sudo.park on 4/17/24.
 //  Copyright © 2024 com.sudo.park. All rights reserved.
 //
 
 import Foundation
+import Domain
 import Extensions
 
 
