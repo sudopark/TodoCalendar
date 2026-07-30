@@ -7,64 +7,34 @@
 //
 
 import Foundation
-import SwiftLinkPreview
 
 
-public protocol LinkPreviewFetchUsecase: AnyObject, Sendable {
-    
+// MARK: - LinkPreviewFetchEngine
+
+public protocol LinkPreviewFetchEngine: AnyObject, Sendable {
+
     func fetchPreview(_ url: URL) async throws -> LinkPreview
 }
 
 
-public final class LinkPreviewFetchUsecaesImple: LinkPreviewFetchUsecase, @unchecked Sendable {
-    
-    private let previewEngine: SwiftLinkPreview
-    public init(previewEngine: SwiftLinkPreview) {
+// MARK: - LinkPreviewFetchUsecase
+
+public protocol LinkPreviewFetchUsecase: AnyObject, Sendable {
+
+    func fetchPreview(_ url: URL) async throws -> LinkPreview
+}
+
+public final class LinkPreviewFetchUsecaseImple: LinkPreviewFetchUsecase, @unchecked Sendable {
+
+    private let previewEngine: any LinkPreviewFetchEngine
+    public init(previewEngine: any LinkPreviewFetchEngine) {
         self.previewEngine = previewEngine
     }
 }
 
-extension LinkPreviewFetchUsecaesImple {
-    
-    final class FetchTask: @unchecked Sendable {
-        let engine: SwiftLinkPreview
-        let url: URL
-        private var request: Cancellable?
-        
-        init(_ engine: SwiftLinkPreview, _ url: URL) {
-            self.engine = engine
-            self.url = url
-        }
-        
-        func fetch() async throws -> LinkPreview {
-            let path = self.url.absoluteString
-            return try await withCheckedThrowingContinuation { [weak self] continuation in
-                self?.request = self?.engine.preview(path) { response in
-                    let preview = LinkPreview(
-                        url: response.url,
-                        title: response.title,
-                        description: response.description,
-                        mainImagePath: response.image,
-                        images: response.images ?? []
-                    )
-                    continuation.resume(returning: preview)
-                } onError: { error in
-                    continuation.resume(throwing: error)
-                }
-            }
-        }
-        
-        func cancel() {
-            self.request?.cancel()
-        }
-    }
-    
+extension LinkPreviewFetchUsecaseImple {
+
     public func fetchPreview(_ url: URL) async throws -> LinkPreview {
-        let fetchTask = FetchTask(self.previewEngine, url)
-        return try await withTaskCancellationHandler {
-            return try await fetchTask.fetch()
-        } onCancel: {
-            fetchTask.cancel()
-        }
+        return try await self.previewEngine.fetchPreview(url)
     }
 }
