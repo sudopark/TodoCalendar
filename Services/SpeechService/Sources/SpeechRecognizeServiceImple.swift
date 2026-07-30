@@ -1,6 +1,6 @@
 //
 //  SpeechRecognizeServiceImple.swift
-//  Domain
+//  SpeechService
 //
 //  Created by sudo.park on 6/7/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -11,6 +11,7 @@ import Combine
 import Speech
 import AVFoundation
 import Extensions
+import Domain
 
 
 public final class SpeechRecognizeServiceImple: SpeechRecognizeService, @unchecked Sendable {

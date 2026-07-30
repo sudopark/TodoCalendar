@@ -8,6 +8,8 @@
 import Foundation
 import Domain
 import FirstPartyServices
+import SpeechService
+import PlaceService
 import Repository
 import Scenes
 
