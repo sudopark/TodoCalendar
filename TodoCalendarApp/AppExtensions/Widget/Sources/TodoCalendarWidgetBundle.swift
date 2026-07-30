@@ -28,6 +28,7 @@ struct BaseWidgetBundle: WidgetBundle {
         ForemostEventWidget()
         NextEventWidget()
         NextRemainEventWidget()
+        DDayWidget()
     }
 }
 
