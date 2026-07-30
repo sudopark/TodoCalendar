@@ -15,7 +15,7 @@ import Extensions
 import FirebaseAuth
 import Alamofire
 import SQLiteService
-import SwiftLinkPreview
+import ExternalServices
 
 
 final class ApplicationBase {
@@ -68,9 +68,7 @@ final class ApplicationBase {
         )
     }()
     
-    let linkPreviewEngine: SwiftLinkPreview = {
-       return SwiftLinkPreview(cache: InMemoryCache())
-    }()
+    let linkPreviewFetchEngine: any LinkPreviewFetchEngine = SwiftLinkPreviewBaseFetchEngineImple()
     
     private lazy var remoteEnvironment: RemoteEnvironment = {
         

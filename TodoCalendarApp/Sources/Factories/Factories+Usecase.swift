@@ -10,6 +10,7 @@ import Domain
 import FirstPartyServices
 import SpeechService
 import PlaceService
+import ExternalServices
 import Repository
 import Scenes
 
@@ -304,8 +305,8 @@ extension NonLoginUsecaseFactoryImple {
 extension NonLoginUsecaseFactoryImple {
     
     func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
-        return LinkPreviewFetchUsecaesImple(
-            previewEngine: applicationBase.linkPreviewEngine
+        return LinkPreviewFetchUsecaseImple(
+            previewEngine: applicationBase.linkPreviewFetchEngine
         )
     }
     
@@ -762,8 +763,8 @@ extension LoginUsecaseFactoryImple {
 extension LoginUsecaseFactoryImple {
     
     func makeLinkPreviewFetchUsecase() -> any LinkPreviewFetchUsecase {
-        return LinkPreviewFetchUsecaesImple(
-            previewEngine: applicationBase.linkPreviewEngine
+        return LinkPreviewFetchUsecaseImple(
+            previewEngine: applicationBase.linkPreviewFetchEngine
         )
     }
     
