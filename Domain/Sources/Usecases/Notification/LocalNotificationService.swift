@@ -2,27 +2,22 @@
 //  LocalNotificationService.swift
 //  Domain
 //
-//  Created by sudo.park on 1/16/24.
-//  Copyright © 2024 com.sudo.park. All rights reserved.
+//  Created by sudo.park on 7/30/26.
+//  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
 import Foundation
-import UserNotifications
 
+public protocol LocalNotificationService: Sendable {
 
+    /// 이벤트 알림 등록. 스케줄 시각이 이미 지난 경우 등록하지 않고 nil, 등록 시 notification identifier 반환
+    func scheduleEventNotification(
+        _ params: SingleEventNotificationMakeParams
+    ) async throws -> String?
 
-public protocol LocalNotificationService {
-    
-    func add(_ request: UNNotificationRequest) async throws
-    func removePendingNotificationRequests(withIdentifiers: [String])
-    func notificationAuthorizationStatus() async -> UNAuthorizationStatus
-    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
-}
+    func removePendingNotifications(withIdentifiers ids: [String])
 
+    func checkAuthorizationStatus() async throws -> NotificationAuthorizationStatus
 
-extension UNUserNotificationCenter: LocalNotificationService { 
-    
-    public func notificationAuthorizationStatus() async -> UNAuthorizationStatus {
-        return await self.notificationSettings().authorizationStatus
-    }
+    func requestAuthorization() async throws -> Bool
 }

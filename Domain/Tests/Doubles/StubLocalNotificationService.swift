@@ -7,39 +7,44 @@
 //
 
 import Foundation
-import UserNotifications
+import Extensions
+import Domain
 
-@testable import Domain
 
+final class StubLocalNotificationService: LocalNotificationService, @unchecked Sendable {
 
-final class StubLocalNotificationService: LocalNotificationService {
-    
-    var didAddNotificationRequest: UNNotificationRequest?
-    var didNotificationAddCalled: ((UNNotificationRequest) -> Void)?
-    func add(_ request: UNNotificationRequest) async throws {
-        self.didAddNotificationRequest = request
-        self.didNotificationAddCalled?(request)
-    }
-    
-    var didRemovePendingNotificationRequestIdentifiers: [String]?
-    var didRemovePendingNotificationWithIdentifiers: (([String]) -> Void)?
-    func removePendingNotificationRequests(withIdentifiers: [String]) {
-        self.didRemovePendingNotificationRequestIdentifiers = withIdentifiers
-        self.didRemovePendingNotificationWithIdentifiers?(withIdentifiers)
-    }
-    
-    var stubAuthorizeStatus: UNAuthorizationStatus?
-    func notificationAuthorizationStatus() async -> UNAuthorizationStatus {
-        return stubAuthorizeStatus ?? .notDetermined
-    }
-    
-    var stubAuthorizationRequestResult: Result<Bool, any Error> = .success(true)
-    func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool {
-        switch self.stubAuthorizationRequestResult {
-        case .success(let flag):
-            return flag
-        case .failure(let error):
-            throw error
+    var didScheduledNotificationParams: [SingleEventNotificationMakeParams] = []
+    var didNotificationScheduled: ((SingleEventNotificationMakeParams) -> Void)?
+    func scheduleEventNotification(
+        _ params: SingleEventNotificationMakeParams
+    ) async throws -> String? {
+        // 기존 UN 트리거 변환과 동일 시맨틱: 과거 .at 시각이면 미등록(nil)
+        if case .at(let time) = params.scheduleTime, time - Date().timeIntervalSince1970 <= 0 {
+            return nil
         }
+        self.didScheduledNotificationParams.append(params)
+        self.didNotificationScheduled?(params)
+        return UUID().uuidString
+    }
+
+    var didRemovePendingNotificationIds: [String]?
+    var didPendingNotificationsRemoved: (([String]) -> Void)?
+    func removePendingNotifications(withIdentifiers ids: [String]) {
+        self.didRemovePendingNotificationIds = ids
+        self.didPendingNotificationsRemoved?(ids)
+    }
+
+    var stubAuthorizeStatus: NotificationAuthorizationStatus?
+    var shouldFailCheckAuthorizationStatus: Bool = false
+    func checkAuthorizationStatus() async throws -> NotificationAuthorizationStatus {
+        if self.shouldFailCheckAuthorizationStatus {
+            throw RuntimeError("invalid status")
+        }
+        return self.stubAuthorizeStatus ?? .notDetermined
+    }
+
+    var stubAuthorizationRequestResult: Result<Bool, any Error> = .success(true)
+    func requestAuthorization() async throws -> Bool {
+        return try self.stubAuthorizationRequestResult.get()
     }
 }
