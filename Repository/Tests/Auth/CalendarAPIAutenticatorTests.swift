@@ -114,6 +114,16 @@ extension CalendarAPIAutenticatorTests {
         parameterizeTest(
             AIAPIEndpoints.usage, method: .get, expecthasToken: true
         )
+        // 회귀: billing API도 인증 토큰이 붙어야 한다 (whitelist 누락)
+        parameterizeTest(
+            BillingAPIEndpoints.plans, method: .get, expecthasToken: true
+        )
+        parameterizeTest(
+            BillingAPIEndpoints.topups, method: .get, expecthasToken: true
+        )
+        parameterizeTest(
+            BillingAPIEndpoints.purchases, method: .post, expecthasToken: true
+        )
     }
 }
 

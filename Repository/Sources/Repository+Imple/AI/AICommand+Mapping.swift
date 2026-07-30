@@ -170,38 +170,17 @@ struct AIAgentUsageMapper {
               let limit = json["daily_limit"] as? Int
         else { throw RuntimeError("invalid usage response") }
 
-        let planJson = json["plan"] as? [String: Any]
-        let scheduledChange = (planJson?["scheduled_change"] as? [String: Any])
-            .flatMap { AIAgentScheduledPlanChangeMapper(json: $0).change }
+        let topupRemaining = json["topup_remaining"] as? Int
+        let userPlan = (json["plan"] as? [String: Any])
+            .map { BillingUserPlanMapper(json: $0, topupRemaining: topupRemaining).userPlan }
 
         self.usage = AIAgentUsage(input: input, output: output, limit: limit)
             |> \.date .~ (json["date"] as? String)
             |> \.creditsUsed .~ (json["credits_used"] as? Int)
             |> \.resetsAt .~ RemoteDateParser.parse(json["resets_at"])
             |> \.updatedAt .~ RemoteDateParser.parse(json["updated_at"])
-            // 앱이 모르는 플랜 id 는 nil — 신규 플랜이 서버에 먼저 배포돼도 나머지 필드는 살린다
-            |> \.plan .~ (planJson?["id"] as? String).flatMap { BillingPlanId(rawValue: $0) }
-            |> \.scheduledPlanChange .~ scheduledChange
-            |> \.topupRemaining .~ (json["topup_remaining"] as? Int)
-    }
-}
-
-
-// MARK: - response: BillingUserPlan.ScheduledChange
-
-struct AIAgentScheduledPlanChangeMapper {
-
-    let change: BillingUserPlan.ScheduledChange?
-
-    init(json: [String: Any]) {
-        let planId = (json["plan_id"] as? String)
-            .flatMap { BillingPlanId(rawValue: $0) }
-        let effectiveAt = RemoteDateParser.parse(json["effective_at"])
-        guard let planId, let effectiveAt
-        else {
-            self.change = nil
-            return
-        }
-        self.change = .init(planId: planId, effectiveAt: effectiveAt)
+            |> \.plan .~ userPlan?.planId
+            |> \.scheduledPlanChange .~ userPlan?.scheduledChange
+            |> \.topupRemaining .~ topupRemaining
     }
 }
