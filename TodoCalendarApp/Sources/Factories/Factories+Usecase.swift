@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import UserNotifications
 import Domain
+import FirstPartyServices
 import Repository
 import Scenes
 
@@ -250,7 +250,8 @@ extension NonLoginUsecaseFactoryImple {
         return EventNotificationUsecaseImple(
             todoEventUsecase: self.makeTodoEventUsecase(),
             scheduleEventUescase: self.makeScheduleEventUsecase(),
-            notificationRepository: notificaitonRepository
+            notificationRepository: notificaitonRepository,
+            notificationService: UNLocalNotificationServiceImple()
         )
     }
 }
@@ -279,7 +280,7 @@ extension NonLoginUsecaseFactoryImple {
     
     func makeNotificationPermissionUsecase() -> NotificationPermissionUsecase {
         return NotificationPermissionUsecaseImple(
-            notificationService: UNUserNotificationCenter.current()
+            notificationService: UNLocalNotificationServiceImple()
         )
     }
     
@@ -709,7 +710,8 @@ extension LoginUsecaseFactoryImple {
         return EventNotificationUsecaseImple(
             todoEventUsecase: self.makeTodoEventUsecase(),
             scheduleEventUescase: self.makeScheduleEventUsecase(),
-            notificationRepository: notificaitonRepository
+            notificationRepository: notificaitonRepository,
+            notificationService: UNLocalNotificationServiceImple()
         )
     }
 }
@@ -739,7 +741,7 @@ extension LoginUsecaseFactoryImple {
     
     func makeNotificationPermissionUsecase() -> any NotificationPermissionUsecase {
         return NotificationPermissionUsecaseImple(
-            notificationService: UNUserNotificationCenter.current()
+            notificationService: UNLocalNotificationServiceImple()
         )
     }
     

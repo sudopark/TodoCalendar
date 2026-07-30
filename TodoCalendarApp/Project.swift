@@ -59,6 +59,10 @@ let project = Project.app(
         .project(
             target: "AIAgentScene",
             path: .relativeToCurrentFile("../Presentations/AIAgentScene")
+        ),
+        .project(
+            target: "FirstPartyServices",
+            path: .relativeToCurrentFile("../Services/FirstPartyServices")
         )
       ],
     extensionTargets:
