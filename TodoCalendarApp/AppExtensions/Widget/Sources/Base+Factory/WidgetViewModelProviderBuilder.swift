@@ -325,6 +325,36 @@ extension WidgetViewModelProviderBuilder {
     }
 }
 
+// MARK: - DDay
+
+extension WidgetViewModelProviderBuilder {
+
+    func makeDDayWidgetViewModelProvider(
+        shouldSkipCheckCacheReset: Bool = false
+    ) async -> DDayWidgetViewModelProvider {
+
+        if !shouldSkipCheckCacheReset {
+            await self.checkShouldReset()
+        }
+
+        let appSettingRepository = AppSettingLocalRepositoryImple(
+            storage: AppSettingLocalStorage(
+                environmentStorage: base.userDefaultEnvironmentStorage
+            )
+        )
+
+        let calendarSettingRepository = CalendarSettingRepositoryImple(
+            environmentStorage: base.userDefaultEnvironmentStorage
+        )
+
+        return DDayWidgetViewModelProvider(
+            eventFetchUsecase: self.usecaseFactory.makeEventsFetchUsecase(),
+            calendarSettingRepository: calendarSettingRepository,
+            appSettingRepository: appSettingRepository
+        )
+    }
+}
+
 // MARK: - composed
 
 extension WidgetViewModelProviderBuilder {
