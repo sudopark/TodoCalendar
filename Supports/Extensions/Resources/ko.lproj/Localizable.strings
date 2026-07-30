@@ -510,6 +510,7 @@
 "widget.dday::noTarget" = "대상을 선택해주세요";
 "widget.dday.sample::title" = "워크숍";
 "widget.dday.target::repeating" = "반복 일정";
+"widget.dday.target::registered" = "지정한 후보";
 "widget.dday.turn::name" = "%d회차";
 
 // MARK: - link

@@ -137,6 +137,15 @@ extension Array where Element == DDayTargetCandidate {
 
         return repeatings + upcoming + past
     }
+
+    /// 지정 후보를 앞에 붙이고, 같은 일정의 자동 산출분을 걷어낸다.
+    ///
+    /// dedupe 키가 `targetId`가 아니라 `rawId`인 이유 — 회차가 지정된 후보(turnKey 있음)와
+    /// 자동 산출 반복 행(turnKey 없음)은 targetId가 달라 둘 다 살아남는다. 회차를 다시 고르는
+    /// 길은 2단 파라미터에 남아 있으므로 자동 행을 숨겨도 잃는 기능이 없다.
+    func mergingPinned(_ pinned: [DDayTargetCandidate]) -> [DDayTargetCandidate] {
+        return (pinned + self).removeDuplicates { $0.targetId.rawId }
+    }
 }
 
 struct DDayTargetEventQuery: EntityQuery, @unchecked Sendable {
@@ -191,18 +200,49 @@ struct DDayTargetEventQuery: EntityQuery, @unchecked Sendable {
         else { return [] }
 
         let countryCode = await self.factory.makeHolidayFetchUsecase().currentCountryCode()
+        let pinned = await self.pinnedCandidates()
         let events = try await usecase.fetchEvents(
             in: from.timeIntervalSince1970..<until.timeIntervalSince1970, timeZone
         )
-        return self.asSuggestions(events.eventWithTimes, timeZone, countryCode, todayStart)
+        return self.asSuggestions(
+            events.eventWithTimes, timeZone, countryCode, todayStart, pinned
+        )
+    }
+
+    /// 유저가 지정한 후보. 삭제된 일정은 조회 실패로 자연히 빠진다.
+    private func pinnedCandidates() async -> [DDayTargetCandidate] {
+
+        let usecase = self.factory.makeEventFetchUsecase()
+        let stored = self.factory.makeCandidateRepository().loadCandidates()
+
+        var candidates: [DDayTargetCandidate] = []
+        for candidate in stored {
+            let targetId = DDayTargetEventId(
+                kind: .schedule, rawId: candidate.scheduleId, turnKey: candidate.turnKey
+            )
+            guard let event = try? await usecase.fetchDDayTargetEvent(targetId)
+            else { continue }
+            candidates.append(
+                DDayTargetCandidate(
+                    targetId: targetId,
+                    name: event.name,
+                    time: event.time,
+                    isRepeating: event.isRepeating
+                )
+            )
+        }
+        return candidates
     }
 
     private func asSuggestions(
         _ events: [any CalendarEvent],
         _ timeZone: TimeZone,
         _ countryCode: String?,
-        _ todayStart: TimeInterval
+        _ todayStart: TimeInterval,
+        _ pinned: [DDayTargetCandidate]
     ) -> [DDayTargetEventEntity] {
+
+        let pinnedIds = Set(pinned.map { $0.targetId })
 
         return events
             .compactMap { self.asCandidate($0, countryCode) }
@@ -214,15 +254,30 @@ struct DDayTargetEventQuery: EntityQuery, @unchecked Sendable {
                 upcomingLimit: Constant.upcomingLimit,
                 pastLimit: Constant.pastLimit
             )
+            // 지정 후보는 티어 상한 뒤에 합친다 — 상한에 걸려 잘리면 지정한 의미가 없다.
+            .mergingPinned(pinned)
             .map { candidate in
                 DDayTargetEventEntity(
                     id: candidate.targetId.entityId(isRepeating: candidate.isRepeating),
                     name: candidate.name,
-                    subtitle: candidate.isRepeating
-                        ? "widget.dday.target::repeating".localized()
-                        : DDayTargetDateFormatter.dateText(of: candidate.time, in: timeZone)
+                    subtitle: self.subtitle(
+                        of: candidate,
+                        in: timeZone,
+                        isPinned: pinnedIds.contains(candidate.targetId)
+                    )
                 )
             }
+    }
+
+    /// "지정한 후보 · 2027년 3월 15일 (월)" 계열. 반복 일정은 날짜 대신 반복 표시.
+    private func subtitle(
+        of candidate: DDayTargetCandidate, in timeZone: TimeZone, isPinned: Bool
+    ) -> String {
+        let base = candidate.isRepeating
+            ? "widget.dday.target::repeating".localized()
+            : DDayTargetDateFormatter.dateText(of: candidate.time, in: timeZone)
+        guard isPinned else { return base }
+        return "\("widget.dday.target::registered".localized()) · \(base)"
     }
 
     private func asCandidate(

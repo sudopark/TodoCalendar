@@ -510,6 +510,7 @@
 "widget.dday::noTarget" = "Select an event";
 "widget.dday.sample::title" = "Workshop";
 "widget.dday.target::repeating" = "Repeating";
+"widget.dday.target::registered" = "Pinned";
 "widget.dday.turn::name" = "Turn %d";
 
 // MARK: - link
