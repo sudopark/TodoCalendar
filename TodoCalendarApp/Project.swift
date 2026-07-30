@@ -63,6 +63,14 @@ let project = Project.app(
         .project(
             target: "FirstPartyServices",
             path: .relativeToCurrentFile("../Services/FirstPartyServices")
+        ),
+        .project(
+            target: "SpeechService",
+            path: .relativeToCurrentFile("../Services/SpeechService")
+        ),
+        .project(
+            target: "PlaceService",
+            path: .relativeToCurrentFile("../Services/PlaceService")
         )
       ],
     extensionTargets:
