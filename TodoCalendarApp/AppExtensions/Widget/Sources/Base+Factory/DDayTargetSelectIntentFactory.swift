@@ -32,6 +32,13 @@ extension DDayTargetSelectIntentFactory {
         return self.usecaseFactory.makeHolidaysFetchUsecase()
     }
 
+    /// 앱이 쓴 후보를 같은 App Group suite에서 읽는다.
+    func makeCandidateRepository() -> any DDayCandidateRepository {
+        return DDayCandidateLocalRepositoryImple(
+            environmentStorage: self.base.userDefaultEnvironmentStorage
+        )
+    }
+
     func loadTimeZone() -> TimeZone {
         let repository = CalendarSettingRepositoryImple(
             environmentStorage: self.base.userDefaultEnvironmentStorage

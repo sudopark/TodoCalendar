@@ -163,3 +163,61 @@ struct DDayTargetCandidateSortTests {
         #expect(sorted.map { $0.name } == ["repeat-old", "repeat-new"])
     }
 }
+
+
+// MARK: - 지정 후보 티어
+
+struct DDayTargetPinnedTierTests {
+
+    private func makeCandidate(
+        _ name: String, at time: TimeInterval,
+        isRepeating: Bool = false, turnKey: String? = nil
+    ) -> DDayTargetCandidate {
+        return DDayTargetCandidate(
+            targetId: .init(kind: .schedule, rawId: name, turnKey: turnKey),
+            name: name,
+            time: .at(time),
+            isRepeating: isRepeating
+        )
+    }
+
+    @Test("지정 후보가 자동 산출분보다 앞에 온다")
+    func mergingPinned_putsPinnedFirst() {
+        // given
+        let pinned = [self.makeCandidate("pinned", at: 5000)]
+        let auto = [self.makeCandidate("auto", at: 1000)]
+
+        // when
+        let merged = auto.mergingPinned(pinned)
+
+        // then
+        #expect(merged.map { $0.name } == ["pinned", "auto"])
+    }
+
+    @Test("같은 일정이 양쪽에 있으면 지정 후보만 남는다")
+    func mergingPinned_whenSameSchedule_dropsAuto() {
+        // given: 지정은 5회차(turnKey 있음), 자동은 회차 없는 반복 행 — targetId는 다르다
+        let pinned = [self.makeCandidate("운동", at: 5000, isRepeating: true, turnKey: "5000")]
+        let auto = [self.makeCandidate("운동", at: 1000, isRepeating: true)]
+
+        // when
+        let merged = auto.mergingPinned(pinned)
+
+        // then
+        #expect(merged.count == 1)
+        #expect(merged.first?.targetId.turnKey == "5000")
+    }
+
+    @Test("다른 일정은 함께 남는다")
+    func mergingPinned_keepsDifferentSchedules() {
+        // given
+        let pinned = [self.makeCandidate("a", at: 5000)]
+        let auto = [self.makeCandidate("b", at: 1000)]
+
+        // when
+        let merged = auto.mergingPinned(pinned)
+
+        // then
+        #expect(merged.map { $0.name } == ["a", "b"])
+    }
+}
