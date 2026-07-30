@@ -1,7 +1,20 @@
-/* 
+/*
   Localizable.strings
   TodoCalendarApp
 
   Created by sudo.park on 8/25/24.
   Copyright © 2024 com.sudo.park. All rights reserved.
 */
+
+/* AppIntents 전용 테이블.
+   위젯 편집 시트의 파라미터·엔티티 라벨은 LocalizedStringResource 로 해석되고,
+   그 기본 번들은 확장 타겟 자신(Bundle.main)이다 — 앱 문자열이 사는
+   Extensions 번들(`.localized()`)에서는 찾지 못하므로 여기에 둔다.
+   키는 코드에 적힌 영문 리터럴 그대로 — 조회가 실패해도 그 영문이 그대로 표시된다. */
+
+"Event" = "이벤트";
+"Turn" = "반복 회차";
+"EventType" = "이벤트 종류";
+"Event Types" = "이벤트 종류";
+"Exclude all day event" = "종일 일정 제외";
+"To-do completion processing" = "할일 완료 처리";

@@ -1,7 +1,16 @@
-/* 
+/*
   Localizable.strings
   TodoCalendarApp
 
   Created by sudo.park on 8/25/24.
   Copyright © 2024 com.sudo.park. All rights reserved.
 */
+
+/* See ko.lproj counterpart — AppIntents labels resolve from this extension's own bundle. */
+
+"Event" = "Event";
+"Turn" = "Repeat turn";
+"EventType" = "Event type";
+"Event Types" = "Event types";
+"Exclude all day event" = "Exclude all-day events";
+"To-do completion processing" = "To-do completion processing";

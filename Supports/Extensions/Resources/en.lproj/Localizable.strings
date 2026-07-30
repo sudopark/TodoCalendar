@@ -501,6 +501,12 @@
 "widget.next.no_events_today" = "No events today";
 "widget.next.no_events" = "No upcoming events";
 
+"widget.dday::name" = "D-Day";
+"widget.dday::noTarget" = "Select an event";
+"widget.dday.sample::title" = "Workshop";
+"widget.dday.target::repeating" = "Repeating";
+"widget.dday.turn::name" = "Turn %d";
+
 // MARK: - link
 
 "deeplink::invalid_link_message" = "This link format is not supported.\nPlease update the app to the latest version.";
@@ -539,11 +545,6 @@
 "aiAgent::keyboard::send" = "Send";
 "aiAgent::stop" = "Stop";
 "aiAgent::usage" = "%@ / %@ credits";
-"aiAgent::plan::free" = "Free";
-"aiAgent::plan::standard" = "Standard";
-"aiAgent::plan::lifetime" = "Lifetime";
-"aiAgent::usage::topupRemaining" = "%@ extra credits left";
-"aiAgent::usage::planChangeScheduled" = "Switching to the %2$@ plan on %1$@";
 "aiAgent::stop::confirm::title" = "Stop processing?";
 "aiAgent::stop::confirm::message" = "Stopping discards the task in progress, and it can't be resumed.";
 "aiAgent::confirm::countdown" = "left to approve";
