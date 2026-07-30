@@ -71,6 +71,10 @@ let project = Project.app(
         .project(
             target: "PlaceService",
             path: .relativeToCurrentFile("../Services/PlaceService")
+        ),
+        .project(
+            target: "AuthService",
+            path: .relativeToCurrentFile("../Services/AuthService")
         )
       ],
     extensionTargets:

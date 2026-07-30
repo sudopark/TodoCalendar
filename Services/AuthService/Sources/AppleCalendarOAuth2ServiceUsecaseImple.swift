@@ -1,12 +1,13 @@
 //
 //  AppleCalendarOAuth2ServiceUsecaseImple.swift
-//  Domain
+//  AuthService
 //
 //  Created by sudo.park on 3/31/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
 //
 
 import Foundation
+import Domain
 import Extensions
 
 

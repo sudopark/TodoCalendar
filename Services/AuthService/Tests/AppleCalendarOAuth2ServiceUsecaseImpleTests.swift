@@ -1,6 +1,6 @@
 //
 //  AppleCalendarOAuth2ServiceUsecaseImpleTests.swift
-//  DomainTests
+//  AuthService
 //
 //  Created by sudo.park on 3/31/26.
 //  Copyright © 2026 com.sudo.park. All rights reserved.
@@ -10,8 +10,9 @@ import Testing
 import Combine
 import Extensions
 import UnitTestHelpKit
+import Domain
 
-@testable import Domain
+@testable import AuthService
 
 
 final class AppleCalendarOAuth2ServiceUsecaseImpleTests {
