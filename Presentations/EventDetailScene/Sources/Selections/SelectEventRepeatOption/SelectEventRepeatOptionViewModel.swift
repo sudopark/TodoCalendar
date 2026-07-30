@@ -14,69 +14,13 @@ import Optics
 import Domain
 import Extensions
 import Scenes
+import CommonPresentation
 
 
 private typealias Options = EventRepeatingOptions
 
-private enum SupportingOptions: Equatable {
-    case everyDay
-    case everyWeek(_ interval: Int, _ weekDay: DayOfWeeks)
-    case everyWeekDays
-    case everyMonth(_ day: Int)
-    case everyYear(_ month: Int, _ day: Int)
-    case everyMonthLastAllWeekDays
-    case everyMonthSomeWeekDay(_ seq: Int, weekDay: DayOfWeeks)
-    case everyMonthLastWeekDay(_ weekDay: DayOfWeeks)
-    case lunarCalendarEveryYear(_ month: Int, _ day: Int)
-    
-    init?(_ option: EventRepeatingOption) {
-        switch option {
-        case let day as Options.EveryDay where day.interval == 1:
-            self = .everyDay
-            
-        case let week as Options.EveryWeek where week.dayOfWeeks.count == 1:
-            self = .everyWeek(week.interval, week.dayOfWeeks[0])
-            
-        case let week as Options.EveryWeek where week.interval == 1 && week.isEveryWeekDays:
-            self = .everyWeekDays
-            
-        case let month as Options.EveryMonth:
-            guard let support = SupportingOptions(month: month)
-            else { return nil }
-            self = support
-            
-        case let year as Options.EveryYearSomeDay where year.interval == 1:
-            self = .everyYear(year.month, year.day)
-            
-        case let year as Options.LunarCalendarEveryYear:
-            self = .lunarCalendarEveryYear(year.month, year.day)
-            
-        default: return nil
-        }
-    }
-    
-    private init?(month: Options.EveryMonth) {
-        guard month.interval == 1 else { return nil }
-        
-        switch month.selection {
-        case .days(let days):
-            guard let day = days.first else { return nil }
-            self = .everyMonth(day)
-            
-        case .week(let ordinals, let weekdays):
-            guard let ordinal = ordinals.first, let firstWeekDay = weekdays.first else { return nil }
-            if case let .seq(seq) = ordinal, weekdays.count == 1 {
-                self = .everyMonthSomeWeekDay(seq, weekDay: firstWeekDay)
-            } else if weekdays.count == 7 {
-                self = .everyMonthLastAllWeekDays
-            } else if weekdays.count == 1 {
-                self = .everyMonthLastWeekDay(firstWeekDay)
-            } else {
-                return nil
-            }
-        }
-    }
-    
+private enum SupportedRepeatOptions {
+
     static func supports(from startTime: Date, timeZone: TimeZone) -> [[any EventRepeatingOption]] {
         let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
         let month = calendar.component(.month, from: startTime)
@@ -143,76 +87,9 @@ struct SelectRepeatingOptionModel: Equatable, Identifiable {
     }
     
     init?(_ option: EventRepeatingOption, _ startTime: Date, _ timeZone: TimeZone) {
-        guard let supportOption = SupportingOptions(option) else { return nil }
-        let calendar = Calendar(identifier: .gregorian) |> \.timeZone .~ timeZone
-        switch supportOption {
-        case .everyDay:
-            self = .init(R.String.EventDetail.Repeating.everyDayTitle, option)
-            
-        case .everyWeek(let seq, let weekDay) where seq == 1:
-            if weekDay.rawValue == calendar.component(.weekday, from: startTime) {
-                self = .init(
-                    "eventDetail.repeating.everyWeek:title".localized(), option
-                )
-            } else {
-                self = .init(
-                    "eventDetail.repeating.everyWeekSomeDay:title".localized(with: weekDay.text), option
-                )
-            }
-            
-        case .everyWeekDays:
-            self = .init("eventDetail.repeating.everyWeekDays:title".localized(), option)
-            
-        case .everyWeek(let seq, let weekDay):
-            if weekDay.rawValue == calendar.component(.weekday, from: startTime) {
-                self = .init(
-                    "eventDetail.repeating.everySomeWeek:title".localized(with: seq), option
-                )
-            } else {
-                self = .init(
-                    "eventDetail.repeating.everySomeWeekSomeDay:title".localized(with: seq, weekDay.text), option
-                )
-            }
-            
-        case .everyMonth(let day):
-            let currentDay = calendar.component(.day, from: startTime)
-            if currentDay == day {
-                self = .init("eventDetail.repeating.everyMonth:title".localized(), option)
-            } else {
-                let ordinal = day.ordinal ?? "\(day)"
-                self = .init(
-                    "eventDetail.repeating.everyMonth_someDay:title".localized(with: ordinal), option
-                )
-            }
-        case .everyYear(let month, let day):
-            if calendar.component(.month, from: startTime) == month &&
-               calendar.component(.day, from: startTime) == day {
-                self = .init("eventDetail.repeating.everyYear:title".localized(), option)
-            } else {
-                let dateText = calendar.dateText(month, day)
-                self = .init("eventDetail.repeating.everyYearSomeDay:title".localized(with: dateText), option)
-            }
-            
-        case .lunarCalendarEveryYear(let month, let day):
-            if calendar.component(.month, from: startTime) == month
-                && calendar.component(.day, from: startTime) == day {
-                self = .init("eventDetail.repeating.lunarCalendar_everyYear:title".localized(), option)
-            } else {
-                let dateText = calendar.dateText(month, day)
-                self = .init("eventDetail.repeating.lunarCalendar_everyYearSomeDay:title".localized(with: dateText), option)
-            }
-            
-        case .everyMonthLastAllWeekDays:
-            self = .init(R.String.EventDetail.Repeating.everyLastWeekDaysOfEveryMonthTitle, option)
-            
-        case .everyMonthSomeWeekDay(let seq, let weekDay):
-            let text = "eventDetail.repeating.every\(seq)WeekOfEveryMonth::someday".localized(with: weekDay.text)
-            self = .init(text, option)
-            
-        case .everyMonthLastWeekDay(let weekDay):
-            let text = R.String.EventDetail.Repeating.everyLastWeekOfEveryMonthSomeday(weekDay.text)
-            self = .init(text, option)
-        }
+        guard let text = option.summaryText(startTime: startTime, timeZone: timeZone)
+        else { return nil }
+        self = .init(text, option)
     }
     
     static func == (lhs: SelectRepeatingOptionModel, rhs: SelectRepeatingOptionModel) -> Bool {
@@ -367,7 +244,7 @@ extension SelectEventRepeatOptionViewModelImple {
         let previousOptionModel = previousSelectOption.flatMap {
             SelectRepeatingOptionModel($0.repeatOption, self.selectTime, timeZone)
         }
-        let supportOptionModels = SupportingOptions.supports(from: self.selectTime, timeZone: timeZone)
+        let supportOptionModels = SupportedRepeatOptions.supports(from: self.selectTime, timeZone: timeZone)
             .map { options in
                 options.compactMap { SelectRepeatingOptionModel($0, self.selectTime, timeZone) }
             }
@@ -543,15 +420,5 @@ extension SelectEventRepeatOptionViewModelImple {
         .map(transform)
         .removeDuplicates()
         .eraseToAnyPublisher()
-    }
-}
-
-private extension Calendar {
-    
-    func dateText(_ month: Int, _ day: Int) -> String {
-        guard let date = self.date(bySetting: .month, value: month, of: Date())
-            .flatMap ({ self.date(bySetting: .day, value: day, of: $0) })
-        else { return "\(month).\(day)" }
-        return date.text("date_form::MMM_d".localized())
     }
 }
