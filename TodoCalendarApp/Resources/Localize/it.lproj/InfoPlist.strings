@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "L'accesso al calendario è necessario per visualizzare gli eventi e sincronizzare con Apple Calendar.";
+"NSMicrophoneUsageDescription" = "L'accesso al microfono è necessario per inserire eventi e da fare tramite la voce.";
+"NSSpeechRecognitionUsageDescription" = "Il riconoscimento vocale è necessario per convertire la tua voce in eventi e da fare.";

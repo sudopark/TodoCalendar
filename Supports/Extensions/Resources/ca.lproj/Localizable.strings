@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " i";
+"common::wait:message" = "Espereu, si us plau...";
+"common::back" = "Enrere";
+"common.remove" = "Elimina";
+"common.confirm" = "Confirma";
+"common.cancel" = "Cancel·la";
+"common.close" = "Tanca";
+"common.yes" = "Sí";
+"common.no" = "No";
+"common.save" = "Desa";
+"common.info" = "Informació";
+"common.search" = "Cerca";
+"common.clear" = "Neteja";
+"common.send" = "Envia";
+"common.done" = "Fet";
+"common.errorMessage" = "S'ha produït un error temporal.\nSi us plau, informeu-ne si el problema persisteix.";
+"common.update" = "Actualitza";
+"common.go_to_settings" = "Vés a Configuració";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d/M, HH:mm";
+"date_form::MM_d" = "d/M";
+"date_form::MM_dd" = "dd/MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd/MM/yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd/MM/yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd/MM/yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd/MM/yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Demà";
+
+// MARK: - event
+
+"dayname::sunday" = "Diumenge";
+"dayname::monday" = "Dilluns";
+"dayname::tuesday" = "Dimarts";
+"dayname::wednesday" = "Dimecres";
+"dayname::thursday" = "Dijous";
+"dayname::friday" = "Divendres";
+"dayname::saturday" = "Dissabte";
+
+"dayname::sunday:short" = "DG";
+"dayname::monday:short" = "DL";
+"dayname::tuesday:short" = "DT";
+"dayname::wednesday:short" = "DC";
+"dayname::thursday:short" = "DJ";
+"dayname::friday:short" = "DV";
+"dayname::saturday:short" = "DS";
+
+"dayname::sunday:very_short" = "DG";
+"dayname::monday:very_short" = "DL";
+"dayname::tuesday:very_short" = "DT";
+"dayname::wednesday:very_short" = "DC";
+"dayname::thursday:very_short" = "DJ";
+"dayname::friday:very_short" = "DV";
+"dayname::saturday:very_short" = "DS";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Esdeveniments d'avui";
+"event_notification::todo:prefix" = "Tasca";
+"event_notification::today:prefix" = "Avui";
+"event_notification::tomorrow:prefix" = "Demà";
+"event_notification::allday_today" = "Tot el dia avui";
+"event_notification::allday_tomorrow" = "Tot el dia demà";
+"event_notification::some_allday" = "%@ tot el dia";
+"event_notification_setting::option_title::no_notification" = "Sense notificacions";
+"event_notification_setting::option_title::at_time" = "A l'hora de l'esdeveniment";
+"event_notification_setting::option_title::allday_9am" = "A les 9 del matí d'aquell dia";
+"event_notification_setting::option_title::allday_12pm" = "Al migdia d'aquell dia";
+"event_notification_setting::option_title::customTime" = "Hora personalitzada: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Hora personalitzada";
+"event_notification_setting::option_title::before_minutes" = "%d minuts abans de l'esdeveniment";
+"event_notification_setting::option_title::before_hours" = "%d hores abans de l'esdeveniment";
+"event_notification_setting::option_title::before_days" = "%d dies abans de l'esdeveniment";
+"event_notification_setting::option_title::before_weeks" = "%d setmanes abans de l'esdeveniment";
+"event_notification_setting::option_title::allday_9am_before_days" = "A les 9:00, %d dies abans";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "A les 9:00, %d setmanes abans";
+"event_notification_setting::need_permission_message" = "Per utilitzar la funció de notificacions d'esdeveniments, necessiteu el permís de notificacions.\nAneu a la configuració del sistema i permeteu les notificacions.";
+"event_notification_setting::need_permission::go_setting" = "Vés a la configuració";
+"event_notification_setting::need_permission_title" = "Informació";
+"event_notification_setting::permission_denied" = "Cal el permís de notificacions de l'aplicació per utilitzar la funció de recordatori d'esdeveniments.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Esdeveniment principal";
+"calendar::uncompletedTodos:title" = "Tasques pendents";
+"calendar::event_time::todo" = "Tasca";
+"calendar::event_time::allday" = "Tot el dia";
+"calendar::event_time::allday::with" = "%@ tot el dia";
+"calendar::event_time::period:some_days" = "%d dies";
+"calendar::event_time::period:some_minutes" = "%d minuts";
+"calendar::event_time::period:some_hours" = "%d hores";
+"calendar::event_time::period:some_days:some_hours" = "%d dies %d hores";
+"calendar::event::more_action::remove:title" = "Elimina l'esdeveniment";
+"calendar::event::more_action::foremost_event:title" = "Esdeveniment principal";
+"calendar::event::more_action::remove_only_thistime:message" = "Voleu suprimir només aquest esdeveniment de tots els esdeveniments repetitius?";
+"calendar::event::more_action::remove:message" = "Voleu eliminar aquest esdeveniment?";
+"calendar::event::more_action::mark_as_foremost" = "Voleu marcar aquest esdeveniment com a esdeveniment principal?";
+"calendar::event::more_action::unmark_as_foremost" = "Voleu desmarcar aquest esdeveniment com a esdeveniment principal?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Un esdeveniment de calendari repetitiu no es pot marcar com a esdeveniment principal.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Elimina només aquest esdeveniment";
+"calendar::event::more_action:remove:item_name" = "Elimina l'esdeveniment";
+"calendar::event::more_action:foremost:mark:item_name" = "Marca com a principal";
+"calendar::event::more_action:foremost:unmark:item_name" = "Desmarca com a principal";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Afegeix al widget de Dia D";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Elimina del widget de Dia D";
+"calendar::event::more_action:dday_candidate:title" = "Candidat al widget de Dia D";
+"calendar::event::more_action:dday_candidate:register:message" = "Voleu afegir aquest esdeveniment com a candidat al widget de Dia D? Apareixerà a la part superior de la llista quan editeu el widget.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Voleu eliminar aquest esdeveniment dels candidats al widget de Dia D?";
+"calendar::event::more_action:copy:item_name" = "Copia l'esdeveniment";
+"calendar::event::more_action:transform_to::schedule" = "Converteix en cita";
+"calendar::event::more_action:transform_to::todo" = "Converteix en tasca";
+"calendar::event::more_action:edit:item_name" = "Edita";
+"calednar::event::add_new" = "Afegeix un esdeveniment nou";
+"calednar::event::add_new:place_holder" = "Afegeix ràpidament una tasca nova.";
+"calednar::event::skip_todo" = "Omet aquesta tasca";
+"calednar::event::skip_todo_until" = "Selecciona una hora per ometre aquesta tasca";
+"calednar::event::copy" = "Copia l'esdeveniment";
+"calendar::move_date" = "Mou la data";
+"calednar::event::google::edit" = "Edita l'esdeveniment de Google Calendar";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Seleccioneu primer l'hora de l'esdeveniment.";
+"eventDetail.messages.selectValidTime" = "Seleccioneu una hora d'esdeveniment vàlida.";
+"eventDetail.notification.custom_eventTime:title" = "Personalitzat";
+"eventDetail.notification.title" = "Hora de la notificació de l'esdeveniment";
+"eventDetail.repeating.title" = "Repetició";
+"eventDetail.repeating.notRepeating::title" = "Sense repetició";
+"eventDetail.repeating.starttime:form" = "d MMM yyyy";
+"eventDetail.repeating.starttime:title" = "Hora d'inici de la repetició";
+"eventDetail.repeating.everyDay:title" = "Cada dia";
+"eventDetail.repeating.everyWeek:title" = "Cada setmana";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Cada %@";
+"eventDetail.repeating.everySomeWeek:title" = "Cada %d setmanes";
+"eventDetail.repeating.everyWeekDays:title" = "Cada dia laborable";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Cada %d setmanes %@";
+"eventDetail.repeating.everyMonth:title" = "Cada mes";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ de cada mes.";
+"eventDetail.repeating.everyYear:title" = "Cada any";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Cada any (calendari lunar)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Cada any %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Cada any %@ (calendari lunar)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Tots els dies de l'última setmana de cada mes";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "El primer %@ de cada mes";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "El segon %@ de cada mes";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "El tercer %@ de cada mes";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "El quart %@ de cada mes";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "El cinquè %@ de cada mes";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "El sisè %@ de cada mes";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "El setè %@ de cada mes";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "L'últim %@ de cada mes";
+"eventDetail.repeating.endtime::title" = "Final de la repetició";
+"eventDetail.repeating.endtime::option::never" = "Mai";
+"eventDetail.repeating.endtime::option::on" = "El";
+"eventDetail.repeating.endtime::option::after" = "Després de";
+"eventDetail.repeating.endtime::option::after_occurrences" = "vegades";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "L'hora de finalització de la repetició ha de ser posterior a l'hora d'inici.\n(Data d'inici de la repetició: %@)";
+"eventDetail.repeating::period_endcount" = "A partir de %@, %d vegades";
+
+"eventDetail.repeating.everyNDays:title" = "Cada %d dies";
+"eventDetail.repeating.last" = "Últim";
+"eventDetail.repeating.everyNMonths:title" = "Cada %d mesos";
+"eventDetail.repeating.everyNYears:title" = "Cada %d anys";
+"eventDetail.repeating::endoption_until" = "fins a %@";
+"eventDetail.repeating::endoption_times" = "%d vegades";
+
+"eventDetail.place::placeholder" = "Ubicació";
+"eventDetail.place::remove_button" = "Elimina la ubicació";
+"eventDetail.place::no_map_app" = "L'aplicació de mapes seleccionada no està instal·lada.";
+"eventDetail.place::select_map_app" = "Selecciona un mapa";
+"eventDetail.place::always_select_this_map" = "Obre sempre amb aquesta aplicació.";
+
+"eventDetail.add_new_todo::message" = "S'ha afegit una tasca nova.";
+"eventDetail.add_new_schedule::message" = "S'ha afegit una cita nova.";
+"eventDetail.scheduleEvent_removed::message" = "S'ha eliminat la cita.";
+"eventDetail.edit::repeating::confirm::ttile" = "Edita l'esdeveniment";
+"eventDetail.edit::repeating::confirm::message" = "Aquest esdeveniment és repetitiu.\nSeleccioneu l'abast de l'esdeveniment repetitiu que voleu editar.";
+"eventDetail.edit::repeating::confirm::all::button" = "Tots els esdeveniments";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "A partir d'ara";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Només aquesta vegada";
+"eventDetail.scheduleEvent_saved::message" = "S'ha desat la cita.";
+"eventDetail.todoEvent_removed::message" = "S'ha eliminat la tasca.";
+"eventDetail.todoEvent_saved::message" = "S'ha desat la tasca.";
+"eventDetail.cancel_edit::title" = "Edita l'esdeveniment";
+"eventDetail.cancel_edit::message" = "Voleu descartar aquests canvis?";
+"eventDetail.cancel_edit::continue::button" = "Continua";
+
+"eventDetail.edit::add_new_name::placeholder" = "Afegeix un nom d'esdeveniment nou";
+"eventDetail.edit::clearEventTime::button" = "Esborra l'hora de l'esdeveniment";
+"eventDetail.edit::noEventTime::button" = "Sense hora de finalització";
+"eventDetail.edit::memo" = "Nota";
+"eventDetail.edit::urlPreview" = "Previsualització de l'URL";
+
+"eventDetail.edit::make::case" = "És una tasca?";
+"eventDetail.edit::todo::case" = "Tasca";
+"eventDetail.edit::schedule::case" = "Cita";
+"eventDetail.edit::holiday::case" = "Festiu públic a %@";
+
+"eventDetail.notSupport::holiday" = "La funció de modificació d'informació no és compatible amb els dies festius.";
+
+"eventDetail:todo:guide:message1" = "Una tasca representa alguna cosa que cal fer.";
+"eventDetail:todo:guide:message2" = "A diferència de les cites habituals, que es mostren al calendari amb una hora (o període) específica, les tasques permeten comprovar si s'han completat.";
+"eventDetail:todo:guide:message3" = "Podeu afegir una tasca sense especificar cap informació horària. Per exemple, podeu registrar una feina que cal fer aviat, però no immediatament.";
+"eventDetail:todo:guide:process:message" = "Les tasques es comporten de manera diferent de les cites habituals quan l'opció de repetició està activada:";
+"eventDetail:todo:guide:process:bullet1" = "Les tasques repetitives actuals o passades que encara no s'han completat es mostren al calendari.";
+"eventDetail:todo:guide:process:bullet2" = "Quan es completa una tasca, s'afegeix a la llista d'esdeveniments completats i la següent repetició s'afegeix de nou al calendari.";
+"eventDetail:todo:guide:process:bullet3" = "Si no hi ha cap repetició següent a causa de l'hora de finalització de la repetició, la tasca repetitiva finalitza.";
+"eventDetail:foremost:guide:message1" = "Marqueu un esdeveniment com a principal per destacar que és l'esdeveniment més important.\nL'esdeveniment principal sempre és visible al calendari i admet un widget independent.";
+"eventDetail:foremost:guide:supports:message" = "Els següents tipus d'esdeveniment es poden establir com a esdeveniment principal:";
+"eventDetail:foremost:guide:supports:todo" = "Tasca";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Cites no repetitives";
+
+"eventDetail:isSaving:toast:message" = "S'estan desant els canvis. Espereu, si us plau.";
+"eventDetail:hasChanges:confirm:message" = "Hi ha canvis sense desar. Voleu descartar-los?";
+"eventDetail:hasChanges:confirm:continue" = "Continua editant";
+
+"eventDetail.unavailto_transform_withoutName" = "Introduïu un nom per convertir l'esdeveniment.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Cal informació horària per convertir-ho en una cita.";
+"eventDetail.todoEvent::transform::schedule_title" = "Converteix";
+"eventDetail.todoEvent::transform::schedule_message" = "Voleu convertir aquesta tasca en una cita?";
+"eventDetail.scheduleEvent::transform::todo" = "Converteix";
+"eventDetail.scheduleEvent::transform::todo_message" = "Voleu convertir aquesta cita en una tasca?";
+
+"eventDetail::revert" = "Desfés la finalització";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Visualitza a Google Calendar";
+"eventDetail::gogoleEvent::calendar" = "Calendari";
+"eventDetail::gogoleEvent::calendar::event" = "Esdeveniment de Google Calendar";
+"eventDetail::gogoleEvent::attendee::unknown" = "Desconegut";
+"eventDetail::gogoleEvent::attendees" = "Assistents (%d persones)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organitzador";
+"eventDetail::gogoleEvent::conference::accessCode" = "Codi d'accés";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Codi de la reunió";
+"eventDetail::gogoleEvent::conference::passCode" = "Codi PIN";
+"eventDetail::gogoleEvent::conference::password" = "Contrasenya";
+"eventDetail::gogoleEvent::copy::message" = "S'ha copiat al porta-retalls.";
+"eventDetail::gogoleEvent::canceled::message" = "Aquest esdeveniment s'ha cancel·lat.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Visualitza a l'Apple Calendar";
+"eventDetail::appleCalendarEvent::calendar::event" = "Esdeveniment de l'Apple Calendar";
+"eventDetail::appleCalendarEvent::attendees" = "Assistents (%d persones)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organitzador";
+
+// MARK: - event tag
+
+"eventTag.title" = "Tipus d'esdeveniment";
+"eventTag.list::title" = "Tipus d'esdeveniments";
+"eventTag.defaults.default::name" = "Per defecte";
+"eventTag.defaults.holiday::name" = "Festiu";
+"eventTag.addNew::placeholder" = "Afegeix un tipus d'esdeveniment nou";
+"eventTag.allEventTypes" = "Tots els tipus d'esdeveniments >";
+"eventTag.remove::confirm::message" = "Voleu eliminar aquest tipus d'esdeveniment? O voleu eliminar també tots els esdeveniments relacionats?";
+"eventTag.remove::only_tag" = "Elimina només el tipus d'esdeveniment";
+"eventTag.remove::tag_and_evets" = "Elimina amb els esdeveniments relacionats";
+"eventTag.removed::message" = "S'ha eliminat aquest tipus d'esdeveniment.";
+"eventTag.removed_with_events::message" = "S'han eliminat aquest tipus d'esdeveniment i els esdeveniments relacionats.";
+"eventTag.color::changed::message" = "S'ha canviat el color.";
+"eventTag.changed::message" = "S'ha modificat el tipus d'esdeveniment.";
+"eventTag.makeNew::message" = "S'ha creat un tipus d'esdeveniment nou.";
+"eventTag.default::title" = "Tipus d'esdeveniment per defecte";
+"eventTag.default::selection::explain" = "Aquest és el tipus d'esdeveniment que se seleccionarà per defecte en crear un esdeveniment.";
+"eventTag.externalCalendar::integrate_button" = "Connecta un calendari";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Avui";
+"eventList::yesterday::title" = "Ahir";
+"eventList::thisMonth::title" = "Aquest mes";
+"eventList::done_todos::title" = "Llista de tasques completades";
+"eventList::done_todos::eventTime" = "Hora de l'esdeveniment:";
+"eventList::done_todos::doneAt" = "Hora de finalització:";
+"eventList::remove::confirm::message" = "Suprimeix la llista de tasques completades";
+"eventList::remove::confirm::button::all" = "Totes les tasques completades";
+"eventList::remove::confirm::button::olderThan1m" = "Més antigues d'1 mes";
+"eventList::remove::confirm::button::olderThan3m" = "Més antigues de 3 mesos";
+"eventList::remove::confirm::button::olderThan6m" = "Més antigues de 6 mesos";
+"eventList::remove::confirm::button::olderThan1y" = "Més antigues d'1 any";
+
+
+// MARK: - account
+
+"manage_account::title" = "Gestió del compte";
+"manage_account::login_method" = "Mètode d'inici de sessió";
+"manage_account::email" = "Correu electrònic";
+"manage_account::last_signedIn_at" = "Última hora d'inici de sessió";
+"manage_account::migration::title" = "Migra les dades temporals de l'usuari";
+"manage_account::migration::description" = "Tots els esdeveniments creats abans d'iniciar sessió (%d esdeveniments) s'estan migrant al vostre compte.\nPodeu accedir als esdeveniments vinculats al vostre compte des de qualsevol dispositiu.";
+"manage_account::migration_finished::message" = "La migració ha finalitzat!";
+"manage_account::signout_button::title" = "Tanca la sessió";
+"manage_account::sign_out::confirm::title" = "Tanca la sessió";
+"manage_account::sign_out::confirm::message" = "Voleu tancar la sessió del compte actual?";
+"manage_account::delete_account_button::title" = "Suprimeix el compte";
+"manage_account::delete_account_button::confirm:message" = "Segur que voleu suprimir el compte?";
+"manage_account::delete_account_button::description" = "Després de sol·licitar la supressió del compte, aquest s'eliminarà.\nUn cop suprimit, la informació del compte no es pot recuperar.";
+"signIn::title" = "Inicia sessió";
+"signIn:description" = "Feu una còpia de seguretat de la vostra llista d'esdeveniments i sincronitzeu-la amb altres dispositius iOS\n(Les plataformes compatibles s'ampliaran properament.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Configuració d'esdeveniments";
+"event_setting::eventType" = "Tipus d'esdeveniment";
+"event_setting::eventPeriod" = "Període de l'esdeveniment";
+"event_setting::defaultMapApp" = "Obre l'aplicació de mapes";
+"event_setting::defaultMapApp_select" = "Selecciona";
+
+"event_setting::eventSync" = "Sincronització d'esdeveniments";
+"event_setting::eventSync::readyToSync::description" = "Sincronitza els esdeveniments de l'usuari amb còpia de seguretat.";
+"event_setting::eventSync::syncInProgress::description" = "S'estan sincronitzant els esdeveniments amb còpia de seguretat...";
+"event_setting::eventSync::lastTime" = "Última sincronització de dades: %@";
+"event_setting::eventSync::force" = "Sincronitza ara";
+
+"event_notification_setting::title::forAllDay" = "Tot el dia";
+"event_notification_setting::title::NotforAllDay" = "Hora de la notificació";
+"event_setting::external_calendar::title" = "Calendaris externs";
+"event_setting::external_calendar::connected::account" = "Connectat: %@";
+"event_setting::external_calendar::start" = "Connecta";
+"event_setting::external_calendar::start::message" = "S'ha connectat a un calendari extern.";
+"event_setting::external_calendar::stop" = "Desconnecta";
+"event_setting::external_calendar::stop::message" = "S'ha desconnectat el calendari extern.";
+"event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
+"event_setting::apple_calendar::permission_denied::message" = "S'ha denegat l'accés al calendari. Activeu-lo a Configuració per utilitzar l'Apple Calendar.";
+"event_setting::apple_calendar::restricted::message" = "L'accés al calendari està restringit en aquest dispositiu.";
+"setting.title" = "Configuració";
+"setting.appearance.title" = "Aparença";
+"setting.appearance.calendar.samplemonth::march" = "MARÇ";
+"setting.appearance.calendar.startDayOfWeek" = "Dia d'inici de la setmana";
+"setting.appearance.calendar.accentDay" = "Dies destacats";
+"setting.appearance.calendar.accentDay::holiday" = "Festiu";
+"setting.appearance.calendar.accentDay::saturday" = "Dissabte";
+"setting.appearance.calendar.accentDay::sunday" = "Diumenge";
+"setting.appearance.calendar.colorTheme" = "Tema de color";
+"setting.appearance.calendar.colorTheme::system" = "Sistema";
+"setting.appearance.calendar.colorTheme::light" = "Clar";
+"setting.appearance.calendar.colorTheme::dark" = "Fosc";
+"setting.appearance.calendar.underline" = "Subratllat als dies amb esdeveniments";
+"setting.appearance.event.edit::name_old" = "Edita l'esdeveniment";
+"setting.appearance.event.edit::name" = "Configuració d'esdeveniments i calendaris externs";
+"setting.appearance.day_row_height" = "Nivell de detall dels esdeveniments";
+"setting.appearance.day_row_height::small::text" = "Mínim";
+"setting.appearance.day_row_height::medium::text" = "Mitjà";
+"setting.appearance.day_row_height::large::text" = "Complet";
+"setting.appearance.event.fontSize" = "Mida de la lletra del text dels esdeveniments";
+"setting.appearance.event.show_holidayName" = "Mostra el nom del festiu";
+"setting.appearance.event.show_lunar" = "Calendari lunar";
+"setting.appearance.event._24form" = "Format de 24 hores";
+"setting.appearance.event.sample::name" = "🥗 Nom de l'esdeveniment";
+"setting.appearance.event.sample::description" = "descripció";
+"setting.appearance.event.sample::christmas" = "Nadal";
+"setting.appearance.event.sample::first" = "primer esdeveniment";
+"setting.appearance.event.sample::second" = "segon esdeveniment";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Mostra les tasques pendents";
+"setting.appearance.widget::title" = "Tema del widget";
+"setting.appearance.widget::useSystemTheme::title" = "Utilitza el tema del sistema";
+"setting.appearance.widget::useSystemTheme::background" = "Color de fons del widget";
+"setting.appearance.widget::useCustomTheme::title" = "Selecciona un color personalitzat";
+"setting.appearance.widget::sample::eventName" = "Esdeveniment del widget";
+"setting.appearance.event.boldText" = "Text en negreta";
+"setting.appearance.event.eventColor" = "Color de l'esdeveniment";
+"setting.timezone::title" = "Fus horari";
+"setting.timezone::systemTimeZone::name" = "Fus horari del sistema";
+"setting.timezone::systemTime::name" = "Hora del sistema";
+"setting.haptic::name" = "Retroalimentació hàptica";
+"setting.minimize_animation::name" = "Redueix els efectes d'animació";
+"setting.holiday.title" = "Festius";
+"setting.holiday.item::name" = "Configuració de festius";
+"setting.holiday.list::sectionTitle" = "Festius";
+"setting.holiday.country.title" = "País";
+"setting.holiday.country.current::title" = "País actual";
+"setting.holiday.country.current::placeHolder" = "Selecciona un país";
+"setting.holiday.country.changeConfirm::title" = "Canvia el país";
+"setting.holiday.country.changeConfirm::message" = "Voleu canviar el país del vostre calendari?";
+"setting.holiday.country.changed::message" = "S'ha canviat el país.";
+"setting.holiday.hide::button" = "Amaga";
+"setting.holiday.hide::confirm::title" = "Amaga el festiu";
+"setting.holiday.hide::confirm::message" = "Voleu amagar aquest festiu cada any?\nEl podreu tornar a mostrar a Configuració > Festius.";
+"setting.holiday.hidden::sectionTitle" = "Festius amagats";
+"setting.holiday.show::button" = "Mostra";
+"setting.feedback::name" = "Comentaris";
+"setting.help::name" = "Ajuda";
+"setting.share::name" = "Comparteix l'aplicació";
+"setting.write_review::name" = "Escriu una ressenya de l'aplicació";
+"setting.account.signedIn::manageAccount" = "Compte";
+"setting.account.needSignIn" = "Inicia sessió";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Gestiona la teva llista de lectura";
+"setting.section.support::name" = "Suport";
+"setting.section.app::name" = "Aplicació";
+"setting.section.suggest::name" = "Suggeriments";
+"feedback::guide:message" = "No dubteu a enviar-nos els vostres comentaris, incloent-hi informes d'errors, opinions i suggeriments sobre el servei.\nEls vostres comentaris ens ajudaran molt a millorar el servei.";
+"feedback::enterMessage::placeholder" = "Introduïu un missatge";
+"feedback::contact::placeholder" = "Adreça de correu electrònic de resposta";
+"feedback::posted:message" = "El vostre comentari s'ha registrat correctament.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Calendar";
+"external_service.expired::message" = "La integració amb %@ ha caducat. Aneu a Configuració i torneu-ho a provar.";
+"external_service::google::hidden_event" = "Amagat";
+"external_service::google::unknown_event" = "Desconegut";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Consulteu els vostres esdeveniments propers.";
+"widget.doubleMonth::name" = "Calendari + Calendari";
+"widget.eventAndMonth::name" = "Esdeveniments + Calendari";
+"widget.todayAndMonth::name" = "AVUI + Calendari";
+"widget.eventAndForesmot::name" = "Esdeveniments + Principal";
+"widget.events::name" = "Esdeveniments";
+"widget.events.noEvents::message" = "No hi ha esdeveniments.";
+"widget.events.currentTodos" = "Llista de tasques actuals";
+"widget.events.sample::check_mailbox" = "Comprova la bústia";
+"widget.events.sample::example" = "Festiu";
+"widget.events.sample::running" = "Córrer";
+"widget.events.sample::luch" = "Dinar";
+"widget.events.sample::luch_appointment" = "Cita per dinar (no es pot arribar tard)";
+"widget.events.sample::call" = "Truca a la Sara";
+"widget.events.sample::surfing" = "Surf";
+"widget.events.sample::moving" = "Dia de la mudança";
+"widget.events.sample::meeting" = "Reunió diària";
+"widget.events.sample::deposit_remain" = "Transfereix el saldo final";
+"widget.events.sample::recycle" = "Reciclatge";
+"widget.events.sample::take_medicine" = "Prendre la medicació";
+"widget.events.sample::watering" = "Regar el test";
+"widget.events.sample::june3" = "DT, 3 JUN";
+"widget.events.sample::july16" = "DG, 16 JUL";
+"widget.events.sample::july21" = "DV, 21 JUL";
+"widget.events.sample::july29" = "DS, 29 JUL";
+"widget.events.sample::aug2" = "DC, 2 AGO";
+"widget.events.sample::aug3" = "DJ, 3 AGO";
+"widget.events.sample::oct10" = "DL, 10 OCT";
+"widget.events.foremost" = "Esdeveniment principal";
+"widget.events.foremost::allFinished::message" = "Afegeix un esdeveniment que no us podeu perdre.";
+"widget.events.foremost::sample::message" = "Agafa el paraigua! ⛱️";
+"widget.events.calendar" = "Calendari";
+"widget.events.today" = "AVUI";
+"widget.events.today::sample::sunday" = "DIUMENGE";
+"widget.events.today::sample::march2024" = "MARÇ 2024";
+"total::event::count" = "%d esdeveniments";
+"todo::count" = "%d tasques";
+"schedule::count" = "%d cites";
+"widget.weeks.lastMonth" = "Mes passat";
+"widget.weeks.thisMonth" = "Aquest mes";
+"widget.weeks.nextMonth" = "Mes vinent";
+"widget.weeks.thisWeek" = "Aquesta setmana";
+"widget.weeks.twoWeek" = "2 setmanes";
+"widget.weeks.threeWeek" = "3 setmanes";
+"widget.weeks.fourWeek" = "4 setmanes";
+"widget.weeks.sample::feb" = "FEBRER";
+"widget.weeks.sample::march" = "MARÇ";
+"widget.weeks.sample::april" = "ABRIL";
+"widget.weeks.sample::hiking" = "🏔️ Excursionisme";
+"widget.weeks.sample::lunch" = "🥗 Dinar";
+"widget.weeks.sample::call" = "📞 Truca a la Sara";
+"widget.weeks.sample::holiday" = "Festiu";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Entrenament";
+"widget.weeks.sample::launch" = "🚀 Llançament";
+"widget.fail.message" = "S'ha produït un error temporal.\nProveu de tornar a executar l'aplicació.";
+"widget.next.noEvent" = "No hi ha cap esdeveniment següent.";
+"widget.next.sample" = "🔥 Entrenament";
+"widget.next.title" = "Esdeveniment següent";
+"widget.next.rect_widget::title" = "El següent esdeveniment d'avui.";
+"widget.next.title::remains" = "Els següents esdeveniments d'avui.";
+"widget.next.title::future" = "Avui i el que ve després";
+"widget.next.title::more_todos" = "%d tasques més";
+"widget.next.title::more_events" = "%d cites més";
+"widget.next.title::more_events_with_todo" = "%1$d tasques més i %2$d cites més";
+"widget.next.title::uncompleted::todo" = "%1$@ no està completada";
+"widget.next.title::uncompleted::todos" = "%1$@ i %2$d tasques pendents més";
+"widget.next.no_events_today" = "Avui no hi ha esdeveniments";
+"widget.next.no_events" = "No hi ha esdeveniments propers";
+
+"widget.dday::name" = "Dia D";
+"widget.dday::noTarget" = "Selecciona un esdeveniment";
+"widget.dday.sample::title" = "Taller";
+"widget.dday.target::repeating" = "Repetitiu";
+"widget.dday.target::registered" = "Fixat";
+"widget.dday.turn::name" = "Torn %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Aquest format d'enllaç no és compatible.\nActualitzeu l'aplicació a l'última versió.";
+
+// MARK: - force update
+
+"force_update.title" = "Cal actualitzar";
+"force_update.message" = "Hi ha disponible una versió nova.\nActualitzeu-la per continuar utilitzant l'aplicació.";
+"recommend_update.title" = "Es recomana actualitzar";
+"recommend_update.message" = "Hi ha disponible una versió nova.\nUs recomanem actualitzar-la per obtenir una millor experiència.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Escoltant…";
+"aiAgent::keyboard" = "Teclat";
+"aiAgent::voice" = "Veu";
+"aiAgent::send" = "Envia";
+"aiAgent::input::placeholder" = "En què puc ajudar-vos?";
+"aiAgent::permission::title" = "Cal accés al micròfon i al reconeixement de veu";
+"aiAgent::permission::message" = "Permeteu l'accés a Configuració, o bé escriviu-ho";
+"aiAgent::permission::keyboard" = "Escriu-ho";
+"aiAgent::permission::setting" = "Obre Configuració";
+"aiAgent::state::processing" = "Processant";
+"aiAgent::state::confirm" = "Cal confirmació";
+"aiAgent::state::confirmExpired" = "Caducat";
+"aiAgent::state::done" = "Ordre completada";
+"aiAgent::state::failed" = "Ordre fallida";
+"aiAgent::done::default" = "Fet";
+"aiAgent::failed::default" = "No s'ha pogut completar";
+"aiAgent::retry" = "Torna-ho a provar";
+"aiAgent::needSignIn::title" = "Cal iniciar sessió";
+"aiAgent::needSignIn::message" = "Inicieu sessió per utilitzar l'entrada ràpida amb IA.";
+"aiAgent::title" = "Entrada ràpida amb IA";
+"aiAgent::keyboard::stop" = "Atura";
+"aiAgent::keyboard::send" = "Envia";
+"aiAgent::stop" = "Atura";
+"aiAgent::usage" = "%@ / %@ crèdits";
+"aiAgent::plan::free" = "Gratuït";
+"aiAgent::plan::standard" = "Estàndard";
+"aiAgent::plan::lifetime" = "Vitalici";
+"aiAgent::usage::topupRemaining" = "Queden %@ crèdits addicionals";
+"aiAgent::usage::planChangeScheduled" = "Canvi al pla %2$@ el %1$@";
+"aiAgent::stop::confirm::title" = "Voleu aturar el processament?";
+"aiAgent::stop::confirm::message" = "En aturar-lo es descartarà l'ordre en curs i no es podrà reprendre.";
+"aiAgent::confirm::countdown" = "restant per aprovar";
+"aiAgent::confirm::expired::message" = "S'ha esgotat el temps. Torneu-ho a sol·licitar.";

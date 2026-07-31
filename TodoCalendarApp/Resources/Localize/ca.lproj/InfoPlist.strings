@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "Cal accés al calendari per mostrar els esdeveniments i sincronitzar-los amb l'Apple Calendar.";
+"NSMicrophoneUsageDescription" = "Cal accés al micròfon per introduir esdeveniments i tasques per veu.";
+"NSSpeechRecognitionUsageDescription" = "Cal el reconeixement de veu per convertir la vostra veu en esdeveniments i tasques.";

@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " en";
+"common::wait:message" = "Een moment geduld...";
+"common::back" = "Terug";
+"common.remove" = "Verwijderen";
+"common.confirm" = "Bevestigen";
+"common.cancel" = "Annuleren";
+"common.close" = "Sluiten";
+"common.yes" = "Ja";
+"common.no" = "Nee";
+"common.save" = "Opslaan";
+"common.info" = "Info";
+"common.search" = "Zoeken";
+"common.clear" = "Wissen";
+"common.send" = "Verzenden";
+"common.done" = "Klaar";
+"common.errorMessage" = "Er is een tijdelijke fout opgetreden.\nMeld het probleem als het aanhoudt.";
+"common.update" = "Bijwerken";
+"common.go_to_settings" = "Ga naar instellingen";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d-M, HH:mm";
+"date_form::MM_d" = "d-M";
+"date_form::MM_dd" = "dd-MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd-MM-yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd-MM-yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd-MM-yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd-MM-yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Morgen";
+
+// MARK: - event
+
+"dayname::sunday" = "Zondag";
+"dayname::monday" = "Maandag";
+"dayname::tuesday" = "Dinsdag";
+"dayname::wednesday" = "Woensdag";
+"dayname::thursday" = "Donderdag";
+"dayname::friday" = "Vrijdag";
+"dayname::saturday" = "Zaterdag";
+
+"dayname::sunday:short" = "ZO";
+"dayname::monday:short" = "MA";
+"dayname::tuesday:short" = "DI";
+"dayname::wednesday:short" = "WO";
+"dayname::thursday:short" = "DO";
+"dayname::friday:short" = "VR";
+"dayname::saturday:short" = "ZA";
+
+"dayname::sunday:very_short" = "Z";
+"dayname::monday:very_short" = "M";
+"dayname::tuesday:very_short" = "D";
+"dayname::wednesday:very_short" = "W";
+"dayname::thursday:very_short" = "D";
+"dayname::friday:very_short" = "V";
+"dayname::saturday:very_short" = "Z";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Gebeurtenissen van vandaag";
+"event_notification::todo:prefix" = "Taak";
+"event_notification::today:prefix" = "Vandaag";
+"event_notification::tomorrow:prefix" = "Morgen";
+"event_notification::allday_today" = "Vandaag de hele dag";
+"event_notification::allday_tomorrow" = "Morgen de hele dag";
+"event_notification::some_allday" = "%@ de hele dag";
+"event_notification_setting::option_title::no_notification" = "Geen meldingen";
+"event_notification_setting::option_title::at_time" = "Op het tijdstip van de gebeurtenis";
+"event_notification_setting::option_title::allday_9am" = "Om 9.00 uur die dag";
+"event_notification_setting::option_title::allday_12pm" = "Om 12.00 uur die dag";
+"event_notification_setting::option_title::customTime" = "Aangepaste tijd: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Aangepaste tijd";
+"event_notification_setting::option_title::before_minutes" = "%d minuten voor de gebeurtenis";
+"event_notification_setting::option_title::before_hours" = "%d uur voor de gebeurtenis";
+"event_notification_setting::option_title::before_days" = "%d dagen voor de gebeurtenis";
+"event_notification_setting::option_title::before_weeks" = "%d weken voor de gebeurtenis";
+"event_notification_setting::option_title::allday_9am_before_days" = "Om 9.00 uur, %d dagen van tevoren";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "Om 9.00 uur, %d weken van tevoren";
+"event_notification_setting::need_permission_message" = "Om meldingen voor gebeurtenissen te gebruiken, heb je meldingstoestemming nodig.\nGa naar de systeeminstellingen van de app en sta meldingen toe.";
+"event_notification_setting::need_permission::go_setting" = "Naar instellingen";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "Meldingstoestemming voor de app is vereist om herinneringen voor gebeurtenissen te gebruiken.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Belangrijkste gebeurtenis";
+"calendar::uncompletedTodos:title" = "Onvoltooide taken";
+"calendar::event_time::todo" = "Taak";
+"calendar::event_time::allday" = "Hele dag";
+"calendar::event_time::allday::with" = "%@ de hele dag";
+"calendar::event_time::period:some_days" = "%d dagen";
+"calendar::event_time::period:some_minutes" = "%d minuten";
+"calendar::event_time::period:some_hours" = "%d uur";
+"calendar::event_time::period:some_days:some_hours" = "%d dagen %d uur";
+"calendar::event::more_action::remove:title" = "Gebeurtenis verwijderen";
+"calendar::event::more_action::foremost_event:title" = "Belangrijkste gebeurtenis";
+"calendar::event::more_action::remove_only_thistime:message" = "Wil je alleen deze gebeurtenis verwijderen uit alle herhalende gebeurtenissen?";
+"calendar::event::more_action::remove:message" = "Wil je deze gebeurtenis verwijderen?";
+"calendar::event::more_action::mark_as_foremost" = "Wil je deze gebeurtenis markeren als je belangrijkste gebeurtenis?";
+"calendar::event::more_action::unmark_as_foremost" = "Wil je deze gebeurtenis niet langer als je belangrijkste gebeurtenis markeren?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Een herhalende afspraak kan niet als belangrijkste gebeurtenis worden gemarkeerd.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Alleen deze gebeurtenis verwijderen";
+"calendar::event::more_action:remove:item_name" = "Gebeurtenis verwijderen";
+"calendar::event::more_action:foremost:mark:item_name" = "Markeren als belangrijkste";
+"calendar::event::more_action:foremost:unmark:item_name" = "Markering als belangrijkste opheffen";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Toevoegen aan D-Day-widget";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Verwijderen uit D-Day-widget";
+"calendar::event::more_action:dday_candidate:title" = "Kandidaat voor D-Day-widget";
+"calendar::event::more_action:dday_candidate:register:message" = "Deze gebeurtenis toevoegen als kandidaat voor de D-Day-widget? Deze verschijnt boven aan de lijst wanneer je de widget bewerkt.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Deze gebeurtenis verwijderen uit de kandidaten voor de D-Day-widget?";
+"calendar::event::more_action:copy:item_name" = "Gebeurtenis kopiëren";
+"calendar::event::more_action:transform_to::schedule" = "Omzetten naar afspraak";
+"calendar::event::more_action:transform_to::todo" = "Omzetten naar taak";
+"calendar::event::more_action:edit:item_name" = "Bewerken";
+"calednar::event::add_new" = "Nieuwe gebeurtenis toevoegen";
+"calednar::event::add_new:place_holder" = "Voeg snel een nieuwe taak toe.";
+"calednar::event::skip_todo" = "Deze taak overslaan";
+"calednar::event::skip_todo_until" = "Kies een tijdstip om deze taak over te slaan";
+"calednar::event::copy" = "Gebeurtenis kopiëren";
+"calendar::move_date" = "Datum verplaatsen";
+"calednar::event::google::edit" = "Google Calendar-gebeurtenis bewerken";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Selecteer eerst een tijdstip voor de gebeurtenis.";
+"eventDetail.messages.selectValidTime" = "Selecteer een geldig tijdstip voor de gebeurtenis.";
+"eventDetail.notification.custom_eventTime:title" = "Aangepast";
+"eventDetail.notification.title" = "Meldingstijd van de gebeurtenis";
+"eventDetail.repeating.title" = "Herhaling";
+"eventDetail.repeating.notRepeating::title" = "Geen herhaling";
+"eventDetail.repeating.starttime:form" = "d MMM yyyy";
+"eventDetail.repeating.starttime:title" = "Startdatum van herhaling";
+"eventDetail.repeating.everyDay:title" = "Elke dag";
+"eventDetail.repeating.everyWeek:title" = "Elke week";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Elke %@";
+"eventDetail.repeating.everySomeWeek:title" = "Elke %d weken";
+"eventDetail.repeating.everyWeekDays:title" = "Elke werkdag";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Elke %d weken op %@";
+"eventDetail.repeating.everyMonth:title" = "Elke maand";
+"eventDetail.repeating.everyMonth_someDay:title" = "De %@ van elke maand.";
+"eventDetail.repeating.everyYear:title" = "Elk jaar";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Elk jaar (maankalender)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Elk jaar %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Elk jaar %@ (maankalender)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Alle dagen van de laatste week van elke maand";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "De eerste %@ van elke maand";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "De tweede %@ van elke maand";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "De derde %@ van elke maand";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "De vierde %@ van elke maand";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "De vijfde %@ van elke maand";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "De zesde %@ van elke maand";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "De zevende %@ van elke maand";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "De laatste %@ van elke maand";
+"eventDetail.repeating.endtime::title" = "Einde van de herhaling";
+"eventDetail.repeating.endtime::option::never" = "Nooit";
+"eventDetail.repeating.endtime::option::on" = "Op";
+"eventDetail.repeating.endtime::option::after" = "Na";
+"eventDetail.repeating.endtime::option::after_occurrences" = "keer";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "De einddatum van de herhaling moet later zijn dan de startdatum.\n(Startdatum van herhaling: %@)";
+"eventDetail.repeating::period_endcount" = "Vanaf %@, %d keer";
+
+"eventDetail.repeating.everyNDays:title" = "Elke %d dagen";
+"eventDetail.repeating.last" = "Laatste";
+"eventDetail.repeating.everyNMonths:title" = "Elke %d maanden";
+"eventDetail.repeating.everyNYears:title" = "Elke %d jaar";
+"eventDetail.repeating::endoption_until" = "tot %@";
+"eventDetail.repeating::endoption_times" = "%d keer";
+
+"eventDetail.place::placeholder" = "Locatie";
+"eventDetail.place::remove_button" = "Locatie verwijderen";
+"eventDetail.place::no_map_app" = "De geselecteerde kaarten-app is niet geïnstalleerd.";
+"eventDetail.place::select_map_app" = "Selecteer een kaarten-app";
+"eventDetail.place::always_select_this_map" = "Altijd met deze app openen.";
+
+"eventDetail.add_new_todo::message" = "Er is een nieuwe taak toegevoegd.";
+"eventDetail.add_new_schedule::message" = "Er is een nieuwe afspraak toegevoegd.";
+"eventDetail.scheduleEvent_removed::message" = "De afspraak is verwijderd.";
+"eventDetail.edit::repeating::confirm::ttile" = "Gebeurtenis bewerken";
+"eventDetail.edit::repeating::confirm::message" = "Deze gebeurtenis is een herhalende gebeurtenis.\nSelecteer het bereik van de herhalende gebeurtenis dat je wilt bewerken.";
+"eventDetail.edit::repeating::confirm::all::button" = "Alle gebeurtenissen";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Vanaf nu";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Alleen deze keer";
+"eventDetail.scheduleEvent_saved::message" = "De afspraak is opgeslagen.";
+"eventDetail.todoEvent_removed::message" = "De taak is verwijderd.";
+"eventDetail.todoEvent_saved::message" = "De taak is opgeslagen.";
+"eventDetail.cancel_edit::title" = "Gebeurtenis bewerken";
+"eventDetail.cancel_edit::message" = "Wil je deze wijzigingen verwerpen?";
+"eventDetail.cancel_edit::continue::button" = "Doorgaan";
+
+"eventDetail.edit::add_new_name::placeholder" = "Voeg een naam voor de gebeurtenis toe";
+"eventDetail.edit::clearEventTime::button" = "Tijdstip van gebeurtenis wissen";
+"eventDetail.edit::noEventTime::button" = "Geen eindtijd";
+"eventDetail.edit::memo" = "Notitie";
+"eventDetail.edit::urlPreview" = "URL-voorbeeld";
+
+"eventDetail.edit::make::case" = "Is dit een taak?";
+"eventDetail.edit::todo::case" = "Taak";
+"eventDetail.edit::schedule::case" = "Afspraak";
+"eventDetail.edit::holiday::case" = "Feestdag in %@";
+
+"eventDetail.notSupport::holiday" = "Het wijzigen van informatie wordt niet ondersteund voor feestdagen.";
+
+"eventDetail:todo:guide:message1" = "Een taak staat voor iets dat gedaan moet worden.";
+"eventDetail:todo:guide:message2" = "In tegenstelling tot gewone afspraken die met een specifiek tijdstip (of periode) op de kalender worden weergegeven, kun je bij taken aangeven of ze zijn voltooid.";
+"eventDetail:todo:guide:message3" = "Je kunt een taak toevoegen zonder een specifiek tijdstip. Zo kun je bijvoorbeeld iets vastleggen dat binnenkort moet gebeuren, maar niet meteen.";
+"eventDetail:todo:guide:process:message" = "Taken gedragen zich anders dan gewone afspraken wanneer de herhaaloptie is ingeschakeld:";
+"eventDetail:todo:guide:process:bullet1" = "Huidige of eerdere herhalende taken die nog niet zijn voltooid, worden op de kalender weergegeven.";
+"eventDetail:todo:guide:process:bullet2" = "Wanneer een taak wordt voltooid, wordt deze toegevoegd aan de lijst met voltooide items en wordt de volgende herhaling nieuw toegevoegd aan de kalender.";
+"eventDetail:todo:guide:process:bullet3" = "Als er geen volgende herhaling meer is vanwege de einddatum van de herhaling, stopt de herhalende taak.";
+"eventDetail:foremost:guide:message1" = "Markeer een gebeurtenis als belangrijkste om te benadrukken dat het je belangrijkste gebeurtenis is.\nDe belangrijkste gebeurtenis is altijd zichtbaar in de kalender en ondersteunt een aparte widget.";
+"eventDetail:foremost:guide:supports:message" = "De volgende typen gebeurtenissen kunnen als belangrijkste gebeurtenis worden ingesteld:";
+"eventDetail:foremost:guide:supports:todo" = "Taak";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Niet-herhalende afspraken";
+
+"eventDetail:isSaving:toast:message" = "Wijzigingen worden opgeslagen. Even geduld.";
+"eventDetail:hasChanges:confirm:message" = "Er zijn wijzigingen. Wil je deze verwerpen?";
+"eventDetail:hasChanges:confirm:continue" = "Doorgaan met bewerken";
+
+"eventDetail.unavailto_transform_withoutName" = "Voer een naam in om de gebeurtenis om te zetten.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Een tijdstip is vereist om om te zetten naar een afspraak.";
+"eventDetail.todoEvent::transform::schedule_title" = "Omzetten";
+"eventDetail.todoEvent::transform::schedule_message" = "Wil je deze taak omzetten naar een afspraak?";
+"eventDetail.scheduleEvent::transform::todo" = "Omzetten";
+"eventDetail.scheduleEvent::transform::todo_message" = "Wil je deze afspraak omzetten naar een taak?";
+
+"eventDetail::revert" = "Voltooiing ongedaan maken";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Bekijken in Google Calendar";
+"eventDetail::gogoleEvent::calendar" = "Agenda";
+"eventDetail::gogoleEvent::calendar::event" = "Google Calendar-gebeurtenis";
+"eventDetail::gogoleEvent::attendee::unknown" = "Onbekend";
+"eventDetail::gogoleEvent::attendees" = "Deelnemers (%d personen)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organisator";
+"eventDetail::gogoleEvent::conference::accessCode" = "Toegangscode";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Vergadercode";
+"eventDetail::gogoleEvent::conference::passCode" = "Pascode";
+"eventDetail::gogoleEvent::conference::password" = "Wachtwoord";
+"eventDetail::gogoleEvent::copy::message" = "Gekopieerd naar klembord.";
+"eventDetail::gogoleEvent::canceled::message" = "Deze gebeurtenis is geannuleerd.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Bekijken in Apple Calendar";
+"eventDetail::appleCalendarEvent::calendar::event" = "Apple Calendar-gebeurtenis";
+"eventDetail::appleCalendarEvent::attendees" = "Deelnemers (%d personen)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organisator";
+
+// MARK: - event tag
+
+"eventTag.title" = "Gebeurtenistype";
+"eventTag.list::title" = "Gebeurtenistypen";
+"eventTag.defaults.default::name" = "Standaard";
+"eventTag.defaults.holiday::name" = "Feestdag";
+"eventTag.addNew::placeholder" = "Voeg een nieuw gebeurtenistype toe";
+"eventTag.allEventTypes" = "Alle gebeurtenistypen >";
+"eventTag.remove::confirm::message" = "Wil je alleen dit gebeurtenistype verwijderen, of ook alle bijbehorende gebeurtenissen?";
+"eventTag.remove::only_tag" = "Alleen gebeurtenistype verwijderen";
+"eventTag.remove::tag_and_evets" = "Verwijderen met bijbehorende gebeurtenissen";
+"eventTag.removed::message" = "Dit gebeurtenistype is verwijderd.";
+"eventTag.removed_with_events::message" = "Dit gebeurtenistype en de bijbehorende gebeurtenissen zijn verwijderd.";
+"eventTag.color::changed::message" = "De kleur is gewijzigd.";
+"eventTag.changed::message" = "Het gebeurtenistype is gewijzigd.";
+"eventTag.makeNew::message" = "Er is een nieuw gebeurtenistype aangemaakt.";
+"eventTag.default::title" = "Standaard gebeurtenistype";
+"eventTag.default::selection::explain" = "Dit is het gebeurtenistype dat standaard wordt geselecteerd bij het aanmaken van een gebeurtenis.";
+"eventTag.externalCalendar::integrate_button" = "Agenda koppelen";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Vandaag";
+"eventList::yesterday::title" = "Gisteren";
+"eventList::thisMonth::title" = "Deze maand";
+"eventList::done_todos::title" = "Voltooide takenlijst";
+"eventList::done_todos::eventTime" = "Tijdstip van gebeurtenis:";
+"eventList::done_todos::doneAt" = "Voltooiingstijd:";
+"eventList::remove::confirm::message" = "Voltooide takenlijst verwijderen";
+"eventList::remove::confirm::button::all" = "Alle voltooide taken";
+"eventList::remove::confirm::button::olderThan1m" = "Ouder dan 1 maand";
+"eventList::remove::confirm::button::olderThan3m" = "Ouder dan 3 maanden";
+"eventList::remove::confirm::button::olderThan6m" = "Ouder dan 6 maanden";
+"eventList::remove::confirm::button::olderThan1y" = "Ouder dan 1 jaar";
+
+
+// MARK: - account
+
+"manage_account::title" = "Accountbeheer";
+"manage_account::login_method" = "Inlogmethode";
+"manage_account::email" = "E-mail";
+"manage_account::last_signedIn_at" = "Laatste inlogtijd";
+"manage_account::migration::title" = "Tijdelijke gebruikersgegevens migreren";
+"manage_account::migration::description" = "Alle gebeurtenissen die zijn aangemaakt voordat je inlogde (%d gebeurtenis(sen)) worden gemigreerd naar je account.\nGebeurtenissen die aan je account zijn gekoppeld, zijn toegankelijk vanaf elk apparaat.";
+"manage_account::migration_finished::message" = "Migratie voltooid!";
+"manage_account::signout_button::title" = "Uitloggen";
+"manage_account::sign_out::confirm::title" = "Uitloggen";
+"manage_account::sign_out::confirm::message" = "Wil je uitloggen bij je huidige account?";
+"manage_account::delete_account_button::title" = "Account verwijderen";
+"manage_account::delete_account_button::confirm:message" = "Weet je zeker dat je je account wilt verwijderen?";
+"manage_account::delete_account_button::description" = "Nadat je het verwijderen van je account hebt aangevraagd, wordt je account verwijderd.\nEenmaal verwijderd, kunnen accountgegevens niet worden hersteld.";
+"signIn::title" = "Inloggen";
+"signIn:description" = "Back-up je gebeurtenislijst en synchroniseer deze op andere iOS-apparaten\n(Ondersteunde platforms worden uitgebreid.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Gebeurtenisinstellingen";
+"event_setting::eventType" = "Gebeurtenistype";
+"event_setting::eventPeriod" = "Gebeurtenisperiode";
+"event_setting::defaultMapApp" = "Kaarten-app openen";
+"event_setting::defaultMapApp_select" = "Selecteren";
+
+"event_setting::eventSync" = "Gebeurtenissynchronisatie";
+"event_setting::eventSync::readyToSync::description" = "Synchroniseer geback-upte gebruikersgebeurtenissen.";
+"event_setting::eventSync::syncInProgress::description" = "Geback-upte gebruikersgebeurtenissen worden gesynchroniseerd...";
+"event_setting::eventSync::lastTime" = "Laatst gesynchroniseerd op: %@";
+"event_setting::eventSync::force" = "Synchronisatie forceren";
+
+"event_notification_setting::title::forAllDay" = "Hele dag";
+"event_notification_setting::title::NotforAllDay" = "Meldingstijd";
+"event_setting::external_calendar::title" = "Externe agenda's";
+"event_setting::external_calendar::connected::account" = "Verbonden: %@";
+"event_setting::external_calendar::start" = "Verbinden";
+"event_setting::external_calendar::start::message" = "Verbonden met een externe agenda.";
+"event_setting::external_calendar::stop" = "Verbinding verbreken";
+"event_setting::external_calendar::stop::message" = "De verbinding met de externe agenda is verbroken.";
+"event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
+"event_setting::apple_calendar::permission_denied::message" = "Toegang tot de agenda is geweigerd. Schakel dit in bij Instellingen om Apple Calendar te gebruiken.";
+"event_setting::apple_calendar::restricted::message" = "Toegang tot de agenda is beperkt op dit apparaat.";
+"setting.title" = "Instellingen";
+"setting.appearance.title" = "Weergave";
+"setting.appearance.calendar.samplemonth::march" = "MAART";
+"setting.appearance.calendar.startDayOfWeek" = "Eerste dag van de week";
+"setting.appearance.calendar.accentDay" = "Geaccentueerde dagen";
+"setting.appearance.calendar.accentDay::holiday" = "Feestdag";
+"setting.appearance.calendar.accentDay::saturday" = "Zaterdag";
+"setting.appearance.calendar.accentDay::sunday" = "Zondag";
+"setting.appearance.calendar.colorTheme" = "Kleurthema";
+"setting.appearance.calendar.colorTheme::system" = "Systeem";
+"setting.appearance.calendar.colorTheme::light" = "Licht";
+"setting.appearance.calendar.colorTheme::dark" = "Donker";
+"setting.appearance.calendar.underline" = "Onderstrepen op dagen met gebeurtenissen";
+"setting.appearance.event.edit::name_old" = "Gebeurtenis bewerken";
+"setting.appearance.event.edit::name" = "Gebeurtenisinstellingen en externe agenda's";
+"setting.appearance.day_row_height" = "Detailniveau van gebeurtenisweergave";
+"setting.appearance.day_row_height::small::text" = "Minimaal";
+"setting.appearance.day_row_height::medium::text" = "Gemiddeld";
+"setting.appearance.day_row_height::large::text" = "Volledig";
+"setting.appearance.event.fontSize" = "Lettergrootte van gebeurtenistekst";
+"setting.appearance.event.show_holidayName" = "Naam van feestdag tonen";
+"setting.appearance.event.show_lunar" = "Maankalender";
+"setting.appearance.event._24form" = "24-uursnotatie";
+"setting.appearance.event.sample::name" = "🥗 Naam van gebeurtenis";
+"setting.appearance.event.sample::description" = "beschrijving";
+"setting.appearance.event.sample::christmas" = "Kerstmis";
+"setting.appearance.event.sample::first" = "eerste gebeurtenis";
+"setting.appearance.event.sample::second" = "tweede gebeurtenis";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Onvoltooide taken tonen";
+"setting.appearance.widget::title" = "Widgetthema";
+"setting.appearance.widget::useSystemTheme::title" = "Systeemthema gebruiken";
+"setting.appearance.widget::useSystemTheme::background" = "Achtergrondkleur van widget";
+"setting.appearance.widget::useCustomTheme::title" = "Aangepaste kleur selecteren";
+"setting.appearance.widget::sample::eventName" = "Widgetgebeurtenis";
+"setting.appearance.event.boldText" = "Vetgedrukte tekst";
+"setting.appearance.event.eventColor" = "Kleur van gebeurtenis";
+"setting.timezone::title" = "Tijdzone";
+"setting.timezone::systemTimeZone::name" = "Systeemtijdzone";
+"setting.timezone::systemTime::name" = "Systeemtijd";
+"setting.haptic::name" = "Trilfeedback";
+"setting.minimize_animation::name" = "Animaties beperken";
+"setting.holiday.title" = "Feestdagen";
+"setting.holiday.item::name" = "Feestdaginstellingen";
+"setting.holiday.list::sectionTitle" = "Feestdagen";
+"setting.holiday.country.title" = "Land";
+"setting.holiday.country.current::title" = "Huidig land";
+"setting.holiday.country.current::placeHolder" = "Selecteer land";
+"setting.holiday.country.changeConfirm::title" = "Land wijzigen";
+"setting.holiday.country.changeConfirm::message" = "Wil je het land van je kalender wijzigen?";
+"setting.holiday.country.changed::message" = "Het land is gewijzigd.";
+"setting.holiday.hide::button" = "Verbergen";
+"setting.holiday.hide::confirm::title" = "Feestdag verbergen";
+"setting.holiday.hide::confirm::message" = "Deze feestdag elk jaar verbergen?\nJe kunt hem weer tonen via Instellingen > Feestdagen.";
+"setting.holiday.hidden::sectionTitle" = "Verborgen feestdagen";
+"setting.holiday.show::button" = "Tonen";
+"setting.feedback::name" = "Feedback";
+"setting.help::name" = "Help";
+"setting.share::name" = "App delen";
+"setting.write_review::name" = "Schrijf een app-recensie";
+"setting.account.signedIn::manageAccount" = "Account";
+"setting.account.needSignIn" = "Inloggen";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Beheer je leeslijst";
+"setting.section.support::name" = "Ondersteuning";
+"setting.section.app::name" = "App";
+"setting.section.suggest::name" = "Suggesties";
+"feedback::guide:message" = "Laat gerust feedback achter, zoals bugmeldingen, opmerkingen en suggesties voor de dienst.\nJe feedback helpt ons enorm om onze service te verbeteren.";
+"feedback::enterMessage::placeholder" = "Voer een bericht in";
+"feedback::contact::placeholder" = "E-mailadres voor antwoord";
+"feedback::posted:message" = "Je feedback is succesvol geregistreerd.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Calendar";
+"external_service.expired::message" = "De integratie met %@ is verlopen. Ga naar Instellingen en probeer het opnieuw.";
+"external_service::google::hidden_event" = "Verborgen";
+"external_service::google::unknown_event" = "Onbekend";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Bekijk je aankomende gebeurtenissen.";
+"widget.doubleMonth::name" = "Kalender + Kalender";
+"widget.eventAndMonth::name" = "Gebeurtenissen + Kalender";
+"widget.todayAndMonth::name" = "VANDAAG + Kalender";
+"widget.eventAndForesmot::name" = "Gebeurtenissen + Belangrijkste";
+"widget.events::name" = "Gebeurtenissen";
+"widget.events.noEvents::message" = "Er zijn geen gebeurtenissen.";
+"widget.events.currentTodos" = "Huidige takenlijst";
+"widget.events.sample::check_mailbox" = "Brievenbus controleren";
+"widget.events.sample::example" = "Feestdag";
+"widget.events.sample::running" = "Hardlopen";
+"widget.events.sample::luch" = "Lunch";
+"widget.events.sample::luch_appointment" = "Lunchafspraak (mag niet te laat zijn)";
+"widget.events.sample::call" = "Sara bellen";
+"widget.events.sample::surfing" = "Surfen";
+"widget.events.sample::moving" = "Verhuisdag";
+"widget.events.sample::meeting" = "Dagelijkse vergadering";
+"widget.events.sample::deposit_remain" = "Het resterende bedrag overmaken";
+"widget.events.sample::recycle" = "Recyclen";
+"widget.events.sample::take_medicine" = "Medicijnen innemen";
+"widget.events.sample::watering" = "Bloempot water geven";
+"widget.events.sample::june3" = "DI 3 JUN";
+"widget.events.sample::july16" = "ZO 16 JUL";
+"widget.events.sample::july21" = "VR 21 JUL";
+"widget.events.sample::july29" = "ZA 29 JUL";
+"widget.events.sample::aug2" = "WO 2 AUG";
+"widget.events.sample::aug3" = "DO 3 AUG";
+"widget.events.sample::oct10" = "MA 10 OKT";
+"widget.events.foremost" = "Belangrijkste gebeurtenis";
+"widget.events.foremost::allFinished::message" = "Voeg een onmisbare gebeurtenis toe.";
+"widget.events.foremost::sample::message" = "Neem een paraplu mee! ⛱️";
+"widget.events.calendar" = "Kalender";
+"widget.events.today" = "VANDAAG";
+"widget.events.today::sample::sunday" = "ZONDAG";
+"widget.events.today::sample::march2024" = "MAART 2024";
+"total::event::count" = "%d gebeurtenissen";
+"todo::count" = "%d taken";
+"schedule::count" = "%d afspraken";
+"widget.weeks.lastMonth" = "Vorige maand";
+"widget.weeks.thisMonth" = "Deze maand";
+"widget.weeks.nextMonth" = "Volgende maand";
+"widget.weeks.thisWeek" = "Deze week";
+"widget.weeks.twoWeek" = "2 weken";
+"widget.weeks.threeWeek" = "3 weken";
+"widget.weeks.fourWeek" = "4 weken";
+"widget.weeks.sample::feb" = "FEBRUARI";
+"widget.weeks.sample::march" = "MAART";
+"widget.weeks.sample::april" = "APRIL";
+"widget.weeks.sample::hiking" = "🏔️ Wandelen";
+"widget.weeks.sample::lunch" = "🥗 Lunch";
+"widget.weeks.sample::call" = "📞 Sara bellen";
+"widget.weeks.sample::holiday" = "Feestdag";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Sporten";
+"widget.weeks.sample::launch" = "🚀 Lancering";
+"widget.fail.message" = "Er is een tijdelijke fout opgetreden.\nProbeer de app opnieuw te openen.";
+"widget.next.noEvent" = "Geen volgende gebeurtenis.";
+"widget.next.sample" = "🔥 Sporten";
+"widget.next.title" = "Volgende gebeurtenis";
+"widget.next.rect_widget::title" = "Volgende gebeurtenis van vandaag.";
+"widget.next.title::remains" = "Volgende gebeurtenissen van vandaag.";
+"widget.next.title::future" = "Vandaag en wat komt hierna";
+"widget.next.title::more_todos" = "Nog %d taken";
+"widget.next.title::more_events" = "Nog %d afspraken";
+"widget.next.title::more_events_with_todo" = "Nog %1$d taken en %2$d afspraken";
+"widget.next.title::uncompleted::todo" = "%1$@ is niet voltooid";
+"widget.next.title::uncompleted::todos" = "%1$@ en nog %2$d onvoltooide taken";
+"widget.next.no_events_today" = "Geen gebeurtenissen vandaag";
+"widget.next.no_events" = "Geen aankomende gebeurtenissen";
+
+"widget.dday::name" = "D-Day";
+"widget.dday::noTarget" = "Selecteer een gebeurtenis";
+"widget.dday.sample::title" = "Workshop";
+"widget.dday.target::repeating" = "Herhalend";
+"widget.dday.target::registered" = "Vastgezet";
+"widget.dday.turn::name" = "Beurt %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Dit linkformaat wordt niet ondersteund.\nWerk de app bij naar de nieuwste versie.";
+
+// MARK: - force update
+
+"force_update.title" = "Update vereist";
+"force_update.message" = "Er is een nieuwe versie beschikbaar.\nWerk bij om de app te blijven gebruiken.";
+"recommend_update.title" = "Update aanbevolen";
+"recommend_update.message" = "Er is een nieuwe versie beschikbaar.\nWe raden aan om bij te werken voor een betere ervaring.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Luisteren…";
+"aiAgent::keyboard" = "Toetsenbord";
+"aiAgent::voice" = "Spraak";
+"aiAgent::send" = "Verzenden";
+"aiAgent::input::placeholder" = "Waarmee kan ik helpen?";
+"aiAgent::permission::title" = "Toegang tot microfoon en spraakherkenning vereist";
+"aiAgent::permission::message" = "Sta toegang toe in Instellingen, of typ in plaats daarvan";
+"aiAgent::permission::keyboard" = "In plaats daarvan typen";
+"aiAgent::permission::setting" = "Instellingen openen";
+"aiAgent::state::processing" = "Verwerken";
+"aiAgent::state::confirm" = "Bevestiging vereist";
+"aiAgent::state::confirmExpired" = "Verlopen";
+"aiAgent::state::done" = "Opdracht voltooid";
+"aiAgent::state::failed" = "Opdracht mislukt";
+"aiAgent::done::default" = "Klaar";
+"aiAgent::failed::default" = "Kon dit niet voltooien";
+"aiAgent::retry" = "Opnieuw proberen";
+"aiAgent::needSignIn::title" = "Inloggen vereist";
+"aiAgent::needSignIn::message" = "Log in om AI-snelinvoer te gebruiken.";
+"aiAgent::title" = "AI-snelinvoer";
+"aiAgent::keyboard::stop" = "Stoppen";
+"aiAgent::keyboard::send" = "Verzenden";
+"aiAgent::stop" = "Stoppen";
+"aiAgent::usage" = "%@ / %@ credits";
+"aiAgent::plan::free" = "Gratis";
+"aiAgent::plan::standard" = "Standaard";
+"aiAgent::plan::lifetime" = "Levenslang";
+"aiAgent::usage::topupRemaining" = "Nog %@ extra credits over";
+"aiAgent::usage::planChangeScheduled" = "Overstap naar het %2$@-plan op %1$@";
+"aiAgent::stop::confirm::title" = "Verwerking stoppen?";
+"aiAgent::stop::confirm::message" = "Stoppen verwerpt de lopende opdracht, en deze kan niet worden hervat.";
+"aiAgent::confirm::countdown" = "resterend om goed te keuren";
+"aiAgent::confirm::expired::message" = "Tijd verlopen. Vraag het opnieuw aan.";

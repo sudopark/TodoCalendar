@@ -1,0 +1,562 @@
+/* 
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " y";
+"common::wait:message" = "Espera, por favor...";
+"common::back" = "Atrás";
+"common.remove" = "Eliminar";
+"common.confirm" = "Confirmar";
+"common.cancel" = "Cancelar";
+"common.close" = "Cerrar";
+"common.yes" = "Sí";
+"common.no" = "No";
+"common.save" = "Guardar";
+"common.info" = "Información";
+"common.search" = "Buscar";
+"common.clear" = "Borrar";
+"common.send" = "Enviar";
+"common.done" = "Listo";
+"common.errorMessage" = "Se produjo un error temporal.\nInforma si el problema persiste.";
+"common.update" = "Actualizar";
+"common.go_to_settings" = "Ir a Ajustes";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d/M, HH:mm";
+"date_form::MM_d" = "d/M";
+"date_form::MM_dd" = "dd/MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd/MM/yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd/MM/yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd/MM/yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd/MM/yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Mañana";
+ 
+// MARK: - event
+
+"dayname::sunday" = "Domingo";
+"dayname::monday" = "Lunes";
+"dayname::tuesday" = "Martes";
+"dayname::wednesday" = "Miércoles";
+"dayname::thursday" = "Jueves";
+"dayname::friday" = "Viernes";
+"dayname::saturday" = "Sábado";
+
+"dayname::sunday:short" = "DOM";
+"dayname::monday:short" = "LUN";
+"dayname::tuesday:short" = "MAR";
+"dayname::wednesday:short" = "MIÉ";
+"dayname::thursday:short" = "JUE";
+"dayname::friday:short" = "VIE";
+"dayname::saturday:short" = "SÁB";
+
+"dayname::sunday:very_short" = "D";
+"dayname::monday:very_short" = "L";
+"dayname::tuesday:very_short" = "M";
+"dayname::wednesday:very_short" = "M";
+"dayname::thursday:very_short" = "J";
+"dayname::friday:very_short" = "V";
+"dayname::saturday:very_short" = "S";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Eventos de hoy";
+"event_notification::todo:prefix" = "Tarea";
+"event_notification::today:prefix" = "Hoy";
+"event_notification::tomorrow:prefix" = "Mañana";
+"event_notification::allday_today" = "Todo el día de hoy";
+"event_notification::allday_tomorrow" = "Todo el día de mañana";
+"event_notification::some_allday" = "%@ todo el día";
+"event_notification_setting::option_title::no_notification" = "Sin notificaciones";
+"event_notification_setting::option_title::at_time" = "En el momento del evento";
+"event_notification_setting::option_title::allday_9am" = "A las 9:00 a. m. de ese día";
+"event_notification_setting::option_title::allday_12pm" = "Al mediodía de ese día";
+"event_notification_setting::option_title::customTime" = "Hora personalizada: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Hora personalizada";
+"event_notification_setting::option_title::before_minutes" = "%d minuto(s) antes del evento";
+"event_notification_setting::option_title::before_hours" = "%d hora(s) antes del evento";
+"event_notification_setting::option_title::before_days" = "%d día(s) antes del evento";
+"event_notification_setting::option_title::before_weeks" = "%d semana(s) antes del evento";
+"event_notification_setting::option_title::allday_9am_before_days" = "A las 9:00 a. m., %d día(s) antes";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "A las 9:00 a. m., %d semana(s) antes";
+"event_notification_setting::need_permission_message" = "Para usar la función de notificación de eventos, necesitas el permiso de notificaciones.\nVe a los Ajustes del sistema y permite las notificaciones.";
+"event_notification_setting::need_permission::go_setting" = "Ir a ajustes";
+"event_notification_setting::need_permission_title" = "Información";
+"event_notification_setting::permission_denied" = "Se requiere el permiso de notificaciones de la app para usar la función de recordatorio de eventos.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Evento principal";
+"calendar::uncompletedTodos:title" = "Tareas pendientes";
+"calendar::event_time::todo" = "Tarea";
+"calendar::event_time::allday" = "Todo el día";
+"calendar::event_time::allday::with" = "%@ todo el día";
+"calendar::event_time::period:some_days" = "%d días";
+"calendar::event_time::period:some_minutes" = "%d minutos";
+"calendar::event_time::period:some_hours" = "%d horas";
+"calendar::event_time::period:some_days:some_hours" = "%d días %d horas";
+"calendar::event::more_action::remove:title" = "Eliminar evento";
+"calendar::event::more_action::foremost_event:title" = "Evento principal";
+"calendar::event::more_action::remove_only_thistime:message" = "¿Quieres eliminar solo este evento de toda la serie de eventos repetidos?";
+"calendar::event::more_action::remove:message" = "¿Quieres eliminar este evento?";
+"calendar::event::more_action::mark_as_foremost" = "¿Quieres marcar este evento como tu evento más importante?";
+"calendar::event::more_action::unmark_as_foremost" = "¿Quieres desmarcar este evento como tu evento más importante?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Un evento de calendario repetido no se puede marcar como el evento más importante.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Eliminar solo este evento";
+"calendar::event::more_action:remove:item_name" = "Eliminar evento";
+"calendar::event::more_action:foremost:mark:item_name" = "Marcar como principal";
+"calendar::event::more_action:foremost:unmark:item_name" = "Desmarcar como principal";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Añadir al widget de Día D";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Quitar del widget de Día D";
+"calendar::event::more_action:dday_candidate:title" = "Candidato al widget de Día D";
+"calendar::event::more_action:dday_candidate:register:message" = "¿Añadir este evento como candidato al widget de Día D? Aparecerá al principio de la lista cuando edites el widget.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "¿Quitar este evento de los candidatos al widget de Día D?";
+"calendar::event::more_action:copy:item_name" = "Copiar evento";
+"calendar::event::more_action:transform_to::schedule" = "Convertir en evento de calendario";
+"calendar::event::more_action:transform_to::todo" = "Convertir en tarea";
+"calendar::event::more_action:edit:item_name" = "Editar";
+"calednar::event::add_new" = "Agregar un evento nuevo";
+"calednar::event::add_new:place_holder" = "Agrega una tarea nueva rápidamente.";
+"calednar::event::skip_todo" = "Omitir esta tarea";
+"calednar::event::skip_todo_until" = "Selecciona una fecha para omitir esta tarea";
+"calednar::event::copy" = "Copiar evento";
+"calendar::move_date" = "Mover fecha";
+"calednar::event::google::edit" = "Editar evento de Google Calendar";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Selecciona primero una hora para el evento.";
+"eventDetail.messages.selectValidTime" = "Selecciona una hora de evento válida.";
+"eventDetail.notification.custom_eventTime:title" = "Personalizado";
+"eventDetail.notification.title" = "Hora de notificación del evento";
+"eventDetail.repeating.title" = "Repetición";
+"eventDetail.repeating.notRepeating::title" = "No se repite";
+"eventDetail.repeating.starttime:form" = "d MMM yyyy";
+"eventDetail.repeating.starttime:title" = "Fecha de inicio de la repetición";
+"eventDetail.repeating.everyDay:title" = "Todos los días";
+"eventDetail.repeating.everyWeek:title" = "Cada semana";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Cada %@";
+"eventDetail.repeating.everySomeWeek:title" = "Cada %d semanas";
+"eventDetail.repeating.everyWeekDays:title" = "Cada día laborable";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Cada %d semanas %@";
+"eventDetail.repeating.everyMonth:title" = "Cada mes";
+"eventDetail.repeating.everyMonth_someDay:title" = "El %@ de cada mes.";
+"eventDetail.repeating.everyYear:title" = "Cada año";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Cada año (calendario lunar)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Cada año %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Cada año %@ (calendario lunar)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Todos los días de la última semana de cada mes";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "El primer %@ de cada mes";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "El segundo %@ de cada mes";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "El tercer %@ de cada mes";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "El cuarto %@ de cada mes";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "El quinto %@ de cada mes";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "El sexto %@ de cada mes";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "El séptimo %@ de cada mes";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "El último %@ de cada mes";
+"eventDetail.repeating.endtime::title" = "Fin de la repetición";
+"eventDetail.repeating.endtime::option::never" = "Nunca";
+"eventDetail.repeating.endtime::option::on" = "El";
+"eventDetail.repeating.endtime::option::after" = "Después de";
+"eventDetail.repeating.endtime::option::after_occurrences" = "repeticiones";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "La fecha de fin de la repetición debe ser posterior a la fecha de inicio.\n(Fecha de inicio de la repetición: %@)";
+"eventDetail.repeating::period_endcount" = "A partir del %@, %d veces";
+
+"eventDetail.repeating.everyNDays:title" = "Cada %d días";
+"eventDetail.repeating.last" = "Último";
+"eventDetail.repeating.everyNMonths:title" = "Cada %d meses";
+"eventDetail.repeating.everyNYears:title" = "Cada %d años";
+"eventDetail.repeating::endoption_until" = "hasta %@";
+"eventDetail.repeating::endoption_times" = "%d vez(veces)";
+
+"eventDetail.place::placeholder" = "Ubicación";
+"eventDetail.place::remove_button" = "Eliminar la ubicación";
+"eventDetail.place::no_map_app" = "La app de mapas seleccionada no está instalada.";
+"eventDetail.place::select_map_app" = "Selecciona un mapa";
+"eventDetail.place::always_select_this_map" = "Abrir siempre con esta app.";
+
+"eventDetail.add_new_todo::message" = "Se agregó una tarea nueva.";
+"eventDetail.add_new_schedule::message" = "Se agregó un evento nuevo.";
+"eventDetail.scheduleEvent_removed::message" = "Se eliminó el evento.";
+"eventDetail.edit::repeating::confirm::ttile" = "Editar evento";
+"eventDetail.edit::repeating::confirm::message" = "Este es un evento repetido.\nSelecciona el alcance del evento repetido que quieres editar.";
+"eventDetail.edit::repeating::confirm::all::button" = "Todos los eventos";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Desde este momento";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Solo esta vez";
+"eventDetail.scheduleEvent_saved::message" = "Se guardó el evento.";
+"eventDetail.todoEvent_removed::message" = "Se eliminó la tarea.";
+"eventDetail.todoEvent_saved::message" = "Se guardó la tarea.";
+"eventDetail.cancel_edit::title" = "Editar evento";
+"eventDetail.cancel_edit::message" = "¿Quieres descartar estos cambios?";
+"eventDetail.cancel_edit::continue::button" = "Continuar";
+
+"eventDetail.edit::add_new_name::placeholder" = "Agrega un nombre de evento";
+"eventDetail.edit::clearEventTime::button" = "Borrar la hora del evento";
+"eventDetail.edit::noEventTime::button" = "Sin hora de fin";
+"eventDetail.edit::memo" = "Nota";
+"eventDetail.edit::urlPreview" = "Vista previa de URL";
+
+"eventDetail.edit::make::case" = "¿Es una tarea?";
+"eventDetail.edit::todo::case" = "Tarea";
+"eventDetail.edit::schedule::case" = "Evento de calendario";
+"eventDetail.edit::holiday::case" = "Día festivo en %@";
+
+"eventDetail.notSupport::holiday" = "La función de modificación de información no está disponible para los días festivos.";
+
+"eventDetail:todo:guide:message1" = "Una tarea representa algo que debes hacer.";
+"eventDetail:todo:guide:message2" = "A diferencia de los eventos de calendario normales, que se muestran con una hora (o período) específico, las tareas permiten marcar si se han completado.";
+"eventDetail:todo:guide:message3" = "Puedes agregar una tarea sin especificar información de hora. Por ejemplo, puedes registrar algo que debes hacer pronto, pero no de inmediato.";
+"eventDetail:todo:guide:process:message" = "Las tareas se comportan de forma distinta a los eventos de calendario normales cuando se activa la opción de repetición:";
+"eventDetail:todo:guide:process:bullet1" = "Las tareas repetidas actuales o pasadas que aún no se han completado se muestran en el calendario.";
+"eventDetail:todo:guide:process:bullet2" = "Cuando se completa una tarea, se agrega a la lista de eventos completados y se crea la siguiente repetición en el calendario.";
+"eventDetail:todo:guide:process:bullet3" = "Si no hay una siguiente repetición debido a la fecha de fin de la repetición, la tarea repetida finaliza.";
+"eventDetail:foremost:guide:message1" = "Marca un evento como principal para destacar que es tu evento más importante.\nEl evento principal siempre es visible en el calendario y tiene un widget propio.";
+"eventDetail:foremost:guide:supports:message" = "Los siguientes tipos de evento se pueden marcar como el evento principal:";
+"eventDetail:foremost:guide:supports:todo" = "Tarea";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Eventos de calendario que no se repiten";
+
+"eventDetail:isSaving:toast:message" = "Guardando cambios. Espera un momento.";
+"eventDetail:hasChanges:confirm:message" = "Hay cambios sin guardar. ¿Quieres descartarlos?";
+"eventDetail:hasChanges:confirm:continue" = "Seguir editando";
+
+"eventDetail.unavailto_transform_withoutName" = "Ingresa un nombre para convertir el evento.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Se necesita información de hora para convertir en un evento de calendario.";
+"eventDetail.todoEvent::transform::schedule_title" = "Convertir";
+"eventDetail.todoEvent::transform::schedule_message" = "¿Quieres convertir esta tarea en un evento de calendario?";
+"eventDetail.scheduleEvent::transform::todo" = "Convertir";
+"eventDetail.scheduleEvent::transform::todo_message" = "¿Quieres convertir este evento de calendario en una tarea?";
+
+"eventDetail::revert" = "Deshacer finalización";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Ver en Google Calendar";
+"eventDetail::gogoleEvent::calendar" = "Calendario";
+"eventDetail::gogoleEvent::calendar::event" = "Evento de Google Calendar";
+"eventDetail::gogoleEvent::attendee::unknown" = "Desconocido";
+"eventDetail::gogoleEvent::attendees" = "Invitados (%d personas)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organizador";
+"eventDetail::gogoleEvent::conference::accessCode" = "Código de acceso";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Código de la reunión";
+"eventDetail::gogoleEvent::conference::passCode" = "Código PIN";
+"eventDetail::gogoleEvent::conference::password" = "Contraseña";
+"eventDetail::gogoleEvent::copy::message" = "Se copió al portapapeles.";
+"eventDetail::gogoleEvent::canceled::message" = "Este evento se canceló.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Ver en Apple Calendar";
+"eventDetail::appleCalendarEvent::calendar::event" = "Evento de Apple Calendar";
+"eventDetail::appleCalendarEvent::attendees" = "Invitados (%d personas)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organizador";
+
+// MARK: - event tag
+
+"eventTag.title" = "Tipo de evento";
+"eventTag.list::title" = "Tipos de evento";
+"eventTag.defaults.default::name" = "Predeterminado";
+"eventTag.defaults.holiday::name" = "Día festivo";
+"eventTag.addNew::placeholder" = "Agrega un tipo de evento nuevo";
+"eventTag.allEventTypes" = "Todos los tipos de evento >";
+"eventTag.remove::confirm::message" = "¿Quieres eliminar este tipo de evento? ¿O prefieres eliminar también los eventos relacionados?";
+"eventTag.remove::only_tag" = "Eliminar solo el tipo de evento";
+"eventTag.remove::tag_and_evets" = "Eliminar con los eventos relacionados";
+"eventTag.removed::message" = "Se eliminó este tipo de evento.";
+"eventTag.removed_with_events::message" = "Se eliminaron este tipo de evento y los eventos relacionados.";
+"eventTag.color::changed::message" = "Se cambió el color.";
+"eventTag.changed::message" = "Se modificó el tipo de evento.";
+"eventTag.makeNew::message" = "Se creó un tipo de evento nuevo.";
+"eventTag.default::title" = "Tipo de evento predeterminado";
+"eventTag.default::selection::explain" = "Este es el tipo de evento que se seleccionará de forma predeterminada al crear un evento.";
+"eventTag.externalCalendar::integrate_button" = "Conectar calendario";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Hoy";
+"eventList::yesterday::title" = "Ayer";
+"eventList::thisMonth::title" = "Este mes";
+"eventList::done_todos::title" = "Lista de tareas completadas";
+"eventList::done_todos::eventTime" = "Hora del evento:";
+"eventList::done_todos::doneAt" = "Hora de finalización:";
+"eventList::remove::confirm::message" = "Eliminar la lista de tareas completadas";
+"eventList::remove::confirm::button::all" = "Todas las tareas completadas";
+"eventList::remove::confirm::button::olderThan1m" = "Más antiguas de 1 mes";
+"eventList::remove::confirm::button::olderThan3m" = "Más antiguas de 3 meses";
+"eventList::remove::confirm::button::olderThan6m" = "Más antiguas de 6 meses";
+"eventList::remove::confirm::button::olderThan1y" = "Más antiguas de 1 año";
+
+
+// MARK: - account
+
+"manage_account::title" = "Gestión de cuenta";
+"manage_account::login_method" = "Método de inicio de sesión";
+"manage_account::email" = "Correo electrónico";
+"manage_account::last_signedIn_at" = "Última hora de inicio de sesión";
+"manage_account::migration::title" = "Migrar datos de usuario temporales";
+"manage_account::migration::description" = "Todos los eventos creados antes de iniciar sesión (%d evento(s)) se están migrando a tu cuenta.\nLos eventos vinculados a tu cuenta se pueden ver desde cualquier dispositivo.";
+"manage_account::migration_finished::message" = "¡La migración se completó!";
+"manage_account::signout_button::title" = "Cerrar sesión";
+"manage_account::sign_out::confirm::title" = "Cerrar sesión";
+"manage_account::sign_out::confirm::message" = "¿Quieres cerrar sesión de tu cuenta actual?";
+"manage_account::delete_account_button::title" = "Eliminar cuenta";
+"manage_account::delete_account_button::confirm:message" = "¿Seguro que quieres eliminar tu cuenta?";
+"manage_account::delete_account_button::description" = "Después de solicitar la eliminación, tu cuenta será eliminada.\nUna vez eliminada, la información de la cuenta no se puede recuperar.";
+"signIn::title" = "Iniciar sesión";
+"signIn:description" = "Haz una copia de seguridad de tu lista de eventos y sincronízala en otros dispositivos iOS\n(Se ampliarán las plataformas compatibles).";
+
+
+// MARK: - setting
+"event_setting::title" = "Ajustes de eventos";
+"event_setting::eventType" = "Tipo de evento";
+"event_setting::eventPeriod" = "Período del evento";
+"event_setting::defaultMapApp" = "Abrir la app de mapas";
+"event_setting::defaultMapApp_select" = "Seleccionar";
+
+"event_setting::eventSync" = "Sincronización de eventos";
+"event_setting::eventSync::readyToSync::description" = "Sincroniza los eventos respaldados del usuario.";
+"event_setting::eventSync::syncInProgress::description" = "Sincronizando los eventos respaldados del usuario...";
+"event_setting::eventSync::lastTime" = "Última sincronización de datos: %@";
+"event_setting::eventSync::force" = "Forzar sincronización";
+
+"event_notification_setting::title::forAllDay" = "Todo el día";
+"event_notification_setting::title::NotforAllDay" = "Hora de la notificación";
+"event_setting::external_calendar::title" = "Calendarios externos";
+"event_setting::external_calendar::connected::account" = "Conectado: %@";
+"event_setting::external_calendar::start" = "Conectar";
+"event_setting::external_calendar::start::message" = "Se conectó a un calendario externo.";
+"event_setting::external_calendar::stop" = "Desconectar";
+"event_setting::external_calendar::stop::message" = "Se desconectó el calendario externo.";
+"event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
+"event_setting::apple_calendar::permission_denied::message" = "Se denegó el acceso al calendario. Actívalo en Ajustes para usar Apple Calendar.";
+"event_setting::apple_calendar::restricted::message" = "El acceso al calendario está restringido en este dispositivo.";
+"setting.title" = "Ajustes";
+"setting.appearance.title" = "Apariencia";
+"setting.appearance.calendar.samplemonth::march" = "MARZO";
+"setting.appearance.calendar.startDayOfWeek" = "Primer día de la semana";
+"setting.appearance.calendar.accentDay" = "Días destacados";
+"setting.appearance.calendar.accentDay::holiday" = "Día festivo";
+"setting.appearance.calendar.accentDay::saturday" = "Sábado";
+"setting.appearance.calendar.accentDay::sunday" = "Domingo";
+"setting.appearance.calendar.colorTheme" = "Tema de color";
+"setting.appearance.calendar.colorTheme::system" = "Sistema";
+"setting.appearance.calendar.colorTheme::light" = "Claro";
+"setting.appearance.calendar.colorTheme::dark" = "Oscuro";
+"setting.appearance.calendar.underline" = "Subrayar los días con eventos";
+"setting.appearance.event.edit::name_old" = "Editar evento";
+"setting.appearance.event.edit::name" = "Ajustes de eventos y calendarios externos";
+"setting.appearance.day_row_height" = "Nivel de detalle de los eventos";
+"setting.appearance.day_row_height::small::text" = "Mínimo";
+"setting.appearance.day_row_height::medium::text" = "Medio";
+"setting.appearance.day_row_height::large::text" = "Completo";
+"setting.appearance.event.fontSize" = "Tamaño de fuente del evento";
+"setting.appearance.event.show_holidayName" = "Mostrar el nombre del día festivo";
+"setting.appearance.event.show_lunar" = "Calendario lunar";
+"setting.appearance.event._24form" = "Formato de 24 horas";
+"setting.appearance.event.sample::name" = "🥗 Nombre del evento";
+"setting.appearance.event.sample::description" = "descripción";
+"setting.appearance.event.sample::christmas" = "Navidad";
+"setting.appearance.event.sample::first" = "primer evento";
+"setting.appearance.event.sample::second" = "segundo evento";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Mostrar tareas pendientes";
+"setting.appearance.widget::title" = "Tema del widget";
+"setting.appearance.widget::useSystemTheme::title" = "Usar tema del sistema";
+"setting.appearance.widget::useSystemTheme::background" = "Color de fondo del widget";
+"setting.appearance.widget::useCustomTheme::title" = "Seleccionar color personalizado";
+"setting.appearance.widget::sample::eventName" = "Evento del widget";
+"setting.appearance.event.boldText" = "Texto en negrita";
+"setting.appearance.event.eventColor" = "Color del evento";
+"setting.timezone::title" = "Zona horaria";
+"setting.timezone::systemTimeZone::name" = "Zona horaria del sistema";
+"setting.timezone::systemTime::name" = "Hora del sistema";
+"setting.haptic::name" = "Retroalimentación háptica";
+"setting.minimize_animation::name" = "Minimizar efectos de animación";
+"setting.holiday.title" = "Días festivos";
+"setting.holiday.item::name" = "Ajustes de días festivos";
+"setting.holiday.list::sectionTitle" = "Días festivos";
+"setting.holiday.country.title" = "País";
+"setting.holiday.country.current::title" = "País actual";
+"setting.holiday.country.current::placeHolder" = "Seleccionar país";
+"setting.holiday.country.changeConfirm::title" = "Cambiar país";
+"setting.holiday.country.changeConfirm::message" = "¿Quieres cambiar el país de tu calendario?";
+"setting.holiday.country.changed::message" = "Se cambió el país.";
+"setting.holiday.hide::button" = "Ocultar";
+"setting.holiday.hide::confirm::title" = "Ocultar día festivo";
+"setting.holiday.hide::confirm::message" = "¿Ocultar este día festivo todos los años?\nPuedes volver a mostrarlo en Ajustes > Días festivos.";
+"setting.holiday.hidden::sectionTitle" = "Días festivos ocultos";
+"setting.holiday.show::button" = "Mostrar";
+"setting.feedback::name" = "Comentarios";
+"setting.help::name" = "Ayuda";
+"setting.share::name" = "Compartir la app";
+"setting.write_review::name" = "Escribir una reseña de la app";
+"setting.account.signedIn::manageAccount" = "Cuenta";
+"setting.account.needSignIn" = "Iniciar sesión";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Gestiona tu lista de lectura";
+"setting.section.support::name" = "Soporte";
+"setting.section.app::name" = "App";
+"setting.section.suggest::name" = "Sugerencias";
+"feedback::guide:message" = "No dudes en enviarnos tus comentarios, incluidos informes de errores, opiniones y sugerencias sobre el servicio.\nTus comentarios nos ayudarán mucho a mejorar nuestro servicio.";
+"feedback::enterMessage::placeholder" = "Escribe un mensaje";
+"feedback::contact::placeholder" = "Correo electrónico de contacto";
+"feedback::posted:message" = "Tus comentarios se registraron correctamente.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Calendar";
+"external_service.expired::message" = "La integración con %@ venció. Ve a Ajustes e inténtalo de nuevo.";
+"external_service::google::hidden_event" = "Oculto";
+"external_service::google::unknown_event" = "Desconocido";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Consulta tus próximos eventos.";
+"widget.doubleMonth::name" = "Calendario + Calendario";
+"widget.eventAndMonth::name" = "Eventos + Calendario";
+"widget.todayAndMonth::name" = "HOY + Calendario";
+"widget.eventAndForesmot::name" = "Eventos + Principal";
+"widget.events::name" = "Eventos";
+"widget.events.noEvents::message" = "No hay eventos.";
+"widget.events.currentTodos" = "Lista de tareas actuales";
+"widget.events.sample::check_mailbox" = "Revisar el correo";
+"widget.events.sample::example" = "Día festivo";
+"widget.events.sample::running" = "Correr";
+"widget.events.sample::luch" = "Almuerzo";
+"widget.events.sample::luch_appointment" = "Cita para almorzar (no llegar tarde)";
+"widget.events.sample::call" = "Llamar a Sara";
+"widget.events.sample::surfing" = "Surf";
+"widget.events.sample::moving" = "Día de mudanza";
+"widget.events.sample::meeting" = "Reunión diaria";
+"widget.events.sample::deposit_remain" = "Transferir el saldo final";
+"widget.events.sample::recycle" = "Reciclar";
+"widget.events.sample::take_medicine" = "Tomar medicamento";
+"widget.events.sample::watering" = "Regar las plantas";
+"widget.events.sample::june3" = "MAR, 3 JUN";
+"widget.events.sample::july16" = "DOM, 16 JUL";
+"widget.events.sample::july21" = "VIE, 21 JUL";
+"widget.events.sample::july29" = "SÁB, 29 JUL";
+"widget.events.sample::aug2" = "MIÉ, 2 AGO";
+"widget.events.sample::aug3" = "JUE, 3 AGO";
+"widget.events.sample::oct10" = "LUN, 10 OCT";
+"widget.events.foremost" = "Evento principal";
+"widget.events.foremost::allFinished::message" = "Agrega un evento que no te quieras perder.";
+"widget.events.foremost::sample::message" = "¡Lleva un paraguas! ⛱️";
+"widget.events.calendar" = "Calendario";
+"widget.events.today" = "HOY";
+"widget.events.today::sample::sunday" = "DOMINGO";
+"widget.events.today::sample::march2024" = "MARZO 2024";
+"total::event::count" = "%d eventos";
+"todo::count" = "%d tareas";
+"schedule::count" = "%d eventos de calendario";
+"widget.weeks.lastMonth" = "El mes pasado";
+"widget.weeks.thisMonth" = "Este mes";
+"widget.weeks.nextMonth" = "El próximo mes";
+"widget.weeks.thisWeek" = "Esta semana";
+"widget.weeks.twoWeek" = "2 semanas";
+"widget.weeks.threeWeek" = "3 semanas";
+"widget.weeks.fourWeek" = "4 semanas";
+"widget.weeks.sample::feb" = "FEBRERO";
+"widget.weeks.sample::march" = "MARZO";
+"widget.weeks.sample::april" = "ABRIL";
+"widget.weeks.sample::hiking" = "🏔️ Senderismo";
+"widget.weeks.sample::lunch" = "🥗 Almuerzo";
+"widget.weeks.sample::call" = "📞 Llamar a Sara";
+"widget.weeks.sample::holiday" = "Día festivo";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Ejercicio";
+"widget.weeks.sample::launch" = "🚀 Lanzamiento";
+"widget.fail.message" = "Se produjo un error temporal.\nVuelve a intentarlo abriendo la app.";
+"widget.next.noEvent" = "No hay un próximo evento.";
+"widget.next.sample" = "🔥 Ejercicio";
+"widget.next.title" = "Próximo evento";
+"widget.next.rect_widget::title" = "El próximo evento de hoy.";
+"widget.next.title::remains" = "Los próximos eventos de hoy.";
+"widget.next.title::future" = "Hoy y lo que sigue";
+"widget.next.title::more_todos" = "%d tareas más";
+"widget.next.title::more_events" = "%d eventos más";
+"widget.next.title::more_events_with_todo" = "%1$d tareas más y %2$d eventos más";
+"widget.next.title::uncompleted::todo" = "%1$@ no se ha completado";
+"widget.next.title::uncompleted::todos" = "%1$@ y %2$d tareas pendientes más";
+"widget.next.no_events_today" = "No hay eventos hoy";
+"widget.next.no_events" = "No hay próximos eventos";
+
+"widget.dday::name" = "Día D";
+"widget.dday::noTarget" = "Selecciona un evento";
+"widget.dday.sample::title" = "Taller";
+"widget.dday.target::repeating" = "Repetido";
+"widget.dday.target::registered" = "Fijado";
+"widget.dday.turn::name" = "Turno %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Este formato de enlace no es compatible.\nActualiza la app a la versión más reciente.";
+
+// MARK: - force update
+
+"force_update.title" = "Actualización requerida";
+"force_update.message" = "Hay una nueva versión disponible.\nActualiza para seguir usando la app.";
+"recommend_update.title" = "Se recomienda actualizar";
+"recommend_update.message" = "Hay una nueva versión disponible.\nTe recomendamos actualizar para una mejor experiencia.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Escuchando…";
+"aiAgent::keyboard" = "Teclado";
+"aiAgent::voice" = "Voz";
+"aiAgent::send" = "Enviar";
+"aiAgent::input::placeholder" = "¿En qué puedo ayudarte?";
+"aiAgent::permission::title" = "Se necesita acceso al micrófono y al reconocimiento de voz";
+"aiAgent::permission::message" = "Permite el acceso en Ajustes, o escribe en su lugar";
+"aiAgent::permission::keyboard" = "Escribir en su lugar";
+"aiAgent::permission::setting" = "Abrir Ajustes";
+"aiAgent::state::processing" = "Procesando";
+"aiAgent::state::confirm" = "Se necesita confirmación";
+"aiAgent::state::confirmExpired" = "Vencido";
+"aiAgent::state::done" = "Comando completado";
+"aiAgent::state::failed" = "El comando falló";
+"aiAgent::done::default" = "Listo";
+"aiAgent::failed::default" = "No se pudo completar";
+"aiAgent::retry" = "Reintentar";
+"aiAgent::needSignIn::title" = "Se requiere iniciar sesión";
+"aiAgent::needSignIn::message" = "Inicia sesión para usar la entrada rápida con IA.";
+"aiAgent::title" = "Entrada rápida con IA";
+"aiAgent::keyboard::stop" = "Detener";
+"aiAgent::keyboard::send" = "Enviar";
+"aiAgent::stop" = "Detener";
+"aiAgent::usage" = "%@ / %@ créditos";
+"aiAgent::plan::free" = "Gratis";
+"aiAgent::plan::standard" = "Estándar";
+"aiAgent::plan::lifetime" = "Vitalicio";
+"aiAgent::usage::topupRemaining" = "%@ créditos adicionales restantes";
+"aiAgent::usage::planChangeScheduled" = "Cambiarás al plan %2$@ el %1$@";
+"aiAgent::stop::confirm::title" = "¿Detener el procesamiento?";
+"aiAgent::stop::confirm::message" = "Al detener se descarta el comando en curso y no se puede reanudar.";
+"aiAgent::confirm::countdown" = "restante para aprobar";
+"aiAgent::confirm::expired::message" = "Se acabó el tiempo. Vuelve a solicitarlo.";

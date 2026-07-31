@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " og";
+"common::wait:message" = "Vent venligst...";
+"common::back" = "Tilbage";
+"common.remove" = "Fjern";
+"common.confirm" = "Bekræft";
+"common.cancel" = "Annuller";
+"common.close" = "Luk";
+"common.yes" = "Ja";
+"common.no" = "Nej";
+"common.save" = "Gem";
+"common.info" = "Info";
+"common.search" = "Søg";
+"common.clear" = "Ryd";
+"common.send" = "Send";
+"common.done" = "Færdig";
+"common.errorMessage" = "Der opstod en midlertidig fejl.\nKontakt os venligst, hvis problemet fortsætter.";
+"common.update" = "Opdater";
+"common.go_to_settings" = "Gå til Indstillinger";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d.M, HH:mm";
+"date_form::MM_d" = "d.M";
+"date_form::MM_dd" = "dd.MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d. MMM HH:mm";
+"date_form::MMM_d" = "d. MMM";
+"date_form::yyyy_MM_dd_E_" = "dd.MM.yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd.MM.yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd.MM.yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd. MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd.MM.yyyy";
+"date_form.yyyy_MMM_dd" = "d. MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE d. MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "I morgen";
+
+// MARK: - event
+
+"dayname::sunday" = "Søndag";
+"dayname::monday" = "Mandag";
+"dayname::tuesday" = "Tirsdag";
+"dayname::wednesday" = "Onsdag";
+"dayname::thursday" = "Torsdag";
+"dayname::friday" = "Fredag";
+"dayname::saturday" = "Lørdag";
+
+"dayname::sunday:short" = "SØN";
+"dayname::monday:short" = "MAN";
+"dayname::tuesday:short" = "TIR";
+"dayname::wednesday:short" = "ONS";
+"dayname::thursday:short" = "TOR";
+"dayname::friday:short" = "FRE";
+"dayname::saturday:short" = "LØR";
+
+"dayname::sunday:very_short" = "S";
+"dayname::monday:very_short" = "M";
+"dayname::tuesday:very_short" = "T";
+"dayname::wednesday:very_short" = "O";
+"dayname::thursday:very_short" = "T";
+"dayname::friday:very_short" = "F";
+"dayname::saturday:very_short" = "L";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Dagens begivenheder";
+"event_notification::todo:prefix" = "Opgave";
+"event_notification::today:prefix" = "I dag";
+"event_notification::tomorrow:prefix" = "I morgen";
+"event_notification::allday_today" = "Hele dagen i dag";
+"event_notification::allday_tomorrow" = "Hele dagen i morgen";
+"event_notification::some_allday" = "%@ hele dagen";
+"event_notification_setting::option_title::no_notification" = "Ingen notifikationer";
+"event_notification_setting::option_title::at_time" = "På begivenhedens tidspunkt";
+"event_notification_setting::option_title::allday_9am" = "Kl. 9 den dag";
+"event_notification_setting::option_title::allday_12pm" = "Kl. 12 den dag";
+"event_notification_setting::option_title::customTime" = "Brugerdefineret tidspunkt: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Brugerdefineret tidspunkt";
+"event_notification_setting::option_title::before_minutes" = "%d minut(ter) før begivenheden";
+"event_notification_setting::option_title::before_hours" = "%d time(r) før begivenheden";
+"event_notification_setting::option_title::before_days" = "%d dag(e) før begivenheden";
+"event_notification_setting::option_title::before_weeks" = "%d uge(r) før begivenheden";
+"event_notification_setting::option_title::allday_9am_before_days" = "Kl. 9:00, %d dag(e) før";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "Kl. 9:00, %d uge(r) før";
+"event_notification_setting::need_permission_message" = "For at bruge funktionen til begivenhedsnotifikationer skal du give tilladelse til notifikationer.\nGå til systemets appindstillinger, og tillad notifikationer.";
+"event_notification_setting::need_permission::go_setting" = "Gå til indstillinger";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "Appens tilladelse til notifikationer kræves for at bruge påmindelsesfunktionen.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Vigtigste begivenhed";
+"calendar::uncompletedTodos:title" = "Uafsluttede opgaver";
+"calendar::event_time::todo" = "Opgave";
+"calendar::event_time::allday" = "Hele dagen";
+"calendar::event_time::allday::with" = "%@ hele dagen";
+"calendar::event_time::period:some_days" = "%d dage";
+"calendar::event_time::period:some_minutes" = "%d minutter";
+"calendar::event_time::period:some_hours" = "%d timer";
+"calendar::event_time::period:some_days:some_hours" = "%d dage %d timer";
+"calendar::event::more_action::remove:title" = "Fjern begivenhed";
+"calendar::event::more_action::foremost_event:title" = "Vigtigste begivenhed";
+"calendar::event::more_action::remove_only_thistime:message" = "Vil du kun slette denne begivenhed blandt alle de gentagne begivenheder?";
+"calendar::event::more_action::remove:message" = "Vil du fjerne denne begivenhed?";
+"calendar::event::more_action::mark_as_foremost" = "Vil du markere denne begivenhed som din vigtigste begivenhed?";
+"calendar::event::more_action::unmark_as_foremost" = "Vil du fjerne markeringen af denne begivenhed som din vigtigste begivenhed?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "En gentagende aftale kan ikke markeres som den vigtigste begivenhed.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Fjern kun denne begivenhed";
+"calendar::event::more_action:remove:item_name" = "Fjern begivenhed";
+"calendar::event::more_action:foremost:mark:item_name" = "Markér som vigtigst";
+"calendar::event::more_action:foremost:unmark:item_name" = "Fjern markering som vigtigst";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Føj til D-dag-widgeten";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Fjern fra D-dag-widgeten";
+"calendar::event::more_action:dday_candidate:title" = "Kandidat til D-dag-widgeten";
+"calendar::event::more_action:dday_candidate:register:message" = "Vil du tilføje denne begivenhed som kandidat til D-dag-widgeten? Den vises øverst på listen, når du redigerer widgeten.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Vil du fjerne denne begivenhed fra kandidaterne til D-dag-widgeten?";
+"calendar::event::more_action:copy:item_name" = "Kopiér begivenhed";
+"calendar::event::more_action:transform_to::schedule" = "Konverter til aftale";
+"calendar::event::more_action:transform_to::todo" = "Konverter til opgave";
+"calendar::event::more_action:edit:item_name" = "Rediger";
+"calednar::event::add_new" = "Tilføj en ny begivenhed";
+"calednar::event::add_new:place_holder" = "Tilføj hurtigt en ny opgave.";
+"calednar::event::skip_todo" = "Spring denne opgave over";
+"calednar::event::skip_todo_until" = "Vælg et tidspunkt for at springe denne opgave over";
+"calednar::event::copy" = "Kopiér begivenhed";
+"calendar::move_date" = "Flyt dato";
+"calednar::event::google::edit" = "Rediger Google Kalender-begivenhed";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Vælg venligst et tidspunkt for begivenheden først.";
+"eventDetail.messages.selectValidTime" = "Vælg venligst et gyldigt tidspunkt for begivenheden.";
+"eventDetail.notification.custom_eventTime:title" = "Brugerdefineret";
+"eventDetail.notification.title" = "Tidspunkt for begivenhedsnotifikation";
+"eventDetail.repeating.title" = "Gentagelse";
+"eventDetail.repeating.notRepeating::title" = "Gentages ikke";
+"eventDetail.repeating.starttime:form" = "d. MMM yyyy";
+"eventDetail.repeating.starttime:title" = "Starttidspunkt for gentagelse";
+"eventDetail.repeating.everyDay:title" = "Hver dag";
+"eventDetail.repeating.everyWeek:title" = "Hver uge";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Hver %@";
+"eventDetail.repeating.everySomeWeek:title" = "Hver %d. uge";
+"eventDetail.repeating.everyWeekDays:title" = "Hver hverdag";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Hver %d. uge %@";
+"eventDetail.repeating.everyMonth:title" = "Hver måned";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ i hver måned.";
+"eventDetail.repeating.everyYear:title" = "Hvert år";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Hvert år (månekalender)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Hvert år %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Hvert år %@ (månekalender)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Alle dage i den sidste uge i hver måned";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Den første %@ i hver måned";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Den anden %@ i hver måned";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Den tredje %@ i hver måned";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Den fjerde %@ i hver måned";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Den femte %@ i hver måned";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Den sjette %@ i hver måned";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Den syvende %@ i hver måned";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Den sidste %@ i hver måned";
+"eventDetail.repeating.endtime::title" = "Gentagelse slutter";
+"eventDetail.repeating.endtime::option::never" = "Aldrig";
+"eventDetail.repeating.endtime::option::on" = "Den";
+"eventDetail.repeating.endtime::option::after" = "Efter";
+"eventDetail.repeating.endtime::option::after_occurrences" = "forekomster";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Sluttidspunktet for gentagelsen skal ligge efter starttidspunktet.\n(Startdato for gentagelse: %@)";
+"eventDetail.repeating::period_endcount" = "Starter %@, %d gange";
+
+"eventDetail.repeating.everyNDays:title" = "Hver %d. dag";
+"eventDetail.repeating.last" = "Sidste";
+"eventDetail.repeating.everyNMonths:title" = "Hver %d. måned";
+"eventDetail.repeating.everyNYears:title" = "Hvert %d. år";
+"eventDetail.repeating::endoption_until" = "indtil %@";
+"eventDetail.repeating::endoption_times" = "%d gang(e)";
+
+"eventDetail.place::placeholder" = "Sted";
+"eventDetail.place::remove_button" = "Fjern stedet";
+"eventDetail.place::no_map_app" = "Den valgte kortapp er ikke installeret.";
+"eventDetail.place::select_map_app" = "Vælg en kortapp";
+"eventDetail.place::always_select_this_map" = "Åbn altid med denne app.";
+
+"eventDetail.add_new_todo::message" = "En ny opgave er blevet tilføjet.";
+"eventDetail.add_new_schedule::message" = "En ny aftale er blevet tilføjet.";
+"eventDetail.scheduleEvent_removed::message" = "Aftalen er blevet fjernet.";
+"eventDetail.edit::repeating::confirm::ttile" = "Rediger begivenhed";
+"eventDetail.edit::repeating::confirm::message" = "Denne begivenhed er en gentagende begivenhed.\nVælg omfanget af den gentagende begivenhed, du vil redigere.";
+"eventDetail.edit::repeating::confirm::all::button" = "Alle begivenheder";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Fra dette tidspunkt";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Kun denne gang";
+"eventDetail.scheduleEvent_saved::message" = "Aftalen er blevet gemt.";
+"eventDetail.todoEvent_removed::message" = "Opgaven er blevet fjernet.";
+"eventDetail.todoEvent_saved::message" = "Opgaven er blevet gemt.";
+"eventDetail.cancel_edit::title" = "Rediger begivenhed";
+"eventDetail.cancel_edit::message" = "Vil du kassere disse ændringer?";
+"eventDetail.cancel_edit::continue::button" = "Fortsæt";
+
+"eventDetail.edit::add_new_name::placeholder" = "Tilføj et nyt begivenhedsnavn";
+"eventDetail.edit::clearEventTime::button" = "Ryd begivenhedstidspunkt";
+"eventDetail.edit::noEventTime::button" = "Ingen sluttid";
+"eventDetail.edit::memo" = "Notat";
+"eventDetail.edit::urlPreview" = "URL-forhåndsvisning";
+
+"eventDetail.edit::make::case" = "Er det en opgave?";
+"eventDetail.edit::todo::case" = "Opgave";
+"eventDetail.edit::schedule::case" = "Aftale";
+"eventDetail.edit::holiday::case" = "Offentlig helligdag i %@";
+
+"eventDetail.notSupport::holiday" = "Det er ikke muligt at ændre oplysninger for offentlige helligdage.";
+
+"eventDetail:todo:guide:message1" = "En opgave repræsenterer noget, der skal gøres.";
+"eventDetail:todo:guide:message2" = "I modsætning til almindelige aftaler, der vises i kalenderen med et bestemt tidspunkt (eller periode), giver opgaver mulighed for at markere, om de er blevet udført.";
+"eventDetail:todo:guide:message3" = "Du kan tilføje en opgave uden angivet tidspunkt. Du kan f.eks. registrere en opgave, der skal udføres snart, men ikke lige nu.";
+"eventDetail:todo:guide:process:message" = "Opgaver opfører sig anderledes end almindelige aftaler, når gentagelse er slået til:";
+"eventDetail:todo:guide:process:bullet1" = "Nuværende eller tidligere gentagne opgaver, der endnu ikke er udført, vises i kalenderen.";
+"eventDetail:todo:guide:process:bullet2" = "Når en opgave udføres, tilføjes den til listen over udførte begivenheder, og den næste gentagelse tilføjes i kalenderen.";
+"eventDetail:todo:guide:process:bullet3" = "Hvis der ikke er nogen næste gentagelse på grund af gentagelsens sluttidspunkt, ophører den gentagne opgave.";
+"eventDetail:foremost:guide:message1" = "Markér en begivenhed som vigtigst for at fremhæve, at det er din vigtigste begivenhed.\nDen vigtigste begivenhed er altid synlig i kalenderen og understøtter en separat widget.";
+"eventDetail:foremost:guide:supports:message" = "Følgende begivenhedstyper kan angives som den vigtigste begivenhed:";
+"eventDetail:foremost:guide:supports:todo" = "Opgave";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Ikke-gentagende aftaler";
+
+"eventDetail:isSaving:toast:message" = "Gemmer ændringer. Vent venligst.";
+"eventDetail:hasChanges:confirm:message" = "Der er ændringer. Vil du kassere dem?";
+"eventDetail:hasChanges:confirm:continue" = "Fortsæt redigering";
+
+"eventDetail.unavailto_transform_withoutName" = "Angiv venligst et navn for at konvertere begivenheden.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Tidspunkt er påkrævet for at konvertere til en aftale.";
+"eventDetail.todoEvent::transform::schedule_title" = "Konverter";
+"eventDetail.todoEvent::transform::schedule_message" = "Vil du konvertere denne opgave til en aftale?";
+"eventDetail.scheduleEvent::transform::todo" = "Konverter";
+"eventDetail.scheduleEvent::transform::todo_message" = "Vil du konvertere denne aftale til en opgave?";
+
+"eventDetail::revert" = "Fortryd fuldførelse";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Vis i Google Kalender";
+"eventDetail::gogoleEvent::calendar" = "Kalender";
+"eventDetail::gogoleEvent::calendar::event" = "Google Kalender-begivenhed";
+"eventDetail::gogoleEvent::attendee::unknown" = "Ukendt";
+"eventDetail::gogoleEvent::attendees" = "Deltagere (%d personer)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Arrangør";
+"eventDetail::gogoleEvent::conference::accessCode" = "Adgangskode";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Mødekode";
+"eventDetail::gogoleEvent::conference::passCode" = "Pinkode";
+"eventDetail::gogoleEvent::conference::password" = "Kodeord";
+"eventDetail::gogoleEvent::copy::message" = "Kopieret til udklipsholderen.";
+"eventDetail::gogoleEvent::canceled::message" = "Denne begivenhed er blevet aflyst.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Vis i Apple Kalender";
+"eventDetail::appleCalendarEvent::calendar::event" = "Apple Kalender-begivenhed";
+"eventDetail::appleCalendarEvent::attendees" = "Deltagere (%d personer)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Arrangør";
+
+// MARK: - event tag
+
+"eventTag.title" = "Begivenhedstype";
+"eventTag.list::title" = "Begivenhedstyper";
+"eventTag.defaults.default::name" = "Standard";
+"eventTag.defaults.holiday::name" = "Helligdag";
+"eventTag.addNew::placeholder" = "Tilføj en ny begivenhedstype";
+"eventTag.allEventTypes" = "Alle begivenhedstyper >";
+"eventTag.remove::confirm::message" = "Vil du kun fjerne denne begivenhedstype, eller vil du også fjerne alle tilknyttede begivenheder?";
+"eventTag.remove::only_tag" = "Fjern kun begivenhedstypen";
+"eventTag.remove::tag_and_evets" = "Fjern sammen med tilknyttede begivenheder";
+"eventTag.removed::message" = "Denne begivenhedstype er blevet fjernet.";
+"eventTag.removed_with_events::message" = "Denne begivenhedstype og de tilknyttede begivenheder er blevet fjernet.";
+"eventTag.color::changed::message" = "Farven er blevet ændret.";
+"eventTag.changed::message" = "Begivenhedstypen er blevet ændret.";
+"eventTag.makeNew::message" = "En ny begivenhedstype er blevet oprettet.";
+"eventTag.default::title" = "Standardbegivenhedstype";
+"eventTag.default::selection::explain" = "Dette er den begivenhedstype, der vælges som standard, når du opretter en begivenhed.";
+"eventTag.externalCalendar::integrate_button" = "Forbind kalender";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "I dag";
+"eventList::yesterday::title" = "I går";
+"eventList::thisMonth::title" = "Denne måned";
+"eventList::done_todos::title" = "Liste over udførte opgaver";
+"eventList::done_todos::eventTime" = "Begivenhedstidspunkt:";
+"eventList::done_todos::doneAt" = "Fuldførelsestidspunkt:";
+"eventList::remove::confirm::message" = "Slet liste over udførte opgaver";
+"eventList::remove::confirm::button::all" = "Alle udførte opgaver";
+"eventList::remove::confirm::button::olderThan1m" = "Ældre end 1 måned";
+"eventList::remove::confirm::button::olderThan3m" = "Ældre end 3 måneder";
+"eventList::remove::confirm::button::olderThan6m" = "Ældre end 6 måneder";
+"eventList::remove::confirm::button::olderThan1y" = "Ældre end 1 år";
+
+
+// MARK: - account
+
+"manage_account::title" = "Kontostyring";
+"manage_account::login_method" = "Login-metode";
+"manage_account::email" = "E-mail";
+"manage_account::last_signedIn_at" = "Sidste login-tidspunkt";
+"manage_account::migration::title" = "Migrer midlertidige brugerdata";
+"manage_account::migration::description" = "Alle begivenheder oprettet før login (%d begivenhed(er)) migreres til din konto.\nBegivenheder knyttet til din konto kan tilgås fra alle enheder.";
+"manage_account::migration_finished::message" = "Migreringen er fuldført!";
+"manage_account::signout_button::title" = "Log ud";
+"manage_account::sign_out::confirm::title" = "Log ud";
+"manage_account::sign_out::confirm::message" = "Vil du logge ud af din nuværende konto?";
+"manage_account::delete_account_button::title" = "Slet konto";
+"manage_account::delete_account_button::confirm:message" = "Er du sikker på, at du vil slette din konto?";
+"manage_account::delete_account_button::description" = "Efter anmodning om sletning bliver din konto slettet.\nNår kontoen er slettet, kan oplysningerne ikke gendannes.";
+"signIn::title" = "Login";
+"signIn:description" = "Sikkerhedskopiér din begivenhedsliste, og synkroniser den på tværs af andre iOS-enheder\n(Understøttede platforme vil blive udvidet.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Begivenhedsindstillinger";
+"event_setting::eventType" = "Begivenhedstype";
+"event_setting::eventPeriod" = "Begivenhedsperiode";
+"event_setting::defaultMapApp" = "Åbn kortappen";
+"event_setting::defaultMapApp_select" = "Vælg";
+
+"event_setting::eventSync" = "Begivenhedssynkronisering";
+"event_setting::eventSync::readyToSync::description" = "Synkroniser sikkerhedskopierede brugerbegivenheder.";
+"event_setting::eventSync::syncInProgress::description" = "Synkroniserer sikkerhedskopierede brugerbegivenheder...";
+"event_setting::eventSync::lastTime" = "Sidste synkroniseringstidspunkt: %@";
+"event_setting::eventSync::force" = "Gennemtving synkronisering";
+
+"event_notification_setting::title::forAllDay" = "Hele dagen";
+"event_notification_setting::title::NotforAllDay" = "Notifikationstidspunkt";
+"event_setting::external_calendar::title" = "Eksterne kalendere";
+"event_setting::external_calendar::connected::account" = "Forbundet: %@";
+"event_setting::external_calendar::start" = "Forbind";
+"event_setting::external_calendar::start::message" = "Forbundet til en ekstern kalender.";
+"event_setting::external_calendar::stop" = "Afbryd forbindelse";
+"event_setting::external_calendar::stop::message" = "Forbindelsen til den eksterne kalender er blevet afbrudt.";
+"event_setting::external_calendar::google::serviceName" = "Google Kalender";
+"event_setting::external_calendar::apple::serviceName" = "Apple Kalender";
+"event_setting::apple_calendar::permission_denied::message" = "Adgang til kalenderen er blevet nægtet. Aktiver den i Indstillinger for at bruge Apple Kalender.";
+"event_setting::apple_calendar::restricted::message" = "Adgang til kalenderen er begrænset på denne enhed.";
+"setting.title" = "Indstillinger";
+"setting.appearance.title" = "Udseende";
+"setting.appearance.calendar.samplemonth::march" = "MARTS";
+"setting.appearance.calendar.startDayOfWeek" = "Ugens startdag";
+"setting.appearance.calendar.accentDay" = "Fremhævede dage";
+"setting.appearance.calendar.accentDay::holiday" = "Helligdag";
+"setting.appearance.calendar.accentDay::saturday" = "Lørdag";
+"setting.appearance.calendar.accentDay::sunday" = "Søndag";
+"setting.appearance.calendar.colorTheme" = "Farvetema";
+"setting.appearance.calendar.colorTheme::system" = "System";
+"setting.appearance.calendar.colorTheme::light" = "Lys";
+"setting.appearance.calendar.colorTheme::dark" = "Mørk";
+"setting.appearance.calendar.underline" = "Understregning på dage med begivenheder";
+"setting.appearance.event.edit::name_old" = "Rediger begivenhed";
+"setting.appearance.event.edit::name" = "Begivenhedsindstillinger og eksterne kalendere";
+"setting.appearance.day_row_height" = "Detaljeniveau for begivenhedsvisning";
+"setting.appearance.day_row_height::small::text" = "Minimal";
+"setting.appearance.day_row_height::medium::text" = "Mellem";
+"setting.appearance.day_row_height::large::text" = "Fuld";
+"setting.appearance.event.fontSize" = "Skriftstørrelse for begivenhedstekst";
+"setting.appearance.event.show_holidayName" = "Vis navn på helligdag";
+"setting.appearance.event.show_lunar" = "Månekalender";
+"setting.appearance.event._24form" = "24-timers format";
+"setting.appearance.event.sample::name" = "🥗 Begivenhedsnavn";
+"setting.appearance.event.sample::description" = "beskrivelse";
+"setting.appearance.event.sample::christmas" = "Jul";
+"setting.appearance.event.sample::first" = "første begivenhed";
+"setting.appearance.event.sample::second" = "anden begivenhed";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Vis uafsluttede opgaver";
+"setting.appearance.widget::title" = "Widget-tema";
+"setting.appearance.widget::useSystemTheme::title" = "Brug systemtema";
+"setting.appearance.widget::useSystemTheme::background" = "Widget-baggrundsfarve";
+"setting.appearance.widget::useCustomTheme::title" = "Vælg brugerdefineret farve";
+"setting.appearance.widget::sample::eventName" = "Widget-begivenhed";
+"setting.appearance.event.boldText" = "Fed tekst";
+"setting.appearance.event.eventColor" = "Begivenhedsfarve";
+"setting.timezone::title" = "Tidszone";
+"setting.timezone::systemTimeZone::name" = "Systemets tidszone";
+"setting.timezone::systemTime::name" = "Systemtid";
+"setting.haptic::name" = "Haptisk feedback";
+"setting.minimize_animation::name" = "Minimer animationseffekter";
+"setting.holiday.title" = "Helligdage";
+"setting.holiday.item::name" = "Helligdagsindstilling";
+"setting.holiday.list::sectionTitle" = "Helligdage";
+"setting.holiday.country.title" = "Land";
+"setting.holiday.country.current::title" = "Nuværende land";
+"setting.holiday.country.current::placeHolder" = "Vælg land";
+"setting.holiday.country.changeConfirm::title" = "Skift land";
+"setting.holiday.country.changeConfirm::message" = "Vil du ændre landet for din kalender?";
+"setting.holiday.country.changed::message" = "Landet er blevet ændret.";
+"setting.holiday.hide::button" = "Skjul";
+"setting.holiday.hide::confirm::title" = "Skjul helligdag";
+"setting.holiday.hide::confirm::message" = "Skjul denne helligdag hvert år?\nDu kan vise den igen under Indstillinger > Helligdage.";
+"setting.holiday.hidden::sectionTitle" = "Skjulte helligdage";
+"setting.holiday.show::button" = "Vis";
+"setting.feedback::name" = "Feedback";
+"setting.help::name" = "Hjælp";
+"setting.share::name" = "Del appen";
+"setting.write_review::name" = "Skriv en anmeldelse af appen";
+"setting.account.signedIn::manageAccount" = "Konto";
+"setting.account.needSignIn" = "Login";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Administrer din læseliste";
+"setting.section.support::name" = "Support";
+"setting.section.app::name" = "App";
+"setting.section.suggest::name" = "Forslag";
+"feedback::guide:message" = "Du er meget velkommen til at give feedback, herunder fejlrapporter, kommentarer og forslag til tjenesten.\nDine kommentarer hjælper os meget med at forbedre tjenesten.";
+"feedback::enterMessage::placeholder" = "Indtast en besked";
+"feedback::contact::placeholder" = "E-mailadresse til svar";
+"feedback::posted:message" = "Din feedback er blevet registreret.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Kalender";
+"external_service.expired::message" = "%@-integrationen er udløbet. Gå til Indstillinger, og prøv igen.";
+"external_service::google::hidden_event" = "Skjult";
+"external_service::google::unknown_event" = "Ukendt";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Se dine kommende begivenheder.";
+"widget.doubleMonth::name" = "Kalender + Kalender";
+"widget.eventAndMonth::name" = "Begivenheder + Kalender";
+"widget.todayAndMonth::name" = "I DAG + Kalender";
+"widget.eventAndForesmot::name" = "Begivenheder + Vigtigste";
+"widget.events::name" = "Begivenheder";
+"widget.events.noEvents::message" = "Der er ingen begivenheder.";
+"widget.events.currentTodos" = "Aktuel opgaveliste";
+"widget.events.sample::check_mailbox" = "Tjek postkassen";
+"widget.events.sample::example" = "Helligdag";
+"widget.events.sample::running" = "Løb";
+"widget.events.sample::luch" = "Frokost";
+"widget.events.sample::luch_appointment" = "Frokostaftale (må ikke komme for sent)";
+"widget.events.sample::call" = "Ring til Sara";
+"widget.events.sample::surfing" = "Surfing";
+"widget.events.sample::moving" = "Flyttedag";
+"widget.events.sample::meeting" = "Dagligt møde";
+"widget.events.sample::deposit_remain" = "Overfør den resterende saldo";
+"widget.events.sample::recycle" = "Genbrug";
+"widget.events.sample::take_medicine" = "Tag medicin";
+"widget.events.sample::watering" = "Vand blomsterpotten";
+"widget.events.sample::june3" = "TIR, 3. JUN";
+"widget.events.sample::july16" = "SØN, 16. JUL";
+"widget.events.sample::july21" = "FRE, 21. JUL";
+"widget.events.sample::july29" = "LØR, 29. JUL";
+"widget.events.sample::aug2" = "ONS, 2. AUG";
+"widget.events.sample::aug3" = "TOR, 3. AUG";
+"widget.events.sample::oct10" = "MAN, 10. OKT";
+"widget.events.foremost" = "Vigtigste begivenhed";
+"widget.events.foremost::allFinished::message" = "Tilføj en begivenhed, du ikke må gå glip af.";
+"widget.events.foremost::sample::message" = "Tag en paraply med! ⛱️";
+"widget.events.calendar" = "Kalender";
+"widget.events.today" = "I DAG";
+"widget.events.today::sample::sunday" = "SØNDAG";
+"widget.events.today::sample::march2024" = "MARTS 2024";
+"total::event::count" = "%d begivenheder";
+"todo::count" = "%d opgaver";
+"schedule::count" = "%d aftaler";
+"widget.weeks.lastMonth" = "Sidste måned";
+"widget.weeks.thisMonth" = "Denne måned";
+"widget.weeks.nextMonth" = "Næste måned";
+"widget.weeks.thisWeek" = "Denne uge";
+"widget.weeks.twoWeek" = "2 uger";
+"widget.weeks.threeWeek" = "3 uger";
+"widget.weeks.fourWeek" = "4 uger";
+"widget.weeks.sample::feb" = "FEBRUAR";
+"widget.weeks.sample::march" = "MARTS";
+"widget.weeks.sample::april" = "APRIL";
+"widget.weeks.sample::hiking" = "🏔️ Vandretur";
+"widget.weeks.sample::lunch" = "🥗 Frokost";
+"widget.weeks.sample::call" = "📞 Ring til Sara";
+"widget.weeks.sample::holiday" = "Helligdag";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Træning";
+"widget.weeks.sample::launch" = "🚀 Lancering";
+"widget.fail.message" = "Der opstod en midlertidig fejl.\nPrøv at genstarte appen.";
+"widget.next.noEvent" = "Ingen kommende begivenhed.";
+"widget.next.sample" = "🔥 Træning";
+"widget.next.title" = "Næste begivenhed";
+"widget.next.rect_widget::title" = "Dagens næste begivenhed.";
+"widget.next.title::remains" = "Dagens kommende begivenheder.";
+"widget.next.title::future" = "I dag og hvad der venter";
+"widget.next.title::more_todos" = "%d flere opgaver";
+"widget.next.title::more_events" = "%d flere aftaler";
+"widget.next.title::more_events_with_todo" = "%1$d flere opgaver og %2$d flere aftaler";
+"widget.next.title::uncompleted::todo" = "%1$@ er ikke fuldført";
+"widget.next.title::uncompleted::todos" = "%1$@ og %2$d flere uafsluttede opgaver";
+"widget.next.no_events_today" = "Ingen begivenheder i dag";
+"widget.next.no_events" = "Ingen kommende begivenheder";
+
+"widget.dday::name" = "D-dag";
+"widget.dday::noTarget" = "Vælg en begivenhed";
+"widget.dday.sample::title" = "Workshop";
+"widget.dday.target::repeating" = "Gentagende";
+"widget.dday.target::registered" = "Fastgjort";
+"widget.dday.turn::name" = "Runde %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Dette linkformat understøttes ikke.\nOpdater appen til den nyeste version.";
+
+// MARK: - force update
+
+"force_update.title" = "Opdatering påkrævet";
+"force_update.message" = "En ny version er tilgængelig.\nOpdater for at fortsætte med at bruge appen.";
+"recommend_update.title" = "Opdatering anbefales";
+"recommend_update.message" = "En ny version er tilgængelig.\nVi anbefaler, at du opdaterer for en bedre oplevelse.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Lytter…";
+"aiAgent::keyboard" = "Tastatur";
+"aiAgent::voice" = "Stemme";
+"aiAgent::send" = "Send";
+"aiAgent::input::placeholder" = "Hvordan kan jeg hjælpe?";
+"aiAgent::permission::title" = "Adgang til mikrofon og talegenkendelse er påkrævet";
+"aiAgent::permission::message" = "Giv adgang i Indstillinger, eller skriv i stedet";
+"aiAgent::permission::keyboard" = "Skriv i stedet";
+"aiAgent::permission::setting" = "Åbn Indstillinger";
+"aiAgent::state::processing" = "Behandler";
+"aiAgent::state::confirm" = "Bekræftelse påkrævet";
+"aiAgent::state::confirmExpired" = "Udløbet";
+"aiAgent::state::done" = "Kommando fuldført";
+"aiAgent::state::failed" = "Kommando mislykkedes";
+"aiAgent::done::default" = "Færdig";
+"aiAgent::failed::default" = "Kunne ikke fuldføre det";
+"aiAgent::retry" = "Prøv igen";
+"aiAgent::needSignIn::title" = "Login påkrævet";
+"aiAgent::needSignIn::message" = "Log ind for at bruge AI-hurtigindtastning.";
+"aiAgent::title" = "AI-hurtigindtastning";
+"aiAgent::keyboard::stop" = "Stop";
+"aiAgent::keyboard::send" = "Send";
+"aiAgent::stop" = "Stop";
+"aiAgent::usage" = "%@ / %@ kreditter";
+"aiAgent::plan::free" = "Gratis";
+"aiAgent::plan::standard" = "Standard";
+"aiAgent::plan::lifetime" = "Livstid";
+"aiAgent::usage::topupRemaining" = "%@ ekstra kreditter tilbage";
+"aiAgent::usage::planChangeScheduled" = "Skift til planen %2$@ den %1$@";
+"aiAgent::stop::confirm::title" = "Stop behandling?";
+"aiAgent::stop::confirm::message" = "Hvis du stopper, kasseres den igangværende kommando, og den kan ikke genoptages.";
+"aiAgent::confirm::countdown" = "tilbage til at godkende";
+"aiAgent::confirm::expired::message" = "Tiden er udløbet. Anmod venligst igen.";
