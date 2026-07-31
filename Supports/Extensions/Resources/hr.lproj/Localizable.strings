@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " i";
+"common::wait:message" = "Pričekajte...";
+"common::back" = "Natrag";
+"common.remove" = "Ukloni";
+"common.confirm" = "Potvrdi";
+"common.cancel" = "Odustani";
+"common.close" = "Zatvori";
+"common.yes" = "Da";
+"common.no" = "Ne";
+"common.save" = "Spremi";
+"common.info" = "Info";
+"common.search" = "Pretraga";
+"common.clear" = "Očisti";
+"common.send" = "Pošalji";
+"common.done" = "Gotovo";
+"common.errorMessage" = "Došlo je do privremene pogreške.\nMolimo prijavite ako se problem nastavi.";
+"common.update" = "Ažuriraj";
+"common.go_to_settings" = "Idi na postavke";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d.M, HH:mm";
+"date_form::MM_d" = "d.M";
+"date_form::MM_dd" = "dd.MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd.MM.yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd.MM.yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd.MM.yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd.MM.yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Sutra";
+
+// MARK: - event
+
+"dayname::sunday" = "Nedjelja";
+"dayname::monday" = "Ponedjeljak";
+"dayname::tuesday" = "Utorak";
+"dayname::wednesday" = "Srijeda";
+"dayname::thursday" = "Četvrtak";
+"dayname::friday" = "Petak";
+"dayname::saturday" = "Subota";
+
+"dayname::sunday:short" = "NED";
+"dayname::monday:short" = "PON";
+"dayname::tuesday:short" = "UTO";
+"dayname::wednesday:short" = "SRI";
+"dayname::thursday:short" = "ČET";
+"dayname::friday:short" = "PET";
+"dayname::saturday:short" = "SUB";
+
+"dayname::sunday:very_short" = "N";
+"dayname::monday:very_short" = "P";
+"dayname::tuesday:very_short" = "U";
+"dayname::wednesday:very_short" = "S";
+"dayname::thursday:very_short" = "Č";
+"dayname::friday:very_short" = "P";
+"dayname::saturday:very_short" = "S";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Današnji događaji";
+"event_notification::todo:prefix" = "Zadatak";
+"event_notification::today:prefix" = "Danas";
+"event_notification::tomorrow:prefix" = "Sutra";
+"event_notification::allday_today" = "Cijeli dan danas";
+"event_notification::allday_tomorrow" = "Cijeli dan sutra";
+"event_notification::some_allday" = "%@ cijeli dan";
+"event_notification_setting::option_title::no_notification" = "Bez obavijesti";
+"event_notification_setting::option_title::at_time" = "U vrijeme događaja";
+"event_notification_setting::option_title::allday_9am" = "U 9:00 tog dana";
+"event_notification_setting::option_title::allday_12pm" = "U podne tog dana";
+"event_notification_setting::option_title::customTime" = "Prilagođeno vrijeme: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Prilagođeno vrijeme";
+"event_notification_setting::option_title::before_minutes" = "%d min prije događaja";
+"event_notification_setting::option_title::before_hours" = "%d h prije događaja";
+"event_notification_setting::option_title::before_days" = "%d dana prije događaja";
+"event_notification_setting::option_title::before_weeks" = "%d tjedana prije događaja";
+"event_notification_setting::option_title::allday_9am_before_days" = "U 9:00, %d dana ranije";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "U 9:00, %d tjedana ranije";
+"event_notification_setting::need_permission_message" = "Za korištenje obavijesti o događajima potrebna je dozvola za obavijesti.\nIdite u sistemske postavke aplikacije i dopustite obavijesti.";
+"event_notification_setting::need_permission::go_setting" = "Idi na postavke";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "Za korištenje funkcije podsjetnika o događajima potrebna je dozvola za obavijesti aplikacije.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Najvažniji događaj";
+"calendar::uncompletedTodos:title" = "Nedovršeni zadaci";
+"calendar::event_time::todo" = "Zadatak";
+"calendar::event_time::allday" = "Cijeli dan";
+"calendar::event_time::allday::with" = "%@ cijeli dan";
+"calendar::event_time::period:some_days" = "%d dana";
+"calendar::event_time::period:some_minutes" = "%d min";
+"calendar::event_time::period:some_hours" = "%d h";
+"calendar::event_time::period:some_days:some_hours" = "%d dana %d h";
+"calendar::event::more_action::remove:title" = "Ukloni događaj";
+"calendar::event::more_action::foremost_event:title" = "Najvažniji događaj";
+"calendar::event::more_action::remove_only_thistime:message" = "Želite li ukloniti samo ovaj događaj iz svih ponavljajućih događaja?";
+"calendar::event::more_action::remove:message" = "Želite li ukloniti ovaj događaj?";
+"calendar::event::more_action::mark_as_foremost" = "Želite li označiti ovaj događaj kao najvažniji?";
+"calendar::event::more_action::unmark_as_foremost" = "Želite li ukloniti oznaku najvažnijeg za ovaj događaj?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Ponavljajući termin ne može se označiti kao najvažniji događaj.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Ukloni samo ovaj događaj";
+"calendar::event::more_action:remove:item_name" = "Ukloni događaj";
+"calendar::event::more_action:foremost:mark:item_name" = "Označi kao najvažnije";
+"calendar::event::more_action:foremost:unmark:item_name" = "Ukloni oznaku najvažnijeg";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Dodaj u widget Odbrojavanje";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Ukloni iz widgeta Odbrojavanje";
+"calendar::event::more_action:dday_candidate:title" = "Kandidat za widget Odbrojavanje";
+"calendar::event::more_action:dday_candidate:register:message" = "Dodati ovaj događaj kao kandidata za widget Odbrojavanje? Prikazat će se na vrhu popisa kada uređujete widget.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Ukloniti ovaj događaj iz kandidata za widget Odbrojavanje?";
+"calendar::event::more_action:copy:item_name" = "Kopiraj događaj";
+"calendar::event::more_action:transform_to::schedule" = "Pretvori u termin";
+"calendar::event::more_action:transform_to::todo" = "Pretvori u zadatak";
+"calendar::event::more_action:edit:item_name" = "Uredi";
+"calednar::event::add_new" = "Dodaj novi događaj";
+"calednar::event::add_new:place_holder" = "Brzo dodajte novi zadatak.";
+"calednar::event::skip_todo" = "Preskoči ovaj zadatak";
+"calednar::event::skip_todo_until" = "Odaberite vrijeme do kojeg preskočiti ovaj zadatak";
+"calednar::event::copy" = "Kopiraj događaj";
+"calendar::move_date" = "Pomakni datum";
+"calednar::event::google::edit" = "Uredi događaj Google kalendara";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Prvo odaberite vrijeme događaja.";
+"eventDetail.messages.selectValidTime" = "Odaberite valjano vrijeme događaja.";
+"eventDetail.notification.custom_eventTime:title" = "Prilagođeno";
+"eventDetail.notification.title" = "Vrijeme obavijesti o događaju";
+"eventDetail.repeating.title" = "Ponavljanje";
+"eventDetail.repeating.notRepeating::title" = "Bez ponavljanja";
+"eventDetail.repeating.starttime:form" = "d. M. yyyy.";
+"eventDetail.repeating.starttime:title" = "Vrijeme početka ponavljanja";
+"eventDetail.repeating.everyDay:title" = "Svaki dan";
+"eventDetail.repeating.everyWeek:title" = "Svaki tjedan";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Svaki %@";
+"eventDetail.repeating.everySomeWeek:title" = "Svaka %d tjedna";
+"eventDetail.repeating.everyWeekDays:title" = "Svaki radni dan";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Svaka %d tjedna, %@";
+"eventDetail.repeating.everyMonth:title" = "Svaki mjesec";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ svakog mjeseca.";
+"eventDetail.repeating.everyYear:title" = "Svake godine";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Svake godine (lunarni kalendar)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Svake godine %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Svake godine %@ (lunarni kalendar)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Svi dani zadnjeg tjedna svakog mjeseca";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Prvi %@ svakog mjeseca";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Drugi %@ svakog mjeseca";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Treći %@ svakog mjeseca";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Četvrti %@ svakog mjeseca";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Peti %@ svakog mjeseca";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Šesti %@ svakog mjeseca";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Sedmi %@ svakog mjeseca";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Zadnji %@ svakog mjeseca";
+"eventDetail.repeating.endtime::title" = "Kraj ponavljanja";
+"eventDetail.repeating.endtime::option::never" = "Nikada";
+"eventDetail.repeating.endtime::option::on" = "Na dan";
+"eventDetail.repeating.endtime::option::after" = "Nakon";
+"eventDetail.repeating.endtime::option::after_occurrences" = "ponavljanja";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Vrijeme kraja ponavljanja mora biti kasnije od vremena početka.\n(Datum početka ponavljanja: %@)";
+"eventDetail.repeating::period_endcount" = "Od %@, %d puta";
+
+"eventDetail.repeating.everyNDays:title" = "Svaka %d dana";
+"eventDetail.repeating.last" = "Zadnji";
+"eventDetail.repeating.everyNMonths:title" = "Svaka %d mjeseca";
+"eventDetail.repeating.everyNYears:title" = "Svaka %d godine";
+"eventDetail.repeating::endoption_until" = "do %@";
+"eventDetail.repeating::endoption_times" = "%d puta";
+
+"eventDetail.place::placeholder" = "Lokacija";
+"eventDetail.place::remove_button" = "Ukloni lokaciju";
+"eventDetail.place::no_map_app" = "Odabrana aplikacija za karte nije instalirana.";
+"eventDetail.place::select_map_app" = "Odaberite kartu";
+"eventDetail.place::always_select_this_map" = "Uvijek otvaraj ovom aplikacijom.";
+
+"eventDetail.add_new_todo::message" = "Dodan je novi zadatak.";
+"eventDetail.add_new_schedule::message" = "Dodan je novi termin.";
+"eventDetail.scheduleEvent_removed::message" = "Termin je uklonjen.";
+"eventDetail.edit::repeating::confirm::ttile" = "Uredi događaj";
+"eventDetail.edit::repeating::confirm::message" = "Ovo je ponavljajući događaj.\nOdaberite opseg ponavljajućeg događaja koji želite urediti.";
+"eventDetail.edit::repeating::confirm::all::button" = "Svi događaji";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Od sada";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Samo ovaj put";
+"eventDetail.scheduleEvent_saved::message" = "Termin je spremljen.";
+"eventDetail.todoEvent_removed::message" = "Zadatak je uklonjen.";
+"eventDetail.todoEvent_saved::message" = "Zadatak je spremljen.";
+"eventDetail.cancel_edit::title" = "Uredi događaj";
+"eventDetail.cancel_edit::message" = "Želite li odbaciti ove promjene?";
+"eventDetail.cancel_edit::continue::button" = "Nastavi";
+
+"eventDetail.edit::add_new_name::placeholder" = "Dodajte naziv novog događaja";
+"eventDetail.edit::clearEventTime::button" = "Očisti vrijeme događaja";
+"eventDetail.edit::noEventTime::button" = "Bez vremena završetka";
+"eventDetail.edit::memo" = "Bilješka";
+"eventDetail.edit::urlPreview" = "Pregled URL-a";
+
+"eventDetail.edit::make::case" = "Je li ovo zadatak?";
+"eventDetail.edit::todo::case" = "Zadatak";
+"eventDetail.edit::schedule::case" = "Termin";
+"eventDetail.edit::holiday::case" = "Državni blagdan u %@";
+
+"eventDetail.notSupport::holiday" = "Funkcija izmjene informacija nije podržana za državne blagdane.";
+
+"eventDetail:todo:guide:message1" = "Zadatak predstavlja nešto što treba obaviti.";
+"eventDetail:todo:guide:message2" = "Za razliku od običnih događaja koji se u kalendaru prikazuju s određenim vremenom (ili razdobljem), zadaci omogućuju provjeru jesu li dovršeni.";
+"eventDetail:todo:guide:message3" = "Zadatak možete dodati i bez navođenja vremena. Na primjer, možete zabilježiti nešto što treba obaviti uskoro, ali ne odmah.";
+"eventDetail:todo:guide:process:message" = "Kada je uključeno ponavljanje, zadaci se ponašaju drugačije od običnih događaja:";
+"eventDetail:todo:guide:process:bullet1" = "Trenutni ili prošli ponavljajući zadaci koji još nisu dovršeni prikazuju se u kalendaru.";
+"eventDetail:todo:guide:process:bullet2" = "Kada se zadatak dovrši, dodaje se na popis dovršenih događaja, a u kalendaru se dodaje novo ponavljanje.";
+"eventDetail:todo:guide:process:bullet3" = "Ako zbog kraja ponavljanja nema sljedećeg ponavljanja, ponavljajući zadatak završava.";
+"eventDetail:foremost:guide:message1" = "Označite događaj kao najvažniji kako biste naglasili da je riječ o vašem najvažnijem događaju.\nNajvažniji događaj uvijek je vidljiv u kalendaru i podržava zaseban widget.";
+"eventDetail:foremost:guide:supports:message" = "Sljedeći tipovi događaja mogu se postaviti kao najvažniji događaj:";
+"eventDetail:foremost:guide:supports:todo" = "Zadatak";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Termini koji se ne ponavljaju";
+
+"eventDetail:isSaving:toast:message" = "Spremanje promjena. Pričekajte.";
+"eventDetail:hasChanges:confirm:message" = "Postoje promjene. Želite li ih odbaciti?";
+"eventDetail:hasChanges:confirm:continue" = "Nastavi uređivanje";
+
+"eventDetail.unavailto_transform_withoutName" = "Unesite naziv kako biste pretvorili događaj.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Za pretvaranje u termin potrebno je navesti vrijeme.";
+"eventDetail.todoEvent::transform::schedule_title" = "Pretvori";
+"eventDetail.todoEvent::transform::schedule_message" = "Želite li pretvoriti ovaj zadatak u termin?";
+"eventDetail.scheduleEvent::transform::todo" = "Pretvori";
+"eventDetail.scheduleEvent::transform::todo_message" = "Želite li pretvoriti ovaj termin u zadatak?";
+
+"eventDetail::revert" = "Poništi dovršenje";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Prikaži u Google kalendaru";
+"eventDetail::gogoleEvent::calendar" = "Kalendar";
+"eventDetail::gogoleEvent::calendar::event" = "Događaj Google kalendara";
+"eventDetail::gogoleEvent::attendee::unknown" = "Nepoznato";
+"eventDetail::gogoleEvent::attendees" = "Sudionici (%d osoba)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organizator";
+"eventDetail::gogoleEvent::conference::accessCode" = "Pristupni kod";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Kod sastanka";
+"eventDetail::gogoleEvent::conference::passCode" = "Kod za prolaz";
+"eventDetail::gogoleEvent::conference::password" = "Lozinka";
+"eventDetail::gogoleEvent::copy::message" = "Kopirano u međuspremnik.";
+"eventDetail::gogoleEvent::canceled::message" = "Ovaj događaj je otkazan.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Prikaži u Apple kalendaru";
+"eventDetail::appleCalendarEvent::calendar::event" = "Događaj Apple kalendara";
+"eventDetail::appleCalendarEvent::attendees" = "Sudionici (%d osoba)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organizator";
+
+// MARK: - event tag
+
+"eventTag.title" = "Tip događaja";
+"eventTag.list::title" = "Tipovi događaja";
+"eventTag.defaults.default::name" = "Zadano";
+"eventTag.defaults.holiday::name" = "Blagdan";
+"eventTag.addNew::placeholder" = "Dodaj novi tip događaja";
+"eventTag.allEventTypes" = "Svi tipovi događaja >";
+"eventTag.remove::confirm::message" = "Želite li ukloniti samo ovaj tip događaja ili i povezane događaje?";
+"eventTag.remove::only_tag" = "Ukloni samo tip događaja";
+"eventTag.remove::tag_and_evets" = "Ukloni zajedno s povezanim događajima";
+"eventTag.removed::message" = "Ovaj tip događaja je uklonjen.";
+"eventTag.removed_with_events::message" = "Ovaj tip događaja i povezani događaji su uklonjeni.";
+"eventTag.color::changed::message" = "Boja je promijenjena.";
+"eventTag.changed::message" = "Tip događaja je izmijenjen.";
+"eventTag.makeNew::message" = "Kreiran je novi tip događaja.";
+"eventTag.default::title" = "Zadani tip događaja";
+"eventTag.default::selection::explain" = "Ovo je tip događaja koji će biti odabran prema zadanim postavkama pri stvaranju događaja.";
+"eventTag.externalCalendar::integrate_button" = "Poveži kalendar";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Danas";
+"eventList::yesterday::title" = "Jučer";
+"eventList::thisMonth::title" = "Ovaj mjesec";
+"eventList::done_todos::title" = "Popis dovršenih zadataka";
+"eventList::done_todos::eventTime" = "Vrijeme događaja:";
+"eventList::done_todos::doneAt" = "Vrijeme dovršetka:";
+"eventList::remove::confirm::message" = "Izbriši popis dovršenih zadataka";
+"eventList::remove::confirm::button::all" = "Svi dovršeni zadaci";
+"eventList::remove::confirm::button::olderThan1m" = "Stariji od 1 mjeseca";
+"eventList::remove::confirm::button::olderThan3m" = "Stariji od 3 mjeseca";
+"eventList::remove::confirm::button::olderThan6m" = "Stariji od 6 mjeseci";
+"eventList::remove::confirm::button::olderThan1y" = "Stariji od 1 godine";
+
+
+// MARK: - account
+
+"manage_account::title" = "Upravljanje računom";
+"manage_account::login_method" = "Način prijave";
+"manage_account::email" = "E-pošta";
+"manage_account::last_signedIn_at" = "Vrijeme zadnje prijave";
+"manage_account::migration::title" = "Prijenos privremenih korisničkih podataka";
+"manage_account::migration::description" = "Svi događaji stvoreni prije prijave (%d događaja) prenose se na vaš račun.\nDogađajima povezanima s vašim računom možete pristupiti s bilo kojeg uređaja.";
+"manage_account::migration_finished::message" = "Prijenos je dovršen!";
+"manage_account::signout_button::title" = "Odjava";
+"manage_account::sign_out::confirm::title" = "Odjava";
+"manage_account::sign_out::confirm::message" = "Želite li se odjaviti s trenutnog računa?";
+"manage_account::delete_account_button::title" = "Izbriši račun";
+"manage_account::delete_account_button::confirm:message" = "Jeste li sigurni da želite izbrisati svoj račun?";
+"manage_account::delete_account_button::description" = "Nakon zahtjeva za brisanje, račun će biti izbrisan.\nNakon brisanja, podatke računa nije moguće vratiti.";
+"signIn::title" = "Prijava";
+"signIn:description" = "Napravite sigurnosnu kopiju popisa događaja i sinkronizirajte ga s drugim iOS uređajima\n(Popis podržanih platformi bit će proširen.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Postavke događaja";
+"event_setting::eventType" = "Tip događaja";
+"event_setting::eventPeriod" = "Razdoblje događaja";
+"event_setting::defaultMapApp" = "Otvori aplikaciju za karte";
+"event_setting::defaultMapApp_select" = "Odaberi";
+
+"event_setting::eventSync" = "Sinkronizacija događaja";
+"event_setting::eventSync::readyToSync::description" = "Sinkronizirajte sigurnosnu kopiju korisničkih događaja.";
+"event_setting::eventSync::syncInProgress::description" = "Sinkronizacija sigurnosne kopije korisničkih događaja...";
+"event_setting::eventSync::lastTime" = "Vrijeme zadnje sinkronizacije: %@";
+"event_setting::eventSync::force" = "Prisilna sinkronizacija";
+
+"event_notification_setting::title::forAllDay" = "Cijeli dan";
+"event_notification_setting::title::NotforAllDay" = "Vrijeme obavijesti";
+"event_setting::external_calendar::title" = "Vanjski kalendari";
+"event_setting::external_calendar::connected::account" = "Povezano: %@";
+"event_setting::external_calendar::start" = "Poveži";
+"event_setting::external_calendar::start::message" = "Povezano s vanjskim kalendarom.";
+"event_setting::external_calendar::stop" = "Prekini vezu";
+"event_setting::external_calendar::stop::message" = "Veza s vanjskim kalendarom je prekinuta.";
+"event_setting::external_calendar::google::serviceName" = "Google kalendar";
+"event_setting::external_calendar::apple::serviceName" = "Apple kalendar";
+"event_setting::apple_calendar::permission_denied::message" = "Pristup kalendaru je odbijen. Omogućite ga u Postavkama kako biste koristili Apple kalendar.";
+"event_setting::apple_calendar::restricted::message" = "Pristup kalendaru je ograničen na ovom uređaju.";
+"setting.title" = "Postavke";
+"setting.appearance.title" = "Izgled";
+"setting.appearance.calendar.samplemonth::march" = "OŽUJAK";
+"setting.appearance.calendar.startDayOfWeek" = "Prvi dan u tjednu";
+"setting.appearance.calendar.accentDay" = "Istaknuti dani";
+"setting.appearance.calendar.accentDay::holiday" = "Blagdan";
+"setting.appearance.calendar.accentDay::saturday" = "Subota";
+"setting.appearance.calendar.accentDay::sunday" = "Nedjelja";
+"setting.appearance.calendar.colorTheme" = "Tema boja";
+"setting.appearance.calendar.colorTheme::system" = "Sustav";
+"setting.appearance.calendar.colorTheme::light" = "Svijetla";
+"setting.appearance.calendar.colorTheme::dark" = "Tamna";
+"setting.appearance.calendar.underline" = "Podcrtavanje dana s događajima";
+"setting.appearance.event.edit::name_old" = "Uredi događaj";
+"setting.appearance.event.edit::name" = "Postavke događaja i vanjski kalendari";
+"setting.appearance.day_row_height" = "Razina prikaza detalja događaja";
+"setting.appearance.day_row_height::small::text" = "Minimalna";
+"setting.appearance.day_row_height::medium::text" = "Srednja";
+"setting.appearance.day_row_height::large::text" = "Puna";
+"setting.appearance.event.fontSize" = "Veličina fonta teksta događaja";
+"setting.appearance.event.show_holidayName" = "Prikaži naziv blagdana";
+"setting.appearance.event.show_lunar" = "Lunarni kalendar";
+"setting.appearance.event._24form" = "24-satni format";
+"setting.appearance.event.sample::name" = "🥗 Naziv događaja";
+"setting.appearance.event.sample::description" = "opis";
+"setting.appearance.event.sample::christmas" = "Božić";
+"setting.appearance.event.sample::first" = "prvi događaj";
+"setting.appearance.event.sample::second" = "drugi događaj";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Prikaži nedovršene zadatke";
+"setting.appearance.widget::title" = "Tema widgeta";
+"setting.appearance.widget::useSystemTheme::title" = "Koristi temu sustava";
+"setting.appearance.widget::useSystemTheme::background" = "Boja pozadine widgeta";
+"setting.appearance.widget::useCustomTheme::title" = "Odaberi prilagođenu boju";
+"setting.appearance.widget::sample::eventName" = "Događaj widgeta";
+"setting.appearance.event.boldText" = "Podebljani tekst";
+"setting.appearance.event.eventColor" = "Boja događaja";
+"setting.timezone::title" = "Vremenska zona";
+"setting.timezone::systemTimeZone::name" = "Vremenska zona sustava";
+"setting.timezone::systemTime::name" = "Vrijeme sustava";
+"setting.haptic::name" = "Haptička povratna informacija";
+"setting.minimize_animation::name" = "Smanji efekte animacije";
+"setting.holiday.title" = "Blagdani";
+"setting.holiday.item::name" = "Postavke blagdana";
+"setting.holiday.list::sectionTitle" = "Blagdani";
+"setting.holiday.country.title" = "Država";
+"setting.holiday.country.current::title" = "Trenutna država";
+"setting.holiday.country.current::placeHolder" = "Odaberite državu";
+"setting.holiday.country.changeConfirm::title" = "Promijeni državu";
+"setting.holiday.country.changeConfirm::message" = "Želite li promijeniti državu svog kalendara?";
+"setting.holiday.country.changed::message" = "Država je promijenjena.";
+"setting.holiday.hide::button" = "Sakrij";
+"setting.holiday.hide::confirm::title" = "Sakrij blagdan";
+"setting.holiday.hide::confirm::message" = "Sakriti ovaj blagdan svake godine?\nMožete ga ponovno prikazati u Postavke > Blagdani.";
+"setting.holiday.hidden::sectionTitle" = "Skriveni blagdani";
+"setting.holiday.show::button" = "Prikaži";
+"setting.feedback::name" = "Povratne informacije";
+"setting.help::name" = "Pomoć";
+"setting.share::name" = "Podijeli aplikaciju";
+"setting.write_review::name" = "Napišite recenziju aplikacije";
+"setting.account.signedIn::manageAccount" = "Račun";
+"setting.account.needSignIn" = "Prijava";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Upravljajte svojim popisom za čitanje";
+"setting.section.support::name" = "Podrška";
+"setting.section.app::name" = "Aplikacija";
+"setting.section.suggest::name" = "Prijedlozi";
+"feedback::guide:message" = "Slobodno nam pošaljite povratne informacije, uključujući prijave grešaka, komentare i prijedloge za uslugu.\nVaši komentari uvelike će nam pomoći u poboljšanju usluge.";
+"feedback::enterMessage::placeholder" = "Unesite poruku";
+"feedback::contact::placeholder" = "Adresa e-pošte za odgovor";
+"feedback::posted:message" = "Vaše povratne informacije su uspješno zabilježene.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google kalendar";
+"external_service.expired::message" = "Integracija s %@ je istekla. Idite u Postavke i pokušajte ponovno.";
+"external_service::google::hidden_event" = "Skriveno";
+"external_service::google::unknown_event" = "Nepoznato";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Pregledajte svoje nadolazeće događaje.";
+"widget.doubleMonth::name" = "Kalendar + Kalendar";
+"widget.eventAndMonth::name" = "Događaji + Kalendar";
+"widget.todayAndMonth::name" = "DANAS + Kalendar";
+"widget.eventAndForesmot::name" = "Događaji + Najvažnije";
+"widget.events::name" = "Događaji";
+"widget.events.noEvents::message" = "Nema događaja.";
+"widget.events.currentTodos" = "Trenutni popis zadataka";
+"widget.events.sample::check_mailbox" = "Provjeri poštanski sandučić";
+"widget.events.sample::example" = "Blagdan";
+"widget.events.sample::running" = "Trčanje";
+"widget.events.sample::luch" = "Ručak";
+"widget.events.sample::luch_appointment" = "Ručak (ne smije zakasniti)";
+"widget.events.sample::call" = "Nazovi Saru";
+"widget.events.sample::surfing" = "Surfanje";
+"widget.events.sample::moving" = "Dan selidbe";
+"widget.events.sample::meeting" = "Dnevni sastanak";
+"widget.events.sample::deposit_remain" = "Prenesi preostali saldo";
+"widget.events.sample::recycle" = "Recikliranje";
+"widget.events.sample::take_medicine" = "Uzmi lijek";
+"widget.events.sample::watering" = "Zalij saksiju";
+"widget.events.sample::june3" = "UTO, 3. LIP";
+"widget.events.sample::july16" = "NED, 16. SRP";
+"widget.events.sample::july21" = "PET, 21. SRP";
+"widget.events.sample::july29" = "SUB, 29. SRP";
+"widget.events.sample::aug2" = "SRI, 2. KOL";
+"widget.events.sample::aug3" = "ČET, 3. KOL";
+"widget.events.sample::oct10" = "PON, 10. LIS";
+"widget.events.foremost" = "Najvažniji događaj";
+"widget.events.foremost::allFinished::message" = "Dodajte događaj koji ne smijete propustiti.";
+"widget.events.foremost::sample::message" = "Ponesite kišobran! ⛱️";
+"widget.events.calendar" = "Kalendar";
+"widget.events.today" = "DANAS";
+"widget.events.today::sample::sunday" = "NEDJELJA";
+"widget.events.today::sample::march2024" = "OŽUJAK 2024";
+"total::event::count" = "%d događaja";
+"todo::count" = "%d zadataka";
+"schedule::count" = "%d termina";
+"widget.weeks.lastMonth" = "Prošli mjesec";
+"widget.weeks.thisMonth" = "Ovaj mjesec";
+"widget.weeks.nextMonth" = "Sljedeći mjesec";
+"widget.weeks.thisWeek" = "Ovaj tjedan";
+"widget.weeks.twoWeek" = "2 tjedna";
+"widget.weeks.threeWeek" = "3 tjedna";
+"widget.weeks.fourWeek" = "4 tjedna";
+"widget.weeks.sample::feb" = "VELJAČA";
+"widget.weeks.sample::march" = "OŽUJAK";
+"widget.weeks.sample::april" = "TRAVANJ";
+"widget.weeks.sample::hiking" = "🏔️ Planinarenje";
+"widget.weeks.sample::lunch" = "🥗 Ručak";
+"widget.weeks.sample::call" = "📞 Nazovi Saru";
+"widget.weeks.sample::holiday" = "Blagdan";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Trening";
+"widget.weeks.sample::launch" = "🚀 Lansiranje";
+"widget.fail.message" = "Došlo je do privremene pogreške.\nPokušajte ponovno pokrenuti aplikaciju.";
+"widget.next.noEvent" = "Nema sljedećeg događaja.";
+"widget.next.sample" = "🔥 Trening";
+"widget.next.title" = "Sljedeći događaj";
+"widget.next.rect_widget::title" = "Sljedeći današnji događaj.";
+"widget.next.title::remains" = "Sljedeći današnji događaji.";
+"widget.next.title::future" = "Danas i što slijedi";
+"widget.next.title::more_todos" = "Još %d zadataka";
+"widget.next.title::more_events" = "Još %d termina";
+"widget.next.title::more_events_with_todo" = "Još %1$d zadataka i %2$d termina";
+"widget.next.title::uncompleted::todo" = "%1$@ nije dovršeno";
+"widget.next.title::uncompleted::todos" = "%1$@ i još %2$d nedovršenih zadataka";
+"widget.next.no_events_today" = "Danas nema događaja";
+"widget.next.no_events" = "Nema nadolazećih događaja";
+
+"widget.dday::name" = "Odbrojavanje";
+"widget.dday::noTarget" = "Odaberite događaj";
+"widget.dday.sample::title" = "Radionica";
+"widget.dday.target::repeating" = "Ponavljajuće";
+"widget.dday.target::registered" = "Prikvačeno";
+"widget.dday.turn::name" = "Krug %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Ovaj format poveznice nije podržan.\nAžurirajte aplikaciju na najnoviju verziju.";
+
+// MARK: - force update
+
+"force_update.title" = "Potrebno je ažuriranje";
+"force_update.message" = "Dostupna je nova verzija.\nAžurirajte kako biste nastavili koristiti aplikaciju.";
+"recommend_update.title" = "Preporučeno ažuriranje";
+"recommend_update.message" = "Dostupna je nova verzija.\nPreporučujemo ažuriranje za bolje iskustvo.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Slušam…";
+"aiAgent::keyboard" = "Tipkovnica";
+"aiAgent::voice" = "Glas";
+"aiAgent::send" = "Pošalji";
+"aiAgent::input::placeholder" = "Kako mogu pomoći?";
+"aiAgent::permission::title" = "Potreban je pristup mikrofonu i prepoznavanju govora";
+"aiAgent::permission::message" = "Omogućite pristup u Postavkama ili upišite tekst";
+"aiAgent::permission::keyboard" = "Upiši tekst";
+"aiAgent::permission::setting" = "Otvori Postavke";
+"aiAgent::state::processing" = "Obrada u tijeku";
+"aiAgent::state::confirm" = "Potrebna je potvrda";
+"aiAgent::state::confirmExpired" = "Isteklo";
+"aiAgent::state::done" = "Naredba dovršena";
+"aiAgent::state::failed" = "Naredba nije uspjela";
+"aiAgent::done::default" = "Gotovo";
+"aiAgent::failed::default" = "Nije uspjelo dovršiti";
+"aiAgent::retry" = "Pokušaj ponovno";
+"aiAgent::needSignIn::title" = "Potrebna je prijava";
+"aiAgent::needSignIn::message" = "Prijavite se kako biste koristili brzi AI unos.";
+"aiAgent::title" = "Brzi AI unos";
+"aiAgent::keyboard::stop" = "Zaustavi";
+"aiAgent::keyboard::send" = "Pošalji";
+"aiAgent::stop" = "Zaustavi";
+"aiAgent::usage" = "%@ / %@ kredita";
+"aiAgent::plan::free" = "Besplatni";
+"aiAgent::plan::standard" = "Standardni";
+"aiAgent::plan::lifetime" = "Doživotni";
+"aiAgent::usage::topupRemaining" = "Preostalo %@ dodatnih kredita";
+"aiAgent::usage::planChangeScheduled" = "Prelazak na plan %2$@ %1$@";
+"aiAgent::stop::confirm::title" = "Zaustaviti obradu?";
+"aiAgent::stop::confirm::message" = "Zaustavljanje odbacuje naredbu u tijeku i ona se neće moći nastaviti.";
+"aiAgent::confirm::countdown" = "preostalo za odobrenje";
+"aiAgent::confirm::expired::message" = "Vrijeme je isteklo. Ponovite zahtjev.";

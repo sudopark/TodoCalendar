@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " a";
+"common::wait:message" = "Čekejte prosím...";
+"common::back" = "Zpět";
+"common.remove" = "Odebrat";
+"common.confirm" = "Potvrdit";
+"common.cancel" = "Zrušit";
+"common.close" = "Zavřít";
+"common.yes" = "Ano";
+"common.no" = "Ne";
+"common.save" = "Uložit";
+"common.info" = "Info";
+"common.search" = "Hledat";
+"common.clear" = "Vymazat";
+"common.send" = "Odeslat";
+"common.done" = "Hotovo";
+"common.errorMessage" = "Došlo k dočasné chybě.\nPokud problém přetrvává, nahlaste jej prosím.";
+"common.update" = "Aktualizovat";
+"common.go_to_settings" = "Přejít do nastavení";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d. M., HH:mm";
+"date_form::MM_d" = "d. M.";
+"date_form::MM_dd" = "dd. MM.";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d. MMM HH:mm";
+"date_form::MMM_d" = "d. MMM";
+"date_form::yyyy_MM_dd_E_" = "dd. MM. yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd. MM. yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd. MM. yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd. MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd. MM. yyyy";
+"date_form.yyyy_MMM_dd" = "d. MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE d. MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Zítra";
+
+// MARK: - event
+
+"dayname::sunday" = "Neděle";
+"dayname::monday" = "Pondělí";
+"dayname::tuesday" = "Úterý";
+"dayname::wednesday" = "Středa";
+"dayname::thursday" = "Čtvrtek";
+"dayname::friday" = "Pátek";
+"dayname::saturday" = "Sobota";
+
+"dayname::sunday:short" = "NE";
+"dayname::monday:short" = "PO";
+"dayname::tuesday:short" = "ÚT";
+"dayname::wednesday:short" = "ST";
+"dayname::thursday:short" = "ČT";
+"dayname::friday:short" = "PÁ";
+"dayname::saturday:short" = "SO";
+
+"dayname::sunday:very_short" = "N";
+"dayname::monday:very_short" = "P";
+"dayname::tuesday:very_short" = "Ú";
+"dayname::wednesday:very_short" = "S";
+"dayname::thursday:very_short" = "Č";
+"dayname::friday:very_short" = "P";
+"dayname::saturday:very_short" = "S";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Dnešní události";
+"event_notification::todo:prefix" = "Úkol";
+"event_notification::today:prefix" = "Dnes";
+"event_notification::tomorrow:prefix" = "Zítra";
+"event_notification::allday_today" = "Dnes celý den";
+"event_notification::allday_tomorrow" = "Zítra celý den";
+"event_notification::some_allday" = "%@ celý den";
+"event_notification_setting::option_title::no_notification" = "Žádná upozornění";
+"event_notification_setting::option_title::at_time" = "V čase události";
+"event_notification_setting::option_title::allday_9am" = "V 9:00 daného dne";
+"event_notification_setting::option_title::allday_12pm" = "V poledne daného dne";
+"event_notification_setting::option_title::customTime" = "Vlastní čas: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Vlastní čas";
+"event_notification_setting::option_title::before_minutes" = "%d minut před událostí";
+"event_notification_setting::option_title::before_hours" = "%d hodin před událostí";
+"event_notification_setting::option_title::before_days" = "%d dní před událostí";
+"event_notification_setting::option_title::before_weeks" = "%d týdnů před událostí";
+"event_notification_setting::option_title::allday_9am_before_days" = "V 9:00, %d dní předem";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "V 9:00, %d týdnů předem";
+"event_notification_setting::need_permission_message" = "Pro použití upozornění na události je potřeba oprávnění k upozorněním.\nPřejděte do nastavení aplikace v systému a povolte upozornění.";
+"event_notification_setting::need_permission::go_setting" = "Přejít do nastavení";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "K použití připomenutí událostí je vyžadováno oprávnění k upozorněním aplikace.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Nejdůležitější událost";
+"calendar::uncompletedTodos:title" = "Nedokončené úkoly";
+"calendar::event_time::todo" = "Úkol";
+"calendar::event_time::allday" = "Celý den";
+"calendar::event_time::allday::with" = "%@ celý den";
+"calendar::event_time::period:some_days" = "%d dní";
+"calendar::event_time::period:some_minutes" = "%d minut";
+"calendar::event_time::period:some_hours" = "%d hodin";
+"calendar::event_time::period:some_days:some_hours" = "%d dní %d hodin";
+"calendar::event::more_action::remove:title" = "Odebrat událost";
+"calendar::event::more_action::foremost_event:title" = "Nejdůležitější událost";
+"calendar::event::more_action::remove_only_thistime:message" = "Chcete odstranit pouze tuto událost ze všech opakujících se událostí?";
+"calendar::event::more_action::remove:message" = "Chcete tuto událost odebrat?";
+"calendar::event::more_action::mark_as_foremost" = "Chcete tuto událost označit jako svou nejdůležitější?";
+"calendar::event::more_action::unmark_as_foremost" = "Chcete zrušit označení této události jako nejdůležitější?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Opakující se termín nelze označit jako nejdůležitější událost.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Odebrat pouze tuto událost";
+"calendar::event::more_action:remove:item_name" = "Odebrat událost";
+"calendar::event::more_action:foremost:mark:item_name" = "Označit jako nejdůležitější";
+"calendar::event::more_action:foremost:unmark:item_name" = "Zrušit označení jako nejdůležitější";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Přidat do widgetu Odpočet";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Odebrat z widgetu Odpočet";
+"calendar::event::more_action:dday_candidate:title" = "Kandidát pro widget Odpočet";
+"calendar::event::more_action:dday_candidate:register:message" = "Přidat tuto událost jako kandidáta pro widget Odpočet? Po úpravě widgetu se zobrazí na začátku seznamu.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Odebrat tuto událost z kandidátů pro widget Odpočet?";
+"calendar::event::more_action:copy:item_name" = "Kopírovat událost";
+"calendar::event::more_action:transform_to::schedule" = "Převést na termín";
+"calendar::event::more_action:transform_to::todo" = "Převést na úkol";
+"calendar::event::more_action:edit:item_name" = "Upravit";
+"calednar::event::add_new" = "Přidat novou událost";
+"calednar::event::add_new:place_holder" = "Rychle přidejte nový úkol.";
+"calednar::event::skip_todo" = "Přeskočit tento úkol";
+"calednar::event::skip_todo_until" = "Vyberte čas, do kdy tento úkol přeskočit";
+"calednar::event::copy" = "Kopírovat událost";
+"calendar::move_date" = "Přesunout datum";
+"calednar::event::google::edit" = "Upravit událost Google Kalendáře";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Nejprve vyberte čas události.";
+"eventDetail.messages.selectValidTime" = "Vyberte platný čas události.";
+"eventDetail.notification.custom_eventTime:title" = "Vlastní";
+"eventDetail.notification.title" = "Čas upozornění na událost";
+"eventDetail.repeating.title" = "Opakování";
+"eventDetail.repeating.notRepeating::title" = "Bez opakování";
+"eventDetail.repeating.starttime:form" = "d. M. yyyy";
+"eventDetail.repeating.starttime:title" = "Čas začátku opakování";
+"eventDetail.repeating.everyDay:title" = "Každý den";
+"eventDetail.repeating.everyWeek:title" = "Každý týden";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Každé %@";
+"eventDetail.repeating.everySomeWeek:title" = "Každých %d týdnů";
+"eventDetail.repeating.everyWeekDays:title" = "Každý pracovní den";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Každých %d týdnů v %@";
+"eventDetail.repeating.everyMonth:title" = "Každý měsíc";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ každý měsíc.";
+"eventDetail.repeating.everyYear:title" = "Každý rok";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Každý rok (lunární kalendář)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Každý rok %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Každý rok %@ (lunární kalendář)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Všechny dny posledního týdne každého měsíce";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "První %@ každého měsíce";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Druhý %@ každého měsíce";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Třetí %@ každého měsíce";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Čtvrtý %@ každého měsíce";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Pátý %@ každého měsíce";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Šestý %@ každého měsíce";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Sedmý %@ každého měsíce";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Poslední %@ každého měsíce";
+"eventDetail.repeating.endtime::title" = "Konec opakování";
+"eventDetail.repeating.endtime::option::never" = "Nikdy";
+"eventDetail.repeating.endtime::option::on" = "Dne";
+"eventDetail.repeating.endtime::option::after" = "Po";
+"eventDetail.repeating.endtime::option::after_occurrences" = "výskytech";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Čas konce opakování musí být pozdější než čas začátku.\n(Datum začátku opakování: %@)";
+"eventDetail.repeating::period_endcount" = "Od %@, %d krát";
+
+"eventDetail.repeating.everyNDays:title" = "Každých %d dní";
+"eventDetail.repeating.last" = "Poslední";
+"eventDetail.repeating.everyNMonths:title" = "Každých %d měsíců";
+"eventDetail.repeating.everyNYears:title" = "Každých %d let";
+"eventDetail.repeating::endoption_until" = "do %@";
+"eventDetail.repeating::endoption_times" = "%d krát";
+
+"eventDetail.place::placeholder" = "Místo";
+"eventDetail.place::remove_button" = "Odebrat místo";
+"eventDetail.place::no_map_app" = "Vybraná mapová aplikace není nainstalována.";
+"eventDetail.place::select_map_app" = "Vyberte mapu";
+"eventDetail.place::always_select_this_map" = "Vždy otevírat touto aplikací.";
+
+"eventDetail.add_new_todo::message" = "Byl přidán nový úkol.";
+"eventDetail.add_new_schedule::message" = "Byl přidán nový termín.";
+"eventDetail.scheduleEvent_removed::message" = "Termín byl odebrán.";
+"eventDetail.edit::repeating::confirm::ttile" = "Upravit událost";
+"eventDetail.edit::repeating::confirm::message" = "Tato událost je opakující se událost.\nVyberte rozsah opakující se události, kterou chcete upravit.";
+"eventDetail.edit::repeating::confirm::all::button" = "Všechny události";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Od nynějška";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Pouze tentokrát";
+"eventDetail.scheduleEvent_saved::message" = "Termín byl uložen.";
+"eventDetail.todoEvent_removed::message" = "Úkol byl odebrán.";
+"eventDetail.todoEvent_saved::message" = "Úkol byl uložen.";
+"eventDetail.cancel_edit::title" = "Upravit událost";
+"eventDetail.cancel_edit::message" = "Chcete tyto změny zahodit?";
+"eventDetail.cancel_edit::continue::button" = "Pokračovat";
+
+"eventDetail.edit::add_new_name::placeholder" = "Přidat název nové události";
+"eventDetail.edit::clearEventTime::button" = "Vymazat čas události";
+"eventDetail.edit::noEventTime::button" = "Bez času konce";
+"eventDetail.edit::memo" = "Poznámka";
+"eventDetail.edit::urlPreview" = "Náhled URL";
+
+"eventDetail.edit::make::case" = "Je to úkol?";
+"eventDetail.edit::todo::case" = "Úkol";
+"eventDetail.edit::schedule::case" = "Termín";
+"eventDetail.edit::holiday::case" = "Státní svátek v %@";
+
+"eventDetail.notSupport::holiday" = "Funkce úpravy informací není u státních svátků podporována.";
+
+"eventDetail:todo:guide:message1" = "Úkol představuje něco, co je třeba udělat.";
+"eventDetail:todo:guide:message2" = "Na rozdíl od běžných termínů zobrazovaných v kalendáři s konkrétním časem (nebo obdobím) nabízejí úkoly možnost ověřit, zda byly dokončeny.";
+"eventDetail:todo:guide:message3" = "Úkol můžete přidat i bez uvedení času. Můžete si tak například poznamenat věc, kterou je třeba udělat brzy, ale ne hned.";
+"eventDetail:todo:guide:process:message" = "Když je zapnuta možnost opakování, chovají se úkoly jinak než běžné termíny:";
+"eventDetail:todo:guide:process:bullet1" = "V kalendáři se zobrazují aktuální nebo minulé opakující se úkoly, které ještě nebyly dokončeny.";
+"eventDetail:todo:guide:process:bullet2" = "Po dokončení úkolu je přidán do seznamu dokončených událostí a do kalendáře je nově přidáno další opakování.";
+"eventDetail:todo:guide:process:bullet3" = "Pokud kvůli konci opakování už neexistuje další opakování, opakující se úkol končí.";
+"eventDetail:foremost:guide:message1" = "Označte událost jako nejdůležitější, abyste zdůraznili, že jde o vaši nejvýznamnější událost.\nNejdůležitější událost je v kalendáři vždy viditelná a podporuje samostatný widget.";
+"eventDetail:foremost:guide:supports:message" = "Jako nejdůležitější událost lze nastavit tyto typy událostí:";
+"eventDetail:foremost:guide:supports:todo" = "Úkol";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Neopakující se termíny";
+
+"eventDetail:isSaving:toast:message" = "Ukládání změn. Čekejte prosím.";
+"eventDetail:hasChanges:confirm:message" = "Máte neuložené změny. Chcete je zahodit?";
+"eventDetail:hasChanges:confirm:continue" = "Pokračovat v úpravách";
+
+"eventDetail.unavailto_transform_withoutName" = "Pro převod události zadejte název.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "K převodu na termín jsou potřeba informace o čase.";
+"eventDetail.todoEvent::transform::schedule_title" = "Převést";
+"eventDetail.todoEvent::transform::schedule_message" = "Chcete tento úkol převést na termín?";
+"eventDetail.scheduleEvent::transform::todo" = "Převést";
+"eventDetail.scheduleEvent::transform::todo_message" = "Chcete tento termín převést na úkol?";
+
+"eventDetail::revert" = "Vrátit dokončení zpět";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Zobrazit v Google Kalendáři";
+"eventDetail::gogoleEvent::calendar" = "Kalendář";
+"eventDetail::gogoleEvent::calendar::event" = "Událost Google Kalendáře";
+"eventDetail::gogoleEvent::attendee::unknown" = "Neznámý";
+"eventDetail::gogoleEvent::attendees" = "Účastníci (%d osob)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organizátor";
+"eventDetail::gogoleEvent::conference::accessCode" = "Přístupový kód";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Kód schůzky";
+"eventDetail::gogoleEvent::conference::passCode" = "Kód pro vstup";
+"eventDetail::gogoleEvent::conference::password" = "Heslo";
+"eventDetail::gogoleEvent::copy::message" = "Zkopírováno do schránky.";
+"eventDetail::gogoleEvent::canceled::message" = "Tato událost byla zrušena.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Zobrazit v Apple Kalendáři";
+"eventDetail::appleCalendarEvent::calendar::event" = "Událost Apple Kalendáře";
+"eventDetail::appleCalendarEvent::attendees" = "Účastníci (%d osob)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organizátor";
+
+// MARK: - event tag
+
+"eventTag.title" = "Typ události";
+"eventTag.list::title" = "Typy událostí";
+"eventTag.defaults.default::name" = "Výchozí";
+"eventTag.defaults.holiday::name" = "Svátek";
+"eventTag.addNew::placeholder" = "Přidat nový typ události";
+"eventTag.allEventTypes" = "Všechny typy událostí >";
+"eventTag.remove::confirm::message" = "Chcete odebrat pouze tento typ události, nebo i všechny související události?";
+"eventTag.remove::only_tag" = "Odebrat pouze typ události";
+"eventTag.remove::tag_and_evets" = "Odebrat i se souvisejícími událostmi";
+"eventTag.removed::message" = "Tento typ události byl odebrán.";
+"eventTag.removed_with_events::message" = "Tento typ události a související události byly odebrány.";
+"eventTag.color::changed::message" = "Barva byla změněna.";
+"eventTag.changed::message" = "Typ události byl upraven.";
+"eventTag.makeNew::message" = "Byl vytvořen nový typ události.";
+"eventTag.default::title" = "Výchozí typ události";
+"eventTag.default::selection::explain" = "Toto je typ události, který bude při vytváření události vybrán jako výchozí.";
+"eventTag.externalCalendar::integrate_button" = "Připojit kalendář";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Dnes";
+"eventList::yesterday::title" = "Včera";
+"eventList::thisMonth::title" = "Tento měsíc";
+"eventList::done_todos::title" = "Seznam dokončených úkolů";
+"eventList::done_todos::eventTime" = "Čas události:";
+"eventList::done_todos::doneAt" = "Čas dokončení:";
+"eventList::remove::confirm::message" = "Odstranit seznam dokončených úkolů";
+"eventList::remove::confirm::button::all" = "Všechny dokončené úkoly";
+"eventList::remove::confirm::button::olderThan1m" = "Starší než 1 měsíc";
+"eventList::remove::confirm::button::olderThan3m" = "Starší než 3 měsíce";
+"eventList::remove::confirm::button::olderThan6m" = "Starší než 6 měsíců";
+"eventList::remove::confirm::button::olderThan1y" = "Starší než 1 rok";
+
+
+// MARK: - account
+
+"manage_account::title" = "Správa účtu";
+"manage_account::login_method" = "Způsob přihlášení";
+"manage_account::email" = "E-mail";
+"manage_account::last_signedIn_at" = "Čas posledního přihlášení";
+"manage_account::migration::title" = "Migrace dočasných uživatelských dat";
+"manage_account::migration::description" = "Všechny události vytvořené před přihlášením (%d událostí) se migrují do vašeho účtu.\nUdálosti propojené s vaším účtem jsou dostupné z libovolného zařízení.";
+"manage_account::migration_finished::message" = "Migrace je dokončena!";
+"manage_account::signout_button::title" = "Odhlásit se";
+"manage_account::sign_out::confirm::title" = "Odhlásit se";
+"manage_account::sign_out::confirm::message" = "Chcete se odhlásit ze svého současného účtu?";
+"manage_account::delete_account_button::title" = "Smazat účet";
+"manage_account::delete_account_button::confirm:message" = "Opravdu chcete smazat svůj účet?";
+"manage_account::delete_account_button::description" = "Po požádání o smazání účtu bude účet smazán.\nJakmile je smazán, údaje o účtu nelze obnovit.";
+"signIn::title" = "Přihlásit se";
+"signIn:description" = "Zálohujte si seznam událostí a synchronizujte jej mezi dalšími zařízeními s iOS\n(Podporované platformy budou rozšiřovány.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Nastavení událostí";
+"event_setting::eventType" = "Typ události";
+"event_setting::eventPeriod" = "Období události";
+"event_setting::defaultMapApp" = "Otevřít aplikaci Mapy";
+"event_setting::defaultMapApp_select" = "Vybrat";
+
+"event_setting::eventSync" = "Synchronizace událostí";
+"event_setting::eventSync::readyToSync::description" = "Synchronizovat zálohované uživatelské události.";
+"event_setting::eventSync::syncInProgress::description" = "Probíhá synchronizace zálohovaných uživatelských událostí...";
+"event_setting::eventSync::lastTime" = "Čas poslední synchronizace: %@";
+"event_setting::eventSync::force" = "Vynutit synchronizaci";
+
+"event_notification_setting::title::forAllDay" = "Celý den";
+"event_notification_setting::title::NotforAllDay" = "Čas upozornění";
+"event_setting::external_calendar::title" = "Externí kalendáře";
+"event_setting::external_calendar::connected::account" = "Připojeno: %@";
+"event_setting::external_calendar::start" = "Připojit";
+"event_setting::external_calendar::start::message" = "Připojeno k externímu kalendáři.";
+"event_setting::external_calendar::stop" = "Odpojit";
+"event_setting::external_calendar::stop::message" = "Připojení k externímu kalendáři bylo odpojeno.";
+"event_setting::external_calendar::google::serviceName" = "Google Kalendář";
+"event_setting::external_calendar::apple::serviceName" = "Apple Kalendář";
+"event_setting::apple_calendar::permission_denied::message" = "Přístup ke kalendáři byl odepřen. Povolte ho v Nastavení, abyste mohli používat Apple Kalendář.";
+"event_setting::apple_calendar::restricted::message" = "Přístup ke kalendáři je na tomto zařízení omezen.";
+"setting.title" = "Nastavení";
+"setting.appearance.title" = "Vzhled";
+"setting.appearance.calendar.samplemonth::march" = "BŘEZEN";
+"setting.appearance.calendar.startDayOfWeek" = "První den v týdnu";
+"setting.appearance.calendar.accentDay" = "Zvýrazněné dny";
+"setting.appearance.calendar.accentDay::holiday" = "Svátek";
+"setting.appearance.calendar.accentDay::saturday" = "Sobota";
+"setting.appearance.calendar.accentDay::sunday" = "Neděle";
+"setting.appearance.calendar.colorTheme" = "Barevné téma";
+"setting.appearance.calendar.colorTheme::system" = "Systémové";
+"setting.appearance.calendar.colorTheme::light" = "Světlé";
+"setting.appearance.calendar.colorTheme::dark" = "Tmavé";
+"setting.appearance.calendar.underline" = "Podtržení dnů s událostmi";
+"setting.appearance.event.edit::name_old" = "Upravit událost";
+"setting.appearance.event.edit::name" = "Nastavení událostí a externí kalendáře";
+"setting.appearance.day_row_height" = "Úroveň zobrazení detailu události";
+"setting.appearance.day_row_height::small::text" = "Minimální";
+"setting.appearance.day_row_height::medium::text" = "Střední";
+"setting.appearance.day_row_height::large::text" = "Plná";
+"setting.appearance.event.fontSize" = "Velikost písma textu události";
+"setting.appearance.event.show_holidayName" = "Zobrazit název svátku";
+"setting.appearance.event.show_lunar" = "Lunární kalendář";
+"setting.appearance.event._24form" = "24hodinový formát";
+"setting.appearance.event.sample::name" = "🥗 Název události";
+"setting.appearance.event.sample::description" = "popis";
+"setting.appearance.event.sample::christmas" = "Vánoce";
+"setting.appearance.event.sample::first" = "první událost";
+"setting.appearance.event.sample::second" = "druhá událost";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Zobrazit nedokončené úkoly";
+"setting.appearance.widget::title" = "Motiv widgetu";
+"setting.appearance.widget::useSystemTheme::title" = "Použít systémový motiv";
+"setting.appearance.widget::useSystemTheme::background" = "Barva pozadí widgetu";
+"setting.appearance.widget::useCustomTheme::title" = "Vybrat vlastní barvu";
+"setting.appearance.widget::sample::eventName" = "Událost widgetu";
+"setting.appearance.event.boldText" = "Tučný text";
+"setting.appearance.event.eventColor" = "Barva události";
+"setting.timezone::title" = "Časové pásmo";
+"setting.timezone::systemTimeZone::name" = "Systémové časové pásmo";
+"setting.timezone::systemTime::name" = "Systémový čas";
+"setting.haptic::name" = "Haptická odezva";
+"setting.minimize_animation::name" = "Omezit animační efekty";
+"setting.holiday.title" = "Svátky";
+"setting.holiday.item::name" = "Nastavení svátků";
+"setting.holiday.list::sectionTitle" = "Svátky";
+"setting.holiday.country.title" = "Země";
+"setting.holiday.country.current::title" = "Aktuální země";
+"setting.holiday.country.current::placeHolder" = "Vybrat zemi";
+"setting.holiday.country.changeConfirm::title" = "Změnit zemi";
+"setting.holiday.country.changeConfirm::message" = "Chcete změnit zemi svého kalendáře?";
+"setting.holiday.country.changed::message" = "Země byla změněna.";
+"setting.holiday.hide::button" = "Skrýt";
+"setting.holiday.hide::confirm::title" = "Skrýt svátek";
+"setting.holiday.hide::confirm::message" = "Skrývat tento svátek každý rok?\nZnovu ho můžete zobrazit v Nastavení > Svátky.";
+"setting.holiday.hidden::sectionTitle" = "Skryté svátky";
+"setting.holiday.show::button" = "Zobrazit";
+"setting.feedback::name" = "Zpětná vazba";
+"setting.help::name" = "Nápověda";
+"setting.share::name" = "Sdílet aplikaci";
+"setting.write_review::name" = "Napsat recenzi aplikace";
+"setting.account.signedIn::manageAccount" = "Účet";
+"setting.account.needSignIn" = "Přihlásit se";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Spravujte svůj seznam ke čtení";
+"setting.section.support::name" = "Podpora";
+"setting.section.app::name" = "Aplikace";
+"setting.section.suggest::name" = "Návrhy";
+"feedback::guide:message" = "Neváhejte nám zaslat zpětnou vazbu, včetně hlášení chyb, komentářů a návrhů ke službě.\nVaše připomínky nám velmi pomohou zlepšit naši službu.";
+"feedback::enterMessage::placeholder" = "Zadejte zprávu";
+"feedback::contact::placeholder" = "E-mailová adresa pro odpověď";
+"feedback::posted:message" = "Vaše zpětná vazba byla úspěšně zaregistrována.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Kalendář";
+"external_service.expired::message" = "Platnost integrace %@ vypršela. Přejděte prosím do Nastavení a zkuste to znovu.";
+"external_service::google::hidden_event" = "Skryto";
+"external_service::google::unknown_event" = "Neznámé";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Zobrazte si nadcházející události.";
+"widget.doubleMonth::name" = "Kalendář + Kalendář";
+"widget.eventAndMonth::name" = "Události + Kalendář";
+"widget.todayAndMonth::name" = "DNES + Kalendář";
+"widget.eventAndForesmot::name" = "Události + Nejdůležitější";
+"widget.events::name" = "Události";
+"widget.events.noEvents::message" = "Nejsou žádné události.";
+"widget.events.currentTodos" = "Aktuální seznam úkolů";
+"widget.events.sample::check_mailbox" = "Zkontrolovat schránku";
+"widget.events.sample::example" = "Svátek";
+"widget.events.sample::running" = "Běhání";
+"widget.events.sample::luch" = "Oběd";
+"widget.events.sample::luch_appointment" = "Oběd (nesmí se zpozdit)";
+"widget.events.sample::call" = "Zavolat Saře";
+"widget.events.sample::surfing" = "Surfování";
+"widget.events.sample::moving" = "Den stěhování";
+"widget.events.sample::meeting" = "Denní porada";
+"widget.events.sample::deposit_remain" = "Převést zbývající zůstatek";
+"widget.events.sample::recycle" = "Recyklace";
+"widget.events.sample::take_medicine" = "Vzít si léky";
+"widget.events.sample::watering" = "Zalít květináč";
+"widget.events.sample::june3" = "ÚT, 3. ČVN";
+"widget.events.sample::july16" = "NE, 16. ČVC";
+"widget.events.sample::july21" = "PÁ, 21. ČVC";
+"widget.events.sample::july29" = "SO, 29. ČVC";
+"widget.events.sample::aug2" = "ST, 2. SRP";
+"widget.events.sample::aug3" = "ČT, 3. SRP";
+"widget.events.sample::oct10" = "PO, 10. ŘÍJ";
+"widget.events.foremost" = "Nejdůležitější událost";
+"widget.events.foremost::allFinished::message" = "Přidejte událost, kterou si nesmíte nechat ujít.";
+"widget.events.foremost::sample::message" = "Vezměte si deštník! ⛱️";
+"widget.events.calendar" = "Kalendář";
+"widget.events.today" = "DNES";
+"widget.events.today::sample::sunday" = "NEDĚLE";
+"widget.events.today::sample::march2024" = "BŘEZEN 2024";
+"total::event::count" = "%d událostí";
+"todo::count" = "%d úkolů";
+"schedule::count" = "%d termínů";
+"widget.weeks.lastMonth" = "Minulý měsíc";
+"widget.weeks.thisMonth" = "Tento měsíc";
+"widget.weeks.nextMonth" = "Příští měsíc";
+"widget.weeks.thisWeek" = "Tento týden";
+"widget.weeks.twoWeek" = "2 týdny";
+"widget.weeks.threeWeek" = "3 týdny";
+"widget.weeks.fourWeek" = "4 týdny";
+"widget.weeks.sample::feb" = "ÚNOR";
+"widget.weeks.sample::march" = "BŘEZEN";
+"widget.weeks.sample::april" = "DUBEN";
+"widget.weeks.sample::hiking" = "🏔️ Turistika";
+"widget.weeks.sample::lunch" = "🥗 Oběd";
+"widget.weeks.sample::call" = "📞 Zavolat Saře";
+"widget.weeks.sample::holiday" = "Svátek";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Trénink";
+"widget.weeks.sample::launch" = "🚀 Start";
+"widget.fail.message" = "Došlo k dočasné chybě.\nZkuste prosím aplikaci znovu spustit.";
+"widget.next.noEvent" = "Žádná další událost.";
+"widget.next.sample" = "🔥 Trénink";
+"widget.next.title" = "Další událost";
+"widget.next.rect_widget::title" = "Další dnešní událost.";
+"widget.next.title::remains" = "Další dnešní události.";
+"widget.next.title::future" = "Dnes a co bude dál";
+"widget.next.title::more_todos" = "Ještě %d úkolů";
+"widget.next.title::more_events" = "Ještě %d termínů";
+"widget.next.title::more_events_with_todo" = "Ještě %1$d úkolů a %2$d termínů";
+"widget.next.title::uncompleted::todo" = "%1$@ není dokončeno";
+"widget.next.title::uncompleted::todos" = "%1$@ a ještě %2$d nedokončených úkolů";
+"widget.next.no_events_today" = "Dnes žádné události";
+"widget.next.no_events" = "Žádné nadcházející události";
+
+"widget.dday::name" = "Odpočet";
+"widget.dday::noTarget" = "Vyberte událost";
+"widget.dday.sample::title" = "Workshop";
+"widget.dday.target::repeating" = "Opakující se";
+"widget.dday.target::registered" = "Připnuto";
+"widget.dday.turn::name" = "Kolo %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Tento formát odkazu není podporován.\nAktualizujte prosím aplikaci na nejnovější verzi.";
+
+// MARK: - force update
+
+"force_update.title" = "Vyžadována aktualizace";
+"force_update.message" = "Je k dispozici nová verze.\nPro pokračování v používání aplikace ji prosím aktualizujte.";
+"recommend_update.title" = "Doporučena aktualizace";
+"recommend_update.message" = "Je k dispozici nová verze.\nDoporučujeme aktualizaci pro lepší zážitek.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Poslouchám…";
+"aiAgent::keyboard" = "Klávesnice";
+"aiAgent::voice" = "Hlas";
+"aiAgent::send" = "Odeslat";
+"aiAgent::input::placeholder" = "Jak mohu pomoci?";
+"aiAgent::permission::title" = "Je vyžadován přístup k mikrofonu a rozpoznávání řeči";
+"aiAgent::permission::message" = "Povolte přístup v Nastavení, nebo místo toho pište";
+"aiAgent::permission::keyboard" = "Místo toho psát";
+"aiAgent::permission::setting" = "Otevřít Nastavení";
+"aiAgent::state::processing" = "Zpracovává se";
+"aiAgent::state::confirm" = "Vyžadováno potvrzení";
+"aiAgent::state::confirmExpired" = "Vypršelo";
+"aiAgent::state::done" = "Příkaz dokončen";
+"aiAgent::state::failed" = "Příkaz se nezdařil";
+"aiAgent::done::default" = "Hotovo";
+"aiAgent::failed::default" = "Nepodařilo se to dokončit";
+"aiAgent::retry" = "Zkusit znovu";
+"aiAgent::needSignIn::title" = "Vyžadováno přihlášení";
+"aiAgent::needSignIn::message" = "Přihlaste se pro použití rychlého zadávání AI.";
+"aiAgent::title" = "Rychlé zadávání AI";
+"aiAgent::keyboard::stop" = "Zastavit";
+"aiAgent::keyboard::send" = "Odeslat";
+"aiAgent::stop" = "Zastavit";
+"aiAgent::usage" = "%@ / %@ kreditů";
+"aiAgent::plan::free" = "Zdarma";
+"aiAgent::plan::standard" = "Standardní";
+"aiAgent::plan::lifetime" = "Doživotní";
+"aiAgent::usage::topupRemaining" = "Zbývá %@ dalších kreditů";
+"aiAgent::usage::planChangeScheduled" = "Přechod na plán %2$@ dne %1$@";
+"aiAgent::stop::confirm::title" = "Zastavit zpracování?";
+"aiAgent::stop::confirm::message" = "Zastavení zruší probíhající příkaz a nebude možné jej obnovit.";
+"aiAgent::confirm::countdown" = "zbývá na potvrzení";
+"aiAgent::confirm::expired::message" = "Čas vypršel. Zkuste to prosím znovu.";

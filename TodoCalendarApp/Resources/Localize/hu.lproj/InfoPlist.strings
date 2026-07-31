@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "A naptárhoz való hozzáférés szükséges az események megjelenítéséhez és az Apple Naptárral való szinkronizáláshoz.";
+"NSMicrophoneUsageDescription" = "A mikrofonhoz való hozzáférés szükséges az események és feladatok hanggal történő megadásához.";
+"NSSpeechRecognitionUsageDescription" = "A beszédfelismerés szükséges ahhoz, hogy a hangját eseményekké és feladatokká alakítsuk.";

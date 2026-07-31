@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " și";
+"common::wait:message" = "Vă rugăm așteptați...";
+"common::back" = "Înapoi";
+"common.remove" = "Elimină";
+"common.confirm" = "Confirmă";
+"common.cancel" = "Anulează";
+"common.close" = "Închide";
+"common.yes" = "Da";
+"common.no" = "Nu";
+"common.save" = "Salvează";
+"common.info" = "Info";
+"common.search" = "Căutare";
+"common.clear" = "Șterge";
+"common.send" = "Trimite";
+"common.done" = "Gata";
+"common.errorMessage" = "A apărut o eroare temporară.\nVă rugăm raportați dacă problema persistă.";
+"common.update" = "Actualizează";
+"common.go_to_settings" = "Mergi la setări";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d.M, HH:mm";
+"date_form::MM_d" = "d.M";
+"date_form::MM_dd" = "dd.MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd.MM.yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd.MM.yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd.MM.yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd.MM.yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE, d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Mâine";
+
+// MARK: - event
+
+"dayname::sunday" = "Duminică";
+"dayname::monday" = "Luni";
+"dayname::tuesday" = "Marți";
+"dayname::wednesday" = "Miercuri";
+"dayname::thursday" = "Joi";
+"dayname::friday" = "Vineri";
+"dayname::saturday" = "Sâmbătă";
+
+"dayname::sunday:short" = "DUM";
+"dayname::monday:short" = "LUN";
+"dayname::tuesday:short" = "MAR";
+"dayname::wednesday:short" = "MIE";
+"dayname::thursday:short" = "JOI";
+"dayname::friday:short" = "VIN";
+"dayname::saturday:short" = "SÂM";
+
+"dayname::sunday:very_short" = "D";
+"dayname::monday:very_short" = "L";
+"dayname::tuesday:very_short" = "M";
+"dayname::wednesday:very_short" = "M";
+"dayname::thursday:very_short" = "J";
+"dayname::friday:very_short" = "V";
+"dayname::saturday:very_short" = "S";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Evenimente astăzi";
+"event_notification::todo:prefix" = "Sarcină";
+"event_notification::today:prefix" = "Astăzi";
+"event_notification::tomorrow:prefix" = "Mâine";
+"event_notification::allday_today" = "Toată ziua astăzi";
+"event_notification::allday_tomorrow" = "Toată ziua mâine";
+"event_notification::some_allday" = "%@ toată ziua";
+"event_notification_setting::option_title::no_notification" = "Fără notificări";
+"event_notification_setting::option_title::at_time" = "La ora evenimentului";
+"event_notification_setting::option_title::allday_9am" = "La ora 9:00 în acea zi";
+"event_notification_setting::option_title::allday_12pm" = "La prânz în acea zi";
+"event_notification_setting::option_title::customTime" = "Oră personalizată: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Oră personalizată";
+"event_notification_setting::option_title::before_minutes" = "Cu %d minute înainte de eveniment";
+"event_notification_setting::option_title::before_hours" = "Cu %d ore înainte de eveniment";
+"event_notification_setting::option_title::before_days" = "Cu %d zile înainte de eveniment";
+"event_notification_setting::option_title::before_weeks" = "Cu %d săptămâni înainte de eveniment";
+"event_notification_setting::option_title::allday_9am_before_days" = "La ora 9:00, cu %d zile înainte";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "La ora 9:00, cu %d săptămâni înainte";
+"event_notification_setting::need_permission_message" = "Pentru a folosi notificările de eveniment, este necesară permisiunea de notificare.\nMergeți la setările sistemului aplicației și permiteți notificările.";
+"event_notification_setting::need_permission::go_setting" = "Mergi la setări";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "Pentru a folosi funcția de reamintire a evenimentelor, este necesară permisiunea de notificare a aplicației.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Eveniment principal";
+"calendar::uncompletedTodos:title" = "Sarcini neterminate";
+"calendar::event_time::todo" = "Sarcină";
+"calendar::event_time::allday" = "Toată ziua";
+"calendar::event_time::allday::with" = "%@ toată ziua";
+"calendar::event_time::period:some_days" = "%d zile";
+"calendar::event_time::period:some_minutes" = "%d minute";
+"calendar::event_time::period:some_hours" = "%d ore";
+"calendar::event_time::period:some_days:some_hours" = "%d zile %d ore";
+"calendar::event::more_action::remove:title" = "Elimină evenimentul";
+"calendar::event::more_action::foremost_event:title" = "Eveniment principal";
+"calendar::event::more_action::remove_only_thistime:message" = "Doriți să eliminați doar acest eveniment din toate evenimentele repetitive?";
+"calendar::event::more_action::remove:message" = "Doriți să eliminați acest eveniment?";
+"calendar::event::more_action::mark_as_foremost" = "Doriți să marcați acest eveniment ca fiind cel mai important?";
+"calendar::event::more_action::unmark_as_foremost" = "Doriți să anulați marcarea acestui eveniment ca fiind cel mai important?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "O programare repetitivă nu poate fi marcată drept cel mai important eveniment.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Elimină doar acest eveniment";
+"calendar::event::more_action:remove:item_name" = "Elimină evenimentul";
+"calendar::event::more_action:foremost:mark:item_name" = "Marchează ca principal";
+"calendar::event::more_action:foremost:unmark:item_name" = "Anulează marcarea principală";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Adaugă la widgetul Numărătoare inversă";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Elimină din widgetul Numărătoare inversă";
+"calendar::event::more_action:dday_candidate:title" = "Candidat pentru widgetul Numărătoare inversă";
+"calendar::event::more_action:dday_candidate:register:message" = "Adaugi acest eveniment ca fiind candidat pentru widgetul Numărătoare inversă? Va apărea în partea de sus a listei când editezi widgetul.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Elimini acest eveniment dintre candidații pentru widgetul Numărătoare inversă?";
+"calendar::event::more_action:copy:item_name" = "Copiază evenimentul";
+"calendar::event::more_action:transform_to::schedule" = "Convertește în programare";
+"calendar::event::more_action:transform_to::todo" = "Convertește în sarcină";
+"calendar::event::more_action:edit:item_name" = "Editează";
+"calednar::event::add_new" = "Adaugă un eveniment nou";
+"calednar::event::add_new:place_holder" = "Adăugați rapid o sarcină nouă.";
+"calednar::event::skip_todo" = "Omite această sarcină";
+"calednar::event::skip_todo_until" = "Selectați ora până la care omiteți această sarcină";
+"calednar::event::copy" = "Copiază evenimentul";
+"calendar::move_date" = "Mută data";
+"calednar::event::google::edit" = "Editează evenimentul din Google Calendar";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Selectați mai întâi ora evenimentului.";
+"eventDetail.messages.selectValidTime" = "Selectați o oră validă a evenimentului.";
+"eventDetail.notification.custom_eventTime:title" = "Personalizat";
+"eventDetail.notification.title" = "Ora notificării evenimentului";
+"eventDetail.repeating.title" = "Repetare";
+"eventDetail.repeating.notRepeating::title" = "Fără repetare";
+"eventDetail.repeating.starttime:form" = "dd.MM.yyyy";
+"eventDetail.repeating.starttime:title" = "Ora de început a repetării";
+"eventDetail.repeating.everyDay:title" = "În fiecare zi";
+"eventDetail.repeating.everyWeek:title" = "În fiecare săptămână";
+"eventDetail.repeating.everyWeekSomeDay:title" = "În fiecare %@";
+"eventDetail.repeating.everySomeWeek:title" = "La fiecare %d săptămâni";
+"eventDetail.repeating.everyWeekDays:title" = "În fiecare zi lucrătoare";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "La fiecare %d săptămâni, %@";
+"eventDetail.repeating.everyMonth:title" = "În fiecare lună";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ din fiecare lună.";
+"eventDetail.repeating.everyYear:title" = "În fiecare an";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "În fiecare an (calendar lunar)";
+"eventDetail.repeating.everyYearSomeDay:title" = "În fiecare an %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "În fiecare an %@ (calendar lunar)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Toate zilele din ultima săptămână a fiecărei luni";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Prima %@ din fiecare lună";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "A doua %@ din fiecare lună";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "A treia %@ din fiecare lună";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "A patra %@ din fiecare lună";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "A cincea %@ din fiecare lună";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "A șasea %@ din fiecare lună";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "A șaptea %@ din fiecare lună";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Ultima %@ din fiecare lună";
+"eventDetail.repeating.endtime::title" = "Sfârșitul repetării";
+"eventDetail.repeating.endtime::option::never" = "Niciodată";
+"eventDetail.repeating.endtime::option::on" = "La data";
+"eventDetail.repeating.endtime::option::after" = "După";
+"eventDetail.repeating.endtime::option::after_occurrences" = "apariții";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Ora de sfârșit a repetării trebuie să fie ulterioară orei de început.\n(Data de început a repetării: %@)";
+"eventDetail.repeating::period_endcount" = "Începând cu %@, de %d ori";
+
+"eventDetail.repeating.everyNDays:title" = "La fiecare %d zile";
+"eventDetail.repeating.last" = "Ultima";
+"eventDetail.repeating.everyNMonths:title" = "La fiecare %d luni";
+"eventDetail.repeating.everyNYears:title" = "La fiecare %d ani";
+"eventDetail.repeating::endoption_until" = "până la %@";
+"eventDetail.repeating::endoption_times" = "de %d ori";
+
+"eventDetail.place::placeholder" = "Locație";
+"eventDetail.place::remove_button" = "Elimină locația";
+"eventDetail.place::no_map_app" = "Aplicația de hărți selectată nu este instalată.";
+"eventDetail.place::select_map_app" = "Selectați o hartă";
+"eventDetail.place::always_select_this_map" = "Deschide întotdeauna cu această aplicație.";
+
+"eventDetail.add_new_todo::message" = "A fost adăugată o sarcină nouă.";
+"eventDetail.add_new_schedule::message" = "A fost adăugată o programare nouă.";
+"eventDetail.scheduleEvent_removed::message" = "Programarea a fost eliminată.";
+"eventDetail.edit::repeating::confirm::ttile" = "Editează evenimentul";
+"eventDetail.edit::repeating::confirm::message" = "Acesta este un eveniment repetitiv.\nSelectați intervalul evenimentului repetitiv pe care doriți să îl editați.";
+"eventDetail.edit::repeating::confirm::all::button" = "Toate evenimentele";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "De acum înainte";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Doar de această dată";
+"eventDetail.scheduleEvent_saved::message" = "Programarea a fost salvată.";
+"eventDetail.todoEvent_removed::message" = "Sarcina a fost eliminată.";
+"eventDetail.todoEvent_saved::message" = "Sarcina a fost salvată.";
+"eventDetail.cancel_edit::title" = "Editează evenimentul";
+"eventDetail.cancel_edit::message" = "Doriți să renunțați la aceste modificări?";
+"eventDetail.cancel_edit::continue::button" = "Continuă";
+
+"eventDetail.edit::add_new_name::placeholder" = "Adăugați numele noului eveniment";
+"eventDetail.edit::clearEventTime::button" = "Șterge ora evenimentului";
+"eventDetail.edit::noEventTime::button" = "Fără oră de sfârșit";
+"eventDetail.edit::memo" = "Notă";
+"eventDetail.edit::urlPreview" = "Previzualizare URL";
+
+"eventDetail.edit::make::case" = "Este o sarcină?";
+"eventDetail.edit::todo::case" = "Sarcină";
+"eventDetail.edit::schedule::case" = "Programare";
+"eventDetail.edit::holiday::case" = "Sărbătoare legală în %@";
+
+"eventDetail.notSupport::holiday" = "Funcția de modificare a informațiilor nu este acceptată pentru sărbătorile legale.";
+
+"eventDetail:todo:guide:message1" = "O sarcină reprezintă ceva ce trebuie făcut.";
+"eventDetail:todo:guide:message2" = "Spre deosebire de programările obișnuite care sunt afișate în calendar cu o oră (sau perioadă) specifică, sarcinile oferă posibilitatea de a verifica dacă au fost finalizate.";
+"eventDetail:todo:guide:message3" = "Puteți adăuga o sarcină fără a specifica ora. De exemplu, puteți nota ceva ce trebuie făcut curând, dar nu chiar acum.";
+"eventDetail:todo:guide:process:message" = "Sarcinile se comportă diferit față de programările obișnuite când opțiunea de repetare este activată:";
+"eventDetail:todo:guide:process:bullet1" = "Sarcinile repetitive curente sau trecute care nu au fost încă finalizate sunt afișate în calendar.";
+"eventDetail:todo:guide:process:bullet2" = "Când o sarcină este finalizată, aceasta este adăugată în lista evenimentelor finalizate, iar în calendar este adăugată o nouă repetare.";
+"eventDetail:todo:guide:process:bullet3" = "Dacă nu mai există o repetare următoare din cauza sfârșitului repetării, sarcina repetitivă se încheie.";
+"eventDetail:foremost:guide:message1" = "Marcați un eveniment ca principal pentru a sublinia că este cel mai important eveniment.\nEvenimentul principal este întotdeauna vizibil în calendar și acceptă un widget separat.";
+"eventDetail:foremost:guide:supports:message" = "Următoarele tipuri de evenimente pot fi setate ca eveniment principal:";
+"eventDetail:foremost:guide:supports:todo" = "Sarcină";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Programări care nu se repetă";
+
+"eventDetail:isSaving:toast:message" = "Se salvează modificările. Vă rugăm așteptați.";
+"eventDetail:hasChanges:confirm:message" = "Există modificări. Doriți să renunțați la ele?";
+"eventDetail:hasChanges:confirm:continue" = "Continuă editarea";
+
+"eventDetail.unavailto_transform_withoutName" = "Introduceți un nume pentru a converti evenimentul.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Este necesară o oră pentru a converti într-o programare.";
+"eventDetail.todoEvent::transform::schedule_title" = "Convertește";
+"eventDetail.todoEvent::transform::schedule_message" = "Doriți să convertiți această sarcină într-o programare?";
+"eventDetail.scheduleEvent::transform::todo" = "Convertește";
+"eventDetail.scheduleEvent::transform::todo_message" = "Doriți să convertiți această programare într-o sarcină?";
+
+"eventDetail::revert" = "Anulează finalizarea";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Vizualizează în Google Calendar";
+"eventDetail::gogoleEvent::calendar" = "Calendar";
+"eventDetail::gogoleEvent::calendar::event" = "Eveniment Google Calendar";
+"eventDetail::gogoleEvent::attendee::unknown" = "Necunoscut";
+"eventDetail::gogoleEvent::attendees" = "Participanți (%d persoane)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organizator";
+"eventDetail::gogoleEvent::conference::accessCode" = "Cod de acces";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Cod al întâlnirii";
+"eventDetail::gogoleEvent::conference::passCode" = "Cod de trecere";
+"eventDetail::gogoleEvent::conference::password" = "Parolă";
+"eventDetail::gogoleEvent::copy::message" = "Copiat în clipboard.";
+"eventDetail::gogoleEvent::canceled::message" = "Acest eveniment a fost anulat.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Vizualizează în Apple Calendar";
+"eventDetail::appleCalendarEvent::calendar::event" = "Eveniment Apple Calendar";
+"eventDetail::appleCalendarEvent::attendees" = "Participanți (%d persoane)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organizator";
+
+// MARK: - event tag
+
+"eventTag.title" = "Tip de eveniment";
+"eventTag.list::title" = "Tipuri de evenimente";
+"eventTag.defaults.default::name" = "Implicit";
+"eventTag.defaults.holiday::name" = "Sărbătoare";
+"eventTag.addNew::placeholder" = "Adaugă un tip nou de eveniment";
+"eventTag.allEventTypes" = "Toate tipurile de evenimente >";
+"eventTag.remove::confirm::message" = "Doriți să eliminați doar acest tip de eveniment sau și evenimentele asociate?";
+"eventTag.remove::only_tag" = "Elimină doar tipul de eveniment";
+"eventTag.remove::tag_and_evets" = "Elimină împreună cu evenimentele asociate";
+"eventTag.removed::message" = "Acest tip de eveniment a fost eliminat.";
+"eventTag.removed_with_events::message" = "Acest tip de eveniment și evenimentele asociate au fost eliminate.";
+"eventTag.color::changed::message" = "Culoarea a fost modificată.";
+"eventTag.changed::message" = "Tipul de eveniment a fost modificat.";
+"eventTag.makeNew::message" = "A fost creat un tip nou de eveniment.";
+"eventTag.default::title" = "Tip de eveniment implicit";
+"eventTag.default::selection::explain" = "Acesta este tipul de eveniment care va fi selectat implicit la crearea unui eveniment.";
+"eventTag.externalCalendar::integrate_button" = "Conectează calendarul";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Astăzi";
+"eventList::yesterday::title" = "Ieri";
+"eventList::thisMonth::title" = "Luna aceasta";
+"eventList::done_todos::title" = "Lista sarcinilor finalizate";
+"eventList::done_todos::eventTime" = "Ora evenimentului:";
+"eventList::done_todos::doneAt" = "Ora finalizării:";
+"eventList::remove::confirm::message" = "Șterge lista sarcinilor finalizate";
+"eventList::remove::confirm::button::all" = "Toate sarcinile finalizate";
+"eventList::remove::confirm::button::olderThan1m" = "Mai vechi de 1 lună";
+"eventList::remove::confirm::button::olderThan3m" = "Mai vechi de 3 luni";
+"eventList::remove::confirm::button::olderThan6m" = "Mai vechi de 6 luni";
+"eventList::remove::confirm::button::olderThan1y" = "Mai vechi de 1 an";
+
+
+// MARK: - account
+
+"manage_account::title" = "Gestionarea contului";
+"manage_account::login_method" = "Metodă de autentificare";
+"manage_account::email" = "E-mail";
+"manage_account::last_signedIn_at" = "Ultima autentificare";
+"manage_account::migration::title" = "Migrarea datelor temporare ale utilizatorului";
+"manage_account::migration::description" = "Toate evenimentele create înainte de autentificare (%d evenimente) sunt migrate în contul dvs.\nEvenimentele asociate contului dvs. pot fi accesate de pe orice dispozitiv.";
+"manage_account::migration_finished::message" = "Migrarea este completă!";
+"manage_account::signout_button::title" = "Deconectare";
+"manage_account::sign_out::confirm::title" = "Deconectare";
+"manage_account::sign_out::confirm::message" = "Doriți să vă deconectați de la contul curent?";
+"manage_account::delete_account_button::title" = "Șterge contul";
+"manage_account::delete_account_button::confirm:message" = "Sigur doriți să vă ștergeți contul?";
+"manage_account::delete_account_button::description" = "După solicitarea ștergerii, contul va fi șters.\nDupă ștergere, datele contului nu pot fi recuperate.";
+"signIn::title" = "Autentificare";
+"signIn:description" = "Faceți o copie de rezervă a listei de evenimente și sincronizați-o cu alte dispozitive iOS\n(Platformele acceptate vor fi extinse.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Setări evenimente";
+"event_setting::eventType" = "Tip de eveniment";
+"event_setting::eventPeriod" = "Perioada evenimentului";
+"event_setting::defaultMapApp" = "Deschide aplicația Hărți";
+"event_setting::defaultMapApp_select" = "Selectează";
+
+"event_setting::eventSync" = "Sincronizare evenimente";
+"event_setting::eventSync::readyToSync::description" = "Sincronizați evenimentele utilizatorului salvate.";
+"event_setting::eventSync::syncInProgress::description" = "Se sincronizează evenimentele utilizatorului salvate...";
+"event_setting::eventSync::lastTime" = "Ora ultimei sincronizări: %@";
+"event_setting::eventSync::force" = "Sincronizare forțată";
+
+"event_notification_setting::title::forAllDay" = "Toată ziua";
+"event_notification_setting::title::NotforAllDay" = "Ora notificării";
+"event_setting::external_calendar::title" = "Calendare externe";
+"event_setting::external_calendar::connected::account" = "Conectat: %@";
+"event_setting::external_calendar::start" = "Conectează";
+"event_setting::external_calendar::start::message" = "Conectat la un calendar extern.";
+"event_setting::external_calendar::stop" = "Deconectează";
+"event_setting::external_calendar::stop::message" = "Conexiunea la calendarul extern a fost întreruptă.";
+"event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
+"event_setting::apple_calendar::permission_denied::message" = "Accesul la calendar a fost refuzat. Activați-l în Setări pentru a folosi Apple Calendar.";
+"event_setting::apple_calendar::restricted::message" = "Accesul la calendar este restricționat pe acest dispozitiv.";
+"setting.title" = "Setări";
+"setting.appearance.title" = "Aspect";
+"setting.appearance.calendar.samplemonth::march" = "MARTIE";
+"setting.appearance.calendar.startDayOfWeek" = "Prima zi a săptămânii";
+"setting.appearance.calendar.accentDay" = "Zile evidențiate";
+"setting.appearance.calendar.accentDay::holiday" = "Sărbătoare";
+"setting.appearance.calendar.accentDay::saturday" = "Sâmbătă";
+"setting.appearance.calendar.accentDay::sunday" = "Duminică";
+"setting.appearance.calendar.colorTheme" = "Temă de culoare";
+"setting.appearance.calendar.colorTheme::system" = "Sistem";
+"setting.appearance.calendar.colorTheme::light" = "Deschisă";
+"setting.appearance.calendar.colorTheme::dark" = "Întunecată";
+"setting.appearance.calendar.underline" = "Subliniere pentru zilele cu evenimente";
+"setting.appearance.event.edit::name_old" = "Editează evenimentul";
+"setting.appearance.event.edit::name" = "Setări evenimente și calendare externe";
+"setting.appearance.day_row_height" = "Nivelul de afișare a detaliilor evenimentului";
+"setting.appearance.day_row_height::small::text" = "Minim";
+"setting.appearance.day_row_height::medium::text" = "Mediu";
+"setting.appearance.day_row_height::large::text" = "Complet";
+"setting.appearance.event.fontSize" = "Dimensiunea fontului textului evenimentului";
+"setting.appearance.event.show_holidayName" = "Afișează numele sărbătorii";
+"setting.appearance.event.show_lunar" = "Calendar lunar";
+"setting.appearance.event._24form" = "Format de 24 de ore";
+"setting.appearance.event.sample::name" = "🥗 Numele evenimentului";
+"setting.appearance.event.sample::description" = "descriere";
+"setting.appearance.event.sample::christmas" = "Crăciun";
+"setting.appearance.event.sample::first" = "primul eveniment";
+"setting.appearance.event.sample::second" = "al doilea eveniment";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Afișează sarcinile neterminate";
+"setting.appearance.widget::title" = "Tema widgetului";
+"setting.appearance.widget::useSystemTheme::title" = "Folosește tema sistemului";
+"setting.appearance.widget::useSystemTheme::background" = "Culoarea fundalului widgetului";
+"setting.appearance.widget::useCustomTheme::title" = "Selectează o culoare personalizată";
+"setting.appearance.widget::sample::eventName" = "Eveniment widget";
+"setting.appearance.event.boldText" = "Text îngroșat";
+"setting.appearance.event.eventColor" = "Culoarea evenimentului";
+"setting.timezone::title" = "Fus orar";
+"setting.timezone::systemTimeZone::name" = "Fusul orar al sistemului";
+"setting.timezone::systemTime::name" = "Ora sistemului";
+"setting.haptic::name" = "Feedback haptic";
+"setting.minimize_animation::name" = "Reduce efectele de animație";
+"setting.holiday.title" = "Sărbători";
+"setting.holiday.item::name" = "Setări sărbători";
+"setting.holiday.list::sectionTitle" = "Sărbători";
+"setting.holiday.country.title" = "Țară";
+"setting.holiday.country.current::title" = "Țara curentă";
+"setting.holiday.country.current::placeHolder" = "Selectați țara";
+"setting.holiday.country.changeConfirm::title" = "Schimbă țara";
+"setting.holiday.country.changeConfirm::message" = "Doriți să schimbați țara calendarului dvs.?";
+"setting.holiday.country.changed::message" = "Țara a fost schimbată.";
+"setting.holiday.hide::button" = "Ascunde";
+"setting.holiday.hide::confirm::title" = "Ascunde sărbătoarea";
+"setting.holiday.hide::confirm::message" = "Ascundeți această sărbătoare în fiecare an?\nO puteți afișa din nou în Setări > Sărbători.";
+"setting.holiday.hidden::sectionTitle" = "Sărbători ascunse";
+"setting.holiday.show::button" = "Afișează";
+"setting.feedback::name" = "Feedback";
+"setting.help::name" = "Ajutor";
+"setting.share::name" = "Distribuie aplicația";
+"setting.write_review::name" = "Scrie o recenzie despre aplicație";
+"setting.account.signedIn::manageAccount" = "Cont";
+"setting.account.needSignIn" = "Autentificare";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Gestionați-vă lista de lectură";
+"setting.section.support::name" = "Asistență";
+"setting.section.app::name" = "Aplicație";
+"setting.section.suggest::name" = "Sugestii";
+"feedback::guide:message" = "Vă rugăm să ne trimiteți feedback, inclusiv rapoarte de erori, comentarii și sugestii pentru serviciu.\nComentariile dvs. ne vor ajuta enorm să ne îmbunătățim serviciul.";
+"feedback::enterMessage::placeholder" = "Introduceți un mesaj";
+"feedback::contact::placeholder" = "Adresa de e-mail pentru răspuns";
+"feedback::posted:message" = "Feedback-ul dvs. a fost înregistrat cu succes.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Calendar";
+"external_service.expired::message" = "Integrarea %@ a expirat. Vă rugăm să mergeți la Setări și să încercați din nou.";
+"external_service::google::hidden_event" = "Ascuns";
+"external_service::google::unknown_event" = "Necunoscut";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Vizualizați-vă evenimentele viitoare.";
+"widget.doubleMonth::name" = "Calendar + Calendar";
+"widget.eventAndMonth::name" = "Evenimente + Calendar";
+"widget.todayAndMonth::name" = "ASTĂZI + Calendar";
+"widget.eventAndForesmot::name" = "Evenimente + Principal";
+"widget.events::name" = "Evenimente";
+"widget.events.noEvents::message" = "Nu există evenimente.";
+"widget.events.currentTodos" = "Lista actuală de sarcini";
+"widget.events.sample::check_mailbox" = "Verifică cutia poștală";
+"widget.events.sample::example" = "Sărbătoare";
+"widget.events.sample::running" = "Alergare";
+"widget.events.sample::luch" = "Prânz";
+"widget.events.sample::luch_appointment" = "Prânz (nu poate întârzia)";
+"widget.events.sample::call" = "Sun-o pe Sara";
+"widget.events.sample::surfing" = "Surfing";
+"widget.events.sample::moving" = "Ziua mutării";
+"widget.events.sample::meeting" = "Ședință zilnică";
+"widget.events.sample::deposit_remain" = "Transferă soldul final";
+"widget.events.sample::recycle" = "Reciclare";
+"widget.events.sample::take_medicine" = "Ia medicamentul";
+"widget.events.sample::watering" = "Udă ghiveciul";
+"widget.events.sample::june3" = "MAR, 3 IUN";
+"widget.events.sample::july16" = "DUM, 16 IUL";
+"widget.events.sample::july21" = "VIN, 21 IUL";
+"widget.events.sample::july29" = "SÂM, 29 IUL";
+"widget.events.sample::aug2" = "MIE, 2 AUG";
+"widget.events.sample::aug3" = "JOI, 3 AUG";
+"widget.events.sample::oct10" = "LUN, 10 OCT";
+"widget.events.foremost" = "Eveniment principal";
+"widget.events.foremost::allFinished::message" = "Adăugați un eveniment pe care nu-l puteți rata.";
+"widget.events.foremost::sample::message" = "Luați o umbrelă! ⛱️";
+"widget.events.calendar" = "Calendar";
+"widget.events.today" = "ASTĂZI";
+"widget.events.today::sample::sunday" = "DUMINICĂ";
+"widget.events.today::sample::march2024" = "MARTIE 2024";
+"total::event::count" = "%d evenimente";
+"todo::count" = "%d sarcini";
+"schedule::count" = "%d programări";
+"widget.weeks.lastMonth" = "Luna trecută";
+"widget.weeks.thisMonth" = "Luna aceasta";
+"widget.weeks.nextMonth" = "Luna viitoare";
+"widget.weeks.thisWeek" = "Săptămâna aceasta";
+"widget.weeks.twoWeek" = "2 săptămâni";
+"widget.weeks.threeWeek" = "3 săptămâni";
+"widget.weeks.fourWeek" = "4 săptămâni";
+"widget.weeks.sample::feb" = "FEBRUARIE";
+"widget.weeks.sample::march" = "MARTIE";
+"widget.weeks.sample::april" = "APRILIE";
+"widget.weeks.sample::hiking" = "🏔️ Drumeție";
+"widget.weeks.sample::lunch" = "🥗 Prânz";
+"widget.weeks.sample::call" = "📞 Sun-o pe Sara";
+"widget.weeks.sample::holiday" = "Sărbătoare";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Antrenament";
+"widget.weeks.sample::launch" = "🚀 Lansare";
+"widget.fail.message" = "A apărut o eroare temporară.\nÎncercați să porniți din nou aplicația.";
+"widget.next.noEvent" = "Nu există eveniment următor.";
+"widget.next.sample" = "🔥 Antrenament";
+"widget.next.title" = "Următorul eveniment";
+"widget.next.rect_widget::title" = "Următorul eveniment de astăzi.";
+"widget.next.title::remains" = "Evenimentele următoare de astăzi.";
+"widget.next.title::future" = "Astăzi și ce urmează";
+"widget.next.title::more_todos" = "Încă %d sarcini";
+"widget.next.title::more_events" = "Încă %d programări";
+"widget.next.title::more_events_with_todo" = "Încă %1$d sarcini și %2$d programări";
+"widget.next.title::uncompleted::todo" = "%1$@ nu este finalizată";
+"widget.next.title::uncompleted::todos" = "%1$@ și încă %2$d sarcini neterminate";
+"widget.next.no_events_today" = "Niciun eveniment astăzi";
+"widget.next.no_events" = "Niciun eveniment viitor";
+
+"widget.dday::name" = "Numărătoare inversă";
+"widget.dday::noTarget" = "Selectați un eveniment";
+"widget.dday.sample::title" = "Atelier";
+"widget.dday.target::repeating" = "Repetitiv";
+"widget.dday.target::registered" = "Fixat";
+"widget.dday.turn::name" = "Runda %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Acest format de link nu este acceptat.\nVă rugăm actualizați aplicația la cea mai recentă versiune.";
+
+// MARK: - force update
+
+"force_update.title" = "Actualizare necesară";
+"force_update.message" = "Este disponibilă o versiune nouă.\nVă rugăm actualizați pentru a continua să folosiți aplicația.";
+"recommend_update.title" = "Actualizare recomandată";
+"recommend_update.message" = "Este disponibilă o versiune nouă.\nVă recomandăm să actualizați pentru o experiență mai bună.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Ascult…";
+"aiAgent::keyboard" = "Tastatură";
+"aiAgent::voice" = "Voce";
+"aiAgent::send" = "Trimite";
+"aiAgent::input::placeholder" = "Cu ce vă pot ajuta?";
+"aiAgent::permission::title" = "Este necesar accesul la microfon și recunoașterea vocală";
+"aiAgent::permission::message" = "Permiteți accesul din Setări sau introduceți textul manual";
+"aiAgent::permission::keyboard" = "Introdu text";
+"aiAgent::permission::setting" = "Deschide Setările";
+"aiAgent::state::processing" = "Se procesează";
+"aiAgent::state::confirm" = "Este necesară confirmarea";
+"aiAgent::state::confirmExpired" = "Expirat";
+"aiAgent::state::done" = "Comandă finalizată";
+"aiAgent::state::failed" = "Comandă eșuată";
+"aiAgent::done::default" = "Gata";
+"aiAgent::failed::default" = "Nu s-a putut finaliza";
+"aiAgent::retry" = "Reîncearcă";
+"aiAgent::needSignIn::title" = "Este necesară autentificarea";
+"aiAgent::needSignIn::message" = "Autentificați-vă pentru a folosi introducerea rapidă AI.";
+"aiAgent::title" = "Introducere rapidă AI";
+"aiAgent::keyboard::stop" = "Stop";
+"aiAgent::keyboard::send" = "Trimite";
+"aiAgent::stop" = "Stop";
+"aiAgent::usage" = "%@ / %@ credite";
+"aiAgent::plan::free" = "Gratuit";
+"aiAgent::plan::standard" = "Standard";
+"aiAgent::plan::lifetime" = "Pe viață";
+"aiAgent::usage::topupRemaining" = "Mai ai %@ credite suplimentare";
+"aiAgent::usage::planChangeScheduled" = "Treci la planul %2$@ pe %1$@";
+"aiAgent::stop::confirm::title" = "Oprești procesarea?";
+"aiAgent::stop::confirm::message" = "Oprirea anulează comanda în desfășurare, iar aceasta nu va putea fi reluată.";
+"aiAgent::confirm::countdown" = "rămas pentru aprobare";
+"aiAgent::confirm::expired::message" = "Timpul a expirat. Vă rugăm să solicitați din nou.";
