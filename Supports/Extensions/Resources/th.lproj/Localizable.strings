@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " และ";
+"common::wait:message" = "กรุณารอสักครู่...";
+"common::back" = "ย้อนกลับ";
+"common.remove" = "ลบ";
+"common.confirm" = "ยืนยัน";
+"common.cancel" = "ยกเลิก";
+"common.close" = "ปิด";
+"common.yes" = "ใช่";
+"common.no" = "ไม่ใช่";
+"common.save" = "บันทึก";
+"common.info" = "ข้อมูล";
+"common.search" = "ค้นหา";
+"common.clear" = "ล้าง";
+"common.send" = "ส่ง";
+"common.done" = "เสร็จสิ้น";
+"common.errorMessage" = "เกิดข้อผิดพลาดชั่วคราว\nกรุณาแจ้งปัญหาหากยังคงเกิดขึ้นซ้ำ";
+"common.update" = "อัปเดต";
+"common.go_to_settings" = "ไปที่การตั้งค่า";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d MM, HH:mm";
+"date_form::MM_d" = "d MM";
+"date_form::MM_dd" = "dd/MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd/MM/yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd/MM/yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd/MM/yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd/MM/yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "พรุ่งนี้";
+
+// MARK: - event
+
+"dayname::sunday" = "วันอาทิตย์";
+"dayname::monday" = "วันจันทร์";
+"dayname::tuesday" = "วันอังคาร";
+"dayname::wednesday" = "วันพุธ";
+"dayname::thursday" = "วันพฤหัสบดี";
+"dayname::friday" = "วันศุกร์";
+"dayname::saturday" = "วันเสาร์";
+
+"dayname::sunday:short" = "อา.";
+"dayname::monday:short" = "จ.";
+"dayname::tuesday:short" = "อ.";
+"dayname::wednesday:short" = "พ.";
+"dayname::thursday:short" = "พฤ.";
+"dayname::friday:short" = "ศ.";
+"dayname::saturday:short" = "ส.";
+
+"dayname::sunday:very_short" = "อา";
+"dayname::monday:very_short" = "จ";
+"dayname::tuesday:very_short" = "อ";
+"dayname::wednesday:very_short" = "พ";
+"dayname::thursday:very_short" = "พฤ";
+"dayname::friday:very_short" = "ศ";
+"dayname::saturday:very_short" = "ส";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "กิจกรรมวันนี้";
+"event_notification::todo:prefix" = "สิ่งที่ต้องทำ";
+"event_notification::today:prefix" = "วันนี้";
+"event_notification::tomorrow:prefix" = "พรุ่งนี้";
+"event_notification::allday_today" = "ทั้งวันนี้";
+"event_notification::allday_tomorrow" = "ทั้งวันพรุ่งนี้";
+"event_notification::some_allday" = "%@ทั้งวัน";
+"event_notification_setting::option_title::no_notification" = "ไม่มีการแจ้งเตือน";
+"event_notification_setting::option_title::at_time" = "ตอนถึงเวลานัดหมาย";
+"event_notification_setting::option_title::allday_9am" = "9 โมงเช้าของวันนั้น";
+"event_notification_setting::option_title::allday_12pm" = "เที่ยงวันของวันนั้น";
+"event_notification_setting::option_title::customTime" = "เวลาที่กำหนด:%@";
+"event_notification_setting::option_title::custimTime_fallback" = "เวลาที่กำหนด";
+"event_notification_setting::option_title::before_minutes" = "%dนาทีก่อนถึงเวลานัด";
+"event_notification_setting::option_title::before_hours" = "%dชั่วโมงก่อนถึงเวลานัด";
+"event_notification_setting::option_title::before_days" = "%dวันก่อนถึงเวลานัด";
+"event_notification_setting::option_title::before_weeks" = "%dสัปดาห์ก่อนถึงเวลานัด";
+"event_notification_setting::option_title::allday_9am_before_days" = "9:00 น. ล่วงหน้า%dวัน";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "9:00 น. ล่วงหน้า%dสัปดาห์";
+"event_notification_setting::need_permission_message" = "การใช้ฟีเจอร์แจ้งเตือนกิจกรรมต้องได้รับอนุญาตแจ้งเตือนก่อน\nไปที่การตั้งค่าระบบแล้วอนุญาตการแจ้งเตือน";
+"event_notification_setting::need_permission::go_setting" = "ไปที่การตั้งค่า";
+"event_notification_setting::need_permission_title" = "ข้อมูล";
+"event_notification_setting::permission_denied" = "ต้องได้รับอนุญาตแจ้งเตือนแอปเพื่อใช้ฟีเจอร์แจ้งเตือนล่วงหน้ากิจกรรม";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "กิจกรรมสำคัญที่สุด";
+"calendar::uncompletedTodos:title" = "สิ่งที่ยังไม่เสร็จ";
+"calendar::event_time::todo" = "สิ่งที่ต้องทำ";
+"calendar::event_time::allday" = "ทั้งวัน";
+"calendar::event_time::allday::with" = "%@ทั้งวัน";
+"calendar::event_time::period:some_days" = "%dวัน";
+"calendar::event_time::period:some_minutes" = "%dนาที";
+"calendar::event_time::period:some_hours" = "%dชั่วโมง";
+"calendar::event_time::period:some_days:some_hours" = "%dวัน%dชั่วโมง";
+"calendar::event::more_action::remove:title" = "ลบกิจกรรม";
+"calendar::event::more_action::foremost_event:title" = "กิจกรรมสำคัญที่สุด";
+"calendar::event::more_action::remove_only_thistime:message" = "ต้องการลบเฉพาะกิจกรรมนี้ออกจากกิจกรรมที่ทำซ้ำทั้งหมดหรือไม่?";
+"calendar::event::more_action::remove:message" = "ต้องการลบกิจกรรมนี้หรือไม่?";
+"calendar::event::more_action::mark_as_foremost" = "ต้องการตั้งกิจกรรมนี้เป็นกิจกรรมสำคัญที่สุดหรือไม่?";
+"calendar::event::more_action::unmark_as_foremost" = "ต้องการยกเลิกการตั้งกิจกรรมนี้เป็นกิจกรรมสำคัญที่สุดหรือไม่?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "กิจกรรมนัดหมายที่ทำซ้ำไม่สามารถตั้งเป็นกิจกรรมสำคัญที่สุดได้";
+"calendar::event::more_action:remove_only_thistime:item_name" = "ลบเฉพาะกิจกรรมนี้";
+"calendar::event::more_action:remove:item_name" = "ลบกิจกรรม";
+"calendar::event::more_action:foremost:mark:item_name" = "ตั้งเป็นกิจกรรมสำคัญที่สุด";
+"calendar::event::more_action:foremost:unmark:item_name" = "ยกเลิกกิจกรรมสำคัญที่สุด";
+"calendar::event::more_action:dday_candidate:register:item_name" = "เพิ่มลงในวิดเจ็ตดีเดย์";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "ลบออกจากวิดเจ็ตดีเดย์";
+"calendar::event::more_action:dday_candidate:title" = "รายการที่จะใช้ในวิดเจ็ตดีเดย์";
+"calendar::event::more_action:dday_candidate:register:message" = "เพิ่มกิจกรรมนี้เป็นรายการที่จะใช้ในวิดเจ็ตดีเดย์หรือไม่? กิจกรรมนี้จะแสดงอยู่บนสุดของรายการเมื่อคุณแก้ไขวิดเจ็ต";
+"calendar::event::more_action:dday_candidate:unregister:message" = "ลบกิจกรรมนี้ออกจากรายการที่จะใช้ในวิดเจ็ตดีเดย์หรือไม่?";
+"calendar::event::more_action:copy:item_name" = "คัดลอกกิจกรรม";
+"calendar::event::more_action:transform_to::schedule" = "เปลี่ยนเป็นนัดหมาย";
+"calendar::event::more_action:transform_to::todo" = "เปลี่ยนเป็นสิ่งที่ต้องทำ";
+"calendar::event::more_action:edit:item_name" = "แก้ไข";
+"calednar::event::add_new" = "เพิ่มกิจกรรมใหม่";
+"calednar::event::add_new:place_holder" = "เพิ่มสิ่งที่ต้องทำใหม่ได้อย่างรวดเร็ว";
+"calednar::event::skip_todo" = "ข้ามสิ่งที่ต้องทำนี้";
+"calednar::event::skip_todo_until" = "เลือกเวลาที่จะข้ามสิ่งที่ต้องทำนี้";
+"calednar::event::copy" = "คัดลอกกิจกรรม";
+"calendar::move_date" = "ย้ายวันที่";
+"calednar::event::google::edit" = "แก้ไขกิจกรรมใน Google ปฏิทิน";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "กรุณาเลือกเวลากิจกรรมก่อน";
+"eventDetail.messages.selectValidTime" = "กรุณาเลือกเวลากิจกรรมที่ถูกต้อง";
+"eventDetail.notification.custom_eventTime:title" = "กำหนดเอง";
+"eventDetail.notification.title" = "เวลาแจ้งเตือนกิจกรรม";
+"eventDetail.repeating.title" = "ทำซ้ำ";
+"eventDetail.repeating.notRepeating::title" = "ไม่ทำซ้ำ";
+"eventDetail.repeating.starttime:form" = "d MMM yyyy";
+"eventDetail.repeating.starttime:title" = "เวลาเริ่มทำซ้ำ";
+"eventDetail.repeating.everyDay:title" = "ทุกวัน";
+"eventDetail.repeating.everyWeek:title" = "ทุกสัปดาห์";
+"eventDetail.repeating.everyWeekSomeDay:title" = "ทุก%@";
+"eventDetail.repeating.everySomeWeek:title" = "ทุก%dสัปดาห์";
+"eventDetail.repeating.everyWeekDays:title" = "ทุกวันธรรมดา";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "ทุก%dสัปดาห์%@";
+"eventDetail.repeating.everyMonth:title" = "ทุกเดือน";
+"eventDetail.repeating.everyMonth_someDay:title" = "วันที่%@ของทุกเดือน";
+"eventDetail.repeating.everyYear:title" = "ทุกปี";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "ทุกปี (ปฏิทินจันทรคติ)";
+"eventDetail.repeating.everyYearSomeDay:title" = "ทุกปี%@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "ทุกปี%@ (ปฏิทินจันทรคติ)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "ทุกวันในสัปดาห์สุดท้ายของทุกเดือน";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "%@แรกของทุกเดือน";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "%@ที่สองของทุกเดือน";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "%@ที่สามของทุกเดือน";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "%@ที่สี่ของทุกเดือน";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "%@ที่ห้าของทุกเดือน";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "%@ที่หกของทุกเดือน";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "%@ที่เจ็ดของทุกเดือน";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "%@สุดท้ายของทุกเดือน";
+"eventDetail.repeating.endtime::title" = "สิ้นสุดการทำซ้ำ";
+"eventDetail.repeating.endtime::option::never" = "ไม่สิ้นสุด";
+"eventDetail.repeating.endtime::option::on" = "ในวันที่";
+"eventDetail.repeating.endtime::option::after" = "หลังจาก";
+"eventDetail.repeating.endtime::option::after_occurrences" = "ครั้ง";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "เวลาสิ้นสุดการทำซ้ำต้องอยู่หลังเวลาเริ่มต้น\n(วันเริ่มทำซ้ำ:%@)";
+"eventDetail.repeating::period_endcount" = "เริ่ม%@ %dครั้ง";
+
+"eventDetail.repeating.everyNDays:title" = "ทุก%dวัน";
+"eventDetail.repeating.last" = "สุดท้าย";
+"eventDetail.repeating.everyNMonths:title" = "ทุก%dเดือน";
+"eventDetail.repeating.everyNYears:title" = "ทุก%dปี";
+"eventDetail.repeating::endoption_until" = "จนถึง%@";
+"eventDetail.repeating::endoption_times" = "%dครั้ง";
+
+"eventDetail.place::placeholder" = "สถานที่";
+"eventDetail.place::remove_button" = "ลบสถานที่";
+"eventDetail.place::no_map_app" = "ไม่ได้ติดตั้งแอปแผนที่ที่เลือกไว้";
+"eventDetail.place::select_map_app" = "เลือกแผนที่";
+"eventDetail.place::always_select_this_map" = "เปิดด้วยแอปนี้เสมอ";
+
+"eventDetail.add_new_todo::message" = "เพิ่มสิ่งที่ต้องทำใหม่แล้ว";
+"eventDetail.add_new_schedule::message" = "เพิ่มนัดหมายใหม่แล้ว";
+"eventDetail.scheduleEvent_removed::message" = "ลบนัดหมายแล้ว";
+"eventDetail.edit::repeating::confirm::ttile" = "แก้ไขกิจกรรม";
+"eventDetail.edit::repeating::confirm::message" = "กิจกรรมนี้เป็นกิจกรรมที่ทำซ้ำ\nเลือกขอบเขตของกิจกรรมที่ทำซ้ำที่ต้องการแก้ไข";
+"eventDetail.edit::repeating::confirm::all::button" = "ทุกกิจกรรม";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "ตั้งแต่ครั้งนี้เป็นต้นไป";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "เฉพาะครั้งนี้";
+"eventDetail.scheduleEvent_saved::message" = "บันทึกนัดหมายแล้ว";
+"eventDetail.todoEvent_removed::message" = "ลบสิ่งที่ต้องทำแล้ว";
+"eventDetail.todoEvent_saved::message" = "บันทึกสิ่งที่ต้องทำแล้ว";
+"eventDetail.cancel_edit::title" = "แก้ไขกิจกรรม";
+"eventDetail.cancel_edit::message" = "ต้องการยกเลิกการเปลี่ยนแปลงนี้หรือไม่?";
+"eventDetail.cancel_edit::continue::button" = "แก้ไขต่อ";
+
+"eventDetail.edit::add_new_name::placeholder" = "เพิ่มชื่อกิจกรรมใหม่";
+"eventDetail.edit::clearEventTime::button" = "ล้างเวลากิจกรรม";
+"eventDetail.edit::noEventTime::button" = "ไม่มีเวลาสิ้นสุด";
+"eventDetail.edit::memo" = "บันทึกช่วยจำ";
+"eventDetail.edit::urlPreview" = "ตัวอย่าง URL";
+
+"eventDetail.edit::make::case" = "เป็นสิ่งที่ต้องทำหรือไม่?";
+"eventDetail.edit::todo::case" = "สิ่งที่ต้องทำ";
+"eventDetail.edit::schedule::case" = "นัดหมาย";
+"eventDetail.edit::holiday::case" = "วันหยุดราชการใน%@";
+
+"eventDetail.notSupport::holiday" = "ไม่รองรับการแก้ไขข้อมูลสำหรับวันหยุดราชการ";
+
+"eventDetail:todo:guide:message1" = "สิ่งที่ต้องทำคือกิจกรรมที่แสดงถึงสิ่งที่ต้องดำเนินการ";
+"eventDetail:todo:guide:message2" = "ต่างจากนัดหมายทั่วไปที่แสดงบนปฏิทินพร้อมเวลา (หรือช่วงเวลา) ที่ระบุไว้ สิ่งที่ต้องทำสามารถตรวจสอบได้ว่าเสร็จสิ้นแล้วหรือไม่";
+"eventDetail:todo:guide:message3" = "คุณสามารถเพิ่มสิ่งที่ต้องทำได้โดยไม่ต้องระบุเวลา เช่น การบันทึกงานที่ต้องทำในเร็ว ๆ นี้แต่ยังไม่ใช่ตอนนี้";
+"eventDetail:todo:guide:process:message" = "เมื่อเปิดใช้ตัวเลือกทำซ้ำ สิ่งที่ต้องทำจะมีพฤติกรรมต่างจากนัดหมายทั่วไปดังนี้";
+"eventDetail:todo:guide:process:bullet1" = "สิ่งที่ต้องทำแบบทำซ้ำในปัจจุบันหรืออดีตที่ยังไม่เสร็จจะแสดงบนปฏิทิน";
+"eventDetail:todo:guide:process:bullet2" = "เมื่อสิ่งที่ต้องทำเสร็จสิ้น กิจกรรมนั้นจะถูกเพิ่มลงในรายการที่เสร็จแล้ว และรอบทำซ้ำครั้งถัดไปจะถูกเพิ่มลงในปฏิทินใหม่";
+"eventDetail:todo:guide:process:bullet3" = "หากไม่มีรอบทำซ้ำถัดไปเนื่องจากถึงเวลาสิ้นสุดการทำซ้ำ สิ่งที่ต้องทำแบบทำซ้ำนี้จะสิ้นสุดลง";
+"eventDetail:foremost:guide:message1" = "ตั้งกิจกรรมเป็นกิจกรรมสำคัญที่สุดเพื่อเน้นว่าเป็นกิจกรรมที่สำคัญที่สุด\nกิจกรรมสำคัญที่สุดจะแสดงในปฏิทินตลอดเวลาและรองรับวิดเจ็ตแยกต่างหาก";
+"eventDetail:foremost:guide:supports:message" = "ประเภทกิจกรรมต่อไปนี้สามารถตั้งเป็นกิจกรรมสำคัญที่สุดได้:";
+"eventDetail:foremost:guide:supports:todo" = "สิ่งที่ต้องทำ";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "นัดหมายที่ไม่ทำซ้ำ";
+
+"eventDetail:isSaving:toast:message" = "กำลังบันทึกการเปลี่ยนแปลง กรุณารอสักครู่";
+"eventDetail:hasChanges:confirm:message" = "มีการเปลี่ยนแปลงที่ยังไม่บันทึก ต้องการยกเลิกหรือไม่?";
+"eventDetail:hasChanges:confirm:continue" = "แก้ไขต่อ";
+
+"eventDetail.unavailto_transform_withoutName" = "กรุณาใส่ชื่อก่อนแปลงกิจกรรม";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "ต้องระบุเวลาก่อนแปลงเป็นนัดหมาย";
+"eventDetail.todoEvent::transform::schedule_title" = "แปลง";
+"eventDetail.todoEvent::transform::schedule_message" = "ต้องการแปลงสิ่งที่ต้องทำนี้เป็นนัดหมายหรือไม่?";
+"eventDetail.scheduleEvent::transform::todo" = "แปลง";
+"eventDetail.scheduleEvent::transform::todo_message" = "ต้องการแปลงนัดหมายนี้เป็นสิ่งที่ต้องทำหรือไม่?";
+
+"eventDetail::revert" = "ยกเลิกการเสร็จสิ้น";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "ดูใน Google ปฏิทิน";
+"eventDetail::gogoleEvent::calendar" = "ปฏิทิน";
+"eventDetail::gogoleEvent::calendar::event" = "กิจกรรมใน Google ปฏิทิน";
+"eventDetail::gogoleEvent::attendee::unknown" = "ไม่ทราบ";
+"eventDetail::gogoleEvent::attendees" = "ผู้เข้าร่วม (%dคน)";
+"eventDetail::gogoleEvent::attendees::organizer" = "ผู้จัด";
+"eventDetail::gogoleEvent::conference::accessCode" = "รหัสเข้าใช้งาน";
+"eventDetail::gogoleEvent::conference::meetingCode" = "รหัสการประชุม";
+"eventDetail::gogoleEvent::conference::passCode" = "รหัสผ่าน";
+"eventDetail::gogoleEvent::conference::password" = "รหัสผ่าน";
+"eventDetail::gogoleEvent::copy::message" = "คัดลอกไปยังคลิปบอร์ดแล้ว";
+"eventDetail::gogoleEvent::canceled::message" = "กิจกรรมนี้ถูกยกเลิกแล้ว";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "ดูใน Apple ปฏิทิน";
+"eventDetail::appleCalendarEvent::calendar::event" = "กิจกรรมใน Apple ปฏิทิน";
+"eventDetail::appleCalendarEvent::attendees" = "ผู้เข้าร่วม (%dคน)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "ผู้จัด";
+
+// MARK: - event tag
+
+"eventTag.title" = "ประเภทกิจกรรม";
+"eventTag.list::title" = "ประเภทกิจกรรม";
+"eventTag.defaults.default::name" = "ค่าเริ่มต้น";
+"eventTag.defaults.holiday::name" = "วันหยุด";
+"eventTag.addNew::placeholder" = "เพิ่มประเภทกิจกรรมใหม่";
+"eventTag.allEventTypes" = "ประเภทกิจกรรมทั้งหมด >";
+"eventTag.remove::confirm::message" = "ต้องการลบประเภทกิจกรรมนี้ หรือต้องการลบกิจกรรมที่เกี่ยวข้องทั้งหมดด้วย?";
+"eventTag.remove::only_tag" = "ลบเฉพาะประเภทกิจกรรม";
+"eventTag.remove::tag_and_evets" = "ลบพร้อมกิจกรรมที่เกี่ยวข้อง";
+"eventTag.removed::message" = "ลบประเภทกิจกรรมนี้แล้ว";
+"eventTag.removed_with_events::message" = "ลบประเภทกิจกรรมนี้และกิจกรรมที่เกี่ยวข้องแล้ว";
+"eventTag.color::changed::message" = "เปลี่ยนสีแล้ว";
+"eventTag.changed::message" = "แก้ไขประเภทกิจกรรมแล้ว";
+"eventTag.makeNew::message" = "สร้างประเภทกิจกรรมใหม่แล้ว";
+"eventTag.default::title" = "ประเภทกิจกรรมเริ่มต้น";
+"eventTag.default::selection::explain" = "เลือกประเภทกิจกรรมที่จะถูกใช้เป็นค่าเริ่มต้นเมื่อสร้างกิจกรรมใหม่";
+"eventTag.externalCalendar::integrate_button" = "เชื่อมต่อปฏิทิน";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "วันนี้";
+"eventList::yesterday::title" = "เมื่อวาน";
+"eventList::thisMonth::title" = "เดือนนี้";
+"eventList::done_todos::title" = "รายการสิ่งที่ทำเสร็จแล้ว";
+"eventList::done_todos::eventTime" = "เวลากิจกรรม:";
+"eventList::done_todos::doneAt" = "เวลาที่เสร็จ:";
+"eventList::remove::confirm::message" = "ลบรายการสิ่งที่ทำเสร็จแล้ว";
+"eventList::remove::confirm::button::all" = "สิ่งที่ทำเสร็จแล้วทั้งหมด";
+"eventList::remove::confirm::button::olderThan1m" = "เก่ากว่า 1 เดือน";
+"eventList::remove::confirm::button::olderThan3m" = "เก่ากว่า 3 เดือน";
+"eventList::remove::confirm::button::olderThan6m" = "เก่ากว่า 6 เดือน";
+"eventList::remove::confirm::button::olderThan1y" = "เก่ากว่า 1 ปี";
+
+
+// MARK: - account
+
+"manage_account::title" = "จัดการบัญชี";
+"manage_account::login_method" = "วิธีเข้าสู่ระบบ";
+"manage_account::email" = "อีเมล";
+"manage_account::last_signedIn_at" = "เวลาเข้าสู่ระบบล่าสุด";
+"manage_account::migration::title" = "ย้ายข้อมูลผู้ใช้ชั่วคราว";
+"manage_account::migration::description" = "กิจกรรมทั้งหมดที่สร้างก่อนเข้าสู่ระบบ (%dรายการ) กำลังถูกย้ายไปยังบัญชีของคุณ\nกิจกรรมที่เชื่อมกับบัญชีจะเข้าถึงได้จากทุกอุปกรณ์";
+"manage_account::migration_finished::message" = "ย้ายข้อมูลเสร็จสมบูรณ์!";
+"manage_account::signout_button::title" = "ออกจากระบบ";
+"manage_account::sign_out::confirm::title" = "ออกจากระบบ";
+"manage_account::sign_out::confirm::message" = "ต้องการออกจากระบบบัญชีปัจจุบันหรือไม่?";
+"manage_account::delete_account_button::title" = "ลบบัญชี";
+"manage_account::delete_account_button::confirm:message" = "ยืนยันการลบบัญชีหรือไม่?";
+"manage_account::delete_account_button::description" = "หลังจากส่งคำขอลบบัญชี บัญชีของคุณจะถูกลบ\nเมื่อลบแล้วจะไม่สามารถกู้คืนข้อมูลบัญชีได้";
+"signIn::title" = "เข้าสู่ระบบ";
+"signIn:description" = "สำรองรายการกิจกรรมและซิงค์กับอุปกรณ์ iOS เครื่องอื่น\n(แพลตฟอร์มที่รองรับจะขยายเพิ่มในอนาคต)";
+
+
+// MARK: - setting
+"event_setting::title" = "ตั้งค่ากิจกรรม";
+"event_setting::eventType" = "ประเภทกิจกรรม";
+"event_setting::eventPeriod" = "ช่วงเวลากิจกรรม";
+"event_setting::defaultMapApp" = "เปิดแอปแผนที่";
+"event_setting::defaultMapApp_select" = "เลือก";
+
+"event_setting::eventSync" = "ซิงค์กิจกรรม";
+"event_setting::eventSync::readyToSync::description" = "ซิงค์กิจกรรมของผู้ใช้ที่สำรองไว้";
+"event_setting::eventSync::syncInProgress::description" = "กำลังซิงค์กิจกรรมของผู้ใช้ที่สำรองไว้...";
+"event_setting::eventSync::lastTime" = "เวลาข้อมูลซิงค์ล่าสุด:%@";
+"event_setting::eventSync::force" = "บังคับซิงค์";
+
+"event_notification_setting::title::forAllDay" = "ทั้งวัน";
+"event_notification_setting::title::NotforAllDay" = "เวลาแจ้งเตือน";
+"event_setting::external_calendar::title" = "ปฏิทินภายนอก";
+"event_setting::external_calendar::connected::account" = "เชื่อมต่อแล้ว:%@";
+"event_setting::external_calendar::start" = "เชื่อมต่อ";
+"event_setting::external_calendar::start::message" = "เชื่อมต่อปฏิทินภายนอกแล้ว";
+"event_setting::external_calendar::stop" = "ยกเลิกการเชื่อมต่อ";
+"event_setting::external_calendar::stop::message" = "ยกเลิกการเชื่อมต่อปฏิทินภายนอกแล้ว";
+"event_setting::external_calendar::google::serviceName" = "Google ปฏิทิน";
+"event_setting::external_calendar::apple::serviceName" = "Apple ปฏิทิน";
+"event_setting::apple_calendar::permission_denied::message" = "การเข้าถึงปฏิทินถูกปฏิเสธ กรุณาเปิดสิทธิ์ในการตั้งค่าเพื่อใช้งาน Apple ปฏิทิน";
+"event_setting::apple_calendar::restricted::message" = "การเข้าถึงปฏิทินถูกจำกัดบนอุปกรณ์นี้";
+"setting.title" = "การตั้งค่า";
+"setting.appearance.title" = "รูปลักษณ์";
+"setting.appearance.calendar.samplemonth::march" = "มีนาคม";
+"setting.appearance.calendar.startDayOfWeek" = "วันเริ่มต้นของสัปดาห์";
+"setting.appearance.calendar.accentDay" = "วันที่เน้นสี";
+"setting.appearance.calendar.accentDay::holiday" = "วันหยุด";
+"setting.appearance.calendar.accentDay::saturday" = "วันเสาร์";
+"setting.appearance.calendar.accentDay::sunday" = "วันอาทิตย์";
+"setting.appearance.calendar.colorTheme" = "ธีมสี";
+"setting.appearance.calendar.colorTheme::system" = "ระบบ";
+"setting.appearance.calendar.colorTheme::light" = "สว่าง";
+"setting.appearance.calendar.colorTheme::dark" = "มืด";
+"setting.appearance.calendar.underline" = "ขีดเส้นใต้วันที่มีกิจกรรม";
+"setting.appearance.event.edit::name_old" = "แก้ไขกิจกรรม";
+"setting.appearance.event.edit::name" = "ตั้งค่ากิจกรรมและปฏิทินภายนอก";
+"setting.appearance.day_row_height" = "ระดับการแสดงรายละเอียดกิจกรรม";
+"setting.appearance.day_row_height::small::text" = "น้อยที่สุด";
+"setting.appearance.day_row_height::medium::text" = "ปานกลาง";
+"setting.appearance.day_row_height::large::text" = "เต็มรูปแบบ";
+"setting.appearance.event.fontSize" = "ขนาดตัวอักษรกิจกรรม";
+"setting.appearance.event.show_holidayName" = "แสดงชื่อวันหยุด";
+"setting.appearance.event.show_lunar" = "ปฏิทินจันทรคติ";
+"setting.appearance.event._24form" = "รูปแบบ 24 ชั่วโมง";
+"setting.appearance.event.sample::name" = "🥗 ชื่อกิจกรรม";
+"setting.appearance.event.sample::description" = "คำอธิบาย";
+"setting.appearance.event.sample::christmas" = "คริสต์มาส";
+"setting.appearance.event.sample::first" = "กิจกรรมแรก";
+"setting.appearance.event.sample::second" = "กิจกรรมที่สอง";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "แสดงสิ่งที่ยังไม่เสร็จ";
+"setting.appearance.widget::title" = "ธีมวิดเจ็ต";
+"setting.appearance.widget::useSystemTheme::title" = "ใช้ธีมระบบ";
+"setting.appearance.widget::useSystemTheme::background" = "สีพื้นหลังวิดเจ็ต";
+"setting.appearance.widget::useCustomTheme::title" = "เลือกสีกำหนดเอง";
+"setting.appearance.widget::sample::eventName" = "กิจกรรมวิดเจ็ต";
+"setting.appearance.event.boldText" = "ตัวหนา";
+"setting.appearance.event.eventColor" = "สีกิจกรรม";
+"setting.timezone::title" = "เขตเวลา";
+"setting.timezone::systemTimeZone::name" = "เขตเวลาของระบบ";
+"setting.timezone::systemTime::name" = "เวลาของระบบ";
+"setting.haptic::name" = "การสั่นตอบสนอง";
+"setting.minimize_animation::name" = "ลดเอฟเฟกต์ภาพเคลื่อนไหว";
+"setting.holiday.title" = "วันหยุด";
+"setting.holiday.item::name" = "ตั้งค่าวันหยุด";
+"setting.holiday.list::sectionTitle" = "วันหยุด";
+"setting.holiday.country.title" = "ประเทศ";
+"setting.holiday.country.current::title" = "ประเทศปัจจุบัน";
+"setting.holiday.country.current::placeHolder" = "เลือกประเทศ";
+"setting.holiday.country.changeConfirm::title" = "เปลี่ยนประเทศ";
+"setting.holiday.country.changeConfirm::message" = "ต้องการเปลี่ยนประเทศของปฏิทินหรือไม่?";
+"setting.holiday.country.changed::message" = "เปลี่ยนประเทศแล้ว";
+"setting.holiday.hide::button" = "ซ่อน";
+"setting.holiday.hide::confirm::title" = "ซ่อนวันหยุด";
+"setting.holiday.hide::confirm::message" = "ซ่อนวันหยุดนี้ทุกปีหรือไม่?\nสามารถแสดงอีกครั้งได้ที่การตั้งค่า > วันหยุด";
+"setting.holiday.hidden::sectionTitle" = "วันหยุดที่ซ่อนไว้";
+"setting.holiday.show::button" = "แสดง";
+"setting.feedback::name" = "ข้อเสนอแนะ";
+"setting.help::name" = "ช่วยเหลือ";
+"setting.share::name" = "แชร์แอป";
+"setting.write_review::name" = "เขียนรีวิวแอป";
+"setting.account.signedIn::manageAccount" = "บัญชี";
+"setting.account.needSignIn" = "เข้าสู่ระบบ";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "จัดการรายการที่อ่าน";
+"setting.section.support::name" = "สนับสนุน";
+"setting.section.app::name" = "แอป";
+"setting.section.suggest::name" = "แนะนำ";
+"feedback::guide:message" = "กรุณาแจ้งข้อเสนอแนะได้อย่างอิสระ ไม่ว่าจะเป็นการรายงานข้อบกพร่อง ความคิดเห็น หรือข้อเสนอแนะเกี่ยวกับบริการ\nความคิดเห็นของคุณจะช่วยให้เราปรับปรุงบริการได้อย่างมาก";
+"feedback::enterMessage::placeholder" = "กรอกข้อความ";
+"feedback::contact::placeholder" = "อีเมลสำหรับติดต่อกลับ";
+"feedback::posted:message" = "ส่งข้อเสนอแนะเรียบร้อยแล้ว";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google ปฏิทิน";
+"external_service.expired::message" = "การเชื่อมต่อ%@หมดอายุแล้ว กรุณาไปที่การตั้งค่าแล้วลองใหม่อีกครั้ง";
+"external_service::google::hidden_event" = "ซ่อนอยู่";
+"external_service::google::unknown_event" = "ไม่ทราบ";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "ดูกิจกรรมที่กำลังจะมาถึง";
+"widget.doubleMonth::name" = "ปฏิทิน + ปฏิทิน";
+"widget.eventAndMonth::name" = "กิจกรรม + ปฏิทิน";
+"widget.todayAndMonth::name" = "วันนี้ + ปฏิทิน";
+"widget.eventAndForesmot::name" = "กิจกรรม + สำคัญที่สุด";
+"widget.events::name" = "กิจกรรม";
+"widget.events.noEvents::message" = "ไม่มีกิจกรรม";
+"widget.events.currentTodos" = "รายการที่ต้องทำตอนนี้";
+"widget.events.sample::check_mailbox" = "เช็คตู้จดหมาย";
+"widget.events.sample::example" = "วันหยุด";
+"widget.events.sample::running" = "วิ่ง";
+"widget.events.sample::luch" = "มื้อเที่ยง";
+"widget.events.sample::luch_appointment" = "นัดทานมื้อเที่ยง (ห้ามสาย)";
+"widget.events.sample::call" = "โทรหาซาร่า";
+"widget.events.sample::surfing" = "โต้คลื่น";
+"widget.events.sample::moving" = "วันย้ายบ้าน";
+"widget.events.sample::meeting" = "ประชุมประจำวัน";
+"widget.events.sample::deposit_remain" = "โอนยอดคงเหลือสุดท้าย";
+"widget.events.sample::recycle" = "รีไซเคิล";
+"widget.events.sample::take_medicine" = "กินยา";
+"widget.events.sample::watering" = "รดน้ำต้นไม้";
+"widget.events.sample::june3" = "วันอังคารที่ 3 มิถุนายน";
+"widget.events.sample::july16" = "วันอาทิตย์ที่ 16 กรกฎาคม";
+"widget.events.sample::july21" = "วันศุกร์ที่ 21 กรกฎาคม";
+"widget.events.sample::july29" = "วันเสาร์ที่ 29 กรกฎาคม";
+"widget.events.sample::aug2" = "วันพุธที่ 2 สิงหาคม";
+"widget.events.sample::aug3" = "วันพฤหัสบดีที่ 3 สิงหาคม";
+"widget.events.sample::oct10" = "วันจันทร์ที่ 10 ตุลาคม";
+"widget.events.foremost" = "กิจกรรมสำคัญที่สุด";
+"widget.events.foremost::allFinished::message" = "เพิ่มกิจกรรมที่ห้ามพลาด";
+"widget.events.foremost::sample::message" = "อย่าลืมพกร่ม! ⛱️";
+"widget.events.calendar" = "ปฏิทิน";
+"widget.events.today" = "วันนี้";
+"widget.events.today::sample::sunday" = "วันอาทิตย์";
+"widget.events.today::sample::march2024" = "มีนาคม 2024";
+"total::event::count" = "%dกิจกรรม";
+"todo::count" = "%dสิ่งที่ต้องทำ";
+"schedule::count" = "%dนัดหมาย";
+"widget.weeks.lastMonth" = "เดือนที่แล้ว";
+"widget.weeks.thisMonth" = "เดือนนี้";
+"widget.weeks.nextMonth" = "เดือนหน้า";
+"widget.weeks.thisWeek" = "สัปดาห์นี้";
+"widget.weeks.twoWeek" = "2 สัปดาห์";
+"widget.weeks.threeWeek" = "3 สัปดาห์";
+"widget.weeks.fourWeek" = "4 สัปดาห์";
+"widget.weeks.sample::feb" = "กุมภาพันธ์";
+"widget.weeks.sample::march" = "มีนาคม";
+"widget.weeks.sample::april" = "เมษายน";
+"widget.weeks.sample::hiking" = "🏔️ เดินป่า";
+"widget.weeks.sample::lunch" = "🥗 มื้อเที่ยง";
+"widget.weeks.sample::call" = "📞 โทรหาซาร่า";
+"widget.weeks.sample::holiday" = "วันหยุด";
+"widget.weeks.sample::golf" = "⛳️ กอล์ฟ";
+"widget.weeks.sample::workout" = "🔥 ออกกำลังกาย";
+"widget.weeks.sample::launch" = "🚀 เปิดตัว";
+"widget.fail.message" = "เกิดข้อผิดพลาดชั่วคราว\nกรุณาลองเปิดแอปใหม่อีกครั้ง";
+"widget.next.noEvent" = "ไม่มีกิจกรรมถัดไป";
+"widget.next.sample" = "🔥 ออกกำลังกาย";
+"widget.next.title" = "กิจกรรมถัดไป";
+"widget.next.rect_widget::title" = "กิจกรรมถัดไปของวันนี้";
+"widget.next.title::remains" = "กิจกรรมที่เหลือของวันนี้";
+"widget.next.title::future" = "วันนี้และกิจกรรมถัดไป";
+"widget.next.title::more_todos" = "อีก%dรายการที่ต้องทำ";
+"widget.next.title::more_events" = "อีก%dนัดหมาย";
+"widget.next.title::more_events_with_todo" = "อีก%1$dสิ่งที่ต้องทำและ%2$dนัดหมาย";
+"widget.next.title::uncompleted::todo" = "%1$@ ยังไม่เสร็จ";
+"widget.next.title::uncompleted::todos" = "%1$@ และอีก%2$dรายการที่ยังไม่เสร็จ";
+"widget.next.no_events_today" = "วันนี้ไม่มีกิจกรรม";
+"widget.next.no_events" = "ไม่มีกิจกรรมที่กำลังจะมาถึง";
+
+"widget.dday::name" = "ดีเดย์";
+"widget.dday::noTarget" = "เลือกกิจกรรม";
+"widget.dday.sample::title" = "เวิร์กช็อป";
+"widget.dday.target::repeating" = "ทำซ้ำ";
+"widget.dday.target::registered" = "ปักหมุดแล้ว";
+"widget.dday.turn::name" = "ครั้งที่%d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "รูปแบบลิงก์นี้ไม่รองรับ\nกรุณาอัปเดตแอปเป็นเวอร์ชันล่าสุด";
+
+// MARK: - force update
+
+"force_update.title" = "ต้องอัปเดต";
+"force_update.message" = "มีเวอร์ชันใหม่แล้ว\nกรุณาอัปเดตเพื่อใช้งานแอปต่อ";
+"recommend_update.title" = "แนะนำให้อัปเดต";
+"recommend_update.message" = "มีเวอร์ชันใหม่แล้ว\nแนะนำให้อัปเดตเพื่อประสบการณ์ที่ดีขึ้น";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "กำลังฟัง…";
+"aiAgent::keyboard" = "แป้นพิมพ์";
+"aiAgent::voice" = "เสียง";
+"aiAgent::send" = "ส่ง";
+"aiAgent::input::placeholder" = "ให้ช่วยอะไรดี?";
+"aiAgent::permission::title" = "ต้องการสิทธิ์เข้าถึงไมโครโฟนและเสียงพูด";
+"aiAgent::permission::message" = "อนุญาตสิทธิ์ในการตั้งค่า หรือพิมพ์แทนก็ได้";
+"aiAgent::permission::keyboard" = "พิมพ์แทน";
+"aiAgent::permission::setting" = "เปิดการตั้งค่า";
+"aiAgent::state::processing" = "กำลังประมวลผล";
+"aiAgent::state::confirm" = "ต้องการการยืนยัน";
+"aiAgent::state::confirmExpired" = "หมดเวลา";
+"aiAgent::state::done" = "ทำเสร็จแล้ว";
+"aiAgent::state::failed" = "ทำไม่สำเร็จ";
+"aiAgent::done::default" = "เสร็จสิ้น";
+"aiAgent::failed::default" = "ทำรายการนี้ไม่สำเร็จ";
+"aiAgent::retry" = "ลองใหม่";
+"aiAgent::needSignIn::title" = "ต้องเข้าสู่ระบบ";
+"aiAgent::needSignIn::message" = "เข้าสู่ระบบเพื่อใช้การป้อนข้อมูลด่วนด้วย AI";
+"aiAgent::title" = "ป้อนข้อมูลด่วนด้วย AI";
+"aiAgent::keyboard::stop" = "หยุด";
+"aiAgent::keyboard::send" = "ส่ง";
+"aiAgent::stop" = "หยุด";
+"aiAgent::usage" = "%@/%@ เครดิต";
+"aiAgent::plan::free" = "ฟรี";
+"aiAgent::plan::standard" = "มาตรฐาน";
+"aiAgent::plan::lifetime" = "ตลอดชีพ";
+"aiAgent::usage::topupRemaining" = "เครดิตเสริมเหลือ %@";
+"aiAgent::usage::planChangeScheduled" = "จะเปลี่ยนเป็นแพ็กเกจ %2$@ ในวันที่ %1$@";
+"aiAgent::stop::confirm::title" = "ต้องการหยุดประมวลผลหรือไม่?";
+"aiAgent::stop::confirm::message" = "การหยุดจะทำให้งานที่กำลังทำอยู่หายไปและไม่สามารถกู้คืนได้";
+"aiAgent::confirm::countdown" = "เหลือเวลาอนุมัติ";
+"aiAgent::confirm::expired::message" = "หมดเวลาแล้ว กรุณาส่งคำขอใหม่อีกครั้ง";
