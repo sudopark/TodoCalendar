@@ -31,6 +31,12 @@ struct DDayWidgetViewModel: Sendable {
         return self.repeatText.isEmpty == false
     }
 
+    /// 잠금화면 inline 한 줄. D-n을 앞에 두는 이유 — inline은 폭이 좁아 뒤에서부터 잘리는데,
+    /// 제목이 길 때 남은 일수가 사라지면 이 위젯을 둘 이유가 없어진다.
+    var lockScreenInlineText: String {
+        return [self.ddayText, self.eventTitle].joinedNonEmpty(separator: " · ")
+    }
+
     static var sample: Self {
         return .init(
             eventTitle: "widget.dday.sample::title".localized(),
