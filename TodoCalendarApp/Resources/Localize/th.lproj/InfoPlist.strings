@@ -1,0 +1,3 @@
+"NSCalendarsFullAccessUsageDescription" = "ต้องเข้าถึงปฏิทินเพื่อแสดงกิจกรรมและซิงค์กับ Apple ปฏิทิน";
+"NSMicrophoneUsageDescription" = "ต้องเข้าถึงไมโครโฟนเพื่อป้อนกิจกรรมและสิ่งที่ต้องทำด้วยเสียง";
+"NSSpeechRecognitionUsageDescription" = "ต้องใช้การรู้จำเสียงพูดเพื่อแปลงเสียงของคุณเป็นกิจกรรมและสิ่งที่ต้องทำ";

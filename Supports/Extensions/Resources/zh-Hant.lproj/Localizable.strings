@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = "、";
+"common::wait:message" = "請稍候…";
+"common::back" = "返回";
+"common.remove" = "刪除";
+"common.confirm" = "確認";
+"common.cancel" = "取消";
+"common.close" = "關閉";
+"common.yes" = "是";
+"common.no" = "否";
+"common.save" = "儲存";
+"common.info" = "資訊";
+"common.search" = "搜尋";
+"common.clear" = "清除";
+"common.send" = "傳送";
+"common.done" = "完成";
+"common.errorMessage" = "發生暫時性錯誤。\n若問題持續發生，請回報給我們。";
+"common.update" = "更新";
+"common.go_to_settings" = "前往設定";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "a h:mm";
+"date_form::MM_d__HH:mm" = "M月d日 HH:mm";
+"date_form::MM_d" = "M月d日";
+"date_form::MM_dd" = "M月dd日";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d日 (E)";
+"date_form::MMM_d_HH:mm" = "MMMd日 HH:mm";
+"date_form::MMM_d" = "MMMd日";
+"date_form::yyyy_MM_dd_E_" = "yyyy年MM月dd日 (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "yyyy年MM月dd日 HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "yyyy年MM月dd日 a h:mm";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "MMMdd日 (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "yyyy年MM月dd日";
+"date_form.yyyy_MMM_dd" = "yyyy年MMMdd日";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "MMMd日 (EEE)";
+"date_form.MMM_yyyy" = "yyyy年MMM";
+"tomorrow" = "明天";
+
+// MARK: - event
+
+"dayname::sunday" = "星期日";
+"dayname::monday" = "星期一";
+"dayname::tuesday" = "星期二";
+"dayname::wednesday" = "星期三";
+"dayname::thursday" = "星期四";
+"dayname::friday" = "星期五";
+"dayname::saturday" = "星期六";
+
+"dayname::sunday:short" = "週日";
+"dayname::monday:short" = "週一";
+"dayname::tuesday:short" = "週二";
+"dayname::wednesday:short" = "週三";
+"dayname::thursday:short" = "週四";
+"dayname::friday:short" = "週五";
+"dayname::saturday:short" = "週六";
+
+"dayname::sunday:very_short" = "日";
+"dayname::monday:very_short" = "一";
+"dayname::tuesday:very_short" = "二";
+"dayname::wednesday:very_short" = "三";
+"dayname::thursday:very_short" = "四";
+"dayname::friday:very_short" = "五";
+"dayname::saturday:very_short" = "六";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "今日活動";
+"event_notification::todo:prefix" = "待辦";
+"event_notification::today:prefix" = "今天";
+"event_notification::tomorrow:prefix" = "明天";
+"event_notification::allday_today" = "今天整天";
+"event_notification::allday_tomorrow" = "明天整天";
+"event_notification::some_allday" = "%@ 整天";
+"event_notification_setting::option_title::no_notification" = "不提醒";
+"event_notification_setting::option_title::at_time" = "活動當下";
+"event_notification_setting::option_title::allday_9am" = "當天上午9點";
+"event_notification_setting::option_title::allday_12pm" = "當天中午12點";
+"event_notification_setting::option_title::customTime" = "自訂時間：%@";
+"event_notification_setting::option_title::custimTime_fallback" = "自訂時間";
+"event_notification_setting::option_title::before_minutes" = "活動前%d分鐘";
+"event_notification_setting::option_title::before_hours" = "活動前%d小時";
+"event_notification_setting::option_title::before_days" = "活動前%d天";
+"event_notification_setting::option_title::before_weeks" = "活動前%d週";
+"event_notification_setting::option_title::allday_9am_before_days" = "提前%d天的上午9:00";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "提前%d週的上午9:00";
+"event_notification_setting::need_permission_message" = "若要使用活動提醒功能，需要允許通知權限。\n請前往系統設定開啟通知權限。";
+"event_notification_setting::need_permission::go_setting" = "前往設定";
+"event_notification_setting::need_permission_title" = "資訊";
+"event_notification_setting::permission_denied" = "使用活動提醒功能需要允許應用程式通知權限。";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "最重要活動";
+"calendar::uncompletedTodos:title" = "未完成待辦事項";
+"calendar::event_time::todo" = "待辦";
+"calendar::event_time::allday" = "整天";
+"calendar::event_time::allday::with" = "%@ 整天";
+"calendar::event_time::period:some_days" = "%d天";
+"calendar::event_time::period:some_minutes" = "%d分鐘";
+"calendar::event_time::period:some_hours" = "%d小時";
+"calendar::event_time::period:some_days:some_hours" = "%d天 %d小時";
+"calendar::event::more_action::remove:title" = "刪除活動";
+"calendar::event::more_action::foremost_event:title" = "最重要活動";
+"calendar::event::more_action::remove_only_thistime:message" = "是否僅刪除這一次的重複活動？";
+"calendar::event::more_action::remove:message" = "是否要刪除此活動？";
+"calendar::event::more_action::mark_as_foremost" = "是否將此活動設為最重要活動？";
+"calendar::event::more_action::unmark_as_foremost" = "是否取消此活動的最重要活動設定？";
+"calendar::event::more_action::mark_as_foremost::unavail" = "重複的行程活動無法設為最重要活動。";
+"calendar::event::more_action:remove_only_thistime:item_name" = "僅刪除這一次";
+"calendar::event::more_action:remove:item_name" = "刪除活動";
+"calendar::event::more_action:foremost:mark:item_name" = "設為最重要活動";
+"calendar::event::more_action:foremost:unmark:item_name" = "取消最重要活動";
+"calendar::event::more_action:dday_candidate:register:item_name" = "加入D-Day小工具";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "從D-Day小工具移除";
+"calendar::event::more_action:dday_candidate:title" = "D-Day小工具候選";
+"calendar::event::more_action:dday_candidate:register:message" = "是否要將此活動加入為D-Day小工具候選？編輯小工具時會顯示在清單最上方。";
+"calendar::event::more_action:dday_candidate:unregister:message" = "是否要將此活動從D-Day小工具候選中移除？";
+"calendar::event::more_action:copy:item_name" = "複製活動";
+"calendar::event::more_action:transform_to::schedule" = "轉換為行程";
+"calendar::event::more_action:transform_to::todo" = "轉換為待辦事項";
+"calendar::event::more_action:edit:item_name" = "編輯";
+"calednar::event::add_new" = "新增活動";
+"calednar::event::add_new:place_holder" = "快速新增待辦事項。";
+"calednar::event::skip_todo" = "略過此待辦事項";
+"calednar::event::skip_todo_until" = "選擇要略過此待辦事項的時間";
+"calednar::event::copy" = "複製活動";
+"calendar::move_date" = "移動日期";
+"calednar::event::google::edit" = "編輯 Google 日曆活動";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "請先選擇活動時間。";
+"eventDetail.messages.selectValidTime" = "請選擇有效的活動時間。";
+"eventDetail.notification.custom_eventTime:title" = "自訂";
+"eventDetail.notification.title" = "活動提醒時間";
+"eventDetail.repeating.title" = "重複";
+"eventDetail.repeating.notRepeating::title" = "不重複";
+"eventDetail.repeating.starttime:form" = "yyyy年M月d日";
+"eventDetail.repeating.starttime:title" = "重複開始時間";
+"eventDetail.repeating.everyDay:title" = "每天";
+"eventDetail.repeating.everyWeek:title" = "每週";
+"eventDetail.repeating.everyWeekSomeDay:title" = "每%@";
+"eventDetail.repeating.everySomeWeek:title" = "每%d週";
+"eventDetail.repeating.everyWeekDays:title" = "每個平日";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "每%d週的%@";
+"eventDetail.repeating.everyMonth:title" = "每個月";
+"eventDetail.repeating.everyMonth_someDay:title" = "每個月的%@日";
+"eventDetail.repeating.everyYear:title" = "每年";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "每年（農曆）";
+"eventDetail.repeating.everyYearSomeDay:title" = "每年%@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "每年%@（農曆）";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "每個月最後一週的所有日子";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "每個月的第一個%@";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "每個月的第二個%@";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "每個月的第三個%@";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "每個月的第四個%@";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "每個月的第五個%@";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "每個月的第六個%@";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "每個月的第七個%@";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "每個月的最後一個%@";
+"eventDetail.repeating.endtime::title" = "重複結束";
+"eventDetail.repeating.endtime::option::never" = "永不";
+"eventDetail.repeating.endtime::option::on" = "指定日期";
+"eventDetail.repeating.endtime::option::after" = "指定次數";
+"eventDetail.repeating.endtime::option::after_occurrences" = "次";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "重複結束時間必須晚於開始時間。\n（重複開始日期：%@）";
+"eventDetail.repeating::period_endcount" = "從%@開始，共%d次";
+
+"eventDetail.repeating.everyNDays:title" = "每%d天";
+"eventDetail.repeating.last" = "最後";
+"eventDetail.repeating.everyNMonths:title" = "每%d個月";
+"eventDetail.repeating.everyNYears:title" = "每%d年";
+"eventDetail.repeating::endoption_until" = "直到%@";
+"eventDetail.repeating::endoption_times" = "%d次";
+
+"eventDetail.place::placeholder" = "地點";
+"eventDetail.place::remove_button" = "刪除地點";
+"eventDetail.place::no_map_app" = "尚未安裝所選的地圖應用程式。";
+"eventDetail.place::select_map_app" = "選擇地圖";
+"eventDetail.place::always_select_this_map" = "永遠使用此應用程式開啟。";
+
+"eventDetail.add_new_todo::message" = "已新增待辦事項。";
+"eventDetail.add_new_schedule::message" = "已新增行程。";
+"eventDetail.scheduleEvent_removed::message" = "行程已刪除。";
+"eventDetail.edit::repeating::confirm::ttile" = "編輯活動";
+"eventDetail.edit::repeating::confirm::message" = "這是一個重複活動。\n請選擇要編輯的重複範圍。";
+"eventDetail.edit::repeating::confirm::all::button" = "所有活動";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "從此次開始";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "僅此一次";
+"eventDetail.scheduleEvent_saved::message" = "行程已儲存。";
+"eventDetail.todoEvent_removed::message" = "待辦事項已刪除。";
+"eventDetail.todoEvent_saved::message" = "待辦事項已儲存。";
+"eventDetail.cancel_edit::title" = "編輯活動";
+"eventDetail.cancel_edit::message" = "是否要放棄這些變更？";
+"eventDetail.cancel_edit::continue::button" = "繼續編輯";
+
+"eventDetail.edit::add_new_name::placeholder" = "輸入活動名稱";
+"eventDetail.edit::clearEventTime::button" = "清除活動時間";
+"eventDetail.edit::noEventTime::button" = "沒有結束時間";
+"eventDetail.edit::memo" = "備註";
+"eventDetail.edit::urlPreview" = "URL 預覽";
+
+"eventDetail.edit::make::case" = "設為待辦事項？";
+"eventDetail.edit::todo::case" = "待辦事項";
+"eventDetail.edit::schedule::case" = "行程";
+"eventDetail.edit::holiday::case" = "%@的國定假日";
+
+"eventDetail.notSupport::holiday" = "國定假日不支援資訊修改功能。";
+
+"eventDetail:todo:guide:message1" = "待辦事項代表需要完成的事情。";
+"eventDetail:todo:guide:message2" = "與在行事曆上以特定時間（或期間）顯示的一般行程不同，待辦事項提供勾選完成與否的功能。";
+"eventDetail:todo:guide:message3" = "您可以在沒有指定時間資訊的情況下新增待辦事項。舉例來說，可以用來記錄不必馬上處理、但近期內需要完成的工作。";
+"eventDetail:todo:guide:process:message" = "開啟重複選項時，待辦事項與一般行程的行為不同：";
+"eventDetail:todo:guide:process:bullet1" = "尚未完成的當前或過去重複待辦事項會顯示在行事曆上。";
+"eventDetail:todo:guide:process:bullet2" = "待辦事項完成後，會被加入已完成清單，並在行事曆上新增下一次重複的活動。";
+"eventDetail:todo:guide:process:bullet3" = "若因重複結束時間而沒有下一次重複，重複待辦事項將會結束。";
+"eventDetail:foremost:guide:message1" = "將活動設為最重要活動，以強調這是最重要的一項活動。\n最重要活動會一直顯示在行事曆上，並支援獨立的小工具。";
+"eventDetail:foremost:guide:supports:message" = "以下類型的活動可以設為最重要活動：";
+"eventDetail:foremost:guide:supports:todo" = "待辦事項";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "不重複的行程";
+
+"eventDetail:isSaving:toast:message" = "正在儲存變更，請稍候。";
+"eventDetail:hasChanges:confirm:message" = "有尚未儲存的變更，是否要放棄？";
+"eventDetail:hasChanges:confirm:continue" = "繼續編輯";
+
+"eventDetail.unavailto_transform_withoutName" = "請輸入名稱後再轉換活動。";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "轉換為行程需要時間資訊。";
+"eventDetail.todoEvent::transform::schedule_title" = "轉換";
+"eventDetail.todoEvent::transform::schedule_message" = "是否要將此待辦事項轉換為行程？";
+"eventDetail.scheduleEvent::transform::todo" = "轉換";
+"eventDetail.scheduleEvent::transform::todo_message" = "是否要將此行程轉換為待辦事項？";
+
+"eventDetail::revert" = "取消完成";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "在 Google 日曆中檢視";
+"eventDetail::gogoleEvent::calendar" = "日曆";
+"eventDetail::gogoleEvent::calendar::event" = "Google 日曆活動";
+"eventDetail::gogoleEvent::attendee::unknown" = "不明";
+"eventDetail::gogoleEvent::attendees" = "出席者（%d人）";
+"eventDetail::gogoleEvent::attendees::organizer" = "主辦人";
+"eventDetail::gogoleEvent::conference::accessCode" = "存取代碼";
+"eventDetail::gogoleEvent::conference::meetingCode" = "會議代碼";
+"eventDetail::gogoleEvent::conference::passCode" = "通行碼";
+"eventDetail::gogoleEvent::conference::password" = "密碼";
+"eventDetail::gogoleEvent::copy::message" = "已複製到剪貼簿。";
+"eventDetail::gogoleEvent::canceled::message" = "此活動已取消。";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "在 Apple 日曆中檢視";
+"eventDetail::appleCalendarEvent::calendar::event" = "Apple 日曆活動";
+"eventDetail::appleCalendarEvent::attendees" = "出席者（%d人）";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "主辦人";
+
+// MARK: - event tag
+
+"eventTag.title" = "活動類型";
+"eventTag.list::title" = "活動類型";
+"eventTag.defaults.default::name" = "預設";
+"eventTag.defaults.holiday::name" = "假日";
+"eventTag.addNew::placeholder" = "新增活動類型";
+"eventTag.allEventTypes" = "所有活動類型 >";
+"eventTag.remove::confirm::message" = "是否要刪除此活動類型？還是要一併刪除所有相關活動？";
+"eventTag.remove::only_tag" = "僅刪除活動類型";
+"eventTag.remove::tag_and_evets" = "連同相關活動一併刪除";
+"eventTag.removed::message" = "此活動類型已刪除。";
+"eventTag.removed_with_events::message" = "此活動類型及相關活動已刪除。";
+"eventTag.color::changed::message" = "顏色已變更。";
+"eventTag.changed::message" = "活動類型已修改。";
+"eventTag.makeNew::message" = "已建立新的活動類型。";
+"eventTag.default::title" = "預設活動類型";
+"eventTag.default::selection::explain" = "這是建立活動時預設選取的活動類型。";
+"eventTag.externalCalendar::integrate_button" = "連接日曆";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "今天";
+"eventList::yesterday::title" = "昨天";
+"eventList::thisMonth::title" = "本月";
+"eventList::done_todos::title" = "已完成待辦清單";
+"eventList::done_todos::eventTime" = "活動時間：";
+"eventList::done_todos::doneAt" = "完成時間：";
+"eventList::remove::confirm::message" = "刪除已完成待辦清單";
+"eventList::remove::confirm::button::all" = "所有已完成待辦事項";
+"eventList::remove::confirm::button::olderThan1m" = "1個月以前";
+"eventList::remove::confirm::button::olderThan3m" = "3個月以前";
+"eventList::remove::confirm::button::olderThan6m" = "6個月以前";
+"eventList::remove::confirm::button::olderThan1y" = "1年以前";
+
+
+// MARK: - account
+
+"manage_account::title" = "帳號管理";
+"manage_account::login_method" = "登入方式";
+"manage_account::email" = "電子郵件";
+"manage_account::last_signedIn_at" = "上次登入時間";
+"manage_account::migration::title" = "遷移暫存使用者資料";
+"manage_account::migration::description" = "登入前建立的所有活動（共%d項）正在遷移至您的帳號。\n連結至帳號的活動可在任何裝置上存取。";
+"manage_account::migration_finished::message" = "遷移完成！";
+"manage_account::signout_button::title" = "登出";
+"manage_account::sign_out::confirm::title" = "登出";
+"manage_account::sign_out::confirm::message" = "是否要登出目前的帳號？";
+"manage_account::delete_account_button::title" = "刪除帳號";
+"manage_account::delete_account_button::confirm:message" = "確定要刪除您的帳號嗎？";
+"manage_account::delete_account_button::description" = "提出刪除帳號要求後，您的帳號將會被刪除。\n刪除後，帳號資訊將無法復原。";
+"signIn::title" = "登入";
+"signIn:description" = "備份您的活動清單，並與其他 iOS 裝置同步\n（支援的平台將持續擴充）";
+
+
+// MARK: - setting
+"event_setting::title" = "活動設定";
+"event_setting::eventType" = "活動類型";
+"event_setting::eventPeriod" = "活動期間";
+"event_setting::defaultMapApp" = "開啟地圖應用程式";
+"event_setting::defaultMapApp_select" = "選擇";
+
+"event_setting::eventSync" = "活動同步";
+"event_setting::eventSync::readyToSync::description" = "同步已備份的使用者活動。";
+"event_setting::eventSync::syncInProgress::description" = "正在同步已備份的使用者活動…";
+"event_setting::eventSync::lastTime" = "最新同步資料時間：%@";
+"event_setting::eventSync::force" = "強制同步";
+
+"event_notification_setting::title::forAllDay" = "整天";
+"event_notification_setting::title::NotforAllDay" = "提醒時間";
+"event_setting::external_calendar::title" = "外部日曆";
+"event_setting::external_calendar::connected::account" = "已連接：%@";
+"event_setting::external_calendar::start" = "連接";
+"event_setting::external_calendar::start::message" = "已連接外部日曆。";
+"event_setting::external_calendar::stop" = "取消連接";
+"event_setting::external_calendar::stop::message" = "已取消外部日曆的連接。";
+"event_setting::external_calendar::google::serviceName" = "Google 日曆";
+"event_setting::external_calendar::apple::serviceName" = "Apple 日曆";
+"event_setting::apple_calendar::permission_denied::message" = "日曆存取權限已被拒絕。請至設定開啟權限以使用 Apple 日曆。";
+"event_setting::apple_calendar::restricted::message" = "此裝置的日曆存取權限受到限制。";
+"setting.title" = "設定";
+"setting.appearance.title" = "外觀";
+"setting.appearance.calendar.samplemonth::march" = "3月";
+"setting.appearance.calendar.startDayOfWeek" = "每週起始日";
+"setting.appearance.calendar.accentDay" = "強調日";
+"setting.appearance.calendar.accentDay::holiday" = "假日";
+"setting.appearance.calendar.accentDay::saturday" = "星期六";
+"setting.appearance.calendar.accentDay::sunday" = "星期日";
+"setting.appearance.calendar.colorTheme" = "色彩主題";
+"setting.appearance.calendar.colorTheme::system" = "系統";
+"setting.appearance.calendar.colorTheme::light" = "淺色";
+"setting.appearance.calendar.colorTheme::dark" = "深色";
+"setting.appearance.calendar.underline" = "在有活動的日期加上底線";
+"setting.appearance.event.edit::name_old" = "編輯活動";
+"setting.appearance.event.edit::name" = "活動設定與外部日曆";
+"setting.appearance.day_row_height" = "活動顯示詳細程度";
+"setting.appearance.day_row_height::small::text" = "最簡";
+"setting.appearance.day_row_height::medium::text" = "適中";
+"setting.appearance.day_row_height::large::text" = "完整";
+"setting.appearance.event.fontSize" = "活動文字字級";
+"setting.appearance.event.show_holidayName" = "顯示假日名稱";
+"setting.appearance.event.show_lunar" = "農曆";
+"setting.appearance.event._24form" = "24小時制";
+"setting.appearance.event.sample::name" = "🥗 活動名稱";
+"setting.appearance.event.sample::description" = "說明";
+"setting.appearance.event.sample::christmas" = "聖誕節";
+"setting.appearance.event.sample::first" = "第一個活動";
+"setting.appearance.event.sample::second" = "第二個活動";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "顯示未完成待辦事項";
+"setting.appearance.widget::title" = "小工具主題";
+"setting.appearance.widget::useSystemTheme::title" = "使用系統主題";
+"setting.appearance.widget::useSystemTheme::background" = "小工具背景色";
+"setting.appearance.widget::useCustomTheme::title" = "選擇自訂色彩";
+"setting.appearance.widget::sample::eventName" = "小工具活動";
+"setting.appearance.event.boldText" = "粗體文字";
+"setting.appearance.event.eventColor" = "活動色彩";
+"setting.timezone::title" = "時區";
+"setting.timezone::systemTimeZone::name" = "系統時區";
+"setting.timezone::systemTime::name" = "系統時間";
+"setting.haptic::name" = "觸覺回饋";
+"setting.minimize_animation::name" = "減少動畫效果";
+"setting.holiday.title" = "假日";
+"setting.holiday.item::name" = "假日設定";
+"setting.holiday.list::sectionTitle" = "假日";
+"setting.holiday.country.title" = "國家";
+"setting.holiday.country.current::title" = "目前國家";
+"setting.holiday.country.current::placeHolder" = "選擇國家";
+"setting.holiday.country.changeConfirm::title" = "變更國家";
+"setting.holiday.country.changeConfirm::message" = "是否要變更行事曆的國家？";
+"setting.holiday.country.changed::message" = "國家已變更。";
+"setting.holiday.hide::button" = "隱藏";
+"setting.holiday.hide::confirm::title" = "隱藏假日";
+"setting.holiday.hide::confirm::message" = "是否每年都隱藏此假日？\n您可以在設定 > 假日中重新顯示。";
+"setting.holiday.hidden::sectionTitle" = "已隱藏的假日";
+"setting.holiday.show::button" = "顯示";
+"setting.feedback::name" = "意見回饋";
+"setting.help::name" = "說明";
+"setting.share::name" = "分享應用程式";
+"setting.write_review::name" = "撰寫應用程式評論";
+"setting.account.signedIn::manageAccount" = "帳號";
+"setting.account.needSignIn" = "登入";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "管理您的閱讀清單";
+"setting.section.support::name" = "支援";
+"setting.section.app::name" = "應用程式";
+"setting.section.suggest::name" = "推薦";
+"feedback::guide:message" = "歡迎提供任何意見回饋，包括錯誤回報、想法或服務建議。\n您的意見將對我們改善服務有很大的幫助。";
+"feedback::enterMessage::placeholder" = "輸入內容";
+"feedback::contact::placeholder" = "回覆用電子郵件地址";
+"feedback::posted:message" = "您的意見回饋已成功送出。";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google 日曆";
+"external_service.expired::message" = "%@ 連接已過期，請前往設定重新嘗試。";
+"external_service::google::hidden_event" = "已隱藏";
+"external_service::google::unknown_event" = "不明";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "檢視即將到來的活動。";
+"widget.doubleMonth::name" = "日曆 + 日曆";
+"widget.eventAndMonth::name" = "活動 + 日曆";
+"widget.todayAndMonth::name" = "今天 + 日曆";
+"widget.eventAndForesmot::name" = "活動 + 最重要活動";
+"widget.events::name" = "活動";
+"widget.events.noEvents::message" = "目前沒有活動。";
+"widget.events.currentTodos" = "目前待辦清單";
+"widget.events.sample::check_mailbox" = "查看信箱";
+"widget.events.sample::example" = "假日";
+"widget.events.sample::running" = "跑步";
+"widget.events.sample::luch" = "午餐";
+"widget.events.sample::luch_appointment" = "午餐約會（不能遲到）";
+"widget.events.sample::call" = "打電話給 Sara";
+"widget.events.sample::surfing" = "衝浪";
+"widget.events.sample::moving" = "搬家日";
+"widget.events.sample::meeting" = "每日會議";
+"widget.events.sample::deposit_remain" = "轉帳尾款";
+"widget.events.sample::recycle" = "回收";
+"widget.events.sample::take_medicine" = "吃藥";
+"widget.events.sample::watering" = "幫花盆澆水";
+"widget.events.sample::june3" = "6月3日 週二";
+"widget.events.sample::july16" = "7月16日 週日";
+"widget.events.sample::july21" = "7月21日 週五";
+"widget.events.sample::july29" = "7月29日 週六";
+"widget.events.sample::aug2" = "8月2日 週三";
+"widget.events.sample::aug3" = "8月3日 週四";
+"widget.events.sample::oct10" = "10月10日 週一";
+"widget.events.foremost" = "最重要活動";
+"widget.events.foremost::allFinished::message" = "新增一項不能錯過的活動。";
+"widget.events.foremost::sample::message" = "記得帶傘！⛱️";
+"widget.events.calendar" = "日曆";
+"widget.events.today" = "今天";
+"widget.events.today::sample::sunday" = "星期日";
+"widget.events.today::sample::march2024" = "2024年3月";
+"total::event::count" = "%d個活動";
+"todo::count" = "%d個待辦事項";
+"schedule::count" = "%d個行程";
+"widget.weeks.lastMonth" = "上個月";
+"widget.weeks.thisMonth" = "本月";
+"widget.weeks.nextMonth" = "下個月";
+"widget.weeks.thisWeek" = "本週";
+"widget.weeks.twoWeek" = "2週";
+"widget.weeks.threeWeek" = "3週";
+"widget.weeks.fourWeek" = "4週";
+"widget.weeks.sample::feb" = "2月";
+"widget.weeks.sample::march" = "3月";
+"widget.weeks.sample::april" = "4月";
+"widget.weeks.sample::hiking" = "🏔️ 登山";
+"widget.weeks.sample::lunch" = "🥗 午餐";
+"widget.weeks.sample::call" = "📞 打電話給 Sara";
+"widget.weeks.sample::holiday" = "假日";
+"widget.weeks.sample::golf" = "⛳️ 高爾夫";
+"widget.weeks.sample::workout" = "🔥 運動";
+"widget.weeks.sample::launch" = "🚀 發表會";
+"widget.fail.message" = "發生暫時性錯誤。\n請重新啟動應用程式再試一次。";
+"widget.next.noEvent" = "沒有下一個活動。";
+"widget.next.sample" = "🔥 運動";
+"widget.next.title" = "下一個活動";
+"widget.next.rect_widget::title" = "今天的下一個活動。";
+"widget.next.title::remains" = "今天剩餘的活動。";
+"widget.next.title::future" = "今天與接下來的行程";
+"widget.next.title::more_todos" = "還有%d項待辦事項";
+"widget.next.title::more_events" = "還有%d項行程";
+"widget.next.title::more_events_with_todo" = "還有%1$d項待辦事項及%2$d項行程";
+"widget.next.title::uncompleted::todo" = "%1$@尚未完成";
+"widget.next.title::uncompleted::todos" = "%1$@及另外%2$d項未完成待辦";
+"widget.next.no_events_today" = "今天沒有活動";
+"widget.next.no_events" = "沒有即將到來的活動";
+
+"widget.dday::name" = "D-Day";
+"widget.dday::noTarget" = "選擇一個活動";
+"widget.dday.sample::title" = "工作坊";
+"widget.dday.target::repeating" = "重複";
+"widget.dday.target::registered" = "已釘選";
+"widget.dday.turn::name" = "第%d次";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "不支援此連結格式。\n請將應用程式更新至最新版本。";
+
+// MARK: - force update
+
+"force_update.title" = "需要更新";
+"force_update.message" = "已推出新版本。\n請更新後繼續使用應用程式。";
+"recommend_update.title" = "建議更新";
+"recommend_update.message" = "已推出新版本。\n建議更新以獲得更好的使用體驗。";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "聆聽中…";
+"aiAgent::keyboard" = "鍵盤";
+"aiAgent::voice" = "語音";
+"aiAgent::send" = "傳送";
+"aiAgent::input::placeholder" = "有什麼我可以幫忙的？";
+"aiAgent::permission::title" = "需要麥克風與語音辨識權限";
+"aiAgent::permission::message" = "請至設定允許權限，或改用鍵盤輸入";
+"aiAgent::permission::keyboard" = "改用鍵盤輸入";
+"aiAgent::permission::setting" = "開啟設定";
+"aiAgent::state::processing" = "處理中";
+"aiAgent::state::confirm" = "需要確認";
+"aiAgent::state::confirmExpired" = "已過期";
+"aiAgent::state::done" = "工作完成";
+"aiAgent::state::failed" = "工作失敗";
+"aiAgent::done::default" = "完成了";
+"aiAgent::failed::default" = "無法完成該項工作";
+"aiAgent::retry" = "重試";
+"aiAgent::needSignIn::title" = "需要登入";
+"aiAgent::needSignIn::message" = "登入後即可使用 AI 快速輸入。";
+"aiAgent::title" = "AI 快速輸入";
+"aiAgent::keyboard::stop" = "停止";
+"aiAgent::keyboard::send" = "傳送";
+"aiAgent::stop" = "停止";
+"aiAgent::usage" = "%@ / %@ 點數";
+"aiAgent::plan::free" = "免費";
+"aiAgent::plan::standard" = "標準";
+"aiAgent::plan::lifetime" = "永久";
+"aiAgent::usage::topupRemaining" = "還剩%@額外點數";
+"aiAgent::usage::planChangeScheduled" = "將於%1$@切換至%2$@方案";
+"aiAgent::stop::confirm::title" = "是否要停止處理？";
+"aiAgent::stop::confirm::message" = "停止後將會捨棄正在進行的工作，且無法繼續。";
+"aiAgent::confirm::countdown" = "內請核准";
+"aiAgent::confirm::expired::message" = "時間已過期，請重新提出要求。";
