@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " och";
+"common::wait:message" = "Vänta...";
+"common::back" = "Tillbaka";
+"common.remove" = "Ta bort";
+"common.confirm" = "Bekräfta";
+"common.cancel" = "Avbryt";
+"common.close" = "Stäng";
+"common.yes" = "Ja";
+"common.no" = "Nej";
+"common.save" = "Spara";
+"common.info" = "Info";
+"common.search" = "Sök";
+"common.clear" = "Rensa";
+"common.send" = "Skicka";
+"common.done" = "Klar";
+"common.errorMessage" = "Ett tillfälligt fel har uppstått.\nVänligen rapportera om problemet kvarstår.";
+"common.update" = "Uppdatera";
+"common.go_to_settings" = "Gå till inställningar";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d-M, HH:mm";
+"date_form::MM_d" = "d-M";
+"date_form::MM_dd" = "dd-MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "yyyy-MM-dd (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "yyyy-MM-dd HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "yyyy-MM-dd h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "yyyy-MM-dd";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Imorgon";
+
+// MARK: - event
+
+"dayname::sunday" = "Söndag";
+"dayname::monday" = "Måndag";
+"dayname::tuesday" = "Tisdag";
+"dayname::wednesday" = "Onsdag";
+"dayname::thursday" = "Torsdag";
+"dayname::friday" = "Fredag";
+"dayname::saturday" = "Lördag";
+
+"dayname::sunday:short" = "SÖN";
+"dayname::monday:short" = "MÅN";
+"dayname::tuesday:short" = "TIS";
+"dayname::wednesday:short" = "ONS";
+"dayname::thursday:short" = "TOR";
+"dayname::friday:short" = "FRE";
+"dayname::saturday:short" = "LÖR";
+
+"dayname::sunday:very_short" = "S";
+"dayname::monday:very_short" = "M";
+"dayname::tuesday:very_short" = "T";
+"dayname::wednesday:very_short" = "O";
+"dayname::thursday:very_short" = "T";
+"dayname::friday:very_short" = "F";
+"dayname::saturday:very_short" = "L";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Dagens händelser";
+"event_notification::todo:prefix" = "Uppgift";
+"event_notification::today:prefix" = "Idag";
+"event_notification::tomorrow:prefix" = "Imorgon";
+"event_notification::allday_today" = "Hela dagen idag";
+"event_notification::allday_tomorrow" = "Hela dagen imorgon";
+"event_notification::some_allday" = "%@ hela dagen";
+"event_notification_setting::option_title::no_notification" = "Inga aviseringar";
+"event_notification_setting::option_title::at_time" = "Vid händelsens tidpunkt";
+"event_notification_setting::option_title::allday_9am" = "Kl. 9 den dagen";
+"event_notification_setting::option_title::allday_12pm" = "Vid middagstid den dagen";
+"event_notification_setting::option_title::customTime" = "Anpassad tid: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Anpassad tid";
+"event_notification_setting::option_title::before_minutes" = "%d minut/minuter före händelsen";
+"event_notification_setting::option_title::before_hours" = "%d timme/timmar före händelsen";
+"event_notification_setting::option_title::before_days" = "%d dag/dagar före händelsen";
+"event_notification_setting::option_title::before_weeks" = "%d vecka/veckor före händelsen";
+"event_notification_setting::option_title::allday_9am_before_days" = "Kl. 09:00, %d dag/dagar innan";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "Kl. 09:00, %d vecka/veckor innan";
+"event_notification_setting::need_permission_message" = "För att använda funktionen för händelseaviseringar behöver du ge aviseringsbehörighet.\nGå till systemets appinställningar och tillåt aviseringar.";
+"event_notification_setting::need_permission::go_setting" = "Gå till inställningar";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "Appens aviseringsbehörighet krävs för att använda funktionen för händelsepåminnelser.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Viktigaste händelsen";
+"calendar::uncompletedTodos:title" = "Ej slutförda uppgifter";
+"calendar::event_time::todo" = "Uppgift";
+"calendar::event_time::allday" = "Hela dagen";
+"calendar::event_time::allday::with" = "%@ hela dagen";
+"calendar::event_time::period:some_days" = "%d dagar";
+"calendar::event_time::period:some_minutes" = "%d minuter";
+"calendar::event_time::period:some_hours" = "%d timmar";
+"calendar::event_time::period:some_days:some_hours" = "%d dagar %d timmar";
+"calendar::event::more_action::remove:title" = "Ta bort händelse";
+"calendar::event::more_action::foremost_event:title" = "Viktigaste händelsen";
+"calendar::event::more_action::remove_only_thistime:message" = "Vill du bara ta bort den här händelsen från alla återkommande händelser?";
+"calendar::event::more_action::remove:message" = "Vill du ta bort den här händelsen?";
+"calendar::event::more_action::mark_as_foremost" = "Vill du markera den här händelsen som din viktigaste händelse?";
+"calendar::event::more_action::unmark_as_foremost" = "Vill du avmarkera den här händelsen som din viktigaste händelse?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Ett återkommande möte kan inte markeras som den viktigaste händelsen.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Ta bort endast den här händelsen";
+"calendar::event::more_action:remove:item_name" = "Ta bort händelse";
+"calendar::event::more_action:foremost:mark:item_name" = "Markera som viktigast";
+"calendar::event::more_action:foremost:unmark:item_name" = "Avmarkera som viktigast";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Lägg till i D-dag-widgeten";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Ta bort från D-dag-widgeten";
+"calendar::event::more_action:dday_candidate:title" = "Kandidat för D-dag-widgeten";
+"calendar::event::more_action:dday_candidate:register:message" = "Lägg till den här händelsen som kandidat för D-dag-widgeten? Den visas högst upp i listan när du redigerar widgeten.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Ta bort den här händelsen från kandidaterna för D-dag-widgeten?";
+"calendar::event::more_action:copy:item_name" = "Kopiera händelse";
+"calendar::event::more_action:transform_to::schedule" = "Konvertera till möte";
+"calendar::event::more_action:transform_to::todo" = "Konvertera till uppgift";
+"calendar::event::more_action:edit:item_name" = "Redigera";
+"calednar::event::add_new" = "Lägg till en ny händelse";
+"calednar::event::add_new:place_holder" = "Lägg snabbt till en ny uppgift.";
+"calednar::event::skip_todo" = "Hoppa över denna uppgift";
+"calednar::event::skip_todo_until" = "Välj en tid för att hoppa över denna uppgift";
+"calednar::event::copy" = "Kopiera händelse";
+"calendar::move_date" = "Flytta datum";
+"calednar::event::google::edit" = "Redigera Google Kalender-händelse";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Välj en tidpunkt för händelsen först.";
+"eventDetail.messages.selectValidTime" = "Välj en giltig tidpunkt för händelsen.";
+"eventDetail.notification.custom_eventTime:title" = "Anpassad";
+"eventDetail.notification.title" = "Aviseringstid för händelse";
+"eventDetail.repeating.title" = "Upprepning";
+"eventDetail.repeating.notRepeating::title" = "Ingen upprepning";
+"eventDetail.repeating.starttime:form" = "d MMM yyyy";
+"eventDetail.repeating.starttime:title" = "Startdatum för upprepning";
+"eventDetail.repeating.everyDay:title" = "Varje dag";
+"eventDetail.repeating.everyWeek:title" = "Varje vecka";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Varje %@";
+"eventDetail.repeating.everySomeWeek:title" = "Var %d:e vecka";
+"eventDetail.repeating.everyWeekDays:title" = "Varje vardag";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Var %d:e vecka %@";
+"eventDetail.repeating.everyMonth:title" = "Varje månad";
+"eventDetail.repeating.everyMonth_someDay:title" = "%@ i varje månad.";
+"eventDetail.repeating.everyYear:title" = "Varje år";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Varje år (månkalender)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Varje år %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Varje år %@ (månkalender)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Alla dagar i den sista veckan varje månad";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Den första %@ i varje månad";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Den andra %@ i varje månad";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Den tredje %@ i varje månad";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Den fjärde %@ i varje månad";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Den femte %@ i varje månad";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Den sjätte %@ i varje månad";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Den sjunde %@ i varje månad";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "Den sista %@ i varje månad";
+"eventDetail.repeating.endtime::title" = "Upprepning slutar";
+"eventDetail.repeating.endtime::option::never" = "Aldrig";
+"eventDetail.repeating.endtime::option::on" = "Den";
+"eventDetail.repeating.endtime::option::after" = "Efter";
+"eventDetail.repeating.endtime::option::after_occurrences" = "gånger";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "Slutdatumet för upprepningen måste vara senare än startdatumet.\n(Startdatum för upprepning: %@)";
+"eventDetail.repeating::period_endcount" = "Från %@, %d gånger";
+
+"eventDetail.repeating.everyNDays:title" = "Var %d:e dag";
+"eventDetail.repeating.last" = "Sista";
+"eventDetail.repeating.everyNMonths:title" = "Var %d:e månad";
+"eventDetail.repeating.everyNYears:title" = "Vart %d:e år";
+"eventDetail.repeating::endoption_until" = "till %@";
+"eventDetail.repeating::endoption_times" = "%d gång/gånger";
+
+"eventDetail.place::placeholder" = "Plats";
+"eventDetail.place::remove_button" = "Ta bort platsen";
+"eventDetail.place::no_map_app" = "Den valda kartappen är inte installerad.";
+"eventDetail.place::select_map_app" = "Välj en karta";
+"eventDetail.place::always_select_this_map" = "Öppna alltid med den här appen.";
+
+"eventDetail.add_new_todo::message" = "En ny uppgift har lagts till.";
+"eventDetail.add_new_schedule::message" = "Ett nytt möte har lagts till.";
+"eventDetail.scheduleEvent_removed::message" = "Mötet har tagits bort.";
+"eventDetail.edit::repeating::confirm::ttile" = "Redigera händelse";
+"eventDetail.edit::repeating::confirm::message" = "Den här händelsen är en återkommande händelse.\nVälj omfattningen för den återkommande händelse du vill redigera.";
+"eventDetail.edit::repeating::confirm::all::button" = "Alla händelser";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Från och med nu";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Endast denna gång";
+"eventDetail.scheduleEvent_saved::message" = "Mötet har sparats.";
+"eventDetail.todoEvent_removed::message" = "Uppgiften har tagits bort.";
+"eventDetail.todoEvent_saved::message" = "Uppgiften har sparats.";
+"eventDetail.cancel_edit::title" = "Redigera händelse";
+"eventDetail.cancel_edit::message" = "Vill du förkasta dessa ändringar?";
+"eventDetail.cancel_edit::continue::button" = "Fortsätt";
+
+"eventDetail.edit::add_new_name::placeholder" = "Lägg till ett nytt händelsenamn";
+"eventDetail.edit::clearEventTime::button" = "Rensa tidpunkt för händelse";
+"eventDetail.edit::noEventTime::button" = "Ingen sluttid";
+"eventDetail.edit::memo" = "Anteckning";
+"eventDetail.edit::urlPreview" = "URL-förhandsvisning";
+
+"eventDetail.edit::make::case" = "Är det en uppgift?";
+"eventDetail.edit::todo::case" = "Uppgift";
+"eventDetail.edit::schedule::case" = "Möte";
+"eventDetail.edit::holiday::case" = "Allmän helgdag i %@";
+
+"eventDetail.notSupport::holiday" = "Funktionen för att ändra information stöds inte för allmänna helgdagar.";
+
+"eventDetail:todo:guide:message1" = "En uppgift representerar något som behöver göras.";
+"eventDetail:todo:guide:message2" = "Till skillnad från vanliga möten som visas i kalendern med en specifik tid (eller period), erbjuder uppgifter möjligheten att markera om de har slutförts.";
+"eventDetail:todo:guide:message3" = "Du kan lägga till en uppgift utan angiven tidsinformation. Du kan till exempel registrera en uppgift som behöver göras snart, men inte omedelbart.";
+"eventDetail:todo:guide:process:message" = "Uppgifter beter sig annorlunda än vanliga möten när upprepningsalternativet är aktiverat:";
+"eventDetail:todo:guide:process:bullet1" = "Nuvarande eller tidigare återkommande uppgifter som ännu inte har slutförts visas i kalendern.";
+"eventDetail:todo:guide:process:bullet2" = "När en uppgift slutförs läggs den till i listan över slutförda händelser och nästa återkommande händelse läggs till i kalendern.";
+"eventDetail:todo:guide:process:bullet3" = "Om det inte finns någon ytterligare upprepning på grund av slutdatumet för upprepningen avslutas den återkommande uppgiften.";
+"eventDetail:foremost:guide:message1" = "Markera en händelse som viktigast för att betona att det är din viktigaste händelse.\nDen viktigaste händelsen är alltid synlig i kalendern och har stöd för en egen widget.";
+"eventDetail:foremost:guide:supports:message" = "Följande händelsetyper kan anges som den viktigaste händelsen:";
+"eventDetail:foremost:guide:supports:todo" = "Uppgift";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Möten som inte upprepas";
+
+"eventDetail:isSaving:toast:message" = "Sparar ändringar. Vänta.";
+"eventDetail:hasChanges:confirm:message" = "Det finns ändringar. Vill du förkasta dem?";
+"eventDetail:hasChanges:confirm:continue" = "Fortsätt redigera";
+
+"eventDetail.unavailto_transform_withoutName" = "Ange ett namn för att konvertera händelsen.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Tidsinformation krävs för att konvertera till ett möte.";
+"eventDetail.todoEvent::transform::schedule_title" = "Konvertera";
+"eventDetail.todoEvent::transform::schedule_message" = "Vill du konvertera den här uppgiften till ett möte?";
+"eventDetail.scheduleEvent::transform::todo" = "Konvertera";
+"eventDetail.scheduleEvent::transform::todo_message" = "Vill du konvertera det här mötet till en uppgift?";
+
+"eventDetail::revert" = "Ångra slutförande";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Visa i Google Kalender";
+"eventDetail::gogoleEvent::calendar" = "Kalender";
+"eventDetail::gogoleEvent::calendar::event" = "Google Kalender-händelse";
+"eventDetail::gogoleEvent::attendee::unknown" = "Okänd";
+"eventDetail::gogoleEvent::attendees" = "Deltagare (%d personer)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organisatör";
+"eventDetail::gogoleEvent::conference::accessCode" = "Åtkomstkod";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Möteskod";
+"eventDetail::gogoleEvent::conference::passCode" = "Lösenordskod";
+"eventDetail::gogoleEvent::conference::password" = "Lösenord";
+"eventDetail::gogoleEvent::copy::message" = "Kopierat till urklipp.";
+"eventDetail::gogoleEvent::canceled::message" = "Den här händelsen har avbokats.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Visa i Apple Kalender";
+"eventDetail::appleCalendarEvent::calendar::event" = "Apple Kalender-händelse";
+"eventDetail::appleCalendarEvent::attendees" = "Deltagare (%d personer)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organisatör";
+
+// MARK: - event tag
+
+"eventTag.title" = "Händelsetyp";
+"eventTag.list::title" = "Händelsetyper";
+"eventTag.defaults.default::name" = "Standard";
+"eventTag.defaults.holiday::name" = "Helgdag";
+"eventTag.addNew::placeholder" = "Lägg till en ny händelsetyp";
+"eventTag.allEventTypes" = "Alla händelsetyper >";
+"eventTag.remove::confirm::message" = "Vill du ta bort den här händelsetypen, eller vill du ta bort alla relaterade händelser?";
+"eventTag.remove::only_tag" = "Ta bort endast händelsetypen";
+"eventTag.remove::tag_and_evets" = "Ta bort med relaterade händelser";
+"eventTag.removed::message" = "Den här händelsetypen har tagits bort.";
+"eventTag.removed_with_events::message" = "Den här händelsetypen och relaterade händelser har tagits bort.";
+"eventTag.color::changed::message" = "Färgen har ändrats.";
+"eventTag.changed::message" = "Händelsetypen har ändrats.";
+"eventTag.makeNew::message" = "En ny händelsetyp har skapats.";
+"eventTag.default::title" = "Standardhändelsetyp";
+"eventTag.default::selection::explain" = "Det här är händelsetypen som väljs som standard när du skapar en händelse.";
+"eventTag.externalCalendar::integrate_button" = "Anslut kalender";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Idag";
+"eventList::yesterday::title" = "Igår";
+"eventList::thisMonth::title" = "Denna månad";
+"eventList::done_todos::title" = "Lista över slutförda uppgifter";
+"eventList::done_todos::eventTime" = "Tidpunkt för händelse:";
+"eventList::done_todos::doneAt" = "Tidpunkt för slutförande:";
+"eventList::remove::confirm::message" = "Ta bort listan över slutförda uppgifter";
+"eventList::remove::confirm::button::all" = "Alla slutförda uppgifter";
+"eventList::remove::confirm::button::olderThan1m" = "Äldre än 1 månad";
+"eventList::remove::confirm::button::olderThan3m" = "Äldre än 3 månader";
+"eventList::remove::confirm::button::olderThan6m" = "Äldre än 6 månader";
+"eventList::remove::confirm::button::olderThan1y" = "Äldre än 1 år";
+
+
+// MARK: - account
+
+"manage_account::title" = "Kontohantering";
+"manage_account::login_method" = "Inloggningsmetod";
+"manage_account::email" = "E-post";
+"manage_account::last_signedIn_at" = "Senaste inloggningstid";
+"manage_account::migration::title" = "Migrera tillfälliga användardata";
+"manage_account::migration::description" = "Alla händelser som skapades innan du loggade in (%d händelse/händelser) migreras till ditt konto.\nHändelser kopplade till ditt konto kan nås från alla enheter.";
+"manage_account::migration_finished::message" = "Migreringen är klar!";
+"manage_account::signout_button::title" = "Logga ut";
+"manage_account::sign_out::confirm::title" = "Logga ut";
+"manage_account::sign_out::confirm::message" = "Vill du logga ut från ditt nuvarande konto?";
+"manage_account::delete_account_button::title" = "Ta bort konto";
+"manage_account::delete_account_button::confirm:message" = "Är du säker på att du vill ta bort ditt konto?";
+"manage_account::delete_account_button::description" = "Efter att du begärt borttagning av kontot kommer det att raderas.\nNär det har raderats kan kontoinformationen inte återställas.";
+"signIn::title" = "Logga in";
+"signIn:description" = "Säkerhetskopiera din händelselista och synkronisera den mellan andra iOS-enheter\n(Fler plattformar kommer att stödjas.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Händelseinställningar";
+"event_setting::eventType" = "Händelsetyp";
+"event_setting::eventPeriod" = "Händelseperiod";
+"event_setting::defaultMapApp" = "Öppna kartappen";
+"event_setting::defaultMapApp_select" = "Välj";
+
+"event_setting::eventSync" = "Händelsesynkronisering";
+"event_setting::eventSync::readyToSync::description" = "Synkronisera säkerhetskopierade användarhändelser.";
+"event_setting::eventSync::syncInProgress::description" = "Synkroniserar säkerhetskopierade användarhändelser...";
+"event_setting::eventSync::lastTime" = "Senaste synkroniserade data: %@";
+"event_setting::eventSync::force" = "Tvinga synkronisering";
+
+"event_notification_setting::title::forAllDay" = "Hela dagen";
+"event_notification_setting::title::NotforAllDay" = "Aviseringstid";
+"event_setting::external_calendar::title" = "Externa kalendrar";
+"event_setting::external_calendar::connected::account" = "Ansluten: %@";
+"event_setting::external_calendar::start" = "Anslut";
+"event_setting::external_calendar::start::message" = "Ansluten till en extern kalender.";
+"event_setting::external_calendar::stop" = "Koppla från";
+"event_setting::external_calendar::stop::message" = "Anslutningen till den externa kalendern har kopplats från.";
+"event_setting::external_calendar::google::serviceName" = "Google Kalender";
+"event_setting::external_calendar::apple::serviceName" = "Apple Kalender";
+"event_setting::apple_calendar::permission_denied::message" = "Åtkomst till kalendern har nekats. Aktivera den i Inställningar för att använda Apple Kalender.";
+"event_setting::apple_calendar::restricted::message" = "Åtkomst till kalendern är begränsad på den här enheten.";
+"setting.title" = "Inställningar";
+"setting.appearance.title" = "Utseende";
+"setting.appearance.calendar.samplemonth::march" = "MARS";
+"setting.appearance.calendar.startDayOfWeek" = "Veckans startdag";
+"setting.appearance.calendar.accentDay" = "Markerade dagar";
+"setting.appearance.calendar.accentDay::holiday" = "Helgdag";
+"setting.appearance.calendar.accentDay::saturday" = "Lördag";
+"setting.appearance.calendar.accentDay::sunday" = "Söndag";
+"setting.appearance.calendar.colorTheme" = "Färgtema";
+"setting.appearance.calendar.colorTheme::system" = "System";
+"setting.appearance.calendar.colorTheme::light" = "Ljust";
+"setting.appearance.calendar.colorTheme::dark" = "Mörkt";
+"setting.appearance.calendar.underline" = "Understrykning på dagar med händelser";
+"setting.appearance.event.edit::name_old" = "Redigera händelse";
+"setting.appearance.event.edit::name" = "Händelseinställningar och externa kalendrar";
+"setting.appearance.day_row_height" = "Detaljnivå för händelser";
+"setting.appearance.day_row_height::small::text" = "Minimal";
+"setting.appearance.day_row_height::medium::text" = "Medium";
+"setting.appearance.day_row_height::large::text" = "Full";
+"setting.appearance.event.fontSize" = "Textstorlek för händelser";
+"setting.appearance.event.show_holidayName" = "Visa helgdagens namn";
+"setting.appearance.event.show_lunar" = "Månkalender";
+"setting.appearance.event._24form" = "24-timmarsformat";
+"setting.appearance.event.sample::name" = "🥗 Händelsenamn";
+"setting.appearance.event.sample::description" = "beskrivning";
+"setting.appearance.event.sample::christmas" = "Jul";
+"setting.appearance.event.sample::first" = "första händelsen";
+"setting.appearance.event.sample::second" = "andra händelsen";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Visa ej slutförda uppgifter";
+"setting.appearance.widget::title" = "Widget-tema";
+"setting.appearance.widget::useSystemTheme::title" = "Använd systemtema";
+"setting.appearance.widget::useSystemTheme::background" = "Bakgrundsfärg för widget";
+"setting.appearance.widget::useCustomTheme::title" = "Välj anpassad färg";
+"setting.appearance.widget::sample::eventName" = "Widget-händelse";
+"setting.appearance.event.boldText" = "Fet text";
+"setting.appearance.event.eventColor" = "Händelsefärg";
+"setting.timezone::title" = "Tidszon";
+"setting.timezone::systemTimeZone::name" = "Systemets tidszon";
+"setting.timezone::systemTime::name" = "Systemtid";
+"setting.haptic::name" = "Haptisk feedback";
+"setting.minimize_animation::name" = "Minimera animationseffekter";
+"setting.holiday.title" = "Helgdagar";
+"setting.holiday.item::name" = "Helgdagsinställning";
+"setting.holiday.list::sectionTitle" = "Helgdagar";
+"setting.holiday.country.title" = "Land";
+"setting.holiday.country.current::title" = "Aktuellt land";
+"setting.holiday.country.current::placeHolder" = "Välj land";
+"setting.holiday.country.changeConfirm::title" = "Byt land";
+"setting.holiday.country.changeConfirm::message" = "Vill du byta land för din kalender?";
+"setting.holiday.country.changed::message" = "Landet har ändrats.";
+"setting.holiday.hide::button" = "Dölj";
+"setting.holiday.hide::confirm::title" = "Dölj helgdag";
+"setting.holiday.hide::confirm::message" = "Dölj den här helgdagen varje år?\nDu kan visa den igen i Inställningar > Helgdagar.";
+"setting.holiday.hidden::sectionTitle" = "Dolda helgdagar";
+"setting.holiday.show::button" = "Visa";
+"setting.feedback::name" = "Feedback";
+"setting.help::name" = "Hjälp";
+"setting.share::name" = "Dela appen";
+"setting.write_review::name" = "Skriv en recension av appen";
+"setting.account.signedIn::manageAccount" = "Konto";
+"setting.account.needSignIn" = "Logga in";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Hantera din läslista";
+"setting.section.support::name" = "Support";
+"setting.section.app::name" = "App";
+"setting.section.suggest::name" = "Förslag";
+"feedback::guide:message" = "Skicka gärna feedback, inklusive felrapporter, kommentarer och förslag på tjänsten.\nDina kommentarer hjälper oss mycket att förbättra vår tjänst.";
+"feedback::enterMessage::placeholder" = "Skriv ett meddelande";
+"feedback::contact::placeholder" = "E-postadress för svar";
+"feedback::posted:message" = "Din feedback har registrerats.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Kalender";
+"external_service.expired::message" = "%@-integrationen har upphört att gälla. Gå till Inställningar och försök igen.";
+"external_service::google::hidden_event" = "Dold";
+"external_service::google::unknown_event" = "Okänd";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Visa dina kommande händelser.";
+"widget.doubleMonth::name" = "Kalender + Kalender";
+"widget.eventAndMonth::name" = "Händelser + Kalender";
+"widget.todayAndMonth::name" = "IDAG + Kalender";
+"widget.eventAndForesmot::name" = "Händelser + Viktigast";
+"widget.events::name" = "Händelser";
+"widget.events.noEvents::message" = "Det finns inga händelser.";
+"widget.events.currentTodos" = "Aktuell uppgiftslista";
+"widget.events.sample::check_mailbox" = "Kolla brevlådan";
+"widget.events.sample::example" = "Helgdag";
+"widget.events.sample::running" = "Löpning";
+"widget.events.sample::luch" = "Lunch";
+"widget.events.sample::luch_appointment" = "Lunchmöte (kan inte bli sen)";
+"widget.events.sample::call" = "Ring Sara";
+"widget.events.sample::surfing" = "Surfing";
+"widget.events.sample::moving" = "Flyttdag";
+"widget.events.sample::meeting" = "Dagligt möte";
+"widget.events.sample::deposit_remain" = "Överför slutbetalningen";
+"widget.events.sample::recycle" = "Återvinning";
+"widget.events.sample::take_medicine" = "Ta medicin";
+"widget.events.sample::watering" = "Vattna blomkrukan";
+"widget.events.sample::june3" = "TIS 3 JUN";
+"widget.events.sample::july16" = "SÖN 16 JUL";
+"widget.events.sample::july21" = "FRE 21 JUL";
+"widget.events.sample::july29" = "LÖR 29 JUL";
+"widget.events.sample::aug2" = "ONS 2 AUG";
+"widget.events.sample::aug3" = "TOR 3 AUG";
+"widget.events.sample::oct10" = "MÅN 10 OKT";
+"widget.events.foremost" = "Viktigaste händelsen";
+"widget.events.foremost::allFinished::message" = "Lägg till en händelse du inte får missa.";
+"widget.events.foremost::sample::message" = "Ta med paraply! ⛱️";
+"widget.events.calendar" = "Kalender";
+"widget.events.today" = "IDAG";
+"widget.events.today::sample::sunday" = "SÖNDAG";
+"widget.events.today::sample::march2024" = "MARS 2024";
+"total::event::count" = "%d händelser";
+"todo::count" = "%d uppgifter";
+"schedule::count" = "%d möten";
+"widget.weeks.lastMonth" = "Förra månaden";
+"widget.weeks.thisMonth" = "Den här månaden";
+"widget.weeks.nextMonth" = "Nästa månad";
+"widget.weeks.thisWeek" = "Den här veckan";
+"widget.weeks.twoWeek" = "2 veckor";
+"widget.weeks.threeWeek" = "3 veckor";
+"widget.weeks.fourWeek" = "4 veckor";
+"widget.weeks.sample::feb" = "FEBRUARI";
+"widget.weeks.sample::march" = "MARS";
+"widget.weeks.sample::april" = "APRIL";
+"widget.weeks.sample::hiking" = "🏔️ Vandring";
+"widget.weeks.sample::lunch" = "🥗 Lunch";
+"widget.weeks.sample::call" = "📞 Ring Sara";
+"widget.weeks.sample::holiday" = "Helgdag";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Träning";
+"widget.weeks.sample::launch" = "🚀 Lansering";
+"widget.fail.message" = "Ett tillfälligt fel inträffade.\nFörsök att köra appen igen.";
+"widget.next.noEvent" = "Ingen kommande händelse.";
+"widget.next.sample" = "🔥 Träning";
+"widget.next.title" = "Nästa händelse";
+"widget.next.rect_widget::title" = "Dagens nästa händelse.";
+"widget.next.title::remains" = "Dagens kommande händelser.";
+"widget.next.title::future" = "Idag och vad som väntar";
+"widget.next.title::more_todos" = "%d uppgift/uppgifter till";
+"widget.next.title::more_events" = "%d möte/möten till";
+"widget.next.title::more_events_with_todo" = "%1$d uppgift/uppgifter och %2$d möte/möten till";
+"widget.next.title::uncompleted::todo" = "%1$@ är inte slutförd";
+"widget.next.title::uncompleted::todos" = "%1$@ och %2$d fler ej slutförda uppgifter";
+"widget.next.no_events_today" = "Inga händelser idag";
+"widget.next.no_events" = "Inga kommande händelser";
+
+"widget.dday::name" = "D-dag";
+"widget.dday::noTarget" = "Välj en händelse";
+"widget.dday.sample::title" = "Workshop";
+"widget.dday.target::repeating" = "Återkommande";
+"widget.dday.target::registered" = "Fäst";
+"widget.dday.turn::name" = "Omgång %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Det här länkformatet stöds inte.\nUppdatera appen till den senaste versionen.";
+
+// MARK: - force update
+
+"force_update.title" = "Uppdatering krävs";
+"force_update.message" = "En ny version är tillgänglig.\nUppdatera för att fortsätta använda appen.";
+"recommend_update.title" = "Uppdatering rekommenderas";
+"recommend_update.message" = "En ny version är tillgänglig.\nVi rekommenderar att du uppdaterar för en bättre upplevelse.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "Lyssnar…";
+"aiAgent::keyboard" = "Tangentbord";
+"aiAgent::voice" = "Röst";
+"aiAgent::send" = "Skicka";
+"aiAgent::input::placeholder" = "Hur kan jag hjälpa till?";
+"aiAgent::permission::title" = "Åtkomst till mikrofon och tal krävs";
+"aiAgent::permission::message" = "Tillåt åtkomst i Inställningar, eller skriv istället";
+"aiAgent::permission::keyboard" = "Skriv istället";
+"aiAgent::permission::setting" = "Öppna inställningar";
+"aiAgent::state::processing" = "Bearbetar";
+"aiAgent::state::confirm" = "Bekräftelse krävs";
+"aiAgent::state::confirmExpired" = "Utgången";
+"aiAgent::state::done" = "Kommandot slutfört";
+"aiAgent::state::failed" = "Kommandot misslyckades";
+"aiAgent::done::default" = "Klart";
+"aiAgent::failed::default" = "Kunde inte slutföra det";
+"aiAgent::retry" = "Försök igen";
+"aiAgent::needSignIn::title" = "Inloggning krävs";
+"aiAgent::needSignIn::message" = "Logga in för att använda AI-snabbinmatning.";
+"aiAgent::title" = "AI-snabbinmatning";
+"aiAgent::keyboard::stop" = "Stopp";
+"aiAgent::keyboard::send" = "Skicka";
+"aiAgent::stop" = "Stopp";
+"aiAgent::usage" = "%@ / %@ krediter";
+"aiAgent::plan::free" = "Gratis";
+"aiAgent::plan::standard" = "Standard";
+"aiAgent::plan::lifetime" = "Livstid";
+"aiAgent::usage::topupRemaining" = "%@ extra krediter kvar";
+"aiAgent::usage::planChangeScheduled" = "Byte till planen %2$@ den %1$@";
+"aiAgent::stop::confirm::title" = "Avbryta bearbetningen?";
+"aiAgent::stop::confirm::message" = "Om du avbryter kasseras den pågående åtgärden, och den kan inte återupptas.";
+"aiAgent::confirm::countdown" = "kvar för att godkänna";
+"aiAgent::confirm::expired::message" = "Tiden har gått ut. Begär igen.";

@@ -1,0 +1,562 @@
+/*
+  Localizable.strings
+  Extensions
+
+  Created by sudo.park on 7/31/26.
+  Copyright © 2026 com.sudo.park. All rights reserved.
+*/
+
+
+// MARK: - common
+"common::and" = " e";
+"common::wait:message" = "Attendere prego...";
+"common::back" = "Indietro";
+"common.remove" = "Rimuovi";
+"common.confirm" = "Conferma";
+"common.cancel" = "Annulla";
+"common.close" = "Chiudi";
+"common.yes" = "Sì";
+"common.no" = "No";
+"common.save" = "Salva";
+"common.info" = "Info";
+"common.search" = "Cerca";
+"common.clear" = "Cancella";
+"common.send" = "Invia";
+"common.done" = "Fatto";
+"common.errorMessage" = "Si è verificato un errore temporaneo.\nSi prega di segnalare se il problema persiste.";
+"common.update" = "Aggiorna";
+"common.go_to_settings" = "Vai alle impostazioni";
+
+// MARK: - date form
+"date_form::HH:mm" = "HH:mm";
+"date_form::a_h:mm" = "h:mm a";
+"date_form::MM_d__HH:mm" = "d/M, HH:mm";
+"date_form::MM_d" = "d/M";
+"date_form::MM_dd" = "dd/MM";
+"date_form::24off_h:mm" = "h:mm";
+"date_form::24on_H:mm" = "H:mm";
+"date_form::d_E_" = "d (E)";
+"date_form::MMM_d_HH:mm" = "d MMM HH:mm";
+"date_form::MMM_d" = "d MMM";
+"date_form::yyyy_MM_dd_E_" = "dd/MM/yyyy (E)";
+"date_form:yyyy.MM_dd_hh:mm" = "dd/MM/yyyy HH:mm";
+"date_form:yyyy.MM_dd_h:mm" = "dd/MM/yyyy h:mm a";
+"date_form.yyyy" = "yyyy";
+"date_form.MMM_dd_E" = "dd MMM (E)";
+"date_form.HH:mm" = "HH:mm";
+"date_form.yyyy_MM_dd" = "dd/MM/yyyy";
+"date_form.yyyy_MMM_dd" = "d MMM yyyy";
+"date_form.MMM" = "MMM";
+"date_form.MMMM" = "MMMM";
+"date_form.EEEE" = "EEEE";
+"date_form.EEE_MMM_d" = "EEE d MMM";
+"date_form.MMM_yyyy" = "MMM yyyy";
+"tomorrow" = "Domani";
+
+// MARK: - event
+
+"dayname::sunday" = "Domenica";
+"dayname::monday" = "Lunedì";
+"dayname::tuesday" = "Martedì";
+"dayname::wednesday" = "Mercoledì";
+"dayname::thursday" = "Giovedì";
+"dayname::friday" = "Venerdì";
+"dayname::saturday" = "Sabato";
+
+"dayname::sunday:short" = "DOM";
+"dayname::monday:short" = "LUN";
+"dayname::tuesday:short" = "MAR";
+"dayname::wednesday:short" = "MER";
+"dayname::thursday:short" = "GIO";
+"dayname::friday:short" = "VEN";
+"dayname::saturday:short" = "SAB";
+
+"dayname::sunday:very_short" = "D";
+"dayname::monday:very_short" = "L";
+"dayname::tuesday:very_short" = "M";
+"dayname::wednesday:very_short" = "M";
+"dayname::thursday:very_short" = "G";
+"dayname::friday:very_short" = "V";
+"dayname::saturday:very_short" = "S";
+
+
+// MARK: - event notification
+
+"event_notification::today:title" = "Eventi di oggi";
+"event_notification::todo:prefix" = "Da fare";
+"event_notification::today:prefix" = "Oggi";
+"event_notification::tomorrow:prefix" = "Domani";
+"event_notification::allday_today" = "Tutto il giorno oggi";
+"event_notification::allday_tomorrow" = "Tutto il giorno domani";
+"event_notification::some_allday" = "%@ tutto il giorno";
+"event_notification_setting::option_title::no_notification" = "Nessuna notifica";
+"event_notification_setting::option_title::at_time" = "All'orario dell'evento";
+"event_notification_setting::option_title::allday_9am" = "Alle 9:00 di quel giorno";
+"event_notification_setting::option_title::allday_12pm" = "A mezzogiorno di quel giorno";
+"event_notification_setting::option_title::customTime" = "Orario personalizzato: %@";
+"event_notification_setting::option_title::custimTime_fallback" = "Orario personalizzato";
+"event_notification_setting::option_title::before_minutes" = "%d minuto/i prima dell'evento";
+"event_notification_setting::option_title::before_hours" = "%d ora/e prima dell'evento";
+"event_notification_setting::option_title::before_days" = "%d giorno/i prima dell'evento";
+"event_notification_setting::option_title::before_weeks" = "%d settimana/e prima dell'evento";
+"event_notification_setting::option_title::allday_9am_before_days" = "Alle 9:00, %d giorno/i prima";
+"event_notification_setting::option_title::allday_9am_before_weeks" = "Alle 9:00, %d settimana/e prima";
+"event_notification_setting::need_permission_message" = "Per utilizzare la funzione di notifica degli eventi, è necessaria l'autorizzazione alle notifiche.\nVai alle impostazioni di sistema dell'app e consenti le notifiche.";
+"event_notification_setting::need_permission::go_setting" = "Vai alle impostazioni";
+"event_notification_setting::need_permission_title" = "Info";
+"event_notification_setting::permission_denied" = "L'autorizzazione alle notifiche dell'app è necessaria per utilizzare la funzione di promemoria degli eventi.";
+
+
+
+// MARK: - calendar
+
+"calendar::foremostevent:title" = "Evento principale";
+"calendar::uncompletedTodos:title" = "Da fare non completati";
+"calendar::event_time::todo" = "Da fare";
+"calendar::event_time::allday" = "Tutto il giorno";
+"calendar::event_time::allday::with" = "%@ tutto il giorno";
+"calendar::event_time::period:some_days" = "%d giorni";
+"calendar::event_time::period:some_minutes" = "%d minuti";
+"calendar::event_time::period:some_hours" = "%d ore";
+"calendar::event_time::period:some_days:some_hours" = "%d giorni %d ore";
+"calendar::event::more_action::remove:title" = "Rimuovi evento";
+"calendar::event::more_action::foremost_event:title" = "Evento principale";
+"calendar::event::more_action::remove_only_thistime:message" = "Vuoi eliminare solo questo evento da tutti gli eventi ricorrenti?";
+"calendar::event::more_action::remove:message" = "Vuoi rimuovere questo evento?";
+"calendar::event::more_action::mark_as_foremost" = "Vuoi contrassegnare questo evento come il tuo evento più importante?";
+"calendar::event::more_action::unmark_as_foremost" = "Vuoi rimuovere il contrassegno di evento più importante da questo evento?";
+"calendar::event::more_action::mark_as_foremost::unavail" = "Un evento di pianificazione ricorrente non può essere contrassegnato come l'evento più importante.";
+"calendar::event::more_action:remove_only_thistime:item_name" = "Rimuovi solo questo evento";
+"calendar::event::more_action:remove:item_name" = "Rimuovi evento";
+"calendar::event::more_action:foremost:mark:item_name" = "Contrassegna come principale";
+"calendar::event::more_action:foremost:unmark:item_name" = "Rimuovi contrassegno principale";
+"calendar::event::more_action:dday_candidate:register:item_name" = "Aggiungi al widget Giorno X";
+"calendar::event::more_action:dday_candidate:unregister:item_name" = "Rimuovi dal widget Giorno X";
+"calendar::event::more_action:dday_candidate:title" = "Candidato al widget Giorno X";
+"calendar::event::more_action:dday_candidate:register:message" = "Aggiungere questo evento come candidato al widget Giorno X? Comparirà in cima all'elenco quando modifichi il widget.";
+"calendar::event::more_action:dday_candidate:unregister:message" = "Rimuovere questo evento dai candidati al widget Giorno X?";
+"calendar::event::more_action:copy:item_name" = "Copia evento";
+"calendar::event::more_action:transform_to::schedule" = "Converti in pianificazione";
+"calendar::event::more_action:transform_to::todo" = "Converti in da fare";
+"calendar::event::more_action:edit:item_name" = "Modifica";
+"calednar::event::add_new" = "Aggiungi un nuovo evento";
+"calednar::event::add_new:place_holder" = "Aggiungi rapidamente un nuovo evento da fare.";
+"calednar::event::skip_todo" = "Salta questo da fare";
+"calednar::event::skip_todo_until" = "Seleziona un orario per saltare questo da fare";
+"calednar::event::copy" = "Copia evento";
+"calendar::move_date" = "Sposta data";
+"calednar::event::google::edit" = "Modifica evento di Google Calendar";
+
+
+// MARK: - event detail
+
+"eventDetail.messages.selectTimeFirst" = "Seleziona prima un orario per l'evento.";
+"eventDetail.messages.selectValidTime" = "Seleziona un orario valido per l'evento.";
+"eventDetail.notification.custom_eventTime:title" = "Personalizzato";
+"eventDetail.notification.title" = "Orario di notifica dell'evento";
+"eventDetail.repeating.title" = "Ricorrenza";
+"eventDetail.repeating.notRepeating::title" = "Nessuna ricorrenza";
+"eventDetail.repeating.starttime:form" = "d MMM yyyy";
+"eventDetail.repeating.starttime:title" = "Orario di inizio ricorrenza";
+"eventDetail.repeating.everyDay:title" = "Ogni giorno";
+"eventDetail.repeating.everyWeek:title" = "Ogni settimana";
+"eventDetail.repeating.everyWeekSomeDay:title" = "Ogni %@";
+"eventDetail.repeating.everySomeWeek:title" = "Ogni %d settimane";
+"eventDetail.repeating.everyWeekDays:title" = "Ogni giorno feriale";
+"eventDetail.repeating.everySomeWeekSomeDay:title" = "Ogni %d settimane il %@";
+"eventDetail.repeating.everyMonth:title" = "Ogni mese";
+"eventDetail.repeating.everyMonth_someDay:title" = "Il %@ di ogni mese.";
+"eventDetail.repeating.everyYear:title" = "Ogni anno";
+"eventDetail.repeating.lunarCalendar_everyYear:title" = "Ogni anno (calendario lunare)";
+"eventDetail.repeating.everyYearSomeDay:title" = "Ogni anno il %@";
+"eventDetail.repeating.lunarCalendar_everyYearSomeDay:title" = "Ogni anno il %@ (calendario lunare)";
+"eventDetail.repeating.everyLastWeekDaysOfEveryMonth:title" = "Tutti i giorni dell'ultima settimana di ogni mese";
+"eventDetail.repeating.every1WeekOfEveryMonth::someday" = "Il primo %@ di ogni mese";
+"eventDetail.repeating.every2WeekOfEveryMonth::someday" = "Il secondo %@ di ogni mese";
+"eventDetail.repeating.every3WeekOfEveryMonth::someday" = "Il terzo %@ di ogni mese";
+"eventDetail.repeating.every4WeekOfEveryMonth::someday" = "Il quarto %@ di ogni mese";
+"eventDetail.repeating.every5WeekOfEveryMonth::someday" = "Il quinto %@ di ogni mese";
+"eventDetail.repeating.every6WeekOfEveryMonth::someday" = "Il sesto %@ di ogni mese";
+"eventDetail.repeating.every7WeekOfEveryMonth::someday" = "Il settimo %@ di ogni mese";
+"eventDetail.repeating.everyLastWeekOfEveryMonth::someday" = "L'ultimo %@ di ogni mese";
+"eventDetail.repeating.endtime::title" = "Fine ricorrenza";
+"eventDetail.repeating.endtime::option::never" = "Mai";
+"eventDetail.repeating.endtime::option::on" = "Il giorno";
+"eventDetail.repeating.endtime::option::after" = "Dopo";
+"eventDetail.repeating.endtime::option::after_occurrences" = "occorrenze";
+"eventDetail.repeating.endtime::shouldFutureThanStartTime" = "L'orario di fine ricorrenza deve essere successivo all'orario di inizio.\n(Data di inizio ricorrenza: %@)";
+"eventDetail.repeating::period_endcount" = "A partire dal %@ per %d volte";
+
+"eventDetail.repeating.everyNDays:title" = "Ogni %d giorni";
+"eventDetail.repeating.last" = "Ultimo";
+"eventDetail.repeating.everyNMonths:title" = "Ogni %d mesi";
+"eventDetail.repeating.everyNYears:title" = "Ogni %d anni";
+"eventDetail.repeating::endoption_until" = "fino al %@";
+"eventDetail.repeating::endoption_times" = "%d volta/e";
+
+"eventDetail.place::placeholder" = "Luogo";
+"eventDetail.place::remove_button" = "Rimuovi il luogo";
+"eventDetail.place::no_map_app" = "L'app mappe selezionata non è installata.";
+"eventDetail.place::select_map_app" = "Seleziona una mappa";
+"eventDetail.place::always_select_this_map" = "Apri sempre con questa app.";
+
+"eventDetail.add_new_todo::message" = "È stato aggiunto un nuovo evento da fare.";
+"eventDetail.add_new_schedule::message" = "È stato aggiunto un nuovo evento di pianificazione.";
+"eventDetail.scheduleEvent_removed::message" = "L'evento di pianificazione è stato rimosso.";
+"eventDetail.edit::repeating::confirm::ttile" = "Modifica evento";
+"eventDetail.edit::repeating::confirm::message" = "Questo è un evento ricorrente.\nSeleziona l'ambito dell'evento ricorrente che vuoi modificare.";
+"eventDetail.edit::repeating::confirm::all::button" = "Tutti gli eventi";
+"eventDetail.edit::repeating::confirm::fromNow::button" = "Da questo momento";
+"eventDetail.edit::repeating::confirm::onlyThisTime::button" = "Solo questa volta";
+"eventDetail.scheduleEvent_saved::message" = "L'evento di pianificazione è stato salvato.";
+"eventDetail.todoEvent_removed::message" = "L'evento da fare è stato rimosso.";
+"eventDetail.todoEvent_saved::message" = "L'evento da fare è stato salvato.";
+"eventDetail.cancel_edit::title" = "Modifica evento";
+"eventDetail.cancel_edit::message" = "Vuoi annullare queste modifiche?";
+"eventDetail.cancel_edit::continue::button" = "Continua";
+
+"eventDetail.edit::add_new_name::placeholder" = "Aggiungi un nuovo nome evento";
+"eventDetail.edit::clearEventTime::button" = "Cancella orario evento";
+"eventDetail.edit::noEventTime::button" = "Nessun orario di fine";
+"eventDetail.edit::memo" = "Nota";
+"eventDetail.edit::urlPreview" = "Anteprima URL";
+
+"eventDetail.edit::make::case" = "È un evento da fare?";
+"eventDetail.edit::todo::case" = "Evento da fare";
+"eventDetail.edit::schedule::case" = "Evento di pianificazione";
+"eventDetail.edit::holiday::case" = "Festività pubblica in %@";
+
+"eventDetail.notSupport::holiday" = "La funzione di modifica delle informazioni non è supportata per le festività pubbliche.";
+
+"eventDetail:todo:guide:message1" = "Un evento da fare rappresenta qualcosa che deve essere fatto.";
+"eventDetail:todo:guide:message2" = "A differenza delle normali pianificazioni visualizzate sul calendario con un orario (o periodo) specifico, gli eventi da fare offrono la possibilità di verificarne il completamento.";
+"eventDetail:todo:guide:message3" = "Puoi aggiungere un evento da fare senza specificare informazioni sull'orario. Ad esempio, puoi registrare un'attività da svolgere presto, ma non immediatamente.";
+"eventDetail:todo:guide:process:message" = "Gli eventi da fare si comportano in modo diverso dalle normali pianificazioni quando l'opzione di ricorrenza è attiva:";
+"eventDetail:todo:guide:process:bullet1" = "Gli eventi da fare ricorrenti attuali o passati non ancora completati vengono visualizzati sul calendario.";
+"eventDetail:todo:guide:process:bullet2" = "Quando un evento da fare viene completato, l'evento viene aggiunto all'elenco degli eventi completati e il successivo evento ricorrente viene aggiunto sul calendario.";
+"eventDetail:todo:guide:process:bullet3" = "Se non c'è una ricorrenza successiva a causa dell'orario di fine ricorrenza, l'evento da fare ricorrente termina.";
+"eventDetail:foremost:guide:message1" = "Contrassegna un evento come principale per sottolineare che è l'evento più importante.\nL'evento principale è sempre visibile nel calendario e supporta un widget separato.";
+"eventDetail:foremost:guide:supports:message" = "I seguenti tipi di evento possono essere impostati come evento principale:";
+"eventDetail:foremost:guide:supports:todo" = "Evento da fare";
+"eventDetail:foremost:guide:supports:notRepeating_schedule" = "Eventi pianificati non ricorrenti";
+
+"eventDetail:isSaving:toast:message" = "Salvataggio delle modifiche in corso. Attendere prego.";
+"eventDetail:hasChanges:confirm:message" = "Ci sono modifiche. Vuoi annullarle?";
+"eventDetail:hasChanges:confirm:continue" = "Continua a modificare";
+
+"eventDetail.unavailto_transform_withoutName" = "Inserisci un nome per convertire l'evento.";
+"eventDetail.todoEvent_unavailto_transform_withoutTime" = "Le informazioni sull'orario sono necessarie per convertire in una pianificazione.";
+"eventDetail.todoEvent::transform::schedule_title" = "Converti";
+"eventDetail.todoEvent::transform::schedule_message" = "Vuoi convertire questo da fare in una pianificazione?";
+"eventDetail.scheduleEvent::transform::todo" = "Converti";
+"eventDetail.scheduleEvent::transform::todo_message" = "Vuoi convertire questa pianificazione in un da fare?";
+
+"eventDetail::revert" = "Annulla completamento";
+
+// MARK: - Google calendar event
+
+"eventDetail::gogoleEvent::viewOnCalendar" = "Visualizza in Google Calendar";
+"eventDetail::gogoleEvent::calendar" = "Calendario";
+"eventDetail::gogoleEvent::calendar::event" = "Evento di Google Calendar";
+"eventDetail::gogoleEvent::attendee::unknown" = "Sconosciuto";
+"eventDetail::gogoleEvent::attendees" = "Partecipanti (%d persone)";
+"eventDetail::gogoleEvent::attendees::organizer" = "Organizzatore";
+"eventDetail::gogoleEvent::conference::accessCode" = "Codice di accesso";
+"eventDetail::gogoleEvent::conference::meetingCode" = "Codice riunione";
+"eventDetail::gogoleEvent::conference::passCode" = "Codice di passaggio";
+"eventDetail::gogoleEvent::conference::password" = "Password";
+"eventDetail::gogoleEvent::copy::message" = "Copiato negli appunti.";
+"eventDetail::gogoleEvent::canceled::message" = "Questo evento è stato annullato.";
+
+// MARK: - Apple calendar event
+"eventDetail::appleCalendarEvent::viewOnCalendar" = "Visualizza in Apple Calendar";
+"eventDetail::appleCalendarEvent::calendar::event" = "Evento di Apple Calendar";
+"eventDetail::appleCalendarEvent::attendees" = "Partecipanti (%d persone)";
+"eventDetail::appleCalendarEvent::attendees::organizer" = "Organizzatore";
+
+// MARK: - event tag
+
+"eventTag.title" = "Tipo di evento";
+"eventTag.list::title" = "Tipi di evento";
+"eventTag.defaults.default::name" = "Predefinito";
+"eventTag.defaults.holiday::name" = "Festività";
+"eventTag.addNew::placeholder" = "Aggiungi un nuovo tipo di evento";
+"eventTag.allEventTypes" = "Tutti i tipi di evento >";
+"eventTag.remove::confirm::message" = "Vuoi rimuovere questo tipo di evento? O vuoi rimuovere anche tutti gli eventi correlati?";
+"eventTag.remove::only_tag" = "Rimuovi solo il tipo di evento";
+"eventTag.remove::tag_and_evets" = "Rimuovi con gli eventi correlati";
+"eventTag.removed::message" = "Questo tipo di evento è stato rimosso.";
+"eventTag.removed_with_events::message" = "Questo tipo di evento e gli eventi correlati sono stati rimossi.";
+"eventTag.color::changed::message" = "Il colore è stato modificato.";
+"eventTag.changed::message" = "Il tipo di evento è stato modificato.";
+"eventTag.makeNew::message" = "È stato creato un nuovo tipo di evento.";
+"eventTag.default::title" = "Tipo di evento predefinito";
+"eventTag.default::selection::explain" = "Questo è il tipo di evento che verrà selezionato per impostazione predefinita durante la creazione di un evento.";
+"eventTag.externalCalendar::integrate_button" = "Collega calendario";
+
+
+// MARK: - event list
+
+"eventList::today::title" = "Oggi";
+"eventList::yesterday::title" = "Ieri";
+"eventList::thisMonth::title" = "Questo mese";
+"eventList::done_todos::title" = "Elenco da fare completati";
+"eventList::done_todos::eventTime" = "Orario evento:";
+"eventList::done_todos::doneAt" = "Orario di completamento:";
+"eventList::remove::confirm::message" = "Elimina l'elenco dei da fare completati";
+"eventList::remove::confirm::button::all" = "Tutti gli eventi da fare completati";
+"eventList::remove::confirm::button::olderThan1m" = "Più vecchi di 1 mese";
+"eventList::remove::confirm::button::olderThan3m" = "Più vecchi di 3 mesi";
+"eventList::remove::confirm::button::olderThan6m" = "Più vecchi di 6 mesi";
+"eventList::remove::confirm::button::olderThan1y" = "Più vecchi di 1 anno";
+
+
+// MARK: - account
+
+"manage_account::title" = "Gestione account";
+"manage_account::login_method" = "Metodo di accesso";
+"manage_account::email" = "Email";
+"manage_account::last_signedIn_at" = "Ultimo accesso";
+"manage_account::migration::title" = "Migra i dati utente temporanei";
+"manage_account::migration::description" = "Tutti gli eventi creati prima dell'accesso (%d evento/i) vengono migrati al tuo account.\nGli eventi collegati al tuo account sono accessibili da qualsiasi dispositivo.";
+"manage_account::migration_finished::message" = "Migrazione completata!";
+"manage_account::signout_button::title" = "Esci";
+"manage_account::sign_out::confirm::title" = "Esci";
+"manage_account::sign_out::confirm::message" = "Vuoi uscire dal tuo account attuale?";
+"manage_account::delete_account_button::title" = "Elimina account";
+"manage_account::delete_account_button::confirm:message" = "Sei sicuro di voler eliminare il tuo account?";
+"manage_account::delete_account_button::description" = "Dopo aver richiesto l'eliminazione dell'account, il tuo account verrà eliminato.\nUna volta eliminato, le informazioni dell'account non potranno essere recuperate.";
+"signIn::title" = "Accedi";
+"signIn:description" = "Esegui il backup del tuo elenco di eventi e sincronizzalo con altri dispositivi iOS\n(Le piattaforme supportate saranno ampliate.)";
+
+
+// MARK: - setting
+"event_setting::title" = "Impostazioni evento";
+"event_setting::eventType" = "Tipo di evento";
+"event_setting::eventPeriod" = "Periodo evento";
+"event_setting::defaultMapApp" = "Apri l'app Mappe";
+"event_setting::defaultMapApp_select" = "Seleziona";
+
+"event_setting::eventSync" = "Sincronizzazione evento";
+"event_setting::eventSync::readyToSync::description" = "Sincronizza gli eventi utente sottoposti a backup.";
+"event_setting::eventSync::syncInProgress::description" = "Sincronizzazione degli eventi utente sottoposti a backup...";
+"event_setting::eventSync::lastTime" = "Ultimo orario di dati sincronizzati: %@";
+"event_setting::eventSync::force" = "Forza sincronizzazione";
+
+"event_notification_setting::title::forAllDay" = "Tutto il giorno";
+"event_notification_setting::title::NotforAllDay" = "Orario di notifica";
+"event_setting::external_calendar::title" = "Calendari esterni";
+"event_setting::external_calendar::connected::account" = "Collegato: %@";
+"event_setting::external_calendar::start" = "Collega";
+"event_setting::external_calendar::start::message" = "Collegato a un calendario esterno.";
+"event_setting::external_calendar::stop" = "Scollega";
+"event_setting::external_calendar::stop::message" = "La connessione al calendario esterno è stata scollegata.";
+"event_setting::external_calendar::google::serviceName" = "Google Calendar";
+"event_setting::external_calendar::apple::serviceName" = "Apple Calendar";
+"event_setting::apple_calendar::permission_denied::message" = "L'accesso al calendario è stato negato. Abilitalo nelle Impostazioni per usare Apple Calendar.";
+"event_setting::apple_calendar::restricted::message" = "L'accesso al calendario è limitato su questo dispositivo.";
+"setting.title" = "Impostazioni";
+"setting.appearance.title" = "Aspetto";
+"setting.appearance.calendar.samplemonth::march" = "MARZO";
+"setting.appearance.calendar.startDayOfWeek" = "Primo giorno della settimana";
+"setting.appearance.calendar.accentDay" = "Giorni in evidenza";
+"setting.appearance.calendar.accentDay::holiday" = "Festività";
+"setting.appearance.calendar.accentDay::saturday" = "Sabato";
+"setting.appearance.calendar.accentDay::sunday" = "Domenica";
+"setting.appearance.calendar.colorTheme" = "Tema colore";
+"setting.appearance.calendar.colorTheme::system" = "Sistema";
+"setting.appearance.calendar.colorTheme::light" = "Chiaro";
+"setting.appearance.calendar.colorTheme::dark" = "Scuro";
+"setting.appearance.calendar.underline" = "Sottolinea i giorni con eventi";
+"setting.appearance.event.edit::name_old" = "Modifica evento";
+"setting.appearance.event.edit::name" = "Impostazioni evento e calendari esterni";
+"setting.appearance.day_row_height" = "Livello di visualizzazione dettagli evento";
+"setting.appearance.day_row_height::small::text" = "Minimo";
+"setting.appearance.day_row_height::medium::text" = "Medio";
+"setting.appearance.day_row_height::large::text" = "Completo";
+"setting.appearance.event.fontSize" = "Dimensione carattere testo evento";
+"setting.appearance.event.show_holidayName" = "Mostra nome festività";
+"setting.appearance.event.show_lunar" = "Calendario lunare";
+"setting.appearance.event._24form" = "Formato 24 ore";
+"setting.appearance.event.sample::name" = "🥗 Nome evento";
+"setting.appearance.event.sample::description" = "descrizione";
+"setting.appearance.event.sample::christmas" = "Natale";
+"setting.appearance.event.sample::first" = "primo evento";
+"setting.appearance.event.sample::second" = "secondo evento";
+"setting.appearance.event.sample::uncompleted_todo::toggle" = "Mostra da fare non completati";
+"setting.appearance.widget::title" = "Tema widget";
+"setting.appearance.widget::useSystemTheme::title" = "Usa tema di sistema";
+"setting.appearance.widget::useSystemTheme::background" = "Colore di sfondo del widget";
+"setting.appearance.widget::useCustomTheme::title" = "Seleziona colore personalizzato";
+"setting.appearance.widget::sample::eventName" = "Evento widget";
+"setting.appearance.event.boldText" = "Testo in grassetto";
+"setting.appearance.event.eventColor" = "Colore evento";
+"setting.timezone::title" = "Fuso orario";
+"setting.timezone::systemTimeZone::name" = "Fuso orario di sistema";
+"setting.timezone::systemTime::name" = "Ora di sistema";
+"setting.haptic::name" = "Feedback aptico";
+"setting.minimize_animation::name" = "Riduci al minimo l'effetto di animazione";
+"setting.holiday.title" = "Festività";
+"setting.holiday.item::name" = "Impostazioni festività";
+"setting.holiday.list::sectionTitle" = "Festività";
+"setting.holiday.country.title" = "Paese";
+"setting.holiday.country.current::title" = "Paese attuale";
+"setting.holiday.country.current::placeHolder" = "Seleziona paese";
+"setting.holiday.country.changeConfirm::title" = "Cambia paese";
+"setting.holiday.country.changeConfirm::message" = "Vuoi cambiare il paese del tuo calendario?";
+"setting.holiday.country.changed::message" = "Il paese è stato cambiato.";
+"setting.holiday.hide::button" = "Nascondi";
+"setting.holiday.hide::confirm::title" = "Nascondi festività";
+"setting.holiday.hide::confirm::message" = "Nascondere questa festività ogni anno?\nPuoi mostrarla di nuovo in Impostazioni > Festività.";
+"setting.holiday.hidden::sectionTitle" = "Festività nascoste";
+"setting.holiday.show::button" = "Mostra";
+"setting.feedback::name" = "Feedback";
+"setting.help::name" = "Aiuto";
+"setting.share::name" = "Condividi app";
+"setting.write_review::name" = "Scrivi una recensione dell'app";
+"setting.account.signedIn::manageAccount" = "Account";
+"setting.account.needSignIn" = "Accedi";
+"setting.suggest::readmind::appName" = "Readminds";
+"setting.suggest::readmind::message" = "Gestisci la tua lista di lettura";
+"setting.section.support::name" = "Supporto";
+"setting.section.app::name" = "App";
+"setting.section.suggest::name" = "Suggerimenti";
+"feedback::guide:message" = "Non esitare a fornire feedback, incluse segnalazioni di bug, commenti e suggerimenti sul servizio.\nI tuoi commenti ci aiuteranno molto a migliorare il nostro servizio.";
+"feedback::enterMessage::placeholder" = "Inserisci un messaggio";
+"feedback::contact::placeholder" = "Email di risposta";
+"feedback::posted:message" = "Il tuo feedback è stato registrato con successo.";
+
+// MARK: - external service
+
+"external_service.name::google" = "Google Calendar";
+"external_service.expired::message" = "L'integrazione con %@ è scaduta. Vai alle Impostazioni e riprova.";
+"external_service::google::hidden_event" = "Nascosto";
+"external_service::google::unknown_event" = "Sconosciuto";
+
+
+// MARK: - widget
+
+"widget.common::explain" = "Visualizza i tuoi prossimi eventi.";
+"widget.doubleMonth::name" = "Calendario + Calendario";
+"widget.eventAndMonth::name" = "Eventi + Calendario";
+"widget.todayAndMonth::name" = "OGGI + Calendario";
+"widget.eventAndForesmot::name" = "Eventi + Principale";
+"widget.events::name" = "Eventi";
+"widget.events.noEvents::message" = "Non ci sono eventi.";
+"widget.events.currentTodos" = "Elenco da fare attuale";
+"widget.events.sample::check_mailbox" = "Controlla la cassetta postale";
+"widget.events.sample::example" = "Festività";
+"widget.events.sample::running" = "Corsa";
+"widget.events.sample::luch" = "Pranzo";
+"widget.events.sample::luch_appointment" = "Appuntamento per il pranzo (non si può ritardare)";
+"widget.events.sample::call" = "Chiama Sara";
+"widget.events.sample::surfing" = "Surf";
+"widget.events.sample::moving" = "Giorno del trasloco";
+"widget.events.sample::meeting" = "Riunione giornaliera";
+"widget.events.sample::deposit_remain" = "Trasferisci il saldo finale";
+"widget.events.sample::recycle" = "Riciclo";
+"widget.events.sample::take_medicine" = "Prendi la medicina";
+"widget.events.sample::watering" = "Annaffia il vaso di fiori";
+"widget.events.sample::june3" = "MAR, 3 GIU";
+"widget.events.sample::july16" = "DOM, 16 LUG";
+"widget.events.sample::july21" = "VEN, 21 LUG";
+"widget.events.sample::july29" = "SAB, 29 LUG";
+"widget.events.sample::aug2" = "MER, 2 AGO";
+"widget.events.sample::aug3" = "GIO, 3 AGO";
+"widget.events.sample::oct10" = "LUN, 10 OTT";
+"widget.events.foremost" = "Evento principale";
+"widget.events.foremost::allFinished::message" = "Aggiungi un evento da non perdere.";
+"widget.events.foremost::sample::message" = "Prendi un ombrello! ⛱️";
+"widget.events.calendar" = "Calendario";
+"widget.events.today" = "OGGI";
+"widget.events.today::sample::sunday" = "DOMENICA";
+"widget.events.today::sample::march2024" = "MARZO 2024";
+"total::event::count" = "%d eventi";
+"todo::count" = "%d da fare";
+"schedule::count" = "%d pianificazioni";
+"widget.weeks.lastMonth" = "Mese scorso";
+"widget.weeks.thisMonth" = "Questo mese";
+"widget.weeks.nextMonth" = "Mese prossimo";
+"widget.weeks.thisWeek" = "Questa settimana";
+"widget.weeks.twoWeek" = "2 settimane";
+"widget.weeks.threeWeek" = "3 settimane";
+"widget.weeks.fourWeek" = "4 settimane";
+"widget.weeks.sample::feb" = "FEBBRAIO";
+"widget.weeks.sample::march" = "MARZO";
+"widget.weeks.sample::april" = "APRILE";
+"widget.weeks.sample::hiking" = "🏔️ Escursione";
+"widget.weeks.sample::lunch" = "🥗 Pranzo";
+"widget.weeks.sample::call" = "📞 Chiama Sara";
+"widget.weeks.sample::holiday" = "Festività";
+"widget.weeks.sample::golf" = "⛳️ Golf";
+"widget.weeks.sample::workout" = "🔥 Allenamento";
+"widget.weeks.sample::launch" = "🚀 Lancio";
+"widget.fail.message" = "Si è verificato un errore temporaneo.\nProva a eseguire di nuovo l'app.";
+"widget.next.noEvent" = "Nessun evento successivo.";
+"widget.next.sample" = "🔥 Allenamento";
+"widget.next.title" = "Prossimo evento";
+"widget.next.rect_widget::title" = "Il prossimo evento di oggi.";
+"widget.next.title::remains" = "I prossimi eventi di oggi.";
+"widget.next.title::future" = "Oggi e cosa viene dopo";
+"widget.next.title::more_todos" = "%d altri da fare";
+"widget.next.title::more_events" = "%d altre pianificazioni";
+"widget.next.title::more_events_with_todo" = "%1$d altri da fare e %2$d altre pianificazioni";
+"widget.next.title::uncompleted::todo" = "%1$@ non è completato";
+"widget.next.title::uncompleted::todos" = "%1$@ e altri %2$d da fare non completati";
+"widget.next.no_events_today" = "Nessun evento oggi";
+"widget.next.no_events" = "Nessun evento in arrivo";
+
+"widget.dday::name" = "Giorno X";
+"widget.dday::noTarget" = "Seleziona un evento";
+"widget.dday.sample::title" = "Workshop";
+"widget.dday.target::repeating" = "Ricorrente";
+"widget.dday.target::registered" = "Fissato";
+"widget.dday.turn::name" = "Turno %d";
+
+// MARK: - link
+
+"deeplink::invalid_link_message" = "Questo formato di link non è supportato.\nAggiorna l'app all'ultima versione.";
+
+// MARK: - force update
+
+"force_update.title" = "Aggiornamento richiesto";
+"force_update.message" = "È disponibile una nuova versione.\nAggiorna per continuare a usare l'app.";
+"recommend_update.title" = "Aggiornamento consigliato";
+"recommend_update.message" = "È disponibile una nuova versione.\nTi consigliamo di aggiornare per un'esperienza migliore.";
+
+
+// MARK: - ai agent
+
+"aiAgent::voice::listening" = "In ascolto…";
+"aiAgent::keyboard" = "Tastiera";
+"aiAgent::voice" = "Voce";
+"aiAgent::send" = "Invia";
+"aiAgent::input::placeholder" = "Come posso aiutarti?";
+"aiAgent::permission::title" = "Accesso a microfono e riconoscimento vocale necessario";
+"aiAgent::permission::message" = "Consenti l'accesso nelle Impostazioni, oppure digita";
+"aiAgent::permission::keyboard" = "Digita invece";
+"aiAgent::permission::setting" = "Apri Impostazioni";
+"aiAgent::state::processing" = "Elaborazione";
+"aiAgent::state::confirm" = "Conferma necessaria";
+"aiAgent::state::confirmExpired" = "Scaduto";
+"aiAgent::state::done" = "Attività completata";
+"aiAgent::state::failed" = "Attività non riuscita";
+"aiAgent::done::default" = "Fatto";
+"aiAgent::failed::default" = "Impossibile completare l'operazione";
+"aiAgent::retry" = "Riprova";
+"aiAgent::needSignIn::title" = "Accesso richiesto";
+"aiAgent::needSignIn::message" = "Accedi per usare l'inserimento rapido con AI.";
+"aiAgent::title" = "Inserimento rapido AI";
+"aiAgent::keyboard::stop" = "Interrompi";
+"aiAgent::keyboard::send" = "Invia";
+"aiAgent::stop" = "Interrompi";
+"aiAgent::usage" = "%1$@ / %2$@ crediti";
+"aiAgent::plan::free" = "Gratuito";
+"aiAgent::plan::standard" = "Standard";
+"aiAgent::plan::lifetime" = "A vita";
+"aiAgent::usage::topupRemaining" = "%@ crediti extra rimanenti";
+"aiAgent::usage::planChangeScheduled" = "Passaggio al piano %2$@ il %1$@";
+"aiAgent::stop::confirm::title" = "Interrompere l'elaborazione?";
+"aiAgent::stop::confirm::message" = "L'interruzione scarta l'attività in corso e non potrà essere ripresa.";
+"aiAgent::confirm::countdown" = "rimasti per approvare";
+"aiAgent::confirm::expired::message" = "Tempo scaduto. Effettua di nuovo la richiesta.";
