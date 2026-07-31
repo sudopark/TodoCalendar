@@ -27,7 +27,7 @@ description: Use when writing or modifying code in this project — 구현 착�
 - **플랜 있음** → superpowers executing-plans/subagent-driven-development가 태스크 순서를 이끈다. 각 태스크에 아래 절차를 적용한다.
 - **플랜 없음** (즉흥 수정) → superpowers TDD + 이 스킬만으로 진행한다. 플랜 단계만 빠질 뿐, rules 확인 → 패턴 파악 → 구현 → 완료 판정은 동일하게 탄다.
 - **페어 프로그래밍 모드** (유저가 명시 선언한 세션) → 턴 규칙·TDD 수준·커밋 시점은 pair-programming 스킬이 이끈다. 이 스킬은 프로젝트 종속 규칙(rules·tuist generate·짝지어진 두 위치·콜사이트 grep) 공급자로만 동작한다.
-- **서브에이전트 dispatch 구현** (subagent-driven-development·병렬 dispatch 등) → 서브에이전트는 이 스킬을 스스로 invoke하지 못한다. dispatch하는 메인 세션이 첫 브리프 작성 전에 이 스킬을 invoke하고, 아래 절차를 브리프로 승계시킨다. "내가 직접 코드를 안 만지니 해당 없음"은 성립하지 않는다 — 코드 diff가 시작되는 주체가 누구든 발동한다. 갭 보고 루프(rules·플랜)의 유저 반문은 메인 세션이 중계한다 — 브리프에 "갭 발견 시 추측으로 채우지 말고 보고 후 중단"을 명시한다.
+- **서브에이전트 dispatch 구현** (subagent-driven-development·병렬 dispatch 등) → 서브에이전트는 이 스킬을 스스로 invoke하지 못한다. dispatch하는 메인 세션이 첫 브리프 작성 전에 이 스킬을 invoke하고, 아래 절차를 브리프로 승계시킨다. "내가 직접 코드를 안 만지니 해당 없음"은 성립하지 않는다 — 코드 diff가 시작되는 주체가 누구든 발동한다. 갭 보고 루프(rules·플랜)의 유저 반문은 메인 세션이 중계한다 — 브리프에 "갭 발견 시 추측으로 채우지 말고 보고 후 중단"을 명시한다. 축1 선언·리팩터 게이트 선언은 브리프 승계와 태스크별 리뷰로 갈음한다 — 컨트롤러가 매 GREEN마다 선언을 재생산하지 않는다 (직접 구현 시에만 선언 관문).
 
 시작할 때:
 
@@ -35,7 +35,8 @@ description: Use when writing or modifying code in this project — 구현 착�
 - 변경 대상 경로에 걸리는 `.claude/rules/*.md` 조항을 확인하고, 구현 결정 시점에 해당 조항을 적극 invoke한다.
 - child CLAUDE.md가 있는 프레임워크(Domain·Repository·각 Presentation 등)를 수정할 땐 해당 child CLAUDE.md를 확인하고, 수정 후 그 규칙과 어긋남이 없는지 재점검한다.
 - 동종 컴포넌트를 grep해 구조 패턴(상태관리·합성·추상화 수준)을 파악하고 그 패턴을 따른다. 요구사항만 보고 즉흥 구현하지 않는다.
-- 서브에이전트에 구현을 dispatch할 땐 프롬프트에 적용 rules 조항·대상 테스트 스킴·따라야 할 구조 패턴을 명시한다.
+- 서브에이전트에 구현을 dispatch할 땐 브리프에 적용 rules 조항의 **요지를 발췌해 싣는다** — 파일 경로·조항명만 던지지 않는다 (path 매칭 자동 로드는 서브에이전트에겐 없다). 대상 테스트 스킴·따라야 할 구조 패턴도 함께 명시한다.
+- 서브에이전트 산출물 검수 때 브리프에 실은 rules 조항의 위반 여부를 항목별로 스캔한다 — 컴파일·테스트 통과는 rules 준수를 보증하지 않는다.
 - (선택) 기존 타입을 수정하는 작업이면 복잡도 baseline을 측정해둔다 — 아래 "복잡도 측정" 참조. 생략 조건에 걸리면 그냥 건너뛴다.
 
 ## 구현 중
@@ -59,6 +60,10 @@ description: Use when writing or modifying code in this project — 구현 착�
 - 유저 답으로 실행을 잇는다.
 - 범위 밖 작업으로 드러난 것은 **후속 이슈로 따거나 같은 이슈 내 추가 할일로 정리한다** — 형태는 그 시점에 유저와 결정. 잃어버리지 않는 것이 불변 조건.
 - 이 루프는 우발상황의 escape hatch다. 빈발하면 플랜 단계의 범위 명확성이 부실했다는 신호 — 그 사실도 유저에게 함께 보고한다.
+
+### 리뷰 지시 게이트
+
+리뷰 코멘트 반영도 구현이다 — 유저 지시와 같은 충언 의무가 걸린다 (superpowers:receiving-code-review와 함께). 반영 전에 지시대로 구현하면 목적이 실제로 성립하는지 검증한다 (예: dedupe 지시면 그 형태가 정말 중복을 제거하는지). 성립하지 않으면 문자 그대로 맞추는 코드를 내지 말고 반영 전에 되묻는다.
 
 ## 리팩터 게이트 (축3) — 매 GREEN 직후
 
@@ -114,6 +119,7 @@ cd tools/complexity-analyzer
    - **짝지어진 두 위치** — 각 경고를 해소(대응처 수정)하거나 오탐임을 확인하고 유저에게 보고. 경고를 무시한 채 커밋하지 않는다
 2. 마지막 리팩터 게이트 선언 완료
 3. Rules 갭·플랜 갭이 있었다면 후속 정리(rules 예약 / 후속 이슈·추가 할일)까지 완료
+4. 컴파일·유닛 테스트로 검증되지 않는 계약(AppIntents parameterSummary·메타데이터, Info.plist 키, 엔타이틀먼트, 위젯 타임라인 등)을 만졌으면 빌드 산출물을 직접 열어 확인 — 예: `.appex/Metadata.appintents/extract.actionsdata`. 테스트 전부 통과가 이 계약들의 동작을 보증하지 않는다
 
 ## 커밋
 
